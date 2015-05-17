@@ -23,12 +23,12 @@ class MessageRow extends Component {
     var isModel = !resource['_type'];
     if (isModel  &&  resource.autoCreate)
       return <View style={{height: 0}} />;
-    var model = this.props.models['model_' + (resource['_type'] || resource.id)].value;
-    
+    var model = utils.getModel(resource['_type'] || resource.id).value;
+    var me = utils.getMe();
     var isMyMessage;
     if (!isModel) {
-      var fromHash = resource[utils.getCloneOf('tradle.Message.from', this.props.models['model_' + resource['_type']].value.properties)].id;
-      if (fromHash == this.props.me['_type'] + '_' + this.props.me.rootHash) 
+      var fromHash = resource[utils.getCloneOf('tradle.Message.from', model.properties)].id;
+      if (fromHash == me['_type'] + '_' + me.rootHash) 
         isMyMessage = true;      
     }
     var to = this.props.to;
@@ -46,8 +46,8 @@ class MessageRow extends Component {
       renderedRow = <Text style={[styles.resourceTitle]} numberOfLines={2}>{vCols}</Text>;
     }
     else if (!isModel) {
-      var fromHash = resource[utils.getCloneOf('tradle.Message.from', this.props.models['model_' + resource['_type']].value.properties)].id;
-      if (fromHash == this.props.me['_type'] + '_' + this.props.me.rootHash) 
+      var fromHash = resource[utils.getCloneOf('tradle.Message.from', model.properties)].id;
+      if (fromHash == me['_type'] + '_' + me.rootHash) 
         addStyle = styles.myCell;
       else
         addStyle = {marginRight: 30, padding: 5, borderRadius: 10};
@@ -90,30 +90,28 @@ class MessageRow extends Component {
   }
   verify(event) {
     var self = this;
-    var models = self.props.models;
     var resource = self.props.resource;
+    var model = utils.getModel(resource['_type']).value;
     this.props.navigator.push({
       component: ResourceView,
       rightButtonTitle: 'Edit',
+      id: 3,
       onRightButtonPress: () => {
-        var page = {
-          metadata: models['model_' + resource['_type']].value,
-          models: models,
-          data: resource,
-          db: self.props.db,
-          me: self.props.me
+        var props = {
+          metadata: model,
+          resource: resource,
         };
 
         self.props.navigator.push({
           title: 'Edit',
           component: NewResource,
           titleTextColor: '#7AAAC3',
-          passProps: {page: page}
+          passProps: props
         });
       }, 
 
       passProps: self.props,
-      title: resource['_type'] == 'tradle.AssetVerification' ? 'Doc verification' : models['model_' + resource['_type']].value.title
+      title: resource['_type'] == 'tradle.AssetVerification' ? 'Doc verification' : model.title
     });
   }
   formatRow(isMyMessage, model, resource) {

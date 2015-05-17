@@ -19,6 +19,9 @@ var propTypesMap = {
   'integer': t.Num
 };
 
+var modelsLoaded = false;
+var me;
+
 var utils = {
   isEmpty: function(obj) {
     for(var prop in obj) {
@@ -30,6 +33,36 @@ var utils = {
   },
   getDb: function() {
     return db;
+  },
+  getMe() {
+    return me;
+  },
+  loadModels: function() {
+    var myId = sampleData.getMyId();
+    var self = this;
+    models.length = 0;
+    this.getDb().createReadStream()
+    .on('data', function(data) {
+       if (data.key.indexOf('model_') === 0)
+         models[data.key] = data;
+       if (!me  &&  myId  && data.value.rootHash == myId)
+         me = data.value; 
+     })
+    .on('close', function() {
+      console.log('Stream closed');
+    })      
+    .on('end', function() {
+      console.log('Stream ended');
+    })      
+    .on('error', function(err) {
+      console.log('err: ' + err);
+    });
+  },
+  getModels: function() {
+    return models;
+  },
+  getModel: function(modelName) {
+    return models['model_' + modelName];
   },
   makeLabel: function(label) {
     return label
@@ -54,7 +87,8 @@ var utils = {
 
     return Object.keys(obj).map(function (key) {return obj[key]});
   },
-  getImplementors(iModel, models) {
+  getImplementors(iModel) {
+    var models = this.getModels();
     var implementors = [];
     for (var p in models) {
       var m = models[p].value;
@@ -66,7 +100,7 @@ var utils = {
   getFormFields(params) {
     var meta = params.meta;
     var model = params.model;
-    var models = params.models;
+    var models = this.getModels();
     var data = params.data;
     var chooser = params.chooser;
     var options = {};

@@ -37,7 +37,7 @@ class ResourceRow extends Component {
   }
   formatRow(resource) {
     var self = this;
-    var model = this.props.models['model_' + (resource['_type'] || resource.id)].value;
+    var model = utils.getModel(resource['_type'] || resource.id).value;
     var viewCols = model.gridCols || model.viewCols;
     var renderedViewCols;
     if (viewCols) {

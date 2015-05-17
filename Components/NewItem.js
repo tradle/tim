@@ -56,33 +56,34 @@ class NewItem extends Component {
     //   this._rerenderWithMessage(msg);
     //   return;
     // }
-    var iKey = this.props.page.resourceKey;
+    var iKey = this.props.resourceKey;
     var modelName = iKey.slice(0, iKey.indexOf('_'));
-    if (this.props.page.models['model_' + modelName]) 
+    if (utils.getModel(modelName)) 
       this._putResourceInDB(modelName, JSON.parse(JSON.stringify(value)));
   }
   onSaveAndAddPressed() {
     var value = this.refs.form.getValue();
     if (!value)
       return;
-    var iKey = this.props.page.resourceKey;
+    var iKey = this.props.resourceKey;
     var modelName = iKey.slice(0, iKey.indexOf('_'));
-    if (this.props.page.models['model_' + modelName]) 
+    if (utils.getModel(modelName)) 
       this._putResourceInDB(modelName, JSON.parse(JSON.stringify(value)), true);
   }
   _putResourceInDB(modelName, value, addMore) {
     var self = this;
-    var resourceKey = this.props.page.resourceKey;
-    this.props.page.db.get(resourceKey)
+    var resourceKey = this.props.resourceKey;
+    var db = utils.getDb();
+    db.get(resourceKey)
     .then(function(data) {
-      var resource = self.props.page.resource;
-      var itemMeta = self.props.page.metadata;
+      var resource = self.props.resource;
+      var itemMeta = self.props.metadata;
       var items = resource[itemMeta['range']];
       if (!items) 
         items = [];
       items.push(value);
       resource[itemMeta['range']] = items;
-      self.props.page.db.put(resourceKey, resource)
+      db.put(resourceKey, resource)
       .then(function() {
         // self.props.navigator.pop();
         if (addMore)
@@ -100,17 +101,15 @@ class NewItem extends Component {
     this.props.navigator.pop();
   }
   render() {
-    var page = this.props.page;
+    var props = this.props.page;
     var parentBG = {backgroundColor: '#7AAAC3'};
     var err = this.props.err || '';
 
-    var meta =  page.metadata;
+    var meta =  props.metadata;
     var model = {};
     var params = {
         meta: meta,
         model: model,
-        models: page.models,
-        // data: page.resource
     };
 
     var options = utils.getFormFields(params);
@@ -133,7 +132,7 @@ class NewItem extends Component {
 
 
         <View style={{'padding': 20}}>
-          <Form ref='form' type={Model} options={options} value={page.resource} />
+          <Form ref='form' type={Model} options={options} value={props.resource} />
           <View style={styles.buttons}>
             <TouchableHighlight style={[styles.button, parentBG]} underlayColor='#7AAAC3'
                 onPress={this.onSavePressed.bind(this)}>
@@ -296,7 +295,7 @@ module.exports = NewItem;
   //           // var options = getModel(meta[type], rModel);
   //           // model[propName] = rModel;
   //         var facet = props[p].facet;  
-  //         var values = this.props.page.metadata.filter(mod => {
+  //         var values = this.props.metadata.filter(mod => {
   //            return mod.type === facet ? mod.values : null;
   //         });  
   //         if (values && values.length) {

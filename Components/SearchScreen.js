@@ -1,7 +1,7 @@
 'use strict';
 
 var React = require('react-native');
-var Q = require('q');
+// var Q = require('q');
 var sha = require('stable-sha1');
 var reactMixin = require('react-mixin');
 var SearchBar = require('./SearchBar');
@@ -60,7 +60,7 @@ class SearchScreen extends Component {
     };
   }
   componentDidMount() {
-    if (!this.props.implementors  ||  this.props.models['model_' + this.props.modelName].isInterface) 
+    if (!this.props.implementors  ||  utils.getModel(this.props.modelName).isInterface) 
       this.searchResources(this.props.filter);
   }
   componentWillUnmount() {
@@ -99,23 +99,24 @@ class SearchScreen extends Component {
     var self = this;
     var foundResources = {};
     var modelName = self.props.modelName;
-    var model = self.props.models['model_' + modelName].value;
+    var model = utils.getModel(modelName).value;
     var isMessage = model.isInterface;
+    var meta = model.properties;
 
-    var implementors = isMessage ? utils.getImplementors(modelName, this.props.models) : null;
+    var implementors = isMessage ? utils.getImplementors(modelName) : null;
 
     var required = model.required;
-    var meRootHash = this.props.me.rootHash;
+    var meRootHash = utils.getMe().rootHash;
     var resourceRootHash = 
     utils.getDb().createReadStream()
     .on('data', function(data) {
       var key = data.key;
       if (key.indexOf('model_') === 0)
         return;
+      var iModel;
       if (isMessage  &&  implementors) {
-        var iModel;
         for (var i=0; i<implementors.length  &&  !iModel; i++) {
-          if (implementors[i].id.indexOf(key.substring(0, data.key.indexOf('_'))) == 0)
+          if (implementors[i].id.indexOf(key.substring(0, data.key.indexOf('_'))) === 0)
             iModel = implementors[i];
         }
         if (!iModel)
@@ -126,7 +127,7 @@ class SearchScreen extends Component {
       var r = data.value;
       if (isMessage) {
         var msgProp = utils.getCloneOf('tradle.Message.message', iModel.properties);
-        if (r[msgProp].trim().length == 0)
+        if (r[msgProp].trim().length === 0)
           return;
         var fromProp = utils.getCloneOf('tradle.Message.from', iModel.properties);
         var toProp = utils.getCloneOf('tradle.Message.to', iModel.properties);
@@ -145,9 +146,14 @@ class SearchScreen extends Component {
        }
        // primitive filtering for this commit
        var combinedValue = '';
-       required.forEach(function(rr) {
-         combinedValue += (r[rr] &&  !(r[rr] instanceof Array) ? (combinedValue ? ' ' + r[rr] : r[rr]) : '');
-       }); 
+       for (var rr in meta) {
+         if (r[rr] instanceof Array)
+          continue;
+         combinedValue += combinedValue ? ' ' + r[rr] : r[rr];
+       }
+       // required.forEach(function(rr) {
+       //   combinedValue += (r[rr] &&  !(r[rr] instanceof Array) ? (combinedValue ? ' ' + r[rr] : r[rr]) : '');
+       // }); 
        if (!combinedValue  ||  (combinedValue  &&  combinedValue.toLowerCase().indexOf(query.toLowerCase()) != -1)) {
          foundResources[key] = r; 
        }
@@ -202,32 +208,30 @@ class SearchScreen extends Component {
   }
 
   selectResource(resource) {
-    var me = this.props.me;
-    var models = this.props.models;
+    var me = utils.getMe();
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
-    var model = models['model_' + this.props.modelName];
+    var model = utils.getModel(this.props.modelName);
 
     if (model.value.isInterface) {
       if (resource['_type'])
         return;
-      var page = {
-        metadata: models['model_' + resource.id].value,
-        models: models,
-        me: me,
-        data: {
+      var props = {
+        metadata: utils.getModel(resource.id).value,
+        resource: {
           '_type': this.props.modelName, 
           'from': me,
           'to': this.props.resource
         }
       };
       if (this.props.returnRoute)
-        page.returnRoute = this.props.returnRoute;
+        props.returnRoute = this.props.returnRoute;
 
       this.props.navigator.replace({
+        id: 4,
         title: resource.title,
         component: NewResource,
         titleTextColor: '#7AAAC3',
-        passProps: {page: page}
+        passProps: props
       });
       return;
     }
@@ -243,64 +247,64 @@ class SearchScreen extends Component {
     var route = {
       title: title,
       component: SearchScreen,
+      id: 10,
+      // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       passProps: {
         resource: resource, 
-        models: models, 
         filter: '',
-        me: me, 
         modelName: modelName,
       },
       rightButtonTitle: 'Profile',
-      onRightButtonPress: () => {
-        self.props.navigator.push({
+      onRightButtonPress: {//() => {
+      //   self.props.navigator.push({
+
           title: title,
+          id: 3,
           component: ResourceView,
           titleTextColor: '#7AAAC3',
-          passProps: {resource: resource, models: this.props.models, me: this.props.me}
-        });
+          passProps: {resource: resource}
+        // });
       }
     }
     this.props.navigator.push(route);
   }
 
   _selectResource(resource) {
-    var parentMeta = this.props.models['model_' + this.props.modelName];
+    var parentMeta = utils.getModel(this.props.modelName);
     var title = utils.getDisplayName(resource, parentMeta.value.properties);
     var route = {
       title: title,
+      id: 3,
       component: ResourceView,
       parentMeta: parentMeta,
-      passProps: {resource: resource, models: this.props.models},
+      passProps: {resource: resource},
     }
     // Edit resource
-    var me = this.props.me;
+    var me = utils.getMe();
     if (me  &&  this.props.prop) {
-      this.props.returnRoute.passProps.setProperty = {
-        name: this.props.prop,
-        value: resource
-      };
+      this.props.callback(this.props.prop, resource);
+      // this.props.returnRoute.passProps.setProperty = {
+      //   name: this.props.prop,
+      //   value: resource
+      // };
       this.props.navigator.popToRoute(this.props.returnRoute);
       return;
     }
-    else if (me  &&  (JSON.stringify(resource) === JSON.stringify(me))  ||  resource['_type'] !== 'tradle.Identity') {
-      var self = this;
-      var models = self.props.models;
+    if (me  &&  (JSON.stringify(resource) === JSON.stringify(me))  ||  resource['_type'] !== 'tradle.Identity') {
+      var self = this ;
       route.rightButtonTitle = 'Edit';
-      route.onRightButtonPress = () => {
-        var page = {
-          metadata: models['model_' + resource['_type']].value,
-          models: models,
-          data: me,
-          me: me
-        };
-
-        self.props.navigator.push({
-          title: 'Edit',
-          component: NewResource,
-          titleTextColor: '#7AAAC3',
-          passProps: {page: page}
-        });
-      } 
+      route.onRightButtonPress = /*() =>*/ {
+        // self.props.navigator.push({
+        title: 'Edit',
+        id: 4,
+        component: NewResource,
+        titleTextColor: '#7AAAC3',
+        passProps: {
+          metadata: utils.getModel(resource['_type']).value,
+          resource: me
+        }
+      };
+        // });
     }
     this.props.navigator.push(route);
   }
@@ -316,11 +320,10 @@ class SearchScreen extends Component {
     if (this.state.userInput.trim().length == 0)
       return;
     var type = interfaceToTypeMapping[this.props.modelName];
-    var me = this.props.me;
+    var me = utils.getMe();
     var resource = this.props.resource;
-    var models = this.props.models;
-    var title = utils.getDisplayName(resource, models['model_' + this.props.resource['_type']].value.properties);
-    var meTitle = utils.getDisplayName(me, models['model_' + me['_type']].value.properties);
+    var title = utils.getDisplayName(resource, utils.getModel(this.props.resource['_type']).value.properties);
+    var meTitle = utils.getDisplayName(me, utils.getModel(me['_type']).value.properties);
     var r = {
       '_type': type,
       'message': this.state.userInput,
@@ -348,24 +351,20 @@ class SearchScreen extends Component {
   }
 
   renderRow(resource)  {
-    var model = this.props.models['model_' + (resource['_type'] || resource.id)].value;
+    var model = utils.getModel(resource['_type'] || resource.id).value;
     var isMessage = model.interfaces  &&  model.interfaces.indexOf('tradle.Message') != -1;
-
+    var me = utils.getMe();
     return isMessage 
      ? ( <MessageRow
         onSelect={() => this.selectResource(resource)}
         resource={resource}
-        me={this.props.me}
         navigator={this.props.navigator}
-        models={this.props.models}
         to={this.props.resource} />
       )
     : (
       <ResourceRow
         onSelect={() => this.selectResource(resource)}
-        resource={resource} 
-        models={this.props.models}
-        me={this.props.me} />
+        resource={resource} />
     );
   }
   handleChange(event) {
@@ -373,10 +372,11 @@ class SearchScreen extends Component {
   }
 
   render() {
+    var model = utils.getModel(this.props.modelName).value;
     var content = this.state.dataSource.getRowCount() === 0 
    ?  <NoResources
         filter={this.state.filter}
-        title={this.props.models['model_' + this.props.modelName].value.title}
+        title={model.title}
         isLoading={this.state.isLoading}/> 
    :  <ListView ref='listview'
         dataSource={this.state.dataSource}
@@ -391,7 +391,6 @@ class SearchScreen extends Component {
         keyboardShouldPersistTaps={true}
         showsVerticalScrollIndicator={false} />;
 
-    var model = this.props.models['model_' + this.props.modelName].value;
     var Model = t.struct({'msg': t.Str});
 
     var addNew = (model.isInterface) 
@@ -434,21 +433,20 @@ class SearchScreen extends Component {
   }
   onAddNewPressed() {
     var modelName = this.props.modelName;
-    var models = this.props.models;
-    var model = models['model_' + modelName].value;
+    var model = utils.getModel(modelName).value;
     var isInterface = model.isInterface;
-    var self = this;
     if (!isInterface) 
       return;
 
+    var self = this;
     self.props.navigator.push({
       title: utils.makeLabel(model.title) + ' type',
+      id: 2,
       component: ResourceTypesScreen,
+      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       passProps: {
-        resource: this.props.resource, 
-        models: models, 
+        resource: self.props.resource, 
         returnRoute: self.props.route,
-        me: this.props.me, 
         modelName: modelName,
       }
     });

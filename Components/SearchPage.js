@@ -1,7 +1,7 @@
 'use strict';
  
 var React = require('react-native');
-var Q = require('q');
+// var Q = require('q');
 var SearchScreen = require('./SearchScreen');
 var SearchBar = require('./SearchBar');
 var ShowItems = require('./ShowItems');
@@ -16,6 +16,7 @@ var sha = require('stable-sha1');
 var {
   StyleSheet,
   Text,
+  Navigator,
   TextInput,
   View,
   TouchableHighlight,
@@ -24,8 +25,6 @@ var {
   Component,
   ScrollView
 } = React;
-
-var models = {};
 
 var styles = StyleSheet.create({
   description: {
@@ -130,38 +129,17 @@ class SearchPage extends Component {
     // this.f();
     var passProps = {
         filter: '', 
-        models: models, 
         modelName: this.props.modelName,
       };
-    if (this.state.me)
-      passProps.me = this.state.me;
     this.props.navigator.push({
+      // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      id: 10,
       title: 'Contacts',
       titleTextColor: '#7AAAC3',
       component: SearchScreen,
       passProps: passProps
     });
 	}
-  componentDidMount() {
-    var myId = sampleData.getMyId();
-    var self = this;
-    utils.getDb().createReadStream()
-    .on('data', function(data) {
-       if (data.key.indexOf('model_') === 0)
-         models[data.key] = data;
-       if (!self.state.me  &&  myId  && data.value.rootHash == myId)
-         self.setState({me: data.value}); 
-     })
-    .on('close', function() {
-      console.log('Stream closed');
-    })      
-    .on('end', function() {
-      console.log('Stream ended');
-    })      
-    .on('error', function(err) {
-      console.log('err: ' + err);
-    });
-  }    
   _rerenderWithError(err) {
     var props = this.props;
     if (err) 
@@ -176,8 +154,8 @@ class SearchPage extends Component {
   }
   
   onSignUpPressed(me) {
-    var modelName = 'model_' + this.props.modelName;
-    if (!models[modelName]) 
+    var modelName = this.props.modelName;
+    if (!utils.getModel(modelName)) 
       this._rerenderWithError('Can find model: ' + modelName);
     else if (me) {
       if (!me.rootHash) // HACK for sample data
@@ -188,17 +166,17 @@ class SearchPage extends Component {
       this._createEditIdentity(modelName);
   }
   _createEditIdentity(modelName, me) {
-    var metadata = models[modelName].value;
+    var metadata = utils.getModel(modelName).value;
     var page = {
       metadata: metadata,
-      models: models,
-      me: this.state.me
     };
     var route = {
       component: NewResource,
+      id: 4,
       titleTextColor: '#7AAAC3',
-      passProps: {page: page}
+      passProps: page
     };
+    var me = utils.getMe();
     if (me) {
       page.data = me;
       route.title = 'Edit Identity';
@@ -209,12 +187,12 @@ class SearchPage extends Component {
       route.onRightButtonPress = () => {
         self.props.navigator.push({
           component: ShowItems,
+          id: 5,
           passProps: {
             resourceKey: resourceKey,  
             resource: me,
             parentMeta: metadata, 
-            itemsMeta: itemsMeta,
-            models: models,
+            itemsMeta: itemsMeta
           }
         });
       };

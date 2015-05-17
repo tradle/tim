@@ -25,7 +25,7 @@ class ResourceTypesScreen extends Component {
   constructor(props) {
     super(props);
     this.timeoutID = null;
-    var implementors = utils.getImplementors(this.props.modelName, this.props.models);
+    var implementors = utils.getImplementors(this.props.modelName);
 
     var dataSource =  new ListView.DataSource({
       rowHasChanged: (row1, row2) => row1 !== row2,
@@ -36,20 +36,16 @@ class ResourceTypesScreen extends Component {
     };
   }
   selectResource(resource) {
-    var me = this.props.me;
-    var models = this.props.models;
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
-    var model = models['model_' + this.props.modelName];
+    var model = utils.getModel(this.props.modelName);
 
     if (resource['_type'])
       return;
     var page = {
-      metadata: models['model_' + resource.id].value,
-      models: models,
-      me: me,
-      data: {
+      metadata: utils.getModel(resource.id).value,
+      resource: {
         '_type': this.props.modelName, 
-        'from': me,
+        'from': utils.getMe(),
         'to': this.props.identity
       }
     };
@@ -65,16 +61,14 @@ class ResourceTypesScreen extends Component {
   }
 
   renderRow(resource)  {
-    var model = this.props.models['model_' + (resource['_type'] || resource.id)].value;
+    var model = utils.getModel(resource['_type'] || resource.id).value;
     var isMessage = model.interfaces  &&  model.interfaces.indexOf('tradle.Message') != -1;
 
     return (
       <MessageRow
         onSelect={() => this.selectResource(resource)}
         resource={resource}
-        me={this.props.me}
         navigator={this.props.navigator}
-        models={this.props.models}
         to={this.props.identity} />
       );
   }

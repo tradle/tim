@@ -15,6 +15,7 @@ var {
 
 var styles = StyleSheet.create({
   container: {
+    marginTop: 60,
     flex: 1,
   },
   textContainer: {
@@ -45,7 +46,7 @@ var styles = StyleSheet.create({
   },
   image: {
     width: 400,
-    height: 300,
+    height: 350,
     alignSelf: 'stretch'
   },
   title: {
@@ -99,7 +100,7 @@ class ResourceView extends Component {
               : <View />;
  
     var modelName = resource['_type'];
-    var meta = this.props.models['model_' + modelName].value;
+    var meta = utils.getModel(modelName).value;
     var vCols = meta.viewCols;
 
     if (!vCols)
@@ -198,6 +199,7 @@ class ResourceView extends Component {
   }
   onPress(url) {
     this.props.navigator.push({
+      id: 7,
       component: ArticleView,
       passProps: {url: url}
     });

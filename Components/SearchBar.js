@@ -12,7 +12,8 @@ var {
 
 class SearchBar extends Component {
   render() {
-    var value = this.props.filter.length === 0 ? '' : this.props.filter;
+    var filter = this.props.filter;
+    var value = !filter ||  filter.length === 0 ? '' : filter;
     return (
       <View style={styles.searchBar}>
       <View style={styles.searchBarBG}>
@@ -60,7 +61,7 @@ var styles = StyleSheet.create({
   },
   searchBarInput: {
     height: 32,
-    fontSize: 20,
+    fontSize: 18,
     paddingLeft: 10,
     // opacity: 1,
     fontWeight: 'bold',

@@ -4,6 +4,7 @@ var React = require('react-native');
 var Q = require('q');
 var utils = require('../utils/utils');
 var ShowItems = require('./ShowItems');
+var SearchScreen = require('./SearchScreen');
 var t = require('tcomb-form-native');
 var sha = require('stable-sha1');
 var extend = require('extend');
@@ -25,6 +26,9 @@ var {
 class NewResource extends Component {
   constructor(props) {
     super(props);
+    this.setState({
+      resourceChanged: false
+    });
   }
   _rerenderWithError(err) {
     this.setState({
@@ -51,7 +55,7 @@ class NewResource extends Component {
     var db = utils.getDb();
     for (var p in options) {
       if (options[p].value) {
-        var ref = this.props.page.metadata.properties[p].ref;
+        var ref = this.props.metadata.properties[p].ref;
         if (ref  &&  options[p].value.indexOf('undefined') == -1)  {
           refProps[options[p].value] = p;
           promises.push(Q.ninvoke(db, 'get', options[p].value));
@@ -71,22 +75,22 @@ class NewResource extends Component {
              title: title,
              id : propValue
            }
-           var interfaces = self.props.page.metadata.interfaces;
+           var interfaces = self.props.metadata.interfaces;
            if (interfaces  &&  interfaces.indexOf('tradle.Message') != -1)
              json['time'] = new Date().getTime();  
          }
        });
-      var page = self.props.page; 
-      var meta = page.metadata.properties;
-      var modelName = page.metadata.id;
-      if (page.models['model_' + modelName]) {
-        var isNew = !page.data.rootHash;
+      var props = self.props; 
+      var meta = props.metadata.properties;
+      var modelName = props.metadata.id;
+      if (utils.getModel(modelName)) {
+        var isNew = !props.resource.rootHash;
         var obj;
-        if (!page.data  ||  isNew) 
+        if (!props.resource  ||  isNew) 
           obj = json;
         else {
           var obj = {};
-          extend(true, obj, page.data);
+          extend(true, obj, props.resource);
           for (var p in json)
             if (!obj[p])
               obj[p] = json[p];
@@ -120,7 +124,7 @@ class NewResource extends Component {
     })
     .then(function(value) {
       // self.props.navigator.pop();
-      var meta = self.props.page.metadata;
+      var meta = self.props.metadata;
       var props = meta.properties;
       var required = utils.arrayToObject(meta.required);
       var itemsMeta = [];
@@ -133,23 +137,23 @@ class NewResource extends Component {
         }
       }
       if (utils.isEmpty(itemsMeta)) {
-        // self.props.navigator.replacePrevious({
-        //   title: 'Hello',
-        //   component: EmptyPage,
-        //   passProps: {text: 'hi there'}
-        // });
-        // self.props.page.returnRoute.passProps.newResource = value;
-        self.props.navigator.replacePreviousAndPop(self.props.page.returnRoute);
+        self.props.navigator.replacePrevious({
+          title: 'Hello',
+          component: EmptyPage,
+          passProps: {text: 'hi there'}
+        });
+        self.props.navigator.replacePreviousAndPop(self.props.returnRoute);
         return;
       }
       self.props.navigator.push({
         component: ShowItems,
+        title: 'Items Chooser',
+        id: 5,
         passProps: {
           resourceKey: iKey, 
           resource: value,
           parentMeta: meta, 
           itemsMeta: itemsMeta,
-          models: self.props.page.models,
         }
       });
     })
@@ -159,47 +163,54 @@ class NewResource extends Component {
   }
 
   chooser(prop, propName, event) {
+    var props = this.props;
     var filter = event.nativeEvent.text; 
-    var title = this.props.page.models['model_' + prop.ref].title;
+    var m = utils.getModel(prop.ref).value;
     this.props.navigator.push({
-      title: title,
+      title: m.title,
       titleTextColor: '#7AAAC3',
-      component: require('./SearchScreen'),
+      id: 10,
+      component: SearchScreen,
       passProps: {
-        filter: filter, 
-        models: this.props.page.models, 
-        prop: propName,
-        returnRoute: this.props.route,
-        modelName: prop.ref,
-        resource: this.props.page.data,
-        me: this.props.page.me
+        filter:      filter, 
+        prop:        propName,
+        returnRoute: props.route,
+        modelName:   prop.ref,
+        resource:    props.resource,
+        callback:    this.setChosenValue.bind(this)
       }
     });
   }
 
-  render() {
-    var page = this.props.page;
-    var parentBG = {backgroundColor: '#7AAAC3'};
-    var err = this.props.err || '';
+  setChosenValue(propName, value) {
+    this.props.resource[propName] = value;
+    this.setState({
+      resourceChanged: true
+    });
 
-    var resource = this.props.page.data  ||  this.props.page.resource;
+  }
+  render() {
+    var props = this.props;
+    var parentBG = {backgroundColor: '#7AAAC3'};
+    var err = props.err || '';
+
+    var resource = props.resource;
     var photo = resource.photos && resource.photos.length 
               ? <Image source={{uri: resource.photos[0].url}} style={styles.image} /> 
               : <View />;
 
-    var meta =  page.metadata;
+    var meta =  props.metadata;
     if (this.props.setProperty)
-      page.data[this.props.setProperty.name] = this.props.setProperty.value;
+      props.resource[this.props.setProperty.name] = this.props.setProperty.value;
     var model = {};
     var arrays = [];
     var data = {};
-    extend(true, data, page.data);
+    extend(true, data, props.resource);
     var options = utils.getFormFields({
         meta: meta, 
         data: data, 
         chooser: this.chooser.bind(this),
         model: model,
-        models: this.props.page.models,
         items: arrays
       });
     
@@ -231,12 +242,9 @@ class NewResource extends Component {
     );
   }
 }
-NewResource.propTypes = {
-  models: React.PropTypes.array.metadata
-};
-
 var styles = StyleSheet.create({
   container: {
+    marginTop: 50,
     flex: 1,
   },
   label: {
@@ -315,7 +323,7 @@ module.exports = NewResource;
 
   // renderField(name, value) {
   //   var meta;
-  //   var rMeta = this.props.page.metadata;
+  //   var rMeta = this.props.metadata;
   //   for (var i=0; i<rMeta.length; i++)
   //     if (rMeta[i].prop == name) {
   //       meta = rMeta[i];

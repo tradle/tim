@@ -21,8 +21,6 @@ class ShowItems extends Component {
   onNewPressed(bl) {
     var page = {
       metadata: bl,
-      models: this.props.models,
-      db: this.props.db,
       resourceKey: this.props.resourceKey, 
       resource: this.props.resource,
       parentMeta: this.props.parentMeta
@@ -30,7 +28,8 @@ class ShowItems extends Component {
     this.props.navigator.push({
       title: 'Create new ' + bl.title,
       component: NewItem,
-      passProps: {page: page}
+      id: 6,
+      passProps: page
     });
 
   }
@@ -38,9 +37,8 @@ class ShowItems extends Component {
     var resource = this.props.resource;
     this.props.navigator.push({
       component: ResourceView,
+      id: 3,
       passProps: {
-        models: this.props.models,
-        db: this.props.db,
         resourceKey: this.props.resourceKey, 
         resource: resource
       }
