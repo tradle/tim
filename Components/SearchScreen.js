@@ -282,11 +282,7 @@ class SearchScreen extends Component {
     // Edit resource
     var me = utils.getMe();
     if (me  &&  this.props.prop) {
-      this.props.callback(this.props.prop, resource);
-      // this.props.returnRoute.passProps.setProperty = {
-      //   name: this.props.prop,
-      //   value: resource
-      // };
+      this.props.callback(this.props.prop, resource); // HACK for now
       this.props.navigator.popToRoute(this.props.returnRoute);
       return;
     }
@@ -372,11 +368,10 @@ class SearchScreen extends Component {
   }
 
   render() {
-    var model = utils.getModel(this.props.modelName).value;
     var content = this.state.dataSource.getRowCount() === 0 
    ?  <NoResources
         filter={this.state.filter}
-        title={model.title}
+        title={utils.getModel(this.props.modelName).value.title}
         isLoading={this.state.isLoading}/> 
    :  <ListView ref='listview'
         dataSource={this.state.dataSource}
@@ -390,8 +385,8 @@ class SearchScreen extends Component {
         keyboardDismissMode="onDrag"
         keyboardShouldPersistTaps={true}
         showsVerticalScrollIndicator={false} />;
-
     var Model = t.struct({'msg': t.Str});
+    var model = utils.getModel(this.props.modelName).value;
 
     var addNew = (model.isInterface) 
                ? <View style={styles.addNew}>
@@ -448,8 +443,12 @@ class SearchScreen extends Component {
         resource: self.props.resource, 
         returnRoute: self.props.route,
         modelName: modelName,
+        callback: this.onMessageCreated
       }
     });
+  }
+  onMessageCreated() {
+    this.setState({isLoading: false});
   }
 }
 reactMixin(SearchScreen.prototype, TimerMixin);

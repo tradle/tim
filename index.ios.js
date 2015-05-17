@@ -103,7 +103,10 @@ class IdentityApp extends Component {
       return <SearchPage navigator={nav} modelName={IDENTITY_MODEL} filter={props.filter} />;
     case 2:
       return <ResourceTypesScreen navigator={nav} 
-                modelName={props.modelName} />;
+                  modelName={props.modelName} 
+                  resource={props.resource} 
+                  returnRoute={props.route}
+                  callback={props.callback} />;
     case 3:
       return <ResourceView navigator={nav} 
                   resource={props.resource} />;      
@@ -112,6 +115,7 @@ class IdentityApp extends Component {
                   resource={props.resource} 
                   metadata={props.metadata}
                   route={route}
+                  callback={props.callback}
                   resourceKey={props.resourceKey} />;      
     case 5:
       return <ShowItems navigator={nav} 
@@ -130,12 +134,12 @@ class IdentityApp extends Component {
     case 10:  
     default: // 10
       return <SearchScreen navigator={nav} 
-                filter={props.filter} 
-                resource={props.resource}
-                prop={props.prop}
-                returnRoute={props.returnRoute}
-                callback={props.callback}
-                modelName={props.modelName} />;
+                  filter={props.filter} 
+                  resource={props.resource}
+                  prop={props.prop}
+                  returnRoute={props.returnRoute}
+                  callback={props.callback}
+                  modelName={props.modelName} />;
     }
   }
 }

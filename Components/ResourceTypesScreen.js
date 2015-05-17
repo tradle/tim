@@ -46,17 +46,19 @@ class ResourceTypesScreen extends Component {
       resource: {
         '_type': this.props.modelName, 
         'from': utils.getMe(),
-        'to': this.props.identity
+        'to': this.props.resource
       }
     };
     if (this.props.returnRoute)
       page.returnRoute = this.props.returnRoute;
-
-    this.props.navigator.replace({
+    if (this.props.callback)
+      page.callback = this.props.callback;
+    this.props.navigator.push({
+      id: 4,
       title: resource.title,
       component: NewResource,
       titleTextColor: '#7AAAC3',
-      passProps: {page: page}
+      passProps: page
     });
   }
 
@@ -69,7 +71,7 @@ class ResourceTypesScreen extends Component {
         onSelect={() => this.selectResource(resource)}
         resource={resource}
         navigator={this.props.navigator}
-        to={this.props.identity} />
+        to={this.props.resource} />
       );
   }
 

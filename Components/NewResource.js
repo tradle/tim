@@ -136,12 +136,9 @@ class NewResource extends Component {
           itemsMeta.push(props[p]);
         }
       }
-      if (utils.isEmpty(itemsMeta)) {
-        self.props.navigator.replacePrevious({
-          title: 'Hello',
-          component: EmptyPage,
-          passProps: {text: 'hi there'}
-        });
+      if (utils.isEmpty(itemsMeta)) {  // No array properties to set
+        if (callback)
+          self.props.callback();
         self.props.navigator.replacePreviousAndPop(self.props.returnRoute);
         return;
       }
@@ -195,7 +192,7 @@ class NewResource extends Component {
     var err = props.err || '';
 
     var resource = props.resource;
-    var photo = resource.photos && resource.photos.length 
+    var photo = resource  &&  resource.photos && resource.photos.length 
               ? <Image source={{uri: resource.photos[0].url}} style={styles.image} /> 
               : <View />;
 
