@@ -12,10 +12,10 @@ var ResourceView = require('./ResourceView');
 var NewResource = require('./NewResource');
 var ResourceTypesScreen = require('./ResourceTypesScreen');
 var utils = require('../utils/utils');
-var sampleData = require('../data/data');
 var t = require('tcomb-form-native');
+
 var Form = t.form.Form;
-var InvertibleScrollView = require('react-native-invertible-scroll-view');
+// var InvertibleScrollView = require('react-native-invertible-scroll-view');
 
 var interfaceToTypeMapping = {
   'tradle.Message': 'tradle.SimpleMessage'
@@ -377,9 +377,9 @@ class SearchScreen extends Component {
         dataSource={this.state.dataSource}
         renderFooter={this.renderFooter.bind(this)}
         renderRow={this.renderRow.bind(this)}
-        renderScrollView={
-          (props) => <InvertibleScrollView {...props} inverted />
-        }
+        // renderScrollView={
+        //   (props) => <InvertibleScrollView {...props} inverted />
+        // }
         // onFocus={() => this.refs.length  &&  this.refs.listview.getScrollResponder().scrollTo(0, 0)}
         automaticallyAdjustContentInsets={false}
         keyboardDismissMode="onDrag"

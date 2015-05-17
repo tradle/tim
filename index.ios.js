@@ -8,7 +8,6 @@ var ShowItems = require('./Components/ShowItems');
 var ResourceView = require('./Components/ResourceView');
 var ArticleView = require('./Components/ArticleView');
 var utils = require('./utils/utils');
-var sampleData = require('./data/data');
 var AddressBook = require('NativeModules').AddressBook;
 
 var IDENTITY_MODEL = 'tradle.Identity';

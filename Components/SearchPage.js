@@ -7,7 +7,6 @@ var SearchBar = require('./SearchBar');
 var ShowItems = require('./ShowItems');
 var NewResource = require('./NewResource');
 var utils = require('../utils/utils');
-var sampleData = require('../data/data');
 var sha = require('stable-sha1');
 // var si = require('search-index')();
 // var SearchResults = require('./SearchResults');
@@ -17,7 +16,6 @@ var {
   StyleSheet,
   Text,
   Navigator,
-  TextInput,
   View,
   TouchableHighlight,
   ActivityIndicatorIOS,
@@ -123,10 +121,7 @@ class SearchPage extends Component {
   //       // delay: 30000
   //     })    
   // }
-	onSearchTextChanged(event) {
-    // setTimeout(this.f.bind(this)
-    // , 0); 
-    // this.f();
+	showContacts(event) {
     var passProps = {
         filter: '', 
         modelName: this.props.modelName,
@@ -153,7 +148,7 @@ class SearchPage extends Component {
     });
   }
   
-  onSignUpPressed(me) {
+  onEditProfilePressed(me) {
     var modelName = this.props.modelName;
     if (!utils.getModel(modelName)) 
       this._rerenderWithError('Can find model: ' + modelName);
@@ -232,14 +227,14 @@ class SearchPage extends Component {
       <View style={styles.scroll}>
         <View style={styles.container} ref='search'>
           <TouchableHighlight style={[styles.thumbButton]}
-              underlayColor='#2E3B4E' onPress={this.onSearchTextChanged.bind(this)}>
+              underlayColor='#2E3B4E' onPress={this.showContacts.bind(this)}>
             <Image style={styles.thumb} source={require('image!Logo')}>
             </Image>
           </TouchableHighlight>
           <Text style={errStyle}>{err}</Text>
           <View style={{marginTop: 170, flexDirection: 'row'}}>
             <TouchableHighlight 
-                underlayColor='#2E3B4E' onPress={this.onSignUpPressed.bind(this, this.state.me)}>
+                underlayColor='#2E3B4E' onPress={this.onEditProfilePressed.bind(this, this.state.me)}>
               <Text style={styles.text}>
                 {signUp}
               </Text>
@@ -259,3 +254,21 @@ class SearchPage extends Component {
   }
 }
 module.exports = SearchPage;
+  // easeInQuad(t) {
+  //   return t * t;
+  // }
+  // f() {
+  //   var infiniteDuration = 1000;
+  //   var easeDuration = 300;
+  //     AnimationExperimental.startAnimation({
+  //       node: this.refs['search'],
+  //       duration: infiniteDuration,
+  //       // easing: 'easeInQuad',
+  //       easing: (t) => this.easeInQuad(Math.min(1, t*infiniteDuration/easeDuration)),
+  //       property: 'scaleXY',
+  //       toValue: [1,1]
+  //       // property: 'position',
+  //       // toValue: {x:200, y:-30},
+  //       // delay: 30000
+  //     })    
+  // }

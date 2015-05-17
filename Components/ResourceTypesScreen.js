@@ -1,14 +1,10 @@
 'use strict';
 
 var React = require('react-native');
-var Q = require('q');
 var MessageRow = require('./MessageRow');
 var NewResource = require('./NewResource');
 var utils = require('../utils/utils');
 
-var interfaceToTypeMapping = {
-  'tradle.Message': 'tradle.SimpleMessage'
-};
 var {
   ListView,
   Component,
