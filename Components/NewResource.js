@@ -137,7 +137,7 @@ class NewResource extends Component {
         }
       }
       if (utils.isEmpty(itemsMeta)) {  // No array properties to set
-        if (callback)
+        if (self.props.callback)
           self.props.callback();
         self.props.navigator.replacePreviousAndPop(self.props.returnRoute);
         return;
@@ -171,7 +171,6 @@ class NewResource extends Component {
       passProps: {
         filter:      filter, 
         prop:        propName,
-        returnRoute: props.route,
         modelName:   prop.ref,
         resource:    props.resource,
         callback:    this.setChosenValue.bind(this)

@@ -61,7 +61,7 @@ class IdentityApp extends Component {
       isLoading: true
     }; 
   }
-  componentDidMount() {
+  componentWillMount() {
     utils.loadModels();
   }    
 
@@ -104,7 +104,7 @@ class IdentityApp extends Component {
       return <ResourceTypesScreen navigator={nav} 
                   modelName={props.modelName} 
                   resource={props.resource} 
-                  returnRoute={props.route}
+                  returnRoute={props.returnRoute}
                   callback={props.callback} />;
     case 3:
       return <ResourceView navigator={nav} 
@@ -113,7 +113,7 @@ class IdentityApp extends Component {
       return <NewResource navigator={nav} 
                   resource={props.resource} 
                   metadata={props.metadata}
-                  route={route}
+                  returnRoute={props.returnRoute}
                   callback={props.callback}
                   resourceKey={props.resourceKey} />;      
     case 5:

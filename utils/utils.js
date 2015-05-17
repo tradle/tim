@@ -7,9 +7,9 @@ var moment = require('moment');
 var level = require('react-level');
 var promisify = require('q-level');
 
-var models = sampleData.getModels();
-var resources = sampleData.getResources();
-var db = promisify(level('identity.db', { valueEncoding: 'json' }))
+var models = [];
+var resources = [];
+var db;
 
 var propTypesMap = {
   'string': t.Str,
@@ -32,7 +32,10 @@ var utils = {
     return true;
   },
   getDb: function() {
+    if (!db)
+      db = promisify(level('identity.db', { valueEncoding: 'json' }));
     return db;
+
   },
   getMe() {
     return me;
@@ -224,20 +227,21 @@ var utils = {
   loadDB: function(db) {
     var batch = [];
 
-    models.forEach(function(m) {
+    sampleData.getModels().forEach(function(m) {
       if (!m.rootHash)
         m.rootHash = sha(m);
       batch.push({type: 'put', key: 'model_' + m.id, value: m});
     });
-    resources.forEach(function(r) {
+    sampleData.getResources().forEach(function(r) {
       if (!r.rootHash) 
         r.rootHash = sha(r);
 
       var key = r['_type'] + '_' + r.rootHash;
       batch.push({type: 'put', key: key, value: r});
     });
-    db.batch(batch, function(err, value) {
-      console.log(err + '; ' + value);
+    this.getDb().batch(batch, function(err, value) {
+      if (!err)
+        loadModels();
     });
   },
   getItemsMeta(metadata) {

@@ -199,9 +199,10 @@ class SearchPage extends Component {
   }
   onReloadDBPressed() {
     var self = this;
-    utils.getDb.createReadStream()
+    var db = utils.getDb();
+    db.createReadStream()
     .on('data', function(data) {
-       self.props.db.del(data.key, function(err) {
+       db.del(data.key, function(err) {
          err = err;
        })
     })

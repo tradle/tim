@@ -49,7 +49,7 @@ class ResourceTypesScreen extends Component {
       page.returnRoute = this.props.returnRoute;
     if (this.props.callback)
       page.callback = this.props.callback;
-    this.props.navigator.push({
+    this.props.navigator.replace({
       id: 4,
       title: resource.title,
       component: NewResource,

@@ -368,6 +368,7 @@ class SearchScreen extends Component {
   }
 
   render() {
+    console.log(this.props.modelName);
     var content = this.state.dataSource.getRowCount() === 0 
    ?  <NoResources
         filter={this.state.filter}
@@ -434,6 +435,7 @@ class SearchScreen extends Component {
       return;
 
     var self = this;
+    var currentRoutes = self.props.navigator.getCurrentRoutes();
     self.props.navigator.push({
       title: utils.makeLabel(model.title) + ' type',
       id: 2,
@@ -441,9 +443,9 @@ class SearchScreen extends Component {
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       passProps: {
         resource: self.props.resource, 
-        returnRoute: self.props.route,
+        returnRoute: currentRoutes[currentRoutes.length - 1],
         modelName: modelName,
-        callback: this.onMessageCreated
+        callback: this.onMessageCreated.bind(this)
       }
     });
   }
