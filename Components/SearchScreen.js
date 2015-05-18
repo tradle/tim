@@ -15,7 +15,7 @@ var utils = require('../utils/utils');
 var t = require('tcomb-form-native');
 
 var Form = t.form.Form;
-// var InvertibleScrollView = require('react-native-invertible-scroll-view');
+var InvertibleScrollView = require('react-native-invertible-scroll-view');
 
 var interfaceToTypeMapping = {
   'tradle.Message': 'tradle.SimpleMessage'
@@ -41,9 +41,13 @@ var resultsCache = {
   totalForQuery: {},
 };
 
-
 var LOADING = {};
 
+class MyList extends ListView {
+  render() {
+    return this.props.renderScrollView();
+  }
+}
 class SearchScreen extends Component {
   constructor(props) {
     super(props);
@@ -312,7 +316,7 @@ class SearchScreen extends Component {
     this.timeoutID = this.setTimeout(() => this.searchResources(filter), 100);
   }
   // Sending chat message
-  onSendPressed() {
+  onEndEditing() {
     if (this.state.userInput.trim().length == 0)
       return;
     var type = interfaceToTypeMapping[this.props.modelName];
@@ -351,7 +355,7 @@ class SearchScreen extends Component {
     var isMessage = model.interfaces  &&  model.interfaces.indexOf('tradle.Message') != -1;
     var me = utils.getMe();
     return isMessage 
-     ? ( <MessageRow
+     ? ( <MessageRow 
         onSelect={() => this.selectResource(resource)}
         resource={resource}
         navigator={this.props.navigator}
@@ -368,24 +372,37 @@ class SearchScreen extends Component {
   }
 
   render() {
-    console.log(this.props.modelName);
-    var content = this.state.dataSource.getRowCount() === 0 
-   ?  <NoResources
-        filter={this.state.filter}
-        title={utils.getModel(this.props.modelName).value.title}
-        isLoading={this.state.isLoading}/> 
-   :  <ListView ref='listview'
-        dataSource={this.state.dataSource}
-        renderFooter={this.renderFooter.bind(this)}
-        renderRow={this.renderRow.bind(this)}
-        // renderScrollView={
-        //   (props) => <InvertibleScrollView {...props} inverted />
-        // }
-        // onFocus={() => this.refs.length  &&  this.refs.listview.getScrollResponder().scrollTo(0, 0)}
-        automaticallyAdjustContentInsets={false}
-        keyboardDismissMode="onDrag"
-        keyboardShouldPersistTaps={true}
-        showsVerticalScrollIndicator={false} />;
+    var content;
+    if (this.state.dataSource.getRowCount() === 0)
+      content =  <NoResources
+                  filter={this.state.filter}
+                  title={utils.getModel(this.props.modelName).value.title}
+                  isLoading={this.state.isLoading}/> 
+    else {               
+      var model = utils.getModel(this.props.modelName).value; 
+      var isMessage = model.isInterface  &&  model.id === 'tradle.Message';
+      content = <ListView ref='listview'
+          dataSource={this.state.dataSource}
+          renderFooter={this.renderFooter.bind(this)}
+          renderRow={this.renderRow.bind(this)}
+          renderScrollView={
+            (props) => <InvertibleScrollView {...props} inverted />
+          }
+          automaticallyAdjustContentInsets={false}
+          keyboardDismissMode='onDrag'
+          keyboardShouldPersistTaps={true}
+          showsVerticalScrollIndicator={false} />;
+
+    if (isMessage)
+      content = 
+        <InvertibleScrollView
+          ref='messages'
+          inverted
+          automaticallyAdjustContentInsets={false}
+          scrollEventThrottle={200}>
+        {content}
+        </InvertibleScrollView>
+    }
     var Model = t.struct({'msg': t.Str});
     var model = utils.getModel(this.props.modelName).value;
 
@@ -399,13 +416,14 @@ class SearchScreen extends Component {
                     <View style={styles.searchBarBG}>
                       <TextInput 
                         autoCapitalize='none'
+                        autoFocus={true}
                         autoCorrect={false}
                         placeholder='Say something'
                         placeholderTextColor='#bbbbbb'
                         style={styles.searchBarInput}
                         value={this.state.userInput}
                         onChange={this.handleChange.bind(this)}
-                        onEndEditing={this.onSendPressed.bind(this)}
+                        onEndEditing={this.onEndEditing.bind(this)}
                       />
                     </View>
                   </View>
@@ -414,12 +432,13 @@ class SearchScreen extends Component {
               : <View></View>;
     
     return (
-      <View style={styles.container}>
+      <View style={styles.container}> 
         <SearchBar
           onSearchChange={this.onSearchChange.bind(this)}
           isLoading={this.state.isLoading}
           filter={this.props.filter}
-          onFocus={() => this.refs.length  &&  this.refs.listview.getScrollResponder().scrollTo(0, 0)} />
+          onFocus={() => this.refs.length  &&  this.refs.listview.getScrollResponder().scrollTo(0, 0)} 
+          />
         <View style={styles.separator} />
         {content}
         {addNew}
@@ -451,6 +470,70 @@ class SearchScreen extends Component {
   }
   onMessageCreated() {
     this.setState({isLoading: false});
+  }
+
+
+  scrollToBottom() {
+    var listViewScrollView = this.refs.listview.getScrollResponder();
+
+    this.refs.listview.requestAnimationFrame(() => {
+      listViewScrollView.refs.InnerScrollView.measure((x, y, width, height, offsetX, offsetY) => {
+        listViewScrollView.refs.ScrollView.measure((x_, y_, width_, height_, offsetX_, offsetY_) => {
+          //console.log("x=", x, "y=", y, "width=", width, "height=", height, "offsetX=", offsetX, "offsetY=", offsetY);
+          //console.log("x'=", x_, "y'=", y, "width'=", width_, "height'=", height_, "offsetX'=", offsetX_, "offsetY'=", offsetY_);
+          var scrollPadding = 3;
+          var scrollTo = height - height_ + y + scrollPadding;
+
+          // marginTop needs to be included
+          // offsetY needs to to be included, offsetY_ seems to always match it
+          // bigger offsetY means scrolled up; smaller offsetY means scrolled down
+          // when offsetY == InnerScrollView.height
+          // offsetY + InnerScrollView.height = ScrollView.height
+
+          // offsetY    marginTop    y_    y/height        scrollTo   marginTop - offsetY
+          // 0          131          0     533             405        131 - 0 = 131
+          // -122       -253         -253  533             405        -253 - (-122) = -131
+
+          //
+          var currentScrollTo = y - offsetY + offsetY_ + scrollPadding;
+          var delta = Math.abs(scrollTo - currentScrollTo);
+          var threshold = 45;
+
+          //console.log("scrollingTo:", scrollTo);
+          var doScroll;
+          // if (opts.maybe) {
+          //   if (delta < threshold) {
+          //     doScroll = true;
+          //   } else {
+          //     doScroll = false;
+          //   }
+          // } else {
+            doScroll = true;
+          // }
+          //Ion.console.log("offsetY=", offsetY, "offsetY_=", offsetY_, "InnerScrollView.height=", height, "ScrollView.height=", height_, "y=", y, "y_=", y_, "doScroll=", doScroll, "scrollTo=", scrollTo, "marginTop=", this.props._conversationMarginTop, "inputHeight=", inputDimensions.height, "currentScrollTo=", currentScrollTo, "threshold=", threshold, "delta=", delta, "(y - height)=", (y - height));
+
+          //doScroll = false;
+
+          if (doScroll) {
+            // if (opts.withoutAnimation) {
+            //   listViewScrollView.scrollWithoutAnimationTo(scrollTo);
+            // } else {
+              listViewScrollView.scrollTo(scrollTo);
+            // }
+          } else {
+            Ion.console.log("Not scrolling because too far apart and maybe");
+          }
+
+          //Ion.console.log("old _innerScrollViewOffsetY=", this._innerScrollViewOffsetY, "new _innerScrollViewOffsetY=", offsetY, "old _scrollViewOffsetY", this._scrollViewOffsetY, "new _scrollViewOffsetY=", offsetY_);
+          this._innerScrollViewOffsetY = offsetY;
+          this._scrollViewOffsetY = offsetY_;
+
+          // if (callback) {
+          //   callback(scrollTo);
+          // }
+        });
+      });
+    });
   }
 }
 reactMixin(SearchScreen.prototype, TimerMixin);
@@ -488,19 +571,19 @@ var styles = StyleSheet.create({
   },
   searchBar: {
     flex: 4,
-    padding: 20,
-    paddingLeft: 10,
+    padding: 10,
+    // paddingLeft: 10,
     paddingTop: 3,
 
-    height: 50,
+    height: 45,
     paddingBottom: 13,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#eeeeee' 
+    backgroundColor: '#eeeeee', 
   },
   searchBarBG: {
     marginTop: 10,
-    marginBottom: 10,
+    marginBottom: 5,
     // padding: 5,
     flex: 1,
     alignSelf: 'center',
@@ -551,7 +634,13 @@ var styles = StyleSheet.create({
     flexDirection: 'row', 
     alignItems: 'center', 
     backgroundColor: '#eeeeee',
+    borderBottomColor: '#eeeeee', 
+    borderRightColor: '#eeeeee', 
+    borderLeftColor: '#eeeeee', 
+    borderWidth: 1,
+    borderTopColor: '#cccccc',
   }
 });
 
 module.exports = SearchScreen;
+
