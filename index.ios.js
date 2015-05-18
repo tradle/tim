@@ -62,7 +62,7 @@ class IdentityApp extends Component {
     }; 
   }
   componentWillMount() {
-    utils.loadModels();
+    utils.loadResources();
   }    
 
   render() {

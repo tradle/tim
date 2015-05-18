@@ -19,7 +19,6 @@ var propTypesMap = {
   'integer': t.Num
 };
 
-var modelsLoaded = false;
 var me;
 
 var utils = {
@@ -40,16 +39,19 @@ var utils = {
   getMe() {
     return me;
   },
-  loadModels: function() {
+  loadResources: function() {
     var myId = sampleData.getMyId();
     var self = this;
     models.length = 0;
-    this.getDb().createReadStream()
+    return this.getDb().createReadStream()
     .on('data', function(data) {
        if (data.key.indexOf('model_') === 0)
          models[data.key] = data;
-       if (!me  &&  myId  && data.value.rootHash == myId)
-         me = data.value; 
+       else {
+         if (!me  &&  myId  && data.value.rootHash == myId)
+           me = data.value; 
+         resources[data.key] = data;
+       } 
      })
     .on('close', function() {
       console.log('Stream closed');
@@ -60,6 +62,9 @@ var utils = {
     .on('error', function(err) {
       console.log('err: ' + err);
     });
+  },
+  getResources: function() {
+    return resources;
   },
   getModels: function() {
     return models;
@@ -241,7 +246,7 @@ var utils = {
     });
     this.getDb().batch(batch, function(err, value) {
       if (!err)
-        loadModels();
+        loadResources();
     });
   },
   getItemsMeta(metadata) {
