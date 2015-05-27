@@ -4,6 +4,11 @@ var React = require('react-native');
 var utils = require('../utils/utils');
 var sha = require('stable-sha1');
 var ResourceTypesScreen = require('./ResourceTypesScreen');
+var Reflux = require('reflux');
+var Actions = require('../Actions/Actions');
+var Store = require('../Store/Store');
+var reactMixin = require('react-mixin');
+
 
 var {
   View,
@@ -22,6 +27,26 @@ class AddNewMessage extends Component {
   constructor(props) {
     this.state = {
       userInput: ''
+    }
+  }
+  componentDidMount() {
+    this.listenTo(Store, 'onAddMessage');
+  }
+  onAddMessage(list, resource, error) {
+    if (!resource)
+      return;
+    if (error) {
+      if (resource['_type'] == this.props.resource['_type']) 
+        this.setState({err: error});
+      return;    
+    }
+    var model = utils.getModel(resource['_type']).value;
+    var isMessage = model.interfaces  &&  model.interfaces.indexOf('tradle.Message') != -1;
+    if (isMessage) {
+      if (this.props.callback) {
+        this.props.callback('');
+        this.setState({userInput: ''});
+      }
     }
   }
   render() {
@@ -60,7 +85,8 @@ class AddNewMessage extends Component {
     var me = utils.getMe();
     var resource = this.props.resource;
     var title = utils.getDisplayName(resource, utils.getModel(this.props.resource['_type']).value.properties);
-    var meTitle = utils.getDisplayName(me, utils.getModel(me['_type']).value.properties);
+    var meta = utils.getModel(me['_type']).value.properties;
+    var meTitle = utils.getDisplayName(me, meta);
     var r = {
       '_type': type,
       'message': this.state.userInput,
@@ -74,22 +100,26 @@ class AddNewMessage extends Component {
       },
       time: new Date().getTime()
     }
-    var rootHash = sha(r);
-    r.rootHash = rootHash;
-    var self = this;
-    var key = type + '_' + rootHash;
-    utils.getDb().put(key, r)
-    .then(function() {
-      utils.addOrUpdateResource(key, r);
-      var userInput = self.state.userInput;
 
-      self.setState({userInput: ''});
-      if (self.props.callback)
-        self.props.callback(userInput);
-    })
-    .catch(function(err) {
-      err = err;
-    });
+    Actions.addMessage(r, meta);
+
+    // var rootHash = sha(r);
+    // r.rootHash = rootHash;
+    // var self = this;
+    // var key = type + '_' + rootHash;
+
+    // utils.getDb().put(key, r)
+    // .then(function() {
+    //   utils.addOrUpdateResource(key, r);
+    //   var userInput = self.state.userInput;
+
+    //   self.setState({userInput: ''});
+    //   if (self.props.callback)
+    //     self.props.callback(userInput);
+    // })
+    // .catch(function(err) {
+    //   err = err;
+    // });
   }
   onAddNewPressed() {
     var modelName = this.props.modelName;
@@ -117,6 +147,8 @@ class AddNewMessage extends Component {
     this.setState({isLoading: false});
   }
 }
+reactMixin(AddNewMessage.prototype, Reflux.ListenerMixin);
+
 var styles = StyleSheet.create({
   searchBar: {
     flex: 4,

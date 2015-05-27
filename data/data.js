@@ -1,7 +1,7 @@
 'use strict'
 
-// var myId = 'b25da36eaf4b01b37fc2154cb1103eb5324a52fa'; // Jane Choi
-var myId = '31eb0b894cad3601adc76713d55a11c88e48b4a2'; // Kate Blair
+var myId = 'b25da36eaf4b01b37fc2154cb1103eb5324a52fa'; // Jane Choi
+// var myId = '31eb0b894cad3601adc76713d55a11c88e48b4a2'; // Kate Blair
 // var myId = '38980944449570d2783d7c8af5db8ca9463391f3'; // Sofie
 var identities = [
 {
@@ -84,7 +84,7 @@ var identities = [
   'photos': [
     {
       'type': 'headshot',
-      'url': 'http://scrapetv.com/News/News%20Pages/Entertainment/images-9/keanu-reeves-bill-and-ted.jpg'
+      'url': 'http://fc09.deviantart.net/fs70/f/2011/334/9/f/second__man__drawing__by_namitokiwa-d4hteh4.jpg'
     }
   ],
   'pubkeys': [
@@ -781,16 +781,17 @@ var models = [{
         'properties': {
           'contactMethod': {
             'type': 'string',
-            // 'displayAs': '<View style='{{paddingLeft:20}}'><Text>{type + ' : ' + identifier'}</Text></View>',
             'displayAs': ['type', ' : ', 'identifier'],
             'readOnly': true,
             'skipLabel': true
           },
           'identifier': {
-            'type': 'string'
+            'type': 'string',
+            'description': 'Phone number, IM name, skype id, etc.'
           },
           'type': {
-            'type': 'string'
+            'type': 'string',
+            'description': 'Like "phone", "IM", "skype", "email", etc.'
           }
         }
       },
@@ -846,7 +847,8 @@ var models = [{
             'type': 'string'
           },
           'url': {
-            'type': 'string'
+            'type': 'string',
+            'skipLabel': true
           }
         }
       },
@@ -968,7 +970,8 @@ var models = [{
             'type': 'string'
           },
           'url': {
-            'type': 'string'
+            'type': 'string',
+            'skipLabel': true
           }
         }
       },
@@ -1044,13 +1047,17 @@ var models = [{
       'items': {
         'type': 'object',
         'properties': {
+          'title': {
+            'type': 'string',
+            'skipLabel': true
+          },
           'url': {
             'type': 'string',
             'skipLabel': true
           }
         }
       },
-      'required': ['url']
+      'required': ['title', 'url']
     }
   },  
   'required': [
@@ -1145,17 +1152,36 @@ var models = [{
      },
     'photos': {
       'type': 'array',
-      'cloneOf': 'photos',
+      'cloneOf': 'tradle.Message.photos',
       'items': {
         'type': 'object',
         'properties': {
+          'title': {
+            'type': 'string',
+            'skipLabel': true
+          },
           'url': {
             'type': 'string',
             'skipLabel': true
           }
         }
       },
-      'required': ['url']
+      'required': ['title', 'url']
+    },
+    'verifiedBy': {
+      'type': 'array',
+      'readOnly': true,
+      'items': {
+        'type': 'object',
+        'readOnly': true,
+        'properties': {
+          'contact': {
+            'type': 'object',
+            'ref': 'tradle.Identity'
+          }
+        }
+      },
+      'required': ['contact']
     }
   },  
   'required': [
@@ -1165,7 +1191,7 @@ var models = [{
     'message', 'time'
   ],
   'viewCols': [
-    'message', 'from', 'to', 'time'
+    'message', 'from', 'to', 'time, photos'
   ],
 },
 {
@@ -1211,16 +1237,35 @@ var models = [{
      },
     'photos': {
       'type': 'array',
-      'cloneOf': 'photos',
+      'cloneOf': 'tradle.Message.photos',
       'items': {
         'type': 'object',
         'properties': {
+          'title': {
+            'type': 'string',
+            'skipLabel': true
+          },
           'url': {
-            'type': 'string'
+            'type': 'string',
+            'skipLabel': true
           }
         }
       },
-      'required': ['url']
+      'required': ['title', 'url']
+    },
+    'verifiedBy': {
+      'type': 'array',
+      'readOnly': true,
+      'items': {
+        'type': 'object',
+        'properties': {
+          'contact': {
+            'type': 'object',
+            'ref': 'tradle.Identity'
+          }
+        }
+      },
+      'required': ['contact']
     }
   },  
   'required': [
@@ -1230,7 +1275,7 @@ var models = [{
     'message', 'time'
   ],
   'viewCols': [
-    'message', 'from', 'to', 'time'
+    'message', 'from', 'to', 'time', 'photos'
   ],
 },
 {
@@ -1276,16 +1321,35 @@ var models = [{
      },
     'photos': {
       'type': 'array',
-      'cloneOf': 'photos',
+      'cloneOf': 'tradle.Message.photos',
       'items': {
         'type': 'object',
         'properties': {
+          'title': {
+            'type': 'string',
+            'skipLabel': true
+          },
           'url': {
-            'type': 'string'
+            'type': 'string',
+            'skipLabel': true
           }
         }
       },
-      'required': ['url']
+      'required': ['title', 'url']
+    },
+    'verifiedBy': {
+      'type': 'array',
+      'readOnly': true,
+      'items': {
+        'type': 'object',
+        'properties': {
+          'contact': {
+            'type': 'object',
+            'ref': 'tradle.Identity'
+          }
+        }
+      },
+      'required': ['contact']
     }
   },  
   'required': [
@@ -1295,7 +1359,7 @@ var models = [{
     'message', 'time'
   ],
   'viewCols': [
-    'message', 'from', 'to', 'time'
+    'message', 'from', 'to', 'time', 'photos'
   ],
 },
 {
@@ -1341,16 +1405,35 @@ var models = [{
      },
     'photos': {
       'type': 'array',
-      'cloneOf': 'photos',
+      'cloneOf': 'tradle.Message.photos',
       'items': {
         'type': 'object',
         'properties': {
+          'title': {
+            'type': 'string',
+            'skipLabel': true
+          },
           'url': {
-            'type': 'string'
+            'type': 'string',
+            'skipLabel': true
           }
         }
       },
-      'required': ['url']
+      'required': ['title', 'url']
+    },
+    'verifiedBy': {
+      'type': 'array',
+      'readOnly': true,
+      'items': {
+        'type': 'object',
+        'properties': {
+          'contact': {
+            'type': 'object',
+            'ref': 'tradle.Identity'
+          }
+        }
+      },
+      'required': ['contact']
     }
   },  
   'required': [
@@ -1427,16 +1510,35 @@ var models = [{
      },
     'photos': {
       'type': 'array',
-      'cloneOf': 'photos',
+      'cloneOf': 'tradle.Message.photos',
       'items': {
         'type': 'object',
         'properties': {
+          'title': {
+            'type': 'string',
+            'skipLabel': true
+          },
           'url': {
-            'type': 'string'
+            'type': 'string',
+            'skipLabel': true
           }
         }
       },
-      'required': ['url']
+      'required': ['title', 'url']
+    },
+    'verifiedBy': {
+      'type': 'array',
+      'readOnly': true,
+      'items': {
+        'type': 'object',
+        'properties': {
+          'contact': {
+            'type': 'object',
+            'ref': 'tradle.Identity'
+          }
+        }
+      },
+      'required': ['contact']
     }
   },  
   'required': [
@@ -1462,7 +1564,8 @@ var models = [{
       'readOnly': true
      },
      'message': {
-      'type': 'string',
+      'type': 'object',
+      'ref': 'tradle.Message',
       'displayName': true,
      },
      'verifier': {

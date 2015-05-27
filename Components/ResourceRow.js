@@ -19,7 +19,7 @@ class ResourceRow extends Component {
     var resource = this.props.resource;
     var photo = resource.photos &&  resource.photos.length
               ? <Image source={{uri: resource.photos[0].url}} style={styles.cellImage} /> 
-              : <View style={styles.cell}></View>
+              : <View style={styles.cellImage}></View>
 
     return (
       <View>
@@ -74,8 +74,10 @@ class ResourceRow extends Component {
         else  {
           if (resource[v]  &&  (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0))
             vCols.push(<Text style={style} onPress={self.onPress.bind(self)} numberOfLines={first ? 2 : 1}>{resource[v]}</Text>);
-          else
-            vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{resource[v]}</Text>);
+          else {
+            var val = properties[v].displayAs ? utils.templateIt(properties[v], resource) : resource[v];
+            vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>);
+          }
         }
         first = false;
       }); 

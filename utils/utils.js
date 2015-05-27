@@ -1,15 +1,7 @@
 'use strict'
 
 var t = require('tcomb-form-native');
-var sampleData = require('../data/data');
-var sha = require('stable-sha1');
 var moment = require('moment');
-var level = require('react-level');
-var promisify = require('q-level');
-
-var models = [];
-var resources = [];
-var db;
 
 var propTypesMap = {
   'string': t.Str,
@@ -18,61 +10,32 @@ var propTypesMap = {
   'number': t.Num,
   'integer': t.Num
 };
-
-var me;
+var models, me;
 
 var utils = {
-  isEmpty: function(obj) {
+  isEmpty(obj) {
     for(var prop in obj) {
-        if(obj.hasOwnProperty(prop))
-            return false;
+      if(obj.hasOwnProperty(prop))
+        return false;
     }
-
     return true;
   },
-  getDb: function() {
-    if (!db)
-      db = promisify(level('identity.db', { valueEncoding: 'json' }));
-    return db;
-
+  setMe(meR) {
+    me = meR;
   },
   getMe() {
     return me;
   },
-  loadResources: function() {
-    var myId = sampleData.getMyId();
-    var self = this;
-    models.length = 0;
-    return this.getDb().createReadStream()
-    .on('data', function(data) {
-       if (data.key.indexOf('model_') === 0)
-         models[data.key] = data;
-       else {
-         if (!me  &&  myId  && data.value.rootHash == myId)
-           me = data.value; 
-         resources[data.key] = data;
-       } 
-     })
-    .on('close', function() {
-      console.log('Stream closed');
-    })      
-    .on('end', function() {
-      console.log('Stream ended');
-    })      
-    .on('error', function(err) {
-      console.log('err: ' + err);
-    });
+  setModels(modelsRL) {
+    models = modelsRL;
   },
-  getResources: function() {
-    return resources;
-  },
-  getModels: function() {
+  getModels() {
     return models;
   },
-  getModel: function(modelName) {
-    return models['model_' + modelName];
+  getModel(modelName) {
+    return models ? models['model_' + modelName] : null;
   },
-  makeLabel: function(label) {
+  makeLabel(label) {
     return label
           // insert a space before all caps
           .replace(/([A-Z])/g, ' $1')
@@ -96,7 +59,6 @@ var utils = {
     return Object.keys(obj).map(function (key) {return obj[key]});
   },
   getImplementors(iModel) {
-    var models = this.getModels();
     var implementors = [];
     for (var p in models) {
       var m = models[p].value;
@@ -159,6 +121,8 @@ var utils = {
       options.fields[p] = {
         error: 'Insert a valid ' + label
       }
+      if (props[p].description)
+        options.fields[p].help = props[p].description;
       if (props[p].readOnly  ||  (props[p].immutable  &&  data  &&  data[p]))
         options.fields[p] = {'editable':  false };
       if (formType) {
@@ -174,7 +138,7 @@ var utils = {
         }
       }
       else if (type === 'array') {
-        props[p].range = p;
+        props[p].name = p;
         continue;
       }
       else if (type != 'enum') {
@@ -213,7 +177,7 @@ var utils = {
     }
     return options;
   },
-  getCloneOf: function(prop, meta) {
+  getCloneOf(prop, meta) {
     for (var p in meta) {
       var cloneOf = meta[p].cloneOf;
       if (cloneOf  &&  cloneOf === prop)
@@ -223,43 +187,18 @@ var utils = {
     var propName = pp[pp.length - 1];
     if (meta[propName])
       return propName;
-    // var iModelName = prop.slice(0, prop.lastIndexOf('.').length());
-
-    // if (cloneOf  &&  cloneOf.type === ) {
-    //   return cloneOf;
-    // }
-  },
-  loadDB: function(db) {
-    var batch = [];
-
-    sampleData.getModels().forEach(function(m) {
-      if (!m.rootHash)
-        m.rootHash = sha(m);
-      batch.push({type: 'put', key: 'model_' + m.id, value: m});
-    });
-    sampleData.getResources().forEach(function(r) {
-      if (!r.rootHash) 
-        r.rootHash = sha(r);
-
-      var key = r['_type'] + '_' + r.rootHash;
-      batch.push({type: 'put', key: key, value: r});
-    });
-    this.getDb().batch(batch, function(err, value) {
-      if (!err)
-        loadResources();
-    });
   },
   getItemsMeta(metadata) {
     var props = metadata.properties;
     var required = utils.arrayToObject(metadata.required);
-    if (!required)
-      return;
+    // if (!required)
+    //   return;
     var itemsMeta = [];
     for (var p in props) {
-      if (props[p].type == 'array'  &&  required[p]) {
+      if (props[p].type == 'array') { //  &&  required[p]) {
         if (!props[p].title)
           props[p].title = utils.makeLabel(p);
-        props[p].range = p; 
+        props[p].name = p; 
         itemsMeta.push(props[p]);
       }
     }
@@ -269,39 +208,25 @@ var utils = {
     if (!meta)
       return resource.title;
     var displayName = '';
-    for (var p in resource) {
-      if (meta[p]  &&  meta[p].displayName) {
-        if (meta[p].ref)
-          displayName += displayName.length ? ' ' + resource[p].title : resource[p].title;
-        else
-          displayName += displayName.length ? ' ' + resource[p] : resource[p];
-      }
+    for (var p in meta) {
+      if (meta[p].displayName) {
+        if (resource[p]) {
+          if (meta[p].type == 'object') 
+            displayName += displayName.length ? ' ' + resource[p].title : resource[p].title;
+          else
+            displayName += displayName.length ? ' ' + resource[p] : resource[p];
+        }
+        else if (meta[p].displayAs) {
+          var dn = this.templateIt(meta[p], resource);
+          if (dn)
+            displayName += displayName.length ? ' ' + dn : dn;
+        }
+
+      }  
     }
     return displayName;
   },
   
-  loadModelsAndMe(db, models) {
-    var myId = sampleData.getMyId();
-    var self = this;
-    var me;
-    return db.createReadStream()
-    .on('data', function(data) {
-       if (data.key.indexOf('model_') === 0)
-         models[data.key] = data;
-       if (myId  && data.value.rootHash == myId)
-         me = data.value; 
-     })
-    .on('close', function() {
-      console.log('Stream closed');
-      return me;
-    })      
-    .on('end', function() {
-      console.log('Stream ended');
-    })      
-    .on('error', function(err) {
-      console.log('err: ' + err);
-    });
-  },    
   templateIt(prop, resource) {
     var template = prop.displayAs;
     var val = '';
@@ -339,3 +264,69 @@ var utils = {
 }
 
 module.exports = utils;
+
+  // loadResources: function() {
+  //   var myId = sampleData.getMyId();
+  //   var self = this;
+  //   return this.getDb().createReadStream()
+  //   .on('data', function(data) {
+  //      if (data.key.indexOf('model_') === 0)
+  //        models[data.key] = data;
+  //      else {
+  //        if (!me  &&  myId  && data.value.rootHash == myId)
+  //          me = data.value; 
+  //        resources[data.key] = data;
+  //      } 
+  //    })
+  //   .on('close', function() {
+  //     console.log('Stream closed');
+  //   })      
+  //   .on('end', function() {
+  //     console.log('Stream ended');
+  //   })      
+  //   .on('error', function(err) {
+  //     console.log('err: ' + err);
+  //   });
+  // },
+  // loadModelsAndMe(db, models) {
+  //   var myId = sampleData.getMyId();
+  //   var self = this;
+  //   var me;
+  //   return db.createReadStream()
+  //   .on('data', function(data) {
+  //      if (data.key.indexOf('model_') === 0)
+  //        models[data.key] = data;
+  //      if (myId  && data.value.rootHash == myId)
+  //        me = data.value; 
+  //    })
+  //   .on('close', function() {
+  //     console.log('Stream closed');
+  //     return me;
+  //   })      
+  //   .on('end', function() {
+  //     console.log('Stream ended');
+  //   })      
+  //   .on('error', function(err) {
+  //     console.log('err: ' + err);
+  //   });
+  // },    
+  // loadDB: function(db) {
+  //   var batch = [];
+  //   var self = this;
+  //   sampleData.getModels().forEach(function(m) {
+  //     if (!m.rootHash)
+  //       m.rootHash = sha(m);
+  //     batch.push({type: 'put', key: 'model_' + m.id, value: m});
+  //   });
+  //   sampleData.getResources().forEach(function(r) {
+  //     if (!r.rootHash) 
+  //       r.rootHash = sha(r);
+
+  //     var key = r['_type'] + '_' + r.rootHash;
+  //     batch.push({type: 'put', key: key, value: r});
+  //   });
+  //   this.getDb().batch(batch, function(err, value) {
+  //     if (!err)
+  //       self.loadResources();
+  //   });
+  // },

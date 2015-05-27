@@ -77,7 +77,7 @@ class ResourceTypesScreen extends Component {
       dataSource={this.state.dataSource}
       renderRow={this.renderRow.bind(this)}
       automaticallyAdjustContentInsets={false}
-      keyboardDismissMode="onDrag"
+      keyboardDismissMode='onDrag'
       keyboardShouldPersistTaps={true}
       showsVerticalScrollIndicator={false} />;
 

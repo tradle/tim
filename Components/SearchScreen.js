@@ -1,25 +1,25 @@
 'use strict';
 
 var React = require('react-native');
-// var Q = require('q');
-var sha = require('stable-sha1');
 var reactMixin = require('react-mixin');
 var SearchBar = require('./SearchBar');
-var TimerMixin = require('react-timer-mixin');
+// var TimerMixin = require('react-timer-mixin');
 var ResourceRow = require('./ResourceRow');
 var MessageRow = require('./MessageRow');
 var ResourceView = require('./ResourceView');
 var NewResource = require('./NewResource');
-var ResourceTypesScreen = require('./ResourceTypesScreen');
+var AddNewMessage = require('./AddNewMessage');
 var utils = require('../utils/utils');
 var t = require('tcomb-form-native');
+var Store = require('../Store/Store');
+var Actions = require('../Actions/Actions');
+var Reflux = require('reflux');
 
 var Form = t.form.Form;
-var InvertibleScrollView = require('react-native-invertible-scroll-view');
 
-var interfaceToTypeMapping = {
-  'tradle.Message': 'tradle.SimpleMessage'
-};
+var InvertibleScrollView = require('react-native-invertible-scroll-view');
+var messageCount;
+
 var {
   ActivityIndicatorIOS,
   ListView,
@@ -34,7 +34,6 @@ var {
   View,
 } = React;
 
-
 var resultsCache = {
   dataForQuery: {},
   nextPageNumberForQuery: {},
@@ -43,168 +42,47 @@ var resultsCache = {
 
 var LOADING = {};
 
-class MyList extends ListView {
-  render() {
-    return this.props.renderScrollView();
-  }
-}
 class SearchScreen extends Component {
   constructor(props) {
     super(props);
     this.timeoutID = null;
     this.state = {
-      isLoading: false,
-      isLoadingTail: false,
+      isLoading: utils.getModels() ? false : true,
       dataSource: new ListView.DataSource({
         rowHasChanged: (row1, row2) => row1 !== row2,
       }),
       filter: this.props.filter,
-      queryNumber: 1,
       userInput: ''
     };
   }
+  componentWillMount() {
+    if (this.props.isAggregation)
+      Actions.list('', this.props.modelName, this.props.resource, true);    
+    else
+      Actions.list('', this.props.modelName, this.props.resource);    
+  }
   componentDidMount() {
-    if (!this.props.implementors  ||  utils.getModel(this.props.modelName).isInterface) 
-      this.searchResources(this.props.filter);
+    this.listenTo(Store, 'onListUpdate');
   }
-  componentWillUnmount() {
-    console.log('Unmounting');
-  }
-
-  _urlForQueryAndPage(query, pageNumber) {
-    return ('file:///Users/Ellen/lablz/Identity/a.json');
-  }
-
-  searchResources(query) {
-    this.timeoutID = null;
-
-    this.setState({filter: query});
-
-    var cachedResultsForQuery = resultsCache.dataForQuery[query];
-    if (cachedResultsForQuery) {
-      if (!LOADING[query]) {
-        this.setState({
-          dataSource: this.getDataSource(cachedResultsForQuery),
-          isLoading: false
-        });
-      } else {
-        this.setState({isLoading: true});
-      }
+  onListUpdate(list, err, isAggregation) {
+    if (isAggregation && !this.props.isAggregation)
       return;
+    if (!err  &&  (list.length || this.state.filter.length)) {
+      var type = list[0]['_type'];
+      if (type  !== this.props.modelName) {
+        var model = utils.getModel(this.props.modelName).value;
+        if (!model.isInterface)
+          return;
+        
+        var rModel = utils.getModel(type).value;
+        if (!rModel.interfaces  ||  rModel.interfaces.indexOf(this.props.modelName) === -1) 
+          return;
+      }
+      this.setState({
+        dataSource: this.getDataSource(list),
+        isLoading: false
+      })
     }
-
-    LOADING[query] = true;
-    resultsCache.dataForQuery[query] = null;
-    this.setState({
-      isLoading: true,
-      queryNumber: this.state.queryNumber + 1,
-      isLoadingTail: false,
-    });
-    var self = this;
-    var foundResources = {};
-    var modelName = self.props.modelName;
-    var model = utils.getModel(modelName).value;
-    var isMessage = model.isInterface;
-    var meta = model.properties;
-
-    var implementors = isMessage ? utils.getImplementors(modelName) : null;
-
-    var required = model.required;
-    var meRootHash = utils.getMe().rootHash;
-    var resourceRootHash = 
-    utils.getDb().createReadStream()
-    .on('data', function(data) {
-      var key = data.key;
-      if (key.indexOf('model_') === 0)
-        return;
-      var iModel;
-      if (isMessage  &&  implementors) {
-        for (var i=0; i<implementors.length  &&  !iModel; i++) {
-          if (implementors[i].id.indexOf(key.substring(0, data.key.indexOf('_'))) === 0)
-            iModel = implementors[i];
-        }
-        if (!iModel)
-          return;
-      }
-      else if (key.indexOf(modelName + '_') == -1)
-        return;
-      var r = data.value;
-      if (isMessage) {
-        var msgProp = utils.getCloneOf('tradle.Message.message', iModel.properties);
-        if (r[msgProp].trim().length === 0)
-          return;
-        var fromProp = utils.getCloneOf('tradle.Message.from', iModel.properties);
-        var toProp = utils.getCloneOf('tradle.Message.to', iModel.properties);
-
-        var fromID = r[fromProp].id.split(/_/)[1];
-        var toID = r[toProp].id.split(/_/)[1];
-        if (fromID  !== meRootHash  &&  toID !== meRootHash) 
-          return;
-        if (fromID !== self.props.resource.rootHash  &&  
-            toID != self.props.resource.rootHash)
-          return;
-      }
-      if (!query) {
-         foundResources[key] = r;      
-         return;   
-       }
-       // primitive filtering for this commit
-       var combinedValue = '';
-       for (var rr in meta) {
-         if (r[rr] instanceof Array)
-          continue;
-         combinedValue += combinedValue ? ' ' + r[rr] : r[rr];
-       }
-       // required.forEach(function(rr) {
-       //   combinedValue += (r[rr] &&  !(r[rr] instanceof Array) ? (combinedValue ? ' ' + r[rr] : r[rr]) : '');
-       // }); 
-       if (!combinedValue  ||  (combinedValue  &&  combinedValue.toLowerCase().indexOf(query.toLowerCase()) != -1)) {
-         foundResources[key] = r; 
-       }
-     })
-    .on('error', function(error) {
-      error = error;
-      LOADING[query] = false;
-    })
-    .on('close', function() {
-      LOADING[query] = false;
-    })
-    .on('end', function() {
-      LOADING[query] = false;
-      resultsCache.nextPageNumberForQuery[query] = 2;
-
-      if (self.state.filter !== query) {
-        // do not update state if the query is stale
-        return;
-      }
-      var resources = utils.objectToArray(foundResources);
-      if (isMessage) {
-        resources.sort(function(a,b){
-          // Turn your strings into dates, and then subtract them
-          // to get a value that is either negative, positive, or zero.
-          return new Date(a.time) - new Date(b.time);
-        });
-      }
-      self.setState({
-        isLoading: false,
-        dataSource: self.getDataSource(resources),
-      });
-    });
-  }
-
-  hasMore() {
-    var query = this.state.filter;
-    if (!resultsCache.dataForQuery[query]) {
-      return true;
-    }
-    return (
-      resultsCache.totalForQuery[query] !== resultsCache.dataForQuery[query].length
-    );
-  }
-  renderFooter() {
-    return (!this.hasMore() || !this.state.isLoadingTail) 
-           ? <View style={styles.scrollSpinner} />
-           : <ActivityIndicatorIOS style={styles.scrollSpinner} />;
   }
 
   getDataSource(resources) {
@@ -217,8 +95,10 @@ class SearchScreen extends Component {
     var model = utils.getModel(this.props.modelName);
 
     if (model.value.isInterface) {
-      if (resource['_type'])
+      if (resource['_type']) {
+        this._selectResource(resource);
         return;
+      }
       var props = {
         metadata: utils.getModel(resource.id).value,
         resource: {
@@ -259,28 +139,36 @@ class SearchScreen extends Component {
         modelName: modelName,
       },
       rightButtonTitle: 'Profile',
-      onRightButtonPress: {//() => {
-      //   self.props.navigator.push({
-
-          title: title,
-          id: 3,
-          component: ResourceView,
-          titleTextColor: '#7AAAC3',
-          passProps: {resource: resource}
-        // });
+      onRightButtonPress: {
+        title: title,
+        id: 3,
+        component: ResourceView,
+        titleTextColor: '#7AAAC3',
+        passProps: {resource: resource}
       }
     }
     this.props.navigator.push(route);
   }
 
   _selectResource(resource) {
-    var parentMeta = utils.getModel(this.props.modelName);
-    var title = utils.getDisplayName(resource, parentMeta.value.properties);
+    var model = utils.getModel(this.props.modelName);
+    var title = utils.getDisplayName(resource, model.value.properties);
+    var newTitle = title;
+    if (title.length > 20) {
+      var t = title.split(' ');
+      newTitle = '';
+      t.forEach(function(word) {
+        if (newTitle.length + word.length > 20)
+          return;
+        newTitle += newTitle.length ? ' ' + word : word;
+      })
+    }
+
     var route = {
-      title: title,
+      title: newTitle,
       id: 3,
       component: ResourceView,
-      parentMeta: parentMeta,
+      parentMeta: model,
       passProps: {resource: resource},
     }
     // Edit resource
@@ -290,7 +178,7 @@ class SearchScreen extends Component {
       this.props.navigator.popToRoute(this.props.returnRoute);
       return;
     }
-    if (me  &&  (JSON.stringify(resource) === JSON.stringify(me))  ||  resource['_type'] !== 'tradle.Identity') {
+    if (me  &&  !model.value.isInterface  &&  (resource.rootHash === me.rootHash  ||  resource['_type'] !== 'tradle.Identity')) {
       var self = this ;
       route.rightButtonTitle = 'Edit';
       route.onRightButtonPress = /*() =>*/ {
@@ -304,62 +192,30 @@ class SearchScreen extends Component {
           resource: me
         }
       };
-        // });
     }
     this.props.navigator.push(route);
   }
 
   onSearchChange(event) {
     var filter = event.nativeEvent.text.toLowerCase();
+    Actions.list(filter, this.props.modelName, this.props.resource);
 
-    this.clearTimeout(this.timeoutID);
-    this.timeoutID = this.setTimeout(() => this.searchResources(filter), 100);
-  }
-  // Sending chat message
-  onEndEditing() {
-    if (this.state.userInput.trim().length == 0)
-      return;
-    var type = interfaceToTypeMapping[this.props.modelName];
-    var me = utils.getMe();
-    var resource = this.props.resource;
-    var title = utils.getDisplayName(resource, utils.getModel(this.props.resource['_type']).value.properties);
-    var meTitle = utils.getDisplayName(me, utils.getModel(me['_type']).value.properties);
-    var r = {
-      '_type': type,
-      'message': this.state.userInput,
-      'from': {
-        id: me['_type'] + '_' + me.rootHash, 
-        title: meTitle
-      }, 
-      'to': {
-        id: resource['_type'] + '_' + resource.rootHash,
-        title: title
-      },
-      time: new Date().getTime()
-    }
-    var rootHash = sha(r);
-    r.rootHash = rootHash;
-    var self = this;
-    utils.getDb().put(type + '_' + rootHash, r)
-    .then(function() {
-      self.searchResources('');
-      self.setState({userInput: ''});
-    })
-    .catch(function(err) {
-      err = err;
-    });
+    // this.clearTimeout(this.timeoutID);
+    // this.timeoutID = this.setTimeout(() => this.searchResources(filter), 100);
   }
 
   renderRow(resource)  {
     var model = utils.getModel(resource['_type'] || resource.id).value;
     var isMessage = model.interfaces  &&  model.interfaces.indexOf('tradle.Message') != -1;
+    var isAggregation = this.props.isAggregation; 
     var me = utils.getMe();
     return isMessage 
      ? ( <MessageRow 
         onSelect={() => this.selectResource(resource)}
         resource={resource}
+        isAggregation={isAggregation}
         navigator={this.props.navigator}
-        to={this.props.resource} />
+        to={isAggregation ? resource.to : this.props.resource} />
       )
     : (
       <ResourceRow
@@ -367,23 +223,28 @@ class SearchScreen extends Component {
         resource={resource} />
     );
   }
-  handleChange(event) {
-    this.setState({userInput: event.nativeEvent.text});
+  addedMessage(text) {
+    Actions.list('', this.props.modelName, this.props.resource);
+    // this.searchResources('');
+    // messageCount++;
+    // this.setState({userInput: text ? text : 'messages ' + messageCount});
   }
 
   render() {
+    if (this.state.isLoading)
+      return <View />
     var content;
     if (this.state.dataSource.getRowCount() === 0)
       content =  <NoResources
                   filter={this.state.filter}
                   title={utils.getModel(this.props.modelName).value.title}
                   isLoading={this.state.isLoading}/> 
-    else {               
+    else {
       var model = utils.getModel(this.props.modelName).value; 
-      var isMessage = model.isInterface  &&  model.id === 'tradle.Message';
+      var isAllMessages = model.isInterface  &&  model.id === 'tradle.Message';
       content = <ListView ref='listview'
           dataSource={this.state.dataSource}
-          renderFooter={this.renderFooter.bind(this)}
+          // renderFooter={this.renderFooter.bind(this)}
           renderRow={this.renderRow.bind(this)}
           renderScrollView={
             (props) => <InvertibleScrollView {...props} inverted />
@@ -392,45 +253,27 @@ class SearchScreen extends Component {
           keyboardDismissMode='onDrag'
           keyboardShouldPersistTaps={true}
           showsVerticalScrollIndicator={false} />;
-
-    if (isMessage)
-      content = 
-        <InvertibleScrollView
-          ref='messages'
-          inverted
-          automaticallyAdjustContentInsets={false}
-          scrollEventThrottle={200}>
-        {content}
-        </InvertibleScrollView>
+      if (isAllMessages)      
+        content = 
+          <InvertibleScrollView
+            ref='messages'
+            inverted
+            automaticallyAdjustContentInsets={false}
+            scrollEventThrottle={200}>
+          {content}
+          </InvertibleScrollView>    
+    
+      
     }
     var Model = t.struct({'msg': t.Str});
     var model = utils.getModel(this.props.modelName).value;
 
     var addNew = (model.isInterface) 
-               ? <View style={styles.addNew}>
-                    <TouchableHighlight style={{paddingLeft: 5}} underlayColor='#eeeeee'
-                      onPress={this.onAddNewPressed.bind(this)}>
-                     <Image source={require('image!clipadd')} style={styles.image} />
-                   </TouchableHighlight>
-                  <View style={styles.searchBar}>
-                    <View style={styles.searchBarBG}>
-                      <TextInput 
-                        autoCapitalize='none'
-                        autoFocus={true}
-                        autoCorrect={false}
-                        placeholder='Say something'
-                        placeholderTextColor='#bbbbbb'
-                        style={styles.searchBarInput}
-                        value={this.state.userInput}
-                        onChange={this.handleChange.bind(this)}
-                        onEndEditing={this.onEndEditing.bind(this)}
-                      />
-                    </View>
-                  </View>
-                   </View> 
-
-              : <View></View>;
-    
+           ? <AddNewMessage navigator={this.props.navigator} 
+                            resource={this.props.resource} 
+                            modelName={this.props.modelName} 
+                            callback={this.addedMessage.bind(this)} />
+           : <View></View>;
     return (
       <View style={styles.container}> 
         <SearchBar
@@ -444,100 +287,11 @@ class SearchScreen extends Component {
         {addNew}
       </View>
     );
-
-  }
-  onAddNewPressed() {
-    var modelName = this.props.modelName;
-    var model = utils.getModel(modelName).value;
-    var isInterface = model.isInterface;
-    if (!isInterface) 
-      return;
-
-    var self = this;
-    var currentRoutes = self.props.navigator.getCurrentRoutes();
-    self.props.navigator.push({
-      title: utils.makeLabel(model.title) + ' type',
-      id: 2,
-      component: ResourceTypesScreen,
-      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      passProps: {
-        resource: self.props.resource, 
-        returnRoute: currentRoutes[currentRoutes.length - 1],
-        modelName: modelName,
-        callback: this.onMessageCreated.bind(this)
-      }
-    });
-  }
-  onMessageCreated() {
-    this.setState({isLoading: false});
   }
 
-
-  scrollToBottom() {
-    var listViewScrollView = this.refs.listview.getScrollResponder();
-
-    this.refs.listview.requestAnimationFrame(() => {
-      listViewScrollView.refs.InnerScrollView.measure((x, y, width, height, offsetX, offsetY) => {
-        listViewScrollView.refs.ScrollView.measure((x_, y_, width_, height_, offsetX_, offsetY_) => {
-          //console.log("x=", x, "y=", y, "width=", width, "height=", height, "offsetX=", offsetX, "offsetY=", offsetY);
-          //console.log("x'=", x_, "y'=", y, "width'=", width_, "height'=", height_, "offsetX'=", offsetX_, "offsetY'=", offsetY_);
-          var scrollPadding = 3;
-          var scrollTo = height - height_ + y + scrollPadding;
-
-          // marginTop needs to be included
-          // offsetY needs to to be included, offsetY_ seems to always match it
-          // bigger offsetY means scrolled up; smaller offsetY means scrolled down
-          // when offsetY == InnerScrollView.height
-          // offsetY + InnerScrollView.height = ScrollView.height
-
-          // offsetY    marginTop    y_    y/height        scrollTo   marginTop - offsetY
-          // 0          131          0     533             405        131 - 0 = 131
-          // -122       -253         -253  533             405        -253 - (-122) = -131
-
-          //
-          var currentScrollTo = y - offsetY + offsetY_ + scrollPadding;
-          var delta = Math.abs(scrollTo - currentScrollTo);
-          var threshold = 45;
-
-          //console.log("scrollingTo:", scrollTo);
-          var doScroll;
-          // if (opts.maybe) {
-          //   if (delta < threshold) {
-          //     doScroll = true;
-          //   } else {
-          //     doScroll = false;
-          //   }
-          // } else {
-            doScroll = true;
-          // }
-          //Ion.console.log("offsetY=", offsetY, "offsetY_=", offsetY_, "InnerScrollView.height=", height, "ScrollView.height=", height_, "y=", y, "y_=", y_, "doScroll=", doScroll, "scrollTo=", scrollTo, "marginTop=", this.props._conversationMarginTop, "inputHeight=", inputDimensions.height, "currentScrollTo=", currentScrollTo, "threshold=", threshold, "delta=", delta, "(y - height)=", (y - height));
-
-          //doScroll = false;
-
-          if (doScroll) {
-            // if (opts.withoutAnimation) {
-            //   listViewScrollView.scrollWithoutAnimationTo(scrollTo);
-            // } else {
-              listViewScrollView.scrollTo(scrollTo);
-            // }
-          } else {
-            Ion.console.log("Not scrolling because too far apart and maybe");
-          }
-
-          //Ion.console.log("old _innerScrollViewOffsetY=", this._innerScrollViewOffsetY, "new _innerScrollViewOffsetY=", offsetY, "old _scrollViewOffsetY", this._scrollViewOffsetY, "new _scrollViewOffsetY=", offsetY_);
-          this._innerScrollViewOffsetY = offsetY;
-          this._scrollViewOffsetY = offsetY_;
-
-          // if (callback) {
-          //   callback(scrollTo);
-          // }
-        });
-      });
-    });
-  }
 }
-reactMixin(SearchScreen.prototype, TimerMixin);
-
+// reactMixin(SearchScreen.prototype, TimerMixin);
+reactMixin(SearchScreen.prototype, Reflux.ListenerMixin);
 class NoResources extends Component {
   render() {
     var text = '';
@@ -620,6 +374,11 @@ var styles = StyleSheet.create({
     width: 40,
     height: 40
   },
+});
+
+module.exports = SearchScreen;
+
+/*
   buttonText: {
     fontSize: 18,
     color: '#2E3B4E',
@@ -640,7 +399,184 @@ var styles = StyleSheet.create({
     borderWidth: 1,
     borderTopColor: '#cccccc',
   }
-});
+    var addNew = (model.isInterface) 
+               ? <View style={styles.addNew}>
+                    <TouchableHighlight style={{paddingLeft: 5}} underlayColor='#eeeeee'
+                      onPress={this.onAddNewPressed.bind(this)}>
+                     <Image source={require('image!clipadd')} style={styles.image} />
+                   </TouchableHighlight>
+                  <View style={styles.searchBar}>
+                    <View style={styles.searchBarBG}>
+                      <TextInput 
+                        autoCapitalize='none'
+                        autoFocus={true}
+                        autoCorrect={false}
+                        placeholder='Say something'
+                        placeholderTextColor='#bbbbbb'
+                        style={styles.searchBarInput}
+                        value={this.state.userInput}
+                        onChange={this.addedMessage.bind(this)}
+                        onEndEditing={this.onEndEditing.bind(this)}
+                      />
+                    </View>
+                  </View>
+                   </View> 
 
-module.exports = SearchScreen;
+              : <View></View>;
+  onAddNewPressed() {
+    var modelName = this.props.modelName;
+    var model = utils.getModel(modelName).value;
+    var isInterface = model.isInterface;
+    if (!isInterface) 
+      return;
 
+    var self = this;
+    var currentRoutes = self.props.navigator.getCurrentRoutes();
+    self.props.navigator.push({
+      title: utils.makeLabel(model.title) + ' type',
+      id: 2,
+      component: ResourceTypesScreen,
+      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      passProps: {
+        resource: self.props.resource, 
+        returnRoute: currentRoutes[currentRoutes.length - 1],
+        modelName: modelName,
+        callback: this.onMessageCreated.bind(this)
+      }
+    });
+  }
+  onMessageCreated() {
+    this.setState({isLoading: false});
+  }
+  handleChange(event) {
+    this.setState({userInput: event.nativeEvent.text});
+  }
+  // Sending chat message
+  onEndEditing() {
+    if (this.state.userInput.trim().length == 0)
+      return;
+    var type = interfaceToTypeMapping[this.props.modelName];
+    var me = utils.getMe();
+    var resource = this.props.resource;
+    var title = utils.getDisplayName(resource, utils.getModel(this.props.resource['_type']).value.properties);
+    var meTitle = utils.getDisplayName(me, utils.getModel(me['_type']).value.properties);
+    var r = {
+      '_type': type,
+      'message': this.state.userInput,
+      'from': {
+        id: me['_type'] + '_' + me.rootHash, 
+        title: meTitle
+      }, 
+      'to': {
+        id: resource['_type'] + '_' + resource.rootHash,
+        title: title
+      },
+      time: new Date().getTime()
+    }
+    var rootHash = sha(r);
+    r.rootHash = rootHash;
+    var self = this;
+    utils.getDb().put(type + '_' + rootHash, r)
+    .then(function() {
+      self.searchResources('');
+      self.setState({userInput: ''});
+    })
+    .catch(function(err) {
+      err = err;
+    });
+  }
+*/
+  // searchResources(query, list) {
+  //   this.timeoutID = null;
+
+  //   this.setState({filter: query});
+  //   var resources = list ? list : utils.getResources();
+
+  //   var foundResources = {};
+  //   var modelName = this.props.modelName;
+  //   var model = utils.getModel(modelName).value;
+  //   var isMessage = model.isInterface;
+  //   var meta = model.properties;
+
+  //   var implementors = isMessage ? utils.getImplementors(modelName) : null;
+
+  //   var required = model.required;
+  //   var meRootHash = utils.getMe().rootHash;
+  //   for (var key in resources) {
+  //     var iModel;
+  //     if (isMessage  &&  implementors) {
+  //       for (var i=0; i<implementors.length  &&  !iModel; i++) {
+  //         if (implementors[i].id.indexOf(key.substring(0, key.indexOf('_'))) === 0)
+  //           iModel = implementors[i];
+  //       }
+  //       if (!iModel)
+  //         continue;
+  //     }
+  //     else if (key.indexOf(modelName + '_') == -1)
+  //       continue;
+  //     var r = resources[key].value;
+  //     if (isMessage) {
+  //       var msgProp = utils.getCloneOf('tradle.Message.message', iModel.properties);
+  //       if (!r[msgProp]  ||  r[msgProp].trim().length === 0)
+  //         continue;
+  //       var fromProp = utils.getCloneOf('tradle.Message.from', iModel.properties);
+  //       var toProp = utils.getCloneOf('tradle.Message.to', iModel.properties);
+
+  //       var fromID = r[fromProp].id.split(/_/)[1];
+  //       var toID = r[toProp].id.split(/_/)[1];
+  //       if (fromID  !== meRootHash  &&  toID !== meRootHash) 
+  //         continue;
+  //       if (fromID !== this.props.resource.rootHash  &&  
+  //           toID != this.props.resource.rootHash)
+  //         continue;
+  //     }
+  //     if (!query) {
+  //        foundResources[key] = r;      
+  //        continue;   
+  //      }
+  //      // primitive filtering for this commit
+  //      var combinedValue = '';
+  //      for (var rr in meta) {
+  //        if (r[rr] instanceof Array)
+  //         continue;
+  //        combinedValue += combinedValue ? ' ' + r[rr] : r[rr];
+  //      }
+  //      if (!combinedValue  ||  (combinedValue  &&  (!query || combinedValue.toLowerCase().indexOf(query.toLowerCase()) != -1))) {
+  //        foundResources[key] = r; 
+  //      }
+  //   }
+  //   LOADING[query] = false;
+  //   resultsCache.nextPageNumberForQuery[query] = 2;
+
+  //   // if (this.state.filter !== query) {
+  //   //   // do not update state if the query is stale
+  //   //   return;
+  //   // }
+  //   var result = utils.objectToArray(foundResources);
+  //   if (isMessage) {
+  //     result.sort(function(a,b){
+  //       // Turn your strings into dates, and then subtract them
+  //       // to get a value that is either negative, positive, or zero.
+  //       return new Date(a.time) - new Date(b.time);
+  //     });
+  //   }
+  //   this.setState({
+  //     isLoading: false,
+  //     dataSource: this.getDataSource(result),
+  //   })
+  // }
+
+  // hasMore() {
+  //   var query = this.state.filter;
+  //   if (!resultsCache.dataForQuery[query]) {
+  //     return true;
+  //   }
+  //   return (
+  //     resultsCache.totalForQuery[query] !== resultsCache.dataForQuery[query].length
+  //   );
+  // }
+  // renderFooter() {
+  //   return (!this.hasMore() || !this.state.isLoadingTail) 
+  //          ? <View style={styles.scrollSpinner} />
+  //          : <ActivityIndicatorIOS style={styles.scrollSpinner} />;
+  // }

@@ -18,12 +18,12 @@ class SearchBar extends Component {
       <View style={styles.searchBar}>
       <View style={styles.searchBarBG}>
         <TextInput
-          autoCapitalize="none"
+          autoCapitalize='none'
           autoCorrect={false}
           onChange={this.props.onSearchChange.bind(this)}
           onFocus={this.props.onFocus.bind(this)}
-          placeholder="Search"
-          placeholderTextColor="#bbbbbb"
+          placeholder='Search'
+          placeholderTextColor='#bbbbbb'
           style={styles.searchBarInput}
           value={value}
         />

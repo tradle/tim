@@ -6,6 +6,11 @@ var ArticleView = require('./ArticleView');
 var ResourceView = require('./ResourceView');
 var NewResource = require('./NewResource');
 var moment = require('moment');
+var extend = require('extend');
+// var Actions = require('../Actions/Actions');
+// var Store = require('../Store/Store');
+// var Reflux = require('reflux');
+// var reactMixin = require('react-mixin');
 
 var {
   Image,
@@ -18,6 +23,23 @@ var {
 } = React;
 
 class MessageRow extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      resource: this.props.resource
+    }
+  }
+  // componentWillMount() {
+  //   if (this.props.isAggregation)
+  //     Actions.getItem(this.props.resource);
+  // }
+  // componentDidMount() {
+  //   this.listenTo(Store, 'onGetItem');
+  // }
+  // onGetItem(action, resource) {
+  //   if (action == 'getItem'  &&  resource.rootHash === this.props.resource.rootHash)
+  //     this.setState({resource: resource});
+  // }
   render() {
     var resource = this.props.resource;
     var isModel = !resource['_type'];
@@ -26,31 +48,34 @@ class MessageRow extends Component {
     var model = utils.getModel(resource['_type'] || resource.id).value;
     var me = utils.getMe();
     var isMyMessage;
-    if (!isModel) {
+    if (!isModel  &&  !this.props.isAggregation) {
       var fromHash = resource[utils.getCloneOf('tradle.Message.from', model.properties)].id;
       if (fromHash == me['_type'] + '_' + me.rootHash) 
         isMyMessage = true;      
     }
     var to = this.props.to;
-    var photo = isMyMessage  || !to  ||  !to.photos.length || isModel
+    var photo = isMyMessage  || !to  ||  !to.photos || isModel
               ? <View style={styles.cell}></View>
-              : <Image source={{uri: to.photos[0].url}} style={styles.msgImage} /> 
+              : <Image source={{uri: (to.photos[0].url.indexOf('http') == 0 ? to.photos[0].url : 'http://' + to.photos[0].url)}} style={styles.msgImage} /> 
 
-    var renderedRow;
-    if (!isModel) 
-      renderedRow = this.formatRow(isMyMessage, model, resource);
+    var renderedRow = [];
+    var onPressCall;
+    if (isModel) 
+      onPressCall = this.props.onSelect;
+    else
+      onPressCall = this.formatRow(isMyMessage, model, resource, renderedRow);
     
     var addStyle;
-    if (!renderedRow) {
+    if (!renderedRow.length) {
       var vCols = isModel ? utils.getDisplayName(resource) : utils.getDisplayName(resource, model.properties);
       renderedRow = <Text style={[styles.resourceTitle]} numberOfLines={2}>{vCols}</Text>;
     }
     else if (!isModel) {
       var fromHash = resource[utils.getCloneOf('tradle.Message.from', model.properties)].id;
-      if (fromHash == me['_type'] + '_' + me.rootHash) 
+      if (isMyMessage) 
         addStyle = styles.myCell;
       else
-        addStyle = {marginRight: 30, padding: 5, borderRadius: 10};
+        addStyle = {padding: 5, borderRadius: 10};
       if (model.style)
         addStyle = [addStyle, model.style];
         // viewCols = <View style={styles.myCell}>{viewCols}</View>
@@ -59,23 +84,25 @@ class MessageRow extends Component {
     var verPhoto;
     if (properties.photos) {
       if (resource.photos)
-        verPhoto = <Image source={{uri: resource.photos[0].url}} style={styles.photo} />
+        verPhoto = <Image source={{uri: (resource.photos[0].url.indexOf('http') == 0 ? resource.photos[0].url : 'http://' + resource.photos[0].url)}} style={styles.msgImage} />
       else
-        verPhoto = <View style={{height: 0}} />
+        verPhoto = <View style={{height: 0, width:0}} />
     }
     var rowStyle = isModel && model.style ? [styles.row, [model.style]] : styles.row;
 
     return (
       <View>
-        <TouchableHighlight onPress={this.props.onSelect} underlayColor={isMyMessage ? '#D7E6ED' : '#ffffff'}>
-          <View style={{flexDirection: 'row'}}>
-          <View style={[rowStyle, {flex: 4}]}>
+        <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor={isMyMessage ? '#D7E6ED' : '#ffffff'}>
+          <View style={[rowStyle, {flexDirection: 'row'}]}>
             {photo}
             <View style={addStyle ? [styles.textContainer, addStyle] : styles.textContainer}>
+              <View style={{flex: 4, flexDirection: 'column'}}>
                {renderedRow}
+             </View>
+             <View style={{flex: 1}}>  
+               {verPhoto}
+             </View>  
             </View>
-          </View>
-            {verPhoto}
           </View>
         </TouchableHighlight>
         <View style={isModel ? {backgroundColor: '#cccccc'} : {backgroundColor: '#ffffff'}} />
@@ -93,28 +120,28 @@ class MessageRow extends Component {
     var resource = self.props.resource;
     var model = utils.getModel(resource['_type']).value;
     this.props.navigator.push({
-      component: ResourceView,
-      rightButtonTitle: 'Edit',
       id: 3,
-      onRightButtonPress: () => {
-        var props = {
-          metadata: model,
-          resource: resource,
-        };
+      component: ResourceView,
+      backButtonTitle: 'Back',
+      // rightButtonTitle: 'Edit',
+      // onRightButtonPress: {
+      //     title: 'Edit',
+      //     component: NewResource,
+      //     titleTextColor: '#7AAAC3',
+      //     id: 4,
+      //     passProps: {
+      //       resource: resource,
+      //       metadata: model,
+      //       callback: this.props.onSelect,
+      //       resourceKey: model.id + '_' + resource.rootHash
+      //     }
+      // }, 
 
-        self.props.navigator.push({
-          title: 'Edit',
-          component: NewResource,
-          titleTextColor: '#7AAAC3',
-          passProps: props
-        });
-      }, 
-
-      passProps: self.props,
+      passProps: {resource: self.props.resource, verify: true},
       title: resource['_type'] == 'tradle.AssetVerification' ? 'Doc verification' : model.title
     });
   }
-  formatRow(isMyMessage, model, resource) {
+  formatRow(isMyMessage, model, resource, renderedRow) {
     var viewCols = model.gridCols || model.viewCols;
     if (!viewCols)
       return
@@ -122,16 +149,17 @@ class MessageRow extends Component {
     var vCols = [];
     var first = true;
     var self = this;
-    var renderedRow;
+    var model = utils.getModel(resource['_type'] || resource.id).value;
+
     var properties = model.properties;
+    var onPressCall;
     viewCols.forEach(function(v) {
       var style = styles.resourceTitle; //(first) ? styles.resourceTitle : styles.description;
       if (isMyMessage)
         style = [style, {justifyContent: 'flex-end', paddingLeft: 5}];
       if (properties[v].ref) {
-        if (resource[v]) {
+        if (resource[v]) 
           vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{resource[v].title}</Text>);
-        }
       }
       else if (properties[v].type === 'array') 
         return;
@@ -153,13 +181,17 @@ class MessageRow extends Component {
         vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>)
       }
       else  {
-        if (resource[v]  &&  (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0))
-          vCols.push(<Text style={style} onPress={self.onPress.bind(self)} numberOfLines={first ? 2 : 1}>{resource[v]}</Text>);
+        if (resource[v]  &&  (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0)) {
+          onPressCall = self.onPress.bind(self);
+          vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{resource[v]}</Text>);
+        }
         else if (!model.autoCreate) {
           var val = (properties[v].displayAs) 
                   ? utils.templateIt(properties[v], resource)
                   : resource[v];
-          vCols.push(<Text style={style} onPress={self.verify.bind(self)} numberOfLines={first ? 2 : 1}>{val}</Text>)
+          if (model.properties.verifiedBy  &&  !isMyMessage)                  
+            onPressCall = self.verify.bind(self);
+          vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>)
         }
         else
           vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{resource[v]}</Text>);
@@ -170,14 +202,16 @@ class MessageRow extends Component {
       vCols.push(<Text style={styles.verySmallLetters}>{model.title}</Text>);
     }
     if (vCols)
-      renderedRow = vCols;
-    return renderedRow;
+      extend(renderedRow, vCols);
+    return onPressCall ? onPressCall : (model.id === 'tradle.SimpleMessage') ? null : this.props.onSelect;
   }
 }
+// reactMixin(MessageRow.prototype, Reflux.ListenerMixin);
 
 var styles = StyleSheet.create({
   textContainer: {
     flex: 1,
+    flexDirection: 'row'
   },
   resourceTitle: {
     flex: 1,

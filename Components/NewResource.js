@@ -1,13 +1,16 @@
 'use strict';
  
 var React = require('react-native');
-var Q = require('q');
 var utils = require('../utils/utils');
-var ShowItems = require('./ShowItems');
+var NewItem = require('./NewItem');
 var SearchScreen = require('./SearchScreen');
 var t = require('tcomb-form-native');
-var sha = require('stable-sha1');
 var extend = require('extend');
+var Actions = require('../Actions/Actions');
+var Store = require('../Store/Store');
+var Reflux = require('reflux');
+var reactMixin = require('react-mixin');
+//var Icon = require('FAKIconImage');
 
 var Form = t.form.Form;
 
@@ -16,8 +19,6 @@ var {
   Image, 
   View,
   Text,
-  TextInput,
-  SwitchIOS,
   ScrollView,
   Component,
   TouchableHighlight,
@@ -26,14 +27,22 @@ var {
 class NewResource extends Component {
   constructor(props) {
     super(props);
-    this.setState({
-      resourceChanged: false
-    });
+    this.state = {
+      resource: props.resource
+    }
   }
-  _rerenderWithError(err) {
-    this.setState({
-      err: err
-    });
+  componentDidMount() {
+    this.listenTo(Store, 'itemAdded');
+  }
+  itemAdded(list, resource, error) {
+    if (!resource)
+      return;
+    if (error) {
+      if (resource['_type'] == this.props.resource['_type'])
+        this.setState({err: error, resource: resource});
+      return;
+    }
+    this.props.navigator.pop();
   }
   onSavePressed() {
     var value = this.refs.form.getValue();
@@ -45,122 +54,12 @@ class NewResource extends Component {
       var errMsg = errors.forEach(function(err) {
          msg += ' ' + err.message;
       }); 
-      this._rerenderWithError(msg);
-      return;
+      this.setState({ err: msg });
     }
-    var options = this.refs.form.props.options.fields;
-    // Check if there are references to other resources
-    var refProps = {};
-    var promises = [];
-    var db = utils.getDb();
-    for (var p in options) {
-      if (options[p].value) {
-        var ref = this.props.metadata.properties[p].ref;
-        if (ref  &&  options[p].value.indexOf('undefined') == -1)  {
-          refProps[options[p].value] = p;
-          promises.push(Q.ninvoke(db, 'get', options[p].value));
-        }
-      }
-    }
-    var self = this;  
-    var json = JSON.parse(JSON.stringify(value));
-    Q.allSettled(promises)
-    .then(function(results) {
-       results.forEach(function(val) {
-         if (val.state === 'fulfilled') {
-           var propValue = val.value['_type'] + '_' + val.value.rootHash;
-           var prop = refProps[propValue];
-           var title = json[prop];
-           json[prop] = {
-             title: title,
-             id : propValue
-           }
-           var interfaces = self.props.metadata.interfaces;
-           if (interfaces  &&  interfaces.indexOf('tradle.Message') != -1)
-             json['time'] = new Date().getTime();  
-         }
-       });
-      var props = self.props; 
-      var meta = props.metadata.properties;
-      var modelName = props.metadata.id;
-      if (utils.getModel(modelName)) {
-        var isNew = !props.resource.rootHash;
-        var obj;
-        if (!props.resource  ||  isNew) 
-          obj = json;
-        else {
-          var obj = {};
-          extend(true, obj, props.resource);
-          for (var p in json)
-            if (!obj[p])
-              obj[p] = json[p];
-            else if (!meta[p].readOnly  &&  !meta[p].immutable)
-              obj[p] = json[p];
-        }
-        self._putResourceInDB(modelName, obj);
-      }
-    })
-    .catch(function(err) {
-      err = err
-    })
-      
+    Actions.addItem(value, this.state.resource, this.props.metadata);
   }
-  _putResourceInDB(modelName, value) {
-    var self = this;
-    
-    for (var p in value) {
-      if (!value[p])
-        delete value[p];      
-    } 
-    if (!value['_type'])
-      value['_type'] = modelName;
-    if (!value.rootHash)
-      value.rootHash = sha(value);
-    var iKey = modelName + '_' + value.rootHash;
-    var db = utils.getDb();
-    db.put(iKey, value)
-    .then(function() {
-      return db.get(iKey)
-    })
-    .then(function(value) {
-      // self.props.navigator.pop();
-      var meta = self.props.metadata;
-      var props = meta.properties;
-      var required = utils.arrayToObject(meta.required);
-      var itemsMeta = [];
-      for (var p in props) {
-        if (props[p].type == 'array'  &&  required[p]) {
-          if (!props[p].title)
-            props[p].title = utils.makeLabel(p);
-          props[p].range = p; 
-          itemsMeta.push(props[p]);
-        }
-      }
-      if (utils.isEmpty(itemsMeta)) {  // No array properties to set
-        if (self.props.callback)
-          self.props.callback();
-        self.props.navigator.replacePreviousAndPop(self.props.returnRoute);
-        return;
-      }
-      self.props.navigator.push({
-        component: ShowItems,
-        title: 'Items Chooser',
-        id: 5,
-        passProps: {
-          resourceKey: iKey, 
-          resource: value,
-          parentMeta: meta, 
-          itemsMeta: itemsMeta,
-        }
-      });
-    })
-    .catch(function(err) {
-      self._rerenderWithError('Error: ' + err.message);
-    });
-  }
-
   chooser(prop, propName, event) {
-    var props = this.props;
+    var resource = this.state.resource;
     var filter = event.nativeEvent.text; 
     var m = utils.getModel(prop.ref).value;
     this.props.navigator.push({
@@ -172,36 +71,69 @@ class NewResource extends Component {
         filter:      filter, 
         prop:        propName,
         modelName:   prop.ref,
-        resource:    props.resource,
+        resource:    resource,
         callback:    this.setChosenValue.bind(this)
       }
     });
   }
-
+  // setting ref property on the resource 
   setChosenValue(propName, value) {
-    this.props.resource[propName] = value;
+    this.state.resource[propName] = value;
     this.setState({
-      resourceChanged: true
+      resource: this.state.resource
     });
-
   }
+
+  onAddItem(propName, item) {
+    var value = this.refs.form.getValue();
+    var json = value ? JSON.parse(JSON.stringify(value)) : {};
+    var resource = this.state.resource;
+    var items = resource[propName];
+    if (!items) {
+      items = [];
+      resource[propName] = items;
+    }
+    items.push(item);
+    for (var p in json)
+      if (!resource[p])
+        resource[p] = json[p];
+    this.setState({resource: resource, err: ''});
+  }
+  onNewPressed(bl) {
+    this.props.navigator.push({
+      title: 'Create new ' + bl.title,
+      backButtonTitle: 'Back',
+      component: NewItem,
+      id: 6,
+      passProps: {
+        metadata: bl,
+        resourceKey: this.props.resourceKey, 
+        resource: this.props.resource,
+        parentMeta: this.props.parentMeta,
+        onAddItem: this.onAddItem.bind(this)
+      }
+    });
+  }
+
   render() {
     var props = this.props;
     var parentBG = {backgroundColor: '#7AAAC3'};
-    var err = props.err || '';
+    var err = this.state.err;
 
-    var resource = props.resource;
+    var resource = this.state.resource;
     var photo = resource  &&  resource.photos && resource.photos.length 
               ? <Image source={{uri: resource.photos[0].url}} style={styles.image} /> 
               : <View />;
+    photo = <View />
+    var iKey = resource  ? resource['_type'] + '_' + resource.rootHash : null;
 
     var meta =  props.metadata;
     if (this.props.setProperty)
-      props.resource[this.props.setProperty.name] = this.props.setProperty.value;
+      this.state.resource[this.props.setProperty.name] = this.props.setProperty.value;
     var model = {};
     var arrays = [];
     var data = {};
-    extend(true, data, props.resource);
+    extend(true, data, resource);
     var options = utils.getFormFields({
         meta: meta, 
         data: data, 
@@ -211,8 +143,40 @@ class NewResource extends Component {
       });
     
     var Model = t.struct(model);
-    var errStyle = err ? styles.err : {'padding': 0, 'height': 0};
 
+    var errStyle = err ? styles.err : {'padding': 0, 'height': 0};
+    var itemsMeta = utils.getItemsMeta(meta);
+    var self = this;
+    var arrayItems = itemsMeta.map(function(bl) {
+      if (bl.readOnly)
+        return <View/>
+      var counter;
+      if (resource[bl.name]) {
+        if (resource[bl.name].length)
+          counter = 
+            <View style={styles.itemsCounter}><Text>{resource[bl.name] ? resource[bl.name].length : ''}</Text></View>;
+        else if (model.required  &&  model.required.indexOf(bl.name) != -1)
+          counter = 
+            <View style={styles.itemsCounter}><Image source={require('image!required')} style={styles.icon} /></View>;
+        else
+          counter = <View></View>    
+      }
+      else if (self.props.metadata.required  &&  self.props.metadata.required.indexOf(bl.name) != -1)
+        counter = 
+          <View><Image source={require('image!required')} style={styles.icon} /></View>;
+      else
+        counter = <View></View>    
+
+      return (
+        <TouchableHighlight style={styles.itemButton} underlayColor='#7AAAC3'
+            onPress={self.onNewPressed.bind(self, bl)}>
+          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+            <Text style={styles.itemsText}>{bl.title}</Text>
+            {counter}
+          </View>
+        </TouchableHighlight>
+      );
+    });
     return (
       <ScrollView
         initialListSize={10}
@@ -225,7 +189,8 @@ class NewResource extends Component {
         </View>
 
         <View style={{'padding': 20}}>
-          <Form ref='form' type={Model} options={options} value={data} />
+          <Form ref='form' type={Model} options={options} value={data} />          
+          {arrayItems}
           <View style={styles.buttons}>
             <TouchableHighlight style={[styles.button, parentBG]} underlayColor='#7AAAC3'
                 onPress={this.onSavePressed.bind(this)}>
@@ -238,41 +203,39 @@ class NewResource extends Component {
     );
   }
 }
+reactMixin(NewResource.prototype, Reflux.ListenerMixin);
+
 var styles = StyleSheet.create({
   container: {
     marginTop: 50,
     flex: 1,
   },
-  label: {
-    fontSize: 14,
-    borderColor: '#7AAAC3',
-    color: '#2E3B4E',
-    paddingBottom: 5,
-    paddingTop: 10,
-    marginRight: 5
-  },
-  textInput: {
-    height: 36,
-    padding: 4,
-    marginRight: 5,
-    flex: 1,
-    fontSize: 18,
-    borderWidth: 1,
-    borderColor: '#7AAAC3',
-    backgroundColor: '#8E9BaE',
-    color: '#2E3B4E',
-    borderRadius: 8,
-  },
-  switchInput: {
-    height: 16,
-    padding: 4,
-    marginRight: 5,
-    flex: 1,
-    fontSize: 18,
-  },
   buttons: { 
     flex: 1,
     flexDirection: 'row',
+  },
+  itemsText: {
+    fontSize: 18,
+    color: '#2E3B4E',
+    alignSelf: 'center'
+  },
+  itemsCounter: {
+    borderColor: '#2E3B4E',
+    borderRadius: 10,
+    borderWidth: 1,
+    alignSelf: 'center',
+    paddingHorizontal: 5,
+  },
+  itemButton: {
+    height: 36,
+    padding: 20,
+    alignSelf: 'stretch',
+    // width: 150,
+    borderColor: '#6093ae',
+    borderWidth: 1,
+    borderRadius: 8,
+    margin: 10,
+    justifyContent: 'center',
   },
   buttonText: {
     fontSize: 18,
@@ -285,10 +248,8 @@ var styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: '#ffffff',
     borderColor: '#6093ae',
-    color: '#2E3B4E',
     borderWidth: 1,
     borderRadius: 8,
-    marginBottom: 10,
     alignSelf: 'stretch',
     justifyContent: 'center',
     margin: 10,
@@ -298,23 +259,19 @@ var styles = StyleSheet.create({
     height: 350,
     alignSelf: 'stretch'
   },
+  icon: {
+    width: 20,
+    height: 20
+  },
   err: {
-    paddingTop: 10,
+    paddingTop: 30,
     paddingLeft: 20,
     fontSize: 20,
     color: 'darkred',
   },
 
 });
-var EmptyPage = React.createClass({
 
-  render: function() {
-    return (
-      <View></View>
-    );
-  },
-
-});
 module.exports = NewResource;
 
   // renderField(name, value) {
@@ -334,7 +291,7 @@ module.exports = NewResource;
   //         <TextInput
   //           style={styles.textInput}
   //           value={value}
-  //           clearButtonMode="while-editing"
+  //           clearButtonMode='while-editing'
   //          />
   //       </View>
   //     );

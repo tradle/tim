@@ -4,11 +4,11 @@ var SearchPage = require('./Components/SearchPage');
 var ResourceTypesScreen = require('./Components/ResourceTypesScreen');
 var NewResource = require('./Components/NewResource');
 var NewItem = require('./Components/NewItem');
-var ShowItems = require('./Components/ShowItems');
 var ResourceView = require('./Components/ResourceView');
 var ArticleView = require('./Components/ArticleView');
 var utils = require('./utils/utils');
-var AddressBook = require('NativeModules').AddressBook;
+
+var reactMixin = require('react-mixin');
 
 var IDENTITY_MODEL = 'tradle.Identity';
 var {
@@ -55,16 +55,6 @@ var styles = StyleSheet.create({
 });
 
 class IdentityApp extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      isLoading: true
-    }; 
-  }
-  componentWillMount() {
-    utils.loadResources();
-  }    
-
   render() {
     var props = {modelName: IDENTITY_MODEL};
     return (
@@ -108,7 +98,8 @@ class IdentityApp extends Component {
                   callback={props.callback} />;
     case 3:
       return <ResourceView navigator={nav} 
-                  resource={props.resource} />;      
+                  resource={props.resource}
+                  verify={props.verify} />;      
     case 4:
       return <NewResource navigator={nav} 
                   resource={props.resource} 
@@ -116,16 +107,11 @@ class IdentityApp extends Component {
                   returnRoute={props.returnRoute}
                   callback={props.callback}
                   resourceKey={props.resourceKey} />;      
-    case 5:
-      return <ShowItems navigator={nav} 
-                  resourceKey={props.resourceKey} 
-                  parentMeta={props.parentMeta}
-                  itemsMeta={props.itemsMeta}
-                  resource={props.resource}  />;      
     case 6:
       return <NewItem navigator={nav} 
                   resource={props.resource} 
                   metadata={props.metadata}
+                  onAddItem={props.onAddItem}
                   resourceKey={props.resourceKey} 
                   parentMeta={props.parentMeta}    />;      
     case 7:
@@ -138,6 +124,7 @@ class IdentityApp extends Component {
                   prop={props.prop}
                   returnRoute={props.returnRoute}
                   callback={props.callback}
+                  isAggregation={props.isAggregation}
                   modelName={props.modelName} />;
     }
   }
@@ -154,7 +141,7 @@ var NavigationBarRouteMapper = {
         onPress={() => navigator.pop()}>
         <View style={styles.navBarLeftButton}>
           <Text style={[styles.navBarText, styles.navBarButtonText]}>
-            {previousRoute.title}
+            {route.backButtonTitle  ||  previousRoute.title}
           </Text>
         </View>
       </TouchableOpacity>
