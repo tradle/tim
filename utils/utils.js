@@ -275,8 +275,12 @@ var utils = {
     var rRoundBr = message.indexOf(')', rBr);
     if (rRoundBr == -1) 
       return [message];
-    else
-      return [message.substring(lBr + 1, rBr), message.substring(rBr + 2, rRoundBr)];
+    else {
+      if (lBr)
+        return [message.substring(0, lBr), message.substring(lBr + 1, rBr), message.substring(rBr + 2, rRoundBr)];
+      else        
+        return [message.substring(lBr + 1, rBr), message.substring(rBr + 2, rRoundBr)];
+    }
   }
 
 }

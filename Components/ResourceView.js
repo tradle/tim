@@ -29,9 +29,9 @@ class ResourceView extends Component {
   componentDidMount() {
     this.listenTo(Store, 'onResourceUpdate');
   }
-  onResourceUpdate(list, resource) {
-    if (resource  &&  this.props.resource.rootHash === resource.rootHash)
-      this.setState({resource: resource});
+  onResourceUpdate(params) {
+    if (params.resource  &&  this.props.resource.rootHash === resource.rootHash)
+      this.setState({resource: params.resource});
   }
   changePhoto(photo) {
     this.setState({currentPhoto: photo});

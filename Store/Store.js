@@ -12,6 +12,7 @@ var level = require('react-level');
 var promisify = require('q-level');
 
 var IDENTITY_MODEL = 'tradle.Identity';
+var RESOURCE_TYPE = '_type'; 
 
 var models = {};
 var resources = {};
@@ -41,19 +42,39 @@ var Store = Reflux.createStore({
   onStart() {
     var self = this;
     this.ready.then(function() {
-      self.trigger('start', models, me);
+      self.trigger({
+        action: 'start',
+        models: models,
+        me: me});
     });
   },
   onAddMessage(r) { // this will move to messagesStore
     var rootHash = sha(r);
     r.rootHash = rootHash;
     var self = this;
-    var key = r['_type'] + '_' + rootHash;
+    var key = r[RESOURCE_TYPE] + '_' + rootHash;
 
     db.put(key, r)
     .then(function() {
       list[key] = {key: key, value: r};
-      self.trigger(list, r);
+      var to = list[r.to.id].value;
+      var from = list[r.from.id].value;
+      to.lastMessage = (from.rootHash === me.rootHash) ? 'You: ' + r.message : r.message;
+      to.lastMessageTime = r.time;
+      from.lastMessage = r.message;
+      from.lastMessageTime = r.time;
+      var batch = [];
+      batch.push({type: 'put', key: to[RESOURCE_TYPE] + '_' + to.rootHash, value: to});
+      batch.push({type: 'put', key: from[RESOURCE_TYPE] + '_' + from.rootHash, value: from});
+
+      return db.batch(batch);
+    })
+    .then(function() {
+      // from.lastMessage = r;
+      self.trigger({
+        action: 'addMessage',
+        resource: r
+      });
     })
     .catch(function(err) {
       err = err;
@@ -61,7 +82,7 @@ var Store = Reflux.createStore({
 
   },
   getItem(resource) {
-    var modelName = resource['_type'];
+    var modelName = resource[RESOURCE_TYPE];
     var meta = this.getModel(modelName).value;
     var foundRefs = [];
     var refProps = this.getRefs(resource, foundRefs, meta.properties);
@@ -72,10 +93,10 @@ var Store = Reflux.createStore({
      // foundRefs.forEach(function(val) {
        var val = foundRefs[i];
        if (val.state === 'fulfilled') {
-         var propValue = val.value['_type'] + '_' + val.value.rootHash;
+         var propValue = val.value[RESOURCE_TYPE] + '_' + val.value.rootHash;
          var prop = refProps[propValue];
          newResource[prop] = val.value;
-         newResource[prop]['id'] = modelName + '_' + newResource.rootHash;
+         newResource[prop].id = modelName + '_' + newResource.rootHash;
          if (!newResource[prop].title)
             newResource[prop].title = utils.getDisplayName(newResource, meta);
        }
@@ -95,7 +116,7 @@ var Store = Reflux.createStore({
       if (props[p] &&  props[p].type === 'object') {
         var ref = props[p].ref;
         if (ref  &&  resource[p]) {
-          var rValue = resource[p].rootHash ? resource[p]['_type'] + '_' + resource[p].rootHash : resource[p].id;
+          var rValue = resource[p].rootHash ? resource[p][RESOURCE_TYPE] + '_' + resource[p].rootHash : resource[p].id;
           refProps[rValue] = p;
           if (list[rValue]) {
             var elm = {value: list[rValue].value, state: 'fulfilled'};
@@ -117,7 +138,7 @@ var Store = Reflux.createStore({
       if (props[p] &&  props[p].type === 'object') {
         var ref = props[p].ref;
         if (ref  &&  resource[p])  {
-          var rValue = resource[p].rootHash ? resource[p]['_type'] + '_' + resource[p].rootHash : resource[p].id;
+          var rValue = resource[p].rootHash ? resource[p][RESOURCE_TYPE] + '_' + resource[p].rootHash : resource[p].id;
           refProps[rValue] = p;
           if (list[rValue]) {
             var elm = {value: list[rValue].value, state: 'fulfilled'};
@@ -137,14 +158,19 @@ var Store = Reflux.createStore({
     }
     var error = this.checkRequired(json, meta);
     if (error) {
-      json['_type'] = resource['_type'];
+      json[RESOURCE_TYPE] = resource[RESOURCE_TYPE];
       foundRefs.forEach(function(val) {
-        var propValue = val.value['_type'] + '_' + val.value.rootHash;
+        var propValue = val.value[RESOURCE_TYPE] + '_' + val.value.rootHash;
         var prop = refProps[propValue];
         json[prop] = val.value;
       });
 
-      this.trigger(list, json, error);
+      this.trigger({
+        action: 'addItem',
+        list: list,
+        resource: json,
+        error: error
+      });
       return;
     }
     // if (error) {
@@ -156,7 +182,7 @@ var Store = Reflux.createStore({
        extend(foundRefs, results);
        foundRefs.forEach(function(val) {
          if (val.state === 'fulfilled') {
-           var propValue = val.value['_type'] + '_' + val.value.rootHash;
+           var propValue = val.value[RESOURCE_TYPE] + '_' + val.value.rootHash;
            var prop = refProps[propValue];
            var title = json[prop];
            json[prop] = {
@@ -189,7 +215,7 @@ var Store = Reflux.createStore({
       
   },
   checkRequired(resource, meta) {
-    var type = resource['_type'];
+    var type = resource[RESOURCE_TYPE];
     var rootHash = resource.rootHash;
     var oldResource = (rootHash) ? resources[type + '_' + rootHash] : null; 
     var required = meta.required;
@@ -207,12 +233,12 @@ var Store = Reflux.createStore({
     .then(function() {
       return self.loadDB(db);
     })
+    // .then(function() {
+    //   list = resources;
+    //   return self.loadAddressBook();
+    // })
     .then(function() {
-      list = resources;
-      return self.loadAddressBook();
-    })
-    .then(function() {
-      self.trigger('reloadDB', list);
+      self.trigger({action: 'reloadDB', list: list});
     })
     .catch(function(err) {
       err = err;
@@ -223,7 +249,7 @@ var Store = Reflux.createStore({
     result = this.searchResources(query, modelName, resource);
     if (isAggregation) 
       result = this.getDependencies(result);
-    this.trigger(result, null, isAggregation);      
+    this.trigger({action: 'list', list: result, isAggregation: isAggregation});      
   },
 
   searchResources(query, modelName, to) {
@@ -299,8 +325,8 @@ var Store = Reflux.createStore({
       if (!value[p])
         delete value[p];      
     } 
-    if (!value['_type'])
-      value['_type'] = modelName;
+    if (!value[RESOURCE_TYPE])
+      value[RESOURCE_TYPE] = modelName;
     var meta = this.getModel(modelName);
     if (!value.rootHash)
       value.rootHash = sha(value);
@@ -312,7 +338,7 @@ var Store = Reflux.createStore({
     })
     .then(function(value) {
       list[iKey] = {key: iKey, value: value};
-      self.trigger(list, value);
+      self.trigger({action: 'addItem', list: list, resource: value});
     })
     .catch(function(err) {
       err = err;
@@ -403,21 +429,14 @@ var Store = Reflux.createStore({
     })      
     .on('end', function() {
       console.log('Stream ended');
+      if (self.isEmpty(models))
+        return self.loadDb();
     })      
     .on('error', function(err) {
       console.log('err: ' + err);
     });
   },
   
-  getResources() {
-    if (!this.isEmpty(resources))
-      return resources;
-    else
-      this.loadResources()
-      .then(function() {
-        return resources;
-      });
-  },
   isEmpty(obj) {
     for(var prop in obj) {
       if(obj.hasOwnProperty(prop))
@@ -426,9 +445,6 @@ var Store = Reflux.createStore({
     return true;
   },
 
-  getModels() {
-    return models;
-  },
   getModel(modelName) {
     return models['model_' + modelName];
   },
@@ -444,16 +460,13 @@ var Store = Reflux.createStore({
       if (!r.rootHash) 
         r.rootHash = sha(r);
 
-      var key = r['_type'] + '_' + r.rootHash;
+      var key = r[RESOURCE_TYPE] + '_' + r.rootHash;
       batch.push({type: 'put', key: key, value: r});
     });
     var self = this;
-    // return db.batch(batch, function(err, value) {
-    //   if (!err)
-    //     self.loadResources();
-    // });
     return db.batch(batch)
-          .then(self.loadResources);
+          .then(self.loadResources)
+          .then(self.loadAddressBook);
   },
   clearDb() {  
     var self = this;

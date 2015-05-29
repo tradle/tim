@@ -209,7 +209,7 @@ class MessageRow extends Component {
               return;
             }
           }
-          vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{resource[v]}</Text>);
+          vCols.push(<Text style={style}>{resource[v]}</Text>);
         }
       }
       first = false;
@@ -230,12 +230,14 @@ var styles = StyleSheet.create({
   },
   resourceTitle: {
     flex: 1,
+    flexWrap: 'wrap',
     fontSize: 16,
     fontWeight: '400',
     marginBottom: 2,
   },
   description: {
     flex: 1,
+    flexWrap: 'wrap',
     color: '#999999',
     fontSize: 12,
     marginLeft: 5

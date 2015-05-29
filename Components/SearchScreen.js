@@ -64,10 +64,11 @@ class SearchScreen extends Component {
   componentDidMount() {
     this.listenTo(Store, 'onListUpdate');
   }
-  onListUpdate(list, err, isAggregation) {
-    if (isAggregation && !this.props.isAggregation)
+  onListUpdate(params) {
+    if (!params.list  ||  params.error || params.isAggregation !== this.props.isAggregation)
       return;
-    if (!err  &&  (list.length || this.state.filter.length)) {
+    var list = params.list;
+    if (list.length || this.state.filter.length) {
       var type = list[0]['_type'];
       if (type  !== this.props.modelName) {
         var model = utils.getModel(this.props.modelName).value;

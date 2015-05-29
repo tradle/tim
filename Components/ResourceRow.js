@@ -40,20 +40,131 @@ class ResourceRow extends Component {
     var model = utils.getModel(resource['_type'] || resource.id).value;
     var viewCols = model.gridCols || model.viewCols;
     var renderedViewCols;
+    if (!viewCols) {
+      var vCols = utils.getDisplayName(resource, model.properties);
+      return <Text style={styles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
+    }
+    var vCols = [];
+    var properties = model.properties;
+    var first = true
+    var dateProp;
+    var dataPropsCounter;
+    viewCols.forEach(function(v) {
+      if (properties[v].type !== 'date'  ||  !resource[v])
+        return;
+      dateProp = v;
+      dataPropsCounter++;
+    });
+    if (dataPropsCounter > 1)
+      dateProp = null;
+    viewCols.forEach(function(v) {
+      if (properties[v].type === 'array') 
+        return;        
+      if (!resource[v]  &&  !properties[v].displayAs)
+        return;
+      var style = (first) ? styles.resourceTitle : styles.description;
+      if (properties[v].style)
+        style = [style, properties[v].style];
+      if (properties[v].ref) {
+        if (resource[v]) {
+          var row;
+          if (dateProp) 
+            row = <View style={{flexDirection: 'row'}}>
+                    <Text style={style} numberOfLines={first ? 2 : 1}>{resource[v].title}</Text>
+                    {self.addDateProp.bind(self, resource, dateProp)}
+                  </View>
+          else
+            row = <Text style={style} numberOfLines={first ? 2 : 1}>{resource[v].title}</Text>
+          vCols.push(row);
+        }
+        first = false;
+      }
+      else if (properties[v].type === 'date') {
+        if (!dateProp)
+          vCols.push(self.addDateProp(resource, v));
+        else
+          return;
+      }
+      else  {
+        var row;
+        if (resource[v]  &&  (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0))
+          row = <Text style={style} onPress={self.onPress.bind(self)} numberOfLines={1}>{resource[v]}</Text>;
+        else {          
+          var val = properties[v].displayAs ? utils.templateIt(properties[v], resource) : resource[v];
+          let msgParts = utils.parseMessage(val);
+          if (msgParts.length <= 2) 
+            val = msgParts[0];
+          else {
+            val = '';
+            for (let i=0; i<msgParts.length - 1; i++)
+              val += msgParts[i];
+          }
+          row = <Text style={style}>{val}</Text>;
+        }
+        if (first  &&  dateProp) {
+          var dateBlock = self.addDateProp(resource, dateProp);
+          row = <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                  <View>{row}</View>
+                  <View>{dateBlock}</View>
+                </View>
+        }
+        vCols.push(row);
+        first = false;
+      }
+    }); 
+    if (vCols)
+      renderedViewCols = vCols;
+    return renderedViewCols;
+  }
+  addDateProp(resource, dateProp) {
+    var properties = utils.getModel(resource['_type'] || resource.id).value.properties;
+    var style = styles.description;
+    if (properties[dateProp].style)
+      style = [style, properties[dateProp].style];
+    var date = new Date(resource[dateProp]);
+    var dayDiff = moment(new Date()).dayOfYear() - moment(date).dayOfYear();
+    var val;
+    switch (dayDiff) {
+    case 0:
+      val = moment(date).fromNow();
+      break;
+    case 1:
+      val = moment(date).format('[yesterday], h:mA');
+      break;
+    case 2:
+      break;
+    default:      
+      val = moment(date).format('ddd, h:mA');
+    }
+    return <Text style={[style, {alignSelf: 'flex-end'}]} numberOfLines={1}>{val}</Text>;
+
+  }
+  formatRow1(resource) {
+    var self = this;
+    var model = utils.getModel(resource['_type'] || resource.id).value;
+    var viewCols = model.gridCols || model.viewCols;
+    var renderedViewCols;
     if (viewCols) {
       var vCols = [];
       var properties = model.properties;
       var first = true
       viewCols.forEach(function(v) {
-        var style = (first) ? styles.resourceTitle : styles.description;
-        if (properties[v].ref) {
-          if (resource[v]) {
-            vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{resource[v].title}</Text>);
-          }
-        }
-        else if (properties[v].type === 'array') 
+        if (properties[v].type === 'array') 
+          return;        
+        if (!resource[v]  &&  !properties[v].displayAs)
           return;
+        var style = (first) ? styles.resourceTitle : styles.description;
+        if (properties[v].style)
+          style = [style, properties[v].style];
+        if (properties[v].ref) {
+          if (resource[v]) 
+            vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{resource[v].title}</Text>);
+          first = false;
+        }
         else if (properties[v].type === 'date') {
+          style = styles.description;
+          if (properties[v].style)
+            style = [style, properties[v].style];
           var date = new Date(resource[v]);
           var dayDiff = moment(new Date()).dayOfYear() - moment(date).dayOfYear();
           var val;
@@ -69,17 +180,17 @@ class ResourceRow extends Component {
           default:      
             val = moment(date).format('ddd, h:mA');
           }
-          vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>)
+          vCols.push(<Text style={[style, {alignSelf: 'flex-end'}]} numberOfLines={1}>{val}</Text>)
         }
         else  {
           if (resource[v]  &&  (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0))
-            vCols.push(<Text style={style} onPress={self.onPress.bind(self)} numberOfLines={first ? 2 : 1}>{resource[v]}</Text>);
+            vCols.push(<Text style={style} onPress={self.onPress.bind(self)} numberOfLines={1}>{resource[v]}</Text>);
           else {
             var val = properties[v].displayAs ? utils.templateIt(properties[v], resource) : resource[v];
-            vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>);
+            vCols.push(<Text style={style}>{val}</Text>);
           }
+          first = false;
         }
-        first = false;
       }); 
       if (vCols)
         renderedViewCols = vCols;
@@ -104,11 +215,12 @@ var styles = StyleSheet.create({
   },
   description: {
     flex: 1,
+    flexWrap: 'wrap',
     color: '#999999',
-    fontSize: 12,
+    fontSize: 14,
   },
   row: {
-    alignItems: 'center',
+    // alignItems: 'center',
     backgroundColor: 'white',
     flexDirection: 'row',
     padding: 5,

@@ -894,6 +894,15 @@ var models = [{
       'type': 'string',
       'readOnly': true
     },
+    lastMessage: {
+       type: 'string',
+       style: {color: '#999999', fontSize: 14},
+       transient: true
+    },
+    lastMessageTime: {
+       type: 'date',
+       transient: true
+    },
     'websites': {
       'type': 'array',
       'items': {
@@ -920,7 +929,8 @@ var models = [{
   ],
   'gridCols': [
     'formatted',
-    'formattedAddress'
+    'lastMessage',
+    'lastMessageTime'
   ],
   'viewCols': [
     'formattedAddress',
@@ -1040,7 +1050,8 @@ var models = [{
      },
      'time': {
        'type': 'date',
-       'readOnly': true
+       'readOnly': true,
+       'displayName': true
      },
     'photos': {
       'type': 'array',

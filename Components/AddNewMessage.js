@@ -32,12 +32,15 @@ class AddNewMessage extends Component {
   componentDidMount() {
     this.listenTo(Store, 'onAddMessage');
   }
-  onAddMessage(list, resource, error) {
+  onAddMessage(params) {
+    if (params.action !== 'addMessage')
+      return;
+    var resource = params.resource;
     if (!resource)
       return;
-    if (error) {
+    if (params.error) {
       if (resource['_type'] == this.props.resource['_type']) 
-        this.setState({err: error});
+        this.setState({err: params.error});
       return;    
     }
     var model = utils.getModel(resource['_type']).value;
@@ -62,6 +65,7 @@ class AddNewMessage extends Component {
               autoCapitalize='none'
               autoFocus={true}
               autoCorrect={false}
+              bufferDelay={20}
               placeholder='Say something'
               placeholderTextColor='#bbbbbb'
               style={styles.searchBarInput}

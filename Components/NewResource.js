@@ -35,12 +35,13 @@ class NewResource extends Component {
   componentDidMount() {
     this.listenTo(Store, 'itemAdded');
   }
-  itemAdded(list, resource, error) {
-    if (!resource)
+  itemAdded(params) {
+    var resource = params.resource;
+    if (!resource  ||  (params.action !== 'addItem'  &&  params.action !== 'addMessage'))
       return;
-    if (error) {
+    if (params.error) {
       if (resource['_type'] == this.props.resource['_type'])
-        this.setState({err: error, resource: resource});
+        this.setState({err: params.error, resource: resource});
       return;
     }
     this.props.navigator.pop();

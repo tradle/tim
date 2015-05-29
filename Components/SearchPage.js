@@ -45,10 +45,10 @@ class SearchPage extends Component {
     if (action === 'reloadDB')
       this.setState({isLoading: false});
   }
-  onStart(action, models, me) {
-    if (action === 'start') {
-      utils.setMe(me);
-      utils.setModels(models);
+  onStart(params) {
+    if (params.action === 'start') {
+      utils.setMe(params.me);
+      utils.setModels(params.models);
     }
 
   }
