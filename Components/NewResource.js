@@ -10,7 +10,7 @@ var Actions = require('../Actions/Actions');
 var Store = require('../Store/Store');
 var Reflux = require('reflux');
 var reactMixin = require('react-mixin');
-//var Icon = require('FAKIconImage');
+var Icon = require('FAKIconImage');
 
 var Form = t.form.Form;
 
@@ -19,6 +19,7 @@ var {
   Image, 
   View,
   Text,
+  TextInput,
   ScrollView,
   Component,
   TouchableHighlight,
@@ -107,7 +108,6 @@ class NewResource extends Component {
       id: 6,
       passProps: {
         metadata: bl,
-        resourceKey: this.props.resourceKey, 
         resource: this.props.resource,
         parentMeta: this.props.parentMeta,
         onAddItem: this.onAddItem.bind(this)
@@ -134,6 +134,13 @@ class NewResource extends Component {
     var arrays = [];
     var data = {};
     extend(true, data, resource);
+    var isMessage = meta.interfaces  &&  meta.interfaces.indexOf('tradle.Message') != -1;
+    var showSendVerificationForm = true;
+    if (isMessage  &&  resource.message  &&  utils.parseMessage(resource.message).length == 2) {
+      showSendVerificationForm = false;
+      data.message = '';
+    }
+
     var options = utils.getFormFields({
         meta: meta, 
         data: data, 
@@ -157,13 +164,17 @@ class NewResource extends Component {
             <View style={styles.itemsCounter}><Text>{resource[bl.name] ? resource[bl.name].length : ''}</Text></View>;
         else if (model.required  &&  model.required.indexOf(bl.name) != -1)
           counter = 
-            <View style={styles.itemsCounter}><Image source={require('image!required')} style={styles.icon} /></View>;
+            <View>
+            <Icon name='fontawesome|asterisk'  size={20}  color='#96415A'  style={styles.icon}/>
+            </View>;
         else
           counter = <View></View>    
       }
       else if (self.props.metadata.required  &&  self.props.metadata.required.indexOf(bl.name) != -1)
         counter = 
-          <View><Image source={require('image!required')} style={styles.icon} /></View>;
+          <View>
+            <Icon name='fontawesome|asterisk'  size={20}  color='#96415A'  style={styles.icon}/>
+          </View>;
       else
         counter = <View></View>    
 
@@ -177,6 +188,33 @@ class NewResource extends Component {
         </TouchableHighlight>
       );
     });
+    var formRequest;
+    if (showSendVerificationForm) {
+      var title = resource.to['_type'] 
+                ? utils.getDisplayName(resource.to, utils.getModel(resource.to['_type']).value.properties)
+                : resource.to.title;
+      formRequest =  
+            <View style={{flex: 1}}>
+              <Text style={styles.formRequest}>Send this form to {title}</Text>
+
+              <View style={styles.searchBarBG}>
+                <TextInput 
+                  autoCapitalize='none'
+                  autoFocus={true}
+                  autoCorrect={false}
+                  placeholder='Say something'
+                  placeholderTextColor='#bbbbbb'
+                  style={styles.searchBarInput}
+                  value={this.state.userInput}
+                  onChange={this.handleChange.bind(this)}
+                  onEndEditing={this.onEndEditing.bind(this)}
+                />
+              </View>
+            </View>
+    }
+    else
+      formRequest = <View />
+
     return (
       <ScrollView
         initialListSize={10}
@@ -198,10 +236,42 @@ class NewResource extends Component {
             </TouchableHighlight>
           </View>
         </View>
+        {formRequest}
       </View>
       </ScrollView>
     );
   }
+  handleChange(event) {
+    this.setState({userInput: event.nativeEvent.text});
+  }
+  onEndEditing() {
+    var msg = this.state.userInput;
+    if (!msg)
+      return;
+    var me = utils.getMe();
+    var resource = this.props.resource;
+    var toName = utils.getDisplayName(resource.to, utils.getModel(this.props.resource.to['_type']).value.properties);
+    var meta = utils.getModel(me['_type']).value.properties;
+    var meName = utils.getDisplayName(me, meta);
+    var modelName = 'tradle.SimpleMessage';
+    var value = {
+      '_type': modelName,  
+      message: '[' + this.state.userInput + '](' + this.props.metadata.id + ')',
+
+      'from': {
+        id: me['_type'] + '_' + me.rootHash, 
+        title: meName
+      }, 
+      'to': {
+        id: resource.to['_type'] + '_' + resource.to.rootHash,
+        title: toName
+      },
+
+      time: new Date().getTime()
+    }
+    Actions.addMessage(value); //, this.state.resource, utils.getModel(modelName).value);
+  }
+
 }
 reactMixin(NewResource.prototype, Reflux.ListenerMixin);
 
@@ -268,6 +338,61 @@ var styles = StyleSheet.create({
     paddingLeft: 20,
     fontSize: 20,
     color: 'darkred',
+  },
+  searchBar: {
+    flex: 4,
+    padding: 10,
+    // paddingLeft: 10,
+    paddingTop: 3,
+
+    height: 45,
+    paddingBottom: 13,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#eeeeee', 
+  },
+  searchBarBG: {
+    marginTop: 10,
+    marginBottom: 5,
+    padding: 5,
+    flex: 1,
+    alignSelf: 'stretch',
+
+    backgroundColor: '#eeeeee', 
+    borderTopColor: '#eeeeee', 
+    borderRightColor: '#eeeeee', 
+    borderLeftColor: '#eeeeee', 
+    borderWidth: 2,
+    borderBottomColor: '#cccccc',
+  },
+  searchBarInput: {
+    height: 30,
+    fontSize: 18,
+    paddingLeft: 10,
+    backgroundColor: '#eeeeee',
+    fontWeight: 'bold',
+    // color: '#2E3B4E',
+    borderRadius: 5,
+    // borderWidth: 1,
+    alignSelf: 'stretch',
+    borderColor: '#eeeeee',
+  },
+  formRequest: {
+    paddingTop: 30,
+    paddingLeft: 20,
+    fontSize: 18,
+    color: '#2E3B4E',
+  },
+  formRequestButton: {
+    height: 36,
+    padding: 20,
+    // alignSelf: 'stretch',
+    // width: 150,
+    borderColor: '#6093ae',
+    borderWidth: 1,
+    borderRadius: 8,
+    margin: 10,
+    justifyContent: 'center',
   },
 
 });

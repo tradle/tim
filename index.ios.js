@@ -1,3 +1,5 @@
+'use strict'
+
 var React = require('react-native');
 var SearchScreen = require('./Components/SearchScreen');
 var SearchPage = require('./Components/SearchPage');
@@ -7,6 +9,7 @@ var NewItem = require('./Components/NewItem');
 var ResourceView = require('./Components/ResourceView');
 var ArticleView = require('./Components/ArticleView');
 var utils = require('./utils/utils');
+var Icon = require('FAKIconImage');
 
 var reactMixin = require('react-mixin');
 
@@ -27,6 +30,11 @@ var styles = StyleSheet.create({
     backgroundColor: 'white',
     fontSize: 30,
     margin: 80
+  },
+  icon: {
+    width: 20,
+    height: 20,
+    marginTop: 15,
   },
   container: {
     flex: 1
@@ -105,14 +113,12 @@ class IdentityApp extends Component {
                   resource={props.resource} 
                   metadata={props.metadata}
                   returnRoute={props.returnRoute}
-                  callback={props.callback}
-                  resourceKey={props.resourceKey} />;      
+                  callback={props.callback} />;
     case 6:
       return <NewItem navigator={nav} 
                   resource={props.resource} 
                   metadata={props.metadata}
                   onAddItem={props.onAddItem}
-                  resourceKey={props.resourceKey} 
                   parentMeta={props.parentMeta}    />;      
     case 7:
       return <ArticleView navigator={nav} url={route.passProps.url} />;      
@@ -134,15 +140,18 @@ var NavigationBarRouteMapper = {
     if (index === 0) {
       return null;
     }
-
     var previousRoute = navState.routeStack[index - 1];
+    var lbTitle = route.backButtonTitle  ||  previousRoute.title;
+    var title = lbTitle.indexOf('|') == -1
+              ?  <Text style={[styles.navBarText, styles.navBarButtonText]}>
+                    {lbTitle}
+                 </Text>
+              : <Icon name={lbTitle} size={20} color='#7AAAC3' style={styles.icon}/>;
     return (
       <TouchableOpacity
         onPress={() => navigator.pop()}>
         <View style={styles.navBarLeftButton}>
-          <Text style={[styles.navBarText, styles.navBarButtonText]}>
-            {route.backButtonTitle  ||  previousRoute.title}
-          </Text>
+          {title}
         </View>
       </TouchableOpacity>
     );
@@ -151,13 +160,18 @@ var NavigationBarRouteMapper = {
   RightButton: function(route, navigator, index, navState) {
     if (!route.rightButtonTitle)
       return <View/>
+    var title = route.rightButtonTitle.indexOf('|') == -1
+              ?  <Text style={[styles.navBarText, styles.navBarButtonText]}>
+                    {route.rightButtonTitle}
+                 </Text>
+              : <Icon name={route.rightButtonTitle} size={20} color='#7AAAC3' style={styles.icon}/>;
+    
+
     return (
       <TouchableOpacity
         onPress={() => navigator.push(route.onRightButtonPress)}>
         <View style={styles.navBarRightButton}>
-          <Text style={[styles.navBarText, styles.navBarButtonText]}>
-            {route.rightButtonTitle}
-          </Text>
+          {title}
         </View>
       </TouchableOpacity>
     );

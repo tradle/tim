@@ -138,7 +138,7 @@ class SearchScreen extends Component {
         filter: '',
         modelName: modelName,
       },
-      rightButtonTitle: 'Profile',
+      rightButtonTitle: 'Profile', //'fontawesome|user',
       onRightButtonPress: {
         title: title,
         id: 3,

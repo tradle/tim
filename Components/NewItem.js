@@ -37,7 +37,7 @@ class NewItem extends Component {
   }
   onSaveAndAddPressed() {
     if (this.addItem()) 
-      this.setState({err: 'Add another ' + itemMeta['title']});
+      this.setState({err: 'Add another ' + itemMeta.title});
   }
   onCancelPressed() {
     this.props.navigator.pop();

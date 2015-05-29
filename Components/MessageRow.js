@@ -7,10 +7,6 @@ var ResourceView = require('./ResourceView');
 var NewResource = require('./NewResource');
 var moment = require('moment');
 var extend = require('extend');
-// var Actions = require('../Actions/Actions');
-// var Store = require('../Store/Store');
-// var Reflux = require('reflux');
-// var reactMixin = require('react-mixin');
 
 var {
   Image,
@@ -29,17 +25,6 @@ class MessageRow extends Component {
       resource: this.props.resource
     }
   }
-  // componentWillMount() {
-  //   if (this.props.isAggregation)
-  //     Actions.getItem(this.props.resource);
-  // }
-  // componentDidMount() {
-  //   this.listenTo(Store, 'onGetItem');
-  // }
-  // onGetItem(action, resource) {
-  //   if (action == 'getItem'  &&  resource.rootHash === this.props.resource.rootHash)
-  //     this.setState({resource: resource});
-  // }
   render() {
     var resource = this.props.resource;
     var isModel = !resource['_type'];
@@ -114,6 +99,23 @@ class MessageRow extends Component {
       component: ArticleView,
       passProps: {url: this.props.resource.message}
     });
+  }
+  createNewResource(meta) {
+    this.props.navigator.push({
+      id: 4,
+      title: meta.title,
+      component: NewResource,
+      titleTextColor: '#7AAAC3',
+      passProps:  {
+        metadata: meta,
+        resource: {
+          '_type': meta.id, 
+          'from': this.props.resource.to,
+          'to': this.props.resource.from,
+          'message': this.props.resource.message,
+        }
+      }
+    });    
   }
   verify(event) {
     var self = this;
@@ -193,8 +195,22 @@ class MessageRow extends Component {
             onPressCall = self.verify.bind(self);
           vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>)
         }
-        else
+        else {
+          var msgParts = utils.parseMessage(resource[v]);
+          if (msgParts.length === 2) {
+            var msgModel = utils.getModel(msgParts[1]);
+            if (msgModel) {
+              if (!isMyMessage)
+                onPressCall = self.createNewResource.bind(self, msgModel.value);
+              vCols.push(<View>
+                           <Text style={style}>{msgParts[0]}</Text>
+                           <Text style={[style, {color: '#7AAAC3'}]}>{msgModel.value.title}</Text>
+                         </View>);                  
+              return;
+            }
+          }
           vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{resource[v]}</Text>);
+        }
       }
       first = false;
     }); 
@@ -206,7 +222,6 @@ class MessageRow extends Component {
     return onPressCall ? onPressCall : (model.id === 'tradle.SimpleMessage') ? null : this.props.onSelect;
   }
 }
-// reactMixin(MessageRow.prototype, Reflux.ListenerMixin);
 
 var styles = StyleSheet.create({
   textContainer: {

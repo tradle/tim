@@ -30,10 +30,12 @@ var Store = Reflux.createStore({
   // this will be called by all listening components as they register their listeners
   init() {
     db = promisify(level('identity.db', { valueEncoding: 'json' }));
-    var self = this;
     this.ready = this.loadResources()
     .then(function() { 
-      list = self.getResources();
+      list = resources;
+    })
+    .catch(function(err) {
+      err = err;
     });
   },
   onStart() {
@@ -114,8 +116,8 @@ var Store = Reflux.createStore({
     for (var p in resource) {
       if (props[p] &&  props[p].type === 'object') {
         var ref = props[p].ref;
-        if (ref  &&  resource[p]  &&  resource[p].rootHash)  {
-          var rValue = resource[p]['_type'] + '_' + resource[p].rootHash;
+        if (ref  &&  resource[p])  {
+          var rValue = resource[p].rootHash ? resource[p]['_type'] + '_' + resource[p].rootHash : resource[p].id;
           refProps[rValue] = p;
           if (list[rValue]) {
             var elm = {value: list[rValue].value, state: 'fulfilled'};
@@ -166,20 +168,20 @@ var Store = Reflux.createStore({
              json.time = new Date().getTime();  
          }
        });
-      var isNew = !resource.rootHash;
-      var modelName = meta.id;
-      if (!resource  ||  isNew) 
-        self._putResourceInDB(modelName, json);
-      else {
-        var obj = {};
-        extend(true, obj, resource);
-        for (var p in json)
-          if (!obj[p])
+       var isNew = !resource.rootHash;
+       var modelName = meta.id;
+       if (!resource  ||  isNew) 
+         self._putResourceInDB(modelName, json);
+       else {
+         var obj = {};
+         extend(true, obj, resource);
+         for (var p in json)
+           if (!obj[p])
+             obj[p] = json[p];
+           else if (!props[p].readOnly  &&  !props[p].immutable)
             obj[p] = json[p];
-          else if (!props[p].readOnly  &&  !props[p].immutable)
-            obj[p] = json[p];
-        self._putResourceInDB(modelName, obj);
-      }
+         self._putResourceInDB(modelName, obj);
+       }
     })
     .catch(function(err) {
       err = err
@@ -198,23 +200,22 @@ var Store = Reflux.createStore({
       if (!resource[prop] && (!oldResource || !oldResource[prop]))
         return 'Please add "' + meta.properties[prop].title + '"';
     }
-
-
-    // return 'Error'; 
   },
   onReloadDB() {
     var self = this;
-    this.reloadDb()
-    .then(function() { 
-      self.loadResources()
+    this.clearDb()
+    .then(function() {
+      return self.loadDB(db);
     })
     .then(function() {
-      list = self.getResources();
-      self.loadAddressBook();
+      list = resources;
+      return self.loadAddressBook();
     })
     .then(function() {
-      list = self.getResources();
       self.trigger('reloadDB', list);
+    })
+    .catch(function(err) {
+      err = err;
     });
   }, 
   onList(query, modelName, resource, isAggregation) {
@@ -318,20 +319,26 @@ var Store = Reflux.createStore({
     });
   },
   loadAddressBook() {
-    AddressBook.checkPermission((err, permission) => {
+    var self = this;
+    return Q.ninvoke(AddressBook, 'checkPermission')
+    .then(function(permission) {
       // AddressBook.PERMISSION_AUTHORIZED || AddressBook.PERMISSION_UNDEFINED || AddressBook.PERMISSION_DENIED 
       if(permission === AddressBook.PERMISSION_UNDEFINED)
-        AddressBook.requestPermission((err, permission) => {
-          this.storeContacts()
-        })
-      else if(permission === AddressBook.PERMISSION_AUTHORIZED)
-        this.storeContacts()
-      else if(permission === AddressBook.PERMISSION_DENIED){
+        return Q.ninvoke(AddressBook, 'requestPermission')
+               .then(function(permission) {
+                 if (permission === AddressBook.PERMISSION_AUTHORIZED)      
+                   return self.storeContacts.bind(self);
+               });
+      else if (permission === AddressBook.PERMISSION_AUTHORIZED)
+        return self.storeContacts()
+      else if (permission === AddressBook.PERMISSION_DENIED) {
         //handle permission denied 
+        return Q();
       }
-    })      
+    })
   },
   storeContacts() {
+    var dfd = Q.defer();
     var self = this;
     var batch = [];
     AddressBook.getContacts(function(err, contacts) {
@@ -364,11 +371,19 @@ var Store = Reflux.createStore({
       });      
       if (batch.length)
         db.batch(batch, function(err, value) {
-          if (!err) {
+          if (err) 
+            dfd.reject();
+          else {
             self.loadResources()
+            .then(function() {
+              dfd.resolve();
+            })
           }
         });
+      else
+        dfd.resolve();
     })
+    return dfd.promise;
   },  
   loadResources() {
     var myId = sampleData.getMyId();
@@ -397,10 +412,11 @@ var Store = Reflux.createStore({
   getResources() {
     if (!this.isEmpty(resources))
       return resources;
-    this.loadResources()
-    .then(function() {
-      return resources;
-    });
+    else
+      this.loadResources()
+      .then(function() {
+        return resources;
+      });
   },
   isEmpty(obj) {
     for(var prop in obj) {
@@ -432,12 +448,14 @@ var Store = Reflux.createStore({
       batch.push({type: 'put', key: key, value: r});
     });
     var self = this;
-    db.batch(batch, function(err, value) {
-      if (!err)
-        self.loadResources();
-    });
+    // return db.batch(batch, function(err, value) {
+    //   if (!err)
+    //     self.loadResources();
+    // });
+    return db.batch(batch)
+          .then(self.loadResources);
   },
-  reloadDb() {  
+  clearDb() {  
     var self = this;
     return db.createReadStream()
     .on('data', function(data) {
@@ -452,7 +470,6 @@ var Store = Reflux.createStore({
       console.log('Stream closed');
     })
     .on('end', function () {
-      self.loadDB(db)
       console.log('Stream end');
     })
   }

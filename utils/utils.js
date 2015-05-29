@@ -86,7 +86,7 @@ var utils = {
            return;
 
         data['_type'] = meta.id;          
-        for (var p in data) {
+        for (let p in data) {
           if (p == '_type')
             continue;
           if (props[p])
@@ -104,7 +104,7 @@ var utils = {
     var eCols = editCols ? editCols : props;
     var required = this.arrayToObject(meta.required);
     // var d = data ? data[i] : null;
-    for (var p in eCols) {
+    for (let p in eCols) {
       if (p === '_type')
         continue;
       var maybe = required  &&  !required.hasOwnProperty(p);
@@ -149,7 +149,9 @@ var utils = {
 
         var subModel = models['model_' + ref];
         if (data  &&  data[p]) {
-          options.fields[p].value = data[p]['_type'] + '_' + data[p].rootHash; // || data[p]['_type'] + '_' + sha(data[p]);
+          options.fields[p].value = data[p]['_type'] 
+                                  ? data[p]['_type'] + '_' + data[p].rootHash
+                                  : data[p].id; 
           data[p] = utils.getDisplayName(data[p], subModel.value.properties) || data[p].title;
         }
 
@@ -259,6 +261,22 @@ var utils = {
       val = moment(date).format('ddd, h:mA');
     }
     return val;
+  },
+  parseMessage(message) {
+    var lBr = message.indexOf('[');          
+    var msg;
+    if (lBr == -1) 
+      return [message];
+    var rBr = message.indexOf(']', lBr);
+    if (rBr == -1) 
+      return [message];
+    if (message.charAt(rBr + 1) != '(') 
+      return [message];
+    var rRoundBr = message.indexOf(')', rBr);
+    if (rRoundBr == -1) 
+      return [message];
+    else
+      return [message.substring(lBr + 1, rBr), message.substring(rBr + 2, rRoundBr)];
   }
 
 }

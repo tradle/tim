@@ -70,13 +70,13 @@ class ResourceView extends Component {
           var nextPhoto;
           var len = resource.photos.length;
           for (var i=0; i<len  &&  !nextPhoto; i++) {
-            var p = photo.url;
+            var p = resource.photos[i].url;
             if (p === url)
-              nextPhoto = i === len - 1 ? resource.photos[0] : resource.photos[i];
+              nextPhoto = i === len - 1 ? resource.photos[0] : resource.photos[i + 1];
           }
-          photo = <TouchableHighlight underlayColor='#ffffff' onPress={self.changePhoto.bind(self, nextPhoto)}>
-                    <Image source={{uri: (url.indexOf('http') == 0 ? url : 'http://' + url)}} style={styles.image} />; 
-                  </TouchableHighlight>;
+          photo = <TouchableHighlight underlayColor='#ffffff' onPress={this.changePhoto.bind(this, nextPhoto)}>
+                    <Image source={{uri: (url.indexOf('http') == 0 ? url : 'http://' + url)}} style={styles.image} />
+                  </TouchableHighlight>
         }
       }
     }
@@ -118,7 +118,7 @@ class ResourceView extends Component {
           counter++; 
           if (isPhoto) 
             ret.push(
-              <TouchableHighlight underlayColor='#ffffff' onPress={self.changePhoto.bind(self, v.url)}>
+              <TouchableHighlight underlayColor='#ffffff' onPress={self.changePhoto.bind(self, v)}>
                 <View style={styles.itemContainer}>
                   <Image style={styles.photo} source={{uri: (v.url.indexOf('http') == -1 ? 'http://' + v.url : v.url)}} />
                   <Text style={styles.description}>{v.title}</Text>
