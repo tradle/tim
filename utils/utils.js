@@ -79,7 +79,7 @@ var utils = {
     var props = meta.items ? meta.items.properties : meta.properties;
 
     var dModel = data  &&  models['model_' + data['_type']];
-    if (data) {
+    if (!this.isEmpty(data)) {
       if (data['_type'] !== meta.id) {
         var interfaces = meta.interfaces;
         if (!interfaces  ||  interfaces.indexOf(data['_type']) == -1) 
@@ -119,7 +119,8 @@ var utils = {
       if (!label)
         label = utils.makeLabel(p);
       options.fields[p] = {
-        error: 'Insert a valid ' + label
+        error: 'Insert a valid ' + label,
+        bufferDelay: 20
       }
       if (props[p].description)
         options.fields[p].help = props[p].description;

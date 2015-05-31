@@ -12,6 +12,7 @@ var level = require('react-level');
 var promisify = require('q-level');
 
 var IDENTITY_MODEL = 'tradle.Identity';
+var MY_IDENTITY_MODEL = 'tradle.MyIdentity';
 var RESOURCE_TYPE = '_type'; 
 
 var models = {};
@@ -127,7 +128,7 @@ var Store = Reflux.createStore({
     }
     return refProps;
   },
-  onAddItem(value, resource, meta) {
+  onAddItem(value, resource, meta, isRegistration) {
     // Check if there are references to other resources
     var refProps = {};
     var promises = [];
@@ -156,9 +157,10 @@ var Store = Reflux.createStore({
       if (props[p]  &&  props[p].type === 'array') 
         json[p] = resource[p];
     }
+    if (!json[RESOURCE_TYPE])
+      json[RESOURCE_TYPE] = resource[RESOURCE_TYPE];
     var error = this.checkRequired(json, meta);
     if (error) {
-      json[RESOURCE_TYPE] = resource[RESOURCE_TYPE];
       foundRefs.forEach(function(val) {
         var propValue = val.value[RESOURCE_TYPE] + '_' + val.value.rootHash;
         var prop = refProps[propValue];
@@ -197,7 +199,7 @@ var Store = Reflux.createStore({
        var isNew = !resource.rootHash;
        var modelName = meta.id;
        if (!resource  ||  isNew) 
-         self._putResourceInDB(modelName, json);
+         self._putResourceInDB(modelName, json, isRegistration);
        else {
          var obj = {};
          extend(true, obj, resource);
@@ -206,7 +208,7 @@ var Store = Reflux.createStore({
              obj[p] = json[p];
            else if (!props[p].readOnly  &&  !props[p].immutable)
             obj[p] = json[p];
-         self._putResourceInDB(modelName, obj);
+         self._putResourceInDB(modelName, obj, isRegistration);
        }
     })
     .catch(function(err) {
@@ -262,7 +264,7 @@ var Store = Reflux.createStore({
     var implementors = isAllMessages ? utils.getImplementors(modelName) : null;
 
     var required = meta.required;
-    var meRootHash = me.rootHash;
+    var meRootHash = me  &&  me.rootHash;
     for (var key in list) {
       var iMeta;
       if (isAllMessages) {
@@ -320,7 +322,7 @@ var Store = Reflux.createStore({
     return result;
   },
 
-  _putResourceInDB(modelName, value) {    
+  _putResourceInDB(modelName, value, isRegistration) {    
     for (var p in value) {
       if (!value[p])
         delete value[p];      
@@ -332,13 +334,29 @@ var Store = Reflux.createStore({
       value.rootHash = sha(value);
     var iKey = modelName + '_' + value.rootHash;
     var self = this;
-    db.put(iKey, value)
-    .then(function() {
+    var batch = [];
+    batch.push({type: 'put', key: iKey, value: value});
+    var mid;
+    if (isRegistration) {
+      mid = {_type: MY_IDENTITY_MODEL, id: iKey};
+      batch.push({type: 'put', key: MY_IDENTITY_MODEL + '_' + sha(mid), value: mid});
+    }
+
+    db.batch(batch)
+    .then(function(results) {
+      if (isRegistration)
+        me = value;
       return db.get(iKey)
     })
     .then(function(value) {
       list[iKey] = {key: iKey, value: value};
-      self.trigger({action: 'addItem', list: list, resource: value});
+      if (mid)
+        list[MY_IDENTITY_MODEL + '_' + mid.rootHash] = mid;
+      var  params = {action: 'addItem', list: list, resource: value};
+      // registration or profile editing
+      if (isRegistration  ||  value.rootHash === me.rootHash)
+        params.me = me;
+      self.trigger(params);
     })
     .catch(function(err) {
       err = err;
@@ -413,13 +431,20 @@ var Store = Reflux.createStore({
   },  
   loadResources() {
     var myId = sampleData.getMyId();
+    if (myId)
+      myId = IDENTITY_MODEL + '_' + myId;
     var self = this;
     return db.createReadStream()
     .on('data', function(data) {
        if (data.key.indexOf('model_') === 0)
          models[data.key] = data;
        else {
-         if (!me  &&  myId  && data.value.rootHash == myId)
+         if (!myId  &&  data.key.indexOf('tradle.MyIdentity_') == 0) {
+           myId = data.value.id;
+           if (resources[myId])
+             me = resources[myId].value;
+         }
+         if (!me  &&  myId  && data.key == myId)
            me = data.value; 
          resources[data.key] = data;
        } 

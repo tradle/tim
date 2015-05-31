@@ -52,7 +52,13 @@ class SearchPage extends Component {
     }
 
   }
-	showContacts(event) {
+  showContactsOrRegister() {
+    if (utils.getMe())
+      this.showContacts();
+    else
+      this.onEditProfilePressed();
+  }
+	showContacts() {
     var passProps = {
         filter: '', 
         modelName: this.props.modelName,
@@ -79,6 +85,7 @@ class SearchPage extends Component {
     };
     var route = {
       component: NewResource,
+      backButtonTitle: 'Back',
       id: 4,
       titleTextColor: '#7AAAC3',
       passProps: page
@@ -89,7 +96,7 @@ class SearchPage extends Component {
       route.title = 'Edit Identity';
     }
     else
-      route.title = 'Create new identity';
+      route.title = 'Register';
     this.props.navigator.push(route);
   }
   onReloadDBPressed() {
@@ -101,13 +108,13 @@ class SearchPage extends Component {
                 :  <View/>;
     var err = this.state.err || '';
     var errStyle = err ? styles.err : {'padding': 0, 'height': 0};
-    var myId = sampleData.getMyId();
-    var signUp = myId ? 'Edit Profile' : 'Sign up';
+    var myId = sampleData.getMyId() || utils.getMe();
+    var editProfile = 'Edit Profile';
     return (
       <View style={styles.scroll}>
         <View style={styles.container} ref='search'>
           <TouchableHighlight style={[styles.thumbButton]}
-              underlayColor='#2E3B4E' onPress={this.showContacts.bind(this)}>
+              underlayColor='#2E3B4E' onPress={this.showContactsOrRegister.bind(this)}>
             <Image style={styles.thumb} source={require('image!Logo')}>
             </Image>
           </TouchableHighlight>
@@ -116,7 +123,7 @@ class SearchPage extends Component {
             <TouchableHighlight 
                 underlayColor='#2E3B4E' onPress={this.onEditProfilePressed.bind(this)}>
               <Text style={styles.text}>
-                {signUp}
+                {editProfile}
               </Text>
             </TouchableHighlight>      		
             <TouchableHighlight 

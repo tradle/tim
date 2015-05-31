@@ -17,9 +17,15 @@ var {
 class ResourceRow extends Component {
   render() {     
     var resource = this.props.resource;
-    var photo = resource.photos &&  resource.photos.length
-              ? <Image source={{uri: resource.photos[0].url}} style={styles.cellImage} /> 
-              : <View style={styles.cellImage}></View>
+    var photo;
+    if (resource.photos &&  resource.photos.length) {
+      var uri = resource.photos[0].url;
+      if (uri.indexOf('http') == -1)
+        uri = 'http://' + uri;
+      photo = <Image source={{uri: uri}} style={styles.cellImage} /> 
+    }
+    else
+      photo = <View style={styles.cellImage}></View>
 
     return (
       <View>

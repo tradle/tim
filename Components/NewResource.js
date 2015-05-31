@@ -44,6 +44,9 @@ class NewResource extends Component {
         this.setState({err: params.error, resource: resource});
       return;
     }
+    // if registration or after editing the profile
+    if (this.state.isRegistration  ||  (params.me  &&  resource.rootHash === params.me.rootHash))
+      utils.setMe(params.me);
     this.props.navigator.pop();
   }
   onSavePressed() {
@@ -58,7 +61,13 @@ class NewResource extends Component {
       }); 
       this.setState({ err: msg });
     }
-    Actions.addItem(value, this.state.resource, this.props.metadata);
+    var resource = this.state.resource;
+    var isRegistration = !utils.getMe()  && this.props.metadata.id === 'tradle.Identity'  &&  (!resource || !resource.rootHash);
+    if (!resource)
+      resource = {'_type': this.props.metadata.id};
+    if (isRegistration)
+      this.state.isRegistration = true;
+    Actions.addItem(value, resource, this.props.metadata, isRegistration);
   }
   chooser(prop, propName, event) {
     var resource = this.state.resource;
@@ -90,6 +99,8 @@ class NewResource extends Component {
     var value = this.refs.form.getValue();
     var json = value ? JSON.parse(JSON.stringify(value)) : {};
     var resource = this.state.resource;
+    if (!resource)
+      resource = {'_type': this.props.metadata.id};
     var items = resource[propName];
     if (!items) {
       items = [];
@@ -97,7 +108,7 @@ class NewResource extends Component {
     }
     items.push(item);
     for (var p in json)
-      if (!resource[p])
+      if (!resource[p] && json[p])
         resource[p] = json[p];
     this.setState({resource: resource, err: ''});
   }
@@ -136,10 +147,12 @@ class NewResource extends Component {
     var data = {};
     extend(true, data, resource);
     var isMessage = meta.interfaces  &&  meta.interfaces.indexOf('tradle.Message') != -1;
-    var showSendVerificationForm = true;
-    if (isMessage  &&  resource.message  &&  utils.parseMessage(resource.message).length == 2) {
-      showSendVerificationForm = false;
-      data.message = '';
+    var showSendVerificationForm = false;
+    if (isMessage) {
+      if (!resource.message  ||  utils.parseMessage(resource.message).length < 2) {
+        showSendVerificationForm = true;
+        data.message = '';
+      }
     }
 
     var options = utils.getFormFields({
@@ -159,7 +172,7 @@ class NewResource extends Component {
       if (bl.readOnly)
         return <View/>
       var counter;
-      if (resource[bl.name]) {
+      if (resource  &&  resource[bl.name]) {
         if (resource[bl.name].length)
           counter = 
             <View style={styles.itemsCounter}><Text>{resource[bl.name] ? resource[bl.name].length : ''}</Text></View>;
@@ -190,7 +203,7 @@ class NewResource extends Component {
       );
     });
     var formRequest;
-    if (showSendVerificationForm) {
+    if (resource  &&  showSendVerificationForm) {
       var title = resource.to['_type'] 
                 ? utils.getDisplayName(resource.to, utils.getModel(resource.to['_type']).value.properties)
                 : resource.to.title;
@@ -203,6 +216,7 @@ class NewResource extends Component {
                   autoCapitalize='none'
                   autoFocus={true}
                   autoCorrect={false}
+                  bufferDelay={20}
                   placeholder='Say something'
                   placeholderTextColor='#bbbbbb'
                   style={styles.searchBarInput}

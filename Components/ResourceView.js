@@ -30,7 +30,7 @@ class ResourceView extends Component {
     this.listenTo(Store, 'onResourceUpdate');
   }
   onResourceUpdate(params) {
-    if (params.resource  &&  this.props.resource.rootHash === resource.rootHash)
+    if (params.resource  &&  this.props.resource.rootHash === params.resource.rootHash)
       this.setState({resource: params.resource});
   }
   changePhoto(photo) {
@@ -260,7 +260,7 @@ var styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     paddingLeft: 10,
-    justifyContent: 'space-between'
+    // justifyContent: 'space-between'
   },
   itemColContainer: {
     flex: 1,
