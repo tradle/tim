@@ -16,7 +16,7 @@ var ArticleView = React.createClass({
     return (
       <ScrollView contentContainerStyle={styles.contentContainer}>
         <View style={styles.container}>
-          <View style={[styles.loading]}>
+          <View style={styles.loading}>
             <Text>Loading article</Text>
             <ActivityIndicatorIOS style={{alignSelf: 'center'}} />
           </View>
