@@ -10,7 +10,6 @@ var extend = require('extend');
 
 var {
   Image,
-  PixelRatio,
   StyleSheet,
   Text,
   TouchableHighlight,
