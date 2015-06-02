@@ -16,8 +16,7 @@ var MY_IDENTITY_MODEL = 'tradle.MyIdentity';
 var RESOURCE_TYPE = '_type'; 
 
 var models = {};
-var resources = {};
-var list;
+var list = {};
 var db;
 var me;
 var ready;
@@ -32,10 +31,7 @@ var Store = Reflux.createStore({
   // this will be called by all listening components as they register their listeners
   init() {
     db = promisify(level('identity.db', { valueEncoding: 'json' }));
-    this.ready = this.loadResources()
-    .then(function() { 
-      list = resources;
-    })
+    this.ready = this.loadResources()    
     .catch(function(err) {
       err = err;
     });
@@ -219,7 +215,7 @@ var Store = Reflux.createStore({
   checkRequired(resource, meta) {
     var type = resource[RESOURCE_TYPE];
     var rootHash = resource.rootHash;
-    var oldResource = (rootHash) ? resources[type + '_' + rootHash] : null; 
+    var oldResource = (rootHash) ? list[type + '_' + rootHash] : null; 
     var required = meta.required;
     if (!required)
       return;
@@ -235,10 +231,6 @@ var Store = Reflux.createStore({
     .then(function() {
       return self.loadDB(db);
     })
-    // .then(function() {
-    //   list = resources;
-    //   return self.loadAddressBook();
-    // })
     .then(function() {
       self.trigger({action: 'reloadDB', list: list});
     })
@@ -441,12 +433,12 @@ var Store = Reflux.createStore({
        else {
          if (!myId  &&  data.key.indexOf('tradle.MyIdentity_') == 0) {
            myId = data.value.id;
-           if (resources[myId])
-             me = resources[myId].value;
+           if (list[myId])
+             me = list[myId].value;
          }
          if (!me  &&  myId  && data.key == myId)
            me = data.value; 
-         resources[data.key] = data;
+         list[data.key] = data;
        } 
      })
     .on('close', function() {
