@@ -5,6 +5,7 @@ var utils = require('../utils/utils');
 var NewItem = require('./NewItem');
 var SearchScreen = require('./SearchScreen');
 var ResourceView = require('./ResourceView');
+var ChatMessage = require('./ChatMessage');
 var t = require('tcomb-form-native');
 var extend = require('extend');
 var Actions = require('../Actions/Actions');
@@ -45,19 +46,17 @@ class NewResource extends Component {
         this.setState({err: params.error, resource: resource});
       return;
     }
-    // if registration or after editing the profile
+    // if registration or after editing your own profile 
     if (this.state.isRegistration  ||  (params.me  &&  resource.rootHash === params.me.rootHash))
       utils.setMe(params.me);
     var self = this;
     var title = utils.getDisplayName(resource, self.props.metadata.properties);
     var isMessage = this.props.metadata.interfaces  &&  this.props.metadata.interfaces.indexOf('tradle.Message') != -1;
+    // When message created the return page is the chat window, 
+    // When profile or some contact info changed/added the return page is Profile view page
     if (isMessage) {
-      if (this.props.callback) {
-        if (this.props.callback) {
-          this.props.callback('');
-          this.setState({userInput: ''});
-        }
-      }
+      if (this.props.callback) 
+        this.props.callback('');
     }
     else {
       this.props.navigator.replacePrevious({
@@ -121,7 +120,7 @@ class NewResource extends Component {
       }
     });
   }
-  // setting ref property on the resource 
+  // setting chosen from the list property on the resource like for ex. Organization on Contact
   setChosenValue(propName, value) {
     this.state.resource[propName] = value;
     this.setState({
@@ -183,10 +182,13 @@ class NewResource extends Component {
     var isMessage = meta.interfaces  &&  meta.interfaces.indexOf('tradle.Message') != -1;
     var showSendVerificationForm = false;
     if (isMessage) {
-      if (!resource.message  ||  utils.parseMessage(resource.message).length < 2) {
+      var len = resource.message  &&  utils.getMessageParts(resource.message).length;
+      if (len < 2) {
         showSendVerificationForm = true;
         data.message = '';
       }
+      else
+        data.message = '';        
     }
 
     var options = utils.getFormFields({
@@ -237,34 +239,6 @@ class NewResource extends Component {
         </TouchableHighlight>
       );
     });
-    var formRequest;
-    if (resource  &&  showSendVerificationForm) {
-      var title = resource.to['_type'] 
-                ? utils.getDisplayName(resource.to, utils.getModel(resource.to['_type']).value.properties)
-                : resource.to.title;
-      formRequest =  
-            <View style={{flex: 1}}>
-              <Text style={styles.formRequest}>Send this form to {title}</Text>
-
-              <View style={styles.searchBarBG}>
-                <TextInput 
-                  autoCapitalize='none'
-                  autoFocus={true}
-                  autoCorrect={false}
-                  bufferDelay={20}
-                  placeholder='Say something'
-                  placeholderTextColor='#bbbbbb'
-                  style={styles.searchBarInput}
-                  value={this.state.userInput}
-                  onChange={this.handleChange.bind(this)}
-                  onEndEditing={this.onEndEditing.bind(this)}
-                />
-              </View>
-            </View>
-    }
-    else
-      formRequest = <View />
-
     return (
       <ScrollView
         initialListSize={10}
@@ -286,42 +260,11 @@ class NewResource extends Component {
             </TouchableHighlight>
           </View>
         </View>
-        {formRequest}
+        <ChatMessage resource={resource} model={meta} />
       </View>
       </ScrollView>
     );
   }
-  handleChange(event) {
-    this.setState({userInput: event.nativeEvent.text});
-  }
-  onEndEditing() {
-    var msg = this.state.userInput;
-    if (!msg)
-      return;
-    var me = utils.getMe();
-    var resource = this.props.resource;
-    var toName = utils.getDisplayName(resource.to, utils.getModel(this.props.resource.to['_type']).value.properties);
-    var meta = utils.getModel(me['_type']).value.properties;
-    var meName = utils.getDisplayName(me, meta);
-    var modelName = 'tradle.SimpleMessage';
-    var value = {
-      '_type': modelName,  
-      message: '[' + this.state.userInput + '](' + this.props.metadata.id + ')',
-
-      'from': {
-        id: me['_type'] + '_' + me.rootHash, 
-        title: meName
-      }, 
-      'to': {
-        id: resource.to['_type'] + '_' + resource.to.rootHash,
-        title: toName
-      },
-
-      time: new Date().getTime()
-    }
-    Actions.addMessage(value); //, this.state.resource, utils.getModel(modelName).value);
-  }
-
 }
 reactMixin(NewResource.prototype, Reflux.ListenerMixin);
 
@@ -389,96 +332,7 @@ var styles = StyleSheet.create({
     fontSize: 20,
     color: 'darkred',
   },
-  searchBar: {
-    flex: 4,
-    padding: 10,
-    // paddingLeft: 10,
-    paddingTop: 3,
-
-    height: 45,
-    paddingBottom: 13,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#eeeeee', 
-  },
-  searchBarBG: {
-    marginTop: 10,
-    marginBottom: 5,
-    padding: 5,
-    flex: 1,
-    alignSelf: 'stretch',
-
-    backgroundColor: '#eeeeee', 
-    borderTopColor: '#eeeeee', 
-    borderRightColor: '#eeeeee', 
-    borderLeftColor: '#eeeeee', 
-    borderWidth: 2,
-    borderBottomColor: '#cccccc',
-  },
-  searchBarInput: {
-    height: 30,
-    fontSize: 18,
-    paddingLeft: 10,
-    backgroundColor: '#eeeeee',
-    fontWeight: 'bold',
-    // color: '#2E3B4E',
-    borderRadius: 5,
-    // borderWidth: 1,
-    alignSelf: 'stretch',
-    borderColor: '#eeeeee',
-  },
-  formRequest: {
-    paddingTop: 30,
-    paddingLeft: 20,
-    fontSize: 18,
-    color: '#2E3B4E',
-  },
-  formRequestButton: {
-    height: 36,
-    padding: 20,
-    // alignSelf: 'stretch',
-    // width: 150,
-    borderColor: '#6093ae',
-    borderWidth: 1,
-    borderRadius: 8,
-    margin: 10,
-    justifyContent: 'center',
-  },
 
 });
 
 module.exports = NewResource;
-
-  // renderField(name, value) {
-  //   var meta;
-  //   var rMeta = this.props.metadata;
-  //   for (var i=0; i<rMeta.length; i++)
-  //     if (rMeta[i].prop == name) {
-  //       meta = rMeta[i];
-  //       break;
-  //     }
-  //   if (!meta.range) {
-  //     return (
-  //       <View style={{'paddingTop': 10}}>
-  //         <View>
-  //           <Text style={styles.label}>{meta.label}</Text>
-  //         </View>
-  //         <TextInput
-  //           style={styles.textInput}
-  //           value={value}
-  //           clearButtonMode='while-editing'
-  //          />
-  //       </View>
-  //     );
-  //   }
-  //   if (meta.range == 'boolean') 
-  //     return (
-  //       <View style={{'paddingTop': 10}}>
-  //         <Text style={styles.label}>{meta.label}</Text>
-  //         <SwitchIOS
-  //           style={styles.switchInput}
-  //           value={value}
-  //           />
-  //       </View>
-  //     );
-  // }

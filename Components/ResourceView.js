@@ -4,6 +4,8 @@ var React = require('react-native');
 var utils = require('../utils/utils');
 var ArticleView = require('./ArticleView');
 var SearchScreen = require('./SearchScreen');
+var MoreLikeThis = require('./MoreLikeThis');
+var VerificationButton = require('./VerificationButton');
 var Reflux = require('reflux');
 var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
@@ -35,22 +37,6 @@ class ResourceView extends Component {
   }
   changePhoto(photo) {
     this.setState({currentPhoto: photo});
-  }
-  showMoreLikeThis() {
-    var self = this;
-    var modelName = this.props.resource['_type'];
-    this.props.navigator.push({
-      title: utils.getModel(modelName).value.title,
-      component: SearchScreen,
-      id: 10,
-      backButtonTitle: 'Back',
-      passProps: {
-        resource: utils.getMe(), 
-        filter: '',
-        isAggregation: true,
-        modelName: modelName,
-      }
-    });
   }
   render() {
     var resource = this.state.resource;
@@ -85,27 +71,7 @@ class ResourceView extends Component {
       photo = <View/>;
  
     var viewCols = this.getViewCols(resource, model);
-    var verify = this.props.verify
-               ? <View style={{flex: 1, paddingRight: 10}}>
-                   <TouchableHighlight onPress={this.verify.bind(this)} underlayColor='#ffffff'>
-                     <View style={[styles.button, {backgroundColor: '#7AAAC3', alignSelf: 'stretch'}]}>
-                       <Text style={[styles.buttonText, {color: '#ffffff'}]}>Verify</Text>
-                     </View>
-                   </TouchableHighlight>
-                 </View>
-               : <View></View>  
-                  // <TextInput style={self.state.embedHeight} value={'<iframe width='420' height='315' src='https://barclays.com/embed/aifSjuyeE5M' frameborder='0' allowfullscreen></iframe>'}/>
     var isMessage = model.interfaces  &&  model.interfaces.indexOf('tradle.Message') != -1;
-    var moreLikeThis;
-    if (isMessage) 
-      moreLikeThis = 
-        <View style={{flex: 2, paddingHorizontal: 10}}>
-          <TouchableHighlight underlayColor='#ffffff' onPress={this.showMoreLikeThis.bind(this)}>
-            <View style={[styles.button, {alignSelf: 'stretch'}]}><Text style={styles.buttonText}>{'More ' + model.title}</Text></View>           
-          </TouchableHighlight>
-        </View>
-    else
-      moreLikeThis = <View />
     var embed = /*modelName === 'tradle.AssetVerification' 
               ? <View style={{marginLeft: 15}}>
                   <Text style={{fontSize: 20, paddingTop: 15, paddingBottom: 15, color: '#2E3B4E'}}>Verified By</Text>
@@ -123,8 +89,8 @@ class ResourceView extends Component {
           {photo}
         </View>
         <View style={styles.buttonsContainer}>
-          {moreLikeThis}
-          {verify}
+          <MoreLikeThis resource={resource} navigator={this.props.navigator} />
+          <VerificationButton  resource={resource} navigator={this.props.navigator} />
         </View>
         <View style={styles.rowContainer}>    
           {viewCols}
@@ -133,26 +99,6 @@ class ResourceView extends Component {
       </View>
       </ScrollView>
     );
-  }
-  verify() {
-    this.props.navigator.pop();
-    // var resource = this.props.resource;
-    // var me = utils.getMe();
-    // var owner = this.props.resource[toClone];
-    // var verification = {
-    //   message: {
-    //     value: resource['_type'] + '_' + resource.rootHash;
-    //     title: utils.getModel(this.props.modelName).value.title;
-    //   }
-    //   owner: {
-    //     value: owner['_type'] + '_' + owner.rootHash;
-    //     title: owner.formatted
-    //   }
-    //   verifier: { 
-    //     value: me['_type'] + '_' : me.rootHash,
-    //     title: me.formatted
-    //   }
-    // }
   }
   onPress(url) {
     this.props.navigator.push({
@@ -319,7 +265,6 @@ var styles = StyleSheet.create({
     alignItems: 'center'
   },
   buttonText: {
-    // marginTop: 20,
     fontSize: 18,
     color: '#2E3B4E',
     alignSelf: 'center',
@@ -328,7 +273,6 @@ var styles = StyleSheet.create({
     marginTop: 10,
     alignSelf: 'center',
     marginBottom: 10,
-    // width: 100,
     backgroundColor: '#eeeeee',
     borderColor: '#cccccc',
     borderWidth: 1,

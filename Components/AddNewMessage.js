@@ -4,10 +4,8 @@ var React = require('react-native');
 var utils = require('../utils/utils');
 var sha = require('stable-sha1');
 var ResourceTypesScreen = require('./ResourceTypesScreen');
-var Reflux = require('reflux');
-var Actions = require('../Actions/Actions');
 var Store = require('../Store/Store');
-var reactMixin = require('react-mixin');
+var ChatMessage = require('./ChatMessage');
 
 
 var {
@@ -29,30 +27,9 @@ class AddNewMessage extends Component {
       userInput: ''
     }
   }
-  componentDidMount() {
-    this.listenTo(Store, 'onAddMessage');
-  }
-  onAddMessage(params) {
-    if (params.action !== 'addMessage')
-      return;
-    var resource = params.resource;
-    if (!resource)
-      return;
-    if (params.error) {
-      if (resource['_type'] == this.props.resource['_type']) 
-        this.setState({err: params.error});
-      return;    
-    }
-    var model = utils.getModel(resource['_type']).value;
-    var isMessage = model.interfaces  &&  model.interfaces.indexOf('tradle.Message') != -1;
-    if (isMessage) {
-      if (this.props.callback) {
-        this.props.callback('');
-        this.setState({userInput: ''});
-      }
-    }
-  }
   render() {
+    var resource = {from: utils.getMe(), to: this.props.resource};
+    var model = utils.getModel(this.props.modelName).value;
     return (
       <View style={styles.addNew}>
         <TouchableHighlight style={{paddingLeft: 5}} underlayColor='#eeeeee'
@@ -60,52 +37,10 @@ class AddNewMessage extends Component {
          <Image source={require('image!clipadd')} style={styles.image} />
         </TouchableHighlight>
         <View style={styles.searchBar}>
-          <View style={styles.searchBarBG}>
-            <TextInput 
-              autoCapitalize='none'
-              autoFocus={true}
-              autoCorrect={false}
-              bufferDelay={20}
-              placeholder='Say something'
-              placeholderTextColor='#bbbbbb'
-              style={styles.searchBarInput}
-              value={this.state.userInput}
-              onChange={this.handleChange.bind(this)}
-              onEndEditing={this.onEndEditing.bind(this)}
-            />
-          </View>
+          <ChatMessage resource={resource} model={model} callback={this.props.callback} />
         </View>
       </View> 
     );
-  }
-  handleChange(event) {
-    this.setState({userInput: event.nativeEvent.text});
-  }
-
-  onEndEditing() {
-    if (this.state.userInput.trim().length == 0)
-      return;
-    var type = interfaceToTypeMapping[this.props.modelName];
-    var me = utils.getMe();
-    var resource = this.props.resource;
-    var title = utils.getDisplayName(resource, utils.getModel(this.props.resource['_type']).value.properties);
-    var meta = utils.getModel(me['_type']).value.properties;
-    var meTitle = utils.getDisplayName(me, meta);
-    var r = {
-      '_type': type,
-      'message': this.state.userInput,
-      'from': {
-        id: me['_type'] + '_' + me.rootHash, 
-        title: meTitle
-      }, 
-      'to': {
-        id: resource['_type'] + '_' + resource.rootHash,
-        title: title
-      },
-      time: new Date().getTime()
-    }
-
-    Actions.addMessage(r, meta);
   }
   onAddNewPressed() {
     var modelName = this.props.modelName;
@@ -129,11 +64,7 @@ class AddNewMessage extends Component {
       }
     });
   }
-  onMessageCreated() {
-    this.setState({isLoading: false});
-  }
 }
-reactMixin(AddNewMessage.prototype, Reflux.ListenerMixin);
 
 var styles = StyleSheet.create({
   searchBar: {
@@ -145,27 +76,6 @@ var styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#eeeeee', 
-  },
-  searchBarBG: {
-    marginTop: 10,
-    marginBottom: 5,
-    flex: 1,
-    alignSelf: 'center',
-    backgroundColor: '#eeeeee', 
-    borderTopColor: '#eeeeee', 
-    borderRightColor: '#eeeeee', 
-    borderLeftColor: '#eeeeee', 
-    borderWidth: 2,
-    borderBottomColor: '#cccccc',
-  },
-  searchBarInput: {
-    height: 30,
-    fontSize: 18,
-    paddingLeft: 10,
-    backgroundColor: '#eeeeee',
-    fontWeight: 'bold',
-    alignSelf: 'stretch',
-    borderColor: '#eeeeee',
   },
   image: {
     width: 40,

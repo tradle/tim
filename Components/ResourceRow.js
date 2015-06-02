@@ -97,7 +97,7 @@ class ResourceRow extends Component {
           row = <Text style={style} onPress={self.onPress.bind(self)} numberOfLines={1}>{resource[v]}</Text>;
         else {          
           var val = properties[v].displayAs ? utils.templateIt(properties[v], resource) : resource[v];
-          let msgParts = utils.parseMessage(val);
+          let msgParts = utils.getMessageParts(val);
           if (msgParts.length <= 2) 
             val = msgParts[0];
           else {

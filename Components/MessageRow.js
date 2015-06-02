@@ -196,7 +196,7 @@ class MessageRow extends Component {
           vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>)
         }
         else {
-          var msgParts = utils.parseMessage(resource[v]);
+          var msgParts = utils.getMessageParts(resource[v]);
           if (msgParts.length === 2) {
             var msgModel = utils.getModel(msgParts[1]);
             if (msgModel) {

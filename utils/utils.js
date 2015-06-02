@@ -137,8 +137,9 @@ var utils = {
           if (props[p].multiline)
             options.fields[p].multiline = true;
           options.fields[p].autoCorrect = false;
-          options.fields[p].onSubmitEditing = callback;
         }
+        if (type === 'string'  ||  type === 'integer')
+          options.fields[p].onSubmitEditing = callback;
       }
       else if (type === 'array') {
         props[p].name = p;
@@ -265,7 +266,7 @@ var utils = {
     }
     return val;
   },
-  parseMessage(message) {
+  getMessageParts(message) {
     var lBr = message.indexOf('[');          
     var msg;
     if (lBr == -1) 
