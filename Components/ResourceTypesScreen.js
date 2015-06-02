@@ -9,10 +9,7 @@ var {
   ListView,
   Component,
   StyleSheet,
-  Text,
   TextInput,
-  Image,
-  TouchableHighlight,
   View,
 } = React;
 
