@@ -53,6 +53,7 @@ var models = [{
       'type': 'string'
     },
     'formattedAddress': {
+      transient: true,
       'type': 'string',
       'displayAs': ['street', ',', 'city', ',', 'region', 'postalCode'],
       'title': 'Address',
@@ -65,6 +66,7 @@ var models = [{
       'type': 'string'
     },
     'formatted': {
+      transient: true,
       'type': 'string',
       'displayAs': ['firstName', 'lastName'],
       'readOnly': true,
@@ -184,6 +186,7 @@ var models = [{
     'street', 
     'city', 
     'region', 
+    'postalCode',
     'country',
     'pubkeys',
     'organization'
@@ -325,6 +328,10 @@ var models = [{
         }
       },
       'required': ['title', 'url']
+    },
+    relatedTo: {
+      type: 'object',
+      ref: 'tradle.Message',      
     }
   },  
   'required': [
@@ -875,7 +882,6 @@ var identities = [
   '_type':'tradle.Identity',
   'firstName':'Kate',
   'lastName':'Blair',
-  'formatted': 'Kate Blair',
   'street':'200 Columbus Ave',
   'city':'New York',
   'region':'NY',
@@ -940,12 +946,10 @@ var identities = [
   ],
   'city': 'San Dimas',
   'country': 'USA',
-  'formattedAddress': '666 Wyld Stallyns Dr, San Dimas, California',
   'postalCode': '666',
   'region': 'California',
   'street': '666 Wyld Stallyns Dr',
   'firstName': 'Ted',
-  'formatted': 'Ted Theodore Logan',
   'lastName': 'Logan',
   'middleName': 'Theodore',
   'photos': [
@@ -1024,12 +1028,10 @@ var identities = [
   ],
   'city': 'San Dimas',
   'country': 'USA',
-  'formattedAddress': '666 Wyld Stallyns Dr, San Dimas, California',
   'postalCode': '666',
   'region': 'California',
   'street': '666 Wyld Stallyns Dr',
   'firstName': 'Jane',
-  'formatted': 'Jane Choi',
   'lastName': 'Choi',
   'rootHash': 'b25da36eaf4b01b37fc2154cb1103eb5324a52fa',
   'photos': [
@@ -1108,12 +1110,10 @@ var identities = [
   ],
   'city': 'San Dimas',
   'country': 'USA',
-  'formattedAddress': '666 Wyld Stallyns Dr, San Dimas, California',
   'postalCode': '666',
   'region': 'California',
   'street': '666 Wyld Stallyns Dr',
   'firstName': 'Adam',
-  'formatted': 'Adam Scott',
   'lastName': 'Scott',
   'photos': [
     {
@@ -1189,14 +1189,12 @@ var identities = [
       'type': 'skype'
     }
   ],
-  'city': 'San Dimas',
+  'city': 'Austen',
   'country': 'USA',
-  'formattedAddress': '666 Wyld Stallyns Dr, San Dimas, California',
-  'postalCode': '666',
-  'region': 'California',
-  'street': '666 Wyld Stallyns Dr',
+  'postalCode': '09990',
+  'region': 'TX',
+  'street': '666 Columbia Ave',
   'firstName': 'Timo',
-  'formatted': 'Timo Hanke',
   'lastName': 'Heinke',
   'photos': [
     {
@@ -1274,12 +1272,10 @@ var identities = [
   ],
   'city': 'San Dimas',
   'country': 'USA',
-  'formattedAddress': '666 Wyld Stallyns Dr, San Dimas, California',
   'postalCode': '666',
   'region': 'California',
   'street': '666 Wyld Stallyns Dr',
   'firstName': 'Sophia',
-  'formatted': 'Sophia Loren',
   'lastName': 'Loren',
   'photos': [
     {
@@ -1358,13 +1354,11 @@ var identities = [
   ],
   'city': 'San Dimas',
   'country': 'USA',
-  'formattedAddress': '666 Wyld Stallyns Dr, San Dimas, California',
   'postalCode': '666',
   'region': 'California',
   'street': '666 Wyld Stallyns Dr',
   'firstName': 'Jane',
   'lastName': 'Wayman',
-  'formatted': 'Jane Wayman',
   'photos': [
     {
       'type': 'headshot',
@@ -1441,12 +1435,10 @@ var identities = [
   ],
   'city': 'San Dimas',
   'country': 'USA',
-  'formattedAddress': '666 Wyld Stallyns Dr, San Dimas, California',
   'postalCode': '666',
   'region': 'California',
   'street': '666 Wyld Stallyns Dr',
   'firstName': 'Jake',
-  'formatted': 'Jake Peralta',
   'lastName': 'Peralta',
   'photos': [
     {
@@ -1524,12 +1516,10 @@ var identities = [
   ],
   'city': 'San Dimas',
   'country': 'USA',
-  'formattedAddress': '666 Wyld Stallyns Dr, San Dimas, California',
   'postalCode': '666',
   'region': 'California',
   'street': '666 Wyld Stallyns Dr',
   'firstName': 'Ken',
-  'formatted': 'Ken Wilber',
   'lastName': 'Wilber',
   'photos': [
     {

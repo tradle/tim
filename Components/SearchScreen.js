@@ -145,6 +145,18 @@ class SearchScreen extends Component {
         id: 3,
         component: ResourceView,
         titleTextColor: '#7AAAC3',
+        rightButtonTitle: 'Edit',
+        onRightButtonPress: {
+          title: title,
+          id: 4,
+          component: NewResource,
+          titleTextColor: '#7AAAC3',
+          passProps: {
+            metadata: utils.getModel(resource['_type']).value,
+            resource: resource
+          }
+        },
+
         passProps: {resource: resource}
       }
     }

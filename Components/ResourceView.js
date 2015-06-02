@@ -54,18 +54,19 @@ class ResourceView extends Component {
   }
   render() {
     var resource = this.state.resource;
-    var hasPhoto = resource.photos && resource.photos.length; 
     var modelName = resource['_type'];
     var model = utils.getModel(modelName).value;
 
+    var hasPhoto = resource.photos && resource.photos.length; 
+    var currentPhoto = this.state.currentPhoto || (hasPhoto  &&  resource.photos[0]);
+
     var photo;
-    var currentPhoto = this.state.currentPhoto || (resource.photos && resource.photos[0]);
     if (hasPhoto) {
       if (!model.interfaces  || currentPhoto) {
         var url = currentPhoto.url;
         var nextPhoto = resource.photos.length == 1
         if (resource.photos.length == 1)
-          photo = <Image source={{uri: (url.indexOf('http') == 0 ? url : 'http://' + url)}} style={styles.image} />; 
+          photo = <Image source={{uri: (url.indexOf('http') === 0 ? url : 'http://' + url)}} style={styles.image} />; 
         else {           
           var nextPhoto;
           var len = resource.photos.length;
@@ -81,91 +82,9 @@ class ResourceView extends Component {
       }
     }
     else
-      photo = <View style={styles.image}/>;
+      photo = <View/>;
  
-    var vCols = model.viewCols;
-
-    if (!vCols)
-      vCols = model.properties;
-    var self = this;
-    var viewCols = vCols.map(function(p) {
-      var val = resource[p];
-      var pMeta = model.properties[p];
-      if (!val) {
-        if (pMeta.displayAs) 
-          val = utils.templateIt(pMeta, resource);      
-        else
-          return;
-      }
-      else if (pMeta.ref)
-        val = val['_type'] ? utils.getDisplayName(val, utils.getModel(val['_type']).value.properties) : val.title;
-      else if (pMeta.type === 'date')
-        val = utils.formatDate(val);
-
-      if (!val)
-        return <View></View>;
-      var isDirectionRow;
-      if (val instanceof Array) {
-        var vCols = pMeta.viewCols;          
-        var cnt = val.length;
-        var counter = 0;
-        var isPhoto = pMeta.cloneOf  &&  pMeta.cloneOf == 'tradle.Message.photos';
-        if (isPhoto  &&  val.length == 1)
-          return <View />; 
-        val = val.map(function(v) {
-          var ret = [];
-          var itemsMeta = pMeta.items.properties;
-          counter++; 
-          if (isPhoto) 
-            ret.push(
-              <TouchableHighlight underlayColor='#ffffff' onPress={self.changePhoto.bind(self, v)}>
-                <View style={styles.itemContainer}>
-                  <Image style={styles.photo} source={{uri: (v.url.indexOf('http') == -1 ? 'http://' + v.url : v.url)}} />
-                  <Text style={styles.description}>{v.title}</Text>
-                </View>
-              </TouchableHighlight>
-            ); 
-          else  
-            for (var p in itemsMeta) {
-              if (vCols  &&  vCols.indexOf(p) == -1)
-                continue;
-              var itemMeta = pMeta.items.properties[p];
-              var value = (itemMeta.displayAs) ? utils.templateIt(itemMeta, v) : v[p];
-              if (!value)
-                continue;
-              ret.push(
-                <View>
-                 <View style={value.length > 60 ? styles.itemColContainer : styles.itemContainer}>
-                   <Text style={itemMeta.skipLabel ? {height: 0} : styles.itemTitle}>{itemMeta.skipLabel ? '' : utils.makeLabel(p)}</Text>
-                   <Text style={styles.description}>{value}</Text>                 
-                 </View>
-               </View>);
-            } 
-          return (
-            <View>
-               {ret}
-               {counter == cnt ? <View></View> : <View style={styles.itemSeparator}></View>}
-            </View>
-          )
-        });        
-      } 
-      else if (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0)
-        val = <Text onPress={self.onPress.bind(self, val)} style={styles.description}>{val}</Text>;
-      else {
-        if (val.length < 40)
-          isDirectionRow = true;
-        val = <Text style={[styles.description, isDirectionRow ? {alignSelf: 'flex-end'} : {alignSelf: 'flex-start'}]}>{val}</Text>;
-      }
-      
-      return (<View style={{padding:5}}>
-               <View style={[styles.textContainer, isDirectionRow ? {flexDirection: 'row'} : {flexDirection: 'column'}]}>
-                 <Text style={styles.title}>{model.properties[p].title || utils.makeLabel(p)}</Text>
-                 {val}
-               </View>
-                <View style={styles.separator}></View>
-             </View>
-             );
-    });
+    var viewCols = this.getViewCols(resource, model);
     var verify = this.props.verify
                ? <View style={{flex: 1, paddingRight: 10}}>
                    <TouchableHighlight onPress={this.verify.bind(this)} underlayColor='#ffffff'>
@@ -245,6 +164,93 @@ class ResourceView extends Component {
   showEmbed() {
     this.setState({embedHeight: {height: 60, padding: 5, marginRight: 10, borderColor: '#2E3B4E', backgroundColor: '#eeeeee'}});
   }
+  getViewCols(resource, model) {
+    var vCols = model.viewCols;
+
+    if (!vCols)
+      vCols = model.properties;
+    var self = this;
+    var viewCols = vCols.map(function(p) {
+      var val = resource[p];
+      var pMeta = model.properties[p];
+      if (!val) {
+        if (pMeta.displayAs) 
+          val = utils.templateIt(pMeta, resource);      
+        else
+          return;
+      }
+      else if (pMeta.ref)
+        val = val['_type'] ? utils.getDisplayName(val, utils.getModel(val['_type']).value.properties) : val.title;
+      else if (pMeta.type === 'date')
+        val = utils.formatDate(val);
+
+      if (!val)
+        return <View></View>;
+      var isDirectionRow;
+      if (val instanceof Array) {
+        var vCols = pMeta.viewCols;          
+        var cnt = val.length;
+        var counter = 0;
+        var isPhoto = pMeta.cloneOf  &&  pMeta.cloneOf == 'tradle.Message.photos';
+        if (isPhoto  &&  val.length == 1)
+          return <View />; 
+        val = val.map(function(v) {
+          var ret = [];
+          var itemsMeta = pMeta.items.properties;
+          counter++; 
+          if (isPhoto) 
+            ret.push(
+              <TouchableHighlight underlayColor='#ffffff' onPress={self.changePhoto.bind(self, v)}>
+                <View style={styles.itemContainer}>
+                  <Image style={styles.photo} source={{uri: (v.url.indexOf('http') == -1 ? 'http://' + v.url : v.url)}} />
+                  <Text style={styles.description}>{v.title}</Text>
+                </View>
+              </TouchableHighlight>
+            ); 
+          else  
+            for (var p in itemsMeta) {
+              if (vCols  &&  vCols.indexOf(p) == -1)
+                continue;
+              var itemMeta = pMeta.items.properties[p];
+              var value = (itemMeta.displayAs) ? utils.templateIt(itemMeta, v) : v[p];
+              if (!value)
+                continue;
+              ret.push(
+                <View>
+                 <View style={value.length > 60 ? styles.itemColContainer : styles.itemContainer}>
+                   <Text style={itemMeta.skipLabel ? {height: 0} : styles.itemTitle}>{itemMeta.skipLabel ? '' : utils.makeLabel(p)}</Text>
+                   <Text style={styles.description}>{value}</Text>                 
+                 </View>
+               </View>);
+            } 
+          return (
+            <View>
+               {ret}
+               {counter == cnt ? <View></View> : <View style={styles.itemSeparator}></View>}
+            </View>
+          )
+        });        
+      } 
+      else if (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0)
+        val = <Text onPress={self.onPress.bind(self, val)} style={styles.description}>{val}</Text>;
+      else {
+        if (val.length < 30)
+          isDirectionRow = true;
+        val = <Text style={[styles.description, {flexWrap: 'wrap'}]} numberOfLines={2}>{val}</Text>;
+        // val = <Text style={[styles.description, isDirectionRow ? {alignSelf: 'flex-end'} : {alignSelf: 'flex-start'}]}>{val}</Text>;
+      }
+      
+      return (<View style={{padding:5}}>
+               <View style={[styles.textContainer, isDirectionRow ? {flexDirection: 'row'} : {flexDirection: 'column'}]}>
+                 <Text style={styles.title}>{model.properties[p].title || utils.makeLabel(p)}</Text>
+                 {val}
+               </View>
+                <View style={styles.separator}></View>
+             </View>
+             );
+    });
+    return viewCols;    
+  }
 }
 reactMixin(ResourceView.prototype, Reflux.ListenerMixin);
 
@@ -255,6 +261,7 @@ var styles = StyleSheet.create({
   },
   textContainer: {
     flex: 1,
+    // flexWrap: 'wrap'
   },
   itemContainer: {
     flex: 1,

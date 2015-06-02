@@ -73,6 +73,7 @@ var utils = {
     var models = this.getModels();
     var data = params.data;
     var chooser = params.chooser;
+    var callback = params.callback;
     var options = {};
     options.fields = {};
  
@@ -136,6 +137,7 @@ var utils = {
           if (props[p].multiline)
             options.fields[p].multiline = true;
           options.fields[p].autoCorrect = false;
+          options.fields[p].onSubmitEditing = callback;
         }
       }
       else if (type === 'array') {

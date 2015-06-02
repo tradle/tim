@@ -158,7 +158,7 @@ var Store = Reflux.createStore({
         json[p] = resource[p];
     }
     if (!json[RESOURCE_TYPE])
-      json[RESOURCE_TYPE] = resource[RESOURCE_TYPE];
+      json[RESOURCE_TYPE] = meta.id;
     var error = this.checkRequired(json, meta);
     if (error) {
       foundRefs.forEach(function(val) {
@@ -323,17 +323,16 @@ var Store = Reflux.createStore({
   },
 
   _putResourceInDB(modelName, value, isRegistration) {    
+    // Cleanup null form values
     for (var p in value) {
       if (!value[p])
         delete value[p];      
     } 
     if (!value[RESOURCE_TYPE])
       value[RESOURCE_TYPE] = modelName;
-    var meta = this.getModel(modelName);
     if (!value.rootHash)
       value.rootHash = sha(value);
     var iKey = modelName + '_' + value.rootHash;
-    var self = this;
     var batch = [];
     batch.push({type: 'put', key: iKey, value: value});
     var mid;
@@ -342,6 +341,7 @@ var Store = Reflux.createStore({
       batch.push({type: 'put', key: MY_IDENTITY_MODEL + '_' + sha(mid), value: mid});
     }
 
+    var self = this;
     db.batch(batch)
     .then(function(results) {
       if (isRegistration)

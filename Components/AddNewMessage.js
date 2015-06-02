@@ -106,24 +106,6 @@ class AddNewMessage extends Component {
     }
 
     Actions.addMessage(r, meta);
-
-    // var rootHash = sha(r);
-    // r.rootHash = rootHash;
-    // var self = this;
-    // var key = type + '_' + rootHash;
-
-    // utils.getDb().put(key, r)
-    // .then(function() {
-    //   utils.addOrUpdateResource(key, r);
-    //   var userInput = self.state.userInput;
-
-    //   self.setState({userInput: ''});
-    //   if (self.props.callback)
-    //     self.props.callback(userInput);
-    // })
-    // .catch(function(err) {
-    //   err = err;
-    // });
   }
   onAddNewPressed() {
     var modelName = this.props.modelName;
@@ -157,9 +139,7 @@ var styles = StyleSheet.create({
   searchBar: {
     flex: 4,
     padding: 10,
-    // paddingLeft: 10,
     paddingTop: 3,
-
     height: 45,
     paddingBottom: 13,
     flexDirection: 'row',
@@ -169,7 +149,6 @@ var styles = StyleSheet.create({
   searchBarBG: {
     marginTop: 10,
     marginBottom: 5,
-    // padding: 5,
     flex: 1,
     alignSelf: 'center',
     backgroundColor: '#eeeeee', 
@@ -185,9 +164,6 @@ var styles = StyleSheet.create({
     paddingLeft: 10,
     backgroundColor: '#eeeeee',
     fontWeight: 'bold',
-    // color: '#2E3B4E',
-    borderRadius: 5,
-    // borderWidth: 1,
     alignSelf: 'stretch',
     borderColor: '#eeeeee',
   },

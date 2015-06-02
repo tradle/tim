@@ -4,6 +4,7 @@ var React = require('react-native');
 var utils = require('../utils/utils');
 var NewItem = require('./NewItem');
 var SearchScreen = require('./SearchScreen');
+var ResourceView = require('./ResourceView');
 var t = require('tcomb-form-native');
 var extend = require('extend');
 var Actions = require('../Actions/Actions');
@@ -47,6 +48,39 @@ class NewResource extends Component {
     // if registration or after editing the profile
     if (this.state.isRegistration  ||  (params.me  &&  resource.rootHash === params.me.rootHash))
       utils.setMe(params.me);
+    var self = this;
+    var title = utils.getDisplayName(resource, self.props.metadata.properties);
+    var isMessage = this.props.metadata.interfaces  &&  this.props.metadata.interfaces.indexOf('tradle.Message') != -1;
+    if (isMessage) {
+      if (this.props.callback) {
+        if (this.props.callback) {
+          this.props.callback('');
+          this.setState({userInput: ''});
+        }
+      }
+    }
+    else {
+      this.props.navigator.replacePrevious({
+        id: 3,
+        title: title,
+        component: ResourceView,
+        titleTextColor: '#7AAAC3',
+        rightButtonTitle: 'Edit',
+        onRightButtonPress: {
+          title: title,
+          id: 4,
+          component: NewResource,
+          titleTextColor: '#7AAAC3',
+          passProps: {
+            metadata: self.props.metadata,
+            resource: resource
+          }
+        },
+        passProps: {
+          resource: resource
+        }
+      });
+    }
     this.props.navigator.pop();
   }
   onSavePressed() {
@@ -160,7 +194,8 @@ class NewResource extends Component {
         data: data, 
         chooser: this.chooser.bind(this),
         model: model,
-        items: arrays
+        items: arrays,
+        callback: this.onSavePressed.bind(this)
       });
     
     var Model = t.struct(model);

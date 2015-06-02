@@ -137,8 +137,6 @@ class ResourceRow extends Component {
     case 1:
       val = moment(date).format('[yesterday], h:mA');
       break;
-    case 2:
-      break;
     default:      
       val = moment(date).format('ddd, h:mA');
     }
