@@ -3,7 +3,6 @@
 var React = require('react-native');
 var utils = require('../utils/utils');
 var ArticleView = require('./ArticleView');
-var SearchScreen = require('./SearchScreen');
 var MoreLikeThis = require('./MoreLikeThis');
 var VerificationButton = require('./VerificationButton');
 var Reflux = require('reflux');
@@ -263,21 +262,6 @@ var styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center'
-  },
-  buttonText: {
-    fontSize: 18,
-    color: '#2E3B4E',
-    alignSelf: 'center',
-  },
-  button: {
-    marginTop: 10,
-    alignSelf: 'center',
-    marginBottom: 10,
-    backgroundColor: '#eeeeee',
-    borderColor: '#cccccc',
-    borderWidth: 1,
-    padding: 10,
-    borderRadius: 10
   },
   rowContainer: {
     padding: 10
