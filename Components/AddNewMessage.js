@@ -4,9 +4,7 @@ var React = require('react-native');
 var utils = require('../utils/utils');
 var sha = require('stable-sha1');
 var ResourceTypesScreen = require('./ResourceTypesScreen');
-var Store = require('../Store/Store');
 var ChatMessage = require('./ChatMessage');
-
 
 var {
   View,
