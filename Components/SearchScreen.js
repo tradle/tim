@@ -10,37 +10,18 @@ var ResourceView = require('./ResourceView');
 var NewResource = require('./NewResource');
 var AddNewMessage = require('./AddNewMessage');
 var utils = require('../utils/utils');
-var t = require('tcomb-form-native');
 var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
-
-var Form = t.form.Form;
-
 var InvertibleScrollView = require('react-native-invertible-scroll-view');
-var messageCount;
 
 var {
-  ActivityIndicatorIOS,
   ListView,
-  ScrollView,
   Component,
   StyleSheet,
-  Navigator,
   Text,
-  TextInput,
-  Image,
-  TouchableHighlight,
   View,
 } = React;
-
-var resultsCache = {
-  dataForQuery: {},
-  nextPageNumberForQuery: {},
-  totalForQuery: {},
-};
-
-var LOADING = {};
 
 class SearchScreen extends Component {
   constructor(props) {
@@ -68,8 +49,8 @@ class SearchScreen extends Component {
     if (!params.list  ||  params.error || params.isAggregation !== this.props.isAggregation)
       return;
     var list = params.list;
-    if (list.length || this.state.filter.length) {
-      var type = list[0]['_type'];
+    if (!utils.isEmpty(list) || this.state.filter.length) {
+      var type = list['_type'];
       if (type  !== this.props.modelName) {
         var model = utils.getModel(this.props.modelName).value;
         if (!model.isInterface)
@@ -133,7 +114,6 @@ class SearchScreen extends Component {
       title: title,
       component: SearchScreen,
       id: 10,
-      // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       passProps: {
         resource: resource, 
         filter: '',
@@ -212,9 +192,6 @@ class SearchScreen extends Component {
   onSearchChange(event) {
     var filter = event.nativeEvent.text.toLowerCase();
     Actions.list(filter, this.props.modelName, this.props.resource);
-
-    // this.clearTimeout(this.timeoutID);
-    // this.timeoutID = this.setTimeout(() => this.searchResources(filter), 100);
   }
 
   renderRow(resource)  {
@@ -238,9 +215,6 @@ class SearchScreen extends Component {
   }
   addedMessage(text) {
     Actions.list('', this.props.modelName, this.props.resource);
-    // this.searchResources('');
-    // messageCount++;
-    // this.setState({userInput: text ? text : 'messages ' + messageCount});
   }
 
   render() {
@@ -336,43 +310,6 @@ var styles = StyleSheet.create({
     marginTop: 80,
     color: '#888888',
   },
-  searchBar: {
-    flex: 4,
-    padding: 10,
-    // paddingLeft: 10,
-    paddingTop: 3,
-
-    height: 45,
-    paddingBottom: 13,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#eeeeee', 
-  },
-  searchBarBG: {
-    marginTop: 10,
-    marginBottom: 5,
-    // padding: 5,
-    flex: 1,
-    alignSelf: 'center',
-    backgroundColor: '#eeeeee', 
-    borderTopColor: '#eeeeee', 
-    borderRightColor: '#eeeeee', 
-    borderLeftColor: '#eeeeee', 
-    borderWidth: 2,
-    borderBottomColor: '#cccccc',
-  },
-  searchBarInput: {
-    height: 30,
-    fontSize: 18,
-    paddingLeft: 10,
-    backgroundColor: '#eeeeee',
-    fontWeight: 'bold',
-    // color: '#2E3B4E',
-    borderRadius: 5,
-    // borderWidth: 1,
-    alignSelf: 'stretch',
-    borderColor: '#eeeeee',
-  },
   separator: {
     height: 1,
     backgroundColor: '#cccccc',
@@ -383,213 +320,6 @@ var styles = StyleSheet.create({
   scrollSpinner: {
     marginVertical: 20,
   },
-  image: {
-    width: 40,
-    height: 40
-  },
 });
 
 module.exports = SearchScreen;
-
-/*
-  buttonText: {
-    fontSize: 18,
-    color: '#2E3B4E',
-    alignSelf: 'center',
-  },
-  button: {
-    flex: 1,
-    backgroundColor: '#D7E6ED',
-    padding: 10,
-  },
-  addNew: {
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    backgroundColor: '#eeeeee',
-    borderBottomColor: '#eeeeee', 
-    borderRightColor: '#eeeeee', 
-    borderLeftColor: '#eeeeee', 
-    borderWidth: 1,
-    borderTopColor: '#cccccc',
-  }
-    var addNew = (model.isInterface) 
-               ? <View style={styles.addNew}>
-                    <TouchableHighlight style={{paddingLeft: 5}} underlayColor='#eeeeee'
-                      onPress={this.onAddNewPressed.bind(this)}>
-                     <Image source={require('image!clipadd')} style={styles.image} />
-                   </TouchableHighlight>
-                  <View style={styles.searchBar}>
-                    <View style={styles.searchBarBG}>
-                      <TextInput 
-                        autoCapitalize='none'
-                        autoFocus={true}
-                        autoCorrect={false}
-                        placeholder='Say something'
-                        placeholderTextColor='#bbbbbb'
-                        style={styles.searchBarInput}
-                        value={this.state.userInput}
-                        onChange={this.addedMessage.bind(this)}
-                        onEndEditing={this.onEndEditing.bind(this)}
-                      />
-                    </View>
-                  </View>
-                   </View> 
-
-              : <View></View>;
-  onAddNewPressed() {
-    var modelName = this.props.modelName;
-    var model = utils.getModel(modelName).value;
-    var isInterface = model.isInterface;
-    if (!isInterface) 
-      return;
-
-    var self = this;
-    var currentRoutes = self.props.navigator.getCurrentRoutes();
-    self.props.navigator.push({
-      title: utils.makeLabel(model.title) + ' type',
-      id: 2,
-      component: ResourceTypesScreen,
-      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      passProps: {
-        resource: self.props.resource, 
-        returnRoute: currentRoutes[currentRoutes.length - 1],
-        modelName: modelName,
-        callback: this.onMessageCreated.bind(this)
-      }
-    });
-  }
-  onMessageCreated() {
-    this.setState({isLoading: false});
-  }
-  handleChange(event) {
-    this.setState({userInput: event.nativeEvent.text});
-  }
-  // Sending chat message
-  onEndEditing() {
-    if (this.state.userInput.trim().length == 0)
-      return;
-    var type = interfaceToTypeMapping[this.props.modelName];
-    var me = utils.getMe();
-    var resource = this.props.resource;
-    var title = utils.getDisplayName(resource, utils.getModel(this.props.resource['_type']).value.properties);
-    var meTitle = utils.getDisplayName(me, utils.getModel(me['_type']).value.properties);
-    var r = {
-      '_type': type,
-      'message': this.state.userInput,
-      'from': {
-        id: me['_type'] + '_' + me.rootHash, 
-        title: meTitle
-      }, 
-      'to': {
-        id: resource['_type'] + '_' + resource.rootHash,
-        title: title
-      },
-      time: new Date().getTime()
-    }
-    var rootHash = sha(r);
-    r.rootHash = rootHash;
-    var self = this;
-    utils.getDb().put(type + '_' + rootHash, r)
-    .then(function() {
-      self.searchResources('');
-      self.setState({userInput: ''});
-    })
-    .catch(function(err) {
-      err = err;
-    });
-  }
-*/
-  // searchResources(query, list) {
-  //   this.timeoutID = null;
-
-  //   this.setState({filter: query});
-  //   var resources = list ? list : utils.getResources();
-
-  //   var foundResources = {};
-  //   var modelName = this.props.modelName;
-  //   var model = utils.getModel(modelName).value;
-  //   var isMessage = model.isInterface;
-  //   var meta = model.properties;
-
-  //   var implementors = isMessage ? utils.getImplementors(modelName) : null;
-
-  //   var required = model.required;
-  //   var meRootHash = utils.getMe().rootHash;
-  //   for (var key in resources) {
-  //     var iModel;
-  //     if (isMessage  &&  implementors) {
-  //       for (var i=0; i<implementors.length  &&  !iModel; i++) {
-  //         if (implementors[i].id.indexOf(key.substring(0, key.indexOf('_'))) === 0)
-  //           iModel = implementors[i];
-  //       }
-  //       if (!iModel)
-  //         continue;
-  //     }
-  //     else if (key.indexOf(modelName + '_') == -1)
-  //       continue;
-  //     var r = resources[key].value;
-  //     if (isMessage) {
-  //       var msgProp = utils.getCloneOf('tradle.Message.message', iModel.properties);
-  //       if (!r[msgProp]  ||  r[msgProp].trim().length === 0)
-  //         continue;
-  //       var fromProp = utils.getCloneOf('tradle.Message.from', iModel.properties);
-  //       var toProp = utils.getCloneOf('tradle.Message.to', iModel.properties);
-
-  //       var fromID = r[fromProp].id.split(/_/)[1];
-  //       var toID = r[toProp].id.split(/_/)[1];
-  //       if (fromID  !== meRootHash  &&  toID !== meRootHash) 
-  //         continue;
-  //       if (fromID !== this.props.resource.rootHash  &&  
-  //           toID != this.props.resource.rootHash)
-  //         continue;
-  //     }
-  //     if (!query) {
-  //        foundResources[key] = r;      
-  //        continue;   
-  //      }
-  //      // primitive filtering for this commit
-  //      var combinedValue = '';
-  //      for (var rr in meta) {
-  //        if (r[rr] instanceof Array)
-  //         continue;
-  //        combinedValue += combinedValue ? ' ' + r[rr] : r[rr];
-  //      }
-  //      if (!combinedValue  ||  (combinedValue  &&  (!query || combinedValue.toLowerCase().indexOf(query.toLowerCase()) != -1))) {
-  //        foundResources[key] = r; 
-  //      }
-  //   }
-  //   LOADING[query] = false;
-  //   resultsCache.nextPageNumberForQuery[query] = 2;
-
-  //   // if (this.state.filter !== query) {
-  //   //   // do not update state if the query is stale
-  //   //   return;
-  //   // }
-  //   var result = utils.objectToArray(foundResources);
-  //   if (isMessage) {
-  //     result.sort(function(a,b){
-  //       // Turn your strings into dates, and then subtract them
-  //       // to get a value that is either negative, positive, or zero.
-  //       return new Date(a.time) - new Date(b.time);
-  //     });
-  //   }
-  //   this.setState({
-  //     isLoading: false,
-  //     dataSource: this.getDataSource(result),
-  //   })
-  // }
-
-  // hasMore() {
-  //   var query = this.state.filter;
-  //   if (!resultsCache.dataForQuery[query]) {
-  //     return true;
-  //   }
-  //   return (
-  //     resultsCache.totalForQuery[query] !== resultsCache.dataForQuery[query].length
-  //   );
-  // }
-  // renderFooter() {
-  //   return (!this.hasMore() || !this.state.isLoadingTail) 
-  //          ? <View style={styles.scrollSpinner} />
-  //          : <ActivityIndicatorIOS style={styles.scrollSpinner} />;
-  // }
