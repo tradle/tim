@@ -13,15 +13,26 @@ var utils = require('../utils/utils');
 var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
+
 var InvertibleScrollView = require('react-native-invertible-scroll-view');
+var messageCount;
 
 var {
   ListView,
   Component,
   StyleSheet,
   Text,
+  TouchableHighlight,
   View,
 } = React;
+
+var resultsCache = {
+  dataForQuery: {},
+  nextPageNumberForQuery: {},
+  totalForQuery: {},
+};
+
+var LOADING = {};
 
 class SearchScreen extends Component {
   constructor(props) {
@@ -49,8 +60,8 @@ class SearchScreen extends Component {
     if (!params.list  ||  params.error || params.isAggregation !== this.props.isAggregation)
       return;
     var list = params.list;
-    if (!utils.isEmpty(list) || this.state.filter.length) {
-      var type = list['_type'];
+    if (list.length || this.state.filter.length) {
+      var type = list[0]['_type'];
       if (type  !== this.props.modelName) {
         var model = utils.getModel(this.props.modelName).value;
         if (!model.isInterface)
@@ -192,6 +203,9 @@ class SearchScreen extends Component {
   onSearchChange(event) {
     var filter = event.nativeEvent.text.toLowerCase();
     Actions.list(filter, this.props.modelName, this.props.resource);
+
+    // this.clearTimeout(this.timeoutID);
+    // this.timeoutID = this.setTimeout(() => this.searchResources(filter), 100);
   }
 
   renderRow(resource)  {
@@ -252,7 +266,6 @@ class SearchScreen extends Component {
     
       
     }
-    var Model = t.struct({'msg': t.Str});
     var model = utils.getModel(this.props.modelName).value;
 
     var addNew = (model.isInterface) 
@@ -323,3 +336,4 @@ var styles = StyleSheet.create({
 });
 
 module.exports = SearchScreen;
+
