@@ -18,20 +18,17 @@ var RESOURCE_TYPE = '_type';
 var models = {};
 var list = {};
 var db;
+
 var me;
 var ready;
-
-function getItemByKey(list, itemKey) {
-  return list[itemKey];
-}
 
 var Store = Reflux.createStore({
   // this will set up listeners to all publishers in TodoActions, using onKeyname (or keyname) as callbacks
   listenables: [Actions],
   // this will be called by all listening components as they register their listeners
   init() {
-    db = promisify(level('identity.db', { valueEncoding: 'json' }));
-    this.ready = this.loadResources()    
+    db = promisify(level('TiM.db', { valueEncoding: 'json' }));
+    this.ready = this.loadResources()
     .catch(function(err) {
       err = err;
     });
@@ -77,6 +74,22 @@ var Store = Reflux.createStore({
       err = err;
     });
 
+  },
+  onGetItem(key) {
+    this.trigger({ resource: list[key].value, action: 'getItem'});
+  },
+  onAddNewIdentity(resource) {
+    var newIdentity = resource['_type'] + '_' + resource.rootHash;
+    me.allIdentities.push(newIdentity);
+    list[MY_IDENTITY_MODEL + '_1'] = me;
+    var self = this;
+    db.put(MY_IDENTITY_MODEL + '_1', me)
+    .then(function() {
+      self.trigger({action: 'addNewIdentity', resource: me});
+    })
+    .catch (function(err) {
+      err = err;
+    })
   },
   getItem(resource) {
     var modelName = resource[RESOURCE_TYPE];
@@ -155,7 +168,7 @@ var Store = Reflux.createStore({
     }
     if (!json[RESOURCE_TYPE])
       json[RESOURCE_TYPE] = meta.id;
-    var error = this.checkRequired(json, meta);
+    var error = this.checkRequired(json, props);
     if (error) {
       foundRefs.forEach(function(val) {
         var propValue = val.value[RESOURCE_TYPE] + '_' + val.value.rootHash;
@@ -180,9 +193,11 @@ var Store = Reflux.createStore({
        extend(foundRefs, results);
        foundRefs.forEach(function(val) {
          if (val.state === 'fulfilled') {
-           var propValue = val.value[RESOURCE_TYPE] + '_' + val.value.rootHash;
+           var value = val.value;
+           var propValue = value[RESOURCE_TYPE] + '_' + value.rootHash;
            var prop = refProps[propValue];
-           var title = json[prop];
+
+           var title = utils.getDisplayName(value, self.getModel(value[RESOURCE_TYPE]).value.properties);
            json[prop] = {
              title: title,
              id : propValue
@@ -229,7 +244,8 @@ var Store = Reflux.createStore({
     var self = this;
     this.clearDb()
     .then(function() {
-      return self.loadDB(db);
+      list = {};
+      return self.loadDB();
     })
     .then(function() {
       self.trigger({action: 'reloadDB', list: list});
@@ -261,10 +277,14 @@ var Store = Reflux.createStore({
       var iMeta;
       if (isAllMessages) {
         if (implementors) {
-          for (var i=0; i<implementors.length  &&  !iMeta; i++) {
-            if (implementors[i].id.indexOf(key.substring(0, key.indexOf('_'))) === 0)
-              iMeta = implementors[i];
+          for (var impl of implementors) {
+            if (impl.id.indexOf(key.substring(0, key.indexOf('_'))) === 0) {
+              iMeta = impl;
+              break;
+            }
           }
+          if (!iMeta)
+            continue;
         }  
       }
       else if (key.indexOf(modelName + '_') == -1)
@@ -305,11 +325,18 @@ var Store = Reflux.createStore({
     }
     var result = utils.objectToArray(foundResources);
     if (isMessage) {
-      result.sort(function(a,b){
+      result.sort(function(a,b) {
         // Turn your strings into dates, and then subtract them
         // to get a value that is either negative, positive, or zero.
         return new Date(a.time) - new Date(b.time);
       });
+      for (var r of result) {
+        var m = this.getModel(r['_type']).value;
+        var from = utils.getCloneOf('tradle.Message.from', m.properties);
+        r[from].photos = list[r[from].id].value.photos; 
+        var to = utils.getCloneOf('tradle.Message.to', m.properties);
+        r[to].photos = list[r[to].id].value.photos; 
+      }
     }
     return result;
   },
@@ -328,11 +355,17 @@ var Store = Reflux.createStore({
     var batch = [];
     batch.push({type: 'put', key: iKey, value: value});
     var mid;
+    
     if (isRegistration) {
-      mid = {_type: MY_IDENTITY_MODEL, id: iKey};
-      batch.push({type: 'put', key: MY_IDENTITY_MODEL + '_' + sha(mid), value: mid});
+      mid = {
+        _type: MY_IDENTITY_MODEL, 
+        currentIdentity: iKey, 
+        allIdentities: [{
+          id: iKey, 
+          title: utils.getDisplayName(value, models['model_' + modelName].value.properties)
+        }]};
+      batch.push({type: 'put', key: MY_IDENTITY_MODEL + '_1', value: mid});
     }
-
     var self = this;
     db.batch(batch)
     .then(function(results) {
@@ -342,8 +375,11 @@ var Store = Reflux.createStore({
     })
     .then(function(value) {
       list[iKey] = {key: iKey, value: value};
-      if (mid)
+      if (mid) 
         list[MY_IDENTITY_MODEL + '_' + mid.rootHash] = mid;
+    //   return self.loadDB(db);
+    // })    
+    // .then(function() {
       var  params = {action: 'addItem', list: list, resource: value};
       // registration or profile editing
       if (isRegistration  ||  value.rootHash === me.rootHash)
@@ -431,8 +467,8 @@ var Store = Reflux.createStore({
        if (data.key.indexOf('model_') === 0)
          models[data.key] = data;
        else {
-         if (!myId  &&  data.key.indexOf('tradle.MyIdentity_') == 0) {
-           myId = data.value.id;
+         if (!myId  &&  data.key.indexOf(MY_IDENTITY_MODEL + '_') === 0) {
+           myId = data.value.currentIdentity;
            if (list[myId])
              me = list[myId].value;
          }
@@ -447,7 +483,7 @@ var Store = Reflux.createStore({
     .on('end', function() {
       console.log('Stream ended');
       if (self.isEmpty(models))
-        return self.loadDb();
+        return self.loadDB();
     })      
     .on('error', function(err) {
       console.log('err: ' + err);
@@ -465,7 +501,7 @@ var Store = Reflux.createStore({
   getModel(modelName) {
     return models['model_' + modelName];
   },
-  loadDB(db) {
+  loadDB() {
     var batch = [];
 
     sampleData.getModels().forEach(function(m) {
@@ -483,7 +519,10 @@ var Store = Reflux.createStore({
     var self = this;
     return db.batch(batch)
           .then(self.loadResources)
-          .then(self.loadAddressBook);
+          .then(self.loadAddressBook)
+          .catch(function(err) {
+            err = err;
+            });
   },
   clearDb() {  
     var self = this;
