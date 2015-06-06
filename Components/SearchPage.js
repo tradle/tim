@@ -2,6 +2,7 @@
  
 var React = require('react-native');
 var SearchScreen = require('./SearchScreen');
+var AddNewIdentity = require('./AddNewIdentity');
 var NewResource = require('./NewResource');
 var utils = require('../utils/utils');
 var Reflux = require('reflux');
@@ -26,7 +27,7 @@ class SearchPage extends Component {
 	constructor(props) {
 	  super(props);
 	  this.state = {
-	    isLoading: false,
+	    isLoading: true,
 	  };
 	}
   componentWillMount() {
@@ -44,6 +45,7 @@ class SearchPage extends Component {
     if (params.action === 'start') {
       utils.setMe(params.me);
       utils.setModels(params.models);
+      this.setState({isLoading: false});
     }
 
   }
@@ -90,21 +92,44 @@ class SearchPage extends Component {
       page.resource = me;
       route.title = 'Edit Identity';
     }
-    else
+    else {
       route.title = 'Register';
+      route.passProps.callback = this.popToTop.bind(this);
+    }
     this.props.navigator.push(route);
   }
+  popToTop(resource) {
+    utils.setMe(resource);
+    this.props.navigator.popToTop();
+  }
   onReloadDBPressed() {
+    utils.setMe(null);
     Actions.reloadDB();
   } 
   render() {
   	var spinner = this.state.isLoading 
                 ? <ActivityIndicatorIOS hidden='true' size='large'/>  
                 :  <View/>;
+    if (this.state.isLoading)
+      return <View/>;                
     var err = this.state.err || '';
     var errStyle = err ? styles.err : {'padding': 0, 'height': 0};
     var myId = sampleData.getMyId() || utils.getMe();
-    var editProfile = 'Edit Profile';
+    var editProfile;
+
+    if (utils.getMe())
+      editProfile = <TouchableHighlight 
+                        underlayColor='#2E3B4E' onPress={this.onEditProfilePressed.bind(this)}>
+                      <Text style={styles.text}>
+                        {'Edit Profile'}
+                      </Text>
+                    </TouchableHighlight>         
+    else
+      editProfile = <View />;
+    // else  {
+    //   var r = {'_type': this.props.modelName};
+    //   editProfile = <AddNewIdentity resource={r} isRegistration={true} navigator={this.props.navigator} />;
+    // }
     return (
       <View style={styles.scroll}>
         <View style={styles.container} ref='search'>
@@ -115,12 +140,7 @@ class SearchPage extends Component {
           </TouchableHighlight>
           <Text style={errStyle}>{err}</Text>
           <View style={{marginTop: 170, flexDirection: 'row'}}>
-            <TouchableHighlight 
-                underlayColor='#2E3B4E' onPress={this.onEditProfilePressed.bind(this)}>
-              <Text style={styles.text}>
-                {editProfile}
-              </Text>
-            </TouchableHighlight>      		
+            {editProfile}
             <TouchableHighlight 
                 underlayColor='#2E3B4E' onPress={this.onReloadDBPressed.bind(this)}>
               <Text style={styles.text}>
