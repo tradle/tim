@@ -19,9 +19,10 @@ class VerificationButton extends Component {
     var resource = this.props.resource;
     var modelName = resource['_type'];
     var model = utils.getModel(modelName).value;
-
+    var me = utils.getMe();
+    var meId = me['_type'] + '_' + me.rootHash;
     var isMessage = model.interfaces  &&  model.interfaces.indexOf('tradle.Message') != -1;
-    return isMessage
+    return isMessage  &&  resource.from  &&  resource.from.id != meId
            ? <View style={{flex: 1, paddingRight: 10}}>
                <TouchableHighlight onPress={this.verify.bind(this)} underlayColor='#ffffff'>
                  <View style={[styles.button, {backgroundColor: '#7AAAC3', alignSelf: 'stretch'}]}>
