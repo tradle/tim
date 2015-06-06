@@ -71,20 +71,20 @@ class NewItem extends Component {
                 onPress={this.onSavePressed.bind(this)}>
               <Text style={[styles.buttonText]}>Save</Text>
             </TouchableHighlight>
-            <TouchableHighlight style={[styles.button, parentBG, {paddingRight:10, paddingLeft:10}]} underlayColor='#7AAAC3'
-                onPress={this.onSavePressed.bind(this, true)}>
-              <Text style={[styles.buttonText]}>Save + Add</Text>
-            </TouchableHighlight>
-            <TouchableHighlight style={styles.button} underlayColor='#ffffff'
-                onPress={this.onCancelPressed.bind(this)}>
-              <Text style={[styles.buttonText,{'color':'#2E3B4E'}]}>Cancel</Text>
-            </TouchableHighlight>
           </View>
         </View>
       </View>
       </ScrollView>
     );
   }
+            // <TouchableHighlight style={[styles.button, parentBG, {paddingRight:10, paddingLeft:10}]} underlayColor='#7AAAC3'
+            //     onPress={this.onSavePressed.bind(this, true)}>
+            //   <Text style={[styles.buttonText]}>Save + Add</Text>
+            // </TouchableHighlight>
+            // <TouchableHighlight style={styles.button} underlayColor='#ffffff'
+            //     onPress={this.onCancelPressed.bind(this)}>
+            //   <Text style={[styles.buttonText,{'color':'#2E3B4E'}]}>Cancel</Text>
+            // </TouchableHighlight>
 
 }
 
@@ -105,15 +105,16 @@ var styles = StyleSheet.create({
   button: {
     height: 36,
     flex: 1,
-    flexDirection: 'row',
+    width: 100,
+    // flexDirection: 'row',
     backgroundColor: '#ffffff',
     borderColor: '#6093ae',
     borderWidth: 1,
     borderRadius: 8,
     marginBottom: 10,
-    alignSelf: 'stretch',
+    // alignSelf: 'stretch',
     justifyContent: 'center',
-    margin: 10,
+    // margin: 10,
   },
   err: {
     paddingTop: 10,
