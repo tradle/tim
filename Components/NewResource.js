@@ -3,6 +3,8 @@
 var React = require('react-native');
 var utils = require('../utils/utils');
 var NewItem = require('./NewItem');
+var PhotoView = require('./PhotoView');
+// var FromToView = require('./FromToView');
 var SearchScreen = require('./SearchScreen');
 var ResourceView = require('./ResourceView');
 var ChatMessage = require('./ChatMessage');
@@ -31,7 +33,7 @@ class NewResource extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      resource: props.resource
+      resource: props.resource,
     }
   }
   componentDidMount() {
@@ -47,18 +49,16 @@ class NewResource extends Component {
       return;
     }
     // if registration or after editing your own profile 
-    if (this.state.isRegistration  ||  (params.me  &&  resource.rootHash === params.me.rootHash))
-      utils.setMe(params.me);
+    // if (this.state.isRegistration  ||  (params.me  &&  resource.rootHash === params.me.rootHash))
+    //   utils.setMe(params.me);
     var self = this;
     var title = utils.getDisplayName(resource, self.props.metadata.properties);
     var isMessage = this.props.metadata.interfaces  &&  this.props.metadata.interfaces.indexOf('tradle.Message') != -1;
     // When message created the return page is the chat window, 
     // When profile or some contact info changed/added the return page is Profile view page
-    if (isMessage) {
-      if (this.props.callback) 
-        this.props.callback('');
-    }
-    else {
+    if (this.props.callback) 
+      this.props.callback(resource);
+    else if (!isMessage) {
       this.props.navigator.replacePrevious({
         id: 3,
         title: title,
@@ -95,9 +95,9 @@ class NewResource extends Component {
       this.setState({ err: msg });
     }
     var resource = this.state.resource;
-    var isRegistration = !utils.getMe()  && this.props.metadata.id === 'tradle.Identity'  &&  (!resource || !resource.rootHash);
     if (!resource)
       resource = {'_type': this.props.metadata.id};
+    var isRegistration = !utils.getMe()  && this.props.metadata.id === 'tradle.Identity'  &&  (!resource || !resource.rootHash);
     if (isRegistration)
       this.state.isRegistration = true;
     Actions.addItem(value, resource, this.props.metadata, isRegistration);
@@ -159,6 +159,9 @@ class NewResource extends Component {
       }
     });
   }
+  // handleChange(prop, event) {
+  //   this.state.resource[prop] = event.nativeEvent.text;
+  // }
 
   render() {
     var props = this.props;
@@ -166,27 +169,21 @@ class NewResource extends Component {
     var err = this.state.err;
 
     var resource = this.state.resource;
-    var photo = resource  &&  resource.photos && resource.photos.length 
-              ? <Image source={{uri: resource.photos[0].url}} style={styles.image} /> 
-              : <View />;
-    photo = <View />
     var iKey = resource  ? resource['_type'] + '_' + resource.rootHash : null;
 
     var meta =  props.metadata;
     if (this.props.setProperty)
       this.state.resource[this.props.setProperty.name] = this.props.setProperty.value;
+    var data = {};
     var model = {};
     var arrays = [];
-    var data = {};
     extend(true, data, resource);
     var isMessage = meta.interfaces  &&  meta.interfaces.indexOf('tradle.Message') != -1;
     var showSendVerificationForm = false;
     if (isMessage) {
-      var len = resource.message  &&  utils.getMessageParts(resource.message).length;
-      if (len < 2) {
+      var len = resource.message  &&  utils.splitMessage(resource.message).length;
+      if (len < 2) 
         showSendVerificationForm = true;
-        data.message = '';
-      }
       else
         data.message = '';        
     }
@@ -197,7 +194,8 @@ class NewResource extends Component {
         chooser: this.chooser.bind(this),
         model: model,
         items: arrays,
-        callback: this.onSavePressed.bind(this)
+        onSubmitEditing: this.onSavePressed.bind(this)
+        // onEndEditing: this.handleChange.bind(this)
       });
     
     var Model = t.struct(model);
@@ -233,26 +231,30 @@ class NewResource extends Component {
         <TouchableHighlight style={styles.itemButton} underlayColor='#7AAAC3'
             onPress={self.onNewPressed.bind(self, bl)}>
           <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-            <Text style={styles.itemsText}>{bl.title}</Text>
+            <View style={{justifyContent: 'flex-start', flexDirection: 'row'}}>
+              <Icon name='fontawesome|plus'   size={20}  color='#7AAAC3'  style={styles.icon} />
+              <Text style={styles.itemsText}>{bl.title}</Text>
+            </View>
             {counter}
           </View>
         </TouchableHighlight>
       );
     });
+    var FromToView = require('./FromToView');
+    var style = isMessage ? {height: 570} : {height: 667};
     return (
-      <ScrollView
-        initialListSize={10}
-        pageSize={4}      
-      >
-      <View style={styles.container}>
-        <Text style={errStyle}>{err}</Text>
-        <View style={styles.photoBG}>
-          {photo}
-        </View>
-
-        <View style={{'padding': 20}}>
-          <Form ref='form' type={Model} options={options} value={data} />          
-          {arrayItems}
+    <View>  
+      <ScrollView style={style}>
+        <View style={styles.container}>
+          <Text style={errStyle}>{err}</Text>
+          <View style={styles.photoBG}>
+            <PhotoView resource={resource} />
+          </View>
+          <FromToView resource={resource} model={meta} navigator={this.props.navigator} />
+          <View style={{'padding': 20}}>
+            <Form ref='form' type={Model} options={options} value={data} />          
+            {arrayItems}
+          </View>
           <View style={styles.buttons}>
             <TouchableHighlight style={[styles.button, parentBG]} underlayColor='#7AAAC3'
                 onPress={this.onSavePressed.bind(this)}>
@@ -260,9 +262,9 @@ class NewResource extends Component {
             </TouchableHighlight>
           </View>
         </View>
-        <ChatMessage resource={resource} model={meta} />
-      </View>
       </ScrollView>
+      <ChatMessage resource={resource} model={meta} />
+    </View>
     );
   }
 }
@@ -274,13 +276,13 @@ var styles = StyleSheet.create({
     flex: 1,
   },
   buttons: { 
-    flex: 1,
-    flexDirection: 'row',
+    width: 100,
+    alignSelf: 'center'
   },
   itemsText: {
     fontSize: 18,
     color: '#2E3B4E',
-    alignSelf: 'center'
+    alignSelf: 'center',
   },
   itemsCounter: {
     borderColor: '#2E3B4E',
@@ -293,11 +295,10 @@ var styles = StyleSheet.create({
     height: 36,
     padding: 20,
     alignSelf: 'stretch',
-    // width: 150,
     borderColor: '#6093ae',
     borderWidth: 1,
     borderRadius: 8,
-    margin: 10,
+    marginTop: 7,
     justifyContent: 'center',
   },
   buttonText: {
@@ -313,7 +314,7 @@ var styles = StyleSheet.create({
     borderColor: '#6093ae',
     borderWidth: 1,
     borderRadius: 8,
-    alignSelf: 'stretch',
+    // alignSelf: 'stretch',
     justifyContent: 'center',
     margin: 10,
   },
@@ -324,7 +325,9 @@ var styles = StyleSheet.create({
   },
   icon: {
     width: 20,
-    height: 20
+    height: 20,
+    marginLeft: -5,
+    marginRight: 5,
   },
   err: {
     paddingTop: 30,
