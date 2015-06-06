@@ -7,6 +7,7 @@ var SearchBar = require('./SearchBar');
 var ResourceRow = require('./ResourceRow');
 var MessageRow = require('./MessageRow');
 var ResourceView = require('./ResourceView');
+var MessageView = require('./MessageView');
 var NewResource = require('./NewResource');
 var AddNewMessage = require('./AddNewMessage');
 var utils = require('../utils/utils');
@@ -170,8 +171,8 @@ class SearchScreen extends Component {
 
     var route = {
       title: newTitle,
-      id: 3,
-      component: ResourceView,
+      id: model.value.isInterface ? 5 : 3,
+      component: model.value.isInterface ? MessageView : ResourceView,
       parentMeta: model,
       passProps: {resource: resource},
     }
