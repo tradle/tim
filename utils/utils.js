@@ -73,7 +73,8 @@ var utils = {
     var models = this.getModels();
     var data = params.data;
     var chooser = params.chooser;
-    var callback = params.callback;
+    var onSubmitEditing = params.onSubmitEditing;
+    var onEndEditing = params.onEndEditing;
     var options = {};
     options.fields = {};
  
@@ -113,7 +114,7 @@ var utils = {
       var type = props[p].type;
       var formType = propTypesMap[type];
       // Don't show readOnly property in edit mode if not set
-      if (props[p].readOnly  &&  (type === 'date'  ||  !data  ||  !data[p]))
+      if (props[p].readOnly) //  &&  (type === 'date'  ||  !data  ||  !data[p]))
         continue;
 
       var label = props[p].title;
@@ -138,8 +139,12 @@ var utils = {
             options.fields[p].multiline = true;
           options.fields[p].autoCorrect = false;
         }
-        if (type === 'string'  ||  type === 'integer')
-          options.fields[p].onSubmitEditing = callback;
+        if (type === 'string'  ||  type === 'integer') {
+          if (onSubmitEditing) 
+            options.fields[p].onSubmitEditing = onSubmitEditing;
+          if (onEndEditing)
+            options.fields[p].onEndEditing = onEndEditing.bind({}, p);
+        }
       }
       else if (type === 'array') {
         props[p].name = p;
@@ -182,6 +187,22 @@ var utils = {
       
     }
     return options;
+  },
+  getFormattedDate(dateTime) {
+    var date = new Date(dateTime);
+    var dayDiff = moment(new Date()).dayOfYear() - moment(date).dayOfYear();
+    var val;
+    switch (dayDiff) {
+    case 0:
+      val = moment(date).fromNow();
+      break;
+    case 1:
+      val = moment(date).format('[yesterday], h:mA');
+      break;
+    default:      
+      val = moment(date).format('ddd, h:mA');
+    }
+    return val;
   },
   getCloneOf(prop, meta) {
     for (var p in meta) {
@@ -266,7 +287,7 @@ var utils = {
     }
     return val;
   },
-  getMessageParts(message) {
+  splitMessage(message) {
     var lBr = message.indexOf('[');          
     var msg;
     if (lBr == -1) 
