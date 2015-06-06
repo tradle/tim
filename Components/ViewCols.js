@@ -2,7 +2,6 @@
  
 var React = require('react-native');
 var utils = require('../utils/utils');
-var api = require('../api/api');
 
 var {
   StyleSheet,
@@ -45,7 +44,7 @@ class ViewCols extends Component {
           mapped.push(p);
           continue;
         }
-        var prop = api.getCloneOf(p, model.properties);
+        var prop = utils.getCloneOf(p, model.properties);
         if (prop)
           mapped.push(prop);
       }
