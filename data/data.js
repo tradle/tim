@@ -1,7 +1,7 @@
 'use strict'
 
-// var myId = 'b25da36eaf4b01b37fc2154cb1103eb5324a52fa'; // Jane Choi
-var myId = '31eb0b894cad3601adc76713d55a11c88e48b4a2'; // Kate Blair
+ // var myId = 'b25da36eaf4b01b37fc2154cb1103eb5324a52fa'; // Jane Choi
+// var myId = '31eb0b894cad3601adc76713d55a11c88e48b4a2'; // Kate Blair
 // var myId = '38980944449570d2783d7c8af5db8ca9463391f3'; // Sophia
 
 var models = [{
@@ -193,18 +193,25 @@ var models = [{
   ]
 },
 {
-   id: 'tradle.MyIdentity',
+   id: 'tradle.MyIdentities',
    type: 'object',
-   title: 'My Identity',
+   title: 'My Identities',
    properties: {
      _type: {
        type: 'string',
        readOnly: true
      },
-     id: {
+     currentIdentity: {
        type: 'object',
        ref: 'tradle.Identity',
        readOnly: true      
+     },
+     allIdentities: {
+       type: 'array',
+       items: {
+         type: 'object',
+         ref: 'tradle.Identity',
+       } 
      }
    },
    required: ['id']
@@ -396,6 +403,7 @@ var models = [{
      },
      'message': {
       'type': 'string',
+      'title': 'Description',
       'displayName': true,
      },
      'from': {
@@ -465,7 +473,7 @@ var models = [{
     'message', 'time'
   ],
   'viewCols': [
-    'message', 'from', 'to', 'time, photos'
+    'message', 'time, photos'
   ],
 },
 {
@@ -481,6 +489,7 @@ var models = [{
      },
      'message': {
       'type': 'string',
+      'title': 'Description',
       'displayName': true,
      },
      'from': {
@@ -549,7 +558,7 @@ var models = [{
     'message', 'time'
   ],
   'viewCols': [
-    'message', 'from', 'to', 'time', 'photos'
+    'message', 'time', 'photos'
   ],
 },
 {
@@ -565,6 +574,7 @@ var models = [{
      },
      'message': {
       'type': 'string',
+      'title': 'Description',
       'displayName': true,
      },
      'from': {
@@ -633,7 +643,7 @@ var models = [{
     'message', 'time'
   ],
   'viewCols': [
-    'message', 'from', 'to', 'time', 'photos'
+    'message', 'time', 'photos'
   ],
 },
 {
@@ -650,6 +660,7 @@ var models = [{
      'message': {
       'type': 'string',
       'displayName': true,
+      'title': 'Description',
      },
      'from': {
       'type': 'object',
@@ -717,7 +728,7 @@ var models = [{
     'message', 'time'
   ],
   'viewCols': [
-    'message', 'from', 'to', 'time', 'photos', 'blockchainUrl'
+    'message', 'time', 'photos', 'blockchainUrl'
   ],
 },
 {
@@ -734,6 +745,7 @@ var models = [{
      'message': {
       'type': 'string',
       'displayName': true,
+      'title': 'Description',
      },
      'blockchainUrl': {
        'type': 'string',      
@@ -767,6 +779,7 @@ var models = [{
       'type': 'string',
       'displayAs': ['street', ',', 'city', ',', 'region', 'postalCode'],
       'title': 'Address',
+      'skipLabel': true,
       'readOnly': true
     },
      'from': {
@@ -822,7 +835,7 @@ var models = [{
     'message', 'formattedAddress', 'time'
   ],
   'viewCols': [
-    'message', 'formattedAddress', 'from', 'to', 'blockchainUrl', 'time'
+    'message', 'formattedAddress', 'blockchainUrl', 'time'
   ],
 },
 {
@@ -840,6 +853,7 @@ var models = [{
      'message': {
       'type': 'object',
       'ref': 'tradle.Message',
+      'title': 'Description',
       'displayName': true,
      },
      'verifier': {
