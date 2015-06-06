@@ -4,6 +4,7 @@ var React = require('react-native');
 var utils = require('../utils/utils');
 var ArticleView = require('./ArticleView');
 var ResourceView = require('./ResourceView');
+var MessageView = require('./MessageView');
 var NewResource = require('./NewResource');
 var moment = require('moment');
 var extend = require('extend');
@@ -122,7 +123,7 @@ class MessageRow extends Component {
     var model = utils.getModel(resource['_type']).value;
     this.props.navigator.push({
       id: 3,
-      component: ResourceView,
+      component: MessageView,
       backButtonTitle: 'Back',
       // rightButtonTitle: 'Edit',
       // onRightButtonPress: {
@@ -166,19 +167,20 @@ class MessageRow extends Component {
         return;
       else if (properties[v].type === 'date') {
         style = styles.description
-        var date = new Date(resource[v]);
-        var dayDiff = moment(new Date()).dayOfYear() - moment(date).dayOfYear();
-        var val;
-        switch (dayDiff) {
-        case 0:
-          val = moment(date).fromNow();
-          break;
-        case 1:
-          val = moment(date).format('[yesterday], h:mA');
-          break;
-        default:      
-          val = moment(date).format('ddd, h:mA');
-        }
+        var val = utils.getFormattedDate(new Date(resource[v]));
+        // var date = new Date(resource[v]);
+        // var dayDiff = moment(new Date()).dayOfYear() - moment(date).dayOfYear();
+        // var val;
+        // switch (dayDiff) {
+        // case 0:
+        //   val = moment(date).fromNow();
+        //   break;
+        // case 1:
+        //   val = moment(date).format('[yesterday], h:mA');
+        //   break;
+        // default:      
+        //   val = moment(date).format('ddd, h:mA');
+        // }
         vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>)
       }
       else  {
@@ -195,7 +197,7 @@ class MessageRow extends Component {
           vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>)
         }
         else {
-          var msgParts = utils.getMessageParts(resource[v]);
+          var msgParts = utils.splitMessage(resource[v]);
           if (msgParts.length === 2) {
             var msgModel = utils.getModel(msgParts[1]);
             if (msgModel) {

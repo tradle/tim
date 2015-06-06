@@ -1,3 +1,5 @@
+'use strict'
+
 var React = require('react-native');
 var Actions = require('../Actions/Actions');
 var Store = require('../Store/Store');
