@@ -7,6 +7,7 @@ var ResourceTypesScreen = require('./Components/ResourceTypesScreen');
 var NewResource = require('./Components/NewResource');
 var NewItem = require('./Components/NewItem');
 var ResourceView = require('./Components/ResourceView');
+var MessageView = require('./Components/MessageView');
 var ArticleView = require('./Components/ArticleView');
 var utils = require('./utils/utils');
 var Icon = require('FAKIconImage');
@@ -114,6 +115,10 @@ class IdentityApp extends Component {
                   metadata={props.metadata}
                   returnRoute={props.returnRoute}
                   callback={props.callback} />;
+    case 5:
+      return <MessageView navigator={nav} 
+                  resource={props.resource}
+                  verify={props.verify} />;      
     case 6:
       return <NewItem navigator={nav} 
                   resource={props.resource} 
