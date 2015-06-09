@@ -10,12 +10,12 @@
      },
      "message": {
       "type": "string",
-      "title": "Description",
+      "title": "Description"
      },
      "from": {
       "type": "object",
       "readOnly": true,
-      "ref": "tradle.Identity",
+      "ref": "tradle.Identity"
      },
      "to": {
        "type": "object",
@@ -32,7 +32,7 @@
      },
      "time": {
        "type": "date",
-       "readOnly": true,
+       "readOnly": true
      },
     "photos": {
       "type": "array",
@@ -76,5 +76,5 @@
   ],
   "viewCols": [
     "message", "time, photos"
-  ],
+  ]
 }
