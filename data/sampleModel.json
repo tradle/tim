@@ -1,7 +1,7 @@
 {
   "id": "pgmemk.VerificationRequest",
   "type": "object",
-  "title": "Verification Request",
+  "title": "Ellen's Verification Request",
   "style": {"backgroundColor": "#Ffeeaa"},
   "properties": {
     "_type": {
