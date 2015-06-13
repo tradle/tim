@@ -3,7 +3,6 @@
 var React = require('react-native');
 var utils = require('../utils/utils');
 var ArticleView = require('./ArticleView');
-var ResourceView = require('./ResourceView');
 var MessageView = require('./MessageView');
 var NewResource = require('./NewResource');
 var moment = require('moment');
@@ -14,6 +13,7 @@ var {
   StyleSheet,
   Text,
   TouchableHighlight,
+  // LayoutAnimation,
   Component,
   View
 } = React;
@@ -22,7 +22,11 @@ class MessageRow extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      resource: this.props.resource
+      resource: this.props.resource,
+      // viewStyle: {
+      //   margin: 1,
+      // },
+      // cnt: 0
     }
   }
   render() {
@@ -59,24 +63,34 @@ class MessageRow extends Component {
       var fromHash = resource[utils.getCloneOf('tradle.Message.from', model.properties)].id;
       if (isMyMessage) 
         addStyle = styles.myCell;
-      else
-        addStyle = {padding: 5, borderRadius: 10};
+      else {
+        if (!model.style)
+          addStyle = {padding: 5, borderRadius: 10, borderColor: '#cccccc', backgroundColor: '#ffffff'};
+        else
+          addStyle = {padding: 5, borderRadius: 10};
+      }
       if (model.style)
-        addStyle = [addStyle, model.style];
+        addStyle = [addStyle, {backgroundColor: '#efffe5'}]; //model.style];
         // viewCols = <View style={styles.myCell}>{viewCols}</View>
     }
     var properties = model.properties;
     var verPhoto;
-    if (properties.photos) {
+    if (!isModel  &&  properties.photos) {
       if (resource.photos)
         verPhoto = <Image source={{uri: (resource.photos[0].url.indexOf('http') == 0 ? resource.photos[0].url : 'http://' + resource.photos[0].url)}} style={styles.msgImage} />
       else
         verPhoto = <View style={{height: 0, width:0}} />
     }
-    var rowStyle = isModel && model.style ? [styles.row, [model.style]] : styles.row;
+    else if (isModel  &&  this.props.owner  &&  this.props.owner.photos) {
+      var ownerImg = this.props.owner.photos[0].url;
+      var url = ownerImg.indexOf('http') == 0 ? ownerImg : 'http://' + ownerImg;
+      verPhoto = <Image source={{uri: ownerImg}} style={styles.ownerImage} />
+    }
+    var rowStyle = isModel && model.style ? [styles.row, {backgroundColor: '#efffe5'}] : styles.row;
+    // var rowStyle = isModel && model.style ? [styles.row, [model.style]] : styles.row;
 
     return (
-      <View>
+      <View style={{margin:1, backgroundColor: '#f7f7f7' }}>
         <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor={isMyMessage ? '#D7E6ED' : '#ffffff'}>
           <View style={[rowStyle, {flexDirection: 'row'}]}>
             {photo}
@@ -117,12 +131,13 @@ class MessageRow extends Component {
       }
     });    
   }
+
   verify(event) {
     var self = this;
     var resource = self.props.resource;
     var model = utils.getModel(resource['_type']).value;
     this.props.navigator.push({
-      id: 3,
+      id: 5,
       component: MessageView,
       backButtonTitle: 'Back',
       // rightButtonTitle: 'Edit',
@@ -156,9 +171,14 @@ class MessageRow extends Component {
     var properties = model.properties;
     var onPressCall;
     viewCols.forEach(function(v) {
+      var isSimpleMessage = model.id === 'tradle.SimpleMessage';
       var style = styles.resourceTitle; //(first) ? styles.resourceTitle : styles.description;
-      if (isMyMessage)
+      if (isMyMessage) {
         style = [style, {justifyContent: 'flex-end', paddingLeft: 5}];
+        if (isSimpleMessage)
+          style.push({color: '#ffffff'});
+      }
+
       if (properties[v].ref) {
         if (resource[v]) 
           vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{resource[v].title}</Text>);
@@ -167,20 +187,9 @@ class MessageRow extends Component {
         return;
       else if (properties[v].type === 'date') {
         style = styles.description
+        if (isMyMessage  &&  isSimpleMessage)
+          style = [style, {color: '#eeeeee'}];
         var val = utils.getFormattedDate(new Date(resource[v]));
-        // var date = new Date(resource[v]);
-        // var dayDiff = moment(new Date()).dayOfYear() - moment(date).dayOfYear();
-        // var val;
-        // switch (dayDiff) {
-        // case 0:
-        //   val = moment(date).fromNow();
-        //   break;
-        // case 1:
-        //   val = moment(date).format('[yesterday], h:mA');
-        //   break;
-        // default:      
-        //   val = moment(date).format('ddd, h:mA');
-        // }
         vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>)
       }
       else  {
@@ -222,6 +231,28 @@ class MessageRow extends Component {
       extend(renderedRow, vCols);
     return onPressCall ? onPressCall : (model.id === 'tradle.SimpleMessage') ? null : this.props.onSelect;
   }
+
+  // animateViewLayout() {
+  //   var resource = this.props.resource;
+  //   if (resource['_type'])
+  //     return;
+
+  //   LayoutAnimation.configureNext(
+  //     LayoutAnimation.Presets.easeInEaseOut,
+  //     () => {
+  //       console.log('layout animation done.');
+  //       // this.addWrapText();
+  //     },
+  //     (error) => { throw new Error(JSON.stringify(error)); }
+  //   );
+
+  //   this.setState({
+  //     viewStyle: {
+  //       margin: this.state.cnt > 0 ? 0 : (this.state.viewStyle.margin > 1 ? 1 : 2),
+  //       cnt: this.state.cnt++
+  //     }
+  //   });
+  // }
 }
 
 var styles = StyleSheet.create({
@@ -245,7 +276,7 @@ var styles = StyleSheet.create({
   },
   row: {
     alignItems: 'center',
-    backgroundColor: 'white',
+    backgroundColor: '#f7f7f7',
     flexDirection: 'row',
     padding: 5,
   },
@@ -260,7 +291,8 @@ var styles = StyleSheet.create({
     marginLeft: 30,
     justifyContent: 'flex-end', 
     borderRadius: 10, 
-    backgroundColor: '#D7E6ED'
+    backgroundColor: '#569bff',
+    color: '#ffffff'
   },
   msgImage: {
     backgroundColor: '#dddddd',
@@ -269,7 +301,18 @@ var styles = StyleSheet.create({
     width: 50,
     borderRadius: 25,
     borderColor: '#cccccc',
-    borderWidth: 2
+    borderWidth: 1
+  },
+  ownerImage: {
+    backgroundColor: '#dddddd',
+    height: 30,
+    width: 30,
+    marginTop: -5,
+    position: 'absolute',
+    right: 10,
+    borderRadius: 15,
+    borderColor: '#cccccc',
+    borderWidth: 1
   },
   photo: {
     backgroundColor: '#dddddd',

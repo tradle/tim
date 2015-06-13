@@ -2,9 +2,6 @@
  
 var React = require('react-native');
 var utils = require('../utils/utils');
-var ArticleView = require('./ArticleView');
-var SearchScreen = require('./SearchScreen');
-var MoreLikeThis = require('./MoreLikeThis');
 
 var {
   StyleSheet,

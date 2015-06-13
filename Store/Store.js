@@ -10,6 +10,7 @@ var sha = require('stable-sha1');
 var utils = require('../utils/utils');
 var level = require('react-level');
 var promisify = require('q-level');
+var Sublevel = require('level-sublevel')
 
 var IDENTITY_MODEL = 'tradle.Identity';
 var MY_IDENTITY_MODEL = 'tradle.MyIdentity';
@@ -17,8 +18,9 @@ var RESOURCE_TYPE = '_type';
 
 var models = {};
 var list = {};
-var db;
-
+var idenities = {};
+var db; //, identityDb, messagesDb;
+var isLoaded;
 var me;
 var ready;
 
@@ -27,8 +29,16 @@ var Store = Reflux.createStore({
   listenables: [Actions],
   // this will be called by all listening components as they register their listeners
   init() {
-    db = promisify(level('TiM.db', { valueEncoding: 'json' }));
+    var ldb = level('TiM.db', { valueEncoding: 'json' });
+    db = promisify(ldb);
+
+    // var sdb = promisify(Sublevel(ldb));
+    // identityDb = sdb.sublevel(IDENTITY_MODEL);
+
     this.ready = this.loadResources()
+    .then(function(){
+      isLoaded = true;
+    })
     .catch(function(err) {
       err = err;
     });
@@ -78,19 +88,87 @@ var Store = Reflux.createStore({
   onGetItem(key) {
     this.trigger({ resource: list[key].value, action: 'getItem'});
   },
-  onAddNewIdentity(resource) {
-    var newIdentity = resource['_type'] + '_' + resource.rootHash;
-    me.allIdentities.push(newIdentity);
-    list[MY_IDENTITY_MODEL + '_1'] = me;
-    var self = this;
-    db.put(MY_IDENTITY_MODEL + '_1', me)
+  onShowIdentityList() {
+    if (sampleData.getMyId()) {
+      this.trigger({action: 'showIdentityList', list: []});    
+      return; 
+    }
+    var allIdentities = list[MY_IDENTITY_MODEL + '_1'].value.allIdentities;
+    var meId = me['_type'] + '_' + me.rootHash;
+    var result = [];
+    if (allIdentities) {
+      for (var id of allIdentities)
+        if (id.id != meId)
+          result.push(list[id.id].value);
+    }
+    this.trigger({action: 'showIdentityList', list: result});    
+  },
+  
+  onChangeIdentity(newMe) {
+    var myIdentities = list[MY_IDENTITY_MODEL + '_1'].value;
+    myIdentities.currentIdentity = newMe['_type'] + '_' + newMe.rootHash;
+      var self = this;
+    db.put(MY_IDENTITY_MODEL + '_1', myIdentities)
     .then(function() {
+      return self.loadResources()
+    })
+    .then(function() {
+      me = newMe;
+      list = {};
+      return self.loadResources()
+            .then(function() {
+              var result = self.searchResources('', IDENTITY_MODEL, me);
+              self.trigger({action: 'changeIdentity', list: result, me: me});
+            });
+    })
+    .catch(function(err) {
+      err = err;
+    });
+  },
+
+  onAddNewIdentity(resource) {
+    var newIdentity = {
+      id: resource['_type'] + '_' + resource.rootHash, 
+      title: utils.getDisplayName(resource, this.getModel(resource['_type']).value.properties)
+    };
+    var myIdentity = list[MY_IDENTITY_MODEL + '_1'].value;
+    myIdentity.allIdentities.push(newIdentity);
+    var self = this;
+    db.put(MY_IDENTITY_MODEL + '_1', myIdentity)
+    .then(function() {
+      list[MY_IDENTITY_MODEL + '_1'].value = myIdentity;
       self.trigger({action: 'addNewIdentity', resource: me});
     })
     .catch (function(err) {
       err = err;
     })
   },
+  onRemoveIdentity(resource) {
+    var myIdentity = list[MY_IDENTITY_MODEL + '_1'].value;
+    var iKey = resource['_type'] + '_' + resource.rootHash;
+    var allIdentities = myIdentity.allIdentities;
+    for (var i=0; i<allIdentities.length; i++)
+      if (allIdentities[i].id === iKey) {
+        allIdentities.splice(i, 1);
+        break;
+      }
+    
+    var batch = [];
+    batch.push({type: 'del', key: iKey, value: resource});
+    batch.push({type: 'put', key: MY_IDENTITY_MODEL + '_1', value: myIdentity});
+
+    var self = this;
+    db.batch(batch)
+    .then(function() {
+      delete list[resource['_type'] + '_' + resource.rootHash];
+      self.trigger({action: 'removeIdentity', resource: resource});
+    })
+    .catch (function(err) {
+      err = err;
+    })
+
+  },
+
   getItem(resource) {
     var modelName = resource[RESOURCE_TYPE];
     var meta = this.getModel(modelName).value;
@@ -136,6 +214,72 @@ var Store = Reflux.createStore({
       }
     }
     return refProps;
+  },
+  onAddModelFromUrl(url) {
+    var self = this;
+    var model;
+    return fetch(url)
+    .then((response) => response.json())
+    .then(function(responseData) {
+      model = responseData;
+      var props = model.properties;
+      
+      var err = ''; 
+      var id = model.id;
+
+      if (!id) 
+        err += '"id" is required. Could be something like "myGithubId.nameOfTheModel"';
+      var key = 'model_' + id;
+      // if (models[key])
+      //   err += '"id" is not unique';
+      var message = model.message;
+      if (!message  &&  props.message)
+        props.message.cloneOf = 'tradle.Message.message';
+      var from = props.from;
+      if (!from)
+        err += '"from" is required. Should have {ref: "tradle.Identity"}';
+      else
+        props.from.cloneOf = 'tradle.Message.from';
+
+      var to = props.to;
+      if (!to)
+        err += '"to" is required. Should have {ref: "tradle.Identity"}';
+      else
+        props.to.cloneOf = 'tradle.Message.to';
+      var time = props.time;
+      if (!time)
+        err += '"time" is required';
+      else
+        props.time.cloneOf = 'tradle.Message.time';
+
+      if (err.length) {
+        self.trigger({action: 'newModelAdded', err: err});
+        return;
+      }
+      model.interfaces = [];
+      model.interfaces.push('tradle.Message');
+      var rootHash = sha(model);
+      model.rootHash = rootHash;
+      model.owner = {
+        key: IDENTITY_MODEL + '_' + me.rootHash,
+        title: utils.getDisplayName(me, self.getModel(IDENTITY_MODEL).value.properties),
+        photos: me.photos
+      }
+      return db.put(key, model);
+    })
+    .then(function() {
+      var key = 'model_' + model.id;
+
+      models[key] = {
+        key: key,
+        value: model
+      };
+      self.trigger({action: 'newModelAdded', newModel: model});
+    })     
+    .catch(function(err) {
+      err = err;
+    })
+    .done();
   },
   onAddItem(value, resource, meta, isRegistration) {
     // Check if there are references to other resources
@@ -242,26 +386,51 @@ var Store = Reflux.createStore({
   },
   onReloadDB() {
     var self = this;
+    isLoaded = false;
+    // this.clearDb()
+    // .then(function() {
+    //   list = {};
+    //   return self.loadDB();
+    // })
+    // .then(function() {
+    //   self.trigger({action: 'reloadDB', list: list});
+    // })
     this.clearDb()
     .then(function() {
       list = {};
-      return self.loadDB();
+      models = {};
+      me = null;
+      return self.loadModels();
     })
     .then(function() {
-      self.trigger({action: 'reloadDB', list: list});
+      self.trigger({action: 'reloadDB', models: models});
     })
     .catch(function(err) {
       err = err;
     });
   }, 
   onList(query, modelName, resource, isAggregation) {
+    if (isLoaded) 
+      this.getList(query, modelName, resource, isAggregation);
+    else {
+      var self = this;
+      this.loadDB()
+      .then(function() {
+        isLoaded = true;
+        if (modelName) 
+        self.getList(query, modelName, resource, isAggregation);
+      });
+    }
+  },
+  getList(query, modelName, resource, isAggregation) {
     var result;
     result = this.searchResources(query, modelName, resource);
     if (isAggregation) 
       result = this.getDependencies(result);
-    this.trigger({action: 'list', list: result, isAggregation: isAggregation});      
-  },
+    var model = this.getModel(modelName).value;
 
+    this.trigger({action: model.isInterface  ||  model.interfaces ? 'messageList' : 'list', list: result, isAggregation: isAggregation});              
+  },
   searchResources(query, modelName, to) {
     var foundResources = {};
     var meta = this.getModel(modelName).value;
@@ -323,6 +492,14 @@ var Store = Reflux.createStore({
          foundResources[key] = r; 
        }
     }
+    if (me  &&  modelName === IDENTITY_MODEL  &&  !sampleData.getMyId()) {
+      var myIdentities = list[MY_IDENTITY_MODEL + '_1'].value.allIdentities;
+      for (var meId of myIdentities) {
+        if (foundResources[meId.id])
+           delete foundResources[meId.id];
+      }
+    }
+
     var result = utils.objectToArray(foundResources);
     if (isMessage) {
       result.sort(function(a,b) {
@@ -353,7 +530,11 @@ var Store = Reflux.createStore({
       value.rootHash = sha(value);
     var iKey = modelName + '_' + value.rootHash;
     var batch = [];
-    batch.push({type: 'put', key: iKey, value: value});
+    // if (value[RESOURCE_TYPE] == IDENTITY_MODEL)
+    //   batch.push({type: 'put', key: iKey, value: value, prefix: identityDb});
+    // else
+      batch.push({type: 'put', key: iKey, value: value});
+
     var mid;
     
     if (isRegistration) {
@@ -364,9 +545,11 @@ var Store = Reflux.createStore({
           id: iKey, 
           title: utils.getDisplayName(value, models['model_' + modelName].value.properties)
         }]};
-      batch.push({type: 'put', key: MY_IDENTITY_MODEL + '_1', value: mid});
+      batch.push({type: 'put', key: MY_IDENTITY_MODEL + '_1', value: mid});///
     }
+
     var self = this;
+
     db.batch(batch)
     .then(function(results) {
       if (isRegistration)
@@ -376,14 +559,14 @@ var Store = Reflux.createStore({
     .then(function(value) {
       list[iKey] = {key: iKey, value: value};
       if (mid) 
-        list[MY_IDENTITY_MODEL + '_' + mid.rootHash] = mid;
+        list[MY_IDENTITY_MODEL + '_1'] = {key: MY_IDENTITY_MODEL + '_1', value: mid};
     //   return self.loadDB(db);
     // })    
     // .then(function() {
-      var  params = {action: 'addItem', list: list, resource: value};
+      var  params = {action: 'addItem', resource: value};
       // registration or profile editing
       if (isRegistration  ||  value.rootHash === me.rootHash)
-        params.me = me;
+        params.me = value;
       self.trigger(params);
     })
     .catch(function(err) {
@@ -423,6 +606,10 @@ var Store = Reflux.createStore({
           // formatted: contact.firstName + ' ' + contact.lastName,          
           contact: contactInfo
         };
+        var me = list[MY_IDENTITY_MODEL + '_1'];
+        if (me) 
+          newIdentity.owner = {id: IDENTITY_MODEL + '_' + me.rootHash, title: utils.getDisplayName(me, models['model_' + IDENTITY_MODEL])};
+        
         if (contact.thumbnailPath  &&  contact.thumbnailPath.length)
           newIdentity.photos = [{type: 'address book', url: contact.thumbnailPath}];
         var phoneNumbers = contact.phoneNumbers;
@@ -442,6 +629,7 @@ var Store = Reflux.createStore({
           batch.push({type: 'put', key: key, value: newIdentity});
       });      
       if (batch.length)
+        // identityDb.batch(batch, function(err, value) {
         db.batch(batch, function(err, value) {
           if (err) 
             dfd.reject();
@@ -467,7 +655,7 @@ var Store = Reflux.createStore({
        if (data.key.indexOf('model_') === 0)
          models[data.key] = data;
        else {
-         if (!myId  &&  data.key.indexOf(MY_IDENTITY_MODEL + '_') === 0) {
+         if (!myId  &&  data.key === MY_IDENTITY_MODEL + '_1') {
            myId = data.value.currentIdentity;
            if (list[myId])
              me = list[myId].value;
@@ -483,7 +671,12 @@ var Store = Reflux.createStore({
     .on('end', function() {
       console.log('Stream ended');
       if (self.isEmpty(models))
-        return self.loadDB();
+        if (me)
+          return self.loadDB();
+        else {
+          isLoaded = false;
+          return self.loadModels();
+        }
     })      
     .on('error', function(err) {
       console.log('err: ' + err);
@@ -514,7 +707,11 @@ var Store = Reflux.createStore({
         r.rootHash = sha(r);
 
       var key = r[RESOURCE_TYPE] + '_' + r.rootHash;
-      batch.push({type: 'put', key: key, value: r});
+      // if (r[RESOURCE_TYPE] === IDENTITY_MODEL)
+      //   batch.push({type: 'put', key: key, value: r, prefix: identityDb});
+      // else
+        batch.push({type: 'put', key: key, value: r});
+
     });
     var self = this;
     return db.batch(batch)
@@ -524,6 +721,24 @@ var Store = Reflux.createStore({
             err = err;
             });
   },
+  loadModels() {
+    var batch = [];
+
+    sampleData.getModels().forEach(function(m) {
+      if (!m.rootHash)
+        m.rootHash = sha(m);
+      batch.push({type: 'put', key: 'model_' + m.id, value: m});
+    });
+    var self = this;
+    return db.batch(batch)
+          .then(function() {
+            return self.loadResources();
+          })
+          .catch(function(err) {
+            err = err;
+            });
+  },
+
   clearDb() {  
     var self = this;
     return db.createReadStream()

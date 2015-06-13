@@ -1,14 +1,16 @@
 'use strict'
 
 var React = require('react-native');
-var SearchScreen = require('./Components/SearchScreen');
+var ResourceList = require('./Components/ResourceList');
 var SearchPage = require('./Components/SearchPage');
 var ResourceTypesScreen = require('./Components/ResourceTypesScreen');
 var NewResource = require('./Components/NewResource');
 var NewItem = require('./Components/NewItem');
 var ResourceView = require('./Components/ResourceView');
 var MessageView = require('./Components/MessageView');
+var MessagesList = require('./Components/MessagesList');
 var ArticleView = require('./Components/ArticleView');
+var IdentitiesList = require('./Components/IdentitiesList');
 var utils = require('./utils/utils');
 var Icon = require('FAKIconImage');
 
@@ -126,10 +128,25 @@ class IdentityApp extends Component {
                   onAddItem={props.onAddItem}
                   parentMeta={props.parentMeta}    />;      
     case 7:
-      return <ArticleView navigator={nav} url={route.passProps.url} />;      
+      return <ArticleView navigator={nav} url={props.url} />;      
+    case 8:
+      return <IdentitiesList navigator={nav} 
+                  filter={props.filter} 
+                  list={props.list}
+                  callback={props.callback}
+                  modelName={props.modelName} />;
+    case 11:
+      return <MessagesList navigator={nav} 
+                  filter={props.filter} 
+                  resource={props.resource}
+                  prop={props.prop}
+                  returnRoute={props.returnRoute}
+                  callback={props.callback}
+                  isAggregation={props.isAggregation}
+                  modelName={props.modelName} />;
     case 10:  
     default: // 10
-      return <SearchScreen navigator={nav} 
+      return <ResourceList navigator={nav} 
                   filter={props.filter} 
                   resource={props.resource}
                   prop={props.prop}
@@ -347,7 +364,7 @@ React.AppRegistry.registerComponent('Identity', function() { return IdentityApp 
   //       initialRoute={{
   //         title: 'All Contacts',
   //         titleTextColor: '#7AAAC3',
-  //         component: SearchScreen,
+  //         component: ResourceList,
   //         passProps: passProps
   //       }} />
   //   }

@@ -1,16 +1,14 @@
 'use strict';
 
 var React = require('react-native');
-var reactMixin = require('react-mixin');
 var SearchBar = require('./SearchBar');
-// var TimerMixin = require('react-timer-mixin');
-var ResourceRow = require('./ResourceRow');
-var MessageRow = require('./MessageRow');
-var ResourceView = require('./ResourceView');
 var MessageView = require('./MessageView');
+var NoResources = require('./NoResources');
 var NewResource = require('./NewResource');
+var ResourceTypesScreen = require('./ResourceTypesScreen');
 var AddNewMessage = require('./AddNewMessage');
 var utils = require('../utils/utils');
+var reactMixin = require('react-mixin');
 var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
@@ -22,20 +20,11 @@ var {
   ListView,
   Component,
   StyleSheet,
-  Text,
-  TouchableHighlight,
+  Navigator,
   View,
 } = React;
 
-var resultsCache = {
-  dataForQuery: {},
-  nextPageNumberForQuery: {},
-  totalForQuery: {},
-};
-
-var LOADING = {};
-
-class SearchScreen extends Component {
+class MessagesList extends Component {
   constructor(props) {
     super(props);
     this.timeoutID = null;
@@ -57,8 +46,16 @@ class SearchScreen extends Component {
   componentDidMount() {
     this.listenTo(Store, 'onListUpdate');
   }
+
   onListUpdate(params) {
-    if (!params.list  ||  params.error || params.isAggregation !== this.props.isAggregation)
+    if (params.error)
+      return;
+    if (params.action === 'addItem') {
+      Actions.list(this.state.filter, this.props.modelName, this.props.resource);
+      return;      
+    }
+
+    if (params.action !== 'messageList' ||  !params.list || params.isAggregation !== this.props.isAggregation)
       return;
     var list = params.list;
     if (list.length || this.state.filter.length) {
@@ -73,14 +70,10 @@ class SearchScreen extends Component {
           return;
       }
       this.setState({
-        dataSource: this.getDataSource(list),
+        dataSource: this.state.dataSource.cloneWithRows(list),
         isLoading: false
       })
     }
-  }
-
-  getDataSource(resources) {
-    return this.state.dataSource.cloneWithRows(resources);
   }
 
   selectResource(resource) {
@@ -88,71 +81,29 @@ class SearchScreen extends Component {
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     var model = utils.getModel(this.props.modelName);
 
-    if (model.value.isInterface) {
-      if (resource['_type']) {
-        this._selectResource(resource);
-        return;
-      }
-      var props = {
-        metadata: utils.getModel(resource.id).value,
-        resource: {
-          '_type': this.props.modelName, 
-          'from': me,
-          'to': this.props.resource
-        }
-      };
-      if (this.props.returnRoute)
-        props.returnRoute = this.props.returnRoute;
-
-      this.props.navigator.replace({
-        id: 4,
-        title: resource.title,
-        component: NewResource,
-        titleTextColor: '#7AAAC3',
-        passProps: props
-      });
-      return;
-    }
-    if (me.rootHash === resource.rootHash  ||  
-       (this.props.resource  &&  me.rootHash === this.props.resource.rootHash  && this.props.prop)) {
+    if (resource['_type']) {
       this._selectResource(resource);
       return;
     }
+    // var props = {
+    //   metadata: utils.getModel(resource.id).value,
+    //   resource: {
+    //     '_type': this.props.modelName, 
+    //     'from': me,
+    //     'to': this.props.resource
+    //   }
+    // };
+    // if (this.props.returnRoute)
+    //   props.returnRoute = this.props.returnRoute;
 
-    var title = resource.firstName; //utils.getDisplayName(resource, model.value.properties);
-    var modelName = 'tradle.Message';
-    var self = this;
-    var route = {
-      title: title,
-      component: SearchScreen,
-      id: 10,
-      passProps: {
-        resource: resource, 
-        filter: '',
-        modelName: modelName,
-      },
-      rightButtonTitle: 'Profile', //'fontawesome|user',
-      onRightButtonPress: {
-        title: title,
-        id: 3,
-        component: ResourceView,
-        titleTextColor: '#7AAAC3',
-        rightButtonTitle: 'Edit',
-        onRightButtonPress: {
-          title: title,
-          id: 4,
-          component: NewResource,
-          titleTextColor: '#7AAAC3',
-          passProps: {
-            metadata: utils.getModel(resource['_type']).value,
-            resource: resource
-          }
-        },
+    // this.props.navigator.replace({
+    //   id: 4,
+    //   title: resource.title,
+    //   component: NewResource,
+    //   titleTextColor: '#7AAAC3',
+    //   passProps: props
+    // });
 
-        passProps: {resource: resource}
-      }
-    }
-    this.props.navigator.push(route);
   }
 
   _selectResource(resource) {
@@ -172,31 +123,9 @@ class SearchScreen extends Component {
     var route = {
       title: newTitle,
       id: model.value.isInterface ? 5 : 3,
-      component: model.value.isInterface ? MessageView : ResourceView,
+      component: MessageView,
       parentMeta: model,
       passProps: {resource: resource},
-    }
-    // Edit resource
-    var me = utils.getMe();
-    if (me  &&  this.props.prop) {
-      this.props.callback(this.props.prop, resource); // HACK for now
-      this.props.navigator.popToRoute(this.props.returnRoute);
-      return;
-    }
-    if (me  &&  !model.value.isInterface  &&  (resource.rootHash === me.rootHash  ||  resource['_type'] !== 'tradle.Identity')) {
-      var self = this ;
-      route.rightButtonTitle = 'Edit';
-      route.onRightButtonPress = /*() =>*/ {
-        // self.props.navigator.push({
-        title: 'Edit',
-        id: 4,
-        component: NewResource,
-        titleTextColor: '#7AAAC3',
-        passProps: {
-          metadata: utils.getModel(resource['_type']).value,
-          resource: me
-        }
-      };
     }
     this.props.navigator.push(route);
   }
@@ -204,9 +133,6 @@ class SearchScreen extends Component {
   onSearchChange(event) {
     var filter = event.nativeEvent.text.toLowerCase();
     Actions.list(filter, this.props.modelName, this.props.resource);
-
-    // this.clearTimeout(this.timeoutID);
-    // this.timeoutID = this.setTimeout(() => this.searchResources(filter), 100);
   }
 
   renderRow(resource)  {
@@ -214,27 +140,23 @@ class SearchScreen extends Component {
     var isMessage = model.interfaces  &&  model.interfaces.indexOf('tradle.Message') != -1;
     var isAggregation = this.props.isAggregation; 
     var me = utils.getMe();
-    return isMessage 
-     ? ( <MessageRow 
-        onSelect={() => this.selectResource(resource)}
+    var MessageRow = require('./MessageRow');
+    return  (
+      <MessageRow 
+        onSelect={this.selectResource.bind(this, resource)}
         resource={resource}
         isAggregation={isAggregation}
         navigator={this.props.navigator}
         to={isAggregation ? resource.to : this.props.resource} />
-      )
-    : (
-      <ResourceRow
-        onSelect={() => this.selectResource(resource)}
-        resource={resource} />
-    );
+      );
   }
   addedMessage(text) {
     Actions.list('', this.props.modelName, this.props.resource);
   }
 
   render() {
-    if (this.state.isLoading)
-      return <View />
+    if (this.state.isLoading) 
+      return <View/>
     var content;
     if (this.state.dataSource.getRowCount() === 0)
       content =  <NoResources
@@ -273,6 +195,7 @@ class SearchScreen extends Component {
            ? <AddNewMessage navigator={this.props.navigator} 
                             resource={this.props.resource} 
                             modelName={this.props.modelName} 
+                            onAddNewPressed={this.onAddNewPressed.bind(this)}
                             callback={this.addedMessage.bind(this)} />
            : <View></View>;
     return (
@@ -290,32 +213,52 @@ class SearchScreen extends Component {
     );
   }
 
-}
-// reactMixin(SearchScreen.prototype, TimerMixin);
-reactMixin(SearchScreen.prototype, Reflux.ListenerMixin);
-class NoResources extends Component {
-  render() {
-    var text = '';
-    if (this.props.filter) {
-      text = `No results for “${this.props.filter}”`;
-    } else if (!this.props.isLoading) {
-      // If we're looking at the latest resources, aren't currently loading, and
-      // still have no results, show a message
-      text = 'No ' + this.props.title + ' were found';
-    }
-    return (
-      <View style={[styles.container, styles.centerText]}>
-        <Text style={styles.NoResourcesText}>{text}</Text>
-      </View>
-    );
-  }
+  onAddNewPressed() {
+    var modelName = this.props.modelName;
+    var model = utils.getModel(modelName).value;
+    var isInterface = model.isInterface;
+    if (!isInterface) 
+      return;
 
+    var self = this;
+    var currentRoutes = self.props.navigator.getCurrentRoutes();
+    self.props.navigator.push({
+      title: utils.makeLabel(model.title) + ' type',
+      id: 2,
+      component: ResourceTypesScreen,
+      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      backButtonTitle: 'Chat',
+      passProps: {
+        resource: self.props.resource, 
+        returnRoute: currentRoutes[currentRoutes.length - 1],
+        modelName: modelName,
+        callback: this.props.callback
+      },
+      rightButtonTitle: 'ion|plus',
+      onRightButtonPress: {
+        id: 4,
+        title: 'New model url',
+        component: NewResource,
+        backButtonTitle: 'Back',
+        titleTextColor: '#7AAAC3',
+        passProps: {
+          metadata: utils.getModel('tradle.NewMessageModel').value,
+          callback: this.modelAdded.bind(this)
+        }        
+      }
+    });
+  }
+  modelAdded(resource) {
+    if (resource.url) 
+      Actions.addModelFromUrl(resource.url);    
+  }  
 }
+reactMixin(MessagesList.prototype, Reflux.ListenerMixin);
 
 var styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: '#f7f7f7',
   },
   centerText: {
     alignItems: 'center',
@@ -327,14 +270,7 @@ var styles = StyleSheet.create({
   separator: {
     height: 1,
     backgroundColor: '#cccccc',
-  },
-  spinner: {
-    width: 30,
-  },
-  scrollSpinner: {
-    marginVertical: 20,
-  },
+  }
 });
-
-module.exports = SearchScreen;
+module.exports = MessagesList;
 

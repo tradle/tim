@@ -7,8 +7,12 @@ var Actions = Reflux.createActions([
   'addMessage',
   'getItem',
   'addNewIdentity',
+  'removeIdentity',
+  'showIdentityList',
+  'changeIdentity',
   'reloadDB',
   'list',
+  'addModelFromUrl',
   'start'
   // 'messageList',
   // 'getMe',

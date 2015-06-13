@@ -1,7 +1,7 @@
 'use strict'
 
- // var myId = 'b25da36eaf4b01b37fc2154cb1103eb5324a52fa'; // Jane Choi
-// var myId = '31eb0b894cad3601adc76713d55a11c88e48b4a2'; // Kate Blair
+// var myId = 'b25da36eaf4b01b37fc2154cb1103eb5324a52fa'; // Jane Choi
+var myId = '31eb0b894cad3601adc76713d55a11c88e48b4a2'; // Kate Blair
 // var myId = '38980944449570d2783d7c8af5db8ca9463391f3'; // Sophia
 
 var models = [{
@@ -12,6 +12,12 @@ var models = [{
     '_type': {
       'type': 'string',
       'readOnly': true
+    },
+    'owner': {
+      type: 'object',
+      ref: 'tradle.Identity',
+      description: 'Owner of the contact list',
+      readOnly: true
     },
     'contact': {
       'type': 'array',
@@ -349,6 +355,22 @@ var models = [{
   ],
 },
 {
+  id: 'tradle.NewMessageModel',
+  type: 'object',
+  title: 'New message model',
+  properties: {
+    '_type': {
+      'type': 'string',
+      'readOnly': true
+     },
+     'url': {
+      'type': 'string',
+      'displayName': true
+     }
+  },
+  required: ['url'] 
+},
+{
   'id': 'tradle.SimpleMessage',
   'type': 'object',
   'title': 'Simple Message',
@@ -362,6 +384,7 @@ var models = [{
      'message': {
       'type': 'string',
       'displayName': true,
+      'cloneOf': 'tradle.Message.message',
      },
      'from': {
       'type': 'object',
@@ -405,6 +428,7 @@ var models = [{
       'type': 'string',
       'title': 'Description',
       'displayName': true,
+      'cloneOf': 'tradle.Message.message',
      },
      'from': {
       'type': 'object',
@@ -491,6 +515,7 @@ var models = [{
       'type': 'string',
       'title': 'Description',
       'displayName': true,
+      'cloneOf': 'tradle.Message.message',
      },
      'from': {
       'type': 'object',
@@ -576,6 +601,7 @@ var models = [{
       'type': 'string',
       'title': 'Description',
       'displayName': true,
+      'cloneOf': 'tradle.Message.message',
      },
      'from': {
       'type': 'object',
@@ -661,6 +687,7 @@ var models = [{
       'type': 'string',
       'displayName': true,
       'title': 'Description',
+      'cloneOf': 'tradle.Message.message',
      },
      'from': {
       'type': 'object',
@@ -746,6 +773,7 @@ var models = [{
       'type': 'string',
       'displayName': true,
       'title': 'Description',
+      'cloneOf': 'tradle.Message.message',
      },
      'blockchainUrl': {
        'type': 'string',      
@@ -850,11 +878,17 @@ var models = [{
       'type': 'string',
       'readOnly': true
      },
-     'message': {
+     'document': {
       'type': 'object',
       'ref': 'tradle.Message',
+      'title': 'Verifying document',
+      'displayName': true,
+     },
+     'message': {
+      'type': 'object',
       'title': 'Description',
       'displayName': true,
+      'cloneOf': 'tradle.Message.message',
      },
      'verifier': {
       'type': 'object',
@@ -900,6 +934,10 @@ var identities = [
   'city':'New York',
   'region':'NY',
   'country':'USA',
+  'owner':{
+     id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa', 
+     title: 'Jane Choi'
+  },
   'contact': [
     {
       'identifier':'jane@ms.com',
@@ -966,6 +1004,10 @@ var identities = [
   'firstName': 'Ted',
   'lastName': 'Logan',
   'middleName': 'Theodore',
+  'owner':{
+     id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa', 
+     title: 'Jane Choi'
+  },
   'photos': [
     {
       'type': 'headshot',
@@ -1048,6 +1090,10 @@ var identities = [
   'firstName': 'Jane',
   'lastName': 'Choi',
   'rootHash': 'b25da36eaf4b01b37fc2154cb1103eb5324a52fa',
+  'owner':{
+     id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa', 
+     title: 'Jane Choi'
+  },
   'photos': [
     {
       'type': 'headshot',
@@ -1129,6 +1175,10 @@ var identities = [
   'street': '666 Wyld Stallyns Dr',
   'firstName': 'Adam',
   'lastName': 'Scott',
+  'owner':{
+     id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa', 
+     title: 'Jane Choi'
+  },
   'photos': [
     {
       'type': 'headshot',
@@ -1210,6 +1260,10 @@ var identities = [
   'street': '666 Columbia Ave',
   'firstName': 'Timo',
   'lastName': 'Heinke',
+  'owner':{
+     id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa', 
+     title: 'Jane Choi'
+  },
   'photos': [
     {
       'type': 'headshot',
@@ -1291,6 +1345,10 @@ var identities = [
   'street': '666 Wyld Stallyns Dr',
   'firstName': 'Sophia',
   'lastName': 'Loren',
+  'owner':{
+     id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa', 
+     title: 'Jane Choi'
+  },
   'photos': [
     {
       'type': 'headshot',
@@ -1373,6 +1431,10 @@ var identities = [
   'street': '666 Wyld Stallyns Dr',
   'firstName': 'Jane',
   'lastName': 'Wayman',
+  'owner':{
+     id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa', 
+     title: 'Jane Choi'
+  },
   'photos': [
     {
       'type': 'headshot',
@@ -1454,6 +1516,10 @@ var identities = [
   'street': '666 Wyld Stallyns Dr',
   'firstName': 'Jake',
   'lastName': 'Peralta',
+  'owner':{
+     id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa', 
+     title: 'Jane Choi'
+  },
   'photos': [
     {
       'type': 'headshot',
@@ -1535,6 +1601,10 @@ var identities = [
   'street': '666 Wyld Stallyns Dr',
   'firstName': 'Ken',
   'lastName': 'Wilber',
+  'owner':{
+     id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa', 
+     title: 'Jane Choi'
+  },
   'photos': [
     {
       'type': 'headshot',

@@ -3,6 +3,7 @@
 var React = require('react-native');
 var utils = require('../utils/utils');
 var moment = require('moment');
+var Icon = require('FAKIconImage');
 
 var {
   Image,
@@ -27,6 +28,14 @@ class ResourceRow extends Component {
     else
       photo = <View style={styles.cellImage}></View>
 
+    var cancelResource = (this.props.onCancel) 
+                       ? <View style={{justifyContent: 'flex-end'}}>
+                         <TouchableHighlight onPress={this.props.onCancel} underlayColor='#ffffff'>
+                           <Icon name='ion|ios-close-empty'  size={30}  color='#9E0603'  style={styles.icon} /> 
+                         </TouchableHighlight>
+                         </View>  
+                       : <View />; 
+    
     return (
       <View>
         <TouchableHighlight onPress={this.props.onSelect}>
@@ -34,6 +43,7 @@ class ResourceRow extends Component {
             {photo}
             <View style={styles.textContainer}>
               {this.formatRow(resource)}
+              {cancelResource}
             </View>
           </View>
         </TouchableHighlight>
@@ -143,68 +153,6 @@ class ResourceRow extends Component {
     return <Text style={[style, {alignSelf: 'flex-end'}]} numberOfLines={1}>{val}</Text>;
 
   }
-  formatRow1(resource) {
-    var self = this;
-    var model = utils.getModel(resource['_type'] || resource.id).value;
-    var viewCols = model.gridCols || model.viewCols;
-    var renderedViewCols;
-    if (viewCols) {
-      var vCols = [];
-      var properties = model.properties;
-      var first = true
-      viewCols.forEach(function(v) {
-        if (properties[v].type === 'array') 
-          return;        
-        if (!resource[v]  &&  !properties[v].displayAs)
-          return;
-        var style = (first) ? styles.resourceTitle : styles.description;
-        if (properties[v].style)
-          style = [style, properties[v].style];
-        if (properties[v].ref) {
-          if (resource[v]) 
-            vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{resource[v].title}</Text>);
-          first = false;
-        }
-        else if (properties[v].type === 'date') {
-          style = styles.description;
-          if (properties[v].style)
-            style = [style, properties[v].style];
-          var date = new Date(resource[v]);
-          var dayDiff = moment(new Date()).dayOfYear() - moment(date).dayOfYear();
-          var val;
-          switch (dayDiff) {
-          case 0:
-            val = moment(date).fromNow();
-            break;
-          case 1:
-            val = moment(date).format('[yesterday], h:mA');
-            break;
-          case 2:
-            break;
-          default:      
-            val = moment(date).format('ddd, h:mA');
-          }
-          vCols.push(<Text style={[style, {alignSelf: 'flex-end'}]} numberOfLines={1}>{val}</Text>)
-        }
-        else  {
-          if (resource[v]  &&  (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0))
-            vCols.push(<Text style={style} onPress={self.onPress.bind(self)} numberOfLines={1}>{resource[v]}</Text>);
-          else {
-            var val = properties[v].displayAs ? utils.templateIt(properties[v], resource) : resource[v];
-            vCols.push(<Text style={style}>{val}</Text>);
-          }
-          first = false;
-        }
-      }); 
-      if (vCols)
-        renderedViewCols = vCols;
-    }
-    if (!viewCols) {
-      var vCols = utils.getDisplayName(resource, model.properties);
-      renderedViewCols = <Text style={styles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
-    }
-    return renderedViewCols;
-  }
 }
 
 var styles = StyleSheet.create({
@@ -253,6 +201,24 @@ var styles = StyleSheet.create({
     height: 1,
     marginLeft: 4,
   },
+  icon: {
+    width: 30,
+    height: 30,
+    // borderWidth: 2,
+    // borderColor: '#D7E6ED',
+    // borderRadius: 14,
+    position: 'absolute',
+    right: 0
+  },
+  // icon: {
+  //   width: 30,
+  //   height: 30,
+  //   marginRight: 5,
+  //   position: 'absolute',
+  //   right: 0,
+  //   // marginTop: 3,
+  //   color: '#7AAAC3'
+  // },
 });
 
 module.exports = ResourceRow;

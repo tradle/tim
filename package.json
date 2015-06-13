@@ -26,6 +26,7 @@
     "react-native-invertible-scroll-view": "0.0.2",
     "extend": "~2.0.1",
     "reflux": "~0.2.7",
-    "react-native-scrollable-mixin": "0.0.2"
+    "react-native-scrollable-mixin": "0.0.2",
+    "level-sublevel": "~6.4.6"
   }
 }

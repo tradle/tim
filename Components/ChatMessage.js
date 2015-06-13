@@ -17,7 +17,7 @@ var {
 } = React;
 // Component is used in 2 other components
 // 1. NewResource for sending the correct verification form to your friend/customer to help them with finding the right one
-// 2. AddNewMessage for submitting regular chat message. AddNewResource is used in SearchScreen component when it shows chat messages
+// 2. AddNewMessage for submitting regular chat message. AddNewResource is used in ResourceList component when it shows chat messages
 class ChatMessage extends Component {
   constructor(props) {
     super(props);
@@ -59,7 +59,7 @@ class ChatMessage extends Component {
     var title = resource.to['_type'] 
               ? utils.getDisplayName(resource.to, utils.getModel(resource.to['_type']).value.properties)
               : resource.to.title;
-    if (resource.message  &&  utils.getMessageParts(resource.message).length === 1)
+    if (resource.message  &&  utils.splitMessage(resource.message).length === 1)
       return <View></View>;
     var alignStyle = model.isInterface ? {alignSelf: 'center'} : {alignSelf: 'stretch'};
     var messageField =

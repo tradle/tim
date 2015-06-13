@@ -2,7 +2,7 @@
  
 var React = require('react-native');
 var utils = require('../utils/utils');
-var SearchScreen = require('./SearchScreen');
+var MessagesList = require('./MessagesList');
 
 var {
   StyleSheet,
@@ -18,8 +18,8 @@ class MoreLikeThis extends Component {
     var modelName = this.props.resource['_type'];
     this.props.navigator.push({
       title: utils.getModel(modelName).value.title,
-      component: SearchScreen,
-      id: 10,
+      component: MessagesList,
+      id: 11,
       backButtonTitle: 'Back',
       passProps: {
         resource: utils.getMe(), 

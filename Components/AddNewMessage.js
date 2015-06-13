@@ -2,8 +2,6 @@
 
 var React = require('react-native');
 var utils = require('../utils/utils');
-var sha = require('stable-sha1');
-var ResourceTypesScreen = require('./ResourceTypesScreen');
 var ChatMessage = require('./ChatMessage');
 
 var {
@@ -31,7 +29,7 @@ class AddNewMessage extends Component {
     return (
       <View style={styles.addNew}>
         <TouchableHighlight style={{paddingLeft: 5}} underlayColor='#eeeeee'
-          onPress={this.onAddNewPressed.bind(this)}>
+          onPress={this.props.onAddNewPressed.bind(this)}>
          <Image source={require('image!clipadd')} style={styles.image} />
         </TouchableHighlight>
         <View style={styles.searchBar}>
@@ -39,28 +37,6 @@ class AddNewMessage extends Component {
         </View>
       </View> 
     );
-  }
-  onAddNewPressed() {
-    var modelName = this.props.modelName;
-    var model = utils.getModel(modelName).value;
-    var isInterface = model.isInterface;
-    if (!isInterface) 
-      return;
-
-    var self = this;
-    var currentRoutes = self.props.navigator.getCurrentRoutes();
-    self.props.navigator.push({
-      title: utils.makeLabel(model.title) + ' type',
-      id: 2,
-      component: ResourceTypesScreen,
-      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      passProps: {
-        resource: self.props.resource, 
-        returnRoute: currentRoutes[currentRoutes.length - 1],
-        modelName: modelName,
-        callback: this.props.callback
-      }
-    });
   }
 }
 

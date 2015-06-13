@@ -5,6 +5,7 @@ var utils = require('../utils/utils');
 var NewResource = require('./NewResource');
 var Reflux = require('reflux');
 var Store = require('../Store/Store');
+var Actions = require('../Actions/Actions');
 var reactMixin = require('react-mixin');
 var Icon = require('FAKIconImage');
 
@@ -35,13 +36,13 @@ class AddNewIdentity extends Component {
 
     var hasPhoto = resource  &&  resource.photos && resource.photos.length;
     var style = hasPhoto 
-              ? {alignSelf: 'center', justifyContent: 'center', position: 'absolute', top: 15, right: 10 }
-              : {alignSelf: 'center', justifyContent: 'center'}
+              ? {position: 'absolute', top: 15, right: 10 }
+              : {alignSelf: 'flex-end', marginTop: 25, marginRight: 10 }
  
     return this.props.isRegistration || (resource.rootHash === utils.getMe().rootHash)
            ? <View style={style}>
                <TouchableHighlight onPress={this.createNewIdentity.bind(this)}>
-                 <Icon name='fontawesome|plus'  size={30}  color='#ffffff'  style={styles.icon}/>
+                 <Icon name='fontawesome|plus'  size={40}  color='#ffffff'  style={styles.icon}/>
                </TouchableHighlight>
              </View>
            : <View></View>;    

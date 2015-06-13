@@ -17,13 +17,8 @@ var {
 
 class NewItem extends Component {
   onSavePressed(addMore) {
-    if (this.addItem()) {
-      if (addMore) {
-        this.setState({err: 'Add another ' + this.props.metadata.title});
-      }
-      else
-        this.props.navigator.pop();
-    }
+    if (this.addItem()) 
+      this.props.navigator.pop();
   }
   addItem() {
     var value = this.refs.form.getValue();
@@ -35,13 +30,6 @@ class NewItem extends Component {
     this.props.onAddItem(propName, json);    
     return true;
   }
-  onSaveAndAddPressed() {
-    if (this.addItem()) 
-      this.setState({err: 'Add another ' + itemMeta.title});
-  }
-  onCancelPressed() {
-    this.props.navigator.pop();
-  }
   render() {
     var props = this.props;
     var parentBG = {backgroundColor: '#7AAAC3'};
@@ -52,6 +40,7 @@ class NewItem extends Component {
     var params = {
         meta: meta,
         model: model,
+        onSubmitEditing: this.onSavePressed.bind(this)
     };
 
     var options = utils.getFormFields(params);
@@ -66,12 +55,10 @@ class NewItem extends Component {
         <Text style={errStyle}>{err}</Text>
         <View style={{'padding': 20}}>
           <Form ref='form' type={Model} options={options} />
-          <View style={styles.buttons}>
-            <TouchableHighlight style={[styles.button, parentBG]} underlayColor='#7AAAC3'
-                onPress={this.onSavePressed.bind(this)}>
-              <Text style={[styles.buttonText]}>Save</Text>
-            </TouchableHighlight>
-          </View>
+          <TouchableHighlight style={[styles.button, parentBG]} underlayColor='#7AAAC3'
+              onPress={this.onSavePressed.bind(this)}>
+            <Text style={[styles.buttonText]}>Save</Text>
+          </TouchableHighlight>
         </View>
       </View>
       </ScrollView>
@@ -104,17 +91,15 @@ var styles = StyleSheet.create({
   },
   button: {
     height: 36,
-    flex: 1,
     width: 100,
-    // flexDirection: 'row',
+    flex: 1,
     backgroundColor: '#ffffff',
     borderColor: '#6093ae',
     borderWidth: 1,
     borderRadius: 8,
     marginBottom: 10,
-    // alignSelf: 'stretch',
     justifyContent: 'center',
-    // margin: 10,
+    alignSelf: 'center'
   },
   err: {
     paddingTop: 10,

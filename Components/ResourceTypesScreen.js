@@ -1,15 +1,18 @@
 'use strict';
 
 var React = require('react-native');
-var MessageRow = require('./MessageRow');
 var NewResource = require('./NewResource');
 var utils = require('../utils/utils');
+var reactMixin = require('react-mixin');
+var Store = require('../Store/Store');
+var Actions = require('../Actions/Actions');
+var Reflux = require('reflux');
 
 var {
   ListView,
+  Text,
   Component,
   StyleSheet,
-  TextInput,
   View,
 } = React;
 
@@ -17,16 +20,33 @@ var {
 class ResourceTypesScreen extends Component {
   constructor(props) {
     super(props);
-    this.timeoutID = null;
     var implementors = utils.getImplementors(this.props.modelName);
 
     var dataSource =  new ListView.DataSource({
       rowHasChanged: (row1, row2) => row1 !== row2,
     });
     this.state = {
+      implementors: implementors,
       dataSource: dataSource.cloneWithRows(implementors),
-      userInput: ''
+      newModelAdded: false
     };
+  }
+  componentDidMount() {
+    this.listenTo(Store, 'onNewModelAdded');
+  }
+  onNewModelAdded(params) {
+    if (params.action !== 'newModelAdded')
+      return;
+    if (params.err)
+      this.setState({err: params.err});
+    else {
+      var implementors = this.state.implementors;
+      implementors.push(params.newModel);
+      this.setState({
+        implementors: implementors,
+        dataSource: this.state.dataSource.cloneWithRows(this.state.implementors),
+      });
+    }
   }
   selectResource(resource) {
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
@@ -58,16 +78,17 @@ class ResourceTypesScreen extends Component {
   renderRow(resource)  {
     var model = utils.getModel(resource['_type'] || resource.id).value;
     var isMessage = model.interfaces  &&  model.interfaces.indexOf('tradle.Message') != -1;
+    var MessageRow = require('./MessageRow');
 
     return (
       <MessageRow
         onSelect={() => this.selectResource(resource)}
         resource={resource}
+        owner={resource.owner}
         navigator={this.props.navigator}
         to={this.props.resource} />
       );
   }
-
   render() {
     var content = 
     <ListView ref='listview' style={styles.listview}
@@ -78,14 +99,18 @@ class ResourceTypesScreen extends Component {
       keyboardShouldPersistTaps={true}
       showsVerticalScrollIndicator={false} />;
 
+    var err = this.state.err 
+            ? <View style={styles.errContainer}><Text style={styles.err}>{this.state.err}</Text></View>
+            : <View />;
     return (
       <View style={styles.container}>
+        {err}
         {content}
       </View>
     );
   }
-
 }
+reactMixin(ResourceTypesScreen.prototype, Reflux.ListenerMixin);
 
 var styles = StyleSheet.create({
   container: {
@@ -98,6 +123,15 @@ var styles = StyleSheet.create({
   centerText: {
     alignItems: 'center',
   },
+  err: {
+    color: '#D7E6ED'
+  },
+  errContainer: {
+    height: 45, 
+    paddingTop: 5, 
+    paddingHorizontal: 10, 
+    backgroundColor: '#eeeeee', 
+  }
 });
 
 module.exports = ResourceTypesScreen;

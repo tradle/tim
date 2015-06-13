@@ -5,7 +5,7 @@ var utils = require('../utils/utils');
 var NewItem = require('./NewItem');
 var PhotoView = require('./PhotoView');
 // var FromToView = require('./FromToView');
-var SearchScreen = require('./SearchScreen');
+var ResourceList = require('./ResourceList');
 var ResourceView = require('./ResourceView');
 var ChatMessage = require('./ChatMessage');
 var t = require('tcomb-form-native');
@@ -110,7 +110,7 @@ class NewResource extends Component {
       title: m.title,
       titleTextColor: '#7AAAC3',
       id: 10,
-      component: SearchScreen,
+      component: ResourceList,
       passProps: {
         filter:      filter, 
         prop:        propName,

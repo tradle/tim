@@ -1,9 +1,10 @@
 'use strict';
  
 var React = require('react-native');
-var SearchScreen = require('./SearchScreen');
+var ResourceList = require('./ResourceList');
 var AddNewIdentity = require('./AddNewIdentity');
 var NewResource = require('./NewResource');
+var ResourceView = require('./ResourceView');
 var utils = require('../utils/utils');
 var Reflux = require('reflux');
 var Actions = require('../Actions/Actions');
@@ -37,9 +38,11 @@ class SearchPage extends Component {
     this.listenTo(Store, 'onReloadDB');
     this.listenTo(Store, 'onStart');
   }
-  onReloadDB(action) {
-    if (action === 'reloadDB')
+  onReloadDB(params) {
+    if (params.action === 'reloadDB') {
       this.setState({isLoading: false});
+      utils.setModels(params.models);
+    }
   }
   onStart(params) {
     if (params.action === 'start') {
@@ -60,13 +63,34 @@ class SearchPage extends Component {
         filter: '', 
         modelName: this.props.modelName,
       };
+    var me = utils.getMe();
     this.props.navigator.push({
       // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       id: 10,
       title: 'Contacts',
       titleTextColor: '#7AAAC3',
-      component: SearchScreen,
-      passProps: passProps
+      component: ResourceList,
+      rightButtonTitle: 'Profile',
+      passProps: passProps,
+      onRightButtonPress: {
+        title: utils.getDisplayName(me, utils.getModel(me['_type']).value.properties),
+        id: 3,
+        component: ResourceView,
+        titleTextColor: '#7AAAC3',
+        rightButtonTitle: 'Edit',
+        onRightButtonPress: {
+          title: me.firstName,
+          id: 4,
+          component: NewResource,
+          titleTextColor: '#7AAAC3',
+          backButtonTitle: me.firstName,
+          passProps: {
+            metadata: utils.getModel(me['_type']).value,
+            resource: me
+          }
+        },        
+        passProps: {resource: me}
+      }
     });
 	}
   
@@ -104,6 +128,7 @@ class SearchPage extends Component {
   }
   onReloadDBPressed() {
     utils.setMe(null);
+    utils.setModels(null);
     Actions.reloadDB();
   } 
   render() {
