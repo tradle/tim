@@ -147,10 +147,12 @@ class NewResource extends Component {
   }
   onNewPressed(bl) {
     this.props.navigator.push({
-      title: 'Create new ' + bl.title,
+      id: 6,
+      title: 'Add new ' + bl.title,
       backButtonTitle: 'Back',
       component: NewItem,
-      id: 6,
+      // rightButtonTitle: 'Done',
+      // onRightButtonPress: this.onAddItem.bind(this),
       passProps: {
         metadata: bl,
         resource: this.props.resource,
@@ -322,6 +324,10 @@ var styles = StyleSheet.create({
     width: 400,
     height: 350,
     alignSelf: 'stretch'
+  },
+  photoBG: {
+    backgroundColor: '#2E3B4E',
+    alignItems: 'center',
   },
   icon: {
     width: 20,
