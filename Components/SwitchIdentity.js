@@ -18,17 +18,9 @@ var {
 class SwitchIdentity extends Component {
   render() {
     var resource = this.props.resource;
-    var modelName = resource['_type'];
-    var model = utils.getModel(modelName).value;
-
-    var hasPhoto = resource  &&  resource.photos && resource.photos.length;
-    var style = hasPhoto 
-              ? {position: 'absolute', top: 65, right: 10 }
-              : {alignSelf: 'flex-end', marginTop: 5, marginRight: 10 }
- 
     return resource.rootHash === utils.getMe().rootHash
-           ? <View style={style}>
-               <TouchableHighlight onPress={this.showIdentities.bind(this)} underlayColor='#ffffff'>
+           ? <View style={styles.switchButton}>
+               <TouchableHighlight onPress={this.showIdentities.bind(this)} underlayColor='transparent'>
                  <Icon name='fontawesome|arrows'  size={30}  color='#ffffff'  style={styles.icon}/>
                </TouchableHighlight>
              </View>
@@ -47,8 +39,13 @@ var styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#D7E6ED',
     backgroundColor: '#9287ED',
-    borderRadius: 18,
+    borderRadius: 20,
   },
+  switchButton: {
+    position: 'absolute', 
+    top: 60, 
+    right: 10 
+  }
 });
 
 module.exports = SwitchIdentity;

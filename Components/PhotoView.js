@@ -2,7 +2,7 @@
  
 var React = require('react-native');
 var utils = require('../utils/utils');
-
+var Icon = require('FAKIconImage');
 var {
   StyleSheet,
   Image, 
@@ -30,13 +30,20 @@ class PhotoView extends Component {
     var hasPhoto = resource.photos && resource.photos.length; 
     var currentPhoto = this.state.currentPhoto || (hasPhoto  &&  resource.photos[0]);
 
-    if (!currentPhoto)
-      return <View/>;
+    if (!currentPhoto) {
+      var icon;
+      if (model.id === 'tradle.Identity')
+        icon = 'ion|person';
+      else
+        icon = 'ion|chatboxes'
+      return <Icon name={icon} size={200}  color='#f6f6f4'  style={styles.icon} />
+    }
 
     var url = currentPhoto.url;
     var nextPhoto = resource.photos.length == 1
+    var uri = utils.getImageUri(url);
     if (resource.photos.length == 1)
-      return <Image source={{uri: (url.indexOf('http') === 0 ? url : 'http://' + url)}} style={styles.image} />; 
+      return <Image source={{uri: uri}} style={styles.image} />; 
     else {           
       var nextPhoto;
       var len = resource.photos.length;
@@ -46,7 +53,7 @@ class PhotoView extends Component {
           nextPhoto = i === len - 1 ? resource.photos[0] : resource.photos[i + 1];
       }
       return <TouchableHighlight underlayColor='#ffffff' onPress={this.changePhoto.bind(this, nextPhoto)}>
-                <Image source={{uri: (url.indexOf('http') == 0 ? url : 'http://' + url)}} style={styles.image} />
+                <Image source={{uri: uri}} style={styles.image} />
               </TouchableHighlight>
     }
   }
@@ -57,6 +64,11 @@ var styles = StyleSheet.create({
     width: 400,
     height: 350,
     alignSelf: 'stretch'
+  },
+  icon: {
+    width: 300,
+    height: 250,
+    alignSelf: 'center'
   },
 });
 

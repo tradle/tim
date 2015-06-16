@@ -2,6 +2,7 @@
  
 var React = require('react-native');
 var utils = require('../utils/utils');
+var Icon = require('FAKIconImage');
 
 var {
   StyleSheet,
@@ -14,17 +15,12 @@ var {
 class VerificationButton extends Component {
   render() {
     var resource = this.props.resource;
-    var modelName = resource['_type'];
-    var model = utils.getModel(modelName).value;
     var me = utils.getMe();
     var meId = me['_type'] + '_' + me.rootHash;
-    var isMessage = model.interfaces  &&  model.interfaces.indexOf('tradle.Message') != -1;
-    return isMessage  &&  resource.from  &&  resource.from.id != meId
-           ? <View style={{flex: 1, paddingRight: 10}}>
-               <TouchableHighlight onPress={this.verify.bind(this)} underlayColor='#ffffff'>
-                 <View style={[styles.button, {backgroundColor: '#7AAAC3', alignSelf: 'stretch'}]}>
-                   <Text style={[styles.buttonText, {color: '#ffffff'}]}>Verify</Text>
-                 </View>
+    return resource.from  &&  resource.from.id != meId
+           ? <View style={styles.verification}>
+               <TouchableHighlight underlayColor='transparent' onPress={this.verify.bind(this)}>
+                 <Icon name='ion|checkmark' size={30}  color='#ffffff'  style={styles.icon}/>
                </TouchableHighlight>
              </View>
            : <View></View>  
@@ -52,21 +48,20 @@ class VerificationButton extends Component {
 }
 
 var styles = StyleSheet.create({
-  buttonText: {
-    fontSize: 18,
-    color: '#2E3B4E',
-    alignSelf: 'center',
+  icon: {
+    width: 40,
+    height: 40,
+    borderWidth: 2,
+    borderColor: '#D7E6ED',
+    backgroundColor: '#7AAAC3',
+    borderRadius: 20,
   },
-  button: {
-    marginTop: 10,
-    alignSelf: 'center',
-    marginBottom: 10,
-    backgroundColor: '#eeeeee',
-    borderColor: '#cccccc',
-    borderWidth: 1,
-    padding: 10,
-    borderRadius: 10
+  verification: {
+    position: 'absolute',
+    top: 60,
+    right: 10
   },
+
 });
 
 module.exports = VerificationButton;

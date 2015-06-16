@@ -31,18 +31,11 @@ class AddNewIdentity extends Component {
   }
   render() {
     var resource = this.props.resource;
-    var modelName = resource['_type'];
-    var model = utils.getModel(modelName).value;
 
-    var hasPhoto = resource  &&  resource.photos && resource.photos.length;
-    var style = hasPhoto 
-              ? {position: 'absolute', top: 15, right: 10 }
-              : {alignSelf: 'flex-end', marginTop: 25, marginRight: 10 }
- 
     return this.props.isRegistration || (resource.rootHash === utils.getMe().rootHash)
-           ? <View style={style}>
-               <TouchableHighlight onPress={this.createNewIdentity.bind(this)}>
-                 <Icon name='fontawesome|plus'  size={40}  color='#ffffff'  style={styles.icon}/>
+           ? <View style={styles.addNew}>
+               <TouchableHighlight onPress={this.createNewIdentity.bind(this)} underlayColor='transparent'>
+                 <Icon name='fontawesome|plus'  size={30}  color='#ffffff'  style={styles.icon}/>
                </TouchableHighlight>
              </View>
            : <View></View>;    
@@ -76,8 +69,13 @@ var styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#D7E6ED',
     backgroundColor: '#7AAAC3',
-    borderRadius: 18,
+    borderRadius: 20,
   },
+  addNew: {
+    position: 'absolute', 
+    top: 15, 
+    right: 10 
+  }
 });
 
 module.exports = AddNewIdentity;
