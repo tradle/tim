@@ -7,6 +7,8 @@ var {
   StyleSheet,
   Image, 
   View,
+  ListView,
+  LayoutAnimation,
   Text,
   TextInput,
   TouchableHighlight,
@@ -16,27 +18,31 @@ var {
 class ViewCols extends Component {
   constructor(props) {
     super(props);
-    this.state = {resource: this.props.resource}
+    var dataSource = new ListView.DataSource({
+      rowHasChanged: (row1, row2) => row1 !== row2,
+    });
+    this.state = {
+      resource: this.props.resource,
+      viewStyle: {margin: 3},
+      dataSource: dataSource
+    }
   }
   render() {
-    var resource = this.state.resource;
-    var modelName = resource['_type'];
-    var model = utils.getModel(modelName).value;
- 
-    var viewCols = this.getViewCols(resource, model, this.props.excludedProperties);
-    var date = utils.getFormattedDate(new Date(resource[this.state.timeProp]));
+    var viewCols = this.getViewCols();
     return (
-      <View style={styles.rowContainer}>    
+      <View>    
         {viewCols}
       </View>
     );
   }
-  changePhoto(photo) {
-    this.setState({currentPhoto: photo});
-  }
 
-  getViewCols(resource, model, excludedProperties) {
+  getViewCols(resource, model) {
+    var resource = this.state.resource;
+    var modelName = resource['_type'];
+    var model = utils.getModel(modelName).value;
     var vCols = model.viewCols;
+
+    var excludedProperties = this.props.excludedProperties;
     if (excludedProperties) {
       var mapped = [];
       for (var p of excludedProperties) {
@@ -77,49 +83,9 @@ class ViewCols extends Component {
       if (val instanceof Array) {
         var vCols = pMeta.viewCols;          
         var cnt = val.length;
-        var counter = 0;
-        var isPhoto = pMeta.cloneOf  &&  pMeta.cloneOf == 'tradle.Message.photos';
-        if (isPhoto  &&  val.length == 1)
-          return <View />; 
-        val = val.map(function(v) {
-          var ret = [];
-          var itemsMeta = pMeta.items.properties;
-          counter++; 
-          if (isPhoto) {
-            ret.push(
-              <TouchableHighlight underlayColor='#ffffff' onPress={self.changePhoto.bind(self, v)}>
-                <View style={styles.photoItemContainer}>
-                  <Image style={styles.thumb} source={{uri: (v.url.indexOf('http') == -1 ? 'http://' + v.url : v.url)}} />
-                  <Text style={styles.description}>{v.title}</Text>
-                </View>
-              </TouchableHighlight>
-            ); 
-          }
-          else  
-            for (var p in itemsMeta) {
-              if (vCols  &&  vCols.indexOf(p) == -1)
-                continue;
-              var itemMeta = pMeta.items.properties[p];
-              var value = (itemMeta.displayAs) ? utils.templateIt(itemMeta, v) : v[p];
-              if (!value)
-                continue;
-              ret.push(
-                <View>
-                 <View style={value.length > 60 ? styles.itemColContainer : styles.itemContainer}>
-                   <Text style={itemMeta.skipLabel ? {height: 0} : styles.itemTitle}>{itemMeta.skipLabel ? '' : utils.makeLabel(p)}</Text>
-                   <Text style={styles.description}>{value}</Text>                 
-                 </View>
-               </View>);
-            } 
-          first = false;
-          return (
-            <View>
-               {ret}
-               {counter == cnt ? <View></View> : <View style={styles.itemSeparator}></View>}
-            </View>
-          )
-        });        
-      } 
+        val = self.renderItems(val, pMeta);
+        first = false;
+      }      
       else if (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0)
         val = <Text onPress={self.onPress.bind(self, val)} style={styles.description}>{val}</Text>;
       else {
@@ -128,7 +94,7 @@ class ViewCols extends Component {
         val = <Text style={[styles.description, {flexWrap: 'wrap'}]} numberOfLines={2}>{val}</Text>;
         // val = <Text style={[styles.description, isDirectionRow ? {alignSelf: 'flex-end'} : {alignSelf: 'flex-start'}]}>{val}</Text>;
       }
-      var separator = first 
+      var separator = first
                     ? <View /> 
                     : <View style={styles.separator}></View>;
 
@@ -147,17 +113,43 @@ class ViewCols extends Component {
     });
     return viewCols;    
   }
+
+  renderItems(val, pMeta) {
+    var counter = 0;
+    var vCols = pMeta.viewCols;          
+    var cnt = val.length;
+    return val.map(function(v) {
+      var ret = [];
+      var itemsMeta = pMeta.items.properties;
+      counter++; 
+      for (var p in itemsMeta) {
+        if (vCols  &&  vCols.indexOf(p) == -1)
+          continue;
+        var itemMeta = pMeta.items.properties[p];
+        var value = (itemMeta.displayAs) ? utils.templateIt(itemMeta, v) : v[p];
+        if (!value)
+          continue;
+        ret.push(
+          <View>
+           <View style={value.length > 60 ? styles.itemColContainer : styles.itemContainer}>
+             <Text style={itemMeta.skipLabel ? {height: 0} : styles.itemTitle}>{itemMeta.skipLabel ? '' : utils.makeLabel(p)}</Text>
+             <Text style={styles.description}>{value}</Text>                 
+           </View>
+         </View>);
+      } 
+      return (
+        <View>
+           {ret}
+           {counter == cnt ? <View></View> : <View style={styles.itemSeparator}></View>}
+        </View>
+      )
+    });    
+  }
 }
 var styles = StyleSheet.create({
   textContainer: {
     flex: 1,
     // flexWrap: 'wrap'
-  },
-  photoItemContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    padding: 2,
-    justifyContent: 'space-between'
   },
   itemContainer: {
     flex: 1,
@@ -177,11 +169,6 @@ var styles = StyleSheet.create({
     height: 1,
     backgroundColor: '#D7E6ED'
   },
-  imageVerifiedBy: {
-    width: 300,
-    height: 50,
-    alignSelf: 'stretch'
-  },
   title: {
     fontSize: 18,
     margin: 5,
@@ -199,25 +186,6 @@ var styles = StyleSheet.create({
     margin: 5,
     color: '#656565',
   },
-  photoBG: {
-    backgroundColor: '#2E3B4E',
-    alignItems: 'center',
-  },
-  rowContainer: {
-    padding: 10
-  },
-  thumb: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    borderWidth: 2,
-    borderColor: '#D7E6ED'
-  },
-  date: {
-    fontSize: 12,
-    alignSelf: 'flex-end',
-    color: '#b4c3cb'
-  }
 });
 
 module.exports = ViewCols;
