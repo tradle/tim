@@ -268,7 +268,10 @@ var Store = Reflux.createStore({
       return db.put(key, model);
     })
     .then(function() {
+      if (!me.myModels)
+        me.myModels = [];
       var key = 'model_' + model.id;
+      me.myModels.push({key: key, title: model.title});
 
       models[key] = {
         key: key,
