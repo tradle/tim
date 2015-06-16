@@ -306,8 +306,16 @@ var utils = {
       else        
         return [message.substring(lBr + 1, rBr), message.substring(rBr + 2, rRoundBr)];
     }
+  },
+  getImageUri(url) {
+    if (url === null)
+      return null;
+    if (url.indexOf('assets-') === 0 || url.indexOf('http') === 0)
+      return url;
+    else
+      return 'http://' + url;
   }
-
+  
 }
 
 module.exports = utils;
