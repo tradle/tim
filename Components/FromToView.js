@@ -38,7 +38,7 @@ class FromToView extends Component {
 
     var photoProp = utils.getCloneOf(MESSAGE_INTERFACE + '.photos', model.properties);
 
-    var hasPhoto = resource[photoProp]  &&  resource[photoProp].length; 
+    var hasPhoto = true; //resource[photoProp]  &&  resource[photoProp].length; 
     var fromTitle = resource.from.title ? resource.from.title :  utils.getDisplayName(resource.from, utils.getModel(resource.from['_type']).value.properties);
     var toTitle = resource.to.title ? resource.to.title : utils.getDisplayName(resource.to, utils.getModel(resource.to['_type']).value.properties);
     if (!resource.to.photos && !resource.from.photos)
@@ -48,20 +48,34 @@ class FromToView extends Component {
              </View>      
     var style = hasPhoto ? {marginTop: -70} : {marginTop: 0};
     var toPhoto = resource.to.photos && resource.to.photos[0].url;
-    if (toPhoto  &&  toPhoto.indexOf('http') === -1)
-      toPhoto = 'http://' + toPhoto;
+    if (toPhoto)
+      toPhoto = utils.getImageUri(toPhoto);
     var fromPhoto = resource.from.photos && resource.from.photos[0].url;
-    if (fromPhoto  &&  fromPhoto.indexOf('http') === -1)
-      fromPhoto = 'http://' + fromPhoto;
+    if (fromPhoto)
+      fromPhoto = utils.getImageUri(fromPhoto);
     return <View style={[styles.container, style]}>
-            <TouchableHighlight underlayColor='#ffffff' onPress={() => Actions.getItem(resource.from.id)}>
+            <TouchableHighlight underlayColor='transparent' onPress={() => 
+              {
+                if (resource.from.id)
+                  Actions.getItem(resource.from.id)
+                else
+                  this.showProfile(resource.from)
+              }
+            }>
              <View  style={{flexDirection: 'column'}}>
                <Image style={styles.thumb} source={{uri: fromPhoto}} />
                <Text>{fromTitle}</Text>
              </View>
              </TouchableHighlight>
-            <Icon name='fontawesome|long-arrow-right'   size={70}  color='#eeeeee'  style={styles.arrow} />
-            <TouchableHighlight underlayColor='#ffffff' onPress={() => Actions.getItem(resource.to.id)}>
+            <Icon name='fontawesome|long-arrow-right'   size={70}  color='#f7f7f7'  style={styles.arrow} />
+            <TouchableHighlight underlayColor='transparent' onPress={() => 
+               {
+                 if (resource.to.id)
+                   Actions.getItem(resource.to.id)
+                 else
+                   this.showProfile(resource.to)
+               }
+             }>
              <View  style={{flexDirection: 'column'}}>
                <Image style={styles.thumb} source={{uri: toPhoto}} />
                <Text>{toTitle}</Text>
