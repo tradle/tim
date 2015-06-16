@@ -4,6 +4,7 @@ var React = require('react-native');
 var utils = require('../utils/utils');
 var ArticleView = require('./ArticleView');
 var FromToView = require('./FromToView');
+var PhotosList = require('./PhotosList');
 var PhotoView = require('./PhotoView');
 var ViewCols = require('./ViewCols');
 var MoreLikeThis = require('./MoreLikeThis');
@@ -12,11 +13,8 @@ var VerificationButton = require('./VerificationButton');
 var {
   StyleSheet,
   ScrollView,
-  Image, 
   View,
   Text,
-  TextInput,
-  TouchableHighlight,
   Component
 } = React;
 
@@ -31,7 +29,6 @@ class MessageView extends Component {
     var resource = this.state.resource;
     var modelName = resource['_type'];
     var model = utils.getModel(modelName).value;
- 
     var embed = /*modelName === 'tradle.AssetVerification' 
               ? <View style={{marginLeft: 15}}>
                   <Text style={{fontSize: 20, paddingTop: 15, paddingBottom: 15, color: '#2E3B4E'}}>Verified By</Text>
@@ -43,22 +40,21 @@ class MessageView extends Component {
                 </View>
               :*/ <View></View>  
     var msgProp = utils.getCloneOf('tradle.Message.message', model.properties);
-    var date = utils.getFormattedDate(new Date(resource[this.state.timeProp]));
+    var timeProp = utils.getCloneOf('tradle.Message.time', model.properties);
+    var date = utils.getFormattedDate(new Date(resource[timeProp]));
     return (
       <ScrollView  ref='this' style={styles.container}>
         <View style={styles.photoBG}>
           <PhotoView resource={resource} />
         </View>
-
-        <FromToView resource={resource} navigator={this.props.navigator} />
-        <View style={styles.buttonsContainer}>
-          <MoreLikeThis resource={resource} navigator={this.props.navigator} />
-          <VerificationButton  resource={resource} navigator={this.props.navigator} />
-        </View>
+        <MoreLikeThis resource={resource} navigator={this.props.navigator}/>
+        <VerificationButton  resource={resource} navigator={this.props.navigator} />
+        <FromToView resource={resource} navigator={this.props.navigator} excluded/>
+        <View style={styles.band}><Text style={styles.date}>{date}</Text></View>
         <View style={styles.rowContainer}>    
-          <View><Text style={styles.date}>{date}</Text></View>
           <View><Text style={styles.itemTitle}>{resource[msgProp]}</Text></View>
-          <ViewCols resource={resource} excludedProperties={['tradle.Message.message', 'tradle.Message.time']} />
+          <PhotosList resource={resource} />
+          <ViewCols resource={resource} excludedProperties={['tradle.Message.message', 'tradle.Message.time', 'tradle.message.photos']} />
           {embed}
         </View>
       </ScrollView>
@@ -88,22 +84,26 @@ var styles = StyleSheet.create({
     color: '#7AAAC3'
   },
   photoBG: {
-    backgroundColor: '#2E3B4E',
+    backgroundColor: '#CEE7F5',
     alignItems: 'center',
   },
-  buttonsContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center'
+  band: {
+    height: 30,
+    backgroundColor: '#f7f7f7',
+    alignSelf: 'stretch'
   },
   rowContainer: {
-    padding: 10
+    paddingBottom: 10,
+    paddingHorizontal: 10
   },
   date: {
-    fontSize: 12,
+    fontSize: 14,
+    marginTop: 5,
+    marginRight: 10,
     alignSelf: 'flex-end',
-    color: '#b4c3cb'
-  }
+    color: '#2E3B4E'
+    // color: '#b4c3cb'
+  },
 });
 
 module.exports = MessageView;
