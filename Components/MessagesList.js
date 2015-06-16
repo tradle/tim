@@ -107,8 +107,8 @@ class MessagesList extends Component {
   }
 
   _selectResource(resource) {
-    var model = utils.getModel(this.props.modelName);
-    var title = utils.getDisplayName(resource, model.value.properties);
+    var model = utils.getModel(resource['_type']).value;
+    var title = utils.getDisplayName(resource, model.properties);
     var newTitle = title;
     if (title.length > 20) {
       var t = title.split(' ');
@@ -119,10 +119,11 @@ class MessagesList extends Component {
         newTitle += newTitle.length ? ' ' + word : word;
       })
     }
+    var timeProp = utils.getCloneOf('tradle.Message.time', model.properties);
 
     var route = {
       title: newTitle,
-      id: model.value.isInterface ? 5 : 3,
+      id: 5,
       component: MessageView,
       parentMeta: model,
       passProps: {resource: resource},
