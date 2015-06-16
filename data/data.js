@@ -1,7 +1,7 @@
 'use strict'
 
 // var myId = 'b25da36eaf4b01b37fc2154cb1103eb5324a52fa'; // Jane Choi
-var myId = '31eb0b894cad3601adc76713d55a11c88e48b4a2'; // Kate Blair
+//var myId = '31eb0b894cad3601adc76713d55a11c88e48b4a2'; // Kate Blair
 // var myId = '38980944449570d2783d7c8af5db8ca9463391f3'; // Sophia
 
 var models = [{
@@ -95,7 +95,7 @@ var models = [{
           },
           'url': {
             'type': 'string',
-            'skipLabel': true
+            readOnly: true
           }
         }
       },
@@ -184,7 +184,8 @@ var models = [{
     'organization',
     'contact',
     'websites',
-    'pubkeys'
+    'pubkeys',
+    'photos'
   ],
   'editCols': [
     'firstName', 
@@ -336,7 +337,7 @@ var models = [{
           },
           'url': {
             'type': 'string',
-            'skipLabel': true
+            'readOnly': true
           }
         }
       },
@@ -468,7 +469,7 @@ var models = [{
           },
           'url': {
             'type': 'string',
-            'skipLabel': true
+            'readOnly': true
           }
         }
       },
@@ -497,7 +498,7 @@ var models = [{
     'message', 'time'
   ],
   'viewCols': [
-    'message', 'time, photos'
+    'message', 'time', 'photos'
   ],
 },
 {
@@ -555,7 +556,7 @@ var models = [{
           },
           'url': {
             'type': 'string',
-            'skipLabel': true
+            'readOnly': true
           }
         }
       },
@@ -641,7 +642,7 @@ var models = [{
           },
           'url': {
             'type': 'string',
-            'skipLabel': true
+            'readOnly': true
           }
         }
       },
@@ -727,7 +728,7 @@ var models = [{
           },
           'url': {
             'type': 'string',
-            'skipLabel': true
+            'readOnly': true
           }
         }
       },
@@ -835,7 +836,7 @@ var models = [{
           },
           'url': {
             'type': 'string',
-            'skipLabel': true
+            'readOnly': true
           }
         }
       },
