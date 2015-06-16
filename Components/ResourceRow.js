@@ -21,9 +21,7 @@ class ResourceRow extends Component {
     var photo;
     if (resource.photos &&  resource.photos.length) {
       var uri = resource.photos[0].url;
-      if (uri.indexOf('http') == -1)
-        uri = 'http://' + uri;
-      photo = <Image source={{uri: uri}} style={styles.cellImage} /> 
+      photo = <Image source={{uri: utils.getImageUri(uri)}} style={styles.cellImage} /> 
     }
     else
       photo = <View style={styles.cellImage}></View>

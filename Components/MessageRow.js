@@ -43,10 +43,13 @@ class MessageRow extends Component {
         isMyMessage = true;      
     }
     var to = this.props.to;
-    var photo = isMyMessage  || !to  ||  !to.photos || isModel
-              ? <View style={styles.cell}></View>
-              : <Image source={{uri: (to.photos[0].url.indexOf('http') == 0 ? to.photos[0].url : 'http://' + to.photos[0].url)}} style={styles.msgImage} /> 
-
+    var photo;
+    if (isMyMessage  || !to  ||  !to.photos || isModel)
+      photo = <View style={styles.cell}></View>
+    else {
+      var uri = utils.getImageUri(to.photos[0].url);
+      photo = <Image source={{uri: uri}} style={styles.msgImage} /> 
+    }
     var renderedRow = [];
     var onPressCall;
     if (isModel) 
@@ -76,14 +79,15 @@ class MessageRow extends Component {
     var properties = model.properties;
     var verPhoto;
     if (!isModel  &&  properties.photos) {
-      if (resource.photos)
-        verPhoto = <Image source={{uri: (resource.photos[0].url.indexOf('http') == 0 ? resource.photos[0].url : 'http://' + resource.photos[0].url)}} style={styles.msgImage} />
+      if (resource.photos) {
+        verPhoto = <Image source={{uri: utils.getImageUri(resource.photos[0].url)}} style={styles.msgImage} />
+      }
       else
         verPhoto = <View style={{height: 0, width:0}} />
     }
     else if (isModel  &&  this.props.owner  &&  this.props.owner.photos) {
       var ownerImg = this.props.owner.photos[0].url;
-      var url = ownerImg.indexOf('http') == 0 ? ownerImg : 'http://' + ownerImg;
+      var url = utils.getImageUri(ownerImg);
       verPhoto = <Image source={{uri: ownerImg}} style={styles.ownerImage} />
     }
     var rowStyle = isModel && model.style ? [styles.row, {backgroundColor: '#efffe5'}] : styles.row;
@@ -214,7 +218,7 @@ class MessageRow extends Component {
                 onPressCall = self.createNewResource.bind(self, msgModel.value);
               vCols.push(<View>
                            <Text style={style}>{msgParts[0]}</Text>
-                           <Text style={[style, {color: '#7AAAC3'}]}>{msgModel.value.title}</Text>
+                           <Text style={[style, {color: isMyMessage ? '#efffe5' : '#7AAAC3'}]}>{msgModel.value.title}</Text>
                          </View>);                  
               return;
             }
