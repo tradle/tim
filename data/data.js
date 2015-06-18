@@ -400,6 +400,24 @@ var models = [{
        'displayName': true,
        'readOnly': true
      },
+     'photos': {
+      'type': 'array',
+      'cloneOf': 'tradle.Message.photos',
+      'items': {
+        'type': 'object',
+        'properties': {
+          'title': {
+            'type': 'string',
+            'skipLabel': true
+          },
+          'url': {
+            'type': 'string',
+            'readOnly': true
+          }
+        }
+      },
+      'required': ['title', 'url']
+     },
      'time': {
        'type': 'date',
        'readOnly': true,
