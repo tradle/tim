@@ -7,12 +7,14 @@ var MessageView = require('./MessageView');
 var NewResource = require('./NewResource');
 var moment = require('moment');
 var extend = require('extend');
+var groupByEveryN = require('groupByEveryN');
 
 var {
   Image,
   StyleSheet,
   Text,
   TouchableHighlight,
+  ListView,
   // LayoutAnimation,
   Component,
   View
@@ -21,8 +23,13 @@ var {
 class MessageRow extends Component {
   constructor(props) {
     super(props);
+    var dataSource = new ListView.DataSource({
+      rowHasChanged: (row1, row2) => row1 !== row2,
+    });
+
     this.state = {
       resource: this.props.resource,
+      dataSource: dataSource
       // viewStyle: {
       //   margin: 1,
       // },
@@ -43,12 +50,13 @@ class MessageRow extends Component {
         isMyMessage = true;      
     }
     var to = this.props.to;
-    var photo;
+    var ownerPhoto, hasOwnerPhoto;
     if (isMyMessage  || !to  ||  !to.photos || isModel)
-      photo = <View style={styles.cell}></View>
+      ownerPhoto = <View style={styles.cell}></View>
     else {
       var uri = utils.getImageUri(to.photos[0].url);
-      photo = <Image source={{uri: uri}} style={styles.msgImage} /> 
+      ownerPhoto = <Image source={{uri: uri}} style={styles.msgImage} /> 
+      hasOwnerPhoto = true;
     }
     var renderedRow = [];
     var onPressCall;
@@ -58,14 +66,20 @@ class MessageRow extends Component {
       onPressCall = this.formatRow(isMyMessage, model, resource, renderedRow);
     
     var addStyle;
+    var noMessage = !resource.message  ||  !resource.message.length;
     if (!renderedRow.length) {
-      var vCols = isModel ? utils.getDisplayName(resource) : utils.getDisplayName(resource, model.properties);
-      renderedRow = <Text style={[styles.resourceTitle]} numberOfLines={2}>{vCols}</Text>;
+      var vCols = isModel 
+                ? utils.getDisplayName(resource) 
+                : noMessage ? null : utils.getDisplayName(resource, model.properties);
+      if (vCols)                
+        renderedRow = <Text style={[styles.resourceTitle]} numberOfLines={2}>{vCols}</Text>;
     }
     else if (!isModel) {
       var fromHash = resource[utils.getCloneOf('tradle.Message.from', model.properties)].id;
-      if (isMyMessage) 
-        addStyle = styles.myCell;
+      if (isMyMessage) { 
+        if (!noMessage)
+          addStyle = styles.myCell;
+      }
       else {
         if (!model.style)
           addStyle = {padding: 5, borderRadius: 10, borderColor: '#cccccc', backgroundColor: '#ffffff'};
@@ -77,10 +91,34 @@ class MessageRow extends Component {
         // viewCols = <View style={styles.myCell}>{viewCols}</View>
     }
     var properties = model.properties;
-    var verPhoto;
+    var verPhoto, photosList;
     if (!isModel  &&  properties.photos) {
       if (resource.photos) {
-        verPhoto = <Image source={{uri: utils.getImageUri(resource.photos[0].url)}} style={styles.msgImage} />
+        var rem = resource.photos.length % 3;
+        var inRow = resource.photos.length === 1 ? 1 : rem ? 2 : 3;
+        var style;
+        if (inRow === 1)
+          style = styles.bigImage;
+        else if (inRow === 2)
+          style = styles.mediumImage;
+        else
+          style = styles.image;
+        var photos = [];
+        for (var p of resource.photos) {
+          photos.push(<Image  source={{uri: utils.getImageUri(p.url)}} style={style} />)
+        }  
+        var photoListStyle = {
+          flexDirection: 'row', 
+          alignSelf: isMyMessage ? 'flex-end' : 'flex-start', 
+          marginLeft: isMyMessage ? 30 : 10,
+          marginRight: 5,
+          borderRadius: 10 
+        }
+        photosList = this.renderPhotoList(photos, inRow, photoListStyle);
+        // photosList = <View style={photoListStyle}>
+        //               {photos}
+        //             </View>  
+
       }
       else
         verPhoto = <View style={{height: 0, width:0}} />
@@ -90,44 +128,114 @@ class MessageRow extends Component {
       var url = utils.getImageUri(ownerImg);
       verPhoto = <Image source={{uri: ownerImg}} style={styles.ownerImage} />
     }
-    var rowStyle = isModel && model.style ? [styles.row, {backgroundColor: '#efffe5'}] : styles.row;
-    // var rowStyle = isModel && model.style ? [styles.row, [model.style]] : styles.row;
+    var rowStyle = isModel && model.style 
+                 ? [styles.row, {backgroundColor: '#efffe5'}] 
+                 : noMessage ? {} : styles.row;
+    var val;
+    var date;
+    if (!isModel  &&  resource.time) {
+      var previousMessageTime = this.props.previousMessageTime;      
+      var showTime = !previousMessageTime;
+
+      if (!showTime)  {
+        var prevDate = new Date(previousMessageTime);
+        var curDate = new Date(resource.time);
+        showTime = resource.time - previousMessageTime > 3600000 ||
+                   prevDate.getDate()  !== curDate.getDate()  ||
+                   prevDate.getMonth() !== curDate.getMonth() ||
+                   prevDate.getYear()  !== curDate.getYear() 
+      }
+
+      if (showTime)
+        val = utils.getFormattedDate(resource.time);
+    }
+    
+    var date = val 
+             ? <Text style={styles.date} numberOfLines={1}>{val}</Text>
+             : <View />;
+    var messageBody = <View style={addStyle ? [styles.textContainer, addStyle] : styles.textContainer}>
+                        <View style={{flex: 1}}>
+                          {renderedRow}
+                       </View>
+                      </View>;
+
+    var showMessageBody;
+    if (!isModel  &&  noMessage) {
+      if (hasOwnerPhoto) 
+        showMessageBody = true;
+    }
+    else 
+      showMessageBody = true;
+    if (showMessageBody)
+        messageBody = 
+          <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor={isMyMessage ? '#D7E6ED' : '#ffffff'}>
+            <View style={[rowStyle, {flexDirection: 'row', width: 340, alignSelf: isMyMessage ? 'flex-end' : 'flex-start'}]}>
+              {ownerPhoto}
+              {messageBody}
+            </View>
+          </TouchableHighlight>      
+    else
+      messageBody = <View style={{height: 7}}/>
 
     return (
       <View style={{margin:1, backgroundColor: '#f7f7f7' }}>
-        <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor={isMyMessage ? '#D7E6ED' : '#ffffff'}>
-          <View style={[rowStyle, {flexDirection: 'row'}]}>
-            {photo}
-            <View style={addStyle ? [styles.textContainer, addStyle] : styles.textContainer}>
-              <View style={{flex: 4, flexDirection: 'column'}}>
-               {renderedRow}
-             </View>
-             <View style={{flex: 1}}>  
-               {verPhoto}
-             </View>  
-            </View>
+        {date}
+        {messageBody}
+        <TouchableHighlight onPress={onPressCall ? onPressCall: () => {}} underlayColor={isMyMessage ? '#D7E6ED' : '#ffffff'}>
+          <View>
+            {photosList}
           </View>
         </TouchableHighlight>
         <View style={isModel ? {backgroundColor: '#cccccc'} : {backgroundColor: '#ffffff'}} />
       </View>
     );
   }
+  renderPhotoList(val, inRow, style) {
+    var dataSource = this.state.dataSource.cloneWithRows(
+      groupByEveryN(val, inRow)
+    );
+    return (
+      <View style={style}>
+         <ListView
+            renderRow={this.renderRow.bind(this, style)}
+            dataSource={dataSource} />
+      </View>
+    );
+  }
+  renderRow(style, photos)  {
+    var photos = photos.map((photo) => {
+      if (photo === null) 
+        return null;
+      return (
+        <View style={this.state.viewStyle}>
+          {photo}
+        </View>
+      );
+    });
+
+    return (
+      <View style={styles.row}>
+        {photos}
+      </View>
+    );
+  }
+
   onPress(event) {
     this.props.navigator.push({
       component: ArticleView,
       passProps: {url: this.props.resource.message}
     });
   }
-  createNewResource(meta) {
+  createNewResource(model) {
     this.props.navigator.push({
       id: 4,
-      title: meta.title,
+      title: model.title,
       component: NewResource,
       titleTextColor: '#7AAAC3',
       passProps:  {
-        metadata: meta,
+        model: model,
         resource: {
-          '_type': meta.id, 
+          '_type': model.id, 
           'from': this.props.resource.to,
           'to': this.props.resource.from,
           'message': this.props.resource.message,
@@ -173,9 +281,12 @@ class MessageRow extends Component {
     var model = utils.getModel(resource['_type'] || resource.id).value;
 
     var properties = model.properties;
+    var noMessage = !resource.message  ||  !resource.message.length;
     var onPressCall;
+
+    var isSimpleMessage = model.id === 'tradle.SimpleMessage';
+    
     viewCols.forEach(function(v) {
-      var isSimpleMessage = model.id === 'tradle.SimpleMessage';
       var style = styles.resourceTitle; //(first) ? styles.resourceTitle : styles.description;
       if (isMyMessage) {
         style = [style, {justifyContent: 'flex-end', paddingLeft: 5}];
@@ -190,11 +301,14 @@ class MessageRow extends Component {
       else if (properties[v].type === 'array') 
         return;
       else if (properties[v].type === 'date') {
-        style = styles.description
-        if (isMyMessage  &&  isSimpleMessage)
-          style = [style, {color: '#eeeeee'}];
-        var val = utils.getFormattedDate(new Date(resource[v]));
-        vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>)
+        return;
+        // style = styles.description
+        // if (isMyMessage  &&  isSimpleMessage) {
+        //   var dateStyle = noMessage ? {alignSelf: 'flex-end', color: '#999999'} : {color: '#eeeeee'};
+        //   style = [style, dateStyle];
+        // }
+        // var val = utils.getFormattedDate(new Date(resource[v]));
+        // vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>)
       }
       else  {
         if (resource[v]  &&  (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0)) {
@@ -210,7 +324,10 @@ class MessageRow extends Component {
           vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>)
         }
         else {
+          if (!resource[v].length)
+            return;
           var msgParts = utils.splitMessage(resource[v]);
+          // Case when the needed form was sent along with the message
           if (msgParts.length === 2) {
             var msgModel = utils.getModel(msgParts[1]);
             if (msgModel) {
@@ -228,14 +345,14 @@ class MessageRow extends Component {
       }
       first = false;
     }); 
-    if (model.style) {
+    if (model.style) 
       vCols.push(<Text style={styles.verySmallLetters}>{model.title}</Text>);
-    }
-    if (vCols)
+    
+    if (vCols  &&  vCols.length)
       extend(renderedRow, vCols);
-    return onPressCall ? onPressCall : (model.id === 'tradle.SimpleMessage') ? null : this.props.onSelect;
+    var photosProp = utils.getCloneOf('tradle.Message.photos', properties);
+    return onPressCall ? onPressCall : (isSimpleMessage  &&  !resource[photosProp]) ? null : this.props.onSelect;
   }
-
   // animateViewLayout() {
   //   var resource = this.props.resource;
   //   if (resource['_type'])
@@ -271,18 +388,18 @@ var styles = StyleSheet.create({
     fontWeight: '400',
     marginBottom: 2,
   },
-  description: {
+  date: {
     flex: 1,
-    flexWrap: 'wrap',
     color: '#999999',
     fontSize: 12,
-    marginLeft: 5
+    alignSelf: 'center',
+    marginTop: 10
   },
   row: {
     alignItems: 'center',
     backgroundColor: '#f7f7f7',
     flexDirection: 'row',
-    padding: 5,
+    // padding: 5,
   },
   cell: {
     marginTop: 20,
@@ -292,7 +409,8 @@ var styles = StyleSheet.create({
   },
   myCell: { 
     padding: 5, 
-    marginLeft: 30,
+    marginRight: 5,
+    marginLeft: 30,    
     justifyContent: 'flex-end', 
     borderRadius: 10, 
     backgroundColor: '#569bff',
@@ -307,6 +425,24 @@ var styles = StyleSheet.create({
     borderColor: '#cccccc',
     borderWidth: 1
   },
+  bigImage: {
+    width: 180,
+    height: 220,
+    margin: 1,
+    borderRadius: 10
+  },
+  mediumImage: {
+    width: 120,
+    height: 120,
+    margin: 1,
+    borderRadius: 10
+  },
+  image: {
+    width: 80,
+    height: 80,
+    margin: 1,
+    borderRadius: 10
+  },
   ownerImage: {
     backgroundColor: '#dddddd',
     height: 30,
@@ -317,14 +453,6 @@ var styles = StyleSheet.create({
     borderRadius: 15,
     borderColor: '#cccccc',
     borderWidth: 1
-  },
-  photo: {
-    backgroundColor: '#dddddd',
-    height: 73,
-    alignSelf: 'flex-end',
-    marginRight: 5,
-    flex:1, 
-    width: 70
   },
   verySmallLetters: {
     fontSize: 12,
