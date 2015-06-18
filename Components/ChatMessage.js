@@ -1,12 +1,12 @@
 'use strict'
 
 var React = require('react-native');
-var Actions = require('../Actions/Actions');
-var Store = require('../Store/Store');
+// var Actions = require('../Actions/Actions');
+// var Store = require('../Store/Store');
 
 var utils = require('../utils/utils');
-var reactMixin = require('react-mixin');
-var Reflux = require('reflux');
+// var reactMixin = require('react-mixin');
+// var Reflux = require('reflux');
 
 var {
   Component,
@@ -23,33 +23,33 @@ class ChatMessage extends Component {
     super(props);
     this.state = {userInput: ''};
   }
-  componentDidMount() {
-    this.listenTo(Store, 'onAddMessage');
-  }
-  onAddMessage(params) {
-    if (params.action !== 'addMessage')
-      return;
-    var resource = params.resource;
-    if (!resource)
-      return;
-    if (params.error) {
-      if (resource['_type'] == this.props.resource['_type']) 
-        this.setState({err: params.error});
-      return;    
-    }
-    var model = utils.getModel(resource['_type']).value;
-    var isMessage = model.interfaces  &&  model.interfaces.indexOf('tradle.Message') != -1;
-    if (isMessage) {
-      if (this.props.callback) {
-        this.props.callback('');
-        this.setState({userInput: ''});
-        setTimeout(function() {
-          this.setState({textValue: this.state.userInput});
-          this.refs.chat.focus();
-        }.bind(this), 0);
-      }
-    }
-  }
+  // componentDidMount() {
+  //   this.listenTo(Store, 'onAddMessage');
+  // }
+  // onAddMessage(params) {
+  //   if (params.action !== 'addMessage')
+  //     return;
+  //   var resource = params.resource;
+  //   if (!resource)
+  //     return;
+  //   if (params.error) {
+  //     if (resource['_type'] == this.props.resource['_type']) 
+  //       this.setState({err: params.error});
+  //     return;    
+  //   }
+  //   var model = utils.getModel(resource['_type']).value;
+  //   var isMessage = model.interfaces  &&  model.interfaces.indexOf('tradle.Message') != -1;
+  //   if (isMessage) {
+  //     if (this.props.callback) {
+  //       this.props.callback('');
+  //       this.setState({userInput: ''});
+  //       setTimeout(function() {
+  //         this.setState({textValue: this.state.userInput});
+  //         this.refs.chat.focus();
+  //       }.bind(this), 0);
+  //     }
+  //   }
+  // }
   render() {
     var model = this.props.model;
     var isMessage = model.interfaces  &&  model.interfaces.indexOf('tradle.Message') != -1;
@@ -75,6 +75,7 @@ class ChatMessage extends Component {
             value={this.state.userInput}
             onChange={this.handleChange.bind(this)}
             onSubmitEditing={this.onSubmitEditing.bind(this)}
+            onEndEditing={this.props.onEndEditing.bind(this, this.state.userInput)}
           />
         </View>
 
@@ -96,36 +97,39 @@ class ChatMessage extends Component {
     var msg = this.state.userInput;
     if (!msg)
       return;
-    var me = utils.getMe();
-    var resource = this.props.resource;
-    var toName = utils.getDisplayName(resource.to, utils.getModel(this.props.resource.to['_type']).value.properties);
-    var meta = utils.getModel(me['_type']).value.properties;
-    var meName = utils.getDisplayName(me, meta);
-    var modelName = 'tradle.SimpleMessage';
-    var value = {
-      '_type': modelName,  
-      message: this.props.model.isInterface ? msg : '[' + this.state.userInput + '](' + this.props.model.id + ')',
-
-      'from': {
-        id: me['_type'] + '_' + me.rootHash, 
-        title: meName
-      }, 
-      'to': {
-        id: resource.to['_type'] + '_' + resource.to.rootHash,
-        title: toName
-      },
-
-      time: new Date().getTime()
-    }
     this.setState({userInput: ''});
-    setTimeout(function() {
-      this.setState({textValue: this.state.userInput});
-      this.refs.chat.focus();
-    }.bind(this), 0);
-    Actions.addMessage(value); //, this.state.resource, utils.getModel(modelName).value);
+    this.props.onSubmitEditing(msg);
+
+    // var me = utils.getMe();
+    // var resource = this.props.resource;
+    // var toName = utils.getDisplayName(resource.to, utils.getModel(this.props.resource.to['_type']).value.properties);
+    // var meta = utils.getModel(me['_type']).value.properties;
+    // var meName = utils.getDisplayName(me, meta);
+    // var modelName = 'tradle.SimpleMessage';
+    // var value = {
+    //   '_type': modelName,  
+    //   message: this.props.model.isInterface ? msg : '[' + this.state.userInput + '](' + this.props.model.id + ')',
+
+    //   'from': {
+    //     id: me['_type'] + '_' + me.rootHash, 
+    //     title: meName
+    //   }, 
+    //   'to': {
+    //     id: resource.to['_type'] + '_' + resource.to.rootHash,
+    //     title: toName
+    //   },
+
+    //   time: new Date().getTime()
+    // }
+    // this.setState({userInput: ''});
+    // setTimeout(function() {
+    //   this.setState({textValue: this.state.userInput});
+    //   this.refs.chat.focus();
+    // }.bind(this), 0);
+    // Actions.addMessage(value); //, this.state.resource, utils.getModel(modelName).value);
   }
 }
-reactMixin(ChatMessage.prototype, Reflux.ListenerMixin);
+// reactMixin(ChatMessage.prototype, Reflux.ListenerMixin);
 var styles = StyleSheet.create({
   searchBarBG: {
     marginTop: 10,

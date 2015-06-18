@@ -13,6 +13,7 @@ var {
   StyleSheet,
   View,
   Image,
+  Text,
   CameraRoll,
   ListView,
   Component,
@@ -27,7 +28,7 @@ class SelectPhotoList extends Component {
       });
     this.state = {
       assets: [],
-      batchSize: 21,
+      batchSize: 30,
       groupTypes: 'All',
       lastCursor: null,
       selected: {},
@@ -50,11 +51,13 @@ class SelectPhotoList extends Component {
     if (this.props.metadata.name !== 'photos')
       return false;
     return (
+      <View style={{flex: 1}}>
       <ListView
         renderRow={this.renderRow.bind(this)}
         style={styles.photoContainer}
         dataSource={this.state.dataSource}
-        onEndReached={this.onEndReached} />
+        onEndReached={this.onEndReached.bind(this)} />
+      </View>
     );
   }
   fetchAssets(clear) {
@@ -68,33 +71,31 @@ class SelectPhotoList extends Component {
       first: this.state.batchSize,
       groupTypes: 'All'
     };
-    if (this.state.lastCursor) {
+    if (this.state.lastCursor) 
       fetchParams.after = this.state.lastCursor;
-    }
 
     CameraRoll.getPhotos(fetchParams, this._appendAssets.bind(this), logError);
   }
   onEndReached() {
-    if (!this.state.noMore) {
+    if (!this.state.noMore) 
       this.fetch();
-    }
   }
   renderRow(assets, sectionID, rowID)  {
     var photos = assets.map((asset) => {
       if (asset === null) 
         return null;
       var icon = (this.state.selected[asset.node.image.uri])
-               ? 'ion|ios-checkmark-outline'
-               : 'ion|ios-circle-outline';
+               ? 
+                 <TouchableHighlight onPress={this.onSelect.bind(this, asset)} underlayColor='#ffffff'>
+                   <Icon name={'ion|ios-checkmark-empty'} size={20} color='#eeeeee' style={styles.icon} />
+                 </TouchableHighlight>  
+               : <View />
       return (
               <View>
                  <TouchableHighlight onPress={this.onSelect.bind(this, asset)} underlayColor='#ffffff'>
                     <Image style={styles.image} source={asset.node.image} />
                  </TouchableHighlight>
-                 <TouchableHighlight onPress={this.onSelect.bind(this, asset)} underlayColor='#ffffff'>
-                    <Icon name={icon} size={20} color='blue' style={styles.icon} />
-                 </TouchableHighlight>
-
+                 {icon}
               </View>
       );
     });
@@ -139,6 +140,7 @@ class SelectPhotoList extends Component {
 
 var styles = StyleSheet.create({
   photoContainer: {
+    marginTop: 65,
     flex: 1,
   },
   row: {
@@ -147,21 +149,20 @@ var styles = StyleSheet.create({
     alignSelf: 'center'
   },
   image: {
-    margin: 5,
-    marginVertical: 10,
-    width: 100,
-    height: 100
+    margin: 1,
+    marginVertical: 1,
+    width: 110,
+    height: 110
   },
   icon: {
     width: 20,
     height: 20,
-    marginTop: -33,
-    marginLeft: 7,
-    borderWidth: 2,
-    borderColor: '#D7E6ED',
-    backgroundColor: '#eeeeee',
+    marginTop: -25,
+    marginLeft: 4,
+    borderWidth: 1,
+    borderColor: '#eeeeee',
+    backgroundColor: 'blue',
     borderRadius: 10,
   },
-
 });
 module.exports = SelectPhotoList;
