@@ -31,6 +31,8 @@ class MoreLikeThis extends Component {
     });
   }
   render() {
+    if (this.props.resource['_type'] === 'tradle.SimpleMessage')
+      return null;
     return (
       <View style={styles.moreLikeThis}>
         <TouchableHighlight underlayColor='transparent' onPress={this.showMoreLikeThis.bind(this)}>
