@@ -10,7 +10,7 @@ var sha = require('stable-sha1');
 var utils = require('../utils/utils');
 var level = require('react-level');
 var promisify = require('q-level');
-var Sublevel = require('level-sublevel')
+// var Sublevel = require('level-sublevel')
 
 var IDENTITY_MODEL = 'tradle.Identity';
 var MY_IDENTITY_MODEL = 'tradle.MyIdentity';
@@ -217,12 +217,12 @@ var Store = Reflux.createStore({
   },
   onAddModelFromUrl(url) {
     var self = this;
-    var model;
+    var model, props;
     return fetch(url)
     .then((response) => response.json())
     .then(function(responseData) {
       model = responseData;
-      var props = model.properties;
+      props = model.properties;
       
       var err = ''; 
       var id = model.id;
@@ -238,7 +238,7 @@ var Store = Reflux.createStore({
       var from = props.from;
       if (!from)
         err += '"from" is required. Should have {ref: "tradle.Identity"}';
-      else
+      else 
         props.from.cloneOf = 'tradle.Message.from';
 
       var to = props.to;
@@ -272,6 +272,8 @@ var Store = Reflux.createStore({
         me.myModels = [];
       var key = 'model_' + model.id;
       me.myModels.push({key: key, title: model.title});
+      
+      self.setPropertyNames(props);
 
       models[key] = {
         key: key,
@@ -283,6 +285,14 @@ var Store = Reflux.createStore({
       err = err;
     })
     .done();
+  },
+  setPropertyNames(props) {
+    for (var p in props) {
+      if (!props[p].name)
+        props[p].name = p;
+      if (!props[p].title)
+        props[p].title = utils.makeLabel(p);
+    } 
   },
   onAddItem(value, resource, meta, isRegistration) {
     // Check if there are references to other resources
@@ -467,7 +477,8 @@ var Store = Reflux.createStore({
       // Make sure that the messages that are showing in chat belong to the conversation between these participants
       if (isMessage  &&  to) {
         var msgProp = utils.getCloneOf('tradle.Message.message', iMeta.properties);
-        if (!r[msgProp]  ||  r[msgProp].trim().length === 0)
+        var photosProp = utils.getCloneOf('tradle.Message.photos', iMeta.properties);
+        if ((!r[msgProp]  ||  r[msgProp].trim().length === 0) && !r[photosProp])
           continue;
         var fromProp = utils.getCloneOf('tradle.Message.from', iMeta.properties);
         var toProp = utils.getCloneOf('tradle.Message.to', iMeta.properties);
@@ -655,8 +666,10 @@ var Store = Reflux.createStore({
     var self = this;
     return db.createReadStream()
     .on('data', function(data) {
-       if (data.key.indexOf('model_') === 0)
+       if (data.key.indexOf('model_') === 0) {
          models[data.key] = data;
+         self.setPropertyNames(data.value.properties);
+       }
        else {
          if (!myId  &&  data.key === MY_IDENTITY_MODEL + '_1') {
            myId = data.value.currentIdentity;
