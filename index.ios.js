@@ -11,6 +11,8 @@ var MessageView = require('./Components/MessageView');
 var MessagesList = require('./Components/MessagesList');
 var ArticleView = require('./Components/ArticleView');
 var IdentitiesList = require('./Components/IdentitiesList');
+var SelectPhotoList = require('./Components/SelectPhotoList');
+var CameraView = require('./Components/CameraView');
 var utils = require('./utils/utils');
 var Icon = require('FAKIconImage');
 
@@ -114,7 +116,7 @@ class IdentityApp extends Component {
     case 4:
       return <NewResource navigator={nav} 
                   resource={props.resource} 
-                  metadata={props.metadata}
+                  model={props.model}
                   returnRoute={props.returnRoute}
                   callback={props.callback} />;
     case 5:
@@ -144,6 +146,15 @@ class IdentityApp extends Component {
                   callback={props.callback}
                   isAggregation={props.isAggregation}
                   modelName={props.modelName} />;
+    case 12:
+      return <CameraView />
+    case 13: 
+      return <SelectPhotoList 
+                metadata={props.metadata} 
+                navigator={props.navigator} 
+                onSelect={props.onSelect} 
+                onSelectingEnd={props.onSelectingEnd} />
+
     case 10:  
     default: // 10
       return <ResourceList navigator={nav} 
@@ -191,7 +202,19 @@ var NavigationBarRouteMapper = {
 
     return (
       <TouchableOpacity
-        onPress={() => navigator.push(route.onRightButtonPress)}>
+        onPress={() => {
+                  // 'Done' button case for creating new resources
+                  if (route.onRightButtonPress.stateChange) {
+                    if (route.onRightButtonPress.before)
+                      route.onRightButtonPress.before();
+                    route.onRightButtonPress.stateChange();
+                    if (route.onRightButtonPress.after)
+                      route.onRightButtonPress.after();
+                  }
+                  else
+                    navigator.push(route.onRightButtonPress)
+               }
+        }>
         <View style={styles.navBarRightButton}>
           {title}
         </View>
