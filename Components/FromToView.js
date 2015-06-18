@@ -101,7 +101,7 @@ class FromToView extends Component {
         backButtonTitle: resource.firstName,
         titleTextColor: '#7AAAC3',
         passProps: {
-          metadata: model,
+          model: model,
           resource: resource
         }
       },

@@ -97,7 +97,7 @@ class IdentitiesList extends Component {
           titleTextColor: '#7AAAC3',
           backButtonTitle: me.firstName,
           passProps: {
-            metadata: model,
+            model: model,
             resource: me
           }
         },

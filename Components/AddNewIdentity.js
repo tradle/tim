@@ -51,7 +51,7 @@ class AddNewIdentity extends Component {
       backButtonTitle: resource ? resource.firstName : 'Back',
       titleTextColor: '#7AAAC3',
       passProps: {
-        metadata: model,
+        model: model,
         callback: this.addNewIdentity
       }
     });
