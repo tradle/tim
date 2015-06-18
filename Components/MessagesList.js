@@ -7,6 +7,7 @@ var NoResources = require('./NoResources');
 var NewResource = require('./NewResource');
 var ResourceTypesScreen = require('./ResourceTypesScreen');
 var AddNewMessage = require('./AddNewMessage');
+var CameraView = require('./CameraView');
 var utils = require('../utils/utils');
 var reactMixin = require('react-mixin');
 var Store = require('../Store/Store');
@@ -14,7 +15,6 @@ var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 
 var InvertibleScrollView = require('react-native-invertible-scroll-view');
-var messageCount;
 
 var {
   ListView,
@@ -24,12 +24,15 @@ var {
   View,
 } = React;
 
+var currentMessageTime;
+
 class MessagesList extends Component {
   constructor(props) {
     super(props);
     this.timeoutID = null;
     this.state = {
       isLoading: utils.getModels() ? false : true,
+      selectedAssets: {},
       dataSource: new ListView.DataSource({
         rowHasChanged: (row1, row2) => row1 !== row2,
       }),
@@ -124,6 +127,7 @@ class MessagesList extends Component {
     var route = {
       title: newTitle,
       id: 5,
+      backButtonTitle: 'Back',
       component: MessageView,
       parentMeta: model,
       passProps: {resource: resource},
@@ -142,12 +146,15 @@ class MessagesList extends Component {
     var isAggregation = this.props.isAggregation; 
     var me = utils.getMe();
     var MessageRow = require('./MessageRow');
+    var previousMessageTime = currentMessageTime;
+    currentMessageTime = resource.time;
     return  (
       <MessageRow 
         onSelect={this.selectResource.bind(this, resource)}
         resource={resource}
         isAggregation={isAggregation}
         navigator={this.props.navigator}
+        previousMessageTime={previousMessageTime}
         to={isAggregation ? resource.to : this.props.resource} />
       );
   }
@@ -197,6 +204,8 @@ class MessagesList extends Component {
                             resource={this.props.resource} 
                             modelName={this.props.modelName} 
                             onAddNewPressed={this.onAddNewPressed.bind(this)}
+                            onTakePicPressed={this.onTakePicPressed.bind(this)}
+                            onPhotoSelect={this.onPhotoSelect.bind(this)}
                             callback={this.addedMessage.bind(this)} />
            : <View></View>;
     return (
@@ -213,7 +222,14 @@ class MessagesList extends Component {
       </View>
     );
   }
-
+  onPhotoSelect(asset) {
+    var selectedAssets = this.state.selectedAssets;
+    // unselect if was selected before
+    if (selectedAssets[asset.node.image.uri])
+      delete selectedAssets[asset.node.image.uri];
+    else
+      selectedAssets[asset.node.image.uri] = asset;
+  }
   onAddNewPressed() {
     var modelName = this.props.modelName;
     var model = utils.getModel(modelName).value;
@@ -223,7 +239,7 @@ class MessagesList extends Component {
 
     var self = this;
     var currentRoutes = self.props.navigator.getCurrentRoutes();
-    self.props.navigator.push({
+    this.props.navigator.push({
       title: utils.makeLabel(model.title) + ' type',
       id: 2,
       component: ResourceTypesScreen,
@@ -243,7 +259,7 @@ class MessagesList extends Component {
         backButtonTitle: 'Back',
         titleTextColor: '#7AAAC3',
         passProps: {
-          metadata: utils.getModel('tradle.NewMessageModel').value,
+          model: utils.getModel('tradle.NewMessageModel').value,
           callback: this.modelAdded.bind(this)
         }        
       }
@@ -253,6 +269,20 @@ class MessagesList extends Component {
     if (resource.url) 
       Actions.addModelFromUrl(resource.url);    
   }  
+  onTakePicPressed() {
+    var self = this;
+    this.props.navigator.push({
+      title: 'Take a pic',
+      id: 12,
+      component: CameraView,
+      passProps: {
+        ontakePic: self.onTakePic.bind(this)
+      }
+    });
+  }
+  onTakePic(data) {
+
+  }
 }
 reactMixin(MessagesList.prototype, Reflux.ListenerMixin);
 
