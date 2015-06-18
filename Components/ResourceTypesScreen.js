@@ -55,7 +55,7 @@ class ResourceTypesScreen extends Component {
     if (resource['_type'])
       return;
     var page = {
-      metadata: utils.getModel(resource.id).value,
+      model: utils.getModel(resource.id).value,
       resource: {
         '_type': this.props.modelName, 
         'from': utils.getMe(),

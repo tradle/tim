@@ -111,7 +111,7 @@ class ResourceList extends Component {
           titleTextColor: '#7AAAC3',
           backButtonTitle: resource.firstName,
           passProps: {
-            metadata: utils.getModel(resource['_type']).value,
+            model: utils.getModel(resource['_type']).value,
             resource: resource
           }
         },
@@ -159,7 +159,7 @@ class ResourceList extends Component {
         component: NewResource,
         titleTextColor: '#7AAAC3',
         passProps: {
-          metadata: utils.getModel(resource['_type']).value,
+          model: utils.getModel(resource['_type']).value,
           resource: me
         }
       };

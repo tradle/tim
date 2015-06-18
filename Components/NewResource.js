@@ -4,7 +4,6 @@ var React = require('react-native');
 var utils = require('../utils/utils');
 var NewItem = require('./NewItem');
 var PhotoView = require('./PhotoView');
-// var FromToView = require('./FromToView');
 var ResourceList = require('./ResourceList');
 var ResourceView = require('./ResourceView');
 var ChatMessage = require('./ChatMessage');
@@ -52,8 +51,8 @@ class NewResource extends Component {
     // if (this.state.isRegistration  ||  (params.me  &&  resource.rootHash === params.me.rootHash))
     //   utils.setMe(params.me);
     var self = this;
-    var title = utils.getDisplayName(resource, self.props.metadata.properties);
-    var isMessage = this.props.metadata.interfaces  &&  this.props.metadata.interfaces.indexOf('tradle.Message') != -1;
+    var title = utils.getDisplayName(resource, self.props.model.properties);
+    var isMessage = this.props.model.interfaces  &&  this.props.model.interfaces.indexOf('tradle.Message') != -1;
     // When message created the return page is the chat window, 
     // When profile or some contact info changed/added the return page is Profile view page
     if (this.props.callback) 
@@ -71,7 +70,7 @@ class NewResource extends Component {
           component: NewResource,
           titleTextColor: '#7AAAC3',
           passProps: {
-            metadata: self.props.metadata,
+            model: self.props.model,
             resource: resource
           }
         },
@@ -96,11 +95,11 @@ class NewResource extends Component {
     }
     var resource = this.state.resource;
     if (!resource)
-      resource = {'_type': this.props.metadata.id};
-    var isRegistration = !utils.getMe()  && this.props.metadata.id === 'tradle.Identity'  &&  (!resource || !resource.rootHash);
+      resource = {'_type': this.props.model.id};
+    var isRegistration = !utils.getMe()  && this.props.model.id === 'tradle.Identity'  &&  (!resource || !resource.rootHash);
     if (isRegistration)
       this.state.isRegistration = true;
-    Actions.addItem(value, resource, this.props.metadata, isRegistration);
+    Actions.addItem(value, resource, this.props.model, isRegistration);
   }
   chooser(prop, propName, event) {
     var resource = this.state.resource;
@@ -133,7 +132,7 @@ class NewResource extends Component {
     var json = value ? JSON.parse(JSON.stringify(value)) : {};
     var resource = this.state.resource;
     if (!resource)
-      resource = {'_type': this.props.metadata.id};
+      resource = {'_type': this.props.model.id};
     var items = resource[propName];
     if (!items) {
       items = [];
@@ -173,7 +172,7 @@ class NewResource extends Component {
     var resource = this.state.resource;
     var iKey = resource  ? resource['_type'] + '_' + resource.rootHash : null;
 
-    var meta =  props.metadata;
+    var meta =  props.model;
     if (this.props.setProperty)
       this.state.resource[this.props.setProperty.name] = this.props.setProperty.value;
     var data = {};
@@ -221,7 +220,7 @@ class NewResource extends Component {
         else
           counter = <View></View>    
       }
-      else if (self.props.metadata.required  &&  self.props.metadata.required.indexOf(bl.name) != -1)
+      else if (self.props.model.required  &&  self.props.model.required.indexOf(bl.name) != -1)
         counter = 
           <View>
             <Icon name='fontawesome|asterisk'  size={20}  color='#96415A'  style={styles.icon}/>
@@ -265,9 +264,61 @@ class NewResource extends Component {
           </View>
         </View>
       </ScrollView>
-      <ChatMessage resource={resource} model={meta} />
+      <ChatMessage resource={resource} 
+                   model={meta} 
+                   onSubmitEditing={this.onSubmitEditing.bind(this)}
+                   onEndEditing={this.onEndEditing.bind(this)} />
     </View>
     );
+  }
+  onEndEditing(userInput) {
+    this.setState({userInput: userInput});
+  }
+
+  onSubmitEditing(msg) {
+    msg = msg ? msg : this.state.userInput;
+    var assets = this.state.selectedAssets;
+    var isNoAssets = utils.isEmpty(assets);
+    if (!msg  &&  isNoAssets)
+      return;
+    var me = utils.getMe();
+    var resource = {from: utils.getMe(), to: this.props.resource.to};
+    var model = this.props.model;
+
+    var toName = utils.getDisplayName(resource.to, utils.getModel(resource.to['_type']).value.properties);
+    var meta = utils.getModel(me['_type']).value.properties;
+    var meName = utils.getDisplayName(me, meta);
+    var modelName = 'tradle.SimpleMessage';
+    var value = {
+      '_type': modelName,  
+      message: msg 
+              ?  model.isInterface ? msg : '[' + this.state.userInput + '](' + model.id + ')'
+              : '',
+
+      'from': {
+        id: me['_type'] + '_' + me.rootHash, 
+        title: meName
+      }, 
+      'to': {
+        id: resource.to['_type'] + '_' + resource.to.rootHash,
+        title: toName
+      },
+
+      time: new Date().getTime()
+    }
+    if (!isNoAssets) {
+      var photos = [];
+      for (var assetUri in assets) 
+        photos.push({url: assetUri, title: 'photo'});
+      
+      value.photos = photos;
+    }
+    this.setState({userInput: '', selectedAssets: {}});
+    // setTimeout(function() {
+    //   this.setState({textValue: this.state.userInput, selectedAssets: {}});
+    //   this.refs.chat.focus();
+    // }.bind(this), 0);
+    Actions.addMessage(value); //, this.state.resource, utils.getModel(modelName).value);
   }
 }
 reactMixin(NewResource.prototype, Reflux.ListenerMixin);

@@ -85,7 +85,7 @@ class SearchPage extends Component {
           titleTextColor: '#7AAAC3',
           backButtonTitle: me.firstName,
           passProps: {
-            metadata: utils.getModel(me['_type']).value,
+            model: utils.getModel(me['_type']).value,
             resource: me
           }
         },        
@@ -100,16 +100,15 @@ class SearchPage extends Component {
       this.setState({err: 'Can find model: ' + modelName});
       return;
     }
-    var metadata = utils.getModel(modelName).value;
-    var page = {
-      metadata: metadata,
-    };
+    var model = utils.getModel(modelName).value;
     var route = {
       component: NewResource,
       backButtonTitle: 'Back',
       id: 4,
       titleTextColor: '#7AAAC3',
-      passProps: page
+      passProps: {
+        model: model
+      },
     };
     var me = utils.getMe();
     if (me) {
