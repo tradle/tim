@@ -146,10 +146,6 @@ var utils = {
             options.fields[p].onEndEditing = onEndEditing.bind({}, p);
         }
       }
-      else if (type === 'array') {
-        props[p].name = p;
-        continue;
-      }
       else if (type != 'enum') {
         var ref = props[p].ref;
         if (!ref)
@@ -222,12 +218,8 @@ var utils = {
     //   return;
     var itemsMeta = [];
     for (var p in props) {
-      if (props[p].type == 'array') { //  &&  required[p]) {
-        if (!props[p].title)
-          props[p].title = utils.makeLabel(p);
-        props[p].name = p; 
-        itemsMeta.push(props[p]);
-      }
+      if (props[p].type == 'array')  //  &&  required[p]) {
+        itemsMeta.push(props[p]);      
     }
     return itemsMeta;
   },
