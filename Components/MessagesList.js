@@ -13,7 +13,6 @@ var reactMixin = require('react-mixin');
 var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
-
 var InvertibleScrollView = require('react-native-invertible-scroll-view');
 
 var {
@@ -80,36 +79,9 @@ class MessagesList extends Component {
   }
 
   selectResource(resource) {
-    var me = utils.getMe();
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
-    var model = utils.getModel(this.props.modelName);
-
-    if (resource['_type']) {
-      this._selectResource(resource);
+    if (!resource['_type']) 
       return;
-    }
-    // var props = {
-    //   metadata: utils.getModel(resource.id).value,
-    //   resource: {
-    //     '_type': this.props.modelName, 
-    //     'from': me,
-    //     'to': this.props.resource
-    //   }
-    // };
-    // if (this.props.returnRoute)
-    //   props.returnRoute = this.props.returnRoute;
-
-    // this.props.navigator.replace({
-    //   id: 4,
-    //   title: resource.title,
-    //   component: NewResource,
-    //   titleTextColor: '#7AAAC3',
-    //   passProps: props
-    // });
-
-  }
-
-  _selectResource(resource) {
     var model = utils.getModel(resource['_type']).value;
     var title = utils.getDisplayName(resource, model.properties);
     var newTitle = title;

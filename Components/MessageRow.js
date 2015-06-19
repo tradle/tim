@@ -5,6 +5,7 @@ var utils = require('../utils/utils');
 var ArticleView = require('./ArticleView');
 var MessageView = require('./MessageView');
 var NewResource = require('./NewResource');
+var PhotoCarousel = require('./PhotoCarousel');
 var moment = require('moment');
 var extend = require('extend');
 var groupByEveryN = require('groupByEveryN');
@@ -15,7 +16,6 @@ var {
   Text,
   TouchableHighlight,
   ListView,
-  // LayoutAnimation,
   Component,
   View
 } = React;
@@ -104,8 +104,14 @@ class MessageRow extends Component {
         else
           style = styles.image;
         var photos = [];
+        var photoUrls = [];
         for (var p of resource.photos) {
-          photos.push(<Image  source={{uri: utils.getImageUri(p.url)}} style={style} />)
+          photoUrls.push(utils.getImageUri(p.url));
+          photos.push(
+            <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, resource.photos)}>
+              <Image  source={{uri: utils.getImageUri(p.url)}} style={style} />
+            </TouchableHighlight>            
+          );
         }  
         var photoListStyle = {
           flexDirection: 'row', 
@@ -168,7 +174,7 @@ class MessageRow extends Component {
       showMessageBody = true;
     if (showMessageBody)
         messageBody = 
-          <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor={isMyMessage ? '#D7E6ED' : '#ffffff'}>
+          <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
             <View style={[rowStyle, {flexDirection: 'row', width: 340, alignSelf: isMyMessage ? 'flex-end' : 'flex-start'}]}>
               {ownerPhoto}
               {messageBody}
@@ -181,7 +187,7 @@ class MessageRow extends Component {
       <View style={{margin:1, backgroundColor: '#f7f7f7' }}>
         {date}
         {messageBody}
-        <TouchableHighlight onPress={onPressCall ? onPressCall: () => {}} underlayColor={isMyMessage ? '#D7E6ED' : '#ffffff'}>
+        <TouchableHighlight onPress={onPressCall ? onPressCall: () => {}} underlayColor='transparent'>
           <View>
             {photosList}
           </View>
@@ -190,13 +196,29 @@ class MessageRow extends Component {
       </View>
     );
   }
+  showCarousel(photos) {
+    this.props.navigator.push({
+      id: 14,
+      title: 'Photos',
+      backButtonTitle: 'Back',
+      component: PhotoCarousel,
+      passProps: {photos: photos},
+      rightButtonTitle: 'Done',
+      onRightButtonPress: {
+        stateChange: this.closeCarousel.bind(this)
+      }
+    })
+  }
+  closeCarousel() {
+    this.props.navigator.pop();
+  }
   renderPhotoList(val, inRow, style) {
     var dataSource = this.state.dataSource.cloneWithRows(
       groupByEveryN(val, inRow)
     );
     return (
-      <View style={style}>
-         <ListView
+      <View style={[style, styles.list]}>
+         <ListView style={styles.list}
             renderRow={this.renderRow.bind(this, style)}
             dataSource={dataSource} />
       </View>
@@ -287,6 +309,8 @@ class MessageRow extends Component {
     var isSimpleMessage = model.id === 'tradle.SimpleMessage';
     
     viewCols.forEach(function(v) {
+      if (properties[v].type === 'array'  ||  properties[v].type === 'date') 
+        return;
       var style = styles.resourceTitle; //(first) ? styles.resourceTitle : styles.description;
       if (isMyMessage) {
         style = [style, {justifyContent: 'flex-end', paddingLeft: 5}];
@@ -295,53 +319,43 @@ class MessageRow extends Component {
       }
 
       if (properties[v].ref) {
-        if (resource[v]) 
+        if (resource[v]) {
           vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{resource[v].title}</Text>);
-      }
-      else if (properties[v].type === 'array') 
-        return;
-      else if (properties[v].type === 'date') {
-        return;
-        // style = styles.description
-        // if (isMyMessage  &&  isSimpleMessage) {
-        //   var dateStyle = noMessage ? {alignSelf: 'flex-end', color: '#999999'} : {color: '#eeeeee'};
-        //   style = [style, dateStyle];
-        // }
-        // var val = utils.getFormattedDate(new Date(resource[v]));
-        // vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>)
-      }
-      else  {
-        if (resource[v]  &&  (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0)) {
-          onPressCall = self.onPress.bind(self);
-          vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{resource[v]}</Text>);
+          first = false;
         }
-        else if (!model.autoCreate) {
-          var val = (properties[v].displayAs) 
-                  ? utils.templateIt(properties[v], resource)
-                  : resource[v];
-          if (model.properties.verifiedBy  &&  !isMyMessage)                  
-            onPressCall = self.verify.bind(self);
-          vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>)
-        }
-        else {
-          if (!resource[v].length)
+        return;
+      }
+
+      if (resource[v]  &&  (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0)) {
+        onPressCall = self.onPress.bind(self);
+        vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{resource[v]}</Text>);
+      }
+      else if (!model.autoCreate) {
+        var val = (properties[v].displayAs) 
+                ? utils.templateIt(properties[v], resource)
+                : resource[v];
+        if (model.properties.verifiedBy  &&  !isMyMessage)                  
+          onPressCall = self.verify.bind(self);
+        vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>)
+      }
+      else {
+        if (!resource[v].length)
+          return;
+        var msgParts = utils.splitMessage(resource[v]);
+        // Case when the needed form was sent along with the message
+        if (msgParts.length === 2) {
+          var msgModel = utils.getModel(msgParts[1]);
+          if (msgModel) {
+            if (!isMyMessage)
+              onPressCall = self.createNewResource.bind(self, msgModel.value);
+            vCols.push(<View>
+                         <Text style={style}>{msgParts[0]}</Text>
+                         <Text style={[style, {color: isMyMessage ? '#efffe5' : '#7AAAC3'}]}>{msgModel.value.title}</Text>
+                       </View>);                  
             return;
-          var msgParts = utils.splitMessage(resource[v]);
-          // Case when the needed form was sent along with the message
-          if (msgParts.length === 2) {
-            var msgModel = utils.getModel(msgParts[1]);
-            if (msgModel) {
-              if (!isMyMessage)
-                onPressCall = self.createNewResource.bind(self, msgModel.value);
-              vCols.push(<View>
-                           <Text style={style}>{msgParts[0]}</Text>
-                           <Text style={[style, {color: isMyMessage ? '#efffe5' : '#7AAAC3'}]}>{msgModel.value.title}</Text>
-                         </View>);                  
-              return;
-            }
           }
-          vCols.push(<Text style={style}>{resource[v]}</Text>);
         }
+        vCols.push(<Text style={style}>{resource[v]}</Text>);
       }
       first = false;
     }); 
@@ -350,30 +364,8 @@ class MessageRow extends Component {
     
     if (vCols  &&  vCols.length)
       extend(renderedRow, vCols);
-    var photosProp = utils.getCloneOf('tradle.Message.photos', properties);
-    return onPressCall ? onPressCall : (isSimpleMessage  &&  !resource[photosProp]) ? null : this.props.onSelect;
+    return onPressCall ? onPressCall : (isSimpleMessage ? null : this.props.onSelect);
   }
-  // animateViewLayout() {
-  //   var resource = this.props.resource;
-  //   if (resource['_type'])
-  //     return;
-
-  //   LayoutAnimation.configureNext(
-  //     LayoutAnimation.Presets.easeInEaseOut,
-  //     () => {
-  //       console.log('layout animation done.');
-  //       // this.addWrapText();
-  //     },
-  //     (error) => { throw new Error(JSON.stringify(error)); }
-  //   );
-
-  //   this.setState({
-  //     viewStyle: {
-  //       margin: this.state.cnt > 0 ? 0 : (this.state.viewStyle.margin > 1 ? 1 : 2),
-  //       cnt: this.state.cnt++
-  //     }
-  //   });
-  // }
 }
 
 var styles = StyleSheet.create({
@@ -442,6 +434,9 @@ var styles = StyleSheet.create({
     height: 80,
     margin: 1,
     borderRadius: 10
+  },
+  list: {
+    borderRadius: 30
   },
   ownerImage: {
     backgroundColor: '#dddddd',
