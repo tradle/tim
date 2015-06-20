@@ -83,7 +83,7 @@ class MessagesList extends Component {
     if (!resource['_type']) 
       return;
     var model = utils.getModel(resource['_type']).value;
-    var title = utils.getDisplayName(resource, model.properties);
+    var title = model.title; //utils.getDisplayName(resource, model.properties);
     var newTitle = title;
     if (title.length > 20) {
       var t = title.split(' ');
