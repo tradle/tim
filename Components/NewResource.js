@@ -34,6 +34,9 @@ class NewResource extends Component {
     this.state = {
       resource: props.resource,
     }
+    this.props.navigator.route.onRightButtonPress = {
+      stateChange: this.onSavePressed.bind(this)
+    };
   }
   componentDidMount() {
     this.listenTo(Store, 'itemAdded');
@@ -128,6 +131,8 @@ class NewResource extends Component {
   }
 
   onAddItem(propName, item) {
+    if (!item)
+      return;
     var value = this.refs.form.getValue();
     var json = value ? JSON.parse(JSON.stringify(value)) : {};
     var resource = this.state.resource;
@@ -150,8 +155,11 @@ class NewResource extends Component {
       title: 'Add new ' + bl.title,
       backButtonTitle: 'Back',
       component: NewItem,
-      // rightButtonTitle: 'Done',
-      // onRightButtonPress: this.onAddItem.bind(this),
+      rightButtonTitle: 'Done',
+      // onRightButtonPress: {
+      //   stateChange: this.onAddItem.bind(this, bl, ),
+      //   before: this.done.bind(this)
+      // },
       passProps: {
         metadata: bl,
         resource: this.props.resource,
@@ -160,9 +168,6 @@ class NewResource extends Component {
       }
     });
   }
-  // handleChange(prop, event) {
-  //   this.state.resource[prop] = event.nativeEvent.text;
-  // }
 
   render() {
     var props = this.props;
@@ -255,12 +260,6 @@ class NewResource extends Component {
           <View style={{'padding': 20}}>
             <Form ref='form' type={Model} options={options} value={data} />          
             {arrayItems}
-          </View>
-          <View style={styles.buttons}>
-            <TouchableHighlight style={[styles.button, parentBG]} underlayColor='#7AAAC3'
-                onPress={this.onSavePressed.bind(this)}>
-              <Text style={[styles.buttonText]}>Save</Text>
-            </TouchableHighlight>
           </View>
         </View>
       </ScrollView>

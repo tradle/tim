@@ -54,7 +54,7 @@ class SelectPhotoList extends Component {
       <View style={{flex: 1}}>
       <ListView
         renderRow={this.renderRow.bind(this)}
-        style={styles.photoContainer}
+        style={this.props.style  ||  styles.photoContainer}
         dataSource={this.state.dataSource}
         onEndReached={this.onEndReached.bind(this)} />
       </View>

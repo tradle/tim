@@ -83,7 +83,8 @@ class SearchPage extends Component {
           id: 4,
           component: NewResource,
           titleTextColor: '#7AAAC3',
-          backButtonTitle: me.firstName,
+          backButtonTitle: 'Back',
+          rightButtonTitle: 'Done',
           passProps: {
             model: utils.getModel(me['_type']).value,
             resource: me

@@ -24,6 +24,9 @@ class NewItem extends Component {
     this.state = {
       selectedAssets: {}
     }
+    this.props.navigator.route.onRightButtonPress = {
+      stateChange: this.onSavePressed.bind(this)
+    };
   }
   onSavePressed() {
     var value = this.refs.form.getValue();
@@ -40,8 +43,8 @@ class NewItem extends Component {
         newJson = {url: assetUri, title: 'photo'};
         this.props.onAddItem(propName, newJson);    
       }
-      this.props.navigator.pop();
     }
+    this.props.navigator.pop();
   }
   addItem() {
     var propName = this.props.metadata.name;
@@ -74,7 +77,7 @@ class NewItem extends Component {
         <Text style={errStyle}>{err}</Text>
         <View style={{'padding': 20}}>
           <Form ref='form' type={Model} options={options} />
-          <SelectPhotoList 
+          <SelectPhotoList style={this.props.style || {flex: 1}}
             metadata={this.props.metadata} 
             navigator={this.props.navigator} 
             onSelect={this.onSelect.bind(this)} />
