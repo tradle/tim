@@ -456,7 +456,7 @@ var Store = Reflux.createStore({
     var required = meta.required;
     var meRootHash = me  &&  me.rootHash;
     for (var key in list) {
-      var iMeta;
+      var iMeta = null;
       if (isAllMessages) {
         if (implementors) {
           for (var impl of implementors) {
