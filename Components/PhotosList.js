@@ -148,9 +148,6 @@ var styles = StyleSheet.create({
     marginHorizontal: 1,
     borderColor: '#2E3B4E'
   },
-  viewStyle: {
-    margin: 1
-  },
   row: {
     flexDirection: 'row',
     flex: 1,
