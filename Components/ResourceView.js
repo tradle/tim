@@ -12,6 +12,7 @@ var Reflux = require('reflux');
 var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
 var Icon = require('FAKIconImage');
+var extend = require('extend');
 
 var {
   StyleSheet,
@@ -80,7 +81,17 @@ class ResourceView extends Component {
     var resource = this.state.resource;
     var modelName = resource['_type'];
     var model = utils.getModel(modelName).value;
- 
+    // var photoView = !resource.photos  ||  resource.photos.length > 1
+    //                 ? <View /> 
+    //                 : <View style={styles.photoBG}>
+    //                     <PhotoView resource={resource} />
+    //                   </View>
+    var photos = [];
+    if (resource.photos  &&  resource.photos.length > 1) {
+      extend(photos, resource.photos);
+      photos.splice(0, 1);
+    }
+
     return (
       <View style={{flex:1}}>
       <ScrollView  ref='this' style={styles.container}>
@@ -89,8 +100,8 @@ class ResourceView extends Component {
         </View>
         <AddNewIdentity resource={resource} navigator={this.props.navigator} />
         <SwitchIdentity resource={resource} navigator={this.props.navigator} />
+        <PhotosList photos={photos} navigator={this.props.navigator} numberInRow={photos.length > 4 ? 5 : photos.length} />    
         <ViewCols resource={resource} excludedProperties={['photos']}/>      
-        <PhotosList resource={resource} />    
       </ScrollView>
       {this.renderFooter()}
       </View>

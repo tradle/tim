@@ -16,12 +16,24 @@ class PhotoCarousel extends Component {
   }
   render() {
     var photos = [];
-    for (var photo of this.props.photos) {
-      photos.push(
-        <View style={styles.container}>
-          <Image source={{uri: photo.url}} style={styles.image}/>
-        </View>
-      )
+    var currentPhoto = this.props.currentPhoto || this.props.photos[0];
+    var currentPhotoIndex = -1;
+    var n = this.props.photos.length;
+    for (var j=0; j<2; j++) {
+      for (var i=0; i<n; i++) {
+        var photo = this.props.photos[i];
+
+        if (currentPhotoIndex == -1  &&  photo.url !== currentPhoto.url)
+          continue;
+        if (currentPhotoIndex == -1)
+          currentPhotoIndex = i;
+        photos.push(
+          <View style={styles.container}>
+            <Image source={{uri: photo.url}} style={styles.image}/>
+          </View>
+        )
+      }
+      n = currentPhotoIndex;
     }
     return (
       <Carousel width={375}>
@@ -41,7 +53,7 @@ var styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'black',
+    backgroundColor: 'transparent',
   },
 });
 module.exports = PhotoCarousel;

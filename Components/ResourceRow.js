@@ -28,7 +28,7 @@ class ResourceRow extends Component {
 
     var cancelResource = (this.props.onCancel) 
                        ? <View style={{justifyContent: 'flex-end'}}>
-                         <TouchableHighlight onPress={this.props.onCancel} underlayColor='#ffffff'>
+                         <TouchableHighlight onPress={this.props.onCancel} underlayColor='transparent'>
                            <Icon name='ion|ios-close-empty'  size={30}  color='#9E0603'  style={styles.icon} /> 
                          </TouchableHighlight>
                          </View>  
@@ -170,7 +170,6 @@ var styles = StyleSheet.create({
     fontSize: 14,
   },
   row: {
-    // alignItems: 'center',
     backgroundColor: 'white',
     flexDirection: 'row',
     padding: 5,
@@ -202,21 +201,9 @@ var styles = StyleSheet.create({
   icon: {
     width: 30,
     height: 30,
-    // borderWidth: 2,
-    // borderColor: '#D7E6ED',
-    // borderRadius: 14,
     position: 'absolute',
     right: 0
   },
-  // icon: {
-  //   width: 30,
-  //   height: 30,
-  //   marginRight: 5,
-  //   position: 'absolute',
-  //   right: 0,
-  //   // marginTop: 3,
-  //   color: '#7AAAC3'
-  // },
 });
 
 module.exports = ResourceRow;

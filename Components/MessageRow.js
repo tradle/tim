@@ -87,7 +87,7 @@ class MessageRow extends Component {
           addStyle = {padding: 5, borderRadius: 10};
       }
       if (model.style)
-        addStyle = [addStyle, {backgroundColor: '#efffe5'}]; //model.style];
+        addStyle = [addStyle, {padding: 5, backgroundColor: '#efffe5', borderWidth: 1, borderColor: '#deeeb4', marginBottom: 2}]; //model.style];
         // viewCols = <View style={styles.myCell}>{viewCols}</View>
     }
     var properties = model.properties;
@@ -108,7 +108,7 @@ class MessageRow extends Component {
         for (var p of resource.photos) {
           photoUrls.push(utils.getImageUri(p.url));
           photos.push(
-            <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, resource.photos)}>
+            <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, resource.photos, p)}>
               <Image  source={{uri: utils.getImageUri(p.url)}} style={style} />
             </TouchableHighlight>            
           );
@@ -196,13 +196,16 @@ class MessageRow extends Component {
       </View>
     );
   }
-  showCarousel(photos) {
+  showCarousel(photos, currentPhoto) {
     this.props.navigator.push({
       id: 14,
       title: 'Photos',
-      backButtonTitle: 'Back',
+      backButtonTitle: ' ',
       component: PhotoCarousel,
-      passProps: {photos: photos},
+      passProps: {
+        currentPhoto: currentPhoto,
+        photos: photos
+      },
       rightButtonTitle: 'Done',
       onRightButtonPress: {
         stateChange: this.closeCarousel.bind(this)
@@ -411,7 +414,8 @@ var styles = StyleSheet.create({
   msgImage: {
     backgroundColor: '#dddddd',
     height: 50,
-    marginRight: 10,
+    marginLeft: 10,
+    marginRight: 5,
     width: 50,
     borderRadius: 25,
     borderColor: '#cccccc',
