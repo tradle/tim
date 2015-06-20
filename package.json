@@ -27,6 +27,7 @@
     "extend": "~2.0.1",
     "reflux": "~0.2.7",
     "react-native-scrollable-mixin": "0.0.2",
-    "level-sublevel": "~6.4.6"
+    "level-sublevel": "~6.4.6",
+    "react-native-carousel": "~0.3.3"
   }
 }
