@@ -99,6 +99,7 @@ class FromToView extends Component {
         id: 4,
         component: NewResource,
         backButtonTitle: resource.firstName,
+        rightButtonTitle: 'Done',
         titleTextColor: '#7AAAC3',
         passProps: {
           model: model,

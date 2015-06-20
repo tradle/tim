@@ -95,7 +95,8 @@ class IdentitiesList extends Component {
           id: 4,
           component: NewResource,
           titleTextColor: '#7AAAC3',
-          backButtonTitle: me.firstName,
+          backButtonTitle: 'Back',
+          rightButtonTitle: 'Done',
           passProps: {
             model: model,
             resource: me
