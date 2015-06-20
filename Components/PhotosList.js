@@ -3,13 +3,13 @@
 var React = require('react-native');
 var utils = require('../utils/utils');
 var groupByEveryN = require('groupByEveryN');
+var PhotoCarousel = require('./PhotoCarousel');
 
 var {
   StyleSheet,
   Image, 
   View,
   ListView,
-  LayoutAnimation,
   Text,
   TextInput,
   TouchableHighlight,
@@ -23,54 +23,16 @@ class PhotosList extends Component {
       rowHasChanged: (row1, row2) => row1 !== row2,
     });
     this.state = {
-      resource: this.props.resource,
-      viewStyle: {margin: 3},
+      photos: this.props.photos,
       dataSource: dataSource
     }
   }
-  zoomPhoto(photo) {
-    // LayoutAnimation.configureNext(
-    //   LayoutAnimation.Presets.spring,
-    //   () => {
-    //     this.setState(
-    //       {thumb: {width: 280}}
-    //     );
-    //   },
-    //   (error) => { throw new Error(JSON.stringify(error)); }
-    // );
-    // this.setState({
-    //   viewStyle: {
-    //     margin: this.state.viewStyle.margin > 3 ? 3 : 10,
-    //   }
-    // });
-  
-    // this.setState({currentPhoto: photo});
-  }
-  // onViewLayout(e) {
-  //   this.setState({viewLayout: e.nativeEvent.layout});
-  // }
-  // onTextLayout(e) {
-  //   this.setState({textLayout: e.nativeEvent.layout});
-  // }
-  // onImageLayout(e) {
-  //   this.setState({imageLayout: e.nativeEvent.layout});
-  // }
   render() { 
-    var resource = this.state.resource;
-    var modelName = resource['_type'];
-    var model = utils.getModel(modelName).value;
-    
-    var photosProp = utils.getCloneOf('tradle.Message.photos', model.properties);
-    if (!photosProp)
-      photosProp = model.properties.photos  ? 'photos' : null
-    if (!photosProp)
-      return null;
-    
-    var val = resource[photosProp];
-    if (!val  ||  val.length === 1)
+    var photos = this.props.photos;
+    if (!photos  ||  photos.length <= 1)
       return null;
 
-    val = this.renderPhotoList(val);        
+    var val = this.renderPhotoList(photos);        
     return (
        <View style={styles.photoContainer}>
          {val}
@@ -80,7 +42,7 @@ class PhotosList extends Component {
 
   renderPhotoList(val) {
     var dataSource = this.state.dataSource.cloneWithRows(
-      groupByEveryN(val, 3)
+      groupByEveryN(val, this.props.numberInRow || 3)
     );
     return (
       <View style={styles.row}>
@@ -92,15 +54,38 @@ class PhotosList extends Component {
   }
 
   renderRow(photos)  {
-    var photos = photos.map((photo) => {
+    var len = photos.length;
+    var imageStyle = this.props.style;
+    if (!imageStyle) {
+      switch (len) {
+        case 1:
+        case 2:
+        case 3:
+          imageStyle = styles.thumb3;
+          break;
+        case 4:  
+          imageStyle = styles.thumb4;
+          break;
+        default:
+        case 5:
+          imageStyle = styles.thumb5;
+          break;      
+       }
+     }
+     var photos = photos.map((photo) => {
       if (photo === null) 
         return null;
+      var title = photo.title === 'photo'
+                ? <View />
+                : <Text style={styles.photoTitle}>{photo.title}</Text>
       return (
-        <View style={this.state.viewStyle}>
-          <TouchableHighlight onPress={this.zoomPhoto.bind(this, photo)} underlayColor='#ffffff'>
-            <Image style={styles.thumb} source={{uri: utils.getImageUri(photo.url)}} />
+        <View style={{paddingTop: 2, paddingRight: 1, flexDirection: 'column'}}>
+          <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, photo)}>
+            <View>
+             <Image style={[imageStyle, styles.thumbCommon]} source={{uri: utils.getImageUri(photo.url)}} />
+            {title}
+            </View>
           </TouchableHighlight>
-          <Text style={styles.photoTitle}>{photo.title}</Text>
         </View>
       );
     });
@@ -111,12 +96,33 @@ class PhotosList extends Component {
       </View>
     );
   }
+  showCarousel(currentPhoto) {
+    this.props.navigator.push({
+      id: 14,
+      title: 'Photos',
+      backButtonTitle: ' ',
+      component: PhotoCarousel,
+      passProps: {
+        currentPhoto: currentPhoto,
+        photos: this.props.photos
+      },
+      rightButtonTitle: 'Done',
+      onRightButtonPress: {
+        stateChange: this.closeCarousel.bind(this)
+      }
+    })
+  }
+  closeCarousel() {
+    this.props.navigator.pop();
+  }
 
 }
 var styles = StyleSheet.create({
   photoContainer: {
     flex: 1,
-    padding: 5
+    marginHorizontal: 5,
+    paddingTop: 5,
+    alignSelf: 'center'
   },
   photoTitle: {
     fontSize: 14,
@@ -124,13 +130,26 @@ var styles = StyleSheet.create({
     marginBottom: 5,
     color: '#656565',
   },
-  thumb: {
-    width: 110,
-    height: 110,
+  thumb3: {
+    width: 120,
+    height: 120,
+  },
+  thumb4: {
+    width: 90,
+    height: 90,
+  },
+  thumb5: {
+    width: 70,
+    height: 70,    
+  },
+  thumbCommon: {
     borderRadius: 5,
     borderWidth: 1,
-    marginHorizontal: 3,
+    marginHorizontal: 1,
     borderColor: '#2E3B4E'
+  },
+  viewStyle: {
+    margin: 1
   },
   row: {
     flexDirection: 'row',
