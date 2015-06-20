@@ -42,6 +42,9 @@ class MessageView extends Component {
     var msgProp = utils.getCloneOf('tradle.Message.message', model.properties);
     var timeProp = utils.getCloneOf('tradle.Message.time', model.properties);
     var date = utils.getFormattedDate(new Date(resource[timeProp]));
+    var inRow = resource.photos ? resource.photos.length : 0;
+    if (inRow  &&  inRow > 4)
+      inRow = 5;
     return (
       <ScrollView  ref='this' style={styles.container}>
         <View style={styles.photoBG}>
@@ -51,9 +54,9 @@ class MessageView extends Component {
         <VerificationButton  resource={resource} navigator={this.props.navigator} />
         <FromToView resource={resource} navigator={this.props.navigator} excluded/>
         <View style={styles.band}><Text style={styles.date}>{date}</Text></View>
+          <PhotosList photos={resource.photos} navigator={this.props.navigator} numberInRow={inRow}/>
         <View style={styles.rowContainer}>    
           <View><Text style={styles.itemTitle}>{resource[msgProp]}</Text></View>
-          <PhotosList resource={resource} />
           <ViewCols resource={resource} excludedProperties={['tradle.Message.message', 'tradle.Message.time', 'tradle.message.photos']} />
           {embed}
         </View>
