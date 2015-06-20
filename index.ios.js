@@ -13,6 +13,7 @@ var ArticleView = require('./Components/ArticleView');
 var IdentitiesList = require('./Components/IdentitiesList');
 var SelectPhotoList = require('./Components/SelectPhotoList');
 var CameraView = require('./Components/CameraView');
+var PhotoCarousel = require('./Components/PhotoCarousel');
 var utils = require('./utils/utils');
 var Icon = require('FAKIconImage');
 
@@ -151,10 +152,13 @@ class IdentityApp extends Component {
     case 13: 
       return <SelectPhotoList 
                 metadata={props.metadata} 
+                style={styles.style}
                 navigator={props.navigator} 
                 onSelect={props.onSelect} 
                 onSelectingEnd={props.onSelectingEnd} />
 
+    case 14:
+      return <PhotoCarousel photos={props.photos} currentPhoto={props.currentPhoto} />
     case 10:  
     default: // 10
       return <ResourceList navigator={nav} 
