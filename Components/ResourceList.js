@@ -19,6 +19,7 @@ var {
   Component,
   StyleSheet,
   Navigator,
+  TouchableHighlight,
   View,
 } = React;
 
@@ -188,14 +189,30 @@ class ResourceList extends Component {
       return <View />;
     return (
       <View style={styles.footer}>
-      <View>
-        <Icon name='ion|person-add'  size={30}  color='#999999'  style={styles.icon} /> 
-      </View>  
-      <View>
-        <Icon name='ion|person-stalker'  size={30}  color='#999999'  style={styles.icon} /> 
-      </View>  
+        <View>
+          <TouchableHighlight underlayColor='transparent' onPress={this.addNew.bind(this)}>
+            <Icon name='ion|person-add'  size={30}  color='#999999' style={styles.icon} /> 
+          </TouchableHighlight>
+        </View>  
+        <View>
+          <Icon name='ion|person-stalker'  size={30}  color='#999999'  style={styles.icon} /> 
+        </View>  
       </View>
     );
+  }
+  addNew() {
+    var model = utils.getModel(this.props.modelName).value;
+    this.props.navigator.push({
+      title: model.title,
+      id: 4,
+      component: NewResource,
+      titleTextColor: '#7AAAC3',
+      backButtonTitle: 'Back',
+      rightButtonTitle: 'Done',
+      passProps: {
+        model: model,
+      }      
+    })
   }
   render() {
     if (this.state.isLoading) 
@@ -252,7 +269,6 @@ var styles = StyleSheet.create({
     width: 30,
     height: 30,
     marginRight: 5,
-    // marginTop: 3,
     color: '#cccccc'
   },
   footer: {
