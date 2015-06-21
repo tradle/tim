@@ -35,17 +35,14 @@ class SearchPage extends Component {
     Actions.start();
   }
   componentDidMount() {
-    this.listenTo(Store, 'onReloadDB');
-    this.listenTo(Store, 'onStart');
+    this.listenTo(Store, 'handleEvent');
   }
-  onReloadDB(params) {
+  handleEvent(params) {
     if (params.action === 'reloadDB') {
       this.setState({isLoading: false});
       utils.setModels(params.models);
     }
-  }
-  onStart(params) {
-    if (params.action === 'start') {
+    else if (params.action === 'start') {
       utils.setMe(params.me);
       utils.setModels(params.models);
       this.setState({isLoading: false});
