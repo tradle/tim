@@ -184,6 +184,14 @@ var utils = {
     }
     return options;
   },
+  getId(r) {
+    if (r.id) {
+      var idArr = r.id.split('_');
+      return idArr.length === 2 ? idArr : idArr[0] + '_' + idArr[1];
+    }
+    else 
+      return r['_type'] + '_' + r.rootHash;    
+  },
   getFormattedDate(dateTime) {
     var date = new Date(dateTime);
     var dayDiff = moment(new Date()).dayOfYear() - moment(date).dayOfYear();
