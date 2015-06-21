@@ -102,7 +102,8 @@ class NewResource extends Component {
     var isRegistration = !utils.getMe()  && this.props.model.id === 'tradle.Identity'  &&  (!resource || !resource.rootHash);
     if (isRegistration)
       this.state.isRegistration = true;
-    Actions.addItem(value, resource, this.props.model, isRegistration);
+    var json = JSON.parse(JSON.stringify(value));
+    Actions.addItem(json, resource, this.props.model, isRegistration);
   }
   chooser(prop, propName, event) {
     var resource = this.state.resource;
@@ -175,7 +176,9 @@ class NewResource extends Component {
     var err = this.state.err;
 
     var resource = this.state.resource;
-    var iKey = resource  ? resource['_type'] + '_' + resource.rootHash : null;
+    var iKey = resource  
+             ? resource['_type'] + '_' + resource.rootHash
+             : null;
 
     var meta =  props.model;
     if (this.props.setProperty)
@@ -294,12 +297,12 @@ class NewResource extends Component {
               ?  model.isInterface ? msg : '[' + this.state.userInput + '](' + model.id + ')'
               : '',
 
-      'from': {
-        id: me['_type'] + '_' + me.rootHash, 
+      from: {
+        id: me['_type'] + '_' + me.rootHash + '_' + me.currentHash, 
         title: meName
       }, 
-      'to': {
-        id: resource.to['_type'] + '_' + resource.to.rootHash,
+      to: {
+        id: resource.to['_type'] + '_' + resource.to.rootHash + '_' + resource.to.currentHash,
         title: toName
       },
 
