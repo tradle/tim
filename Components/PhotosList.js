@@ -100,13 +100,15 @@ class PhotosList extends Component {
     this.props.navigator.push({
       id: 14,
       title: 'Photos',
-      backButtonTitle: ' ',
+      noLeftButton: true,
       component: PhotoCarousel,
       passProps: {
         currentPhoto: currentPhoto,
         photos: this.props.photos
       },
       rightButtonTitle: 'Done',
+      titleTintColor: 'black',
+      tintColor: '#dddddd',
       onRightButtonPress: {
         stateChange: this.closeCarousel.bind(this)
       }
