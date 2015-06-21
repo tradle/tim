@@ -2,7 +2,7 @@
 
 var React = require('react-native');
 var ResourceList = require('./Components/ResourceList');
-var SearchPage = require('./Components/SearchPage');
+var TimHome = require('./Components/TimHome');
 var ResourceTypesScreen = require('./Components/ResourceTypesScreen');
 var NewResource = require('./Components/NewResource');
 var NewItem = require('./Components/NewItem');
@@ -22,7 +22,7 @@ var reactMixin = require('react-mixin');
 var IDENTITY_MODEL = 'tradle.Identity';
 var {
   Component,
-  NavigatorIOS,
+  // NavigatorIOS,
   Navigator,
   View,
   Text,
@@ -45,9 +45,9 @@ var styles = StyleSheet.create({
   container: {
     flex: 1
   },
-  navBar: {
-    backgroundColor: 'white',
-  },
+  // navBar: {
+  //   backgroundColor: 'white',
+  // },
   navBarText: {
     fontSize: 16,
     marginVertical: 15,
@@ -69,6 +69,9 @@ var styles = StyleSheet.create({
 });
 
 class IdentityApp extends Component {
+  constructor(props) {
+    super(props);
+  }
   render() {
     var props = {modelName: IDENTITY_MODEL};
     return (
@@ -77,9 +80,9 @@ class IdentityApp extends Component {
         initialRoute={{
           id: 1,
           title: 'Trust in Motion',
-          backButtonTitle: 'Back',
+          backButtonTitle: 'blue',
           titleTextColor: '#2E3B4E',
-          component: SearchPage,
+          component: TimHome,
           passProps: props,
         }}
         renderScene={this.renderScene}
@@ -103,7 +106,7 @@ class IdentityApp extends Component {
     var props = route.passProps;
     switch (route.id) {
     case 1:
-      return <SearchPage navigator={nav} modelName={IDENTITY_MODEL} filter={props.filter} />;
+      return <TimHome navigator={nav} modelName={IDENTITY_MODEL} filter={props.filter} />;
     case 2:
       return <ResourceTypesScreen navigator={nav} 
                   modelName={props.modelName} 
@@ -174,13 +177,19 @@ class IdentityApp extends Component {
 }
 var NavigationBarRouteMapper = {
   LeftButton: function(route, navigator, index, navState) {
-    if (index === 0) {
+    if (index === 0  ||  route.noLeftButton) {
       return null;
     }
     var previousRoute = navState.routeStack[index - 1];
     var lbTitle = route.backButtonTitle  ||  previousRoute.title;
+    var style = [styles.navBarText]; 
+    if (route.tintColor)
+      style.push(route.tintColor);
+    else
+      style.push(styles.navBarButtonText);
+
     var title = lbTitle.indexOf('|') == -1
-              ?  <Text style={[styles.navBarText, styles.navBarButtonText]}>
+              ?  <Text style={style}>
                     {lbTitle}
                  </Text>
               : <Icon name={lbTitle} size={20} color='#7AAAC3' style={styles.icon}/>;
@@ -197,13 +206,15 @@ var NavigationBarRouteMapper = {
   RightButton: function(route, navigator, index, navState) {
     if (!route.rightButtonTitle)
       return <View/>
+    var style = [styles.navBarText, styles.navBarButtonText];
+    if (route.tintColor)
+      style.push({color: route.tintColor});
     var title = route.rightButtonTitle.indexOf('|') == -1
-              ?  <Text style={[styles.navBarText, styles.navBarButtonText]}>
+              ?  <Text style={style}>
                     {route.rightButtonTitle}
                  </Text>
               : <Icon name={route.rightButtonTitle} size={20} color='#7AAAC3' style={styles.icon}/>;
     
-
     return (
       <TouchableOpacity
         onPress={() => {
@@ -227,8 +238,11 @@ var NavigationBarRouteMapper = {
   },
 
   Title: function(route, navigator, index, navState) {
+    var style = [styles.navBarText, styles.navBarTitleText];
+    if (route.titleTintColor)
+      style.push({color: route.titleTintColor});
     return (
-      <Text style={[styles.navBarText, styles.navBarTitleText]}>
+      <Text style={style}>
         {route.title}
       </Text>
     );
