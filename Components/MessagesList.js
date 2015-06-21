@@ -146,7 +146,7 @@ class MessagesList extends Component {
     else {
       var model = utils.getModel(this.props.modelName).value; 
       var isAllMessages = model.isInterface  &&  model.id === 'tradle.Message';
-      content = <ListView ref='listview'
+      content = <ListView ref='listview' style={{marginHorizontal: 10}}
           dataSource={this.state.dataSource}
           // renderFooter={this.renderFooter.bind(this)}
           renderRow={this.renderRow.bind(this)}
