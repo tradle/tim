@@ -57,7 +57,7 @@ class FromToView extends Component {
             <TouchableHighlight underlayColor='transparent' onPress={() => 
               {
                 if (resource.from.id)
-                  Actions.getItem(resource.from.id)
+                  Actions.getItem(utils.getId(resource.from))
                 else
                   this.showProfile(resource.from)
               }
