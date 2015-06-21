@@ -92,21 +92,6 @@ class AddNewMessage extends Component {
     }, function(buttonIndex) {
       self.onButtonPress(buttonIndex);
     });
-    // (buttonIndex) => {
-    //   if (buttonIndex == 0)
-    //     this.props.onTakePicPressed.bind(this);
-    //   else
-    //     this.selectPhotoFromTheLibrary.bind(this);
-    // });
-    // AlertIOS.alert(
-    //   null,
-    //   null,
-    //   [
-    //     {text: 'Take photo', onPress: this.props.onTakePicPressed.bind(this) },
-    //     {text: 'Photo library', onPress: this.selectPhotoFromTheLibrary.bind(this)},
-    //     {text: 'Cancel', onPress: () => console.log('cancel')}
-    //   ]
-    // )
   }
   onButtonPress(buttonIndex) {
     if (buttonIndex == 0)
@@ -174,16 +159,8 @@ class AddNewMessage extends Component {
       message: msg 
               ?  model.isInterface ? msg : '[' + this.state.userInput + '](' + this.props.model.id + ')'
               : '',
-
-      'from': {
-        id: me['_type'] + '_' + me.rootHash, 
-        title: meName
-      }, 
-      'to': {
-        id: resource.to['_type'] + '_' + resource.to.rootHash,
-        title: toName
-      },
-
+      from: me,
+      to: resource.to,
       time: new Date().getTime()
     }
     if (!isNoAssets) {
