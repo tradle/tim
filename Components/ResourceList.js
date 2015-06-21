@@ -104,6 +104,7 @@ class ResourceList extends Component {
         id: 3,
         component: ResourceView,
         titleTextColor: '#7AAAC3',
+        backButtonTitle: 'Back',
         rightButtonTitle: 'Edit',
         onRightButtonPress: {
           title: title,
@@ -143,6 +144,7 @@ class ResourceList extends Component {
       id: 3,
       component: ResourceView,
       parentMeta: model,
+      backButtonTitle: 'Back',
       passProps: {resource: resource},
     }
     // Edit resource
@@ -160,7 +162,6 @@ class ResourceList extends Component {
         id: 4,
         component: NewResource,
         rightButtonTitle: 'Done',
-        backButtonTitle: 'Back',
         titleTextColor: '#7AAAC3',
         passProps: {
           model: utils.getModel(resource['_type']).value,
