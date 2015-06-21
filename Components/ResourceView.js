@@ -66,19 +66,6 @@ class ResourceView extends Component {
       }
     });
   }
-  renderFooter() {
-    return (
-      <View style={styles.footer}>
-      <TouchableHighlight onPress={this.contactList.bind(this)}>
-        <Icon name='ion|person-stalker' size={30}  color='#999999'  style={styles.icon} /> 
-      </TouchableHighlight>
-      </View>
-    );
-  }
-
-  contactList() {
-    
-  }
 
   render() {
     var resource = this.state.resource;
@@ -106,10 +93,23 @@ class ResourceView extends Component {
         <PhotosList photos={photos} navigator={this.props.navigator} numberInRow={photos.length > 4 ? 5 : photos.length} />    
         <ViewCols resource={resource} excludedProperties={['photos']}/>      
       </ScrollView>
-      {this.renderFooter()}
       </View>
     );
+      // {this.renderFooter()}
   }
+  // renderFooter() {
+  //   return (
+  //     <View style={styles.footer}>
+  //     <TouchableHighlight onPress={this.contactList.bind(this)}>
+  //       <Icon name='ion|person-stalker' size={30}  color='#999999'  style={styles.icon} /> 
+  //     </TouchableHighlight>
+  //     </View>
+  //   );
+  // }
+
+  // contactList() {
+    
+  // }
 }
 reactMixin(ResourceView.prototype, Reflux.ListenerMixin);
 
@@ -128,20 +128,20 @@ var styles = StyleSheet.create({
     marginRight: 5,
     justifyContent: 'flex-end'
   },
-  footer: {
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    backgroundColor: '#eeeeee',
-    borderBottomColor: '#eeeeee', 
-    borderRightColor: '#eeeeee', 
-    borderLeftColor: '#eeeeee', 
-    borderWidth: 1,
-    borderTopColor: '#cccccc',
-    height: 35, 
-    paddingVertical: 5, 
-    paddingHorizontal: 10,
-    alignSelf: 'stretch'
-  }
+  // footer: {
+  //   flexDirection: 'row', 
+  //   alignItems: 'center', 
+  //   backgroundColor: '#eeeeee',
+  //   borderBottomColor: '#eeeeee', 
+  //   borderRightColor: '#eeeeee', 
+  //   borderLeftColor: '#eeeeee', 
+  //   borderWidth: 1,
+  //   borderTopColor: '#cccccc',
+  //   height: 35, 
+  //   paddingVertical: 5, 
+  //   paddingHorizontal: 10,
+  //   alignSelf: 'stretch'
+  // }
 
 });
 
