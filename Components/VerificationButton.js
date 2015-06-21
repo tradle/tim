@@ -17,7 +17,10 @@ class VerificationButton extends Component {
     var resource = this.props.resource;
     var me = utils.getMe();
     var meId = me['_type'] + '_' + me.rootHash;
-    return resource.from  &&  resource.from.id != meId
+    var s = resource.from.id.split('_');
+    var fromId = s[0] + '_' + s[1];
+
+    return resource.from  &&  fromId != meId
            ? <View style={styles.verification}>
                <TouchableHighlight underlayColor='transparent' onPress={this.verify.bind(this)}>
                  <Icon name='ion|checkmark' size={30}  color='#ffffff'  style={styles.icon}/>
