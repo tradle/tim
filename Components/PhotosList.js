@@ -34,7 +34,7 @@ class PhotosList extends Component {
 
     var val = this.renderPhotoList(photos);        
     return (
-       <View style={styles.photoContainer}>
+       <View style={[styles.photoContainer, this.props.style ? {} : {marginHorizontal: 5}]}>
          {val}
        </View>
      );
@@ -75,7 +75,7 @@ class PhotosList extends Component {
      var photos = photos.map((photo) => {
       if (photo === null) 
         return null;
-      var title = photo.title === 'photo'
+      var title = !photo.title || photo.title === 'photo'
                 ? <View />
                 : <Text style={styles.photoTitle}>{photo.title}</Text>
       return (
@@ -120,7 +120,6 @@ class PhotosList extends Component {
 var styles = StyleSheet.create({
   photoContainer: {
     flex: 1,
-    marginHorizontal: 5,
     paddingTop: 5,
     alignSelf: 'center'
   },
