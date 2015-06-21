@@ -5,7 +5,8 @@ var utils = require('../utils/utils');
 var ArticleView = require('./ArticleView');
 var MessageView = require('./MessageView');
 var NewResource = require('./NewResource');
-var PhotoCarousel = require('./PhotoCarousel');
+var PhotosList = require('./PhotosList');
+// var PhotoCarousel = require('./PhotoCarousel');
 var moment = require('moment');
 var extend = require('extend');
 var groupByEveryN = require('groupByEveryN');
@@ -45,7 +46,7 @@ class MessageRow extends Component {
     var me = utils.getMe();
     var isMyMessage;
     if (!isModel  &&  !this.props.isAggregation) {
-      var fromHash = resource[utils.getCloneOf('tradle.Message.from', model.properties)].id;
+      var fromHash = utils.getId(resource.from);
       if (fromHash == me['_type'] + '_' + me.rootHash) 
         isMyMessage = true;      
     }
@@ -65,6 +66,8 @@ class MessageRow extends Component {
     else
       onPressCall = this.formatRow(isMyMessage, model, resource, renderedRow);
     
+    var photoUrls = [];
+    var photoListStyle, inRow;
     var addStyle;
     var noMessage = !resource.message  ||  !resource.message.length;
     if (!renderedRow.length) {
@@ -91,11 +94,11 @@ class MessageRow extends Component {
         // viewCols = <View style={styles.myCell}>{viewCols}</View>
     }
     var properties = model.properties;
-    var verPhoto, photosList;
+    var verPhoto;
     if (!isModel  &&  properties.photos) {
       if (resource.photos) {
-        var rem = resource.photos.length % 3;
-        var inRow = resource.photos.length === 1 ? 1 : rem ? 2 : 3;
+        var len = resource.photos.length;
+        inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
         var style;
         if (inRow === 1)
           style = styles.bigImage;
@@ -103,28 +106,15 @@ class MessageRow extends Component {
           style = styles.mediumImage;
         else
           style = styles.image;
-        var photos = [];
-        var photoUrls = [];
-        for (var p of resource.photos) {
-          photoUrls.push(utils.getImageUri(p.url));
-          photos.push(
-            <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, resource.photos, p)}>
-              <Image  source={{uri: utils.getImageUri(p.url)}} style={style} />
-            </TouchableHighlight>            
-          );
-        }  
-        var photoListStyle = {
+        for (var p of resource.photos) 
+          photoUrls.push({url: utils.getImageUri(p.url)});
+        
+        photoListStyle = {
           flexDirection: 'row', 
           alignSelf: isMyMessage ? 'flex-end' : 'flex-start', 
           marginLeft: isMyMessage ? 30 : 10,
-          marginRight: 5,
           borderRadius: 10 
         }
-        photosList = this.renderPhotoList(photos, inRow, photoListStyle);
-        // photosList = <View style={photoListStyle}>
-        //               {photos}
-        //             </View>  
-
       }
       else
         verPhoto = <View style={{height: 0, width:0}} />
@@ -159,11 +149,6 @@ class MessageRow extends Component {
     var date = val 
              ? <Text style={styles.date} numberOfLines={1}>{val}</Text>
              : <View />;
-    var messageBody = <View style={addStyle ? [styles.textContainer, addStyle] : styles.textContainer}>
-                        <View style={{flex: 1}}>
-                          {renderedRow}
-                       </View>
-                      </View>;
 
     var showMessageBody;
     if (!isModel  &&  noMessage) {
@@ -172,79 +157,50 @@ class MessageRow extends Component {
     }
     else 
       showMessageBody = true;
-    if (showMessageBody)
+    var messageBody;
+    if (showMessageBody) {
+        var viewStyle;
+        if (!isModel) {
+          viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
+          if (resource.message.length > 40)
+            viewStyle.width = 260;
+        }  
         messageBody = 
           <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
-            <View style={[rowStyle, {flexDirection: 'row', width: 340, alignSelf: isMyMessage ? 'flex-end' : 'flex-start'}]}>
+            <View style={[rowStyle, viewStyle]}>
               {ownerPhoto}
-              {messageBody}
+              <View style={addStyle ? [styles.textContainer, addStyle] : styles.textContainer}>
+                <View style={{flex: 1}}>
+                  {renderedRow}
+               </View>
+              </View>
             </View>
           </TouchableHighlight>      
+    }
     else
       messageBody = <View style={{height: 7}}/>
-
+    var len = photoUrls.length;
+    var inRow = len ? (len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3) : 0;
+    var photoStyle; 
+    if (inRow > 0) {
+      if (inRow === 1)
+        photoStyle = styles.bigImage;
+      else if (inRow === 2)
+        photoStyle = styles.mediumImage;
+      else
+        photoStyle = styles.image;
+    }
     return (
       <View style={{margin:1, backgroundColor: '#f7f7f7' }}>
         {date}
         {messageBody}
-        <TouchableHighlight onPress={onPressCall ? onPressCall: () => {}} underlayColor='transparent'>
-          <View>
-            {photosList}
-          </View>
-        </TouchableHighlight>
+        <View style={photoListStyle}>
+          <PhotosList photos={photoUrls} style={photoStyle} navigator={this.props.navigator} numberInRow={inRow} />    
+        </View>  
         <View style={isModel ? {backgroundColor: '#cccccc'} : {backgroundColor: '#ffffff'}} />
       </View>
     );
   }
-  showCarousel(photos, currentPhoto) {
-    this.props.navigator.push({
-      id: 14,
-      title: 'Photos',
-      backButtonTitle: ' ',
-      component: PhotoCarousel,
-      passProps: {
-        currentPhoto: currentPhoto,
-        photos: photos
-      },
-      rightButtonTitle: 'Done',
-      onRightButtonPress: {
-        stateChange: this.closeCarousel.bind(this)
-      }
-    })
-  }
-  closeCarousel() {
-    this.props.navigator.pop();
-  }
-  renderPhotoList(val, inRow, style) {
-    var dataSource = this.state.dataSource.cloneWithRows(
-      groupByEveryN(val, inRow)
-    );
-    return (
-      <View style={[style, styles.list]}>
-         <ListView style={styles.list}
-            renderRow={this.renderRow.bind(this, style)}
-            dataSource={dataSource} />
-      </View>
-    );
-  }
-  renderRow(style, photos)  {
-    var photos = photos.map((photo) => {
-      if (photo === null) 
-        return null;
-      return (
-        <View style={this.state.viewStyle}>
-          {photo}
-        </View>
-      );
-    });
-
-    return (
-      <View style={styles.row}>
-        {photos}
-      </View>
-    );
-  }
-
   onPress(event) {
     this.props.navigator.push({
       component: ArticleView,
@@ -404,8 +360,8 @@ var styles = StyleSheet.create({
   },
   myCell: { 
     padding: 5, 
-    marginRight: 5,
-    marginLeft: 30,    
+    // marginRight: 5,
+    // marginLeft: 30,    
     justifyContent: 'flex-end', 
     borderRadius: 10, 
     backgroundColor: '#569bff',
@@ -414,7 +370,7 @@ var styles = StyleSheet.create({
   msgImage: {
     backgroundColor: '#dddddd',
     height: 50,
-    marginLeft: 10,
+    // marginLeft: 10,
     marginRight: 5,
     width: 50,
     borderRadius: 25,
@@ -438,9 +394,6 @@ var styles = StyleSheet.create({
     height: 80,
     margin: 1,
     borderRadius: 10
-  },
-  list: {
-    borderRadius: 30
   },
   ownerImage: {
     backgroundColor: '#dddddd',
