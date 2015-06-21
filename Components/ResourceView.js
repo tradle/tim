@@ -33,8 +33,13 @@ class ResourceView extends Component {
     };
   }
   componentDidMount() {
-    this.listenTo(Store, 'onResourceUpdate');
-    this.listenTo(Store, 'onShowIdentityList');
+    this.listenTo(Store, 'handleEvent');
+  }
+  handleEvent(params) {
+    if (params.action === 'showIdentityList')
+      this.onShowIdentityList(params);
+    else
+      this.onResourceUpdate(params);
   }
   onResourceUpdate(params) {
     var resource = params.resource;
@@ -49,8 +54,6 @@ class ResourceView extends Component {
     this.setState({currentPhoto: photo});
   }
   onShowIdentityList(params) {
-    if (params.action !== 'showIdentityList')
-      return;
     var me = utils.getMe();
     this.props.navigator.push({
       id: 8,
