@@ -119,8 +119,8 @@ class MessageRow extends Component {
       else
         verPhoto = <View style={{height: 0, width:0}} />
     }
-    else if (isModel  &&  this.props.owner  &&  this.props.owner.photos) {
-      var ownerImg = this.props.owner.photos[0].url;
+    else if (isModel  &&  resource.owner  &&  resource.owner.photos) {
+      var ownerImg = resource.owner.photos[0].url;
       var url = utils.getImageUri(ownerImg);
       verPhoto = <Image source={{uri: ownerImg}} style={styles.ownerImage} />
     }
