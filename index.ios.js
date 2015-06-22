@@ -31,12 +31,6 @@ var {
 } = React;
 
 var styles = StyleSheet.create({
-  text: {
-    color: 'black',
-    backgroundColor: 'white',
-    fontSize: 30,
-    margin: 80
-  },
   icon: {
     width: 20,
     height: 20,
@@ -46,7 +40,7 @@ var styles = StyleSheet.create({
     flex: 1
   },
   // navBar: {
-  //   backgroundColor: 'white',
+  //   backgroundColor: 'transparent',
   // },
   navBarText: {
     fontSize: 16,
