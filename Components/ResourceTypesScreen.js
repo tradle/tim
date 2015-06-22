@@ -84,7 +84,6 @@ class ResourceTypesScreen extends Component {
       <MessageRow
         onSelect={() => this.selectResource(resource)}
         resource={resource}
-        owner={resource.owner}
         navigator={this.props.navigator}
         to={this.props.resource} />
       );
