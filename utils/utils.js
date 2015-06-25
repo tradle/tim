@@ -122,7 +122,7 @@ var utils = {
         label = utils.makeLabel(p);
       options.fields[p] = {
         error: 'Insert a valid ' + label,
-        bufferDelay: 20
+        bufferDelay: 20 // to eliminate missed keystrokes
       }
       if (props[p].description)
         options.fields[p].help = props[p].description;
@@ -139,7 +139,7 @@ var utils = {
             options.fields[p].multiline = true;
           options.fields[p].autoCorrect = false;
         }
-        if (type === 'string'  ||  type === 'integer') {
+        if (!props.isMultiline && (type === 'string'  ||  type === 'integer')) {
           if (onSubmitEditing) 
             options.fields[p].onSubmitEditing = onSubmitEditing;
           if (onEndEditing)
@@ -308,7 +308,7 @@ var utils = {
     }
   },
   getImageUri(url) {
-    if (url === null)
+    if (!url)
       return null;
     if (url.indexOf('assets-') === 0 || url.indexOf('http') === 0)
       return url;
