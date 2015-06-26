@@ -29,7 +29,7 @@ class PhotosList extends Component {
   }
   render() { 
     var photos = this.props.photos;
-    if (!photos  ||  photos.length <= 1)
+    if (!photos) //  ||  photos.length <= 1)
       return null;
 
     var val = this.renderPhotoList(photos);        
@@ -147,7 +147,7 @@ var styles = StyleSheet.create({
     borderRadius: 5,
     borderWidth: 1,
     marginHorizontal: 1,
-    borderColor: '#2E3B4E'
+    borderColor: 'transparent'
   },
   row: {
     flexDirection: 'row',
