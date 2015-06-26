@@ -2,7 +2,7 @@
  
 var React = require('react-native');
 var utils = require('../utils/utils');
-var ViewCols = require('./ViewCols');
+var ShowPropertiesView = require('./ShowPropertiesView');
 var PhotoView = require('./PhotoView');
 var PhotosList = require('./PhotosList');
 var AddNewIdentity = require('./AddNewIdentity');
@@ -86,7 +86,7 @@ class ResourceView extends Component {
         <AddNewIdentity resource={resource} navigator={this.props.navigator} />
         <SwitchIdentity resource={resource} navigator={this.props.navigator} />
         <PhotosList photos={photos} navigator={this.props.navigator} numberInRow={photos.length > 4 ? 5 : photos.length} />    
-        <ViewCols resource={resource} excludedProperties={['photos']}/>      
+        <ShowPropertiesView resource={resource} excludedProperties={['photos']}/>      
       </ScrollView>
       </View>
     );

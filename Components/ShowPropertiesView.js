@@ -15,7 +15,7 @@ var {
   Component
 } = React;
 
-class ViewCols extends Component {
+class ShowPropertiesView extends Component {
   constructor(props) {
     super(props);
     var dataSource = new ListView.DataSource({
@@ -50,9 +50,9 @@ class ViewCols extends Component {
           mapped.push(p);
           continue;
         }
-        var prop = utils.getCloneOf(p, model.properties);
-        if (prop)
-          mapped.push(prop);
+        // var prop = utils.getCloneOf(p, model.properties);
+        // if (prop)
+        //   mapped.push(prop);
       }
       excludedProperties = mapped;
     }
@@ -118,6 +118,7 @@ class ViewCols extends Component {
     var counter = 0;
     var vCols = pMeta.viewCols;          
     var cnt = val.length;
+    var self = this;
     return val.map(function(v) {
       var ret = [];
       var itemsMeta = pMeta.items.properties;
@@ -129,13 +130,34 @@ class ViewCols extends Component {
         var value = (itemMeta.displayAs) ? utils.templateIt(itemMeta, v) : v[p];
         if (!value)
           continue;
-        ret.push(
-          <View>
-           <View style={value.length > 60 ? styles.itemColContainer : styles.itemContainer}>
-             <Text style={itemMeta.skipLabel ? {height: 0} : styles.itemTitle}>{itemMeta.skipLabel ? '' : utils.makeLabel(p)}</Text>
-             <Text style={styles.description}>{value}</Text>                 
-           </View>
-         </View>);
+        if (itemMeta.ref) {
+          ret.push(
+            <View>
+              <TouchableHighlight onPress={self.showResources.bind(this, p, v)} underlayColor='transparent'>
+                <View style={styles.itemContainer}>
+                  <Icon style={styles.icon} size={30} name={iModel.icon || 'ion|ios-browsers-outline'} />             
+                </View>
+               </TouchableHighlight>
+           </View>);
+
+          // ret.push(
+          //   <View>
+          //     <TouchableHighlight onPress={self.showResource.bind(this, value)} underlayColor='transparent'>
+          //       <View style={value.length > 60 ? styles.itemColContainer : styles.itemContainer}>
+          //         <Text style={itemMeta.skipLabel ? {height: 0} : styles.itemTitle}>{itemMeta.skipLabel ? '' : utils.makeLabel(p)}</Text>
+          //         <Text style={styles.description}>{value.title}</Text>                 
+          //       </View>
+          //      </TouchableHighlight>
+          //  </View>);
+        }
+        else
+          ret.push(
+            <View>
+             <View style={value.length > 60 ? styles.itemColContainer : styles.itemContainer}>
+               <Text style={itemMeta.skipLabel ? {height: 0} : styles.itemTitle}>{itemMeta.skipLabel ? '' : utils.makeLabel(p)}</Text>
+               <Text style={styles.description}>{value}</Text>                 
+             </View>
+           </View>);
       } 
       return (
         <View>
@@ -144,6 +166,20 @@ class ViewCols extends Component {
         </View>
       )
     });    
+  }
+  showResource(prop, resource) {
+    this.props.navigator.push({
+      id: 10,
+      title: 'Contacts',
+      titleTextColor: '#7AAAC3',
+      backButtonTitle: 'Back',
+      component: ResourceList,
+      passProps: {
+        modelName: value.id.split('_')[0],
+        filter: '',
+        resource: resource
+      }
+    });
   }
 }
 var styles = StyleSheet.create({
@@ -186,6 +222,10 @@ var styles = StyleSheet.create({
     margin: 5,
     color: '#656565',
   },
+  icon: {
+    width: 40,
+    height: 40
+  }
 });
 
-module.exports = ViewCols;
+module.exports = ShowPropertiesView;

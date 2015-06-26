@@ -6,7 +6,7 @@ var ArticleView = require('./ArticleView');
 var FromToView = require('./FromToView');
 var PhotosList = require('./PhotosList');
 var PhotoView = require('./PhotoView');
-var ViewCols = require('./ViewCols');
+var ShowPropertiesView = require('./ShowPropertiesView');
 var MoreLikeThis = require('./MoreLikeThis');
 var VerificationButton = require('./VerificationButton');
 
@@ -55,7 +55,7 @@ class MessageView extends Component {
           <PhotosList photos={resource.photos} navigator={this.props.navigator} numberInRow={inRow}/>
         <View style={styles.rowContainer}>    
           <View><Text style={styles.itemTitle}>{resource.message}</Text></View>
-          <ViewCols resource={resource} excludedProperties={['tradle.Message.message', 'tradle.Message.time', 'tradle.message.photos']} />
+          <ShowPropertiesView resource={resource} excludedProperties={['tradle.Message.message', 'tradle.Message.time', 'tradle.message.photos']} />
           {embed}
         </View>
       </ScrollView>
