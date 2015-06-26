@@ -112,9 +112,7 @@ class AddNewMessage extends Component {
     var model = utils.getModel(this.props.modelName).value;
     if (model.isInterface)
       model = utils.getModel(interfaceToTypeMapping[this.props.modelName]).value;
-    var photoProp = utils.getCloneOf('tradle.Message.photos', model.properties); 
 
-    var currentRoutes = this.props.navigator.getCurrentRoutes();
     var self = this;
     this.props.navigator.push({
       id: 13,
@@ -129,7 +127,7 @@ class AddNewMessage extends Component {
         navigator: self.props.navigator,
         onSelect: self.onPhotoSelect.bind(this),
         onSelectingEnd: self.onSubmitEditing.bind(this),
-        metadata: model.properties[photoProp],
+        metadata: model.properties.photos,
       }
     })
   }
