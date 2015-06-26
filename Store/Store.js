@@ -101,35 +101,37 @@ var Store = Reflux.createStore({
 
   },
   onAddVerification(r) {
-    var rootHash = sha(r);
-    r.rootHash = rootHash;
-    r.currentHash = rootHash;
-    var self = this;
-    var key = r[RESOURCE_TYPE] + '_' + rootHash;
-    var batch = [];
+    if (!r.rootHash) {
+      var rootHash = sha(r);
+      r.rootHash = rootHash;
+      r.currentHash = rootHash;
+      var self = this;
+      var key = r[RESOURCE_TYPE] + '_' + rootHash;
+      var batch = [];
 
-    var toId = utils.getId(r.verifier);
-    var fromId = utils.getId(r.from);
-    var verificationRequestId = utils.getId(r.document);
-    var to = list[toId].value;
-    var from = list[fromId].value;
-    
-    var newVerification = {id: key + '_' + r.currentHash, title: r.document.title ? r.document.title : ''};
+      var toId = utils.getId(r.verifier);
+      var fromId = utils.getId(r.from);
+      var verificationRequestId = utils.getId(r.document);
+      var to = list[toId].value;
+      var from = list[fromId].value;
+      
+      var newVerification = {id: key + '_' + r.currentHash, title: r.document.title ? r.document.title : ''};
 
-    var verificationRequest = list[verificationRequestId].value;
-    if (!verificationRequest.verifiedBy)
-      verificationRequest.verifiedBy = [];
-    verificationRequest.verifiedBy.push({ verification: newVerification} );
+      var verificationRequest = list[verificationRequestId].value;
+      if (!verificationRequest.verifiedBy)
+        verificationRequest.verifiedBy = [];
+      verificationRequest.verifiedBy.push({ verification: newVerification} );
 
-    if (!from.myVerifications)
-      from.myVerifications = [];
+      if (!from.myVerifications)
+        from.myVerifications = [];
 
-    from.myVerifications.push({ verification: newVerification});
-    if (!to.verifiedByMe)
-      to.verifiedByMe = [];
-    to.verifiedByMe.push({ verification: newVerification} );
-    
-    batch.push({type: 'put', key: key, value: r});
+      from.myVerifications.push({ verification: newVerification});
+      if (!to.verifiedByMe)
+        to.verifiedByMe = [];
+      to.verifiedByMe.push({ verification: newVerification} );
+      
+      batch.push({type: 'put', key: key, value: r});
+    }
     batch.push({type: 'put', key: toId, value: to});
     batch.push({type: 'put', key: fromId, value: from});
     return db.batch(batch)
@@ -509,8 +511,7 @@ var Store = Reflux.createStore({
     }
   },
   getList(query, modelName, resource, isAggregation) {
-    var result;
-    result = this.searchResources(query, modelName, resource);
+    var result = this.searchResources(query, modelName, resource);
     if (isAggregation) 
       result = this.getDependencies(result);
     var resultList = [];
@@ -524,58 +525,30 @@ var Store = Reflux.createStore({
     this.trigger({action: model.isInterface  ||  model.interfaces ? 'messageList' : 'list', list: resultList, isAggregation: isAggregation});              
   },
   searchResources(query, modelName, to) {
+    var meta = this.getModel(modelName).value;
+    var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf('tradle.Message') != -1);    
+    if (isMessage)
+      return this.searchMessages(query, modelName, to);
+    else
+      return this.searchNotMessages(query, modelName, to);
+  },  
+  searchNotMessages(query, modelName, to) {
     var foundResources = {};
     var meta = this.getModel(modelName).value;
-    var isAllMessages = meta.isInterface;
-    var isMessage = isAllMessages  ||  (meta.interfaces  &&  meta.interfaces.indexOf('tradle.Message') != -1);
     var props = meta.properties;
-
-    var implementors = isAllMessages ? utils.getImplementors(modelName) : null;
 
     var required = meta.required;
     var meRootHash = me  &&  me.rootHash;
     var meId = IDENTITY_MODEL + '_' + meRootHash;
     for (var key in list) {
-      var iMeta = null;
-      if (isAllMessages) {
-        if (implementors) {
-          for (var impl of implementors) {
-            if (impl.id.indexOf(key.substring(0, key.indexOf('_'))) === 0) {
-              iMeta = impl;
-              break;
-            }
-          }
-          if (!iMeta)
-            continue;
-        }  
-      }
-      else if (key.indexOf(modelName + '_') == -1)
+      if (key.indexOf(modelName + '_') == -1)
         continue;
-      if (isMessage  &&  !iMeta)
-        iMeta = meta;
       var r = list[key].value;
       if (r.canceled)
         continue;
-      if (!isMessage  &&  r.creator_) {
+      if (r.creator_) {
         var id = utils.getId(r.creator_);
         if (id != me['_type'] + '_' + me.rootHash)
-          continue;
-      }
-      // Make sure that the messages that are showing in chat belong to the conversation between these participants
-      if (isMessage  &&  to) {
-        var msgProp = utils.getCloneOf('tradle.Message.message', iMeta.properties);
-        var photosProp = utils.getCloneOf('tradle.Message.photos', iMeta.properties);
-        if ((!r[msgProp]  ||  r[msgProp].trim().length === 0) && !r[photosProp])
-          continue;
-        var fromProp = utils.getCloneOf('tradle.Message.from', iMeta.properties);
-        var toProp = utils.getCloneOf('tradle.Message.to', iMeta.properties);
-
-        var fromID = utils.getId(r[fromProp]); 
-        var toID = utils.getId(r[toProp]);
-        if (fromID !== meId  &&  toID !== meId) 
-          continue;
-        var id = IDENTITY_MODEL + '_' + to.rootHash;
-        if (fromID !== id  &&  toID != id)
           continue;
       }
       if (!query) {
@@ -602,19 +575,77 @@ var Store = Reflux.createStore({
     }
 
     var result = utils.objectToArray(foundResources);
-    if (isMessage) {
-      result.sort(function(a,b) {
-        // Turn your strings into dates, and then subtract them
-        // to get a value that is either negative, positive, or zero.
-        return new Date(a.time) - new Date(b.time);
-      });
-      for (let r of result) {
-        var m = this.getModel(r['_type']).value;
-        var from = utils.getCloneOf('tradle.Message.from', m.properties);
-        r[from].photos = list[utils.getId(r.from)].value.photos; 
-        var to = utils.getCloneOf('tradle.Message.to', m.properties);
-        r[to].photos = list[utils.getId(r.to)].value.photos; 
+    return result;
+  },
+  searchMessages(query, modelName, to) {
+    var foundResources = {};
+    var meta = this.getModel(modelName).value;
+    var isAllMessages = meta.isInterface;
+    var props = meta.properties;
+
+    var implementors = isAllMessages ? utils.getImplementors(modelName) : null;
+
+    var required = meta.required;
+    var meRootHash = me  &&  me.rootHash;
+    var meId = IDENTITY_MODEL + '_' + meRootHash;
+    for (var key in list) {
+      var iMeta = null;
+      if (isAllMessages) {
+        if (implementors) {
+          for (var impl of implementors) {
+            if (impl.id.indexOf(key.substring(0, key.indexOf('_'))) === 0) {
+              iMeta = impl;
+              break;
+            }
+          }
+          if (!iMeta)
+            continue;
+        }  
       }
+      else if (key.indexOf(modelName + '_') == -1)
+        continue;
+      if (!iMeta)
+        iMeta = meta;
+      var r = list[key].value;
+      if (r.canceled)
+        continue;
+      // Make sure that the messages that are showing in chat belong to the conversation between these participants
+      if (to) {
+        if ((!r.message  ||  r.message.trim().length === 0) && !r.photos)
+          continue;
+        var fromID = utils.getId(r.from); 
+        var toID = utils.getId(r.to);
+        if (fromID !== meId  &&  toID !== meId) 
+          continue;
+        var id = IDENTITY_MODEL + '_' + to.rootHash;
+        if (fromID !== id  &&  toID != id)
+          continue;
+      }
+      if (!query) {
+         foundResources[key] = r;      
+         continue;   
+       }
+       // primitive filtering for this commit
+       var combinedValue = '';
+       for (var rr in props) {
+         if (r[rr] instanceof Array)
+          continue;
+         combinedValue += combinedValue ? ' ' + r[rr] : r[rr];
+       }
+       if (!combinedValue  ||  (combinedValue  &&  (!query || combinedValue.toLowerCase().indexOf(query.toLowerCase()) != -1))) {
+         foundResources[key] = r; 
+       }
+    }
+
+    var result = utils.objectToArray(foundResources);
+    result.sort(function(a,b) {
+      // Turn your strings into dates, and then subtract them
+      // to get a value that is either negative, positive, or zero.
+      return new Date(a.time) - new Date(b.time);
+    });
+    for (let r of result) {
+      r.from.photos = list[utils.getId(r.from)].value.photos; 
+      r.to.photos = list[utils.getId(r.to)].value.photos; 
     }
     return result;
   },
