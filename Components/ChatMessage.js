@@ -1,12 +1,7 @@
 'use strict'
 
 var React = require('react-native');
-// var Actions = require('../Actions/Actions');
-// var Store = require('../Store/Store');
-
 var utils = require('../utils/utils');
-// var reactMixin = require('react-mixin');
-// var Reflux = require('reflux');
 
 var {
   Component,
@@ -23,33 +18,6 @@ class ChatMessage extends Component {
     super(props);
     this.state = {userInput: ''};
   }
-  // componentDidMount() {
-  //   this.listenTo(Store, 'onAddMessage');
-  // }
-  // onAddMessage(params) {
-  //   if (params.action !== 'addMessage')
-  //     return;
-  //   var resource = params.resource;
-  //   if (!resource)
-  //     return;
-  //   if (params.error) {
-  //     if (resource['_type'] == this.props.resource['_type']) 
-  //       this.setState({err: params.error});
-  //     return;    
-  //   }
-  //   var model = utils.getModel(resource['_type']).value;
-  //   var isMessage = model.interfaces  &&  model.interfaces.indexOf('tradle.Message') != -1;
-  //   if (isMessage) {
-  //     if (this.props.callback) {
-  //       this.props.callback('');
-  //       this.setState({userInput: ''});
-  //       setTimeout(function() {
-  //         this.setState({textValue: this.state.userInput});
-  //         this.refs.chat.focus();
-  //       }.bind(this), 0);
-  //     }
-  //   }
-  // }
   render() {
     var model = this.props.model;
     var isMessage = model.interfaces  &&  model.interfaces.indexOf('tradle.Message') != -1;
@@ -61,9 +29,9 @@ class ChatMessage extends Component {
               : resource.to.title;
     if (resource.message  &&  utils.splitMessage(resource.message).length === 1)
       return <View></View>;
-    var alignStyle = model.isInterface ? {alignSelf: 'center'} : {alignSelf: 'stretch'};
+    var alignStyle = model.isInterface ? {alignSelf: 'center', marginTop: 10} : {alignSelf: 'stretch'};
     var messageField =
-        <View style={[styles.searchBarBG, alignStyle]}>
+        <View style={[styles.chat, alignStyle]}>
           <TextInput ref='chat'
             autoCapitalize='none'
             autoFocus={true}
@@ -71,7 +39,7 @@ class ChatMessage extends Component {
             bufferDelay={20}
             placeholder='Say something'
             placeholderTextColor='#bbbbbb'
-            style={styles.searchBarInput}
+            style={styles.chatInput}
             value={this.state.userInput}
             onChange={this.handleChange.bind(this)}
             onSubmitEditing={this.onSubmitEditing.bind(this)}
@@ -84,8 +52,10 @@ class ChatMessage extends Component {
     if (model.isInterface)
       return messageField;
     return  (
-      <View style={{flex: 1}}>
-        <Text style={styles.formRequest}>Send this form to {title}</Text>
+      <View>
+        <View style={styles.view}>
+          <Text style={styles.formRequest}>Send this form to {title}</Text>
+        </View>
         {messageField}
       </View>
       );
@@ -97,42 +67,22 @@ class ChatMessage extends Component {
     var msg = this.state.userInput;
     if (!msg)
       return;
-    this.setState({userInput: ''});
     this.props.onSubmitEditing(msg);
-
-    // var me = utils.getMe();
-    // var resource = this.props.resource;
-    // var toName = utils.getDisplayName(resource.to, utils.getModel(this.props.resource.to['_type']).value.properties);
-    // var meta = utils.getModel(me['_type']).value.properties;
-    // var meName = utils.getDisplayName(me, meta);
-    // var modelName = 'tradle.SimpleMessage';
-    // var value = {
-    //   '_type': modelName,  
-    //   message: this.props.model.isInterface ? msg : '[' + this.state.userInput + '](' + this.props.model.id + ')',
-
-    //   'from': {
-    //     id: me['_type'] + '_' + me.rootHash, 
-    //     title: meName
-    //   }, 
-    //   'to': {
-    //     id: resource.to['_type'] + '_' + resource.to.rootHash,
-    //     title: toName
-    //   },
-
-    //   time: new Date().getTime()
-    // }
-    // this.setState({userInput: ''});
-    // setTimeout(function() {
-    //   this.setState({textValue: this.state.userInput});
-    //   this.refs.chat.focus();
-    // }.bind(this), 0);
-    // Actions.addMessage(value); //, this.state.resource, utils.getModel(modelName).value);
+    this.setState({userInput: ''});
   }
 }
 // reactMixin(ChatMessage.prototype, Reflux.ListenerMixin);
 var styles = StyleSheet.create({
-  searchBarBG: {
-    marginTop: 10,
+  view: {
+    backgroundColor: '#efffe5',
+    borderWidth: 1, 
+    borderTopColor: '#deeeb4', 
+    borderLeftColor: '#efffe5', 
+    borderRightColor: '#efffe5', 
+    borderBottomColor: '#deeeb4', 
+    paddingVertical: 7,
+  },
+  chat: {
     marginBottom: 5,
     flex: 1,
     alignSelf: 'center',
@@ -143,7 +93,7 @@ var styles = StyleSheet.create({
     borderWidth: 2,
     borderBottomColor: '#cccccc',
   },
-  searchBarInput: {
+  chatInput: {
     height: 30,
     fontSize: 18,
     paddingLeft: 10,
@@ -153,8 +103,7 @@ var styles = StyleSheet.create({
     borderColor: '#eeeeee',
   },
   formRequest: {
-    paddingTop: 30,
-    paddingLeft: 20,
+    paddingLeft: 10,
     fontSize: 18,
     color: '#2E3B4E',
   },
