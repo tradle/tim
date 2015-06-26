@@ -48,11 +48,17 @@ class FromToView extends Component {
              </View>      
     var style = hasPhoto ? {marginTop: -70} : {marginTop: 0};
     var toPhoto = resource.to.photos && resource.to.photos[0].url;
-    if (toPhoto)
-      toPhoto = utils.getImageUri(toPhoto);
+    if (toPhoto) 
+      toPhoto = <Image style={styles.icon} source={{uri: utils.getImageUri(toPhoto)}} />
+    else
+      toPhoto = <Icon style={styles.icon} color='#2E3B4E' name='ion|android-person' size={70} />
+
     var fromPhoto = resource.from.photos && resource.from.photos[0].url;
     if (fromPhoto)
-      fromPhoto = utils.getImageUri(fromPhoto);
+      fromPhoto = <Image style={styles.icon} source={{uri: utils.getImageUri(fromPhoto)}} />
+    else
+      fromPhoto = <Icon style={styles.icon} color='#7AAAC3' name='ion|ios-person' size={70} />
+      // fromPhoto = utils.getImageUri(fromPhoto);
     return <View style={[styles.container, style]}>
             <TouchableHighlight underlayColor='transparent' onPress={() => 
               {
@@ -63,11 +69,11 @@ class FromToView extends Component {
               }
             }>
              <View  style={{flexDirection: 'column'}}>
-               <Image style={styles.thumb} source={{uri: fromPhoto}} />
+               {fromPhoto}
                <Text>{fromTitle}</Text>
              </View>
              </TouchableHighlight>
-            <Icon name='fontawesome|long-arrow-right'   size={70}  color='#f7f7f7'  style={styles.arrow} />
+            <Icon name='ion|ios-arrow-thin-right'   size={70}  color='#f7f7f7'  style={styles.arrow} />
             <TouchableHighlight underlayColor='transparent' onPress={() => 
                {
                  if (resource.to.id)
@@ -77,7 +83,7 @@ class FromToView extends Component {
                }
              }>
              <View  style={{flexDirection: 'column'}}>
-               <Image style={styles.thumb} source={{uri: toPhoto}} />
+               {toPhoto}
                <Text>{toTitle}</Text>
              </View>
              </TouchableHighlight>
@@ -124,6 +130,19 @@ var styles = StyleSheet.create({
   arrow: {
     width:  70,
     height: 70,
+    shadowColor: '#2E3B4E',
+    shadowOffset: {width: 0.5, height: 0.5},
+    shadowOpacity: 1,
+    shadowRadius: 1
+  },
+  icon: {
+    width: 70,
+    height: 70,
+    borderRadius: 33,
+    borderWidth: 2,
+    borderColor: '#7AAAC3',
+    color: '#ffffff',
+    backgroundColor: '#f7f7f7'
   },
   thumb: {
     width: 70,
