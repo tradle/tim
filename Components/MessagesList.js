@@ -41,19 +41,19 @@ class MessagesList extends Component {
   }
   componentWillMount() {
     if (this.props.isAggregation)
-      Actions.list('', this.props.modelName, this.props.resource, true);    
+      Actions.messageList('', this.props.modelName, this.props.resource, true);    
     else
-      Actions.list('', this.props.modelName, this.props.resource);    
+      Actions.messageList('', this.props.modelName, this.props.resource);    
   }
   componentDidMount() {
-    this.listenTo(Store, 'onListUpdate');
+    this.listenTo(Store, 'onAction');
   }
 
-  onListUpdate(params) {
+  onAction(params) {
     if (params.error)
       return;
-    if (params.action === 'addItem') {
-      Actions.list(this.state.filter, this.props.modelName, this.props.resource);
+    if (params.action === 'addItem'  ||  params.action === 'addVerification') {
+      Actions.messageList(this.state.filter, this.props.modelName, this.props.resource);
       return;      
     }
 
@@ -109,7 +109,7 @@ class MessagesList extends Component {
 
   onSearchChange(event) {
     var filter = event.nativeEvent.text.toLowerCase();
-    Actions.list(filter, this.props.modelName, this.props.resource);
+    Actions.messageList(filter, this.props.modelName, this.props.resource);
   }
 
   renderRow(resource)  {
@@ -230,6 +230,7 @@ class MessagesList extends Component {
         component: NewResource,
         backButtonTitle: 'Back',
         titleTextColor: '#7AAAC3',
+        rightButtonTitle: 'Done',
         passProps: {
           model: utils.getModel('tradle.NewMessageModel').value,
           callback: this.modelAdded.bind(this)
