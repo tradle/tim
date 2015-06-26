@@ -73,9 +73,8 @@ class IdentityApp extends Component {
         style={styles.container}
         initialRoute={{
           id: 1,
-          title: 'Trust in Motion',
-          backButtonTitle: 'blue',
-          titleTextColor: '#2E3B4E',
+          // title: 'Trust in Motion',
+          // titleTextColor: '#7AAAC3',
           component: TimHome,
           passProps: props,
         }}
@@ -176,6 +175,8 @@ var NavigationBarRouteMapper = {
     }
     var previousRoute = navState.routeStack[index - 1];
     var lbTitle = route.backButtonTitle  ||  previousRoute.title;
+    if (!lbTitle)
+      return null;
     var style = [styles.navBarText]; 
     if (route.tintColor)
       style.push(route.tintColor);
