@@ -66,6 +66,7 @@ class TimHome extends Component {
       id: 10,
       title: 'Contacts',
       titleTextColor: '#7AAAC3',
+      backButtonTitle: 'Back',
       component: ResourceList,
       rightButtonTitle: 'Profile',
       passProps: passProps,
@@ -102,6 +103,7 @@ class TimHome extends Component {
     var route = {
       component: NewResource,
       backButtonTitle: 'Back',
+      rightButtonTitle: 'Done',
       id: 4,
       titleTextColor: '#7AAAC3',
       passProps: {
@@ -110,7 +112,7 @@ class TimHome extends Component {
     };
     var me = utils.getMe();
     if (me) {
-      page.resource = me;
+      route.passProps.resource = me;
       route.title = 'Edit Identity';
     }
     else {
@@ -154,14 +156,17 @@ class TimHome extends Component {
     // }
     return (
       <View style={styles.scroll}>
+        <Text style={styles.title}>Trust in Motion (TiM)</Text>
         <View style={styles.container} ref='search'>
           <TouchableHighlight style={[styles.thumbButton]}
               underlayColor='#2E3B4E' onPress={this.showContactsOrRegister.bind(this)}>
-            <Image style={styles.thumb} source={require('image!Logo')}>
-            </Image>
+            <View>  
+            <Image style={styles.thumb} source={require('image!Logo')}></Image>
+            <Text style={styles.tradle}>Tradle</Text>
+            </View>
           </TouchableHighlight>
           <Text style={errStyle}>{err}</Text>
-          <View style={{marginTop: 170, flexDirection: 'row'}}>
+          <View style={styles.dev}>
             {editProfile}
             <TouchableHighlight 
                 underlayColor='#2E3B4E' onPress={this.onReloadDBPressed.bind(this)}>
@@ -182,19 +187,21 @@ reactMixin(TimHome.prototype, Reflux.ListenerMixin);
 
 var styles = StyleSheet.create({
   scroll: {
-    marginTop: 60,
+    // marginTop: 60,
     backgroundColor: '#2E3B4E',
   },
   container: {
     padding: 30,
-    // paddingTop: 10,
-    marginTop: 70,
+    marginTop: 60,
     alignItems: 'center',
-    backgroundColor: '#2E3B4E',
-
+  },
+  tradle: {
+    color: '#7AAAC3',
+    fontSize: 50,
+    alignSelf: 'center',
   },
   text: {
-    color: '#D7E6ED',
+    color: '#7AAAC3',
     paddingLeft: 10,
     paddingRight: 10,
     fontSize: 18,
@@ -203,12 +210,22 @@ var styles = StyleSheet.create({
     marginBottom: 10,
     alignSelf: 'center',
     justifyContent: 'center',
-    padding:40, 
+    padding: 40, 
   },
   thumb: {
     width: 200,
     height: 200,
   },
+  title: {
+    marginTop: 30,
+    alignSelf: 'center',
+    fontSize: 20,
+    color: '#7AAAC3'
+  },
+  dev: {
+    marginTop: 140,
+    flexDirection: 'row'
+  }
 });
 
 
