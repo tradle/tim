@@ -14,8 +14,10 @@ var Store = require('../Store/Store');
 var Reflux = require('reflux');
 var reactMixin = require('react-mixin');
 var Icon = require('FAKIconImage');
+var myStyles = require('../styles/styles');
 
 var Form = t.form.Form;
+Form.stylesheet = myStyles;
 
 var {
   StyleSheet,
@@ -58,31 +60,44 @@ class NewResource extends Component {
     var isMessage = this.props.model.interfaces  &&  this.props.model.interfaces.indexOf('tradle.Message') != -1;
     // When message created the return page is the chat window, 
     // When profile or some contact info changed/added the return page is Profile view page
-    if (this.props.callback) 
+    if (this.props.callback) {
       this.props.callback(resource);
-    else if (!isMessage) {
-      this.props.navigator.replacePrevious({
-        id: 3,
+      this.props.navigator.pop();
+      return;
+    }
+    if (isMessage) {
+      this.props.navigator.pop();
+      return;
+    }
+    var currentRoutes = self.props.navigator.getCurrentRoutes();
+    var currentRoutesLength = currentRoutes.length;
+    var navigateTo = (currentRoutesLength == 2)
+             ? this.props.navigator.replace
+             : this.props.navigator.replacePrevious
+
+    navigateTo({
+      id: 3,
+      title: title,
+      component: ResourceView,
+      titleTextColor: '#7AAAC3',
+      rightButtonTitle: 'Edit',
+      backButtonTitle: 'Back',
+      onRightButtonPress: {
         title: title,
-        component: ResourceView,
+        id: 4,
+        component: NewResource,
         titleTextColor: '#7AAAC3',
-        rightButtonTitle: 'Edit',
-        onRightButtonPress: {
-          title: title,
-          id: 4,
-          component: NewResource,
-          titleTextColor: '#7AAAC3',
-          passProps: {
-            model: self.props.model,
-            resource: resource
-          }
-        },
         passProps: {
+          model: self.props.model,
           resource: resource
         }
-      });
-    }
-    this.props.navigator.pop();
+      },
+      passProps: {
+        resource: resource
+      }
+    });
+    if (currentRoutesLength != 2)
+      this.props.navigator.pop();  
   }
   onSavePressed() {
     var value = this.refs.form.getValue();
@@ -95,14 +110,15 @@ class NewResource extends Component {
          msg += ' ' + err.message;
       }); 
       this.setState({ err: msg });
+      return;
     }
+    var json = JSON.parse(JSON.stringify(value));
     var resource = this.state.resource;
     if (!resource)
       resource = {'_type': this.props.model.id};
     var isRegistration = !utils.getMe()  && this.props.model.id === 'tradle.Identity'  &&  (!resource || !resource.rootHash);
     if (isRegistration)
       this.state.isRegistration = true;
-    var json = JSON.parse(JSON.stringify(value));
     Actions.addItem(json, resource, this.props.model, isRegistration);
   }
   chooser(prop, propName, event) {
@@ -250,28 +266,40 @@ class NewResource extends Component {
       );
     });
     var FromToView = require('./FromToView');
-    var style = isMessage ? {height: 570} : {height: 667};
-    return (
-    <View>  
-      <ScrollView style={style}>
-        <View style={styles.container}>
-          <Text style={errStyle}>{err}</Text>
-          <View style={styles.photoBG}>
-            <PhotoView resource={resource} />
-          </View>
-          <FromToView resource={resource} model={meta} navigator={this.props.navigator} />
-          <View style={{'padding': 20}}>
-            <Form ref='form' type={Model} options={options} value={data} />          
-            {arrayItems}
-          </View>
+    var style = isMessage ? {height: 570} : {height: 867};
+    style.marginTop = 60;
+    options.auto = 'placeholders';
+    options.tintColor = 'red'
+
+    var content = <ScrollView style={style}
+                    pagingEnabled={true}>
+                      <View style={styles.container}>
+                        <Text style={errStyle}>{err}</Text>
+                        <View style={styles.photoBG}>
+                          <PhotoView resource={resource} />
+                        </View>
+                        <FromToView resource={resource} model={meta} navigator={this.props.navigator} />
+                        <View style={{'padding': 15}}>
+                          <Form ref='form' type={Model} options={options} value={data} />          
+                          {arrayItems}
+                        </View>
+                        <View style={{height: 30}} />          
+                      </View>
+                    </ScrollView>
+    if (isMessage) 
+      return (
+        <View>
+          {content}
+          <View style={{marginTop: -35}}>
+            <ChatMessage resource={resource} 
+                         model={meta} 
+                         onSubmitEditing={this.onSubmitEditing.bind(this)}
+                         onEndEditing={this.onEndEditing.bind(this)} />
+          </View>    
         </View>
-      </ScrollView>
-      <ChatMessage resource={resource} 
-                   model={meta} 
-                   onSubmitEditing={this.onSubmitEditing.bind(this)}
-                   onEndEditing={this.onEndEditing.bind(this)} />
-    </View>
-    );
+      );
+    else
+      return content;
   }
   onEndEditing(userInput) {
     this.setState({userInput: userInput});
@@ -294,7 +322,7 @@ class NewResource extends Component {
     var value = {
       '_type': modelName,  
       message: msg 
-              ?  model.isInterface ? msg : '[' + this.state.userInput + '](' + model.id + ')'
+              ?  model.isInterface ? msg : '[' + msg + '](' + model.id + ')'
               : '',
 
       from: {
@@ -327,7 +355,6 @@ reactMixin(NewResource.prototype, Reflux.ListenerMixin);
 
 var styles = StyleSheet.create({
   container: {
-    marginTop: 50,
     flex: 1,
   },
   buttons: { 
@@ -351,7 +378,7 @@ var styles = StyleSheet.create({
     padding: 20,
     alignSelf: 'stretch',
     borderColor: '#6093ae',
-    borderWidth: 1,
+    borderWidth: 0.5,
     borderRadius: 8,
     marginTop: 7,
     justifyContent: 'center',
