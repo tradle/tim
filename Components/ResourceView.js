@@ -38,7 +38,7 @@ class ResourceView extends Component {
   handleEvent(params) {
     if (params.action === 'showIdentityList')
       this.onShowIdentityList(params);
-    else
+    else  
       this.onResourceUpdate(params);
   }
   onResourceUpdate(params) {
@@ -71,11 +71,6 @@ class ResourceView extends Component {
     var resource = this.state.resource;
     var modelName = resource['_type'];
     var model = utils.getModel(modelName).value;
-    // var photoView = !resource.photos  ||  resource.photos.length > 1
-    //                 ? <View /> 
-    //                 : <View style={styles.photoBG}>
-    //                     <PhotoView resource={resource} />
-    //                   </View>
     var photos = [];
     if (resource.photos  &&  resource.photos.length > 1) {
       extend(photos, resource.photos);
@@ -95,21 +90,7 @@ class ResourceView extends Component {
       </ScrollView>
       </View>
     );
-      // {this.renderFooter()}
   }
-  // renderFooter() {
-  //   return (
-  //     <View style={styles.footer}>
-  //     <TouchableHighlight onPress={this.contactList.bind(this)}>
-  //       <Icon name='ion|person-stalker' size={30}  color='#999999'  style={styles.icon} /> 
-  //     </TouchableHighlight>
-  //     </View>
-  //   );
-  // }
-
-  // contactList() {
-    
-  // }
 }
 reactMixin(ResourceView.prototype, Reflux.ListenerMixin);
 
