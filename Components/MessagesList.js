@@ -94,8 +94,6 @@ class MessagesList extends Component {
         newTitle += newTitle.length ? ' ' + word : word;
       })
     }
-    var timeProp = utils.getCloneOf('tradle.Message.time', model.properties);
-
     var route = {
       title: newTitle,
       id: 5,
