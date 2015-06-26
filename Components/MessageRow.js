@@ -52,12 +52,26 @@ class MessageRow extends Component {
     }
     var to = this.props.to;
     var ownerPhoto, hasOwnerPhoto;
-    if (isMyMessage  || !to  ||  !to.photos || isModel)
-      ownerPhoto = <View style={styles.cell}></View>
+    if (isModel) {
+      if (resource.owner  &&  resource.owner.photos)  {
+        hasOwnerPhoto = true;
+        var uri = utils.getImageUri(resource.owner.photos[0].url);
+        ownerPhoto = 
+          <View style={[styles.cell, {marginVertical: 2}]}>
+            <Image source={{uri: uri}} style={styles.msgImage} />         
+          </View>
+      }
+      else
+        ownerPhoto = <View style={[styles.cell, {marginVertical: 20}]} />
+    }  
     else {
-      var uri = utils.getImageUri(to.photos[0].url);
-      ownerPhoto = <Image source={{uri: uri}} style={styles.msgImage} /> 
-      hasOwnerPhoto = true;
+      if (isMyMessage  || !to  ||  !to.photos)
+        ownerPhoto = <View style={[styles.cell, {marginVertical: 0}]} />
+      else {
+        var uri = utils.getImageUri(to.photos[0].url);
+        ownerPhoto = <Image source={{uri: uri}} style={styles.msgImage} /> 
+        hasOwnerPhoto = true;
+      }
     }
     var renderedRow = [];
     var onPressCall;
@@ -67,8 +81,8 @@ class MessageRow extends Component {
       onPressCall = this.formatRow(isMyMessage, model, resource, renderedRow);
     
     var photoUrls = [];
-    var photoListStyle, inRow;
-    var addStyle;
+    var photoListStyle = {height: isModel ? 0 : 3};
+    var addStyle, inRow;
     var noMessage = !resource.message  ||  !resource.message.length;
     if (!renderedRow.length) {
       var vCols = isModel 
@@ -78,19 +92,19 @@ class MessageRow extends Component {
         renderedRow = <Text style={[styles.resourceTitle]} numberOfLines={2}>{vCols}</Text>;
     }
     else if (!isModel) {
-      var fromHash = resource[utils.getCloneOf('tradle.Message.from', model.properties)].id;
+      var fromHash = resource.from.id;
       if (isMyMessage) { 
         if (!noMessage)
           addStyle = styles.myCell;
       }
       else {
         if (!model.style)
-          addStyle = {padding: 5, borderRadius: 10, borderColor: '#cccccc', backgroundColor: '#ffffff'};
-        else
-          addStyle = {padding: 5, borderRadius: 10};
+          addStyle = {padding: 5, borderRadius: 10, borderColor: '#cccccc', backgroundColor: '#ffffff', marginVertical: 2};
+        // else
+        //   addStyle = {padding: 5, borderRadius: 10};
       }
       if (model.style)
-        addStyle = [addStyle, {padding: 5, backgroundColor: '#efffe5', borderWidth: 1, borderColor: '#deeeb4', marginBottom: 2}]; //model.style];
+        addStyle = [addStyle, {padding: 5, borderRadius: 10, backgroundColor: '#efffe5', borderWidth: 1, borderColor: '#deeeb4', marginVertical: 2}]; //model.style];
         // viewCols = <View style={styles.myCell}>{viewCols}</View>
     }
     var properties = model.properties;
@@ -112,8 +126,9 @@ class MessageRow extends Component {
         photoListStyle = {
           flexDirection: 'row', 
           alignSelf: isMyMessage ? 'flex-end' : 'flex-start', 
-          marginLeft: isMyMessage ? 30 : 10,
-          borderRadius: 10 
+          marginLeft: isMyMessage ? 30 : 55,
+          borderRadius: 10,
+          marginBottom: 3, 
         }
       }
       else
@@ -131,7 +146,7 @@ class MessageRow extends Component {
     var date;
     if (!isModel  &&  resource.time) {
       var previousMessageTime = this.props.previousMessageTime;      
-      var showTime = !previousMessageTime;
+      var showTime = !previousMessageTime  ||  this.props.isAggregation;
 
       if (!showTime)  {
         var prevDate = new Date(previousMessageTime);
@@ -158,22 +173,24 @@ class MessageRow extends Component {
     else 
       showMessageBody = true;
     var messageBody;
+    var isSimpleMessage = model.id === 'tradle.SimpleMessage';
     if (showMessageBody) {
         var viewStyle;
         if (!isModel) {
           viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
-          if (resource.message.length > 40)
+          if (resource.message.length > 30  ||  !isSimpleMessage)
             viewStyle.width = 260;
         }  
         messageBody = 
           <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
             <View style={[rowStyle, viewStyle]}>
-              {ownerPhoto}
+              {isModel ? <View style={{paddingLeft: 10}}/> : ownerPhoto}
               <View style={addStyle ? [styles.textContainer, addStyle] : styles.textContainer}>
                 <View style={{flex: 1}}>
                   {renderedRow}
                </View>
               </View>
+              {!isModel ? <View/> : ownerPhoto}
             </View>
           </TouchableHighlight>      
     }
@@ -181,7 +198,7 @@ class MessageRow extends Component {
       messageBody = <View style={{height: 7}}/>
     var len = photoUrls.length;
     var inRow = len ? (len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3) : 0;
-    var photoStyle; 
+    var photoStyle = {}; 
     if (inRow > 0) {
       if (inRow === 1)
         photoStyle = styles.bigImage;
@@ -190,14 +207,16 @@ class MessageRow extends Component {
       else
         photoStyle = styles.image;
     }
+
+    var viewStyle = { margin:1, backgroundColor: '#f7f7f7' }
+      
     return (
-      <View style={{margin:1, backgroundColor: '#f7f7f7' }}>
+      <View style={viewStyle}>
         {date}
         {messageBody}
         <View style={photoListStyle}>
           <PhotosList photos={photoUrls} style={photoStyle} navigator={this.props.navigator} numberInRow={inRow} />    
         </View>  
-        <View style={isModel ? {backgroundColor: '#cccccc'} : {backgroundColor: '#ffffff'}} />
       </View>
     );
   }
@@ -353,8 +372,8 @@ var styles = StyleSheet.create({
     // padding: 5,
   },
   cell: {
-    marginTop: 20,
-    marginBottom: 20,
+    // marginTop: 20,
+    // marginBottom: 20,
     marginLeft: 10,
     fontSize: 18
   },
