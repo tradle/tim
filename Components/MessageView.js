@@ -39,9 +39,7 @@ class MessageView extends Component {
                   <View style={{height: 50}} />
                 </View>
               :*/ <View></View>  
-    var msgProp = utils.getCloneOf('tradle.Message.message', model.properties);
-    var timeProp = utils.getCloneOf('tradle.Message.time', model.properties);
-    var date = utils.getFormattedDate(new Date(resource[timeProp]));
+    var date = utils.getFormattedDate(new Date(resource.time));
     var inRow = resource.photos ? resource.photos.length : 0;
     if (inRow  &&  inRow > 4)
       inRow = 5;
@@ -56,7 +54,7 @@ class MessageView extends Component {
         <View style={styles.band}><Text style={styles.date}>{date}</Text></View>
           <PhotosList photos={resource.photos} navigator={this.props.navigator} numberInRow={inRow}/>
         <View style={styles.rowContainer}>    
-          <View><Text style={styles.itemTitle}>{resource[msgProp]}</Text></View>
+          <View><Text style={styles.itemTitle}>{resource.message}</Text></View>
           <ViewCols resource={resource} excludedProperties={['tradle.Message.message', 'tradle.Message.time', 'tradle.message.photos']} />
           {embed}
         </View>
