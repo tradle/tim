@@ -6,8 +6,10 @@ var utils = require('../utils/utils');
 var extend = require('extend');
 var logError = require('logError');
 var SelectPhotoList = require('./SelectPhotoList');
+var myStyles = require('../styles/styles');
 
 var Form = t.form.Form;
+Form.stylesheet = myStyles;
 
 var {
   StyleSheet,
@@ -33,18 +35,40 @@ class NewItem extends Component {
     if (!value)
       return;
     var propName = this.props.metadata.name;
-    var json = JSON.parse(JSON.stringify(value));
+    var item = JSON.parse(JSON.stringify(value));
+    if (!this.validateValues(this.props.metadata, item)) 
+      return;
+    
     if (utils.isEmpty(this.state.selectedAssets)) 
-      this.props.onAddItem(propName, json);
+      this.props.onAddItem(propName, item);
     else {
       for (var assetUri in this.state.selectedAssets) {
-        var newJson = {};
-        extend(newJson, json);
-        newJson = {url: assetUri, title: 'photo'};
-        this.props.onAddItem(propName, newJson);    
+        var newItem = {};
+        extend(newItem, item);
+        newItem = {url: assetUri, title: 'photo'};
+        this.props.onAddItem(propName, newItem);    
       }
     }
     this.props.navigator.pop();
+  }
+  validateValues(prop, item) {
+    var required = prop.required;
+    var hasError;
+    this.state.options = {
+      fields: {}
+    };
+    if (required) {
+      for (var p of required)
+        if (!item[p]  &&  prop.name == 'photos') {
+          if (!utils.isEmpty(this.state.selectedAssets)) 
+            continue;
+          hasError = true;
+          this.setState({err: 'Select the photo please'});
+        }
+    }
+    if (!hasError)
+      this.state.options = null;
+    return !hasError;
   }
   addItem() {
     var propName = this.props.metadata.name;
@@ -55,7 +79,12 @@ class NewItem extends Component {
   render() {
     var props = this.props;
     var parentBG = {backgroundColor: '#7AAAC3'};
-    var err = props.err || '';
+    var err = props.err || this.state.err || '';
+    var errStyle = err ? styles.err : {'padding': 0, 'height': 0};
+    var error = err
+              ? <Text style={errStyle}>{err}</Text>
+              : <View />
+
 
     var meta =  props.metadata;
     var model = {};
@@ -67,16 +96,24 @@ class NewItem extends Component {
 
     var options = utils.getFormFields(params);
     var Model = t.struct(model);
-    var errStyle = err ? styles.err : {'padding': 0, 'height': 0};
+    if (this.state.options) {
+      for (var fieldName in this.state.options.fields) {
+        var fields = this.state.options.fields[fieldName]
+        for (var f in fields) {
+          options.fields[fieldName][f] = fields[f];
+        }
+      }
+    }
+
     return (
       <ScrollView
         initialListSize={10}
         pageSize={4}      
       >
       <View style={styles.container}>
-        <Text style={errStyle}>{err}</Text>
         <View style={{'padding': 20}}>
           <Form ref='form' type={Model} options={options} />
+          {error}
           <SelectPhotoList style={this.props.style || {flex: 1}}
             metadata={this.props.metadata} 
             navigator={this.props.navigator} 
@@ -131,11 +168,29 @@ var styles = StyleSheet.create({
     alignSelf: 'center'
   },
   err: {
-    paddingTop: 10,
-    paddingLeft: 20,
+    paddingVertical: 10,
     fontSize: 20,
     color: 'darkred',
   },
 
 });
 module.exports = NewItem;
+
+// tryiing to add custom validation of typed props e.g email
+    // if (propName == 'contact'  &&  value.type === 'email') {
+    //    var validated = /(.)+@(.)+/.test(value);
+    //   if (!validate) {
+    //      this.setState({
+    //         options: {
+    //           fields: {
+    //             identifier: {
+    //               hasError: true,
+    //               error: 'Invalid email'
+    //             }
+    //           }
+    //         }
+    //     });        
+    //     return;
+    //   }
+
+    // }
