@@ -271,8 +271,7 @@ class NewResource extends Component {
     options.auto = 'placeholders';
     options.tintColor = 'red'
 
-    var content = <ScrollView style={style}
-                    pagingEnabled={true}>
+    var content = <ScrollView style={style}>
                       <View style={styles.container}>
                         <Text style={errStyle}>{err}</Text>
                         <View style={styles.photoBG}>
