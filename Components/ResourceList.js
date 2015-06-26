@@ -26,7 +26,6 @@ var {
 class ResourceList extends Component {
   constructor(props) {
     super(props);
-    this.timeoutID = null;
     this.state = {
       isLoading: utils.getModels() ? false : true,
       dataSource: new ListView.DataSource({
@@ -49,31 +48,36 @@ class ResourceList extends Component {
   onListUpdate(params) {
     if (params.error)
       return;
-    if (params.action === 'addItem') {
+    var action = params.action;
+    if (action === 'addItem'  ||  action === 'addMessage') {
+      this.state.isLoading = true;
       Actions.list(this.state.filter, this.props.modelName, this.props.resource);
       return;      
     }
 
-    if (params.action !== 'list' ||  !params.list || params.isAggregation !== this.props.isAggregation)
+    if (action !== 'list' ||  !params.list || params.isAggregation !== this.props.isAggregation)
       return;
     var list = params.list;
-    if (list.length || this.state.filter.length) {
-      var type = list[0]['_type'];
-      if (type  !== this.props.modelName) {
-        var model = utils.getModel(this.props.modelName).value;
-        if (!model.isInterface)
-          return;
-        
-        var rModel = utils.getModel(type).value;
-        if (!rModel.interfaces  ||  rModel.interfaces.indexOf(this.props.modelName) === -1) 
-          return;
-      }
-      this.setState({
-        dataSource: this.state.dataSource.cloneWithRows(list),
-        isLoading: false
-      })
-    }
+    if (!list.length && !this.state.filter.length) 
+      return;
+    var type = list[0]['_type'];
+    if (type  !== this.props.modelName) 
+      return;
+    
+    // var n = Math.floor(5, list.length);
+    // for (var i=0; i<n; i++) {
+    //   var rnd = this.getRandomInt(1, list.length - 1);
+    //   list[rnd].online = true; 
+    // }
+
+    this.setState({
+      dataSource: this.state.dataSource.cloneWithRows(list),
+      isLoading: false
+    })
   }
+  // getRandomInt(min, max) {
+  //   return Math.floor(Math.random() * (max - min + 1)) + min;
+  // }
 
   selectResource(resource) {
     var me = utils.getMe();
@@ -212,6 +216,7 @@ class ResourceList extends Component {
       rightButtonTitle: 'Done',
       passProps: {
         model: model,
+        callback: () => Actions.list('', this.props.modelName, this.props.resource),
       }      
     })
   }
