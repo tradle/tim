@@ -6,8 +6,7 @@ var ArticleView = require('./ArticleView');
 var MessageView = require('./MessageView');
 var NewResource = require('./NewResource');
 var PhotosList = require('./PhotosList');
-// var PhotoCarousel = require('./PhotoCarousel');
-var moment = require('moment');
+var Icon = require('FAKIconImage');
 var extend = require('extend');
 var groupByEveryN = require('groupByEveryN');
 
@@ -103,7 +102,7 @@ class MessageRow extends Component {
         // else
         //   addStyle = {padding: 5, borderRadius: 10};
       }
-      if (model.style)
+      if (model.style) 
         addStyle = [addStyle, {padding: 5, borderRadius: 10, backgroundColor: '#efffe5', borderWidth: 1, borderColor: '#deeeb4', marginVertical: 2}]; //model.style];
         // viewCols = <View style={styles.myCell}>{viewCols}</View>
     }
@@ -181,6 +180,11 @@ class MessageRow extends Component {
           if (resource.message.length > 30  ||  !isSimpleMessage)
             viewStyle.width = 260;
         }  
+        var verified = (resource.verifications  &&  resource.verifications.length)
+                     ? <View style={styles.verificationCheck}>
+                         <Icon name='ion|ios-checkmark-empty' size={25} style={styles.icon} />
+                       </View>
+                     : <View />
         messageBody = 
           <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
             <View style={[rowStyle, viewStyle]}>
@@ -189,6 +193,7 @@ class MessageRow extends Component {
                 <View style={{flex: 1}}>
                   {renderedRow}
                </View>
+               {verified}
               </View>
               {!isModel ? <View/> : ownerPhoto}
             </View>
@@ -312,7 +317,7 @@ class MessageRow extends Component {
         var val = (properties[v].displayAs) 
                 ? utils.templateIt(properties[v], resource)
                 : resource[v];
-        if (model.properties.verifiedBy  &&  !isMyMessage)                  
+        if (model.properties.verifications  &&  !isMyMessage)                  
           onPressCall = self.verify.bind(self);
         vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>)
       }
@@ -429,6 +434,16 @@ var styles = StyleSheet.create({
     fontSize: 12,
     alignSelf: 'flex-end',
     color: '#b4c3cb'
+  },
+  icon: {
+    width: 30,
+    height: 30,
+    color: '#28C2C0'
+  },
+  verificationCheck: {
+    position: 'absolute', 
+    top:-5, 
+    right: 5    
   }
 });
 
