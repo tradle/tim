@@ -380,7 +380,7 @@ var styles = StyleSheet.create({
     // marginTop: 20,
     // marginBottom: 20,
     marginLeft: 10,
-    fontSize: 18
+    // fontSize: 18
   },
   myCell: { 
     padding: 5, 
@@ -389,7 +389,7 @@ var styles = StyleSheet.create({
     justifyContent: 'flex-end', 
     borderRadius: 10, 
     backgroundColor: '#569bff',
-    color: '#ffffff'
+    // color: '#ffffff'
   },
   msgImage: {
     backgroundColor: '#dddddd',
@@ -442,7 +442,7 @@ var styles = StyleSheet.create({
   },
   verificationCheck: {
     position: 'absolute', 
-    top:-5, 
+    top: -5, 
     right: 5    
   }
 });
