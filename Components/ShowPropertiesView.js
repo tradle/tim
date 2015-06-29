@@ -2,7 +2,7 @@
  
 var React = require('react-native');
 var utils = require('../utils/utils');
-
+var Icon = require('FAKIconImage');
 var {
   StyleSheet,
   Image, 
@@ -56,8 +56,11 @@ class ShowPropertiesView extends Component {
       }
       excludedProperties = mapped;
     }
-    if (!vCols)
+    if (!vCols) {
       vCols = utils.objectToArray(model.properties);
+      var idx = vCols.indexOf('_type');
+      delete vCols[idx];
+    }
     var self = this;
     var first = true;
     var viewCols = vCols.map(function(p) {
@@ -115,30 +118,51 @@ class ShowPropertiesView extends Component {
   }
 
   renderItems(val, pMeta) {
+    var itemsMeta = pMeta.items.properties;
+    if (!itemsMeta) {
+      var ref = pMeta.items.ref;
+      if (ref) {
+        pMeta = utils.getModel(ref).value;
+        itemsMeta = pMeta.properties;
+      }
+    }
     var counter = 0;
     var vCols = pMeta.viewCols;          
     var cnt = val.length;
     var self = this;
+    // if (pMeta.items.ref) {
+    //   return (
+    //     <View>
+    //       <TouchableHighlight onPress={self.showResource.bind(self, this.props.resource, pMeta.name)} underlayColor='transparent'>
+    //         <View style={styles.itemContainer}>
+    //           <Icon style={styles.icon} size={30} name={pMeta.items.icon || 'ion|ios-browsers-outline'} />             
+    //         </View>
+    //        </TouchableHighlight>
+    //    </View>);
+    // }    
     return val.map(function(v) {
       var ret = [];
-      var itemsMeta = pMeta.items.properties;
       counter++; 
       for (var p in itemsMeta) {
         if (vCols  &&  vCols.indexOf(p) == -1)
           continue;
-        var itemMeta = pMeta.items.properties[p];
-        var value = (itemMeta.displayAs) ? utils.templateIt(itemMeta, v) : v[p];
+        if (!v[p])
+          continue;
+        var itemMeta = itemsMeta[p];
+        var value;
+        if (itemMeta.displayAs) 
+          value = utils.templateIt(itemMeta, v) 
+        else if (itemMeta.type === 'date')
+          value = utils.formatDate(v[p]);
+        else if (itemMeta.type !== 'object')
+          value = v[p];
+        else if (itemMeta.ref)
+          value = v[p].title  ||  utils.getDisplayName(v[p], utils.getModel(itemMeta.ref).value.properties);
+        else   
+          value = v[p].title;
+
         if (!value)
           continue;
-        if (itemMeta.ref) {
-          ret.push(
-            <View>
-              <TouchableHighlight onPress={self.showResources.bind(this, p, v)} underlayColor='transparent'>
-                <View style={styles.itemContainer}>
-                  <Icon style={styles.icon} size={30} name={iModel.icon || 'ion|ios-browsers-outline'} />             
-                </View>
-               </TouchableHighlight>
-           </View>);
 
           // ret.push(
           //   <View>
@@ -149,16 +173,14 @@ class ShowPropertiesView extends Component {
           //       </View>
           //      </TouchableHighlight>
           //  </View>);
-        }
-        else
-          ret.push(
-            <View>
-             <View style={value.length > 60 ? styles.itemColContainer : styles.itemContainer}>
-               <Text style={itemMeta.skipLabel ? {height: 0} : styles.itemTitle}>{itemMeta.skipLabel ? '' : utils.makeLabel(p)}</Text>
-               <Text style={styles.description}>{value}</Text>                 
-             </View>
-           </View>);
-      } 
+        ret.push(
+          <View>
+           <View style={value.length > 60 ? styles.itemColContainer : styles.itemContainer}>
+             <Text style={itemMeta.skipLabel ? {height: 0} : styles.itemTitle}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
+             <Text style={styles.description}>{value}</Text>                 
+           </View>
+         </View>);
+      }
       return (
         <View>
            {ret}
@@ -167,19 +189,8 @@ class ShowPropertiesView extends Component {
       )
     });    
   }
-  showResource(prop, resource) {
-    this.props.navigator.push({
-      id: 10,
-      title: 'Contacts',
-      titleTextColor: '#7AAAC3',
-      backButtonTitle: 'Back',
-      component: ResourceList,
-      passProps: {
-        modelName: value.id.split('_')[0],
-        filter: '',
-        resource: resource
-      }
-    });
+  showResource(resource, prop) {
+    this.props.callback(resource, prop);
   }
 }
 var styles = StyleSheet.create({
