@@ -212,17 +212,6 @@ var utils = {
     }
     return val;
   },
-  // getCloneOf(prop, meta) {
-  //   for (var p in meta) {
-  //     var cloneOf = meta[p].cloneOf;
-  //     if (cloneOf  &&  cloneOf === prop)
-  //       return p;
-  //   }
-  //   var pp = prop.split(/\./g);
-  //   var propName = pp[pp.length - 1];
-  //   if (meta[propName])
-  //     return propName;
-  // },
   getItemsMeta(metadata) {
     var props = metadata.properties;
     var required = utils.arrayToObject(metadata.required);
@@ -323,69 +312,3 @@ var utils = {
 }
 
 module.exports = utils;
-
-  // loadResources: function() {
-  //   var myId = sampleData.getMyId();
-  //   var self = this;
-  //   return this.getDb().createReadStream()
-  //   .on('data', function(data) {
-  //      if (data.key.indexOf('model_') === 0)
-  //        models[data.key] = data;
-  //      else {
-  //        if (!me  &&  myId  && data.value.rootHash == myId)
-  //          me = data.value; 
-  //        resources[data.key] = data;
-  //      } 
-  //    })
-  //   .on('close', function() {
-  //     console.log('Stream closed');
-  //   })      
-  //   .on('end', function() {
-  //     console.log('Stream ended');
-  //   })      
-  //   .on('error', function(err) {
-  //     console.log('err: ' + err);
-  //   });
-  // },
-  // loadModelsAndMe(db, models) {
-  //   var myId = sampleData.getMyId();
-  //   var self = this;
-  //   var me;
-  //   return db.createReadStream()
-  //   .on('data', function(data) {
-  //      if (data.key.indexOf('model_') === 0)
-  //        models[data.key] = data;
-  //      if (myId  && data.value.rootHash == myId)
-  //        me = data.value; 
-  //    })
-  //   .on('close', function() {
-  //     console.log('Stream closed');
-  //     return me;
-  //   })      
-  //   .on('end', function() {
-  //     console.log('Stream ended');
-  //   })      
-  //   .on('error', function(err) {
-  //     console.log('err: ' + err);
-  //   });
-  // },    
-  // loadDB: function(db) {
-  //   var batch = [];
-  //   var self = this;
-  //   sampleData.getModels().forEach(function(m) {
-  //     if (!m.rootHash)
-  //       m.rootHash = sha(m);
-  //     batch.push({type: 'put', key: 'model_' + m.id, value: m});
-  //   });
-  //   sampleData.getResources().forEach(function(r) {
-  //     if (!r.rootHash) 
-  //       r.rootHash = sha(r);
-
-  //     var key = r['_type'] + '_' + r.rootHash;
-  //     batch.push({type: 'put', key: key, value: r});
-  //   });
-  //   this.getDb().batch(batch, function(err, value) {
-  //     if (!err)
-  //       self.loadResources();
-  //   });
-  // },
