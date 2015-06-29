@@ -17,7 +17,7 @@
     "react-mixin": "~1.2.2",
     "tcomb": "~1.0.3",
     "tcomb-validation": "~1.0.3",
-    "tcomb-form-native": "~0.2.1",
+    "tcomb-form-native": "~0.2.2",
     "clone": "~1.0.2",
     "react-native-addressbook": "git://github.com/pgmemk/react-native-addressbook#peerDepSemver",
     "react-native-icons": "~0.1.0",
