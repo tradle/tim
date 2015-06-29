@@ -1,7 +1,7 @@
 'use strict'
 
-// var myId = 'b25da36eaf4b01b37fc2154cb1103eb5324a52fa'; // Jane Choi
-//var myId = '31eb0b894cad3601adc76713d55a11c88e48b4a2'; // Kate Blair
+var myId = 'b25da36eaf4b01b37fc2154cb1103eb5324a52fa'; // Jane Choi
+ // var myId = '31eb0b894cad3601adc76713d55a11c88e48b4a2'; // Kate Blair
 // var myId = '38980944449570d2783d7c8af5db8ca9463391f3'; // Sophia
 
 var models = [{
@@ -19,7 +19,7 @@ var models = [{
       description: 'Owner of the contact list',
       readOnly: true
     },
-    'contact': {
+    'contactInfo': {
       'type': 'array',
       'items': {
         'type': 'object',
@@ -85,13 +85,32 @@ var models = [{
       'type': 'object',
       'ref': 'tradle.Organization'
     },
+    'verifiedByMe': {
+      'type': 'array',
+      'readOnly': true,
+      'items': {
+        'type': 'object',
+        'readOnly': true,
+        'ref': 'tradle.Verification'
+      },
+    },
+    'myVerifications': {
+      'type': 'array',
+      'readOnly': true,
+      'items': {
+        'type': 'object',
+        'readOnly': true,
+        'ref': 'tradle.Verification'
+      },
+    },
     'photos': {
       'type': 'array',
       'items': {
         'type': 'object',
         'properties': {
-          'type': {
-            'type': 'string'
+          'tags': {
+            'type': 'string',
+            'title': 'Tags via comma'
           },
           'url': {
             'type': 'string',
@@ -103,6 +122,7 @@ var models = [{
     },
     'pubkeys': {
       'type': 'array',
+      'readOnly': true,
       'items':  {
         'type': 'object',
         'properties': {
@@ -182,7 +202,8 @@ var models = [{
   'viewCols': [
     'formattedAddress',
     'organization',
-    'contact',
+    'myVerifications',
+    'contactInfo',
     'websites',
     'pubkeys',
     'photos'
@@ -249,7 +270,7 @@ var models = [{
       'items': {
         'type': 'object',
         'properties': {
-          'type': {
+          'tags': {
             'type': 'string'
           },
           'url': {
@@ -331,7 +352,7 @@ var models = [{
       'items': {
         'type': 'object',
         'properties': {
-          'title': {
+          'tags': {
             'type': 'string',
             'skipLabel': true
           },
@@ -385,28 +406,24 @@ var models = [{
      'message': {
       'type': 'string',
       'displayName': true,
-      'cloneOf': 'tradle.Message.message',
      },
      'from': {
       'type': 'object',
       'readOnly': true,
       'ref': 'tradle.Identity',
-      'cloneOf': 'tradle.Message.from',
      },
      'to': {
        'type': 'object',
        'ref': 'tradle.Identity',
-       'cloneOf': 'tradle.Message.to',
        'displayName': true,
        'readOnly': true
      },
      'photos': {
       'type': 'array',
-      'cloneOf': 'tradle.Message.photos',
       'items': {
         'type': 'object',
         'properties': {
-          'title': {
+          'tags': {
             'type': 'string',
             'skipLabel': true
           },
@@ -421,7 +438,6 @@ var models = [{
      'time': {
        'type': 'date',
        'readOnly': true,
-       'cloneOf': 'tradle.Message.time'
      }
   },  
   'required': [
@@ -447,18 +463,15 @@ var models = [{
       'type': 'string',
       'title': 'Description',
       'displayName': true,
-      'cloneOf': 'tradle.Message.message',
      },
      'from': {
       'type': 'object',
       'readOnly': true,
       'ref': 'tradle.Identity',
-      'cloneOf': 'tradle.Message.from',
      },
      'to': {
        'type': 'object',
        'ref': 'tradle.Identity',
-       'cloneOf': 'tradle.Message.to',
        'displayName': true,
        'readOnly': true
      },
@@ -473,15 +486,13 @@ var models = [{
      'time': {
        'type': 'date',
        'readOnly': true,
-       'cloneOf': 'tradle.Message.time'
      },
     'photos': {
       'type': 'array',
-      'cloneOf': 'tradle.Message.photos',
       'items': {
         'type': 'object',
         'properties': {
-          'title': {
+          'tags': {
             'type': 'string',
             'skipLabel': true
           },
@@ -493,18 +504,13 @@ var models = [{
       },
       'required': ['title', 'url']
     },
-    'verifiedBy': {
+    'verifications': {
       'type': 'array',
       'readOnly': true,
       'items': {
         'type': 'object',
         'readOnly': true,
-        'properties': {
-          'contact': {
-            'type': 'object',
-            'ref': 'tradle.Identity'
-          }
-        }
+        'ref': 'tradle.Verification'        
       },
       'required': ['contact']
     }
@@ -516,7 +522,7 @@ var models = [{
     'message', 'time'
   ],
   'viewCols': [
-    'message', 'time', 'photos'
+    'message', 'time', 'photos', 'verifications'
   ],
 },
 {
@@ -534,18 +540,15 @@ var models = [{
       'type': 'string',
       'title': 'Description',
       'displayName': true,
-      'cloneOf': 'tradle.Message.message',
      },
      'from': {
       'type': 'object',
       'readOnly': true,
       'ref': 'tradle.Identity',
-      'cloneOf': 'tradle.Message.from',
      },
      'to': {
        'type': 'object',
        'ref': 'tradle.Identity',
-       'cloneOf': 'tradle.Message.to',
        'displayName': true,
        'readOnly': true
      },
@@ -560,15 +563,13 @@ var models = [{
      'time': {
        'type': 'date',
        'readOnly': true,
-       'cloneOf': 'tradle.Message.time'
      },
     'photos': {
       'type': 'array',
-      'cloneOf': 'tradle.Message.photos',
       'items': {
         'type': 'object',
         'properties': {
-          'title': {
+          'tags': {
             'type': 'string',
             'skipLabel': true
           },
@@ -580,17 +581,12 @@ var models = [{
       },
       'required': ['title', 'url']
     },
-    'verifiedBy': {
+    'verifications': {
       'type': 'array',
       'readOnly': true,
       'items': {
         'type': 'object',
-        'properties': {
-          'contact': {
-            'type': 'object',
-            'ref': 'tradle.Identity'
-          }
-        }
+        'ref': 'tradle.Verification'
       },
       'required': ['contact']
     }
@@ -602,7 +598,7 @@ var models = [{
     'message', 'time'
   ],
   'viewCols': [
-    'message', 'time', 'photos'
+    'message', 'time', 'photos', 'verifications'
   ],
 },
 {
@@ -620,18 +616,15 @@ var models = [{
       'type': 'string',
       'title': 'Description',
       'displayName': true,
-      'cloneOf': 'tradle.Message.message',
      },
      'from': {
       'type': 'object',
       'readOnly': true,
       'ref': 'tradle.Identity',
-      'cloneOf': 'tradle.Message.from',
      },
      'to': {
        'type': 'object',
        'ref': 'tradle.Identity',
-       'cloneOf': 'tradle.Message.to',
        'displayName': true,
        'readOnly': true
      },
@@ -646,15 +639,13 @@ var models = [{
      'time': {
        'type': 'date',
        'readOnly': true,
-       'cloneOf': 'tradle.Message.time'
      },
     'photos': {
       'type': 'array',
-      'cloneOf': 'tradle.Message.photos',
       'items': {
         'type': 'object',
         'properties': {
-          'title': {
+          'tags': {
             'type': 'string',
             'skipLabel': true
           },
@@ -666,17 +657,12 @@ var models = [{
       },
       'required': ['title', 'url']
     },
-    'verifiedBy': {
+    'verifications': {
       'type': 'array',
       'readOnly': true,
       'items': {
         'type': 'object',
-        'properties': {
-          'contact': {
-            'type': 'object',
-            'ref': 'tradle.Identity'
-          }
-        }
+        'ref': 'tradle.Verification'
       },
       'required': ['contact']
     }
@@ -688,7 +674,7 @@ var models = [{
     'message', 'time'
   ],
   'viewCols': [
-    'message', 'time', 'photos'
+    'message', 'time', 'photos', 'verifications'
   ],
 },
 {
@@ -706,18 +692,15 @@ var models = [{
       'type': 'string',
       'displayName': true,
       'title': 'Description',
-      'cloneOf': 'tradle.Message.message',
      },
      'from': {
       'type': 'object',
       'readOnly': true,
       'ref': 'tradle.Identity',
-      'cloneOf': 'tradle.Message.from',
      },
      'to': {
        'type': 'object',
        'ref': 'tradle.Identity',
-       'cloneOf': 'tradle.Message.to',
        'displayName': true,
        'readOnly': true
      },
@@ -732,15 +715,13 @@ var models = [{
      'time': {
        'type': 'date',
        'readOnly': true,
-       'cloneOf': 'tradle.Message.time'
      },
     'photos': {
       'type': 'array',
-      'cloneOf': 'tradle.Message.photos',
       'items': {
         'type': 'object',
         'properties': {
-          'title': {
+          'tags': {
             'type': 'string',
             'skipLabel': true
           },
@@ -752,17 +733,12 @@ var models = [{
       },
       'required': ['title', 'url']
     },
-    'verifiedBy': {
+    'verifications': {
       'type': 'array',
       'readOnly': true,
       'items': {
         'type': 'object',
-        'properties': {
-          'contact': {
-            'type': 'object',
-            'ref': 'tradle.Identity'
-          }
-        }
+        'ref': 'tradle.Verification'
       },
       'required': ['contact']
     }
@@ -774,7 +750,7 @@ var models = [{
     'message', 'time'
   ],
   'viewCols': [
-    'message', 'time', 'photos', 'blockchainUrl'
+    'message', 'time', 'photos', 'blockchainUrl', 'verifications'
   ],
 },
 {
@@ -792,7 +768,6 @@ var models = [{
       'type': 'string',
       'displayName': true,
       'title': 'Description',
-      'cloneOf': 'tradle.Message.message',
      },
      'blockchainUrl': {
        'type': 'string',      
@@ -805,7 +780,6 @@ var models = [{
      'time': {
        'type': 'date',
        'readOnly': true,
-       'cloneOf': 'tradle.Message.time'
      },
     'street': {
       'type': 'string'
@@ -833,22 +807,19 @@ var models = [{
       'type': 'object',
       'readOnly': true,
       'ref': 'tradle.Identity',
-      'cloneOf': 'tradle.Message.from',
      },
      'to': {
        'type': 'object',
        'ref': 'tradle.Identity',
-       'cloneOf': 'tradle.Message.to',
        'displayName': true,
        'readOnly': true
      },
     'photos': {
       'type': 'array',
-      'cloneOf': 'tradle.Message.photos',
       'items': {
         'type': 'object',
         'properties': {
-          'title': {
+          'tags': {
             'type': 'string',
             'skipLabel': true
           },
@@ -860,17 +831,12 @@ var models = [{
       },
       'required': ['title', 'url']
     },
-    'verifiedBy': {
+    'verifications': {
       'type': 'array',
       'readOnly': true,
       'items': {
         'type': 'object',
-        'properties': {
-          'contact': {
-            'type': 'object',
-            'ref': 'tradle.Identity'
-          }
-        }
+        'ref': 'tradle.VerificationOfAddress'
       },
       'required': ['contact']
     }
@@ -882,7 +848,7 @@ var models = [{
     'message', 'formattedAddress', 'time'
   ],
   'viewCols': [
-    'message', 'formattedAddress', 'blockchainUrl', 'time'
+    'message', 'formattedAddress', 'blockchainUrl', 'time', 'verifications'
   ],
 },
 {
@@ -899,25 +865,25 @@ var models = [{
      },
      'document': {
       'type': 'object',
+      'readOnly': true,
       'ref': 'tradle.Message',
       'title': 'Verifying document',
-      'displayName': true,
      },
      'message': {
       'type': 'object',
       'title': 'Description',
       'displayName': true,
-      'cloneOf': 'tradle.Message.message',
      },
-     'verifier': {
+     'to': {
       'type': 'object',
-      'cloneOf': 'tradle.Message.to',
+      'title': 'Owner',
       'ref': 'tradle.Identity',
+      'displayName': true,
       'readOnly': true,
      },
-     'owner': {
+     'from': {
        'type': 'object',
-       'cloneOf': 'tradle.Message.from',
+       'title': 'Verifier',
        'readOnly': true,
        'ref': 'tradle.Identity',
        'displayName': true
@@ -932,14 +898,83 @@ var models = [{
      },
      'time': {
        'type': 'date',
-       'cloneOf': 'tradle.Message.time'
+       readOnly: true
      }
   },  
   'required': [
-    'message', 'verifier', 'owner', 'time'
+    'message', 'to', 'from', 'time'
   ],
   'viewCols': [
     'message', 'time'
+  ],
+},
+{
+  'id': 'tradle.VerificationOfAddress',
+  'type': 'object',
+  'title': 'Verification',
+  'interfaces': ['tradle.Message'],
+  'style': {'backgroundColor': '#E7E6F5'},
+  'autoCreate': true,
+  'properties': {
+    '_type': {
+      'type': 'string',
+      'readOnly': true
+     },
+     'document': {
+      'type': 'object',
+      'readOnly': true,
+      'ref': 'tradle.Message',
+      'title': 'Verifying document',
+     },
+     'message': {
+      'type': 'object',
+      'title': 'Description',
+      'displayName': true,
+     },
+     'ver1': {
+        type: 'string'
+     },
+     'ver2': {
+        type: 'string'
+     },
+     'ver3': {
+        type: 'string'
+     },
+     'ver4': {
+        type: 'boolean'
+     },
+     'to': {
+      'type': 'object',
+      'title': 'Owner',
+      'ref': 'tradle.Identity',
+      'displayName': true,
+      'readOnly': true,
+     },
+     'from': {
+       'title': 'Verifier',
+       'type': 'object',
+       'readOnly': true,
+       'ref': 'tradle.Identity',
+       'displayName': true
+     },
+     'blockchainUrl': {
+       'type': 'string',      
+       'readOnly': true
+     },
+     'transactionHash': {
+       'type': 'string',
+       'readOnly': true
+     },
+     'time': {
+       'type': 'date',
+       'readOnly': true,
+     }
+  },  
+  'required': [
+    'message', 'ver1', 'ver2', 'ver3', 'to', 'from', 'time'
+  ],
+  'viewCols': [
+    'message', 'time', 'from'
   ],
 },
 ];
@@ -969,7 +1004,7 @@ var identities = [
   ],
   'photos': [
     {
-      'type': 'headshot',
+      'tags': 'headshot',
       'url': 'https://stocklandmartel.blob.core.windows.net/media/images/JC00065.jpg'
     }
   ],
@@ -1029,7 +1064,7 @@ var identities = [
   },
   'photos': [
     {
-      'type': 'headshot',
+      'tags': 'headshot',
       'url': 'http://fc09.deviantart.net/fs70/f/2011/334/9/f/second__man__drawing__by_namitokiwa-d4hteh4.jpg'
     }
   ],
@@ -1115,7 +1150,7 @@ var identities = [
   },
   'photos': [
     {
-      'type': 'headshot',
+      'tags': 'headshot',
       'url': 'http://www.morganstanley.com/assets/images/people/tiles/audrey-choi-large.jpg'
     }
   ],
@@ -1200,7 +1235,7 @@ var identities = [
   },
   'photos': [
     {
-      'type': 'headshot',
+      'tags': 'headshot',
       'url': 'http://www.theurbanlist.com/content/article/a_list_images/adam-scott-2008.jpg'
     }
   ],
@@ -1285,7 +1320,7 @@ var identities = [
   },
   'photos': [
     {
-      'type': 'headshot',
+      'tags': 'headshot',
       'url': 'http://www.bitcoin2013.com/uploads/1/4/9/4/14946598/2010100_orig.jpg'
     }
   ],
@@ -1360,18 +1395,18 @@ var identities = [
   'city': 'San Dimas',
   'country': 'USA',
   'postalCode': '666',
-  'region': 'California',
-  'street': '666 Wyld Stallyns Dr',
-  'firstName': 'Sophia',
-  'lastName': 'Loren',
+  'region': 'Paris',
+  'street': '123 Rue de Marseille',
+  'firstName': 'Helene',
+  'lastName': 'Lumiere',
   'owner':{
      id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa', 
      title: 'Jane Choi'
   },
   'photos': [
     {
-      'type': 'headshot',
-      'url': 'https://s-media-cache-ak0.pinimg.com/236x/da/40/8c/da408ced982d40d63e022733cf831ad9.jpg'
+      'tags': 'headshot',
+      'url': 'https://scontent-lga1-1.xx.fbcdn.net/hphotos-xfa1/v/t1.0-9/10665799_10204022199610484_1148728443853769394_n.jpg?oh=55ff42033219d12c596e6caa6e637f76&oe=56244BCF'
     }
   ],
   'pubkeys': [
@@ -1426,7 +1461,6 @@ var identities = [
       'value': '026cc579570dd554105c0bab90f4f0aa711693d6d12c4a6bfb517f13ffa8abe66d'
     }
   ],
-  'summary': 'Bill\'s best friend',
   'v': '0.3',
   'rootHash': '38980944449570d2783d7c8af5db8ca9463391f3',
   'websites': [
@@ -1443,21 +1477,21 @@ var identities = [
       'type': 'skype'
     }
   ],
-  'city': 'San Dimas',
+  'city': 'New York',
   'country': 'USA',
   'postalCode': '666',
-  'region': 'California',
-  'street': '666 Wyld Stallyns Dr',
-  'firstName': 'Jane',
-  'lastName': 'Wayman',
+  'region': 'NY',
+  'street': '123 Wyld Stallyns Dr',
+  'firstName': 'Kate',
+  'lastName': 'Hao',
   'owner':{
      id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa', 
      title: 'Jane Choi'
   },
   'photos': [
     {
-      'type': 'headshot',
-      'url': 'http://b-i.forbesimg.com/maryclairekendall/files/2014/01/300px-Eiganotomo-janewyman-dec19531.jpg'
+      'tags': 'headshot',
+      'url': 'https://scontent-lga1-1.xx.fbcdn.net/hphotos-xfp1/t31.0-8/10604688_10204178311753190_6807024764791621704_o.jpg'
     }
   ],
   'pubkeys': [
@@ -1541,8 +1575,8 @@ var identities = [
   },
   'photos': [
     {
-      'type': 'headshot',
-      'url': 'http://ia.media-imdb.com/images/M/MV5BMTM1ODAwMDc2NF5BMl5BanBnXkFtZTcwMjUzNzg3MQ@@._V1_SX640_SY720_.jpg'
+      'tags': 'headshot',
+      'url': 'https://scontent-lga1-1.xx.fbcdn.net/hphotos-xta1/t31.0-8/10373153_10100282480857898_4039399677094768799_o.jpg'
     }
   ],
   'pubkeys': [
@@ -1613,12 +1647,12 @@ var identities = [
       'type': 'skype'
     }
   ],
-  'city': 'San Dimas',
+  'city': 'New York',
   'country': 'USA',
-  'postalCode': '666',
-  'region': 'California',
+  'postalCode': '10001',
+  'region': 'NY',
   'street': '666 Wyld Stallyns Dr',
-  'firstName': 'Ken',
+  'firstName': 'Gene',
   'lastName': 'Wilber',
   'owner':{
      id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa', 
@@ -1626,8 +1660,8 @@ var identities = [
   },
   'photos': [
     {
-      'type': 'headshot',
-      'url': 'http://consciousthinkers.billyojai.com/wp-content/uploads/2013/08/Ken-Wilber.jpg'
+      'tags': 'headshot',
+      'url': 'https://scontent-lga1-1.xx.fbcdn.net/hphotos-xfa1/t31.0-8/10714435_10204194198870358_6364485006481495908_o.jpg'
     }
   ],
   'pubkeys': [
