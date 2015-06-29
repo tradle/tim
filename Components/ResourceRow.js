@@ -26,6 +26,10 @@ class ResourceRow extends Component {
     else
       photo = <View style={styles.cellImage}></View>
 
+    var onlineStatus = (resource.online) 
+                     ? <View style={styles.online}></View>
+                     : <View style={[styles.online, {backgroundColor: 'transparent'}]}></View>
+    
     var cancelResource = (this.props.onCancel) 
                        ? <View style={{justifyContent: 'flex-end'}}>
                          <TouchableHighlight onPress={this.props.onCancel} underlayColor='transparent'>
@@ -39,6 +43,7 @@ class ResourceRow extends Component {
         <TouchableHighlight onPress={this.props.onSelect}>
           <View style={styles.row}>
             {photo}
+            {onlineStatus}
             <View style={styles.textContainer}>
               {this.formatRow(resource)}
               {cancelResource}
@@ -135,19 +140,7 @@ class ResourceRow extends Component {
     var style = styles.description;
     if (properties[dateProp].style)
       style = [style, properties[dateProp].style];
-    var date = new Date(resource[dateProp]);
-    var dayDiff = moment(new Date()).dayOfYear() - moment(date).dayOfYear();
-    var val;
-    switch (dayDiff) {
-    case 0:
-      val = moment(date).fromNow();
-      break;
-    case 1:
-      val = moment(date).format('[yesterday], h:mA');
-      break;
-    default:      
-      val = moment(date).format('ddd, h:mA');
-    }
+    var val = utils.getFormattedDate(new Date(resource[dateProp]));
     return <Text style={[style, {alignSelf: 'flex-end'}]} numberOfLines={1}>{val}</Text>;
 
   }
@@ -203,6 +196,17 @@ var styles = StyleSheet.create({
     height: 30,
     position: 'absolute',
     right: 0
+  },
+  online: {
+    backgroundColor: 'green',
+    borderRadius: 6,
+    width: 12,
+    height: 12,
+    position: 'absolute',
+    top: 83,
+    left: 8,
+    borderWidth: 1,
+    borderColor: '#ffffff'
   },
 });
 
