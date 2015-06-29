@@ -93,11 +93,11 @@ var utils = {
             continue;
           if (props[p])
             continue;
-          var cloneOf = this.getCloneOf(dModel.value.id + '.' + p, props);
-          if (cloneOf) {
-            data[cloneOf] = data[p];
-            delete data[p];
-          }
+          // var cloneOf = this.getCloneOf(dModel.value.id + '.' + p, props);
+          // if (cloneOf) {
+          //   data[cloneOf] = data[p];
+          //   delete data[p];
+          // }
         }
       }
     }
@@ -202,27 +202,27 @@ var utils = {
     var val;
     switch (dayDiff) {
     case 0:
-      val = moment(date).fromNow();
+      val = moment(date).format('[today], h:mA');
       break;
     case 1:
-      val = moment(date).format('[yesterday], h:mA');
+      val = moment(date).format('[yesterday], h:m');
       break;
     default:      
-      val = moment(date).format('ddd, h:mA');
+      val = moment(date).format('ddd, h:m');
     }
     return val;
   },
-  getCloneOf(prop, meta) {
-    for (var p in meta) {
-      var cloneOf = meta[p].cloneOf;
-      if (cloneOf  &&  cloneOf === prop)
-        return p;
-    }
-    var pp = prop.split(/\./g);
-    var propName = pp[pp.length - 1];
-    if (meta[propName])
-      return propName;
-  },
+  // getCloneOf(prop, meta) {
+  //   for (var p in meta) {
+  //     var cloneOf = meta[p].cloneOf;
+  //     if (cloneOf  &&  cloneOf === prop)
+  //       return p;
+  //   }
+  //   var pp = prop.split(/\./g);
+  //   var propName = pp[pp.length - 1];
+  //   if (meta[propName])
+  //     return propName;
+  // },
   getItemsMeta(metadata) {
     var props = metadata.properties;
     var required = utils.arrayToObject(metadata.required);
