@@ -8,7 +8,7 @@ var AddressBook = require('NativeModules').AddressBook;
 var sampleData = require('../data/data');
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
-var level = require('react-level');
+var level = require('react-native-level');
 var promisify = require('q-level');
 // var Sublevel = require('level-sublevel')
 
@@ -493,16 +493,16 @@ var Store = Reflux.createStore({
   onMessageList(params) {
     this.onList(params);
   },
-  onList(query, modelName, resource, isAggregation, prop) {
+  onList(params) {
     if (isLoaded) 
-      this.getList(query, modelName, resource, isAggregation, prop);
+      this.getList(params);
     else {
       var self = this;
       this.loadDB()
       .then(function() {
         isLoaded = true;
-        if (modelName) 
-        self.getList(query, modelName, resource, isAggregation, prop);
+        if (params.modelName) 
+          self.getList(params);
       });
     }
   },
