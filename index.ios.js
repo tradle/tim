@@ -63,7 +63,7 @@ var styles = StyleSheet.create({
   },
 });
 
-class IdentityApp extends Component {
+class TiMApp extends Component {
   constructor(props) {
     super(props);
   }
@@ -246,7 +246,7 @@ var NavigationBarRouteMapper = {
 
 };
 
-React.AppRegistry.registerComponent('Identity', function() { return IdentityApp });
+React.AppRegistry.registerComponent('TiM', function() { return TiMApp });
 
   // render() {
   //   var props = {db: this.state.db};
