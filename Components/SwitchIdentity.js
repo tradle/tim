@@ -11,6 +11,7 @@ var {
   StyleSheet,
   Image, 
   View,
+  Text,
   TouchableHighlight,
   Component
 } = React;
@@ -21,7 +22,13 @@ class SwitchIdentity extends Component {
     return resource.rootHash === utils.getMe().rootHash
            ? <View style={styles.switchButton}>
                <TouchableHighlight onPress={this.showIdentities.bind(this)} underlayColor='transparent'>
-                 <Icon name='fontawesome|arrows'  size={30}  color='#ffffff'  style={styles.icon}/>
+               <View>
+                 <View style={styles.switchIdentity} />
+                 <View style={{flexDirection: 'row', paddingHorizontal: 5}}>                 
+                   <Icon name='fontawesome|arrows'  size={20}  color='#ffffff'  style={styles.icon}/>
+                   <Text style={styles.text}>Switch Identity</Text>
+                 </View>
+               </View>
                </TouchableHighlight>
              </View>
            : <View></View>;    
@@ -34,17 +41,33 @@ reactMixin(SwitchIdentity.prototype, Reflux.ListenerMixin);
 
 var styles = StyleSheet.create({
   icon: {
-    width: 40,
-    height: 40,
+    width: 25,
+    height: 25,
     borderWidth: 2,
     borderColor: '#D7E6ED',
-    backgroundColor: '#9287ED',
-    borderRadius: 20,
+    borderRadius: 12,
+    marginTop: -33,
   },
   switchButton: {
     position: 'absolute', 
     top: 60, 
     right: 10 
+  },
+  switchIdentity: {
+    padding: 10, 
+    width: 150, 
+    height: 40, 
+    borderRadius: 10, 
+    backgroundColor: '#7AAAC3', 
+    opacity: 0.5, 
+    borderWidth: 2, 
+    borderColor: '#7AAAC3'
+  },
+  text: {
+    color: '#ffffff', 
+    marginTop: -30, 
+    marginLeft: 5,
+    fontWeight: '800'
   }
 });
 

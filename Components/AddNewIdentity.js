@@ -35,7 +35,13 @@ class AddNewIdentity extends Component {
     return this.props.isRegistration || (resource.rootHash === utils.getMe().rootHash)
            ? <View style={styles.addNew}>
                <TouchableHighlight onPress={this.createNewIdentity.bind(this)} underlayColor='transparent'>
-                 <Icon name='fontawesome|plus'  size={30}  color='#ffffff'  style={styles.icon}/>
+               <View>
+                 <View style={styles.addIdentity} />
+                 <View style={{flexDirection: 'row', paddingHorizontal: 5}}>
+                   <Icon name='fontawesome|plus'  size={20}  color='#ffffff'  style={styles.icon}/>
+                   <Text style={styles.text}>Add Identity</Text>
+                 </View>
+               </View>
                </TouchableHighlight>
              </View>
            : <View></View>;    
@@ -64,17 +70,34 @@ reactMixin(AddNewIdentity.prototype, Reflux.ListenerMixin);
 
 var styles = StyleSheet.create({
   icon: {
-    width: 40,
-    height: 40,
+    width: 25,
+    height: 25,
     borderWidth: 2,
     borderColor: '#D7E6ED',
-    backgroundColor: '#7AAAC3',
-    borderRadius: 20,
+    borderRadius: 12,
+    marginTop: -33,
   },
   addNew: {
+    flex: 1,
     position: 'absolute', 
     top: 15, 
     right: 10 
+  },
+  addIdentity: {
+    padding: 10, 
+    width: 150, 
+    height: 40, 
+    borderRadius: 10, 
+    backgroundColor: '#7AAAC3', 
+    opacity: 0.5, 
+    borderWidth: 2, 
+    borderColor: '#7AAAC3'
+  },
+  text: {
+    color: '#ffffff', 
+    marginTop: -30, 
+    marginLeft: 5,
+    fontWeight: '800'
   }
 });
 
