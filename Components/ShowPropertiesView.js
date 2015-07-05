@@ -2,7 +2,6 @@
  
 var React = require('react-native');
 var utils = require('../utils/utils');
-var Icon = require('FAKIconImage');
 var {
   StyleSheet,
   Image, 
