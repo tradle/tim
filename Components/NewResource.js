@@ -15,6 +15,8 @@ var Reflux = require('reflux');
 var reactMixin = require('react-mixin');
 var Icon = require('FAKIconImage');
 var myStyles = require('../styles/styles');
+var KeyboardEvents = require('react-native-keyboardevents');
+var KeyboardEventEmitter = KeyboardEvents.Emitter;
 
 var Form = t.form.Form;
 Form.stylesheet = myStyles;
@@ -26,6 +28,7 @@ var {
   Text,
   TextInput,
   ScrollView,
+  LayoutAnimation,
   Component,
   TouchableHighlight,
 } = React;
@@ -35,13 +38,31 @@ class NewResource extends Component {
     super(props);
     this.state = {
       resource: props.resource,
+      keyboardSpace: 0,
     }
     this.props.navigator.route.onRightButtonPress = {
       stateChange: this.onSavePressed.bind(this)
     };
   }
+  updateKeyboardSpace(frames) {
+    LayoutAnimation.configureNext(animations.layout.spring);
+    this.setState({keyboardSpace: frames.end.height});
+  }
+
+  resetKeyboardSpace() {
+    LayoutAnimation.configureNext(animations.layout.spring);
+    this.setState({keyboardSpace: 0});
+  }  
+
   componentDidMount() {
     this.listenTo(Store, 'itemAdded');
+    KeyboardEventEmitter.on(KeyboardEvents.KeyboardDidShowEvent, this.updateKeyboardSpace);
+    KeyboardEventEmitter.on(KeyboardEvents.KeyboardWillHideEvent, this.resetKeyboardSpace);
+  }
+
+  componentWillUnmount() {
+    KeyboardEventEmitter.off(KeyboardEvents.KeyboardDidShowEvent, this.updateKeyboardSpace);
+    KeyboardEventEmitter.off(KeyboardEvents.KeyboardWillHideEvent, this.resetKeyboardSpace);
   }
   itemAdded(params) {
     var resource = params.resource;
@@ -61,8 +82,8 @@ class NewResource extends Component {
     // When message created the return page is the chat window, 
     // When profile or some contact info changed/added the return page is Profile view page
     if (this.props.callback) {
-      this.props.callback(resource);
       this.props.navigator.pop();
+      this.props.callback(resource);
       return;
     }
     if (isMessage) {
@@ -289,12 +310,14 @@ class NewResource extends Component {
       return (
         <View>
           {content}
+          <View style={{height: this.state.keyboardSpace}}>
           <View style={{marginTop: -35}}>
             <ChatMessage resource={resource} 
                          model={meta} 
                          onSubmitEditing={this.onSubmitEditing.bind(this)}
                          onEndEditing={this.onEndEditing.bind(this)} />
           </View>    
+          </View>
         </View>
       );
     else
@@ -351,6 +374,32 @@ class NewResource extends Component {
   }
 }
 reactMixin(NewResource.prototype, Reflux.ListenerMixin);
+var animations = {
+  layout: {
+    spring: {
+      duration: 400,
+      create: {
+        duration: 300,
+        type: LayoutAnimation.Types.easeInEaseOut,
+        property: LayoutAnimation.Properties.opacity,
+      },
+      update: {
+        type: LayoutAnimation.Types.spring,
+        springDamping: 1,
+      },
+    },
+    easeInEaseOut: {
+      duration: 400,
+      create: {
+        type: LayoutAnimation.Types.easeInEaseOut,
+        property: LayoutAnimation.Properties.scaleXY,
+      },
+      update: {
+        type: LayoutAnimation.Types.easeInEaseOut,
+      },
+    },
+  },
+};
 
 var styles = StyleSheet.create({
   container: {
