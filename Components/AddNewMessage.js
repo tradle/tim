@@ -10,6 +10,8 @@ var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
 var Reflux = require('reflux');
 var Actions = require('../Actions/Actions');
+var KeyboardEvents = require('react-native-keyboardevents');
+var KeyboardEventEmitter = KeyboardEvents.Emitter;
 
 var {
   View,
@@ -17,6 +19,7 @@ var {
   Navigator,
   Image,
   StyleSheet,
+  LayoutAnimation,
   Component
 } = React;
 
@@ -28,14 +31,37 @@ var interfaceToTypeMapping = {
 
 class AddNewMessage extends Component {
   constructor(props) {
+    super(props);
+
+    this.updateKeyboardSpace = this.updateKeyboardSpace.bind(this);
+    this.resetKeyboardSpace = this.resetKeyboardSpace.bind(this);
     this.state = {
+      keyboardSpace: 0,
       selectedAssets: {},
       userInput: ''
     }
   }
+  updateKeyboardSpace(frames) {
+    LayoutAnimation.configureNext(animations.layout.spring);
+    this.setState({keyboardSpace: frames.end.height});
+  }
+
+  resetKeyboardSpace() {
+    LayoutAnimation.configureNext(animations.layout.spring);
+    this.setState({keyboardSpace: 0});
+  }  
+
   componentDidMount() {
     this.listenTo(Store, 'onAddMessage');
+    KeyboardEventEmitter.on(KeyboardEvents.KeyboardDidShowEvent, this.updateKeyboardSpace);
+    KeyboardEventEmitter.on(KeyboardEvents.KeyboardWillHideEvent, this.resetKeyboardSpace);
   }
+
+  componentWillUnmount() {
+    KeyboardEventEmitter.off(KeyboardEvents.KeyboardDidShowEvent, this.updateKeyboardSpace);
+    KeyboardEventEmitter.off(KeyboardEvents.KeyboardWillHideEvent, this.resetKeyboardSpace);
+  }
+
   onAddMessage(params) {
     if (params.action !== 'addMessage')
       return;
@@ -64,22 +90,24 @@ class AddNewMessage extends Component {
     var resource = {from: utils.getMe(), to: this.props.resource};
     var model = utils.getModel(this.props.modelName).value;
     return (
+      <View style={{height: this.state.keyboardSpace + 45}}>
       <View style={styles.addNew}>
         <TouchableHighlight style={{paddingLeft: 5}} underlayColor='#eeeeee'
           onPress={this.props.onAddNewPressed.bind(this)}>
          <Image source={require('image!clipadd')} style={styles.image} />
         </TouchableHighlight>
         <View style={styles.searchBar}>
-          <ChatMessage resource={resource} 
+          <ChatMessage ref="chat" resource={resource} 
                        model={model} 
                        callback={this.props.callback} 
                        onSubmitEditing={this.onSubmitEditing.bind(this)}
                        onEndEditing={this.onEndEditing.bind(this)} />
         </View>
-        <TouchableHighlight style={{paddingRight: 5}} underlayColor='#eeeeee'
+        <TouchableHighlight style={{paddingRight: 5}} underlayColor='transparent'
           onPress={this.showChoice.bind(this)}>
             <Icon name='ion|ios-camera' style={styles.image} size={35} color='#aaaaaa' />
         </TouchableHighlight>
+        </View>
       </View> 
     );
   }
@@ -90,13 +118,16 @@ class AddNewMessage extends Component {
       options: buttons,
       cancelButtonIndex: 2
     }, function(buttonIndex) {
-      self.onButtonPress(buttonIndex);
+    if (buttonIndex == 0)
+      self.props.onTakePicPressed();
+    else
+      self.selectPhotoFromTheLibrary();
     });
   }
   onButtonPress(buttonIndex) {
     if (buttonIndex == 0)
       this.props.onTakePicPressed();
-    else
+    else if (buttonIndex == 1)
       this.selectPhotoFromTheLibrary();
   }
   onPhotoSelect(asset) {
@@ -177,7 +208,32 @@ class AddNewMessage extends Component {
   }
 }
 reactMixin(AddNewMessage.prototype, Reflux.ListenerMixin);
-
+var animations = {
+  layout: {
+    spring: {
+      duration: 400,
+      create: {
+        duration: 300,
+        type: LayoutAnimation.Types.easeInEaseOut,
+        property: LayoutAnimation.Properties.opacity,
+      },
+      update: {
+        type: LayoutAnimation.Types.spring,
+        springDamping: 1,
+      },
+    },
+    easeInEaseOut: {
+      duration: 400,
+      create: {
+        type: LayoutAnimation.Types.easeInEaseOut,
+        property: LayoutAnimation.Properties.scaleXY,
+      },
+      update: {
+        type: LayoutAnimation.Types.easeInEaseOut,
+      },
+    },
+  },
+};
 var styles = StyleSheet.create({
   searchBar: {
     flex: 4,
