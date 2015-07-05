@@ -131,7 +131,8 @@ var styles = StyleSheet.create({
     shadowColor: '#2E3B4E',
     shadowOffset: {width: 0.5, height: 0.5},
     shadowOpacity: 1,
-    shadowRadius: 1
+    shadowRadius: 1,
+    marginTop: -5
   },
   icon: {
     width: 70,
