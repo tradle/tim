@@ -2,13 +2,19 @@
  
 var React = require('react-native');
 var utils = require('../utils/utils');
+// var MessageList = require('./MessageList');
 var ArticleView = require('./ArticleView');
 var FromToView = require('./FromToView');
 var PhotosList = require('./PhotosList');
 var PhotoView = require('./PhotoView');
 var ShowPropertiesView = require('./ShowPropertiesView');
 var MoreLikeThis = require('./MoreLikeThis');
+var NewResource = require('./NewResource');
 var VerificationButton = require('./VerificationButton');
+var Actions = require('../Actions/Actions');
+var Reflux = require('reflux');
+var Store = require('../Store/Store');
+var reactMixin = require('react-mixin');
 
 var {
   StyleSheet,
@@ -24,6 +30,18 @@ class MessageView extends Component {
     this.state = {
       resource: props.resource,
     };
+  }
+  componentDidMount() {
+    this.listenTo(Store, 'onAddVerification');
+  }
+  onAddVerification(params) {
+    if (params.action === 'addVerification') {
+      this.props.navigator.pop();
+      Actions.messageList({
+        modelName: 'tradle.Message', 
+        resource: params.resource
+      });    
+    }
   }
   render() {
     var resource = this.state.resource;
@@ -49,10 +67,10 @@ class MessageView extends Component {
           <PhotoView resource={resource} />
         </View>
         <MoreLikeThis resource={resource} navigator={this.props.navigator}/>
-        <VerificationButton  resource={resource} navigator={this.props.navigator} />
-        <FromToView resource={resource} navigator={this.props.navigator} excluded/>
+        <VerificationButton  resource={resource} verify={this.verify.bind(this)}/>
+        <FromToView resource={resource} navigator={this.props.navigator} excluded />
         <View style={styles.band}><Text style={styles.date}>{date}</Text></View>
-          <PhotosList photos={resource.photos} navigator={this.props.navigator} numberInRow={inRow}/>
+        <PhotosList photos={resource.photos} navigator={this.props.navigator} numberInRow={inRow}/>
         <View style={styles.rowContainer}>    
           <View><Text style={styles.itemTitle}>{resource.message}</Text></View>
           <ShowPropertiesView resource={resource} excludedProperties={['tradle.Message.message', 'tradle.Message.time', 'tradle.message.photos']} />
@@ -61,8 +79,68 @@ class MessageView extends Component {
       </ScrollView>
     );
   }
+          // <ShowPropertiesView resource={resource} callback={this.showResources.bind(this)} excludedProperties={['tradle.Message.message', 'tradle.Message.time', 'tradle.message.photos']} />
+  // showResources(resource, prop) {
+  //   var meta = utils.getModel(resource['_type']).value.properties;
+  //   this.props.navigator.push({
+  //     id: 10,
+  //     title: utils.makeLabel(prop),
+  //     titleTextColor: '#7AAAC3',
+  //     backButtonTitle: 'Back',
+  //     component: MessageList,
+  //     passProps: {
+  //       modelName: meta[prop].items.ref,
+  //       filter: '',
+  //       resource: resource,
+  //       prop: prop
+  //     }
+  //   });
+  // }
   showEmbed() {
     this.setState({embedHeight: {height: 60, padding: 5, marginRight: 10, borderColor: '#2E3B4E', backgroundColor: '#eeeeee'}});
+  }
+  verify() {
+    var resource = this.props.resource;
+    var model = utils.getModel(resource['_type']).value;
+    // this.props.navigator.pop();
+    var me = utils.getMe();
+    var from = this.props.resource.from;
+    var verificationModel = model.properties.verifications.items.ref;
+    var verification = {
+      '_type': verificationModel,
+      document: {
+        id: resource['_type'] + '_' + resource.rootHash + '_' + resource.currentHash,
+        title: resource.message ? resource.message : model.title
+      },
+      to: {
+        id: from.id,
+        title: from.title
+      },
+      from: { 
+        id: me['_type'] + '_' + me.rootHash + '_' + me.currentHash,
+        title: utils.getDisplayName(me, utils.getModel(me['_type']).value.properties)
+      }
+    }
+    if (verificationModel === 'tradle.Verification') 
+      Actions.addVerification(verification);
+    else {
+      this.props.navigator.replace({
+        title: resource.message,
+        id: 4,
+        component: NewResource,
+        backButtonTitle: resource.firstName,
+        rightButtonTitle: 'Done',
+        titleTextColor: '#7AAAC3',
+        passProps: {
+          model: utils.getModel(verificationModel).value,
+          resource: verification,
+          callback: this.createVerification.bind(self)
+        }
+      });
+    }
+  }
+  createVerification(resource) {
+    Actions.addVerification(resource, true);
   }
   
   onPress(url) {
@@ -72,7 +150,10 @@ class MessageView extends Component {
       passProps: {url: url}
     });
   } 
+
 }
+reactMixin(MessageView.prototype, Reflux.ListenerMixin);
+
 var styles = StyleSheet.create({
   container: {
     marginTop: 60,
