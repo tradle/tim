@@ -12,7 +12,6 @@ var ResourceList = require('./ResourceList');
 var Reflux = require('reflux');
 var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
-var Icon = require('FAKIconImage');
 var extend = require('extend');
 
 var {
@@ -120,12 +119,6 @@ var styles = StyleSheet.create({
   photoBG: {
     backgroundColor: '#2E3B4E',
     alignItems: 'center',
-  },
-  icon: {
-    width: 30,
-    height: 30,
-    marginRight: 5,
-    justifyContent: 'flex-end'
   },
   // footer: {
   //   flexDirection: 'row', 
