@@ -1,5 +1,6 @@
 'use strict'
 
+// require('react-level')
 var React = require('react-native');
 var ResourceList = require('./Components/ResourceList');
 var TimHome = require('./Components/TimHome');
@@ -8,7 +9,7 @@ var NewResource = require('./Components/NewResource');
 var NewItem = require('./Components/NewItem');
 var ResourceView = require('./Components/ResourceView');
 var MessageView = require('./Components/MessageView');
-var MessagesList = require('./Components/MessagesList');
+var MessageList = require('./Components/MessageList');
 var ArticleView = require('./Components/ArticleView');
 var IdentitiesList = require('./Components/IdentitiesList');
 var SelectPhotoList = require('./Components/SelectPhotoList');
@@ -135,7 +136,7 @@ class IdentityApp extends Component {
                   callback={props.callback}
                   modelName={props.modelName} />;
     case 11:
-      return <MessagesList navigator={nav} 
+      return <MessageList navigator={nav} 
                   filter={props.filter} 
                   resource={props.resource}
                   prop={props.prop}
