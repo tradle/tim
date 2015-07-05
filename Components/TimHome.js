@@ -161,7 +161,7 @@ class TimHome extends Component {
           <TouchableHighlight style={[styles.thumbButton]}
               underlayColor='#2E3B4E' onPress={this.showContactsOrRegister.bind(this)}>
             <View>  
-            <Image style={styles.thumb} source={require('image!Logo')}></Image>
+            <Image style={styles.thumb} source={require('image!Tradle')}></Image>
             <Text style={styles.tradle}>Tradle</Text>
             </View>
           </TouchableHighlight>
