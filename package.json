@@ -30,7 +30,6 @@
     "react-native-camera": "~0.2.11",
     "jsonquery-engine": "~1.0.2",
     "react-native-keyboardevents": "~0.4.4",
-    "react-native-level": "~1.0.1",
-    "level-queryengine": "~3.0.1"
+    "react-native-level": "~1.0.1"
   }
 }
