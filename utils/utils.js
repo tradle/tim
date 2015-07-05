@@ -160,7 +160,7 @@ var utils = {
           data[p] = utils.getDisplayName(data[p], subModel.value.properties) || data[p].title;
         }
 
-        options.fields[p].onFocus = chooser.bind(event, props[p], p);
+        options.fields[p].onFocus = chooser.bind({}, props[p], p);
         options.fields[p].nullOption = {value: '', label: 'Choose your ' + utils.makeLabel(p)};
       }
       else {
