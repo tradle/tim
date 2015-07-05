@@ -8,6 +8,7 @@ var PhotosList = require('./PhotosList');
 var AddNewIdentity = require('./AddNewIdentity');
 var SwitchIdentity = require('./SwitchIdentity');
 var IdentitiesList = require('./IdentitiesList');
+var ResourceList = require('./ResourceList');
 var Reflux = require('reflux');
 var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
@@ -27,6 +28,7 @@ var {
 
 class ResourceView extends Component {
   constructor(props) {
+    super(props);
     this.state = {
       resource: props.resource,
       embedHeight: {height: 0}
@@ -86,10 +88,26 @@ class ResourceView extends Component {
         <AddNewIdentity resource={resource} navigator={this.props.navigator} />
         <SwitchIdentity resource={resource} navigator={this.props.navigator} />
         <PhotosList photos={photos} navigator={this.props.navigator} numberInRow={photos.length > 4 ? 5 : photos.length} />    
-        <ShowPropertiesView resource={resource} excludedProperties={['photos']}/>      
+        <ShowPropertiesView resource={resource} callback={this.showResources.bind(this)} excludedProperties={['photos']}/>      
       </ScrollView>
       </View>
     );
+  }
+  showResources(resource, prop) {
+    var meta = utils.getModel(resource['_type']).value.properties;
+    this.props.navigator.push({
+      id: 10,
+      title: utils.makeLabel(prop),
+      titleTextColor: '#7AAAC3',
+      backButtonTitle: 'Back',
+      component: ResourceList,
+      passProps: {
+        modelName: meta[prop].items.ref,
+        filter: '',
+        resource: resource,
+        prop: prop
+      }
+    });
   }
 }
 reactMixin(ResourceView.prototype, Reflux.ListenerMixin);
