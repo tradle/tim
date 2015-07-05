@@ -43,7 +43,7 @@ class ChatMessage extends Component {
             value={this.state.userInput}
             onChange={this.handleChange.bind(this)}
             onSubmitEditing={this.onSubmitEditing.bind(this)}
-            onEndEditing={this.props.onEndEditing.bind(this, this.state.userInput)}
+            onEndEditing={this.onEndEditing.bind(this)}
           />
         </View>
 
@@ -60,6 +60,9 @@ class ChatMessage extends Component {
       </View>
       );
   }
+  onEndEditing() {
+    this.props.onEndEditing.bind(this, this.state.userInput)
+  }
   handleChange(event) {
     this.setState({userInput: event.nativeEvent.text});
   }
@@ -68,10 +71,13 @@ class ChatMessage extends Component {
     if (!msg)
       return;
     this.props.onSubmitEditing(msg);
-    this.setState({userInput: ''});
+    // this.setState({userInput: ''});
+    setTimeout(function() {
+      this.setState({userInput: ''});
+      this.refs.chat.focus();
+    }.bind(this), 0);
   }
 }
-// reactMixin(ChatMessage.prototype, Reflux.ListenerMixin);
 var styles = StyleSheet.create({
   view: {
     backgroundColor: '#efffe5',
@@ -107,7 +113,16 @@ var styles = StyleSheet.create({
     fontSize: 18,
     color: '#2E3B4E',
   },
-
+  // mythingscontainer: {
+  //   flex: 1,
+  //   justifyContent: "center",
+  //   alignItems: "center",
+  //   flexDirection: "column",
+  // },
+  // bumpedcontainer: {
+  //   marginBottom: 210,
+  //   marginTop: -210,
+  // },
 });
 
 module.exports = ChatMessage;
