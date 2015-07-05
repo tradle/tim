@@ -36,8 +36,6 @@ class FromToView extends Component {
     if (!model.interfaces  ||  model.interfaces.indexOf(MESSAGE_INTERFACE) == -1) 
       return <View />;
 
-    var photoProp = utils.getCloneOf(MESSAGE_INTERFACE + '.photos', model.properties);
-
     var hasPhoto = true; //resource[photoProp]  &&  resource[photoProp].length; 
     var fromTitle = resource.from.title ? resource.from.title :  utils.getDisplayName(resource.from, utils.getModel(resource.from['_type']).value.properties);
     var toTitle = resource.to.title ? resource.to.title : utils.getDisplayName(resource.to, utils.getModel(resource.to['_type']).value.properties);
@@ -73,7 +71,7 @@ class FromToView extends Component {
                <Text>{fromTitle}</Text>
              </View>
              </TouchableHighlight>
-            <Icon name='ion|ios-arrow-thin-right'   size={70}  color='#f7f7f7'  style={styles.arrow} />
+            <Icon name='ion|ios-arrow-thin-right' size={70} color='#f7f7f7' style={styles.arrow} />
             <TouchableHighlight underlayColor='transparent' onPress={() => 
                {
                  if (resource.to.id)
@@ -141,7 +139,7 @@ var styles = StyleSheet.create({
     borderRadius: 33,
     borderWidth: 2,
     borderColor: '#7AAAC3',
-    color: '#ffffff',
+    // color: '#ffffff',
     backgroundColor: '#f7f7f7'
   },
   thumb: {
