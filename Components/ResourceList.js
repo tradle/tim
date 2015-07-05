@@ -6,7 +6,7 @@ var NoResources = require('./NoResources');
 var ResourceRow = require('./ResourceRow');
 var ResourceView = require('./ResourceView');
 var NewResource = require('./NewResource');
-var MessagesList = require('./MessagesList');
+var MessageList = require('./MessageList');
 var utils = require('../utils/utils');
 var reactMixin = require('react-mixin');
 var Store = require('../Store/Store');
@@ -36,10 +36,10 @@ class ResourceList extends Component {
     };
   }
   componentWillMount() {
+    var params = {modelName: this.props.modelName, to: this.props.resource};
     if (this.props.isAggregation)
-      Actions.list('', this.props.modelName, this.props.resource, true);    
-    else
-      Actions.list('', this.props.modelName, this.props.resource);    
+      params.isAggregation = true;
+    Actions.list(params);    
   }
   componentDidMount() {
     this.listenTo(Store, 'onListUpdate');
@@ -51,7 +51,11 @@ class ResourceList extends Component {
     var action = params.action;
     if (action === 'addItem'  ||  action === 'addMessage') {
       this.state.isLoading = true;
-      Actions.list(this.state.filter, this.props.modelName, this.props.resource);
+      Actions.list({
+        query: this.state.filter, 
+        modelName: this.props.modelName, 
+        to: this.props.resource
+      });
       return;      
     }
 
@@ -95,7 +99,7 @@ class ResourceList extends Component {
     var self = this;
     var route = {
       title: title,
-      component: MessagesList,
+      component: MessageList,
       id: 11,
       passProps: {
         resource: resource, 
@@ -178,7 +182,11 @@ class ResourceList extends Component {
 
   onSearchChange(event) {
     var filter = event.nativeEvent.text.toLowerCase();
-    Actions.list(filter, this.props.modelName, this.props.resource);
+    Actions.list({
+      query: filter, 
+      modelName: this.props.modelName, 
+      to: this.props.resource
+    });
   }
 
   renderRow(resource)  {
@@ -216,7 +224,10 @@ class ResourceList extends Component {
       rightButtonTitle: 'Done',
       passProps: {
         model: model,
-        callback: () => Actions.list('', this.props.modelName, this.props.resource),
+        callback: () => Actions.list({
+          modelName: this.props.modelName, 
+          to: this.props.resource
+        }),
       }      
     })
   }
