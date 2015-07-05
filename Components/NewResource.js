@@ -36,6 +36,8 @@ var {
 class NewResource extends Component {
   constructor(props) {
     super(props);
+    this.updateKeyboardSpace = this.updateKeyboardSpace.bind(this);
+    this.resetKeyboardSpace = this.resetKeyboardSpace.bind(this);
     this.state = {
       resource: props.resource,
       keyboardSpace: 0,
