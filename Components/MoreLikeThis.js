@@ -2,7 +2,7 @@
  
 var React = require('react-native');
 var utils = require('../utils/utils');
-var MessagesList = require('./MessagesList');
+var MessageList = require('./MessageList');
 var Icon = require('FAKIconImage');
 
 var {
@@ -19,7 +19,7 @@ class MoreLikeThis extends Component {
     var modelName = this.props.resource['_type'];
     this.props.navigator.push({
       title: utils.getModel(modelName).value.title,
-      component: MessagesList,
+      component: MessageList,
       id: 11,
       backButtonTitle: 'Back',
       passProps: {
