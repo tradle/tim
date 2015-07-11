@@ -165,6 +165,7 @@ class TiMApp extends Component {
                   returnRoute={props.returnRoute}
                   callback={props.callback}
                   isAggregation={props.isAggregation}
+                  sortProperty={props.sortProperty}
                   modelName={props.modelName} />;
     }
   }
