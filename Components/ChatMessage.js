@@ -30,11 +30,11 @@ class ChatMessage extends Component {
     if (resource.message  &&  utils.splitMessage(resource.message).length === 1)
       return <View></View>;
     var alignStyle = model.isInterface ? {alignSelf: 'center', marginTop: 10} : {alignSelf: 'stretch'};
+            // autoFocus={true}
     var messageField =
         <View style={[styles.chat, alignStyle]}>
           <TextInput ref='chat'
             autoCapitalize='none'
-            autoFocus={true}
             autoCorrect={false}
             bufferDelay={20}
             placeholder='Say something'
@@ -43,7 +43,7 @@ class ChatMessage extends Component {
             value={this.state.userInput}
             onChange={this.handleChange.bind(this)}
             onSubmitEditing={this.onSubmitEditing.bind(this)}
-            onEndEditing={this.onEndEditing.bind(this)}
+            onEndEditing={this.props.onEndEditing.bind(this, this.state.userInput, this.clear.bind(this))}
           />
         </View>
 
@@ -60,10 +60,12 @@ class ChatMessage extends Component {
       </View>
       );
   }
-  onEndEditing() {
-    this.props.onEndEditing.bind(this, this.state.userInput)
+  clear() {
+    this.setState({userInput: ''});
   }
   handleChange(event) {
+    if (this.props.onChange)
+      this.props.onChange(event);
     this.setState({userInput: event.nativeEvent.text});
   }
   onSubmitEditing() {
