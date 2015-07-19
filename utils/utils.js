@@ -303,7 +303,9 @@ var utils = {
   getImageUri(url) {
     if (!url)
       return null;
-    if (url.indexOf('assets-') === 0 || url.indexOf('http') === 0)
+    if (url.indexOf('data') === 0 || url.indexOf('assets-') === 0 || url.indexOf('http') === 0)
+      return url;
+    else if (url.indexOf('/var/mobile/') == 0)
       return url;
     else
       return 'http://' + url;
