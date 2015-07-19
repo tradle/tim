@@ -12,8 +12,9 @@ var reactMixin = require('react-mixin');
 var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
-var Icon = require('FAKIconImage');
+var Icon = require('./FAKIconImage');
 
+var IDENTITY_MODEL = 'tradle.Identity';
 var {
   ListView,
   Component,
@@ -36,9 +37,14 @@ class ResourceList extends Component {
     };
   }
   componentWillMount() {
-    var params = {modelName: this.props.modelName, to: this.props.resource};
+    var params = {
+      modelName: this.props.modelName, 
+      to: this.props.resource
+    };
     if (this.props.isAggregation)
       params.isAggregation = true;
+    if (this.props.sortProperty)
+      params.sortProperty = this.props.sortProperty;
     Actions.list(params);    
   }
   componentDidMount() {
@@ -54,7 +60,8 @@ class ResourceList extends Component {
       Actions.list({
         query: this.state.filter, 
         modelName: this.props.modelName, 
-        to: this.props.resource
+        to: this.props.resource,
+        sortProperty: this.props.modelName === IDENTITY_MODEL ? 'lastMessageTime' : null
       });
       return;      
     }
@@ -162,7 +169,7 @@ class ResourceList extends Component {
       this.props.navigator.popToRoute(this.props.returnRoute);
       return;
     }
-    if (me  &&  !model.value.isInterface  &&  (resource.rootHash === me.rootHash  ||  resource['_type'] !== 'tradle.Identity')) {
+    if (me  &&  !model.value.isInterface  &&  (resource.rootHash === me.rootHash  ||  resource['_type'] !== IDENTITY_MODEL)) {
       var self = this ;
       route.rightButtonTitle = 'Edit';
       route.onRightButtonPress = /*() =>*/ {
@@ -246,7 +253,7 @@ class ResourceList extends Component {
           dataSource={this.state.dataSource}
           renderRow={this.renderRow.bind(this)}
           automaticallyAdjustContentInsets={false}
-          keyboardDismissMode='onDrag'
+          keyboardDismissMode='on-drag'
           keyboardShouldPersistTaps={true}
           showsVerticalScrollIndicator={false} />;
     }
@@ -286,7 +293,7 @@ var styles = StyleSheet.create({
     width: 30,
     height: 30,
     marginRight: 5,
-    color: '#cccccc'
+    // color: '#cccccc'
   },
   footer: {
     flexDirection: 'row',
