@@ -149,6 +149,7 @@ class MessageList extends Component {
   render() {
     if (this.state.isLoading) 
       return <View/>
+    currentMessageTime = null;
     var content;
     if (this.state.dataSource.getRowCount() === 0)
       content =  <NoResources
@@ -166,7 +167,7 @@ class MessageList extends Component {
             (props) => <InvertibleScrollView {...props} inverted />
           }
           automaticallyAdjustContentInsets={false}
-          keyboardDismissMode='onDrag'
+          keyboardDismissMode='on-drag'
           keyboardShouldPersistTaps={true}
           showsVerticalScrollIndicator={false} />;
       if (isAllMessages)      
@@ -258,15 +259,27 @@ class MessageList extends Component {
     var self = this;
     this.props.navigator.push({
       title: 'Take a pic',
+      backButtonTitle: 'Cancel',
       id: 12,
       component: CameraView,
+      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       passProps: {
-        ontakePic: self.onTakePic.bind(this)
+        onTakePic: self.onTakePic.bind(this),
       }
     });
   }
   onTakePic(data) {
-
+    var msg = {
+      '_type': 'tradle.SimpleMessage', 
+      from: utils.getMe(), 
+      to: this.props.resource,
+      time: new Date().getTime(),
+      photos: [{
+        url: data
+      }]
+    }
+    this.props.navigator.pop();
+    Actions.addMessage(msg);
   }
 }
 reactMixin(MessageList.prototype, Reflux.ListenerMixin);
