@@ -3,7 +3,7 @@
 var React = require('react-native');
 var utils = require('../utils/utils');
 var moment = require('moment');
-var Icon = require('FAKIconImage');
+var Icon = require('./FAKIconImage');
 
 var {
   Image,
@@ -20,8 +20,15 @@ class ResourceRow extends Component {
     var resource = this.props.resource;
     var photo;
     if (resource.photos &&  resource.photos.length) {
-      var uri = resource.photos[0].url;
-      photo = <Image source={{uri: utils.getImageUri(uri)}} style={styles.cellImage} /> 
+      var uri = utils.getImageUri(resource.photos[0].url);
+
+        var params = {
+          uri: utils.getImageUri(uri)
+        }
+        if (uri.indexOf('/var/mobile/') === 0)
+          params.isStatic = true
+        photo = <Image source={params} style={styles.cellImage} /> 
+      
     }
     else
       photo = <View style={styles.cellImage}></View>
@@ -182,7 +189,7 @@ var styles = StyleSheet.create({
   },
   cellImage: {
     backgroundColor: '#dddddd',
-    height: 93,
+    height: 63,
     marginRight: 10,
     width: 60,
   },
