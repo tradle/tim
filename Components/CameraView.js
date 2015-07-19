@@ -8,6 +8,7 @@ var {
   TouchableHighlight
 } = React;
 var Camera = require('react-native-camera');
+var Icon = require('./FAKIconImage');
 
 class CameraView extends Component {
   constructor(props) {
@@ -18,20 +19,28 @@ class CameraView extends Component {
   }
 
   render() {
-
     return (
-      <Camera
-        ref="cam"
-        style={styles.container}
-        onBarCodeRead={this._onBarCodeRead}
-        type={this.state.cameraType}>
-        <TouchableHighlight onPress={this._switchCamera}>
-          <Text>The old switcheroo</Text>
-        </TouchableHighlight>
-        <TouchableHighlight onPress={this._takePicture}>
-          <Text>Take Picture</Text>
-        </TouchableHighlight>
-      </Camera>
+      <View style={styles.container}>
+        <Camera
+          ref="cam"
+          captureTarget={Camera.constants.CaptureTarget.cameraRoll}
+          style={styles.container}
+          onBarCodeRead={this._onBarCodeRead.bind(this)}
+          type={this.state.cameraType}>
+          <TouchableHighlight onPress={this._switchCamera.bind(this)}>
+            <Text>The old switcheroo</Text>
+          </TouchableHighlight>
+        </Camera>
+        <View style={{backgroundColor: '#000000', paddingTop: 7, height: 125, alignSelf: 'stretch'}}>
+          <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+            <Text style={{color: '#eeeeee', paddingHorizontal: 5, fontSize: 24, fontWeight: '400'}}>Video</Text>
+            <Text style={{color: 'yellow', paddingHorizontal: 5, fontSize: 24, fontWeight: '400'}}>Photo</Text>
+          </View>
+          <TouchableHighlight onPress={this._takePicture.bind(this)}>
+             <Icon name='ion|ios-circle-filled'  size={85}  color='#eeeeee'  style={styles.icon}/>
+          </TouchableHighlight>
+        </View>  
+      </View>
     );
   }
   _onBarCodeRead(e) {
@@ -47,7 +56,7 @@ class CameraView extends Component {
     var self = this;
     this.refs.cam.capture(function(err, data) {
       console.log(err, data);
-      this.props.onTakePic(data);
+      self.props.onTakePic(data);
     });
   }
 }
@@ -58,16 +67,14 @@ var styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    alignSelf: 'stretch',
     backgroundColor: 'transparent',
   },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
+  icon: {
+    width: 85,
+    height: 85,
+    marginTop: 2,
+    alignSelf: 'center',
   },
 });
 
