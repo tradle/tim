@@ -5,7 +5,7 @@ var t = require('tcomb-form-native');
 var utils = require('../utils/utils');
 var logError = require('logError');
 var groupByEveryN = require('groupByEveryN');
-var Icon = require('FAKIconImage');
+var Icon = require('./FAKIconImage');
 
 var Form = t.form.Form;
 
@@ -28,12 +28,12 @@ class SelectPhotoList extends Component {
       });
     this.state = {
       assets: [],
-      batchSize: 30,
-      groupTypes: 'All',
+      batchSize: 32,
+      groupTypes: 'SavedPhotos',
       lastCursor: null,
       selected: {},
       noMore: false,
-      imagesPerRow: this.props.imagesPerRow || 3,
+      imagesPerRow: this.props.imagesPerRow || 4,
       loadingMore: false,
       dataSource: dataSource,
     };
@@ -69,7 +69,7 @@ class SelectPhotoList extends Component {
 
     var fetchParams: Object = {
       first: this.state.batchSize,
-      groupTypes: 'All'
+      groupTypes: this.state.groupTypes
     };
     if (this.state.lastCursor) 
       fetchParams.after = this.state.lastCursor;
@@ -81,16 +81,17 @@ class SelectPhotoList extends Component {
       this.fetch();
   }
   renderRow(assets, sectionID, rowID)  {
-    var photos = assets.map((asset) => {
+    var photos = [];
+    for (var asset of assets) {
       if (asset === null) 
-        return null;
+        continue;
       var icon = (this.state.selected[asset.node.image.uri])
                ? 
                  <TouchableHighlight onPress={this.onSelect.bind(this, asset)} underlayColor='#ffffff'>
                    <Icon name={'ion|ios-checkmark-empty'} size={20} color='#eeeeee' style={styles.icon} />
                  </TouchableHighlight>  
                : <View />
-      return (
+      photos.push(
               <View>
                  <TouchableHighlight onPress={this.onSelect.bind(this, asset)} underlayColor='#ffffff'>
                     <Image style={styles.image} source={asset.node.image} />
@@ -98,7 +99,8 @@ class SelectPhotoList extends Component {
                  {icon}
               </View>
       );
-    });
+    }
+
 
     return (
       <View style={styles.row}>
@@ -146,19 +148,20 @@ var styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     flex: 1,
-    alignSelf: 'center'
+    marginLeft: 0
+    // alignSelf: 'center'
   },
   image: {
     margin: 1,
     marginVertical: 1,
-    width: 110,
-    height: 110
+    width: 92,
+    height: 92
   },
   icon: {
     width: 20,
     height: 20,
     marginTop: -25,
-    marginLeft: 4,
+    // marginLeft: 4,
     borderWidth: 1,
     borderColor: '#eeeeee',
     backgroundColor: 'blue',
