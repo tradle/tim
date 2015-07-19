@@ -6,7 +6,7 @@ var ArticleView = require('./ArticleView');
 var MessageView = require('./MessageView');
 var NewResource = require('./NewResource');
 var PhotosList = require('./PhotosList');
-var Icon = require('FAKIconImage');
+var Icon = require('./FAKIconImage');
 var extend = require('extend');
 var groupByEveryN = require('groupByEveryN');
 
@@ -88,7 +88,7 @@ class MessageRow extends Component {
                 ? utils.getDisplayName(resource) 
                 : noMessage ? null : utils.getDisplayName(resource, model.properties);
       if (vCols)                
-        renderedRow = <Text style={[styles.resourceTitle]} numberOfLines={2}>{vCols}</Text>;
+        renderedRow = <Text style={isModel ? styles.modelTitle : styles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
     }
     else if (!isModel) {
       var fromHash = resource.from.id;
@@ -202,7 +202,7 @@ class MessageRow extends Component {
     else
       messageBody = <View style={{height: 7}}/>
     var len = photoUrls.length;
-    var inRow = len ? (len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3) : 0;
+    var inRow = len ? (len === 1 ? 1 : (len % 2) ? 3 : 2) : 0;
     var photoStyle = {}; 
     if (inRow > 0) {
       if (inRow === 1)
@@ -322,7 +322,7 @@ class MessageRow extends Component {
         vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>)
       }
       else {
-        if (!resource[v].length)
+        if (!resource[v]  ||  !resource[v].length)
           return;
         var msgParts = utils.splitMessage(resource[v]);
         // Case when the needed form was sent along with the message
@@ -355,6 +355,13 @@ var styles = StyleSheet.create({
   textContainer: {
     flex: 1,
     flexDirection: 'row'
+  },
+  modelTitle: {
+    flex: 1,
+    flexWrap: 'wrap',
+    fontSize: 22,
+    fontWeight: '400',
+    marginVertical: 15,
   },
   resourceTitle: {
     flex: 1,
@@ -402,8 +409,8 @@ var styles = StyleSheet.create({
     borderWidth: 1
   },
   bigImage: {
-    width: 180,
-    height: 220,
+    width: 240,
+    height: 280,
     margin: 1,
     borderRadius: 10
   },
