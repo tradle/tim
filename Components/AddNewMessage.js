@@ -4,7 +4,7 @@ var React = require('react-native');
 var utils = require('../utils/utils');
 var ChatMessage = require('./ChatMessage');
 var SelectPhotoList = require('./SelectPhotoList');
-var Icon = require('FAKIconImage');
+var Icon = require('./FAKIconImage');
 var extend = require('extend');
 var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
@@ -12,6 +12,8 @@ var Reflux = require('reflux');
 var Actions = require('../Actions/Actions');
 var KeyboardEvents = require('react-native-keyboardevents');
 var KeyboardEventEmitter = KeyboardEvents.Emitter;
+
+var UIImagePickerManager = require('NativeModules').UIImagePickerManager;
 
 var {
   View,
@@ -42,12 +44,12 @@ class AddNewMessage extends Component {
     }
   }
   updateKeyboardSpace(frames) {
-    LayoutAnimation.configureNext(animations.layout.spring);
+    // LayoutAnimation.configureNext(animations.layout.spring);
     this.setState({keyboardSpace: frames.end.height});
   }
 
   resetKeyboardSpace() {
-    LayoutAnimation.configureNext(animations.layout.spring);
+    // LayoutAnimation.configureNext(animations.layout.spring);
     this.setState({keyboardSpace: 0});
   }  
 
@@ -101,6 +103,7 @@ class AddNewMessage extends Component {
                        model={model} 
                        callback={this.props.callback} 
                        onSubmitEditing={this.onSubmitEditing.bind(this)}
+                       onChange={this.onChange.bind(this)}
                        onEndEditing={this.onEndEditing.bind(this)} />
         </View>
         <TouchableHighlight style={{paddingRight: 5}} underlayColor='transparent'
@@ -111,6 +114,33 @@ class AddNewMessage extends Component {
       </View> 
     );
   }
+
+  onChange(event) {
+    this.setState({userInput: event.nativeEvent.text});    
+  }
+  showChoice1() {
+    var self = this;
+    UIImagePickerManager.showImagePicker(null, (type, response) => {
+      if (type !== 'cancel') {
+        var selectedAssets = self.state.selectedAssets;
+        if (type === 'data')  // New photo taken -  response is the 64 bit encoded image data string
+          selectedAssets['data:image/jpeg;base64,' + response] = 'y'; //, isStatic: true};
+        else { // Selected from library - response is the URI to the local file asset
+          // unselect if was selected before
+          if (selectedAssets[response])
+            delete selectedAssets[response];
+          else
+            selectedAssets[response] = 'y';
+          // source = {uri: response};
+        }
+
+        self.onSubmitEditing(self.state.userInput); 
+      } else {
+        console.log('Cancel');
+      }
+    });
+  }
+
   showChoice() {
     var buttons = ['Take photo', 'Photo library', 'Cancel'];
     var self = this;
@@ -154,6 +184,7 @@ class AddNewMessage extends Component {
         before: this.beforeDone.bind(this),
         stateChange: this.onSubmitEditing.bind(this)
       },      
+      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       passProps: {
         navigator: self.props.navigator,
         onSelect: self.onPhotoSelect.bind(this),
@@ -165,8 +196,11 @@ class AddNewMessage extends Component {
   beforeDone() {
     this.props.navigator.pop();
   }
-  onEndEditing(userInput) {
+  onEndEditing(userInput, clearCallback) {
     this.setState({userInput: userInput});
+
+    if (clearCallback)
+      this.state.clearCallback = clearCallback;
   }
 
   onSubmitEditing(msg) {
@@ -200,6 +234,8 @@ class AddNewMessage extends Component {
       value.photos = photos;
     }
     this.setState({userInput: '', selectedAssets: {}});
+    if (this.state.clearCallback)
+      this.state.clearCallback();
     // setTimeout(function() {
     //   this.setState({textValue: this.state.userInput, selectedAssets: {}});
     //   this.refs.chat.focus();
