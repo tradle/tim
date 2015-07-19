@@ -145,9 +145,9 @@ class ShowPropertiesView extends Component {
       for (var p in itemsMeta) {
         if (vCols  &&  vCols.indexOf(p) == -1)
           continue;
-        if (!v[p])
-          continue;
         var itemMeta = itemsMeta[p];
+        if (!v[p]  &&  !itemMeta.displayAs)
+          continue;
         var value;
         if (itemMeta.displayAs) 
           value = utils.templateIt(itemMeta, v) 
