@@ -1,7 +1,7 @@
 'use strict';
 
 var React = require('react-native');
-var SearchBar = require('./SearchBar');
+var SearchBar = require('react-native-search-bar'); //('./SearchBar');
 var NoResources = require('./NoResources');
 var ResourceRow = require('./ResourceRow');
 var ResourceView = require('./ResourceView');
@@ -15,6 +15,7 @@ var Reflux = require('reflux');
 var Icon = require('./FAKIconImage');
 
 var IDENTITY_MODEL = 'tradle.Identity';
+var DEAL_MODEL = 'tradle.Coupon';
 var {
   ListView,
   Component,
@@ -94,13 +95,42 @@ class ResourceList extends Component {
     var me = utils.getMe();
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     var model = utils.getModel(this.props.modelName);
+    if (this.props.modelName != IDENTITY_MODEL  &&  !this.props.callback) {
+      this.props.navigator.push({
+        title: title,
+        id: 3,
+        component: ResourceView,
+        titleTextColor: '#7AAAC3',
+        backButtonTitle: 'Back',
+        rightButtonTitle: 'Edit',
+        onRightButtonPress: {
+          title: title,
+          id: 4,
+          component: NewResource,
+          titleTextColor: '#7AAAC3',
+          backButtonTitle: 'Back',
+          rightButtonTitle: 'Done',
+          passProps: {
+            model: utils.getModel(resource['_type']).value,
+            resource: resource
+          }
+        },
 
-    if (me.rootHash === resource.rootHash  ||  
-       (this.props.resource  &&  me.rootHash === this.props.resource.rootHash  && this.props.prop)) {
-      this._selectResource(resource);
+        passProps: {resource: resource}
+      });
       return;
     }
-
+    if (this.props.prop) { 
+      if (me  &&  this.props.modelName != IDENTITY_MODEL) {
+        this._selectResource(resource);
+        return;
+      }
+      if (me.rootHash === resource.rootHash  ||  
+         (this.props.resource  &&  me.rootHash === this.props.resource.rootHash  && this.props.prop)) {
+        this._selectResource(resource);
+        return;
+      }
+    }
     var title = resource.firstName; //utils.getDisplayName(resource, model.value.properties);
     var modelName = 'tradle.Message';
     var self = this;
@@ -186,8 +216,15 @@ class ResourceList extends Component {
     }
     this.props.navigator.push(route);
   }
+  onSearchChange(filter) {
+    Actions.list({
+      query: filter, 
+      modelName: this.props.modelName, 
+      to: this.props.resource
+    });
+  }
 
-  onSearchChange(event) {
+  onSearchChange1(event) {
     var filter = event.nativeEvent.text.toLowerCase();
     Actions.list({
       query: filter, 
@@ -200,6 +237,7 @@ class ResourceList extends Component {
     return (
       <ResourceRow
         onSelect={() => this.selectResource(resource)}
+        key={resource.rootHash}
         resource={resource} />
     );
   }
@@ -207,18 +245,37 @@ class ResourceList extends Component {
     var me = utils.getMe();
     if (!me)
       return <View />;
+            // <Icon name='ion|person-add'  size={30}  color='#999999' style={styles.icon} /> 
+            // <Icon name='ion|person-stalker'  size={30}  color='#999999'  style={styles.icon} /> 
     return (
       <View style={styles.footer}>
         <View>
           <TouchableHighlight underlayColor='transparent' onPress={this.addNew.bind(this)}>
-            <Icon name='ion|person-add'  size={30}  color='#999999' style={styles.icon} /> 
+            <Icon name='ion|plus'  size={30}  color='#999999' style={styles.icon} /> 
           </TouchableHighlight>
         </View>  
         <View>
-          <Icon name='ion|person-stalker'  size={30}  color='#999999'  style={styles.icon} /> 
+          <TouchableHighlight underlayColor='transparent' onPress={this.showDeals.bind(this, DEAL_MODEL)}>
+            <Icon name='ion|nuclear'  size={30}  color='#999999'  style={styles.icon} /> 
+          </TouchableHighlight>
         </View>  
       </View>
     );
+  }
+  showDeals(modelName) {
+    var model = utils.getModel(modelName).value;
+    // var model = utils.getModel(this.props.modelName).value;
+    this.props.navigator.push({
+      title: model.title,
+      id: 10,
+      component: ResourceList,
+      titleTextColor: '#7AAAC3',
+      backButtonTitle: 'Back',
+      passProps: {
+        filter: '',
+        modelName: DEAL_MODEL,
+      },
+    })
   }
   addNew() {
     var model = utils.getModel(this.props.modelName).value;
@@ -262,10 +319,11 @@ class ResourceList extends Component {
     return (
       <View style={styles.container}> 
         <SearchBar
-          onSearchChange={this.onSearchChange.bind(this)}
-          isLoading={this.state.isLoading}
-          filter={this.props.filter}
-          onFocus={() => this.refs.length  &&  this.refs.listview.getScrollResponder().scrollTo(0, 0)} 
+          onChangeText={this.onSearchChange.bind(this)}
+          placeholder='Search'
+          tintColor='blue'
+          showsCancelButton={false}
+          hideBackground={true}
           />
         <View style={styles.separator} />
         {content}
@@ -274,6 +332,17 @@ class ResourceList extends Component {
     );
   }
 }
+      // <View style={styles.container}> 
+      //   <SearchBar
+      //     onSearchChange={this.onSearchChange.bind(this)}
+      //     isLoading={this.state.isLoading}
+      //     filter={this.props.filter}
+      //     onFocus={() => this.refs.length  &&  this.refs.listview.getScrollResponder().scrollTo(0, 0)} 
+      //     />
+      //   <View style={styles.separator} />
+      //   {content}
+      //   {Footer}
+      // </View>
 // reactMixin(ResourceList.prototype, TimerMixin);
 reactMixin(ResourceList.prototype, Reflux.ListenerMixin);
 
@@ -281,6 +350,7 @@ var styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
+    marginTop: 60
   },
   centerText: {
     alignItems: 'center',
