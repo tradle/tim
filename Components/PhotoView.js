@@ -22,7 +22,7 @@ class PhotoView extends Component {
   }
   render() {
     var resource = this.props.resource;
-    if (!resource)
+    if (!resource  ||  !resource.rootHash)
       return <View />;
     var modelName = resource['_type'];
     var model = utils.getModel(modelName).value;
