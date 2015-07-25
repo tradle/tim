@@ -2,6 +2,7 @@
  
 var React = require('react-native');
 var utils = require('../utils/utils');
+var MONEY_TYPE = 'tradle.Money';
 var {
   StyleSheet,
   Image, 
@@ -56,9 +57,14 @@ class ShowPropertiesView extends Component {
       excludedProperties = mapped;
     }
     if (!vCols) {
-      vCols = utils.objectToArray(model.properties);
-      var idx = vCols.indexOf('_type');
-      delete vCols[idx];
+      vCols = [];
+      for (var p in model.properties) {
+        if (p != '_type')
+          vCols.push(p)
+      }
+      // vCols = utils.objectToArray(model.properties);
+      // var idx = vCols.indexOf('_type');
+      // delete vCols[idx];
     }
     var self = this;
     var first = true;
@@ -74,8 +80,21 @@ class ShowPropertiesView extends Component {
         else
           return;
       }
-      else if (pMeta.ref)
-        val = val['_type'] ? utils.getDisplayName(val, utils.getModel(val['_type']).value.properties) : val.title;
+      else if (pMeta.ref) {
+        if (pMeta.ref == MONEY_TYPE) {
+          var currencies = utils.getModel(pMeta.ref).value.properties.currency.oneOf;
+          var valCurrency = val.currency;
+          for (var c of currencies) {
+            var currencySymbol = c[valCurrency];
+            if (currencySymbol) {
+              val = (valCurrency == 'USD') ? currencySymbol + val.value : val.value + currencySymbol;
+              break;
+            }
+          }
+        }
+        else
+          val = val['_type'] ? utils.getDisplayName(val, utils.getModel(val['_type']).value.properties) : val.title;
+      }
       else if (pMeta.type === 'date')
         val = utils.formatDate(val);
 
@@ -88,6 +107,10 @@ class ShowPropertiesView extends Component {
         val = self.renderItems(val, pMeta);
         first = false;
       }      
+      else if (typeof val === 'number') {
+        val = <Text style={styles.description}>{val}</Text>;        
+        isDirectionRow = true;
+      }
       else if (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0)
         val = <Text onPress={self.onPress.bind(self, val)} style={styles.description}>{val}</Text>;
       else {
@@ -200,11 +223,9 @@ var styles = StyleSheet.create({
   itemContainer: {
     flex: 1,
     flexDirection: 'row',
-    paddingLeft: 10,
   },
   itemColContainer: {
     flex: 1,
-    paddingLeft: 10,
     flexWrap: 'wrap',
   },
   separator: {
@@ -217,19 +238,22 @@ var styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    margin: 5,
+    marginTop: 3,
     marginBottom: 0,
+    marginHorizontal: 7,
     color: '#2E3B4E'
   },
   itemTitle: {
     fontSize: 18,
-    margin: 5,
+    marginTop: 3,
     marginBottom: 0,
+    marginHorizontal: 7,
     color: '#7AAAC3'
   },
   description: {
     fontSize: 18,
-    margin: 5,
+    marginVertical: 3,
+    marginHorizontal: 7,
     color: '#656565',
   },
   icon: {
