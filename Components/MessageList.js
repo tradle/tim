@@ -1,7 +1,7 @@
 'use strict';
 
 var React = require('react-native');
-var SearchBar = require('./SearchBar');
+var SearchBar = require('react-native-search-bar');
 var MessageView = require('./MessageView');
 var NoResources = require('./NoResources');
 var NewResource = require('./NewResource');
@@ -196,10 +196,11 @@ class MessageList extends Component {
     return (
       <View style={styles.container}> 
         <SearchBar
-          onSearchChange={this.onSearchChange.bind(this)}
-          isLoading={this.state.isLoading}
-          filter={this.props.filter}
-          onFocus={() => this.refs.length  &&  this.refs.listview.getScrollResponder().scrollTo(0, 0)} 
+          onChangeText={this.onSearchChange.bind(this)}
+          placeholder='Search'
+          tintColor='blue'
+          showsCancelButton={false}
+          hideBackground={true}
           />
         <View style={styles.separator} />
         {content}
@@ -207,6 +208,12 @@ class MessageList extends Component {
       </View>
     );
   }
+        // <SearchBar
+        //   onSearchChange={this.onSearchChange.bind(this)}
+        //   isLoading={this.state.isLoading}
+        //   filter={this.props.filter}
+        //   onFocus={() => this.refs.length  &&  this.refs.listview.getScrollResponder().scrollTo(0, 0)} 
+        //   />
   onPhotoSelect(asset) {
     var selectedAssets = this.state.selectedAssets;
     // unselect if was selected before
@@ -287,6 +294,7 @@ reactMixin(MessageList.prototype, Reflux.ListenerMixin);
 var styles = StyleSheet.create({
   container: {
     flex: 1,
+    marginTop: 60,
     backgroundColor: '#f7f7f7',
   },
   centerText: {
