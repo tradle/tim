@@ -4,6 +4,7 @@ var React = require('react-native');
 var utils = require('../utils/utils');
 var moment = require('moment');
 var Icon = require('./FAKIconImage');
+var MONEY_TYPE = 'tradle.Money';
 
 var {
   Image,
@@ -46,12 +47,12 @@ class ResourceRow extends Component {
                        : <View />; 
     
     return (
-      <View>
+      <View key={this.props.key}>
         <TouchableHighlight onPress={this.props.onSelect}>
-          <View style={styles.row}>
+          <View style={styles.row} key={this.props.key + '1'}>
             {photo}
             {onlineStatus}
-            <View style={styles.textContainer}>
+            <View style={styles.textContainer} key={this.props.key + '2'}>
               {this.formatRow(resource)}
               {cancelResource}
             </View>
@@ -78,8 +79,10 @@ class ResourceRow extends Component {
     viewCols.forEach(function(v) {
       if (properties[v].type !== 'date'  ||  !resource[v])
         return;
-      dateProp = v;
-      dataPropsCounter++;
+      if (v === 'dateSubmitted') {
+        dateProp = v;
+        dataPropsCounter++;
+      }
     });
     if (dataPropsCounter > 1)
       dateProp = null;
@@ -91,16 +94,35 @@ class ResourceRow extends Component {
       var style = (first) ? styles.resourceTitle : styles.description;
       if (properties[v].style)
         style = [style, properties[v].style];
-      if (properties[v].ref) {
+      var ref = properties[v].ref;
+      if (dateProp) {
+        row = <View style={{flexDirection: 'row'}}>
+                <Text style={style} numberOfLines={first ? 2 : 1}>{resource[v].title}</Text>
+                {self.addDateProp.bind(self, resource, dateProp)}
+              </View>
+        dateProp = null;
+      }
+
+      if (ref) {
         if (resource[v]) {
           var row;
-          if (dateProp) 
-            row = <View style={{flexDirection: 'row'}}>
-                    <Text style={style} numberOfLines={first ? 2 : 1}>{resource[v].title}</Text>
-                    {self.addDateProp.bind(self, resource, dateProp)}
-                  </View>
-          else
+          if (ref == MONEY_TYPE) {
+            var currencies = utils.getModel(ref).value.properties.currency.oneOf;
+            var valCurrency = resource[v].currency;
+            for (var c of currencies) {
+              var currencySymbol = c[valCurrency];
+              if (currencySymbol) {
+                var val = (valCurrency == 'USD') ? currencySymbol + resource[v].value : resource[v].value + currencySymbol;
+                row = properties[v].skipLabel
+                    ? <Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>
+                    : <View style={{flexDirection: 'row'}}><Text style={style}>{properties[v].title}</Text><Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text></View>
+                break;
+              }
+            }        
+          }
+          else  
             row = <Text style={style} numberOfLines={first ? 2 : 1}>{resource[v].title}</Text>
+          
           vCols.push(row);
         }
         first = false;
@@ -113,7 +135,9 @@ class ResourceRow extends Component {
       }
       else  {
         var row;
-        if (resource[v]  &&  (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0))
+        if (resource[v]  &&  (typeof resource[v] != 'string'))
+          row = <Text style={style} numberOfLines={1}>{resource[v]}</Text>;
+        else if (resource[v]  && (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0))
           row = <Text style={style} onPress={self.onPress.bind(self)} numberOfLines={1}>{resource[v]}</Text>;
         else {          
           var val = properties[v].displayAs ? utils.templateIt(properties[v], resource) : resource[v];
@@ -148,7 +172,13 @@ class ResourceRow extends Component {
     if (properties[dateProp].style)
       style = [style, properties[dateProp].style];
     var val = utils.getFormattedDate(new Date(resource[dateProp]));
-    return <Text style={[style, {alignSelf: 'flex-end'}]} numberOfLines={1}>{val}</Text>;
+    
+    return properties[dateProp].skipLabel
+        ? <Text style={style}>{val}</Text>
+        : <View style={{flexDirection: 'row'}}><Text style={style}>{properties[dateProp].title}</Text><Text style={style}>{val}</Text></View>
+
+    return <Text style={[style]} numberOfLines={1}>{val}</Text>;
+    // return <Text style={[style, {alignSelf: 'flex-end'}]} numberOfLines={1}>{val}</Text>;
 
   }
 }
