@@ -39,7 +39,7 @@ class NewResource extends Component {
     this.updateKeyboardSpace = this.updateKeyboardSpace.bind(this);
     this.resetKeyboardSpace = this.resetKeyboardSpace.bind(this);
     this.state = {
-      resource: props.resource,
+      resource: props.resource || {'_type': props.model.id },
       keyboardSpace: 0,
     }
     this.props.navigator.route.onRightButtonPress = {
@@ -146,25 +146,41 @@ class NewResource extends Component {
   }
   chooser(prop, propName, event) {
     var resource = this.state.resource;
+    if (!resource)
+      resource = {'_type': this.props.model.id};
+    
+    var value = this.refs.form.input;
+
     var filter = event.nativeEvent.text; 
     var m = utils.getModel(prop.ref).value;
+    var currentRoutes = this.props.navigator.getCurrentRoutes();
     this.props.navigator.push({
       title: m.title,
       titleTextColor: '#7AAAC3',
       id: 10,
       component: ResourceList,
+      backButtonTitle: 'Back',
       passProps: {
         filter:      filter, 
         prop:        propName,
         modelName:   prop.ref,
         resource:    resource,
+        returnRoute: currentRoutes[currentRoutes.length - 1],
         callback:    this.setChosenValue.bind(this)
       }
     });
   }
   // setting chosen from the list property on the resource like for ex. Organization on Contact
   setChosenValue(propName, value) {
-    this.state.resource[propName] = value;
+    var resource = this.state.resource;
+    resource[propName] = value;
+    var data = this.refs.form.refs.input.state.value;
+    if (data) {
+      for (var p in data)
+        if (!resource[p])
+          resource[p] = data[p];
+    }
+
     this.setState({
       resource: this.state.resource
     });
@@ -295,19 +311,19 @@ class NewResource extends Component {
     options.tintColor = 'red'
 
     var content = <ScrollView style={style}>
-                      <View style={styles.container}>
-                        <Text style={errStyle}>{err}</Text>
-                        <View style={styles.photoBG}>
-                          <PhotoView resource={resource} />
-                        </View>
-                        <FromToView resource={resource} model={meta} navigator={this.props.navigator} />
-                        <View style={{'padding': 15}}>
-                          <Form ref='form' type={Model} options={options} value={data} />          
-                          {arrayItems}
-                        </View>
-                        <View style={{height: 30}} />          
+                    <View style={styles.container}>
+                      <Text style={errStyle}>{err}</Text>
+                      <View style={styles.photoBG}>
+                        <PhotoView resource={resource} />
                       </View>
-                    </ScrollView>
+                      <FromToView resource={resource} model={meta} navigator={this.props.navigator} />
+                      <View style={{'padding': 15}}>
+                        <Form ref='form' type={Model} options={options} value={data} />          
+                        {arrayItems}
+                      </View>
+                      <View style={{height: 30}} />          
+                    </View>
+                  </ScrollView>
     if (isMessage) 
       return (
         <View>
