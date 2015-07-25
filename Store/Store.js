@@ -6,13 +6,18 @@ var extend = require('extend');
 var Q = require('q');
 var AddressBook = require('NativeModules').AddressBook;
 var sampleData = require('../data/data');
+var voc = require('../data/models');
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
 var level = require('react-native-level');
 var promisify = require('q-level');
+// var levelQuery = require('level-queryengine');
+// var jsonqueryEngine = require('jsonquery-engine');
+// var Device = require('react-native-device');
 // var Sublevel = require('level-sublevel')
 
 var IDENTITY_MODEL = 'tradle.Identity';
+var MODEL_TYPE_VALUE = 'tradle.Model';
 var MY_IDENTITY_MODEL = 'tradle.MyIdentity';
 var RESOURCE_TYPE = '_type'; 
 
@@ -20,6 +25,7 @@ var models = {};
 var list = {};
 var idenities = {};
 var db; //, identityDb, messagesDb;
+var ldb;
 var isLoaded;
 var me;
 var ready;
@@ -30,6 +36,8 @@ var Store = Reflux.createStore({
   // this will be called by all listening components as they register their listeners
   init() {
     var ldb = level('TiM.db', { valueEncoding: 'json' });
+    // ldb = levelQuery(level('TiM.db', { valueEncoding: 'json' }));
+    // ldb.query.use(jsonqueryEngine());
     db = promisify(ldb);
 
     // var sdb = promisify(Sublevel(ldb));
@@ -73,22 +81,21 @@ var Store = Reflux.createStore({
     rr.currentHash = rootHash;
     var self = this;
     var key = rr[RESOURCE_TYPE] + '_' + rootHash;
-    r = rr;
-    db.put(key, r)
-    .then(function() {
-      list[key] = {key: key, value: r};
-      var to = list[utils.getId(r.to)].value;
-      var from = list[utils.getId(r.from)].value;
-      to.lastMessage = (from.rootHash === me.rootHash) ? 'You: ' + r.message : r.message;
-      to.lastMessageTime = r.time;
-      from.lastMessage = r.message;
-      from.lastMessageTime = r.time;
-      var batch = [];
-      batch.push({type: 'put', key: to[RESOURCE_TYPE] + '_' + to.rootHash, value: to});
-      batch.push({type: 'put', key: from[RESOURCE_TYPE] + '_' + from.rootHash, value: from});
+    var batch = [];
+    batch.push({type: 'put', key: key, value: rr})
+    // db.put(key, r)
+    // .then(function() {
+    list[key] = {key: key, value: r};
+    var to = list[utils.getId(r.to)].value;
+    var from = list[utils.getId(r.from)].value;
+    to.lastMessage = (from.rootHash === me.rootHash) ? 'You: ' + r.message : r.message;
+    to.lastMessageTime = r.time;
+    from.lastMessage = r.message;
+    from.lastMessageTime = r.time;
+    batch.push({type: 'put', key: to[RESOURCE_TYPE] + '_' + to.rootHash, value: to});
+    batch.push({type: 'put', key: from[RESOURCE_TYPE] + '_' + from.rootHash, value: from});
 
-      return db.batch(batch);
-    })
+    db.batch(batch)    
     .then(function() {
       self.trigger({
         action: 'addMessage',
@@ -373,6 +380,8 @@ var Store = Reflux.createStore({
       if (props[p] &&  props[p].type === 'object') {
         var ref = props[p].ref;
         if (ref  &&  resource[p])  {
+          if (props[p].ref  &&  this.getModel(props[p].ref).value.inlined) 
+            continue;
           var rValue = resource[p].rootHash ? resource[p][RESOURCE_TYPE] + '_' + resource[p].rootHash : utils.getId(resource[p].id);
           refProps[rValue] = p;
           if (list[rValue]) {
@@ -575,6 +584,30 @@ var Store = Reflux.createStore({
     }
 
     var result = utils.objectToArray(foundResources);
+    var sortProp = params.sortProperty;
+    if (sortProp) {
+      var asc = (typeof params.asc != 'undefined') ? params.asc : false;
+      if (props[sortProp].type == 'date') {
+        result.sort(function(a,b) {
+          var aVal = a[sortProp] ? a[sortProp] : 0;
+          var bVal = b[sortProp] ? b[sortProp] : 0;
+          if (asc)
+            return new Date(aVal) - new Date(bVal);
+          else
+            return new Date(bVal) - new Date(aVal);
+        });      
+      }
+      else if (props[sortProp].type == 'string')  {
+        result.sort();
+        if (asc)
+          result.reverse();
+      }
+      else if (props[sortProp].type == 'number') {
+        result.sort(function(a, b) {
+          return asc ? a - b : b - a
+        }); 
+      }        
+    }
     return result;
   },
   searchMessages(params) {
@@ -785,7 +818,7 @@ var Store = Reflux.createStore({
           firstName: contact.firstName,
           lastName: contact.lastName,
           // formatted: contact.firstName + ' ' + contact.lastName,          
-          contact: contactInfo
+          contactInfo: contactInfo
         };
         var me = list[MY_IDENTITY_MODEL + '_1'];
         if (me) 
@@ -800,7 +833,7 @@ var Store = Reflux.createStore({
           })
         } 
         var emailAddresses = contact.emailAddresses;
-        if (emailAddresses)
+        if (emailAddresses) 
           emailAddresses.forEach(function(email) {
             contactInfo.push({identifier: email.email, type: email.label + ' email'})
           });
@@ -832,6 +865,32 @@ var Store = Reflux.createStore({
     if (myId)
       myId = IDENTITY_MODEL + '_' + myId;
     var self = this;
+    // var qq = { $and: [{ type: MODEL_TYPE_VALUE }]};    
+    
+    // db.query(qq)
+    // // return db.createReadStream()
+    // .on('data', function(data) {
+    //    models['model_' + data.id] = data;
+    //  })
+    // .on('close', function() {
+    //   console.log('Stream closed');
+    // })      
+    // .on('end', function() {
+    //   console.log('Stream ended');
+    //   if (self.isEmpty(models) || Object.keys(list).length == 2)
+    //     if (me)
+    //       return self.loadDB();
+    //     else {
+    //       isLoaded = false;
+    //       return self.loadModels();
+    //     }
+    //   // else
+    //   //   return self.loadAddressBook();
+    // })      
+    // .on('error', function(err) {
+    //   console.log('err: ' + err);
+    // });
+
     return db.createReadStream()
     .on('data', function(data) {
        if (data.key.indexOf('model_') === 0) {
@@ -854,17 +913,21 @@ var Store = Reflux.createStore({
     })      
     .on('end', function() {
       console.log('Stream ended');
-      if (self.isEmpty(models))
+      if (self.isEmpty(models) || Object.keys(list).length == 2)
         if (me)
           return self.loadDB();
         else {
           isLoaded = false;
           return self.loadModels();
         }
+      // else
+      //   return self.loadAddressBook();
     })      
     .on('error', function(err) {
       console.log('err: ' + err);
     });
+
+
   },
   
   isEmpty(obj) {
@@ -878,37 +941,47 @@ var Store = Reflux.createStore({
   getModel(modelName) {
     return models['model_' + modelName];
   },
-  loadDB() {
+  loadDB(loadTest) {
+    loadTest = true;
+    // var lt = !Device.isIphone();
     var batch = [];
 
-    sampleData.getModels().forEach(function(m) {
-      if (!m.rootHash)
-        m.rootHash = sha(m);
-      batch.push({type: 'put', key: 'model_' + m.id, value: m});
-    });
-    sampleData.getResources().forEach(function(r) {
-      if (!r.rootHash) 
-        r.rootHash = sha(r);
-      r.currentHash = r.rootHash;
-      var key = r[RESOURCE_TYPE] + '_' + r.rootHash;
-      // if (r[RESOURCE_TYPE] === IDENTITY_MODEL)
-      //   batch.push({type: 'put', key: key, value: r, prefix: identityDb});
-      // else
-        batch.push({type: 'put', key: key, value: r});
+    if (loadTest) {
+      voc.getModels().forEach(function(m) {
+        if (!m.rootHash)
+          m.rootHash = sha(m);
+        batch.push({type: 'put', key: 'model_' + m.id, value: m});
+      });
+      sampleData.getResources().forEach(function(r) {
+        if (!r.rootHash) 
+          r.rootHash = sha(r);
+        r.currentHash = r.rootHash;
+        var key = r[RESOURCE_TYPE] + '_' + r.rootHash;
+        // if (r[RESOURCE_TYPE] === IDENTITY_MODEL)
+        //   batch.push({type: 'put', key: key, value: r, prefix: identityDb});
+        // else
+          batch.push({type: 'put', key: key, value: r});
 
-    });
-    var self = this;
-    return db.batch(batch)
-          .then(self.loadResources)
-          .then(self.loadAddressBook)
-          .catch(function(err) {
-            err = err;
-            });
+      });
+      var self = this;
+      return db.batch(batch)
+            .then(self.loadResources)
+            .then(self.loadAddressBook)
+            .catch(function(err) {
+              err = err;
+              });
+    }
+    else {
+      return this.loadAddressBook()
+            .catch(function(err) {
+              err = err;
+              });
+    }
   },
   loadModels() {
     var batch = [];
 
-    sampleData.getModels().forEach(function(m) {
+    voc.getModels().forEach(function(m) {
       if (!m.rootHash)
         m.rootHash = sha(m);
       batch.push({type: 'put', key: 'model_' + m.id, value: m});
