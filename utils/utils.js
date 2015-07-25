@@ -3,6 +3,7 @@
 var t = require('tcomb-form-native');
 var moment = require('moment');
 
+var MONEY_TYPE = 'tradle.Money';
 var propTypesMap = {
   'string': t.Str,
   'boolean': t.Bool,
@@ -79,6 +80,17 @@ var utils = {
     options.fields = {};
  
     var props = meta.items ? meta.items.properties : meta.properties;
+    
+    var currency = t.enums({
+      USD: '$',
+      GBR: '£',
+      CNY: '¥'
+    });
+
+    var moneyModel = t.struct({
+       value: t.Num,
+       currency: currency
+    });
 
     var dModel = data  &&  models['model_' + data['_type']];
     if (!this.isEmpty(data)) {
@@ -124,7 +136,7 @@ var utils = {
         error: 'Insert a valid ' + label,
         bufferDelay: 20 // to eliminate missed keystrokes
       }
-      if (props[p].description)
+      if (props[p].description) 
         options.fields[p].help = props[p].description;
       if (props[p].readOnly  ||  (props[p].immutable  &&  data  &&  data[p]))
         options.fields[p] = {'editable':  false };
@@ -133,40 +145,25 @@ var utils = {
         if (data  &&  (type == 'date')) {
           data[p] = new Date(data[p]);
           options.fields[p] = { mode: 'date'};
+          options.fields[p].auto = 'labels';
         }
         else if (type === 'string') {
-          if (props[p].multiline)
+          if (props[p].maxLength > 100)
             options.fields[p].multiline = true;
           options.fields[p].autoCorrect = false;
         }
-        if (!props.isMultiline && (type === 'string'  ||  type === 'integer')) {
+        if (!options.fields[p].multiline && (type === 'string'  ||  type === 'integer')) {
           if (onSubmitEditing) 
             options.fields[p].onSubmitEditing = onSubmitEditing;
           if (onEndEditing)
             options.fields[p].onEndEditing = onEndEditing.bind({}, p);
         }
       }
-      else if (type != 'enum') {
-        var ref = props[p].ref;
-        if (!ref)
-         continue;
-        model[p] = maybe ? t.maybe(t.Str) : t.Str;
-
-        var subModel = models['model_' + ref];
-        if (data  &&  data[p]) {
-          options.fields[p].value = data[p]['_type'] 
-                                  ? data[p]['_type'] + '_' + data[p].rootHash
-                                  : data[p].id; 
-          data[p] = utils.getDisplayName(data[p], subModel.value.properties) || data[p].title;
-        }
-
-        options.fields[p].onFocus = chooser.bind({}, props[p], p);
-        options.fields[p].nullOption = {value: '', label: 'Choose your ' + utils.makeLabel(p)};
+      else if (props[p].oneOf) {
+        model[p] = t.enums(props[p].oneOf);
+        options.fields[p].auto = 'labels';
       }
-      else {
-          // var rModel = {};
-          // var options = getModel(meta[type], rModel);
-          // model[propName] = rModel;
+      else if (type == 'enum') {
         var facet = props[p].facet;  
         var values = models.filter(mod => {
            return mod.type === facet ? mod.values : null;
@@ -179,6 +176,40 @@ var utils = {
           // options.fields[p].factory = t.form.radio;
           model[p] = t.enums(enumValues);
         }
+        options.fields[p].auto = 'labels';
+      }
+      else {
+        var ref = props[p].ref;
+        if (!ref)
+          continue;
+        if (ref === MONEY_TYPE) {
+          model[p] = maybe ? t.maybe(moneyModel) : moneyModel;
+          options.fields[p].auto = 'labels';
+          options.fields[p].options = {
+            fields: {
+              value: {
+                auto: 'placeholders'
+              }
+            }
+          }
+          if (onSubmitEditing) 
+            options.fields[p].onSubmitEditing = onSubmitEditing;
+          if (onEndEditing)
+            options.fields[p].onEndEditing = onEndEditing.bind({}, p);   
+          continue;       
+        }
+        model[p] = maybe ? t.maybe(t.Str) : t.Str;
+
+        var subModel = models['model_' + ref];
+        if (data  &&  data[p]) {
+          options.fields[p].value = data[p]['_type'] 
+                                  ? data[p]['_type'] + '_' + data[p].rootHash
+                                  : data[p].id; 
+          data[p] = utils.getDisplayName(data[p], subModel.value.properties) || data[p].title;
+        }
+
+        options.fields[p].onFocus = chooser.bind({}, props[p], p);
+        options.fields[p].nullOption = {value: '', label: 'Choose your ' + utils.makeLabel(p)};
       }
       
     }
@@ -276,7 +307,7 @@ var utils = {
       val = moment(date).format('[yesterday], h:mA');
       break;
     default:      
-      val = moment(date).format('ddd, h:mA');
+      val = moment(date).format('LL');
     }
     return val;
   },
