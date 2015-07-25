@@ -59,6 +59,7 @@ class TimHome extends Component {
     var passProps = {
         filter: '', 
         modelName: this.props.modelName,
+        sortProperty: 'lastMessageTime'
       };
     var me = utils.getMe();
     this.props.navigator.push({
@@ -85,7 +86,7 @@ class TimHome extends Component {
           rightButtonTitle: 'Done',
           passProps: {
             model: utils.getModel(me['_type']).value,
-            resource: me
+            resource: me,
           }
         },        
         passProps: {resource: me}
@@ -176,12 +177,21 @@ class TimHome extends Component {
             </TouchableHighlight>
           </View>
         </View>
-          {spinner}   
-          <View style={{height: 400}}></View>
       </View>  
     );
   }
 }
+          // {spinner}   
+          // <View style={{height: 400}}></View>
+          // <View style={styles.dev}>
+          //   {editProfile}
+          //   <TouchableHighlight 
+          //       underlayColor='#2E3B4E' onPress={this.onReloadDBPressed.bind(this)}>
+          //     <Text style={styles.text}>
+          //       Reload DB
+          //     </Text>
+          //   </TouchableHighlight>
+          // </View>
 
 reactMixin(TimHome.prototype, Reflux.ListenerMixin);
 
