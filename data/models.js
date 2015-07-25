@@ -2,7 +2,7 @@
 
 var voc = [{
   'id': 'tradle.Identity',
-  'type': 'object',
+  'type': 'tradle.Model',
   'title': 'Identity',
   'properties': {
     '_type': {
@@ -242,7 +242,7 @@ var voc = [{
 },
 {
   'id': 'tradle.Organization',
-  'type': 'object',
+  'type': 'tradle.Model',
   'title': 'Organization',
   'properties': {
     '_type': {
@@ -316,7 +316,7 @@ var voc = [{
 },
 {
   'id': 'tradle.Message',
-  'type': 'object',
+  'type': 'tradle.Model',
   'title': 'Message',
   'isInterface': true,
   'properties': {
@@ -390,7 +390,7 @@ var voc = [{
 },
 {
   'id': 'tradle.SimpleMessage',
-  'type': 'object',
+  'type': 'tradle.Model',
   'title': 'Simple Message',
   'autoCreate': true,
   'interfaces': ['tradle.Message'],
@@ -446,7 +446,7 @@ var voc = [{
 
 {
   'id': 'tradle.VerificationRequest',
-  'type': 'object',
+  'type': 'tradle.Model',
   'title': 'Verification Request',
   'interfaces': ['tradle.Message'],
   'style': {'backgroundColor': '#F4F5E6'},
@@ -523,7 +523,7 @@ var voc = [{
 },
 {
   'id': 'tradle.SkillVerification',
-  'type': 'object',
+  'type': 'tradle.Model',
   'title': 'Skill Verification',
   'interfaces': ['tradle.Message'],
   'style': {'backgroundColor': '#FAF9E1'},
@@ -599,7 +599,7 @@ var voc = [{
 },
 {
   'id': 'tradle.SalaryVerification',
-  'type': 'object',
+  'type': 'tradle.Model',
   'title': 'Salary Verification',
   'interfaces': ['tradle.Message'],
   'style': {'backgroundColor': '#E1FAF9'},
@@ -675,7 +675,7 @@ var voc = [{
 },
 {
   'id': 'tradle.DocumentVerification',
-  'type': 'object',
+  'type': 'tradle.Model',
   'title': 'Doc Verification',
   'interfaces': ['tradle.Message'],
   'style': {'backgroundColor': '#EBE1FA'},
@@ -751,7 +751,7 @@ var voc = [{
 },
 {
   'id': 'tradle.AddressVerification',
-  'type': 'object',
+  'type': 'tradle.Model',
   'title': 'Verify Address',
   'interfaces': ['tradle.Message'],
   'style': {'backgroundColor': '#FAEDE1'},
@@ -849,7 +849,7 @@ var voc = [{
 },
 {
   'id': 'tradle.Verification',
-  'type': 'object',
+  'type': 'tradle.Model',
   'title': 'Verification',
   'interfaces': ['tradle.Message'],
   'style': {'backgroundColor': '#E7E6F5'},
@@ -906,7 +906,7 @@ var voc = [{
 },
 {
   'id': 'tradle.VerificationOfAddress',
-  'type': 'object',
+  'type': 'tradle.Model',
   'title': 'Verification',
   'interfaces': ['tradle.Message'],
   'style': {'backgroundColor': '#E7E6F5'},
@@ -988,10 +988,13 @@ var voc = [{
     },              //* deal reference
     title: {
       type: 'string',
+      skipLabel: true,
       description: 'title is displayed on the coupon'
     },
     shortTitle: {
       type: 'string',
+      skipLabel: true,
+      displayName: true
     },
     conditions: {
       maxLength: 2000,
@@ -1032,21 +1035,16 @@ var voc = [{
     featured: {
       type: 'date'
     },
-    expired: {
+    expires: {
       type: 'date'
     },
     redeemBy: {
       description: 'must redeem by this date'
     },
-    dealAmount: {
-      type: 'object',
-      ref: 'tradle.Money',
-      description: 'only for "Buy Limited Discount" coupons; how much more customer needs to spend including certificate to get a deal'
-    },
     dealValue: {
       type: 'object',
       ref: 'tradle.Money',
-      description: 'price before discount for "Standard" coupons or price of the certificate for "Buy Limited Discount" coupons'
+      description: 'price before discount'
     },
     dealPrice: {
       type: 'object',
@@ -1055,10 +1053,12 @@ var voc = [{
     dealDiscount: {
       type: 'object',
       ref: 'tradle.Money',
-      readOnly: true
+      readOnly: true,
+      formula: 'dealValue - dealPrice'
     },
     allPurchases: {
       type: 'array',
+      readOnly: true,
       items: {
         type: 'object',
         ref: 'tradle.CouponBuy'
@@ -1068,16 +1068,13 @@ var voc = [{
       type: 'number',
       readOnly: true
     },
-    couponBuysAdjustedTotal: {
-      type: 'object',
-      ref: 'tradle.Money',
-      readOnly: true
-    },
     discount: {
       type: 'number',
       suffix: '%',
       minimum: 1,
-      maximum: 99
+      maximum: 99,
+      readOnly: true,
+      formula: '((dealValue - dealPrice)/dealValue) * 100',
     },
     dealStatus: {
       type: 'string',
@@ -1090,6 +1087,7 @@ var voc = [{
     },
     availableLocations: {
       type: 'array',
+      readOnly: true,
       ref: 'tradle.RedemptionLocation'
     },
     vendor: {
@@ -1097,7 +1095,8 @@ var voc = [{
       ref: 'tradle.Vendor'
     },
     canceled: {
-      type: 'boolean'
+      type: 'boolean',
+      skipOnCreate: true
     },
     canceledBy: {
       type: 'object',
@@ -1112,9 +1111,10 @@ var voc = [{
       type: 'date',
       readOnly: true
     },
-    required: ['title', 'dealPrice', 'vendor', 'expired'],
-    viewCols: ['shortTitle', 'dateSubmitted', 'dealPrice', 'discount', 'couponBuysCount', 'vendor', 'dealStatus']
-  }
+  },
+  required: ['title', 'shortTitle', 'shortDescription', 'dealPrice', 'vendor', 'expires'],
+  gridCols: ['shortTitle', 'dealPrice', 'discount', 'expires', 'vendor', 'dealStatus'],
+  viewCols: ['shortTitle', 'dealPrice', 'dealValue', 'dealDiscount', 'discount', 'featured', 'expires', 'couponBuysCount', 'vendor', 'dealStatus'],
 },
 {
   id: 'tradle.CouponBuy',
@@ -1162,15 +1162,10 @@ var voc = [{
     email: {
       type: 'string'
     },
-    dealAmount: {
-      type: 'object',
-      ref: 'tradle.Money',
-      description: 'only for "Buy Limited Discount" coupons; how much more customer needs to spend including certificate to get a deal'
-    },
     dealValue: {
       type: 'object',
       ref: 'tradle.Money',
-      description: 'price before discount for "Standard" coupons or price of the certificate for "Buy Limited Discount" coupons'
+      description: 'price before discount'
     },
     dealPrice: {
       type: 'object',
@@ -1213,10 +1208,18 @@ var voc = [{
   id: 'tradle.RedemptionLocation',
   type: 'object',
   properties: {
+    '_type': {
+      type: 'string',
+      readOnly: true
+    },
     coupon: {
       type: 'object',
       ref: 'tradle.Coupon',
       readOnly: true
+    },
+    address: {
+      readOnly: true,
+      formula: 'vendor.address'
     },
     vendor: {
       type: 'object',
@@ -1235,12 +1238,73 @@ var voc = [{
   type: 'object',
   title: 'Vendor',
   properties: {
+    '_type': {
+      type: 'string',
+      readOnly: true
+    },
+    'name': {
+      'type': 'string',
+      displayName: true
+    },
+    email: {
+      type: 'string'
+    },    
+    'city': {
+      'type': 'string'
+    },
+    'country': {
+      'type': 'string'
+    },
+    'postalCode': {
+      'type': 'number'
+    },
+    'region': {
+      'type': 'string'
+    },
+    'street': {
+      'type': 'string'
+    },
+    'formattedAddress': {
+      transient: true,
+      'type': 'string',
+      'displayAs': ['street', ',', 'city', ',', 'region', 'postalCode'],
+      'title': 'Address',
+      'readOnly': true
+    },
+    photos: {
+      type: 'array',
+      readOnly: true,
+      items: {
+        type: 'object',
+        properties: {
+          tags: {
+            type: 'string',
+            title: 'Tags via comma'
+          },
+          url: {
+            type: 'string',
+            readOnly: true
+          }
+        }
+      },
+      required: ['url']
+    },
+    coupons: {
+      type: 'array',
+      items: {
+        type: 'object',
+        ref: 'tradle.Coupon',
+        backLink: 'vendor'
+      }
+    }
+  },
+  required: ['name']
 
-  }
 },
 {
   id: 'tradle.Money',
   type: 'object',
+  inlined: true,
   properties: { 
     '_type': {
       'type': 'string',
