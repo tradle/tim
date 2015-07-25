@@ -1,6 +1,6 @@
 'use strict'
 
-// require('react-level')
+require('react-native-level')
 var React = require('react-native');
 var ResourceList = require('./Components/ResourceList');
 var TimHome = require('./Components/TimHome');
@@ -17,6 +17,7 @@ var CameraView = require('./Components/CameraView');
 var PhotoCarousel = require('./Components/PhotoCarousel');
 var utils = require('./utils/utils');
 var Icon = require('FAKIconImage');
+// var Device = require('react-native-device');
 
 var reactMixin = require('react-mixin');
 
@@ -66,6 +67,9 @@ var styles = StyleSheet.create({
 class TiMApp extends Component {
   constructor(props) {
     super(props);
+    // var isIphone = Device.isIphone();
+    // if (!isIphone)
+    //   isIphone = isIphone;
   }
   render() {
     var props = {modelName: IDENTITY_MODEL};
@@ -146,6 +150,10 @@ class TiMApp extends Component {
                   modelName={props.modelName} />;
     case 12:
       return <CameraView />
+      // <CameraView navigator={nav} 
+      //             onTakePic={props.onTakePic} 
+      //             resource={props.resource} 
+      //             prop={props.prop}/>
     case 13: 
       return <SelectPhotoList 
                 metadata={props.metadata} 
