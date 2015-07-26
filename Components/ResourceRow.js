@@ -4,6 +4,8 @@ var React = require('react-native');
 var utils = require('../utils/utils');
 var moment = require('moment');
 var Icon = require('./FAKIconImage');
+var constants = require('tradle-constants');
+
 var MONEY_TYPE = 'tradle.Money';
 
 var {
@@ -64,7 +66,7 @@ class ResourceRow extends Component {
   }
   formatRow(resource) {
     var self = this;
-    var model = utils.getModel(resource['_type'] || resource.id).value;
+    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
     var viewCols = model.gridCols || model.viewCols;
     var renderedViewCols;
     if (!viewCols) {
@@ -167,7 +169,7 @@ class ResourceRow extends Component {
     return renderedViewCols;
   }
   addDateProp(resource, dateProp) {
-    var properties = utils.getModel(resource['_type'] || resource.id).value.properties;
+    var properties = utils.getModel(resource[constants.TYPE] || resource.id).value.properties;
     var style = styles.description;
     if (properties[dateProp].style)
       style = [style, properties[dateProp].style];

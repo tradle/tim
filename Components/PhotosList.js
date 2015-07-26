@@ -11,11 +11,12 @@ var {
   View,
   ListView,
   Text,
+  // Animated,
   TextInput,
   TouchableHighlight,
   Component
 } = React;
-
+// var Animated = require('Animated');
 class PhotosList extends Component {
   constructor(props) {
     super(props);
@@ -24,12 +25,24 @@ class PhotosList extends Component {
     });
     this.state = {
       photos: this.props.photos,
+      // bounceValue: new Animated.Value(0),
       dataSource: dataSource
     }
   }
+  // componentDidMount() {
+  //  // this.state.bounceValue.setValue(1.5);     // Start large
+  //   Animated.spring(                          // Base: spring, decay, timing
+  //     this.state.bounceValue,                 // Animate `bounceValue`
+  //     {
+  //       toValue: 0.8,                         // Animate to smaller size
+  //       friction: 1,                          // Bouncier spring
+  //     }
+  //   ).start();                                // Start the animation
+
+  // }
   render() { 
     var photos = this.props.photos;
-    if (!photos) //  ||  photos.length <= 1)
+    if (!photos || !photos.length) //  ||  photos.length <= 1)
       return null;
 
     var val = this.renderPhotoList(photos);        
@@ -78,11 +91,28 @@ class PhotosList extends Component {
       var title = !photo.title || photo.title === 'photo'
                 ? <View />
                 : <Text style={styles.photoTitle}>{photo.title}</Text>
+
+
+      // return (
+      // <Animated.Image                         // Base: Image, Text, View
+      //   source={{uri: utils.getImageUri(photo.url)}}
+      //   style={{
+      //     flex: 1,
+      //     transform: [                        // `transform` is an ordered array
+      //       {scale: this.state.bounceValue},  // Map `bounceValue` to `scale`
+      //     ]
+      //   }}
+      // />);
+      var uri = utils.getImageUri(photo.url)
+      var source = {uri: uri};
+      if (uri.indexOf('data') === 0)
+        source.isStatic = true;
+
       return (
         <View style={{paddingTop: 2, paddingRight: 1, flexDirection: 'column'}}>
           <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, photo)}>
             <View>
-             <Image style={[imageStyle, styles.thumbCommon]} source={{uri: utils.getImageUri(photo.url)}} />
+             <Image style={[styles.thumbCommon, imageStyle]} source={source} />
             {title}
             </View>
           </TouchableHighlight>

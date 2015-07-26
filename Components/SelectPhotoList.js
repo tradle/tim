@@ -111,7 +111,10 @@ class SelectPhotoList extends Component {
   onSelect(asset) {    
     this.props.onSelect(asset);
     var selected = this.state.selected;
-    selected[asset.node.image.uri] = asset;
+    if (selected[asset.node.image.uri])
+      delete selected[asset.node.image.uri]
+    else
+      selected[asset.node.image.uri] = asset;
 
     var newDataSource = this.state.dataSource.cloneWithRows(
       groupByEveryN(this.state.assets, this.state.imagesPerRow)

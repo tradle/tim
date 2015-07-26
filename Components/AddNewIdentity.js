@@ -9,6 +9,7 @@ var Actions = require('../Actions/Actions');
 var reactMixin = require('react-mixin');
 var Icon = require('FAKIconImage');
 var buttonStyles = require('../styles/buttonStyles');
+var constants = require('tradle-constants');
 
 var {
   View,
@@ -30,7 +31,7 @@ class AddNewIdentity extends Component {
   render() {
     var resource = this.props.resource;
 
-    return this.props.isRegistration || (resource.rootHash === utils.getMe().rootHash)
+    return this.props.isRegistration || (resource[constants.ROOT_HASH] === utils.getMe()[constants.ROOT_HASH])
            ? <View style={[buttonStyles.container, {top: 15}]}>
                <TouchableHighlight onPress={this.createNewIdentity.bind(this)} underlayColor='transparent'>
                <View>
@@ -46,7 +47,7 @@ class AddNewIdentity extends Component {
   }
   createNewIdentity() {
     var resource = this.props.resource;
-    var model = utils.getModel(resource['_type']).value;
+    var model = utils.getModel(resource[constants.TYPE]).value;
     var title = 'New Identity for ' + resource.firstName;
     this.props.navigator.push({
       title: title,

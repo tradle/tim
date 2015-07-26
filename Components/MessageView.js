@@ -2,7 +2,7 @@
  
 var React = require('react-native');
 var utils = require('../utils/utils');
-// var MessageList = require('./MessageList');
+var constants = require('tradle-constants');
 var ArticleView = require('./ArticleView');
 var FromToView = require('./FromToView');
 var PhotosList = require('./PhotosList');
@@ -45,7 +45,7 @@ class MessageView extends Component {
   }
   render() {
     var resource = this.state.resource;
-    var modelName = resource['_type'];
+    var modelName = resource[constants.TYPE];
     var model = utils.getModel(modelName).value;
     var embed = /*modelName === 'tradle.AssetVerification' 
               ? <View style={{marginLeft: 15}}>
@@ -81,7 +81,7 @@ class MessageView extends Component {
   }
           // <ShowPropertiesView resource={resource} callback={this.showResources.bind(this)} excludedProperties={['tradle.Message.message', 'tradle.Message.time', 'tradle.message.photos']} />
   // showResources(resource, prop) {
-  //   var meta = utils.getModel(resource['_type']).value.properties;
+  //   var meta = utils.getModel(resource[constants.TYPE]).value.properties;
   //   this.props.navigator.push({
   //     id: 10,
   //     title: utils.makeLabel(prop),
@@ -101,15 +101,14 @@ class MessageView extends Component {
   }
   verify() {
     var resource = this.props.resource;
-    var model = utils.getModel(resource['_type']).value;
+    var model = utils.getModel(resource[constants.TYPE]).value;
     // this.props.navigator.pop();
     var me = utils.getMe();
     var from = this.props.resource.from;
     var verificationModel = model.properties.verifications.items.ref;
     var verification = {
-      '_type': verificationModel,
       document: {
-        id: resource['_type'] + '_' + resource.rootHash + '_' + resource.currentHash,
+        id: resource[constants.TYPE] + '_' + resource[constants.ROOT_HASH] + '_' + resource[constants.CUR_HASH],
         title: resource.message ? resource.message : model.title
       },
       to: {
@@ -117,10 +116,12 @@ class MessageView extends Component {
         title: from.title
       },
       from: { 
-        id: me['_type'] + '_' + me.rootHash + '_' + me.currentHash,
-        title: utils.getDisplayName(me, utils.getModel(me['_type']).value.properties)
+        id: me[constants.TYPE] + '_' + me[constants.ROOT_HASH] + '_' + me[constants.CUR_HASH],
+        title: utils.getDisplayName(me, utils.getModel(me[constants.TYPE]).value.properties)
       }
     }
+    verification[constants.TYPE] = verificationModel;
+
     if (verificationModel === 'tradle.Verification') 
       Actions.addVerification(verification);
     else {

@@ -13,6 +13,7 @@ var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var reactMixin = require('react-mixin');
 var extend = require('extend');
+var constants = require('tradle-constants');
 
 var {
   ListView,
@@ -50,7 +51,7 @@ class IdentitiesList extends Component {
     var list = [];
     extend(list, this.state.list);
     for (var i=0; i<list.length; i++) {
-      if (list[i].rootHash == params.resource.rootHash) {
+      if (list[i][constants.ROOT_HASH] == params.resource[constants.ROOT_HASH]) {
         list.splice(i, 1);
         break;
       }
@@ -69,7 +70,7 @@ class IdentitiesList extends Component {
     if (params.action !== 'changeIdentity')
       return;
     var me = params.me;
-    var modelName = me['_type'];
+    var modelName = me[constants.TYPE];
     utils.setMe(me);
     var model = utils.getModel(modelName).value;
     var meName = utils.getDisplayName(me, model.properties);
@@ -111,11 +112,11 @@ class IdentitiesList extends Component {
 
   // onSearchChange(event) {
   //   var filter = event.nativeEvent.text.toLowerCase();
-  //   Actions.list(filter, this.props.list[0]['_type']);
+  //   Actions.list(filter, this.props.list[0][constants.TYPE]);
   // }
 
   renderRow(resource)  {
-    var model = utils.getModel(resource['_type'] || resource.id).value;
+    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
     var me = utils.getMe();
     return (
       <ResourceRow

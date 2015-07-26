@@ -13,8 +13,8 @@ var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var Icon = require('./FAKIconImage');
+var constants = require('tradle-constants');
 
-var IDENTITY_MODEL = 'tradle.Identity';
 var DEAL_MODEL = 'tradle.Coupon';
 var {
   ListView,
@@ -62,7 +62,7 @@ class ResourceList extends Component {
         query: this.state.filter, 
         modelName: this.props.modelName, 
         to: this.props.resource,
-        sortProperty: this.props.modelName === IDENTITY_MODEL ? 'lastMessageTime' : null
+        sortProperty: this.props.modelName === constants.TYPES.IDENTITY ? 'lastMessageTime' : null
       });
       return;      
     }
@@ -72,7 +72,7 @@ class ResourceList extends Component {
     var list = params.list;
     if (!list.length && !this.state.filter.length) 
       return;
-    var type = list[0]['_type'];
+    var type = list[0][constants.TYPE];
     if (type  !== this.props.modelName) 
       return;
     
@@ -95,7 +95,7 @@ class ResourceList extends Component {
     var me = utils.getMe();
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     var model = utils.getModel(this.props.modelName);
-    if (this.props.modelName != IDENTITY_MODEL  &&  !this.props.callback) {
+    if (this.props.modelName != constants.TYPES.IDENTITY  &&  !this.props.callback) {
       this.props.navigator.push({
         title: title,
         id: 3,
@@ -111,7 +111,7 @@ class ResourceList extends Component {
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
           passProps: {
-            model: utils.getModel(resource['_type']).value,
+            model: utils.getModel(resource[constants.TYPE]).value,
             resource: resource
           }
         },
@@ -121,12 +121,12 @@ class ResourceList extends Component {
       return;
     }
     if (this.props.prop) { 
-      if (me  &&  this.props.modelName != IDENTITY_MODEL) {
+      if (me  &&  this.props.modelName != constants.TYPES.IDENTITY) {
         this._selectResource(resource);
         return;
       }
-      if (me.rootHash === resource.rootHash  ||  
-         (this.props.resource  &&  me.rootHash === this.props.resource.rootHash  && this.props.prop)) {
+      if (me[constants.ROOT_HASH] === resource[constants.ROOT_HASH]  ||  
+         (this.props.resource  &&  me[constants.ROOT_HASH] === this.props.resource[constants.ROOT_HASH]  && this.props.prop)) {
         this._selectResource(resource);
         return;
       }
@@ -159,7 +159,7 @@ class ResourceList extends Component {
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
           passProps: {
-            model: utils.getModel(resource['_type']).value,
+            model: utils.getModel(resource[constants.TYPE]).value,
             resource: resource
           }
         },
@@ -199,7 +199,7 @@ class ResourceList extends Component {
       this.props.navigator.popToRoute(this.props.returnRoute);
       return;
     }
-    if (me  &&  !model.value.isInterface  &&  (resource.rootHash === me.rootHash  ||  resource['_type'] !== IDENTITY_MODEL)) {
+    if (me  &&  !model.value.isInterface  &&  (resource[constants.ROOT_HASH] === me[constants.ROOT_HASH]  ||  resource[constants.TYPE] !== constants.TYPES.IDENTITY)) {
       var self = this ;
       route.rightButtonTitle = 'Edit';
       route.onRightButtonPress = /*() =>*/ {
@@ -209,7 +209,7 @@ class ResourceList extends Component {
         rightButtonTitle: 'Done',
         titleTextColor: '#7AAAC3',
         passProps: {
-          model: utils.getModel(resource['_type']).value,
+          model: utils.getModel(resource[constants.TYPE]).value,
           resource: me
         }
       };
@@ -237,7 +237,7 @@ class ResourceList extends Component {
     return (
       <ResourceRow
         onSelect={() => this.selectResource(resource)}
-        key={resource.rootHash}
+        key={resource[constants.ROOT_HASH]}
         resource={resource} />
     );
   }

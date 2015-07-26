@@ -9,6 +9,7 @@ var PhotosList = require('./PhotosList');
 var Icon = require('./FAKIconImage');
 var extend = require('extend');
 var groupByEveryN = require('groupByEveryN');
+var constants = require('tradle-constants');
 
 var {
   Image,
@@ -38,15 +39,15 @@ class MessageRow extends Component {
   }
   render() {
     var resource = this.props.resource;
-    var isModel = !resource['_type'];
+    var isModel = !resource[constants.TYPE];
     if (isModel  &&  resource.autoCreate)
       return <View style={{height: 0}} />;
-    var model = utils.getModel(resource['_type'] || resource.id).value;
+    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
     var me = utils.getMe();
     var isMyMessage;
     if (!isModel  &&  !this.props.isAggregation) {
       var fromHash = utils.getId(resource.from);
-      if (fromHash == me['_type'] + '_' + me.rootHash) 
+      if (fromHash == me[constants.TYPE] + '_' + me[constants.ROOT_HASH]) 
         isMyMessage = true;      
     }
     var to = this.props.to;
@@ -216,7 +217,7 @@ class MessageRow extends Component {
     var viewStyle = { margin:1, backgroundColor: '#f7f7f7' }
       
     return (
-      <View style={viewStyle}>
+      <View style={viewStyle} key={resource}>
         {date}
         {messageBody}
         <View style={photoListStyle}>
@@ -232,6 +233,13 @@ class MessageRow extends Component {
     });
   }
   createNewResource(model) {
+    resource = {
+      'from': this.props.resource.to,
+      'to': this.props.resource.from,
+      'message': this.props.resource.message,
+    }
+    resource[constants.TYPE] = model.id;
+
     this.props.navigator.push({
       id: 4,
       title: model.title,
@@ -239,12 +247,7 @@ class MessageRow extends Component {
       titleTextColor: '#7AAAC3',
       passProps:  {
         model: model,
-        resource: {
-          '_type': model.id, 
-          'from': this.props.resource.to,
-          'to': this.props.resource.from,
-          'message': this.props.resource.message,
-        }
+        resource: resource
       }
     });    
   }
@@ -252,7 +255,7 @@ class MessageRow extends Component {
   verify(event) {
     var self = this;
     var resource = self.props.resource;
-    var model = utils.getModel(resource['_type']).value;
+    var model = utils.getModel(resource[constants.TYPE]).value;
     this.props.navigator.push({
       id: 5,
       component: MessageView,
@@ -267,12 +270,12 @@ class MessageRow extends Component {
       //       resource: resource,
       //       metadata: model,
       //       callback: this.props.onSelect,
-      //       resourceKey: model.id + '_' + resource.rootHash
+      //       resourceKey: model.id + '_' + resource[constants.ROOT_HASH]
       //     }
       // }, 
 
       passProps: {resource: self.props.resource, verify: true},
-      title: resource['_type'] == 'tradle.AssetVerification' ? 'Doc verification' : model.title
+      title: resource[constants.TYPE] == 'tradle.AssetVerification' ? 'Doc verification' : model.title
     });
   }
   formatRow(isMyMessage, model, resource, renderedRow) {
@@ -283,7 +286,7 @@ class MessageRow extends Component {
     var vCols = [];
     var first = true;
     var self = this;
-    var model = utils.getModel(resource['_type'] || resource.id).value;
+    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
 
     var properties = model.properties;
     var noMessage = !resource.message  ||  !resource.message.length;

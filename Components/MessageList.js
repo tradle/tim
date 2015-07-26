@@ -14,6 +14,7 @@ var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var InvertibleScrollView = require('react-native-invertible-scroll-view');
+var constants = require('tradle-constants');
 
 var {
   ListView,
@@ -70,7 +71,7 @@ class MessageList extends Component {
       return;
     var list = params.list;
     if (list.length || this.state.filter.length) {
-      var type = list[0]['_type'];
+      var type = list[0][constants.TYPE];
       if (type  !== this.props.modelName) {
         var model = utils.getModel(this.props.modelName).value;
         if (!model.isInterface)
@@ -89,9 +90,9 @@ class MessageList extends Component {
 
   selectResource(resource) {
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
-    if (!resource['_type']) 
+    if (!resource[constants.TYPE]) 
       return;
-    var model = utils.getModel(resource['_type']).value;
+    var model = utils.getModel(resource[constants.TYPE]).value;
     var title = model.title; //utils.getDisplayName(resource, model.properties);
     var newTitle = title;
     if (title.length > 20) {
@@ -125,7 +126,7 @@ class MessageList extends Component {
   }
 
   renderRow(resource)  {
-    var model = utils.getModel(resource['_type'] || resource.id).value;
+    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
     var isMessage = model.interfaces  &&  model.interfaces.indexOf('tradle.Message') != -1;
     var isAggregation = this.props.isAggregation; 
     var me = utils.getMe();
@@ -277,7 +278,6 @@ class MessageList extends Component {
   }
   onTakePic(data) {
     var msg = {
-      '_type': 'tradle.SimpleMessage', 
       from: utils.getMe(), 
       to: this.props.resource,
       time: new Date().getTime(),
@@ -285,6 +285,7 @@ class MessageList extends Component {
         url: data
       }]
     }
+    msg[constants.TYPE] = 'tradle.SimpleMessage';
     this.props.navigator.pop();
     Actions.addMessage(msg);
   }

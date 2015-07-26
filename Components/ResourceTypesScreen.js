@@ -7,6 +7,7 @@ var reactMixin = require('react-mixin');
 var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
+var constants = require('tradle-constants');
 
 var {
   ListView,
@@ -52,16 +53,17 @@ class ResourceTypesScreen extends Component {
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     var model = utils.getModel(this.props.modelName);
 
-    if (resource['_type'])
+    if (resource[constants.TYPE])
       return;
     var page = {
       model: utils.getModel(resource.id).value,
       resource: {
-        '_type': this.props.modelName, 
         'from': utils.getMe(),
         'to': this.props.resource
       }
     };
+    page.resource[constants.TYPE] = this.props.modelName;
+
     if (this.props.returnRoute)
       page.returnRoute = this.props.returnRoute;
     if (this.props.callback)
@@ -76,7 +78,7 @@ class ResourceTypesScreen extends Component {
   }
 
   renderRow(resource)  {
-    var model = utils.getModel(resource['_type'] || resource.id).value;
+    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
     var isMessage = model.interfaces  &&  model.interfaces.indexOf('tradle.Message') != -1;
     var MessageRow = require('./MessageRow');
 

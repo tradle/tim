@@ -4,6 +4,7 @@ var React = require('react-native');
 var utils = require('../utils/utils');
 var MessageList = require('./MessageList');
 var Icon = require('FAKIconImage');
+var constants = require('tradle-constants');
 
 var {
   StyleSheet,
@@ -16,7 +17,7 @@ var {
 class MoreLikeThis extends Component {
   showMoreLikeThis() {
     var self = this;
-    var modelName = this.props.resource['_type'];
+    var modelName = this.props.resource[constants.TYPE];
     this.props.navigator.push({
       title: utils.getModel(modelName).value.title,
       component: MessageList,
@@ -31,7 +32,7 @@ class MoreLikeThis extends Component {
     });
   }
   render() {
-    if (this.props.resource['_type'] === 'tradle.SimpleMessage')
+    if (this.props.resource[constants.TYPE] === 'tradle.SimpleMessage')
       return null;
     return (
       <View style={styles.moreLikeThis}>

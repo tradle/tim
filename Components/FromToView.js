@@ -9,6 +9,7 @@ var ResourceView = require('./ResourceView');
 var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Icon = require('FAKIconImage');
+var constants = require('tradle-constants');
 
 var MESSAGE_INTERFACE = 'tradle.Message';
 
@@ -32,13 +33,13 @@ class FromToView extends Component {
   render() {
     var resource = this.props.resource;    
 
-    var model = this.props.model || utils.getModel(resource['_type']).value;
+    var model = this.props.model || utils.getModel(resource[constants.TYPE]).value;
     if (!model.interfaces  ||  model.interfaces.indexOf(MESSAGE_INTERFACE) == -1) 
       return <View />;
 
     var hasPhoto = true; //resource[photoProp]  &&  resource[photoProp].length; 
-    var fromTitle = resource.from.title ? resource.from.title :  utils.getDisplayName(resource.from, utils.getModel(resource.from['_type']).value.properties);
-    var toTitle = resource.to.title ? resource.to.title : utils.getDisplayName(resource.to, utils.getModel(resource.to['_type']).value.properties);
+    var fromTitle = resource.from.title ? resource.from.title :  utils.getDisplayName(resource.from, utils.getModel(resource.from[constants.TYPE]).value.properties);
+    var toTitle = resource.to.title ? resource.to.title : utils.getDisplayName(resource.to, utils.getModel(resource.to[constants.TYPE]).value.properties);
     if (!resource.to.photos && !resource.from.photos)
       return <View style={styles.container}>
                <Text>{fromTitle}</Text>
@@ -89,7 +90,7 @@ class FromToView extends Component {
   }
 
   showProfile(resource) {
-    var model = utils.getModel(resource['_type']).value;
+    var model = utils.getModel(resource[constants.TYPE]).value;
     var title = utils.getDisplayName(resource, model.properties);
     this.props.navigator.push({
       title: title,

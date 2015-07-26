@@ -11,8 +11,9 @@ var reactMixin = require('react-mixin');
 var Reflux = require('reflux');
 var Actions = require('../Actions/Actions');
 var KeyboardEvents = require('react-native-keyboardevents');
-var KeyboardEventEmitter = KeyboardEvents.Emitter;
+var constants = require('tradle-constants');
 
+var KeyboardEventEmitter = KeyboardEvents.Emitter;
 var UIImagePickerManager = require('NativeModules').UIImagePickerManager;
 
 var {
@@ -71,11 +72,11 @@ class AddNewMessage extends Component {
     if (!resource)
       return;
     if (params.error) {
-      if (resource['_type'] == this.props.resource['_type']) 
+      if (resource[constants.TYPE] == this.props.resource[constants.TYPE]) 
         this.setState({err: params.error});
       return;    
     }
-    var model = utils.getModel(resource['_type']).value;
+    var model = utils.getModel(resource[constants.TYPE]).value;
     var isMessage = model.interfaces  &&  model.interfaces.indexOf('tradle.Message') != -1;
     if (isMessage) {
       if (this.props.callback) {
@@ -213,12 +214,11 @@ class AddNewMessage extends Component {
     var resource = {from: utils.getMe(), to: this.props.resource};
     var model = utils.getModel(this.props.modelName).value;
 
-    var toName = utils.getDisplayName(resource.to, utils.getModel(resource.to['_type']).value.properties);
-    var meta = utils.getModel(me['_type']).value.properties;
+    var toName = utils.getDisplayName(resource.to, utils.getModel(resource.to[constants.TYPE]).value.properties);
+    var meta = utils.getModel(me[constants.TYPE]).value.properties;
     var meName = utils.getDisplayName(me, meta);
     var modelName = 'tradle.SimpleMessage';
     var value = {
-      '_type': modelName,  
       message: msg 
               ?  model.isInterface ? msg : '[' + this.state.userInput + '](' + this.props.model.id + ')'
               : '',
@@ -226,6 +226,7 @@ class AddNewMessage extends Component {
       to: resource.to,
       time: new Date().getTime()
     }
+    value[constants.TYPE] = modelName;
     if (!isNoAssets) {
       var photos = [];
       for (var assetUri in assets) 

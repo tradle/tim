@@ -13,6 +13,7 @@ var Reflux = require('reflux');
 var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
 var extend = require('extend');
+var constants = require('tradle-constants');
 
 var {
   StyleSheet,
@@ -44,9 +45,9 @@ class ResourceView extends Component {
   }
   onResourceUpdate(params) {
     var resource = params.resource;
-    if (resource  &&  this.props.resource.rootHash === resource.rootHash) {
+    if (resource  &&  this.props.resource[constants.ROOT_HASH] === resource[constants.ROOT_HASH]) {
       var me = utils.getMe();
-      if (resource.rootHash === me.rootHash)
+      if (resource[constants.ROOT_HASH] === me[constants.ROOT_HASH])
         utils.setMe(resource);
       this.setState({resource: resource});
     }
@@ -70,7 +71,7 @@ class ResourceView extends Component {
 
   render() {
     var resource = this.state.resource;
-    var modelName = resource['_type'];
+    var modelName = resource[constants.TYPE];
     var model = utils.getModel(modelName).value;
     var photos = [];
     if (resource.photos  &&  resource.photos.length > 1) {
@@ -93,7 +94,7 @@ class ResourceView extends Component {
     );
   }
   showResources(resource, prop) {
-    var meta = utils.getModel(resource['_type']).value.properties;
+    var meta = utils.getModel(resource[constants.TYPE]).value.properties;
     this.props.navigator.push({
       id: 10,
       title: utils.makeLabel(prop),

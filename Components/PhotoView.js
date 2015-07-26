@@ -3,6 +3,8 @@
 var React = require('react-native');
 var utils = require('../utils/utils');
 var Icon = require('FAKIconImage');
+var constants = require('tradle-constants');
+
 var {
   StyleSheet,
   Image, 
@@ -22,9 +24,9 @@ class PhotoView extends Component {
   }
   render() {
     var resource = this.props.resource;
-    if (!resource  ||  !resource.rootHash)
+    if (!resource  ||  !resource[constants.ROOT_HASH])
       return <View />;
-    var modelName = resource['_type'];
+    var modelName = resource[constants.TYPE];
     var model = utils.getModel(modelName).value;
 
     var hasPhoto = resource.photos && resource.photos.length; 
@@ -32,7 +34,7 @@ class PhotoView extends Component {
 
     if (!currentPhoto) {
       var icon;
-      if (model.id === 'tradle.Identity')
+      if (model.id === constants.TYPES.IDENTITY)
         icon = 'ion|person';
       else
         icon = 'ion|chatboxes'

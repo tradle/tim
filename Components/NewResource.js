@@ -17,6 +17,7 @@ var Icon = require('FAKIconImage');
 var myStyles = require('../styles/styles');
 var KeyboardEvents = require('react-native-keyboardevents');
 var KeyboardEventEmitter = KeyboardEvents.Emitter;
+var constants = require('tradle-constants');
 
 var Form = t.form.Form;
 Form.stylesheet = myStyles;
@@ -38,9 +39,15 @@ class NewResource extends Component {
     super(props);
     this.updateKeyboardSpace = this.updateKeyboardSpace.bind(this);
     this.resetKeyboardSpace = this.resetKeyboardSpace.bind(this);
+    var r = {};
+    if (props.resource)
+      r.resource = props.resource
+    else {
+      r[constants.TYPE] = props.model.id;
+    }
     this.state = {
-      resource: props.resource || {'_type': props.model.id },
-      keyboardSpace: 0,
+      resource: r,
+      keyboardSpace: 0
     }
     this.props.navigator.route.onRightButtonPress = {
       stateChange: this.onSavePressed.bind(this)
@@ -71,12 +78,12 @@ class NewResource extends Component {
     if (!resource  ||  (params.action !== 'addItem'  &&  params.action !== 'addMessage'))
       return;
     if (params.error) {
-      if (resource['_type'] == this.props.resource['_type'])
+      if (resource[constants.TYPE] == this.props.resource[constants.TYPE])
         this.setState({err: params.error, resource: resource});
       return;
     }
     // if registration or after editing your own profile 
-    // if (this.state.isRegistration  ||  (params.me  &&  resource.rootHash === params.me.rootHash))
+    // if (this.state.isRegistration  ||  (params.me  &&  resource[constants.ROOT_HASH] === params.me[constants.ROOT_HASH]))
     //   utils.setMe(params.me);
     var self = this;
     var title = utils.getDisplayName(resource, self.props.model.properties);
@@ -137,17 +144,21 @@ class NewResource extends Component {
     }
     var json = JSON.parse(JSON.stringify(value));
     var resource = this.state.resource;
-    if (!resource)
-      resource = {'_type': this.props.model.id};
-    var isRegistration = !utils.getMe()  && this.props.model.id === 'tradle.Identity'  &&  (!resource || !resource.rootHash);
+    if (!resource) {
+      resource = {};
+      resource[constants.TYPE] = this.props.model.id;
+    }
+    var isRegistration = !utils.getMe()  && this.props.model.id === constants.TYPES.IDENTITY  &&  (!resource || !resource[constants.ROOT_HASH]);
     if (isRegistration)
       this.state.isRegistration = true;
     Actions.addItem(json, resource, this.props.model, isRegistration);
   }
   chooser(prop, propName, event) {
     var resource = this.state.resource;
-    if (!resource)
-      resource = {'_type': this.props.model.id};
+    if (!resource) {
+      resource = {};
+      resource[constants.TYPE] = this.props.model.id;
+    }
     
     var value = this.refs.form.input;
 
@@ -192,8 +203,10 @@ class NewResource extends Component {
     var value = this.refs.form.getValue();
     var json = value ? JSON.parse(JSON.stringify(value)) : {};
     var resource = this.state.resource;
-    if (!resource)
-      resource = {'_type': this.props.model.id};
+    if (!resource) {
+      resource = {};
+      resource[constants.TYPE] = this.props.model.id;
+    }
     var items = resource[propName];
     if (!items) {
       items = [];
@@ -232,7 +245,7 @@ class NewResource extends Component {
 
     var resource = this.state.resource;
     var iKey = resource  
-             ? resource['_type'] + '_' + resource.rootHash
+             ? resource[constants.TYPE] + '_' + resource[constants.ROOT_HASH]
              : null;
 
     var meta =  props.model;
@@ -355,27 +368,28 @@ class NewResource extends Component {
     var resource = {from: utils.getMe(), to: this.props.resource.to};
     var model = this.props.model;
 
-    var toName = utils.getDisplayName(resource.to, utils.getModel(resource.to['_type']).value.properties);
-    var meta = utils.getModel(me['_type']).value.properties;
+    var toName = utils.getDisplayName(resource.to, utils.getModel(resource.to[constants.TYPE]).value.properties);
+    var meta = utils.getModel(me[constants.TYPE]).value.properties;
     var meName = utils.getDisplayName(me, meta);
     var modelName = 'tradle.SimpleMessage';
     var value = {
-      '_type': modelName,  
       message: msg 
               ?  model.isInterface ? msg : '[' + msg + '](' + model.id + ')'
               : '',
 
       from: {
-        id: me['_type'] + '_' + me.rootHash + '_' + me.currentHash, 
+        id: me[constants.TYPE] + '_' + me[constants.ROOT_HASH] + '_' + me[constants.CUR_HASH], 
         title: meName
       }, 
       to: {
-        id: resource.to['_type'] + '_' + resource.to.rootHash + '_' + resource.to.currentHash,
+        id: resource.to[constants.TYPE] + '_' + resource.to[constants.ROOT_HASH] + '_' + resource.to[constants.CUR_HASH],
         title: toName
       },
 
       time: new Date().getTime()
     }
+    value[constants.TYPE] = modelName;
+
     if (!isNoAssets) {
       var photos = [];
       for (var assetUri in assets) 

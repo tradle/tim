@@ -2,7 +2,7 @@
 
 var React = require('react-native');
 var utils = require('../utils/utils');
-
+var constants = require('tradle-constants');
 var {
   Component,
   View,
@@ -24,8 +24,8 @@ class ChatMessage extends Component {
     if (!isMessage  &&  !model.isInterface)
       return <View></View>;
     var resource = this.props.resource;
-    var title = resource.to['_type'] 
-              ? utils.getDisplayName(resource.to, utils.getModel(resource.to['_type']).value.properties)
+    var title = resource.to[constants.TYPE] 
+              ? utils.getDisplayName(resource.to, utils.getModel(resource.to[constants.TYPE]).value.properties)
               : resource.to.title;
     if (resource.message  &&  utils.splitMessage(resource.message).length === 1)
       return <View></View>;

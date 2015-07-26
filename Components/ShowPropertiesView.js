@@ -2,6 +2,8 @@
  
 var React = require('react-native');
 var utils = require('../utils/utils');
+var constants = require('tradle-constants');
+
 var MONEY_TYPE = 'tradle.Money';
 var {
   StyleSheet,
@@ -38,7 +40,7 @@ class ShowPropertiesView extends Component {
 
   getViewCols(resource, model) {
     var resource = this.state.resource;
-    var modelName = resource['_type'];
+    var modelName = resource[constants.TYPE];
     var model = utils.getModel(modelName).value;
     var vCols = model.viewCols;
 
@@ -59,11 +61,11 @@ class ShowPropertiesView extends Component {
     if (!vCols) {
       vCols = [];
       for (var p in model.properties) {
-        if (p != '_type')
+        if (p != constants.TYPE)
           vCols.push(p)
       }
       // vCols = utils.objectToArray(model.properties);
-      // var idx = vCols.indexOf('_type');
+      // var idx = vCols.indexOf(constants.TYPE);
       // delete vCols[idx];
     }
     var self = this;
@@ -93,7 +95,7 @@ class ShowPropertiesView extends Component {
           }
         }
         else
-          val = val['_type'] ? utils.getDisplayName(val, utils.getModel(val['_type']).value.properties) : val.title;
+          val = val[constants.TYPE] ? utils.getDisplayName(val, utils.getModel(val[constants.TYPE]).value.properties) : val.title;
       }
       else if (pMeta.type === 'date')
         val = utils.formatDate(val);
