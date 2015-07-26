@@ -199,7 +199,6 @@ class MessageList extends Component {
         <SearchBar
           onChangeText={this.onSearchChange.bind(this)}
           placeholder='Search'
-          tintColor='blue'
           showsCancelButton={false}
           hideBackground={true}
           />
