@@ -6,7 +6,7 @@
 
 var identities = [
 {
-  '_type':'tradle.Identity',
+  _t:'tradle.Identity',
   'firstName':'Kate',
   'lastName':'Blair',
   'street':'200 Columbus Ave',
@@ -65,10 +65,10 @@ var identities = [
       'url':'ms.com'
     }
   ],
-  'rootHash' : '31eb0b894cad3601adc76713d55a11c88e48b4a2'
+  _r : '31eb0b894cad3601adc76713d55a11c88e48b4a2'
 },
 {
-  '_type': 'tradle.Identity',
+  _t: 'tradle.Identity',
   'contact': [
     {
       'identifier': 'somebodyelse',
@@ -154,7 +154,7 @@ var identities = [
   ]
 },
 {
-  '_type': 'tradle.Identity',
+  _t: 'tradle.Identity',
   'contact': [
     {
       'identifier': 'somebodyelse',
@@ -168,7 +168,7 @@ var identities = [
   'street': '666 Wyld Stallyns Dr',
   'firstName': 'Jane',
   'lastName': 'Choi',
-  'rootHash': 'b25da36eaf4b01b37fc2154cb1103eb5324a52fa',
+  _r: 'b25da36eaf4b01b37fc2154cb1103eb5324a52fa',
   'owner':{
      id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa', 
      title: 'Jane Choi'
@@ -240,7 +240,7 @@ var identities = [
   ]
 },
 {
-  '_type': 'tradle.Identity',
+  _t: 'tradle.Identity',
   'contact': [
     {
       'identifier': 'somebodyelse',
@@ -325,7 +325,7 @@ var identities = [
   ]
 },
 {
-  '_type': 'tradle.Identity',
+  _t: 'tradle.Identity',
   'contact': [
     {
       'identifier': 'somebodyelse',
@@ -410,7 +410,7 @@ var identities = [
   ]
 },
 {
-  '_type': 'tradle.Identity',
+  _t: 'tradle.Identity',
   'contact': [
     {
       'identifier': 'somebodyelse',
@@ -487,7 +487,7 @@ var identities = [
     }
   ],
   'v': '0.3',
-  'rootHash': '38980944449570d2783d7c8af5db8ca9463391f3',
+  _r: '38980944449570d2783d7c8af5db8ca9463391f3',
   'websites': [
     {
       'url': 'wyldstallyns.com'
@@ -495,7 +495,7 @@ var identities = [
   ]
 },
 {
-  '_type': 'tradle.Identity',
+  _t: 'tradle.Identity',
   'contact': [
     {
       'identifier': 'somebodyelse',
@@ -580,7 +580,7 @@ var identities = [
   ]
 },
 {
-  '_type': 'tradle.Identity',
+  _t: 'tradle.Identity',
   'contact': [
     {
       'identifier': 'somebodyelse',
@@ -665,7 +665,7 @@ var identities = [
   ]
 },
 {
-  '_type': 'tradle.Identity',
+  _t: 'tradle.Identity',
   'contact': [
     {
       'identifier': 'somebodyelse',
@@ -751,7 +751,7 @@ var identities = [
 },
 
 {
-  '_type': 'tradle.Organization',
+  _t: 'tradle.Organization',
   'name': 'Morgan Stanley',
   'contacts': [
     {
@@ -766,7 +766,7 @@ var identities = [
   ]
 },
 {
-  '_type': 'tradle.Organization',
+  _t: 'tradle.Organization',
   'name': 'JP Morgan',
   'contacts': [
     {
@@ -782,11 +782,11 @@ var identities = [
 
 },
 {
-  '_type': 'tradle.Vendor',
+  _t: 'tradle.Vendor',
   'name': 'Cool Vendor'
 },
 {
-  '_type': 'tradle.Coupon',
+  _t: 'tradle.Coupon',
     dealRef: 12345,
     title: 'Amazing deal for BENTO & BUBBLES',
     shortTitle: 'Amazing deal',

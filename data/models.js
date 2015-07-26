@@ -5,7 +5,7 @@ var voc = [{
   'type': 'tradle.Model',
   'title': 'Identity',
   'properties': {
-    '_type': {
+    _t: {
       'type': 'string',
       'readOnly': true
     },
@@ -180,7 +180,7 @@ var voc = [{
     }
   },
   'required': [
-    '_type',
+    '_t',
     // 'contact',
     // 'photos',
     // 'pubkeys',
@@ -221,7 +221,7 @@ var voc = [{
    type: 'object',
    title: 'My Identities',
    properties: {
-     _type: {
+     '_t': {
        type: 'string',
        readOnly: true
      },
@@ -245,7 +245,7 @@ var voc = [{
   'type': 'tradle.Model',
   'title': 'Organization',
   'properties': {
-    '_type': {
+    '_t': {
       'type': 'string',
       'readOnly': true
      },
@@ -320,7 +320,7 @@ var voc = [{
   'title': 'Message',
   'isInterface': true,
   'properties': {
-    '_type': {
+    '_t': {
       'type': 'string',
       'readOnly': true
      },
@@ -377,7 +377,7 @@ var voc = [{
   type: 'object',
   title: 'New message model',
   properties: {
-    '_type': {
+    '_t': {
       'type': 'string',
       'readOnly': true
      },
@@ -395,7 +395,7 @@ var voc = [{
   'autoCreate': true,
   'interfaces': ['tradle.Message'],
   'properties': {
-    '_type': {
+    '_t': {
       'type': 'string',
       'readOnly': true
      },
@@ -451,7 +451,7 @@ var voc = [{
   'interfaces': ['tradle.Message'],
   'style': {'backgroundColor': '#F4F5E6'},
   'properties': {
-    '_type': {
+    '_t': {
       'type': 'string',
       'readOnly': true
      },
@@ -528,7 +528,7 @@ var voc = [{
   'interfaces': ['tradle.Message'],
   'style': {'backgroundColor': '#FAF9E1'},
   'properties': {
-    '_type': {
+    '_t': {
       'type': 'string',
       'readOnly': true
      },
@@ -604,7 +604,7 @@ var voc = [{
   'interfaces': ['tradle.Message'],
   'style': {'backgroundColor': '#E1FAF9'},
   'properties': {
-    '_type': {
+    '_t': {
       'type': 'string',
       'readOnly': true
      },
@@ -680,7 +680,7 @@ var voc = [{
   'interfaces': ['tradle.Message'],
   'style': {'backgroundColor': '#EBE1FA'},
   'properties': {
-    '_type': {
+    '_t': {
       'type': 'string',
       'readOnly': true
      },
@@ -756,7 +756,7 @@ var voc = [{
   'interfaces': ['tradle.Message'],
   'style': {'backgroundColor': '#FAEDE1'},
   'properties': {
-    '_type': {
+    '_t': {
       'type': 'string',
       'readOnly': true
      },
@@ -855,7 +855,7 @@ var voc = [{
   'style': {'backgroundColor': '#E7E6F5'},
   'autoCreate': true,
   'properties': {
-    '_type': {
+    '_t': {
       'type': 'string',
       'readOnly': true
      },
@@ -912,7 +912,7 @@ var voc = [{
   'style': {'backgroundColor': '#E7E6F5'},
   'autoCreate': true,
   'properties': {
-    '_type': {
+    '_t': {
       'type': 'string',
       'readOnly': true
      },
@@ -978,7 +978,7 @@ var voc = [{
   title: 'Coupon',
   type: 'object',
   properties: {
-    '_type': {
+    '_t': {
       type: 'string',
       readOnly: true
     },
@@ -1121,7 +1121,7 @@ var voc = [{
   type: 'object',
   title: 'Coupon Buy',
   properties: {
-    '_type': {
+    '_t': {
       type: 'string',
       readOnly: true
     },
@@ -1208,7 +1208,7 @@ var voc = [{
   id: 'tradle.RedemptionLocation',
   type: 'object',
   properties: {
-    '_type': {
+    '_t': {
       type: 'string',
       readOnly: true
     },
@@ -1238,7 +1238,7 @@ var voc = [{
   type: 'object',
   title: 'Vendor',
   properties: {
-    '_type': {
+    '_t': {
       type: 'string',
       readOnly: true
     },
@@ -1306,7 +1306,7 @@ var voc = [{
   type: 'object',
   inlined: true,
   properties: { 
-    '_type': {
+    '_t': {
       'type': 'string',
       'readOnly': true
     },
