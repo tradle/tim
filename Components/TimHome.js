@@ -11,6 +11,7 @@ var Actions = require('../Actions/Actions');
 var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
 var sampleData = require('../data/data');
+var constants = require('tradle-constants');
 
 var {
   StyleSheet,
@@ -72,7 +73,7 @@ class TimHome extends Component {
       rightButtonTitle: 'Profile',
       passProps: passProps,
       onRightButtonPress: {
-        title: utils.getDisplayName(me, utils.getModel(me['_type']).value.properties),
+        title: utils.getDisplayName(me, utils.getModel(me[constants.TYPE]).value.properties),
         id: 3,
         component: ResourceView,
         titleTextColor: '#7AAAC3',
@@ -85,7 +86,7 @@ class TimHome extends Component {
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
           passProps: {
-            model: utils.getModel(me['_type']).value,
+            model: utils.getModel(me[constants.TYPE]).value,
             resource: me,
           }
         },        
@@ -152,7 +153,7 @@ class TimHome extends Component {
     else
       editProfile = <View />;
     // else  {
-    //   var r = {'_type': this.props.modelName};
+    //   var r = {_t: this.props.modelName};
     //   editProfile = <AddNewIdentity resource={r} isRegistration={true} navigator={this.props.navigator} />;
     // }
     return (
