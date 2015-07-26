@@ -2,6 +2,7 @@
 
 var t = require('tcomb-form-native');
 var moment = require('moment');
+var constants = require('tradle-constants');
 
 var MONEY_TYPE = 'tradle.Money';
 var propTypesMap = {
@@ -92,16 +93,16 @@ var utils = {
        currency: currency
     });
 
-    var dModel = data  &&  models['model_' + data['_type']];
+    var dModel = data  &&  models['model_' + data[constants.TYPE]];
     if (!this.isEmpty(data)) {
-      if (data['_type'] !== meta.id) {
+      if (data[constants.TYPE] !== meta.id) {
         var interfaces = meta.interfaces;
-        if (!interfaces  ||  interfaces.indexOf(data['_type']) == -1) 
+        if (!interfaces  ||  interfaces.indexOf(data[constants.TYPE]) == -1) 
            return;
 
-        data['_type'] = meta.id;          
+        data[constants.TYPE] = meta.id;          
         for (let p in data) {
-          if (p == '_type')
+          if (p == constants.TYPE)
             continue;
           if (props[p])
             continue;
@@ -119,7 +120,7 @@ var utils = {
     var required = this.arrayToObject(meta.required);
     // var d = data ? data[i] : null;
     for (let p in eCols) {
-      if (p === '_type')
+      if (p === constants.TYPE)
         continue;
       var maybe = required  &&  !required.hasOwnProperty(p);
 
@@ -202,8 +203,8 @@ var utils = {
 
         var subModel = models['model_' + ref];
         if (data  &&  data[p]) {
-          options.fields[p].value = data[p]['_type'] 
-                                  ? data[p]['_type'] + '_' + data[p].rootHash
+          options.fields[p].value = data[p][constants.TYPE] 
+                                  ? data[p][constants.TYPE] + '_' + data[p][constants.ROOT_HASH]
                                   : data[p].id; 
           data[p] = utils.getDisplayName(data[p], subModel.value.properties) || data[p].title;
         }
@@ -225,7 +226,7 @@ var utils = {
       return idArr.length === 2 ? r.id : idArr[0] + '_' + idArr[1];
     }
     else 
-      return r['_type'] + '_' + r.rootHash;    
+      return r[constants.TYPE] + '_' + r[constants.ROOT_HASH];    
   },
   getFormattedDate(dateTime) {
     var date = new Date(dateTime);
