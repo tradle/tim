@@ -4,6 +4,7 @@ var React = require('react-native');
 var utils = require('../utils/utils');
 var Icon = require('FAKIconImage');
 var reactMixin = require('react-mixin');
+var constants = require('tradle-constants');
 
 var {
   StyleSheet,
@@ -16,13 +17,13 @@ var {
 class VerificationButton extends Component {
   render() {
     var resource = this.props.resource;
-    var model = utils.getModel(resource['_type']).value;
+    var model = utils.getModel(resource[constants.TYPE]).value;
 
     if (!model.properties.verifications)
       return null;
 
     var me = utils.getMe();
-    var meId = me['_type'] + '_' + me.rootHash;
+    var meId = me[constants.TYPE] + '_' + me[constants.ROOT_HASH];
     var s = resource.from.id.split('_');
     var fromId = s[0] + '_' + s[1];
 
