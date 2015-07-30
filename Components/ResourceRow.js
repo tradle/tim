@@ -77,19 +77,26 @@ class ResourceRow extends Component {
     var properties = model.properties;
     var first = true
     var dateProp;
-    var dataPropsCounter;
-    viewCols.forEach(function(v) {
+    var datePropIdx;
+    var datePropsCounter = 0;
+    for (var i=0; i<viewCols.length; i++) {
+      var v = viewCols[i];
       if (properties[v].type !== 'date'  ||  !resource[v])
-        return;
-      if (v === 'dateSubmitted') {
+        continue;
+      if (resource[v]) {
+      if (v === 'dateSubmitted' || v === 'lastMessageTime') {
         dateProp = v;
-        dataPropsCounter++;
+        if (!datePropsCounter)
+          datePropIdx = i;
+        datePropsCounter++;
       }
-    });
-    if (dataPropsCounter > 1)
+      }
+    }
+    if (datePropsCounter > 1)
       dateProp = null;
+
     viewCols.forEach(function(v) {
-      if (properties[v].type === 'array') 
+      if (properties[v].type === 'array'  ||  v === dateProp) 
         return;        
       if (!resource[v]  &&  !properties[v].displayAs)
         return;
@@ -97,14 +104,6 @@ class ResourceRow extends Component {
       if (properties[v].style)
         style = [style, properties[v].style];
       var ref = properties[v].ref;
-      if (dateProp) {
-        row = <View style={{flexDirection: 'row'}}>
-                <Text style={style} numberOfLines={first ? 2 : 1}>{resource[v].title}</Text>
-                {self.addDateProp.bind(self, resource, dateProp)}
-              </View>
-        dateProp = null;
-      }
-
       if (ref) {
         if (resource[v]) {
           var row;
@@ -154,10 +153,11 @@ class ResourceRow extends Component {
           row = <Text style={style}>{val}</Text>;
         }
         if (first  &&  dateProp) {
-          var dateBlock = self.addDateProp(resource, dateProp);
+          var val = utils.formatDate(new Date(resource[dateProp]));
+          // var dateBlock = self.addDateProp(resource, dateProp, true);
           row = <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                   <View>{row}</View>
-                  <View>{dateBlock}</View>
+                  <View><Text style={styles.verySmallLetters}>{val}</Text></View>
                 </View>
         }
         vCols.push(row);
@@ -173,7 +173,7 @@ class ResourceRow extends Component {
     var style = styles.description;
     if (properties[dateProp].style)
       style = [style, properties[dateProp].style];
-    var val = utils.getFormattedDate(new Date(resource[dateProp]));
+    var val = utils.formatDate(new Date(resource[dateProp])); //utils.getFormattedDate(new Date(resource[dateProp]));
     
     return properties[dateProp].skipLabel
         ? <Text style={style}>{val}</Text>
@@ -246,6 +246,11 @@ var styles = StyleSheet.create({
     left: 8,
     borderWidth: 1,
     borderColor: '#ffffff'
+  },
+  verySmallLetters: {
+    fontSize: 12,
+    alignSelf: 'flex-end',
+    color: '#b4c3cb'
   },
 });
 
