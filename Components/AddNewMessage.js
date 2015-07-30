@@ -237,10 +237,6 @@ class AddNewMessage extends Component {
     this.setState({userInput: '', selectedAssets: {}});
     if (this.state.clearCallback)
       this.state.clearCallback();
-    // setTimeout(function() {
-    //   this.setState({textValue: this.state.userInput, selectedAssets: {}});
-    //   this.refs.chat.focus();
-    // }.bind(this), 0);
     Actions.addMessage(value); //, this.state.resource, utils.getModel(modelName).value);
   }
 }
