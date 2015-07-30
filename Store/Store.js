@@ -416,7 +416,7 @@ var Store = Reflux.createStore({
 
       this.trigger({
         action: 'addItem',
-        list: list,
+        // list: list,
         resource: json,
         error: error
       });
@@ -720,6 +720,7 @@ var Store = Reflux.createStore({
       value[constants.TYPE] = modelName;
 
     value[constants.CUR_HASH] = sha(value);
+    var meta = this.getModel(modelName).value;
     if (!value[constants.ROOT_HASH]) {
       value[constants.ROOT_HASH] = value[constants.CUR_HASH];
       var creator = me  
@@ -731,12 +732,13 @@ var Store = Reflux.createStore({
           title: utils.getDisplayName(me, this.getModel(IDENTITY_MODEL))
         };
       }
+      if (meta.properties.dateSubmitted) 
+        value.dateSubmitted = new Date().getTime();
     }
     
     var iKey = modelName + '_' + value[constants.ROOT_HASH];
     var batch = [];
 
-    var meta = this.getModel(modelName).value;
     if (meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf('tradle.Message') != -1)) {
       var to = list[utils.getId(value.to)].value;
       var from = list[utils.getId(value.from)].value;
@@ -851,7 +853,7 @@ var Store = Reflux.createStore({
         // identityDb.batch(batch, function(err, value) {
         db.batch(batch, function(err, value) {
           if (err) 
-            dfd.reject();
+            dfd.reject(err);
           else {
             self.loadResources()
             .then(function() {
