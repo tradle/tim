@@ -7,6 +7,7 @@ var extend = require('extend');
 var logError = require('logError');
 var SelectPhotoList = require('./SelectPhotoList');
 var myStyles = require('../styles/styles');
+var constants = require('tradle-constants');
 
 var Form = t.form.Form;
 Form.stylesheet = myStyles;
@@ -38,6 +39,9 @@ class NewItem extends Component {
     var item = JSON.parse(JSON.stringify(value));
     if (!this.validateValues(this.props.metadata, item)) 
       return;
+    
+    // if (this.props.metadata.items.backlink) 
+    //   item[this.props.metadata.items.backlink] = this.props.resource[constants.TYPE] + '_' + this.props.resource[constants.ROOT_HASH];
     
     if (utils.isEmpty(this.state.selectedAssets)) 
       this.props.onAddItem(propName, item);
@@ -93,7 +97,7 @@ class NewItem extends Component {
         model: model,
         onSubmitEditing: this.onSavePressed.bind(this)
     };
-
+    
     var options = utils.getFormFields(params);
     var Model = t.struct(model);
     if (this.state.options) {
@@ -109,14 +113,16 @@ class NewItem extends Component {
       <ScrollView
         initialListSize={10}
         pageSize={4}      
+        style={styles.container}
       >
-      <View style={styles.container}>
+      <View >
         <View style={{'padding': 20}}>
           <Form ref='form' type={Model} options={options} />
           {error}
           <SelectPhotoList style={this.props.style || {flex: 1}}
             metadata={this.props.metadata} 
             navigator={this.props.navigator} 
+            imagesPerRow={3}
             onSelect={this.onSelect.bind(this)} />
         </View>
       </View>
