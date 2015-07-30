@@ -7,6 +7,7 @@ var Actions = require('../Actions/Actions');
 var reactMixin = require('react-mixin');
 var Icon = require('FAKIconImage');
 var buttonStyles = require('../styles/buttonStyles');
+var constants = require('tradle-constants');
 
 var {
   View,
