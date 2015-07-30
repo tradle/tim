@@ -16,6 +16,7 @@ var Icon = require('./FAKIconImage');
 var constants = require('tradle-constants');
 
 var DEAL_MODEL = 'tradle.Coupon';
+var VENDOR_MODEL = 'tradle.Vendor';
 var {
   ListView,
   Component,
@@ -57,13 +58,18 @@ class ResourceList extends Component {
       return;
     var action = params.action;
     if (action === 'addItem'  ||  action === 'addMessage') {
+      var model = action === 'addMessage' 
+                ? utils.getModel(this.props.modelName).value
+                : utils.getModel(params.resource[constants.TYPE]).value;
+
       this.state.isLoading = true;
       Actions.list({
         query: this.state.filter, 
-        modelName: this.props.modelName, 
+        modelName: model.id,
         to: this.props.resource,
-        sortProperty: this.props.modelName === constants.TYPES.IDENTITY ? 'lastMessageTime' : null
+        sortProperty: model.sort
       });
+      console.log('Actions.list');
       return;      
     }
 
@@ -348,7 +354,8 @@ reactMixin(ResourceList.prototype, Reflux.ListenerMixin);
 var styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: '#f7f7f7',
+    // backgroundColor: 'white',
     marginTop: 60
   },
   centerText: {
