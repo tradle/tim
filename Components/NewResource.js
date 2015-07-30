@@ -41,7 +41,7 @@ class NewResource extends Component {
     this.resetKeyboardSpace = this.resetKeyboardSpace.bind(this);
     var r = {};
     if (props.resource)
-      r.resource = props.resource
+      r = props.resource
     else {
       r[constants.TYPE] = props.model.id;
     }
@@ -116,6 +116,8 @@ class NewResource extends Component {
         title: title,
         id: 4,
         component: NewResource,
+        rightButtonTitle: 'Done',
+        backButtonTitle: 'Back',        
         titleTextColor: '#7AAAC3',
         passProps: {
           model: self.props.model,
@@ -142,8 +144,10 @@ class NewResource extends Component {
       this.setState({ err: msg });
       return;
     }
+
     var json = JSON.parse(JSON.stringify(value));
     var resource = this.state.resource;
+
     if (!resource) {
       resource = {};
       resource[constants.TYPE] = this.props.model.id;
@@ -219,6 +223,26 @@ class NewResource extends Component {
     this.setState({resource: resource, err: ''});
   }
   onNewPressed(bl) {
+    // if (bl.items.backlink) {
+    //   var model = utils.getModel(bl.items.ref).value;
+    //   var resource = {};
+    //   resource[constants.TYPE] = bl.items.ref;
+    //   resource[bl.items.backlink] = this.props.resource;
+    //   var passProps = {
+    //     model: model,
+    //     // callback: this.props.navigator.pop,
+    //     resource: resource
+    //   }
+    //   this.props.navigator.push({
+    //     id: 4,
+    //     title: 'Add new ' + bl.title,
+    //     backButtonTitle: 'Back',
+    //     component: NewResource,
+    //     rightButtonTitle: 'Done',
+    //     passProps: passProps,
+    //   });
+    //   return;
+    // }
     this.props.navigator.push({
       id: 6,
       title: 'Add new ' + bl.title,
@@ -271,8 +295,8 @@ class NewResource extends Component {
         chooser: this.chooser.bind(this),
         model: model,
         items: arrays,
-        onSubmitEditing: this.onSavePressed.bind(this)
-        // onEndEditing: this.handleChange.bind(this)
+        onSubmitEditing: this.onSavePressed.bind(this),
+        onEndEditing: this.onEndEditing.bind(this)
       });
     
     var Model = t.struct(model);
@@ -354,8 +378,12 @@ class NewResource extends Component {
     else
       return content;
   }
-  onEndEditing(userInput) {
-    this.setState({userInput: userInput});
+  onEndEditing(prop, event) {
+    if (this.state.resource[prop]  ||  event.nativeEvent.text.length)
+      this.state.resource[prop] = event.nativeEvent.text;
+  }
+  onChange(prop, value) {
+    value = value;
   }
 
   onSubmitEditing(msg) {
