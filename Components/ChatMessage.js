@@ -73,10 +73,9 @@ class ChatMessage extends Component {
     if (!msg)
       return;
     this.props.onSubmitEditing(msg);
-    // this.setState({userInput: ''});
     setTimeout(function() {
       this.setState({userInput: ''});
-      this.refs.chat.focus();
+      // this.refs.chat.focus();
     }.bind(this), 0);
   }
 }
