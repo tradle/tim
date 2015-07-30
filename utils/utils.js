@@ -80,22 +80,30 @@ var utils = {
     var options = {};
     options.fields = {};
  
-    var props = meta.items ? meta.items.properties : meta.properties;
-    
-    var currency = t.enums({
-      USD: '$',
-      GBR: '£',
-      CNY: '¥'
-    });
+    var props, bl;
+    if (!meta.items)
+      props = meta.properties;
+    else {
+      bl = meta.items.backlink;
+      if (!meta.items.ref) 
+        props = meta.items.properties;
+      else
+        props = this.getModel(meta.items.ref).value.properties;
+    }  
+    // var currency = t.enums({
+    //   USD: '$',
+    //   GBR: '£',
+    //   CNY: '¥'
+    // });
 
-    var moneyModel = t.struct({
-       value: t.Num,
-       currency: currency
-    });
+    // var moneyModel = t.struct({
+    //    value: t.Num,
+    //    currency: currency
+    // });
 
     var dModel = data  &&  models['model_' + data[constants.TYPE]];
     if (!this.isEmpty(data)) {
-      if (data[constants.TYPE] !== meta.id) {
+      if (!meta.items && data[constants.TYPE] !== meta.id) {
         var interfaces = meta.interfaces;
         if (!interfaces  ||  interfaces.indexOf(data[constants.TYPE]) == -1) 
            return;
@@ -120,7 +128,7 @@ var utils = {
     var required = this.arrayToObject(meta.required);
     // var d = data ? data[i] : null;
     for (let p in eCols) {
-      if (p === constants.TYPE)
+      if (p === constants.TYPE  ||  p === bl)
         continue;
       var maybe = required  &&  !required.hasOwnProperty(p);
 
@@ -184,15 +192,16 @@ var utils = {
         if (!ref)
           continue;
         if (ref === MONEY_TYPE) {
-          model[p] = maybe ? t.maybe(moneyModel) : moneyModel;
-          options.fields[p].auto = 'labels';
-          options.fields[p].options = {
-            fields: {
-              value: {
-                auto: 'placeholders'
-              }
-            }
-          }
+          model[p] = maybe ? t.maybe(t.Num) : t.Num;
+          // model[p] = maybe ? t.maybe(moneyModel) : moneyModel;
+          // options.fields[p].auto = 'labels';
+          // options.fields[p].options = {
+          //   fields: {
+          //     value: {
+          //       auto: 'placeholders'
+          //     }
+          //   }
+          // }
           if (onSubmitEditing) 
             options.fields[p].onSubmitEditing = onSubmitEditing;
           if (onEndEditing)
