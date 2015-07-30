@@ -4,6 +4,7 @@ var voc = [{
   'id': 'tradle.Identity',
   'type': 'tradle.Model',
   'title': 'Identity',
+  sort: 'lastMessageTime',  
   'properties': {
     _t: {
       'type': 'string',
@@ -977,6 +978,7 @@ var voc = [{
   id: 'tradle.Coupon',
   title: 'Coupon',
   type: 'object',
+  sort: 'dateSubmitted',
   properties: {
     '_t': {
       type: 'string',
@@ -1044,17 +1046,19 @@ var voc = [{
     dealValue: {
       type: 'object',
       ref: 'tradle.Money',
-      description: 'price before discount'
+      description: '$ price before discount'
     },
     dealPrice: {
       type: 'object',
       ref: 'tradle.Money',
+      description: '$ price after discount'
     },    
     dealDiscount: {
       type: 'object',
       ref: 'tradle.Money',
       readOnly: true,
-      formula: 'dealValue - dealPrice'
+      formula: 'dealValue - dealPrice',
+      description: '$ discount'
     },
     allPurchases: {
       type: 'array',
@@ -1074,6 +1078,7 @@ var voc = [{
       minimum: 1,
       maximum: 99,
       readOnly: true,
+      description: '% discount',      
       formula: '((dealValue - dealPrice)/dealValue) * 100',
     },
     dealStatus: {
@@ -1113,7 +1118,7 @@ var voc = [{
     },
   },
   required: ['title', 'shortTitle', 'shortDescription', 'dealPrice', 'vendor', 'expires'],
-  gridCols: ['shortTitle', 'dealPrice', 'discount', 'expires', 'vendor', 'dealStatus'],
+  gridCols: ['shortTitle', 'dealPrice', 'discount', 'vendor', 'expires', 'dealStatus'],
   viewCols: ['shortTitle', 'dealPrice', 'dealValue', 'dealDiscount', 'discount', 'featured', 'expires', 'couponBuysCount', 'vendor', 'dealStatus'],
 },
 {
@@ -1273,7 +1278,6 @@ var voc = [{
     },
     photos: {
       type: 'array',
-      readOnly: true,
       items: {
         type: 'object',
         properties: {
@@ -1294,12 +1298,17 @@ var voc = [{
       items: {
         type: 'object',
         ref: 'tradle.Coupon',
-        backLink: 'vendor'
+        backlink: 'vendor'
       }
+    },
+    couponsCount: {
+      type: 'number',
+      readOnly: true,
+      skipLabel: true
     }
   },
-  required: ['name']
-
+  required: ['name'],
+  viewCols: ['name', 'photos', 'coupons']
 },
 {
   id: 'tradle.Money',
