@@ -1,8 +1,8 @@
 'use strict';
- 
+
 var React = require('react-native');
 var utils = require('../utils/utils');
-var Icon = require('FAKIconImage');
+var Icon = require('react-native-icons');
 var constants = require('tradle-constants');
 
 var {
