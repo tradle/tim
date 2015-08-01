@@ -12,7 +12,7 @@ var reactMixin = require('react-mixin');
 var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
-var Icon = require('./FAKIconImage');
+var Icon = require('react-native-icons');
 var constants = require('tradle-constants');
 
 var DEAL_MODEL = 'tradle.Coupon';

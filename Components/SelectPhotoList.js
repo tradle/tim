@@ -5,7 +5,7 @@ var t = require('tcomb-form-native');
 var utils = require('../utils/utils');
 var logError = require('logError');
 var groupByEveryN = require('groupByEveryN');
-var Icon = require('./FAKIconImage');
+var Icon = require('react-native-icons');
 
 var Form = t.form.Form;
 

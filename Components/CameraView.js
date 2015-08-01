@@ -8,7 +8,7 @@ var {
   TouchableHighlight
 } = React;
 var Camera = require('react-native-camera');
-var Icon = require('./FAKIconImage');
+var Icon = require('react-native-icons');
 
 class CameraView extends Component {
   constructor(props) {

@@ -16,7 +16,7 @@ var SelectPhotoList = require('./Components/SelectPhotoList');
 var CameraView = require('./Components/CameraView');
 var PhotoCarousel = require('./Components/PhotoCarousel');
 var utils = require('./utils/utils');
-var Icon = require('FAKIconImage');
+var Icon = require('react-native-icons');
 // var Device = require('react-native-device');
 
 var reactMixin = require('react-mixin');

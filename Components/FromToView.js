@@ -8,7 +8,7 @@ var NewResource = require('./NewResource');
 var ResourceView = require('./ResourceView');
 var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
-var Icon = require('FAKIconImage');
+var Icon = require('react-native-icons');
 var constants = require('tradle-constants');
 
 var MESSAGE_INTERFACE = 'tradle.Message';
