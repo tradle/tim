@@ -116,13 +116,14 @@ class NewItem extends Component {
         style={styles.container}
       >
       <View >
-        <View style={{'padding': 20}}>
+        <View style={{'paddingHorizontal': 20, paddingTop: 20}}>
           <Form ref='form' type={Model} options={options} />
+        </View>
+        <View>  
           {error}
           <SelectPhotoList style={this.props.style || {flex: 1}}
             metadata={this.props.metadata} 
             navigator={this.props.navigator} 
-            imagesPerRow={3}
             onSelect={this.onSelect.bind(this)} />
         </View>
       </View>
