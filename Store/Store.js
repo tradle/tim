@@ -160,6 +160,24 @@ var Store = Reflux.createStore({
   onGetItem(key) {
     var resource = {};
     extend(resource, list[utils.getId(key)].value);
+    var props = this.getModel(resource[constants.TYPE]).value.properties;
+    for (var p in props) {
+      if (p.charAt(0) === '_')
+        continue;
+      var items = props[p].items;
+      if (!items  ||  !items.backlink)
+        continue;
+      var backlink = items.backlink;
+      var itemsModel = this.getModel(items.ref).value;
+      var params = {
+        modelName: items.ref,
+        to: resource,
+        meta: itemsModel,
+        props: itemsModel.properties
+      }
+      var result = this.searchNotMessages(params);
+      resource[p] = result;
+    }
     this.trigger({ resource: resource, action: 'getItem'});
   },
   onShowIdentityList() {
@@ -559,8 +577,8 @@ var Store = Reflux.createStore({
       var r = list[key].value;
       if (r.canceled)
         continue;
-      if (r.creator_) {
-        var id = utils.getId(r.creator_);
+      if (r[constants.OWNER]) {
+        var id = utils.getId(r[constants.OWNER]);
         if (id != me[constants.TYPE] + '_' + me[constants.ROOT_HASH])
           continue;
       }
@@ -727,7 +745,7 @@ var Store = Reflux.createStore({
                   ?  me 
                   :  isRegistration ? value : null;
       if (creator) {
-        value.creator_ = {
+        value[constants.OWNER] = {
           id: IDENTITY_MODEL + '_' + creator[constants.ROOT_HASH] + '_' + creator[constants.CUR_HASH],
           title: utils.getDisplayName(me, this.getModel(IDENTITY_MODEL))
         };
