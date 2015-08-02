@@ -27,7 +27,7 @@ class FromToView extends Component {
     this.listenTo(Store, 'onGetItem');
   }
   onGetItem(params) {
-    if (params.action  &&  params.action === 'getItem')
+    if (params.action  &&  params.action === 'getItem'  &&  resource[constants.TYPE] === this.props.resource[constants.TYPE])
       this.showProfile(params.resource);
   }
   render() {
