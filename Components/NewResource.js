@@ -132,9 +132,17 @@ class NewResource extends Component {
       this.props.navigator.pop();  
   }
   onSavePressed() {
+    var resource = this.state.resource;
     var value = this.refs.form.getValue();
-    if (!value)
-      return;
+    if (!value) {
+      value = this.refs.form.refs.input.state.value;
+      if (!value)
+        return; 
+      var required = this.props.model.required;
+      for (var p of required)
+        if (!value[p]  &&  !resource[p])
+          return;
+    }
     if (!value) {
       var errors = this.refs.form.refs.input.getValue().errors;
       var msg = '';
@@ -146,7 +154,6 @@ class NewResource extends Component {
     }
 
     var json = JSON.parse(JSON.stringify(value));
-    var resource = this.state.resource;
 
     if (!resource) {
       resource = {};
