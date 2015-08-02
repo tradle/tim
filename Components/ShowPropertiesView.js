@@ -1,10 +1,13 @@
 'use strict';
  
 var React = require('react-native');
+var PhotosList = require('./PhotosList');
 var utils = require('../utils/utils');
 var constants = require('tradle-constants');
 
 var MONEY_TYPE = 'tradle.Money';
+var DEFAULT_CURRENCY_SYMBOL = '$';
+
 var {
   StyleSheet,
   Image, 
@@ -29,6 +32,7 @@ class ShowPropertiesView extends Component {
       dataSource: dataSource
     }
   }
+
   render() {
     var viewCols = this.getViewCols();
     return (
@@ -76,6 +80,8 @@ class ShowPropertiesView extends Component {
       
       var val = resource[p];
       var pMeta = model.properties[p];
+      var isRef;
+      var isDirectionRow;
       if (!val) {
         if (pMeta.displayAs) 
           val = utils.templateIt(pMeta, resource);      
@@ -84,42 +90,55 @@ class ShowPropertiesView extends Component {
       }
       else if (pMeta.ref) {
         if (pMeta.ref == MONEY_TYPE) {
-          var currencies = utils.getModel(pMeta.ref).value.properties.currency.oneOf;
-          var valCurrency = val.currency;
-          for (var c of currencies) {
-            var currencySymbol = c[valCurrency];
-            if (currencySymbol) {
-              val = (valCurrency == 'USD') ? currencySymbol + val.value : val.value + currencySymbol;
-              break;
+          if (typeof val === 'number') 
+            val = DEFAULT_CURRENCY_SYMBOL + val; 
+          
+          else {
+            var currencies = utils.getModel(pMeta.ref).value.properties.currency.oneOf;
+            var valCurrency = val.currency;
+            for (var c of currencies) {
+              var currencySymbol = c[valCurrency];
+              if (currencySymbol) {
+                val = (valCurrency == 'USD') ? currencySymbol + val.value : val.value + currencySymbol;
+                break;
+              }
             }
           }
         }
-        else
-          val = val[constants.TYPE] ? utils.getDisplayName(val, utils.getModel(val[constants.TYPE]).value.properties) : val.title;
+        else {
+          var value = val[constants.TYPE] ? utils.getDisplayName(val, utils.getModel(val[constants.TYPE]).value.properties) : val.title;
+          val = <TouchableHighlight onPress={self.props.showRefResource.bind(self, val, p)} underlayColor='transparent'>
+                 <Text style={styles.itemTitle}>{value}</Text>                 
+               </TouchableHighlight>
+
+          isRef = true;
+          isDirectionRow = true;
+        }
       }
       else if (pMeta.type === 'date')
         val = utils.formatDate(val);
 
       if (!val)
         return <View></View>;
-      var isDirectionRow;
-      if (val instanceof Array) {
-        var vCols = pMeta.viewCols;          
-        var cnt = val.length;
-        val = self.renderItems(val, pMeta);
-        first = false;
-      }      
-      else if (typeof val === 'number') {
-        val = <Text style={styles.description}>{val}</Text>;        
-        isDirectionRow = true;
-      }
-      else if (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0)
-        val = <Text onPress={self.onPress.bind(self, val)} style={styles.description}>{val}</Text>;
-      else {
-        if (val.length < 30)
+      if (!isRef) {
+        if (val instanceof Array) {
+          var vCols = pMeta.viewCols;          
+          var cnt = val.length;
+          val = self.renderItems(val, pMeta);
+          first = false;
+        }      
+        else if (typeof val === 'number') {
+          val = <Text style={styles.description}>{val}</Text>;        
           isDirectionRow = true;
-        val = <Text style={[styles.description, {flexWrap: 'wrap'}]} numberOfLines={2}>{val}</Text>;
-        // val = <Text style={[styles.description, isDirectionRow ? {alignSelf: 'flex-end'} : {alignSelf: 'flex-start'}]}>{val}</Text>;
+        }
+        else if (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0)
+          val = <Text onPress={self.onPress.bind(self, val)} style={styles.description}>{val}</Text>;
+        else {
+          if (val.length < 30)
+            isDirectionRow = true;
+          val = <Text style={[styles.description, {flexWrap: 'wrap'}]} numberOfLines={2}>{val}</Text>;
+          // val = <Text style={[styles.description, isDirectionRow ? {alignSelf: 'flex-end'} : {alignSelf: 'flex-start'}]}>{val}</Text>;
+        }
       }
       var separator = first
                     ? <View /> 
@@ -151,7 +170,12 @@ class ShowPropertiesView extends Component {
       }
     }
     var counter = 0;
-    var vCols = pMeta.viewCols;          
+    var vCols = pMeta.viewCols;        
+    if (!vCols) {
+      vCols = [];
+      for (var p in itemsMeta)
+        vCols.push(p);
+    }
     var cnt = val.length;
     var self = this;
     // if (pMeta.items.ref) {
@@ -167,20 +191,37 @@ class ShowPropertiesView extends Component {
     return val.map(function(v) {
       var ret = [];
       counter++; 
-      for (var p in itemsMeta) {
-        if (vCols  &&  vCols.indexOf(p) == -1)
-          continue;
+      for (var p of vCols) {
         var itemMeta = itemsMeta[p];
         if (!v[p]  &&  !itemMeta.displayAs)
+          continue;
+        if (itemMeta.displayName)
           continue;
         var value;
         if (itemMeta.displayAs) 
           value = utils.templateIt(itemMeta, v) 
         else if (itemMeta.type === 'date')
           value = utils.formatDate(v[p]);
-        else if (itemMeta.type !== 'object')
-          value = v[p];
-        else if (itemMeta.ref)
+        else if (itemMeta.type !== 'object') {
+          if (p == 'photos') {
+            var photos = [];
+            ret.push(
+               <PhotosList photos={v.photos} navigator={self.props.navigator} numberInRow={4}/>
+            );
+            // for (var ph of v[p])
+            //   photos.push(<Image source={{uri: ph.url}} style={styles.photo} />)
+            // ret.push(
+            //      <View style={[styles.itemContainer, {marginHorizontal: 7}]}>
+            //        {photos}
+            //      </View>
+            // );
+            continue;
+          }
+          
+          else
+            value = v[p];
+        }
+        else if (itemMeta.ref) 
           value = v[p].title  ||  utils.getDisplayName(v[p], utils.getModel(itemMeta.ref).value.properties);
         else   
           value = v[p].title;
@@ -213,10 +254,21 @@ class ShowPropertiesView extends Component {
       )
     });    
   }
-  showResource(resource, prop) {
-    this.props.callback(resource, prop);
-  }
+  // showResource(resource, prop) {
+  //   var model = utils.getModel(this.props.resource[constants.TYPE]).value;
+        
+  //   var propObj = model.properties[prop];
+  //   if (propObj.items)
+  //     this.props.showItems(resource, prop);
+  //   else {
+  //     this.state.prop = prop;
+  //     this.state.propValue = utils.getId(resource.id);
+  //     Actions.getItem(resource.id);
+  //   }
+  // }
 }
+// reactMixin(ShowPropertiesView.prototype, Reflux.ListenerMixin);
+
 var styles = StyleSheet.create({
   textContainer: {
     flex: 1,
@@ -256,7 +308,13 @@ var styles = StyleSheet.create({
     fontSize: 18,
     marginVertical: 3,
     marginHorizontal: 7,
-    color: '#656565',
+    paddingLeft: 5,
+    color: '#999999',
+  },
+  photo: {
+    width: 86,
+    height: 86,
+    marginLeft: 1,
   },
   icon: {
     width: 40,
