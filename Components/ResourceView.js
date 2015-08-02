@@ -7,8 +7,10 @@ var PhotoView = require('./PhotoView');
 var PhotosList = require('./PhotosList');
 var AddNewIdentity = require('./AddNewIdentity');
 var SwitchIdentity = require('./SwitchIdentity');
+var ShowRefList = require('./ShowRefList');
 var IdentitiesList = require('./IdentitiesList');
 var ResourceList = require('./ResourceList');
+var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
@@ -40,8 +42,11 @@ class ResourceView extends Component {
   handleEvent(params) {
     if (params.action === 'showIdentityList')
       this.onShowIdentityList(params);
+    else if (params.action == 'getItem') 
+      this.showRefResource(params.resource)
     else  
       this.onResourceUpdate(params);
+
   }
   onResourceUpdate(params) {
     var resource = params.resource;
@@ -87,11 +92,53 @@ class ResourceView extends Component {
         </View>
         <AddNewIdentity resource={resource} navigator={this.props.navigator} />
         <SwitchIdentity resource={resource} navigator={this.props.navigator} />
-        <PhotosList photos={photos} navigator={this.props.navigator} numberInRow={photos.length > 4 ? 5 : photos.length} />    
-        <ShowPropertiesView resource={resource} callback={this.showResources.bind(this)} excludedProperties={['photos']}/>      
+        <ShowRefList resource={resource} navigator={this.props.navigator} />    
+        <PhotosList photos={photos} navigator={this.props.navigator} numberInRow={photos.length > 4 ? 5 : photos.length} />
+        <ShowPropertiesView resource={resource} 
+                            showItems={this.showResources.bind(this)} 
+                            showRefResource={this.getRefResource.bind(this)}
+                            excludedProperties={['photos']}
+                            navigator={this.props.navigator} />      
       </ScrollView>
       </View>
     );
+  }
+  getRefResource(resource, prop) {
+    var model = utils.getModel(this.props.resource[constants.TYPE]).value;
+        
+    this.state.prop = prop;
+    this.state.propValue = utils.getId(resource.id);
+    Actions.getItem(resource.id);
+  }
+
+  showRefResource(resource, prop) {
+    if (resource[constants.TYPE] + '_' + resource[constants.ROOT_HASH] !== this.state.propValue)
+      return;
+    var model = utils.getModel(resource[constants.TYPE]).value;
+    var title = utils.getDisplayName(resource, model.properties);
+    this.props.navigator.push({
+      title: title,
+      id: 3,
+      component: ResourceView,
+      titleTextColor: '#7AAAC3',
+      // rightButtonTitle: 'Edit',
+      backButtonTitle: 'Back',
+
+      // onRightButtonPress: {
+      //   title: title,
+      //   id: 4,
+      //   component: NewResource,
+      //   backButtonTitle: resource.firstName,
+      //   rightButtonTitle: 'Done',
+      //   titleTextColor: '#7AAAC3',
+      //   passProps: {
+      //     model: model,
+      //     resource: resource
+      //   }
+      // },
+
+      passProps: {resource: resource, prop: prop}
+    });    
   }
   showResources(resource, prop) {
     var meta = utils.getModel(resource[constants.TYPE]).value.properties;
