@@ -101,9 +101,8 @@ class SelectPhotoList extends Component {
       );
     }
 
-    var style = this.state.imagesPerRow == 4 ? {marginLeft: 0} : {alignSelf: 'center'}
     return (
-      <View style={[styles.row, style]}>
+      <View style={styles.row}>
         {photos}
       </View>
     );
@@ -151,7 +150,7 @@ var styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     flex: 1,
-    // marginLeft: 0
+    marginLeft: 0
     // alignSelf: 'center'
   },
   image: {
