@@ -15,8 +15,8 @@ var Reflux = require('reflux');
 var Icon = require('react-native-icons');
 var constants = require('tradle-constants');
 
-var DEAL_MODEL = 'tradle.Coupon';
-var VENDOR_MODEL = 'tradle.Vendor';
+var DEAL_MODEL = 'tradle.Offer';
+var VENDOR_MODEL = 'tradle.Organization';
 var {
   ListView,
   Component,
@@ -102,8 +102,9 @@ class ResourceList extends Component {
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     var model = utils.getModel(this.props.modelName);
     if (this.props.modelName != constants.TYPES.IDENTITY  &&  !this.props.callback) {
+      var m = utils.getModel(resource[constants.TYPE]).value;
       this.props.navigator.push({
-        title: title,
+        title: utils.getDisplayName(resource, m.properties),
         id: 3,
         component: ResourceView,
         titleTextColor: '#7AAAC3',
@@ -117,7 +118,7 @@ class ResourceList extends Component {
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
           passProps: {
-            model: utils.getModel(resource[constants.TYPE]).value,
+            model: m,
             resource: resource
           }
         },
