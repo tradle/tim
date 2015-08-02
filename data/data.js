@@ -782,11 +782,16 @@ var identities = [
 
 },
 {
-  _t: 'tradle.Vendor',
-  'name': 'Cool Vendor'
+  _t: 'tradle.Organization',
+  'name': 'Tilton',
+  'photos': [
+    {
+      'url':  'http://www.archivisionmodels.com/Architectural-Models/hotel/images/making-scale-models.jpg'
+    }
+  ]
 },
 {
-  _t: 'tradle.Coupon',
+  _t: 'tradle.Offer',
     dealRef: 12345,
     title: 'Amazing deal for BENTO & BUBBLES',
     shortTitle: 'Amazing deal',

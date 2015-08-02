@@ -242,80 +242,6 @@ var voc = [{
    required: ['id']
 },
 {
-  'id': 'tradle.Organization',
-  'type': 'tradle.Model',
-  'title': 'Organization',
-  'properties': {
-    '_t': {
-      'type': 'string',
-      'readOnly': true
-     },
-     'name': {
-       'type': 'string',
-       'displayName': true,
-       'skipLabel': true
-     },
-     'contacts': {
-      'type': 'array',
-      'items': {
-        'type': 'object',
-        'ref': 'tradle.Identity',
-       } 
-     },
-     'photos': {
-      'type': 'array',
-      'items': {
-        'type': 'object',
-        'properties': {
-          'tags': {
-            'type': 'string'
-          },
-          'url': {
-            'type': 'string',
-            'skipLabel': true
-          }
-        }
-      },
-      'required': ['url']
-     },
-    'city': {
-      'type': 'string'
-    },
-    'country': {
-      'type': 'string'
-    },
-    'postalCode': {
-      'type': 'number'
-    },
-    'region': {
-      'type': 'string'
-    },
-    'street': {
-      'type': 'string'
-    },
-    'formattedAddress': {
-      'type': 'string',
-      'displayAs': ['street', ',', 'city', ',', 'region', 'postalCode'],
-      'title': 'Address'
-    }     
-  },  
-  'required': ['name'],
-  'viewCols': [
-    'name',
-    'street', 
-    'city', 
-    'region', 
-    'country',
-  ],
-  'editCols': [
-    'name', 
-    'street', 
-    'city', 
-    'region', 
-    'country',
-  ]
-},
-{
   'id': 'tradle.Message',
   'type': 'tradle.Model',
   'title': 'Message',
@@ -975,8 +901,8 @@ var voc = [{
   ],
 },
 {
-  id: 'tradle.Coupon',
-  title: 'Coupon',
+  id: 'tradle.Offer',
+  title: 'Offer',
   type: 'object',
   sort: 'dateSubmitted',
   properties: {
@@ -991,7 +917,7 @@ var voc = [{
     title: {
       type: 'string',
       skipLabel: true,
-      description: 'title is displayed on the coupon'
+      description: 'title is displayed on the offer'
     },
     shortTitle: {
       type: 'string',
@@ -1001,7 +927,7 @@ var voc = [{
     conditions: {
       maxLength: 2000,
       type: 'string',
-      description: 'What is this coupon for? Limits for personal use and gifts. Phone # for questions and booking. Operating hours. Any special conditions for coupon use. Other discounts/bonuses provided by the vendor. Omit dates already specified on coupon.'
+      description: 'What is this offer for? Limits for personal use and gifts. Phone # for questions and booking. Operating hours. Any special conditions for offer use. Other discounts/bonuses provided by the organization. Omit dates already specified on offer.'
     },
     description: {
       type: 'string',
@@ -1065,10 +991,10 @@ var voc = [{
       readOnly: true,
       items: {
         type: 'object',
-        ref: 'tradle.CouponBuy'
+        ref: 'tradle.OfferBuy'
       }
     },
-    couponBuysCount: {
+    offerBuysCount: {
       type: 'number',
       readOnly: true
     },
@@ -1095,9 +1021,9 @@ var voc = [{
       readOnly: true,
       ref: 'tradle.RedemptionLocation'
     },
-    vendor: {
+    organization: {
       type: 'object',
-      ref: 'tradle.Vendor'
+      ref: 'tradle.Organization'
     },
     canceled: {
       type: 'boolean',
@@ -1117,14 +1043,14 @@ var voc = [{
       readOnly: true
     },
   },
-  required: ['title', 'shortTitle', 'shortDescription', 'dealPrice', 'vendor', 'expires'],
-  gridCols: ['shortTitle', 'dealPrice', 'discount', 'vendor', 'expires', 'dealStatus'],
-  viewCols: ['shortTitle', 'dealPrice', 'dealValue', 'dealDiscount', 'discount', 'featured', 'expires', 'couponBuysCount', 'vendor', 'dealStatus'],
+  required: ['title', 'photos', 'shortTitle', 'description', 'dealValue', 'dealPrice', 'organization', 'expires'],
+  gridCols: ['shortTitle', 'photos', 'dealPrice', 'discount', 'organization', 'expires', 'dealStatus'],
+  viewCols: ['title', 'photos', 'organization', 'dealPrice', 'dealValue', 'dealDiscount', 'description', 'conditions', 'discount', 'featured', 'expires', 'offerBuysCount', 'dealStatus'],
 },
 {
-  id: 'tradle.CouponBuy',
+  id: 'tradle.OfferBuy',
   type: 'object',
-  title: 'Coupon Buy',
+  title: 'Offer Buy',
   properties: {
     '_t': {
       type: 'string',
@@ -1143,19 +1069,19 @@ var voc = [{
       ref: 'tradle.Identity',
       readOnly: true
     },
-    coupon: {
+    offer: {
       type: 'object',
-      ref: 'tradle.Coupon',
+      ref: 'tradle.Offer',
       readOnly: true
     },
-    vendor: {
+    organization: {
       type: 'object',
       readOnly: true,
-      ref: 'tradle.Vendor'
+      ref: 'tradle.Organization'
     },
     title: {
       type: 'string',
-      description: 'title is displayed on the coupon'
+      description: 'title is displayed on the offer'
     },
     shortTitle: {
       type: 'string',
@@ -1207,7 +1133,7 @@ var voc = [{
       required: ['url']
     },
   },
-  required: ['purchaseNumber', 'customer', 'coupon'],
+  required: ['purchaseNumber', 'customer', 'offer'],
 },
 {
   id: 'tradle.RedemptionLocation',
@@ -1217,31 +1143,31 @@ var voc = [{
       type: 'string',
       readOnly: true
     },
-    coupon: {
+    offer: {
       type: 'object',
-      ref: 'tradle.Coupon',
+      ref: 'tradle.Offer',
       readOnly: true
     },
     address: {
       readOnly: true,
-      formula: 'vendor.address'
+      formula: 'organization.address'
     },
-    vendor: {
+    organization: {
       type: 'object',
       readOnly: true,
-      ref: 'tradle.Vendor'
+      ref: 'tradle.Organization'
     },
     photos: {
       type: 'array',      
-      formula: 'vendor.photos'
+      formula: 'organization.photos'
     }
   },
-  required: ['coupon', 'vendor']
+  required: ['offer', 'organization']
 },
 {
-  id: 'tradle.Vendor',
+  id: 'tradle.Organization',
   type: 'object',
-  title: 'Vendor',
+  title: 'Organization',
   properties: {
     '_t': {
       type: 'string',
@@ -1276,6 +1202,13 @@ var voc = [{
       'title': 'Address',
       'readOnly': true
     },
+    'contacts': {
+     'type': 'array',
+     'items': {
+       'type': 'object',
+       'ref': 'tradle.Identity',
+      } 
+    },
     photos: {
       type: 'array',
       items: {
@@ -1293,22 +1226,29 @@ var voc = [{
       },
       required: ['url']
     },
-    coupons: {
+    offers: {
       type: 'array',
       items: {
         type: 'object',
-        ref: 'tradle.Coupon',
-        backlink: 'vendor'
+        ref: 'tradle.Offer',
+        backlink: 'organization'
       }
     },
-    couponsCount: {
+    offersCount: {
       type: 'number',
       readOnly: true,
       skipLabel: true
     }
   },
   required: ['name'],
-  viewCols: ['name', 'photos', 'coupons']
+  viewCols: ['name', 'photos', 'offers'],
+  editCols: [
+    'name', 
+    'street', 
+    'city', 
+    'region', 
+    'country',
+  ]
 },
 {
   id: 'tradle.Money',
@@ -1341,3 +1281,81 @@ var models = {
   }
 }
 module.exports = models;
+
+
+
+// {
+//   'id': 'tradle.Organization',
+//   'type': 'tradle.Model',
+//   'title': 'Organization',
+//   'properties': {
+//     '_t': {
+//       'type': 'string',
+//       'readOnly': true
+//      },
+//      'name': {
+//        'type': 'string',
+//        'displayName': true,
+//        'skipLabel': true
+//      },
+//      'contacts': {
+//       'type': 'array',
+//       'items': {
+//         'type': 'object',
+//         'ref': 'tradle.Identity',
+//        } 
+//      },
+//      'photos': {
+//       'type': 'array',
+//       'items': {
+//         'type': 'object',
+//         'properties': {
+//           'tags': {
+//             'type': 'string'
+//           },
+//           'url': {
+//             'type': 'string',
+//             'skipLabel': true
+//           }
+//         }
+//       },
+//       'required': ['url']
+//      },
+//     'city': {
+//       'type': 'string'
+//     },
+//     'country': {
+//       'type': 'string'
+//     },
+//     'postalCode': {
+//       'type': 'number'
+//     },
+//     'region': {
+//       'type': 'string'
+//     },
+//     'street': {
+//       'type': 'string'
+//     },
+//     'formattedAddress': {
+//       'type': 'string',
+//       'displayAs': ['street', ',', 'city', ',', 'region', 'postalCode'],
+//       'title': 'Address'
+//     }     
+//   },  
+//   'required': ['name'],
+//   'viewCols': [
+//     'name',
+//     'street', 
+//     'city', 
+//     'region', 
+//     'country',
+//   ],
+//   'editCols': [
+//     'name', 
+//     'street', 
+//     'city', 
+//     'region', 
+//     'country',
+//   ]
+// },
+
