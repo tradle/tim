@@ -193,6 +193,8 @@ var utils = {
           continue;
         if (ref === MONEY_TYPE) {
           model[p] = maybe ? t.maybe(t.Num) : t.Num;
+          if (data[p]  &&  (typeof data[p] != 'number'))
+            data[p] = data[p].value
           // model[p] = maybe ? t.maybe(moneyModel) : moneyModel;
           // options.fields[p].auto = 'labels';
           // options.fields[p].options = {
