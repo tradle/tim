@@ -6,7 +6,7 @@ var ArticleView = require('./ArticleView');
 var MessageView = require('./MessageView');
 var NewResource = require('./NewResource');
 var PhotosList = require('./PhotosList');
-var Icon = require('react-native-icons');
+var { Icon } = require('react-native-icons');
 var extend = require('extend');
 var groupByEveryN = require('groupByEveryN');
 var constants = require('tradle-constants');
@@ -201,7 +201,7 @@ class MessageRow extends Component {
           </TouchableHighlight>      
     }
     else
-      messageBody = <View style={{height: 7}}/>
+      messageBody = <View style={{height: 5}}/>
     var len = photoUrls.length;
     var inRow = len ? (len === 1 ? 1 : (len % 2) ? 3 : 2) : 0;
     var photoStyle = {}; 
@@ -228,6 +228,7 @@ class MessageRow extends Component {
   }
   onPress(event) {
     this.props.navigator.push({
+      id: 7,
       component: ArticleView,
       passProps: {url: this.props.resource.message}
     });
