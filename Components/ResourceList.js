@@ -12,8 +12,8 @@ var reactMixin = require('react-mixin');
 var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
-var Icon = require('react-native-icons');
 var constants = require('tradle-constants');
+var { Icon } = require('react-native-icons');
 
 var DEAL_MODEL = 'tradle.Offer';
 var VENDOR_MODEL = 'tradle.Organization';
@@ -47,6 +47,7 @@ class ResourceList extends Component {
       params.isAggregation = true;
     if (this.props.sortProperty)
       params.sortProperty = this.props.sortProperty;
+    this.state.isLoading = true;
     Actions.list(params);    
   }
   componentDidMount() {
@@ -76,8 +77,13 @@ class ResourceList extends Component {
     if (action !== 'list' ||  !params.list || params.isAggregation !== this.props.isAggregation)
       return;
     var list = params.list;
-    if (!list.length && !this.state.filter.length) 
+    if (!list.length  &&  (!this.state.filter  ||  !this.state.filter.length))  {
+      this.setState({
+        isLoading: false
+      })
+
       return;
+    }
     var type = list[0][constants.TYPE];
     if (type  !== this.props.modelName) 
       return;
@@ -104,7 +110,7 @@ class ResourceList extends Component {
     if (this.props.modelName != constants.TYPES.IDENTITY  &&  !this.props.callback) {
       var m = utils.getModel(resource[constants.TYPE]).value;
       this.props.navigator.push({
-        title: utils.getDisplayName(resource, m.properties),
+        title: utils.makeTitle(utils.getDisplayName(resource, m.properties)),
         id: 3,
         component: ResourceView,
         titleTextColor: '#7AAAC3',
@@ -192,7 +198,7 @@ class ResourceList extends Component {
     }
 
     var route = {
-      title: newTitle,
+      title: utils.makeTitle(newTitle),
       id: 3,
       component: ResourceView,
       parentMeta: model,
@@ -223,6 +229,53 @@ class ResourceList extends Component {
     }
     this.props.navigator.push(route);
   }
+  showRefResources(resource, prop) {
+    var props = utils.getModel(resource[constants.TYPE]).value.properties;
+    var propJson = props[prop];
+    var resourceTitle = utils.getDisplayName(resource, props);
+    resourceTitle = utils.makeTitle(resourceTitle);
+
+    var backlinksTitle = propJson.title + ' - ' + resourceTitle;
+    backlinksTitle = utils.makeTitle(backlinksTitle);
+    var modelName = propJson.items.ref;
+
+    this.props.navigator.push({
+      title: backlinksTitle,
+      id: 10,
+      component: ResourceList,
+      backButtonTitle: 'Back',
+      titleTextColor: '#7AAAC3',
+      passProps: {
+        resource: resource,
+        prop: prop,
+        modelName: modelName
+      },
+      rightButtonTitle: 'Details',
+      onRightButtonPress: {
+        title: resourceTitle,
+        id: 3,
+        component: ResourceView,
+        titleTextColor: '#7AAAC3',
+        backButtonTitle: 'Back',
+        rightButtonTitle: 'Edit',
+        onRightButtonPress: {
+          title: resourceTitle,
+          id: 4,
+          component: NewResource,
+          titleTextColor: '#7AAAC3',
+          backButtonTitle: 'Back',
+          rightButtonTitle: 'Done',
+          passProps: {
+            model: utils.getModel(resource[constants.TYPE]).value,
+            resource: resource
+          }
+        },
+
+        passProps: {resource: resource}
+      }
+    });
+  }
+
   onSearchChange(filter) {
     Actions.list({
       query: filter, 
@@ -245,6 +298,7 @@ class ResourceList extends Component {
       <ResourceRow
         onSelect={() => this.selectResource(resource)}
         key={resource[constants.ROOT_HASH]}
+        showRefResources={this.showRefResources.bind(this)}
         resource={resource} />
     );
   }
@@ -252,24 +306,26 @@ class ResourceList extends Component {
     var me = utils.getMe();
     if (!me)
       return <View />;
-            // <Icon name='ion|person-add'  size={30}  color='#999999' style={styles.icon} /> 
-            // <Icon name='ion|person-stalker'  size={30}  color='#999999'  style={styles.icon} /> 
     return (
       <View style={styles.footer}>
         <View>
           <TouchableHighlight underlayColor='transparent' onPress={this.addNew.bind(this)}>
-            <Icon name='ion|plus'  size={30}  color='#999999' style={styles.icon} /> 
-          </TouchableHighlight>
-        </View>  
-        <View>
-          <TouchableHighlight underlayColor='transparent' onPress={this.showDeals.bind(this, DEAL_MODEL)}>
-            <Icon name='ion|nuclear'  size={30}  color='#999999'  style={styles.icon} /> 
+            <View>
+              <Icon name='ion|plus'  size={30}  color='#999999' style={styles.icon} /> 
+            </View>
           </TouchableHighlight>
         </View>  
       </View>
     );
   }
-  showDeals(modelName) {
+      // <View>
+        //   <TouchableHighlight underlayColor='transparent' onPress={this.showDeals.bind(this, DEAL_MODEL)}>
+        //     <View>
+        //       <Icon name='ion|nuclear'  size={30}  color='#999999'  style={styles.icon} /> 
+        //     </View>
+        //   </TouchableHighlight>
+        // </View>  
+    showDeals(modelName) {
     var model = utils.getModel(modelName).value;
     // var model = utils.getModel(this.props.modelName).value;
     this.props.navigator.push({
@@ -286,6 +342,22 @@ class ResourceList extends Component {
   }
   addNew() {
     var model = utils.getModel(this.props.modelName).value;
+    var r;
+    // resource if present is a container resource as for example subreddit for posts or post for comments
+    // if to is passed then resources only of this container need to be returned
+    if (this.props.resource) {
+      var props = model.properties;
+      for (var p in props) {
+        if (props[p].ref  &&  props[p].ref === this.props.resource[constants.TYPE]) {
+          r = {};
+          r[constants.TYPE] = this.props.modelName;
+          r[p] = { id: this.props.resource[constants.TYPE] + '_' + this.props.resource[constants.ROOT_HASH] };
+        
+          if (this.props.resource.relatedTo  &&  props.relatedTo) // HACK for now for main container
+            r.relatedTo = this.props.resource.relatedTo;
+        }
+      }
+    }
     this.props.navigator.push({
       title: model.title,
       id: 4,
@@ -295,6 +367,7 @@ class ResourceList extends Component {
       rightButtonTitle: 'Done',
       passProps: {
         model: model,
+        resource: r,
         callback: () => Actions.list({
           modelName: this.props.modelName, 
           to: this.props.resource
@@ -306,10 +379,11 @@ class ResourceList extends Component {
     if (this.state.isLoading) 
       return <View/>
     var content;
+    var model = utils.getModel(this.props.modelName).value;
     if (this.state.dataSource.getRowCount() === 0)
       content =  <NoResources
                   filter={this.state.filter}
-                  title={utils.getModel(this.props.modelName).value.title}
+                  model={model}
                   isLoading={this.state.isLoading}/> 
     else {
       var model = utils.getModel(this.props.modelName).value; 
