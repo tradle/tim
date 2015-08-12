@@ -85,9 +85,8 @@ class ResourceView extends Component {
     }
 
     return (
-      <View style={{flex:1}}>
       <ScrollView  ref='this' style={styles.container}>
-        <View style={styles.photoBG}>
+        <View style={[styles.photoBG, {marginTop: -20}]}>
           <PhotoView resource={resource} />
         </View>
         <AddNewIdentity resource={resource} navigator={this.props.navigator} />
@@ -100,7 +99,6 @@ class ResourceView extends Component {
                             excludedProperties={['photos']}
                             navigator={this.props.navigator} />      
       </ScrollView>
-      </View>
     );
   }
   getRefResource(resource, prop) {
@@ -123,20 +121,6 @@ class ResourceView extends Component {
       titleTextColor: '#7AAAC3',
       // rightButtonTitle: 'Edit',
       backButtonTitle: 'Back',
-
-      // onRightButtonPress: {
-      //   title: title,
-      //   id: 4,
-      //   component: NewResource,
-      //   backButtonTitle: resource.firstName,
-      //   rightButtonTitle: 'Done',
-      //   titleTextColor: '#7AAAC3',
-      //   passProps: {
-      //     model: model,
-      //     resource: resource
-      //   }
-      // },
-
       passProps: {resource: resource, prop: prop}
     });    
   }
@@ -161,7 +145,12 @@ reactMixin(ResourceView.prototype, Reflux.ListenerMixin);
 
 var styles = StyleSheet.create({
   container: {
-    marginTop: 60,
+    // borderWidth: 1,
+    // borderTopColor: '#eeeeee',
+    // borderBottomColor: '#ffffff',
+    // borderLeftColor: '#ffffff',
+    // borderRightColor: '#ffffff',
+    marginTop: 64,
     flex: 1,
   },
   photoBG: {
