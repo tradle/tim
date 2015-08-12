@@ -4,7 +4,7 @@ var React = require('react-native');
 var utils = require('../utils/utils');
 var ChatMessage = require('./ChatMessage');
 var SelectPhotoList = require('./SelectPhotoList');
-var Icon = require('react-native-icons');
+var { Icon } = require('react-native-icons');
 var extend = require('extend');
 var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
@@ -109,7 +109,9 @@ class AddNewMessage extends Component {
         </View>
         <TouchableHighlight style={{paddingRight: 5}} underlayColor='transparent'
           onPress={this.showChoice.bind(this)}>
+          <View>
             <Icon name='ion|ios-camera' style={styles.image} size={35} color='#aaaaaa' />
+          </View>
         </TouchableHighlight>
         </View>
       </View> 
