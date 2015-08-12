@@ -5,7 +5,7 @@ var utils = require('../utils/utils');
 var Reflux = require('reflux');
 var Actions = require('../Actions/Actions');
 var reactMixin = require('react-mixin');
-var Icon = require('react-native-icons');
+var { Icon } = require('react-native-icons');
 var buttonStyles = require('../styles/buttonStyles');
 var constants = require('tradle-constants');
 
