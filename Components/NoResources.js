@@ -11,17 +11,21 @@ var {
 
 class NoResources extends Component {
   render() {
-    var text = '';
+    var noRes = [];
     if (this.props.filter) {
-      text = `No results for “${this.props.filter}”`;
+      noRes.push(<Text style={styles.NoResourcesText}>{`No results for “${this.props.filter}”`}</Text>);
     } else if (!this.props.isLoading) {
       // If we're looking at the latest resources, aren't currently loading, and
       // still have no results, show a message
-      text = 'No ' + this.props.title + ' were found';
+      noRes.push(<Text style={styles.NoResourcesText}>{'No ' + this.props.model.title + ' were found.'}</Text>);
+      if (!this.props.model.interfaces) {
+
+        noRes.push(<Text style={styles.NoResourcesText}>{'Tap on + to add'}</Text>);
+      }
     }
     return (
       <View style={[styles.container, styles.centerText]}>
-        <Text style={styles.NoResourcesText}>{text}</Text>
+        <Text style={styles.NoResourcesText}>{noRes}</Text>
       </View>
     );
   }
