@@ -19,6 +19,7 @@ var {
   Navigator,
   View,
   TouchableHighlight,
+  TouchableWithoutFeedback,
   ActivityIndicatorIOS,
   Image,
   Component,
@@ -95,6 +96,22 @@ class TimHome extends Component {
     });
 	}
   
+  showCommunities() {
+    var passProps = {
+        filter: '', 
+        modelName: 'tradle.Community',
+      };
+    var me = utils.getMe();
+    this.props.navigator.push({
+      // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      id: 10,
+      title: 'Communities',
+      titleTextColor: '#7AAAC3',
+      backButtonTitle: 'Back',
+      component: ResourceList,
+      passProps: passProps,
+    });
+  }
   onEditProfilePressed() {
     var modelName = this.props.modelName;
     if (!utils.getModel(modelName)) {
@@ -118,7 +135,7 @@ class TimHome extends Component {
       route.title = 'Edit Identity';
     }
     else {
-      route.title = 'Register';
+      route.title = 'New Identity';
       route.passProps.callback = this.popToTop.bind(this);
     }
     this.props.navigator.push(route);
@@ -141,17 +158,23 @@ class TimHome extends Component {
     var err = this.state.err || '';
     var errStyle = err ? styles.err : {'padding': 0, 'height': 0};
     var myId = sampleData.getMyId() || utils.getMe();
-    var editProfile;
+    var editProfile, communities;
 
-    if (utils.getMe())
+    if (utils.getMe()) {
       editProfile = <TouchableHighlight 
                         underlayColor='#2E3B4E' onPress={this.onEditProfilePressed.bind(this)}>
                       <Text style={styles.text}>
                         {'Edit Profile'}
                       </Text>
                     </TouchableHighlight>         
-    else
+      communities = <TouchableWithoutFeedback style={styles.communities} onPress={this.showCommunities.bind(this)}>
+                      <Text style={styles.communitiesText}>Communities</Text>
+                    </TouchableWithoutFeedback>          
+    }
+    else {
       editProfile = <View />;
+      communities = <View style={{marginTop: 20}}/>;
+    }
     // else  {
     //   var r = {_t: this.props.modelName};
     //   editProfile = <AddNewIdentity resource={r} isRegistration={true} navigator={this.props.navigator} />;
@@ -159,19 +182,24 @@ class TimHome extends Component {
     return (
       <View style={styles.scroll}>
         <Text style={styles.title}>Trust in Motion (TiM)</Text>
+        <ScrollView>
         <View style={styles.container} ref='search'>
           <TouchableHighlight style={[styles.thumbButton]}
-              underlayColor='#2E3B4E' onPress={this.showContactsOrRegister.bind(this)}>
+              underlayColor='transparent' onPress={this.showContactsOrRegister.bind(this)}>
             <View>  
-            <Image style={styles.thumb} source={require('image!Tradle')}></Image>
-            <Text style={styles.tradle}>Tradle</Text>
+              <Image style={styles.thumb} source={require('image!Tradle')}></Image>
+              <Text style={styles.tradle}>Tradle</Text>
             </View>
           </TouchableHighlight>
+          {communities}
+        </View>
+        </ScrollView>
+        <View style={{justifyContent: 'flex-end', alignSelf: 'center'}}>
           <Text style={errStyle}>{err}</Text>
           <View style={styles.dev}>
             {editProfile}
             <TouchableHighlight 
-                underlayColor='#2E3B4E' onPress={this.onReloadDBPressed.bind(this)}>
+                underlayColor='transparent' onPress={this.onReloadDBPressed.bind(this)}>
               <Text style={styles.text}>
                 Reload DB
               </Text>
@@ -221,11 +249,19 @@ var styles = StyleSheet.create({
     marginBottom: 10,
     alignSelf: 'center',
     justifyContent: 'center',
-    padding: 40, 
+    // padding: 40, 
   },
   thumb: {
     width: 200,
     height: 200,
+  },
+  communitiesText: {
+    color: '#f8920d',
+    fontSize: 20,
+  },
+  communities: {
+    paddingBottom: 40,
+    alignSelf: 'center',
   },
   title: {
     marginTop: 30,
@@ -234,8 +270,10 @@ var styles = StyleSheet.create({
     color: '#7AAAC3'
   },
   dev: {
-    marginTop: 140,
-    flexDirection: 'row'
+    marginTop: 100,
+    flexDirection: 'row',
+    marginBottom: 500,
+    alignSelf: 'center'
   }
 });
 
