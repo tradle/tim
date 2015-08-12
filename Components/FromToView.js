@@ -8,7 +8,7 @@ var NewResource = require('./NewResource');
 var ResourceView = require('./ResourceView');
 var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
-var Icon = require('react-native-icons');
+var { Icon } = require('react-native-icons');
 var constants = require('tradle-constants');
 
 var MESSAGE_INTERFACE = 'tradle.Message';
@@ -39,8 +39,10 @@ class FromToView extends Component {
 
     var hasPhoto = true; //resource[photoProp]  &&  resource[photoProp].length; 
     var fromTitle = resource.from.title ? resource.from.title :  utils.getDisplayName(resource.from, utils.getModel(resource.from[constants.TYPE]).value.properties);
-    var toTitle = resource.to.title ? resource.to.title : utils.getDisplayName(resource.to, utils.getModel(resource.to[constants.TYPE]).value.properties);
-    if (!resource.to.photos && !resource.from.photos)
+    var toTitle = resource.to
+                ? resource.to.title ? resource.to.title : utils.getDisplayName(resource.to, utils.getModel(resource.to[constants.TYPE]).value.properties)
+                : null;
+    if (!resource.to  ||  (!resource.to.photos && !resource.from.photos))
       return <View style={styles.container}>
                <Text>{fromTitle}</Text>
                <Text>{toTitle}</Text>
@@ -49,8 +51,10 @@ class FromToView extends Component {
     var toPhoto = resource.to.photos && resource.to.photos[0].url;
     if (toPhoto) 
       toPhoto = <Image style={styles.icon} source={{uri: utils.getImageUri(toPhoto)}} />
-    else
+    else if (resource.to)
       toPhoto = <Icon style={styles.icon} color='#2E3B4E' name='ion|android-person' size={70} />
+    else
+      toPhoto = <View />
 
     var fromPhoto = resource.from.photos && resource.from.photos[0].url;
     if (fromPhoto)
