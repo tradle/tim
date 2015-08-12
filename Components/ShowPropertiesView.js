@@ -2,6 +2,7 @@
  
 var React = require('react-native');
 var PhotosList = require('./PhotosList');
+var ArticleView = require('./ArticleView');
 var utils = require('../utils/utils');
 var constants = require('tradle-constants');
 
@@ -49,10 +50,11 @@ class ShowPropertiesView extends Component {
     var vCols = model.viewCols;
 
     var excludedProperties = this.props.excludedProperties;
+    var props = model.properties;
     if (excludedProperties) {
       var mapped = [];
       for (var p of excludedProperties) {
-        if (model.properties[p]) {
+        if (props[p]) {
           mapped.push(p);
           continue;
         }
@@ -62,15 +64,23 @@ class ShowPropertiesView extends Component {
       }
       excludedProperties = mapped;
     }
+
     if (!vCols) {
       vCols = [];
-      for (var p in model.properties) {
+      for (var p in props) {
         if (p != constants.TYPE)
           vCols.push(p)
       }
       // vCols = utils.objectToArray(model.properties);
       // var idx = vCols.indexOf(constants.TYPE);
       // delete vCols[idx];
+    }
+    var len = vCols.length; 
+    for (var i=0; i<len; i++) {
+      if (props[vCols[i]].displayName) {
+        vCols.splice(i, 1);
+        len--;
+      }
     }
     var self = this;
     var first = true;
@@ -132,7 +142,7 @@ class ShowPropertiesView extends Component {
           isDirectionRow = true;
         }
         else if (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0)
-          val = <Text onPress={self.onPress.bind(self, val)} style={styles.description}>{val}</Text>;
+          val = <Text onPress={self.onPress.bind(self, val)} style={[styles.description, {color: '#7AAAC3'}]}>{val}</Text>;
         else {
           if (val.length < 30)
             isDirectionRow = true;
@@ -150,7 +160,7 @@ class ShowPropertiesView extends Component {
 
       return (<View style={{padding:5}}>
                {separator}
-               <View style={[styles.textContainer, isDirectionRow ? {flexDirection: 'row'} : {flexDirection: 'column'}]}>
+               <View style={[styles.textContainer, isDirectionRow ? {flexDirection: 'row', flexWrap: 'wrap'} : {flexDirection: 'column'}]}>
                  {title}
                  {val}
                </View>
@@ -254,6 +264,16 @@ class ShowPropertiesView extends Component {
       )
     });    
   }
+  onPress(event) {
+    var model = utils.getModel(this.props.resource[constants.TYPE]).value;
+    this.props.navigator.push({
+      id: 7,
+      backButtonTitle: 'Back',
+      title: utils.getDisplayName(this.props.resource, model.properties),
+      component: ArticleView,
+      passProps: {url: this.props.resource.url}
+    });
+  }
   // showResource(resource, prop) {
   //   var model = utils.getModel(this.props.resource[constants.TYPE]).value;
         
@@ -302,7 +322,8 @@ var styles = StyleSheet.create({
     marginTop: 3,
     marginBottom: 0,
     marginHorizontal: 7,
-    color: '#7AAAC3'
+    color: '#7AAAC3',
+    flexWrap: 'wrap'
   },
   description: {
     fontSize: 18,
