@@ -19,8 +19,8 @@ var buttonStyles = Object.freeze({
   icon: {
     width: 25,
     height: 25,
-    borderWidth: 2,
-    borderColor: ICON_BORDER_COLOR,
+    // borderWidth: 2,
+    // borderColor: ICON_BORDER_COLOR,
     borderRadius: 12,
   },
   container: {
