@@ -2,7 +2,7 @@
 
 var React = require('react-native');
 var utils = require('../utils/utils');
-var Icon = require('react-native-icons');
+var { Icon } = require('react-native-icons');
 var constants = require('tradle-constants');
 
 var {
@@ -24,11 +24,12 @@ class PhotoView extends Component {
   }
   render() {
     var resource = this.props.resource;
-    if (!resource  ||  !resource[constants.ROOT_HASH])
+    if (!resource)
       return <View />;
     var modelName = resource[constants.TYPE];
     var model = utils.getModel(modelName).value;
-
+    if (!model.interfaces  &&  !model.isInterface  &&  !resource[constants.ROOT_HASH])
+      return <View />
     var hasPhoto = resource.photos && resource.photos.length; 
     var currentPhoto = this.state.currentPhoto || (hasPhoto  &&  resource.photos[0]);
 
