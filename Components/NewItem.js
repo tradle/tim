@@ -27,7 +27,9 @@ class NewItem extends Component {
     this.state = {
       selectedAssets: {}
     }
-    this.props.navigator.route.onRightButtonPress = {
+    var currentRoutes = this.props.navigator.getCurrentRoutes();
+    var currentRoutesLength = currentRoutes.length;
+    currentRoutes[currentRoutesLength - 1].onRightButtonPress = {
       stateChange: this.onSavePressed.bind(this)
     };
   }
@@ -110,24 +112,16 @@ class NewItem extends Component {
     }
 
     return (
-      <ScrollView
-        initialListSize={10}
-        pageSize={4}      
-        style={styles.container}
-      >
-      <View >
-        <View style={{'paddingHorizontal': 20, paddingTop: 20}}>
+      <View style={styles.container}>
+        <View style={{padding: 15, marginBottom: 15 }}>
           <Form ref='form' type={Model} options={options} />
         </View>
-        <View>  
-          {error}
-          <SelectPhotoList style={this.props.style || {flex: 1}}
-            metadata={this.props.metadata} 
-            navigator={this.props.navigator} 
-            onSelect={this.onSelect.bind(this)} />
-        </View>
+        {error}
+        <SelectPhotoList style={{marginTop: -40}}
+          metadata={this.props.metadata} 
+          navigator={this.props.navigator} 
+          onSelect={this.onSelect.bind(this)} />
       </View>
-      </ScrollView>
     );
   }
   onSelect(asset) {    
