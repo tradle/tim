@@ -5,7 +5,7 @@ var t = require('tcomb-form-native');
 var utils = require('../utils/utils');
 var logError = require('logError');
 var groupByEveryN = require('groupByEveryN');
-var Icon = require('react-native-icons');
+var { Icon } = require('react-native-icons');
 
 var Form = t.form.Form;
 
@@ -51,13 +51,11 @@ class SelectPhotoList extends Component {
     if (this.props.metadata.name !== 'photos')
       return false;
     return (
-      <View style={{flex: 1}}>
       <ListView
         renderRow={this.renderRow.bind(this)}
         style={this.props.style  ||  styles.photoContainer}
         dataSource={this.state.dataSource}
         onEndReached={this.onEndReached.bind(this)} />
-      </View>
     );
   }
   fetchAssets(clear) {
@@ -88,7 +86,9 @@ class SelectPhotoList extends Component {
       var icon = (this.state.selected[asset.node.image.uri])
                ? 
                  <TouchableHighlight onPress={this.onSelect.bind(this, asset)} underlayColor='#ffffff'>
-                   <Icon name={'ion|ios-checkmark-empty'} size={20} color='#eeeeee' style={styles.icon} />
+                   <View>
+                     <Icon name={'ion|ios-checkmark-empty'} size={20} color='#eeeeee' style={styles.icon} />
+                   </View>
                  </TouchableHighlight>  
                : <View />
       photos.push(
@@ -150,24 +150,23 @@ var styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     flex: 1,
-    marginLeft: 0
+    marginLeft: 1
     // alignSelf: 'center'
   },
   image: {
     margin: 1,
-    marginVertical: 1,
-    width: 92,
-    height: 92
+    width: 91,
+    height: 91
   },
   icon: {
     width: 20,
     height: 20,
-    marginTop: -25,
     marginLeft: 4,
     borderWidth: 1,
     borderColor: '#eeeeee',
     backgroundColor: 'blue',
     borderRadius: 10,
+    marginTop: -25
   },
 });
 module.exports = SelectPhotoList;
