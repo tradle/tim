@@ -357,7 +357,7 @@ var Store = Reflux.createStore({
       model.interfaces.push('tradle.Message');
       var rootHash = sha(model);
       model[constants.ROOT_HASH] = rootHash;
-      model.owner = {
+      model[constants.OWNER] = {
         key: IDENTITY_MODEL + '_' + me[constants.ROOT_HASH],
         title: utils.getDisplayName(me, self.getModel(IDENTITY_MODEL).value.properties),
         photos: me.photos
@@ -564,9 +564,20 @@ var Store = Reflux.createStore({
     var foundResources = {};
     var modelName = params.modelName;
     var to = params.to;
-    var query = params.query;
     var meta = this.getModel(modelName).value;
     var props = meta.properties;
+    var containerProp, resourceId;
+    // to variable if present is a container resource as for example subreddit for posts or post for comments
+    // if to is passed then resources only of this container need to be returned
+    if (to) {
+      for (var p in props) {
+        if (props[p].ref  &&  props[p].ref === to[constants.TYPE]) {
+          containerProp = p;
+          resourceId = to[constants.TYPE] + '_' + to[constants.ROOT_HASH];
+        }
+      }
+    }
+    var query = params.query;
 
     var required = meta.required;
     var meRootHash = me  &&  me[constants.ROOT_HASH];
@@ -582,6 +593,8 @@ var Store = Reflux.createStore({
         if (id != me[constants.TYPE] + '_' + me[constants.ROOT_HASH])
           continue;
       }
+      if (containerProp  &&  (!r[containerProp]  ||  utils.getId(r[containerProp]) !== resourceId))
+        continue;
       if (!query) {
          foundResources[key] = r;      
          continue;   
@@ -706,6 +719,7 @@ var Store = Reflux.createStore({
       // to get a value that is either negative, positive, or zero.
       return new Date(a.time) - new Date(b.time);
     });
+    // not for subreddit
     for (let r of result) {
       r.from.photos = list[utils.getId(r.from)].value.photos; 
       r.to.photos = list[utils.getId(r.to)].value.photos; 
@@ -758,14 +772,16 @@ var Store = Reflux.createStore({
     var batch = [];
 
     if (meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf('tradle.Message') != -1)) {
-      var to = list[utils.getId(value.to)].value;
-      var from = list[utils.getId(value.from)].value;
-      to.lastMessage = (from[constants.ROOT_HASH] === me[constants.ROOT_HASH]) ? 'You: ' + value.message : value.message;
-      to.lastMessageTime = value.time;
-      from.lastMessage = value.message;
-      from.lastMessageTime = value.time;
-      batch.push({type: 'put', key: to[constants.TYPE] + '_' + to[constants.ROOT_HASH], value: to});
-      batch.push({type: 'put', key: from[constants.TYPE] + '_' + from[constants.ROOT_HASH], value: from});
+      if (meta.properties['to']  &&  meta.properties['from']) {
+        var to = list[utils.getId(value.to)].value;
+        var from = list[utils.getId(value.from)].value;
+        to.lastMessage = (from[constants.ROOT_HASH] === me[constants.ROOT_HASH]) ? 'You: ' + value.message : value.message;
+        to.lastMessageTime = value.time;
+        from.lastMessage = value.message;
+        from.lastMessageTime = value.time;
+        batch.push({type: 'put', key: to[constants.TYPE] + '_' + to[constants.ROOT_HASH], value: to});
+        batch.push({type: 'put', key: from[constants.TYPE] + '_' + from[constants.ROOT_HASH], value: from});
+      }
     }
     // if (value[constants.TYPE] == IDENTITY_MODEL)
     //   batch.push({type: 'put', key: iKey, value: value, prefix: identityDb});
@@ -845,8 +861,10 @@ var Store = Reflux.createStore({
         };
         newIdentity[constants.TYPE] = IDENTITY_MODEL;
         var me = list[MY_IDENTITY_MODEL + '_1'];
-        if (me) 
-          newIdentity.owner = {id: IDENTITY_MODEL + '_' + me[constants.ROOT_HASH], title: utils.getDisplayName(me, props)};
+        if (me)  {
+          var currentIdentity = me.value.currentIdentity;
+          newIdentity[constants.OWNER] = {id: currentIdentity, title: utils.getDisplayName(me, props)};
+        }
         
         if (contact.thumbnailPath  &&  contact.thumbnailPath.length)
           newIdentity.photos = [{type: 'address book', url: contact.thumbnailPath}];
