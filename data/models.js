@@ -5,16 +5,11 @@ var voc = [{
   'type': 'tradle.Model',
   'title': 'Identity',
   sort: 'lastMessageTime',  
+  plural: 'Identities',
   'properties': {
     _t: {
       'type': 'string',
       'readOnly': true
-    },
-    'owner': {
-      type: 'object',
-      ref: 'tradle.Identity',
-      description: 'Owner of the contact list',
-      readOnly: true
     },
     'contactInfo': {
       'type': 'array',
@@ -66,7 +61,8 @@ var voc = [{
       'type': 'string'
     },
     'lastName': {
-      'type': 'string'
+      'type': 'string',
+      description:  'Choose a fake name or a real name. It all depends on how you want people to know you. Choose a different Identity for work and social.',
     },
     'formatted': {
       transient: true,
@@ -154,10 +150,6 @@ var voc = [{
     'summary': {
       'type': 'string'
     },
-    // 'v': {
-    //   'type': 'string',
-    //   'readOnly': true
-    // },
     lastMessage: {
        type: 'string',
        style: {color: '#999999', fontSize: 14},
@@ -181,13 +173,13 @@ var voc = [{
     }
   },
   'required': [
-    '_t',
+    // '_t',
     // 'contact',
     // 'photos',
     // 'pubkeys',
     'firstName',
-    'lastName',
-    'city',
+    //'lastName',
+    // 'city',
     // 'v',
     // 'websites'
   ],
@@ -900,6 +892,230 @@ var voc = [{
     'message', 'time', 'from'
   ],
 },
+{
+  'id': 'tradle.Community',
+  'type': 'tradle.Model',
+  'title': 'Community',
+  'plural': 'Communities',
+  icon: 'person-stalker',
+  'properties': {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+     },
+     'title': {
+      'type': 'string',
+      'displayName': true,
+     },
+     'description': {
+      'type': 'string',
+      'title': 'Description',
+      maxLength: 2000
+     },
+     'owner': {
+      'type': 'object',
+      'readOnly': true,
+      'ref': 'tradle.Identity',
+     },
+     // 'to': {
+     //   'type': 'object',
+     //   'ref': 'tradle.Identity',
+     //   'displayName': true,
+     //   'readOnly': true
+     // },
+     'blockchainUrl': {
+       'type': 'string',      
+       'readOnly': true
+     },
+     'transactionHash': {
+       'readOnly': true,
+       'type': 'string'
+     },
+     'time': {
+       'type': 'date',
+       'readOnly': true,
+     },
+    'posts': {
+      type: 'array',
+      items: {
+        ref: 'tradle.Post',
+        backlink: 'relatedTo'
+      },
+    },
+    'photos': {
+      'type': 'array',
+      'items': {
+        'type': 'object',
+        'properties': {
+          'tags': {
+            'type': 'string',
+            'skipLabel': true
+          },
+          'url': {
+            'type': 'string',
+            'readOnly': true
+          }
+        }
+      },
+      'required': ['url']
+    },
+  },  
+  'required': [
+    'title', 'description'
+  ],
+  'gridCols': [
+    'title', 'description', 'owner', 'posts'
+  ],
+  'viewCols': [
+    'title', 'description', 'owner', 'photos'
+  ],
+},
+
+{
+  'id': 'tradle.Post',
+  'type': 'tradle.Model',
+  'title': 'Post',
+  'icon': 'social-buffer-outline',
+  'properties': {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+     },
+     'relatedTo': {
+      'type': 'object',
+      'readOnly': true,
+      'ref': 'tradle.Community',
+     },
+     'title': {
+      'type': 'string',
+      'displayName': true,
+     },
+     // 'description': {
+     //  'type': 'string',
+     //  'title': 'Description',
+     //  maxLength: 2000
+     // },
+     url: {
+       type: 'string'
+     },
+     'from': {
+      'type': 'object',
+      'readOnly': true,
+      'ref': 'tradle.Identity',
+     },
+     'blockchainUrl': {
+       'type': 'string',      
+       'readOnly': true
+     },
+     'transactionHash': {
+       'type': 'string',
+       'readOnly': true
+     },
+     'time': {
+       type: 'date',
+       readOnly: true
+     },
+     comments: {
+      'type': 'array',
+      items: {
+        ref: 'tradle.PostComment',
+        backlink: 'post'
+      } 
+     },
+    'photos': {
+      'type': 'array',
+      'items': {
+        'type': 'object',
+        'properties': {
+          'tags': {
+            'type': 'string',
+            'skipLabel': true
+          },
+          'url': {
+            'type': 'string',
+            'readOnly': true
+          }
+        }
+      },
+      'required': ['url']
+    },
+  },  
+  'required': [
+    'relatedTo', 'title', 'url'
+  ],
+  'viewCols': [
+    'title', 'url', 'from', 'time'
+  ],
+  'gridCols': [
+    'title', 'url', 'from', 'time', 'comments'
+  ]
+},
+{
+  'id': 'tradle.PostComment',
+  'type': 'tradle.Model',
+  'title': 'Comment',
+  'icon': 'chatboxes',
+  'properties': {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+     },
+     'message': {
+      'type': 'string',
+      'displayName': true,
+      maxLength: 2000
+     },
+     'from': {
+       'type': 'object',
+       'readOnly': true,
+       'ref': 'tradle.Identity',
+     },
+     'post': {
+       'type': 'object',
+       'ref': 'tradle.Post',
+       readOnly: true
+       // 'displayName': true,
+     },
+     'time': {
+       'type': 'date',
+       'readOnly': true,
+       'displayName': true
+     },
+    'photos': {
+      'type': 'array',
+      'items': {
+        'type': 'object',
+        'properties': {
+          'tags': {
+            'type': 'string',
+            'skipLabel': true
+          },
+          'url': {
+            'type': 'string',
+            'readOnly': true
+          }
+        }
+      },
+      'required': ['title', 'url']
+    },
+    relatedTo: {
+      type: 'object',
+      ref: 'tradle.Community',   
+      readOnly: true   
+    }
+  },  
+  'required': [
+    'message', 'post', 'relatedTo'
+  ],
+  'viewCols': [
+    'message', 'post', 'time', 'from'
+  ],
+  'gridCols': [
+    'message', 'time', 'from'
+  ],
+},
+
+
 {
   id: 'tradle.Offer',
   title: 'Offer',

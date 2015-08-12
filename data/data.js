@@ -881,6 +881,69 @@ var identities = [
   //   viewCols: ['shortTitle', 'dateSubmitted', 'dealPrice', 'discount', 'couponBuysCount', 'vendor', 'dealStatus']
   // }
 },
+{
+  _t: 'tradle.Community',
+  _r: 'tradle12397d8f7s989843589798s9dg7f987h987',
+  title: 'Tradle',
+  description: 'p2p network with peer discovery over bittorrent DHT, OTR over rUDP + NAT traversal for peer comms, and optional externalization of messages to blockchain + DHT',
+},
+{
+  _t: 'tradle.Community',
+  _r: 'datt2937598r98d7h98fg7h8979fd9dg80d9f0fgh',
+  title: 'DATT',
+  description: 'Decentralize all things',
+},
+{
+  _t: 'tradle.Post',
+  _r: 'tradle129494tt9ehdgo346c6vu67bvdofuoiwere',
+  relatedTo: {
+    id: 'tradle.Community_tradle12397d8f7s989843589798s9dg7f987h987',
+    title: 'Tradle'
+  },
+  url: 'http://github.com/tradle/tim',
+  title: 'Tradle\'s Trust in Motion (TiM) on github'
+},
+{
+  _t: 'tradle.Post',
+  _r: 'datt0129494tt9ehdgo346c6vu67bvdofuoiwere',
+  relatedTo: {
+    id: 'tradle.Community_datt2937598r98d7h98fg7h8979fd9dg80d9f0fgh',
+    title: 'DATT'
+  },
+  url: 'https://github.com/dattnetwork',
+  title: 'DATT on github'
+},
+{
+  _t: 'tradle.PostComment',
+  _r: 'tradle98798dfg98568579fgh8fg7h98459dhkjk',
+  relatedTo: {
+    id: 'tradle.Community_datt2937598r98d7h98fg7h8979fd9dg80d9f0fgh',
+    title: 'DATT'
+  },
+  message: 'comment',
+  post: 'tradle.Post_datt0129494tt9ehdgo346c6vu67bvdofuoiwere'
+},
+{
+  _t: 'tradle.PostComment',
+  _r: 'tradle98798dfg98568579frtygh8fg7h98459dhkjk',
+  relatedTo: {
+    id: 'tradle.Community_datt2937598r98d7h98fg7h8979fd9dg80d9f0fgh',
+    title: 'DATT'
+  },
+  message: 'comment2',
+  post: 'tradle.Post_datt0129494tt9ehdgo346c6vu67bvdofuoiwere'
+},
+{
+  _t: 'tradle.PostComment',
+  _r: 'tradle98798dfg9856857ert9fgh8fg7h98459dhkjk',
+  relatedTo: {
+    id: 'tradle.Community_datt2937598r98d7h98fg7h8979fd9dg80d9f0fgh',
+    title: 'DATT'
+  },
+  message: 'comment3',
+  post: 'tradle.Post_datt0129494tt9ehdgo346c6vu67bvdofuoiwere'
+},
+
 
 
 ];
