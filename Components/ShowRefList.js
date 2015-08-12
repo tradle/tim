@@ -3,7 +3,7 @@
 var React = require('react-native');
 var utils = require('../utils/utils');
 var ResourceList = require('./ResourceList');
-var Icon = require('react-native-icons');
+var { Icon } = require('react-native-icons');
 var buttonStyles = require('../styles/buttonStyles');
 var constants = require('tradle-constants');
 
@@ -30,7 +30,7 @@ class ShowRefList extends Component {
 
     var pos = 0;
     var marginTopStep = 30;
-    for (var p in resource) {
+    for (var p in props) {
       if (p.charAt(0) === '_'  ||  !props[p].items  ||  !props[p].items.backlink)
         continue;
       refList.push(
