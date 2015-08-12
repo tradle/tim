@@ -152,10 +152,11 @@ class MessageList extends Component {
       return <View/>
     currentMessageTime = null;
     var content;
+    var model = utils.getModel(this.props.modelName).value;
     if (this.state.dataSource.getRowCount() === 0)
       content =  <NoResources
                   filter={this.state.filter}
-                  title={utils.getModel(this.props.modelName).value.title}
+                  model={model}
                   isLoading={this.state.isLoading}/> 
     else {
       var model = utils.getModel(this.props.modelName).value; 
