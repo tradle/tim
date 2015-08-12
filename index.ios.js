@@ -16,7 +16,7 @@ var SelectPhotoList = require('./Components/SelectPhotoList');
 var CameraView = require('./Components/CameraView');
 var PhotoCarousel = require('./Components/PhotoCarousel');
 var utils = require('./utils/utils');
-var Icon = require('react-native-icons');
+var { Icon } = require('react-native-icons');
 // var Device = require('react-native-device');
 
 var reactMixin = require('react-mixin');
@@ -114,6 +114,7 @@ class TiMApp extends Component {
     case 3:
       return <ResourceView navigator={nav} 
                   resource={props.resource}
+                  prop={props.prop}
                   verify={props.verify} />;      
     case 4:
       return <NewResource navigator={nav} 
