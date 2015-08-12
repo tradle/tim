@@ -77,6 +77,7 @@ var utils = {
     var chooser = params.chooser;
     var onSubmitEditing = params.onSubmitEditing;
     var onEndEditing = params.onEndEditing;
+    var onChange = params.onChange;
     var options = {};
     options.fields = {};
  
@@ -128,8 +129,9 @@ var utils = {
     var required = this.arrayToObject(meta.required);
     // var d = data ? data[i] : null;
     for (let p in eCols) {
-      if (p === constants.TYPE  ||  p === bl)
+      if (p === constants.TYPE  ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink))
         continue;
+
       var maybe = required  &&  !required.hasOwnProperty(p);
 
       var type = props[p].type;
@@ -150,6 +152,8 @@ var utils = {
       if (props[p].readOnly  ||  (props[p].immutable  &&  data  &&  data[p]))
         options.fields[p] = {'editable':  false };
       if (formType) {
+        if (onChange)
+          options.fields[p].onChange = onChange;
         model[p] = maybe ? t.maybe(formType) : formType;
         if (data  &&  (type == 'date')) {
           data[p] = new Date(data[p]);
@@ -266,6 +270,9 @@ var utils = {
         itemsMeta.push(props[p]);      
     }
     return itemsMeta;
+  },
+  makeTitle(resourceTitle, prop) {
+    return (resourceTitle.length > 28) ? resourceTitle.substring(0, 28) + '...' : resourceTitle;
   },
   getDisplayName(resource, meta) {
     if (!meta)
