@@ -3,9 +3,10 @@
 var React = require('react-native');
 var utils = require('../utils/utils');
 var moment = require('moment');
-var Icon = require('react-native-icons');
+var LinearGradient = require('react-native-linear-gradient');
+var ArticleView = require('./ArticleView');
 var constants = require('tradle-constants');
-
+var Icon = require('react-native-vector-icons/Ionicons');
 var MONEY_TYPE = 'tradle.Money';
 
 var {
@@ -14,6 +15,7 @@ var {
   StyleSheet,
   Text,
   TouchableHighlight,
+  TouchableWithoutFeedback,
   Component,
   View
 } = React;
@@ -33,17 +35,31 @@ class ResourceRow extends Component {
         photo = <Image source={params} style={styles.cellImage} /> 
       
     }
-    else
-      photo = <View style={styles.cellImage}></View>
+    else {
+      if (resource[constants.TYPE] === constants.TYPES.IDENTITY) {
+        photo = <LinearGradient colors={['#A4CCE0', '#7AAAc3', '#5E92AD']} style={styles.cellRoundImage}>
+           <Text style={styles.cellText}>{resource.firstName.charAt(0) + (resource.lastName ? resource.lastName.charAt(0) : '')}</Text>
+        </LinearGradient>
+      }
+      else {
+        var icon = utils.getModel(resource[constants.TYPE]).value.icon;
+        if (icon) 
+          photo = <View style={styles.cellImage}><Icon name={icon} size={35} style={styles.icon} /></View>
+        else
+          photo = <View style={styles.cellImage} />
+      }
+    }
 
     var onlineStatus = (resource.online) 
                      ? <View style={styles.online}></View>
                      : <View style={[styles.online, {backgroundColor: 'transparent'}]}></View>
     
     var cancelResource = (this.props.onCancel) 
-                       ? <View style={{justifyContent: 'flex-end'}}>
+                       ? <View>
                          <TouchableHighlight onPress={this.props.onCancel} underlayColor='transparent'>
-                           <Icon name='ion|ios-close-empty'  size={30}  color='#9E0603'  style={styles.icon} /> 
+                           <View>
+                             <Icon name='close-circled'  size={30}  color='#B1010E'  style={styles.cancelIcon} /> 
+                           </View>  
                          </TouchableHighlight>
                          </View>  
                        : <View />; 
@@ -56,8 +72,8 @@ class ResourceRow extends Component {
             {onlineStatus}
             <View style={styles.textContainer} key={this.props.key + '2'}>
               {this.formatRow(resource)}
-              {cancelResource}
             </View>
+            {cancelResource}
           </View>
         </TouchableHighlight>
         <View style={styles.cellBorder} />
@@ -79,25 +95,34 @@ class ResourceRow extends Component {
     var dateProp;
     var datePropIdx;
     var datePropsCounter = 0;
+    var backlink;    
     for (var i=0; i<viewCols.length; i++) {
       var v = viewCols[i];
+      if (properties[v].type === 'array') { 
+        if (properties[v].items.backlink)
+          backlink = v;
+        continue;
+      }
       if (properties[v].type !== 'date'  ||  !resource[v])
         continue;
       if (resource[v]) {
-      if (v === 'dateSubmitted' || v === 'lastMessageTime') {
-        dateProp = v;
-        if (!datePropsCounter)
-          datePropIdx = i;
-        datePropsCounter++;
-      }
+        if (v === 'dateSubmitted' || v === 'lastMessageTime') {
+          dateProp = v;
+          if (!datePropsCounter)
+            datePropIdx = i;
+          datePropsCounter++;
+        }
       }
     }
     if (datePropsCounter > 1)
       dateProp = null;
 
     viewCols.forEach(function(v) {
-      if (properties[v].type === 'array'  ||  v === dateProp) 
+      if (v === dateProp)
+        return;
+      if (properties[v].type === 'array') 
         return;        
+      
       if (!resource[v]  &&  !properties[v].displayAs)
         return;
       var style = (first) ? styles.resourceTitle : styles.description;
@@ -138,7 +163,7 @@ class ResourceRow extends Component {
         var row;
         if (resource[v]  &&  (typeof resource[v] != 'string'))
           row = <Text style={style} numberOfLines={1}>{resource[v]}</Text>;
-        else if (resource[v]  && (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0))
+        else if (!backlink  &&  resource[v]  && (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0))
           row = <Text style={style} onPress={self.onPress.bind(self)} numberOfLines={1}>{resource[v]}</Text>;
         else {          
           var val = properties[v].displayAs ? utils.templateIt(properties[v], resource) : resource[v];
@@ -166,7 +191,15 @@ class ResourceRow extends Component {
     }); 
     if (vCols)
       renderedViewCols = vCols;
-    return renderedViewCols;
+    if (!backlink)
+      return renderedViewCols;
+    return [ 
+      <TouchableHighlight onPress={this.props.showRefResources.bind(this, resource, backlink)}>
+        <View>
+          {renderedViewCols}
+        </View>
+      </TouchableHighlight>
+    ];
   }
   addDateProp(resource, dateProp) {
     var properties = utils.getModel(resource[constants.TYPE] || resource.id).value.properties;
@@ -182,6 +215,16 @@ class ResourceRow extends Component {
     return <Text style={[style]} numberOfLines={1}>{val}</Text>;
     // return <Text style={[style, {alignSelf: 'flex-end'}]} numberOfLines={1}>{val}</Text>;
 
+  }
+  onPress(event) {
+    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
+    var title = utils.makeTitle(utils.getDisplayName(this.props.resource, model.properties));
+    this.props.navigator.push({
+      id: 7,
+      title: title,
+      component: ArticleView,
+      passProps: {url: this.props.resource.url}
+    });
   }
 }
 
@@ -203,6 +246,7 @@ var styles = StyleSheet.create({
   },
   row: {
     backgroundColor: 'white',
+    // justifyContent: 'space-around',
     flexDirection: 'row',
     padding: 5,
   },
@@ -219,22 +263,56 @@ var styles = StyleSheet.create({
     borderRadius: 10, 
     backgroundColor: '#D7E6ED'
   },
-  cellImage: {
-    backgroundColor: '#dddddd',
-    height: 63,
+  cellRoundImage: {
+    // backgroundColor: '#7AAAc3',
+    paddingVertical: 1,
+    // borderColor: '#7AAAc3',
+    borderRadius: 30,
+    // borderWidth: 1,
+    height: 60,
     marginRight: 10,
     width: 60,
+    alignSelf: 'center'
+  },
+  cellText: {
+    marginTop: 16,
+    alignSelf: 'center',
+    color: '#ffffff',
+    fontSize: 20,
+    backgroundColor: 'transparent'
+  },
+  cellImage: {
+    backgroundColor: '#dddddd',
+    height: 60,
+    marginRight: 10,
+    width: 60,
+    borderColor: '#7AAAc3',
+    borderRadius: 30,
+    borderWidth: 1,
   },
   cellBorder: {
     backgroundColor: '#eeeeee',
     height: 1,
     marginLeft: 4,
   },
+  cancelIcon: {
+    width: 40,
+    height: 40,
+    // marginTop: -10,
+    // alignSelf: 'center',
+    // position: 'absolute',
+    // right: 10,
+    // marginTop: 7,
+    // color: '#7AAAc3'
+  },
   icon: {
-    width: 30,
-    height: 30,
-    position: 'absolute',
-    right: 0
+    width: 40,
+    height: 40,
+    alignSelf: 'center',
+    // position: 'absolute',
+    marginLeft: 10,
+    marginTop: 7,
+    color: '#7AAAc3'
   },
   online: {
     backgroundColor: 'green',
@@ -252,6 +330,40 @@ var styles = StyleSheet.create({
     alignSelf: 'flex-end',
     color: '#b4c3cb'
   },
+  backlinks: {
+    position: 'absolute', 
+    right: 5, 
+    top: 5, 
+    padding: 5, 
+    borderRadius: 5, 
+    borderColor: '#7AAAc3', 
+    color: '#7AAAc3', 
+    borderWidth: 1
+  },
+  backlinksIcon: {
+    position: 'absolute', 
+    width: 50,
+    height: 50,
+    right: 5, 
+    top: -50, 
+    padding: 5, 
+    borderRadius: 25, 
+    borderColor: '#7AAAc3', 
+    color: '#7AAAc3', 
+    borderWidth: 1
+  },
+  // linearGradient: {
+  //   flex: 1,
+  //   paddingLeft: 15,
+  //   paddingRight: 15,
+  //   borderRadius: 5
+  // },
+  // buttonText: {
+  //   fontSize: 18,
+  //   textAlign: 'center',
+  //   margin: 10,
+  //   color: '#ffffff',
+  // },
 });
 
 module.exports = ResourceRow;
