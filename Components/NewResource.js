@@ -13,7 +13,7 @@ var Actions = require('../Actions/Actions');
 var Store = require('../Store/Store');
 var Reflux = require('reflux');
 var reactMixin = require('react-mixin');
-var Icon = require('react-native-icons');
+var { Icon, }  = require('react-native-icons');
 var myStyles = require('../styles/styles');
 var KeyboardEvents = require('react-native-keyboardevents');
 var KeyboardEventEmitter = KeyboardEvents.Emitter;
@@ -24,7 +24,6 @@ Form.stylesheet = myStyles;
 
 var {
   StyleSheet,
-  Image, 
   View,
   Text,
   TextInput,
@@ -49,7 +48,9 @@ class NewResource extends Component {
       resource: r,
       keyboardSpace: 0
     }
-    this.props.navigator.route.onRightButtonPress = {
+    var currentRoutes = this.props.navigator.getCurrentRoutes();
+    var currentRoutesLength = currentRoutes.length;
+    currentRoutes[currentRoutesLength - 1].onRightButtonPress = {
       stateChange: this.onSavePressed.bind(this)
     };
   }
@@ -208,9 +209,7 @@ class NewResource extends Component {
     });
   }
 
-  onAddItem(propName, item) {
-    if (!item)
-      return;
+  addFormValues() {
     var value = this.refs.form.getValue();
     var json = value ? JSON.parse(JSON.stringify(value)) : {};
     var resource = this.state.resource;
@@ -218,15 +217,32 @@ class NewResource extends Component {
       resource = {};
       resource[constants.TYPE] = this.props.model.id;
     }
+    for (var p in json)
+      if (!resource[p] && json[p])
+        resource[p] = json[p];
+    return resource;    
+  }
+
+  onAddItem(propName, item) {
+    if (!item)
+      return;
+    var resource = this.addFormValues();
+    // var value = this.refs.form.getValue();
+    // var json = value ? JSON.parse(JSON.stringify(value)) : {};
+    // var resource = this.state.resource;
+    // if (!resource) {
+    //   resource = {};
+    //   resource[constants.TYPE] = this.props.model.id;
+    // }
     var items = resource[propName];
     if (!items) {
       items = [];
       resource[propName] = items;
     }
     items.push(item);
-    for (var p in json)
-      if (!resource[p] && json[p])
-        resource[p] = json[p];
+    // for (var p in json)
+    //   if (!resource[p] && json[p])
+    //     resource[p] = json[p];
     this.setState({resource: resource, err: ''});
   }
   onNewPressed(bl) {
@@ -250,6 +266,8 @@ class NewResource extends Component {
     //   });
     //   return;
     // }
+    var resource = this.addFormValues();
+    this.setState({resource: resource, err: ''});
     this.props.navigator.push({
       id: 6,
       title: 'Add new ' + bl.title,
@@ -262,7 +280,7 @@ class NewResource extends Component {
       // },
       passProps: {
         metadata: bl,
-        resource: this.props.resource,
+        resource: this.state.resource,
         parentMeta: this.props.parentMeta,
         onAddItem: this.onAddItem.bind(this)
       }
@@ -303,7 +321,8 @@ class NewResource extends Component {
         model: model,
         items: arrays,
         onSubmitEditing: this.onSavePressed.bind(this),
-        onEndEditing: this.onEndEditing.bind(this)
+        onEndEditing: this.onEndEditing.bind(this),
+        onChange: this.onChange.bind(this)
       });
     
     var Model = t.struct(model);
@@ -312,7 +331,7 @@ class NewResource extends Component {
     var itemsMeta = utils.getItemsMeta(meta);
     var self = this;
     var arrayItems = itemsMeta.map(function(bl) {
-      if (bl.readOnly)
+      if (bl.readOnly  ||  bl.items.backlink)
         return <View/>
       var counter;
       if (resource  &&  resource[bl.name]) {
@@ -390,7 +409,7 @@ class NewResource extends Component {
       this.state.resource[prop] = event.nativeEvent.text;
   }
   onChange(prop, value) {
-    value = value;
+    this.props.resource[prop] = value;
   }
 
   onSubmitEditing(msg) {
@@ -514,11 +533,6 @@ var styles = StyleSheet.create({
     // alignSelf: 'stretch',
     justifyContent: 'center',
     margin: 10,
-  },
-  image: {
-    width: 400,
-    height: 350,
-    alignSelf: 'stretch'
   },
   photoBG: {
     backgroundColor: '#2E3B4E',
