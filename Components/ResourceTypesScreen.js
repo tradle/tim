@@ -71,6 +71,7 @@ class ResourceTypesScreen extends Component {
     this.props.navigator.replace({
       id: 4,
       title: resource.title,
+      rightButtonTitle: 'Done',
       component: NewResource,
       titleTextColor: '#7AAAC3',
       passProps: page
