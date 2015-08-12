@@ -3,7 +3,7 @@
 var React = require('react-native');
 var utils = require('../utils/utils');
 var MessageList = require('./MessageList');
-var Icon = require('react-native-icons');
+var { Icon } = require('react-native-icons');
 var constants = require('tradle-constants');
 
 var {
