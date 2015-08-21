@@ -17,11 +17,9 @@ class NoResources extends Component {
     } else if (!this.props.isLoading) {
       // If we're looking at the latest resources, aren't currently loading, and
       // still have no results, show a message
-      noRes.push(<Text style={styles.NoResourcesText}>{'No ' + this.props.model.title + ' were found.'}</Text>);
-      if (!this.props.model.interfaces) {
-
-        noRes.push(<Text style={styles.NoResourcesText}>{'Tap on + to add'}</Text>);
-      }
+      noRes.push(<Text style={styles.NoResourcesText}>{'No ' + (this.props.model.plural || (this.props.model.title + 's')) + ' were found.'}</Text>);
+      if (!this.props.model.interfaces  &&  !this.props.model.isInterface) 
+        noRes.push(<Text style={styles.NoResourcesText}>{'Tap on + to add'}</Text>);      
     }
     return (
       <View style={[styles.container, styles.centerText]}>
