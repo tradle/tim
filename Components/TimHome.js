@@ -191,7 +191,6 @@ class TimHome extends Component {
               <Text style={styles.tradle}>Tradle</Text>
             </View>
           </TouchableHighlight>
-          {communities}
         </View>
         </ScrollView>
         <View style={{justifyContent: 'flex-end', alignSelf: 'center'}}>
