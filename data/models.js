@@ -78,23 +78,21 @@ var voc = [{
       'type': 'object',
       'ref': 'tradle.Organization'
     },
-    'verifiedByMe': {
-      'type': 'array',
-      'readOnly': true,
-      'items': {
-        'type': 'object',
-        'readOnly': true,
-        'ref': 'tradle.Verification'
-      },
+    verifiedByMe: {
+      type: 'array',
+      items: {
+        readOnly: true,
+        ref: 'tradle.Verification',
+        backlink: 'to'
+      }
     },
-    'myVerifications': {
-      'type': 'array',
-      'readOnly': true,
-      'items': {
-        'type': 'object',
-        'readOnly': true,
-        'ref': 'tradle.Verification'
-      },
+    myVerifications: {
+      type: 'array',
+      items: {
+        readOnly: true,
+        ref: 'tradle.Verification',
+        backlink: 'from'
+      }
     },
     'photos': {
       'type': 'array',
@@ -423,11 +421,9 @@ var voc = [{
       'type': 'array',
       'readOnly': true,
       'items': {
-        'type': 'object',
-        'readOnly': true,
-        'ref': 'tradle.Verification'        
+        ref: 'tradle.Verification',
+        backlink: 'document'
       },
-      'required': ['contact']
     }
   },  
   'required': [
@@ -500,10 +496,9 @@ var voc = [{
       'type': 'array',
       'readOnly': true,
       'items': {
-        'type': 'object',
+        'backlink': 'document',
         'ref': 'tradle.Verification'
       },
-      'required': ['contact']
     }
   },  
   'required': [
@@ -576,7 +571,7 @@ var voc = [{
       'type': 'array',
       'readOnly': true,
       'items': {
-        'type': 'object',
+        'backlink': 'document',
         'ref': 'tradle.Verification'
       },
       'required': ['contact']
@@ -652,10 +647,9 @@ var voc = [{
       'type': 'array',
       'readOnly': true,
       'items': {
-        'type': 'object',
+        'backlink': 'document',
         'ref': 'tradle.Verification'
       },
-      'required': ['contact']
     }
   },  
   'required': [
@@ -750,10 +744,9 @@ var voc = [{
       'type': 'array',
       'readOnly': true,
       'items': {
-        'type': 'object',
+        'backlink': 'document',
         'ref': 'tradle.VerificationOfAddress'
       },
-      'required': ['contact']
     }
   },  
   'required': [
@@ -813,20 +806,26 @@ var voc = [{
      },
      'time': {
        type: 'date',
+       skipLabel: true,
        readOnly: true
+     },
+     organization: {
+      type: 'object',
+      ref: 'tradle.Organization'
      }
   },  
   'required': [
     'message', 'to', 'from', 'time'
   ],
   'viewCols': [
-    'message', 'time'
+    'message', 'time', 'organization'
   ],
 },
 {
   'id': 'tradle.VerificationOfAddress',
   'type': 'tradle.Model',
   'title': 'Verification',
+  'subClassOf': 'tradle.Verification',
   'interfaces': ['tradle.Message'],
   'style': {'backgroundColor': '#E7E6F5'},
   'autoCreate': true,
@@ -838,7 +837,7 @@ var voc = [{
      'document': {
       'type': 'object',
       'readOnly': true,
-      'ref': 'tradle.Message',
+      'ref': 'tradle.AddressVerification',
       'title': 'Verifying document',
      },
      'message': {
@@ -882,14 +881,18 @@ var voc = [{
      },
      'time': {
        'type': 'date',
+       skipLabel: true,       
        'readOnly': true,
-     }
+     }, 
   },  
   'required': [
-    'message', 'ver1', 'ver2', 'ver3', 'to', 'from', 'time'
+    'ver1', 'ver2', 'ver3', 'to', 'from', 'time'
   ],
   'viewCols': [
-    'message', 'time', 'from'
+    'ver1', 'ver2', 'ver3', 'to', 'from', 'time', 'organization'
+  ],
+  'gridCols': [
+    'ver1', 'ver2', 'ver3', 'time', 'organization'
   ],
 },
 {
@@ -1442,22 +1445,35 @@ var voc = [{
       },
       required: ['url']
     },
-    offers: {
+    verifications: {
       type: 'array',
       items: {
         type: 'object',
-        ref: 'tradle.Offer',
+        ref: 'tradle.Verification',
         backlink: 'organization'
       }
     },
-    offersCount: {
+    verificationsCount: {
       type: 'number',
       readOnly: true,
       skipLabel: true
     }
+    // offers: {
+    //   type: 'array',
+    //   items: {
+    //     type: 'object',
+    //     ref: 'tradle.Offer',
+    //     backlink: 'organization'
+    //   }
+    // },
+    // offersCount: {
+    //   type: 'number',
+    //   readOnly: true,
+    //   skipLabel: true
+    // }
   },
   required: ['name'],
-  viewCols: ['name', 'photos', 'offers'],
+  viewCols: ['name', 'photos', 'verifications'],
   editCols: [
     'name', 
     'street', 
