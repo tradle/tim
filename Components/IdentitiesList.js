@@ -137,7 +137,7 @@ class IdentitiesList extends Component {
           dataSource={this.state.dataSource}
           renderRow={this.renderRow.bind(this)}
           automaticallyAdjustContentInsets={false}
-          keyboardDismissMode='onDrag'
+          keyboardDismissMode='on-drag'
           keyboardShouldPersistTaps={true}
           showsVerticalScrollIndicator={false} />
       </View>
