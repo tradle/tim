@@ -29,6 +29,7 @@ var {
 class ResourceList extends Component {
   constructor(props) {
     super(props);
+
     this.state = {
       isLoading: utils.getModels() ? false : true,
       dataSource: new ListView.DataSource({
@@ -37,6 +38,9 @@ class ResourceList extends Component {
       filter: this.props.filter,
       userInput: ''
     };
+    var isRegistration = this.props.resource  &&  this.props.resource[constants.TYPE] === constants.TYPES.IDENTITY  &&  !this.props.resource[constants.ROOT_HASH];
+    if (isRegistration)
+      this.state.isRegistration = isRegistration;    
   }
   componentWillMount() {
     var params = {
@@ -47,6 +51,8 @@ class ResourceList extends Component {
       params.isAggregation = true;
     if (this.props.sortProperty)
       params.sortProperty = this.props.sortProperty;
+    if (this.props.prop)
+      params.prop = this.props.prop;
     this.state.isLoading = true;
     Actions.list(params);    
   }
@@ -85,9 +91,18 @@ class ResourceList extends Component {
       return;
     }
     var type = list[0][constants.TYPE];
-    if (type  !== this.props.modelName) 
-      return;
-    
+    // if (type  !== this.props.modelName) 
+    //   return;
+    if (type  !== this.props.modelName) {
+      var m = utils.getModel(type).value;
+      if (!m.subClassOf  ||  m.subClassOf != this.props.modelName)
+        return;
+      // if (!params.prop  ||  !params.prop.items  ||  !params.prop.items.ref  ||  !params.prop.items.backlink)
+      //   return;
+      // var m = utils.getModel(params.prop.items.ref).value;
+      // if (m.properties[params.prop.items.backlink].ref !== this.props.modelName) 
+      //   return;
+    }
     // var n = Math.floor(5, list.length);
     // for (var i=0; i<n; i++) {
     //   var rnd = this.getRandomInt(1, list.length - 1);
@@ -138,7 +153,13 @@ class ResourceList extends Component {
         this._selectResource(resource);
         return;
       }
-      if (me[constants.ROOT_HASH] === resource[constants.ROOT_HASH]  ||  
+      if (!me) {
+        if (this.state.isRegistration) {
+          this._selectResource(resource);
+          return;
+        }
+      }
+      else if (me[constants.ROOT_HASH] === resource[constants.ROOT_HASH]  ||  
          (this.props.resource  &&  me[constants.ROOT_HASH] === this.props.resource[constants.ROOT_HASH]  && this.props.prop)) {
         this._selectResource(resource);
         return;
@@ -207,7 +228,7 @@ class ResourceList extends Component {
     }
     // Edit resource
     var me = utils.getMe();
-    if (me  &&  this.props.prop) {
+    if ((me || this.state.isRegistration) &&  this.props.prop) {
       this.props.callback(this.props.prop, resource); // HACK for now
       this.props.navigator.popToRoute(this.props.returnRoute);
       return;
