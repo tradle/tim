@@ -5,11 +5,12 @@ var utils = require('../utils/utils');
 var ArticleView = require('./ArticleView');
 var MessageView = require('./MessageView');
 var NewResource = require('./NewResource');
-var PhotosList = require('./PhotosList');
-var { Icon } = require('react-native-icons');
+var PhotoList = require('./PhotoList');
+var Icon = require('react-native-vector-icons/Ionicons');
 var extend = require('extend');
 var groupByEveryN = require('groupByEveryN');
 var constants = require('tradle-constants');
+var LinearGradient = require('react-native-linear-gradient');
 
 var {
   Image,
@@ -65,12 +66,22 @@ class MessageRow extends Component {
         ownerPhoto = <View style={[styles.cell, {marginVertical: 20}]} />
     }  
     else {
-      if (isMyMessage  || !to  ||  !to.photos)
+      if (isMyMessage  || !to  ||  !to.photos) 
         ownerPhoto = <View style={[styles.cell, {marginVertical: 0}]} />
-      else {
-        var uri = utils.getImageUri(to.photos[0].url);
-        ownerPhoto = <Image source={{uri: uri}} style={styles.msgImage} /> 
-        hasOwnerPhoto = true;
+      else if (to) {
+        if (to.photos) {
+          var uri = utils.getImageUri(to.photos[0].url);
+          ownerPhoto = <Image source={{uri: uri}} style={styles.msgImage} /> 
+          hasOwnerPhoto = true;
+        }
+        else if (!isMyMessage) {
+          var title = resource.to.title.split(' ').map(function(s) {
+            return s.charAt(0);
+          }).join('');
+          ownerPhoto = <LinearGradient colors={['#A4CCE0', '#7AAAc3', '#5E92AD']} style={styles.cellRoundImage}>
+            <Text style={styles.cellText}>{title}</Text>
+          </LinearGradient>
+        }
       }
     }
     var renderedRow = [];
@@ -100,6 +111,7 @@ class MessageRow extends Component {
       else {
         if (!model.style)
           addStyle = {padding: 5, borderRadius: 10, borderColor: '#cccccc', backgroundColor: '#ffffff', marginVertical: 2};
+          // addStyle = {padding: 5, borderRadius: 10, borderColor: '#cccccc', backgroundColor: '#ffffff', marginVertical: 2};
         // else
         //   addStyle = {padding: 5, borderRadius: 10};
       }
@@ -178,14 +190,24 @@ class MessageRow extends Component {
         var viewStyle;
         if (!isModel) {
           viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
-          if (resource.message.length > 30  ||  !isSimpleMessage)
+          if ((!noMessage  &&  resource.message.length > 30)  ||  !isSimpleMessage)
             viewStyle.width = 260;
         }  
-        var verified = (resource.verifications  &&  resource.verifications.length)
-                     ? <View style={styles.verificationCheck}>
-                         <Icon name='ion|ios-checkmark-empty' size={25} style={styles.icon} />
-                       </View>
-                     : <View />
+
+        var verified;
+        if (!resource.verifications  ||  !resource.verifications.length)
+          verified = <View />
+        else {
+          var verifications = [];
+          resource.verifications.forEach(function(v) {
+            if (v.organization  &&  v.organization.photo)              
+              verifications.push(<Image source={{uri: v.organization.photo}} style={styles.orgImage} />)
+          })
+          verified = <View style={styles.verificationCheck}>
+                       <Icon name='ios-checkmark-empty' size={25} style={styles.icon} />
+                       {verifications}
+                     </View>
+        }
         messageBody = 
           <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
             <View style={[rowStyle, viewStyle]}>
@@ -221,7 +243,7 @@ class MessageRow extends Component {
         {date}
         {messageBody}
         <View style={photoListStyle}>
-          <PhotosList photos={photoUrls} style={photoStyle} navigator={this.props.navigator} numberInRow={inRow} />    
+          <PhotoList photos={photoUrls} style={[photoStyle, {marginTop: -20}]} navigator={this.props.navigator} numberInRow={inRow} />    
         </View>  
       </View>
     );
@@ -234,7 +256,7 @@ class MessageRow extends Component {
     });
   }
   createNewResource(model) {
-    resource = {
+    var resource = {
       'from': this.props.resource.to,
       'to': this.props.resource.from,
       'message': this.props.resource.message,
@@ -244,6 +266,7 @@ class MessageRow extends Component {
     this.props.navigator.push({
       id: 4,
       title: model.title,
+      rightButtonTitle: 'Done',
       component: NewResource,
       titleTextColor: '#7AAAC3',
       passProps:  {
@@ -379,33 +402,25 @@ var styles = StyleSheet.create({
     color: '#999999',
     fontSize: 12,
     alignSelf: 'center',
-    marginTop: 10
+    paddingTop: 10
   },
   row: {
     alignItems: 'center',
     backgroundColor: '#f7f7f7',
     flexDirection: 'row',
-    // padding: 5,
   },
   cell: {
-    // marginTop: 20,
-    // marginBottom: 20,
     marginLeft: 10,
-    // fontSize: 18
   },
   myCell: { 
     padding: 5, 
-    // marginRight: 5,
-    // marginLeft: 30,    
     justifyContent: 'flex-end', 
     borderRadius: 10, 
     backgroundColor: '#569bff',
-    // color: '#ffffff'
   },
   msgImage: {
     backgroundColor: '#dddddd',
     height: 50,
-    // marginLeft: 10,
     marginRight: 5,
     width: 50,
     borderRadius: 25,
@@ -449,13 +464,36 @@ var styles = StyleSheet.create({
   icon: {
     width: 30,
     height: 30,
+    marginRight: -15,
     color: '#28C2C0'
   },
+  orgImage: {
+    width: 25,
+    height: 25,
+    marginRight: 2,
+    marginTop: 3,
+    borderRadius: 12
+  },
   verificationCheck: {
-    position: 'absolute', 
-    top: -5, 
-    right: 5    
-  }
+    flexDirection: 'row',
+    marginTop: -5
+  },
+  cellRoundImage: {
+    paddingVertical: 1,
+    borderRadius: 30,
+    height: 60,
+    marginRight: 10,
+    width: 60,
+    alignSelf: 'center'
+  },
+  cellText: {
+    marginTop: 16,
+    alignSelf: 'center',
+    color: '#ffffff',
+    fontSize: 20,
+    backgroundColor: 'transparent'
+  },
+
 });
 
 module.exports = MessageRow;
