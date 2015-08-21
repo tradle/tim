@@ -3,11 +3,11 @@
 var React = require('react-native');
 var utils = require('../utils/utils');
 var MessageList = require('./MessageList');
-var { Icon } = require('react-native-icons');
+var Icon = require('react-native-vector-icons/Ionicons');
 var constants = require('tradle-constants');
+var buttonStyles = require('../styles/buttonStyles');
 
 var {
-  StyleSheet,
   View,
   Text,
   TouchableHighlight,
@@ -35,34 +35,19 @@ class MoreLikeThis extends Component {
     if (this.props.resource[constants.TYPE] === 'tradle.SimpleMessage')
       return null;
     return (
-      <View style={styles.moreLikeThis}>
-        <TouchableHighlight underlayColor='transparent' onPress={this.showMoreLikeThis.bind(this)}>
-          <Icon name='ion|arrow-shrink' size={30}  color='#ffffff'  style={styles.icon}/>
-        </TouchableHighlight>
+      <View style={[buttonStyles.container, {top: 15}]}>
+      <TouchableHighlight underlayColor='transparent' onPress={this.showMoreLikeThis.bind(this)}>
+       <View>
+         <View style={buttonStyles.buttonContent} />
+         <View style={{flexDirection: 'row', paddingHorizontal: 5}}>
+           <Icon name='arrow-shrink'  size={20}  color='#ffffff'  style={[buttonStyles.icon, {marginTop: -33}]}/>
+           <Text style={[buttonStyles.text, {marginTop: -30}]}>More like this</Text>
+         </View>
+       </View>
+      </TouchableHighlight>
       </View>
     );
   }
 }
-
-var styles = StyleSheet.create({
-  icon: {
-    width: 40,
-    height: 40,
-    borderWidth: 2,
-    borderColor: '#D7E6ED',
-    backgroundColor: '#7AAAC3',
-    borderRadius: 20,
-  },
-  moreLikeThis: {
-    position: 'absolute',
-    top: 15,
-    right: 10
-  },
-  moreLikeThisNoPhoto: {
-    marginTop: 15,
-    marginRight: 10,
-    alignSelf: 'flex-end'
-  }
-});
 
 module.exports = MoreLikeThis;
