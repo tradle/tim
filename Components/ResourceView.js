@@ -4,7 +4,7 @@ var React = require('react-native');
 var utils = require('../utils/utils');
 var ShowPropertiesView = require('./ShowPropertiesView');
 var PhotoView = require('./PhotoView');
-var PhotosList = require('./PhotosList');
+var PhotoList = require('./PhotoList');
 var AddNewIdentity = require('./AddNewIdentity');
 var SwitchIdentity = require('./SwitchIdentity');
 var ShowRefList = require('./ShowRefList');
@@ -14,6 +14,8 @@ var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
+var ResourceViewMixin = require('./ResourceViewMixin');
+
 var extend = require('extend');
 var constants = require('tradle-constants');
 
@@ -92,7 +94,7 @@ class ResourceView extends Component {
         <AddNewIdentity resource={resource} navigator={this.props.navigator} />
         <SwitchIdentity resource={resource} navigator={this.props.navigator} />
         <ShowRefList resource={resource} navigator={this.props.navigator} />    
-        <PhotosList photos={photos} navigator={this.props.navigator} numberInRow={photos.length > 4 ? 5 : photos.length} />
+        <PhotoList photos={photos} navigator={this.props.navigator} isView={true} numberInRow={photos.length > 4 ? 5 : photos.length} />
         <ShowPropertiesView resource={resource} 
                             showItems={this.showResources.bind(this)} 
                             showRefResource={this.getRefResource.bind(this)}
@@ -109,47 +111,12 @@ class ResourceView extends Component {
     Actions.getItem(resource.id);
   }
 
-  showRefResource(resource, prop) {
-    if (resource[constants.TYPE] + '_' + resource[constants.ROOT_HASH] !== this.state.propValue)
-      return;
-    var model = utils.getModel(resource[constants.TYPE]).value;
-    var title = utils.getDisplayName(resource, model.properties);
-    this.props.navigator.push({
-      title: title,
-      id: 3,
-      component: ResourceView,
-      titleTextColor: '#7AAAC3',
-      // rightButtonTitle: 'Edit',
-      backButtonTitle: 'Back',
-      passProps: {resource: resource, prop: prop}
-    });    
-  }
-  showResources(resource, prop) {
-    var meta = utils.getModel(resource[constants.TYPE]).value.properties;
-    this.props.navigator.push({
-      id: 10,
-      title: utils.makeLabel(prop),
-      titleTextColor: '#7AAAC3',
-      backButtonTitle: 'Back',
-      component: ResourceList,
-      passProps: {
-        modelName: meta[prop].items.ref,
-        filter: '',
-        resource: resource,
-        prop: prop
-      }
-    });
-  }
 }
 reactMixin(ResourceView.prototype, Reflux.ListenerMixin);
+reactMixin(ResourceView.prototype, ResourceViewMixin);
 
 var styles = StyleSheet.create({
   container: {
-    // borderWidth: 1,
-    // borderTopColor: '#eeeeee',
-    // borderBottomColor: '#ffffff',
-    // borderLeftColor: '#ffffff',
-    // borderRightColor: '#ffffff',
     marginTop: 64,
     flex: 1,
   },
