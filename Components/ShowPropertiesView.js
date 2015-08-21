@@ -1,7 +1,7 @@
 'use strict';
  
 var React = require('react-native');
-var PhotosList = require('./PhotosList');
+var PhotoList = require('./PhotoList');
 var ArticleView = require('./ArticleView');
 var utils = require('../utils/utils');
 var constants = require('tradle-constants');
@@ -58,9 +58,6 @@ class ShowPropertiesView extends Component {
           mapped.push(p);
           continue;
         }
-        // var prop = utils.getCloneOf(p, model.properties);
-        // if (prop)
-        //   mapped.push(prop);
       }
       excludedProperties = mapped;
     }
@@ -116,8 +113,10 @@ class ShowPropertiesView extends Component {
           }
         }
         else {
+          // ex. property that is referencing to the Organization for the contact
           var value = val[constants.TYPE] ? utils.getDisplayName(val, utils.getModel(val[constants.TYPE]).value.properties) : val.title;
-          val = <TouchableHighlight onPress={self.props.showRefResource.bind(self, val, p)} underlayColor='transparent'>
+               
+          val = <TouchableHighlight onPress={self.props.showRefResource.bind(self, val, pMeta)} underlayColor='transparent'>
                  <Text style={styles.itemTitle}>{value}</Text>                 
                </TouchableHighlight>
 
@@ -132,6 +131,8 @@ class ShowPropertiesView extends Component {
         return <View></View>;
       if (!isRef) {
         if (val instanceof Array) {
+          if (pMeta.items.backlink)
+            return <View />
           var vCols = pMeta.viewCols;          
           var cnt = val.length;
           val = self.renderItems(val, pMeta);
@@ -146,7 +147,8 @@ class ShowPropertiesView extends Component {
         else {
           if (val.length < 30)
             isDirectionRow = true;
-          val = <Text style={[styles.description, {flexWrap: 'wrap'}]} numberOfLines={2}>{val}</Text>;
+          val = <Text style={[styles.description]} numberOfLines={2}>{val}</Text>;
+          // val = <Text style={[styles.description, {flexWrap: 'wrap'}]} numberOfLines={2}>{val}</Text>;
           // val = <Text style={[styles.description, isDirectionRow ? {alignSelf: 'flex-end'} : {alignSelf: 'flex-start'}]}>{val}</Text>;
         }
       }
@@ -160,7 +162,7 @@ class ShowPropertiesView extends Component {
 
       return (<View style={{padding:5}}>
                {separator}
-               <View style={[styles.textContainer, isDirectionRow ? {flexDirection: 'row', flexWrap: 'wrap'} : {flexDirection: 'column'}]}>
+               <View style={[styles.textContainer, isDirectionRow ? {flexDirection: 'row'} : {flexDirection: 'column'}]}>
                  {title}
                  {val}
                </View>
@@ -188,16 +190,6 @@ class ShowPropertiesView extends Component {
     }
     var cnt = val.length;
     var self = this;
-    // if (pMeta.items.ref) {
-    //   return (
-    //     <View>
-    //       <TouchableHighlight onPress={self.showResource.bind(self, this.props.resource, pMeta.name)} underlayColor='transparent'>
-    //         <View style={styles.itemContainer}>
-    //           <Icon style={styles.icon} size={30} name={pMeta.items.icon || 'ion|ios-browsers-outline'} />             
-    //         </View>
-    //        </TouchableHighlight>
-    //    </View>);
-    // }    
     return val.map(function(v) {
       var ret = [];
       counter++; 
@@ -216,18 +208,10 @@ class ShowPropertiesView extends Component {
           if (p == 'photos') {
             var photos = [];
             ret.push(
-               <PhotosList photos={v.photos} navigator={self.props.navigator} numberInRow={4}/>
+               <PhotoList photos={v.photos} navigator={self.props.navigator} numberInRow={4}/>
             );
-            // for (var ph of v[p])
-            //   photos.push(<Image source={{uri: ph.url}} style={styles.photo} />)
-            // ret.push(
-            //      <View style={[styles.itemContainer, {marginHorizontal: 7}]}>
-            //        {photos}
-            //      </View>
-            // );
             continue;
-          }
-          
+          }          
           else
             value = v[p];
         }
@@ -274,20 +258,7 @@ class ShowPropertiesView extends Component {
       passProps: {url: this.props.resource.url}
     });
   }
-  // showResource(resource, prop) {
-  //   var model = utils.getModel(this.props.resource[constants.TYPE]).value;
-        
-  //   var propObj = model.properties[prop];
-  //   if (propObj.items)
-  //     this.props.showItems(resource, prop);
-  //   else {
-  //     this.state.prop = prop;
-  //     this.state.propValue = utils.getId(resource.id);
-  //     Actions.getItem(resource.id);
-  //   }
-  // }
 }
-// reactMixin(ShowPropertiesView.prototype, Reflux.ListenerMixin);
 
 var styles = StyleSheet.create({
   textContainer: {
@@ -300,7 +271,7 @@ var styles = StyleSheet.create({
   },
   itemColContainer: {
     flex: 1,
-    flexWrap: 'wrap',
+    // flexWrap: 'wrap',
   },
   separator: {
     height: 1,
@@ -323,7 +294,7 @@ var styles = StyleSheet.create({
     marginBottom: 0,
     marginHorizontal: 7,
     color: '#7AAAC3',
-    flexWrap: 'wrap'
+    // flexWrap: 'wrap'
   },
   description: {
     fontSize: 18,
