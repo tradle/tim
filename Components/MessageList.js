@@ -161,13 +161,11 @@ class MessageList extends Component {
     else {
       var model = utils.getModel(this.props.modelName).value; 
       var isAllMessages = model.isInterface  &&  model.id === 'tradle.Message';
+          // renderScrollView={(props) => <InvertibleScrollView {...props} inverted />}
       content = <ListView ref='listview' style={{marginHorizontal: 10}}
           dataSource={this.state.dataSource}
           initialListSize={1000}
           renderRow={this.renderRow.bind(this)}
-          renderScrollView={
-            (props) => <InvertibleScrollView {...props} inverted />
-          }
           automaticallyAdjustContentInsets={false}
           keyboardDismissMode='on-drag'
           keyboardShouldPersistTaps={true}
@@ -209,12 +207,6 @@ class MessageList extends Component {
       </View>
     );
   }
-        // <SearchBar
-        //   onSearchChange={this.onSearchChange.bind(this)}
-        //   isLoading={this.state.isLoading}
-        //   filter={this.props.filter}
-        //   onFocus={() => this.refs.length  &&  this.refs.listview.getScrollResponder().scrollTo(0, 0)} 
-        //   />
   onPhotoSelect(asset) {
     var selectedAssets = this.state.selectedAssets;
     // unselect if was selected before
