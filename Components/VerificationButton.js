@@ -2,9 +2,10 @@
 
 var React = require('react-native');
 var utils = require('../utils/utils');
-var { Icon } = require('react-native-icons');
+var Icon = require('react-native-vector-icons/Ionicons');
 var reactMixin = require('react-mixin');
 var constants = require('tradle-constants');
+var buttonStyles = require('../styles/buttonStyles');
 
 var {
   StyleSheet,
@@ -26,14 +27,35 @@ class VerificationButton extends Component {
     var meId = me[constants.TYPE] + '_' + me[constants.ROOT_HASH];
     var s = resource.from.id.split('_');
     var fromId = s[0] + '_' + s[1];
+     
+    if (!resource.from  ||  fromId === meId)
+      return <View />
 
-    return resource.from  &&  fromId != meId
-           ? <View style={styles.verification}>
-               <TouchableHighlight underlayColor='transparent' onPress={this.props.verify.bind(this)}>
-                 <Icon name='ion|checkmark' size={30}  color='#ffffff'  style={styles.icon}/>
-               </TouchableHighlight>
+    var verifiedByMe;
+    if (resource.verifications){
+      resource.verifications.forEach(function(r) {
+        var rh = r.from[constants.ROOT_HASH];
+        if (!rh) 
+          rh = utils.getId(r.from).split('_')[1];
+
+        if (rh === me[constants.ROOT_HASH])
+          verifiedByMe = true;
+      });
+    }
+
+    return (
+       <View style={[buttonStyles.container, {top: 60}]}>
+         <TouchableHighlight underlayColor='transparent' onPress={verifiedByMe ? this.props.verificationList.bind(this, resource, model.properties['verifications']) : this.props.verify.bind(this)}>
+           <View>
+             <View style={buttonStyles.buttonContent} />
+             <View style={{flexDirection: 'row', paddingHorizontal: 5}}>
+               <Icon name='checkmark' size={20}  color='#ffffff' style={[buttonStyles.icon, {marginTop: -33}]}/>
+               <Text style={[buttonStyles.text, {marginTop: -30}]}>{verifiedByMe ? 'Verifications' : 'Verify'}</Text>
              </View>
-           : <View></View>  
+           </View>
+         </TouchableHighlight>
+       </View>
+    );
   }
 }
 
@@ -46,12 +68,6 @@ var styles = StyleSheet.create({
     backgroundColor: '#7AAAC3',
     borderRadius: 20,
   },
-  verification: {
-    position: 'absolute',
-    top: 60,
-    right: 10
-  },
-
 });
 
 module.exports = VerificationButton;
