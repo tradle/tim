@@ -5,7 +5,7 @@ var utils = require('../utils/utils');
 var constants = require('tradle-constants');
 var ArticleView = require('./ArticleView');
 var FromToView = require('./FromToView');
-var PhotosList = require('./PhotosList');
+var PhotoList = require('./PhotoList');
 var PhotoView = require('./PhotoView');
 var ShowPropertiesView = require('./ShowPropertiesView');
 var MoreLikeThis = require('./MoreLikeThis');
@@ -15,6 +15,7 @@ var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
+var ResourceViewMixin = require('./ResourceViewMixin');
 
 var {
   StyleSheet,
@@ -67,20 +68,20 @@ class MessageView extends Component {
           <PhotoView resource={resource} />
         </View>
         <MoreLikeThis resource={resource} navigator={this.props.navigator}/>
-        <VerificationButton  resource={resource} verify={this.verify.bind(this)}/>
+        <VerificationButton  resource={resource} verify={this.verify.bind(this)} verificationList={this.showResources.bind(this)}/>
         <FromToView resource={resource} navigator={this.props.navigator} excluded />
         <View style={styles.band}><Text style={styles.date}>{date}</Text></View>
-        <PhotosList photos={resource.photos} navigator={this.props.navigator} numberInRow={inRow}/>
+        <PhotoList photos={resource.photos} isView={true} navigator={this.props.navigator} numberInRow={inRow}/>
         <View style={styles.rowContainer}>    
           <View><Text style={styles.itemTitle}>{resource.message}</Text></View>
-          <ShowPropertiesView resource={resource} excludedProperties={['tradle.Message.message', 'tradle.Message.time', 'tradle.message.photos']} />
+          <ShowPropertiesView resource={resource} excludedProperties={['tradle.Message.message', 'time', 'photos']} />
           {embed}
         </View>
       </ScrollView>
     );
   }
           // <ShowPropertiesView resource={resource} callback={this.showResources.bind(this)} excludedProperties={['tradle.Message.message', 'tradle.Message.time', 'tradle.message.photos']} />
-  // showResources(resource, prop) {
+  // showRefResources(resource, prop) {
   //   var meta = utils.getModel(resource[constants.TYPE]).value.properties;
   //   this.props.navigator.push({
   //     id: 10,
@@ -118,7 +119,8 @@ class MessageView extends Component {
       from: { 
         id: me[constants.TYPE] + '_' + me[constants.ROOT_HASH] + '_' + me[constants.CUR_HASH],
         title: utils.getDisplayName(me, utils.getModel(me[constants.TYPE]).value.properties)
-      }
+      },
+      time: new Date().getTime()
     }
     verification[constants.TYPE] = verificationModel;
 
@@ -135,14 +137,14 @@ class MessageView extends Component {
         passProps: {
           model: utils.getModel(verificationModel).value,
           resource: verification,
-          callback: this.createVerification.bind(self)
+          // callback: this.createVerification.bind(self)
         }
       });
     }
   }
-  createVerification(resource) {
-    Actions.addVerification(resource, true);
-  }
+  // createVerification(resource) {
+  //   Actions.addVerification(resource, true);
+  // }
   
   onPress(url) {
     this.props.navigator.push({
@@ -154,6 +156,7 @@ class MessageView extends Component {
 
 }
 reactMixin(MessageView.prototype, Reflux.ListenerMixin);
+reactMixin(MessageView.prototype, ResourceViewMixin);
 
 var styles = StyleSheet.create({
   container: {
