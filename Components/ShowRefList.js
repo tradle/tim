@@ -3,9 +3,13 @@
 var React = require('react-native');
 var utils = require('../utils/utils');
 var ResourceList = require('./ResourceList');
+// var Icon = require('react-native-vector-icons/Ionicons');
 var { Icon } = require('react-native-icons');
+
 var buttonStyles = require('../styles/buttonStyles');
 var constants = require('tradle-constants');
+var reactMixin = require('react-mixin');
+var ResourceViewMixin = require('./ResourceViewMixin');
 
 var {
   View,
@@ -28,14 +32,15 @@ class ShowRefList extends Component {
 
     var refList = [];
 
-    var pos = 0;
-    var marginTopStep = 30;
+    // The profile page for the device owner has 2 more profile specific links: add new identity and switch identity
+    var pos = (utils.getMe()[constants.ROOT_HASH] === resource[constants.ROOT_HASH]) ? 80 : 0;
+    var marginTopStep = 5; //30;
     for (var p in props) {
       if (p.charAt(0) === '_'  ||  !props[p].items  ||  !props[p].items.backlink)
         continue;
       refList.push(
         <View style={{top: pos}}>
-           <TouchableHighlight onPress={this.showAll.bind(this, p)} underlayColor='transparent'>
+           <TouchableHighlight onPress={this.showResources.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
            <View>
              <View style={buttonStyles.buttonContent} />
              <View style={{flexDirection: 'row', paddingHorizontal: 5}}>
@@ -54,23 +59,7 @@ class ShowRefList extends Component {
         </View> 
       );
   }
-  showAll(prop) {
-    var resource = this.props.resource;
-    var propJson = utils.getModel(resource[constants.TYPE]).value.properties[prop];
-    var modelName = propJson.items.ref;
-    this.props.navigator.push({
-      title: propJson.title,
-      id: 10,
-      component: ResourceList,
-      backButtonTitle: 'Back',
-      titleTextColor: '#7AAAC3',
-      passProps: {
-        resource: resource,
-        prop: prop,
-        modelName: modelName
-      }
-    });
-  }
 }
+reactMixin(ShowRefList.prototype, ResourceViewMixin);
 
 module.exports = ShowRefList;
