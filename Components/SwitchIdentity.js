@@ -20,7 +20,7 @@ class SwitchIdentity extends Component {
   render() {
     var resource = this.props.resource;
     return resource[constants.ROOT_HASH] === utils.getMe()[constants.ROOT_HASH]
-           ? <View style={[buttonStyles.container, {top: 60}]}>
+           ? <View style={[buttonStyles.container, {top: 50}]}>
                <TouchableHighlight onPress={this.showIdentities.bind(this)} underlayColor='transparent'>
                <View>
                  <View style={buttonStyles.buttonContent} />
