@@ -21,6 +21,15 @@ var {
 } = React;
 
 class ResourceRow extends Component {
+  constructor(props) {
+    super(props);
+    var resource = this.props.resource;
+    var model = utils.getModel(resource[constants.TYPE]).value;
+    var isVerification = model.id == 'tradle.Verification' ||  (model.subClassOf  &&  model.subClassOf == 'tradle.Verification');
+    this.state = {
+      isVerification: !!isVerification
+    }
+  } 
   render() {     
     var resource = this.props.resource;
     var photo;
@@ -42,11 +51,22 @@ class ResourceRow extends Component {
         </LinearGradient>
       }
       else {
-        var icon = utils.getModel(resource[constants.TYPE]).value.icon;
+        var model = utils.getModel(resource[constants.TYPE]).value;
+        var icon = model.icon;
         if (icon) 
           photo = <View style={styles.cellImage}><Icon name={icon} size={35} style={styles.icon} /></View>
-        else
-          photo = <View style={styles.cellImage} />
+        else {
+          if (this.state.isVerification) {
+            if (resource.from  &&  resource.from.photos)
+              photo = <Image source={{uri: utils.getImageUri(resource.from.photos[0].url)}} style={styles.cellImage} />
+            else if (resource.document  &&  resource.document.photos)
+              photo = <Image source={{uri: utils.getImageUri(resource.document.photos[0].url)}}  style={styles.cellImage} />
+            else
+            photo = <View style={styles.cellImage} />
+          }
+          else
+            photo = <View style={styles.cellImage} />
+        }
       }
     }
 
@@ -63,7 +83,11 @@ class ResourceRow extends Component {
                          </TouchableHighlight>
                          </View>  
                        : <View />; 
-    
+    var verification;
+    if (this.state.isVerification) {
+      var model = utils.getModel(resource[constants.TYPE]).value;
+      verification = <Text style={styles.verySmallLetters}>{model.title}</Text>
+    }
     return (
       <View key={this.props.key}>
         <TouchableHighlight onPress={this.props.onSelect}>
@@ -74,6 +98,7 @@ class ResourceRow extends Component {
               {this.formatRow(resource)}
             </View>
             {cancelResource}
+            {verification}
           </View>
         </TouchableHighlight>
         <View style={styles.cellBorder} />
@@ -146,8 +171,15 @@ class ResourceRow extends Component {
               }
             }        
           }
-          else  
+          else  {          
             row = <Text style={style} numberOfLines={first ? 2 : 1}>{resource[v].title}</Text>
+            if (resource[v].photos  &&  (!self.state.isVerification  ||  v != 'from')) {
+              row = <View style={styles.row}>
+                      <Image source={{uri: resource[v].photos[0].url}} style={styles.orgIcon}/>
+                      {row}
+                    </View>
+            }
+          }
           
           vCols.push(row);
         }
@@ -313,6 +345,19 @@ var styles = StyleSheet.create({
     marginLeft: 10,
     marginTop: 7,
     color: '#7AAAc3'
+  },
+  orgIcon: {
+    width: 30,
+    height: 30,
+    borderWidth: 1,
+    borderColor: '#7AAAc3',
+    borderRadius: 15,
+    marginRight: 10,
+
+    alignSelf: 'center',
+    // position: 'absolute',
+    // marginLeft: 10,
+    // marginTop: 7,
   },
   online: {
     backgroundColor: 'green',
