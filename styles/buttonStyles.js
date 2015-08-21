@@ -21,15 +21,15 @@ var buttonStyles = Object.freeze({
     height: 25,
     // borderWidth: 2,
     // borderColor: ICON_BORDER_COLOR,
-    borderRadius: 12,
+    // borderRadius: 12,
   },
   container: {
     flex: 1,
     position: 'absolute', 
-    right: 10 
+    right: 10
   },
   buttonContent: {
-    padding: 10, 
+    padding: 15, 
     width: 150, 
     height: 40, 
     borderRadius: 10, 
@@ -40,7 +40,6 @@ var buttonStyles = Object.freeze({
   },
   text: {
     color: '#ffffff', 
-    marginLeft: 5,
     fontWeight: '800'
   }
 });
