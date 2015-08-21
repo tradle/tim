@@ -395,8 +395,7 @@ class NewResource extends Component {
           <View style={{marginTop: -35}}>
             <ChatMessage resource={resource} 
                          model={meta} 
-                         onSubmitEditing={this.onSubmitEditing.bind(this)}
-                         onEndEditing={this.onEndEditing.bind(this)} />
+                         onSubmitEditing={this.onSubmitEditing.bind(this)} />
           </View>    
           </View>
         </View>
