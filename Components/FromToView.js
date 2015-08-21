@@ -27,8 +27,11 @@ class FromToView extends Component {
     this.listenTo(Store, 'onGetItem');
   }
   onGetItem(params) {
-    if (params.action  &&  params.action === 'getItem'  &&  resource[constants.TYPE] === this.props.resource[constants.TYPE])
-      this.showProfile(params.resource);
+    if (params.action  &&  params.action === 'getItem') { //  &&  params.resource[constants.TYPE] === this.props.resource[constants.TYPE])
+      var paramsRID = params.resource[constants.TYPE] + '_' + params.resource[constants.ROOT_HASH]
+      if (paramsRID === utils.getId(this.props.resource.to)  ||  paramsRID === utils.getId(this.props.resource.from))
+        this.showProfile(params.resource);
+    }
   }
   render() {
     var resource = this.props.resource;    
@@ -52,7 +55,7 @@ class FromToView extends Component {
     if (toPhoto) 
       toPhoto = <Image style={styles.icon} source={{uri: utils.getImageUri(toPhoto)}} />
     else if (resource.to)
-      toPhoto = <Icon style={styles.icon} color='#2E3B4E' name='ion|android-person' size={70} />
+      toPhoto = <Icon style={styles.icon} color='#2E3B4E' name='ion|android-person' size={60} />
     else
       toPhoto = <View />
 
@@ -60,7 +63,7 @@ class FromToView extends Component {
     if (fromPhoto)
       fromPhoto = <Image style={styles.icon} source={{uri: utils.getImageUri(fromPhoto)}} />
     else
-      fromPhoto = <Icon style={styles.icon} color='#7AAAC3' name='ion|ios-person' size={70} />
+      fromPhoto = <Icon style={styles.icon} color='#7AAAC3' name='ion|ios-person' size={60} />
       // fromPhoto = utils.getImageUri(fromPhoto);
     return <View style={[styles.container, style]}>
             <TouchableHighlight underlayColor='transparent' onPress={() => 
@@ -80,7 +83,7 @@ class FromToView extends Component {
             <TouchableHighlight underlayColor='transparent' onPress={() => 
                {
                  if (resource.to.id)
-                   Actions.getItem(resource.to.id)
+                   Actions.getItem(utils.getId(resource.to.id))
                  else
                    this.showProfile(resource.to)
                }
