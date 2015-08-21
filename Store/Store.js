@@ -23,7 +23,7 @@ var tim;
 
 var IDENTITY_MODEL = constants.TYPES.IDENTITY;
 var MODEL_TYPE_VALUE = 'tradle.Model';
-var MY_IDENTITY_MODEL = 'tradle.MyIdentity';
+var MY_IDENTITIES_MODEL = 'tradle.MyIdentities';
 
 var models = {};
 var list = {};
@@ -92,7 +92,8 @@ var Store = Reflux.createStore({
     list[key] = {key: key, value: r};
     var to = list[utils.getId(r.to)].value;
     var from = list[utils.getId(r.from)].value;
-    to.lastMessage = (from[constants.ROOT_HASH] === me[constants.ROOT_HASH]) ? 'You: ' + r.message : r.message;
+    var dn = r.message || utils.getDisplayName(r, props);
+    to.lastMessage = (from[constants.ROOT_HASH] === me[constants.ROOT_HASH]) ? 'You: ' + dn : dn;
     to.lastMessageTime = r.time;
     from.lastMessage = r.message;
     from.lastMessageTime = r.time;
@@ -111,9 +112,11 @@ var Store = Reflux.createStore({
     });
 
   },
-  onAddVerification(r) {
+  onAddVerification(r, notOneClickVerification) {
     var batch = [];
     var key;
+    var fromId = utils.getId(r.from);
+    var from = list[fromId].value;
     if (r[constants.ROOT_HASH]) 
       key = r[constants.TYPE] + '_' + r[constants.ROOT_HASH];
     else {
@@ -122,16 +125,19 @@ var Store = Reflux.createStore({
       r[constants.CUR_HASH] = rootHash;
 
       key = r[constants.TYPE] + '_' + rootHash;
+      if (from.organization)
+        r.organization = from.organization;
+
       batch.push({type: 'put', key: key, value: r});
     }
     var toId = utils.getId(r.to);
-    var fromId = utils.getId(r.from);
     var verificationRequestId = utils.getId(r.document);
     var to = list[toId].value;
-    var from = list[fromId].value;
     
-    var newVerification = {id: key + '_' + r[constants.CUR_HASH], title: r.document.title ? r.document.title : ''};
-
+    var newVerification = {
+      id: key + '_' + r[constants.CUR_HASH], 
+      title: r.document.title ? r.document.title : ''
+    };
     var verificationRequest = list[verificationRequestId].value;
     if (!verificationRequest.verifiedBy)
       verificationRequest.verifications = [];
@@ -154,7 +160,15 @@ var Store = Reflux.createStore({
       var rr = {};
       extend(rr, to);
       rr.verifiedByMe = r;
-      self.trigger({action: 'addVerification', resource: rr});
+      list[key] = {key: key, value: r};
+
+      if (notOneClickVerification) 
+        self.trigger({action: 'addItem', resource: rr});
+      else
+        self.trigger({action: 'addVerification', resource: rr});
+    })
+    .catch(function(err) {
+      err = err;
     });
   },
   onGetItem(key) {
@@ -176,7 +190,8 @@ var Store = Reflux.createStore({
         props: itemsModel.properties
       }
       var result = this.searchNotMessages(params);
-      resource[p] = result;
+      if (result.length)
+        resource[p] = result;
     }
     this.trigger({ resource: resource, action: 'getItem'});
   },
@@ -185,7 +200,7 @@ var Store = Reflux.createStore({
       this.trigger({action: 'showIdentityList', list: []});    
       return; 
     }
-    var allIdentities = list[MY_IDENTITY_MODEL + '_1'].value.allIdentities;
+    var allIdentities = list[MY_IDENTITIES_MODEL + '_1'].value.allIdentities;
     var meId = me[constants.TYPE] + '_' + me[constants.ROOT_HASH];
     var result = [];
     if (allIdentities) {
@@ -202,10 +217,10 @@ var Store = Reflux.createStore({
   },
   
   onChangeIdentity(newMe) {
-    var myIdentities = list[MY_IDENTITY_MODEL + '_1'].value;
+    var myIdentities = list[MY_IDENTITIES_MODEL + '_1'].value;
     myIdentities.currentIdentity = newMe[constants.TYPE] + '_' + newMe[constants.ROOT_HASH];
       var self = this;
-    db.put(MY_IDENTITY_MODEL + '_1', myIdentities)
+    db.put(MY_IDENTITIES_MODEL + '_1', myIdentities)
     .then(function() {
       return self.loadResources()
     })
@@ -228,12 +243,12 @@ var Store = Reflux.createStore({
       id: resource[constants.TYPE] + '_' + resource[constants.ROOT_HASH], 
       title: utils.getDisplayName(resource, this.getModel(resource[constants.TYPE]).value.properties)
     };
-    var myIdentity = list[MY_IDENTITY_MODEL + '_1'].value;
+    var myIdentity = list[MY_IDENTITIES_MODEL + '_1'].value;
     myIdentity.allIdentities.push(newIdentity);
     var self = this;
-    db.put(MY_IDENTITY_MODEL + '_1', myIdentity)
+    db.put(MY_IDENTITIES_MODEL + '_1', myIdentity)
     .then(function() {
-      list[MY_IDENTITY_MODEL + '_1'].value = myIdentity;
+      list[MY_IDENTITIES_MODEL + '_1'].value = myIdentity;
       self.trigger({action: 'addNewIdentity', resource: me});
     })
     .catch (function(err) {
@@ -241,7 +256,7 @@ var Store = Reflux.createStore({
     })
   },
   onRemoveIdentity(resource) {
-    var myIdentity = list[MY_IDENTITY_MODEL + '_1'].value;
+    var myIdentity = list[MY_IDENTITIES_MODEL + '_1'].value;
     var iKey = resource[constants.TYPE] + '_' + resource[constants.ROOT_HASH];
     var allIdentities = myIdentity.allIdentities;
     for (var i=0; i<allIdentities.length; i++)
@@ -253,7 +268,7 @@ var Store = Reflux.createStore({
     var batch = [];
     resource.canceled = true;
     batch.push({type: 'put', key: iKey, value: resource});
-    batch.push({type: 'put', key: MY_IDENTITY_MODEL + '_1', value: myIdentity});
+    batch.push({type: 'put', key: MY_IDENTITIES_MODEL + '_1', value: myIdentity});
 
     var self = this;
     db.batch(batch)
@@ -282,7 +297,7 @@ var Store = Reflux.createStore({
          var propValue = val.value[constants.TYPE] + '_' + val.value[constants.ROOT_HASH];
          var prop = refProps[propValue];
          newResource[prop] = val.value;
-         newResource[prop].id = modelName + '_' + newResource[constants.ROOT_HASH];
+         newResource[prop].id = val.value[constants.TYPE] + '_' + val.value[constants.ROOT_HASH];
          if (!newResource[prop].title)
             newResource[prop].title = utils.getDisplayName(newResource, meta);
        }
@@ -397,6 +412,8 @@ var Store = Reflux.createStore({
     var promises = [];
     var foundRefs = [];
     var props = meta.properties;
+    if (meta[constants.TYPE] == 'tradle.Verification'  ||  (meta.subClassOf  &&  meta.subClassOf == 'tradle.Verification'))
+      return this.onAddVerification(resource, true);
 
     for (var p in resource) {
       if (props[p] &&  props[p].type === 'object') {
@@ -538,7 +555,6 @@ var Store = Reflux.createStore({
     }
   },
   getList(params) { //query, modelName, resource, isAggregation, prop) {
-
     var result = this.searchResources(params);
     if (params.isAggregation) 
       result = this.getDependencies(result);
@@ -549,8 +565,15 @@ var Store = Reflux.createStore({
       resultList.push(rr);
     }
     var model = this.getModel(params.modelName).value;
+    var retParams = {
+      action: model.isInterface  ||  model.interfaces  &&  !params.prop ? 'messageList' : 'list',
+      list: resultList, 
+      isAggregation: params.isAggregation      
+    }
+    if (params.prop)
+      retParams.prop = params.prop;
 
-    this.trigger({action: model.isInterface  ||  model.interfaces ? 'messageList' : 'list', list: resultList, isAggregation: params.isAggregation});              
+    this.trigger(retParams);              
   },
   searchResources(params) {
     var meta = this.getModel(params.modelName).value;
@@ -588,11 +611,11 @@ var Store = Reflux.createStore({
       var r = list[key].value;
       if (r.canceled)
         continue;
-      if (r[constants.OWNER]) {
-        var id = utils.getId(r[constants.OWNER]);
-        if (id != me[constants.TYPE] + '_' + me[constants.ROOT_HASH])
-          continue;
-      }
+      // if (r[constants.OWNER]) {
+      //   var id = utils.getId(r[constants.OWNER]);
+      //   if (id != me[constants.TYPE] + '_' + me[constants.ROOT_HASH])
+      //     continue;
+      // }
       if (containerProp  &&  (!r[containerProp]  ||  utils.getId(r[containerProp]) !== resourceId))
         continue;
       if (!query) {
@@ -610,11 +633,15 @@ var Store = Reflux.createStore({
          foundResources[key] = r; 
        }
     }
-    if (me  &&  modelName === IDENTITY_MODEL  &&  !sampleData.getMyId()) {
-      var myIdentities = list[MY_IDENTITY_MODEL + '_1'].value.allIdentities;
-      for (var meId of myIdentities) {
-        if (foundResources[meId.id])
-           delete foundResources[meId.id];
+    if (me  &&  modelName === IDENTITY_MODEL) {
+      if (sampleData.getMyId()) 
+        delete foundResources[IDENTITY_MODEL + '_' + me[constants.ROOT_HASH]];
+      else {
+        var myIdentities = list[MY_IDENTITIES_MODEL + '_1'].value.allIdentities;
+        for (var meId of myIdentities) {
+          if (foundResources[meId.id])
+             delete foundResources[meId.id];
+        }
       }
     }
 
@@ -648,10 +675,12 @@ var Store = Reflux.createStore({
   searchMessages(params) {
     var query = params.query;
     var modelName = params.modelName;
+    var meta = this.getModel(modelName).value;
+    var isVerification = modelName === 'tradle.Verification'  ||  (meta.subClassOf  &&  meta.subClassOf === 'tradle.Verification');
     var to = params.to;
     var prop = params.prop;
+    var backlink = prop ? prop.items.backlink : prop;
     var foundResources = {};
-    var meta = this.getModel(modelName).value;
     var isAllMessages = meta.isInterface;
     var props = meta.properties;
 
@@ -660,6 +689,7 @@ var Store = Reflux.createStore({
     var required = meta.required;
     var meRootHash = me  &&  me[constants.ROOT_HASH];
     var meId = IDENTITY_MODEL + '_' + meRootHash;
+    var toId = to ? to[constants.TYPE] + '_' + to[constants.ROOT_HASH] : null;
     for (var key in list) {
       var iMeta = null;
       if (isAllMessages) {
@@ -674,15 +704,33 @@ var Store = Reflux.createStore({
             continue;
         }  
       }
-      else if (key.indexOf(modelName + '_') == -1)
-        continue;
+      else if (key.indexOf(modelName + '_') === -1) {
+        var rModel = this.getModel(key.split('_')[0]).value;
+        if (!rModel.subClassOf  ||  rModel.subClassOf !== modelName)
+          continue;
+      }
       if (!iMeta)
         iMeta = meta;
       var r = list[key].value;
       if (r.canceled)
         continue;
       // Make sure that the messages that are showing in chat belong to the conversation between these participants
+      if (isVerification) {
+        if (r.organization) {
+          if (!r.organization.photos) {
+            var orgPhotos = list[utils.getId(r.organization.id)].value.photos;
+            if (orgPhotos)
+              r.organization.photos = [orgPhotos[0]];
+          }
+        }
+      }
       if (to) {
+        if (backlink  &&  r[backlink]) {
+          if (toId === utils.getId(r[backlink])) 
+            foundResources[key] = r;
+          
+          continue;
+        }
         if ((!r.message  ||  r.message.trim().length === 0) && !r.photos) 
           // check if this is verification resource
           continue;
@@ -694,6 +742,7 @@ var Store = Reflux.createStore({
         if (fromID !== id  &&  toID != id)
           continue;
       }
+
       if (!query) {
         // foundResources[key] = r;
         var msg = this.fillMessage(r);
@@ -737,6 +786,11 @@ var Store = Reflux.createStore({
       var ver = {};
       extend(ver, list[vId].value);
       resource.verifications[i] = ver;
+      if (ver.organization  &&  !ver.organization.photos) {
+        var orgPhotos = list[utils.getId(ver.organization.id)].value.photos;
+        if (orgPhotos)
+          ver.organization.photo = orgPhotos[0].url;
+      }
       // resource.time = ver.time;
     }
     return resource;
@@ -750,9 +804,10 @@ var Store = Reflux.createStore({
     } 
     if (!value[constants.TYPE])
       value[constants.TYPE] = modelName;
-
+    
     value[constants.CUR_HASH] = sha(value);
     var meta = this.getModel(modelName).value;
+    var props = meta.properties;
     if (!value[constants.ROOT_HASH]) {
       value[constants.ROOT_HASH] = value[constants.CUR_HASH];
       var creator = me  
@@ -764,7 +819,7 @@ var Store = Reflux.createStore({
           title: utils.getDisplayName(me, this.getModel(IDENTITY_MODEL))
         };
       }
-      if (meta.properties.dateSubmitted) 
+      if (props.dateSubmitted) 
         value.dateSubmitted = new Date().getTime();
     }
     
@@ -772,10 +827,11 @@ var Store = Reflux.createStore({
     var batch = [];
 
     if (meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf('tradle.Message') != -1)) {
-      if (meta.properties['to']  &&  meta.properties['from']) {
+      if (props['to']  &&  props['from']) {
         var to = list[utils.getId(value.to)].value;
         var from = list[utils.getId(value.from)].value;
-        to.lastMessage = (from[constants.ROOT_HASH] === me[constants.ROOT_HASH]) ? 'You: ' + value.message : value.message;
+        var dn = value.message || utils.getDisplayName(value, props);
+        to.lastMessage = (from[constants.ROOT_HASH] === me[constants.ROOT_HASH]) ? 'You: ' + dn : dn;
         to.lastMessageTime = value.time;
         from.lastMessage = value.message;
         from.lastMessageTime = value.time;
@@ -792,13 +848,13 @@ var Store = Reflux.createStore({
     
     if (isRegistration) {
       mid = {
-        _type: MY_IDENTITY_MODEL, 
+        _type: MY_IDENTITIES_MODEL, 
         currentIdentity: iKey, 
         allIdentities: [{
           id: iKey, 
           title: utils.getDisplayName(value, models['model_' + modelName].value.properties)
         }]};
-      batch.push({type: 'put', key: MY_IDENTITY_MODEL + '_1', value: mid});///
+      batch.push({type: 'put', key: MY_IDENTITIES_MODEL + '_1', value: mid});///
     }
 
     var self = this;
@@ -812,7 +868,7 @@ var Store = Reflux.createStore({
     .then(function(value) {
       list[iKey] = {key: iKey, value: value};
       if (mid) 
-        list[MY_IDENTITY_MODEL + '_1'] = {key: MY_IDENTITY_MODEL + '_1', value: mid};
+        list[MY_IDENTITIES_MODEL + '_1'] = {key: MY_IDENTITIES_MODEL + '_1', value: mid};
     //   return self.loadDB(db);
     // })    
     // .then(function() {
@@ -860,7 +916,7 @@ var Store = Reflux.createStore({
           contactInfo: contactInfo
         };
         newIdentity[constants.TYPE] = IDENTITY_MODEL;
-        var me = list[MY_IDENTITY_MODEL + '_1'];
+        var me = list[MY_IDENTITIES_MODEL + '_1'];
         if (me)  {
           var currentIdentity = me.value.currentIdentity;
           newIdentity[constants.OWNER] = {id: currentIdentity, title: utils.getDisplayName(me, props)};
@@ -940,7 +996,7 @@ var Store = Reflux.createStore({
          self.setPropertyNames(data.value.properties);
        }
        else {
-         if (!myId  &&  data.key === MY_IDENTITY_MODEL + '_1') {
+         if (!myId  &&  data.key === MY_IDENTITIES_MODEL + '_1') {
            myId = data.value.currentIdentity;
            if (list[myId])
              me = list[myId].value;
