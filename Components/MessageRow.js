@@ -11,6 +11,8 @@ var extend = require('extend');
 var groupByEveryN = require('groupByEveryN');
 var constants = require('tradle-constants');
 var LinearGradient = require('react-native-linear-gradient');
+var RowMixin = require('./RowMixin');
+var reactMixin = require('react-mixin');
 
 var {
   Image,
@@ -181,46 +183,47 @@ class MessageRow extends Component {
     if (!isModel  &&  noMessage) {
       if (hasOwnerPhoto) 
         showMessageBody = true;
+      else if (!model.properties['message'])
+        showMessageBody = true;
     }
     else 
       showMessageBody = true;
     var messageBody;
     var isSimpleMessage = model.id === 'tradle.SimpleMessage';
     if (showMessageBody) {
-        var viewStyle;
-        if (!isModel) {
-          viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
-          if ((!noMessage  &&  resource.message.length > 30)  ||  !isSimpleMessage)
-            viewStyle.width = 260;
-        }  
+      var viewStyle;
+      if (!isModel) {
+        viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
+        if ((!noMessage  &&  resource.message.length > 30)  ||  !isSimpleMessage)
+          viewStyle.width = 260;
+      }  
 
-        var verified;
-        if (!resource.verifications  ||  !resource.verifications.length)
-          verified = <View />
-        else {
-          var verifications = [];
-          resource.verifications.forEach(function(v) {
-            if (v.organization  &&  v.organization.photo)              
-              verifications.push(<Image source={{uri: v.organization.photo}} style={styles.orgImage} />)
-          })
-          verified = <View style={styles.verificationCheck}>
-                       <Icon name='ios-checkmark-empty' size={25} style={styles.icon} />
-                       {verifications}
-                     </View>
-        }
-        messageBody = 
-          <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
-            <View style={[rowStyle, viewStyle]}>
-              {isModel ? <View style={{paddingLeft: 10}}/> : ownerPhoto}
-              <View style={addStyle ? [styles.textContainer, addStyle] : styles.textContainer}>
-                <View style={{flex: 1}}>
-                  {renderedRow}
-               </View>
-               {verified}
-              </View>
-              {!isModel ? <View/> : ownerPhoto}
+      // var verified;
+      // if (!resource.verifications  ||  !resource.verifications.length)
+      //   verified = <View />
+      // else {
+      //   var verifications = [];
+      //   resource.verifications.forEach(function(v) {
+      //     if (v.organization  &&  v.organization.photo)              
+      //       verifications.push(<Image source={{uri: v.organization.photo}} style={styles.orgImage} />)
+      //   })
+      //   verified = <View style={styles.verificationCheck}>
+      //                <Icon name='ios-checkmark-empty' size={25} style={styles.icon} />
+      //                {verifications}
+      //              </View>
+      // }
+      messageBody = 
+        <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
+          <View style={[rowStyle, viewStyle]}>
+            {isModel ? <View style={{paddingLeft: 10}}/> : ownerPhoto}
+            <View style={addStyle ? [styles.textContainer, addStyle] : styles.textContainer}>
+              <View style={{flex: 1}}>
+                {renderedRow}
+             </View>
             </View>
-          </TouchableHighlight>      
+            {!isModel ? <View/> : ownerPhoto}
+          </View>
+        </TouchableHighlight>      
     }
     else
       messageBody = <View style={{height: 5}}/>
@@ -267,6 +270,7 @@ class MessageRow extends Component {
       id: 4,
       title: model.title,
       rightButtonTitle: 'Done',
+      backButtonTitle: 'Back',
       component: NewResource,
       titleTextColor: '#7AAAC3',
       passProps:  {
@@ -317,7 +321,7 @@ class MessageRow extends Component {
     var onPressCall;
 
     var isSimpleMessage = model.id === 'tradle.SimpleMessage';
-    
+    var cnt = 0; 
     viewCols.forEach(function(v) {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date') 
         return;
@@ -356,12 +360,63 @@ class MessageRow extends Component {
         if (msgParts.length === 2) {
           var msgModel = utils.getModel(msgParts[1]);
           if (msgModel) {
+            msgModel = msgModel.value;
             if (!isMyMessage)
-              onPressCall = self.createNewResource.bind(self, msgModel.value);
+              onPressCall = self.createNewResource.bind(self, msgModel);
             vCols.push(<View>
                          <Text style={style}>{msgParts[0]}</Text>
-                         <Text style={[style, {color: isMyMessage ? '#efffe5' : '#7AAAC3'}]}>{msgModel.value.title}</Text>
-                       </View>);                  
+                         <Text style={[style, {color: isMyMessage ? '#efffe5' : '#7AAAC3'}]}>{msgModel.title}</Text>
+                       </View>);     
+            if (self.props.verificationsToTransfer) {
+              var vtt = [];
+              var cnt = 0;
+              for (var t in  self.props.verificationsToTransfer) {
+                if (t === msgModel.id) {
+                  var ver = self.props.verificationsToTransfer[t];                 
+                  ver.forEach(function(r) {
+                    var vModel = utils.getModel(r[constants.TYPE]);
+                    var doc = self.formatDocument(msgModel, r);
+                    if (cnt) {
+                      doc = <View>
+                              <View style={{height: 1, backgroundColor: '#dddddd'}} />
+                              {doc}
+                            </View>
+
+                    }
+                    vtt.push(doc);
+                    cnt++;
+                  })
+                }
+              }
+              if (vtt.length) {
+                var orgRow;
+                if (resource.organization) {
+                  orgRow = resource.organization.photos
+                         ?  <View style={{flexDirection: 'row', flex: 1}}>
+                               <Image source={{uri: utils.getImageUri(resource.organization.photos[0].url)}} style={styles.icon} />
+                               <Text style={styles.verySmallLetters}>{resource.organization.title}</Text>
+                            </View>
+                         :  <Text style={styles.description}>{resource.organization.title}</Text>
+                  orgRow = <TouchableHighlight underlayColor='transparent' onPress={this.transferDocs.bind(this)}>
+                             {orgRow}
+                           </TouchableHighlight>
+                  // contentRows.push(<Text style={styles.description}>{resource.organization.title}</Text>);
+                  // if (resource.organization.photos)
+                  //   contentRows.push(<Image source={{uri: utils.getImageUri(resource.organization.photos[0].url)}} style={styles.icon} />);
+                }
+                else
+                  orgRow = <View />
+
+                vCols.push(
+                  <View>
+                    <View style={{backgroundColor: '#f3f3f3', padding: 5, marginVertical: 5}}>
+                      <Text style={styles.verifications}>OR choose one of already verified</Text>
+                      {orgRow}
+                    </View>
+                    {vtt}
+                  </View>)
+              }
+            }                        
             return;
           }
         }
@@ -369,13 +424,94 @@ class MessageRow extends Component {
       }
       first = false;
     }); 
-    if (model.style) 
-      vCols.push(<Text style={styles.verySmallLetters}>{model.title}</Text>);
     
+    if (model.id !== 'tradle.SimpleMessage')  {
+      var t = model.title.split(' ');
+      var s = '';
+      t.forEach(function(p) {
+        if (p.indexOf('Verif') === -1)
+          s += p + ' ';
+      });
+
+
+      if (resource.verifications  &&  resource.verifications.length) {
+        var verifications = [];
+        resource.verifications.forEach(function(v) {
+          if (v.organization  &&  v.organization.photo) {
+            verifications.push(<Text style={styles.verySmallLetters}>{v.organization.title}</Text>);
+            verifications.push(<Image source={{uri: v.organization.photo}} style={styles.orgImage} />);
+          }
+        })
+        vCols.push(<View style={styles.verificationCheck}>
+                     <Text style={styles.verySmallLetters}>{s}verified by </Text>
+                     {verifications}
+                   </View>);
+      }
+      else
+        vCols.push(<Text style={styles.verySmallLetters}>{s}</Text>);
+    }  
     if (vCols  &&  vCols.length)
       extend(renderedRow, vCols);
     return onPressCall ? onPressCall : (isSimpleMessage ? null : this.props.onSelect);
   }
+  transferDocs() {
+    this.props.navigator.push({
+      title: m.title,
+      titleTextColor: '#7AAAC3',
+      id: 10,
+      component: ResourceList,
+      backButtonTitle: 'Back',
+      passProps: {
+        filter:      filter, 
+        prop:        propName,
+        modelName:   prop.ref,
+        resource:    resource,
+        returnRoute: currentRoutes[currentRoutes.length - 1],
+        callback:    this.setChosenValue.bind(this)
+      }
+    });
+    
+  }
+  formatDocument(model, verification) {
+    var resource = verification.document;
+    var self = this;
+
+    var msg = resource.message
+            ? <View><Text style={styles.description}>{resource.message}</Text></View>
+            : <View />
+
+    var photo = (resource  &&  resource.photos)
+              ? <Image source={{uri: utils.getImageUri(resource.photos[0].url)}}  style={styles.cellImage} />
+              : <View />;
+    
+    var orgRow;
+    if (verification.organization) {
+      var orgPhoto = verification.organization.photo
+                   ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
+                   : <View/> 
+      orgRow =  <View style={{flexDirection: 'row', marginTop: 5}}>
+                   <Text style={[styles.verySmallLetters, {color: '#7AAAc3'}]}>verified by </Text>
+                   <Text style={styles.verySmallLetters}>{verification.organization.title.length < 10 ? verification.organization.title : verification.organization.title.substring(0, 8) + '..'}</Text>
+                   {orgPhoto}
+                </View>
+    }
+    else
+      orgRow = <View />
+
+    return <View style={{flex: 1, flexDirection: 'row', paddingVertical: 5, justifyContent: 'space-around'}}>
+             <View>
+               {photo}
+             </View>  
+             <View>
+               {msg}
+               {orgRow}
+             </View>  
+           </View>
+  }
+  onSelect() {
+
+  }
+
 }
 
 var styles = StyleSheet.create({
@@ -386,13 +522,12 @@ var styles = StyleSheet.create({
   modelTitle: {
     flex: 1,
     flexWrap: 'wrap',
-    fontSize: 22,
+    fontSize: 17,
     fontWeight: '400',
     marginVertical: 15,
   },
   resourceTitle: {
     flex: 1,
-    flexWrap: 'wrap',
     fontSize: 16,
     fontWeight: '400',
     marginBottom: 2,
@@ -420,10 +555,10 @@ var styles = StyleSheet.create({
   },
   msgImage: {
     backgroundColor: '#dddddd',
-    height: 50,
+    height: 40,
     marginRight: 5,
-    width: 50,
-    borderRadius: 25,
+    width: 40,
+    borderRadius: 20,
     borderColor: '#cccccc',
     borderWidth: 1
   },
@@ -456,27 +591,28 @@ var styles = StyleSheet.create({
     borderColor: '#cccccc',
     borderWidth: 1
   },
+  verifications: {
+    fontSize: 12,
+    // backgroundColor: '#efffe5'
+  },
   verySmallLetters: {
     fontSize: 12,
     alignSelf: 'flex-end',
     color: '#b4c3cb'
   },
-  icon: {
-    width: 30,
-    height: 30,
-    marginRight: -15,
-    color: '#28C2C0'
-  },
   orgImage: {
-    width: 25,
-    height: 25,
-    marginRight: 2,
-    marginTop: 3,
-    borderRadius: 12
+    width: 20,
+    height: 20,
+    marginLeft: 5,
+    // marginTop: 17,
+    borderRadius: 10
   },
   verificationCheck: {
     flexDirection: 'row',
-    marginTop: -5
+    alignSelf: 'flex-end',
+    padding: 3, 
+    marginVertical: 5
+    // marginTop: -5
   },
   cellRoundImage: {
     paddingVertical: 1,
@@ -493,7 +629,26 @@ var styles = StyleSheet.create({
     fontSize: 20,
     backgroundColor: 'transparent'
   },
+  cellImage: {
+    backgroundColor: '#dddddd',
+    height: 30,
+    marginRight: 10,
+    width: 30,
+    borderColor: 'transparent',
+    borderRadius:10,
+    borderWidth: 1,
+  },
+  icon: {
+    width: 20,
+    height: 20,
+    marginLeft: 4,
+    borderWidth: 1,
+    borderColor: '#eeeeee',
+    borderRadius: 10,
+    marginRight: 5,
+  },
 
 });
+reactMixin(MessageRow.prototype, RowMixin);
 
 module.exports = MessageRow;
