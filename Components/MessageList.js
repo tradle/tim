@@ -83,8 +83,9 @@ class MessageList extends Component {
       }
       this.setState({
         dataSource: this.state.dataSource.cloneWithRows(list),
-        isLoading: false
-      })
+        isLoading: false,
+        verificationsToTransfer: params.verificationsToTransfer
+      });
     }
   }
 
@@ -139,6 +140,7 @@ class MessageList extends Component {
         resource={resource}
         isAggregation={isAggregation}
         navigator={this.props.navigator}
+        verificationsToTransfer={this.state.verificationsToTransfer}
         previousMessageTime={previousMessageTime}
         to={isAggregation ? resource.to : this.props.resource} />
       );
