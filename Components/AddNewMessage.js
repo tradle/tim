@@ -4,7 +4,7 @@ var React = require('react-native');
 var utils = require('../utils/utils');
 var ChatMessage = require('./ChatMessage');
 var SelectPhotoList = require('./SelectPhotoList');
-var { Icon } = require('react-native-icons');
+var Icon = require('react-native-vector-icons/Ionicons');
 var extend = require('extend');
 var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
@@ -110,7 +110,7 @@ class AddNewMessage extends Component {
         <TouchableHighlight style={{paddingRight: 5}} underlayColor='transparent'
           onPress={this.showChoice.bind(this)}>
           <View>
-            <Icon name='ion|ios-camera' style={styles.image} size={35} color='#aaaaaa' />
+            <Icon name='ios-camera' style={styles.image} size={35} color='#aaaaaa' />
           </View>
         </TouchableHighlight>
         </View>
@@ -121,7 +121,7 @@ class AddNewMessage extends Component {
   onChange(event) {
     this.setState({userInput: event.nativeEvent.text});    
   }
-  showChoice1() {
+  showChoice() {
     var self = this;
     UIImagePickerManager.showImagePicker(null, (type, response) => {
       if (type !== 'cancel') {
@@ -144,7 +144,7 @@ class AddNewMessage extends Component {
     });
   }
 
-  showChoice() {
+  showChoice1() {
     var buttons = ['Take photo', 'Photo library', 'Cancel'];
     var self = this;
     ActionSheetIOS.showActionSheetWithOptions({
