@@ -39,9 +39,9 @@ class MoreLikeThis extends Component {
       <TouchableHighlight underlayColor='transparent' onPress={this.showMoreLikeThis.bind(this)}>
        <View>
          <View style={buttonStyles.buttonContent} />
-         <View style={{flexDirection: 'row', paddingHorizontal: 5}}>
-           <Icon name='arrow-shrink'  size={20}  color='#ffffff'  style={[buttonStyles.icon, {marginTop: -33}]}/>
-           <Text style={[buttonStyles.text, {marginTop: -30}]}>More like this</Text>
+         <View style={buttonStyles.row}>
+           <Icon name='arrow-shrink'  size={20}  color='#ffffff'  style={buttonStyles.icon}/>
+           <Text style={buttonStyles.text}>More like this</Text>
          </View>
        </View>
       </TouchableHighlight>
