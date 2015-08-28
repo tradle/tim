@@ -229,7 +229,8 @@ class MessageRow extends Component {
       messageBody = <View style={{height: 5}}/>
     var len = photoUrls.length;
     var inRow = len ? (len === 1 ? 1 : (len % 2) ? 3 : 2) : 0;
-    var photoStyle = {}; 
+    var photoStyle = {};
+    var height; 
     if (inRow > 0) {
       if (inRow === 1)
         photoStyle = styles.bigImage;
@@ -240,6 +241,7 @@ class MessageRow extends Component {
     }
 
     var viewStyle = { margin:1, backgroundColor: '#f7f7f7' }
+    // var viewStyle = { margin:1, backgroundColor: '#f7f7f7' }
       
     return (
       <View style={viewStyle} key={resource}>
@@ -340,7 +342,9 @@ class MessageRow extends Component {
         return;
       }
 
-      if (resource[v]  &&  (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0)) {
+      if (resource[v]                      &&  
+          properties[v].type === 'string'  && 
+          (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0)) {
         onPressCall = self.onPress.bind(self);
         vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{resource[v]}</Text>);
       }
@@ -363,9 +367,15 @@ class MessageRow extends Component {
             msgModel = msgModel.value;
             if (!isMyMessage)
               onPressCall = self.createNewResource.bind(self, msgModel);
+            var link = isMyMessage
+                     ? <Text style={[style, {color: isMyMessage ? '#efffe5' : '#2892C6'}]}>{msgModel.title}</Text>
+                     : <View style={{flexDirection: 'row'}}>
+                         <Text style={[style, {color: isMyMessage ? '#efffe5' : '#2892C6'}]}>{msgModel.title}</Text>
+                         <Icon style={styles.linkIcon} size={20} name={'ios-arrow-right'} />
+                       </View>
             vCols.push(<View>
                          <Text style={style}>{msgParts[0]}</Text>
-                         <Text style={[style, {color: isMyMessage ? '#efffe5' : '#7AAAC3'}]}>{msgModel.title}</Text>
+                         {link}
                        </View>);     
             if (self.props.verificationsToTransfer) {
               var vtt = [];
@@ -637,6 +647,11 @@ var styles = StyleSheet.create({
     borderColor: 'transparent',
     borderRadius:10,
     borderWidth: 1,
+  },
+  linkIcon: {
+    width: 20,
+    height: 20,
+    color: '#2892C6'
   },
   icon: {
     width: 20,
