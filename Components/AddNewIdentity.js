@@ -7,9 +7,7 @@ var Reflux = require('reflux');
 var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var reactMixin = require('react-mixin');
-var { Icon } = require('react-native-icons');
-
-// var Icon = require('react-native-vector-icons/FontAwesome');
+var Icon = require('react-native-vector-icons/Ionicons');
 var buttonStyles = require('../styles/buttonStyles');
 var constants = require('tradle-constants');
 
@@ -38,9 +36,9 @@ class AddNewIdentity extends Component {
                <TouchableHighlight onPress={this.createNewIdentity.bind(this)} underlayColor='transparent'>
                <View>
                  <View style={buttonStyles.buttonContent} />
-                 <View style={{flexDirection: 'row', paddingHorizontal: 5}}>
-                   <Icon name='fontawesome|plus'  size={20}  color='#ffffff'  style={[buttonStyles.icon, {marginTop: -33}]}/>
-                   <Text style={[buttonStyles.text, {marginTop: -30}]}>Add Identity</Text>
+                 <View style={buttonStyles.row}>
+                   <Icon name='plus'  size={25}  color='#ffffff'  style={buttonStyles.icon}/>
+                   <Text style={buttonStyles.text}>Add Identity</Text>
                  </View>
                </View>
                </TouchableHighlight>
