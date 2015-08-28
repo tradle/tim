@@ -43,7 +43,6 @@ class ChatMessage extends Component {
             value={this.state.userInput}
             onChange={this.handleChange.bind(this)}
             onSubmitEditing={this.onSubmitEditing.bind(this)}
-            onEndEditing={this.props.onEndEditing.bind(this, this.state.userInput, this.clear.bind(this))}
           />
         </View>
 
@@ -75,7 +74,7 @@ class ChatMessage extends Component {
     this.props.onSubmitEditing(msg);
     setTimeout(function() {
       this.setState({userInput: ''});
-      // this.refs.chat.focus();
+      this.refs.chat.focus();
     }.bind(this), 0);
   }
 }
