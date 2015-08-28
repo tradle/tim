@@ -20,7 +20,6 @@ var {
   View,
   TouchableHighlight,
   Navigator,
-  Image,
   StyleSheet,
   LayoutAnimation,
   Component
@@ -95,9 +94,9 @@ class AddNewMessage extends Component {
     return (
       <View style={{height: this.state.keyboardSpace + 45}}>
       <View style={styles.addNew}>
-        <TouchableHighlight style={{paddingLeft: 5}} underlayColor='#eeeeee'
+        <TouchableHighlight style={{paddingLeft: 15}} underlayColor='#eeeeee'
           onPress={this.props.onAddNewPressed.bind(this)}>
-         <Image source={require('image!clipadd')} style={styles.image} />
+         <Icon name={'ios-compose'} size={35} style={styles.image}  color='#aaaaaa' />
         </TouchableHighlight>
         <View style={styles.searchBar}>
           <ChatMessage ref="chat" resource={resource} 
