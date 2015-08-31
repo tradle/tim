@@ -72,11 +72,14 @@ class ShowPropertiesView extends Component {
       // var idx = vCols.indexOf(constants.TYPE);
       // delete vCols[idx];
     }
-    var len = vCols.length; 
-    for (var i=0; i<len; i++) {
-      if (props[vCols[i]].displayName) {
-        vCols.splice(i, 1);
-        len--;
+    var isMessage = model.interfaces;
+    if (!isMessage) {
+      var len = vCols.length; 
+      for (var i=0; i<len; i++) {
+        if (props[vCols[i]].displayName) {
+          vCols.splice(i, 1);
+          len--;
+        }
       }
     }
     var self = this;
@@ -112,16 +115,16 @@ class ShowPropertiesView extends Component {
             }
           }
         }
-        else {
+        else if (self.props.showRefResource) {
           // ex. property that is referencing to the Organization for the contact
           var value = val[constants.TYPE] ? utils.getDisplayName(val, utils.getModel(val[constants.TYPE]).value.properties) : val.title;
                
           val = <TouchableHighlight onPress={self.props.showRefResource.bind(self, val, pMeta)} underlayColor='transparent'>
-                 <Text style={styles.itemTitle}>{value}</Text>                 
+                 <Text style={[styles.title, styles.linkTitle]}>{value}</Text>                 
                </TouchableHighlight>
 
           isRef = true;
-          isDirectionRow = true;
+          // isDirectionRow = true;
         }
       }
       else if (pMeta.type === 'date')
@@ -140,13 +143,13 @@ class ShowPropertiesView extends Component {
         }      
         else if (typeof val === 'number') {
           val = <Text style={styles.description}>{val}</Text>;        
-          isDirectionRow = true;
+          // isDirectionRow = true;
         }
-        else if (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0)
+        else if (pMeta.type !== 'object'  &&  (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0))
           val = <Text onPress={self.onPress.bind(self, val)} style={[styles.description, {color: '#7AAAC3'}]}>{val}</Text>;
         else {
-          if (val.length < 30)
-            isDirectionRow = true;
+          // if (val.length < 30)
+          //   isDirectionRow = true;
           val = <Text style={[styles.description]} numberOfLines={2}>{val}</Text>;
           // val = <Text style={[styles.description, {flexWrap: 'wrap'}]} numberOfLines={2}>{val}</Text>;
           // val = <Text style={[styles.description, isDirectionRow ? {alignSelf: 'flex-end'} : {alignSelf: 'flex-start'}]}>{val}</Text>;
@@ -159,10 +162,10 @@ class ShowPropertiesView extends Component {
       var title = model.properties[p].skipLabel
                 ? <View />
                 : <Text style={styles.title}>{model.properties[p].title || utils.makeLabel(p)}</Text> 
-
-      return (<View style={{padding:5}}>
+      first = false;
+      return (<View>
                {separator}
-               <View style={[styles.textContainer, isDirectionRow ? {flexDirection: 'row'} : {flexDirection: 'column'}]}>
+               <View style={[styles.textContainer, {padding: 10}, isDirectionRow ? {flexDirection: 'row'} : {flexDirection: 'column'}]}>
                  {title}
                  {val}
                </View>
@@ -227,15 +230,15 @@ class ShowPropertiesView extends Component {
           //   <View>
           //     <TouchableHighlight onPress={self.showResource.bind(this, value)} underlayColor='transparent'>
           //       <View style={value.length > 60 ? styles.itemColContainer : styles.itemContainer}>
-          //         <Text style={itemMeta.skipLabel ? {height: 0} : styles.itemTitle}>{itemMeta.skipLabel ? '' : utils.makeLabel(p)}</Text>
+          //         <Text style={itemMeta.skipLabel ? {height: 0} : styles.title}>{itemMeta.skipLabel ? '' : utils.makeLabel(p)}</Text>
           //         <Text style={styles.description}>{value.title}</Text>                 
           //       </View>
           //      </TouchableHighlight>
           //  </View>);
         ret.push(
-          <View>
-           <View style={value.length > 60 ? styles.itemColContainer : styles.itemContainer}>
-             <Text style={itemMeta.skipLabel ? {height: 0} : styles.itemTitle}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
+          <View style={{padding: 10}}>
+           <View style={styles.itemColContainer}>
+             <Text style={itemMeta.skipLabel ? {height: 0} : styles.title}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
              <Text style={styles.description}>{value}</Text>                 
            </View>
          </View>);
@@ -275,33 +278,30 @@ var styles = StyleSheet.create({
   },
   separator: {
     height: 1,
-    backgroundColor: '#DDDDDD'
+    backgroundColor: '#eeeeee',
+    marginHorizontal: 15
   },
   itemSeparator: {
     height: 1,
-    backgroundColor: '#D7E6ED'
+    backgroundColor: '#D7E6ED',
+    marginHorizontal: 7
   },
   title: {
-    fontSize: 18,
+    fontSize: 16,
+    fontFamily: 'Avenir Next',
     marginTop: 3,
     marginBottom: 0,
     marginHorizontal: 7,
-    color: '#2E3B4E'
+    color: '#9b9b9b'
   },
-  itemTitle: {
-    fontSize: 18,
-    marginTop: 3,
-    marginBottom: 0,
-    marginHorizontal: 7,
-    color: '#7AAAC3',
-    // flexWrap: 'wrap'
+  linkTitle: {
+    color: '#2892C6'
   },
   description: {
-    fontSize: 18,
+    fontSize: 16,
     marginVertical: 3,
     marginHorizontal: 7,
-    paddingLeft: 5,
-    color: '#999999',
+    color: '#2E3B4E',
   },
   photo: {
     width: 86,
