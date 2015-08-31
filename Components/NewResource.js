@@ -369,7 +369,7 @@ class NewResource extends Component {
     });
     var FromToView = require('./FromToView');
     var style = isMessage ? {height: 570} : {height: 867};
-    style.marginTop = 60;
+    style.marginTop = 64;
     options.auto = 'placeholders';
     options.tintColor = 'red'
 
@@ -534,7 +534,7 @@ var styles = StyleSheet.create({
     margin: 10,
   },
   photoBG: {
-    backgroundColor: '#2E3B4E',
+    marginTop: -15,
     alignItems: 'center',
   },
   icon: {
