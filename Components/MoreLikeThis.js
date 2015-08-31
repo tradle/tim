@@ -35,13 +35,13 @@ class MoreLikeThis extends Component {
     if (this.props.resource[constants.TYPE] === 'tradle.SimpleMessage')
       return null;
     return (
-      <View style={[buttonStyles.container, {top: 15}]}>
+      <View style={[buttonStyles.container1, {top: 35}]}>
       <TouchableHighlight underlayColor='transparent' onPress={this.showMoreLikeThis.bind(this)}>
        <View>
          <View style={buttonStyles.buttonContent} />
-         <View style={buttonStyles.row}>
-           <Icon name='arrow-shrink'  size={20}  color='#ffffff'  style={buttonStyles.icon}/>
-           <Text style={buttonStyles.text}>More like this</Text>
+         <View style={buttonStyles.row1}>
+           <Icon name='arrow-shrink'  size={25}  color='#ffffff'  style={buttonStyles.icon1}/>
+           <Text style={buttonStyles.text1}>More like this</Text>
          </View>
        </View>
       </TouchableHighlight>
