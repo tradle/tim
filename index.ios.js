@@ -16,16 +16,17 @@ var SelectPhotoList = require('./Components/SelectPhotoList');
 var CameraView = require('./Components/CameraView');
 var PhotoCarousel = require('./Components/PhotoCarousel');
 var utils = require('./utils/utils');
-var { Icon } = require('react-native-icons');
+var constants = require('tradle-constants');
+var Icon = require('react-native-vector-icons/Ionicons');
 // var Device = require('react-native-device');
 
 var reactMixin = require('react-mixin');
 
-var IDENTITY_MODEL = 'tradle.Identity';
 var {
   Component,
   // NavigatorIOS,
   Navigator,
+  Image,
   View,
   Text,
   TouchableOpacity,
@@ -36,22 +37,28 @@ var styles = StyleSheet.create({
   icon: {
     width: 20,
     height: 20,
+    // marginTop: 15,
+  },
+  orgImage: {
+    width: 20,
+    height: 20,
     marginTop: 15,
+    marginRight: 3,
+    borderRadius: 10
   },
   container: {
     flex: 1
   },
-  // navBar: {
-  //   backgroundColor: 'transparent',
-  // },
+  navBar: {
+    marginTop: 16,
+  },
   navBarText: {
     fontSize: 16,
-    marginVertical: 15,
   },
   navBarTitleText: {
     color: '#2E3B4E',
     fontWeight: '500',
-    marginVertical: 14,
+    fontSize: 16,
   },
   navBarLeftButton: {
     paddingLeft: 15,
@@ -66,13 +73,13 @@ var styles = StyleSheet.create({
 
 class TiMApp extends Component {
   constructor(props) {
-    super(props);
+    super(props)
     // var isIphone = Device.isIphone();
     // if (!isIphone)
     //   isIphone = isIphone;
   }
   render() {
-    var props = {modelName: IDENTITY_MODEL};
+    var props = {modelName: constants.TYPES.IDENTITY};
     return (
       <Navigator
         style={styles.container}
@@ -104,7 +111,7 @@ class TiMApp extends Component {
     var props = route.passProps;
     switch (route.id) {
     case 1:
-      return <TimHome navigator={nav} modelName={IDENTITY_MODEL} filter={props.filter} />;
+      return <TimHome navigator={nav} modelName={constants.TYPES.IDENTITY} filter={props.filter} />;
     case 2:
       return <ResourceTypesScreen navigator={nav} 
                   modelName={props.modelName} 
@@ -198,7 +205,7 @@ var NavigationBarRouteMapper = {
               ?  <Text style={style}>
                     {lbTitle}
                  </Text>
-              : <Icon name={lbTitle} size={20} color='#7AAAC3' style={styles.icon}/>;
+              : <Icon name={lbTitle.substring(4)} size={20} color='#7AAAC3' style={styles.icon}/>;
     return (
       <TouchableOpacity
         onPress={() => navigator.pop()}>
@@ -219,7 +226,7 @@ var NavigationBarRouteMapper = {
               ?  <Text style={style}>
                     {route.rightButtonTitle}
                  </Text>
-              : <Icon name={route.rightButtonTitle} size={20} color='#7AAAC3' style={styles.icon}/>;
+              : <Icon name={route.rightButtonTitle.substring(4)} size={20} color='#7AAAC3' style={styles.icon}/>;
     
     return (
       <TouchableOpacity
@@ -244,13 +251,29 @@ var NavigationBarRouteMapper = {
   },
 
   Title: function(route, navigator, index, navState) {
+    var org;
     var style = [styles.navBarText, styles.navBarTitleText];
+    if (route.passProps.modelName) {
+      if (route.passProps.modelName === 'tradle.Message') {
+        if (route.passProps.resource  &&  route.passProps.resource[constants.TYPE] === constants.TYPES.IDENTITY) {
+          // if (route.passProps.resource.organization  &&  route.passProps.resource.organization.photo)
+          //   org = <Image source={{uri: route.passProps.resource.organization.photo}} style={styles.orgImage} />
+          if (route.passProps.resource.organization)
+            org = <Text style={style}> - {route.passProps.resource.organization.title}</Text>
+        }
+      }
+    } 
+    if (!org)
+      org = <View />;
     if (route.titleTintColor)
       style.push({color: route.titleTintColor});
     return (
-      <Text style={style}>
-        {route.title}
-      </Text>
+      <View style={{flexDirection: 'row', flex: 1}}>
+        <Text style={style}>
+          {route.title}
+        </Text>
+        {org}
+      </View>
     );
   },
 
