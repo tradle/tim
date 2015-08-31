@@ -5,6 +5,7 @@ var SearchBar = require('react-native-search-bar'); //('./SearchBar');
 var NoResources = require('./NoResources');
 var ResourceRow = require('./ResourceRow');
 var ResourceView = require('./ResourceView');
+var VerificationRow = require('./VerificationRow');
 var NewResource = require('./NewResource');
 var MessageList = require('./MessageList');
 var utils = require('../utils/utils');
@@ -15,14 +16,15 @@ var Reflux = require('reflux');
 var constants = require('tradle-constants');
 var { Icon } = require('react-native-icons');
 
-var DEAL_MODEL = 'tradle.Offer';
-var VENDOR_MODEL = 'tradle.Organization';
+// var DEAL_MODEL = 'tradle.Offer';
+// var VENDOR_MODEL = 'tradle.Organization';
 var {
   ListView,
   Component,
   StyleSheet,
   Navigator,
   TouchableHighlight,
+  StatusBarIOS,
   View,
 } = React;
 
@@ -43,6 +45,7 @@ class ResourceList extends Component {
       this.state.isRegistration = isRegistration;    
   }
   componentWillMount() {
+    StatusBarIOS.setHidden(false);
     var params = {
       modelName: this.props.modelName, 
       to: this.props.resource
@@ -315,8 +318,16 @@ class ResourceList extends Component {
   }
 
   renderRow(resource)  {
-    return (
-      <ResourceRow
+    var model = utils.getModel(this.props.modelName).value;
+
+    return model.id === 'tradle.Verification' ||  (model.subClassOf  &&  model.subClassOf === 'tradle.Verification')
+    ? (<VerificationRow
+        onSelect={() => this.selectResource(resource.document)}
+        key={resource[constants.ROOT_HASH]}
+        prop={this.props.prop}
+        resource={resource} />
+      )
+    : (<ResourceRow
         onSelect={() => this.selectResource(resource)}
         key={resource[constants.ROOT_HASH]}
         showRefResources={this.showRefResources.bind(this)}
@@ -325,8 +336,9 @@ class ResourceList extends Component {
   }
   renderFooter() {
     var me = utils.getMe();
-    if (!me)
+    if (!me  ||  (this.props.prop  &&  this.props.prop.readOnly))
       return <View />;
+
     return (
       <View style={styles.footer}>
         <View>
@@ -346,21 +358,21 @@ class ResourceList extends Component {
         //     </View>
         //   </TouchableHighlight>
         // </View>  
-    showDeals(modelName) {
-    var model = utils.getModel(modelName).value;
-    // var model = utils.getModel(this.props.modelName).value;
-    this.props.navigator.push({
-      title: model.title,
-      id: 10,
-      component: ResourceList,
-      titleTextColor: '#7AAAC3',
-      backButtonTitle: 'Back',
-      passProps: {
-        filter: '',
-        modelName: DEAL_MODEL,
-      },
-    })
-  }
+  // showDeals(modelName) {
+  //   var model = utils.getModel(modelName).value;
+  //   // var model = utils.getModel(this.props.modelName).value;
+  //   this.props.navigator.push({
+  //     title: model.title,
+  //     id: 10,
+  //     component: ResourceList,
+  //     titleTextColor: '#7AAAC3',
+  //     backButtonTitle: 'Back',
+  //     passProps: {
+  //       filter: '',
+  //       modelName: DEAL_MODEL,
+  //     },
+  //   })
+  // }
   addNew() {
     var model = utils.getModel(this.props.modelName).value;
     var r;
