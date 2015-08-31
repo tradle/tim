@@ -32,18 +32,15 @@ class AddNewIdentity extends Component {
     var resource = this.props.resource;
 
     return this.props.isRegistration || (resource[constants.ROOT_HASH] === utils.getMe()[constants.ROOT_HASH])
-           ? <View style={[buttonStyles.container, {top: 5}]}>
+           ? <View style={[buttonStyles.container]}>
                <TouchableHighlight onPress={this.createNewIdentity.bind(this)} underlayColor='transparent'>
-               <View>
-                 <View style={buttonStyles.buttonContent} />
-                 <View style={buttonStyles.row}>
-                   <Icon name='plus'  size={25}  color='#ffffff'  style={buttonStyles.icon}/>
-                   <Text style={buttonStyles.text}>Add Identity</Text>
+                 <View style={{alignItems: 'center'}}>
+                   <Icon name='plus'  size={25}  color='#f7f7f7'  style={buttonStyles.icon}/>
+                   <Text style={[buttonStyles.text, {color: '#f7f7f7'}]}>Add Identity</Text>
                  </View>
-               </View>
                </TouchableHighlight>
              </View>
-           : <View></View>;    
+           : null;    
   }
   createNewIdentity() {
     var resource = this.props.resource;
