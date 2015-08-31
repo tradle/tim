@@ -12,18 +12,60 @@ var HELP_COLOR = '#999999';
 var BORDER_COLOR = '#cccccc';
 var DISABLED_COLOR = '#777777';
 var DISABLED_BACKGROUND_COLOR = '#eeeeee';
-var FONT_SIZE = 17;
+var FONT_SIZE = 12;
+var FONT_SIZE_1 = 17;
 var FONT_WEIGHT = '500';
 
 var buttonStyles = Object.freeze({
   icon: {
-    width: 25,
-    height: 25,
-    // borderWidth: 2,
-    // borderColor: ICON_BORDER_COLOR,
-    // borderRadius: 12,
+    width: 30,
+    height: 30,
+    paddingLeft: 5,
+    borderWidth: 1,
+    borderColor: ICON_BORDER_COLOR,
+    borderRadius: 15,
+  },
+  row: {
+    flexDirection: 'row', 
   },
   container: {
+    alignSelf: 'center',
+    paddingHorizontal: 7,
+    paddingTop: 10
+  },
+  buttons: {
+    // marginTop: -80,
+    opacity: 0.8,
+    height: 80, 
+    flexDirection: 'row',
+    backgroundColor: '#909090', 
+    // backgroundColor: BACKGROUND_COLOR, 
+    justifyContent: 'center',
+    alignSelf: 'stretch'
+  },
+  text: {
+    color: '#ffffff', 
+    paddingVertical: 10,
+    fontSize: FONT_SIZE
+  },
+
+  row1: {
+    flexDirection: 'row', 
+    position: 'absolute',
+    left: 10,
+    top: 5 
+  },
+  icon1: {
+    width: 25,
+    height: 25,
+    // paddingLeft: 5,
+    // borderWidth: 1,
+    // borderColor: ICON_BORDER_COLOR,
+    // borderRadius: 15,
+    // borderWidth: 2,
+    // borderRadius: 12,
+  },
+  container1: {
     flex: 1,
     position: 'absolute', 
     right: 10
@@ -38,10 +80,12 @@ var buttonStyles = Object.freeze({
     borderWidth: 1, 
     borderColor: '#466690'
   },
-  text: {
+  text1: {
     color: '#ffffff', 
-    fontWeight: '800'
-  }
+    fontFamily: 'Avenir Next',
+    // fontWeight: '800',
+    fontSize: FONT_SIZE_1
+  }  
 });
 
 module.exports = buttonStyles;
