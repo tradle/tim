@@ -31,13 +31,14 @@ class ChatMessage extends Component {
       return <View></View>;
     var alignStyle = model.isInterface ? {alignSelf: 'center', marginTop: 10} : {alignSelf: 'stretch'};
             // autoFocus={true}
+    var t = model.isInterface ? 'Say something' : 'Send this form to ' + title;
     var messageField =
         <View style={[styles.chat, alignStyle]}>
           <TextInput ref='chat'
             autoCapitalize='none'
             autoCorrect={false}
             bufferDelay={20}
-            placeholder='Say something'
+            placeholder={t}
             placeholderTextColor='#bbbbbb'
             style={styles.chatInput}
             value={this.state.userInput}
@@ -52,9 +53,7 @@ class ChatMessage extends Component {
       return messageField;
     return  (
       <View>
-        <View style={styles.view}>
-          <Text style={styles.formRequest}>Send this form to {title}</Text>
-        </View>
+        <View style={styles.view} />
         {messageField}
       </View>
       );
@@ -80,13 +79,14 @@ class ChatMessage extends Component {
 }
 var styles = StyleSheet.create({
   view: {
-    backgroundColor: '#efffe5',
-    borderWidth: 1, 
-    borderTopColor: '#deeeb4', 
-    borderLeftColor: '#efffe5', 
-    borderRightColor: '#efffe5', 
-    borderBottomColor: '#deeeb4', 
-    paddingVertical: 7,
+    // backgroundColor: '#efffe5',
+    // borderWidth: 1, 
+    // borderTopColor: '#deeeb4', 
+    // borderLeftColor: '#efffe5', 
+    // borderRightColor: '#efffe5', 
+    // borderBottomColor: '#deeeb4', 
+    // paddingVertical: 7,
+    marginTop: 30
   },
   chat: {
     marginBottom: 5,
