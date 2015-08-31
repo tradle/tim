@@ -9,8 +9,7 @@ var propTypesMap = {
   'string': t.Str,
   'boolean': t.Bool,
   'date': t.Dat,
-  'number': t.Num,
-  'integer': t.Num
+  'number': t.Num
 };
 var models, me;
 
@@ -165,11 +164,13 @@ var utils = {
             options.fields[p].multiline = true;
           options.fields[p].autoCorrect = false;
         }
-        if (!options.fields[p].multiline && (type === 'string'  ||  type === 'integer')) {
+        if (!options.fields[p].multiline && (type === 'string'  ||  type === 'number')) {
           if (onSubmitEditing) 
             options.fields[p].onSubmitEditing = onSubmitEditing;
           if (onEndEditing)
             options.fields[p].onEndEditing = onEndEditing.bind({}, p);
+          if (props[p].maxLength)
+            options.fields[p].maxLength = props[p].maxLength;
         }
       }
       else if (props[p].oneOf) {
