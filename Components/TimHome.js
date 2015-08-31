@@ -23,7 +23,8 @@ var {
   ActivityIndicatorIOS,
   Image,
   Component,
-  ScrollView
+  ScrollView,
+  StatusBarIOS
 } = React;
 
 class TimHome extends Component {
@@ -179,21 +180,28 @@ class TimHome extends Component {
     //   var r = {_t: this.props.modelName};
     //   editProfile = <AddNewIdentity resource={r} isRegistration={true} navigator={this.props.navigator} />;
     // }
+    StatusBarIOS.setHidden(true);
     return (
       <View style={styles.scroll}>
         <Text style={styles.title}>Trust in Motion (TiM)</Text>
         <ScrollView>
-        <View style={styles.container} ref='search'>
           <TouchableHighlight style={[styles.thumbButton]}
-              underlayColor='transparent' onPress={this.showContactsOrRegister.bind(this)}>
-            <View>  
-              <Image style={styles.thumb} source={require('image!Tradle')}></Image>
-              <Text style={styles.tradle}>Tradle</Text>
+                underlayColor='transparent' onPress={this.showContactsOrRegister.bind(this)}>        
+            <View style={styles.container} ref='search'>
+              <View>  
+                <Image style={styles.thumb} source={require('image!Tradle')}></Image>
+                <Text style={styles.tradle}>Tradle</Text>
+              </View>
             </View>
           </TouchableHighlight>
-        </View>
         </ScrollView>
-        <View style={{justifyContent: 'flex-end', alignSelf: 'center'}}>
+        <View style={{height: 180}}></View>
+        <TouchableHighlight style={[styles.thumbButton]}
+              underlayColor='transparent' onPress={this.showContactsOrRegister.bind(this)}>        
+          <View style={{backgroundColor: '#2892C6', paddingVertical: 10, paddingHorizontal: 30, borderRadius: 10}}>
+             <Text style={{color: '#f0f0f0', fontSize: 17, fontWeight:400}}>Get started</Text>
+          </View>
+        </TouchableHighlight>
           <Text style={errStyle}>{err}</Text>
           <View style={styles.dev}>
             {editProfile}
@@ -204,10 +212,21 @@ class TimHome extends Component {
               </Text>
             </TouchableHighlight>
           </View>
-        </View>
+        <View style={{height: 200}}></View>
       </View>  
     );
   }
+          // <Text style={errStyle}>{err}</Text>
+          // <View style={styles.dev}>
+          //   {editProfile}
+          //   <TouchableHighlight 
+          //       underlayColor='transparent' onPress={this.onReloadDBPressed.bind(this)}>
+          //     <Text style={styles.text}>
+          //       Reload DB
+          //     </Text>
+          //   </TouchableHighlight>
+          // </View>
+
 }
           // {spinner}   
           // <View style={{height: 400}}></View>
@@ -229,20 +248,20 @@ var styles = StyleSheet.create({
     backgroundColor: '#2E3B4E',
   },
   container: {
-    padding: 30,
-    marginTop: 60,
+    // padding: 30,
+    marginTop: 120,
     alignItems: 'center',
   },
   tradle: {
     color: '#7AAAC3',
-    fontSize: 50,
+    fontSize: 40,
     alignSelf: 'center',
   },
   text: {
     color: '#7AAAC3',
     paddingLeft: 10,
     paddingRight: 10,
-    fontSize: 18,
+    fontSize: 12,
   },
   thumbButton: {
     marginBottom: 10,
@@ -251,8 +270,8 @@ var styles = StyleSheet.create({
     // padding: 40, 
   },
   thumb: {
-    width: 200,
-    height: 200,
+    width: 170,
+    height: 170,
   },
   communitiesText: {
     color: '#f8920d',
@@ -269,7 +288,7 @@ var styles = StyleSheet.create({
     color: '#7AAAC3'
   },
   dev: {
-    marginTop: 100,
+    marginTop: 10,
     flexDirection: 'row',
     marginBottom: 500,
     alignSelf: 'center'
