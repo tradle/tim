@@ -9,12 +9,12 @@ var AddNewIdentity = require('./AddNewIdentity');
 var SwitchIdentity = require('./SwitchIdentity');
 var ShowRefList = require('./ShowRefList');
 var IdentitiesList = require('./IdentitiesList');
-var ResourceList = require('./ResourceList');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
 var ResourceViewMixin = require('./ResourceViewMixin');
+var buttonStyles = require('../styles/buttonStyles');
 
 var extend = require('extend');
 var constants = require('tradle-constants');
@@ -85,15 +85,25 @@ class ResourceView extends Component {
       extend(photos, resource.photos);
       photos.splice(0, 1);
     }
-
+    var actionPanel;
+    var isIdentity = model.id === constants.TYPES.IDENTITY;
+    var isMe = isIdentity ? resource[constants.ROOT_HASH] === utils.getMe()[constants.ROOT_HASH] : true;
+    if (isIdentity  &&  !isMe)
+      actionPanel = <View/>
+    else {
+      actionPanel = 
+        <View style={buttonStyles.buttons}>
+          <AddNewIdentity resource={resource} navigator={this.props.navigator} />
+          <SwitchIdentity resource={resource} navigator={this.props.navigator} />
+          <ShowRefList    resource={resource} navigator={this.props.navigator} />    
+        </View>
+    }
     return (
       <ScrollView  ref='this' style={styles.container}>
         <View style={[styles.photoBG, {marginTop: -20}]}>
           <PhotoView resource={resource} />
         </View>
-        <AddNewIdentity resource={resource} navigator={this.props.navigator} />
-        <SwitchIdentity resource={resource} navigator={this.props.navigator} />
-        <ShowRefList resource={resource} navigator={this.props.navigator} />    
+        {actionPanel}
         <PhotoList photos={photos} navigator={this.props.navigator} isView={true} numberInRow={photos.length > 4 ? 5 : photos.length} />
         <ShowPropertiesView resource={resource} 
                             showItems={this.showResources.bind(this)} 
@@ -103,6 +113,7 @@ class ResourceView extends Component {
       </ScrollView>
     );
   }
+
   getRefResource(resource, prop) {
     var model = utils.getModel(this.props.resource[constants.TYPE]).value;
         
