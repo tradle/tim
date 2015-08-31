@@ -8,7 +8,7 @@ var NewResource = require('./NewResource');
 var ResourceView = require('./ResourceView');
 var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
-var { Icon } = require('react-native-icons');
+var Icon = require('react-native-vector-icons/Ionicons');
 var constants = require('tradle-constants');
 
 var MESSAGE_INTERFACE = 'tradle.Message';
@@ -55,7 +55,7 @@ class FromToView extends Component {
     if (toPhoto) 
       toPhoto = <Image style={styles.icon} source={{uri: utils.getImageUri(toPhoto)}} />
     else if (resource.to)
-      toPhoto = <Icon style={styles.icon} color='#2E3B4E' name='ion|android-person' size={60} />
+      toPhoto = <Icon style={[styles.icon, {paddingLeft: 5}]} color='#2E3B4E' name='android-person' size={60} />
     else
       toPhoto = <View />
 
@@ -63,7 +63,7 @@ class FromToView extends Component {
     if (fromPhoto)
       fromPhoto = <Image style={styles.icon} source={{uri: utils.getImageUri(fromPhoto)}} />
     else
-      fromPhoto = <Icon style={styles.icon} color='#7AAAC3' name='ion|ios-person' size={60} />
+      fromPhoto = <Icon style={[styles.icon, {paddingLeft: 5}]} color='#7AAAC3' name='ios-person' size={90} />
       // fromPhoto = utils.getImageUri(fromPhoto);
     return <View style={[styles.container, style]}>
             <TouchableHighlight underlayColor='transparent' onPress={() => 
@@ -79,7 +79,7 @@ class FromToView extends Component {
                <Text>{fromTitle}</Text>
              </View>
              </TouchableHighlight>
-            <Icon name='ion|ios-arrow-thin-right' size={70} color='#f7f7f7' style={styles.arrow} />
+            <Icon name='arrow-right-a' size={70} color='#f7f7f7' style={styles.arrow} />
             <TouchableHighlight underlayColor='transparent' onPress={() => 
                {
                  if (resource.to.id)
@@ -134,13 +134,14 @@ var styles = StyleSheet.create({
     padding: 20
   },
   arrow: {
-    width:  70,
-    height: 70,
+    width:  75,
+    height: 75,
     shadowColor: '#2E3B4E',
     shadowOffset: {width: 0.5, height: 0.5},
     shadowOpacity: 1,
     shadowRadius: 1,
-    marginTop: -5
+    marginTop: -5,
+    paddingLeft: 5
   },
   icon: {
     width: 70,
