@@ -60,6 +60,7 @@ class PhotoList extends Component {
     return (
       <View style={styles.row}>
          <ListView
+            scrollEnabled = {false}
             renderRow={this.renderRow.bind(this)}
             dataSource={dataSource} />
       </View>
@@ -74,14 +75,14 @@ class PhotoList extends Component {
         case 1:
         case 2:
         case 3:
-          imageStyle = styles.thumb3;
+          imageStyle = [styles.thumb3];
           break;
         case 4:  
-          imageStyle = styles.thumb4;
+          imageStyle = [styles.thumb4];
           break;
         default:
         case 5:
-          imageStyle = styles.thumb5;
+          imageStyle = [styles.thumb5];
           break;      
        }
      }
@@ -109,7 +110,7 @@ class PhotoList extends Component {
         source.isStatic = true;
 
       return (
-        <View style={{paddingTop: 2, paddingRight: 1, flexDirection: 'column'}}>
+        <View style={[{paddingTop: 2, marginRight: 1, flexDirection: 'column'}, imageStyle[0]]}>
           <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, photo)}>
             <View>
              <Image style={[styles.thumbCommon, imageStyle]} source={source} />
@@ -176,13 +177,14 @@ var styles = StyleSheet.create({
   thumbCommon: {
     borderRadius: 5,
     borderWidth: 1,
-    marginHorizontal: 1,
+    margin: 1,
     borderColor: 'transparent'
   },
   row: {
     flexDirection: 'row',
     flex: 1,
   },
+
 });
 
 module.exports = PhotoList;
