@@ -2,7 +2,7 @@
 
 var React = require('react-native');
 var utils = require('../utils/utils');
-var { Icon } = require('react-native-icons');
+var Icon = require('react-native-vector-icons/Ionicons');
 var constants = require('tradle-constants');
 
 var {
@@ -30,16 +30,19 @@ class PhotoView extends Component {
     var model = utils.getModel(modelName).value;
     if (!model.interfaces  &&  !model.isInterface  &&  !resource[constants.ROOT_HASH])
       return <View />
+
     var hasPhoto = resource.photos && resource.photos.length; 
     var currentPhoto = this.state.currentPhoto || (hasPhoto  &&  resource.photos[0]);
-
     if (!currentPhoto) {
       var icon;
       if (model.id === constants.TYPES.IDENTITY)
-        icon = 'ion|person';
+        return <Icon name={'person'} size={200}  color='#f6f6f4'  style={styles.icon} />
+
+        // icon = 'ion|person';
       else
-        icon = 'ion|chatboxes'
-      return <Icon name={icon} size={200}  color='#f6f6f4'  style={styles.icon} />
+        return <View style={{height: 50}} />
+        // icon = 'ion|chatboxes'
+      // return <Icon name={icon} size={200}  color='#f6f6f4'  style={styles.icon} />
     }
 
     var url = currentPhoto.url;
