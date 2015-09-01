@@ -64,18 +64,20 @@ class MessageView extends Component {
       inRow = 5;
     return (
       <ScrollView  ref='this' style={styles.container}>
+        <View style={styles.band}><Text style={styles.date}>{date}</Text></View>
         <View style={styles.photoBG}>
           <PhotoView resource={resource} />
         </View>
+        <FromToView resource={resource} navigator={this.props.navigator} />
         <MoreLikeThis resource={resource} navigator={this.props.navigator}/>
         <VerificationButton  resource={resource} verify={this.verify.bind(this)} verificationList={this.showResources.bind(this)}/>
-        <FromToView resource={resource} navigator={this.props.navigator} excluded />
-        <View style={styles.band}><Text style={styles.date}>{date}</Text></View>
-        <PhotoList photos={resource.photos} isView={true} navigator={this.props.navigator} numberInRow={inRow}/>
-        <View style={styles.rowContainer}>    
-          <View><Text style={styles.itemTitle}>{resource.message}</Text></View>
-          <ShowPropertiesView resource={resource} excludedProperties={['tradle.Message.message', 'time', 'photos']} />
-          {embed}
+        <View style={{marginTop: -20}}>
+          <PhotoList photos={resource.photos} isView={true} navigator={this.props.navigator} numberInRow={inRow}/>
+          <View style={styles.rowContainer}>    
+            <View><Text style={styles.itemTitle}>{resource.message}</Text></View>
+            <ShowPropertiesView resource={resource} excludedProperties={['tradle.Message.message', 'time', 'photos']} />
+            {embed}
+          </View>
         </View>
       </ScrollView>
     );
@@ -176,7 +178,10 @@ var styles = StyleSheet.create({
   band: {
     height: 30,
     backgroundColor: '#f7f7f7',
-    alignSelf: 'stretch'
+    alignSelf: 'stretch',
+    // paddingRight: 10,
+    // paddingTop: 3,
+    marginTop: -20,
   },
   rowContainer: {
     paddingBottom: 10,
