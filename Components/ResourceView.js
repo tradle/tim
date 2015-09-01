@@ -93,11 +93,11 @@ class ResourceView extends Component {
     else {
       actionPanel = 
         <View style={buttonStyles.buttons}>
-          <AddNewIdentity resource={resource} navigator={this.props.navigator} />
-          <SwitchIdentity resource={resource} navigator={this.props.navigator} />
           <ShowRefList    resource={resource} navigator={this.props.navigator} />    
         </View>
     }
+          // <AddNewIdentity resource={resource} navigator={this.props.navigator} />
+          // <SwitchIdentity resource={resource} navigator={this.props.navigator} />
     return (
       <ScrollView  ref='this' style={styles.container}>
         <View style={[styles.photoBG, {marginTop: -20}]}>
