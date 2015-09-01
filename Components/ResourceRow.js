@@ -2,7 +2,6 @@
 
 var React = require('react-native');
 var utils = require('../utils/utils');
-var moment = require('moment');
 var LinearGradient = require('react-native-linear-gradient');
 var ArticleView = require('./ArticleView');
 var constants = require('tradle-constants');
@@ -15,7 +14,6 @@ var {
   StyleSheet,
   Text,
   TouchableHighlight,
-  TouchableWithoutFeedback,
   Component,
   View
 } = React;
@@ -23,29 +21,22 @@ var {
 class ResourceRow extends Component {
   constructor(props) {
     super(props);
-    var resource = this.props.resource;
-    var model = utils.getModel(resource[constants.TYPE]).value;
-    var isVerification = model.id == 'tradle.Verification' ||  (model.subClassOf  &&  model.subClassOf == 'tradle.Verification');
-    this.state = {
-      isVerification: !!isVerification
-    }
   } 
   render() {     
     var resource = this.props.resource;
     var photo;
+    var isIdentity = resource[constants.TYPE] === constants.TYPES.IDENTITY;
     if (resource.photos &&  resource.photos.length) {
       var uri = utils.getImageUri(resource.photos[0].url);
-
-        var params = {
-          uri: utils.getImageUri(uri)
-        }
-        if (uri.indexOf('/var/mobile/') === 0)
-          params.isStatic = true
-        photo = <Image source={params} style={styles.cellImage} /> 
-      
+      var params = {
+        uri: utils.getImageUri(uri)
+      }
+      if (uri.indexOf('/var/mobile/') === 0)
+        params.isStatic = true
+      photo = <Image source={params} style={styles.cellImage} />;      
     }
     else {
-      if (resource[constants.TYPE] === constants.TYPES.IDENTITY) {
+      if (isIdentity) {
         photo = <LinearGradient colors={['#A4CCE0', '#7AAAc3', '#5E92AD']} style={styles.cellRoundImage}>
            <Text style={styles.cellText}>{resource.firstName.charAt(0) + (resource.lastName ? resource.lastName.charAt(0) : '')}</Text>
         </LinearGradient>
@@ -55,20 +46,17 @@ class ResourceRow extends Component {
         var icon = model.icon;
         if (icon) 
           photo = <View style={styles.cellImage}><Icon name={icon} size={35} style={styles.icon} /></View>
-        else {
-          if (this.state.isVerification) {
-            if (resource.from  &&  resource.from.photos)
-              photo = <Image source={{uri: utils.getImageUri(resource.from.photos[0].url)}} style={styles.cellImage} />
-            else if (resource.document  &&  resource.document.photos)
-              photo = <Image source={{uri: utils.getImageUri(resource.document.photos[0].url)}}  style={styles.cellImage} />
-            else
-            photo = <View style={styles.cellImage} />
-          }
-          else
-            photo = <View style={styles.cellImage} />
-        }
+        else 
+          photo = <View style={styles.cellImage} />        
       }
     }
+    var orgPhoto;
+    // if (isIdentity  &&  resource.organization) {
+    //   if (resource.organization.photo) 
+    //     orgPhoto = <Image source={{uri: resource.organization.photo}} style={styles.orgIcon} />
+    // }
+    // if (!orgPhoto)
+      orgPhoto = <View/>
 
     var onlineStatus = (resource.online) 
                      ? <View style={styles.online}></View>
@@ -84,21 +72,17 @@ class ResourceRow extends Component {
                          </View>  
                        : <View />; 
     var verification;
-    if (this.state.isVerification) {
-      var model = utils.getModel(resource[constants.TYPE]).value;
-      verification = <Text style={styles.verySmallLetters}>{model.title}</Text>
-    }
     return (
       <View key={this.props.key}>
         <TouchableHighlight onPress={this.props.onSelect}>
           <View style={styles.row} key={this.props.key + '1'}>
             {photo}
+            {orgPhoto}
             {onlineStatus}
             <View style={styles.textContainer} key={this.props.key + '2'}>
               {this.formatRow(resource)}
             </View>
             {cancelResource}
-            {verification}
           </View>
         </TouchableHighlight>
         <View style={styles.cellBorder} />
@@ -142,6 +126,7 @@ class ResourceRow extends Component {
     if (datePropsCounter > 1)
       dateProp = null;
 
+    var isIdentity = resource[constants.TYPE] === constants.TYPES.IDENTITY;
     viewCols.forEach(function(v) {
       if (v === dateProp)
         return;
@@ -151,6 +136,8 @@ class ResourceRow extends Component {
       if (!resource[v]  &&  !properties[v].displayAs)
         return;
       var style = (first) ? styles.resourceTitle : styles.description;
+      if (isIdentity  &&  v === 'organization')
+        style = [style, {alignSelf: 'flex-end'}];
       if (properties[v].style)
         style = [style, properties[v].style];
       var ref = properties[v].ref;
@@ -158,27 +145,18 @@ class ResourceRow extends Component {
         if (resource[v]) {
           var row;
           if (ref == MONEY_TYPE) {
-            var currencies = utils.getModel(ref).value.properties.currency.oneOf;
-            var valCurrency = resource[v].currency;
-            for (var c of currencies) {
-              var currencySymbol = c[valCurrency];
-              if (currencySymbol) {
-                var val = (valCurrency == 'USD') ? currencySymbol + resource[v].value : resource[v].value + currencySymbol;
-                row = properties[v].skipLabel
-                    ? <Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>
-                    : <View style={{flexDirection: 'row'}}><Text style={style}>{properties[v].title}</Text><Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text></View>
-                break;
-              }
-            }        
+            row = this.getMoneyValue(ref, properties[v]);
+            if (!row)
+              return;
           }
           else  {          
             row = <Text style={style} numberOfLines={first ? 2 : 1}>{resource[v].title}</Text>
-            if (resource[v].photos  &&  (!self.state.isVerification  ||  v != 'from')) {
-              row = <View style={styles.row}>
-                      <Image source={{uri: resource[v].photos[0].url}} style={styles.orgIcon}/>
-                      {row}
-                    </View>
-            }
+            // if (resource[v].photos) {
+            //   row = <View style={styles.row}>
+            //           <Image source={{uri: resource[v].photos[0].url}} style={styles.orgImage}/>
+            //           {row}
+            //         </View>
+            // }
           }
           
           vCols.push(row);
@@ -187,7 +165,7 @@ class ResourceRow extends Component {
       }
       else if (properties[v].type === 'date') {
         if (!dateProp)
-          vCols.push(self.addDateProp(resource, v));
+          vCols.push(self.addDateProp(v));
         else
           return;
       }
@@ -232,21 +210,6 @@ class ResourceRow extends Component {
         </View>
       </TouchableHighlight>
     ];
-  }
-  addDateProp(resource, dateProp) {
-    var properties = utils.getModel(resource[constants.TYPE] || resource.id).value.properties;
-    var style = styles.description;
-    if (properties[dateProp].style)
-      style = [style, properties[dateProp].style];
-    var val = utils.formatDate(new Date(resource[dateProp])); //utils.getFormattedDate(new Date(resource[dateProp]));
-    
-    return properties[dateProp].skipLabel
-        ? <Text style={style}>{val}</Text>
-        : <View style={{flexDirection: 'row'}}><Text style={style}>{properties[dateProp].title}</Text><Text style={style}>{val}</Text></View>
-
-    return <Text style={[style]} numberOfLines={1}>{val}</Text>;
-    // return <Text style={[style, {alignSelf: 'flex-end'}]} numberOfLines={1}>{val}</Text>;
-
   }
   onPress(event) {
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
@@ -352,6 +315,19 @@ var styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#7AAAc3',
     borderRadius: 15,
+    marginLeft: -30,
+    marginTop: 40,
+    // alignSelf: 'center',
+    // position: 'absolute',
+    // marginLeft: 10,
+    // marginTop: 7,
+  },
+  orgImage: {
+    width: 30,
+    height: 30,
+    borderWidth: 1,
+    borderColor: '#7AAAc3',
+    borderRadius: 15,
     marginRight: 10,
 
     alignSelf: 'center',
@@ -375,40 +351,6 @@ var styles = StyleSheet.create({
     alignSelf: 'flex-end',
     color: '#b4c3cb'
   },
-  backlinks: {
-    position: 'absolute', 
-    right: 5, 
-    top: 5, 
-    padding: 5, 
-    borderRadius: 5, 
-    borderColor: '#7AAAc3', 
-    color: '#7AAAc3', 
-    borderWidth: 1
-  },
-  backlinksIcon: {
-    position: 'absolute', 
-    width: 50,
-    height: 50,
-    right: 5, 
-    top: -50, 
-    padding: 5, 
-    borderRadius: 25, 
-    borderColor: '#7AAAc3', 
-    color: '#7AAAc3', 
-    borderWidth: 1
-  },
-  // linearGradient: {
-  //   flex: 1,
-  //   paddingLeft: 15,
-  //   paddingRight: 15,
-  //   borderRadius: 5
-  // },
-  // buttonText: {
-  //   fontSize: 18,
-  //   textAlign: 'center',
-  //   margin: 10,
-  //   color: '#ffffff',
-  // },
 });
 
 module.exports = ResourceRow;
