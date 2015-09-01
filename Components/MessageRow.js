@@ -19,7 +19,7 @@ var {
   StyleSheet,
   Text,
   TouchableHighlight,
-  ListView,
+  AlertIOS,
   Component,
   View
 } = React;
@@ -27,18 +27,18 @@ var {
 class MessageRow extends Component {
   constructor(props) {
     super(props);
-    var dataSource = new ListView.DataSource({
-      rowHasChanged: (row1, row2) => row1 !== row2,
-    });
+    // var dataSource = new ListView.DataSource({
+    //   rowHasChanged: (row1, row2) => row1 !== row2,
+    // });
 
-    this.state = {
-      resource: this.props.resource,
-      dataSource: dataSource
+    // this.state = {
+    //   resource: this.props.resource,
+    //   dataSource: dataSource
       // viewStyle: {
       //   margin: 1,
       // },
       // cnt: 0
-    }
+    // }
   }
   render() {
     var resource = this.props.resource;
@@ -228,7 +228,8 @@ class MessageRow extends Component {
     else
       messageBody = <View style={{height: 5}}/>
     var len = photoUrls.length;
-    var inRow = len ? (len === 1 ? 1 : (len % 2) ? 3 : 2) : 0;
+    var inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
+    // var inRow = len ? (len === 1 ? 1 : (len % 2) ? 3 : 2) : 0;
     var photoStyle = {};
     var height; 
     if (inRow > 0) {
@@ -400,29 +401,34 @@ class MessageRow extends Component {
               }
               if (vtt.length) {
                 var orgRow;
-                if (resource.organization) {
-                  orgRow = resource.organization.photos
-                         ?  <View style={{flexDirection: 'row', flex: 1}}>
-                               <Image source={{uri: utils.getImageUri(resource.organization.photos[0].url)}} style={styles.icon} />
-                               <Text style={styles.verySmallLetters}>{resource.organization.title}</Text>
-                            </View>
-                         :  <Text style={styles.description}>{resource.organization.title}</Text>
-                  orgRow = <TouchableHighlight underlayColor='transparent' onPress={this.transferDocs.bind(this)}>
-                             {orgRow}
-                           </TouchableHighlight>
-                  // contentRows.push(<Text style={styles.description}>{resource.organization.title}</Text>);
-                  // if (resource.organization.photos)
-                  //   contentRows.push(<Image source={{uri: utils.getImageUri(resource.organization.photos[0].url)}} style={styles.icon} />);
-                }
-                else
+                // if (resource.organization) {
+                //   orgRow = resource.organization.photos
+                //          ?  <View style={{flexDirection: 'row', flex: 1}}>
+                //                <Image source={{uri: utils.getImageUri(resource.organization.photos[0].url)}} style={styles.icon} />
+                //                <Text style={styles.verySmallLetters}>{resource.organization.title}</Text>
+                //             </View>
+                //          :  <Text style={styles.description}>{resource.organization.title}</Text>
+                //   orgRow = <TouchableHighlight underlayColor='transparent' onPress={this.transferDocs.bind(this)}>
+                //              {orgRow}
+                //            </TouchableHighlight>
+                //   // contentRows.push(<Text style={styles.description}>{resource.organization.title}</Text>);
+                //   // if (resource.organization.photos)
+                //   //   contentRows.push(<Image source={{uri: utils.getImageUri(resource.organization.photos[0].url)}} style={styles.icon} />);
+                // }
+                // else
                   orgRow = <View />
 
                 vCols.push(
                   <View>
-                    <View style={{backgroundColor: '#f3f3f3', padding: 5, marginVertical: 5}}>
-                      <Text style={styles.verifications}>OR choose one of already verified</Text>
+                    <View style={{flexDirection: 'row'}}>
+                      <View style={styles.separator} />
+                      <View style={{flex:20, marginLeft: 10, marginRight: -10}}>
+                        <Text style={styles.verifications}>OR</Text>
+                      </View>
+                      <View style={styles.separator} />
                       {orgRow}
                     </View>
+                    <View style={{alignSelf: 'center'}}><Text style={[styles.verySmallLetters, {marginTop: -3, paddingBottom:10}]}>Choose from the ones below</Text></View>
                     {vtt}
                   </View>)
               }
@@ -443,7 +449,6 @@ class MessageRow extends Component {
           s += p + ' ';
       });
 
-
       if (resource.verifications  &&  resource.verifications.length) {
         var verifications = [];
         resource.verifications.forEach(function(v) {
@@ -463,6 +468,9 @@ class MessageRow extends Component {
     if (vCols  &&  vCols.length)
       extend(renderedRow, vCols);
     return onPressCall ? onPressCall : (isSimpleMessage ? null : this.props.onSelect);
+  }
+  transfer() {
+    console.log('Transfer')
   }
   transferDocs() {
     this.props.navigator.push({
@@ -485,11 +493,24 @@ class MessageRow extends Component {
   formatDocument(model, verification) {
     var resource = verification.document;
     var self = this;
+    var docModel = utils.getModel(resource[constants.TYPE]).value;
+    var docModelTitle = docModel.title;
+    var idx = docModelTitle.indexOf('Verification');
+    var docTitle = idx === -1 ? docModelTitle : docModelTitle.substring(0, idx);
 
-    var msg = resource.message
-            ? <View><Text style={styles.description}>{resource.message}</Text></View>
-            : <View />
-
+    var msg;
+    if (resource.message)
+      msg = <View><Text style={styles.description}>{resource.message}</Text></View>
+    else {
+      var rows = [];
+      this.formatDocument1(model, resource, rows);
+      msg = <View>{rows}</View>
+      // msg = <View>
+      //         <Text style={styles.description}>
+      //           {utils.getDisplayName(resource, docModel.properties)}
+      //         </Text>
+      //       </View>
+    }
     var photo = (resource  &&  resource.photos)
               ? <Image source={{uri: utils.getImageUri(resource.photos[0].url)}}  style={styles.cellImage} />
               : <View />;
@@ -500,26 +521,109 @@ class MessageRow extends Component {
                    ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
                    : <View/> 
       orgRow =  <View style={{flexDirection: 'row', marginTop: 5}}>
-                   <Text style={[styles.verySmallLetters, {color: '#7AAAc3'}]}>verified by </Text>
-                   <Text style={styles.verySmallLetters}>{verification.organization.title.length < 10 ? verification.organization.title : verification.organization.title.substring(0, 8) + '..'}</Text>
-                   {orgPhoto}
+                   <Text style={styles.verySmallLetters}>verified by </Text>
+                   <Text style={[styles.verySmallLetters, {color: '#757575'}]}>{verification.organization.title.length < 10 ? verification.organization.title : verification.organization.title.substring(0, 8) + '..'}</Text>
                 </View>
     }
     else
       orgRow = <View />
 
-    return <View style={{flex: 1, flexDirection: 'row', paddingVertical: 5, justifyContent: 'space-around'}}>
+    return (
+           <TouchableHighlight underlayColor='transparent' onPress={() =>
+              AlertIOS.alert(
+                'Transfering ' + docTitle + ' verified by ' + verification.organization.title,
+                'to ' + this.props.to.organization.title, 
+                [
+                  {text: 'Transfer', onPress: this.transfer.bind(this)},
+                  {text: 'Cancel', onPress: () => console.log('Canceled!')},
+                ]
+            )}>
+           <View style={{flex: 1, flexDirection: 'row', paddingVertical: 5}}>
              <View>
                {photo}
              </View>  
-             <View>
+             <View style={{flex:1}}>
                {msg}
                {orgRow}
              </View>  
            </View>
+           </TouchableHighlight>
+           );
   }
-  onSelect() {
+  formatDocument1(model, resource, renderedRow) {
+    var viewCols = model.gridCols || model.viewCols;
+    if (!viewCols)
+      return
+    var verPhoto;
+    var vCols = [];
+    var first = true;
+    var self = this;
+    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
 
+    var properties = model.properties;
+    var noMessage = !resource.message  ||  !resource.message.length;
+    var onPressCall;
+
+    var isSimpleMessage = model.id === 'tradle.SimpleMessage';
+    
+    viewCols.forEach(function(v) {
+      if (properties[v].type === 'array'  ||  properties[v].type === 'date') 
+        return;
+      var style = styles.description; //(first) ? styles.resourceTitle : styles.description;
+
+      if (properties[v].ref) {
+        if (resource[v]) {
+          vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{resource[v].title}</Text>);
+          first = false;
+        }
+
+        return;
+      }
+
+      if (resource[v]  &&  properties[v].type === 'string'  &&  (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0)) 
+        row = <Text style={style} numberOfLines={first ? 2 : 1}>{resource[v]}</Text>;
+      else if (!model.autoCreate) {
+        var val = (properties[v].displayAs) 
+                ? utils.templateIt(properties[v], resource)
+                : resource[v];
+        row = <Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>
+      }
+      else {
+        if (!resource[v]  ||  !resource[v].length)
+          return;
+        var msgParts = utils.splitMessage(resource[v]);
+        // Case when the needed form was sent along with the message
+        if (msgParts.length === 2) {
+          var msgModel = utils.getModel(msgParts[1]);
+          if (msgModel) {
+            vCols.push(<View>
+                         <Text style={style}>{msgParts[0]}</Text>
+                         <Text style={[style, {color: isMyMessage ? '#efffe5' : '#7AAAC3'}]}>{msgModel.value.title}</Text>
+                       </View>);                  
+            return;
+          }
+        }
+        var row = <Text style={style}>{resource[v]}</Text>;
+
+      }
+      if (first) {
+        row = <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                <View>{row}</View>
+                <View><Text style={styles.verySmallLetters}>{renderedRow[0]}</Text></View>
+              </View>
+        renderedRow.splice(0, 1);
+      }
+      vCols.push(row);
+      first = false;
+    }); 
+    // if (model.style) 
+    //   vCols.push(<Text style={styles.verySmallLetters}>{model.title}</Text>);
+    
+    if (vCols  &&  vCols.length) {
+      vCols.forEach(function(v) {
+        renderedRow.push(v);
+      });
+    }
   }
 
 }
@@ -641,9 +745,9 @@ var styles = StyleSheet.create({
   },
   cellImage: {
     backgroundColor: '#dddddd',
-    height: 30,
+    height: 40,
+    width: 40,
     marginRight: 10,
-    width: 30,
     borderColor: 'transparent',
     borderRadius:10,
     borderWidth: 1,
@@ -662,7 +766,17 @@ var styles = StyleSheet.create({
     borderRadius: 10,
     marginRight: 5,
   },
-
+  description: {
+    flexWrap: 'wrap',
+    color: '#999999',
+    fontSize: 14,
+  },
+  separator: {
+    height: 1,
+    marginTop: 5,
+    backgroundColor: '#cccccc',
+    flex: 40
+  }  
 });
 reactMixin(MessageRow.prototype, RowMixin);
 
