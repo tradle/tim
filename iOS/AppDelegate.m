@@ -8,11 +8,17 @@
  */
 
 #import "AppDelegate.h"
-
+#import "RCTLinkingManager.h"
 #import "RCTRootView.h"
 
 @implementation AppDelegate
 
+
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
+  
+  
+  return [RCTLinkingManager application:application openURL:url sourceApplication:sourceApplication annotation:annotation];
+}
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
   NSURL *jsCodeLocation;
@@ -27,17 +33,18 @@
   // To run on device, change `localhost` to the IP address of your computer, and make sure your computer and
   // iOS device are on the same Wi-Fi network.
   jsCodeLocation = [NSURL URLWithString:@"http://localhost:8081/index.ios.bundle"];
+//  jsCodeLocation = [NSURL URLWithString:@"http://172.16.10.67:8081/index.ios.bundle"];
 
-  // OPTION 2
+  // OPTION 2s
   // Load from pre-bundled file on disk. To re-generate the static bundle, run
   //
   // $ curl 'http://localhost:8081/index.ios.bundle?dev=false&minify=true' -o iOS/main.jsbundle
   //
   // and uncomment the next following line
-  // jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
+//  jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
 
   RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
-                                                      moduleName:@"TiM"
+                                                    moduleName:@"TiM"
                                                    launchOptions:launchOptions];
 
   self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
