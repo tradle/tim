@@ -211,7 +211,7 @@ class ShowPropertiesView extends Component {
           if (p == 'photos') {
             var photos = [];
             ret.push(
-               <PhotoList photos={v.photos} navigator={self.props.navigator} numberInRow={4}/>
+               <PhotoList photos={v.photos} navigator={self.props.navigator} numberInRow={4} resource={resource}/>
             );
             continue;
           }          
