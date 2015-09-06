@@ -98,6 +98,8 @@ class ResourceRow extends Component {
       var vCols = utils.getDisplayName(resource, model.properties);
       return <Text style={styles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
     }
+    // if (model.id === 'tradle.Organization')
+    //   viewCols.push('name');
     var vCols = [];
     var properties = model.properties;
     var first = true
@@ -137,7 +139,7 @@ class ResourceRow extends Component {
         return;
       var style = (first) ? styles.resourceTitle : styles.description;
       if (isIdentity  &&  v === 'organization')
-        style = [style, {alignSelf: 'flex-end'}];
+        style = [style, {alignSelf: 'flex-end', marginTop: 20}, styles.verySmallLetters];
       if (properties[v].style)
         style = [style, properties[v].style];
       var ref = properties[v].ref;
@@ -199,8 +201,13 @@ class ResourceRow extends Component {
         first = false;
       }
     }); 
-    if (vCols)
+    if (vCols  &&  vCols.length)
       renderedViewCols = vCols;
+    else {
+      var vCols = utils.getDisplayName(resource, model.properties);
+      return <Text style={styles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
+
+    }
     if (!backlink)
       return renderedViewCols;
     return [ 
