@@ -22,6 +22,7 @@ var {
   Navigator,
   StyleSheet,
   LayoutAnimation,
+  Image,
   Component
 } = React;
 
@@ -94,10 +95,16 @@ class AddNewMessage extends Component {
     return (
       <View style={{height: this.state.keyboardSpace + 45}}>
       <View style={styles.addNew}>
-        <TouchableHighlight style={{paddingLeft: 15}} underlayColor='#eeeeee'
-          onPress={this.props.onAddNewPressed.bind(this)}>
-         <Icon name={'ios-compose'} size={35} style={styles.image}  color='#aaaaaa' />
-        </TouchableHighlight>
+        <View style={{flexDirection: 'row', marginLeft: -8}}>
+          <TouchableHighlight style={{paddingLeft: 15}} underlayColor='#eeeeee'
+            onPress={this.props.onAddNewPressed.bind(this, true)}>
+               <Icon name={'ios-arrow-thin-up'} size={25} style={styles.imageOutline} color='#757575' />
+          </TouchableHighlight>
+          <TouchableHighlight style={{paddingRight: 5}} underlayColor='#eeeeee'
+            onPress={this.props.onAddNewPressed.bind(this)}>
+               <Image source={require('image!edit')} style={[styles.image]} />
+          </TouchableHighlight>
+        </View>
         <View style={styles.searchBar}>
           <ChatMessage ref="chat" resource={resource} 
                        model={model} 
@@ -106,10 +113,10 @@ class AddNewMessage extends Component {
                        onChange={this.onChange.bind(this)}
                        onEndEditing={this.onEndEditing.bind(this)} />
         </View>
-        <TouchableHighlight style={{paddingRight: 5}} underlayColor='transparent'
+        <TouchableHighlight style={{paddingRight: 8}} underlayColor='transparent'
           onPress={this.showChoice.bind(this)}>
           <View>
-            <Icon name='ios-camera' style={styles.image} size={35} color='#aaaaaa' />
+            <Icon name='ios-camera' style={styles.icon} size={40} color='#999999' />
           </View>
         </TouchableHighlight>
         </View>
@@ -280,8 +287,21 @@ var styles = StyleSheet.create({
     backgroundColor: '#eeeeee', 
   },
   image: {
-    width: 40,
-    height: 40,
+    width: 27,
+    height: 27,
+    marginLeft: 5
+  },
+  icon: {
+    width: 35,
+    height: 35,
+  },
+  imageOutline: {
+    width: 27,
+    height: 27,
+    borderRadius: 13,
+    borderColor: '#aaaaaa',
+    paddingLeft: 7,
+    borderWidth: 2,
   },
   addNew: {
     flexDirection: 'row', 
