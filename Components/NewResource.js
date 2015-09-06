@@ -13,11 +13,12 @@ var Actions = require('../Actions/Actions');
 var Store = require('../Store/Store');
 var Reflux = require('reflux');
 var reactMixin = require('react-mixin');
-var { Icon, }  = require('react-native-icons');
+var Icon = require('react-native-vector-icons/Ionicons');
 var myStyles = require('../styles/styles');
 var KeyboardEvents = require('react-native-keyboardevents');
 var KeyboardEventEmitter = KeyboardEvents.Emitter;
 var constants = require('tradle-constants');
+var UIImagePickerManager = require('NativeModules').UIImagePickerManager;
 
 var Form = t.form.Form;
 Form.stylesheet = myStyles;
@@ -227,22 +228,12 @@ class NewResource extends Component {
     if (!item)
       return;
     var resource = this.addFormValues();
-    // var value = this.refs.form.getValue();
-    // var json = value ? JSON.parse(JSON.stringify(value)) : {};
-    // var resource = this.state.resource;
-    // if (!resource) {
-    //   resource = {};
-    //   resource[constants.TYPE] = this.props.model.id;
-    // }
     var items = resource[propName];
     if (!items) {
       items = [];
       resource[propName] = items;
     }
     items.push(item);
-    // for (var p in json)
-    //   if (!resource[p] && json[p])
-    //     resource[p] = json[p];
     this.setState({resource: resource, err: ''});
   }
   onNewPressed(bl) {
@@ -266,6 +257,10 @@ class NewResource extends Component {
     //   });
     //   return;
     // }
+    if (bl.name === 'photos') {
+      this.showChoice();
+      return;
+    }
     var resource = this.addFormValues();
     this.setState({resource: resource, err: ''});
     this.props.navigator.push({
@@ -284,6 +279,18 @@ class NewResource extends Component {
         parentMeta: this.props.parentMeta,
         onAddItem: this.onAddItem.bind(this)
       }
+    });
+  }
+  showChoice() {
+    var self = this;
+    UIImagePickerManager.showImagePicker(null, (type, response) => {
+      if (type === 'cancel') 
+        return;
+      var item = {
+        title: 'photo',
+        url: response
+      };
+      self.onAddItem('photos', item);
     });
   }
 
@@ -341,7 +348,7 @@ class NewResource extends Component {
         else if (model.required  &&  model.required.indexOf(bl.name) != -1)
           counter = 
             <View>
-            <Icon name='fontawesome|asterisk'  size={20}  color='#96415A'  style={styles.icon}/>
+            <Icon name='asterisk'  size={20}  color='#96415A'  style={styles.icon}/>
             </View>;
         else
           counter = <View></View>    
@@ -349,7 +356,7 @@ class NewResource extends Component {
       else if (self.props.model.required  &&  self.props.model.required.indexOf(bl.name) != -1)
         counter = 
           <View>
-            <Icon name='fontawesome|asterisk'  size={20}  color='#96415A'  style={styles.icon}/>
+            <Icon name='asterisk'  size={20}  color='#96415A'  style={styles.icon}/>
           </View>;
       else
         counter = <View></View>    
@@ -359,7 +366,7 @@ class NewResource extends Component {
             onPress={self.onNewPressed.bind(self, bl)}>
           <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
             <View style={{justifyContent: 'flex-start', flexDirection: 'row'}}>
-              <Icon name='fontawesome|plus'   size={20}  color='#7AAAC3'  style={styles.icon} />
+              <Icon name='plus'   size={20}  color='#7AAAC3'  style={styles.icon} />
               <Text style={styles.itemsText}>{bl.title}</Text>
             </View>
             {counter}
@@ -368,18 +375,18 @@ class NewResource extends Component {
       );
     });
     var FromToView = require('./FromToView');
-    var style = isMessage ? {height: 570} : {height: 867};
-    style.marginTop = 64;
+    // var style = isMessage ? {height: 570} : {height: 867};
+    var style = {marginTop: 64};
     options.auto = 'placeholders';
     options.tintColor = 'red'
-
+    var photoStyle = isMessage ? {marginTop: -45} : styles.photoBG; 
+    // <FromToView resource={resource} model={meta} navigator={this.props.navigator} />
     var content = <ScrollView style={style}>
                     <View style={styles.container}>
                       <Text style={errStyle}>{err}</Text>
-                      <View style={styles.photoBG}>
+                      <View style={photoStyle}>
                         <PhotoView resource={resource} />
                       </View>
-                      <FromToView resource={resource} model={meta} navigator={this.props.navigator} />
                       <View style={{'padding': 15}}>
                         <Form ref='form' type={Model} options={options} value={data} />          
                         {arrayItems}
@@ -387,20 +394,20 @@ class NewResource extends Component {
                       <View style={{height: 30}} />          
                     </View>
                   </ScrollView>
-    if (isMessage) 
-      return (
-        <View>
-          {content}
-          <View style={{height: this.state.keyboardSpace}}>
-          <View style={{marginTop: -35}}>
-            <ChatMessage resource={resource} 
-                         model={meta} 
-                         onSubmitEditing={this.onSubmitEditing.bind(this)} />
-          </View>    
-          </View>
-        </View>
-      );
-    else
+    // if (isMessage) 
+    //   return (
+    //     <View>
+    //       {content}
+    //       <View style={{height: this.state.keyboardSpace}}>
+    //       <View style={{marginTop: -35}}>
+    //         <ChatMessage resource={resource} 
+    //                      model={meta} 
+    //                      onSubmitEditing={this.onSubmitEditing.bind(this)} />
+    //       </View>    
+    //       </View>
+    //     </View>
+    //   );
+    // else
       return content;
   }
   onEndEditing(prop, event) {
