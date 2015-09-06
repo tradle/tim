@@ -6,7 +6,7 @@
 'use strict';
 
 var ICON_BORDER_COLOR = '#D7E6ED';
-var BACKGROUND_COLOR = '#7AAAC3';
+var BACKGROUND_COLOR = /*'#2E3B4E';*/'#7AAAC3';
 var ERROR_COLOR = '#a94442';
 var HELP_COLOR = '#999999';
 var BORDER_COLOR = '#cccccc';
@@ -20,7 +20,7 @@ var buttonStyles = Object.freeze({
   icon: {
     width: 30,
     height: 30,
-    paddingLeft: 5,
+    paddingLeft: 4,
     borderWidth: 1,
     borderColor: ICON_BORDER_COLOR,
     borderRadius: 15,
@@ -35,10 +35,11 @@ var buttonStyles = Object.freeze({
   },
   buttons: {
     // marginTop: -80,
-    opacity: 0.8,
-    height: 80, 
+    // opacity: 0.8,
+    height: 75, 
     flexDirection: 'row',
-    backgroundColor: '#909090', 
+    backgroundColor: '#a0a0a0', 
+
     // backgroundColor: BACKGROUND_COLOR, 
     justifyContent: 'center',
     alignSelf: 'stretch'
@@ -46,6 +47,7 @@ var buttonStyles = Object.freeze({
   text: {
     color: '#ffffff', 
     paddingVertical: 10,
+    fontWeight: FONT_WEIGHT,
     fontSize: FONT_SIZE
   },
 
