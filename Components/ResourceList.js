@@ -24,8 +24,10 @@ var {
   StyleSheet,
   Navigator,
   TouchableHighlight,
+  Image,
   StatusBarIOS,
   View,
+  Text
 } = React;
 
 class ResourceList extends Component {
@@ -54,8 +56,9 @@ class ResourceList extends Component {
       params.isAggregation = true;
     if (this.props.sortProperty)
       params.sortProperty = this.props.sortProperty;
-    if (this.props.prop)
-      params.prop = this.props.prop;
+    if (this.props.prop) 
+      params.prop = utils.getModel(this.props.resource[constants.TYPE]).value.properties[this.props.prop];
+    
     this.state.isLoading = true;
     Actions.list(params);    
   }
@@ -125,7 +128,11 @@ class ResourceList extends Component {
     var me = utils.getMe();
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     var model = utils.getModel(this.props.modelName);
-    if (this.props.modelName != constants.TYPES.IDENTITY  &&  !this.props.callback) {
+    var isIdentity = this.props.modelName === constants.TYPES.IDENTITY;
+    var isOrganization = this.props.modelName === 'tradle.Organization';
+    if (!isIdentity         &&  
+        !isOrganization     &&
+        !this.props.callback) {
       var m = utils.getModel(resource[constants.TYPE]).value;
       this.props.navigator.push({
         title: utils.makeTitle(utils.getDisplayName(resource, m.properties)),
@@ -168,7 +175,7 @@ class ResourceList extends Component {
         return;
       }
     }
-    var title = resource.firstName; //utils.getDisplayName(resource, model.value.properties);
+    var title = isIdentity ? resource.firstName : resource.name; //utils.getDisplayName(resource, model.value.properties);
     var modelName = 'tradle.Message';
     var self = this;
     var route = {
@@ -180,8 +187,10 @@ class ResourceList extends Component {
         filter: '',
         modelName: modelName,
       },
-      rightButtonTitle: 'Profile', //'fontawesome|user',
-      onRightButtonPress: {
+    }
+    if (isIdentity) {
+      route.rightButtonTitle = 'Profile';
+      route.onRightButtonPress = {
         title: title,
         id: 3,
         component: ResourceView,
@@ -200,9 +209,8 @@ class ResourceList extends Component {
             resource: resource
           }
         },
-
         passProps: {resource: resource}
-      }
+      }      
     }
     this.props.navigator.push(route);
   }
@@ -236,7 +244,9 @@ class ResourceList extends Component {
       this.props.navigator.popToRoute(this.props.returnRoute);
       return;
     }
-    if (me  &&  !model.value.isInterface  &&  (resource[constants.ROOT_HASH] === me[constants.ROOT_HASH]  ||  resource[constants.TYPE] !== constants.TYPES.IDENTITY)) {
+    if (me                       &&  
+       !model.value.isInterface  &&  
+       (resource[constants.ROOT_HASH] === me[constants.ROOT_HASH]  ||  resource[constants.TYPE] !== constants.TYPES.IDENTITY)) {
       var self = this ;
       route.rightButtonTitle = 'Edit';
       route.onRightButtonPress = /*() =>*/ {
@@ -341,16 +351,19 @@ class ResourceList extends Component {
 
     return (
       <View style={styles.footer}>
-        <View>
-          <TouchableHighlight underlayColor='transparent' onPress={this.addNew.bind(this)}>
-            <View>
-              <Icon name='ion|plus'  size={30}  color='#999999' style={styles.icon} /> 
-            </View>
-          </TouchableHighlight>
-        </View>  
+        <TouchableHighlight underlayColor='transparent' onPress={this.addNew.bind(this)}>
+          <View>
+            <Icon name='ion|plus'  size={30}  color='#999999' style={styles.icon} /> 
+          </View>
+        </TouchableHighlight>
       </View>
     );
   }
+        // <TouchableHighlight underlayColor='transparent' onPress={this.showBanks.bind(this)}>
+        //   <View>
+        //     <Image source={require('image!banking')} style={styles.image} /> 
+        //   </View>
+        // </TouchableHighlight>
       // <View>
         //   <TouchableHighlight underlayColor='transparent' onPress={this.showDeals.bind(this, DEAL_MODEL)}>
         //     <View>
@@ -373,6 +386,18 @@ class ResourceList extends Component {
   //     },
   //   })
   // }
+  showBanks() {
+    this.props.navigator.push({
+      title: 'Banks',
+      id: 10,
+      component: ResourceList,
+      backButtonTitle: 'Back',
+      titleTextColor: '#7AAAC3',
+      passProps: {
+        modelName: 'tradle.Organization'
+      }
+    });    
+  }
   addNew() {
     var model = utils.getModel(this.props.modelName).value;
     var r;
@@ -423,6 +448,7 @@ class ResourceList extends Component {
       content = <ListView ref='listview'
           dataSource={this.state.dataSource}
           renderRow={this.renderRow.bind(this)}
+          renderHeader={this.renderHeader.bind(this)}
           automaticallyAdjustContentInsets={false}
           keyboardDismissMode='on-drag'
           keyboardShouldPersistTaps={true}
@@ -430,12 +456,13 @@ class ResourceList extends Component {
     }
     var model = utils.getModel(this.props.modelName).value;
     var Footer = this.renderFooter();
+    var header = this.renderHeader();
     return (
       <View style={styles.container}> 
         <SearchBar
           onChangeText={this.onSearchChange.bind(this)}
           placeholder='Search'
-          showsCancelButton={false}
+          showsCancelButton={false}          
           hideBackground={true}
           />
         <View style={styles.separator} />
@@ -444,6 +471,24 @@ class ResourceList extends Component {
       </View>
     );
   }
+  renderHeader() {
+    return (this.props.modelName === constants.TYPES.IDENTITY)
+          ? <View style={{padding: 5, backgroundColor: '#D7E9F3'}}>
+              <TouchableHighlight underlayColor='transparent' onPress={this.showBanks.bind(this)}>
+                <View style={styles.row}>
+                  <View>
+                    <Image source={require('image!banking')} style={styles.cellImage} /> 
+                  </View>
+                  <View style={styles.textContainer} key={this.props.key + '2'}>
+                    <Text style={styles.resourceTitle}>Official Accounts</Text>
+                  </View>
+                </View>
+              </TouchableHighlight>
+            </View>
+          : <View />
+
+  }
+
 }
       // <View style={styles.container}> 
       //   <SearchBar
@@ -479,6 +524,12 @@ var styles = StyleSheet.create({
     marginRight: 5,
     // color: '#cccccc'
   },
+  image: {
+    width: 25,
+    height: 25,
+    marginRight: 5,
+    // color: '#cccccc'
+  },
   footer: {
     flexDirection: 'row',
     flexWrap: 'nowrap',
@@ -492,7 +543,33 @@ var styles = StyleSheet.create({
     borderLeftColor: '#eeeeee', 
     borderWidth: 1,
     borderTopColor: '#cccccc',
-  }
+  },
+  row: {
+    // backgroundColor: 'white',
+    // justifyContent: 'space-around',
+    flexDirection: 'row',
+    padding: 5,
+  },
+  textContainer: {
+    flex: 1,
+  },
+  resourceTitle: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '400',
+    marginBottom: 2,
+    paddingLeft: 5
+  },
+  cellImage: {
+    // backgroundColor: '#dddddd',
+    height: 50,
+    marginRight: 10,
+    width: 50,
+    // borderColor: '#7AAAc3',
+    // borderRadius: 30,
+    // borderWidth: 1,
+  },
+
 });
 
 module.exports = ResourceList;
