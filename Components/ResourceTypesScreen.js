@@ -15,6 +15,7 @@ var {
   Component,
   StyleSheet,
   View,
+  AlertIOS
 } = React;
 
 
@@ -55,6 +56,21 @@ class ResourceTypesScreen extends Component {
 
     if (resource[constants.TYPE])
       return;
+    if (this.props.sendForm) {
+      var buttons = [{
+        text: 'Cancel',
+      }, 
+      {
+        text: 'OK',
+        onPress: this.sendFormTo.bind(this, resource)
+      }];      
+      var to = this.props.resource;
+      AlertIOS.prompt(
+        'Sending ' + resource.title + ' form to ' + utils.getDisplayName(to, utils.getModel(to[constants.TYPE]).value.properties),
+        buttons
+      );
+      return;
+    }
     var page = {
       model: utils.getModel(resource.id).value,
       resource: {
@@ -72,10 +88,31 @@ class ResourceTypesScreen extends Component {
       id: 4,
       title: resource.title,
       rightButtonTitle: 'Done',
+      backButtonTitle: 'Back',
       component: NewResource,
       titleTextColor: '#7AAAC3',
       passProps: page
     });
+  }
+
+  sendFormTo(model, msg) {
+    var me = utils.getMe();
+    var resource = {from: utils.getMe(), to: this.props.resource};
+    // var model = utils.getModel(this.props.modelName).value;
+
+    var toName = utils.getDisplayName(resource.to, utils.getModel(resource.to[constants.TYPE]).value.properties);
+    var meta = utils.getModel(me[constants.TYPE]).value.properties;
+    var meName = utils.getDisplayName(me, meta);
+    var modelName = 'tradle.SimpleMessage';
+    var value = {
+      message: '[' + msg + '](' + model.id + ')',
+      from: me,
+      to: resource.to,
+      time: new Date().getTime()
+    }
+    value[constants.TYPE] = modelName;
+    Actions.addMessage(value); 
+    this.props.navigator.pop();
   }
 
   renderRow(resource)  {
