@@ -680,7 +680,8 @@ var voc = [{
        displayName: true
      },
      dateOfExpiry: {
-       type: 'date'
+       type: 'date',
+       displayName: true
      },
      'from': {
       'type': 'object',
@@ -778,7 +779,8 @@ var voc = [{
       type: 'date',      
      },
      dateOfExpiry: {
-       type: 'date'
+       type: 'date',
+       displayName: true
      },
      issuingAuthority: {
        type: 'string'
@@ -842,10 +844,10 @@ var voc = [{
     'to', 'from', 'photos', 'licenseNumber', 'surname', 'givenName', 'dateOfBirth', 'dateOfIssue', 'dateOfExpiry', 'issuingAuthority', 'holderAddress', 'entitlementCategories'
   ],
   'gridCols': [
-    'licenseNumber', 'time'
+    'from', 'licenseNumber', 'dateOfExpiry', 'time'
   ],
   'viewCols': [
-    'time', 'photos', 'blockchainUrl', 'verifications'
+    'photos', 'licenseNumber', 'surname', 'givenName', 'dateOfBirth', 'dateOfIssue', 'dateOfExpiry', 'issuingAuthority', 'holderAddress', 'entitlementCategories', 'verifications'
   ],
 },
 
@@ -1486,6 +1488,7 @@ var voc = [{
   id: 'tradle.Organization',
   type: 'object',
   title: 'Organization',
+  sort: 'lastMessageTime',  
   properties: {
     '_t': {
       type: 'string',
