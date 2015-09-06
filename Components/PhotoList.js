@@ -4,6 +4,7 @@ var React = require('react-native');
 var utils = require('../utils/utils');
 var groupByEveryN = require('groupByEveryN');
 var PhotoCarousel = require('./PhotoCarousel');
+var constants = require('tradle-constants');
 
 var {
   StyleSheet,
@@ -45,9 +46,30 @@ class PhotoList extends Component {
     if (!photos || !photos.length  ||  (photos.length <= 1  &&  this.props.isView))
       return null;
 
+    var inRow = photos.length, height;
+
+    switch (photos.length) {
+      case 1:
+      case 2:
+      case 3:
+        height = 122;
+        break;
+      case 4:  
+        height = 92;
+        break;
+      default:
+      case 5:
+        height = 80;
+        inRow = 5;
+        break;      
+    }    
+    var rows = photos.length / inRow;
+    if (photos.length % inRow)
+      rows++;
+    height *= rows;
     var val = this.renderPhotoList(photos);        
     return (
-       <View style={[styles.photoContainer, this.props.style ? {} : {marginHorizontal: 5}]}>
+       <View style={[styles.photoContainer, this.props.style ? {} : {marginHorizontal: 5, height: height}]}>
          {val}
        </View>
      );
@@ -93,7 +115,6 @@ class PhotoList extends Component {
                 ? <View />
                 : <Text style={styles.photoTitle}>{photo.title}</Text>
 
-
       // return (
       // <Animated.Image                         // Base: Image, Text, View
       //   source={{uri: utils.getImageUri(photo.url)}}
@@ -110,12 +131,9 @@ class PhotoList extends Component {
         source.isStatic = true;
 
       return (
-        <View style={[{paddingTop: 2, marginRight: 1, flexDirection: 'column'}, imageStyle[0]]}>
+        <View style={[{paddingTop: 2, margin: 1, flexDirection: 'column'}, imageStyle[0]]}>
           <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, photo)}>
-            <View>
              <Image style={[styles.thumbCommon, imageStyle]} source={source} />
-            {title}
-            </View>
           </TouchableHighlight>
         </View>
       );
@@ -135,7 +153,8 @@ class PhotoList extends Component {
       component: PhotoCarousel,
       passProps: {
         currentPhoto: currentPhoto,
-        photos: this.props.photos
+        photos: this.props.photos,
+        resource: this.props.resource
       },
       rightButtonTitle: 'Done',
       titleTintColor: 'black',
