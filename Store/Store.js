@@ -226,6 +226,11 @@ var Store = Reflux.createStore({
     })
     .then(function() {
       me = newMe;
+      if (me.organization) {
+        var photos = list[utils.getId(me.organization.id)].value.photos;
+        if (photos)
+          me.organization.photo = photos[0].url;
+      }
       list = {};
       return self.loadResources()
             .then(function() {
@@ -565,11 +570,17 @@ var Store = Reflux.createStore({
       resultList.push(rr);
     }
     var model = this.getModel(params.modelName).value;
+    var isMessage = model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf('tradle.Message') != -1);   
+    var verificationsToShare; 
+    if (isMessage  &&  !params.isAggregation) 
+      verificationsToShare = this.getVerificationsToShare(result, params.to);
     var retParams = {
-      action: model.isInterface  ||  model.interfaces  &&  !params.prop ? 'messageList' : 'list',
+      action: isMessage  &&  !params.prop ? 'messageList' : 'list',
       list: resultList, 
       isAggregation: params.isAggregation      
     }
+    if (verificationsToShare)
+      retParams.verificationsToShare = verificationsToShare;
     if (params.prop)
       retParams.prop = params.prop;
 
@@ -633,7 +644,9 @@ var Store = Reflux.createStore({
          foundResources[key] = r; 
        }
     }
-    if (me  &&  modelName === IDENTITY_MODEL) {
+    // Don't show current 'me' contact in contact list or my identities list
+    var isIdentity = modelName === IDENTITY_MODEL;
+    if (!containerProp  &&  me  &&  isIdentity) {
       if (sampleData.getMyId()) 
         delete foundResources[IDENTITY_MODEL + '_' + me[constants.ROOT_HASH]];
       else {
@@ -646,6 +659,16 @@ var Store = Reflux.createStore({
     }
 
     var result = utils.objectToArray(foundResources);
+    if (isIdentity) {
+      result.forEach(function(r) {
+        if (r.organization) {
+          var photos = list[utils.getId(r.organization.id)].value.photos;
+          if (photos)
+            r.organization.photo = photos[0].url;
+        }      
+      });
+    }
+
     var sortProp = params.sortProperty;
     if (sortProp) {
       var asc = (typeof params.asc != 'undefined') ? params.asc : false;
@@ -690,6 +713,7 @@ var Store = Reflux.createStore({
     var meRootHash = me  &&  me[constants.ROOT_HASH];
     var meId = IDENTITY_MODEL + '_' + meRootHash;
     var toId = to ? to[constants.TYPE] + '_' + to[constants.ROOT_HASH] : null;
+    var toModelName = toId.split('_')[0];
     for (var key in list) {
       var iMeta = null;
       if (isAllMessages) {
@@ -723,6 +747,8 @@ var Store = Reflux.createStore({
               r.organization.photos = [orgPhotos[0]];
           }
         }
+        if (r.document  &&  r.document.id) 
+          r.document = list[utils.getId(r.document.id)].value;
       }
       if (to) {
         if (backlink  &&  r[backlink]) {
@@ -738,7 +764,7 @@ var Store = Reflux.createStore({
         var toID = utils.getId(r.to);
         if (fromID !== meId  &&  toID !== meId) 
           continue;
-        var id = IDENTITY_MODEL + '_' + to[constants.ROOT_HASH];
+        var id = toModelName + '_' + to[constants.ROOT_HASH];
         if (fromID !== id  &&  toID != id)
           continue;
       }
@@ -763,6 +789,9 @@ var Store = Reflux.createStore({
     }
 
     var result = utils.objectToArray(foundResources);
+
+    // find possible verifications for the requests that were not yet fulfilled from other verification providers
+
     result.sort(function(a,b) {
       // Turn your strings into dates, and then subtract them
       // to get a value that is either negative, positive, or zero.
@@ -795,7 +824,64 @@ var Store = Reflux.createStore({
     }
     return resource;
   },
+  getVerificationsToShare(foundResources, to) {
+    var verTypes = [];
+    var meId = me[constants.TYPE] + '_' + me[constants.ROOT_HASH];
+    for (var i=0; i<foundResources.length; i++) {
+      var r = foundResources[i];
+      if (me  &&  utils.getId(r.to) !== meId)
+        continue;
+      if (r[constants.TYPE] !== 'tradle.SimpleMessage'  ||  r.verifications) 
+        continue;
+      var msgParts = utils.splitMessage(r.message);
+      // Case when the needed form was sent along with the message
+      if (msgParts.length !== 2) 
+        continue;
+      var msgModel = utils.getModel(msgParts[1]);
+      if (msgModel) 
+        verTypes.push(msgModel.value.id);      
+    }
+    var verificationsToShare = {};
+    if (!verTypes.length) 
+      return;
 
+    for (var key in list) {
+      var type = key.split('_')[0];
+      var model = utils.getModel(type).value;
+      if (model.id !== 'tradle.Verification' && (!model.subClassOf  ||  model.subClassOf !== 'tradle.Verification'))
+        continue;
+      
+      var doc = list[key].value.document;
+      var docType = (doc.id && doc.id.split('_')[0]) || doc[constants.TYPE];
+      if (verTypes.indexOf(docType) === -1)
+        continue;
+      var val = list[key].value;
+      var id = utils.getId(val.to.id);
+      if (id === meId) {
+        var document = doc.id ? list[utils.getId(doc.id)].value : doc;
+        if (to  &&  to.organization  &&  document.verifications) {
+          var thisCompanyVerification;
+          for (var i=0; i<document.verifications.length; i++) {
+            var v = document.verifications[i];
+            if (v.organization  &&  utils.getId(to.organization) === utils.getId(v.organization)) {
+              thisCompanyVerification = true;
+              break;
+            }
+          }
+          if (thisCompanyVerification)
+            continue;
+        }
+        var value = {};
+        extend(value, list[key].value);
+        value.document = document;
+        var v = verificationsToShare[docType];
+        if (!v)
+          verificationsToShare[docType] = [];
+        verificationsToShare[docType].push(value);
+      }
+    } 
+    return verificationsToShare;
+  },
   _putResourceInDB(modelName, value, isRegistration) {    
     // Cleanup null form values
     for (var p in value) {
@@ -861,8 +947,14 @@ var Store = Reflux.createStore({
 
     db.batch(batch)
     .then(function(results) {
-      if (isRegistration)
+      if (isRegistration) {
         me = value;
+        if (me.organization) {
+          var photos = list[utils.getId(me.organization.id)].value.photos;
+          if (photos)
+            me.organization.photo = photos[0].url;
+        }
+      }
       return db.get(iKey)
     })
     .then(function(value) {
@@ -920,6 +1012,11 @@ var Store = Reflux.createStore({
         if (me)  {
           var currentIdentity = me.value.currentIdentity;
           newIdentity[constants.OWNER] = {id: currentIdentity, title: utils.getDisplayName(me, props)};
+          if (me.organization) {
+            var photos = list[utils.getId(me.organization.id)].value.photos;
+            if (photos)
+              me.organization.photo = photos[0].url;
+          }
         }
         
         if (contact.thumbnailPath  &&  contact.thumbnailPath.length)
@@ -1007,6 +1104,11 @@ var Store = Reflux.createStore({
        } 
      })
     .on('close', function() {
+      if (me  &&  me.organization) {
+        var photos = list[utils.getId(me.organization.id)].value.photos;
+        if (photos)
+          me.organization.photo = photos[0].url;
+      }
       console.log('Stream closed');
     })      
     .on('end', function() {
