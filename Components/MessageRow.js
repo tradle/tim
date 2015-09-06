@@ -243,13 +243,18 @@ class MessageRow extends Component {
 
     var viewStyle = { margin:1, backgroundColor: '#f7f7f7' }
     // var viewStyle = { margin:1, backgroundColor: '#f7f7f7' }
+    var isModel = !this.props.resource[constants.TYPE];
+    var model = isModel ? utils.getModel(this.props.resource.id).value : utils.getModel(this.props.resource[constants.TYPE]).value;
+    var isLicense = model.id.indexOf('License') !== -1  ||  model.id.indexOf('Passport') !== -1;
+    // var isUtility = !isLicense  &&  model.id.indexOf('Utility') !== -1
+    var photoStyle = (isLicense) ? styles.bigImageH : photoStyle;
       
     return (
       <View style={viewStyle} key={resource}>
         {date}
         {messageBody}
         <View style={photoListStyle}>
-          <PhotoList photos={photoUrls} style={[photoStyle, {marginTop: -20}]} navigator={this.props.navigator} numberInRow={inRow} />    
+          <PhotoList photos={photoUrls} resource={this.props.resource} style={[photoStyle, {marginTop: -20}]} navigator={this.props.navigator} numberInRow={inRow} />    
         </View>  
       </View>
     );
@@ -363,6 +368,8 @@ class MessageRow extends Component {
         var msgParts = utils.splitMessage(resource[v]);
         // Case when the needed form was sent along with the message
         if (msgParts.length === 2) {
+          if (!msgParts[0].length)
+            msgParts[0] = 'Form for';
           var msgModel = utils.getModel(msgParts[1]);
           if (msgModel) {
             msgModel = msgModel.value;
@@ -370,7 +377,7 @@ class MessageRow extends Component {
               onPressCall = self.createNewResource.bind(self, msgModel);
             var link = isMyMessage
                      ? <Text style={[style, {color: isMyMessage ? '#efffe5' : '#2892C6'}]}>{msgModel.title}</Text>
-                     : <View style={{flexDirection: 'row'}}>
+                     : <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                          <Text style={[style, {color: isMyMessage ? '#efffe5' : '#2892C6'}]}>{msgModel.title}</Text>
                          <Icon style={styles.linkIcon} size={20} name={'ios-arrow-right'} />
                        </View>
@@ -378,12 +385,12 @@ class MessageRow extends Component {
                          <Text style={style}>{msgParts[0]}</Text>
                          {link}
                        </View>);     
-            if (self.props.verificationsToTransfer) {
+            if (self.props.verificationsToShare) {
               var vtt = [];
               var cnt = 0;
-              for (var t in  self.props.verificationsToTransfer) {
+              for (var t in  self.props.verificationsToShare) {
                 if (t === msgModel.id) {
-                  var ver = self.props.verificationsToTransfer[t];                 
+                  var ver = self.props.verificationsToShare[t];                 
                   ver.forEach(function(r) {
                     var vModel = utils.getModel(r[constants.TYPE]);
                     var doc = self.formatDocument(msgModel, r);
@@ -422,7 +429,7 @@ class MessageRow extends Component {
                   <View>
                     <View style={{flexDirection: 'row'}}>
                       <View style={styles.separator} />
-                      <View style={{flex:20, marginLeft: 10, marginRight: -10}}>
+                      <View style={{flex:20, marginLeft: 10, marginRight: -10, alignSelf: 'center'}}>
                         <Text style={styles.verifications}>OR</Text>
                       </View>
                       <View style={styles.separator} />
@@ -469,10 +476,10 @@ class MessageRow extends Component {
       extend(renderedRow, vCols);
     return onPressCall ? onPressCall : (isSimpleMessage ? null : this.props.onSelect);
   }
-  transfer() {
-    console.log('Transfer')
+  share() {
+    console.log('Share')
   }
-  transferDocs() {
+  shareDocs() {
     this.props.navigator.push({
       title: m.title,
       titleTextColor: '#7AAAC3',
@@ -531,10 +538,10 @@ class MessageRow extends Component {
     return (
            <TouchableHighlight underlayColor='transparent' onPress={() =>
               AlertIOS.alert(
-                'Transfering ' + docTitle + ' verified by ' + verification.organization.title,
-                'to ' + this.props.to.organization.title, 
+                'Sharing ' + docTitle + ' verified by ' + verification.organization.title,
+                'with ' + this.props.to.organization.title, 
                 [
-                  {text: 'Transfer', onPress: this.transfer.bind(this)},
+                  {text: 'Share', onPress: this.share.bind(this)},
                   {text: 'Cancel', onPress: () => console.log('Canceled!')},
                 ]
             )}>
@@ -679,6 +686,12 @@ var styles = StyleSheet.create({
   bigImage: {
     width: 240,
     height: 280,
+    margin: 1,
+    borderRadius: 10
+  },
+  bigImageH: {
+    width: 240,
+    height: 170,
     margin: 1,
     borderRadius: 10
   },
