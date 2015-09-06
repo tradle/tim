@@ -84,7 +84,7 @@ class MessageList extends Component {
       this.setState({
         dataSource: this.state.dataSource.cloneWithRows(list),
         isLoading: false,
-        verificationsToTransfer: params.verificationsToTransfer
+        verificationsToShare: params.verificationsToShare
       });
     }
   }
@@ -140,7 +140,7 @@ class MessageList extends Component {
         resource={resource}
         isAggregation={isAggregation}
         navigator={this.props.navigator}
-        verificationsToTransfer={this.state.verificationsToTransfer}
+        verificationsToShare={this.state.verificationsToShare}
         previousMessageTime={previousMessageTime}
         to={isAggregation ? resource.to : this.props.resource} />
       );
@@ -217,7 +217,7 @@ class MessageList extends Component {
     else
       selectedAssets[asset.node.image.uri] = asset;
   }
-  onAddNewPressed() {
+  onAddNewPressed(sendForm) {
     var modelName = this.props.modelName;
     var model = utils.getModel(modelName).value;
     var isInterface = model.isInterface;
@@ -236,6 +236,7 @@ class MessageList extends Component {
         resource: self.props.resource, 
         returnRoute: currentRoutes[currentRoutes.length - 1],
         modelName: modelName,
+        sendForm: sendForm,
         callback: this.props.callback
       },
       rightButtonTitle: 'ion|plus',
