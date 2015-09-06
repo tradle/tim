@@ -72,7 +72,7 @@ class MessageView extends Component {
         <MoreLikeThis resource={resource} navigator={this.props.navigator}/>
         <VerificationButton  resource={resource} verify={this.verify.bind(this)} verificationList={this.showResources.bind(this)}/>
         <View style={{marginTop: -20}}>
-          <PhotoList photos={resource.photos} isView={true} navigator={this.props.navigator} numberInRow={inRow}/>
+          <PhotoList photos={resource.photos} resource={resource} isView={true} navigator={this.props.navigator} numberInRow={inRow}/>
           <View style={styles.rowContainer}>    
             <View><Text style={styles.itemTitle}>{resource.message}</Text></View>
             <ShowPropertiesView resource={resource} excludedProperties={['tradle.Message.message', 'time', 'photos']} />
