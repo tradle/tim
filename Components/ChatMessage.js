@@ -39,7 +39,7 @@ class ChatMessage extends Component {
             autoCorrect={false}
             bufferDelay={20}
             placeholder={t}
-            placeholderTextColor='#bbbbbb'
+            placeholderTextColor='#aaaaaa'
             style={styles.chatInput}
             value={this.state.userInput}
             onChange={this.handleChange.bind(this)}
@@ -102,17 +102,17 @@ var styles = StyleSheet.create({
   chatInput: {
     height: 30,
     fontSize: 18,
-    paddingLeft: 10,
+    paddingLeft: 7,
     backgroundColor: '#eeeeee',
     fontWeight: 'bold',
     alignSelf: 'stretch',
     borderColor: '#eeeeee',
   },
-  formRequest: {
-    paddingLeft: 10,
-    fontSize: 18,
-    color: '#2E3B4E',
-  },
+  // formRequest: {
+  //   paddingLeft: 10,
+  //   fontSize: 18,
+  //   color: '#2E3B4E',
+  // },
   // mythingscontainer: {
   //   flex: 1,
   //   justifyContent: "center",
