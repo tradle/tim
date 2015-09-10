@@ -90,20 +90,24 @@ class AddNewMessage extends Component {
     }
   }
   render() {
-    var resource = {from: utils.getMe(), to: this.props.resource};
+    var me = utils.getMe();
+    var resource = {from: me, to: this.props.resource};
     var model = utils.getModel(this.props.modelName).value;
+    var pushForm = me.organization
+                 ? <TouchableHighlight style={{paddingLeft: 20}} underlayColor='#eeeeee'
+                     onPress={this.props.onAddNewPressed.bind(this, true)}>
+                       <Icon name={'ios-arrow-thin-up'} size={25} style={styles.imageOutline} color='#757575' />
+                   </TouchableHighlight>
+                 : <View style={{marginLeft: 10}}/>
+          // <TouchableHighlight style={{paddingRight: 5}} underlayColor='#eeeeee'
+          //   onPress={this.props.onAddNewPressed.bind(this)}>
+          //      <Image source={require('image!edit')} style={[styles.image]} />
+          // </TouchableHighlight>
     return (
       <View style={{height: this.state.keyboardSpace + 45}}>
       <View style={styles.addNew}>
         <View style={{flexDirection: 'row', marginLeft: -8}}>
-          <TouchableHighlight style={{paddingLeft: 15}} underlayColor='#eeeeee'
-            onPress={this.props.onAddNewPressed.bind(this, true)}>
-               <Icon name={'ios-arrow-thin-up'} size={25} style={styles.imageOutline} color='#757575' />
-          </TouchableHighlight>
-          <TouchableHighlight style={{paddingRight: 5}} underlayColor='#eeeeee'
-            onPress={this.props.onAddNewPressed.bind(this)}>
-               <Image source={require('image!edit')} style={[styles.image]} />
-          </TouchableHighlight>
+          {pushForm}
         </View>
         <View style={styles.searchBar}>
           <ChatMessage ref="chat" resource={resource} 
@@ -150,25 +154,25 @@ class AddNewMessage extends Component {
     });
   }
 
-  showChoice1() {
-    var buttons = ['Take photo', 'Photo library', 'Cancel'];
-    var self = this;
-    ActionSheetIOS.showActionSheetWithOptions({
-      options: buttons,
-      cancelButtonIndex: 2
-    }, function(buttonIndex) {
-    if (buttonIndex == 0)
-      self.props.onTakePicPressed();
-    else
-      self.selectPhotoFromTheLibrary();
-    });
-  }
-  onButtonPress(buttonIndex) {
-    if (buttonIndex == 0)
-      this.props.onTakePicPressed();
-    else if (buttonIndex == 1)
-      this.selectPhotoFromTheLibrary();
-  }
+  // showChoice1() {
+  //   var buttons = ['Take photo', 'Photo library', 'Cancel'];
+  //   var self = this;
+  //   ActionSheetIOS.showActionSheetWithOptions({
+  //     options: buttons,
+  //     cancelButtonIndex: 2
+  //   }, function(buttonIndex) {
+  //   if (buttonIndex == 0)
+  //     self.props.onTakePicPressed();
+  //   else
+  //     self.selectPhotoFromTheLibrary();
+  //   });
+  // }
+  // onButtonPress(buttonIndex) {
+  //   if (buttonIndex == 0)
+  //     this.props.onTakePicPressed();
+  //   else if (buttonIndex == 1)
+  //     this.selectPhotoFromTheLibrary();
+  // }
   onPhotoSelect(asset) {
     var selectedAssets = this.state.selectedAssets;
     // unselect if was selected before
