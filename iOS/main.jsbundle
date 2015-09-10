@@ -1429,11 +1429,12 @@ GLOBAL.document.createElement = null;}
 
 GLOBAL.MutationObserver = undefined;})(
 this);
-__d('Identity/index.ios.js',["react-native-level/index.js","react-native/Libraries/react-native/react-native.js","Identity/Components/ResourceList.js","Identity/Components/TimHome.js","Identity/Components/ResourceTypesScreen.js","Identity/Components/NewResource.js","Identity/Components/NewItem.js","Identity/Components/ResourceView.js","Identity/Components/MessageView.js","Identity/Components/MessageList.js","Identity/Components/ArticleView.js","Identity/Components/IdentitiesList.js","Identity/Components/SelectPhotoList.js","Identity/Components/CameraView.js","Identity/Components/PhotoCarousel.js","Identity/utils/utils.js","tradle-constants/index.js","react-native-icons/index.js","react-mixin/index.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
+__d('Identity/index.ios.js',["Ionicons","react-native-level/index.js","react-native/Libraries/react-native/react-native.js","Identity/Components/ResourceList.js","Identity/Components/GridList.js","Identity/Components/TimHome.js","Identity/Components/ResourceTypesScreen.js","Identity/Components/NewResource.js","Identity/Components/NewItem.js","Identity/Components/ResourceView.js","Identity/Components/MessageView.js","Identity/Components/MessageList.js","Identity/Components/ArticleView.js","Identity/Components/IdentitiesList.js","Identity/Components/SelectPhotoList.js","Identity/Components/CameraView.js","Identity/Components/PhotoCarousel.js","Identity/utils/utils.js","tradle-constants/index.js","react-mixin/index.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
 
 require('react-native-level/index.js');
 var React=require('react-native/Libraries/react-native/react-native.js');
 var ResourceList=require('Identity/Components/ResourceList.js');
+var GridList=require('Identity/Components/GridList.js');
 var TimHome=require('Identity/Components/TimHome.js');
 var ResourceTypesScreen=require('Identity/Components/ResourceTypesScreen.js');
 var NewResource=require('Identity/Components/NewResource.js');
@@ -1447,13 +1448,12 @@ var SelectPhotoList=require('Identity/Components/SelectPhotoList.js');
 var CameraView=require('Identity/Components/CameraView.js');
 var PhotoCarousel=require('Identity/Components/PhotoCarousel.js');
 var utils=require('Identity/utils/utils.js');
-var constants=require('tradle-constants/index.js');var _require=
-require('react-native-icons/index.js');var Icon=_require.Icon;
+var constants=require('tradle-constants/index.js');
+var Icon=require('Ionicons');
 
 
-var reactMixin=require('react-mixin/index.js');
+var reactMixin=require('react-mixin/index.js');var 
 
-var IDENTITY_MODEL='tradle.Identity';var 
 
 Component=
 
@@ -1463,56 +1463,23 @@ Component=
 
 
 
-React.Component;var Navigator=React.Navigator;var Image=React.Image;var View=React.View;var Text=React.Text;var TouchableOpacity=React.TouchableOpacity;var StyleSheet=React.StyleSheet;
 
-var styles=StyleSheet.create({
-icon:{
-width:20,
-height:20,
-marginTop:15},
-
-orgImage:{
-width:20,
-height:20,
-marginTop:15,
-marginRight:3,
-borderRadius:10},
-
-container:{
-flex:1},
-
-
-
-
-navBarText:{
-fontSize:16,
-marginVertical:15},
-
-navBarTitleText:{
-color:'#2E3B4E',
-fontWeight:'500',
-marginVertical:14},
-
-navBarLeftButton:{
-paddingLeft:15},
-
-navBarRightButton:{
-paddingRight:15},
-
-navBarButtonText:{
-color:'#7AAAC3'}});var 
-
+React.Component;var Navigator=React.Navigator;var Image=React.Image;var View=React.View;var Text=React.Text;var TouchableOpacity=React.TouchableOpacity;var StyleSheet=React.StyleSheet;var LinkingIOS=React.LinkingIOS;var 
 
 
 TiMApp=(function(_Component){_inherits(TiMApp,_Component);
 function TiMApp(props){_classCallCheck(this,TiMApp);
-_get(Object.getPrototypeOf(TiMApp.prototype),'constructor',this).call(this,props);}_createClass(TiMApp,[{key:'render',value:
+_get(Object.getPrototypeOf(TiMApp.prototype),'constructor',this).call(this,props);}_createClass(TiMApp,[{key:'componentDidMount',value:
 
 
 
+
+function componentDidMount(){
+var url=LinkingIOS.popInitialURL();
+var u=url;}},{key:'render',value:
 
 function render(){
-var props={modelName:IDENTITY_MODEL};
+var props={modelName:constants.TYPES.IDENTITY};
 return (
 React.createElement(Navigator,{
 style:styles.container,
@@ -1544,12 +1511,13 @@ function renderScene(route,nav){
 var props=route.passProps;
 switch(route.id){
 case 1:
-return React.createElement(TimHome,{navigator:nav,modelName:IDENTITY_MODEL,filter:props.filter});
+return React.createElement(TimHome,{navigator:nav,modelName:constants.TYPES.IDENTITY,filter:props.filter});
 case 2:
 return React.createElement(ResourceTypesScreen,{navigator:nav,
 modelName:props.modelName,
 resource:props.resource,
 returnRoute:props.returnRoute,
+sendForm:props.sendForm,
 callback:props.callback});
 case 3:
 return React.createElement(ResourceView,{navigator:nav,
@@ -1604,7 +1572,18 @@ onSelect:props.onSelect,
 onSelectingEnd:props.onSelectingEnd});
 
 case 14:
-return React.createElement(PhotoCarousel,{photos:props.photos,currentPhoto:props.currentPhoto});
+return React.createElement(PhotoCarousel,{photos:props.photos,currentPhoto:props.currentPhoto,resource:props.resource});
+case 15:
+return React.createElement(GridList,{navigator:nav,
+filter:props.filter,
+resource:props.resource,
+prop:props.prop,
+returnRoute:props.returnRoute,
+callback:props.callback,
+isAggregation:props.isAggregation,
+sortProperty:props.sortProperty,
+modelName:props.modelName});
+
 case 10:
 default:
 return React.createElement(ResourceList,{navigator:nav,
@@ -1638,7 +1617,7 @@ var title=lbTitle.indexOf('|') == -1?
 React.createElement(Text,{style:style},
 lbTitle):
 
-React.createElement(Icon,{name:lbTitle,size:20,color:'#7AAAC3',style:styles.icon});
+React.createElement(Icon,{name:lbTitle.substring(4),size:20,color:'#7AAAC3',style:styles.icon});
 return (
 React.createElement(TouchableOpacity,{
 onPress:function(){return navigator.pop();}},
@@ -1659,7 +1638,7 @@ var title=route.rightButtonTitle.indexOf('|') == -1?
 React.createElement(Text,{style:style},
 route.rightButtonTitle):
 
-React.createElement(Icon,{name:route.rightButtonTitle,size:20,color:'#7AAAC3',style:styles.icon});
+React.createElement(Icon,{name:route.rightButtonTitle.substring(4),size:20,color:'#7AAAC3',style:styles.icon});
 
 return (
 React.createElement(TouchableOpacity,{
@@ -1685,28 +1664,68 @@ title)));},
 
 Title:function(route,navigator,index,navState){
 var org;
+var style=[styles.navBarText,styles.navBarTitleText];
 if(route.passProps.modelName){
 if(route.passProps.modelName === 'tradle.Message'){
 if(route.passProps.resource && route.passProps.resource[constants.TYPE] === constants.TYPES.IDENTITY){
-if(route.passProps.resource.organization && route.passProps.resource.organization.photo)
-org = React.createElement(Image,{source:{uri:route.passProps.resource.organization.photo},style:styles.orgImage});}}}
+
+
+if(route.passProps.resource.organization)
+org = React.createElement(Text,{style:style},' - ',route.passProps.resource.organization.title);}}}
 
 
 
 if(!org)
 org = React.createElement(View,null);
-var style=[styles.navBarText,styles.navBarTitleText];
 if(route.titleTintColor)
 style.push({color:route.titleTintColor});
 return (
 React.createElement(View,{style:{flexDirection:'row',flex:1}},
-org,
 React.createElement(Text,{style:style},
-route.title)));}};
+route.title),
+
+org));}};
 
 
 
 
+
+
+var styles=StyleSheet.create({
+icon:{
+width:20,
+height:20},
+
+
+orgImage:{
+width:20,
+height:20,
+marginTop:15,
+marginRight:3,
+borderRadius:10},
+
+container:{
+flex:1},
+
+navBar:{
+marginTop:16},
+
+navBarText:{
+fontSize:16},
+
+navBarTitleText:{
+color:'#2E3B4E',
+fontWeight:'500',
+fontSize:16},
+
+navBarLeftButton:{
+paddingLeft:15},
+
+navBarRightButton:{
+paddingRight:15},
+
+navBarButtonText:{
+color:'#7AAAC3'}});
 
 
 
@@ -56653,7 +56672,7 @@ return exports;};
 
 module.exports(CHARS,module.exports);
 });
-__d('Identity/Components/ResourceList.js',["react-native/Libraries/react-native/react-native.js","react-native-search-bar/SearchBar.js","Identity/Components/NoResources.js","Identity/Components/ResourceRow.js","Identity/Components/ResourceView.js","Identity/Components/VerificationRow.js","Identity/Components/NewResource.js","Identity/Components/MessageList.js","Identity/utils/utils.js","react-mixin/index.js","Identity/Store/Store.js","Identity/Actions/Actions.js","reflux/src/index.js","tradle-constants/index.js","react-native-icons/index.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
+__d('Identity/Components/ResourceList.js',["image!banking","react-native/Libraries/react-native/react-native.js","react-native-search-bar/SearchBar.js","Identity/Components/NoResources.js","Identity/Components/ResourceRow.js","Identity/Components/ResourceView.js","Identity/Components/VerificationRow.js","Identity/Components/NewResource.js","Identity/Components/MessageList.js","Identity/utils/utils.js","react-mixin/index.js","Identity/Store/Store.js","Identity/Actions/Actions.js","reflux/src/index.js","tradle-constants/index.js","react-native-icons/index.js","Identity/Components/GridList.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
 
 var React=require('react-native/Libraries/react-native/react-native.js');
 var SearchBar=require('react-native-search-bar/SearchBar.js');
@@ -56669,8 +56688,8 @@ var Store=require('Identity/Store/Store.js');
 var Actions=require('Identity/Actions/Actions.js');
 var Reflux=require('reflux/src/index.js');
 var constants=require('tradle-constants/index.js');var _require=
-require('react-native-icons/index.js');var Icon=_require.Icon;var 
-
+require('react-native-icons/index.js');var Icon=_require.Icon;
+var GridList=require('Identity/Components/GridList.js');var 
 
 
 
@@ -56680,7 +56699,10 @@ ListView=
 
 
 
-React.ListView;var Component=React.Component;var StyleSheet=React.StyleSheet;var Navigator=React.Navigator;var TouchableHighlight=React.TouchableHighlight;var View=React.View;var 
+
+
+
+React.ListView;var Component=React.Component;var StyleSheet=React.StyleSheet;var Navigator=React.Navigator;var TouchableHighlight=React.TouchableHighlight;var Image=React.Image;var StatusBarIOS=React.StatusBarIOS;var View=React.View;var Text=React.Text;var 
 
 ResourceList=(function(_Component){_inherits(ResourceList,_Component);
 function ResourceList(props){_classCallCheck(this,ResourceList);
@@ -56699,6 +56721,7 @@ if(isRegistration)
 this.state.isRegistration = isRegistration;}_createClass(ResourceList,[{key:'componentWillMount',value:
 
 function componentWillMount(){
+StatusBarIOS.setHidden(false);
 var params={
 modelName:this.props.modelName,
 to:this.props.resource};
@@ -56708,7 +56731,8 @@ params.isAggregation = true;
 if(this.props.sortProperty)
 params.sortProperty = this.props.sortProperty;
 if(this.props.prop)
-params.prop = this.props.prop;
+params.prop = utils.getModel(this.props.resource[constants.TYPE]).value.properties[this.props.prop];
+
 this.state.isLoading = true;
 Actions.list(params);}},{key:'componentDidMount',value:
 
@@ -56747,6 +56771,8 @@ isLoading:false});
 return;}
 
 var type=list[0][constants.TYPE];
+if(type === 'tradle.Organization')
+return;
 
 
 if(type !== this.props.modelName){
@@ -56778,7 +56804,11 @@ function selectResource(resource){
 var me=utils.getMe();
 
 var model=utils.getModel(this.props.modelName);
-if(this.props.modelName != constants.TYPES.IDENTITY && !this.props.callback){
+var isIdentity=this.props.modelName === constants.TYPES.IDENTITY;
+var isOrganization=this.props.modelName === 'tradle.Organization';
+if(!isIdentity && 
+!isOrganization && 
+!this.props.callback){
 var m=utils.getModel(resource[constants.TYPE]).value;
 this.props.navigator.push({
 title:utils.makeTitle(utils.getDisplayName(resource,m.properties)),
@@ -56821,7 +56851,7 @@ this._selectResource(resource);
 return;}}
 
 
-var title=resource.firstName;
+var title=isIdentity?resource.firstName:resource.name;
 var modelName='tradle.Message';
 var self=this;
 var route={
@@ -56831,10 +56861,12 @@ id:11,
 passProps:{
 resource:resource,
 filter:'',
-modelName:modelName},
+modelName:modelName}};
 
-rightButtonTitle:'Profile',
-onRightButtonPress:{
+
+if(isIdentity){
+route.rightButtonTitle = 'Profile';
+route.onRightButtonPress = {
 title:title,
 id:3,
 component:ResourceView,
@@ -56853,8 +56885,7 @@ model:utils.getModel(resource[constants.TYPE]).value,
 resource:resource}},
 
 
-
-passProps:{resource:resource}}};
+passProps:{resource:resource}};}
 
 
 this.props.navigator.push(route);}},{key:'_selectResource',value:
@@ -56889,7 +56920,9 @@ this.props.callback(this.props.prop,resource);
 this.props.navigator.popToRoute(this.props.returnRoute);
 return;}
 
-if(me && !model.value.isInterface && (resource[constants.ROOT_HASH] === me[constants.ROOT_HASH] || resource[constants.TYPE] !== constants.TYPES.IDENTITY)){
+if(me && 
+!model.value.isInterface && (
+resource[constants.ROOT_HASH] === me[constants.ROOT_HASH] || resource[constants.TYPE] !== constants.TYPES.IDENTITY)){
 var self=this;
 route.rightButtonTitle = 'Edit';
 route.onRightButtonPress = {
@@ -56989,14 +57022,14 @@ resource:resource});}},{key:'renderFooter',value:
 
 function renderFooter(){
 var me=utils.getMe();
-if(!me)
+if(!me || this.props.prop && this.props.prop.readOnly)
 return React.createElement(View,null);
+
 return (
 React.createElement(View,{style:styles.footer},
-React.createElement(View,null,
 React.createElement(TouchableHighlight,{underlayColor:'transparent',onPress:this.addNew.bind(this)},
 React.createElement(View,null,
-React.createElement(Icon,{name:'ion|plus',size:30,color:'#999999',style:styles.icon}))))));}},{key:'addNew',value:
+React.createElement(Icon,{name:'ion|plus',size:30,color:'#999999',style:styles.icon})))));}},{key:'showBanks',value:
 
 
 
@@ -57022,6 +57055,22 @@ React.createElement(Icon,{name:'ion|plus',size:30,color:'#999999',style:styles.i
 
 
 
+
+
+
+
+
+
+
+function showBanks(){
+this.props.navigator.push({
+title:'Banks',
+id:15,
+component:GridList,
+backButtonTitle:'Back',
+titleTextColor:'#7AAAC3',
+passProps:{
+modelName:'tradle.Organization'}});}},{key:'addNew',value:
 
 
 
@@ -57075,6 +57124,7 @@ var model=utils.getModel(this.props.modelName).value;
 content = React.createElement(ListView,{ref:'listview',
 dataSource:this.state.dataSource,
 renderRow:this.renderRow.bind(this),
+renderHeader:this.renderHeader.bind(this),
 automaticallyAdjustContentInsets:false,
 keyboardDismissMode:'on-drag',
 keyboardShouldPersistTaps:true,
@@ -57082,6 +57132,7 @@ showsVerticalScrollIndicator:false});}
 
 var model=utils.getModel(this.props.modelName).value;
 var Footer=this.renderFooter();
+var header=this.renderHeader();
 return (
 React.createElement(View,{style:styles.container},
 React.createElement(SearchBar,{
@@ -57092,7 +57143,25 @@ hideBackground:true}),
 
 React.createElement(View,{style:styles.separator}),
 content,
-Footer));}}]);return ResourceList;})(Component);
+Footer));}},{key:'renderHeader',value:
+
+
+
+function renderHeader(){
+return this.props.modelName === constants.TYPES.IDENTITY?
+React.createElement(View,{style:{padding:5,backgroundColor:'#D7E9F3'}},
+React.createElement(TouchableHighlight,{underlayColor:'transparent',onPress:this.showBanks.bind(this)},
+React.createElement(View,{style:styles.row},
+React.createElement(View,null,
+React.createElement(Image,{source:require('image!banking'),style:styles.cellImage})),
+
+React.createElement(View,{style:styles.textContainer,key:this.props.key + '2'},
+React.createElement(Text,{style:styles.resourceTitle},'Official Accounts'))))):
+
+
+
+
+React.createElement(View,null);}}]);return ResourceList;})(Component);
 
 
 
@@ -57131,6 +57200,12 @@ height:30,
 marginRight:5},
 
 
+image:{
+width:25,
+height:25,
+marginRight:5},
+
+
 footer:{
 flexDirection:'row',
 flexWrap:'nowrap',
@@ -57143,7 +57218,33 @@ borderBottomColor:'#eeeeee',
 borderRightColor:'#eeeeee',
 borderLeftColor:'#eeeeee',
 borderWidth:1,
-borderTopColor:'#cccccc'}});
+borderTopColor:'#cccccc'},
+
+row:{
+
+
+flexDirection:'row',
+padding:5},
+
+textContainer:{
+flex:1},
+
+resourceTitle:{
+flex:1,
+fontSize:16,
+fontWeight:'400',
+marginBottom:2,
+paddingLeft:5},
+
+cellImage:{
+
+height:50,
+marginRight:10,
+width:50}});
+
+
+
+
 
 
 
@@ -57298,11 +57399,11 @@ photo = React.createElement(View,{style:styles.cellImage});}}
 
 
 var orgPhoto;
-if(isIdentity && resource.organization){
-if(resource.organization.photo)
-orgPhoto = React.createElement(Image,{source:{uri:resource.organization.photo},style:styles.orgIcon});}
 
-if(!orgPhoto)
+
+
+
+
 orgPhoto = React.createElement(View,null);
 
 var onlineStatus=resource.online?
@@ -57318,15 +57419,16 @@ React.createElement(Icon,{name:'close-circled',size:30,color:'#B1010E',style:sty
 
 
 React.createElement(View,null);
+var isOrganization=!isIdentity && resource[constants.TYPE] === 'tradle.Organization';
 var verification;
 return (
 React.createElement(View,{key:this.props.key},
 React.createElement(TouchableHighlight,{onPress:this.props.onSelect},
-React.createElement(View,{style:styles.row,key:this.props.key + '1'},
+React.createElement(View,{style:isOrganization?styles.rowV:styles.row},
 photo,
 orgPhoto,
 onlineStatus,
-React.createElement(View,{style:styles.textContainer,key:this.props.key + '2'},
+React.createElement(View,{style:styles.textContainer},
 this.formatRow(resource)),
 
 cancelResource)),
@@ -57373,6 +57475,8 @@ datePropsCounter++;}}}
 if(datePropsCounter > 1)
 dateProp = null;
 
+var isIdentity=resource[constants.TYPE] === constants.TYPES.IDENTITY;
+var isOrganization=!isIdentity && resource[constants.TYPE] === 'tradle.Organization';
 viewCols.forEach(function(v){
 if(v === dateProp)
 return;
@@ -57381,7 +57485,9 @@ return;
 
 if(!resource[v] && !properties[v].displayAs)
 return;
-var style=first?styles.resourceTitle:styles.description;
+var style=first && !isOrganization?styles.resourceTitle:styles.description;
+if(isIdentity && v === 'organization')
+style = [style,{alignSelf:'flex-end',marginTop:20},styles.verySmallLetters];
 if(properties[v].style)
 style = [style,properties[v].style];
 var ref=properties[v].ref;
@@ -57393,15 +57499,8 @@ row = this.getMoneyValue(ref,properties[v]);
 if(!row)
 return;}else 
 
-{
+
 row = React.createElement(Text,{style:style,numberOfLines:first?2:1},resource[v].title);
-if(resource[v].photos){
-row = React.createElement(View,{style:styles.row},
-React.createElement(Image,{source:{uri:resource[v].photos[0].url},style:styles.orgImage}),
-row);}}
-
-
-
 
 vCols.push(row);}
 
@@ -57443,8 +57542,13 @@ vCols.push(row);
 first = false;}});
 
 
-if(vCols)
-renderedViewCols = vCols;
+if(vCols && vCols.length)
+renderedViewCols = vCols;else 
+{
+var vCols=utils.getDisplayName(resource,model.properties);
+return React.createElement(Text,{style:styles.resourceTitle,numberOfLines:2},vCols);}
+
+
 if(!backlink)
 return renderedViewCols;
 return [
@@ -57487,6 +57591,12 @@ row:{
 backgroundColor:'white',
 
 flexDirection:'row',
+padding:5},
+
+rowV:{
+
+
+
 padding:5},
 
 cell:{
@@ -57610,8 +57720,7 @@ var propTypesMap={
 'string':t.Str,
 'boolean':t.Bool,
 'date':t.Dat,
-'number':t.Num,
-'integer':t.Num};
+'number':t.Num};
 
 var models,me;
 
@@ -57766,11 +57875,13 @@ if(props[p].maxLength > 100)
 options.fields[p].multiline = true;
 options.fields[p].autoCorrect = false;}
 
-if(!options.fields[p].multiline && (type === 'string' || type === 'integer')){
+if(!options.fields[p].multiline && (type === 'string' || type === 'number')){
 if(onSubmitEditing)
 options.fields[p].onSubmitEditing = onSubmitEditing;
 if(onEndEditing)
-options.fields[p].onEndEditing = onEndEditing.bind({},p);}}else 
+options.fields[p].onEndEditing = onEndEditing.bind({},p);
+if(props[p].maxLength)
+options.fields[p].maxLength = props[p].maxLength;}}else 
 
 
 if(props[p].oneOf){
@@ -76378,7 +76489,7 @@ root._ = _;}}).
 
 call(this);
 });
-__d('Identity/Components/ResourceView.js',["react-native/Libraries/react-native/react-native.js","Identity/utils/utils.js","Identity/Components/ShowPropertiesView.js","Identity/Components/PhotoView.js","Identity/Components/PhotoList.js","Identity/Components/AddNewIdentity.js","Identity/Components/SwitchIdentity.js","Identity/Components/ShowRefList.js","Identity/Components/IdentitiesList.js","Identity/Actions/Actions.js","reflux/src/index.js","Identity/Store/Store.js","react-mixin/index.js","Identity/Components/ResourceViewMixin.js","extend/index.js","tradle-constants/index.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
+__d('Identity/Components/ResourceView.js',["react-native/Libraries/react-native/react-native.js","Identity/utils/utils.js","Identity/Components/ShowPropertiesView.js","Identity/Components/PhotoView.js","Identity/Components/PhotoList.js","Identity/Components/AddNewIdentity.js","Identity/Components/SwitchIdentity.js","Identity/Components/ShowRefList.js","Identity/Components/IdentitiesList.js","Identity/Actions/Actions.js","reflux/src/index.js","Identity/Store/Store.js","react-mixin/index.js","Identity/Components/ResourceViewMixin.js","Identity/styles/buttonStyles.js","extend/index.js","tradle-constants/index.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
 
 var React=require('react-native/Libraries/react-native/react-native.js');
 var utils=require('Identity/utils/utils.js');
@@ -76394,6 +76505,7 @@ var Reflux=require('reflux/src/index.js');
 var Store=require('Identity/Store/Store.js');
 var reactMixin=require('react-mixin/index.js');
 var ResourceViewMixin=require('Identity/Components/ResourceViewMixin.js');
+var buttonStyles=require('Identity/styles/buttonStyles.js');
 
 var extend=require('extend/index.js');
 var constants=require('tradle-constants/index.js');var 
@@ -76464,21 +76576,32 @@ if(resource.photos && resource.photos.length > 1){
 extend(photos,resource.photos);
 photos.splice(0,1);}
 
+var actionPanel;
+var isIdentity=model.id === constants.TYPES.IDENTITY;
+var isMe=isIdentity?resource[constants.ROOT_HASH] === utils.getMe()[constants.ROOT_HASH]:true;
+if(isIdentity && !isMe)
+actionPanel = React.createElement(View,null);else 
+{
+actionPanel = 
+React.createElement(View,{style:buttonStyles.buttons},
+React.createElement(ShowRefList,{resource:resource,navigator:this.props.navigator}));}
+
+
+
 
 return (
 React.createElement(ScrollView,{ref:'this',style:styles.container},
 React.createElement(View,{style:[styles.photoBG,{marginTop:-20}]},
 React.createElement(PhotoView,{resource:resource})),
 
-React.createElement(AddNewIdentity,{resource:resource,navigator:this.props.navigator}),
-React.createElement(SwitchIdentity,{resource:resource,navigator:this.props.navigator}),
-React.createElement(ShowRefList,{resource:resource,navigator:this.props.navigator}),
-React.createElement(PhotoList,{photos:photos,navigator:this.props.navigator,isView:true,numberInRow:photos.length > 4?5:photos.length}),
+actionPanel,
+React.createElement(PhotoList,{photos:photos,resource:this.props.resource,navigator:this.props.navigator,isView:true,numberInRow:photos.length > 4?5:photos.length}),
 React.createElement(ShowPropertiesView,{resource:resource,
 showItems:this.showResources.bind(this),
 showRefResource:this.getRefResource.bind(this),
 excludedProperties:['photos'],
 navigator:this.props.navigator})));}},{key:'getRefResource',value:
+
 
 
 
@@ -76596,11 +76719,14 @@ vCols.push(p);}}
 
 
 
+var isMessage=model.interfaces;
+if(!isMessage){
 var len=vCols.length;
 for(var i=0;i < len;i++) {
 if(props[vCols[i]].displayName){
 vCols.splice(i,1);
-len--;}}
+len--;}}}
+
 
 
 var self=this;
@@ -76636,16 +76762,16 @@ break;}}}}else
 
 
 
-{
+if(self.props.showRefResource){
 
 var value=val[constants.TYPE]?utils.getDisplayName(val,utils.getModel(val[constants.TYPE]).value.properties):val.title;
 
 val = React.createElement(TouchableHighlight,{onPress:self.props.showRefResource.bind(self,val,pMeta),underlayColor:'transparent'},
-React.createElement(Text,{style:styles.itemTitle},value));
+React.createElement(Text,{style:[styles.title,styles.linkTitle]},value));
 
 
-isRef = true;
-isDirectionRow = true;}}else 
+isRef = true;}}else 
+
 
 
 if(pMeta.type === 'date')
@@ -76663,14 +76789,14 @@ val = self.renderItems(val,pMeta);
 first = false;}else 
 
 if(typeof val === 'number'){
-val = React.createElement(Text,{style:styles.description},val);
-isDirectionRow = true;}else 
+val = React.createElement(Text,{style:styles.description},val);}else 
 
-if(val.indexOf('http://') == 0 || val.indexOf('https://') === 0)
+
+if(pMeta.type !== 'object' && (val.indexOf('http://') == 0 || val.indexOf('https://') === 0))
 val = React.createElement(Text,{onPress:self.onPress.bind(self,val),style:[styles.description,{color:'#7AAAC3'}]},val);else 
 {
-if(val.length < 30)
-isDirectionRow = true;
+
+
 val = React.createElement(Text,{style:[styles.description],numberOfLines:2},val);}}
 
 
@@ -76683,10 +76809,10 @@ React.createElement(View,{style:styles.separator});
 var title=model.properties[p].skipLabel?
 React.createElement(View,null):
 React.createElement(Text,{style:styles.title},model.properties[p].title || utils.makeLabel(p));
-
-return React.createElement(View,{style:{padding:5}},
+first = false;
+return React.createElement(View,null,
 separator,
-React.createElement(View,{style:[styles.textContainer,isDirectionRow?{flexDirection:'row'}:{flexDirection:'column'}]},
+React.createElement(View,{style:[styles.textContainer,{padding:10},isDirectionRow?{flexDirection:'row'}:{flexDirection:'column'}]},
 title,
 val));});
 
@@ -76732,7 +76858,7 @@ if(itemMeta.type !== 'object'){
 if(p == 'photos'){
 var photos=[];
 ret.push(
-React.createElement(PhotoList,{photos:v.photos,navigator:self.props.navigator,numberInRow:4}));
+React.createElement(PhotoList,{photos:v.photos,navigator:self.props.navigator,numberInRow:4,resource:resource}));
 
 continue;}else 
 
@@ -76757,9 +76883,9 @@ continue;
 
 
 ret.push(
-React.createElement(View,null,
-React.createElement(View,{style:value.length > 60?styles.itemColContainer:styles.itemContainer},
-React.createElement(Text,{style:itemMeta.skipLabel?{height:0}:styles.itemTitle},itemMeta.skipLabel?'':itemMeta.title || utils.makeLabel(p)),
+React.createElement(View,{style:{padding:10}},
+React.createElement(View,{style:styles.itemColContainer},
+React.createElement(Text,{style:itemMeta.skipLabel?{height:0}:styles.title},itemMeta.skipLabel?'':itemMeta.title || utils.makeLabel(p)),
 React.createElement(Text,{style:styles.description},value))));}
 
 
@@ -76799,33 +76925,30 @@ flex:1},
 
 separator:{
 height:1,
-backgroundColor:'#DDDDDD'},
+backgroundColor:'#eeeeee',
+marginHorizontal:15},
 
 itemSeparator:{
 height:1,
-backgroundColor:'#D7E6ED'},
+backgroundColor:'#D7E6ED',
+marginHorizontal:7},
 
 title:{
-fontSize:18,
+fontSize:16,
+fontFamily:'Avenir Next',
 marginTop:3,
 marginBottom:0,
 marginHorizontal:7,
-color:'#2E3B4E'},
+color:'#9b9b9b'},
 
-itemTitle:{
-fontSize:18,
-marginTop:3,
-marginBottom:0,
-marginHorizontal:7,
-color:'#7AAAC3'},
-
+linkTitle:{
+color:'#2892C6'},
 
 description:{
-fontSize:18,
+fontSize:16,
 marginVertical:3,
 marginHorizontal:7,
-paddingLeft:5,
-color:'#999999'},
+color:'#2E3B4E'},
 
 photo:{
 width:86,
@@ -76840,12 +76963,13 @@ height:40}});
 
 module.exports = ShowPropertiesView;
 });
-__d('Identity/Components/PhotoList.js',["groupByEveryN","react-native/Libraries/react-native/react-native.js","Identity/utils/utils.js","Identity/Components/PhotoCarousel.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
+__d('Identity/Components/PhotoList.js',["groupByEveryN","react-native/Libraries/react-native/react-native.js","Identity/utils/utils.js","Identity/Components/PhotoCarousel.js","tradle-constants/index.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
 
 var React=require('react-native/Libraries/react-native/react-native.js');
 var utils=require('Identity/utils/utils.js');
 var groupByEveryN=require('groupByEveryN');
-var PhotoCarousel=require('Identity/Components/PhotoCarousel.js');var 
+var PhotoCarousel=require('Identity/Components/PhotoCarousel.js');
+var constants=require('tradle-constants/index.js');var 
 
 
 StyleSheet=
@@ -76887,9 +77011,30 @@ var photos=this.props.photos;
 if(!photos || !photos.length || photos.length <= 1 && this.props.isView)
 return null;
 
+var inRow=photos.length,height;
+
+switch(photos.length){
+case 1:
+case 2:
+case 3:
+height = 122;
+break;
+case 4:
+height = 92;
+break;
+default:
+case 5:
+height = 80;
+inRow = 5;
+break;}
+
+var rows=photos.length / inRow;
+if(photos.length % inRow)
+rows++;
+height *= rows;
 var val=this.renderPhotoList(photos);
 return (
-React.createElement(View,{style:[styles.photoContainer,this.props.style?{}:{marginHorizontal:5}]},
+React.createElement(View,{style:[styles.photoContainer,this.props.style?{}:{marginHorizontal:5,height:height}]},
 val));}},{key:'renderPhotoList',value:
 
 
@@ -76902,6 +77047,7 @@ groupByEveryN(val,this.props.numberInRow || 3));
 return (
 React.createElement(View,{style:styles.row},
 React.createElement(ListView,{
+scrollEnabled:false,
 renderRow:this.renderRow.bind(this),
 dataSource:dataSource})));}},{key:'renderRow',value:
 
@@ -76916,14 +77062,14 @@ switch(len){
 case 1:
 case 2:
 case 3:
-imageStyle = styles.thumb3;
+imageStyle = [styles.thumb3];
 break;
 case 4:
-imageStyle = styles.thumb4;
+imageStyle = [styles.thumb4];
 break;
 default:
 case 5:
-imageStyle = styles.thumb5;
+imageStyle = [styles.thumb5];
 break;}}
 
 
@@ -76944,19 +77090,15 @@ React.createElement(Text,{style:styles.photoTitle},photo.title);
 
 
 
-
 var uri=utils.getImageUri(photo.url);
 var source={uri:uri};
 if(uri.indexOf('data') === 0)
 source.isStatic = true;
 
 return (
-React.createElement(View,{style:{paddingTop:2,paddingRight:1,flexDirection:'column'}},
+React.createElement(View,{style:[{paddingTop:2,margin:1,flexDirection:'column'},imageStyle[0]]},
 React.createElement(TouchableHighlight,{underlayColor:'transparent',onPress:_this.showCarousel.bind(_this,photo)},
-React.createElement(View,null,
-React.createElement(Image,{style:[styles.thumbCommon,imageStyle],source:source}),
-title))));});
-
+React.createElement(Image,{style:[styles.thumbCommon,imageStyle],source:source}))));});
 
 
 
@@ -76976,7 +77118,8 @@ noLeftButton:true,
 component:PhotoCarousel,
 passProps:{
 currentPhoto:currentPhoto,
-photos:this.props.photos},
+photos:this.props.photos,
+resource:this.props.resource},
 
 rightButtonTitle:'Done',
 titleTintColor:'black',
@@ -77018,12 +77161,13 @@ height:70},
 thumbCommon:{
 borderRadius:5,
 borderWidth:1,
-marginHorizontal:1,
+margin:1,
 borderColor:'transparent'},
 
 row:{
 flexDirection:'row',
 flex:1}});
+
 
 
 
@@ -77082,10 +77226,12 @@ return result;}
 
 module.exports = groupByEveryN;
 });
-__d('Identity/Components/PhotoCarousel.js',["react-native/Libraries/react-native/react-native.js","react-native-carousel/Carousel.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
+__d('Identity/Components/PhotoCarousel.js',["react-native/Libraries/react-native/react-native.js","react-native-carousel/Carousel.js","Identity/utils/utils.js","tradle-constants/index.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
 
 var React=require('react-native/Libraries/react-native/react-native.js');
-var Carousel=require('react-native-carousel/Carousel.js');var 
+var Carousel=require('react-native-carousel/Carousel.js');
+var utils=require('Identity/utils/utils.js');
+var constants=require('tradle-constants/index.js');var 
 
 
 StyleSheet=
@@ -77103,6 +77249,10 @@ var photos=[];
 var currentPhoto=this.props.currentPhoto || this.props.photos[0];
 var currentPhotoIndex=-1;
 var n=this.props.photos.length;
+
+var model=utils.getModel(this.props.resource[constants.TYPE]).value;
+var isLicense=model.id.indexOf('License') !== -1 || model.id.indexOf('Passport') !== -1;
+var isUtility=!isLicense && model.id.indexOf('Utility') !== -1;
 for(var j=0;j < 2;j++) {
 for(var i=0;i < n;i++) {
 var photo=this.props.photos[i];
@@ -77112,8 +77262,17 @@ continue;
 if(currentPhotoIndex == -1)
 currentPhotoIndex = i;
 photos.push(
+isLicense?React.createElement(View,{style:styles.container},
+React.createElement(Image,{source:{uri:photo.url},style:styles.imageH})):
+
+isUtility?
+React.createElement(View,{style:styles.container},
+React.createElement(Image,{source:{uri:photo.url},style:styles.imageV})):
+
+
 React.createElement(View,{style:styles.container},
 React.createElement(Image,{source:{uri:photo.url},style:styles.image})));}
+
 
 
 
@@ -77131,6 +77290,14 @@ var styles=StyleSheet.create({
 image:{
 width:375,
 height:400},
+
+imageH:{
+width:375,
+height:250},
+
+imageV:{
+width:375,
+height:450},
 
 container:{
 width:375,
@@ -77275,11 +77442,11 @@ bottom:20}});
 
 module.exports = Carousel;
 });
-__d('Identity/Components/PhotoView.js',["react-native/Libraries/react-native/react-native.js","Identity/utils/utils.js","react-native-icons/index.js","tradle-constants/index.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
+__d('Identity/Components/PhotoView.js',["Ionicons","react-native/Libraries/react-native/react-native.js","Identity/utils/utils.js","tradle-constants/index.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
 
 var React=require('react-native/Libraries/react-native/react-native.js');
-var utils=require('Identity/utils/utils.js');var _require=
-require('react-native-icons/index.js');var Icon=_require.Icon;
+var utils=require('Identity/utils/utils.js');
+var Icon=require('Ionicons');
 var constants=require('tradle-constants/index.js');var 
 
 
@@ -77307,16 +77474,19 @@ var modelName=resource[constants.TYPE];
 var model=utils.getModel(modelName).value;
 if(!model.interfaces && !model.isInterface && !resource[constants.ROOT_HASH])
 return React.createElement(View,null);
+
 var hasPhoto=resource.photos && resource.photos.length;
 var currentPhoto=this.state.currentPhoto || hasPhoto && resource.photos[0];
-
 if(!currentPhoto){
 var icon;
 if(model.id === constants.TYPES.IDENTITY)
-icon = 'ion|person';else 
+return React.createElement(Icon,{name:'person',size:200,color:'#f6f6f4',style:styles.icon});else 
 
-icon = 'ion|chatboxes';
-return React.createElement(Icon,{name:icon,size:200,color:'#f6f6f4',style:styles.icon});}
+
+
+return React.createElement(View,{style:{height:50}});}
+
+
 
 
 var url=currentPhoto.url;
@@ -77354,344 +77524,6 @@ alignSelf:'center'}});
 
 module.exports = PhotoView;
 });
-__d('react-native-icons/index.js',["SMXIconImage","SMXTabBarIOS","SMXLoadingImage"],function(global, require, requireDynamic, requireLazy, module, exports) {  module.exports = {
-Icon:require('SMXIconImage'),
-TabBarIOS:require('SMXTabBarIOS'),
-Spinner:require('SMXLoadingImage')};
-});
-__d('SMXIconImage',["react-native/Libraries/react-native/react-native.js","react-native-icons/shim-assert.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _extends=Object.assign || function(target){for(var i=1;i < arguments.length;i++) {var source=arguments[i];for(var key in source) {if(Object.prototype.hasOwnProperty.call(source,key)){target[key] = source[key];}}}return target;};
-
-
-
-
-
-
-var React=require('react-native/Libraries/react-native/react-native.js');var 
-StyleSheet=React.StyleSheet;var View=React.View;var requireNativeComponent=React.requireNativeComponent;
-var shimAssert=require('react-native-icons/shim-assert.js');
-
-var ICON_REF='icon';
-
-var SMXIconImage=React.createClass({displayName:'SMXIconImage',
-propTypes:{
-name:React.PropTypes.string,
-size:React.PropTypes.number,
-color:React.PropTypes.string,
-
-
-
-
-
-accessible:React.PropTypes.bool,
-
-
-
-accessibilityLabel:React.PropTypes.string,
-
-
-
-
-
-testID:React.PropTypes.string,
-icon:React.PropTypes.object},
-
-
-setNativeProps:function(props){
-this.refs[ICON_REF].setNativeProps(props);},
-
-
-render:function(){
-var style=[styles.base,this.props.style];
-shimAssert.basic(style,'style must be initialized');
-
-var name=this.props.name;
-shimAssert.basic(name,'name must be initialized');
-
-var size=this.props.size;
-shimAssert.basic(size,'size must be initialized');
-
-var color=this.props.color;
-
-var nativeProps=Object.assign({},this.props);
-nativeProps.style = style;
-nativeProps.icon = {
-name:name,
-size:size,
-color:color};
-
-
-return React.createElement(SMXIconImageView,_extends({},nativeProps,{ref:ICON_REF}));}});
-
-
-
-var styles=StyleSheet.create({
-base:{
-overflow:'hidden'}});
-
-
-
-var SMXIconImageView=requireNativeComponent('FAKIconImage',SMXIconImage);
-
-module.exports = SMXIconImage;
-});
-__d('react-native-icons/shim-assert.js',[],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';
-
-
-module.exports = {
-
-basic:function(object,text){
-
-if(!object){
-throw Error(text);}}};
-});
-__d('SMXTabBarIOS',["SMXTabBarItemIOS","react-native/Libraries/react-native/react-native.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _extends=Object.assign || function(target){for(var i=1;i < arguments.length;i++) {var source=arguments[i];for(var key in source) {if(Object.prototype.hasOwnProperty.call(source,key)){target[key] = source[key];}}}return target;};
-
-
-
-
-
-
-var React=require('react-native/Libraries/react-native/react-native.js');var 
-StyleSheet=React.StyleSheet;var requireNativeComponent=React.requireNativeComponent;var PropTypes=React.PropTypes;
-var SMXTabBarIconItemIOS=require('SMXTabBarItemIOS');
-
-var SMXTabBarIOS=React.createClass({displayName:'SMXTabBarIOS',
-propTypes:{
-tintColor:PropTypes.string,
-barTintColor:PropTypes.string,
-translucent:PropTypes.bool},
-
-
-statics:{
-Item:SMXTabBarIconItemIOS},
-
-
-render:function(){
-var nativeProps={
-tintColor:this.props.tintColor,
-barTintColor:this.props.barTintColor,
-translucent:this.props.translucent};
-
-
-return (
-React.createElement(SMXIconTabBar,_extends({style:[styles.tabGroup,this.props.style]},nativeProps),
-this.props.children));}});
-
-
-
-
-
-var styles=StyleSheet.create({
-tabGroup:{
-flex:1}});
-
-
-
-var SMXIconTabBar=requireNativeComponent('SMXTabBar',SMXTabBarIOS);
-
-module.exports = SMXTabBarIOS;
-});
-__d('SMXTabBarItemIOS',["react-native/Libraries/react-native/react-native.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
-
-
-
-
-
-
-var React=require('react-native/Libraries/react-native/react-native.js');var 
-Image=React.Image;var StyleSheet=React.StyleSheet;var View=React.View;var requireNativeComponent=React.requireNativeComponent;var PropTypes=React.PropTypes;var Dimensions=React.Dimensions;
-
-var onlyChild=React.Children.only;var 
-
-
-StaticContainer=(function(_React$Component){_inherits(StaticContainer,_React$Component);function StaticContainer(){_classCallCheck(this,StaticContainer);_get(Object.getPrototypeOf(StaticContainer.prototype),'constructor',this).apply(this,arguments);}_createClass(StaticContainer,[{key:'shouldComponentUpdate',value:
-
-function shouldComponentUpdate(nextProps){
-return !!nextProps.shouldUpdate;}},{key:'render',value:
-
-
-function render(){
-var child=this.props.children;
-return child === null || child === false?null:onlyChild(child);}}]);return StaticContainer;})(React.Component);
-
-
-
-
-var SmixxTabBarItemIOS=React.createClass({displayName:'SmixxTabBarItemIOS',
-propTypes:{
-onPress:PropTypes.func.isRequired,
-selected:PropTypes.bool.isRequired,
-badgeValue:PropTypes.string,
-title:PropTypes.string,
-icon:PropTypes.object},
-
-
-getInitialState:function(){
-return {
-hasBeenSelected:false};},
-
-
-
-componentWillMount:function(){
-if(this.props.selected){
-this.setState({hasBeenSelected:true});}},
-
-
-
-componentWillReceiveProps:function(nextProps){
-if(this.state.hasBeenSelected || nextProps.selected){
-this.setState({hasBeenSelected:true});}},
-
-
-
-render:function(){
-var tabContents=null;
-
-
-if(this.state.hasBeenSelected){
-tabContents = 
-React.createElement(StaticContainer,{shouldUpdate:this.props.selected},
-this.props.children);}else 
-
-
-{
-tabContents = React.createElement(View,null);}
-
-
-var icon={name:this.props.iconName,size:this.props.iconSize?this.props.iconSize:28};
-
-return (
-React.createElement(SmixxTabBarItem,{
-icon:icon,
-selectedIcon:icon,
-onPress:this.props.onPress,
-selected:this.props.selected,
-badgeValue:this.props.badgeValue,
-title:this.props.title,
-style:[styles.tab,this.props.style]},
-tabContents));}});
-
-
-
-
-
-var styles=StyleSheet.create({
-tab:{
-position:'absolute',
-width:Dimensions.get('window').width,
-height:Dimensions.get('window').height}});
-
-
-
-var SmixxTabBarItem=requireNativeComponent('SMXTabBarItem',SmixxTabBarItemIOS);
-module.exports = SmixxTabBarItemIOS;
-});
-__d('SMXLoadingImage',["react-native/Libraries/react-native/react-native.js","react-native-icons/shim-assert.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _extends=Object.assign || function(target){for(var i=1;i < arguments.length;i++) {var source=arguments[i];for(var key in source) {if(Object.prototype.hasOwnProperty.call(source,key)){target[key] = source[key];}}}return target;};
-
-
-
-
-
-
-var React=require('react-native/Libraries/react-native/react-native.js');var 
-StyleSheet=React.StyleSheet;var View=React.View;var requireNativeComponent=React.requireNativeComponent;var Animated=React.Animated;var Easing=React.Easing;
-
-var shimAssert=require('react-native-icons/shim-assert.js');
-
-var SMXLoadingImage=React.createClass({displayName:'SMXLoadingImage',
-propTypes:{
-name:React.PropTypes.string,
-size:React.PropTypes.number,
-color:React.PropTypes.string,
-
-
-
-
-
-accessible:React.PropTypes.bool,
-
-
-
-accessibilityLabel:React.PropTypes.string,
-
-
-
-
-
-testID:React.PropTypes.string,
-icon:React.PropTypes.object},
-
-
-getInitialState:function(){
-return {
-angle:new Animated.Value(0)};},
-
-
-
-setNativeProps:function(props){},
-
-
-
-_animate:function(){
-this.state.angle.setValue(0);
-this._anim = Animated.timing(this.state.angle,{
-toValue:360,
-duration:1200,
-easing:Easing.linear}).
-start(this._animate);},
-
-
-componentDidMount:function(){
-this._animate();},
-
-
-render:function(){
-var transformStyle={
-transform:[
-{
-rotate:this.state.angle.interpolate({
-inputRange:[0,360],
-outputRange:['0deg','360deg']})}]};
-
-
-
-
-
-var style=[styles.base,this.props.style];
-
-shimAssert.basic(style,'style must be initialized');
-
-var name=this.props.name;
-shimAssert.basic(name,'name must be initialized');
-
-var size=this.props.size;
-shimAssert.basic(size,'size must be initialized');
-
-var color=this.props.color;
-
-var nativeProps=Object.assign({},this.props);
-nativeProps.icon = {
-name:name,
-size:size,
-color:color};
-
-
-return React.createElement(Animated.View,{style:[styles.base,style,transformStyle]},
-React.createElement(SMXLoadingImageView,_extends({style:{backgroundColor:'transparent'}},nativeProps)));}});
-
-
-
-
-
-var styles=StyleSheet.create({
-base:{
-overflow:'hidden'}});
-
-
-var SMXLoadingImageView=requireNativeComponent('FAKIconImage',SMXLoadingImage);
-
-module.exports = SMXLoadingImage;
-});
 __d('Identity/Components/AddNewIdentity.js',["Ionicons","react-native/Libraries/react-native/react-native.js","Identity/utils/utils.js","Identity/Components/NewResource.js","reflux/src/index.js","Identity/Store/Store.js","Identity/Actions/Actions.js","react-mixin/index.js","Identity/styles/buttonStyles.js","tradle-constants/index.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
 
 var React=require('react-native/Libraries/react-native/react-native.js');
@@ -77726,18 +77558,15 @@ function render(){
 var resource=this.props.resource;
 
 return this.props.isRegistration || resource[constants.ROOT_HASH] === utils.getMe()[constants.ROOT_HASH]?
-React.createElement(View,{style:[buttonStyles.container,{top:5}]},
+React.createElement(View,{style:[buttonStyles.container]},
 React.createElement(TouchableHighlight,{onPress:this.createNewIdentity.bind(this),underlayColor:'transparent'},
-React.createElement(View,null,
-React.createElement(View,{style:buttonStyles.buttonContent}),
-React.createElement(View,{style:buttonStyles.row},
-React.createElement(Icon,{name:'plus',size:25,color:'#ffffff',style:buttonStyles.icon}),
-React.createElement(Text,{style:buttonStyles.text},'Add Identity'))))):
+React.createElement(View,{style:{alignItems:'center'}},
+React.createElement(Icon,{name:'plus',size:25,color:'#f7f7f7',style:buttonStyles.icon}),
+React.createElement(Text,{style:[buttonStyles.text,{color:'#f7f7f7'}]},'Add Identity')))):
 
 
 
-
-React.createElement(View,null);}},{key:'createNewIdentity',value:
+null;}},{key:'createNewIdentity',value:
 
 function createNewIdentity(){
 var resource=this.props.resource;
@@ -77763,7 +77592,7 @@ reactMixin(AddNewIdentity.prototype,Reflux.ListenerMixin);
 
 module.exports = AddNewIdentity;
 });
-__d('Identity/Components/NewResource.js',["react-native/Libraries/react-native/react-native.js","Identity/utils/utils.js","Identity/Components/NewItem.js","Identity/Components/PhotoView.js","Identity/Components/ResourceList.js","Identity/Components/ResourceView.js","Identity/Components/ChatMessage.js","tcomb-form-native/index.js","extend/index.js","Identity/Actions/Actions.js","Identity/Store/Store.js","reflux/src/index.js","react-mixin/index.js","react-native-icons/index.js","Identity/styles/styles.js","react-native-keyboardevents/KeyboardEvents.ios.js","tradle-constants/index.js","Identity/Components/FromToView.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
+__d('Identity/Components/NewResource.js',["Ionicons","NativeModules","react-native/Libraries/react-native/react-native.js","Identity/utils/utils.js","Identity/Components/NewItem.js","Identity/Components/PhotoView.js","Identity/Components/ResourceList.js","Identity/Components/ResourceView.js","Identity/Components/ChatMessage.js","tcomb-form-native/index.js","extend/index.js","Identity/Actions/Actions.js","Identity/Store/Store.js","reflux/src/index.js","react-mixin/index.js","Identity/styles/styles.js","react-native-keyboardevents/KeyboardEvents.ios.js","tradle-constants/index.js","Identity/Components/FromToView.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
 
 var React=require('react-native/Libraries/react-native/react-native.js');
 var utils=require('Identity/utils/utils.js');
@@ -77777,12 +77606,13 @@ var extend=require('extend/index.js');
 var Actions=require('Identity/Actions/Actions.js');
 var Store=require('Identity/Store/Store.js');
 var Reflux=require('reflux/src/index.js');
-var reactMixin=require('react-mixin/index.js');var _require=
-require('react-native-icons/index.js');var Icon=_require.Icon;
+var reactMixin=require('react-mixin/index.js');
+var Icon=require('Ionicons');
 var myStyles=require('Identity/styles/styles.js');
 var KeyboardEvents=require('react-native-keyboardevents/KeyboardEvents.ios.js');
 var KeyboardEventEmitter=KeyboardEvents.Emitter;
 var constants=require('tradle-constants/index.js');
+var UIImagePickerManager=require('NativeModules').UIImagePickerManager;
 
 var Form=t.form.Form;
 Form.stylesheet = myStyles;var 
@@ -77992,22 +77822,12 @@ function onAddItem(propName,item){
 if(!item)
 return;
 var resource=this.addFormValues();
-
-
-
-
-
-
-
 var items=resource[propName];
 if(!items){
 items = [];
 resource[propName] = items;}
 
 items.push(item);
-
-
-
 this.setState({resource:resource,err:''});}},{key:'onNewPressed',value:
 
 function onNewPressed(bl){
@@ -78031,6 +77851,10 @@ function onNewPressed(bl){
 
 
 
+if(bl.name === 'photos'){
+this.showChoice();
+return;}
+
 var resource=this.addFormValues();
 this.setState({resource:resource,err:''});
 this.props.navigator.push({
@@ -78047,8 +77871,20 @@ passProps:{
 metadata:bl,
 resource:this.state.resource,
 parentMeta:this.props.parentMeta,
-onAddItem:this.onAddItem.bind(this)}});}},{key:'render',value:
+onAddItem:this.onAddItem.bind(this)}});}},{key:'showChoice',value:
 
+
+
+function showChoice(){
+var self=this;
+UIImagePickerManager.showImagePicker(null,function(type,response){
+if(type === 'cancel')
+return;
+var item={
+title:'photo',
+url:response};
+
+self.onAddItem('photos',item);});}},{key:'render',value:
 
 
 
@@ -78106,7 +77942,7 @@ React.createElement(View,{style:styles.itemsCounter},React.createElement(Text,nu
 if(model.required && model.required.indexOf(bl.name) != -1)
 counter = 
 React.createElement(View,null,
-React.createElement(Icon,{name:'fontawesome|asterisk',size:20,color:'#96415A',style:styles.icon}));else 
+React.createElement(Icon,{name:'asterisk',size:20,color:'#96415A',style:styles.icon}));else 
 
 
 counter = React.createElement(View,null);}else 
@@ -78114,7 +77950,7 @@ counter = React.createElement(View,null);}else
 if(self.props.model.required && self.props.model.required.indexOf(bl.name) != -1)
 counter = 
 React.createElement(View,null,
-React.createElement(Icon,{name:'fontawesome|asterisk',size:20,color:'#96415A',style:styles.icon}));else 
+React.createElement(Icon,{name:'asterisk',size:20,color:'#96415A',style:styles.icon}));else 
 
 
 counter = React.createElement(View,null);
@@ -78124,7 +77960,7 @@ React.createElement(TouchableHighlight,{style:styles.itemButton,underlayColor:'#
 onPress:self.onNewPressed.bind(self,bl)},
 React.createElement(View,{style:{flexDirection:'row',justifyContent:'space-between'}},
 React.createElement(View,{style:{justifyContent:'flex-start',flexDirection:'row'}},
-React.createElement(Icon,{name:'fontawesome|plus',size:20,color:'#7AAAC3',style:styles.icon}),
+React.createElement(Icon,{name:'plus',size:20,color:'#7AAAC3',style:styles.icon}),
 React.createElement(Text,{style:styles.itemsText},bl.title)),
 
 counter)));});
@@ -78133,18 +77969,18 @@ counter)));});
 
 
 var FromToView=require('Identity/Components/FromToView.js');
-var style=isMessage?{height:570}:{height:867};
-style.marginTop = 60;
+
+var style={marginTop:64};
 options.auto = 'placeholders';
 options.tintColor = 'red';
+var photoStyle=isMessage?{marginTop:-45}:styles.photoBG;
 
 var content=React.createElement(ScrollView,{style:style},
 React.createElement(View,{style:styles.container},
 React.createElement(Text,{style:errStyle},err),
-React.createElement(View,{style:styles.photoBG},
+React.createElement(View,{style:photoStyle},
 React.createElement(PhotoView,{resource:resource})),
 
-React.createElement(FromToView,{resource:resource,model:meta,navigator:this.props.navigator}),
 React.createElement(View,{style:{'padding':15}},
 React.createElement(Form,{ref:'form',type:Model,options:options,value:data}),
 arrayItems),
@@ -78152,15 +77988,15 @@ arrayItems),
 React.createElement(View,{style:{height:30}})));
 
 
-if(isMessage)
-return (
-React.createElement(View,null,
-content,
-React.createElement(View,{style:{height:this.state.keyboardSpace}},
-React.createElement(View,{style:{marginTop:-35}},
-React.createElement(ChatMessage,{resource:resource,
-model:meta,
-onSubmitEditing:this.onSubmitEditing.bind(this)})))));else 
+
+
+
+
+
+
+
+
+
 
 
 
@@ -78299,7 +78135,7 @@ justifyContent:'center',
 margin:10},
 
 photoBG:{
-backgroundColor:'#2E3B4E',
+marginTop:-15,
 alignItems:'center'},
 
 icon:{
@@ -78759,6 +78595,344 @@ marginTop:-25}});
 
 module.exports = SelectPhotoList;
 });
+__d('react-native-icons/index.js',["SMXIconImage","SMXTabBarIOS","SMXLoadingImage"],function(global, require, requireDynamic, requireLazy, module, exports) {  module.exports = {
+Icon:require('SMXIconImage'),
+TabBarIOS:require('SMXTabBarIOS'),
+Spinner:require('SMXLoadingImage')};
+});
+__d('SMXIconImage',["react-native/Libraries/react-native/react-native.js","react-native-icons/shim-assert.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _extends=Object.assign || function(target){for(var i=1;i < arguments.length;i++) {var source=arguments[i];for(var key in source) {if(Object.prototype.hasOwnProperty.call(source,key)){target[key] = source[key];}}}return target;};
+
+
+
+
+
+
+var React=require('react-native/Libraries/react-native/react-native.js');var 
+StyleSheet=React.StyleSheet;var View=React.View;var requireNativeComponent=React.requireNativeComponent;
+var shimAssert=require('react-native-icons/shim-assert.js');
+
+var ICON_REF='icon';
+
+var SMXIconImage=React.createClass({displayName:'SMXIconImage',
+propTypes:{
+name:React.PropTypes.string,
+size:React.PropTypes.number,
+color:React.PropTypes.string,
+
+
+
+
+
+accessible:React.PropTypes.bool,
+
+
+
+accessibilityLabel:React.PropTypes.string,
+
+
+
+
+
+testID:React.PropTypes.string,
+icon:React.PropTypes.object},
+
+
+setNativeProps:function(props){
+this.refs[ICON_REF].setNativeProps(props);},
+
+
+render:function(){
+var style=[styles.base,this.props.style];
+shimAssert.basic(style,'style must be initialized');
+
+var name=this.props.name;
+shimAssert.basic(name,'name must be initialized');
+
+var size=this.props.size;
+shimAssert.basic(size,'size must be initialized');
+
+var color=this.props.color;
+
+var nativeProps=Object.assign({},this.props);
+nativeProps.style = style;
+nativeProps.icon = {
+name:name,
+size:size,
+color:color};
+
+
+return React.createElement(SMXIconImageView,_extends({},nativeProps,{ref:ICON_REF}));}});
+
+
+
+var styles=StyleSheet.create({
+base:{
+overflow:'hidden'}});
+
+
+
+var SMXIconImageView=requireNativeComponent('FAKIconImage',SMXIconImage);
+
+module.exports = SMXIconImage;
+});
+__d('react-native-icons/shim-assert.js',[],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';
+
+
+module.exports = {
+
+basic:function(object,text){
+
+if(!object){
+throw Error(text);}}};
+});
+__d('SMXTabBarIOS',["SMXTabBarItemIOS","react-native/Libraries/react-native/react-native.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _extends=Object.assign || function(target){for(var i=1;i < arguments.length;i++) {var source=arguments[i];for(var key in source) {if(Object.prototype.hasOwnProperty.call(source,key)){target[key] = source[key];}}}return target;};
+
+
+
+
+
+
+var React=require('react-native/Libraries/react-native/react-native.js');var 
+StyleSheet=React.StyleSheet;var requireNativeComponent=React.requireNativeComponent;var PropTypes=React.PropTypes;
+var SMXTabBarIconItemIOS=require('SMXTabBarItemIOS');
+
+var SMXTabBarIOS=React.createClass({displayName:'SMXTabBarIOS',
+propTypes:{
+tintColor:PropTypes.string,
+barTintColor:PropTypes.string,
+translucent:PropTypes.bool},
+
+
+statics:{
+Item:SMXTabBarIconItemIOS},
+
+
+render:function(){
+var nativeProps={
+tintColor:this.props.tintColor,
+barTintColor:this.props.barTintColor,
+translucent:this.props.translucent};
+
+
+return (
+React.createElement(SMXIconTabBar,_extends({style:[styles.tabGroup,this.props.style]},nativeProps),
+this.props.children));}});
+
+
+
+
+
+var styles=StyleSheet.create({
+tabGroup:{
+flex:1}});
+
+
+
+var SMXIconTabBar=requireNativeComponent('SMXTabBar',SMXTabBarIOS);
+
+module.exports = SMXTabBarIOS;
+});
+__d('SMXTabBarItemIOS',["react-native/Libraries/react-native/react-native.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
+
+
+
+
+
+
+var React=require('react-native/Libraries/react-native/react-native.js');var 
+Image=React.Image;var StyleSheet=React.StyleSheet;var View=React.View;var requireNativeComponent=React.requireNativeComponent;var PropTypes=React.PropTypes;var Dimensions=React.Dimensions;
+
+var onlyChild=React.Children.only;var 
+
+
+StaticContainer=(function(_React$Component){_inherits(StaticContainer,_React$Component);function StaticContainer(){_classCallCheck(this,StaticContainer);_get(Object.getPrototypeOf(StaticContainer.prototype),'constructor',this).apply(this,arguments);}_createClass(StaticContainer,[{key:'shouldComponentUpdate',value:
+
+function shouldComponentUpdate(nextProps){
+return !!nextProps.shouldUpdate;}},{key:'render',value:
+
+
+function render(){
+var child=this.props.children;
+return child === null || child === false?null:onlyChild(child);}}]);return StaticContainer;})(React.Component);
+
+
+
+
+var SmixxTabBarItemIOS=React.createClass({displayName:'SmixxTabBarItemIOS',
+propTypes:{
+onPress:PropTypes.func.isRequired,
+selected:PropTypes.bool.isRequired,
+badgeValue:PropTypes.string,
+title:PropTypes.string,
+icon:PropTypes.object},
+
+
+getInitialState:function(){
+return {
+hasBeenSelected:false};},
+
+
+
+componentWillMount:function(){
+if(this.props.selected){
+this.setState({hasBeenSelected:true});}},
+
+
+
+componentWillReceiveProps:function(nextProps){
+if(this.state.hasBeenSelected || nextProps.selected){
+this.setState({hasBeenSelected:true});}},
+
+
+
+render:function(){
+var tabContents=null;
+
+
+if(this.state.hasBeenSelected){
+tabContents = 
+React.createElement(StaticContainer,{shouldUpdate:this.props.selected},
+this.props.children);}else 
+
+
+{
+tabContents = React.createElement(View,null);}
+
+
+var icon={name:this.props.iconName,size:this.props.iconSize?this.props.iconSize:28};
+
+return (
+React.createElement(SmixxTabBarItem,{
+icon:icon,
+selectedIcon:icon,
+onPress:this.props.onPress,
+selected:this.props.selected,
+badgeValue:this.props.badgeValue,
+title:this.props.title,
+style:[styles.tab,this.props.style]},
+tabContents));}});
+
+
+
+
+
+var styles=StyleSheet.create({
+tab:{
+position:'absolute',
+width:Dimensions.get('window').width,
+height:Dimensions.get('window').height}});
+
+
+
+var SmixxTabBarItem=requireNativeComponent('SMXTabBarItem',SmixxTabBarItemIOS);
+module.exports = SmixxTabBarItemIOS;
+});
+__d('SMXLoadingImage',["react-native/Libraries/react-native/react-native.js","react-native-icons/shim-assert.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _extends=Object.assign || function(target){for(var i=1;i < arguments.length;i++) {var source=arguments[i];for(var key in source) {if(Object.prototype.hasOwnProperty.call(source,key)){target[key] = source[key];}}}return target;};
+
+
+
+
+
+
+var React=require('react-native/Libraries/react-native/react-native.js');var 
+StyleSheet=React.StyleSheet;var View=React.View;var requireNativeComponent=React.requireNativeComponent;var Animated=React.Animated;var Easing=React.Easing;
+
+var shimAssert=require('react-native-icons/shim-assert.js');
+
+var SMXLoadingImage=React.createClass({displayName:'SMXLoadingImage',
+propTypes:{
+name:React.PropTypes.string,
+size:React.PropTypes.number,
+color:React.PropTypes.string,
+
+
+
+
+
+accessible:React.PropTypes.bool,
+
+
+
+accessibilityLabel:React.PropTypes.string,
+
+
+
+
+
+testID:React.PropTypes.string,
+icon:React.PropTypes.object},
+
+
+getInitialState:function(){
+return {
+angle:new Animated.Value(0)};},
+
+
+
+setNativeProps:function(props){},
+
+
+
+_animate:function(){
+this.state.angle.setValue(0);
+this._anim = Animated.timing(this.state.angle,{
+toValue:360,
+duration:1200,
+easing:Easing.linear}).
+start(this._animate);},
+
+
+componentDidMount:function(){
+this._animate();},
+
+
+render:function(){
+var transformStyle={
+transform:[
+{
+rotate:this.state.angle.interpolate({
+inputRange:[0,360],
+outputRange:['0deg','360deg']})}]};
+
+
+
+
+
+var style=[styles.base,this.props.style];
+
+shimAssert.basic(style,'style must be initialized');
+
+var name=this.props.name;
+shimAssert.basic(name,'name must be initialized');
+
+var size=this.props.size;
+shimAssert.basic(size,'size must be initialized');
+
+var color=this.props.color;
+
+var nativeProps=Object.assign({},this.props);
+nativeProps.icon = {
+name:name,
+size:size,
+color:color};
+
+
+return React.createElement(Animated.View,{style:[styles.base,style,transformStyle]},
+React.createElement(SMXLoadingImageView,_extends({style:{backgroundColor:'transparent'}},nativeProps)));}});
+
+
+
+
+
+var styles=StyleSheet.create({
+base:{
+overflow:'hidden'}});
+
+
+var SMXLoadingImageView=requireNativeComponent('FAKIconImage',SMXLoadingImage);
+
+module.exports = SMXLoadingImage;
+});
 __d('Identity/styles/styles.js',[],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';
 
 
@@ -78929,14 +79103,15 @@ if(resource.message && utils.splitMessage(resource.message).length === 1)
 return React.createElement(View,null);
 var alignStyle=model.isInterface?{alignSelf:'center',marginTop:10}:{alignSelf:'stretch'};
 
+var t=model.isInterface?'Say something':'Send this form to ' + title;
 var messageField=
 React.createElement(View,{style:[styles.chat,alignStyle]},
 React.createElement(TextInput,{ref:'chat',
 autoCapitalize:'none',
 autoCorrect:false,
 bufferDelay:20,
-placeholder:'Say something',
-placeholderTextColor:'#bbbbbb',
+placeholder:t,
+placeholderTextColor:'#aaaaaa',
 style:styles.chatInput,
 value:this.state.userInput,
 onChange:this.handleChange.bind(this),
@@ -78950,9 +79125,7 @@ if(model.isInterface)
 return messageField;
 return (
 React.createElement(View,null,
-React.createElement(View,{style:styles.view},
-React.createElement(Text,{style:styles.formRequest},'Send this form to ',title)),
-
+React.createElement(View,{style:styles.view}),
 messageField));}},{key:'clear',value:
 
 
@@ -78978,13 +79151,14 @@ bind(this),0);}}]);return ChatMessage;})(Component);
 
 var styles=StyleSheet.create({
 view:{
-backgroundColor:'#efffe5',
-borderWidth:1,
-borderTopColor:'#deeeb4',
-borderLeftColor:'#efffe5',
-borderRightColor:'#efffe5',
-borderBottomColor:'#deeeb4',
-paddingVertical:7},
+
+
+
+
+
+
+
+marginTop:30},
 
 chat:{
 marginBottom:5,
@@ -79000,16 +79174,16 @@ borderBottomColor:'#cccccc'},
 chatInput:{
 height:30,
 fontSize:18,
-paddingLeft:10,
+paddingLeft:7,
 backgroundColor:'#eeeeee',
 fontWeight:'bold',
 alignSelf:'stretch',
-borderColor:'#eeeeee'},
+borderColor:'#eeeeee'}});
 
-formRequest:{
-paddingLeft:10,
-fontSize:18,
-color:'#2E3B4E'}});
+
+
+
+
 
 
 
@@ -81056,16 +81230,16 @@ resultList.push(rr);}
 
 var model=this.getModel(params.modelName).value;
 var isMessage=model.isInterface || model.interfaces && model.interfaces.indexOf('tradle.Message') != -1;
-var verificationsToTransfer;
+var verificationsToShare;
 if(isMessage && !params.isAggregation)
-verificationsToTransfer = this.getVerificationsToTransfer(result);
+verificationsToShare = this.getVerificationsToShare(result,params.to);
 var retParams={
 action:isMessage && !params.prop?'messageList':'list',
 list:resultList,
 isAggregation:params.isAggregation};
 
-if(verificationsToTransfer)
-retParams.verificationsToTransfer = verificationsToTransfer;
+if(verificationsToShare)
+retParams.verificationsToShare = verificationsToShare;
 if(params.prop)
 retParams.prop = params.prop;
 
@@ -81198,6 +81372,7 @@ var required=meta.required;
 var meRootHash=me && me[constants.ROOT_HASH];
 var meId=IDENTITY_MODEL + '_' + meRootHash;
 var toId=to?to[constants.TYPE] + '_' + to[constants.ROOT_HASH]:null;
+var toModelName=toId.split('_')[0];
 for(var key in list) {
 var iMeta=null;
 if(isAllMessages){
@@ -81248,7 +81423,7 @@ var fromID=utils.getId(r.from);
 var toID=utils.getId(r.to);
 if(fromID !== meId && toID !== meId)
 continue;
-var id=IDENTITY_MODEL + '_' + to[constants.ROOT_HASH];
+var id=toModelName + '_' + to[constants.ROOT_HASH];
 if(fromID !== id && toID != id)
 continue;}
 
@@ -81308,7 +81483,7 @@ ver.organization.photo = orgPhotos[0].url;}}
 
 return resource;},
 
-getVerificationsToTransfer:function(foundResources){
+getVerificationsToShare:function(foundResources,to){
 var verTypes=[];
 var meId=me[constants.TYPE] + '_' + me[constants.ROOT_HASH];
 for(var i=0;i < foundResources.length;i++) {
@@ -81325,7 +81500,7 @@ var msgModel=utils.getModel(msgParts[1]);
 if(msgModel)
 verTypes.push(msgModel.value.id);}
 
-var verificationsToTransfer={};
+var verificationsToShare={};
 if(!verTypes.length)
 return;
 
@@ -81336,22 +81511,35 @@ if(model.id !== 'tradle.Verification' && (!model.subClassOf || model.subClassOf 
 continue;
 
 var doc=list[key].value.document;
-var docType=doc.id.split('_')[0];
+var docType=doc.id && doc.id.split('_')[0] || doc[constants.TYPE];
 if(verTypes.indexOf(docType) === -1)
 continue;
 var val=list[key].value;
 var id=utils.getId(val.to.id);
 if(id === meId){
+var document=doc.id?list[utils.getId(doc.id)].value:doc;
+if(to && to.organization && document.verifications){
+var thisCompanyVerification;
+for(var i=0;i < document.verifications.length;i++) {
+var v=document.verifications[i];
+if(v.organization && utils.getId(to.organization) === utils.getId(v.organization)){
+thisCompanyVerification = true;
+break;}}
+
+
+if(thisCompanyVerification)
+continue;}
+
 var value={};
 extend(value,list[key].value);
-value.document = list[utils.getId(doc.id)].value;
-var v=verificationsToTransfer[docType];
+value.document = document;
+var v=verificationsToShare[docType];
 if(!v)
-verificationsToTransfer[docType] = [];
-verificationsToTransfer[docType].push(value);}}
+verificationsToShare[docType] = [];
+verificationsToShare[docType].push(value);}}
 
 
-return verificationsToTransfer;},
+return verificationsToShare;},
 
 _putResourceInDB:function(modelName,value,isRegistration){
 
@@ -83746,6 +83934,48 @@ __d('Identity/data/data.js',[],function(global, require, requireDynamic, require
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 var identities=[
 {
 _t:'tradle.Identity',
@@ -84789,18 +85019,22 @@ transient:true,
 
 verifiedByMe:{
 type:'array',
-items:{
-readOnly:true,
-ref:'tradle.Verification',
-backlink:'to'}},
-
-
-myVerifications:{
-type:'array',
+allowRoles:'me',
+icon:'ios-checkmark-empty',
 items:{
 readOnly:true,
 ref:'tradle.Verification',
 backlink:'from'}},
+
+
+myVerifications:{
+type:'array',
+allowRoles:'me',
+icon:'ios-checkmark-empty',
+items:{
+readOnly:true,
+ref:'tradle.Verification',
+backlink:'to'}},
 
 
 'photos':{
@@ -85072,81 +85306,6 @@ required:['url']},
 
 
 {
-'id':'tradle.VerificationRequest',
-'type':'tradle.Model',
-'title':'Verification Request',
-'interfaces':['tradle.Message'],
-'style':{'backgroundColor':'#F4F5E6'},
-'properties':{
-'_t':{
-'type':'string',
-'readOnly':true},
-
-'message':{
-'type':'string',
-'title':'Description',
-'displayName':true},
-
-'from':{
-'type':'object',
-'readOnly':true,
-'ref':'tradle.Identity'},
-
-'to':{
-'type':'object',
-'ref':'tradle.Identity',
-'displayName':true,
-'readOnly':true},
-
-'blockchainUrl':{
-'type':'string',
-'readOnly':true},
-
-'transactionHash':{
-'readOnly':true,
-'type':'string'},
-
-'time':{
-'type':'date',
-'readOnly':true},
-
-'photos':{
-'type':'array',
-'items':{
-'type':'object',
-'properties':{
-'tags':{
-'type':'string',
-'skipLabel':true},
-
-'url':{
-'type':'string',
-'readOnly':true}}},
-
-
-
-'required':['title','url']},
-
-'verifications':{
-'type':'array',
-'readOnly':true,
-'items':{
-ref:'tradle.Verification',
-backlink:'document'}}},
-
-
-
-'required':[
-'to','message','from'],
-
-'gridCols':[
-'message','time'],
-
-'viewCols':[
-'message','time','photos','verifications']},
-
-
-{
 'id':'tradle.SkillVerification',
 'type':'tradle.Model',
 'title':'Skill Verification',
@@ -85298,9 +85457,9 @@ backlink:'document'}}},
 
 
 {
-'id':'tradle.DocumentVerification',
+'id':'tradle.UtilityBillVerification',
 'type':'tradle.Model',
-'title':'Doc Verification',
+'title':'Utility Bill Verification',
 'interfaces':['tradle.Message'],
 'style':{'backgroundColor':'#EBE1FA'},
 'properties':{
@@ -85308,10 +85467,41 @@ backlink:'document'}}},
 'type':'string',
 'readOnly':true},
 
-'message':{
+billDate:{
+type:'date',
+displayName:true},
+
+issuedBy:{
+type:'string'},
+
+'firstName':{
+'type':'string'},
+
+'lastName':{
+'type':'string'},
+
+'city':{
+'type':'string'},
+
+'country':{
+'type':'string'},
+
+'postalCode':{
+'type':'number'},
+
+'region':{
+'type':'string'},
+
+'street':{
+'type':'string'},
+
+'formattedAddress':{
+transient:true,
 'type':'string',
-'displayName':true,
-'title':'Description'},
+'displayAs':['street',',','city',',','region','postalCode'],
+'title':'Address',
+'readOnly':true},
+
 
 'from':{
 'type':'object',
@@ -85363,74 +85553,88 @@ backlink:'document'}}},
 
 
 'required':[
-'to','message','from','photos'],
+'to','from','photos','billDate','issuedBy','firstName','lastName','city','street','postalCode','region'],
 
 'gridCols':[
-'message','time'],
+'from','formattedAddress','billDate','time'],
 
 'viewCols':[
-'message','time','photos','blockchainUrl','verifications']},
+'from','formattedAddress','billDate','time']},
 
 
 {
-'id':'tradle.AddressVerification',
+'id':'tradle.PassportVerification',
 'type':'tradle.Model',
-'title':'Verify Address',
+'title':'Passport Verification',
 'interfaces':['tradle.Message'],
-'style':{'backgroundColor':'#FAEDE1'},
+'style':{'backgroundColor':'#EBE1FA'},
 'properties':{
 '_t':{
 'type':'string',
 'readOnly':true},
 
-'message':{
-'type':'string',
-'displayName':true,
-'title':'Description'},
 
-'blockchainUrl':{
-'type':'string',
-'readOnly':true},
 
-'transactionHash':{
-'readOnly':true,
+
+
+
+codeOfIssuing:{
+type:'string'},
+
+passportNumber:{
+'type':'number',
+'maxLength':9,
+'minLength':9,
+'displayName':true},
+
+surname:{
 'type':'string'},
 
-'time':{
-'type':'date',
-'readOnly':true},
 
-'street':{
+givenName:{
 'type':'string'},
 
-'city':{
+
+nationality:{
 'type':'string'},
 
-'region':{
-'type':'string'},
+dateOfBirth:{
+type:'date'},
 
-'postalCode':{
-'type':'number'},
+sex:{
+type:'string',
+oneOf:[
+'Male',
+'Female']},
 
-'country':{
-'type':'string'},
 
-'formattedAddress':{
-'type':'string',
-'displayAs':['street',',','city',',','region','postalCode'],
-'title':'Address',
-'skipLabel':true,
-'readOnly':true},
+placeOfBirth:{
+type:'string'},
+
+dateOfIssue:{
+type:'date'},
+
+authority:{
+type:'string',
+displayName:true},
+
+dateOfExpiry:{
+type:'date',
+displayName:true},
 
 'from':{
 'type':'object',
 'readOnly':true,
-'ref':'tradle.Identity'},
+'ref':'tradle.Identity',
+displayName:true},
 
 'to':{
 'type':'object',
 'ref':'tradle.Identity',
-'displayName':true,
+'readOnly':true},
+
+'time':{
+'type':'date',
 'readOnly':true},
 
 'photos':{
@@ -85455,18 +85659,135 @@ backlink:'document'}}},
 'readOnly':true,
 'items':{
 'backlink':'document',
-'ref':'tradle.VerificationOfAddress'}}},
+'ref':'tradle.Verification'}},
 
+
+'blockchainUrl':{
+'type':'string',
+'readOnly':true},
+
+'transactionHash':{
+'readOnly':true,
+'type':'string'}},
 
 
 'required':[
-'to','from','message','street','city','region','postalCode'],
+'to','from','photos','codeOfIssuing','passportNumber','surname','givenName','nationality','dateOfBirth','sex','placeOfBirth','dateOfIssue','authority','dateOfExpiry'],
 
 'gridCols':[
-'message','formattedAddress','time'],
+'from','passportNumber','dateOfExpiry','time'],
 
 'viewCols':[
-'message','formattedAddress','blockchainUrl','time','verifications']},
+'codeOfIssuing','passportNumber','surname','givenName','nationality','dateOfBirth','sex','placeOfBirth','dateOfIssue','authority','dateOfExpiry']},
+
+
+{
+'id':'tradle.LicenseVerification',
+'type':'tradle.Model',
+'title':'License Verification',
+'interfaces':['tradle.Message'],
+'style':{'backgroundColor':'#EBE1FA'},
+'properties':{
+'_t':{
+'type':'string',
+'readOnly':true},
+
+
+
+
+
+
+licenseNumber:{
+'type':'number',
+maxLength:8,
+'displayName':true,
+'title':'Description'},
+
+surname:{
+'type':'string'},
+
+
+givenName:{
+'type':'string'},
+
+
+dateOfBirth:{
+type:'date'},
+
+dateOfIssue:{
+type:'date'},
+
+dateOfExpiry:{
+type:'date',
+displayName:true},
+
+issuingAuthority:{
+type:'string'},
+
+holderAddress:{
+type:'string'},
+
+entitlementCategories:{
+type:'string'},
+
+'from':{
+'type':'object',
+'readOnly':true,
+'ref':'tradle.Identity'},
+
+'to':{
+'type':'object',
+'ref':'tradle.Identity',
+'displayName':true,
+'readOnly':true},
+
+'time':{
+'type':'date',
+'readOnly':true},
+
+'photos':{
+'type':'array',
+'items':{
+'type':'object',
+'properties':{
+'tags':{
+'type':'string',
+'skipLabel':true},
+
+'url':{
+'type':'string',
+'readOnly':true}}},
+
+
+
+'required':['title','url']},
+
+'verifications':{
+'type':'array',
+'readOnly':true,
+'items':{
+'backlink':'document',
+'ref':'tradle.Verification'}},
+
+
+'blockchainUrl':{
+'type':'string',
+'readOnly':true},
+
+'transactionHash':{
+'readOnly':true,
+'type':'string'}},
+
+
+'required':[
+'to','from','photos','licenseNumber','surname','givenName','dateOfBirth','dateOfIssue','dateOfExpiry','issuingAuthority','holderAddress','entitlementCategories'],
+
+'gridCols':[
+'from','licenseNumber','dateOfExpiry','time'],
+
+'viewCols':[
+'photos','licenseNumber','surname','givenName','dateOfBirth','dateOfIssue','dateOfExpiry','issuingAuthority','holderAddress','entitlementCategories','verifications']},
+
 
 
 {
@@ -85474,6 +85795,7 @@ backlink:'document'}}},
 'type':'tradle.Model',
 'title':'Verification',
 'interfaces':['tradle.Message'],
+icon:'ios-checkmark-empty',
 'style':{'backgroundColor':'#E7E6F5'},
 'autoCreate':true,
 'properties':{
@@ -86105,6 +86427,7 @@ required:['offer','organization']},
 id:'tradle.Organization',
 type:'object',
 title:'Organization',
+sort:'lastMessageTime',
 properties:{
 '_t':{
 type:'string',
@@ -86166,6 +86489,7 @@ required:['url']},
 
 verifications:{
 type:'array',
+readOnly:true,
 items:{
 type:'object',
 ref:'tradle.Verification',
@@ -87602,7 +87926,7 @@ EventEmitter.prefixed = prefix;
 if('undefined' !== typeof module){
 module.exports = EventEmitter;}
 });
-__d('Identity/Components/FromToView.js',["react-native/Libraries/react-native/react-native.js","reflux/src/index.js","react-mixin/index.js","Identity/utils/utils.js","Identity/Components/NewResource.js","Identity/Components/ResourceView.js","Identity/Store/Store.js","Identity/Actions/Actions.js","react-native-icons/index.js","tradle-constants/index.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
+__d('Identity/Components/FromToView.js',["Ionicons","react-native/Libraries/react-native/react-native.js","reflux/src/index.js","react-mixin/index.js","Identity/utils/utils.js","Identity/Components/NewResource.js","Identity/Components/ResourceView.js","Identity/Store/Store.js","Identity/Actions/Actions.js","tradle-constants/index.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
 
 var React=require('react-native/Libraries/react-native/react-native.js');
 var Reflux=require('reflux/src/index.js');
@@ -87611,8 +87935,8 @@ var utils=require('Identity/utils/utils.js');
 var NewResource=require('Identity/Components/NewResource.js');
 var ResourceView=require('Identity/Components/ResourceView.js');
 var Store=require('Identity/Store/Store.js');
-var Actions=require('Identity/Actions/Actions.js');var _require=
-require('react-native-icons/index.js');var Icon=_require.Icon;
+var Actions=require('Identity/Actions/Actions.js');
+var Icon=require('Ionicons');
 var constants=require('tradle-constants/index.js');
 
 var MESSAGE_INTERFACE='tradle.Message';var 
@@ -87659,7 +87983,7 @@ var toPhoto=resource.to.photos && resource.to.photos[0].url;
 if(toPhoto)
 toPhoto = React.createElement(Image,{style:styles.icon,source:{uri:utils.getImageUri(toPhoto)}});else 
 if(resource.to)
-toPhoto = React.createElement(Icon,{style:styles.icon,color:'#2E3B4E',name:'ion|android-person',size:60});else 
+toPhoto = React.createElement(Icon,{style:[styles.icon,{paddingLeft:5}],color:'#2E3B4E',name:'android-person',size:60});else 
 
 toPhoto = React.createElement(View,null);
 
@@ -87667,7 +87991,7 @@ var fromPhoto=resource.from.photos && resource.from.photos[0].url;
 if(fromPhoto)
 fromPhoto = React.createElement(Image,{style:styles.icon,source:{uri:utils.getImageUri(fromPhoto)}});else 
 
-fromPhoto = React.createElement(Icon,{style:styles.icon,color:'#7AAAC3',name:'ion|ios-person',size:60});
+fromPhoto = React.createElement(Icon,{style:[styles.icon,{paddingLeft:5}],color:'#7AAAC3',name:'ios-person',size:90});
 
 return React.createElement(View,{style:[styles.container,style]},
 React.createElement(TouchableHighlight,{underlayColor:'transparent',onPress:function()
@@ -87683,7 +88007,7 @@ fromPhoto,
 React.createElement(Text,null,fromTitle))),
 
 
-React.createElement(Icon,{name:'ion|ios-arrow-thin-right',size:70,color:'#f7f7f7',style:styles.arrow}),
+React.createElement(Icon,{name:'arrow-right-a',size:70,color:'#f7f7f7',style:styles.arrow}),
 React.createElement(TouchableHighlight,{underlayColor:'transparent',onPress:function()
 {
 if(resource.to.id)
@@ -87738,13 +88062,14 @@ justifyContent:'space-between',
 padding:20},
 
 arrow:{
-width:70,
-height:70,
+width:75,
+height:75,
 shadowColor:'#2E3B4E',
 shadowOffset:{width:0.5,height:0.5},
 shadowOpacity:1,
 shadowRadius:1,
-marginTop:-5},
+marginTop:-5,
+paddingLeft:5},
 
 icon:{
 width:70,
@@ -87780,24 +88105,62 @@ var HELP_COLOR='#999999';
 var BORDER_COLOR='#cccccc';
 var DISABLED_COLOR='#777777';
 var DISABLED_BACKGROUND_COLOR='#eeeeee';
-var FONT_SIZE=17;
+var FONT_SIZE=12;
+var FONT_SIZE_1=17;
 var FONT_WEIGHT='500';
 
 var buttonStyles=Object.freeze({
 icon:{
-width:25,
-height:25,
-marginTop:-33,
-marginLeft:5},
-
-
-
+width:30,
+height:30,
+paddingLeft:4,
+borderWidth:1,
+borderColor:ICON_BORDER_COLOR,
+borderRadius:15},
 
 row:{
 flexDirection:'row'},
 
-
 container:{
+alignSelf:'center',
+paddingHorizontal:7,
+paddingTop:10},
+
+buttons:{
+
+
+height:75,
+flexDirection:'row',
+backgroundColor:'#a0a0a0',
+
+
+justifyContent:'center',
+alignSelf:'stretch'},
+
+text:{
+color:'#ffffff',
+paddingVertical:10,
+fontWeight:FONT_WEIGHT,
+fontSize:FONT_SIZE},
+
+
+row1:{
+flexDirection:'row',
+position:'absolute',
+left:10,
+top:5},
+
+icon1:{
+width:25,
+height:25},
+
+
+
+
+
+
+
+container1:{
 flex:1,
 position:'absolute',
 right:10},
@@ -87812,10 +88175,11 @@ opacity:0.5,
 borderWidth:1,
 borderColor:'#466690'},
 
-text:{
+text1:{
 color:'#ffffff',
-fontWeight:'800',
-marginTop:-30}});
+fontFamily:'Avenir Next',
+
+fontSize:FONT_SIZE_1}});
 
 
 
@@ -87839,23 +88203,19 @@ View=
 
 
 React.View;var Text=React.Text;var TouchableHighlight=React.TouchableHighlight;var Component=React.Component;var 
-
 SwitchIdentity=(function(_Component){_inherits(SwitchIdentity,_Component);function SwitchIdentity(){_classCallCheck(this,SwitchIdentity);_get(Object.getPrototypeOf(SwitchIdentity.prototype),'constructor',this).apply(this,arguments);}_createClass(SwitchIdentity,[{key:'render',value:
 function render(){
 var resource=this.props.resource;
 return resource[constants.ROOT_HASH] === utils.getMe()[constants.ROOT_HASH]?
-React.createElement(View,{style:[buttonStyles.container,{top:50}]},
+React.createElement(View,{style:[buttonStyles.container]},
 React.createElement(TouchableHighlight,{onPress:this.showIdentities.bind(this),underlayColor:'transparent'},
-React.createElement(View,null,
-React.createElement(View,{style:buttonStyles.buttonContent}),
-React.createElement(View,{style:buttonStyles.row},
-React.createElement(Icon,{name:'arrow-move',size:25,color:'#ffffff',style:buttonStyles.icon}),
-React.createElement(Text,{style:buttonStyles.text},'Switch Identity'))))):
+React.createElement(View,{style:{alignItems:'center'}},
+React.createElement(Icon,{name:'arrow-swap',size:25,color:'#ffffff',style:buttonStyles.icon}),
+React.createElement(Text,{style:buttonStyles.text},'Switch Identity')))):
 
 
 
-
-React.createElement(View,null);}},{key:'showIdentities',value:
+null;}},{key:'showIdentities',value:
 
 function showIdentities(){
 Actions.showIdentityList(utils.getMe());}}]);return SwitchIdentity;})(Component);
@@ -87886,6 +88246,13 @@ View=
 
 React.View;var Text=React.Text;var TextInput=React.TextInput;var TouchableHighlight=React.TouchableHighlight;var Component=React.Component;var 
 
+
+
+
+
+
+
+
 ShowRefList=(function(_Component){_inherits(ShowRefList,_Component);
 function ShowRefList(props){_classCallCheck(this,ShowRefList);
 _get(Object.getPrototypeOf(ShowRefList.prototype),'constructor',this).call(this,props);
@@ -87895,37 +88262,39 @@ startTop:props.resource[constants.TYPE] == constants.TYPES.IDENTITY && props.res
 
 function render(){
 var resource=this.props.resource;
-var props=utils.getModel(resource[constants.TYPE]).value.properties;
+var model=utils.getModel(resource[constants.TYPE]).value;
+var props=model.properties;
 
 var refList=[];
+var isIdentity=model.id === constants.TYPES.IDENTITY;
+var isMe=isIdentity?resource[constants.ROOT_HASH] === utils.getMe()[constants.ROOT_HASH]:true;
 
-
-var initPos=utils.getMe()[constants.ROOT_HASH] === resource[constants.ROOT_HASH]?95:0;
-var pos=0;
-var marginTopStep=5;
 for(var p in props) {
+if(isIdentity && !isMe && props[p].allowRoles && props[p].allowRoles === 'me')
+continue;
 if(p.charAt(0) === '_' || !props[p].items || !props[p].items.backlink)
 continue;
+var icon=props[p].icon || utils.getModel(props[p].items.ref).value.icon;
+if(!icon)
+icon = 'ios-checkmark-empty';
 refList.push(
-React.createElement(View,{style:{top:pos}},
+React.createElement(View,{style:buttonStyles.container},
 React.createElement(TouchableHighlight,{onPress:this.showResources.bind(this,this.props.resource,props[p]),underlayColor:'transparent'},
-React.createElement(View,null,
-React.createElement(View,{style:buttonStyles.buttonContent}),
-React.createElement(View,{style:buttonStyles.row},
-React.createElement(Icon,{name:'android-checkmark-circle',size:25,color:'#ffffff',style:buttonStyles.icon}),
-React.createElement(Text,{style:buttonStyles.text},props[p].title))))));
+React.createElement(View,{style:{alignItems:'center'}},
+React.createElement(Icon,{name:icon,size:35,color:'#ffffff',style:[buttonStyles.icon,{paddingLeft:7}]}),
+React.createElement(Text,{style:buttonStyles.text},props[p].title)))));}
 
 
 
 
 
-pos += marginTopStep;}
+return refList.length?
 
-return (
-React.createElement(View,{style:[buttonStyles.container,{top:initPos}]},
-refList));}}]);return ShowRefList;})(Component);
+React.createElement(View,{style:{flexDirection:'row'}},
+refList):
 
 
+null;}}]);return ShowRefList;})(Component);
 
 
 reactMixin(ShowRefList.prototype,ResourceViewMixin);
@@ -88294,32 +88663,36 @@ this.formatDocument(verificationRequest,resource.document,rows);
 
 var backlink=this.props.prop.items.backlink;
 
-if(resource.to && backlink !== resource.to){
-var row=resource.to.photos?
-React.createElement(View,{style:{flexDirection:'row'}},
-React.createElement(Text,{style:[styles.description,{color:'#7AAAc3'}]},'submitted by '),
-React.createElement(Text,{style:styles.description},resource.to.title),
-React.createElement(Image,{source:{uri:resource.to.photos[0].url},style:styles.icon})):
-
-React.createElement(View,{style:{flexDirection:'row'}},
+if(resource.to && backlink !== 'to'){
+var row=React.createElement(View,{style:{flexDirection:'row'}},
 React.createElement(Text,{style:[styles.description,{color:'#7AAAc3'}]},'submitted by '),
 React.createElement(Text,{style:styles.description},resource.to.title));
 
+
+
+
+
+
+
+
+
+
+
 rows.push(row);}
 
-if(resource.from && backlink !== resource.from){
+if(resource.from){
 var contentRows=[];
 
 contentRows.push(React.createElement(Text,{style:[styles.description,{color:'#7AAAc3'}]},'verified by '));
 if(resource.organization){
-var orgRow=resource.organization.photos?
-React.createElement(View,{style:{flexDirection:'row',flex:1}},
-React.createElement(Text,{style:styles.description},resource.organization.title),
-React.createElement(Image,{source:{uri:utils.getImageUri(resource.organization.photos[0].url)},style:styles.icon})):
+var orgRow=React.createElement(Text,{style:styles.description},resource.organization.title);
 
-React.createElement(Text,{style:styles.description},resource.organization.title);
+
+
+
+
+
 contentRows.push(orgRow);}
-
 
 
 
@@ -88330,17 +88703,19 @@ contentRows);
 rows.push(row);
 contentRows = [];
 
+if(backlink !== 'from'){
 contentRows.push(React.createElement(Text,{style:[styles.description,{color:'#7AAAc3'}]},'representative'));
-contentRows.push(React.createElement(Text,{style:styles.description},resource.from.title));
+contentRows.push(React.createElement(Text,{style:styles.description},resource.from.title));}
 
-if(resource.to.photos)
-contentRows.push(React.createElement(Image,{source:{uri:resource.from.photos[0].url},style:styles.icon}));
+
+
 
 row = React.createElement(View,{style:{flexDirection:'row'}},
 contentRows);
 
 rows.push(row);}
 
+rows.push(React.createElement(View,{style:{alignSelf:'flex-end',marginTop:7}},React.createElement(Text,{style:styles.verySmallLetters},verificationRequest.title)));
 
 
 
@@ -88390,7 +88765,7 @@ first = false;}
 return;}
 
 
-if(resource[v] && (resource[v].indexOf('http://') == 0 || resource[v].indexOf('https://') == 0))
+if(resource[v] && properties[v].type === 'string' && (resource[v].indexOf('http://') == 0 || resource[v].indexOf('https://') == 0))
 row = React.createElement(Text,{style:style,numberOfLines:first?2:1},resource[v]);else 
 if(!model.autoCreate){
 var val=properties[v].displayAs?
@@ -88759,7 +89134,7 @@ return;}
 this.setState({
 dataSource:this.state.dataSource.cloneWithRows(list),
 isLoading:false,
-verificationsToTransfer:params.verificationsToTransfer});}}},{key:'selectResource',value:
+verificationsToShare:params.verificationsToShare});}}},{key:'selectResource',value:
 
 
 
@@ -88815,7 +89190,7 @@ onSelect:this.selectResource.bind(this,resource),
 resource:resource,
 isAggregation:isAggregation,
 navigator:this.props.navigator,
-verificationsToTransfer:this.state.verificationsToTransfer,
+verificationsToShare:this.state.verificationsToShare,
 previousMessageTime:previousMessageTime,
 to:isAggregation?resource.to:this.props.resource}));}},{key:'addedMessage',value:
 
@@ -88892,7 +89267,7 @@ delete selectedAssets[asset.node.image.uri];else
 
 selectedAssets[asset.node.image.uri] = asset;}},{key:'onAddNewPressed',value:
 
-function onAddNewPressed(){
+function onAddNewPressed(sendForm){
 var modelName=this.props.modelName;
 var model=utils.getModel(modelName).value;
 var isInterface=model.isInterface;
@@ -88911,6 +89286,7 @@ passProps:{
 resource:self.props.resource,
 returnRoute:currentRoutes[currentRoutes.length - 1],
 modelName:modelName,
+sendForm:sendForm,
 callback:this.props.callback},
 
 rightButtonTitle:'ion|plus',
@@ -89043,18 +89419,20 @@ if(inRow && inRow > 4)
 inRow = 5;
 return (
 React.createElement(ScrollView,{ref:'this',style:styles.container},
+React.createElement(View,{style:styles.band},React.createElement(Text,{style:styles.date},date)),
 React.createElement(View,{style:styles.photoBG},
 React.createElement(PhotoView,{resource:resource})),
 
+React.createElement(FromToView,{resource:resource,navigator:this.props.navigator}),
 React.createElement(MoreLikeThis,{resource:resource,navigator:this.props.navigator}),
 React.createElement(VerificationButton,{resource:resource,verify:this.verify.bind(this),verificationList:this.showResources.bind(this)}),
-React.createElement(FromToView,{resource:resource,navigator:this.props.navigator,excluded:true}),
-React.createElement(View,{style:styles.band},React.createElement(Text,{style:styles.date},date)),
-React.createElement(PhotoList,{photos:resource.photos,isView:true,navigator:this.props.navigator,numberInRow:inRow}),
+React.createElement(View,{style:{marginTop:-20}},
+React.createElement(PhotoList,{photos:resource.photos,resource:resource,isView:true,navigator:this.props.navigator,numberInRow:inRow}),
 React.createElement(View,{style:styles.rowContainer},
 React.createElement(View,null,React.createElement(Text,{style:styles.itemTitle},resource.message)),
 React.createElement(ShowPropertiesView,{resource:resource,excludedProperties:['tradle.Message.message','time','photos']}),
-embed)));}},{key:'showEmbed',value:
+embed))));}},{key:'showEmbed',value:
+
 
 
 
@@ -89155,7 +89533,10 @@ alignItems:'center'},
 band:{
 height:30,
 backgroundColor:'#f7f7f7',
-alignSelf:'stretch'},
+alignSelf:'stretch',
+
+
+marginTop:-20},
 
 rowContainer:{
 paddingBottom:10,
@@ -89210,13 +89591,13 @@ function render(){
 if(this.props.resource[constants.TYPE] === 'tradle.SimpleMessage')
 return null;
 return (
-React.createElement(View,{style:[buttonStyles.container,{top:15}]},
+React.createElement(View,{style:[buttonStyles.container1,{top:35}]},
 React.createElement(TouchableHighlight,{underlayColor:'transparent',onPress:this.showMoreLikeThis.bind(this)},
 React.createElement(View,null,
 React.createElement(View,{style:buttonStyles.buttonContent}),
-React.createElement(View,{style:buttonStyles.row},
-React.createElement(Icon,{name:'arrow-shrink',size:20,color:'#ffffff',style:buttonStyles.icon}),
-React.createElement(Text,{style:buttonStyles.text},'More like this'))))));}}]);return MoreLikeThis;})(Component);
+React.createElement(View,{style:buttonStyles.row1},
+React.createElement(Icon,{name:'arrow-shrink',size:25,color:'#ffffff',style:buttonStyles.icon1}),
+React.createElement(Text,{style:buttonStyles.text1},'More like this'))))));}}]);return MoreLikeThis;})(Component);
 
 
 
@@ -89273,13 +89654,13 @@ verifiedByMe = true;});}
 
 
 return (
-React.createElement(View,{style:[buttonStyles.container,{top:60}]},
+React.createElement(View,{style:[buttonStyles.container1,{top:80}]},
 React.createElement(TouchableHighlight,{underlayColor:'transparent',onPress:verifiedByMe?this.props.verificationList.bind(this,resource,model.properties['verifications']):this.props.verify.bind(this)},
 React.createElement(View,null,
 React.createElement(View,{style:buttonStyles.buttonContent}),
-React.createElement(View,{style:buttonStyles.row},
-React.createElement(Icon,{name:'checkmark',size:20,color:'#ffffff',style:buttonStyles.icon}),
-React.createElement(Text,{style:buttonStyles.text},verifiedByMe?'Verifications':'Verify'))))));}}]);return VerificationButton;})(Component);
+React.createElement(View,{style:buttonStyles.row1},
+React.createElement(Icon,{name:'ios-checkmark-outline',size:25,color:'#ffffff',style:buttonStyles.icon1}),
+React.createElement(Text,{style:buttonStyles.text1},verifiedByMe?'Verifications':'Verify'))))));}}]);return VerificationButton;})(Component);
 
 
 
@@ -89318,7 +89699,8 @@ ListView=
 
 
 
-React.ListView;var Text=React.Text;var Component=React.Component;var StyleSheet=React.StyleSheet;var View=React.View;var 
+
+React.ListView;var Text=React.Text;var Component=React.Component;var StyleSheet=React.StyleSheet;var View=React.View;var AlertIOS=React.AlertIOS;var 
 
 
 ResourceTypesScreen=(function(_Component){_inherits(ResourceTypesScreen,_Component);
@@ -89358,6 +89740,21 @@ var model=utils.getModel(this.props.modelName);
 
 if(resource[constants.TYPE])
 return;
+if(this.props.sendForm){
+var buttons=[{
+text:'Cancel'},
+
+{
+text:'OK',
+onPress:this.sendFormTo.bind(this,resource)}];
+
+var to=this.props.resource;
+AlertIOS.prompt(
+'Sending ' + resource.title + ' form to ' + utils.getDisplayName(to,utils.getModel(to[constants.TYPE]).value.properties),
+buttons);
+
+return;}
+
 var page={
 model:utils.getModel(resource.id).value,
 resource:{
@@ -89375,10 +89772,31 @@ this.props.navigator.replace({
 id:4,
 title:resource.title,
 rightButtonTitle:'Done',
+backButtonTitle:'Back',
 component:NewResource,
 titleTextColor:'#7AAAC3',
-passProps:page});}},{key:'renderRow',value:
+passProps:page});}},{key:'sendFormTo',value:
 
+
+
+function sendFormTo(model,msg){
+var me=utils.getMe();
+var resource={from:utils.getMe(),to:this.props.resource};
+
+
+var toName=utils.getDisplayName(resource.to,utils.getModel(resource.to[constants.TYPE]).value.properties);
+var meta=utils.getModel(me[constants.TYPE]).value.properties;
+var meName=utils.getDisplayName(me,meta);
+var modelName='tradle.SimpleMessage';
+var value={
+message:'[' + msg + '](' + model.id + ')',
+from:me,
+to:resource.to,
+time:new Date().getTime()};
+
+value[constants.TYPE] = modelName;
+Actions.addMessage(value);
+this.props.navigator.pop();}},{key:'renderRow',value:
 
 
 function renderRow(resource){var _this=this;
@@ -89465,18 +89883,18 @@ Image=
 
 
 
-React.Image;var StyleSheet=React.StyleSheet;var Text=React.Text;var TouchableHighlight=React.TouchableHighlight;var ListView=React.ListView;var Component=React.Component;var View=React.View;var 
+React.Image;var StyleSheet=React.StyleSheet;var Text=React.Text;var TouchableHighlight=React.TouchableHighlight;var AlertIOS=React.AlertIOS;var Component=React.Component;var View=React.View;var 
 
 MessageRow=(function(_Component){_inherits(MessageRow,_Component);
 function MessageRow(props){_classCallCheck(this,MessageRow);
-_get(Object.getPrototypeOf(MessageRow.prototype),'constructor',this).call(this,props);
-var dataSource=new ListView.DataSource({
-rowHasChanged:function(row1,row2){return row1 !== row2;}});
+_get(Object.getPrototypeOf(MessageRow.prototype),'constructor',this).call(this,props);}_createClass(MessageRow,[{key:'render',value:
 
 
-this.state = {
-resource:this.props.resource,
-dataSource:dataSource};}_createClass(MessageRow,[{key:'render',value:
+
+
+
+
+
 
 
 
@@ -89625,6 +90043,8 @@ React.createElement(View,null);
 var showMessageBody;
 if(!isModel && noMessage){
 if(hasOwnerPhoto)
+showMessageBody = true;else 
+if(!model.properties['message'])
 showMessageBody = true;}else 
 
 
@@ -89668,9 +90088,12 @@ renderedRow)),
 
 
 messageBody = React.createElement(View,{style:{height:5}});
+
 var len=photoUrls.length;
-var inRow=len?len === 1?1:len % 2?3:2:0;
+var inRow=len === 1?1:len == 2 || len == 4?2:3;
+
 var photoStyle={};
+var height;
 if(inRow > 0){
 if(inRow === 1)
 photoStyle = styles.bigImage;else 
@@ -89682,12 +90105,18 @@ photoStyle = styles.image;}
 
 var viewStyle={margin:1,backgroundColor:'#f7f7f7'};
 
+var isModel=!this.props.resource[constants.TYPE];
+var model=isModel?utils.getModel(this.props.resource.id).value:utils.getModel(this.props.resource[constants.TYPE]).value;
+var isLicense=model.id.indexOf('License') !== -1 || model.id.indexOf('Passport') !== -1;
+
+var photoStyle=isLicense?styles.bigImageH:photoStyle;
+
 return (
 React.createElement(View,{style:viewStyle,key:resource},
 date,
 messageBody,
 React.createElement(View,{style:photoListStyle},
-React.createElement(PhotoList,{photos:photoUrls,style:[photoStyle,{marginTop:-20}],navigator:this.props.navigator,numberInRow:inRow}))));}},{key:'onPress',value:
+React.createElement(PhotoList,{photos:photoUrls,resource:this.props.resource,style:[photoStyle,{marginTop:-20}],navigator:this.props.navigator,numberInRow:inRow}))));}},{key:'onPress',value:
 
 
 
@@ -89711,6 +90140,7 @@ this.props.navigator.push({
 id:4,
 title:model.title,
 rightButtonTitle:'Done',
+backButtonTitle:'Back',
 component:NewResource,
 titleTextColor:'#7AAAC3',
 passProps:{
@@ -89780,7 +90210,9 @@ first = false;}
 return;}
 
 
-if(resource[v] && (resource[v].indexOf('http://') == 0 || resource[v].indexOf('https://') == 0)){
+if(resource[v] && 
+properties[v].type === 'string' && (
+resource[v].indexOf('http://') == 0 || resource[v].indexOf('https://') == 0)){
 onPressCall = self.onPress.bind(self);
 vCols.push(React.createElement(Text,{style:style,numberOfLines:first?2:1},resource[v]));}else 
 
@@ -89798,21 +90230,27 @@ return;
 var msgParts=utils.splitMessage(resource[v]);
 
 if(msgParts.length === 2){
+if(!msgParts[0].length)
+msgParts[0] = 'Form for';
 var msgModel=utils.getModel(msgParts[1]);
 if(msgModel){
+if(self.props.verificationsToShare)
+style = styles.description;
 msgModel = msgModel.value;
 if(!isMyMessage)
 onPressCall = self.createNewResource.bind(self,msgModel);
-vCols.push(React.createElement(View,null,
-React.createElement(Text,{style:style},msgParts[0]),
-React.createElement(Text,{style:[style,{color:isMyMessage?'#efffe5':'#7AAAC3'}]},msgModel.title)));
+var link=isMyMessage?
+React.createElement(Text,{style:[style,{color:isMyMessage?'#efffe5':'#2892C6'}]},msgModel.title):
+React.createElement(View,{style:{flexDirection:'row',justifyContent:'space-between'}},
+React.createElement(Text,{style:[style,{color:isMyMessage?'#efffe5':'#2892C6'}]},msgModel.title),
+React.createElement(Icon,{style:styles.linkIcon,size:20,name:'ios-arrow-right'}));
 
-if(self.props.verificationsToTransfer){
+if(self.props.verificationsToShare){
 var vtt=[];
 var cnt=0;
-for(var t in self.props.verificationsToTransfer) {
+for(var t in self.props.verificationsToShare) {
 if(t === msgModel.id){
-var ver=self.props.verificationsToTransfer[t];
+var ver=self.props.verificationsToShare[t];
 ver.forEach(function(r){
 var vModel=utils.getModel(r[constants.TYPE]);
 var doc=self.formatDocument(msgModel,r);
@@ -89829,36 +90267,33 @@ cnt++;});}}
 
 
 if(vtt.length){
-var orgRow;
-if(resource.organization){
-orgRow = resource.organization.photos?
-React.createElement(View,{style:{flexDirection:'row',flex:1}},
-React.createElement(Image,{source:{uri:utils.getImageUri(resource.organization.photos[0].url)},style:styles.icon}),
-React.createElement(Text,{style:styles.verySmallLetters},resource.organization.title)):
+var orgRow=React.createElement(View,null);
+vCols.push(
+React.createElement(Text,{style:{color:'#C390D4'}},'I just sent you a request for ',
+msgModel.title,'.',
+utils.getMe().firstName,', this is your Tradle assistent talking. Tap on one of the items below to share with ',
+isMyMessage?resource.to.title:resource.from.title));
 
-React.createElement(Text,{style:styles.description},resource.organization.title);
-orgRow = React.createElement(TouchableHighlight,{underlayColor:'transparent',onPress:this.transferDocs.bind(this)},
-orgRow);}else 
-
-
-
-
-
-
-orgRow = React.createElement(View,null);
 
 vCols.push(
 React.createElement(View,null,
+vtt,
 React.createElement(View,{style:{flexDirection:'row'}},
-React.createElement(View,{style:{alignSelf:'center'}},React.createElement(Text,null,'OR'))),
-
-React.createElement(View,{style:{backgroundColor:'#efffe5',padding:5,marginVertical:5}},
-React.createElement(Text,{style:styles.verifications},'Choose one of already verified documents from the list below'),
-orgRow),
-
-vtt));}}
+orgRow)));}
 
 
+
+
+vCols.push(React.createElement(View,null,
+React.createElement(View,{style:styles.separator}),
+React.createElement(Text,{style:[styles.verifications,{color:'#b4c3cb'}]},'You can choose to submit the document anew'),
+link));}else 
+
+
+
+vCols.push(React.createElement(View,null,
+React.createElement(Text,{style:style},msgParts[0]),
+link));
 
 return;}}
 
@@ -89868,13 +90303,24 @@ vCols.push(React.createElement(Text,{style:style},resource[v]));}
 first = false;});
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 if(model.id !== 'tradle.SimpleMessage'){
 var t=model.title.split(' ');
 var s='';
 t.forEach(function(p){
 if(p.indexOf('Verif') === -1)
 s += p + ' ';});
-
 
 
 if(resource.verifications && resource.verifications.length){
@@ -89895,18 +90341,49 @@ vCols.push(React.createElement(Text,{style:styles.verySmallLetters},s));}
 
 if(vCols && vCols.length)
 extend(renderedRow,vCols);
-return onPressCall?onPressCall:isSimpleMessage?null:this.props.onSelect;}},{key:'transferDocs',value:
+return onPressCall?onPressCall:isSimpleMessage?null:this.props.onSelect;}},{key:'share',value:
 
-function transferDocs(){}},{key:'formatDocument',value:
+function share(){
+console.log('Share');}},{key:'shareDocs',value:
+
+function shareDocs(){
+this.props.navigator.push({
+title:m.title,
+titleTextColor:'#7AAAC3',
+id:10,
+component:ResourceList,
+backButtonTitle:'Back',
+passProps:{
+filter:filter,
+prop:propName,
+modelName:prop.ref,
+resource:resource,
+returnRoute:currentRoutes[currentRoutes.length - 1],
+callback:this.setChosenValue.bind(this)}});}},{key:'formatDocument',value:
 
 
-function formatDocument(model,verification){
+
+
+function formatDocument(model,verification){var _this=this;
 var resource=verification.document;
 var self=this;
+var docModel=utils.getModel(resource[constants.TYPE]).value;
+var docModelTitle=docModel.title;
+var idx=docModelTitle.indexOf('Verification');
+var docTitle=idx === -1?docModelTitle:docModelTitle.substring(0,idx);
 
-var msg=resource.message?
-React.createElement(View,null,React.createElement(Text,{style:styles.verySmallLetters},resource.message)):
-React.createElement(View,null);
+var msg;
+if(resource.message)
+msg = React.createElement(View,null,React.createElement(Text,{style:styles.description},resource.message));else 
+{
+var rows=[];
+this.formatDocument1(model,resource,rows);
+msg = React.createElement(View,null,rows);}
+
+
+
+
+
 
 var photo=resource && resource.photos?
 React.createElement(Image,{source:{uri:utils.getImageUri(resource.photos[0].url)},style:styles.cellImage}):
@@ -89917,26 +90394,109 @@ if(verification.organization){
 var orgPhoto=verification.organization.photo?
 React.createElement(Image,{source:{uri:utils.getImageUri(verification.organization.photo)},style:[styles.orgImage,{marginTop:-5}]}):
 React.createElement(View,null);
-orgRow = React.createElement(View,{style:{flexDirection:'row',flex:1}},
-React.createElement(Text,{style:[styles.verySmallLetters,{color:'#7AAAc3'}]},'verified by '),
-React.createElement(Text,{style:styles.verySmallLetters},verification.organization.title.length < 10?verification.organization.title:verification.organization.title.substring(0,8) + '..'),
-orgPhoto);}else 
+orgRow = React.createElement(View,{style:{flexDirection:'row',marginTop:5}},
+React.createElement(Text,{style:styles.verySmallLetters},'verified by '),
+React.createElement(Text,{style:[styles.verySmallLetters,{color:'#757575'}]},verification.organization.title.length < 10?verification.organization.title:verification.organization.title.substring(0,8) + '..'));}else 
 
 
 
 orgRow = React.createElement(View,null);
 
-return React.createElement(View,{style:{flex:1,flexDirection:'row',paddingVertical:5}},
+return (
+React.createElement(TouchableHighlight,{underlayColor:'transparent',onPress:function(){return (
+AlertIOS.alert(
+'Sharing ' + docTitle + ' verified by ' + verification.organization.title,
+'with ' + _this.props.to.organization.title,
+[
+{text:'Share',onPress:_this.share.bind(_this)},
+{text:'Cancel',onPress:function(){return console.log('Canceled!');}}]));}},
+
+
+React.createElement(View,{style:{flex:1,flexDirection:'row',paddingVertical:5}},
 React.createElement(View,null,
 photo),
 
-React.createElement(View,null,
+React.createElement(View,{style:{flex:1}},
 msg,
-orgRow));}},{key:'onSelect',value:
+orgRow))));}},{key:'formatDocument1',value:
 
 
 
-function onSelect(){}}]);return MessageRow;})(Component);
+
+
+function formatDocument1(model,resource,renderedRow){
+var viewCols=model.gridCols || model.viewCols;
+if(!viewCols)
+return;
+var verPhoto;
+var vCols=[];
+var first=true;
+var self=this;
+var model=utils.getModel(resource[constants.TYPE] || resource.id).value;
+
+var properties=model.properties;
+var noMessage=!resource.message || !resource.message.length;
+var onPressCall;
+
+var isSimpleMessage=model.id === 'tradle.SimpleMessage';
+
+viewCols.forEach(function(v){
+if(properties[v].type === 'array' || properties[v].type === 'date')
+return;
+var style=styles.description;
+
+if(properties[v].ref){
+if(resource[v]){
+vCols.push(React.createElement(Text,{style:style,numberOfLines:first?2:1},resource[v].title));
+first = false;}
+
+
+return;}
+
+
+if(resource[v] && properties[v].type === 'string' && (resource[v].indexOf('http://') == 0 || resource[v].indexOf('https://') == 0))
+row = React.createElement(Text,{style:style,numberOfLines:first?2:1},resource[v]);else 
+if(!model.autoCreate){
+var val=properties[v].displayAs?
+utils.templateIt(properties[v],resource):
+resource[v];
+row = React.createElement(Text,{style:style,numberOfLines:first?2:1},val);}else 
+
+{
+if(!resource[v] || !resource[v].length)
+return;
+var msgParts=utils.splitMessage(resource[v]);
+
+if(msgParts.length === 2){
+var msgModel=utils.getModel(msgParts[1]);
+if(msgModel){
+vCols.push(React.createElement(View,null,
+React.createElement(Text,{style:style},msgParts[0]),
+React.createElement(Text,{style:[style,{color:isMyMessage?'#efffe5':'#7AAAC3'}]},msgModel.value.title)));
+
+return;}}
+
+
+var row=React.createElement(Text,{style:style},resource[v]);}
+
+
+if(first){
+row = React.createElement(View,{style:{flexDirection:'row',justifyContent:'space-between'}},
+React.createElement(View,null,row),
+React.createElement(View,null,React.createElement(Text,{style:styles.verySmallLetters},renderedRow[0])));
+
+renderedRow.splice(0,1);}
+
+vCols.push(row);
+first = false;});
+
+
+
+
+if(vCols && vCols.length){
+vCols.forEach(function(v){
+renderedRow.push(v);});}}}]);return MessageRow;})(Component);
+
 
 
 
@@ -89950,7 +90510,7 @@ flexDirection:'row'},
 modelTitle:{
 flex:1,
 flexWrap:'wrap',
-fontSize:22,
+fontSize:17,
 fontWeight:'400',
 marginVertical:15},
 
@@ -89983,16 +90543,22 @@ backgroundColor:'#569bff'},
 
 msgImage:{
 backgroundColor:'#dddddd',
-height:50,
+height:40,
 marginRight:5,
-width:50,
-borderRadius:25,
+width:40,
+borderRadius:20,
 borderColor:'#cccccc',
 borderWidth:1},
 
 bigImage:{
 width:240,
 height:280,
+margin:1,
+borderRadius:10},
+
+bigImageH:{
+width:240,
+height:170,
 margin:1,
 borderRadius:10},
 
@@ -90020,8 +90586,8 @@ borderColor:'#cccccc',
 borderWidth:1},
 
 verifications:{
-fontSize:12,
-backgroundColor:'#efffe5'},
+fontSize:12},
+
 
 verySmallLetters:{
 fontSize:12,
@@ -90059,12 +90625,17 @@ backgroundColor:'transparent'},
 
 cellImage:{
 backgroundColor:'#dddddd',
-height:30,
+height:40,
+width:40,
 marginRight:10,
-width:30,
 borderColor:'transparent',
 borderRadius:10,
 borderWidth:1},
+
+linkIcon:{
+width:20,
+height:20,
+color:'#2892C6'},
 
 icon:{
 width:20,
@@ -90073,21 +90644,31 @@ marginLeft:4,
 borderWidth:1,
 borderColor:'#eeeeee',
 borderRadius:10,
-marginRight:5}});
+marginRight:5},
 
+description:{
+flexWrap:'wrap',
+color:'#999999',
+fontSize:14},
+
+separator:{
+height:0.5,
+marginTop:5,
+backgroundColor:'#cccccc',
+flex:40}});
 
 
 reactMixin(MessageRow.prototype,RowMixin);
 
 module.exports = MessageRow;
 });
-__d('Identity/Components/AddNewMessage.js',["image!clipadd","NativeModules","ActionSheetIOS","react-native/Libraries/react-native/react-native.js","Identity/utils/utils.js","Identity/Components/ChatMessage.js","Identity/Components/SelectPhotoList.js","react-native-icons/index.js","extend/index.js","Identity/Store/Store.js","react-mixin/index.js","reflux/src/index.js","Identity/Actions/Actions.js","react-native-keyboardevents/KeyboardEvents.ios.js","tradle-constants/index.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
+__d('Identity/Components/AddNewMessage.js',["Ionicons","NativeModules","ActionSheetIOS","react-native/Libraries/react-native/react-native.js","Identity/utils/utils.js","Identity/Components/ChatMessage.js","Identity/Components/SelectPhotoList.js","extend/index.js","Identity/Store/Store.js","react-mixin/index.js","reflux/src/index.js","Identity/Actions/Actions.js","react-native-keyboardevents/KeyboardEvents.ios.js","tradle-constants/index.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
 
 var React=require('react-native/Libraries/react-native/react-native.js');
 var utils=require('Identity/utils/utils.js');
 var ChatMessage=require('Identity/Components/ChatMessage.js');
-var SelectPhotoList=require('Identity/Components/SelectPhotoList.js');var _require=
-require('react-native-icons/index.js');var Icon=_require.Icon;
+var SelectPhotoList=require('Identity/Components/SelectPhotoList.js');
+var Icon=require('Ionicons');
 var extend=require('extend/index.js');
 var Store=require('Identity/Store/Store.js');
 var reactMixin=require('react-mixin/index.js');
@@ -90107,7 +90688,7 @@ View=
 
 
 
-React.View;var TouchableHighlight=React.TouchableHighlight;var Navigator=React.Navigator;var Image=React.Image;var StyleSheet=React.StyleSheet;var LayoutAnimation=React.LayoutAnimation;var Component=React.Component;
+React.View;var TouchableHighlight=React.TouchableHighlight;var Navigator=React.Navigator;var StyleSheet=React.StyleSheet;var LayoutAnimation=React.LayoutAnimation;var Image=React.Image;var Component=React.Component;
 
 var ActionSheetIOS=require('ActionSheetIOS');
 
@@ -90173,14 +90754,24 @@ this.setState({userInput:''});}}}},{key:'render',value:
 
 
 function render(){
-var resource={from:utils.getMe(),to:this.props.resource};
+var me=utils.getMe();
+var resource={from:me,to:this.props.resource};
 var model=utils.getModel(this.props.modelName).value;
+var pushForm=me.organization?
+React.createElement(TouchableHighlight,{style:{paddingLeft:20},underlayColor:'#eeeeee',
+onPress:this.props.onAddNewPressed.bind(this,true)},
+React.createElement(Icon,{name:'ios-arrow-thin-up',size:25,style:styles.imageOutline,color:'#757575'})):
+
+React.createElement(View,{style:{marginLeft:10}});
+
+
+
+
 return (
 React.createElement(View,{style:{height:this.state.keyboardSpace + 45}},
 React.createElement(View,{style:styles.addNew},
-React.createElement(TouchableHighlight,{style:{paddingLeft:5},underlayColor:'#eeeeee',
-onPress:this.props.onAddNewPressed.bind(this)},
-React.createElement(Image,{source:require('image!clipadd'),style:styles.image})),
+React.createElement(View,{style:{flexDirection:'row',marginLeft:-8}},
+pushForm),
 
 React.createElement(View,{style:styles.searchBar},
 React.createElement(ChatMessage,{ref:'chat',resource:resource,
@@ -90190,10 +90781,10 @@ onSubmitEditing:this.onSubmitEditing.bind(this),
 onChange:this.onChange.bind(this),
 onEndEditing:this.onEndEditing.bind(this)})),
 
-React.createElement(TouchableHighlight,{style:{paddingRight:5},underlayColor:'transparent',
+React.createElement(TouchableHighlight,{style:{paddingRight:8},underlayColor:'transparent',
 onPress:this.showChoice.bind(this)},
 React.createElement(View,null,
-React.createElement(Icon,{name:'ion|ios-camera',style:styles.image,size:35,color:'#aaaaaa'}))))));}},{key:'onChange',value:
+React.createElement(Icon,{name:'ios-camera',style:styles.icon,size:40,color:'#999999'}))))));}},{key:'onChange',value:
 
 
 
@@ -90364,8 +90955,21 @@ alignItems:'center',
 backgroundColor:'#eeeeee'},
 
 image:{
-width:40,
-height:40},
+width:27,
+height:27,
+marginLeft:5},
+
+icon:{
+width:35,
+height:35},
+
+imageOutline:{
+width:27,
+height:27,
+borderRadius:13,
+borderColor:'#aaaaaa',
+paddingLeft:7,
+borderWidth:2},
 
 addNew:{
 flexDirection:'row',
@@ -90380,8 +90984,6 @@ borderTopColor:'#cccccc'}});
 
 
 module.exports = AddNewMessage;
-});
-__d('image!clipadd',[],function(global, require, requireDynamic, requireLazy, module, exports) {  module.exports = {"__packager_asset":true,"isStatic":true,"path":"/Users/Ellen/lablz/Identity/iOS/Images.xcassets/clipadd.imageset/clipadd.png","uri":"clipadd","width":72,"height":72,"deprecated":true};
 });
 __d('Identity/Components/CameraView.js',["react-native/Libraries/react-native/react-native.js","react-native-camera/Camera.ios.js","react-native-icons/index.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}var React=require('react-native/Libraries/react-native/react-native.js');var 
 
@@ -90826,6 +91428,641 @@ children));}
 
 module.exports = cloneReferencedElement;
 });
+__d('Identity/Components/GridList.js',["react-native/Libraries/react-native/react-native.js","react-native-search-bar/SearchBar.js","Identity/Components/NoResources.js","Identity/Components/ResourceRow.js","Identity/Components/ResourceView.js","Identity/Components/VerificationRow.js","Identity/Components/NewResource.js","Identity/Components/MessageList.js","Identity/utils/utils.js","react-mixin/index.js","Identity/Store/Store.js","Identity/Actions/Actions.js","reflux/src/index.js","tradle-constants/index.js","react-native-icons/index.js","react-native-grid-view/index.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
+
+var React=require('react-native/Libraries/react-native/react-native.js');
+var SearchBar=require('react-native-search-bar/SearchBar.js');
+var NoResources=require('Identity/Components/NoResources.js');
+var ResourceRow=require('Identity/Components/ResourceRow.js');
+var ResourceView=require('Identity/Components/ResourceView.js');
+var VerificationRow=require('Identity/Components/VerificationRow.js');
+var NewResource=require('Identity/Components/NewResource.js');
+var MessageList=require('Identity/Components/MessageList.js');
+var utils=require('Identity/utils/utils.js');
+var reactMixin=require('react-mixin/index.js');
+var Store=require('Identity/Store/Store.js');
+var Actions=require('Identity/Actions/Actions.js');
+var Reflux=require('reflux/src/index.js');
+var constants=require('tradle-constants/index.js');var _require=
+require('react-native-icons/index.js');var Icon=_require.Icon;
+var GridView=require('react-native-grid-view/index.js');var 
+
+
+ListView=
+
+
+
+
+
+
+
+
+React.ListView;var Component=React.Component;var StyleSheet=React.StyleSheet;var Navigator=React.Navigator;var TouchableHighlight=React.TouchableHighlight;var Image=React.Image;var StatusBarIOS=React.StatusBarIOS;var View=React.View;var Text=React.Text;var 
+
+GridList=(function(_Component){_inherits(GridList,_Component);
+function GridList(props){_classCallCheck(this,GridList);
+_get(Object.getPrototypeOf(GridList.prototype),'constructor',this).call(this,props);
+
+this.state = {
+isLoading:utils.getModels()?false:true,
+dataSource:new ListView.DataSource({
+rowHasChanged:function(row1,row2){return row1 !== row2;}})};}_createClass(GridList,[{key:'componentWillMount',value:
+
+
+
+function componentWillMount(){
+StatusBarIOS.setHidden(false);
+var params={
+modelName:this.props.modelName,
+to:this.props.resource};
+
+if(this.props.isAggregation)
+params.isAggregation = true;
+if(this.props.sortProperty)
+params.sortProperty = this.props.sortProperty;
+if(this.props.prop)
+params.prop = utils.getModel(this.props.resource[constants.TYPE]).value.properties[this.props.prop];
+
+this.state.isLoading = true;
+Actions.list(params);}},{key:'componentDidMount',value:
+
+function componentDidMount(){
+this.listenTo(Store,'onListUpdate');}},{key:'onListUpdate',value:
+
+
+function onListUpdate(params){
+if(params.error)
+return;
+var action=params.action;
+if(action === 'addItem' || action === 'addMessage'){
+var model=action === 'addMessage'?
+utils.getModel(this.props.modelName).value:
+utils.getModel(params.resource[constants.TYPE]).value;
+
+this.state.isLoading = true;
+Actions.list({
+query:this.state.filter,
+modelName:model.id,
+to:this.props.resource,
+sortProperty:model.sort});
+
+console.log('Actions.list');
+return;}
+
+
+if(action !== 'list' || !params.list || params.isAggregation !== this.props.isAggregation)
+return;
+var list=params.list;
+if(!list.length && (!this.state.filter || !this.state.filter.length)){
+this.setState({
+isLoading:false});
+
+
+return;}
+
+var type=list[0][constants.TYPE];
+
+
+if(type !== this.props.modelName){
+var m=utils.getModel(type).value;
+if(!m.subClassOf || m.subClassOf != this.props.modelName)
+return;}
+
+
+
+
+
+
+
+
+
+
+
+
+this.setState({
+dataSource:this.state.dataSource.cloneWithRows(list),
+list:list,
+isLoading:false});}},{key:'selectResource',value:
+
+
+
+
+
+
+function selectResource(resource){
+var me=utils.getMe();
+
+var model=utils.getModel(this.props.modelName);
+var isIdentity=this.props.modelName === constants.TYPES.IDENTITY;
+var isOrganization=this.props.modelName === 'tradle.Organization';
+
+if(!isIdentity && 
+!isOrganization && 
+!this.props.callback){
+var m=utils.getModel(resource[constants.TYPE]).value;
+this.props.navigator.push({
+title:utils.makeTitle(utils.getDisplayName(resource,m.properties)),
+id:3,
+component:ResourceView,
+titleTextColor:'#7AAAC3',
+backButtonTitle:'Back',
+rightButtonTitle:'Edit',
+onRightButtonPress:{
+title:title,
+id:4,
+component:NewResource,
+titleTextColor:'#7AAAC3',
+backButtonTitle:'Back',
+rightButtonTitle:'Done',
+passProps:{
+model:m,
+resource:resource}},
+
+
+
+passProps:{resource:resource}});
+
+return;}
+
+if(this.props.prop){
+if(me && this.props.modelName != constants.TYPES.IDENTITY){
+this._selectResource(resource);
+return;}
+
+if(!me){
+if(this.state.isRegistration){
+this._selectResource(resource);
+return;}}else 
+
+
+if(me[constants.ROOT_HASH] === resource[constants.ROOT_HASH] || 
+this.props.resource && me[constants.ROOT_HASH] === this.props.resource[constants.ROOT_HASH] && this.props.prop){
+this._selectResource(resource);
+return;}}
+
+
+var title=isIdentity?resource.firstName:resource.name;
+var modelName='tradle.Message';
+var self=this;
+var route={
+title:title,
+component:MessageList,
+id:11,
+passProps:{
+resource:resource,
+filter:'',
+modelName:modelName}};
+
+
+if(isIdentity){
+route.rightButtonTitle = 'Profile';
+route.onRightButtonPress = {
+title:title,
+id:3,
+component:ResourceView,
+titleTextColor:'#7AAAC3',
+backButtonTitle:'Back',
+rightButtonTitle:'Edit',
+onRightButtonPress:{
+title:title,
+id:4,
+component:NewResource,
+titleTextColor:'#7AAAC3',
+backButtonTitle:'Back',
+rightButtonTitle:'Done',
+passProps:{
+model:utils.getModel(resource[constants.TYPE]).value,
+resource:resource}},
+
+
+passProps:{resource:resource}};}
+
+
+this.props.navigator.push(route);}},{key:'_selectResource',value:
+
+
+function _selectResource(resource){
+var model=utils.getModel(this.props.modelName);
+var title=utils.getDisplayName(resource,model.value.properties);
+var newTitle=title;
+if(title.length > 20){
+var t=title.split(' ');
+newTitle = '';
+t.forEach(function(word){
+if(newTitle.length + word.length > 20)
+return;
+newTitle += newTitle.length?' ' + word:word;});}
+
+
+
+var route={
+title:utils.makeTitle(newTitle),
+id:3,
+component:ResourceView,
+parentMeta:model,
+backButtonTitle:'Back',
+passProps:{resource:resource}};
+
+
+var me=utils.getMe();
+if((me || this.state.isRegistration) && this.props.prop){
+this.props.callback(this.props.prop,resource);
+this.props.navigator.popToRoute(this.props.returnRoute);
+return;}
+
+if(me && 
+!model.value.isInterface && (
+resource[constants.ROOT_HASH] === me[constants.ROOT_HASH] || resource[constants.TYPE] !== constants.TYPES.IDENTITY)){
+var self=this;
+route.rightButtonTitle = 'Edit';
+route.onRightButtonPress = {
+title:'Edit',
+id:4,
+component:NewResource,
+rightButtonTitle:'Done',
+titleTextColor:'#7AAAC3',
+passProps:{
+model:utils.getModel(resource[constants.TYPE]).value,
+resource:me}};}
+
+
+
+this.props.navigator.push(route);}},{key:'showRefResources',value:
+
+function showRefResources(resource,prop){
+var props=utils.getModel(resource[constants.TYPE]).value.properties;
+var propJson=props[prop];
+var resourceTitle=utils.getDisplayName(resource,props);
+resourceTitle = utils.makeTitle(resourceTitle);
+
+var backlinksTitle=propJson.title + ' - ' + resourceTitle;
+backlinksTitle = utils.makeTitle(backlinksTitle);
+var modelName=propJson.items.ref;
+
+this.props.navigator.push({
+title:backlinksTitle,
+id:10,
+component:ResourceList,
+backButtonTitle:'Back',
+titleTextColor:'#7AAAC3',
+passProps:{
+resource:resource,
+prop:prop,
+modelName:modelName},
+
+rightButtonTitle:'Details',
+onRightButtonPress:{
+title:resourceTitle,
+id:3,
+component:ResourceView,
+titleTextColor:'#7AAAC3',
+backButtonTitle:'Back',
+rightButtonTitle:'Edit',
+onRightButtonPress:{
+title:resourceTitle,
+id:4,
+component:NewResource,
+titleTextColor:'#7AAAC3',
+backButtonTitle:'Back',
+rightButtonTitle:'Done',
+passProps:{
+model:utils.getModel(resource[constants.TYPE]).value,
+resource:resource}},
+
+
+
+passProps:{resource:resource}}});}},{key:'onSearchChange',value:
+
+
+
+
+function onSearchChange(filter){
+Actions.list({
+query:filter,
+modelName:this.props.modelName,
+to:this.props.resource});}},{key:'renderRow',value:
+
+
+
+function renderRow(resource){var _this=this;
+var model=utils.getModel(this.props.modelName).value;
+
+return React.createElement(ResourceRow,{
+onSelect:function(){return _this.selectResource(resource);},
+key:resource[constants.ROOT_HASH],
+showRefResources:this.showRefResources.bind(this),
+resource:resource});}},{key:'renderFooter',value:
+
+
+function renderFooter(){
+var me=utils.getMe();
+if(!me || this.props.prop && this.props.prop.readOnly)
+return React.createElement(View,null);
+
+return (
+React.createElement(View,{style:styles.footer},
+React.createElement(TouchableHighlight,{underlayColor:'transparent',onPress:this.addNew.bind(this)},
+React.createElement(View,null,
+React.createElement(Icon,{name:'ion|plus',size:30,color:'#999999',style:styles.icon})))));}},{key:'addNew',value:
+
+
+
+
+
+function addNew(){var _this2=this;
+var model=utils.getModel(this.props.modelName).value;
+var r;
+
+
+if(this.props.resource){
+var props=model.properties;
+for(var p in props) {
+if(props[p].ref && props[p].ref === this.props.resource[constants.TYPE]){
+r = {};
+r[constants.TYPE] = this.props.modelName;
+r[p] = {id:this.props.resource[constants.TYPE] + '_' + this.props.resource[constants.ROOT_HASH]};
+
+if(this.props.resource.relatedTo && props.relatedTo)
+r.relatedTo = this.props.resource.relatedTo;}}}
+
+
+
+this.props.navigator.push({
+title:model.title,
+id:4,
+component:NewResource,
+titleTextColor:'#7AAAC3',
+backButtonTitle:'Back',
+rightButtonTitle:'Done',
+passProps:{
+model:model,
+resource:r,
+callback:function(){return Actions.list({
+modelName:_this2.props.modelName,
+to:_this2.props.resource});}}});}},{key:'render',value:
+
+
+
+
+function render(){
+if(this.state.isLoading)
+return React.createElement(View,null);
+var content;
+var model=utils.getModel(this.props.modelName).value;
+if(this.state.dataSource.getRowCount() === 0)
+content = React.createElement(NoResources,{
+filter:this.state.filter,
+model:model,
+isLoading:this.state.isLoading});else 
+{
+var model=utils.getModel(this.props.modelName).value;
+content = React.createElement(GridView,{ref:'listview',
+items:this.state.list,
+renderItem:this.renderRow.bind(this),
+itemsPerRow:4});}
+
+var model=utils.getModel(this.props.modelName).value;
+var Footer=this.renderFooter();
+return (
+React.createElement(View,{style:styles.container},
+React.createElement(SearchBar,{
+onChangeText:this.onSearchChange.bind(this),
+placeholder:'Search',
+showsCancelButton:false,
+hideBackground:true}),
+
+React.createElement(View,{style:styles.separator}),
+content,
+Footer));}}]);return GridList;})(Component);
+
+
+
+
+reactMixin(GridList.prototype,Reflux.ListenerMixin);
+
+var styles=StyleSheet.create({
+container:{
+flex:1,
+backgroundColor:'#f7f7f7',
+
+marginTop:60},
+
+centerText:{
+alignItems:'center'},
+
+separator:{
+height:1,
+backgroundColor:'#cccccc'},
+
+icon:{
+width:30,
+height:30,
+marginRight:5},
+
+
+image:{
+width:25,
+height:25,
+marginRight:5},
+
+
+footer:{
+flexDirection:'row',
+flexWrap:'nowrap',
+justifyContent:'space-between',
+height:45,
+paddingTop:5,
+paddingHorizontal:10,
+backgroundColor:'#eeeeee',
+borderBottomColor:'#eeeeee',
+borderRightColor:'#eeeeee',
+borderLeftColor:'#eeeeee',
+borderWidth:1,
+borderTopColor:'#cccccc'},
+
+row:{
+
+
+flexDirection:'row',
+padding:5},
+
+textContainer:{
+flex:1},
+
+resourceTitle:{
+flex:1,
+fontSize:16,
+fontWeight:'400',
+marginBottom:2,
+paddingLeft:5},
+
+cellImage:{
+
+height:50,
+marginRight:10,
+width:50}});
+
+
+
+
+
+
+
+module.exports = GridList;
+});
+__d('react-native-grid-view/index.js',["react-native/Libraries/react-native/react-native.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';
+
+var React=require('react-native/Libraries/react-native/react-native.js');var 
+
+
+AppRegistry=
+
+
+
+React.AppRegistry;var View=React.View;var StyleSheet=React.StyleSheet;var ListView=React.ListView;
+
+var CollectionView=React.createClass({displayName:'CollectionView',
+groupItems:function(items,itemsPerRow){
+var itemsGroups=[];
+var group=[];
+items.forEach(function(item){
+if(group.length === itemsPerRow){
+itemsGroups.push(group);
+group = [item];}else 
+{
+group.push(item);}});
+
+
+
+if(group.length > 0){
+itemsGroups.push(group);}
+
+
+return itemsGroups;},
+
+getInitialState:function(){
+return {items:[],renderItem:null,style:undefined,itemsPerRow:1,onEndReached:undefined};},
+
+renderGroup:function(group){
+var that=this;
+var items=group.map(function(item){
+return that.props.renderItem(item);});
+
+return (
+React.createElement(View,{style:styles.group},
+items));},
+
+
+
+render:function(){
+var groups=this.groupItems(this.props.items,this.props.itemsPerRow);
+var ds=new ListView.DataSource({rowHasChanged:function(r1,r2){return r1 !== r2;}});
+return React.createElement(ListView,{
+dataSource:ds.cloneWithRows(groups),
+renderRow:this.renderGroup,
+style:this.props.style,
+onEndReached:this.props.onEndReached});}});
+
+
+
+
+
+var styles=StyleSheet.create({
+group:{
+flexDirection:'row',
+alignItems:'center',
+justifyContent:'center'}});
+
+
+
+module.exports = CollectionView;
+});
+__d('react-native/Libraries/react-native/react-native.js',["React","ActivityIndicatorIOS","DatePickerIOS","Image","ListView","MapView","NavigatorIOS","PickerIOS","Navigator","SegmentedControlIOS","ScrollView","SliderIOS","SwitchIOS","TabBarIOS","Text","TextInput","TouchableHighlight","TouchableOpacity","TouchableWithoutFeedback","View","WebView","AlertIOS","AppRegistry","AppStateIOS","AsyncStorage","CameraRoll","InteractionManager","LinkingIOS","LayoutAnimation","NetInfo","PixelRatio","PushNotificationIOS","PanResponder","StatusBarIOS","StyleSheet","VibrationIOS","RCTDeviceEventEmitter","NativeModules","requireNativeComponent","LinkedStateMixin","ReactComponentWithPureRenderMixin","NativeModules","ReactUpdates","cloneWithProps","ReactFragment","update","ReactDefaultPerf","ReactTestUtils"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var ReactNative=Object.assign(Object.create(require('React')),{
+
+ActivityIndicatorIOS:require('ActivityIndicatorIOS'),
+DatePickerIOS:require('DatePickerIOS'),
+Image:require('Image'),
+ListView:require('ListView'),
+MapView:require('MapView'),
+NavigatorIOS:require('NavigatorIOS'),
+PickerIOS:require('PickerIOS'),
+Navigator:require('Navigator'),
+SegmentedControlIOS:require('SegmentedControlIOS'),
+ScrollView:require('ScrollView'),
+SliderIOS:require('SliderIOS'),
+SwitchIOS:require('SwitchIOS'),
+TabBarIOS:require('TabBarIOS'),
+Text:require('Text'),
+TextInput:require('TextInput'),
+TouchableHighlight:require('TouchableHighlight'),
+TouchableOpacity:require('TouchableOpacity'),
+TouchableWithoutFeedback:require('TouchableWithoutFeedback'),
+View:require('View'),
+WebView:require('WebView'),
+
+
+AlertIOS:require('AlertIOS'),
+AppRegistry:require('AppRegistry'),
+AppStateIOS:require('AppStateIOS'),
+AsyncStorage:require('AsyncStorage'),
+CameraRoll:require('CameraRoll'),
+InteractionManager:require('InteractionManager'),
+LinkingIOS:require('LinkingIOS'),
+LayoutAnimation:require('LayoutAnimation'),
+NetInfo:require('NetInfo'),
+PixelRatio:require('PixelRatio'),
+PushNotificationIOS:require('PushNotificationIOS'),
+PanResponder:require('PanResponder'),
+StatusBarIOS:require('StatusBarIOS'),
+StyleSheet:require('StyleSheet'),
+VibrationIOS:require('VibrationIOS'),
+
+
+DeviceEventEmitter:require('RCTDeviceEventEmitter'),
+NativeModules:require('NativeModules'),
+requireNativeComponent:require('requireNativeComponent'),
+
+addons:{
+LinkedStateMixin:require('LinkedStateMixin'),
+Perf:undefined,
+PureRenderMixin:require('ReactComponentWithPureRenderMixin'),
+TestModule:require('NativeModules').TestModule,
+TestUtils:undefined,
+batchedUpdates:require('ReactUpdates').batchedUpdates,
+cloneWithProps:require('cloneWithProps'),
+createFragment:require('ReactFragment').create,
+update:require('update')}});
+
+
+
+if(__DEV__){
+ReactNative.addons.Perf = require('ReactDefaultPerf');
+ReactNative.addons.TestUtils = require('ReactTestUtils');}
+
+
+module.exports = ReactNative;
+});
+__d('image!banking',[],function(global, require, requireDynamic, requireLazy, module, exports) {  module.exports = {"__packager_asset":true,"isStatic":true,"path":"/Users/Ellen/lablz/Identity/iOS/Images.xcassets/banking.imageset/banking.png","uri":"banking","width":32,"height":32,"deprecated":true};
+});
 __d('Identity/Components/TimHome.js',["image!Tradle","react-native/Libraries/react-native/react-native.js","Identity/Components/ResourceList.js","Identity/Components/AddNewIdentity.js","Identity/Components/NewResource.js","Identity/Components/ResourceView.js","Identity/utils/utils.js","reflux/src/index.js","Identity/Actions/Actions.js","Identity/Store/Store.js","react-mixin/index.js","Identity/data/data.js","tradle-constants/index.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
 
 var React=require('react-native/Libraries/react-native/react-native.js');
@@ -90852,7 +92089,9 @@ StyleSheet=
 
 
 
-React.StyleSheet;var Text=React.Text;var Navigator=React.Navigator;var View=React.View;var TouchableHighlight=React.TouchableHighlight;var TouchableWithoutFeedback=React.TouchableWithoutFeedback;var ActivityIndicatorIOS=React.ActivityIndicatorIOS;var Image=React.Image;var Component=React.Component;var ScrollView=React.ScrollView;var 
+
+
+React.StyleSheet;var Text=React.Text;var Navigator=React.Navigator;var View=React.View;var TouchableHighlight=React.TouchableHighlight;var TouchableWithoutFeedback=React.TouchableWithoutFeedback;var ActivityIndicatorIOS=React.ActivityIndicatorIOS;var Image=React.Image;var Component=React.Component;var ScrollView=React.ScrollView;var LinkingIOS=React.LinkingIOS;var StatusBarIOS=React.StatusBarIOS;var 
 
 TimHome=(function(_Component){_inherits(TimHome,_Component);
 function TimHome(props){_classCallCheck(this,TimHome);
@@ -90862,6 +92101,7 @@ isLoading:true};}_createClass(TimHome,[{key:'componentWillMount',value:
 
 
 function componentWillMount(){
+var url=LinkingIOS.popInitialURL();
 Actions.start();}},{key:'componentDidMount',value:
 
 function componentDidMount(){
@@ -90978,6 +92218,7 @@ utils.setModels(null);
 Actions.reloadDB();}},{key:'render',value:
 
 function render(){
+var url=LinkingIOS.popInitialURL();
 var spinner=this.state.isLoading?
 React.createElement(ActivityIndicatorIOS,{hidden:'true',size:'large'}):
 React.createElement(View,null);
@@ -91007,13 +92248,14 @@ communities = React.createElement(View,{style:{marginTop:20}});}
 
 
 
+StatusBarIOS.setHidden(true);
 return (
 React.createElement(View,{style:styles.scroll},
 React.createElement(Text,{style:styles.title},'Trust in Motion (TiM)'),
 React.createElement(ScrollView,null,
-React.createElement(View,{style:styles.container,ref:'search'},
 React.createElement(TouchableHighlight,{style:[styles.thumbButton],
 underlayColor:'transparent',onPress:this.showContactsOrRegister.bind(this)},
+React.createElement(View,{style:styles.container,ref:'search'},
 React.createElement(View,null,
 React.createElement(Image,{style:styles.thumb,source:require('image!Tradle')}),
 React.createElement(Text,{style:styles.tradle},'Tradle'))))),
@@ -91021,17 +92263,24 @@ React.createElement(Text,{style:styles.tradle},'Tradle'))))),
 
 
 
-React.createElement(View,{style:{justifyContent:'flex-end',alignSelf:'center'}},
+React.createElement(View,{style:{height:180}}),
+React.createElement(TouchableHighlight,{style:[styles.thumbButton],
+underlayColor:'transparent',onPress:this.showContactsOrRegister.bind(this)},
+React.createElement(View,{style:{backgroundColor:'#2892C6',paddingVertical:10,paddingHorizontal:30,borderRadius:10}},
+React.createElement(Text,{style:{color:'#f0f0f0',fontSize:17,fontWeight:400}},'Get started'))),
+
+
 React.createElement(Text,{style:errStyle},err),
 React.createElement(View,{style:styles.dev},
 editProfile,
 React.createElement(TouchableHighlight,{
 underlayColor:'transparent',onPress:this.onReloadDBPressed.bind(this)},
-React.createElement(Text,{style:styles.text},'Reload DB'))))));}}]);return TimHome;})(Component);
+React.createElement(Text,{style:styles.text},'Reload DB'))),
 
 
 
 
+React.createElement(View,{style:{height:200}})));}}]);return TimHome;})(Component);
 
 
 
@@ -91057,20 +92306,20 @@ scroll:{
 backgroundColor:'#2E3B4E'},
 
 container:{
-padding:30,
-marginTop:60,
+
+marginTop:120,
 alignItems:'center'},
 
 tradle:{
 color:'#7AAAC3',
-fontSize:50,
+fontSize:40,
 alignSelf:'center'},
 
 text:{
 color:'#7AAAC3',
 paddingLeft:10,
 paddingRight:10,
-fontSize:18},
+fontSize:12},
 
 thumbButton:{
 marginBottom:10,
@@ -91079,8 +92328,8 @@ justifyContent:'center'},
 
 
 thumb:{
-width:200,
-height:200},
+width:170,
+height:170},
 
 communitiesText:{
 color:'#f8920d',
@@ -91097,7 +92346,7 @@ fontSize:20,
 color:'#7AAAC3'},
 
 dev:{
-marginTop:100,
+marginTop:10,
 flexDirection:'row',
 marginBottom:500,
 alignSelf:'center'}});
