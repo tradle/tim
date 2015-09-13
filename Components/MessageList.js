@@ -7,7 +7,7 @@ var NoResources = require('./NoResources');
 var NewResource = require('./NewResource');
 var ResourceTypesScreen = require('./ResourceTypesScreen');
 var AddNewMessage = require('./AddNewMessage');
-var CameraView = require('./CameraView');
+// var CameraView = require('./CameraView');
 var utils = require('../utils/utils');
 var reactMixin = require('react-mixin');
 var Store = require('../Store/Store');
@@ -191,10 +191,10 @@ class MessageList extends Component {
                             resource={this.props.resource} 
                             modelName={this.props.modelName} 
                             onAddNewPressed={this.onAddNewPressed.bind(this)}
-                            onTakePicPressed={this.onTakePicPressed.bind(this)}
                             onPhotoSelect={this.onPhotoSelect.bind(this)}
                             callback={this.addedMessage.bind(this)} />
            : <View></View>;
+                            // onTakePicPressed={this.onTakePicPressed.bind(this)}
     return (
       <View style={styles.container}> 
         <SearchBar
@@ -258,19 +258,19 @@ class MessageList extends Component {
     if (resource.url) 
       Actions.addModelFromUrl(resource.url);    
   }  
-  onTakePicPressed() {
-    var self = this;
-    this.props.navigator.push({
-      title: 'Take a pic',
-      backButtonTitle: 'Cancel',
-      id: 12,
-      component: CameraView,
-      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      passProps: {
-        onTakePic: self.onTakePic.bind(this),
-      }
-    });
-  }
+  // onTakePicPressed() {
+  //   var self = this;
+  //   this.props.navigator.push({
+  //     title: 'Take a pic',
+  //     backButtonTitle: 'Cancel',
+  //     id: 12,
+  //     component: CameraView,
+  //     sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+  //     passProps: {
+  //       onTakePic: self.onTakePic.bind(this),
+  //     }
+  //   });
+  // }
   onTakePic(data) {
     var msg = {
       from: utils.getMe(), 
