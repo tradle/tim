@@ -13,7 +13,7 @@ var constants = require('tradle-constants');
 var LinearGradient = require('react-native-linear-gradient');
 var RowMixin = require('./RowMixin');
 var reactMixin = require('react-mixin');
-
+var STRUCTURED_MESSAGE_COLOR = '#F6FFF0';
 var {
   Image,
   StyleSheet,
@@ -27,84 +27,61 @@ var {
 class MessageRow extends Component {
   constructor(props) {
     super(props);
-    // var dataSource = new ListView.DataSource({
-    //   rowHasChanged: (row1, row2) => row1 !== row2,
-    // });
-
-    // this.state = {
-    //   resource: this.props.resource,
-    //   dataSource: dataSource
-      // viewStyle: {
-      //   margin: 1,
-      // },
-      // cnt: 0
-    // }
-  }
-  render() {
     var resource = this.props.resource;
-    var isModel = !resource[constants.TYPE];
-    if (isModel  &&  resource.autoCreate)
-      return <View style={{height: 0}} />;
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
     var me = utils.getMe();
     var isMyMessage;
-    if (!isModel  &&  !this.props.isAggregation) {
+    if (!this.props.isAggregation) {
       var fromHash = utils.getId(resource.from);
       if (fromHash == me[constants.TYPE] + '_' + me[constants.ROOT_HASH]) 
         isMyMessage = true;      
     }
+    this.state = { isMyMessage: isMyMessage };
+  }
+  render() {
+    var resource = this.props.resource;
+    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
+    var me = utils.getMe();
+    var isMyMessage = this.state.isMyMessage;
     var to = this.props.to;
     var ownerPhoto, hasOwnerPhoto;
-    if (isModel) {
-      if (resource.owner  &&  resource.owner.photos)  {
+
+    if (isMyMessage  || !to  ||  !to.photos) 
+      ownerPhoto = <View style={[styles.cell, {marginVertical: 0}]} />
+    else if (to) {
+      if (to.photos) {
+        var uri = utils.getImageUri(to.photos[0].url);
+        ownerPhoto = <Image source={{uri: uri}} style={styles.msgImage} /> 
         hasOwnerPhoto = true;
-        var uri = utils.getImageUri(resource.owner.photos[0].url);
-        ownerPhoto = 
-          <View style={[styles.cell, {marginVertical: 2}]}>
-            <Image source={{uri: uri}} style={styles.msgImage} />         
-          </View>
       }
-      else
-        ownerPhoto = <View style={[styles.cell, {marginVertical: 20}]} />
-    }  
-    else {
-      if (isMyMessage  || !to  ||  !to.photos) 
-        ownerPhoto = <View style={[styles.cell, {marginVertical: 0}]} />
-      else if (to) {
-        if (to.photos) {
-          var uri = utils.getImageUri(to.photos[0].url);
-          ownerPhoto = <Image source={{uri: uri}} style={styles.msgImage} /> 
-          hasOwnerPhoto = true;
-        }
-        else if (!isMyMessage) {
-          var title = resource.to.title.split(' ').map(function(s) {
-            return s.charAt(0);
-          }).join('');
-          ownerPhoto = <LinearGradient colors={['#A4CCE0', '#7AAAc3', '#5E92AD']} style={styles.cellRoundImage}>
-            <Text style={styles.cellText}>{title}</Text>
-          </LinearGradient>
-        }
+      else if (!isMyMessage) {
+        var title = resource.to.title.split(' ').map(function(s) {
+          return s.charAt(0);
+        }).join('');
+        ownerPhoto = <LinearGradient colors={['#A4CCE0', '#7AAAc3', '#5E92AD']} style={styles.cellRoundImage}>
+          <Text style={styles.cellText}>{title}</Text>
+        </LinearGradient>
       }
     }
+
     var renderedRow = [];
     var onPressCall;
-    if (isModel) 
+    var isVerification = resource[constants.TYPE] === 'tradle.Verification';
+    if (isVerification) 
       onPressCall = this.props.onSelect;
     else
       onPressCall = this.formatRow(isMyMessage, model, resource, renderedRow);
     
     var photoUrls = [];
-    var photoListStyle = {height: isModel ? 0 : 3};
+    var photoListStyle = {height: 3};
     var addStyle, inRow;
     var noMessage = !resource.message  ||  !resource.message.length;
-    if (!renderedRow.length) {
-      var vCols = isModel 
-                ? utils.getDisplayName(resource) 
-                : noMessage ? null : utils.getDisplayName(resource, model.properties);
+    if (!renderedRow.length  &&  !isVerification) {
+      var vCols = noMessage ? null : utils.getDisplayName(resource, model.properties);
       if (vCols)                
-        renderedRow = <Text style={isModel ? styles.modelTitle : styles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
+        renderedRow = <Text style={styles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
     }
-    else if (!isModel) {
+    else {
       var fromHash = resource.from.id;
       if (isMyMessage) { 
         if (!noMessage)
@@ -113,17 +90,13 @@ class MessageRow extends Component {
       else {
         if (!model.style)
           addStyle = {padding: 5, borderRadius: 10, borderColor: '#cccccc', backgroundColor: '#ffffff', marginVertical: 2};
-          // addStyle = {padding: 5, borderRadius: 10, borderColor: '#cccccc', backgroundColor: '#ffffff', marginVertical: 2};
-        // else
-        //   addStyle = {padding: 5, borderRadius: 10};
       }
-      if (model.style) 
-        addStyle = [addStyle, {padding: 5, borderRadius: 10, backgroundColor: '#efffe5', borderWidth: 1, borderColor: '#deeeb4', marginVertical: 2}]; //model.style];
-        // viewCols = <View style={styles.myCell}>{viewCols}</View>
+      if (model.style  ||  isVerification) 
+        addStyle = [addStyle, {padding: 5, borderRadius: 10, backgroundColor: STRUCTURED_MESSAGE_COLOR, borderWidth: 1, borderColor: '#deeeb4', marginVertical: 2}]; //model.style];
     }
     var properties = model.properties;
     var verPhoto;
-    if (!isModel  &&  properties.photos) {
+    if (properties.photos) {
       if (resource.photos) {
         var len = resource.photos.length;
         inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
@@ -140,7 +113,7 @@ class MessageRow extends Component {
         photoListStyle = {
           flexDirection: 'row', 
           alignSelf: isMyMessage ? 'flex-end' : 'flex-start', 
-          marginLeft: isMyMessage ? 30 : 55,
+          marginLeft: isMyMessage ? 30 : 45,
           borderRadius: 10,
           marginBottom: 3, 
         }
@@ -148,17 +121,10 @@ class MessageRow extends Component {
       else
         verPhoto = <View style={{height: 0, width:0}} />
     }
-    else if (isModel  &&  resource.owner  &&  resource.owner.photos) {
-      var ownerImg = resource.owner.photos[0].url;
-      var url = utils.getImageUri(ownerImg);
-      verPhoto = <Image source={{uri: ownerImg}} style={styles.ownerImage} />
-    }
-    var rowStyle = isModel && model.style 
-                 ? [styles.row, {backgroundColor: '#efffe5'}] 
-                 : noMessage ? {} : styles.row;
+    var rowStyle = styles.row;
     var val;
     var date;
-    if (!isModel  &&  resource.time) {
+    if (resource.time) {
       var previousMessageTime = this.props.previousMessageTime;      
       var showTime = !previousMessageTime  ||  this.props.isAggregation;
 
@@ -180,10 +146,12 @@ class MessageRow extends Component {
              : <View />;
 
     var showMessageBody;
-    if (!isModel  &&  noMessage) {
+    if (noMessage) {
       if (hasOwnerPhoto) 
         showMessageBody = true;
       else if (!model.properties['message'])
+        showMessageBody = true;
+      else if (isVerification)
         showMessageBody = true;
     }
     else 
@@ -191,45 +159,44 @@ class MessageRow extends Component {
     var messageBody;
     var isSimpleMessage = model.id === 'tradle.SimpleMessage';
     if (showMessageBody) {
-      var viewStyle;
-      if (!isModel) {
-        viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
-        if ((!noMessage  &&  resource.message.length > 30)  ||  !isSimpleMessage)
-          viewStyle.width = 260;
-      }  
-
-      // var verified;
-      // if (!resource.verifications  ||  !resource.verifications.length)
-      //   verified = <View />
-      // else {
-      //   var verifications = [];
-      //   resource.verifications.forEach(function(v) {
-      //     if (v.organization  &&  v.organization.photo)              
-      //       verifications.push(<Image source={{uri: v.organization.photo}} style={styles.orgImage} />)
-      //   })
-      //   verified = <View style={styles.verificationCheck}>
-      //                <Icon name='ios-checkmark-empty' size={25} style={styles.icon} />
-      //                {verifications}
-      //              </View>
-      // }
+      var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
+      if (resource.message) {
+        if (resource.message.charAt(0) === '['  ||  resource.message.length > 30)            
+          viewStyle.width = 280;
+      }
+      if (!isSimpleMessage)
+        viewStyle.width = 280;
+      if (isVerification) {
+        var msgModel = utils.getModel(resource.document[constants.TYPE]).value;
+        
+        renderedRow = <View>
+                        <View style={{backgroundColor: '#289427', padding: 5, marginHorizontal: -6, marginTop: -5}}>
+                          <Text style={{fontSize: 16, fontWeight: 600, color: '#ffffff', alignSelf: 'center'}}>
+                             Verified by {resource.organization.title}
+                          </Text>
+                        </View>
+                        <View style={{paddingTop: 5}}>
+                          {this.formatDocument(msgModel, resource, this.verify.bind(this))}
+                        </View>
+                      </View>
+      }
       messageBody = 
         <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
           <View style={[rowStyle, viewStyle]}>
-            {isModel ? <View style={{paddingLeft: 10}}/> : ownerPhoto}
+            {ownerPhoto}
             <View style={addStyle ? [styles.textContainer, addStyle] : styles.textContainer}>
               <View style={{flex: 1}}>
                 {renderedRow}
              </View>
             </View>
-            {!isModel ? <View/> : ownerPhoto}
           </View>
         </TouchableHighlight>      
     }
     else
       messageBody = <View style={{height: 5}}/>
+
     var len = photoUrls.length;
     var inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
-    // var inRow = len ? (len === 1 ? 1 : (len % 2) ? 3 : 2) : 0;
     var photoStyle = {};
     var height; 
     if (inRow > 0) {
@@ -242,12 +209,10 @@ class MessageRow extends Component {
     }
 
     var viewStyle = { margin:1, backgroundColor: '#f7f7f7' }
-    // var viewStyle = { margin:1, backgroundColor: '#f7f7f7' }
-    var isModel = !this.props.resource[constants.TYPE];
-    var model = isModel ? utils.getModel(this.props.resource.id).value : utils.getModel(this.props.resource[constants.TYPE]).value;
+    var model = utils.getModel(this.props.resource[constants.TYPE]).value;
     var isLicense = model.id.indexOf('License') !== -1  ||  model.id.indexOf('Passport') !== -1;
-    // var isUtility = !isLicense  &&  model.id.indexOf('Utility') !== -1
     var photoStyle = (isLicense) ? styles.bigImageH : photoStyle;
+    var verifications = this.showVerifications(rowStyle, viewStyle, addStyle);
       
     return (
       <View style={viewStyle} key={resource}>
@@ -256,9 +221,83 @@ class MessageRow extends Component {
         <View style={photoListStyle}>
           <PhotoList photos={photoUrls} resource={this.props.resource} style={[photoStyle, {marginTop: -20}]} navigator={this.props.navigator} numberInRow={inRow} />    
         </View>  
+        {verifications}
       </View>
     );
   }
+
+  showVerifications(rowStyle, viewStyle, addStyle) {
+    if (!this.props.verificationsToShare || !this.props.resource.message) 
+      return <View/>;
+
+    var resource = this.props.resource;
+    var msgParts = utils.splitMessage(resource.message);
+    // Case when the needed form was sent along with the message
+    if (msgParts.length != 2) 
+      return <View /> 
+
+    var msgModel = utils.getModel(msgParts[1]);
+    if (!msgModel)
+      return <View />;
+    msgModel = msgModel.value;
+    var vtt = [];
+    var cnt = 0;
+    var self = this;
+    for (var t in  this.props.verificationsToShare) {
+      // if (t === msgModel.id) {
+        var ver = this.props.verificationsToShare[t];                 
+        ver.forEach(function(r) {
+          var vModel = utils.getModel(r[constants.TYPE]);
+          var doc = self.formatDocument(msgModel, r);
+          if (cnt) {
+            doc = <View>
+                    <View style={{height: 1, backgroundColor: '#dddddd'}} />
+                    {doc}
+                  </View>
+
+          }
+          vtt.push(doc);
+          cnt++;
+        })
+      // }
+    }
+    if (!vtt.length) 
+      return <View />;
+    var ownerPhoto = <Image style={styles.msgImage} source={require('image!happyLock')}></Image>;
+    var modelTitle = msgModel.title;
+    var idx = modelTitle.indexOf('Verification');
+    var docType;
+    if (idx === -1)
+      docType = modelTitle;
+    else
+      docType = modelTitle.substring(0, idx) + (modelTitle.length === idx + 12 ? '' : modelTitle.substring(idx + 12))
+
+    var msg = utils.getMe().firstName + ', this is your personal privacy assistant. I see you\'ve already had your ' + docType + ' verified.'
+    if (vtt.length === 1)
+       msg += ' You can tap below to share it with ';
+    else
+       msg += ' You can tap on any items in the list below to share them with ';
+    msg += this.props.to.organization ? (this.props.to.organization.title + '.') : this.props.to.name;
+    
+    return (
+      <View style={[rowStyle, viewStyle, {width: 280}]}>
+        {ownerPhoto}
+        <View style={addStyle ? [styles.textContainer, addStyle] : styles.textContainer}>
+          <View style={{flex: 1}}>
+            <View style={{backgroundColor: STRUCTURED_MESSAGE_COLOR, padding: 5, margin: -5}}>
+              <Text style={{color: '#2E3B4E'}}>
+                {msg}
+              </Text>
+              <View style={[styles.separator, {marginHorizontal: -7}]} />
+            </View>
+            {vtt}
+         </View>
+        </View>
+      </View>
+     );
+  }
+          // I just sent you a request for {msgModel.title}. {utils.getMe().firstName}, this is your Tradle assistent talking. Tap on one of the items below to share with {isMyMessage ? resource.to.title : resource.from.title}
+
   onPress(event) {
     this.props.navigator.push({
       id: 7,
@@ -289,30 +328,42 @@ class MessageRow extends Component {
   }
 
   verify(event) {
-    var self = this;
-    var resource = self.props.resource;
+    var resource = this.props.resource;
+    var isVerification = resource[constants.TYPE] === 'tradle.Verification';
+    if (isVerification)
+      resource = resource.document;
+
+    var passProps = {
+      resource: resource, 
+    }
+    if (!isVerification)
+      passProps.verify = true
+
+
     var model = utils.getModel(resource[constants.TYPE]).value;
-    this.props.navigator.push({
+    var route = {
       id: 5,
       component: MessageView,
       backButtonTitle: 'Back',
-      // rightButtonTitle: 'Edit',
-      // onRightButtonPress: {
-      //     title: 'Edit',
-      //     component: NewResource,
-      //     titleTextColor: '#7AAAC3',
-      //     id: 4,
-      //     passProps: {
-      //       resource: resource,
-      //       metadata: model,
-      //       callback: this.props.onSelect,
-      //       resourceKey: model.id + '_' + resource[constants.ROOT_HASH]
-      //     }
-      // }, 
-
-      passProps: {resource: self.props.resource, verify: true},
+      passProps: passProps,
       title: resource[constants.TYPE] == 'tradle.AssetVerification' ? 'Doc verification' : model.title
-    });
+    }
+    if (this.state.isMyMessage) {
+      route.rightButtonTitle = 'Edit';
+      route.onRightButtonPress = {
+          title: 'Edit',
+          component: NewResource,
+          titleTextColor: '#7AAAC3',
+          id: 4,
+          passProps: {
+            resource: resource,
+            metadata: model,
+            callback: this.props.onSelect,
+            resourceKey: model.id + '_' + resource[constants.ROOT_HASH]
+          }
+      };
+    }
+    this.props.navigator.push(route);
   }
   formatRow(isMyMessage, model, resource, renderedRow) {
     var viewCols = model.gridCols || model.viewCols;
@@ -368,85 +419,46 @@ class MessageRow extends Component {
         var msgParts = utils.splitMessage(resource[v]);
         // Case when the needed form was sent along with the message
         if (msgParts.length === 2) {
-          if (!msgParts[0].length)
-            msgParts[0] = 'Form for';
           var msgModel = utils.getModel(msgParts[1]);
           if (msgModel) {
+            if (self.props.verificationsToShare)
+              style = styles.description;
             msgModel = msgModel.value;
+            if (!msgParts[0].length)
+              msgParts[0] = 'I just sent you a request for ' + msgModel.title;
             if (!isMyMessage)
               onPressCall = self.createNewResource.bind(self, msgModel);
             var link = isMyMessage
-                     ? <Text style={[style, {color: isMyMessage ? '#efffe5' : '#2892C6'}]}>{msgModel.title}</Text>
+                     ? <Text style={[style, {color: isMyMessage ? STRUCTURED_MESSAGE_COLOR : '#2892C6'}]}>{msgModel.title}</Text>
                      : <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                         <Text style={[style, {color: isMyMessage ? '#efffe5' : '#2892C6'}]}>{msgModel.title}</Text>
+                         <Text style={[style, {color: isMyMessage ? STRUCTURED_MESSAGE_COLOR : '#2892C6'}]}>{msgModel.title}</Text>
                          <Icon style={styles.linkIcon} size={20} name={'ios-arrow-right'} />
                        </View>
+
             vCols.push(<View>
                          <Text style={style}>{msgParts[0]}</Text>
                          {link}
                        </View>);     
-            if (self.props.verificationsToShare) {
-              var vtt = [];
-              var cnt = 0;
-              for (var t in  self.props.verificationsToShare) {
-                if (t === msgModel.id) {
-                  var ver = self.props.verificationsToShare[t];                 
-                  ver.forEach(function(r) {
-                    var vModel = utils.getModel(r[constants.TYPE]);
-                    var doc = self.formatDocument(msgModel, r);
-                    if (cnt) {
-                      doc = <View>
-                              <View style={{height: 1, backgroundColor: '#dddddd'}} />
-                              {doc}
-                            </View>
-
-                    }
-                    vtt.push(doc);
-                    cnt++;
-                  })
-                }
-              }
-              if (vtt.length) {
-                var orgRow;
-                // if (resource.organization) {
-                //   orgRow = resource.organization.photos
-                //          ?  <View style={{flexDirection: 'row', flex: 1}}>
-                //                <Image source={{uri: utils.getImageUri(resource.organization.photos[0].url)}} style={styles.icon} />
-                //                <Text style={styles.verySmallLetters}>{resource.organization.title}</Text>
-                //             </View>
-                //          :  <Text style={styles.description}>{resource.organization.title}</Text>
-                //   orgRow = <TouchableHighlight underlayColor='transparent' onPress={this.transferDocs.bind(this)}>
-                //              {orgRow}
-                //            </TouchableHighlight>
-                //   // contentRows.push(<Text style={styles.description}>{resource.organization.title}</Text>);
-                //   // if (resource.organization.photos)
-                //   //   contentRows.push(<Image source={{uri: utils.getImageUri(resource.organization.photos[0].url)}} style={styles.icon} />);
-                // }
-                // else
-                  orgRow = <View />
-
-                vCols.push(
-                  <View>
-                    <View style={{flexDirection: 'row'}}>
-                      <View style={styles.separator} />
-                      <View style={{flex:20, marginLeft: 10, marginRight: -10, alignSelf: 'center'}}>
-                        <Text style={styles.verifications}>OR</Text>
-                      </View>
-                      <View style={styles.separator} />
-                      {orgRow}
-                    </View>
-                    <View style={{alignSelf: 'center'}}><Text style={[styles.verySmallLetters, {marginTop: -3, paddingBottom:10}]}>Choose from the ones below</Text></View>
-                    {vtt}
-                  </View>)
-              }
-            }                        
             return;
           }
         }
         vCols.push(<Text style={style}>{resource[v]}</Text>);
       }
       first = false;
+
     }); 
+                  // <View>
+                  //   <View style={{flexDirection: 'row'}}>
+                  //     <View style={styles.separator} />
+                  //     <View style={{flex:20, marginLeft: 10, marginRight: -10, alignSelf: 'center'}}>
+                  //       <Text style={styles.verifications}>OR</Text>
+                  //     </View>
+                  //     <View style={styles.separator} />
+                  //     {orgRow}
+                  //   </View>
+                  //   <View style={{alignSelf: 'center'}}><Text style={[styles.verySmallLetters, {marginTop: -3, paddingBottom:10}]}>Choose from the ones below</Text></View>
+                  //   {vtt}
+                  // </View>
     
     if (model.id !== 'tradle.SimpleMessage')  {
       var t = model.title.split(' ');
@@ -456,20 +468,20 @@ class MessageRow extends Component {
           s += p + ' ';
       });
 
-      if (resource.verifications  &&  resource.verifications.length) {
-        var verifications = [];
-        resource.verifications.forEach(function(v) {
-          if (v.organization  &&  v.organization.photo) {
-            verifications.push(<Text style={styles.verySmallLetters}>{v.organization.title}</Text>);
-            verifications.push(<Image source={{uri: v.organization.photo}} style={styles.orgImage} />);
-          }
-        })
-        vCols.push(<View style={styles.verificationCheck}>
-                     <Text style={styles.verySmallLetters}>{s}verified by </Text>
-                     {verifications}
-                   </View>);
-      }
-      else
+      // if (resource.verifications  &&  resource.verifications.length) {
+      //   var verifications = [];
+      //   resource.verifications.forEach(function(v) {
+      //     if (v.organization  &&  v.organization.photo) {
+      //       verifications.push(<Text style={styles.verySmallLetters}>{v.organization.title}</Text>);
+      //       verifications.push(<Image source={{uri: v.organization.photo}} style={styles.orgImage} />);
+      //     }
+      //   })
+      //   vCols.push(<View style={styles.verificationCheck}>
+      //                <Text style={styles.verySmallLetters}>{s}verified by </Text>
+      //                {verifications}
+      //              </View>);
+      // }
+      // else
         vCols.push(<Text style={styles.verySmallLetters}>{s}</Text>);
     }  
     if (vCols  &&  vCols.length)
@@ -497,7 +509,7 @@ class MessageRow extends Component {
     });
     
   }
-  formatDocument(model, verification) {
+  formatDocument(model, verification, onPress) {
     var resource = verification.document;
     var self = this;
     var docModel = utils.getModel(resource[constants.TYPE]).value;
@@ -526,20 +538,23 @@ class MessageRow extends Component {
     if (verification.organization) {
       var orgPhoto = verification.organization.photo
                    ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
-                   : <View/> 
-      orgRow =  <View style={{flexDirection: 'row', marginTop: 5}}>
+                   : <View/>
+
+      orgRow =  onPress 
+             ? <View />
+             : <View style={{flexDirection: 'row', marginTop: 5}}>
                    <Text style={styles.verySmallLetters}>verified by </Text>
                    <Text style={[styles.verySmallLetters, {color: '#757575'}]}>{verification.organization.title.length < 10 ? verification.organization.title : verification.organization.title.substring(0, 8) + '..'}</Text>
                 </View>
     }
     else
       orgRow = <View />
-
+    var orgTitle = this.props.to[constants.TYPE] === 'tradle.Organization' ? this.props.to.name : this.props.to.organization.title;
     return (
-           <TouchableHighlight underlayColor='transparent' onPress={() =>
+           <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
               AlertIOS.alert(
                 'Sharing ' + docTitle + ' verified by ' + verification.organization.title,
-                'with ' + this.props.to.organization.title, 
+                'with ' + orgTitle, 
                 [
                   {text: 'Share', onPress: this.share.bind(this)},
                   {text: 'Cancel', onPress: () => console.log('Canceled!')},
@@ -605,7 +620,7 @@ class MessageRow extends Component {
           if (msgModel) {
             vCols.push(<View>
                          <Text style={style}>{msgParts[0]}</Text>
-                         <Text style={[style, {color: isMyMessage ? '#efffe5' : '#7AAAC3'}]}>{msgModel.value.title}</Text>
+                         <Text style={[style, {color: isMyMessage ? STRUCTURED_MESSAGE_COLOR : '#7AAAC3'}]}>{msgModel.value.title}</Text>
                        </View>);                  
             return;
           }
@@ -674,6 +689,15 @@ var styles = StyleSheet.create({
     borderRadius: 10, 
     backgroundColor: '#569bff',
   },
+  warnImage: {
+    backgroundColor: '#dddddd',
+    height: 45,
+    marginRight: 5,
+    width: 45,
+    borderRadius: 10,
+    borderColor: '#cccccc',
+    borderWidth: 1
+  },
   msgImage: {
     backgroundColor: '#dddddd',
     height: 40,
@@ -690,8 +714,8 @@ var styles = StyleSheet.create({
     borderRadius: 10
   },
   bigImageH: {
-    width: 240,
-    height: 170,
+    width: 270,
+    height: 200,
     margin: 1,
     borderRadius: 10
   },
@@ -725,7 +749,8 @@ var styles = StyleSheet.create({
   verySmallLetters: {
     fontSize: 12,
     alignSelf: 'flex-end',
-    color: '#b4c3cb'
+    color: '#757575'
+    // color: '#b4c3cb'
   },
   orgImage: {
     width: 20,
@@ -770,22 +795,22 @@ var styles = StyleSheet.create({
     height: 20,
     color: '#2892C6'
   },
-  icon: {
-    width: 20,
-    height: 20,
-    marginLeft: 4,
-    borderWidth: 1,
-    borderColor: '#eeeeee',
-    borderRadius: 10,
-    marginRight: 5,
-  },
+  // icon: {
+  //   width: 20,
+  //   height: 20,
+  //   marginLeft: 4,
+  //   borderWidth: 1,
+  //   borderColor: '#eeeeee',
+  //   borderRadius: 10,
+  //   marginRight: 5,
+  // },
   description: {
-    flexWrap: 'wrap',
-    color: '#999999',
+    // flexWrap: 'wrap',
+    color: '#757575',
     fontSize: 14,
   },
   separator: {
-    height: 1,
+    height: 0.5,
     marginTop: 5,
     backgroundColor: '#cccccc',
     flex: 40
