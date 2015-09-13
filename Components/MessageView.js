@@ -44,6 +44,13 @@ class MessageView extends Component {
       });    
     }
   }
+  getRefResource(resource, prop) {
+    var model = utils.getModel(this.props.resource[constants.TYPE]).value;
+        
+    this.state.prop = prop;
+    this.state.propValue = utils.getId(resource.id);
+    Actions.getItem(resource.id);
+  }
   render() {
     var resource = this.state.resource;
     var modelName = resource[constants.TYPE];
@@ -75,7 +82,7 @@ class MessageView extends Component {
           <PhotoList photos={resource.photos} resource={resource} isView={true} navigator={this.props.navigator} numberInRow={inRow}/>
           <View style={styles.rowContainer}>    
             <View><Text style={styles.itemTitle}>{resource.message}</Text></View>
-            <ShowPropertiesView resource={resource} excludedProperties={['tradle.Message.message', 'time', 'photos']} />
+            <ShowPropertiesView resource={resource} excludedProperties={['tradle.Message.message', 'time', 'photos']} showRefResource={this.getRefResource.bind(this)}/>
             {embed}
           </View>
         </View>
