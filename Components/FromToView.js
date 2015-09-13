@@ -27,7 +27,7 @@ class FromToView extends Component {
     this.listenTo(Store, 'onGetItem');
   }
   onGetItem(params) {
-    if (params.action  &&  params.action === 'getItem') { //  &&  params.resource[constants.TYPE] === this.props.resource[constants.TYPE])
+    if (params.action  &&  (params.action === 'getFrom' || params.action === 'getTo')) { //  &&  params.resource[constants.TYPE] === this.props.resource[constants.TYPE])
       var paramsRID = params.resource[constants.TYPE] + '_' + params.resource[constants.ROOT_HASH]
       if (paramsRID === utils.getId(this.props.resource.to)  ||  paramsRID === utils.getId(this.props.resource.from))
         this.showProfile(params.resource);
@@ -37,7 +37,7 @@ class FromToView extends Component {
     var resource = this.props.resource;    
 
     var model = this.props.model || utils.getModel(resource[constants.TYPE]).value;
-    if (!model.interfaces  ||  model.interfaces.indexOf(MESSAGE_INTERFACE) == -1) 
+    if (!model.interfaces  ||  model.interfaces.indexOf(MESSAGE_INTERFACE) == -1 || model.id === 'tradle.Verification') 
       return <View />;
 
     var hasPhoto = true; //resource[photoProp]  &&  resource[photoProp].length; 
@@ -69,7 +69,7 @@ class FromToView extends Component {
             <TouchableHighlight underlayColor='transparent' onPress={() => 
               {
                 if (resource.from.id)
-                  Actions.getItem(utils.getId(resource.from))
+                  Actions.getFrom(utils.getId(resource.from))
                 else
                   this.showProfile(resource.from)
               }
@@ -83,7 +83,7 @@ class FromToView extends Component {
             <TouchableHighlight underlayColor='transparent' onPress={() => 
                {
                  if (resource.to.id)
-                   Actions.getItem(utils.getId(resource.to.id))
+                   Actions.getTo(utils.getId(resource.to.id))
                  else
                    this.showProfile(resource.to)
                }
