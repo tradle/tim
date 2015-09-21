@@ -212,7 +212,7 @@ class NewResource extends Component {
 
   addFormValues() {
     var value = this.refs.form.getValue();
-    var json = value ? JSON.parse(JSON.stringify(value)) : {};
+    var json = value ? JSON.parse(JSON.stringify(value)) : this.refs.form.refs.input.state.value;
     var resource = this.state.resource;
     if (!resource) {
       resource = {};
@@ -257,12 +257,12 @@ class NewResource extends Component {
     //   });
     //   return;
     // }
+    var resource = this.addFormValues();
+    this.setState({resource: resource, err: ''});
     if (bl.name === 'photos') {
       this.showChoice();
       return;
     }
-    var resource = this.addFormValues();
-    this.setState({resource: resource, err: ''});
     this.props.navigator.push({
       id: 6,
       title: 'Add new ' + bl.title,
@@ -381,19 +381,20 @@ class NewResource extends Component {
     options.tintColor = 'red'
     var photoStyle = isMessage ? {marginTop: -45} : styles.photoBG; 
     // <FromToView resource={resource} model={meta} navigator={this.props.navigator} />
-    var content = <ScrollView style={style}>
-                    <View style={styles.container}>
-                      <Text style={errStyle}>{err}</Text>
-                      <View style={photoStyle}>
-                        <PhotoView resource={resource} />
-                      </View>
-                      <View style={{'padding': 15}}>
-                        <Form ref='form' type={Model} options={options} value={data} />          
-                        {arrayItems}
-                      </View>
-                      <View style={{height: 30}} />          
-                    </View>
-                  </ScrollView>
+    var content = 
+      <ScrollView style={style}>
+        <View style={styles.container}>
+          <Text style={errStyle}>{err}</Text>
+          <View style={photoStyle}>
+            <PhotoView resource={resource} />
+          </View>
+          <View style={{'padding': 15}}>
+            <Form ref='form' type={Model} options={options} value={data} />          
+            {arrayItems}
+          </View>
+          <View style={{height: 300}} />          
+        </View>
+      </ScrollView>
     // if (isMessage) 
     //   return (
     //     <View>
