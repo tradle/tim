@@ -44,10 +44,12 @@ class MessageRow extends Component {
     var me = utils.getMe();
     var isMyMessage = this.state.isMyMessage;
     var to = this.props.to;
-    var ownerPhoto, hasOwnerPhoto;
+    var ownerPhoto, hasOwnerPhoto = true;
 
-    if (isMyMessage  || !to  ||  !to.photos) 
+    if (isMyMessage  || !to  ||  !to.photos) {
       ownerPhoto = <View style={[styles.cell, {marginVertical: 0}]} />
+      hasOwnerPhoto = false;
+    }
     else if (to) {
       if (to.photos) {
         var uri = utils.getImageUri(to.photos[0].url);
@@ -113,7 +115,7 @@ class MessageRow extends Component {
         photoListStyle = {
           flexDirection: 'row', 
           alignSelf: isMyMessage ? 'flex-end' : 'flex-start', 
-          marginLeft: isMyMessage ? 30 : 45,
+          marginLeft: isMyMessage ? 30 : (hasOwnerPhoto ? 45 : 10),
           borderRadius: 10,
           marginBottom: 3, 
         }
@@ -425,7 +427,7 @@ class MessageRow extends Component {
               style = styles.description;
             msgModel = msgModel.value;
             if (!msgParts[0].length)
-              msgParts[0] = 'I just sent you a request for ' + msgModel.title;
+              msgParts[0] = 'I just sent you a request for '; // + msgModel.title;
             if (!isMyMessage)
               onPressCall = self.createNewResource.bind(self, msgModel);
             var link = isMyMessage
@@ -549,7 +551,9 @@ class MessageRow extends Component {
     }
     else
       orgRow = <View />
-    var orgTitle = this.props.to[constants.TYPE] === 'tradle.Organization' ? this.props.to.name : this.props.to.organization.title;
+    var orgTitle = this.props.to[constants.TYPE] === 'tradle.Organization' 
+                 ? this.props.to.name 
+                 : (this.props.to.organization ? this.props.to.organization.title : null);
     return (
            <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
               AlertIOS.alert(
