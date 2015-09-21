@@ -46,7 +46,7 @@ class ResourceView extends Component {
       this.onShowIdentityList(params);
     else if (params.action == 'getItem') 
       this.showRefResource(params.resource)
-    else  
+    else  if (params.resource)
       this.onResourceUpdate(params);
 
   }
