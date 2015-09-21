@@ -23,7 +23,6 @@ var ResourceViewMixin = {
     });    
   },
   showResources(resource, prop) {
-    var meta = utils.getModel(resource[constants.TYPE]).value.properties;
     this.props.navigator.push({
       id: 10,
       title: utils.makeLabel(prop.title),
