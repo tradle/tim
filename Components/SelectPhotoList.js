@@ -5,7 +5,8 @@ var t = require('tcomb-form-native');
 var utils = require('../utils/utils');
 var logError = require('logError');
 var groupByEveryN = require('groupByEveryN');
-var { Icon } = require('react-native-icons');
+var Icon = require('react-native-vector-icons/Ionicons');
+// var { Icon } = require('react-native-icons');
 
 var Form = t.form.Form;
 
@@ -87,7 +88,7 @@ class SelectPhotoList extends Component {
                ? 
                  <TouchableHighlight onPress={this.onSelect.bind(this, asset)} underlayColor='#ffffff'>
                    <View>
-                     <Icon name={'ion|ios-checkmark-empty'} size={20} color='#eeeeee' style={styles.icon} />
+                     <Icon name={'ios-checkmark-empty'} size={20} color='#eeeeee' style={styles.icon} />
                    </View>
                  </TouchableHighlight>  
                : <View />
