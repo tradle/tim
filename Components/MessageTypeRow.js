@@ -16,36 +16,28 @@ var {
 class MessageTypeRow extends Component {
   constructor(props) {
     super(props);
-    var resource = this.props.resource;
-    this.state = {
-      isModel: !resource[constants.TYPE]
-    }
   }
   render() {
     var resource = this.props.resource;
-    var isModel = this.state.isModel;
-    if (isModel  &&  resource.autoCreate)
+    if (resource.autoCreate)
       return <View style={{height: 0}} />;
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
     var me = utils.getMe();
     var to = this.props.to;
     var ownerPhoto, hasOwnerPhoto;
-    if (isModel) {
-      if (resource.owner  &&  resource.owner.photos)  {
-        hasOwnerPhoto = true;
-        var uri = utils.getImageUri(resource.owner.photos[0].url);
-        ownerPhoto = 
-          <View style={[styles.cell, {marginVertical: 2}]}>
-            <Image source={{uri: uri}} style={styles.msgImage} />         
-          </View>
-      }
-      else
-        ownerPhoto = <View style={[styles.cell, {marginVertical: 20}]} />
-    }  
+    if (resource.owner  &&  resource.owner.photos)  {
+      hasOwnerPhoto = true;
+      var uri = utils.getImageUri(resource.owner.photos[0].url);
+      ownerPhoto = 
+        <View style={[styles.cell, {marginVertical: 2}]}>
+          <Image source={{uri: uri}} style={styles.msgImage} />         
+        </View>
+    }
+    else
+      ownerPhoto = <View style={[styles.cell, {marginVertical: 20}]} />
     var renderedRow = [];
     var onPressCall = this.props.onSelect;
     
-    var photoListStyle = {height: isModel ? 0 : 3};
     var addStyle, inRow;
     var noMessage = !resource.message  ||  !resource.message.length;
     var properties = model.properties;
