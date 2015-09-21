@@ -37,8 +37,12 @@ class ResourceRow extends Component {
     }
     else {
       if (isIdentity) {
+        if (!resource.firstName  &&  !resource.lastName)
+          return <View/>
+        var name = (resource.firstName ? resource.firstName.charAt(0) : '');
+        name += (resource.lastName ? resource.lastName.charAt(0) : '');
         photo = <LinearGradient colors={['#A4CCE0', '#7AAAc3', '#5E92AD']} style={styles.cellRoundImage}>
-           <Text style={styles.cellText}>{resource.firstName.charAt(0) + (resource.lastName ? resource.lastName.charAt(0) : '')}</Text>
+           <Text style={styles.cellText}>{name}</Text>
         </LinearGradient>
       }
       else {
@@ -71,15 +75,14 @@ class ResourceRow extends Component {
                          </TouchableHighlight>
                          </View>  
                        : <View />; 
-    var verification;
     return (
       <View key={this.props.key}>
         <TouchableHighlight onPress={this.props.onSelect}>
-          <View style={styles.row} key={this.props.key + '1'}>
+          <View style={styles.row}>
             {photo}
             {orgPhoto}
             {onlineStatus}
-            <View style={styles.textContainer} key={this.props.key + '2'}>
+            <View style={styles.textContainer}>
               {this.formatRow(resource)}
             </View>
             {cancelResource}
@@ -98,8 +101,6 @@ class ResourceRow extends Component {
       var vCols = utils.getDisplayName(resource, model.properties);
       return <Text style={styles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
     }
-    // if (model.id === 'tradle.Organization')
-    //   viewCols.push('name');
     var vCols = [];
     var properties = model.properties;
     var first = true
@@ -137,7 +138,7 @@ class ResourceRow extends Component {
       
       if (!resource[v]  &&  !properties[v].displayAs)
         return;
-      var style = (first) ? styles.resourceTitle : styles.description;
+      var style = first ? styles.resourceTitle : styles.description;
       if (isIdentity  &&  v === 'organization')
         style = [style, {alignSelf: 'flex-end', marginTop: 20}, styles.verySmallLetters];
       if (properties[v].style)
@@ -151,15 +152,8 @@ class ResourceRow extends Component {
             if (!row)
               return;
           }
-          else  {          
+          else  
             row = <Text style={style} numberOfLines={first ? 2 : 1}>{resource[v].title}</Text>
-            // if (resource[v].photos) {
-            //   row = <View style={styles.row}>
-            //           <Image source={{uri: resource[v].photos[0].url}} style={styles.orgImage}/>
-            //           {row}
-            //         </View>
-            // }
-          }
           
           vCols.push(row);
         }
@@ -250,6 +244,12 @@ var styles = StyleSheet.create({
     backgroundColor: 'white',
     // justifyContent: 'space-around',
     flexDirection: 'row',
+    padding: 5,
+  },
+  rowV: {
+    // backgroundColor: 'white',
+    // justifyContent: 'space-around',
+    // flexDirection: 'row',
     padding: 5,
   },
   cell: {
