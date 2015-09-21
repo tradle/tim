@@ -14,8 +14,8 @@ var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var constants = require('tradle-constants');
-var { Icon } = require('react-native-icons');
-
+var Icon = require('react-native-vector-icons/Ionicons');
+// var GridList = require('./GridList');
 // var DEAL_MODEL = 'tradle.Offer';
 // var VENDOR_MODEL = 'tradle.Organization';
 var {
@@ -57,7 +57,7 @@ class ResourceList extends Component {
     if (this.props.sortProperty)
       params.sortProperty = this.props.sortProperty;
     if (this.props.prop) 
-      params.prop = utils.getModel(this.props.resource[constants.TYPE]).value.properties[this.props.prop];
+      params.prop = utils.getModel(this.props.resource[constants.TYPE]).value.properties[this.props.prop.name];
     
     this.state.isLoading = true;
     Actions.list(params);    
@@ -97,6 +97,8 @@ class ResourceList extends Component {
       return;
     }
     var type = list[0][constants.TYPE];
+    // if (type === 'tradle.Organization')
+    //   return;
     // if (type  !== this.props.modelName) 
     //   return;
     if (type  !== this.props.modelName) {
@@ -353,7 +355,7 @@ class ResourceList extends Component {
       <View style={styles.footer}>
         <TouchableHighlight underlayColor='transparent' onPress={this.addNew.bind(this)}>
           <View>
-            <Icon name='ion|plus'  size={30}  color='#999999' style={styles.icon} /> 
+            <Icon name='plus'  size={30}  color='#999999' style={styles.icon} /> 
           </View>
         </TouchableHighlight>
       </View>
@@ -445,7 +447,7 @@ class ResourceList extends Component {
                   isLoading={this.state.isLoading}/> 
     else {
       var model = utils.getModel(this.props.modelName).value; 
-      content = <ListView ref='listview'
+      content = <ListView 
           dataSource={this.state.dataSource}
           renderRow={this.renderRow.bind(this)}
           renderHeader={this.renderHeader.bind(this)}
@@ -490,18 +492,6 @@ class ResourceList extends Component {
   }
 
 }
-      // <View style={styles.container}> 
-      //   <SearchBar
-      //     onSearchChange={this.onSearchChange.bind(this)}
-      //     isLoading={this.state.isLoading}
-      //     filter={this.props.filter}
-      //     onFocus={() => this.refs.length  &&  this.refs.listview.getScrollResponder().scrollTo(0, 0)} 
-      //     />
-      //   <View style={styles.separator} />
-      //   {content}
-      //   {Footer}
-      // </View>
-// reactMixin(ResourceList.prototype, TimerMixin);
 reactMixin(ResourceList.prototype, Reflux.ListenerMixin);
 
 var styles = StyleSheet.create({
