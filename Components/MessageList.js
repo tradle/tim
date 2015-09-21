@@ -70,7 +70,7 @@ class MessageList extends Component {
     if (params.action !== 'messageList' ||  !params.list || params.isAggregation !== this.props.isAggregation)
       return;
     var list = params.list;
-    if (list.length || this.state.filter.length) {
+    if (list.length || (this.state.filter  &&  this.state.filter.length)) {
       var type = list[0][constants.TYPE];
       if (type  !== this.props.modelName) {
         var model = utils.getModel(this.props.modelName).value;
@@ -86,6 +86,10 @@ class MessageList extends Component {
         isLoading: false,
         verificationsToShare: params.verificationsToShare
       });
+    }
+    else {
+      var first = true
+      this.setState({isLoading: false})
     }
   }
 
@@ -161,7 +165,6 @@ class MessageList extends Component {
                   model={model}
                   isLoading={this.state.isLoading}/> 
     else {
-      var model = utils.getModel(this.props.modelName).value; 
       var isAllMessages = model.isInterface  &&  model.id === 'tradle.Message';
           // renderScrollView={(props) => <InvertibleScrollView {...props} inverted />}
       content = <ListView ref='listview' style={{marginHorizontal: 10}}
@@ -184,7 +187,6 @@ class MessageList extends Component {
     
       
     }
-    var model = utils.getModel(this.props.modelName).value;
 
     var addNew = (model.isInterface) 
            ? <AddNewMessage navigator={this.props.navigator} 
