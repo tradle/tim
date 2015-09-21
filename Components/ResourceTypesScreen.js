@@ -118,10 +118,10 @@ class ResourceTypesScreen extends Component {
   renderRow(resource)  {
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
     var isMessage = model.interfaces  &&  model.interfaces.indexOf('tradle.Message') != -1;
-    var MessageRow = require('./MessageRow');
+    var MessageTypeRow = require('./MessageTypeRow');
 
     return (
-      <MessageRow
+      <MessageTypeRow
         onSelect={() => this.selectResource(resource)}
         resource={resource}
         navigator={this.props.navigator}
