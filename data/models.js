@@ -98,6 +98,17 @@ var voc = [{
         backlink: 'to'
       }
     },
+    myRequests: {
+      type: 'array',
+      allowRoles: 'me',
+      // icon: 'ios-checkmark-empty',
+      items: {
+        readOnly: true,
+        ref: 'tradle.Message',
+        where: 'document !== null', 
+        backlink: 'from'
+      }
+    },
     'photos': {
       'type': 'array',
       'items': {
@@ -235,6 +246,43 @@ var voc = [{
      }
    },
    required: ['id']
+},
+{
+  id: 'tradle.AdditionalInfo',
+  type: 'tradle.Model',
+  title: 'Additional Information',
+  interfaces: ['tradle.Message'],
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+     },
+     'message': {
+      'type': 'string',
+      'displayName': true,
+     },
+    'photos': {
+      'type': 'array',
+      'items': {
+        'type': 'object',
+        'properties': {
+          'tags': {
+            'type': 'string',
+            'skipLabel': true
+          },
+          'url': {
+            'type': 'string',
+            'readOnly': true
+          }
+        }
+      },
+      'required': ['title', 'url']
+    },
+    verificationRequest: {
+      ref: 'tradle.Message',
+      type: 'object'
+    },
+  }
 },
 {
   'id': 'tradle.Message',
@@ -839,6 +887,11 @@ var voc = [{
        'readOnly': true,
        'type': 'string'
      },
+     additionalInfo: { 
+       type: 'array', 
+       ref: 'tradle.AdditionalInfo',
+       backlink: 'verificationRequest'
+     }
   },  
   'required': [
     'to', 'from', 'photos', 'licenseNumber', 'surname', 'givenName', 'dateOfBirth', 'dateOfIssue', 'dateOfExpiry', 'issuingAuthority', 'holderAddress', 'entitlementCategories'
@@ -856,7 +909,7 @@ var voc = [{
   'type': 'tradle.Model',
   'title': 'Verification',
   'interfaces': ['tradle.Message'],
-  icon: 'ios-checkmark-empty',
+  'icon': 'ios-checkmark-empty',
   'style': {'backgroundColor': '#E7E6F5'},
   'autoCreate': true,
   'properties': {
@@ -997,494 +1050,6 @@ var voc = [{
   ],
 },
 {
-  'id': 'tradle.Community',
-  'type': 'tradle.Model',
-  'title': 'Community',
-  'plural': 'Communities',
-  icon: 'person-stalker',
-  'properties': {
-    '_t': {
-      'type': 'string',
-      'readOnly': true
-     },
-     'title': {
-      'type': 'string',
-      'displayName': true,
-     },
-     'description': {
-      'type': 'string',
-      'title': 'Description',
-      maxLength: 2000
-     },
-     'owner': {
-      'type': 'object',
-      'readOnly': true,
-      'ref': 'tradle.Identity',
-     },
-     // 'to': {
-     //   'type': 'object',
-     //   'ref': 'tradle.Identity',
-     //   'displayName': true,
-     //   'readOnly': true
-     // },
-     'blockchainUrl': {
-       'type': 'string',      
-       'readOnly': true
-     },
-     'transactionHash': {
-       'readOnly': true,
-       'type': 'string'
-     },
-     'time': {
-       'type': 'date',
-       'readOnly': true,
-     },
-    'posts': {
-      type: 'array',
-      items: {
-        ref: 'tradle.Post',
-        backlink: 'relatedTo'
-      },
-    },
-    'photos': {
-      'type': 'array',
-      'items': {
-        'type': 'object',
-        'properties': {
-          'tags': {
-            'type': 'string',
-            'skipLabel': true
-          },
-          'url': {
-            'type': 'string',
-            'readOnly': true
-          }
-        }
-      },
-      'required': ['url']
-    },
-  },  
-  'required': [
-    'title', 'description'
-  ],
-  'gridCols': [
-    'title', 'description', 'owner', 'posts'
-  ],
-  'viewCols': [
-    'title', 'description', 'owner', 'photos'
-  ],
-},
-
-{
-  'id': 'tradle.Post',
-  'type': 'tradle.Model',
-  'title': 'Post',
-  'icon': 'social-buffer-outline',
-  'properties': {
-    '_t': {
-      'type': 'string',
-      'readOnly': true
-     },
-     'relatedTo': {
-      'type': 'object',
-      'readOnly': true,
-      'ref': 'tradle.Community',
-     },
-     'title': {
-      'type': 'string',
-      'displayName': true,
-     },
-     // 'description': {
-     //  'type': 'string',
-     //  'title': 'Description',
-     //  maxLength: 2000
-     // },
-     url: {
-       type: 'string'
-     },
-     'from': {
-      'type': 'object',
-      'readOnly': true,
-      'ref': 'tradle.Identity',
-     },
-     'blockchainUrl': {
-       'type': 'string',      
-       'readOnly': true
-     },
-     'transactionHash': {
-       'type': 'string',
-       'readOnly': true
-     },
-     'time': {
-       type: 'date',
-       readOnly: true
-     },
-     comments: {
-      'type': 'array',
-      items: {
-        ref: 'tradle.PostComment',
-        backlink: 'post'
-      } 
-     },
-    'photos': {
-      'type': 'array',
-      'items': {
-        'type': 'object',
-        'properties': {
-          'tags': {
-            'type': 'string',
-            'skipLabel': true
-          },
-          'url': {
-            'type': 'string',
-            'readOnly': true
-          }
-        }
-      },
-      'required': ['url']
-    },
-  },  
-  'required': [
-    'relatedTo', 'title', 'url'
-  ],
-  'viewCols': [
-    'title', 'url', 'from', 'time'
-  ],
-  'gridCols': [
-    'title', 'url', 'from', 'time', 'comments'
-  ]
-},
-{
-  'id': 'tradle.PostComment',
-  'type': 'tradle.Model',
-  'title': 'Comment',
-  'icon': 'chatboxes',
-  'properties': {
-    '_t': {
-      'type': 'string',
-      'readOnly': true
-     },
-     'message': {
-      'type': 'string',
-      'displayName': true,
-      maxLength: 2000
-     },
-     'from': {
-       'type': 'object',
-       'readOnly': true,
-       'ref': 'tradle.Identity',
-     },
-     'post': {
-       'type': 'object',
-       'ref': 'tradle.Post',
-       readOnly: true
-       // 'displayName': true,
-     },
-     'time': {
-       'type': 'date',
-       'readOnly': true,
-       'displayName': true
-     },
-    'photos': {
-      'type': 'array',
-      'items': {
-        'type': 'object',
-        'properties': {
-          'tags': {
-            'type': 'string',
-            'skipLabel': true
-          },
-          'url': {
-            'type': 'string',
-            'readOnly': true
-          }
-        }
-      },
-      'required': ['title', 'url']
-    },
-    relatedTo: {
-      type: 'object',
-      ref: 'tradle.Community',   
-      readOnly: true   
-    }
-  },  
-  'required': [
-    'message', 'post', 'relatedTo'
-  ],
-  'viewCols': [
-    'message', 'post', 'time', 'from'
-  ],
-  'gridCols': [
-    'message', 'time', 'from'
-  ],
-},
-
-
-{
-  id: 'tradle.Offer',
-  title: 'Offer',
-  type: 'object',
-  sort: 'dateSubmitted',
-  properties: {
-    '_t': {
-      type: 'string',
-      readOnly: true
-    },
-    dealRef: {
-      type: 'number',
-      readOnly: true
-    },              //* deal reference
-    title: {
-      type: 'string',
-      skipLabel: true,
-      description: 'title is displayed on the offer'
-    },
-    shortTitle: {
-      type: 'string',
-      skipLabel: true,
-      displayName: true
-    },
-    conditions: {
-      maxLength: 2000,
-      type: 'string',
-      description: 'What is this offer for? Limits for personal use and gifts. Phone # for questions and booking. Operating hours. Any special conditions for offer use. Other discounts/bonuses provided by the organization. Omit dates already specified on offer.'
-    },
-    description: {
-      type: 'string',
-      maxLength: 2000,
-      description: 'clearly describe the product/service. Emphasize high value low price contrast. State quality/quantity of the product/service (and why the customer needs it). When in doubt, use "You pay x instead of XX"'
-    },
-    summary: {
-      type: 'string',
-      description: 'Short description of the deal. IMPORTANT for aggregators - must include discount and amount saved.'
-    },
-    submittedBy: {
-      type: 'object',
-      ref: 'tradle.Identity',
-      readOnly: true
-    },
-    photos: {
-      type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          tags: {
-            type: 'string',
-            title: 'Tags via comma'
-          },
-          url: {
-            type: 'string',
-            readOnly: true
-          }
-        }
-      },
-      required: ['url']
-    },
-    featured: {
-      type: 'date'
-    },
-    expires: {
-      type: 'date'
-    },
-    redeemBy: {
-      description: 'must redeem by this date'
-    },
-    dealValue: {
-      type: 'object',
-      ref: 'tradle.Money',
-      description: '$ price before discount'
-    },
-    dealPrice: {
-      type: 'object',
-      ref: 'tradle.Money',
-      description: '$ price after discount'
-    },    
-    dealDiscount: {
-      type: 'object',
-      ref: 'tradle.Money',
-      readOnly: true,
-      formula: 'dealValue - dealPrice',
-      description: '$ discount'
-    },
-    allPurchases: {
-      type: 'array',
-      readOnly: true,
-      items: {
-        type: 'object',
-        ref: 'tradle.OfferBuy'
-      }
-    },
-    offerBuysCount: {
-      type: 'number',
-      readOnly: true
-    },
-    discount: {
-      type: 'number',
-      suffix: '%',
-      minimum: 1,
-      maximum: 99,
-      readOnly: true,
-      description: '% discount',      
-      formula: '((dealValue - dealPrice)/dealValue) * 100',
-    },
-    dealStatus: {
-      type: 'string',
-      readOnly: true,
-      oneOf: [
-        'Deal is over', 
-        'Deal is going', 
-        'Not featured yet'
-      ]
-    },
-    availableLocations: {
-      type: 'array',
-      readOnly: true,
-      ref: 'tradle.RedemptionLocation'
-    },
-    organization: {
-      type: 'object',
-      ref: 'tradle.Organization'
-    },
-    canceled: {
-      type: 'boolean',
-      skipOnCreate: true
-    },
-    canceledBy: {
-      type: 'object',
-      ref: 'tradle.Identity',
-      readOnly: true
-    },
-    dateCanceled: {
-      type: 'date',
-      readOnly: true
-    },
-    dateSubmitted: {
-      type: 'date',
-      readOnly: true
-    },
-  },
-  required: ['title', 'photos', 'shortTitle', 'description', 'dealValue', 'dealPrice', 'organization', 'expires'],
-  gridCols: ['shortTitle', 'photos', 'dealPrice', 'discount', 'organization', 'expires', 'dealStatus'],
-  viewCols: ['title', 'photos', 'organization', 'dealPrice', 'dealValue', 'dealDiscount', 'description', 'conditions', 'discount', 'featured', 'expires', 'offerBuysCount', 'dealStatus'],
-},
-{
-  id: 'tradle.OfferBuy',
-  type: 'object',
-  title: 'Offer Buy',
-  properties: {
-    '_t': {
-      type: 'string',
-      readOnly: true
-    },
-    purchaseNumber: {
-      type: 'number',
-      readOnly: 'true'
-    },
-    transactionId: {
-      type: 'string',
-      readOnly: true
-    },
-    customer: {
-      type: 'object',
-      ref: 'tradle.Identity',
-      readOnly: true
-    },
-    offer: {
-      type: 'object',
-      ref: 'tradle.Offer',
-      readOnly: true
-    },
-    organization: {
-      type: 'object',
-      readOnly: true,
-      ref: 'tradle.Organization'
-    },
-    title: {
-      type: 'string',
-      description: 'title is displayed on the offer'
-    },
-    shortTitle: {
-      type: 'string',
-    },
-    purchaseTime: {
-      type: 'date',
-      readOnly: true
-    },
-    email: {
-      type: 'string'
-    },
-    dealValue: {
-      type: 'object',
-      ref: 'tradle.Money',
-      description: 'price before discount'
-    },
-    dealPrice: {
-      type: 'object',
-      ref: 'tradle.Money',
-    },    
-    dealDiscount: {
-      type: 'object',
-      ref: 'tradle.Money',
-      readOnly: true
-    },
-    redeemed: {
-      type: 'boolean'
-    },
-    location: {
-      type: 'object',
-      ref: 'tradle.RedemptionLocation'
-    },
-    photos: {
-      type: 'array',
-      readOnly: true,
-      items: {
-        type: 'object',
-        properties: {
-          tags: {
-            type: 'string',
-            title: 'Tags via comma'
-          },
-          url: {
-            type: 'string',
-            readOnly: true
-          }
-        }
-      },
-      required: ['url']
-    },
-  },
-  required: ['purchaseNumber', 'customer', 'offer'],
-},
-{
-  id: 'tradle.RedemptionLocation',
-  type: 'object',
-  properties: {
-    '_t': {
-      type: 'string',
-      readOnly: true
-    },
-    offer: {
-      type: 'object',
-      ref: 'tradle.Offer',
-      readOnly: true
-    },
-    address: {
-      readOnly: true,
-      formula: 'organization.address'
-    },
-    organization: {
-      type: 'object',
-      readOnly: true,
-      ref: 'tradle.Organization'
-    },
-    photos: {
-      type: 'array',      
-      formula: 'organization.photos'
-    }
-  },
-  required: ['offer', 'organization']
-},
-{
   id: 'tradle.Organization',
   type: 'object',
   title: 'Organization',
@@ -1531,6 +1096,15 @@ var voc = [{
        backlink: 'organization'
       } 
     },
+    lastMessage: {
+       type: 'string',
+       style: {color: '#999999', fontSize: 14},
+       transient: true
+    },
+    lastMessageTime: {
+       type: 'date',
+       transient: true
+    },
     photos: {
       type: 'array',
       items: {
@@ -1561,7 +1135,16 @@ var voc = [{
       type: 'number',
       readOnly: true,
       skipLabel: true
-    }
+    },
+    verificationRequests: {
+      type: 'array',
+      readOnly: true,
+      items: {
+        type: 'object',
+        ref: 'tradle.Message',
+        backlink: 'organization'
+      }
+    },
     // offers: {
     //   type: 'array',
     //   items: {
@@ -1578,6 +1161,11 @@ var voc = [{
   },
   required: ['name'],
   viewCols: ['name', 'photos', 'verifications'],
+  gridCols: [
+    'name',
+    'lastMessage',
+    'lastMessageTime',
+  ],
   editCols: [
     'name', 
     'street', 
@@ -1618,6 +1206,494 @@ var models = {
 }
 module.exports = models;
 
+// {
+//   'id': 'tradle.Community',
+//   'type': 'tradle.Model',
+//   'title': 'Community',
+//   'plural': 'Communities',
+//   icon: 'person-stalker',
+//   'properties': {
+//     '_t': {
+//       'type': 'string',
+//       'readOnly': true
+//      },
+//      'title': {
+//       'type': 'string',
+//       'displayName': true,
+//      },
+//      'description': {
+//       'type': 'string',
+//       'title': 'Description',
+//       maxLength: 2000
+//      },
+//      'owner': {
+//       'type': 'object',
+//       'readOnly': true,
+//       'ref': 'tradle.Identity',
+//      },
+//      // 'to': {
+//      //   'type': 'object',
+//      //   'ref': 'tradle.Identity',
+//      //   'displayName': true,
+//      //   'readOnly': true
+//      // },
+//      'blockchainUrl': {
+//        'type': 'string',      
+//        'readOnly': true
+//      },
+//      'transactionHash': {
+//        'readOnly': true,
+//        'type': 'string'
+//      },
+//      'time': {
+//        'type': 'date',
+//        'readOnly': true,
+//      },
+//     'posts': {
+//       type: 'array',
+//       items: {
+//         ref: 'tradle.Post',
+//         backlink: 'relatedTo'
+//       },
+//     },
+//     'photos': {
+//       'type': 'array',
+//       'items': {
+//         'type': 'object',
+//         'properties': {
+//           'tags': {
+//             'type': 'string',
+//             'skipLabel': true
+//           },
+//           'url': {
+//             'type': 'string',
+//             'readOnly': true
+//           }
+//         }
+//       },
+//       'required': ['url']
+//     },
+//   },  
+//   'required': [
+//     'title', 'description'
+//   ],
+//   'gridCols': [
+//     'title', 'description', 'owner', 'posts'
+//   ],
+//   'viewCols': [
+//     'title', 'description', 'owner', 'photos'
+//   ],
+// },
+
+// {
+//   'id': 'tradle.Post',
+//   'type': 'tradle.Model',
+//   'title': 'Post',
+//   'icon': 'social-buffer-outline',
+//   'properties': {
+//     '_t': {
+//       'type': 'string',
+//       'readOnly': true
+//      },
+//      'relatedTo': {
+//       'type': 'object',
+//       'readOnly': true,
+//       'ref': 'tradle.Community',
+//      },
+//      'title': {
+//       'type': 'string',
+//       'displayName': true,
+//      },
+//      // 'description': {
+//      //  'type': 'string',
+//      //  'title': 'Description',
+//      //  maxLength: 2000
+//      // },
+//      url: {
+//        type: 'string'
+//      },
+//      'from': {
+//       'type': 'object',
+//       'readOnly': true,
+//       'ref': 'tradle.Identity',
+//      },
+//      'blockchainUrl': {
+//        'type': 'string',      
+//        'readOnly': true
+//      },
+//      'transactionHash': {
+//        'type': 'string',
+//        'readOnly': true
+//      },
+//      'time': {
+//        type: 'date',
+//        readOnly: true
+//      },
+//      comments: {
+//       'type': 'array',
+//       items: {
+//         ref: 'tradle.PostComment',
+//         backlink: 'post'
+//       } 
+//      },
+//     'photos': {
+//       'type': 'array',
+//       'items': {
+//         'type': 'object',
+//         'properties': {
+//           'tags': {
+//             'type': 'string',
+//             'skipLabel': true
+//           },
+//           'url': {
+//             'type': 'string',
+//             'readOnly': true
+//           }
+//         }
+//       },
+//       'required': ['url']
+//     },
+//   },  
+//   'required': [
+//     'relatedTo', 'title', 'url'
+//   ],
+//   'viewCols': [
+//     'title', 'url', 'from', 'time'
+//   ],
+//   'gridCols': [
+//     'title', 'url', 'from', 'time', 'comments'
+//   ]
+// },
+// {
+//   'id': 'tradle.PostComment',
+//   'type': 'tradle.Model',
+//   'title': 'Comment',
+//   'icon': 'chatboxes',
+//   'properties': {
+//     '_t': {
+//       'type': 'string',
+//       'readOnly': true
+//      },
+//      'message': {
+//       'type': 'string',
+//       'displayName': true,
+//       maxLength: 2000
+//      },
+//      'from': {
+//        'type': 'object',
+//        'readOnly': true,
+//        'ref': 'tradle.Identity',
+//      },
+//      'post': {
+//        'type': 'object',
+//        'ref': 'tradle.Post',
+//        readOnly: true
+//        // 'displayName': true,
+//      },
+//      'time': {
+//        'type': 'date',
+//        'readOnly': true,
+//        'displayName': true
+//      },
+//     'photos': {
+//       'type': 'array',
+//       'items': {
+//         'type': 'object',
+//         'properties': {
+//           'tags': {
+//             'type': 'string',
+//             'skipLabel': true
+//           },
+//           'url': {
+//             'type': 'string',
+//             'readOnly': true
+//           }
+//         }
+//       },
+//       'required': ['title', 'url']
+//     },
+//     relatedTo: {
+//       type: 'object',
+//       ref: 'tradle.Community',   
+//       readOnly: true   
+//     }
+//   },  
+//   'required': [
+//     'message', 'post', 'relatedTo'
+//   ],
+//   'viewCols': [
+//     'message', 'post', 'time', 'from'
+//   ],
+//   'gridCols': [
+//     'message', 'time', 'from'
+//   ],
+// },
+
+
+// {
+//   id: 'tradle.Offer',
+//   title: 'Offer',
+//   type: 'object',
+//   sort: 'dateSubmitted',
+//   properties: {
+//     '_t': {
+//       type: 'string',
+//       readOnly: true
+//     },
+//     dealRef: {
+//       type: 'number',
+//       readOnly: true
+//     },              //* deal reference
+//     title: {
+//       type: 'string',
+//       skipLabel: true,
+//       description: 'title is displayed on the offer'
+//     },
+//     shortTitle: {
+//       type: 'string',
+//       skipLabel: true,
+//       displayName: true
+//     },
+//     conditions: {
+//       maxLength: 2000,
+//       type: 'string',
+//       description: 'What is this offer for? Limits for personal use and gifts. Phone # for questions and booking. Operating hours. Any special conditions for offer use. Other discounts/bonuses provided by the organization. Omit dates already specified on offer.'
+//     },
+//     description: {
+//       type: 'string',
+//       maxLength: 2000,
+//       description: 'clearly describe the product/service. Emphasize high value low price contrast. State quality/quantity of the product/service (and why the customer needs it). When in doubt, use "You pay x instead of XX"'
+//     },
+//     summary: {
+//       type: 'string',
+//       description: 'Short description of the deal. IMPORTANT for aggregators - must include discount and amount saved.'
+//     },
+//     submittedBy: {
+//       type: 'object',
+//       ref: 'tradle.Identity',
+//       readOnly: true
+//     },
+//     photos: {
+//       type: 'array',
+//       items: {
+//         type: 'object',
+//         properties: {
+//           tags: {
+//             type: 'string',
+//             title: 'Tags via comma'
+//           },
+//           url: {
+//             type: 'string',
+//             readOnly: true
+//           }
+//         }
+//       },
+//       required: ['url']
+//     },
+//     featured: {
+//       type: 'date'
+//     },
+//     expires: {
+//       type: 'date'
+//     },
+//     redeemBy: {
+//       description: 'must redeem by this date'
+//     },
+//     dealValue: {
+//       type: 'object',
+//       ref: 'tradle.Money',
+//       description: '$ price before discount'
+//     },
+//     dealPrice: {
+//       type: 'object',
+//       ref: 'tradle.Money',
+//       description: '$ price after discount'
+//     },    
+//     dealDiscount: {
+//       type: 'object',
+//       ref: 'tradle.Money',
+//       readOnly: true,
+//       formula: 'dealValue - dealPrice',
+//       description: '$ discount'
+//     },
+//     allPurchases: {
+//       type: 'array',
+//       readOnly: true,
+//       items: {
+//         type: 'object',
+//         ref: 'tradle.OfferBuy'
+//       }
+//     },
+//     offerBuysCount: {
+//       type: 'number',
+//       readOnly: true
+//     },
+//     discount: {
+//       type: 'number',
+//       suffix: '%',
+//       minimum: 1,
+//       maximum: 99,
+//       readOnly: true,
+//       description: '% discount',      
+//       formula: '((dealValue - dealPrice)/dealValue) * 100',
+//     },
+//     dealStatus: {
+//       type: 'string',
+//       readOnly: true,
+//       oneOf: [
+//         'Deal is over', 
+//         'Deal is going', 
+//         'Not featured yet'
+//       ]
+//     },
+//     availableLocations: {
+//       type: 'array',
+//       readOnly: true,
+//       ref: 'tradle.RedemptionLocation'
+//     },
+//     organization: {
+//       type: 'object',
+//       ref: 'tradle.Organization'
+//     },
+//     canceled: {
+//       type: 'boolean',
+//       skipOnCreate: true
+//     },
+//     canceledBy: {
+//       type: 'object',
+//       ref: 'tradle.Identity',
+//       readOnly: true
+//     },
+//     dateCanceled: {
+//       type: 'date',
+//       readOnly: true
+//     },
+//     dateSubmitted: {
+//       type: 'date',
+//       readOnly: true
+//     },
+//   },
+//   required: ['title', 'photos', 'shortTitle', 'description', 'dealValue', 'dealPrice', 'organization', 'expires'],
+//   gridCols: ['shortTitle', 'photos', 'dealPrice', 'discount', 'organization', 'expires', 'dealStatus'],
+//   viewCols: ['title', 'photos', 'organization', 'dealPrice', 'dealValue', 'dealDiscount', 'description', 'conditions', 'discount', 'featured', 'expires', 'offerBuysCount', 'dealStatus'],
+// },
+// {
+//   id: 'tradle.OfferBuy',
+//   type: 'object',
+//   title: 'Offer Buy',
+//   properties: {
+//     '_t': {
+//       type: 'string',
+//       readOnly: true
+//     },
+//     purchaseNumber: {
+//       type: 'number',
+//       readOnly: 'true'
+//     },
+//     transactionId: {
+//       type: 'string',
+//       readOnly: true
+//     },
+//     customer: {
+//       type: 'object',
+//       ref: 'tradle.Identity',
+//       readOnly: true
+//     },
+//     offer: {
+//       type: 'object',
+//       ref: 'tradle.Offer',
+//       readOnly: true
+//     },
+//     organization: {
+//       type: 'object',
+//       readOnly: true,
+//       ref: 'tradle.Organization'
+//     },
+//     title: {
+//       type: 'string',
+//       description: 'title is displayed on the offer'
+//     },
+//     shortTitle: {
+//       type: 'string',
+//     },
+//     purchaseTime: {
+//       type: 'date',
+//       readOnly: true
+//     },
+//     email: {
+//       type: 'string'
+//     },
+//     dealValue: {
+//       type: 'object',
+//       ref: 'tradle.Money',
+//       description: 'price before discount'
+//     },
+//     dealPrice: {
+//       type: 'object',
+//       ref: 'tradle.Money',
+//     },    
+//     dealDiscount: {
+//       type: 'object',
+//       ref: 'tradle.Money',
+//       readOnly: true
+//     },
+//     redeemed: {
+//       type: 'boolean'
+//     },
+//     location: {
+//       type: 'object',
+//       ref: 'tradle.RedemptionLocation'
+//     },
+//     photos: {
+//       type: 'array',
+//       readOnly: true,
+//       items: {
+//         type: 'object',
+//         properties: {
+//           tags: {
+//             type: 'string',
+//             title: 'Tags via comma'
+//           },
+//           url: {
+//             type: 'string',
+//             readOnly: true
+//           }
+//         }
+//       },
+//       required: ['url']
+//     },
+//   },
+//   required: ['purchaseNumber', 'customer', 'offer'],
+// },
+// {
+//   id: 'tradle.RedemptionLocation',
+//   type: 'object',
+//   properties: {
+//     '_t': {
+//       type: 'string',
+//       readOnly: true
+//     },
+//     offer: {
+//       type: 'object',
+//       ref: 'tradle.Offer',
+//       readOnly: true
+//     },
+//     address: {
+//       readOnly: true,
+//       formula: 'organization.address'
+//     },
+//     organization: {
+//       type: 'object',
+//       readOnly: true,
+//       ref: 'tradle.Organization'
+//     },
+//     photos: {
+//       type: 'array',      
+//       formula: 'organization.photos'
+//     }
+//   },
+//   required: ['offer', 'organization']
+// },
 
 
 // {
