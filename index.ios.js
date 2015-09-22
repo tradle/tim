@@ -3,6 +3,7 @@
 require('react-native-level')
 var React = require('react-native');
 var ResourceList = require('./Components/ResourceList');
+// var GridList = require('./Components/GridList');
 var TimHome = require('./Components/TimHome');
 var ResourceTypesScreen = require('./Components/ResourceTypesScreen');
 var NewResource = require('./Components/NewResource');
@@ -13,7 +14,7 @@ var MessageList = require('./Components/MessageList');
 var ArticleView = require('./Components/ArticleView');
 var IdentitiesList = require('./Components/IdentitiesList');
 var SelectPhotoList = require('./Components/SelectPhotoList');
-var CameraView = require('./Components/CameraView');
+// var CameraView = require('./Components/CameraView');
 var PhotoCarousel = require('./Components/PhotoCarousel');
 var utils = require('./utils/utils');
 var constants = require('tradle-constants');
@@ -31,73 +32,143 @@ var {
   Text,
   TouchableOpacity,
   StyleSheet,
+  LinkingIOS
 } = React;
 
-var styles = StyleSheet.create({
-  icon: {
-    width: 20,
-    height: 20,
-    // marginTop: 15,
-  },
-  orgImage: {
-    width: 20,
-    height: 20,
-    marginTop: 15,
-    marginRight: 3,
-    borderRadius: 10
-  },
-  container: {
-    flex: 1
-  },
-  navBar: {
-    marginTop: 16,
-  },
-  navBarText: {
-    fontSize: 16,
-  },
-  navBarTitleText: {
-    color: '#2E3B4E',
-    fontWeight: '500',
-    fontSize: 16,
-  },
-  navBarLeftButton: {
-    paddingLeft: 15,
-  },
-  navBarRightButton: {
-    paddingRight: 15,
-  },
-  navBarButtonText: {
-    color: '#7AAAC3',
-  },
-});
 
 class TiMApp extends Component {
   constructor(props) {
     super(props)
+    var props = {
+      modelName: constants.TYPES.IDENTITY
+    }
+    this.state = {
+      initialRoute: {
+        id: 1,
+        // title: 'Trust in Motion',
+        // titleTextColor: '#7AAAC3',
+        component: TimHome,
+        passProps: props,
+      },
+      props: props
+    };
+    // var url = 'tradlekyc://71e4b7cd6c11ab7221537275988f113a879029ea';
+    // this._handleOpenURL({url});
     // var isIphone = Device.isIphone();
     // if (!isIphone)
     //   isIphone = isIphone;
   }
+ 
+  componentDidMount() {
+    LinkingIOS.addEventListener('url', this._handleOpenURL.bind(this));
+    var url = LinkingIOS.popInitialURL();
+    if (url) 
+      this._handleOpenURL({url});    
+  }
+  componentWillUnmount() {
+    LinkingIOS.removeEventListener('url', this._handleOpenURL.bind(this));
+  }
+  _handleOpenURL(event) {    
+    var url = event.url.trim();
+    var idx = url.indexOf('://');
+    var q = (idx + 3 === url.length) ? null : url.substring(idx + 3);
+
+    var r;
+    if (!q) {
+      r = {
+        _t: 'tradle.Organization', 
+        _r: '0191ef415aa2ec76fb8ec8760b55112cadf573bc',
+        name: 'HSBC',
+        me: 'me'
+      }
+    }
+    else {
+      var params = q.split('=');
+      if (params.length === 1) {
+        switch (parseInt(params[0])) {
+        case 1:
+          r = {
+            _t: 'tradle.Organization', 
+            _r: '96e460ca282d62e41d4b59c85b212d102d7a5a6e',
+            name: 'Lloyds',
+            me: 'me'
+          }
+          break;
+        case 2:
+          r = {
+            _t: 'tradle.Organization', 
+            _r: '0191ef415aa2ec76fb8ec8760b55112cadf573bc',
+            name: 'HSBC',
+            me: '31eb0b894cad3601adc76713d55a11c88e48b4a2'
+          }
+          break;
+        case 3:
+          r = {
+            _t: 'tradle.Organization', 
+            _r: '96e460ca282d62e41d4b59c85b212d102d7a5a6e',
+            name: 'Lloyds',
+            me: 'b25da36eaf4b01b37fc2154cb1103eb5324a12345'
+          }
+          break;
+        }
+      }
+      else {
+        r = JSON.parse(decodeURIComponent(params[1]));
+        if (!r[constants.TYPE])
+          r[constants.TYPE] = 'tradle.Organization';
+      }
+    }
+    var props = {modelName: 'tradle.Message'};
+
+    if (this.state.navigator) {
+      var currentRoutes = this.state.navigator.getCurrentRoutes();
+      var route = {
+        title: r.name ||  'Chat',
+        backButtonTitle: 'Back', 
+        component: MessageList,
+        id: 11,
+        passProps: {
+          resource: r, //{'_t': type, '_r': rId}, 
+          modelName: 'tradle.Message',          
+          // prop: prop
+        }
+      }
+      if (currentRoutes.length === 1)
+        this.state.navigator.push(route);
+      else
+        this.state.navigator.replace(route);
+    }
+    else {
+      this.setState({
+        initialRoute: {
+          title: r.name ||  'Chat',
+          // backButtonTitle: 'Back', 
+          component: MessageList,
+          id: 11,
+          passProps: {
+            resource: r, //{'_t': type, '_r': rId}, 
+            modelName: 'tradle.Message',          
+            // prop: prop
+          }
+        },
+        props: props
+      });
+    }
+  }
+
   render() {
-    var props = {modelName: constants.TYPES.IDENTITY};
     return (
       <Navigator
         style={styles.container}
-        initialRoute={{
-          id: 1,
-          // title: 'Trust in Motion',
-          // titleTextColor: '#7AAAC3',
-          component: TimHome,
-          passProps: props,
-        }}
-        renderScene={this.renderScene}
+        initialRoute={this.state.initialRoute}
+        renderScene={this.renderScene.bind(this)}
         navigationBar={
           <Navigator.NavigationBar
             routeMapper={NavigationBarRouteMapper}
             style={styles.navBar}
           />
         }
-        passProps={props}
+        passProps={this.state.props}
         configureScene={(route) => {
           if (route.sceneConfig) 
             return route.sceneConfig;
@@ -109,6 +180,7 @@ class TiMApp extends Component {
 
   renderScene(route, nav) {
     var props = route.passProps;
+    this.state.navigator = nav;
     switch (route.id) {
     case 1:
       return <TimHome navigator={nav} modelName={constants.TYPES.IDENTITY} filter={props.filter} />;
@@ -117,6 +189,7 @@ class TiMApp extends Component {
                   modelName={props.modelName} 
                   resource={props.resource} 
                   returnRoute={props.returnRoute}
+                  sendForm={props.sendForm}
                   callback={props.callback} />;
     case 3:
       return <ResourceView navigator={nav} 
@@ -156,8 +229,8 @@ class TiMApp extends Component {
                   callback={props.callback}
                   isAggregation={props.isAggregation}
                   modelName={props.modelName} />;
-    case 12:
-      return <CameraView />
+    // case 12:
+    //   return <CameraView />
       // <CameraView navigator={nav} 
       //             onTakePic={props.onTakePic} 
       //             resource={props.resource} 
@@ -171,7 +244,18 @@ class TiMApp extends Component {
                 onSelectingEnd={props.onSelectingEnd} />
 
     case 14:
-      return <PhotoCarousel photos={props.photos} currentPhoto={props.currentPhoto} />
+      return <PhotoCarousel photos={props.photos} currentPhoto={props.currentPhoto} resource={props.resource} />
+    // case 15: 
+    //   return <GridList navigator={nav} 
+    //               filter={props.filter} 
+    //               resource={props.resource}
+    //               prop={props.prop}
+    //               returnRoute={props.returnRoute}
+    //               callback={props.callback}
+    //               isAggregation={props.isAggregation}
+    //               sortProperty={props.sortProperty}
+    //               modelName={props.modelName} />;
+
     case 10:  
     default: // 10
       return <ResourceList navigator={nav} 
@@ -278,6 +362,44 @@ var NavigationBarRouteMapper = {
   },
 
 };
+
+var styles = StyleSheet.create({
+  icon: {
+    width: 20,
+    height: 20,
+    // marginTop: 15,
+  },
+  orgImage: {
+    width: 20,
+    height: 20,
+    marginTop: 15,
+    marginRight: 3,
+    borderRadius: 10
+  },
+  container: {
+    flex: 1
+  },
+  navBar: {
+    marginTop: 16,
+  },
+  navBarText: {
+    fontSize: 16,
+  },
+  navBarTitleText: {
+    color: '#2E3B4E',
+    fontWeight: '500',
+    fontSize: 16,
+  },
+  navBarLeftButton: {
+    paddingLeft: 15,
+  },
+  navBarRightButton: {
+    paddingRight: 15,
+  },
+  navBarButtonText: {
+    color: '#7AAAC3',
+  },
+});
 
 React.AppRegistry.registerComponent('TiM', function() { return TiMApp });
 
