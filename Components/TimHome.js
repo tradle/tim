@@ -24,6 +24,7 @@ var {
   Image,
   Component,
   ScrollView,
+  LinkingIOS,
   StatusBarIOS
 } = React;
 
@@ -35,6 +36,7 @@ class TimHome extends Component {
 	  };
 	}
   componentWillMount() {
+    var url = LinkingIOS.popInitialURL();
     Actions.start();
   }
   componentDidMount() {
@@ -151,6 +153,7 @@ class TimHome extends Component {
     Actions.reloadDB();
   } 
   render() {
+    var url = LinkingIOS.popInitialURL();
   	var spinner = this.state.isLoading 
                 ? <ActivityIndicatorIOS hidden='true' size='large'/>  
                 :  <View/>;
@@ -168,13 +171,13 @@ class TimHome extends Component {
                         {'Edit Profile'}
                       </Text>
                     </TouchableHighlight>         
-      communities = <TouchableWithoutFeedback style={styles.communities} onPress={this.showCommunities.bind(this)}>
-                      <Text style={styles.communitiesText}>Communities</Text>
-                    </TouchableWithoutFeedback>          
+      // communities = <TouchableWithoutFeedback style={styles.communities} onPress={this.showCommunities.bind(this)}>
+      //                 <Text style={styles.communitiesText}>Communities</Text>
+      //               </TouchableWithoutFeedback>          
     }
     else {
       editProfile = <View />;
-      communities = <View style={{marginTop: 20}}/>;
+      // communities = <View style={{marginTop: 20}}/>;
     }
     // else  {
     //   var r = {_t: this.props.modelName};
@@ -184,10 +187,13 @@ class TimHome extends Component {
     return (
       <View style={styles.scroll}>
         <Text style={styles.title}>Trust in Motion (TiM)</Text>
-        <ScrollView>
+        <ScrollView
+          scrollEnabled={false}
+          style={{height:350}}
+        >
           <TouchableHighlight style={[styles.thumbButton]}
                 underlayColor='transparent' onPress={this.showContactsOrRegister.bind(this)}>        
-            <View style={styles.container} ref='search'>
+            <View style={styles.container}>
               <View>  
                 <Image style={styles.thumb} source={require('image!Tradle')}></Image>
                 <Text style={styles.tradle}>Tradle</Text>
@@ -198,8 +204,8 @@ class TimHome extends Component {
         <View style={{height: 180}}></View>
         <TouchableHighlight style={[styles.thumbButton]}
               underlayColor='transparent' onPress={this.showContactsOrRegister.bind(this)}>        
-          <View style={{backgroundColor: '#2892C6', paddingVertical: 10, paddingHorizontal: 30, borderRadius: 10}}>
-             <Text style={{color: '#f0f0f0', fontSize: 17, fontWeight:400}}>Get started</Text>
+          <View style={styles.getStarted}>
+             <Text style={styles.getStartedText}>Get started</Text>
           </View>
         </TouchableHighlight>
           <Text style={errStyle}>{err}</Text>
@@ -216,16 +222,6 @@ class TimHome extends Component {
       </View>  
     );
   }
-          // <Text style={errStyle}>{err}</Text>
-          // <View style={styles.dev}>
-          //   {editProfile}
-          //   <TouchableHighlight 
-          //       underlayColor='transparent' onPress={this.onReloadDBPressed.bind(this)}>
-          //     <Text style={styles.text}>
-          //       Reload DB
-          //     </Text>
-          //   </TouchableHighlight>
-          // </View>
 
 }
           // {spinner}   
@@ -254,7 +250,7 @@ var styles = StyleSheet.create({
   },
   tradle: {
     color: '#7AAAC3',
-    fontSize: 40,
+    fontSize: 35,
     alignSelf: 'center',
   },
   text: {
@@ -264,7 +260,7 @@ var styles = StyleSheet.create({
     fontSize: 12,
   },
   thumbButton: {
-    marginBottom: 10,
+    // marginBottom: 10,
     alignSelf: 'center',
     justifyContent: 'center',
     // padding: 40, 
@@ -292,7 +288,18 @@ var styles = StyleSheet.create({
     flexDirection: 'row',
     marginBottom: 500,
     alignSelf: 'center'
-  }
+  },
+  getStartedText: {
+    color: '#f0f0f0', 
+    fontSize: 17, 
+    fontWeight:'400'
+  },
+  getStarted: {
+    backgroundColor: '#2892C6', 
+    paddingVertical: 10, 
+    paddingHorizontal: 30, 
+    borderRadius: 10
+  },
 });
 
 
