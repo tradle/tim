@@ -12,6 +12,7 @@ var utils = require('../utils/utils');
 var level = require('react-native-level');
 var promisify = require('q-level');
 var constants = require('tradle-constants');
+var isTest, originalMe;
 // var Identity = require('midentity');
 // var Tim = require('tim');
 
@@ -48,8 +49,9 @@ var Store = Reflux.createStore({
     // identityDb = sdb.sublevel(IDENTITY_MODEL);
 
     this.ready = this.loadResources()
-    .then(function(){
-      isLoaded = true;
+    .then(function() {
+      if (!utils.isEmpty(list))
+        isLoaded = true;
     })
     .catch(function(err) {
       err = err;
@@ -64,7 +66,7 @@ var Store = Reflux.createStore({
         me: me});
     });
   },
-  onAddMessage(r) { // this will move to messagesStore
+  onAddMessage(r) { 
     var props = this.getModel(r[constants.TYPE]).value.properties;
     var rr = {};
     for (var p in r) {
@@ -92,7 +94,10 @@ var Store = Reflux.createStore({
     list[key] = {key: key, value: r};
     var to = list[utils.getId(r.to)].value;
     var from = list[utils.getId(r.from)].value;
-    var dn = r.message || utils.getDisplayName(r, props);
+    var dn = r.message; // || utils.getDisplayName(r, props);
+    if (!dn)
+      dn = 'sent photo';
+
     to.lastMessage = (from[constants.ROOT_HASH] === me[constants.ROOT_HASH]) ? 'You: ' + dn : dn;
     to.lastMessageTime = r.time;
     from.lastMessage = r.message;
@@ -171,7 +176,13 @@ var Store = Reflux.createStore({
       err = err;
     });
   },
-  onGetItem(key) {
+  onGetTo(key) {
+    this.onGetItem(key, 'getTo');
+  },
+  onGetFrom(key) {
+    this.onGetItem(key, 'getFrom');
+  },
+  onGetItem(key, action) {
     var resource = {};
     extend(resource, list[utils.getId(key)].value);
     var props = this.getModel(resource[constants.TYPE]).value.properties;
@@ -193,7 +204,7 @@ var Store = Reflux.createStore({
       if (result.length)
         resource[p] = result;
     }
-    this.trigger({ resource: resource, action: 'getItem'});
+    this.trigger({ resource: resource, action: action || 'getItem'});
   },
   onShowIdentityList() {
     if (sampleData.getMyId()) {
@@ -649,7 +660,7 @@ var Store = Reflux.createStore({
     if (!containerProp  &&  me  &&  isIdentity) {
       if (sampleData.getMyId()) 
         delete foundResources[IDENTITY_MODEL + '_' + me[constants.ROOT_HASH]];
-      else {
+      else if (!isTest) {
         var myIdentities = list[MY_IDENTITIES_MODEL + '_1'].value.allIdentities;
         for (var meId of myIdentities) {
           if (foundResources[meId.id])
@@ -700,8 +711,10 @@ var Store = Reflux.createStore({
     var modelName = params.modelName;
     var meta = this.getModel(modelName).value;
     var isVerification = modelName === 'tradle.Verification'  ||  (meta.subClassOf  &&  meta.subClassOf === 'tradle.Verification');
-    var to = params.to;
+    var chatTo = params.to;
     var prop = params.prop;
+    if (typeof prop === 'string')
+      prop = meta[prop];
     var backlink = prop ? prop.items.backlink : prop;
     var foundResources = {};
     var isAllMessages = meta.isInterface;
@@ -712,8 +725,30 @@ var Store = Reflux.createStore({
     var required = meta.required;
     var meRootHash = me  &&  me[constants.ROOT_HASH];
     var meId = IDENTITY_MODEL + '_' + meRootHash;
-    var toId = to ? to[constants.TYPE] + '_' + to[constants.ROOT_HASH] : null;
-    var toModelName = toId.split('_')[0];
+    var meOrgId = me.organization ? utils.getId(me.organization) : null;
+
+    var chatId = chatTo ? chatTo[constants.TYPE] + '_' + chatTo[constants.ROOT_HASH] : null;
+    var isChatWithOrg = chatTo  &&  chatTo[constants.TYPE] === 'tradle.Organization';
+    if (isChatWithOrg  &&  !chatTo.name) {
+      chatTo = list[chatId].value;
+    }
+    var testMe = chatTo ? chatTo.me : null;
+    if (testMe) {
+      if (testMe === 'me') {
+        if (!originalMe) 
+          originalMe = me;
+        testMe = originalMe[constants.ROOT_HASH];
+      }
+
+      isTest = true;
+      var meId = constants.TYPES.IDENTITY + '_' + testMe;
+      me = list[meId].value;
+      utils.setMe(me);
+      var myIdentities = list[MY_IDENTITIES_MODEL + '_1'].value;
+      if (myIdentities)
+        myIdentities.currentIdentity = meId;
+    }
+    var toModelName = chatTo ? chatId.split('_')[0] : null;
     for (var key in list) {
       var iMeta = null;
       if (isAllMessages) {
@@ -750,25 +785,47 @@ var Store = Reflux.createStore({
         if (r.document  &&  r.document.id) 
           r.document = list[utils.getId(r.document.id)].value;
       }
-      if (to) {
+      if (chatTo) {
         if (backlink  &&  r[backlink]) {
-          if (toId === utils.getId(r[backlink])) 
+          if (chatId === utils.getId(r[backlink])) 
             foundResources[key] = r;
           
           continue;
         }
-        if ((!r.message  ||  r.message.trim().length === 0) && !r.photos) 
+        var isVerificationR = r[constants.TYPE] === 'tradle.Verification'  ||  r[constants.TYPE].subClassOf === 'tradle.Verification';
+        if ((!r.message  ||  r.message.trim().length === 0) && !r.photos &&  !isVerificationR) 
           // check if this is verification resource
           continue;
         var fromID = utils.getId(r.from); 
         var toID = utils.getId(r.to);
-        if (fromID !== meId  &&  toID !== meId) 
+       
+        if (fromID !== meId  &&  toID !== meId  &&  toID != meOrgId) 
           continue;
-        var id = toModelName + '_' + to[constants.ROOT_HASH];
-        if (fromID !== id  &&  toID != id)
+        var id = toModelName + '_' + chatTo[constants.ROOT_HASH];
+        if (isChatWithOrg) { 
+          var toOrgId = null, fromOrgId = null;
+
+          if (list[fromID].value.organization) 
+            fromOrgId = utils.getId(list[fromID].value.organization);
+          else if (fromID.split('_')[0] === 'tradle.Organization')
+            fromOrgId = utils.getId(list[fromID].value);
+          if (list[toID].value.organization) 
+            toOrgId = utils.getId(list[toID].value.organization);
+          else if (toID.split('_')[0] === 'tradle.Organization')
+            toOrgId = utils.getId(list[toID].value);
+
+          if (chatId !== toOrgId  &&  chatId !== fromOrgId)
+            continue;
+          if (fromID != meId  &&  toID != meId)
+            continue
+        }
+        else if (fromID !== id  &&  toID != id  &&  toID != meOrgId)
           continue;
       }
+      if (isVerificationR) {
+        r.document = list[utils.getId(r.document)].value;
 
+      }
       if (!query) {
         // foundResources[key] = r;
         var msg = this.fillMessage(r);
@@ -975,6 +1032,7 @@ var Store = Reflux.createStore({
     });
   },
   loadAddressBook() {
+    return;
     var self = this;
     return Q.ninvoke(AddressBook, 'checkPermission')
     .then(function(permission) {
@@ -1085,7 +1143,7 @@ var Store = Reflux.createStore({
     // .on('error', function(err) {
     //   console.log('err: ' + err);
     // });
-
+    var loadingModels = false;
     return db.createReadStream()
     .on('data', function(data) {
        if (data.key.indexOf('model_') === 0) {
@@ -1110,15 +1168,20 @@ var Store = Reflux.createStore({
           me.organization.photo = photos[0].url;
       }
       console.log('Stream closed');
+      utils.setModels(models);
     })      
     .on('end', function() {
       console.log('Stream ended');
-      if (self.isEmpty(models) || Object.keys(list).length == 2)
+      if (me)
+        utils.setMe(me);
+      var noModels = self.isEmpty(models);
+      if (noModels || Object.keys(list).length == 2)
         if (me)
           return self.loadDB();
         else {
           isLoaded = false;
-          return self.loadModels();
+          if (noModels)
+            return self.loadModels();
         }
       // else
       //   return self.loadAddressBook();
