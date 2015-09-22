@@ -282,8 +282,10 @@ var utils = {
     for (var p in meta) {
       if (meta[p].displayName) {
         if (resource[p]) {
-          if (meta[p].type == 'object') 
-            displayName += displayName.length ? ' ' + resource[p].title : resource[p].title;
+          if (meta[p].type == 'object') {
+            var title = resource[p].title || this.getDisplayName(resource[p], utils.getModel(resource[p][constants.TYPE]).value.properties);
+            displayName += displayName.length ? ' ' + title : title;
+          }
           else
             displayName += displayName.length ? ' ' + resource[p] : resource[p];
         }
