@@ -1,13 +1,55 @@
 'use strict'
 
+
+// var myId = 'b25da36eaf4b01b37fc2154cb1103eb5324a52fa'; // Jane Choi
+// var myId = '31eb0b894cad3601adc76713d55a11c88e48b4a2'; // Kate Blair
+// var myId = '38980944449570d2783d7c8af5db8ca9463391f3'; // Sophia
+// var myId = 'b25da36eaf4b01b37fc2154cb1103eb5324a12348'; // Timo
+// var myId = 'b25da36eaf4b01b37fc2154cb1103eb5324a12345'; // Ted
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ResidencyVerification - address - bank statement, utility bill
 // EmploymentVerification - employer 
 // SalaryVerification - latest pay stub
-
-var myId = 'b25da36eaf4b01b37fc2154cb1103eb5324a52fa'; // Jane Choi
-// var myId = '31eb0b894cad3601adc76713d55a11c88e48b4a2'; // Kate Blair
-// var myId = '38980944449570d2783d7c8af5db8ca9463391f3'; // Sophia
-
 var identities = [
 {
   _t:'tradle.Identity',
@@ -20,6 +62,10 @@ var identities = [
   'owner':{
      id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa', 
      title: 'Jane Choi'
+  },
+  organization: {
+    id: 'tradle.Organization_0191ef415aa2ec76fb8ec8760b55112cadf573bc',
+    title: 'HSBC'
   },
   'contact': [
     {
@@ -73,6 +119,7 @@ var identities = [
 },
 {
   _t: 'tradle.Identity',
+  _r: 'b25da36eaf4b01b37fc2154cb1103eb5324a12345',  
   'contact': [
     {
       'identifier': 'somebodyelse',
@@ -91,6 +138,10 @@ var identities = [
      id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa', 
      title: 'Jane Choi'
   },
+  organization: {
+     id: 'tradle.Organization_96e460ca282d62e41d4b59c85b212d102d7a5a6e',
+     title: 'Lloyds'
+  }, 
   'photos': [
     {
       'tags': 'headshot',
@@ -176,6 +227,10 @@ var identities = [
   'owner':{
      id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa', 
      title: 'Jane Choi'
+  },
+  organization: {
+     id: 'tradle.Organization_0b462e6124d39fda3af523b49b07affb67129102',
+     title: 'Morgan Stanley'
   },
   'photos': [
     {
@@ -330,6 +385,7 @@ var identities = [
 },
 {
   _t: 'tradle.Identity',
+  _r: 'b25da36eaf4b01b37fc2154cb1103eb5324a12348',
   'contact': [
     {
       'identifier': 'somebodyelse',
@@ -347,12 +403,17 @@ var identities = [
      id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa', 
      title: 'Jane Choi'
   },
+  organization: {
+     id: 'tradle.Organization_71e4b7cd6c11ab7221537275988f113a879029ea',
+     title: 'Rabobank'
+  },
   'photos': [
     {
       'tags': 'headshot',
       'url': 'http://www.bitcoin2013.com/uploads/1/4/9/4/14946598/2010100_orig.jpg'
     }
   ],
+
   'pubkeys': [
     {
       '_sig': '304302200be2aeec26edbbf6d516441de0fedebacf0252f7a3d4d2993f4f8c76ec949cd8021f4eadda2cb931d233925c1a922a6de5cf41befafe0567b718efba4e3942f693',
@@ -682,7 +743,7 @@ var identities = [
   'region': 'NY',
   'street': '666 Wyld Stallyns Dr',
   'firstName': 'Gene',
-  'lastName': 'Wilber',
+  'lastName': 'Vayngrib',
   'owner':{
      id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa', 
      title: 'Jane Choi'
@@ -753,9 +814,41 @@ var identities = [
     }
   ]
 },
+{
+  _t: 'tradle.Identity',
+  'contact': [
+    {
+      'identifier': 'somebodyelse',
+      'type': 'skype'
+    }
+  ],
+  'city': 'New York',
+  'country': 'USA',
+  'postalCode': '10001',
+  'region': 'NY',
+  'street': '666 Wyld Stallyns Dr',
+  'firstName': 'Tony',
+  'owner':{
+     id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa', 
+     title: 'Jane Choi'
+  },
+  'photos': [
+    {
+      'tags': 'headshot',
+      'url': 'http://thebookboy.co.uk/wp-content/uploads/2013/04/tony2.jpg'
+    }
+  ],
+  'v': '0.3',
+  'websites': [
+    {
+      'url': 'wyldstallyns.com'
+    }
+  ]
+},
 
 {
   _t: 'tradle.Organization',
+  _r: '0b462e6124d39fda3af523b49b07affb67129102',
   'name': 'Morgan Stanley',
   'contacts': [
     {
@@ -769,21 +862,86 @@ var identities = [
     }
   ]
 },
+// {
+//   _t: 'tradle.Organization',
+//   _r: '0191ef415aa2ec76fb8ec8760b55112cadf573bc',
+//   'name': 'JP Morgan',
+//   'contacts': [
+//     {
+//       'id': 'tradle.Identity_31eb0b894cad3601adc76713d55a11c88e48b4a2',
+//       'title': 'Kate Blair'
+//     }
+//   ],
+//   'photos': [
+//     {
+//       'url':  'http://hypeorlando.s3.amazonaws.com/sites/162/2014/10/JP-Morgan-Chase-Logo-600x350.jpg'
+//     }
+//   ]
+// },
+// {
+//   _t: 'tradle.Organization',
+//   _r: '0191ef415aa2ec76fb8ec8760b55112cadf573bc',
+//   'name': 'ABN AMRO',
+//   'contacts': [
+//     {
+//       'id': 'tradle.Identity_31eb0b894cad3601adc76713d55a11c88e48b4a2',
+//       'title': 'Kate Blair'
+//     }
+//   ],
+//   'photos': [
+//     {
+//       'url':  'http://www.tobloom.nl/_datapics/klanten/groep132.jpg'
+//     }
+//   ]
+// },
 {
   _t: 'tradle.Organization',
-  'name': 'JP Morgan',
+  _r: '0191ef415aa2ec76fb8ec8760b55112cadf573bc',
+  'name': 'HSBC',
   'contacts': [
     {
       'id': 'tradle.Identity_31eb0b894cad3601adc76713d55a11c88e48b4a2',
-      'title': 'Jane Blair'
+      'title': 'Kate Blair'
     }
   ],
   'photos': [
     {
-      'url':  'http://hypeorlando.s3.amazonaws.com/sites/162/2014/10/JP-Morgan-Chase-Logo-600x350.jpg'
+      'url':  'http://www.gunesulasim.com/web/uploads/referans/kucuk/hsbc_logo_square.gif'
     }
   ]
+},
+{
+  _t: 'tradle.Organization',
+  'name': 'Rabobank',
+  _r: '71e4b7cd6c11ab7221537275988f113a879029ea',
+  'contacts': [
+    {
+      'id': 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a12348',
+      'title': 'Timo Heinke'
+    }
+  ],
+  'photos': [
+    {
+      'url':  'http://vectorlogofree.com/wp-content/uploads/2012/06/rabobank-logo-vector-01.png'
+    }
+  ]
+},
 
+{
+  _t: 'tradle.Organization',
+  _r: '96e460ca282d62e41d4b59c85b212d102d7a5a6e',
+  'name': 'Lloyds',
+  'contacts': [
+    {
+      'id': 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a12345',
+      'title': 'Ted Logan'
+    }
+  ],
+  'photos': [
+    {
+      'url':  'http://www.bankpoint.co.uk/assets/images/companies/lloyds.jpg'
+    }
+  ]
 },
 {
   _t: 'tradle.Organization',
@@ -794,161 +952,6 @@ var identities = [
     }
   ]
 },
-{
-  _t: 'tradle.Offer',
-    dealRef: 12345,
-    title: 'Amazing deal for BENTO & BUBBLES',
-    shortTitle: 'Amazing deal',
-    conditions: 'Available in all Chino\'s restaurants',
-    description: 'clearly describe the product/service. Emphasize high value low price contrast. State quality/quantity of the product/service (and why the customer needs it). When in doubt, use "You pay x instead of XX"',
-    summary: 'piuxv oiupoi poshusofgiup upi uopiuroup pi upoiuo',
-    dealPrice: {
-      value: 100,
-      currency: 'USD'
-    },
-    dealValue: {
-      value: 120,
-      currency: 'USD'
-    }
-  //   submittedBy: 
-  //     type: 'object',
-  //     ref: 'tradle.Identity',
-  //     readOnly: true
-  //   },
-  //   photos: [{
-  //     url: 'http://www.chinolatino.eu/assets/parkplaza_chino_latino/content/images/bandb.jpg'
-  //   }],
-  //   featured: {
-  //     type: 'date'
-  //   },
-  //   expired: {
-  //     type: 'date'
-  //   },
-  //   redeemBy: {
-  //     description: 'must redeem by this date'
-  //   },
-  //   dealAmount: {
-  //     type: 'object',
-  //     ref: 'tradle.Money',
-  //     description: 'only for "Buy Limited Discount" coupons; how much more customer needs to spend including certificate to get a deal'
-  //   },
-  //   dealValue: {
-  //     type: 'object',
-  //     ref: 'tradle.Money',
-  //     description: 'price before discount for "Standard" coupons or price of the certificate for "Buy Limited Discount" coupons'
-  //   },
-  //   dealPrice: {
-  //     type: 'object',
-  //     ref: 'tradle.Money',
-  //   },    
-  //   dealDiscount: {
-  //     type: 'object',
-  //     ref: 'tradle.Money',
-  //     readOnly: true
-  //   },
-  //   discount: {
-  //     type: 'number',
-  //     suffix: '%',
-  //     minimum: 1,
-  //     maximum: 99
-  //   },
-  //   dealStatus: {
-  //     type: 'string',
-  //     readOnly: true,
-  //     oneOf: [
-  //       'Deal is over', 
-  //       'Deal is going', 
-  //       'Not featured yet'
-  //     ]
-  //   },
-  //   availableLocations: {
-  //     type: 'array',
-  //     ref: 'tradle.RedemptionLocation'
-  //   },
-  //   vendor: {
-  //     type: 'object',
-  //     ref: 'tradle.Vendor'
-  //   },
-  //   canceled: {
-  //     type: 'boolean'
-  //   },
-  //   canceledBy: {
-  //     type: 'object',
-  //     ref: 'tradle.Identity',
-  //     readOnly: true
-  //   },
-  //   dateSubmitted: {
-  //     type: 'date',
-  //     readOnly: true
-  //   },
-  //   required: ['title', 'dealPrice', 'vendor', 'expired'],
-  //   viewCols: ['shortTitle', 'dateSubmitted', 'dealPrice', 'discount', 'couponBuysCount', 'vendor', 'dealStatus']
-  // }
-},
-{
-  _t: 'tradle.Community',
-  _r: 'tradle12397d8f7s989843589798s9dg7f987h987',
-  title: 'Tradle',
-  description: 'p2p network with peer discovery over bittorrent DHT, OTR over rUDP + NAT traversal for peer comms, and optional externalization of messages to blockchain + DHT',
-},
-{
-  _t: 'tradle.Community',
-  _r: 'datt2937598r98d7h98fg7h8979fd9dg80d9f0fgh',
-  title: 'DATT',
-  description: 'Decentralize all things',
-},
-{
-  _t: 'tradle.Post',
-  _r: 'tradle129494tt9ehdgo346c6vu67bvdofuoiwere',
-  relatedTo: {
-    id: 'tradle.Community_tradle12397d8f7s989843589798s9dg7f987h987',
-    title: 'Tradle'
-  },
-  url: 'http://github.com/tradle/tim',
-  title: 'Tradle\'s Trust in Motion (TiM) on github'
-},
-{
-  _t: 'tradle.Post',
-  _r: 'datt0129494tt9ehdgo346c6vu67bvdofuoiwere',
-  relatedTo: {
-    id: 'tradle.Community_datt2937598r98d7h98fg7h8979fd9dg80d9f0fgh',
-    title: 'DATT'
-  },
-  url: 'https://github.com/dattnetwork',
-  title: 'DATT on github'
-},
-{
-  _t: 'tradle.PostComment',
-  _r: 'tradle98798dfg98568579fgh8fg7h98459dhkjk',
-  relatedTo: {
-    id: 'tradle.Community_datt2937598r98d7h98fg7h8979fd9dg80d9f0fgh',
-    title: 'DATT'
-  },
-  message: 'comment',
-  post: 'tradle.Post_datt0129494tt9ehdgo346c6vu67bvdofuoiwere'
-},
-{
-  _t: 'tradle.PostComment',
-  _r: 'tradle98798dfg98568579frtygh8fg7h98459dhkjk',
-  relatedTo: {
-    id: 'tradle.Community_datt2937598r98d7h98fg7h8979fd9dg80d9f0fgh',
-    title: 'DATT'
-  },
-  message: 'comment2',
-  post: 'tradle.Post_datt0129494tt9ehdgo346c6vu67bvdofuoiwere'
-},
-{
-  _t: 'tradle.PostComment',
-  _r: 'tradle98798dfg9856857ert9fgh8fg7h98459dhkjk',
-  relatedTo: {
-    id: 'tradle.Community_datt2937598r98d7h98fg7h8979fd9dg80d9f0fgh',
-    title: 'DATT'
-  },
-  message: 'comment3',
-  post: 'tradle.Post_datt0129494tt9ehdgo346c6vu67bvdofuoiwere'
-},
-
-
 
 ];
 
@@ -968,3 +971,158 @@ var data = {
   }
 }
 module.exports = data;
+
+// {
+//   _t: 'tradle.Offer',
+//     dealRef: 12345,
+//     title: 'Amazing deal for BENTO & BUBBLES',
+//     shortTitle: 'Amazing deal',
+//     conditions: 'Available in all Chino\'s restaurants',
+//     description: 'clearly describe the product/service. Emphasize high value low price contrast. State quality/quantity of the product/service (and why the customer needs it). When in doubt, use "You pay x instead of XX"',
+//     summary: 'piuxv oiupoi poshusofgiup upi uopiuroup pi upoiuo',
+//     dealPrice: {
+//       value: 100,
+//       currency: 'USD'
+//     },
+//     dealValue: {
+//       value: 120,
+//       currency: 'USD'
+//     }
+//   //   submittedBy: 
+//   //     type: 'object',
+//   //     ref: 'tradle.Identity',
+//   //     readOnly: true
+//   //   },
+//   //   photos: [{
+//   //     url: 'http://www.chinolatino.eu/assets/parkplaza_chino_latino/content/images/bandb.jpg'
+//   //   }],
+//   //   featured: {
+//   //     type: 'date'
+//   //   },
+//   //   expired: {
+//   //     type: 'date'
+//   //   },
+//   //   redeemBy: {
+//   //     description: 'must redeem by this date'
+//   //   },
+//   //   dealAmount: {
+//   //     type: 'object',
+//   //     ref: 'tradle.Money',
+//   //     description: 'only for "Buy Limited Discount" coupons; how much more customer needs to spend including certificate to get a deal'
+//   //   },
+//   //   dealValue: {
+//   //     type: 'object',
+//   //     ref: 'tradle.Money',
+//   //     description: 'price before discount for "Standard" coupons or price of the certificate for "Buy Limited Discount" coupons'
+//   //   },
+//   //   dealPrice: {
+//   //     type: 'object',
+//   //     ref: 'tradle.Money',
+//   //   },    
+//   //   dealDiscount: {
+//   //     type: 'object',
+//   //     ref: 'tradle.Money',
+//   //     readOnly: true
+//   //   },
+//   //   discount: {
+//   //     type: 'number',
+//   //     suffix: '%',
+//   //     minimum: 1,
+//   //     maximum: 99
+//   //   },
+//   //   dealStatus: {
+//   //     type: 'string',
+//   //     readOnly: true,
+//   //     oneOf: [
+//   //       'Deal is over', 
+//   //       'Deal is going', 
+//   //       'Not featured yet'
+//   //     ]
+//   //   },
+//   //   availableLocations: {
+//   //     type: 'array',
+//   //     ref: 'tradle.RedemptionLocation'
+//   //   },
+//   //   vendor: {
+//   //     type: 'object',
+//   //     ref: 'tradle.Vendor'
+//   //   },
+//   //   canceled: {
+//   //     type: 'boolean'
+//   //   },
+//   //   canceledBy: {
+//   //     type: 'object',
+//   //     ref: 'tradle.Identity',
+//   //     readOnly: true
+//   //   },
+//   //   dateSubmitted: {
+//   //     type: 'date',
+//   //     readOnly: true
+//   //   },
+//   //   required: ['title', 'dealPrice', 'vendor', 'expired'],
+//   //   viewCols: ['shortTitle', 'dateSubmitted', 'dealPrice', 'discount', 'couponBuysCount', 'vendor', 'dealStatus']
+//   // }
+// },
+// {
+//   _t: 'tradle.Community',
+//   _r: 'tradle12397d8f7s989843589798s9dg7f987h987',
+//   title: 'Tradle',
+//   description: 'p2p network with peer discovery over bittorrent DHT, OTR over rUDP + NAT traversal for peer comms, and optional externalization of messages to blockchain + DHT',
+// },
+// {
+//   _t: 'tradle.Community',
+//   _r: 'datt2937598r98d7h98fg7h8979fd9dg80d9f0fgh',
+//   title: 'DATT',
+//   description: 'Decentralize all things',
+// },
+// {
+//   _t: 'tradle.Post',
+//   _r: 'tradle129494tt9ehdgo346c6vu67bvdofuoiwere',
+//   relatedTo: {
+//     id: 'tradle.Community_tradle12397d8f7s989843589798s9dg7f987h987',
+//     title: 'Tradle'
+//   },
+//   url: 'http://github.com/tradle/tim',
+//   title: 'Tradle\'s Trust in Motion (TiM) on github'
+// },
+// {
+//   _t: 'tradle.Post',
+//   _r: 'datt0129494tt9ehdgo346c6vu67bvdofuoiwere',
+//   relatedTo: {
+//     id: 'tradle.Community_datt2937598r98d7h98fg7h8979fd9dg80d9f0fgh',
+//     title: 'DATT'
+//   },
+//   url: 'https://github.com/dattnetwork',
+//   title: 'DATT on github'
+// },
+// {
+//   _t: 'tradle.PostComment',
+//   _r: 'tradle98798dfg98568579fgh8fg7h98459dhkjk',
+//   relatedTo: {
+//     id: 'tradle.Community_datt2937598r98d7h98fg7h8979fd9dg80d9f0fgh',
+//     title: 'DATT'
+//   },
+//   message: 'comment',
+//   post: 'tradle.Post_datt0129494tt9ehdgo346c6vu67bvdofuoiwere'
+// },
+// {
+//   _t: 'tradle.PostComment',
+//   _r: 'tradle98798dfg98568579frtygh8fg7h98459dhkjk',
+//   relatedTo: {
+//     id: 'tradle.Community_datt2937598r98d7h98fg7h8979fd9dg80d9f0fgh',
+//     title: 'DATT'
+//   },
+//   message: 'comment2',
+//   post: 'tradle.Post_datt0129494tt9ehdgo346c6vu67bvdofuoiwere'
+// },
+// {
+//   _t: 'tradle.PostComment',
+//   _r: 'tradle98798dfg9856857ert9fgh8fg7h98459dhkjk',
+//   relatedTo: {
+//     id: 'tradle.Community_datt2937598r98d7h98fg7h8979fd9dg80d9f0fgh',
+//     title: 'DATT'
+//   },
+//   message: 'comment3',
+//   post: 'tradle.Post_datt0129494tt9ehdgo346c6vu67bvdofuoiwere'
+// },
+
