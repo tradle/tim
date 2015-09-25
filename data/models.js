@@ -261,28 +261,51 @@ var voc = [{
       'type': 'string',
       'displayName': true,
      },
-    'photos': {
-      'type': 'array',
-      'items': {
-        'type': 'object',
-        'properties': {
-          'tags': {
-            'type': 'string',
-            'skipLabel': true
-          },
-          'url': {
-            'type': 'string',
-            'readOnly': true
-          }
-        }
-      },
-      'required': ['title', 'url']
-    },
+     // 'photos': {
+     //   'type': 'array',
+     //   'items': {
+     //     'type': 'object',
+     //     'properties': {
+     //       'tags': {
+     //         'type': 'string',
+     //         'skipLabel': true
+     //       },
+     //       'url': {
+     //         'type': 'string',
+     //         'readOnly': true
+     //       }
+     //     }
+     //   },
+     //   'required': ['title', 'url']
+     // },
+     'from': {
+       'type': 'object',
+       'readOnly': true,
+       'ref': 'tradle.Identity',
+     },
+     'to': {
+       'type': 'object',
+       'ref': 'tradle.Identity',
+       'readOnly': true,
+       // 'displayName': true,
+     },
+     'time': {
+       'type': 'date',
+       'readOnly': true,
+       'displayName': true
+     },
     verificationRequest: {
       ref: 'tradle.Message',
+      readOnly: true,
       type: 'object'
     },
-  }
+  },
+  'required': [
+    'to', 'from', 'message'
+  ],
+  'viewCols': [
+    'message'
+  ],
 },
 {
   'id': 'tradle.Message',
@@ -477,6 +500,13 @@ var voc = [{
         'backlink': 'document',
         'ref': 'tradle.Verification'
       },
+    },
+    additionalInfo: { 
+      type: 'array', 
+      items: {
+        ref: 'tradle.AdditionalInfo',
+        backlink: 'verificationRequest'
+      }
     }
   },  
   'required': [
@@ -553,6 +583,13 @@ var voc = [{
         'ref': 'tradle.Verification'
       },
       'required': ['contact']
+    },
+    additionalInfo: { 
+      type: 'array', 
+      items: {
+        ref: 'tradle.AdditionalInfo',
+        backlink: 'verificationRequest'
+      }
     }
   },  
   'required': [
@@ -779,6 +816,13 @@ var voc = [{
        'readOnly': true,
        'type': 'string'
      },
+     additionalInfo: { 
+       type: 'array', 
+       items: {
+         ref: 'tradle.AdditionalInfo',
+         backlink: 'verificationRequest'
+       }
+     }
   },  
   'required': [
     'to', 'from', 'photos', 'codeOfIssuing', 'passportNumber', 'surname', 'givenName', 'nationality', 'dateOfBirth', 'sex', 'placeOfBirth', 'dateOfIssue', 'authority', 'dateOfExpiry'
@@ -810,7 +854,6 @@ var voc = [{
       'type': 'number',
       maxLength: 8,
       'displayName': true,
-      'title': 'Description',
      },
      surname: {
       'type': 'string',
@@ -889,8 +932,10 @@ var voc = [{
      },
      additionalInfo: { 
        type: 'array', 
-       ref: 'tradle.AdditionalInfo',
-       backlink: 'verificationRequest'
+       items: {
+         ref: 'tradle.AdditionalInfo',
+         backlink: 'verificationRequest'
+       }
      }
   },  
   'required': [
@@ -900,7 +945,7 @@ var voc = [{
     'from', 'licenseNumber', 'dateOfExpiry', 'time'
   ],
   'viewCols': [
-    'photos', 'licenseNumber', 'surname', 'givenName', 'dateOfBirth', 'dateOfIssue', 'dateOfExpiry', 'issuingAuthority', 'holderAddress', 'entitlementCategories', 'verifications'
+    'photos', 'licenseNumber', 'surname', 'givenName', 'dateOfBirth', 'dateOfIssue', 'dateOfExpiry', 'issuingAuthority', 'holderAddress', 'entitlementCategories', 'verifications', 'additionalInfo'
   ],
 },
 
@@ -968,85 +1013,6 @@ var voc = [{
   ],
   'gridCols': [
     'message', 'time', 'from', 'document', 'organization'
-  ],
-},
-{
-  'id': 'tradle.VerificationOfAddress',
-  'type': 'tradle.Model',
-  'title': 'Verification',
-  'subClassOf': 'tradle.Verification',
-  'interfaces': ['tradle.Message'],
-  'style': {'backgroundColor': '#E7E6F5'},
-  'autoCreate': true,
-  'properties': {
-    '_t': {
-      'type': 'string',
-      'readOnly': true
-     },
-     'document': {
-      'type': 'object',
-      'readOnly': true,
-      'ref': 'tradle.AddressVerification',
-      'title': 'Verifying document',
-     },
-     'message': {
-      'type': 'object',
-      'title': 'Description',
-      'displayName': true,
-     },
-     'ver1': {
-        type: 'string'
-     },
-     'ver2': {
-        type: 'string'
-     },
-     'ver3': {
-        type: 'string'
-     },
-     'ver4': {
-        type: 'boolean'
-     },
-     'to': {
-      'type': 'object',
-      'title': 'Owner',
-      'ref': 'tradle.Identity',
-      'displayName': true,
-      'readOnly': true,
-     },
-     'from': {
-       'title': 'Verifier',
-       'type': 'object',
-       'readOnly': true,
-       'ref': 'tradle.Identity',
-       'displayName': true
-     },
-     'blockchainUrl': {
-       'type': 'string',      
-       'readOnly': true
-     },
-     'transactionHash': {
-       'type': 'string',
-       'readOnly': true
-     },
-     'time': {
-       'type': 'date',
-       skipLabel: true,       
-       'readOnly': true,
-     }, 
-      organization: {
-        type: 'object',
-        readOnly: true,
-        ref: 'tradle.Organization'
-      },
-  },  
-  'required': [
-    'ver1', 'ver2', 'ver3', 'to', 'from', 'time'
-  ],
-  'viewCols': [
-    'ver1', 'ver2', 'ver3', 'to', 'from', 'time', 'organization'
-  ],
-  'gridCols': [
-    'ver1', 'ver2', 'ver3', 'time', 'organization'
   ],
 },
 {
@@ -1945,3 +1911,82 @@ module.exports = models;
 //   ],
 // },
 //
+// {
+//   'id': 'tradle.VerificationOfAddress',
+//   'type': 'tradle.Model',
+//   'title': 'Verification',
+//   'subClassOf': 'tradle.Verification',
+//   'interfaces': ['tradle.Message'],
+//   'style': {'backgroundColor': '#E7E6F5'},
+//   'autoCreate': true,
+//   'properties': {
+//     '_t': {
+//       'type': 'string',
+//       'readOnly': true
+//      },
+//      'document': {
+//       'type': 'object',
+//       'readOnly': true,
+//       'ref': 'tradle.AddressVerification',
+//       'title': 'Verifying document',
+//      },
+//      'message': {
+//       'type': 'object',
+//       'title': 'Description',
+//       'displayName': true,
+//      },
+//      'ver1': {
+//         type: 'string'
+//      },
+//      'ver2': {
+//         type: 'string'
+//      },
+//      'ver3': {
+//         type: 'string'
+//      },
+//      'ver4': {
+//         type: 'boolean'
+//      },
+//      'to': {
+//       'type': 'object',
+//       'title': 'Owner',
+//       'ref': 'tradle.Identity',
+//       'displayName': true,
+//       'readOnly': true,
+//      },
+//      'from': {
+//        'title': 'Verifier',
+//        'type': 'object',
+//        'readOnly': true,
+//        'ref': 'tradle.Identity',
+//        'displayName': true
+//      },
+//      'blockchainUrl': {
+//        'type': 'string',      
+//        'readOnly': true
+//      },
+//      'transactionHash': {
+//        'type': 'string',
+//        'readOnly': true
+//      },
+//      'time': {
+//        'type': 'date',
+//        skipLabel: true,       
+//        'readOnly': true,
+//      }, 
+//       organization: {
+//         type: 'object',
+//         readOnly: true,
+//         ref: 'tradle.Organization'
+//       },
+//   },  
+//   'required': [
+//     'ver1', 'ver2', 'ver3', 'to', 'from', 'time'
+//   ],
+//   'viewCols': [
+//     'ver1', 'ver2', 'ver3', 'to', 'from', 'time', 'organization'
+//   ],
+//   'gridCols': [
+//     'ver1', 'ver2', 'ver3', 'time', 'organization'
+//   ],
+// },
