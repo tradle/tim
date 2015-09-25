@@ -42,15 +42,16 @@ class VerificationButton extends Component {
           verifiedByMe = true;
       });
     }
-
+    if (verifiedByMe)
+      return <View />; 
     return (
        <View style={[buttonStyles.container1, {top: 80}]}>
-         <TouchableHighlight underlayColor='transparent' onPress={verifiedByMe ? this.props.verificationList.bind(this, resource, model.properties['verifications']) : this.props.verify.bind(this)}>
+         <TouchableHighlight underlayColor='transparent' onPress={this.props.verify.bind(this)}>
            <View>
              <View style={buttonStyles.buttonContent} />
              <View style={buttonStyles.row1}>
                <Icon name='ios-checkmark-outline' size={25}  color='#ffffff' style={buttonStyles.icon1}/>
-               <Text style={buttonStyles.text1}>{verifiedByMe ? 'Verifications' : 'Verify'}</Text>
+               <Text style={buttonStyles.text1}>{'Verify'}</Text>
              </View>
            </View>
          </TouchableHighlight>
