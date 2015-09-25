@@ -8,6 +8,7 @@ var FromToView = require('./FromToView');
 var PhotoList = require('./PhotoList');
 var PhotoView = require('./PhotoView');
 var ShowPropertiesView = require('./ShowPropertiesView');
+var ShowMessageRefList = require('./ShowMessageRefList');
 var MoreLikeThis = require('./MoreLikeThis');
 var NewResource = require('./NewResource');
 var VerificationButton = require('./VerificationButton');
@@ -16,6 +17,7 @@ var Reflux = require('reflux');
 var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
 var ResourceViewMixin = require('./ResourceViewMixin');
+var buttonStyles = require('../styles/buttonStyles');
 
 var {
   StyleSheet,
@@ -69,13 +71,18 @@ class MessageView extends Component {
     var inRow = resource.photos ? resource.photos.length : 0;
     if (inRow  &&  inRow > 4)
       inRow = 5;
+    var actionPanel = 
+        <View style={buttonStyles.buttons}>
+          <ShowMessageRefList    resource={resource} navigator={this.props.navigator} />    
+        </View>
+        // <FromToView resource={resource} navigator={this.props.navigator} />
     return (
       <ScrollView  ref='this' style={styles.container}>
         <View style={styles.band}><Text style={styles.date}>{date}</Text></View>
         <View style={styles.photoBG}>
           <PhotoView resource={resource} />
         </View>
-        <FromToView resource={resource} navigator={this.props.navigator} />
+        {actionPanel}
         <MoreLikeThis resource={resource} navigator={this.props.navigator}/>
         <VerificationButton  resource={resource} verify={this.verify.bind(this)} verificationList={this.showResources.bind(this)}/>
         <View style={{marginTop: -20}}>
