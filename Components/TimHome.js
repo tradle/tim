@@ -183,13 +183,13 @@ class TimHome extends Component {
     //   var r = {_t: this.props.modelName};
     //   editProfile = <AddNewIdentity resource={r} isRegistration={true} navigator={this.props.navigator} />;
     // }
+        // <Text style={styles.title}>Trust in Motion (TiM)</Text>
     StatusBarIOS.setHidden(true);
     return (
       <View style={styles.scroll}>
-        <Text style={styles.title}>Trust in Motion (TiM)</Text>
         <ScrollView
           scrollEnabled={false}
-          style={{height:350}}
+          style={{height:480}}
         >
           <TouchableHighlight style={[styles.thumbButton]}
                 underlayColor='transparent' onPress={this.showContactsOrRegister.bind(this)}>        
@@ -201,7 +201,7 @@ class TimHome extends Component {
             </View>
           </TouchableHighlight>
         </ScrollView>
-        <View style={{height: 180}}></View>
+        <View style={{height: 100}}></View>
         <TouchableHighlight style={[styles.thumbButton]}
               underlayColor='transparent' onPress={this.showContactsOrRegister.bind(this)}>        
           <View style={styles.getStarted}>
@@ -244,7 +244,7 @@ var styles = StyleSheet.create({
     backgroundColor: '#2E3B4E',
   },
   container: {
-    // padding: 30,
+    padding: 30,
     marginTop: 120,
     alignItems: 'center',
   },
