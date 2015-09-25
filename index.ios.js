@@ -1,6 +1,6 @@
 'use strict'
 
-require('react-native-level')
+// require('react-native-level')
 var React = require('react-native');
 var ResourceList = require('./Components/ResourceList');
 // var GridList = require('./Components/GridList');
