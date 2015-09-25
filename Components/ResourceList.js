@@ -408,7 +408,12 @@ class ResourceList extends Component {
     if (this.props.resource) {
       var props = model.properties;
       for (var p in props) {
-        if (props[p].ref  &&  props[p].ref === this.props.resource[constants.TYPE]) {
+        var isBacklink = props[p].ref  &&  props[p].ref === this.props.resource[constants.TYPE];
+        if (props[p].ref  &&  !isBacklink) {
+          if (utils.getModel(props[p].ref).value.isInterface  &&  model.interfaces  &&  model.interfaces.indexOf(props[p].ref) !== -1)
+            isBacklink = true;
+        }
+        if (isBacklink) {  
           r = {};
           r[constants.TYPE] = this.props.modelName;
           r[p] = { id: this.props.resource[constants.TYPE] + '_' + this.props.resource[constants.ROOT_HASH] };
