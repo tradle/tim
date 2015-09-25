@@ -71,7 +71,7 @@ class MessageRow extends Component {
     var isVerification = resource[constants.TYPE] === 'tradle.Verification';
     if (isVerification) 
       onPressCall = this.props.onSelect;
-    else
+    else 
       onPressCall = this.formatRow(isMyMessage, model, resource, renderedRow);
     
     var photoUrls = [];
@@ -227,7 +227,23 @@ class MessageRow extends Component {
       </View>
     );
   }
-
+  editVerificationRequest() {
+    var resource = this.props.resource.verificationRequest;
+    var rmodel = utils.getModel(resource[constants.TYPE]).value;
+    var title = utils.getDisplayName(resource, rmodel.properties);
+    this.props.navigator.push({
+      title: title,
+      id: 4,
+      component: NewResource,
+      titleTextColor: '#7AAAC3',
+      backButtonTitle: 'Back',
+      rightButtonTitle: 'Done',
+      passProps: {
+        model: rmodel,
+        resource: resource,
+      }      
+    })    
+  } 
   showVerifications(rowStyle, viewStyle, addStyle) {
     if (!this.props.verificationsToShare || !this.props.resource.message) 
       return <View/>;
@@ -488,7 +504,11 @@ class MessageRow extends Component {
     }  
     if (vCols  &&  vCols.length)
       extend(renderedRow, vCols);
-    return onPressCall ? onPressCall : (isSimpleMessage ? null : this.props.onSelect);
+    var isAdditionalInfo = resource[constants.TYPE] === 'tradle.AdditionalInfo';
+    if (isAdditionalInfo)
+      return this.editVerificationRequest.bind(this);
+    else
+      return onPressCall ? onPressCall : (isSimpleMessage ? null : this.props.onSelect);
   }
   share() {
     console.log('Share')
