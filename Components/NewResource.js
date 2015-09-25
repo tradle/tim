@@ -141,9 +141,23 @@ class NewResource extends Component {
       if (!value)
         return; 
       var required = this.props.model.required;
-      for (var p of required)
-        if (!value[p]  &&  !resource[p])
-          return;
+      var msg = '';
+      for (var p of required) {
+        var v = value[p] ? value[p] : resource[p];
+
+        if (!v || (Object.prototype.toString.call(v) === '[object Date]'  &&  isNaN(v.getTime())))  {
+          if (msg.length == 0)
+            msg += 'Invalid values for the properties: '
+          else
+            msg += ', ';
+          msg += '\'' + this.props.model.properties[p].title + '\'';
+        }
+      }
+      if (msg.length) {
+        this.setState({ err: msg });
+        return;
+      }
+
     }
     if (!value) {
       var errors = this.refs.form.refs.input.getValue().errors;
@@ -384,7 +398,9 @@ class NewResource extends Component {
     var content = 
       <ScrollView style={style}>
         <View style={styles.container}>
-          <Text style={errStyle}>{err}</Text>
+          <View style={{flexWrap: 'wrap'}}>
+            <Text style={errStyle}>{err}</Text>
+          </View>
           <View style={photoStyle}>
             <PhotoView resource={resource} />
           </View>
@@ -552,7 +568,8 @@ var styles = StyleSheet.create({
     marginRight: 5,
   },
   err: {
-    paddingTop: 30,
+    // paddingTop: 30,
+    flexWrap: 'wrap',
     paddingLeft: 20,
     fontSize: 20,
     color: 'darkred',
