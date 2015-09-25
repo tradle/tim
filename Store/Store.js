@@ -17,6 +17,8 @@ var isTest, originalMe;
 // var Tim = require('tim');
 
 var tim;
+var ADDITIONAL_INFO = 'tradle.AdditionalInfo';
+
 // var levelQuery = require('level-queryengine');
 // var jsonqueryEngine = require('jsonquery-engine');
 // var Device = require('react-native-device');
@@ -855,9 +857,12 @@ var Store = Reflux.createStore({
       return new Date(a.time) - new Date(b.time);
     });
     // not for subreddit
-    for (let r of result) {
+    for (var r of result) {
       r.from.photos = list[utils.getId(r.from)].value.photos; 
       r.to.photos = list[utils.getId(r.to)].value.photos; 
+      if (r[constants.TYPE] !== ADDITIONAL_INFO)
+        continue;
+      r.verificationRequest = list[utils.getId(r.verificationRequest)].value;
     }
     return result;
   },
