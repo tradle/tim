@@ -213,7 +213,7 @@ class MessageRow extends Component {
     var viewStyle = { margin:1, backgroundColor: '#f7f7f7' }
     var model = utils.getModel(this.props.resource[constants.TYPE]).value;
     var isLicense = model.id.indexOf('License') !== -1  ||  model.id.indexOf('Passport') !== -1;
-    var photoStyle = (isLicense) ? styles.bigImageH : photoStyle;
+    var photoStyle = (isLicense  &&  len === 1) ? styles.bigImageH : photoStyle;
     var verifications = this.showVerifications(rowStyle, viewStyle, addStyle);
       
     return (
@@ -398,6 +398,7 @@ class MessageRow extends Component {
     var onPressCall;
 
     var isSimpleMessage = model.id === 'tradle.SimpleMessage';
+    var isAdditionalInfo = resource[constants.TYPE] === 'tradle.AdditionalInfo';
     var cnt = 0; 
     viewCols.forEach(function(v) {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date') 
@@ -407,6 +408,12 @@ class MessageRow extends Component {
         style = [style, {justifyContent: 'flex-end', paddingLeft: 5}];
         if (isSimpleMessage)
           style.push({color: '#ffffff'});
+        else if (isAdditionalInfo) {
+          // if (isMyMessage)
+          //   style.push({color: '#ffffff'});
+          // else
+            style.push({color: '#2892C6'});
+        }
       }
 
       if (properties[v].ref) {
@@ -500,13 +507,14 @@ class MessageRow extends Component {
       //              </View>);
       // }
       // else
-        vCols.push(<Text style={styles.verySmallLetters}>{s}</Text>);
+      vCols.push(<Text style={isAdditionalInfo && isMyMessage ? [styles.verySmallLetters, {color: '#ffffff'}] : styles.verySmallLetters}>{s}</Text>);
     }  
     if (vCols  &&  vCols.length)
       extend(renderedRow, vCols);
-    var isAdditionalInfo = resource[constants.TYPE] === 'tradle.AdditionalInfo';
-    if (isAdditionalInfo)
-      return this.editVerificationRequest.bind(this);
+    if (isAdditionalInfo) {
+      if (!isMyMessage)
+        return this.editVerificationRequest.bind(this);
+    }
     else
       return onPressCall ? onPressCall : (isSimpleMessage ? null : this.props.onSelect);
   }
