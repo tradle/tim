@@ -970,6 +970,7 @@ var Store = Reflux.createStore({
       if (props.dateSubmitted) 
         value.dateSubmitted = new Date().getTime();
     }
+    value.time = new Date().getTime();
     
     var iKey = modelName + '_' + value[constants.ROOT_HASH];
     var batch = [];
