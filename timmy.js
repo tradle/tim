@@ -1,12 +1,6 @@
 var crypto = require('crypto')
 var DHT = require('bittorrent-dht')
 var leveldown = require('asyncstorage-down')
-var open = leveldown.open
-leveldown.open = function () {
-  console.log(arguments)
-  return open.apply(this, arguments)
-}
-
 var utils = require('tradle-utils')
 var fs = require('fs')
 var level = require('react-native-level')
@@ -20,13 +14,15 @@ var Wallet = require('simple-wallet')
 // var fakeKeeper = help.fakeKeeper
 // var fakeWallet = help.fakeWallet
 // var ted = Identity.fromJSON(tedPriv)
-var billPriv = require('tim/test/fixtures/bill-priv.json')
-var billPub = require('tim/test/fixtures/bill-pub.json')
-var tedPriv = require('tim/test/fixtures/ted-priv.json')
-var tedPub = require('tim/test/fixtures/ted-pub.json')
+var billPriv = require('./TiMTests/fixtures/bill-priv.json')
+var billPub = require('./TiMTests/fixtures/bill-pub.json')
+var tedPriv = require('./TiMTests/fixtures/ted-priv.json')
+var tedPub = require('./TiMTests/fixtures/ted-pub.json')
 var networkName = 'testnet'
 var BILL_PORT = 51086
 var TED_PORT = 51087
+var driverBill
+var driverTed
 // var keeper = fakeKeeper.empty()
 
 // var tedPub = new Buffer(stringify(require('./fixtures/ted-pub.json')), 'binary')
@@ -42,6 +38,7 @@ clear(init)
 function clear (cb) {
   fs.readdir('storage', function (err, files) {
     console.log(files)
+    cb()
   })
 
   // var a = level('bill-addressBook.db', { db: leveldown })
@@ -54,10 +51,11 @@ function clear (cb) {
 }
 
 function init () {
-  setInterval(printIdentityStatus, 30000)
-  var driverBill = buildDriver(Identity.fromJSON(billPub), billPriv, BILL_PORT)
-  var driverTed = buildDriver(Identity.fromJSON(tedPub), tedPriv, TED_PORT)
+  driverBill = buildDriver(Identity.fromJSON(billPub), billPriv, BILL_PORT)
+  driverTed = buildDriver(Identity.fromJSON(tedPub), tedPriv, TED_PORT)
+  setInterval(printIdentityStatus, 10000)
   driverBill.once('ready', function () {
+    // printIdentityStatus()
     console.log('bill is ready')
     driverBill.on('chained', function (obj) {
       console.log('chained', obj)
@@ -74,6 +72,7 @@ function init () {
   })
 
   driverTed.on('ready', function () {
+    console.log('ted is ready')
     var billCoords = {
       fingerprint: billPub.pubkeys[0].fingerprint
     }
@@ -91,7 +90,7 @@ function init () {
 function printIdentityStatus () {
   ;[driverBill, driverTed].forEach(function (d) {
     d.identityPublishStatus(function (err, status) {
-      console.log(d.name, 'identity publish status', status)
+      console.log(d.name(), 'identity publish status', status)
     })
   })
 }
