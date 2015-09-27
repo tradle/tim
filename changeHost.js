@@ -2,7 +2,7 @@
 
 var fs = require('fs')
 var path = require('path')
-var hostname = process.argv[2] || 'rnhost'
+var hostname = process.argv[2] || 'dockerhost'
 
 ;[
   path.resolve('./node_modules/react-native/Libraries/WebSocket/RCTWebSocketExecutor.m'),
