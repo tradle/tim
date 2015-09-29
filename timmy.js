@@ -20,10 +20,10 @@ var Wallet = require('simple-wallet')
 // var fakeKeeper = help.fakeKeeper
 // var fakeWallet = help.fakeWallet
 // var ted = Identity.fromJSON(tedPriv)
-var billPriv = require('tim/test/fixtures/bill-priv.json')
-var billPub = require('tim/test/fixtures/bill-pub.json')
-var tedPriv = require('tim/test/fixtures/ted-priv.json')
-var tedPub = require('tim/test/fixtures/ted-pub.json')
+var billPriv = require('./TiMTests/fixtures/bill-priv.json')
+var billPub = require('./TiMTests/fixtures/bill-pub.json')
+var tedPriv = require('./TiMTests/fixtures/ted-priv.json')
+var tedPub = require('./TiMTests/fixtures/ted-pub.json')
 var networkName = 'testnet'
 var BILL_PORT = 51086
 var TED_PORT = 51087
@@ -40,9 +40,10 @@ var TED_PORT = 51087
 clear(init)
 
 function clear (cb) {
-  fs.readdir('storage', function (err, files) {
-    console.log(files)
-  })
+  cb()
+  // fs.readdir('storage', function (err, files) {
+  //   console.log(files)
+  // })
 
   // var a = level('bill-addressBook.db', { db: leveldown })
   // a.createReadStream()

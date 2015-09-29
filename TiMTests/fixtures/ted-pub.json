@@ -1,0 +1,72 @@
+{
+  "_t": "tradle.Identity",
+  "contact": [
+    {
+      "identifier": "somebodyelse",
+      "type": "skype"
+    }
+  ],
+  "location": {
+    "city": "San Dimas",
+    "country": "USA",
+    "formatted": "666 Wyld Stallyns Dr, San Dimas, California",
+    "postalCode": 666,
+    "region": "California",
+    "street": "666 Wyld Stallyns Dr"
+  },
+  "name": {
+    "firstName": "Ted",
+    "formatted": "Ted Theodore Logan",
+    "lastName": "Logan",
+    "middleName": "Theodore"
+  },
+  "photos": [
+    {
+      "type": "headshot",
+      "url": "http://scrapetv.com/News/News%20Pages/Entertainment/images-9/keanu-reeves-bill-and-ted.jpg"
+    }
+  ],
+  "pubkeys": [
+    {
+      "fingerprint": "mm6S6MeCpTAH5TfSAA4Yy2T5DyzfaU6qo3",
+      "networkName": "testnet",
+      "purpose": "payment",
+      "type": "bitcoin",
+      "value": "028fc7f0b4f13a0466f5a99426a1f68e5672158c53a34d3db1dce2ccb0c4f54d1f"
+    },
+    {
+      "fingerprint": "n2zwePXuQicxiM2iFY8ncAN5niwhQr6Mvq",
+      "networkName": "testnet",
+      "purpose": "messaging",
+      "type": "bitcoin",
+      "value": "039292871677fae073f834c3267aacf14daa67f3c2305aedf74e52e2782ba65366"
+    },
+    {
+      "curve": "secp256k1",
+      "fingerprint": "322d31e4d283fae8aea3820cccf5b569780edacff545c43664963555387f7c15",
+      "purpose": "sign",
+      "type": "ec",
+      "value": "0241630e14e1c7f41c93e713a870fbe1ed1ade97cccc923a702b6be375c061fec9"
+    },
+    {
+      "curve": "secp256k1",
+      "fingerprint": "df14dd42e78592afed1babb2d86c66f6f4aa88f39e2108682a8afae8a663aadb",
+      "purpose": "update",
+      "type": "ec",
+      "value": "03c6afa3f1e66950df8b36cb5c74954cb24842e4bdd5a246a1f96bb3da7c1464db"
+    },
+    {
+      "fingerprint": "9884f681eca7164c8fe76bfd73af62b2cdb9dda0",
+      "purpose": "sign",
+      "type": "dsa",
+      "value": "AAAAAACA+FHnjTHWfSTRo7cs9gl9YUp+MigLWImPAjppBwmkIZtoPw+VH891nVhrS3Zh+pCC8E6mDxPiAge0+2PFgrdoTV24AQJyLnaA7JP5wJAnFr6p2HCzqVFuTQUOwcARwNamBvo+gRRGn9TWN27DN0YWiHcZLq7kLcWqYQDMUNsWsv8AAAAU/i+3tBk4HBGND7bNTNF3fah4W3MAAACAx2dbdAtRuUqAtXTO05SNm3uqrXDbIlSKP1gBCq6YK28oproC3sR0Ig/RudzYJZXrRigWKijjM4Fm8v/nQkaBfXyrMMN8wtUobQggTNWJM5XVFtVmy1Y65gPOsEJFHSqlfO7AzAUg7Vj4aE1EGgJlgvkxNiASXCtF0o46lzPrwMkAAACAGH3jDpNvX9fEy1Bo7isilFVQ6O2MwzJmbnBbLuwZ5+WEKuKbqFo8EEq03lJZ1N5NW6QQz7AUBSe0zrpnFoI93IhnB+CZnwThSW6Cx+C7XdtDE/TJbVZbz23oQQkj4CePZVgEp7SfqXiXoXCQ908m30G4Rtoy8c4f2ekvsPfHYkk="
+    }
+  ],
+  "summary": "Bill's best friend",
+  "v": "0.3",
+  "websites": [
+    {
+      "url": "wyldstallyns.com"
+    }
+  ]
+}
