@@ -29,6 +29,7 @@
 		9B3ADDF11B5E8A3800B6594A /* libRNSearchBar.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B3ADDF01B5E8A3300B6594A /* libRNSearchBar.a */; };
 		9B3DAD271B999F42000702AD /* RCTLinkingManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B3DAD251B999F42000702AD /* RCTLinkingManager.m */; };
 		9B8B70D11BA75C1800E8128E /* FontAwesome.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9B8B70D01BA75C1800E8128E /* FontAwesome.ttf */; };
+		9BCB660C1BBA9F8100A86D73 /* libUdpSockets.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BCB660B1BBA9F7400A86D73 /* libUdpSockets.a */; };
 		9BCC4DB81B4894100071A39A /* libRNKeyboardEvents.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BCC4DB71B4894010071A39A /* libRNKeyboardEvents.a */; };
 		9BCC4DC21B4894400071A39A /* libRCTAddressBook.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BCC4DBF1B48943A0071A39A /* libRCTAddressBook.a */; };
 /* End PBXBuildFile section */
@@ -125,6 +126,13 @@
 			remoteGlobalIDString = 134814201AA4EA6300B7C361;
 			remoteInfo = RNSearchBar;
 		};
+		9BCB660A1BBA9F7400A86D73 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9BCB65F71BBA9F7400A86D73 /* UdpSockets.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 134814201AA4EA6300B7C361;
+			remoteInfo = UdpSockets;
+		};
 		9BCC4DB61B4894010071A39A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 9BCC4DA81B4894010071A39A /* RNKeyboardEvents.xcodeproj */;
@@ -177,6 +185,7 @@
 		9B3DAD251B999F42000702AD /* RCTLinkingManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTLinkingManager.m; sourceTree = "<group>"; };
 		9B3DAD261B999F42000702AD /* RCTLinkingManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTLinkingManager.h; sourceTree = "<group>"; };
 		9B8B70D01BA75C1800E8128E /* FontAwesome.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = FontAwesome.ttf; path = "node_modules/react-native-vector-icons/Fonts/FontAwesome.ttf"; sourceTree = "<group>"; };
+		9BCB65F71BBA9F7400A86D73 /* UdpSockets.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = UdpSockets.xcodeproj; path = "node_modules/react-native-udp/UdpSockets.xcodeproj"; sourceTree = "<group>"; };
 		9BCC4DA81B4894010071A39A /* RNKeyboardEvents.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNKeyboardEvents.xcodeproj; path = "node_modules/react-native-keyboardevents/RNKeyboardEvents.xcodeproj"; sourceTree = "<group>"; };
 		9BCC4DB91B48943A0071A39A /* RCTAddressBook.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTAddressBook.xcodeproj; path = "node_modules/react-native-addressbook/RCTAddressBook.xcodeproj"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -207,6 +216,7 @@
 				832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */,
 				00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */,
 				139FDEF61B0652A700C62182 /* libRCTWebSocket.a in Frameworks */,
+				9BCB660C1BBA9F8100A86D73 /* libUdpSockets.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -313,6 +323,7 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				9BCB65F71BBA9F7400A86D73 /* UdpSockets.xcodeproj */,
 				9B13CD781B7919600030EDE0 /* RNVectorIcons.xcodeproj */,
 				9B13CD611B7044970030EDE0 /* BVLinearGradient.xcodeproj */,
 				9B3ADDEB1B5E8A3300B6594A /* RNSearchBar.xcodeproj */,
@@ -383,6 +394,14 @@
 			isa = PBXGroup;
 			children = (
 				9B3ADDF01B5E8A3300B6594A /* libRNSearchBar.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9BCB65F81BBA9F7400A86D73 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9BCB660B1BBA9F7400A86D73 /* libUdpSockets.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -528,6 +547,10 @@
 					ProductGroup = 9B13CD791B7919600030EDE0 /* Products */;
 					ProjectRef = 9B13CD781B7919600030EDE0 /* RNVectorIcons.xcodeproj */;
 				},
+				{
+					ProductGroup = 9BCB65F81BBA9F7400A86D73 /* Products */;
+					ProjectRef = 9BCB65F71BBA9F7400A86D73 /* UdpSockets.xcodeproj */;
+				},
 			);
 			projectRoot = "";
 			targets = (
@@ -620,6 +643,13 @@
 			fileType = archive.ar;
 			path = libRNSearchBar.a;
 			remoteRef = 9B3ADDEF1B5E8A3300B6594A /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		9BCB660B1BBA9F7400A86D73 /* libUdpSockets.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libUdpSockets.a;
+			remoteRef = 9BCB660A1BBA9F7400A86D73 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		9BCC4DB71B4894010071A39A /* libRNKeyboardEvents.a */ = {
