@@ -256,7 +256,7 @@ var utils = {
       val = moment(date).format('[yesterday], h:m');
       break;
     default:      
-      val = moment(date).format('ddd, h:m');
+      val = moment(date).format('MMMM Do YYYY, h:mm:ss a');
     }
     return val;
   },

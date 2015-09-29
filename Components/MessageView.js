@@ -9,7 +9,7 @@ var PhotoList = require('./PhotoList');
 var PhotoView = require('./PhotoView');
 var ShowPropertiesView = require('./ShowPropertiesView');
 var ShowMessageRefList = require('./ShowMessageRefList');
-var MoreLikeThis = require('./MoreLikeThis');
+// var MoreLikeThis = require('./MoreLikeThis');
 var NewResource = require('./NewResource');
 var VerificationButton = require('./VerificationButton');
 var Actions = require('../Actions/Actions');
@@ -76,6 +76,7 @@ class MessageView extends Component {
           <ShowMessageRefList    resource={resource} navigator={this.props.navigator} />    
         </View>
         // <FromToView resource={resource} navigator={this.props.navigator} />
+        // <MoreLikeThis resource={resource} navigator={this.props.navigator}/>
     return (
       <ScrollView  ref='this' style={styles.container}>
         <View style={styles.band}><Text style={styles.date}>{date}</Text></View>
@@ -83,9 +84,8 @@ class MessageView extends Component {
           <PhotoView resource={resource} />
         </View>
         {actionPanel}
-        <MoreLikeThis resource={resource} navigator={this.props.navigator}/>
         <VerificationButton  resource={resource} verify={this.verify.bind(this)} verificationList={this.showResources.bind(this)}/>
-        <View style={{marginTop: -20}}>
+        <View style={{marginTop: -3}}>
           <PhotoList photos={resource.photos} resource={resource} isView={true} navigator={this.props.navigator} numberInRow={inRow}/>
           <View style={styles.rowContainer}>    
             <View><Text style={styles.itemTitle}>{resource.message}</Text></View>
@@ -116,6 +116,7 @@ class MessageView extends Component {
   showEmbed() {
     this.setState({embedHeight: {height: 60, padding: 5, marginRight: 10, borderColor: '#2E3B4E', backgroundColor: '#eeeeee'}});
   }
+  
   verify() {
     var resource = this.props.resource;
     var model = utils.getModel(resource[constants.TYPE]).value;

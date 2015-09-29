@@ -52,14 +52,14 @@ class PhotoList extends Component {
       case 1:
       case 2:
       case 3:
-        height = 122;
+        height = 150;
         break;
       case 4:  
-        height = 92;
+        height = 120;
         break;
       default:
       case 5:
-        height = 80;
+        height = 100;
         inRow = 5;
         break;      
     }    
@@ -69,7 +69,7 @@ class PhotoList extends Component {
     height *= rows;
     var val = this.renderPhotoList(photos);        
     return (
-       <View style={[styles.photoContainer, this.props.style ? {} : {marginHorizontal: 5, height: height}]}>
+       <View style={[styles.photoContainer, this.props.style ? {} : {marginHorizontal: 5, marginTop: -20, height: height}]}>
          {val}
        </View>
      );
@@ -173,7 +173,7 @@ var styles = StyleSheet.create({
   photoContainer: {
     flex: 1,
     paddingTop: 5,
-    alignSelf: 'center'
+    alignSelf: 'center',
   },
   photoTitle: {
     fontSize: 14,

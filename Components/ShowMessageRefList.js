@@ -3,6 +3,7 @@
 var React = require('react-native');
 var utils = require('../utils/utils');
 var ResourceList = require('./ResourceList');
+var MessageList = require('./MessageList');
 var Icon = require('react-native-vector-icons/Ionicons');
 var NewResource = require('./NewResource');
 
@@ -42,6 +43,19 @@ class ShowMessageRefList extends Component {
     var isIdentity = model.id === constants.TYPES.IDENTITY;
     var isMe = isIdentity ? resource[constants.ROOT_HASH] === utils.getMe()[constants.ROOT_HASH] : true;
     // The profile page for the device owner has 2 more profile specific links: add new identity and switch identity
+
+    if (this.props.resource[constants.TYPE] !== 'tradle.SimpleMessage' && this.props.resource[constants.TYPE] !== 'tradle.Verification')
+      refList.push(
+        <View style={buttonStyles.container}>
+        <TouchableHighlight underlayColor='transparent' onPress={this.showMoreLikeThis.bind(this)}>
+           <View style={{alignItems: 'center'}}>
+             <Icon name='arrow-shrink'  size={35}  color='#ffffff'  style={[buttonStyles.icon, {paddingLeft: 1}]}/>
+             <Text style={buttonStyles.text}>More like this</Text>
+           </View>
+        </TouchableHighlight>
+        </View>
+      );
+
     for (var p in props) {
       if (isIdentity  &&  !isMe  &&  props[p].allowRoles  &&  props[p].allowRoles === 'me')
         continue;
@@ -51,16 +65,17 @@ class ShowMessageRefList extends Component {
       if (!icon)
         icon = 'ios-checkmark-empty';
       if (props[p].items.ref === 'tradle.AdditionalInfo') {
-        refList.push(
-            <View style={buttonStyles.container}>
-               <TouchableHighlight onPress={this.additionalInfo.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
-                 <View style={{alignItems: 'center'}}>
-                   <Icon name={icon}  size={35}  color='#ffffff'  style={[buttonStyles.icon, {paddingLeft: 7}]}/>
-                   <Text style={buttonStyles.text}>{props[p].title}</Text>
-                 </View>
-               </TouchableHighlight>
-             </View>
-            );
+        if (utils.getMe().organization) 
+          refList.push(
+              <View style={buttonStyles.container}>
+                 <TouchableHighlight onPress={this.additionalInfo.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
+                   <View style={{alignItems: 'center'}}>
+                     <Icon name={icon}  size={35}  color='#ffffff'  style={[buttonStyles.icon, {paddingLeft: 7}]}/>
+                     <Text style={buttonStyles.text}>{props[p].title}</Text>
+                   </View>
+                 </TouchableHighlight>
+               </View>
+              );
       }
       else
         refList.push(
@@ -112,6 +127,22 @@ class ShowMessageRefList extends Component {
       }      
     })
 
+  }
+  showMoreLikeThis() {
+    var self = this;
+    var modelName = this.props.resource[constants.TYPE];
+    this.props.navigator.push({
+      title: utils.getModel(modelName).value.title,
+      component: MessageList,
+      id: 11,
+      backButtonTitle: 'Back',
+      passProps: {
+        resource: utils.getMe(), 
+        filter: '',
+        isAggregation: true,
+        modelName: modelName,
+      }
+    });
   }
 }
 reactMixin(ShowMessageRefList.prototype, ResourceViewMixin);

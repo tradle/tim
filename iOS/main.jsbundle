@@ -1429,12 +1429,12 @@ GLOBAL.document.createElement = null;}
 
 GLOBAL.MutationObserver = undefined;})(
 this);
-__d('Identity/index.ios.js',["Ionicons","react-native-level/index.js","react-native/Libraries/react-native/react-native.js","Identity/Components/ResourceList.js","Identity/Components/GridList.js","Identity/Components/TimHome.js","Identity/Components/ResourceTypesScreen.js","Identity/Components/NewResource.js","Identity/Components/NewItem.js","Identity/Components/ResourceView.js","Identity/Components/MessageView.js","Identity/Components/MessageList.js","Identity/Components/ArticleView.js","Identity/Components/IdentitiesList.js","Identity/Components/SelectPhotoList.js","Identity/Components/CameraView.js","Identity/Components/PhotoCarousel.js","Identity/utils/utils.js","tradle-constants/index.js","react-mixin/index.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
+__d('Identity/index.ios.js',["Ionicons","react-native-level/index.js","react-native/Libraries/react-native/react-native.js","Identity/Components/ResourceList.js","Identity/Components/TimHome.js","Identity/Components/ResourceTypesScreen.js","Identity/Components/NewResource.js","Identity/Components/NewItem.js","Identity/Components/ResourceView.js","Identity/Components/MessageView.js","Identity/Components/MessageList.js","Identity/Components/ArticleView.js","Identity/Components/IdentitiesList.js","Identity/Components/SelectPhotoList.js","Identity/Components/PhotoCarousel.js","Identity/utils/utils.js","tradle-constants/index.js","react-mixin/index.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
 
 require('react-native-level/index.js');
 var React=require('react-native/Libraries/react-native/react-native.js');
 var ResourceList=require('Identity/Components/ResourceList.js');
-var GridList=require('Identity/Components/GridList.js');
+
 var TimHome=require('Identity/Components/TimHome.js');
 var ResourceTypesScreen=require('Identity/Components/ResourceTypesScreen.js');
 var NewResource=require('Identity/Components/NewResource.js');
@@ -1445,7 +1445,7 @@ var MessageList=require('Identity/Components/MessageList.js');
 var ArticleView=require('Identity/Components/ArticleView.js');
 var IdentitiesList=require('Identity/Components/IdentitiesList.js');
 var SelectPhotoList=require('Identity/Components/SelectPhotoList.js');
-var CameraView=require('Identity/Components/CameraView.js');
+
 var PhotoCarousel=require('Identity/Components/PhotoCarousel.js');
 var utils=require('Identity/utils/utils.js');
 var constants=require('tradle-constants/index.js');
@@ -1469,20 +1469,11 @@ React.Component;var Navigator=React.Navigator;var Image=React.Image;var View=Rea
 
 TiMApp=(function(_Component){_inherits(TiMApp,_Component);
 function TiMApp(props){_classCallCheck(this,TiMApp);
-_get(Object.getPrototypeOf(TiMApp.prototype),'constructor',this).call(this,props);}_createClass(TiMApp,[{key:'componentDidMount',value:
+_get(Object.getPrototypeOf(TiMApp.prototype),'constructor',this).call(this,props);
+var props={
+modelName:constants.TYPES.IDENTITY};
 
-
-
-
-function componentDidMount(){
-var url=LinkingIOS.popInitialURL();
-var u=url;}},{key:'render',value:
-
-function render(){
-var props={modelName:constants.TYPES.IDENTITY};
-return (
-React.createElement(Navigator,{
-style:styles.container,
+this.state = {
 initialRoute:{
 id:1,
 
@@ -1490,14 +1481,125 @@ id:1,
 component:TimHome,
 passProps:props},
 
-renderScene:this.renderScene,
+props:props};}_createClass(TiMApp,[{key:'componentDidMount',value:
+
+
+
+
+
+
+
+
+function componentDidMount(){
+LinkingIOS.addEventListener('url',this._handleOpenURL.bind(this));
+var url=LinkingIOS.popInitialURL();
+if(url)
+this._handleOpenURL({url:url});}},{key:'componentWillUnmount',value:
+
+function componentWillUnmount(){
+LinkingIOS.removeEventListener('url',this._handleOpenURL.bind(this));}},{key:'_handleOpenURL',value:
+
+function _handleOpenURL(event){
+var url=event.url.trim();
+var idx=url.indexOf('://');
+var q=idx + 3 === url.length?null:url.substring(idx + 3);
+
+var r;
+if(!q){
+r = {
+_t:'tradle.Organization',
+_r:'0191ef415aa2ec76fb8ec8760b55112cadf573bc',
+name:'HSBC',
+me:'me'};}else 
+
+
+{
+var params=q.split('=');
+if(params.length === 1){
+switch(parseInt(params[0])){
+case 1:
+r = {
+_t:'tradle.Organization',
+_r:'96e460ca282d62e41d4b59c85b212d102d7a5a6e',
+name:'Lloyds',
+me:'me'};
+
+break;
+case 2:
+r = {
+_t:'tradle.Organization',
+_r:'0191ef415aa2ec76fb8ec8760b55112cadf573bc',
+name:'HSBC',
+me:'31eb0b894cad3601adc76713d55a11c88e48b4a2'};
+
+break;
+case 3:
+r = {
+_t:'tradle.Organization',
+_r:'96e460ca282d62e41d4b59c85b212d102d7a5a6e',
+name:'Lloyds',
+me:'b25da36eaf4b01b37fc2154cb1103eb5324a12345'};
+
+break;}}else 
+
+
+{
+r = JSON.parse(decodeURIComponent(params[1]));
+if(!r[constants.TYPE])
+r[constants.TYPE] = 'tradle.Organization';}}
+
+
+var props={modelName:'tradle.Message'};
+
+if(this.state.navigator){
+var currentRoutes=this.state.navigator.getCurrentRoutes();
+var route={
+title:r.name || 'Chat',
+backButtonTitle:'Back',
+component:MessageList,
+id:11,
+passProps:{
+resource:r,
+modelName:'tradle.Message'}};
+
+
+
+if(currentRoutes.length === 1)
+this.state.navigator.push(route);else 
+
+this.state.navigator.replace(route);}else 
+
+{
+this.setState({
+initialRoute:{
+title:r.name || 'Chat',
+
+component:MessageList,
+id:11,
+passProps:{
+resource:r,
+modelName:'tradle.Message'}},
+
+
+
+props:props});}}},{key:'render',value:
+
+
+
+
+function render(){
+return (
+React.createElement(Navigator,{
+style:styles.container,
+initialRoute:this.state.initialRoute,
+renderScene:this.renderScene.bind(this),
 navigationBar:
 React.createElement(Navigator.NavigationBar,{
 routeMapper:NavigationBarRouteMapper,
 style:styles.navBar}),
 
 
-passProps:props,
+passProps:this.state.props,
 configureScene:function(route){
 if(route.sceneConfig)
 return route.sceneConfig;
@@ -1509,6 +1611,7 @@ return Navigator.SceneConfigs.FloatFromRight;}}));}},{key:'renderScene',value:
 
 function renderScene(route,nav){
 var props=route.passProps;
+this.state.navigator = nav;
 switch(route.id){
 case 1:
 return React.createElement(TimHome,{navigator:nav,modelName:constants.TYPES.IDENTITY,filter:props.filter});
@@ -1557,8 +1660,8 @@ returnRoute:props.returnRoute,
 callback:props.callback,
 isAggregation:props.isAggregation,
 modelName:props.modelName});
-case 12:
-return React.createElement(CameraView,null);
+
+
 
 
 
@@ -1573,16 +1676,16 @@ onSelectingEnd:props.onSelectingEnd});
 
 case 14:
 return React.createElement(PhotoCarousel,{photos:props.photos,currentPhoto:props.currentPhoto,resource:props.resource});
-case 15:
-return React.createElement(GridList,{navigator:nav,
-filter:props.filter,
-resource:props.resource,
-prop:props.prop,
-returnRoute:props.returnRoute,
-callback:props.callback,
-isAggregation:props.isAggregation,
-sortProperty:props.sortProperty,
-modelName:props.modelName});
+
+
+
+
+
+
+
+
+
+
 
 case 10:
 default:
@@ -56672,7 +56775,7 @@ return exports;};
 
 module.exports(CHARS,module.exports);
 });
-__d('Identity/Components/ResourceList.js',["image!banking","react-native/Libraries/react-native/react-native.js","react-native-search-bar/SearchBar.js","Identity/Components/NoResources.js","Identity/Components/ResourceRow.js","Identity/Components/ResourceView.js","Identity/Components/VerificationRow.js","Identity/Components/NewResource.js","Identity/Components/MessageList.js","Identity/utils/utils.js","react-mixin/index.js","Identity/Store/Store.js","Identity/Actions/Actions.js","reflux/src/index.js","tradle-constants/index.js","react-native-icons/index.js","Identity/Components/GridList.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
+__d('Identity/Components/ResourceList.js',["image!banking","Ionicons","react-native/Libraries/react-native/react-native.js","react-native-search-bar/SearchBar.js","Identity/Components/NoResources.js","Identity/Components/ResourceRow.js","Identity/Components/ResourceView.js","Identity/Components/VerificationRow.js","Identity/Components/NewResource.js","Identity/Components/MessageList.js","Identity/utils/utils.js","react-mixin/index.js","Identity/Store/Store.js","Identity/Actions/Actions.js","reflux/src/index.js","tradle-constants/index.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
 
 var React=require('react-native/Libraries/react-native/react-native.js');
 var SearchBar=require('react-native-search-bar/SearchBar.js');
@@ -56687,9 +56790,9 @@ var reactMixin=require('react-mixin/index.js');
 var Store=require('Identity/Store/Store.js');
 var Actions=require('Identity/Actions/Actions.js');
 var Reflux=require('reflux/src/index.js');
-var constants=require('tradle-constants/index.js');var _require=
-require('react-native-icons/index.js');var Icon=_require.Icon;
-var GridList=require('Identity/Components/GridList.js');var 
+var constants=require('tradle-constants/index.js');
+var Icon=require('Ionicons');var 
+
 
 
 
@@ -56731,7 +56834,7 @@ params.isAggregation = true;
 if(this.props.sortProperty)
 params.sortProperty = this.props.sortProperty;
 if(this.props.prop)
-params.prop = utils.getModel(this.props.resource[constants.TYPE]).value.properties[this.props.prop];
+params.prop = utils.getModel(this.props.resource[constants.TYPE]).value.properties[this.props.prop.name];
 
 this.state.isLoading = true;
 Actions.list(params);}},{key:'componentDidMount',value:
@@ -56771,8 +56874,8 @@ isLoading:false});
 return;}
 
 var type=list[0][constants.TYPE];
-if(type === 'tradle.Organization')
-return;
+
+
 
 
 if(type !== this.props.modelName){
@@ -57029,7 +57132,7 @@ return (
 React.createElement(View,{style:styles.footer},
 React.createElement(TouchableHighlight,{underlayColor:'transparent',onPress:this.addNew.bind(this)},
 React.createElement(View,null,
-React.createElement(Icon,{name:'ion|plus',size:30,color:'#999999',style:styles.icon})))));}},{key:'showBanks',value:
+React.createElement(Icon,{name:'plus',size:30,color:'#999999',style:styles.icon})))));}},{key:'showBanks',value:
 
 
 
@@ -57065,8 +57168,8 @@ React.createElement(Icon,{name:'ion|plus',size:30,color:'#999999',style:styles.i
 function showBanks(){
 this.props.navigator.push({
 title:'Banks',
-id:15,
-component:GridList,
+id:10,
+component:ResourceList,
 backButtonTitle:'Back',
 titleTextColor:'#7AAAC3',
 passProps:{
@@ -57121,7 +57224,7 @@ model:model,
 isLoading:this.state.isLoading});else 
 {
 var model=utils.getModel(this.props.modelName).value;
-content = React.createElement(ListView,{ref:'listview',
+content = React.createElement(ListView,{
 dataSource:this.state.dataSource,
 renderRow:this.renderRow.bind(this),
 renderHeader:this.renderHeader.bind(this),
@@ -57162,18 +57265,6 @@ React.createElement(Text,{style:styles.resourceTitle},'Official Accounts'))))):
 
 
 React.createElement(View,null);}}]);return ResourceList;})(Component);
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -57385,8 +57476,12 @@ photo = React.createElement(Image,{source:params,style:styles.cellImage});}else
 
 {
 if(isIdentity){
+if(!resource.firstName && !resource.lastName)
+return React.createElement(View,null);
+var name=resource.firstName?resource.firstName.charAt(0):'';
+name += resource.lastName?resource.lastName.charAt(0):'';
 photo = React.createElement(LinearGradient,{colors:['#A4CCE0','#7AAAc3','#5E92AD'],style:styles.cellRoundImage},
-React.createElement(Text,{style:styles.cellText},resource.firstName.charAt(0) + (resource.lastName?resource.lastName.charAt(0):'')));}else 
+React.createElement(Text,{style:styles.cellText},name));}else 
 
 
 {
@@ -57424,7 +57519,7 @@ var verification;
 return (
 React.createElement(View,{key:this.props.key},
 React.createElement(TouchableHighlight,{onPress:this.props.onSelect},
-React.createElement(View,{style:isOrganization?styles.rowV:styles.row},
+React.createElement(View,{style:styles.row},
 photo,
 orgPhoto,
 onlineStatus,
@@ -57485,7 +57580,8 @@ return;
 
 if(!resource[v] && !properties[v].displayAs)
 return;
-var style=first && !isOrganization?styles.resourceTitle:styles.description;
+var style=first?styles.resourceTitle:styles.description;
+
 if(isIdentity && v === 'organization')
 style = [style,{alignSelf:'flex-end',marginTop:20},styles.verySmallLetters];
 if(properties[v].style)
@@ -57993,8 +58089,10 @@ var displayName='';
 for(var p in meta) {
 if(meta[p].displayName){
 if(resource[p]){
-if(meta[p].type == 'object')
-displayName += displayName.length?' ' + resource[p].title:resource[p].title;else 
+if(meta[p].type == 'object'){
+var title=resource[p].title || this.getDisplayName(resource[p],utils.getModel(resource[p][constants.TYPE]).value.properties);
+displayName += displayName.length?' ' + title:title;}else 
+
 
 displayName += displayName.length?' ' + resource[p]:resource[p];}else 
 
@@ -76537,7 +76635,7 @@ if(params.action === 'showIdentityList')
 this.onShowIdentityList(params);else 
 if(params.action == 'getItem')
 this.showRefResource(params.resource);else 
-
+if(params.resource)
 this.onResourceUpdate(params);}},{key:'onResourceUpdate',value:
 
 
@@ -77806,7 +77904,7 @@ resource:this.state.resource});}},{key:'addFormValues',value:
 
 function addFormValues(){
 var value=this.refs.form.getValue();
-var json=value?JSON.parse(JSON.stringify(value)):{};
+var json=value?JSON.parse(JSON.stringify(value)):this.refs.form.refs.input.state.value;
 var resource=this.state.resource;
 if(!resource){
 resource = {};
@@ -77851,12 +77949,12 @@ function onNewPressed(bl){
 
 
 
+var resource=this.addFormValues();
+this.setState({resource:resource,err:''});
 if(bl.name === 'photos'){
 this.showChoice();
 return;}
 
-var resource=this.addFormValues();
-this.setState({resource:resource,err:''});
 this.props.navigator.push({
 id:6,
 title:'Add new ' + bl.title,
@@ -77975,7 +78073,8 @@ options.auto = 'placeholders';
 options.tintColor = 'red';
 var photoStyle=isMessage?{marginTop:-45}:styles.photoBG;
 
-var content=React.createElement(ScrollView,{style:style},
+var content=
+React.createElement(ScrollView,{style:style},
 React.createElement(View,{style:styles.container},
 React.createElement(Text,{style:errStyle},err),
 React.createElement(View,{style:photoStyle},
@@ -77985,7 +78084,7 @@ React.createElement(View,{style:{'padding':15}},
 React.createElement(Form,{ref:'form',type:Model,options:options,value:data}),
 arrayItems),
 
-React.createElement(View,{style:{height:30}})));
+React.createElement(View,{style:{height:300}})));
 
 
 
@@ -78422,14 +78521,15 @@ target[name] = copy;}}}}
 
 return target;};
 });
-__d('Identity/Components/SelectPhotoList.js',["logError","groupByEveryN","react-native/Libraries/react-native/react-native.js","tcomb-form-native/index.js","Identity/utils/utils.js","react-native-icons/index.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
+__d('Identity/Components/SelectPhotoList.js',["logError","groupByEveryN","Ionicons","react-native/Libraries/react-native/react-native.js","tcomb-form-native/index.js","Identity/utils/utils.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
 
 var React=require('react-native/Libraries/react-native/react-native.js');
 var t=require('tcomb-form-native/index.js');
 var utils=require('Identity/utils/utils.js');
 var logError=require('logError');
-var groupByEveryN=require('groupByEveryN');var _require=
-require('react-native-icons/index.js');var Icon=_require.Icon;
+var groupByEveryN=require('groupByEveryN');
+var Icon=require('Ionicons');
+
 
 var Form=t.form.Form;var 
 
@@ -78511,7 +78611,7 @@ var icon=this.state.selected[asset.node.image.uri]?
 
 React.createElement(TouchableHighlight,{onPress:this.onSelect.bind(this,asset),underlayColor:'#ffffff'},
 React.createElement(View,null,
-React.createElement(Icon,{name:'ion|ios-checkmark-empty',size:20,color:'#eeeeee',style:styles.icon}))):
+React.createElement(Icon,{name:'ios-checkmark-empty',size:20,color:'#eeeeee',style:styles.icon}))):
 
 
 React.createElement(View,null);
@@ -78594,344 +78694,6 @@ marginTop:-25}});
 
 
 module.exports = SelectPhotoList;
-});
-__d('react-native-icons/index.js',["SMXIconImage","SMXTabBarIOS","SMXLoadingImage"],function(global, require, requireDynamic, requireLazy, module, exports) {  module.exports = {
-Icon:require('SMXIconImage'),
-TabBarIOS:require('SMXTabBarIOS'),
-Spinner:require('SMXLoadingImage')};
-});
-__d('SMXIconImage',["react-native/Libraries/react-native/react-native.js","react-native-icons/shim-assert.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _extends=Object.assign || function(target){for(var i=1;i < arguments.length;i++) {var source=arguments[i];for(var key in source) {if(Object.prototype.hasOwnProperty.call(source,key)){target[key] = source[key];}}}return target;};
-
-
-
-
-
-
-var React=require('react-native/Libraries/react-native/react-native.js');var 
-StyleSheet=React.StyleSheet;var View=React.View;var requireNativeComponent=React.requireNativeComponent;
-var shimAssert=require('react-native-icons/shim-assert.js');
-
-var ICON_REF='icon';
-
-var SMXIconImage=React.createClass({displayName:'SMXIconImage',
-propTypes:{
-name:React.PropTypes.string,
-size:React.PropTypes.number,
-color:React.PropTypes.string,
-
-
-
-
-
-accessible:React.PropTypes.bool,
-
-
-
-accessibilityLabel:React.PropTypes.string,
-
-
-
-
-
-testID:React.PropTypes.string,
-icon:React.PropTypes.object},
-
-
-setNativeProps:function(props){
-this.refs[ICON_REF].setNativeProps(props);},
-
-
-render:function(){
-var style=[styles.base,this.props.style];
-shimAssert.basic(style,'style must be initialized');
-
-var name=this.props.name;
-shimAssert.basic(name,'name must be initialized');
-
-var size=this.props.size;
-shimAssert.basic(size,'size must be initialized');
-
-var color=this.props.color;
-
-var nativeProps=Object.assign({},this.props);
-nativeProps.style = style;
-nativeProps.icon = {
-name:name,
-size:size,
-color:color};
-
-
-return React.createElement(SMXIconImageView,_extends({},nativeProps,{ref:ICON_REF}));}});
-
-
-
-var styles=StyleSheet.create({
-base:{
-overflow:'hidden'}});
-
-
-
-var SMXIconImageView=requireNativeComponent('FAKIconImage',SMXIconImage);
-
-module.exports = SMXIconImage;
-});
-__d('react-native-icons/shim-assert.js',[],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';
-
-
-module.exports = {
-
-basic:function(object,text){
-
-if(!object){
-throw Error(text);}}};
-});
-__d('SMXTabBarIOS',["SMXTabBarItemIOS","react-native/Libraries/react-native/react-native.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _extends=Object.assign || function(target){for(var i=1;i < arguments.length;i++) {var source=arguments[i];for(var key in source) {if(Object.prototype.hasOwnProperty.call(source,key)){target[key] = source[key];}}}return target;};
-
-
-
-
-
-
-var React=require('react-native/Libraries/react-native/react-native.js');var 
-StyleSheet=React.StyleSheet;var requireNativeComponent=React.requireNativeComponent;var PropTypes=React.PropTypes;
-var SMXTabBarIconItemIOS=require('SMXTabBarItemIOS');
-
-var SMXTabBarIOS=React.createClass({displayName:'SMXTabBarIOS',
-propTypes:{
-tintColor:PropTypes.string,
-barTintColor:PropTypes.string,
-translucent:PropTypes.bool},
-
-
-statics:{
-Item:SMXTabBarIconItemIOS},
-
-
-render:function(){
-var nativeProps={
-tintColor:this.props.tintColor,
-barTintColor:this.props.barTintColor,
-translucent:this.props.translucent};
-
-
-return (
-React.createElement(SMXIconTabBar,_extends({style:[styles.tabGroup,this.props.style]},nativeProps),
-this.props.children));}});
-
-
-
-
-
-var styles=StyleSheet.create({
-tabGroup:{
-flex:1}});
-
-
-
-var SMXIconTabBar=requireNativeComponent('SMXTabBar',SMXTabBarIOS);
-
-module.exports = SMXTabBarIOS;
-});
-__d('SMXTabBarItemIOS',["react-native/Libraries/react-native/react-native.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
-
-
-
-
-
-
-var React=require('react-native/Libraries/react-native/react-native.js');var 
-Image=React.Image;var StyleSheet=React.StyleSheet;var View=React.View;var requireNativeComponent=React.requireNativeComponent;var PropTypes=React.PropTypes;var Dimensions=React.Dimensions;
-
-var onlyChild=React.Children.only;var 
-
-
-StaticContainer=(function(_React$Component){_inherits(StaticContainer,_React$Component);function StaticContainer(){_classCallCheck(this,StaticContainer);_get(Object.getPrototypeOf(StaticContainer.prototype),'constructor',this).apply(this,arguments);}_createClass(StaticContainer,[{key:'shouldComponentUpdate',value:
-
-function shouldComponentUpdate(nextProps){
-return !!nextProps.shouldUpdate;}},{key:'render',value:
-
-
-function render(){
-var child=this.props.children;
-return child === null || child === false?null:onlyChild(child);}}]);return StaticContainer;})(React.Component);
-
-
-
-
-var SmixxTabBarItemIOS=React.createClass({displayName:'SmixxTabBarItemIOS',
-propTypes:{
-onPress:PropTypes.func.isRequired,
-selected:PropTypes.bool.isRequired,
-badgeValue:PropTypes.string,
-title:PropTypes.string,
-icon:PropTypes.object},
-
-
-getInitialState:function(){
-return {
-hasBeenSelected:false};},
-
-
-
-componentWillMount:function(){
-if(this.props.selected){
-this.setState({hasBeenSelected:true});}},
-
-
-
-componentWillReceiveProps:function(nextProps){
-if(this.state.hasBeenSelected || nextProps.selected){
-this.setState({hasBeenSelected:true});}},
-
-
-
-render:function(){
-var tabContents=null;
-
-
-if(this.state.hasBeenSelected){
-tabContents = 
-React.createElement(StaticContainer,{shouldUpdate:this.props.selected},
-this.props.children);}else 
-
-
-{
-tabContents = React.createElement(View,null);}
-
-
-var icon={name:this.props.iconName,size:this.props.iconSize?this.props.iconSize:28};
-
-return (
-React.createElement(SmixxTabBarItem,{
-icon:icon,
-selectedIcon:icon,
-onPress:this.props.onPress,
-selected:this.props.selected,
-badgeValue:this.props.badgeValue,
-title:this.props.title,
-style:[styles.tab,this.props.style]},
-tabContents));}});
-
-
-
-
-
-var styles=StyleSheet.create({
-tab:{
-position:'absolute',
-width:Dimensions.get('window').width,
-height:Dimensions.get('window').height}});
-
-
-
-var SmixxTabBarItem=requireNativeComponent('SMXTabBarItem',SmixxTabBarItemIOS);
-module.exports = SmixxTabBarItemIOS;
-});
-__d('SMXLoadingImage',["react-native/Libraries/react-native/react-native.js","react-native-icons/shim-assert.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _extends=Object.assign || function(target){for(var i=1;i < arguments.length;i++) {var source=arguments[i];for(var key in source) {if(Object.prototype.hasOwnProperty.call(source,key)){target[key] = source[key];}}}return target;};
-
-
-
-
-
-
-var React=require('react-native/Libraries/react-native/react-native.js');var 
-StyleSheet=React.StyleSheet;var View=React.View;var requireNativeComponent=React.requireNativeComponent;var Animated=React.Animated;var Easing=React.Easing;
-
-var shimAssert=require('react-native-icons/shim-assert.js');
-
-var SMXLoadingImage=React.createClass({displayName:'SMXLoadingImage',
-propTypes:{
-name:React.PropTypes.string,
-size:React.PropTypes.number,
-color:React.PropTypes.string,
-
-
-
-
-
-accessible:React.PropTypes.bool,
-
-
-
-accessibilityLabel:React.PropTypes.string,
-
-
-
-
-
-testID:React.PropTypes.string,
-icon:React.PropTypes.object},
-
-
-getInitialState:function(){
-return {
-angle:new Animated.Value(0)};},
-
-
-
-setNativeProps:function(props){},
-
-
-
-_animate:function(){
-this.state.angle.setValue(0);
-this._anim = Animated.timing(this.state.angle,{
-toValue:360,
-duration:1200,
-easing:Easing.linear}).
-start(this._animate);},
-
-
-componentDidMount:function(){
-this._animate();},
-
-
-render:function(){
-var transformStyle={
-transform:[
-{
-rotate:this.state.angle.interpolate({
-inputRange:[0,360],
-outputRange:['0deg','360deg']})}]};
-
-
-
-
-
-var style=[styles.base,this.props.style];
-
-shimAssert.basic(style,'style must be initialized');
-
-var name=this.props.name;
-shimAssert.basic(name,'name must be initialized');
-
-var size=this.props.size;
-shimAssert.basic(size,'size must be initialized');
-
-var color=this.props.color;
-
-var nativeProps=Object.assign({},this.props);
-nativeProps.icon = {
-name:name,
-size:size,
-color:color};
-
-
-return React.createElement(Animated.View,{style:[styles.base,style,transformStyle]},
-React.createElement(SMXLoadingImageView,_extends({style:{backgroundColor:'transparent'}},nativeProps)));}});
-
-
-
-
-
-var styles=StyleSheet.create({
-base:{
-overflow:'hidden'}});
-
-
-var SMXLoadingImageView=requireNativeComponent('FAKIconImage',SMXLoadingImage);
-
-module.exports = SMXLoadingImage;
 });
 __d('Identity/styles/styles.js',[],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';
 
@@ -79207,6 +78969,8 @@ var Actions=Reflux.createActions([
 'addItem',
 'addMessage',
 'getItem',
+'getTo',
+'getFrom',
 'addNewIdentity',
 'removeIdentity',
 'showIdentityList',
@@ -80671,6 +80435,7 @@ var utils=require('Identity/utils/utils.js');
 var level=require('react-native-level/index.js');
 var promisify=require('q-level/index.js');
 var constants=require('tradle-constants/index.js');
+var isTest,originalMe;
 
 
 
@@ -80708,6 +80473,7 @@ db = promisify(ldb);
 
 this.ready = this.loadResources().
 then(function(){
+if(!utils.isEmpty(list))
 isLoaded = true;}).
 
 catch(function(err){
@@ -80751,7 +80517,10 @@ batch.push({type:'put',key:key,value:rr});
 list[key] = {key:key,value:r};
 var to=list[utils.getId(r.to)].value;
 var from=list[utils.getId(r.from)].value;
-var dn=r.message || utils.getDisplayName(r,props);
+var dn=r.message;
+if(!dn)
+dn = 'sent photo';
+
 to.lastMessage = from[constants.ROOT_HASH] === me[constants.ROOT_HASH]?'You: ' + dn:dn;
 to.lastMessageTime = r.time;
 from.lastMessage = r.message;
@@ -80830,7 +80599,13 @@ catch(function(err){
 err = err;});},
 
 
-onGetItem:function(key){
+onGetTo:function(key){
+this.onGetItem(key,'getTo');},
+
+onGetFrom:function(key){
+this.onGetItem(key,'getFrom');},
+
+onGetItem:function(key,action){
 var resource={};
 extend(resource,list[utils.getId(key)].value);
 var props=this.getModel(resource[constants.TYPE]).value.properties;
@@ -80852,7 +80627,7 @@ var result=this.searchNotMessages(params);
 if(result.length)
 resource[p] = result;}
 
-this.trigger({resource:resource,action:'getItem'});},
+this.trigger({resource:resource,action:action || 'getItem'});},
 
 onShowIdentityList:function(){
 if(sampleData.getMyId()){
@@ -81308,7 +81083,7 @@ var isIdentity=modelName === IDENTITY_MODEL;
 if(!containerProp && me && isIdentity){
 if(sampleData.getMyId())
 delete foundResources[IDENTITY_MODEL + '_' + me[constants.ROOT_HASH]];else 
-{
+if(!isTest){
 var myIdentities=list[MY_IDENTITIES_MODEL + '_1'].value.allIdentities;
 for(var meId of myIdentities) {
 if(foundResources[meId.id])
@@ -81359,8 +81134,10 @@ var query=params.query;
 var modelName=params.modelName;
 var meta=this.getModel(modelName).value;
 var isVerification=modelName === 'tradle.Verification' || meta.subClassOf && meta.subClassOf === 'tradle.Verification';
-var to=params.to;
+var chatTo=params.to;
 var prop=params.prop;
+if(typeof prop === 'string')
+prop = meta[prop];
 var backlink=prop?prop.items.backlink:prop;
 var foundResources={};
 var isAllMessages=meta.isInterface;
@@ -81371,8 +81148,30 @@ var implementors=isAllMessages?utils.getImplementors(modelName):null;
 var required=meta.required;
 var meRootHash=me && me[constants.ROOT_HASH];
 var meId=IDENTITY_MODEL + '_' + meRootHash;
-var toId=to?to[constants.TYPE] + '_' + to[constants.ROOT_HASH]:null;
-var toModelName=toId.split('_')[0];
+var meOrgId=me.organization?utils.getId(me.organization):null;
+
+var chatId=chatTo?chatTo[constants.TYPE] + '_' + chatTo[constants.ROOT_HASH]:null;
+var isChatWithOrg=chatTo && chatTo[constants.TYPE] === 'tradle.Organization';
+if(isChatWithOrg && !chatTo.name){
+chatTo = list[chatId].value;}
+
+var testMe=chatTo?chatTo.me:null;
+if(testMe){
+if(testMe === 'me'){
+if(!originalMe)
+originalMe = me;
+testMe = originalMe[constants.ROOT_HASH];}
+
+
+isTest = true;
+var meId=constants.TYPES.IDENTITY + '_' + testMe;
+me = list[meId].value;
+utils.setMe(me);
+var myIdentities=list[MY_IDENTITIES_MODEL + '_1'].value;
+if(myIdentities)
+myIdentities.currentIdentity = meId;}
+
+var toModelName=chatTo?chatId.split('_')[0]:null;
 for(var key in list) {
 var iMeta=null;
 if(isAllMessages){
@@ -81409,23 +81208,45 @@ r.organization.photos = [orgPhotos[0]];}}
 if(r.document && r.document.id)
 r.document = list[utils.getId(r.document.id)].value;}
 
-if(to){
+if(chatTo){
 if(backlink && r[backlink]){
-if(toId === utils.getId(r[backlink]))
+if(chatId === utils.getId(r[backlink]))
 foundResources[key] = r;
 
 continue;}
 
-if((!r.message || r.message.trim().length === 0) && !r.photos)
+var isVerificationR=r[constants.TYPE] === 'tradle.Verification' || r[constants.TYPE].subClassOf === 'tradle.Verification';
+if((!r.message || r.message.trim().length === 0) && !r.photos && !isVerificationR)
 
 continue;
 var fromID=utils.getId(r.from);
 var toID=utils.getId(r.to);
-if(fromID !== meId && toID !== meId)
+
+if(fromID !== meId && toID !== meId && toID != meOrgId)
 continue;
-var id=toModelName + '_' + to[constants.ROOT_HASH];
-if(fromID !== id && toID != id)
+var id=toModelName + '_' + chatTo[constants.ROOT_HASH];
+if(isChatWithOrg){
+var toOrgId=null,fromOrgId=null;
+
+if(list[fromID].value.organization)
+fromOrgId = utils.getId(list[fromID].value.organization);else 
+if(fromID.split('_')[0] === 'tradle.Organization')
+fromOrgId = utils.getId(list[fromID].value);
+if(list[toID].value.organization)
+toOrgId = utils.getId(list[toID].value.organization);else 
+if(toID.split('_')[0] === 'tradle.Organization')
+toOrgId = utils.getId(list[toID].value);
+
+if(chatId !== toOrgId && chatId !== fromOrgId)
+continue;
+if(fromID != meId && toID != meId)
+continue;}else 
+
+if(fromID !== id && toID != id && toID != meOrgId)
 continue;}
+
+if(isVerificationR){
+r.document = list[utils.getId(r.document)].value;}
 
 
 if(!query){
@@ -81634,6 +81455,7 @@ err = err;});},
 
 
 loadAddressBook:function(){
+return;
 var self=this;
 return Q.ninvoke(AddressBook,'checkPermission').
 then(function(permission){
@@ -81744,7 +81566,7 @@ var self=this;
 
 
 
-
+var loadingModels=false;
 return db.createReadStream().
 on('data',function(data){
 if(data.key.indexOf('model_') === 0){
@@ -81768,15 +81590,20 @@ var photos=list[utils.getId(me.organization.id)].value.photos;
 if(photos)
 me.organization.photo = photos[0].url;}
 
-console.log('Stream closed');}).
+console.log('Stream closed');
+utils.setModels(models);}).
 
 on('end',function(){
 console.log('Stream ended');
-if(self.isEmpty(models) || Object.keys(list).length == 2)
+if(me)
+utils.setMe(me);
+var noModels=self.isEmpty(models);
+if(noModels || Object.keys(list).length == 2)
 if(me)
 return self.loadDB();else 
 {
 isLoaded = false;
+if(noModels)
 return self.loadModels();}}).
 
 
@@ -83989,6 +83816,10 @@ _t:'tradle.Identity',
 id:'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa',
 title:'Jane Choi'},
 
+organization:{
+id:'tradle.Organization_0191ef415aa2ec76fb8ec8760b55112cadf573bc',
+title:'HSBC'},
+
 'contact':[
 {
 'identifier':'jane@ms.com',
@@ -84041,6 +83872,7 @@ _r:'31eb0b894cad3601adc76713d55a11c88e48b4a2'},
 
 {
 _t:'tradle.Identity',
+_r:'b25da36eaf4b01b37fc2154cb1103eb5324a12345',
 'contact':[
 {
 'identifier':'somebodyelse',
@@ -84058,6 +83890,10 @@ _t:'tradle.Identity',
 'owner':{
 id:'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa',
 title:'Jane Choi'},
+
+organization:{
+id:'tradle.Organization_96e460ca282d62e41d4b59c85b212d102d7a5a6e',
+title:'Lloyds'},
 
 'photos':[
 {
@@ -84144,6 +83980,10 @@ _r:'b25da36eaf4b01b37fc2154cb1103eb5324a52fa',
 'owner':{
 id:'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa',
 title:'Jane Choi'},
+
+organization:{
+id:'tradle.Organization_0b462e6124d39fda3af523b49b07affb67129102',
+title:'Morgan Stanley'},
 
 'photos':[
 {
@@ -84298,6 +84138,7 @@ title:'Jane Choi'},
 
 {
 _t:'tradle.Identity',
+_r:'b25da36eaf4b01b37fc2154cb1103eb5324a12348',
 'contact':[
 {
 'identifier':'somebodyelse',
@@ -84315,10 +84156,15 @@ _t:'tradle.Identity',
 id:'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa',
 title:'Jane Choi'},
 
+organization:{
+id:'tradle.Organization_71e4b7cd6c11ab7221537275988f113a879029ea',
+title:'Rabobank'},
+
 'photos':[
 {
 'tags':'headshot',
 'url':'http://www.bitcoin2013.com/uploads/1/4/9/4/14946598/2010100_orig.jpg'}],
+
 
 
 'pubkeys':[
@@ -84650,7 +84496,7 @@ _t:'tradle.Identity',
 'region':'NY',
 'street':'666 Wyld Stallyns Dr',
 'firstName':'Gene',
-'lastName':'Wilber',
+'lastName':'Vayngrib',
 'owner':{
 id:'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa',
 title:'Jane Choi'},
@@ -84721,9 +84567,41 @@ title:'Jane Choi'},
 
 
 
+{
+_t:'tradle.Identity',
+'contact':[
+{
+'identifier':'somebodyelse',
+'type':'skype'}],
+
+
+'city':'New York',
+'country':'USA',
+'postalCode':'10001',
+'region':'NY',
+'street':'666 Wyld Stallyns Dr',
+'firstName':'Tony',
+'owner':{
+id:'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa',
+title:'Jane Choi'},
+
+'photos':[
+{
+'tags':'headshot',
+'url':'http://thebookboy.co.uk/wp-content/uploads/2013/04/tony2.jpg'}],
+
+
+'v':'0.3',
+'websites':[
+{
+'url':'wyldstallyns.com'}]},
+
+
+
 
 {
 _t:'tradle.Organization',
+_r:'0b462e6124d39fda3af523b49b07affb67129102',
 'name':'Morgan Stanley',
 'contacts':[
 {
@@ -84737,19 +84615,84 @@ _t:'tradle.Organization',
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 {
 _t:'tradle.Organization',
-'name':'JP Morgan',
+_r:'0191ef415aa2ec76fb8ec8760b55112cadf573bc',
+'name':'HSBC',
 'contacts':[
 {
 'id':'tradle.Identity_31eb0b894cad3601adc76713d55a11c88e48b4a2',
-'title':'Jane Blair'}],
+'title':'Kate Blair'}],
 
 
 'photos':[
 {
-'url':'http://hypeorlando.s3.amazonaws.com/sites/162/2014/10/JP-Morgan-Chase-Logo-600x350.jpg'}]},
+'url':'http://www.gunesulasim.com/web/uploads/referans/kucuk/hsbc_logo_square.gif'}]},
 
+
+
+{
+_t:'tradle.Organization',
+'name':'Rabobank',
+_r:'71e4b7cd6c11ab7221537275988f113a879029ea',
+'contacts':[
+{
+'id':'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a12348',
+'title':'Timo Heinke'}],
+
+
+'photos':[
+{
+'url':'http://vectorlogofree.com/wp-content/uploads/2012/06/rabobank-logo-vector-01.png'}]},
+
+
+
+
+{
+_t:'tradle.Organization',
+_r:'96e460ca282d62e41d4b59c85b212d102d7a5a6e',
+'name':'Lloyds',
+'contacts':[
+{
+'id':'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a12345',
+'title':'Ted Logan'}],
+
+
+'photos':[
+{
+'url':'http://www.bankpoint.co.uk/assets/images/companies/lloyds.jpg'}]},
 
 
 
@@ -84758,162 +84701,7 @@ _t:'tradle.Organization',
 'name':'Tilton',
 'photos':[
 {
-'url':'http://www.archivisionmodels.com/Architectural-Models/hotel/images/making-scale-models.jpg'}]},
-
-
-
-{
-_t:'tradle.Offer',
-dealRef:12345,
-title:'Amazing deal for BENTO & BUBBLES',
-shortTitle:'Amazing deal',
-conditions:'Available in all Chino\'s restaurants',
-description:'clearly describe the product/service. Emphasize high value low price contrast. State quality/quantity of the product/service (and why the customer needs it). When in doubt, use "You pay x instead of XX"',
-summary:'piuxv oiupoi poshusofgiup upi uopiuroup pi upoiuo',
-dealPrice:{
-value:100,
-currency:'USD'},
-
-dealValue:{
-value:120,
-currency:'USD'}},
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-{
-_t:'tradle.Community',
-_r:'tradle12397d8f7s989843589798s9dg7f987h987',
-title:'Tradle',
-description:'p2p network with peer discovery over bittorrent DHT, OTR over rUDP + NAT traversal for peer comms, and optional externalization of messages to blockchain + DHT'},
-
-{
-_t:'tradle.Community',
-_r:'datt2937598r98d7h98fg7h8979fd9dg80d9f0fgh',
-title:'DATT',
-description:'Decentralize all things'},
-
-{
-_t:'tradle.Post',
-_r:'tradle129494tt9ehdgo346c6vu67bvdofuoiwere',
-relatedTo:{
-id:'tradle.Community_tradle12397d8f7s989843589798s9dg7f987h987',
-title:'Tradle'},
-
-url:'http://github.com/tradle/tim',
-title:'Tradle\'s Trust in Motion (TiM) on github'},
-
-{
-_t:'tradle.Post',
-_r:'datt0129494tt9ehdgo346c6vu67bvdofuoiwere',
-relatedTo:{
-id:'tradle.Community_datt2937598r98d7h98fg7h8979fd9dg80d9f0fgh',
-title:'DATT'},
-
-url:'https://github.com/dattnetwork',
-title:'DATT on github'},
-
-{
-_t:'tradle.PostComment',
-_r:'tradle98798dfg98568579fgh8fg7h98459dhkjk',
-relatedTo:{
-id:'tradle.Community_datt2937598r98d7h98fg7h8979fd9dg80d9f0fgh',
-title:'DATT'},
-
-message:'comment',
-post:'tradle.Post_datt0129494tt9ehdgo346c6vu67bvdofuoiwere'},
-
-{
-_t:'tradle.PostComment',
-_r:'tradle98798dfg98568579frtygh8fg7h98459dhkjk',
-relatedTo:{
-id:'tradle.Community_datt2937598r98d7h98fg7h8979fd9dg80d9f0fgh',
-title:'DATT'},
-
-message:'comment2',
-post:'tradle.Post_datt0129494tt9ehdgo346c6vu67bvdofuoiwere'},
-
-{
-_t:'tradle.PostComment',
-_r:'tradle98798dfg9856857ert9fgh8fg7h98459dhkjk',
-relatedTo:{
-id:'tradle.Community_datt2937598r98d7h98fg7h8979fd9dg80d9f0fgh',
-title:'DATT'},
-
-message:'comment3',
-post:'tradle.Post_datt0129494tt9ehdgo346c6vu67bvdofuoiwere'}];
+'url':'http://www.archivisionmodels.com/Architectural-Models/hotel/images/making-scale-models.jpg'}]}];
 
 
 
@@ -85035,6 +84823,17 @@ items:{
 readOnly:true,
 ref:'tradle.Verification',
 backlink:'to'}},
+
+
+myRequests:{
+type:'array',
+allowRoles:'me',
+
+items:{
+readOnly:true,
+ref:'tradle.Message',
+where:'document !== null',
+backlink:'from'}},
 
 
 'photos':{
@@ -85936,494 +85735,6 @@ ref:'tradle.Organization'}},
 
 
 {
-'id':'tradle.Community',
-'type':'tradle.Model',
-'title':'Community',
-'plural':'Communities',
-icon:'person-stalker',
-'properties':{
-'_t':{
-'type':'string',
-'readOnly':true},
-
-'title':{
-'type':'string',
-'displayName':true},
-
-'description':{
-'type':'string',
-'title':'Description',
-maxLength:2000},
-
-'owner':{
-'type':'object',
-'readOnly':true,
-'ref':'tradle.Identity'},
-
-
-
-
-
-
-
-'blockchainUrl':{
-'type':'string',
-'readOnly':true},
-
-'transactionHash':{
-'readOnly':true,
-'type':'string'},
-
-'time':{
-'type':'date',
-'readOnly':true},
-
-'posts':{
-type:'array',
-items:{
-ref:'tradle.Post',
-backlink:'relatedTo'}},
-
-
-'photos':{
-'type':'array',
-'items':{
-'type':'object',
-'properties':{
-'tags':{
-'type':'string',
-'skipLabel':true},
-
-'url':{
-'type':'string',
-'readOnly':true}}},
-
-
-
-'required':['url']}},
-
-
-'required':[
-'title','description'],
-
-'gridCols':[
-'title','description','owner','posts'],
-
-'viewCols':[
-'title','description','owner','photos']},
-
-
-
-{
-'id':'tradle.Post',
-'type':'tradle.Model',
-'title':'Post',
-'icon':'social-buffer-outline',
-'properties':{
-'_t':{
-'type':'string',
-'readOnly':true},
-
-'relatedTo':{
-'type':'object',
-'readOnly':true,
-'ref':'tradle.Community'},
-
-'title':{
-'type':'string',
-'displayName':true},
-
-
-
-
-
-
-url:{
-type:'string'},
-
-'from':{
-'type':'object',
-'readOnly':true,
-'ref':'tradle.Identity'},
-
-'blockchainUrl':{
-'type':'string',
-'readOnly':true},
-
-'transactionHash':{
-'type':'string',
-'readOnly':true},
-
-'time':{
-type:'date',
-readOnly:true},
-
-comments:{
-'type':'array',
-items:{
-ref:'tradle.PostComment',
-backlink:'post'}},
-
-
-'photos':{
-'type':'array',
-'items':{
-'type':'object',
-'properties':{
-'tags':{
-'type':'string',
-'skipLabel':true},
-
-'url':{
-'type':'string',
-'readOnly':true}}},
-
-
-
-'required':['url']}},
-
-
-'required':[
-'relatedTo','title','url'],
-
-'viewCols':[
-'title','url','from','time'],
-
-'gridCols':[
-'title','url','from','time','comments']},
-
-
-{
-'id':'tradle.PostComment',
-'type':'tradle.Model',
-'title':'Comment',
-'icon':'chatboxes',
-'properties':{
-'_t':{
-'type':'string',
-'readOnly':true},
-
-'message':{
-'type':'string',
-'displayName':true,
-maxLength:2000},
-
-'from':{
-'type':'object',
-'readOnly':true,
-'ref':'tradle.Identity'},
-
-'post':{
-'type':'object',
-'ref':'tradle.Post',
-readOnly:true},
-
-
-'time':{
-'type':'date',
-'readOnly':true,
-'displayName':true},
-
-'photos':{
-'type':'array',
-'items':{
-'type':'object',
-'properties':{
-'tags':{
-'type':'string',
-'skipLabel':true},
-
-'url':{
-'type':'string',
-'readOnly':true}}},
-
-
-
-'required':['title','url']},
-
-relatedTo:{
-type:'object',
-ref:'tradle.Community',
-readOnly:true}},
-
-
-'required':[
-'message','post','relatedTo'],
-
-'viewCols':[
-'message','post','time','from'],
-
-'gridCols':[
-'message','time','from']},
-
-
-
-
-{
-id:'tradle.Offer',
-title:'Offer',
-type:'object',
-sort:'dateSubmitted',
-properties:{
-'_t':{
-type:'string',
-readOnly:true},
-
-dealRef:{
-type:'number',
-readOnly:true},
-
-title:{
-type:'string',
-skipLabel:true,
-description:'title is displayed on the offer'},
-
-shortTitle:{
-type:'string',
-skipLabel:true,
-displayName:true},
-
-conditions:{
-maxLength:2000,
-type:'string',
-description:'What is this offer for? Limits for personal use and gifts. Phone # for questions and booking. Operating hours. Any special conditions for offer use. Other discounts/bonuses provided by the organization. Omit dates already specified on offer.'},
-
-description:{
-type:'string',
-maxLength:2000,
-description:'clearly describe the product/service. Emphasize high value low price contrast. State quality/quantity of the product/service (and why the customer needs it). When in doubt, use "You pay x instead of XX"'},
-
-summary:{
-type:'string',
-description:'Short description of the deal. IMPORTANT for aggregators - must include discount and amount saved.'},
-
-submittedBy:{
-type:'object',
-ref:'tradle.Identity',
-readOnly:true},
-
-photos:{
-type:'array',
-items:{
-type:'object',
-properties:{
-tags:{
-type:'string',
-title:'Tags via comma'},
-
-url:{
-type:'string',
-readOnly:true}}},
-
-
-
-required:['url']},
-
-featured:{
-type:'date'},
-
-expires:{
-type:'date'},
-
-redeemBy:{
-description:'must redeem by this date'},
-
-dealValue:{
-type:'object',
-ref:'tradle.Money',
-description:'$ price before discount'},
-
-dealPrice:{
-type:'object',
-ref:'tradle.Money',
-description:'$ price after discount'},
-
-dealDiscount:{
-type:'object',
-ref:'tradle.Money',
-readOnly:true,
-formula:'dealValue - dealPrice',
-description:'$ discount'},
-
-allPurchases:{
-type:'array',
-readOnly:true,
-items:{
-type:'object',
-ref:'tradle.OfferBuy'}},
-
-
-offerBuysCount:{
-type:'number',
-readOnly:true},
-
-discount:{
-type:'number',
-suffix:'%',
-minimum:1,
-maximum:99,
-readOnly:true,
-description:'% discount',
-formula:'((dealValue - dealPrice)/dealValue) * 100'},
-
-dealStatus:{
-type:'string',
-readOnly:true,
-oneOf:[
-'Deal is over',
-'Deal is going',
-'Not featured yet']},
-
-
-availableLocations:{
-type:'array',
-readOnly:true,
-ref:'tradle.RedemptionLocation'},
-
-organization:{
-type:'object',
-ref:'tradle.Organization'},
-
-canceled:{
-type:'boolean',
-skipOnCreate:true},
-
-canceledBy:{
-type:'object',
-ref:'tradle.Identity',
-readOnly:true},
-
-dateCanceled:{
-type:'date',
-readOnly:true},
-
-dateSubmitted:{
-type:'date',
-readOnly:true}},
-
-
-required:['title','photos','shortTitle','description','dealValue','dealPrice','organization','expires'],
-gridCols:['shortTitle','photos','dealPrice','discount','organization','expires','dealStatus'],
-viewCols:['title','photos','organization','dealPrice','dealValue','dealDiscount','description','conditions','discount','featured','expires','offerBuysCount','dealStatus']},
-
-{
-id:'tradle.OfferBuy',
-type:'object',
-title:'Offer Buy',
-properties:{
-'_t':{
-type:'string',
-readOnly:true},
-
-purchaseNumber:{
-type:'number',
-readOnly:'true'},
-
-transactionId:{
-type:'string',
-readOnly:true},
-
-customer:{
-type:'object',
-ref:'tradle.Identity',
-readOnly:true},
-
-offer:{
-type:'object',
-ref:'tradle.Offer',
-readOnly:true},
-
-organization:{
-type:'object',
-readOnly:true,
-ref:'tradle.Organization'},
-
-title:{
-type:'string',
-description:'title is displayed on the offer'},
-
-shortTitle:{
-type:'string'},
-
-purchaseTime:{
-type:'date',
-readOnly:true},
-
-email:{
-type:'string'},
-
-dealValue:{
-type:'object',
-ref:'tradle.Money',
-description:'price before discount'},
-
-dealPrice:{
-type:'object',
-ref:'tradle.Money'},
-
-dealDiscount:{
-type:'object',
-ref:'tradle.Money',
-readOnly:true},
-
-redeemed:{
-type:'boolean'},
-
-location:{
-type:'object',
-ref:'tradle.RedemptionLocation'},
-
-photos:{
-type:'array',
-readOnly:true,
-items:{
-type:'object',
-properties:{
-tags:{
-type:'string',
-title:'Tags via comma'},
-
-url:{
-type:'string',
-readOnly:true}}},
-
-
-
-required:['url']}},
-
-
-required:['purchaseNumber','customer','offer']},
-
-{
-id:'tradle.RedemptionLocation',
-type:'object',
-properties:{
-'_t':{
-type:'string',
-readOnly:true},
-
-offer:{
-type:'object',
-ref:'tradle.Offer',
-readOnly:true},
-
-address:{
-readOnly:true,
-formula:'organization.address'},
-
-organization:{
-type:'object',
-readOnly:true,
-ref:'tradle.Organization'},
-
-photos:{
-type:'array',
-formula:'organization.photos'}},
-
-
-required:['offer','organization']},
-
-{
 id:'tradle.Organization',
 type:'object',
 title:'Organization',
@@ -86470,6 +85781,15 @@ transient:true,
 backlink:'organization'}},
 
 
+lastMessage:{
+type:'string',
+style:{color:'#999999',fontSize:14},
+transient:true},
+
+lastMessageTime:{
+type:'date',
+transient:true},
+
 photos:{
 type:'array',
 items:{
@@ -86499,7 +85819,16 @@ backlink:'organization'}},
 verificationsCount:{
 type:'number',
 readOnly:true,
-skipLabel:true}},
+skipLabel:true},
+
+verificationRequests:{
+type:'array',
+readOnly:true,
+items:{
+type:'object',
+ref:'tradle.Message',
+backlink:'organization'}}},
+
 
 
 
@@ -86517,6 +85846,11 @@ skipLabel:true}},
 
 required:['name'],
 viewCols:['name','photos','verifications'],
+gridCols:[
+'name',
+'lastMessage',
+'lastMessageTime'],
+
 editCols:[
 'name',
 'street',
@@ -87955,7 +87289,7 @@ function componentDidMount(){
 this.listenTo(Store,'onGetItem');}},{key:'onGetItem',value:
 
 function onGetItem(params){
-if(params.action && params.action === 'getItem'){
+if(params.action && (params.action === 'getFrom' || params.action === 'getTo')){
 var paramsRID=params.resource[constants.TYPE] + '_' + params.resource[constants.ROOT_HASH];
 if(paramsRID === utils.getId(this.props.resource.to) || paramsRID === utils.getId(this.props.resource.from))
 this.showProfile(params.resource);}}},{key:'render',value:
@@ -87965,7 +87299,7 @@ function render(){var _this=this;
 var resource=this.props.resource;
 
 var model=this.props.model || utils.getModel(resource[constants.TYPE]).value;
-if(!model.interfaces || model.interfaces.indexOf(MESSAGE_INTERFACE) == -1)
+if(!model.interfaces || model.interfaces.indexOf(MESSAGE_INTERFACE) == -1 || model.id === 'tradle.Verification')
 return React.createElement(View,null);
 
 var hasPhoto=true;
@@ -87997,7 +87331,7 @@ return React.createElement(View,{style:[styles.container,style]},
 React.createElement(TouchableHighlight,{underlayColor:'transparent',onPress:function()
 {
 if(resource.from.id)
-Actions.getItem(utils.getId(resource.from));else 
+Actions.getFrom(utils.getId(resource.from));else 
 
 _this.showProfile(resource.from);}},
 
@@ -88011,7 +87345,7 @@ React.createElement(Icon,{name:'arrow-right-a',size:70,color:'#f7f7f7',style:sty
 React.createElement(TouchableHighlight,{underlayColor:'transparent',onPress:function()
 {
 if(resource.to.id)
-Actions.getItem(utils.getId(resource.to.id));else 
+Actions.getTo(utils.getId(resource.to.id));else 
 
 _this.showProfile(resource.to);}},
 
@@ -88326,7 +87660,7 @@ passProps:{resource:resource,prop:prop}});},
 
 
 showResources:function(resource,prop){
-var meta=utils.getModel(resource[constants.TYPE]).value.properties;
+
 this.props.navigator.push({
 id:10,
 title:utils.makeLabel(prop.title),
@@ -89048,7 +88382,7 @@ return row;}};
 
 module.exports = RowMixin;
 });
-__d('Identity/Components/MessageList.js',["react-native/Libraries/react-native/react-native.js","react-native-search-bar/SearchBar.js","Identity/Components/MessageView.js","Identity/Components/NoResources.js","Identity/Components/NewResource.js","Identity/Components/ResourceTypesScreen.js","Identity/Components/AddNewMessage.js","Identity/Components/CameraView.js","Identity/utils/utils.js","react-mixin/index.js","Identity/Store/Store.js","Identity/Actions/Actions.js","reflux/src/index.js","react-native-invertible-scroll-view/InvertibleScrollView.js","tradle-constants/index.js","Identity/Components/MessageRow.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
+__d('Identity/Components/MessageList.js',["react-native/Libraries/react-native/react-native.js","react-native-search-bar/SearchBar.js","Identity/Components/MessageView.js","Identity/Components/NoResources.js","Identity/Components/NewResource.js","Identity/Components/ResourceTypesScreen.js","Identity/Components/AddNewMessage.js","Identity/utils/utils.js","react-mixin/index.js","Identity/Store/Store.js","Identity/Actions/Actions.js","reflux/src/index.js","react-native-invertible-scroll-view/InvertibleScrollView.js","tradle-constants/index.js","Identity/Components/MessageRow.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
 
 var React=require('react-native/Libraries/react-native/react-native.js');
 var SearchBar=require('react-native-search-bar/SearchBar.js');
@@ -89057,7 +88391,7 @@ var NoResources=require('Identity/Components/NoResources.js');
 var NewResource=require('Identity/Components/NewResource.js');
 var ResourceTypesScreen=require('Identity/Components/ResourceTypesScreen.js');
 var AddNewMessage=require('Identity/Components/AddNewMessage.js');
-var CameraView=require('Identity/Components/CameraView.js');
+
 var utils=require('Identity/utils/utils.js');
 var reactMixin=require('react-mixin/index.js');
 var Store=require('Identity/Store/Store.js');
@@ -89120,7 +88454,7 @@ return;}
 if(params.action !== 'messageList' || !params.list || params.isAggregation !== this.props.isAggregation)
 return;
 var list=params.list;
-if(list.length || this.state.filter.length){
+if(list.length || this.state.filter && this.state.filter.length){
 var type=list[0][constants.TYPE];
 if(type !== this.props.modelName){
 var model=utils.getModel(this.props.modelName).value;
@@ -89134,8 +88468,12 @@ return;}
 this.setState({
 dataSource:this.state.dataSource.cloneWithRows(list),
 isLoading:false,
-verificationsToShare:params.verificationsToShare});}}},{key:'selectResource',value:
+verificationsToShare:params.verificationsToShare});}else 
 
+
+{
+var first=true;
+this.setState({isLoading:false});}}},{key:'selectResource',value:
 
 
 
@@ -89211,7 +88549,6 @@ filter:this.state.filter,
 model:model,
 isLoading:this.state.isLoading});else 
 {
-var model=utils.getModel(this.props.modelName).value;
 var isAllMessages=model.isInterface && model.id === 'tradle.Message';
 
 content = React.createElement(ListView,{ref:'listview',style:{marginHorizontal:10},
@@ -89234,17 +88571,16 @@ content);}
 
 
 
-var model=utils.getModel(this.props.modelName).value;
 
 var addNew=model.isInterface?
 React.createElement(AddNewMessage,{navigator:this.props.navigator,
 resource:this.props.resource,
 modelName:this.props.modelName,
 onAddNewPressed:this.onAddNewPressed.bind(this),
-onTakePicPressed:this.onTakePicPressed.bind(this),
 onPhotoSelect:this.onPhotoSelect.bind(this),
 callback:this.addedMessage.bind(this)}):
 React.createElement(View,null);
+
 return (
 React.createElement(View,{style:styles.container},
 React.createElement(SearchBar,{
@@ -89306,18 +88642,18 @@ callback:this.modelAdded.bind(this)}}});}},{key:'modelAdded',value:
 
 function modelAdded(resource){
 if(resource.url)
-Actions.addModelFromUrl(resource.url);}},{key:'onTakePicPressed',value:
+Actions.addModelFromUrl(resource.url);}},{key:'onTakePic',value:
 
-function onTakePicPressed(){
-var self=this;
-this.props.navigator.push({
-title:'Take a pic',
-backButtonTitle:'Cancel',
-id:12,
-component:CameraView,
-sceneConfig:Navigator.SceneConfigs.FloatFromBottom,
-passProps:{
-onTakePic:self.onTakePic.bind(this)}});}},{key:'onTakePic',value:
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -89395,9 +88731,16 @@ if(params.action === 'addVerification'){
 this.props.navigator.pop();
 Actions.messageList({
 modelName:'tradle.Message',
-resource:params.resource});}}},{key:'render',value:
+resource:params.resource});}}},{key:'getRefResource',value:
 
 
+
+function getRefResource(resource,prop){
+var model=utils.getModel(this.props.resource[constants.TYPE]).value;
+
+this.state.prop = prop;
+this.state.propValue = utils.getId(resource.id);
+Actions.getItem(resource.id);}},{key:'render',value:
 
 function render(){
 var resource=this.state.resource;
@@ -89430,7 +88773,7 @@ React.createElement(View,{style:{marginTop:-20}},
 React.createElement(PhotoList,{photos:resource.photos,resource:resource,isView:true,navigator:this.props.navigator,numberInRow:inRow}),
 React.createElement(View,{style:styles.rowContainer},
 React.createElement(View,null,React.createElement(Text,{style:styles.itemTitle},resource.message)),
-React.createElement(ShowPropertiesView,{resource:resource,excludedProperties:['tradle.Message.message','time','photos']}),
+React.createElement(ShowPropertiesView,{resource:resource,excludedProperties:['tradle.Message.message','time','photos'],showRefResource:this.getRefResource.bind(this)}),
 embed))));}},{key:'showEmbed',value:
 
 
@@ -89588,7 +88931,7 @@ modelName:modelName}});}},{key:'render',value:
 
 
 function render(){
-if(this.props.resource[constants.TYPE] === 'tradle.SimpleMessage')
+if(this.props.resource[constants.TYPE] === 'tradle.SimpleMessage' || this.props.resource[constants.TYPE] === 'tradle.Verification')
 return null;
 return (
 React.createElement(View,{style:[buttonStyles.container1,{top:35}]},
@@ -89682,7 +89025,7 @@ borderRadius:20}});
 
 module.exports = VerificationButton;
 });
-__d('Identity/Components/ResourceTypesScreen.js',["react-native/Libraries/react-native/react-native.js","Identity/Components/NewResource.js","Identity/utils/utils.js","react-mixin/index.js","Identity/Store/Store.js","Identity/Actions/Actions.js","reflux/src/index.js","tradle-constants/index.js","Identity/Components/MessageRow.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
+__d('Identity/Components/ResourceTypesScreen.js',["react-native/Libraries/react-native/react-native.js","Identity/Components/NewResource.js","Identity/utils/utils.js","react-mixin/index.js","Identity/Store/Store.js","Identity/Actions/Actions.js","reflux/src/index.js","tradle-constants/index.js","Identity/Components/MessageTypeRow.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
 
 var React=require('react-native/Libraries/react-native/react-native.js');
 var NewResource=require('Identity/Components/NewResource.js');
@@ -89802,10 +89145,10 @@ this.props.navigator.pop();}},{key:'renderRow',value:
 function renderRow(resource){var _this=this;
 var model=utils.getModel(resource[constants.TYPE] || resource.id).value;
 var isMessage=model.interfaces && model.interfaces.indexOf('tradle.Message') != -1;
-var MessageRow=require('Identity/Components/MessageRow.js');
+var MessageTypeRow=require('Identity/Components/MessageTypeRow.js');
 
 return (
-React.createElement(MessageRow,{
+React.createElement(MessageTypeRow,{
 onSelect:function(){return _this.selectResource(resource);},
 resource:resource,
 navigator:this.props.navigator,
@@ -89859,22 +89202,12 @@ backgroundColor:'#eeeeee'}});
 
 module.exports = ResourceTypesScreen;
 });
-__d('Identity/Components/MessageRow.js',["Ionicons","groupByEveryN","LinearGradient","react-native/Libraries/react-native/react-native.js","Identity/utils/utils.js","Identity/Components/ArticleView.js","Identity/Components/MessageView.js","Identity/Components/NewResource.js","Identity/Components/PhotoList.js","extend/index.js","tradle-constants/index.js","Identity/Components/RowMixin.js","react-mixin/index.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
+__d('Identity/Components/MessageTypeRow.js',["react-native/Libraries/react-native/react-native.js","Identity/utils/utils.js","tradle-constants/index.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
 
 var React=require('react-native/Libraries/react-native/react-native.js');
 var utils=require('Identity/utils/utils.js');
-var ArticleView=require('Identity/Components/ArticleView.js');
-var MessageView=require('Identity/Components/MessageView.js');
-var NewResource=require('Identity/Components/NewResource.js');
-var PhotoList=require('Identity/Components/PhotoList.js');
-var Icon=require('Ionicons');
-var extend=require('extend/index.js');
-var groupByEveryN=require('groupByEveryN');
 var constants=require('tradle-constants/index.js');
-var LinearGradient=require('LinearGradient');
-var RowMixin=require('Identity/Components/RowMixin.js');
-var reactMixin=require('react-mixin/index.js');var 
-
+var STRUCTURED_MESSAGE_COLOR='#F6FFF0';var 
 
 Image=
 
@@ -89882,41 +89215,20 @@ Image=
 
 
 
+React.Image;var StyleSheet=React.StyleSheet;var Text=React.Text;var TouchableHighlight=React.TouchableHighlight;var Component=React.Component;var View=React.View;var 
 
-React.Image;var StyleSheet=React.StyleSheet;var Text=React.Text;var TouchableHighlight=React.TouchableHighlight;var AlertIOS=React.AlertIOS;var Component=React.Component;var View=React.View;var 
-
-MessageRow=(function(_Component){_inherits(MessageRow,_Component);
-function MessageRow(props){_classCallCheck(this,MessageRow);
-_get(Object.getPrototypeOf(MessageRow.prototype),'constructor',this).call(this,props);}_createClass(MessageRow,[{key:'render',value:
-
-
-
-
-
-
-
-
-
-
-
-
+MessageTypeRow=(function(_Component){_inherits(MessageTypeRow,_Component);
+function MessageTypeRow(props){_classCallCheck(this,MessageTypeRow);
+_get(Object.getPrototypeOf(MessageTypeRow.prototype),'constructor',this).call(this,props);}_createClass(MessageTypeRow,[{key:'render',value:
 
 function render(){
 var resource=this.props.resource;
-var isModel=!resource[constants.TYPE];
-if(isModel && resource.autoCreate)
+if(resource.autoCreate)
 return React.createElement(View,{style:{height:0}});
 var model=utils.getModel(resource[constants.TYPE] || resource.id).value;
 var me=utils.getMe();
-var isMyMessage;
-if(!isModel && !this.props.isAggregation){
-var fromHash=utils.getId(resource.from);
-if(fromHash == me[constants.TYPE] + '_' + me[constants.ROOT_HASH])
-isMyMessage = true;}
-
 var to=this.props.to;
 var ownerPhoto,hasOwnerPhoto;
-if(isModel){
 if(resource.owner && resource.owner.photos){
 hasOwnerPhoto = true;
 var uri=utils.getImageUri(resource.owner.photos[0].url);
@@ -89926,577 +89238,46 @@ React.createElement(Image,{source:{uri:uri},style:styles.msgImage}));}else
 
 
 
-ownerPhoto = React.createElement(View,{style:[styles.cell,{marginVertical:20}]});}else 
-
-{
-if(isMyMessage || !to || !to.photos)
-ownerPhoto = React.createElement(View,{style:[styles.cell,{marginVertical:0}]});else 
-if(to){
-if(to.photos){
-var uri=utils.getImageUri(to.photos[0].url);
-ownerPhoto = React.createElement(Image,{source:{uri:uri},style:styles.msgImage});
-hasOwnerPhoto = true;}else 
-
-if(!isMyMessage){
-var title=resource.to.title.split(' ').map(function(s){
-return s.charAt(0);}).
-join('');
-ownerPhoto = React.createElement(LinearGradient,{colors:['#A4CCE0','#7AAAc3','#5E92AD'],style:styles.cellRoundImage},
-React.createElement(Text,{style:styles.cellText},title));}}}
-
-
-
-
+ownerPhoto = React.createElement(View,{style:[styles.cell,{marginVertical:20}]});
 var renderedRow=[];
-var onPressCall;
-if(isModel)
-onPressCall = this.props.onSelect;else 
+var onPressCall=this.props.onSelect;
 
-onPressCall = this.formatRow(isMyMessage,model,resource,renderedRow);
-
-var photoUrls=[];
-var photoListStyle={height:isModel?0:3};
 var addStyle,inRow;
 var noMessage=!resource.message || !resource.message.length;
-if(!renderedRow.length){
-var vCols=isModel?
-utils.getDisplayName(resource):
-noMessage?null:utils.getDisplayName(resource,model.properties);
-if(vCols)
-renderedRow = React.createElement(Text,{style:isModel?styles.modelTitle:styles.resourceTitle,numberOfLines:2},vCols);}else 
-
-if(!isModel){
-var fromHash=resource.from.id;
-if(isMyMessage){
-if(!noMessage)
-addStyle = styles.myCell;}else 
-
-{
-if(!model.style)
-addStyle = {padding:5,borderRadius:10,borderColor:'#cccccc',backgroundColor:'#ffffff',marginVertical:2};}
-
-
-
-
-if(model.style)
-addStyle = [addStyle,{padding:5,borderRadius:10,backgroundColor:'#efffe5',borderWidth:1,borderColor:'#deeeb4',marginVertical:2}];}
-
-
 var properties=model.properties;
+if(!renderedRow.length){
+var vCols=utils.getDisplayName(resource);
+if(vCols)
+renderedRow = React.createElement(Text,{style:styles.modelTitle,numberOfLines:2},vCols);}
+
 var verPhoto;
-if(!isModel && properties.photos){
-if(resource.photos){
-var len=resource.photos.length;
-inRow = len === 1?1:len == 2 || len == 4?2:3;
-var style;
-if(inRow === 1)
-style = styles.bigImage;else 
-if(inRow === 2)
-style = styles.mediumImage;else 
-
-style = styles.image;
-for(var p of resource.photos) 
-photoUrls.push({url:utils.getImageUri(p.url)});
-
-photoListStyle = {
-flexDirection:'row',
-alignSelf:isMyMessage?'flex-end':'flex-start',
-marginLeft:isMyMessage?30:55,
-borderRadius:10,
-marginBottom:3};}else 
-
-
-
-verPhoto = React.createElement(View,{style:{height:0,width:0}});}else 
-
-if(isModel && resource.owner && resource.owner.photos){
+if(resource.owner && resource.owner.photos){
 var ownerImg=resource.owner.photos[0].url;
 var url=utils.getImageUri(ownerImg);
 verPhoto = React.createElement(Image,{source:{uri:ownerImg},style:styles.ownerImage});}
 
-var rowStyle=isModel && model.style?
-[styles.row,{backgroundColor:'#efffe5'}]:
-noMessage?{}:styles.row;
-var val;
-var date;
-if(!isModel && resource.time){
-var previousMessageTime=this.props.previousMessageTime;
-var showTime=!previousMessageTime || this.props.isAggregation;
+var rowStyle=model.style?
+[styles.row,{backgroundColor:STRUCTURED_MESSAGE_COLOR}]:
+styles.row;
 
-if(!showTime){
-var prevDate=new Date(previousMessageTime);
-var curDate=new Date(resource.time);
-showTime = resource.time - previousMessageTime > 3600000 || 
-prevDate.getDate() !== curDate.getDate() || 
-prevDate.getMonth() !== curDate.getMonth() || 
-prevDate.getYear() !== curDate.getYear();}
-
-
-if(showTime)
-val = utils.getFormattedDate(resource.time);}
-
-
-var date=val?
-React.createElement(Text,{style:styles.date,numberOfLines:1},val):
-React.createElement(View,null);
-
-var showMessageBody;
-if(!isModel && noMessage){
-if(hasOwnerPhoto)
-showMessageBody = true;else 
-if(!model.properties['message'])
-showMessageBody = true;}else 
-
-
-showMessageBody = true;
-var messageBody;
-var isSimpleMessage=model.id === 'tradle.SimpleMessage';
-if(showMessageBody){
-var viewStyle;
-if(!isModel){
-viewStyle = {flexDirection:'row',alignSelf:isMyMessage?'flex-end':'flex-start'};
-if(!noMessage && resource.message.length > 30 || !isSimpleMessage)
-viewStyle.width = 260;}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-messageBody = 
+var messageBody=
 React.createElement(TouchableHighlight,{onPress:onPressCall?onPressCall:function(){},underlayColor:'transparent'},
-React.createElement(View,{style:[rowStyle,viewStyle]},
-isModel?React.createElement(View,{style:{paddingLeft:10}}):ownerPhoto,
+React.createElement(View,{style:rowStyle},
+React.createElement(View,{style:{paddingLeft:10}}),
 React.createElement(View,{style:addStyle?[styles.textContainer,addStyle]:styles.textContainer},
 React.createElement(View,{style:{flex:1}},
 renderedRow)),
 
 
-!isModel?React.createElement(View,null):ownerPhoto));}else 
+ownerPhoto));
 
-
-
-
-messageBody = React.createElement(View,{style:{height:5}});
-
-var len=photoUrls.length;
-var inRow=len === 1?1:len == 2 || len == 4?2:3;
-
-var photoStyle={};
-var height;
-if(inRow > 0){
-if(inRow === 1)
-photoStyle = styles.bigImage;else 
-if(inRow === 2)
-photoStyle = styles.mediumImage;else 
-
-photoStyle = styles.image;}
 
 
 var viewStyle={margin:1,backgroundColor:'#f7f7f7'};
 
-var isModel=!this.props.resource[constants.TYPE];
-var model=isModel?utils.getModel(this.props.resource.id).value:utils.getModel(this.props.resource[constants.TYPE]).value;
-var isLicense=model.id.indexOf('License') !== -1 || model.id.indexOf('Passport') !== -1;
-
-var photoStyle=isLicense?styles.bigImageH:photoStyle;
-
 return (
 React.createElement(View,{style:viewStyle,key:resource},
-date,
-messageBody,
-React.createElement(View,{style:photoListStyle},
-React.createElement(PhotoList,{photos:photoUrls,resource:this.props.resource,style:[photoStyle,{marginTop:-20}],navigator:this.props.navigator,numberInRow:inRow}))));}},{key:'onPress',value:
-
-
-
-
-function onPress(event){
-this.props.navigator.push({
-id:7,
-component:ArticleView,
-passProps:{url:this.props.resource.message}});}},{key:'createNewResource',value:
-
-
-function createNewResource(model){
-var resource={
-'from':this.props.resource.to,
-'to':this.props.resource.from,
-'message':this.props.resource.message};
-
-resource[constants.TYPE] = model.id;
-
-this.props.navigator.push({
-id:4,
-title:model.title,
-rightButtonTitle:'Done',
-backButtonTitle:'Back',
-component:NewResource,
-titleTextColor:'#7AAAC3',
-passProps:{
-model:model,
-resource:resource}});}},{key:'verify',value:
-
-
-
-
-function verify(event){
-var self=this;
-var resource=self.props.resource;
-var model=utils.getModel(resource[constants.TYPE]).value;
-this.props.navigator.push({
-id:5,
-component:MessageView,
-backButtonTitle:'Back',
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-passProps:{resource:self.props.resource,verify:true},
-title:resource[constants.TYPE] == 'tradle.AssetVerification'?'Doc verification':model.title});}},{key:'formatRow',value:
-
-
-function formatRow(isMyMessage,model,resource,renderedRow){
-var viewCols=model.gridCols || model.viewCols;
-if(!viewCols)
-return;
-var verPhoto;
-var vCols=[];
-var first=true;
-var self=this;
-var model=utils.getModel(resource[constants.TYPE] || resource.id).value;
-
-var properties=model.properties;
-var noMessage=!resource.message || !resource.message.length;
-var onPressCall;
-
-var isSimpleMessage=model.id === 'tradle.SimpleMessage';
-var cnt=0;
-viewCols.forEach(function(v){
-if(properties[v].type === 'array' || properties[v].type === 'date')
-return;
-var style=styles.resourceTitle;
-if(isMyMessage){
-style = [style,{justifyContent:'flex-end',paddingLeft:5}];
-if(isSimpleMessage)
-style.push({color:'#ffffff'});}
-
-
-if(properties[v].ref){
-if(resource[v]){
-vCols.push(React.createElement(Text,{style:style,numberOfLines:first?2:1},resource[v].title));
-first = false;}
-
-return;}
-
-
-if(resource[v] && 
-properties[v].type === 'string' && (
-resource[v].indexOf('http://') == 0 || resource[v].indexOf('https://') == 0)){
-onPressCall = self.onPress.bind(self);
-vCols.push(React.createElement(Text,{style:style,numberOfLines:first?2:1},resource[v]));}else 
-
-if(!model.autoCreate){
-var val=properties[v].displayAs?
-utils.templateIt(properties[v],resource):
-resource[v];
-if(model.properties.verifications && !isMyMessage)
-onPressCall = self.verify.bind(self);
-vCols.push(React.createElement(Text,{style:style,numberOfLines:first?2:1},val));}else 
-
-{
-if(!resource[v] || !resource[v].length)
-return;
-var msgParts=utils.splitMessage(resource[v]);
-
-if(msgParts.length === 2){
-if(!msgParts[0].length)
-msgParts[0] = 'Form for';
-var msgModel=utils.getModel(msgParts[1]);
-if(msgModel){
-if(self.props.verificationsToShare)
-style = styles.description;
-msgModel = msgModel.value;
-if(!isMyMessage)
-onPressCall = self.createNewResource.bind(self,msgModel);
-var link=isMyMessage?
-React.createElement(Text,{style:[style,{color:isMyMessage?'#efffe5':'#2892C6'}]},msgModel.title):
-React.createElement(View,{style:{flexDirection:'row',justifyContent:'space-between'}},
-React.createElement(Text,{style:[style,{color:isMyMessage?'#efffe5':'#2892C6'}]},msgModel.title),
-React.createElement(Icon,{style:styles.linkIcon,size:20,name:'ios-arrow-right'}));
-
-if(self.props.verificationsToShare){
-var vtt=[];
-var cnt=0;
-for(var t in self.props.verificationsToShare) {
-if(t === msgModel.id){
-var ver=self.props.verificationsToShare[t];
-ver.forEach(function(r){
-var vModel=utils.getModel(r[constants.TYPE]);
-var doc=self.formatDocument(msgModel,r);
-if(cnt){
-doc = React.createElement(View,null,
-React.createElement(View,{style:{height:1,backgroundColor:'#dddddd'}}),
-doc);}
-
-
-
-vtt.push(doc);
-cnt++;});}}
-
-
-
-if(vtt.length){
-var orgRow=React.createElement(View,null);
-vCols.push(
-React.createElement(Text,{style:{color:'#C390D4'}},'I just sent you a request for ',
-msgModel.title,'.',
-utils.getMe().firstName,', this is your Tradle assistent talking. Tap on one of the items below to share with ',
-isMyMessage?resource.to.title:resource.from.title));
-
-
-vCols.push(
-React.createElement(View,null,
-vtt,
-React.createElement(View,{style:{flexDirection:'row'}},
-orgRow)));}
-
-
-
-
-vCols.push(React.createElement(View,null,
-React.createElement(View,{style:styles.separator}),
-React.createElement(Text,{style:[styles.verifications,{color:'#b4c3cb'}]},'You can choose to submit the document anew'),
-link));}else 
-
-
-
-vCols.push(React.createElement(View,null,
-React.createElement(Text,{style:style},msgParts[0]),
-link));
-
-return;}}
-
-
-vCols.push(React.createElement(Text,{style:style},resource[v]));}
-
-first = false;});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-if(model.id !== 'tradle.SimpleMessage'){
-var t=model.title.split(' ');
-var s='';
-t.forEach(function(p){
-if(p.indexOf('Verif') === -1)
-s += p + ' ';});
-
-
-if(resource.verifications && resource.verifications.length){
-var verifications=[];
-resource.verifications.forEach(function(v){
-if(v.organization && v.organization.photo){
-verifications.push(React.createElement(Text,{style:styles.verySmallLetters},v.organization.title));
-verifications.push(React.createElement(Image,{source:{uri:v.organization.photo},style:styles.orgImage}));}});
-
-
-vCols.push(React.createElement(View,{style:styles.verificationCheck},
-React.createElement(Text,{style:styles.verySmallLetters},s,'verified by '),
-verifications));}else 
-
-
-
-vCols.push(React.createElement(Text,{style:styles.verySmallLetters},s));}
-
-if(vCols && vCols.length)
-extend(renderedRow,vCols);
-return onPressCall?onPressCall:isSimpleMessage?null:this.props.onSelect;}},{key:'share',value:
-
-function share(){
-console.log('Share');}},{key:'shareDocs',value:
-
-function shareDocs(){
-this.props.navigator.push({
-title:m.title,
-titleTextColor:'#7AAAC3',
-id:10,
-component:ResourceList,
-backButtonTitle:'Back',
-passProps:{
-filter:filter,
-prop:propName,
-modelName:prop.ref,
-resource:resource,
-returnRoute:currentRoutes[currentRoutes.length - 1],
-callback:this.setChosenValue.bind(this)}});}},{key:'formatDocument',value:
-
-
-
-
-function formatDocument(model,verification){var _this=this;
-var resource=verification.document;
-var self=this;
-var docModel=utils.getModel(resource[constants.TYPE]).value;
-var docModelTitle=docModel.title;
-var idx=docModelTitle.indexOf('Verification');
-var docTitle=idx === -1?docModelTitle:docModelTitle.substring(0,idx);
-
-var msg;
-if(resource.message)
-msg = React.createElement(View,null,React.createElement(Text,{style:styles.description},resource.message));else 
-{
-var rows=[];
-this.formatDocument1(model,resource,rows);
-msg = React.createElement(View,null,rows);}
-
-
-
-
-
-
-var photo=resource && resource.photos?
-React.createElement(Image,{source:{uri:utils.getImageUri(resource.photos[0].url)},style:styles.cellImage}):
-React.createElement(View,null);
-
-var orgRow;
-if(verification.organization){
-var orgPhoto=verification.organization.photo?
-React.createElement(Image,{source:{uri:utils.getImageUri(verification.organization.photo)},style:[styles.orgImage,{marginTop:-5}]}):
-React.createElement(View,null);
-orgRow = React.createElement(View,{style:{flexDirection:'row',marginTop:5}},
-React.createElement(Text,{style:styles.verySmallLetters},'verified by '),
-React.createElement(Text,{style:[styles.verySmallLetters,{color:'#757575'}]},verification.organization.title.length < 10?verification.organization.title:verification.organization.title.substring(0,8) + '..'));}else 
-
-
-
-orgRow = React.createElement(View,null);
-
-return (
-React.createElement(TouchableHighlight,{underlayColor:'transparent',onPress:function(){return (
-AlertIOS.alert(
-'Sharing ' + docTitle + ' verified by ' + verification.organization.title,
-'with ' + _this.props.to.organization.title,
-[
-{text:'Share',onPress:_this.share.bind(_this)},
-{text:'Cancel',onPress:function(){return console.log('Canceled!');}}]));}},
-
-
-React.createElement(View,{style:{flex:1,flexDirection:'row',paddingVertical:5}},
-React.createElement(View,null,
-photo),
-
-React.createElement(View,{style:{flex:1}},
-msg,
-orgRow))));}},{key:'formatDocument1',value:
-
-
-
-
-
-function formatDocument1(model,resource,renderedRow){
-var viewCols=model.gridCols || model.viewCols;
-if(!viewCols)
-return;
-var verPhoto;
-var vCols=[];
-var first=true;
-var self=this;
-var model=utils.getModel(resource[constants.TYPE] || resource.id).value;
-
-var properties=model.properties;
-var noMessage=!resource.message || !resource.message.length;
-var onPressCall;
-
-var isSimpleMessage=model.id === 'tradle.SimpleMessage';
-
-viewCols.forEach(function(v){
-if(properties[v].type === 'array' || properties[v].type === 'date')
-return;
-var style=styles.description;
-
-if(properties[v].ref){
-if(resource[v]){
-vCols.push(React.createElement(Text,{style:style,numberOfLines:first?2:1},resource[v].title));
-first = false;}
-
-
-return;}
-
-
-if(resource[v] && properties[v].type === 'string' && (resource[v].indexOf('http://') == 0 || resource[v].indexOf('https://') == 0))
-row = React.createElement(Text,{style:style,numberOfLines:first?2:1},resource[v]);else 
-if(!model.autoCreate){
-var val=properties[v].displayAs?
-utils.templateIt(properties[v],resource):
-resource[v];
-row = React.createElement(Text,{style:style,numberOfLines:first?2:1},val);}else 
-
-{
-if(!resource[v] || !resource[v].length)
-return;
-var msgParts=utils.splitMessage(resource[v]);
-
-if(msgParts.length === 2){
-var msgModel=utils.getModel(msgParts[1]);
-if(msgModel){
-vCols.push(React.createElement(View,null,
-React.createElement(Text,{style:style},msgParts[0]),
-React.createElement(Text,{style:[style,{color:isMyMessage?'#efffe5':'#7AAAC3'}]},msgModel.value.title)));
-
-return;}}
-
-
-var row=React.createElement(Text,{style:style},resource[v]);}
-
-
-if(first){
-row = React.createElement(View,{style:{flexDirection:'row',justifyContent:'space-between'}},
-React.createElement(View,null,row),
-React.createElement(View,null,React.createElement(Text,{style:styles.verySmallLetters},renderedRow[0])));
-
-renderedRow.splice(0,1);}
-
-vCols.push(row);
-first = false;});
-
-
-
-
-if(vCols && vCols.length){
-vCols.forEach(function(v){
-renderedRow.push(v);});}}}]);return MessageRow;})(Component);
-
+messageBody));}}]);return MessageTypeRow;})(Component);
 
 
 
@@ -90540,6 +89321,15 @@ padding:5,
 justifyContent:'flex-end',
 borderRadius:10,
 backgroundColor:'#569bff'},
+
+warnImage:{
+backgroundColor:'#dddddd',
+height:45,
+marginRight:5,
+width:45,
+borderRadius:10,
+borderColor:'#cccccc',
+borderWidth:1},
 
 msgImage:{
 backgroundColor:'#dddddd',
@@ -90585,82 +89375,15 @@ borderRadius:15,
 borderColor:'#cccccc',
 borderWidth:1},
 
-verifications:{
-fontSize:12},
-
-
 verySmallLetters:{
 fontSize:12,
 alignSelf:'flex-end',
-color:'#b4c3cb'},
-
-orgImage:{
-width:20,
-height:20,
-marginLeft:5,
-
-borderRadius:10},
-
-verificationCheck:{
-flexDirection:'row',
-alignSelf:'flex-end',
-padding:3,
-marginVertical:5},
+color:'#757575'}});
 
 
-cellRoundImage:{
-paddingVertical:1,
-borderRadius:30,
-height:60,
-marginRight:10,
-width:60,
-alignSelf:'center'},
-
-cellText:{
-marginTop:16,
-alignSelf:'center',
-color:'#ffffff',
-fontSize:20,
-backgroundColor:'transparent'},
-
-cellImage:{
-backgroundColor:'#dddddd',
-height:40,
-width:40,
-marginRight:10,
-borderColor:'transparent',
-borderRadius:10,
-borderWidth:1},
-
-linkIcon:{
-width:20,
-height:20,
-color:'#2892C6'},
-
-icon:{
-width:20,
-height:20,
-marginLeft:4,
-borderWidth:1,
-borderColor:'#eeeeee',
-borderRadius:10,
-marginRight:5},
-
-description:{
-flexWrap:'wrap',
-color:'#999999',
-fontSize:14},
-
-separator:{
-height:0.5,
-marginTop:5,
-backgroundColor:'#cccccc',
-flex:40}});
 
 
-reactMixin(MessageRow.prototype,RowMixin);
-
-module.exports = MessageRow;
+module.exports = MessageTypeRow;
 });
 __d('Identity/Components/AddNewMessage.js',["Ionicons","NativeModules","ActionSheetIOS","react-native/Libraries/react-native/react-native.js","Identity/utils/utils.js","Identity/Components/ChatMessage.js","Identity/Components/SelectPhotoList.js","extend/index.js","Identity/Store/Store.js","react-mixin/index.js","reflux/src/index.js","Identity/Actions/Actions.js","react-native-keyboardevents/KeyboardEvents.ios.js","tradle-constants/index.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
 
@@ -90813,29 +89536,29 @@ selectedAssets[response] = 'y';}
 
 self.onSubmitEditing(self.state.userInput);}else 
 {
-console.log('Cancel');}});}},{key:'showChoice1',value:
+console.log('Cancel');}});}},{key:'onPhotoSelect',value:
 
 
 
 
-function showChoice1(){
-var buttons=['Take photo','Photo library','Cancel'];
-var self=this;
-ActionSheetIOS.showActionSheetWithOptions({
-options:buttons,
-cancelButtonIndex:2},
-function(buttonIndex){
-if(buttonIndex == 0)
-self.props.onTakePicPressed();else 
-
-self.selectPhotoFromTheLibrary();});}},{key:'onButtonPress',value:
 
 
-function onButtonPress(buttonIndex){
-if(buttonIndex == 0)
-this.props.onTakePicPressed();else 
-if(buttonIndex == 1)
-this.selectPhotoFromTheLibrary();}},{key:'onPhotoSelect',value:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function onPhotoSelect(asset){
 var selectedAssets=this.state.selectedAssets;
@@ -90985,307 +89708,6 @@ borderTopColor:'#cccccc'}});
 
 module.exports = AddNewMessage;
 });
-__d('Identity/Components/CameraView.js',["react-native/Libraries/react-native/react-native.js","react-native-camera/Camera.ios.js","react-native-icons/index.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}var React=require('react-native/Libraries/react-native/react-native.js');var 
-
-AppRegistry=
-
-
-
-
-
-React.AppRegistry;var StyleSheet=React.StyleSheet;var Text=React.Text;var View=React.View;var Component=React.Component;var TouchableHighlight=React.TouchableHighlight;
-var Camera=require('react-native-camera/Camera.ios.js');var _require=
-require('react-native-icons/index.js');var Icon=_require.Icon;var 
-
-CameraView=(function(_Component){_inherits(CameraView,_Component);
-function CameraView(props){_classCallCheck(this,CameraView);
-_get(Object.getPrototypeOf(CameraView.prototype),'constructor',this).call(this,props);
-this.state = {
-cameraType:Camera.constants.Type.back};}_createClass(CameraView,[{key:'render',value:
-
-
-
-function render(){
-return (
-React.createElement(View,{style:styles.container},
-React.createElement(Camera,{
-ref:'cam',
-captureTarget:Camera.constants.CaptureTarget.cameraRoll,
-style:styles.container,
-onBarCodeRead:this._onBarCodeRead.bind(this),
-type:this.state.cameraType},
-React.createElement(TouchableHighlight,{onPress:this._switchCamera.bind(this)},
-React.createElement(Text,null,'The old switcheroo'))),
-
-
-React.createElement(View,{style:{backgroundColor:'#000000',paddingTop:7,height:125,alignSelf:'stretch'}},
-React.createElement(View,{style:{flexDirection:'row',justifyContent:'center'}},
-React.createElement(Text,{style:{color:'#eeeeee',paddingHorizontal:5,fontSize:24,fontWeight:'400'}},'Video'),
-React.createElement(Text,{style:{color:'yellow',paddingHorizontal:5,fontSize:24,fontWeight:'400'}},'Photo')),
-
-React.createElement(TouchableHighlight,{onPress:this._takePicture.bind(this)},
-React.createElement(Icon,{name:'ion|ios-circle-filled',size:85,color:'#eeeeee',style:styles.icon})))));}},{key:'_onBarCodeRead',value:
-
-
-
-
-
-function _onBarCodeRead(e){
-console.log(e);}},{key:'_switchCamera',value:
-
-function _switchCamera(){
-var state=this.state;
-state.cameraType = state.cameraType === Camera.constants.Type.back?
-Camera.constants.Type.front:Camera.constants.Type.back;
-this.setState(state);}},{key:'_takePicture',value:
-
-function _takePicture(){
-var self=this;
-this.refs.cam.capture(function(err,data){
-console.log(err,data);
-self.props.onTakePic(data);});}}]);return CameraView;})(Component);
-
-
-
-
-
-var styles=StyleSheet.create({
-container:{
-flex:1,
-justifyContent:'center',
-alignItems:'center',
-alignSelf:'stretch',
-backgroundColor:'transparent'},
-
-icon:{
-width:85,
-height:85,
-marginTop:2,
-alignSelf:'center'}});
-
-
-
-module.exports = CameraView;
-});
-__d('react-native-camera/Camera.ios.js',[],function(global, require, requireDynamic, requireLazy, module, exports) {  var React=require('React');
-var DeviceEventEmitter=require('RCTDeviceEventEmitter');
-var NativeModules=require('NativeModules');
-var ReactNativeViewAttributes=require('ReactNativeViewAttributes');
-var StyleSheet=require('StyleSheet');
-var createReactNativeComponentClass=require('createReactNativeComponentClass');
-var PropTypes=require('ReactPropTypes');
-var StyleSheetPropType=require('StyleSheetPropType');
-var NativeMethodsMixin=require('NativeMethodsMixin');
-var flattenStyle=require('flattenStyle');
-var merge=require('merge');
-
-var constants={
-Aspect:NativeModules.CameraManager.Aspect,
-BarCodeType:NativeModules.CameraManager.BarCodeType,
-Type:NativeModules.CameraManager.Type,
-CaptureMode:NativeModules.CameraManager.CaptureMode,
-CaptureTarget:NativeModules.CameraManager.CaptureTarget,
-Orientation:NativeModules.CameraManager.Orientation,
-FlashMode:NativeModules.CameraManager.FlashMode,
-TorchMode:NativeModules.CameraManager.TorchMode};
-
-
-var Camera=React.createClass({displayName:'Camera',
-propTypes:{
-aspect:PropTypes.oneOfType([
-PropTypes.string,
-PropTypes.number]),
-
-captureAudio:PropTypes.bool,
-captureMode:PropTypes.oneOfType([
-PropTypes.string,
-PropTypes.number]),
-
-captureTarget:PropTypes.oneOfType([
-PropTypes.string,
-PropTypes.number]),
-
-type:PropTypes.oneOfType([
-PropTypes.string,
-PropTypes.number]),
-
-orientation:PropTypes.oneOfType([
-PropTypes.string,
-PropTypes.number]),
-
-flashMode:PropTypes.oneOfType([
-PropTypes.string,
-PropTypes.number]),
-
-torchMode:PropTypes.oneOfType([
-PropTypes.string,
-PropTypes.number])},
-
-
-
-mixins:[NativeMethodsMixin],
-
-viewConfig:{
-uiViewClassName:'UIView',
-validAttributes:ReactNativeViewAttributes.UIView},
-
-
-getDefaultProps:function(){
-return {
-aspect:constants.Aspect.fill,
-type:constants.Type.back,
-orientation:constants.Orientation.auto,
-captureAudio:true,
-captureMode:constants.CaptureMode.still,
-captureTarget:constants.CaptureTarget.cameraRoll,
-flashMode:constants.FlashMode.off,
-torchMode:constants.TorchMode.off};},
-
-
-
-getInitialState:function(){
-return {
-isAuthorized:false,
-isRecording:false};},
-
-
-
-componentWillMount:function(){
-NativeModules.CameraManager.checkDeviceAuthorizationStatus((function(err,isAuthorized){
-this.state.isAuthorized = isAuthorized;
-this.setState(this.state);}).
-bind(this));
-this.cameraBarCodeReadListener = DeviceEventEmitter.addListener('CameraBarCodeRead',this._onBarCodeRead);},
-
-
-componentWillUnmount:function(){
-this.cameraBarCodeReadListener.remove();
-
-if(this.state.isRecording){
-this.stopRecording();}},
-
-
-
-render:function(){
-var style=flattenStyle([styles.base,this.props.style]);
-
-var aspect=this.props.aspect,
-type=this.props.type,
-orientation=this.props.orientation,
-flashMode=this.props.flashMode,
-torchMode=this.props.torchMode;
-
-var legacyProps={
-aspect:{
-Fill:'fill',
-Fit:'fit',
-Stretch:'stretch'},
-
-orientation:{
-LandscapeLeft:'landscapeLeft',
-LandscapeRight:'landscapeRight',
-Portrait:'portrait',
-PortraitUpsideDown:'portraitUpsideDown'},
-
-type:{
-Front:'front',
-Back:'back'}};
-
-
-
-if(typeof aspect === 'string'){
-aspect = constants.Aspect[aspect];}
-
-
-if(typeof flashMode === 'string'){
-flashMode = constants.FlashMode[flashMode];}
-
-
-if(typeof orientation === 'string'){
-orientation = constants.Orientation[orientation];}
-
-
-if(typeof torchMode === 'string'){
-torchMode = constants.TorchMode[torchMode];}
-
-
-if(typeof type === 'string'){
-type = constants.Type[type];}
-
-
-var nativeProps=merge(this.props,{
-style:style,
-aspect:aspect,
-type:type,
-orientation:orientation,
-flashMode:flashMode,
-torchMode:torchMode});
-
-
-return React.createElement(RCTCamera,nativeProps);},
-
-
-_onBarCodeRead:function(e){
-this.props.onBarCodeRead && this.props.onBarCodeRead(e);},
-
-
-capture:function(options,cb){
-
-if(arguments.length == 1){
-cb = options;
-options = {};}
-
-
-options = Object.assign({},{
-audio:this.props.captureAudio,
-mode:this.props.captureMode,
-target:this.props.captureTarget},
-options);
-
-if(typeof options.mode === 'string'){
-options.mode = constants.CaptureMode[options.mode];}
-
-
-if(options.mode === constants.CaptureMode.video){
-options.totalSeconds = options.totalSeconds > -1?options.totalSeconds:-1;
-options.preferredTimeScale = options.preferredTimeScale || 30;
-this.setState({isRecording:true});}
-
-
-if(typeof options.target === 'string'){
-options.target = constants.CaptureTarget[options.target];}
-
-
-NativeModules.CameraManager.capture(options,cb);},
-
-
-stopCapture:function(){
-if(this.state.isRecording){
-NativeModules.CameraManager.stopCapture();
-this.setState({isRecording:false});}}});
-
-
-
-
-
-var RCTCamera=createReactNativeComponentClass({
-validAttributes:merge(ReactNativeViewAttributes.UIView,{
-aspect:true,
-type:true,
-orientation:true,
-flashMode:true,
-torchMode:true}),
-
-uiViewClassName:'RCTCamera'});
-
-
-var styles=StyleSheet.create({
-base:{}});
-
-
-Camera.constants = constants;
-module.exports = Camera;
-});
 __d('react-native-invertible-scroll-view/InvertibleScrollView.js',["react-native/Libraries/react-native/react-native.js","react-native-scrollable-mixin/ScrollableMixin.js","react-native-clone-referenced-element/cloneReferencedElement.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _extends=Object.assign || function(target){for(var i=1;i < arguments.length;i++) {var source=arguments[i];for(var key in source) {if(Object.prototype.hasOwnProperty.call(source,key)){target[key] = source[key];}}}return target;};function _objectWithoutProperties(obj,keys){var target={};for(var i in obj) {if(keys.indexOf(i) >= 0)continue;if(!Object.prototype.hasOwnProperty.call(obj,i))continue;target[i] = obj[i];}return target;}
 
 
@@ -91428,479 +89850,806 @@ children));}
 
 module.exports = cloneReferencedElement;
 });
-__d('Identity/Components/GridList.js',["react-native/Libraries/react-native/react-native.js","react-native-search-bar/SearchBar.js","Identity/Components/NoResources.js","Identity/Components/ResourceRow.js","Identity/Components/ResourceView.js","Identity/Components/VerificationRow.js","Identity/Components/NewResource.js","Identity/Components/MessageList.js","Identity/utils/utils.js","react-mixin/index.js","Identity/Store/Store.js","Identity/Actions/Actions.js","reflux/src/index.js","tradle-constants/index.js","react-native-icons/index.js","react-native-grid-view/index.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
+__d('Identity/Components/MessageRow.js',["image!happyLock","Ionicons","groupByEveryN","LinearGradient","react-native/Libraries/react-native/react-native.js","Identity/utils/utils.js","Identity/Components/ArticleView.js","Identity/Components/MessageView.js","Identity/Components/NewResource.js","Identity/Components/PhotoList.js","extend/index.js","tradle-constants/index.js","Identity/Components/RowMixin.js","react-mixin/index.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}
 
 var React=require('react-native/Libraries/react-native/react-native.js');
-var SearchBar=require('react-native-search-bar/SearchBar.js');
-var NoResources=require('Identity/Components/NoResources.js');
-var ResourceRow=require('Identity/Components/ResourceRow.js');
-var ResourceView=require('Identity/Components/ResourceView.js');
-var VerificationRow=require('Identity/Components/VerificationRow.js');
-var NewResource=require('Identity/Components/NewResource.js');
-var MessageList=require('Identity/Components/MessageList.js');
 var utils=require('Identity/utils/utils.js');
+var ArticleView=require('Identity/Components/ArticleView.js');
+var MessageView=require('Identity/Components/MessageView.js');
+var NewResource=require('Identity/Components/NewResource.js');
+var PhotoList=require('Identity/Components/PhotoList.js');
+var Icon=require('Ionicons');
+var extend=require('extend/index.js');
+var groupByEveryN=require('groupByEveryN');
+var constants=require('tradle-constants/index.js');
+var LinearGradient=require('LinearGradient');
+var RowMixin=require('Identity/Components/RowMixin.js');
 var reactMixin=require('react-mixin/index.js');
-var Store=require('Identity/Store/Store.js');
-var Actions=require('Identity/Actions/Actions.js');
-var Reflux=require('reflux/src/index.js');
-var constants=require('tradle-constants/index.js');var _require=
-require('react-native-icons/index.js');var Icon=_require.Icon;
-var GridView=require('react-native-grid-view/index.js');var 
+var STRUCTURED_MESSAGE_COLOR='#F6FFF0';var 
 
-
-ListView=
+Image=
 
 
 
 
 
 
+React.Image;var StyleSheet=React.StyleSheet;var Text=React.Text;var TouchableHighlight=React.TouchableHighlight;var AlertIOS=React.AlertIOS;var Component=React.Component;var View=React.View;var 
 
-
-React.ListView;var Component=React.Component;var StyleSheet=React.StyleSheet;var Navigator=React.Navigator;var TouchableHighlight=React.TouchableHighlight;var Image=React.Image;var StatusBarIOS=React.StatusBarIOS;var View=React.View;var Text=React.Text;var 
-
-GridList=(function(_Component){_inherits(GridList,_Component);
-function GridList(props){_classCallCheck(this,GridList);
-_get(Object.getPrototypeOf(GridList.prototype),'constructor',this).call(this,props);
-
-this.state = {
-isLoading:utils.getModels()?false:true,
-dataSource:new ListView.DataSource({
-rowHasChanged:function(row1,row2){return row1 !== row2;}})};}_createClass(GridList,[{key:'componentWillMount',value:
-
-
-
-function componentWillMount(){
-StatusBarIOS.setHidden(false);
-var params={
-modelName:this.props.modelName,
-to:this.props.resource};
-
-if(this.props.isAggregation)
-params.isAggregation = true;
-if(this.props.sortProperty)
-params.sortProperty = this.props.sortProperty;
-if(this.props.prop)
-params.prop = utils.getModel(this.props.resource[constants.TYPE]).value.properties[this.props.prop];
-
-this.state.isLoading = true;
-Actions.list(params);}},{key:'componentDidMount',value:
-
-function componentDidMount(){
-this.listenTo(Store,'onListUpdate');}},{key:'onListUpdate',value:
-
-
-function onListUpdate(params){
-if(params.error)
-return;
-var action=params.action;
-if(action === 'addItem' || action === 'addMessage'){
-var model=action === 'addMessage'?
-utils.getModel(this.props.modelName).value:
-utils.getModel(params.resource[constants.TYPE]).value;
-
-this.state.isLoading = true;
-Actions.list({
-query:this.state.filter,
-modelName:model.id,
-to:this.props.resource,
-sortProperty:model.sort});
-
-console.log('Actions.list');
-return;}
-
-
-if(action !== 'list' || !params.list || params.isAggregation !== this.props.isAggregation)
-return;
-var list=params.list;
-if(!list.length && (!this.state.filter || !this.state.filter.length)){
-this.setState({
-isLoading:false});
-
-
-return;}
-
-var type=list[0][constants.TYPE];
-
-
-if(type !== this.props.modelName){
-var m=utils.getModel(type).value;
-if(!m.subClassOf || m.subClassOf != this.props.modelName)
-return;}
-
-
-
-
-
-
-
-
-
-
-
-
-this.setState({
-dataSource:this.state.dataSource.cloneWithRows(list),
-list:list,
-isLoading:false});}},{key:'selectResource',value:
-
-
-
-
-
-
-function selectResource(resource){
+MessageRow=(function(_Component){_inherits(MessageRow,_Component);
+function MessageRow(props){_classCallCheck(this,MessageRow);
+_get(Object.getPrototypeOf(MessageRow.prototype),'constructor',this).call(this,props);
+var resource=this.props.resource;
+var model=utils.getModel(resource[constants.TYPE] || resource.id).value;
 var me=utils.getMe();
+var isMyMessage;
+if(!this.props.isAggregation){
+var fromHash=utils.getId(resource.from);
+if(fromHash == me[constants.TYPE] + '_' + me[constants.ROOT_HASH])
+isMyMessage = true;}
 
-var model=utils.getModel(this.props.modelName);
-var isIdentity=this.props.modelName === constants.TYPES.IDENTITY;
-var isOrganization=this.props.modelName === 'tradle.Organization';
+this.state = {isMyMessage:isMyMessage};}_createClass(MessageRow,[{key:'render',value:
 
-if(!isIdentity && 
-!isOrganization && 
-!this.props.callback){
-var m=utils.getModel(resource[constants.TYPE]).value;
+function render(){
+var resource=this.props.resource;
+var model=utils.getModel(resource[constants.TYPE] || resource.id).value;
+var me=utils.getMe();
+var isMyMessage=this.state.isMyMessage;
+var to=this.props.to;
+var ownerPhoto,hasOwnerPhoto=true;
+
+if(isMyMessage || !to || !to.photos){
+ownerPhoto = React.createElement(View,{style:[styles.cell,{marginVertical:0}]});
+hasOwnerPhoto = false;}else 
+
+if(to){
+if(to.photos){
+var uri=utils.getImageUri(to.photos[0].url);
+ownerPhoto = React.createElement(Image,{source:{uri:uri},style:styles.msgImage});
+hasOwnerPhoto = true;}else 
+
+if(!isMyMessage){
+var title=resource.to.title.split(' ').map(function(s){
+return s.charAt(0);}).
+join('');
+ownerPhoto = React.createElement(LinearGradient,{colors:['#A4CCE0','#7AAAc3','#5E92AD'],style:styles.cellRoundImage},
+React.createElement(Text,{style:styles.cellText},title));}}
+
+
+
+
+var renderedRow=[];
+var onPressCall;
+var isVerification=resource[constants.TYPE] === 'tradle.Verification';
+if(isVerification)
+onPressCall = this.props.onSelect;else 
+
+onPressCall = this.formatRow(isMyMessage,model,resource,renderedRow);
+
+var photoUrls=[];
+var photoListStyle={height:3};
+var addStyle,inRow;
+var noMessage=!resource.message || !resource.message.length;
+if(!renderedRow.length && !isVerification){
+var vCols=noMessage?null:utils.getDisplayName(resource,model.properties);
+if(vCols)
+renderedRow = React.createElement(Text,{style:styles.resourceTitle,numberOfLines:2},vCols);}else 
+
+{
+var fromHash=resource.from.id;
+if(isMyMessage){
+if(!noMessage)
+addStyle = styles.myCell;}else 
+
+{
+if(!model.style)
+addStyle = {padding:5,borderRadius:10,borderColor:'#cccccc',backgroundColor:'#ffffff',marginVertical:2};}
+
+if(model.style || isVerification)
+addStyle = [addStyle,{padding:5,borderRadius:10,backgroundColor:STRUCTURED_MESSAGE_COLOR,borderWidth:1,borderColor:'#deeeb4',marginVertical:2}];}
+
+var properties=model.properties;
+var verPhoto;
+if(properties.photos){
+if(resource.photos){
+var len=resource.photos.length;
+inRow = len === 1?1:len == 2 || len == 4?2:3;
+var style;
+if(inRow === 1)
+style = styles.bigImage;else 
+if(inRow === 2)
+style = styles.mediumImage;else 
+
+style = styles.image;
+for(var p of resource.photos) 
+photoUrls.push({url:utils.getImageUri(p.url)});
+
+photoListStyle = {
+flexDirection:'row',
+alignSelf:isMyMessage?'flex-end':'flex-start',
+marginLeft:isMyMessage?30:hasOwnerPhoto?45:10,
+borderRadius:10,
+marginBottom:3};}else 
+
+
+
+verPhoto = React.createElement(View,{style:{height:0,width:0}});}
+
+var rowStyle=styles.row;
+var val;
+var date;
+if(resource.time){
+var previousMessageTime=this.props.previousMessageTime;
+var showTime=!previousMessageTime || this.props.isAggregation;
+
+if(!showTime){
+var prevDate=new Date(previousMessageTime);
+var curDate=new Date(resource.time);
+showTime = resource.time - previousMessageTime > 3600000 || 
+prevDate.getDate() !== curDate.getDate() || 
+prevDate.getMonth() !== curDate.getMonth() || 
+prevDate.getYear() !== curDate.getYear();}
+
+
+if(showTime)
+val = utils.getFormattedDate(resource.time);}
+
+
+var date=val?
+React.createElement(Text,{style:styles.date,numberOfLines:1},val):
+React.createElement(View,null);
+
+var showMessageBody;
+if(noMessage){
+if(hasOwnerPhoto)
+showMessageBody = true;else 
+if(!model.properties['message'])
+showMessageBody = true;else 
+if(isVerification)
+showMessageBody = true;}else 
+
+
+showMessageBody = true;
+var messageBody;
+var isSimpleMessage=model.id === 'tradle.SimpleMessage';
+if(showMessageBody){
+var viewStyle={flexDirection:'row',alignSelf:isMyMessage?'flex-end':'flex-start'};
+if(resource.message){
+if(resource.message.charAt(0) === '[' || resource.message.length > 30)
+viewStyle.width = 280;}
+
+if(!isSimpleMessage)
+viewStyle.width = 280;
+if(isVerification){
+var msgModel=utils.getModel(resource.document[constants.TYPE]).value;
+
+renderedRow = React.createElement(View,null,
+React.createElement(View,{style:{backgroundColor:'#289427',padding:5,marginHorizontal:-6,marginTop:-5}},
+React.createElement(Text,{style:{fontSize:16,fontWeight:600,color:'#ffffff',alignSelf:'center'}},'Verified by ',
+resource.organization.title)),
+
+
+React.createElement(View,{style:{paddingTop:5}},
+this.formatDocument(msgModel,resource,this.verify.bind(this))));}
+
+
+
+messageBody = 
+React.createElement(TouchableHighlight,{onPress:onPressCall?onPressCall:function(){},underlayColor:'transparent'},
+React.createElement(View,{style:[rowStyle,viewStyle]},
+ownerPhoto,
+React.createElement(View,{style:addStyle?[styles.textContainer,addStyle]:styles.textContainer},
+React.createElement(View,{style:{flex:1}},
+renderedRow))));}else 
+
+
+
+
+
+
+messageBody = React.createElement(View,{style:{height:5}});
+
+var len=photoUrls.length;
+var inRow=len === 1?1:len == 2 || len == 4?2:3;
+var photoStyle={};
+var height;
+if(inRow > 0){
+if(inRow === 1)
+photoStyle = styles.bigImage;else 
+if(inRow === 2)
+photoStyle = styles.mediumImage;else 
+
+photoStyle = styles.image;}
+
+
+var viewStyle={margin:1,backgroundColor:'#f7f7f7'};
+var model=utils.getModel(this.props.resource[constants.TYPE]).value;
+var isLicense=model.id.indexOf('License') !== -1 || model.id.indexOf('Passport') !== -1;
+var photoStyle=isLicense?styles.bigImageH:photoStyle;
+var verifications=this.showVerifications(rowStyle,viewStyle,addStyle);
+
+return (
+React.createElement(View,{style:viewStyle,key:resource},
+date,
+messageBody,
+React.createElement(View,{style:photoListStyle},
+React.createElement(PhotoList,{photos:photoUrls,resource:this.props.resource,style:[photoStyle,{marginTop:-20}],navigator:this.props.navigator,numberInRow:inRow})),
+
+verifications));}},{key:'showVerifications',value:
+
+
+
+
+function showVerifications(rowStyle,viewStyle,addStyle){
+if(!this.props.verificationsToShare || !this.props.resource.message)
+return React.createElement(View,null);
+
+var resource=this.props.resource;
+var msgParts=utils.splitMessage(resource.message);
+
+if(msgParts.length != 2)
+return React.createElement(View,null);
+
+var msgModel=utils.getModel(msgParts[1]);
+if(!msgModel)
+return React.createElement(View,null);
+msgModel = msgModel.value;
+var vtt=[];
+var cnt=0;
+var self=this;
+for(var t in this.props.verificationsToShare) {
+
+var ver=this.props.verificationsToShare[t];
+ver.forEach(function(r){
+var vModel=utils.getModel(r[constants.TYPE]);
+var doc=self.formatDocument(msgModel,r);
+if(cnt){
+doc = React.createElement(View,null,
+React.createElement(View,{style:{height:1,backgroundColor:'#dddddd'}}),
+doc);}
+
+
+
+vtt.push(doc);
+cnt++;});}
+
+
+
+if(!vtt.length)
+return React.createElement(View,null);
+var ownerPhoto=React.createElement(Image,{style:styles.msgImage,source:require('image!happyLock')});
+var modelTitle=msgModel.title;
+var idx=modelTitle.indexOf('Verification');
+var docType;
+if(idx === -1)
+docType = modelTitle;else 
+
+docType = modelTitle.substring(0,idx) + (modelTitle.length === idx + 12?'':modelTitle.substring(idx + 12));
+
+var msg=utils.getMe().firstName + ', this is your personal privacy assistant. I see you\'ve already had your ' + docType + ' verified.';
+if(vtt.length === 1)
+msg += ' You can tap below to share it with ';else 
+
+msg += ' You can tap on any items in the list below to share them with ';
+msg += this.props.to.organization?this.props.to.organization.title + '.':this.props.to.name;
+
+return (
+React.createElement(View,{style:[rowStyle,viewStyle,{width:280}]},
+ownerPhoto,
+React.createElement(View,{style:addStyle?[styles.textContainer,addStyle]:styles.textContainer},
+React.createElement(View,{style:{flex:1}},
+React.createElement(View,{style:{backgroundColor:STRUCTURED_MESSAGE_COLOR,padding:5,margin:-5}},
+React.createElement(Text,{style:{color:'#2E3B4E'}},
+msg),
+
+React.createElement(View,{style:[styles.separator,{marginHorizontal:-7}]})),
+
+vtt))));}},{key:'onPress',value:
+
+
+
+
+
+
+
+function onPress(event){
 this.props.navigator.push({
-title:utils.makeTitle(utils.getDisplayName(resource,m.properties)),
-id:3,
-component:ResourceView,
-titleTextColor:'#7AAAC3',
-backButtonTitle:'Back',
-rightButtonTitle:'Edit',
-onRightButtonPress:{
-title:title,
+id:7,
+component:ArticleView,
+passProps:{url:this.props.resource.message}});}},{key:'createNewResource',value:
+
+
+function createNewResource(model){
+var resource={
+'from':this.props.resource.to,
+'to':this.props.resource.from,
+'message':this.props.resource.message};
+
+resource[constants.TYPE] = model.id;
+
+this.props.navigator.push({
 id:4,
+title:model.title,
+rightButtonTitle:'Done',
+backButtonTitle:'Back',
 component:NewResource,
 titleTextColor:'#7AAAC3',
-backButtonTitle:'Back',
-rightButtonTitle:'Done',
 passProps:{
-model:m,
-resource:resource}},
+model:model,
+resource:resource}});}},{key:'verify',value:
 
 
 
-passProps:{resource:resource}});
 
-return;}
+function verify(event){
+var resource=this.props.resource;
+var isVerification=resource[constants.TYPE] === 'tradle.Verification';
+if(isVerification)
+resource = resource.document;
 
-if(this.props.prop){
-if(me && this.props.modelName != constants.TYPES.IDENTITY){
-this._selectResource(resource);
-return;}
+var passProps={
+resource:resource};
 
-if(!me){
-if(this.state.isRegistration){
-this._selectResource(resource);
-return;}}else 
-
-
-if(me[constants.ROOT_HASH] === resource[constants.ROOT_HASH] || 
-this.props.resource && me[constants.ROOT_HASH] === this.props.resource[constants.ROOT_HASH] && this.props.prop){
-this._selectResource(resource);
-return;}}
+if(!isVerification)
+passProps.verify = true;
 
 
-var title=isIdentity?resource.firstName:resource.name;
-var modelName='tradle.Message';
-var self=this;
+var model=utils.getModel(resource[constants.TYPE]).value;
 var route={
-title:title,
-component:MessageList,
-id:11,
-passProps:{
-resource:resource,
-filter:'',
-modelName:modelName}};
-
-
-if(isIdentity){
-route.rightButtonTitle = 'Profile';
-route.onRightButtonPress = {
-title:title,
-id:3,
-component:ResourceView,
-titleTextColor:'#7AAAC3',
+id:5,
+component:MessageView,
 backButtonTitle:'Back',
-rightButtonTitle:'Edit',
-onRightButtonPress:{
-title:title,
-id:4,
-component:NewResource,
-titleTextColor:'#7AAAC3',
-backButtonTitle:'Back',
-rightButtonTitle:'Done',
-passProps:{
-model:utils.getModel(resource[constants.TYPE]).value,
-resource:resource}},
+passProps:passProps,
+title:resource[constants.TYPE] == 'tradle.AssetVerification'?'Doc verification':model.title};
 
-
-passProps:{resource:resource}};}
-
-
-this.props.navigator.push(route);}},{key:'_selectResource',value:
-
-
-function _selectResource(resource){
-var model=utils.getModel(this.props.modelName);
-var title=utils.getDisplayName(resource,model.value.properties);
-var newTitle=title;
-if(title.length > 20){
-var t=title.split(' ');
-newTitle = '';
-t.forEach(function(word){
-if(newTitle.length + word.length > 20)
-return;
-newTitle += newTitle.length?' ' + word:word;});}
-
-
-
-var route={
-title:utils.makeTitle(newTitle),
-id:3,
-component:ResourceView,
-parentMeta:model,
-backButtonTitle:'Back',
-passProps:{resource:resource}};
-
-
-var me=utils.getMe();
-if((me || this.state.isRegistration) && this.props.prop){
-this.props.callback(this.props.prop,resource);
-this.props.navigator.popToRoute(this.props.returnRoute);
-return;}
-
-if(me && 
-!model.value.isInterface && (
-resource[constants.ROOT_HASH] === me[constants.ROOT_HASH] || resource[constants.TYPE] !== constants.TYPES.IDENTITY)){
-var self=this;
+if(this.state.isMyMessage){
 route.rightButtonTitle = 'Edit';
 route.onRightButtonPress = {
 title:'Edit',
-id:4,
 component:NewResource,
-rightButtonTitle:'Done',
 titleTextColor:'#7AAAC3',
+id:4,
 passProps:{
-model:utils.getModel(resource[constants.TYPE]).value,
-resource:me}};}
+resource:resource,
+metadata:model,
+callback:this.props.onSelect,
+resourceKey:model.id + '_' + resource[constants.ROOT_HASH]}};}
 
 
 
-this.props.navigator.push(route);}},{key:'showRefResources',value:
+this.props.navigator.push(route);}},{key:'formatRow',value:
 
-function showRefResources(resource,prop){
-var props=utils.getModel(resource[constants.TYPE]).value.properties;
-var propJson=props[prop];
-var resourceTitle=utils.getDisplayName(resource,props);
-resourceTitle = utils.makeTitle(resourceTitle);
+function formatRow(isMyMessage,model,resource,renderedRow){
+var viewCols=model.gridCols || model.viewCols;
+if(!viewCols)
+return;
+var verPhoto;
+var vCols=[];
+var first=true;
+var self=this;
+var model=utils.getModel(resource[constants.TYPE] || resource.id).value;
 
-var backlinksTitle=propJson.title + ' - ' + resourceTitle;
-backlinksTitle = utils.makeTitle(backlinksTitle);
-var modelName=propJson.items.ref;
+var properties=model.properties;
+var noMessage=!resource.message || !resource.message.length;
+var onPressCall;
 
+var isSimpleMessage=model.id === 'tradle.SimpleMessage';
+var cnt=0;
+viewCols.forEach(function(v){
+if(properties[v].type === 'array' || properties[v].type === 'date')
+return;
+var style=styles.resourceTitle;
+if(isMyMessage){
+style = [style,{justifyContent:'flex-end',paddingLeft:5}];
+if(isSimpleMessage)
+style.push({color:'#ffffff'});}
+
+
+if(properties[v].ref){
+if(resource[v]){
+vCols.push(React.createElement(Text,{style:style,numberOfLines:first?2:1},resource[v].title));
+first = false;}
+
+return;}
+
+
+if(resource[v] && 
+properties[v].type === 'string' && (
+resource[v].indexOf('http://') == 0 || resource[v].indexOf('https://') == 0)){
+onPressCall = self.onPress.bind(self);
+vCols.push(React.createElement(Text,{style:style,numberOfLines:first?2:1},resource[v]));}else 
+
+if(!model.autoCreate){
+var val=properties[v].displayAs?
+utils.templateIt(properties[v],resource):
+resource[v];
+if(model.properties.verifications && !isMyMessage)
+onPressCall = self.verify.bind(self);
+vCols.push(React.createElement(Text,{style:style,numberOfLines:first?2:1},val));}else 
+
+{
+if(!resource[v] || !resource[v].length)
+return;
+var msgParts=utils.splitMessage(resource[v]);
+
+if(msgParts.length === 2){
+var msgModel=utils.getModel(msgParts[1]);
+if(msgModel){
+if(self.props.verificationsToShare)
+style = styles.description;
+msgModel = msgModel.value;
+if(!msgParts[0].length)
+msgParts[0] = 'I just sent you a request for ';
+if(!isMyMessage)
+onPressCall = self.createNewResource.bind(self,msgModel);
+var link=isMyMessage?
+React.createElement(Text,{style:[style,{color:isMyMessage?STRUCTURED_MESSAGE_COLOR:'#2892C6'}]},msgModel.title):
+React.createElement(View,{style:{flexDirection:'row',justifyContent:'space-between'}},
+React.createElement(Text,{style:[style,{color:isMyMessage?STRUCTURED_MESSAGE_COLOR:'#2892C6'}]},msgModel.title),
+React.createElement(Icon,{style:styles.linkIcon,size:20,name:'ios-arrow-right'}));
+
+
+vCols.push(React.createElement(View,null,
+React.createElement(Text,{style:style},msgParts[0]),
+link));
+
+return;}}
+
+
+vCols.push(React.createElement(Text,{style:style},resource[v]));}
+
+first = false;});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+if(model.id !== 'tradle.SimpleMessage'){
+var t=model.title.split(' ');
+var s='';
+t.forEach(function(p){
+if(p.indexOf('Verif') === -1)
+s += p + ' ';});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+vCols.push(React.createElement(Text,{style:styles.verySmallLetters},s));}
+
+if(vCols && vCols.length)
+extend(renderedRow,vCols);
+return onPressCall?onPressCall:isSimpleMessage?null:this.props.onSelect;}},{key:'share',value:
+
+function share(){
+console.log('Share');}},{key:'shareDocs',value:
+
+function shareDocs(){
 this.props.navigator.push({
-title:backlinksTitle,
+title:m.title,
+titleTextColor:'#7AAAC3',
 id:10,
 component:ResourceList,
 backButtonTitle:'Back',
-titleTextColor:'#7AAAC3',
 passProps:{
+filter:filter,
+prop:propName,
+modelName:prop.ref,
 resource:resource,
-prop:prop,
-modelName:modelName},
-
-rightButtonTitle:'Details',
-onRightButtonPress:{
-title:resourceTitle,
-id:3,
-component:ResourceView,
-titleTextColor:'#7AAAC3',
-backButtonTitle:'Back',
-rightButtonTitle:'Edit',
-onRightButtonPress:{
-title:resourceTitle,
-id:4,
-component:NewResource,
-titleTextColor:'#7AAAC3',
-backButtonTitle:'Back',
-rightButtonTitle:'Done',
-passProps:{
-model:utils.getModel(resource[constants.TYPE]).value,
-resource:resource}},
-
-
-
-passProps:{resource:resource}}});}},{key:'onSearchChange',value:
+returnRoute:currentRoutes[currentRoutes.length - 1],
+callback:this.setChosenValue.bind(this)}});}},{key:'formatDocument',value:
 
 
 
 
-function onSearchChange(filter){
-Actions.list({
-query:filter,
-modelName:this.props.modelName,
-to:this.props.resource});}},{key:'renderRow',value:
+function formatDocument(model,verification,onPress){var _this=this;
+var resource=verification.document;
+var self=this;
+var docModel=utils.getModel(resource[constants.TYPE]).value;
+var docModelTitle=docModel.title;
+var idx=docModelTitle.indexOf('Verification');
+var docTitle=idx === -1?docModelTitle:docModelTitle.substring(0,idx);
 
-
-
-function renderRow(resource){var _this=this;
-var model=utils.getModel(this.props.modelName).value;
-
-return React.createElement(ResourceRow,{
-onSelect:function(){return _this.selectResource(resource);},
-key:resource[constants.ROOT_HASH],
-showRefResources:this.showRefResources.bind(this),
-resource:resource});}},{key:'renderFooter',value:
-
-
-function renderFooter(){
-var me=utils.getMe();
-if(!me || this.props.prop && this.props.prop.readOnly)
-return React.createElement(View,null);
-
-return (
-React.createElement(View,{style:styles.footer},
-React.createElement(TouchableHighlight,{underlayColor:'transparent',onPress:this.addNew.bind(this)},
-React.createElement(View,null,
-React.createElement(Icon,{name:'ion|plus',size:30,color:'#999999',style:styles.icon})))));}},{key:'addNew',value:
-
-
-
-
-
-function addNew(){var _this2=this;
-var model=utils.getModel(this.props.modelName).value;
-var r;
-
-
-if(this.props.resource){
-var props=model.properties;
-for(var p in props) {
-if(props[p].ref && props[p].ref === this.props.resource[constants.TYPE]){
-r = {};
-r[constants.TYPE] = this.props.modelName;
-r[p] = {id:this.props.resource[constants.TYPE] + '_' + this.props.resource[constants.ROOT_HASH]};
-
-if(this.props.resource.relatedTo && props.relatedTo)
-r.relatedTo = this.props.resource.relatedTo;}}}
-
-
-
-this.props.navigator.push({
-title:model.title,
-id:4,
-component:NewResource,
-titleTextColor:'#7AAAC3',
-backButtonTitle:'Back',
-rightButtonTitle:'Done',
-passProps:{
-model:model,
-resource:r,
-callback:function(){return Actions.list({
-modelName:_this2.props.modelName,
-to:_this2.props.resource});}}});}},{key:'render',value:
-
-
-
-
-function render(){
-if(this.state.isLoading)
-return React.createElement(View,null);
-var content;
-var model=utils.getModel(this.props.modelName).value;
-if(this.state.dataSource.getRowCount() === 0)
-content = React.createElement(NoResources,{
-filter:this.state.filter,
-model:model,
-isLoading:this.state.isLoading});else 
+var msg;
+if(resource.message)
+msg = React.createElement(View,null,React.createElement(Text,{style:styles.description},resource.message));else 
 {
-var model=utils.getModel(this.props.modelName).value;
-content = React.createElement(GridView,{ref:'listview',
-items:this.state.list,
-renderItem:this.renderRow.bind(this),
-itemsPerRow:4});}
+var rows=[];
+this.formatDocument1(model,resource,rows);
+msg = React.createElement(View,null,rows);}
 
-var model=utils.getModel(this.props.modelName).value;
-var Footer=this.renderFooter();
+
+
+
+
+
+var photo=resource && resource.photos?
+React.createElement(Image,{source:{uri:utils.getImageUri(resource.photos[0].url)},style:styles.cellImage}):
+React.createElement(View,null);
+
+var orgRow;
+if(verification.organization){
+var orgPhoto=verification.organization.photo?
+React.createElement(Image,{source:{uri:utils.getImageUri(verification.organization.photo)},style:[styles.orgImage,{marginTop:-5}]}):
+React.createElement(View,null);
+
+orgRow = onPress?
+React.createElement(View,null):
+React.createElement(View,{style:{flexDirection:'row',marginTop:5}},
+React.createElement(Text,{style:styles.verySmallLetters},'verified by '),
+React.createElement(Text,{style:[styles.verySmallLetters,{color:'#757575'}]},verification.organization.title.length < 10?verification.organization.title:verification.organization.title.substring(0,8) + '..'));}else 
+
+
+
+orgRow = React.createElement(View,null);
+var orgTitle=this.props.to[constants.TYPE] === 'tradle.Organization'?
+this.props.to.name:
+this.props.to.organization?this.props.to.organization.title:null;
 return (
-React.createElement(View,{style:styles.container},
-React.createElement(SearchBar,{
-onChangeText:this.onSearchChange.bind(this),
-placeholder:'Search',
-showsCancelButton:false,
-hideBackground:true}),
-
-React.createElement(View,{style:styles.separator}),
-content,
-Footer));}}]);return GridList;})(Component);
+React.createElement(TouchableHighlight,{underlayColor:'transparent',onPress:onPress?onPress:function(){return (
+AlertIOS.alert(
+'Sharing ' + docTitle + ' verified by ' + verification.organization.title,
+'with ' + orgTitle,
+[
+{text:'Share',onPress:_this.share.bind(_this)},
+{text:'Cancel',onPress:function(){return console.log('Canceled!');}}]));}},
 
 
+React.createElement(View,{style:{flex:1,flexDirection:'row',paddingVertical:5}},
+React.createElement(View,null,
+photo),
+
+React.createElement(View,{style:{flex:1}},
+msg,
+orgRow))));}},{key:'formatDocument1',value:
 
 
-reactMixin(GridList.prototype,Reflux.ListenerMixin);
+
+
+
+function formatDocument1(model,resource,renderedRow){
+var viewCols=model.gridCols || model.viewCols;
+if(!viewCols)
+return;
+var verPhoto;
+var vCols=[];
+var first=true;
+var self=this;
+var model=utils.getModel(resource[constants.TYPE] || resource.id).value;
+
+var properties=model.properties;
+var noMessage=!resource.message || !resource.message.length;
+var onPressCall;
+
+var isSimpleMessage=model.id === 'tradle.SimpleMessage';
+
+viewCols.forEach(function(v){
+if(properties[v].type === 'array' || properties[v].type === 'date')
+return;
+var style=styles.description;
+
+if(properties[v].ref){
+if(resource[v]){
+vCols.push(React.createElement(Text,{style:style,numberOfLines:first?2:1},resource[v].title));
+first = false;}
+
+
+return;}
+
+
+if(resource[v] && properties[v].type === 'string' && (resource[v].indexOf('http://') == 0 || resource[v].indexOf('https://') == 0))
+row = React.createElement(Text,{style:style,numberOfLines:first?2:1},resource[v]);else 
+if(!model.autoCreate){
+var val=properties[v].displayAs?
+utils.templateIt(properties[v],resource):
+resource[v];
+row = React.createElement(Text,{style:style,numberOfLines:first?2:1},val);}else 
+
+{
+if(!resource[v] || !resource[v].length)
+return;
+var msgParts=utils.splitMessage(resource[v]);
+
+if(msgParts.length === 2){
+var msgModel=utils.getModel(msgParts[1]);
+if(msgModel){
+vCols.push(React.createElement(View,null,
+React.createElement(Text,{style:style},msgParts[0]),
+React.createElement(Text,{style:[style,{color:isMyMessage?STRUCTURED_MESSAGE_COLOR:'#7AAAC3'}]},msgModel.value.title)));
+
+return;}}
+
+
+var row=React.createElement(Text,{style:style},resource[v]);}
+
+
+if(first){
+row = React.createElement(View,{style:{flexDirection:'row',justifyContent:'space-between'}},
+React.createElement(View,null,row),
+React.createElement(View,null,React.createElement(Text,{style:styles.verySmallLetters},renderedRow[0])));
+
+renderedRow.splice(0,1);}
+
+vCols.push(row);
+first = false;});
+
+
+
+
+if(vCols && vCols.length){
+vCols.forEach(function(v){
+renderedRow.push(v);});}}}]);return MessageRow;})(Component);
+
+
+
+
+
 
 var styles=StyleSheet.create({
-container:{
-flex:1,
-backgroundColor:'#f7f7f7',
-
-marginTop:60},
-
-centerText:{
-alignItems:'center'},
-
-separator:{
-height:1,
-backgroundColor:'#cccccc'},
-
-icon:{
-width:30,
-height:30,
-marginRight:5},
-
-
-image:{
-width:25,
-height:25,
-marginRight:5},
-
-
-footer:{
-flexDirection:'row',
-flexWrap:'nowrap',
-justifyContent:'space-between',
-height:45,
-paddingTop:5,
-paddingHorizontal:10,
-backgroundColor:'#eeeeee',
-borderBottomColor:'#eeeeee',
-borderRightColor:'#eeeeee',
-borderLeftColor:'#eeeeee',
-borderWidth:1,
-borderTopColor:'#cccccc'},
-
-row:{
-
-
-flexDirection:'row',
-padding:5},
-
 textContainer:{
-flex:1},
+flex:1,
+flexDirection:'row'},
+
+modelTitle:{
+flex:1,
+flexWrap:'wrap',
+fontSize:17,
+fontWeight:'400',
+marginVertical:15},
 
 resourceTitle:{
 flex:1,
 fontSize:16,
 fontWeight:'400',
-marginBottom:2,
-paddingLeft:5},
+marginBottom:2},
+
+date:{
+flex:1,
+color:'#999999',
+fontSize:12,
+alignSelf:'center',
+paddingTop:10},
+
+row:{
+alignItems:'center',
+backgroundColor:'#f7f7f7',
+flexDirection:'row'},
+
+cell:{
+marginLeft:10},
+
+myCell:{
+padding:5,
+justifyContent:'flex-end',
+borderRadius:10,
+backgroundColor:'#569bff'},
+
+warnImage:{
+backgroundColor:'#dddddd',
+height:45,
+marginRight:5,
+width:45,
+borderRadius:10,
+borderColor:'#cccccc',
+borderWidth:1},
+
+msgImage:{
+backgroundColor:'#dddddd',
+height:40,
+marginRight:5,
+width:40,
+borderRadius:20,
+borderColor:'#cccccc',
+borderWidth:1},
+
+bigImage:{
+width:240,
+height:280,
+margin:1,
+borderRadius:10},
+
+bigImageH:{
+width:270,
+height:200,
+margin:1,
+borderRadius:10},
+
+mediumImage:{
+width:120,
+height:120,
+margin:1,
+borderRadius:10},
+
+image:{
+width:80,
+height:80,
+margin:1,
+borderRadius:10},
+
+ownerImage:{
+backgroundColor:'#dddddd',
+height:30,
+width:30,
+marginTop:-5,
+position:'absolute',
+right:10,
+borderRadius:15,
+borderColor:'#cccccc',
+borderWidth:1},
+
+verifications:{
+fontSize:12},
+
+
+verySmallLetters:{
+fontSize:12,
+alignSelf:'flex-end',
+color:'#757575'},
+
+
+orgImage:{
+width:20,
+height:20,
+marginLeft:5,
+
+borderRadius:10},
+
+verificationCheck:{
+flexDirection:'row',
+alignSelf:'flex-end',
+padding:3,
+marginVertical:5},
+
+
+cellRoundImage:{
+paddingVertical:1,
+borderRadius:30,
+height:60,
+marginRight:10,
+width:60,
+alignSelf:'center'},
+
+cellText:{
+marginTop:16,
+alignSelf:'center',
+color:'#ffffff',
+fontSize:20,
+backgroundColor:'transparent'},
 
 cellImage:{
-
-height:50,
+backgroundColor:'#dddddd',
+height:40,
+width:40,
 marginRight:10,
-width:50}});
+borderColor:'transparent',
+borderRadius:10,
+borderWidth:1},
+
+linkIcon:{
+width:20,
+height:20,
+color:'#2892C6'},
 
 
 
@@ -91908,158 +90657,26 @@ width:50}});
 
 
 
-module.exports = GridList;
+
+
+
+description:{
+
+color:'#757575',
+fontSize:14},
+
+separator:{
+height:0.5,
+marginTop:5,
+backgroundColor:'#cccccc',
+flex:40}});
+
+
+reactMixin(MessageRow.prototype,RowMixin);
+
+module.exports = MessageRow;
 });
-__d('react-native-grid-view/index.js',["react-native/Libraries/react-native/react-native.js"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';
-
-var React=require('react-native/Libraries/react-native/react-native.js');var 
-
-
-AppRegistry=
-
-
-
-React.AppRegistry;var View=React.View;var StyleSheet=React.StyleSheet;var ListView=React.ListView;
-
-var CollectionView=React.createClass({displayName:'CollectionView',
-groupItems:function(items,itemsPerRow){
-var itemsGroups=[];
-var group=[];
-items.forEach(function(item){
-if(group.length === itemsPerRow){
-itemsGroups.push(group);
-group = [item];}else 
-{
-group.push(item);}});
-
-
-
-if(group.length > 0){
-itemsGroups.push(group);}
-
-
-return itemsGroups;},
-
-getInitialState:function(){
-return {items:[],renderItem:null,style:undefined,itemsPerRow:1,onEndReached:undefined};},
-
-renderGroup:function(group){
-var that=this;
-var items=group.map(function(item){
-return that.props.renderItem(item);});
-
-return (
-React.createElement(View,{style:styles.group},
-items));},
-
-
-
-render:function(){
-var groups=this.groupItems(this.props.items,this.props.itemsPerRow);
-var ds=new ListView.DataSource({rowHasChanged:function(r1,r2){return r1 !== r2;}});
-return React.createElement(ListView,{
-dataSource:ds.cloneWithRows(groups),
-renderRow:this.renderGroup,
-style:this.props.style,
-onEndReached:this.props.onEndReached});}});
-
-
-
-
-
-var styles=StyleSheet.create({
-group:{
-flexDirection:'row',
-alignItems:'center',
-justifyContent:'center'}});
-
-
-
-module.exports = CollectionView;
-});
-__d('react-native/Libraries/react-native/react-native.js',["React","ActivityIndicatorIOS","DatePickerIOS","Image","ListView","MapView","NavigatorIOS","PickerIOS","Navigator","SegmentedControlIOS","ScrollView","SliderIOS","SwitchIOS","TabBarIOS","Text","TextInput","TouchableHighlight","TouchableOpacity","TouchableWithoutFeedback","View","WebView","AlertIOS","AppRegistry","AppStateIOS","AsyncStorage","CameraRoll","InteractionManager","LinkingIOS","LayoutAnimation","NetInfo","PixelRatio","PushNotificationIOS","PanResponder","StatusBarIOS","StyleSheet","VibrationIOS","RCTDeviceEventEmitter","NativeModules","requireNativeComponent","LinkedStateMixin","ReactComponentWithPureRenderMixin","NativeModules","ReactUpdates","cloneWithProps","ReactFragment","update","ReactDefaultPerf","ReactTestUtils"],function(global, require, requireDynamic, requireLazy, module, exports) {  'use strict';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-var ReactNative=Object.assign(Object.create(require('React')),{
-
-ActivityIndicatorIOS:require('ActivityIndicatorIOS'),
-DatePickerIOS:require('DatePickerIOS'),
-Image:require('Image'),
-ListView:require('ListView'),
-MapView:require('MapView'),
-NavigatorIOS:require('NavigatorIOS'),
-PickerIOS:require('PickerIOS'),
-Navigator:require('Navigator'),
-SegmentedControlIOS:require('SegmentedControlIOS'),
-ScrollView:require('ScrollView'),
-SliderIOS:require('SliderIOS'),
-SwitchIOS:require('SwitchIOS'),
-TabBarIOS:require('TabBarIOS'),
-Text:require('Text'),
-TextInput:require('TextInput'),
-TouchableHighlight:require('TouchableHighlight'),
-TouchableOpacity:require('TouchableOpacity'),
-TouchableWithoutFeedback:require('TouchableWithoutFeedback'),
-View:require('View'),
-WebView:require('WebView'),
-
-
-AlertIOS:require('AlertIOS'),
-AppRegistry:require('AppRegistry'),
-AppStateIOS:require('AppStateIOS'),
-AsyncStorage:require('AsyncStorage'),
-CameraRoll:require('CameraRoll'),
-InteractionManager:require('InteractionManager'),
-LinkingIOS:require('LinkingIOS'),
-LayoutAnimation:require('LayoutAnimation'),
-NetInfo:require('NetInfo'),
-PixelRatio:require('PixelRatio'),
-PushNotificationIOS:require('PushNotificationIOS'),
-PanResponder:require('PanResponder'),
-StatusBarIOS:require('StatusBarIOS'),
-StyleSheet:require('StyleSheet'),
-VibrationIOS:require('VibrationIOS'),
-
-
-DeviceEventEmitter:require('RCTDeviceEventEmitter'),
-NativeModules:require('NativeModules'),
-requireNativeComponent:require('requireNativeComponent'),
-
-addons:{
-LinkedStateMixin:require('LinkedStateMixin'),
-Perf:undefined,
-PureRenderMixin:require('ReactComponentWithPureRenderMixin'),
-TestModule:require('NativeModules').TestModule,
-TestUtils:undefined,
-batchedUpdates:require('ReactUpdates').batchedUpdates,
-cloneWithProps:require('cloneWithProps'),
-createFragment:require('ReactFragment').create,
-update:require('update')}});
-
-
-
-if(__DEV__){
-ReactNative.addons.Perf = require('ReactDefaultPerf');
-ReactNative.addons.TestUtils = require('ReactTestUtils');}
-
-
-module.exports = ReactNative;
+__d('image!happyLock',[],function(global, require, requireDynamic, requireLazy, module, exports) {  module.exports = {"__packager_asset":true,"isStatic":true,"path":"/Users/Ellen/lablz/Identity/iOS/Images.xcassets/happyLock.imageset/happyLock.png","uri":"happyLock","width":270,"height":270,"deprecated":true};
 });
 __d('image!banking',[],function(global, require, requireDynamic, requireLazy, module, exports) {  module.exports = {"__packager_asset":true,"isStatic":true,"path":"/Users/Ellen/lablz/Identity/iOS/Images.xcassets/banking.imageset/banking.png","uri":"banking","width":32,"height":32,"deprecated":true};
 });
@@ -92233,16 +90850,16 @@ if(utils.getMe()){
 editProfile = React.createElement(TouchableHighlight,{
 underlayColor:'#2E3B4E',onPress:this.onEditProfilePressed.bind(this)},
 React.createElement(Text,{style:styles.text},
-'Edit Profile'));
+'Edit Profile'));}else 
 
 
-communities = React.createElement(TouchableWithoutFeedback,{style:styles.communities,onPress:this.showCommunities.bind(this)},
-React.createElement(Text,{style:styles.communitiesText},'Communities'));}else 
+
+
 
 
 {
-editProfile = React.createElement(View,null);
-communities = React.createElement(View,{style:{marginTop:20}});}
+editProfile = React.createElement(View,null);}
+
 
 
 
@@ -92252,10 +90869,13 @@ StatusBarIOS.setHidden(true);
 return (
 React.createElement(View,{style:styles.scroll},
 React.createElement(Text,{style:styles.title},'Trust in Motion (TiM)'),
-React.createElement(ScrollView,null,
+React.createElement(ScrollView,{
+scrollEnabled:false,
+style:{height:350}},
+
 React.createElement(TouchableHighlight,{style:[styles.thumbButton],
 underlayColor:'transparent',onPress:this.showContactsOrRegister.bind(this)},
-React.createElement(View,{style:styles.container,ref:'search'},
+React.createElement(View,{style:styles.container},
 React.createElement(View,null,
 React.createElement(Image,{style:styles.thumb,source:require('image!Tradle')}),
 React.createElement(Text,{style:styles.tradle},'Tradle'))))),
@@ -92266,8 +90886,8 @@ React.createElement(Text,{style:styles.tradle},'Tradle'))))),
 React.createElement(View,{style:{height:180}}),
 React.createElement(TouchableHighlight,{style:[styles.thumbButton],
 underlayColor:'transparent',onPress:this.showContactsOrRegister.bind(this)},
-React.createElement(View,{style:{backgroundColor:'#2892C6',paddingVertical:10,paddingHorizontal:30,borderRadius:10}},
-React.createElement(Text,{style:{color:'#f0f0f0',fontSize:17,fontWeight:400}},'Get started'))),
+React.createElement(View,{style:styles.getStarted},
+React.createElement(Text,{style:styles.getStartedText},'Get started'))),
 
 
 React.createElement(Text,{style:errStyle},err),
@@ -92312,7 +90932,7 @@ alignItems:'center'},
 
 tradle:{
 color:'#7AAAC3',
-fontSize:40,
+fontSize:35,
 alignSelf:'center'},
 
 text:{
@@ -92322,7 +90942,7 @@ paddingRight:10,
 fontSize:12},
 
 thumbButton:{
-marginBottom:10,
+
 alignSelf:'center',
 justifyContent:'center'},
 
@@ -92349,7 +90969,18 @@ dev:{
 marginTop:10,
 flexDirection:'row',
 marginBottom:500,
-alignSelf:'center'}});
+alignSelf:'center'},
+
+getStartedText:{
+color:'#f0f0f0',
+fontSize:17,
+fontWeight:'400'},
+
+getStarted:{
+backgroundColor:'#2892C6',
+paddingVertical:10,
+paddingHorizontal:30,
+borderRadius:10}});
 
 
 

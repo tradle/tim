@@ -221,7 +221,7 @@ class MessageRow extends Component {
         {date}
         {messageBody}
         <View style={photoListStyle}>
-          <PhotoList photos={photoUrls} resource={this.props.resource} style={[photoStyle, {marginTop: -20}]} navigator={this.props.navigator} numberInRow={inRow} />    
+          <PhotoList photos={photoUrls} resource={this.props.resource} style={[photoStyle, {marginTop: -30}]} navigator={this.props.navigator} numberInRow={inRow} />    
         </View>  
         {verifications}
       </View>
@@ -398,7 +398,7 @@ class MessageRow extends Component {
     var onPressCall;
 
     var isSimpleMessage = model.id === 'tradle.SimpleMessage';
-    var isAdditionalInfo = resource[constants.TYPE] === 'tradle.AdditionalInfo';
+    var isAdditionalInfo = !isSimpleMessage  &&  resource[constants.TYPE] === 'tradle.AdditionalInfo';
     var cnt = 0; 
     viewCols.forEach(function(v) {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date') 
@@ -436,6 +436,8 @@ class MessageRow extends Component {
                 : resource[v];
         if (model.properties.verifications  &&  !isMyMessage)                  
           onPressCall = self.verify.bind(self);
+        if (isAdditionalInfo)
+          style = [styles.description, {paddingBottom: 10, color: isMyMessage ? '#ffffff' : '#2892C6'}];
         vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>)
       }
       else {
@@ -467,6 +469,8 @@ class MessageRow extends Component {
             return;
           }
         }
+        if (isAdditionalInfo)
+          style = [style, {color: '#ffffff'}];
         vCols.push(<Text style={style}>{resource[v]}</Text>);
       }
       first = false;
@@ -507,13 +511,13 @@ class MessageRow extends Component {
       //              </View>);
       // }
       // else
-      vCols.push(<Text style={isAdditionalInfo && isMyMessage ? [styles.verySmallLetters, {color: '#ffffff'}] : styles.verySmallLetters}>{s}</Text>);
+
+        vCols.push(<Text style={styles.verySmallLetters}>{s}</Text>);
     }  
     if (vCols  &&  vCols.length)
       extend(renderedRow, vCols);
     if (isAdditionalInfo) {
-      if (!isMyMessage)
-        return this.editVerificationRequest.bind(this);
+      return isMyMessage ? onPressCall : this.editVerificationRequest.bind(this);
     }
     else
       return onPressCall ? onPressCall : (isSimpleMessage ? null : this.props.onSelect);
@@ -758,8 +762,8 @@ var styles = StyleSheet.create({
     borderRadius: 10
   },
   image: {
-    width: 80,
-    height: 80,
+    width: 88,
+    height: 88,
     margin: 1,
     borderRadius: 10
   },

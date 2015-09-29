@@ -12,6 +12,7 @@ var utils = require('../utils/utils');
 var level = require('react-native-level');
 var promisify = require('q-level');
 var constants = require('tradle-constants');
+
 var isTest, originalMe;
 // var Identity = require('midentity');
 // var Tim = require('tim');
@@ -78,7 +79,8 @@ var Store = Reflux.createStore({
         var title = type ? utils.getDisplayName(r[p], this.getModel(type).value.properties) : r[p].title
         rr[p] = {
           id: id,
-          title: title
+          title: title,
+          time: r.time
         }
       }
       else
@@ -143,7 +145,8 @@ var Store = Reflux.createStore({
     
     var newVerification = {
       id: key + '_' + r[constants.CUR_HASH], 
-      title: r.document.title ? r.document.title : ''
+      title: r.document.title ? r.document.title : '',
+      time: r.time
     };
     var verificationRequest = list[verificationRequestId].value;
     if (!verificationRequest.verifiedBy)
@@ -259,7 +262,7 @@ var Store = Reflux.createStore({
   onAddNewIdentity(resource) {
     var newIdentity = {
       id: resource[constants.TYPE] + '_' + resource[constants.ROOT_HASH], 
-      title: utils.getDisplayName(resource, this.getModel(resource[constants.TYPE]).value.properties)
+      title: utils.getDisplayName(resource, this.getModel(resource[constants.TYPE]).value.properties),
     };
     var myIdentity = list[MY_IDENTITIES_MODEL + '_1'].value;
     myIdentity.allIdentities.push(newIdentity);
@@ -491,7 +494,8 @@ var Store = Reflux.createStore({
           var title = utils.getDisplayName(value, self.getModel(value[constants.TYPE]).value.properties);
           json[prop] = {
             title: title,
-            id: propValue  + '_' + value[constants.CUR_HASH]
+            id: propValue  + '_' + value[constants.CUR_HASH],
+            time: value.time
           }
           var interfaces = meta.interfaces;
           if (interfaces  &&  interfaces.indexOf('tradle.Message') != -1)
@@ -956,6 +960,7 @@ var Store = Reflux.createStore({
     value[constants.CUR_HASH] = sha(value);
     var meta = this.getModel(modelName).value;
     var props = meta.properties;
+    var batch = [];
     if (!value[constants.ROOT_HASH]) {
       value[constants.ROOT_HASH] = value[constants.CUR_HASH];
       var creator = me  
@@ -969,11 +974,25 @@ var Store = Reflux.createStore({
       }
       if (props.dateSubmitted) 
         value.dateSubmitted = new Date().getTime();
+
+      if (value[constants.TYPE] === ADDITIONAL_INFO) {
+        var verificationRequest = value.verificationRequest;
+
+        var vrId = verificationRequest[constants.TYPE] + '_' + verificationRequest[constants.ROOT_HASH];
+        var vr = list[vrId].value;
+        if (!vr.additionalInfo  ||  !vr.additionalInfo.length) 
+          vr.additionalInfo = [];
+        vr.additionalInfo.push({
+          id: ADDITIONAL_INFO + '_' + value[constants.ROOT_HASH],
+          title: value.message,
+          time: value.time 
+        });
+        batch.push({type: 'put', key: vrId, value: vr});
+      }
     }
     value.time = new Date().getTime();
     
     var iKey = modelName + '_' + value[constants.ROOT_HASH];
-    var batch = [];
 
     if (meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf('tradle.Message') != -1)) {
       if (props['to']  &&  props['from']) {

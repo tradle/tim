@@ -32,13 +32,20 @@ class VerificationButton extends Component {
       return <View />
 
     var verifiedByMe;
-    if (resource.verifications){
+    if (resource.verifications) {
+      var lastAdditionalInfoTime;
+      if (resource.additionalInfo) {
+        resource.additionalInfo.forEach(function(r) {
+          if (lastAdditionalInfoTime  &&  lastAdditionalInfoTime < r.time)
+            lastAdditionalInfoTime = r.time;
+        });
+      }
       resource.verifications.forEach(function(r) {
         var rh = r.from[constants.ROOT_HASH];
         if (!rh) 
           rh = utils.getId(r.from).split('_')[1];
 
-        if (rh === me[constants.ROOT_HASH])
+        if (rh === me[constants.ROOT_HASH]  &&  (!lastAdditionalInfoTime  ||  lastAdditionalInfoTime < r.time))
           verifiedByMe = true;
       });
     }
@@ -46,7 +53,14 @@ class VerificationButton extends Component {
       return <View />; 
     return (
        <View style={[buttonStyles.container1, {top: 80}]}>
-         <TouchableHighlight underlayColor='transparent' onPress={this.props.verify.bind(this)}>
+         <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
+              AlertIOS.alert(
+                'Verify ' + utils.getDisplayName(resource, model.properties),
+                [
+                  {text: 'Verify', onPress: this.props.verify.bind(this)},
+                  {text: 'Cancel', onPress: () => console.log('Canceled!')},
+                ]
+            )}>
            <View>
              <View style={buttonStyles.buttonContent} />
              <View style={buttonStyles.row1}>

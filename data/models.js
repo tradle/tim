@@ -196,6 +196,10 @@ var voc = [{
     // 'v',
     // 'websites'
   ],
+  groups: {
+    name: ['firstName', 'middleName', 'lastName', 'formatted'],
+    location: ['city', 'country', 'street', 'region', 'postalCode', 'formattedAddress'],
+  },
   'gridCols': [
     'formatted',
     'lastMessage',
@@ -261,23 +265,6 @@ var voc = [{
       'type': 'string',
       'displayName': true,
      },
-     // 'photos': {
-     //   'type': 'array',
-     //   'items': {
-     //     'type': 'object',
-     //     'properties': {
-     //       'tags': {
-     //         'type': 'string',
-     //         'skipLabel': true
-     //       },
-     //       'url': {
-     //         'type': 'string',
-     //         'readOnly': true
-     //       }
-     //     }
-     //   },
-     //   'required': ['title', 'url']
-     // },
      'from': {
        'type': 'object',
        'readOnly': true,
