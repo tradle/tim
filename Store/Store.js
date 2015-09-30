@@ -18,13 +18,15 @@ var isTest, originalMe;
 // var Tim = require('tim');
 
 var tim;
-var ADDITIONAL_INFO = 'tradle.AdditionalInfo';
-
 // var levelQuery = require('level-queryengine');
 // var jsonqueryEngine = require('jsonquery-engine');
 // var Device = require('react-native-device');
 // var Sublevel = require('level-sublevel')
 
+var ADDITIONAL_INFO = 'tradle.AdditionalInfo';
+var VERIFICATION = 'tradle.Verification';
+var MESSAGE = 'tradle.Message';
+var ORGANIZATION = 'tradle.Organization';
 var IDENTITY_MODEL = constants.TYPES.IDENTITY;
 var MODEL_TYPE_VALUE = 'tradle.Model';
 var MY_IDENTITIES_MODEL = 'tradle.MyIdentities';
@@ -72,6 +74,8 @@ var Store = Reflux.createStore({
   onAddMessage(r) { 
     var props = this.getModel(r[constants.TYPE]).value.properties;
     var rr = {};
+    if (!r.time)
+      r.time = new Date().getTime();
     for (var p in r) {
       if (props[p].ref  &&  !props[p].id) {
         var type = r[p][constants.TYPE];
@@ -101,6 +105,10 @@ var Store = Reflux.createStore({
     var dn = r.message; // || utils.getDisplayName(r, props);
     if (!dn)
       dn = 'sent photo';
+    else {
+      var msgParts = utils.splitMessage(dn);
+      dn = msgParts.length === 1 ? dn : utils.getModel(msgParts[1]).value.title + ' request';
+    }
 
     to.lastMessage = (from[constants.ROOT_HASH] === me[constants.ROOT_HASH]) ? 'You: ' + dn : dn;
     to.lastMessageTime = r.time;
@@ -125,6 +133,7 @@ var Store = Reflux.createStore({
     var batch = [];
     var key;
     var fromId = utils.getId(r.from);
+    var isVerification = r[constants.TYPE] === VERIFICATION;
     var from = list[fromId].value;
     if (r[constants.ROOT_HASH]) 
       key = r[constants.TYPE] + '_' + r[constants.ROOT_HASH];
@@ -136,13 +145,14 @@ var Store = Reflux.createStore({
       key = r[constants.TYPE] + '_' + rootHash;
       if (from.organization)
         r.organization = from.organization;
-
+      if (!r.time)
+        r.time = new Date().getTime();
       batch.push({type: 'put', key: key, value: r});
     }
     var toId = utils.getId(r.to);
     var verificationRequestId = utils.getId(r.document);
     var to = list[toId].value;
-    
+    r.time = r.time || new Date().getTime();
     var newVerification = {
       id: key + '_' + r[constants.CUR_HASH], 
       title: r.document.title ? r.document.title : '',
@@ -390,7 +400,7 @@ var Store = Reflux.createStore({
         return;
       }
       model.interfaces = [];
-      model.interfaces.push('tradle.Message');
+      model.interfaces.push(MESSAGE);
       var rootHash = sha(model);
       model[constants.ROOT_HASH] = rootHash;
       model[constants.OWNER] = {
@@ -433,7 +443,7 @@ var Store = Reflux.createStore({
     var promises = [];
     var foundRefs = [];
     var props = meta.properties;
-    if (meta[constants.TYPE] == 'tradle.Verification'  ||  (meta.subClassOf  &&  meta.subClassOf == 'tradle.Verification'))
+    if (meta[constants.TYPE] == VERIFICATION  ||  (meta.subClassOf  &&  meta.subClassOf == VERIFICATION))
       return this.onAddVerification(resource, true);
 
     for (var p in resource) {
@@ -498,11 +508,13 @@ var Store = Reflux.createStore({
             time: value.time
           }
           var interfaces = meta.interfaces;
-          if (interfaces  &&  interfaces.indexOf('tradle.Message') != -1)
+          if (interfaces  &&  interfaces.indexOf(MESSAGE) != -1)
             json.time = new Date().getTime();  
         }
       });
       var isNew = !resource[constants.ROOT_HASH];
+      if (isNew  &&  !resource.time)
+        resource.time = new Date().getTime();
       var modelName = meta.id;
       if (!resource  ||  isNew) 
         self._putResourceInDB(modelName, json, isRegistration);
@@ -587,7 +599,7 @@ var Store = Reflux.createStore({
       resultList.push(rr);
     }
     var model = this.getModel(params.modelName).value;
-    var isMessage = model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf('tradle.Message') != -1);   
+    var isMessage = model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1);   
     var verificationsToShare; 
     if (isMessage  &&  !params.isAggregation) 
       verificationsToShare = this.getVerificationsToShare(result, params.to);
@@ -605,7 +617,7 @@ var Store = Reflux.createStore({
   },
   searchResources(params) {
     var meta = this.getModel(params.modelName).value;
-    var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf('tradle.Message') != -1);    
+    var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);    
     if (isMessage)
       return this.searchMessages(params);
     else
@@ -716,7 +728,7 @@ var Store = Reflux.createStore({
     var query = params.query;
     var modelName = params.modelName;
     var meta = this.getModel(modelName).value;
-    var isVerification = modelName === 'tradle.Verification'  ||  (meta.subClassOf  &&  meta.subClassOf === 'tradle.Verification');
+    var isVerification = modelName === VERIFICATION  ||  (meta.subClassOf  &&  meta.subClassOf === VERIFICATION);
     var chatTo = params.to;
     var prop = params.prop;
     if (typeof prop === 'string')
@@ -734,7 +746,7 @@ var Store = Reflux.createStore({
     var meOrgId = me.organization ? utils.getId(me.organization) : null;
 
     var chatId = chatTo ? chatTo[constants.TYPE] + '_' + chatTo[constants.ROOT_HASH] : null;
-    var isChatWithOrg = chatTo  &&  chatTo[constants.TYPE] === 'tradle.Organization';
+    var isChatWithOrg = chatTo  &&  chatTo[constants.TYPE] === ORGANIZATION;
     if (isChatWithOrg  &&  !chatTo.name) {
       chatTo = list[chatId].value;
     }
@@ -798,7 +810,7 @@ var Store = Reflux.createStore({
           
           continue;
         }
-        var isVerificationR = r[constants.TYPE] === 'tradle.Verification'  ||  r[constants.TYPE].subClassOf === 'tradle.Verification';
+        var isVerificationR = r[constants.TYPE] === VERIFICATION  ||  r[constants.TYPE].subClassOf === VERIFICATION;
         if ((!r.message  ||  r.message.trim().length === 0) && !r.photos &&  !isVerificationR) 
           // check if this is verification resource
           continue;
@@ -813,11 +825,11 @@ var Store = Reflux.createStore({
 
           if (list[fromID].value.organization) 
             fromOrgId = utils.getId(list[fromID].value.organization);
-          else if (fromID.split('_')[0] === 'tradle.Organization')
+          else if (fromID.split('_')[0] === ORGANIZATION)
             fromOrgId = utils.getId(list[fromID].value);
           if (list[toID].value.organization) 
             toOrgId = utils.getId(list[toID].value.organization);
-          else if (toID.split('_')[0] === 'tradle.Organization')
+          else if (toID.split('_')[0] === ORGANIZATION)
             toOrgId = utils.getId(list[toID].value);
 
           if (chatId !== toOrgId  &&  chatId !== fromOrgId)
@@ -828,10 +840,14 @@ var Store = Reflux.createStore({
         else if (fromID !== id  &&  toID != id  &&  toID != meOrgId)
           continue;
       }
-      if (isVerificationR) {
-        r.document = list[utils.getId(r.document)].value;
-
+      if (isVerificationR  ||  r[constants.TYPE] === ADDITIONAL_INFO) {
+        var doc = {};
+        extend(true, doc, list[utils.getId(r.document)].value);
+        delete doc.verifications;
+        delete doc.additionalInfo;
+        r.document = doc;
       }
+
       if (!query) {
         // foundResources[key] = r;
         var msg = this.fillMessage(r);
@@ -864,9 +880,6 @@ var Store = Reflux.createStore({
     for (var r of result) {
       r.from.photos = list[utils.getId(r.from)].value.photos; 
       r.to.photos = list[utils.getId(r.to)].value.photos; 
-      if (r[constants.TYPE] !== ADDITIONAL_INFO)
-        continue;
-      r.verificationRequest = list[utils.getId(r.verificationRequest)].value;
     }
     return result;
   },
@@ -914,7 +927,7 @@ var Store = Reflux.createStore({
     for (var key in list) {
       var type = key.split('_')[0];
       var model = utils.getModel(type).value;
-      if (model.id !== 'tradle.Verification' && (!model.subClassOf  ||  model.subClassOf !== 'tradle.Verification'))
+      if (model.id !== VERIFICATION && (!model.subClassOf  ||  model.subClassOf !== VERIFICATION))
         continue;
       
       var doc = list[key].value.document;
@@ -976,9 +989,9 @@ var Store = Reflux.createStore({
         value.dateSubmitted = new Date().getTime();
 
       if (value[constants.TYPE] === ADDITIONAL_INFO) {
-        var verificationRequest = value.verificationRequest;
+        var verificationRequest = value.document;
 
-        var vrId = verificationRequest[constants.TYPE] + '_' + verificationRequest[constants.ROOT_HASH];
+        var vrId = utils.getId(verificationRequest);
         var vr = list[vrId].value;
         if (!vr.additionalInfo  ||  !vr.additionalInfo.length) 
           vr.additionalInfo = [];
@@ -994,7 +1007,7 @@ var Store = Reflux.createStore({
     
     var iKey = modelName + '_' + value[constants.ROOT_HASH];
 
-    if (meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf('tradle.Message') != -1)) {
+    if (meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1)) {
       if (props['to']  &&  props['from']) {
         var to = list[utils.getId(value.to)].value;
         var from = list[utils.getId(value.from)].value;
@@ -1305,3 +1318,4 @@ var Store = Reflux.createStore({
 
 });
 module.exports = Store;
+
