@@ -34,7 +34,9 @@ var MY_IDENTITIES_MODEL = 'tradle.MyIdentities';
 var models = {};
 var list = {};
 var idenities = {};
-var db; //, identityDb, messagesDb;
+var db; 
+var identitiesDb;
+var messagesDb;
 var ldb;
 var isLoaded;
 var me;
@@ -380,7 +382,7 @@ var Store = Reflux.createStore({
 
       if (!id) 
         err += '"id" is required. Could be something like "myGithubId.nameOfTheModel"';
-      var key = 'model_' + id;
+      var key = id;
       // if (models[key])
       //   err += '"id" is not unique';
       var message = model.message;
@@ -413,7 +415,7 @@ var Store = Reflux.createStore({
     .then(function() {
       if (!me.myModels)
         me.myModels = [];
-      var key = 'model_' + model.id;
+      var key = model.id;
       me.myModels.push({key: key, title: model.title});
       
       self.setPropertyNames(props);
@@ -1038,7 +1040,7 @@ var Store = Reflux.createStore({
         currentIdentity: iKey, 
         allIdentities: [{
           id: iKey, 
-          title: utils.getDisplayName(value, models['model_' + modelName].value.properties)
+          title: utils.getDisplayName(value, models[modelName].value.properties)
         }]};
       batch.push({type: 'put', key: MY_IDENTITIES_MODEL + '_1', value: mid});///
     }
@@ -1098,7 +1100,7 @@ var Store = Reflux.createStore({
     var dfd = Q.defer();
     var self = this;
     var batch = [];
-    var props = models['model_' + IDENTITY_MODEL].value.properties;
+    var props = models[IDENTITY_MODEL].value.properties;
     AddressBook.getContacts(function(err, contacts) {
       contacts.forEach(function(contact) {
         var contactInfo = [];
@@ -1189,7 +1191,7 @@ var Store = Reflux.createStore({
     var loadingModels = false;
     return db.createReadStream()
     .on('data', function(data) {
-       if (data.key.indexOf('model_') === 0) {
+       if (data.value.type === 'tradle.Model') {
          models[data.key] = data;
          self.setPropertyNames(data.value.properties);
        }
@@ -1245,7 +1247,7 @@ var Store = Reflux.createStore({
   },
 
   getModel(modelName) {
-    return models['model_' + modelName];
+    return models[modelName];
   },
   loadDB(loadTest) {
     loadTest = true;
@@ -1256,7 +1258,7 @@ var Store = Reflux.createStore({
       voc.getModels().forEach(function(m) {
         if (!m[constants.ROOT_HASH])
           m[constants.ROOT_HASH] = sha(m);
-        batch.push({type: 'put', key: 'model_' + m.id, value: m});
+        batch.push({type: 'put', key: m.id, value: m});
       });
       sampleData.getResources().forEach(function(r) {
         if (!r[constants.ROOT_HASH]) 
@@ -1285,21 +1287,22 @@ var Store = Reflux.createStore({
     }
   },
   loadModels() {
-    var batch = [];
+    // var batch = [];
 
-    voc.getModels().forEach(function(m) {
-      if (!m[constants.ROOT_HASH])
-        m[constants.ROOT_HASH] = sha(m);
-      batch.push({type: 'put', key: 'model_' + m.id, value: m});
-    });
-    var self = this;
-    return db.batch(batch)
-          .then(function() {
-            return self.loadResources();
-          })
-          .catch(function(err) {
-            err = err;
-            });
+    models = voc.getModels();
+    // voc.getModels().forEach(function(m) {
+    //   if (!m[constants.ROOT_HASH])
+    //     m[constants.ROOT_HASH] = sha(m);
+    //   batch.push({type: 'put', key: m.id, value: m});
+    // });
+    // var self = this;
+    // return db.batch(batch)
+    //       .then(function() {
+    //         return self.loadResources();
+    //       })
+    //       .catch(function(err) {
+    //         err = err;
+    //       });
   },
 
   clearDb() {  
