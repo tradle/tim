@@ -38,7 +38,7 @@ class MessageView extends Component {
     this.listenTo(Store, 'onAddVerification');
   }
   onAddVerification(params) {
-    if (params.action === 'addVerification') {
+    if (params.action === 'addVerification' ||  params.action === 'addAdditionalInfo') {
       this.props.navigator.pop();
       Actions.messageList({
         modelName: 'tradle.Message', 
@@ -73,7 +73,7 @@ class MessageView extends Component {
       inRow = 5;
     var actionPanel = 
         <View style={buttonStyles.buttons}>
-          <ShowMessageRefList    resource={resource} navigator={this.props.navigator} />    
+          <ShowMessageRefList  resource={resource} navigator={this.props.navigator} additionalInfo={this.additionalInfo.bind(this)}/>    
         </View>
         // <FromToView resource={resource} navigator={this.props.navigator} />
         // <MoreLikeThis resource={resource} navigator={this.props.navigator}/>
@@ -171,6 +171,22 @@ class MessageView extends Component {
     });
   } 
 
+  additionalInfo(resource, prop, msg) {
+    var rmodel = utils.getModel(resource[constants.TYPE]).value;
+    msg = msg.length ? msg : 'Please submit more info';
+    var r = {
+      _t: prop.items.ref,
+      from: utils.getMe(),
+      to: resource.from,
+      time: new Date().getTime(),
+      message: msg
+    };
+    r[prop.items.backlink] = {
+      id: resource[constants.TYPE] + '_' + resource[constants.ROOT_HASH],
+      title: utils.getDisplayName(resource, rmodel.properties)
+    }
+    Actions.addVerification(r);
+  }
 }
 reactMixin(MessageView.prototype, Reflux.ListenerMixin);
 reactMixin(MessageView.prototype, ResourceViewMixin);
