@@ -34,7 +34,7 @@ var utils = {
     return models;
   },
   getModel(modelName) {
-    return models ? models['model_' + modelName] : null;
+    return models ? models[modelName] : null;
   },
   makeLabel(label) {
     return label
@@ -101,7 +101,7 @@ var utils = {
     //    currency: currency
     // });
 
-    var dModel = data  &&  models['model_' + data[constants.TYPE]];
+    var dModel = data  &&  models[data[constants.TYPE]];
     if (!this.isEmpty(data)) {
       if (!meta.items && data[constants.TYPE] !== meta.id) {
         var interfaces = meta.interfaces;
@@ -226,7 +226,7 @@ var utils = {
         }
         model[p] = maybe ? t.maybe(t.Str) : t.Str;
 
-        var subModel = models['model_' + ref];
+        var subModel = models[ref];
         if (data  &&  data[p]) {
           options.fields[p].value = data[p][constants.TYPE] 
                                   ? data[p][constants.TYPE] + '_' + data[p][constants.ROOT_HASH]
