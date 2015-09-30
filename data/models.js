@@ -229,7 +229,7 @@ var voc = [{
 },
 {
    id: 'tradle.MyIdentities',
-   type: 'object',
+   type: 'tradle.Model',
    title: 'My Identities',
    properties: {
      '_t': {
@@ -355,22 +355,6 @@ var voc = [{
   'viewCols': [
     'message'
   ],
-},
-{
-  id: 'tradle.NewMessageModel',
-  type: 'object',
-  title: 'New message model',
-  properties: {
-    '_t': {
-      'type': 'string',
-      'readOnly': true
-     },
-     'url': {
-      'type': 'string',
-      'displayName': true
-     }
-  },
-  required: ['url'] 
 },
 {
   'id': 'tradle.SimpleMessage',
@@ -1008,7 +992,7 @@ var voc = [{
 },
 {
   id: 'tradle.Organization',
-  type: 'object',
+  type: 'tradle.Model',
   title: 'Organization',
   sort: 'lastMessageTime',  
   properties: {
@@ -1133,7 +1117,7 @@ var voc = [{
 },
 {
   id: 'tradle.Money',
-  type: 'object',
+  type: 'tradle.Model',
   inlined: true,
   properties: { 
     '_t': {
@@ -1980,4 +1964,20 @@ module.exports = models;
 //   'gridCols': [
 //     'ver1', 'ver2', 'ver3', 'time', 'organization'
 //   ],
+// },
+// {
+//   id: 'tradle.NewMessageModel',
+//   type: 'object',
+//   title: 'New message model',
+//   properties: {
+//     '_t': {
+//       'type': 'string',
+//       'readOnly': true
+//      },
+//      'url': {
+//       'type': 'string',
+//       'displayName': true
+//      }
+//   },
+//   required: ['url'] 
 // },
