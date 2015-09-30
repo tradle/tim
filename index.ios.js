@@ -203,7 +203,7 @@ class TiMApp extends Component {
                   resource={props.resource} 
                   model={props.model}
                   editCols={props.editCols}
-                  additionalInfo={additionalInfo}
+                  additionalInfo={props.additionalInfo}
                   returnRoute={props.returnRoute}
                   callback={props.callback} />;
     case 5:
@@ -565,7 +565,7 @@ React.AppRegistry.registerComponent('TiM', function() { return TiMApp });
   //       }} />
   //   }
   //   else {
-  //     var metadata = models['model_' + IDENTITY_MODEL].value;
+  //     var metadata = models[IDENTITY_MODEL].value;
   //     var page = {
   //       metadata: metadata,
   //       models: models,
