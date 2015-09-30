@@ -437,7 +437,12 @@ var Store = Reflux.createStore({
         props[p].title = utils.makeLabel(p);
     } 
   },
-  onAddItem(value, resource, meta, isRegistration) {
+  onAddItem(params) {
+    var value = params.value;
+    var resource = params.resource;
+    var meta = params.meta;
+    var isRegistration = params.isRegistration;
+    var additionalInfo = params.sdditionalInfo;
     // Check if there are references to other resources
     var refProps = {};
     var promises = [];
