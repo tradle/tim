@@ -5,7 +5,8 @@ var utils = require('../utils/utils');
 var ResourceList = require('./ResourceList');
 var MessageList = require('./MessageList');
 var Icon = require('react-native-vector-icons/Ionicons');
-var NewResource = require('./NewResource');
+// var NewResource = require('./NewResource');
+var Actions = require('../Actions/Actions');
 
 var buttonStyles = require('../styles/buttonStyles');
 var constants = require('tradle-constants');
@@ -14,6 +15,7 @@ var ResourceViewMixin = require('./ResourceViewMixin');
 
 var {
   View,
+  AlertIOS,
   Text,
   TextInput,
   TouchableHighlight,
@@ -68,7 +70,22 @@ class ShowMessageRefList extends Component {
         if (utils.getMe().organization) 
           refList.push(
               <View style={buttonStyles.container}>
-                 <TouchableHighlight onPress={this.additionalInfo.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
+                 <TouchableHighlight onPress={() => {
+                    var buttons = [{
+                      text: 'Cancel',
+                    }, 
+                    {
+                      text: 'OK',
+                      onPress: this.props.additionalInfo.bind(this, this.props.resource, props[p])
+                    }];      
+                    var to = this.props.resource;
+                    AlertIOS.prompt(
+                      'Sending ' + resource.title + ' form to ' + utils.getDisplayName(to, utils.getModel(to[constants.TYPE]).value.properties),
+                      buttons
+                    );
+                     
+                   }
+                 } underlayColor='transparent'>
                    <View style={{alignItems: 'center'}}>
                      <Icon name={icon}  size={35}  color='#ffffff'  style={[buttonStyles.icon, {paddingLeft: 7}]}/>
                      <Text style={buttonStyles.text}>{props[p].title}</Text>
@@ -76,6 +93,16 @@ class ShowMessageRefList extends Component {
                  </TouchableHighlight>
                </View>
               );
+          // refList.push(
+          //     <View style={buttonStyles.container}>
+          //        <TouchableHighlight onPress={this.additionalInfo.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
+          //          <View style={{alignItems: 'center'}}>
+          //            <Icon name={icon}  size={35}  color='#ffffff'  style={[buttonStyles.icon, {paddingLeft: 7}]}/>
+          //            <Text style={buttonStyles.text}>{props[p].title}</Text>
+          //          </View>
+          //        </TouchableHighlight>
+          //      </View>
+          //     );
       }
       else
         refList.push(
@@ -97,37 +124,37 @@ class ShowMessageRefList extends Component {
               )
              : null;
   }
-  additionalInfo(resource, prop) {
-    var rmodel = utils.getModel(resource[constants.TYPE]).value;
-    var r = {
-      _t: prop.items.ref,
-      from: utils.getMe(),
-      to: resource.from
-    };
-    r[prop.items.backlink] = {
-      id: resource[constants.TYPE] + '_' + resource[constants.ROOT_HASH],
-      title: utils.getDisplayName(resource, rmodel.properties)
-    }
-    var model = utils.getModel(prop.items.ref).value;
-    this.props.navigator.push({
-      title: model.title,
-      id: 4,
-      component: NewResource,
-      titleTextColor: '#7AAAC3',
-      backButtonTitle: 'Back',
-      rightButtonTitle: 'Done',
-      passProps: {
-        model: model,
-        resource: r,
-        callback: () => Actions.list({
-          modelName: prop.items.ref, 
-          to: this.props.resource,
-          resource: r
-        }),
-      }      
-    })
+  // additionalInfo(resource, prop) {
+  //   var rmodel = utils.getModel(resource[constants.TYPE]).value;
+  //   var r = {
+  //     _t: prop.items.ref,
+  //     from: utils.getMe(),
+  //     to: resource.from
+  //   };
+  //   r[prop.items.backlink] = {
+  //     id: resource[constants.TYPE] + '_' + resource[constants.ROOT_HASH],
+  //     title: utils.getDisplayName(resource, rmodel.properties)
+  //   }
+  //   var model = utils.getModel(prop.items.ref).value;
+  //   this.props.navigator.push({
+  //     title: model.title,
+  //     id: 4,
+  //     component: NewResource,
+  //     titleTextColor: '#7AAAC3',
+  //     backButtonTitle: 'Back',
+  //     rightButtonTitle: 'Done',
+  //     passProps: {
+  //       model: model,
+  //       resource: r,
+  //       callback: () => Actions.list({
+  //         modelName: prop.items.ref, 
+  //         to: this.props.resource,
+  //         resource: r
+  //       }),
+  //     }      
+  //   })
 
-  }
+  // }
   showMoreLikeThis() {
     var self = this;
     var modelName = this.props.resource[constants.TYPE];
