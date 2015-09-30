@@ -78,6 +78,7 @@ class MessageRow extends Component {
     var photoListStyle = {height: 3};
     var addStyle, inRow;
     var noMessage = !resource.message  ||  !resource.message.length;
+    var isAdditionalInfo = !isSimpleMessage  &&  resource[constants.TYPE] === 'tradle.AdditionalInfo';
     if (!renderedRow.length  &&  !isVerification) {
       var vCols = noMessage ? null : utils.getDisplayName(resource, model.properties);
       if (vCols)                
@@ -95,6 +96,8 @@ class MessageRow extends Component {
       }
       if (model.style  ||  isVerification) 
         addStyle = [addStyle, {padding: 5, borderRadius: 10, backgroundColor: STRUCTURED_MESSAGE_COLOR, borderWidth: 1, borderColor: '#deeeb4', marginVertical: 2}]; //model.style];
+      else if (isAdditionalInfo)
+        addStyle = [addStyle, {padding: 5, borderRadius: 10, backgroundColor: '#FCF1ED', borderWidth: 1, borderColor: '#FAE9E3', marginVertical: 2}]; //model.style];
     }
     var properties = model.properties;
     var verPhoto;
@@ -228,7 +231,7 @@ class MessageRow extends Component {
     );
   }
   editVerificationRequest() {
-    var resource = this.props.resource.verificationRequest;
+    var resource = this.props.resource.document;
     var rmodel = utils.getModel(resource[constants.TYPE]).value;
     var title = utils.getDisplayName(resource, rmodel.properties);
     this.props.navigator.push({
@@ -241,6 +244,8 @@ class MessageRow extends Component {
       passProps: {
         model: rmodel,
         resource: resource,
+        additionalInfo: this.props.resource,
+        editCols: ['photos']
       }      
     })    
   } 
@@ -409,9 +414,9 @@ class MessageRow extends Component {
         if (isSimpleMessage)
           style.push({color: '#ffffff'});
         else if (isAdditionalInfo) {
-          // if (isMyMessage)
-          //   style.push({color: '#ffffff'});
-          // else
+          if (isMyMessage)
+            style.push({color: '#ffffff'});
+          else
             style.push({color: '#2892C6'});
         }
       }
@@ -437,7 +442,7 @@ class MessageRow extends Component {
         if (model.properties.verifications  &&  !isMyMessage)                  
           onPressCall = self.verify.bind(self);
         if (isAdditionalInfo)
-          style = [styles.description, {paddingBottom: 10, color: isMyMessage ? '#ffffff' : '#2892C6'}];
+          style = [style, {paddingBottom: 10, color: isMyMessage ? '#ffffff' : '#2892C6'}];
         vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>)
       }
       else {
@@ -511,8 +516,9 @@ class MessageRow extends Component {
       //              </View>);
       // }
       // else
+        var msgTypeStyle = isAdditionalInfo &&  isMyMessage ? [styles.verySmallLetters, {color: '#ffffff'}] : styles.verySmallLetters;
 
-        vCols.push(<Text style={styles.verySmallLetters}>{s}</Text>);
+        vCols.push(<Text style={msgTypeStyle}>{s}</Text>);
     }  
     if (vCols  &&  vCols.length)
       extend(renderedRow, vCols);
