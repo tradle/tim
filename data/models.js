@@ -281,11 +281,15 @@ var voc = [{
        'readOnly': true,
        'displayName': true
      },
-    verificationRequest: {
-      ref: 'tradle.Message',
-      readOnly: true,
-      type: 'object'
+     document: {
+       ref: 'tradle.Message',
+       readOnly: true,
+       type: 'object'
     },
+    confirmed: {
+      type: 'boolean',
+      readOnly: true
+    }
   },
   'required': [
     'to', 'from', 'message'
@@ -492,7 +496,7 @@ var voc = [{
       type: 'array', 
       items: {
         ref: 'tradle.AdditionalInfo',
-        backlink: 'verificationRequest'
+        backlink: 'document'
       }
     }
   },  
@@ -575,7 +579,7 @@ var voc = [{
       type: 'array', 
       items: {
         ref: 'tradle.AdditionalInfo',
-        backlink: 'verificationRequest'
+        backlink: 'document'
       }
     }
   },  
@@ -807,7 +811,7 @@ var voc = [{
        type: 'array', 
        items: {
          ref: 'tradle.AdditionalInfo',
-         backlink: 'verificationRequest'
+         backlink: 'document'
        }
      }
   },  
@@ -921,7 +925,7 @@ var voc = [{
        type: 'array', 
        items: {
          ref: 'tradle.AdditionalInfo',
-         backlink: 'verificationRequest'
+         backlink: 'document'
        }
      }
   },  
