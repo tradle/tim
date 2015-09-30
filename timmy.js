@@ -1,3 +1,4 @@
+var path = require('path')
 var crypto = require('crypto')
 var DHT = require('bittorrent-dht')
 var leveldown = require('asyncstorage-down')
@@ -8,6 +9,7 @@ leveldown.open = function () {
 }
 
 var utils = require('tradle-utils')
+var rimraf = require('rimraf')
 var fs = require('fs')
 var level = require('react-native-level')
 var Driver = require('tim')
@@ -24,6 +26,8 @@ var billPriv = require('./TiMTests/fixtures/bill-priv.json')
 var billPub = require('./TiMTests/fixtures/bill-pub.json')
 var tedPriv = require('./TiMTests/fixtures/ted-priv.json')
 var tedPub = require('./TiMTests/fixtures/ted-pub.json')
+var driverBill
+var driverTed
 var networkName = 'testnet'
 var BILL_PORT = 51086
 var TED_PORT = 51087
@@ -37,56 +41,107 @@ var TED_PORT = 51087
 // var blockchain = tedWallet.blockchain
 // var tedWallet = walletFor(ted)
 
-clear(init)
+clear(function () {
+  print(init)
+})
+
+// init()
+
+function print (cb) {
+  walk('./', function (err, results) {
+    if (results && results.length) {
+      results.forEach(function (r) {
+        console.log(r)
+      })
+    }
+
+    cb()
+  })
+}
+
+function walk (dir, done) {
+  var results = []
+  fs.readdir(dir, function(err, list) {
+    if (err) return done(err)
+    var pending = list.length
+    if (!pending) return done(null, results)
+    list.forEach(function(file) {
+      file = path.resolve(dir, file)
+      fs.stat(file, function(err, stat) {
+        if (stat && stat.isDirectory()) {
+          walk(file, function(err, res) {
+            results = results.concat(res)
+            if (!--pending) done(null, results)
+          })
+        } else {
+          results.push(file)
+          if (!--pending) done(null, results)
+        }
+      })
+    })
+  })
+}
 
 function clear (cb) {
-  cb()
-  // fs.readdir('storage', function (err, files) {
-  //   console.log(files)
-  // })
+  var togo = 1
+  rimraf('./', finish)
 
-  // var a = level('bill-addressBook.db', { db: leveldown })
-  // a.createReadStream()
-  //   .on('data', console.log)
-  //   .on('end', console.log.bind(console, 'done'))
+  ;[
+    'addressBook.db',
+    'msg-log.db',
+    'messages.db',
+    'txs.db'
+  ].forEach(function (dbName) {
+    ;['bill', 'ted'].forEach(function (name) {
+      togo++
+      leveldown.destroy(name + '-' + dbName, finish)
+    })
+  })
 
-  // cb()
-  // fs.emptyDir('./')
+  function finish () {
+    if (--togo === 0) cb()
+  }
 }
 
 function init () {
   setInterval(printIdentityStatus, 30000)
-  var driverBill = buildDriver(Identity.fromJSON(billPub), billPriv, BILL_PORT)
-  var driverTed = buildDriver(Identity.fromJSON(tedPub), tedPriv, TED_PORT)
-  driverBill.once('ready', function () {
-    console.log('bill is ready')
-    driverBill.on('chained', function (obj) {
+  driverBill = buildDriver(Identity.fromJSON(billPub), billPriv, BILL_PORT)
+  driverTed = buildDriver(Identity.fromJSON(tedPub), tedPriv, TED_PORT)
+  ;[driverBill, driverTed].forEach(function (d) {
+    d.once('ready', function () {
+      console.log(d.name(), 'is ready')
+    })
+
+    d.on('chained', function (obj) {
+      debugger
       console.log('chained', obj)
     })
 
-    // driverBill.publishMyIdentity()
-    driverBill.on('error', function (err) {
+    // d.publishMyIdentity()
+    d.on('error', function (err) {
+      debugger
       console.error(err)
     })
 
-    driverBill.on('message', function (msg) {
+    d.on('message', function (msg) {
+      debugger
       console.log(msg)
     })
   })
 
-  driverTed.on('ready', function () {
-    var billCoords = {
-      fingerprint: billPub.pubkeys[0].fingerprint
-    }
+  // driverTed.once('ready', function () {
+  //   var billCoords = {
+  //     fingerprint: billPub.pubkeys[0].fingerprint
+  //   }
 
-    driverTed.send({
-      msg: {
-        hey: 'ho'
-      },
-      to: [billCoords],
-      deliver: true
-    })
-  })
+  //   driverTed.send({
+  //     msg: {
+  //       hey: 'ho'
+  //     },
+  //     to: [billCoords],
+  //     deliver: true
+  //   })
+  // })
 }
 
 function printIdentityStatus () {
@@ -99,17 +154,20 @@ function printIdentityStatus () {
 
 function buildDriver (identity, keys, port) {
   var iJSON = identity.toJSON()
+  var prefix = iJSON.name.firstName.toLowerCase()
   var dht = dhtFor(iJSON)
   dht.listen(port)
 
   var keeper = new Keeper({
-    dht: dht
+    dht: dht,
+    storage: prefix + '-storage',
+    checkReplication: 120000
   })
 
   var blockchain = new Blockchain(networkName)
 
   var d = new Driver({
-    pathPrefix: iJSON.name.firstName.toLowerCase(),
+    pathPrefix: prefix,
     networkName: networkName,
     keeper: keeper,
     blockchain: blockchain,
