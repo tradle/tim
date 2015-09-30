@@ -202,6 +202,8 @@ class TiMApp extends Component {
       return <NewResource navigator={nav} 
                   resource={props.resource} 
                   model={props.model}
+                  editCols={props.editCols}
+                  additionalInfo={additionalInfo}
                   returnRoute={props.returnRoute}
                   callback={props.callback} />;
     case 5:
