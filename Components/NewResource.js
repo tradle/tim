@@ -178,7 +178,16 @@ class NewResource extends Component {
     var isRegistration = !utils.getMe()  && this.props.model.id === constants.TYPES.IDENTITY  &&  (!resource || !resource[constants.ROOT_HASH]);
     if (isRegistration)
       this.state.isRegistration = true;
-    Actions.addItem(json, resource, this.props.model, isRegistration);
+    var params = {
+      newValue: json, 
+      resource: resource, 
+      model: this.props.model, 
+      isRegistration: isRegistration
+    };
+    if (this.props.additionalInfo)
+      additionalInfo: additionalInfo
+
+    Actions.addItem(params);
   }
   chooser(prop, propName, event) {
     var resource = this.state.resource;
@@ -334,8 +343,7 @@ class NewResource extends Component {
       else
         data.message = '';        
     }
-
-    var options = utils.getFormFields({
+    var params = {
         meta: meta, 
         data: data, 
         chooser: this.chooser.bind(this),
@@ -344,7 +352,10 @@ class NewResource extends Component {
         onSubmitEditing: this.onSavePressed.bind(this),
         onEndEditing: this.onEndEditing.bind(this),
         onChange: this.onChange.bind(this)
-      });
+      };
+    if (this.props.editCols)
+      params.editCols = this.props.editCols;
+    var options = utils.getFormFields(params);
     
     var Model = t.struct(model);
 
