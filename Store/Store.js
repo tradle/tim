@@ -1289,20 +1289,19 @@ var Store = Reflux.createStore({
   loadModels() {
     // var batch = [];
 
-    models = voc.getModels();
-    // voc.getModels().forEach(function(m) {
-    //   if (!m[constants.ROOT_HASH])
-    //     m[constants.ROOT_HASH] = sha(m);
-    //   batch.push({type: 'put', key: m.id, value: m});
-    // });
-    // var self = this;
-    // return db.batch(batch)
-    //       .then(function() {
-    //         return self.loadResources();
-    //       })
-    //       .catch(function(err) {
-    //         err = err;
-    //       });
+    voc.getModels().forEach(function(m) {
+      if (!m[constants.ROOT_HASH])
+        m[constants.ROOT_HASH] = sha(m);
+      batch.push({type: 'put', key: m.id, value: m});
+    });
+    var self = this;
+    return db.batch(batch)
+          .then(function() {
+            return self.loadResources();
+          })
+          .catch(function(err) {
+            err = err;
+          });
   },
 
   clearDb() {  
