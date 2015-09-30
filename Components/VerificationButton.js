@@ -10,6 +10,7 @@ var buttonStyles = require('../styles/buttonStyles');
 var {
   StyleSheet,
   View,
+  AlertIOS,
   Text,
   TouchableHighlight,
   Component
@@ -53,14 +54,17 @@ class VerificationButton extends Component {
       return <View />; 
     return (
        <View style={[buttonStyles.container1, {top: 80}]}>
-         <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
-              AlertIOS.alert(
-                'Verify ' + utils.getDisplayName(resource, model.properties),
-                [
-                  {text: 'Verify', onPress: this.props.verify.bind(this)},
-                  {text: 'Cancel', onPress: () => console.log('Canceled!')},
-                ]
-            )}>
+         <TouchableHighlight underlayColor='transparent' onPress={() =>
+            AlertIOS.alert(
+              'Verify ' + utils.getDisplayName(resource, model.properties),
+              null,
+              [
+                {text: 'Verify', onPress: this.props.verify.bind(this)},
+                {text: 'Cancel', onPress: () => console.log('Canceled!')},
+              ]
+            )
+          
+         }>
            <View>
              <View style={buttonStyles.buttonContent} />
              <View style={buttonStyles.row1}>
@@ -72,6 +76,7 @@ class VerificationButton extends Component {
        </View>
     );
   }
+
 }
 
 var styles = StyleSheet.create({
