@@ -47,7 +47,7 @@ class MessageRow extends Component {
     var ownerPhoto, hasOwnerPhoto = true;
 
     if (isMyMessage  || !to  ||  !to.photos) {
-      ownerPhoto = <View style={[styles.cell, {marginVertical: 0}]} />
+      ownerPhoto = <View style={{marginVertical: 0}} />
       hasOwnerPhoto = false;
     }
     else if (to) {
@@ -118,7 +118,7 @@ class MessageRow extends Component {
         photoListStyle = {
           flexDirection: 'row', 
           alignSelf: isMyMessage ? 'flex-end' : 'flex-start', 
-          marginLeft: isMyMessage ? 30 : (hasOwnerPhoto ? 45 : 10),
+          // marginLeft: isMyMessage ? 30 : (hasOwnerPhoto ? 45 : 10),
           borderRadius: 10,
           marginBottom: 3, 
         }
@@ -167,10 +167,10 @@ class MessageRow extends Component {
       var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
       if (resource.message) {
         if (resource.message.charAt(0) === '['  ||  resource.message.length > 30)            
-          viewStyle.width = 280;
+          viewStyle.width = isMyMessage || !hasOwnerPhoto ? 250 : 280;
       }
       if (!isSimpleMessage)
-        viewStyle.width = 280;
+        viewStyle.width = isMyMessage || !hasOwnerPhoto ? 250 : 280;
       if (isVerification) {
         var msgModel = utils.getModel(resource.document[constants.TYPE]).value;
         
@@ -410,13 +410,14 @@ class MessageRow extends Component {
         return;
       var style = styles.resourceTitle; //(first) ? styles.resourceTitle : styles.description;
       if (isMyMessage) {
-        style = [style, {justifyContent: 'flex-end', paddingLeft: 5}];
+        // style = [style, {justifyContent: 'flex-end', paddingLeft: 5}];
+        style = [style, {justifyContent: 'flex-end'}];
         if (isSimpleMessage)
           style.push({color: '#ffffff'});
         else if (isAdditionalInfo) {
-          if (isMyMessage)
-            style.push({color: '#ffffff'});
-          else
+          // if (isMyMessage)
+          //   style.push({color: '#ffffff'});
+          // else
             style.push({color: '#2892C6'});
         }
       }
@@ -442,7 +443,7 @@ class MessageRow extends Component {
         if (model.properties.verifications  &&  !isMyMessage)                  
           onPressCall = self.verify.bind(self);
         if (isAdditionalInfo)
-          style = [style, {paddingBottom: 10, color: isMyMessage ? '#ffffff' : '#2892C6'}];
+          style = [style, {paddingBottom: 10, color: '#2892C6'}];
         vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>)
       }
       else {
@@ -474,8 +475,6 @@ class MessageRow extends Component {
             return;
           }
         }
-        if (isAdditionalInfo)
-          style = [style, {color: '#ffffff'}];
         vCols.push(<Text style={style}>{resource[v]}</Text>);
       }
       first = false;
@@ -516,9 +515,8 @@ class MessageRow extends Component {
       //              </View>);
       // }
       // else
-        var msgTypeStyle = isAdditionalInfo &&  isMyMessage ? [styles.verySmallLetters, {color: '#ffffff'}] : styles.verySmallLetters;
-
-        vCols.push(<Text style={msgTypeStyle}>{s}</Text>);
+        // var msgTypeStyle = isAdditionalInfo &&  isMyMessage ? [styles.verySmallLetters, {color: '#ffffff'}] : styles.verySmallLetters;
+      vCols.push(<Text style={styles.verySmallLetters}>{s}</Text>);
     }  
     if (vCols  &&  vCols.length)
       extend(renderedRow, vCols);
@@ -722,9 +720,6 @@ var styles = StyleSheet.create({
     backgroundColor: '#f7f7f7',
     flexDirection: 'row',
   },
-  cell: {
-    marginLeft: 10,
-  },
   myCell: { 
     padding: 5, 
     justifyContent: 'flex-end', 
@@ -737,6 +732,15 @@ var styles = StyleSheet.create({
     marginRight: 5,
     width: 45,
     borderRadius: 10,
+    borderColor: '#cccccc',
+    borderWidth: 1
+  },
+  msgImageSmall: {
+    backgroundColor: '#dddddd',
+    height: 25,
+    marginRight: 5,
+    width: 25,
+    borderRadius: 12,
     borderColor: '#cccccc',
     borderWidth: 1
   },
@@ -797,7 +801,7 @@ var styles = StyleSheet.create({
   orgImage: {
     width: 20,
     height: 20,
-    marginLeft: 5,
+    // marginLeft: 5,
     // marginTop: 17,
     borderRadius: 10
   },
@@ -812,7 +816,7 @@ var styles = StyleSheet.create({
     paddingVertical: 1,
     borderRadius: 30,
     height: 60,
-    marginRight: 10,
+    // marginRight: 10,
     width: 60,
     alignSelf: 'center'
   },
