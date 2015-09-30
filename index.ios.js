@@ -1,8 +1,9 @@
 'use strict'
 
 // require('react-native-level')
-require('./shim')
-// require('./timmy')
+require('./utils/shim')
+require('./utils/crypto')
+require('./timmy')
 var React = require('react-native');
 var ResourceList = require('./Components/ResourceList');
 // var GridList = require('./Components/GridList');
@@ -60,17 +61,17 @@ class TiMApp extends Component {
     // if (!isIphone)
     //   isIphone = isIphone;
   }
- 
+
   componentDidMount() {
     LinkingIOS.addEventListener('url', this._handleOpenURL.bind(this));
     var url = LinkingIOS.popInitialURL();
-    if (url) 
-      this._handleOpenURL({url});    
+    if (url)
+      this._handleOpenURL({url});
   }
   componentWillUnmount() {
     LinkingIOS.removeEventListener('url', this._handleOpenURL.bind(this));
   }
-  _handleOpenURL(event) {    
+  _handleOpenURL(event) {
     var url = event.url.trim();
     var idx = url.indexOf('://');
     var q = (idx + 3 === url.length) ? null : url.substring(idx + 3);
@@ -78,7 +79,7 @@ class TiMApp extends Component {
     var r;
     if (!q) {
       r = {
-        _t: 'tradle.Organization', 
+        _t: 'tradle.Organization',
         _r: '0191ef415aa2ec76fb8ec8760b55112cadf573bc',
         name: 'HSBC',
         me: 'me'
@@ -90,7 +91,7 @@ class TiMApp extends Component {
         switch (parseInt(params[0])) {
         case 1:
           r = {
-            _t: 'tradle.Organization', 
+            _t: 'tradle.Organization',
             _r: '96e460ca282d62e41d4b59c85b212d102d7a5a6e',
             name: 'Lloyds',
             me: 'me'
@@ -98,7 +99,7 @@ class TiMApp extends Component {
           break;
         case 2:
           r = {
-            _t: 'tradle.Organization', 
+            _t: 'tradle.Organization',
             _r: '0191ef415aa2ec76fb8ec8760b55112cadf573bc',
             name: 'HSBC',
             me: '31eb0b894cad3601adc76713d55a11c88e48b4a2'
@@ -106,7 +107,7 @@ class TiMApp extends Component {
           break;
         case 3:
           r = {
-            _t: 'tradle.Organization', 
+            _t: 'tradle.Organization',
             _r: '96e460ca282d62e41d4b59c85b212d102d7a5a6e',
             name: 'Lloyds',
             me: 'b25da36eaf4b01b37fc2154cb1103eb5324a12345'
@@ -126,12 +127,12 @@ class TiMApp extends Component {
       var currentRoutes = this.state.navigator.getCurrentRoutes();
       var route = {
         title: r.name ||  'Chat',
-        backButtonTitle: 'Back', 
+        backButtonTitle: 'Back',
         component: MessageList,
         id: 11,
         passProps: {
-          resource: r, //{'_t': type, '_r': rId}, 
-          modelName: 'tradle.Message',          
+          resource: r, //{'_t': type, '_r': rId},
+          modelName: 'tradle.Message',
           // prop: prop
         }
       }
@@ -144,12 +145,12 @@ class TiMApp extends Component {
       this.setState({
         initialRoute: {
           title: r.name ||  'Chat',
-          // backButtonTitle: 'Back', 
+          // backButtonTitle: 'Back',
           component: MessageList,
           id: 11,
           passProps: {
-            resource: r, //{'_t': type, '_r': rId}, 
-            modelName: 'tradle.Message',          
+            resource: r, //{'_t': type, '_r': rId},
+            modelName: 'tradle.Message',
             // prop: prop
           }
         },
@@ -172,10 +173,10 @@ class TiMApp extends Component {
         }
         passProps={this.state.props}
         configureScene={(route) => {
-          if (route.sceneConfig) 
+          if (route.sceneConfig)
             return route.sceneConfig;
           return Navigator.SceneConfigs.FloatFromRight;
-        }} 
+        }}
         />
     );
   }
@@ -187,44 +188,44 @@ class TiMApp extends Component {
     case 1:
       return <TimHome navigator={nav} modelName={constants.TYPES.IDENTITY} filter={props.filter} />;
     case 2:
-      return <ResourceTypesScreen navigator={nav} 
-                  modelName={props.modelName} 
-                  resource={props.resource} 
+      return <ResourceTypesScreen navigator={nav}
+                  modelName={props.modelName}
+                  resource={props.resource}
                   returnRoute={props.returnRoute}
                   sendForm={props.sendForm}
                   callback={props.callback} />;
     case 3:
-      return <ResourceView navigator={nav} 
+      return <ResourceView navigator={nav}
                   resource={props.resource}
                   prop={props.prop}
-                  verify={props.verify} />;      
+                  verify={props.verify} />;
     case 4:
-      return <NewResource navigator={nav} 
-                  resource={props.resource} 
+      return <NewResource navigator={nav}
+                  resource={props.resource}
                   model={props.model}
                   returnRoute={props.returnRoute}
                   callback={props.callback} />;
     case 5:
-      return <MessageView navigator={nav} 
+      return <MessageView navigator={nav}
                   resource={props.resource}
-                  verify={props.verify} />;      
+                  verify={props.verify} />;
     case 6:
-      return <NewItem navigator={nav} 
-                  resource={props.resource} 
+      return <NewItem navigator={nav}
+                  resource={props.resource}
                   metadata={props.metadata}
                   onAddItem={props.onAddItem}
-                  parentMeta={props.parentMeta}    />;      
+                  parentMeta={props.parentMeta}    />;
     case 7:
-      return <ArticleView navigator={nav} url={props.url} />;      
+      return <ArticleView navigator={nav} url={props.url} />;
     case 8:
-      return <IdentitiesList navigator={nav} 
-                  filter={props.filter} 
+      return <IdentitiesList navigator={nav}
+                  filter={props.filter}
                   list={props.list}
                   callback={props.callback}
                   modelName={props.modelName} />;
     case 11:
-      return <MessageList navigator={nav} 
-                  filter={props.filter} 
+      return <MessageList navigator={nav}
+                  filter={props.filter}
                   resource={props.resource}
                   prop={props.prop}
                   returnRoute={props.returnRoute}
@@ -233,23 +234,23 @@ class TiMApp extends Component {
                   modelName={props.modelName} />;
     // case 12:
     //   return <CameraView />
-      // <CameraView navigator={nav} 
-      //             onTakePic={props.onTakePic} 
-      //             resource={props.resource} 
+      // <CameraView navigator={nav}
+      //             onTakePic={props.onTakePic}
+      //             resource={props.resource}
       //             prop={props.prop}/>
-    case 13: 
-      return <SelectPhotoList 
-                metadata={props.metadata} 
+    case 13:
+      return <SelectPhotoList
+                metadata={props.metadata}
                 style={styles.style}
-                navigator={props.navigator} 
-                onSelect={props.onSelect} 
+                navigator={props.navigator}
+                onSelect={props.onSelect}
                 onSelectingEnd={props.onSelectingEnd} />
 
     case 14:
       return <PhotoCarousel photos={props.photos} currentPhoto={props.currentPhoto} resource={props.resource} />
-    // case 15: 
-    //   return <GridList navigator={nav} 
-    //               filter={props.filter} 
+    // case 15:
+    //   return <GridList navigator={nav}
+    //               filter={props.filter}
     //               resource={props.resource}
     //               prop={props.prop}
     //               returnRoute={props.returnRoute}
@@ -258,10 +259,10 @@ class TiMApp extends Component {
     //               sortProperty={props.sortProperty}
     //               modelName={props.modelName} />;
 
-    case 10:  
+    case 10:
     default: // 10
-      return <ResourceList navigator={nav} 
-                  filter={props.filter} 
+      return <ResourceList navigator={nav}
+                  filter={props.filter}
                   resource={props.resource}
                   prop={props.prop}
                   returnRoute={props.returnRoute}
@@ -281,7 +282,7 @@ var NavigationBarRouteMapper = {
     var lbTitle = route.backButtonTitle  ||  previousRoute.title;
     if (!lbTitle)
       return null;
-    var style = [styles.navBarText]; 
+    var style = [styles.navBarText];
     if (route.tintColor)
       style.push(route.tintColor);
     else
@@ -313,7 +314,7 @@ var NavigationBarRouteMapper = {
                     {route.rightButtonTitle}
                  </Text>
               : <Icon name={route.rightButtonTitle.substring(4)} size={20} color='#7AAAC3' style={styles.icon}/>;
-    
+
     return (
       <TouchableOpacity
         onPress={() => {
@@ -348,7 +349,7 @@ var NavigationBarRouteMapper = {
             org = <Text style={style}> - {route.passProps.resource.organization.title}</Text>
         }
       }
-    } 
+    }
     if (!org)
       org = <View />;
     if (route.titleTintColor)
@@ -450,7 +451,7 @@ React.AppRegistry.registerComponent('TiM', function() { return TiMApp });
     //   })
     //   .on('end', function () {
     //     console.log('Stream end');
-    //     if (!dbHasResources) 
+    //     if (!dbHasResources)
     //       utils.loadDB(db);
     //   });
     // }
@@ -477,7 +478,7 @@ React.AppRegistry.registerComponent('TiM', function() { return TiMApp });
   //     })
   //     .on('end', function () {
   //       console.log('Stream end');
-  //       if (!dbHasResources) 
+  //       if (!dbHasResources)
   //         utils.loadDB(db);
   //     });
   //   }
@@ -488,7 +489,7 @@ React.AppRegistry.registerComponent('TiM', function() { return TiMApp });
   //   this.loadModels(db, models)
   //   .then(function() {
   //     AddressBook.checkPermission((err, permission) => {
-  //       // AddressBook.PERMISSION_AUTHORIZED || AddressBook.PERMISSION_UNDEFINED || AddressBook.PERMISSION_DENIED 
+  //       // AddressBook.PERMISSION_AUTHORIZED || AddressBook.PERMISSION_UNDEFINED || AddressBook.PERMISSION_DENIED
   //       if(permission === AddressBook.PERMISSION_UNDEFINED){
   //         AddressBook.requestPermission((err, permission) => {
   //           self.storeContacts()
@@ -498,9 +499,9 @@ React.AppRegistry.registerComponent('TiM', function() { return TiMApp });
   //         self.storeContacts()
   //       }
   //       else if(permission === AddressBook.PERMISSION_DENIED){
-  //         //handle permission denied 
+  //         //handle permission denied
   //       }
-  //     })      
+  //     })
   //   });
   // }
   // storeContacts() {
@@ -514,16 +515,16 @@ React.AppRegistry.registerComponent('TiM', function() { return TiMApp });
   //     .on('close', function() {
   //       console.log('Stream closed');
   //       return me;
-  //     })      
+  //     })
   //     .on('end', function() {
   //       console.log('Stream ended');
-  //     })      
+  //     })
   //     .on('error', function(err) {
   //       console.log('err: ' + err);
   //     });
   //     console.log(contacts)
   //   })
-  // }  
+  // }
 // The LATEST
 
   // render() {
@@ -545,8 +546,8 @@ React.AppRegistry.registerComponent('TiM', function() { return TiMApp });
   //   if (this.state.isLoading)
   //     return <View></View>;
   //   var passProps = {
-  //     filter: '', 
-  //     models: models, 
+  //     filter: '',
+  //     models: models,
   //     modelName: IDENTITY_MODEL,
   //   };
   //   if (this.state.me) {
@@ -585,5 +586,5 @@ React.AppRegistry.registerComponent('TiM', function() { return TiMApp });
   //     );
   //   }
   // }
-  
+
 
