@@ -179,9 +179,9 @@ class NewResource extends Component {
     if (isRegistration)
       this.state.isRegistration = true;
     var params = {
-      newValue: json, 
+      value: json, 
       resource: resource, 
-      model: this.props.model, 
+      meta: this.props.model, 
       isRegistration: isRegistration
     };
     if (this.props.additionalInfo)
