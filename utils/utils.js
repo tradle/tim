@@ -122,7 +122,16 @@ var utils = {
         }
       }
     }
-    var editCols = this.arrayToObject(meta.editCols);
+
+    var editCols;
+    if (params.editCols) {
+      editCols = {};
+      params.editCols.forEach(function(r) {
+        editCols[r] = props[r];
+      })
+    } 
+    else 
+      editCols = this.arrayToObject(meta.editCols);
       
     var eCols = editCols ? editCols : props;
     var required = this.arrayToObject(meta.required);
