@@ -2,12 +2,6 @@ var path = require('path')
 var crypto = require('crypto')
 var DHT = require('bittorrent-dht')
 var leveldown = require('asyncstorage-down')
-var open = leveldown.open
-leveldown.open = function () {
-  console.log(arguments)
-  return open.apply(this, arguments)
-}
-
 var utils = require('tradle-utils')
 var rimraf = require('rimraf')
 var fs = require('fs')
@@ -17,7 +11,8 @@ var Identity = require('midentity').Identity
 // var tedPriv = require('chained-chat/test/fixtures/ted-priv')
 // var Fakechain = require('blockloader/fakechain')
 var Blockchain = require('cb-blockr')
-var Keeper = require('bitkeeper-js')
+// var Keeper = require('bitkeeper-js')
+var Keeper = require('http-keeper')
 var Wallet = require('simple-wallet')
 // var fakeKeeper = help.fakeKeeper
 // var fakeWallet = help.fakeWallet
@@ -41,11 +36,52 @@ var TED_PORT = 51087
 // var blockchain = tedWallet.blockchain
 // var tedWallet = walletFor(ted)
 
-clear(function () {
-  print(init)
-})
+// clear(function () {
+//   print(init)
+// })
 
-// init()
+init()
+
+// ;['bill', 'ted'].forEach(function (prefix) {
+//   var keeper = new Keeper({
+//     storage: prefix + '-storage',
+//     fallbacks: ['http://tradle.io:25667']
+//   })
+
+//   keeper.getAll()
+//     .then(function (map) {
+//       for (var key in map) {
+//         keeper.push({
+//           key: key,
+//           value: map[key]
+//         })
+//       }
+//     })
+// })
+
+// clear(function () {
+//   var keeper = new Keeper({
+//     storage: 'blah',
+//     fallbacks: ['http://tradle.io:25667']
+//   })
+
+//   keeper.put(new Buffer('1'))
+//     .then(function () {
+//       return keeper.getAll()
+//     })
+//     .then(function (map) {
+//       debugger
+//       for (var key in map) {
+//         keeper.push({
+//           key: key,
+//           value: map[key]
+//         })
+//       }
+//     })
+//     .catch(function (err) {
+//       debugger
+//     })
+// })
 
 function print (cb) {
   walk('./', function (err, results) {
@@ -110,23 +146,40 @@ function init () {
   ;[driverBill, driverTed].forEach(function (d) {
     d.once('ready', function () {
       console.log(d.name(), 'is ready')
+      // d.publishMyIdentity()
+      d.identities().createReadStream()
+        .on('data', function (data) {
+          console.log('identity', data)
+        })
+
+      d.messages().createValueStream()
+        .on('data', function (data) {
+          d.lookupObject(data)
+            .then(function (obj) {
+              console.log('msg', obj)
+            })
+        })
     })
 
-    d.on('chained', function (obj) {
-      debugger
-      console.log('chained', obj)
-    })
+    // d.on('unchained', function (obj) {
+    //   debugger
+    //   console.log('chained', obj)
+    // })
 
-    // d.publishMyIdentity()
+    // d.on('chained', function (obj) {
+    //   debugger
+    //   console.log('chained', obj)
+    // })
+
     d.on('error', function (err) {
       debugger
       console.error(err)
     })
 
-    d.on('message', function (msg) {
-      debugger
-      console.log(msg)
-    })
+    // d.on('message', function (msg) {
+    //   debugger
+    //   console.log(msg)
+    // })
   })
 
   // driverTed.once('ready', function () {
@@ -159,9 +212,8 @@ function buildDriver (identity, keys, port) {
   dht.listen(port)
 
   var keeper = new Keeper({
-    dht: dht,
     storage: prefix + '-storage',
-    checkReplication: 120000
+    fallbacks: ['http://tradle.io:25667']
   })
 
   var blockchain = new Blockchain(networkName)
