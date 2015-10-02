@@ -1,9 +1,9 @@
 'use strict'
 
-require('react-native-level')
-// require('./utils/shim')
-// require('./utils/crypto')
-// require('./timmy')
+// require('react-native-level')
+require('./utils/shim')
+require('./utils/crypto')
+require('./timmy')
 var React = require('react-native');
 var ResourceList = require('./Components/ResourceList');
 // var GridList = require('./Components/GridList');
