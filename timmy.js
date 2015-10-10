@@ -37,10 +37,11 @@ var TED_PORT = 51087
 // var tedWallet = walletFor(ted)
 
 // clear(function () {
-//   print(init)
+  // print(init)
 // })
 
-init()
+clear(init)
+// init()
 
 // ;['bill', 'ted'].forEach(function (prefix) {
 //   var keeper = new Keeper({
@@ -120,7 +121,7 @@ function walk (dir, done) {
 
 function clear (cb) {
   var togo = 1
-  rimraf('./', finish)
+  rimraf('./', setTimeout.bind(null, finish, 100))
 
   ;[
     'addressBook.db',
@@ -141,9 +142,11 @@ function clear (cb) {
 
 function init () {
   setInterval(printIdentityStatus, 30000)
-  driverBill = buildDriver(Identity.fromJSON(billPub), billPriv, BILL_PORT)
+  // driverBill = buildDriver(Identity.fromJSON(billPub), billPriv, BILL_PORT)
   driverTed = buildDriver(Identity.fromJSON(tedPub), tedPriv, TED_PORT)
   ;[driverBill, driverTed].forEach(function (d) {
+    if (!d) return
+
     d.once('ready', function () {
       console.log(d.name(), 'is ready')
       // d.publishMyIdentity()
@@ -199,8 +202,10 @@ function init () {
 
 function printIdentityStatus () {
   ;[driverBill, driverTed].forEach(function (d) {
+    if (!d) return
+
     d.identityPublishStatus(function (err, status) {
-      console.log(d.name, 'identity publish status', status)
+      console.log(d.name(), 'identity publish status', status)
     })
   })
 }
@@ -230,12 +235,6 @@ function buildDriver (identity, keys, port) {
     port: port,
     syncInterval: 60000
   })
-
-  var log = d.log
-  d.log = function () {
-    console.log('log', arguments)
-    return log.apply(this, arguments)
-  }
 
   return d
 }

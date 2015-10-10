@@ -59,7 +59,7 @@
     "rimraf": "^2.4.3",
     "simple-wallet": "tradle/simple-wallet",
     "stable-sha1": "~1.0.1",
-    "stream-browserify": "^1.0.0",
+    "stream-browserify": "substack/stream-browserify#fa56e68",
     "stream-http": "^1.3.0",
     "string_decoder": "^0.10.31",
     "tcomb": "^1.0.3",
