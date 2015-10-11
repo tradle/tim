@@ -21,9 +21,9 @@
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		146834051AC3E58100842450 /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 146834041AC3E56700842450 /* libReact.a */; };
+		73C5A64B1BCAA06F004D4D9D /* libUdpSockets.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73C5A64A1BCAA060004D4D9D /* libUdpSockets.a */; };
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 		9B01D5141B8C892800657C81 /* UIImagePickerManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B01D5131B8C892800657C81 /* UIImagePickerManager.m */; };
-		9B072ACB1BCBF891003DAFF0 /* libUdpSockets.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B072ACA1BCBF888003DAFF0 /* libUdpSockets.a */; };
 		9B13CD771B7044C90030EDE0 /* libBVLinearGradient.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B13CD661B7044970030EDE0 /* libBVLinearGradient.a */; };
 		9B13CD7E1B7919750030EDE0 /* libRNVectorIcons.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B13CD7D1B7919600030EDE0 /* libRNVectorIcons.a */; };
 		9B1B84D91BA751AE00D0AE18 /* Ionicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9B1B84D81BA751AE00D0AE18 /* Ionicons.ttf */; };
@@ -98,19 +98,19 @@
 			remoteGlobalIDString = 83CBBA2E1A601D0E00E9B192;
 			remoteInfo = React;
 		};
+		73C5A6491BCAA060004D4D9D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 73C5A6451BCAA060004D4D9D /* UdpSockets.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 134814201AA4EA6300B7C361;
+			remoteInfo = UdpSockets;
+		};
 		832341B41AAA6A8300B99B32 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 58B5119B1A9E6C1200147676;
 			remoteInfo = RCTText;
-		};
-		9B072AC91BCBF888003DAFF0 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 9B072AC51BCBF888003DAFF0 /* UdpSockets.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 134814201AA4EA6300B7C361;
-			remoteInfo = UdpSockets;
 		};
 		9B13CD651B7044970030EDE0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -176,9 +176,9 @@
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = iOS/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = iOS/main.m; sourceTree = "<group>"; };
 		146833FF1AC3E56700842450 /* React.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = React.xcodeproj; path = "node_modules/react-native/React/React.xcodeproj"; sourceTree = "<group>"; };
+		73C5A6451BCAA060004D4D9D /* UdpSockets.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = UdpSockets.xcodeproj; path = "node_modules/react-native-udp/ios/UdpSockets.xcodeproj"; sourceTree = "<group>"; };
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
 		9B01D5131B8C892800657C81 /* UIImagePickerManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = UIImagePickerManager.m; path = "node_modules/react-native-image-picker/UIImagePickerManager/UIImagePickerManager.m"; sourceTree = "<group>"; };
-		9B072AC51BCBF888003DAFF0 /* UdpSockets.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = UdpSockets.xcodeproj; path = "node_modules/react-native-udp/ios/UdpSockets.xcodeproj"; sourceTree = "<group>"; };
 		9B13CD611B7044970030EDE0 /* BVLinearGradient.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = BVLinearGradient.xcodeproj; path = "node_modules/react-native-linear-gradient/BVLinearGradient.xcodeproj"; sourceTree = "<group>"; };
 		9B13CD781B7919600030EDE0 /* RNVectorIcons.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNVectorIcons.xcodeproj; path = "node_modules/react-native-vector-icons/RNVectorIcons.xcodeproj"; sourceTree = "<group>"; };
 		9B1B84D81BA751AE00D0AE18 /* Ionicons.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = Ionicons.ttf; path = "node_modules/react-native-vector-icons/Fonts/Ionicons.ttf"; sourceTree = "<group>"; };
@@ -216,7 +216,7 @@
 				832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */,
 				00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */,
 				139FDEF61B0652A700C62182 /* libRCTWebSocket.a in Frameworks */,
-				9B072ACB1BCBF891003DAFF0 /* libUdpSockets.a in Frameworks */,
+				73C5A64B1BCAA06F004D4D9D /* libUdpSockets.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -320,10 +320,18 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		73C5A6461BCAA060004D4D9D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				73C5A64A1BCAA060004D4D9D /* libUdpSockets.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				9B072AC51BCBF888003DAFF0 /* UdpSockets.xcodeproj */,
+				73C5A6451BCAA060004D4D9D /* UdpSockets.xcodeproj */,
 				9B13CD781B7919600030EDE0 /* RNVectorIcons.xcodeproj */,
 				9B13CD611B7044970030EDE0 /* BVLinearGradient.xcodeproj */,
 				9B3ADDEB1B5E8A3300B6594A /* RNSearchBar.xcodeproj */,
@@ -370,14 +378,6 @@
 			children = (
 				13B07F961A680F5B00A75B9A /* TiM.app */,
 				00E356EE1AD99517003FC87E /* TiMTests.xctest */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		9B072AC61BCBF888003DAFF0 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				9B072ACA1BCBF888003DAFF0 /* libUdpSockets.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -548,8 +548,8 @@
 					ProjectRef = 9B13CD781B7919600030EDE0 /* RNVectorIcons.xcodeproj */;
 				},
 				{
-					ProductGroup = 9B072AC61BCBF888003DAFF0 /* Products */;
-					ProjectRef = 9B072AC51BCBF888003DAFF0 /* UdpSockets.xcodeproj */;
+					ProductGroup = 73C5A6461BCAA060004D4D9D /* Products */;
+					ProjectRef = 73C5A6451BCAA060004D4D9D /* UdpSockets.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -617,18 +617,18 @@
 			remoteRef = 146834031AC3E56700842450 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		73C5A64A1BCAA060004D4D9D /* libUdpSockets.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libUdpSockets.a;
+			remoteRef = 73C5A6491BCAA060004D4D9D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		832341B51AAA6A8300B99B32 /* libRCTText.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libRCTText.a;
 			remoteRef = 832341B41AAA6A8300B99B32 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		9B072ACA1BCBF888003DAFF0 /* libUdpSockets.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libUdpSockets.a;
-			remoteRef = 9B072AC91BCBF888003DAFF0 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		9B13CD661B7044970030EDE0 /* libBVLinearGradient.a */ = {
