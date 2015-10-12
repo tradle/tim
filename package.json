@@ -38,7 +38,7 @@
     "q-level": "~1.1.2",
     "querystring-es3": "^0.2.1",
     "react-mixin": "~1.2.2",
-    "react-native": "^0.8.0",
+    "react-native": "facebook/react-native#v0.11.0",
     "react-native-addressbook": "^1.1.5",
     "react-native-carousel": "git://github.com/nick/react-native-carousel#5a753cd900b3d4b5ee9ec07cedb18dc3703db266",
     "react-native-clone-referenced-element": "^1.0.0",
