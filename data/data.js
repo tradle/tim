@@ -2,7 +2,7 @@
 
 
 // var myId = 'b25da36eaf4b01b37fc2154cb1103eb5324a52fa'; // Jane Choi
-var myId = '31eb0b894cad3601adc76713d55a11c88e48b4a2'; // Kate Blair
+// var myId = '31eb0b894cad3601adc76713d55a11c88e48b4a2'; // Kate Blair
 // var myId = '38980944449570d2783d7c8af5db8ca9463391f3'; // Sophia
 // var myId = 'b25da36eaf4b01b37fc2154cb1103eb5324a12348'; // Timo
 // var myId = 'b25da36eaf4b01b37fc2154cb1103eb5324a12345'; // Ted
@@ -42,15 +42,45 @@ var myId = '31eb0b894cad3601adc76713d55a11c88e48b4a2'; // Kate Blair
 
 
 
-
-
-
-
+// var securityCodes = [
+// {
+//   _t: 'tradle.SecurityCode',
+//   code: '1234567',
+//   organization: {
+//     id: 'tradle.Organization_71e4b7cd6c11ab7221537275988f113a879029ea',
+//     title: 'Rabobank'
+//   }
+// },
+// {
+//   _t: 'tradle.SecurityCode',
+//   code: '7654321',
+//   organization: {
+//     id: 'tradle.Organization_71e4b7cd6c11ab7221537275988f113a879029ea',
+//     title: 'Rabobank'
+//   }
+// },
+// ]
 
 // ResidencyVerification - address - bank statement, utility bill
 // EmploymentVerification - employer 
 // SalaryVerification - latest pay stub
 var identities = [
+{
+  _t: 'tradle.SecurityCode',
+  code: '1234567',
+  organization: {
+    id: 'tradle.Organization_71e4b7cd6c11ab7221537275988f113a879029ea',
+    title: 'Rabobank'
+  }
+},
+{
+  _t: 'tradle.SecurityCode',
+  code: '7654321',
+  organization: {
+    id: 'tradle.Organization_71e4b7cd6c11ab7221537275988f113a879029ea',
+    title: 'Rabobank'
+  }
+},
 {
   _t:'tradle.Identity',
   'firstName':'Kate',

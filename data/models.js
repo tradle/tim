@@ -11,6 +11,9 @@ var voc = [{
       'type': 'string',
       'readOnly': true
     },
+    securityCode: {
+      type: 'string',
+    },
     'contactInfo': {
       'type': 'array',
       'items': {
@@ -62,7 +65,7 @@ var voc = [{
     },
     'lastName': {
       'type': 'string',
-      description:  'Choose a fake name or a real name. It all depends on how you want people to know you. Choose a different Identity for work and social.',
+      'description':  'Choose a fake name or a real name. It all depends on how you want people to know you. Choose a different Identity for work and social.',
     },
     'formatted': {
       transient: true,
@@ -78,7 +81,7 @@ var voc = [{
       'type': 'object',
       'ref': 'tradle.Organization'
     },
-    verifiedByMe: {
+    'verifiedByMe': {
       type: 'array',
       allowRoles: 'me',
       icon: 'ios-checkmark-empty',
@@ -191,6 +194,7 @@ var voc = [{
     // 'photos',
     // 'pubkeys',
     'firstName',
+    // 'securityCode'
     //'lastName',
     // 'city',
     // 'v',
@@ -216,6 +220,7 @@ var voc = [{
     'photos'
   ],
   'editCols': [
+    'securityCode',
     'firstName', 
     'lastName',
     'street', 
@@ -991,6 +996,25 @@ var voc = [{
   ],
 },
 {
+  id: 'tradle.SecurityCode',
+  type: 'tradle.Model',
+  title: 'Security Code',
+  properties: {
+    _t: {
+      type: 'string',
+      readOnly: true      
+    },
+    code: {
+      type: 'string',
+      readOnly: true
+    },
+    organization: {
+      type: 'object',
+      ref: 'tradle.Organization'
+    }
+  }
+},
+{
   id: 'tradle.Organization',
   type: 'tradle.Model',
   title: 'Organization',
@@ -1072,6 +1096,15 @@ var voc = [{
         backlink: 'organization'
       }
     },
+    securityCodes: {
+      type: 'array',
+      readOnly: true,
+      items: {
+        type: 'object',
+        ref: 'tradle.SecurityCode',
+        backlink: 'organization'
+      }
+    },
     verificationsCount: {
       type: 'number',
       readOnly: true,
@@ -1114,6 +1147,21 @@ var voc = [{
     'region', 
     'country',
   ]
+},
+{
+  id: 'tradle.NewMessageModel',
+  type: 'tradle.Model',
+  title: 'New message model',
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+     },
+     'url': {
+      'type': 'string',
+      'displayName': true
+     }
+  },
 },
 {
   id: 'tradle.Money',
