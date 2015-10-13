@@ -42,7 +42,7 @@ class ResourceList extends Component {
       filter: this.props.filter,
       userInput: ''
     };
-    var isRegistration = this.props.resource  &&  this.props.resource[constants.TYPE] === constants.TYPES.IDENTITY  &&  !this.props.resource[constants.ROOT_HASH];
+    var isRegistration = this.props.isRegistration ||  (this.props.resource  &&  this.props.resource[constants.TYPE] === constants.TYPES.IDENTITY  &&  !this.props.resource[constants.ROOT_HASH]);
     if (isRegistration)
       this.state.isRegistration = isRegistration;    
   }
@@ -181,7 +181,6 @@ class ResourceList extends Component {
     var modelName = 'tradle.Message';
     var self = this;
     var route = {
-      title: title,
       component: MessageList,
       id: 11,
       passProps: {
@@ -191,7 +190,8 @@ class ResourceList extends Component {
       },
     }
     if (isIdentity) {
-      route.rightButtonTitle = 'Profile';
+      route.title = resource.firstName
+      route.rightButtonTitle = 'Profile'
       route.onRightButtonPress = {
         title: title,
         id: 3,
@@ -212,7 +212,23 @@ class ResourceList extends Component {
           }
         },
         passProps: {resource: resource}
-      }      
+      }
+    }      
+    else {
+      route.title = resource.name
+      var routes = this.props.navigator.getCurrentRoutes();        
+      if (routes[routes.length - 1].title === 'Banks'  ||
+          routes[routes.length - 1].title === 'Official Accounts') {
+        var msg = {
+          message: (me.firstName || 'There is a customer') + ' waiting for the response',
+          _t: constants.TYPES.SIMPLE_MESSAGE,
+          from: me,
+          to: resource,
+          time: new Date().getTime(),
+        }
+
+        Actions.addMessage(msg, true) 
+      }
     }
     this.props.navigator.push(route);
   }
