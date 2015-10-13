@@ -6,10 +6,10 @@ var extend = require('extend');
 var Q = require('q');
 var AddressBook = require('NativeModules').AddressBook;
 var sampleData = require('../data/data');
-var securityCodes = require('../data/codes');
 var voc = require('../data/models');
 
 var myIdentity = require('../data/myIdentity.json');
+var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
@@ -233,25 +233,26 @@ var Store = Reflux.createStore({
     // Customer clicks on any of the Official accounts
     if (isWelcome) {
       var self = this
-      fs.createReadStream('welcome.json')
-      .on('data', function(data) {
-        var msg = JSON.parse(data)
-        msg.message.replace('{firstName}', me.firstNamfe)
-        msg.time = new Date()
-        msg[TYPE] = constants.TYPES.SIMPLE_MESSAGE
-        msg.from = {
-          id: me[TYPE] + '_' + me[ROOT_HASH],
-          title: utils.getDisplayName(me, self.getModel(constants.TYPES.IDENTITY).value.properties)
-        }
-        msg.to = msg.from
-        msg.organization = to
-        msg[ROOT_HASH] = sha(msg)
-        var key = constants.TYPES.SIMPLE_MESSAGE + '_' + msg[ROOT_HASH]
-        list[key] = {
-          key: key,
-          value: msg
-        }
-      })
+      // fs.createReadStream('welcome.json')
+      // .on('data', function(data) {
+
+      var msg = JSON.parse(welcome.msg)
+      msg.message.replace('{firstName}', me.firstName)
+      msg.time = new Date()
+      msg[TYPE] = constants.TYPES.SIMPLE_MESSAGE
+      msg.from = {
+        id: me[TYPE] + '_' + me[ROOT_HASH],
+        title: utils.getDisplayName(me, self.getModel(constants.TYPES.IDENTITY).value.properties)
+      }
+      msg.to = msg.from
+      msg.organization = to
+      msg[ROOT_HASH] = sha(msg)
+      var key = constants.TYPES.SIMPLE_MESSAGE + '_' + msg[ROOT_HASH]
+      list[key] = {
+        key: key,
+        value: msg
+      }
+      // })
     }
     // var rootHash = sha(rr);
     // rr[ROOT_HASH] = rootHash;
@@ -1537,10 +1538,11 @@ var Store = Reflux.createStore({
       }
     }
     if (pubkeys) {
-      pubkeys.forEach(function(key) {
+      for (var i=0; i<pubkeys.length; i++) {
+        var key = pubkeys[i]
         if (key.purpose === 'sign'  &&  key.type === 'ec')
           return key.fingerprint
-      })
+      }
     }    
   },
   initIdentity(me) {
