@@ -23,6 +23,7 @@ class ResourceTypesScreen extends Component {
   constructor(props) {
     super(props);
     var implementors = utils.getImplementors(this.props.modelName);
+    delete implementors[constants.TYPES.ADDITIONAL_INFO]
 
     var dataSource =  new ListView.DataSource({
       rowHasChanged: (row1, row2) => row1 !== row2,
