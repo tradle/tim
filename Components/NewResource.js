@@ -80,8 +80,8 @@ class NewResource extends Component {
     if (!resource  ||  (params.action !== 'addItem'  &&  params.action !== 'addMessage'))
       return;
     if (params.error) {
-      if (resource[constants.TYPE] == this.props.resource[constants.TYPE])
-        this.setState({err: params.error, resource: resource});
+      if (resource[constants.TYPE] == this.state.resource[constants.TYPE])
+        this.setState({err: params.error, resource: resource, isRegistration: this.state.isRegistration});
       return;
     }
     // if registration or after editing your own profile 
@@ -212,6 +212,7 @@ class NewResource extends Component {
         prop:        propName,
         modelName:   prop.ref,
         resource:    resource,
+        isRegistration: this.state.isRegistration,
         returnRoute: currentRoutes[currentRoutes.length - 1],
         callback:    this.setChosenValue.bind(this)
       }

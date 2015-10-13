@@ -3,7 +3,8 @@
 // require('react-native-level')
 require('./utils/shim')
 require('./utils/crypto')
-require('./timmy')
+require('stream')
+// require('./timmy')
 var React = require('react-native');
 var ResourceList = require('./Components/ResourceList');
 // var GridList = require('./Components/GridList');
@@ -270,6 +271,7 @@ class TiMApp extends Component {
                   returnRoute={props.returnRoute}
                   callback={props.callback}
                   isAggregation={props.isAggregation}
+                  isRegistration={props.isRegistration}
                   sortProperty={props.sortProperty}
                   modelName={props.modelName} />;
     }
