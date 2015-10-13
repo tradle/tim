@@ -216,6 +216,74 @@ var Store = Reflux.createStore({
       else
         rr[p] = r[p];
     }
+    rr[NONCE] = this.getNonce()
+    var batch = [];
+    var self = this;
+    var welcomeMessage;
+    return Q.nfcall(getDHTKey, rr)
+    .then(function(dhtKey) {
+      var batch = [];
+      rr[ROOT_HASH] = dhtKey;
+      rr[constants.CUR_HASH] = dhtKey;
+      var key = rr[TYPE] + '_' + dhtKey;
+      batch.push({type: 'put', key: key, value: rr})
+      // db.put(key, r)
+      // .then(function() {
+      list[key] = {key: key, value: rr};
+      var to = list[utils.getId(r.to)].value;
+      var from = list[utils.getId(r.from)].value;
+      var dn = r.message; // || utils.getDisplayName(r, props);
+      if (!dn)
+        dn = 'sent photo';
+      else {
+        var msgParts = utils.splitMessage(dn);
+        dn = msgParts.length === 1 ? dn : utils.getModel(msgParts[1]).value.title + ' request';
+      }
+
+      to.lastMessage = (from[ROOT_HASH] === me[ROOT_HASH]) ? 'You: ' + dn : dn;
+      to.lastMessageTime = r.time;
+      from.lastMessage = r.message;
+      from.lastMessageTime = r.time;
+      batch.push({type: 'put', key: to[TYPE] + '_' + to[ROOT_HASH], value: to});
+      batch.push({type: 'put', key: from[TYPE] + '_' + from[ROOT_HASH], value: from});
+      if (!isWelcome) 
+        return Q()
+
+      var welcomeMessage = {}
+      welcomeMessage.message = welcome.msg.replace('{firstName}', me.firstName)
+      welcomeMessage.time = new Date()
+      welcomeMessage[TYPE] = constants.TYPES.SIMPLE_MESSAGE
+      welcomeMessage[NONCE] = self.getNonce()
+      welcomeMessage.to = {
+        id: me[TYPE] + '_' + me[ROOT_HASH],
+        title: utils.getDisplayName(me, self.getModel(constants.TYPES.IDENTITY).value.properties)
+      }
+      welcomeMessage.from = rr.to
+      welcomeMessage.organization = rr.to
+
+      return Q.nfcall(getDHTKey, welcomeMessage)
+    })
+    .then(function(dhtKey) {
+      if (dhtKey) {
+        welcomeMessage[ROOT_HASH] = dhtKey
+        batch.push({type: 'put', key: welcomeMessage[TYPE] + '_' + dhtKey, value: welcomeMessage})
+      }
+    })
+    .then(function() {
+      db.batch(batch)    
+      .then(function() {
+
+      })
+      .then(function() {
+        self.trigger({
+          action: 'addMessage',
+          resource: rr
+        });
+      })
+      .catch(function(err) {
+        err = err;
+      });
+    })
 
     // P2P message without putting it on blockchain
     meDriver.send({
@@ -231,29 +299,30 @@ var Store = Reflux.createStore({
       err = err
     })
     // Customer clicks on any of the Official accounts
-    if (isWelcome) {
-      var self = this
-      // fs.createReadStream('welcome.json')
-      // .on('data', function(data) {
+    // if (isWelcome) {
+    //   var self = this
+    //   var msg = {}
+    //   msg.message = welcome.msg.replace('{firstName}', me.firstName)
+    //   msg.time = new Date()
+    //   msg[TYPE] = constants.TYPES.SIMPLE_MESSAGE
+    //   msg.to = {
+    //     id: me[TYPE] + '_' + me[ROOT_HASH],
+    //     title: utils.getDisplayName(me, self.getModel(constants.TYPES.IDENTITY).value.properties)
+    //   }
+    //   msg.from = r.to
+    //   msg.organization = r.to
 
-      var msg = JSON.parse(welcome.msg)
-      msg.message.replace('{firstName}', me.firstName)
-      msg.time = new Date()
-      msg[TYPE] = constants.TYPES.SIMPLE_MESSAGE
-      msg.from = {
-        id: me[TYPE] + '_' + me[ROOT_HASH],
-        title: utils.getDisplayName(me, self.getModel(constants.TYPES.IDENTITY).value.properties)
-      }
-      msg.to = msg.from
-      msg.organization = to
-      msg[ROOT_HASH] = sha(msg)
-      var key = constants.TYPES.SIMPLE_MESSAGE + '_' + msg[ROOT_HASH]
-      list[key] = {
-        key: key,
-        value: msg
-      }
-      // })
-    }
+    //   Q.nfcall(getDHTKey, msg)
+
+    //   msg[ROOT_HASH] = sha(msg)
+    //   var key = constants.TYPES.SIMPLE_MESSAGE + '_' + msg[ROOT_HASH]
+    //   list[key] = {
+    //     key: key,
+    //     value: msg
+    //   }
+    // }
+
+    // var batch = [];
     // var rootHash = sha(rr);
     // rr[ROOT_HASH] = rootHash;
     // rr[constants.CUR_HASH] = rootHash;
@@ -648,8 +717,11 @@ var Store = Reflux.createStore({
       // var promiseKey = returnVal[ROOT_HASH]
       //   ? returnVal[ROOT_HASH]
       //   : Q.nfcall(getDHTKey, returnVal)
-
-      return returnVal[ROOT_HASH] || Q.nfcall(getDHTKey, returnVal)
+      if (returnVal[ROOT_HASH])
+        return returnVal[ROOT_HASH]
+      if (isRegistration  &&  returnVal.securityCode)
+        this.setOrg(returnVal)
+      return Q.nfcall(getDHTKey, returnVal)
     })
     .then(function (dhtKey) {
       if (!resource  ||  isNew)
@@ -1441,40 +1513,40 @@ var Store = Reflux.createStore({
     .then(function() {
       isLoaded = true;
 
-      if (value.securityCode) {
-      // var org = list[utils.getId(value.organization)].value
-        var result = self.searchNotMessages({modelName: 'tradle.SecurityCode'})
-        if (!result) {
-          var err = 'The security code you specified was not registered with ' + value.organization.title
-          this.trigger({action: 'addItem', resource: value, error: err})
-          return
-        }
+      // if (value.securityCode) {
+      // // var org = list[utils.getId(value.organization)].value
+      //   var result = self.searchNotMessages({modelName: 'tradle.SecurityCode'})
+      //   if (!result) {
+      //     var err = 'The security code you specified was not registered with ' + value.organization.title
+      //     this.trigger({action: 'addItem', resource: value, error: err})
+      //     return
+      //   }
                
-        var i = 0       
-        for (; i<result.length; i++) {
-          if (result[i].code === value.securityCode) {
-            value.organization = result[i].organization
-            break
-          }
-        }
-        if (!value.organization) {
-          var err = 'The security code you specified was not registered with ' + value.organization.title
-          this.trigger({action: 'addItem', resource: value, error: err})
-          return
-        }
+      //   var i = 0       
+      //   for (; i<result.length; i++) {
+      //     if (result[i].code === value.securityCode) {
+      //       value.organization = result[i].organization
+      //       break
+      //     }
+      //   }
+      //   if (!value.organization) {
+      //     var err = 'The security code you specified was not registered with ' + value.organization.title
+      //     this.trigger({action: 'addItem', resource: value, error: err})
+      //     return
+      //   }
      
-        // var org = list[utils.getId(value.organization)].value
+      //   // var org = list[utils.getId(value.organization)].value
 
-        var photos = list[utils.getId(value.organization.id)].value.photos;
-        if (photos)
-          value.organization.photo = photos[0].url;
+      //   var photos = list[utils.getId(value.organization.id)].value.photos;
+      //   if (photos)
+      //     value.organization.photo = photos[0].url;
    
-      }
-      // else if (value.securityCode) {
-      //   var err = 'Please set the organization you are representing'
-      //   this.trigger({action: 'addItem', resource: value, error: err})
-      //   return
       // }
+      // // else if (value.securityCode) {
+      // //   var err = 'Please set the organization you are representing'
+      // //   this.trigger({action: 'addItem', resource: value, error: err})
+      // //   return
+      // // }
       
       me = value
      
@@ -1514,6 +1586,35 @@ var Store = Reflux.createStore({
       err = err;
     });
   },
+  setOrg(value) {
+  // var org = list[utils.getId(value.organization)].value
+    var result = self.searchNotMessages({modelName: 'tradle.SecurityCode'})
+    if (!result) {
+      var err = 'The security code you specified was not registered with ' + value.organization.title
+      this.trigger({action: 'addItem', resource: value, error: err})
+      return
+    }
+           
+    var i = 0       
+    for (; i<result.length; i++) {
+      if (result[i].code === value.securityCode) {
+        value.organization = result[i].organization
+        break
+      }
+    }
+    if (!value.organization) {
+      var err = 'The security code you specified was not registered with ' + value.organization.title
+      this.trigger({action: 'addItem', resource: value, error: err})
+      return
+    }
+ 
+    // var org = list[utils.getId(value.organization)].value
+
+    var photos = list[utils.getId(value.organization.id)].value.photos;
+    if (photos)
+      value.organization.photo = photos[0].url;
+  },
+
   getFingerprint(r) {
     var pubkeys = r.pubkeys
     if (!pubkeys) {
