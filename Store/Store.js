@@ -6,12 +6,16 @@ var extend = require('extend');
 var Q = require('q');
 var AddressBook = require('NativeModules').AddressBook;
 var sampleData = require('../data/data');
+var securityCodes = require('../data/codes');
 var voc = require('../data/models');
+
 var myIdentity = require('../data/myIdentity.json');
+
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
 var level = require('react-native-level');
 var promisify = require('q-level');
+
 var constants = require('tradle-constants');
 var NONCE = constants.NONCE
 var TYPE = constants.TYPE
@@ -55,12 +59,10 @@ var PORT = 51086
 // var jsonqueryEngine = require('jsonquery-engine');
 // var Device = require('react-native-device');
 // var Sublevel = require('level-sublevel')
+var IDENTITY_MODEL = constants.TYPES.IDENTITY;
 
 var ADDITIONAL_INFO = 'tradle.AdditionalInfo';
 var VERIFICATION = 'tradle.Verification';
-var MESSAGE = 'tradle.Message';
-var ORGANIZATION = 'tradle.Organization';
-var IDENTITY_MODEL = constants.TYPES.IDENTITY;
 var MODEL_TYPE_VALUE = 'tradle.Model';
 var MY_IDENTITIES_MODEL = 'tradle.MyIdentities';
 
@@ -1433,52 +1435,49 @@ var Store = Reflux.createStore({
     //   this.trigger({action: 'addItem', resource: value, error: err})
     //   return 
     // }
-    
-    if (value.securityCode) {
-    // var org = list[utils.getId(value.organization)].value
-      var params = {
-        modelName: 'tradle.SecurityCode',
-        // to: org
-      }
-
-      var result = this.searchNotMessages(params)
-      if (!result) {
-        var err = 'The security code you specified was not registered with ' + value.organization.title
-        this.trigger({action: 'addItem', resource: value, error: err})
-        return
-      }
-             
-      var i = 0       
-      for (; i<result.length; i++) {
-        if (result[i].code === value.securityCode) {
-          value.organization = result[i].organization
-          break
-        }
-      }
-      if (!value.organization) {
-        var err = 'The security code you specified was not registered with ' + value.organization.title
-        this.trigger({action: 'addItem', resource: value, error: err})
-        return
-      }
-   
-      // var org = list[utils.getId(value.organization)].value
-
-      var photos = list[utils.getId(value.organization.id)].value.photos;
-      if (photos)
-        value.organization.photo = photos[0].url;
- 
-    }
-    // else if (value.securityCode) {
-    //   var err = 'Please set the organization you are representing'
-    //   this.trigger({action: 'addItem', resource: value, error: err})
-    //   return
-    // }
-    
-    me = value
-   
-    var iKey = value[TYPE] + '_' + value[ROOT_HASH];
-    return Q.ninvoke(this, 'initIdentity', value)
+    var self = this
+    return this.loadDB()
     .then(function() {
+      isLoaded = true;
+
+      if (value.securityCode) {
+      // var org = list[utils.getId(value.organization)].value
+        var result = self.searchNotMessages({modelName: 'tradle.SecurityCode'})
+        if (!result) {
+          var err = 'The security code you specified was not registered with ' + value.organization.title
+          this.trigger({action: 'addItem', resource: value, error: err})
+          return
+        }
+               
+        var i = 0       
+        for (; i<result.length; i++) {
+          if (result[i].code === value.securityCode) {
+            value.organization = result[i].organization
+            break
+          }
+        }
+        if (!value.organization) {
+          var err = 'The security code you specified was not registered with ' + value.organization.title
+          this.trigger({action: 'addItem', resource: value, error: err})
+          return
+        }
+     
+        // var org = list[utils.getId(value.organization)].value
+
+        var photos = list[utils.getId(value.organization.id)].value.photos;
+        if (photos)
+          value.organization.photo = photos[0].url;
+   
+      }
+      // else if (value.securityCode) {
+      //   var err = 'Please set the organization you are representing'
+      //   this.trigger({action: 'addItem', resource: value, error: err})
+      //   return
+      // }
+      
+      me = value
+     
+      var iKey = value[TYPE] + '_' + value[ROOT_HASH];
       var batch = [];
       batch.push({type: 'put', key: iKey, value: value});
       var mid = {
@@ -1486,10 +1485,13 @@ var Store = Reflux.createStore({
         currentIdentity: iKey, 
         allIdentities: [{
           id: iKey, 
-          title: utils.getDisplayName(value, models[modelName].value.properties)
+          title: utils.getDisplayName(value, models[value[TYPE]].value.properties)
         }]};
       batch.push({type: 'put', key: MY_IDENTITIES_MODEL + '_1', value: mid});///      
       return db.batch(batch)
+    })
+    .then(function() {
+      return Q.ninvoke(this, 'initIdentity', value)
     })
     .then(function() {
       return self.loadResources(); 
@@ -1512,17 +1514,21 @@ var Store = Reflux.createStore({
     });
   },
   getFingerprint(r) {
-    var fingerprint
     var pubkeys = r.pubkeys
     if (!pubkeys) {
       // Choose any employee from the company to send the notification about the customer
       if (r[TYPE] === ORGANIZATION) {
-        var secCodes = list[r[TYPE] + '_' + r[ROOT_HASH]].value.securityCodes
-        if (employees  &&  employees[r.title]) {
-          var orgEmployees = employees[r.title]
-          for (var sc in secCodes) {
-            if (orgEmployees[sc.code]) {
-              pubkeys = orgEmployees[sc.code].pubkeys                           
+        var secCodes = this.searchNotMessages({modelName: 'tradle.SecurityCode', to: r})
+        var employees = this.searchNotMessages({modelName: IDENTITY, prop: 'organization', to: r})
+
+        if (employees) {
+          var codes = [];
+          secCodes.forEach(function(sc) {
+            codes.push(sc.code)
+          })
+          for (var i=0; i<employees.length; i++) {
+            if (employees[i].securityCode && codes.indexOf(employees[i].securityCode) != -1) {
+              pubkeys = employees[i].pubkeys                           
               if (pubkeys)
                 break
             }
@@ -1530,11 +1536,12 @@ var Store = Reflux.createStore({
         }
       }
     }
-    r.pubkeys.forEach(function(key) {
-      if (key.purpose === 'sign'  &&  key.type === 'ec')
-        fingerprint = key.fingerprint
-    })
-    return fingerprint    
+    if (pubkeys) {
+      pubkeys.forEach(function(key) {
+        if (key.purpose === 'sign'  &&  key.type === 'ec')
+          return key.fingerprint
+      })
+    }    
   },
   initIdentity(me) {
     mePub = me['pubkeys']
@@ -1602,7 +1609,7 @@ var Store = Reflux.createStore({
     })
   },
   loadAddressBook() {
-    return;
+    return Q();
     var self = this;
     return Q.ninvoke(AddressBook, 'checkPermission')
     .then(function(permission) {
@@ -1811,6 +1818,7 @@ var Store = Reflux.createStore({
       if (me  &&  me.organization) {
         if (me.securityCode) {
           var org = list[utils.getId(me.organization)].value
+          var secCodes = self.searchNotMessages({modelName: 'tradle.SecurityCode', to: org})
           if (!org.securityCodes  ||  org.securityCodes[!me.securityCode]) {
             self.trigger({err: 'The code was not registered with ' + me.organization.title})           
             return;
@@ -1825,19 +1833,19 @@ var Store = Reflux.createStore({
     })      
     .on('end', function() {
       console.log('Stream ended');
-      if (me)
-        utils.setMe(me);
-      var noModels = self.isEmpty(models);
-      if (noModels || Object.keys(list).length == 2)
-        if (me)
-          return self.loadDB();
-        else {
-          isLoaded = false;
-          if (noModels)
-            return self.loadModels();
-        }
-      // else
-      //   return self.loadAddressBook();
+      // if (me)
+      //   utils.setMe(me);
+      // var noModels = self.isEmpty(models);
+      // if (noModels || Object.keys(list).length == 2)
+      //   if (me)
+      //     return self.loadDB();
+      //   else {
+      //     isLoaded = false;
+      //     if (noModels)
+      //       return self.loadModels();
+      //   }
+      // // else
+      // //   return self.loadAddressBook();
     })      
     .on('error', function(err) {
       console.log('err: ' + err);
@@ -1882,17 +1890,17 @@ var Store = Reflux.createStore({
       var self = this;
       return db.batch(batch)
             .then(self.loadMyResources)
-            .then(self.loadAddressBook)
+            // .then(self.loadAddressBook)
             .catch(function(err) {
               err = err;
               });
     }
-    else {
-      return this.loadAddressBook()
-            .catch(function(err) {
-              err = err;
-              });
-    }
+    // else {
+    //   return this.loadAddressBook()
+    //         .catch(function(err) {
+    //           err = err;
+    //           });
+    // }
   },
   loadModels() {
     var batch = [];
