@@ -1831,10 +1831,10 @@ var Store = Reflux.createStore({
             value: data.value
           }
           if (val.securityCode) {
-            var orgName = data.value.organization.title
+            var orgName = val.organization.title
             if (!employees[orgName])
               employees[orgName] = {}
-            employees[orgName][data.value.securityCode] = data.value                           
+            employees[orgName][val.securityCode] = val                          
           }
         })
       })
