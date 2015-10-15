@@ -102,7 +102,7 @@ var Store = Reflux.createStore({
       if (me) {
         self.getDriver(me)
         self.loadResources()
-        return Q.ninvoke(self, 'initIdentity', me, false)
+        return self.initIdentity(me)
       }
     })  
     .catch(function(err) {
@@ -1577,7 +1577,7 @@ var Store = Reflux.createStore({
     .then(function() {
       meDriver = self.getDriver(value)
       self.loadResources(); 
-      return Q.ninvoke(this, 'initIdentity', value)
+      return self.initIdentity(value)
     })
     .then(function() {
       return db.get(iKey)
@@ -1721,7 +1721,7 @@ var Store = Reflux.createStore({
     })
     .then(function(balance) {
       if (balance)
-        return Q.ninvoke(meDriver, 'publishMyIdentity')
+        meDriver.publishMyIdentity()
     })
     .catch(function(err) {
       err = err
