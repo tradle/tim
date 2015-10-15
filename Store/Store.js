@@ -20,6 +20,7 @@ var constants = require('tradle-constants');
 var NONCE = constants.NONCE
 var TYPE = constants.TYPE
 var ROOT_HASH = constants.ROOT_HASH
+var CUR_HASH  = constants.CUR_HASH
 var ORGANIZATION = constants.TYPES.ORGANIZATION
 var IDENTITY = constants.TYPES.IDENTITY
 var MESSAGE = constants.TYPES.MESSAGE
@@ -99,12 +100,11 @@ var Store = Reflux.createStore({
       if (!utils.isEmpty(list))
         isLoaded = true;
       if (me) {
-        Q.ninvoke(self, 'initIdentity', me, false)
-        .then(function() {
-          return self.loadResources()
-        });
+        self.getDriver(me)
+        self.loadResources()
+        return Q.ninvoke(self, 'initIdentity', me, false)
       }
-    })
+    })  
     .catch(function(err) {
       err = err;
     });
@@ -205,7 +205,7 @@ var Store = Reflux.createStore({
     for (var p in r) {
       if (props[p].ref  &&  !props[p].id) {
         var type = r[p][TYPE];
-        var id = type ? type + '_' + r[p][ROOT_HASH]/* + '_' + r[p][constants.CUR_HASH]*/ : r[p].id;
+        var id = type ? type + '_' + r[p][ROOT_HASH]/* + '_' + r[p][CUR_HASH]*/ : r[p].id;
         var title = type ? utils.getDisplayName(r[p], this.getModel(type).value.properties) : r[p].title
         rr[p] = {
           id: id,
@@ -222,9 +222,8 @@ var Store = Reflux.createStore({
     var welcomeMessage;
     return Q.nfcall(getDHTKey, rr)
     .then(function(dhtKey) {
-      var batch = [];
       rr[ROOT_HASH] = dhtKey;
-      rr[constants.CUR_HASH] = dhtKey;
+      rr[CUR_HASH] = dhtKey;
       var key = rr[TYPE] + '_' + dhtKey;
       batch.push({type: 'put', key: key, value: rr})
       // db.put(key, r)
@@ -246,10 +245,10 @@ var Store = Reflux.createStore({
       from.lastMessageTime = r.time;
       batch.push({type: 'put', key: to[TYPE] + '_' + to[ROOT_HASH], value: to});
       batch.push({type: 'put', key: from[TYPE] + '_' + from[ROOT_HASH], value: from});
-      if (!isWelcome) 
+      if (!isWelcome  ||  (me.organization  &&  utils.getId(me.organization) === utils.getId(r.to))) 
         return Q()
 
-      var welcomeMessage = {}
+      welcomeMessage = {}
       welcomeMessage.message = welcome.msg.replace('{firstName}', me.firstName)
       welcomeMessage.time = new Date()
       welcomeMessage[TYPE] = constants.TYPES.SIMPLE_MESSAGE
@@ -258,8 +257,16 @@ var Store = Reflux.createStore({
         id: me[TYPE] + '_' + me[ROOT_HASH],
         title: utils.getDisplayName(me, self.getModel(constants.TYPES.IDENTITY).value.properties)
       }
-      welcomeMessage.from = rr.to
-      welcomeMessage.organization = rr.to
+      welcomeMessage.from = {
+        id: key,
+        title: rr.title,
+        time: rr.time
+      }
+      welcomeMessage.organization = {
+        id: key,
+        title: rr.title,
+        time: rr.time
+      }
 
       return Q.nfcall(getDHTKey, welcomeMessage)
     })
@@ -270,20 +277,17 @@ var Store = Reflux.createStore({
       }
     })
     .then(function() {
-      db.batch(batch)    
-      .then(function() {
-
-      })
-      .then(function() {
-        self.trigger({
-          action: 'addMessage',
-          resource: rr
-        });
-      })
-      .catch(function(err) {
-        err = err;
+      return db.batch(batch)    
+    })
+    .then(function() {
+      self.trigger({
+        action: 'addMessage',
+        resource: rr
       });
     })
+    .catch(function(err) {
+      err = err;
+    });
 
     // P2P message without putting it on blockchain
     meDriver.send({
@@ -325,7 +329,7 @@ var Store = Reflux.createStore({
     // var batch = [];
     // var rootHash = sha(rr);
     // rr[ROOT_HASH] = rootHash;
-    // rr[constants.CUR_HASH] = rootHash;
+    // rr[CUR_HASH] = rootHash;
     // var self = this;
     // var key = rr[TYPE] + '_' + rootHash;
     // var batch = [];
@@ -373,7 +377,7 @@ var Store = Reflux.createStore({
     else {
       var rootHash = sha(r);
       r[ROOT_HASH] = rootHash;
-      r[constants.CUR_HASH] = rootHash;
+      r[CUR_HASH] = rootHash;
 
       key = r[TYPE] + '_' + rootHash;
       if (from.organization)
@@ -389,7 +393,7 @@ var Store = Reflux.createStore({
     r.time = r.time || new Date().getTime();
 
     var newVerification = {
-      id: key + '_' + r[constants.CUR_HASH], 
+      id: key + '_' + r[CUR_HASH], 
       title: r.document.title ? r.document.title : '',
       time: r.time
     };
@@ -675,7 +679,7 @@ var Store = Reflux.createStore({
     // }
     var returnVal
     var isNew = !resource[ROOT_HASH];
-    Q.allSettled(promises)
+    Q.allSettled(promises) 
     .then(function(results) {
       extend(foundRefs, results);
       foundRefs.forEach(function(val) {
@@ -687,7 +691,7 @@ var Store = Reflux.createStore({
           var title = utils.getDisplayName(value, self.getModel(value[TYPE]).value.properties);
           json[prop] = {
             title: title,
-            id: propValue  + '_' + value[constants.CUR_HASH],
+            id: propValue  + '_' + value[CUR_HASH],
             time: value.time
           }
           var interfaces = meta.interfaces;
@@ -713,14 +717,21 @@ var Store = Reflux.createStore({
 
         // self._putResourceInDB(modelName, returnVal, isRegistration);
       }
-
       // var promiseKey = returnVal[ROOT_HASH]
       //   ? returnVal[ROOT_HASH]
       //   : Q.nfcall(getDHTKey, returnVal)
       if (returnVal[ROOT_HASH])
         return returnVal[ROOT_HASH]
-      if (isRegistration  &&  returnVal.securityCode)
-        this.setOrg(returnVal)
+
+      return isRegistration ? self.loadDB() : Q()
+    })
+    .then(function() { 
+      if (isRegistration) {
+        if (returnVal.securityCode)
+          self.setOrg(returnVal)
+        // HACK
+        returnVal[NONCE] = '04e21cf6dc67f9c5430221031b433e1903ca5975dfd7338f338146a99202c86b'
+      }
       return Q.nfcall(getDHTKey, returnVal)
     })
     .then(function (dhtKey) {
@@ -1344,7 +1355,7 @@ var Store = Reflux.createStore({
     if (!value[TYPE])
       value[TYPE] = modelName;
     
-    value[constants.CUR_HASH] = sha(value);
+    value[CUR_HASH] = sha(value);
     var model = this.getModel(modelName).value;
     var props = model.properties;
     var batch = [];
@@ -1354,13 +1365,13 @@ var Store = Reflux.createStore({
       //   value[ROOT_HASH] = data
       // }); //modelName + '_' + value[constants.ROOT_HASH];
 
-      // value[ROOT_HASH] = value[constants.CUR_HASH];
+      // value[ROOT_HASH] = value[CUR_HASH];
       var creator = me  
                   ?  me 
                   :  isRegistration ? value : null;
       if (creator) {
         value[constants.OWNER] = {
-          id: IDENTITY_MODEL + '_' + creator[ROOT_HASH] + '_' + creator[constants.CUR_HASH],
+          id: IDENTITY_MODEL + '_' + creator[ROOT_HASH] + '_' + creator[CUR_HASH],
           title: utils.getDisplayName(me, this.getModel(IDENTITY_MODEL))
         };
       }
@@ -1509,8 +1520,8 @@ var Store = Reflux.createStore({
     //   return 
     // }
     var self = this
-    return this.loadDB()
-    .then(function() {
+    // return this.loadDB()
+    // .then(function() {
       isLoaded = true;
 
       // if (value.securityCode) {
@@ -1562,12 +1573,11 @@ var Store = Reflux.createStore({
         }]};
       batch.push({type: 'put', key: MY_IDENTITIES_MODEL + '_1', value: mid});///      
       return db.batch(batch)
-    })
+    // })
     .then(function() {
+      meDriver = self.getDriver(value)
+      self.loadResources(); 
       return Q.ninvoke(this, 'initIdentity', value)
-    })
-    .then(function() {
-      return self.loadResources(); 
     })
     .then(function() {
       return db.get(iKey)
@@ -1588,7 +1598,7 @@ var Store = Reflux.createStore({
   },
   setOrg(value) {
   // var org = list[utils.getId(value.organization)].value
-    var result = self.searchNotMessages({modelName: 'tradle.SecurityCode'})
+    var result = this.searchNotMessages({modelName: 'tradle.SecurityCode'})
     if (!result) {
       var err = 'The security code you specified was not registered with ' + value.organization.title
       this.trigger({action: 'addItem', resource: value, error: err})
@@ -1646,7 +1656,9 @@ var Store = Reflux.createStore({
       }
     }    
   },
-  initIdentity(me) {
+  getDriver(me) {
+    if (meDriver)
+      return meDriver
     mePub = me['pubkeys']
     if (!mePub) {      
       mePub = myIdentity.pubkeys  // hardcoded on device
@@ -1665,6 +1677,10 @@ var Store = Reflux.createStore({
       _z: me[NONCE] || this.getNonce()
     }
     meDriver = this.buildDriver(Identity.fromJSON(publishingIdentity), mePriv, PORT)    
+    return meDriver    
+  },
+  initIdentity(me) {
+    meDriver = this.getDriver(me)
     
 
     // var self = this
@@ -1771,7 +1787,7 @@ var Store = Reflux.createStore({
             contactInfo.push({identifier: email.email, type: email.label + ' email'})
           });
         newIdentity[ROOT_HASH] = sha(newIdentity);
-        newIdentity[constants.CUR_HASH] = newIdentity[ROOT_HASH];
+        newIdentity[CUR_HASH] = newIdentity[ROOT_HASH];
         var key = IDENTITY_MODEL + '_' + newIdentity[ROOT_HASH];
         if (!list[key])
           batch.push({type: 'put', key: key, value: newIdentity});
@@ -1799,21 +1815,22 @@ var Store = Reflux.createStore({
       // d.publishMyIdentity()
       meDriver.identities().createReadStream()
       .on('data', function (data) {
-        var key = data.value[TYPE] + '_' + data.key
-        if (!data.value[ROOT_HASH])
-          data.value[ROOT_HASH] = data.key
-        var name = data.value.name;
-        delete data.value.name;
+        var key = IDENTITY + '_' + data.key
+        var val = data.value.identity
+        val[ROOT_HASH] = data.value[ROOT_HASH]
+        val[CUR_HASH] = data.value[CUR_HASH]
+        var name = val.name;
+        delete val.name
         for (var p in name)
-          data.value[p] = name[p]
+          val[p] = name[p]
 
-        db.put(key, data.value) 
+        db.put(key, val) 
         .then(function() {
           list[key] = {
             key: key,
             value: data.value
           }
-          if (data.value.securityCode) {
+          if (val.securityCode) {
             var orgName = data.value.organization.title
             if (!employees[orgName])
               employees[orgName] = {}
@@ -1982,7 +1999,7 @@ var Store = Reflux.createStore({
       sampleData.getResources().forEach(function(r) {
         if (!r[ROOT_HASH]) 
           r[ROOT_HASH] = sha(r);
-        r[constants.CUR_HASH] = r[ROOT_HASH];
+        r[CUR_HASH] = r[ROOT_HASH];
         var key = r[TYPE] + '_' + r[ROOT_HASH];
         // if (r[TYPE] === IDENTITY_MODEL)
         //   batch.push({type: 'put', key: key, value: r, prefix: identityDb});
