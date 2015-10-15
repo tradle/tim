@@ -70,7 +70,7 @@ var MY_IDENTITIES_MODEL = 'tradle.MyIdentities';
 var models = {};
 var list = {};
 var employees = {};
-var db; 
+var db;
 var ldb;
 var isLoaded;
 var me;
@@ -104,7 +104,7 @@ var Store = Reflux.createStore({
         self.loadResources()
         return self.initIdentity(me)
       }
-    })  
+    })
     .catch(function(err) {
       err = err;
     });
@@ -196,7 +196,7 @@ var Store = Reflux.createStore({
     });
   },
 
-  onAddMessage(r, isWelcome) { 
+  onAddMessage(r, isWelcome) {
     var props = this.getModel(r[TYPE]).value.properties;
     var rr = {};
     if (!r.time)
@@ -245,7 +245,7 @@ var Store = Reflux.createStore({
       from.lastMessageTime = r.time;
       batch.push({type: 'put', key: to[TYPE] + '_' + to[ROOT_HASH], value: to});
       batch.push({type: 'put', key: from[TYPE] + '_' + from[ROOT_HASH], value: from});
-      if (!isWelcome  ||  (me.organization  &&  utils.getId(me.organization) === utils.getId(r.to))) 
+      if (!isWelcome  ||  (me.organization  &&  utils.getId(me.organization) === utils.getId(r.to)))
         return Q()
 
       welcomeMessage = {}
@@ -277,7 +277,7 @@ var Store = Reflux.createStore({
       }
     })
     .then(function() {
-      return db.batch(batch)    
+      return db.batch(batch)
     })
     .then(function() {
       self.trigger({
@@ -354,7 +354,7 @@ var Store = Reflux.createStore({
     // batch.push({type: 'put', key: to[TYPE] + '_' + to[ROOT_HASH], value: to});
     // batch.push({type: 'put', key: from[TYPE] + '_' + from[ROOT_HASH], value: from});
 
-    // db.batch(batch)    
+    // db.batch(batch)
     // .then(function() {
     //   self.trigger({
     //     action: 'addMessage',
@@ -372,7 +372,7 @@ var Store = Reflux.createStore({
     var fromId = utils.getId(r.from);
     var isVerification = r[TYPE] === VERIFICATION;
     var from = list[fromId].value;
-    if (r[ROOT_HASH]) 
+    if (r[ROOT_HASH])
       key = r[TYPE] + '_' + r[ROOT_HASH];
     else {
       var rootHash = sha(r);
@@ -393,7 +393,7 @@ var Store = Reflux.createStore({
     r.time = r.time || new Date().getTime();
 
     var newVerification = {
-      id: key + '_' + r[CUR_HASH], 
+      id: key + '_' + r[CUR_HASH],
       title: r.document.title ? r.document.title : '',
       time: r.time
     };
@@ -409,7 +409,7 @@ var Store = Reflux.createStore({
     if (!to.verifiedByMe)
       to.verifiedByMe = [];
     to.verifiedByMe.push(newVerification);
-      
+
     batch.push({type: 'put', key: verificationRequestId, value: verificationRequest});
     // batch.push({type: 'put', key: toId, value: to});
     batch.push({type: 'put', key: fromId, value: from});
@@ -431,7 +431,7 @@ var Store = Reflux.createStore({
       rr.verifiedByMe = r;
       list[key] = {key: key, value: r};
 
-      if (notOneClickVerification) 
+      if (notOneClickVerification)
         self.trigger({action: 'addItem', resource: rr});
       else
         self.trigger({action: 'addVerification', resource: rr});
@@ -473,8 +473,8 @@ var Store = Reflux.createStore({
   },
   onShowIdentityList() {
     if (sampleData.getMyId()) {
-      this.trigger({action: 'showIdentityList', list: []});    
-      return; 
+      this.trigger({action: 'showIdentityList', list: []});
+      return;
     }
     var allIdentities = list[MY_IDENTITIES_MODEL + '_1'].value.allIdentities;
     var meId = me[TYPE] + '_' + me[ROOT_HASH];
@@ -489,9 +489,9 @@ var Store = Reflux.createStore({
           result.push(resource);
         }
     }
-    this.trigger({action: 'showIdentityList', list: result});    
+    this.trigger({action: 'showIdentityList', list: result});
   },
-  
+
   getItem(resource) {
     var modelName = resource[TYPE];
     var meta = this.getModel(modelName).value;
@@ -518,7 +518,7 @@ var Store = Reflux.createStore({
     var self = this;
     var newResult = resultList.map(function(resource) {
       return self.getItem(resource);
-    }); 
+    });
     return newResult;
   },
   getRefs(resource, foundRefs, props) {
@@ -528,13 +528,13 @@ var Store = Reflux.createStore({
         var ref = props[p].ref;
         if (ref  &&  resource[p]) {
           var rValue;
-          // reference property could be set as a full resource (for char to have all info at hand when displaying the message) 
+          // reference property could be set as a full resource (for char to have all info at hand when displaying the message)
           // or resource id
           if (resource[p][ROOT_HASH])
             rValue = resource[p][TYPE] + '_' + resource[p][ROOT_HASH];
-          else 
+          else
             rValue = utils.getId(resource[p]);
-          
+
           refProps[rValue] = p;
           if (list[rValue]) {
             var elm = {value: list[rValue].value, state: 'fulfilled'};
@@ -553,11 +553,11 @@ var Store = Reflux.createStore({
     .then(function(responseData) {
       model = responseData;
       props = model.properties;
-      
-      var err = ''; 
+
+      var err = '';
       var id = model.id;
 
-      if (!id) 
+      if (!id)
         err += '"id" is required. Could be something like "myGithubId.nameOfTheModel"';
       var key = id;
       // if (models[key])
@@ -595,7 +595,7 @@ var Store = Reflux.createStore({
         me.myModels = [];
       var key = model.id;
       me.myModels.push({key: key, title: model.title});
-      
+
       self.setPropertyNames(props);
 
       models[key] = {
@@ -603,7 +603,7 @@ var Store = Reflux.createStore({
         value: model
       };
       self.trigger({action: 'newModelAdded', newModel: model});
-    })     
+    })
     .catch(function(err) {
       err = err;
     })
@@ -615,7 +615,7 @@ var Store = Reflux.createStore({
         props[p].name = p;
       if (!props[p].title)
         props[p].title = utils.makeLabel(p);
-    } 
+    }
   },
   onAddItem(params) {
     var value = params.value;
@@ -635,7 +635,7 @@ var Store = Reflux.createStore({
       if (props[p] &&  props[p].type === 'object') {
         var ref = props[p].ref;
         if (ref  &&  resource[p])  {
-          if (props[p].ref  &&  this.getModel(props[p].ref).value.inlined) 
+          if (props[p].ref  &&  this.getModel(props[p].ref).value.inlined)
             continue;
           var rValue = resource[p][ROOT_HASH] ? resource[p][TYPE] + '_' + resource[p][ROOT_HASH] : utils.getId(resource[p].id);
           refProps[rValue] = p;
@@ -649,10 +649,10 @@ var Store = Reflux.createStore({
       }
     }
     // Add items properties if they were created
-    var self = this;  
+    var self = this;
     var json = JSON.parse(JSON.stringify(value));
     for (p in resource) {
-      if (props[p]  &&  props[p].type === 'array') 
+      if (props[p]  &&  props[p].type === 'array')
         json[p] = resource[p];
     }
     if (!json[TYPE])
@@ -679,7 +679,7 @@ var Store = Reflux.createStore({
     // }
     var returnVal
     var isNew = !resource[ROOT_HASH];
-    Q.allSettled(promises) 
+    Q.allSettled(promises)
     .then(function(results) {
       extend(foundRefs, results);
       foundRefs.forEach(function(val) {
@@ -687,7 +687,7 @@ var Store = Reflux.createStore({
           var value = val.value;
           var propValue = value[TYPE] + '_' + value[ROOT_HASH];
           var prop = refProps[propValue];
-         
+
           var title = utils.getDisplayName(value, self.getModel(value[TYPE]).value.properties);
           json[prop] = {
             title: title,
@@ -696,7 +696,7 @@ var Store = Reflux.createStore({
           }
           var interfaces = meta.interfaces;
           if (interfaces  &&  interfaces.indexOf(MESSAGE) != -1)
-            json.time = new Date().getTime();  
+            json.time = new Date().getTime();
         }
       });
       if (isNew  &&  !resource.time)
@@ -725,7 +725,7 @@ var Store = Reflux.createStore({
 
       return isRegistration ? self.loadDB() : Q()
     })
-    .then(function() { 
+    .then(function() {
       if (isRegistration) {
         if (returnVal.securityCode)
           self.setOrg(returnVal)
@@ -742,12 +742,12 @@ var Store = Reflux.createStore({
     .catch(function(err) {
       err = err
     })
-      
+
   },
   checkRequired(resource, meta) {
     var type = resource[TYPE];
     var rootHash = resource[ROOT_HASH];
-    var oldResource = (rootHash) ? list[type + '_' + rootHash] : null; 
+    var oldResource = (rootHash) ? list[type + '_' + rootHash] : null;
     var required = meta.required;
     if (!required)
       return;
@@ -799,21 +799,21 @@ var Store = Reflux.createStore({
     this.onList(params);
   },
   onList(params) {
-    if (isLoaded) 
+    if (isLoaded)
       this.getList(params);
     else {
       var self = this;
       this.loadDB()
       .then(function() {
         isLoaded = true;
-        if (params.modelName) 
+        if (params.modelName)
           self.getList(params);
       });
     }
   },
   getList(params) { //query, modelName, resource, isAggregation, prop) {
     var result = this.searchResources(params);
-    if (params.isAggregation) 
+    if (params.isAggregation)
       result = this.getDependencies(result);
     var resultList = [];
     for (var r of result) {
@@ -822,30 +822,30 @@ var Store = Reflux.createStore({
       resultList.push(rr);
     }
     var model = this.getModel(params.modelName).value;
-    var isMessage = model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1);   
-    var verificationsToShare; 
-    if (isMessage  &&  !params.isAggregation) 
+    var isMessage = model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1);
+    var verificationsToShare;
+    if (isMessage  &&  !params.isAggregation)
       verificationsToShare = this.getVerificationsToShare(result, params.to);
     var retParams = {
       action: isMessage  &&  !params.prop ? 'messageList' : 'list',
-      list: resultList, 
-      isAggregation: params.isAggregation      
+      list: resultList,
+      isAggregation: params.isAggregation
     }
     if (verificationsToShare)
       retParams.verificationsToShare = verificationsToShare;
     if (params.prop)
       retParams.prop = params.prop;
 
-    this.trigger(retParams);              
+    this.trigger(retParams);
   },
   searchResources(params) {
     var meta = this.getModel(params.modelName).value;
-    var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);    
+    var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
     if (isMessage)
       return this.searchMessages(params);
     else
       return this.searchNotMessages(params);
-  },  
+  },
   searchNotMessages(params) {
     var foundResources = {};
     var modelName = params.modelName;
@@ -882,8 +882,8 @@ var Store = Reflux.createStore({
       if (containerProp  &&  (!r[containerProp]  ||  utils.getId(r[containerProp]) !== resourceId))
         continue;
       if (!query) {
-         foundResources[key] = r;      
-         continue;   
+         foundResources[key] = r;
+         continue;
        }
        // primitive filtering for this commit
        var combinedValue = '';
@@ -893,13 +893,13 @@ var Store = Reflux.createStore({
          combinedValue += combinedValue ? ' ' + r[rr] : r[rr];
        }
        if (!combinedValue  ||  (combinedValue  &&  (!query || combinedValue.toLowerCase().indexOf(query.toLowerCase()) != -1))) {
-         foundResources[key] = r; 
+         foundResources[key] = r;
        }
     }
     // Don't show current 'me' contact in contact list or my identities list
     var isIdentity = modelName === IDENTITY_MODEL;
     if (!containerProp  &&  me  &&  isIdentity) {
-      if (sampleData.getMyId()) 
+      if (sampleData.getMyId())
         delete foundResources[IDENTITY_MODEL + '_' + me[ROOT_HASH]];
       else if (!isTest) {
         var myIdentities = list[MY_IDENTITIES_MODEL + '_1'].value.allIdentities;
@@ -917,7 +917,7 @@ var Store = Reflux.createStore({
           var photos = list[utils.getId(r.organization.id)].value.photos;
           if (photos)
             r.organization.photo = photos[0].url;
-        }      
+        }
       });
     }
 
@@ -932,7 +932,7 @@ var Store = Reflux.createStore({
             return new Date(aVal) - new Date(bVal);
           else
             return new Date(bVal) - new Date(aVal);
-        });      
+        });
       }
       else if (props[sortProp].type == 'string')  {
         result.sort();
@@ -942,8 +942,8 @@ var Store = Reflux.createStore({
       else if (props[sortProp].type == 'number') {
         result.sort(function(a, b) {
           return asc ? a - b : b - a
-        }); 
-      }        
+        });
+      }
     }
     return result;
   },
@@ -976,7 +976,7 @@ var Store = Reflux.createStore({
     var testMe = chatTo ? chatTo.me : null;
     if (testMe) {
       if (testMe === 'me') {
-        if (!originalMe) 
+        if (!originalMe)
           originalMe = me;
         testMe = originalMe[ROOT_HASH];
       }
@@ -1002,7 +1002,7 @@ var Store = Reflux.createStore({
           }
           if (!iMeta)
             continue;
-        }  
+        }
       }
       else if (key.indexOf(modelName + '_') === -1) {
         var rModel = this.getModel(key.split('_')[0]).value;
@@ -1023,34 +1023,34 @@ var Store = Reflux.createStore({
               r.organization.photos = [orgPhotos[0]];
           }
         }
-        if (r.document  &&  r.document.id) 
+        if (r.document  &&  r.document.id)
           r.document = list[utils.getId(r.document.id)].value;
       }
       if (chatTo) {
         if (backlink  &&  r[backlink]) {
-          if (chatId === utils.getId(r[backlink])) 
+          if (chatId === utils.getId(r[backlink]))
             foundResources[key] = r;
-          
+
           continue;
         }
         var isVerificationR = r[TYPE] === VERIFICATION  ||  r[TYPE].subClassOf === VERIFICATION;
-        if ((!r.message  ||  r.message.trim().length === 0) && !r.photos &&  !isVerificationR) 
+        if ((!r.message  ||  r.message.trim().length === 0) && !r.photos &&  !isVerificationR)
           // check if this is verification resource
           continue;
-        var fromID = utils.getId(r.from); 
+        var fromID = utils.getId(r.from);
         var toID = utils.getId(r.to);
-       
-        if (fromID !== meId  &&  toID !== meId  &&  toID != meOrgId) 
+
+        if (fromID !== meId  &&  toID !== meId  &&  toID != meOrgId)
           continue;
         var id = toModelName + '_' + chatTo[ROOT_HASH];
-        if (isChatWithOrg) { 
+        if (isChatWithOrg) {
           var toOrgId = null, fromOrgId = null;
 
-          if (list[fromID].value.organization) 
+          if (list[fromID].value.organization)
             fromOrgId = utils.getId(list[fromID].value.organization);
           else if (fromID.split('_')[0] === ORGANIZATION)
             fromOrgId = utils.getId(list[fromID].value);
-          if (list[toID].value.organization) 
+          if (list[toID].value.organization)
             toOrgId = utils.getId(list[toID].value.organization);
           else if (toID.split('_')[0] === ORGANIZATION)
             toOrgId = utils.getId(list[toID].value);
@@ -1076,7 +1076,7 @@ var Store = Reflux.createStore({
         var msg = this.fillMessage(r);
         if (msg)
           foundResources[key] = msg;
-        continue;   
+        continue;
       }
        // primitive filtering for this commit
       var combinedValue = '';
@@ -1086,7 +1086,7 @@ var Store = Reflux.createStore({
         combinedValue += combinedValue ? ' ' + r[rr] : r[rr];
       }
       if (!combinedValue  ||  (combinedValue  &&  (!query || combinedValue.toLowerCase().indexOf(query.toLowerCase()) != -1))) {
-        foundResources[key] = this.fillMessage(r); 
+        foundResources[key] = this.fillMessage(r);
       }
     }
 
@@ -1101,8 +1101,8 @@ var Store = Reflux.createStore({
     });
     // not for subreddit
     for (var r of result) {
-      r.from.photos = list[utils.getId(r.from)].value.photos; 
-      r.to.photos = list[utils.getId(r.to)].value.photos; 
+      r.from.photos = list[utils.getId(r.from)].value.photos;
+      r.to.photos = list[utils.getId(r.to)].value.photos;
     }
     return result;
   },
@@ -1135,7 +1135,7 @@ var Store = Reflux.createStore({
     var testMe = chatTo ? chatTo.me : null;
     if (testMe) {
       if (testMe === 'me') {
-        if (!originalMe) 
+        if (!originalMe)
           originalMe = me;
         testMe = originalMe[ROOT_HASH];
       }
@@ -1161,7 +1161,7 @@ var Store = Reflux.createStore({
           }
           if (!iMeta)
             continue;
-        }  
+        }
       }
       else if (key.indexOf(modelName + '_') === -1) {
         var rModel = this.getModel(key.split('_')[0]).value;
@@ -1182,34 +1182,34 @@ var Store = Reflux.createStore({
               r.organization.photos = [orgPhotos[0]];
           }
         }
-        if (r.document  &&  r.document.id) 
+        if (r.document  &&  r.document.id)
           r.document = list[utils.getId(r.document.id)].value;
       }
       if (chatTo) {
         if (backlink  &&  r[backlink]) {
-          if (chatId === utils.getId(r[backlink])) 
+          if (chatId === utils.getId(r[backlink]))
             foundResources[key] = r;
-          
+
           continue;
         }
         var isVerificationR = r[TYPE] === VERIFICATION  ||  r[TYPE].subClassOf === VERIFICATION;
-        if ((!r.message  ||  r.message.trim().length === 0) && !r.photos &&  !isVerificationR) 
+        if ((!r.message  ||  r.message.trim().length === 0) && !r.photos &&  !isVerificationR)
           // check if this is verification resource
           continue;
-        var fromID = utils.getId(r.from); 
+        var fromID = utils.getId(r.from);
         var toID = utils.getId(r.to);
-       
-        if (fromID !== meId  &&  toID !== meId  &&  toID != meOrgId) 
+
+        if (fromID !== meId  &&  toID !== meId  &&  toID != meOrgId)
           continue;
         var id = toModelName + '_' + chatTo[ROOT_HASH];
-        if (isChatWithOrg) { 
+        if (isChatWithOrg) {
           var toOrgId = null, fromOrgId = null;
 
-          if (list[fromID].value.organization) 
+          if (list[fromID].value.organization)
             fromOrgId = utils.getId(list[fromID].value.organization);
           else if (fromID.split('_')[0] === ORGANIZATION)
             fromOrgId = utils.getId(list[fromID].value);
-          if (list[toID].value.organization) 
+          if (list[toID].value.organization)
             toOrgId = utils.getId(list[toID].value.organization);
           else if (toID.split('_')[0] === ORGANIZATION)
             toOrgId = utils.getId(list[toID].value);
@@ -1235,7 +1235,7 @@ var Store = Reflux.createStore({
         var msg = this.fillMessage(r);
         if (msg)
           foundResources[key] = msg;
-        continue;   
+        continue;
       }
        // primitive filtering for this commit
       var combinedValue = '';
@@ -1245,7 +1245,7 @@ var Store = Reflux.createStore({
         combinedValue += combinedValue ? ' ' + r[rr] : r[rr];
       }
       if (!combinedValue  ||  (combinedValue  &&  (!query || combinedValue.toLowerCase().indexOf(query.toLowerCase()) != -1))) {
-        foundResources[key] = this.fillMessage(r); 
+        foundResources[key] = this.fillMessage(r);
       }
     }
 
@@ -1260,15 +1260,15 @@ var Store = Reflux.createStore({
     });
     // not for subreddit
     for (var r of result) {
-      r.from.photos = list[utils.getId(r.from)].value.photos; 
-      r.to.photos = list[utils.getId(r.to)].value.photos; 
+      r.from.photos = list[utils.getId(r.from)].value.photos;
+      r.to.photos = list[utils.getId(r.to)].value.photos;
     }
     return result;
   },
   fillMessage(r) {
     var resource = {};
-    extend(resource, r);      
-    if (!r.verifications  ||  !r.verifications.length) 
+    extend(resource, r);
+    if (!r.verifications  ||  !r.verifications.length)
       return resource;
     for (var i=0; i<resource.verifications.length; i++) {
       var v = resource.verifications[i];
@@ -1292,18 +1292,18 @@ var Store = Reflux.createStore({
       var r = foundResources[i];
       if (me  &&  utils.getId(r.to) !== meId)
         continue;
-      if (r[TYPE] !== 'tradle.SimpleMessage'  ||  r.verifications) 
+      if (r[TYPE] !== 'tradle.SimpleMessage'  ||  r.verifications)
         continue;
       var msgParts = utils.splitMessage(r.message);
       // Case when the needed form was sent along with the message
-      if (msgParts.length !== 2) 
+      if (msgParts.length !== 2)
         continue;
       var msgModel = utils.getModel(msgParts[1]);
-      if (msgModel) 
-        verTypes.push(msgModel.value.id);      
+      if (msgModel)
+        verTypes.push(msgModel.value.id);
     }
     var verificationsToShare = {};
-    if (!verTypes.length) 
+    if (!verTypes.length)
       return;
 
     for (var key in list) {
@@ -1311,7 +1311,7 @@ var Store = Reflux.createStore({
       var model = utils.getModel(type).value;
       if (model.id !== VERIFICATION && (!model.subClassOf  ||  model.subClassOf !== VERIFICATION))
         continue;
-      
+
       var doc = list[key].value.document;
       var docType = (doc.id && doc.id.split('_')[0]) || doc[TYPE];
       if (verTypes.indexOf(docType) === -1)
@@ -1340,21 +1340,21 @@ var Store = Reflux.createStore({
           verificationsToShare[docType] = [];
         verificationsToShare[docType].push(value);
       }
-    } 
+    }
     return verificationsToShare;
   },
   getNonce() {
     return crypto.randomBytes(32).toString('hex')
   },
-  _putResourceInDB(modelName, value, isRegistration) {    
+  _putResourceInDB(modelName, value, isRegistration) {
     // Cleanup null form values
     for (var p in value) {
       if (!value[p])
-        delete value[p];      
-    } 
+        delete value[p];
+    }
     if (!value[TYPE])
       value[TYPE] = modelName;
-    
+
     value[CUR_HASH] = sha(value);
     var model = this.getModel(modelName).value;
     var props = model.properties;
@@ -1366,8 +1366,8 @@ var Store = Reflux.createStore({
       // }); //modelName + '_' + value[constants.ROOT_HASH];
 
       // value[ROOT_HASH] = value[CUR_HASH];
-      var creator = me  
-                  ?  me 
+      var creator = me
+                  ?  me
                   :  isRegistration ? value : null;
       if (creator) {
         value[constants.OWNER] = {
@@ -1381,18 +1381,18 @@ var Store = Reflux.createStore({
 
         var vrId = utils.getId(verificationRequest);
         var vr = list[vrId].value;
-        if (!vr.additionalInfo  ||  !vr.additionalInfo.length) 
+        if (!vr.additionalInfo  ||  !vr.additionalInfo.length)
           vr.additionalInfo = [];
         vr.additionalInfo.push({
           id: ADDITIONAL_INFO + '_' + value[ROOT_HASH],
           title: value.message,
-          time: value.time 
+          time: value.time
         });
         batch.push({type: 'put', key: vrId, value: vr});
       }
     }
     value.time = new Date().getTime();
-    
+
     // if (model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1)) {
     var isMessage = model.subClassOf  &&  model.subClassOf === constants.TYPES.MESSAGE;
     if (isMessage) {
@@ -1417,16 +1417,16 @@ var Store = Reflux.createStore({
     batch.push({type: 'put', key: iKey, value: value});
 
     var mid;
-    
+
     // if (isRegistration) {
     //   mid = {
-    //     _type: MY_IDENTITIES_MODEL, 
-    //     currentIdentity: iKey, 
+    //     _type: MY_IDENTITIES_MODEL,
+    //     currentIdentity: iKey,
     //     allIdentities: [{
-    //       id: iKey, 
+    //       id: iKey,
     //       title: utils.getDisplayName(value, models[modelName].value.properties)
     //     }]};
-    //   batch.push({type: 'put', key: MY_IDENTITIES_MODEL + '_1', value: mid});///      
+    //   batch.push({type: 'put', key: MY_IDENTITIES_MODEL + '_1', value: mid});///
     // }
     // send message to blockchain
     if (isMessage) {
@@ -1442,18 +1442,18 @@ var Store = Reflux.createStore({
     if (isRegistration) {
       this.registration(value)
       return
-    } 
-    
+    }
+
     db.batch(batch)
     // .then(function(results) {
-    //   if (!isRegistration) 
+    //   if (!isRegistration)
     //     return
     //   me = value
     //   if (me.organization) {
     //     if (me.securityCode) {
     //       var org = list[utils.getId(me.organization)].value
     //       if (!org.securityCodes  ||  org.securityCodes[!me.securityCode]) {
-    //         self.trigger({err: 'The code was not registered with ' + me.organization.title})           
+    //         self.trigger({err: 'The code was not registered with ' + me.organization.title})
     //         return
     //       }
     //       else {
@@ -1471,7 +1471,7 @@ var Store = Reflux.createStore({
 
     //     for (var c in codes) {
     //       if (c.code === me.value.securityCode) {
-            
+
     //       }
     //     }
     //   }
@@ -1479,7 +1479,7 @@ var Store = Reflux.createStore({
     //   return Q.ninvoke(self, 'initIdentity', value, true)
     //   // })
     //   .then(function() {
-    //     return self.loadResources(); 
+    //     return self.loadResources();
     //   })
     //   .catch(function(err) {
     //     err = err
@@ -1488,19 +1488,19 @@ var Store = Reflux.createStore({
     //   //   return self.loadMyResources();
     //   // })
     //   // .then(function() {
-    //   //   self.loadResources(); 
+    //   //   self.loadResources();
     //   // })
-      
+
     // })
     .then(function() {
       return db.get(iKey)
-    })      
+    })
     .then(function(value) {
       list[iKey] = {key: iKey, value: value};
-      if (mid) 
+      if (mid)
         list[MY_IDENTITIES_MODEL + '_1'] = {key: MY_IDENTITIES_MODEL + '_1', value: mid};
       return self.loadDB(db);
-    })    
+    })
     .then(function() {
       var  params = {action: 'addItem', resource: value};
       // registration or profile editing
@@ -1517,7 +1517,7 @@ var Store = Reflux.createStore({
     // if (!value.securityCode) {
     //   var err = 'Please enter the security code'
     //   this.trigger({action: 'addItem', resource: value, error: err})
-    //   return 
+    //   return
     // }
     var self = this
     // return this.loadDB()
@@ -1532,8 +1532,8 @@ var Store = Reflux.createStore({
       //     this.trigger({action: 'addItem', resource: value, error: err})
       //     return
       //   }
-               
-      //   var i = 0       
+
+      //   var i = 0
       //   for (; i<result.length; i++) {
       //     if (result[i].code === value.securityCode) {
       //       value.organization = result[i].organization
@@ -1545,49 +1545,49 @@ var Store = Reflux.createStore({
       //     this.trigger({action: 'addItem', resource: value, error: err})
       //     return
       //   }
-     
+
       //   // var org = list[utils.getId(value.organization)].value
 
       //   var photos = list[utils.getId(value.organization.id)].value.photos;
       //   if (photos)
       //     value.organization.photo = photos[0].url;
-   
+
       // }
       // // else if (value.securityCode) {
       // //   var err = 'Please set the organization you are representing'
       // //   this.trigger({action: 'addItem', resource: value, error: err})
       // //   return
       // // }
-      
+
       me = value
-     
+
       var iKey = value[TYPE] + '_' + value[ROOT_HASH];
       var batch = [];
       batch.push({type: 'put', key: iKey, value: value});
       var mid = {
-        _type: MY_IDENTITIES_MODEL, 
-        currentIdentity: iKey, 
+        _type: MY_IDENTITIES_MODEL,
+        currentIdentity: iKey,
         allIdentities: [{
-          id: iKey, 
+          id: iKey,
           title: utils.getDisplayName(value, models[value[TYPE]].value.properties)
         }]};
-      batch.push({type: 'put', key: MY_IDENTITIES_MODEL + '_1', value: mid});///      
+      batch.push({type: 'put', key: MY_IDENTITIES_MODEL + '_1', value: mid});///
       return db.batch(batch)
     // })
     .then(function() {
       meDriver = self.getDriver(value)
-      self.loadResources(); 
+      self.loadResources();
       return self.initIdentity(value)
     })
     .then(function() {
       return db.get(iKey)
-    })      
+    })
     .then(function(value) {
       list[iKey] = {key: iKey, value: value};
-      if (mid) 
+      if (mid)
         list[MY_IDENTITIES_MODEL + '_1'] = {key: MY_IDENTITIES_MODEL + '_1', value: mid};
       return self.loadDB(db);
-    })    
+    })
     .then(function() {
       var  params = {action: 'addItem', resource: value, me: value};
       self.trigger(params);
@@ -1604,8 +1604,8 @@ var Store = Reflux.createStore({
       this.trigger({action: 'addItem', resource: value, error: err})
       return
     }
-           
-    var i = 0       
+
+    var i = 0
     for (; i<result.length; i++) {
       if (result[i].code === value.securityCode) {
         value.organization = result[i].organization
@@ -1617,7 +1617,7 @@ var Store = Reflux.createStore({
       this.trigger({action: 'addItem', resource: value, error: err})
       return
     }
- 
+
     // var org = list[utils.getId(value.organization)].value
 
     var photos = list[utils.getId(value.organization.id)].value.photos;
@@ -1640,7 +1640,7 @@ var Store = Reflux.createStore({
           })
           for (var i=0; i<employees.length; i++) {
             if (employees[i].securityCode && codes.indexOf(employees[i].securityCode) != -1) {
-              pubkeys = employees[i].pubkeys                           
+              pubkeys = employees[i].pubkeys
               if (pubkeys)
                 break
             }
@@ -1654,15 +1654,15 @@ var Store = Reflux.createStore({
         if (key.purpose === 'sign'  &&  key.type === 'ec')
           return key.fingerprint
       }
-    }    
+    }
   },
   getDriver(me) {
     if (meDriver)
       return meDriver
     mePub = me['pubkeys']
-    if (!mePub) {      
+    if (!mePub) {
       mePub = myIdentity.pubkeys  // hardcoded on device
-      me['pubkeys'] = mePub 
+      me['pubkeys'] = mePub
       me['privkeys'] = myIdentity.privkeys
     }
 
@@ -1671,17 +1671,17 @@ var Store = Reflux.createStore({
     var publishingIdentity = {
       name: {
         firstName: me.firstName,
-        formatted: me.firstName + (me.lastName ? ' ' + me.lastName : '')        
+        formatted: me.firstName + (me.lastName ? ' ' + me.lastName : '')
       },
       pubkeys: mePub,
       _z: me[NONCE] || this.getNonce()
     }
-    meDriver = this.buildDriver(Identity.fromJSON(publishingIdentity), mePriv, PORT)    
-    return meDriver    
+    meDriver = this.buildDriver(Identity.fromJSON(publishingIdentity), mePriv, PORT)
+    return meDriver
   },
   initIdentity(me) {
     meDriver = this.getDriver(me)
-    
+
 
     // var self = this
     // return Q.ninvoke(fs, 'readFile', 'myIdentity.json')
@@ -1698,7 +1698,7 @@ var Store = Reflux.createStore({
     //   me['pubkeys'] = mePub
     //   me['privkeys'] = mePriv
     //   return Q.ninvoke(fs, 'writeFile', 'myIdentity.json', JSON.stringify(me))
-    // }) 
+    // })
     // .then(function(data) {
     //   if (data) {
     //     me = JSON.parse(data.value)
@@ -1710,18 +1710,18 @@ var Store = Reflux.createStore({
     //     key: key,
     //     value: me
     //   }
-    // db.put(key, me)      
+    // db.put(key, me)
     // .then(function(data) {
     //   Q.ninvoke(meDriver, 'identityPublishStatus')
     // })
-    Q.ninvoke(meDriver, 'identityPublishStatus')
+    return meDriver.identityPublishStatus()
     .then(function(status) {
       if (!status.ever || !status.current)
         return Q.ninvoke(meDriver.wallet, 'balance')
     })
     .then(function(balance) {
       if (balance)
-        meDriver.publishMyIdentity()
+        return meDriver.publishMyIdentity()
     })
     .catch(function(err) {
       err = err
@@ -1732,17 +1732,17 @@ var Store = Reflux.createStore({
     var self = this;
     return Q.ninvoke(AddressBook, 'checkPermission')
     .then(function(permission) {
-      // AddressBook.PERMISSION_AUTHORIZED || AddressBook.PERMISSION_UNDEFINED || AddressBook.PERMISSION_DENIED 
+      // AddressBook.PERMISSION_AUTHORIZED || AddressBook.PERMISSION_UNDEFINED || AddressBook.PERMISSION_DENIED
       if(permission === AddressBook.PERMISSION_UNDEFINED)
         return Q.ninvoke(AddressBook, 'requestPermission')
                .then(function(permission) {
-                 if (permission === AddressBook.PERMISSION_AUTHORIZED)      
+                 if (permission === AddressBook.PERMISSION_AUTHORIZED)
                    return self.storeContacts.bind(self);
                });
       else if (permission === AddressBook.PERMISSION_AUTHORIZED)
         return self.storeContacts()
       else if (permission === AddressBook.PERMISSION_DENIED) {
-        //handle permission denied 
+        //handle permission denied
         return Q();
       }
     })
@@ -1758,7 +1758,7 @@ var Store = Reflux.createStore({
         var newIdentity = {
           firstName: contact.firstName,
           lastName: contact.lastName,
-          // formatted: contact.firstName + ' ' + contact.lastName,          
+          // formatted: contact.firstName + ' ' + contact.lastName,
           contactInfo: contactInfo
         };
         newIdentity[TYPE] = IDENTITY_MODEL;
@@ -1772,7 +1772,7 @@ var Store = Reflux.createStore({
               me.organization.photo = photos[0].url;
           }
         }
-        
+
         if (contact.thumbnailPath  &&  contact.thumbnailPath.length)
           newIdentity.photos = [{type: 'address book', url: contact.thumbnailPath}];
         var phoneNumbers = contact.phoneNumbers;
@@ -1780,9 +1780,9 @@ var Store = Reflux.createStore({
           phoneNumbers.forEach(function(phone) {
             contactInfo.push({identifier: phone.number, type: phone.label + ' phone'})
           })
-        } 
+        }
         var emailAddresses = contact.emailAddresses;
-        if (emailAddresses) 
+        if (emailAddresses)
           emailAddresses.forEach(function(email) {
             contactInfo.push({identifier: email.email, type: email.label + ' email'})
           });
@@ -1791,11 +1791,11 @@ var Store = Reflux.createStore({
         var key = IDENTITY_MODEL + '_' + newIdentity[ROOT_HASH];
         if (!list[key])
           batch.push({type: 'put', key: key, value: newIdentity});
-      });      
+      });
       if (batch.length)
         // identityDb.batch(batch, function(err, value) {
         db.batch(batch, function(err, value) {
-          if (err) 
+          if (err)
             dfd.reject(err);
           else {
             self.loadMyResources()
@@ -1808,7 +1808,7 @@ var Store = Reflux.createStore({
         dfd.resolve();
     })
     return dfd.promise;
-  },  
+  },
   loadResources() {
     meDriver.once('ready', function () {
       console.log(meDriver.name(), 'is ready')
@@ -1824,7 +1824,7 @@ var Store = Reflux.createStore({
         for (var p in name)
           val[p] = name[p]
 
-        db.put(key, val) 
+        db.put(key, val)
         .then(function() {
           list[key] = {
             key: key,
@@ -1834,7 +1834,7 @@ var Store = Reflux.createStore({
             var orgName = data.value.organization.title
             if (!employees[orgName])
               employees[orgName] = {}
-            employees[orgName][data.value.securityCode] = data.value                           
+            employees[orgName][data.value.securityCode] = data.value
           }
         })
       })
@@ -1897,17 +1897,17 @@ var Store = Reflux.createStore({
       batch.push({type: 'put', key: to[TYPE] + '_' + to[ROOT_HASH], value: to});
       batch.push({type: 'put', key: from[TYPE] + '_' + from[ROOT_HASH], value: from});
     }
-    return db.batch(batch) 
+    return db.batch(batch)
     .then(function() {
       list[key] = {
         key: key,
         value: val
-      }           
+      }
       var retParams = {
         action: 'addItem',
         resource: val
       }
-      self.trigger(params)          
+      self.trigger(params)
     })
 
   },
@@ -1930,9 +1930,9 @@ var Store = Reflux.createStore({
              me = list[myId].value;
          }
          if (!me  &&  myId  && data.key == myId)
-           me = data.value; 
+           me = data.value;
          list[data.key] = data;
-       } 
+       }
      })
     .on('close', function() {
       if (me  &&  me.organization) {
@@ -1940,7 +1940,7 @@ var Store = Reflux.createStore({
           var org = list[utils.getId(me.organization)].value
           var secCodes = self.searchNotMessages({modelName: 'tradle.SecurityCode', to: org})
           if (!org.securityCodes  ||  org.securityCodes[!me.securityCode]) {
-            self.trigger({err: 'The code was not registered with ' + me.organization.title})           
+            self.trigger({err: 'The code was not registered with ' + me.organization.title})
             return;
           }
         }
@@ -1950,7 +1950,7 @@ var Store = Reflux.createStore({
       }
       console.log('Stream closed');
       utils.setModels(models);
-    })      
+    })
     .on('end', function() {
       console.log('Stream ended');
       // if (me)
@@ -1966,14 +1966,14 @@ var Store = Reflux.createStore({
       //   }
       // // else
       // //   return self.loadAddressBook();
-    })      
+    })
     .on('error', function(err) {
       console.log('err: ' + err);
     });
 
 
   },
-  
+
   isEmpty(obj) {
     for(var prop in obj) {
       if(obj.hasOwnProperty(prop))
@@ -1997,7 +1997,7 @@ var Store = Reflux.createStore({
         batch.push({type: 'put', key: m.id, value: m});
       });
       sampleData.getResources().forEach(function(r) {
-        if (!r[ROOT_HASH]) 
+        if (!r[ROOT_HASH])
           r[ROOT_HASH] = sha(r);
         r[CUR_HASH] = r[ROOT_HASH];
         var key = r[TYPE] + '_' + r[ROOT_HASH];
@@ -2070,8 +2070,8 @@ var Store = Reflux.createStore({
     .catch(function(err) {
       err = err;
     });
-  }, 
-  clearDb() {  
+  },
+  clearDb() {
     var self = this;
     return db.createReadStream()
     .on('data', function(data) {
@@ -2119,7 +2119,7 @@ var Store = Reflux.createStore({
 
   onAddNewIdentity(resource) {
     var newIdentity = {
-      id: resource[TYPE] + '_' + resource[ROOT_HASH], 
+      id: resource[TYPE] + '_' + resource[ROOT_HASH],
       title: utils.getDisplayName(resource, this.getModel(resource[TYPE]).value.properties),
     };
     var myIdentity = list[MY_IDENTITIES_MODEL + '_1'].value;
@@ -2143,7 +2143,7 @@ var Store = Reflux.createStore({
         allIdentities.splice(i, 1);
         break;
       }
-    
+
     var batch = [];
     resource.canceled = true;
     batch.push({type: 'put', key: iKey, value: resource});
