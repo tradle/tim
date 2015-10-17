@@ -13,6 +13,7 @@ var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
+var level = require('react-native-level')
 var promisify = require('q-level');
 
 var constants = require('tradle-constants');
@@ -28,7 +29,7 @@ var Tim = require('tim')
 var getDHTKey = require('tim/lib/utils').getDHTKey
 
 var map = require('map-stream')
-var level = require('react-native-level')
+var leveldown = require('asyncstorage-down')
 var DHT = require('bittorrent-dht') // use tradle/bittorrent-dht fork
 var Blockchain = require('cb-blockr') // use tradle/cb-blockr fork
 var midentity = require('midentity')
@@ -1675,6 +1676,7 @@ var Store = Reflux.createStore({
       pubkeys: mePub,
       _z: me[NONCE] || this.getNonce()
     }
+
     meDriver = this.buildDriver(Identity.fromJSON(publishingIdentity), mePriv, PORT)
     return meDriver
   },
