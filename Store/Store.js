@@ -13,7 +13,6 @@ var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
-var level = require('react-native-level');
 var promisify = require('q-level');
 
 var constants = require('tradle-constants');
@@ -26,10 +25,10 @@ var IDENTITY = constants.TYPES.IDENTITY
 var MESSAGE = constants.TYPES.MESSAGE
 
 var Tim = require('tim')
-var getDHTKey = require('tim/lib/getDHTKey')
+var getDHTKey = require('tim/lib/utils').getDHTKey
 
 var map = require('map-stream')
-var leveldown = require('asyncstorage-down')
+var level = require('react-native-level')
 var DHT = require('bittorrent-dht') // use tradle/bittorrent-dht fork
 var Blockchain = require('cb-blockr') // use tradle/cb-blockr fork
 var midentity = require('midentity')
@@ -220,7 +219,7 @@ var Store = Reflux.createStore({
     var batch = [];
     var self = this;
     var welcomeMessage;
-    return Q.nfcall(getDHTKey, rr)
+    return getDHTKey(rr)
     .then(function(dhtKey) {
       rr[ROOT_HASH] = dhtKey;
       rr[CUR_HASH] = dhtKey;
@@ -268,7 +267,7 @@ var Store = Reflux.createStore({
         time: rr.time
       }
 
-      return Q.nfcall(getDHTKey, welcomeMessage)
+      return getDHTKey(welcomeMessage)
     })
     .then(function(dhtKey) {
       if (dhtKey) {
@@ -316,7 +315,7 @@ var Store = Reflux.createStore({
     //   msg.from = r.to
     //   msg.organization = r.to
 
-    //   Q.nfcall(getDHTKey, msg)
+    //   getDHTKey(msg)
 
     //   msg[ROOT_HASH] = sha(msg)
     //   var key = constants.TYPES.SIMPLE_MESSAGE + '_' + msg[ROOT_HASH]
@@ -732,7 +731,7 @@ var Store = Reflux.createStore({
         // HACK
         returnVal[NONCE] = '04e21cf6dc67f9c5430221031b433e1903ca5975dfd7338f338146a99202c86b'
       }
-      return Q.nfcall(getDHTKey, returnVal)
+      return getDHTKey(returnVal)
     })
     .then(function (dhtKey) {
       if (!resource  ||  isNew)
@@ -1716,7 +1715,7 @@ var Store = Reflux.createStore({
     // })
     return meDriver.identityPublishStatus()
     .then(function(status) {
-      if (!status.ever || !status.current)
+      if (!status.queued)
         return Q.ninvoke(meDriver.wallet, 'balance')
     })
     .then(function(balance) {
