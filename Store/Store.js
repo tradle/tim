@@ -28,6 +28,7 @@ var MESSAGE = constants.TYPES.MESSAGE
 var Tim = require('tim')
 var getDHTKey = require('tim/lib/utils').getDHTKey
 
+var dns = require('dns.js')
 var map = require('map-stream')
 var leveldown = require('asyncstorage-down')
 var DHT = require('bittorrent-dht') // use tradle/bittorrent-dht fork
@@ -66,6 +67,7 @@ var ADDITIONAL_INFO = 'tradle.AdditionalInfo';
 var VERIFICATION = 'tradle.Verification';
 var MODEL_TYPE_VALUE = 'tradle.Model';
 var MY_IDENTITIES_MODEL = 'tradle.MyIdentities';
+var TIM_PATH_PREFIX = 'me'
 
 var models = {};
 var list = {};
@@ -100,15 +102,20 @@ var Store = Reflux.createStore({
       if (!utils.isEmpty(list))
         isLoaded = true;
       if (me) {
-        self.getDriver(me)
-        self.loadResources()
-        return self.initIdentity(me)
+        return promiseMe()
       }
     })
     .catch(function(err) {
       err = err;
     });
 
+    function promiseMe () {
+      return self.getDriver(me)
+        .then(function () {
+          self.loadResources()
+          return self.initIdentity(me)
+        })
+    }
   },
   createFromIdentity(r) {
     var rr = {};
@@ -134,32 +141,41 @@ var Store = Reflux.createStore({
 
     var keeper = new Keeper({
       // storage: prefix + '-storage',
+      storeOnFetch: true,
       storage: 'storage',
       fallbacks: ['http://tradle.io:25667']
     })
 
     var blockchain = new Blockchain(networkName)
 
-    var d = new Tim({
-      pathPrefix: iJSON.name.firstName,
-      networkName: networkName,
-      keeper: keeper,
-      blockchain: blockchain,
-      leveldown: leveldown,
-      identity: identity,
-      identityKeys: keys,
-      dht: dht,
-      port: port,
-      syncInterval: 60000
-    })
+    return Q.ninvoke(dns, 'resolve4', 'tradle.io')
+      .then(function (addrs) {
+        console.log('tradle is at', addrs)
+        return meDriver = new Tim({
+          pathPrefix: TIM_PATH_PREFIX,
+          networkName: networkName,
+          keeper: keeper,
+          blockchain: blockchain,
+          leveldown: leveldown,
+          identity: identity,
+          identityKeys: keys,
+          dht: dht,
+          port: port,
+          syncInterval: 60000,
+          relay: {
+            address: addrs[0],
+            port: 25778
+          }
+        })
+      })
 
-    var log = d.log;
-    d.log = function () {
-      console.log('log', arguments);
-      return log.apply(this, arguments);
-    }
+    // var log = d.log;
+    // d.log = function () {
+    //   console.log('log', arguments);
+    //   return log.apply(this, arguments);
+    // }
 
-    return d
+    // return d
   },
   dhtFor (identity) {
     return new DHT({
@@ -769,10 +785,10 @@ var Store = Reflux.createStore({
       'messages.db',
       // 'txs.db'
     ].forEach(function (dbName) {
-      ;[name].forEach(function (name) {
+      // ;[name].forEach(function (name) {
         togo++
-        leveldown.destroy(dbName, finish)
-      })
+        leveldown.destroy(TIM_PATH_PREFIX + '-' + dbName, finish)
+      // })
     })
 
     var self = this;
@@ -1575,7 +1591,9 @@ var Store = Reflux.createStore({
       return db.batch(batch)
     // })
     .then(function() {
-      meDriver = self.getDriver(value)
+      return self.getDriver(value)
+    })
+    .then(function () {
       self.loadResources();
       return self.initIdentity(value)
     })
@@ -1658,7 +1676,7 @@ var Store = Reflux.createStore({
   },
   getDriver(me) {
     if (meDriver)
-      return meDriver
+      return Q.resolve(meDriver)
     mePub = me['pubkeys']
     if (!mePub) {
       mePub = myIdentity.pubkeys  // hardcoded on device
@@ -1677,11 +1695,10 @@ var Store = Reflux.createStore({
       _z: me[NONCE] || this.getNonce()
     }
 
-    meDriver = this.buildDriver(Identity.fromJSON(publishingIdentity), mePriv, PORT)
-    return meDriver
+    return this.buildDriver(Identity.fromJSON(publishingIdentity), mePriv, PORT)
   },
   initIdentity(me) {
-    meDriver = this.getDriver(me)
+    // meDriver = this.getDriver(me)
 
 
     // var self = this
@@ -1715,7 +1732,10 @@ var Store = Reflux.createStore({
     // .then(function(data) {
     //   Q.ninvoke(meDriver, 'identityPublishStatus')
     // })
-    return meDriver.identityPublishStatus()
+    return this.getDriver(me)
+    .then(function () {
+      return meDriver.identityPublishStatus()
+    })
     .then(function(status) {
       if (!status.queued)
         return Q.ninvoke(meDriver.wallet, 'balance')
