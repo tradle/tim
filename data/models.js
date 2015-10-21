@@ -91,6 +91,15 @@ var voc = [{
         backlink: 'from'
       }
     },
+    myFinancialProducts: {
+      type: 'array',
+      allowRoles: 'me',
+      items: {
+        readOnly: true,
+        ref: 'tradle.FinancialProduct',
+        backlink: 'identity'        
+      }
+    },
     myVerifications: {
       type: 'array',
       allowRoles: 'me',
@@ -407,6 +416,10 @@ var voc = [{
      'time': {
        'type': 'date',
        'readOnly': true,
+     },
+     welcome: {
+       type: 'boolean',
+       readOnly: true      
      }
   },  
   'required': [
@@ -1185,7 +1198,406 @@ var voc = [{
     }
   }
 },
-
+{
+  id: 'tradle.CurrentAccounts',
+  type: 'tradle.Model',
+  title: 'Current Accounts',
+  subClassOf: 'tradle.FinancialProduct',
+  properties: { 
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    productType: {
+      type: 'string',
+      readOnly: true,
+      displayName: true
+    },
+    identity: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    accountWith: {
+      type: 'object',
+      readOnly: true,
+      displayName: true,
+      ref: 'tradle.Organization'
+    },
+    forms: {
+      type: 'string',
+      readOnly: true,
+      items: ['tradle.AboutYou', 'tradle.YourMoney']      
+    },
+    residentialStatus: {
+      type: 'object',
+      ref: 'tradle.ResidentialStatus'
+    },
+    maritalStatus: {
+      type: 'object',
+      ref: 'tradle.MaritalStatus'
+    },
+    dependants: {
+      type: 'number',
+      description: 'How many people who live with you depend on you financially?'
+    },
+    nationality: {
+      type: 'object',      
+      ref: 'tradle.Nationality'
+    },
+    inUKFrom: {
+      type: 'date',
+      description: 'When did you arrive in the UK?',
+      title: 'In UK from'
+    },
+    countryOfBirth: {
+      type: 'object',      
+      ref: 'tradle.Country'
+    },
+    taxResidency: {
+      type: 'object',
+      description: 'Country/countries in which you have tax residency (or been resident of for the past 2 years):',
+      ref: 'tradle.Country'
+    },
+    fundAccount: {
+      type: 'object',
+      description: 'How will you fund your account?',
+      ref: 'tradle.HowToFund'
+    },
+    purposeOfTheAccount: {
+      type: 'object',
+      ref: 'tradle.PurposeOfTheAccount'
+    },
+    phones: {
+      type: 'array',
+      items: {
+        type: 'string',
+        properties: {
+          phoneType: {
+            type: 'string',
+            ref: 'tradle.PhoneTypes'
+          },
+          number: {
+            type: 'string'
+          }
+        }
+      },
+      required: ['phoneType', 'number']
+    },
+    emailAddress: {
+      type: 'string',      
+    },
+    employer: {
+      type: 'object',
+      ref: 'tradle.Organization'
+    },
+    monthlyIncome: {
+      type: 'object',
+      ref: 'tradle.Money'
+    },
+    whenHired: {
+      type: 'date'
+    },
+  }
+},
+{
+  id: 'tradle.Savings',
+  title: 'Savings',
+  type: 'tradle.Model',
+  properties: { 
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+  },
+},
+{
+  id: 'tradle.PurposeOfTheAccount',
+  title: 'Purpose Of The Account',
+  type: 'tradle.Model',
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    purpose: {
+      displayName: true,
+      type: 'string'
+    }
+  },
+  required: ['purpose']
+},
+{
+  id: 'tradle.ResidentialStatus',
+  title: 'Residential Status',
+  type: 'tradle.Model',
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    status: {
+      displayName: true,
+      type: 'string'
+    }
+  },
+  required: ['status']
+},
+{
+  id: 'tradle.MaritalStatus',
+  title: 'Marital Status',
+  type: 'tradle.Model',
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    status: {
+      displayName: true,
+      type: 'string'
+    }
+  },
+  required: ['status']
+},
+{
+  id: 'tradle.Nationality',
+  title: 'Nationality',
+  type: 'tradle.Model',
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    nationality: {
+      displayName: true,
+      type: 'string'
+    }
+  },
+  required: ['nationality']
+},
+{
+  id: 'tradle.HowToFund',
+  title: 'How To Fund',
+  type: 'tradle.Model',
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    howToFund: {
+      displayName: true,
+      type: 'string'
+    }
+  },
+  required: ['howToFund']
+},
+{
+  id: 'tradle.Country',
+  title: 'Country',
+  type: 'tradle.Model',
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    country: {
+      displayName: true,
+      type: 'string'
+    }
+  },
+  required: ['country']
+},
+{
+  id: 'tradle.PhoneTypes',
+  title: 'Phone Types',
+  type: 'tradle.Model',
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    phoneType: {
+      displayName: true,
+      type: 'string'
+    }
+  },
+  required: ['phoneType']
+},
+{
+  id: 'tradle.ISAs',
+  title: 'ISAs',
+  type: 'tradle.Model',
+  properties: { 
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+  },
+},
+{
+  id: 'tradle.CreditCards',
+  type: 'tradle.Model',
+  title: 'Credit Cards',
+  properties: { 
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+  },
+},
+{
+  id: 'tradle.FinancialProduct',
+  type: 'tradle.Model',
+  title: 'Financial Product',
+  properties: { 
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    identity: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    accountWith: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Organization'
+    },
+  },
+},
+{
+  id: 'tradle.Loans',
+  title: 'Loans',
+  type: 'tradle.Model',
+  subClassOf: 'tradle.FinancialProduct',
+  properties: { 
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    identity: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    accountWith: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Organization'
+    },
+  },
+},
+{
+  id: 'tradle.HomeInsurance',
+  title: 'Home Insurance',
+  type: 'tradle.Model',
+  subClassOf: 'tradle.FinancialProduct',
+  properties: { 
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    identity: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    accountWith: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Organization'
+    },
+  },
+},
+{
+  id: 'tradle.MotorInsurance',
+  title: 'Motor Insurance',
+  type: 'tradle.Model',
+  subClassOf: 'tradle.FinancialProduct',
+  properties: { 
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    identity: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },    
+    accountWith: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Organization'
+    },
+  },
+},
+{
+  id: 'tradle.Mortgages',
+  title: 'Mortgages',
+  type: 'tradle.Model',
+  subClassOf: 'tradle.FinancialProduct',
+  properties: { 
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    identity: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    accountWith: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Organization'
+    },
+  },
+},
+{
+  id: 'tradle.Investments',
+  title: 'Investments',
+  type: 'tradle.Model',
+  subClassOf: 'tradle.FinancialProduct',
+  properties: { 
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    identity: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    accountWith: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Organization'
+    },
+  },
+},
+{
+  id: 'tradle.LifeInsurance',
+  title: 'Life Insurance',
+  type: 'tradle.Model',
+  subClassOf: 'tradle.FinancialProduct',
+  properties: { 
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    identity: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    accountWith: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Organization'
+    },
+  },
+}
 ];
 
 var models = {
@@ -2028,4 +2440,176 @@ module.exports = models;
 //      }
 //   },
 //   required: ['url'] 
+// },
+// {
+//   id: 'tradle.CurrentAccounts',
+//   type: 'tradle.Model',
+//   title: 'Current Accounts',
+//   subClassOf: 'tradle.FinancialProduct',
+//   properties: { 
+//     '_t': {
+//       'type': 'string',
+//       'readOnly': true
+//     },
+//     forms: {
+//       type: 'string',
+//       readOnly: true,
+//       items: ['tradle.AboutYou', 'tradle.YourMoney']      
+//     },
+//     aboutYou: {
+//       type: 'object',
+//       ref: 'tradle.AboutYou'
+//     },
+//     yourMoney: {
+//       type: 'object',
+//       ref: 'tradle.YourMoney'
+//     },
+//     lastForm: {
+//       type: 'object',
+//       readOnly: true,
+//       ref: 'tradle.Model'
+//     },
+//   },
+// },
+// {
+//   id: 'tradle.AboutYou',
+//   title: 'About You',
+//   type: 'tradle.Model',
+//   properties: {
+//     '_t': {
+//       'type': 'string',
+//       'readOnly': true
+//     },
+//     product: {
+//       type: 'object',
+//       ref: 'tradle.FinancialProduct'
+//     },
+//     residentialStatus: {
+//       type: 'string',
+//       oneOf: [
+//         {'1': 'Home owner (with mortgage)'},
+//         {'2': 'Home owner (without mortgage)'},
+//         {'3': 'Tenant (private)'},
+//         {'4': 'Tenant (counsel)'},
+//         {'5': 'Living with parents'}
+//       ]
+//     },
+//     maritalStatus: {
+//       type: 'string',
+//       oneOf: [
+//         {'1': 'Single'},
+//         {'2': 'Married / civil partnership'},
+//         {'3': 'Widowed'},
+//         {'4': 'Divorced/Dissolved civil partnership'},
+//         {'5': 'Separated'}
+//       ]
+//     },
+//     dependants: {
+//       type: 'number',
+//       description: 'How many people who live with you depend on you financially?'
+//     },
+//     nationality: {
+//       type: 'string',      
+//       oneOf: [
+//         {'1': 'British'},
+//         {'2': 'American'},
+//         {'3': 'French'},
+//         {'4': 'Russian'},
+//         {'5': 'Dutch'}
+//       ]
+//     },
+//     inUKFrom: {
+//       type: 'date',
+//       description: 'When did you arrive in the UK?'
+//     },
+//     countryOfBirth: {
+//       type: 'string',      
+//       oneOf: [
+//         {'1': 'UK'},
+//         {'2': 'US'},
+//         {'3': 'France'},
+//         {'4': 'Russia'},
+//         {'5': 'Netherlands'}
+//       ]
+//     },
+//     taxResidency: {
+//       type: 'string',
+//       description: 'Country/countries in which you have tax residency (or been resident of for the past 2 years):',
+//       oneOf: [
+//         {'1': 'UK'},
+//         {'2': 'US'},
+//         {'3': 'France'},
+//         {'4': 'Russia'},
+//         {'5': 'Netherlands'}
+//       ]
+//     },
+//     fundAccount: {
+//       type: 'string',
+//       description: 'How will you fund your account?',
+//       oneOf: [
+//         {'1': 'Cash'},
+//         {'2': 'Check'},
+//         {'3': 'Direct to Bank'}
+//       ]
+//     },
+//     purposeOfTheAccount: {
+//       type: 'string',
+//       oneOf: [
+//         {'1': 'Benefit Payments'},
+//         {'2': 'Bills / Expenses'},
+//         {'3': 'Capital Raising ( Scottish Widows Bank )'},
+//         {'4': 'Inheritance'},
+//         {'5': 'Probate / Executor / Trustee'},
+//         {'6': 'Salary / Pension / Other Regular Income'},
+//         {'7': 'Savings'},
+//         {'8': 'Spending money'},
+//         {'9': 'Student'}
+//       ]
+//     },
+//     phones: {
+//       type: 'array',
+//       items: {
+//         type: 'string',
+//         properties: {
+//           phoneType: {
+//             type: 'string',
+//             oneOf: [
+//               {'1': 'Home'},
+//               {'2': 'Mobile'},
+//               {'3': 'Work'},
+//             ]
+//           },
+//           number: {
+//             type: 'number'
+//           }
+//         }
+//       },
+//       required: ['url']
+//     },
+//     emailAddress: {
+//       type: 'string',      
+//     }
+//   }
+// },
+// {
+//   id: 'tradle.YourMoney',
+//   title: 'Your Money',
+//   type: 'tradle.Model',
+//   properties: {
+//     '_t': {
+//       'type': 'string',
+//       'readOnly': true
+//     },
+//     employer: {
+//       type: 'object',
+//       ref: 'tradle.Organization'
+//     },
+//     monthlyIncome: {
+//       type: 'object',
+//       ref: 'tradle.Money'
+//     },
+//     whenHired: {
+//       type: 'date'
+//     },
+//   }
 // },
