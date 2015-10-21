@@ -40,18 +40,23 @@ class ShowRefList extends Component {
 
     var refList = [];
     var isIdentity = model.id === constants.TYPES.IDENTITY;
-    var isMe = isIdentity ? resource[constants.ROOT_HASH] === utils.getMe()[constants.ROOT_HASH] : true;
+    var me = utils.getMe()
+    var isMe = isIdentity ? resource[constants.ROOT_HASH] === me[constants.ROOT_HASH] : true;
     // The profile page for the device owner has 2 more profile specific links: add new identity and switch identity
     for (var p in props) {
-      if (isIdentity  &&  !isMe  &&  props[p].allowRoles  &&  props[p].allowRoles === 'me')
-        continue;
+      if (isIdentity) {
+        if (!isMe  &&  props[p].allowRoles  &&  props[p].allowRoles === 'me')
+          continue;
+        if (p === 'verifiedByMe'  &&  !me.organization)
+          continue;
+      }
       if (p.charAt(0) === '_'  ||  !props[p].items  ||  !props[p].items.backlink)
         continue;
       var icon = props[p].icon  ||  utils.getModel(props[p].items.ref).value.icon;
       if (!icon)
         icon = 'ios-checkmark-empty';
       refList.push(
-        <View style={buttonStyles.container}>
+        <View style={[buttonStyles.container, {marginTop: props[p].title.length > 20 ? 6 : -10}]}>
            <TouchableHighlight onPress={this.showResources.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
              <View style={{alignItems: 'center'}}>
                <Icon name={icon}  size={35}  color='#ffffff'  style={[buttonStyles.icon, {paddingLeft: 7}]}/>
@@ -62,12 +67,12 @@ class ShowRefList extends Component {
         );
      }
      return refList.length
-             ? (
-                <View  style={{flexDirection: 'row'}}>
-                  {refList}
-                </View> 
-              )
-             : null;
+             ?  <View style={buttonStyles.buttons}>
+                  <View  style={{flexDirection: 'row'}}>
+                    {refList}
+                  </View> 
+                </View>
+             : <View/>;
   }
 }
 reactMixin(ShowRefList.prototype, ResourceViewMixin);

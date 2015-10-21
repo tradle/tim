@@ -31,12 +31,13 @@ var buttonStyles = Object.freeze({
   container: {
     alignSelf: 'center',
     paddingHorizontal: 7,
-    paddingTop: 10
+    marginTop: 6,
+    width: 110
   },
   buttons: {
     // marginTop: -80,
     // opacity: 0.8,
-    height: 75, 
+    height: 80, 
     flexDirection: 'row',
     backgroundColor: '#a0a0a0', 
 
@@ -48,7 +49,9 @@ var buttonStyles = Object.freeze({
     color: '#ffffff', 
     paddingVertical: 10,
     fontWeight: FONT_WEIGHT,
-    fontSize: FONT_SIZE
+    fontSize: FONT_SIZE,
+    marginTop: -6,
+    alignSelf: 'center'
   },
 
   row1: {
