@@ -83,6 +83,7 @@ var isLoaded;
 var me;
 var mePub, mePriv;
 var meDriver;
+var meIdentity
 var ready;
 var networkName = 'testnet'
 
@@ -669,6 +670,7 @@ var Store = Reflux.createStore({
     // }
     var self = this;
     var returnVal
+    var identity
     var isNew = !resource[ROOT_HASH];
     Q.allSettled(promises)
     .then(function(results) {
@@ -703,13 +705,9 @@ var Store = Reflux.createStore({
             returnVal[p] = json[p];
           else if (!props[p].readOnly  &&  !props[p].immutable)
             returnVal[p] = json[p];
-
-        // self._putResourceInDB(modelName, returnVal, isRegistration);
       }
-      returnVal[NONCE] = self.getNonce()
-      // var promiseKey = returnVal[ROOT_HASH]
-      //   ? returnVal[ROOT_HASH]
-      //   : Q.nfcall(getDHTKey, returnVal)
+      if (!isRegistration)
+        returnVal[NONCE] = self.getNonce()
       if (returnVal[ROOT_HASH])
         return returnVal[ROOT_HASH]
       else
@@ -717,23 +715,27 @@ var Store = Reflux.createStore({
     })
     .then(function() {
       if (isRegistration) {
-        if (returnVal.securityCode)
-          self.setOrg(returnVal)
-        // HACK
-        // returnVal[NONCE] = '04e21cf6dc67f9c5430221031b433e1903ca5975dfd7338f338146a99202c86b'
+        return self.getDriver(returnVal)
       }
-      // var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
-      // var nonce = self.getNonce();
-      // var toChain = {
-      //   _t: rr[TYPE],
-      //   _z: rr[NONCE],
-      // }
-      // if (value.message)
-      //   toChain.message = value.message        
-      // if (value.photos)
-      //   toChain.photos = value.photos
+      else
+        return Q()
+    })
+    .then(function() {
+      if (isRegistration) {
+        // identity = new Identity()
+        //   .name({
+        //     firstName: returnVal.firstName,
+        //     formatted: returnVal.firstName + (returnVal.lastName ? ' ' + returnVal.lastName : '')            
+        //   })
+        //   .set('_z', returnVal[NONCE])
 
-      return getDHTKey(returnVal)
+        // returnVal.pubkeys.forEach(identity.addKey, identity)
+
+        // var publishingIdentity = identity.toJSON()
+
+        return getDHTKey(meIdentity.toJSON())    
+      }
+      return getDHTKey(returnVal)    
     })
     .then(function (dhtKey) {
       if (!resource  ||  isNew)
@@ -745,6 +747,7 @@ var Store = Reflux.createStore({
     })
 
   },
+
   checkRequired(resource, meta) {
     var type = resource[TYPE];
     var rootHash = resource[ROOT_HASH];
@@ -1524,70 +1527,25 @@ var Store = Reflux.createStore({
     });
   },
   registration(value) {
-    // if (value.organization) {
-    // if (!value.securityCode) {
-    //   var err = 'Please enter the security code'
-    //   this.trigger({action: 'addItem', resource: value, error: err})
-    //   return
-    // }
     var self = this
-    // return this.loadDB()
+    isLoaded = true;
+    me = value
+    // meDriver = null
+    var iKey = value[TYPE] + '_' + value[ROOT_HASH];
+    var batch = [];
+    batch.push({type: 'put', key: iKey, value: value});
+    var mid = {
+      _type: MY_IDENTITIES_MODEL,
+      currentIdentity: iKey,
+      allIdentities: [{
+        id: iKey,
+        title: utils.getDisplayName(value, models[value[TYPE]].value.properties)
+      }]};
+    batch.push({type: 'put', key: MY_IDENTITIES_MODEL + '_1', value: mid});///
+    return db.batch(batch)
     // .then(function() {
-      isLoaded = true;
-
-      // if (value.securityCode) {
-      // // var org = list[utils.getId(value.organization)].value
-      //   var result = self.searchNotMessages({modelName: 'tradle.SecurityCode'})
-      //   if (!result) {
-      //     var err = 'The security code you specified was not registered with ' + value.organization.title
-      //     this.trigger({action: 'addItem', resource: value, error: err})
-      //     return
-      //   }
-
-      //   var i = 0
-      //   for (; i<result.length; i++) {
-      //     if (result[i].code === value.securityCode) {
-      //       value.organization = result[i].organization
-      //       break
-      //     }
-      //   }
-      //   if (!value.organization) {
-      //     var err = 'The security code you specified was not registered with ' + value.organization.title
-      //     this.trigger({action: 'addItem', resource: value, error: err})
-      //     return
-      //   }
-
-      //   // var org = list[utils.getId(value.organization)].value
-
-      //   var photos = list[utils.getId(value.organization.id)].value.photos;
-      //   if (photos)
-      //     value.organization.photo = photos[0].url;
-
-      // }
-      // // else if (value.securityCode) {
-      // //   var err = 'Please set the organization you are representing'
-      // //   this.trigger({action: 'addItem', resource: value, error: err})
-      // //   return
-      // // }
-
-      me = value
-      meDriver = null
-      var iKey = value[TYPE] + '_' + value[ROOT_HASH];
-      var batch = [];
-      batch.push({type: 'put', key: iKey, value: value});
-      var mid = {
-        _type: MY_IDENTITIES_MODEL,
-        currentIdentity: iKey,
-        allIdentities: [{
-          id: iKey,
-          title: utils.getDisplayName(value, models[value[TYPE]].value.properties)
-        }]};
-      batch.push({type: 'put', key: MY_IDENTITIES_MODEL + '_1', value: mid});///
-      return db.batch(batch)
+    //   return self.getDriver(value)
     // })
-    .then(function() {
-      return self.getDriver(value)
-    })
     .then(function () {
       self.loadResources();
       return self.initIdentity(me)
@@ -1678,10 +1636,14 @@ var Store = Reflux.createStore({
       mePriv = me['privkeys']
     }
     else {
-      if (!me.securityCode) {
-        mePub = myIdentity[0].pubkeys  // hardcoded on device
-        mePriv = myIdentity[0].privkeys
-        me[NONCE] = myIdentity[0][NONCE]
+      if (me.securityCode) {
+        for (var i=0; i<myIdentity.length; i++) {
+          if (!myIdentity[i].securityCode  &&  me.firstName === myIdentity[i].firstName) {
+            mePub = myIdentity[i].pubkeys  // hardcoded on device
+            mePriv = myIdentity[i].privkeys
+            me[NONCE] = myIdentity[i][NONCE]
+          }
+        }
       }
       else {
         myIdentity.forEach(function(r) {
@@ -1722,14 +1684,25 @@ var Store = Reflux.createStore({
     me['pubkeys'] = mePub
     me['privkeys'] = mePriv
 
-    var publishingIdentity = {
-      name: {
-        firstName: me.firstName,
-        formatted: me.firstName + (me.lastName ? ' ' + me.lastName : '')
-      },
-      pubkeys: mePub,
-      _z: me[NONCE] || this.getNonce()
-    }
+    // var publishingIdentity = {
+    //   name: {
+    //     firstName: me.firstName,
+    //     formatted: me.firstName + (me.lastName ? ' ' + me.lastName : '')
+    //   },
+    //   pubkeys: mePub,
+    //   _z: me[NONCE] || this.getNonce(),
+    //   v: '0.3'
+    // }
+    meIdentity = new Identity()
+                        .name({
+                          firstName: me.firstName,
+                          formatted: me.firstName + (me.lastName ? ' ' + me.lastName : '')            
+                        })
+                        .set('_z', me[NONCE] || this.getNonce())
+
+    me.pubkeys.forEach(meIdentity.addKey, meIdentity)
+
+    var publishingIdentity = meIdentity.toJSON()
 
     return this.buildDriver(Identity.fromJSON(publishingIdentity), mePriv, PORT)
   },
@@ -1778,7 +1751,7 @@ var Store = Reflux.createStore({
     })
     .then(function(balance) {
       if (balance)
-        return // meDriver.publishMyIdentity()
+        return meDriver.publishMyIdentity()
     })
     .catch(function(err) {
       err = err
@@ -1896,7 +1869,7 @@ var Store = Reflux.createStore({
       .on('data', function (data) {
         meDriver.lookupObject(data)
         .then(function (obj) {
-          return putInDb(obj)
+          return self.putInDb(obj)
           // console.log('msg', obj)
         })
       })
@@ -1904,17 +1877,17 @@ var Store = Reflux.createStore({
         console.log('unchained', obj)
         meDriver.lookupObject(obj)
         .then(function(obj) {
-          return putInDb(obj)
+          return self.putInDb(obj)
         })
       })
 
       meDriver.on('chained', function (obj) {
         debugger
         console.log('chained', obj)
-        meDriver.lookupObject(obj)
-        .then(function(obj) {
-          return putInDb(obj)
-        })
+        // meDriver.lookupObject(obj)
+        // .then(function(obj) {
+        //   return putInDb(obj)
+        // })
       })
 
       meDriver.on('error', function (err) {
@@ -1927,7 +1900,7 @@ var Store = Reflux.createStore({
         console.log(msg)
         meDriver.lookupObject(msg)
         .then(function(obj) {
-          return putInDb(obj)
+          return this.putInDb(obj)
         })
       })
     })
