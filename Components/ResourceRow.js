@@ -26,6 +26,7 @@ class ResourceRow extends Component {
     var resource = this.props.resource;
     var photo;
     var isIdentity = resource[constants.TYPE] === constants.TYPES.IDENTITY;
+    var noImage;
     if (resource.photos &&  resource.photos.length) {
       var uri = utils.getImageUri(resource.photos[0].url);
       var params = {
@@ -45,13 +46,17 @@ class ResourceRow extends Component {
            <Text style={styles.cellText}>{name}</Text>
         </LinearGradient>
       }
-      else {
+      else  {
         var model = utils.getModel(resource[constants.TYPE]).value;
         var icon = model.icon;
         if (icon) 
           photo = <View style={styles.cellImage}><Icon name={icon} size={35} style={styles.icon} /></View>
-        else 
+        else if (model.properties.photos) 
           photo = <View style={styles.cellImage} />        
+        else {
+          photo = <View style={styles.cellNoImage} />
+          noImage = true
+        }
       }
     }
     var orgPhoto;
@@ -75,6 +80,7 @@ class ResourceRow extends Component {
                          </TouchableHighlight>
                          </View>  
                        : <View />; 
+    var textStyle = noImage ? [styles.textContainer, {marginVertical: 7}] : styles.textContainer;
     return (
       <View key={this.props.key}>
         <TouchableHighlight onPress={this.props.onSelect}>
@@ -82,7 +88,7 @@ class ResourceRow extends Component {
             {photo}
             {orgPhoto}
             {onlineStatus}
-            <View style={styles.textContainer}>
+            <View style={textStyle} key={resource[constants.ROOT_HASH]}>
               {this.formatRow(resource)}
             </View>
             {cancelResource}
@@ -292,6 +298,11 @@ var styles = StyleSheet.create({
     borderRadius: 30,
     borderWidth: 1,
   },
+  cellNoImage: {
+    backgroundColor: '#dddddd',
+    marginTop: 20,
+    marginLeft: 10,
+  },
   cellBorder: {
     backgroundColor: '#eeeeee',
     height: 1,
@@ -300,48 +311,37 @@ var styles = StyleSheet.create({
   cancelIcon: {
     width: 40,
     height: 40,
-    // marginTop: -10,
-    // alignSelf: 'center',
-    // position: 'absolute',
-    // right: 10,
-    // marginTop: 7,
-    // color: '#7AAAc3'
   },
   icon: {
     width: 40,
     height: 40,
     alignSelf: 'center',
-    // position: 'absolute',
     marginLeft: 10,
     marginTop: 7,
     color: '#7AAAc3'
   },
-  orgIcon: {
-    width: 30,
-    height: 30,
-    borderWidth: 1,
-    borderColor: '#7AAAc3',
-    borderRadius: 15,
-    marginLeft: -30,
-    marginTop: 40,
-    // alignSelf: 'center',
-    // position: 'absolute',
-    // marginLeft: 10,
-    // marginTop: 7,
-  },
-  orgImage: {
-    width: 30,
-    height: 30,
-    borderWidth: 1,
-    borderColor: '#7AAAc3',
-    borderRadius: 15,
-    marginRight: 10,
+  // orgIcon: {
+  //   width: 30,
+  //   height: 30,
+  //   borderWidth: 1,
+  //   borderColor: '#7AAAc3',
+  //   borderRadius: 15,
+  //   marginLeft: -30,
+  //   marginTop: 40,
+  // },
+  // orgImage: {
+  //   width: 30,
+  //   height: 30,
+  //   borderWidth: 1,
+  //   borderColor: '#7AAAc3',
+  //   borderRadius: 15,
+  //   marginRight: 10,
 
-    alignSelf: 'center',
-    // position: 'absolute',
-    // marginLeft: 10,
-    // marginTop: 7,
-  },
+  //   alignSelf: 'center',
+//    // position: 'absolute',
+//    // marginLeft: 10,
+//    // marginTop: 7,
+  // },
   online: {
     backgroundColor: 'green',
     borderRadius: 6,
