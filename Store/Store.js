@@ -1,5 +1,10 @@
 'use strict';
 
+var React = require('react-native')
+var {
+  AsyncStorage
+} = React
+
 var Reflux = require('reflux');
 var Actions = require('../Actions/Actions');
 var extend = require('extend');
@@ -28,7 +33,7 @@ var MESSAGE = constants.TYPES.MESSAGE
 var Tim = require('tim')
 var getDHTKey = require('tim/lib/utils').getDHTKey
 
-var dns = require('dns.js')
+var dns = require('dns')
 var map = require('map-stream')
 var leveldown = require('asyncstorage-down')
 var DHT = require('bittorrent-dht') // use tradle/bittorrent-dht fork
@@ -94,9 +99,12 @@ var Store = Reflux.createStore({
 
     // var sdb = promisify(Sublevel(ldb));
     // identityDb = sdb.sublevel(IDENTITY_MODEL);
-
+    // return this.onReloadDB()
     // this.loadModels()
     var self = this
+    
+    // this.ready = Q.ninvoke(AsyncStorage, 'clear')
+    // .then(this.loadMyResources.bind(this))
     this.ready = this.loadMyResources()
     .then(function() {
       if (!utils.isEmpty(list))
@@ -232,38 +240,55 @@ var Store = Reflux.createStore({
       else
         rr[p] = r[p];
     }
+
     rr[NONCE] = this.getNonce()
+    var toChain = {
+      _t: rr[TYPE],
+      _z: rr[NONCE],
+    }
+    if (rr.message)
+      toChain.message = rr.message        
+    if (rr.photos)
+      toChain.photos = rr.photos
+
     var batch = [];
     var self = this;
     var welcomeMessage;
-    return getDHTKey(rr)
+    return getDHTKey(toChain)
     .then(function(dhtKey) {
-      rr[ROOT_HASH] = dhtKey;
-      rr[CUR_HASH] = dhtKey;
       var key = rr[TYPE] + '_' + dhtKey;
-      batch.push({type: 'put', key: key, value: rr})
-      // db.put(key, r)
-      // .then(function() {
-      list[key] = {key: key, value: rr};
-      var to = list[utils.getId(r.to)].value;
-      var from = list[utils.getId(r.from)].value;
-      var dn = r.message; // || utils.getDisplayName(r, props);
-      if (!dn)
-        dn = 'sent photo';
-      else {
-        var msgParts = utils.splitMessage(dn);
-        dn = msgParts.length === 1 ? dn : utils.getModel(msgParts[1]).value.title + ' request';
-      }
+      if (!isWelcome) {
+        rr[ROOT_HASH] = dhtKey;
+        rr[CUR_HASH] = dhtKey;
+        batch.push({type: 'put', key: key, value: rr})
+        // db.put(key, r)
+        // .then(function() {
+        list[key] = {key: key, value: rr};
+        var to = list[utils.getId(r.to)].value;
+        var from = list[utils.getId(r.from)].value;
+        var dn = r.message; // || utils.getDisplayName(r, props);
+        if (!dn)
+          dn = 'sent photo';
+        else {
+          var msgParts = utils.splitMessage(dn);
+          dn = msgParts.length === 1 ? dn : utils.getModel(msgParts[1]).value.title + ' request';
+        }
 
-      to.lastMessage = (from[ROOT_HASH] === me[ROOT_HASH]) ? 'You: ' + dn : dn;
-      to.lastMessageTime = r.time;
-      from.lastMessage = r.message;
-      from.lastMessageTime = r.time;
-      batch.push({type: 'put', key: to[TYPE] + '_' + to[ROOT_HASH], value: to});
-      batch.push({type: 'put', key: from[TYPE] + '_' + from[ROOT_HASH], value: from});
+        to.lastMessage = (from[ROOT_HASH] === me[ROOT_HASH]) ? 'You: ' + dn : dn;
+        to.lastMessageTime = rr.time;
+        from.lastMessage = rr.message;
+        from.lastMessageTime = r.time;
+        batch.push({type: 'put', key: to[TYPE] + '_' + to[ROOT_HASH], value: to});
+        batch.push({type: 'put', key: from[TYPE] + '_' + from[ROOT_HASH], value: from});
+      }
       if (!isWelcome  ||  (me.organization  &&  utils.getId(me.organization) === utils.getId(r.to)))
         return Q()
-
+      var wmKey = 'Welcome' + rr.to.title
+      if (list[wmKey]) {
+        list[wmKey].value.time = new Date()
+        return Q()
+      }
+      // Create welcome message without saving it in DB
       welcomeMessage = {}
       welcomeMessage.message = welcome.msg.replace('{firstName}', me.firstName)
       welcomeMessage.time = new Date()
@@ -274,113 +299,54 @@ var Store = Reflux.createStore({
         title: utils.getDisplayName(me, self.getModel(constants.TYPES.IDENTITY).value.properties)
       }
       welcomeMessage.from = {
-        id: key,
-        title: rr.title,
-        time: rr.time
+        id: rr.to.id,
+        title: rr.to.title,
+        time: rr.to.time
       }
       welcomeMessage.organization = {
-        id: key,
-        title: rr.title,
-        time: rr.time
+        id: rr.to.id,
+        title: rr.to.title,
+        time: rr.to.time
       }
-
-      return getDHTKey(welcomeMessage)
-    })
-    .then(function(dhtKey) {
-      if (dhtKey) {
-        welcomeMessage[ROOT_HASH] = dhtKey
-        batch.push({type: 'put', key: welcomeMessage[TYPE] + '_' + dhtKey, value: welcomeMessage})
+      welcomeMessage[ROOT_HASH] = wmKey
+      list[welcomeMessage[ROOT_HASH]] = {
+        key: welcomeMessage[ROOT_HASH],
+        value: welcomeMessage
       }
+      return Q()
     })
     .then(function() {
-      return db.batch(batch)
+      if (batch.length)
+        return db.batch(batch)
     })
     .then(function() {
+      // P2P message without putting it on blockchain
       self.trigger({
         action: 'addMessage',
-        resource: rr
+        resource: isWelcome ? welcomeMessage : rr
       });
-    })
-    .catch(function(err) {
-      err = err;
-    });
 
-    // P2P message without putting it on blockchain
-    meDriver.send({
-      msg: rr,
-      to: [{fingerprint: this.getFingerprint(r.to)}],
-      deliver: true,
-      chain: false
+      if (batch.length) {
+        return meDriver.send({
+          msg: toChain,
+          to: [{fingerprint: self.getFingerprint(r.to)}],
+          deliver: true,
+          chain: false
+        })
+      }
     })
     .then(function(data) {
       var d = data
     })
-    .catch(function(err) {
-      err = err
-    })
-    // Customer clicks on any of the Official accounts
-    // if (isWelcome) {
-    //   var self = this
-    //   var msg = {}
-    //   msg.message = welcome.msg.replace('{firstName}', me.firstName)
-    //   msg.time = new Date()
-    //   msg[TYPE] = constants.TYPES.SIMPLE_MESSAGE
-    //   msg.to = {
-    //     id: me[TYPE] + '_' + me[ROOT_HASH],
-    //     title: utils.getDisplayName(me, self.getModel(constants.TYPES.IDENTITY).value.properties)
-    //   }
-    //   msg.from = r.to
-    //   msg.organization = r.to
-
-    //   getDHTKey(msg)
-
-    //   msg[ROOT_HASH] = sha(msg)
-    //   var key = constants.TYPES.SIMPLE_MESSAGE + '_' + msg[ROOT_HASH]
-    //   list[key] = {
-    //     key: key,
-    //     value: msg
-    //   }
-    // }
-
-    // var batch = [];
-    // var rootHash = sha(rr);
-    // rr[ROOT_HASH] = rootHash;
-    // rr[CUR_HASH] = rootHash;
-    // var self = this;
-    // var key = rr[TYPE] + '_' + rootHash;
-    // var batch = [];
-    // batch.push({type: 'put', key: key, value: rr})
-    // // db.put(key, r)
-    // // .then(function() {
-    // list[key] = {key: key, value: r};
-    // var to = list[utils.getId(r.to)].value;
-    // var from = list[utils.getId(r.from)].value;
-    // var dn = r.message; // || utils.getDisplayName(r, props);
-    // if (!dn)
-    //   dn = 'sent photo';
-    // else {
-    //   var msgParts = utils.splitMessage(dn);
-    //   dn = msgParts.length === 1 ? dn : utils.getModel(msgParts[1]).value.title + ' request';
-    // }
-
-    // to.lastMessage = (from[ROOT_HASH] === me[ROOT_HASH]) ? 'You: ' + dn : dn;
-    // to.lastMessageTime = r.time;
-    // from.lastMessage = r.message;
-    // from.lastMessageTime = r.time;
-    // batch.push({type: 'put', key: to[TYPE] + '_' + to[ROOT_HASH], value: to});
-    // batch.push({type: 'put', key: from[TYPE] + '_' + from[ROOT_HASH], value: from});
-
-    // db.batch(batch)
     // .then(function() {
     //   self.trigger({
     //     action: 'addMessage',
-    //     resource: rr
+    //     resource: isWelcome ? welcomeMessage : rr
     //   });
     // })
-    // .catch(function(err) {
-    //   err = err;
-    // });
-
+    .catch(function(err) {
+      err = err;
+    });
   },
   onAddVerification(r, notOneClickVerification) {
     var batch = [];
@@ -388,57 +354,58 @@ var Store = Reflux.createStore({
     var fromId = utils.getId(r.from);
     var isVerification = r[TYPE] === VERIFICATION;
     var from = list[fromId].value;
-    if (r[ROOT_HASH])
-      key = r[TYPE] + '_' + r[ROOT_HASH];
-    else {
-      var rootHash = sha(r);
-      r[ROOT_HASH] = rootHash;
-      r[CUR_HASH] = rootHash;
 
+    r[NONCE] = this.getNonce()
+
+    var toChain = {
+      _t: r[TYPE],
+      _z: r[NONCE],
+    }
+    if (r[ROOT_HASH]) {
+      toChain[CUR_HASH] = r[ROOT_HASH]
+      r[CUR_HASH] = r[ROOT_HASH]
+    }
+    return (getDHTKey(toChain))
+    .then(function(dhtKey) {
+      var rootHash = r[ROOT_HASH]
+      r[ROOT_HASH] = rootHash
       key = r[TYPE] + '_' + rootHash;
+
       if (from.organization)
         r.organization = from.organization;
-      r[NONCE] = this.getNonce()
-      if (!r.time)
-        r.time = new Date().getTime();
+
+      r.time = new Date().getTime();
       batch.push({type: 'put', key: key, value: r});
-    }
-    var toId = utils.getId(r.to);
-    var verificationRequestId = utils.getId(r.document);
-    var to = list[toId].value;
-    r.time = r.time || new Date().getTime();
 
-    var newVerification = {
-      id: key + '_' + r[CUR_HASH],
-      title: r.document.title ? r.document.title : '',
-      time: r.time
-    };
-    var verificationRequest = list[verificationRequestId].value;
-    if (!verificationRequest.verifiedBy)
-      verificationRequest.verifications = [];
-    verificationRequest.verifications.push(newVerification);
+      var toId = utils.getId(r.to);
+      var verificationRequestId = utils.getId(r.document);
+      var to = list[toId].value;
+      r.time = r.time || new Date().getTime();
 
-    if (!from.myVerifications)
-      from.myVerifications = [];
+      var newVerification = {
+        id: key + '_' + r[CUR_HASH],
+        title: r.document.title ? r.document.title : '',
+        time: r.time
+      };
+      var verificationRequest = list[verificationRequestId].value;
+      if (!verificationRequest.verifiedBy)
+        verificationRequest.verifications = [];
+      verificationRequest.verifications.push(newVerification);
 
-    from.myVerifications.push(newVerification);
-    if (!to.verifiedByMe)
-      to.verifiedByMe = [];
-    to.verifiedByMe.push(newVerification);
+      if (!from.myVerifications)
+        from.myVerifications = [];
 
-    batch.push({type: 'put', key: verificationRequestId, value: verificationRequest});
-    // batch.push({type: 'put', key: toId, value: to});
-    batch.push({type: 'put', key: fromId, value: from});
-    var self = this;
+      from.myVerifications.push(newVerification);
+      if (!to.verifiedByMe)
+        to.verifiedByMe = [];
+      to.verifiedByMe.push(newVerification);
 
-    meDriver.send({
-      msg: r,
-      to: [{fingerprint: this.getFingerprint(r.to)}],
-      deliver: true,
-      chain: false
-    })
-    .then(function(data) {
-      // check if send returns somewhere roothash for the new resource
+      batch.push({type: 'put', key: verificationRequestId, value: verificationRequest});
+      // batch.push({type: 'put', key: toId, value: to});
+      batch.push({type: 'put', key: fromId, value: from});
+      var self = this;
+     
+    // check if send returns somewhere roothash for the new resource
       return db.batch(batch)
     })
     .then(function() {
@@ -451,11 +418,19 @@ var Store = Reflux.createStore({
         self.trigger({action: 'addItem', resource: rr});
       else
         self.trigger({action: 'addVerification', resource: rr});
+      return meDriver.send({
+        msg: r,
+        to: [{fingerprint: this.getFingerprint(r.to)}],
+        deliver: true,
+        chain: false
+      })
+    })
+    .then(function(data) {
+      var d = data
     })
     .catch(function(err) {
       err = err
     })
-
   },
   onGetTo(key) {
     this.onGetItem(key, 'getTo');
@@ -665,7 +640,6 @@ var Store = Reflux.createStore({
       }
     }
     // Add items properties if they were created
-    var self = this;
     var json = JSON.parse(JSON.stringify(value));
     for (p in resource) {
       if (props[p]  &&  props[p].type === 'array')
@@ -693,6 +667,7 @@ var Store = Reflux.createStore({
     //   this.listenables[0].addItem.failed(error);
     //   return;
     // }
+    var self = this;
     var returnVal
     var isNew = !resource[ROOT_HASH];
     Q.allSettled(promises)
@@ -718,10 +693,8 @@ var Store = Reflux.createStore({
       if (isNew  &&  !resource.time)
         resource.time = new Date().getTime();
 
-      if (!resource  ||  isNew) {
+      if (!resource  ||  isNew) 
         returnVal = json
-        returnVal[NONCE] = self.getNonce()
-      }
       else {
         returnVal = {};
         extend(true, returnVal, resource);
@@ -733,27 +706,39 @@ var Store = Reflux.createStore({
 
         // self._putResourceInDB(modelName, returnVal, isRegistration);
       }
+      returnVal[NONCE] = self.getNonce()
       // var promiseKey = returnVal[ROOT_HASH]
       //   ? returnVal[ROOT_HASH]
       //   : Q.nfcall(getDHTKey, returnVal)
       if (returnVal[ROOT_HASH])
         return returnVal[ROOT_HASH]
-
-      return isRegistration ? self.loadDB() : Q()
+      else
+        return isRegistration ? self.loadDB() : Q()
     })
     .then(function() {
       if (isRegistration) {
         if (returnVal.securityCode)
           self.setOrg(returnVal)
         // HACK
-        returnVal[NONCE] = '04e21cf6dc67f9c5430221031b433e1903ca5975dfd7338f338146a99202c86b'
+        // returnVal[NONCE] = '04e21cf6dc67f9c5430221031b433e1903ca5975dfd7338f338146a99202c86b'
       }
+      // var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
+      // var nonce = self.getNonce();
+      // var toChain = {
+      //   _t: rr[TYPE],
+      //   _z: rr[NONCE],
+      // }
+      // if (value.message)
+      //   toChain.message = value.message        
+      // if (value.photos)
+      //   toChain.photos = value.photos
+
       return getDHTKey(returnVal)
     })
     .then(function (dhtKey) {
       if (!resource  ||  isNew)
         returnVal[ROOT_HASH] = dhtKey
-      return self._putResourceInDB(returnVal[TYPE], returnVal, isRegistration);
+      return self._putResourceInDB(returnVal[TYPE], returnVal, dhtKey, isRegistration);
     })
     .catch(function(err) {
       err = err
@@ -794,19 +779,7 @@ var Store = Reflux.createStore({
     var self = this;
     function finish () {
       if (--togo === 0)  {
-        // Q.ninvoke(fs, 'unlink', 'myIdentity.json')
-        // .then(function() {
-        //   return Q.invoke(self.onReloadDB1)
-        // })
-        // .then(function() {
         isLoaded = false;
-        //   self.trigger({action: 'reloadDB', models: models});
-        // })
-        // .catch(function(err) {
-          // isLoaded = false;
-          // self.trigger({action: 'reloadDB', models: models});
-
-        // })
         self.onReloadDB1()
       }
     }
@@ -884,9 +857,20 @@ var Store = Reflux.createStore({
     var required = meta.required;
     var meRootHash = me  &&  me[ROOT_HASH];
     var meId = IDENTITY_MODEL + '_' + meRootHash;
+    var subclasses = utils.getAllSubclasses(modelName).map(function(r) {
+      return r.id
+    })
+
     for (var key in list) {
-      if (key.indexOf(modelName + '_') == -1)
-        continue;
+      if (key.indexOf(modelName + '_') == -1) {
+        if (subclasses) {
+          var s = key.split('_')[0]
+          if (subclasses.indexOf(s) === -1) 
+            continue;
+        }
+        else
+          continue;
+      }
       var r = list[key].value;
       if (r.canceled)
         continue;
@@ -1362,7 +1346,7 @@ var Store = Reflux.createStore({
   getNonce() {
     return crypto.randomBytes(32).toString('hex')
   },
-  _putResourceInDB(modelName, value, isRegistration) {
+  _putResourceInDB(modelName, value, dhtKey, isRegistration) {
     // Cleanup null form values
     for (var p in value) {
       if (!value[p])
@@ -1370,19 +1354,20 @@ var Store = Reflux.createStore({
     }
     if (!value[TYPE])
       value[TYPE] = modelName;
-
-    value[CUR_HASH] = sha(value);
+    
+    var isNew = !value[ROOT_HASH]
+    value[CUR_HASH] = isNew ? dhtKey : value[ROOT_HASH]
     var model = this.getModel(modelName).value;
     var props = model.properties;
     var batch = [];
-    if (!value[ROOT_HASH]) {
+    if (isNew) {
       // value[NONCE] = this.getNonce()
       // getDHTKey(value, function(data) {
       //   value[ROOT_HASH] = data
       // }); //modelName + '_' + value[constants.ROOT_HASH];
 
       // value[ROOT_HASH] = value[CUR_HASH];
-      var creator = me
+      var creator =  me
                   ?  me
                   :  isRegistration ? value : null;
       if (creator) {
@@ -1447,6 +1432,16 @@ var Store = Reflux.createStore({
     // send message to blockchain
     if (isMessage) {
       to = list[utils.getId(value.to)].value;
+
+      var toChain = {
+        _t: rr[TYPE],
+        _z: rr[NONCE],
+      }
+      if (value.message)
+        toChain.message = value.message        
+      if (value.photos)
+        toChain.photos = value.photos
+
       meDriver.send({
         msg: value,
         to: this.getFingerprint(to),
@@ -1576,7 +1571,7 @@ var Store = Reflux.createStore({
       // // }
 
       me = value
-
+      meDriver = null
       var iKey = value[TYPE] + '_' + value[ROOT_HASH];
       var batch = [];
       batch.push({type: 'put', key: iKey, value: value});
@@ -1595,7 +1590,7 @@ var Store = Reflux.createStore({
     })
     .then(function () {
       self.loadResources();
-      return self.initIdentity(value)
+      return self.initIdentity(me)
     })
     .then(function() {
       return db.get(iKey)
@@ -1678,13 +1673,54 @@ var Store = Reflux.createStore({
     if (meDriver)
       return Q.resolve(meDriver)
     mePub = me['pubkeys']
-    if (!mePub) {
-      mePub = myIdentity.pubkeys  // hardcoded on device
-      me['pubkeys'] = mePub
-      me['privkeys'] = myIdentity.privkeys
+    if (me['pubkeys']) {
+      mePub = me['pubkeys']
+      mePriv = me['privkeys']
     }
+    else {
+      if (!me.securityCode) {
+        mePub = myIdentity[0].pubkeys  // hardcoded on device
+        mePriv = myIdentity[0].privkeys
+        me[NONCE] = myIdentity[0][NONCE]
+      }
+      else {
+        myIdentity.forEach(function(r) {
+          if (r.securityCode === me.securityCode) {
+            mePub = r.pubkeys  // hardcoded on device
+            mePriv = r.privkeys          
+            me[NONCE] = r[NONCE]
+          }
+        })
+        if (!mePub) {
+          // var org = list[utils.getId(me.organization)].value
+          var secCodes = this.searchNotMessages({modelName: 'tradle.SecurityCode'})
+          for (var i=0; i<secCodes.length; i++) {
+            if (secCodes[i].code === me.securityCode) {
+              me.organization = secCodes[i].organization
+              if (employees[me.securityCode])
+                employees[me.securityCode] = me
+              break
+            }
+          }
+          if (!me.organization) {
+            this.trigger({action:'addItem', resource: me, error: 'The code was not registered with'})
+            return
+          }
 
-    mePriv = me['privkeys']
+          var keys = defaultKeySet({
+            networkName: 'testnet'
+          })
+          mePub = []
+          mePriv = []
+          keys.forEach(function(key) {
+            mePriv.push(key.exportPrivate())
+            mePub.push(key.exportPublic())
+          })
+        }
+      }
+    }
+    me['pubkeys'] = mePub
+    me['privkeys'] = mePriv
 
     var publishingIdentity = {
       name: {
@@ -1737,12 +1773,12 @@ var Store = Reflux.createStore({
       return meDriver.identityPublishStatus()
     })
     .then(function(status) {
-      if (!status.queued)
+      if (!status.queued  &&  !status.current)
         return Q.ninvoke(meDriver.wallet, 'balance')
     })
     .then(function(balance) {
       if (balance)
-        return meDriver.publishMyIdentity()
+        return // meDriver.publishMyIdentity()
     })
     .catch(function(err) {
       err = err
@@ -1849,14 +1885,10 @@ var Store = Reflux.createStore({
         .then(function() {
           list[key] = {
             key: key,
-            value: data.value
+            value: val
           }
-          if (val.securityCode) {
-            var orgName = data.value.organization.title
-            if (!employees[orgName])
-              employees[orgName] = {}
-            employees[orgName][data.value.securityCode] = data.value
-          }
+          if (val.securityCode) 
+            employees[data.value.securityCode] = data.value          
         })
       })
 
@@ -1879,10 +1911,10 @@ var Store = Reflux.createStore({
       meDriver.on('chained', function (obj) {
         debugger
         console.log('chained', obj)
-        // meDriver.lookupObject(data)
-        // .then(obj) {
-        //   return putInDb(obj)
-        // }
+        meDriver.lookupObject(obj)
+        .then(function(obj) {
+          return putInDb(obj)
+        })
       })
 
       meDriver.on('error', function (err) {
@@ -1952,6 +1984,10 @@ var Store = Reflux.createStore({
          }
          if (!me  &&  myId  && data.key == myId)
            me = data.value;
+         if (data.value[TYPE] === IDENTITY) {
+          if (data.value.securityCode) 
+            employees[data.value.securityCode] = data.value          
+         }
          list[data.key] = data;
        }
      })
@@ -1976,7 +2012,9 @@ var Store = Reflux.createStore({
       console.log('Stream ended');
       // if (me)
       //   utils.setMe(me);
-      // var noModels = self.isEmpty(models);
+      var noModels = self.isEmpty(models);
+      if (noModels)
+        return self.loadModels();
       // if (noModels || Object.keys(list).length == 2)
       //   if (me)
       //     return self.loadDB();
@@ -2143,12 +2181,12 @@ var Store = Reflux.createStore({
       id: resource[TYPE] + '_' + resource[ROOT_HASH],
       title: utils.getDisplayName(resource, this.getModel(resource[TYPE]).value.properties),
     };
-    var myIdentity = list[MY_IDENTITIES_MODEL + '_1'].value;
-    myIdentity.allIdentities.push(newIdentity);
+    var myIdentities = list[MY_IDENTITIES_MODEL + '_1'].value;
+    myIdentities.allIdentities.push(newIdentity);
     var self = this;
-    db.put(MY_IDENTITIES_MODEL + '_1', myIdentity)
+    db.put(MY_IDENTITIES_MODEL + '_1', myIdentities)
     .then(function() {
-      list[MY_IDENTITIES_MODEL + '_1'].value = myIdentity;
+      list[MY_IDENTITIES_MODEL + '_1'].value = myIdentities;
       self.trigger({action: 'addNewIdentity', resource: me});
     })
     .catch (function(err) {
