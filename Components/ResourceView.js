@@ -90,12 +90,9 @@ class ResourceView extends Component {
     var isMe = isIdentity ? resource[constants.ROOT_HASH] === utils.getMe()[constants.ROOT_HASH] : true;
     if (isIdentity  &&  !isMe)
       actionPanel = <View/>
-    else {
-      actionPanel = 
-        <View style={buttonStyles.buttons}>
-          <ShowRefList    resource={resource} navigator={this.props.navigator} />    
-        </View>
-    }
+    else 
+      actionPanel = <ShowRefList resource={resource} navigator={this.props.navigator} />    
+    
           // <AddNewIdentity resource={resource} navigator={this.props.navigator} />
           // <SwitchIdentity resource={resource} navigator={this.props.navigator} />
     return (
