@@ -125,9 +125,12 @@ class PhotoList extends Component {
       //     ]
       //   }}
       // />);
-      var uri = utils.getImageUri(photo.url)
+      // var uri = utils.getImageUri(photo.url)
+      var uri = photo.url
+      if (!uri)
+        return <View />
       var source = {uri: uri};
-      if (uri.indexOf('data') === 0)
+      if (uri.indexOf('data') === 0  ||  uri.charAt(0) == '/')
         source.isStatic = true;
 
       return (
