@@ -18,6 +18,7 @@ var MessageList = require('./Components/MessageList');
 var ArticleView = require('./Components/ArticleView');
 var IdentitiesList = require('./Components/IdentitiesList');
 var SelectPhotoList = require('./Components/SelectPhotoList');
+var ProductChooser = require('./Components/ProductChooser')
 // var CameraView = require('./Components/CameraView');
 var PhotoCarousel = require('./Components/PhotoCarousel');
 var utils = require('./utils/utils');
@@ -261,7 +262,11 @@ class TiMApp extends Component {
     //               isAggregation={props.isAggregation}
     //               sortProperty={props.sortProperty}
     //               modelName={props.modelName} />;
-
+    case 15:
+      return <ProductChooser navigator={nav}
+                  resource={props.resource}
+                  returnRoute={props.returnRoute}
+                  callback={props.callback} />;
     case 10:
     default: // 10
       return <ResourceList navigator={nav}
