@@ -15,6 +15,7 @@ var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var constants = require('tradle-constants');
 var Icon = require('react-native-vector-icons/Ionicons');
+var ProductChooser = require('./ProductChooser')
 // var GridList = require('./GridList');
 // var DEAL_MODEL = 'tradle.Offer';
 // var VENDOR_MODEL = 'tradle.Organization';
@@ -136,8 +137,9 @@ class ResourceList extends Component {
         !isOrganization     &&
         !this.props.callback) {
       var m = utils.getModel(resource[constants.TYPE]).value;
+      var title = utils.makeTitle(utils.getDisplayName(resource, m.properties))
       this.props.navigator.push({
-        title: utils.makeTitle(utils.getDisplayName(resource, m.properties)),
+        title: title,
         id: 3,
         component: ResourceView,
         titleTextColor: '#7AAAC3',
@@ -216,18 +218,49 @@ class ResourceList extends Component {
     }      
     else {
       route.title = resource.name
-      var routes = this.props.navigator.getCurrentRoutes();        
-      if (routes[routes.length - 1].title === 'Banks'  ||
-          routes[routes.length - 1].title === 'Official Accounts') {
-        var msg = {
-          message: (me.firstName || 'There is a customer') + ' waiting for the response',
-          _t: constants.TYPES.SIMPLE_MESSAGE,
-          from: me,
-          to: resource,
-          time: new Date().getTime(),
+      if (resource.name === 'Rabobank') {
+        var routes = this.props.navigator.getCurrentRoutes();        
+        if (routes[routes.length - 1].title === 'Banks'  ||
+            routes[routes.length - 1].title === 'Official Accounts') {
+          var msg = {
+            message: (me.firstName || 'There is a customer') + ' waiting for the response',
+            _t: constants.TYPES.SIMPLE_MESSAGE,
+            from: me,
+            to: resource,
+            time: new Date().getTime(),
+          }
+          
+          Actions.addMessage(msg, true) 
         }
-
-        Actions.addMessage(msg, true) 
+      }
+      else if (resource.name === 'Lloyds') {
+        var currentRoutes = self.props.navigator.getCurrentRoutes();
+        this.props.navigator.push({
+          title: 'Financial Product',
+          id: 15,
+          component: ProductChooser,
+          sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+          backButtonTitle: 'Back',
+          passProps: {
+            resource: resource, 
+            returnRoute: currentRoutes[currentRoutes.length - 1],
+            callback: this.props.callback
+          },
+          rightButtonTitle: 'ion|plus',
+          onRightButtonPress: {
+            id: 4,
+            title: 'New product',
+            component: NewResource,
+            backButtonTitle: 'Back',
+            titleTextColor: '#7AAAC3',
+            rightButtonTitle: 'Done',
+            passProps: {
+              model: utils.getModel('tradle.NewMessageModel').value,
+              // callback: this.modelAdded.bind(this)
+            }        
+          }
+        });
+        return;
       }
     }
     this.props.navigator.push(route);
@@ -366,7 +399,11 @@ class ResourceList extends Component {
     var me = utils.getMe();
     if (!me  ||  (this.props.prop  &&  this.props.prop.readOnly))
       return <View />;
+    var model = utils.getModel(this.props.modelName).value;
+    if (model.subClassOf  &&  model.subClassOf === 'tradle.FinancialProduct')
+      return <View />;
 
+    
     return (
       <View style={styles.footer}>
         <TouchableHighlight underlayColor='transparent' onPress={this.addNew.bind(this)}>
