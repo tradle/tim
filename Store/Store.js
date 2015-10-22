@@ -316,13 +316,14 @@ var Store = Reflux.createStore({
       }
       return Q()
     })
+    // .then(function() {
+    //   return batch.length ? Q.ninvoke(meDriver.wallet, 'balance') : Q()
+    // })
+    // .then(function(balance) {
     .then(function() {
-      return batch.length ? Q.ninvoke(meDriver.wallet, 'balance') : Q()
-    })
-    .then(function(balance) {
-      if (balance   &&  balance < 100000)
+      if (batch.length)
         return db.batch(batch)
-      error = 'You have a low balance'
+      // error = 'You have a low balance'
     })
     .then(function() {
       var params = {
@@ -1832,7 +1833,8 @@ var Store = Reflux.createStore({
         batch.push({type: 'put', key: key, value: val})
       }
     }
-    if (model.subClassOf  &&  model.subClassOf === constants.TYPES.MESSAGE) {
+    var isMessage = model.subClassOf  &&  model.subClassOf === constants.TYPES.MESSAGE
+    if (isMessage) {
       var to = list[utils.getId(val.to)].value;
       var from = list[utils.getId(val.from)].value;
       var dn = val.message || utils.getDisplayName(val, model.properties);
@@ -1852,7 +1854,7 @@ var Store = Reflux.createStore({
           value: val
         }
         var retParams = {
-          action: 'addItem',
+          action: isMessage ? 'addMessage' : 'addItem',
           resource: val
         }
         self.trigger(params)
