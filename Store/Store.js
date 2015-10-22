@@ -1636,12 +1636,12 @@ var Store = Reflux.createStore({
       mePriv = me['privkeys']
     }
     else {
-      if (me.securityCode) {
-        for (var i=0; i<myIdentity.length; i++) {
+      if (!me.securityCode) {
+        for (var i=0; i<myIdentity.length  &&  !mePub; i++) {
           if (!myIdentity[i].securityCode  &&  me.firstName === myIdentity[i].firstName) {
             mePub = myIdentity[i].pubkeys  // hardcoded on device
             mePriv = myIdentity[i].privkeys
-            me[NONCE] = myIdentity[i][NONCE]
+            me[NONCE] = myIdentity[i][NONCE]            
           }
         }
       }
@@ -1653,6 +1653,7 @@ var Store = Reflux.createStore({
             me[NONCE] = r[NONCE]
           }
         })
+
         if (!mePub) {
           // var org = list[utils.getId(me.organization)].value
           var secCodes = this.searchNotMessages({modelName: 'tradle.SecurityCode'})
@@ -1668,17 +1669,18 @@ var Store = Reflux.createStore({
             this.trigger({action:'addItem', resource: me, error: 'The code was not registered with'})
             return
           }
-
-          var keys = defaultKeySet({
-            networkName: 'testnet'
-          })
-          mePub = []
-          mePriv = []
-          keys.forEach(function(key) {
-            mePriv.push(key.exportPrivate())
-            mePub.push(key.exportPublic())
-          })
         }
+      }
+      if (!mePub) {
+        var keys = defaultKeySet({
+          networkName: 'testnet'
+        })
+        mePub = []
+        mePriv = []
+        keys.forEach(function(key) {
+          mePriv.push(key.exportPrivate())
+          mePub.push(key.exportPublic())
+        })
       }
     }
     me['pubkeys'] = mePub
