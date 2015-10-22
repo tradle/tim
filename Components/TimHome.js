@@ -12,6 +12,7 @@ var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
 var sampleData = require('../data/data');
 var constants = require('tradle-constants');
+var TouchID = require('react-native-touch-id');
 
 var {
   StyleSheet,
@@ -25,7 +26,8 @@ var {
   Component,
   ScrollView,
   LinkingIOS,
-  StatusBarIOS
+  StatusBarIOS,
+  AlertIOS
 } = React;
 
 class TimHome extends Component {
@@ -203,7 +205,7 @@ class TimHome extends Component {
         </ScrollView>
         <View style={{height: 100}}></View>
         <TouchableHighlight style={[styles.thumbButton]}
-              underlayColor='transparent' onPress={this.showContactsOrRegister.bind(this)}>        
+              underlayColor='transparent' onPress={this._pressHandler.bind(this)}>        
           <View style={styles.getStarted}>
              <Text style={styles.getStartedText}>Get started</Text>
           </View>
@@ -221,6 +223,17 @@ class TimHome extends Component {
         <View style={{height: 200}}></View>
       </View>  
     );
+  }
+  _pressHandler() {
+    var self = this
+    TouchID.authenticate('to demo this react-native component')
+      .then(success => {
+        self.showContactsOrRegister();
+        // AlertIOS.alert('Authenticated Successfully');
+      })
+      .catch(error => {
+        AlertIOS.alert('Authentication Failed');
+      });
   }
 
 }
