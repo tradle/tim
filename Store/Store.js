@@ -1739,7 +1739,7 @@ var Store = Reflux.createStore({
     meDriver.once('ready', function () {
       console.log(meDriver.name(), 'is ready')
       // d.publishMyIdentity()
-      /*
+      
       meDriver.identities().createReadStream()
       .on('data', function (data) {
         var key = IDENTITY + '_' + data.key
@@ -1761,7 +1761,7 @@ var Store = Reflux.createStore({
             employees[data.value.securityCode] = data.value          
         })
       })
-      */
+      
       meDriver.messages().createValueStream()
       .on('data', function (data) {
         meDriver.lookupObject(data)
