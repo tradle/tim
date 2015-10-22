@@ -1770,6 +1770,7 @@ var Store = Reflux.createStore({
           // console.log('msg', obj)
         })
       })
+      // Object was successfully read off chain
       meDriver.on('unchained', function (obj) {
         console.log('unchained', obj)
         meDriver.lookupObject(obj)
@@ -1781,12 +1782,13 @@ var Store = Reflux.createStore({
         // debugger
         console.log('lowbalance')
       })
-
+      // Object was successfully put on chain but not yet confirmed
       meDriver.on('chained', function (obj) {
         debugger
         console.log('chained', obj)
         meDriver.lookupObject(obj)
         .then(function(obj) {
+          obj = obj
           // return putInDb(obj)
         })
       })
@@ -1808,6 +1810,8 @@ var Store = Reflux.createStore({
   },
   putInDb(obj) {
     var val = obj.parsed.data
+    if (!val)
+      return
     val[ROOT_HASH] = obj[ROOT_HASH]
     val[CUR_HASH] = obj[CUR_HASH]
     if (!val.time)
