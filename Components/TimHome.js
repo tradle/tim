@@ -238,7 +238,7 @@ class TimHome extends Component {
     })
     .catch(error => {
       // Failure code
-      console.log(error)
+      self.showContactsOrRegister()
     })
   }
 
