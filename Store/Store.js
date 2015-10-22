@@ -1785,10 +1785,10 @@ var Store = Reflux.createStore({
       meDriver.on('chained', function (obj) {
         debugger
         console.log('chained', obj)
-        // meDriver.lookupObject(obj)
-        // .then(function(obj) {
-        //   return putInDb(obj)
-        // })
+        meDriver.lookupObject(obj)
+        .then(function(obj) {
+          // return putInDb(obj)
+        })
       })
 
       meDriver.on('error', function (err) {
