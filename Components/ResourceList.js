@@ -397,7 +397,7 @@ class ResourceList extends Component {
   }
   renderFooter() {
     var me = utils.getMe();
-    if (!me  ||  (this.props.prop  &&  this.props.prop.readOnly))
+    if (!me  ||  (this.props.prop  &&  (this.props.prop.readOnly || (this.props.prop.items  &&  this.props.prop.items.readOnly))))
       return <View />;
     var model = utils.getModel(this.props.modelName).value;
     if (model.subClassOf  &&  model.subClassOf === 'tradle.FinancialProduct')
