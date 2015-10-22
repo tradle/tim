@@ -226,14 +226,20 @@ class TimHome extends Component {
   }
   _pressHandler() {
     var self = this
-    TouchID.authenticate('to demo this react-native component')
-      .then(success => {
-        self.showContactsOrRegister();
-        // AlertIOS.alert('Authenticated Successfully');
-      })
-      .catch(error => {
-        AlertIOS.alert('Authentication Failed');
-      });
+    TouchID.isSupported()
+   .then(supported => {
+      TouchID.authenticate('to demo this react-native component')
+        .then(success => {
+          self.showContactsOrRegister()
+        })
+        .catch(error => {
+          AlertIOS.alert('Authentication Failed')
+        });
+    })
+    .catch(error => {
+      // Failure code
+      console.log(error)
+    })
   }
 
 }
