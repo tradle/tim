@@ -81,7 +81,6 @@ var db;
 var ldb;
 var isLoaded;
 var me;
-var mePub, mePriv;
 var meDriver;
 var meIdentity
 var ready;
@@ -252,8 +251,9 @@ var Store = Reflux.createStore({
     if (rr.photos)
       toChain.photos = rr.photos
 
-    var batch = [];
-    var self = this;
+    var batch = []
+    var self = this
+    var error
     var welcomeMessage;
     return getDHTKey(toChain)
     .then(function(dhtKey) {
@@ -317,17 +317,24 @@ var Store = Reflux.createStore({
       return Q()
     })
     .then(function() {
-      if (batch.length)
+      return batch.length ? Q.ninvoke(meDriver.wallet, 'balance') : Q()
+    })
+    .then(function(balance) {
+      if (balance   &&  balance < 100000)
         return db.batch(batch)
+      error = 'You have a low balance'
     })
     .then(function() {
-      // P2P message without putting it on blockchain
-      self.trigger({
+      var params = {
         action: 'addMessage',
         resource: isWelcome ? welcomeMessage : rr
-      });
+      }
+      if (error) 
+        params.error = error
+      
+      self.trigger(params);
 
-      if (batch.length) {
+      if (batch.length  &&  !error) {
         return meDriver.send({
           msg: toChain,
           to: [{fingerprint: self.getFingerprint(r.to)}],
@@ -1364,12 +1371,6 @@ var Store = Reflux.createStore({
     var props = model.properties;
     var batch = [];
     if (isNew) {
-      // value[NONCE] = this.getNonce()
-      // getDHTKey(value, function(data) {
-      //   value[ROOT_HASH] = data
-      // }); //modelName + '_' + value[constants.ROOT_HASH];
-
-      // value[ROOT_HASH] = value[CUR_HASH];
       var creator =  me
                   ?  me
                   :  isRegistration ? value : null;
@@ -1412,26 +1413,11 @@ var Store = Reflux.createStore({
         batch.push({type: 'put', key: from[TYPE] + '_' + from[ROOT_HASH], value: from});
       }
     }
-    // if (value[TYPE] == IDENTITY_MODEL)
-    //   batch.push({type: 'put', key: iKey, value: value, prefix: identityDb});
-    // else
     var iKey = modelName + '_' + value[ROOT_HASH];
-
-
     batch.push({type: 'put', key: iKey, value: value});
 
     var mid;
 
-    // if (isRegistration) {
-    //   mid = {
-    //     _type: MY_IDENTITIES_MODEL,
-    //     currentIdentity: iKey,
-    //     allIdentities: [{
-    //       id: iKey,
-    //       title: utils.getDisplayName(value, models[modelName].value.properties)
-    //     }]};
-    //   batch.push({type: 'put', key: MY_IDENTITIES_MODEL + '_1', value: mid});///
-    // }
     // send message to blockchain
     if (isMessage) {
       to = list[utils.getId(value.to)].value;
@@ -1459,53 +1445,6 @@ var Store = Reflux.createStore({
     }
 
     db.batch(batch)
-    // .then(function(results) {
-    //   if (!isRegistration)
-    //     return
-    //   me = value
-    //   if (me.organization) {
-    //     if (me.securityCode) {
-    //       var org = list[utils.getId(me.organization)].value
-    //       if (!org.securityCodes  ||  org.securityCodes[!me.securityCode]) {
-    //         self.trigger({err: 'The code was not registered with ' + me.organization.title})
-    //         return
-    //       }
-    //       else {
-    //         self.trigger({error: 'Please enter the security code'})
-    //         return
-    //       }
-    //     }
-    //     var photos = list[utils.getId(me.organization.id)].value.photos;
-    //     if (photos)
-    //       me.organization.photo = photos[0].url;
-    //   }
-    //   else if (me.securityCode) {
-    //     var orgId = utils.getId(data.value.organization)
-    //     var codes = list[orgId].value.securityCodes
-
-    //     for (var c in codes) {
-    //       if (c.code === me.value.securityCode) {
-
-    //       }
-    //     }
-    //   }
-
-    //   return Q.ninvoke(self, 'initIdentity', value, true)
-    //   // })
-    //   .then(function() {
-    //     return self.loadResources();
-    //   })
-    //   .catch(function(err) {
-    //     err = err
-    //   })
-    //   // .then(function() {
-    //   //   return self.loadMyResources();
-    //   // })
-    //   // .then(function() {
-    //   //   self.loadResources();
-    //   // })
-
-    // })
     .then(function() {
       return db.get(iKey)
     })
@@ -1518,8 +1457,6 @@ var Store = Reflux.createStore({
     .then(function() {
       var  params = {action: 'addItem', resource: value};
       // registration or profile editing
-      // if (isRegistration  ||  value[ROOT_HASH] === me[ROOT_HASH])
-      //   params.me = value;
       self.trigger(params);
     })
     .catch(function(err) {
@@ -1630,12 +1567,9 @@ var Store = Reflux.createStore({
   getDriver(me) {
     if (meDriver)
       return Q.resolve(meDriver)
-    mePub = me['pubkeys']
-    if (me['pubkeys']) {
-      mePub = me['pubkeys']
-      mePriv = me['privkeys']
-    }
-    else {
+    var mePub = me['pubkeys']
+    var mePriv = me['privkeys']
+    if (!mePub  &&  !mePriv) {
       if (!me.securityCode) {
         for (var i=0; i<myIdentity.length  &&  !mePub; i++) {
           if (!myIdentity[i].securityCode  &&  me.firstName === myIdentity[i].firstName) {
@@ -1667,7 +1601,7 @@ var Store = Reflux.createStore({
           }
           if (!me.organization) {
             this.trigger({action:'addItem', resource: me, error: 'The code was not registered with'})
-            return
+            return Q.reject('The code was not registered with')
           }
         }
       }
@@ -1682,19 +1616,10 @@ var Store = Reflux.createStore({
           mePub.push(key.exportPublic())
         })
       }
+      me['pubkeys'] = mePub
+      me['privkeys'] = mePriv
     }
-    me['pubkeys'] = mePub
-    me['privkeys'] = mePriv
 
-    // var publishingIdentity = {
-    //   name: {
-    //     firstName: me.firstName,
-    //     formatted: me.firstName + (me.lastName ? ' ' + me.lastName : '')
-    //   },
-    //   pubkeys: mePub,
-    //   _z: me[NONCE] || this.getNonce(),
-    //   v: '0.3'
-    // }
     meIdentity = new Identity()
                         .name({
                           firstName: me.firstName,
@@ -1708,41 +1633,8 @@ var Store = Reflux.createStore({
 
     return this.buildDriver(Identity.fromJSON(publishingIdentity), mePriv, PORT)
   },
+
   initIdentity(me) {
-    // meDriver = this.getDriver(me)
-
-
-    // var self = this
-    // return Q.ninvoke(fs, 'readFile', 'myIdentity.json')
-    // .catch(function(err){
-    //   mePub = []
-    //   mePriv = []
-    //   var keys = defaultKeySet({
-    //     networkName: 'testnet'
-    //   })
-    //   keys.forEach(function(key) {
-    //     mePriv.push(key.exportPrivate())
-    //     mePub.push(key.exportPublic())
-    //   })
-    //   me['pubkeys'] = mePub
-    //   me['privkeys'] = mePriv
-    //   return Q.ninvoke(fs, 'writeFile', 'myIdentity.json', JSON.stringify(me))
-    // })
-    // .then(function(data) {
-    //   if (data) {
-    //     me = JSON.parse(data.value)
-    //     mePub = me['pubkeys']
-    //     mePriv = me['privkeys']
-    //   }
-    //   var key = me[TYPE] + '_' + me[ROOT_HASH]
-    //   list[key] = {
-    //     key: key,
-    //     value: me
-    //   }
-    // db.put(key, me)
-    // .then(function(data) {
-    //   Q.ninvoke(meDriver, 'identityPublishStatus')
-    // })
     return this.getDriver(me)
     .then(function () {
       return meDriver.identityPublishStatus()
@@ -1842,9 +1734,11 @@ var Store = Reflux.createStore({
     return dfd.promise;
   },
   loadResources() {
+    var self = this
     meDriver.once('ready', function () {
       console.log(meDriver.name(), 'is ready')
       // d.publishMyIdentity()
+      /*
       meDriver.identities().createReadStream()
       .on('data', function (data) {
         var key = IDENTITY + '_' + data.key
@@ -1866,7 +1760,7 @@ var Store = Reflux.createStore({
             employees[data.value.securityCode] = data.value          
         })
       })
-
+      */
       meDriver.messages().createValueStream()
       .on('data', function (data) {
         meDriver.lookupObject(data)
@@ -1881,6 +1775,10 @@ var Store = Reflux.createStore({
         .then(function(obj) {
           return self.putInDb(obj)
         })
+      })
+      meDriver.on('lowbalance', function () {
+        // debugger
+        console.log('lowbalance')
       })
 
       meDriver.on('chained', function (obj) {
@@ -1909,11 +1807,31 @@ var Store = Reflux.createStore({
   },
   putInDb(obj) {
     var val = obj.parsed.data
+    val[ROOT_HASH] = obj[ROOT_HASH]
+    val[CUR_HASH] = obj[CUR_HASH]
+    if (!val.time)
+      val.time = obj.timestamp
     var type = val[TYPE]
     var key = type + '_' + val[ROOT_HASH]
-    batch.push({type: 'put', key: key, value: val})
+    
     var model = utils.getModel(type).value
     var batch = []
+    if (model.id == IDENTITY) {      
+      if (!me  ||  obj[ROOT_HASH] !== me[ROOT_HASH]) {
+        if (val.name) {
+          for (var p in val.name) 
+            val[p] = val.name[p]
+          delete val.name
+        } 
+        if (val.location) {
+          for (var p in val.location) 
+            val[p] = val.location[p]
+          delete val.location
+        } 
+
+        batch.push({type: 'put', key: key, value: val})
+      }
+    }
     if (model.subClassOf  &&  model.subClassOf === constants.TYPES.MESSAGE) {
       var to = list[utils.getId(val.to)].value;
       var from = list[utils.getId(val.from)].value;
@@ -1925,18 +1843,20 @@ var Store = Reflux.createStore({
       batch.push({type: 'put', key: to[TYPE] + '_' + to[ROOT_HASH], value: to});
       batch.push({type: 'put', key: from[TYPE] + '_' + from[ROOT_HASH], value: from});
     }
-    return db.batch(batch)
-    .then(function() {
-      list[key] = {
-        key: key,
-        value: val
-      }
-      var retParams = {
-        action: 'addItem',
-        resource: val
-      }
-      self.trigger(params)
-    })
+    
+    if (batch.length)
+      return db.batch(batch)
+      .then(function() {
+        list[key] = {
+          key: key,
+          value: val
+        }
+        var retParams = {
+          action: 'addItem',
+          resource: val
+        }
+        self.trigger(params)
+      })
 
   },
   loadMyResources() {
