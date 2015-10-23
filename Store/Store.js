@@ -257,14 +257,12 @@ var Store = Reflux.createStore({
     var welcomeMessage;
     return getDHTKey(toChain)
     .then(function(dhtKey) {
-      var key = rr[TYPE] + '_' + dhtKey;
+      // var key = rr[TYPE] + '_' + dhtKey;
       if (!isWelcome) {
         rr[ROOT_HASH] = dhtKey;
-        rr[CUR_HASH] = dhtKey;
-        batch.push({type: 'put', key: key, value: rr})
-        // db.put(key, r)
-        // .then(function() {
-        list[key] = {key: key, value: rr};
+        // rr[CUR_HASH] = dhtKey;
+        // batch.push({type: 'put', key: key, value: rr})
+        // list[key] = {key: key, value: rr};
         var to = list[utils.getId(r.to)].value;
         var from = list[utils.getId(r.from)].value;
         var dn = r.message; // || utils.getDisplayName(r, props);
@@ -316,14 +314,44 @@ var Store = Reflux.createStore({
       }
       return Q()
     })
-    // .then(function() {
-    //   return batch.length ? Q.ninvoke(meDriver.wallet, 'balance') : Q()
-    // })
-    // .then(function(balance) {
     .then(function() {
-      if (batch.length)
-        return db.batch(batch)
-      // error = 'You have a low balance'
+    //   if (batch.length)
+    //     return db.batch(batch)
+    //   // error = 'You have a low balance'
+    // })
+    // .then(function() {
+    //   var params = {
+    //     action: 'addMessage',
+    //     resource: isWelcome ? welcomeMessage : rr
+    //   }
+    //   if (error) 
+    //     params.error = error
+      
+    //   self.trigger(params);
+
+      if (batch.length  &&  !error) 
+        return self.getDriver(me)
+    })
+    .then(function() {
+      if (!isWelcome)
+        return meDriver.send({
+          msg: toChain,
+          to: [{fingerprint: self.getFingerprint(r.to)}],
+          deliver: true,
+          chain: false
+        })
+    })
+    .then(function(data) {
+      if (!data) 
+        return Q()
+      var roothash = data[0]._props[ROOT_HASH]
+      rr[ROOT_HASH] = roothash
+      rr[CUR_HASH] = data[0]._props[CUR_HASH]
+
+      var key = rr[TYPE] + '_' + roothash;
+      batch.push({type: 'put', key: key, value: rr})
+      list[key] = {key: key, value: rr};
+      return db.batch(batch)
     })
     .then(function() {
       var params = {
@@ -335,18 +363,10 @@ var Store = Reflux.createStore({
       
       self.trigger(params);
 
-      if (batch.length  &&  !error) {
-        return meDriver.send({
-          msg: toChain,
-          to: [{fingerprint: self.getFingerprint(r.to)}],
-          deliver: true,
-          chain: false
-        })
-      }
+      // if (batch.length  &&  !error) 
+      //   return self.getDriver(me)
     })
-    .then(function(data) {
-      var d = data
-    })
+
     // .then(function() {
     //   self.trigger({
     //     action: 'addMessage',
@@ -773,27 +793,31 @@ var Store = Reflux.createStore({
     var togo = 1;
     // this.loadModels()
     // var name = me.firstName.toLowerCase();
-    rimraf('./', finish)
+    var self = this
+    meDriver.destroy()
+    .then(function() {
+      meDriver = null
 
-    ;[
-      // 'addressBook.db',
-      // 'msg-log.db',
-      'messages.db',
-      // 'txs.db'
-    ].forEach(function (dbName) {
-      // ;[name].forEach(function (name) {
-        togo++
-        leveldown.destroy(TIM_PATH_PREFIX + '-' + dbName, finish)
-      // })
-    })
+      rimraf('./', finish)
+      ;[
+        'addressBook.db',
+        // 'msg-log.db',
+        'messages.db',
+        'txs.db'
+      ].forEach(function (dbName) {
+        ;[name].forEach(function (name) {
+          togo++
+          leveldown.destroy(TIM_PATH_PREFIX + '-' + dbName, finish)
+        })
+      })
 
-    var self = this;
-    function finish () {
-      if (--togo === 0)  {
-        isLoaded = false;
-        self.onReloadDB1()
+      function finish () {
+        if (--togo === 0)  {
+          isLoaded = false;
+          self.onReloadDB1()
+        }
       }
-    }
+    })
   },
   onMessageList(params) {
     this.onList(params);
@@ -1477,7 +1501,8 @@ var Store = Reflux.createStore({
       currentIdentity: iKey,
       allIdentities: [{
         id: iKey,
-        title: utils.getDisplayName(value, models[value[TYPE]].value.properties)
+        title: utils.getDisplayName(value, models[value[TYPE]].value.properties),
+        privkeys: me.privkeys
       }]};
     batch.push({type: 'put', key: MY_IDENTITIES_MODEL + '_1', value: mid});///
     return db.batch(batch)
@@ -1568,8 +1593,20 @@ var Store = Reflux.createStore({
   getDriver(me) {
     if (meDriver)
       return Q.resolve(meDriver)
-    var mePub = me['pubkeys']
-    var mePriv = me['privkeys']
+    var allMyIdentities = list[MY_IDENTITIES_MODEL + '_1']
+
+    var mePub = me['pubkeys']    
+    var mePriv;
+    if (!allMyIdentities)
+      mePriv = me['privkeys']
+    else {
+      var all = allMyIdentities.value.allIdentities
+      var curId = allMyIdentities.value.currentIdentity
+      all.forEach(function(id) {
+        if (id.id === curId)
+          mePriv = id.privkeys
+      })      
+    }
     if (!mePub  &&  !mePriv) {
       if (!me.securityCode) {
         for (var i=0; i<myIdentity.length  &&  !mePub; i++) {
@@ -1745,7 +1782,12 @@ var Store = Reflux.createStore({
         var key = IDENTITY + '_' + data.key
         var val = data.value.identity
         val[ROOT_HASH] = data.value[ROOT_HASH]
+
+        // if (me  &&  val[ROOT_HASH === me[ROOT_HASH]])
+        //   return
+        
         val[CUR_HASH] = data.value[CUR_HASH]
+
         var name = val.name;
         delete val.name
         for (var p in name)
@@ -1766,6 +1808,7 @@ var Store = Reflux.createStore({
       .on('data', function (data) {
         meDriver.lookupObject(data)
         .then(function (obj) {
+
           return self.putInDb(obj)
           // console.log('msg', obj)
         })
@@ -1795,7 +1838,7 @@ var Store = Reflux.createStore({
 
       meDriver.on('error', function (err) {
         debugger
-        console.error(err)
+        console.log(err)
       })
 
       meDriver.on('message', function (msg) {
@@ -1822,7 +1865,7 @@ var Store = Reflux.createStore({
     var model = utils.getModel(type).value
     var batch = []
     if (model.id == IDENTITY) {      
-      if (!me  ||  obj[ROOT_HASH] !== me[ROOT_HASH]) {
+      // if (!me  ||  obj[ROOT_HASH] !== me[ROOT_HASH]) {
         if (val.name) {
           for (var p in val.name) 
             val[p] = val.name[p]
@@ -1835,22 +1878,32 @@ var Store = Reflux.createStore({
         } 
 
         batch.push({type: 'put', key: key, value: val})
+      // }
+    }
+    else {
+      var isMessage = model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1);
+      // var isMessage = model.subClassOf  &&  model.subClassOf === constants.TYPES.MESSAGE
+      if (isMessage) {      
+        var r = list[key]
+        if (!r)
+          return
+        r = r.value
+        var to = list[utils.getId(r.to)].value;
+        var from = list[utils.getId(r.from)].value;
+
+        val.to = to
+        val.from = from
+
+        var dn = val.message || utils.getDisplayName(val, model.properties);
+        to.lastMessage = (from[ROOT_HASH] === me[ROOT_HASH]) ? 'You: ' + dn : dn;
+        to.lastMessageTime = val.time;
+        from.lastMessage = val.message;
+        from.lastMessageTime = val.time;
+        batch.push({type: 'put', key: to[TYPE] + '_' + to[ROOT_HASH], value: to});
+        batch.push({type: 'put', key: from[TYPE] + '_' + from[ROOT_HASH], value: from});
       }
     }
-    var isMessage = model.subClassOf  &&  model.subClassOf === constants.TYPES.MESSAGE
-    if (isMessage) {
-      var to = list[utils.getId(val.to)].value;
-      var from = list[utils.getId(val.from)].value;
-      var dn = val.message || utils.getDisplayName(val, model.properties);
-      to.lastMessage = (from[ROOT_HASH] === me[ROOT_HASH]) ? 'You: ' + dn : dn;
-      to.lastMessageTime = val.time;
-      from.lastMessage = val.message;
-      from.lastMessageTime = val.time;
-      batch.push({type: 'put', key: to[TYPE] + '_' + to[ROOT_HASH], value: to});
-      batch.push({type: 'put', key: from[TYPE] + '_' + from[ROOT_HASH], value: from});
-    }
-    
-    if (batch.length)
+    // if (batch.length)
       return db.batch(batch)
       .then(function() {
         list[key] = {
