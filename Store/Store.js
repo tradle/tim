@@ -259,7 +259,7 @@ var Store = Reflux.createStore({
     .then(function(dhtKey) {
       // var key = rr[TYPE] + '_' + dhtKey;
       if (!isWelcome) {
-        rr[ROOT_HASH] = dhtKey;
+        // rr[ROOT_HASH] = dhtKey;
         // rr[CUR_HASH] = dhtKey;
         // batch.push({type: 'put', key: key, value: rr})
         // list[key] = {key: key, value: rr};
@@ -362,7 +362,6 @@ var Store = Reflux.createStore({
         params.error = error
       
       self.trigger(params);
-
       // if (batch.length  &&  !error) 
       //   return self.getDriver(me)
     })
@@ -1884,16 +1883,20 @@ var Store = Reflux.createStore({
       var isMessage = model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1);
       // var isMessage = model.subClassOf  &&  model.subClassOf === constants.TYPES.MESSAGE
       if (isMessage) {      
-        var r = list[key]
-        if (!r)
+        var from = obj.from.identity.toJSON()
+        if (me  &&  from[ROOT_HASH] === me[ROOT_HASH])
           return
-        r = r.value
-        var to = list[utils.getId(r.to)].value;
-        var from = list[utils.getId(r.from)].value;
-
-        val.to = to
-        val.from = from
-
+        var to = obj.to.identity.toJSON()
+        val.to = {
+          id: to[TYPE] + '_' + obj.to[ROOT_HASH],
+          title: to.name.formatted
+        }
+        val.from = {
+          id: from[TYPE] + '_' + obj.from[ROOT_HASH],
+          title: from.name.formatted          
+        }  
+        if (!val.time)
+          val.time = obj.timestamp
         var dn = val.message || utils.getDisplayName(val, model.properties);
         to.lastMessage = (from[ROOT_HASH] === me[ROOT_HASH]) ? 'You: ' + dn : dn;
         to.lastMessageTime = val.time;
@@ -1904,18 +1907,18 @@ var Store = Reflux.createStore({
       }
     }
     // if (batch.length)
-      return db.batch(batch)
-      .then(function() {
-        list[key] = {
-          key: key,
-          value: val
-        }
-        var retParams = {
-          action: isMessage ? 'addMessage' : 'addItem',
-          resource: val
-        }
-        self.trigger(params)
-      })
+    return db.batch(batch)
+    .then(function() {
+      list[key] = {
+        key: key,
+        value: val
+      }
+      var retParams = {
+        action: isMessage ? 'addMessage' : 'addItem',
+        resource: val
+      }
+      self.trigger(params)
+    })
 
   },
   loadMyResources() {
