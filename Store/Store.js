@@ -104,31 +104,31 @@ var Store = Reflux.createStore({
     // ldb.query.use(jsonqueryEngine());
     db = promisify(ldb);
 
-    // var sdb = promisify(Sublevel(ldb));
-    // identityDb = sdb.sublevel(IDENTITY_MODEL);
-    // return this.onReloadDB()
     // this.loadModels()
     var self = this
     
     // this.ready = Q.ninvoke(AsyncStorage, 'clear')
     // .then(this.loadMyResources.bind(this))
+    console.time('loadMyResources')
     this.ready = this.loadMyResources()
     .then(function() {
+      console.timeEnd('loadMyResources')
       if (!utils.isEmpty(list))
         isLoaded = true;
-      if (me) {
-        return promiseMe()
-      }
+      if (me) 
+        promiseMe()      
     })
     .catch(function(err) {
       err = err;
     });
 
     function promiseMe () {
+    console.time('getDriver')
       return self.getDriver(me)
         .then(function () {
+    console.timeEnd('getDriver')
           self.loadResources()
-          return self.initIdentity(me)
+          self.initIdentity(me)
         })
     }
   },
@@ -336,31 +336,34 @@ var Store = Reflux.createStore({
       
     //   self.trigger(params);
 
-      if (batch.length  &&  !error) 
+      if (batch.length  &&  !error  &&  list[utils.getId(r.to)].value.pubkeys) 
         return self.getDriver(me)
     })
     .then(function() {
-      if (!isWelcome)
-        return meDriver.send({
-          msg: toChain,
-          to: [{fingerprint: self.getFingerprint(r.to)}],
-          deliver: true,
-          chain: false
-        })
+      if (isWelcome  ||  !list[utils.getId(r.to)].value.pubkeys)
+        return Q()
+      return meDriver.send({
+        msg: toChain,
+        to: [{fingerprint: self.getFingerprint(r.to)}],
+        deliver: true,
+        chain: false
+      })
     })
     .then(function(data) {
-      if (!data) 
-        return Q()
-      var roothash = data[0]._props[ROOT_HASH]
-      rr[ROOT_HASH] = roothash
-      rr[CUR_HASH] = data[0]._props[CUR_HASH]
-
-      var key = rr[TYPE] + '_' + roothash;
+      if (data)  {
+        var roothash = data[0]._props[ROOT_HASH]
+        rr[ROOT_HASH] = roothash
+        rr[CUR_HASH] = data[0]._props[CUR_HASH]
+      }      
+      else 
+        rr[ROOT_HASH] = sha(rr)
+      
+      var key = rr[TYPE] + '_' + rr[ROOT_HASH];
       batch.push({type: 'put', key: key, value: rr})
       list[key] = {key: key, value: rr};
-      return db.batch(batch)
-    })
-    .then(function() {
+    //   return db.batch(batch)
+    // })
+    // .then(function() {
       var params = {
         action: 'addMessage',
         resource: isWelcome ? welcomeMessage : rr
@@ -369,6 +372,7 @@ var Store = Reflux.createStore({
         params.error = error
       
       self.trigger(params);
+      return db.batch(batch)
       // if (batch.length  &&  !error) 
       //   return self.getDriver(me)
     })
@@ -1965,6 +1969,8 @@ var Store = Reflux.createStore({
       myId = IDENTITY_MODEL + '_' + myId;
     var self = this;
     var loadingModels = false;
+    
+    console.time('dbStream')
     return db.createReadStream()
     .on('data', function(data) {
        if (data.value.type === 'tradle.Model') {
@@ -2005,6 +2011,7 @@ var Store = Reflux.createStore({
     })
     .on('end', function() {
       console.log('Stream ended');
+      console.timeEnd('dbStream')
       // if (me)
       //   utils.setMe(me);
       var noModels = self.isEmpty(models);
