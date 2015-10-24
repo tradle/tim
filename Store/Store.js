@@ -1853,7 +1853,7 @@ var Store = Reflux.createStore({
         console.log(msg)
         meDriver.lookupObject(msg)
         .then(function(obj) {
-          return this.putInDb(obj)
+          return self.putInDb(obj)
         })
       })
     })
