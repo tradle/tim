@@ -1849,7 +1849,7 @@ var Store = Reflux.createStore({
       })
 
       meDriver.on('message', function (msg) {
-        debugger
+        // debugger
         console.log(msg)
         meDriver.lookupObject(msg)
         .then(function(obj) {
@@ -1927,17 +1927,31 @@ var Store = Reflux.createStore({
       }
     }
     // if (batch.length)
+    var self = this
     return db.batch(batch)
     .then(function() {
       list[key] = {
         key: key,
         value: val
       }
+
+      var resultList
+      if (isMessage) 
+        resultList = self.searchMessages({to: me, modelName: MESSAGE})
+        // resultList = searchMessages({to: list[obj.to.identity.toJSON()[TYPE] + '_' + obj.to[ROOT_HASH]], modelName: MESSAGE})
+      else
+        resultList = self.searchNotMessages({modelName: val[TYPE]})
       var retParams = {
-        action: isMessage ? 'addMessage' : 'addItem',
-        resource: val
+        action: isMessage ? 'messageList' : 'list',
+        list: resultList
       }
-      self.trigger(params)
+      self.trigger(retParams)
+
+      // var retParams = {
+      //   action: isMessage ? 'addMessage' : 'addItem',
+      //   resource: val
+      // }
+      // self.trigger(retParams)
     })
 
   },
