@@ -46,12 +46,13 @@ class AddNewMessage extends Component {
   }
   updateKeyboardSpace(frames) {
     // LayoutAnimation.configureNext(animations.layout.spring);
-    this.setState({keyboardSpace: frames.end.height});
+    var height = frames.endCoordinates ? frames.endCoordinates.height : frames.end.height
+    this.setState({keyboardSpace: height});
   }
 
   resetKeyboardSpace() {
     // LayoutAnimation.configureNext(animations.layout.spring);
-    this.setState({keyboardSpace: 0});
+    // this.setState({keyboardSpace: 0});
   }  
 
   componentDidMount() {
