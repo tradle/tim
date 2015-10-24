@@ -1815,8 +1815,8 @@ var Store = Reflux.createStore({
       .on('data', function (data) {
         meDriver.lookupObject(data)
         .then(function (obj) {
-
-          return self.putInDb(obj)
+          // return 
+          self.putInDb(obj)
           // console.log('msg', obj)
         })
       })
@@ -1825,7 +1825,8 @@ var Store = Reflux.createStore({
         console.log('unchained', obj)
         meDriver.lookupObject(obj)
         .then(function(obj) {
-          return self.putInDb(obj)
+          // return 
+          self.putInDb(obj)
         })
       })
       meDriver.on('lowbalance', function () {
@@ -1853,7 +1854,8 @@ var Store = Reflux.createStore({
         console.log(msg)
         meDriver.lookupObject(msg)
         .then(function(obj) {
-          return self.putInDb(obj, true)
+          // return 
+          self.putInDb(obj, true)
         })
       })
     })
@@ -1929,8 +1931,8 @@ var Store = Reflux.createStore({
     }
     // if (batch.length)
     var self = this
-    return db.batch(batch)
-    .then(function() {
+    // return db.batch(batch)
+    // .then(function() {
       list[key] = {
         key: key,
         value: val
@@ -1953,8 +1955,9 @@ var Store = Reflux.createStore({
       //   resource: val
       // }
       // self.trigger(retParams)
-    })
-
+    // })
+     // return db.batch(batch)
+     db.batch(batch)
   },
   loadMyResources() {
     var myId = sampleData.getMyId();
