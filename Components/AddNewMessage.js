@@ -133,7 +133,7 @@ class AddNewMessage extends Component {
   }
   showChoice() {
     var self = this;
-    UIImagePickerManager.showImagePicker({returnBase64Image: true, returnIsVertical: true, maxWidth: 375}, (doCancel, response) => {
+    UIImagePickerManager.showImagePicker({returnBase64Image: true, returnIsVertical: true}, (doCancel, response) => {
       if (!doCancel) {
         var selectedAssets = self.state.selectedAssets;
         var dataUri = 'data:image/jpeg;base64,' + response.data
