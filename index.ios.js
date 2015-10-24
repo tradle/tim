@@ -274,7 +274,9 @@ class TiMApp extends Component {
                 onread={props.onread} />
     case 17:
       return <QRCode navigator={nav}
-                content={props.content} />
+                content={props.content}
+                fullScreen={props.fullScreen}
+                dimension={props.dimension} />
     case 10:
     default: // 10
       return <ResourceList navigator={nav}
