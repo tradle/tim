@@ -359,6 +359,8 @@ var utils = {
     return val;
   },
   splitMessage(message) {
+    if (!message)
+      return []
     var lBr = message.indexOf('[');          
     var msg;
     if (lBr == -1) 
