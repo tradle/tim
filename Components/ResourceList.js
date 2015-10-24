@@ -16,6 +16,8 @@ var Reflux = require('reflux');
 var constants = require('tradle-constants');
 var Icon = require('react-native-vector-icons/Ionicons');
 var ProductChooser = require('./ProductChooser')
+var QRCodeScanner = require('./QRCodeScanner')
+var QRCode = require('./QRCode')
 // var GridList = require('./GridList');
 // var DEAL_MODEL = 'tradle.Offer';
 // var VENDOR_MODEL = 'tradle.Organization';
@@ -45,23 +47,23 @@ class ResourceList extends Component {
     };
     var isRegistration = this.props.isRegistration ||  (this.props.resource  &&  this.props.resource[constants.TYPE] === constants.TYPES.IDENTITY  &&  !this.props.resource[constants.ROOT_HASH]);
     if (isRegistration)
-      this.state.isRegistration = isRegistration;    
+      this.state.isRegistration = isRegistration;
   }
   componentWillMount() {
     StatusBarIOS.setHidden(false);
     var params = {
-      modelName: this.props.modelName, 
+      modelName: this.props.modelName,
       to: this.props.resource
     };
     if (this.props.isAggregation)
       params.isAggregation = true;
     if (this.props.sortProperty)
       params.sortProperty = this.props.sortProperty;
-    if (this.props.prop) 
+    if (this.props.prop)
       params.prop = utils.getModel(this.props.resource[constants.TYPE]).value.properties[this.props.prop.name];
-    
+
     this.state.isLoading = true;
-    Actions.list(params);    
+    Actions.list(params);
   }
   componentDidMount() {
     this.listenTo(Store, 'onListUpdate');
@@ -72,19 +74,19 @@ class ResourceList extends Component {
       return;
     var action = params.action;
     if (action === 'addItem'  ||  action === 'addMessage') {
-      var model = action === 'addMessage' 
+      var model = action === 'addMessage'
                 ? utils.getModel(this.props.modelName).value
                 : utils.getModel(params.resource[constants.TYPE]).value;
 
       this.state.isLoading = true;
       Actions.list({
-        query: this.state.filter, 
+        query: this.state.filter,
         modelName: model.id,
         to: this.props.resource,
         sortProperty: model.sort
       });
       console.log('Actions.list');
-      return;      
+      return;
     }
 
     if (action !== 'list' ||  !params.list || params.isAggregation !== this.props.isAggregation)
@@ -100,7 +102,7 @@ class ResourceList extends Component {
     var type = list[0][constants.TYPE];
     // if (type === 'tradle.Organization')
     //   return;
-    // if (type  !== this.props.modelName) 
+    // if (type  !== this.props.modelName)
     //   return;
     if (type  !== this.props.modelName) {
       var m = utils.getModel(type).value;
@@ -109,13 +111,13 @@ class ResourceList extends Component {
       // if (!params.prop  ||  !params.prop.items  ||  !params.prop.items.ref  ||  !params.prop.items.backlink)
       //   return;
       // var m = utils.getModel(params.prop.items.ref).value;
-      // if (m.properties[params.prop.items.backlink].ref !== this.props.modelName) 
+      // if (m.properties[params.prop.items.backlink].ref !== this.props.modelName)
       //   return;
     }
     // var n = Math.floor(5, list.length);
     // for (var i=0; i<n; i++) {
     //   var rnd = this.getRandomInt(1, list.length - 1);
-    //   list[rnd].online = true; 
+    //   list[rnd].online = true;
     // }
 
     this.setState({
@@ -133,7 +135,7 @@ class ResourceList extends Component {
     var model = utils.getModel(this.props.modelName);
     var isIdentity = this.props.modelName === constants.TYPES.IDENTITY;
     var isOrganization = this.props.modelName === 'tradle.Organization';
-    if (!isIdentity         &&  
+    if (!isIdentity         &&
         !isOrganization     &&
         !this.props.callback) {
       var m = utils.getModel(resource[constants.TYPE]).value;
@@ -162,7 +164,7 @@ class ResourceList extends Component {
       });
       return;
     }
-    if (this.props.prop) { 
+    if (this.props.prop) {
       if (me  &&  this.props.modelName != constants.TYPES.IDENTITY) {
         this._selectResource(resource);
         return;
@@ -173,7 +175,7 @@ class ResourceList extends Component {
           return;
         }
       }
-      else if (me[constants.ROOT_HASH] === resource[constants.ROOT_HASH]  ||  
+      else if (me[constants.ROOT_HASH] === resource[constants.ROOT_HASH]  ||
          (this.props.resource  &&  me[constants.ROOT_HASH] === this.props.resource[constants.ROOT_HASH]  && this.props.prop)) {
         this._selectResource(resource);
         return;
@@ -186,7 +188,7 @@ class ResourceList extends Component {
       component: MessageList,
       id: 11,
       passProps: {
-        resource: resource, 
+        resource: resource,
         filter: '',
         modelName: modelName,
       },
@@ -215,11 +217,11 @@ class ResourceList extends Component {
         },
         passProps: {resource: resource}
       }
-    }      
+    }
     else {
       route.title = resource.name
       if (resource.name === 'Rabobank') {
-        var routes = this.props.navigator.getCurrentRoutes();        
+        var routes = this.props.navigator.getCurrentRoutes();
         if (routes[routes.length - 1].title === 'Banks'  ||
             routes[routes.length - 1].title === 'Official Accounts') {
           var msg = {
@@ -229,8 +231,8 @@ class ResourceList extends Component {
             to: resource,
             time: new Date().getTime(),
           }
-          
-          Actions.addMessage(msg, true) 
+
+          Actions.addMessage(msg, true)
         }
       }
       else if (resource.name === 'Lloyds') {
@@ -242,7 +244,7 @@ class ResourceList extends Component {
           sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
           backButtonTitle: 'Back',
           passProps: {
-            resource: resource, 
+            resource: resource,
             returnRoute: currentRoutes[currentRoutes.length - 1],
             callback: this.props.callback
           },
@@ -257,7 +259,7 @@ class ResourceList extends Component {
             passProps: {
               model: utils.getModel('tradle.NewMessageModel').value,
               // callback: this.modelAdded.bind(this)
-            }        
+            }
           }
         });
         return;
@@ -295,8 +297,8 @@ class ResourceList extends Component {
       this.props.navigator.popToRoute(this.props.returnRoute);
       return;
     }
-    if (me                       &&  
-       !model.value.isInterface  &&  
+    if (me                       &&
+       !model.value.isInterface  &&
        (resource[constants.ROOT_HASH] === me[constants.ROOT_HASH]  ||  resource[constants.TYPE] !== constants.TYPES.IDENTITY)) {
       var self = this ;
       route.rightButtonTitle = 'Edit';
@@ -363,8 +365,8 @@ class ResourceList extends Component {
 
   onSearchChange(filter) {
     Actions.list({
-      query: filter, 
-      modelName: this.props.modelName, 
+      query: filter,
+      modelName: this.props.modelName,
       to: this.props.resource
     });
   }
@@ -372,8 +374,8 @@ class ResourceList extends Component {
   onSearchChange1(event) {
     var filter = event.nativeEvent.text.toLowerCase();
     Actions.list({
-      query: filter, 
-      modelName: this.props.modelName, 
+      query: filter,
+      modelName: this.props.modelName,
       to: this.props.resource
     });
   }
@@ -403,12 +405,12 @@ class ResourceList extends Component {
     if (model.subClassOf  &&  model.subClassOf === 'tradle.FinancialProduct')
       return <View />;
 
-    
+
     return (
       <View style={styles.footer}>
         <TouchableHighlight underlayColor='transparent' onPress={this.addNew.bind(this)}>
           <View>
-            <Icon name='plus'  size={30}  color='#999999' style={styles.icon} /> 
+            <Icon name='plus'  size={30}  color='#999999' style={styles.icon} />
           </View>
         </TouchableHighlight>
       </View>
@@ -416,16 +418,16 @@ class ResourceList extends Component {
   }
         // <TouchableHighlight underlayColor='transparent' onPress={this.showBanks.bind(this)}>
         //   <View>
-        //     <Image source={require('image!banking')} style={styles.image} /> 
+        //     <Image source={require('image!banking')} style={styles.image} />
         //   </View>
         // </TouchableHighlight>
       // <View>
         //   <TouchableHighlight underlayColor='transparent' onPress={this.showDeals.bind(this, DEAL_MODEL)}>
         //     <View>
-        //       <Icon name='ion|nuclear'  size={30}  color='#999999'  style={styles.icon} /> 
+        //       <Icon name='ion|nuclear'  size={30}  color='#999999'  style={styles.icon} />
         //     </View>
         //   </TouchableHighlight>
-        // </View>  
+        // </View>
   // showDeals(modelName) {
   //   var model = utils.getModel(modelName).value;
   //   // var model = utils.getModel(this.props.modelName).value;
@@ -451,7 +453,7 @@ class ResourceList extends Component {
       passProps: {
         modelName: 'tradle.Organization'
       }
-    });    
+    });
   }
   addNew() {
     var model = utils.getModel(this.props.modelName).value;
@@ -466,11 +468,11 @@ class ResourceList extends Component {
           if (utils.getModel(props[p].ref).value.isInterface  &&  model.interfaces  &&  model.interfaces.indexOf(props[p].ref) !== -1)
             isBacklink = true;
         }
-        if (isBacklink) {  
+        if (isBacklink) {
           r = {};
           r[constants.TYPE] = this.props.modelName;
           r[p] = { id: this.props.resource[constants.TYPE] + '_' + this.props.resource[constants.ROOT_HASH] };
-        
+
           if (this.props.resource.relatedTo  &&  props.relatedTo) // HACK for now for main container
             r.relatedTo = this.props.resource.relatedTo;
         }
@@ -487,14 +489,14 @@ class ResourceList extends Component {
         model: model,
         resource: r,
         callback: () => Actions.list({
-          modelName: this.props.modelName, 
+          modelName: this.props.modelName,
           to: this.props.resource
         }),
-      }      
+      }
     })
   }
   render() {
-    if (this.state.isLoading) 
+    if (this.state.isLoading)
       return <View/>
     var content;
     var model = utils.getModel(this.props.modelName).value;
@@ -502,10 +504,10 @@ class ResourceList extends Component {
       content =  <NoResources
                   filter={this.state.filter}
                   model={model}
-                  isLoading={this.state.isLoading}/> 
+                  isLoading={this.state.isLoading}/>
     else {
-      var model = utils.getModel(this.props.modelName).value; 
-      content = <ListView 
+      var model = utils.getModel(this.props.modelName).value;
+      content = <ListView
           dataSource={this.state.dataSource}
           renderRow={this.renderRow.bind(this)}
           renderHeader={this.renderHeader.bind(this)}
@@ -518,11 +520,11 @@ class ResourceList extends Component {
     var Footer = this.renderFooter();
     var header = this.renderHeader();
     return (
-      <View style={styles.container}> 
+      <View style={styles.container}>
         <SearchBar
           onChangeText={this.onSearchChange.bind(this)}
           placeholder='Search'
-          showsCancelButton={false}          
+          showsCancelButton={false}
           hideBackground={true}
           />
         <View style={styles.separator} />
@@ -534,10 +536,31 @@ class ResourceList extends Component {
   renderHeader() {
     return (this.props.modelName === constants.TYPES.IDENTITY)
           ? <View style={{padding: 5, backgroundColor: '#D7E9F3'}}>
+              <TouchableHighlight underlayColor='transparent'
+                onPress={this.showQRCode.bind(this, 'Contact Info', 'blah my public key')}>
+                <View style={styles.row}>
+                  <View>
+                    <Icon name='ios-barcode'  size={30}  color='#999999' style={styles.icon} />
+                  </View>
+                  <View style={styles.textContainer} key={this.props.key + '3'}>
+                    <Text style={styles.resourceTitle}>My QR Code</Text>
+                  </View>
+                </View>
+              </TouchableHighlight>
+              <TouchableHighlight underlayColor='transparent' onPress={this.scanQRCode.bind(this)}>
+                <View style={styles.row}>
+                  <View>
+                    <Icon name='qr-scanner'  size={30}  color='#999999' style={styles.icon} />
+                  </View>
+                  <View style={styles.textContainer} key={this.props.key + '3'}>
+                    <Text style={styles.resourceTitle}>Scan new contact</Text>
+                  </View>
+                </View>
+              </TouchableHighlight>
               <TouchableHighlight underlayColor='transparent' onPress={this.showBanks.bind(this)}>
                 <View style={styles.row}>
                   <View>
-                    <Image source={require('image!banking')} style={styles.cellImage} /> 
+                    <Image source={require('image!banking')} style={styles.cellImage} />
                   </View>
                   <View style={styles.textContainer} key={this.props.key + '2'}>
                     <Text style={styles.resourceTitle}>Official Accounts</Text>
@@ -549,6 +572,35 @@ class ResourceList extends Component {
 
   }
 
+  showQRCode(purpose, content) {
+    this.props.navigator.push({
+      title: 'QR Code: ' + purpose,
+      id: 17,
+      component: QRCode,
+      titleTextColor: '#eeeeee',
+      backButtonTitle: 'Back',
+      passProps: {
+        fullScreen: true,
+        content: content
+      }
+    })
+  }
+
+  scanQRCode() {
+    this.props.navigator.push({
+      title: 'Scan QR Code of contact',
+      id: 16,
+      component: QRCodeScanner,
+      titleTextColor: '#eeeeee',
+      backButtonTitle: 'Cancel',
+      // rightButtonTitle: 'ion|ios-reverse-camera',
+      passProps: {
+        onread: function (result) {
+          console.log(result)
+        }
+      }
+    })
+  }
 }
 reactMixin(ResourceList.prototype, Reflux.ListenerMixin);
 
@@ -582,13 +634,13 @@ var styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'nowrap',
     justifyContent: 'space-between',
-    height: 45, 
-    paddingTop: 5, 
-    paddingHorizontal: 10, 
-    backgroundColor: '#eeeeee', 
-    borderBottomColor: '#eeeeee', 
-    borderRightColor: '#eeeeee', 
-    borderLeftColor: '#eeeeee', 
+    height: 45,
+    paddingTop: 5,
+    paddingHorizontal: 10,
+    backgroundColor: '#eeeeee',
+    borderBottomColor: '#eeeeee',
+    borderRightColor: '#eeeeee',
+    borderLeftColor: '#eeeeee',
     borderWidth: 1,
     borderTopColor: '#cccccc',
   },
