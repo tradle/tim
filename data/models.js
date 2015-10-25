@@ -91,13 +91,13 @@ var voc = [{
         backlink: 'from'
       }
     },
-    myFinancialProducts: {
+    myProducts: {
       type: 'array',
       allowRoles: 'me',
       items: {
         readOnly: true,
         ref: 'tradle.FinancialProduct',
-        backlink: 'identity'        
+        backlink: 'from'        
       }
     },
     myVerifications: {
@@ -1202,6 +1202,7 @@ var voc = [{
   id: 'tradle.CurrentAccounts',
   type: 'tradle.Model',
   title: 'Current Accounts',
+  interfaces: ['tradle.Message'],
   subClassOf: 'tradle.FinancialProduct',
   properties: { 
     '_t': {
@@ -1213,7 +1214,7 @@ var voc = [{
       readOnly: true,
       displayName: true
     },
-    identity: {
+    from: {
       type: 'object',
       readOnly: true,
       ref: 'tradle.Identity'
@@ -1448,13 +1449,14 @@ var voc = [{
 {
   id: 'tradle.FinancialProduct',
   type: 'tradle.Model',
+  interfaces: ['tradle.Message'],
   title: 'Financial Product',
   properties: { 
     '_t': {
       'type': 'string',
       'readOnly': true
     },
-    identity: {
+    from: {
       type: 'object',
       readOnly: true,
       ref: 'tradle.Identity'
@@ -1470,13 +1472,14 @@ var voc = [{
   id: 'tradle.Loans',
   title: 'Loans',
   type: 'tradle.Model',
+  interfaces: ['tradle.Message'],
   subClassOf: 'tradle.FinancialProduct',
   properties: { 
     '_t': {
       'type': 'string',
       'readOnly': true
     },
-    identity: {
+    from: {
       type: 'object',
       readOnly: true,
       ref: 'tradle.Identity'
@@ -1493,12 +1496,13 @@ var voc = [{
   title: 'Home Insurance',
   type: 'tradle.Model',
   subClassOf: 'tradle.FinancialProduct',
+  interfaces: ['tradle.Message'],
   properties: { 
     '_t': {
       'type': 'string',
       'readOnly': true
     },
-    identity: {
+    from: {
       type: 'object',
       readOnly: true,
       ref: 'tradle.Identity'
@@ -1514,13 +1518,14 @@ var voc = [{
   id: 'tradle.MotorInsurance',
   title: 'Motor Insurance',
   type: 'tradle.Model',
+  interfaces: ['tradle.Message'],
   subClassOf: 'tradle.FinancialProduct',
   properties: { 
     '_t': {
       'type': 'string',
       'readOnly': true
     },
-    identity: {
+    from: {
       type: 'object',
       readOnly: true,
       ref: 'tradle.Identity'
@@ -1535,6 +1540,7 @@ var voc = [{
 {
   id: 'tradle.Mortgages',
   title: 'Mortgages',
+  interfaces: ['tradle.Message'],
   type: 'tradle.Model',
   subClassOf: 'tradle.FinancialProduct',
   properties: { 
@@ -1542,7 +1548,7 @@ var voc = [{
       'type': 'string',
       'readOnly': true
     },
-    identity: {
+    from: {
       type: 'object',
       readOnly: true,
       ref: 'tradle.Identity'
@@ -1557,6 +1563,7 @@ var voc = [{
 {
   id: 'tradle.Investments',
   title: 'Investments',
+  interfaces: ['tradle.Message'],
   type: 'tradle.Model',
   subClassOf: 'tradle.FinancialProduct',
   properties: { 
@@ -1564,7 +1571,7 @@ var voc = [{
       'type': 'string',
       'readOnly': true
     },
-    identity: {
+    from: {
       type: 'object',
       readOnly: true,
       ref: 'tradle.Identity'
@@ -1578,6 +1585,7 @@ var voc = [{
 },
 {
   id: 'tradle.LifeInsurance',
+  interfaces: ['tradle.Message'],
   title: 'Life Insurance',
   type: 'tradle.Model',
   subClassOf: 'tradle.FinancialProduct',
@@ -1586,7 +1594,7 @@ var voc = [{
       'type': 'string',
       'readOnly': true
     },
-    identity: {
+    from: {
       type: 'object',
       readOnly: true,
       ref: 'tradle.Identity'
