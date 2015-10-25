@@ -86,6 +86,7 @@ var utils = {
     var onSubmitEditing = params.onSubmitEditing;
     var onEndEditing = params.onEndEditing;
     var onChange = params.onChange;
+    var myCustomTemplate = params.template
     var options = {};
     options.fields = {};
  
@@ -162,8 +163,7 @@ var utils = {
         label = utils.makeLabel(p);
       options.fields[p] = {
         error: 'Insert a valid ' + label,
-        bufferDelay: 20 // to eliminate missed keystrokes
-
+        bufferDelay: 20, // to eliminate missed keystrokes
       }
       if (props[p].description) 
         options.fields[p].help = props[p].description;
@@ -251,6 +251,12 @@ var utils = {
         }
 
         options.fields[p].onFocus = chooser.bind({}, props[p], p);
+        options.fields[p].template = myCustomTemplate.bind({}, {
+            label: label, 
+            prop:  p,
+            chooser: chooser.bind({}, props[p], p)
+          })
+
         options.fields[p].nullOption = {value: '', label: 'Choose your ' + utils.makeLabel(p)};
       }
       
