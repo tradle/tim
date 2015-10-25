@@ -65,6 +65,7 @@
 // EmploymentVerification - employer 
 // SalaryVerification - latest pay stub
 var identities = [
+/*
 {
   _t: 'tradle.SecurityCode',
   _z: '04e21cf6dc67f9c5430221031b433e1903ca5975dfd7338f338146a99202c86b',
@@ -897,6 +898,7 @@ var identities = [
     }
   ]
 },
+*/
 
 {
   _t: 'tradle.Organization',
