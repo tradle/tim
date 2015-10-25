@@ -1,4 +1,5 @@
-[{
+[
+{
   "firstName": "Ellen",
   "_t": "tradle.Identity",
   "_z": "3105082c925581b5681daefeac4038c86e83f5cbe64ad82784fdee939f641b43",
@@ -380,5 +381,52 @@
       "priv": "AAAAAACA0QRkdzY0PL6TjUCFF37q7o0XqdR0IqsihRbGQknLR6kppCFqlChh0lx8unzi70dMw56SR59PRmAyIJLyeTUbXoQCAE/rxy0rDDSzXlz7RyWfxveY8VXAR1JbzGo9zPv1weGRi8nrQ0krWj+EnYFOJrPcx3vJaw0tHvU7o1QZo5kAAAAU8WWUx94K/pkONyFgyp0LCt8FItEAAACAMxvuz6uRjQ5Hz4BRIOJ9Fz8kvxZUXR4TGCPpiP6dXrGaUPEeYwjvoT6Ahnhz1KR4Bbfv7yttORM4vi92Oxr91LNHyN49a1BftqE7N3m2RlCWRaEj+l5pQXsBDDikTWt4z1r/AqGTGQG4zod/pfqnVg/EiKmb+03CGjT9FYPv5pcAAACARIlpP2mJQpykc8X8gFTnAqeCk/iUON2LCAJo23RRaChyno9iWmtM38cvZEBatNDjelmWnR0BjiwGjPmmBaS7Ttw8Zh5xEcBM6SuJwvvZmSUDMCoVI4j0aUti6xTxQjvlc5Aax34XQdBfA45/2KVqsmsI3ynCgsiSBV9NhYgLebYAAAAUFh4Nn6ItKAVvpYUT7VTRZ90meZ4="
     }
   ]
+},
+/*
+{
+  "_t": "tradle.Identity",
+  "_z": "f6ed60c0307229d79c1f3b5213bcd9c64428c0813ec4121cf922277159a0c387",
+  "v": "0.3",
+  "_r": "88f89438674f51e10014360e1d28989641ecea0c",
+  "_c": "88f89438674f51e10014360e1d28989641ecea0c",
+  "time": 1445804799991,
+  "firstName": "Ellena",
+  "pubkeys": [
+    {
+      "fingerprint": "mjhfRDoGpqNc3pyomJmjfSfKQCLNkdMWsY",
+      "networkName": "testnet",
+      "purpose": "payment",
+      "type": "bitcoin",
+      "value": "03b2c3250fe55265cbc7a2d1dd2ea9ff65099323b02160b08e855cf0984db89ffb"
+    },
+    {
+      "fingerprint": "mzVLWQMfvavh8anmKCEusBLyR3sWANkTWC",
+      "networkName": "testnet",
+      "purpose": "messaging",
+      "type": "bitcoin",
+      "value": "021650be5a752cb13d53659b37437889749e8c0311bfc1344cb3fff997fc1067c9"
+    },
+    {
+      "curve": "secp256k1",
+      "fingerprint": "d30ada69c705f763a5611afafcd8c8f0b57536149e107711cee5029290154b87",
+      "purpose": "sign",
+      "type": "ec",
+      "value": "02b3d97671206c92f705a4d4834c1e968817017e9ddae1d7d471e0960e935e91cf"
+    },
+    {
+      "curve": "secp256k1",
+      "fingerprint": "309dc528f7071f13f4f3c5b8cb1a704bac53730ae10406be2acd586bfba3fdbf",
+      "purpose": "update",
+      "type": "ec",
+      "value": "025e8664a9a363bbdcd3c0e205c8fc88134b462cab920ced8c65b0c14ac55d2497"
+    },
+    {
+      "fingerprint": "98af5f2a9ec81f45d58c6f5356ccec1580a4cb89",
+      "purpose": "sign",
+      "type": "dsa",
+      "value": "AAAAAACAiJRZaKo7maoAu4Z2iE1aw1kcvooQVg9FRjwf6wsXT3VFGC8ghXUvgOj6gPpBHPNYWUFDjNzPPUw1sN9kkWmUtNG1QiXt0WPxhcX8+9w7ZrOEsAuMdBPMmAnN1VsGH8JDLiFvybbiG4Fn6Tv2MMJ6M74eWAXNvwA4jLfQpG9cPasAAAAU/VunfQIfuwQo002HuaVjybAC5ukAAACAQWJFrgoWNeWqAPpy7Uka6yov2LpoOB/5dDxaNyyNAHNDToewzefCokdWzxRXBlgKASpmFDlxV0ENQlhSaxWD6NUkdp/LeFNDNrQlgL6X1bNWUO+eH+oe0MB8ir255RzcdhAvIRD26Tu5kxejkm5ISAL0kUT7CxewPqqKKOY1CScAAACAHeTKv+j8YbRJjabm4fvSOX5bCBBWX2/ZWRrL8VVlCRNJ2WN3smOo52EWy98+w2//wCDM4uI8k0LX4ZynqhY4r50M/lFNk4OrlXue2LVDN4vilAIUFg5yTlNRqaDEqPL13UVPLkDNeFxVUqndbdNjLLIW4udZqfJ2iJUd2M2kMFU="
+    }
+  ],
 }
+*/
 ]
