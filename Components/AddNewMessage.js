@@ -52,7 +52,7 @@ class AddNewMessage extends Component {
 
   resetKeyboardSpace() {
     // LayoutAnimation.configureNext(animations.layout.spring);
-    // this.setState({keyboardSpace: 0});
+    this.setState({keyboardSpace: 0});
   }  
 
   componentDidMount() {
@@ -288,32 +288,32 @@ class AddNewMessage extends Component {
   }
 }
 reactMixin(AddNewMessage.prototype, Reflux.ListenerMixin);
-var animations = {
-  layout: {
-    spring: {
-      duration: 400,
-      create: {
-        duration: 300,
-        type: LayoutAnimation.Types.easeInEaseOut,
-        property: LayoutAnimation.Properties.opacity,
-      },
-      update: {
-        type: LayoutAnimation.Types.spring,
-        springDamping: 1,
-      },
-    },
-    easeInEaseOut: {
-      duration: 400,
-      create: {
-        type: LayoutAnimation.Types.easeInEaseOut,
-        property: LayoutAnimation.Properties.scaleXY,
-      },
-      update: {
-        type: LayoutAnimation.Types.easeInEaseOut,
-      },
-    },
-  },
-};
+// var animations = {
+//   layout: {
+//     spring: {
+//       duration: 400,
+//       create: {
+//         duration: 300,
+//         type: LayoutAnimation.Types.easeInEaseOut,
+//         property: LayoutAnimation.Properties.opacity,
+//       },
+//       update: {
+//         type: LayoutAnimation.Types.spring,
+//         springDamping: 1,
+//       },
+//     },
+//     easeInEaseOut: {
+//       duration: 400,
+//       create: {
+//         type: LayoutAnimation.Types.easeInEaseOut,
+//         property: LayoutAnimation.Properties.scaleXY,
+//       },
+//       update: {
+//         type: LayoutAnimation.Types.easeInEaseOut,
+//       },
+//     },
+//   },
+// };
 var styles = StyleSheet.create({
   searchBar: {
     flex: 4,
