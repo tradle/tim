@@ -15,9 +15,12 @@ var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var constants = require('tradle-constants');
 var Icon = require('react-native-vector-icons/Ionicons');
+var FontAwesome = require('react-native-vector-icons/FontAwesome')
 var ProductChooser = require('./ProductChooser')
 var QRCodeScanner = require('./QRCodeScanner')
 var QRCode = require('./QRCode')
+var buttonStyles = require('../styles/buttonStyles');
+
 // var GridList = require('./GridList');
 // var DEAL_MODEL = 'tradle.Offer';
 // var VENDOR_MODEL = 'tradle.Organization';
@@ -403,12 +406,43 @@ class ResourceList extends Component {
       return <View />;
     var model = utils.getModel(this.props.modelName).value;
     if (model.subClassOf  &&  model.subClassOf === 'tradle.FinancialProduct')
-      return <View />;
-
+      return <View />
+    // var qrInfo = (model.id === constants.TYPES.IDENTITY) 
+    //            ? <View style={styles.row}>
+    //                <TouchableHighlight underlayColor='transparent'
+    //                   onPress={this.showQRCode.bind(this, 'Contact Info', me[constants.ROOT_HASH])}>
+    //                 <View style={{alignSelf: 'center'}}>
+    //                   <View style={{marginTop: -12}}>
+    //                     <Icon name='ios-barcode'  size={30}  color='#999999' style={styles.icon} />
+    //                   </View>
+    //                   <View style={{marginTop: -5}}>
+    //                     <Text style={[buttonStyles.text, {color:'#999999'}]}>My QR Code</Text>
+    //                   </View>
+    //                 </View>
+    //               </TouchableHighlight>
+    //               <TouchableHighlight underlayColor='transparent' onPress={this.scanQRCode.bind(this)}>
+    //                 <View style={styles.row}>
+    //                   <View style={{marginTop: -5}}>
+    //                     <Text style={styles.resourceTitle}>Scan new contact</Text>
+    //                   </View>
+    //                   <View style={{marginTop: -12}}>
+    //                     <Icon name='qr-scanner'  size={30}  color='#999999' style={styles.icon} />
+    //                   </View>
+    //                 </View>
+    //               </TouchableHighlight>
+    //             </View> 
+    //           : <View />  
 
     return (
+      // <View style={styles.footer}>
+      //   <TouchableHighlight underlayColor='transparent' onPress={this.addNew.bind(this)}>
+      //     <View>
+      //       <Icon name='plus'  size={30}  color='#999999' style={styles.icon} />
+      //     </View>
+      //   </TouchableHighlight>
+      // </View>
       <View style={styles.footer}>
-        <TouchableHighlight underlayColor='transparent' onPress={this.addNew.bind(this)}>
+        <TouchableHighlight underlayColor='transparent' onPress={this.scanQRCode.bind(this)}>
           <View>
             <Icon name='plus'  size={30}  color='#999999' style={styles.icon} />
           </View>
@@ -533,30 +567,10 @@ class ResourceList extends Component {
       </View>
     );
   }
+
   renderHeader() {
     return (this.props.modelName === constants.TYPES.IDENTITY)
           ? <View style={{padding: 5, backgroundColor: '#D7E9F3'}}>
-              <TouchableHighlight underlayColor='transparent'
-                onPress={this.showQRCode.bind(this, 'Contact Info', 'blah my public key')}>
-                <View style={styles.row}>
-                  <View>
-                    <Icon name='ios-barcode'  size={30}  color='#999999' style={styles.icon} />
-                  </View>
-                  <View style={styles.textContainer} key={this.props.key + '3'}>
-                    <Text style={styles.resourceTitle}>My QR Code</Text>
-                  </View>
-                </View>
-              </TouchableHighlight>
-              <TouchableHighlight underlayColor='transparent' onPress={this.scanQRCode.bind(this)}>
-                <View style={styles.row}>
-                  <View>
-                    <Icon name='qr-scanner'  size={30}  color='#999999' style={styles.icon} />
-                  </View>
-                  <View style={styles.textContainer} key={this.props.key + '3'}>
-                    <Text style={styles.resourceTitle}>Scan new contact</Text>
-                  </View>
-                </View>
-              </TouchableHighlight>
               <TouchableHighlight underlayColor='transparent' onPress={this.showBanks.bind(this)}>
                 <View style={styles.row}>
                   <View>
@@ -591,7 +605,7 @@ class ResourceList extends Component {
       title: 'Scan QR Code of contact',
       id: 16,
       component: QRCodeScanner,
-      titleTextColor: '#eeeeee',
+      titleTintColor: '#eeeeee',
       backButtonTitle: 'Cancel',
       // rightButtonTitle: 'ion|ios-reverse-camera',
       passProps: {
