@@ -154,6 +154,10 @@ class TimHome extends Component {
     utils.setModels(null);
     Actions.reloadDB();
   } 
+  onReloadModels() {
+    utils.setModels(null)
+    Actions.reloadModels()
+  }
   render() {
     var url = LinkingIOS.popInitialURL();
   	var spinner = this.state.isLoading 
@@ -217,6 +221,12 @@ class TimHome extends Component {
                 underlayColor='transparent' onPress={this.onReloadDBPressed.bind(this)}>
               <Text style={styles.text}>
                 Reload DB
+              </Text>
+            </TouchableHighlight>
+            <TouchableHighlight 
+                underlayColor='transparent' onPress={this.onReloadModels.bind(this)}>
+              <Text style={styles.text}>
+                Reload Models
               </Text>
             </TouchableHighlight>
           </View>
