@@ -65,7 +65,7 @@ class ProductChooser extends Component {
     var me = utils.getMe()
     page.resource = {
       _t: resource.id,
-      identity: me,
+      from: me,
       accountWith: this.props.resource,
       productType: model.value.title
     }
