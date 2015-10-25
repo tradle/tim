@@ -5,7 +5,7 @@ var {
 } = React
 
 var QRCode = require('react-native-barcode/QR/QRCode')
-var DEFAULT_DIM = 250
+var DEFAULT_DIM = 370
 
 class QRCodeView extends React.Component {
   constructor(props) {
