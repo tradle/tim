@@ -56,7 +56,7 @@
     "react-native-search-bar": "^2.2.0",
     "react-native-touch-id": "^1.2.1",
     "react-native-udp": "^1.0.3",
-    "react-native-vector-icons": "^0.6.8",
+    "react-native-vector-icons": "^0.8.3",
     "readable-stream": "~1.0.33-1",
     "reflux": "^0.2.12",
     "rimraf": "^2.4.3",
