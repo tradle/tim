@@ -100,9 +100,11 @@ class ResourceView extends Component {
       <ScrollView  ref='this' style={styles.container}>
         <View style={[styles.photoBG, {marginTop: -20}]}>
           <PhotoView resource={resource} />
-          <QRCode inline={true} content={resource[constants.ROOT_HASH]} dimension={100} />
         </View>
         {actionPanel}
+        <View style={styles.photoBG}>
+                  <QRCode inline={true} content={resource[constants.ROOT_HASH]} dimension={370} />
+        </View>
         <PhotoList photos={photos} resource={this.props.resource} navigator={this.props.navigator} isView={true} numberInRow={photos.length > 4 ? 5 : photos.length} />
         <ShowPropertiesView resource={resource}
                             showItems={this.showResources.bind(this)}
