@@ -366,7 +366,7 @@ class NewResource extends Component {
         chooser: this.chooser.bind(this),
         model: model,
         items: arrays,
-        onSubmitEditing: this.onSavePressed.bind(this),
+        // onSubmitEditing: this.onSavePressed.bind(this),
         onEndEditing: this.onEndEditing.bind(this),
         onChange: this.onChange.bind(this),
         template: this.myCustomTemplate.bind(this)
@@ -422,7 +422,7 @@ class NewResource extends Component {
     var style = {marginTop: 64};
     options.auto = 'placeholders';
     options.tintColor = 'red'
-    var photoStyle = isMessage && !isFinancialProduct ? {marginTop: -35} : styles.photoBG; 
+    var photoStyle = /*isMessage && !isFinancialProduct ? {marginTop: -35} :*/ styles.photoBG; 
     // <FromToView resource={resource} model={meta} navigator={this.props.navigator} />
     var content = 
       <ScrollView style={style}>
