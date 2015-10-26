@@ -65,7 +65,7 @@
 // EmploymentVerification - employer 
 // SalaryVerification - latest pay stub
 var identities = [
-/*
+
 {
   _t: 'tradle.SecurityCode',
   _z: '04e21cf6dc67f9c5430221031b433e1903ca5975dfd7338f338146a99202c86b',
@@ -85,25 +85,25 @@ var identities = [
   }
 },
 
-{
-  _t: 'tradle.SecurityCode',
-  _z: '14e21cf6dc67f9c5430221031b433e1903ca5975dfd7338f338146a99202c86b',
-  code: '1abc',
-  organization: {
-    id: 'tradle.Organization_96e460ca282d62e41d4b59c85b212d102d7a5a6e',
-    title: 'Lloyds'
-  }
-},
-{
-  _t: 'tradle.SecurityCode',
-  _z: '14e21cf6dc67f9c5430221031b433e1903ca5975dfd7338f338146a99202c87b',
-  code: '2abc',
-  organization: {
-    id: 'tradle.Organization_96e460ca282d62e41d4b59c85b212d102d7a5a6e',
-    title: 'Lloyds'
-  }
-},
-
+// {
+//   _t: 'tradle.SecurityCode',
+//   _z: '14e21cf6dc67f9c5430221031b433e1903ca5975dfd7338f338146a99202c86b',
+//   code: '1abc',
+//   organization: {
+//     id: 'tradle.Organization_96e460ca282d62e41d4b59c85b212d102d7a5a6e',
+//     title: 'Lloyds'
+//   }
+// },
+// {
+//   _t: 'tradle.SecurityCode',
+//   _z: '14e21cf6dc67f9c5430221031b433e1903ca5975dfd7338f338146a99202c87b',
+//   code: '2abc',
+//   organization: {
+//     id: 'tradle.Organization_96e460ca282d62e41d4b59c85b212d102d7a5a6e',
+//     title: 'Lloyds'
+//   }
+// },
+/*
 {
   _t:'tradle.Identity',
   'firstName':'Kate',
