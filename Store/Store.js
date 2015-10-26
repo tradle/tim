@@ -1632,21 +1632,19 @@ var Store = Reflux.createStore({
           }
         })
 
-        if (!mePub) {
           // var org = list[utils.getId(me.organization)].value
-          var secCodes = this.searchNotMessages({modelName: 'tradle.SecurityCode'})
-          for (var i=0; i<secCodes.length; i++) {
-            if (secCodes[i].code === me.securityCode) {
-              me.organization = secCodes[i].organization
-              if (employees[me.securityCode])
-                employees[me.securityCode] = me
-              break
-            }
+        var secCodes = this.searchNotMessages({modelName: 'tradle.SecurityCode'})
+        for (var i=0; i<secCodes.length; i++) {
+          if (secCodes[i].code === me.securityCode) {
+            me.organization = secCodes[i].organization
+            if (employees[me.securityCode])
+              employees[me.securityCode] = me
+            break
           }
-          if (!me.organization) {
-            this.trigger({action:'addItem', resource: me, error: 'The code was not registered with'})
-            return Q.reject('The code was not registered with')
-          }
+        }
+        if (!me.organization) {
+          this.trigger({action:'addItem', resource: me, error: 'The code was not registered with'})
+          return Q.reject('The code was not registered with')
         }
       }
       if (!mePub) {
@@ -1860,7 +1858,7 @@ var Store = Reflux.createStore({
         // debugger
         console.log(msg)
         meDriver.lookupObject(msg)
-        .then(function(obj) {
+        .done(function(obj) {
           // return
           self.putInDb(obj, true)
         })
@@ -1927,7 +1925,7 @@ var Store = Reflux.createStore({
         if (!val.time)
           val.time = obj.timestamp
         var dn = val.message || utils.getDisplayName(val, model.properties);
-        to.lastMessage = (obj.from[ROOT_HASH] === obj.me[ROOT_HASH]) ? 'You: ' + dn : dn;
+        to.lastMessage = (obj.from[ROOT_HASH] === me[ROOT_HASH]) ? 'You: ' + dn : dn;
         to.lastMessageTime = val.time;
         from.lastMessage = val.message;
         from.lastMessageTime = val.time;
