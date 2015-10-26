@@ -223,7 +223,7 @@ class ResourceList extends Component {
     }
     else {
       route.title = resource.name
-      if (resource.name === 'Rabobank') {
+      if (resource.name === 'Rabobank'  &&  (!me.organization  ||  me.organization.name !== 'Rabobank')) {
         var routes = this.props.navigator.getCurrentRoutes();
         if (routes[routes.length - 1].title === 'Banks'  ||
             routes[routes.length - 1].title === 'Official Accounts') {
