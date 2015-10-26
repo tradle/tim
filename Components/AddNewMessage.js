@@ -339,8 +339,8 @@ var styles = StyleSheet.create({
     height: 27,
     borderRadius: 13,
     borderColor: '#aaaaaa',
-    paddingLeft: 7,
-    borderWidth: 2,
+    paddingLeft: 9,
+    borderWidth: 1.5,
   },
   addNew: {
     flexDirection: 'row', 
