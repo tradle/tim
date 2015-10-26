@@ -534,11 +534,23 @@ class ResourceList extends Component {
       return <View/>
     var content;
     var model = utils.getModel(this.props.modelName).value;
-    if (this.state.dataSource.getRowCount() === 0)
-      content =  <NoResources
-                  filter={this.state.filter}
-                  model={model}
-                  isLoading={this.state.isLoading}/>
+    if (this.state.dataSource.getRowCount() === 0) {
+      if (this.props.modelName === constants.TYPES.IDENTITY) {
+        content = <ListView
+            dataSource={this.state.dataSource}
+            renderRow={this.renderRow.bind(this)}
+            renderHeader={this.renderHeader.bind(this)}
+            automaticallyAdjustContentInsets={false}
+            keyboardDismissMode='on-drag'
+            keyboardShouldPersistTaps={true}
+            showsVerticalScrollIndicator={false} />;
+      }
+      else
+        content = <NoResources
+                    filter={this.state.filter}
+                    model={model}
+                    isLoading={this.state.isLoading}/>
+    }
     else {
       var model = utils.getModel(this.props.modelName).value;
       content = <ListView
