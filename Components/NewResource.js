@@ -422,7 +422,7 @@ class NewResource extends Component {
     var style = {marginTop: 64};
     options.auto = 'placeholders';
     options.tintColor = 'red'
-    var photoStyle = isMessage && !isFinancialProduct ? {marginTop: -45} : styles.photoBG; 
+    var photoStyle = isMessage && !isFinancialProduct ? {marginTop: -35} : styles.photoBG; 
     // <FromToView resource={resource} model={meta} navigator={this.props.navigator} />
     var content = 
       <ScrollView style={style}>
@@ -521,8 +521,8 @@ class NewResource extends Component {
       marginBottom: 5, 
       borderRadius: 4 
     };
-    var labelStyle = {color: '#cccccc', fontSize: 17};
-    var textStyle = {color: '#000000', fontSize: 17};
+    var labelStyle = {color: '#cccccc', fontSize: 14};
+    var textStyle = {color: '#000000', fontSize: 14};
     var resource = this.props.resource
     var label, style
 
@@ -539,7 +539,7 @@ class NewResource extends Component {
       <TouchableHighlight underlayColor='transparent' onPress={params.chooser}>
         <View style={containerStyle}>
           <Text style={style}>{label}</Text>
-          <Icon name='ios-arrow-down'  size={20}  color='#96415A'  style={styles.icon1}/>
+          <Icon name='ios-arrow-down'  size={15}  color='#96415A'  style={styles.icon1}/>
         </View>
       </TouchableHighlight>
     );
@@ -626,8 +626,8 @@ var styles = StyleSheet.create({
     alignItems: 'center',
   },
   icon1: {
-    width: 20,
-    height: 20,
+    width: 15,
+    height: 15,
     marginRight: -5
   },
   icon: {
