@@ -1437,7 +1437,7 @@ var Store = Reflux.createStore({
       }
       else {
         myIdentity.forEach(function(r) {
-          if (r.securityCode === me.securityCode  &&  me.firstName === myIdentity[i].firstName) {
+          if (r.securityCode === me.securityCode  &&  me.firstName === r.firstName) {
             mePub = r.pubkeys  // hardcoded on device
             mePriv = r.privkeys
             me[NONCE] = r[NONCE]
