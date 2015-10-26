@@ -109,10 +109,10 @@ var Store = Reflux.createStore({
     
     // this.ready = Q.ninvoke(AsyncStorage, 'clear')
     // .then(this.loadMyResources.bind(this))
-    console.time('loadMyResources')
+    // console.time('loadMyResources')
     this.ready = this.loadMyResources()
     .then(function() {
-      console.timeEnd('loadMyResources')
+      // console.timeEnd('loadMyResources')
       if (!utils.isEmpty(list))
         isLoaded = true;
       if (me) 
@@ -123,10 +123,10 @@ var Store = Reflux.createStore({
     });
 
     function promiseMe () {
-    console.time('getDriver')
+    // console.time('getDriver')
       return self.getDriver(me)
         .then(function () {
-    console.timeEnd('getDriver')
+    // console.timeEnd('getDriver')
           self.loadResources()
           self.initIdentity(me)
         })
@@ -177,6 +177,7 @@ var Store = Reflux.createStore({
           dht: dht,
           port: port,
           syncInterval: 60000,
+          afterBlockTimestamp: 1445510000,
           relay: {
             address: addrs[0],
             port: 25778
@@ -252,6 +253,7 @@ var Store = Reflux.createStore({
     var toChain = {
       _t: rr[TYPE],
       _z: rr[NONCE],
+      time: r.time
     }
     if (rr.message)
       toChain.message = rr.message        
@@ -405,11 +407,11 @@ var Store = Reflux.createStore({
     }
     delete toChain.from
     delete toChain.to
-
+    toChain.time = r.time 
     var self = this;
 
     return meDriver.send({
-      msg: r,
+      msg: toChain,
       to: [{fingerprint: this.getFingerprint(r.to)}],
       deliver: true,
       chain: false
@@ -761,7 +763,7 @@ var Store = Reflux.createStore({
     .then(function() {
       if (isRegistration) 
         return getDHTKey(meIdentity.toJSON())    
-      var isMessage = model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1);
+      var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
       if (isMessage) {
         var to = list[utils.getId(value.to)].value;
 
@@ -772,6 +774,7 @@ var Store = Reflux.createStore({
         delete toChain[ROOT_HASH]
         if (toChain[CUR_HASH])
           toChain[PREV_HASH] = toChain[CUR_HASH]
+        toChain.time = returnVal.time
 
         return meDriver.send({
           msg: toChain,
@@ -814,6 +817,9 @@ var Store = Reflux.createStore({
         return 'Please add "' + meta.properties[prop].title + '"';
     }
   },
+  onReloadModels() {
+    this.loadModels()
+  },
   onReloadDB() {
     var togo = 1;
     // this.loadModels()
@@ -826,7 +832,7 @@ var Store = Reflux.createStore({
       rimraf('./', finish)
       ;[
         'addressBook.db',
-        // 'msg-log.db',
+        'msg-log.db',
         'messages.db',
         'txs.db'
       ].forEach(function (dbName) {
@@ -842,6 +848,9 @@ var Store = Reflux.createStore({
           self.onReloadDB1()
         }
       }
+    })
+    .catch(function(err) {
+      err = err
     })
   },
   onMessageList(params) {
@@ -1473,13 +1482,6 @@ var Store = Reflux.createStore({
     }
 
     db.batch(batch)
-    .then(function(data) {        
-      var roothash = data[0]._props[ROOT_HASH]
-      value[ROOT_HASH] = roothash
-      // [CUR_HASH] = data[0]._props[CUR_HASH]
-      var self = this;    
-      return db.batch(batch)
-    })
     .then(function() {
       return db.get(iKey)
     })
@@ -1487,9 +1489,9 @@ var Store = Reflux.createStore({
       list[iKey] = {key: iKey, value: value};
       if (mid)
         list[MY_IDENTITIES_MODEL + '_1'] = {key: MY_IDENTITIES_MODEL + '_1', value: mid};
-      return self.loadDB(db);
-    })
-    .then(function() {
+    //   return self.loadDB(db);
+    // })
+    // .then(function() {
       var  params = {action: 'addItem', resource: value};
       // registration or profile editing
       self.trigger(params);
@@ -1777,7 +1779,8 @@ var Store = Reflux.createStore({
   },
   loadResources() {
     var self = this
-    meDriver.once('ready', function () {
+    meDriver.ready()
+    .then(function() {
       console.log(meDriver.name(), 'is ready')
       // d.publishMyIdentity()
       
@@ -1924,13 +1927,13 @@ var Store = Reflux.createStore({
         if (!val.time)
           val.time = obj.timestamp
         var dn = val.message || utils.getDisplayName(val, model.properties);
-        to.lastMessage = (from[ROOT_HASH] === me[ROOT_HASH]) ? 'You: ' + dn : dn;
+        to.lastMessage = (obj.from[ROOT_HASH] === obj.me[ROOT_HASH]) ? 'You: ' + dn : dn;
         to.lastMessageTime = val.time;
         from.lastMessage = val.message;
         from.lastMessageTime = val.time;
         batch.push({type: 'put', key: key, value: val})
-        batch.push({type: 'put', key: to[TYPE] + '_' + to[ROOT_HASH], value: to});
-        batch.push({type: 'put', key: from[TYPE] + '_' + from[ROOT_HASH], value: from});
+        batch.push({type: 'put', key: to[TYPE] + '_' + obj.to[ROOT_HASH], value: to});
+        batch.push({type: 'put', key: from[TYPE] + '_' + obj.from[ROOT_HASH], value: from});
       }
     }
     // if (batch.length)
@@ -1970,7 +1973,7 @@ var Store = Reflux.createStore({
     var self = this;
     var loadingModels = false;
     
-    console.time('dbStream')
+    // console.time('dbStream')
     return db.createReadStream()
     .on('data', function(data) {
        if (data.value.type === 'tradle.Model') {
@@ -2011,7 +2014,7 @@ var Store = Reflux.createStore({
     })
     .on('end', function() {
       console.log('Stream ended');
-      console.timeEnd('dbStream')
+      // console.timeEnd('dbStream')
       // if (me)
       //   utils.setMe(me);
       var noModels = self.isEmpty(models);
