@@ -59,11 +59,25 @@ var utils = {
 
     return Object.keys(obj).map(function (key) {return obj[key]});
   },
-  getImplementors(iModel) {
+  getImplementors(iModel, excludeModels) {
     var implementors = [];
     for (var p in models) {
       var m = models[p].value;
-      if (m.interfaces  &&  m.interfaces.indexOf(iModel) != -1) 
+      if (excludeModels) {
+        var found = false
+        for (var i=0; i<excludeModels.length && !found; i++) {
+          if (p === excludeModels[i])
+            found = true
+          else {
+            var em = this.getModel(p).value
+            if (em.subClassOf  &&  em.subClassOf === excludeModels[i])
+              found = true; 
+          }
+        }
+        if (found)
+          continue
+      }
+      if (m.interfaces  &&  m.interfaces.indexOf(iModel) != -1)  
         implementors.push(m);
     }
     return implementors;
