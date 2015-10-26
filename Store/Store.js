@@ -107,6 +107,23 @@ var Store = Reflux.createStore({
     // this.loadModels()
     var self = this
 
+    // ;[
+    //   'addressBook.db',
+    //   'msg-log.db',
+    //   'messages.db',
+    //   'txs.db'
+    // ].forEach(function (dbName) {
+    //   level(TIM_PATH_PREFIX + '-' + dbName, {
+    //     valueEncoding: 'json'
+    //   }).createValueStream()
+    //     .on('data', console.log.bind(console))
+    //     .on('end', console.log.bind(console, 'done'))
+    // })
+
+    // return this.ready = Q.Promise(function (resolve) {
+    //   // 
+    // })
+
     // this.ready = Q.ninvoke(AsyncStorage, 'clear')
     // .then(this.loadMyResources.bind(this))
     // console.time('loadMyResources')
@@ -1633,6 +1650,7 @@ var Store = Reflux.createStore({
         meDriver.lookupObject(data)
         .then(function (obj) {
           // return
+          console.log('from msgs.db', obj)
           self.putInDb(obj)
           // console.log('msg', obj)
         })
@@ -1722,16 +1740,17 @@ var Store = Reflux.createStore({
       var isMessage = model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1);
       // var isMessage = model.subClassOf  &&  model.subClassOf === constants.TYPES.MESSAGE
       if (isMessage) {
-        var from = obj.from.identity.toJSON()
-        if (me  &&  obj.from[ROOT_HASH] === me[ROOT_HASH])
+        var from = list[obj.from[ROOT_HASH]].value
+        if (me  &&  from[ROOT_HASH] === me[ROOT_HASH])
           return
-        var to = obj.to.identity.toJSON()
+        // var to = obj.to.identity.toJSON()
+        var to = list[obj.to[ROOT_HASH]].value
         val.to = {
-          id: to[TYPE] + '_' + obj.to[ROOT_HASH],
+          id: to[TYPE] + '_' + to[ROOT_HASH],
           title: to.name.formatted
         }
         val.from = {
-          id: from[TYPE] + '_' + obj.from[ROOT_HASH],
+          id: from[TYPE] + '_' + from[ROOT_HASH],
           title: from.name.formatted
         }
         if (!val.time)
