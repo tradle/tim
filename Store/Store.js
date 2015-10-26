@@ -177,7 +177,7 @@ var Store = Reflux.createStore({
           dht: dht,
           port: port,
           syncInterval: 60000,
-          afterBlockTimestamp: 1445510000,
+          afterBlockTimestamp: 1445884939,
           relay: {
             address: addrs[0],
             port: 25778
@@ -765,7 +765,7 @@ var Store = Reflux.createStore({
         return getDHTKey(meIdentity.toJSON())
       var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
       if (isMessage) {
-        var to = list[utils.getId(value.to)].value;
+        var to = list[utils.getId(returnVal.to)].value;
 
         var toChain = {}
         extend(toChain, returnVal)
@@ -778,7 +778,7 @@ var Store = Reflux.createStore({
 
         return meDriver.send({
           msg: toChain,
-          to: this.getFingerprint(to),
+          to: [self.getFingerprint(to)],
           deliver: true,
           chain: false
         })
@@ -1175,165 +1175,6 @@ var Store = Reflux.createStore({
     }
     return result;
   },
-  searchMessages1(params) {
-    var query = params.query;
-    var modelName = params.modelName;
-    var meta = this.getModel(modelName).value;
-    var isVerification = modelName === constants.TYPES.VERIFICATION  ||  (meta.subClassOf  &&  meta.subClassOf === constants.TYPES.VERIFICATION);
-    var chatTo = params.to;
-    var prop = params.prop;
-    if (typeof prop === 'string')
-      prop = meta[prop];
-    var backlink = prop ? prop.items.backlink : prop;
-    var foundResources = {};
-    var isAllMessages = meta.isInterface;
-    var props = meta.properties;
-
-    var implementors = isAllMessages ? utils.getImplementors(modelName) : null;
-
-    var required = meta.required;
-    var meRootHash = me  &&  me[ROOT_HASH];
-    var meId = IDENTITY_MODEL + '_' + meRootHash;
-    var meOrgId = me.organization ? utils.getId(me.organization) : null;
-
-    var chatId = chatTo ? chatTo[TYPE] + '_' + chatTo[ROOT_HASH] : null;
-    var isChatWithOrg = chatTo  &&  chatTo[TYPE] === constants.TYPES.ORGANIZATION;
-    if (isChatWithOrg  &&  !chatTo.name) {
-      chatTo = list[chatId].value;
-    }
-    var testMe = chatTo ? chatTo.me : null;
-    if (testMe) {
-      if (testMe === 'me') {
-        if (!originalMe)
-          originalMe = me;
-        testMe = originalMe[ROOT_HASH];
-      }
-
-      isTest = true;
-      var meId = constants.TYPES.IDENTITY + '_' + testMe;
-      me = list[meId].value;
-      utils.setMe(me);
-      var myIdentities = list[MY_IDENTITIES_MODEL + '_1'].value;
-      if (myIdentities)
-        myIdentities.currentIdentity = meId;
-    }
-    var toModelName = chatTo ? chatId.split('_')[0] : null;
-    for (var key in list) {
-      var iMeta = null;
-      if (isAllMessages) {
-        if (implementors) {
-          for (var impl of implementors) {
-            if (impl.id.indexOf(key.substring(0, key.indexOf('_'))) === 0) {
-              iMeta = impl;
-              break;
-            }
-          }
-          if (!iMeta)
-            continue;
-        }
-      }
-      else if (key.indexOf(modelName + '_') === -1) {
-        var rModel = this.getModel(key.split('_')[0]).value;
-        if (!rModel.subClassOf  ||  rModel.subClassOf !== modelName)
-          continue;
-      }
-      if (!iMeta)
-        iMeta = meta;
-      var r = list[key].value;
-      if (r.canceled)
-        continue;
-      // Make sure that the messages that are showing in chat belong to the conversation between these participants
-      if (isVerification) {
-        if (r.organization) {
-          if (!r.organization.photos) {
-            var orgPhotos = list[utils.getId(r.organization.id)].value.photos;
-            if (orgPhotos)
-              r.organization.photos = [orgPhotos[0]];
-          }
-        }
-        if (r.document  &&  r.document.id)
-          r.document = list[utils.getId(r.document.id)].value;
-      }
-      if (chatTo) {
-        if (backlink  &&  r[backlink]) {
-          if (chatId === utils.getId(r[backlink]))
-            foundResources[key] = r;
-
-          continue;
-        }
-        var isVerificationR = r[TYPE] === VERIFICATION  ||  r[TYPE].subClassOf === VERIFICATION;
-        if ((!r.message  ||  r.message.trim().length === 0) && !r.photos &&  !isVerificationR)
-          // check if this is verification resource
-          continue;
-        var fromID = utils.getId(r.from);
-        var toID = utils.getId(r.to);
-
-        if (fromID !== meId  &&  toID !== meId  &&  toID != meOrgId)
-          continue;
-        var id = toModelName + '_' + chatTo[ROOT_HASH];
-        if (isChatWithOrg) {
-          var toOrgId = null, fromOrgId = null;
-
-          if (list[fromID].value.organization)
-            fromOrgId = utils.getId(list[fromID].value.organization);
-          else if (fromID.split('_')[0] === ORGANIZATION)
-            fromOrgId = utils.getId(list[fromID].value);
-          if (list[toID].value.organization)
-            toOrgId = utils.getId(list[toID].value.organization);
-          else if (toID.split('_')[0] === ORGANIZATION)
-            toOrgId = utils.getId(list[toID].value);
-
-          if (chatId !== toOrgId  &&  chatId !== fromOrgId)
-            continue;
-          if (fromID != meId  &&  toID != meId)
-            continue
-        }
-        else if (fromID !== id  &&  toID != id  &&  toID != meOrgId)
-          continue;
-      }
-      if (isVerificationR  ||  r[TYPE] === ADDITIONAL_INFO) {
-        var doc = {};
-        extend(true, doc, list[utils.getId(r.document)].value);
-        delete doc.verifications;
-        delete doc.additionalInfo;
-        r.document = doc;
-      }
-
-      if (!query) {
-        // foundResources[key] = r;
-        var msg = this.fillMessage(r);
-        if (msg)
-          foundResources[key] = msg;
-        continue;
-      }
-       // primitive filtering for this commit
-      var combinedValue = '';
-      for (var rr in props) {
-        if (r[rr] instanceof Array)
-         continue;
-        combinedValue += combinedValue ? ' ' + r[rr] : r[rr];
-      }
-      if (!combinedValue  ||  (combinedValue  &&  (!query || combinedValue.toLowerCase().indexOf(query.toLowerCase()) != -1))) {
-        foundResources[key] = this.fillMessage(r);
-      }
-    }
-
-    var result = utils.objectToArray(foundResources);
-
-    // find possible verifications for the requests that were not yet fulfilled from other verification providers
-
-    result.sort(function(a,b) {
-      // Turn your strings into dates, and then subtract them
-      // to get a value that is either negative, positive, or zero.
-      return new Date(a.time) - new Date(b.time);
-    });
-    // not for subreddit
-    for (var r of result) {
-      r.from.photos = list[utils.getId(r.from)].value.photos;
-      r.to.photos = list[utils.getId(r.to)].value.photos;
-    }
-    return result;
-  },
   fillMessage(r) {
     var resource = {};
     extend(resource, r);
@@ -1536,35 +1377,6 @@ var Store = Reflux.createStore({
       err = err;
     });
   },
-  setOrg(value) {
-  // var org = list[utils.getId(value.organization)].value
-    var result = this.searchNotMessages({modelName: 'tradle.SecurityCode'})
-    if (!result) {
-      var err = 'The security code you specified was not registered with ' + value.organization.title
-      this.trigger({action: 'addItem', resource: value, error: err})
-      return
-    }
-
-    var i = 0
-    for (; i<result.length; i++) {
-      if (result[i].code === value.securityCode) {
-        value.organization = result[i].organization
-        break
-      }
-    }
-    if (!value.organization) {
-      var err = 'The security code you specified was not registered with ' + value.organization.title
-      this.trigger({action: 'addItem', resource: value, error: err})
-      return
-    }
-
-    // var org = list[utils.getId(value.organization)].value
-
-    var photos = list[utils.getId(value.organization.id)].value.photos;
-    if (photos)
-      value.organization.photo = photos[0].url;
-  },
-
   getFingerprint(r) {
     var pubkeys = r.pubkeys
     if (!pubkeys) {
@@ -1625,7 +1437,7 @@ var Store = Reflux.createStore({
       }
       else {
         myIdentity.forEach(function(r) {
-          if (r.securityCode === me.securityCode) {
+          if (r.securityCode === me.securityCode  &&  me.firstName === myIdentity[i].firstName) {
             mePub = r.pubkeys  // hardcoded on device
             mePriv = r.privkeys
             me[NONCE] = r[NONCE]
@@ -2273,6 +2085,194 @@ module.exports = Store;
           .done()
       })
     })
+  },
+
+  searchMessages1(params) {
+    var query = params.query;
+    var modelName = params.modelName;
+    var meta = this.getModel(modelName).value;
+    var isVerification = modelName === constants.TYPES.VERIFICATION  ||  (meta.subClassOf  &&  meta.subClassOf === constants.TYPES.VERIFICATION);
+    var chatTo = params.to;
+    var prop = params.prop;
+    if (typeof prop === 'string')
+      prop = meta[prop];
+    var backlink = prop ? prop.items.backlink : prop;
+    var foundResources = {};
+    var isAllMessages = meta.isInterface;
+    var props = meta.properties;
+
+    var implementors = isAllMessages ? utils.getImplementors(modelName) : null;
+
+    var required = meta.required;
+    var meRootHash = me  &&  me[ROOT_HASH];
+    var meId = IDENTITY_MODEL + '_' + meRootHash;
+    var meOrgId = me.organization ? utils.getId(me.organization) : null;
+
+    var chatId = chatTo ? chatTo[TYPE] + '_' + chatTo[ROOT_HASH] : null;
+    var isChatWithOrg = chatTo  &&  chatTo[TYPE] === constants.TYPES.ORGANIZATION;
+    if (isChatWithOrg  &&  !chatTo.name) {
+      chatTo = list[chatId].value;
+    }
+    var testMe = chatTo ? chatTo.me : null;
+    if (testMe) {
+      if (testMe === 'me') {
+        if (!originalMe)
+          originalMe = me;
+        testMe = originalMe[ROOT_HASH];
+      }
+
+      isTest = true;
+      var meId = constants.TYPES.IDENTITY + '_' + testMe;
+      me = list[meId].value;
+      utils.setMe(me);
+      var myIdentities = list[MY_IDENTITIES_MODEL + '_1'].value;
+      if (myIdentities)
+        myIdentities.currentIdentity = meId;
+    }
+    var toModelName = chatTo ? chatId.split('_')[0] : null;
+    for (var key in list) {
+      var iMeta = null;
+      if (isAllMessages) {
+        if (implementors) {
+          for (var impl of implementors) {
+            if (impl.id.indexOf(key.substring(0, key.indexOf('_'))) === 0) {
+              iMeta = impl;
+              break;
+            }
+          }
+          if (!iMeta)
+            continue;
+        }
+      }
+      else if (key.indexOf(modelName + '_') === -1) {
+        var rModel = this.getModel(key.split('_')[0]).value;
+        if (!rModel.subClassOf  ||  rModel.subClassOf !== modelName)
+          continue;
+      }
+      if (!iMeta)
+        iMeta = meta;
+      var r = list[key].value;
+      if (r.canceled)
+        continue;
+      // Make sure that the messages that are showing in chat belong to the conversation between these participants
+      if (isVerification) {
+        if (r.organization) {
+          if (!r.organization.photos) {
+            var orgPhotos = list[utils.getId(r.organization.id)].value.photos;
+            if (orgPhotos)
+              r.organization.photos = [orgPhotos[0]];
+          }
+        }
+        if (r.document  &&  r.document.id)
+          r.document = list[utils.getId(r.document.id)].value;
+      }
+      if (chatTo) {
+        if (backlink  &&  r[backlink]) {
+          if (chatId === utils.getId(r[backlink]))
+            foundResources[key] = r;
+
+          continue;
+        }
+        var isVerificationR = r[TYPE] === VERIFICATION  ||  r[TYPE].subClassOf === VERIFICATION;
+        if ((!r.message  ||  r.message.trim().length === 0) && !r.photos &&  !isVerificationR)
+          // check if this is verification resource
+          continue;
+        var fromID = utils.getId(r.from);
+        var toID = utils.getId(r.to);
+
+        if (fromID !== meId  &&  toID !== meId  &&  toID != meOrgId)
+          continue;
+        var id = toModelName + '_' + chatTo[ROOT_HASH];
+        if (isChatWithOrg) {
+          var toOrgId = null, fromOrgId = null;
+
+          if (list[fromID].value.organization)
+            fromOrgId = utils.getId(list[fromID].value.organization);
+          else if (fromID.split('_')[0] === ORGANIZATION)
+            fromOrgId = utils.getId(list[fromID].value);
+          if (list[toID].value.organization)
+            toOrgId = utils.getId(list[toID].value.organization);
+          else if (toID.split('_')[0] === ORGANIZATION)
+            toOrgId = utils.getId(list[toID].value);
+
+          if (chatId !== toOrgId  &&  chatId !== fromOrgId)
+            continue;
+          if (fromID != meId  &&  toID != meId)
+            continue
+        }
+        else if (fromID !== id  &&  toID != id  &&  toID != meOrgId)
+          continue;
+      }
+      if (isVerificationR  ||  r[TYPE] === ADDITIONAL_INFO) {
+        var doc = {};
+        extend(true, doc, list[utils.getId(r.document)].value);
+        delete doc.verifications;
+        delete doc.additionalInfo;
+        r.document = doc;
+      }
+
+      if (!query) {
+        // foundResources[key] = r;
+        var msg = this.fillMessage(r);
+        if (msg)
+          foundResources[key] = msg;
+        continue;
+      }
+       // primitive filtering for this commit
+      var combinedValue = '';
+      for (var rr in props) {
+        if (r[rr] instanceof Array)
+         continue;
+        combinedValue += combinedValue ? ' ' + r[rr] : r[rr];
+      }
+      if (!combinedValue  ||  (combinedValue  &&  (!query || combinedValue.toLowerCase().indexOf(query.toLowerCase()) != -1))) {
+        foundResources[key] = this.fillMessage(r);
+      }
+    }
+
+    var result = utils.objectToArray(foundResources);
+
+    // find possible verifications for the requests that were not yet fulfilled from other verification providers
+
+    result.sort(function(a,b) {
+      // Turn your strings into dates, and then subtract them
+      // to get a value that is either negative, positive, or zero.
+      return new Date(a.time) - new Date(b.time);
+    });
+    // not for subreddit
+    for (var r of result) {
+      r.from.photos = list[utils.getId(r.from)].value.photos;
+      r.to.photos = list[utils.getId(r.to)].value.photos;
+    }
+    return result;
+  },
+  setOrg(value) {
+  // var org = list[utils.getId(value.organization)].value
+    var result = this.searchNotMessages({modelName: 'tradle.SecurityCode'})
+    if (!result) {
+      var err = 'The security code you specified was not registered with ' + value.organization.title
+      this.trigger({action: 'addItem', resource: value, error: err})
+      return
+    }
+
+    var i = 0
+    for (; i<result.length; i++) {
+      if (result[i].code === value.securityCode) {
+        value.organization = result[i].organization
+        break
+      }
+    }
+    if (!value.organization) {
+      var err = 'The security code you specified was not registered with ' + value.organization.title
+      this.trigger({action: 'addItem', resource: value, error: err})
+      return
+    }
+
+    // var org = list[utils.getId(value.organization)].value
+
+    var photos = list[utils.getId(value.organization.id)].value.photos;
+    if (photos)
+      value.organization.photo = photos[0].url;
   },
 
 */
