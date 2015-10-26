@@ -46,7 +46,8 @@ class AddNewMessage extends Component {
   }
   updateKeyboardSpace(frames) {
     // LayoutAnimation.configureNext(animations.layout.spring);
-    this.setState({keyboardSpace: frames.end.height});
+    var height = frames.endCoordinates ? frames.endCoordinates.height : frames.end.height
+    this.setState({keyboardSpace: height});
   }
 
   resetKeyboardSpace() {
@@ -133,24 +134,58 @@ class AddNewMessage extends Component {
   }
   showChoice() {
     var self = this;
-    UIImagePickerManager.showImagePicker(null, (type, response) => {
-      if (type !== 'cancel') {
+    UIImagePickerManager.showImagePicker({returnBase64Image: true, returnIsVertical: true}, (doCancel, response) => {
+      if (!doCancel) {
         var selectedAssets = self.state.selectedAssets;
-        if (type === 'data')  // New photo taken -  response is the 64 bit encoded image data string
-          selectedAssets['data:image/jpeg;base64,' + response] = 'y'; //, isStatic: true};
-        else { // Selected from library - response is the URI to the local file asset
-          // unselect if was selected before
-          if (selectedAssets[response])
-            delete selectedAssets[response];
+        var dataUri = 'data:image/jpeg;base64,' + response.data
+        var uri = response.uri
+        if (uri) {
+          if (selectedAssets[uri])
+            delete selectedAssets[uri]
           else
-            selectedAssets[response] = 'y';
-          // source = {uri: response};
+            selectedAssets[uri] = {
+              // url: response.uri,
+              url: dataUri,
+              isVertical: response.isVertical
+            }
+        }
+        else {
+          var i = 0
+          for (; i<selectedAssets.length  &&  !doDelete; i++) {
+            if (selectedAssets[i].data === dataUri)
+              break
+          }
+          if (i < selectedAssets.length)
+            delete selectedAssets[i]
+          else
+            selectedAssets[selectedAssets.length] = {
+              // url: response.uri,
+              url: dataUri,
+              isVertical: response.isVertical
+            }
         }
 
+
+        // if (selectedAssets[dataUri])
+        //   delete selectedAssets[dataUri]
+        // else
+        //   selectedAssets[dataUri] = 'y'
+        // if (type === 'data')  // New photo taken -  response is the 64 bit encoded image data string
+        //   selectedAssets['data:image/jpeg;base64,' + response] = 'y'; //, isStatic: true};
+        // else { 
+        //   // Selected from library - response is the URI to the local file asset
+        //   // unselect if was selected before
+        //   if (typeof response === 'object')
+        //     response = response.uri
+        //   if (selectedAssets[response])
+        //     delete selectedAssets[response];
+        //   else
+        //     selectedAssets[response] = 'y';
+        //   // source = {uri: response};
+        // }
+
         self.onSubmitEditing(self.state.userInput); 
-      } else {
-        console.log('Cancel');
-      }
+      } 
     });
   }
 
@@ -173,42 +208,42 @@ class AddNewMessage extends Component {
   //   else if (buttonIndex == 1)
   //     this.selectPhotoFromTheLibrary();
   // }
-  onPhotoSelect(asset) {
-    var selectedAssets = this.state.selectedAssets;
-    // unselect if was selected before
-    if (selectedAssets[asset.node.image.uri])
-      delete selectedAssets[asset.node.image.uri];
-    else
-      selectedAssets[asset.node.image.uri] = asset;
-  }
+  // onPhotoSelect(asset) {
+  //   var selectedAssets = this.state.selectedAssets;
+  //   // unselect if was selected before
+  //   if (selectedAssets[asset.node.image.uri])
+  //     delete selectedAssets[asset.node.image.uri];
+  //   else
+  //     selectedAssets[asset.node.image.uri] = asset;
+  // }
 
-  selectPhotoFromTheLibrary() {
-    var model = utils.getModel(this.props.modelName).value;
-    if (model.isInterface)
-      model = utils.getModel(interfaceToTypeMapping[this.props.modelName]).value;
+  // selectPhotoFromTheLibrary() {
+  //   var model = utils.getModel(this.props.modelName).value;
+  //   if (model.isInterface)
+  //     model = utils.getModel(interfaceToTypeMapping[this.props.modelName]).value;
 
-    var self = this;
-    this.props.navigator.push({
-      id: 13,
-      title: 'Select photos',
-      component: SelectPhotoList,
-      rightButtonTitle: 'Done',
-      onRightButtonPress: {
-        before: this.beforeDone.bind(this),
-        stateChange: this.onSubmitEditing.bind(this)
-      },      
-      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      passProps: {
-        navigator: self.props.navigator,
-        onSelect: self.onPhotoSelect.bind(this),
-        onSelectingEnd: self.onSubmitEditing.bind(this),
-        metadata: model.properties.photos,
-      }
-    })
-  }
-  beforeDone() {
-    this.props.navigator.pop();
-  }
+  //   var self = this;
+  //   this.props.navigator.push({
+  //     id: 13,
+  //     title: 'Select photos',
+  //     component: SelectPhotoList,
+  //     rightButtonTitle: 'Done',
+  //     onRightButtonPress: {
+  //       before: self.beforeDone.bind(self),
+  //       stateChange: self.onSubmitEditing.bind(self)
+  //     },      
+  //     sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+  //     passProps: {
+  //       navigator: self.props.navigator,
+  //       onSelect: self.onPhotoSelect.bind(self),
+  //       onSelectingEnd: self.onSubmitEditing.bind(self),
+  //       metadata: model.properties.photos,
+  //     }
+  //   })
+  // }
+  // beforeDone() {
+  //   this.props.navigator.pop();
+  // }
   onEndEditing(userInput, clearCallback) {
     this.setState({userInput: userInput});
 
@@ -241,8 +276,8 @@ class AddNewMessage extends Component {
     value[constants.TYPE] = modelName;
     if (!isNoAssets) {
       var photos = [];
-      for (var assetUri in assets) 
-        photos.push({url: assetUri, title: 'photo'});
+      for (var a in assets) 
+        photos.push({url: assets[a].url, isVertical: assets[a].isVertical, title: 'photo'});
       
       value.photos = photos;
     }
@@ -253,32 +288,32 @@ class AddNewMessage extends Component {
   }
 }
 reactMixin(AddNewMessage.prototype, Reflux.ListenerMixin);
-var animations = {
-  layout: {
-    spring: {
-      duration: 400,
-      create: {
-        duration: 300,
-        type: LayoutAnimation.Types.easeInEaseOut,
-        property: LayoutAnimation.Properties.opacity,
-      },
-      update: {
-        type: LayoutAnimation.Types.spring,
-        springDamping: 1,
-      },
-    },
-    easeInEaseOut: {
-      duration: 400,
-      create: {
-        type: LayoutAnimation.Types.easeInEaseOut,
-        property: LayoutAnimation.Properties.scaleXY,
-      },
-      update: {
-        type: LayoutAnimation.Types.easeInEaseOut,
-      },
-    },
-  },
-};
+// var animations = {
+//   layout: {
+//     spring: {
+//       duration: 400,
+//       create: {
+//         duration: 300,
+//         type: LayoutAnimation.Types.easeInEaseOut,
+//         property: LayoutAnimation.Properties.opacity,
+//       },
+//       update: {
+//         type: LayoutAnimation.Types.spring,
+//         springDamping: 1,
+//       },
+//     },
+//     easeInEaseOut: {
+//       duration: 400,
+//       create: {
+//         type: LayoutAnimation.Types.easeInEaseOut,
+//         property: LayoutAnimation.Properties.scaleXY,
+//       },
+//       update: {
+//         type: LayoutAnimation.Types.easeInEaseOut,
+//       },
+//     },
+//   },
+// };
 var styles = StyleSheet.create({
   searchBar: {
     flex: 4,

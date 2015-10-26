@@ -12,6 +12,7 @@ var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
 var sampleData = require('../data/data');
 var constants = require('tradle-constants');
+var TouchID = require('react-native-touch-id');
 
 var {
   StyleSheet,
@@ -25,7 +26,8 @@ var {
   Component,
   ScrollView,
   LinkingIOS,
-  StatusBarIOS
+  StatusBarIOS,
+  AlertIOS
 } = React;
 
 class TimHome extends Component {
@@ -152,6 +154,10 @@ class TimHome extends Component {
     utils.setModels(null);
     Actions.reloadDB();
   } 
+  onReloadModels() {
+    utils.setModels(null)
+    Actions.reloadModels()
+  }
   render() {
     var url = LinkingIOS.popInitialURL();
   	var spinner = this.state.isLoading 
@@ -203,7 +209,7 @@ class TimHome extends Component {
         </ScrollView>
         <View style={{height: 100}}></View>
         <TouchableHighlight style={[styles.thumbButton]}
-              underlayColor='transparent' onPress={this.showContactsOrRegister.bind(this)}>        
+              underlayColor='transparent' onPress={this._pressHandler.bind(this)}>        
           <View style={styles.getStarted}>
              <Text style={styles.getStartedText}>Get started</Text>
           </View>
@@ -217,10 +223,33 @@ class TimHome extends Component {
                 Reload DB
               </Text>
             </TouchableHighlight>
+            <TouchableHighlight 
+                underlayColor='transparent' onPress={this.onReloadModels.bind(this)}>
+              <Text style={styles.text}>
+                Reload Models
+              </Text>
+            </TouchableHighlight>
           </View>
         <View style={{height: 200}}></View>
       </View>  
     );
+  }
+  _pressHandler() {
+    var self = this
+    TouchID.isSupported()
+   .then(supported => {
+      TouchID.authenticate('to demo this react-native component')
+        .then(success => {
+          self.showContactsOrRegister()
+        })
+        .catch(error => {
+          AlertIOS.alert('Authentication Failed')
+        });
+    })
+    .catch(error => {
+      // Failure code
+      self.showContactsOrRegister()
+    })
   }
 
 }

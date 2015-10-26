@@ -18,8 +18,11 @@ var MessageList = require('./Components/MessageList');
 var ArticleView = require('./Components/ArticleView');
 var IdentitiesList = require('./Components/IdentitiesList');
 var SelectPhotoList = require('./Components/SelectPhotoList');
+var ProductChooser = require('./Components/ProductChooser')
 // var CameraView = require('./Components/CameraView');
 var PhotoCarousel = require('./Components/PhotoCarousel');
+var QRCode = require('./Components/QRCode')
+var QRCodeScanner = require('./Components/QRCodeScanner')
 var utils = require('./utils/utils');
 var constants = require('tradle-constants');
 var Icon = require('react-native-vector-icons/Ionicons');
@@ -261,7 +264,19 @@ class TiMApp extends Component {
     //               isAggregation={props.isAggregation}
     //               sortProperty={props.sortProperty}
     //               modelName={props.modelName} />;
-
+    case 15:
+      return <ProductChooser navigator={nav}
+                  resource={props.resource}
+                  returnRoute={props.returnRoute}
+                  callback={props.callback} />;
+    case 16:
+      return <QRCodeScanner navigator={nav}
+                onread={props.onread} />
+    case 17:
+      return <QRCode navigator={nav}
+                content={props.content}
+                fullScreen={props.fullScreen}
+                dimension={props.dimension} />
     case 10:
     default: // 10
       return <ResourceList navigator={nav}

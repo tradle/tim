@@ -23,6 +23,7 @@ class PhotoCarousel extends Component {
     var n = this.props.photos.length;
 
     var model = utils.getModel(this.props.resource[constants.TYPE]).value;
+    var isVertical = currentPhoto.isVertical
     var isLicense = model.id.indexOf('License') !== -1  ||  model.id.indexOf('Passport') !== -1;
     var isUtility = !isLicense  &&  model.id.indexOf('Utility') !== -1
     for (var j=0; j<2; j++) {
@@ -34,21 +35,35 @@ class PhotoCarousel extends Component {
         if (currentPhotoIndex == -1)
           currentPhotoIndex = i;
         photos.push(
-          isLicense ? <View style={styles.container}>
-                       <Image source={{uri: photo.url}} style={styles.imageH}/>
-                      </View>
-                    : (isUtility  
-                      ? <View style={styles.container}>
+          isVertical  ? <View style={styles.container}>
                           <Image source={{uri: photo.url}} style={styles.imageV}/>
                         </View>
 
-                      : <View style={styles.container}>
-                          <Image source={{uri: photo.url}} style={styles.image}/>
-                        </View>
+                      : (isLicense 
+                         ? <View style={styles.container}>
+                              <Image source={{uri: photo.url}} style={styles.imageH}/>
+                            </View>
+                         : <View style={styles.container}>
+                              <Image source={{uri: photo.url}} style={styles.image}/>
+                            </View>
                       )
         )
+        // photos.push(
+        //   isLicense ? <View style={styles.container}>
+        //                <Image source={{uri: photo.url}} style={styles.imageH}/>
+        //               </View>
+        //             : (isUtility  
+        //               ? <View style={styles.container}>
+        //                   <Image source={{uri: photo.url}} style={styles.imageV}/>
+        //                 </View>
+
+        //               : <View style={styles.container}>
+        //                   <Image source={{uri: photo.url}} style={styles.image}/>
+        //                 </View>
+        //               )
+        // )
       }
-      n = currentPhotoIndex;
+      n = currentPhotoIndex
     }
     return (
       <Carousel width={375}>

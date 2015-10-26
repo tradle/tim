@@ -68,6 +68,15 @@ var utils = {
     }
     return implementors;
   },
+  getAllSubclasses(iModel) {
+    var subclasses = [];
+    for (var p in models) {
+      var m = models[p].value;
+      if (m.subClassOf  &&  m.subClassOf === iModel) 
+        subclasses.push(m);
+    }
+    return subclasses;
+  },
   getFormFields(params) {
     var meta = params.meta;
     var model = params.model;
@@ -77,6 +86,7 @@ var utils = {
     var onSubmitEditing = params.onSubmitEditing;
     var onEndEditing = params.onEndEditing;
     var onChange = params.onChange;
+    var myCustomTemplate = params.template
     var options = {};
     options.fields = {};
  
@@ -153,7 +163,7 @@ var utils = {
         label = utils.makeLabel(p);
       options.fields[p] = {
         error: 'Insert a valid ' + label,
-        bufferDelay: 20 // to eliminate missed keystrokes
+        bufferDelay: 20, // to eliminate missed keystrokes
       }
       if (props[p].description) 
         options.fields[p].help = props[p].description;
@@ -165,13 +175,19 @@ var utils = {
         model[p] = maybe ? t.maybe(formType) : formType;
         if (data  &&  (type == 'date')) {
           data[p] = new Date(data[p]);
-          options.fields[p] = { mode: 'date'};
+          // options.fields[p] = { mode: 'date'};
+          options.fields[p].mode = 'date';
           options.fields[p].auto = 'labels';
+          options.fields[p].label = label
         }
         else if (type === 'string') {
           if (props[p].maxLength > 100)
             options.fields[p].multiline = true;
           options.fields[p].autoCorrect = false;
+          if (props[p].oneOf) {
+            model[p] = t.enums(props[p].oneOf);
+            options.fields[p].auto = 'labels';
+          }
         }
         if (!options.fields[p].multiline && (type === 'string'  ||  type === 'number')) {
           if (onSubmitEditing) 
@@ -235,6 +251,12 @@ var utils = {
         }
 
         options.fields[p].onFocus = chooser.bind({}, props[p], p);
+        options.fields[p].template = myCustomTemplate.bind({}, {
+            label: label, 
+            prop:  p,
+            chooser: chooser.bind({}, props[p], p)
+          })
+
         options.fields[p].nullOption = {value: '', label: 'Choose your ' + utils.makeLabel(p)};
       }
       
@@ -343,6 +365,8 @@ var utils = {
     return val;
   },
   splitMessage(message) {
+    if (!message)
+      return []
     var lBr = message.indexOf('[');          
     var msg;
     if (lBr == -1) 
@@ -367,8 +391,10 @@ var utils = {
       return null;
     if (url.indexOf('data') === 0 || url.indexOf('assets-') === 0 || url.indexOf('http') === 0)
       return url;
-    else if (url.indexOf('/var/mobile/') == 0)
-      return url;
+    else if (url.indexOf('file:///') === 0)
+      return url.replace('file://', '')
+    // else if (url.indexOf('/var/mobile/') == 0)
+    //   return url;
     else
       return 'http://' + url;
   }

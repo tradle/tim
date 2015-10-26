@@ -1,5 +1,5 @@
 'use strict';
- 
+
 var React = require('react-native');
 var utils = require('../utils/utils');
 var ShowPropertiesView = require('./ShowPropertiesView');
@@ -14,6 +14,7 @@ var Reflux = require('reflux');
 var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
 var ResourceViewMixin = require('./ResourceViewMixin');
+var QRCode = require('./QRCode')
 var buttonStyles = require('../styles/buttonStyles');
 
 var extend = require('extend');
@@ -22,7 +23,7 @@ var constants = require('tradle-constants');
 var {
   StyleSheet,
   ScrollView,
-  Image, 
+  Image,
   View,
   Text,
   TextInput,
@@ -44,7 +45,7 @@ class ResourceView extends Component {
   handleEvent(params) {
     if (params.action === 'showIdentityList')
       this.onShowIdentityList(params);
-    else if (params.action == 'getItem') 
+    else if (params.action == 'getItem')
       this.showRefResource(params.resource)
     else  if (params.resource)
       this.onResourceUpdate(params);
@@ -90,12 +91,9 @@ class ResourceView extends Component {
     var isMe = isIdentity ? resource[constants.ROOT_HASH] === utils.getMe()[constants.ROOT_HASH] : true;
     if (isIdentity  &&  !isMe)
       actionPanel = <View/>
-    else {
-      actionPanel = 
-        <View style={buttonStyles.buttons}>
-          <ShowRefList    resource={resource} navigator={this.props.navigator} />    
-        </View>
-    }
+    else
+      actionPanel = <ShowRefList resource={resource} navigator={this.props.navigator} />
+
           // <AddNewIdentity resource={resource} navigator={this.props.navigator} />
           // <SwitchIdentity resource={resource} navigator={this.props.navigator} />
     return (
@@ -104,19 +102,22 @@ class ResourceView extends Component {
           <PhotoView resource={resource} />
         </View>
         {actionPanel}
+        <View style={styles.photoBG}>
+                  <QRCode inline={true} content={resource[constants.ROOT_HASH]} dimension={370} />
+        </View>
         <PhotoList photos={photos} resource={this.props.resource} navigator={this.props.navigator} isView={true} numberInRow={photos.length > 4 ? 5 : photos.length} />
-        <ShowPropertiesView resource={resource} 
-                            showItems={this.showResources.bind(this)} 
+        <ShowPropertiesView resource={resource}
+                            showItems={this.showResources.bind(this)}
                             showRefResource={this.getRefResource.bind(this)}
                             excludedProperties={['photos']}
-                            navigator={this.props.navigator} />      
+                            navigator={this.props.navigator} />
       </ScrollView>
     );
   }
 
   getRefResource(resource, prop) {
     var model = utils.getModel(this.props.resource[constants.TYPE]).value;
-        
+
     this.state.prop = prop;
     this.state.propValue = utils.getId(resource.id);
     Actions.getItem(resource.id);
@@ -136,16 +137,16 @@ var styles = StyleSheet.create({
     alignItems: 'center',
   },
   // footer: {
-  //   flexDirection: 'row', 
-  //   alignItems: 'center', 
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
   //   backgroundColor: '#eeeeee',
-  //   borderBottomColor: '#eeeeee', 
-  //   borderRightColor: '#eeeeee', 
-  //   borderLeftColor: '#eeeeee', 
+  //   borderBottomColor: '#eeeeee',
+  //   borderRightColor: '#eeeeee',
+  //   borderLeftColor: '#eeeeee',
   //   borderWidth: 1,
   //   borderTopColor: '#cccccc',
-  //   height: 35, 
-  //   paddingVertical: 5, 
+  //   height: 35,
+  //   paddingVertical: 5,
   //   paddingHorizontal: 10,
   //   alignSelf: 'stretch'
   // }

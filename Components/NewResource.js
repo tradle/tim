@@ -31,6 +31,7 @@ var {
   ScrollView,
   LayoutAnimation,
   Component,
+  Navigator,
   TouchableHighlight,
 } = React;
 
@@ -57,7 +58,8 @@ class NewResource extends Component {
   }
   updateKeyboardSpace(frames) {
     LayoutAnimation.configureNext(animations.layout.spring);
-    this.setState({keyboardSpace: frames.end.height});
+    var height = frames.end ? frames.end.height : frames.endCoordinates.height
+    this.setState({keyboardSpace: height});
   }
 
   resetKeyboardSpace() {
@@ -141,7 +143,16 @@ class NewResource extends Component {
       if (!value)
         return; 
       var required = this.props.model.required;
+      if (!required) {
+        required = []
+        for (var p in this.props.model.properties) {
+          if (!p.charAt(0) == '_')
+            required.push(p)
+        }
+
+      }
       var msg = '';
+
       for (var p of required) {
         var v = value[p] ? value[p] : resource[p];
 
@@ -195,7 +206,7 @@ class NewResource extends Component {
       resource = {};
       resource[constants.TYPE] = this.props.model.id;
     }
-    
+    var isFinancialProduct = this.props.model.subClassOf  &&  this.props.model.subClassOf == 'tradle.FinancialProduct';
     var value = this.refs.form.input;
 
     var filter = event.nativeEvent.text; 
@@ -207,6 +218,7 @@ class NewResource extends Component {
       id: 10,
       component: ResourceList,
       backButtonTitle: 'Back',
+      sceneConfig: isFinancialProduct ? Navigator.SceneConfigs.FloatFromBottom : Navigator.SceneConfigs.FloatFromRight,
       passProps: {
         filter:      filter, 
         prop:        propName,
@@ -214,7 +226,7 @@ class NewResource extends Component {
         resource:    resource,
         isRegistration: this.state.isRegistration,
         returnRoute: currentRoutes[currentRoutes.length - 1],
-        callback:    this.setChosenValue.bind(this)
+        callback:    this.setChosenValue.bind(this),
       }
     });
   }
@@ -307,12 +319,14 @@ class NewResource extends Component {
   }
   showChoice() {
     var self = this;
-    UIImagePickerManager.showImagePicker(null, (type, response) => {
-      if (type === 'cancel') 
+    UIImagePickerManager.showImagePicker({returnBase64Image: true, returnIsVertical: true}, (doCancel, response) => {
+      if (doCancel) 
         return;
+
       var item = {
-        title: 'photo',
-        url: response
+        // title: 'photo',
+        url: 'data:image/jpeg;base64,' + response.data,
+        isVertical: response.isVertical
       };
       self.onAddItem('photos', item);
     });
@@ -336,7 +350,9 @@ class NewResource extends Component {
     var arrays = [];
     extend(true, data, resource);
     var isMessage = meta.interfaces  &&  meta.interfaces.indexOf('tradle.Message') != -1;
+    var isFinancialProduct = isMessage  &&  this.props.model.subClassOf && this.props.model.subClassOf === 'tradle.FinancialProduct' 
     var showSendVerificationForm = false;
+    var formToDisplay;
     if (isMessage) {
       var len = resource.message  &&  utils.splitMessage(resource.message).length;
       if (len < 2) 
@@ -352,7 +368,8 @@ class NewResource extends Component {
         items: arrays,
         onSubmitEditing: this.onSavePressed.bind(this),
         onEndEditing: this.onEndEditing.bind(this),
-        onChange: this.onChange.bind(this)
+        onChange: this.onChange.bind(this),
+        template: this.myCustomTemplate.bind(this)
       };
     if (this.props.editCols)
       params.editCols = this.props.editCols;
@@ -405,7 +422,7 @@ class NewResource extends Component {
     var style = {marginTop: 64};
     options.auto = 'placeholders';
     options.tintColor = 'red'
-    var photoStyle = isMessage ? {marginTop: -45} : styles.photoBG; 
+    var photoStyle = isMessage && !isFinancialProduct ? {marginTop: -45} : styles.photoBG; 
     // <FromToView resource={resource} model={meta} navigator={this.props.navigator} />
     var content = 
       <ScrollView style={style}>
@@ -416,7 +433,7 @@ class NewResource extends Component {
           <View style={photoStyle}>
             <PhotoView resource={resource} />
           </View>
-          <View style={{'padding': 15}}>
+          <View style={{'padding': 15}} key={'NewResource'}>
             <Form ref='form' type={Model} options={options} value={data} />          
             {arrayItems}
           </View>
@@ -493,6 +510,41 @@ class NewResource extends Component {
     // }.bind(this), 0);
     Actions.addMessage(value); //, this.state.resource, utils.getModel(modelName).value);
   }
+  myCustomTemplate(params) {
+    var containerStyle = {
+      justifyContent: 'space-between', 
+      flexDirection: 'row',
+      borderWidth: 0.5, 
+      height: 36, 
+      borderColor: '#cccccc', 
+      padding: 8, 
+      marginBottom: 5, 
+      borderRadius: 4 
+    };
+    var labelStyle = {color: '#cccccc', fontSize: 17};
+    var textStyle = {color: '#000000', fontSize: 17};
+    var resource = this.props.resource
+    var label, style
+
+    if (resource && resource[params.prop]) {
+      var rModel = utils.getModel(resource[params.prop][constants.TYPE]).value
+      label = utils.getDisplayName(resource[params.prop], rModel.properties)
+      style = textStyle
+    }
+    else {
+      label = params.label
+      style = labelStyle
+    }
+    return (
+      <TouchableHighlight underlayColor='transparent' onPress={params.chooser}>
+        <View style={containerStyle}>
+          <Text style={style}>{label}</Text>
+          <Icon name='ios-arrow-down'  size={20}  color='#96415A'  style={styles.icon1}/>
+        </View>
+      </TouchableHighlight>
+    );
+  }
+
 }
 reactMixin(NewResource.prototype, Reflux.ListenerMixin);
 var animations = {
@@ -572,6 +624,11 @@ var styles = StyleSheet.create({
   photoBG: {
     marginTop: -15,
     alignItems: 'center',
+  },
+  icon1: {
+    width: 20,
+    height: 20,
+    marginRight: -5
   },
   icon: {
     width: 20,

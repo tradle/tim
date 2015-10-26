@@ -40,7 +40,8 @@ class PhotoView extends Component {
 
         // icon = 'ion|person';
       else
-        return <View style={{height: 50}} />
+        return <View />
+        // return <View style={{height: 50}} />
         // icon = 'ion|chatboxes'
       // return <Icon name={icon} size={200}  color='#f6f6f4'  style={styles.icon} />
     }
@@ -48,8 +49,11 @@ class PhotoView extends Component {
     var url = currentPhoto.url;
     var nextPhoto = resource.photos.length == 1
     var uri = utils.getImageUri(url);
+    var source = uri.charAt(0) == '/' || uri.indexOf('data') === 0 
+               ? {uri: uri, isStatic: true}
+               : {uri: uri}
     if (resource.photos.length == 1)
-      return <Image source={{uri: uri}} style={styles.image} />; 
+      return <Image source={source} style={styles.image} />; 
     else {           
       var nextPhoto;
       var len = resource.photos.length;
@@ -59,7 +63,7 @@ class PhotoView extends Component {
           nextPhoto = i === len - 1 ? resource.photos[0] : resource.photos[i + 1];
       }
       return <TouchableHighlight underlayColor='#ffffff' onPress={this.changePhoto.bind(this, nextPhoto)}>
-                <Image source={{uri: uri}} style={styles.image} />
+                <Image source={source} style={styles.image} />
               </TouchableHighlight>
     }
   }
