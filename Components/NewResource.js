@@ -539,7 +539,8 @@ class NewResource extends Component {
     var label, style
 
     if (resource && resource[params.prop]) {
-      var rModel = utils.getModel(resource[params.prop][constants.TYPE]).value
+      var m = utils.getId(resource[params.prop]).split('_')[0]
+      var rModel = utils.getModel(m).value
       label = utils.getDisplayName(resource[params.prop], rModel.properties)
       style = textStyle
     }
