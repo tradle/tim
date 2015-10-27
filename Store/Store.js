@@ -1758,11 +1758,11 @@ var Store = Reflux.createStore({
         var to = list[IDENTITY + '_' + obj.to[ROOT_HASH]].value
         val.to = {
           id: to[TYPE] + '_' + to[ROOT_HASH],
-          title: to.name.formatted
+          title: obj.to.identity.toJSON().name.formatted
         }
         val.from = {
           id: from[TYPE] + '_' + from[ROOT_HASH],
-          title: from.name.formatted
+          title: obj.from.identity.toJSON().name.formatted
         }
         if (!val.time)
           val.time = obj.timestamp
