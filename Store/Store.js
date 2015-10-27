@@ -121,7 +121,7 @@ var Store = Reflux.createStore({
     // })
 
     // return this.ready = Q.Promise(function (resolve) {
-    //   // 
+    //   //
     // })
 
     // this.ready = Q.ninvoke(AsyncStorage, 'clear')
@@ -168,11 +168,10 @@ var Store = Reflux.createStore({
   buildDriver(identity, keys, port) {
     var iJSON = identity.toJSON()
     // var prefix = iJSON.name.firstName.toLowerCase()
-    var dht = this.dhtFor(iJSON)
-    dht.listen(port)
-
+    var dht = this.dhtFor(iJSON, port)
     var keeper = new Keeper({
       // storage: prefix + '-storage',
+      // flat: true, // flat directory structure
       storeOnFetch: true,
       storage: 'storage',
       fallbacks: ['http://tradle.io:25667']
@@ -210,11 +209,15 @@ var Store = Reflux.createStore({
 
     // return d
   },
-  dhtFor (identity) {
-    return new DHT({
+  dhtFor (identity, port) {
+    var dht = new DHT({
       nodeId: this.nodeIdFor(identity),
       bootstrap: ['tradle.io:25778']
     })
+
+    dht.listen(port)
+    dht.socket.filterMessages(tutils.isDHTMessage)
+    return dht
   },
   nodeIdFor (identity) {
     return crypto.createHash('sha256')
@@ -1511,8 +1514,9 @@ var Store = Reflux.createStore({
       return meDriver.identityPublishStatus()
     })
     .then(function(status) {
-      if (!status.queued  &&  !status.current)
+      if (!status.queued  &&  !status.current) {
         return Q.ninvoke(meDriver.wallet, 'balance')
+      }
     })
     .then(function(balance) {
       if (balance)
