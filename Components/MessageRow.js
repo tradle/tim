@@ -33,8 +33,8 @@ class MessageRow extends Component {
     var isMyMessage;
     if (!this.props.isAggregation) {
       var fromHash = utils.getId(resource.from);
-      if (fromHash == me[constants.TYPE] + '_' + me[constants.ROOT_HASH]) 
-        isMyMessage = true;      
+      if (fromHash == me[constants.TYPE] + '_' + me[constants.ROOT_HASH])
+        isMyMessage = true;
     }
     this.state = { isMyMessage: isMyMessage };
   }
@@ -53,7 +53,7 @@ class MessageRow extends Component {
     else if (to) {
       if (to.photos) {
         var uri = utils.getImageUri(to.photos[0].url);
-        ownerPhoto = <Image source={{uri: uri}} style={styles.msgImage} /> 
+        ownerPhoto = <Image source={{uri: uri}} style={styles.msgImage} />
         hasOwnerPhoto = true;
       }
       else if (!isMyMessage) {
@@ -69,24 +69,25 @@ class MessageRow extends Component {
     var renderedRow = [];
     var onPressCall;
     var isVerification = resource[constants.TYPE] === 'tradle.Verification';
-    if (isVerification) 
+    if (isVerification)
       onPressCall = this.props.onSelect;
-    else 
+    else
       onPressCall = this.formatRow(isMyMessage, model, resource, renderedRow);
-    
+
     var photoUrls = [];
     var photoListStyle = {height: 3};
     var addStyle, inRow;
     var noMessage = !resource.message  ||  !resource.message.length;
+    var isSimpleMessage = resource[constants.TYPE] === constants.TYPES.SIMPLE_MESSAGE
     var isAdditionalInfo = !isSimpleMessage  &&  resource[constants.TYPE] === 'tradle.AdditionalInfo';
     if (!renderedRow.length  &&  !isVerification) {
       var vCols = noMessage ? null : utils.getDisplayName(resource, model.properties);
-      if (vCols)                
+      if (vCols)
         renderedRow = <Text style={styles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
     }
     else {
       var fromHash = resource.from.id;
-      if (isMyMessage) { 
+      if (isMyMessage) {
         if (!noMessage)
           addStyle = styles.myCell;
       }
@@ -94,10 +95,14 @@ class MessageRow extends Component {
         if (!model.style)
           addStyle = {padding: 5, borderRadius: 10, borderColor: '#cccccc', backgroundColor: '#ffffff', marginVertical: 2};
       }
-      if (model.style  ||  isVerification) 
+      if (model.style  ||  isVerification)
         addStyle = [addStyle, {padding: 5, borderRadius: 10, backgroundColor: STRUCTURED_MESSAGE_COLOR, borderWidth: 1, borderColor: '#deeeb4', marginVertical: 2}]; //model.style];
       else if (isAdditionalInfo)
         addStyle = [addStyle, {padding: 5, borderRadius: 10, backgroundColor: '#FCF1ED', borderWidth: 1, borderColor: '#FAE9E3', marginVertical: 2}]; //model.style];
+      else {
+        if (isMyMessage  &&  !isSimpleMessage)
+          addStyle = [addStyle, {padding: 5, borderRadius: 10, backgroundColor: STRUCTURED_MESSAGE_COLOR, borderWidth: 1, borderColor: '#deeeb4', marginVertical: 2}]; //model.style];
+      }
     }
     var properties = model.properties;
     var verPhoto;
@@ -112,15 +117,15 @@ class MessageRow extends Component {
           style = styles.mediumImage;
         else
           style = styles.image;
-        for (var p of resource.photos) 
+        for (var p of resource.photos)
           photoUrls.push({url: utils.getImageUri(p.url)});
-        
+
         photoListStyle = {
-          flexDirection: 'row', 
-          alignSelf: isMyMessage ? 'flex-end' : 'flex-start', 
+          flexDirection: 'row',
+          alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
           // marginLeft: isMyMessage ? 30 : (hasOwnerPhoto ? 45 : 10),
           borderRadius: 10,
-          marginBottom: 3, 
+          marginBottom: 3,
         }
       }
       else
@@ -130,7 +135,7 @@ class MessageRow extends Component {
     var val;
     var date;
     if (resource.time) {
-      var previousMessageTime = this.props.previousMessageTime;      
+      var previousMessageTime = this.props.previousMessageTime;
       var showTime = !previousMessageTime  ||  this.props.isAggregation;
 
       if (!showTime)  {
@@ -139,45 +144,45 @@ class MessageRow extends Component {
         showTime = resource.time - previousMessageTime > 3600000 ||
                    prevDate.getDate()  !== curDate.getDate()  ||
                    prevDate.getMonth() !== curDate.getMonth() ||
-                   prevDate.getYear()  !== curDate.getYear() 
+                   prevDate.getYear()  !== curDate.getYear()
       }
 
       if (showTime)
         val = utils.getFormattedDate(resource.time);
     }
-    
-    var date = val 
+
+    var date = val
              ? <Text style={styles.date} numberOfLines={1}>{val}</Text>
              : <View />;
 
     var showMessageBody;
     if (noMessage) {
-      if (hasOwnerPhoto) 
+      if (hasOwnerPhoto)
         showMessageBody = true;
       else if (!model.properties['message'])
         showMessageBody = true;
       else if (isVerification)
         showMessageBody = true;
     }
-    else 
+    else
       showMessageBody = true;
     var messageBody;
     var isSimpleMessage = model.id === 'tradle.SimpleMessage';
     if (showMessageBody) {
       var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
       if (resource.message) {
-        if (resource.message.charAt(0) === '['  ||  resource.message.length > 30)            
+        if (resource.message.charAt(0) === '['  ||  resource.message.length > 30)
           viewStyle.width = isMyMessage || !hasOwnerPhoto ? 250 : 280;
       }
       if (!isSimpleMessage)
         viewStyle.width = isMyMessage || !hasOwnerPhoto ? 250 : 280;
       if (isVerification) {
         var msgModel = utils.getModel(resource.document[constants.TYPE]).value;
-        
+        var orgName = resource.organization  ? resource.organization.title : ''
         renderedRow = <View>
                         <View style={{backgroundColor: '#289427', padding: 5, marginHorizontal: -6, marginTop: -5}}>
-                          <Text style={{fontSize: 16, fontWeight: 600, color: '#ffffff', alignSelf: 'center'}}>
-                             Verified by {resource.organization.title}
+                          <Text style={{fontSize: 16, fontWeight: '600', color: '#ffffff', alignSelf: 'center'}}>
+                             Verified by {orgName}
                           </Text>
                         </View>
                         <View style={{paddingTop: 5}}>
@@ -185,7 +190,7 @@ class MessageRow extends Component {
                         </View>
                       </View>
       }
-      messageBody = 
+      messageBody =
         <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
           <View style={[rowStyle, viewStyle]}>
             {ownerPhoto}
@@ -195,7 +200,7 @@ class MessageRow extends Component {
              </View>
             </View>
           </View>
-        </TouchableHighlight>      
+        </TouchableHighlight>
     }
     else
       messageBody = <View style={{height: 5}}/>
@@ -203,7 +208,7 @@ class MessageRow extends Component {
     var len = photoUrls.length;
     var inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
     var photoStyle = {};
-    var height; 
+    var height;
     if (inRow > 0) {
       if (inRow === 1)
         photoStyle = styles.bigImage;
@@ -218,14 +223,14 @@ class MessageRow extends Component {
     var isLicense = model.id.indexOf('License') !== -1  ||  model.id.indexOf('Passport') !== -1;
     var photoStyle = (isLicense  &&  len === 1) ? styles.bigImageH : photoStyle;
     var verifications = this.showVerifications(rowStyle, viewStyle, addStyle);
-      
+
     return (
       <View style={viewStyle} key={resource}>
         {date}
         {messageBody}
         <View style={photoListStyle}>
-          <PhotoList photos={photoUrls} resource={this.props.resource} style={[photoStyle, {marginTop: -30}]} navigator={this.props.navigator} numberInRow={inRow} />    
-        </View>  
+          <PhotoList photos={photoUrls} resource={this.props.resource} style={[photoStyle, {marginTop: -30}]} navigator={this.props.navigator} numberInRow={inRow} />
+        </View>
         {verifications}
       </View>
     );
@@ -246,18 +251,18 @@ class MessageRow extends Component {
         resource: resource,
         additionalInfo: this.props.resource,
         editCols: ['photos']
-      }      
-    })    
-  } 
+      }
+    })
+  }
   showVerifications(rowStyle, viewStyle, addStyle) {
-    if (!this.props.verificationsToShare || !this.props.resource.message) 
+    if (!this.props.verificationsToShare || !this.props.resource.message)
       return <View/>;
 
     var resource = this.props.resource;
     var msgParts = utils.splitMessage(resource.message);
     // Case when the needed form was sent along with the message
-    if (msgParts.length != 2) 
-      return <View /> 
+    if (msgParts.length != 2)
+      return <View />
 
     var msgModel = utils.getModel(msgParts[1]);
     if (!msgModel)
@@ -268,7 +273,7 @@ class MessageRow extends Component {
     var self = this;
     for (var t in  this.props.verificationsToShare) {
       // if (t === msgModel.id) {
-        var ver = this.props.verificationsToShare[t];                 
+        var ver = this.props.verificationsToShare[t];
         ver.forEach(function(r) {
           var vModel = utils.getModel(r[constants.TYPE]);
           var doc = self.formatDocument(msgModel, r);
@@ -284,7 +289,7 @@ class MessageRow extends Component {
         })
       // }
     }
-    if (!vtt.length) 
+    if (!vtt.length)
       return <View />;
     var ownerPhoto = <Image style={styles.msgImage} source={require('image!happyLock')}></Image>;
     var modelTitle = msgModel.title;
@@ -301,7 +306,7 @@ class MessageRow extends Component {
     else
        msg += ' You can tap on any items in the list below to share them with ';
     msg += this.props.to.organization ? (this.props.to.organization.title + '.') : this.props.to.name;
-    
+
     return (
       <View style={[rowStyle, viewStyle, {width: 280}]}>
         {ownerPhoto}
@@ -347,7 +352,7 @@ class MessageRow extends Component {
         model: model,
         resource: resource
       }
-    });    
+    });
   }
 
   verify(event) {
@@ -357,7 +362,7 @@ class MessageRow extends Component {
       resource = resource.document;
 
     var passProps = {
-      resource: resource, 
+      resource: resource,
     }
     if (!isVerification)
       passProps.verify = true
@@ -404,9 +409,9 @@ class MessageRow extends Component {
 
     var isSimpleMessage = model.id === 'tradle.SimpleMessage';
     var isAdditionalInfo = !isSimpleMessage  &&  resource[constants.TYPE] === 'tradle.AdditionalInfo';
-    var cnt = 0; 
+    var cnt = 0;
     viewCols.forEach(function(v) {
-      if (properties[v].type === 'array'  ||  properties[v].type === 'date') 
+      if (properties[v].type === 'array'  ||  properties[v].type === 'date')
         return;
       var style = styles.resourceTitle; //(first) ? styles.resourceTitle : styles.description;
       if (isMyMessage) {
@@ -430,17 +435,17 @@ class MessageRow extends Component {
         return;
       }
 
-      if (resource[v]                      &&  
-          properties[v].type === 'string'  && 
+      if (resource[v]                      &&
+          properties[v].type === 'string'  &&
           (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0)) {
         onPressCall = self.onPress.bind(self);
         vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{resource[v]}</Text>);
       }
       else if (!model.autoCreate) {
-        var val = (properties[v].displayAs) 
+        var val = (properties[v].displayAs)
                 ? utils.templateIt(properties[v], resource)
                 : resource[v];
-        if (model.properties.verifications  &&  !isMyMessage)                  
+        if (model.properties.verifications  &&  !isMyMessage)
           onPressCall = self.verify.bind(self);
         if (isAdditionalInfo)
           style = [style, {paddingBottom: 10, color: '#2892C6'}];
@@ -471,7 +476,7 @@ class MessageRow extends Component {
             vCols.push(<View>
                          <Text style={style}>{msgParts[0]}</Text>
                          {link}
-                       </View>);     
+                       </View>);
             return;
           }
         }
@@ -479,7 +484,7 @@ class MessageRow extends Component {
       }
       first = false;
 
-    }); 
+    });
                   // <View>
                   //   <View style={{flexDirection: 'row'}}>
                   //     <View style={styles.separator} />
@@ -492,7 +497,7 @@ class MessageRow extends Component {
                   //   <View style={{alignSelf: 'center'}}><Text style={[styles.verySmallLetters, {marginTop: -3, paddingBottom:10}]}>Choose from the ones below</Text></View>
                   //   {vtt}
                   // </View>
-    
+
     if (model.id !== 'tradle.SimpleMessage')  {
       var t = model.title.split(' ');
       var s = '';
@@ -517,7 +522,7 @@ class MessageRow extends Component {
       // else
         // var msgTypeStyle = isAdditionalInfo &&  isMyMessage ? [styles.verySmallLetters, {color: '#ffffff'}] : styles.verySmallLetters;
       vCols.push(<Text style={styles.verySmallLetters}>{s}</Text>);
-    }  
+    }
     if (vCols  &&  vCols.length)
       extend(renderedRow, vCols);
     if (isAdditionalInfo) {
@@ -537,7 +542,7 @@ class MessageRow extends Component {
       component: ResourceList,
       backButtonTitle: 'Back',
       passProps: {
-        filter:      filter, 
+        filter:      filter,
         prop:        propName,
         modelName:   prop.ref,
         resource:    resource,
@@ -545,7 +550,7 @@ class MessageRow extends Component {
         callback:    this.setChosenValue.bind(this)
       }
     });
-    
+
   }
   formatDocument(model, verification, onPress) {
     var resource = verification.document;
@@ -571,14 +576,14 @@ class MessageRow extends Component {
     var photo = (resource  &&  resource.photos)
               ? <Image source={{uri: utils.getImageUri(resource.photos[0].url)}}  style={styles.cellImage} />
               : <View />;
-    
+
     var orgRow;
     if (verification.organization) {
       var orgPhoto = verification.organization.photo
                    ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
                    : <View/>
 
-      orgRow =  onPress 
+      orgRow =  onPress
              ? <View />
              : <View style={{flexDirection: 'row', marginTop: 5}}>
                    <Text style={styles.verySmallLetters}>verified by </Text>
@@ -587,14 +592,15 @@ class MessageRow extends Component {
     }
     else
       orgRow = <View />
-    var orgTitle = this.props.to[constants.TYPE] === 'tradle.Organization' 
-                 ? this.props.to.name 
+    var orgTitle = this.props.to[constants.TYPE] === 'tradle.Organization'
+                 ? this.props.to.name
                  : (this.props.to.organization ? this.props.to.organization.title : null);
+    var verifiedBy = verification.organization ? verification.organization.title : ''
     return (
            <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
               AlertIOS.alert(
-                'Sharing ' + docTitle + ' verified by ' + verification.organization.title,
-                'with ' + orgTitle, 
+                'Sharing ' + docTitle + ' verified by ' + verifiedBy,
+                'with ' + orgTitle,
                 [
                   {text: 'Share', onPress: this.share.bind(this)},
                   {text: 'Cancel', onPress: () => console.log('Canceled!')},
@@ -603,11 +609,11 @@ class MessageRow extends Component {
            <View style={{flex: 1, flexDirection: 'row', paddingVertical: 5}}>
              <View>
                {photo}
-             </View>  
+             </View>
              <View style={{flex:1}}>
                {msg}
                {orgRow}
-             </View>  
+             </View>
            </View>
            </TouchableHighlight>
            );
@@ -627,9 +633,9 @@ class MessageRow extends Component {
     var onPressCall;
 
     var isSimpleMessage = model.id === 'tradle.SimpleMessage';
-    
+
     viewCols.forEach(function(v) {
-      if (properties[v].type === 'array'  ||  properties[v].type === 'date') 
+      if (properties[v].type === 'array'  ||  properties[v].type === 'date')
         return;
       var style = styles.description; //(first) ? styles.resourceTitle : styles.description;
 
@@ -642,10 +648,10 @@ class MessageRow extends Component {
         return;
       }
 
-      if (resource[v]  &&  properties[v].type === 'string'  &&  (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0)) 
+      if (resource[v]  &&  properties[v].type === 'string'  &&  (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0))
         row = <Text style={style} numberOfLines={first ? 2 : 1}>{resource[v]}</Text>;
       else if (!model.autoCreate) {
-        var val = (properties[v].displayAs) 
+        var val = (properties[v].displayAs)
                 ? utils.templateIt(properties[v], resource)
                 : resource[v];
         row = <Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>
@@ -661,7 +667,7 @@ class MessageRow extends Component {
             vCols.push(<View>
                          <Text style={style}>{msgParts[0]}</Text>
                          <Text style={[style, {color: isMyMessage ? STRUCTURED_MESSAGE_COLOR : '#7AAAC3'}]}>{msgModel.value.title}</Text>
-                       </View>);                  
+                       </View>);
             return;
           }
         }
@@ -677,10 +683,10 @@ class MessageRow extends Component {
       }
       vCols.push(row);
       first = false;
-    }); 
-    // if (model.style) 
+    });
+    // if (model.style)
     //   vCols.push(<Text style={styles.verySmallLetters}>{model.title}</Text>);
-    
+
     if (vCols  &&  vCols.length) {
       vCols.forEach(function(v) {
         renderedRow.push(v);
@@ -720,10 +726,10 @@ var styles = StyleSheet.create({
     backgroundColor: '#f7f7f7',
     flexDirection: 'row',
   },
-  myCell: { 
-    padding: 5, 
-    justifyContent: 'flex-end', 
-    borderRadius: 10, 
+  myCell: {
+    padding: 5,
+    justifyContent: 'flex-end',
+    borderRadius: 10,
     backgroundColor: '#569bff',
   },
   warnImage: {
@@ -808,7 +814,7 @@ var styles = StyleSheet.create({
   verificationCheck: {
     flexDirection: 'row',
     alignSelf: 'flex-end',
-    padding: 3, 
+    padding: 3,
     marginVertical: 5
     // marginTop: -5
   },
@@ -860,7 +866,7 @@ var styles = StyleSheet.create({
     marginTop: 5,
     backgroundColor: '#cccccc',
     flex: 40
-  }  
+  }
 });
 reactMixin(MessageRow.prototype, RowMixin);
 
