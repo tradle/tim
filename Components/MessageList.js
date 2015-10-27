@@ -69,7 +69,7 @@ class MessageList extends Component {
 
     if (params.action !== 'messageList' ||  !params.list || params.isAggregation !== this.props.isAggregation)
       return;
-    if (params.resource  &&  params.resource[constants.ROOT_HASH] != this.props.resource[ROOT_HASH])
+    if (params.resource  &&  params.resource[constants.ROOT_HASH] != this.props.resource[constants.ROOT_HASH])
       return;
     var list = params.list;
     if (list.length || (this.state.filter  &&  this.state.filter.length)) {
