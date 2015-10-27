@@ -1,5 +1,5 @@
 'use strict';
- 
+
 var React = require('react-native');
 var utils = require('../utils/utils');
 var ResourceList = require('./ResourceList');
@@ -49,6 +49,8 @@ class ShowRefList extends Component {
           continue;
         if (p === 'verifiedByMe'  &&  !me.organization)
           continue;
+        if (p == 'myVerifications' && me.organization)
+          continue;
       }
       if (p.charAt(0) === '_'  ||  !props[p].items  ||  !props[p].items.backlink)
         continue;
@@ -70,7 +72,7 @@ class ShowRefList extends Component {
              ?  <View style={buttonStyles.buttons}>
                   <View  style={{flexDirection: 'row'}}>
                     {refList}
-                  </View> 
+                  </View>
                 </View>
              : <View/>;
   }
