@@ -4,7 +4,7 @@ var voc = [{
   'id': 'tradle.Identity',
   'type': 'tradle.Model',
   'title': 'Identity',
-  sort: 'lastMessageTime',  
+  sort: 'lastMessageTime',
   plural: 'Identities',
   'properties': {
     _t: {
@@ -97,7 +97,7 @@ var voc = [{
       items: {
         readOnly: true,
         ref: 'tradle.FinancialProduct',
-        backlink: 'from'        
+        backlink: 'from'
       }
     },
     myVerifications: {
@@ -117,7 +117,7 @@ var voc = [{
       items: {
         readOnly: true,
         ref: 'tradle.Message',
-        where: 'document !== null', 
+        where: 'document !== null',
         backlink: 'from'
       }
     },
@@ -230,11 +230,11 @@ var voc = [{
   ],
   'editCols': [
     'securityCode',
-    'firstName', 
+    'firstName',
     'lastName',
-    'street', 
-    'city', 
-    'region', 
+    'street',
+    'city',
+    'region',
     'postalCode',
     'country',
     'pubkeys',
@@ -253,14 +253,14 @@ var voc = [{
      currentIdentity: {
        type: 'object',
        ref: 'tradle.Identity',
-       readOnly: true      
+       readOnly: true
      },
      allIdentities: {
        type: 'array',
        items: {
          type: 'object',
          ref: 'tradle.Identity',
-       } 
+       }
      }
    },
    required: ['id']
@@ -360,9 +360,9 @@ var voc = [{
     },
     relatedTo: {
       type: 'object',
-      ref: 'tradle.Message',      
+      ref: 'tradle.Message',
     }
-  },  
+  },
   'required': [
     'to', 'from', 'message'
   ],
@@ -419,9 +419,9 @@ var voc = [{
      },
      welcome: {
        type: 'boolean',
-       readOnly: true      
+       readOnly: true
      }
-  },  
+  },
   'required': [
     'to', 'message', 'from'
   ],
@@ -458,7 +458,7 @@ var voc = [{
        'readOnly': true
      },
      'blockchainUrl': {
-       'type': 'string',      
+       'type': 'string',
        'readOnly': true
      },
      'transactionHash': {
@@ -494,14 +494,14 @@ var voc = [{
         'ref': 'tradle.Verification'
       },
     },
-    additionalInfo: { 
-      type: 'array', 
+    additionalInfo: {
+      type: 'array',
       items: {
         ref: 'tradle.AdditionalInfo',
         backlink: 'document'
       }
     }
-  },  
+  },
   'required': [
     'to', 'message', 'from'
   ],
@@ -540,7 +540,7 @@ var voc = [{
        'readOnly': true
      },
      'blockchainUrl': {
-       'type': 'string',      
+       'type': 'string',
        'readOnly': true,
      },
      'transactionHash': {
@@ -577,14 +577,14 @@ var voc = [{
       },
       'required': ['contact']
     },
-    additionalInfo: { 
-      type: 'array', 
+    additionalInfo: {
+      type: 'array',
       items: {
         ref: 'tradle.AdditionalInfo',
         backlink: 'document'
       }
     }
-  },  
+  },
   'required': [
     'to', 'message', 'from'
   ],
@@ -606,10 +606,10 @@ var voc = [{
       'type': 'string',
       'readOnly': true
      },
-     billDate: {    
+     billDate: {
        type: 'date',
        displayName: true
-     }, 
+     },
      issuedBy: {
        type: 'string'
      },
@@ -641,7 +641,7 @@ var voc = [{
       'title': 'Address',
       'readOnly': true
     },
-    
+
     'from': {
       'type': 'object',
       'readOnly': true,
@@ -654,7 +654,7 @@ var voc = [{
        'readOnly': true
      },
      'blockchainUrl': {
-       'type': 'string',      
+       'type': 'string',
        'readOnly': true,
      },
      'transactionHash': {
@@ -690,7 +690,7 @@ var voc = [{
         'ref': 'tradle.Verification'
       },
     }
-  },  
+  },
   'required': [
     'to', 'from', 'photos', 'billDate', 'issuedBy', 'firstName', 'lastName', 'city', 'street', 'postalCode', 'region'
   ],
@@ -717,13 +717,13 @@ var voc = [{
      //  'displayName': true,
      //  readOnly: true,
      // },
-     codeOfIssuing: {   
+     codeOfIssuing: {
        type: 'string'
      },
      passportNumber: {
       'type': 'number',
       'maxLength': 9,
-      'minLength': 9,      
+      'minLength': 9,
       'displayName': true,
      },
      surname: {
@@ -743,7 +743,7 @@ var voc = [{
      sex: {
        type: 'string',
        oneOf: [
-        'Male', 
+        'Male',
         'Female'
        ]
      },
@@ -751,7 +751,7 @@ var voc = [{
        type: 'string',
      },
      dateOfIssue: {
-      type: 'date',      
+      type: 'date',
      },
      authority: {
        type: 'string',
@@ -802,21 +802,21 @@ var voc = [{
       },
     },
      'blockchainUrl': {
-       'type': 'string',      
+       'type': 'string',
        'readOnly': true,
      },
      'transactionHash': {
        'readOnly': true,
        'type': 'string'
      },
-     additionalInfo: { 
-       type: 'array', 
+     additionalInfo: {
+       type: 'array',
        items: {
          ref: 'tradle.AdditionalInfo',
          backlink: 'document'
        }
      }
-  },  
+  },
   'required': [
     'to', 'from', 'photos', 'codeOfIssuing', 'passportNumber', 'surname', 'givenName', 'nationality', 'dateOfBirth', 'sex', 'placeOfBirth', 'dateOfIssue', 'authority', 'dateOfExpiry'
   ],
@@ -824,7 +824,7 @@ var voc = [{
     'from', 'passportNumber', 'dateOfExpiry', 'time'
   ],
   'viewCols': [
-    'codeOfIssuing', 'passportNumber', 'surname', 'givenName', 'nationality', 'dateOfBirth', 'sex', 'placeOfBirth', 'dateOfIssue', 'authority', 'dateOfExpiry'  
+    'codeOfIssuing', 'passportNumber', 'surname', 'givenName', 'nationality', 'dateOfBirth', 'sex', 'placeOfBirth', 'dateOfIssue', 'authority', 'dateOfExpiry'
   ],
 },
 {
@@ -843,7 +843,7 @@ var voc = [{
      //  'displayName': true,
      //  readOnly: true,
      // },
-     licenseNumber: {   
+     licenseNumber: {
       'type': 'number',
       maxLength: 8,
       'displayName': true,
@@ -860,7 +860,7 @@ var voc = [{
        type: 'date'
      },
      dateOfIssue: {
-      type: 'date',      
+      type: 'date',
      },
      dateOfExpiry: {
        type: 'date',
@@ -873,7 +873,7 @@ var voc = [{
        type: 'string'
      },
      entitlementCategories: {
-       type: 'string'      
+       type: 'string'
      },
      'from': {
       'type': 'object',
@@ -916,21 +916,21 @@ var voc = [{
       },
     },
      'blockchainUrl': {
-       'type': 'string',      
+       'type': 'string',
        'readOnly': true,
      },
      'transactionHash': {
        'readOnly': true,
        'type': 'string'
      },
-     additionalInfo: { 
-       type: 'array', 
+     additionalInfo: {
+       type: 'array',
        items: {
          ref: 'tradle.AdditionalInfo',
          backlink: 'document'
        }
      }
-  },  
+  },
   'required': [
     'to', 'from', 'photos', 'licenseNumber', 'surname', 'givenName', 'dateOfBirth', 'dateOfIssue', 'dateOfExpiry', 'issuingAuthority', 'holderAddress', 'entitlementCategories'
   ],
@@ -981,7 +981,7 @@ var voc = [{
        'displayName': true
      },
      'blockchainUrl': {
-       'type': 'string',      
+       'type': 'string',
        'readOnly': true
      },
      'transactionHash': {
@@ -997,7 +997,7 @@ var voc = [{
       type: 'object',
       ref: 'tradle.Organization'
      }
-  },  
+  },
   'required': [
     'message', 'to', 'from', 'time'
   ],
@@ -1015,7 +1015,7 @@ var voc = [{
   properties: {
     _t: {
       type: 'string',
-      readOnly: true      
+      readOnly: true
     },
     code: {
       type: 'string',
@@ -1031,7 +1031,7 @@ var voc = [{
   id: 'tradle.Organization',
   type: 'tradle.Model',
   title: 'Organization',
-  sort: 'lastMessageTime',  
+  sort: 'lastMessageTime',
   properties: {
     '_t': {
       type: 'string',
@@ -1043,7 +1043,7 @@ var voc = [{
     },
     email: {
       type: 'string'
-    },    
+    },
     'city': {
       'type': 'string'
     },
@@ -1072,7 +1072,7 @@ var voc = [{
        'type': 'object',
        'ref': 'tradle.Identity',
        backlink: 'organization'
-      } 
+      }
     },
     lastMessage: {
        type: 'string',
@@ -1154,10 +1154,10 @@ var voc = [{
     'lastMessageTime',
   ],
   editCols: [
-    'name', 
-    'street', 
-    'city', 
-    'region', 
+    'name',
+    'street',
+    'city',
+    'region',
     'country',
   ]
 },
@@ -1180,7 +1180,7 @@ var voc = [{
   id: 'tradle.Money',
   type: 'tradle.Model',
   inlined: true,
-  properties: { 
+  properties: {
     '_t': {
       'type': 'string',
       'readOnly': true
@@ -1199,12 +1199,12 @@ var voc = [{
   }
 },
 {
-  id: 'tradle.CurrentAccounts',
+  id: 'tradle.CurrentAccount',
   type: 'tradle.Model',
-  title: 'Current Accounts',
+  title: 'Current Account',
   interfaces: ['tradle.Message'],
   subClassOf: 'tradle.FinancialProduct',
-  properties: { 
+  properties: {
     '_t': {
       'type': 'string',
       'readOnly': true
@@ -1228,7 +1228,7 @@ var voc = [{
     forms: {
       type: 'string',
       readOnly: true,
-      items: ['tradle.AboutYou', 'tradle.YourMoney']      
+      items: ['tradle.AboutYou', 'tradle.YourMoney']
     },
     residentialStatus: {
       type: 'object',
@@ -1243,7 +1243,7 @@ var voc = [{
       description: 'How many people who live with you depend on you financially?'
     },
     nationality: {
-      type: 'object',      
+      type: 'object',
       ref: 'tradle.Nationality'
     },
     inUKFrom: {
@@ -1252,7 +1252,7 @@ var voc = [{
       title: 'In UK from'
     },
     countryOfBirth: {
-      type: 'object',      
+      type: 'object',
       ref: 'tradle.Country'
     },
     taxResidency: {
@@ -1286,7 +1286,7 @@ var voc = [{
       required: ['phoneType', 'number']
     },
     emailAddress: {
-      type: 'string',      
+      type: 'string',
     },
     employer: {
       type: 'object',
@@ -1305,7 +1305,7 @@ var voc = [{
   id: 'tradle.Savings',
   title: 'Savings',
   type: 'tradle.Model',
-  properties: { 
+  properties: {
     '_t': {
       'type': 'string',
       'readOnly': true
@@ -1428,7 +1428,7 @@ var voc = [{
   id: 'tradle.ISAs',
   title: 'ISAs',
   type: 'tradle.Model',
-  properties: { 
+  properties: {
     '_t': {
       'type': 'string',
       'readOnly': true
@@ -1439,7 +1439,7 @@ var voc = [{
   id: 'tradle.CreditCards',
   type: 'tradle.Model',
   title: 'Credit Cards',
-  properties: { 
+  properties: {
     '_t': {
       'type': 'string',
       'readOnly': true
@@ -1449,9 +1449,9 @@ var voc = [{
 {
   id: 'tradle.FinancialProduct',
   type: 'tradle.Model',
-  interfaces: ['tradle.Message'],
+  // interfaces: ['tradle.Message'],
   title: 'Financial Product',
-  properties: { 
+  properties: {
     '_t': {
       'type': 'string',
       'readOnly': true
@@ -1474,7 +1474,7 @@ var voc = [{
   type: 'tradle.Model',
   interfaces: ['tradle.Message'],
   subClassOf: 'tradle.FinancialProduct',
-  properties: { 
+  properties: {
     '_t': {
       'type': 'string',
       'readOnly': true
@@ -1497,7 +1497,8 @@ var voc = [{
   type: 'tradle.Model',
   subClassOf: 'tradle.FinancialProduct',
   interfaces: ['tradle.Message'],
-  properties: { 
+  forms: ['tradle.H1', 'tradle.H2'],
+  properties: {
     '_t': {
       'type': 'string',
       'readOnly': true
@@ -1512,15 +1513,31 @@ var voc = [{
       readOnly: true,
       ref: 'tradle.Organization'
     },
+    to: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
   },
 },
 {
-  id: 'tradle.MotorInsurance',
-  title: 'Motor Insurance',
+  id: 'tradle.Form',
+  title: 'Form',
+  type: 'tradle.Model',
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+  }
+},
+{
+  id: 'tradle.H1',
+  title: 'H1',
   type: 'tradle.Model',
   interfaces: ['tradle.Message'],
-  subClassOf: 'tradle.FinancialProduct',
-  properties: { 
+  subClassOf: 'tradle.Form',
+  properties: {
     '_t': {
       'type': 'string',
       'readOnly': true
@@ -1529,7 +1546,34 @@ var voc = [{
       type: 'object',
       readOnly: true,
       ref: 'tradle.Identity'
-    },    
+    },
+    to: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    residentialStatus: {
+      type: 'object',
+      ref: 'tradle.ResidentialStatus'
+    },
+  }
+},
+{
+  id: 'tradle.MotorInsurance',
+  title: 'Motor Insurance',
+  type: 'tradle.Model',
+  interfaces: ['tradle.Message'],
+  subClassOf: 'tradle.FinancialProduct',
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    from: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
     accountWith: {
       type: 'object',
       readOnly: true,
@@ -1543,7 +1587,7 @@ var voc = [{
   interfaces: ['tradle.Message'],
   type: 'tradle.Model',
   subClassOf: 'tradle.FinancialProduct',
-  properties: { 
+  properties: {
     '_t': {
       'type': 'string',
       'readOnly': true
@@ -1566,7 +1610,7 @@ var voc = [{
   interfaces: ['tradle.Message'],
   type: 'tradle.Model',
   subClassOf: 'tradle.FinancialProduct',
-  properties: { 
+  properties: {
     '_t': {
       'type': 'string',
       'readOnly': true
@@ -1589,7 +1633,7 @@ var voc = [{
   title: 'Life Insurance',
   type: 'tradle.Model',
   subClassOf: 'tradle.FinancialProduct',
-  properties: { 
+  properties: {
     '_t': {
       'type': 'string',
       'readOnly': true
@@ -1647,7 +1691,7 @@ module.exports = models;
 //      //   'readOnly': true
 //      // },
 //      'blockchainUrl': {
-//        'type': 'string',      
+//        'type': 'string',
 //        'readOnly': true
 //      },
 //      'transactionHash': {
@@ -1682,7 +1726,7 @@ module.exports = models;
 //       },
 //       'required': ['url']
 //     },
-//   },  
+//   },
 //   'required': [
 //     'title', 'description'
 //   ],
@@ -1727,7 +1771,7 @@ module.exports = models;
 //       'ref': 'tradle.Identity',
 //      },
 //      'blockchainUrl': {
-//        'type': 'string',      
+//        'type': 'string',
 //        'readOnly': true
 //      },
 //      'transactionHash': {
@@ -1743,7 +1787,7 @@ module.exports = models;
 //       items: {
 //         ref: 'tradle.PostComment',
 //         backlink: 'post'
-//       } 
+//       }
 //      },
 //     'photos': {
 //       'type': 'array',
@@ -1762,7 +1806,7 @@ module.exports = models;
 //       },
 //       'required': ['url']
 //     },
-//   },  
+//   },
 //   'required': [
 //     'relatedTo', 'title', 'url'
 //   ],
@@ -1823,10 +1867,10 @@ module.exports = models;
 //     },
 //     relatedTo: {
 //       type: 'object',
-//       ref: 'tradle.Community',   
-//       readOnly: true   
+//       ref: 'tradle.Community',
+//       readOnly: true
 //     }
-//   },  
+//   },
 //   'required': [
 //     'message', 'post', 'relatedTo'
 //   ],
@@ -1917,7 +1961,7 @@ module.exports = models;
 //       type: 'object',
 //       ref: 'tradle.Money',
 //       description: '$ price after discount'
-//     },    
+//     },
 //     dealDiscount: {
 //       type: 'object',
 //       ref: 'tradle.Money',
@@ -1943,15 +1987,15 @@ module.exports = models;
 //       minimum: 1,
 //       maximum: 99,
 //       readOnly: true,
-//       description: '% discount',      
+//       description: '% discount',
 //       formula: '((dealValue - dealPrice)/dealValue) * 100',
 //     },
 //     dealStatus: {
 //       type: 'string',
 //       readOnly: true,
 //       oneOf: [
-//         'Deal is over', 
-//         'Deal is going', 
+//         'Deal is over',
+//         'Deal is going',
 //         'Not featured yet'
 //       ]
 //     },
@@ -2040,7 +2084,7 @@ module.exports = models;
 //     dealPrice: {
 //       type: 'object',
 //       ref: 'tradle.Money',
-//     },    
+//     },
 //     dealDiscount: {
 //       type: 'object',
 //       ref: 'tradle.Money',
@@ -2097,7 +2141,7 @@ module.exports = models;
 //       ref: 'tradle.Organization'
 //     },
 //     photos: {
-//       type: 'array',      
+//       type: 'array',
 //       formula: 'organization.photos'
 //     }
 //   },
@@ -2124,7 +2168,7 @@ module.exports = models;
 //       'items': {
 //         'type': 'object',
 //         'ref': 'tradle.Identity',
-//        } 
+//        }
 //      },
 //      'photos': {
 //       'type': 'array',
@@ -2161,21 +2205,21 @@ module.exports = models;
 //       'type': 'string',
 //       'displayAs': ['street', ',', 'city', ',', 'region', 'postalCode'],
 //       'title': 'Address'
-//     }     
-//   },  
+//     }
+//   },
 //   'required': ['name'],
 //   'viewCols': [
 //     'name',
-//     'street', 
-//     'city', 
-//     'region', 
+//     'street',
+//     'city',
+//     'region',
 //     'country',
 //   ],
 //   'editCols': [
-//     'name', 
-//     'street', 
-//     'city', 
-//     'region', 
+//     'name',
+//     'street',
+//     'city',
+//     'region',
 //     'country',
 //   ]
 // },
@@ -2208,7 +2252,7 @@ module.exports = models;
 //        'readOnly': true
 //      },
 //      'blockchainUrl': {
-//        'type': 'string',      
+//        'type': 'string',
 //        'readOnly': true
 //      },
 //      'transactionHash': {
@@ -2244,7 +2288,7 @@ module.exports = models;
 //         backlink: 'document'
 //       },
 //     }
-//   },  
+//   },
 //   'required': [
 //     'to', 'message', 'from'
 //   ],
@@ -2273,7 +2317,7 @@ module.exports = models;
 //       'title': 'Description',
 //      },
 //      'blockchainUrl': {
-//        'type': 'string',      
+//        'type': 'string',
 //        'readOnly': true
 //      },
 //      'transactionHash': {
@@ -2342,7 +2386,7 @@ module.exports = models;
 //         'ref': 'tradle.VerificationOfAddress'
 //       },
 //     }
-//   },  
+//   },
 //   'required': [
 //     'to', 'from', 'message', 'street', 'city', 'region', 'postalCode'
 //   ],
@@ -2405,7 +2449,7 @@ module.exports = models;
 //        'displayName': true
 //      },
 //      'blockchainUrl': {
-//        'type': 'string',      
+//        'type': 'string',
 //        'readOnly': true
 //      },
 //      'transactionHash': {
@@ -2414,15 +2458,15 @@ module.exports = models;
 //      },
 //      'time': {
 //        'type': 'date',
-//        skipLabel: true,       
+//        skipLabel: true,
 //        'readOnly': true,
-//      }, 
+//      },
 //       organization: {
 //         type: 'object',
 //         readOnly: true,
 //         ref: 'tradle.Organization'
 //       },
-//   },  
+//   },
 //   'required': [
 //     'ver1', 'ver2', 'ver3', 'to', 'from', 'time'
 //   ],
@@ -2447,14 +2491,14 @@ module.exports = models;
 //       'displayName': true
 //      }
 //   },
-//   required: ['url'] 
+//   required: ['url']
 // },
 // {
 //   id: 'tradle.CurrentAccounts',
 //   type: 'tradle.Model',
 //   title: 'Current Accounts',
 //   subClassOf: 'tradle.FinancialProduct',
-//   properties: { 
+//   properties: {
 //     '_t': {
 //       'type': 'string',
 //       'readOnly': true
@@ -2462,7 +2506,7 @@ module.exports = models;
 //     forms: {
 //       type: 'string',
 //       readOnly: true,
-//       items: ['tradle.AboutYou', 'tradle.YourMoney']      
+//       items: ['tradle.AboutYou', 'tradle.YourMoney']
 //     },
 //     aboutYou: {
 //       type: 'object',
@@ -2517,7 +2561,7 @@ module.exports = models;
 //       description: 'How many people who live with you depend on you financially?'
 //     },
 //     nationality: {
-//       type: 'string',      
+//       type: 'string',
 //       oneOf: [
 //         {'1': 'British'},
 //         {'2': 'American'},
@@ -2531,7 +2575,7 @@ module.exports = models;
 //       description: 'When did you arrive in the UK?'
 //     },
 //     countryOfBirth: {
-//       type: 'string',      
+//       type: 'string',
 //       oneOf: [
 //         {'1': 'UK'},
 //         {'2': 'US'},
@@ -2595,7 +2639,7 @@ module.exports = models;
 //       required: ['url']
 //     },
 //     emailAddress: {
-//       type: 'string',      
+//       type: 'string',
 //     }
 //   }
 // },

@@ -253,7 +253,28 @@ var Store = Reflux.createStore({
     var rr = {};
     if (!r.time)
       r.time = new Date().getTime();
-
+    if (r.to[TYPE] === ORGANIZATION) {
+      var orgId = utils.getId(r.to)
+      var result = this.searchNotMessages({modelName: IDENTITY})
+      var orgRep;
+      for (var ir of result) {
+        if (!ir.organization)
+          continue
+        if (utils.getId(ir.organization) === orgId) {
+          orgRep = ir
+          break
+        }
+      }
+      if (!orgRep) {
+        var params = {
+          action: 'addMessage',
+          error: 'No ' + r.to.name + ' representative was found'
+        }
+        this.trigger(params);
+        return
+      }
+      r.to = orgRep
+    }
     for (var p in r) {
       if (props[p].ref  &&  !props[p].id) {
         var type = r[p][TYPE];
@@ -286,12 +307,7 @@ var Store = Reflux.createStore({
     var welcomeMessage;
     return getDHTKey(toChain)
     .then(function(dhtKey) {
-      // var key = rr[TYPE] + '_' + dhtKey;
       if (!isWelcome) {
-        // rr[ROOT_HASH] = dhtKey;
-        // rr[CUR_HASH] = dhtKey;
-        // batch.push({type: 'put', key: key, value: rr})
-        // list[key] = {key: key, value: rr};
         var to = list[utils.getId(r.to)].value;
         var from = list[utils.getId(r.from)].value;
         var dn = r.message; // || utils.getDisplayName(r, props);
@@ -1116,7 +1132,7 @@ var Store = Reflux.createStore({
           r.document = list[utils.getId(r.document.id)].value;
       }
       // HACK to not show service message in customer stream
-      else if (r.message  &&  r.message.length  && 
+      else if (r.message  &&  r.message.length  &&
                r.message.indexOf('waiting for response') != r.message.length - 20) {
         var rid = utils.getId(r.to);
         if (rid.indexOf(ORGANIZATION) == 0  &&  (!me.organization  ||  rid !== utils.getId(me.organization)))
@@ -1129,7 +1145,8 @@ var Store = Reflux.createStore({
 
           continue;
         }
-        var isVerificationR = r[TYPE] === VERIFICATION  ||  r[TYPE].subClassOf === VERIFICATION;
+
+        var isVerificationR = r[TYPE] === VERIFICATION  ||  this.getModel(r[TYPE]).value.subClassOf === VERIFICATION;
         if ((!r.message  ||  r.message.trim().length === 0) && !r.photos &&  !isVerificationR)
           // check if this is verification resource
           continue;
@@ -1507,6 +1524,8 @@ var Store = Reflux.createStore({
                           formatted: me.firstName + (me.lastName ? ' ' + me.lastName : '')
                         })
                         .set('_z', me[NONCE] || this.getNonce())
+    if (me.organization)
+      meIdentity.set('organization', me.organization)
 
     me.pubkeys.forEach(meIdentity.addKey, meIdentity)
 
@@ -1786,15 +1805,22 @@ var Store = Reflux.createStore({
       }
 
       var resultList
-      if (isMessage)
-        resultList = self.searchMessages({to: me, modelName: MESSAGE})
+      if (isMessage) {
+        var toId = IDENTITY + '_' + obj.to[ROOT_HASH]
+        var meId = IDENTITY + '_' + me[ROOT_HASH]
+        var id = toId === meId ? IDENTITY + '_' + obj.from[ROOT_HASH] : toId
+
+        resultList = self.searchMessages({to: list[id].value, modelName: MESSAGE})
+      }
         // resultList = searchMessages({to: list[obj.to.identity.toJSON()[TYPE] + '_' + obj.to[ROOT_HASH]], modelName: MESSAGE})
       else if (!onMessage  ||  val[TYPE] != IDENTITY)
         resultList = self.searchNotMessages({modelName: val[TYPE]})
       var retParams = {
         action: isMessage ? 'messageList' : 'list',
-        list: resultList
+        list: resultList,
       }
+      if (isMessage)
+        retParams.resource = list[id].value
       self.trigger(retParams)
 
       // var retParams = {
