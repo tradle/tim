@@ -8,7 +8,7 @@ var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var constants = require('tradle-constants');
-
+var MessageList = require('./MessageList')
 var {
   ListView,
   Text,
@@ -49,7 +49,32 @@ class ProductChooser extends Component {
       });
     }
   }
+
   selectResource(resource) {
+    var route = {
+      component: MessageList,
+      backButtonTitle: 'Back',
+      id: 11,
+      title: this.props.resource.name,
+      passProps: {
+        resource: this.props.resource,
+        filter: '',
+        modelName: 'tradle.Message',
+      },
+    }
+    var msg = {
+      message: '[application for][' + resource.id + ']',
+      _t: constants.TYPES.SIMPLE_MESSAGE,
+      from: utils.getMe(),
+      to: this.props.resource,
+      time: new Date().getTime(),
+    }
+
+    Actions.addMessage(msg, true)
+    this.props.navigator.push(route);
+
+  }
+  selectResource1(resource) {
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     var model = utils.getModel(this.state.modelName);
 
@@ -93,7 +118,7 @@ class ProductChooser extends Component {
       );
   }
   render() {
-    var content = 
+    var content =
     <ListView ref='listview' style={styles.listview}
       dataSource={this.state.dataSource}
       renderRow={this.renderRow.bind(this)}
@@ -102,7 +127,7 @@ class ProductChooser extends Component {
       keyboardShouldPersistTaps={true}
       showsVerticalScrollIndicator={false} />;
 
-    var err = this.state.err 
+    var err = this.state.err
             ? <View style={styles.errContainer}><Text style={styles.err}>{this.state.err}</Text></View>
             : <View />;
     return (
@@ -130,10 +155,10 @@ var styles = StyleSheet.create({
     color: '#D7E6ED'
   },
   errContainer: {
-    height: 45, 
-    paddingTop: 5, 
-    paddingHorizontal: 10, 
-    backgroundColor: '#eeeeee', 
+    height: 45,
+    paddingTop: 5,
+    paddingHorizontal: 10,
+    backgroundColor: '#eeeeee',
   }
 });
 
