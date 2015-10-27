@@ -193,7 +193,7 @@ var Store = Reflux.createStore({
           dht: dht,
           port: port,
           syncInterval: 60000,
-          afterBlockTimestamp: 1445884939,
+          afterBlockTimestamp: 1445976998,
           relay: {
             address: addrs[0],
             port: 25778
@@ -325,13 +325,14 @@ var Store = Reflux.createStore({
         batch.push({type: 'put', key: to[TYPE] + '_' + to[ROOT_HASH], value: to});
         batch.push({type: 'put', key: from[TYPE] + '_' + from[ROOT_HASH], value: from});
       }
+      rr[ROOT_HASH] = dhtKey
       if (!isWelcome  ||  (me.organization  &&  utils.getId(me.organization) === utils.getId(r.to)))
         return Q()
       var wmKey = 'Welcome' + rr.to.title
-      if (list[wmKey]) {
-        list[wmKey].value.time = new Date()
-        return Q()
-      }
+      // if (list[wmKey]) {
+      //   list[wmKey].value.time = new Date()
+      //   return Q()
+      // }
       // Create welcome message without saving it in DB
       welcomeMessage = {}
       welcomeMessage.message = welcome.msg.replace('{firstName}', me.firstName)
@@ -353,10 +354,10 @@ var Store = Reflux.createStore({
         time: rr.to.time
       }
       welcomeMessage[ROOT_HASH] = wmKey
-      list[welcomeMessage[ROOT_HASH]] = {
-        key: welcomeMessage[ROOT_HASH],
-        value: welcomeMessage
-      }
+      // list[welcomeMessage[ROOT_HASH]] = {
+      //   key: welcomeMessage[ROOT_HASH],
+      //   value: welcomeMessage
+      // }
       return Q()
     })
     .then(function() {
@@ -378,7 +379,7 @@ var Store = Reflux.createStore({
         return self.getDriver(me)
     })
     .then(function() {
-      if (isWelcome  ||  !list[utils.getId(r.to)].value.pubkeys)
+      if (/*isWelcome  || */ !list[utils.getId(r.to)].value.pubkeys)
         return Q()
       return meDriver.send({
         msg: toChain,
@@ -393,8 +394,8 @@ var Store = Reflux.createStore({
         rr[ROOT_HASH] = roothash
         rr[CUR_HASH] = data[0]._props[CUR_HASH]
       }
-      else
-        rr[ROOT_HASH] = sha(rr)
+      // else
+      //   rr[ROOT_HASH] = toChain[ROOT_HASH]
 
       var key = rr[TYPE] + '_' + rr[ROOT_HASH];
       batch.push({type: 'put', key: key, value: rr})
@@ -782,8 +783,11 @@ var Store = Reflux.createStore({
           else if (!props[p].readOnly  &&  !props[p].immutable)
             returnVal[p] = json[p];
       }
-      if (!isRegistration)
-        returnVal[NONCE] = self.getNonce()
+      if (!isRegistration) {
+        // HACK to not to republish identity
+        if (returnVal[TYPE] !== IDENTITY)
+          returnVal[NONCE] = self.getNonce()
+      }
       if (returnVal[ROOT_HASH])
         return returnVal[ROOT_HASH]
       else
@@ -814,7 +818,7 @@ var Store = Reflux.createStore({
 
         return meDriver.send({
           msg: toChain,
-          to: [self.getFingerprint(to)],
+          to: [{fingerprint: self.getFingerprint(to)}],
           deliver: true,
           chain: false
         })
@@ -828,14 +832,14 @@ var Store = Reflux.createStore({
           returnVal[ROOT_HASH] = dhtKey
       }
       else {
-        returnVal[ROOT_HASH] = dhtKey[ROOT_HASH]
-        returnVal[CUR_HASH] = dhtKey[CUR_HASH]
-        dhtKey = dhtKey[ROOT_HASH]
+        returnVal[ROOT_HASH] = dhtKey[0]._props[ROOT_HASH]
+        returnVal[CUR_HASH] = dhtKey[0]._props[CUR_HASH]
+        dhtKey = dhtKey[0]._props[ROOT_HASH]
       }
       return self._putResourceInDB(returnVal[TYPE], returnVal, dhtKey, isRegistration);
     })
     .catch(function(err) {
-      err = err
+      debugger
     })
 
   },
@@ -906,6 +910,12 @@ var Store = Reflux.createStore({
     }
   },
   getList(params) { //query, modelName, resource, isAggregation, prop) {
+    // meDriver.messages().byRootHash("41677f5827973883a3a5259c1337bda9a5360d38", function(err, r) {
+    //   meDriver.lookupObject(r[0])
+    //     .then(function (obj) {
+    //       debugger
+    //     })
+    // })
     var result = this.searchResources(params);
     if (params.isAggregation)
       result = this.getDependencies(result);
@@ -1132,11 +1142,14 @@ var Store = Reflux.createStore({
           r.document = list[utils.getId(r.document.id)].value;
       }
       // HACK to not show service message in customer stream
-      else if (r.message  &&  r.message.length  &&
-               r.message.indexOf('waiting for response') != r.message.length - 20) {
-        var rid = utils.getId(r.to);
-        if (rid.indexOf(ORGANIZATION) == 0  &&  (!me.organization  ||  rid !== utils.getId(me.organization)))
-           continue;
+      else if (r.message  &&  r.message.length)  {
+        if (r.message.indexOf('waiting for response') == r.message.length - 20) {
+          var rid = utils.getId(r.to);
+          if (rid.indexOf(ORGANIZATION) == 0  &&  (!me.organization  ||  rid !== utils.getId(me.organization)))
+             continue;
+        }
+        else if (r.message.indexOf('[application for]') === 0  &&  me[ROOT_HASH] === utils.getId(r.from).split('_')[1])
+          continue
       }
       if (chatTo) {
         if (backlink  &&  r[backlink]) {
@@ -1147,7 +1160,8 @@ var Store = Reflux.createStore({
         }
 
         var isVerificationR = r[TYPE] === VERIFICATION  ||  this.getModel(r[TYPE]).value.subClassOf === VERIFICATION;
-        if ((!r.message  ||  r.message.trim().length === 0) && !r.photos &&  !isVerificationR)
+        var isForm = this.getModel(r[TYPE]).value.subClassOf === 'tradle.Form'
+        if ((!r.message  ||  r.message.trim().length === 0) && !r.photos &&  !isVerificationR  &&  !isForm)
           // check if this is verification resource
           continue;
         var fromID = utils.getId(r.from);
@@ -1262,7 +1276,10 @@ var Store = Reflux.createStore({
 
     for (var key in list) {
       var type = key.split('_')[0];
-      var model = utils.getModel(type).value;
+      var model = utils.getModel(type)
+      if (!model)  // Welcome
+        continue;
+      model = model.value;
       if (model.id !== VERIFICATION && (!model.subClassOf  ||  model.subClassOf !== VERIFICATION))
         continue;
 
