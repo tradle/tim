@@ -63,11 +63,11 @@ class ProductChooser extends Component {
       },
     }
     var msg = {
-      message: '[application for][' + resource.id + ']',
+      message: '[application for](' + resource.id + ')',
       _t: constants.TYPES.SIMPLE_MESSAGE,
       from: utils.getMe(),
       to: this.props.resource,
-      time: new Date().getTime(),
+      time: new Date().getTime()
     }
 
     Actions.addMessage(msg, true)
