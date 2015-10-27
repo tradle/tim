@@ -22,7 +22,7 @@ var {
 class ResourceTypesScreen extends Component {
   constructor(props) {
     super(props);
-    var implementors = utils.getImplementors(this.props.modelName, ['tradle.FinancialProduct', constants.TYPES.ADDITIONAL_INFO]);
+    var implementors = utils.getImplementors(this.props.modelName, ['tradle.FinancialProduct', 'tradle.Form', constants.TYPES.ADDITIONAL_INFO]);
 
     // delete implementors[constants.TYPES.ADDITIONAL_INFO]
 
