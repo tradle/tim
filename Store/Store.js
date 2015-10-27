@@ -1115,6 +1115,13 @@ var Store = Reflux.createStore({
         if (r.document  &&  r.document.id)
           r.document = list[utils.getId(r.document.id)].value;
       }
+      // HACK to not show service message in customer stream
+      else if (r.message  &&  r.message.length  && 
+               r.message.indexOf('waiting for response') != r.message.length - 20) {
+        var rid = utils.getId(r.to);
+        if (rid.indexOf(ORGANIZATION) == 0  &&  (!me.organization  ||  rid !== utils.getId(me.organization)))
+           continue;
+      }
       if (chatTo) {
         if (backlink  &&  r[backlink]) {
           if (chatId === utils.getId(r[backlink]))
@@ -1744,11 +1751,11 @@ var Store = Reflux.createStore({
       var isMessage = model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1);
       // var isMessage = model.subClassOf  &&  model.subClassOf === constants.TYPES.MESSAGE
       if (isMessage) {
-        var from = list[obj.from[ROOT_HASH]].value
+        var from = list[IDENTITY + '_' + obj.from[ROOT_HASH]].value
         if (me  &&  from[ROOT_HASH] === me[ROOT_HASH])
           return
         // var to = obj.to.identity.toJSON()
-        var to = list[obj.to[ROOT_HASH]].value
+        var to = list[IDENTITY + '_' + obj.to[ROOT_HASH]].value
         val.to = {
           id: to[TYPE] + '_' + to[ROOT_HASH],
           title: to.name.formatted
