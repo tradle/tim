@@ -1,5 +1,5 @@
 'use strict';
- 
+
 var React = require('react-native');
 var utils = require('../utils/utils');
 var NewItem = require('./NewItem');
@@ -15,8 +15,8 @@ var Reflux = require('reflux');
 var reactMixin = require('react-mixin');
 var Icon = require('react-native-vector-icons/Ionicons');
 var myStyles = require('../styles/styles');
-var KeyboardEvents = require('react-native-keyboardevents');
-var KeyboardEventEmitter = KeyboardEvents.Emitter;
+// var KeyboardEvents = require('react-native-keyboardevents');
+// var KeyboardEventEmitter = KeyboardEvents.Emitter;
 var constants = require('tradle-constants');
 var UIImagePickerManager = require('NativeModules').UIImagePickerManager;
 
@@ -29,10 +29,12 @@ var {
   Text,
   TextInput,
   ScrollView,
-  LayoutAnimation,
+  DeviceEventEmitter,
+  // LayoutAnimation,
   Component,
   Navigator,
   TouchableHighlight,
+
 } = React;
 
 class NewResource extends Component {
@@ -57,25 +59,35 @@ class NewResource extends Component {
     };
   }
   updateKeyboardSpace(frames) {
-    LayoutAnimation.configureNext(animations.layout.spring);
-    var height = frames.end ? frames.end.height : frames.endCoordinates.height
+    // LayoutAnimation.configureNext(animations.layout.spring);
+    // var height = frames.end ? frames.end.height : frames.endCoordinates.height
+    var height = frames.endCoordinates ? frames.endCoordinates.height : 0
     this.setState({keyboardSpace: height});
   }
 
   resetKeyboardSpace() {
-    LayoutAnimation.configureNext(animations.layout.spring);
+    // LayoutAnimation.configureNext(animations.layout.spring);
     this.setState({keyboardSpace: 0});
-  }  
+  }
+
 
   componentDidMount() {
     this.listenTo(Store, 'itemAdded');
-    KeyboardEventEmitter.on(KeyboardEvents.KeyboardDidShowEvent, this.updateKeyboardSpace);
-    KeyboardEventEmitter.on(KeyboardEvents.KeyboardWillHideEvent, this.resetKeyboardSpace);
+    DeviceEventEmitter.addListener('keyboardWillShow', (e) => {
+      this.updateKeyboardSpace(e)
+    });
+
+    DeviceEventEmitter.addListener('keyboardWillHide', (e) => {
+      this.resetKeyboardSpace(e)
+     // ...
+    })
+    // KeyboardEventEmitter.on(KeyboardEvents.KeyboardDidShowEvent, this.updateKeyboardSpace);
+    // KeyboardEventEmitter.on(KeyboardEvents.KeyboardWillHideEvent, this.resetKeyboardSpace);
   }
 
   componentWillUnmount() {
-    KeyboardEventEmitter.off(KeyboardEvents.KeyboardDidShowEvent, this.updateKeyboardSpace);
-    KeyboardEventEmitter.off(KeyboardEvents.KeyboardWillHideEvent, this.resetKeyboardSpace);
+    // KeyboardEventEmitter.off(KeyboardEvents.KeyboardDidShowEvent, this.updateKeyboardSpace);
+    // KeyboardEventEmitter.off(KeyboardEvents.KeyboardWillHideEvent, this.resetKeyboardSpace);
   }
   itemAdded(params) {
     var resource = params.resource;
@@ -86,13 +98,13 @@ class NewResource extends Component {
         this.setState({err: params.error, resource: resource, isRegistration: this.state.isRegistration});
       return;
     }
-    // if registration or after editing your own profile 
+    // if registration or after editing your own profile
     // if (this.state.isRegistration  ||  (params.me  &&  resource[constants.ROOT_HASH] === params.me[constants.ROOT_HASH]))
     //   utils.setMe(params.me);
     var self = this;
     var title = utils.getDisplayName(resource, self.props.model.properties);
     var isMessage = this.props.model.interfaces  &&  this.props.model.interfaces.indexOf('tradle.Message') != -1;
-    // When message created the return page is the chat window, 
+    // When message created the return page is the chat window,
     // When profile or some contact info changed/added the return page is Profile view page
     if (this.props.callback) {
       this.props.navigator.pop();
@@ -121,7 +133,7 @@ class NewResource extends Component {
         id: 4,
         component: NewResource,
         rightButtonTitle: 'Done',
-        backButtonTitle: 'Back',        
+        backButtonTitle: 'Back',
         titleTextColor: '#7AAAC3',
         passProps: {
           model: self.props.model,
@@ -133,7 +145,7 @@ class NewResource extends Component {
       }
     });
     if (currentRoutesLength != 2)
-      this.props.navigator.pop();  
+      this.props.navigator.pop();
   }
   onSavePressed() {
     var resource = this.state.resource;
@@ -141,7 +153,7 @@ class NewResource extends Component {
     if (!value) {
       value = this.refs.form.refs.input.state.value;
       if (!value)
-        return; 
+        return;
       var required = this.props.model.required;
       if (!required) {
         required = []
@@ -175,7 +187,7 @@ class NewResource extends Component {
       var msg = '';
       var errMsg = errors.forEach(function(err) {
          msg += ' ' + err.message;
-      }); 
+      });
       this.setState({ err: msg });
       return;
     }
@@ -190,9 +202,9 @@ class NewResource extends Component {
     if (isRegistration)
       this.state.isRegistration = true;
     var params = {
-      value: json, 
-      resource: resource, 
-      meta: this.props.model, 
+      value: json,
+      resource: resource,
+      meta: this.props.model,
       isRegistration: isRegistration
     };
     if (this.props.additionalInfo)
@@ -209,7 +221,7 @@ class NewResource extends Component {
     var isFinancialProduct = this.props.model.subClassOf  &&  this.props.model.subClassOf == 'tradle.FinancialProduct';
     var value = this.refs.form.input;
 
-    var filter = event.nativeEvent.text; 
+    var filter = event.nativeEvent.text;
     var m = utils.getModel(prop.ref).value;
     var currentRoutes = this.props.navigator.getCurrentRoutes();
     this.props.navigator.push({
@@ -220,7 +232,7 @@ class NewResource extends Component {
       backButtonTitle: 'Back',
       sceneConfig: isFinancialProduct ? Navigator.SceneConfigs.FloatFromBottom : Navigator.SceneConfigs.FloatFromRight,
       passProps: {
-        filter:      filter, 
+        filter:      filter,
         prop:        propName,
         modelName:   prop.ref,
         resource:    resource,
@@ -257,7 +269,7 @@ class NewResource extends Component {
     for (var p in json)
       if (!resource[p] && json[p])
         resource[p] = json[p];
-    return resource;    
+    return resource;
   }
 
   onAddItem(propName, item) {
@@ -320,7 +332,7 @@ class NewResource extends Component {
   showChoice() {
     var self = this;
     UIImagePickerManager.showImagePicker({returnBase64Image: true, returnIsVertical: true}, (doCancel, response) => {
-      if (doCancel) 
+      if (doCancel)
         return;
 
       var item = {
@@ -338,7 +350,7 @@ class NewResource extends Component {
     var err = this.state.err;
 
     var resource = this.state.resource;
-    var iKey = resource  
+    var iKey = resource
              ? resource[constants.TYPE] + '_' + resource[constants.ROOT_HASH]
              : null;
 
@@ -350,19 +362,19 @@ class NewResource extends Component {
     var arrays = [];
     extend(true, data, resource);
     var isMessage = meta.interfaces  &&  meta.interfaces.indexOf('tradle.Message') != -1;
-    var isFinancialProduct = isMessage  &&  this.props.model.subClassOf && this.props.model.subClassOf === 'tradle.FinancialProduct' 
+    var isFinancialProduct = isMessage  &&  this.props.model.subClassOf && this.props.model.subClassOf === 'tradle.FinancialProduct'
     var showSendVerificationForm = false;
     var formToDisplay;
     if (isMessage) {
       var len = resource.message  &&  utils.splitMessage(resource.message).length;
-      if (len < 2) 
+      if (len < 2)
         showSendVerificationForm = true;
       else
-        data.message = '';        
+        data.message = '';
     }
     var params = {
-        meta: meta, 
-        data: data, 
+        meta: meta,
+        data: data,
         chooser: this.chooser.bind(this),
         model: model,
         items: arrays,
@@ -374,7 +386,7 @@ class NewResource extends Component {
     if (this.props.editCols)
       params.editCols = this.props.editCols;
     var options = utils.getFormFields(params);
-    
+
     var Model = t.struct(model);
 
     var errStyle = err ? styles.err : {'padding': 0, 'height': 0};
@@ -386,23 +398,23 @@ class NewResource extends Component {
       var counter;
       if (resource  &&  resource[bl.name]) {
         if (resource[bl.name].length)
-          counter = 
+          counter =
             <View style={styles.itemsCounter}><Text>{resource[bl.name] ? resource[bl.name].length : ''}</Text></View>;
         else if (model.required  &&  model.required.indexOf(bl.name) != -1)
-          counter = 
+          counter =
             <View>
             <Icon name='asterisk'  size={20}  color='#96415A'  style={styles.icon}/>
             </View>;
         else
-          counter = <View></View>    
+          counter = <View></View>
       }
       else if (self.props.model.required  &&  self.props.model.required.indexOf(bl.name) != -1)
-        counter = 
+        counter =
           <View>
             <Icon name='asterisk'  size={20}  color='#96415A'  style={styles.icon}/>
           </View>;
       else
-        counter = <View></View>    
+        counter = <View></View>
 
       return (
         <TouchableHighlight style={styles.itemButton} underlayColor='#7AAAC3'
@@ -422,9 +434,9 @@ class NewResource extends Component {
     var style = {marginTop: 64};
     options.auto = 'placeholders';
     options.tintColor = 'red'
-    var photoStyle = /*isMessage && !isFinancialProduct ? {marginTop: -35} :*/ styles.photoBG; 
+    var photoStyle = /*isMessage && !isFinancialProduct ? {marginTop: -35} :*/ styles.photoBG;
     // <FromToView resource={resource} model={meta} navigator={this.props.navigator} />
-    var content = 
+    var content =
       <ScrollView style={style}>
         <View style={styles.container}>
           <View style={{flexWrap: 'wrap'}}>
@@ -434,22 +446,22 @@ class NewResource extends Component {
             <PhotoView resource={resource} />
           </View>
           <View style={{'padding': 15}} key={'NewResource'}>
-            <Form ref='form' type={Model} options={options} value={data} />          
+            <Form ref='form' type={Model} options={options} value={data} />
             {arrayItems}
           </View>
-          <View style={{height: 300}} />          
+          <View style={{height: 300}} />
         </View>
       </ScrollView>
-    // if (isMessage) 
+    // if (isMessage)
     //   return (
     //     <View>
     //       {content}
     //       <View style={{height: this.state.keyboardSpace}}>
     //       <View style={{marginTop: -35}}>
-    //         <ChatMessage resource={resource} 
-    //                      model={meta} 
+    //         <ChatMessage resource={resource}
+    //                      model={meta}
     //                      onSubmitEditing={this.onSubmitEditing.bind(this)} />
-    //       </View>    
+    //       </View>
     //       </View>
     //     </View>
     //   );
@@ -479,14 +491,14 @@ class NewResource extends Component {
     var meName = utils.getDisplayName(me, meta);
     var modelName = 'tradle.SimpleMessage';
     var value = {
-      message: msg 
+      message: msg
               ?  model.isInterface ? msg : '[' + msg + '](' + model.id + ')'
               : '',
 
       from: {
-        id: me[constants.TYPE] + '_' + me[constants.ROOT_HASH] + '_' + me[constants.CUR_HASH], 
+        id: me[constants.TYPE] + '_' + me[constants.ROOT_HASH] + '_' + me[constants.CUR_HASH],
         title: meName
-      }, 
+      },
       to: {
         id: resource.to[constants.TYPE] + '_' + resource.to[constants.ROOT_HASH] + '_' + resource.to[constants.CUR_HASH],
         title: toName
@@ -498,9 +510,9 @@ class NewResource extends Component {
 
     if (!isNoAssets) {
       var photos = [];
-      for (var assetUri in assets) 
+      for (var assetUri in assets)
         photos.push({url: assetUri, title: 'photo'});
-      
+
       value.photos = photos;
     }
     this.setState({userInput: '', selectedAssets: {}});
@@ -512,18 +524,18 @@ class NewResource extends Component {
   }
   myCustomTemplate(params) {
     var containerStyle = {
-      justifyContent: 'space-between', 
+      justifyContent: 'space-between',
       flexDirection: 'row',
-      borderWidth: 0.5, 
-      height: 36, 
-      borderColor: '#cccccc', 
-      padding: 8, 
-      marginBottom: 5, 
-      borderRadius: 4 
+      borderWidth: 0.5,
+      height: 36,
+      borderColor: '#cccccc',
+      padding: 8,
+      marginBottom: 5,
+      borderRadius: 4
     };
     var labelStyle = {color: '#cccccc', fontSize: 14};
     var textStyle = {color: '#000000', fontSize: 14};
-    var resource = this.props.resource
+    var resource = this.props.resource || this.state.resource
     var label, style
 
     if (resource && resource[params.prop]) {
@@ -547,38 +559,38 @@ class NewResource extends Component {
 
 }
 reactMixin(NewResource.prototype, Reflux.ListenerMixin);
-var animations = {
-  layout: {
-    spring: {
-      duration: 400,
-      create: {
-        duration: 300,
-        type: LayoutAnimation.Types.easeInEaseOut,
-        property: LayoutAnimation.Properties.opacity,
-      },
-      update: {
-        type: LayoutAnimation.Types.spring,
-        springDamping: 1,
-      },
-    },
-    easeInEaseOut: {
-      duration: 400,
-      create: {
-        type: LayoutAnimation.Types.easeInEaseOut,
-        property: LayoutAnimation.Properties.scaleXY,
-      },
-      update: {
-        type: LayoutAnimation.Types.easeInEaseOut,
-      },
-    },
-  },
-};
+// var animations = {
+//   layout: {
+//     spring: {
+//       duration: 400,
+//       create: {
+//         duration: 300,
+//         type: LayoutAnimation.Types.easeInEaseOut,
+//         property: LayoutAnimation.Properties.opacity,
+//       },
+//       update: {
+//         type: LayoutAnimation.Types.spring,
+//         springDamping: 1,
+//       },
+//     },
+//     easeInEaseOut: {
+//       duration: 400,
+//       create: {
+//         type: LayoutAnimation.Types.easeInEaseOut,
+//         property: LayoutAnimation.Properties.scaleXY,
+//       },
+//       update: {
+//         type: LayoutAnimation.Types.easeInEaseOut,
+//       },
+//     },
+//   },
+// };
 
 var styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  buttons: { 
+  buttons: {
     width: 100,
     alignSelf: 'center'
   },
