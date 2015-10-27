@@ -1518,6 +1518,19 @@ var voc = [{
       readOnly: true,
       ref: 'tradle.Identity'
     },
+    'verifications': {
+      'type': 'array',
+      'readOnly': true,
+      'items': {
+        'backlink': 'document',
+        'ref': 'tradle.Verification'
+      },
+    },
+    referencedBy: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.SimpleMessage'
+    }
   },
 },
 {
@@ -1556,7 +1569,64 @@ var voc = [{
       type: 'object',
       ref: 'tradle.ResidentialStatus'
     },
-  }
+    'verifications': {
+      'type': 'array',
+      'readOnly': true,
+      'items': {
+        'backlink': 'document',
+        'ref': 'tradle.Verification'
+      },
+    },
+  },
+  viewCols: ['residentialStatus']
+
+},
+{
+  id: 'tradle.H2',
+  title: 'H2',
+  type: 'tradle.Model',
+  interfaces: ['tradle.Message'],
+  subClassOf: 'tradle.Form',
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    from: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    to: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    countryOfBirth: {
+      type: 'object',
+      ref: 'tradle.Country'
+    },
+    taxResidency: {
+      type: 'object',
+      description: 'Country/countries in which you have tax residency (or been resident of for the past 2 years):',
+      ref: 'tradle.Country'
+    },
+    fundAccount: {
+      type: 'object',
+      description: 'How will you fund your account?',
+      ref: 'tradle.HowToFund'
+    },
+    'verifications': {
+      'type': 'array',
+      'readOnly': true,
+      'items': {
+        'backlink': 'document',
+        'ref': 'tradle.Verification'
+      },
+    },
+  },
+  viewCols: ['countryOfBirth', 'fundAccount']
+
 },
 {
   id: 'tradle.MotorInsurance',
