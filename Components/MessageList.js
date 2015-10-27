@@ -41,13 +41,13 @@ class MessageList extends Component {
   }
   componentWillMount() {
     var params = {
-      modelName: this.props.modelName, 
+      modelName: this.props.modelName,
       to: this.props.resource,
-      prop: this.props.prop, 
+      prop: this.props.prop,
     }
     if (this.props.isAggregation)
       params.isAggregation = true;
-    Actions.messageList(params);    
+    Actions.messageList(params);
   }
   componentDidMount() {
     this.listenTo(Store, 'onAction');
@@ -59,15 +59,17 @@ class MessageList extends Component {
     if (params.action === 'addItem'  ||  params.action === 'addVerification') {
       var actionParams = {
         query: this.state.filter,
-        modelName: this.props.modelName, 
+        modelName: this.props.modelName,
         to: this.props.resource,
       }
 
       Actions.messageList(actionParams);
-      return;      
+      return;
     }
 
     if (params.action !== 'messageList' ||  !params.list || params.isAggregation !== this.props.isAggregation)
+      return;
+    if (params.resource  &&  params.resource[constants.ROOT_HASH] != this.props.resource[ROOT_HASH])
       return;
     var list = params.list;
     if (list.length || (this.state.filter  &&  this.state.filter.length)) {
@@ -76,9 +78,9 @@ class MessageList extends Component {
         var model = utils.getModel(this.props.modelName).value;
         if (!model.isInterface)
           return;
-        
+
         var rModel = utils.getModel(type).value;
-        if (!rModel.interfaces  ||  rModel.interfaces.indexOf(this.props.modelName) === -1) 
+        if (!rModel.interfaces  ||  rModel.interfaces.indexOf(this.props.modelName) === -1)
           return;
       }
       this.setState({
@@ -95,7 +97,7 @@ class MessageList extends Component {
 
   selectResource(resource) {
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
-    if (!resource[constants.TYPE]) 
+    if (!resource[constants.TYPE])
       return;
     var model = utils.getModel(resource[constants.TYPE]).value;
     var title = model.title; //utils.getDisplayName(resource, model.properties);
@@ -123,7 +125,7 @@ class MessageList extends Component {
   onSearchChange(event) {
     var actionParams = {
       query: event.nativeEvent.text.toLowerCase(),
-      modelName: this.props.modelName, 
+      modelName: this.props.modelName,
       to: this.props.resource,
     }
 
@@ -133,13 +135,13 @@ class MessageList extends Component {
   renderRow(resource)  {
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
     var isMessage = model.interfaces  &&  model.interfaces.indexOf('tradle.Message') != -1;
-    var isAggregation = this.props.isAggregation; 
+    var isAggregation = this.props.isAggregation;
     var me = utils.getMe();
     var MessageRow = require('./MessageRow');
     var previousMessageTime = currentMessageTime;
     currentMessageTime = resource.time;
     return  (
-      <MessageRow 
+      <MessageRow
         onSelect={this.selectResource.bind(this, resource)}
         resource={resource}
         isAggregation={isAggregation}
@@ -154,7 +156,7 @@ class MessageList extends Component {
   }
 
   render() {
-    if (this.state.isLoading) 
+    if (this.state.isLoading)
       return <View/>
     currentMessageTime = null;
     var content;
@@ -163,7 +165,7 @@ class MessageList extends Component {
       content =  <NoResources
                   filter={this.state.filter}
                   model={model}
-                  isLoading={this.state.isLoading}/> 
+                  isLoading={this.state.isLoading}/>
     else {
       var isAllMessages = model.isInterface  &&  model.id === 'tradle.Message';
           // renderScrollView={(props) => <InvertibleScrollView {...props} inverted />}
@@ -175,30 +177,30 @@ class MessageList extends Component {
           keyboardDismissMode='on-drag'
           keyboardShouldPersistTaps={true}
           showsVerticalScrollIndicator={false} />;
-      if (isAllMessages)      
-        content = 
+      if (isAllMessages)
+        content =
           <InvertibleScrollView
             ref='messages'
             inverted
             automaticallyAdjustContentInsets={false}
             scrollEventThrottle={200}>
           {content}
-          </InvertibleScrollView>    
-    
-      
+          </InvertibleScrollView>
+
+
     }
 
-    var addNew = (model.isInterface) 
-           ? <AddNewMessage navigator={this.props.navigator} 
-                            resource={this.props.resource} 
-                            modelName={this.props.modelName} 
+    var addNew = (model.isInterface)
+           ? <AddNewMessage navigator={this.props.navigator}
+                            resource={this.props.resource}
+                            modelName={this.props.modelName}
                             onAddNewPressed={this.onAddNewPressed.bind(this)}
                             onPhotoSelect={this.onPhotoSelect.bind(this)}
                             callback={this.addedMessage.bind(this)} />
            : <View></View>;
                             // onTakePicPressed={this.onTakePicPressed.bind(this)}
     return (
-      <View style={styles.container}> 
+      <View style={styles.container}>
         <SearchBar
           onChangeText={this.onSearchChange.bind(this)}
           placeholder='Search'
@@ -223,7 +225,7 @@ class MessageList extends Component {
     var modelName = this.props.modelName;
     var model = utils.getModel(modelName).value;
     var isInterface = model.isInterface;
-    if (!isInterface) 
+    if (!isInterface)
       return;
 
     var self = this;
@@ -235,7 +237,7 @@ class MessageList extends Component {
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       backButtonTitle: 'Chat',
       passProps: {
-        resource: self.props.resource, 
+        resource: self.props.resource,
         returnRoute: currentRoutes[currentRoutes.length - 1],
         modelName: modelName,
         sendForm: sendForm,
@@ -252,14 +254,14 @@ class MessageList extends Component {
         passProps: {
           model: utils.getModel('tradle.NewMessageModel').value,
           callback: this.modelAdded.bind(this)
-        }        
+        }
       }
     });
   }
   modelAdded(resource) {
-    if (resource.url) 
-      Actions.addModelFromUrl(resource.url);    
-  }  
+    if (resource.url)
+      Actions.addModelFromUrl(resource.url);
+  }
   // onTakePicPressed() {
   //   var self = this;
   //   this.props.navigator.push({
@@ -275,7 +277,7 @@ class MessageList extends Component {
   // }
   onTakePic(data) {
     var msg = {
-      from: utils.getMe(), 
+      from: utils.getMe(),
       to: this.props.resource,
       time: new Date().getTime(),
       photos: [{
