@@ -332,10 +332,10 @@ var Store = Reflux.createStore({
       if (!isWelcome  ||  (me.organization  &&  utils.getId(me.organization) === utils.getId(r.to)))
         return Q()
       var wmKey = 'Welcome' + rr.to.title
-      // if (list[wmKey]) {
-      //   list[wmKey].value.time = new Date()
-      //   return Q()
-      // }
+      if (list[wmKey]) {
+        list[wmKey].value.time = new Date()
+        return Q()
+      }
       // Create welcome message without saving it in DB
       welcomeMessage = {}
       welcomeMessage.message = welcome.msg.replace('{firstName}', me.firstName)
@@ -357,10 +357,10 @@ var Store = Reflux.createStore({
         time: rr.to.time
       }
       welcomeMessage[ROOT_HASH] = wmKey
-      // list[welcomeMessage[ROOT_HASH]] = {
-      //   key: welcomeMessage[ROOT_HASH],
-      //   value: welcomeMessage
-      // }
+      list[welcomeMessage[ROOT_HASH]] = {
+        key: welcomeMessage[ROOT_HASH],
+        value: welcomeMessage
+      }
       return Q()
     })
     .then(function() {
@@ -846,7 +846,18 @@ var Store = Reflux.createStore({
     })
 
   },
+  onShare(resource, to) {
+    debugger
 
+    var opts = {
+      to: [{fingerprint: self.getFingerprint(to)}],
+      deliver: true,
+      chain: false
+    }
+
+    opts[CUR_HASH] = resource[CUR_HASH]
+    return meDriver.share(opts)
+  },
   checkRequired(resource, meta) {
     var type = resource[TYPE];
     var rootHash = resource[ROOT_HASH];
@@ -1579,7 +1590,7 @@ var Store = Reflux.createStore({
         return meDriver.publishMyIdentity()
     })
     .catch(function(err) {
-      err = err
+      debugger
     })
   },
   loadAddressBook() {
