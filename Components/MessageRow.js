@@ -533,6 +533,7 @@ class MessageRow extends Component {
   }
   share() {
     console.log('Share')
+    Actions.share(this.props.resource, this.props.to)
   }
   shareDocs() {
     this.props.navigator.push({
