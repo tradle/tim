@@ -626,7 +626,14 @@ class MessageRow extends Component {
     var vCols = [];
     var first = true;
     var self = this;
-    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
+
+    if (resource[constants.TYPE] != model.id)
+      return;
+    var verPhoto;
+    var vCols = [];
+    var first = true;
+    var self = this;
+    // var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
 
     var properties = model.properties;
     var noMessage = !resource.message  ||  !resource.message.length;
