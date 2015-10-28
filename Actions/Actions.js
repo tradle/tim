@@ -3,7 +3,7 @@
 var Reflux = require('reflux');
 
 var Actions = Reflux.createActions([
-  'addItem',        
+  'addItem',
   'addMessage',
   'getItem',
   'getTo',
@@ -18,6 +18,7 @@ var Actions = Reflux.createActions([
   'messageList',
   'addModelFromUrl',
   'start',
+  'share',
   'addVerification'
   // 'messageList',
   // 'getMe',
