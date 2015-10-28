@@ -90,6 +90,7 @@ var ldb;
 var isLoaded;
 var me;
 var meDriver;
+var driverPromise
 var meIdentity
 var ready;
 var networkName = 'testnet'
@@ -1472,8 +1473,8 @@ var Store = Reflux.createStore({
     }
   },
   getDriver(me) {
-    if (meDriver)
-      return Q.resolve(meDriver)
+    if (driverPromise) return driverPromise
+
     var allMyIdentities = list[MY_IDENTITIES_MODEL + '_1']
 
     var mePub = me['pubkeys']
@@ -1560,7 +1561,7 @@ var Store = Reflux.createStore({
 
       // db.put(key, me)
     }
-    return this.buildDriver(Identity.fromJSON(publishingIdentity), mePriv, PORT)
+    return driverPromise = this.buildDriver(Identity.fromJSON(publishingIdentity), mePriv, PORT)
   },
 
   initIdentity(me) {
