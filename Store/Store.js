@@ -30,6 +30,7 @@ var PREV_HASH  = constants.CUR_HASH
 var ORGANIZATION = constants.TYPES.ORGANIZATION
 var IDENTITY = constants.TYPES.IDENTITY
 var MESSAGE = constants.TYPES.MESSAGE
+var PUB_ID = 'publishedIdentity'
 
 var Tim = require('tim')
 var Zlorp = require('zlorp')
@@ -193,7 +194,8 @@ var Store = Reflux.createStore({
           dht: dht,
           port: port,
           syncInterval: 60000,
-          afterBlockTimestamp: 1445976998,
+          afterBlockTimestamp: constants.afterBlockTimestamp,
+          // afterBlockTimestamp: 1445976998,
           relay: {
             address: addrs[0],
             port: 25778
@@ -1534,20 +1536,30 @@ var Store = Reflux.createStore({
       me['pubkeys'] = mePub
       me['privkeys'] = mePriv
     }
+    var publishingIdentity
 
-    meIdentity = new Identity()
-                        .name({
-                          firstName: me.firstName,
-                          formatted: me.firstName + (me.lastName ? ' ' + me.lastName : '')
-                        })
-                        .set('_z', me[NONCE] || this.getNonce())
-    if (me.organization)
-      meIdentity.set('organization', me.organization)
+    if (me[PUB_ID])
+      publishingIdentity = me[PUB_ID]
+    else {
+      meIdentity = new Identity()
+                          .name({
+                            firstName: me.firstName,
+                            formatted: me.firstName + (me.lastName ? ' ' + me.lastName : '')
+                          })
+                          .set('_z', me[NONCE] || this.getNonce())
+      if (me.organization)
+        meIdentity.set('organization', me.organization)
 
-    me.pubkeys.forEach(meIdentity.addKey, meIdentity)
+      me.pubkeys.forEach(meIdentity.addKey, meIdentity)
 
-    var publishingIdentity = meIdentity.toJSON()
+      publishingIdentity = meIdentity.toJSON()
 
+      me[PUB_ID] = publishingIdentity
+      // var key = IDENTITY + '_' + me[ROOT_HASH]
+      // list[key].value = me
+
+      // db.put(key, me)
+    }
     return this.buildDriver(Identity.fromJSON(publishingIdentity), mePriv, PORT)
   },
 
