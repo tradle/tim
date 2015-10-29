@@ -307,9 +307,11 @@ var Store = Reflux.createStore({
     var batch = []
     var self = this
     var error
-    var welcomeMessage;
+    var welcomeMessage
+    var dhtKey
     return getDHTKey(toChain)
-    .then(function(dhtKey) {
+    .then(function(data) {
+      dhtKey = data
       if (!isWelcome) {
         var to = list[utils.getId(r.to)].value;
         var from = list[utils.getId(r.from)].value;
@@ -364,6 +366,20 @@ var Store = Reflux.createStore({
       return Q()
     })
     .then(function() {
+      // Temporary untill the real hash is known
+      var key = rr[TYPE] + '_' + rr[ROOT_HASH];
+      list[key] = {key: key, value: rr};
+
+      var params = {
+        action: 'addMessage',
+        resource: isWelcome ? welcomeMessage : rr
+      }
+      if (error)
+        params.error = error
+
+      self.trigger(params);
+
+
     //   if (batch.length)
     //     return db.batch(batch)
     //   // error = 'You have a low balance'
@@ -395,6 +411,7 @@ var Store = Reflux.createStore({
       })
     })
     .then(function(data) {
+      delete list[rr[TYPE] + '_' + dhtKey]
       if (data)  {
         var roothash = data[0]._props[ROOT_HASH]
         rr[ROOT_HASH] = roothash
@@ -810,29 +827,38 @@ var Store = Reflux.createStore({
       if (isRegistration)
         return getDHTKey(publishedIdentity)
       var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
-      if (isMessage) {
-        var to = list[utils.getId(returnVal.to)].value;
+      if (!isMessage)
+        return Q()
 
-        var toChain = {}
-        extend(toChain, returnVal)
-        delete toChain.from
-        delete toChain.to
-        delete toChain[ROOT_HASH]
-        if (toChain[CUR_HASH])
-          toChain[PREV_HASH] = toChain[CUR_HASH]
-        toChain.time = returnVal.time
+      returnVal[ROOT_HASH] = returnVal[NONCE]
+      var key = returnVal[TYPE] + '_' + returnVal[ROOT_HASH]
+      list[key] = {key: key, value: returnVal};
 
-        return meDriver.send({
-          msg: toChain,
-          to: [{fingerprint: self.getFingerprint(to)}],
-          deliver: true,
-          chain: false
-        })
-      }
-      else
-        return getDHTKey(returnVal)
+      var  params = {action: 'addItem', resource: returnVal}
+      // registration or profile editing
+      self.trigger(params);
+
+
+      var to = list[utils.getId(returnVal.to)].value;
+
+      var toChain = {}
+      extend(toChain, returnVal)
+      delete toChain.from
+      delete toChain.to
+      delete toChain[ROOT_HASH]
+      if (toChain[CUR_HASH])
+        toChain[PREV_HASH] = toChain[CUR_HASH]
+      toChain.time = returnVal.time
+
+      return meDriver.send({
+        msg: toChain,
+        to: [{fingerprint: self.getFingerprint(to)}],
+        deliver: true,
+        chain: false
+      })
     })
     .then(function (dhtKey) {
+      delete list[returnVal[TYPE] + '_' + returnVal[ROOT_HASH]]
       if (typeof dhtKey === 'string') {
         if (!resource  ||  isNew)
           returnVal[ROOT_HASH] = dhtKey
