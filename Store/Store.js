@@ -33,7 +33,7 @@ var MESSAGE = constants.TYPES.MESSAGE
 var PUB_ID = 'publishedIdentity'
 
 var Tim = require('tim')
-var Zlorp = require('zlorp')
+var Zlorp = Tim.Zlorp
 Zlorp.ANNOUNCE_INTERVAL = 10000
 Zlorp.LOOKUP_INTERVAL = 10000
 Zlorp.KEEP_ALIVE_INTERVAL = 10000
@@ -1676,56 +1676,67 @@ var Store = Reflux.createStore({
     return dfd.promise;
   },
   loadResources() {
-    var self = this
-    meDriver.ready()
-    .then(function() {
-      console.log(meDriver.name(), 'is ready')
+    // var self = this
+    // meDriver.ready()
+    // .then(function() {
+    //   console.log(meDriver.name(), 'is ready')
       // d.publishMyIdentity()
 
-      meDriver.identities().createReadStream()
-      .on('data', function (data) {
-        var key = IDENTITY + '_' + data.key
-        var v;
-        if (me  &&  data.key == me[ROOT_HASH])
-          v = me
-        else {
-          if (list[key])
-            v = list[key].value
-          else
-            v = {}
-        }
-        var val = data.value.identity
-        val[ROOT_HASH] = data.value[ROOT_HASH]
-        val[CUR_HASH] = data.value[CUR_HASH]
+      // meDriver.identities().createReadStream()
+      // .on('data', function (data) {
+      //   var key = IDENTITY + '_' + data.key
+      //   var v;
+      //   if (me  &&  data.key == me[ROOT_HASH])
+      //     v = me
+      //   else {
+      //     if (list[key])
+      //       v = list[key].value
+      //     else
+      //       v = {}
+      //   }
+      //   var val = data.value.identity
+      //   val[ROOT_HASH] = data.value[ROOT_HASH]
+      //   val[CUR_HASH] = data.value[CUR_HASH]
 
-        var name = val.name;
-        delete val.name
-        for (var p in name)
-          val[p] = name[p]
+      //   var name = val.name;
+      //   delete val.name
+      //   for (var p in name)
+      //     val[p] = name[p]
 
-        extend(v, val)
+      //   extend(v, val)
 
-        db.put(key, v)
-        .then(function() {
-          list[key] = {
-            key: key,
-            value: v
-          }
-          if (v.securityCode)
-            employees[data.value.securityCode] = data.value
-        })
-      })
+      //   db.put(key, v)
+      //   .then(function() {
+      //     list[key] = {
+      //       key: key,
+      //       value: v
+      //     }
+      //     if (v.securityCode)
+      //       employees[data.value.securityCode] = data.value
+      //   })
+      // })
 
-      meDriver.messages().createValueStream()
-      .on('data', function (data) {
-        meDriver.lookupObject(data)
-        .then(function (obj) {
-          // return
-          console.log('from msgs.db', obj)
-          self.putInDb(obj)
-          // console.log('msg', obj)
-        })
-      })
+      // var ellens = 0
+      // meDriver.messages().createValueStream()
+      // .on('data', function (data) {
+      //   meDriver.lookupObject(data)
+      //   .then(function (obj) {
+      //     // return
+      //     if (['from', 'to'].some(function (party) {
+      //       try {
+      //         return obj[party].identity.toJSON().name.firstName === 'Ellen'
+      //       } catch (err) {}
+      //     })) {
+      //       ellens++
+      //       console.log('ELLEN MSGS', ellens)
+      //     }
+
+      //     console.log('from msgs.db', obj)
+      //     self.putInDb(obj)
+      //     // console.log('msg', obj)
+      //   })
+      // })
+
       // Object was successfully read off chain
       meDriver.on('unchained', function (obj) {
         console.log('unchained', obj)
@@ -1764,7 +1775,8 @@ var Store = Reflux.createStore({
           self.putInDb(obj, true)
         })
       })
-    })
+    // })
+    return meDriver.ready()
   },
   putInDb(obj, onMessage) {
     var val = obj.parsed.data
