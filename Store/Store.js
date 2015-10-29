@@ -89,9 +89,9 @@ var db;
 var ldb;
 var isLoaded;
 var me;
-var meDriver;
+var meDriver
+var publishedIdentity
 var driverPromise
-var meIdentity
 var ready;
 var networkName = 'testnet'
 
@@ -805,7 +805,7 @@ var Store = Reflux.createStore({
     })
     .then(function() {
       if (isRegistration)
-        return getDHTKey(meIdentity.toJSON())
+        return getDHTKey(publishedIdentity)
       var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
       if (isMessage) {
         var to = list[utils.getId(returnVal.to)].value;
@@ -1548,12 +1548,11 @@ var Store = Reflux.createStore({
       me['pubkeys'] = mePub
       me['privkeys'] = mePriv
     }
-    var publishingIdentity
 
     if (me[PUB_ID])
-      publishingIdentity = me[PUB_ID]
+      publishedIdentity = me[PUB_ID]
     else {
-      meIdentity = new Identity()
+      var meIdentity = new Identity()
                           .name({
                             firstName: me.firstName,
                             formatted: me.firstName + (me.lastName ? ' ' + me.lastName : '')
@@ -1564,15 +1563,15 @@ var Store = Reflux.createStore({
 
       me.pubkeys.forEach(meIdentity.addKey, meIdentity)
 
-      publishingIdentity = meIdentity.toJSON()
+      publishedIdentity = meIdentity.toJSON()
 
-      me[PUB_ID] = publishingIdentity
+      me[PUB_ID] = publishedIdentity
       // var key = IDENTITY + '_' + me[ROOT_HASH]
       // list[key].value = me
 
       // db.put(key, me)
     }
-    return driverPromise = this.buildDriver(Identity.fromJSON(publishingIdentity), mePriv, PORT)
+    return driverPromise = this.buildDriver(Identity.fromJSON(publishedIdentity), mePriv, PORT)
   },
 
   initIdentity(me) {
@@ -1676,7 +1675,7 @@ var Store = Reflux.createStore({
     return dfd.promise;
   },
   loadResources() {
-    // var self = this
+    var self = this
     // meDriver.ready()
     // .then(function() {
     //   console.log(meDriver.name(), 'is ready')
