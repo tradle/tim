@@ -331,7 +331,7 @@ var Store = Reflux.createStore({
       rr[ROOT_HASH] = dhtKey
       if (!isWelcome  ||  (me.organization  &&  utils.getId(me.organization) === utils.getId(r.to)))
         return Q()
-      var wmKey = 'Welcome' + rr.to.title
+      var wmKey = constants.TYPES.SIMPLE_MESSAGE + '_Welcome' + rr.to.title
       if (list[wmKey]) {
         list[wmKey].value.time = new Date()
         return Q()
@@ -389,6 +389,9 @@ var Store = Reflux.createStore({
         to: [{fingerprint: self.getFingerprint(r.to)}],
         deliver: true,
         chain: false
+      })
+      .catch(function (err) {
+        debugger
       })
     })
     .then(function(data) {
@@ -882,6 +885,7 @@ var Store = Reflux.createStore({
     meDriver.destroy()
     .then(function() {
       meDriver = null
+      driverPromise = null
 
       rimraf('./', finish)
       ;[
@@ -1681,8 +1685,10 @@ var Store = Reflux.createStore({
     //   console.log(meDriver.name(), 'is ready')
       // d.publishMyIdentity()
 
-      // meDriver.identities().createReadStream()
-      // .on('data', function (data) {
+      meDriver.identities().createReadStream()
+      .on('data', function (data) {
+        console.log(data)
+      })
       //   var key = IDENTITY + '_' + data.key
       //   var v;
       //   if (me  &&  data.key == me[ROOT_HASH])
