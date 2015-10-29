@@ -71,7 +71,7 @@ class ProductChooser extends Component {
     }
 
     Actions.addMessage(msg, true)
-    this.props.navigator.push(route);
+    this.props.navigator.pop();
 
   }
   selectResource1(resource) {
