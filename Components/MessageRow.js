@@ -93,15 +93,15 @@ class MessageRow extends Component {
       }
       else {
         if (!model.style)
-          addStyle = {padding: 5, borderRadius: 10, borderColor: '#cccccc', backgroundColor: '#ffffff', marginVertical: 2};
+          addStyle = {paddingVertical: 5, paddingHorizontal: 7, borderRadius: 10, borderColor: '#cccccc', backgroundColor: '#ffffff', marginVertical: 2};
       }
       if (model.style  ||  isVerification)
-        addStyle = [addStyle, {padding: 5, borderRadius: 10, backgroundColor: STRUCTURED_MESSAGE_COLOR, borderWidth: 1, borderColor: '#deeeb4', marginVertical: 2}]; //model.style];
+        addStyle = [addStyle, {paddingVertical: 5, paddingHorizontal: 7, borderRadius: 10, backgroundColor: STRUCTURED_MESSAGE_COLOR, borderWidth: 1, borderColor: '#deeeb4', marginVertical: 2}]; //model.style];
       else if (isAdditionalInfo)
-        addStyle = [addStyle, {padding: 5, borderRadius: 10, backgroundColor: '#FCF1ED', borderWidth: 1, borderColor: '#FAE9E3', marginVertical: 2}]; //model.style];
+        addStyle = [addStyle, {paddingVertical: 5, paddingHorizontal: 7, borderRadius: 10, backgroundColor: '#FCF1ED', borderWidth: 1, borderColor: '#FAE9E3', marginVertical: 2}]; //model.style];
       else {
         if (isMyMessage  &&  !isSimpleMessage)
-          addStyle = [addStyle, {padding: 5, borderRadius: 10, backgroundColor: STRUCTURED_MESSAGE_COLOR, borderWidth: 1, borderColor: '#deeeb4', marginVertical: 2}]; //model.style];
+          addStyle = [addStyle, {paddingVertical: 5, paddingHorizontal: 7, borderRadius: 10, backgroundColor: STRUCTURED_MESSAGE_COLOR, borderWidth: 1, borderColor: '#deeeb4', marginVertical: 2}]; //model.style];
       }
     }
     var properties = model.properties;
@@ -180,7 +180,7 @@ class MessageRow extends Component {
         var msgModel = utils.getModel(resource.document[constants.TYPE]).value;
         var orgName = resource.organization  ? resource.organization.title : ''
         renderedRow = <View>
-                        <View style={{backgroundColor: '#289427', padding: 5, marginHorizontal: -6, marginTop: -5}}>
+                        <View style={{backgroundColor: '#289427', paddingVertical: 5, paddingHorizontal: 7, marginHorizontal: -6, marginTop: -5}}>
                           <Text style={{fontSize: 16, fontWeight: '600', color: '#ffffff', alignSelf: 'center'}}>
                              Verified by {orgName}
                           </Text>
@@ -190,6 +190,7 @@ class MessageRow extends Component {
                         </View>
                       </View>
       }
+      var rowId = <Text style={{fontWeight: '600', fontSize: 16, color: isMyMessage ? '#ffffff' : '#289427', paddingRight: 3}}>{this.props.messageNumber + '.'}</Text>;
       messageBody =
         <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
           <View style={[rowStyle, viewStyle]}>
@@ -312,7 +313,7 @@ class MessageRow extends Component {
         {ownerPhoto}
         <View style={addStyle ? [styles.textContainer, addStyle] : styles.textContainer}>
           <View style={{flex: 1}}>
-            <View style={{backgroundColor: STRUCTURED_MESSAGE_COLOR, padding: 5, margin: -5}}>
+            <View style={{backgroundColor: STRUCTURED_MESSAGE_COLOR, paddingVertical: 5, paddingHorizontal: 7, margin: -5}}>
               <Text style={{color: '#2E3B4E'}}>
                 {msg}
               </Text>
@@ -735,7 +736,8 @@ var styles = StyleSheet.create({
     flexDirection: 'row',
   },
   myCell: {
-    padding: 5,
+    paddingVertical: 5,
+    paddingHorizontal: 7,
     justifyContent: 'flex-end',
     borderRadius: 10,
     backgroundColor: '#569bff',
