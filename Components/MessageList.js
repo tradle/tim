@@ -7,6 +7,7 @@ var NoResources = require('./NoResources');
 var NewResource = require('./NewResource');
 var ResourceTypesScreen = require('./ResourceTypesScreen');
 var AddNewMessage = require('./AddNewMessage');
+var ProductChooser = require('./ProductChooser');
 // var CameraView = require('./CameraView');
 var utils = require('../utils/utils');
 var reactMixin = require('react-mixin');
@@ -69,8 +70,15 @@ class MessageList extends Component {
 
     if (params.action !== 'messageList' ||  !params.list || params.isAggregation !== this.props.isAggregation)
       return;
-    if (params.resource  &&  params.resource[constants.ROOT_HASH] != this.props.resource[constants.ROOT_HASH])
-      return;
+    if (params.resource  &&  params.resource[constants.ROOT_HASH] != this.props.resource[constants.ROOT_HASH]) {
+      var doUpdate
+      if (this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION  &&  params.resource.organization) {
+        if (this.props.resource[constants.TYPE] + '_' + this.props.resource[constants.ROOT_HASH] === utils.getId(params.resource.organization))
+          doUpdate = true
+      }
+      if (!doUpdate)
+        return;
+    }
     var list = params.list;
     if (list.length || (this.state.filter  &&  this.state.filter.length)) {
       var type = list[0][constants.TYPE];
@@ -132,7 +140,7 @@ class MessageList extends Component {
     Actions.messageList(actionParams);
   }
 
-  renderRow(resource)  {
+  renderRow(resource, sectionId, rowId)  {
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
     var isMessage = model.interfaces  &&  model.interfaces.indexOf('tradle.Message') != -1;
     var isAggregation = this.props.isAggregation;
@@ -144,6 +152,7 @@ class MessageList extends Component {
       <MessageRow
         onSelect={this.selectResource.bind(this, resource)}
         resource={resource}
+        messageNumber={rowId}
         isAggregation={isAggregation}
         navigator={this.props.navigator}
         verificationsToShare={this.state.verificationsToShare}
@@ -230,6 +239,37 @@ class MessageList extends Component {
 
     var self = this;
     var currentRoutes = self.props.navigator.getCurrentRoutes();
+    var resource = this.props.resource
+    if (resource.name === 'Lloyds') {
+      var currentRoutes = self.props.navigator.getCurrentRoutes();
+      this.props.navigator.push({
+        title: 'Financial Product',
+        id: 15,
+        component: ProductChooser,
+        sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+        backButtonTitle: 'Back',
+        passProps: {
+          resource: resource,
+          returnRoute: currentRoutes[currentRoutes.length - 1],
+          callback: this.props.callback
+        },
+        rightButtonTitle: 'ion|plus',
+        onRightButtonPress: {
+          id: 4,
+          title: 'New product',
+          component: NewResource,
+          backButtonTitle: 'Back',
+          titleTextColor: '#7AAAC3',
+          rightButtonTitle: 'Done',
+          passProps: {
+            model: utils.getModel('tradle.NewMessageModel').value,
+            // callback: this.modelAdded.bind(this)
+          }
+        }
+      });
+      return;
+    }
+
     this.props.navigator.push({
       title: utils.makeLabel(model.title) + ' type',
       id: 2,
