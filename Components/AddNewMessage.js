@@ -10,10 +10,10 @@ var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
 var Reflux = require('reflux');
 var Actions = require('../Actions/Actions');
-var KeyboardEvents = require('react-native-keyboardevents');
+// var KeyboardEvents = require('react-native-keyboardevents');
+// var KeyboardEventEmitter = KeyboardEvents.Emitter;
 var constants = require('tradle-constants');
 
-var KeyboardEventEmitter = KeyboardEvents.Emitter;
 var UIImagePickerManager = require('NativeModules').UIImagePickerManager;
 
 var {
@@ -23,6 +23,8 @@ var {
   StyleSheet,
   LayoutAnimation,
   Image,
+  Text,
+  DeviceEventEmitter,
   Component
 } = React;
 
@@ -53,17 +55,29 @@ class AddNewMessage extends Component {
   resetKeyboardSpace() {
     // LayoutAnimation.configureNext(animations.layout.spring);
     this.setState({keyboardSpace: 0});
-  }  
+  }
 
   componentDidMount() {
     this.listenTo(Store, 'onAddMessage');
-    KeyboardEventEmitter.on(KeyboardEvents.KeyboardDidShowEvent, this.updateKeyboardSpace);
-    KeyboardEventEmitter.on(KeyboardEvents.KeyboardWillHideEvent, this.resetKeyboardSpace);
+    DeviceEventEmitter.addListener('keyboardWillShow', (e) => {
+      this.updateKeyboardSpace(e)
+    });
+
+    DeviceEventEmitter.addListener('keyboardWillHide', (e) => {
+      this.resetKeyboardSpace(e)
+     // ...
+    })
+    // KeyboardEventEmitter.on(KeyboardEvents.KeyboardDidShowEvent, this.updateKeyboardSpace);
+    // KeyboardEventEmitter.on(KeyboardEvents.KeyboardWillHideEvent, this.resetKeyboardSpace);
   }
 
   componentWillUnmount() {
-    KeyboardEventEmitter.off(KeyboardEvents.KeyboardDidShowEvent, this.updateKeyboardSpace);
-    KeyboardEventEmitter.off(KeyboardEvents.KeyboardWillHideEvent, this.resetKeyboardSpace);
+    // DeviceEventEmitter.addListener('keyboardWillHide', (e) => {
+    //   this.resetKeyboardSpace(e)
+    //  // ...
+    // })
+    // KeyboardEventEmitter.off(KeyboardEvents.KeyboardDidShowEvent, this.updateKeyboardSpace);
+    // KeyboardEventEmitter.off(KeyboardEvents.KeyboardWillHideEvent, this.resetKeyboardSpace);
   }
 
   onAddMessage(params) {
@@ -73,9 +87,9 @@ class AddNewMessage extends Component {
     if (!resource)
       return;
     if (params.error) {
-      if (resource[constants.TYPE] == this.props.resource[constants.TYPE]) 
+      if (resource[constants.TYPE] == this.props.resource[constants.TYPE])
         this.setState({err: params.error});
-      return;    
+      return;
     }
     var model = utils.getModel(resource[constants.TYPE]).value;
     var isMessage = model.interfaces  &&  model.interfaces.indexOf('tradle.Message') != -1;
@@ -94,43 +108,60 @@ class AddNewMessage extends Component {
     var me = utils.getMe();
     var resource = {from: me, to: this.props.resource};
     var model = utils.getModel(this.props.modelName).value;
-    var pushForm = me.organization
-                 ? <TouchableHighlight style={{paddingLeft: 20}} underlayColor='#eeeeee'
-                     onPress={this.props.onAddNewPressed.bind(this, true)}>
-                       <Icon name={'ios-arrow-thin-up'} size={25} style={styles.imageOutline} color='#757575' />
-                   </TouchableHighlight>
-                 : <View style={{marginLeft: 10}}/>
+    var pushForm;
+    var isLloyds = resource.to[constants.TYPE] == constants.TYPES.ORGANIZATION  &&  resource.to.name === 'Lloyds';
+    if (me.organization)
+      pushForm = <TouchableHighlight style={{paddingLeft: 20}} underlayColor='#eeeeee'
+                   onPress={this.props.onAddNewPressed.bind(this, true)}>
+                     <Icon name={'ios-arrow-thin-up'} size={25} style={styles.imageOutline} color='#757575' />
+                 </TouchableHighlight>
+    else if (isLloyds) {
+      pushForm = <TouchableHighlight underlayColor='#7AAAC3'
+                   onPress={this.props.onAddNewPressed.bind(this, true)}>
+                     <Text style={[styles.products, {paddingTop: 7, color: '#ffffff', fontSize: 20}]}>Choose the product</Text>
+                 </TouchableHighlight>
+    }
+    else
+      pushForm = <View style={{marginLeft: 10}}/>
           // <TouchableHighlight style={{paddingRight: 5}} underlayColor='#eeeeee'
           //   onPress={this.props.onAddNewPressed.bind(this)}>
           //      <Image source={require('image!edit')} style={[styles.image]} />
           // </TouchableHighlight>
+    var chat = isLloyds
+             ? <View />
+             : <View style={styles.searchBar}>
+                  <ChatMessage ref="chat" resource={resource}
+                               model={model}
+                               callback={this.props.callback}
+                               onSubmitEditing={this.onSubmitEditing.bind(this)}
+                               onChange={this.onChange.bind(this)}
+                               onEndEditing={this.onEndEditing.bind(this)} />
+               </View>
+    var camera = isLloyds
+               ? <View />
+               : <TouchableHighlight style={{paddingRight: 8, marginBottom: 4}} underlayColor='transparent'
+                  onPress={this.showChoice.bind(this)}>
+                  <View>
+                    <Icon name='ios-camera' style={styles.icon} size={40} color='#999999' />
+                  </View>
+                </TouchableHighlight>
+
+    var style = isLloyds ? {alignSelf: 'center'} : {flexDirection: 'row', marginLeft: -8}
     return (
       <View style={{height: this.state.keyboardSpace + 45}}>
-      <View style={styles.addNew}>
-        <View style={{flexDirection: 'row', marginLeft: -8}}>
+      <View style={isLloyds ? styles.addNewProduct : styles.addNew}>
+        <View style={style}>
           {pushForm}
         </View>
-        <View style={styles.searchBar}>
-          <ChatMessage ref="chat" resource={resource} 
-                       model={model} 
-                       callback={this.props.callback} 
-                       onSubmitEditing={this.onSubmitEditing.bind(this)}
-                       onChange={this.onChange.bind(this)}
-                       onEndEditing={this.onEndEditing.bind(this)} />
+        {chat}
+        {camera}
         </View>
-        <TouchableHighlight style={{paddingRight: 8}} underlayColor='transparent'
-          onPress={this.showChoice.bind(this)}>
-          <View>
-            <Icon name='ios-camera' style={styles.icon} size={40} color='#999999' />
-          </View>
-        </TouchableHighlight>
-        </View>
-      </View> 
+      </View>
     );
   }
 
   onChange(event) {
-    this.setState({userInput: event.nativeEvent.text});    
+    this.setState({userInput: event.nativeEvent.text});
   }
   showChoice() {
     var self = this;
@@ -172,7 +203,7 @@ class AddNewMessage extends Component {
         //   selectedAssets[dataUri] = 'y'
         // if (type === 'data')  // New photo taken -  response is the 64 bit encoded image data string
         //   selectedAssets['data:image/jpeg;base64,' + response] = 'y'; //, isStatic: true};
-        // else { 
+        // else {
         //   // Selected from library - response is the URI to the local file asset
         //   // unselect if was selected before
         //   if (typeof response === 'object')
@@ -184,8 +215,8 @@ class AddNewMessage extends Component {
         //   // source = {uri: response};
         // }
 
-        self.onSubmitEditing(self.state.userInput); 
-      } 
+        self.onSubmitEditing(self.state.userInput);
+      }
     });
   }
 
@@ -231,7 +262,7 @@ class AddNewMessage extends Component {
   //     onRightButtonPress: {
   //       before: self.beforeDone.bind(self),
   //       stateChange: self.onSubmitEditing.bind(self)
-  //     },      
+  //     },
   //     sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
   //     passProps: {
   //       navigator: self.props.navigator,
@@ -266,7 +297,7 @@ class AddNewMessage extends Component {
     var meName = utils.getDisplayName(me, meta);
     var modelName = 'tradle.SimpleMessage';
     var value = {
-      message: msg 
+      message: msg
               ?  model.isInterface ? msg : '[' + this.state.userInput + '](' + this.props.model.id + ')'
               : '',
       from: me,
@@ -276,9 +307,9 @@ class AddNewMessage extends Component {
     value[constants.TYPE] = modelName;
     if (!isNoAssets) {
       var photos = [];
-      for (var a in assets) 
+      for (var a in assets)
         photos.push({url: assets[a].url, isVertical: assets[a].isVertical, title: 'photo'});
-      
+
       value.photos = photos;
     }
     this.setState({userInput: '', selectedAssets: {}});
@@ -323,7 +354,27 @@ var styles = StyleSheet.create({
     paddingBottom: 13,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#eeeeee', 
+    backgroundColor: '#eeeeee',
+  },
+  // searchBar: {
+  //   flex: 4,
+  //   padding: 10,
+  //   paddingTop: 3,
+  //   height: 45,
+  //   paddingBottom: 13,
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  //   backgroundColor: '#eeeeee',
+  // },
+  products: {
+    flex: 4,
+    padding: 10,
+    paddingTop: 3,
+    height: 45,
+    paddingBottom: 13,
+    // flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#7AAAC3',
   },
   image: {
     width: 27,
@@ -343,15 +394,24 @@ var styles = StyleSheet.create({
     borderWidth: 1.5,
   },
   addNew: {
-    flexDirection: 'row', 
-    alignItems: 'center', 
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#eeeeee',
-    borderBottomColor: '#eeeeee', 
-    borderRightColor: '#eeeeee', 
-    borderLeftColor: '#eeeeee', 
+    borderBottomColor: '#eeeeee',
+    borderRightColor: '#eeeeee',
+    borderLeftColor: '#eeeeee',
     borderWidth: 1,
     borderTopColor: '#cccccc',
-  }
-});
+  },
+  addNewProduct: {
+    // flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#7AAAC3',
+    borderBottomColor: '#7AAAC3',
+    borderRightColor: '#7AAAC3',
+    borderLeftColor: '#7AAAC3',
+    borderWidth: 1,
+    borderTopColor: '#2E3B4E',
+  }});
 
 module.exports = AddNewMessage;
