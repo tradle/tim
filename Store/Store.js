@@ -15,6 +15,7 @@ var voc = require('../data/models');
 
 var myIdentity = require('../data/myIdentity.json');
 var welcome = require('../data/welcome.json');
+var welcomeLloyds = require('../data/welcomeLloyds.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
@@ -181,10 +182,10 @@ var Store = Reflux.createStore({
 
     var blockchain = new Blockchain(networkName)
 
-    return Q.ninvoke(dns, 'resolve4', 'tradle.io')
-      .then(function (addrs) {
-        console.log('tradle is at', addrs)
-        return meDriver = new Tim({
+    // return Q.ninvoke(dns, 'resolve4', 'tradle.io')
+    //   .then(function (addrs) {
+    //     console.log('tradle is at', addrs)
+        meDriver = new Tim({
           pathPrefix: TIM_PATH_PREFIX,
           networkName: networkName,
           keeper: keeper,
@@ -198,11 +199,13 @@ var Store = Reflux.createStore({
           afterBlockTimestamp: constants.afterBlockTimestamp,
           // afterBlockTimestamp: 1445976998,
           relay: {
-            address: addrs[0],
+            // address: addrs[0],
+            address: '54.236.214.150',
             port: 25778
           }
         })
-      })
+      // })
+  return Q.resolve(meDriver)
 
     // var log = d.log;
     // d.log = function () {
@@ -256,6 +259,7 @@ var Store = Reflux.createStore({
     var rr = {};
     if (!r.time)
       r.time = new Date().getTime();
+    var toOrg
     if (r.to[TYPE] === ORGANIZATION) {
       var orgId = utils.getId(r.to)
       var result = this.searchNotMessages({modelName: IDENTITY})
@@ -276,6 +280,7 @@ var Store = Reflux.createStore({
         this.trigger(params);
         return
       }
+      toOrg = r.to
       r.to = orgRep
     }
     for (var p in r) {
@@ -309,6 +314,7 @@ var Store = Reflux.createStore({
     var error
     var welcomeMessage
     var dhtKey
+    var onlyWelcome
     return getDHTKey(toChain)
     .then(function(data) {
       dhtKey = data
@@ -332,15 +338,20 @@ var Store = Reflux.createStore({
       }
       rr[ROOT_HASH] = dhtKey
       if (!isWelcome  ||  (me.organization  &&  utils.getId(me.organization) === utils.getId(r.to)))
-        return Q()
+        return
       var wmKey = constants.TYPES.SIMPLE_MESSAGE + '_Welcome' + rr.to.title
       if (list[wmKey]) {
         list[wmKey].value.time = new Date()
-        return Q()
+        return
       }
       // Create welcome message without saving it in DB
       welcomeMessage = {}
-      welcomeMessage.message = welcome.msg.replace('{firstName}', me.firstName)
+      var isLloyds = toOrg.name === 'Lloyds'
+      onlyWelcome = isLloyds
+      var w = isLloyds ? welcomeLloyds : welcome
+
+
+      welcomeMessage.message = w.msg.replace('{firstName}', me.firstName)
       welcomeMessage.time = new Date()
       welcomeMessage[TYPE] = constants.TYPES.SIMPLE_MESSAGE
       welcomeMessage[NONCE] = self.getNonce()
@@ -363,7 +374,6 @@ var Store = Reflux.createStore({
         key: welcomeMessage[ROOT_HASH],
         value: welcomeMessage
       }
-      return Q()
     })
     .then(function() {
       // Temporary untill the real hash is known
@@ -378,28 +388,12 @@ var Store = Reflux.createStore({
         params.error = error
 
       self.trigger(params);
-
-
-    //   if (batch.length)
-    //     return db.batch(batch)
-    //   // error = 'You have a low balance'
-    // })
-    // .then(function() {
-    //   var params = {
-    //     action: 'addMessage',
-    //     resource: isWelcome ? welcomeMessage : rr
-    //   }
-    //   if (error)
-    //     params.error = error
-
-    //   self.trigger(params);
-
-      if (batch.length  &&  !error  &&  list[utils.getId(r.to)].value.pubkeys)
+      if (!onlyWelcome  &&  batch.length  &&  !error  &&  list[utils.getId(r.to)].value.pubkeys)
         return self.getDriver(me)
     })
     .then(function() {
-      if (/*isWelcome  || */ !list[utils.getId(r.to)].value.pubkeys)
-        return Q()
+      if (/*isWelcome  || */ onlyWelcome  ||  !list[utils.getId(r.to)].value.pubkeys)
+        return
       return meDriver.send({
         msg: toChain,
         to: [{fingerprint: self.getFingerprint(r.to)}],
@@ -411,21 +405,17 @@ var Store = Reflux.createStore({
       })
     })
     .then(function(data) {
+      if (onlyWelcome)
+        return
       delete list[rr[TYPE] + '_' + dhtKey]
       if (data)  {
         var roothash = data[0]._props[ROOT_HASH]
         rr[ROOT_HASH] = roothash
         rr[CUR_HASH] = data[0]._props[CUR_HASH]
       }
-      // else
-      //   rr[ROOT_HASH] = toChain[ROOT_HASH]
-
       var key = rr[TYPE] + '_' + rr[ROOT_HASH];
       batch.push({type: 'put', key: key, value: rr})
       list[key] = {key: key, value: rr};
-    //   return db.batch(batch)
-    // })
-    // .then(function() {
       var params = {
         action: 'addMessage',
         resource: isWelcome ? welcomeMessage : rr
@@ -435,53 +425,48 @@ var Store = Reflux.createStore({
 
       self.trigger(params);
       return db.batch(batch)
-      // if (batch.length  &&  !error)
-      //   return self.getDriver(me)
     })
-
-    // .then(function() {
-    //   self.trigger({
-    //     action: 'addMessage',
-    //     resource: isWelcome ? welcomeMessage : rr
-    //   });
-    // })
     .catch(function(err) {
       err = err;
     });
   },
-  onAddVerification(r, notOneClickVerification) {
+  onAddVerification(r, notOneClickVerification, dontSend) {
     var batch = [];
     var key;
     var fromId = utils.getId(r.from);
-    var isVerification = r[TYPE] === VERIFICATION;
     var from = list[fromId].value;
 
-    r[NONCE] = this.getNonce()
+    r[NONCE] = r[NONCE]  ||  this.getNonce()
     r.time = new Date().getTime();
 
     var toChain = {}
-    extend(toChain, r);
-    if (r[ROOT_HASH]) {
-      toChain[CUR_HASH] = r[ROOT_HASH]
-      r[CUR_HASH] = r[ROOT_HASH]
+    if (!dontSend) {
+      extend(toChain, r);
+      if (r[ROOT_HASH]) {
+        toChain[CUR_HASH] = r[ROOT_HASH]
+        r[CUR_HASH] = r[ROOT_HASH]
+      }
+      delete toChain.from
+      delete toChain.to
+      toChain.time = r.time
     }
-    delete toChain.from
-    delete toChain.to
-    toChain.time = r.time
     var self = this;
 
-    return meDriver.send({
-      msg: toChain,
-      to: [{fingerprint: this.getFingerprint(r.to)}],
-      deliver: true,
-      chain: false
-    })
+    return   dontSend
+           ? Q()
+           :  meDriver.send({
+              msg: toChain,
+              to: [{fingerprint: this.getFingerprint(r.to)}],
+              deliver: true,
+              chain: false
+            })
     .then(function(data) {
-      var roothash = data[0]._props[ROOT_HASH]
-      r[ROOT_HASH] = roothash
-      r[CUR_HASH] = data[0]._props[CUR_HASH]
-      key = r[TYPE] + '_' + roothash;
-
+      if (data) {
+        var roothash = data[0]._props[ROOT_HASH]
+        r[ROOT_HASH] = roothash
+        r[CUR_HASH] = data[0]._props[CUR_HASH]
+        key = r[TYPE] + '_' + roothash;
+      }
       if (from.organization)
         r.organization = from.organization;
 
@@ -813,22 +798,19 @@ var Store = Reflux.createStore({
       }
       if (returnVal[ROOT_HASH])
         return returnVal[ROOT_HASH]
-      else
-        return isRegistration ? self.loadDB() : Q()
+      else if (isRegistration)
+        return self.loadDB()
     })
     .then(function() {
-      if (isRegistration) {
+      if (isRegistration)
         return self.getDriver(returnVal)
-      }
-      else
-        return Q()
     })
     .then(function() {
       if (isRegistration)
         return getDHTKey(publishedIdentity)
       var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
       if (!isMessage)
-        return Q()
+        return
 
       returnVal[ROOT_HASH] = returnVal[NONCE]
       var key = returnVal[TYPE] + '_' + returnVal[ROOT_HASH]
@@ -879,7 +861,7 @@ var Store = Reflux.createStore({
     debugger
 
     var opts = {
-      to: [{fingerprint: self.getFingerprint(to)}],
+      to: [{fingerprint: this.getFingerprint(to)}],
       deliver: true,
       chain: false
     }
@@ -1300,6 +1282,7 @@ var Store = Reflux.createStore({
   getVerificationsToShare(foundResources, to) {
     var verTypes = [];
     var meId = me[TYPE] + '_' + me[ROOT_HASH];
+    var isOrg = to[TYPE] === ORGANIZATION
     for (var i=0; i<foundResources.length; i++) {
       var r = foundResources[i];
       if (me  &&  utils.getId(r.to) !== meId)
@@ -1333,13 +1316,14 @@ var Store = Reflux.createStore({
         continue;
       var val = list[key].value;
       var id = utils.getId(val.to.id);
+      var org = to.organization ? to.organization : (isOrg ? to : null)
       if (id === meId) {
         var document = doc.id ? list[utils.getId(doc.id)].value : doc;
-        if (to  &&  to.organization  &&  document.verifications) {
+        if (to  &&  org  &&  document.verifications) {
           var thisCompanyVerification;
           for (var i=0; i<document.verifications.length; i++) {
             var v = document.verifications[i];
-            if (v.organization  &&  utils.getId(to.organization) === utils.getId(v.organization)) {
+            if (v.organization  &&  utils.getId(org) === utils.getId(v.organization)) {
               thisCompanyVerification = true;
               break;
             }
@@ -1623,7 +1607,8 @@ var Store = Reflux.createStore({
     })
   },
   loadAddressBook() {
-    return Q();
+    return
+
     var self = this;
     return Q.ninvoke(AddressBook, 'checkPermission')
     .then(function(permission) {
@@ -1638,7 +1623,7 @@ var Store = Reflux.createStore({
         return self.storeContacts()
       else if (permission === AddressBook.PERMISSION_DENIED) {
         //handle permission denied
-        return Q();
+        return
       }
     })
   },
@@ -1824,7 +1809,9 @@ var Store = Reflux.createStore({
     var v = list[key] ? list[key].value : null
     var inDB = !!v
 
-    var model = utils.getModel(type).value
+    var model = utils.getModel(type)  &&  utils.getModel(type).value
+    if (!model)
+      return;
     var batch = []
     if (model.id === IDENTITY) {
       // if (!me  ||  obj[ROOT_HASH] !== me[ROOT_HASH]) {
@@ -1869,6 +1856,13 @@ var Store = Reflux.createStore({
         }
         if (!val.time)
           val.time = obj.timestamp
+
+        var isVerification = type === VERIFICATION  ||  (model.subClassOf  &&  model.subClassOf === VERIFICATION);
+        if (isVerification) {
+          onAddVerification(val, false, true)
+          return
+        }
+
         var dn = val.message || utils.getDisplayName(val, model.properties);
         to.lastMessage = (obj.from[ROOT_HASH] === me[ROOT_HASH]) ? 'You: ' + dn : dn;
         to.lastMessageTime = val.time;
