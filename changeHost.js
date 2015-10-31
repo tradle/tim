@@ -18,7 +18,7 @@ var hostname = process.argv[2] || 'rnhost'
     }
 
     var hacked = contents.replace(
-      /(NSURL\ URLWithString\:\@\"http\:\/\/)[^:]+:(\d+)/,
+      /(NSURL(?: URLWithString)?\:\@\"http\:\/\/)[^:]+:(\d+)/,
       '$1' + hostname + ':$2'
     )
 
