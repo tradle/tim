@@ -62,10 +62,9 @@
 // ]
 
 // ResidencyVerification - address - bank statement, utility bill
-// EmploymentVerification - employer 
+// EmploymentVerification - employer
 // SalaryVerification - latest pay stub
 var identities = [
-
 {
   _t: 'tradle.SecurityCode',
   _z: '04e21cf6dc67f9c5430221031b433e1903ca5975dfd7338f338146a99202c86b',
@@ -84,6 +83,26 @@ var identities = [
     title: 'Rabobank'
   }
 },
+
+// "{
+//   "_i": "71e4b7cd6c11ab7221537275988f113a879029ea:71e4b7cd6c11ab7221537275988f113a879029ea",
+//   "_s": "3045022100cb2dc8331d8eb7a22940988f88e2496e22f0521824f4b9f6045a02e10a9c05e002206ade3dce404b9c9c41f64133e185fd4759225d74bf35b6fc76e12f98ba21df1d",
+//   "_t": "tradle.Verification",
+//   "_z": "Rb5u0JBP8sKXn9\/DfHwXu\/9aoyhKR6YW5ANZ+ZfN1Iw=",
+//   "document": {
+//     "id": "tradle.AboutYou_05bd7b0d480997fdc119d2f5b6be3cfe2e494d8f",
+//     "title": "tradle.AboutYou"
+//   },
+//   "documentOwner": {
+//     "id": "tradle.Identity_6072296facffb77088426d02f6cc11b131fe960d",
+//     "title": "Bill S. Preston"
+//   },
+//   organization: {
+//     id: 'tradle.Organization_71e4b7cd6c11ab7221537275988f113a879029ea',
+//     title: 'Rabobank'
+//   }
+//   "time": 1446290725510
+// }
 
 // {
 //   _t: 'tradle.SecurityCode',
@@ -113,7 +132,7 @@ var identities = [
   'region':'NY',
   'country':'USA',
   'owner':{
-     id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa', 
+     id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa',
      title: 'Jane Choi'
   },
   organization: {
@@ -172,7 +191,7 @@ var identities = [
 },
 {
   _t: 'tradle.Identity',
-  _r: 'b25da36eaf4b01b37fc2154cb1103eb5324a12345',  
+  _r: 'b25da36eaf4b01b37fc2154cb1103eb5324a12345',
   'contact': [
     {
       'identifier': 'somebodyelse',
@@ -188,13 +207,13 @@ var identities = [
   'lastName': 'Logan',
   'middleName': 'Theodore',
   'owner':{
-     id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa', 
+     id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa',
      title: 'Jane Choi'
   },
   organization: {
      id: 'tradle.Organization_96e460ca282d62e41d4b59c85b212d102d7a5a6e',
      title: 'Lloyds'
-  }, 
+  },
   'photos': [
     {
       'tags': 'headshot',
@@ -278,7 +297,7 @@ var identities = [
   'lastName': 'Choi',
   _r: 'b25da36eaf4b01b37fc2154cb1103eb5324a52fa',
   'owner':{
-     id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa', 
+     id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa',
      title: 'Jane Choi'
   },
   organization: {
@@ -367,7 +386,7 @@ var identities = [
   'firstName': 'Adam',
   'lastName': 'Scott',
   'owner':{
-     id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa', 
+     id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa',
      title: 'Jane Choi'
   },
   'photos': [
@@ -453,7 +472,7 @@ var identities = [
   'firstName': 'Timo',
   'lastName': 'Heinke',
   'owner':{
-     id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa', 
+     id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa',
      title: 'Jane Choi'
   },
   organization: {
@@ -543,7 +562,7 @@ var identities = [
   'firstName': 'Helene',
   'lastName': 'Lumiere',
   'owner':{
-     id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa', 
+     id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa',
      title: 'Jane Choi'
   },
   'photos': [
@@ -628,7 +647,7 @@ var identities = [
   'firstName': 'Kate',
   'lastName': 'Hao',
   'owner':{
-     id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa', 
+     id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa',
      title: 'Jane Choi'
   },
   'photos': [
@@ -713,7 +732,7 @@ var identities = [
   'firstName': 'Jake',
   'lastName': 'Peralta',
   'owner':{
-     id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa', 
+     id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa',
      title: 'Jane Choi'
   },
   'photos': [
@@ -798,7 +817,7 @@ var identities = [
   'firstName': 'Gene',
   'lastName': 'Vayngrib',
   'owner':{
-     id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa', 
+     id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa',
      title: 'Jane Choi'
   },
   'photos': [
@@ -882,7 +901,7 @@ var identities = [
   'street': '666 Wyld Stallyns Dr',
   'firstName': 'Tony',
   'owner':{
-     id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa', 
+     id: 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa',
      title: 'Jane Choi'
   },
   'photos': [
@@ -900,147 +919,142 @@ var identities = [
 },
 */
 
+// {
+//   _t: 'tradle.Organization',
+//   _r: '0b462e6124d39fda3af523b49b07affb67129102',
+//   'name': 'Morgan Stanley',
+//   'photos': [
+//     {
+//       'url':  'http://www.gabelliconnect.com/wp-content/uploads/2012/10/308112_thumb.jpg'
+//     }
+//   ]
+// },
+
 {
-  _t: 'tradle.Organization',
-  _r: '0b462e6124d39fda3af523b49b07affb67129102',
-  'name': 'Morgan Stanley',
-  'contacts': [
-    {
-      'id': 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a52fa',
-      'title': 'Jane Choi'
-    }
-  ],
-  'photos': [
-    {
-      'url':  'http://www.gabelliconnect.com/wp-content/uploads/2012/10/308112_thumb.jpg'
-    }
-  ]
-},
-{ 
   _t: 'tradle.PurposeOfTheAccount',
   purpose: 'Benefit Payments'
 },
-{ 
+{
   _t: 'tradle.PurposeOfTheAccount',
   purpose: 'Bills / Expenses'
 },
-{ 
+{
   _t: 'tradle.PurposeOfTheAccount',
   purpose: 'Capital Raising ( Scottish Widows Bank )'
 },
-{ 
+{
   _t: 'tradle.PurposeOfTheAccount',
   purpose: 'Inheritance'
-},  
-{ 
+},
+{
   _t: 'tradle.PurposeOfTheAccount',
   purpose: 'Probate / Executor / Trustee'
 },
-{ 
+{
   _t: 'tradle.PurposeOfTheAccount',
   purpose: 'Salary / Pension / Other Regular Income'
 },
-{ 
+{
   _t: 'tradle.PurposeOfTheAccount',
   purpose: 'Savings'
 },
-{ 
+{
   _t: 'tradle.PurposeOfTheAccount',
   purpose: 'Spending money'
 },
-{ 
+{
   _t: 'tradle.PurposeOfTheAccount',
   purpose: 'Student'
 },
-{ 
+{
   _t: 'tradle.ResidentialStatus',
   status: 'Home owner (with mortgage)'
 },
-{ 
+{
   _t: 'tradle.ResidentialStatus',
   status: 'Home owner (without mortgage)',
 },
-{ 
+{
   _t: 'tradle.ResidentialStatus',
   status:  'Tenant (private)',
 },
-{ 
+{
   _t: 'tradle.ResidentialStatus',
   status: 'Tenant (counsel)',
 },
-{ 
+{
   _t: 'tradle.ResidentialStatus',
   status: 'Living with parents'
 },
-{ 
+{
   _t: 'tradle.MaritalStatus',
   status: 'Single',
 },
-{ 
+{
   _t: 'tradle.MaritalStatus',
   status: 'Married / civil partnership',
 },
-{ 
+{
   _t: 'tradle.MaritalStatus',
   status: 'Widowed',
 },
-{ 
+{
   _t: 'tradle.MaritalStatus',
   status: 'Divorced/Dissolved civil partnership',
 },
-{ 
+{
   _t: 'tradle.MaritalStatus',
   status: 'Separated'
 },
-{ 
+{
   _t: 'tradle.Nationality',
   nationality: 'British',
 },
-{ 
+{
   _t: 'tradle.Nationality',
   nationality: 'American',
 },
-{ 
+{
   _t: 'tradle.Nationality',
   nationality: 'French',
 },
-{ 
+{
   _t: 'tradle.Nationality',
   nationality: 'Russian',
 },
-{ 
+{
   _t: 'tradle.Nationality',
   nationality: 'Dutch'
 },
-{ 
+{
   _t: 'tradle.Country',
   country: 'UK',
 },
-{ 
+{
   _t: 'tradle.Country',
   country: 'US',
 },
-{ 
+{
   _t: 'tradle.Country',
   country: 'France',
 },
-{ 
+{
   _t: 'tradle.Country',
   country: 'Russia',
 },
-{ 
+{
   _t: 'tradle.Country',
   country: 'Netherlands'
 },
-{ 
+{
   _t: 'tradle.HowToFund',
   howToFund: 'Cash',
 },
-{ 
+{
   _t: 'tradle.HowToFund',
   howToFund: 'Check',
 },
-{ 
+{
   _t: 'tradle.HowToFund',
   howToFund: 'Direct to Bank'
 },
@@ -1096,12 +1110,6 @@ var identities = [
   _t: 'tradle.Organization',
   _r: '0191ef415aa2ec76fb8ec8760b55112cadf573bc',
   'name': 'HSBC',
-  'contacts': [
-    {
-      'id': 'tradle.Identity_31eb0b894cad3601adc76713d55a11c88e48b4a2',
-      'title': 'Kate Blair'
-    }
-  ],
   'photos': [
     {
       'url':  'http://www.gunesulasim.com/web/uploads/referans/kucuk/hsbc_logo_square.gif'
@@ -1112,12 +1120,6 @@ var identities = [
   _t: 'tradle.Organization',
   'name': 'Rabobank',
   _r: '71e4b7cd6c11ab7221537275988f113a879029ea',
-  'contacts': [
-    {
-      'id': 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a12348',
-      'title': 'Timo Heinke'
-    }
-  ],
   'photos': [
     {
       'url':  'http://vectorlogofree.com/wp-content/uploads/2012/06/rabobank-logo-vector-01.png'
@@ -1127,26 +1129,57 @@ var identities = [
 
 {
   _t: 'tradle.Organization',
-  _r: '96e460ca282d62e41d4b59c85b212d102d7a5a6e',
-  'name': 'Lloyds',
-  'contacts': [
-    {
-      'id': 'tradle.Identity_b25da36eaf4b01b37fc2154cb1103eb5324a12345',
-      'title': 'Ted Logan'
-    }
-  ],
+  'name': 'Obvion',
+  _r: '71e4b7cd6c11ab7221537275988f113a879029ob',
   'photos': [
     {
-      'url':  'http://www.bankpoint.co.uk/assets/images/companies/lloyds.jpg'
+      'url':  'https://pbs.twimg.com/profile_images/486406149017579521/vnJStaMl.jpeg'
     }
   ]
 },
+
 {
   _t: 'tradle.Organization',
-  'name': 'Tilton',
+  'name': 'Achmea',
+  _r: '71e4b7cd6c11ab7221537275988f113a879029ah',
   'photos': [
     {
-      'url':  'http://www.archivisionmodels.com/Architectural-Models/hotel/images/making-scale-models.jpg'
+      'url':  'https://pbs.twimg.com/profile_images/438648661157765120/iGehefKE.png'
+    }
+  ]
+},
+
+{
+  _t: 'tradle.Organization',
+  'name': 'DLL',
+  _r: '71e4b7cd6c11ab7221537275988f113a87902dll',
+  'photos': [
+    {
+      url: 'http://www.iqmedia.nl/assets/uploads/DLL_infographic-360x270.jpg'
+      // 'url':  'https://media.licdn.com/mpr/mpr/shrink_200_200/AAEAAQAAAAAAAAZFAAAAJDc2ZjY0Y2E5LTFiNjYtNDk3MS04YjVhLTcxOWU3OTM1MTU0Mw.png'
+    }
+  ]
+},
+
+
+{
+  _t: 'tradle.Organization',
+  'name': 'Amstel en Vecht',
+  _r: '71e4b7cd6c11ab7221537275988f113a879029am',
+  'photos': [
+    {
+      'url':  'https://media.licdn.com/mpr/mpr/shrink_200_200/p/2/000/00d/1ad/3dfb60a.jpg'
+    }
+  ]
+},
+
+{
+  _t: 'tradle.Organization',
+  _r: '96e460ca282d62e41d4b59c85b212d102d7a5a6e',
+  'name': 'Lloyds',
+  'photos': [
+    {
+      'url':  'http://www.bankpoint.co.uk/assets/images/companies/lloyds.jpg'
     }
   ]
 },
@@ -1190,7 +1223,7 @@ module.exports = data;
 //       value: 120,
 //       currency: 'USD'
 //     }
-//   //   submittedBy: 
+//   //   submittedBy:
 //   //     type: 'object',
 //   //     ref: 'tradle.Identity',
 //   //     readOnly: true
@@ -1220,7 +1253,7 @@ module.exports = data;
 //   //   dealPrice: {
 //   //     type: 'object',
 //   //     ref: 'tradle.Money',
-//   //   },    
+//   //   },
 //   //   dealDiscount: {
 //   //     type: 'object',
 //   //     ref: 'tradle.Money',
@@ -1236,8 +1269,8 @@ module.exports = data;
 //   //     type: 'string',
 //   //     readOnly: true,
 //   //     oneOf: [
-//   //       'Deal is over', 
-//   //       'Deal is going', 
+//   //       'Deal is over',
+//   //       'Deal is going',
 //   //       'Not featured yet'
 //   //     ]
 //   //   },
