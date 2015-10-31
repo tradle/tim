@@ -222,7 +222,7 @@ var Store = Reflux.createStore({
     })
 
     dht.listen(port)
-    dht.socket.filterMessages(tutils.isDHTMessage)
+    // dht.socket.filterMessages(tutils.isDHTMessage)
     return dht
   },
   nodeIdFor (identity) {
@@ -254,7 +254,7 @@ var Store = Reflux.createStore({
     });
   },
 
-  onAddMessage(r, isWelcome) {
+  onAddMessage(r, isWelcome, requestForForm) {
     var props = this.getModel(r[TYPE]).value.properties;
     var rr = {};
     if (!r.time)
@@ -314,11 +314,14 @@ var Store = Reflux.createStore({
     var error
     var welcomeMessage
     var dhtKey
-    var onlyWelcome
-    return getDHTKey(toChain)
+    var onlyWelcome = !requestForForm  &&  isWelcome  &&  !!toOrg
+    var promise = onlyWelcome
+                ? Q.resolve()
+                : getDHTKey(toChain)
+    return promise
     .then(function(data) {
-      dhtKey = data
       if (!isWelcome) {
+        dhtKey = data
         var to = list[utils.getId(r.to)].value;
         var from = list[utils.getId(r.from)].value;
         var dn = r.message; // || utils.getDisplayName(r, props);
@@ -329,6 +332,7 @@ var Store = Reflux.createStore({
           dn = msgParts.length === 1 ? dn : utils.getModel(msgParts[1]).value.title + ' request';
         }
 
+        rr[ROOT_HASH] = dhtKey
         to.lastMessage = (from[ROOT_HASH] === me[ROOT_HASH]) ? 'You: ' + dn : dn;
         to.lastMessageTime = rr.time;
         from.lastMessage = rr.message;
@@ -336,7 +340,6 @@ var Store = Reflux.createStore({
         batch.push({type: 'put', key: to[TYPE] + '_' + to[ROOT_HASH], value: to});
         batch.push({type: 'put', key: from[TYPE] + '_' + from[ROOT_HASH], value: from});
       }
-      rr[ROOT_HASH] = dhtKey
       if (!isWelcome  ||  (me.organization  &&  utils.getId(me.organization) === utils.getId(r.to)))
         return
       var wmKey = constants.TYPES.SIMPLE_MESSAGE + '_Welcome' + rr.to.title
@@ -346,10 +349,15 @@ var Store = Reflux.createStore({
       }
       // Create welcome message without saving it in DB
       welcomeMessage = {}
-      var isLloyds = toOrg.name === 'Lloyds'
-      onlyWelcome = isLloyds
-      var w = isLloyds ? welcomeLloyds : welcome
+      // var isLloyds = toOrg.name === 'Lloyds'
+      onlyWelcome = !!toOrg
+      var result = self.searchMessages({to: toOrg, modelName: MESSAGE, limit: 1});
+      if (!result || result.length > 0) {
+        isWelcome = false
+        return
+      }
 
+      var w = welcomeLloyds //isLloyds ? welcomeLloyds : welcome
 
       welcomeMessage.message = w.msg.replace('{firstName}', me.firstName)
       welcomeMessage.time = new Date()
@@ -377,9 +385,10 @@ var Store = Reflux.createStore({
     })
     .then(function() {
       // Temporary untill the real hash is known
-      var key = rr[TYPE] + '_' + rr[ROOT_HASH];
-      list[key] = {key: key, value: rr};
-
+      if (!onlyWelcome) {
+        var key = rr[TYPE] + '_' + rr[ROOT_HASH];
+        list[key] = {key: key, value: rr};
+      }
       var params = {
         action: 'addMessage',
         resource: isWelcome ? welcomeMessage : rr
@@ -392,17 +401,16 @@ var Store = Reflux.createStore({
         return self.getDriver(me)
     })
     .then(function() {
-      if (/*isWelcome  || */ onlyWelcome  ||  !list[utils.getId(r.to)].value.pubkeys)
-        return
-      return meDriver.send({
-        msg: toChain,
-        to: [{fingerprint: self.getFingerprint(r.to)}],
-        deliver: true,
-        chain: false
-      })
-      .catch(function (err) {
-        debugger
-      })
+      if (/*isWelcome  || */ !onlyWelcome  &&  list[utils.getId(r.to)].value.pubkeys)
+        return meDriver.send({
+          msg: toChain,
+          to: [{fingerprint: self.getFingerprint(r.to)}],
+          deliver: true,
+          chain: false
+        })
+        .catch(function (err) {
+          debugger
+        })
     })
     .then(function(data) {
       if (onlyWelcome)
@@ -859,7 +867,9 @@ var Store = Reflux.createStore({
   },
   onShare(resource, to) {
     debugger
+    if (to[TYPE] === ORGANIZATION) {
 
+    }
     var opts = {
       to: [{fingerprint: this.getFingerprint(to)}],
       deliver: true,
@@ -1179,8 +1189,11 @@ var Store = Reflux.createStore({
       }
       if (chatTo) {
         if (backlink  &&  r[backlink]) {
-          if (chatId === utils.getId(r[backlink]))
+          if (chatId === utils.getId(r[backlink])) {
             foundResources[key] = r;
+            if (params.limit  &&  Object.keys(foundResources).length === params.limit)
+              break;
+          }
 
           continue;
         }
@@ -1227,8 +1240,11 @@ var Store = Reflux.createStore({
       if (!query) {
         // foundResources[key] = r;
         var msg = this.fillMessage(r);
-        if (msg)
+        if (msg) {
           foundResources[key] = msg;
+          if (params.limit  &&  Object.keys(foundResources).length === params.limit)
+            break;
+        }
         continue;
       }
        // primitive filtering for this commit
@@ -1240,6 +1256,8 @@ var Store = Reflux.createStore({
       }
       if (!combinedValue  ||  (combinedValue  &&  (!query || combinedValue.toLowerCase().indexOf(query.toLowerCase()) != -1))) {
         foundResources[key] = this.fillMessage(r);
+        if (params.limit  &&  Object.keys(foundResources).length === params.limit)
+          break;
       }
     }
 
@@ -1282,7 +1300,7 @@ var Store = Reflux.createStore({
   getVerificationsToShare(foundResources, to) {
     var verTypes = [];
     var meId = me[TYPE] + '_' + me[ROOT_HASH];
-    var isOrg = to[TYPE] === ORGANIZATION
+    var isOrg = to  &&  to[TYPE] === ORGANIZATION
     for (var i=0; i<foundResources.length; i++) {
       var r = foundResources[i];
       if (me  &&  utils.getId(r.to) !== meId)
@@ -1475,17 +1493,21 @@ var Store = Reflux.createStore({
         var employees = this.searchNotMessages({modelName: IDENTITY, prop: 'organization', to: r})
 
         if (employees) {
-          var codes = [];
-          secCodes.forEach(function(sc) {
-            codes.push(sc.code)
-          })
-          for (var i=0; i<employees.length; i++) {
-            if (employees[i].securityCode && codes.indexOf(employees[i].securityCode) != -1) {
-              pubkeys = employees[i].pubkeys
-              if (pubkeys)
-                break
+          // RABOBANK case
+          if (secCodes) {
+            var codes = [];
+            secCodes.forEach(function(sc) {
+              codes.push(sc.code)
+            })
+
+            for (var i=0; i<employees.length  &&  !pubkeys; i++) {
+              if (employees[i].securityCode  && codes.indexOf(employees[i].securityCode) != -1)
+                pubkeys = employees[i].pubkeys
             }
           }
+          // LLOYDS case
+          else
+            pubkeys = employees[0].pubkeys
         }
       }
     }
@@ -1561,6 +1583,7 @@ var Store = Reflux.createStore({
       }
       me['pubkeys'] = mePub
       me['privkeys'] = mePriv
+      me[NONCE] = me[NONCE] || this.getNonce()
     }
 
     if (me[PUB_ID])
@@ -1738,17 +1761,8 @@ var Store = Reflux.createStore({
       //   meDriver.lookupObject(data)
       //   .then(function (obj) {
       //     // return
-      //     if (['from', 'to'].some(function (party) {
-      //       try {
-      //         return obj[party].identity.toJSON().name.firstName === 'Ellen'
-      //       } catch (err) {}
-      //     })) {
-      //       ellens++
-      //       console.log('ELLEN MSGS', ellens)
-      //     }
-
       //     console.log('from msgs.db', obj)
-      //     self.putInDb(obj)
+      //     // self.putInDb(obj)
       //     // console.log('msg', obj)
       //   })
       // })
@@ -1759,7 +1773,10 @@ var Store = Reflux.createStore({
         meDriver.lookupObject(obj)
         .then(function(obj) {
           // return
-          self.putInDb(obj)
+          return self.putInDb(obj)
+        })
+        .catch(function (err) {
+          debugger
         })
       })
       meDriver.on('lowbalance', function () {
@@ -1786,9 +1803,12 @@ var Store = Reflux.createStore({
         // debugger
         console.log(msg)
         meDriver.lookupObject(msg)
-        .done(function(obj) {
+        .then(function(obj) {
           // return
-          self.putInDb(obj, true)
+          return self.putInDb(obj, true)
+        })
+        .catch(function (err) {
+          debugger
         })
       })
     // })
@@ -1908,7 +1928,7 @@ var Store = Reflux.createStore({
       // self.trigger(retParams)
     // })
      // return db.batch(batch)
-     db.batch(batch)
+     return db.batch(batch)
   },
   loadMyResources() {
     var myId = sampleData.getMyId();
