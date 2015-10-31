@@ -532,28 +532,28 @@ class MessageRow extends Component {
     else
       return onPressCall ? onPressCall : (isSimpleMessage ? null : this.props.onSelect);
   }
-  share() {
-    console.log('Share')
-    Actions.share(this.props.resource, this.props.to)
-  }
-  shareDocs() {
-    this.props.navigator.push({
-      title: m.title,
-      titleTextColor: '#7AAAC3',
-      id: 10,
-      component: ResourceList,
-      backButtonTitle: 'Back',
-      passProps: {
-        filter:      filter,
-        prop:        propName,
-        modelName:   prop.ref,
-        resource:    resource,
-        returnRoute: currentRoutes[currentRoutes.length - 1],
-        callback:    this.setChosenValue.bind(this)
-      }
-    });
+  // share() {
+  //   console.log('Share')
+  //   Actions.share(this.props.resource, this.props.to)
+  // }
+  // shareDocs() {
+  //   this.props.navigator.push({
+  //     title: m.title,
+  //     titleTextColor: '#7AAAC3',
+  //     id: 10,
+  //     component: ResourceList,
+  //     backButtonTitle: 'Back',
+  //     passProps: {
+  //       filter:      filter,
+  //       prop:        propName,
+  //       modelName:   prop.ref,
+  //       resource:    resource,
+  //       returnRoute: currentRoutes[currentRoutes.length - 1],
+  //       callback:    this.setChosenValue.bind(this)
+  //     }
+  //   });
 
-  }
+  // }
   formatDocument(model, verification, onPress) {
     var resource = verification.document;
     var self = this;
@@ -604,7 +604,7 @@ class MessageRow extends Component {
                 'Sharing ' + docTitle + ' verified by ' + verifiedBy,
                 'with ' + orgTitle,
                 [
-                  {text: 'Share', onPress: this.share.bind(this)},
+                  {text: 'Share', onPress: this.props.share.bind(this, verification.document, this.props.to)},
                   {text: 'Cancel', onPress: () => console.log('Canceled!')},
                 ]
             )}>
