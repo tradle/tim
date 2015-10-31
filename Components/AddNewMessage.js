@@ -110,17 +110,20 @@ class AddNewMessage extends Component {
     var model = utils.getModel(this.props.modelName).value;
     var pushForm;
     var isLloyds = resource.to[constants.TYPE] == constants.TYPES.ORGANIZATION  &&  resource.to.name === 'Lloyds';
-    if (me.organization)
-      pushForm = <TouchableHighlight style={{paddingLeft: 20}} underlayColor='#eeeeee'
-                   onPress={this.props.onAddNewPressed.bind(this, true)}>
-                     <Icon name={'ios-arrow-thin-up'} size={25} style={styles.imageOutline} color='#757575' />
-                 </TouchableHighlight>
-    else if (isLloyds) {
+    if (!isLloyds)
+      isLloyds = resource[constants.TYPE] === constants.TYPES.ORGANIZATION  &&  resource.name === 'Lloyds'
+    if (isLloyds)
       pushForm = <TouchableHighlight underlayColor='#7AAAC3'
                    onPress={this.props.onAddNewPressed.bind(this, true)}>
                      <Text style={[styles.products, {paddingTop: 7, color: '#ffffff', fontSize: 20}]}>Choose the product</Text>
                  </TouchableHighlight>
-    }
+    else if (me.organization                                                       &&
+             this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION  &&
+             me.organization.title === this.props.resource.name)
+      pushForm = <TouchableHighlight style={{paddingLeft: 20}} underlayColor='#eeeeee'
+                   onPress={this.props.onAddNewPressed.bind(this, true)}>
+                     <Icon name={'ios-arrow-thin-up'} size={25} style={styles.imageOutline} color='#757575' />
+                 </TouchableHighlight>
     else
       pushForm = <View style={{marginLeft: 10}}/>
           // <TouchableHighlight style={{paddingRight: 5}} underlayColor='#eeeeee'
@@ -411,7 +414,7 @@ var styles = StyleSheet.create({
     borderRightColor: '#7AAAC3',
     borderLeftColor: '#7AAAC3',
     borderWidth: 1,
-    borderTopColor: '#2E3B4E',
+    borderTopColor: '#60879C',
   }});
 
 module.exports = AddNewMessage;
