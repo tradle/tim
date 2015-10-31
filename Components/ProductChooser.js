@@ -70,7 +70,7 @@ class ProductChooser extends Component {
       time: new Date().getTime()
     }
 
-    Actions.addMessage(msg, true)
+    Actions.addMessage(msg, true, true)
     this.props.navigator.pop();
 
   }

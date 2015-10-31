@@ -109,15 +109,17 @@ class AddNewMessage extends Component {
     var resource = {from: me, to: this.props.resource};
     var model = utils.getModel(this.props.modelName).value;
     var pushForm;
-    var isLloyds = resource.to[constants.TYPE] == constants.TYPES.ORGANIZATION  &&  resource.to.name === 'Lloyds';
-    if (!isLloyds)
-      isLloyds = resource[constants.TYPE] === constants.TYPES.ORGANIZATION  &&  resource.name === 'Lloyds'
-    if (isLloyds)
+    // var isLloyds = resource.to[constants.TYPE] == constants.TYPES.ORGANIZATION  &&  resource.to.name === 'Lloyds';
+    // if (!isLloyds)
+    //   isLloyds = resource[constants.TYPE] === constants.TYPES.ORGANIZATION  &&  resource.name === 'Lloyds'
+    var isOrg = resource.to[constants.TYPE] == constants.TYPES.ORGANIZATION  ||  resource[constants.TYPE] === constants.TYPES.ORGANIZATION
+    if (isOrg)
       pushForm = <TouchableHighlight underlayColor='#7AAAC3'
                    onPress={this.props.onAddNewPressed.bind(this, true)}>
                      <Text style={[styles.products, {paddingTop: 7, color: '#ffffff', fontSize: 20}]}>Choose the product</Text>
                  </TouchableHighlight>
-    else if (me.organization                                                       &&
+    else
+      if (me.organization                                                       &&
              this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION  &&
              me.organization.title === this.props.resource.name)
       pushForm = <TouchableHighlight style={{paddingLeft: 20}} underlayColor='#eeeeee'
@@ -130,7 +132,7 @@ class AddNewMessage extends Component {
           //   onPress={this.props.onAddNewPressed.bind(this)}>
           //      <Image source={require('image!edit')} style={[styles.image]} />
           // </TouchableHighlight>
-    var chat = isLloyds
+    var chat = isOrg
              ? <View />
              : <View style={styles.searchBar}>
                   <ChatMessage ref="chat" resource={resource}
@@ -140,7 +142,7 @@ class AddNewMessage extends Component {
                                onChange={this.onChange.bind(this)}
                                onEndEditing={this.onEndEditing.bind(this)} />
                </View>
-    var camera = isLloyds
+    var camera = isOrg
                ? <View />
                : <TouchableHighlight style={{paddingRight: 8, marginBottom: 4}} underlayColor='transparent'
                   onPress={this.showChoice.bind(this)}>
@@ -149,10 +151,10 @@ class AddNewMessage extends Component {
                   </View>
                 </TouchableHighlight>
 
-    var style = isLloyds ? {alignSelf: 'center'} : {flexDirection: 'row', marginLeft: -8}
+    var style = isOrg ? {alignSelf: 'center'} : {flexDirection: 'row', marginLeft: -8}
     return (
       <View style={{height: this.state.keyboardSpace + 45}}>
-      <View style={isLloyds ? styles.addNewProduct : styles.addNew}>
+      <View style={isOrg ? styles.addNewProduct : styles.addNew}>
         <View style={style}>
           {pushForm}
         </View>

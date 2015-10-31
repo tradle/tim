@@ -245,7 +245,7 @@ class MessageList extends Component {
     var self = this;
     var currentRoutes = self.props.navigator.getCurrentRoutes();
     var resource = this.props.resource
-    if (resource.name === 'Lloyds') {
+    // if (resource.name === 'Lloyds') {
       var currentRoutes = self.props.navigator.getCurrentRoutes();
       this.props.navigator.push({
         title: 'Financial Product',
@@ -272,9 +272,9 @@ class MessageList extends Component {
           }
         }
       });
-      return;
-    }
-
+    //   return;
+    // }
+/*
     this.props.navigator.push({
       title: utils.makeLabel(model.title) + ' type',
       id: 2,
@@ -302,6 +302,7 @@ class MessageList extends Component {
         }
       }
     });
+*/
   }
   modelAdded(resource) {
     if (resource.url)
