@@ -122,6 +122,17 @@ class ResourceList extends Component {
     //   var rnd = this.getRandomInt(1, list.length - 1);
     //   list[rnd].online = true;
     // }
+    if (type === constants.TYPES.IDENTITY) {
+      // var routes = this.props.navigator.getCurrentRoutes();
+      // if (routes.length == 2) {
+        // var l = []
+        // list.forEach(function(r) {
+        //   if (!r.organization)
+        //     l.push(r)
+        // })
+        // list = l
+      // }
+    }
 
     this.setState({
       dataSource: this.state.dataSource.cloneWithRows(list),
@@ -190,6 +201,7 @@ class ResourceList extends Component {
     var route = {
       component: MessageList,
       id: 11,
+      backButtonTitle: 'Back',
       passProps: {
         resource: resource,
         filter: '',
@@ -223,50 +235,51 @@ class ResourceList extends Component {
     }
     else {
       route.title = resource.name
-      if (resource.name === 'Rabobank'  &&  (!me.organization  ||  me.organization.name !== 'Rabobank')) {
-        var routes = this.props.navigator.getCurrentRoutes();
-        if (routes[routes.length - 1].title === 'Banks'  ||
-            routes[routes.length - 1].title === 'Official Accounts') {
-          var msg = {
-            message: (me.firstName || 'There is a customer') + ' waiting for the response',
-            _t: constants.TYPES.SIMPLE_MESSAGE,
-            from: me,
-            to: resource,
-            time: new Date().getTime(),
-          }
-
-          Actions.addMessage(msg, true)
+      // if (resource.name === 'Rabobank'  &&  (!me.organization  ||  me.organization.name !== 'Rabobank')) {
+      var routes = this.props.navigator.getCurrentRoutes();
+      if (routes[routes.length - 1].title === 'Official Accounts') {
+        var msg = {
+          message: (me.firstName || 'There is a customer') + ' waiting for the response',
+          _t: constants.TYPES.SIMPLE_MESSAGE,
+          from: me,
+          to: resource,
+          time: new Date().getTime(),
         }
+
+        // var sendNotification = (resource.name === 'Rabobank'  &&  (!me.organization  ||  me.organization.name !== 'Rabobank'))
+        // Actions.addMessage(msg, true, sendNotification)
+        Actions.addMessage(msg, true)
       }
-      else if (resource.name === 'Lloyds') {
-        var currentRoutes = self.props.navigator.getCurrentRoutes();
-        this.props.navigator.push({
-          title: 'Financial Product',
-          id: 15,
-          component: ProductChooser,
-          sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-          backButtonTitle: 'Back',
-          passProps: {
-            resource: resource,
-            returnRoute: currentRoutes[currentRoutes.length - 1],
-            callback: this.props.callback
-          },
-          rightButtonTitle: 'ion|plus',
-          onRightButtonPress: {
-            id: 4,
-            title: 'New product',
-            component: NewResource,
-            backButtonTitle: 'Back',
-            titleTextColor: '#7AAAC3',
-            rightButtonTitle: 'Done',
-            passProps: {
-              model: utils.getModel('tradle.NewMessageModel').value,
-              // callback: this.modelAdded.bind(this)
-            }
-          }
-        });
-        return;
-      }
+      // }
+      // else if (resource.name === 'Lloyds') {
+      //   var currentRoutes = self.props.navigator.getCurrentRoutes();
+      //   this.props.navigator.push({
+      //     title: 'Financial Product',
+      //     id: 15,
+      //     component: ProductChooser,
+      //     sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      //     backButtonTitle: 'Back',
+      //     passProps: {
+      //       resource: resource,
+      //       returnRoute: currentRoutes[currentRoutes.length - 1],
+      //       callback: this.props.callback
+      //     },
+      //     rightButtonTitle: 'ion|plus',
+      //     onRightButtonPress: {
+      //       id: 4,
+      //       title: 'New product',
+      //       component: NewResource,
+      //       backButtonTitle: 'Back',
+      //       titleTextColor: '#7AAAC3',
+      //       rightButtonTitle: 'Done',
+      //       passProps: {
+      //         model: utils.getModel('tradle.NewMessageModel').value,
+      //         // callback: this.modelAdded.bind(this)
+      //       }
+      //     }
+      //   });
+      //   return;
+      // }
     }
     this.props.navigator.push(route);
   }
@@ -407,7 +420,7 @@ class ResourceList extends Component {
     var model = utils.getModel(this.props.modelName).value;
     if (model.subClassOf  &&  model.subClassOf === 'tradle.FinancialProduct')
       return <View />
-    // var qrInfo = (model.id === constants.TYPES.IDENTITY) 
+    // var qrInfo = (model.id === constants.TYPES.IDENTITY)
     //            ? <View style={styles.row}>
     //                <TouchableHighlight underlayColor='transparent'
     //                   onPress={this.showQRCode.bind(this, 'Contact Info', me[constants.ROOT_HASH])}>
@@ -430,8 +443,8 @@ class ResourceList extends Component {
     //                   </View>
     //                 </View>
     //               </TouchableHighlight>
-    //             </View> 
-    //           : <View />  
+    //             </View>
+    //           : <View />
 
     return (
       // <View style={styles.footer}>
@@ -479,7 +492,7 @@ class ResourceList extends Component {
   // }
   showBanks() {
     this.props.navigator.push({
-      title: 'Banks',
+      title: 'Official Accounts',
       id: 10,
       component: ResourceList,
       backButtonTitle: 'Back',
