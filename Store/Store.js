@@ -91,6 +91,7 @@ var ldb;
 var isLoaded;
 var me;
 var meDriver
+var messenger
 var publishedIdentity
 var driverPromise
 var ready;
@@ -185,27 +186,42 @@ var Store = Reflux.createStore({
     // return Q.ninvoke(dns, 'resolve4', 'tradle.io')
     //   .then(function (addrs) {
     //     console.log('tradle is at', addrs)
-        meDriver = new Tim({
-          pathPrefix: TIM_PATH_PREFIX,
-          networkName: networkName,
-          keeper: keeper,
-          blockchain: blockchain,
-          leveldown: leveldown,
-          identity: identity,
-          identityKeys: keys,
-          dht: dht,
-          port: port,
-          syncInterval: 60000,
-          afterBlockTimestamp: constants.afterBlockTimestamp,
-          // afterBlockTimestamp: 1445976998,
-          relay: {
-            // address: addrs[0],
-            address: '54.236.214.150',
-            port: 25778
-          }
-        })
+    messenger = new Tim.Messengers.HttpClient()
+    meDriver = new Tim({
+      pathPrefix: TIM_PATH_PREFIX,
+      networkName: networkName,
+      keeper: keeper,
+      blockchain: blockchain,
+      leveldown: leveldown,
+      identity: identity,
+      identityKeys: keys,
+      dht: dht,
+      port: port,
+      syncInterval: 60000,
+      afterBlockTimestamp: constants.afterBlockTimestamp,
+      messenger: messenger
+      // afterBlockTimestamp: 1445976998,
+      // relay: {
+      //   // address: addrs[0],
+      //   address: '54.236.214.150',
+      //   port: 25778
+      // }
+    })
+
+    // START  HTTP specific stuff
+    var lloydsHash = '3a55cc6346fdd73a4ac4debd311d80cbaa53ebcd'
+    messenger.addRecipient(
+      lloydsHash,
+      'http://127.0.0.1:44444/lloyds/send'
+    )
+
+    meDriver.ready().then(function () {
+      messenger.setRootHash(meDriver.myRootHash())
+    })
+    // END  HTTP specific stuff
+
       // })
-  return Q.resolve(meDriver)
+    return Q.resolve(meDriver)
 
     // var log = d.log;
     // d.log = function () {
@@ -219,6 +235,11 @@ var Store = Reflux.createStore({
     var dht = new DHT({
       nodeId: this.nodeIdFor(identity),
       bootstrap: ['tradle.io:25778']
+    })
+
+    dht.on('error', function (err) {
+      debugger
+      throw err
     })
 
     dht.listen(port)

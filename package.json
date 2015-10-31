@@ -68,7 +68,7 @@
     "tcomb": "^1.0.3",
     "tcomb-form-native": "0.2.4",
     "tcomb-validation": "^1.0.4",
-    "tim": "tradle/tim",
+    "tim": "tradle/tim#talko2",
     "timers-browserify": "^1.4.1",
     "tradle-constants": "git://github.com/mvayngrib/tradle-constants.git",
     "tradle-test-helpers": "tradle/test-helpers",
