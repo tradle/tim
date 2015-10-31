@@ -1204,6 +1204,7 @@ var voc = [{
   title: 'Current Account',
   interfaces: ['tradle.Message'],
   subClassOf: 'tradle.FinancialProduct',
+  forms: ['tradle.AboutYou', 'tradle.LicenseVerification', 'tradle.UtilityBillVerification'],
   properties: {
     '_t': {
       'type': 'string',
@@ -1224,11 +1225,6 @@ var voc = [{
       readOnly: true,
       displayName: true,
       ref: 'tradle.Organization'
-    },
-    forms: {
-      type: 'string',
-      readOnly: true,
-      items: ['tradle.AboutYou', 'tradle.YourMoney']
     },
     residentialStatus: {
       type: 'object',
@@ -1301,6 +1297,102 @@ var voc = [{
     },
   }
 },
+{
+  id: 'tradle.AboutYou',
+  title: 'About You',
+  type: 'tradle.Model',
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    // product: {
+    //   type: 'object',
+    //   ref: 'tradle.FinancialProduct'
+    // },
+    residentialStatus: {
+      type: 'object',
+      ref: 'tradle.ResidentialStatus'
+    },
+    maritalStatus: {
+      type: 'object',
+      ref: 'tradle.MaritalStatus'
+    },
+    dependants: {
+      type: 'number',
+      description: 'How many people who live with you depend on you financially?'
+    },
+    nationality: {
+      type: 'object',
+      ref: 'tradle.Nationality'
+    },
+    inUKFrom: {
+      type: 'date',
+      description: 'When did you arrive in the UK?',
+      title: 'In UK from'
+    },
+    countryOfBirth: {
+      type: 'object',
+      ref: 'tradle.Country'
+    },
+    taxResidency: {
+      type: 'object',
+      description: 'Country/countries in which you have tax residency (or been resident of for the past 2 years):',
+      ref: 'tradle.Country'
+    },
+    fundAccount: {
+      type: 'object',
+      description: 'How will you fund your account?',
+      ref: 'tradle.HowToFund'
+    },
+    purposeOfTheAccount: {
+      type: 'object',
+      ref: 'tradle.PurposeOfTheAccount'
+    },
+    phones: {
+      type: 'array',
+      items: {
+        type: 'string',
+        properties: {
+          phoneType: {
+            type: 'string',
+            ref: 'tradle.PhoneTypes'
+          },
+          number: {
+            type: 'string'
+          }
+        }
+      },
+      required: ['phoneType', 'number']
+    },
+    emailAddress: {
+      type: 'string',
+    },
+  }
+},
+{
+  id: 'tradle.YourMoney',
+  title: 'Your Money',
+  type: 'tradle.Model',
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    employer: {
+      type: 'object',
+      ref: 'tradle.Organization'
+    },
+    monthlyIncome: {
+      type: 'object',
+      ref: 'tradle.Money'
+    },
+    whenHired: {
+      type: 'date'
+    },
+  }
+},
+
 {
   id: 'tradle.Savings',
   title: 'Savings',
