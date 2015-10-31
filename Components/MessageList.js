@@ -72,7 +72,7 @@ class MessageList extends Component {
       return;
     if (params.resource  &&  params.resource[constants.ROOT_HASH] != this.props.resource[constants.ROOT_HASH]) {
       var doUpdate
-      if (this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION  &&  params.resource.organization) {
+      if (this.props.resource[constants.TYPE] === constants.ORGANIZATION  &&  params.resource.organization) {
         if (this.props.resource[constants.TYPE] + '_' + this.props.resource[constants.ROOT_HASH] === utils.getId(params.resource.organization))
           doUpdate = true
       }
@@ -101,6 +101,10 @@ class MessageList extends Component {
       var first = true
       this.setState({isLoading: false})
     }
+  }
+  share(resource, to) {
+    console.log('Share')
+    Actions.share(resource, to)
   }
 
   selectResource(resource) {
@@ -151,6 +155,7 @@ class MessageList extends Component {
     return  (
       <MessageRow
         onSelect={this.selectResource.bind(this, resource)}
+        share={this.share.bind(this)}
         resource={resource}
         messageNumber={rowId}
         isAggregation={isAggregation}
