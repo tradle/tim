@@ -72,7 +72,7 @@ class MessageList extends Component {
       return;
     if (params.resource  &&  params.resource[constants.ROOT_HASH] != this.props.resource[constants.ROOT_HASH]) {
       var doUpdate
-      if (this.props.resource[constants.TYPE] === constants.ORGANIZATION  &&  params.resource.organization) {
+      if (this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION  &&  params.resource.organization) {
         if (this.props.resource[constants.TYPE] + '_' + this.props.resource[constants.ROOT_HASH] === utils.getId(params.resource.organization))
           doUpdate = true
       }
