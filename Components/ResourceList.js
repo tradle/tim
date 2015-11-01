@@ -81,7 +81,7 @@ class ResourceList extends Component {
                 ? utils.getModel(this.props.modelName).value
                 : utils.getModel(params.resource[constants.TYPE]).value;
 
-      this.state.isLoading = true;
+      // this.state.isLoading = true;
       Actions.list({
         query: this.state.filter,
         modelName: model.id,
