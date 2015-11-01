@@ -188,6 +188,9 @@ class MessageRow extends Component {
                         <View style={{paddingTop: 5}}>
                           {this.formatDocument(msgModel, resource, this.verify.bind(this))}
                         </View>
+                        <View style={{paddingTop: 5}}>
+                          <Text style={styles.verySmallLetters}>{msgModel.title}</Text>
+                        </View>
                       </View>
       }
       var rowId = <Text style={{fontWeight: '600', fontSize: 16, color: isMyMessage ? '#ffffff' : '#289427', paddingRight: 3}}>{this.props.messageNumber + '.'}</Text>;
@@ -272,10 +275,13 @@ class MessageRow extends Component {
     var vtt = [];
     var cnt = 0;
     var self = this;
+    var chatOrg = this.props.to[constants.TYPE] === constants.TYPES.ORGANIZATION  &&  this.props.to[constants.TYPE] + '_' + this.props.to[constants.ROOT_HASH]
     for (var t in  this.props.verificationsToShare) {
-      // if (t === msgModel.id) {
+      if (t === msgModel.id) {
         var ver = this.props.verificationsToShare[t];
         ver.forEach(function(r) {
+          if (chatOrg  &&  utils.getId(r.organization) === chatOrg)
+            return
           var vModel = utils.getModel(r[constants.TYPE]);
           var doc = self.formatDocument(msgModel, r);
           if (cnt) {
@@ -288,7 +294,7 @@ class MessageRow extends Component {
           vtt.push(doc);
           cnt++;
         })
-      // }
+      }
     }
     if (!vtt.length)
       return <View />;
@@ -416,16 +422,11 @@ class MessageRow extends Component {
         return;
       var style = styles.resourceTitle; //(first) ? styles.resourceTitle : styles.description;
       if (isMyMessage) {
-        // style = [style, {justifyContent: 'flex-end', paddingLeft: 5}];
         style = [style, {justifyContent: 'flex-end'}];
         if (isSimpleMessage)
           style.push({color: '#ffffff'});
-        else if (isAdditionalInfo) {
-          // if (isMyMessage)
-          //   style.push({color: '#ffffff'});
-          // else
-            style.push({color: '#2892C6'});
-        }
+        else if (isAdditionalInfo)
+          style.push({color: '#2892C6'});
       }
 
       if (properties[v].ref) {
@@ -569,11 +570,6 @@ class MessageRow extends Component {
       var rows = [];
       this.formatDocument1(model, resource, rows);
       msg = <View>{rows}</View>
-      // msg = <View>
-      //         <Text style={styles.description}>
-      //           {utils.getDisplayName(resource, docModel.properties)}
-      //         </Text>
-      //       </View>
     }
     var photo = (resource  &&  resource.photos)
               ? <Image source={{uri: utils.getImageUri(resource.photos[0].url)}}  style={styles.cellImage} />
@@ -587,9 +583,9 @@ class MessageRow extends Component {
 
       orgRow =  onPress
              ? <View />
-             : <View style={{flexDirection: 'row', marginTop: 5}}>
+             : <View style={{flexDirection: 'row', justifyContent: 'flex-end', marginTop: 5}}>
                    <Text style={styles.verySmallLetters}>verified by </Text>
-                   <Text style={[styles.verySmallLetters, {color: '#757575'}]}>{verification.organization.title.length < 10 ? verification.organization.title : verification.organization.title.substring(0, 8) + '..'}</Text>
+                   <Text style={[styles.verySmallLetters, {color: '#289427'}]}>{verification.organization.title.length < 10 ? verification.organization.title : verification.organization.title.substring(0, 8) + '..'}</Text>
                 </View>
     }
     else
@@ -653,7 +649,6 @@ class MessageRow extends Component {
           vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{resource[v].title}</Text>);
           first = false;
         }
-
         return;
       }
 
