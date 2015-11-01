@@ -158,7 +158,7 @@ class NewResource extends Component {
       if (!required) {
         required = []
         for (var p in this.props.model.properties) {
-          if (!p.charAt(0) == '_')
+          if (p.charAt(0) !== '_')
             required.push(p)
         }
 
@@ -167,13 +167,18 @@ class NewResource extends Component {
 
       for (var p of required) {
         var v = value[p] ? value[p] : resource[p];
-
-        if (!v || (Object.prototype.toString.call(v) === '[object Date]'  &&  isNaN(v.getTime())))  {
-          if (msg.length == 0)
-            msg += 'Invalid values for the properties: '
-          else
-            msg += ', ';
-          msg += '\'' + this.props.model.properties[p].title + '\'';
+        var isDate = Object.prototype.toString.call(v) === '[object Date]'
+        if (!v || (isDate  &&  isNaN(v.getTime())))  {
+          var prop = this.props.model.properties[p]
+          if (prop.items  &&  prop.items.backlink)
+            continue
+          if ((prop.ref && prop.ref !== 'tradle.Money') ||  isDate) {
+            if (msg.length == 0)
+              msg += 'Invalid values for the properties: '
+            else
+              msg += ', ';
+            msg += '\'' + this.props.model.properties[p].title + '\'';
+          }
         }
       }
       if (msg.length) {
@@ -650,10 +655,10 @@ var styles = StyleSheet.create({
     marginRight: 5,
   },
   err: {
-    // paddingTop: 30,
+    // paddingVertical: 10,
     flexWrap: 'wrap',
-    paddingLeft: 20,
-    fontSize: 20,
+    paddingHorizontal: 15,
+    fontSize: 16,
     color: 'darkred',
   },
 
