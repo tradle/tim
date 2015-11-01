@@ -1220,6 +1220,11 @@ var voc = [{
       readOnly: true,
       ref: 'tradle.Identity'
     },
+    to: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
     accountWith: {
       type: 'object',
       readOnly: true,
@@ -1300,6 +1305,7 @@ var voc = [{
 {
   id: 'tradle.AboutYou',
   title: 'About You',
+  interfaces: ['tradle.Message'],
   type: 'tradle.Model',
   properties: {
     '_t': {
@@ -1310,6 +1316,16 @@ var voc = [{
     //   type: 'object',
     //   ref: 'tradle.FinancialProduct'
     // },
+    from: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    to: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
     residentialStatus: {
       type: 'object',
       ref: 'tradle.ResidentialStatus'
@@ -1373,6 +1389,7 @@ var voc = [{
 {
   id: 'tradle.YourMoney',
   title: 'Your Money',
+  interfaces: ['tradle.Message'],
   type: 'tradle.Model',
   properties: {
     '_t': {
@@ -1389,6 +1406,16 @@ var voc = [{
     },
     whenHired: {
       type: 'date'
+    },
+    from: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    to: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
     },
   }
 },
@@ -1811,7 +1838,181 @@ var voc = [{
       ref: 'tradle.Organization'
     },
   },
+},
+
+{
+  id: 'tradle.PresentationOfTheCompany',
+  title: 'PresentationOfTheCompany',
+  interfaces: ['tradle.Message'],
+  subClassOf: 'tradle.FinancialProduct',
+  type: 'tradle.Model',
+  forms: ['tradle.CustomerIdentification', 'tradle.BusinessInformation'],
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    from: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    to: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+
+  }
+},
+
+{
+  id: 'tradle.CustomerIdentification',
+  title: 'Customer identification',
+  interfaces: ['tradle.Message'],
+  type: 'tradle.Model',
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    from: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    to: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    contactsIntroducingCompany: {
+      type: 'array',
+      items: {
+        'type': 'object',
+        'properties': {
+          'contact': {
+            'type': 'object',
+            'ref': 'tradle.Identity',
+            'skipLabel': true
+          },
+          'email': {
+            'type': 'string',
+          },
+          'phone': {
+            'type': 'string',
+          }
+        }
+      },
+    },
+    introducedParentCompany: {
+      type: 'object',
+      ref: 'tradle.Organization',
+      title: 'Introduced Parent Company (legally registered name of entity) '
+    },
+    accountName: {
+      type: 'string',
+      title: 'Account name',
+    },
+    officeAddress: {
+      type: 'string'
+    },
+    countryOfOrigin: {
+      type: 'object',
+      ref: 'tradle.Country'
+    },
+    contactPerson: {
+      type: 'object',
+      ref: 'tradle.Identity'
+    },
+    isYouCompanyListed: {
+      type: 'object',
+      ref: 'tradle.Organizations'
+    },
+    stockExchange: {
+      type: 'object',
+      ref: 'tradle.StockExchange',
+      description: 'Stock exchange at which your company is listed'
+    }
+// Telephone number      
+// E-mail      
+
+  }
+},
+
+{
+  id: 'tradle.BusinessInformation',
+  title: 'Business Information',
+  interfaces: ['tradle.Message'],
+  type: 'tradle.Model',
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    from: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    to: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    businessSector: {
+      type: 'object',
+      ref: 'tradle.BusinessSector',
+      description: 'Business sector & Business of the company'
+    },
+    sourceOfFunds: {
+      type: 'object',
+      ref: 'tradle.SourceOfFunds',
+      description: 'Source of Funds and information about the company’s equity capital'
+    },
+    mainReason: {
+      type: 'object',
+      description: 'Main (fiscal) reason for using Rabobank'
+    },
+    consolidatedGlobalVolumeOfSales: {
+      type: 'number',
+      title: 'Consolidated global volume of sales'
+    },
+
+
+
+// Consolidated global volume of sales
+
+// (p.a.)
+
+// Global  number of employees      
+
+// Expected volume of sales/turnover
+
+// over the Rabobank account(s) or
+
+// expected volume of sales of the Dutch
+
+// operations
+
+// In which countries does your company
+
+// have entities, suppliers or customers?
+
+// Does your company have subsidiaries
+
+// in any of the countries designated by
+
+// 1 Only relevant if it is required that the account holds a different name than the Legal entity opening the account.
+
+// 2 www.fatf-gafi.org
+
+// the FATF as high-risk or non-
+
+// cooperative jurisdictions?2
+  }
 }
+
 ];
 
 var models = {
