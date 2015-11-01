@@ -215,6 +215,12 @@ var Store = Reflux.createStore({
       'http://127.0.0.1:44444/lloyds/send'
     )
 
+    var achmeaHash = '64e174085ef1ae52026e589c484d36a5c5f969aa'
+    messenger.addRecipient(
+      achmeaHash,
+      'http://127.0.0.1:44444/achmea/send'
+    )
+
     meDriver.ready().then(function () {
       messenger.setRootHash(meDriver.myRootHash())
     })
@@ -283,16 +289,7 @@ var Store = Reflux.createStore({
     var toOrg
     if (r.to[TYPE] === ORGANIZATION) {
       var orgId = utils.getId(r.to)
-      var result = this.searchNotMessages({modelName: IDENTITY})
-      var orgRep;
-      for (var ir of result) {
-        if (!ir.organization)
-          continue
-        if (utils.getId(ir.organization) === orgId) {
-          orgRep = ir
-          break
-        }
-      }
+      var orgRep = this.getRepresentative(orgId)
       if (!orgRep) {
         var params = {
           action: 'addMessage',
@@ -363,18 +360,18 @@ var Store = Reflux.createStore({
       }
       if (!isWelcome  ||  (me.organization  &&  utils.getId(me.organization) === utils.getId(r.to)))
         return
-      var wmKey = constants.TYPES.SIMPLE_MESSAGE + '_Welcome' + rr.to.title
-      if (list[wmKey]) {
-        list[wmKey].value.time = new Date()
-        return
-      }
-      // Create welcome message without saving it in DB
-      welcomeMessage = {}
-      // var isLloyds = toOrg.name === 'Lloyds'
-      onlyWelcome = !!toOrg
       var result = self.searchMessages({to: toOrg, modelName: MESSAGE, limit: 1});
       if (!result || result.length > 0) {
         isWelcome = false
+        return
+      }
+      var wmKey = constants.TYPES.SIMPLE_MESSAGE + '_Welcome' + rr.to.title
+      // Create welcome message without saving it in DB
+      welcomeMessage = {}
+      // var isLloyds = toOrg.name === 'Lloyds'
+      // onlyWelcome = !!toOrg
+      if (list[wmKey]) {
+        list[wmKey].value.time = new Date()
         return
       }
 
@@ -456,14 +453,30 @@ var Store = Reflux.createStore({
       return db.batch(batch)
     })
     .catch(function(err) {
-      err = err;
+      debugger
     });
+  },
+
+  getRepresentative(orgId) {
+    var result = this.searchNotMessages({modelName: IDENTITY})
+    var orgRep;
+    for (var ir of result) {
+      if (!ir.organization)
+        continue
+      if (utils.getId(ir.organization) === orgId) {
+        orgRep = ir
+        break
+      }
+    }
+    return orgRep
   },
   onAddVerification(r, notOneClickVerification, dontSend) {
     var batch = [];
     var key;
     var fromId = utils.getId(r.from);
     var from = list[fromId].value;
+    var toId = utils.getId(r.to);
+    var to = list[toId].value;
 
     r[NONCE] = r[NONCE]  ||  this.getNonce()
     r.time = new Date().getTime();
@@ -481,39 +494,32 @@ var Store = Reflux.createStore({
     }
     var self = this;
 
-    return   dontSend
-           ? Q()
-           :  meDriver.send({
-              msg: toChain,
-              to: [{fingerprint: this.getFingerprint(r.to)}],
-              deliver: true,
-              chain: false
-            })
+    var promise = dontSend
+                 ? Q()
+                 :  meDriver.send({
+                    msg: toChain,
+                    to: [{fingerprint: this.getFingerprint(r.to)}],
+                    deliver: true,
+                    chain: false
+                  })
+    return promise
     .then(function(data) {
       if (data) {
         var roothash = data[0]._props[ROOT_HASH]
         r[ROOT_HASH] = roothash
         r[CUR_HASH] = data[0]._props[CUR_HASH]
-        key = r[TYPE] + '_' + roothash;
       }
+      key = r[TYPE] + '_' + r[ROOT_HASH];
       if (from.organization)
         r.organization = from.organization;
 
       batch.push({type: 'put', key: key, value: r});
-
-      var toId = utils.getId(r.to);
-      var verificationRequestId = utils.getId(r.document);
-      var to = list[toId].value;
 
       var newVerification = {
         id: key + '_' + r[CUR_HASH],
         title: r.document.title ? r.document.title : '',
         time: r.time
       };
-      var verificationRequest = list[verificationRequestId].value;
-      if (!verificationRequest.verifiedBy)
-        verificationRequest.verifications = [];
-      verificationRequest.verifications.push(newVerification);
 
       if (!from.myVerifications)
         from.myVerifications = [];
@@ -523,7 +529,6 @@ var Store = Reflux.createStore({
         to.verifiedByMe = [];
       to.verifiedByMe.push(newVerification);
 
-      batch.push({type: 'put', key: verificationRequestId, value: verificationRequest});
       batch.push({type: 'put', key: fromId, value: from});
 
     // check if send returns somewhere roothash for the new resource
@@ -539,6 +544,13 @@ var Store = Reflux.createStore({
         self.trigger({action: 'addItem', resource: rr});
       else
         self.trigger({action: 'addVerification', resource: rr});
+
+      var verificationRequestId = utils.getId(r.document);
+      var verificationRequest = list[verificationRequestId].value;
+      if (!verificationRequest.verifiedBy)
+        verificationRequest.verifications = [];
+      verificationRequest.verifications.push(newVerification);
+      return db.put(verificationRequestId, verificationRequest);
     })
     .then(function(data) {
       var d = data
@@ -888,9 +900,10 @@ var Store = Reflux.createStore({
   },
   onShare(resource, to) {
     debugger
-    if (to[TYPE] === ORGANIZATION) {
-
-    }
+    if (to[TYPE] === ORGANIZATION)
+      to = this.getRepresentative(ORGANIZATION + '_' + to[ROOT_HASH])
+    if (!to)
+      return
     var opts = {
       to: [{fingerprint: this.getFingerprint(to)}],
       deliver: true,
@@ -899,6 +912,9 @@ var Store = Reflux.createStore({
 
     opts[CUR_HASH] = resource[CUR_HASH]
     return meDriver.share(opts)
+    .then(function(data) {
+      debugger
+    })
   },
   checkRequired(resource, meta) {
     var type = resource[TYPE];
@@ -1142,9 +1158,17 @@ var Store = Reflux.createStore({
 
     var chatId = chatTo ? chatTo[TYPE] + '_' + chatTo[ROOT_HASH] : null;
     var isChatWithOrg = chatTo  &&  chatTo[TYPE] === ORGANIZATION;
-    if (isChatWithOrg  &&  !chatTo.name) {
-      chatTo = list[chatId].value;
+    if (isChatWithOrg) {
+      var rep = this.getRepresentative(chatId)
+      if (!rep)
+        return
+      chatTo = rep
+      chatId = chatTo[TYPE] + '_' + chatTo[ROOT_HASH]
+      isChatWithOrg = false
     }
+    // if (isChatWithOrg  &&  !chatTo.name) {
+    //   chatTo = list[chatId].value;
+    // }
     var testMe = chatTo ? chatTo.me : null;
     if (testMe) {
       if (testMe === 'me') {
@@ -1230,24 +1254,25 @@ var Store = Reflux.createStore({
         if (fromID !== meId  &&  toID !== meId  &&  toID != meOrgId)
           continue;
         var id = toModelName + '_' + chatTo[ROOT_HASH];
-        if (isChatWithOrg) {
-          var toOrgId = null, fromOrgId = null;
+        // if (isChatWithOrg) {
+        //   var toOrgId = null, fromOrgId = null;
 
-          if (list[fromID].value.organization)
-            fromOrgId = utils.getId(list[fromID].value.organization);
-          else if (fromID.split('_')[0] === ORGANIZATION)
-            fromOrgId = utils.getId(list[fromID].value);
-          if (list[toID].value.organization)
-            toOrgId = utils.getId(list[toID].value.organization);
-          else if (toID.split('_')[0] === ORGANIZATION)
-            toOrgId = utils.getId(list[toID].value);
+        //   if (list[fromID].value.organization)
+        //     fromOrgId = utils.getId(list[fromID].value.organization);
+        //   else if (fromID.split('_')[0] === ORGANIZATION)
+        //     fromOrgId = utils.getId(list[fromID].value);
+        //   if (list[toID].value.organization)
+        //     toOrgId = utils.getId(list[toID].value.organization);
+        //   else if (toID.split('_')[0] === ORGANIZATION)
+        //     toOrgId = utils.getId(list[toID].value);
 
-          if (chatId !== toOrgId  &&  chatId !== fromOrgId)
-            continue;
-          if (fromID != meId  &&  toID != meId)
-            continue
-        }
-        else if (fromID !== id  &&  toID != id  &&  toID != meOrgId)
+        //   if (chatId !== toOrgId  &&  chatId !== fromOrgId)
+        //     continue;
+        //   if (fromID != meId  &&  toID != meId)
+        //     continue
+        // }
+        // else
+        if (fromID !== id  &&  toID != id  &&  toID != meOrgId)
           continue;
       }
       if (isVerificationR  ||  r[TYPE] === ADDITIONAL_INFO) {
@@ -1900,7 +1925,7 @@ var Store = Reflux.createStore({
 
         var isVerification = type === VERIFICATION  ||  (model.subClassOf  &&  model.subClassOf === VERIFICATION);
         if (isVerification) {
-          onAddVerification(val, false, true)
+          this.onAddVerification(val, false, true)
           return
         }
 
@@ -1922,25 +1947,31 @@ var Store = Reflux.createStore({
         key: key,
         value: val
       }
-
+      var retParams = {
+        action: isMessage ? 'messageList' : 'list',
+      }
       var resultList
       if (isMessage) {
         var toId = IDENTITY + '_' + obj.to[ROOT_HASH]
         var meId = IDENTITY + '_' + me[ROOT_HASH]
         var id = toId === meId ? IDENTITY + '_' + obj.from[ROOT_HASH] : toId
+        var to = list[id].value
 
-        resultList = self.searchMessages({to: list[id].value, modelName: MESSAGE})
+        resultList = self.searchMessages({to: to, modelName: MESSAGE})
+        var verificationsToShare = this.getVerificationsToShare(resultList, to);
+        if (verificationsToShare)
+          retParams.verificationsToShare = verificationsToShare
+        retParams.resource = to
       }
         // resultList = searchMessages({to: list[obj.to.identity.toJSON()[TYPE] + '_' + obj.to[ROOT_HASH]], modelName: MESSAGE})
       else if (!onMessage  ||  val[TYPE] != IDENTITY)
         resultList = self.searchNotMessages({modelName: val[TYPE]})
-      var retParams = {
-        action: isMessage ? 'messageList' : 'list',
-        list: resultList,
-      }
-      if (isMessage)
-        retParams.resource = list[id].value
-      self.trigger(retParams)
+      retParams.list = resultList
+
+      return db.batch(batch)
+      .then(function() {
+        self.trigger(retParams)
+      })
 
       // var retParams = {
       //   action: isMessage ? 'addMessage' : 'addItem',
@@ -1949,7 +1980,6 @@ var Store = Reflux.createStore({
       // self.trigger(retParams)
     // })
      // return db.batch(batch)
-     return db.batch(batch)
   },
   loadMyResources() {
     var myId = sampleData.getMyId();
