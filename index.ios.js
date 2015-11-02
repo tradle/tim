@@ -220,6 +220,8 @@ class TiMApp extends Component {
                   resource={props.resource}
                   metadata={props.metadata}
                   onAddItem={props.onAddItem}
+                  chooser={props.chooser}
+                  template={props.template}
                   parentMeta={props.parentMeta}    />;
     case 7:
       return <ArticleView navigator={nav} url={props.url} />;
