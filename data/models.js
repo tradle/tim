@@ -1306,16 +1306,13 @@ var voc = [{
   id: 'tradle.AboutYou',
   title: 'About You',
   interfaces: ['tradle.Message'],
+  subClassOf: 'tradle.Form',
   type: 'tradle.Model',
   properties: {
     '_t': {
       'type': 'string',
       'readOnly': true
     },
-    // product: {
-    //   type: 'object',
-    //   ref: 'tradle.FinancialProduct'
-    // },
     from: {
       type: 'object',
       readOnly: true,
@@ -1342,11 +1339,11 @@ var voc = [{
       type: 'object',
       ref: 'tradle.Nationality'
     },
-    inUKFrom: {
-      type: 'date',
-      description: 'When did you arrive in the UK?',
-      title: 'In UK from'
-    },
+    // inUKFrom: {
+    //   type: 'date',
+    //   // description: 'When did you arrive in the UK?',
+    //   title: 'In UK from'
+    // },
     countryOfBirth: {
       type: 'object',
       ref: 'tradle.Country'
@@ -1368,10 +1365,10 @@ var voc = [{
     phones: {
       type: 'array',
       items: {
-        type: 'string',
+        type: 'object',
         properties: {
           phoneType: {
-            type: 'string',
+            type: 'object',
             ref: 'tradle.PhoneTypes'
           },
           number: {
@@ -1384,13 +1381,15 @@ var voc = [{
     emailAddress: {
       type: 'string',
     },
-  }
+  },
+  viewCols: ['residentialStatus', 'maritalStatus', 'countryOfBirth', 'taxResidency']
 },
 {
   id: 'tradle.YourMoney',
   title: 'Your Money',
   interfaces: ['tradle.Message'],
   type: 'tradle.Model',
+  subClassOf: 'tradle.Form',
   properties: {
     '_t': {
       'type': 'string',
@@ -1451,6 +1450,7 @@ var voc = [{
   id: 'tradle.ResidentialStatus',
   title: 'Residential Status',
   type: 'tradle.Model',
+  sort: 'status',
   properties: {
     '_t': {
       'type': 'string',

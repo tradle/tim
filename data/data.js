@@ -1106,16 +1106,16 @@ var identities = [
 //     }
 //   ]
 // },
-{
-  _t: 'tradle.Organization',
-  _r: '0191ef415aa2ec76fb8ec8760b55112cadf573bc',
-  'name': 'HSBC',
-  'photos': [
-    {
-      'url':  'http://www.gunesulasim.com/web/uploads/referans/kucuk/hsbc_logo_square.gif'
-    }
-  ]
-},
+// {
+//   _t: 'tradle.Organization',
+//   _r: '0191ef415aa2ec76fb8ec8760b55112cadf573bc',
+//   'name': 'HSBC',
+//   'photos': [
+//     {
+//       'url':  'http://www.gunesulasim.com/web/uploads/referans/kucuk/hsbc_logo_square.gif'
+//     }
+//   ]
+// },
 {
   _t: 'tradle.Organization',
   'name': 'Rabobank',
@@ -1123,6 +1123,16 @@ var identities = [
   'photos': [
     {
       'url':  'http://vectorlogofree.com/wp-content/uploads/2012/06/rabobank-logo-vector-01.png'
+    }
+  ]
+},
+{
+  _t: 'tradle.Organization',
+  'name': 'My Order',
+  _r: '71e4b7cd6c11ab7221537275988f113a879029mo',
+  'photos': [
+    {
+      'url':  'http://qiqqer.com/wp-content/uploads/2014/09/myorder-logo.jpg'
     }
   ]
 },
