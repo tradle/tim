@@ -42,7 +42,7 @@ var utils = {
           .replace(/([A-Z])/g, ' $1')
           // uppercase the first character
           .replace(/^./, function(str){ return str.toUpperCase(); })
-  },  
+  },
   arrayToObject(arr) {
     if (!arr)
       return;
@@ -71,13 +71,13 @@ var utils = {
           else {
             var em = this.getModel(p).value
             if (em.subClassOf  &&  em.subClassOf === excludeModels[i])
-              found = true; 
+              found = true;
           }
         }
         if (found)
           continue
       }
-      if (m.interfaces  &&  m.interfaces.indexOf(iModel) != -1)  
+      if (m.interfaces  &&  m.interfaces.indexOf(iModel) != -1)
         implementors.push(m);
     }
     return implementors;
@@ -86,7 +86,7 @@ var utils = {
     var subclasses = [];
     for (var p in models) {
       var m = models[p].value;
-      if (m.subClassOf  &&  m.subClassOf === iModel) 
+      if (m.subClassOf  &&  m.subClassOf === iModel)
         subclasses.push(m);
     }
     return subclasses;
@@ -97,23 +97,24 @@ var utils = {
     var models = this.getModels();
     var data = params.data;
     var chooser = params.chooser;
+    var content = params.content
     var onSubmitEditing = params.onSubmitEditing;
     var onEndEditing = params.onEndEditing;
     var onChange = params.onChange;
     var myCustomTemplate = params.template
     var options = {};
     options.fields = {};
- 
+
     var props, bl;
     if (!meta.items)
       props = meta.properties;
     else {
       bl = meta.items.backlink;
-      if (!meta.items.ref) 
+      if (!meta.items.ref)
         props = meta.items.properties;
       else
         props = this.getModel(meta.items.ref).value.properties;
-    }  
+    }
     // var currency = t.enums({
     //   USD: '$',
     //   GBR: '£',
@@ -129,10 +130,10 @@ var utils = {
     if (!this.isEmpty(data)) {
       if (!meta.items && data[constants.TYPE] !== meta.id) {
         var interfaces = meta.interfaces;
-        if (!interfaces  ||  interfaces.indexOf(data[constants.TYPE]) == -1) 
+        if (!interfaces  ||  interfaces.indexOf(data[constants.TYPE]) == -1)
            return;
 
-        data[constants.TYPE] = meta.id;          
+        data[constants.TYPE] = meta.id;
         for (let p in data) {
           if (p == constants.TYPE)
             continue;
@@ -153,10 +154,10 @@ var utils = {
       params.editCols.forEach(function(r) {
         editCols[r] = props[r];
       })
-    } 
-    else 
+    }
+    else
       editCols = this.arrayToObject(meta.editCols);
-      
+
     var eCols = editCols ? editCols : props;
     var required = this.arrayToObject(meta.required);
     // var d = data ? data[i] : null;
@@ -179,7 +180,7 @@ var utils = {
         error: 'Insert a valid ' + label,
         bufferDelay: 20, // to eliminate missed keystrokes
       }
-      if (props[p].description) 
+      if (props[p].description)
         options.fields[p].help = props[p].description;
       if (props[p].readOnly  ||  (props[p].immutable  &&  data  &&  data[p]))
         options.fields[p] = {'editable':  false };
@@ -204,7 +205,7 @@ var utils = {
           }
         }
         if (!options.fields[p].multiline && (type === 'string'  ||  type === 'number')) {
-          if (onSubmitEditing) 
+          if (onSubmitEditing)
             options.fields[p].onSubmitEditing = onSubmitEditing;
           if (onEndEditing)
             options.fields[p].onEndEditing = onEndEditing.bind({}, p);
@@ -217,13 +218,13 @@ var utils = {
         options.fields[p].auto = 'labels';
       }
       else if (type == 'enum') {
-        var facet = props[p].facet;  
+        var facet = props[p].facet;
         var values = models.filter(mod => {
            return mod.type === facet ? mod.values : null;
-        });  
+        });
         if (values && values.length) {
           var enumValues = {};
-          values[0].values.forEach(function(val) { 
+          values[0].values.forEach(function(val) {
             enumValues[val.label] = val.displayName;
           });
           // options.fields[p].factory = t.form.radio;
@@ -248,46 +249,46 @@ var utils = {
           //     }
           //   }
           // }
-          if (onSubmitEditing) 
+          if (onSubmitEditing)
             options.fields[p].onSubmitEditing = onSubmitEditing;
           if (onEndEditing)
-            options.fields[p].onEndEditing = onEndEditing.bind({}, p);   
-          continue;       
+            options.fields[p].onEndEditing = onEndEditing.bind({}, p);
+          continue;
         }
         model[p] = maybe ? t.maybe(t.Str) : t.Str;
 
         var subModel = models[ref];
         if (data  &&  data[p]) {
-          options.fields[p].value = data[p][constants.TYPE] 
+          options.fields[p].value = data[p][constants.TYPE]
                                   ? data[p][constants.TYPE] + '_' + data[p][constants.ROOT_HASH]
-                                  : data[p].id; 
+                                  : data[p].id;
           data[p] = utils.getDisplayName(data[p], subModel.value.properties) || data[p].title;
         }
 
-        options.fields[p].onFocus = chooser.bind({}, props[p], p);
+        options.fields[p].onFocus = chooser.bind({}, props[p], p)
         options.fields[p].template = myCustomTemplate.bind({}, {
-            label: label, 
+            label: label,
             prop:  p,
-            chooser: chooser.bind({}, props[p], p)
+            chooser: options.fields[p].onFocus
           })
 
         options.fields[p].nullOption = {value: '', label: 'Choose your ' + utils.makeLabel(p)};
       }
-      
+
     }
     return options;
   },
   getId(r) {
     if (typeof r === 'string') {
       var idArr = r.split('_');
-      return idArr.length === 2 ? r : idArr[0] + '_' + idArr[1];      
+      return idArr.length === 2 ? r : idArr[0] + '_' + idArr[1];
     }
     if (r.id) {
       var idArr = r.id.split('_');
       return idArr.length === 2 ? r.id : idArr[0] + '_' + idArr[1];
     }
-    else 
-      return r[constants.TYPE] + '_' + r[constants.ROOT_HASH];    
+    else
+      return r[constants.TYPE] + '_' + r[constants.ROOT_HASH];
   },
   getFormattedDate(dateTime) {
     var date = new Date(dateTime);
@@ -300,7 +301,7 @@ var utils = {
     case 1:
       val = moment(date).format('[yesterday], h:m');
       break;
-    default:      
+    default:
       val = moment(date).format('MMMM Do YYYY, h:mm:ss a');
     }
     return val;
@@ -313,7 +314,7 @@ var utils = {
     var itemsMeta = [];
     for (var p in props) {
       if (props[p].type == 'array')  //  &&  required[p]) {
-        itemsMeta.push(props[p]);      
+        itemsMeta.push(props[p]);
     }
     return itemsMeta;
   },
@@ -340,11 +341,11 @@ var utils = {
             displayName += displayName.length ? ' ' + dn : dn;
         }
 
-      }  
+      }
     }
     return displayName;
   },
-  
+
   templateIt(prop, resource) {
     var template = prop.displayAs;
     var val = '';
@@ -360,7 +361,7 @@ var utils = {
         else if (val.length  &&  val.indexOf(t) != val.length - 1)
           val += t;
       });
-    } 
+    }
     return val;
   },
   formatDate(date) {
@@ -373,7 +374,7 @@ var utils = {
     case 1:
       val = moment(date).format('[yesterday], h:mA');
       break;
-    default:      
+    default:
       val = moment(date).format('LL');
     }
     return val;
@@ -381,22 +382,22 @@ var utils = {
   splitMessage(message) {
     if (!message)
       return []
-    var lBr = message.indexOf('[');          
+    var lBr = message.indexOf('[');
     var msg;
-    if (lBr == -1) 
+    if (lBr == -1)
       return [message];
     var rBr = message.indexOf(']', lBr);
-    if (rBr == -1) 
+    if (rBr == -1)
       return [message];
-    if (message.charAt(rBr + 1) != '(') 
+    if (message.charAt(rBr + 1) != '(')
       return [message];
     var rRoundBr = message.indexOf(')', rBr);
-    if (rRoundBr == -1) 
+    if (rRoundBr == -1)
       return [message];
     else {
       if (lBr)
         return [message.substring(0, lBr), message.substring(lBr + 1, rBr), message.substring(rBr + 2, rRoundBr)];
-      else        
+      else
         return [message.substring(lBr + 1, rBr), message.substring(rBr + 2, rRoundBr)];
     }
   },
@@ -412,7 +413,7 @@ var utils = {
     else
       return 'http://' + url;
   }
-  
+
 }
 
 module.exports = utils;
