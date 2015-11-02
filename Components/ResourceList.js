@@ -125,12 +125,12 @@ class ResourceList extends Component {
     if (type === constants.TYPES.IDENTITY) {
       // var routes = this.props.navigator.getCurrentRoutes();
       // if (routes.length == 2) {
-        // var l = []
-        // list.forEach(function(r) {
-        //   if (!r.organization)
-        //     l.push(r)
-        // })
-        // list = l
+        var l = []
+        list.forEach(function(r) {
+          if (!r.organization)
+            l.push(r)
+        })
+        list = l
       // }
     }
 
