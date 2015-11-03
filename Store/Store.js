@@ -31,7 +31,7 @@ var PREV_HASH  = constants.CUR_HASH
 var ORGANIZATION = constants.TYPES.ORGANIZATION
 var IDENTITY = constants.TYPES.IDENTITY
 var MESSAGE = constants.TYPES.MESSAGE
-var SIMPLE_MESSAGE = constants.SIMPLE_MESSAGE
+var SIMPLE_MESSAGE = constants.TYPES.SIMPLE_MESSAGE
 var PUB_ID = 'publishedIdentity'
 
 var Tim = require('tim')
@@ -1895,16 +1895,24 @@ var Store = Reflux.createStore({
     val[CUR_HASH] = obj[CUR_HASH]
     if (!val.time)
       val.time = obj.timestamp
+
     var type = val[TYPE]
 
-    var key = type + '_' + val[ROOT_HASH]
+    var model = utils.getModel(type)  &&  utils.getModel(type).value
+    if (!model) {
+      if (val.message  &&  val.message.indexOf('Congratulations! You were approved for: ') != -1) {
+        isMessage = true
+        type = SIMPLE_MESSAGE
+        val[TYPE] = type
+        model = models[SIMPLE_MESSAGE].value
+      }
+      else
+        return;
+    }
 
+    var key = type + '_' + val[ROOT_HASH]
     var v = list[key] ? list[key].value : null
     var inDB = !!v
-
-    var model = utils.getModel(type)  &&  utils.getModel(type).value
-    if (!model)
-      return;
     var batch = []
     if (model.id === IDENTITY) {
       // if (!me  ||  obj[ROOT_HASH] !== me[ROOT_HASH]) {
@@ -1932,11 +1940,6 @@ var Store = Reflux.createStore({
     }
     else {
       var isMessage = model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1
-      // if (!isMessage  &&  obj.message  &&  obj.message.indexOf('Congratulations! You were approved for: ') != -1) {
-      //   isMessage = true
-      //   val[TYPE] = SIMPLE_MESSAGE
-      // }
-      // var isMessage = model.subClassOf  &&  model.subClassOf === constants.TYPES.MESSAGE
       if (isMessage) {
         var from = list[IDENTITY + '_' + obj.from[ROOT_HASH]].value
         if (me  &&  from[ROOT_HASH] === me[ROOT_HASH])

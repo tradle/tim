@@ -68,7 +68,7 @@ class MessageRow extends Component {
 
     var renderedRow = [];
     var onPressCall;
-    var isNewProduct
+    var isNewProduct, isConfirmation
     var isVerification = resource[constants.TYPE] === 'tradle.Verification';
     if (isVerification)
       onPressCall = this.props.onSelect;
@@ -76,6 +76,7 @@ class MessageRow extends Component {
       var ret = this.formatRow(isMyMessage, model, resource, renderedRow);
       onPressCall = ret ? ret.onPressCall : null
       isNewProduct = ret ? ret.isNewProduct : null
+      isConfirmation = ret ? ret.isConfirmation : null
     }
 
     var photoUrls = [];
@@ -96,8 +97,11 @@ class MessageRow extends Component {
           addStyle = isNewProduct ? styles.myAdCell : styles.myCell;
       }
       else {
-        if (!model.style)
+        if (!model.style) {
           addStyle = {paddingVertical: 5, paddingHorizontal: 7, borderRadius: 10, borderColor: '#cccccc', backgroundColor: '#ffffff', marginVertical: 2};
+          if (isConfirmation)
+            addStyle = [addStyle, styles.myConfCell]
+        }
       }
       if (model.style  ||  isVerification)
         addStyle = [addStyle, {paddingVertical: 5, paddingHorizontal: 7, borderRadius: 10, backgroundColor: STRUCTURED_MESSAGE_COLOR, borderWidth: 1, borderColor: '#deeeb4', marginVertical: 2}]; //model.style];
@@ -178,6 +182,10 @@ class MessageRow extends Component {
         if (resource.message.charAt(0) === '['  ||  resource.message.length > 30) {
           if (!isNewProduct)
             viewStyle.width = isMyMessage || !hasOwnerPhoto ? 250 : 280;
+          else {
+            viewStyle.alignSelf = 'stretch'
+            viewStyle.justifyContent = 'center'
+          }
         }
       }
       if (!isSimpleMessage)
@@ -423,7 +431,7 @@ class MessageRow extends Component {
     var isSimpleMessage = model.id === 'tradle.SimpleMessage';
     var isAdditionalInfo = !isSimpleMessage  &&  resource[constants.TYPE] === 'tradle.AdditionalInfo';
     var cnt = 0;
-    var isNewProduct
+    var isNewProduct, isConfirmation
     viewCols.forEach(function(v) {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date')
         return;
@@ -476,7 +484,8 @@ class MessageRow extends Component {
             if (!isMyMessage)
               onPressCall = self.createNewResource.bind(self, msgModel);
             isNewProduct = msgParts[0].length  &&  msgParts[0] === 'application for'
-            var color = isMyMessage ? (isNewProduct ? {color: 'red', fontWeight: '400', fontSize: 20} : {color: STRUCTURED_MESSAGE_COLOR}) : {color: '#2892C6'}
+
+            var color = isMyMessage ? (isNewProduct ? {color: '#7AAAC3', fontWeight: '400', fontSize: 20} : {color: STRUCTURED_MESSAGE_COLOR}) : {color: '#2892C6'}
             var link = isMyMessage
                      ? <Text style={[style, color]}>{msgModel.title}</Text>
                      : <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
@@ -496,6 +505,9 @@ class MessageRow extends Component {
             return;
           }
         }
+        else
+          isConfirmation = resource[v].indexOf('Congratulations!') !== -1
+
         vCols.push(<Text style={style}>{resource[v]}</Text>);
       }
       first = false;
@@ -551,6 +563,8 @@ class MessageRow extends Component {
       else if (isSimpleMessage) {
         if (isNewProduct)
           ret.isNewProduct = true
+        else if (isConfirmation)
+          ret.isConfirmation = true
         else
           return null
       }
@@ -767,8 +781,13 @@ var styles = StyleSheet.create({
     paddingVertical: 5,
     paddingHorizontal: 7,
     justifyContent: 'flex-end',
+    // backgroundColor: '#7AAAC3',
+  },
+  myConfCell: {
+    paddingVertical: 5,
+    paddingHorizontal: 7,
+    justifyContent: 'flex-end',
     borderRadius: 10,
-    // backgroundColor: '#ffffff',
   },
   warnImage: {
     backgroundColor: '#dddddd',
