@@ -128,10 +128,20 @@ var Store = Reflux.createStore({
     //   //
     // })
 
-    // this.ready = Q.ninvoke(AsyncStorage, 'clear')
-    // .then(this.loadMyResources.bind(this))
     // console.time('loadMyResources')
-    this.ready = this.loadMyResources()
+    var intermediate
+    // change to true if you want to wip
+    // everything and start from scratch
+    if (false) {
+      intermediate = Q.ninvoke(AsyncStorage, 'clear')
+    } else {
+      intermediate = Q()
+    }
+
+    this.ready = intermediate
+    .then(function () {
+      return self.loadMyResources()
+    })
     .then(function() {
       // console.timeEnd('loadMyResources')
       if (!utils.isEmpty(list))
@@ -882,14 +892,16 @@ var Store = Reflux.createStore({
     })
     .then(function (dhtKey) {
       delete list[returnVal[TYPE] + '_' + returnVal[ROOT_HASH]]
-      if (typeof dhtKey === 'string') {
-        if (!resource  ||  isNew)
-          returnVal[ROOT_HASH] = dhtKey
-      }
-      else {
-        returnVal[ROOT_HASH] = dhtKey[0]._props[ROOT_HASH]
-        returnVal[CUR_HASH] = dhtKey[0]._props[CUR_HASH]
-        dhtKey = dhtKey[0]._props[ROOT_HASH]
+      if (dhtKey) {
+        if (typeof dhtKey === 'string') {
+          if (!resource  ||  isNew)
+            returnVal[ROOT_HASH] = dhtKey
+        }
+        else {
+          returnVal[ROOT_HASH] = dhtKey[0]._props[ROOT_HASH]
+          returnVal[CUR_HASH] = dhtKey[0]._props[CUR_HASH]
+          dhtKey = dhtKey[0]._props[ROOT_HASH]
+        }
       }
       return self._putResourceInDB(returnVal[TYPE], returnVal, dhtKey, isRegistration);
     })
@@ -1102,9 +1114,12 @@ var Store = Reflux.createStore({
     if (isIdentity) {
       result.forEach(function(r) {
         if (r.organization) {
-          var photos = list[utils.getId(r.organization.id)].value.photos;
-          if (photos)
-            r.organization.photo = photos[0].url;
+          var res = list[utils.getId(r.organization.id)];
+          if (res  &&  res.value) {
+            var photos = res.value.photos;
+            if (photos)
+              r.organization.photo = photos[0].url;
+          }
         }
       });
     }
@@ -1319,7 +1334,9 @@ var Store = Reflux.createStore({
     // not for subreddit
     for (var r of result) {
       r.from.photos = list[utils.getId(r.from)].value.photos;
-      r.to.photos = list[utils.getId(r.to)].value.photos;
+      var to = list[utils.getId(r.to)]
+      if (!to) console.log(r.to)
+      r.to.photos = to && to.value.photos;
     }
     return result;
   },
