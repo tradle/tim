@@ -13,7 +13,7 @@ var constants = require('tradle-constants');
 var LinearGradient = require('react-native-linear-gradient');
 var RowMixin = require('./RowMixin');
 var reactMixin = require('react-mixin');
-var STRUCTURED_MESSAGE_COLOR = '#DBFAFF' //'#F4F5E6'
+var STRUCTURED_MESSAGE_COLOR = '#77ADFC' //'#F4F5E6'
 var VERIFICATION_BG = '#F6FFF0';
 var {
   Image,
@@ -191,6 +191,7 @@ class MessageRow extends Component {
       }
       if (!isSimpleMessage)
         viewStyle.width = isMyMessage || !hasOwnerPhoto ? 250 : 280;
+
       if (isVerification) {
         var msgModel = utils.getModel(resource.document[constants.TYPE]).value;
         var orgName = resource.organization  ? resource.organization.title : ''
@@ -336,7 +337,7 @@ class MessageRow extends Component {
         <View style={[addStyle ? [styles.textContainer, addStyle] : styles.textContainer]}>
           <View style={{flex: 1}}>
             <View style={{backgroundColor: '#EBFCFF', paddingTop: 5, paddingHorizontal: 7, marginTop: -7, marginHorizontal: -7}}>
-              <Text style={{color: '#2E3B4E'}}>
+              <Text style={{color: '#467E9C'}}>
                 {msg}
               </Text>
               <View style={[styles.separator, {marginHorizontal: -7}]} />
@@ -439,11 +440,13 @@ class MessageRow extends Component {
         return;
       var style = styles.resourceTitle; //(first) ? styles.resourceTitle : styles.description;
       if (isMyMessage) {
-        style = [style, {justifyContent: 'flex-end'}];
-        if (isSimpleMessage)
-          style.push({color: '#ffffff'});
-        else if (isAdditionalInfo)
-          style.push({color: '#2892C6'});
+        style = [style, {justifyContent: 'flex-end', color: isAdditionalInfo ? '#2892C6' : '#ffffff'}];
+        // if (isSimpleMessage)
+        //   style.push({color: '#ffffff'});
+        // else if (isAdditionalInfo)
+        //   style.push({color: '#2892C6'});
+        // else
+        //   style.push({color: '#ffffff'})
       }
 
       if (properties[v].ref) {
