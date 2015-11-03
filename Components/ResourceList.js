@@ -80,7 +80,8 @@ class ResourceList extends Component {
       var model = action === 'addMessage'
                 ? utils.getModel(this.props.modelName).value
                 : utils.getModel(params.resource[constants.TYPE]).value;
-
+      if (action === 'addItem'  &&  model.id !== this.props.modelName)
+        return
       // this.state.isLoading = true;
       Actions.list({
         query: this.state.filter,
