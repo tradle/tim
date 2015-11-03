@@ -13,7 +13,8 @@ var constants = require('tradle-constants');
 var LinearGradient = require('react-native-linear-gradient');
 var RowMixin = require('./RowMixin');
 var reactMixin = require('react-mixin');
-var STRUCTURED_MESSAGE_COLOR = '#F6FFF0';
+var STRUCTURED_MESSAGE_COLOR = '#DBFAFF' //'#F4F5E6'
+var VERIFICATION_BG = '#F6FFF0';
 var {
   Image,
   StyleSheet,
@@ -104,12 +105,12 @@ class MessageRow extends Component {
         }
       }
       if (model.style  ||  isVerification)
-        addStyle = [addStyle, {paddingVertical: 5, paddingHorizontal: 7, borderRadius: 10, backgroundColor: STRUCTURED_MESSAGE_COLOR, borderWidth: 1, borderColor: '#deeeb4', marginVertical: 2}]; //model.style];
+        addStyle = [addStyle, {paddingVertical: 5, paddingHorizontal: 7, borderRadius: 10, backgroundColor: (isVerification ? VERIFICATION_BG : STRUCTURED_MESSAGE_COLOR), borderWidth: 1, borderColor: '#deeeb4', marginVertical: 2}]; //model.style];
       else if (isAdditionalInfo)
         addStyle = [addStyle, {paddingVertical: 5, paddingHorizontal: 7, borderRadius: 10, backgroundColor: '#FCF1ED', borderWidth: 1, borderColor: '#FAE9E3', marginVertical: 2}]; //model.style];
       else {
         if (isMyMessage  &&  !isSimpleMessage)
-          addStyle = [addStyle, {paddingVertical: 5, paddingHorizontal: 7, borderRadius: 10, backgroundColor: STRUCTURED_MESSAGE_COLOR, borderWidth: 1, borderColor: '#deeeb4', marginVertical: 2}]; //model.style];
+          addStyle = [addStyle, {paddingVertical: 5, paddingHorizontal: 7, borderRadius: 10, backgroundColor: STRUCTURED_MESSAGE_COLOR, borderWidth: 1, borderColor: '#C1E3E8', marginVertical: 2}]; //model.style];
       }
     }
     var properties = model.properties;
@@ -327,13 +328,14 @@ class MessageRow extends Component {
     else
        msg += ' You can tap on any items in the list below to share them with ';
     msg += this.props.to.organization ? (this.props.to.organization.title + '.') : this.props.to.name;
-
+    var st = [addStyle ? [styles.textContainer, addStyle] : styles.textContainer]
+    st.push({borderWidth: 1, borderColor: '#C1DBCE'})
     return (
       <View style={[rowStyle, viewStyle, {width: 280}]}>
         {ownerPhoto}
-        <View style={addStyle ? [styles.textContainer, addStyle] : styles.textContainer}>
+        <View style={[addStyle ? [styles.textContainer, addStyle] : styles.textContainer]}>
           <View style={{flex: 1}}>
-            <View style={{backgroundColor: STRUCTURED_MESSAGE_COLOR, paddingVertical: 5, paddingHorizontal: 7, margin: -5}}>
+            <View style={{backgroundColor: '#EBFCFF', paddingTop: 5, paddingHorizontal: 7, marginTop: -7, marginHorizontal: -7}}>
               <Text style={{color: '#2E3B4E'}}>
                 {msg}
               </Text>
