@@ -31,6 +31,7 @@ var PREV_HASH  = constants.CUR_HASH
 var ORGANIZATION = constants.TYPES.ORGANIZATION
 var IDENTITY = constants.TYPES.IDENTITY
 var MESSAGE = constants.TYPES.MESSAGE
+var SIMPLE_MESSAGE = constants.SIMPLE_MESSAGE
 var PUB_ID = 'publishedIdentity'
 
 var Tim = require('tim')
@@ -38,7 +39,6 @@ var Zlorp = Tim.Zlorp
 Zlorp.ANNOUNCE_INTERVAL = 10000
 Zlorp.LOOKUP_INTERVAL = 10000
 Zlorp.KEEP_ALIVE_INTERVAL = 10000
-
 
 var getDHTKey = require('tim/lib/utils').getDHTKey
 
@@ -237,6 +237,12 @@ var Store = Reflux.createStore({
       'http://127.0.0.1:44444/rabobank/send'
     )
 
+    var obvionHash = 'c83c53d07001dd95276b88af54e009e916f86f4b'
+    messenger.addRecipient(
+      obvionHash,
+      'http://127.0.0.1:44444/obvion/send'
+    )
+
     meDriver.ready().then(function () {
       messenger.setRootHash(meDriver.myRootHash())
     })
@@ -381,7 +387,7 @@ var Store = Reflux.createStore({
         isWelcome = false
         return
       }
-      var wmKey = constants.TYPES.SIMPLE_MESSAGE + '_Welcome' + rr.to.title
+      var wmKey = SIMPLE_MESSAGE + '_Welcome' + rr.to.title
       // Create welcome message without saving it in DB
       welcomeMessage = {}
       // var isLloyds = toOrg.name === 'Lloyds'
@@ -395,7 +401,7 @@ var Store = Reflux.createStore({
 
       welcomeMessage.message = w.msg.replace('{firstName}', me.firstName)
       welcomeMessage.time = new Date()
-      welcomeMessage[TYPE] = constants.TYPES.SIMPLE_MESSAGE
+      welcomeMessage[TYPE] = SIMPLE_MESSAGE
       welcomeMessage[NONCE] = self.getNonce()
       welcomeMessage.to = {
         id: me[TYPE] + '_' + me[ROOT_HASH],
@@ -814,6 +820,7 @@ var Store = Reflux.createStore({
     var returnVal
     var identity
     var isNew = !resource[ROOT_HASH];
+    var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
     Q.allSettled(promises)
     .then(function(results) {
       extend(foundRefs, results);
@@ -829,8 +836,7 @@ var Store = Reflux.createStore({
             id: propValue  + '_' + value[CUR_HASH],
             time: value.time
           }
-          var interfaces = meta.interfaces;
-          if (interfaces  &&  interfaces.indexOf(MESSAGE) != -1)
+          if (isMessage)
             json.time = new Date().getTime();
         }
       });
@@ -865,7 +871,6 @@ var Store = Reflux.createStore({
     .then(function() {
       if (isRegistration)
         return getDHTKey(publishedIdentity)
-      var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
       if (!isMessage)
         return
 
@@ -1926,7 +1931,11 @@ var Store = Reflux.createStore({
       // }
     }
     else {
-      var isMessage = model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1);
+      var isMessage = model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1
+      // if (!isMessage  &&  obj.message  &&  obj.message.indexOf('Congratulations! You were approved for: ') != -1) {
+      //   isMessage = true
+      //   val[TYPE] = SIMPLE_MESSAGE
+      // }
       // var isMessage = model.subClassOf  &&  model.subClassOf === constants.TYPES.MESSAGE
       if (isMessage) {
         var from = list[IDENTITY + '_' + obj.from[ROOT_HASH]].value
