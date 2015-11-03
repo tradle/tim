@@ -495,7 +495,7 @@ var Store = Reflux.createStore({
     var to = list[toId].value;
 
     r[NONCE] = r[NONCE]  ||  this.getNonce()
-    r.time = new Date().getTime();
+    r.time = r.time || new Date().getTime();
 
     var toChain = {}
     if (!dontSend) {
@@ -1470,7 +1470,8 @@ var Store = Reflux.createStore({
         batch.push({type: 'put', key: vrId, value: vr});
       }
     }
-    value.time = new Date().getTime();
+
+    value.time = value.time || new Date().getTime();
 
     if (model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1)) {
       if (props['to']  &&  props['from']) {
