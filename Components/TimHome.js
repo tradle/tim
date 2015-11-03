@@ -1,5 +1,5 @@
 'use strict';
- 
+
 var React = require('react-native');
 var ResourceList = require('./ResourceList');
 var AddNewIdentity = require('./AddNewIdentity');
@@ -64,7 +64,7 @@ class TimHome extends Component {
   }
 	showContacts() {
     var passProps = {
-        filter: '', 
+        filter: '',
         modelName: this.props.modelName,
         sortProperty: 'lastMessageTime'
       };
@@ -95,15 +95,15 @@ class TimHome extends Component {
             model: utils.getModel(me[constants.TYPE]).value,
             resource: me,
           }
-        },        
+        },
         passProps: {resource: me}
       }
     });
 	}
-  
+
   showCommunities() {
     var passProps = {
-        filter: '', 
+        filter: '',
         modelName: 'tradle.Community',
       };
     var me = utils.getMe();
@@ -153,33 +153,37 @@ class TimHome extends Component {
     utils.setMe(null);
     utils.setModels(null);
     Actions.reloadDB();
-  } 
+  }
   onReloadModels() {
     utils.setModels(null)
     Actions.reloadModels()
   }
   render() {
     var url = LinkingIOS.popInitialURL();
-  	var spinner = this.state.isLoading 
-                ? <ActivityIndicatorIOS hidden='true' size='large'/>  
-                :  <View/>;
+  	var spinner =  <ScrollView
+                    scrollEnabled={false}
+                    style={{height:480, backgroundColor: '#2E3B4E'}}>
+                    <View style={{marginTop: 300, alignItems: 'center'}}>
+                      <ActivityIndicatorIOS hidden='true' size='large'/>
+                    </View>
+                  </ScrollView>
     if (this.state.isLoading)
-      return <View/>;                
+      return spinner
     var err = this.state.err || '';
     var errStyle = err ? styles.err : {'padding': 0, 'height': 0};
     var myId = sampleData.getMyId() || utils.getMe();
     var editProfile, communities;
 
     if (utils.getMe()) {
-      editProfile = <TouchableHighlight 
+      editProfile = <TouchableHighlight
                         underlayColor='#2E3B4E' onPress={this.onEditProfilePressed.bind(this)}>
                       <Text style={styles.text}>
                         {'Edit Profile'}
                       </Text>
-                    </TouchableHighlight>         
+                    </TouchableHighlight>
       // communities = <TouchableWithoutFeedback style={styles.communities} onPress={this.showCommunities.bind(this)}>
       //                 <Text style={styles.communitiesText}>Communities</Text>
-      //               </TouchableWithoutFeedback>          
+      //               </TouchableWithoutFeedback>
     }
     else {
       editProfile = <View />;
@@ -198,9 +202,9 @@ class TimHome extends Component {
           style={{height:480}}
         >
           <TouchableHighlight style={[styles.thumbButton]}
-                underlayColor='transparent' onPress={this.showContactsOrRegister.bind(this)}>        
+                underlayColor='transparent' onPress={this.showContactsOrRegister.bind(this)}>
             <View style={styles.container}>
-              <View>  
+              <View>
                 <Image style={styles.thumb} source={require('image!Tradle')}></Image>
                 <Text style={styles.tradle}>Tradle</Text>
               </View>
@@ -209,7 +213,7 @@ class TimHome extends Component {
         </ScrollView>
         <View style={{height: 100}}></View>
         <TouchableHighlight style={[styles.thumbButton]}
-              underlayColor='transparent' onPress={this._pressHandler.bind(this)}>        
+              underlayColor='transparent' onPress={this._pressHandler.bind(this)}>
           <View style={styles.getStarted}>
              <Text style={styles.getStartedText}>Get started</Text>
           </View>
@@ -217,13 +221,13 @@ class TimHome extends Component {
           <Text style={errStyle}>{err}</Text>
           <View style={styles.dev}>
             {editProfile}
-            <TouchableHighlight 
+            <TouchableHighlight
                 underlayColor='transparent' onPress={this.onReloadDBPressed.bind(this)}>
               <Text style={styles.text}>
                 Reload DB
               </Text>
             </TouchableHighlight>
-            <TouchableHighlight 
+            <TouchableHighlight
                 underlayColor='transparent' onPress={this.onReloadModels.bind(this)}>
               <Text style={styles.text}>
                 Reload Models
@@ -231,7 +235,7 @@ class TimHome extends Component {
             </TouchableHighlight>
           </View>
         <View style={{height: 200}}></View>
-      </View>  
+      </View>
     );
   }
   _pressHandler() {
@@ -253,11 +257,11 @@ class TimHome extends Component {
   }
 
 }
-          // {spinner}   
+          // {spinner}
           // <View style={{height: 400}}></View>
           // <View style={styles.dev}>
           //   {editProfile}
-          //   <TouchableHighlight 
+          //   <TouchableHighlight
           //       underlayColor='#2E3B4E' onPress={this.onReloadDBPressed.bind(this)}>
           //     <Text style={styles.text}>
           //       Reload DB
@@ -292,7 +296,7 @@ var styles = StyleSheet.create({
     // marginBottom: 10,
     alignSelf: 'center',
     justifyContent: 'center',
-    // padding: 40, 
+    // padding: 40,
   },
   thumb: {
     width: 170,
@@ -319,14 +323,14 @@ var styles = StyleSheet.create({
     alignSelf: 'center'
   },
   getStartedText: {
-    color: '#f0f0f0', 
-    fontSize: 17, 
+    color: '#f0f0f0',
+    fontSize: 17,
     fontWeight:'400'
   },
   getStarted: {
-    backgroundColor: '#2892C6', 
-    paddingVertical: 10, 
-    paddingHorizontal: 30, 
+    backgroundColor: '#2892C6',
+    paddingVertical: 10,
+    paddingHorizontal: 30,
     borderRadius: 10
   },
 });
@@ -349,5 +353,5 @@ module.exports = TimHome;
   //       // property: 'position',
   //       // toValue: {x:200, y:-30},
   //       // delay: 30000
-  //     })    
+  //     })
   // }
