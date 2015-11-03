@@ -231,6 +231,12 @@ var Store = Reflux.createStore({
       'http://127.0.0.1:44444/achmea/send'
     )
 
+    var rabobankHash = '7433dd127cd7e9dfd41e82162116fa480428d3f2'
+    messenger.addRecipient(
+      rabobankHash,
+      'http://127.0.0.1:44444/rabobank/send'
+    )
+
     meDriver.ready().then(function () {
       messenger.setRootHash(meDriver.myRootHash())
     })
@@ -911,7 +917,6 @@ var Store = Reflux.createStore({
 
   },
   onShare(resource, to) {
-    debugger
     if (to[TYPE] === ORGANIZATION)
       to = this.getRepresentative(ORGANIZATION + '_' + to[ROOT_HASH])
     if (!to)
@@ -924,9 +929,6 @@ var Store = Reflux.createStore({
 
     opts[CUR_HASH] = resource[CUR_HASH]
     return meDriver.share(opts)
-    .then(function(data) {
-      debugger
-    })
   },
   checkRequired(resource, meta) {
     var type = resource[TYPE];
@@ -1004,6 +1006,8 @@ var Store = Reflux.createStore({
     var result = this.searchResources(params);
     if (params.isAggregation)
       result = this.getDependencies(result);
+    if (!result)
+      return
     var resultList = [];
     for (var r of result) {
       var rr = {};
@@ -1244,8 +1248,8 @@ var Store = Reflux.createStore({
           if (rid.indexOf(ORGANIZATION) == 0  &&  (!me.organization  ||  rid !== utils.getId(me.organization)))
              continue;
         }
-        else if (r.message.indexOf('[application for]') === 0  &&  me[ROOT_HASH] === utils.getId(r.from).split('_')[1])
-          continue
+        // else if (r.message.indexOf('[application for]') === 0  &&  me[ROOT_HASH] === utils.getId(r.from).split('_')[1])
+        //   continue
       }
       if (chatTo) {
         if (backlink  &&  r[backlink]) {
