@@ -68,11 +68,15 @@ class MessageRow extends Component {
 
     var renderedRow = [];
     var onPressCall;
+    var isNewProduct
     var isVerification = resource[constants.TYPE] === 'tradle.Verification';
     if (isVerification)
       onPressCall = this.props.onSelect;
-    else
-      onPressCall = this.formatRow(isMyMessage, model, resource, renderedRow);
+    else {
+      var ret = this.formatRow(isMyMessage, model, resource, renderedRow);
+      onPressCall = ret ? ret.onPressCall : null
+      isNewProduct = ret ? ret.isNewProduct : null
+    }
 
     var photoUrls = [];
     var photoListStyle = {height: 3};
@@ -89,7 +93,7 @@ class MessageRow extends Component {
       var fromHash = resource.from.id;
       if (isMyMessage) {
         if (!noMessage)
-          addStyle = styles.myCell;
+          addStyle = isNewProduct ? styles.myAdCell : styles.myCell;
       }
       else {
         if (!model.style)
@@ -169,10 +173,12 @@ class MessageRow extends Component {
     var messageBody;
     var isSimpleMessage = model.id === 'tradle.SimpleMessage';
     if (showMessageBody) {
-      var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
+      var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? (isNewProduct ? 'center' : 'flex-end') : 'flex-start'};
       if (resource.message) {
-        if (resource.message.charAt(0) === '['  ||  resource.message.length > 30)
-          viewStyle.width = isMyMessage || !hasOwnerPhoto ? 250 : 280;
+        if (resource.message.charAt(0) === '['  ||  resource.message.length > 30) {
+          if (!isNewProduct)
+            viewStyle.width = isMyMessage || !hasOwnerPhoto ? 250 : 280;
+        }
       }
       if (!isSimpleMessage)
         viewStyle.width = isMyMessage || !hasOwnerPhoto ? 250 : 280;
@@ -417,6 +423,7 @@ class MessageRow extends Component {
     var isSimpleMessage = model.id === 'tradle.SimpleMessage';
     var isAdditionalInfo = !isSimpleMessage  &&  resource[constants.TYPE] === 'tradle.AdditionalInfo';
     var cnt = 0;
+    var isNewProduct
     viewCols.forEach(function(v) {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date')
         return;
@@ -468,17 +475,24 @@ class MessageRow extends Component {
               msgParts[0] = 'I just sent you a request for '; // + msgModel.title;
             if (!isMyMessage)
               onPressCall = self.createNewResource.bind(self, msgModel);
+            isNewProduct = msgParts[0].length  &&  msgParts[0] === 'application for'
+            var color = isMyMessage ? (isNewProduct ? {color: 'red', fontWeight: '400', fontSize: 20} : {color: STRUCTURED_MESSAGE_COLOR}) : {color: '#2892C6'}
             var link = isMyMessage
-                     ? <Text style={[style, {color: isMyMessage ? STRUCTURED_MESSAGE_COLOR : '#2892C6'}]}>{msgModel.title}</Text>
+                     ? <Text style={[style, color]}>{msgModel.title}</Text>
                      : <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                          <Text style={[style, {color: isMyMessage ? STRUCTURED_MESSAGE_COLOR : '#2892C6'}]}>{msgModel.title}</Text>
                          <Icon style={styles.linkIcon} size={20} name={'ios-arrow-right'} />
                        </View>
 
-            vCols.push(<View>
+            var msg = isNewProduct
+                    ? <View style={{color: '#ffffff'}}>
+                         {link}
+                      </View>
+                    : <View>
                          <Text style={style}>{msgParts[0]}</Text>
                          {link}
-                       </View>);
+                       </View>
+            vCols.push(msg);
             return;
           }
         }
@@ -530,8 +544,20 @@ class MessageRow extends Component {
     if (isAdditionalInfo) {
       return isMyMessage ? onPressCall : this.editVerificationRequest.bind(this);
     }
-    else
-      return onPressCall ? onPressCall : (isSimpleMessage ? null : this.props.onSelect);
+    else {
+      var ret = {}
+      if (onPressCall)
+        ret.onPressCall = onPressCall;
+      else if (isSimpleMessage) {
+        if (isNewProduct)
+          ret.isNewProduct = true
+        else
+          return null
+      }
+      else
+        ret.onPressCall = this.props.onSelect;
+      return ret
+    }
   }
   // share() {
   //   console.log('Share')
@@ -736,6 +762,13 @@ var styles = StyleSheet.create({
     justifyContent: 'flex-end',
     borderRadius: 10,
     backgroundColor: '#569bff',
+  },
+  myAdCell: {
+    paddingVertical: 5,
+    paddingHorizontal: 7,
+    justifyContent: 'flex-end',
+    borderRadius: 10,
+    // backgroundColor: '#ffffff',
   },
   warnImage: {
     backgroundColor: '#dddddd',
