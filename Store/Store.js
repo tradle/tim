@@ -132,7 +132,7 @@ var Store = Reflux.createStore({
     var intermediate
     // change to true if you want to wipe
     // everything and start from scratch
-    if (false) {
+    if (true) {
       intermediate = Q.ninvoke(AsyncStorage, 'clear')
     } else {
       intermediate = Q()
@@ -1427,7 +1427,7 @@ var Store = Reflux.createStore({
         continue;
       var val = list[key].value;
       var id = utils.getId(val.to.id);
-      var org = to.organization ? to.organization : (isOrg ? to : null)
+      var org = isOrg ? to : (to.organization ? to.organization : null)
       if (id === meId) {
         var document = doc.id ? list[utils.getId(doc.id)].value : doc;
         if (to  &&  org  &&  document.verifications) {
