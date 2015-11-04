@@ -1617,8 +1617,8 @@ var voc = [{
       type: 'object',
       ref: 'tradle.Money'
     },
-    whenHired: {
-      type: 'date'
+    howLongHaveYouWorkedHere: {
+      type: 'number'
     },
     from: {
       type: 'object',
@@ -1630,7 +1630,8 @@ var voc = [{
       readOnly: true,
       ref: 'tradle.Identity'
     },
-  }
+  },
+  viewCols: ['employer', 'monthlyIncome', 'howLongHaveYouWorkedHere']
 },
 
 {
