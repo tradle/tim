@@ -499,7 +499,7 @@ class MessageRow extends Component {
                        </View>
 
             var msg = isNewProduct
-                    ? <View style={{color: '#ffffff'}}>
+                    ? <View>
                          {link}
                       </View>
                     : <View>
