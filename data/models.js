@@ -1297,10 +1297,184 @@ var voc = [{
       type: 'object',
       ref: 'tradle.Money'
     },
-    whenHired: {
-      type: 'date'
+    howLongHaveYouWorkedHere: {
+      type: 'number'
     },
   }
+},
+{
+  id: 'tradle.Mortgage',
+  title: 'Mortgage',
+  interfaces: ['tradle.Message'],
+  type: 'tradle.Model',
+  forms: ['AboutYou', 'Your Money', 'MortgageLoanDetail','LicenseVerification'],
+  subClassOf: 'tradle.FinancialProduct',
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    from: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    to: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+  },
+},
+
+{
+  id: 'tradle.BusinessAccount',
+  title: 'Business Account',
+  interfaces: ['tradle.Message'],
+  type: 'tradle.Model',
+  forms: ['BusinessInformation'],
+  subClassOf: 'tradle.FinancialProduct',
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    from: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    to: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+  },
+},
+
+{
+  "id": "tradle.BusinessInformation",
+  "title": "Business Information",
+  "interfaces": [
+    "tradle.Message"
+  ],
+  "subClassOf": "tradle.Form",
+  "type": "tradle.Model",
+  "properties": {
+    "_t": {
+      "type": "string",
+      "readOnly": true
+    },
+    "companyName": {
+      "type": "string"
+    },
+    "DBAName": {
+      "type": "string",
+      "title": "DBA Name"
+    },
+    "registrationNumber": {
+      "type": "string"
+    },
+    "registrationDate": {
+      "type": "date"
+    },
+    "taxIdNumber": {
+      "type": "string",
+      "title": "Tax ID Number"
+    },
+    "officialAddress": {
+      "type": "string"
+    },
+    "actualAddress": {
+      "type": "string"
+    },
+    "companyPhone": {
+      "type": "string"
+    },
+    "companyFax": {
+      "type": "string"
+    },
+    "companyEmail": {
+      "type": "string"
+    },
+    "numberOfEmployees": {
+      "type": "number"
+    }
+  },
+  "viewCols": [
+    "companyName",
+    "registrationNumber",
+    "officialAddress",
+    "companyEmail"
+  ],
+  "required": [
+    "companyName",
+    "registrationNumber",
+    "registrationDate",
+    "taxIdNumber",
+    "officialAddress",
+    "actualAddress",
+    "companyPhone",
+    "companyFax",
+    "companyEmail",
+    "numberOfEmployees"
+  ]
+},
+{
+  "id": "tradle.SalesData",
+  "title": "Sales Data for last year",
+  "interfaces": [
+    "tradle.Message"
+  ],
+  "subClassOf": "tradle.Form",
+  "type": "tradle.Model",
+  "properties": {
+    "_t": {
+      "type": "string",
+      "readOnly": true
+    },
+    "averageMonthlySales": {
+      "type": "object",
+      "ref": "tradle.Money",
+      "title": "[min - max]",
+      "description": "Average monthly sales"
+    },
+    "averageTxsPerMonth": {
+      "type": "number",
+      "title": "[min - max]",
+      "description": "Average number of transactions per month"
+    },
+    "averageTxAmount": {
+      "type": "object",
+      "ref": "tradle.Money",
+      "title": "[min - max]",
+      "description": "Average amount of a single transaction"
+    },
+    "numberOfChargebacks": {
+      "type": "number"
+    },
+    "volumeOfChargebacks": {
+      "type": "object",
+      "ref": "tradle.Money",
+      "title": "Total amount of chargebacks"
+    },
+    "settlementCurrency": {
+      "type": "string"
+    }
+  },
+  "viewCols": [
+    "averageMonthlySales",
+    "averageTxsPerMonth",
+    "settlementCurrency"
+  ],
+  "required": [
+    "averageMonthlySales",
+    "averageTxsPerMonth",
+    "averageTxAmount",
+    "numberOfChargebacks",
+    "volumeOfChargebacks",
+    "settlementCurrency"
+  ]
 },
 {
   id: 'tradle.AboutYou',
@@ -1611,6 +1785,69 @@ var voc = [{
   },
 },
 {
+  id: 'tradle.MortgageLoanDetail',
+  title: 'Mortgage Loan Details',
+  interfaces: ['tradle.Message'],
+  type: 'tradle.Model',
+  subClassOf: 'tradle.Form',
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    purposeOfMortgageLoan: {
+      type: 'string',
+      ref: 'tradle.Organization'
+    },
+    totalAmountRequired: {
+      type: 'object',
+      ref: 'tradle.Money'
+    },
+    totalValueOfProperty: {
+      type: 'object',
+      ref: 'tradle.Money'
+    },
+    propertyStreetAddress: {
+      'type': 'string'
+    },
+    'region': {
+      'type': 'string'
+    },
+    'city': {
+      'type': 'string'
+    },
+    'postalCode': {
+      'type': 'number'
+    },
+    'country': {
+      'type': 'string'
+    },
+    propertyType: {
+      type: 'string'
+    },
+    sizeOfProperty: {
+      type: 'string'
+    },
+    from: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    to: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+  },
+  viewCols: [
+    'purposeOfMortgageLoan',
+    'totalAmountRequired',
+    'totalValueOfProperty',
+    'propertyType',
+    'sizeOfProperty',
+  ]
+},
+{
   id: 'tradle.HomeInsurance',
   title: 'Home Insurance',
   type: 'tradle.Model',
@@ -1626,11 +1863,6 @@ var voc = [{
       type: 'object',
       readOnly: true,
       ref: 'tradle.Identity'
-    },
-    accountWith: {
-      type: 'object',
-      readOnly: true,
-      ref: 'tradle.Organization'
     },
     to: {
       type: 'object',
@@ -1771,29 +2003,6 @@ var voc = [{
   },
 },
 {
-  id: 'tradle.Mortgages',
-  title: 'Mortgages',
-  interfaces: ['tradle.Message'],
-  type: 'tradle.Model',
-  subClassOf: 'tradle.FinancialProduct',
-  properties: {
-    '_t': {
-      'type': 'string',
-      'readOnly': true
-    },
-    from: {
-      type: 'object',
-      readOnly: true,
-      ref: 'tradle.Identity'
-    },
-    accountWith: {
-      type: 'object',
-      readOnly: true,
-      ref: 'tradle.Organization'
-    },
-  },
-},
-{
   id: 'tradle.Investments',
   title: 'Investments',
   interfaces: ['tradle.Message'],
@@ -1840,31 +2049,31 @@ var voc = [{
   },
 },
 
-{
-  id: 'tradle.PresentationOfTheCompany',
-  title: 'PresentationOfTheCompany',
-  interfaces: ['tradle.Message'],
-  subClassOf: 'tradle.FinancialProduct',
-  type: 'tradle.Model',
-  forms: ['tradle.CustomerIdentification', 'tradle.BusinessInformation'],
-  properties: {
-    '_t': {
-      'type': 'string',
-      'readOnly': true
-    },
-    from: {
-      type: 'object',
-      readOnly: true,
-      ref: 'tradle.Identity'
-    },
-    to: {
-      type: 'object',
-      readOnly: true,
-      ref: 'tradle.Identity'
-    },
+// {
+//   id: 'tradle.PresentationOfTheCompany',
+//   title: 'PresentationOfTheCompany',
+//   interfaces: ['tradle.Message'],
+//   subClassOf: 'tradle.FinancialProduct',
+//   type: 'tradle.Model',
+//   forms: ['tradle.CustomerIdentification', 'tradle.BusinessInformation'],
+//   properties: {
+//     '_t': {
+//       'type': 'string',
+//       'readOnly': true
+//     },
+//     from: {
+//       type: 'object',
+//       readOnly: true,
+//       ref: 'tradle.Identity'
+//     },
+//     to: {
+//       type: 'object',
+//       readOnly: true,
+//       ref: 'tradle.Identity'
+//     },
 
-  }
-},
+//   }
+// },
 
 {
   id: 'tradle.CustomerIdentification',
