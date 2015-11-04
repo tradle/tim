@@ -1409,6 +1409,26 @@ var voc = [{
     },
     "numberOfEmployees": {
       "type": "number"
+    },
+    "photos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tags": {
+            "type": "string",
+            "skipLabel": true
+          },
+          "url": {
+            "type": "string",
+            "readOnly": true
+          }
+        }
+      },
+      "required": [
+        "title",
+        "url"
+      ]
     }
   },
   "viewCols": [
@@ -1427,7 +1447,8 @@ var voc = [{
     "companyPhone",
     "companyFax",
     "companyEmail",
-    "numberOfEmployees"
+    "numberOfEmployees",
+    "photos"
   ]
 },
 {
