@@ -245,8 +245,19 @@ var Store = Reflux.createStore({
 
     var myOrderHash = '707ae31e2a789593b68faf8331213b32da3ce4e0'
     messenger.addRecipient(
-      obvionHash,
+      myOrderHash,
       'http://127.0.0.1:44444/myorder/send'
+    )
+
+    var amstelHash = '28b3bc9db174284f90abe775ef62cd8f974e8555'
+    messenger.addRecipient(
+      amstelHash,
+      'http://127.0.0.1:44444/amstel/send'
+    )
+    var dllHash = 'd3a3c63d72c3288be9ddeffc69870a49188e2c11'
+    messenger.addRecipient(
+      dllHash,
+      'http://127.0.0.1:44444/dll/send'
     )
 
     meDriver.ready().then(function () {
