@@ -148,12 +148,17 @@ class NewResource extends Component {
       this.props.navigator.pop();
   }
   onSavePressed() {
+    if (this.state.submitted)
+      return
+    this.state.submitted = true
     var resource = this.state.resource;
     var value = this.refs.form.getValue();
     if (!value) {
       value = this.refs.form.refs.input.state.value;
-      if (!value)
+      if (!value) {
+        this.state.submitted = false
         return;
+      }
       var required = this.props.model.required;
       if (!required) {
         required = []
@@ -183,6 +188,7 @@ class NewResource extends Component {
       }
       if (msg.length) {
         this.setState({ err: msg });
+        this.state.submitted = false
         return;
       }
 
@@ -194,6 +200,7 @@ class NewResource extends Component {
          msg += ' ' + err.message;
       });
       this.setState({ err: msg });
+      this.state.submitted = false
       return;
     }
 
