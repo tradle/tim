@@ -163,12 +163,12 @@ class TimHome extends Component {
   	var spinner =  <ScrollView
                     scrollEnabled={false}
                     style={{height:480, backgroundColor: '#2E3B4E'}}>
-            <View style={styles.container}>
-              <View>
-                <Image style={styles.thumb} source={require('image!Tradle')}></Image>
-                <Text style={styles.tradle}>Tradle</Text>
-              </View>
-            </View>
+                    <View style={styles.container}>
+                      <View>
+                        <Image style={styles.thumb} source={require('image!Tradle')}></Image>
+                        <Text style={styles.tradle}>Tradle</Text>
+                      </View>
+                    </View>
                     <View style={{alignItems: 'center'}}>
                       <ActivityIndicatorIOS hidden='true' size='large'/>
                     </View>
