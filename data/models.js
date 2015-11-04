@@ -1365,6 +1365,16 @@ var voc = [{
       "type": "string",
       "readOnly": true
     },
+    from: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    to: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
     "companyName": {
       "type": "string"
     },
@@ -1433,6 +1443,16 @@ var voc = [{
       "type": "string",
       "readOnly": true
     },
+    from: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    to: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
     "averageMonthlySales": {
       "type": "object",
       "ref": "tradle.Money",
@@ -1465,7 +1485,6 @@ var voc = [{
   "viewCols": [
     "averageMonthlySales",
     "averageTxsPerMonth",
-    "settlementCurrency"
   ],
   "required": [
     "averageMonthlySales",
@@ -1685,6 +1704,7 @@ var voc = [{
   },
   required: ['howToFund']
 },
+
 {
   id: 'tradle.Country',
   title: 'Country',
@@ -1796,8 +1816,8 @@ var voc = [{
       'readOnly': true
     },
     purposeOfMortgageLoan: {
-      type: 'string',
-      ref: 'tradle.Organization'
+      type: 'object',
+      ref: 'tradle.PurposeOfMortgageLoan'
     },
     totalAmountRequired: {
       type: 'object',
@@ -1823,7 +1843,8 @@ var voc = [{
       'type': 'string'
     },
     propertyType: {
-      type: 'string'
+      type: 'object',
+      ref: 'tradle.PropertyType'
     },
     sizeOfProperty: {
       type: 'string'
@@ -1847,6 +1868,40 @@ var voc = [{
     'sizeOfProperty',
   ]
 },
+{
+  id: 'tradle.PropertyType',
+  title: 'Property Type',
+  type: 'tradle.Model',
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    propertyType: {
+      displayName: true,
+      type: 'string'
+    }
+  },
+  required: ['propertyType']
+},
+{
+  id: 'tradle.PurposeOfMortgageLoan',
+  title: 'Purpose of mortgage loan',
+  type: 'tradle.Model',
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    purpose: {
+      displayName: true,
+      type: 'string'
+    }
+  },
+  required: ['purpose']
+},
+
+
 {
   id: 'tradle.HomeInsurance',
   title: 'Home Insurance',
@@ -2149,44 +2204,44 @@ var voc = [{
   }
 },
 
-{
-  id: 'tradle.BusinessInformation',
-  title: 'Business Information',
-  interfaces: ['tradle.Message'],
-  type: 'tradle.Model',
-  properties: {
-    '_t': {
-      'type': 'string',
-      'readOnly': true
-    },
-    from: {
-      type: 'object',
-      readOnly: true,
-      ref: 'tradle.Identity'
-    },
-    to: {
-      type: 'object',
-      readOnly: true,
-      ref: 'tradle.Identity'
-    },
-    businessSector: {
-      type: 'object',
-      ref: 'tradle.BusinessSector',
-      description: 'Business sector & Business of the company'
-    },
-    sourceOfFunds: {
-      type: 'object',
-      ref: 'tradle.SourceOfFunds',
-      description: 'Source of Funds and information about the company’s equity capital'
-    },
-    mainReason: {
-      type: 'object',
-      description: 'Main (fiscal) reason for using Rabobank'
-    },
-    consolidatedGlobalVolumeOfSales: {
-      type: 'number',
-      title: 'Consolidated global volume of sales'
-    },
+// {
+//   id: 'tradle.BusinessInformation',
+//   title: 'Business Information',
+//   interfaces: ['tradle.Message'],
+//   type: 'tradle.Model',
+//   properties: {
+//     '_t': {
+//       'type': 'string',
+//       'readOnly': true
+//     },
+//     from: {
+//       type: 'object',
+//       readOnly: true,
+//       ref: 'tradle.Identity'
+//     },
+//     to: {
+//       type: 'object',
+//       readOnly: true,
+//       ref: 'tradle.Identity'
+//     },
+//     businessSector: {
+//       type: 'object',
+//       ref: 'tradle.BusinessSector',
+//       description: 'Business sector & Business of the company'
+//     },
+//     sourceOfFunds: {
+//       type: 'object',
+//       ref: 'tradle.SourceOfFunds',
+//       description: 'Source of Funds and information about the company’s equity capital'
+//     },
+//     mainReason: {
+//       type: 'object',
+//       description: 'Main (fiscal) reason for using Rabobank'
+//     },
+//     consolidatedGlobalVolumeOfSales: {
+//       type: 'number',
+//       title: 'Consolidated global volume of sales'
+//     },
 
 
 
@@ -2219,8 +2274,8 @@ var voc = [{
 // the FATF as high-risk or non-
 
 // cooperative jurisdictions?2
-  }
-}
+  // }
+//}
 
 ];
 

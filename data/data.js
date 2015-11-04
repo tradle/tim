@@ -1014,6 +1014,7 @@ var identities = [
   _t: 'tradle.Nationality',
   nationality: 'American',
 },
+
 {
   _t: 'tradle.Nationality',
   nationality: 'French',
@@ -1025,6 +1026,57 @@ var identities = [
 {
   _t: 'tradle.Nationality',
   nationality: 'Dutch'
+},
+{
+  _t: 'tradle.PropertyType',
+  propertyType: 'Freehold'
+},
+
+{
+  _t: 'tradle.PropertyType',
+  propertyType: 'Leasehold'
+},
+{
+  _t: 'tradle.PropertyType',
+  propertyType: 'New build or converted properties'
+},
+{
+  _t: 'tradle.PropertyType',
+  propertyType: 'Shared equity'
+},
+{
+  _t: 'tradle.PropertyType',
+  propertyType: 'Shared ownership'
+},
+{
+  _t: 'tradle.PropertyType',
+  propertyType: 'Right to Buy'
+},
+{
+  _t: 'tradle.PropertyType',
+  propertyType: 'Buy to let'
+},
+{
+  _t: 'tradle.PurposeOfMortgageLoan',
+  purpose: 'Buy your first home'
+},
+
+{
+  _t: 'tradle.PurposeOfMortgageLoan',
+  purpose: 'Move home'
+},
+{
+  _t: 'tradle.PurposeOfMortgageLoan',
+  purpose: 'Find a new mortgage deal'
+},
+
+{
+  _t: 'tradle.PurposeOfMortgageLoan',
+  purpose: 'Buying to let'
+},
+{
+  _t: 'tradle.PurposeOfMortgageLoan',
+  purpose: 'Borrowing more'
 },
 {
   _t: 'tradle.Country',
