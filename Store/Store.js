@@ -524,6 +524,7 @@ var Store = Reflux.createStore({
                     deliver: true,
                     chain: false
                   })
+    var newVerification
     return promise
     .then(function(data) {
       if (data) {
@@ -537,7 +538,7 @@ var Store = Reflux.createStore({
 
       batch.push({type: 'put', key: key, value: r});
 
-      var newVerification = {
+      newVerification = {
         id: key + '_' + r[CUR_HASH],
         title: r.document.title ? r.document.title : '',
         time: r.time
