@@ -134,9 +134,9 @@ class MessageList extends Component {
     this.props.navigator.push(route);
   }
 
-  onSearchChange(event) {
+  onSearchChange(text) {
     var actionParams = {
-      query: event.nativeEvent.text.toLowerCase(),
+      query: text,
       modelName: this.props.modelName,
       to: this.props.resource,
     }
