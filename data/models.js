@@ -1307,7 +1307,7 @@ var voc = [{
   title: 'Mortgage',
   interfaces: ['tradle.Message'],
   type: 'tradle.Model',
-  forms: ['AboutYou', 'Your Money', 'MortgageLoanDetail','LicenseVerification'],
+  forms: ['tradle.AboutYou', 'tradle.YourMoney', 'tradle.MortgageLoanDetail','tradle.LicenseVerification'],
   subClassOf: 'tradle.FinancialProduct',
   properties: {
     '_t': {
@@ -1332,7 +1332,7 @@ var voc = [{
   title: 'Business Account',
   interfaces: ['tradle.Message'],
   type: 'tradle.Model',
-  forms: ['BusinessInformation'],
+  forms: ['tradle.BusinessInformation', 'tradle.SalesData'],
   subClassOf: 'tradle.FinancialProduct',
   properties: {
     '_t': {
