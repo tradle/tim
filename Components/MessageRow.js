@@ -32,18 +32,13 @@ class MessageRow extends Component {
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
     var me = utils.getMe();
     var isMyMessage;
-    if (!this.props.isAggregation) {
-      var fromHash = utils.getId(resource.from);
-      if (fromHash == me[constants.TYPE] + '_' + me[constants.ROOT_HASH])
-        isMyMessage = true;
-    }
-    this.state = { isMyMessage: isMyMessage };
   }
   render() {
     var resource = this.props.resource;
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
     var me = utils.getMe();
-    var isMyMessage = this.state.isMyMessage;
+
+    var isMyMessage = this.isMyMessage();
     var to = this.props.to;
     var ownerPhoto, hasOwnerPhoto = true;
 
@@ -400,7 +395,7 @@ class MessageRow extends Component {
       passProps: passProps,
       title: resource[constants.TYPE] == 'tradle.AssetVerification' ? 'Doc verification' : model.title
     }
-    if (this.state.isMyMessage) {
+    if (this.isMyMessage()) {
       route.rightButtonTitle = 'Edit';
       route.onRightButtonPress = {
           title: 'Edit',
@@ -600,6 +595,15 @@ class MessageRow extends Component {
   //   });
 
   // }
+  isMyMessage() {
+    if (this.props.isAggregation)
+      return
+
+    var fromHash = utils.getId(this.props.resource.from);
+    var me = utils.getMe()
+    if (fromHash == me[constants.TYPE] + '_' + me[constants.ROOT_HASH])
+      return true;
+  }
   formatDocument(model, verification, onPress) {
     var resource = verification.document;
     var self = this;
