@@ -130,7 +130,7 @@ var Store = Reflux.createStore({
 
     // console.time('loadMyResources')
     var intermediate
-    // change to true if you want to wip
+    // change to true if you want to wipe
     // everything and start from scratch
     if (false) {
       intermediate = Q.ninvoke(AsyncStorage, 'clear')
@@ -241,6 +241,12 @@ var Store = Reflux.createStore({
     messenger.addRecipient(
       obvionHash,
       'http://127.0.0.1:44444/obvion/send'
+    )
+
+    var myOrderHash = '707ae31e2a789593b68faf8331213b32da3ce4e0'
+    messenger.addRecipient(
+      obvionHash,
+      'http://127.0.0.1:44444/myorder/send'
     )
 
     meDriver.ready().then(function () {
@@ -962,7 +968,10 @@ var Store = Reflux.createStore({
       meDriver = null
       driverPromise = null
 
-      rimraf('./', finish)
+      rimraf('./', function () {
+        console.log('rimraf done')
+        finish()
+      })
       ;[
         'addressBook.db',
         'msg-log.db',
