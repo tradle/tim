@@ -7,7 +7,6 @@ var MessageView = require('./MessageView');
 var NewResource = require('./NewResource');
 var PhotoList = require('./PhotoList');
 var Icon = require('react-native-vector-icons/Ionicons');
-var extend = require('extend');
 var groupByEveryN = require('groupByEveryN');
 var constants = require('tradle-constants');
 var LinearGradient = require('react-native-linear-gradient');
@@ -177,7 +176,7 @@ class MessageRow extends Component {
       if (resource.message) {
         if (resource.message.charAt(0) === '['  ||  resource.message.length > 30) {
           if (!isNewProduct)
-            viewStyle.width = isMyMessage || !hasOwnerPhoto ? 300 : 330;
+            viewStyle.width = isMyMessage || !hasOwnerPhoto ? 290 : 310;
           else {
             viewStyle.alignSelf = 'stretch'
             viewStyle.justifyContent = 'center'
@@ -185,7 +184,7 @@ class MessageRow extends Component {
         }
       }
       if (!isSimpleMessage)
-        viewStyle.width = isMyMessage || !hasOwnerPhoto ? 300 : 330;
+        viewStyle.width = isMyMessage || !hasOwnerPhoto ? 290 : 310;
 
       if (isVerification) {
         var msgModel = utils.getModel(resource.document[constants.TYPE]).value;
@@ -327,7 +326,7 @@ class MessageRow extends Component {
     var st = [addStyle ? [styles.textContainer, addStyle] : styles.textContainer]
     st.push({borderWidth: 1, borderColor: '#C1DBCE'})
     return (
-      <View style={[rowStyle, viewStyle, {width: 330}]}>
+      <View style={[rowStyle, viewStyle, {width: 310}]}>
         <View style={{width: 30}} />
         <View style={[addStyle ? [styles.textContainer, addStyle] : styles.textContainer]}>
           <View style={{flex: 1}}>
@@ -553,8 +552,11 @@ class MessageRow extends Component {
         // var msgTypeStyle = isAdditionalInfo &&  isMyMessage ? [styles.verySmallLetters, {color: '#ffffff'}] : styles.verySmallLetters;
       vCols.push(<Text style={[styles.resourceTitle, {color: '#EBFCFF', fontSize: 18, fontWeight: '600', opacity: 0.3, alignSelf: 'flex-end', marginTop: 10}]}>{s}</Text>);
     }
-    if (vCols  &&  vCols.length)
-      extend(renderedRow, vCols);
+    if (vCols  &&  vCols.length) {
+      vCols.forEach(function(v) {
+        renderedRow.push(v);
+      })
+    }
     if (isAdditionalInfo) {
       return isMyMessage ? onPressCall : this.editVerificationRequest.bind(this);
     }
@@ -702,8 +704,10 @@ class MessageRow extends Component {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date')
         return;
       var style = styles.verySmallLetters; //(first) ? styles.resourceTitle : styles.description;
-
-      var pTitle = properties[v].title.length > 25 ? properties[v].title.substring(0, 25) + '...' : properties[v].title
+      var maxSize = resource.photos ? 15 : 25
+      var pTitle = properties[v].title.length > maxSize
+                 ? properties[v].title.substring(0, maxSize) + '...'
+                 : properties[v].title
       if (properties[v].ref) {
         if (resource[v]) {
           var val
