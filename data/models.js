@@ -1621,7 +1621,8 @@ var voc = [{
       ref: 'tradle.Money'
     },
     howLongHaveYouWorkedHere: {
-      type: 'number'
+      type: 'number',
+      units: 'years'
     },
     from: {
       type: 'object',
@@ -1651,6 +1652,7 @@ var voc = [{
 {
   id: 'tradle.PurposeOfTheAccount',
   title: 'Purpose Of The Account',
+  subClassOf: 'tradle.Enum',
   type: 'tradle.Model',
   properties: {
     '_t': {
@@ -1668,6 +1670,7 @@ var voc = [{
   id: 'tradle.ResidentialStatus',
   title: 'Residential Status',
   type: 'tradle.Model',
+  subClassOf: 'tradle.Enum',
   sort: 'status',
   properties: {
     '_t': {
@@ -1685,6 +1688,7 @@ var voc = [{
   id: 'tradle.MaritalStatus',
   title: 'Marital Status',
   type: 'tradle.Model',
+  subClassOf: 'tradle.Enum',
   properties: {
     '_t': {
       'type': 'string',
@@ -1700,6 +1704,7 @@ var voc = [{
 {
   id: 'tradle.Nationality',
   title: 'Nationality',
+  subClassOf: 'tradle.Enum',
   type: 'tradle.Model',
   properties: {
     '_t': {
@@ -1716,6 +1721,7 @@ var voc = [{
 {
   id: 'tradle.HowToFund',
   title: 'How To Fund',
+  subClassOf: 'tradle.Enum',
   type: 'tradle.Model',
   properties: {
     '_t': {
@@ -1729,9 +1735,20 @@ var voc = [{
   },
   required: ['howToFund']
 },
-
+{
+  id: 'tradle.Enum',
+  title: 'Enum',
+  type: 'tradle.Model',
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+  }
+},
 {
   id: 'tradle.Country',
+  subClassOf: 'tradle.Enum',
   title: 'Country',
   type: 'tradle.Model',
   properties: {
@@ -1749,6 +1766,7 @@ var voc = [{
 {
   id: 'tradle.PhoneTypes',
   title: 'Phone Types',
+  subClassOf: 'tradle.Enum',
   type: 'tradle.Model',
   properties: {
     '_t': {
