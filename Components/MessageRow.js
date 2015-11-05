@@ -862,9 +862,9 @@ var styles = StyleSheet.create({
     backgroundColor: '#dddddd',
     height: 30,
     marginRight: 3,
-    marginLeft: -5,
+    marginLeft: 0,
     width: 30,
-    borderRadius: 20,
+    borderRadius: 15,
     borderColor: '#cccccc',
     borderWidth: 1
   },
