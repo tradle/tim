@@ -132,7 +132,7 @@ var Store = Reflux.createStore({
     var intermediate
     // change to true if you want to wipe
     // everything and start from scratch
-    if (true) {
+    if (false) {
       intermediate = Q.ninvoke(AsyncStorage, 'clear')
     } else {
       intermediate = Q()
