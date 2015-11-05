@@ -508,12 +508,14 @@ class MessageRow extends Component {
         }
         else
           isConfirmation = resource[v].indexOf('Congratulations!') !== -1
+              // <Icon style={{color: '#289427', alignSelf: 'flex-end', marginTop: -10}} size={20} name={'android-done-all'} />
               // <Icon style={[{color: '#289427', alignSelf: 'flex-end', width: 50, height: 50, marginTop: -45, opacity: 0.1}]} size={50} name={'ios-flower'} />
         if (isConfirmation) {
           style = [style, {color: '#289427', fontSize: 16}]
           vCols.push(
             <View>
               <Text style={[style]}>{resource[v]}</Text>
+              <Icon style={[{color: '#289427', alignSelf: 'flex-end', width: 50, height: 50, marginTop: -45, opacity: 0.2}]} size={50} name={'ios-flower'} />
               <Icon style={{color: '#289427', alignSelf: 'flex-end', marginTop: -10}} size={20} name={'android-done-all'} />
             </View>
           );
