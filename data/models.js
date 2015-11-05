@@ -409,6 +409,14 @@ var voc = [{
           'url': {
             'type': 'string',
             'readOnly': true
+          },
+          width: {
+            type: 'number',
+            readOnly: true
+          },
+          height: {
+            type: 'number',
+            readOnly: true
           }
         }
       },
@@ -482,6 +490,14 @@ var voc = [{
           'url': {
             'type': 'string',
             'readOnly': true
+          },
+          width: {
+            type: 'number',
+            readOnly: true
+          },
+          height: {
+            type: 'number',
+            readOnly: true
           }
         }
       },
@@ -564,6 +580,14 @@ var voc = [{
           'url': {
             'type': 'string',
             'readOnly': true
+          },
+          width: {
+            type: 'number',
+            readOnly: true
+          },
+          height: {
+            type: 'number',
+            readOnly: true
           }
         }
       },
@@ -679,6 +703,14 @@ var voc = [{
           'url': {
             'type': 'string',
             'readOnly': true
+          },
+          width: {
+            type: 'number',
+            readOnly: true
+          },
+          height: {
+            type: 'number',
+            readOnly: true
           }
         }
       },
@@ -790,6 +822,14 @@ var voc = [{
           'url': {
             'type': 'string',
             'readOnly': true
+          },
+          width: {
+            type: 'number',
+            readOnly: true
+          },
+          height: {
+            type: 'number',
+            readOnly: true
           }
         }
       },
@@ -904,6 +944,14 @@ var voc = [{
           'url': {
             'type': 'string',
             'readOnly': true
+          },
+          width: {
+            type: 'number',
+            readOnly: true
+          },
+          height: {
+            type: 'number',
+            readOnly: true
           }
         }
       },
@@ -1097,6 +1145,14 @@ var voc = [{
           },
           url: {
             type: 'string',
+            readOnly: true
+          },
+          width: {
+            type: 'number',
+            readOnly: true
+          },
+          height: {
+            type: 'number',
             readOnly: true
           }
         }
@@ -1425,6 +1481,14 @@ var voc = [{
           "url": {
             "type": "string",
             "readOnly": true
+          },
+          width: {
+            type: 'number',
+            readOnly: true
+          },
+          height: {
+            type: 'number',
+            readOnly: true
           }
         }
       },
@@ -1599,7 +1663,7 @@ var voc = [{
       type: 'string',
     },
   },
-  viewCols: ['residentialStatus', 'maritalStatus', 'countryOfBirth', 'taxResidency']
+  viewCols: ['residentialStatus', 'maritalStatus', 'countryOfBirth', 'taxResidency', 'fundAccount', 'purposeOfTheAccount', 'phones']
 },
 {
   id: 'tradle.YourMoney',
