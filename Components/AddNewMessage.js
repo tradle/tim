@@ -114,7 +114,7 @@ class AddNewMessage extends Component {
     //   isLloyds = resource[constants.TYPE] === constants.TYPES.ORGANIZATION  &&  resource.name === 'Lloyds'
     var isOrg = resource.to[constants.TYPE] == constants.TYPES.ORGANIZATION  ||  resource[constants.TYPE] === constants.TYPES.ORGANIZATION
     if (isOrg)
-      pushForm = <TouchableHighlight underlayColor='#7AAAC3'
+      pushForm = <TouchableHighlight underlayColor='#79AAF2'
                    onPress={this.props.onAddNewPressed.bind(this, true)}>
                      <Text style={[styles.products, {paddingTop: 7, color: '#ffffff', fontSize: 20}]}>Choose the product</Text>
                  </TouchableHighlight>
@@ -379,7 +379,7 @@ var styles = StyleSheet.create({
     paddingBottom: 13,
     // flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#7AAAC3',
+    backgroundColor: '#79AAF2',
   },
   image: {
     width: 27,
@@ -411,10 +411,10 @@ var styles = StyleSheet.create({
   addNewProduct: {
     // flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#7AAAC3',
-    borderBottomColor: '#7AAAC3',
-    borderRightColor: '#7AAAC3',
-    borderLeftColor: '#7AAAC3',
+    backgroundColor: '#79AAF2',
+    borderBottomColor: '#79AAF2',
+    borderRightColor: '#79AAF2',
+    borderLeftColor: '#79AAF2',
     borderWidth: 1,
     borderTopColor: '#60879C',
   }});
