@@ -33,7 +33,8 @@
   // To run on device, change `localhost` to the IP address of your computer, and make sure your computer and
   // iOS device are on the same Wi-Fi network.
   jsCodeLocation = [NSURL URLWithString:@"http://localhost:8081/index.ios.bundle?platform=ios"];
-//  jsCodeLocation = [NSURL URLWithString:@"http://172.16.13.118:8081/index.ios.bundle"];
+//  jsCodeLocation = [NSURL URLWithString:@"http://192.168.1.126:8081/index.ios.bundle"];
+//    jsCodeLocation = [NSURL URLWithString:@"http://172.16.10.134:8081/index.ios.bundle"];
 
   // OPTION 2s
   // Load from pre-bundled file on disk. To re-generate the static bundle, run
