@@ -432,7 +432,7 @@ class MessageRow extends Component {
     viewCols.forEach(function(v) {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date')
         return;
-      var style = styles.description; //resourceTitle; //(first) ? styles.resourceTitle : styles.description;
+      var style = isSimpleMessage ? styles.resourceTitle : styles.description; //resourceTitle; //(first) ? styles.resourceTitle : styles.description;
       // if (isMyMessage)
       //   style = [style, {justifyContent: 'flex-end', color: isAdditionalInfo ? '#2892C6' : '#ffffff'}];
 
@@ -478,7 +478,7 @@ class MessageRow extends Component {
           var msgModel = utils.getModel(msgParts[1]);
           if (msgModel) {
             if (self.props.verificationsToShare)
-              style = styles.description;
+              style = isSimpleMessage ? styles.resourceTitle : styles.description;
             msgModel = msgModel.value;
             if (!msgParts[0].length)
               msgParts[0] = 'I just sent you a request for '; // + msgModel.title;
