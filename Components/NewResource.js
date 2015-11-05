@@ -353,7 +353,9 @@ class NewResource extends Component {
       var item = {
         // title: 'photo',
         url: 'data:image/jpeg;base64,' + response.data,
-        isVertical: response.isVertical
+        isVertical: response.isVertical,
+        width: response.width,
+        height: response.height
       };
       self.onAddItem('photos', item);
     });
