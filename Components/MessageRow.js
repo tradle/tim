@@ -13,8 +13,8 @@ var constants = require('tradle-constants');
 var LinearGradient = require('react-native-linear-gradient');
 var RowMixin = require('./RowMixin');
 var reactMixin = require('react-mixin');
-var STRUCTURED_MESSAGE_COLOR = '#77ADFC' //'#F4F5E6'
-var VERIFICATION_BG = '#F6FFF0';
+var STRUCTURED_MESSAGE_COLOR = '#5482C7' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
+var VERIFICATION_BG = '#FBFFE5' //'#F6FFF0';
 var {
   Image,
   StyleSheet,
@@ -177,7 +177,7 @@ class MessageRow extends Component {
       if (resource.message) {
         if (resource.message.charAt(0) === '['  ||  resource.message.length > 30) {
           if (!isNewProduct)
-            viewStyle.width = isMyMessage || !hasOwnerPhoto ? 250 : 280;
+            viewStyle.width = isMyMessage || !hasOwnerPhoto ? 300 : 330;
           else {
             viewStyle.alignSelf = 'stretch'
             viewStyle.justifyContent = 'center'
@@ -185,14 +185,15 @@ class MessageRow extends Component {
         }
       }
       if (!isSimpleMessage)
-        viewStyle.width = isMyMessage || !hasOwnerPhoto ? 250 : 280;
+        viewStyle.width = isMyMessage || !hasOwnerPhoto ? 300 : 330;
 
       if (isVerification) {
         var msgModel = utils.getModel(resource.document[constants.TYPE]).value;
         var orgName = resource.organization  ? resource.organization.title : ''
         renderedRow = <View>
-                        <View style={{backgroundColor: '#289427', paddingVertical: 5, paddingHorizontal: 7, marginHorizontal: -6, marginTop: -5}}>
-                          <Text style={{fontSize: 16, fontWeight: '600', color: '#ffffff', alignSelf: 'center'}}>
+                        <View style={{flexDirection: 'row', backgroundColor: '#289427', paddingVertical: 5, paddingHorizontal: 7, marginHorizontal: -7, marginTop: -5, justifyContent: 'center'}}>
+                          <Icon style={styles.verificationIcon} size={20} name={'android-done'} />
+                          <Text style={{fontSize: 16, fontWeight: '600', color: '#FBFFE5', alignSelf: 'center'}}>
                              Verified by {orgName}
                           </Text>
                         </View>
@@ -200,7 +201,7 @@ class MessageRow extends Component {
                           {this.formatDocument(msgModel, resource, this.verify.bind(this))}
                         </View>
                         <View style={{paddingTop: 5}}>
-                          <Text style={styles.verySmallLetters}>{msgModel.title}</Text>
+                          <Text style={[styles.resourceTitle, {alignSelf:'flex-end', fontSize: 18, color: '#CCCCB2'}]}>{msgModel.title}</Text>
                         </View>
                       </View>
       }
@@ -309,7 +310,6 @@ class MessageRow extends Component {
     }
     if (!vtt.length)
       return <View />;
-    var ownerPhoto = <Image style={styles.msgImage} source={require('image!happyLock')}></Image>;
     var modelTitle = msgModel.title;
     var idx = modelTitle.indexOf('Verification');
     var docType;
@@ -327,14 +327,12 @@ class MessageRow extends Component {
     var st = [addStyle ? [styles.textContainer, addStyle] : styles.textContainer]
     st.push({borderWidth: 1, borderColor: '#C1DBCE'})
     return (
-      <View style={[rowStyle, viewStyle, {width: 280}]}>
-        {ownerPhoto}
+      <View style={[rowStyle, viewStyle, {width: 330}]}>
+        <View style={{width: 30}} />
         <View style={[addStyle ? [styles.textContainer, addStyle] : styles.textContainer]}>
           <View style={{flex: 1}}>
-            <View style={{backgroundColor: '#EBFCFF', paddingTop: 5, paddingHorizontal: 7, marginTop: -7, marginHorizontal: -7}}>
-              <Text style={{color: '#467E9C'}}>
-                {msg}
-              </Text>
+            <View style={{backgroundColor: '#CCE0FF', paddingTop: 5, paddingHorizontal: 7, marginTop: -7, marginHorizontal: -7}}>
+              <Text style={{color: '#467E9C'}}>{msg}</Text>
               <View style={[styles.separator, {marginHorizontal: -7}]} />
             </View>
             {vtt}
@@ -430,27 +428,30 @@ class MessageRow extends Component {
     var isAdditionalInfo = !isSimpleMessage  &&  resource[constants.TYPE] === 'tradle.AdditionalInfo';
     var cnt = 0;
     var isNewProduct, isConfirmation
+    var self = this
     viewCols.forEach(function(v) {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date')
         return;
-      var style = styles.resourceTitle; //(first) ? styles.resourceTitle : styles.description;
-      if (isMyMessage) {
-        style = [style, {justifyContent: 'flex-end', color: isAdditionalInfo ? '#2892C6' : '#ffffff'}];
-        // if (isSimpleMessage)
-        //   style.push({color: '#ffffff'});
-        // else if (isAdditionalInfo)
-        //   style.push({color: '#2892C6'});
-        // else
-        //   style.push({color: '#ffffff'})
-      }
+      var style = styles.description; //resourceTitle; //(first) ? styles.resourceTitle : styles.description;
+      // if (isMyMessage)
+      //   style = [style, {justifyContent: 'flex-end', color: isAdditionalInfo ? '#2892C6' : '#ffffff'}];
 
       if (properties[v].ref) {
         if (resource[v]) {
-          vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{resource[v].title}</Text>);
+       //    vCols.push(
+       //  <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+       //    <Text style={styles.description}>{properties[v].title}</Text>
+       //    <Text style={styles.description} numberOfLines={first ? 2 : 1}>{resource[v].title || resource[v]}</Text>
+       // </View>
+
+            // )
+          vCols.push(self.getPropRow(properties[v], resource[v].title || resource[v]))
           first = false;
         }
         return;
       }
+      if (isMyMessage)
+        style = [style, {justifyContent: 'flex-end', color: isAdditionalInfo ? '#2892C6' : '#ffffff'}];
 
       if (resource[v]                      &&
           properties[v].type === 'string'  &&
@@ -466,11 +467,11 @@ class MessageRow extends Component {
           onPressCall = self.verify.bind(self);
         if (isAdditionalInfo)
           style = [style, {paddingBottom: 10, color: '#2892C6'}];
-        vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>)
+        vCols.push(self.getPropRow(properties[v], val, style))
       }
       else {
         if (!resource[v]  ||  !resource[v].length)
-          return;
+          return
         var msgParts = utils.splitMessage(resource[v]);
         // Case when the needed form was sent along with the message
         if (msgParts.length === 2) {
@@ -513,18 +514,6 @@ class MessageRow extends Component {
       first = false;
 
     });
-                  // <View>
-                  //   <View style={{flexDirection: 'row'}}>
-                  //     <View style={styles.separator} />
-                  //     <View style={{flex:20, marginLeft: 10, marginRight: -10, alignSelf: 'center'}}>
-                  //       <Text style={styles.verifications}>OR</Text>
-                  //     </View>
-                  //     <View style={styles.separator} />
-                  //     {orgRow}
-                  //   </View>
-                  //   <View style={{alignSelf: 'center'}}><Text style={[styles.verySmallLetters, {marginTop: -3, paddingBottom:10}]}>Choose from the ones below</Text></View>
-                  //   {vtt}
-                  // </View>
 
     if (model.id !== 'tradle.SimpleMessage')  {
       var t = model.title.split(' ');
@@ -549,7 +538,7 @@ class MessageRow extends Component {
       // }
       // else
         // var msgTypeStyle = isAdditionalInfo &&  isMyMessage ? [styles.verySmallLetters, {color: '#ffffff'}] : styles.verySmallLetters;
-      vCols.push(<Text style={styles.verySmallLetters}>{s}</Text>);
+      vCols.push(<Text style={[styles.resourceTitle, {color: '#EBFCFF', fontSize: 18, fontWeight: '600', opacity: 0.3, alignSelf: 'flex-end', marginTop: 10}]}>{s}</Text>);
     }
     if (vCols  &&  vCols.length)
       extend(renderedRow, vCols);
@@ -573,10 +562,14 @@ class MessageRow extends Component {
       return ret
     }
   }
-  // share() {
-  //   console.log('Share')
-  //   Actions.share(this.props.resource, this.props.to)
-  // }
+  getPropRow(prop, val) {
+    return (
+        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+          <Text style={[styles.descriptionW, {color: '#FFFFEE'}]}>{prop.title}</Text>
+          <Text style={[styles.descriptionW, {fontWeight: '600'}]}>{val}</Text>
+       </View>
+    )
+  }
   // shareDocs() {
   //   this.props.navigator.push({
   //     title: m.title,
@@ -632,10 +625,16 @@ class MessageRow extends Component {
 
       orgRow =  onPress
              ? <View />
-             : <View style={{flexDirection: 'row', justifyContent: 'flex-end', marginTop: 5}}>
-                   <Text style={styles.verySmallLetters}>verified by </Text>
-                   <Text style={[styles.verySmallLetters, {color: '#289427'}]}>{verification.organization.title.length < 10 ? verification.organization.title : verification.organization.title.substring(0, 8) + '..'}</Text>
+             : <View style={{flexDirection: 'row', marginTop: 10, justifyContent:'space-between'}}>
+                <View style={{flexDirection: 'row', justifyContent: 'space-between', padding: 5, borderRadius: 10, borderWidth: 1, borderColor: '#eeeeee', backgroundColor: '#F0F0EE'}}>
+                  <Image style={styles.msgImageSmall} source={require('image!Tradle')}></Image>
+                  <Text style={{color: '#2E3B4E', fontSize: 14, paddingRight: 5, marginTop: 2}}>Tap</Text>
                 </View>
+                 <View style={{flexDirection: 'row', justifyContent: 'flex-end', marginTop: 5}}>
+                   <Text style={[styles.verySmallLetters]}>verified by </Text>
+                   <Text style={[styles.verySmallLetters, {color: '#2E3B4E'}]}>{verification.organization.title.length < 30 ? verification.organization.title : verification.organization.title.substring(0, 27) + '..'}</Text>
+                 </View>
+               </View>
     }
     else
       orgRow = <View />
@@ -676,10 +675,6 @@ class MessageRow extends Component {
 
     if (resource[constants.TYPE] != model.id)
       return;
-    var verPhoto;
-    var vCols = [];
-    var first = true;
-    var self = this;
     // var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
 
     var properties = model.properties;
@@ -691,23 +686,51 @@ class MessageRow extends Component {
     viewCols.forEach(function(v) {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date')
         return;
-      var style = styles.description; //(first) ? styles.resourceTitle : styles.description;
+      var style = styles.verySmallLetters; //(first) ? styles.resourceTitle : styles.description;
 
+      var pTitle = properties[v].title.length > 25 ? properties[v].title.substring(0, 25) + '...' : properties[v].title
       if (properties[v].ref) {
         if (resource[v]) {
-          vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{resource[v].title}</Text>);
+          var val
+          if (properties[v].type === 'object') {
+            if (properties[v].ref) {
+              if (properties[v].ref === 'tradle.Money')
+                val = '£' + resource[v]
+              else {
+                var m = utils.getModel(properties[v].ref).value
+                if (m.subClassOf  &&  m.subClassOf == 'tradle.Enum') {
+                  if (resource[v].title  &&  (resource[v].title.length > 25 || resource[v].length > 25)) {
+                    val = resource[v].title.substring(0, 20)
+                    if (pTitle.length > 15)
+                      pTitle = pTitle.substring(0, 15)
+                  }
+                }
+              }
+            }
+          }
+          if (!val)
+            val = resource[v].title
+          var st = {flexDirection: 'row', justifyContent: 'space-between'}
+          vCols.push(
+            <View style={st}>
+              <Text style={[style, {color: '#555555'}]} numberOfLines={first ? 2 : 1}>{pTitle}</Text>
+              <Text style={style}> {val}</Text>
+            </View>);
           first = false;
         }
         return;
       }
-
+      var row
       if (resource[v]  &&  properties[v].type === 'string'  &&  (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0))
         row = <Text style={style} numberOfLines={first ? 2 : 1}>{resource[v]}</Text>;
       else if (!model.autoCreate) {
         var val = (properties[v].displayAs)
                 ? utils.templateIt(properties[v], resource)
                 : resource[v];
-        row = <Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>
+        row = <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                <Text style={[style, {color: '#555555'}]} numberOfLines={first ? 2 : 1}>{pTitle}</Text>
+                <Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>
+              </View>
       }
       else {
         if (!resource[v]  ||  !resource[v].length)
@@ -724,12 +747,16 @@ class MessageRow extends Component {
             return;
           }
         }
-        var row = <Text style={style}>{resource[v]}</Text>;
-
+        row = <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                <Text style={[style, {color: '#555555'}]} numberOfLines={first ? 2 : 1}>{pTitle}</Text>
+                <Text style={style}>{resource[v]}</Text>;
+              </View>
       }
       if (first) {
         row = <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                <View>{row}</View>
+                <View>
+                  {row}
+                </View>
                 <View><Text style={styles.verySmallLetters}>{renderedRow[0]}</Text></View>
               </View>
         renderedRow.splice(0, 1);
@@ -808,19 +835,20 @@ var styles = StyleSheet.create({
     borderWidth: 1
   },
   msgImageSmall: {
-    backgroundColor: '#dddddd',
-    height: 25,
+    // backgroundColor: '#dddddd',
+    height: 20,
     marginRight: 5,
-    width: 25,
-    borderRadius: 12,
-    borderColor: '#cccccc',
-    borderWidth: 1
+    width: 20,
+    // borderRadius: 10,
+    // borderColor: '#cccccc',
+    // borderWidth: 1
   },
   msgImage: {
     backgroundColor: '#dddddd',
-    height: 40,
-    marginRight: 5,
-    width: 40,
+    height: 30,
+    marginRight: 3,
+    marginLeft: -5,
+    width: 30,
     borderRadius: 20,
     borderColor: '#cccccc',
     borderWidth: 1
@@ -849,17 +877,17 @@ var styles = StyleSheet.create({
     margin: 1,
     borderRadius: 10
   },
-  ownerImage: {
-    backgroundColor: '#dddddd',
-    height: 30,
-    width: 30,
-    marginTop: -5,
-    position: 'absolute',
-    right: 10,
-    borderRadius: 15,
-    borderColor: '#cccccc',
-    borderWidth: 1
-  },
+  // ownerImage: {
+  //   backgroundColor: '#dddddd',
+  //   height: 30,
+  //   width: 30,
+  //   marginTop: -5,
+  //   position: 'absolute',
+  //   right: 10,
+  //   borderRadius: 15,
+  //   borderColor: '#cccccc',
+  //   borderWidth: 1
+  // },
   verifications: {
     fontSize: 12,
     // backgroundColor: '#efffe5'
@@ -908,6 +936,12 @@ var styles = StyleSheet.create({
     borderRadius:10,
     borderWidth: 1,
   },
+  verificationIcon: {
+    width: 20,
+    height: 20,
+    color: '#ffffff',
+    // marginRight: -10
+  },
   linkIcon: {
     width: 20,
     height: 20,
@@ -925,6 +959,11 @@ var styles = StyleSheet.create({
   description: {
     // flexWrap: 'wrap',
     color: '#757575',
+    fontSize: 14,
+  },
+  descriptionW: {
+    // flexWrap: 'wrap',
+    color: '#ffffff',
     fontSize: 14,
   },
   separator: {
