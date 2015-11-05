@@ -508,8 +508,19 @@ class MessageRow extends Component {
         }
         else
           isConfirmation = resource[v].indexOf('Congratulations!') !== -1
+              // <Icon style={[{color: '#289427', alignSelf: 'flex-end', width: 50, height: 50, marginTop: -45, opacity: 0.1}]} size={50} name={'ios-flower'} />
+        if (isConfirmation) {
+          style = [style, {color: '#289427', fontSize: 16}]
+          vCols.push(
+            <View>
+              <Text style={[style]}>{resource[v]}</Text>
+              <Icon style={{color: '#289427', alignSelf: 'flex-end', marginTop: -10}} size={20} name={'android-done-all'} />
+            </View>
+          );
 
-        vCols.push(<Text style={style}>{resource[v]}</Text>);
+        }
+        else
+          vCols.push(<Text style={style}>{resource[v]}</Text>);
       }
       first = false;
 
@@ -563,9 +574,11 @@ class MessageRow extends Component {
     }
   }
   getPropRow(prop, val) {
+    var val = val.length > 22 ? val.substring(0, 22) : val
+    var pTitle = (prop.title.length  > 21) ? (val.length === 22 ? prop.title.substring(0, 21) : prop.title.substring(0, 21)) : prop.title
     return (
         <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-          <Text style={[styles.descriptionW, {color: '#FFFFEE'}]}>{prop.title}</Text>
+          <Text style={[styles.descriptionW, {color: '#FFFFEE', paddingRight: 3}]}>{pTitle}</Text>
           <Text style={[styles.descriptionW, {fontWeight: '600'}]}>{val}</Text>
        </View>
     )
@@ -699,7 +712,7 @@ class MessageRow extends Component {
               else {
                 var m = utils.getModel(properties[v].ref).value
                 if (m.subClassOf  &&  m.subClassOf == 'tradle.Enum') {
-                  if (resource[v].title  &&  (resource[v].title.length > 25 || resource[v].length > 25)) {
+                  if (resource[v].title  &&  (resource[v].title.length > 20 || resource[v].length > 20)) {
                     val = resource[v].title.substring(0, 20)
                     if (pTitle.length > 15)
                       pTitle = pTitle.substring(0, 15)
@@ -856,7 +869,7 @@ var styles = StyleSheet.create({
   bigImage: {
     width: 240,
     height: 280,
-    margin: 1,
+  margin: 1,
     borderRadius: 10
   },
   bigImageH: {
