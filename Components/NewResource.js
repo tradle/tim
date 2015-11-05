@@ -159,40 +159,41 @@ class NewResource extends Component {
         this.state.submitted = false
         return;
       }
-      var required = this.props.model.required;
-      if (!required) {
-        required = []
-        for (var p in this.props.model.properties) {
-          if (p.charAt(0) !== '_')
-            required.push(p)
-        }
-
-      }
-      var msg = '';
-
-      for (var p of required) {
-        var v = value[p] ? value[p] : resource[p];
-        var isDate = Object.prototype.toString.call(v) === '[object Date]'
-        if (!v || (isDate  &&  isNaN(v.getTime())))  {
-          var prop = this.props.model.properties[p]
-          if (prop.items  &&  prop.items.backlink)
-            continue
-          if ((prop.ref && prop.ref !== 'tradle.Money') ||  isDate) {
-            if (msg.length == 0)
-              msg += 'Invalid values for the properties: '
-            else
-              msg += ', ';
-            msg += '\'' + this.props.model.properties[p].title + '\'';
-          }
-        }
-      }
-      if (msg.length) {
-        this.setState({ err: msg });
-        this.state.submitted = false
-        return;
-      }
-
     }
+    var required = this.props.model.required;
+    if (!required) {
+      required = []
+      for (var p in this.props.model.properties) {
+        if (p.charAt(0) !== '_')
+          required.push(p)
+      }
+    }
+    var msg = '';
+
+    for (var p of required) {
+      var v = value[p] ? value[p] : resource[p];
+      var isDate = Object.prototype.toString.call(v) === '[object Date]'
+      if (!v || (isDate  &&  isNaN(v.getTime())))  {
+        var prop = this.props.model.properties[p]
+        if (prop.items  &&  prop.items.backlink)
+          continue
+        if ((prop.ref && prop.ref !== 'tradle.Money') ||  isDate  ||  prop.items) {
+          if (resource && resource[p])
+            continue;
+          if (msg.length == 0)
+            msg += 'Invalid values for the properties: '
+          else
+            msg += ', ';
+          msg += '\'' + this.props.model.properties[p].title + '\'';
+        }
+      }
+    }
+    if (msg.length) {
+      this.setState({ err: msg });
+      this.state.submitted = false
+      return;
+    }
+
     if (!value) {
       var errors = this.refs.form.refs.input.getValue().errors;
       var msg = '';
@@ -345,7 +346,7 @@ class NewResource extends Component {
   }
   showChoice() {
     var self = this;
-    UIImagePickerManager.showImagePicker({returnBase64Image: true, returnIsVertical: true}, (doCancel, response) => {
+    UIImagePickerManager.showImagePicker({returnIsVertical: true}, (doCancel, response) => {
       if (doCancel)
         return;
 
