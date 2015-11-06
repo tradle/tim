@@ -1431,7 +1431,7 @@ var Store = Reflux.createStore({
         continue;
       var val = list[key].value;
       var id = utils.getId(val.to.id);
-      var org = isOrg ? to : (to.organization ? to.organization : null)
+      var org = isOrg ? to : (to && to.organization ? to.organization : null)
       if (id === meId) {
         var document = doc.id ? list[utils.getId(doc.id)].value : doc;
         if (to  &&  org  &&  document.verifications) {
