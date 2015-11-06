@@ -432,18 +432,9 @@ class MessageRow extends Component {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date')
         return;
       var style = isSimpleMessage ? styles.resourceTitle : styles.description; //resourceTitle; //(first) ? styles.resourceTitle : styles.description;
-      // if (isMyMessage)
-      //   style = [style, {justifyContent: 'flex-end', color: isAdditionalInfo ? '#2892C6' : '#ffffff'}];
 
       if (properties[v].ref) {
         if (resource[v]) {
-       //    vCols.push(
-       //  <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-       //    <Text style={styles.description}>{properties[v].title}</Text>
-       //    <Text style={styles.description} numberOfLines={first ? 2 : 1}>{resource[v].title || resource[v]}</Text>
-       // </View>
-
-            // )
           vCols.push(self.getPropRow(properties[v], resource[v].title || resource[v]))
           first = false;
         }
@@ -466,7 +457,7 @@ class MessageRow extends Component {
           onPressCall = self.verify.bind(self);
         if (isAdditionalInfo)
           style = [style, {paddingBottom: 10, color: '#2892C6'}];
-        vCols.push(self.getPropRow(properties[v], val, style))
+        vCols.push(self.getPropRow(properties[v], val))
       }
       else {
         if (!resource[v]  ||  !resource[v].length)
@@ -535,21 +526,6 @@ class MessageRow extends Component {
           s += p + ' ';
       });
 
-      // if (resource.verifications  &&  resource.verifications.length) {
-      //   var verifications = [];
-      //   resource.verifications.forEach(function(v) {
-      //     if (v.organization  &&  v.organization.photo) {
-      //       verifications.push(<Text style={styles.verySmallLetters}>{v.organization.title}</Text>);
-      //       verifications.push(<Image source={{uri: v.organization.photo}} style={styles.orgImage} />);
-      //     }
-      //   })
-      //   vCols.push(<View style={styles.verificationCheck}>
-      //                <Text style={styles.verySmallLetters}>{s}verified by </Text>
-      //                {verifications}
-      //              </View>);
-      // }
-      // else
-        // var msgTypeStyle = isAdditionalInfo &&  isMyMessage ? [styles.verySmallLetters, {color: '#ffffff'}] : styles.verySmallLetters;
       vCols.push(<Text style={[styles.resourceTitle, {color: '#EBFCFF', fontSize: 18, fontWeight: '600', opacity: 0.3, alignSelf: 'flex-end', marginTop: 10}]}>{s}</Text>);
     }
     if (vCols  &&  vCols.length) {
@@ -577,13 +553,27 @@ class MessageRow extends Component {
       return ret
     }
   }
-  getPropRow(prop, val) {
-    var val = val.length > 22 ? val.substring(0, 22) : val
-    var pTitle = (prop.title.length  > 21) ? (val.length === 22 ? prop.title.substring(0, 21) : prop.title.substring(0, 21)) : prop.title
-    return (
-        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-          <Text style={[styles.descriptionW, {color: '#FFFFEE', paddingRight: 3}]}>{pTitle}</Text>
-          <Text style={[styles.descriptionW, {fontWeight: '600'}]}>{val}</Text>
+  getPropRow(prop, val, style, isVerification) {
+    if (isVerification)
+      return (
+        <View style={{flexDirection: 'row'}}>
+          <View style={{flex: 1, flexDirection: 'column'}}>
+            <Text style={[styles.verySmallLetters, {color: '#555555'}]}>{prop.title}</Text>
+          </View>
+          <View style={{flex: 1, flexDirection: 'column'}}>
+            <Text style={styles.verySmallLetters}> {val}</Text>
+          </View>
+        </View>
+    )
+    else
+      return (
+        <View style={{flexDirection: 'row'}}>
+          <View style={{flex: 1, flexDirection: 'column'}}>
+            <Text style={[styles.descriptionW, {color: '#FFFFEE', paddingRight: 3}]}>{prop.title}</Text>
+          </View>
+          <View style={{flex: 1, flexDirection: 'column'}}>
+            <Text style={[styles.descriptionW, {fontWeight: '600'}]}>{val}</Text>
+          </View>
        </View>
     )
   }
@@ -647,7 +637,7 @@ class MessageRow extends Component {
                   <Image style={styles.msgImageSmall} source={require('image!Tradle')}></Image>
                   <Text style={{color: '#2E3B4E', fontSize: 14, paddingRight: 5, marginTop: 2}}>Tap</Text>
                 </View>
-                 <View style={{flexDirection: 'row', justifyContent: 'flex-end', marginTop: 5}}>
+                 <View style={{flexDirection: 'row', justifyContent: 'flex-end', marginTop: 10}}>
                    <Text style={[styles.verySmallLetters]}>verified by </Text>
                    <Text style={[styles.verySmallLetters, {color: '#2E3B4E'}]}>{verification.organization.title.length < 30 ? verification.organization.title : verification.organization.title.substring(0, 27) + '..'}</Text>
                  </View>
@@ -692,7 +682,6 @@ class MessageRow extends Component {
 
     if (resource[constants.TYPE] != model.id)
       return;
-    // var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
 
     var properties = model.properties;
     var noMessage = !resource.message  ||  !resource.message.length;
@@ -704,10 +693,6 @@ class MessageRow extends Component {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date')
         return;
       var style = styles.verySmallLetters; //(first) ? styles.resourceTitle : styles.description;
-      var maxSize = resource.photos ? 15 : 25
-      var pTitle = properties[v].title.length > maxSize
-                 ? properties[v].title.substring(0, maxSize) + '...'
-                 : properties[v].title
       if (properties[v].ref) {
         if (resource[v]) {
           var val
@@ -717,24 +702,14 @@ class MessageRow extends Component {
                 val = '£' + resource[v]
               else {
                 var m = utils.getModel(properties[v].ref).value
-                if (m.subClassOf  &&  m.subClassOf == 'tradle.Enum') {
-                  if (resource[v].title  &&  (resource[v].title.length > 20 || resource[v].length > 20)) {
-                    val = resource[v].title.substring(0, 20)
-                    if (pTitle.length > 15)
-                      pTitle = pTitle.substring(0, 15)
-                  }
-                }
+                if (m.subClassOf  &&  m.subClassOf == 'tradle.Enum')
+                  val = resource[v].title
               }
             }
           }
           if (!val)
             val = resource[v].title
-          var st = {flexDirection: 'row', justifyContent: 'space-between'}
-          vCols.push(
-            <View style={st}>
-              <Text style={[style, {color: '#555555'}]} numberOfLines={first ? 2 : 1}>{pTitle}</Text>
-              <Text style={style}> {val}</Text>
-            </View>);
+          vCols.push(self.getPropRow(properties[v], val, style, true))
           first = false;
         }
         return;
@@ -746,10 +721,7 @@ class MessageRow extends Component {
         var val = (properties[v].displayAs)
                 ? utils.templateIt(properties[v], resource)
                 : resource[v];
-        row = <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                <Text style={[style, {color: '#555555'}]} numberOfLines={first ? 2 : 1}>{pTitle}</Text>
-                <Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>
-              </View>
+        row = self.getPropRow(properties[v], resource[v], style, true)
       }
       else {
         if (!resource[v]  ||  !resource[v].length)
@@ -766,10 +738,7 @@ class MessageRow extends Component {
             return;
           }
         }
-        row = <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                <Text style={[style, {color: '#555555'}]} numberOfLines={first ? 2 : 1}>{pTitle}</Text>
-                <Text style={style}>{resource[v]}</Text>;
-              </View>
+        row = self.getPropRow(properties[v], resource[v], style, true)
       }
       if (first) {
         row = <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
@@ -783,8 +752,6 @@ class MessageRow extends Component {
       vCols.push(row);
       first = false;
     });
-    // if (model.style)
-    //   vCols.push(<Text style={styles.verySmallLetters}>{model.title}</Text>);
 
     if (vCols  &&  vCols.length) {
       vCols.forEach(function(v) {
@@ -844,15 +811,6 @@ var styles = StyleSheet.create({
     justifyContent: 'flex-end',
     borderRadius: 10,
   },
-  warnImage: {
-    backgroundColor: '#dddddd',
-    height: 45,
-    marginRight: 5,
-    width: 45,
-    borderRadius: 10,
-    borderColor: '#cccccc',
-    borderWidth: 1
-  },
   msgImageSmall: {
     // backgroundColor: '#dddddd',
     height: 20,
@@ -896,46 +854,21 @@ var styles = StyleSheet.create({
     margin: 1,
     borderRadius: 10
   },
-  // ownerImage: {
-  //   backgroundColor: '#dddddd',
-  //   height: 30,
-  //   width: 30,
-  //   marginTop: -5,
-  //   position: 'absolute',
-  //   right: 10,
-  //   borderRadius: 15,
-  //   borderColor: '#cccccc',
-  //   borderWidth: 1
-  // },
-  verifications: {
-    fontSize: 12,
-    // backgroundColor: '#efffe5'
-  },
   verySmallLetters: {
     fontSize: 12,
-    alignSelf: 'flex-end',
+    // alignSelf: 'flex-end',
     color: '#757575'
     // color: '#b4c3cb'
   },
   orgImage: {
     width: 20,
     height: 20,
-    // marginLeft: 5,
-    // marginTop: 17,
     borderRadius: 10
-  },
-  verificationCheck: {
-    flexDirection: 'row',
-    alignSelf: 'flex-end',
-    padding: 3,
-    marginVertical: 5
-    // marginTop: -5
   },
   cellRoundImage: {
     paddingVertical: 1,
     borderRadius: 30,
     height: 60,
-    // marginRight: 10,
     width: 60,
     alignSelf: 'center'
   },
@@ -966,15 +899,6 @@ var styles = StyleSheet.create({
     height: 20,
     color: '#2892C6'
   },
-  // icon: {
-  //   width: 20,
-  //   height: 20,
-  //   marginLeft: 4,
-  //   borderWidth: 1,
-  //   borderColor: '#eeeeee',
-  //   borderRadius: 10,
-  //   marginRight: 5,
-  // },
   description: {
     // flexWrap: 'wrap',
     color: '#757575',
