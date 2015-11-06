@@ -561,7 +561,7 @@ class MessageRow extends Component {
             <Text style={[styles.verySmallLetters, {color: '#555555'}]}>{prop.title}</Text>
           </View>
           <View style={{flex: 1, flexDirection: 'column'}}>
-            <Text style={styles.verySmallLetters}> {val}</Text>
+            <Text style={styles.verySmallLetters}>{val}</Text>
           </View>
         </View>
     )
@@ -569,7 +569,7 @@ class MessageRow extends Component {
       return (
         <View style={{flexDirection: 'row'}}>
           <View style={{flex: 1, flexDirection: 'column'}}>
-            <Text style={[styles.descriptionW, {color: '#FFFFEE', paddingRight: 3}]}>{prop.title}</Text>
+            <Text style={[styles.descriptionW, {color: '#FFFFEE'}]}>{prop.title}</Text>
           </View>
           <View style={{flex: 1, flexDirection: 'column'}}>
             <Text style={[styles.descriptionW, {fontWeight: '600'}]}>{val}</Text>
