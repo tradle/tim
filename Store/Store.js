@@ -1035,27 +1035,8 @@ var Store = Reflux.createStore({
     if (!result)
       return
 
-    if (result.length) {
-      var vFound = {}
-      var i = result.length
-      while (i--) {
-        var r = result[i]
-        if (r[TYPE] !== VERIFICATION) continue
-
-        var docType = r.document && r.document[TYPE]
-        if (!docType) continue
-
-        var org = r.organization && r.organization.id
-        if (!org) continue
-
-        var vid = docType + org
-        if (vFound[vid]) {
-          result.splice(i, 1)
-        } else {
-          vFound[vid] = true
-        }
-      }
-    }
+    // HACK
+    utils.dedupeVerifications(result)
 
     var resultList = [];
     for (var r of result) {

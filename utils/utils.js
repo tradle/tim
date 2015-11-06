@@ -3,7 +3,8 @@
 var t = require('tcomb-form-native');
 var moment = require('moment');
 var constants = require('tradle-constants');
-
+var TYPE = constants.TYPE
+var VERIFICATION = constants.TYPES.VERIFICATION
 var MONEY_TYPE = 'tradle.Money';
 var propTypesMap = {
   'string': t.Str,
@@ -412,8 +413,28 @@ var utils = {
     //   return url;
     else
       return 'http://' + url;
-  }
+  },
+  dedupeVerifications(list) {
+    var vFound = {}
+    var i = list.length
+    while (i--) {
+      var r = list[i]
+      if (r[TYPE] !== VERIFICATION) continue
 
+      var docType = r.document && r.document[TYPE]
+      if (!docType) continue
+
+      var org = r.organization && r.organization.id
+      if (!org) continue
+
+      var vid = docType + org
+      if (vFound[vid]) {
+        list.splice(i, 1)
+      } else {
+        vFound[vid] = true
+      }
+    }
+  }
 }
 
 module.exports = utils;

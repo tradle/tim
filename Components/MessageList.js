@@ -91,6 +91,13 @@ class MessageList extends Component {
         if (!rModel.interfaces  ||  rModel.interfaces.indexOf(this.props.modelName) === -1)
           return;
       }
+
+      if (params.verificationsToShare) {
+        for (var formName in params.verificationsToShare) {
+          utils.dedupeVerifications(params.verificationsToShare[formName])
+        }
+      }
+
       this.setState({
         dataSource: this.state.dataSource.cloneWithRows(list),
         isLoading: false,
