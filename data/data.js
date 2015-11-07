@@ -1123,7 +1123,21 @@ var identities = [
   phoneType: 'Work',
 },
 
-
+{
+  _t: 'tradle.Currency',
+  currency: 'USD',
+  symbol: '$'
+},
+{
+  _t: 'tradle.Currency',
+  currency: 'Euro',
+  symbol: '€'
+},
+{
+  _t: 'tradle.Currency',
+  currency: 'GBR',
+  symbol: '£'
+},
 
 
 // {
