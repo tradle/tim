@@ -176,7 +176,7 @@ class MessageRow extends Component {
       if (resource.message) {
         if (resource.message.charAt(0) === '['  ||  resource.message.length > 30) {
           if (!isNewProduct)
-            viewStyle.width = isMyMessage || !hasOwnerPhoto ? 290 : 310;
+            viewStyle.width = isMyMessage || !hasOwnerPhoto ? 305 : 325;
           else {
             viewStyle.alignSelf = 'stretch'
             viewStyle.justifyContent = 'center'
@@ -184,7 +184,7 @@ class MessageRow extends Component {
         }
       }
       if (!isSimpleMessage)
-        viewStyle.width = isMyMessage || !hasOwnerPhoto ? 290 : 310;
+        viewStyle.width = isMyMessage || !hasOwnerPhoto ? 305 : 325;
 
       if (isVerification) {
         var msgModel = utils.getModel(resource.document[constants.TYPE]).value;
@@ -192,9 +192,7 @@ class MessageRow extends Component {
         renderedRow = <View>
                         <View style={{flexDirection: 'row', backgroundColor: '#289427', paddingVertical: 5, paddingHorizontal: 7, marginHorizontal: -7, marginTop: -5, justifyContent: 'center'}}>
                           <Icon style={styles.verificationIcon} size={20} name={'android-done'} />
-                          <Text style={{fontSize: 16, fontWeight: '600', color: '#FBFFE5', alignSelf: 'center'}}>
-                             Verified by {orgName}
-                          </Text>
+                          <Text style={{fontSize: 16, fontWeight: '600', color: '#FBFFE5', alignSelf: 'center'}}> Verified by {orgName}</Text>
                         </View>
                         <View style={{paddingTop: 5}}>
                           {this.formatDocument(msgModel, resource, this.verify.bind(this))}
@@ -326,7 +324,7 @@ class MessageRow extends Component {
     var st = [addStyle ? [styles.textContainer, addStyle] : styles.textContainer]
     st.push({borderWidth: 1, borderColor: '#C1DBCE'})
     return (
-      <View style={[rowStyle, viewStyle, {width: 310}]}>
+      <View style={[rowStyle, viewStyle, {width: 325}]}>
         <View style={{width: 30}} />
         <View style={[addStyle ? [styles.textContainer, addStyle] : styles.textContainer]}>
           <View style={{flex: 1}}>
