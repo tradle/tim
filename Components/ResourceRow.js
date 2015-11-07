@@ -7,6 +7,8 @@ var ArticleView = require('./ArticleView');
 var constants = require('tradle-constants');
 var Icon = require('react-native-vector-icons/Ionicons');
 var MONEY_TYPE = 'tradle.Money';
+var RowMixin = require('./RowMixin');
+var reactMixin = require('react-mixin');
 
 var {
   Image,
@@ -21,8 +23,8 @@ var {
 class ResourceRow extends Component {
   constructor(props) {
     super(props);
-  } 
-  render() {     
+  }
+  render() {
     var resource = this.props.resource;
     var photo;
     var isIdentity = resource[constants.TYPE] === constants.TYPES.IDENTITY;
@@ -34,7 +36,7 @@ class ResourceRow extends Component {
       }
       if (uri.indexOf('/var/mobile/') === 0)
         params.isStatic = true
-      photo = <Image source={params} style={styles.cellImage} />;      
+      photo = <Image source={params} style={styles.cellImage} />;
     }
     else {
       if (isIdentity) {
@@ -49,10 +51,10 @@ class ResourceRow extends Component {
       else  {
         var model = utils.getModel(resource[constants.TYPE]).value;
         var icon = model.icon;
-        if (icon) 
+        if (icon)
           photo = <View style={styles.cellImage}><Icon name={icon} size={35} style={styles.icon} /></View>
-        else if (model.properties.photos) 
-          photo = <View style={styles.cellImage} />        
+        else if (model.properties.photos)
+          photo = <View style={styles.cellImage} />
         else {
           photo = <View style={styles.cellNoImage} />
           noImage = true
@@ -61,25 +63,25 @@ class ResourceRow extends Component {
     }
     var orgPhoto;
     // if (isIdentity  &&  resource.organization) {
-    //   if (resource.organization.photo) 
+    //   if (resource.organization.photo)
     //     orgPhoto = <Image source={{uri: resource.organization.photo}} style={styles.orgIcon} />
     // }
     // if (!orgPhoto)
       orgPhoto = <View/>
 
-    var onlineStatus = (resource.online) 
+    var onlineStatus = (resource.online)
                      ? <View style={styles.online}></View>
                      : <View style={[styles.online, {backgroundColor: 'transparent'}]}></View>
-    
-    var cancelResource = (this.props.onCancel) 
+
+    var cancelResource = (this.props.onCancel)
                        ? <View>
                          <TouchableHighlight onPress={this.props.onCancel} underlayColor='transparent'>
                            <View>
-                             <Icon name='close-circled'  size={30}  color='#B1010E'  style={styles.cancelIcon} /> 
-                           </View>  
+                             <Icon name='close-circled'  size={30}  color='#B1010E'  style={styles.cancelIcon} />
+                           </View>
                          </TouchableHighlight>
-                         </View>  
-                       : <View />; 
+                         </View>
+                       : <View />;
     var textStyle = noImage ? [styles.textContainer, {marginVertical: 7}] : styles.textContainer;
     return (
       <View key={this.props.key}>
@@ -113,10 +115,10 @@ class ResourceRow extends Component {
     var dateProp;
     var datePropIdx;
     var datePropsCounter = 0;
-    var backlink;    
+    var backlink;
     for (var i=0; i<viewCols.length; i++) {
       var v = viewCols[i];
-      if (properties[v].type === 'array') { 
+      if (properties[v].type === 'array') {
         if (properties[v].items.backlink)
           backlink = v;
         continue;
@@ -139,9 +141,9 @@ class ResourceRow extends Component {
     viewCols.forEach(function(v) {
       if (v === dateProp)
         return;
-      if (properties[v].type === 'array') 
-        return;        
-      
+      if (properties[v].type === 'array')
+        return;
+
       if (!resource[v]  &&  !properties[v].displayAs)
         return;
       var style = first ? styles.resourceTitle : styles.description;
@@ -154,13 +156,13 @@ class ResourceRow extends Component {
         if (resource[v]) {
           var row;
           if (ref == MONEY_TYPE) {
-            row = this.getMoneyValue(ref, properties[v]);
+            row = this.getMoneyProp(ref, properties[v]);
             if (!row)
               return;
           }
-          else  
+          else
             row = <Text style={style} numberOfLines={first ? 2 : 1}>{resource[v].title}</Text>
-          
+
           vCols.push(row);
         }
         first = false;
@@ -177,10 +179,10 @@ class ResourceRow extends Component {
           row = <Text style={style} numberOfLines={1}>{resource[v]}</Text>;
         else if (!backlink  &&  resource[v]  && (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0))
           row = <Text style={style} onPress={self.onPress.bind(self)} numberOfLines={1}>{resource[v]}</Text>;
-        else {          
+        else {
           var val = properties[v].displayAs ? utils.templateIt(properties[v], resource) : resource[v];
           let msgParts = utils.splitMessage(val);
-          if (msgParts.length <= 2) 
+          if (msgParts.length <= 2)
             val = msgParts[0];
           else {
             val = '';
@@ -200,7 +202,7 @@ class ResourceRow extends Component {
         vCols.push(row);
         first = false;
       }
-    }); 
+    });
     if (vCols  &&  vCols.length)
       renderedViewCols = vCols;
     else {
@@ -210,7 +212,7 @@ class ResourceRow extends Component {
     }
     if (!backlink)
       return renderedViewCols;
-    return [ 
+    return [
       <TouchableHighlight onPress={this.props.showRefResources.bind(this, resource, backlink)}>
         <View>
           {renderedViewCols}
@@ -229,6 +231,7 @@ class ResourceRow extends Component {
     });
   }
 }
+reactMixin(ResourceRow.prototype, RowMixin);
 
 var styles = StyleSheet.create({
   textContainer: {
@@ -264,11 +267,11 @@ var styles = StyleSheet.create({
     marginLeft: 10,
     fontSize: 18
   },
-  myCell: { 
-    padding: 5, 
+  myCell: {
+    padding: 5,
     marginLeft: 30,
-    justifyContent: 'flex-end', 
-    borderRadius: 10, 
+    justifyContent: 'flex-end',
+    borderRadius: 10,
     backgroundColor: '#D7E6ED'
   },
   cellRoundImage: {
