@@ -8,6 +8,8 @@ var logError = require('logError');
 var SelectPhotoList = require('./SelectPhotoList');
 var myStyles = require('../styles/styles');
 var constants = require('tradle-constants');
+var NewResourceMixin = require('./NewResourceMixin');
+var reactMixin = require('react-mixin');
 
 var Form = t.form.Form;
 Form.stylesheet = myStyles;
@@ -154,6 +156,7 @@ class NewItem extends Component {
       selectedAssets[asset.node.image.uri] = asset;
   }
 }
+reactMixin(NewItem.prototype, NewResourceMixin);
 
 var styles = StyleSheet.create({
   container: {
