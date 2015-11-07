@@ -15,6 +15,9 @@ var Reflux = require('reflux');
 var reactMixin = require('react-mixin');
 var Icon = require('react-native-vector-icons/Ionicons');
 var myStyles = require('../styles/styles');
+var NewResourceMixin = require('./NewResourceMixin');
+var reactMixin = require('react-mixin');
+
 // var KeyboardEvents = require('react-native-keyboardevents');
 // var KeyboardEventEmitter = KeyboardEvents.Emitter;
 var constants = require('tradle-constants');
@@ -177,7 +180,7 @@ class NewResource extends Component {
         var prop = this.props.model.properties[p]
         if (prop.items  &&  prop.items.backlink)
           continue
-        if ((prop.ref && prop.ref !== 'tradle.Money') ||  isDate  ||  prop.items) {
+        if ((prop.ref /*&& prop.ref !== 'tradle.Money'*/) ||  isDate  ||  prop.items) {
           if (resource && resource[p])
             continue;
           if (msg.length == 0)
@@ -398,11 +401,12 @@ class NewResource extends Component {
         // onSubmitEditing: this.onSavePressed.bind(this),
         onEndEditing: this.onEndEditing.bind(this),
         onChange: this.onChange.bind(this),
-        template: this.myCustomTemplate.bind(this)
+        template: this.myCustomTemplate.bind(this),
       };
     if (this.props.editCols)
       params.editCols = this.props.editCols;
-    var options = utils.getFormFields(params);
+    var options = this.getFormFields(params);
+    // var options = utils.getFormFields(params);
 
     var Model = t.struct(model);
 
@@ -575,6 +579,29 @@ class NewResource extends Component {
     );
   }
 
+  moneyTemplate(prop) {
+    var containerStyle = {
+      justifyContent: 'space-between',
+      flexDirection: 'row',
+      borderWidth: 0.5,
+      height: 36,
+      borderColor: '#cccccc',
+      padding: 8,
+      marginBottom: 5,
+      borderRadius: 4
+    };
+    return
+      <TouchableHighlight style={containerStyle} underlayColor='#7AAAC3'
+          onPress={this.onNewPressed.bind(this, prop)}>
+        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+          <View style={{justifyContent: 'flex-start', flexDirection: 'row'}}>
+            <Text style={styles.itemsText}>{prop.title}</Text>
+            <Icon name='ios-arrow-down'  size={15}  color='#96415A'  style={styles.icon1}/>
+          </View>
+        </View>
+      </TouchableHighlight>
+  }
+
 }
 reactMixin(NewResource.prototype, Reflux.ListenerMixin);
 // var animations = {
@@ -603,6 +630,7 @@ reactMixin(NewResource.prototype, Reflux.ListenerMixin);
 //     },
 //   },
 // };
+reactMixin(NewResource.prototype, NewResourceMixin);
 
 var styles = StyleSheet.create({
   container: {
