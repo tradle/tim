@@ -84,14 +84,15 @@ var NewResourceMixin = {
         continue;
 
       var label = props[p].title;
-      if (props[p].units)
-        label += ' (' + props[p].units + ')'
       if (!label)
         label = utils.makeLabel(p);
       options.fields[p] = {
         error: 'Insert a valid ' + label,
         bufferDelay: 20, // to eliminate missed keystrokes
       }
+      if (props[p].units)
+        options.fields[p].placeholder = label + ' (' + props[p].units + ')'
+
       if (props[p].description)
         options.fields[p].help = props[p].description;
       if (props[p].readOnly  ||  (props[p].immutable  &&  data  &&  data[p]))
