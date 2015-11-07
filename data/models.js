@@ -1248,14 +1248,29 @@ var voc = [{
       type: 'number'
     },
     currency: {
-      type: 'string',
-      oneOf: [
-        {USD: '$'},
-        {GBR: '£'},
-        {CNY: '¥'}
-      ]
+      type: 'object',
+      ref: 'tradle.Currency'
     }
-  }
+  },
+  required: ['value', 'currency']
+},
+{
+  id: 'tradle.Currency',
+  type: 'tradle.Model',
+  subClassOf: 'tradle.Enum',
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    currency: {
+      type: 'string'
+    },
+    symbol: {
+      type: 'string'
+    }
+  },
+  required: ['currency']
 },
 {
   id: 'tradle.CurrentAccount',
@@ -1352,12 +1367,13 @@ var voc = [{
       type: 'object',
       ref: 'tradle.Organization'
     },
+    howLongHaveYouWorkedHere: {
+      type: 'number',
+      units: 'years'
+    },
     monthlyIncome: {
       type: 'object',
       ref: 'tradle.Money'
-    },
-    howLongHaveYouWorkedHere: {
-      type: 'number'
     },
   }
 },
@@ -1680,13 +1696,13 @@ var voc = [{
       type: 'object',
       ref: 'tradle.Organization'
     },
-    monthlyIncome: {
-      type: 'object',
-      ref: 'tradle.Money'
-    },
     howLongHaveYouWorkedHere: {
       type: 'number',
       units: 'years'
+    },
+    monthlyIncome: {
+      type: 'object',
+      ref: 'tradle.Money'
     },
     from: {
       type: 'object',
