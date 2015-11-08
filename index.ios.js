@@ -26,6 +26,10 @@ var QRCodeScanner = require('./Components/QRCodeScanner')
 var utils = require('./utils/utils');
 var constants = require('tradle-constants');
 var Icon = require('react-native-vector-icons/Ionicons');
+
+var MyRouter = require('./router/MyRouter');
+
+import ExNavigator from '@exponent/react-native-navigator'
 // var Device = require('react-native-device');
 
 var reactMixin = require('react-mixin');
@@ -46,18 +50,8 @@ var {
 class TiMApp extends Component {
   constructor(props) {
     super(props)
-    var props = {
-      modelName: constants.TYPES.IDENTITY
-    }
     this.state = {
-      initialRoute: {
-        id: 1,
-        // title: 'Trust in Motion',
-        // titleTextColor: '#7AAAC3',
-        component: TimHome,
-        passProps: props,
-      },
-      props: props
+      initialRoute: MyRouter.getHomeRoute(),
     };
     // var url = 'tradlekyc://71e4b7cd6c11ab7221537275988f113a879029ea';
     // this._handleOpenURL({url});
@@ -75,6 +69,7 @@ class TiMApp extends Component {
   componentWillUnmount() {
     LinkingIOS.removeEventListener('url', this._handleOpenURL.bind(this));
   }
+
   _handleOpenURL(event) {
     var url = event.url.trim();
     var idx = url.indexOf('://');
@@ -165,23 +160,9 @@ class TiMApp extends Component {
 
   render() {
     return (
-      <Navigator
-        style={styles.container}
-        initialRoute={this.state.initialRoute}
-        renderScene={this.renderScene.bind(this)}
-        navigationBar={
-          <Navigator.NavigationBar
-            routeMapper={NavigationBarRouteMapper}
-            style={styles.navBar}
-          />
-        }
-        passProps={this.state.props}
-        configureScene={(route) => {
-          if (route.sceneConfig)
-            return route.sceneConfig;
-          return Navigator.SceneConfigs.FloatFromRight;
-        }}
-        />
+      <ExNavigator
+        initialRoute={MyRouter.getRoute({routeName: 'TimHome'})}
+        style={{backgroundColor: '#2E3B4E', flex: 1}} />
     );
   }
 
@@ -294,6 +275,8 @@ class TiMApp extends Component {
     }
   }
 }
+
+
 var NavigationBarRouteMapper = {
   LeftButton: function(route, navigator, index, navState) {
     if (index === 0  ||  route.noLeftButton) {
@@ -386,6 +369,73 @@ var NavigationBarRouteMapper = {
   },
 
 };
+// var MyRouter = {
+//   getHomeRoute() {
+//     return {
+//       getSceneClass() {
+//         return require('../Components/TimHome');
+//       },
+//       renderScene() {
+//         return <TimHome navigator={navigator} modelName={constants.TYPES.IDENTITY} />;
+//       },
+//       configureScene() {
+//         return ExNavigator.SceneConfigs.FloatFromRight;
+//       },
+//     }
+
+//   },
+
+//   getResourceListRoute(route) {
+//     return {
+//       getSceneClass() {
+//         return require('../Components/ResourceList');
+//       },
+//       renderScene() {
+//         var props = route.passProps
+//         return <ResourceList navigator={nav}
+//                     filter={props.filter}
+//                     resource={props.resource}
+//                     prop={props.prop}
+//                     returnRoute={props.returnRoute}
+//                     callback={props.callback}
+//                     isAggregation={props.isAggregation}
+//                     isRegistration={props.isRegistration}
+//                     sortProperty={props.sortProperty}
+//                     modelName={props.modelName} />;
+//       },
+//       getTitle() {
+//         return route.title
+//       },
+
+//       // renderLeftButton(navigator) {
+//       //   return (
+//       //     <TouchableOpacity
+//       //       touchRetentionOffset={ExNavigator.Styles.barButtonTouchRetentionOffset}
+//       //       onPress={() => navigator.push(getSettingsRoute())}
+//       //       style={ExNavigator.Styles.barLeftButton}>
+//       //       <Text style={ExNavigator.Styles.barLeftButtonText}>Settings</Text>
+//       //     </TouchableOpacity>
+//       //   );
+//       // },
+
+//       // renderRightButton(navigator) {
+//       //   return (
+//       //     <TouchableOpacity
+//       //      touchRetentionOffset={ExNavigator.Styles.barButtonTouchRetentionOffset}
+//       //       onPress={() => navigator.push(getHelpRoute())}
+//       //       style={ExNavigator.Styles.barRightButton}>
+//       //       <Text style={ExNavigator.Styles.barRightButtonText}>Help</Text>
+//       //     </TouchableOpacity>
+//       //   );
+//       // },
+
+//       configureScene() {
+//         return ExNavigator.SceneConfigs.FloatFromRight;
+//       }
+//     }
+
+//   }
+// }
 
 var styles = StyleSheet.create({
   icon: {
