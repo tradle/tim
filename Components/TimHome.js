@@ -13,6 +13,7 @@ var reactMixin = require('react-mixin');
 var sampleData = require('../data/data');
 var constants = require('tradle-constants');
 var TouchID = require('react-native-touch-id');
+var MyRouter = require('../router/MyRouter');
 
 var {
   StyleSheet,
@@ -32,7 +33,7 @@ var {
 
 class TimHome extends Component {
 	constructor(props) {
-	  super(props);
+	  super(props)
 	  this.state = {
 	    isLoading: true,
 	  };
@@ -69,38 +70,39 @@ class TimHome extends Component {
         sortProperty: 'lastMessageTime'
       };
     var me = utils.getMe();
-    this.props.navigator.push({
-      // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+    var nr_onRightButtonPress = {
+      title: me.firstName,
+      routeName: 'NewResource',
+      titleTextColor: '#7AAAC3',
+      backButtonTitle: 'Back',
+      rightButtonTitle: 'Done',
+      passProps: {
+        model: utils.getModel(me[constants.TYPE]).value,
+        resource: me,
+      }
+    }
+    var rv_onRightButtonPress = {
+      title: utils.getDisplayName(me, utils.getModel(me[constants.TYPE]).value.properties),
+      id: 3,
+      routeName: 'ResourceView',
+      titleTextColor: '#7AAAC3',
+      rightButtonTitle: 'Edit',
+      onRightButtonPress: nr_onRightButtonPress,
+      passProps: {resource: me}
+    }
+    var route = {
       id: 10,
       title: 'Contacts',
       titleTextColor: '#7AAAC3',
       backButtonTitle: 'Back',
-      component: ResourceList,
+      routeName: 'ResourceList',
       rightButtonTitle: 'Profile',
       passProps: passProps,
-      onRightButtonPress: {
-        title: utils.getDisplayName(me, utils.getModel(me[constants.TYPE]).value.properties),
-        id: 3,
-        component: ResourceView,
-        titleTextColor: '#7AAAC3',
-        rightButtonTitle: 'Edit',
-        onRightButtonPress: {
-          title: me.firstName,
-          id: 4,
-          component: NewResource,
-          titleTextColor: '#7AAAC3',
-          backButtonTitle: 'Back',
-          rightButtonTitle: 'Done',
-          passProps: {
-            model: utils.getModel(me[constants.TYPE]).value,
-            resource: me,
-          }
-        },
-        passProps: {resource: me}
-      }
-    });
+      onRightButtonPress: rv_onRightButtonPress
+    }
+    this.props.navigator.push(MyRouter.getRoute(route));
 	}
-
+/*
   showCommunities() {
     var passProps = {
         filter: '',
@@ -117,6 +119,7 @@ class TimHome extends Component {
       passProps: passProps,
     });
   }
+*/
   onEditProfilePressed() {
     var modelName = this.props.modelName;
     if (!utils.getModel(modelName)) {
@@ -125,7 +128,7 @@ class TimHome extends Component {
     }
     var model = utils.getModel(modelName).value;
     var route = {
-      component: NewResource,
+      routeName: 'NewResource',
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
       id: 4,
@@ -143,7 +146,7 @@ class TimHome extends Component {
       route.title = 'New Identity';
       route.passProps.callback = this.popToTop.bind(this);
     }
-    this.props.navigator.push(route);
+    this.props.navigator.push(MyRouter.getRoute(route));
   }
   popToTop(resource) {
     utils.setMe(resource);

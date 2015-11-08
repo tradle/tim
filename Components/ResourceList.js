@@ -20,6 +20,7 @@ var ProductChooser = require('./ProductChooser')
 var QRCodeScanner = require('./QRCodeScanner')
 var QRCode = require('./QRCode')
 var buttonStyles = require('../styles/buttonStyles');
+var MyRouter = require('../router/MyRouter')
 
 // var GridList = require('./GridList');
 // var DEAL_MODEL = 'tradle.Offer';
@@ -155,17 +156,15 @@ class ResourceList extends Component {
         !this.props.callback) {
       var m = utils.getModel(resource[constants.TYPE]).value;
       var title = utils.makeTitle(utils.getDisplayName(resource, m.properties))
-      this.props.navigator.push({
+      var route = {
         title: title,
-        id: 3,
-        component: ResourceView,
+        routeName: 'ResourceView',
         titleTextColor: '#7AAAC3',
         backButtonTitle: 'Back',
         rightButtonTitle: 'Edit',
         onRightButtonPress: {
           title: title,
-          id: 4,
-          component: NewResource,
+          routeName: 'NewResource',
           titleTextColor: '#7AAAC3',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
@@ -176,7 +175,8 @@ class ResourceList extends Component {
         },
 
         passProps: {resource: resource}
-      });
+      }
+      this.props.navigator.push(MyRouter(route));
       return;
     }
     if (this.props.prop) {
@@ -200,8 +200,7 @@ class ResourceList extends Component {
     var modelName = 'tradle.Message';
     var self = this;
     var route = {
-      component: MessageList,
-      id: 11,
+      routeName: 'MessageList',
       backButtonTitle: 'Back',
       passProps: {
         resource: resource,
@@ -214,15 +213,13 @@ class ResourceList extends Component {
       route.rightButtonTitle = 'Profile'
       route.onRightButtonPress = {
         title: title,
-        id: 3,
-        component: ResourceView,
+        routeName: 'ResourceView',
         titleTextColor: '#7AAAC3',
         backButtonTitle: 'Back',
         rightButtonTitle: 'Edit',
         onRightButtonPress: {
           title: title,
-          id: 4,
-          component: NewResource,
+          routeName: 'NewResource',
           titleTextColor: '#7AAAC3',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
@@ -282,7 +279,7 @@ class ResourceList extends Component {
       //   return;
       // }
     }
-    this.props.navigator.push(route);
+    this.props.navigator.push(MyRouter.getRoute(route));
   }
 
   _selectResource(resource) {
@@ -301,8 +298,7 @@ class ResourceList extends Component {
 
     var route = {
       title: utils.makeTitle(newTitle),
-      id: 3,
-      component: ResourceView,
+      routeName: 'ResourceView',
       parentMeta: model,
       backButtonTitle: 'Back',
       passProps: {resource: resource},
@@ -321,8 +317,7 @@ class ResourceList extends Component {
       route.rightButtonTitle = 'Edit';
       route.onRightButtonPress = /*() =>*/ {
         title: 'Edit',
-        id: 4,
-        component: NewResource,
+        routeName: 'NewResource',
         rightButtonTitle: 'Done',
         titleTextColor: '#7AAAC3',
         passProps: {
@@ -331,7 +326,7 @@ class ResourceList extends Component {
         }
       };
     }
-    this.props.navigator.push(route);
+    this.props.navigator.push(MyRoute.getRoute(route));
   }
   showRefResources(resource, prop) {
     var props = utils.getModel(resource[constants.TYPE]).value.properties;
@@ -342,11 +337,9 @@ class ResourceList extends Component {
     var backlinksTitle = propJson.title + ' - ' + resourceTitle;
     backlinksTitle = utils.makeTitle(backlinksTitle);
     var modelName = propJson.items.ref;
-
-    this.props.navigator.push({
+    var route = {
       title: backlinksTitle,
-      id: 10,
-      component: ResourceList,
+      routeName: 'ResourceList',
       backButtonTitle: 'Back',
       titleTextColor: '#7AAAC3',
       passProps: {
@@ -357,15 +350,13 @@ class ResourceList extends Component {
       rightButtonTitle: 'Details',
       onRightButtonPress: {
         title: resourceTitle,
-        id: 3,
-        component: ResourceView,
+        routeName: 'ResourceView',
         titleTextColor: '#7AAAC3',
         backButtonTitle: 'Back',
         rightButtonTitle: 'Edit',
         onRightButtonPress: {
           title: resourceTitle,
-          id: 4,
-          component: NewResource,
+          routeName: 'NewResource',
           titleTextColor: '#7AAAC3',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
@@ -377,7 +368,8 @@ class ResourceList extends Component {
 
         passProps: {resource: resource}
       }
-    });
+    }
+    this.props.navigator.push(MyRouter.getRoute(route));
   }
 
   onSearchChange(filter) {
@@ -492,16 +484,15 @@ class ResourceList extends Component {
   //   })
   // }
   showBanks() {
-    this.props.navigator.push({
+    this.props.navigator.push(MyRouter.getRoute({
       title: 'Official Accounts',
-      id: 10,
-      component: ResourceList,
+      routeName: 'ResourceList',
       backButtonTitle: 'Back',
       titleTextColor: '#7AAAC3',
       passProps: {
         modelName: 'tradle.Organization'
       }
-    });
+    }));
   }
   addNew() {
     var model = utils.getModel(this.props.modelName).value;
@@ -526,10 +517,9 @@ class ResourceList extends Component {
         }
       }
     }
-    this.props.navigator.push({
+    this.props.navigator.push(MyRouter.getRoute({
       title: model.title,
-      id: 4,
-      component: NewResource,
+      routeName: 'NewResource',
       titleTextColor: '#7AAAC3',
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
@@ -541,7 +531,7 @@ class ResourceList extends Component {
           to: this.props.resource
         }),
       }
-    })
+    }))
   }
   render() {
     if (this.state.isLoading)
@@ -602,24 +592,22 @@ class ResourceList extends Component {
   }
 
   showQRCode(purpose, content) {
-    this.props.navigator.push({
+    this.props.navigator.push(MyRouter.getRoute({
       title: 'QR Code: ' + purpose,
-      id: 17,
-      component: QRCode,
+      routeName: 'QRCode',
       titleTextColor: '#eeeeee',
       backButtonTitle: 'Back',
       passProps: {
         fullScreen: true,
         content: content
       }
-    })
+    }))
   }
 
   scanQRCode() {
-    this.props.navigator.push({
+    this.props.navigator.push(MyRouter.getRoute({
       title: 'Scan QR Code of contact',
-      id: 16,
-      component: QRCodeScanner,
+      routeName: 'QRCodeScanner',
       titleTintColor: '#eeeeee',
       backButtonTitle: 'Cancel',
       // rightButtonTitle: 'ion|ios-reverse-camera',
@@ -628,7 +616,7 @@ class ResourceList extends Component {
           console.log(result)
         }
       }
-    })
+    }))
   }
 }
 reactMixin(ResourceList.prototype, Reflux.ListenerMixin);

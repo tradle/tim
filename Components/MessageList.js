@@ -16,6 +16,7 @@ var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var InvertibleScrollView = require('react-native-invertible-scroll-view');
 var constants = require('tradle-constants');
+var MyRouter = require('../router/MyRouter');
 
 var {
   ListView,
@@ -132,13 +133,12 @@ class MessageList extends Component {
     }
     var route = {
       title: newTitle,
-      id: 5,
       backButtonTitle: 'Back',
-      component: MessageView,
+      routeName: 'MessageView',
       parentMeta: model,
       passProps: {resource: resource},
     }
-    this.props.navigator.push(route);
+    this.props.navigator.push(MyRouter.getRoute(route));
   }
 
   onSearchChange(text) {
@@ -254,10 +254,9 @@ class MessageList extends Component {
     var resource = this.props.resource
     // if (resource.name === 'Lloyds') {
       var currentRoutes = self.props.navigator.getCurrentRoutes();
-      this.props.navigator.push({
+      this.props.navigator.push(MyRouter.getRoute({
         title: 'Financial Product',
-        id: 15,
-        component: ProductChooser,
+        routeName: 'ProductChooser',
         sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
         backButtonTitle: 'Back',
         passProps: {
@@ -267,9 +266,8 @@ class MessageList extends Component {
         },
         rightButtonTitle: 'ion|plus',
         onRightButtonPress: {
-          id: 4,
           title: 'New product',
-          component: NewResource,
+          routeName: 'NewResource',
           backButtonTitle: 'Back',
           titleTextColor: '#7AAAC3',
           rightButtonTitle: 'Done',
@@ -278,7 +276,7 @@ class MessageList extends Component {
             // callback: this.modelAdded.bind(this)
           }
         }
-      });
+      }));
     //   return;
     // }
 /*

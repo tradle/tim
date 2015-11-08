@@ -17,7 +17,7 @@ var Icon = require('react-native-vector-icons/Ionicons');
 var myStyles = require('../styles/styles');
 var NewResourceMixin = require('./NewResourceMixin');
 var reactMixin = require('react-mixin');
-
+var MyRouter = require('../router/MyRouter')
 // var KeyboardEvents = require('react-native-keyboardevents');
 // var KeyboardEventEmitter = KeyboardEvents.Emitter;
 var constants = require('tradle-constants');
@@ -240,11 +240,11 @@ class NewResource extends Component {
     var filter = event.nativeEvent.text;
     var m = utils.getModel(prop.ref).value;
     var currentRoutes = this.props.navigator.getCurrentRoutes();
-    this.props.navigator.push({
+    var route = {
       title: m.title,
       titleTextColor: '#7AAAC3',
       id: 10,
-      component: ResourceList,
+      routeName: 'ResourceList',
       backButtonTitle: 'Back',
       sceneConfig: isFinancialProduct ? Navigator.SceneConfigs.FloatFromBottom : Navigator.SceneConfigs.FloatFromRight,
       passProps: {
@@ -256,7 +256,8 @@ class NewResource extends Component {
         returnRoute: currentRoutes[currentRoutes.length - 1],
         callback:    this.setChosenValue.bind(this),
       }
-    });
+    }
+    this.props.navigator.push(MyRouter.getRoute(route));
   }
   // setting chosen from the list property on the resource like for ex. Organization on Contact
   setChosenValue(propName, value) {
