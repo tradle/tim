@@ -638,8 +638,8 @@ class MessageRow extends Component {
              ? <View />
              : <View style={{flexDirection: 'row', marginTop: 10, justifyContent:'space-between'}}>
                 <View style={{flexDirection: 'row', justifyContent: 'space-between', padding: 5, borderRadius: 10, borderWidth: 1, borderColor: '#eeeeee', backgroundColor: '#F0F0EE'}}>
-                  <Image style={styles.msgImageSmall} source={require('image!Tradle')}></Image>
-                  <Text style={{color: '#2E3B4E', fontSize: 14, paddingRight: 5, marginTop: 2}}>Tap</Text>
+                  <Icon style={styles.shareIcon} size={20} name={'android-share-alt'} />
+                  <Text style={{color: '#2E3B4E', fontSize: 14, paddingRight: 5, marginTop: 2}}>Share</Text>
                 </View>
                  <View style={{flexDirection: 'row', justifyContent: 'flex-end', marginTop: 10}}>
                    <Text style={[styles.verySmallLetters]}>verified by </Text>
@@ -815,14 +815,10 @@ var styles = StyleSheet.create({
     justifyContent: 'flex-end',
     borderRadius: 10,
   },
-  msgImageSmall: {
-    // backgroundColor: '#dddddd',
+  shareIcon: {
     height: 20,
-    marginRight: 5,
+    color: '#7aaac3',
     width: 20,
-    // borderRadius: 10,
-    // borderColor: '#cccccc',
-    // borderWidth: 1
   },
   msgImage: {
     backgroundColor: '#dddddd',
