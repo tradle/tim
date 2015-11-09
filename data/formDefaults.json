@@ -1,0 +1,67 @@
+{
+  "tradle.AboutYou": {
+    "residentialStatus": {
+      "title": "Living with parents",
+      "id": "tradle.ResidentialStatus_2e980aba65b66702cb2f7fa92f9575b4f3d4f6eb_2e980aba65b66702cb2f7fa92f9575b4f3d4f6eb"
+    },
+    "maritalStatus": {
+      "title": "Married \/ civil partnership",
+      "id": "tradle.MaritalStatus_36dc78aac69ade995b595079c57cdd5d954f16ac_36dc78aac69ade995b595079c57cdd5d954f16ac"
+    },
+    "nationality": {
+      "title": "American",
+      "id": "tradle.Nationality_3adb8e0d4833c55d836d7fb3b8c2891da3d07216_3adb8e0d4833c55d836d7fb3b8c2891da3d07216"
+    },
+    "countryOfBirth": {
+      "title": "US",
+      "id": "tradle.Country_b424fcc35801022868a5285956805e8e9e0bb31a_b424fcc35801022868a5285956805e8e9e0bb31a"
+    },
+    "taxResidency": {
+      "title": "US",
+      "id": "tradle.Country_b424fcc35801022868a5285956805e8e9e0bb31a_b424fcc35801022868a5285956805e8e9e0bb31a"
+    },
+    "fundAccount": {
+      "title": "Cash",
+      "id": "tradle.HowToFund_928ac6d8a07b31d14735cfd7fa45949d1a4844c7_928ac6d8a07b31d14735cfd7fa45949d1a4844c7"
+    },
+    "purposeOfTheAccount": {
+      "title": "Spending money",
+      "id": "tradle.PurposeOfTheAccount_3cbe03f6a729ff73b608bc0fa24494844466e17a_3cbe03f6a729ff73b608bc0fa24494844466e17a"
+    },
+    "emailAddress": "bill@tradle.io",
+    "phones": [
+      {
+        "number": "12345123456",
+        "phoneType": {
+          "_t": "tradle.PhoneTypes",
+          "phoneType": "Mobile"
+        }
+      }
+    ]
+  },
+  "tradle.MortgageLoanDetail": {
+    "purposeOfMortgageLoan": {
+      "title": "Buy your first home",
+      "id": "tradle.PurposeOfMortgageLoan_8b8b536b72fcf7b9d4d632209e28da56fe412f12_8b8b536b72fcf7b9d4d632209e28da56fe412f12"
+    },
+    "propertyStreetAddress": "23 Main St",
+    "region": "NJ",
+    "city": "New Brunswick",
+    "postalCode": "07888",
+    "country": {
+      "title": "US",
+      "id": "tradle.Country_b424fcc35801022868a5285956805e8e9e0bb31a_b424fcc35801022868a5285956805e8e9e0bb31a"
+    },
+    "propertyType": {
+      "title": "Right to Buy",
+      "id": "tradle.PropertyType_5b129ede14b65b25afcf72ac3727d78d0b9d8257_5b129ede14b65b25afcf72ac3727d78d0b9d8257"
+    },
+    "sizeOfProperty": "2700",
+    "totalAmountRequired": {
+      "value": 100000
+    },
+    "totalValueOfProperty": {
+      "value": 500000
+    }
+  }
+}
