@@ -18,10 +18,10 @@ var {
 
 var NewResourceMixin = {
   getFormFields(params) {
-    var meta = this.props.model  ||  this.props.model;
+    var meta = this.props.model  ||  this.props.metadata;
     var model = params.model;  // For the form
-    var onSubmitEditing = this.onSubmitEditing  ||  this.props.onSubmitEditing
-    var onEndEditing = this.onEndEditing  ||  this.props.onEndEditing
+    var onSubmitEditing = this.onSubmitEditing  ||  params.onSubmitEditing
+    var onEndEditing = this.onEndEditing  ||  params.onEndEditing
     var chooser = this.chooser  ||  this.props.chooser
     var myCustomTemplate = this.myCustomTemplate  || this.props.template
 
@@ -90,17 +90,41 @@ var NewResourceMixin = {
         error: 'Insert a valid ' + label,
         bufferDelay: 20, // to eliminate missed keystrokes
       }
-      if (props[p].units)
-        options.fields[p].placeholder = label + ' (' + props[p].units + ')'
+      var isRange
+      if (props[p].units) {
+        if (props[p].units.charAt(0) === '[') {
+          options.fields[p].placeholder = label + ' ' + props[p].units
+          // isRange = type === 'number'  &&  props[p].units == '[min - max]'
+          // if (isRange) {
+          //   formType = t.Str
+          //   var Range = t.refinement(t.Str, function (n) {
+          //     var s = s.split(' - ')
+          //     if (s.length < 2  ||  s > 3)
+          //       return false
+
+          //     if (!s[0].match(/\d{1,2}[\,.]{1}\d{1,2}/)  ||  !s[1].match(/\d{1,2}[\,.]{1}\d{1,2}/))
+          //       return false
+          //     return true
+          //   });
+          //   model[p] = maybe ? t.maybe(Range) : Range;
+
+          // }
+        }
+        else
+          options.fields[p].placeholder = label + ' (' + props[p].units + ')'
+      }
 
       if (props[p].description)
         options.fields[p].help = props[p].description;
       if (props[p].readOnly  ||  (props[p].immutable  &&  data  &&  data[p]))
         options.fields[p] = {'editable':  false };
+      // if (formType  &&   (formType === t.Num  ||  formType === t.Str))
+      //   formType = null
+
       if (formType) {
         // if (this.onChange)
         //   options.fields[p].onChange = this.onChange.bind(this);
-        model[p] = maybe ? t.maybe(formType) : formType;
+        model[p] = !model[p]  &&  (maybe ? t.maybe(formType) : formType);
         if (data  &&  (type == 'date')) {
           data[p] = new Date(data[p]);
           // options.fields[p] = { mode: 'date'};
@@ -109,7 +133,6 @@ var NewResourceMixin = {
           options.fields[p].label = label
         }
         else if (type === 'string') {
-          options.fields[p].label = label
           if (props[p].maxLength > 100)
             options.fields[p].multiline = true;
           options.fields[p].autoCorrect = false;
@@ -120,9 +143,14 @@ var NewResourceMixin = {
         }
         if (!options.fields[p].multiline && (type === 'string'  ||  type === 'number')) {
           options.fields[p].onSubmitEditing = onSubmitEditing.bind(this);
-          options.fields[p].onEndEditing = onEndEditing.bind(this, p);
+          if (onEndEditing)
+            options.fields[p].onEndEditing = onEndEditing.bind(this, p);
           if (props[p].maxLength)
             options.fields[p].maxLength = props[p].maxLength;
+          if (type === 'number') {
+            if (data[p]  &&  (typeof data[p] != 'number'))
+              data[p] = parseFloat(data[p])
+          }
         }
       }
       else if (props[p].oneOf) {
@@ -146,8 +174,12 @@ var NewResourceMixin = {
       }
       else {
         var ref = props[p].ref;
-        if (!ref)
+        if (!ref) {
+          if (type === 'number'  ||  type === 'string')
+            ref = MONEY_TYPE
+          else
           continue;
+        }
         if (ref === MONEY_TYPE) {
           model[p] = maybe ? t.maybe(t.Num) : t.Num;
           if (data[p]  &&  (typeof data[p] != 'number'))
