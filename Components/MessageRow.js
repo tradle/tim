@@ -355,6 +355,45 @@ class MessageRow extends Component {
     }
     resource[constants.TYPE] = model.id;
 
+    if (model.id === 'tradle.MortgageLoanDetail') {
+      resource.purposeOfMortgageLoan = {
+        title: 'Buy your first home',
+        id: 'tradle.PurposeOfMortgageLoan_8b8b536b72fcf7b9d4d632209e28da56fe412f12_8b8b536b72fcf7b9d4d632209e28da56fe412f12'
+      }
+      resource.propertyStreetAddress = '23 Main St'
+      resource.region =  'NJ'
+      resource.city = 'New Brunswick'
+      resource.postalCode = '07888'
+      resource.country = {
+        title: 'US',
+        id: 'tradle.Country_b424fcc35801022868a5285956805e8e9e0bb31a_b424fcc35801022868a5285956805e8e9e0bb31a'
+      },
+      resource.propertyType = {
+        title: 'Right to Buy',
+        id: 'tradle.PropertyType_5b129ede14b65b25afcf72ac3727d78d0b9d8257_5b129ede14b65b25afcf72ac3727d78d0b9d8257'
+      }
+      resource.sizeOfProperty = '2700'
+      resource.totalAmountRequired = {
+        value: 100000
+      }
+      resource.totalValueOfProperty = {
+        value: 500000
+      }
+
+
+      // resource.purposeOfMortgageLoan = 'Buy your first home';
+      // resource.propertyStreetAddress = '23 Main St'
+      // resource.region =  'NJ'
+      // resource.city = 'New Brunswick'
+      // resource.postalCode = '07888'
+      // resource.country = 'US'
+      // resource.propertyType = 'Right to Buy'
+      // resource.sizeOfProperty = '2700'
+      // resource.totalAmountRequired = '100000'
+      // resource.totalValueOfProperty = '500000'
+
+    }
+
     this.props.navigator.push({
       id: 4,
       title: model.title,
@@ -653,7 +692,7 @@ class MessageRow extends Component {
                 'Sharing ' + docTitle + ' verified by ' + verifiedBy,
                 'with ' + orgTitle,
                 [
-                  {text: 'Share', onPress: this.props.share.bind(this, verification.document, this.props.to)},
+                  {text: 'Share', onPress: this.props.share.bind(this, verification, this.props.to)},
                   {text: 'Cancel', onPress: () => console.log('Canceled!')},
                 ]
             )}>
