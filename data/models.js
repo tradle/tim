@@ -934,6 +934,7 @@ var voc = [{
      },
     'photos': {
       'type': 'array',
+      'title': 'Document Snapshots',
       'items': {
         'type': 'object',
         'properties': {
@@ -1159,6 +1160,7 @@ var voc = [{
       },
       required: ['url']
     },
+
     verifications: {
       type: 'array',
       readOnly: true,
@@ -1191,6 +1193,18 @@ var voc = [{
         backlink: 'organization'
       }
     },
+    products: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          modelName: {
+           type: 'tradle.Model'
+          }
+        }
+      }
+    }
+
     // offers: {
     //   type: 'array',
     //   items: {
@@ -1205,6 +1219,7 @@ var voc = [{
     //   skipLabel: true
     // }
   },
+
   required: ['name'],
   viewCols: ['name', 'photos', 'verifications'],
   gridCols: [
@@ -1220,6 +1235,25 @@ var voc = [{
     'country',
   ]
 },
+// {
+//   id: 'tradle.FinancialProductsInOrganization',
+//   type: 'tradle.Model',
+//   properties: {
+//     '_t': {
+//       'type': 'string',
+//       'readOnly': true
+//     },
+//     product: {
+//       type: 'object',
+//       ref: 'tradle.FinancialProduct'
+//     },
+//     organization: {
+//       type: 'object',
+//       ref: 'tradle.Organization'
+//     }
+//   },
+//   required: ['product', 'organization']
+// },
 {
   id: 'tradle.NewMessageModel',
   type: 'tradle.Model',
@@ -1278,7 +1312,7 @@ var voc = [{
   title: 'Current Account',
   interfaces: ['tradle.Message'],
   subClassOf: 'tradle.FinancialProduct',
-  forms: ['tradle.AboutYou', 'tradle.LicenseVerification', 'tradle.UtilityBillVerification'],
+  forms: ['tradle.AboutYou', 'tradle.UtilityBillVerification'],
   properties: {
     '_t': {
       'type': 'string',
@@ -1382,7 +1416,129 @@ var voc = [{
   title: 'Mortgage',
   interfaces: ['tradle.Message'],
   type: 'tradle.Model',
-  forms: ['tradle.AboutYou', 'tradle.YourMoney', 'tradle.MortgageLoanDetail','tradle.LicenseVerification'],
+  forms: ['tradle.AboutYou', 'tradle.YourMoney', 'tradle.MortgageLoanDetail'],
+  subClassOf: 'tradle.FinancialProduct',
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    from: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    to: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+  },
+},
+
+{
+  id: 'tradle.HealthInsurance',
+  title: 'Health Insurance',
+  interfaces: ['tradle.Message'],
+  type: 'tradle.Model',
+  forms: ['tradle.AboutYou', 'tradle.YourMoney'],
+  subClassOf: 'tradle.FinancialProduct',
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    from: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    to: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+  },
+},
+{
+  id: 'tradle.LifeInsurance',
+  title: 'Life Insurance',
+  interfaces: ['tradle.Message'],
+  type: 'tradle.Model',
+  forms: ['tradle.AboutYou', 'tradle.YourMoney'],
+  subClassOf: 'tradle.FinancialProduct',
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    from: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    to: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+  },
+},
+
+{
+  id: 'tradle.TermInsurance',
+  title: 'Term Insurance',
+  interfaces: ['tradle.Message'],
+  type: 'tradle.Model',
+  forms: ['tradle.AboutYou', 'tradle.YourMoney'],
+  subClassOf: 'tradle.FinancialProduct',
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    from: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    to: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+  },
+},
+{
+  id: 'tradle.Pension',
+  title: 'Pension',
+  interfaces: ['tradle.Message'],
+  type: 'tradle.Model',
+  forms: ['tradle.AboutYou', 'tradle.YourMoney'],
+  subClassOf: 'tradle.FinancialProduct',
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    from: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    to: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+  },
+},
+{
+  id: 'tradle.IncomeProtectionInsurance',
+  title: 'Income Protection Insurance',
+  interfaces: ['tradle.Message'],
+  type: 'tradle.Model',
+  forms: ['tradle.AboutYou', 'tradle.YourMoney'],
   subClassOf: 'tradle.FinancialProduct',
   properties: {
     '_t': {
@@ -1560,18 +1716,18 @@ var voc = [{
     "averageMonthlySales": {
       "type": "object",
       "ref": "tradle.Money",
-      "title": "[min - max]",
+      units: "[min - max]",
       "description": "Average monthly sales"
     },
     "averageTxsPerMonth": {
       "type": "number",
-      "title": "[min - max]",
+      units: "[min - max]",
       "description": "Average number of transactions per month"
     },
     "averageTxAmount": {
       "type": "object",
       "ref": "tradle.Money",
-      "title": "[min - max]",
+      units: "[min - max]",
       "description": "Average amount of a single transaction"
     },
     "numberOfChargebacks": {
@@ -1678,8 +1834,34 @@ var voc = [{
     emailAddress: {
       type: 'string',
     },
+    'photos': {
+      'type': 'array',
+      'title': 'Photo ID snapshots',
+      'items': {
+        'type': 'object',
+        'properties': {
+          'tags': {
+            'type': 'string',
+            'skipLabel': true
+          },
+          'url': {
+            'type': 'string',
+            'readOnly': true
+          },
+          width: {
+            type: 'number',
+            readOnly: true
+          },
+          height: {
+            type: 'number',
+            readOnly: true
+          }
+        }
+      },
+      'required': ['title', 'url']
+    },
   },
-  viewCols: ['residentialStatus', 'maritalStatus', 'countryOfBirth', 'taxResidency', 'fundAccount', 'purposeOfTheAccount', 'phones']
+  viewCols: ['residentialStatus', 'maritalStatus', 'countryOfBirth', 'taxResidency', 'fundAccount', 'purposeOfTheAccount', 'phones', 'emailAddress', 'photos']
 },
 {
   id: 'tradle.YourMoney',
@@ -1905,8 +2087,8 @@ var voc = [{
   },
 },
 {
-  id: 'tradle.Loans',
-  title: 'Loans',
+  id: 'tradle.Loan',
+  title: 'Loan',
   type: 'tradle.Model',
   interfaces: ['tradle.Message'],
   subClassOf: 'tradle.FinancialProduct',
@@ -1966,6 +2148,14 @@ var voc = [{
       'type': 'object',
        ref: 'tradle.Country'
     },
+    formattedAddress: {
+      transient: true,
+      'type': 'string',
+      'displayAs': ['propertyStreetAddress', ',', 'city', ',', 'region', 'postalCode', ',  ', 'country'],
+      'title': 'Property Address',
+      'readOnly': true
+    },
+
     propertyType: {
       type: 'object',
       ref: 'tradle.PropertyType'
@@ -1985,6 +2175,7 @@ var voc = [{
     },
   },
   viewCols: [
+    'formattedAddress',
     'purposeOfMortgageLoan',
     'totalAmountRequired',
     'totalValueOfProperty',
@@ -2029,6 +2220,43 @@ var voc = [{
 {
   id: 'tradle.HomeInsurance',
   title: 'Home Insurance',
+  type: 'tradle.Model',
+  subClassOf: 'tradle.FinancialProduct',
+  interfaces: ['tradle.Message'],
+  forms: ['tradle.AboutYou', 'tradle.PropertyInformation'],
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    from: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    to: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    'verifications': {
+      'type': 'array',
+      'readOnly': true,
+      'items': {
+        'backlink': 'document',
+        'ref': 'tradle.Verification'
+      },
+    },
+    referencedBy: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.SimpleMessage'
+    }
+  },
+},
+{
+  id: 'tradle.AutoInsurance',
+  title: 'Auto Insurance',
   type: 'tradle.Model',
   subClassOf: 'tradle.FinancialProduct',
   interfaces: ['tradle.Message'],
