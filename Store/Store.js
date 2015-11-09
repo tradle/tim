@@ -970,41 +970,46 @@ var Store = Reflux.createStore({
     this.loadModels()
   },
   onReloadDB() {
-    var togo = 1;
-    // this.loadModels()
-    // var name = me.firstName.toLowerCase();
     var self = this
-    meDriver.destroy()
+    Q.ninvoke(AsyncStorage, 'clear')
     .then(function() {
-      meDriver = null
-      driverPromise = null
-
-      rimraf('./', function () {
-        console.log('rimraf done')
-        finish()
-      })
-      ;[
-        'addressBook.db',
-        'msg-log.db',
-        'messages.db',
-        'txs.db'
-      ].forEach(function (dbName) {
-        ;[name].forEach(function (name) {
-          togo++
-          leveldown.destroy(TIM_PATH_PREFIX + '-' + dbName, finish)
-        })
-      })
-
-      function finish () {
-        if (--togo === 0)  {
-          isLoaded = false;
-          self.onReloadDB1()
-        }
-      }
+      return self.onReloadDB1()
     })
-    .catch(function(err) {
-      err = err
-    })
+    // var togo = 1;
+    // // this.loadModels()
+    // // var name = me.firstName.toLowerCase();
+    // var self = this
+    // meDriver.destroy()
+    // .then(function() {
+    //   meDriver = null
+    //   driverPromise = null
+
+    //   rimraf('./', function () {
+    //     console.log('rimraf done')
+    //     finish()
+    //   })
+    //   ;[
+    //     'addressBook.db',
+    //     'msg-log.db',
+    //     'messages.db',
+    //     'txs.db'
+    //   ].forEach(function (dbName) {
+    //     ;[name].forEach(function (name) {
+    //       togo++
+    //       leveldown.destroy(TIM_PATH_PREFIX + '-' + dbName, finish)
+    //     })
+    //   })
+
+    //   function finish () {
+    //     if (--togo === 0)  {
+    //       isLoaded = false;
+    //       self.onReloadDB1()
+    //     }
+    //   }
+    // })
+    // .catch(function(err) {
+    //   err = err
+    // })
   },
   onMessageList(params) {
     this.onList(params);
@@ -1817,10 +1822,10 @@ var Store = Reflux.createStore({
     //   console.log(meDriver.name(), 'is ready')
       // d.publishMyIdentity()
 
-      meDriver.identities().createReadStream()
-      .on('data', function (data) {
-        console.log(data)
-      })
+      // meDriver.identities().createReadStream()
+      // .on('data', function (data) {
+      //   console.log(data)
+      // })
       //   var key = IDENTITY + '_' + data.key
       //   var v;
       //   if (me  &&  data.key == me[ROOT_HASH])
@@ -2195,13 +2200,13 @@ var Store = Reflux.createStore({
     // .then(function() {
     //   self.trigger({action: 'reloadDB', list: list});
     // })
-    this.clearDb()
-    .then(function() {
+    // this.clearDb()
+    // .then(function() {
       list = {};
       models = {};
       me = null;
-      return self.loadModels();
-    })
+      return self.loadModels()
+    // })
     .then(function() {
       self.trigger({action: 'reloadDB', models: models});
     })
