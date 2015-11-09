@@ -116,7 +116,7 @@ class AddNewMessage extends Component {
     if (isOrg)
       pushForm = <TouchableHighlight underlayColor='#79AAF2'
                    onPress={this.props.onAddNewPressed.bind(this, true)}>
-                     <Text style={[styles.products, {paddingTop: 7, color: '#ffffff', fontSize: 20}]}>Choose the product</Text>
+                     <Text style={[styles.products, {paddingTop: 7, color: '#ffffff', fontSize: 20}]}>Choose a product</Text>
                  </TouchableHighlight>
     else
       if (me.organization                                                       &&
