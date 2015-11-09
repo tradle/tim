@@ -261,7 +261,12 @@ class NewResource extends Component {
   // setting chosen from the list property on the resource like for ex. Organization on Contact
   setChosenValue(propName, value) {
     var resource = this.state.resource;
-    resource[propName] = value;
+    var id = value[constants.TYPE] + '_' + value[constants.ROOT_HASH]
+    resource[propName] = {
+      id: id,
+      title: utils.getDisplayName(value, utils.getModel(value[constants.TYPE]).value.properties)
+    }
+    // resource[propName] = value;
     var data = this.refs.form.refs.input.state.value;
     if (data) {
       for (var p in data)
@@ -563,6 +568,8 @@ class NewResource extends Component {
       var m = utils.getId(resource[params.prop]).split('_')[0]
       var rModel = utils.getModel(m).value
       label = utils.getDisplayName(resource[params.prop], rModel.properties)
+      if (!label)
+        label = resource[params.prop].title
       style = textStyle
     }
     else {
