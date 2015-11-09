@@ -237,10 +237,13 @@ var styles = StyleSheet.create({
   textContainer: {
     flex: 1,
   },
+  // TODO: remove when you figure out v-centering
+  // HACK FOR VERTICAL CENTERING
   resourceTitle: {
     flex: 1,
     fontSize: 16,
     fontWeight: '400',
+    paddingTop: 18,
     marginBottom: 2,
   },
   description: {
