@@ -46,7 +46,7 @@ var voc = [{
       ref: 'tradle.Country'
     },
     'postalCode': {
-      'type': 'number'
+      'type': 'string'
     },
     'region': {
       'type': 'string'
@@ -652,7 +652,7 @@ var voc = [{
       ref: 'tradle.Country'
     },
     'postalCode': {
-      'type': 'number'
+      'type': 'string'
     },
     'region': {
       'type': 'string'
@@ -1103,7 +1103,7 @@ var voc = [{
       ref: 'tradle.Country'
     },
     'postalCode': {
-      'type': 'number'
+      'type': 'string'
     },
     'region': {
       'type': 'string'
@@ -2215,7 +2215,7 @@ var voc = [{
       'type': 'string'
     },
     'postalCode': {
-      'type': 'number'
+      'type': 'string'
     },
     'country': {
       'type': 'object',
