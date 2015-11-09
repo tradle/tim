@@ -123,7 +123,8 @@ class NewItem extends Component {
         onSubmitEditing: this.onSavePressed.bind(this)
     };
 
-    var options = utils.getFormFields(params);
+    var options = this.getFormFields(params);
+    options.auto = 'placeholders';
     var Model = t.struct(model);
     if (this.state.options) {
       for (var fieldName in this.state.options.fields) {
