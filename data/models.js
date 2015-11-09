@@ -1312,7 +1312,7 @@ var voc = [{
   title: 'Current Account',
   interfaces: ['tradle.Message'],
   subClassOf: 'tradle.FinancialProduct',
-  forms: ['tradle.AboutYou', 'tradle.UtilityBillVerification'],
+  forms: ['tradle.AboutYou', 'tradle.YourMoney', 'tradle.UtilityBillVerification'],
   properties: {
     '_t': {
       'type': 'string',
