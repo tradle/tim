@@ -1435,6 +1435,79 @@ var voc = [{
     },
   },
 },
+{
+  id: 'tradle.JumboMortgage',
+  title: 'Jumbo Mortgage',
+  interfaces: ['tradle.Message'],
+  type: 'tradle.Model',
+  forms: ['tradle.AboutYou', 'tradle.YourMoney', 'tradle.MortgageLoanDetail'],
+  subClassOf: 'tradle.FinancialProduct',
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    from: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    to: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+  },
+},
+{
+  id: 'tradle.Refinancing',
+  title: 'Refinancing',
+  interfaces: ['tradle.Message'],
+  type: 'tradle.Model',
+  forms: ['tradle.AboutYou', 'tradle.YourMoney', 'tradle.MortgageLoanDetail'],
+  subClassOf: 'tradle.FinancialProduct',
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    from: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    to: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+  },
+},
+{
+  id: 'tradle.HomeImprovement',
+  title: 'Home Improvement',
+  interfaces: ['tradle.Message'],
+  type: 'tradle.Model',
+  forms: ['tradle.AboutYou', 'tradle.YourMoney', 'tradle.MortgageLoanDetail'],
+  subClassOf: 'tradle.FinancialProduct',
+  properties: {
+    '_t': {
+      'type': 'string',
+      'readOnly': true
+    },
+    from: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+    to: {
+      type: 'object',
+      readOnly: true,
+      ref: 'tradle.Identity'
+    },
+  },
+},
+
 
 {
   id: 'tradle.HealthInsurance',
