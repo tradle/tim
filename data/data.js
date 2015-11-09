@@ -1270,7 +1270,7 @@ var identities = [
   products: [
     {modelName: 'tradle.Mortgage'},
     {modelName: 'tradle.JumboMortgage'},
-    {modelName: 'tradle.Refinance'},
+    {modelName: 'tradle.Refinancing'},
     {modelName: 'tradle.HomeImprovement'},
   ]
 },
