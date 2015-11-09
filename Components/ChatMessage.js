@@ -24,7 +24,7 @@ class ChatMessage extends Component {
     if (!isMessage  &&  !model.isInterface)
       return <View></View>;
     var resource = this.props.resource;
-    var title = resource.to[constants.TYPE] 
+    var title = resource.to[constants.TYPE]
               ? utils.getDisplayName(resource.to, utils.getModel(resource.to[constants.TYPE]).value.properties)
               : resource.to.title;
     if (resource.message  &&  utils.splitMessage(resource.message).length === 1)
@@ -47,7 +47,7 @@ class ChatMessage extends Component {
           />
         </View>
 
-    // This is the case of when you want to send your friend/customer 
+    // This is the case of when you want to send your friend/customer
     // a verification form that corresponds to his/her needs
     if (model.isInterface)
       return messageField;
@@ -80,11 +80,11 @@ class ChatMessage extends Component {
 var styles = StyleSheet.create({
   view: {
     // backgroundColor: '#efffe5',
-    // borderWidth: 1, 
-    // borderTopColor: '#deeeb4', 
-    // borderLeftColor: '#efffe5', 
-    // borderRightColor: '#efffe5', 
-    // borderBottomColor: '#deeeb4', 
+    // borderWidth: 1,
+    // borderTopColor: '#deeeb4',
+    // borderLeftColor: '#efffe5',
+    // borderRightColor: '#efffe5',
+    // borderBottomColor: '#deeeb4',
     // paddingVertical: 7,
     marginTop: 30
   },
@@ -92,10 +92,10 @@ var styles = StyleSheet.create({
     marginBottom: 5,
     flex: 1,
     alignSelf: 'center',
-    backgroundColor: '#eeeeee', 
-    borderTopColor: '#eeeeee', 
-    borderRightColor: '#eeeeee', 
-    borderLeftColor: '#eeeeee', 
+    backgroundColor: '#eeeeee',
+    borderTopColor: '#eeeeee',
+    borderRightColor: '#eeeeee',
+    borderLeftColor: '#eeeeee',
     borderWidth: 2,
     borderBottomColor: '#cccccc',
   },
