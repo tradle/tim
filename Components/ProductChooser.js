@@ -21,7 +21,18 @@ var {
 class ProductChooser extends Component {
   constructor(props) {
     super(props);
-    var products = utils.getAllSubclasses('tradle.FinancialProduct');
+
+    var products = []
+
+    var orgProducts = this.props.resource.products
+    if (orgProducts) {
+      orgProducts.forEach(function(m) {
+        products.push(utils.getModel(m.modelName).value)
+      })
+
+    }
+    else
+      products = utils.getAllSubclasses('tradle.FinancialProduct');
 
     var dataSource =  new ListView.DataSource({
       rowHasChanged: (row1, row2) => row1 !== row2,
