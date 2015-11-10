@@ -26,7 +26,7 @@ var buttonStyles = Object.freeze({
     // borderRadius: 15,
   },
   row: {
-    flexDirection: 'row', 
+    flexDirection: 'row',
   },
   container: {
     alignSelf: 'center',
@@ -37,16 +37,16 @@ var buttonStyles = Object.freeze({
   buttons: {
     // marginTop: -80,
     // opacity: 0.8,
-    height: 83, 
+    height: 63,
     flexDirection: 'row',
-    backgroundColor: '#a0a0a0', 
+    backgroundColor: '#a0a0a0',
 
-    // backgroundColor: BACKGROUND_COLOR, 
+    // backgroundColor: BACKGROUND_COLOR,
     justifyContent: 'center',
     alignSelf: 'stretch'
   },
   text: {
-    color: '#ffffff', 
+    color: '#ffffff',
     paddingVertical: 10,
     fontWeight: FONT_WEIGHT,
     fontSize: FONT_SIZE,
@@ -55,10 +55,10 @@ var buttonStyles = Object.freeze({
   },
 
   row1: {
-    flexDirection: 'row', 
+    flexDirection: 'row',
     position: 'absolute',
     left: 10,
-    top: 5 
+    top: 5
   },
   icon1: {
     width: 25,
@@ -72,25 +72,25 @@ var buttonStyles = Object.freeze({
   },
   container1: {
     flex: 1,
-    position: 'absolute', 
+    position: 'absolute',
     right: 10
   },
   buttonContent: {
-    padding: 15, 
-    width: 150, 
-    height: 40, 
-    borderRadius: 10, 
-    backgroundColor: BACKGROUND_COLOR, 
-    opacity: 0.5, 
-    borderWidth: 1, 
+    padding: 15,
+    width: 150,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: BACKGROUND_COLOR,
+    opacity: 0.5,
+    borderWidth: 1,
     borderColor: '#466690'
   },
   text1: {
-    color: '#ffffff', 
+    color: '#ffffff',
     fontFamily: 'Avenir Next',
     // fontWeight: '800',
     fontSize: FONT_SIZE_1
-  }  
+  }
 });
 
 module.exports = buttonStyles;
