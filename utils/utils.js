@@ -169,7 +169,7 @@ var utils = {
           if (resource[t]) {
             if (val  &&  val.charAt(val.length - 1).match(/[a-z,]/i))
               val += ' ';
-            val += resource[t];
+            val += (typeof resource[t] === 'object') ? resource[t].title : resource[t];
           }
         }
         else if (val.length  &&  val.indexOf(t) != val.length - 1)
