@@ -1,5 +1,5 @@
 'use strict';
- 
+
 var React = require('react-native');
 var utils = require('../utils/utils');
 var ResourceList = require('./ResourceList');
@@ -46,17 +46,17 @@ class ShowMessageRefList extends Component {
     var isMe = isIdentity ? resource[constants.ROOT_HASH] === utils.getMe()[constants.ROOT_HASH] : true;
     // The profile page for the device owner has 2 more profile specific links: add new identity and switch identity
 
-    if (this.props.resource[constants.TYPE] !== 'tradle.SimpleMessage' && this.props.resource[constants.TYPE] !== 'tradle.Verification')
-      refList.push(
-        <View style={buttonStyles.container}>
-        <TouchableHighlight underlayColor='transparent' onPress={this.showMoreLikeThis.bind(this)}>
-           <View style={{alignItems: 'center'}}>
-             <Icon name='arrow-shrink'  size={35}  color='#ffffff'  style={[buttonStyles.icon, {paddingLeft: 1}]}/>
-             <Text style={buttonStyles.text}>More like this</Text>
-           </View>
-        </TouchableHighlight>
-        </View>
-      );
+    // if (this.props.resource[constants.TYPE] !== 'tradle.SimpleMessage' && this.props.resource[constants.TYPE] !== 'tradle.Verification')
+    //   refList.push(
+    //     <View style={buttonStyles.container}>
+    //     <TouchableHighlight underlayColor='transparent' onPress={this.showMoreLikeThis.bind(this)}>
+    //        <View style={{alignItems: 'center'}}>
+    //          <Icon name='arrow-shrink'  size={35}  color='#ffffff'  style={[buttonStyles.icon, {paddingLeft: 1}]}/>
+    //          <Text style={buttonStyles.text}>More like this</Text>
+    //        </View>
+    //     </TouchableHighlight>
+    //     </View>
+    //   );
 
     for (var p in props) {
       if (isIdentity  &&  !isMe  &&  props[p].allowRoles  &&  props[p].allowRoles === 'me')
@@ -67,23 +67,23 @@ class ShowMessageRefList extends Component {
       if (!icon)
         icon = 'ios-checkmark-empty';
       if (props[p].items.ref === 'tradle.AdditionalInfo') {
-        if (utils.getMe().organization) 
+        if (utils.getMe().organization)
           refList.push(
               <View style={buttonStyles.container}>
                  <TouchableHighlight onPress={() => {
                     var buttons = [{
                       text: 'Cancel',
-                    }, 
+                    },
                     {
                       text: 'OK',
                       onPress: this.props.additionalInfo.bind(this, this.props.resource, props[p])
-                    }];      
+                    }];
                     var to = this.props.resource;
                     AlertIOS.prompt(
                       'Sending ' + resource.title + ' form to ' + utils.getDisplayName(to, utils.getModel(to[constants.TYPE]).value.properties),
                       buttons
                     );
-                     
+
                    }
                  } underlayColor='transparent'>
                    <View style={{alignItems: 'center'}}>
@@ -120,7 +120,7 @@ class ShowMessageRefList extends Component {
              ? (
                 <View  style={{flexDirection: 'row'}}>
                   {refList}
-                </View> 
+                </View>
               )
              : null;
   }
@@ -147,11 +147,11 @@ class ShowMessageRefList extends Component {
   //       model: model,
   //       resource: r,
   //       callback: () => Actions.list({
-  //         modelName: prop.items.ref, 
+  //         modelName: prop.items.ref,
   //         to: this.props.resource,
   //         resource: r
   //       }),
-  //     }      
+  //     }
   //   })
 
   // }
@@ -164,7 +164,7 @@ class ShowMessageRefList extends Component {
       id: 11,
       backButtonTitle: 'Back',
       passProps: {
-        resource: utils.getMe(), 
+        resource: utils.getMe(),
         filter: '',
         isAggregation: true,
         modelName: modelName,
