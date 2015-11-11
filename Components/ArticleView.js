@@ -55,7 +55,7 @@ var styles = StyleSheet.create({
   },
   webView: {
     backgroundColor: '#ffffff',
-    marginTop: 60,
+    marginTop: 50,
     height: 350,
   },
 
