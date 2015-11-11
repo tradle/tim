@@ -404,7 +404,7 @@ var styles = StyleSheet.create({
     flex: 1
   },
   navBar: {
-    marginTop: 16,
+    marginTop: 6,
   },
   navBarText: {
     fontSize: 16,
