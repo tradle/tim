@@ -347,7 +347,7 @@ reactMixin(MessageList.prototype, Reflux.ListenerMixin);
 var styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: 60,
+    marginTop: 50,
     backgroundColor: '#f7f7f7',
   },
   centerText: {
