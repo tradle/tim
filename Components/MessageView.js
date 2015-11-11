@@ -1,5 +1,5 @@
 'use strict';
- 
+
 var React = require('react-native');
 var utils = require('../utils/utils');
 var constants = require('tradle-constants');
@@ -41,14 +41,14 @@ class MessageView extends Component {
     if (params.action === 'addVerification' ||  params.action === 'addAdditionalInfo') {
       this.props.navigator.pop();
       Actions.messageList({
-        modelName: 'tradle.Message', 
+        modelName: 'tradle.Message',
         resource: params.resource
-      });    
+      });
     }
   }
   getRefResource(resource, prop) {
     var model = utils.getModel(this.props.resource[constants.TYPE]).value;
-        
+
     this.state.prop = prop;
     this.state.propValue = utils.getId(resource.id);
     Actions.getItem(resource.id);
@@ -57,7 +57,7 @@ class MessageView extends Component {
     var resource = this.state.resource;
     var modelName = resource[constants.TYPE];
     var model = utils.getModel(modelName).value;
-    var embed = /*modelName === 'tradle.AssetVerification' 
+    var embed = /*modelName === 'tradle.AssetVerification'
               ? <View style={{marginLeft: 15}}>
                   <Text style={{fontSize: 20, paddingTop: 15, paddingBottom: 15, color: '#2E3B4E'}}>Verified By</Text>
                   <Image style={styles.imageVerifiedBy} source={{uri: 'http://upload.wikimedia.org/wikipedia/en/thumb/7/7e/Barclays_logo.svg/391px-Barclays_logo.svg.png'}}/>
@@ -66,14 +66,14 @@ class MessageView extends Component {
                   <Text style={self.state.embedHeight}>{"<iframe width='420' height='315' src='https://tradle.io/embed/aifSjuyeE5M' frameborder='0' allowfullscreen></iframe>"}</Text>
                   <View style={{height: 50}} />
                 </View>
-              :*/ <View></View>  
+              :*/ <View></View>
     var date = utils.getFormattedDate(new Date(resource.time));
     var inRow = resource.photos ? resource.photos.length : 0;
     if (inRow  &&  inRow > 4)
       inRow = 5;
-    var actionPanel = 
+    var actionPanel =
         <View style={buttonStyles.buttons}>
-          <ShowMessageRefList  resource={resource} navigator={this.props.navigator} additionalInfo={this.additionalInfo.bind(this)}/>    
+          <ShowMessageRefList  resource={resource} navigator={this.props.navigator} additionalInfo={this.additionalInfo.bind(this)}/>
         </View>
         // <FromToView resource={resource} navigator={this.props.navigator} />
         // <MoreLikeThis resource={resource} navigator={this.props.navigator}/>
@@ -87,7 +87,7 @@ class MessageView extends Component {
         <VerificationButton  resource={resource} verify={this.verify.bind(this)} verificationList={this.showResources.bind(this)}/>
         <View style={{marginTop: -3}}>
           <PhotoList photos={resource.photos} resource={resource} isView={true} navigator={this.props.navigator} numberInRow={inRow}/>
-          <View style={styles.rowContainer}>    
+          <View style={styles.rowContainer}>
             <View><Text style={styles.itemTitle}>{resource.message}</Text></View>
             <ShowPropertiesView resource={resource} excludedProperties={['tradle.Message.message', 'time', 'photos']} showRefResource={this.getRefResource.bind(this)}/>
             {embed}
@@ -116,7 +116,7 @@ class MessageView extends Component {
   showEmbed() {
     this.setState({embedHeight: {height: 60, padding: 5, marginRight: 10, borderColor: '#2E3B4E', backgroundColor: '#eeeeee'}});
   }
-  
+
   verify() {
     var resource = this.props.resource;
     var model = utils.getModel(resource[constants.TYPE]).value;
@@ -133,7 +133,7 @@ class MessageView extends Component {
         id: from.id,
         title: from.title
       },
-      from: { 
+      from: {
         id: me[constants.TYPE] + '_' + me[constants.ROOT_HASH] + '_' + me[constants.CUR_HASH],
         title: utils.getDisplayName(me, utils.getModel(me[constants.TYPE]).value.properties)
       },
@@ -141,7 +141,7 @@ class MessageView extends Component {
     }
     verification[constants.TYPE] = verificationModel;
 
-    if (verificationModel === 'tradle.Verification') 
+    if (verificationModel === 'tradle.Verification')
       Actions.addVerification(verification);
     else {
       this.props.navigator.replace({
@@ -162,14 +162,14 @@ class MessageView extends Component {
   // createVerification(resource) {
   //   Actions.addVerification(resource, true);
   // }
-  
+
   onPress(url) {
     this.props.navigator.push({
       id: 7,
       component: ArticleView,
       passProps: {url: url}
     });
-  } 
+  }
 
   additionalInfo(resource, prop, msg) {
     var rmodel = utils.getModel(resource[constants.TYPE]).value;
@@ -193,7 +193,7 @@ reactMixin(MessageView.prototype, ResourceViewMixin);
 
 var styles = StyleSheet.create({
   container: {
-    marginTop: 60,
+    marginTop: 50,
     flex: 1,
   },
   itemTitle: {
