@@ -124,15 +124,15 @@ class ResourceList extends Component {
     //   list[rnd].online = true;
     // }
     if (type === constants.TYPES.IDENTITY) {
-      // var routes = this.props.navigator.getCurrentRoutes();
-      // if (routes.length == 2) {
+      // // var routes = this.props.navigator.getCurrentRoutes();
+      // // if (routes.length == 2) {
         var l = []
         list.forEach(function(r) {
           if (!r.organization)
             l.push(r)
         })
         list = l
-      // }
+      // // }
     }
 
     this.setState({
@@ -638,7 +638,7 @@ var styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f7f7f7',
     // backgroundColor: 'white',
-    marginTop: 60
+    marginTop: 50
   },
   centerText: {
     alignItems: 'center',
