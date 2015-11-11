@@ -9,7 +9,6 @@
   "organization": {
     "title": "Safe Bank",
     "id": "tradle.Organization_71e4b7cd6c11ab7221537275988f113a879029sa_71e4b7cd6c11ab7221537275988f113a879029sa",
-    "photo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAACgCAIAAADGnbT+AAAABGdBT…VYdGRhdGU6bW9kaWZ5ADIwMTUtMTEtMDlUMTc6Mjg6MTYrMDA6MDAr7o7MAAAAAElFTkSuQmCC"
   },
   "pubkeys": [
     {
@@ -369,7 +368,6 @@
   "organization": {
     "title": "Digibank",
     "id": "tradle.Organization_96e460ca282d62e41d4b59c85b212d102d7a5adi_96e460ca282d62e41d4b59c85b212d102d7a5adi",
-    "photo": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEB9AH0AAD/7Q8sUGhvdG9zaG9wIDMuMAA4…EBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBF//9k="
   },
   "_t": "tradle.Identity",
   "pubkeys": [
@@ -819,8 +817,6 @@
     }
   ]
 },
-
-
 {
   "securityCode": "1234567",
   "firstName": "Edwin",
@@ -831,8 +827,8 @@
   },
   "_t": "tradle.Identity",
   "_z": "a780dbd87e6b44b50a98ac89a19defa4137d017137a3cd7e0a8f9f0536176793",
-  "_r": "7433dd127cd7e9dfd41e82162116fa480428d3f2",
-  "_c": "7433dd127cd7e9dfd41e82162116fa480428d3f2",
+  "_r": "dc5298f560a7a5bac05a049ea0af9caa5f5a493e",
+  "_c": "dc5298f560a7a5bac05a049ea0af9caa5f5a493e",
   "time": 1445164686786,
   "pubkeys": [
     {
