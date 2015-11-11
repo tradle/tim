@@ -129,7 +129,7 @@ reactMixin(ResourceView.prototype, ResourceViewMixin);
 
 var styles = StyleSheet.create({
   container: {
-    marginTop: 64,
+    marginTop: 50,
     flex: 1,
   },
   photoBG: {
