@@ -14,8 +14,10 @@ var RowMixin = require('./RowMixin');
 var extend = require('extend')
 var formDefaults = require('../data/formDefaults')
 var reactMixin = require('react-mixin');
+var STRUCTURED_MESSAGE_BORDER = '#3260a5' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
 var STRUCTURED_MESSAGE_COLOR = '#5482C7' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
 var VERIFICATION_BG = '#FBFFE5' //'#F6FFF0';
+var newProduct = require('../data/newProduct.json')
 var {
   Image,
   StyleSheet,
@@ -75,7 +77,14 @@ class MessageRow extends Component {
       isNewProduct = ret ? ret.isNewProduct : null
       isConfirmation = ret ? ret.isConfirmation : null
     }
-
+    if (isNewProduct) {
+      if (to  &&  to.photos) {
+        var uri = utils.getImageUri(to.photos[0].url);
+        ownerPhoto = <Image source={{uri: uri}} style={styles.msgImage} />
+        hasOwnerPhoto = true;
+        isMyMessage = false
+      }
+    }
     var photoUrls = [];
     var photoListStyle = {height: 3};
     var addStyle, inRow;
@@ -91,7 +100,7 @@ class MessageRow extends Component {
       var fromHash = resource.from.id;
       if (isMyMessage) {
         if (!noMessage)
-          addStyle = isNewProduct ? styles.myAdCell : styles.myCell;
+          addStyle = /*isNewProduct ? styles.myAdCell :*/ styles.myCell;
       }
       else {
         if (!model.style) {
@@ -177,12 +186,12 @@ class MessageRow extends Component {
       var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? (isNewProduct ? 'center' : 'flex-end') : 'flex-start'};
       if (resource.message) {
         if (resource.message.charAt(0) === '['  ||  resource.message.length > 30) {
-          if (!isNewProduct)
+          // if (!isNewProduct)
             viewStyle.width = isMyMessage || !hasOwnerPhoto ? 305 : 325;
-          else {
-            viewStyle.alignSelf = 'stretch'
-            viewStyle.justifyContent = 'center'
-          }
+          // else {
+          //   viewStyle.alignSelf = 'stretch'
+          //   viewStyle.justifyContent = 'center'
+          // }
         }
       }
       if (!isSimpleMessage)
@@ -440,6 +449,15 @@ class MessageRow extends Component {
       if (properties[v].ref) {
         if (resource[v]) {
           vCols.push(self.getPropRow(properties[v], resource[v].title || resource[v]))
+          // var dn = resource[v].title;
+          // if (!dn) {
+          //   if (typeof resource[v] !== Object)
+          //     dn = resource[v]
+          //   else
+          //     dn = utils.getDisplayName(resource[v], utils.getModel(resource[v][constants.TYPE]).value.properties)
+          // }
+
+          // vCols.push(self.getPropRow(dn))
           first = false;
         }
         return;
@@ -488,14 +506,21 @@ class MessageRow extends Component {
                          <Icon style={styles.linkIcon} size={20} name={'ios-arrow-right'} />
                        </View>
 
-            var msg = isNewProduct
-                    ? <View>
-                         {link}
-                      </View>
-                    : <View>
-                         <Text style={style}>{msgParts[0]}</Text>
-                         {link}
-                       </View>
+            var msg;
+            if (isNewProduct) {
+              var newMsg = newProduct.msg.replace('{firstName}', utils.getMe().firstName);
+              newMsg = newMsg.replace('{product}', msgModel.title)
+
+              msg = <View>
+                       <Text style={[style, {color: '#000000'}]}>{newMsg}</Text>
+                    </View>
+                       // {link}
+            }
+            else
+               msg = <View>
+                       <Text style={style}>{msgParts[0]}</Text>
+                       {link}
+                     </View>
             vCols.push(msg);
             return;
           }
@@ -558,20 +583,26 @@ class MessageRow extends Component {
     }
   }
   getPropRow(prop, val, style, isVerification) {
-    if (isVerification)
+    var style = {flexDirection: 'row'}
+    if (isVerification) {
+      if (!this.props.isAggregation)
+        style = [style, {borderWidth: 0.5, paddingVertical: 3, borderBottomColor: '#eeeeee', borderTopColor: VERIFICATION_BG, borderLeftColor: VERIFICATION_BG, borderRightColor: VERIFICATION_BG}]
       return (
-        <View style={{flexDirection: 'row'}}>
+        <View style={style}>
           <View style={{flex: 1, flexDirection: 'column'}}>
             <Text style={[styles.verySmallLetters, {color: '#555555'}]}>{prop.title}</Text>
           </View>
           <View style={{flex: 1, flexDirection: 'column'}}>
-            <Text style={styles.verySmallLetters}>{val}</Text>
+            <Text style={styles.verySmallLetters}>{val + (prop.units ? ' ' + prop.units : '')}</Text>
           </View>
         </View>
     )
-    else
+    }
+    else {
+      if (!this.propsisAggregation)
+        style = [style, {borderWidth: 0.5, paddingVertical: 3, borderBottomColor: STRUCTURED_MESSAGE_BORDER, borderTopColor: STRUCTURED_MESSAGE_COLOR, borderLeftColor: STRUCTURED_MESSAGE_COLOR, borderRightColor: STRUCTURED_MESSAGE_COLOR}]
       return (
-        <View style={{flexDirection: 'row'}}>
+        <View style={style}>
           <View style={{flex: 1, flexDirection: 'column'}}>
             <Text style={[styles.descriptionW, {color: '#FFFFEE'}]}>{prop.title}</Text>
           </View>
@@ -579,7 +610,9 @@ class MessageRow extends Component {
             <Text style={[styles.descriptionW, {fontWeight: '600'}]}>{val}</Text>
           </View>
        </View>
-    )
+      )
+    }
+
   }
   // shareDocs() {
   //   this.props.navigator.push({
