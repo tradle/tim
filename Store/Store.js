@@ -231,7 +231,7 @@ var Store = Reflux.createStore({
     //   'http://127.0.0.1:44444/achmea/send'
     // )
 
-    var rabobankHash = '7433dd127cd7e9dfd41e82162116fa480428d3f2'
+    var rabobankHash = 'dc5298f560a7a5bac05a049ea0af9caa5f5a493e'
     messenger.addRecipient(
       rabobankHash,
       'http://127.0.0.1:44444/rabobank/send'
@@ -259,6 +259,12 @@ var Store = Reflux.createStore({
     //   dllHash,
     //   'http://127.0.0.1:44444/dll/send'
     // )
+    var digiHash = '4ab4e9953c2a10fbc9bc884bd447b1003540995c'
+    messenger.addRecipient(
+      digiHash,
+      'http://127.0.0.1:44444/digibank/send'
+    )
+
     var reliaHash = '178cbc9f29c68728e56122d4981c34439dbf77cc'
     messenger.addRecipient(
       reliaHash,
@@ -1676,8 +1682,9 @@ var Store = Reflux.createStore({
       var all = allMyIdentities.value.allIdentities
       var curId = allMyIdentities.value.currentIdentity
       all.forEach(function(id) {
-        if (id.id === curId)
-          mePriv = id.privkeys
+        if (id.id === curId) {
+          mePriv = list[id.id].value.privkeys
+        }
       })
     }
     if (!mePub  &&  !mePriv) {
@@ -1739,8 +1746,13 @@ var Store = Reflux.createStore({
                             formatted: me.firstName + (me.lastName ? ' ' + me.lastName : '')
                           })
                           .set('_z', me[NONCE] || this.getNonce())
-      if (me.organization)
-        meIdentity.set('organization', me.organization)
+      if (me.organization) {
+        var org = {
+          id: me.organization.id,
+          title: me.organization.title
+        }
+        meIdentity.set('organization', org)
+      }
 
       me.pubkeys.forEach(meIdentity.addKey, meIdentity)
 
