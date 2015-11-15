@@ -29,8 +29,13 @@ class NewItem extends Component {
     this.state = {
       selectedAssets: {}
     }
+    //
+    if (this.props.resource[this.props.metadata.name])
+      this.state.data = this.props.resource[this.props.metadata.name]
+    //
     var currentRoutes = this.props.navigator.getCurrentRoutes();
     var currentRoutesLength = currentRoutes.length;
+
     currentRoutes[currentRoutesLength - 1].onRightButtonPress = {
       stateChange: this.onSavePressed.bind(this)
     };
@@ -122,6 +127,8 @@ class NewItem extends Component {
         template: this.props.template.bind(this),
         onSubmitEditing: this.onSavePressed.bind(this)
     };
+    if (this.state.data)
+      params.data = this.state.data[0]
 
     var options = this.getFormFields(params);
     options.auto = 'placeholders';
@@ -162,7 +169,7 @@ reactMixin(NewItem.prototype, NewResourceMixin);
 var styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: 60
+    marginTop: 50
   },
   imageContainer: {
     flex: 1,
