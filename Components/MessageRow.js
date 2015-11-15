@@ -339,9 +339,8 @@ class MessageRow extends Component {
         <View style={{width: 30}} />
         <View style={[addStyle ? [styles.textContainer, addStyle] : styles.textContainer]}>
           <View style={{flex: 1}}>
-            <View style={{backgroundColor: '#CCE0FF', paddingTop: 5, paddingHorizontal: 7, marginTop: -7, marginHorizontal: -7}}>
+            <View style={{backgroundColor: '#c6e2ef', paddingVertical: 5, borderRadius: 5, paddingHorizontal: 7, marginTop: -7, marginHorizontal: -7}}>
               <Text style={{color: '#467E9C'}}>{msg}</Text>
-              <View style={[styles.separator, {marginHorizontal: -7}]} />
             </View>
             {vtt}
          </View>
