@@ -66,14 +66,15 @@
     "stream-http": "^1.3.0",
     "string_decoder": "^0.10.31",
     "tcomb": "^1.0.3",
-    "tcomb-form-native": "0.2.4",
+    "tcomb-form-native": "^0.2.4",
     "tcomb-validation": "^1.0.4",
     "tim": "tradle/tim#talko2",
     "timers-browserify": "^1.4.1",
-    "tradle-constants": "git://github.com/mvayngrib/tradle-constants.git",
+    "tradle-constants": "^1.1.3",
     "tradle-test-helpers": "tradle/test-helpers",
     "tradle-utils": "^0.1.5",
     "tty-browserify": "0.0.0",
+    "typeforce": "^1.5.5",
     "url": "^0.10.3",
     "util": "^0.10.3",
     "utp": "mvayngrib/utp#6ebad0d",
@@ -104,5 +105,8 @@
     "timers": "timers-browserify",
     "tty": "tty-browserify",
     "vm": "vm-browserify"
+  },
+  "devDependencies": {
+    "memdown": "^1.1.0"
   }
 }
