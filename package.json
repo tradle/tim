@@ -71,6 +71,7 @@
     "tim": "tradle/tim#talko2",
     "timers-browserify": "^1.4.1",
     "tradle-constants": "^1.1.3",
+    "tradle-models": "tradle/models",
     "tradle-test-helpers": "tradle/test-helpers",
     "tradle-utils": "^0.1.5",
     "tty-browserify": "0.0.0",

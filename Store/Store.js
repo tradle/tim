@@ -11,7 +11,7 @@ var extend = require('extend');
 var Q = require('q');
 var AddressBook = require('NativeModules').AddressBook;
 var sampleData = require('../data/data');
-var voc = require('../data/models');
+var voc = require('tradle-models');
 
 var myIdentity = require('../data/myIdentity.json');
 var welcome = require('../data/welcome.json');
@@ -2241,7 +2241,7 @@ var Store = Reflux.createStore({
   loadModels() {
     var batch = [];
 
-    voc.getModels().forEach(function(m) {
+    voc.forEach(function(m) {
       if (!m[ROOT_HASH])
         m[ROOT_HASH] = sha(m);
       batch.push({type: 'put', key: m.id, value: m});
