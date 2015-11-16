@@ -183,7 +183,7 @@ class TimHome extends Component {
                     style={{height:480, backgroundColor: '#2E3B4E'}}>
                     <View style={styles.container}>
                       <View>
-                        <Image style={styles.thumb} source={require('image!Tradle')}></Image>
+                        <Image style={styles.thumb} source={require('../img/Tradle.png')}></Image>
                         <Text style={styles.tradle}>Tradle</Text>
                       </View>
                     </View>
@@ -229,7 +229,7 @@ class TimHome extends Component {
                 underlayColor='transparent' onPress={this.showContactsOrRegister.bind(this)}>
             <View style={styles.container}>
               <View>
-                <Image style={styles.thumb} source={require('image!Tradle')}></Image>
+                <Image style={styles.thumb} source={require('../img/Tradle.png')}></Image>
                 <Text style={styles.tradle}>Tradle</Text>
               </View>
             </View>

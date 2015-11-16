@@ -130,7 +130,7 @@ class AddNewMessage extends Component {
       pushForm = <View style={{marginLeft: 10}}/>
           // <TouchableHighlight style={{paddingRight: 5}} underlayColor='#eeeeee'
           //   onPress={this.props.onAddNewPressed.bind(this)}>
-          //      <Image source={require('image!edit')} style={[styles.image]} />
+          //      <Image source={require('../img/edit.png')} style={[styles.image]} />
           // </TouchableHighlight>
     var chat = isOrg
              ? <View />
