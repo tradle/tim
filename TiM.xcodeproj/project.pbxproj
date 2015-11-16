@@ -26,14 +26,12 @@
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 		9B01D5141B8C892800657C81 /* UIImagePickerManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B01D5131B8C892800657C81 /* UIImagePickerManager.m */; };
 		9B072ACB1BCBF891003DAFF0 /* libUdpSockets.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B072ACA1BCBF888003DAFF0 /* libUdpSockets.a */; };
-		9B0F9B651BEC3ABB00441898 /* libRNBlur.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B0F9B641BEC3AB400441898 /* libRNBlur.a */; };
 		9B13CD771B7044C90030EDE0 /* libBVLinearGradient.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B13CD661B7044970030EDE0 /* libBVLinearGradient.a */; };
 		9B13CD7E1B7919750030EDE0 /* libRNVectorIcons.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B13CD7D1B7919600030EDE0 /* libRNVectorIcons.a */; };
 		9B1B84D91BA751AE00D0AE18 /* Ionicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9B1B84D81BA751AE00D0AE18 /* Ionicons.ttf */; };
 		9B3ADDF11B5E8A3800B6594A /* libRNSearchBar.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B3ADDF01B5E8A3300B6594A /* libRNSearchBar.a */; };
 		9B3DAD271B999F42000702AD /* RCTLinkingManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B3DAD251B999F42000702AD /* RCTLinkingManager.m */; };
 		9B8B70D11BA75C1800E8128E /* FontAwesome.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9B8B70D01BA75C1800E8128E /* FontAwesome.ttf */; };
-		9BBB57251BEC363700BAEE50 /* libRNOverlay.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BBB57211BEC362300BAEE50 /* libRNOverlay.a */; };
 		9BCC4DB81B4894100071A39A /* libRNKeyboardEvents.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BCC4DB71B4894010071A39A /* libRNKeyboardEvents.a */; };
 		9BCC4DC21B4894400071A39A /* libRCTAddressBook.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BCC4DBF1B48943A0071A39A /* libRCTAddressBook.a */; };
 /* End PBXBuildFile section */
@@ -244,12 +242,10 @@
 				00C302E81ABCBA2D00DB3ED1 /* libRCTImage.a in Frameworks */,
 				9BCC4DC21B4894400071A39A /* libRCTAddressBook.a in Frameworks */,
 				9BCC4DB81B4894100071A39A /* libRNKeyboardEvents.a in Frameworks */,
-				9B0F9B651BEC3ABB00441898 /* libRNBlur.a in Frameworks */,
 				00C302E91ABCBA2D00DB3ED1 /* libRCTNetwork.a in Frameworks */,
 				139105C61AF99C1200B5F7CC /* libRCTSettings.a in Frameworks */,
 				9B13CD7E1B7919750030EDE0 /* libRNVectorIcons.a in Frameworks */,
 				9B3ADDF11B5E8A3800B6594A /* libRNSearchBar.a in Frameworks */,
-				9BBB57251BEC363700BAEE50 /* libRNOverlay.a in Frameworks */,
 				9B13CD771B7044C90030EDE0 /* libBVLinearGradient.a in Frameworks */,
 				832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */,
 				00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */,
