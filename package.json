@@ -108,6 +108,7 @@
     "vm": "vm-browserify"
   },
   "devDependencies": {
+    "findit": "^2.0.0",
     "memdown": "^1.1.0"
   }
 }
