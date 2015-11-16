@@ -39,7 +39,7 @@
     "q-level": "~1.1.2",
     "querystring-es3": "^0.2.1",
     "react-mixin": "~1.2.2",
-    "react-native": "facebook/react-native#v0.11.0",
+    "react-native": "facebook/react-native#v0.14.2",
     "react-native-addressbook": "^1.1.5",
     "react-native-barcode": "^0.2.1",
     "react-native-camera": "^0.3.8",
