@@ -1,0 +1,3 @@
+rootProject.name = 'Identity'
+
+include ':app'

@@ -182,13 +182,13 @@ class TimHome extends Component {
     var d = Device
 
   	var spinner =  <View style={styles.scroll}>
-          <Image source={require('image!bg')} style={{position:'absolute', left: 0, top: 0, width: d.width, height: d.height}} />
+          <Image source={require('../img/bg.png')} style={{position:'absolute', left: 0, top: 0, width: d.width, height: d.height}} />
           <ScrollView
             scrollEnabled={false}
             style={{height:480}}>
             <View style={styles.container}>
               <View>
-                <Image style={styles.thumb} source={require('image!TradleW')}></Image>
+                <Image style={styles.thumb} source={require('../img/TradleW.png')}></Image>
                 <Text style={styles.tradle}>Tradle</Text>
               </View>
             </View>
@@ -227,7 +227,7 @@ class TimHome extends Component {
     StatusBarIOS.setHidden(true);
     return (
       <View style={styles.scroll}>
-      <Image source={require('image!bg')} style={{position:'absolute', left: 0, top: 0, width: d.width, height: d.height}} />
+      <Image source={require('../img/bg.png')} style={{position:'absolute', left: 0, top: 0, width: d.width, height: d.height}} />
         <ScrollView
           scrollEnabled={false}
           style={{height:480}}
@@ -236,7 +236,7 @@ class TimHome extends Component {
                 underlayColor='transparent' onPress={this.showContactsOrRegister.bind(this)}>
             <View style={styles.container}>
               <View>
-                <Image style={styles.thumb} source={require('image!TradleW')}></Image>
+                <Image style={styles.thumb} source={require('../img/Tradle.png')}></Image>
                 <Text style={styles.tradle}>Tradle</Text>
               </View>
             </View>

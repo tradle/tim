@@ -466,7 +466,7 @@ class ResourceList extends Component {
   }
         // <TouchableHighlight underlayColor='transparent' onPress={this.showBanks.bind(this)}>
         //   <View>
-        //     <Image source={require('image!banking')} style={styles.image} />
+        //     <Image source={require('../img/banking.png')} style={styles.image} />
         //   </View>
         // </TouchableHighlight>
       // <View>
@@ -592,7 +592,7 @@ class ResourceList extends Component {
               <TouchableHighlight underlayColor='transparent' onPress={this.showBanks.bind(this)}>
                 <View style={styles.row}>
                   <View>
-                    <Image source={require('image!banking')} style={styles.cellImage} />
+                    <Image source={require('../img/banking.png')} style={styles.cellImage} />
                   </View>
                   <View style={styles.textContainer} key={this.props.key + '2'}>
                     <Text style={styles.resourceTitle}>Official Accounts</Text>
