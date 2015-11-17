@@ -138,7 +138,7 @@ class MessageList extends Component {
       parentMeta: model,
       passProps: {resource: resource},
     }
-    this.props.navigator.push(MyRouter.getRoute(route));
+    this.props.navigator.push(require('../router/MyRouter').getRoute(route));
   }
 
   onSearchChange(text) {
@@ -253,37 +253,38 @@ class MessageList extends Component {
     var currentRoutes = self.props.navigator.getCurrentRoutes();
     var resource = this.props.resource
     // if (resource.name === 'Lloyds') {
-      var currentRoutes = self.props.navigator.getCurrentRoutes();
-      this.props.navigator.push(MyRouter.getRoute({
-        title: 'Financial Product',
-        routeName: 'ProductChooser',
-        sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+    var currentRoutes = self.props.navigator.getCurrentRoutes();
+    var route = {
+      title: 'Financial Product',
+      routeName: 'ProductChooser',
+      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      backButtonTitle: 'Back',
+      passProps: {
+        resource: resource,
+        returnRoute: currentRoutes[currentRoutes.length - 1],
+        callback: this.props.callback
+      },
+      rightButtonTitle: 'ios-plus',
+      onRightButtonPress: {
+        title: 'New product',
+        routeName: 'NewResource',
         backButtonTitle: 'Back',
+        titleTextColor: '#7AAAC3',
+        rightButtonTitle: 'Done',
         passProps: {
-          resource: resource,
-          returnRoute: currentRoutes[currentRoutes.length - 1],
-          callback: this.props.callback
-        },
-        rightButtonTitle: 'ion|plus',
-        onRightButtonPress: {
-          title: 'New product',
-          routeName: 'NewResource',
-          backButtonTitle: 'Back',
-          titleTextColor: '#7AAAC3',
-          rightButtonTitle: 'Done',
-          passProps: {
-            model: utils.getModel('tradle.NewMessageModel').value,
-            // callback: this.modelAdded.bind(this)
-          }
+          model: utils.getModel('tradle.NewMessageModel').value,
+          // callback: this.modelAdded.bind(this)
         }
-      }));
+      }
+    }
+
+    this.props.navigator.push(require('../router/MyRouter').getRoute(route));
     //   return;
     // }
 /*
-    this.props.navigator.push({
+    this.props.navigator.push(MyRouter.getRoute({
       title: utils.makeLabel(model.title) + ' type',
-      id: 2,
-      component: ResourceTypesScreen,
+      routeName: 'ResourceTypesScreen',
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       backButtonTitle: 'Chat',
       passProps: {
@@ -293,7 +294,7 @@ class MessageList extends Component {
         sendForm: sendForm,
         callback: this.props.callback
       },
-      rightButtonTitle: 'ion|plus',
+      rightButtonTitle: 'ion-plus',
       onRightButtonPress: {
         id: 4,
         title: 'New model url',
@@ -306,7 +307,7 @@ class MessageList extends Component {
           callback: this.modelAdded.bind(this)
         }
       }
-    });
+    }));
 */
   }
   modelAdded(resource) {

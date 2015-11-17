@@ -124,17 +124,15 @@ class NewResource extends Component {
              ? this.props.navigator.replace
              : this.props.navigator.replacePrevious
 
-    navigateTo({
-      id: 3,
+    navigateTo(MyRouter.getRoute({
       title: title,
-      component: ResourceView,
+      routeName: 'ResourceView',
       titleTextColor: '#7AAAC3',
       rightButtonTitle: 'Edit',
       backButtonTitle: 'Back',
       onRightButtonPress: {
         title: title,
-        id: 4,
-        component: NewResource,
+        routeName: 'NewResource',
         rightButtonTitle: 'Done',
         backButtonTitle: 'Back',
         titleTextColor: '#7AAAC3',
@@ -146,7 +144,7 @@ class NewResource extends Component {
       passProps: {
         resource: resource
       }
-    });
+    }))
     if (currentRoutesLength != 2)
       this.props.navigator.pop();
   }
@@ -333,8 +331,8 @@ class NewResource extends Component {
       this.showChoice();
       return;
     }
-    this.props.navigator.push({
-      id: 6,
+    var route = {
+      routeName: 'NewItem',
       title: 'Add new ' + bl.title,
       backButtonTitle: 'Back',
       component: NewItem,
@@ -351,7 +349,8 @@ class NewResource extends Component {
         parentMeta: this.props.parentMeta,
         onAddItem: this.onAddItem.bind(this)
       }
-    });
+    }
+    this.props.navigator.push(require('../router/MyRouter').getRoute(route));
   }
   showChoice() {
     var self = this;

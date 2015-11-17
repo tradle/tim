@@ -10,6 +10,7 @@ var myStyles = require('../styles/styles');
 var constants = require('tradle-constants');
 var NewResourceMixin = require('./NewResourceMixin');
 var reactMixin = require('react-mixin');
+var UIImagePickerManager = require('NativeModules').UIImagePickerManager;
 
 var Form = t.form.Form;
 Form.stylesheet = myStyles;
