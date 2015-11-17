@@ -120,11 +120,7 @@ class NewResource extends Component {
     }
     var currentRoutes = self.props.navigator.getCurrentRoutes();
     var currentRoutesLength = currentRoutes.length;
-    var navigateTo = (currentRoutesLength == 2)
-             ? this.props.navigator.replace
-             : this.props.navigator.replacePrevious
-
-    navigateTo(MyRouter.getRoute({
+    var route = {
       title: title,
       routeName: 'ResourceView',
       titleTextColor: '#7AAAC3',
@@ -144,9 +140,13 @@ class NewResource extends Component {
       passProps: {
         resource: resource
       }
-    }))
-    if (currentRoutesLength != 2)
+    }
+    if (currentRoutesLength == 2)
+      this.props.navigator.replace(MyRouter.getRoute(route))
+    else {
+      this.props.navigator.replacePrevious(MyRouter.getRoute(route))
       this.props.navigator.pop();
+    }
   }
   onSavePressed() {
     if (this.state.submitted)
