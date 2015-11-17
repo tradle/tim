@@ -140,7 +140,10 @@ var Store = Reflux.createStore({
 
     this.ready = intermediate
     .then(function () {
-      return self.loadMyResources()
+      return self.getMe()
+    })
+    .then(function(value) {
+      self.loadMyResources()
     })
     .then(function() {
       // console.timeEnd('loadMyResources')
@@ -162,6 +165,20 @@ var Store = Reflux.createStore({
           self.initIdentity(me)
         })
     }
+  },
+  getMe() {
+    var self = this
+    return db.get(MY_IDENTITIES_MODEL + '_1')
+    .then(function(value) {
+      if (value)
+        return db.get(value.currentIdentity)
+    })
+    .then (function(value) {
+      me = value
+    })
+    .catch(function(err) {
+      return self.loadModels()
+    })
   },
   createFromIdentity(r) {
     var rr = {};
@@ -351,6 +368,7 @@ var Store = Reflux.createStore({
   onStart() {
     var self = this;
     this.ready.then(function() {
+      isLoaded = true
       self.trigger({
         action: 'start',
         models: models,
@@ -1682,6 +1700,7 @@ var Store = Reflux.createStore({
       all.forEach(function(id) {
         if (id.id === curId) {
           mePriv = list[id.id].value.privkeys
+          mePub = list[id.id].value.pubkeys
         }
       })
     }
@@ -2106,25 +2125,26 @@ var Store = Reflux.createStore({
     // console.time('dbStream')
     return db.createReadStream()
     .on('data', function(data) {
-       if (data.value.type === 'tradle.Model') {
-         models[data.key] = data;
-         self.setPropertyNames(data.value.properties);
-       }
-       else {
-         if (!myId  &&  data.key === MY_IDENTITIES_MODEL + '_1') {
-           myId = data.value.currentIdentity;
-           if (list[myId])
-             me = list[myId].value;
-         }
-         if (!me  &&  myId  && data.key == myId)
-           me = data.value;
-         if (data.value[TYPE] === IDENTITY) {
+      if (data.value.type === 'tradle.Model') {
+        models[data.key] = data;
+        self.setPropertyNames(data.value.properties);
+      }
+      else {
+        isLoaded = true
+        if (!myId  &&  data.key === MY_IDENTITIES_MODEL + '_1') {
+          myId = data.value.currentIdentity;
+          if (list[myId])
+            me = list[myId].value;
+        }
+        if (!me  &&  myId  && data.key == myId)
+          me = data.value;
+        if (data.value[TYPE] === IDENTITY) {
           if (data.value.securityCode)
             employees[data.value.securityCode] = data.value
-         }
-         list[data.key] = data;
-       }
-     })
+        }
+        list[data.key] = data;
+      }
+    })
     .on('close', function() {
       if (me  &&  me.organization) {
         if (me.securityCode) {
