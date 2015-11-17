@@ -1014,7 +1014,8 @@ var Store = Reflux.createStore({
       list = {};
       models = {};
       me = null;
-      return self.loadModels()
+      return
+      // return self.loadModels()
     })
     .then(function() {
       self.trigger({action: 'reloadDB', models: models});
@@ -1624,9 +1625,6 @@ var Store = Reflux.createStore({
       list[iKey] = {key: iKey, value: me};
       if (mid)
         list[MY_IDENTITIES_MODEL + '_1'] = {key: MY_IDENTITIES_MODEL + '_1', value: mid};
-      return self.loadDB(db);
-    })
-    .then(function () {
       self.loadResources();
       return self.initIdentity(me)
     })
@@ -2187,11 +2185,13 @@ var Store = Reflux.createStore({
     var batch = [];
 
     if (loadTest) {
-      voc.getModels().forEach(function(m) {
-        if (!m[ROOT_HASH])
-          m[ROOT_HASH] = sha(m);
-        batch.push({type: 'put', key: m.id, value: m});
-      });
+      if (utils.isEmpty(models)) {
+        voc.getModels().forEach(function(m) {
+          if (!m[ROOT_HASH])
+            m[ROOT_HASH] = sha(m);
+          batch.push({type: 'put', key: m.id, value: m});
+        });
+      }
       sampleData.getResources().forEach(function(r) {
         if (!r[ROOT_HASH])
           r[ROOT_HASH] = sha(r);
@@ -2235,13 +2235,6 @@ var Store = Reflux.createStore({
             err = err;
           });
   },
-  // loadModels() {
-  //   models = {}
-  //   voc.getModels().forEach(function(m) {
-  //     models[m.id] = {key: m.id, value: m}
-  //   })
-  // },
-////////////// Not used right now
   onReloadDB1() {
     var self = this;
     isLoaded = false;
