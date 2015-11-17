@@ -6,19 +6,19 @@ require('./utils/crypto')
 require('stream')
 // require('./timmy')
 var React = require('react-native');
-var ResourceList = require('./Components/ResourceList');
+// var ResourceList = require('./Components/ResourceList');
 // var GridList = require('./Components/GridList');
-var TimHome = require('./Components/TimHome');
-var ResourceTypesScreen = require('./Components/ResourceTypesScreen');
-var NewResource = require('./Components/NewResource');
-var NewItem = require('./Components/NewItem');
-var ResourceView = require('./Components/ResourceView');
-var MessageView = require('./Components/MessageView');
-var MessageList = require('./Components/MessageList');
+// var TimHome = require('./Components/TimHome');
+// var ResourceTypesScreen = require('./Components/ResourceTypesScreen');
+// var NewResource = require('./Components/NewResource');
+// var NewItem = require('./Components/NewItem');
+// var ResourceView = require('./Components/ResourceView');
+// var MessageView = require('./Components/MessageView');
+// var MessageList = require('./Components/MessageList');
 var ArticleView = require('./Components/ArticleView');
 var IdentitiesList = require('./Components/IdentitiesList');
 var SelectPhotoList = require('./Components/SelectPhotoList');
-var ProductChooser = require('./Components/ProductChooser')
+// var ProductChooser = require('./Components/ProductChooser')
 // var CameraView = require('./Components/CameraView');
 var PhotoCarousel = require('./Components/PhotoCarousel');
 var QRCode = require('./Components/QRCode')
@@ -159,10 +159,12 @@ class TiMApp extends Component {
   }
 
   render() {
+    var navStyle = {height: 0}
     return (
       <ExNavigator
         initialRoute={MyRouter.getRoute({routeName: 'TimHome'})}
-        style={{backgroundColor: '#2E3B4E', flex: 1}} />
+        style={{backgroundColor: '#2E3B4E', flex: 1}}
+        navigationBarStyle={navStyle} />
     );
   }
 
@@ -170,70 +172,70 @@ class TiMApp extends Component {
     var props = route.passProps;
     this.state.navigator = nav;
     switch (route.id) {
-    case 1:
-      return <TimHome navigator={nav} modelName={constants.TYPES.IDENTITY} filter={props.filter} />;
-    case 2:
-      return <ResourceTypesScreen navigator={nav}
-                  modelName={props.modelName}
-                  resource={props.resource}
-                  returnRoute={props.returnRoute}
-                  sendForm={props.sendForm}
-                  callback={props.callback} />;
-    case 3:
-      return <ResourceView navigator={nav}
-                  resource={props.resource}
-                  prop={props.prop}
-                  verify={props.verify} />;
-    case 4:
-      return <NewResource navigator={nav}
-                  resource={props.resource}
-                  model={props.model}
-                  editCols={props.editCols}
-                  additionalInfo={props.additionalInfo}
-                  returnRoute={props.returnRoute}
-                  callback={props.callback} />;
-    case 5:
-      return <MessageView navigator={nav}
-                  resource={props.resource}
-                  verify={props.verify} />;
-    case 6:
-      return <NewItem navigator={nav}
-                  resource={props.resource}
-                  metadata={props.metadata}
-                  onAddItem={props.onAddItem}
-                  chooser={props.chooser}
-                  template={props.template}
-                  parentMeta={props.parentMeta}    />;
-    case 7:
-      return <ArticleView navigator={nav} url={props.url} />;
+    // case 1:
+    //   return <TimHome navigator={nav} modelName={constants.TYPES.IDENTITY} filter={props.filter} />;
+    // case 2:
+    //   return <ResourceTypesScreen navigator={nav}
+    //               modelName={props.modelName}
+    //               resource={props.resource}
+    //               returnRoute={props.returnRoute}
+    //               sendForm={props.sendForm}
+    //               callback={props.callback} />;
+    // case 3:
+    //   return <ResourceView navigator={nav}
+    //               resource={props.resource}
+    //               prop={props.prop}
+    //               verify={props.verify} />;
+    // case 4:
+    //   return <NewResource navigator={nav}
+    //               resource={props.resource}
+    //               model={props.model}
+    //               editCols={props.editCols}
+    //               additionalInfo={props.additionalInfo}
+    //               returnRoute={props.returnRoute}
+    //               callback={props.callback} />;
+    // case 5:
+    //   return <MessageView navigator={nav}
+    //               resource={props.resource}
+    //               verify={props.verify} />;
+    // case 6:
+    //   return <NewItem navigator={nav}
+    //               resource={props.resource}
+    //               metadata={props.metadata}
+    //               onAddItem={props.onAddItem}
+    //               chooser={props.chooser}
+    //               template={props.template}
+    //               parentMeta={props.parentMeta}    />;
+    // case 7:
+    //   return <ArticleView navigator={nav} url={props.url} />;
     case 8:
       return <IdentitiesList navigator={nav}
                   filter={props.filter}
                   list={props.list}
                   callback={props.callback}
                   modelName={props.modelName} />;
-    case 11:
-      return <MessageList navigator={nav}
-                  filter={props.filter}
-                  resource={props.resource}
-                  prop={props.prop}
-                  returnRoute={props.returnRoute}
-                  callback={props.callback}
-                  isAggregation={props.isAggregation}
-                  modelName={props.modelName} />;
+    // case 11:
+    //   return <MessageList navigator={nav}
+    //               filter={props.filter}
+    //               resource={props.resource}
+    //               prop={props.prop}
+    //               returnRoute={props.returnRoute}
+    //               callback={props.callback}
+    //               isAggregation={props.isAggregation}
+    //               modelName={props.modelName} />;
     // case 12:
     //   return <CameraView />
       // <CameraView navigator={nav}
       //             onTakePic={props.onTakePic}
       //             resource={props.resource}
       //             prop={props.prop}/>
-    case 13:
-      return <SelectPhotoList
-                metadata={props.metadata}
-                style={styles.style}
-                navigator={props.navigator}
-                onSelect={props.onSelect}
-                onSelectingEnd={props.onSelectingEnd} />
+    // case 13:
+    //   return <SelectPhotoList
+    //             metadata={props.metadata}
+    //             style={styles.style}
+    //             navigator={props.navigator}
+    //             onSelect={props.onSelect}
+    //             onSelectingEnd={props.onSelectingEnd} />
 
     case 14:
       return <PhotoCarousel photos={props.photos} currentPhoto={props.currentPhoto} resource={props.resource} />
@@ -247,31 +249,31 @@ class TiMApp extends Component {
     //               isAggregation={props.isAggregation}
     //               sortProperty={props.sortProperty}
     //               modelName={props.modelName} />;
-    case 15:
-      return <ProductChooser navigator={nav}
-                  resource={props.resource}
-                  returnRoute={props.returnRoute}
-                  callback={props.callback} />;
-    case 16:
-      return <QRCodeScanner navigator={nav}
-                onread={props.onread} />
-    case 17:
-      return <QRCode navigator={nav}
-                content={props.content}
-                fullScreen={props.fullScreen}
-                dimension={props.dimension} />
-    case 10:
-    default: // 10
-      return <ResourceList navigator={nav}
-                  filter={props.filter}
-                  resource={props.resource}
-                  prop={props.prop}
-                  returnRoute={props.returnRoute}
-                  callback={props.callback}
-                  isAggregation={props.isAggregation}
-                  isRegistration={props.isRegistration}
-                  sortProperty={props.sortProperty}
-                  modelName={props.modelName} />;
+    // case 15:
+    //   return <ProductChooser navigator={nav}
+    //               resource={props.resource}
+    //               returnRoute={props.returnRoute}
+    //               callback={props.callback} />;
+    // case 16:
+    //   return <QRCodeScanner navigator={nav}
+    //             onread={props.onread} />
+    // case 17:
+    //   return <QRCode navigator={nav}
+    //             content={props.content}
+    //             fullScreen={props.fullScreen}
+    //             dimension={props.dimension} />
+    // case 10:
+    // default: // 10
+    //   return <ResourceList navigator={nav}
+    //               filter={props.filter}
+    //               resource={props.resource}
+    //               prop={props.prop}
+    //               returnRoute={props.returnRoute}
+    //               callback={props.callback}
+    //               isAggregation={props.isAggregation}
+    //               isRegistration={props.isRegistration}
+    //               sortProperty={props.sortProperty}
+    //               modelName={props.modelName} />;
     }
   }
 }
@@ -369,73 +371,6 @@ var NavigationBarRouteMapper = {
   },
 
 };
-// var MyRouter = {
-//   getHomeRoute() {
-//     return {
-//       getSceneClass() {
-//         return require('../Components/TimHome');
-//       },
-//       renderScene() {
-//         return <TimHome navigator={navigator} modelName={constants.TYPES.IDENTITY} />;
-//       },
-//       configureScene() {
-//         return ExNavigator.SceneConfigs.FloatFromRight;
-//       },
-//     }
-
-//   },
-
-//   getResourceListRoute(route) {
-//     return {
-//       getSceneClass() {
-//         return require('../Components/ResourceList');
-//       },
-//       renderScene() {
-//         var props = route.passProps
-//         return <ResourceList navigator={nav}
-//                     filter={props.filter}
-//                     resource={props.resource}
-//                     prop={props.prop}
-//                     returnRoute={props.returnRoute}
-//                     callback={props.callback}
-//                     isAggregation={props.isAggregation}
-//                     isRegistration={props.isRegistration}
-//                     sortProperty={props.sortProperty}
-//                     modelName={props.modelName} />;
-//       },
-//       getTitle() {
-//         return route.title
-//       },
-
-//       // renderLeftButton(navigator) {
-//       //   return (
-//       //     <TouchableOpacity
-//       //       touchRetentionOffset={ExNavigator.Styles.barButtonTouchRetentionOffset}
-//       //       onPress={() => navigator.push(getSettingsRoute())}
-//       //       style={ExNavigator.Styles.barLeftButton}>
-//       //       <Text style={ExNavigator.Styles.barLeftButtonText}>Settings</Text>
-//       //     </TouchableOpacity>
-//       //   );
-//       // },
-
-//       // renderRightButton(navigator) {
-//       //   return (
-//       //     <TouchableOpacity
-//       //      touchRetentionOffset={ExNavigator.Styles.barButtonTouchRetentionOffset}
-//       //       onPress={() => navigator.push(getHelpRoute())}
-//       //       style={ExNavigator.Styles.barRightButton}>
-//       //       <Text style={ExNavigator.Styles.barRightButtonText}>Help</Text>
-//       //     </TouchableOpacity>
-//       //   );
-//       // },
-
-//       configureScene() {
-//         return ExNavigator.SceneConfigs.FloatFromRight;
-//       }
-//     }
-
-//   }
-// }
 
 var styles = StyleSheet.create({
   icon: {
@@ -476,186 +411,3 @@ var styles = StyleSheet.create({
 });
 
 React.AppRegistry.registerComponent('TiM', function() { return TiMApp });
-
-  // render() {
-  //   var props = {db: this.state.db};
-  //   return (
-  //     <Navigator
-  //       style={styles.container}
-  //       initialRoute={{
-  //         id: 1,
-  //         title: 'Identity Finder',
-  //         backButtonTitle: 'Back',
-  //         titleTextColor: '#2E3B4E',
-  //         component: SearchPage,
-  //         passProps: {db: this.state.db},
-  //       }}
-  //       renderScene={this.renderScene}
-  //       passProps={props}
-  //       configureScene={(route) => {
-  //         if (route.sceneConfig) {
-  //           return route.sceneConfig;
-  //         }
-  //         return Navigator.SceneConfigs.FloatFromBottom;
-  //       }}
-  //     />
-  //   );
-  // }
-  // componentDidMount() {
-  //   var self = this;
-  //   var db = this.state.db;
-  // dbHasResources = false;
-    // db.createReadStream({limit: 1})
-    //   .on('data', function (data) {
-    //     var m = data.value;
-    //     dbHasResources = true;
-    //     utils.loadModelsAndMe(db, models)
-    //     .then(function(results) {
-    //       self.state.isLoading = false;
-    //     });
-    //   })
-    //   .on('error', function (err) {
-    //     console.log('Oh my!', err.name + ": " + err.message);
-    //   })
-    //   .on('close', function (err) {
-    //     console.log('Stream closed');
-    //   })
-    //   .on('end', function () {
-    //     console.log('Stream end');
-    //     if (!dbHasResources)
-    //       utils.loadDB(db);
-    //   });
-    // }
-
-
-  // componentDidMount() {
-  //   var self = this;
-  //   var db = utils.getDb();
-  //   var dbHasResources = false;
-  //   db.createReadStream({limit: 1})
-  //     .on('data', function (data) {
-  //       var m = data.value;
-  //       dbHasResources = true;
-  //       utils.loadModelsAndMe(db, models)
-  //       .then(function(results) {
-  //         self.state.isLoading = false;
-  //       });
-  //     })
-  //     .on('error', function (err) {
-  //       console.log('Oh my!', err.name + ": " + err.message);
-  //     })
-  //     .on('close', function (err) {
-  //       console.log('Stream closed');
-  //     })
-  //     .on('end', function () {
-  //       console.log('Stream end');
-  //       if (!dbHasResources)
-  //         utils.loadDB(db);
-  //     });
-  //   }
-
-  // componentDidMount1() {
-  //   var self = this;
-  //   var db = this.state.db;
-  //   this.loadModels(db, models)
-  //   .then(function() {
-  //     AddressBook.checkPermission((err, permission) => {
-  //       // AddressBook.PERMISSION_AUTHORIZED || AddressBook.PERMISSION_UNDEFINED || AddressBook.PERMISSION_DENIED
-  //       if(permission === AddressBook.PERMISSION_UNDEFINED){
-  //         AddressBook.requestPermission((err, permission) => {
-  //           self.storeContacts()
-  //         })
-  //       }
-  //       else if(permission === AddressBook.PERMISSION_AUTHORIZED){
-  //         self.storeContacts()
-  //       }
-  //       else if(permission === AddressBook.PERMISSION_DENIED){
-  //         //handle permission denied
-  //       }
-  //     })
-  //   });
-  // }
-  // storeContacts() {
-  //   var self = this;
-  //   AddressBook.getContacts(function(err, contacts) {
-  //     self.props.db.createReadStream()
-  //     .on('data', function(data) {
-  //       if (data.key.indexOf(IDENTITY_MODEL + '_') == -1)
-  //         return;
-  //     })
-  //     .on('close', function() {
-  //       console.log('Stream closed');
-  //       return me;
-  //     })
-  //     .on('end', function() {
-  //       console.log('Stream ended');
-  //     })
-  //     .on('error', function(err) {
-  //       console.log('err: ' + err);
-  //     });
-  //     console.log(contacts)
-  //   })
-  // }
-// The LATEST
-
-  // render() {
-  //   return (
-  //     <NavigatorIOS
-  //       style={styles.container}
-  //       barTintColor='#D7E6ED'
-  //       tintColor='#7AAAC3'
-  //       initialRoute={{
-  //         title: 'Trust in Motion',
-  //         backButtonTitle: 'Back',
-  //         titleTextColor: '#3f4c5f',
-  //         component: SearchPage,
-  //         passProps: {modelName: IDENTITY_MODEL},
-  //       }}/>
-  //   );
-  // }
-  // render1() {
-  //   if (this.state.isLoading)
-  //     return <View></View>;
-  //   var passProps = {
-  //     filter: '',
-  //     models: models,
-  //     modelName: IDENTITY_MODEL,
-  //   };
-  //   if (this.state.me) {
-  //     passProps.me = this.state.me;
-  //     return <NavigatorIOS
-  //       style={styles.container}
-  //       barTintColor='#D7E6ED'
-  //       tintColor='#7AAAC3'
-  //       initialRoute={{
-  //         title: 'All Contacts',
-  //         titleTextColor: '#7AAAC3',
-  //         component: ResourceList,
-  //         passProps: passProps
-  //       }} />
-  //   }
-  //   else {
-  //     var metadata = models[IDENTITY_MODEL].value;
-  //     var page = {
-  //       metadata: metadata,
-  //       models: models,
-  //       db: this.state.db,
-  //     };
-
-  //     return (
-  //       <NavigatorIOS
-  //         style={styles.container}
-  //         barTintColor='#D7E6ED'
-  //         tintColor='#7AAAC3'
-  //         initialRoute={{
-  //           title: 'Sign Up',
-  //           backButtonTitle: 'Back',
-  //           titleTextColor: '#7AAAC3',
-  //           component: NewResource,
-  //           passProps: {page: page},
-  //         }}/>
-  //     );
-  //   }
-  // }
-
-

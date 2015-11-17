@@ -4,7 +4,7 @@ var React = require('react-native');
 var utils = require('../utils/utils');
 var constants = require('tradle-constants');
 var ArticleView = require('./ArticleView');
-var FromToView = require('./FromToView');
+// var FromToView = require('./FromToView');
 var PhotoList = require('./PhotoList');
 var PhotoView = require('./PhotoView');
 var ShowPropertiesView = require('./ShowPropertiesView');
@@ -18,6 +18,7 @@ var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
 var ResourceViewMixin = require('./ResourceViewMixin');
 var buttonStyles = require('../styles/buttonStyles');
+var MyRouter = require('../router/MyRouter');
 
 var {
   StyleSheet,
@@ -144,10 +145,9 @@ class MessageView extends Component {
     if (verificationModel === 'tradle.Verification')
       Actions.addVerification(verification);
     else {
-      this.props.navigator.replace({
+      this.props.navigator.replace(MyRouter.getRoute({
         title: resource.message,
-        id: 4,
-        component: NewResource,
+        routeName: 'NewResource',
         backButtonTitle: resource.firstName,
         rightButtonTitle: 'Done',
         titleTextColor: '#7AAAC3',
@@ -156,7 +156,7 @@ class MessageView extends Component {
           resource: verification,
           // callback: this.createVerification.bind(self)
         }
-      });
+      }))
     }
   }
   // createVerification(resource) {
@@ -164,11 +164,10 @@ class MessageView extends Component {
   // }
 
   onPress(url) {
-    this.props.navigator.push({
-      id: 7,
-      component: ArticleView,
+    this.props.navigator.push(MyRouter.getRoute({
+      routeName: 'ArticleView',
       passProps: {url: url}
-    });
+    }))
   }
 
   additionalInfo(resource, prop, msg) {

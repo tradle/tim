@@ -176,7 +176,7 @@ class ResourceList extends Component {
 
         passProps: {resource: resource}
       }
-      this.props.navigator.push(MyRouter(route));
+      this.props.navigator.push(MyRouter.getRoute(route));
       return;
     }
     if (this.props.prop) {
@@ -579,7 +579,7 @@ class ResourceList extends Component {
               <TouchableHighlight underlayColor='transparent' onPress={this.showBanks.bind(this)}>
                 <View style={styles.row}>
                   <View>
-                    <Image source={require('image!banking')} style={styles.cellImage} />
+                    <Image source={require('../iOS/Images.xcassets/banking.imageset/banking.png')} style={styles.cellImage} />
                   </View>
                   <View style={styles.textContainer} key={this.props.key + '2'}>
                     <Text style={styles.resourceTitle}>Official Accounts</Text>

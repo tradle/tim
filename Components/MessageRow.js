@@ -14,10 +14,13 @@ var RowMixin = require('./RowMixin');
 var extend = require('extend')
 var formDefaults = require('../data/formDefaults')
 var reactMixin = require('react-mixin');
+var newProduct = require('../data/newProduct.json')
+var MyRouter = require('../router/MyRouter')
+
 var STRUCTURED_MESSAGE_BORDER = '#3260a5' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
 var STRUCTURED_MESSAGE_COLOR = '#5482C7' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
 var VERIFICATION_BG = '#FBFFE5' //'#F6FFF0';
-var newProduct = require('../data/newProduct.json')
+
 var {
   Image,
   StyleSheet,
@@ -263,10 +266,9 @@ class MessageRow extends Component {
     var resource = this.props.resource.document;
     var rmodel = utils.getModel(resource[constants.TYPE]).value;
     var title = utils.getDisplayName(resource, rmodel.properties);
-    this.props.navigator.push({
+    this.props.navigator.push(MyRouter.getRoute({
       title: title,
-      id: 4,
-      component: NewResource,
+      routeName: 'NewResource',
       titleTextColor: '#7AAAC3',
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
@@ -276,7 +278,7 @@ class MessageRow extends Component {
         additionalInfo: this.props.resource,
         editCols: ['photos']
       }
-    })
+    }))
   }
   showVerifications(rowStyle, viewStyle, addStyle) {
     if (!this.props.verificationsToShare || !this.props.resource.message)
@@ -351,11 +353,10 @@ class MessageRow extends Component {
           // I just sent you a request for {msgModel.title}. {utils.getMe().firstName}, this is your Tradle assistent talking. Tap on one of the items below to share with {isMyMessage ? resource.to.title : resource.from.title}
 
   onPress(event) {
-    this.props.navigator.push({
-      id: 7,
-      component: ArticleView,
+    this.props.navigator.push(MyRouter.getRoute({
+      routeName: 'ArticleView',
       passProps: {url: this.props.resource.message}
-    });
+    }));
   }
   createNewResource(model) {
     var resource = {
@@ -369,18 +370,17 @@ class MessageRow extends Component {
       extend(true, resource, formDefaults[model.id])
     }
 
-    this.props.navigator.push({
-      id: 4,
+    this.props.navigator.push(MyRouter.getRoute({
       title: model.title,
       rightButtonTitle: 'Done',
       backButtonTitle: 'Back',
-      component: NewResource,
+      routeName: 'NewResource',
       titleTextColor: '#7AAAC3',
       passProps:  {
         model: model,
         resource: resource
       }
-    });
+    }));
   }
 
   verify(event) {
@@ -398,8 +398,7 @@ class MessageRow extends Component {
 
     var model = utils.getModel(resource[constants.TYPE]).value;
     var route = {
-      id: 5,
-      component: MessageView,
+      routeName: 'MessageView',
       backButtonTitle: 'Back',
       passProps: passProps,
       title: resource[constants.TYPE] == 'tradle.AssetVerification' ? 'Doc verification' : model.title
@@ -408,9 +407,8 @@ class MessageRow extends Component {
       route.rightButtonTitle = 'Edit';
       route.onRightButtonPress = {
           title: 'Edit',
-          component: NewResource,
+          routeName: 'NewResource',
           titleTextColor: '#7AAAC3',
-          id: 4,
           passProps: {
             resource: resource,
             metadata: model,
@@ -419,7 +417,7 @@ class MessageRow extends Component {
           }
       };
     }
-    this.props.navigator.push(route);
+    this.props.navigator.push(MyRouter.getRoute(route));
   }
   formatRow(isMyMessage, model, resource, renderedRow) {
     var viewCols = model.gridCols || model.viewCols;

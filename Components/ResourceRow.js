@@ -243,6 +243,13 @@ var styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     fontWeight: '400',
+    // paddingTop: 18,
+    marginBottom: 2,
+  },
+  resourceTitleCentered: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '400',
     paddingTop: 18,
     marginBottom: 2,
   },

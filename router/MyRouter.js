@@ -1,23 +1,19 @@
 'use strict'
 
 var React = require('react-native');
-var ResourceTypesScreen = require('../Components/ResourceTypesScreen');
-var NewItem = require('../Components/NewItem');
-var MessageView = require('../Components/MessageView');
-var MessageList = require('../Components/MessageList');
 var ArticleView = require('../Components/ArticleView');
 var IdentitiesList = require('../Components/IdentitiesList');
 var SelectPhotoList = require('../Components/SelectPhotoList');
-var ProductChooser = require('../Components/ProductChooser')
 var PhotoCarousel = require('../Components/PhotoCarousel');
-var QRCode = require('../Components/QRCode')
-var QRCodeScanner = require('../Components/QRCodeScanner')
 var utils = require('../utils/utils');
 var constants = require('tradle-constants');
+var Icon = require('react-native-vector-icons/Ionicons');
+var extend = require('xtend/mutable')
 
 var {
   View,
   Text,
+  StyleSheet,
   TouchableOpacity
 } = React
 
@@ -27,16 +23,30 @@ var MyRouter = {
   getRoute(route) {
     var viewName = route.routeName
     switch (viewName) {
-      case 'TimHome':
-        return this.getHomeRoute(route)
-      case 'ResourceList':
-        return this.getResourceListRoute(route)
-      case 'MessageList':
-        return this.getMessageListRoute(route)
-      case 'ResourceView':
-        return this.getResourceViewRoute(route)
-      case 'NewResource':
-        return this.getNewResourceRoute(route)
+    case 'TimHome':
+      return this.getHomeRoute(route)
+    case 'ResourceList':
+      return this.getResourceListRoute(route)
+    case 'ResourceView':
+      return this.getResourceViewRoute(route)
+    case 'MessageList':
+      return this.getMessageListRoute(route)
+    case 'MessageView':
+      return this.getMessageViewRoute(route)
+    case 'NewResource':
+      return this.getNewResourceRoute(route)
+    case 'NewItem':
+      return this.getNewItemRoute(route)
+    case 'ProductChooser':
+      return this.getProductChooserRoute(route)
+    case 'ResourceTypesScreen':
+      return this.getResourceTypesScreen(route)
+    case 'QRCodeScanner':
+      return this.getQRCodeScannerRoute(route)
+    case 'QRCode':
+      return this.getQRCodeRoute(route)
+    case 'ArticleView':
+      return this.getArticleViewRoute(route)
     }
   },
   getHomeRoute() {
@@ -45,28 +55,22 @@ var MyRouter = {
       getSceneClass() {
         return TimHome;
       },
+      // showNavigationBar: false,
       renderScene(navigator) {
         return <TimHome navigator={navigator} modelName={constants.TYPES.IDENTITY} />;
       },
-      configureScene() {
-        return ExNavigator.SceneConfigs.FloatFromRight;
-      },
-      renderTitle() {
-        return null
-      },
-      renderTitle() {
-        return (
-          <View style={{height: 70, width: 500, marginTop: -20, backgroundColor: '#2E3B4E'}}>
-          </View>
-        );
-      },
+      // renderTitle() {
+      //   return (
+      //     <View style={{height: 70, width: 500, marginTop: -20, backgroundColor: '#2E3B4E'}}>
+      //     </View>
+      //   );
+      // },
     }
-
   },
 
   getResourceListRoute(route) {
     var ResourceList = require('../Components/ResourceList')
-    return {
+    return extend(defaultRouteConfig(route), {
       getSceneClass() {
         return ResourceList;
       },
@@ -83,74 +87,12 @@ var MyRouter = {
                     sortProperty={props.sortProperty}
                     modelName={props.modelName} />;
       },
-      getTitle() {
-        return route.title
-      },
-      renderTitle() {
-        return (
-          <Text style={{color: '#555555', fontSize: 18, marginTop: 15}}>{route.title}</Text>
-        );
-      },
-      renderLeftButton(navigator) {
-        return (
-          <TouchableOpacity
-            touchRetentionOffset={ExNavigator.Styles.barButtonTouchRetentionOffset}
-            onPress={() => navigator.pop()}>
-            <View style={{marginLeft: 20, marginTop: 17}}>
-              <Text style={{color: '#7AAAC3', fontSize: 16}}>{route.backButtonTitle || 'Back'}</Text>
-            </View>
-          </TouchableOpacity>
-        );
-      },
-
-      renderRightButton(navigator) {
-        if (!route.rightButtonTitle)
-          return <View />
-        var self = this
-        return (
-          <TouchableOpacity
-            touchRetentionOffset={ExNavigator.Styles.barButtonTouchRetentionOffset}
-            onPress={() =>
-              navigator.push(MyRouter.getRoute(route.onRightButtonPress))
-            }>
-            <View style={{marginRight: 20, marginTop: 17}}>
-              <Text style={{color: '#7AAAC3', fontSize: 16}}>{route.rightButtonTitle || ''}</Text>
-            </View>
-          </TouchableOpacity>
-        );
-      },
-
-      // renderLeftButton(navigator) {
-      //   return (
-      //     <TouchableOpacity
-      //       touchRetentionOffset={ExNavigator.Styles.barButtonTouchRetentionOffset}
-      //       onPress={() => navigator.push(getSettingsRoute())}
-      //       style={ExNavigator.Styles.barLeftButton}>
-      //       <Text style={ExNavigator.Styles.barLeftButtonText}>Settings</Text>
-      //     </TouchableOpacity>
-      //   );
-      // },
-
-      // renderRightButton(navigator) {
-      //   return (
-      //     <TouchableOpacity
-      //       touchRetentionOffset={ExNavigator.Styles.barButtonTouchRetentionOffset}
-      //       onPress={() => navigator.push(getHelpRoute())}
-      //       style={ExNavigator.Styles.barRightButton}>
-      //       <Text style={ExNavigator.Styles.barRightButtonText}>Help</Text>
-      //     </TouchableOpacity>
-      //   );
-      // },
-
-      configureScene() {
-        return ExNavigator.SceneConfigs.FloatFromRight;
-      }
-    }
-
+    })
   },
+
   getMessageListRoute(route) {
     var MessageList = require('../Components/MessageList')
-    return {
+    return extend(defaultRouteConfig(route), {
       getSceneClass() {
         return MessageList;
       },
@@ -165,74 +107,79 @@ var MyRouter = {
                     isAggregation={props.isAggregation}
                     modelName={props.modelName} />;
       },
-      getTitle() {
-        return route.title
-      },
-      renderTitle() {
-        return (
-          <Text style={{color: '#555555', fontSize: 18, marginTop: 15}}>{route.title}</Text>
-        );
-      },
-      renderLeftButton(navigator) {
-        return (
-          <TouchableOpacity
-            touchRetentionOffset={ExNavigator.Styles.barButtonTouchRetentionOffset}
-            onPress={() => navigator.pop()}>
-            <View style={{marginLeft: 20, marginTop: 17}}>
-              <Text style={{color: '#7AAAC3', fontSize: 16}}>{route.backButtonTitle || 'Back'}</Text>
-            </View>
-          </TouchableOpacity>
-        );
-      },
+    })
 
+  },
+  getProductChooserRoute(route) {
+    var ProductChooser = require('../Components/ProductChooser')
+    return extend(defaultRouteConfig(route), {
+      getSceneClass() {
+        return ProductChooser;
+      },
+      renderScene(navigator) {
+        var props = route.passProps
+        return <ProductChooser navigator={navigator}
+                  resource={props.resource}
+                  returnRoute={props.returnRoute}
+                  callback={props.callback} />;
+      },
       renderRightButton(navigator) {
         if (!route.rightButtonTitle)
           return <View />
-        var self = this
+
         return (
           <TouchableOpacity
             touchRetentionOffset={ExNavigator.Styles.barButtonTouchRetentionOffset}
-            onPress={() =>
-              navigator.push(MyRouter.getRoute(route.onRightButtonPress))
-            }>
-            <View style={{marginRight: 20, marginTop: 17}}>
-              <Text style={{color: '#7AAAC3', fontSize: 16}}>{route.rightButtonTitle || ''}</Text>
+            onPress={() => navigator.push(MyRouter.getRoute(route.onRightButtonPress))}>
+            <View style={{marginRight: 10, marginTop: 8}}>
+              <Icon name='plus'  size={22}  color='#7AAAC3'  style={styles.icon}/>
             </View>
           </TouchableOpacity>
         );
       },
 
-      // renderLeftButton(navigator) {
-      //   return (
-      //     <TouchableOpacity
-      //       touchRetentionOffset={ExNavigator.Styles.barButtonTouchRetentionOffset}
-      //       onPress={() => navigator.push(getSettingsRoute())}
-      //       style={ExNavigator.Styles.barLeftButton}>
-      //       <Text style={ExNavigator.Styles.barLeftButtonText}>Settings</Text>
-      //     </TouchableOpacity>
-      //   );
-      // },
+      configureScene() {
+        return ExNavigator.SceneConfigs.FloatFromBottom;
+      }
+    })
+  },
+  getResourceTypesScreenRoute(route) {
+    var ResourceTypesScreen = require('../Components/ResourceTypesScreen')
+    return extend(defaultRouteConfig(route), {
+      getSceneClass() {
+        return ResourceTypesScreen;
+      },
+      renderScene(navigator) {
+        var props = route.passProps
+        return <ResourceTypesScreen navigator={navigator}
+                  resource={props.resource}
+                  returnRoute={props.returnRoute}
+                  callback={props.callback} />;
+      },
+      renderRightButton(navigator) {
+        if (!route.rightButtonTitle)
+          return <View />
 
-      // renderRightButton(navigator) {
-      //   return (
-      //     <TouchableOpacity
-      //       touchRetentionOffset={ExNavigator.Styles.barButtonTouchRetentionOffset}
-      //       onPress={() => navigator.push(getHelpRoute())}
-      //       style={ExNavigator.Styles.barRightButton}>
-      //       <Text style={ExNavigator.Styles.barRightButtonText}>Help</Text>
-      //     </TouchableOpacity>
-      //   );
-      // },
+        return (
+          <TouchableOpacity
+            touchRetentionOffset={ExNavigator.Styles.barButtonTouchRetentionOffset}
+            onPress={() => navigator.push(MyRouter.getRoute(route.onRightButtonPress))}>
+            <View style={{marginRight: 10, marginTop: 8}}>
+              <Icon name='plus'  size={22}  color='#7AAAC3'  style={styles.icon}/>
+            </View>
+          </TouchableOpacity>
+        );
+      },
 
       configureScene() {
-        return ExNavigator.SceneConfigs.FloatFromRight;
+        return ExNavigator.SceneConfigs.FloatFromBottom;
       }
-    }
+    })
 
   },
   getResourceViewRoute(route) {
     var ResourceView = require('../Components/ResourceView')
-    return {
+    return extend(defaultRouteConfig(route), {
       getSceneClass() {
         return ResourceView;
       },
@@ -243,51 +190,25 @@ var MyRouter = {
                     prop={props.prop}
                     verify={props.verify} />;
       },
-      getTitle() {
-        return route.title
+    })
+  },
+  getMessageViewRoute(route) {
+    var MessageView = require('../Components/MessageView')
+    return extend(defaultRouteConfig(route), {
+      getSceneClass() {
+        return MessageView;
       },
-      renderTitle() {
-        return (
-          <Text style={{color: '#555555', fontSize: 18, marginTop: 15}}>{route.title}</Text>
-        );
+      renderScene(navigator) {
+        var props = route.passProps
+        return <MessageView navigator={navigator}
+                    resource={props.resource}
+                    verify={props.verify} />;
       },
-      renderLeftButton(navigator) {
-        return (
-          <TouchableOpacity
-            touchRetentionOffset={ExNavigator.Styles.barButtonTouchRetentionOffset}
-            onPress={() => navigator.pop()}>
-            <View style={{marginLeft: 20, marginTop: 17}}>
-              <Text style={{color: '#7AAAC3', fontSize: 16}}>{route.backButtonTitle || 'Back'}</Text>
-            </View>
-          </TouchableOpacity>
-        );
-      },
-
-      renderRightButton(navigator) {
-        if (!route.rightButtonTitle)
-          return <View />
-
-        return (
-          <TouchableOpacity
-            touchRetentionOffset={ExNavigator.Styles.barButtonTouchRetentionOffset}
-            onPress={() => navigator.push(MyRouter.getRoute(route.onRightButtonPress))}>
-            <View style={{marginRight: 20, marginTop: 17}}>
-              <Text style={{color: '#7AAAC3', fontSize: 16}}>{route.rightButtonTitle || ''}</Text>
-            </View>
-          </TouchableOpacity>
-        );
-      },
-
-
-      configureScene() {
-        return ExNavigator.SceneConfigs.FloatFromRight;
-      }
-    }
-
+    })
   },
   getNewResourceRoute(route) {
     var NewResource = require('../Components/NewResource')
-    return {
+    return extend(defaultRouteConfig(route), {
       getSceneClass() {
         return NewResource;
       },
@@ -301,47 +222,121 @@ var MyRouter = {
                   returnRoute={props.returnRoute}
                   callback={props.callback} />;
       },
-      getTitle() {
-        return route.title
+    })
+  },
+  getNewItemRoute(route) {
+    var NewItem = require('../Components/NewItem')
+    return extend(defaultRouteConfig(route), {
+      getSceneClass() {
+        return NewItem;
       },
-      renderTitle() {
-        return (
-          <Text style={{color: '#555555', fontSize: 18, marginTop: 15}}>{route.title}</Text>
-        );
+      renderScene(navigator) {
+        var props = route.passProps
+      return <NewItem navigator={navigator}
+                  resource={props.resource}
+                  metadata={props.metadata}
+                  onAddItem={props.onAddItem}
+                  chooser={props.chooser}
+                  template={props.template}
+                  parentMeta={props.parentMeta}    />
       },
-      renderLeftButton(navigator) {
-        return (
-          <TouchableOpacity
-            touchRetentionOffset={ExNavigator.Styles.barButtonTouchRetentionOffset}
-            onPress={() => navigator.pop()}>
-            <View style={{marginLeft: 20, marginTop: 17}}>
-              <Text style={{color: '#7AAAC3', fontSize: 16}}>{route.backButtonTitle || 'Back'}</Text>
-            </View>
-          </TouchableOpacity>
-        );
+    })
+  },
+
+  getQRCodeScannerRoute(route) {
+    var QRCodeScanner = require('../Components/QRCodeScanner')
+    return extend(defaultRouteConfig(route), {
+      getSceneClass() {
+        return QRCodeScanner;
       },
-
-      renderRightButton(navigator) {
-        if (!route.rightButtonTitle)
-          return <View />
-
-        return (
-          <TouchableOpacity
-            touchRetentionOffset={ExNavigator.Styles.barButtonTouchRetentionOffset}
-            onPress={() => navigator.push(MyRouter.getRoute(route.onRightButtonPress))}>
-            <View style={{marginRight: 20, marginTop: 17}}>
-              <Text style={{color: '#7AAAC3', fontSize: 16}}>{route.rightButtonTitle || ''}</Text>
-            </View>
-          </TouchableOpacity>
-        );
+      renderScene(navigator) {
+        var props = route.passProps
+        return <QRCodeScanner navigator={navigator}
+                onread={props.onread} />
       },
+    })
+  },
+  getQRCodeRoute(route) {
+    var QRCode = require('../Components/QRCode')
+    return extend(defaultRouteConfig(route), {
+      getSceneClass() {
+        return QRCode;
+      },
+      renderScene(navigator) {
+        var props = route.passProps
+        return <QRCode navigator={navigator}
+                content={props.content}
+                fullScreen={props.fullScreen}
+                dimension={props.dimension} />
+      },
+    })
+  },
+  getArticleViewRoute(route) {
+    var ArticleView = require('../Components/ArticleView')
+    return extend(defaultRouteConfig(route), {
+      getSceneClass() {
+        return ArticleView;
+      },
+      renderScene(navigator) {
+        var props = route.passProps
+        return <ArticleView navigator={navigator} url={props.url} />;
+      },
+    })
 
+  }
 
-      configureScene() {
-        return ExNavigator.SceneConfigs.FloatFromRight;
-      }
+}
+
+function defaultRouteConfig (route) {
+  return {
+    getTitle() {
+      return route ? route.title : null
+    },
+    renderTitle() {
+      return (
+        <Text style={{color: '#555555', fontSize: 16, marginTop: 8}}>{route.title}</Text>
+      );
+    },
+    renderLeftButton(navigator) {
+      return (
+        <TouchableOpacity
+          touchRetentionOffset={ExNavigator.Styles.barButtonTouchRetentionOffset}
+          onPress={() => navigator.pop()}>
+          <View style={{marginLeft: 10, marginTop: 8}}>
+            <Text style={{color: '#7AAAC3', fontSize: 16}}>{route.backButtonTitle || 'Back'}</Text>
+          </View>
+        </TouchableOpacity>
+      );
+    },
+
+    renderRightButton(navigator) {
+      if (!route.rightButtonTitle)
+        return <View />
+      var self = this
+      return (
+        <TouchableOpacity
+          touchRetentionOffset={ExNavigator.Styles.barButtonTouchRetentionOffset}
+          onPress={() =>
+            navigator.push(MyRouter.getRoute(route.onRightButtonPress))
+          }>
+          <View style={{marginRight: 10, marginTop: 8}}>
+            <Text style={{color: '#7AAAC3', fontSize: 16}}>{route.rightButtonTitle || ''}</Text>
+          </View>
+        </TouchableOpacity>
+      );
+    },
+
+    configureScene() {
+      return ExNavigator.SceneConfigs.FloatFromRight;
     }
   }
 }
 
+var styles = StyleSheet.create({
+  icon: {
+    width: 22,
+    height: 22,
+    color: '#7AAAC3'
+  }
+})
 module.exports = MyRouter;
