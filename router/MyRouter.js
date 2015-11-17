@@ -1,9 +1,8 @@
 'use strict'
 
 var React = require('react-native');
-var ArticleView = require('../Components/ArticleView');
 var IdentitiesList = require('../Components/IdentitiesList');
-var SelectPhotoList = require('../Components/SelectPhotoList');
+// var SelectPhotoList = require('../Components/SelectPhotoList');
 var PhotoCarousel = require('../Components/PhotoCarousel');
 var utils = require('../utils/utils');
 var constants = require('tradle-constants');
@@ -222,6 +221,40 @@ var MyRouter = {
                   returnRoute={props.returnRoute}
                   callback={props.callback} />;
       },
+      renderRightButton() { //} function(route, navigator, index, navState) {
+        if (!route.rightButtonTitle)
+          return <View/>
+        var style = [styles.navBarText, styles.navBarButtonText];
+        if (route.tintColor)
+          style.push({color: route.tintColor});
+        var title = route.rightButtonTitle.indexOf('|') == -1
+                  ?  <Text style={style}>
+                        {route.rightButtonTitle}
+                     </Text>
+                  : <Icon name={route.rightButtonTitle.substring(4)} size={20} color='#7AAAC3' style={styles.icon}/>;
+
+        return (
+          <TouchableOpacity
+            onPress={() => {
+                      // 'Done' button case for creating new resources
+                      if (this.onRightButtonPress  &&  this.onRightButtonPress.stateChange) {
+                        if (this.onRightButtonPress.before)
+                          this.onRightButtonPress.before();
+                        this.onRightButtonPress.stateChange();
+                        if (this.onRightButtonPress.after)
+                          this.onRightButtonPress.after();
+                      }
+                      else
+                        navigator.push(this.onRightButtonPress)
+                   }
+            }>
+            <View style={styles.navBarRightButton}>
+              {title}
+            </View>
+          </TouchableOpacity>
+        );
+      },
+
     })
   },
   getNewItemRoute(route) {
@@ -312,7 +345,6 @@ function defaultRouteConfig (route) {
     renderRightButton(navigator) {
       if (!route.rightButtonTitle)
         return <View />
-      var self = this
       return (
         <TouchableOpacity
           touchRetentionOffset={ExNavigator.Styles.barButtonTouchRetentionOffset}
@@ -337,6 +369,20 @@ var styles = StyleSheet.create({
     width: 22,
     height: 22,
     color: '#7AAAC3'
-  }
+  },
+  navBarText: {
+    fontSize: 16,
+  },
+  navBarButtonText: {
+    color: '#7AAAC3',
+  },
+  navBarLeftButton: {
+    marginTop: 8,
+    paddingLeft: 15,
+  },
+  navBarRightButton: {
+    marginTop: 8,
+    paddingRight: 15,
+  },
 })
 module.exports = MyRouter;
