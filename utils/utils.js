@@ -1,5 +1,7 @@
 'use strict'
 
+var {AsyncStorage} = require('react-native')
+var collect = require('stream-collector')
 var t = require('tcomb-form-native');
 var moment = require('moment');
 var constants = require('tradle-constants');
@@ -247,6 +249,45 @@ var utils = {
         vFound[vid] = true
       }
     }
+  },
+
+  readDB(db) {
+    // return new Promise((resolve, reject) => {
+    //   collect(db.createReadStream(), (err, data) => {
+    //     if (err) reject(err)
+    //     else resolve(data)
+    //   })
+    // })
+
+    var prefix = db.location + '!'
+    return new Promise((resolve, reject) => {
+        collect(db.createKeyStream(), (err, keys) => {
+          if (err) reject(err)
+          else resolve(keys)
+        })
+      })
+      .then((keys) => {
+        if (keys.length) {
+          return AsyncStorage.multiGet(keys.map((key) => prefix + key))
+        } else {
+          return []
+        }
+      })
+      .then((pairs) => {
+        return pairs
+          .filter((pair) => typeof pair[1] !== 'undefined')
+          .map((pair) => {
+            try {
+              pair[1] = pair[1] && JSON.parse(pair[1])
+            } catch (err) {
+            }
+
+            return {
+              key: pair[0].slice(prefix.length),
+              value: pair[1]
+            }
+          })
+      })
   }
 }
 
