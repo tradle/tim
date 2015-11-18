@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "assert": "^1.3.0",
-    "asyncstorage-down": "tradle/asyncstorage-down",
+    "asyncstorage-down": "^2.1.0",
     "bittorrent-dht": "tradle/bittorrent-dht",
     "browserify-zlib": "^0.1.4",
     "buffer": "^3.5.1",
