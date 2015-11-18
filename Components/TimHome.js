@@ -13,6 +13,7 @@ var reactMixin = require('react-mixin');
 var sampleData = require('../data/data');
 var constants = require('tradle-constants');
 var TouchID = require('react-native-touch-id');
+var BACKUPS = require('asyncstorage-backup')
 
 var {
   StyleSheet,
@@ -54,7 +55,6 @@ class TimHome extends Component {
       utils.setModels(params.models);
       this.setState({isLoading: false});
     }
-
   }
   showContactsOrRegister() {
     if (utils.getMe())
@@ -158,6 +158,22 @@ class TimHome extends Component {
     utils.setModels(null)
     Actions.reloadModels()
   }
+  onBackupPressed() {
+    BACKUPS.backup()
+      .then((backupNumber) => {
+        AlertIOS.alert(
+          `Backed up to #${backupNumber}`
+        )
+      })
+  }
+  onLoadFromBackupPressed() {
+    BACKUPS.loadFromBackup()
+      .then((backupNumber) => {
+        AlertIOS.alert(
+          `Loaded from backup #${backupNumber}. Please refresh`
+        )
+      })
+  }
   render() {
     var url = LinkingIOS.popInitialURL();
   	var spinner =  <ScrollView
@@ -237,6 +253,18 @@ class TimHome extends Component {
                 underlayColor='transparent' onPress={this.onReloadModels.bind(this)}>
               <Text style={styles.text}>
                 Reload Models
+              </Text>
+            </TouchableHighlight>
+            <TouchableHighlight
+                underlayColor='transparent' onPress={this.onBackupPressed.bind(this)}>
+              <Text style={styles.text}>
+                Backup
+              </Text>
+            </TouchableHighlight>
+            <TouchableHighlight
+                underlayColor='transparent' onPress={this.onLoadFromBackupPressed.bind(this)}>
+              <Text style={styles.text}>
+                Load
               </Text>
             </TouchableHighlight>
           </View>

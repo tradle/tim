@@ -2,9 +2,11 @@
 
 var React = require('react-native')
 var {
-  AsyncStorage
+  AsyncStorage,
+  AlertIOS
 } = React
 
+var BeSafe = require('asyncstorage-backup')
 var Reflux = require('reflux');
 var Actions = require('../Actions/Actions');
 var extend = require('extend');
@@ -133,7 +135,10 @@ var Store = Reflux.createStore({
     // change to true if you want to wipe
     // everything and start from scratch
     if (false) {
-      intermediate = Q.ninvoke(AsyncStorage, 'clear')
+      intermediate = BeSafe.clear()
+    } else if (false) {
+      intermediate = BeSafe.loadFromLastBackup()
+        .catch(() => BeSafe.clear())
     } else {
       intermediate = Q()
     }
@@ -2385,8 +2390,7 @@ var Store = Reflux.createStore({
       err = err;
     })
 
-  },
-
+  }
 });
 module.exports = Store;
 
