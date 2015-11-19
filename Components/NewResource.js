@@ -224,7 +224,7 @@ class NewResource extends Component {
     if (this.props.additionalInfo)
       additionalInfo: additionalInfo
 
-    this.state.submitted = false
+    // this.state.submitted = false
     Actions.addItem(params);
   }
   chooser(prop, propName, event) {

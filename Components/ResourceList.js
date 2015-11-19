@@ -235,7 +235,7 @@ class ResourceList extends Component {
       route.title = resource.name
       // if (resource.name === 'Rabobank'  &&  (!me.organization  ||  me.organization.name !== 'Rabobank')) {
       var routes = this.props.navigator.getCurrentRoutes();
-      if (routes[routes.length - 1].title === 'Official Accounts') {
+      if (routes[routes.length - 1].scene.props.isOfficialAccounts) {
         var msg = {
           message: (me.firstName || 'There is a customer') + ' waiting for the response',
           _t: constants.TYPES.SIMPLE_MESSAGE,
@@ -450,7 +450,7 @@ class ResourceList extends Component {
       <View style={styles.footer}>
         <TouchableHighlight underlayColor='transparent' onPress={this.scanQRCode.bind(this)}>
           <View>
-            <Icon name='plus'  size={30}  color='#999999' style={styles.icon} />
+            <Icon name='plus'  size={25}  color='#999999' style={styles.icon} />
           </View>
         </TouchableHighlight>
       </View>
@@ -490,7 +490,8 @@ class ResourceList extends Component {
       backButtonTitle: 'Back',
       titleTextColor: '#7AAAC3',
       passProps: {
-        modelName: 'tradle.Organization'
+        modelName: 'tradle.Organization',
+        isOfficialAccounts: true
       }
     }));
   }
@@ -636,8 +637,8 @@ var styles = StyleSheet.create({
     backgroundColor: '#cccccc',
   },
   icon: {
-    width: 30,
-    height: 30,
+    width: 25,
+    height: 25,
     marginRight: 5,
     // color: '#cccccc'
   },
