@@ -137,7 +137,12 @@ var Store = Reflux.createStore({
     } else {
       intermediate = Q()
     }
-
+    voc.getModels().forEach(function(m) {
+      models[m.id] = {
+        key: m.id,
+        value: m
+      }
+    })
     this.ready = intermediate
     .then(function () {
       return self.getMe()
@@ -170,11 +175,23 @@ var Store = Reflux.createStore({
     var self = this
     return db.get(MY_IDENTITIES_MODEL + '_1')
     .then(function(value) {
-      if (value)
+      if (value) {
+        var key = MY_IDENTITIES_MODEL + '_1'
+        list[key] = {
+          key:   key,
+          value: value
+        }
         return db.get(value.currentIdentity)
+      }
     })
     .then (function(value) {
       me = value
+      utils.setMe(me)
+      var key = value[TYPE] + '_' + value[ROOT_HASH]
+      list[key] = {
+        key: key,
+        value: value
+      }
     })
     .catch(function(err) {
       return self.loadModels()
@@ -368,7 +385,7 @@ var Store = Reflux.createStore({
   onStart() {
     var self = this;
     this.ready.then(function() {
-      isLoaded = true
+      // isLoaded = true
       self.trigger({
         action: 'start',
         models: models,
@@ -2170,6 +2187,11 @@ var Store = Reflux.createStore({
       var noModels = self.isEmpty(models);
       if (noModels)
         return self.loadModels();
+      else {
+        var result = self.searchNotMessages({modelName: IDENTITY})
+        self.trigger({action: 'list', list: result})
+      }
+
       // if (noModels || Object.keys(list).length == 2)
       //   if (me)
       //     return self.loadDB();
