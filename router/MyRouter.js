@@ -46,6 +46,8 @@ var MyRouter = {
       return this.getQRCodeRoute(route)
     case 'ArticleView':
       return this.getArticleViewRoute(route)
+    case 'PhotoCarousel':
+      return this.getPhotoCarouselRoute(route)
     }
   },
   getHomeRoute() {
@@ -84,6 +86,7 @@ var MyRouter = {
                     isAggregation={props.isAggregation}
                     isRegistration={props.isRegistration}
                     sortProperty={props.sortProperty}
+                    isOfficialAccounts={props.isOfficialAccounts}
                     modelName={props.modelName} />;
       },
     })
@@ -130,7 +133,7 @@ var MyRouter = {
           <TouchableOpacity
             touchRetentionOffset={ExNavigator.Styles.barButtonTouchRetentionOffset}
             onPress={() => navigator.push(MyRouter.getRoute(route.onRightButtonPress))}>
-            <View style={{marginRight: 10, marginTop: 8}}>
+            <View style={styles.navBarRightButton}>
               <Icon name='plus'  size={22}  color='#7AAAC3'  style={styles.icon}/>
             </View>
           </TouchableOpacity>
@@ -163,7 +166,7 @@ var MyRouter = {
           <TouchableOpacity
             touchRetentionOffset={ExNavigator.Styles.barButtonTouchRetentionOffset}
             onPress={() => navigator.push(MyRouter.getRoute(route.onRightButtonPress))}>
-            <View style={{marginRight: 10, marginTop: 8}}>
+            <View style={styles.navBarRightButton}>
               <Icon name='plus'  size={22}  color='#7AAAC3'  style={styles.icon}/>
             </View>
           </TouchableOpacity>
@@ -189,6 +192,21 @@ var MyRouter = {
                     prop={props.prop}
                     verify={props.verify} />;
       },
+    })
+  },
+  getPhotoCarouselRoute(route) {
+    var PhotoCarousel = require('../Components/PhotoCarousel')
+    return extend(defaultRouteConfig(route), {
+      getSceneClass() {
+        return PhotoCarousel;
+      },
+      renderScene(navigator) {
+        var props = route.passProps
+        return <PhotoCarousel
+                   photos={props.photos}
+                   currentPhoto={props.currentPhoto}
+                   resource={props.resource} />
+      }
     })
   },
   getMessageViewRoute(route) {
@@ -327,7 +345,7 @@ function defaultRouteConfig (route) {
     },
     renderTitle() {
       return (
-        <Text style={{color: '#555555', fontSize: 16, marginTop: 8}}>{route.title}</Text>
+        <Text style={styles.navBarText}>{route.title}</Text>
       );
     },
     renderLeftButton(navigator) {
@@ -335,8 +353,8 @@ function defaultRouteConfig (route) {
         <TouchableOpacity
           touchRetentionOffset={ExNavigator.Styles.barButtonTouchRetentionOffset}
           onPress={() => navigator.pop()}>
-          <View style={{marginLeft: 10, marginTop: 8}}>
-            <Text style={{color: '#7AAAC3', fontSize: 16}}>{route.backButtonTitle || 'Back'}</Text>
+          <View style={styles.navBarLeftButton}>
+            <Text style={styles.navBarButtonText}>{route.backButtonTitle || 'Back'}</Text>
           </View>
         </TouchableOpacity>
       );
@@ -351,8 +369,8 @@ function defaultRouteConfig (route) {
           onPress={() =>
             navigator.push(MyRouter.getRoute(route.onRightButtonPress))
           }>
-          <View style={{marginRight: 10, marginTop: 8}}>
-            <Text style={{color: '#7AAAC3', fontSize: 16}}>{route.rightButtonTitle || ''}</Text>
+          <View style={styles.navBarRightButton}>
+            <Text style={styles.navBarButtonText}>{route.rightButtonTitle || ''}</Text>
           </View>
         </TouchableOpacity>
       );
@@ -371,17 +389,20 @@ var styles = StyleSheet.create({
     color: '#7AAAC3'
   },
   navBarText: {
-    fontSize: 16,
+    color: '#555555',
+    fontSize: 14,
+    marginTop: 6
   },
   navBarButtonText: {
     color: '#7AAAC3',
+    fontSize: 14
   },
   navBarLeftButton: {
-    marginTop: 8,
+    marginTop: 6,
     paddingLeft: 15,
   },
   navBarRightButton: {
-    marginTop: 8,
+    marginTop: 6,
     paddingRight: 15,
   },
 })
