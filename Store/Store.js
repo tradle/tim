@@ -11,7 +11,7 @@ var extend = require('extend');
 var Q = require('q');
 var AddressBook = require('NativeModules').AddressBook;
 var sampleData = require('../data/data');
-var voc = require('../data/models');
+var voc = require('tradle-models');
 
 var myIdentity = require('../data/myIdentity.json');
 var welcome = require('../data/welcome.json');
@@ -137,7 +137,7 @@ var Store = Reflux.createStore({
     } else {
       intermediate = Q()
     }
-    voc.getModels().forEach(function(m) {
+    voc.forEach(function(m) {
       models[m.id] = {
         key: m.id,
         value: m
@@ -216,7 +216,7 @@ var Store = Reflux.createStore({
   buildDriver(identity, keys, port) {
     var iJSON = identity.toJSON()
     // var prefix = iJSON.name.firstName.toLowerCase()
-    var dht = this.dhtFor(iJSON, port)
+    var dht = null; //this.dhtFor(iJSON, port)
     var keeper = new Keeper({
       // storage: prefix + '-storage',
       // flat: true, // flat directory structure
@@ -2140,29 +2140,50 @@ var Store = Reflux.createStore({
     var loadingModels = false;
 
     // console.time('dbStream')
-    return db.createReadStream()
-    .on('data', function(data) {
-      if (data.value.type === 'tradle.Model') {
-        models[data.key] = data;
-        self.setPropertyNames(data.value.properties);
-      }
-      else {
-        isLoaded = true
-        if (!myId  &&  data.key === MY_IDENTITIES_MODEL + '_1') {
-          myId = data.value.currentIdentity;
-          if (list[myId])
-            me = list[myId].value;
+    return utils.readDB(db)
+    .then((results) => {
+      results.forEach((data) => {
+        if (data.value == null) return
+
+        if (data.value.type === 'tradle.Model') {
+          models[data.key] = data;
+          self.setPropertyNames(data.value.properties);
         }
-        if (!me  &&  myId  && data.key == myId)
-          me = data.value;
-        if (data.value[TYPE] === IDENTITY) {
-          if (data.value.securityCode)
-            employees[data.value.securityCode] = data.value
+        else {
+          isLoaded = true
+          if (!myId  &&  data.key === MY_IDENTITIES_MODEL + '_1') {
+            myId = data.value.currentIdentity;
+            if (list[myId])
+              me = list[myId].value;
+          }
+          if (!me  &&  myId  && data.key == myId)
+            me = data.value;
+          if (data.value[TYPE] === IDENTITY) {
+            if (data.value.securityCode)
+              employees[data.value.securityCode] = data.value
+          }
+          list[data.key] = data;
         }
-        list[data.key] = data;
-      }
-    })
-    .on('close', function() {
+      })
+
+      console.log('Stream ended');
+      // console.timeEnd('dbStream')
+      // if (me)
+      //   utils.setMe(me);
+      var noModels = self.isEmpty(models);
+      if (noModels)
+        return self.loadModels();
+      // if (noModels || Object.keys(list).length == 2)
+      //   if (me)
+      //     return self.loadDB();
+      //   else {
+      //     isLoaded = false;
+      //     if (noModels)
+      //       return self.loadModels();
+      //   }
+      // // else
+      // //   return self.loadAddressBook();
+
       if (me  &&  me.organization) {
         if (me.securityCode) {
           var org = list[utils.getId(me.organization)].value
@@ -2179,35 +2200,9 @@ var Store = Reflux.createStore({
       console.log('Stream closed');
       utils.setModels(models);
     })
-    .on('end', function() {
-      console.log('Stream ended');
-      // console.timeEnd('dbStream')
-      // if (me)
-      //   utils.setMe(me);
-      var noModels = self.isEmpty(models);
-      if (noModels)
-        return self.loadModels();
-      else {
-        var result = self.searchNotMessages({modelName: IDENTITY})
-        self.trigger({action: 'list', list: result})
-      }
-
-      // if (noModels || Object.keys(list).length == 2)
-      //   if (me)
-      //     return self.loadDB();
-      //   else {
-      //     isLoaded = false;
-      //     if (noModels)
-      //       return self.loadModels();
-      //   }
-      // // else
-      // //   return self.loadAddressBook();
+    .catch(err => {
+      console.log('err:' + err);
     })
-    .on('error', function(err) {
-      console.log('err: ' + err);
-    });
-
-
   },
 
   isEmpty(obj) {
@@ -2228,7 +2223,7 @@ var Store = Reflux.createStore({
 
     if (loadTest) {
       if (utils.isEmpty(models)) {
-        voc.getModels().forEach(function(m) {
+        voc.forEach(function(m) {
           if (!m[ROOT_HASH])
             m[ROOT_HASH] = sha(m);
           batch.push({type: 'put', key: m.id, value: m});
@@ -2263,7 +2258,7 @@ var Store = Reflux.createStore({
   loadModels() {
     var batch = [];
 
-    voc.getModels().forEach(function(m) {
+    voc.forEach(function(m) {
       if (!m[ROOT_HASH])
         m[ROOT_HASH] = sha(m);
       batch.push({type: 'put', key: m.id, value: m});
