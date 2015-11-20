@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node_modules/react-native/packager/packager.sh",
-    "postinstall": "../rn-nodeify/cmd.js --hack=all"
+    "postinstall": "rn-nodeify --hack=all"
   },
   "dependencies": {
     "assert": "^1.3.0",
