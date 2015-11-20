@@ -49,6 +49,8 @@ var map = require('map-stream')
 var leveldown = require('asyncstorage-down')
 var DHT = require('bittorrent-dht') // use tradle/bittorrent-dht fork
 var Blockchain = require('cb-blockr') // use tradle/cb-blockr fork
+Blockchain.throttleGet(100)
+Blockchain.throttlePost(1000)
 var midentity = require('midentity')
 var Identity = midentity.Identity
 var defaultKeySet = midentity.defaultKeySet
@@ -103,7 +105,7 @@ var Store = Reflux.createStore({
   // this will set up listeners to all publishers in TodoActions, using onKeyname (or keyname) as callbacks
   listenables: [Actions],
   // this will be called by all listening components as they register their listeners
-  init() {
+  async init() {
     // Setup components:
     var ldb = level('TiM.db', { valueEncoding: 'json' });
     // ldb = levelQuery(level('TiM.db', { valueEncoding: 'json' }));
@@ -130,11 +132,21 @@ var Store = Reflux.createStore({
     //   //
     // })
 
+    voc.forEach(function(m) {
+      models[m.id] = {
+        key: m.id,
+        value: m
+      }
+    })
+
     // console.time('loadMyResources')
+    var readyDefer = Q.defer()
+    this.ready = readyDefer.promise
     var intermediate
     // change to true if you want to wipe
     // everything and start from scratch
     if (false) {
+      // intermediate = AsyncStorage.clear()
       intermediate = BeSafe.clear()
     } else if (false) {
       intermediate = BeSafe.loadFromLastBackup()
@@ -142,39 +154,31 @@ var Store = Reflux.createStore({
     } else {
       intermediate = Q()
     }
-    voc.forEach(function(m) {
-      models[m.id] = {
-        key: m.id,
-        value: m
-      }
-    })
-    this.ready = intermediate
-    .then(function () {
-      return self.getMe()
-    })
-    .then(function(value) {
-      self.loadMyResources()
-    })
-    .then(function() {
-      // console.timeEnd('loadMyResources')
-      if (!utils.isEmpty(list))
-        isLoaded = true;
-      if (me)
-        promiseMe()
-    })
-    .catch(function(err) {
-      err = err;
-    });
 
-    function promiseMe () {
-    // console.time('getDriver')
-      return self.getDriver(me)
-        .then(function () {
-    // console.timeEnd('getDriver')
-          self.loadResources()
-          self.initIdentity(me)
-        })
+    try {
+      await intermediate
+      await self.getMe()
+    } catch (err) {
+      throw err
     }
+
+      // console.timeEnd('loadMyResources')
+    if (!utils.isEmpty(list))
+      isLoaded = true;
+
+    if (me) {
+      try {
+        await self.getDriver(me)
+      } catch (err) {
+        throw err
+      }
+
+      self.loadResources()
+      self.initIdentity(me)
+    }
+
+    readyDefer.resolve()
+    await this.ready
   },
   getMe() {
     var self = this
@@ -2390,7 +2394,13 @@ var Store = Reflux.createStore({
       err = err;
     })
 
-  }
+  },
+  onStartTransition() {
+    // if (meDriver) meDriver.pause(2000)
+  },
+  onEndTransition() {
+    // if (meDriver) meDriver.resume()
+  },
 });
 module.exports = Store;
 

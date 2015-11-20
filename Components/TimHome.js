@@ -158,21 +158,23 @@ class TimHome extends Component {
     utils.setModels(null)
     Actions.reloadModels()
   }
-  onBackupPressed() {
-    BACKUPS.backup()
-      .then((backupNumber) => {
-        AlertIOS.alert(
-          `Backed up to #${backupNumber}`
-        )
-      })
+  async onBackupPressed() {
+    let backupNumber = await BACKUPS.backup()
+    AlertIOS.alert(
+      `Backed up to #${backupNumber}`
+    )
   }
-  onLoadFromBackupPressed() {
-    BACKUPS.loadFromBackup()
-      .then((backupNumber) => {
-        AlertIOS.alert(
-          `Loaded from backup #${backupNumber}. Please refresh`
-        )
-      })
+  async onLoadFromBackupPressed() {
+    try {
+      let backupNumber = await BACKUPS.loadFromBackup()
+      AlertIOS.alert(
+        `Loaded from backup #${backupNumber}. Please refresh`
+      )
+    } catch (err) {
+      AlertIOS.alert(
+        `${err.message}`
+      )
+    }
   }
   render() {
     var url = LinkingIOS.popInitialURL();

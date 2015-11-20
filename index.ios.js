@@ -27,6 +27,7 @@ var QRCodeScanner = require('./Components/QRCodeScanner')
 var utils = require('./utils/utils');
 var constants = require('tradle-constants');
 var Icon = require('react-native-vector-icons/Ionicons');
+var Actions = require('./Actions/Actions');
 // var Device = require('react-native-device');
 
 var reactMixin = require('react-mixin');
@@ -75,6 +76,7 @@ class TiMApp extends Component {
   }
   componentWillUnmount() {
     LinkingIOS.removeEventListener('url', this._handleOpenURL.bind(this));
+    this._navListeners.forEach((listener) => listener.remove())
   }
   _handleOpenURL(event) {
     var url = event.url.trim();
@@ -164,8 +166,16 @@ class TiMApp extends Component {
     }
   }
 
+  onNavigatorBeforeTransition() {
+    Actions.startTransition()
+  }
+
+  onNavigatorAfterTransition() {
+    Actions.endTransition()
+  }
+
   render() {
-    return (
+    var nav = (
       <Navigator
         style={styles.container}
         initialRoute={this.state.initialRoute}
@@ -184,11 +194,21 @@ class TiMApp extends Component {
         }}
         />
     );
+
+    return nav
   }
 
   renderScene(route, nav) {
     var props = route.passProps;
-    this.state.navigator = nav;
+    if (!this.state.navigator) {
+      this._navListeners = [
+        nav.navigationContext.addListener('willfocus', this.onNavigatorBeforeTransition),
+        nav.navigationContext.addListener('didfocus', this.onNavigatorAfterTransition)
+      ]
+
+      this.state.navigator = nav;
+    }
+
     switch (route.id) {
     case 1:
       return <TimHome navigator={nav} modelName={constants.TYPES.IDENTITY} filter={props.filter} />;

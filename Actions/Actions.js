@@ -19,7 +19,9 @@ var Actions = Reflux.createActions([
   'addModelFromUrl',
   'start',
   'share',
-  'addVerification'
+  'addVerification',
+  'startTransition',
+  'endTransition'
   // 'messageList',
   // 'getMe',
   // 'getDb',
