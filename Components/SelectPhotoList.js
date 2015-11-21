@@ -1,5 +1,5 @@
 'use strict';
- 
+
 var React = require('react-native');
 var t = require('tcomb-form-native');
 var utils = require('../utils/utils');
@@ -70,27 +70,27 @@ class SelectPhotoList extends Component {
       first: this.state.batchSize,
       groupTypes: this.state.groupTypes
     };
-    if (this.state.lastCursor) 
+    if (this.state.lastCursor)
       fetchParams.after = this.state.lastCursor;
 
     CameraRoll.getPhotos(fetchParams, this._appendAssets.bind(this), logError);
   }
   onEndReached() {
-    if (!this.state.noMore) 
+    if (!this.state.noMore)
       this.fetch();
   }
   renderRow(assets, sectionID, rowID)  {
     var photos = [];
-    for (var asset of assets) {
-      if (asset === null) 
-        continue;
+    assets.forEach((asset) =>  {
+      if (asset === null) return
+
       var icon = (this.state.selected[asset.node.image.uri])
-               ? 
+               ?
                  <TouchableHighlight onPress={this.onSelect.bind(this, asset)} underlayColor='#ffffff'>
                    <View>
                      <Icon name={'ios-checkmark-empty'} size={20} color='#eeeeee' style={styles.icon} />
                    </View>
-                 </TouchableHighlight>  
+                 </TouchableHighlight>
                : <View />
       photos.push(
               <View>
@@ -100,7 +100,7 @@ class SelectPhotoList extends Component {
                  {icon}
               </View>
       );
-    }
+    })
 
     return (
       <View style={styles.row}>
@@ -108,7 +108,7 @@ class SelectPhotoList extends Component {
       </View>
     );
   }
-  onSelect(asset) {    
+  onSelect(asset) {
     this.props.onSelect(asset);
     var selected = this.state.selected;
     if (selected[asset.node.image.uri])
@@ -128,8 +128,8 @@ class SelectPhotoList extends Component {
     var assets = data.edges;
     var state = { loadingMore: false };
 
-    if (!data.page_info.has_next_page) 
-      state.noMore = true;    
+    if (!data.page_info.has_next_page)
+      state.noMore = true;
 
     if (assets.length > 0) {
       state.lastCursor = data.page_info.end_cursor;

@@ -1,5 +1,5 @@
 'use strict';
- 
+
 var React = require('react-native');
 var PhotoList = require('./PhotoList');
 var ArticleView = require('./ArticleView');
@@ -11,7 +11,7 @@ var DEFAULT_CURRENCY_SYMBOL = '$';
 
 var {
   StyleSheet,
-  Image, 
+  Image,
   View,
   ListView,
   LayoutAnimation,
@@ -37,7 +37,7 @@ class ShowPropertiesView extends Component {
   render() {
     var viewCols = this.getViewCols();
     return (
-      <View>    
+      <View>
         {viewCols}
       </View>
     );
@@ -53,12 +53,11 @@ class ShowPropertiesView extends Component {
     var props = model.properties;
     if (excludedProperties) {
       var mapped = [];
-      for (var p of excludedProperties) {
+      excludedProperties.forEach((p) =>  {
         if (props[p]) {
           mapped.push(p);
-          continue;
         }
-      }
+      })
       excludedProperties = mapped;
     }
 
@@ -74,7 +73,7 @@ class ShowPropertiesView extends Component {
     }
     var isMessage = model.interfaces;
     if (!isMessage) {
-      var len = vCols.length; 
+      var len = vCols.length;
       for (var i=0; i<len; i++) {
         if (props[vCols[i]].displayName) {
           vCols.splice(i, 1);
@@ -87,40 +86,40 @@ class ShowPropertiesView extends Component {
     var viewCols = vCols.map(function(p) {
       if (excludedProperties  &&  excludedProperties.indexOf(p) !== -1)
         return;
-      
+
       var val = resource[p];
       var pMeta = model.properties[p];
       var isRef;
       var isDirectionRow;
       if (!val) {
-        if (pMeta.displayAs) 
-          val = utils.templateIt(pMeta, resource);      
+        if (pMeta.displayAs)
+          val = utils.templateIt(pMeta, resource);
         else
           return;
       }
       else if (pMeta.ref) {
         if (pMeta.ref == MONEY_TYPE) {
-          if (typeof val === 'number') 
-            val = DEFAULT_CURRENCY_SYMBOL + val; 
-          
+          if (typeof val === 'number')
+            val = DEFAULT_CURRENCY_SYMBOL + val;
+
           else {
             var currencies = utils.getModel(pMeta.ref).value.properties.currency.oneOf;
             var valCurrency = val.currency;
-            for (var c of currencies) {
+            currencies.some((c) =>  {
               var currencySymbol = c[valCurrency];
               if (currencySymbol) {
                 val = (valCurrency == 'USD') ? currencySymbol + val.value : val.value + currencySymbol;
-                break;
+                return true
               }
-            }
+            })
           }
         }
         else if (self.props.showRefResource) {
           // ex. property that is referencing to the Organization for the contact
           var value = val[constants.TYPE] ? utils.getDisplayName(val, utils.getModel(val[constants.TYPE]).value.properties) : val.title;
-               
+
           val = <TouchableHighlight onPress={self.props.showRefResource.bind(self, val, pMeta)} underlayColor='transparent'>
-                 <Text style={[styles.title, styles.linkTitle]}>{value}</Text>                 
+                 <Text style={[styles.title, styles.linkTitle]}>{value}</Text>
                </TouchableHighlight>
 
           isRef = true;
@@ -136,13 +135,13 @@ class ShowPropertiesView extends Component {
         if (val instanceof Array) {
           if (pMeta.items.backlink)
             return <View />
-          var vCols = pMeta.viewCols;          
+          var vCols = pMeta.viewCols;
           var cnt = val.length;
           val = self.renderItems(val, pMeta);
           first = false;
-        }      
+        }
         else if (typeof val === 'number') {
-          val = <Text style={styles.description}>{val}</Text>;        
+          val = <Text style={styles.description}>{val}</Text>;
           // isDirectionRow = true;
         }
         else if (pMeta.type !== 'object'  &&  (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0))
@@ -156,12 +155,12 @@ class ShowPropertiesView extends Component {
         }
       }
       var separator = first
-                    ? <View /> 
+                    ? <View />
                     : <View style={styles.separator}></View>;
 
       var title = model.properties[p].skipLabel
                 ? <View />
-                : <Text style={styles.title}>{model.properties[p].title || utils.makeLabel(p)}</Text> 
+                : <Text style={styles.title}>{model.properties[p].title || utils.makeLabel(p)}</Text>
       first = false;
       return (<View>
                {separator}
@@ -172,7 +171,7 @@ class ShowPropertiesView extends Component {
              </View>
              );
     });
-    return viewCols;    
+    return viewCols;
   }
 
   renderItems(val, pMeta) {
@@ -185,7 +184,7 @@ class ShowPropertiesView extends Component {
       }
     }
     var counter = 0;
-    var vCols = pMeta.viewCols;        
+    var vCols = pMeta.viewCols;
     if (!vCols) {
       vCols = [];
       for (var p in itemsMeta)
@@ -195,16 +194,16 @@ class ShowPropertiesView extends Component {
     var self = this;
     return val.map(function(v) {
       var ret = [];
-      counter++; 
-      for (var p of vCols) {
+      counter++;
+      vCols.forEach((p) =>  {
         var itemMeta = itemsMeta[p];
         if (!v[p]  &&  !itemMeta.displayAs)
-          continue;
+          return
         if (itemMeta.displayName)
-          continue;
+          return
         var value;
-        if (itemMeta.displayAs) 
-          value = utils.templateIt(itemMeta, v) 
+        if (itemMeta.displayAs)
+          value = utils.templateIt(itemMeta, v)
         else if (itemMeta.type === 'date')
           value = utils.formatDate(v[p]);
         else if (itemMeta.type !== 'object') {
@@ -213,25 +212,25 @@ class ShowPropertiesView extends Component {
             ret.push(
                <PhotoList photos={v.photos} navigator={self.props.navigator} numberInRow={4} resource={resource}/>
             );
-            continue;
-          }          
+            return
+          }
           else
             value = v[p];
         }
-        else if (itemMeta.ref) 
+        else if (itemMeta.ref)
           value = v[p].title  ||  utils.getDisplayName(v[p], utils.getModel(itemMeta.ref).value.properties);
-        else   
+        else
           value = v[p].title;
 
         if (!value)
-          continue;
+          return
 
           // ret.push(
           //   <View>
           //     <TouchableHighlight onPress={self.showResource.bind(this, value)} underlayColor='transparent'>
           //       <View style={value.length > 60 ? styles.itemColContainer : styles.itemContainer}>
           //         <Text style={itemMeta.skipLabel ? {height: 0} : styles.title}>{itemMeta.skipLabel ? '' : utils.makeLabel(p)}</Text>
-          //         <Text style={styles.description}>{value.title}</Text>                 
+          //         <Text style={styles.description}>{value.title}</Text>
           //       </View>
           //      </TouchableHighlight>
           //  </View>);
@@ -239,17 +238,18 @@ class ShowPropertiesView extends Component {
           <View style={{padding: 10}}>
            <View style={styles.itemColContainer}>
              <Text style={itemMeta.skipLabel ? {height: 0} : styles.title}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
-             <Text style={styles.description}>{value}</Text>                 
+             <Text style={styles.description}>{value}</Text>
            </View>
-         </View>);
-      }
+         </View>
+        );
+      })
       return (
         <View>
            {ret}
            {counter == cnt ? <View></View> : <View style={styles.itemSeparator}></View>}
         </View>
       )
-    });    
+    });
   }
   onPress(event) {
     var model = utils.getModel(this.props.resource[constants.TYPE]).value;

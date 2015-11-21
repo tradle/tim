@@ -1,5 +1,5 @@
 'use strict';
- 
+
 var React = require('react-native');
 var utils = require('../utils/utils');
 var constants = require('tradle-constants');
@@ -14,7 +14,7 @@ var RowMixin = {
     var moneyValue = this.props.resource[moneyProp.name];
     var currencies = utils.getModel(ref).value.properties.currency.oneOf;
     var valCurrency = moneyValue.currency;
-    for (var c of currencies) {
+    currencies.forEach((c) => {
       var currencySymbol = c[valCurrency];
       if (currencySymbol) {
         var val = (valCurrency == 'USD') ? currencySymbol + moneyValue.value : moneyValue.value + currencySymbol;
@@ -22,7 +22,7 @@ var RowMixin = {
             ? <Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>
             : <View style={{flexDirection: 'row'}}><Text style={style}>{moneyProp.title}</Text><Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text></View>
       }
-    }        
+    })
 
   },
   addDateProp(dateProp, style) {
@@ -32,7 +32,7 @@ var RowMixin = {
     if (properties[dateProp].style)
       style = [style, properties[dateProp].style];
     var val = utils.formatDate(new Date(resource[dateProp])); //utils.getFormattedDate(new Date(resource[dateProp]));
-    
+
     return properties[dateProp].skipLabel
         ? <Text style={style}>{val}</Text>
         : <View style={{flexDirection: 'row'}}><Text style={style}>{properties[dateProp].title}</Text><Text style={style}>{val}</Text></View>
@@ -47,10 +47,10 @@ var RowMixin = {
       row = <Text style={style} numberOfLines={1}>{propValue}</Text>;
     else if (!backlink  &&  propValue  && (propValue.indexOf('http://') == 0  ||  propValue.indexOf('https://') == 0))
       row = <Text style={style} onPress={this.onPress.bind(this)} numberOfLines={1}>{propValue}</Text>;
-    else {          
+    else {
       var val = prop.displayAs ? utils.templateIt(prop, resource) : propValue;
       let msgParts = utils.splitMessage(val);
-      if (msgParts.length <= 2) 
+      if (msgParts.length <= 2)
         val = msgParts[0];
       else {
         val = '';

@@ -90,13 +90,14 @@ class NewItem extends Component {
       fields: {}
     };
     if (required) {
-      for (var p of required)
+      required.forEach((p) => {
         if (!item[p]  &&  prop.name == 'photos') {
           if (!utils.isEmpty(this.state.selectedAssets))
-            continue;
+            return;
           hasError = true;
           this.setState({err: 'Select the photo please'});
         }
+      })
     }
     if (!hasError)
       this.state.options = null;

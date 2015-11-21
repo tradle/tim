@@ -173,16 +173,16 @@ class NewResource extends Component {
     }
     var msg = '';
 
-    for (var p of required) {
+    required.forEach((p) =>  {
       var v = value[p] ? value[p] : resource[p];
       var isDate = Object.prototype.toString.call(v) === '[object Date]'
       if (!v || (isDate  &&  isNaN(v.getTime())))  {
         var prop = this.props.model.properties[p]
         if (prop.items  &&  prop.items.backlink)
-          continue
+          return
         if ((prop.ref /*&& prop.ref !== 'tradle.Money'*/) ||  isDate  ||  prop.items) {
           if (resource && resource[p])
-            continue;
+            return;
           if (msg.length == 0)
             msg += 'Invalid values for the properties: '
           else
@@ -190,7 +190,7 @@ class NewResource extends Component {
           msg += '\'' + this.props.model.properties[p].title + '\'';
         }
       }
-    }
+    })
     if (msg.length) {
       this.setState({ err: msg });
       this.state.submitted = false

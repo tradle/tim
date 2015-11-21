@@ -131,8 +131,9 @@ class MessageRow extends Component {
           style = styles.mediumImage;
         else
           style = styles.image;
-        for (var p of resource.photos)
+        resource.photos.forEach((p) => {
           photoUrls.push({url: utils.getImageUri(p.url)});
+        })
 
         photoListStyle = {
           flexDirection: 'row',

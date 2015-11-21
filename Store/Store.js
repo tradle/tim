@@ -581,14 +581,15 @@ var Store = Reflux.createStore({
   getRepresentative(orgId) {
     var result = this.searchNotMessages({modelName: IDENTITY})
     var orgRep;
-    for (var ir of result) {
-      if (!ir.organization)
-        continue
+    result.some((ir) =>  {
+      if (!ir.organization) return
+
       if (utils.getId(ir.organization) === orgId) {
         orgRep = ir
-        break
+        return true
       }
-    }
+    })
+
     return orgRep
   },
   onAddVerification(r, notOneClickVerification, dontSend) {
@@ -720,14 +721,15 @@ var Store = Reflux.createStore({
     var meId = me[TYPE] + '_' + me[ROOT_HASH];
     var result = [];
     if (allIdentities) {
-      for (var id of allIdentities)
+      allIdentities.forEach((id) => {
         if (id.id != meId) {
           var resource = {};
           if (list[id.id].value.canceled)
-            continue;
+            return;
           extend(resource, list[id.id].value);
           result.push(resource);
         }
+      })
     }
     this.trigger({action: 'showIdentityList', list: result});
   },
@@ -1136,11 +1138,11 @@ var Store = Reflux.createStore({
     utils.dedupeVerifications(result)
 
     var resultList = [];
-    for (var r of result) {
+    result.forEach((r) =>  {
       var rr = {};
       extend(rr, r);
       resultList.push(rr);
-    }
+    })
     var model = this.getModel(params.modelName).value;
     var isMessage = model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1);
     var verificationsToShare;
@@ -1234,10 +1236,10 @@ var Store = Reflux.createStore({
         delete foundResources[IDENTITY_MODEL + '_' + me[ROOT_HASH]];
       else if (!isTest) {
         var myIdentities = list[MY_IDENTITIES_MODEL + '_1'].value.allIdentities;
-        for (var meId of myIdentities) {
+        myIdentities.forEach((meId) =>  {
           if (foundResources[meId.id])
              delete foundResources[meId.id];
-        }
+        })
       }
     }
 
@@ -1336,12 +1338,12 @@ var Store = Reflux.createStore({
       var iMeta = null;
       if (isAllMessages) {
         if (implementors) {
-          for (var impl of implementors) {
+          implementors.some((impl) => {
             if (impl.id.indexOf(key.substring(0, key.indexOf('_'))) === 0) {
               iMeta = impl;
-              break;
+              return true
             }
-          }
+          })
           if (!iMeta)
             continue;
         }
@@ -1463,12 +1465,12 @@ var Store = Reflux.createStore({
       return new Date(a.time) - new Date(b.time);
     });
     // not for subreddit
-    for (var r of result) {
+    result.forEach((r) =>  {
       r.from.photos = list[utils.getId(r.from)].value.photos;
       var to = list[utils.getId(r.to)]
       if (!to) console.log(r.to)
       r.to.photos = to && to.value.photos;
-    }
+    })
     return result;
   },
   fillMessage(r) {
@@ -2500,12 +2502,12 @@ module.exports = Store;
       var iMeta = null;
       if (isAllMessages) {
         if (implementors) {
-          for (var impl of implementors) {
+          implementors.forEach((impl) =>  {
             if (impl.id.indexOf(key.substring(0, key.indexOf('_'))) === 0) {
               iMeta = impl;
               break;
             }
-          }
+          })
           if (!iMeta)
             continue;
         }
@@ -2606,10 +2608,10 @@ module.exports = Store;
       return new Date(a.time) - new Date(b.time);
     });
     // not for subreddit
-    for (var r of result) {
+    result.forEach((r) =>  {
       r.from.photos = list[utils.getId(r.from)].value.photos;
       r.to.photos = list[utils.getId(r.to)].value.photos;
-    }
+    })
     return result;
   },
   setOrg(value) {
