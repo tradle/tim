@@ -2398,10 +2398,10 @@ var Store = Reflux.createStore({
 
   },
   onStartTransition() {
-    // if (meDriver) meDriver.pause(2000)
+    if (meDriver) meDriver.pause(2000)
   },
   onEndTransition() {
-    // if (meDriver) meDriver.resume()
+    if (meDriver) meDriver.resume()
   },
 });
 module.exports = Store;
