@@ -2,7 +2,7 @@
 
 var React = require('react-native');
 var utils = require('../utils/utils');
-var constants = require('tradle-constants');
+var constants = require('@tradle/constants');
 var t = require('tcomb-form-native');
 var MONEY_TYPE = 'tradle.Money';
 var propTypesMap = {

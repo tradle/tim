@@ -15,7 +15,7 @@ var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var InvertibleScrollView = require('react-native-invertible-scroll-view');
-var constants = require('tradle-constants');
+var constants = require('@tradle/constants');
 
 var {
   ListView,

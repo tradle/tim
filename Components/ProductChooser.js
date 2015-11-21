@@ -7,7 +7,7 @@ var reactMixin = require('react-mixin');
 var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
-var constants = require('tradle-constants');
+var constants = require('@tradle/constants');
 var MessageList = require('./MessageList')
 var {
   ListView,

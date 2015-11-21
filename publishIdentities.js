@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 var repub = require('./utils/repub')
-var constants = require('tradle-constants')
+var constants = require('@tradle/constants')
 var identities = require('./data/myIdentity.json')
   .map(function (i) {
     return {

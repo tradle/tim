@@ -2,7 +2,7 @@
 
 var React = require('react-native');
 var utils = require('../utils/utils');
-var constants = require('tradle-constants');
+var constants = require('@tradle/constants');
 var STRUCTURED_MESSAGE_COLOR = '#F6FFF0';
 var {
   Image,
@@ -28,22 +28,22 @@ class MessageTypeRow extends Component {
     if (resource.owner  &&  resource.owner.photos)  {
       hasOwnerPhoto = true;
       var uri = utils.getImageUri(resource.owner.photos[0].url);
-      ownerPhoto = 
+      ownerPhoto =
         <View style={[styles.cell, {marginVertical: 2}]}>
-          <Image source={{uri: uri}} style={styles.msgImage} />         
+          <Image source={{uri: uri}} style={styles.msgImage} />
         </View>
     }
     else
       ownerPhoto = <View style={[styles.cell, {marginVertical: 20}]} />
     var renderedRow = [];
     var onPressCall = this.props.onSelect;
-    
+
     var addStyle, inRow;
     var noMessage = !resource.message  ||  !resource.message.length;
     var properties = model.properties;
     if (!renderedRow.length) {
       var vCols = utils.getDisplayName(resource);
-      if (vCols)                
+      if (vCols)
         renderedRow = <Text style={styles.modelTitle} numberOfLines={2}>{vCols}</Text>;
     }
     var verPhoto;
@@ -52,11 +52,11 @@ class MessageTypeRow extends Component {
       var url = utils.getImageUri(ownerImg);
       verPhoto = <Image source={{uri: ownerImg}} style={styles.ownerImage} />
     }
-    var rowStyle = model.style 
-                 ? [styles.row, {backgroundColor: STRUCTURED_MESSAGE_COLOR}] 
+    var rowStyle = model.style
+                 ? [styles.row, {backgroundColor: STRUCTURED_MESSAGE_COLOR}]
                  /*: noMessage ? {}*/ : styles.row;
 
-    var messageBody = 
+    var messageBody =
       <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
         <View style={rowStyle}>
           <View style={{paddingLeft: 10}}/>
@@ -67,10 +67,10 @@ class MessageTypeRow extends Component {
           </View>
           {ownerPhoto}
         </View>
-      </TouchableHighlight>      
+      </TouchableHighlight>
 
     var viewStyle = { margin:1, backgroundColor: '#f7f7f7' }
-      
+
     return (
       <View style={viewStyle} key={resource}>
         {messageBody}
@@ -112,10 +112,10 @@ var styles = StyleSheet.create({
   cell: {
     marginLeft: 10,
   },
-  myCell: { 
-    padding: 5, 
-    justifyContent: 'flex-end', 
-    borderRadius: 10, 
+  myCell: {
+    padding: 5,
+    justifyContent: 'flex-end',
+    borderRadius: 10,
     backgroundColor: '#569bff',
   },
   warnImage: {

@@ -3,11 +3,11 @@
 var React = require('react-native');
 var utils = require('../utils/utils');
 var Icon = require('react-native-vector-icons/Ionicons');
-var constants = require('tradle-constants');
+var constants = require('@tradle/constants');
 
 var {
   StyleSheet,
-  Image, 
+  Image,
   View,
   Text,
   TouchableHighlight,
@@ -31,7 +31,7 @@ class PhotoView extends Component {
     if (!model.interfaces  &&  !model.isInterface  &&  !resource[constants.ROOT_HASH])
       return <View />
 
-    var hasPhoto = resource.photos && resource.photos.length; 
+    var hasPhoto = resource.photos && resource.photos.length;
     var currentPhoto = this.state.currentPhoto || (hasPhoto  &&  resource.photos[0]);
     if (!currentPhoto) {
       var icon;
@@ -49,12 +49,12 @@ class PhotoView extends Component {
     var url = currentPhoto.url;
     var nextPhoto = resource.photos.length == 1
     var uri = utils.getImageUri(url);
-    var source = uri.charAt(0) == '/' || uri.indexOf('data') === 0 
+    var source = uri.charAt(0) == '/' || uri.indexOf('data') === 0
                ? {uri: uri, isStatic: true}
                : {uri: uri}
     if (resource.photos.length == 1)
-      return <Image source={source} style={styles.image} />; 
-    else {           
+      return <Image source={source} style={styles.image} />;
+    else {
       var nextPhoto;
       var len = resource.photos.length;
       for (var i=0; i<len  &&  !nextPhoto; i++) {

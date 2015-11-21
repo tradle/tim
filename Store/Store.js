@@ -13,7 +13,7 @@ var extend = require('extend');
 var Q = require('q');
 var AddressBook = require('NativeModules').AddressBook;
 var sampleData = require('../data/data');
-var voc = require('tradle-models');
+var voc = require('@tradle/models');
 
 var myIdentity = require('../data/myIdentity.json');
 var welcome = require('../data/welcome.json');
@@ -24,7 +24,7 @@ var utils = require('../utils/utils');
 var level = require('react-native-level')
 var promisify = require('q-level');
 
-var constants = require('tradle-constants');
+var constants = require('@tradle/constants');
 var NONCE = constants.NONCE
 var TYPE = constants.TYPE
 var ROOT_HASH = constants.ROOT_HASH
@@ -47,23 +47,23 @@ var getDHTKey = require('tim/lib/utils').getDHTKey
 var dns = require('dns')
 var map = require('map-stream')
 var leveldown = require('asyncstorage-down')
-var DHT = require('bittorrent-dht') // use tradle/bittorrent-dht fork
-var Blockchain = require('cb-blockr') // use tradle/cb-blockr fork
+var DHT = require('@tradle/bittorrent-dht') // use tradle/bittorrent-dht fork
+var Blockchain = require('@tradle/cb-blockr') // use tradle/cb-blockr fork
 Blockchain.throttleGet(100)
 Blockchain.throttlePost(1000)
-var midentity = require('midentity')
+var midentity = require('@tradle/identity')
 var Identity = midentity.Identity
 var defaultKeySet = midentity.defaultKeySet
-var Keeper = require('http-keeper')
-var Wallet = require('simple-wallet')
+var Keeper = require('@tradle/http-keeper')
+var Wallet = require('@tradle/simple-wallet')
 var crypto = require('crypto')
 var rimraf = require('rimraf')
 var fs = require('fs')
-var kiki = require('kiki')
+var kiki = require('@tradle/kiki')
 var Keys = kiki.Keys
 
-var tutils = require('tradle-utils')
-var ChainedObj = require('chained-obj');
+var tutils = require('@tradle/utils')
+var ChainedObj = require('@tradle/chained-obj');
 var Builder = ChainedObj.Builder;
 var Parser = ChainedObj.Parser;
 
@@ -1970,7 +1970,7 @@ var Store = Reflux.createStore({
 
       // Object was successfully read off chain
       meDriver.on('unchained', function (obj) {
-        console.log('unchained', obj)
+        // console.log('unchained', obj)
         meDriver.lookupObject(obj)
         .then(function(obj) {
           // return
@@ -1986,8 +1986,8 @@ var Store = Reflux.createStore({
       })
       // Object was successfully put on chain but not yet confirmed
       meDriver.on('chained', function (obj) {
-        debugger
-        console.log('chained', obj)
+        // debugger
+        // console.log('chained', obj)
         meDriver.lookupObject(obj)
         .then(function(obj) {
           obj = obj
@@ -2002,7 +2002,7 @@ var Store = Reflux.createStore({
 
       meDriver.on('message', function (msg) {
         // debugger
-        console.log(msg)
+        // console.log(msg)
         meDriver.lookupObject(msg)
         .then(function(obj) {
           // return

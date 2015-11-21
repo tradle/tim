@@ -1,10 +1,10 @@
 'use strict';
- 
+
 var React = require('react-native');
 var utils = require('../utils/utils');
 var MessageList = require('./MessageList');
 var Icon = require('react-native-vector-icons/Ionicons');
-var constants = require('tradle-constants');
+var constants = require('@tradle/constants');
 var buttonStyles = require('../styles/buttonStyles');
 
 var {
@@ -24,7 +24,7 @@ class MoreLikeThis extends Component {
       id: 11,
       backButtonTitle: 'Back',
       passProps: {
-        resource: utils.getMe(), 
+        resource: utils.getMe(),
         filter: '',
         isAggregation: true,
         modelName: modelName,

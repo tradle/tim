@@ -1,9 +1,9 @@
 'use strict';
- 
+
 var utils = require('../utils/utils');
 var ResourceView = require('./ResourceView');
 var ResourceList = require('./ResourceList');
-var constants = require('tradle-constants');
+var constants = require('@tradle/constants');
 
 
 var ResourceViewMixin = {
@@ -20,7 +20,7 @@ var ResourceViewMixin = {
       // rightButtonTitle: 'Edit',
       backButtonTitle: 'Back',
       passProps: {resource: resource, prop: prop}
-    });    
+    });
   },
   showResources(resource, prop) {
     this.props.navigator.push({

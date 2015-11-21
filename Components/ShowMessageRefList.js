@@ -9,7 +9,7 @@ var Icon = require('react-native-vector-icons/Ionicons');
 var Actions = require('../Actions/Actions');
 
 var buttonStyles = require('../styles/buttonStyles');
-var constants = require('tradle-constants');
+var constants = require('@tradle/constants');
 var reactMixin = require('react-mixin');
 var ResourceViewMixin = require('./ResourceViewMixin');
 

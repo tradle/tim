@@ -2,10 +2,10 @@
 var Q = require('q')
 var typeforce = require('typeforce')
 var memdown = require('memdown')
-var Keeper = require('http-keeper')
-var Blockchain = require('cb-blockr')
+var Keeper = require('@tradle/http-keeper')
+var Blockchain = require('@tradle/cb-blockr')
 var Tim = require('tim')
-var CONSTANTS = require('tradle-constants')
+var CONSTANTS = require('@tradle/constants')
 var NETWORK_NAME = 'testnet'
 var BASE_PORT = 22222
 

@@ -20,7 +20,7 @@ var reactMixin = require('react-mixin');
 
 // var KeyboardEvents = require('react-native-keyboardevents');
 // var KeyboardEventEmitter = KeyboardEvents.Emitter;
-var constants = require('tradle-constants');
+var constants = require('@tradle/constants');
 var UIImagePickerManager = require('NativeModules').UIImagePickerManager;
 
 var Form = t.form.Form;

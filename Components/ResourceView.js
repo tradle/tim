@@ -18,7 +18,7 @@ var QRCode = require('./QRCode')
 var buttonStyles = require('../styles/buttonStyles');
 
 var extend = require('extend');
-var constants = require('tradle-constants');
+var constants = require('@tradle/constants');
 
 var {
   StyleSheet,

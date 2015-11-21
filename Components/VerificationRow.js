@@ -2,7 +2,7 @@
 
 var React = require('react-native');
 var utils = require('../utils/utils');
-var constants = require('tradle-constants');
+var constants = require('@tradle/constants');
 var Icon = require('react-native-vector-icons/Ionicons');
 var reactMixin = require('react-mixin');
 var RowMixin = require('./RowMixin');
@@ -22,8 +22,8 @@ var {
 class VerificationRow extends Component {
   constructor(props) {
     super(props);
-  } 
-  render() {     
+  }
+  render() {
     var resource = this.props.resource;
     var photo;
     // if (resource.from  &&  resource.from.photos)
@@ -48,20 +48,20 @@ class VerificationRow extends Component {
 
     rows.push(this.addDateProp('time', styles.verySmallLetters));
 
-    // var val = utils.formatDate(new Date(resource.time));    
-    // rows.push(<View><Text style={styles.resourceTitle}>{val}</Text></View>); 
+    // var val = utils.formatDate(new Date(resource.time));
+    // rows.push(<View><Text style={styles.resourceTitle}>{val}</Text></View>);
 
-    if (resource.document) 
-      this.formatDocument(verificationRequest, resource.document, rows); 
+    if (resource.document)
+      this.formatDocument(verificationRequest, resource.document, rows);
 
     var backlink = this.props.prop.items.backlink;
-    
+
     if (resource.to  &&  backlink !== 'to') {
       var row = <View style={{flexDirection: 'row'}}>
                   <Text style={[styles.description, {color: '#7AAAc3'}]}>submitted by </Text>
                   <Text style={styles.description}>{resource.to.title}</Text>
                 </View>;
-      // var row = resource.to.photos 
+      // var row = resource.to.photos
       //         ? <View style={{flexDirection: 'row'}}>
       //             <Text style={[styles.description, {color: '#7AAAc3'}]}>submitted by </Text>
       //             <Text style={styles.description}>{resource.to.title}</Text>
@@ -71,7 +71,7 @@ class VerificationRow extends Component {
       //             <Text style={[styles.description, {color: '#7AAAc3'}]}>submitted by </Text>
       //             <Text style={styles.description}>{resource.to.title}</Text>
       //           </View>;
-      rows.push(row);         
+      rows.push(row);
     }
     if (resource.from) {
       var contentRows = [];
@@ -93,20 +93,20 @@ class VerificationRow extends Component {
       row = <View style={contentRows.length == 1 ? {flex: 1} : {flexDirection: 'row'}}>
               {contentRows}
             </View>
-      rows.push(row);         
-      contentRows = []; 
+      rows.push(row);
+      contentRows = [];
 
       if (backlink !== 'from') {
         contentRows.push(<Text style={[styles.description, {color: '#7AAAc3'}]}>representative</Text>);
         contentRows.push(<Text style={styles.description}>{resource.from.title}</Text>);
       }
-      // if (resource.to.photos) 
+      // if (resource.to.photos)
       //   contentRows.push(<Image source={{uri: resource.from.photos[0].url}} style={styles.icon}/>);
 
       row = <View style={{flexDirection: 'row'}}>
               {contentRows}
             </View>
-      rows.push(row);         
+      rows.push(row);
     }
     rows.push(<View style={{alignSelf: 'flex-end', marginTop: 7}}><Text style={styles.verySmallLetters}>{verificationRequest.title}</Text></View>);
 
@@ -143,9 +143,9 @@ class VerificationRow extends Component {
     var onPressCall;
 
     var isSimpleMessage = model.id === 'tradle.SimpleMessage';
-    
+
     viewCols.forEach(function(v) {
-      if (properties[v].type === 'array'  ||  properties[v].type === 'date') 
+      if (properties[v].type === 'array'  ||  properties[v].type === 'date')
         return;
       var style = styles.resourceTitle; //(first) ? styles.resourceTitle : styles.description;
 
@@ -158,10 +158,10 @@ class VerificationRow extends Component {
         return;
       }
 
-      if (resource[v]  &&  properties[v].type === 'string'  &&  (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0)) 
+      if (resource[v]  &&  properties[v].type === 'string'  &&  (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0))
         row = <Text style={style} numberOfLines={first ? 2 : 1}>{resource[v]}</Text>;
       else if (!model.autoCreate) {
-        var val = (properties[v].displayAs) 
+        var val = (properties[v].displayAs)
                 ? utils.templateIt(properties[v], resource)
                 : resource[v];
         row = <Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>
@@ -177,7 +177,7 @@ class VerificationRow extends Component {
             vCols.push(<View>
                          <Text style={style}>{msgParts[0]}</Text>
                          <Text style={[style, {color: isMyMessage ? '#efffe5' : '#7AAAC3'}]}>{msgModel.value.title}</Text>
-                       </View>);                  
+                       </View>);
             return;
           }
         }
@@ -193,10 +193,10 @@ class VerificationRow extends Component {
       }
       vCols.push(row);
       first = false;
-    }); 
-    // if (model.style) 
+    });
+    // if (model.style)
     //   vCols.push(<Text style={styles.verySmallLetters}>{model.title}</Text>);
-    
+
     if (vCols  &&  vCols.length) {
       vCols.forEach(function(v) {
         renderedRow.push(v);
@@ -239,7 +239,7 @@ class VerificationRow extends Component {
     viewCols.forEach(function(v) {
       if (v === dateProp)
         return;
-      
+
       if (!resource[v]  &&  !properties[v].displayAs)
         return;
       var style = (first) ? styles.resourceTitle : styles.description;
@@ -247,7 +247,7 @@ class VerificationRow extends Component {
         style = [style, properties[v].style];
       var ref = properties[v].ref;
       if (ref) {
-        if (!resource[v]) 
+        if (!resource[v])
           return;
         var row;
         if (ref == MONEY_TYPE) {
@@ -255,7 +255,7 @@ class VerificationRow extends Component {
           if (!row)
             return;
         }
-        else  {          
+        else  {
           row = <Text style={style} numberOfLines={first ? 2 : 1}>{resource[v].title}</Text>
           if (resource[v].photos  &&  v != 'organization') {
             row = <View style={styles.row}>
@@ -271,7 +271,7 @@ class VerificationRow extends Component {
                   <View><Text style={styles.verySmallLetters}>{val}</Text></View>
                 </View>
         }
-        
+
         vCols.push(row);
         first = false;
       }
@@ -287,7 +287,7 @@ class VerificationRow extends Component {
           row = <Text style={style} numberOfLines={1}>{resource[v]}</Text>;
         // else if (!backlink  &&  resource[v]  && (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0))
         //   row = <Text style={style} onPress={self.onPress.bind(self)} numberOfLines={1}>{resource[v]}</Text>;
-        else {          
+        else {
           var val = properties[v].displayAs ? utils.templateIt(properties[v], resource) : resource[v];
           row = <Text style={style}>{val}</Text>;
         }
@@ -301,7 +301,7 @@ class VerificationRow extends Component {
         vCols.push(row);
         first = false;
       }
-    }); 
+    });
     if (vCols)
       renderedViewCols = vCols;
     return renderedViewCols;

@@ -7,7 +7,7 @@ var extend = require('extend');
 var logError = require('logError');
 var SelectPhotoList = require('./SelectPhotoList');
 var myStyles = require('../styles/styles');
-var constants = require('tradle-constants');
+var constants = require('@tradle/constants');
 var NewResourceMixin = require('./NewResourceMixin');
 var reactMixin = require('react-mixin');
 

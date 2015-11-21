@@ -7,7 +7,7 @@ var reactMixin = require('react-mixin');
 var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
-var constants = require('tradle-constants');
+var constants = require('@tradle/constants');
 
 var {
   ListView,
@@ -61,11 +61,11 @@ class ResourceTypesScreen extends Component {
     if (this.props.sendForm) {
       var buttons = [{
         text: 'Cancel',
-      }, 
+      },
       {
         text: 'OK',
         onPress: this.sendFormTo.bind(this, resource)
-      }];      
+      }];
       var to = this.props.resource;
       AlertIOS.prompt(
         'Sending ' + resource.title + ' form to ' + utils.getDisplayName(to, utils.getModel(to[constants.TYPE]).value.properties),
@@ -113,7 +113,7 @@ class ResourceTypesScreen extends Component {
       time: new Date().getTime()
     }
     value[constants.TYPE] = modelName;
-    Actions.addMessage(value); 
+    Actions.addMessage(value);
     this.props.navigator.pop();
   }
 
@@ -131,7 +131,7 @@ class ResourceTypesScreen extends Component {
       );
   }
   render() {
-    var content = 
+    var content =
     <ListView ref='listview' style={styles.listview}
       dataSource={this.state.dataSource}
       renderRow={this.renderRow.bind(this)}
@@ -140,7 +140,7 @@ class ResourceTypesScreen extends Component {
       keyboardShouldPersistTaps={true}
       showsVerticalScrollIndicator={false} />;
 
-    var err = this.state.err 
+    var err = this.state.err
             ? <View style={styles.errContainer}><Text style={styles.err}>{this.state.err}</Text></View>
             : <View />;
     return (
@@ -168,10 +168,10 @@ var styles = StyleSheet.create({
     color: '#D7E6ED'
   },
   errContainer: {
-    height: 45, 
-    paddingTop: 5, 
-    paddingHorizontal: 10, 
-    backgroundColor: '#eeeeee', 
+    height: 45,
+    paddingTop: 5,
+    paddingHorizontal: 10,
+    backgroundColor: '#eeeeee',
   }
 });
 

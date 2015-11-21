@@ -11,7 +11,7 @@ var Actions = require('../Actions/Actions');
 var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
 var sampleData = require('../data/data');
-var constants = require('tradle-constants');
+var constants = require('@tradle/constants');
 var TouchID = require('react-native-touch-id');
 var BACKUPS = require('asyncstorage-backup')
 

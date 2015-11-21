@@ -13,7 +13,7 @@ var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var reactMixin = require('react-mixin');
 var extend = require('extend');
-var constants = require('tradle-constants');
+var constants = require('@tradle/constants');
 
 var {
   ListView,
@@ -43,7 +43,7 @@ class IdentitiesList extends Component {
   componentDidMount() {
     this.listenTo(Store, 'onChangeIdentity');
   }
-  
+
   selectResource(resource) {
     Actions.changeIdentity(resource);
   }
@@ -121,7 +121,7 @@ class IdentitiesList extends Component {
     return (
       <ResourceRow
         onSelect={() => this.selectResource(resource)}
-        resource={resource} 
+        resource={resource}
         onCancel={() => Actions.removeIdentity(resource)} />
     );
   }
@@ -129,10 +129,10 @@ class IdentitiesList extends Component {
     Actions.removeIdentity(resource);
   }
   render() {
-    if (this.state.isLoading) 
+    if (this.state.isLoading)
       return <View/>
     return (
-      <View style={styles.container}> 
+      <View style={styles.container}>
         <ListView ref='listview'
           dataSource={this.state.dataSource}
           renderRow={this.renderRow.bind(this)}

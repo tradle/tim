@@ -4,7 +4,7 @@ var React = require('react-native');
 var utils = require('../utils/utils');
 var Icon = require('react-native-vector-icons/Ionicons');
 var reactMixin = require('react-mixin');
-var constants = require('tradle-constants');
+var constants = require('@tradle/constants');
 var buttonStyles = require('../styles/buttonStyles');
 
 var {
@@ -28,7 +28,7 @@ class VerificationButton extends Component {
     var meId = me[constants.TYPE] + '_' + me[constants.ROOT_HASH];
     var s = resource.from.id.split('_');
     var fromId = s[0] + '_' + s[1];
-     
+
     if (!resource.from  ||  fromId === meId)
       return <View />
 
@@ -43,7 +43,7 @@ class VerificationButton extends Component {
       }
       resource.verifications.forEach(function(r) {
         var rh = r.from[constants.ROOT_HASH];
-        if (!rh) 
+        if (!rh)
           rh = utils.getId(r.from).split('_')[1];
 
         if (rh === me[constants.ROOT_HASH]  &&  (!lastAdditionalInfoTime  ||  lastAdditionalInfoTime < r.time))
@@ -51,7 +51,7 @@ class VerificationButton extends Component {
       });
     }
     if (verifiedByMe)
-      return <View />; 
+      return <View />;
     return (
        <View style={[buttonStyles.container1, {top: 80}]}>
          <TouchableHighlight underlayColor='transparent' onPress={() =>
@@ -63,7 +63,7 @@ class VerificationButton extends Component {
                 {text: 'Cancel', onPress: () => console.log('Canceled!')},
               ]
             )
-          
+
          }>
            <View>
              <View style={buttonStyles.buttonContent} />

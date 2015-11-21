@@ -2,7 +2,7 @@
 
 var React = require('react-native');
 var utils = require('../utils/utils');
-var constants = require('tradle-constants');
+var constants = require('@tradle/constants');
 
 var {
   Text,

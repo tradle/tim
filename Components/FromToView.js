@@ -1,5 +1,5 @@
 'use strict';
- 
+
 var React = require('react-native');
 var Reflux = require('reflux');
 var reactMixin = require('react-mixin');
@@ -9,13 +9,13 @@ var ResourceView = require('./ResourceView');
 var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Icon = require('react-native-vector-icons/Ionicons');
-var constants = require('tradle-constants');
+var constants = require('@tradle/constants');
 
 var MESSAGE_INTERFACE = 'tradle.Message';
 
 var {
   StyleSheet,
-  Image, 
+  Image,
   View,
   Text,
   Component,
@@ -34,13 +34,13 @@ class FromToView extends Component {
     }
   }
   render() {
-    var resource = this.props.resource;    
+    var resource = this.props.resource;
 
     var model = this.props.model || utils.getModel(resource[constants.TYPE]).value;
-    if (!model.interfaces  ||  model.interfaces.indexOf(MESSAGE_INTERFACE) == -1 || model.id === 'tradle.Verification') 
+    if (!model.interfaces  ||  model.interfaces.indexOf(MESSAGE_INTERFACE) == -1 || model.id === 'tradle.Verification')
       return <View />;
 
-    var hasPhoto = true; //resource[photoProp]  &&  resource[photoProp].length; 
+    var hasPhoto = true; //resource[photoProp]  &&  resource[photoProp].length;
     var fromTitle = resource.from.title ? resource.from.title :  utils.getDisplayName(resource.from, utils.getModel(resource.from[constants.TYPE]).value.properties);
     var toTitle = resource.to
                 ? resource.to.title ? resource.to.title : utils.getDisplayName(resource.to, utils.getModel(resource.to[constants.TYPE]).value.properties)
@@ -49,10 +49,10 @@ class FromToView extends Component {
       return <View style={styles.container}>
                <Text>{fromTitle}</Text>
                <Text>{toTitle}</Text>
-             </View>      
+             </View>
     var style = hasPhoto ? {marginTop: -70} : {marginTop: 0};
     var toPhoto = resource.to.photos && resource.to.photos[0].url;
-    if (toPhoto) 
+    if (toPhoto)
       toPhoto = <Image style={styles.icon} source={{uri: utils.getImageUri(toPhoto)}} />
     else if (resource.to)
       toPhoto = <Icon style={[styles.icon, {paddingLeft: 5}]} color='#2E3B4E' name='android-person' size={60} />
@@ -66,7 +66,7 @@ class FromToView extends Component {
       fromPhoto = <Icon style={[styles.icon, {paddingLeft: 5}]} color='#7AAAC3' name='ios-person' size={90} />
       // fromPhoto = utils.getImageUri(fromPhoto);
     return <View style={[styles.container, style]}>
-            <TouchableHighlight underlayColor='transparent' onPress={() => 
+            <TouchableHighlight underlayColor='transparent' onPress={() =>
               {
                 if (resource.from.id)
                   Actions.getFrom(utils.getId(resource.from))
@@ -80,7 +80,7 @@ class FromToView extends Component {
              </View>
              </TouchableHighlight>
             <Icon name='arrow-right-a' size={70} color='#f7f7f7' style={styles.arrow} />
-            <TouchableHighlight underlayColor='transparent' onPress={() => 
+            <TouchableHighlight underlayColor='transparent' onPress={() =>
                {
                  if (resource.to.id)
                    Actions.getTo(utils.getId(resource.to.id))
@@ -121,7 +121,7 @@ class FromToView extends Component {
 
       passProps: {resource: resource}
     });
-    
+
   }
 }
 reactMixin(FromToView.prototype, Reflux.ListenerMixin);

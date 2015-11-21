@@ -1,14 +1,14 @@
 'use strict';
- 
+
 var React = require('react-native');
 var utils = require('../utils/utils');
 var groupByEveryN = require('groupByEveryN');
 var PhotoCarousel = require('./PhotoCarousel');
-var constants = require('tradle-constants');
+var constants = require('@tradle/constants');
 
 var {
   StyleSheet,
-  Image, 
+  Image,
   View,
   ListView,
   Text,
@@ -41,7 +41,7 @@ class PhotoList extends Component {
   //   ).start();                                // Start the animation
 
   // }
-  render() { 
+  render() {
     var photos = this.props.photos;
     if (!photos || !photos.length  ||  (photos.length <= 1  &&  this.props.isView))
       return null;
@@ -54,20 +54,20 @@ class PhotoList extends Component {
       case 3:
         height = 150;
         break;
-      case 4:  
+      case 4:
         height = 120;
         break;
       default:
       case 5:
         height = 100;
         inRow = 5;
-        break;      
-    }    
+        break;
+    }
     var rows = photos.length / inRow;
     if (photos.length % inRow)
       rows++;
     height *= rows;
-    var val = this.renderPhotoList(photos);        
+    var val = this.renderPhotoList(photos);
     return (
        <View style={[styles.photoContainer, this.props.style ? {} : {marginHorizontal: 5, marginTop: -20, height: height}]}>
          {val}
@@ -99,17 +99,17 @@ class PhotoList extends Component {
         case 3:
           imageStyle = [styles.thumb3];
           break;
-        case 4:  
+        case 4:
           imageStyle = [styles.thumb4];
           break;
         default:
         case 5:
           imageStyle = [styles.thumb5];
-          break;      
+          break;
        }
      }
      var photos = photos.map((photo) => {
-      if (photo === null) 
+      if (photo === null)
         return null;
       var title = !photo.title || photo.title === 'photo'
                 ? <View />
@@ -194,7 +194,7 @@ var styles = StyleSheet.create({
   },
   thumb5: {
     width: 70,
-    height: 70,    
+    height: 70,
   },
   thumbCommon: {
     borderRadius: 5,

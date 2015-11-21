@@ -3,7 +3,7 @@
 var React = require('react-native');
 var Carousel = require('react-native-carousel');
 var utils = require('../utils/utils');
-var constants = require('tradle-constants');
+var constants = require('@tradle/constants');
 
 var {
   StyleSheet,
@@ -14,7 +14,7 @@ var {
 
 class PhotoCarousel extends Component {
   constructor(props) {
-    super(props);    
+    super(props);
   }
   render() {
     var photos = [];
@@ -39,7 +39,7 @@ class PhotoCarousel extends Component {
                           <Image source={{uri: photo.url}} style={styles.imageV}/>
                         </View>
 
-                      : (isLicense 
+                      : (isLicense
                          ? <View style={styles.container}>
                               <Image source={{uri: photo.url}} style={styles.imageH}/>
                             </View>
@@ -52,7 +52,7 @@ class PhotoCarousel extends Component {
         //   isLicense ? <View style={styles.container}>
         //                <Image source={{uri: photo.url}} style={styles.imageH}/>
         //               </View>
-        //             : (isUtility  
+        //             : (isUtility
         //               ? <View style={styles.container}>
         //                   <Image source={{uri: photo.url}} style={styles.imageV}/>
         //                 </View>

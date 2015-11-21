@@ -4,7 +4,7 @@ var React = require('react-native');
 var PhotoList = require('./PhotoList');
 var ArticleView = require('./ArticleView');
 var utils = require('../utils/utils');
-var constants = require('tradle-constants');
+var constants = require('@tradle/constants');
 
 var MONEY_TYPE = 'tradle.Money';
 var DEFAULT_CURRENCY_SYMBOL = '$';
