@@ -158,6 +158,7 @@ var Store = Reflux.createStore({
     try {
       await intermediate
       await self.getMe()
+      self.loadMyResources()
     } catch (err) {
       throw err
     }
