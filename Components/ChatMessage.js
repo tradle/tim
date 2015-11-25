@@ -79,13 +79,6 @@ class ChatMessage extends Component {
 }
 var styles = StyleSheet.create({
   view: {
-    // backgroundColor: '#efffe5',
-    // borderWidth: 1,
-    // borderTopColor: '#deeeb4',
-    // borderLeftColor: '#efffe5',
-    // borderRightColor: '#efffe5',
-    // borderBottomColor: '#deeeb4',
-    // paddingVertical: 7,
     marginTop: 30
   },
   chat: {
@@ -96,33 +89,18 @@ var styles = StyleSheet.create({
     borderTopColor: '#eeeeee',
     borderRightColor: '#eeeeee',
     borderLeftColor: '#eeeeee',
-    borderWidth: 2,
-    borderBottomColor: '#cccccc',
+    borderWidth: 1,
+    borderBottomColor: '#aaaaaa',
   },
   chatInput: {
     height: 30,
     fontSize: 18,
-    paddingLeft: 7,
+    paddingLeft: 5,
     backgroundColor: '#eeeeee',
     fontWeight: 'bold',
     alignSelf: 'stretch',
-    borderColor: '#eeeeee',
+    // borderColor: '#eeeeee',
   },
-  // formRequest: {
-  //   paddingLeft: 10,
-  //   fontSize: 18,
-  //   color: '#2E3B4E',
-  // },
-  // mythingscontainer: {
-  //   flex: 1,
-  //   justifyContent: "center",
-  //   alignItems: "center",
-  //   flexDirection: "column",
-  // },
-  // bumpedcontainer: {
-  //   marginBottom: 210,
-  //   marginTop: -210,
-  // },
 });
 
 module.exports = ChatMessage;
