@@ -4,6 +4,9 @@ var React = require('react-native');
 var utils = require('../utils/utils');
 var Icon = require('react-native-vector-icons/Ionicons');
 var constants = require('@tradle/constants');
+var PhotoCarousel = require('./PhotoCarousel')
+var reactMixin = require('react-mixin');
+var PhotoCarouselMixin = require('./PhotoCarouselMixin');
 
 var {
   StyleSheet,
@@ -52,6 +55,9 @@ class PhotoView extends Component {
     var source = uri.charAt(0) == '/' || uri.indexOf('data') === 0
                ? {uri: uri, isStatic: true}
                : {uri: uri}
+    // var style = (currentPhoto.width)
+    //           ? [styles.image, {height: currentPhoto.height * (currentPhoto.width/400)}]
+    //           : styles.image
     if (resource.photos.length == 1)
       return <Image source={source} style={styles.image} />;
     else {
@@ -62,12 +68,13 @@ class PhotoView extends Component {
         if (p === url)
           nextPhoto = i === len - 1 ? resource.photos[0] : resource.photos[i + 1];
       }
-      return <TouchableHighlight underlayColor='#ffffff' onPress={this.changePhoto.bind(this, nextPhoto)}>
+      return <TouchableHighlight underlayColor='#ffffff' onPress={this.showCarousel.bind(this, resource.photos[0])}>
                 <Image source={source} style={styles.image} />
               </TouchableHighlight>
     }
   }
 }
+reactMixin(PhotoView.prototype, PhotoCarouselMixin);
 
 var styles = StyleSheet.create({
   image: {

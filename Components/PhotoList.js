@@ -5,6 +5,8 @@ var utils = require('../utils/utils');
 var groupByEveryN = require('groupByEveryN');
 var PhotoCarousel = require('./PhotoCarousel');
 var constants = require('@tradle/constants');
+var reactMixin = require('react-mixin');
+var PhotoCarouselMixin = require('./PhotoCarouselMixin');
 
 var {
   StyleSheet,
@@ -148,30 +150,9 @@ class PhotoList extends Component {
       </View>
     );
   }
-  showCarousel(currentPhoto) {
-    this.props.navigator.push({
-      id: 14,
-      title: 'Photos',
-      noLeftButton: true,
-      component: PhotoCarousel,
-      passProps: {
-        currentPhoto: currentPhoto,
-        photos: this.props.photos,
-        resource: this.props.resource
-      },
-      rightButtonTitle: 'Done',
-      titleTintColor: 'black',
-      tintColor: '#dddddd',
-      onRightButtonPress: {
-        stateChange: this.closeCarousel.bind(this)
-      }
-    })
-  }
-  closeCarousel() {
-    this.props.navigator.pop();
-  }
-
 }
+reactMixin(PhotoList.prototype, PhotoCarouselMixin);
+
 var styles = StyleSheet.create({
   photoContainer: {
     flex: 1,
