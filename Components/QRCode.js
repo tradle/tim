@@ -1,9 +1,12 @@
 var React = require('react-native')
 var {
   StyleSheet,
-  View
+  View,
+  ActivityIndicatorIOS,
+  InteractionManager
 } = React
 
+var extend = require('xtend')
 var QRCode = require('react-native-barcode/QR/QRCode')
 var DEFAULT_DIM = 370
 
@@ -12,7 +15,8 @@ class QRCodeView extends React.Component {
     super(props)
 
     this.state = {
-      style: getStyle(this.props.dimension || DEFAULT_DIM)
+      style: getStyle(this.props.dimension || DEFAULT_DIM),
+      renderPlaceholderOnly: true
     }
   }
   propTypes: {
@@ -20,7 +24,19 @@ class QRCodeView extends React.Component {
     dimension: React.PropTypes.number,
     fullScreen: React.PropTypes.boolean
   }
+  componentDidMount() {
+    InteractionManager.runAfterInteractions(() => {
+      this.setState({
+        renderPlaceholderOnly: false
+      });
+    });
+  }
   render() {
+    var code
+    if (this.state.renderPlaceholderOnly) {
+      return <ActivityIndicatorIOS hidden='true' size='large' style={this.state.style} />
+    }
+
     var code = <QRCode content={this.props.content} style={this.state.style} />
     if (!this.props.fullScreen) return code
 
