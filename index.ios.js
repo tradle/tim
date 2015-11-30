@@ -4,6 +4,10 @@
 require('regenerator/runtime') // support es7.asyncFunctions
 require('./utils/shim')
 require('./utils/crypto')
+if (!__DEV__) {
+  require('debug').disable()
+}
+
 require('stream')
 // require('./timmy')
 var React = require('react-native');
