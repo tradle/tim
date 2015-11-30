@@ -166,6 +166,7 @@ var Store = Reflux.createStore({
     if (!utils.isEmpty(list))
       isLoaded = true;
 
+    this.loadMyResources()
     if (me) {
       try {
         await self.getDriver(me)
