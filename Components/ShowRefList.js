@@ -56,12 +56,12 @@ class ShowRefList extends Component {
         continue;
       var icon = props[p].icon  ||  utils.getModel(props[p].items.ref).value.icon;
       if (!icon)
-        icon = 'ios-checkmark-empty';
+        icon = 'ios-checkmark-outline';
       refList.push(
         <View style={buttonStyles.container}>
            <TouchableHighlight onPress={this.showResources.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
              <View style={{alignItems: 'center'}}>
-               <Icon name={icon}  size={35}  color='#ffffff'  style={[buttonStyles.icon, {paddingLeft: 9}]}/>
+               <Icon name={icon}  size={30}  color='#ffffff'  style={[buttonStyles.icon, {paddingLeft: 5}]}/>
                <Text style={buttonStyles.text}>{props[p].title}</Text>
              </View>
            </TouchableHighlight>
