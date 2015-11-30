@@ -1,6 +1,3 @@
-if (typeof localStorage !== 'undefined') localStorage.debug = '*'
-// if (typeof localStorage !== 'undefined') localStorage.debug = ''
-
 if (typeof __dirname === 'undefined') global.__dirname = '/'
 if (typeof __filename === 'undefined') global.__filename = ''
 if (typeof process === 'undefined') {
@@ -15,7 +12,11 @@ if (typeof process === 'undefined') {
 }
 
 process.browser = false
-process.env.NODE_ENV = 'development'
+process.env.NODE_ENV = __DEV__ ? 'development' : 'production'
+if (typeof localStorage !== 'undefined') {
+  localStorage.debug = __DEV__ ? '*' : ''
+}
+
 process.on('exit', cleanup)
 process.on('SIGINT', cleanup)
 process.on('SIGTERM', cleanup)
