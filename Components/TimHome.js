@@ -16,6 +16,8 @@ var TouchID = require('react-native-touch-id');
 var BACKUPS = require('asyncstorage-backup')
 var Device = require('react-native-device');
 var TradleLogo = require('../img/Tradle.png')
+var TradleWhite = require('../img/TradleW.png')
+var BG_IMAGE = require('../img/bg.png')
 
 var {
   StyleSheet,
@@ -183,13 +185,13 @@ class TimHome extends Component {
     var d = Device
 
   	var spinner =  <View style={styles.scroll}>
-          <Image source={require('../img/bg.png')} style={{position:'absolute', left: 0, top: 0, width: d.width, height: d.height}} />
+          <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: d.width, height: d.height}} />
           <ScrollView
             scrollEnabled={false}
             style={{height:480}}>
             <View style={styles.container}>
               <View>
-                <Image style={styles.thumb} source={require('../img/TradleW.png')}></Image>
+                <Image style={styles.thumb} source={TradleWhite}></Image>
                 <Text style={styles.tradle}>Tradle</Text>
               </View>
             </View>
@@ -228,7 +230,7 @@ class TimHome extends Component {
     StatusBarIOS.setHidden(true);
     return (
       <View style={styles.scroll}>
-      <Image source={require('../img/bg.png')} style={{position:'absolute', left: 0, top: 0, width: d.width, height: d.height}} />
+      <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: d.width, height: d.height}} />
         <ScrollView
           scrollEnabled={false}
           style={{height:480}}
