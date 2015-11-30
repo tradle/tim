@@ -14,6 +14,7 @@ var sampleData = require('../data/data');
 var constants = require('@tradle/constants');
 var TouchID = require('react-native-touch-id');
 var BACKUPS = require('asyncstorage-backup')
+var Device = require('react-native-device');
 
 var {
   StyleSheet,
@@ -178,19 +179,24 @@ class TimHome extends Component {
   }
   render() {
     var url = LinkingIOS.popInitialURL();
-  	var spinner =  <ScrollView
-                    scrollEnabled={false}
-                    style={{height:480, backgroundColor: '#2E3B4E'}}>
-                    <View style={styles.container}>
-                      <View>
-                        <Image style={styles.thumb} source={require('image!Tradle')}></Image>
-                        <Text style={styles.tradle}>Tradle</Text>
-                      </View>
-                    </View>
-                    <View style={{alignItems: 'center'}}>
-                      <ActivityIndicatorIOS hidden='true' size='large'/>
-                    </View>
-                  </ScrollView>
+    var d = Device
+
+  	var spinner =  <View style={styles.scroll}>
+          <Image source={require('image!bg')} style={{position:'absolute', left: 0, top: 0, width: d.width, height: d.height}} />
+          <ScrollView
+            scrollEnabled={false}
+            style={{height:480}}>
+            <View style={styles.container}>
+              <View>
+                <Image style={styles.thumb} source={require('image!TradleW')}></Image>
+                <Text style={styles.tradle}>Tradle</Text>
+              </View>
+            </View>
+            <View style={{alignItems: 'center'}}>
+              <ActivityIndicatorIOS hidden='true' size='large'/>
+            </View>
+          </ScrollView>
+          </View>
     if (this.state.isLoading)
       return spinner
     var err = this.state.err || '';
@@ -221,6 +227,7 @@ class TimHome extends Component {
     StatusBarIOS.setHidden(true);
     return (
       <View style={styles.scroll}>
+      <Image source={require('image!bg')} style={{position:'absolute', left: 0, top: 0, width: d.width, height: d.height}} />
         <ScrollView
           scrollEnabled={false}
           style={{height:480}}
@@ -229,7 +236,7 @@ class TimHome extends Component {
                 underlayColor='transparent' onPress={this.showContactsOrRegister.bind(this)}>
             <View style={styles.container}>
               <View>
-                <Image style={styles.thumb} source={require('image!Tradle')}></Image>
+                <Image style={styles.thumb} source={require('image!TradleW')}></Image>
                 <Text style={styles.tradle}>Tradle</Text>
               </View>
             </View>
@@ -244,7 +251,6 @@ class TimHome extends Component {
         </TouchableHighlight>
           <Text style={errStyle}>{err}</Text>
           <View style={styles.dev}>
-            {editProfile}
             <TouchableHighlight
                 underlayColor='transparent' onPress={this.onReloadDBPressed.bind(this)}>
               <Text style={styles.text}>
@@ -310,7 +316,7 @@ reactMixin(TimHome.prototype, Reflux.ListenerMixin);
 var styles = StyleSheet.create({
   scroll: {
     // marginTop: 60,
-    backgroundColor: '#2E3B4E',
+    // backgroundColor: '#2E3B4E',
   },
   container: {
     padding: 30,
@@ -318,7 +324,8 @@ var styles = StyleSheet.create({
     alignItems: 'center',
   },
   tradle: {
-    color: '#7AAAC3',
+    // color: '#7AAAC3',
+    color: '#eeeeee',
     fontSize: 35,
     alignSelf: 'center',
   },
@@ -364,7 +371,7 @@ var styles = StyleSheet.create({
     fontWeight:'400'
   },
   getStarted: {
-    backgroundColor: '#2892C6',
+    backgroundColor: '#568FBE', //'#2892C6',
     paddingVertical: 10,
     paddingHorizontal: 30,
     borderRadius: 10
