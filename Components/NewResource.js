@@ -472,7 +472,7 @@ class NewResource extends Component {
             <PhotoView resource={resource} />
           </View>
           <View style={{'padding': 15}} key={'NewResource'}>
-            <Form ref='form' type={Model} options={options} value={data} />
+            <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange.bind(this)}/>
             {arrayItems}
           </View>
           <View style={{height: 300}} />
@@ -498,8 +498,8 @@ class NewResource extends Component {
     if (this.state.resource[prop]  ||  event.nativeEvent.text.length)
       this.state.resource[prop] = event.nativeEvent.text;
   }
-  onChange(prop, value) {
-    this.props.resource[prop] = value;
+  onChange(value) {
+    this.state.resource = value;
   }
 
   onSubmitEditing(msg) {
@@ -561,7 +561,7 @@ class NewResource extends Component {
     };
     var labelStyle = {color: '#cccccc', fontSize: 14};
     var textStyle = {color: '#000000', fontSize: 14};
-    var resource = this.props.resource || this.state.resource
+    var resource = /*this.props.resource ||*/ this.state.resource
     var label, style
 
     if (resource && resource[params.prop]) {
