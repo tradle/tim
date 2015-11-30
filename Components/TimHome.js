@@ -14,6 +14,7 @@ var sampleData = require('../data/data');
 var constants = require('@tradle/constants');
 var TouchID = require('react-native-touch-id');
 var BACKUPS = require('asyncstorage-backup')
+var TradleLogo = require('../img/Tradle.png')
 
 var {
   StyleSheet,
@@ -229,7 +230,7 @@ class TimHome extends Component {
                 underlayColor='transparent' onPress={this.showContactsOrRegister.bind(this)}>
             <View style={styles.container}>
               <View>
-                <Image style={styles.thumb} source={require('../img/Tradle.png')}></Image>
+                <Image style={styles.thumb} source={TradleLogo}></Image>
                 <Text style={styles.tradle}>Tradle</Text>
               </View>
             </View>
