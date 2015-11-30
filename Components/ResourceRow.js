@@ -44,9 +44,12 @@ class ResourceRow extends Component {
           return <View/>
         var name = (resource.firstName ? resource.firstName.charAt(0) : '');
         name += (resource.lastName ? resource.lastName.charAt(0) : '');
-        photo = <LinearGradient colors={['#A4CCE0', '#7AAAc3', '#5E92AD']} style={styles.cellRoundImage}>
+        photo = <LinearGradient colors={['#A4CCE0','#5790BF', '#5E92AD']} style={styles.cellRoundImage}>
            <Text style={styles.cellText}>{name}</Text>
         </LinearGradient>
+        // photo = <LinearGradient colors={['#A4CCE0', '#7AAAc3', '#5E92AD']} style={styles.cellRoundImage}>
+        //    <Text style={styles.cellText}>{name}</Text>
+        // </LinearGradient>
       }
       else  {
         var model = utils.getModel(resource[constants.TYPE]).value;
@@ -85,7 +88,7 @@ class ResourceRow extends Component {
     var textStyle = noImage ? [styles.textContainer, {marginVertical: 7}] : styles.textContainer;
     return (
       <View key={this.props.key}>
-        <TouchableHighlight onPress={this.props.onSelect}>
+        <TouchableHighlight onPress={this.props.onSelect} underlayColor='transparent'>
           <View style={styles.row}>
             {photo}
             {orgPhoto}
@@ -213,7 +216,7 @@ class ResourceRow extends Component {
     if (!backlink)
       return renderedViewCols;
     return [
-      <TouchableHighlight onPress={this.props.showRefResources.bind(this, resource, backlink)}>
+      <TouchableHighlight onPress={this.props.showRefResources.bind(this, resource, backlink)} underlayColor='transparent'>
         <View>
           {renderedViewCols}
         </View>
