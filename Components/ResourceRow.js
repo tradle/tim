@@ -17,7 +17,8 @@ var {
   Text,
   TouchableHighlight,
   Component,
-  View
+  View,
+  processColor
 } = React;
 
 class ResourceRow extends Component {
@@ -44,7 +45,7 @@ class ResourceRow extends Component {
           return <View/>
         var name = (resource.firstName ? resource.firstName.charAt(0) : '');
         name += (resource.lastName ? resource.lastName.charAt(0) : '');
-        photo = <LinearGradient colors={['#A4CCE0', '#7AAAc3', '#5E92AD']} style={styles.cellRoundImage}>
+        photo = <LinearGradient colors={['#A4CCE0', '#7AAAc3', '#5E92AD'].map(processColor)} style={styles.cellRoundImage}>
            <Text style={styles.cellText}>{name}</Text>
         </LinearGradient>
       }

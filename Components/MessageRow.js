@@ -25,7 +25,8 @@ var {
   TouchableHighlight,
   AlertIOS,
   Component,
-  View
+  View,
+  processColor
 } = React;
 
 class MessageRow extends Component {
@@ -59,7 +60,7 @@ class MessageRow extends Component {
         var title = resource.to.title.split(' ').map(function(s) {
           return s.charAt(0);
         }).join('');
-        ownerPhoto = <LinearGradient colors={['#A4CCE0', '#7AAAc3', '#5E92AD']} style={styles.cellRoundImage}>
+        ownerPhoto = <LinearGradient colors={['#A4CCE0', '#7AAAc3', '#5E92AD'].map(processColor)} style={styles.cellRoundImage}>
           <Text style={styles.cellText}>{title}</Text>
         </LinearGradient>
       }
