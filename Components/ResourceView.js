@@ -99,7 +99,7 @@ class ResourceView extends Component {
     return (
       <ScrollView  ref='this' style={styles.container}>
         <View style={[styles.photoBG, {marginTop: -20}]}>
-          <PhotoView resource={resource} />
+          <PhotoView resource={resource} navigator={this.props.navigator}/>
         </View>
         {actionPanel}
         <View style={styles.photoBG}>
@@ -129,7 +129,7 @@ reactMixin(ResourceView.prototype, ResourceViewMixin);
 
 var styles = StyleSheet.create({
   container: {
-    marginTop: 50,
+    marginTop: 60,
     flex: 1,
   },
   photoBG: {
