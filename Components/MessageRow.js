@@ -29,7 +29,8 @@ var {
   AlertIOS,
   Component,
   Navigator,
-  View
+  View,
+  processColor
 } = React;
 
 class MessageRow extends Component {
@@ -64,7 +65,7 @@ class MessageRow extends Component {
           return s.charAt(0);
         }).join('');
 
-        ownerPhoto = <LinearGradient colors={['#2B6493', '#417AA9', '#568FBE']} style={styles.cellRoundImage}>
+        ownerPhoto = <LinearGradient colors={['#2B6493', '#417AA9', '#568FBE'].map(processColor)} style={styles.cellRoundImage}>
           <Text style={styles.cellText}>{title}</Text>
         </LinearGradient>
         // ownerPhoto = <LinearGradient colors={['#A4CCE0', '#7AAAc3', '#5E92AD']} style={styles.cellRoundImage}>
