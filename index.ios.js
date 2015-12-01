@@ -1,12 +1,13 @@
 'use strict'
 
 // require('react-native-level')
-require('regenerator/runtime') // support es7.asyncFunctions
-require('./utils/shim')
-require('./utils/crypto')
 if (!__DEV__) {
   require('debug').disable()
 }
+
+require('regenerator/runtime') // support es7.asyncFunctions
+require('./utils/shim')
+require('./utils/crypto')
 
 require('stream')
 // require('./timmy')
