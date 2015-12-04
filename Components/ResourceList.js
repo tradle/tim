@@ -16,7 +16,7 @@ var Reflux = require('reflux');
 var constants = require('@tradle/constants');
 var Icon = require('react-native-vector-icons/Ionicons');
 var FontAwesome = require('react-native-vector-icons/FontAwesome')
-var ProductChooser = require('./ProductChooser')
+// var ProductChooser = require('./ProductChooser')
 var QRCodeScanner = require('./QRCodeScanner')
 var QRCode = require('./QRCode')
 var buttonStyles = require('../styles/buttonStyles');
@@ -244,7 +244,7 @@ class ResourceList extends Component {
           _t: constants.TYPES.SIMPLE_MESSAGE,
           from: me,
           to: resource,
-          time: new Date().getTime(),
+          time: new Date().getTime()
         }
 
         // var sendNotification = (resource.name === 'Rabobank'  &&  (!me.organization  ||  me.organization.name !== 'Rabobank'))
@@ -457,8 +457,8 @@ class ResourceList extends Component {
       // </View>
       <View style={styles.footer}>
         <TouchableHighlight underlayColor='transparent' onPress={this.scanQRCode.bind(this)}>
-          <View>
-            <Icon name='plus'  size={30}  color='#999999' style={styles.icon} />
+          <View style={{marginTop: -10}}>
+            <Icon name='plus-circled'  size={50}  color='#ffffff' style={styles.icon} />
           </View>
         </TouchableHighlight>
       </View>
@@ -563,6 +563,9 @@ class ResourceList extends Component {
           automaticallyAdjustContentInsets={false}
           keyboardDismissMode='on-drag'
           keyboardShouldPersistTaps={true}
+          initialListSize={10}
+          pageSize={20}
+          scrollRenderAhead={10}
           showsVerticalScrollIndicator={false} />;
     }
     var model = utils.getModel(this.props.modelName).value;
@@ -585,7 +588,7 @@ class ResourceList extends Component {
 
   renderHeader() {
     return (this.props.modelName === constants.TYPES.IDENTITY)
-          ? <View style={{padding: 5, backgroundColor: '#D7E9F3'}}>
+          ? <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
               <TouchableHighlight underlayColor='transparent' onPress={this.showBanks.bind(this)}>
                 <View style={styles.row}>
                   <View>
@@ -638,7 +641,7 @@ var styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f7f7f7',
     // backgroundColor: 'white',
-    marginTop: 50
+    marginTop: 60
   },
   centerText: {
     alignItems: 'center',
@@ -648,9 +651,13 @@ var styles = StyleSheet.create({
     backgroundColor: '#cccccc',
   },
   icon: {
-    width: 30,
-    height: 30,
+    width: 50,
+    height: 50,
     marginRight: 5,
+    // backgroundColor: 'red',
+    // borderRadius: 25,
+    marginTop: -10,
+    color: '#629BCA',
     // color: '#cccccc'
   },
   image: {
@@ -662,7 +669,7 @@ var styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     flexWrap: 'nowrap',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     height: 45,
     paddingTop: 5,
     paddingHorizontal: 10,
