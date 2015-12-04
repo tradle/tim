@@ -405,7 +405,7 @@ class NewResource extends Component {
         items: arrays,
         // onSubmitEditing: this.onSavePressed.bind(this),
         onEndEditing: this.onEndEditing.bind(this),
-        onChange: this.onChange.bind(this),
+        // onChange: this.onChange.bind(this),
         template: this.myCustomTemplate.bind(this),
       };
     if (this.props.editCols)
