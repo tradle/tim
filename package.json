@@ -45,7 +45,7 @@
     "q-level": "~1.1.2",
     "querystring-es3": "^0.2.1",
     "react-mixin": "~1.2.2",
-    "react-native": "facebook/react-native#v0.15.0",
+    "react-native": "^0.16.0",
     "react-native-addressbook": "^1.1.5",
     "react-native-barcode": "tradle/react-native-barcode",
     "react-native-camera": "^0.3.8",
@@ -61,7 +61,7 @@
     "react-native-linear-gradient": "^0.3.2",
     "react-native-randombytes": "^1.0.1",
     "react-native-scrollable-mixin": "0.0.2",
-    "react-native-search-bar": "tradle/react-native-search-bar#67af0f6",
+    "react-native-search-bar": "git+https://github.com/tradle/react-native-search-bar.git",
     "react-native-touch-id": "^1.2.1",
     "react-native-udp": "tradle/react-native-udp",
     "react-native-vector-icons": "^1.0.0",
@@ -111,6 +111,10 @@
     "vm": "vm-browserify"
   },
   "devDependencies": {
+    "babel-plugin-transform-async-functions": "^6.3.13",
+    "babel-plugin-transform-object-rest-spread": "^6.3.13",
+    "babel-plugin-transform-regenerator": "^6.3.13",
+    "babel-preset-es2015": "^6.3.13",
     "memdown": "^1.1.0"
   }
 }
