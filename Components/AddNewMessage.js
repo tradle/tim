@@ -38,13 +38,15 @@ class AddNewMessage extends Component {
   constructor(props) {
     super(props);
 
+    var isOrg = this.props.resource[constants.TYPE] == constants.TYPES.ORGANIZATION;
     this.updateKeyboardSpace = this.updateKeyboardSpace.bind(this);
     this.resetKeyboardSpace = this.resetKeyboardSpace.bind(this);
     this.state = {
       keyboardSpace: 0,
       selectedAssets: {},
-      userInput: ''
+      userInput: '',
     }
+
   }
   updateKeyboardSpace(frames) {
     // LayoutAnimation.configureNext(animations.layout.spring);
@@ -112,20 +114,20 @@ class AddNewMessage extends Component {
     // var isLloyds = resource.to[constants.TYPE] == constants.TYPES.ORGANIZATION  &&  resource.to.name === 'Lloyds';
     // if (!isLloyds)
     //   isLloyds = resource[constants.TYPE] === constants.TYPES.ORGANIZATION  &&  resource.name === 'Lloyds'
-    var isOrg = resource.to[constants.TYPE] == constants.TYPES.ORGANIZATION  ||  resource[constants.TYPE] === constants.TYPES.ORGANIZATION
+    var isOrg = false; //resource.to[constants.TYPE] == constants.TYPES.ORGANIZATION  ||  resource[constants.TYPE] === constants.TYPES.ORGANIZATION
     if (isOrg)
       pushForm = <TouchableHighlight underlayColor='#79AAF2'
                    onPress={this.props.onAddNewPressed.bind(this, true)}>
                      <Text style={[styles.products, {paddingTop: 7, color: '#ffffff', fontSize: 20}]}>Choose a product</Text>
                  </TouchableHighlight>
-    else
-      if (me.organization                                                       &&
-             this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION  &&
-             me.organization.title === this.props.resource.name)
-      pushForm = <TouchableHighlight style={{paddingLeft: 20}} underlayColor='#eeeeee'
-                   onPress={this.props.onAddNewPressed.bind(this, true)}>
-                     <Icon name={'ios-arrow-thin-up'} size={25} style={styles.imageOutline} color='#757575' />
-                 </TouchableHighlight>
+    // else
+    //   if (me.organization                                                       &&
+    //          this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION  &&
+    //          me.organization.title === this.props.resource.name)
+    //   pushForm = <TouchableHighlight style={{paddingLeft: 20}} underlayColor='#eeeeee'
+    //                onPress={this.props.onAddNewPressed.bind(this, true)}>
+    //                  <Icon name={'ios-arrow-thin-up'} size={25} style={styles.imageOutline} color='#757575' />
+    //              </TouchableHighlight>
     else
       pushForm = <View style={{marginLeft: 10}}/>
           // <TouchableHighlight style={{paddingRight: 5}} underlayColor='#eeeeee'
@@ -135,7 +137,7 @@ class AddNewMessage extends Component {
     var chat = isOrg
              ? <View />
              : <View style={styles.searchBar}>
-                  <ChatMessage ref="chat" resource={resource}
+                  <ChatMessage ref='chat' resource={resource}
                                model={model}
                                callback={this.props.callback}
                                onSubmitEditing={this.onSubmitEditing.bind(this)}
@@ -144,10 +146,10 @@ class AddNewMessage extends Component {
                </View>
     var camera = isOrg
                ? <View />
-               : <TouchableHighlight style={{paddingRight: 8, marginBottom: 4}} underlayColor='transparent'
-                  onPress={this.showChoice.bind(this)}>
-                  <View>
-                    <Icon name='ios-camera' style={styles.icon} size={40} color='#999999' />
+               : <TouchableHighlight underlayColor='transparent'
+                    onPress={this.showChoice.bind(this)}>
+                  <View style={{paddingRight: 0, marginBottom: 2}}>
+                    <Icon name='ios-camera-outline' style={styles.icon} size={35} color='#999999' />
                   </View>
                 </TouchableHighlight>
 
@@ -382,22 +384,30 @@ var styles = StyleSheet.create({
     backgroundColor: '#79AAF2',
   },
   image: {
-    width: 27,
-    height: 27,
-    marginLeft: 5
+    width: 30,
+    height: 30,
+    marginLeft: 5,
+    color: '#aaaaaa'
+  },
+  imageW: {
+    width: 35,
+    height: 35,
+    marginLeft: 5,
+    color: '#eeeeee'
   },
   icon: {
     width: 35,
     height: 35,
   },
-  imageOutline: {
-    width: 27,
-    height: 27,
-    borderRadius: 13,
-    borderColor: '#aaaaaa',
-    paddingLeft: 9,
-    borderWidth: 1.5,
-  },
+  // imageOutline: {
+  //   width: 25,
+  //   height: 25,
+  //   borderRadius: 13,
+  //   borderColor: '#aaaaaa',
+  //   paddingLeft: 8,
+  //   borderWidth: 1,
+  //   color: '#79AAF2'
+  // },
   addNew: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -407,6 +417,7 @@ var styles = StyleSheet.create({
     borderLeftColor: '#eeeeee',
     borderWidth: 1,
     borderTopColor: '#cccccc',
+    // paddingLeft: 35
   },
   addNewProduct: {
     // flexDirection: 'row',
