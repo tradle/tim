@@ -9,6 +9,8 @@ var ResourceTypesScreen = require('./ResourceTypesScreen');
 var AddNewMessage = require('./AddNewMessage');
 var ProductChooser = require('./ProductChooser');
 // var CameraView = require('./CameraView');
+var Icon = require('react-native-vector-icons/Ionicons');
+
 var utils = require('../utils/utils');
 var reactMixin = require('react-mixin');
 var Store = require('../Store/Store');
@@ -23,6 +25,10 @@ var {
   StyleSheet,
   Navigator,
   View,
+  Text,
+  AlertIOS,
+  ActivityIndicatorIOS,
+  TouchableHighlight
 } = React;
 
 var currentMessageTime;
@@ -31,7 +37,7 @@ class MessageList extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      isLoading: utils.getModels() ? false : true,
+      isLoading: true,
       selectedAssets: {},
       dataSource: new ListView.DataSource({
         rowHasChanged: (row1, row2) =>  row1 !== row2
@@ -178,15 +184,35 @@ class MessageList extends Component {
 
   render() {
     if (this.state.isLoading)
-      return <View/>
+      return <View />
+
     currentMessageTime = null;
     var content;
     var model = utils.getModel(this.props.modelName).value;
-    if (this.state.dataSource.getRowCount() === 0)
-      content =  <NoResources
-                  filter={this.state.filter}
-                  model={model}
-                  isLoading={this.state.isLoading}/>
+    if (this.state.dataSource.getRowCount() === 0) {
+      if (this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION) {
+        content = <View style={[styles.container]}>
+          <Text style={{fontSize: 16, alignSelf: 'center', marginTop: 80, color: '#629BCA'}}>{'Please wait a bit...'}</Text>
+          <ActivityIndicatorIOS style={{alignSelf: 'center', size: 'large', marginTop: 20}} />
+        </View>
+
+
+        // content = <View style={{flex: 1}} onLayout={() =>
+        //   AlertIOS.alert(
+        //     'Please wait ...',
+        //     'We will talk to you soon',
+        //     [
+        //       {text: 'OK', onPress: () => console.log('OK Pressed!')}
+        //     ]
+        //   )
+        // } />
+      }
+      else
+        content =  <NoResources
+                    filter={this.state.filter}
+                    model={model}
+                    isLoading={this.state.isLoading}/>
+    }
     else {
       var isAllMessages = model.isInterface  &&  model.id === 'tradle.Message';
           // renderScrollView={(props) => <InvertibleScrollView {...props} inverted />}
@@ -207,8 +233,6 @@ class MessageList extends Component {
             scrollEventThrottle={200}>
           {content}
           </InvertibleScrollView>
-
-
     }
 
     var addNew = (model.isInterface)
@@ -218,16 +242,31 @@ class MessageList extends Component {
                             onAddNewPressed={this.onAddNewPressed.bind(this)}
                             onPhotoSelect={this.onPhotoSelect.bind(this)}
                             callback={this.addedMessage.bind(this)} />
-           : <View></View>;
+           : <View/>;
                             // onTakePicPressed={this.onTakePicPressed.bind(this)}
+    var isOrg = !this.props.isAggregation  &&  this.props.resource  &&  this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION
+    var chooser
+    if (isOrg)
+      chooser =  <View style={{flex:1, marginTop: 8}}>
+                  <TouchableHighlight underlayColor='transparent' onPress={this.onAddNewPressed.bind(this, true)}>
+                    <Icon name={'arrow-down-c'} size={25} style={styles.imageOutline} />
+                  </TouchableHighlight>
+                </View>
+    else
+      chooser = <View/>
+
     return (
       <View style={styles.container}>
-        <SearchBar
-          onChangeText={this.onSearchChange.bind(this)}
-          placeholder='Search'
-          showsCancelButton={false}
-          hideBackground={true}
-          />
+        <View style={{flexDirection:'row'}}>
+          <View style={{flex: 10}}>
+            <SearchBar
+              onChangeText={this.onSearchChange.bind(this)}
+              placeholder='Search'
+              showsCancelButton={false}
+              hideBackground={true} />
+          </View>
+          {chooser}
+        </View>
         <View style={styles.separator} />
         {content}
         {addNew}
@@ -347,7 +386,7 @@ reactMixin(MessageList.prototype, Reflux.ListenerMixin);
 var styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: 50,
+    marginTop: 60,
     backgroundColor: '#f7f7f7',
   },
   centerText: {
@@ -356,7 +395,18 @@ var styles = StyleSheet.create({
   separator: {
     height: 1,
     backgroundColor: '#cccccc',
-  }
+  },
+  imageOutline: {
+    width: 25,
+    height: 25,
+    borderRadius: 13,
+    borderColor: '#aaaaaa',
+    paddingLeft: 6,
+    // paddingLeft: 8,
+    borderWidth: 1,
+    color: '#79AAF2'
+  },
+
 });
 module.exports = MessageList;
 
