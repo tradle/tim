@@ -57,7 +57,7 @@ var Keeper = require('@tradle/http-keeper')
 var Wallet = require('@tradle/simple-wallet')
 var crypto = require('crypto')
 var rimraf = require('rimraf')
-var fs = require('fs')
+// var fs = require('fs')
 var kiki = require('@tradle/kiki')
 var Keys = kiki.Keys
 
@@ -230,7 +230,7 @@ var Store = Reflux.createStore({
       // storage: prefix + '-storage',
       // flat: true, // flat directory structure
       storeOnFetch: true,
-      storage: 'storage',
+      db: level('storage', { db: leveldown }),
       fallbacks: ['http://tradle.io:25667']
     })
 
