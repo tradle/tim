@@ -5,6 +5,7 @@ var utils = require('../utils/utils');
 var ArticleView = require('./ArticleView');
 var MessageView = require('./MessageView');
 var NewResource = require('./NewResource');
+var ProductChooser = require('./ProductChooser');
 var PhotoList = require('./PhotoList');
 var Icon = require('react-native-vector-icons/Ionicons');
 var groupByEveryN = require('groupByEveryN');
@@ -15,9 +16,11 @@ var extend = require('extend')
 var formDefaults = require('../data/formDefaults')
 var reactMixin = require('react-mixin');
 var STRUCTURED_MESSAGE_BORDER = '#3260a5' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
-var STRUCTURED_MESSAGE_COLOR = '#5482C7' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
+var STRUCTURED_MESSAGE_COLOR = '#4BA0F2' //'#5482C7' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
 var VERIFICATION_BG = '#FBFFE5' //'#F6FFF0';
 var newProduct = require('../data/newProduct.json')
+var Actions = require('../Actions/Actions');
+
 var {
   Image,
   StyleSheet,
@@ -25,6 +28,7 @@ var {
   TouchableHighlight,
   AlertIOS,
   Component,
+  Navigator,
   View
 } = React;
 
@@ -59,9 +63,13 @@ class MessageRow extends Component {
         var title = resource.to.title.split(' ').map(function(s) {
           return s.charAt(0);
         }).join('');
-        ownerPhoto = <LinearGradient colors={['#A4CCE0', '#7AAAc3', '#5E92AD']} style={styles.cellRoundImage}>
+
+        ownerPhoto = <LinearGradient colors={['#2B6493', '#417AA9', '#568FBE']} style={styles.cellRoundImage}>
           <Text style={styles.cellText}>{title}</Text>
         </LinearGradient>
+        // ownerPhoto = <LinearGradient colors={['#A4CCE0', '#7AAAc3', '#5E92AD']} style={styles.cellRoundImage}>
+        //   <Text style={styles.cellText}>{title}</Text>
+        // </LinearGradient>
       }
     }
 
@@ -203,6 +211,18 @@ class MessageRow extends Component {
         var orgName = resource.organization  ? resource.organization.title : ''
         renderedRow = <View>
                         <View style={{flexDirection: 'row', backgroundColor: '#289427', paddingVertical: 5, paddingHorizontal: 7, marginHorizontal: -7, marginTop: -5, justifyContent: 'center'}}>
+                          <Icon style={styles.verificationIcon} size={20} name={'android-done'} />
+                          <Text style={{fontSize: 16, fontWeight: '600', color: '#FBFFE5', alignSelf: 'center'}}> Verified by {orgName}</Text>
+                        </View>
+                        <View style={{paddingTop: 5}}>
+                          {this.formatDocument(msgModel, resource, this.verify.bind(this))}
+                        </View>
+                        <View style={{paddingTop: 5}}>
+                          <Text style={[styles.resourceTitle, {alignSelf:'flex-end', fontSize: 18, color: '#CCCCB2'}]}>{msgModel.title}</Text>
+                        </View>
+                      </View>
+        renderedRow = <View>
+                        <View style={{flexDirection: 'row', backgroundColor: '#289427', paddingVertical: 5, paddingHorizontal: 7, marginHorizontal: -7, marginTop: -5, borderRadius: 5, justifyContent: 'center'}}>
                           <Icon style={styles.verificationIcon} size={20} name={'android-done'} />
                           <Text style={{fontSize: 16, fontWeight: '600', color: '#FBFFE5', alignSelf: 'center'}}> Verified by {orgName}</Text>
                         </View>
@@ -487,6 +507,18 @@ class MessageRow extends Component {
         var msgParts = utils.splitMessage(resource[v]);
         // Case when the needed form was sent along with the message
         if (msgParts.length === 2) {
+          if (resource.welcome) {
+            msg = <View>
+                    <Text style={style}>{msgParts[0]}</Text>
+                    <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                      <Text style={[style, {color: isMyMessage ? STRUCTURED_MESSAGE_COLOR : '#2892C6'}]}>{msgParts[1]} </Text>
+                       <Icon style={styles.linkIcon} size={20} name={'ios-arrow-right'} />
+                     </View>
+                  </View>
+            vCols.push(msg);
+            onPressCall = self.onChooseProduct.bind(self, true)
+            return;
+          }
           var msgModel = utils.getModel(msgParts[1]);
           if (msgModel) {
             if (self.props.verificationsToShare)
@@ -529,6 +561,7 @@ class MessageRow extends Component {
           isConfirmation = resource[v].indexOf('Congratulations!') !== -1
               // <Icon style={{color: '#289427', alignSelf: 'flex-end', marginTop: -10}} size={20} name={'android-done-all'} />
               // <Icon style={[{color: '#289427', alignSelf: 'flex-end', width: 50, height: 50, marginTop: -45, opacity: 0.1}]} size={50} name={'ios-flower'} />
+
         if (isConfirmation) {
           style = [style, {color: '#289427', fontSize: 16}]
           vCols.push(
@@ -614,6 +647,47 @@ class MessageRow extends Component {
     }
 
   }
+
+  onChooseProduct(sendForm) {
+    if (this.props.isAggregation)
+      return
+    var modelName = 'tradle.Message';
+    var model = utils.getModel(modelName).value;
+    var isInterface = model.isInterface;
+    if (!isInterface)
+      return;
+
+    var self = this;
+    var currentRoutes = self.props.navigator.getCurrentRoutes();
+    var resource = this.props.to
+    // if (resource.name === 'Lloyds') {
+      var currentRoutes = self.props.navigator.getCurrentRoutes();
+      this.props.navigator.push({
+        title: 'Financial Product',
+        id: 15,
+        component: ProductChooser,
+        sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+        backButtonTitle: 'Back',
+        passProps: {
+          resource: resource,
+          returnRoute: currentRoutes[currentRoutes.length - 1],
+          callback: this.props.callback
+        },
+        rightButtonTitle: 'ion|plus',
+        onRightButtonPress: {
+          id: 4,
+          title: 'New product',
+          component: NewResource,
+          backButtonTitle: 'Back',
+          titleTextColor: '#7AAAC3',
+          rightButtonTitle: 'Done',
+          passProps: {
+            model: utils.getModel('tradle.NewMessageModel').value,
+            // callback: this.modelAdded.bind(this)
+          }
+        }
+      });
+    }
   // shareDocs() {
   //   this.props.navigator.push({
   //     title: m.title,
