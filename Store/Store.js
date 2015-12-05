@@ -141,21 +141,21 @@ var Store = Reflux.createStore({
     // console.time('loadMyResources')
     var readyDefer = Q.defer()
     this.ready = readyDefer.promise
-    var intermediate
+
     // change to true if you want to wipe
     // everything and start from scratch
     if (false) {
-      // intermediate = AsyncStorage.clear()
-      intermediate = BeSafe.clear()
+      await AsyncStorage.clear()
+      // await BeSafe.clear()
     } else if (false) {
-      intermediate = BeSafe.loadFromLastBackup()
-        .catch(() => BeSafe.clear())
-    } else {
-      intermediate = Q()
+      try {
+        await BeSafe.loadFromLastBackup()
+      } catch (err) {
+        await BeSafe.clear()
+      }
     }
 
     try {
-      await intermediate
       await self.getMe()
       self.loadMyResources()
     } catch (err) {
