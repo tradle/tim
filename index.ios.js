@@ -1,8 +1,11 @@
 'use strict'
 
 // require('react-native-level')
-if (!__DEV__) {
-  require('debug').disable()
+var debug = require('debug')
+if (__DEV__) {
+  debug.enable()
+} else {
+  debug.disable()
 }
 
 require('regenerator/runtime') // support es7.asyncFunctions
