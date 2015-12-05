@@ -64,7 +64,7 @@
     "react-native-search-bar": "tradle/react-native-search-bar",
     "react-native-touch-id": "tradle/react-native-touch-id",
     "react-native-udp": "tradle/react-native-udp",
-    "react-native-vector-icons": "tradle/react-native-vector-icons",
+    "react-native-vector-icons": "^1.0.0",
     "readable-stream": "1.0.33",
     "reflux": "^0.2.12",
     "regenerator": "^0.8.42",
