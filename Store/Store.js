@@ -142,21 +142,21 @@ var Store = Reflux.createStore({
     // console.time('loadMyResources')
     var readyDefer = Q.defer()
     this.ready = readyDefer.promise
-    var intermediate
+
     // change to true if you want to wipe
     // everything and start from scratch
-    if (false) {
-      // intermediate = AsyncStorage.clear()
-      intermediate = BeSafe.clear()
+    if (true) {
+      await AsyncStorage.clear()
+      // await BeSafe.clear()
     } else if (false) {
-      intermediate = BeSafe.loadFromLastBackup()
-        .catch(() => BeSafe.clear())
-    } else {
-      intermediate = Q()
+      try {
+        await BeSafe.loadFromLastBackup()
+      } catch (err) {
+        await BeSafe.clear()
+      }
     }
 
     try {
-      await intermediate
       await self.getMe()
     } catch (err) {
       throw err
@@ -231,7 +231,7 @@ var Store = Reflux.createStore({
       // storage: prefix + '-storage',
       // flat: true, // flat directory structure
       storeOnFetch: true,
-      storage: 'storage',
+      db: level('storage', { db: leveldown }),
       fallbacks: ['http://tradle.io:25667']
     })
 
