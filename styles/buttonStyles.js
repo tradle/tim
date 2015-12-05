@@ -20,7 +20,7 @@ var buttonStyles = Object.freeze({
   icon: {
     width: 30,
     height: 30,
-    paddingLeft: 4,
+    // paddingLeft: 4, // for not outline icon
     // borderWidth: 1,
     // borderColor: ICON_BORDER_COLOR,
     // borderRadius: 15,
@@ -31,6 +31,7 @@ var buttonStyles = Object.freeze({
   container: {
     alignSelf: 'center',
     paddingHorizontal: 7,
+    marginTop: 3,
     // marginTop: 16,
     width: 130
   },
