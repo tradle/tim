@@ -239,7 +239,7 @@ class TimHome extends Component {
                 underlayColor='transparent' onPress={this.showContactsOrRegister.bind(this)}>
             <View style={styles.container}>
               <View>
-                <Image style={styles.thumb} source={TradleLogo}></Image>
+                <Image style={styles.thumb} source={TradleWhite}></Image>
                 <Text style={styles.tradle}>Tradle</Text>
               </View>
             </View>
