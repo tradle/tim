@@ -1315,10 +1315,6 @@ var identities = [
 
 ];
 
-var welcome =  {
-  "msg": "Welcome {firstName}! It is a pleasure to have you here! Agent will be with you shortly. Meanwhile could you please tell how can we be of help to you today?"
-}
-
 var myId;
 var data = {
   getModels: function() {
