@@ -145,8 +145,8 @@ var Store = Reflux.createStore({
     // change to true if you want to wipe
     // everything and start from scratch
     if (false) {
-      await AsyncStorage.clear()
-      // await BeSafe.clear()
+      // await AsyncStorage.clear()
+      await BeSafe.clear()
     } else if (false) {
       try {
         await BeSafe.loadFromLastBackup()
@@ -231,7 +231,10 @@ var Store = Reflux.createStore({
       // storage: prefix + '-storage',
       // flat: true, // flat directory structure
       storeOnFetch: true,
-      db: level('storage', { db: leveldown }),
+      db: level('storage', {
+        db: leveldown,
+        valueEncoding: 'binary'
+      }),
       fallbacks: ['http://tradle.io:25667']
     })
 
