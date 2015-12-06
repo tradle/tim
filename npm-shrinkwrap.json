@@ -319,9 +319,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/constants/-/constants-1.1.3.tgz"
     },
     "@tradle/http-keeper": {
-      "version": "1.4.1",
-      "from": "@tradle/http-keeper@>=1.4.1 <2.0.0",
-      "resolved": "https://registry.npmjs.org/@tradle/http-keeper/-/http-keeper-1.4.1.tgz",
+      "version": "2.1.0",
+      "from": "@tradle/http-keeper@>=2.1.0 <3.0.0",
+      "resolved": "https://registry.npmjs.org/@tradle/http-keeper/-/http-keeper-2.1.0.tgz",
       "dependencies": {
         "@tradle/bitkeeper-client": {
           "version": "0.0.1",
@@ -336,9 +336,9 @@
           }
         },
         "@tradle/offline-keeper": {
-          "version": "1.7.2",
-          "from": "@tradle/offline-keeper@>=1.7.2 <2.0.0",
-          "resolved": "https://registry.npmjs.org/@tradle/offline-keeper/-/offline-keeper-1.7.2.tgz",
+          "version": "2.1.5",
+          "from": "@tradle/offline-keeper@>=2.1.5 <3.0.0",
+          "resolved": "https://registry.npmjs.org/@tradle/offline-keeper/-/offline-keeper-2.1.5.tgz",
           "dependencies": {
             "bindall": {
               "version": "1.0.0",
@@ -698,9 +698,9 @@
       "resolved": "git+https://github.com/mvayngrib/asyncstorage-backup.git#a59430c193d38e6dfa79a0c4fd2dd8e5816118d2"
     },
     "asyncstorage-down": {
-      "version": "2.2.1",
-      "from": "asyncstorage-down@>=2.2.1 <3.0.0",
-      "resolved": "https://registry.npmjs.org/asyncstorage-down/-/asyncstorage-down-2.2.1.tgz",
+      "version": "2.3.0",
+      "from": "asyncstorage-down@>=2.3.0 <3.0.0",
+      "resolved": "https://registry.npmjs.org/asyncstorage-down/-/asyncstorage-down-2.3.0.tgz",
       "dependencies": {
         "argsarray": {
           "version": "0.0.1",
