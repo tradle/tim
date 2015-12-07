@@ -193,7 +193,7 @@ class TimHome extends Component {
               </View>
             </View>
             <View style={{alignItems: 'center'}}>
-              <ActivityIndicatorIOS hidden='true' size='large'/>
+              <ActivityIndicatorIOS hidden='true' size='large' color='#ffffff'/>
             </View>
           </ScrollView>
           </View>
