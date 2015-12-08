@@ -193,7 +193,7 @@ class MessageList extends Component {
       if (this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION) {
         content = <View style={[styles.container]}>
           <Text style={{fontSize: 16, alignSelf: 'center', marginTop: 80, color: '#629BCA'}}>{'Please wait a bit...'}</Text>
-          <ActivityIndicatorIOS style={{alignSelf: 'center', size: 'large', marginTop: 20}} />
+          <ActivityIndicatorIOS size='large' style={{alignSelf: 'center', marginTop: 20}} />
         </View>
 
 
