@@ -240,7 +240,7 @@ class ResourceList extends Component {
       var routes = this.props.navigator.getCurrentRoutes();
       if (routes[routes.length - 1].title === 'Official Accounts') {
         var msg = {
-          message: (me.firstName || 'There is a customer') + ' waiting for the response',
+          message: '[' + (me.firstName || 'There is a customer') + ' is waiting for the response](tradle.CustomerWaiting)',
           _t: constants.TYPES.SIMPLE_MESSAGE,
           from: me,
           to: resource,
@@ -458,7 +458,7 @@ class ResourceList extends Component {
       <View style={styles.footer}>
         <TouchableHighlight underlayColor='transparent' onPress={this.scanQRCode.bind(this)}>
           <View style={{marginTop: -10}}>
-            <Icon name='plus-circled'  size={50}  color='#ffffff' style={styles.icon} />
+            <Icon name='plus-circled'  size={45}  color='#ffffff' style={styles.icon} />
           </View>
         </TouchableHighlight>
       </View>
@@ -651,12 +651,14 @@ var styles = StyleSheet.create({
     backgroundColor: '#cccccc',
   },
   icon: {
-    width: 50,
-    height: 50,
-    marginRight: 5,
+    width: 55,
+    height: 60,
+    // marginRight: 5,
+    marginLeft: -30,
+    marginTop: -20,
     // backgroundColor: 'red',
     // borderRadius: 25,
-    marginTop: -10,
+    // marginTop: -10,
     color: '#629BCA',
     // color: '#cccccc'
   },
