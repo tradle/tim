@@ -145,8 +145,8 @@ var Store = Reflux.createStore({
     // change to true if you want to wipe
     // everything and start from scratch
     if (false) {
-      // await AsyncStorage.clear()
-      await BeSafe.clear()
+      await AsyncStorage.clear()
+      // await BeSafe.clear()
     } else if (false) {
       try {
         await BeSafe.loadFromLastBackup()
@@ -166,7 +166,6 @@ var Store = Reflux.createStore({
     if (!utils.isEmpty(list))
       isLoaded = true;
 
-    this.loadMyResources()
     if (me) {
       try {
         await self.getDriver(me)
