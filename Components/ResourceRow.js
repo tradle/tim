@@ -292,7 +292,7 @@ var styles = StyleSheet.create({
     alignSelf: 'center'
   },
   cellText: {
-    marginTop: 16,
+    marginTop: 12,
     alignSelf: 'center',
     color: '#ffffff',
     fontSize: 20,
