@@ -418,7 +418,10 @@ class NewResource extends Component {
     var errStyle = err ? styles.err : {'padding': 0, 'height': 0};
     var itemsMeta = utils.getItemsMeta(meta);
     var self = this;
-    var arrayItems = itemsMeta.map(function(bl) {
+    var arrayItems = [];
+
+    for (var p in itemsMeta) {
+      var bl = itemsMeta[p]
       if (bl.readOnly  ||  bl.items.backlink)
         return <View/>
       var counter;
@@ -441,9 +444,9 @@ class NewResource extends Component {
           </View>;
       else
         counter = <View></View>
-
-      return (
-        <TouchableHighlight style={styles.itemButton} underlayColor='#7AAAC3'
+      var title = bl.title || utils.makeLabel(p)
+      arrayItems.push (
+        <TouchableHighlight style={styles.itemButton} underlayColor='transparent'
             onPress={self.onNewPressed.bind(self, bl)}>
           <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
             <View style={{justifyContent: 'flex-start', flexDirection: 'row'}}>
@@ -454,7 +457,7 @@ class NewResource extends Component {
           </View>
         </TouchableHighlight>
       );
-    });
+    }
     var FromToView = require('./FromToView');
     // var style = isMessage ? {height: 570} : {height: 867};
     var style = {marginTop: 64};
