@@ -422,8 +422,10 @@ class NewResource extends Component {
 
     for (var p in itemsMeta) {
       var bl = itemsMeta[p]
-      if (bl.readOnly  ||  bl.items.backlink)
-        return <View/>
+      if (bl.readOnly  ||  bl.items.backlink) {
+        arrayItems.push (<View/>)
+        continue
+      }
       var counter;
       if (resource  &&  resource[bl.name]) {
         if (resource[bl.name].length)

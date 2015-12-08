@@ -210,27 +210,27 @@ class MessageRow extends Component {
       if (isVerification) {
         var msgModel = utils.getModel(resource.document[constants.TYPE]).value;
         var orgName = resource.organization  ? resource.organization.title : ''
-        renderedRow = <View>
-                        <View style={{flexDirection: 'row', backgroundColor: '#289427', paddingVertical: 5, paddingHorizontal: 7, marginHorizontal: -7, marginTop: -5, justifyContent: 'center'}}>
+        renderedRow = <View key={this.getNextKey()}>
+                        <View style={{flexDirection: 'row', backgroundColor: '#289427', paddingVertical: 5, paddingHorizontal: 7, marginHorizontal: -7, marginTop: -5, justifyContent: 'center'}} key={this.getNextKey()}>
                           <Icon style={styles.verificationIcon} size={20} name={'android-done'} />
                           <Text style={{fontSize: 16, fontWeight: '600', color: '#FBFFE5', alignSelf: 'center'}}> Verified by {orgName}</Text>
                         </View>
-                        <View style={{paddingTop: 5}}>
+                        <View style={{paddingTop: 5}} key={this.getNextKey()}>
                           {this.formatDocument(msgModel, resource, this.verify.bind(this))}
                         </View>
-                        <View style={{paddingTop: 5}}>
+                        <View style={{paddingTop: 5}} key={this.getNextKey()}>
                           <Text style={[styles.resourceTitle, {alignSelf:'flex-end', fontSize: 18, color: '#CCCCB2'}]}>{msgModel.title}</Text>
                         </View>
                       </View>
-        renderedRow = <View>
-                        <View style={{flexDirection: 'row', backgroundColor: '#289427', paddingVertical: 5, paddingHorizontal: 7, marginHorizontal: -7, marginTop: -5, borderRadius: 5, justifyContent: 'center'}}>
+        renderedRow = <View key={this.getNextKey()}>
+                        <View style={{flexDirection: 'row', backgroundColor: '#289427', paddingVertical: 5, paddingHorizontal: 7, marginHorizontal: -7, marginTop: -5, borderRadius: 5, justifyContent: 'center'}} key={this.getNextKey()}>
                           <Icon style={styles.verificationIcon} size={20} name={'android-done'} />
                           <Text style={{fontSize: 16, fontWeight: '600', color: '#FBFFE5', alignSelf: 'center'}}> Verified by {orgName}</Text>
                         </View>
-                        <View style={{paddingTop: 5}}>
+                        <View style={{paddingTop: 5}} key={this.getNextKey()}>
                           {this.formatDocument(msgModel, resource, this.verify.bind(this))}
                         </View>
-                        <View style={{paddingTop: 5}}>
+                        <View style={{paddingTop: 5}} key={this.getNextKey()}>
                           <Text style={[styles.resourceTitle, {alignSelf:'flex-end', fontSize: 18, color: '#CCCCB2'}]}>{msgModel.title}</Text>
                         </View>
                       </View>
@@ -238,10 +238,10 @@ class MessageRow extends Component {
       var rowId = <Text style={{fontWeight: '600', fontSize: 16, color: isMyMessage ? '#ffffff' : '#289427', paddingRight: 3}}>{this.props.messageNumber + '.'}</Text>;
       messageBody =
         <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
-          <View style={[rowStyle, viewStyle]}>
+          <View style={[rowStyle, viewStyle]} key={this.getNextKey()}>
             {ownerPhoto}
-            <View style={addStyle ? [styles.textContainer, addStyle] : styles.textContainer}>
-              <View style={{flex: 1}}>
+            <View style={addStyle ? [styles.textContainer, addStyle] : styles.textContainer} key={this.getNextKey()}>
+              <View style={{flex: 1}} key={this.getNextKey()}>
                 {renderedRow}
              </View>
             </View>
@@ -271,10 +271,10 @@ class MessageRow extends Component {
     var verifications = this.showVerifications(rowStyle, viewStyle, addStyle);
 
     return (
-      <View style={viewStyle} key={resource}>
+      <View style={viewStyle} key={this.getNextKey()}>
         {date}
         {messageBody}
-        <View style={photoListStyle}>
+        <View style={photoListStyle} key={this.getNextKey()}>
           <PhotoList photos={photoUrls} resource={this.props.resource} style={[photoStyle, {marginTop: -30}]} navigator={this.props.navigator} numberInRow={inRow} />
         </View>
         {verifications}
@@ -327,7 +327,7 @@ class MessageRow extends Component {
           var vModel = utils.getModel(r[constants.TYPE]);
           var doc = self.formatDocument(msgModel, r);
           if (cnt) {
-            doc = <View>
+            doc = <View key={this.getNextKey()}>
                     <View style={{height: 1, backgroundColor: '#dddddd'}} />
                     {doc}
                   </View>
@@ -357,11 +357,11 @@ class MessageRow extends Component {
     var st = [addStyle ? [styles.textContainer, addStyle] : styles.textContainer]
     st.push({borderWidth: 1, borderColor: '#C1DBCE'})
     return (
-      <View style={[rowStyle, viewStyle, {width: 325}]}>
-        <View style={{width: 30}} />
-        <View style={[addStyle ? [styles.textContainer, addStyle] : styles.textContainer]}>
-          <View style={{flex: 1}}>
-            <View style={{backgroundColor: '#c6e2ef', paddingVertical: 5, borderRadius: 5, paddingHorizontal: 7, marginTop: -7, marginHorizontal: -7}}>
+      <View style={[rowStyle, viewStyle, {width: 325}]} key={this.getNextKey()}>
+        <View style={{width: 30}} key={this.getNextKey()} />
+        <View style={[addStyle ? [styles.textContainer, addStyle] : styles.textContainer]} key={this.getNextKey()}>
+          <View style={{flex: 1}} key={this.getNextKey()}>
+            <View style={{backgroundColor: '#c6e2ef', paddingVertical: 5, borderRadius: 5, paddingHorizontal: 7, marginTop: -7, marginHorizontal: -7}} key={this.getNextKey()}>
               <Text style={{color: '#467E9C'}}>{msg}</Text>
             </View>
             {vtt}
@@ -511,12 +511,12 @@ class MessageRow extends Component {
         // Case when the needed form was sent along with the message
         if (msgParts.length === 2) {
           if (resource.welcome) {
-            msg = <View>
+            msg = <View key={self.getNextKey()}>
                     <Text style={style}>{msgParts[0]}</Text>
-                    <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                    <View style={{flexDirection: 'row', justifyContent: 'space-between'}} key={self.getNextKey()}>
                       <Text style={[style, {color: isMyMessage ? STRUCTURED_MESSAGE_COLOR : '#2892C6'}]}>{msgParts[1]} </Text>
-                       <Icon style={styles.linkIcon} size={20} name={'ios-arrow-right'} />
-                     </View>
+                      <Icon style={styles.linkIcon} size={20} name={'ios-arrow-right'} />
+                    </View>
                   </View>
             vCols.push(msg);
             onPressCall = self.onChooseProduct.bind(self, true)
@@ -536,7 +536,7 @@ class MessageRow extends Component {
             var color = isMyMessage ? (isNewProduct ? {color: '#7AAAC3', fontWeight: '400', fontSize: 20} : {color: STRUCTURED_MESSAGE_COLOR}) : {color: '#2892C6'}
             var link = isMyMessage
                      ? <Text style={[style, color]}>{msgModel.title}</Text>
-                     : <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                     : <View style={{flexDirection: 'row', justifyContent: 'space-between'}} key={self.getNextKey()}>
                          <Text style={[style, {color: isMyMessage ? STRUCTURED_MESSAGE_COLOR : '#2892C6'}]}>{msgModel.title}</Text>
                          <Icon style={styles.linkIcon} size={20} name={'ios-arrow-right'} />
                        </View>
@@ -552,7 +552,7 @@ class MessageRow extends Component {
                        // {link}
             }
             else
-               msg = <View>
+               msg = <View key={self.getNextKey()}>
                        <Text style={style}>{msgParts[0]}</Text>
                        {link}
                      </View>
@@ -568,7 +568,7 @@ class MessageRow extends Component {
         if (isConfirmation) {
           style = [style, {color: '#289427', fontSize: 16}]
           vCols.push(
-            <View>
+            <View key={self.getNextKey()}>
               <Text style={[style]}>{resource[v]}</Text>
               <Icon style={[{color: '#289427', alignSelf: 'flex-end', width: 50, height: 50, marginTop: -45, opacity: 0.2}]} size={50} name={'ios-flower'} />
               <Icon style={{color: '#289427', alignSelf: 'flex-end', marginTop: -10}} size={20} name={'android-done-all'} />
@@ -577,7 +577,7 @@ class MessageRow extends Component {
 
         }
         else
-          vCols.push(<Text style={style}>{resource[v]}</Text>);
+          vCols.push(<Text style={style} key={self.getNextKey()}>{resource[v]}</Text>);
       }
       first = false;
 
@@ -591,7 +591,7 @@ class MessageRow extends Component {
           s += p + ' ';
       });
 
-      vCols.push(<Text style={[styles.resourceTitle, {color: '#EBFCFF', fontSize: 18, fontWeight: '600', opacity: 0.3, alignSelf: 'flex-end', marginTop: 10}]}>{s}</Text>);
+      vCols.push(<Text style={[styles.resourceTitle, {color: '#EBFCFF', fontSize: 18, fontWeight: '600', opacity: 0.3, alignSelf: 'flex-end', marginTop: 10}]} key={this.getNextKey()}>{s}</Text>);
     }
     if (vCols  &&  vCols.length) {
       vCols.forEach(function(v) {
@@ -638,7 +638,7 @@ class MessageRow extends Component {
       if (!this.propsisAggregation)
         style = [style, {borderWidth: 0.5, paddingVertical: 3, borderBottomColor: STRUCTURED_MESSAGE_BORDER, borderTopColor: STRUCTURED_MESSAGE_COLOR, borderLeftColor: STRUCTURED_MESSAGE_COLOR, borderRightColor: STRUCTURED_MESSAGE_COLOR}]
       return (
-        <View style={style}>
+        <View style={style} key={this.getNextKey()}>
           <View style={{flex: 1, flexDirection: 'column'}}>
             <Text style={[styles.descriptionW, {color: '#FFFFEE'}]}>{prop.title}</Text>
           </View>
@@ -746,7 +746,7 @@ class MessageRow extends Component {
 
       orgRow =  onPress
              ? <View />
-             : <View style={{flexDirection: 'row', marginTop: 10, justifyContent:'space-between'}}>
+             : <View style={{flexDirection: 'row', marginTop: 10, justifyContent:'space-between'}} key={this.getNextKey()}>
                 <View style={{flexDirection: 'row', justifyContent: 'space-between', padding: 5, borderRadius: 10, borderWidth: 1, borderColor: '#eeeeee', backgroundColor: '#F0F0EE'}}>
                   <Icon style={styles.shareIcon} size={20} name={'android-share-alt'} />
                   <Text style={{color: '#2E3B4E', fontSize: 14, paddingRight: 5, marginTop: 2}}>Share</Text>
@@ -773,7 +773,7 @@ class MessageRow extends Component {
                   {text: 'Cancel', onPress: () => console.log('Canceled!')},
                 ]
             )}>
-           <View style={{flex: 1, flexDirection: 'row', paddingVertical: 5}}>
+           <View style={{flex: 1, flexDirection: 'row', paddingVertical: 5}} key={this.getNextKey()}>
              <View>
                {photo}
              </View>
@@ -845,7 +845,7 @@ class MessageRow extends Component {
         if (msgParts.length === 2) {
           var msgModel = utils.getModel(msgParts[1]);
           if (msgModel) {
-            vCols.push(<View>
+            vCols.push(<View key={self.getNextKey()}>
                          <Text style={style}>{msgParts[0]}</Text>
                          <Text style={[style, {color: isMyMessage ? STRUCTURED_MESSAGE_COLOR : '#7AAAC3'}]}>{msgModel.value.title}</Text>
                        </View>);
@@ -855,11 +855,13 @@ class MessageRow extends Component {
         row = self.getPropRow(properties[v], resource[v], style, true)
       }
       if (first) {
-        row = <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                <View>
+        row = <View style={{flexDirection: 'row', justifyContent: 'space-between'}} key={this.getNextKey()}>
+                <View key={self.getNextKey()}>
                   {row}
                 </View>
-                <View><Text style={styles.verySmallLetters}>{renderedRow[0]}</Text></View>
+                <View key={self.getNextKey()}>
+                  <Text style={styles.verySmallLetters}>{renderedRow[0]}</Text>
+                </View>
               </View>
         renderedRow.splice(0, 1);
       }

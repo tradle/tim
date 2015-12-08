@@ -3,7 +3,7 @@
 var React = require('react-native');
 var utils = require('../utils/utils');
 var constants = require('@tradle/constants');
-
+var cnt = 0;
 var {
   Text,
   View
@@ -38,6 +38,9 @@ var RowMixin = {
         : <View style={{flexDirection: 'row'}}><Text style={style}>{properties[dateProp].title}</Text><Text style={style}>{val}</Text></View>
 
     return <Text style={[style]} numberOfLines={1}>{val}</Text>;
+  },
+  getNextKey() {
+    return this.props.resource[constants.ROOT_HASH] + '_' + cnt++
   },
   anyOtherRow(prop, backlink, styles) {
     var row;

@@ -88,19 +88,19 @@ class ResourceRow extends Component {
                        : <View />;
     var textStyle = noImage ? [styles.textContainer, {marginVertical: 7}] : styles.textContainer;
     return (
-      <View key={this.props.key}>
-        <TouchableHighlight onPress={this.props.onSelect} underlayColor='transparent'>
-          <View style={styles.row}>
+      <View key={this.getNextKey()}>
+        <TouchableHighlight onPress={this.props.onSelect} underlayColor='transparent' key={this.getNextKey()}>
+          <View style={styles.row} key={this.getNextKey()}>
             {photo}
             {orgPhoto}
             {onlineStatus}
-            <View style={textStyle} key={resource[constants.ROOT_HASH]}>
+            <View style={textStyle} key={this.getNextKey()}>
               {this.formatRow(resource)}
             </View>
             {cancelResource}
           </View>
         </TouchableHighlight>
-        <View style={styles.cellBorder} />
+        <View style={styles.cellBorder}  key={this.getNextKey()} />
       </View>
     );
   }
@@ -120,6 +120,7 @@ class ResourceRow extends Component {
     var datePropIdx;
     var datePropsCounter = 0;
     var backlink;
+    var cnt = 10;
     for (var i=0; i<viewCols.length; i++) {
       var v = viewCols[i];
       if (properties[v].type === 'array') {
@@ -165,7 +166,7 @@ class ResourceRow extends Component {
               return;
           }
           else
-            row = <Text style={style} numberOfLines={first ? 2 : 1}>{resource[v].title}</Text>
+            row = <Text style={style} numberOfLines={first ? 2 : 1} key={self.getNextKey()}>{resource[v].title}</Text>
 
           vCols.push(row);
         }
@@ -180,9 +181,9 @@ class ResourceRow extends Component {
       else  {
         var row;
         if (resource[v]  &&  (typeof resource[v] != 'string'))
-          row = <Text style={style} numberOfLines={1}>{resource[v]}</Text>;
+          row = <Text style={style} numberOfLines={1} key={self.getNextKey()}>{resource[v]}</Text>;
         else if (!backlink  &&  resource[v]  && (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0))
-          row = <Text style={style} onPress={self.onPress.bind(self)} numberOfLines={1}>{resource[v]}</Text>;
+          row = <Text style={style} onPress={self.onPress.bind(self)} numberOfLines={1} key={self.getNextKey()}>{resource[v]}</Text>;
         else {
           var val = properties[v].displayAs ? utils.templateIt(properties[v], resource) : resource[v];
           let msgParts = utils.splitMessage(val);
@@ -193,14 +194,16 @@ class ResourceRow extends Component {
             for (let i=0; i<msgParts.length - 1; i++)
               val += msgParts[i];
           }
-          row = <Text style={style}>{val}</Text>;
+          row = <Text style={style} key={self.getNextKey()}>{val}</Text>;
         }
         if (first  &&  dateProp) {
           var val = utils.formatDate(new Date(resource[dateProp]));
           // var dateBlock = self.addDateProp(resource, dateProp, true);
-          row = <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                  <View>{row}</View>
-                  <View><Text style={styles.verySmallLetters}>{val}</Text></View>
+          row = <View style={{flexDirection: 'row', justifyContent: 'space-between'}} key={this.getNextKey()}>
+                  <View key={this.getNextKey()}>{row}</View>
+                  <View key={this.getNextKey()}>
+                    <Text style={styles.verySmallLetters}>{val}</Text>
+                  </View>
                 </View>
         }
         vCols.push(row);
@@ -217,8 +220,8 @@ class ResourceRow extends Component {
     if (!backlink)
       return renderedViewCols;
     return [
-      <TouchableHighlight onPress={this.props.showRefResources.bind(this, resource, backlink)} underlayColor='transparent'>
-        <View>
+      <TouchableHighlight key={this.getNextKey()} onPress={this.props.showRefResources.bind(this, resource, backlink)} underlayColor='transparent'>
+        <View key={this.getNextKey()}>
           {renderedViewCols}
         </View>
       </TouchableHighlight>
