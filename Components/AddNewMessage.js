@@ -148,8 +148,8 @@ class AddNewMessage extends Component {
                ? <View />
                : <TouchableHighlight underlayColor='transparent'
                     onPress={this.showChoice.bind(this)}>
-                  <View style={{paddingRight: 0, marginBottom: 2}}>
-                    <Icon name='ios-camera-outline' style={styles.icon} size={35} color='#999999' />
+                  <View style={{paddingRight: 10, marginBottom: 20}}>
+                    <Icon name='ios-camera' style={styles.icon} size={30} color='#999999' />
                   </View>
                 </TouchableHighlight>
 
@@ -396,8 +396,8 @@ var styles = StyleSheet.create({
     color: '#eeeeee'
   },
   icon: {
-    width: 35,
-    height: 35,
+    width: 30,
+    height: 32,
   },
   // imageOutline: {
   //   width: 25,
