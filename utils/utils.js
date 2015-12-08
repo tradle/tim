@@ -127,10 +127,10 @@ var utils = {
     var required = utils.arrayToObject(metadata.required);
     // if (!required)
     //   return;
-    var itemsMeta = [];
+    var itemsMeta = {};
     for (var p in props) {
       if (props[p].type == 'array')  //  &&  required[p]) {
-        itemsMeta.push(props[p]);
+        itemsMeta[p] = props[p];
     }
     return itemsMeta;
   },
