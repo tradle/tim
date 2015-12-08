@@ -47,18 +47,18 @@ class ProductChooser extends Component {
     this.listenTo(Store, 'onNewProductAdded');
   }
   onNewProductAdded(params) {
-    if (params.action !== 'newProductAdded')
+    if (params.action !== 'productList' || params.resource[constants.ROOT_HASH] !== this.props.resource[constants.ROOT_HASH])
       return;
-    if (params.err)
+    if (params.err) {
       this.setState({err: params.err});
-    else {
-      var products = this.state.products;
-      products.push(params.newModel);
-      this.setState({
-        products: products,
-        dataSource: this.state.dataSource.cloneWithRows(this.state.products),
-      });
+      return
     }
+    var products = params.productList;
+
+    this.setState({
+      products: products,
+      dataSource: this.state.dataSource.cloneWithRows(products),
+    });
   }
 
   selectResource(resource) {
