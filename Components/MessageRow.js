@@ -456,7 +456,9 @@ class MessageRow extends Component {
     var noMessage = !resource.message  ||  !resource.message.length;
     var onPressCall;
 
-    var isSimpleMessage = model.id === 'tradle.SimpleMessage';
+    var isProductList = model.id === 'tradle.ProductList'
+    var isSimpleMessage = isProductList ||  model.id === 'tradle.SimpleMessage'
+
     var isAdditionalInfo = !isSimpleMessage  &&  resource[constants.TYPE] === 'tradle.AdditionalInfo';
     var cnt = 0;
     var isNewProduct, isConfirmation
@@ -491,7 +493,7 @@ class MessageRow extends Component {
         onPressCall = self.onPress.bind(self);
         vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{resource[v]}</Text>);
       }
-      else if (!model.autoCreate) {
+      else if (!isProductList  &&  !model.autoCreate) {
         var val = (properties[v].displayAs)
                 ? utils.templateIt(properties[v], resource)
                 : resource[v];
@@ -580,7 +582,7 @@ class MessageRow extends Component {
 
     });
 
-    if (model.id !== 'tradle.SimpleMessage')  {
+    if (!isSimpleMessage)  {
       var t = model.title.split(' ');
       var s = '';
       t.forEach(function(p) {
