@@ -17,7 +17,6 @@ var voc = require('@tradle/models');
 
 var myIdentity = require('../data/myIdentity.json');
 var welcome = require('../data/welcome.json');
-var welcomeLloyds = require('../data/welcomeLloyds.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
@@ -448,18 +447,22 @@ var Store = Reflux.createStore({
       toChain.message = rr.message
     if (rr.photos)
       toChain.photos = rr.photos
-
+    if (r.list)
+      rr.list = r.list
     var batch = []
     var self = this
     var error
     var welcomeMessage
     var dhtKey
-    var onlyWelcome = !requestForForm  &&  isWelcome  &&  !!toOrg
+    var onlyWelcome = false; //!requestForForm  &&  isWelcome  &&  !!toOrg
     var promise = onlyWelcome
                 ? Q.resolve()
                 : getDHTKey(toChain)
+    // var isServiceMessage = rr[TYPE] === 'tradle.ServiceMessage'
     return promise
     .then(function(data) {
+      if (!isWelcome  ||  (me.organization  &&  utils.getId(me.organization) === utils.getId(r.to)))
+        return
       if (!isWelcome) {
         dhtKey = data
         var to = list[utils.getId(r.to)].value;
@@ -469,7 +472,10 @@ var Store = Reflux.createStore({
           dn = 'sent photo';
         else {
           var msgParts = utils.splitMessage(dn);
-          dn = msgParts.length === 1 ? dn : utils.getModel(msgParts[1]).value.title + ' request';
+          if (msgParts.length === 2) {
+            var m = utils.getModel(msgParts[1]);
+            dn = m ? m.value.title + ' request' : msgParts[1];
+          }
         }
 
         rr[ROOT_HASH] = dhtKey
@@ -480,28 +486,27 @@ var Store = Reflux.createStore({
         batch.push({type: 'put', key: to[TYPE] + '_' + to[ROOT_HASH], value: to});
         batch.push({type: 'put', key: from[TYPE] + '_' + from[ROOT_HASH], value: from});
       }
-      if (!isWelcome  ||  (me.organization  &&  utils.getId(me.organization) === utils.getId(r.to)))
-        return
+      // Check whose message was the last one
       var result = self.searchMessages({to: toOrg, modelName: MESSAGE, limit: 1});
-      if (!result || result.length > 0) {
+      if (result && result.length > 0) {
         isWelcome = false
-        return
+        return;
       }
-      var wmKey = SIMPLE_MESSAGE + '_Welcome' + rr.to.title
+      var wmKey = SIMPLE_MESSAGE + '_Welcome' + toOrg.name.replace(' ', '_')
       // Create welcome message without saving it in DB
       welcomeMessage = {}
-      // var isLloyds = toOrg.name === 'Lloyds'
       // onlyWelcome = !!toOrg
       if (list[wmKey]) {
         list[wmKey].value.time = new Date()
         return
       }
 
-      var w = welcomeLloyds //isLloyds ? welcomeLloyds : welcome
+      var w = welcome //isLloyds ? welcomeLloyds : welcome
 
       welcomeMessage.message = w.msg.replace('{firstName}', me.firstName)
       welcomeMessage.time = new Date()
       welcomeMessage[TYPE] = SIMPLE_MESSAGE
+      welcomeMessage.welcome = true
       welcomeMessage[NONCE] = self.getNonce()
       welcomeMessage.to = {
         id: me[TYPE] + '_' + me[ROOT_HASH],
@@ -541,7 +546,7 @@ var Store = Reflux.createStore({
         return self.getDriver(me)
     })
     .then(function() {
-      if (/*isWelcome  || */ !onlyWelcome  &&  list[utils.getId(r.to)].value.pubkeys)
+      if (!onlyWelcome  &&  list[utils.getId(r.to)].value.pubkeys)
         return meDriver.send({
           msg: toChain,
           to: [{fingerprint: self.getFingerprint(r.to)}],
@@ -553,7 +558,9 @@ var Store = Reflux.createStore({
         })
     })
     .then(function(data) {
-      if (onlyWelcome)
+      // if (onlyWelcome)
+      //   return
+      if (!requestForForm  &&  isWelcome)
         return
       delete list[rr[TYPE] + '_' + dhtKey]
       if (data)  {
@@ -1307,6 +1314,8 @@ var Store = Reflux.createStore({
 
     var chatId = chatTo ? chatTo[TYPE] + '_' + chatTo[ROOT_HASH] : null;
     var isChatWithOrg = chatTo  &&  chatTo[TYPE] === ORGANIZATION;
+    var toId
+    var toOrg
     if (isChatWithOrg) {
       var rep = this.getRepresentative(chatId)
       if (!rep)
@@ -1314,10 +1323,13 @@ var Store = Reflux.createStore({
       chatTo = rep
       chatId = chatTo[TYPE] + '_' + chatTo[ROOT_HASH]
       isChatWithOrg = false
+      toId = utils.getId(params.to)
+      toOrg = list[toId].value
     }
     // if (isChatWithOrg  &&  !chatTo.name) {
     //   chatTo = list[chatId].value;
     // }
+    var productListMsgKey
     var testMe = chatTo ? chatTo.me : null;
     if (testMe) {
       if (testMe === 'me') {
@@ -1335,6 +1347,7 @@ var Store = Reflux.createStore({
         myIdentities.currentIdentity = meId;
     }
     var toModelName = chatTo ? chatId.split('_')[0] : null;
+    var lastPL
     for (var key in list) {
       var iMeta = null;
       if (isAllMessages) {
@@ -1373,14 +1386,20 @@ var Store = Reflux.createStore({
       }
       // HACK to not show service message in customer stream
       else if (r.message  &&  r.message.length)  {
-        if (r.message.indexOf('waiting for response') == r.message.length - 20) {
-          var rid = utils.getId(r.to);
+        var s = '](tradle.CustomerWaiting)'
+        if (r.message.indexOf(s) === r.message.length - s.length) {
+          var rid = utils.getId(chatTo.organization);
           if (rid.indexOf(ORGANIZATION) == 0  &&  (!me.organization  ||  rid !== utils.getId(me.organization)))
              continue;
         }
-        // else if (r.message.indexOf('[application for]') === 0  &&  me[ROOT_HASH] === utils.getId(r.from).split('_')[1])
-        //   continue
+        // Show only the last 'Choose the product' message
+        else if (r[TYPE] === 'tradle.ProductList') {
+          if (!lastPL  ||  lastPL.time < r.time)
+            lastPL = r
+          continue;
+        }
       }
+
       if (chatTo) {
         if (backlink  &&  r[backlink]) {
           if (chatId === utils.getId(r[backlink])) {
@@ -1457,6 +1476,8 @@ var Store = Reflux.createStore({
     }
 
     var result = utils.objectToArray(foundResources);
+    if (lastPL)
+      result.push(lastPL)
 
     // find possible verifications for the requests that were not yet fulfilled from other verification providers
 
@@ -2020,6 +2041,7 @@ var Store = Reflux.createStore({
     var val = obj.parsed.data
     if (!val)
       return
+
     val[ROOT_HASH] = obj[ROOT_HASH]
     val[CUR_HASH] = obj[CUR_HASH]
     if (!val.time)
@@ -2043,6 +2065,7 @@ var Store = Reflux.createStore({
     var v = list[key] ? list[key].value : null
     var inDB = !!v
     var batch = []
+    // var isServiceMessage
     if (model.id === IDENTITY) {
       // if (!me  ||  obj[ROOT_HASH] !== me[ROOT_HASH]) {
         if (val.name) {
@@ -2073,7 +2096,22 @@ var Store = Reflux.createStore({
         var from = list[IDENTITY + '_' + obj.from[ROOT_HASH]].value
         if (me  &&  from[ROOT_HASH] === me[ROOT_HASH])
           return
-        // var to = obj.to.identity.toJSON()
+        var isProductList = val[TYPE] === 'tradle.ProductList'
+        if (isProductList) {
+          var pList = JSON.parse(val.list)
+          var fOrg = obj.from.identity.toJSON().organization
+          var org = list[utils.getId(fOrg)].value
+          org.list = pList
+          pList.forEach(function(m) {
+            models[m.id] = {
+              key: m.id,
+              value: m
+            }
+            if (!m[ROOT_HASH])
+              m[ROOT_HASH] = sha(m)
+            batch.push({type: 'put', key: m.id, value: m})
+          })
+        }
         var to = list[IDENTITY + '_' + obj.to[ROOT_HASH]].value
         val.to = {
           id: to[TYPE] + '_' + to[ROOT_HASH],
@@ -2091,58 +2129,54 @@ var Store = Reflux.createStore({
           this.onAddVerification(val, false, true)
           return
         }
-
-        var dn = val.message || utils.getDisplayName(val, model.properties);
-        to.lastMessage = (obj.from[ROOT_HASH] === me[ROOT_HASH]) ? 'You: ' + dn : dn;
-        to.lastMessageTime = val.time;
-        from.lastMessage = val.message;
-        from.lastMessageTime = val.time;
+          // else
+          //   isServiceMessage = val.list  &&  type === 'tradle.ServiceMessage'  ||  (model.subClassOf  &&  model.subClassOf === 'tradle.ServiceMessage')
         batch.push({type: 'put', key: key, value: val})
-        batch.push({type: 'put', key: to[TYPE] + '_' + obj.to[ROOT_HASH], value: to});
-        batch.push({type: 'put', key: from[TYPE] + '_' + obj.from[ROOT_HASH], value: from});
+        if (!isProductList) {
+          var dn = val.message || utils.getDisplayName(val, model.properties);
+          to.lastMessage = (obj.from[ROOT_HASH] === me[ROOT_HASH]) ? 'You: ' + dn : dn;
+          to.lastMessageTime = val.time;
+          from.lastMessage = val.message;
+          from.lastMessageTime = val.time;
+          batch.push({type: 'put', key: to[TYPE] + '_' + obj.to[ROOT_HASH], value: to});
+          batch.push({type: 'put', key: from[TYPE] + '_' + obj.from[ROOT_HASH], value: from});
+        }
       }
     }
     // if (batch.length)
     var self = this
     // return db.batch(batch)
     // .then(function() {
-      list[key] = {
-        key: key,
-        value: val
-      }
-      var retParams = {
-        action: isMessage ? 'messageList' : 'list',
-      }
-      var resultList
-      if (isMessage) {
-        var toId = IDENTITY + '_' + obj.to[ROOT_HASH]
-        var meId = IDENTITY + '_' + me[ROOT_HASH]
-        var id = toId === meId ? IDENTITY + '_' + obj.from[ROOT_HASH] : toId
-        var to = list[id].value
 
-        resultList = self.searchMessages({to: to, modelName: MESSAGE})
-        var verificationsToShare = this.getVerificationsToShare(resultList, to);
-        if (verificationsToShare)
-          retParams.verificationsToShare = verificationsToShare
-        retParams.resource = to
-      }
-        // resultList = searchMessages({to: list[obj.to.identity.toJSON()[TYPE] + '_' + obj.to[ROOT_HASH]], modelName: MESSAGE})
-      else if (!onMessage  ||  val[TYPE] != IDENTITY)
-        resultList = self.searchNotMessages({modelName: val[TYPE]})
-      retParams.list = resultList
+    list[key] = {
+      key: key,
+      value: val
+    }
+    var retParams = {
+      action: isMessage ? 'messageList' : 'list',
+    }
+    var resultList
+    if (isMessage) {
+      var toId = IDENTITY + '_' + obj.to[ROOT_HASH]
+      var meId = IDENTITY + '_' + me[ROOT_HASH]
+      var id = toId === meId ? IDENTITY + '_' + obj.from[ROOT_HASH] : toId
+      var to = list[id].value
 
-      return db.batch(batch)
-      .then(function() {
-        self.trigger(retParams)
-      })
+      resultList = self.searchMessages({to: to, modelName: MESSAGE})
+      var verificationsToShare = this.getVerificationsToShare(resultList, to);
+      if (verificationsToShare)
+        retParams.verificationsToShare = verificationsToShare
+      retParams.resource = to
+    }
+      // resultList = searchMessages({to: list[obj.to.identity.toJSON()[TYPE] + '_' + obj.to[ROOT_HASH]], modelName: MESSAGE})
+    else if (!onMessage  ||  val[TYPE] != IDENTITY)
+      resultList = self.searchNotMessages({modelName: val[TYPE]})
+    retParams.list = resultList
 
-      // var retParams = {
-      //   action: isMessage ? 'addMessage' : 'addItem',
-      //   resource: val
-      // }
-      // self.trigger(retParams)
-    // })
-     // return db.batch(batch)
+    return db.batch(batch)
+    .then(function() {
+      self.trigger(retParams)
+    })
   },
   loadMyResources() {
     var myId = sampleData.getMyId();
