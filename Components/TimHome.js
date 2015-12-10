@@ -236,7 +236,7 @@ class TimHome extends Component {
           style={{height:480}}
         >
           <TouchableHighlight style={[styles.thumbButton]}
-                underlayColor='transparent' onPress={this.showContactsOrRegister.bind(this)}>
+                underlayColor='transparent' onPress={this._pressHandler.bind(this)}>
             <View style={styles.container}>
               <View>
                 <Image style={styles.thumb} source={TradleWhite}></Image>
@@ -283,24 +283,28 @@ class TimHome extends Component {
       </View>
     );
   }
-  _pressHandler() {
+  async _pressHandler() {
     var self = this
-    TouchID.isSupported()
-   .then(supported => {
-      TouchID.authenticate('to demo this react-native component')
-        .then(success => {
-          self.showContactsOrRegister()
-        })
-        .catch(error => {
-          AlertIOS.alert('Authentication Failed')
-        });
-    })
-    .catch(error => {
-      // Failure code
-      self.showContactsOrRegister()
-    })
-  }
+    try {
+      await TouchID.isSupported()
+    } catch (err) {
+      if (!__DEV__) {
+        return AlertIOS.alert(
+          'Please set up Touch ID first, so the app can better protect your data.'
+        )
+      }
+    }
 
+    try {
+      await TouchID.authenticate('authenticate yourself!')
+    } catch (err) {
+      if (!__DEV__) {
+        return AlertIOS.alert('Authentication Failed')
+      }
+    }
+
+    this.showContactsOrRegister()
+  }
 }
           // {spinner}
           // <View style={{height: 400}}></View>
