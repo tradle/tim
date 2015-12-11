@@ -11,6 +11,11 @@ var Reflux = require('reflux');
 var Actions = require('../Actions/Actions');
 var extend = require('extend');
 var Q = require('q');
+Q.onerror = function (err) {
+  console.error(err)
+  throw err
+}
+
 var AddressBook = require('NativeModules').AddressBook;
 var sampleData = require('../data/data');
 var voc = require('@tradle/models');
