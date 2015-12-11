@@ -63,7 +63,7 @@
     "react-native-scrollable-mixin": "0.0.2",
     "react-native-search-bar": "tradle/react-native-search-bar",
     "react-native-touch-id": "tradle/react-native-touch-id",
-    "react-native-udp": "^1.1.0",
+    "react-native-udp": "^1.2.0",
     "react-native-vector-icons": "^1.0.0",
     "readable-stream": "1.0.33",
     "reflux": "^0.2.12",
