@@ -12,12 +12,12 @@ var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
 var sampleData = require('../data/data');
 var constants = require('@tradle/constants');
-var TouchID = require('react-native-touch-id');
 var BACKUPS = require('asyncstorage-backup')
 var Device = require('react-native-device');
 var TradleLogo = require('../img/Tradle.png')
 var TradleWhite = require('../img/TradleW.png')
 var BG_IMAGE = require('../img/bg.png')
+import authenticateUser from '../utils/authenticateUser'
 
 var {
   StyleSheet,
@@ -284,26 +284,9 @@ class TimHome extends Component {
     );
   }
   async _pressHandler() {
-    var self = this
-    try {
-      await TouchID.isSupported()
-    } catch (err) {
-      if (!__DEV__) {
-        return AlertIOS.alert(
-          'Please set up Touch ID first, so the app can better protect your data.'
-        )
-      }
+    if (await authenticateUser()) {
+      this.showContactsOrRegister()
     }
-
-    try {
-      await TouchID.authenticate('authenticate yourself!')
-    } catch (err) {
-      if (!__DEV__) {
-        return AlertIOS.alert('Authentication Failed')
-      }
-    }
-
-    this.showContactsOrRegister()
   }
 }
           // {spinner}
