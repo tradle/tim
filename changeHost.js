@@ -6,7 +6,7 @@ var hostname = process.argv[2] || 'rnhost'
 
 ;[
   path.resolve('./node_modules/react-native/Libraries/WebSocket/RCTWebSocketExecutor.m'),
-  path.resolve('./iOS/AppDelegate.m')
+  path.resolve('./iOS/Identity/AppDelegate.m')
 ].forEach(function (file) {
   fs.readFile(file, { encoding: 'utf8' }, function (err, contents) {
     if (err) {
@@ -18,8 +18,8 @@ var hostname = process.argv[2] || 'rnhost'
     }
 
     var hacked = contents.replace(
-      /(NSURL(?: URLWithString)?\:\@\"http\:\/\/)[^:]+:(\d+)/,
-      '$1' + hostname + ':$2'
+      /((?:URLWithString|stringWithFormat)\:\@\"http\:\/\/)[^:]+/,
+      '$1' + hostname
     )
 
     if (hacked !== contents) {
