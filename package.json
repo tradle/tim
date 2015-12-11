@@ -76,7 +76,7 @@
     "tcomb": "^2.2.0",
     "tcomb-form-native": "tradle/tcomb-form-native",
     "tcomb-validation": "^2.2.0",
-    "tim": "tradle/tim#es6",
+    "tim": "tradle/tim",
     "timers-browserify": "^1.4.1",
     "tty-browserify": "0.0.0",
     "typeforce": "^1.5.5",
