@@ -4,8 +4,16 @@ import TouchID from 'react-native-touch-id'
 
 var SETUP_MSG = 'Please set up Touch ID first, so the app can better protect your data.'
 var AUTH_FAILED_MSG = 'Authentication failed'
+var AUTHENTICATION_EXPIRES_IN = 60000
+var authenticated = false
 
-export default async function authenticateUser () {
+export async function unauthenticateUser () {
+  authenticated = false
+}
+
+export async function authenticateUser () {
+  if (authenticated) return authenticated
+
   try {
     await TouchID.isSupported()
   } catch (err) {
@@ -29,6 +37,7 @@ export default async function authenticateUser () {
         break
       default:
         message = AUTH_FAILED_MSG
+        break
     }
 
     if (message) AlertIOS.alert(message)
@@ -36,5 +45,7 @@ export default async function authenticateUser () {
     return false
   }
 
-  return true
+  authenticated = true
+  setTimeout(unauthenticateUser, AUTHENTICATION_EXPIRES_IN)
+  return authenticated
 }

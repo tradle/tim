@@ -17,7 +17,7 @@ var Device = require('react-native-device');
 var TradleLogo = require('../img/Tradle.png')
 var TradleWhite = require('../img/TradleW.png')
 var BG_IMAGE = require('../img/bg.png')
-import authenticateUser from '../utils/authenticateUser'
+import { authenticateUser } from '../utils/authenticateUser'
 
 var {
   StyleSheet,
