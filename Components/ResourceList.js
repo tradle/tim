@@ -89,7 +89,7 @@ class ResourceList extends Component {
         to: this.props.resource,
         sortProperty: model.sort
       });
-      console.log('Actions.list');
+
       return;
     }
 
@@ -249,7 +249,7 @@ class ResourceList extends Component {
 
         // var sendNotification = (resource.name === 'Rabobank'  &&  (!me.organization  ||  me.organization.name !== 'Rabobank'))
         // Actions.addMessage(msg, true, sendNotification)
-        Actions.addMessage(msg, true)
+        utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg, true))
       }
       // }
       // else if (resource.name === 'Lloyds') {
@@ -282,6 +282,7 @@ class ResourceList extends Component {
       //   return;
       // }
     }
+
     this.props.navigator.push(route);
   }
 

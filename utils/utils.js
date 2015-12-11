@@ -288,6 +288,18 @@ var utils = {
             }
           })
       })
+  },
+
+  onNextTransitionEnd(navigator, fn) {
+    var removeListener = navigator.navigationContext.addListener('didfocus', () => {
+      if (removeListener.remove) {
+        removeListener.remove()
+      } else {
+        removeListener()
+      }
+
+      fn()
+    })
   }
 }
 
