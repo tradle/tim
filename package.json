@@ -68,7 +68,6 @@
     "reflux": "^0.2.12",
     "regenerator": "^0.8.42",
     "rimraf": "^2.4.3",
-    "rn-nodeify": "^3.1.5",
     "stable-sha1": "~1.0.1",
     "stream-browserify": "^1.0.0",
     "stream-collector": "^1.0.1",
