@@ -1945,6 +1945,11 @@
         }
       }
     },
+    "react-addons-perf": {
+      "version": "0.14.3",
+      "from": "react-addons-perf@*",
+      "resolved": "https://registry.npmjs.org/react-addons-perf/-/react-addons-perf-0.14.3.tgz"
+    },
     "react-mixin": {
       "version": "1.2.4",
       "from": "https://registry.npmjs.org/react-mixin/-/react-mixin-1.2.4.tgz",
@@ -2637,15 +2642,15 @@
               "from": "https://registry.npmjs.org/statuses/-/statuses-1.2.1.tgz",
               "resolved": "https://registry.npmjs.org/statuses/-/statuses-1.2.1.tgz"
             },
-            "uid-safe": {
-              "version": "2.0.0",
-              "from": "https://registry.npmjs.org/uid-safe/-/uid-safe-2.0.0.tgz",
-              "resolved": "https://registry.npmjs.org/uid-safe/-/uid-safe-2.0.0.tgz"
-            },
             "unpipe": {
               "version": "1.0.0",
               "from": "https://registry.npmjs.org/unpipe/-/unpipe-1.0.0.tgz",
               "resolved": "https://registry.npmjs.org/unpipe/-/unpipe-1.0.0.tgz"
+            },
+            "uid-safe": {
+              "version": "2.0.0",
+              "from": "https://registry.npmjs.org/uid-safe/-/uid-safe-2.0.0.tgz",
+              "resolved": "https://registry.npmjs.org/uid-safe/-/uid-safe-2.0.0.tgz"
             },
             "vary": {
               "version": "1.0.1",

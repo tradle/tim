@@ -42,6 +42,7 @@
     "q": "^1.4.1",
     "q-level": "~1.1.2",
     "querystring-es3": "^0.2.1",
+    "react-addons-perf": "^0.14.3",
     "react-mixin": "~1.2.2",
     "react-native": "facebook/react-native#v0.16.0",
     "react-native-addressbook": "^1.1.5",
@@ -111,6 +112,7 @@
     "babel-plugin-transform-async-functions": "^6.3.13",
     "babel-plugin-transform-object-rest-spread": "^6.3.13",
     "babel-plugin-transform-regenerator": "^6.3.13",
-    "memdown": "^1.1.0"
+    "memdown": "^1.1.0",
+    "react-addons-perf": "^0.14.3"
   }
 }

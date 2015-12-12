@@ -2,11 +2,11 @@
 
 // require('react-native-level')
 var debug = require('debug')
-if (__DEV__) {
-  debug.enable('*')
-} else {
+// if (__DEV__) {
+//   debug.enable('*')
+// } else {
   debug.disable()
-}
+// }
 
 debug = debug('tim:main')
 
@@ -53,6 +53,7 @@ var {
   LinkingIOS
 } = React;
 
+var ReactPerf = __DEV__ && require('react-addons-perf')
 
 class TiMApp extends Component {
   constructor(props) {
@@ -176,10 +177,19 @@ class TiMApp extends Component {
   }
 
   onNavigatorBeforeTransition() {
+    if (__DEV__) ReactPerf.start()
+
     Actions.startTransition()
   }
 
   onNavigatorAfterTransition() {
+    if (__DEV__) {
+      setTimeout(function () {
+        ReactPerf.stop()
+        console.log(ReactPerf.printWasted())
+      }, 500)
+    }
+
     Actions.endTransition()
   }
 
