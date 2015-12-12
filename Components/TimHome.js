@@ -363,8 +363,7 @@ var styles = StyleSheet.create({
   getStarted: {
     backgroundColor: '#568FBE', //'#2892C6',
     paddingVertical: 10,
-    paddingHorizontal: 30,
-    borderRadius: 10
+    paddingHorizontal: 30
   },
 });
 
