@@ -26,6 +26,7 @@
     "asyncstorage-down": "^2.3.0",
     "browserify-zlib": "^0.1.4",
     "buffer": "^3.5.1",
+    "cachedown": "mvayngrib/cachedown#old",
     "debug": "^2.2.0",
     "dns.js": "^1.0.1",
     "events": "^1.1.0",

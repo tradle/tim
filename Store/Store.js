@@ -25,8 +25,20 @@ var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
-var level = require('react-native-level')
 var promisify = require('q-level');
+var asyncstorageDown = require('asyncstorage-down')
+var levelup = require('levelup')
+var leveldown = require('cachedown')
+leveldown.setLeveldown(asyncstorageDown)
+var level = function (loc, opts) {
+  opts = opts || {}
+  opts.db = opts.db || function () {
+    return leveldown.apply(null, arguments)
+      .maxSize(100) // max cache size
+  }
+
+  return levelup(loc, opts)
+}
 
 var constants = require('@tradle/constants');
 var NONCE = constants.NONCE
@@ -50,7 +62,6 @@ var getDHTKey = require('tim/lib/utils').getDHTKey
 
 var dns = require('dns')
 var map = require('map-stream')
-var leveldown = require('asyncstorage-down')
 var DHT = require('@tradle/bittorrent-dht') // use tradle/bittorrent-dht fork
 var Blockchain = require('@tradle/cb-blockr') // use tradle/cb-blockr fork
 Blockchain.throttleGet(100)
