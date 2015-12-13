@@ -58,11 +58,13 @@ class ShowRefList extends Component {
       if (!icon)
         icon = 'ios-checkmark-empty';
         // icon = 'ios-checkmark-outline';
+      var key = p
+      var cnt = 1
       refList.push(
-        <View style={buttonStyles.container}>
+        <View style={buttonStyles.container} key={getNextKey(key)}>
            <TouchableHighlight onPress={this.showResources.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
-             <View style={{alignItems: 'center'}}>
-               <Icon name={icon}  size={30}  color='#ffffff'  style={[buttonStyles.icon, {paddingLeft: 5}]}/>
+             <View style={{alignItems: 'center'}} key={getNextKey(key)}>
+               <Icon name={icon}  size={30}  color='#ffffff'  style={[buttonStyles.icon, {paddingLeft: 5}]} />
                <Text style={buttonStyles.text}>{props[p].title}</Text>
              </View>
            </TouchableHighlight>
@@ -70,12 +72,15 @@ class ShowRefList extends Component {
         );
      }
      return refList.length
-             ?  <View style={buttonStyles.buttons}>
+             ?  <View style={buttonStyles.buttons} key={'ShowRefList'}>
                   <View  style={{flexDirection: 'row'}}>
                     {refList}
                   </View>
                 </View>
              : <View/>;
+    function getNextKey(key) {
+      return key + '_' + cnt++
+    }
   }
 }
 reactMixin(ShowRefList.prototype, ResourceViewMixin);
