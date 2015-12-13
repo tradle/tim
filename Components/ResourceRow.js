@@ -94,7 +94,7 @@ class ResourceRow extends Component {
             {photo}
             {orgPhoto}
             {onlineStatus}
-            <View style={textStyle} key={this.getNextKey()}>
+            <View style={styles.textContainer} key={this.getNextKey()}>
               {this.formatRow(resource)}
             </View>
             {cancelResource}
@@ -218,7 +218,7 @@ class ResourceRow extends Component {
 
     }
     if (!backlink)
-      return renderedViewCols;
+      return renderedViewCols
     return [
       <TouchableHighlight key={this.getNextKey()} onPress={this.props.showRefResources.bind(this, resource, backlink)} underlayColor='transparent'>
         <View key={this.getNextKey()}>
@@ -243,6 +243,7 @@ reactMixin(ResourceRow.prototype, RowMixin);
 var styles = StyleSheet.create({
   textContainer: {
     flex: 1,
+    alignSelf: 'center'
   },
   // TODO: remove when you figure out v-centering
   // HACK FOR VERTICAL CENTERING
@@ -250,8 +251,8 @@ var styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     fontWeight: '400',
-    paddingTop: 18,
-    marginBottom: 2,
+    // paddingTop: 18,
+    // marginBottom: 2,
   },
   description: {
     flex: 1,
@@ -285,6 +286,9 @@ var styles = StyleSheet.create({
     backgroundColor: '#D7E6ED'
   },
   cellRoundImage: {
+    // flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     // backgroundColor: '#7AAAc3',
     paddingVertical: 1,
     // borderColor: '#7AAAc3',
@@ -296,8 +300,8 @@ var styles = StyleSheet.create({
     alignSelf: 'center'
   },
   cellText: {
-    marginTop: 12,
-    alignSelf: 'center',
+    // marginTop: 12,
+    // alignSelf: 'center',
     color: '#ffffff',
     fontSize: 20,
     backgroundColor: 'transparent'
