@@ -50,7 +50,7 @@ class QRCodeView extends React.Component {
 
 function getStyle (dim) {
   return {
-    textAlign: 'center',
+    alignSelf: 'center',
     height: dim,
     width: dim
   }
