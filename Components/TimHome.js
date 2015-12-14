@@ -17,6 +17,7 @@ var Device = require('react-native-device');
 var TradleLogo = require('../img/Tradle.png')
 var TradleWhite = require('../img/TradleW.png')
 var BG_IMAGE = require('../img/bg.png')
+// var Progress = require('react-native-progress')
 import { authenticateUser } from '../utils/authenticateUser'
 
 var {
@@ -34,6 +35,7 @@ var {
   StatusBarIOS,
   AlertIOS
 } = React;
+
 
 class TimHome extends Component {
 	constructor(props) {
@@ -62,7 +64,8 @@ class TimHome extends Component {
   }
   showContactsOrRegister() {
     if (utils.getMe())
-      this.showContacts();
+      this.showOfficialAccounts();
+      // this.showContacts();
     else
       this.onEditProfilePressed();
   }
@@ -104,6 +107,42 @@ class TimHome extends Component {
       }
     });
 	}
+  showOfficialAccounts() {
+    var resource = utils.getMe()
+    var title = resource.firstName;
+    this.props.navigator.push({
+      title: 'Official Accounts',
+      id: 10,
+      component: ResourceList,
+      backButtonTitle: 'Back',
+      titleTextColor: '#7AAAC3',
+      passProps: {
+        modelName: 'tradle.Organization'
+      },
+      rightButtonTitle: 'Profile',
+      onRightButtonPress: {
+        title: title,
+        id: 3,
+        component: ResourceView,
+        titleTextColor: '#7AAAC3',
+        backButtonTitle: 'Back',
+        rightButtonTitle: 'Edit',
+        onRightButtonPress: {
+          title: title,
+          id: 4,
+          component: NewResource,
+          titleTextColor: '#7AAAC3',
+          backButtonTitle: 'Back',
+          rightButtonTitle: 'Done',
+          passProps: {
+            model: utils.getModel(resource[constants.TYPE]).value,
+            resource: resource
+          }
+        },
+        passProps: {resource: resource}
+      }
+    });
+  }
 
   showCommunities() {
     var passProps = {
@@ -183,15 +222,22 @@ class TimHome extends Component {
   render() {
     var url = LinkingIOS.popInitialURL();
     var d = Device
+    var h = d.height - 180
+    var cTop = h / 4
 
+    var thumb = {
+      width: d.width / 2.2,
+      height: d.width / 2.2
+    }
+              // <Progress.CircleSnail color={'white'} size={70} thickness={5}/>
   	var spinner =  <View style={styles.scroll}>
           <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: d.width, height: d.height}} />
           <ScrollView
             scrollEnabled={false}
-            style={{height:480}}>
-            <View style={styles.container}>
+            style={{height:h}}>
+            <View style={[styles.container, {marginTop: cTop}]}>
               <View>
-                <Image style={styles.thumb} source={TradleWhite}></Image>
+                <Image style={thumb} source={require('../img/TradleW.png')}></Image>
                 <Text style={styles.tradle}>Tradle</Text>
               </View>
             </View>
@@ -233,13 +279,13 @@ class TimHome extends Component {
       <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: d.width, height: d.height}} />
         <ScrollView
           scrollEnabled={false}
-          style={{height:480}}
+          style={{height:h}}
         >
           <TouchableHighlight style={[styles.thumbButton]}
                 underlayColor='transparent' onPress={this._pressHandler.bind(this)}>
-            <View style={styles.container}>
+            <View style={[styles.container, {marginTop: cTop}]}>
               <View>
-                <Image style={styles.thumb} source={TradleWhite}></Image>
+                <Image style={thumb} source={require('../img/TradleW.png')}></Image>
                 <Text style={styles.tradle}>Tradle</Text>
               </View>
             </View>
