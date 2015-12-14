@@ -115,6 +115,9 @@ var publishedIdentity
 var driverPromise
 var ready;
 var networkName = 'testnet'
+var SERVICE_PROVIDERS = require('../data/serviceProviders')
+var SERVICE_PROVIDERS_HOST = __DEV__ ? '127.0.0.1:44444' : 'tradle.io:44444'
+// var SERVICE_PROVIDERS_HOST = 'tradle.io:44444'
 
 var Store = Reflux.createStore({
   // this will set up listeners to all publishers in TodoActions, using onKeyname (or keyname) as callbacks
@@ -280,85 +283,17 @@ var Store = Reflux.createStore({
       // }
     })
 
-    // START  HTTP specific stuff
-    // var lloydsHash = '3a55cc6346fdd73a4ac4debd311d80cbaa53ebcd'
-    // messenger.addRecipient(
-    //   lloydsHash,
-    //   'http://127.0.0.1:44444/lloyds/send'
-    // )
+    for (var name in SERVICE_PROVIDERS) {
+      if (SERVICE_PROVIDERS[name].on === false) {
+        continue
+      }
 
-    // var achmeaHash = '64e174085ef1ae52026e589c484d36a5c5f969aa'
-    // messenger.addRecipient(
-    //   achmeaHash,
-    //   'http://127.0.0.1:44444/achmea/send'
-    // )
-
-    var rabobankHash = 'dc5298f560a7a5bac05a049ea0af9caa5f5a493e'
-    messenger.addRecipient(
-      rabobankHash,
-      'http://127.0.0.1:44444/rabobank/send'
-    )
-
-    // var obvionHash = 'c83c53d07001dd95276b88af54e009e916f86f4b'
-    // messenger.addRecipient(
-    //   obvionHash,
-    //   'http://127.0.0.1:44444/obvion/send'
-    // )
-
-    var myOrderHash = '707ae31e2a789593b68faf8331213b32da3ce4e0'
-    messenger.addRecipient(
-      myOrderHash,
-      'http://127.0.0.1:44444/myorder/send'
-    )
-
-    // var amstelHash = '28b3bc9db174284f90abe775ef62cd8f974e8555'
-    // messenger.addRecipient(
-    //   amstelHash,
-    //   'http://127.0.0.1:44444/amstel/send'
-    // )
-    // var dllHash = 'd3a3c63d72c3288be9ddeffc69870a49188e2c11'
-    // messenger.addRecipient(
-    //   dllHash,
-    //   'http://127.0.0.1:44444/dll/send'
-    // )
-    var digiHash = '4ab4e9953c2a10fbc9bc884bd447b1003540995c'
-    messenger.addRecipient(
-      digiHash,
-      'http://127.0.0.1:44444/digibank/send'
-    )
-
-    var reliaHash = '178cbc9f29c68728e56122d4981c34439dbf77cc'
-    messenger.addRecipient(
-      reliaHash,
-      'http://127.0.0.1:44444/relia/send'
-    )
-    var easyHash = '179d536d4fc033b0e074be8d756413302ea62805'
-    messenger.addRecipient(
-      easyHash,
-      'http://127.0.0.1:44444/easy/send'
-    )
-    var safeHash = '3b31cbee623a1795fd6ecb6fe650cc2d874be958'
-    messenger.addRecipient(
-      safeHash,
-      'http://127.0.0.1:44444/safe/send'
-    )
-    var friendlyHash = '19b1bf07e11b921b0334e711caae9eedf6748af2'
-    messenger.addRecipient(
-      friendlyHash,
-      'http://127.0.0.1:44444/friendly/send'
-    )
-    var europiHash = 'd0b3f6780215cb8adfb9524810599b4f1f6444ae'
-    messenger.addRecipient(
-      europiHash,
-      'http://127.0.0.1:44444/europi/send'
-    )
-    var peopleHash = '57bfdcacb61d2c0cbb0adb97f8eabced780e1d79'
-    messenger.addRecipient(
-      peopleHash,
-      'http://127.0.0.1:44444/people/send'
-    )
-
-
+      messenger.addRecipient(
+        SERVICE_PROVIDERS[name].hash,
+        // e.g. http://tradle.io:44444/rabobank/send
+        `http://${SERVICE_PROVIDERS_HOST}/${name}/send`
+      )
+    }
 
     meDriver.ready().then(function () {
       messenger.setRootHash(meDriver.myRootHash())
