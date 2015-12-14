@@ -28,7 +28,7 @@ var {
   Component
 } = React;
 
-var ActionSheetIOS = require('ActionSheetIOS');
+// var ActionSheetIOS = require('ActionSheetIOS');
 
 var interfaceToTypeMapping = {
   'tradle.Message': 'tradle.SimpleMessage'
@@ -58,7 +58,9 @@ class AddNewMessage extends Component {
     // LayoutAnimation.configureNext(animations.layout.spring);
     this.setState({keyboardSpace: 0});
   }
-
+  shouldComponentUpdate(newProps, newState) {
+    return this.state.userInput !== newState.userInput  ||  this.state.keyboardSpace !== newState.keyboardSpace
+  }
   componentDidMount() {
     this.listenTo(Store, 'onAddMessage');
     DeviceEventEmitter.addListener('keyboardWillShow', (e) => {
@@ -95,15 +97,15 @@ class AddNewMessage extends Component {
     }
     var model = utils.getModel(resource[constants.TYPE]).value;
     var isMessage = model.interfaces  &&  model.interfaces.indexOf('tradle.Message') != -1;
-    if (isMessage) {
-      if (this.props.callback) {
-        this.props.callback('');
+    if (isMessage  &&  this.state.userInput.length) {
+      // if (this.props.callback) {
+        // this.props.callback('');
         this.setState({userInput: ''});
         // setTimeout(function() {
         //   this.setState({textValue: this.state.userInput});
         //   this.refs.chat.focus();
         // }.bind(this), 0);
-      }
+      // }
     }
   }
   render() {
