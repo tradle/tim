@@ -5,9 +5,12 @@ var PhotoList = require('./PhotoList');
 var ArticleView = require('./ArticleView');
 var utils = require('../utils/utils');
 var constants = require('@tradle/constants');
+var RowMixin = require('./RowMixin')
+var reactMixin = require('react-mixin')
 
 var MONEY_TYPE = 'tradle.Money';
 var DEFAULT_CURRENCY_SYMBOL = '$';
+var cnt = 0;
 
 var {
   StyleSheet,
@@ -37,7 +40,7 @@ class ShowPropertiesView extends Component {
   render() {
     var viewCols = this.getViewCols();
     return (
-      <View>
+      <View key={this.getNextKey()}>
         {viewCols}
       </View>
     );
@@ -130,11 +133,11 @@ class ShowPropertiesView extends Component {
         val = utils.formatDate(val);
 
       if (!val)
-        return <View></View>;
+        return <View key={self.getNextKey()}></View>;
       if (!isRef) {
         if (val instanceof Array) {
           if (pMeta.items.backlink)
-            return <View />
+            return <View  key={this.getNextKey()} />
           var vCols = pMeta.viewCols;
           var cnt = val.length;
           val = self.renderItems(val, pMeta);
@@ -162,7 +165,7 @@ class ShowPropertiesView extends Component {
                 ? <View />
                 : <Text style={styles.title}>{model.properties[p].title || utils.makeLabel(p)}</Text>
       first = false;
-      return (<View>
+      return (<View key={self.getNextKey()}>
                {separator}
                <View style={[styles.textContainer, {padding: 10}, isDirectionRow ? {flexDirection: 'row'} : {flexDirection: 'column'}]}>
                  {title}
@@ -235,16 +238,16 @@ class ShowPropertiesView extends Component {
           //      </TouchableHighlight>
           //  </View>);
         ret.push(
-          <View style={{padding: 10}}>
-           <View style={styles.itemColContainer}>
-             <Text style={itemMeta.skipLabel ? {height: 0} : styles.title}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
-             <Text style={styles.description}>{value}</Text>
+          <View style={{padding: 10}} key={self.getNextKey()}>
+           <View style={styles.itemColContainer} key={self.getNextKey()}>
+             <Text style={itemMeta.skipLabel ? {height: 0} : styles.title} key={self.getNextKey()}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
+             <Text style={styles.description} key={self.getNextKey()}>{value}</Text>
            </View>
          </View>
         );
       })
       return (
-        <View>
+        <View key={self.getNextKey()}>
            {ret}
            {counter == cnt ? <View></View> : <View style={styles.itemSeparator}></View>}
         </View>
@@ -262,6 +265,7 @@ class ShowPropertiesView extends Component {
     });
   }
 }
+reactMixin(ShowPropertiesView.prototype, RowMixin);
 
 var styles = StyleSheet.create({
   textContainer: {
