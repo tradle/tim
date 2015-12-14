@@ -83,6 +83,7 @@ var styles = StyleSheet.create({
     alignSelf: 'stretch'
   },
   icon: {
+    marginTop: 50,
     width: 300,
     height: 250,
     alignSelf: 'center'

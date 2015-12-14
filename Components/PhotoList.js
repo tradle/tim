@@ -7,7 +7,8 @@ var PhotoCarousel = require('./PhotoCarousel');
 var constants = require('@tradle/constants');
 var reactMixin = require('react-mixin');
 var PhotoCarouselMixin = require('./PhotoCarouselMixin');
-
+var RowMixin = require('./RowMixin')
+var cnt = 1000
 var {
   StyleSheet,
   Image,
@@ -71,7 +72,7 @@ class PhotoList extends Component {
     height *= rows;
     var val = this.renderPhotoList(photos);
     return (
-       <View style={[styles.photoContainer, this.props.style ? {} : {marginHorizontal: 5, marginTop: -20, height: height}]}>
+       <View style={[styles.photoContainer, this.props.style ? {} : {marginHorizontal: 5, marginTop: -20, height: height}]} key={this.getNextKey() + '_photo'}>
          {val}
        </View>
      );
@@ -113,9 +114,9 @@ class PhotoList extends Component {
      var photos = photos.map((photo) => {
       if (photo === null)
         return null;
-      var title = !photo.title || photo.title === 'photo'
-                ? <View />
-                : <Text style={styles.photoTitle}>{photo.title}</Text>
+      // var title = !photo.title || photo.title === 'photo'
+      //           ? <View />
+      //           : <Text style={styles.photoTitle}>{photo.title}</Text>
 
       // return (
       // <Animated.Image                         // Base: Image, Text, View
@@ -136,7 +137,7 @@ class PhotoList extends Component {
         source.isStatic = true;
 
       return (
-        <View style={[{paddingTop: 2, margin: 1, flexDirection: 'column'}, imageStyle[0]]}>
+        <View style={[{paddingTop: 2, margin: 1, flexDirection: 'column'}, imageStyle[0]]} key={this.getNextKey() + '_photo'}>
           <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, photo)}>
              <Image style={[styles.thumbCommon, imageStyle]} source={source} />
           </TouchableHighlight>
@@ -152,6 +153,7 @@ class PhotoList extends Component {
   }
 }
 reactMixin(PhotoList.prototype, PhotoCarouselMixin);
+reactMixin(PhotoList.prototype, RowMixin);
 
 var styles = StyleSheet.create({
   photoContainer: {

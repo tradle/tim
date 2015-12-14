@@ -5,6 +5,7 @@ var utils = require('../utils/utils');
 var constants = require('@tradle/constants');
 var t = require('tcomb-form-native');
 var MONEY_TYPE = 'tradle.Money';
+var cnt = 0;
 var propTypesMap = {
   'string': t.Str,
   'boolean': t.Bool,
@@ -213,6 +214,8 @@ var NewResourceMixin = {
     }
     return options;
   },
-
+  getNextKey() {
+    return this.props.model.id + '_' + cnt++
+  }
 }
 module.exports = NewResourceMixin;
