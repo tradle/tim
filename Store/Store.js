@@ -163,7 +163,7 @@ var Store = Reflux.createStore({
 
     // change to true if you want to wipe
     // everything and start from scratch
-    if (false) {
+    if (true) {
       await AsyncStorage.clear()
       // await BeSafe.clear()
     } else if (false) {
@@ -2019,29 +2019,63 @@ var Store = Reflux.createStore({
     var v = list[key] ? list[key].value : null
     var inDB = !!v
     var batch = []
+    var representativeAddedTo
     // var isServiceMessage
     if (model.id === IDENTITY) {
       // if (!me  ||  obj[ROOT_HASH] !== me[ROOT_HASH]) {
-        if (val.name) {
-          for (var p in val.name)
-            val[p] = val.name[p]
-          delete val.name
+      if (val.name) {
+        for (var p in val.name)
+          val[p] = val.name[p]
+        delete val.name
+      }
+      if (val.location) {
+        for (var p in val.location)
+          val[p] = val.location[p]
+        delete val.location
+      }
+      if (!v  &&  me  &&  val[ROOT_HASH] === me[ROOT_HASH])
+        v = me
+      if (v)  {
+        var vv = {}
+        extend(vv, v)
+        extend(vv, val)
+        val = vv
+      }
+      batch.push({type: 'put', key: key, value: val})
+      if (val.organization) {
+        var org = list[utils.getId(val.organization)]  &&  list[utils.getId(val.organization)].value
+        if (org) {
+          var doAdd
+          if (!org.contacts)
+            doAdd = true
+          else {
+            var i = 0
+            for (; i<org.contacts.length; i++) {
+              if (org.contacts[i][ROOT_HASH] === key)
+                break
+            }
+            doAdd = i !== org.contacts.length
+          }
+          if (doAdd)  {
+            var representative = {
+              id: key,
+              title: val.formatted
+            }
+            var oo = {}
+            extend(oo, org)
+            if (!oo.contacts)
+              oo.contacts = []
+            oo.contacts.push(representative)
+            var orgKey = org[TYPE] + '_' + org[ROOT_HASH];
+            list[orgKey] = {
+              key: orgKey,
+              value: oo
+            }
+            batch.push({type: 'put', key: orgKey, value: oo})
+            representativeAddedTo = org[ROOT_HASH]
+          }
         }
-        if (val.location) {
-          for (var p in val.location)
-            val[p] = val.location[p]
-          delete val.location
-        }
-        if (!v  &&  me  &&  val[ROOT_HASH] === me[ROOT_HASH])
-          v = me
-        if (v)  {
-          var vv = {}
-          extend(vv, v)
-          extend(vv, val)
-          val = vv
-        }
-
-        batch.push({type: 'put', key: key, value: val})
+      }
       // }
     }
     else {
@@ -2129,7 +2163,25 @@ var Store = Reflux.createStore({
 
     return db.batch(batch)
     .then(function() {
-      self.trigger(retParams)
+      if (representativeAddedTo) {
+        var orgList = self.searchNotMessages({modelName: ORGANIZATION})
+        // for (var i=0; i<orgList.length; i++) {
+        //   var o = orgList[i]
+        //   if (o[ROOT_HASH] === representativeAddedTo) {
+        //     var oo = {}
+        //     extend(oo, o)
+        //     // oo.contactsCount = o.contacts.length
+        //     orgList[i] = oo
+        //     list[key] = {
+        //       key: key,
+        //       value: oo
+        //     }
+        //   }
+        // }
+        self.trigger({action: 'list', list: orgList, forceUpdate: true})
+      }
+      else
+        self.trigger(retParams)
     })
   },
   loadMyResources() {
@@ -2140,6 +2192,7 @@ var Store = Reflux.createStore({
     var loadingModels = false;
 
     // console.time('dbStream')
+    var orgContacts = {}
     return utils.readDB(db)
     .then((results) => {
       results.forEach((data) => {
@@ -2161,10 +2214,50 @@ var Store = Reflux.createStore({
           if (data.value[TYPE] === IDENTITY) {
             if (data.value.securityCode)
               employees[data.value.securityCode] = data.value
+            if (data.value.organization) {
+              if (!orgContacts[utils.getId(data.value.organization)])
+                orgContacts[utils.getId(data.value.organization)] = []
+              var c = orgContacts[utils.getId(data.value.organization)]
+              c.push({
+                id: utils.getId(data.value),
+                title: utils.getDisplayName(data.value, utils.getModel(IDENTITY).value.properties)
+              })
+            }
           }
           list[data.key] = data;
         }
       })
+      var sameContactList = {}
+      for (var p in orgContacts) {
+        if (!list[p])
+          continue
+        var org = list[p].value
+        if (!org.contacts  ||  org.contacts.length !== orgContacts[p].length) {
+          org.contacts = orgContacts[p]
+          continue
+        }
+        var newContact
+        orgContacts[p].forEach(function(c) {
+          var i = 0
+          for (; i<org.contacts.length; i++) {
+            var id = utils.getId(org.contacts[i])
+            if (c[constants.TYPE] + '_' + c[constants.ROOT_HASH] === id)
+              break
+          }
+          if (i !== org.contacts.length)
+            newContact = true
+        })
+        if (newContact)
+          org.contacts = orgContacts[p]
+        else
+          sameContactList[p] = p
+      }
+      for (var s in sameContactList)
+        delete orgContacts(s)
+      if (!utils.isEmpty(orgContacts)) {
+        var results = this.searchNotMessages(constants.TYPES.ORGANIZATION)
+        self.trigger({action: 'list', list: results})
+      }
 
       console.log('Stream ended');
       // console.timeEnd('dbStream')
