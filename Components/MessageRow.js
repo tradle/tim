@@ -20,6 +20,7 @@ var STRUCTURED_MESSAGE_COLOR = '#4BA0F2' //'#5482C7' //'#2E3B4E' //'#77ADFC' //'
 var VERIFICATION_BG = '#FBFFE5' //'#F6FFF0';
 var newProduct = require('../data/newProduct.json')
 var Actions = require('../Actions/Actions');
+var Device = require('react-native-device')
 
 var {
   Image,
@@ -192,12 +193,15 @@ class MessageRow extends Component {
       showMessageBody = true;
     var messageBody;
     var isSimpleMessage = model.id === 'tradle.SimpleMessage';
+    var w = Device.width
+
     if (showMessageBody) {
       var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? (isNewProduct ? 'center' : 'flex-end') : 'flex-start'};
       if (resource.message) {
         if (resource.message.charAt(0) === '['  ||  resource.message.length > 30) {
           // if (!isNewProduct)
-            viewStyle.width = isMyMessage || !hasOwnerPhoto ? 305 : 325;
+            viewStyle.width = isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
+            // viewStyle.width = isMyMessage || !hasOwnerPhoto ? 305 : 325;
           // else {
           //   viewStyle.alignSelf = 'stretch'
           //   viewStyle.justifyContent = 'center'
@@ -205,23 +209,24 @@ class MessageRow extends Component {
         }
       }
       if (!isSimpleMessage)
-        viewStyle.width = isMyMessage || !hasOwnerPhoto ? 305 : 325;
+        viewStyle.width = isMyMessage || !hasOwnerPhoto ? w - 50 : w - 50;
+        // viewStyle.width = isMyMessage || !hasOwnerPhoto ? 305 : 325;
 
       if (isVerification) {
         var msgModel = utils.getModel(resource.document[constants.TYPE]).value;
         var orgName = resource.organization  ? resource.organization.title : ''
-        renderedRow = <View key={this.getNextKey()}>
-                        <View style={{flexDirection: 'row', backgroundColor: '#289427', paddingVertical: 5, paddingHorizontal: 7, marginHorizontal: -7, marginTop: -5, justifyContent: 'center'}} key={this.getNextKey()}>
-                          <Icon style={styles.verificationIcon} size={20} name={'android-done'} />
-                          <Text style={{fontSize: 16, fontWeight: '600', color: '#FBFFE5', alignSelf: 'center'}}> Verified by {orgName}</Text>
-                        </View>
-                        <View style={{paddingTop: 5}} key={this.getNextKey()}>
-                          {this.formatDocument(msgModel, resource, this.verify.bind(this))}
-                        </View>
-                        <View style={{paddingTop: 5}} key={this.getNextKey()}>
-                          <Text style={[styles.resourceTitle, {alignSelf:'flex-end', fontSize: 18, color: '#CCCCB2'}]}>{msgModel.title}</Text>
-                        </View>
-                      </View>
+        // renderedRow = <View key={this.getNextKey()}>
+        //                 <View style={{flexDirection: 'row', backgroundColor: '#289427', paddingVertical: 5, paddingHorizontal: 7, marginHorizontal: -7, marginTop: -5, justifyContent: 'center'}} key={this.getNextKey()}>
+        //                   <Icon style={styles.verificationIcon} size={20} name={'android-done'} />
+        //                   <Text style={{fontSize: 16, fontWeight: '600', color: '#FBFFE5', alignSelf: 'center'}}> Verified by {orgName}</Text>
+        //                 </View>
+        //                 <View style={{paddingTop: 5}} key={this.getNextKey()}>
+        //                   {this.formatDocument(msgModel, resource, this.verify.bind(this))}
+        //                 </View>
+        //                 <View style={{paddingTop: 5}} key={this.getNextKey()}>
+        //                   <Text style={[styles.resourceTitle, {alignSelf:'flex-end', fontSize: 18, color: '#CCCCB2'}]}>{msgModel.title}</Text>
+        //                 </View>
+        //               </View>
         renderedRow = <View key={this.getNextKey()}>
                         <View style={{flexDirection: 'row', backgroundColor: '#289427', paddingVertical: 5, paddingHorizontal: 7, marginHorizontal: -7, marginTop: -5, borderRadius: 5, justifyContent: 'center'}} key={this.getNextKey()}>
                           <Icon style={styles.verificationIcon} size={20} name={'android-done'} />
@@ -356,8 +361,9 @@ class MessageRow extends Component {
     msg += this.props.to.organization ? (this.props.to.organization.title + '.') : this.props.to.name;
     var st = [addStyle ? [styles.textContainer, addStyle] : styles.textContainer]
     st.push({borderWidth: 1, borderColor: '#C1DBCE'})
+
     return (
-      <View style={[rowStyle, viewStyle, {width: 325}]} key={this.getNextKey()}>
+      <View style={[rowStyle, viewStyle, {width: Device.width - 50}]} key={this.getNextKey()}>
         <View style={{width: 30}} key={this.getNextKey()} />
         <View style={[addStyle ? [styles.textContainer, addStyle] : styles.textContainer]} key={this.getNextKey()}>
           <View style={{flex: 1}} key={this.getNextKey()}>
@@ -471,7 +477,7 @@ class MessageRow extends Component {
 
       if (properties[v].ref) {
         if (resource[v]) {
-          vCols.push(self.getPropRow(properties[v], resource[v].title || resource[v]))
+          vCols.push(self.getPropRow(properties[v], resource, resource[v].title || resource[v]))
           // var dn = resource[v].title;
           // if (!dn) {
           //   if (typeof resource[v] !== Object)
@@ -502,7 +508,7 @@ class MessageRow extends Component {
           onPressCall = self.verify.bind(self);
         if (isAdditionalInfo)
           style = [style, {paddingBottom: 10, color: '#2892C6'}];
-        vCols.push(self.getPropRow(properties[v], val))
+        vCols.push(self.getPropRow(properties[v], resource, val))
       }
       else {
         if (!resource[v]  ||  !resource[v].length)
@@ -546,7 +552,7 @@ class MessageRow extends Component {
               var newMsg = newProduct.msg.replace('{firstName}', utils.getMe().firstName);
               newMsg = newMsg.replace('{product}', msgModel.title)
 
-              msg = <View>
+              msg = <View key={self.getNextKey()}>
                        <Text style={[style, {color: '#000000'}]}>{newMsg}</Text>
                     </View>
                        // {link}
@@ -618,17 +624,17 @@ class MessageRow extends Component {
       return ret
     }
   }
-  getPropRow(prop, val, style, isVerification) {
+  getPropRow(prop, resource, val, isVerification) {
     var style = {flexDirection: 'row'}
     if (isVerification) {
       if (!this.props.isAggregation)
         style = [style, {borderWidth: 0.5, paddingVertical: 3, borderBottomColor: '#eeeeee', borderTopColor: VERIFICATION_BG, borderLeftColor: VERIFICATION_BG, borderRightColor: VERIFICATION_BG}]
       return (
-        <View style={style}>
-          <View style={{flex: 1, flexDirection: 'column'}}>
+        <View style={style} key={this.getNextKey()}>
+          <View style={{flex: 1, flexDirection: 'column'}} key={this.getNextKey()}>
             <Text style={[styles.verySmallLetters, {color: '#555555'}]}>{prop.title}</Text>
           </View>
-          <View style={{flex: 1, flexDirection: 'column'}}>
+          <View style={{flex: 1, flexDirection: 'column'}} key={this.getNextKey()}>
             <Text style={styles.verySmallLetters}>{val + (prop.units ? ' ' + prop.units : '')}</Text>
           </View>
         </View>
@@ -639,10 +645,10 @@ class MessageRow extends Component {
         style = [style, {borderWidth: 0.5, paddingVertical: 3, borderBottomColor: STRUCTURED_MESSAGE_BORDER, borderTopColor: STRUCTURED_MESSAGE_COLOR, borderLeftColor: STRUCTURED_MESSAGE_COLOR, borderRightColor: STRUCTURED_MESSAGE_COLOR}]
       return (
         <View style={style} key={this.getNextKey()}>
-          <View style={{flex: 1, flexDirection: 'column'}}>
+          <View style={{flex: 1, flexDirection: 'column'}} key={this.getNextKey()}>
             <Text style={[styles.descriptionW, {color: '#FFFFEE'}]}>{prop.title}</Text>
           </View>
-          <View style={{flex: 1, flexDirection: 'column'}}>
+          <View style={{flex: 1, flexDirection: 'column'}} key={this.getNextKey()}>
             <Text style={[styles.descriptionW, {fontWeight: '600'}]}>{val}</Text>
           </View>
        </View>
@@ -735,7 +741,7 @@ class MessageRow extends Component {
       msg = <View>{rows}</View>
     }
     var photo = (resource  &&  resource.photos)
-              ? <Image source={{uri: utils.getImageUri(resource.photos[0].url)}}  style={styles.cellImage} />
+              ? <Image source={{uri: utils.getImageUri(resource.photos[0].url)}}  style={styles.cellImage} key={self.getNextKey()} />
               : <View />;
 
     var orgRow;
@@ -747,11 +753,11 @@ class MessageRow extends Component {
       orgRow =  onPress
              ? <View />
              : <View style={{flexDirection: 'row', marginTop: 10, justifyContent:'space-between'}} key={this.getNextKey()}>
-                <View style={{flexDirection: 'row', justifyContent: 'space-between', padding: 5, borderRadius: 10, borderWidth: 1, borderColor: '#eeeeee', backgroundColor: '#F0F0EE'}}>
+                <View style={{flexDirection: 'row', justifyContent: 'space-between', padding: 5, borderRadius: 10, borderWidth: 1, borderColor: '#eeeeee', backgroundColor: '#F0F0EE'}} key={self.getNextKey()}>
                   <Icon style={styles.shareIcon} size={20} name={'android-share-alt'} />
                   <Text style={{color: '#2E3B4E', fontSize: 14, paddingRight: 5, marginTop: 2}}>Share</Text>
                 </View>
-                 <View style={{flexDirection: 'row', justifyContent: 'flex-end', marginTop: 10}}>
+                 <View style={{flexDirection: 'row', justifyContent: 'flex-end', marginTop: 10}} key={self.getNextKey()}>
                    <Text style={[styles.verySmallLetters]}>verified by </Text>
                    <Text style={[styles.verySmallLetters, {color: '#2E3B4E'}]}>{verification.organization.title.length < 30 ? verification.organization.title : verification.organization.title.substring(0, 27) + '..'}</Text>
                  </View>
@@ -823,7 +829,7 @@ class MessageRow extends Component {
           }
           if (!val)
             val = resource[v].title
-          vCols.push(self.getPropRow(properties[v], val, style, true))
+          vCols.push(self.getPropRow(properties[v], resource, val, true))
           first = false;
         }
         return;
@@ -835,7 +841,7 @@ class MessageRow extends Component {
         var val = (properties[v].displayAs)
                 ? utils.templateIt(properties[v], resource)
                 : resource[v];
-        row = self.getPropRow(properties[v], resource[v], style, true)
+        row = self.getPropRow(properties[v], resource, resource[v], true)
       }
       else {
         if (!resource[v]  ||  !resource[v].length)
@@ -852,7 +858,7 @@ class MessageRow extends Component {
             return;
           }
         }
-        row = self.getPropRow(properties[v], resource[v], style, true)
+        row = self.getPropRow(properties[v], resource, resource[v], /*style,*/ true)
       }
       if (first) {
         row = <View style={{flexDirection: 'row', justifyContent: 'space-between'}} key={this.getNextKey()}>

@@ -58,8 +58,7 @@ class MessageTypeRow extends Component {
 
     var messageBody =
       <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
-        <View style={rowStyle}>
-          <View style={{paddingLeft: 10}}/>
+        <View style={[rowStyle, {paddingLeft: 10}]}>
           <View style={addStyle ? [styles.textContainer, addStyle] : styles.textContainer}>
             <View style={{flex: 1}}>
               {renderedRow}

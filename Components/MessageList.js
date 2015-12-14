@@ -73,7 +73,10 @@ class MessageList extends Component {
       Actions.messageList(actionParams);
       return;
     }
-
+    if (params.action === 'addMessage') {
+      Actions.messageList({modelName: this.props.modelName, to: this.props.resource});
+      return
+    }
     if (params.action !== 'messageList' ||  !params.list || params.isAggregation !== this.props.isAggregation)
       return;
     if (params.resource  &&  params.resource[constants.ROOT_HASH] != this.props.resource[constants.ROOT_HASH]) {
@@ -107,6 +110,7 @@ class MessageList extends Component {
       this.setState({
         dataSource: this.state.dataSource.cloneWithRows(list),
         isLoading: false,
+        list: list,
         verificationsToShare: params.verificationsToShare
       });
     }
@@ -114,6 +118,16 @@ class MessageList extends Component {
       var first = true
       this.setState({isLoading: false})
     }
+  }
+  shouldComponentUpdate(nextProps, nextState) {
+    if (!this.state.list  ||  !nextState.list  ||  this.state.list.length !== nextState.list.length)
+      return true
+    var isDiff = false
+    for (var i=0; i<this.state.list.length  &&  !isDiff; i++) {
+      if (this.state.list[i][constants.ROOT_HASH] !== nextState.list[i][constants.ROOT_HASH])
+        isDiff = true
+    }
+    return isDiff
   }
   share(resource, to) {
     console.log('Share')
@@ -265,7 +279,6 @@ class MessageList extends Component {
               showsCancelButton={false}
               hideBackground={true} />
           </View>
-          {chooser}
         </View>
         <View style={styles.separator} />
         {content}
