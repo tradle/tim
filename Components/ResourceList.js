@@ -43,7 +43,9 @@ class ResourceList extends Component {
     this.state = {
       isLoading: utils.getModels() ? false : true,
       dataSource: new ListView.DataSource({
-        rowHasChanged: (row1, row2) => row1 !== row2,
+        rowHasChanged: function(row1, row2) {
+          return row1 !== row2
+        }
       }),
       filter: this.props.filter,
       userInput: ''
@@ -82,6 +84,8 @@ class ResourceList extends Component {
                 : utils.getModel(params.resource[constants.TYPE]).value;
       if (action === 'addItem'  &&  model.id !== this.props.modelName)
         return
+      if (action === 'addMessage'  &&  this.props.modelName !== constants.TYPES.IDENTITY)
+        return
       // this.state.isLoading = true;
       Actions.list({
         query: this.state.filter,
@@ -112,6 +116,7 @@ class ResourceList extends Component {
       var m = utils.getModel(type).value;
       if (!m.subClassOf  ||  m.subClassOf != this.props.modelName)
         return;
+
       // if (!params.prop  ||  !params.prop.items  ||  !params.prop.items.ref  ||  !params.prop.items.backlink)
       //   return;
       // var m = utils.getModel(params.prop.items.ref).value;
@@ -137,8 +142,24 @@ class ResourceList extends Component {
 
     this.setState({
       dataSource: this.state.dataSource.cloneWithRows(list),
+      list: list,
+      forceUpdate: params.forceUpdate,
       isLoading: false
     })
+  }
+  shouldComponentUpdate(nextProps, nextState) {
+    if (nextState.forceUpdate)
+      return true
+    if (!this.state.list && !nextState.list)
+      return true
+    if (!this.state.list  ||  !nextState.list  ||  this.state.list.length !== nextState.list.length)
+      return true
+    var isDiff = false
+    for (var i=0; i<this.state.list.length  &&  !isDiff; i++) {
+      if (this.state.list[i][constants.ROOT_HASH] !== nextState.list[i][constants.ROOT_HASH])
+        isDiff = true
+    }
+    return isDiff
   }
   // getRandomInt(min, max) {
   //   return Math.floor(Math.random() * (max - min + 1)) + min;

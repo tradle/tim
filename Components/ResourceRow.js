@@ -9,6 +9,7 @@ var Icon = require('react-native-vector-icons/Ionicons');
 var MONEY_TYPE = 'tradle.Money';
 var RowMixin = require('./RowMixin');
 var reactMixin = require('react-mixin');
+var equal = require('deep-equal');
 
 var {
   Image,
@@ -25,6 +26,39 @@ class ResourceRow extends Component {
   constructor(props) {
     super(props);
   }
+  shouldComponentUpdate(nextProps, nextState) {
+    if (Object.keys(this.props).length  !== Object.keys(nextProps).length)
+      return true
+    if (this.state || nextState) {
+      if (this.state  &&  nextState) {
+        if (Object.keys(this.state).length  !== Object.keys(nextState).length)
+          return true
+      }
+      else
+        return true
+    }
+    var opts = {strict: true}
+    for (var p in this.props) {
+      if (typeof this.props[p] === 'function') {
+        if ('' + this.props[p] !== '' + nextProps[p])
+          return true
+      }
+      else if (this.props[p] !== nextProps[p]) {
+        if (!equal(this.props[p], nextProps[p], opts))
+          return true
+      }
+    }
+    if (!this.state  &&  !nextState)
+      return false
+    for (var p in this.state) {
+      if (this.state[p] !== nextState[p]) {
+        if (!equal(this.state[p], nextState[p], opts))
+          return true
+      }
+    }
+    return false
+  }
+
   render() {
     var resource = this.props.resource;
     var photo;
@@ -37,7 +71,7 @@ class ResourceRow extends Component {
       }
       if (uri.indexOf('/var/mobile/') === 0)
         params.isStatic = true
-      photo = <Image source={params} style={styles.cellImage} />;
+      photo = <Image source={params} style={styles.cellImage}  key={this.getNextKey()} />;
     }
     else {
       if (isIdentity) {
@@ -87,22 +121,51 @@ class ResourceRow extends Component {
                          </View>
                        : <View />;
     var textStyle = noImage ? [styles.textContainer, {marginVertical: 7}] : styles.textContainer;
-    return (
-      <View key={this.getNextKey()}>
-        <TouchableHighlight onPress={this.props.onSelect} underlayColor='transparent' key={this.getNextKey()}>
-          <View style={styles.row} key={this.getNextKey()}>
-            {photo}
-            {orgPhoto}
-            {onlineStatus}
-            <View style={styles.textContainer} key={this.getNextKey()}>
-              {this.formatRow(resource)}
-            </View>
-            {cancelResource}
+    var isOpaque = resource[constants.TYPE] !== constants.TYPES.ORGANIZATION || !resource.contacts
+    if (isOpaque)
+      return (
+      <View key={this.getNextKey()} style={{opacity: 0.5}}>
+        <View style={styles.row} key={this.getNextKey()}>
+          {photo}
+          {orgPhoto}
+          {onlineStatus}
+          <View style={textStyle} key={this.getNextKey()}>
+            {this.formatRow(resource)}
           </View>
-        </TouchableHighlight>
+          {cancelResource}
+        </View>
         <View style={styles.cellBorder}  key={this.getNextKey()} />
       </View>
-    );
+        )
+    else
+      return (
+        <View key={this.getNextKey()} style={{opacity: 1}}>
+          <TouchableHighlight onPress={this.props.onSelect} underlayColor='transparent' key={this.getNextKey()}>
+            <View style={styles.row} key={this.getNextKey()}>
+              {photo}
+              {orgPhoto}
+              {onlineStatus}
+              <View style={textStyle} key={this.getNextKey()}>
+                {this.formatRow(resource)}
+              </View>
+              {cancelResource}
+            </View>
+          </TouchableHighlight>
+          <View style={styles.cellBorder}  key={this.getNextKey()} />
+        </View>
+      );
+  }
+  rowContent() {
+    return
+    <View style={styles.row} key={this.getNextKey()}>
+      {photo}
+      {orgPhoto}
+      {onlineStatus}
+      <View style={textStyle} key={this.getNextKey()}>
+        {this.formatRow(resource)}
+      </View>
+      {cancelResource}
+    </View>
   }
   formatRow(resource) {
     var self = this;
