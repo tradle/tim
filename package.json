@@ -113,7 +113,6 @@
     "babel-plugin-transform-async-functions": "^6.3.13",
     "babel-plugin-transform-object-rest-spread": "^6.3.13",
     "babel-plugin-transform-regenerator": "^6.3.13",
-    "memdown": "^1.1.0",
-    "react-addons-perf": "^0.14.3"
+    "memdown": "^1.1.0"
   }
 }
