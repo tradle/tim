@@ -456,9 +456,13 @@ var styles = StyleSheet.create({
   },
   navBarLeftButton: {
     paddingLeft: 15,
+    paddingRight: 25,
+    paddingBottom: 10
   },
   navBarRightButton: {
+    paddingLeft: 25,
     paddingRight: 15,
+    paddingBottom: 10
   },
   navBarButtonText: {
     color: '#7AAAC3',
