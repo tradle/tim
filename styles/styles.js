@@ -13,7 +13,7 @@ var BORDER_COLOR = '#cccccc';
 var DISABLED_COLOR = '#777777';
 var DISABLED_BACKGROUND_COLOR = '#eeeeee';
 var FONT_SIZE = 17;
-var HELP_FONT_SIZE = 15;
+var HELP_FONT_SIZE = 14;
 
 var FONT_WEIGHT = '400';
 
@@ -48,7 +48,7 @@ var stylesheet = Object.freeze({
       color: HELP_COLOR,
       fontSize: HELP_FONT_SIZE,
       marginLeft: 10,
-      marginBottom: 2
+      marginTop: 5
     },
     // the style applied when a validation error occours
     error: {
@@ -71,12 +71,12 @@ var stylesheet = Object.freeze({
       padding: 7,
       borderRadius: 4,
       borderColor: BORDER_COLOR,
-      // borderBottomColor: BORDER_COLOR,
-      // borderTopColor: '#ffffff',
-      // borderLeftColor: '#ffffff',
-      // borderRightColor: '#ffffff',
+      borderBottomColor: BORDER_COLOR,
+      borderTopColor: '#ffffff',
+      borderLeftColor: '#ffffff',
+      borderRightColor: '#ffffff',
       borderWidth: 0.5,
-      marginBottom: 5
+      marginBottom: 0
     },
     // the style applied when a validation error occours
     error: {
