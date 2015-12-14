@@ -72,7 +72,9 @@ class NewResource extends Component {
     // LayoutAnimation.configureNext(animations.layout.spring);
     this.setState({keyboardSpace: 0});
   }
-
+  shouldComponentUpdate(nextProps, nextState) {
+    return false
+  }
 
   componentDidMount() {
     this.listenTo(Store, 'itemAdded');
@@ -172,7 +174,7 @@ class NewResource extends Component {
       }
     }
     var msg = '';
-
+    var noRequired;
     required.forEach((p) =>  {
       var v = value[p] ? value[p] : resource[p];
       var isDate = Object.prototype.toString.call(v) === '[object Date]'
@@ -189,10 +191,16 @@ class NewResource extends Component {
             msg += ', ';
           msg += '\'' + this.props.model.properties[p].title + '\'';
         }
+        else
+          noRequired = true
       }
     })
     if (msg.length) {
       this.setState({ err: msg });
+      this.state.submitted = false
+      return;
+    }
+    if (noRequired) {
       this.state.submitted = false
       return;
     }
@@ -423,36 +431,38 @@ class NewResource extends Component {
     for (var p in itemsMeta) {
       var bl = itemsMeta[p]
       if (bl.readOnly  ||  bl.items.backlink) {
-        arrayItems.push (<View/>)
+        arrayItems.push (<View key={this.getNextKey()} />)
         continue
       }
       var counter;
       if (resource  &&  resource[bl.name]) {
         if (resource[bl.name].length)
           counter =
-            <View style={styles.itemsCounter}><Text>{resource[bl.name] ? resource[bl.name].length : ''}</Text></View>;
+            <View style={styles.itemsCounter}>
+              <Text>{resource[bl.name] ? resource[bl.name].length : ''}</Text>
+            </View>;
         else if (model.required  &&  model.required.indexOf(bl.name) != -1)
           counter =
             <View>
-            <Icon name='asterisk'  size={20}  color='#96415A'  style={styles.icon}/>
+              <Icon name='asterisk'  size={15}  color='#96415A'  style={styles.icon1}/>
             </View>;
         else
-          counter = <View></View>
+          counter = <View/>
       }
       else if (self.props.model.required  &&  self.props.model.required.indexOf(bl.name) != -1)
         counter =
           <View>
-            <Icon name='asterisk'  size={20}  color='#96415A'  style={styles.icon}/>
+            <Icon name='asterisk'  size={15}  color='#96415A'  style={styles.icon1} />
           </View>;
       else
-        counter = <View></View>
+        counter = <View />
       var title = bl.title || utils.makeLabel(p)
       arrayItems.push (
         <TouchableHighlight style={styles.itemButton} underlayColor='transparent'
-            onPress={self.onNewPressed.bind(self, bl)}>
+            onPress={self.onNewPressed.bind(self, bl)} key={this.getNextKey()}>
           <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
             <View style={{justifyContent: 'flex-start', flexDirection: 'row'}}>
-              <Icon name='plus'   size={20}  color='#7AAAC3'  style={styles.icon} />
+              <Icon name='plus'   size={15}  color='#7AAAC3'  style={styles.icon1} />
               <Text style={styles.itemsText}>{bl.title}</Text>
             </View>
             {counter}
@@ -476,11 +486,11 @@ class NewResource extends Component {
           <View style={photoStyle}>
             <PhotoView resource={resource} />
           </View>
-          <View style={{'padding': 15}} key={'NewResource'}>
+          <View style={{'padding': 15}}>
             <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange.bind(this)}/>
             {arrayItems}
           </View>
-          <View style={{height: 300}} />
+          <View style={{height: 300}}/>
         </View>
       </ScrollView>
     // if (isMessage)
@@ -561,11 +571,11 @@ class NewResource extends Component {
       height: 36,
       borderColor: '#cccccc',
       padding: 8,
-      marginBottom: 5,
+      marginBottom: 10,
       borderRadius: 4
     };
-    var labelStyle = {color: '#cccccc', fontSize: 14};
-    var textStyle = {color: '#000000', fontSize: 14};
+    var labelStyle = {color: '#cccccc', fontSize: 17};
+    var textStyle = {color: '#000000', fontSize: 17};
     var resource = /*this.props.resource ||*/ this.state.resource
     var label, style
 
@@ -582,10 +592,10 @@ class NewResource extends Component {
       style = labelStyle
     }
     return (
-      <TouchableHighlight underlayColor='transparent' onPress={params.chooser}>
+      <TouchableHighlight underlayColor='transparent' onPress={params.chooser} key={this.getNextKey()}>
         <View style={containerStyle}>
           <Text style={style}>{label}</Text>
-          <Icon name='ios-arrow-down'  size={15}  color='#96415A'  style={styles.icon1}/>
+          <Icon name='ios-arrow-down'  size={15}  color='#96415A'  style={styles.icon1} />
         </View>
       </TouchableHighlight>
     );
@@ -604,11 +614,11 @@ class NewResource extends Component {
     };
     return
       <TouchableHighlight style={containerStyle} underlayColor='#7AAAC3'
-          onPress={this.onNewPressed.bind(this, prop)}>
+          onPress={this.onNewPressed.bind(this, prop)} key={this.getNextKey()}>
         <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
           <View style={{justifyContent: 'flex-start', flexDirection: 'row'}}>
             <Text style={styles.itemsText}>{prop.title}</Text>
-            <Icon name='ios-arrow-down'  size={15}  color='#96415A'  style={styles.icon1}/>
+            <Icon name='ios-arrow-down'  size={15}  color='#96415A'  style={styles.icon1} key={this.getNextKey()}/>
           </View>
         </View>
       </TouchableHighlight>
@@ -653,7 +663,7 @@ var styles = StyleSheet.create({
     alignSelf: 'center'
   },
   itemsText: {
-    fontSize: 18,
+    fontSize: 16,
     color: '#2E3B4E',
     alignSelf: 'center',
   },
@@ -671,7 +681,7 @@ var styles = StyleSheet.create({
     borderColor: '#6093ae',
     borderWidth: 0.5,
     borderRadius: 8,
-    marginTop: 7,
+    marginBottom: 10,
     justifyContent: 'center',
   },
   buttonText: {
@@ -698,7 +708,8 @@ var styles = StyleSheet.create({
   icon1: {
     width: 15,
     height: 15,
-    marginRight: -5
+    marginRight: 5,
+    marginLeft: -5,
   },
   icon: {
     width: 20,
