@@ -177,13 +177,13 @@ class TiMApp extends Component {
   }
 
   onNavigatorBeforeTransition() {
-    if (__DEV__) ReactPerf.start()
+    if (ReactPerf) ReactPerf.start()
 
     Actions.startTransition()
   }
 
   onNavigatorAfterTransition() {
-    if (__DEV__) {
+    if (ReactPerf) {
       setTimeout(function () {
         ReactPerf.stop()
         console.log(ReactPerf.printWasted())
@@ -448,6 +448,7 @@ var styles = StyleSheet.create({
   },
   navBarText: {
     fontSize: 14,
+    marginBottom: 7
   },
   navBarTitleText: {
     color: '#2E3B4E',
