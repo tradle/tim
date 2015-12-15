@@ -107,10 +107,10 @@ class TimHome extends Component {
       }
     });
 	}
-  showOfficialAccounts() {
+  showOfficialAccounts(isReplace) {
     var resource = utils.getMe()
     var title = resource.firstName;
-    this.props.navigator.push({
+    var route = {
       title: 'Official Accounts',
       id: 10,
       component: ResourceList,
@@ -141,7 +141,11 @@ class TimHome extends Component {
         },
         passProps: {resource: resource}
       }
-    });
+    }
+    if (isReplace)
+      this.props.navigator.replace(route)
+    else
+      this.props.navigator.push(route)
   }
 
   showCommunities() {
@@ -169,28 +173,32 @@ class TimHome extends Component {
     var model = utils.getModel(modelName).value;
     var route = {
       component: NewResource,
-      backButtonTitle: 'Back',
-      rightButtonTitle: 'Done',
+      // backButtonTitle: 'Back',
+      // rightButtonTitle: 'Done',
       id: 4,
       titleTextColor: '#7AAAC3',
       passProps: {
         model: model
       },
     };
+
     var me = utils.getMe();
     if (me) {
       route.passProps.resource = me;
-      route.title = 'Edit Identity';
+      route.title = 'Edit Profile';
     }
     else {
-      route.title = 'New Identity';
+      // route.title = 'Introduce yourself';
       route.passProps.callback = this.popToTop.bind(this);
+      route.passProps.editCols = ['firstName', 'lastName']
+      route.titleTintColor = '#ffffff'
     }
     this.props.navigator.push(route);
   }
   popToTop(resource) {
     utils.setMe(resource);
-    this.props.navigator.popToTop();
+    this.showOfficialAccounts(true);
+    // this.props.navigator.popToTop();
   }
   onReloadDBPressed() {
     utils.setMe(null);
@@ -230,7 +238,7 @@ class TimHome extends Component {
       height: d.width / 2.2
     }
               // <Progress.CircleSnail color={'white'} size={70} thickness={5}/>
-  	var spinner =  <View style={styles.scroll}>
+  	var spinner =  <View>
           <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: d.width, height: d.height}} />
           <ScrollView
             scrollEnabled={false}
@@ -350,10 +358,6 @@ class TimHome extends Component {
 reactMixin(TimHome.prototype, Reflux.ListenerMixin);
 
 var styles = StyleSheet.create({
-  scroll: {
-    // marginTop: 60,
-    // backgroundColor: '#2E3B4E',
-  },
   container: {
     padding: 30,
     marginTop: 120,
