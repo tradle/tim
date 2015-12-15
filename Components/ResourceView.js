@@ -102,8 +102,8 @@ class ResourceView extends Component {
           <PhotoView resource={resource} navigator={this.props.navigator}/>
         </View>
         {actionPanel}
-        <View style={styles.photoBG}>
-                  <QRCode inline={true} content={resource[constants.ROOT_HASH]} dimension={370} />
+        <View>
+          <QRCode inline={true} content={resource[constants.ROOT_HASH]} dimension={370} />
         </View>
         <PhotoList photos={photos} resource={this.props.resource} navigator={this.props.navigator} isView={true} numberInRow={photos.length > 4 ? 5 : photos.length} />
         <ShowPropertiesView resource={resource}
@@ -133,7 +133,7 @@ var styles = StyleSheet.create({
     flex: 1,
   },
   photoBG: {
-    backgroundColor: '#2E3B4E',
+    backgroundColor: '#245D8C',
     alignItems: 'center',
   },
   // footer: {
