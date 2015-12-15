@@ -21,7 +21,8 @@ var NewResourceMixin = {
   getFormFields(params) {
     var meta = this.props.model  ||  this.props.metadata;
     var model = params.model;  // For the form
-    var onSubmitEditing = this.onSubmitEditing  ||  params.onSubmitEditing
+    var isMessage = model.interfaces
+    var onSubmitEditing = isMessage ? this.onSubmitEditing  ||  params.onSubmitEditing : this.onSavePressed
     var onEndEditing = this.onEndEditing  ||  params.onEndEditing
     var chooser = this.chooser  ||  this.props.chooser
     var myCustomTemplate = this.myCustomTemplate  || this.props.template
