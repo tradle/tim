@@ -143,16 +143,16 @@ class NewItem extends Component {
       }
     }
 
+        // <SelectPhotoList style={{marginTop: -40}}
+        //   metadata={this.props.metadata}
+        //   navigator={this.props.navigator}
+        //   onSelect={this.onSelect.bind(this)} />
     return (
       <View style={styles.container}>
         <View style={{padding: 15, marginBottom: 15 }}>
           <Form ref='form' type={Model} options={options} />
         </View>
         {error}
-        <SelectPhotoList style={{marginTop: -40}}
-          metadata={this.props.metadata}
-          navigator={this.props.navigator}
-          onSelect={this.onSelect.bind(this)} />
       </View>
     );
   }
