@@ -122,10 +122,10 @@ class ResourceRow extends Component {
                          </View>
                        : <View />;
     var textStyle = noImage ? [styles.textContainer, {marginVertical: 7}] : styles.textContainer;
-    var isOpaque = resource[constants.TYPE] !== constants.TYPES.ORGANIZATION || !resource.contacts
+    var isOpaque = resource[constants.TYPE] === constants.TYPES.ORGANIZATION && !resource.contacts
     if (isOpaque)
       return (
-      <View key={this.getNextKey()}>
+      <View key={this.getNextKey()} style={{opacity: 0.5}}>
         <View style={styles.row} key={this.getNextKey()}>
           {photo}
           {orgPhoto}
