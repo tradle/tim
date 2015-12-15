@@ -13,7 +13,6 @@ var BORDER_COLOR = '#cccccc';
 var DISABLED_COLOR = '#777777';
 var DISABLED_BACKGROUND_COLOR = '#eeeeee';
 var FONT_SIZE = 17;
-var HELP_FONT_SIZE = 14;
 
 var FONT_WEIGHT = '400';
 
@@ -46,14 +45,14 @@ var stylesheet = Object.freeze({
   helpBlock: {
     normal: {
       color: HELP_COLOR,
-      fontSize: HELP_FONT_SIZE,
+      fontSize: FONT_SIZE,
       marginLeft: 10,
       marginTop: 5
     },
     // the style applied when a validation error occours
     error: {
       color: HELP_COLOR,
-      fontSize: HELP_FONT_SIZE,
+      fontSize: FONT_SIZE,
       marginLeft: 10,
       marginBottom: 2
     }

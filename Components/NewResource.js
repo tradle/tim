@@ -493,7 +493,12 @@ class NewResource extends Component {
       Form.stylesheet = myStyles
 
     // var style = isMessage ? {height: 570} : {height: 867};
-    var style = isRegistration ? {marginTop: Device.height / 5} : {marginTop: 64};
+
+    var style
+    if (isRegistration)
+      style = Device.height < 600 ? {marginTop: 90} : {marginTop: Device.height / 5}
+    else
+      style = {marginTop: 64}
     options.auto = 'placeholders';
     options.tintColor = 'red'
     var photoStyle = /*isMessage && !isFinancialProduct ? {marginTop: -35} :*/ styles.photoBG;
@@ -812,12 +817,14 @@ var styles = StyleSheet.create({
     // color: '#f0f0f0',
     color: '#eeeeee',
     fontSize: 20,
-    fontWeight:'500'
+    fontWeight:'500',
+    alignSelf: 'center'
   },
   getStarted: {
     backgroundColor: '#467EAE', //'#2892C6',
     paddingVertical: 10,
-    paddingHorizontal: 50
+    // paddingHorizontal: 50,
+    alignSelf: 'stretch',
   },
   thumbButton: {
     marginTop: 20,

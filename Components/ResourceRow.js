@@ -19,6 +19,7 @@ var {
   TouchableHighlight,
   Component,
   View,
+  ActivityIndicatorIOS,
   processColor
 } = React;
 
@@ -124,13 +125,14 @@ class ResourceRow extends Component {
     var isOpaque = resource[constants.TYPE] !== constants.TYPES.ORGANIZATION || !resource.contacts
     if (isOpaque)
       return (
-      <View key={this.getNextKey()} style={{opacity: 0.5}}>
+      <View key={this.getNextKey()}>
         <View style={styles.row} key={this.getNextKey()}>
           {photo}
           {orgPhoto}
           {onlineStatus}
-          <View style={textStyle} key={this.getNextKey()}>
+          <View style={[textStyle, {flexDirection: 'row', justifyContent: 'space-between'}]} key={this.getNextKey()}>
             {this.formatRow(resource)}
+            <ActivityIndicatorIOS hidden='true' color='#cccccc'/>
           </View>
           {cancelResource}
         </View>

@@ -9,11 +9,11 @@ var LABEL_COLOR = '#000000';
 var INPUT_COLOR = '#000000';
 var ERROR_COLOR = '#EEF2DB';
 var HELP_COLOR = '#999999';
-var BORDER_COLOR = '#B1D5F2';
+var BORDER_COLOR = '#356D9D';
 var DISABLED_COLOR = '#777777';
 var DISABLED_BACKGROUND_COLOR = '#eeeeee';
-var FONT_SIZE = 17;
-var HELP_FONT_SIZE = 17;
+var FONT_SIZE = 24;
+var HELP_FONT_SIZE = 24;
 
 var FONT_WEIGHT = '400';
 
@@ -69,12 +69,12 @@ var stylesheet = Object.freeze({
       // color: '#eeeeee',
       fontSize: FONT_SIZE,
       // backgroundColor: '#B1D5F2',
-      height: 46,
+      height: 60,
       padding: 12,
       borderColor: BORDER_COLOR,
       borderBottomColor: BORDER_COLOR,
-      borderWidth: 0.5,
-      // marginBottom: 5
+      borderWidth: 1,
+      marginBottom: 5
     },
     // the style applied when a validation error occours
     error: {
