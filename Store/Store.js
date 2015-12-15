@@ -945,8 +945,9 @@ var Store = Reflux.createStore({
       var  params = {action: 'addItem', resource: returnVal}
       // registration or profile editing
       self.trigger(params);
-
-
+      return self.waitForTransitionToEnd()
+    })
+    .then(function () {
       var to = list[utils.getId(returnVal.to)].value;
 
       var toChain = {}
@@ -2484,7 +2485,23 @@ var Store = Reflux.createStore({
   },
   onEndTransition() {
     if (meDriver) meDriver.resume()
+
+    if (this._transitionCallbacks) {
+      // defensive copy
+      var cbs = this._transitionCallbacks.slice()
+      this._transitionCallbacks.length = 0
+      cbs.forEach((fn) => fn())
+    }
   },
+  waitForTransitionToEnd(fn) {
+    if (!this._transitionCallbacks) {
+      this._transitionCallbacks = []
+    }
+
+    var defer = Q.defer()
+    this._transitionCallbacks.push(defer.resolve)
+    return defer.promise
+  }
 });
 module.exports = Store;
 
