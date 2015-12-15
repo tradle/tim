@@ -7,7 +7,7 @@ var constants = require('@tradle/constants');
 var PhotoCarousel = require('./PhotoCarousel')
 var reactMixin = require('react-mixin');
 var PhotoCarouselMixin = require('./PhotoCarouselMixin');
-
+var Device = require('react-native-device')
 var {
   StyleSheet,
   Image,
@@ -84,8 +84,8 @@ var styles = StyleSheet.create({
   },
   icon: {
     marginTop: 50,
-    width: 300,
-    height: 250,
+    width: 200,
+    height: 200,
     alignSelf: 'center'
   },
 });
