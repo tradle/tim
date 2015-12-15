@@ -163,7 +163,7 @@ var Store = Reflux.createStore({
 
     // change to true if you want to wipe
     // everything and start from scratch
-    if (false) {
+    if (true) {
       await AsyncStorage.clear()
       // await BeSafe.clear()
     } else if (false) {
@@ -408,10 +408,7 @@ var Store = Reflux.createStore({
     var error
     var welcomeMessage
     var dhtKey
-    var onlyWelcome = false; //!requestForForm  &&  isWelcome  &&  !!toOrg
-    var promise = onlyWelcome
-                ? Q.resolve()
-                : getDHTKey(toChain)
+    var promise = getDHTKey(toChain)
     // var isServiceMessage = rr[TYPE] === 'tradle.ServiceMessage'
     return promise
     .then(function(data) {
@@ -449,13 +446,12 @@ var Store = Reflux.createStore({
       var wmKey = SIMPLE_MESSAGE + '_Welcome' + toOrg.name.replace(' ', '_')
       // Create welcome message without saving it in DB
       welcomeMessage = {}
-      // onlyWelcome = !!toOrg
       if (list[wmKey]) {
         list[wmKey].value.time = new Date()
         return
       }
 
-      var w = welcome //isLloyds ? welcomeLloyds : welcome
+      var w = welcome
 
       welcomeMessage.message = w.msg.replace('{firstName}', me.firstName)
       welcomeMessage.time = new Date()
@@ -484,10 +480,8 @@ var Store = Reflux.createStore({
     })
     .then(function() {
       // Temporary untill the real hash is known
-      if (!onlyWelcome) {
-        var key = rr[TYPE] + '_' + rr[ROOT_HASH];
-        list[key] = {key: key, value: rr};
-      }
+      var key = rr[TYPE] + '_' + rr[ROOT_HASH];
+      list[key] = {key: key, value: rr};
       var params = {
         action: 'addMessage',
         resource: isWelcome ? welcomeMessage : rr
@@ -496,11 +490,11 @@ var Store = Reflux.createStore({
         params.error = error
 
       self.trigger(params);
-      if (!onlyWelcome  &&  batch.length  &&  !error  &&  list[utils.getId(r.to)].value.pubkeys)
+      if (batch.length  &&  !error  &&  list[utils.getId(r.to)].value.pubkeys)
         return self.getDriver(me)
     })
     .then(function() {
-      if (!onlyWelcome  &&  list[utils.getId(r.to)].value.pubkeys)
+      if (list[utils.getId(r.to)].value.pubkeys)
         return meDriver.send({
           msg: toChain,
           to: [{fingerprint: self.getFingerprint(r.to)}],
@@ -512,8 +506,6 @@ var Store = Reflux.createStore({
         })
     })
     .then(function(data) {
-      // if (onlyWelcome)
-      //   return
       if (!requestForForm  &&  isWelcome)
         return
       delete list[rr[TYPE] + '_' + dhtKey]
@@ -945,9 +937,9 @@ var Store = Reflux.createStore({
       var  params = {action: 'addItem', resource: returnVal}
       // registration or profile editing
       self.trigger(params);
-      return self.waitForTransitionToEnd()
-    })
-    .then(function () {
+    //   return self.waitForTransitionToEnd()
+    // })
+    // .then(function () {
       var to = list[utils.getId(returnVal.to)].value;
 
       var toChain = {}
