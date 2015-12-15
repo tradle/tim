@@ -196,7 +196,7 @@ class NewResource extends Component {
             msg += ', ';
           msg += '\'' + this.props.model.properties[p].title + '\'';
         }
-        else
+        else if (!prop.displayAs)
           noRequired = true
       }
     })
@@ -647,8 +647,8 @@ class NewResource extends Component {
       borderRadius: 4
     };
 
-    var labelStyle = {color: '#cccccc', fontSize: 14};
-    var textStyle = {color: '#000000', fontSize: 14};
+    var labelStyle = {color: '#cccccc', fontSize: 17};
+    var textStyle = {color: '#000000', fontSize: 17};
     var resource = /*this.props.resource ||*/ this.state.resource
     var label, style
 
@@ -738,7 +738,7 @@ var styles = StyleSheet.create({
     alignSelf: 'center'
   },
   itemsText: {
-    fontSize: 12,
+    fontSize: 17,
     color: '#cccccc',
     // color: '#2E3B4E',
     alignSelf: 'center',
