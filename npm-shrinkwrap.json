@@ -675,7 +675,7 @@
     },
     "cachedown": {
       "version": "1.0.0",
-      "from": "mvayngrib/cachedown#old",
+      "from": "git://github.com/mvayngrib/cachedown.git#bb59815b7a18a047ad7fc12b6644043d8d6aacf9",
       "resolved": "git://github.com/mvayngrib/cachedown.git#bb59815b7a18a047ad7fc12b6644043d8d6aacf9"
     },
     "caseless": {
@@ -1059,15 +1059,15 @@
               "from": "lodash.repeat@^3.0.0",
               "resolved": "https://registry.npmjs.org/lodash.repeat/-/lodash.repeat-3.0.1.tgz"
             },
-            "npmlog": {
-              "version": "2.0.0",
-              "from": "npmlog@~2.0.0",
-              "resolved": "https://registry.npmjs.org/npmlog/-/npmlog-2.0.0.tgz"
-            },
             "once": {
               "version": "1.1.1",
               "from": "once@~1.1.1",
               "resolved": "https://registry.npmjs.org/once/-/once-1.1.1.tgz"
+            },
+            "npmlog": {
+              "version": "2.0.0",
+              "from": "npmlog@~2.0.0",
+              "resolved": "https://registry.npmjs.org/npmlog/-/npmlog-2.0.0.tgz"
             },
             "readable-stream": {
               "version": "1.1.13",
@@ -1652,12 +1652,12 @@
     },
     "lru-cache": {
       "version": "3.2.0",
-      "from": "lru-cache@3.2.0",
+      "from": "https://registry.npmjs.org/lru-cache/-/lru-cache-3.2.0.tgz",
       "resolved": "https://registry.npmjs.org/lru-cache/-/lru-cache-3.2.0.tgz",
       "dependencies": {
         "pseudomap": {
           "version": "1.0.1",
-          "from": "pseudomap@>=1.0.1 <2.0.0",
+          "from": "https://registry.npmjs.org/pseudomap/-/pseudomap-1.0.1.tgz",
           "resolved": "https://registry.npmjs.org/pseudomap/-/pseudomap-1.0.1.tgz"
         }
       }
@@ -5509,11 +5509,6 @@
           "from": "https://registry.npmjs.org/array-differ/-/array-differ-1.0.0.tgz",
           "resolved": "https://registry.npmjs.org/array-differ/-/array-differ-1.0.0.tgz"
         },
-        "babel-helper-function-name": {
-          "version": "6.3.15",
-          "from": "https://registry.npmjs.org/babel-helper-function-name/-/babel-helper-function-name-6.3.15.tgz",
-          "resolved": "https://registry.npmjs.org/babel-helper-function-name/-/babel-helper-function-name-6.3.15.tgz"
-        },
         "babel-helper-define-map": {
           "version": "6.3.13",
           "from": "https://registry.npmjs.org/babel-helper-define-map/-/babel-helper-define-map-6.3.13.tgz",
@@ -5523,6 +5518,11 @@
           "version": "6.3.13",
           "from": "https://registry.npmjs.org/babel-helper-get-function-arity/-/babel-helper-get-function-arity-6.3.13.tgz",
           "resolved": "https://registry.npmjs.org/babel-helper-get-function-arity/-/babel-helper-get-function-arity-6.3.13.tgz"
+        },
+        "babel-helper-function-name": {
+          "version": "6.3.15",
+          "from": "https://registry.npmjs.org/babel-helper-function-name/-/babel-helper-function-name-6.3.15.tgz",
+          "resolved": "https://registry.npmjs.org/babel-helper-function-name/-/babel-helper-function-name-6.3.15.tgz"
         },
         "babel-messages": {
           "version": "6.3.13",
@@ -5544,15 +5544,15 @@
           "from": "https://registry.npmjs.org/convert-source-map/-/convert-source-map-1.1.2.tgz",
           "resolved": "https://registry.npmjs.org/convert-source-map/-/convert-source-map-1.1.2.tgz"
         },
-        "diff": {
-          "version": "2.2.1",
-          "from": "https://registry.npmjs.org/diff/-/diff-2.2.1.tgz",
-          "resolved": "https://registry.npmjs.org/diff/-/diff-2.2.1.tgz"
-        },
         "dateformat": {
           "version": "1.0.12",
           "from": "https://registry.npmjs.org/dateformat/-/dateformat-1.0.12.tgz",
           "resolved": "https://registry.npmjs.org/dateformat/-/dateformat-1.0.12.tgz"
+        },
+        "diff": {
+          "version": "2.2.1",
+          "from": "https://registry.npmjs.org/diff/-/diff-2.2.1.tgz",
+          "resolved": "https://registry.npmjs.org/diff/-/diff-2.2.1.tgz"
         },
         "esutils": {
           "version": "2.0.2",
@@ -6133,9 +6133,9 @@
       "resolved": "https://registry.npmjs.org/react-native-camera/-/react-native-camera-0.3.8.tgz"
     },
     "react-native-carousel": {
-      "version": "0.4.2",
-      "from": "git+https://github.com/mvayngrib/react-native-carousel.git#5bb9809c478a947293f6ef76fb41fc181c8ff01f",
-      "resolved": "git+https://github.com/mvayngrib/react-native-carousel.git#5bb9809c478a947293f6ef76fb41fc181c8ff01f"
+      "version": "0.4.3",
+      "from": "react-native-carousel@0.4.3",
+      "resolved": "https://registry.npmjs.org/react-native-carousel/-/react-native-carousel-0.4.3.tgz"
     },
     "react-native-clone-referenced-element": {
       "version": "1.0.0",
