@@ -26,6 +26,8 @@ class PhotoCarousel extends Component {
     var isVertical = currentPhoto.isVertical
     var isLicense = model.id.indexOf('License') !== -1  ||  model.id.indexOf('Passport') !== -1;
     var isUtility = !isLicense  &&  model.id.indexOf('Utility') !== -1
+    var cnt = 2000
+    var r = this.props.resource
     for (var j=0; j<2; j++) {
       for (var i=0; i<n; i++) {
         var photo = this.props.photos[i];
@@ -34,16 +36,17 @@ class PhotoCarousel extends Component {
           continue;
         if (currentPhotoIndex == -1)
           currentPhotoIndex = i;
+        var key = r[constants.ROOT_HASH] + cnt++
         photos.push(
-          isVertical  ? <View style={styles.container}>
+          isVertical  ? <View style={styles.container} key={key}>
                           <Image source={{uri: photo.url}} style={styles.imageV}/>
                         </View>
 
                       : (isLicense
-                         ? <View style={styles.container}>
+                         ? <View style={styles.container} key={key}>
                               <Image source={{uri: photo.url}} style={styles.imageH}/>
                             </View>
-                         : <View style={styles.container}>
+                         : <View style={styles.container} key={key}>
                               <Image source={{uri: photo.url}} style={styles.image}/>
                             </View>
                       )
@@ -66,7 +69,7 @@ class PhotoCarousel extends Component {
       n = currentPhotoIndex
     }
     return (
-      <Carousel width={375}>
+      <Carousel width={375} loop={false} animate={false}>
         {photos}
       </Carousel>
     );
