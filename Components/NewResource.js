@@ -15,16 +15,19 @@ var Reflux = require('reflux');
 var reactMixin = require('react-mixin');
 var Icon = require('react-native-vector-icons/Ionicons');
 var myStyles = require('../styles/styles');
+var rStyles = require('../styles/registrationStyles');
 var NewResourceMixin = require('./NewResourceMixin');
 var reactMixin = require('react-mixin');
-
+var Device = require('react-native-device');
+var BG_IMAGE = require('../img/bg.png')
+var equal = require('deep-equal')
 // var KeyboardEvents = require('react-native-keyboardevents');
 // var KeyboardEventEmitter = KeyboardEvents.Emitter;
 var constants = require('@tradle/constants');
 var UIImagePickerManager = require('NativeModules').UIImagePickerManager;
 
 var Form = t.form.Form;
-Form.stylesheet = myStyles;
+// Form.stylesheet = myStyles;
 
 var {
   StyleSheet,
@@ -32,7 +35,9 @@ var {
   Text,
   TextInput,
   ScrollView,
+  Image,
   DeviceEventEmitter,
+  StatusBarIOS,
   // LayoutAnimation,
   Component,
   Navigator,
@@ -73,7 +78,7 @@ class NewResource extends Component {
     this.setState({keyboardSpace: 0});
   }
   shouldComponentUpdate(nextProps, nextState) {
-    return false
+    return equal(this.state.resource, nextState.resource)
   }
 
   componentDidMount() {
@@ -112,7 +117,7 @@ class NewResource extends Component {
     // When message created the return page is the chat window,
     // When profile or some contact info changed/added the return page is Profile view page
     if (this.props.callback) {
-      this.props.navigator.pop();
+      // this.props.navigator.pop();
       this.props.callback(resource);
       return;
     }
@@ -424,7 +429,17 @@ class NewResource extends Component {
     var Model = t.struct(model);
 
     var errStyle = err ? styles.err : {'padding': 0, 'height': 0};
-    var itemsMeta = utils.getItemsMeta(meta);
+    var itemsMeta
+    if (this.props.editCols) {
+      itemsMeta = []
+      this.props.editCols.forEach(function(p) {
+        if (meta.properties[p].type === 'array')
+          itemsMeta.push(meta.properties[p])
+      })
+    }
+    else
+      itemsMeta = utils.getItemsMeta(meta);
+
     var self = this;
     var arrayItems = [];
 
@@ -470,12 +485,28 @@ class NewResource extends Component {
         </TouchableHighlight>
       );
     }
-    var FromToView = require('./FromToView');
+    // var FromToView = require('./FromToView');
+    var isRegistration = !utils.getMe()  &&  resource[constants.TYPE] === constants.TYPES.IDENTITY
+    // if (isRegistration)
+    //   Form.stylesheet = rStyles
+    // else
+    //   Form.stylesheet = myStyles
+
     // var style = isMessage ? {height: 570} : {height: 867};
-    var style = {marginTop: 64};
+    var style = isRegistration ? {marginTop: Device.height / 5} : {marginTop: 64};
     options.auto = 'placeholders';
     options.tintColor = 'red'
     var photoStyle = /*isMessage && !isFinancialProduct ? {marginTop: -35} :*/ styles.photoBG;
+
+    var button = isRegistration
+               ? <TouchableHighlight style={styles.thumbButton}
+                      underlayColor='transparent' onPress={this.onSavePressed.bind(this)}>
+                  <View style={styles.getStarted}>
+                     <Text style={styles.getStartedText}>Welcome</Text>
+                  </View>
+                 </TouchableHighlight>
+               : <View />
+
     // <FromToView resource={resource} model={meta} navigator={this.props.navigator} />
     var content =
       <ScrollView style={style}>
@@ -486,8 +517,9 @@ class NewResource extends Component {
           <View style={photoStyle}>
             <PhotoView resource={resource} />
           </View>
-          <View style={{'padding': 15}}>
+          <View style={isRegistration ? {marginLeft: 30, marginRight: 30, paddingTop: 30} : {'padding': 15}}>
             <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange.bind(this)}/>
+            {button}
             {arrayItems}
           </View>
           <View style={{height: 300}}/>
@@ -507,6 +539,40 @@ class NewResource extends Component {
     //     </View>
     //   );
     // else
+
+    StatusBarIOS.setHidden(true);
+    if (isRegistration) {
+      var cTop = Device.height / 6
+
+      var thumb = {
+        width: Device.width / 2.2,
+        height: Device.width / 2.2,
+      }
+          // <View>
+          //   <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: Device.width, height: Device.height}} />
+          //   <View style={{alignSelf: 'center', marginTop: cTop}}>
+          //     <View style={{opacity: 0.3}}>
+          //       <Image style={thumb} source={require('../img/TradleW.png')}></Image>
+          //       <Text style={styles.tradle}>Tradle</Text>
+          //     </View>
+          //   </View>
+          //   {content}
+          // </View>
+
+      return (
+          <View>
+            <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: Device.width, height: Device.height}} />
+            <View style={{opacity: 0.7, marginLeft: 20, marginTop: 10, flexDirection: 'row'}}>
+              <Image style={{width: 50, height: 50}} source={require('../img/TradleW.png')}></Image>
+              <Text style={{fontSize: 25, marginTop: 10, paddingHorizontal: 10, color: '#cccccc'}}>Tradle</Text>
+            </View>
+
+            {content}
+          </View>
+
+        )
+    }
+    else
       return content;
   }
   onEndEditing(prop, event) {
@@ -564,18 +630,20 @@ class NewResource extends Component {
     Actions.addMessage(value); //, this.state.resource, utils.getModel(modelName).value);
   }
   myCustomTemplate(params) {
-    var containerStyle = {
+    var contentStyle = {
       justifyContent: 'space-between',
       flexDirection: 'row',
+      alignSelf: 'stretch',
       borderWidth: 0.5,
       height: 36,
       borderColor: '#cccccc',
       padding: 8,
-      marginBottom: 10,
+      marginBottom: 5,
       borderRadius: 4
     };
-    var labelStyle = {color: '#cccccc', fontSize: 17};
-    var textStyle = {color: '#000000', fontSize: 17};
+
+    var labelStyle = {color: '#cccccc', fontSize: 14};
+    var textStyle = {color: '#000000', fontSize: 14};
     var resource = /*this.props.resource ||*/ this.state.resource
     var label, style
 
@@ -592,12 +660,14 @@ class NewResource extends Component {
       style = labelStyle
     }
     return (
-      <TouchableHighlight underlayColor='transparent' onPress={params.chooser} key={this.getNextKey()}>
-        <View style={containerStyle}>
-          <Text style={style}>{label}</Text>
-          <Icon name='ios-arrow-down'  size={15}  color='#96415A'  style={styles.icon1} />
-        </View>
-      </TouchableHighlight>
+      <View>
+        <TouchableHighlight underlayColor='transparent' onPress={params.chooser} key={this.getNextKey()}>
+          <View style={contentStyle}>
+            <Text style={style}>{label}</Text>
+            <Icon name='ios-arrow-down'  size={15}  color='#96415A'  style={styles.icon1} />
+          </View>
+        </TouchableHighlight>
+      </View>
     );
   }
 
@@ -618,7 +688,7 @@ class NewResource extends Component {
         <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
           <View style={{justifyContent: 'flex-start', flexDirection: 'row'}}>
             <Text style={styles.itemsText}>{prop.title}</Text>
-            <Icon name='ios-arrow-down'  size={15}  color='#96415A'  style={styles.icon1} key={this.getNextKey()}/>
+            <Icon name='ios-arrow-down'  size={15}  color='#96415A' style={styles.icon1} key={this.getNextKey()}/>
           </View>
         </View>
       </TouchableHighlight>
@@ -663,8 +733,9 @@ var styles = StyleSheet.create({
     alignSelf: 'center'
   },
   itemsText: {
-    fontSize: 16,
-    color: '#2E3B4E',
+    fontSize: 12,
+    color: '#cccccc',
+    // color: '#2E3B4E',
     alignSelf: 'center',
   },
   itemsCounter: {
@@ -674,11 +745,24 @@ var styles = StyleSheet.create({
     alignSelf: 'center',
     paddingHorizontal: 5,
   },
+  submitButton: {
+    color: '#2B6493',
+    fontSize: 17,
+    backgroundColor: '#cccccc',
+    height: 56,
+    paddingHorizontal: 30,
+    padding: 17,
+    borderRadius: 10,
+    borderColor: '#cccccc',
+    borderWidth: 0.5,
+  },
+
   itemButton: {
     height: 36,
     padding: 20,
     alignSelf: 'stretch',
-    borderColor: '#6093ae',
+    borderColor: '#cccccc',
+    // borderColor: '#6093ae',
     borderWidth: 0.5,
     borderRadius: 8,
     marginBottom: 10,
@@ -723,6 +807,30 @@ var styles = StyleSheet.create({
     paddingHorizontal: 15,
     fontSize: 16,
     color: 'darkred',
+  },
+  getStartedText: {
+    // color: '#f0f0f0',
+    color: '#eeeeee',
+    fontSize: 20,
+    fontWeight:'500'
+  },
+  getStarted: {
+    backgroundColor: '#467EAE', //'#2892C6',
+    paddingVertical: 10,
+    paddingHorizontal: 50
+  },
+  thumbButton: {
+    marginTop: 20,
+    alignSelf: 'stretch',
+    alignItems: 'center',
+    justifyContent: 'center',
+    // paddingHorizontal: 80,
+  },
+  tradle: {
+    // color: '#7AAAC3',
+    color: '#eeeeee',
+    fontSize: 35,
+    alignSelf: 'center',
   },
 
 });
