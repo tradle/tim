@@ -3,7 +3,6 @@
 var React = require('react-native');
 var utils = require('../utils/utils');
 var groupByEveryN = require('groupByEveryN');
-var PhotoCarousel = require('./PhotoCarousel');
 var constants = require('@tradle/constants');
 var reactMixin = require('react-mixin');
 var PhotoCarouselMixin = require('./PhotoCarouselMixin');
@@ -187,6 +186,7 @@ var styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
+    marginTop: 3,
     flex: 1,
   },
 
