@@ -9,7 +9,7 @@ var LABEL_COLOR = '#000000';
 var INPUT_COLOR = '#000000';
 var ERROR_COLOR = '#EEF2DB';
 var HELP_COLOR = '#999999';
-var BORDER_COLOR = '#cccccc';
+var BORDER_COLOR = '#B1D5F2';
 var DISABLED_COLOR = '#777777';
 var DISABLED_BACKGROUND_COLOR = '#eeeeee';
 var FONT_SIZE = 17;
@@ -65,8 +65,8 @@ var stylesheet = Object.freeze({
   },
   textbox: {
     normal: {
-      // color: '#2B6493',
-      color: '#eeeeee',
+      color: '#B1D5F2',
+      // color: '#eeeeee',
       fontSize: FONT_SIZE,
       // backgroundColor: '#B1D5F2',
       height: 46,
