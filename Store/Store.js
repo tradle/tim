@@ -915,68 +915,79 @@ var Store = Reflux.createStore({
         if (returnVal[TYPE] !== IDENTITY)
           returnVal[NONCE] = self.getNonce()
       }
-      if (returnVal[ROOT_HASH])
-        return returnVal[ROOT_HASH]
-      else if (isRegistration)
-        return self.loadDB()
-    })
-    .then(function() {
+
       if (isRegistration)
-        return self.getDriver(returnVal)
+        return handleRegistration()
+      else if (isMessage)
+        return handleMessage()
+      else
+        return save()
     })
-    .then(function() {
-      if (isRegistration)
-        return getDHTKey(publishedIdentity)
-      if (!isMessage)
-        return
 
-      returnVal[ROOT_HASH] = returnVal[NONCE]
-      var key = returnVal[TYPE] + '_' + returnVal[ROOT_HASH]
-      list[key] = {key: key, value: returnVal};
-
-      var  params = {action: 'addItem', resource: returnVal}
-      // registration or profile editing
-      self.trigger(params);
-    //   return self.waitForTransitionToEnd()
-    // })
-    // .then(function () {
-      var to = list[utils.getId(returnVal.to)].value;
-
-      var toChain = {}
-      extend(toChain, returnVal)
-      delete toChain.from
-      delete toChain.to
-      delete toChain[ROOT_HASH]
-      if (toChain[CUR_HASH])
-        toChain[PREV_HASH] = toChain[CUR_HASH]
-      toChain.time = returnVal.time
-
-      return meDriver.send({
-        msg: toChain,
-        to: [{fingerprint: self.getFingerprint(to)}],
-        deliver: true,
-        chain: false
-      })
-    })
-    .then(function (dhtKey) {
-      delete list[returnVal[TYPE] + '_' + returnVal[ROOT_HASH]]
-      if (dhtKey) {
-        if (typeof dhtKey === 'string') {
-          if (!resource  ||  isNew)
+    function handleRegistration () {
+      return self.loadDB()
+        .then(function () {
+          return self.getDriver(returnVal)
+        })
+        .then(function () {
+          return getDHTKey(publishedIdentity)
+        })
+        .then(function (dhtKey) {
+          if (!resource || isNew) {
             returnVal[ROOT_HASH] = dhtKey
-        }
-        else {
-          returnVal[ROOT_HASH] = dhtKey[0]._props[ROOT_HASH]
-          returnVal[CUR_HASH] = dhtKey[0]._props[CUR_HASH]
-          dhtKey = dhtKey[0]._props[ROOT_HASH]
-        }
-      }
-      return self._putResourceInDB(returnVal[TYPE], returnVal, dhtKey, isRegistration);
-    })
-    .catch(function(err) {
-      debugger
-    })
+          }
 
+          return save()
+        })
+    }
+
+    function handleMessage () {
+      // TODO: fix hack
+      // hack: we don't know root hash yet, use a fake
+      returnVal[ROOT_HASH] = returnVal[NONCE]
+      var tmpKey = returnVal[TYPE] + '_' + returnVal[ROOT_HASH]
+      list[tmpKey] = {key: tmpKey, value: returnVal};
+
+      var params = {action: 'addItem', resource: returnVal}
+      self.trigger(params);
+      return self.waitForTransitionToEnd()
+        .then(function () {
+          var to = list[utils.getId(returnVal.to)].value;
+
+          var toChain = {}
+          extend(toChain, returnVal)
+          delete toChain.from
+          delete toChain.to
+          delete toChain[ROOT_HASH]
+          if (toChain[CUR_HASH])
+            toChain[PREV_HASH] = toChain[CUR_HASH]
+          toChain.time = returnVal.time
+
+          return meDriver.send({
+            msg: toChain,
+            to: [{fingerprint: self.getFingerprint(to)}],
+            deliver: true,
+            chain: false
+          })
+        })
+        .then(function (entries) {
+          var entry = entries[0]
+          // TODO: fix hack
+          // we now have a real root hash,
+          // scrap the placeholder
+          delete list[tmpKey]
+          returnVal[CUR_HASH] = entry.get(CUR_HASH)
+          returnVal[ROOT_HASH] = entry.get(ROOT_HASH)
+          return save()
+        })
+    }
+
+    function save () {
+      return self._putResourceInDB(returnVal[TYPE], returnVal, returnVal[ROOT_HASH], isRegistration)
+        .catch(function(err) {
+          debugger
+        })
+    }
   },
   onShare(resource, to) {
     if (to[TYPE] === ORGANIZATION)
