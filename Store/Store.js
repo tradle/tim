@@ -163,7 +163,7 @@ var Store = Reflux.createStore({
 
     // change to true if you want to wipe
     // everything and start from scratch
-    if (true) {
+    if (false) {
       await AsyncStorage.clear()
       // await BeSafe.clear()
     } else if (false) {
