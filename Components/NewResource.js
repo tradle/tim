@@ -487,10 +487,10 @@ class NewResource extends Component {
     }
     // var FromToView = require('./FromToView');
     var isRegistration = !utils.getMe()  &&  resource[constants.TYPE] === constants.TYPES.IDENTITY
-    // if (isRegistration)
-    //   Form.stylesheet = rStyles
-    // else
-    //   Form.stylesheet = myStyles
+    if (isRegistration)
+      Form.stylesheet = rStyles
+    else
+      Form.stylesheet = myStyles
 
     // var style = isMessage ? {height: 570} : {height: 867};
     var style = isRegistration ? {marginTop: Device.height / 5} : {marginTop: 64};
