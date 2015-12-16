@@ -52,7 +52,7 @@ class MessageRow extends Component {
     var ownerPhoto, hasOwnerPhoto = true;
 
     if (isMyMessage  || !to  ||  !to.photos) {
-      ownerPhoto = <View style={{marginVertical: 0}} />
+      ownerPhoto = <View style={{marginVertical: 0}} key={this.getNextKey()}/>
       hasOwnerPhoto = false;
     }
     else if (to) {
@@ -66,9 +66,9 @@ class MessageRow extends Component {
           return s.charAt(0);
         }).join('');
 
-        ownerPhoto = <LinearGradient colors={['#2B6493', '#417AA9', '#568FBE'].map(processColor)} style={styles.cellRoundImage}>
-          <Text style={styles.cellText}>{title}</Text>
-        </LinearGradient>
+        ownerPhoto = <LinearGradient colors={['#2B6493', '#417AA9', '#568FBE'].map(processColor)} style={styles.cellRoundImage} key={this.getNextKey()}>
+                       <Text style={styles.cellText}>{title}</Text>
+                     </LinearGradient>
         // ownerPhoto = <LinearGradient colors={['#A4CCE0', '#7AAAc3', '#5E92AD']} style={styles.cellRoundImage}>
         //   <Text style={styles.cellText}>{title}</Text>
         // </LinearGradient>
@@ -154,7 +154,7 @@ class MessageRow extends Component {
         }
       }
       else
-        verPhoto = <View style={{height: 0, width:0}} />
+        verPhoto = <View style={{height: 0, width:0}} key={this.getNextKey()}/>
     }
     var rowStyle = styles.row;
     var val;
@@ -178,7 +178,7 @@ class MessageRow extends Component {
 
     var date = val
              ? <Text style={styles.date} numberOfLines={1}>{val}</Text>
-             : <View />;
+             : <View key={this.getNextKey()} />;
 
     var showMessageBody;
     if (noMessage) {
@@ -242,7 +242,7 @@ class MessageRow extends Component {
       }
       var rowId = <Text style={{fontWeight: '600', fontSize: 16, color: isMyMessage ? '#ffffff' : '#289427', paddingRight: 3}}>{this.props.messageNumber + '.'}</Text>;
       messageBody =
-        <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
+        <TouchableHighlight key={this.getNextKey()} onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
           <View style={[rowStyle, viewStyle]} key={this.getNextKey()}>
             {ownerPhoto}
             <View style={addStyle ? [styles.textContainer, addStyle] : styles.textContainer} key={this.getNextKey()}>
@@ -254,7 +254,7 @@ class MessageRow extends Component {
         </TouchableHighlight>
     }
     else
-      messageBody = <View style={{height: 5}}/>
+      messageBody = <View style={{height: 5}} key={this.getNextKey()}/>
 
     var len = photoUrls.length;
     var inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
@@ -307,17 +307,17 @@ class MessageRow extends Component {
   }
   showVerifications(rowStyle, viewStyle, addStyle) {
     if (!this.props.verificationsToShare || !this.props.resource.message)
-      return <View/>;
+      return <View key={this.getNextKey()}/>;
 
     var resource = this.props.resource;
     var msgParts = utils.splitMessage(resource.message);
     // Case when the needed form was sent along with the message
     if (msgParts.length != 2)
-      return <View />
+      return <View key={this.getNextKey()}/>
 
     var msgModel = utils.getModel(msgParts[1]);
     if (!msgModel)
-      return <View />;
+      return <View key={this.getNextKey()}/>;
     msgModel = msgModel.value;
     var vtt = [];
     var cnt = 0;
@@ -333,7 +333,7 @@ class MessageRow extends Component {
           var doc = self.formatDocument(msgModel, r);
           if (cnt) {
             doc = <View key={this.getNextKey()}>
-                    <View style={{height: 1, backgroundColor: '#dddddd'}} />
+                    <View style={{height: 1, backgroundColor: '#dddddd'}} key={this.getNextKey()} />
                     {doc}
                   </View>
 
@@ -344,7 +344,7 @@ class MessageRow extends Component {
       }
     }
     if (!vtt.length)
-      return <View />;
+      return <View key={this.getNextKey()} />;
     var modelTitle = msgModel.title;
     var idx = modelTitle.indexOf('Verification');
     var docType;
@@ -734,24 +734,24 @@ class MessageRow extends Component {
 
     var msg;
     if (resource.message)
-      msg = <View><Text style={styles.description}>{resource.message}</Text></View>
+      msg = <View key={this.getNextKey()}><Text style={styles.description}>{resource.message}</Text></View>
     else {
       var rows = [];
       this.formatDocument1(model, resource, rows);
-      msg = <View>{rows}</View>
+      msg = <View key={this.getNextKey()}>{rows}</View>
     }
     var photo = (resource  &&  resource.photos)
               ? <Image source={{uri: utils.getImageUri(resource.photos[0].url)}}  style={styles.cellImage} key={self.getNextKey()} />
-              : <View />;
+              : <View key={this.getNextKey()} />;
 
     var orgRow;
     if (verification.organization) {
       var orgPhoto = verification.organization.photo
                    ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
-                   : <View/>
+                   : <View key={this.getNextKey()}/>
 
       orgRow =  onPress
-             ? <View />
+             ? <View key={this.getNextKey()} />
              : <View style={{flexDirection: 'row', marginTop: 10, justifyContent:'space-between'}} key={this.getNextKey()}>
                 <View style={{flexDirection: 'row', justifyContent: 'space-between', padding: 5, borderRadius: 10, borderWidth: 1, borderColor: '#eeeeee', backgroundColor: '#F0F0EE'}} key={self.getNextKey()}>
                   <Icon style={styles.shareIcon} size={20} name={'android-share-alt'} />
@@ -764,7 +764,7 @@ class MessageRow extends Component {
                </View>
     }
     else
-      orgRow = <View />
+      orgRow = <View key={this.getNextKey()}/>
     var orgTitle = this.props.to[constants.TYPE] === 'tradle.Organization'
                  ? this.props.to.name
                  : (this.props.to.organization ? this.props.to.organization.title : null);
@@ -861,7 +861,7 @@ class MessageRow extends Component {
         row = self.getPropRow(properties[v], resource, resource[v], /*style,*/ true)
       }
       if (first) {
-        row = <View style={{flexDirection: 'row', justifyContent: 'space-between'}} key={this.getNextKey()}>
+        row = <View style={{flexDirection: 'row', justifyContent: 'space-between'}} key={self.getNextKey()}>
                 <View key={self.getNextKey()}>
                   {row}
                 </View>

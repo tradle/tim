@@ -115,7 +115,7 @@ var NewResourceMixin = {
         else
           options.fields[p].placeholder = label + ' (' + props[p].units + ')'
       }
-      if (params.isRegistration)
+      if (params.isRegistration  &&  params.editCols.length === 1)
         options.fields[p].placeholder = 'Enter your name'
 
       if (props[p].description)

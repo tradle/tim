@@ -132,7 +132,7 @@ class ResourceRow extends Component {
           {onlineStatus}
           <View style={[textStyle, {flexDirection: 'row', justifyContent: 'space-between'}]} key={this.getNextKey()}>
             {this.formatRow(resource)}
-            <ActivityIndicatorIOS hidden='true' color='#cccccc'/>
+            <ActivityIndicatorIOS hidden='true' color='#B1D5F2'/>
           </View>
           {cancelResource}
         </View>
@@ -314,7 +314,7 @@ var styles = StyleSheet.create({
   // HACK FOR VERTICAL CENTERING
   resourceTitle: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '400',
     // paddingTop: 18,
     // marginBottom: 2,

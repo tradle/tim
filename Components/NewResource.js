@@ -511,7 +511,7 @@ class NewResource extends Component {
                ? <TouchableHighlight style={styles.thumbButton}
                       underlayColor='transparent' onPress={this.onSavePressed.bind(this)}>
                   <View style={styles.getStarted}>
-                     <Text style={styles.getStartedText}>Welcome</Text>
+                     <Text style={styles.getStartedText}>Let me in</Text>
                   </View>
                  </TouchableHighlight>
                : <View />
@@ -591,8 +591,8 @@ class NewResource extends Component {
   onChange(value, properties) {
     if (!properties)
       return
-    properties.forEach(function(p) {
-      this.state.resource[0] = value[p];
+    properties.forEach((p) => {
+      this.state.resource[p] = value[p];
     })
   }
 
@@ -824,13 +824,13 @@ var styles = StyleSheet.create({
   getStartedText: {
     // color: '#f0f0f0',
     color: '#eeeeee',
-    fontSize: 30,
-    fontWeight:'500',
+    fontSize: 28,
+    fontWeight:'300',
     alignSelf: 'center'
   },
   getStarted: {
     backgroundColor: '#467EAE', //'#2892C6',
-    paddingVertical: 20,
+    paddingVertical: 10,
     // paddingHorizontal: 50,
     alignSelf: 'stretch',
   },

@@ -2,11 +2,11 @@
 
 // require('react-native-level')
 var debug = require('debug')
-if (__DEV__) {
-  debug.enable('*')
-} else {
-  debug.disable()
-}
+// if (__DEV__) {
+//   debug.enable('*')
+// } else {
+//   debug.disable()
+// }
 
 debug = debug('tim:main')
 

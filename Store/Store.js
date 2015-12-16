@@ -117,6 +117,7 @@ var ready;
 var networkName = 'testnet'
 var SERVICE_PROVIDERS = require('../data/serviceProviders')
 var SERVICE_PROVIDERS_HOST = __DEV__ ? '127.0.0.1:44444' : 'tradle.io:44444'
+// var SERVICE_PROVIDERS_HOST = __DEV__ ? '192.168.1.105:44444' : 'tradle.io:44444'
 // var SERVICE_PROVIDERS_HOST = 'tradle.io:44444'
 
 var Store = Reflux.createStore({
@@ -1311,7 +1312,7 @@ var Store = Reflux.createStore({
       if (isAllMessages) {
         if (implementors) {
           implementors.some((impl) => {
-            if (impl.id.indexOf(key.substring(0, key.indexOf('_'))) === 0) {
+            if (impl.id === key.split('_')[0]) {
               iMeta = impl;
               return true
             }
@@ -2047,6 +2048,8 @@ var Store = Reflux.createStore({
       }
       batch.push({type: 'put', key: key, value: val})
       if (val.organization) {
+        if (val.organization.title === 'Rabobank'  &&  val.securityCode)
+          return
         var org = list[utils.getId(val.organization)]  &&  list[utils.getId(val.organization)].value
         if (org) {
           var doAdd
@@ -2085,7 +2088,10 @@ var Store = Reflux.createStore({
     else {
       var isMessage = model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1
       if (isMessage) {
-        var from = list[IDENTITY + '_' + obj.from[ROOT_HASH]].value
+        var fromR = list[IDENTITY + '_' + obj.from[ROOT_HASH]]
+        if (!fromR)
+          return
+        var from = fromR.value
         if (me  &&  from[ROOT_HASH] === me[ROOT_HASH])
           return
         var isProductList = val[TYPE] === 'tradle.ProductList'
@@ -2257,9 +2263,9 @@ var Store = Reflux.createStore({
           sameContactList[p] = p
       }
       for (var s in sameContactList)
-        delete orgContacts(s)
+        delete orgContacts[s]
       if (!utils.isEmpty(orgContacts)) {
-        var results = this.searchNotMessages(constants.TYPES.ORGANIZATION)
+        var results = this.searchNotMessages({modelName: constants.TYPES.ORGANIZATION})
         self.trigger({action: 'list', list: results})
       }
 
@@ -2298,7 +2304,7 @@ var Store = Reflux.createStore({
       utils.setModels(models);
     })
     .catch(err => {
-      console.log('err:' + err);
+      console.error('err:' + err);
     })
   },
 

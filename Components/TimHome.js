@@ -51,6 +51,12 @@ class TimHome extends Component {
   componentDidMount() {
     this.listenTo(Store, 'handleEvent');
   }
+  shouldComponentUpdate(nextProps, nextState) {
+    if (this.state.isLoading  !== nextState.isLoading)
+      return true
+    else
+      return false
+  }
   handleEvent(params) {
     if (params.action === 'reloadDB') {
       this.setState({isLoading: false});
@@ -338,9 +344,9 @@ class TimHome extends Component {
     );
   }
   async _pressHandler() {
-    if (await authenticateUser()) {
+    // if (await authenticateUser()) {
       this.showContactsOrRegister()
-    }
+    // }
   }
 }
           // {spinner}

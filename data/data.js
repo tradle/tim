@@ -1057,6 +1057,34 @@ var identities = [
   propertyType: 'Buy to let'
 },
 {
+  _t: 'tradle.PropertyTypes',
+  propertyType: 'Single Family House'
+},
+{
+  _t: 'tradle.PropertyTypes',
+  propertyType: 'Condominium'
+},
+{
+  _t: 'tradle.PropertyTypes',
+  propertyType: 'Duplex'
+},
+{
+  _t: 'tradle.PropertyTypes',
+  propertyType: 'High Volume Home'
+},
+{
+  _t: 'tradle.PropertyTypes',
+  propertyType: 'Vacation Home'
+},
+{
+  _t: 'tradle.PropertyTypes',
+  propertyType: 'Farm'
+},
+{
+  _t: 'tradle.PropertyTypes',
+  propertyType: 'Land'
+},
+{
   _t: 'tradle.PurposeOfMortgageLoan',
   purpose: 'Buy your first home'
 },
