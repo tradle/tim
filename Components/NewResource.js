@@ -27,7 +27,7 @@ var constants = require('@tradle/constants');
 var UIImagePickerManager = require('NativeModules').UIImagePickerManager;
 
 var Form = t.form.Form;
-// Form.stylesheet = myStyles;
+var stylesheet = require('../styles/styles') //require('tcomb-form-native/lib/stylesheets/bootstrap');
 
 var {
   StyleSheet,
@@ -423,6 +423,10 @@ class NewResource extends Component {
       };
     if (this.props.editCols)
       params.editCols = this.props.editCols;
+    var isRegistration = !utils.getMe()  &&  resource[constants.TYPE] === constants.TYPES.IDENTITY
+    if (isRegistration) {
+      params.isRegistration = true
+    }
     var options = this.getFormFields(params);
     // var options = utils.getFormFields(params);
 
@@ -490,7 +494,7 @@ class NewResource extends Component {
     if (isRegistration)
       Form.stylesheet = rStyles
     else
-      Form.stylesheet = myStyles
+      Form.stylesheet = stylesheet
 
     // var style = isMessage ? {height: 570} : {height: 867};
 
@@ -584,8 +588,12 @@ class NewResource extends Component {
     if (this.state.resource[prop]  ||  event.nativeEvent.text.length)
       this.state.resource[prop] = event.nativeEvent.text;
   }
-  onChange(value) {
-    this.state.resource = value;
+  onChange(value, properties) {
+    if (!properties)
+      return
+    properties.forEach(function(p) {
+      this.state.resource[0] = value[p];
+    })
   }
 
   onSubmitEditing(msg) {
@@ -642,8 +650,8 @@ class NewResource extends Component {
       borderWidth: 0.5,
       height: 36,
       borderColor: '#cccccc',
-      padding: 8,
-      marginBottom: 5,
+      padding: 7,
+      marginBottom: 10,
       borderRadius: 4
     };
 
@@ -816,13 +824,13 @@ var styles = StyleSheet.create({
   getStartedText: {
     // color: '#f0f0f0',
     color: '#eeeeee',
-    fontSize: 20,
+    fontSize: 30,
     fontWeight:'500',
     alignSelf: 'center'
   },
   getStarted: {
     backgroundColor: '#467EAE', //'#2892C6',
-    paddingVertical: 10,
+    paddingVertical: 20,
     // paddingHorizontal: 50,
     alignSelf: 'stretch',
   },
