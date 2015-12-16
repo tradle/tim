@@ -344,9 +344,9 @@ class TimHome extends Component {
     );
   }
   async _pressHandler() {
-    // if (await authenticateUser()) {
+    if (await authenticateUser()) {
       this.showContactsOrRegister()
-    // }
+    }
   }
 }
           // {spinner}
