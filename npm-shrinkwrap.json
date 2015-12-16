@@ -994,15 +994,15 @@
               "from": "node-pre-gyp@>=0.6.17 <0.7.0",
               "resolved": "https://registry.npmjs.org/node-pre-gyp/-/node-pre-gyp-0.6.17.tgz"
             },
-            "ansi": {
-              "version": "0.3.0",
-              "from": "ansi@~0.3.0",
-              "resolved": "https://registry.npmjs.org/ansi/-/ansi-0.3.0.tgz"
-            },
             "are-we-there-yet": {
               "version": "1.0.4",
               "from": "are-we-there-yet@~1.0.0",
               "resolved": "https://registry.npmjs.org/are-we-there-yet/-/are-we-there-yet-1.0.4.tgz"
+            },
+            "ansi": {
+              "version": "0.3.0",
+              "from": "ansi@~0.3.0",
+              "resolved": "https://registry.npmjs.org/ansi/-/ansi-0.3.0.tgz"
             },
             "block-stream": {
               "version": "0.0.8",
@@ -1089,15 +1089,15 @@
               "from": "readable-stream@^1.1.13",
               "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-1.1.13.tgz"
             },
-            "strip-json-comments": {
-              "version": "1.0.4",
-              "from": "strip-json-comments@~1.0.4",
-              "resolved": "https://registry.npmjs.org/strip-json-comments/-/strip-json-comments-1.0.4.tgz"
-            },
             "semver": {
               "version": "5.1.0",
               "from": "semver@~5.1.0",
               "resolved": "https://registry.npmjs.org/semver/-/semver-5.1.0.tgz"
+            },
+            "strip-json-comments": {
+              "version": "1.0.4",
+              "from": "strip-json-comments@~1.0.4",
+              "resolved": "https://registry.npmjs.org/strip-json-comments/-/strip-json-comments-1.0.4.tgz"
             },
             "tar": {
               "version": "2.2.1",
@@ -7002,7 +7002,7 @@
     "tim": {
       "version": "2.0.0",
       "from": "tradle/tim",
-      "resolved": "git://github.com/tradle/tim.git#6ca0b1e7ce9d25b6fdf58c607463f4f1d87749cb",
+      "resolved": "git://github.com/tradle/tim.git#ea6fdcdcc7dce163ce431a1a2fc9a3fe3d8c4ed0",
       "dependencies": {
         "@tradle/chainloader": {
           "version": "1.1.2",
