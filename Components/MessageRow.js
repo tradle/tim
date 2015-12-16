@@ -740,7 +740,8 @@ class MessageRow extends Component {
       this.formatDocument1(model, resource, rows);
       msg = <View key={this.getNextKey()}>{rows}</View>
     }
-    var photo = (resource  &&  resource.photos)
+    var hasPhotos = resource  &&  resource.photos
+    var photo = hasPhotos
               ? <Image source={{uri: utils.getImageUri(resource.photos[0].url)}}  style={styles.cellImage} key={self.getNextKey()} />
               : <View key={this.getNextKey()} />;
 
@@ -753,7 +754,7 @@ class MessageRow extends Component {
       orgRow =  onPress
              ? <View key={this.getNextKey()} />
              : <View style={{flexDirection: 'row', marginTop: 10, justifyContent:'space-between'}} key={this.getNextKey()}>
-                <View style={{flexDirection: 'row', justifyContent: 'space-between', padding: 5, borderRadius: 10, borderWidth: 1, borderColor: '#eeeeee', backgroundColor: '#F0F0EE'}} key={self.getNextKey()}>
+                <View style={{flexDirection: 'row', marginLeft: hasPhotos ? -50 : 0, justifyContent: 'space-between', padding: 5, borderRadius: 10, borderWidth: 1, borderColor: '#eeeeee', backgroundColor: '#F0F0EE'}} key={self.getNextKey()}>
                   <Icon style={styles.shareIcon} size={20} name={'android-share-alt'} />
                   <Text style={{color: '#2E3B4E', fontSize: 14, paddingRight: 5, marginTop: 2}}>Share</Text>
                 </View>
