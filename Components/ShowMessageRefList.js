@@ -12,6 +12,7 @@ var buttonStyles = require('../styles/buttonStyles');
 var constants = require('@tradle/constants');
 var reactMixin = require('react-mixin');
 var ResourceViewMixin = require('./ResourceViewMixin');
+var RowMixin = require('./RowMixin');
 
 var {
   View,
@@ -69,7 +70,7 @@ class ShowMessageRefList extends Component {
       if (props[p].items.ref === 'tradle.AdditionalInfo') {
         if (utils.getMe().organization)
           refList.push(
-              <View style={buttonStyles.container}>
+              <View style={buttonStyles.container} key={this.getNextKey()}>
                  <TouchableHighlight onPress={() => {
                     var buttons = [{
                       text: 'Cancel',
@@ -106,7 +107,7 @@ class ShowMessageRefList extends Component {
       }
       else
         refList.push(
-          <View style={buttonStyles.container}>
+          <View style={buttonStyles.container} key={this.getNextKey()}>
              <TouchableHighlight onPress={this.showResources.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
                <View style={{alignItems: 'center'}}>
                  <Icon name={icon}  size={35}  color='#ffffff'  style={[buttonStyles.icon, {paddingLeft: 7}]}/>
@@ -173,5 +174,6 @@ class ShowMessageRefList extends Component {
   }
 }
 reactMixin(ShowMessageRefList.prototype, ResourceViewMixin);
+reactMixin(ShowMessageRefList.prototype, RowMixin);
 
 module.exports = ShowMessageRefList;

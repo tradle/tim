@@ -13,6 +13,7 @@ var constants = require('@tradle/constants');
 var LinearGradient = require('react-native-linear-gradient');
 var RowMixin = require('./RowMixin');
 var extend = require('extend')
+var equal = require('deep-equal')
 var formDefaults = require('../data/formDefaults')
 var reactMixin = require('react-mixin');
 var STRUCTURED_MESSAGE_BORDER = '#3260a5' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
@@ -41,6 +42,9 @@ class MessageRow extends Component {
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
     var me = utils.getMe();
     var isMyMessage;
+  }
+  shouldComponentUpdate(nextProps, nextState) {
+    return !equal(this.props.resource, nextProps.resource)
   }
   render() {
     var resource = this.props.resource;

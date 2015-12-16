@@ -78,7 +78,7 @@ class NewResource extends Component {
     this.setState({keyboardSpace: 0});
   }
   shouldComponentUpdate(nextProps, nextState) {
-    return equal(this.state.resource, nextState.resource)
+    return (nextState.err  ||  !equal(this.state.resource, nextState.resource) || this.state.prop !== nextState.prop)
   }
 
   componentDidMount() {
@@ -288,7 +288,8 @@ class NewResource extends Component {
     }
 
     this.setState({
-      resource: this.state.resource
+      resource: this.state.resource,
+      prop: propName
     });
   }
 
@@ -655,8 +656,8 @@ class NewResource extends Component {
       borderRadius: 4
     };
 
-    var labelStyle = {color: '#cccccc', fontSize: 17};
-    var textStyle = {color: '#000000', fontSize: 17};
+    var labelStyle = {color: '#cccccc', fontSize: 14};
+    var textStyle = {color: '#000000', fontSize: 14};
     var resource = /*this.props.resource ||*/ this.state.resource
     var label, style
 

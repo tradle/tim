@@ -280,6 +280,7 @@ class MessageList extends Component {
               hideBackground={true} />
           </View>
         </View>
+
         <View style={styles.separator} />
         {content}
         {addNew}
