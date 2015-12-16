@@ -92,7 +92,6 @@ var stylesheet = Object.freeze({
     },
     // the style applied when the textbox is not editable
     notEditable: {
-      backgroundColor: '#ffffff',
       fontSize: FONT_SIZE,
       height: height,
       padding: 7,
