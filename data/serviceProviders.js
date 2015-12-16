@@ -21,7 +21,7 @@ module.exports = {
     on: false
   },
   rabobank: {
-    hash: 'dc5298f560a7a5bac05a049ea0af9caa5f5a493e'
+    hash: '7433dd127cd7e9dfd41e82162116fa480428d3f2'
   },
   myorder: {
     hash: '707ae31e2a789593b68faf8331213b32da3ce4e0'
