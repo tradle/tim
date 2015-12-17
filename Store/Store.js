@@ -440,18 +440,23 @@ var Store = Reflux.createStore({
         batch.push({type: 'put', key: from[TYPE] + '_' + from[ROOT_HASH], value: from});
       }
       // Check whose message was the last one
-      var result = self.searchMessages({to: toOrg, modelName: MESSAGE, limit: 1});
+      var result = self.searchMessages({to: toOrg, modelName: MESSAGE});
       if (result && result.length > 0) {
-        isWelcome = false
-        return;
+        result.sort(function(a,b) {
+          return new Date(b.time) - new Date(a.time);
+        });
+        isWelcome = new Date().getTime() - result[0].time > 600 * 1000
+        if (!isWelcome)
+          return;
       }
-      var wmKey = SIMPLE_MESSAGE + '_Welcome' + toOrg.name.replace(' ', '_')
+      var wmKey = SIMPLE_MESSAGE + '_Welcome' + toOrg.name.replace(' ', '_')// + '_' + new Date().getTime()
       // Create welcome message without saving it in DB
       welcomeMessage = {}
-      if (list[wmKey]) {
-        list[wmKey].value.time = new Date()
-        return
-      }
+      // if (list[wmKey]) {
+      //   list[wmKey].value.time = new Date()
+      //   welcomeMessage = list[wmKey].value
+      //   return
+      // }
 
       var w = welcome
 
@@ -475,6 +480,7 @@ var Store = Reflux.createStore({
         time: rr.to.time
       }
       welcomeMessage[ROOT_HASH] = wmKey
+      batch.push({type: 'put', key: welcomeMessage[TYPE] + '_' + wmKey, value: welcomeMessage});
       list[welcomeMessage[ROOT_HASH]] = {
         key: welcomeMessage[ROOT_HASH],
         value: welcomeMessage
@@ -1347,7 +1353,7 @@ var Store = Reflux.createStore({
       // HACK to not show service message in customer stream
       else if (r.message  &&  r.message.length)  {
         var s = '](tradle.CustomerWaiting)'
-        if (r.message.indexOf(s) === r.message.length - s.length) {
+        if (chatTo.organization  &&  r.message.indexOf(s) === r.message.length - s.length) {
           var rid = utils.getId(chatTo.organization);
           if (rid.indexOf(ORGANIZATION) == 0  &&  (!me.organization  ||  rid !== utils.getId(me.organization)))
              continue;
