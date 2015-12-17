@@ -21,7 +21,7 @@ var reactMixin = require('react-mixin');
 var Device = require('react-native-device');
 var BG_IMAGE = require('../img/bg.png')
 var equal = require('deep-equal')
-var CustomActionSheet = require('react-native-custom-action-sheet');
+// var CustomActionSheet = require('react-native-custom-action-sheet');
 
 // var KeyboardEvents = require('react-native-keyboardevents');
 // var KeyboardEventEmitter = KeyboardEvents.Emitter;
@@ -660,34 +660,34 @@ class NewResource extends Component {
     // }.bind(this), 0);
     Actions.addMessage(value); //, this.state.resource, utils.getModel(modelName).value);
   }
-  myDateTemplate(params) {
-    var contentStyle = {
-      justifyContent: 'space-between',
-      flexDirection: 'row',
-      alignSelf: 'stretch',
-      borderWidth: 0.5,
-      height: 36,
-      borderColor: '#cccccc',
-      padding: 7,
-      marginBottom: 10,
-      borderRadius: 4
-    };
-    var resource = this.state.resource
-    var prop = params.prop
-    var date =resource[prop] ? new Date(resource[prop]) : new Date()
-      // <TouchableHighlight onPress={this.onCancel.bind(this, prop)} underlayColor='transparent'>
-      //   <Text style={{fontSize: 17}}>{prop}</Text>
-      // </TouchableHighlight>
-    return (
-      <View>
-        <CustomActionSheet modalVisible={this.state.modalVisible} onCancel={this.onCancel.bind(this, prop)}>
-          <View style={contentStyle}>
-            <DatePickerIOS mode={"date"} date={date} onDateChange={this.onDateChange.bind(this, prop)} />
-          </View>
-        </CustomActionSheet>
-      </View>
-    );
-  }
+  // myDateTemplate(params) {
+  //   var contentStyle = {
+  //     justifyContent: 'space-between',
+  //     flexDirection: 'row',
+  //     alignSelf: 'stretch',
+  //     borderWidth: 0.5,
+  //     height: 36,
+  //     borderColor: '#cccccc',
+  //     padding: 7,
+  //     marginBottom: 10,
+  //     borderRadius: 4
+  //   };
+  //   var resource = this.state.resource
+  //   var prop = params.prop
+  //   var date =resource[prop] ? new Date(resource[prop]) : new Date()
+  //     // <TouchableHighlight onPress={this.onCancel.bind(this, prop)} underlayColor='transparent'>
+  //     //   <Text style={{fontSize: 17}}>{prop}</Text>
+  //     // </TouchableHighlight>
+  //   return (
+  //     <View>
+  //       <CustomActionSheet modalVisible={this.state.modalVisible} onCancel={this.onCancel.bind(this, prop)}>
+  //         <View style={contentStyle}>
+  //           <DatePickerIOS mode={"date"} date={date} onDateChange={this.onDateChange.bind(this, prop)} />
+  //         </View>
+  //       </CustomActionSheet>
+  //     </View>
+  //   );
+  // }
   onCancel(prop) {
     this.setState({modalVisible: false})
   }
