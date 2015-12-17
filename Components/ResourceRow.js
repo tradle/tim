@@ -226,7 +226,7 @@ class ResourceRow extends Component {
         if (resource[v]) {
           var row;
           if (ref == MONEY_TYPE) {
-            row = this.getMoneyProp(ref, properties[v]);
+            row = self.getMoneyProp(ref, properties[v]);
             if (!row)
               return;
           }
@@ -265,8 +265,8 @@ class ResourceRow extends Component {
           var val = utils.formatDate(new Date(resource[dateProp]));
           // var dateBlock = self.addDateProp(resource, dateProp, true);
           row = <View style={{flexDirection: 'row', justifyContent: 'space-between'}} key={this.getNextKey()}>
-                  <View key={this.getNextKey()}>{row}</View>
-                  <View key={this.getNextKey()}>
+                  <View>{row}</View>
+                  <View>
                     <Text style={styles.verySmallLetters}>{val}</Text>
                   </View>
                 </View>
