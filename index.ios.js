@@ -445,15 +445,16 @@ var styles = StyleSheet.create({
   },
   navBar: {
     marginTop: 10,
+    padding: 3
   },
   navBarText: {
-    fontSize: 14,
+    fontSize: 17,
     marginBottom: 7
   },
   navBarTitleText: {
     color: '#2E3B4E',
     fontWeight: '500',
-    fontSize: 14,
+    fontSize: 17,
   },
   navBarLeftButton: {
     paddingLeft: 15,
