@@ -212,7 +212,7 @@ var styles = StyleSheet.create({
     alignSelf: 'stretch',
     // paddingRight: 10,
     // paddingTop: 3,
-    marginTop: -20,
+    // marginTop: -10,
   },
   rowContainer: {
     paddingBottom: 10,
