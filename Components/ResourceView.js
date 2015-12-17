@@ -98,7 +98,7 @@ class ResourceView extends Component {
           // <SwitchIdentity resource={resource} navigator={this.props.navigator} />
     return (
       <ScrollView  ref='this' style={styles.container}>
-        <View style={[styles.photoBG, {marginTop: -20}]}>
+        <View style={[styles.photoBG]}>
           <PhotoView resource={resource} navigator={this.props.navigator}/>
         </View>
         {actionPanel}

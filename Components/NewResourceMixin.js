@@ -21,12 +21,12 @@ var NewResourceMixin = {
   getFormFields(params) {
     var meta = this.props.model  ||  this.props.metadata;
     var model = params.model;  // For the form
-    var isMessage = model.interfaces
+    var isMessage = meta.interfaces
     var onSubmitEditing = isMessage ? this.onSubmitEditing  ||  params.onSubmitEditing : this.onSavePressed
     var onEndEditing = this.onEndEditing  ||  params.onEndEditing
     var chooser = this.chooser  ||  this.props.chooser
     var myCustomTemplate = this.myCustomTemplate  || this.props.template
-
+    // var myDateTemplate = this.myDateTemplate
     var models = utils.getModels();
     var data = params.data;
     var options = {};
@@ -135,6 +135,13 @@ var NewResourceMixin = {
           options.fields[p].mode = 'date';
           options.fields[p].auto = 'labels';
           options.fields[p].label = label
+          this.state[p] = {
+            modalVisible: false
+          }
+          // options.fields[p].template = myDateTemplate.bind(this, {
+          //     label: label,
+          //     prop:  p,
+          //   })
         }
         else if (type === 'string') {
           if (props[p].maxLength > 100)

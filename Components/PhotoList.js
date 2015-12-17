@@ -7,6 +7,7 @@ var constants = require('@tradle/constants');
 var reactMixin = require('react-mixin');
 var PhotoCarouselMixin = require('./PhotoCarouselMixin');
 var RowMixin = require('./RowMixin')
+var Device = require('react-native-device')
 var cnt = 1000
 var {
   StyleSheet,
@@ -19,6 +20,10 @@ var {
   TouchableHighlight,
   Component
 } = React;
+var d3 = (Device.width / 3) - 5
+var d4 = (Device.width / 4) - 5
+var d5 = (Device.width / 5) - 5
+
 // var Animated = require('Animated');
 class PhotoList extends Component {
   constructor(props) {
@@ -54,14 +59,14 @@ class PhotoList extends Component {
       case 1:
       case 2:
       case 3:
-        height = 150;
+        height = d3 + 20;
         break;
       case 4:
-        height = 120;
+        height = d4 + 20;
         break;
       default:
       case 5:
-        height = 100;
+        height = d5 + 20;
         inRow = 5;
         break;
     }
@@ -71,7 +76,7 @@ class PhotoList extends Component {
     height *= rows;
     var val = this.renderPhotoList(photos);
     return (
-       <View style={[styles.photoContainer, this.props.style ? {} : {marginHorizontal: 5, marginTop: -20, height: height}]} key={this.getNextKey() + '_photo'}>
+       <View style={[styles.photoContainer, this.props.style ? {} : {marginHorizontal: 5, height: height}]} key={this.getNextKey() + '_photo'}>
          {val}
        </View>
      );
@@ -167,16 +172,16 @@ var styles = StyleSheet.create({
     color: '#656565',
   },
   thumb3: {
-    width: 120,
-    height: 120,
+    width: d3,
+    height: d3,
   },
   thumb4: {
-    width: 90,
-    height: 90,
+    width: d4,
+    height: d4,
   },
   thumb5: {
-    width: 70,
-    height: 70,
+    width: d5,
+    height: d5,
   },
   thumbCommon: {
     borderRadius: 5,

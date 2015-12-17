@@ -21,6 +21,8 @@ var reactMixin = require('react-mixin');
 var Device = require('react-native-device');
 var BG_IMAGE = require('../img/bg.png')
 var equal = require('deep-equal')
+var CustomActionSheet = require('react-native-custom-action-sheet');
+
 // var KeyboardEvents = require('react-native-keyboardevents');
 // var KeyboardEventEmitter = KeyboardEvents.Emitter;
 var constants = require('@tradle/constants');
@@ -38,6 +40,7 @@ var {
   Image,
   DeviceEventEmitter,
   StatusBarIOS,
+  DatePickerIOS,
   // LayoutAnimation,
   Component,
   Navigator,
@@ -53,12 +56,13 @@ class NewResource extends Component {
     var r = {};
     if (props.resource)
       r = props.resource
-    else {
+    else
       r[constants.TYPE] = props.model.id;
-    }
+
     this.state = {
       resource: r,
-      keyboardSpace: 0
+      keyboardSpace: 0,
+      // modalVisible: true
     }
     var currentRoutes = this.props.navigator.getCurrentRoutes();
     var currentRoutesLength = currentRoutes.length;
@@ -78,7 +82,12 @@ class NewResource extends Component {
     this.setState({keyboardSpace: 0});
   }
   shouldComponentUpdate(nextProps, nextState) {
-    return (nextState.err  ||  !equal(this.state.resource, nextState.resource) || this.state.prop !== nextState.prop)
+    return nextState.err                      ||
+           this.state.prop !== nextState.prop ||
+           this.state.itemsCount != nextState.itemsCount     ||
+           this.state.modalVisible != nextState.modalVisible ||
+          !equal(this.state.resource, nextState.resource)
+
   }
 
   componentDidMount() {
@@ -317,7 +326,12 @@ class NewResource extends Component {
       resource[propName] = items;
     }
     items.push(item);
-    this.setState({resource: resource, err: ''});
+    var itemsCount = this.state.itemsCount ? this.state.itemsCount  + 1 : 1
+    this.setState({
+      resource: resource,
+      itemsCount: itemsCount,
+      err: ''
+    });
   }
   onNewPressed(bl) {
     // if (bl.items.backlink) {
@@ -360,6 +374,7 @@ class NewResource extends Component {
         metadata: bl,
         chooser: this.chooser.bind(this),
         template: this.myCustomTemplate.bind(this),
+        // dateTemplate: myDateTemplate,
         resource: this.state.resource,
         parentMeta: this.props.parentMeta,
         onAddItem: this.onAddItem.bind(this)
@@ -421,6 +436,7 @@ class NewResource extends Component {
         onEndEditing: this.onEndEditing.bind(this),
         // onChange: this.onChange.bind(this),
         template: this.myCustomTemplate.bind(this),
+        // dateTemplate: this.myDateTemplate,
       };
     if (this.props.editCols)
       params.editCols = this.props.editCols;
@@ -454,9 +470,10 @@ class NewResource extends Component {
         arrayItems.push (<View key={this.getNextKey()} />)
         continue
       }
-      var counter;
+      var counter, count = 0
       if (resource  &&  resource[bl.name]) {
-        if (resource[bl.name].length)
+        count = resource[bl.name].length
+        if (count)
           counter =
             <View style={styles.itemsCounter}>
               <Text>{resource[bl.name] ? resource[bl.name].length : ''}</Text>
@@ -480,10 +497,10 @@ class NewResource extends Component {
       arrayItems.push (
         <TouchableHighlight style={styles.itemButton} underlayColor='transparent'
             onPress={self.onNewPressed.bind(self, bl)} key={this.getNextKey()}>
-          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-            <View style={{justifyContent: 'flex-start', flexDirection: 'row'}}>
-              <Icon name='plus'   size={15}  color='#7AAAC3'  style={styles.icon1} />
-              <Text style={styles.itemsText}>{bl.title}</Text>
+          <View style={{flexDirection: 'row', justifyContent: 'space-between', padding: 10}}>
+            <View style={{justifyContent: 'center', flexDirection: 'row'}}>
+              <Icon name='plus'   size={17}  color='#7AAAC3'  style={styles.icon1} />
+              <Text style={count ? styles.itemsText : styles.noItemsText}>{bl.title}</Text>
             </View>
             {counter}
           </View>
@@ -643,6 +660,41 @@ class NewResource extends Component {
     // }.bind(this), 0);
     Actions.addMessage(value); //, this.state.resource, utils.getModel(modelName).value);
   }
+  myDateTemplate(params) {
+    var contentStyle = {
+      justifyContent: 'space-between',
+      flexDirection: 'row',
+      alignSelf: 'stretch',
+      borderWidth: 0.5,
+      height: 36,
+      borderColor: '#cccccc',
+      padding: 7,
+      marginBottom: 10,
+      borderRadius: 4
+    };
+    var resource = this.state.resource
+    var prop = params.prop
+    var date =resource[prop] ? new Date(resource[prop]) : new Date()
+      // <TouchableHighlight onPress={this.onCancel.bind(this, prop)} underlayColor='transparent'>
+      //   <Text style={{fontSize: 17}}>{prop}</Text>
+      // </TouchableHighlight>
+    return (
+      <View>
+        <CustomActionSheet modalVisible={this.state.modalVisible} onCancel={this.onCancel.bind(this, prop)}>
+          <View style={contentStyle}>
+            <DatePickerIOS mode={"date"} date={date} onDateChange={this.onDateChange.bind(this, prop)} />
+          </View>
+        </CustomActionSheet>
+      </View>
+    );
+  }
+  onCancel(prop) {
+    this.setState({modalVisible: false})
+  }
+  onDateChange(prop, event) {
+    var e = event.nativeEvent
+  }
+
   myCustomTemplate(params) {
     var contentStyle = {
       justifyContent: 'space-between',
@@ -746,10 +798,14 @@ var styles = StyleSheet.create({
     width: 100,
     alignSelf: 'center'
   },
-  itemsText: {
+  noItemsText: {
     fontSize: 17,
     color: '#cccccc',
-    // color: '#2E3B4E',
+    alignSelf: 'center',
+  },
+  itemsText: {
+    fontSize: 17,
+    color: '#000000',
     alignSelf: 'center',
   },
   itemsCounter: {
@@ -773,7 +829,7 @@ var styles = StyleSheet.create({
 
   itemButton: {
     height: 36,
-    padding: 20,
+    paddingVertical: 20,
     alignSelf: 'stretch',
     borderColor: '#cccccc',
     // borderColor: '#6093ae',
@@ -804,10 +860,10 @@ var styles = StyleSheet.create({
     alignItems: 'center',
   },
   icon1: {
-    width: 15,
-    height: 15,
-    marginRight: 5,
-    marginLeft: -5,
+    width: 17,
+    height: 17,
+    // marginRight: 5,
+    // marginLeft: -5,
   },
   icon: {
     width: 20,
