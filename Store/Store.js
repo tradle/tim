@@ -53,6 +53,7 @@ var SIMPLE_MESSAGE = constants.TYPES.SIMPLE_MESSAGE
 var PUB_ID = 'publishedIdentity'
 
 var Tim = require('tim')
+Tim.enableOptimizations()
 var Zlorp = Tim.Zlorp
 Zlorp.ANNOUNCE_INTERVAL = 10000
 Zlorp.LOOKUP_INTERVAL = 10000
@@ -1997,7 +1998,8 @@ var Store = Reflux.createStore({
     return meDriver.ready()
   },
   putInDb(obj, onMessage) {
-    var val = obj.parsed.data
+    // defensive copy
+    var val = extend(true, obj.parsed.data)
     if (!val)
       return
 
