@@ -21,7 +21,8 @@ var reactMixin = require('react-mixin');
 var Device = require('react-native-device');
 var BG_IMAGE = require('../img/bg.png')
 var equal = require('deep-equal')
-// var CustomActionSheet = require('react-native-custom-action-sheet');
+var FloatLabelTextInput = require('react-native-floating-label-text-input');
+var CustomActionSheet = require('react-native-custom-action-sheet');
 
 // var KeyboardEvents = require('react-native-keyboardevents');
 // var KeyboardEventEmitter = KeyboardEvents.Emitter;
@@ -62,7 +63,8 @@ class NewResource extends Component {
     this.state = {
       resource: r,
       keyboardSpace: 0,
-      // modalVisible: true
+      modalVisible: false,
+      date: new Date()
     }
     var currentRoutes = this.props.navigator.getCurrentRoutes();
     var currentRoutesLength = currentRoutes.length;
@@ -83,11 +85,11 @@ class NewResource extends Component {
   }
   shouldComponentUpdate(nextProps, nextState) {
     return nextState.err                      ||
+           nextState.missedRequired           ||
            this.state.prop !== nextState.prop ||
            this.state.itemsCount != nextState.itemsCount     ||
            this.state.modalVisible != nextState.modalVisible ||
           !equal(this.state.resource, nextState.resource)
-
   }
 
   componentDidMount() {
@@ -179,6 +181,13 @@ class NewResource extends Component {
         return;
       }
     }
+    var json = JSON.parse(JSON.stringify(value));
+
+    if (this.state.floatingProps) {
+      for (var p in this.state.floatingProps) {
+        json[p] = this.state.floatingProps[p]
+      }
+    }
     var required = this.props.model.required;
     if (!required) {
       required = []
@@ -187,34 +196,41 @@ class NewResource extends Component {
           required.push(p)
       }
     }
-    var msg = '';
-    var noRequired;
+    var missedRequired = {}
     required.forEach((p) =>  {
-      var v = value[p] ? value[p] : resource[p];
+      var v = json[p] ? json[p] : resource[p];
       var isDate = Object.prototype.toString.call(v) === '[object Date]'
       if (!v || (isDate  &&  isNaN(v.getTime())))  {
         var prop = this.props.model.properties[p]
         if (prop.items  &&  prop.items.backlink)
           return
-        if ((prop.ref /*&& prop.ref !== 'tradle.Money'*/) ||  isDate  ||  prop.items) {
+        if ((prop.ref) ||  isDate  ||  prop.items) {
           if (resource && resource[p])
             return;
-          if (msg.length == 0)
-            msg += 'Invalid values for the properties: '
+          if (!msg)
+            msg = 'Invalid values for the properties: '
           else
             msg += ', ';
           msg += '\'' + this.props.model.properties[p].title + '\'';
+          missedRequired[p] = prop
         }
         else if (!prop.displayAs)
-          noRequired = true
+          missedRequired[p] = prop
       }
     })
-    if (msg.length) {
-      this.setState({ err: msg });
+
+    if (!utils.isEmpty(missedRequired)) {
       this.state.submitted = false
+      var state = {
+        missedRequired: missedRequired
+      }
+      if (msg)
+        state.err = msg
+      this.setState(state)
       return;
     }
-    if (noRequired) {
+    if (msg) {
+      this.setState({ err: msg });
       this.state.submitted = false
       return;
     }
@@ -230,7 +246,7 @@ class NewResource extends Component {
       return;
     }
 
-    var json = JSON.parse(JSON.stringify(value));
+    // var json = JSON.parse(JSON.stringify(value));
 
     if (!resource) {
       resource = {};
@@ -373,11 +389,10 @@ class NewResource extends Component {
       passProps: {
         metadata: bl,
         chooser: this.chooser.bind(this),
-        template: this.myCustomTemplate.bind(this),
-        // dateTemplate: myDateTemplate,
         resource: this.state.resource,
         parentMeta: this.props.parentMeta,
-        onAddItem: this.onAddItem.bind(this)
+        onAddItem: this.onAddItem.bind(this),
+        template: this.myCustomTemplate.bind(this),
       }
     });
   }
@@ -435,8 +450,6 @@ class NewResource extends Component {
         // onSubmitEditing: this.onSavePressed.bind(this),
         onEndEditing: this.onEndEditing.bind(this),
         // onChange: this.onChange.bind(this),
-        template: this.myCustomTemplate.bind(this),
-        // dateTemplate: this.myDateTemplate,
       };
     if (this.props.editCols)
       params.editCols = this.props.editCols;
@@ -497,9 +510,9 @@ class NewResource extends Component {
       arrayItems.push (
         <TouchableHighlight style={styles.itemButton} underlayColor='transparent'
             onPress={self.onNewPressed.bind(self, bl)} key={this.getNextKey()}>
-          <View style={{flexDirection: 'row', justifyContent: 'space-between', padding: 10}}>
+          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
             <View style={{justifyContent: 'center', flexDirection: 'row'}}>
-              <Icon name='plus'   size={17}  color='#7AAAC3'  style={styles.icon1} />
+              <Icon name='plus'   size={15}  color='#7AAAC3'  style={styles.icon1} />
               <Text style={count ? styles.itemsText : styles.noItemsText}>{bl.title}</Text>
             </View>
             {counter}
@@ -544,7 +557,7 @@ class NewResource extends Component {
           <View style={photoStyle}>
             <PhotoView resource={resource} />
           </View>
-          <View style={isRegistration ? {marginLeft: 30, marginRight: 30, paddingTop: 30} : {'padding': 15}}>
+          <View style={isRegistration ? {marginLeft: 30, marginRight: 30, paddingTop: 30} : {'paddingRight': 15, marginHorizontal: 10}}>
             <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange.bind(this)}/>
             {button}
             {arrayItems}
@@ -556,7 +569,7 @@ class NewResource extends Component {
     //   return (
     //     <View>
     //       {content}
-    //       <View style={{height: this.state.keyboardSpace}}>
+    //       <View stychle={{height: this.state.keyboardSpace}}>
     //       <View style={{marginTop: -35}}>
     //         <ChatMessage resource={resource}
     //                      model={meta}
@@ -599,8 +612,21 @@ class NewResource extends Component {
 
         )
     }
-    else
-      return content;
+    else {
+      return content
+      //  (
+      // <View>
+      //   {content}
+      //   <View>
+      //     <CustomActionSheet modalVisible={this.state.modalVisible} onCancel={this.onCancel.bind(this, this.state.prop)}>
+      //       <View>
+      //         <DatePickerIOS mode={"date"} date={new Date()} onDateChange={this.onDateChange.bind(this, this.state.prop)} />
+      //       </View>
+      //     </CustomActionSheet>
+      //   </View>
+      // </View>
+      // )
+    }
   }
   onEndEditing(prop, event) {
     if (this.state.resource[prop]  ||  event.nativeEvent.text.length)
@@ -660,59 +686,75 @@ class NewResource extends Component {
     // }.bind(this), 0);
     Actions.addMessage(value); //, this.state.resource, utils.getModel(modelName).value);
   }
-  // myDateTemplate(params) {
-  //   var contentStyle = {
-  //     justifyContent: 'space-between',
-  //     flexDirection: 'row',
-  //     alignSelf: 'stretch',
-  //     borderWidth: 0.5,
-  //     height: 36,
-  //     borderColor: '#cccccc',
-  //     padding: 7,
-  //     marginBottom: 10,
-  //     borderRadius: 4
-  //   };
+  // myDateTemplate(prop, value) {
+  //   var err = this.state.missedRequired
+  //           ? this.state.missedRequired[prop.name]
+  //           : null
+  //   var error = err
+  //             ? <View style={{paddingLeft: 15, backgroundColor: '#ffffff'}} >
+  //                 <Text style={{fontSize: 12, color: '#a94442'}}>Insert the valid {prop.title}</Text>
+  //               </View>
+  //             : <View key={this.getNextKey()} />
   //   var resource = this.state.resource
-  //   var prop = params.prop
-  //   var date =resource[prop] ? new Date(resource[prop]) : new Date()
-  //     // <TouchableHighlight onPress={this.onCancel.bind(this, prop)} underlayColor='transparent'>
-  //     //   <Text style={{fontSize: 17}}>{prop}</Text>
-  //     // </TouchableHighlight>
+  //   var date = resource[prop.name] ? new Date(resource[prop.name]) : new Date()
+  //   var visible = this.state.modalVisible
   //   return (
-  //     <View>
-  //       <CustomActionSheet modalVisible={this.state.modalVisible} onCancel={this.onCancel.bind(this, prop)}>
-  //         <View style={contentStyle}>
-  //           <DatePickerIOS mode={"date"} date={date} onDateChange={this.onDateChange.bind(this, prop)} />
-  //         </View>
-  //       </CustomActionSheet>
+  //     <View style={styles.dateContainer}>
+  //       <TouchableHighlight underlayColor='transparent'
+  //                   onPress={this.showDatePicker.bind(this, prop, date)}>
+  //         <Text style={{fontSize: 16, color: '#cccccc'}}>{prop.title}</Text>
+  //       </TouchableHighlight>
+  //       {error}
   //     </View>
   //   );
   // }
-  onCancel(prop) {
-    this.setState({modalVisible: false})
+  // showDatePicker(prop, date) {
+  //   this.setState({
+  //     modalVisible:true,
+  //     prop: prop
+  //   })
+  // }
+  // onCancel(prop) {
+  //   this.setState({modalVisible: false})
+  // }
+  // onDateChange(prop, event) {
+  //   var e = event.nativeEvent
+  // }
+  onChangeTextValue(prop, value) {
+    // this.state.resource[prop] = value
+    if (!this.state.floatingProps)
+      this.state.floatingProps = {}
+    this.state.floatingProps[prop] = value
   }
-  onDateChange(prop, event) {
-    var e = event.nativeEvent
+  myTextInputTemplate(params) {
+    var err = this.state.missedRequired
+            ? this.state.missedRequired[params.prop.name]
+            : null
+    var error = err
+              ? <View style={{paddingLeft: 15, backgroundColor: '#ffffff'}} key={this.getNextKey()}>
+                  <Text style={{fontSize: 12, color: '#a94442'}}>Insert the valid {params.prop.title}</Text>
+                </View>
+              : <View key={this.getNextKey()} />
+    return (
+      <View style={{paddingBottom: 10}}>
+        <FloatLabelTextInput
+          placeHolder={params.label}
+          value={params.value}
+          style={{fontSize: 30}}
+          keyboardType={params.keyboard || 'default'}
+          onChangeTextValue={this.onChangeTextValue.bind(this)}
+        />
+        {error}
+      </View>
+    );
   }
 
   myCustomTemplate(params) {
-    var contentStyle = {
-      justifyContent: 'space-between',
-      flexDirection: 'row',
-      alignSelf: 'stretch',
-      borderWidth: 0.5,
-      height: 36,
-      borderColor: '#cccccc',
-      padding: 7,
-      marginBottom: 10,
-      borderRadius: 4
-    };
-
-    var labelStyle = {color: '#cccccc', fontSize: 14};
-    var textStyle = {color: '#000000', fontSize: 14};
+    var labelStyle = {color: '#cccccc', fontSize: 16};
+    var textStyle = {color: '#000000', fontSize: 16};
     var resource = /*this.props.resource ||*/ this.state.resource
     var label, style
-
+    var propLabel
     if (resource && resource[params.prop]) {
       var m = utils.getId(resource[params.prop]).split('_')[0]
       var rModel = utils.getModel(m).value
@@ -720,45 +762,61 @@ class NewResource extends Component {
       if (!label)
         label = resource[params.prop].title
       style = textStyle
+      propLabel = <View style={{marginTop: 5, backgroundColor: '#ffffff'}}>
+                    <Text style={{fontSize: 9, height: 10, color: '#B1B1B1'}}>{params.label}</Text>
+                  </View>
     }
     else {
       label = params.label
       style = labelStyle
+      propLabel = <View/>
     }
+    var err = this.state.missedRequired
+            ? this.state.missedRequired[params.prop.name]
+            : null
+    var error = err
+              ? <View style={{paddingLeft: 15, backgroundColor: '#ffffff'}}>
+                  <Text style={{fontSize: 12, color: '#a94442'}}>Insert the valid {params.prop.title}</Text>
+                </View>
+              : <View />
     return (
-      <View>
-        <TouchableHighlight underlayColor='transparent' onPress={params.chooser} key={this.getNextKey()}>
-          <View style={contentStyle}>
-            <Text style={style}>{label}</Text>
-            <Icon name='ios-arrow-down'  size={15}  color='#96415A'  style={styles.icon1} />
+      <View style={styles.chooserContainer} key={this.getNextKey()}>
+        <TouchableHighlight underlayColor='transparent' onPress={params.chooser}>
+          <View>
+            {propLabel}
+            <View style={styles.chooserContentStyle}>
+              <Text style={style}>{label}</Text>
+              <Icon name='ios-arrow-down'  size={15}  color='#96415A'  style={styles.icon1} />
+            </View>
+           {error}
           </View>
         </TouchableHighlight>
       </View>
     );
   }
 
-  moneyTemplate(prop) {
-    var containerStyle = {
-      justifyContent: 'space-between',
-      flexDirection: 'row',
-      borderWidth: 0.5,
-      height: 36,
-      borderColor: '#cccccc',
-      padding: 8,
-      marginBottom: 5,
-      borderRadius: 4
-    };
-    return
-      <TouchableHighlight style={containerStyle} underlayColor='#7AAAC3'
-          onPress={this.onNewPressed.bind(this, prop)} key={this.getNextKey()}>
-        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-          <View style={{justifyContent: 'flex-start', flexDirection: 'row'}}>
-            <Text style={styles.itemsText}>{prop.title}</Text>
-            <Icon name='ios-arrow-down'  size={15}  color='#96415A' style={styles.icon1} key={this.getNextKey()}/>
-          </View>
-        </View>
-      </TouchableHighlight>
-  }
+  // moneyTemplate(prop) {
+  //   var containerStyle = {
+  //     justifyContent: 'space-between',
+  //     flexDirection: 'row',
+  //     borderWidth: 0.5,
+  //     height: 36,
+  //     borderColor: '#cccccc',
+  //     padding: 8,
+  //     marginBottom: 5,
+  //     borderRadius: 4
+  //   };
+  //   return
+  //     <TouchableHighlight style={containerStyle} underlayColor='#7AAAC3'
+  //         onPress={this.onNewPressed.bind(this, prop)} key={this.getNextKey()}>
+  //       <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+  //         <View style={{justifyContent: 'flex-start', flexDirection: 'row'}}>
+  //           <Text style={styles.itemsText}>{prop.title}</Text>
+  //           <Icon name='ios-arrow-down'  size={15}  color='#96415A' style={styles.icon1} key={this.getNextKey()}/>
+  //         </View>
+  //       </View>
+  //     </TouchableHighlight>
+  // }
 
 }
 reactMixin(NewResource.prototype, Reflux.ListenerMixin);
@@ -799,14 +857,16 @@ var styles = StyleSheet.create({
     alignSelf: 'center'
   },
   noItemsText: {
-    fontSize: 17,
+    fontSize: 16,
     color: '#cccccc',
     alignSelf: 'center',
+    paddingLeft: 5
   },
   itemsText: {
-    fontSize: 17,
+    fontSize: 16,
     color: '#000000',
     alignSelf: 'center',
+    paddingLeft: 5
   },
   itemsCounter: {
     borderColor: '#2E3B4E',
@@ -828,13 +888,15 @@ var styles = StyleSheet.create({
   },
 
   itemButton: {
-    height: 36,
-    paddingVertical: 20,
+    height: 46,
+    marginLeft: 15,
+    // paddingVertical: 20,
     alignSelf: 'stretch',
-    borderColor: '#cccccc',
-    // borderColor: '#6093ae',
+    borderColor: '#ffffff',
+    borderBottomColor: '#cccccc',
+    // borderColor: '#cccccc',
     borderWidth: 0.5,
-    borderRadius: 8,
+    // borderRadius: 8,
     marginBottom: 10,
     justifyContent: 'center',
   },
@@ -856,14 +918,13 @@ var styles = StyleSheet.create({
     margin: 10,
   },
   photoBG: {
-    marginTop: -15,
+    // marginTop: -15,
     alignItems: 'center',
   },
   icon1: {
-    width: 17,
-    height: 17,
-    // marginRight: 5,
-    // marginLeft: -5,
+    width: 15,
+    height: 15,
+    marginVertical: 2
   },
   icon: {
     width: 20,
@@ -904,7 +965,35 @@ var styles = StyleSheet.create({
     fontSize: 35,
     alignSelf: 'center',
   },
-
+  dateContainer: {
+    height: 45,
+    justifyContent: 'center',
+    borderColor: '#ffffff',
+    borderBottomColor: '#cccccc',
+    borderWidth: 0.5,
+    marginBottom: 10,
+    marginLeft: 15,
+    marginTop: 5
+  },
+  chooserContainer: {
+    height: 45,
+    borderColor: '#ffffff',
+    borderBottomColor: '#cccccc',
+    borderWidth: 0.5,
+    marginLeft: 15,
+    marginBottom: 10
+  },
+  chooserLabel: {
+    paddingLeft: 15,
+    marginTop: 5,
+    backgroundColor: '#ffffff'
+  },
+  chooserContentStyle: {
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+    paddingTop: 5,
+    borderRadius: 4
+  }
 });
 
 module.exports = NewResource;
