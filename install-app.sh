@@ -18,7 +18,13 @@ case "$CONFIGURATION" in
     DEV=false
     ;;
   "")
-    echo "$0 must be invoked by Xcode"
+    react-native bundle \
+      --entry-file index.ios.js \
+      --platform ios \
+      --dev false \
+      --bundle-output "ios/main.jsbundle" \
+      --assets-dest "ios/"
+    # echo "$0 must be invoked by Xcode"
     exit 1
     ;;
   *)
