@@ -117,9 +117,9 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var SERVICE_PROVIDERS = require('../data/serviceProviders')
-var SERVICE_PROVIDERS_HOST = __DEV__ ? '127.0.0.1:44444' : 'tradle.io:44444'
+// var SERVICE_PROVIDERS_HOST = __DEV__ ? '127.0.0.1:44444' : 'tradle.io:44444'
 // var SERVICE_PROVIDERS_HOST = __DEV__ ? '192.168.1.105:44444' : 'tradle.io:44444'
-// var SERVICE_PROVIDERS_HOST = 'tradle.io:44444'
+var SERVICE_PROVIDERS_HOST = 'tradle.io:44444'
 
 var Store = Reflux.createStore({
   // this will set up listeners to all publishers in TodoActions, using onKeyname (or keyname) as callbacks
@@ -411,16 +411,16 @@ var Store = Reflux.createStore({
     var welcomeMessage
     var dhtKey
     var promise = getDHTKey(toChain)
+    var isRequestForRepresentative
     // var isServiceMessage = rr[TYPE] === 'tradle.ServiceMessage'
     return promise
     .then(function(data) {
-      if (!isWelcome  ||  (me.organization  &&  utils.getId(me.organization) === utils.getId(r.to)))
-        return
       if (!isWelcome) {
         dhtKey = data
         var to = list[utils.getId(r.to)].value;
         var from = list[utils.getId(r.from)].value;
         var dn = r.message; // || utils.getDisplayName(r, props);
+
         if (!dn)
           dn = 'sent photo';
         else {
@@ -428,6 +428,17 @@ var Store = Reflux.createStore({
           if (msgParts.length === 2) {
             var m = utils.getModel(msgParts[1]);
             dn = m ? m.value.title + ' request' : msgParts[1];
+          }
+          else {
+            var result = self.searchMessages({to: toOrg, modelName: MESSAGE});
+            for (var i=result.length - 1; i>=0; i++) {
+              if (result[i].type !== constants.TYPES.SIMPLE_MESSAGE)
+                break
+
+              var m = result[i].message
+              if (m.charAt[0] === '['  ||  m.indexOf('Congratulations!') === 0)
+                isRequestForRepresentative = true
+            }
           }
         }
 
@@ -439,6 +450,8 @@ var Store = Reflux.createStore({
         batch.push({type: 'put', key: to[TYPE] + '_' + to[ROOT_HASH], value: to});
         batch.push({type: 'put', key: from[TYPE] + '_' + from[ROOT_HASH], value: from});
       }
+      if (!isWelcome  ||  (me.organization  &&  utils.getId(me.organization) === utils.getId(r.to)))
+        return
       // Check whose message was the last one
       var result = self.searchMessages({to: toOrg, modelName: MESSAGE});
       if (result && result.length > 0) {
@@ -1411,7 +1424,10 @@ var Store = Reflux.createStore({
       }
       if (isVerificationR  ||  r[TYPE] === ADDITIONAL_INFO) {
         var doc = {};
-        extend(true, doc, list[utils.getId(r.document)].value);
+        var rDoc = list[utils.getId(r.document)]
+        if (!rDoc)
+          continue
+        extend(true, doc, rDoc.value);
         delete doc.verifications;
         delete doc.additionalInfo;
         r.document = doc;

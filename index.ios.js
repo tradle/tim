@@ -40,6 +40,15 @@ var Actions = require('./Actions/Actions');
 // var Device = require('react-native-device');
 
 var reactMixin = require('react-mixin');
+import { Text } from 'react-native';
+
+let originalGetDefaultProps = Text.getDefaultProps;
+Text.defaultProps = function() {
+  return {
+    ...originalGetDefaultProps(),
+    allowFontScaling: false,
+  };
+};
 
 var {
   Component,
@@ -47,7 +56,7 @@ var {
   Navigator,
   Image,
   View,
-  Text,
+  // Text,
   TouchableOpacity,
   StyleSheet,
   LinkingIOS
@@ -448,13 +457,13 @@ var styles = StyleSheet.create({
     padding: 3
   },
   navBarText: {
-    fontSize: 17,
+    fontSize: 16,
     marginBottom: 7
   },
   navBarTitleText: {
     color: '#2E3B4E',
-    fontWeight: '500',
-    fontSize: 17,
+    fontWeight: '400',
+    fontSize: 16,
   },
   navBarLeftButton: {
     paddingLeft: 15,

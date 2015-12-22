@@ -304,7 +304,7 @@ class AddNewMessage extends Component {
     var toName = utils.getDisplayName(resource.to, utils.getModel(resource.to[constants.TYPE]).value.properties);
     var meta = utils.getModel(me[constants.TYPE]).value.properties;
     var meName = utils.getDisplayName(me, meta);
-    var modelName = 'tradle.SimpleMessage';
+    var modelName = constants.TYPES.SIMPLE_MESSAGE;
     var value = {
       message: msg
               ?  model.isInterface ? msg : '[' + this.state.userInput + '](' + this.props.model.id + ')'

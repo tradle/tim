@@ -230,6 +230,13 @@ class MessageList extends Component {
     else {
       var isAllMessages = model.isInterface  &&  model.id === 'tradle.Message';
           // renderScrollView={(props) => <InvertibleScrollView {...props} inverted />}
+
+      // content = <ListView ref='listview' style={{marginHorizontal: 10}}
+      //   renderScrollComponent={props => <InvertibleScrollView {...props} inverted />}
+      //   dataSource={this.state.dataSource}
+      //   renderRow={this.renderRow.bind(this)} />
+
+
       content = <ListView ref='listview' style={{marginHorizontal: 10}}
           dataSource={this.state.dataSource}
           initialListSize={1000}

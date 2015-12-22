@@ -115,6 +115,7 @@ var NewResourceMixin = {
         else
           options.fields[p].placeholder = label + ' (' + props[p].units + ')'
       }
+      // HACK for registration screen
       if (params.isRegistration  &&  params.editCols.length === 1)
         options.fields[p].placeholder = 'Enter your name'
 
@@ -126,22 +127,21 @@ var NewResourceMixin = {
       //   formType = null
 
       if (formType) {
+        if (props[p].keyboard)
+          options.fields[p].keyboardType = props[p].keyboard
+
         // if (this.onChange)
         //   options.fields[p].onChange = this.onChange.bind(this);
         model[p] = !model[p]  &&  (maybe ? t.maybe(formType) : formType);
         if (data  &&  (type == 'date')) {
-          data[p] = new Date(data[p]);
-          // options.fields[p] = { mode: 'date'};
+          // model[p] = t.Str
+          // options.fields[p].template = this.myDateTemplate.bind(this, props[p])
+          if (data[p])
+            data[p] = new Date(data[p]);
           options.fields[p].mode = 'date';
           options.fields[p].auto = 'labels';
           options.fields[p].label = label
-          this.state[p] = {
-            modalVisible: false
-          }
-          // options.fields[p].template = myDateTemplate.bind(this, {
-          //     label: label,
-          //     prop:  p,
-          //   })
+          options.fields[p].onDateChange = this.onDateChange
         }
         else if (type === 'string') {
           if (props[p].maxLength > 100)
@@ -153,12 +153,22 @@ var NewResourceMixin = {
           }
         }
         if (!options.fields[p].multiline && (type === 'string'  ||  type === 'number')) {
+          options.fields[p].template = this.myTextInputTemplate.bind(this, {
+                    label: label,
+                    prop:  props[p],
+                    value: data[p] ? data[p] + '' : null,
+                    keyboard: props[p].keyboard ||  (type === 'number' ? 'numeric' : 'default'),
+                    onChangeTextValue: this.onChangeTextValue.bind(this, p)
+                  })
+
           options.fields[p].onSubmitEditing = onSubmitEditing.bind(this);
           if (onEndEditing)
             options.fields[p].onEndEditing = onEndEditing.bind(this, p);
           if (props[p].maxLength)
             options.fields[p].maxLength = props[p].maxLength;
           if (type === 'number') {
+            if (!props[p].keyboard)
+              options.fields[p].keyboardType = 'numeric'
             if (data[p]  &&  (typeof data[p] != 'number'))
               data[p] = parseFloat(data[p])
           }
@@ -189,12 +199,19 @@ var NewResourceMixin = {
           if (type === 'number'  ||  type === 'string')
             ref = MONEY_TYPE
           else
-          continue;
+            continue;
         }
         if (ref === MONEY_TYPE) {
           model[p] = maybe ? t.maybe(t.Num) : t.Num;
           if (data[p]  &&  (typeof data[p] != 'number'))
             data[p] = data[p].value
+          options.fields[p].template = this.myTextInputTemplate.bind(this, {
+                    label: label,
+                    prop:  props[p],
+                    value: data[p] ? data[p] + '' : null,
+                    keyboard: 'numeric',
+                    onChangeTextValue: this.onChangeTextValue.bind(this, p)
+                  })
 
           // options.fields[p].template = moneyTemplate.bind({}, props[p])
 

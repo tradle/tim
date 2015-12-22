@@ -5,14 +5,16 @@
 */
 'use strict';
 
-var LABEL_COLOR = '#000000';
+var LABEL_COLOR = '#757575';
 var INPUT_COLOR = '#000000';
 var ERROR_COLOR = '#a94442';
 var HELP_COLOR = '#999999';
 var BORDER_COLOR = '#cccccc';
 var DISABLED_COLOR = '#777777';
 var DISABLED_BACKGROUND_COLOR = '#eeeeee';
-var FONT_SIZE = 17;
+var FONT_SIZE = 20
+var HELP_FONT_SIZE = 14
+var LABEL_FONT_SIZE = 9
 
 var FONT_WEIGHT = '400';
 
@@ -30,14 +32,15 @@ var stylesheet = Object.freeze({
   controlLabel: {
     normal: {
       color: LABEL_COLOR,
-      fontSize: FONT_SIZE,
+      fontSize: LABEL_FONT_SIZE,
       marginBottom: 3,
+      paddingLeft: 15,
       fontWeight: FONT_WEIGHT
     },
     // the style applied when a validation error occours
     error: {
       color: ERROR_COLOR,
-      fontSize: FONT_SIZE,
+      fontSize: LABEL_FONT_SIZE,
       marginBottom: 7,
       fontWeight: FONT_WEIGHT
     }
@@ -45,15 +48,15 @@ var stylesheet = Object.freeze({
   helpBlock: {
     normal: {
       color: HELP_COLOR,
-      fontSize: FONT_SIZE,
-      marginLeft: 10,
+      fontSize: HELP_FONT_SIZE,
+      // marginLeft: 10,
       marginTop: 5
     },
     // the style applied when a validation error occours
     error: {
       color: HELP_COLOR,
-      fontSize: FONT_SIZE,
-      marginLeft: 10,
+      fontSize: HELP_FONT_SIZE,
+      // marginLeft: 10,
       marginBottom: 2
     }
   },
@@ -66,9 +69,14 @@ var stylesheet = Object.freeze({
     normal: {
       color: INPUT_COLOR,
       fontSize: FONT_SIZE,
-      height: 36,
+      // fontFamily: 'Helvetica Light',
+      height: 46,
       padding: 7,
       borderRadius: 4,
+      // textDecorationLine: 'underline',
+      // textDecorationStyle: 'solid',
+      // textDecorationColor: '#aaaaaa',
+      // lineHeight: 5,
       borderColor: BORDER_COLOR,
       borderBottomColor: BORDER_COLOR,
       borderTopColor: '#ffffff',

@@ -20,6 +20,9 @@ DerivedData
 *.hmap
 *.ipa
 *.xcuserstate
+identity.*
+hack.*
+john*.*
 project.xcworkspace
 
 # Android/IJ

@@ -42,10 +42,10 @@ elif [[ -x "$(command -v brew)" && -s "$(brew --prefix nvm)/nvm.sh" ]]; then
   . "$(brew --prefix nvm)/nvm.sh"
 fi
 
-if [ -f ios/main.jsbundle ]; then
-  cp ios/main.jsbundle $DEST/main.jsbundle
-  cp -r ios/assets $DEST/
-else
+# if [ -f ios/main.jsbundle ]; then
+#   cp ios/main.jsbundle $DEST/main.jsbundle
+#   cp -r ios/assets $DEST/
+# else
   react-native bundle \
     --entry-file index.ios.js \
     --platform ios \
@@ -53,4 +53,4 @@ else
     --bundle-output "$DEST/main.jsbundle" \
     --assets-dest "$DEST" \
     --verbose
-fi
+# fi

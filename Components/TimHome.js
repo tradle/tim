@@ -19,7 +19,6 @@ var TradleWhite = require('../img/TradleW.png')
 var BG_IMAGE = require('../img/bg.png')
 // var Progress = require('react-native-progress')
 import { authenticateUser } from '../utils/authenticateUser'
-
 var {
   StyleSheet,
   Text,
@@ -344,9 +343,9 @@ class TimHome extends Component {
     );
   }
   async _pressHandler() {
-    if (await authenticateUser()) {
+    // if (await authenticateUser()) {
       this.showContactsOrRegister()
-    }
+    // }
   }
 }
           // {spinner}
