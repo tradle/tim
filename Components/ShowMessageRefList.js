@@ -70,40 +70,30 @@ class ShowMessageRefList extends Component {
       if (props[p].items.ref === 'tradle.AdditionalInfo') {
         if (utils.getMe().organization)
           refList.push(
-              <View style={buttonStyles.container} key={this.getNextKey()}>
-                 <TouchableHighlight onPress={() => {
-                    var buttons = [{
-                      text: 'Cancel',
-                    },
-                    {
-                      text: 'OK',
-                      onPress: this.props.additionalInfo.bind(this, this.props.resource, props[p])
-                    }];
-                    var to = this.props.resource;
-                    AlertIOS.prompt(
-                      'Sending ' + resource.title + ' form to ' + utils.getDisplayName(to, utils.getModel(to[constants.TYPE]).value.properties),
-                      buttons
-                    );
+            <View style={buttonStyles.container} key={this.getNextKey()}>
+               <TouchableHighlight onPress={() => {
+                  var buttons = [{
+                    text: 'Cancel',
+                  },
+                  {
+                    text: 'OK',
+                    onPress: this.props.additionalInfo.bind(this, this.props.resource, props[p])
+                  }];
+                  var to = this.props.resource;
+                  AlertIOS.prompt(
+                    'Sending ' + resource.title + ' form to ' + utils.getDisplayName(to, utils.getModel(to[constants.TYPE]).value.properties),
+                    buttons
+                  );
 
-                   }
-                 } underlayColor='transparent'>
-                   <View style={{alignItems: 'center'}}>
-                     <Icon name={icon}  size={35}  color='#ffffff'  style={[buttonStyles.icon, {paddingLeft: 7}]}/>
-                     <Text style={buttonStyles.text}>{props[p].title}</Text>
-                   </View>
-                 </TouchableHighlight>
-               </View>
-              );
-          // refList.push(
-          //     <View style={buttonStyles.container}>
-          //        <TouchableHighlight onPress={this.additionalInfo.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
-          //          <View style={{alignItems: 'center'}}>
-          //            <Icon name={icon}  size={35}  color='#ffffff'  style={[buttonStyles.icon, {paddingLeft: 7}]}/>
-          //            <Text style={buttonStyles.text}>{props[p].title}</Text>
-          //          </View>
-          //        </TouchableHighlight>
-          //      </View>
-          //     );
+                 }
+               } underlayColor='transparent'>
+                 <View style={{alignItems: 'center'}}>
+                   <Icon name={icon}  size={35}  color='#ffffff'  style={[buttonStyles.icon, {paddingLeft: 7}]}/>
+                   <Text style={buttonStyles.text}>{props[p].title}</Text>
+                 </View>
+               </TouchableHighlight>
+             </View>
+          );
       }
       else
         refList.push(
@@ -119,11 +109,11 @@ class ShowMessageRefList extends Component {
      }
      return refList.length
              ? (
-                <View  style={{flexDirection: 'row'}}>
+               <View style={[buttonStyles.buttons, {flexDirection: 'row'}]}>
                   {refList}
                 </View>
               )
-             : null;
+             : <View/>;
   }
   // additionalInfo(resource, prop) {
   //   var rmodel = utils.getModel(resource[constants.TYPE]).value;
