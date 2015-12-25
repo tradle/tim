@@ -72,16 +72,14 @@ class MessageView extends Component {
     if (inRow  &&  inRow > 4)
       inRow = 5;
     var actionPanel =
-        <View style={buttonStyles.buttons}>
           <ShowMessageRefList  resource={resource} navigator={this.props.navigator} additionalInfo={this.additionalInfo.bind(this)}/>
-        </View>
         // <FromToView resource={resource} navigator={this.props.navigator} />
         // <MoreLikeThis resource={resource} navigator={this.props.navigator}/>
     return (
       <ScrollView  ref='this' style={styles.container}>
         <View style={styles.band}><Text style={styles.date}>{date}</Text></View>
         <View style={styles.photoBG}>
-          <PhotoView resource={resource} />
+          <PhotoView resource={resource} navigator={this.props.navigator}/>
         </View>
         {actionPanel}
         <VerificationButton  resource={resource} verify={this.verify.bind(this)} verificationList={this.showResources.bind(this)}/>
