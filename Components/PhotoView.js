@@ -58,9 +58,9 @@ class PhotoView extends Component {
     // var style = (currentPhoto.width)
     //           ? [styles.image, {height: currentPhoto.height * (currentPhoto.width/400)}]
     //           : styles.image
-    if (resource.photos.length == 1)
-      return <Image source={source} style={styles.image} />;
-    else {
+    // if (resource.photos.length == 1)
+    //   return <Image source={source} style={styles.image} />;
+    // else {
       var nextPhoto;
       var len = resource.photos.length;
       for (var i=0; i<len  &&  !nextPhoto; i++) {
@@ -71,7 +71,7 @@ class PhotoView extends Component {
       return <TouchableHighlight underlayColor='#ffffff' onPress={this.showCarousel.bind(this, resource.photos[0])}>
                 <Image source={source} style={styles.image} />
               </TouchableHighlight>
-    }
+    // }
   }
 }
 reactMixin(PhotoView.prototype, PhotoCarouselMixin);
