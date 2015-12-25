@@ -91,11 +91,12 @@ var styles = StyleSheet.create({
     borderLeftColor: '#eeeeee',
     borderWidth: 1,
     borderBottomColor: '#aaaaaa',
+    marginLeft: -15,
   },
   chatInput: {
     height: 30,
     fontSize: 18,
-    paddingLeft: 5,
+    // paddingLeft: 5,
     backgroundColor: '#eeeeee',
     fontWeight: 'bold',
     alignSelf: 'stretch',
