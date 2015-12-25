@@ -27,12 +27,13 @@ class NewItem extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      selectedAssets: {}
+      selectedAssets: {},
+      resource: this.props.resource
     }
-    //
-    if (this.props.resource[this.props.metadata.name])
-      this.state.data = this.props.resource[this.props.metadata.name]
-    //
+
+    // if (this.props.resource[this.props.metadata.name])
+    //   this.state.data = this.props.resource[this.props.metadata.name]
+
     var currentRoutes = this.props.navigator.getCurrentRoutes();
     var currentRoutesLength = currentRoutes.length;
 
@@ -41,11 +42,23 @@ class NewItem extends Component {
     };
   }
   onSavePressed() {
+    if (this.state.submitted)
+      return
+    this.state.submitted = true
     var value = this.refs.form.getValue();
     if (!value)
       value = this.refs.form.refs.input.state.value;
-    if (!value)
-      return;
+    if (!value) {
+      value = this.state.data
+      if (!value)
+        value = {}
+    }
+
+    if (this.state.floatingProps) {
+      for (var p in this.state.floatingProps) {
+        value[p] = this.state.floatingProps[p]
+      }
+    }
     var propName = this.props.metadata.name;
     var resource = this.props.resource
     var item = JSON.parse(JSON.stringify(value));
@@ -65,8 +78,10 @@ class NewItem extends Component {
       }
     }
 
-    if (!this.validateValues(this.props.metadata, item))
+    if (!this.validateValues(this.props.metadata, item)) {
+      this.state.submitted = false
       return;
+    }
 
     // if (this.props.metadata.items.backlink)
     //   item[this.props.metadata.items.backlink] = this.props.resource[constants.TYPE] + '_' + this.props.resource[constants.ROOT_HASH];
@@ -81,6 +96,7 @@ class NewItem extends Component {
         this.props.onAddItem(propName, newItem);
       }
     }
+    this.state.submitted = false
     this.props.navigator.pop();
   }
   validateValues(prop, item) {
@@ -124,8 +140,8 @@ class NewItem extends Component {
     var params = {
         meta: meta,
         model: model,
-        chooser: this.props.chooser.bind(this),
-        template: this.props.template.bind(this),
+        // chooser: this.props.chooser.bind(this),
+        // template: this.props.template.bind(this),
         onSubmitEditing: this.onSavePressed.bind(this)
     };
     if (this.state.data)
@@ -164,6 +180,12 @@ class NewItem extends Component {
     else
       selectedAssets[asset.node.image.uri] = asset;
   }
+  // onChangeTextValue(prop, value) {
+  //   // this.state.resource[prop] = value
+  //   if (!this.state.floatingProps)
+  //     this.state.floatingProps = {}
+  //   this.state.floatingProps[prop.name] = value
+  // }
 }
 reactMixin(NewItem.prototype, NewResourceMixin);
 
@@ -205,7 +227,7 @@ var styles = StyleSheet.create({
     paddingVertical: 10,
     fontSize: 20,
     color: 'darkred',
-  },
+  }
 
 });
 module.exports = NewItem;
