@@ -269,6 +269,7 @@ class TiMApp extends Component {
                   resource={props.resource}
                   metadata={props.metadata}
                   onAddItem={props.onAddItem}
+                  model={props.model}
                   chooser={props.chooser}
                   template={props.template}
                   parentMeta={props.parentMeta}    />;
@@ -319,6 +320,7 @@ class TiMApp extends Component {
       return <ProductChooser navigator={nav}
                   resource={props.resource}
                   returnRoute={props.returnRoute}
+                  products={props.products}
                   callback={props.callback} />;
     case 16:
       return <QRCodeScanner navigator={nav}
