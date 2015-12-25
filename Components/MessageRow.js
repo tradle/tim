@@ -17,7 +17,7 @@ var equal = require('deep-equal')
 var formDefaults = require('../data/formDefaults')
 var reactMixin = require('react-mixin');
 var STRUCTURED_MESSAGE_BORDER = '#3260a5' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
-var STRUCTURED_MESSAGE_COLOR = '#4BA0F2' //'#5482C7' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
+var STRUCTURED_MESSAGE_COLOR = '#77ADFC' //'#4BA0F2' //'#5482C7' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
 var VERIFICATION_BG = '#FBFFE5' //'#F6FFF0';
 var newProduct = require('../data/newProduct.json')
 var Actions = require('../Actions/Actions');
@@ -213,7 +213,7 @@ class MessageRow extends Component {
         }
       }
       if (!isSimpleMessage)
-        viewStyle.width = isMyMessage || !hasOwnerPhoto ? w - 50 : w - 50;
+        viewStyle.width = isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
         // viewStyle.width = isMyMessage || !hasOwnerPhoto ? 305 : 325;
 
       if (isVerification) {
@@ -601,7 +601,7 @@ class MessageRow extends Component {
           s += p + ' ';
       });
 
-      vCols.push(<Text style={[styles.resourceTitle, {color: '#EBFCFF', fontSize: 18, fontWeight: '600', opacity: 0.3, alignSelf: 'flex-end', marginTop: 10}]} key={this.getNextKey()}>{s}</Text>);
+      vCols.push(<Text style={[styles.resourceTitle, {color: '#EBFCFF', fontSize: 18, fontWeight: '600', opacity: 0.5, alignSelf: 'flex-end', marginTop: 10}]} key={this.getNextKey()}>{s}</Text>);
     }
     if (vCols  &&  vCols.length) {
       vCols.forEach(function(v) {
@@ -684,21 +684,22 @@ class MessageRow extends Component {
         passProps: {
           resource: resource,
           returnRoute: currentRoutes[currentRoutes.length - 1],
+          products: JSON.parse(this.props.resource.list),
           callback: this.props.callback
         },
-        rightButtonTitle: 'ion|plus',
-        onRightButtonPress: {
-          id: 4,
-          title: 'New product',
-          component: NewResource,
-          backButtonTitle: 'Back',
-          titleTextColor: '#7AAAC3',
-          rightButtonTitle: 'Done',
-          passProps: {
-            model: utils.getModel('tradle.NewMessageModel').value,
-            // callback: this.modelAdded.bind(this)
-          }
-        }
+        // rightButtonTitle: 'ion|plus',
+        // onRightButtonPress: {
+        //   id: 4,
+        //   title: 'New product',
+        //   component: NewResource,
+        //   backButtonTitle: 'Back',
+        //   titleTextColor: '#7AAAC3',
+        //   rightButtonTitle: 'Done',
+        //   passProps: {
+        //     model: utils.getModel('tradle.NewMessageModel').value,
+        //     // callback: this.modelAdded.bind(this)
+        //   }
+        // }
       });
     }
   // shareDocs() {
