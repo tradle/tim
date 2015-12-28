@@ -52,6 +52,7 @@
     "react-native-camera": "^0.3.8",
     "react-native-carousel": "^0.4.3",
     "react-native-clone-referenced-element": "^1.0.0",
+    "react-native-code-push": "^1.5.2-beta",
     "react-native-crypto": "mvayngrib/react-native-crypto#92ebb1b",
     "react-native-custom-action-sheet": "0.0.6",
     "react-native-device": "^1.0.1",
