@@ -1,6 +1,7 @@
 package com.identity;
 
 import android.app.Activity;
+import com.microsoft.codepush.react.CodePushReactPackage;
 import android.os.Bundle;
 import android.view.KeyEvent;
 
@@ -26,6 +27,7 @@ public class MainActivity extends Activity implements DefaultHardwareBackBtnHand
                 .setBundleAssetName("index.android.bundle")
                 .setJSMainModuleName("index.android")
                 .addPackage(new MainReactPackage())
+                .addPackage(new CodePushReactPackage())
                 .setUseDeveloperSupport(BuildConfig.DEBUG)
                 .setInitialLifecycleState(LifecycleState.RESUMED)
                 .build();

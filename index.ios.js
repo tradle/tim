@@ -16,6 +16,7 @@ require('./utils/crypto')
 require('stream')
 // require('./timmy')
 var React = require('react-native');
+var CodePush = require('react-native-code-push')
 var ResourceList = require('./Components/ResourceList');
 // var GridList = require('./Components/GridList');
 var TimHome = require('./Components/TimHome');
@@ -88,6 +89,7 @@ class TiMApp extends Component {
   }
 
   componentDidMount() {
+    codePush.sync({ updateDialog: true, installMode: codePush.InstallMode.IMMEDIATE });
     LinkingIOS.addEventListener('url', this._handleOpenURL.bind(this));
     var url = LinkingIOS.popInitialURL();
     if (url)
