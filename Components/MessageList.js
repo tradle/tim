@@ -27,6 +27,7 @@ var {
   View,
   Text,
   AlertIOS,
+  ActionSheetIOS,
   ActivityIndicatorIOS,
   TouchableHighlight
 } = React;
@@ -77,7 +78,9 @@ class MessageList extends Component {
       Actions.messageList({modelName: this.props.modelName, to: this.props.resource});
       return
     }
-    if (params.action !== 'messageList' ||  !params.list || params.isAggregation !== this.props.isAggregation)
+    if ( params.action !== 'messageList'   ||
+        !params.list                       ||
+        params.isAggregation !== this.props.isAggregation)
       return;
     if (params.resource  &&  params.resource[constants.ROOT_HASH] != this.props.resource[constants.ROOT_HASH]) {
       var doUpdate
@@ -106,7 +109,6 @@ class MessageList extends Component {
           utils.dedupeVerifications(params.verificationsToShare[formName])
         }
       }
-
       this.setState({
         dataSource: this.state.dataSource.cloneWithRows(list),
         isLoading: false,
@@ -173,7 +175,7 @@ class MessageList extends Component {
 
   renderRow(resource, sectionId, rowId)  {
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
-    var isMessage = model.interfaces  &&  model.interfaces.indexOf('tradle.Message') != -1;
+    var isMessage = model.interfaces  &&  model.interfaces.indexOf(constants.TYPES.MESSAGE) != -1;
     var isAggregation = this.props.isAggregation;
     var me = utils.getMe();
     var MessageRow = require('./MessageRow');
@@ -199,6 +201,20 @@ class MessageList extends Component {
   render() {
     if (this.state.isLoading)
       return <View />
+    // if (this.state.message) {
+    //   return (
+    //     <View style={{flex: 1}} onLayout={() =>
+    //       AlertIOS.alert(
+    //         this.state.message,
+    //         null,
+    //         [
+    //           {text: 'OK', onPress: () => console.log('OK Pressed!')}
+    //         ]
+    //       )
+    //     } />
+
+    //     )
+    // }
 
     currentMessageTime = null;
     var content;
@@ -228,7 +244,7 @@ class MessageList extends Component {
                     isLoading={this.state.isLoading}/>
     }
     else {
-      var isAllMessages = model.isInterface  &&  model.id === 'tradle.Message';
+      var isAllMessages = model.isInterface  &&  model.id === constants.TYPES.MESSAGE;
           // renderScrollView={(props) => <InvertibleScrollView {...props} inverted />}
 
       // content = <ListView ref='listview' style={{marginHorizontal: 10}}
@@ -261,6 +277,7 @@ class MessageList extends Component {
                             resource={this.props.resource}
                             modelName={this.props.modelName}
                             onAddNewPressed={this.onAddNewPressed.bind(this)}
+                            onMenu={this.showMenu.bind(this)}
                             onPhotoSelect={this.onPhotoSelect.bind(this)}
                             callback={this.addedMessage.bind(this)} />
            : <View/>;
@@ -294,6 +311,40 @@ class MessageList extends Component {
       </View>
     );
   }
+  showMenu() {
+    var buttons = ['Forget me', 'Cancel']
+    var self = this;
+    ActionSheetIOS.showActionSheetWithOptions({
+      options: buttons,
+      cancelButtonIndex: 3
+    }, function(buttonIndex) {
+      switch (buttonIndex) {
+      // case 0:
+      //   self.showChoice()
+      //   break
+      case 0:
+        self.forgetMe()
+        break;
+      default:
+        return
+      }
+    });
+  }
+  forgetMe() {
+    var resource = this.props.resource
+    AlertIOS.alert(
+      'Are you sure you want \'' + utils.getDisplayName(resource, utils.getModel(resource[constants.TYPE]).value.properties) + '\' to forget you',
+      null,
+      [
+        {text: 'OK', onPress: () => {
+            Actions.forgetMe(resource)
+          }
+        },
+        {text: 'Cancel', onPress: () => console.log('Cancel')}
+      ]
+    )
+  }
+
   onPhotoSelect(asset) {
     var selectedAssets = this.state.selectedAssets;
     // unselect if was selected before
