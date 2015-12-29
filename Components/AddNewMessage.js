@@ -28,10 +28,8 @@ var {
   Component
 } = React;
 
-// var ActionSheetIOS = require('ActionSheetIOS');
-
 var interfaceToTypeMapping = {
-  'tradle.Message': 'tradle.SimpleMessage'
+  'tradle.Message': constants.TYPES.SIMPLE_MESSAGE
 };
 
 class AddNewMessage extends Component {
@@ -96,7 +94,7 @@ class AddNewMessage extends Component {
       return;
     }
     var model = utils.getModel(resource[constants.TYPE]).value;
-    var isMessage = model.interfaces  &&  model.interfaces.indexOf('tradle.Message') != -1;
+    var isMessage = model.interfaces  &&  model.interfaces.indexOf(constants.TYPES.MESSAGE) != -1;
     if (isMessage  &&  this.state.userInput.length) {
       // if (this.props.callback) {
         // this.props.callback('');
@@ -146,6 +144,12 @@ class AddNewMessage extends Component {
                                onChange={this.onChange.bind(this)}
                                onEndEditing={this.onEndEditing.bind(this)} />
                </View>
+    var menu = <TouchableHighlight underlayColor='transparent'
+                    onPress={this.props.onMenu.bind(this)}>
+                  <View style={{marginLeft: 15, paddingRight: 0, marginBottom: 5}}>
+                    <Icon name='android-more-vertical' style={styles.icon} size={30} color='#999999' />
+                  </View>
+                </TouchableHighlight>
     var camera = isOrg
                ? <View />
                : <TouchableHighlight underlayColor='transparent'
@@ -162,8 +166,8 @@ class AddNewMessage extends Component {
         <View style={style}>
           {pushForm}
         </View>
+        {menu}
         {chat}
-        {camera}
         </View>
       </View>
     );
