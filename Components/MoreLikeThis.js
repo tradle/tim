@@ -32,7 +32,7 @@ class MoreLikeThis extends Component {
     });
   }
   render() {
-    if (this.props.resource[constants.TYPE] === 'tradle.SimpleMessage' || this.props.resource[constants.TYPE] === 'tradle.Verification')
+    if (this.props.resource[constants.TYPE] === constants.TYPES.SIMPLE_MESSAGE || this.props.resource[constants.TYPE] === constants.TYPES.VERIFICATION)
       return null;
     return (
       <View style={[buttonStyles.container1, {top: 35}]}>
