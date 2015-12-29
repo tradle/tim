@@ -51,14 +51,18 @@ class TimHome extends Component {
     this.listenTo(Store, 'handleEvent');
   }
   shouldComponentUpdate(nextProps, nextState) {
-    if (this.state.isLoading  !== nextState.isLoading)
+    if (this.state.isLoading  !== nextState.isLoading  ||
+        this.state.message !== nextState.message)
       return true
     else
       return false
   }
   handleEvent(params) {
     if (params.action === 'reloadDB') {
-      this.setState({isLoading: false});
+      this.setState({
+        isLoading: false,
+        message: 'Please restart TiM'
+      });
       utils.setModels(params.models);
     }
     else if (params.action === 'start') {
@@ -68,6 +72,10 @@ class TimHome extends Component {
     }
   }
   showContactsOrRegister() {
+    if (this.state.message) {
+      this.restartTiM()
+      return
+    }
     if (utils.getMe())
       this.showOfficialAccounts();
       // this.showContacts();
@@ -122,7 +130,7 @@ class TimHome extends Component {
       backButtonTitle: 'Back',
       titleTextColor: '#7AAAC3',
       passProps: {
-        modelName: 'tradle.Organization'
+        modelName: constants.TYPES.ORGANIZATION
       },
       rightButtonTitle: 'Profile',
       onRightButtonPress: {
@@ -153,23 +161,28 @@ class TimHome extends Component {
       this.props.navigator.push(route)
   }
 
-  showCommunities() {
-    var passProps = {
-        filter: '',
-        modelName: 'tradle.Community',
-      };
-    var me = utils.getMe();
-    this.props.navigator.push({
-      // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      id: 10,
-      title: 'Communities',
-      titleTextColor: '#7AAAC3',
-      backButtonTitle: 'Back',
-      component: ResourceList,
-      passProps: passProps,
-    });
-  }
+  // showCommunities() {
+  //   var passProps = {
+  //       filter: '',
+  //       modelName: 'tradle.Community',
+  //     };
+  //   var me = utils.getMe();
+  //   this.props.navigator.push({
+  //     // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+  //     id: 10,
+  //     title: 'Communities',
+  //     titleTextColor: '#7AAAC3',
+  //     backButtonTitle: 'Back',
+  //     component: ResourceList,
+  //     passProps: passProps,
+  //   });
+  // }
   onEditProfilePressed() {
+    if (this.state.message) {
+      this.restartTiM()
+      return
+    }
+
     var modelName = this.props.modelName;
     if (!utils.getModel(modelName)) {
       this.setState({err: 'Can find model: ' + modelName});
@@ -233,6 +246,10 @@ class TimHome extends Component {
     }
   }
   render() {
+    if (this.state.message) {
+      this.restartTiM()
+      return
+    }
     var url = LinkingIOS.popInitialURL();
     var d = Device
     var h = d.height - 180
@@ -342,10 +359,15 @@ class TimHome extends Component {
       </View>
     );
   }
+  restartTiM() {
+    AlertIOS.alert(
+      'Please restart TiM'
+    )
+  }
   async _pressHandler() {
-    // if (await authenticateUser()) {
+    if (await authenticateUser()) {
       this.showContactsOrRegister()
-    // }
+    }
   }
 }
           // {spinner}
