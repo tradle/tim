@@ -138,8 +138,12 @@ var utils = {
     return (resourceTitle.length > 28) ? resourceTitle.substring(0, 28) + '...' : resourceTitle;
   },
   getDisplayName(resource, meta) {
-    if (!meta)
-      return resource.title;
+    if (!meta) {
+      if (resource.title)
+        return resource.title
+      else
+        meta = this.getModel(resource[constants.TYPE]).value.properties
+    }
     var displayName = '';
     for (var p in meta) {
       if (meta[p].displayName) {
