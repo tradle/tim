@@ -22,7 +22,7 @@ var {
 class ResourceTypesScreen extends Component {
   constructor(props) {
     super(props);
-    var implementors = utils.getImplementors(this.props.modelName, ['tradle.FinancialProduct', 'tradle.Form', constants.TYPES.ADDITIONAL_INFO]);
+    var implementors = utils.getImplementors(this.props.modelName, [constants.TYPES.FINANCIAL_PRODUCT, constants.TYPES.FORM, constants.TYPES.ADDITIONAL_INFO]);
 
     // delete implementors[constants.TYPES.ADDITIONAL_INFO]
 
@@ -105,7 +105,7 @@ class ResourceTypesScreen extends Component {
     var toName = utils.getDisplayName(resource.to, utils.getModel(resource.to[constants.TYPE]).value.properties);
     var meta = utils.getModel(me[constants.TYPE]).value.properties;
     var meName = utils.getDisplayName(me, meta);
-    var modelName = 'tradle.SimpleMessage';
+    var modelName = constants.TYPES.SIMPLE_MESSAGE;
     var value = {
       message: '[' + msg + '](' + model.id + ')',
       from: me,
@@ -119,7 +119,7 @@ class ResourceTypesScreen extends Component {
 
   renderRow(resource)  {
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
-    var isMessage = model.interfaces  &&  model.interfaces.indexOf('tradle.Message') != -1;
+    var isMessage = model.interfaces  &&  model.interfaces.indexOf(constants.TYPES.MESSAGE) != -1;
     var MessageTypeRow = require('./MessageTypeRow');
 
     return (
