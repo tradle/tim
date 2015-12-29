@@ -67,7 +67,7 @@ class ShowMessageRefList extends Component {
       var icon = props[p].icon  ||  utils.getModel(props[p].items.ref).value.icon;
       if (!icon)
         icon = 'ios-checkmark-empty';
-      if (props[p].items.ref === 'tradle.AdditionalInfo') {
+      if (props[p].items.ref === constants.TYPES.ADDITIONAL_INFO) {
         if (utils.getMe().organization)
           refList.push(
             <View style={buttonStyles.container} key={this.getNextKey()}>
