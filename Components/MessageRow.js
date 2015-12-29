@@ -82,7 +82,7 @@ class MessageRow extends Component {
     var renderedRow = [];
     var onPressCall;
     var isNewProduct, isConfirmation
-    var isVerification = resource[constants.TYPE] === 'tradle.Verification';
+    var isVerification = resource[constants.TYPE] === constants.TYPES.VERIFICATION;
     if (isVerification)
       onPressCall = this.props.onSelect;
     else {
@@ -104,7 +104,8 @@ class MessageRow extends Component {
     var addStyle, inRow;
     var noMessage = !resource.message  ||  !resource.message.length;
     var isSimpleMessage = resource[constants.TYPE] === constants.TYPES.SIMPLE_MESSAGE
-    var isAdditionalInfo = !isSimpleMessage  &&  resource[constants.TYPE] === 'tradle.AdditionalInfo';
+    var isForgetting = model.id === constants.TYPES.FORGET_ME || model.id === constants.TYPES.FORGOT_YOU
+    var isAdditionalInfo = !isSimpleMessage  &&  resource[constants.TYPE] === constants.TYPES.ADDITIONAL_INFO;
     if (!renderedRow.length  &&  !isVerification) {
       var vCols = noMessage ? null : utils.getDisplayName(resource, model.properties);
       if (vCols)
@@ -116,6 +117,8 @@ class MessageRow extends Component {
         if (!noMessage)
           addStyle = /*isNewProduct ? styles.myAdCell :*/ styles.myCell;
       }
+      else if (isForgetting)
+        addStyle = styles.forgetCell
       else {
         if (!model.style) {
           addStyle = {paddingVertical: 5, paddingHorizontal: 7, borderRadius: 10, borderColor: '#cccccc', backgroundColor: '#ffffff', marginVertical: 2};
@@ -196,7 +199,7 @@ class MessageRow extends Component {
     else
       showMessageBody = true;
     var messageBody;
-    var isSimpleMessage = model.id === 'tradle.SimpleMessage';
+    var isSimpleMessage = model.id === constants.TYPES.SIMPLE_MESSAGE;
     var w = Device.width
 
     if (showMessageBody) {
@@ -417,7 +420,7 @@ class MessageRow extends Component {
 
   verify(event) {
     var resource = this.props.resource;
-    var isVerification = resource[constants.TYPE] === 'tradle.Verification';
+    var isVerification = resource[constants.TYPE] === constants.TYPES.VERIFICATION;
     if (isVerification)
       resource = resource.document;
 
@@ -434,7 +437,7 @@ class MessageRow extends Component {
       component: MessageView,
       backButtonTitle: 'Back',
       passProps: passProps,
-      title: resource[constants.TYPE] == 'tradle.AssetVerification' ? 'Doc verification' : model.title
+      title: model.title
     }
     if (this.isMyMessage()) {
       route.rightButtonTitle = 'Edit';
@@ -467,10 +470,10 @@ class MessageRow extends Component {
     var noMessage = !resource.message  ||  !resource.message.length;
     var onPressCall;
 
-    var isProductList = model.id === 'tradle.ProductList'
-    var isSimpleMessage = isProductList ||  model.id === 'tradle.SimpleMessage'
-
-    var isAdditionalInfo = !isSimpleMessage  &&  resource[constants.TYPE] === 'tradle.AdditionalInfo';
+    var isProductList = model.id === constants.TYPES.PRODUCT_LIST
+    var isSimpleMessage = isProductList ||  model.id === constants.TYPES.SIMPLE_MESSAGE
+    var isForgetting = model.id === constants.TYPES.FORGET_ME || model.id === constants.TYPES.FORGOT_YOU
+    var isAdditionalInfo = !isSimpleMessage  &&  resource[constants.TYPE] === constants.TYPES.ADDITIONAL_INFO
     var cnt = 0;
     var isNewProduct, isConfirmation
     var self = this
@@ -504,7 +507,7 @@ class MessageRow extends Component {
         onPressCall = self.onPress.bind(self);
         vCols.push(<Text style={style} numberOfLines={first ? 2 : 1} key={self.getNextKey()}>{resource[v]}</Text>);
       }
-      else if (!isProductList  &&  !model.autoCreate) {
+      else if (!isProductList  &&  !isForgetting  &&  !model.autoCreate) {
         var val = (properties[v].displayAs)
                 ? utils.templateIt(properties[v], resource)
                 : resource[v];
@@ -587,13 +590,13 @@ class MessageRow extends Component {
 
         }
         else
-          vCols.push(<Text style={style} key={self.getNextKey()}>{resource[v]}</Text>);
+          vCols.push(<Text style={isForgetting ? [style, {fontSize: 18, color: 'ffffff'}] : style} key={self.getNextKey()}>{resource[v]}</Text>);
       }
       first = false;
 
     });
 
-    if (!isSimpleMessage)  {
+    if (!isSimpleMessage  &&  !isForgetting)  {
       var t = model.title.split(' ');
       var s = '';
       t.forEach(function(p) {
@@ -664,7 +667,7 @@ class MessageRow extends Component {
   onChooseProduct(sendForm) {
     if (this.props.isAggregation)
       return
-    var modelName = 'tradle.Message';
+    var modelName = constants.TYPES.MESSAGE
     var model = utils.getModel(modelName).value;
     var isInterface = model.isInterface;
     if (!isInterface)
@@ -771,7 +774,7 @@ class MessageRow extends Component {
     }
     else
       orgRow = <View/>
-    var orgTitle = this.props.to[constants.TYPE] === 'tradle.Organization'
+    var orgTitle = this.props.to[constants.TYPE] === constants.TYPES.ORGANIZATION
                  ? this.props.to.name
                  : (this.props.to.organization ? this.props.to.organization.title : null);
     var verifiedBy = verification.organization ? verification.organization.title : ''
@@ -813,7 +816,7 @@ class MessageRow extends Component {
     var noMessage = !resource.message  ||  !resource.message.length;
     var onPressCall;
 
-    var isSimpleMessage = model.id === 'tradle.SimpleMessage';
+    var isSimpleMessage = model.id === constants.TYPES.SIMPLE_MESSAGE
 
     viewCols.forEach(function(v) {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date')
@@ -824,7 +827,7 @@ class MessageRow extends Component {
           var val
           if (properties[v].type === 'object') {
             if (properties[v].ref) {
-              if (properties[v].ref === 'tradle.Money')
+              if (properties[v].ref === constants.TYPES.MONEY)
                 val = '£' + resource[v]
               else {
                 var m = utils.getModel(properties[v].ref).value
@@ -926,6 +929,13 @@ var styles = StyleSheet.create({
     justifyContent: 'flex-end',
     borderRadius: 10,
     backgroundColor: '#569bff',
+  },
+  forgetCell: {
+    paddingVertical: 5,
+    paddingHorizontal: 7,
+    justifyContent: 'flex-end',
+    borderRadius: 10,
+    backgroundColor: 'red',
   },
   myAdCell: {
     paddingVertical: 5,
