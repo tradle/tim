@@ -132,7 +132,7 @@ class NewResource extends Component {
     //   utils.setMe(params.me);
     var self = this;
     var title = utils.getDisplayName(resource, self.props.model.properties);
-    var isMessage = this.props.model.interfaces  &&  this.props.model.interfaces.indexOf('tradle.Message') != -1;
+    var isMessage = this.props.model.interfaces  &&  this.props.model.interfaces.indexOf(constants.TYPES.MESSAGE) != -1;
     // When message created the return page is the chat window,
     // When profile or some contact info changed/added the return page is Profile view page
     if (this.props.callback) {
@@ -439,8 +439,8 @@ class NewResource extends Component {
     var model = {};
     var arrays = [];
     extend(true, data, resource);
-    var isMessage = meta.interfaces  &&  meta.interfaces.indexOf('tradle.Message') != -1;
-    var isFinancialProduct = isMessage  &&  this.props.model.subClassOf && this.props.model.subClassOf === 'tradle.FinancialProduct'
+    var isMessage = meta.interfaces  &&  meta.interfaces.indexOf(constants.TYPES.MESSAGE) != -1;
+    var isFinancialProduct = isMessage  &&  this.props.model.subClassOf && this.props.model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT
     var showSendVerificationForm = false;
     var formToDisplay;
     if (isMessage) {
@@ -662,7 +662,7 @@ class NewResource extends Component {
     var toName = utils.getDisplayName(resource.to, utils.getModel(resource.to[constants.TYPE]).value.properties);
     var meta = utils.getModel(me[constants.TYPE]).value.properties;
     var meName = utils.getDisplayName(me, meta);
-    var modelName = 'tradle.SimpleMessage';
+    var modelName = constants.TYPES.SIMPLE_MESSAGE;
     var value = {
       message: msg
               ?  model.isInterface ? msg : '[' + msg + '](' + model.id + ')'
