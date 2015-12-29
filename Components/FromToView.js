@@ -11,8 +11,6 @@ var Actions = require('../Actions/Actions');
 var Icon = require('react-native-vector-icons/Ionicons');
 var constants = require('@tradle/constants');
 
-var MESSAGE_INTERFACE = 'tradle.Message';
-
 var {
   StyleSheet,
   Image,
@@ -37,7 +35,7 @@ class FromToView extends Component {
     var resource = this.props.resource;
 
     var model = this.props.model || utils.getModel(resource[constants.TYPE]).value;
-    if (!model.interfaces  ||  model.interfaces.indexOf(MESSAGE_INTERFACE) == -1 || model.id === 'tradle.Verification')
+    if (!model.interfaces  ||  model.interfaces.indexOf(constants.TYPES.MESSAGE) == -1 || model.id === 'tradle.Verification')
       return <View />;
 
     var hasPhoto = true; //resource[photoProp]  &&  resource[photoProp].length;
