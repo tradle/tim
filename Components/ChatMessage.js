@@ -20,7 +20,7 @@ class ChatMessage extends Component {
   }
   render() {
     var model = this.props.model;
-    var isMessage = model.interfaces  &&  model.interfaces.indexOf('tradle.Message') != -1;
+    var isMessage = model.interfaces  &&  model.interfaces.indexOf(constants.TYPES.MESSAGE) != -1;
     if (!isMessage  &&  !model.isInterface)
       return <View></View>;
     var resource = this.props.resource;
