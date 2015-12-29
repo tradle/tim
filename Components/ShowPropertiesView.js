@@ -8,7 +8,6 @@ var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin')
 var reactMixin = require('react-mixin')
 
-var MONEY_TYPE = 'tradle.Money';
 var DEFAULT_CURRENCY_SYMBOL = '$';
 var cnt = 0;
 
@@ -101,7 +100,7 @@ class ShowPropertiesView extends Component {
           return;
       }
       else if (pMeta.ref) {
-        if (pMeta.ref == MONEY_TYPE) {
+        if (pMeta.ref == constants.TYPES.MONEY) {
           if (typeof val === 'number')
             val = DEFAULT_CURRENCY_SYMBOL + val;
 
