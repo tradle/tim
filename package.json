@@ -13,7 +13,7 @@
     "@tradle/cb-blockr": "^3.1.1",
     "@tradle/chained-obj": "^2.0.3",
     "@tradle/constants": "^1.1.4",
-    "@tradle/http-keeper": "^3.0.2",
+    "@tradle/http-keeper": "^3.0.3",
     "@tradle/identity": "^1.0.9",
     "@tradle/kiki": "^1.1.11",
     "@tradle/models": "^1.2.0",
