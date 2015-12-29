@@ -7,8 +7,6 @@ var Icon = require('react-native-vector-icons/Ionicons');
 var reactMixin = require('react-mixin');
 var RowMixin = require('./RowMixin');
 
-var MONEY_TYPE = 'tradle.Money';
-
 var {
   Image,
   PixelRatio,
@@ -142,7 +140,7 @@ class VerificationRow extends Component {
     var noMessage = !resource.message  ||  !resource.message.length;
     var onPressCall;
 
-    var isSimpleMessage = model.id === 'tradle.SimpleMessage';
+    var isSimpleMessage = model.id === constants.TYPES.SIMPLE_MESSAGE;
 
     viewCols.forEach(function(v) {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date')
