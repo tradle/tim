@@ -9,7 +9,6 @@ var utils = require('../utils/utils');
 var constants = require('@tradle/constants');
 var t = require('tcomb-form-native');
 var Device = require('react-native-device')
-var MONEY_TYPE = 'tradle.Money';
 var cnt = 0;
 var propTypesMap = {
   'string': t.Str,
@@ -207,11 +206,11 @@ var NewResourceMixin = {
         var ref = props[p].ref;
         if (!ref) {
           if (type === 'number'  ||  type === 'string')
-            ref = MONEY_TYPE
+            ref = constants.TYPES.MONEY
           else
             continue;
         }
-        if (ref === MONEY_TYPE) {
+        if (ref === constants.TYPES.MONEY) {
           model[p] = maybe ? t.maybe(t.Num) : t.Num;
           if (data[p]  &&  (typeof data[p] != 'number'))
             data[p] = data[p].value
@@ -304,7 +303,7 @@ var NewResourceMixin = {
       let scrollResponder=this.refs.scrollView.getScrollResponder();
       scrollResponder.scrollResponderScrollNativeHandleToKeyboard(
         React.findNodeHandle(this.refs.form.refs.input.refs[refName]),
-        50, //additionalOffset
+        120, //additionalOffset
         true
       );
     }, 50);
@@ -372,7 +371,7 @@ var NewResourceMixin = {
       resource[constants.TYPE] = model.id;
     }
 
-    var isFinancialProduct = model.subClassOf  &&  model.subClassOf == 'tradle.FinancialProduct';
+    var isFinancialProduct = model.subClassOf  &&  model.subClassOf == constants.TYPES.FINANCIAL_PRODUCT
     var value = this.refs.form.input;
 
     var filter = event.nativeEvent.text;
