@@ -6,7 +6,6 @@ var LinearGradient = require('react-native-linear-gradient');
 var ArticleView = require('./ArticleView');
 var constants = require('@tradle/constants');
 var Icon = require('react-native-vector-icons/Ionicons');
-var MONEY_TYPE = 'tradle.Money';
 var RowMixin = require('./RowMixin');
 var reactMixin = require('react-mixin');
 var equal = require('deep-equal');
@@ -225,7 +224,7 @@ class ResourceRow extends Component {
       if (ref) {
         if (resource[v]) {
           var row;
-          if (ref == MONEY_TYPE) {
+          if (ref == constants.TYPES.MONEY) {
             row = self.getMoneyProp(ref, properties[v]);
             if (!row)
               return;
