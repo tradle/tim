@@ -41,7 +41,7 @@ class MessageView extends Component {
     if (params.action === 'addVerification' ||  params.action === 'addAdditionalInfo') {
       this.props.navigator.pop();
       Actions.messageList({
-        modelName: 'tradle.Message',
+        modelName: constants.TYPES.MESSAGE,
         resource: params.resource
       });
     }
@@ -139,7 +139,7 @@ class MessageView extends Component {
     }
     verification[constants.TYPE] = verificationModel;
 
-    if (verificationModel === 'tradle.Verification')
+    if (verificationModel === constants.TYPES.VERIFICATION)
       Actions.addVerification(verification);
     else {
       this.props.navigator.replace({
