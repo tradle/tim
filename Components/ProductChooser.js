@@ -32,14 +32,14 @@ class ProductChooser extends Component {
 
     }
     else
-      products = utils.getAllSubclasses('tradle.FinancialProduct');
+      products = utils.getAllSubclasses(constants.TYPES.FINANCIAL_PRODUCT);
 
     var dataSource =  new ListView.DataSource({
       rowHasChanged: (row1, row2) => row1 !== row2,
     });
     this.state = {
       products: products,
-      modelName: 'tradle.FinancialProduct',
+      modelName: constants.TYPES.FINANCIAL_PRODUCT,
       dataSource: dataSource.cloneWithRows(products),
     };
   }
@@ -70,7 +70,7 @@ class ProductChooser extends Component {
       passProps: {
         resource: this.props.resource,
         filter: '',
-        modelName: 'tradle.Message',
+        modelName: constants.TYPES.MESSAGE,
       },
     }
     var msg = {

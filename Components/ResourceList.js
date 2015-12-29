@@ -29,6 +29,7 @@ var {
   Component,
   StyleSheet,
   Navigator,
+  AlertIOS,
   TouchableHighlight,
   Image,
   StatusBarIOS,
@@ -170,7 +171,7 @@ class ResourceList extends Component {
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     var model = utils.getModel(this.props.modelName);
     var isIdentity = this.props.modelName === constants.TYPES.IDENTITY;
-    var isOrganization = this.props.modelName === 'tradle.Organization';
+    var isOrganization = this.props.modelName === constants.TYPES.ORGANIZATION;
     if (!isIdentity         &&
         !isOrganization     &&
         !this.props.callback) {
@@ -218,7 +219,7 @@ class ResourceList extends Component {
       }
     }
     var title = isIdentity ? resource.firstName : resource.name; //utils.getDisplayName(resource, model.value.properties);
-    var modelName = 'tradle.Message';
+    var modelName = constants.TYPES.MESSAGE;
     var self = this;
     var route = {
       component: MessageList,
@@ -261,8 +262,8 @@ class ResourceList extends Component {
       var routes = this.props.navigator.getCurrentRoutes();
       if (routes[routes.length - 1].title === 'Official Accounts') {
         var msg = {
-          message: '[' + (me.firstName || 'There is a customer') + ' is waiting for the response](tradle.CustomerWaiting)',
-          _t: constants.TYPES.SIMPLE_MESSAGE,
+          message: me.firstName + ' is waiting for the response',
+          _t: constants.TYPES.CUSTOMER_WAITING,
           from: me,
           to: resource,
           time: new Date().getTime()
@@ -422,7 +423,7 @@ class ResourceList extends Component {
   renderRow(resource)  {
     var model = utils.getModel(this.props.modelName).value;
 
-    return model.id === 'tradle.Verification' ||  (model.subClassOf  &&  model.subClassOf === 'tradle.Verification')
+    return model.id === constants.TYPES.VERIFICATION ||  (model.subClassOf  &&  model.subClassOf === constants.TYPES.VERIFICATION)
     ? (<VerificationRow
         onSelect={() => this.selectResource(resource.document)}
         key={resource[constants.ROOT_HASH]}
@@ -441,7 +442,7 @@ class ResourceList extends Component {
     if (!me  ||  (this.props.prop  &&  (this.props.prop.readOnly || (this.props.prop.items  &&  this.props.prop.items.readOnly))))
       return <View />;
     var model = utils.getModel(this.props.modelName).value;
-    if (model.subClassOf  &&  model.subClassOf === 'tradle.FinancialProduct')
+    if (model.subClassOf  &&  model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT)
       return <View />
     // var qrInfo = (model.id === constants.TYPES.IDENTITY)
     //            ? <View style={styles.row}>
@@ -521,7 +522,7 @@ class ResourceList extends Component {
       backButtonTitle: 'Back',
       titleTextColor: '#7AAAC3',
       passProps: {
-        modelName: 'tradle.Organization'
+        modelName: constants.TYPES.ORGANIZATION
       }
     });
   }
@@ -566,6 +567,7 @@ class ResourceList extends Component {
     })
   }
   render() {
+    // AlertIOS.alert('Rendering list ' + this.state.isLoading)
     if (this.state.isLoading)
       return <View/>
     var content;
