@@ -330,11 +330,12 @@ class MessageList extends Component {
       }
     });
   }
+      // 'Are you sure you want \'' + utils.getDisplayName(resource, utils.getModel(resource[constants.TYPE]).value.properties) + '\' to forget you',
   forgetMe() {
     var resource = this.props.resource
     AlertIOS.alert(
       'Are you sure you want \'' + utils.getDisplayName(resource, utils.getModel(resource[constants.TYPE]).value.properties) + '\' to forget you',
-      null,
+      'This is a test mechanism to reset all communications with this provider',
       [
         {text: 'OK', onPress: () => {
             Actions.forgetMe(resource)
