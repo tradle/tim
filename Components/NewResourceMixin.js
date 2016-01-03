@@ -8,7 +8,9 @@ var Icon = require('react-native-vector-icons/Ionicons');
 var utils = require('../utils/utils');
 var constants = require('@tradle/constants');
 var t = require('tcomb-form-native');
+var Actions = require('../Actions/Actions');
 var Device = require('react-native-device')
+var extend = require('extend');
 var cnt = 0;
 var propTypesMap = {
   'string': t.Str,
@@ -32,7 +34,6 @@ var NewResourceMixin = {
     var onSubmitEditing = isMessage ? this.onSubmitEditing  ||  params.onSubmitEditing : this.onSavePressed
     var onEndEditing = this.onEndEditing  ||  params.onEndEditing
     var chooser = this.chooser  ||  this.props.chooser
-    var onChangeTextValue = this.onChangeTextValue  || this.props.onChangeTextValue
     var myCustomTemplate = this.myCustomTemplate //  || this.props.template
     var textTemplate = this.myTextInputTemplate
     // var myDateTemplate = this.myDateTemplate
@@ -166,8 +167,9 @@ var NewResourceMixin = {
                     label: label,
                     prop:  props[p],
                     value: data  &&  data[p] ? data[p] + '' : null,
+                    required: !maybe,
                     keyboard: props[p].keyboard ||  (type === 'number' ? 'numeric' : 'default'),
-                    onChangeTextValue: onChangeTextValue.bind(this, p)
+                    onChangeTextValue: this.onChangeTextValue.bind(this, p)
                   })
 
           options.fields[p].onSubmitEditing = onSubmitEditing.bind(this);
@@ -219,7 +221,8 @@ var NewResourceMixin = {
                     prop:  props[p],
                     value: data[p] ? data[p] + '' : null,
                     keyboard: 'numeric',
-                    onChangeTextValue: onChangeTextValue.bind(this, p)
+                    required: !maybe,
+                    onChangeTextValue: this.onChangeTextValue.bind(this, p)
                   })
 
           // options.fields[p].template = moneyTemplate.bind({}, props[p])
@@ -242,6 +245,7 @@ var NewResourceMixin = {
         options.fields[p].template = myCustomTemplate.bind(this, {
             label: label,
             prop:  p,
+            required: !maybe,
             chooser: options.fields[p].onFocus
           })
 
@@ -257,7 +261,14 @@ var NewResourceMixin = {
     // this.state.resource[prop] = value
     if (!this.state.floatingProps)
       this.state.floatingProps = {}
-    this.state.floatingProps[prop.name] = value
+    this.state.floatingProps[prop.name] = prop.type === 'object' && prop.ref === constants.TYPES.MONEY
+                                        ? {value: value}
+                                        : value
+    var r = {}
+    extend(r, this.state.resource)
+    for (var p in this.state.floatingProps)
+      r[p] = this.state.floatingProps[p]
+    Actions.saveTemporary(r)
   },
   myTextInputTemplate(params) {
     var err = this.state.missedRequired
@@ -292,7 +303,7 @@ var NewResourceMixin = {
           value={params.value}
           keyboardType={params.keyboard || 'default'}
           onChangeText={this.onChangeTextValue.bind(this, params.prop)}
-        >{params.label}</FloatLabel>
+        >{params.label + (params.required ? '' : ' (optional)')}</FloatLabel>
         {error}
       </View>
     );
@@ -314,8 +325,8 @@ var NewResourceMixin = {
   //   }
   // },
   myCustomTemplate(params) {
-    var labelStyle = {color: '#cccccc', fontSize: 20, paddingLeft: 10};
-    var textStyle = {color: '#000000', fontSize: 20, paddingLeft: 10};
+    var labelStyle = {color: '#cccccc', fontSize: 20, paddingLeft: 10, paddingBottom: 10};
+    var textStyle = {color: '#000000', fontSize: 20, paddingLeft: 10, paddingBottom: 10};
     var resource = /*this.props.resource ||*/ this.state.resource
     var label, style
     var propLabel, propName
@@ -331,14 +342,14 @@ var NewResourceMixin = {
       if (!label)
         label = resource[params.prop].title
       style = textStyle
-      propLabel = <View style={{marginTop: 5, backgroundColor: '#ffffff'}}>
+      propLabel = <View style={{marginLeft: 10, marginTop: 5, marginBottom: 5, backgroundColor: '#ffffff'}}>
                     <Text style={{fontSize: 9, height: 10, color: '#B1B1B1'}}>{params.label}</Text>
                   </View>
     }
     else {
       label = params.label
       style = labelStyle
-      propLabel = <View/>
+      propLabel = <View style={{marginTop: 20}}/>
     }
     var err = this.state.missedRequired
             ? this.state.missedRequired[prop.name]
@@ -351,7 +362,7 @@ var NewResourceMixin = {
     return (
       <View style={styles.chooserContainer} key={this.getNextKey()}>
         <TouchableHighlight underlayColor='transparent' onPress={this.chooser.bind(this, prop, params.prop)}>
-          <View>
+          <View style={{ position: 'relative'}}>
             {propLabel}
             <View style={styles.chooserContentStyle}>
               <Text style={style}>{label}</Text>
@@ -415,82 +426,17 @@ var NewResourceMixin = {
       resource: this.state.resource,
       prop: propName
     });
+
+    var r = {}
+    extend(r, this.state.resource)
+    for (var p in this.state.floatingProps)
+      r[p] = this.state.floatingProps[p]
+    Actions.saveTemporary(r)
+
   }
 
 }
 var styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  buttons: {
-    width: 100,
-    alignSelf: 'center'
-  },
-  noItemsText: {
-    fontSize: 16,
-    color: '#cccccc',
-    alignSelf: 'center',
-    paddingLeft: 5
-  },
-  itemsText: {
-    fontSize: 16,
-    color: '#000000',
-    alignSelf: 'center',
-    paddingLeft: 5
-  },
-  itemsCounter: {
-    borderColor: '#2E3B4E',
-    borderRadius: 10,
-    borderWidth: 1,
-    alignSelf: 'center',
-    paddingHorizontal: 5,
-  },
-  submitButton: {
-    color: '#2B6493',
-    fontSize: 17,
-    backgroundColor: '#cccccc',
-    height: 56,
-    paddingHorizontal: 30,
-    padding: 17,
-    borderRadius: 10,
-    borderColor: '#cccccc',
-    borderWidth: 0.5,
-  },
-
-  itemButton: {
-    height: 46,
-    marginLeft: 15,
-    // paddingVertical: 20,
-    alignSelf: 'stretch',
-    borderColor: '#ffffff',
-    borderBottomColor: '#cccccc',
-    // borderColor: '#cccccc',
-    borderWidth: 0.5,
-    // borderRadius: 8,
-    marginBottom: 10,
-    justifyContent: 'center',
-  },
-  buttonText: {
-    fontSize: 18,
-    color: 'white',
-    alignSelf: 'center',
-  },
-  button: {
-    height: 36,
-    flex: 1,
-    flexDirection: 'row',
-    backgroundColor: '#ffffff',
-    borderColor: '#6093ae',
-    borderWidth: 1,
-    borderRadius: 8,
-    // alignSelf: 'stretch',
-    justifyContent: 'center',
-    margin: 10,
-  },
-  photoBG: {
-    // marginTop: -15,
-    alignItems: 'center',
-  },
   icon1: {
     width: 15,
     height: 15,
@@ -502,66 +448,19 @@ var styles = StyleSheet.create({
     marginLeft: -5,
     marginRight: 5,
   },
-  err: {
-    // paddingVertical: 10,
-    flexWrap: 'wrap',
-    paddingHorizontal: 15,
-    fontSize: 16,
-    color: 'darkred',
-  },
-  getStartedText: {
-    // color: '#f0f0f0',
-    color: '#eeeeee',
-    fontSize: 28,
-    fontWeight:'300',
-    alignSelf: 'center'
-  },
-  getStarted: {
-    backgroundColor: '#467EAE', //'#2892C6',
-    paddingVertical: 10,
-    // paddingHorizontal: 50,
-    alignSelf: 'stretch',
-  },
-  thumbButton: {
-    marginTop: 20,
-    alignSelf: 'stretch',
-    alignItems: 'center',
-    justifyContent: 'center',
-    // paddingHorizontal: 80,
-  },
-  tradle: {
-    // color: '#7AAAC3',
-    color: '#eeeeee',
-    fontSize: 35,
-    alignSelf: 'center',
-  },
-  dateContainer: {
-    height: 45,
-    justifyContent: 'center',
-    borderColor: '#ffffff',
-    borderBottomColor: '#cccccc',
-    borderWidth: 0.5,
-    marginBottom: 10,
-    marginLeft: 15,
-    marginTop: 5
-  },
   chooserContainer: {
-    height: 45,
+    height: 60,
     borderColor: '#ffffff',
     borderBottomColor: '#cccccc',
     borderWidth: 0.5,
     marginLeft: 10,
-    marginBottom: 10
-  },
-  chooserLabel: {
-    paddingLeft: 10,
-    marginTop: 5,
-    backgroundColor: '#ffffff'
+    marginBottom: 10,
+    flex: 1
   },
   chooserContentStyle: {
     justifyContent: 'space-between',
     flexDirection: 'row',
-    paddingTop: 5,
+    paddingVertical: 5,
     borderRadius: 4
   },
   labelInput: {
