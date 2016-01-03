@@ -168,9 +168,9 @@
       }
     },
     "@tradle/models": {
-      "version": "1.2.0",
-      "from": "@tradle/models@1.2.0",
-      "resolved": "https://registry.npmjs.org/@tradle/models/-/models-1.2.0.tgz"
+      "version": "1.2.1",
+      "from": "@tradle/models@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/models/-/models-1.2.1.tgz"
     },
     "@tradle/otr": {
       "version": "0.2.15",
@@ -2681,15 +2681,15 @@
                           "from": "are-we-there-yet@~1.0.0",
                           "resolved": "https://registry.npmjs.org/are-we-there-yet/-/are-we-there-yet-1.0.4.tgz"
                         },
-                        "core-util-is": {
-                          "version": "1.0.2",
-                          "from": "core-util-is@~1.0.0",
-                          "resolved": "https://registry.npmjs.org/core-util-is/-/core-util-is-1.0.2.tgz"
-                        },
                         "block-stream": {
                           "version": "0.0.8",
                           "from": "block-stream@*",
                           "resolved": "https://registry.npmjs.org/block-stream/-/block-stream-0.0.8.tgz"
+                        },
+                        "core-util-is": {
+                          "version": "1.0.2",
+                          "from": "core-util-is@~1.0.0",
+                          "resolved": "https://registry.npmjs.org/core-util-is/-/core-util-is-1.0.2.tgz"
                         },
                         "debug": {
                           "version": "0.7.4",
