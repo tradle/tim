@@ -1,10 +1,10 @@
 'use strict';
 
-__DEV__ = false
+// __DEV__ = false
 var React = require('react-native')
 var {
-  AsyncStorage
-  // AlertIOS
+  AsyncStorage,
+  AlertIOS
 } = React
 
 var BeSafe = require('asyncstorage-backup')
@@ -67,6 +67,7 @@ var getDHTKey = require('tim/lib/utils').getDHTKey
 
 var dns = require('dns')
 var map = require('map-stream')
+// var bitcoin = require('@tradle/bitcoinjs-lib')
 var DHT = require('@tradle/bittorrent-dht') // use tradle/bittorrent-dht fork
 var Blockchain = require('@tradle/cb-blockr') // use tradle/cb-blockr fork
 Blockchain.throttleGet(100)
@@ -110,6 +111,7 @@ var TIM_PATH_PREFIX = 'me'
 
 var models = {};
 var list = {};
+var temporaryResources = {}
 var employees = {};
 var db;
 var ldb;
@@ -417,7 +419,6 @@ var Store = Reflux.createStore({
     var welcomeMessage
     var dhtKey
     var promise = getDHTKey(toChain)
-    var isRequestForRepresentative
     // var isServiceMessage = rr[TYPE] === 'tradle.ServiceMessage'
     return promise
     .then(function(data) {
@@ -440,10 +441,6 @@ var Store = Reflux.createStore({
             for (var i=result.length - 1; i>=0; i++) {
               if (result[i].type !== constants.TYPES.SIMPLE_MESSAGE)
                 break
-
-              var m = result[i].message
-              if (m.charAt[0] === '['  ||  m.indexOf('Congratulations!') === 0)
-                isRequestForRepresentative = true
             }
           }
         }
@@ -529,11 +526,10 @@ var Store = Reflux.createStore({
     })
     .then(function() {
       if (list[utils.getId(r.to)].value.pubkeys)
-        return meDriver.send({
+        return utils.sendSigned(meDriver, {
           msg: toChain,
           to: [{fingerprint: self.getFingerprint(r.to)}],
-          deliver: true,
-          chain: false
+          deliver: true
         })
         .catch(function (err) {
           debugger
@@ -606,11 +602,10 @@ var Store = Reflux.createStore({
 
     var promise = dontSend
                  ? Q()
-                 :  meDriver.send({
-                    msg: toChain,
-                    to: [{fingerprint: this.getFingerprint(r.to)}],
-                    deliver: true,
-                    chain: false
+                 :  utils.sendSigned(meDriver, {
+                      msg: toChain,
+                      to: [{fingerprint: this.getFingerprint(r.to)}],
+                      deliver: true
                   })
     var newVerification
     return promise
@@ -847,9 +842,16 @@ var Store = Reflux.createStore({
         props[p].title = utils.makeLabel(p);
     }
   },
+  onSaveTemporary(resource) {
+    temporaryResources[resource[TYPE]] = resource
+  },
+  onGetTemporary(type) {
+    this.trigger({action: 'getTemporary', resource: temporaryResources[type] || {_t: type}})
+  },
   onAddItem(params) {
     var value = params.value;
     var resource = params.resource;
+    delete temporaryResources[resource[TYPE]]
     var meta = params.meta;
     var isRegistration = params.isRegistration;
     var additionalInfo = params.additionalInfo;
@@ -997,11 +999,10 @@ var Store = Reflux.createStore({
             toChain[PREV_HASH] = toChain[CUR_HASH]
           toChain.time = returnVal.time
 
-          return meDriver.send({
+          return utils.sendSigned(meDriver, {
             msg: toChain,
             to: [{fingerprint: self.getFingerprint(to)}],
-            deliver: true,
-            chain: false
+            deliver: true
           })
         })
         .then(function (entries) {
@@ -1847,6 +1848,7 @@ var Store = Reflux.createStore({
 
       // db.put(key, me)
     }
+
     return driverPromise = this.buildDriver(Identity.fromJSON(publishedIdentity), mePriv, PORT)
   },
 
@@ -1865,15 +1867,7 @@ var Store = Reflux.createStore({
       meIdentity.set('organization', org)
     }
 
-    me.pubkeys.forEach(function(key) {
-      try {
-        meIdentity.addKey(key)
-      } catch (err) {
-        // AlertIOS.alert('addKey err: ' + err.message + err.stack)
-        throw err
-      }
-      });
-
+    me.pubkeys.forEach(meIdentity.addKey, meIdentity)
     return meIdentity.toJSON()
   },
   publishMyIdentity(orgRep) {
@@ -1886,15 +1880,14 @@ var Store = Reflux.createStore({
       if (!status.queued  &&  !status.current) {
         var msg = {
           _t: constants.TYPES.IDENTITY_PUBLISHING_REQUEST,
-          _z: publishedIdentity[NONCE],
+          _z: self.getNonce(),
           identity: publishedIdentity
         }
-        return meDriver.send({
+        return utils.sendSigned(meDriver, {
           msg: msg,
           to: [{fingerprint: self.getFingerprint(orgRep)}],
           deliver: true,
-          public: true,
-          chain: false
+          public: true
         })
       }
     })
@@ -2061,16 +2054,16 @@ var Store = Reflux.createStore({
           debugger
         })
       })
-      meDriver.on('unchained-self', function (obj) {
+      meDriver.on('unchained-self', function () {
         // console.log('unchained', obj)
-        meDriver.lookupObject(obj)
-        .then(function(obj) {
-          // return
-          return self.updateMe(obj)
-        })
-        .catch(function (err) {
-          debugger
-        })
+        // meDriver.lookupObject(obj)
+        // .then(function(obj) {
+        //   // return
+        //   return self.updateMe(obj)
+        // })
+        // .catch(function (err) {
+        //   debugger
+        // })
       })
       meDriver.on('lowbalance', function () {
         // debugger
@@ -2117,6 +2110,7 @@ var Store = Reflux.createStore({
     if (!val)
       return
 
+
     val[ROOT_HASH] = obj[ROOT_HASH]
     val[CUR_HASH] = obj[CUR_HASH]
     if (!val.time)
@@ -2135,7 +2129,8 @@ var Store = Reflux.createStore({
       else
         return;
     }
-
+    if (obj.txId)
+      val.txId = obj.txId
     var key = type + '_' + val[ROOT_HASH]
     var v = list[key] ? list[key].value : null
     var inDB = !!v
@@ -2489,6 +2484,53 @@ var Store = Reflux.createStore({
       self.trigger({action: 'messageList', list: [msg], resource: resource})
     })
   },
+  onTalkToRepresentative(resource, org) {
+    var orgRep = resource[TYPE] === ORGANIZATION
+               ? this.getRepresentative(resource[TYPE] + '_' + resource[ROOT_HASH])
+               : resource
+    var self = this
+    if (!orgRep) {
+      var msg = {
+        _t: SIMPLE_MESSAGE,
+        _z: this.getNonce(),
+        message: 'All representatives are currently assisting other customers. Please try again later'
+      }
+      msg.from = {
+        id: resource[TYPE] + '_' + resource[ROOT_HASH],
+        title: utils.getDisplayName(resource)
+      }
+      msg.to = {
+        id: me[TYPE] + '_' + me[ROOT_HASH],
+        title: me.firstName
+      }
+      msg.id = sha(msg)
+      result.push(msg)
+      self.trigger({action: 'messageList', list: result, resource: resource})
+      return
+    }
+    var result = self.searchMessages({to: resource, modelName: MESSAGE});
+    var msg = {
+      _t: SIMPLE_MESSAGE,
+      _z: this.getNonce(),
+      message: 'Representative will be with you shortly. Please tell us how can we help you today?'
+    }
+    msg.from = {
+      id: resource[TYPE] + '_' + resource[ROOT_HASH],
+      title: utils.getDisplayName(resource)
+    }
+    msg.to = {
+      id: me[TYPE] + '_' + me[ROOT_HASH],
+      title: me.firstName
+    }
+    msg.id = sha(msg)
+    result.push(msg)
+    self.trigger({action: 'messageList', list: result, resource: resource})
+    return utils.sendSigned(meDriver, {
+      msg: msg,
+      to: [{fingerprint: self.getFingerprint(orgRep)}],
+      deliver: true
+    })
+  },
   onForgetMe(resource) {
     var me = utils.getMe()
     var msg = {
@@ -2499,11 +2541,10 @@ var Store = Reflux.createStore({
                ? this.getRepresentative(resource[TYPE] + '_' + resource[ROOT_HASH])
                : resource
     var self = this
-    return meDriver.send({
+    return utils.sendSigned(meDriver, {
       msg: msg,
       to: [{fingerprint: self.getFingerprint(orgRep)}],
-      deliver: true,
-      chain: false
+      deliver: true
     })
     .then(function() {
       var result = self.searchMessages({to: resource, modelName: MESSAGE});
@@ -2523,7 +2564,6 @@ var Store = Reflux.createStore({
     .catch(function (err) {
       debugger
     })
-
   },
 
   isEmpty(obj) {
