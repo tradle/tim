@@ -65,6 +65,7 @@ class NewResource extends Component {
       keyboardSpace: 0,
       modalVisible: false,
       date: new Date(),
+      isUploading: !isRegistration  &&  !r[constants.ROOT_HASH],
       isRegistration: isRegistration
     }
     var currentRoutes = this.props.navigator.getCurrentRoutes();
@@ -95,9 +96,14 @@ class NewResource extends Component {
     return nextState.err                      ||
            nextState.missedRequired           ||
            this.state.prop !== nextState.prop ||
+           this.state.isUploading !== nextState.isUploading  ||
            this.state.itemsCount != nextState.itemsCount     ||
            this.state.modalVisible != nextState.modalVisible ||
           !equal(this.state.resource, nextState.resource)
+  }
+  componentWillMount() {
+    if (this.state.isUploading)
+      Actions.getTemporary(this.state.resource[constants.TYPE])
   }
 
   componentDidMount() {
@@ -120,6 +126,16 @@ class NewResource extends Component {
   }
   itemAdded(params) {
     var resource = params.resource;
+    if (params.action === 'getTemporary') {
+      var r = {}
+      extend(r, this.state.resource)
+      extend(r, params.resource)
+      this.setState({
+        resource: r,
+        isUploading: false
+      })
+      return
+    }
     if (!resource  ||  (params.action !== 'addItem'  &&  params.action !== 'addMessage'))
       return;
     if (params.error) {
@@ -275,57 +291,6 @@ class NewResource extends Component {
 
     Actions.addItem(params);
   }
-  // chooser(prop, propName, event) {
-  //   var resource = this.state.resource;
-  //   if (!resource) {
-  //     resource = {};
-  //     resource[constants.TYPE] = this.props.model.id;
-  //   }
-  //   var isFinancialProduct = this.props.model.subClassOf  &&  this.props.model.subClassOf == 'tradle.FinancialProduct';
-  //   var value = this.refs.form.input;
-
-  //   var filter = event.nativeEvent.text;
-  //   var m = utils.getModel(prop.ref).value;
-  //   var currentRoutes = this.props.navigator.getCurrentRoutes();
-  //   this.props.navigator.push({
-  //     title: m.title,
-  //     titleTextColor: '#7AAAC3',
-  //     id: 10,
-  //     component: ResourceList,
-  //     backButtonTitle: 'Back',
-  //     sceneConfig: isFinancialProduct ? Navigator.SceneConfigs.FloatFromBottom : Navigator.SceneConfigs.FloatFromRight,
-  //     passProps: {
-  //       filter:      filter,
-  //       prop:        propName,
-  //       modelName:   prop.ref,
-  //       resource:    resource,
-  //       isRegistration: this.state.isRegistration,
-  //       returnRoute: currentRoutes[currentRoutes.length - 1],
-  //       callback:    this.setChosenValue.bind(this),
-  //     }
-  //   });
-  // }
-  // // setting chosen from the list property on the resource like for ex. Organization on Contact
-  // setChosenValue(propName, value) {
-  //   var resource = this.state.resource;
-  //   var id = value[constants.TYPE] + '_' + value[constants.ROOT_HASH]
-  //   resource[propName] = {
-  //     id: id,
-  //     title: utils.getDisplayName(value, utils.getModel(value[constants.TYPE]).value.properties)
-  //   }
-  //   // resource[propName] = value;
-  //   var data = this.refs.form.refs.input.state.value;
-  //   if (data) {
-  //     for (var p in data)
-  //       if (!resource[p])
-  //         resource[p] = data[p];
-  //   }
-
-  //   this.setState({
-  //     resource: this.state.resource,
-  //     prop: propName
-  //   });
-  // }
 
   addFormValues() {
     var value = this.refs.form.getValue();
@@ -423,6 +388,8 @@ class NewResource extends Component {
   }
 
   render() {
+    if (this.state.isUploading)
+      return <View/>
     var props = this.props;
     var parentBG = {backgroundColor: '#7AAAC3'};
     var err = this.state.err;
@@ -453,21 +420,16 @@ class NewResource extends Component {
     var params = {
         meta: meta,
         data: data,
-        // chooser: this.chooser.bind(this),
         model: model,
         items: arrays,
-        // onSubmitEditing: this.onSavePressed.bind(this),
         onEndEditing: this.onEndEditing.bind(this),
-        // onChange: this.onChange.bind(this),
       };
     if (this.props.editCols)
       params.editCols = this.props.editCols;
-    // var isRegistration = !utils.getMe()  &&  resource[constants.TYPE] === constants.TYPES.IDENTITY
     if (this.state.isRegistration)
       params.isRegistration = true
 
     var options = this.getFormFields(params);
-    // var options = utils.getFormFields(params);
 
     var Model = t.struct(model);
 
@@ -520,13 +482,15 @@ class NewResource extends Component {
       }
       var title = bl.title || utils.makeLabel(p)
       arrayItems.push (
-        <TouchableHighlight style={styles.itemButton} underlayColor='transparent'
-            onPress={self.onNewPressed.bind(self, bl)} key={this.getNextKey()}>
-          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-            <Text style={count ? styles.itemsText : styles.noItemsText}>{bl.title}</Text>
-            {counter}
-          </View>
-        </TouchableHighlight>
+        <View style={styles.itemButton} key={this.getNextKey()}>
+          <TouchableHighlight underlayColor='transparent'
+              onPress={self.onNewPressed.bind(self, bl)}>
+            <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+              <Text style={count ? styles.itemsText : styles.noItemsText}>{bl.title}</Text>
+              {counter}
+            </View>
+          </TouchableHighlight>
+        </View>
       );
     }
     // var FromToView = require('./FromToView');
@@ -554,7 +518,7 @@ class NewResource extends Component {
                      <Text style={styles.getStartedText}>Let me in</Text>
                   </View>
                  </TouchableHighlight>
-               : <View />
+               : <View style={{height: 0}} />
 
     // <FromToView resource={resource} model={meta} navigator={this.props.navigator} />
     var content =
@@ -569,7 +533,9 @@ class NewResource extends Component {
           <View style={this.state.isRegistration ? {marginLeft: 30, marginRight: 30, paddingTop: 30} : {paddingRight: 15, paddingTop: 10, marginHorizontal: 10}}>
             <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange.bind(this)}/>
             {button}
-            {arrayItems}
+            <View style={{marginTop: -10}}>
+                {arrayItems}
+             </View>
           </View>
           <View style={{height: 300}}/>
         </View>
@@ -695,139 +661,6 @@ class NewResource extends Component {
     // }.bind(this), 0);
     Actions.addMessage(value); //, this.state.resource, utils.getModel(modelName).value);
   }
-  // myDateTemplate(prop, value) {
-  //   var err = this.state.missedRequired
-  //           ? this.state.missedRequired[prop.name]
-  //           : null
-  //   var error = err
-  //             ? <View style={{paddingLeft: 15, backgroundColor: '#ffffff'}} >
-  //                 <Text style={{fontSize: 12, color: '#a94442'}}>Insert the valid {prop.title}</Text>
-  //               </View>
-  //             : <View key={this.getNextKey()} />
-  //   var resource = this.state.resource
-  //   var date = resource[prop.name] ? new Date(resource[prop.name]) : new Date()
-  //   var visible = this.state.modalVisible
-  //   return (
-  //     <View style={styles.dateContainer}>
-  //       <TouchableHighlight underlayColor='transparent'
-  //                   onPress={this.showDatePicker.bind(this, prop, date)}>
-  //         <Text style={{fontSize: 16, color: '#cccccc'}}>{prop.title}</Text>
-  //       </TouchableHighlight>
-  //       {error}
-  //     </View>
-  //   );
-  // }
-  // showDatePicker(prop, date) {
-  //   this.setState({
-  //     modalVisible:true,
-  //     prop: prop
-  //   })
-  // }
-  // onCancel(prop) {
-  //   this.setState({modalVisible: false})
-  // }
-  // onDateChange(prop, event) {
-  //   var e = event.nativeEvent
-  // }
-
-  // onChangeTextValue(prop, value) {
-  //   // this.state.resource[prop] = value
-  //   if (!this.state.floatingProps)
-  //     this.state.floatingProps = {}
-  //   this.state.floatingProps[prop.name] = value
-  // }
-  // myTextInputTemplate(params) {
-  //   var err = this.state.missedRequired
-  //           ? this.state.missedRequired[params.prop.name]
-  //           : null
-  //   var error = err
-  //             ? <View style={{paddingLeft: 15, backgroundColor: '#ffffff'}} key={this.getNextKey()}>
-  //                 <Text style={{fontSize: 12, color: '#a94442'}}>Insert the valid {params.prop.title}</Text>
-  //               </View>
-  //             : <View key={this.getNextKey()} />
-  //   return (
-  //     <View style={{paddingBottom: 10}}>
-  //       <FloatLabelTextInput
-  //         placeHolder={params.label}
-  //         value={params.value}
-  //         style={{fontSize: 30}}
-  //         keyboardType={params.keyboard || 'default'}
-  //         onChangeTextValue={this.onChangeTextValue.bind(this, params.prop)}
-  //       />
-  //       {error}
-  //     </View>
-  //   );
-  // }
-
-  // myCustomTemplate(params) {
-  //   var labelStyle = {color: '#cccccc', fontSize: 16};
-  //   var textStyle = {color: '#000000', fontSize: 16};
-  //   var resource = /*this.props.resource ||*/ this.state.resource
-  //   var label, style
-  //   var propLabel
-  //   if (resource && resource[params.prop]) {
-  //     var m = utils.getId(resource[params.prop]).split('_')[0]
-  //     var rModel = utils.getModel(m).value
-  //     label = utils.getDisplayName(resource[params.prop], rModel.properties)
-  //     if (!label)
-  //       label = resource[params.prop].title
-  //     style = textStyle
-  //     propLabel = <View style={{marginTop: 5, backgroundColor: '#ffffff'}}>
-  //                   <Text style={{fontSize: 9, height: 10, color: '#B1B1B1'}}>{params.label}</Text>
-  //                 </View>
-  //   }
-  //   else {
-  //     label = params.label
-  //     style = labelStyle
-  //     propLabel = <View/>
-  //   }
-  //   var err = this.state.missedRequired
-  //           ? this.state.missedRequired[params.prop.name]
-  //           : null
-  //   var error = err
-  //             ? <View style={{paddingLeft: 15, backgroundColor: '#ffffff'}}>
-  //                 <Text style={{fontSize: 12, color: '#a94442'}}>Insert the valid {params.prop.title}</Text>
-  //               </View>
-  //             : <View />
-  //   return (
-  //     <View style={styles.chooserContainer} key={this.getNextKey()}>
-  //       <TouchableHighlight underlayColor='transparent' onPress={params.chooser}>
-  //         <View>
-  //           {propLabel}
-  //           <View style={styles.chooserContentStyle}>
-  //             <Text style={style}>{label}</Text>
-  //             <Icon name='ios-arrow-down'  size={15}  color='#96415A'  style={styles.icon1} />
-  //           </View>
-  //          {error}
-  //         </View>
-  //       </TouchableHighlight>
-  //     </View>
-  //   );
-  // }
-
-  // moneyTemplate(prop) {
-  //   var containerStyle = {
-  //     justifyContent: 'space-between',
-  //     flexDirection: 'row',
-  //     borderWidth: 0.5,
-  //     height: 36,
-  //     borderColor: '#cccccc',
-  //     padding: 8,
-  //     marginBottom: 5,
-  //     borderRadius: 4
-  //   };
-  //   return
-  //     <TouchableHighlight style={containerStyle} underlayColor='#7AAAC3'
-  //         onPress={this.onNewPressed.bind(this, prop)} key={this.getNextKey()}>
-  //       <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-  //         <View style={{justifyContent: 'flex-start', flexDirection: 'row'}}>
-  //           <Text style={styles.itemsText}>{prop.title}</Text>
-  //           <Icon name='ios-arrow-down'  size={15}  color='#96415A' style={styles.icon1} key={this.getNextKey()}/>
-  //         </View>
-  //       </View>
-  //     </TouchableHighlight>
-  // }
-
 }
 reactMixin(NewResource.prototype, Reflux.ListenerMixin);
 // var animations = {
@@ -870,13 +703,13 @@ var styles = StyleSheet.create({
     fontSize: 20,
     color: '#cccccc',
     alignSelf: 'center',
-    paddingLeft: 5
+    paddingLeft: 10
   },
   itemsText: {
     fontSize: 20,
     color: '#000000',
     alignSelf: 'center',
-    paddingLeft: 5
+    paddingLeft: 10
   },
   itemsCounter: {
     borderColor: '#2E3B4E',
@@ -898,34 +731,18 @@ var styles = StyleSheet.create({
   },
 
   itemButton: {
-    height: 46,
-    marginLeft: 15,
-    // paddingVertical: 20,
-    alignSelf: 'stretch',
+    height: 70,
+    marginLeft: 10,
     borderColor: '#ffffff',
     borderBottomColor: '#cccccc',
-    // borderColor: '#cccccc',
     borderWidth: 0.5,
-    // borderRadius: 8,
-    marginBottom: 10,
-    justifyContent: 'center',
+    paddingBottom: 10,
+    justifyContent: 'flex-end',
   },
   buttonText: {
     fontSize: 18,
     color: 'white',
     alignSelf: 'center',
-  },
-  button: {
-    height: 36,
-    flex: 1,
-    flexDirection: 'row',
-    backgroundColor: '#ffffff',
-    borderColor: '#6093ae',
-    borderWidth: 1,
-    borderRadius: 8,
-    // alignSelf: 'stretch',
-    justifyContent: 'center',
-    margin: 10,
   },
   photoBG: {
     // marginTop: -15,
@@ -975,35 +792,6 @@ var styles = StyleSheet.create({
     fontSize: 35,
     alignSelf: 'center',
   },
-  dateContainer: {
-    height: 45,
-    justifyContent: 'center',
-    borderColor: '#ffffff',
-    borderBottomColor: '#cccccc',
-    borderWidth: 0.5,
-    marginBottom: 10,
-    marginLeft: 15,
-    marginTop: 5
-  },
-  chooserContainer: {
-    height: 45,
-    borderColor: '#ffffff',
-    borderBottomColor: '#cccccc',
-    borderWidth: 0.5,
-    marginLeft: 15,
-    marginBottom: 10
-  },
-  chooserLabel: {
-    paddingLeft: 15,
-    marginTop: 5,
-    backgroundColor: '#ffffff'
-  },
-  chooserContentStyle: {
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    paddingTop: 5,
-    borderRadius: 4
-  }
 });
 
 module.exports = NewResource;
