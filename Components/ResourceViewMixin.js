@@ -8,9 +8,12 @@ var constants = require('@tradle/constants');
 
 var ResourceViewMixin = {
   showRefResource(resource, prop) {
-    if (resource[constants.TYPE] + '_' + resource[constants.ROOT_HASH] !== this.state.propValue)
+    var id = utils.getId(resource)
+    // if (resource[constants.TYPE] + '_' + resource[constants.ROOT_HASH] !== this.state.propValue)
+    if (id !== this.state.propValue)
       return;
-    var model = utils.getModel(resource[constants.TYPE]).value;
+    var type = resource[constants.TYPE] || id.split('_')[0]
+    var model = utils.getModel(type).value;
     var title = utils.getDisplayName(resource, model.properties);
     this.props.navigator.push({
       title: title,
