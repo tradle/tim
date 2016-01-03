@@ -16,7 +16,7 @@ require('./utils/crypto')
 require('stream')
 // require('./timmy')
 var React = require('react-native');
-var CodePush = require('react-native-code-push')
+var CodePush = !__DEV__ && require('react-native-code-push')
 var ResourceList = require('./Components/ResourceList');
 // var GridList = require('./Components/GridList');
 var TimHome = require('./Components/TimHome');
@@ -89,7 +89,10 @@ class TiMApp extends Component {
   }
 
   componentDidMount() {
-    codePush.sync({ updateDialog: true, installMode: codePush.InstallMode.IMMEDIATE });
+    if (CodePush) {
+      CodePush.sync({ updateDialog: true, installMode: CodePush.InstallMode.ON_NEXT_RESUME });
+    }
+
     LinkingIOS.addEventListener('url', this._handleOpenURL.bind(this));
     var url = LinkingIOS.popInitialURL();
     if (url)
@@ -260,7 +263,7 @@ class TiMApp extends Component {
                   model={props.model}
                   editCols={props.editCols}
                   additionalInfo={props.additionalInfo}
-                  returnRoute={props.returnRoute}
+                  returnRoute={props.rπeturnRoute}
                   callback={props.callback} />;
     case 5:
       return <MessageView navigator={nav}
