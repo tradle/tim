@@ -312,17 +312,18 @@ class MessageList extends Component {
     );
   }
   showMenu() {
-    var buttons = ['Talk to representative', 'Forget me', 'Cancel']
+    // var buttons = ['Talk to representative', 'Forget me', 'Cancel']
+    var buttons = ['Forget me', 'Cancel']
     var self = this;
     ActionSheetIOS.showActionSheetWithOptions({
       options: buttons,
-      cancelButtonIndex: 3
+      cancelButtonIndex: 2
     }, function(buttonIndex) {
       switch (buttonIndex) {
+      // case 0:
+      //   Actions.talkToRepresentative(self.props.resource)
+      //   break
       case 0:
-        Actions.talkToRepresentative(self.props.resource)
-        break
-      case 1:
         self.forgetMe()
         break;
       default:
