@@ -15,14 +15,7 @@ export async function authenticateUser () {
   if (authenticated) return authenticated
 
   try {
-    await TouchID.isSupported()
-  } catch (err) {
-    AlertIOS.alert(SETUP_MSG)
-    return false
-  }
-
-  try {
-    await TouchID.authenticate('authenticate yourself!')
+    await TouchID.authenticate('authenticate yourself!', true) // fall back to passcode
   } catch (err) {
     var message
     switch (err.name) {
