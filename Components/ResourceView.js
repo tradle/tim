@@ -36,8 +36,13 @@ class ResourceView extends Component {
     super(props);
     this.state = {
       resource: props.resource,
-      embedHeight: {height: 0}
+      embedHeight: {height: 0},
+      isLoading: props.resource.id ? true : false
     };
+  }
+  componentWillMount() {
+    if (this.props.resource.id)
+      Actions.getItem(this.props.resource)
   }
   componentDidMount() {
     this.listenTo(Store, 'handleEvent');
@@ -45,8 +50,13 @@ class ResourceView extends Component {
   handleEvent(params) {
     if (params.action === 'showIdentityList')
       this.onShowIdentityList(params);
-    else if (params.action == 'getItem')
-      this.showRefResource(params.resource)
+    else if (params.action == 'getItem') {
+      this.setState({
+        resource: params.resource,
+        isLoading: false
+      })
+    }
+      // this.showRefResource(params.resource)
     else  if (params.resource)
       this.onResourceUpdate(params);
 
@@ -78,6 +88,8 @@ class ResourceView extends Component {
   }
 
   render() {
+    if (this.state.isLoading)
+      return <View/>
     var resource = this.state.resource;
     var modelName = resource[constants.TYPE];
     var model = utils.getModel(modelName).value;
@@ -88,8 +100,11 @@ class ResourceView extends Component {
     }
     var actionPanel;
     var isIdentity = model.id === constants.TYPES.IDENTITY;
-    var isMe = isIdentity ? resource[constants.ROOT_HASH] === utils.getMe()[constants.ROOT_HASH] : true;
-    if (isIdentity  &&  !isMe)
+    var isOrg = model.id === constants.TYPES.ORGANIZATION;
+    var me = utils.getMe()
+    var isMe = isIdentity ? resource[constants.ROOT_HASH] === me[constants.ROOT_HASH] : true;
+    if ((isIdentity  &&  !isMe) || (isOrg  &&  (!me.organization  ||  utils.getId(me.organization) !== utils.getId(resource))))
+    // if (isIdentity  &&  !isMe)
       actionPanel = <View/>
     else
       actionPanel = <ShowRefList resource={resource} navigator={this.props.navigator} />
