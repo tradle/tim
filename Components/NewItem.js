@@ -165,7 +165,7 @@ class NewItem extends Component {
         //   onSelect={this.onSelect.bind(this)} />
     return (
       <View style={styles.container}>
-        <View style={{padding: 15, marginBottom: 15 }}>
+        <View style={{marginLeft: 10, marginRight: 20, marginBottom: 15 }}>
           <Form ref='form' type={Model} options={options} />
         </View>
         {error}
@@ -180,12 +180,6 @@ class NewItem extends Component {
     else
       selectedAssets[asset.node.image.uri] = asset;
   }
-  // onChangeTextValue(prop, value) {
-  //   // this.state.resource[prop] = value
-  //   if (!this.state.floatingProps)
-  //     this.state.floatingProps = {}
-  //   this.state.floatingProps[prop.name] = value
-  // }
 }
 reactMixin(NewItem.prototype, NewResourceMixin);
 
