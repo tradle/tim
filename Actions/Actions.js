@@ -24,10 +24,10 @@ var Actions = Reflux.createActions([
   'addVerification',
   'startTransition',
   'endTransition',
+  'talkToRepresentative',
+  'saveTemporary',
+  'getTemporary',
   'forgetMe'
-  // 'messageList',
-  // 'getMe',
-  // 'getDb',
 ]);
 
 Object.keys(Actions).forEach((name) => {
