@@ -228,10 +228,19 @@ var utils = {
       return url;
     else if (url.indexOf('file:///') === 0)
       return url.replace('file://', '')
+    else if (url.indexOf('../') === 0)
+      return url
     // else if (url.indexOf('/var/mobile/') == 0)
     //   return url;
     else
       return 'http://' + url;
+  },
+  sendSigned(driver, opts) {
+    return driver.sign(opts.msg)
+      .then((signed) => {
+        opts.msg = signed
+        return driver.send(opts)
+      })
   },
   dedupeVerifications(list) {
     var vFound = {}
