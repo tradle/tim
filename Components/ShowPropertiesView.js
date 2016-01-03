@@ -101,7 +101,7 @@ class ShowPropertiesView extends Component {
       }
       else if (pMeta.ref) {
         if (pMeta.ref == constants.TYPES.MONEY) {
-          if (typeof val === 'number')
+          if (typeof val === 'string')
             val = DEFAULT_CURRENCY_SYMBOL + val;
 
           else {
@@ -173,6 +173,15 @@ class ShowPropertiesView extends Component {
              </View>
              );
     });
+    if (resource.txId) {
+      viewCols.push(<View key={self.getNextKey()}>
+                     <View style={styles.separator}></View>
+                     <View style={[styles.textContainer, {padding: 10}]}>
+                       <Text style={styles.title}>{'Transaction uri'}</Text>
+                       <Text onPress={self.onPress.bind(self, 'http://tbtc.blockr.io/tx/info/' + resource.txId)} style={[styles.description, {color: '#7AAAC3'}]}>{resource.txId}</Text>
+                      </View>
+                    </View>)
+    }
     return viewCols;
   }
 
@@ -253,14 +262,14 @@ class ShowPropertiesView extends Component {
       )
     });
   }
-  onPress(event) {
+  onPress(url, event) {
     var model = utils.getModel(this.props.resource[constants.TYPE]).value;
     this.props.navigator.push({
       id: 7,
       backButtonTitle: 'Back',
       title: utils.getDisplayName(this.props.resource, model.properties),
       component: ArticleView,
-      passProps: {url: this.props.resource.url}
+      passProps: {url: url ? url : this.props.resource.url}
     });
   }
 }
