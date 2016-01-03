@@ -22,7 +22,7 @@ export async function authenticateUser () {
   }
 
   try {
-    await TouchID.authenticate('authenticate yourself!')
+    await TouchID.authenticate('authenticate yourself!', true) // fall back to passcode
   } catch (err) {
     var message
     switch (err.name) {

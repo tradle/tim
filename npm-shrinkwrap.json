@@ -2671,15 +2671,15 @@
                           "from": "node-pre-gyp@>=0.6.17 <0.7.0",
                           "resolved": "https://registry.npmjs.org/node-pre-gyp/-/node-pre-gyp-0.6.17.tgz"
                         },
-                        "ansi": {
-                          "version": "0.3.0",
-                          "from": "ansi@~0.3.0",
-                          "resolved": "https://registry.npmjs.org/ansi/-/ansi-0.3.0.tgz"
-                        },
                         "are-we-there-yet": {
                           "version": "1.0.4",
                           "from": "are-we-there-yet@~1.0.0",
                           "resolved": "https://registry.npmjs.org/are-we-there-yet/-/are-we-there-yet-1.0.4.tgz"
+                        },
+                        "ansi": {
+                          "version": "0.3.0",
+                          "from": "ansi@~0.3.0",
+                          "resolved": "https://registry.npmjs.org/ansi/-/ansi-0.3.0.tgz"
                         },
                         "block-stream": {
                           "version": "0.0.8",
@@ -6688,8 +6688,8 @@
     },
     "react-native-touch-id": {
       "version": "1.2.2",
-      "from": "git+https://github.com/tradle/react-native-touch-id.git#00ab0cb6bc3c58ecc69ac04218d251983a3e82bd",
-      "resolved": "git+https://github.com/tradle/react-native-touch-id.git#00ab0cb6bc3c58ecc69ac04218d251983a3e82bd"
+      "from": "tradle/react-native-touch-id",
+      "resolved": "git://github.com/tradle/react-native-touch-id.git#de3827dcafa5ba308efe5ffcf2d0d3c53ca86278"
     },
     "react-native-udp": {
       "version": "1.2.0",
