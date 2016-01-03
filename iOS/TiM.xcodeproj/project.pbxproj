@@ -24,7 +24,9 @@
 		731F233C1C31BB4900C3B09D /* libCodePush.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 731F23291C31BB2D00C3B09D /* libCodePush.a */; };
 		731F233E1C31BB6600C3B09D /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 731F233D1C31BB6600C3B09D /* libz.tbd */; };
 		732EA0C81C24AB99000EFAA6 /* libRNRandomBytes.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732EA0C41C24AB90000EFAA6 /* libRNRandomBytes.a */; };
+		7365BF2E1C3461F900B0A512 /* libRNKeychain.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7365BF2D1C3461E700B0A512 /* libRNKeychain.a */; };
 		736E4EEE1C134354000AA599 /* DeviceUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 736E4EEC1C134354000AA599 /* DeviceUtil.m */; };
+		7375AA881C34766300F36CF3 /* libRNECC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7364872F1C34703500713F09 /* libRNECC.a */; };
 		73FE359E1BFA124200EFB313 /* libUdpSockets.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73FE359D1BFA123200EFB313 /* libUdpSockets.a */; };
 		73FE35A81BFA127A00EFB313 /* libRCTAddressBook.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73FE35A51BFA127300EFB313 /* libRCTAddressBook.a */; };
 		73FE35AF1BFA12B800EFB313 /* libLFQRCode.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73FE35AE1BFA12B300EFB313 /* libLFQRCode.a */; };
@@ -115,6 +117,20 @@
 			proxyType = 2;
 			remoteGlobalIDString = 73EEC9391BFE4B1D00D468EB;
 			remoteInfo = RNRandomBytes;
+		};
+		7364872E1C34703500713F09 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7364872A1C34703500713F09 /* RNECC.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 7398B54B1C30326E00106C47;
+			remoteInfo = RNECC;
+		};
+		7365BF2C1C3461E700B0A512 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7365BF281C3461E600B0A512 /* RNKeychain.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 5D82366F1B0CE05B005A9EF3;
+			remoteInfo = RNKeychain;
 		};
 		73FE359C1BFA123200EFB313 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -217,6 +233,8 @@
 		52C9F227A7304496B8DC2A2A /* CodePush.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = CodePush.xcodeproj; path = "../node_modules/react-native-code-push/CodePush.xcodeproj"; sourceTree = "<group>"; };
 		731F233D1C31BB6600C3B09D /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		732EA0AF1C24AB90000EFAA6 /* RNRandomBytes.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNRandomBytes.xcodeproj; path = "../node_modules/react-native-randombytes/RNRandomBytes.xcodeproj"; sourceTree = "<group>"; };
+		7364872A1C34703500713F09 /* RNECC.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNECC.xcodeproj; path = "../node_modules/react-native-ecc/ios/RNECC.xcodeproj"; sourceTree = "<group>"; };
+		7365BF281C3461E600B0A512 /* RNKeychain.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNKeychain.xcodeproj; path = "../node_modules/react-native-keychain/RNKeychain.xcodeproj"; sourceTree = "<group>"; };
 		736E4EEC1C134354000AA599 /* DeviceUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DeviceUtil.m; path = "../node_modules/react-native-device/DeviceUtil.m"; sourceTree = "<group>"; };
 		736E4EED1C134354000AA599 /* DeviceUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DeviceUtil.h; path = "../node_modules/react-native-device/DeviceUtil.h"; sourceTree = "<group>"; };
 		73FE358E1BFA123100EFB313 /* UdpSockets.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = UdpSockets.xcodeproj; path = "../node_modules/react-native-udp/ios/UdpSockets.xcodeproj"; sourceTree = "<group>"; };
@@ -248,7 +266,6 @@
 			files = (
 				731F233E1C31BB6600C3B09D /* libz.tbd in Frameworks */,
 				146834051AC3E58100842450 /* libReact.a in Frameworks */,
-				00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */,
 				00C302E71ABCBA2D00DB3ED1 /* libRCTGeolocation.a in Frameworks */,
 				00C302E81ABCBA2D00DB3ED1 /* libRCTImage.a in Frameworks */,
 				133E29F31AD74F7200F7D852 /* libRCTLinking.a in Frameworks */,
@@ -267,6 +284,9 @@
 				73FE35CF1BFA148B00EFB313 /* libTouchID.a in Frameworks */,
 				732EA0C81C24AB99000EFAA6 /* libRNRandomBytes.a in Frameworks */,
 				731F233C1C31BB4900C3B09D /* libCodePush.a in Frameworks */,
+				7365BF2E1C3461F900B0A512 /* libRNKeychain.a in Frameworks */,
+				00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */,
+				7375AA881C34766300F36CF3 /* libRNECC.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -385,6 +405,22 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		7364872B1C34703500713F09 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				7364872F1C34703500713F09 /* libRNECC.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		7365BF291C3461E600B0A512 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				7365BF2D1C3461E700B0A512 /* libRNKeychain.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		73FE358F1BFA123100EFB313 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -463,6 +499,8 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				7364872A1C34703500713F09 /* RNECC.xcodeproj */,
+				7365BF281C3461E600B0A512 /* RNKeychain.xcodeproj */,
 				732EA0AF1C24AB90000EFAA6 /* RNRandomBytes.xcodeproj */,
 				9B10B2E61C1A05EE00A20159 /* ART.xcodeproj */,
 				73FE35C91BFA148600EFB313 /* TouchID.xcodeproj */,
@@ -658,6 +696,14 @@
 					ProjectRef = 146833FF1AC3E56700842450 /* React.xcodeproj */;
 				},
 				{
+					ProductGroup = 7364872B1C34703500713F09 /* Products */;
+					ProjectRef = 7364872A1C34703500713F09 /* RNECC.xcodeproj */;
+				},
+				{
+					ProductGroup = 7365BF291C3461E600B0A512 /* Products */;
+					ProjectRef = 7365BF281C3461E600B0A512 /* RNKeychain.xcodeproj */;
+				},
+				{
 					ProductGroup = 732EA0B01C24AB90000EFAA6 /* Products */;
 					ProjectRef = 732EA0AF1C24AB90000EFAA6 /* RNRandomBytes.xcodeproj */;
 				},
@@ -751,6 +797,20 @@
 			fileType = archive.ar;
 			path = libRNRandomBytes.a;
 			remoteRef = 732EA0C31C24AB90000EFAA6 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		7364872F1C34703500713F09 /* libRNECC.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNECC.a;
+			remoteRef = 7364872E1C34703500713F09 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		7365BF2D1C3461E700B0A512 /* libRNKeychain.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNKeychain.a;
+			remoteRef = 7365BF2C1C3461E700B0A512 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		73FE359D1BFA123200EFB313 /* libUdpSockets.a */ = {
@@ -927,6 +987,11 @@
 				INFOPLIST_FILE = IdentityTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/TiM\"",
+					"\"$(SRCROOT)/TiM\"",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = TiM;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TiM.app/TiM";
@@ -945,6 +1010,11 @@
 				INFOPLIST_FILE = IdentityTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/TiM\"",
+					"\"$(SRCROOT)/TiM\"",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = TiM;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TiM.app/TiM";
@@ -962,9 +1032,17 @@
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(SRCROOT)/../node_modules/react-native/React/**",
 					"$(SRCROOT)/../node_modules/react-native-code-push/**",
+					"$(SRCROOT)/../node_modules/react-native-ecc/ios",
+					"$(SRCROOT)/../node_modules/react-native-keychain/RNKeychainManager/**",
 				);
 				INFOPLIST_FILE = Identity/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/TiM\"",
+					"\"$(SRCROOT)/TiM\"",
+				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = io.tradle;
 				PRODUCT_NAME = TiM;
@@ -981,9 +1059,17 @@
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(SRCROOT)/../node_modules/react-native/React/**",
 					"$(SRCROOT)/../node_modules/react-native-code-push/**",
+					"$(SRCROOT)/../node_modules/react-native-ecc/ios",
+					"$(SRCROOT)/../node_modules/react-native-keychain/RNKeychainManager/**",
 				);
 				INFOPLIST_FILE = Identity/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/TiM\"",
+					"\"$(SRCROOT)/TiM\"",
+				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = io.tradle;
 				PRODUCT_NAME = TiM;
@@ -1030,6 +1116,8 @@
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(SRCROOT)/../node_modules/react-native/React/**",
 					"$(SRCROOT)/../node_modules/react-native-code-push/**",
+					"$(SRCROOT)/../node_modules/react-native-ecc/ios",
+					"$(SRCROOT)/../node_modules/react-native-keychain/RNKeychainManager/**",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
@@ -1071,6 +1159,8 @@
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(SRCROOT)/../node_modules/react-native/React/**",
 					"$(SRCROOT)/../node_modules/react-native-code-push/**",
+					"$(SRCROOT)/../node_modules/react-native-ecc/ios",
+					"$(SRCROOT)/../node_modules/react-native-keychain/RNKeychainManager/**",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
