@@ -51,7 +51,8 @@ class MessageView extends Component {
 
     this.state.prop = prop;
     this.state.propValue = utils.getId(resource.id);
-    Actions.getItem(resource.id);
+    this.showRefResource(resource, prop)
+    // Actions.getItem(resource.id);
   }
   render() {
     var resource = this.state.resource;
@@ -214,7 +215,7 @@ var styles = StyleSheet.create({
   },
   rowContainer: {
     paddingBottom: 10,
-    paddingHorizontal: 10
+    // paddingHorizontal: 10
   },
   date: {
     fontSize: 14,
