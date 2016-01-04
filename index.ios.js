@@ -223,13 +223,14 @@ class TiMApp extends Component {
         configureScene={(route) => {
           if (route.sceneConfig)
             return route.sceneConfig;
-          return Navigator.SceneConfigs.FloatFromRight;
+          return {...Navigator.SceneConfigs.FloatFromRight, springFriction:26, springTension:200};
         }}
         />
     );
 
     return nav
   }
+          // return {...Navigator.SceneConfigs.FloatFromRight, springFriction:26, springTension:300};
 
   renderScene(route, nav) {
     var props = route.passProps;
