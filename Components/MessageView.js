@@ -42,7 +42,7 @@ class MessageView extends Component {
       this.props.navigator.pop();
       Actions.messageList({
         modelName: constants.TYPES.MESSAGE,
-        resource: params.resource
+        to: params.resource
       });
     }
   }
