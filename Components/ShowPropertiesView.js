@@ -101,7 +101,7 @@ class ShowPropertiesView extends Component {
       }
       else if (pMeta.ref) {
         if (pMeta.ref == constants.TYPES.MONEY) {
-          if (typeof val === 'string')
+          if (typeof val === 'string'  ||  typeof val === 'number')
             val = DEFAULT_CURRENCY_SYMBOL + val;
 
           else {
