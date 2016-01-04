@@ -5,16 +5,16 @@
 */
 'use strict';
 
-var LABEL_COLOR = '#757575';
+var LABEL_COLOR = '#cccccc';
 var INPUT_COLOR = '#000000';
 var ERROR_COLOR = '#a94442';
 var HELP_COLOR = '#999999';
-var BORDER_COLOR = '#cccccc';
+var BORDER_COLOR = '#bbbbbb';
 var DISABLED_COLOR = '#777777';
 var DISABLED_BACKGROUND_COLOR = '#eeeeee';
 var FONT_SIZE = 20
 var HELP_FONT_SIZE = 14
-var LABEL_FONT_SIZE = 9
+var LABEL_FONT_SIZE = 11
 
 var FONT_WEIGHT = '400';
 
@@ -131,11 +131,13 @@ var stylesheet = Object.freeze({
   },
   datepicker: {
     normal: {
-      marginBottom: 4
+      marginBottom: 4,
+      marginLeft: 15
     },
     // the style applied when a validation error occours
     error: {
-      marginBottom: 4
+      marginBottom: 4,
+      marginLeft: 15
     }
   }
 });
