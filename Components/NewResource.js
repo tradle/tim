@@ -222,6 +222,7 @@ class NewResource extends Component {
       }
     }
     var missedRequired = {}
+    var msg
     required.forEach((p) =>  {
       var v = json[p] ? json[p] : resource[p];
       var isDate = Object.prototype.toString.call(v) === '[object Date]'
@@ -233,7 +234,7 @@ class NewResource extends Component {
           if (resource && resource[p])
             return;
           if (!msg)
-            msg = 'Invalid values for the properties: '
+            msg = 'Please specify: '
           else
             msg += ', ';
           msg += '\'' + this.props.model.properties[p].title + '\'';

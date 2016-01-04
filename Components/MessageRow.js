@@ -679,7 +679,7 @@ class MessageRow extends Component {
     // if (resource.name === 'Lloyds') {
       var currentRoutes = self.props.navigator.getCurrentRoutes();
       this.props.navigator.push({
-        title: 'Financial Product',
+        title: 'I need...',
         id: 15,
         component: ProductChooser,
         sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
