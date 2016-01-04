@@ -27,12 +27,18 @@ class ProductChooser extends Component {
     var orgProducts = this.props.resource.products
     if (orgProducts) {
       orgProducts.forEach(function(m) {
-        products.push(utils.getModel(m.modelName).value)
+        products.push(utils.getModel(m).value)
       })
 
     }
-    else
-      products = utils.getAllSubclasses(constants.TYPES.FINANCIAL_PRODUCT);
+    else {
+      var productList = utils.getAllSubclasses(constants.TYPES.FINANCIAL_PRODUCT);
+      productList.forEach(function(p) {
+        var m = utils.getModel(p)
+        if (m.forms)
+          products.push(m)
+      })
+    }
 
     var dataSource =  new ListView.DataSource({
       rowHasChanged: (row1, row2) => row1 !== row2,
