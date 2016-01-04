@@ -81,7 +81,7 @@ class ProductChooser extends Component {
       time: new Date().getTime()
     }
 
-    Actions.addMessage(msg, true, true)
+    utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg, true, true))
     this.props.navigator.pop();
 
   }
