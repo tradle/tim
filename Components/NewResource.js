@@ -157,7 +157,16 @@ class NewResource extends Component {
       return;
     }
     if (isMessage) {
-      this.props.navigator.pop();
+      if (this.props.originatingMessage  &&  resource[constants.ROOT_HASH] !== this.props.originatingMessage[constants.ROOT_HASH]) {
+        var params = {
+          value: {documentCreated: true},
+          resource: this.props.originatingMessage,
+          meta: utils.getModel(this.props.originatingMessage[constants.TYPE]).value
+        }
+        Actions.addItem(params)
+      }
+      else
+        this.props.navigator.pop();
       return;
     }
     var currentRoutes = self.props.navigator.getCurrentRoutes();
@@ -763,7 +772,7 @@ var styles = StyleSheet.create({
   err: {
     // paddingVertical: 10,
     flexWrap: 'wrap',
-    paddingHorizontal: 15,
+    paddingHorizontal: 25,
     fontSize: 16,
     color: 'darkred',
   },
