@@ -267,6 +267,7 @@ class TiMApp extends Component {
                   editCols={props.editCols}
                   additionalInfo={props.additionalInfo}
                   returnRoute={props.rπeturnRoute}
+                  originatingMessage={props.originatingMessage}
                   callback={props.callback} />;
     case 5:
       return <MessageView navigator={nav}
