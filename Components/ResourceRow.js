@@ -131,7 +131,7 @@ class ResourceRow extends Component {
           {onlineStatus}
           <View style={[textStyle, {flexDirection: 'row', justifyContent: 'space-between'}]} key={this.getNextKey()}>
             {this.formatRow(resource)}
-            <ActivityIndicatorIOS hidden='true' color='#B1D5F2'/>
+            <ActivityIndicatorIOS hidden='true' color='#629BCA'/>
           </View>
           {cancelResource}
         </View>
