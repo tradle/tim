@@ -311,7 +311,7 @@ var utils = {
         removeListener()
       }
 
-      fn()
+      setTimeout(fn, 0)
     })
   }
 }
