@@ -303,6 +303,37 @@ class TimHome extends Component {
     //   editProfile = <AddNewIdentity resource={r} isRegistration={true} navigator={this.props.navigator} />;
     // }
         // <Text style={styles.title}>Trust in Motion (TiM)</Text>
+    var me = utils.getMe()
+    var dev = __DEV__
+            ? <View style={styles.dev}>
+              <TouchableHighlight
+                  underlayColor='transparent' onPress={this.onReloadDBPressed.bind(this)}>
+                <Text style={styles.text}>
+                  Reload DB
+                </Text>
+              </TouchableHighlight>
+              <TouchableHighlight
+                  underlayColor='transparent' onPress={this.onReloadModels.bind(this)}>
+                <Text style={styles.text}>
+                  Reload Models
+                </Text>
+              </TouchableHighlight>
+              <TouchableHighlight
+                  underlayColor='transparent' onPress={this.onBackupPressed.bind(this)}>
+                <Text style={styles.text}>
+                  Backup
+                </Text>
+              </TouchableHighlight>
+              <TouchableHighlight
+                  underlayColor='transparent' onPress={this.onLoadFromBackupPressed.bind(this)}>
+                <Text style={styles.text}>
+                  Load
+                </Text>
+              </TouchableHighlight>
+            </View>
+          : <View />
+
+
     StatusBarIOS.setHidden(true);
     return (
       <View style={styles.scroll}>
@@ -329,32 +360,7 @@ class TimHome extends Component {
           </View>
         </TouchableHighlight>
           <Text style={errStyle}>{err}</Text>
-          <View style={styles.dev}>
-            <TouchableHighlight
-                underlayColor='transparent' onPress={this.onReloadDBPressed.bind(this)}>
-              <Text style={styles.text}>
-                Reload DB
-              </Text>
-            </TouchableHighlight>
-            <TouchableHighlight
-                underlayColor='transparent' onPress={this.onReloadModels.bind(this)}>
-              <Text style={styles.text}>
-                Reload Models
-              </Text>
-            </TouchableHighlight>
-            <TouchableHighlight
-                underlayColor='transparent' onPress={this.onBackupPressed.bind(this)}>
-              <Text style={styles.text}>
-                Backup
-              </Text>
-            </TouchableHighlight>
-            <TouchableHighlight
-                underlayColor='transparent' onPress={this.onLoadFromBackupPressed.bind(this)}>
-              <Text style={styles.text}>
-                Load
-              </Text>
-            </TouchableHighlight>
-          </View>
+          {dev}
         <View style={{height: 200}}></View>
       </View>
     );
