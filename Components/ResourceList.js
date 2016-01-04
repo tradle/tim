@@ -129,6 +129,7 @@ class ResourceList extends Component {
     //   var rnd = this.getRandomInt(1, list.length - 1);
     //   list[rnd].online = true;
     // }
+    /*
     if (type === constants.TYPES.IDENTITY) {
       // // var routes = this.props.navigator.getCurrentRoutes();
       // // if (routes.length == 2) {
@@ -140,7 +141,7 @@ class ResourceList extends Component {
         list = l
       // // }
     }
-
+    */
     this.setState({
       dataSource: this.state.dataSource.cloneWithRows(list),
       list: list,
@@ -231,8 +232,9 @@ class ResourceList extends Component {
         modelName: modelName,
       },
     }
-    if (isIdentity) {
+    if (isIdentity)
       route.title = resource.firstName
+    if (isIdentity  ||  isOrganization) {
       route.rightButtonTitle = 'Profile'
       route.onRightButtonPress = {
         title: title,
@@ -256,7 +258,7 @@ class ResourceList extends Component {
         passProps: {resource: resource}
       }
     }
-    else {
+    if (isOrganization) {
       route.title = resource.name
       // if (resource.name === 'Rabobank'  &&  (!me.organization  ||  me.organization.name !== 'Rabobank')) {
       var routes = this.props.navigator.getCurrentRoutes();
@@ -471,21 +473,17 @@ class ResourceList extends Component {
     //           : <View />
 
     return (
-      // <View style={styles.footer}>
-      //   <TouchableHighlight underlayColor='transparent' onPress={this.addNew.bind(this)}>
-      //     <View>
-      //       <Icon name='plus'  size={30}  color='#999999' style={styles.icon} />
-      //     </View>
-      //   </TouchableHighlight>
-      // </View>
-      <View style={styles.footer}>
-        <TouchableHighlight underlayColor='transparent' onPress={this.scanQRCode.bind(this)}>
-          <View style={{marginTop: -10}}>
-            <Icon name='plus-circled'  size={45}  color='#ffffff' style={styles.icon} />
-          </View>
-        </TouchableHighlight>
-      </View>
-    );
+      <View />
+      )
+    // return (
+    //   <View style={styles.footer}>
+    //     <TouchableHighlight underlayColor='transparent' onPress={this.scanQRCode.bind(this)}>
+    //       <View style={{marginTop: -10}}>
+    //         <Icon name='plus-circled'  size={45}  color='#ffffff' style={styles.icon} />
+    //       </View>
+    //     </TouchableHighlight>
+    //   </View>
+    // );
   }
         // <TouchableHighlight underlayColor='transparent' onPress={this.showBanks.bind(this)}>
         //   <View>
@@ -717,7 +715,7 @@ var styles = StyleSheet.create({
   },
   resourceTitle: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '400',
     marginBottom: 2,
     paddingLeft: 5
