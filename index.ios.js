@@ -1,8 +1,10 @@
 'use strict'
 
 // require('react-native-level')
+
 var debug = require('debug')
 if (__DEV__) {
+  console.ignoredYellowBox = ['jsSchedulingOverhead']
   debug.enable('*')
 } else {
   debug.disable()
@@ -488,7 +490,7 @@ var styles = StyleSheet.create({
   },
 });
 
-React.AppRegistry.registerComponent('TiM', function() { return TiMApp });
+React.AppRegistry.registerComponent('Tradle', function() { return TiMApp });
 
   // render() {
   //   var props = {db: this.state.db};
