@@ -118,7 +118,7 @@
       "resolved": "https://registry.npmjs.org/@tradle/constants/-/constants-1.1.7.tgz"
     },
     "@tradle/http-keeper": {
-      "version": "3.0.3",
+      "version": "3.0.4",
       "from": "@tradle/http-keeper@latest",
       "dependencies": {
         "@tradle/bitkeeper-client": {
@@ -1968,15 +1968,15 @@
               "from": "https://registry.npmjs.org/statuses/-/statuses-1.2.1.tgz",
               "resolved": "https://registry.npmjs.org/statuses/-/statuses-1.2.1.tgz"
             },
-            "uid-safe": {
-              "version": "2.0.0",
-              "from": "https://registry.npmjs.org/uid-safe/-/uid-safe-2.0.0.tgz",
-              "resolved": "https://registry.npmjs.org/uid-safe/-/uid-safe-2.0.0.tgz"
-            },
             "unpipe": {
               "version": "1.0.0",
               "from": "https://registry.npmjs.org/unpipe/-/unpipe-1.0.0.tgz",
               "resolved": "https://registry.npmjs.org/unpipe/-/unpipe-1.0.0.tgz"
+            },
+            "uid-safe": {
+              "version": "2.0.0",
+              "from": "https://registry.npmjs.org/uid-safe/-/uid-safe-2.0.0.tgz",
+              "resolved": "https://registry.npmjs.org/uid-safe/-/uid-safe-2.0.0.tgz"
             },
             "vary": {
               "version": "1.0.1",
@@ -2671,15 +2671,15 @@
                           "from": "node-pre-gyp@>=0.6.17 <0.7.0",
                           "resolved": "https://registry.npmjs.org/node-pre-gyp/-/node-pre-gyp-0.6.17.tgz"
                         },
-                        "are-we-there-yet": {
-                          "version": "1.0.4",
-                          "from": "are-we-there-yet@~1.0.0",
-                          "resolved": "https://registry.npmjs.org/are-we-there-yet/-/are-we-there-yet-1.0.4.tgz"
-                        },
                         "ansi": {
                           "version": "0.3.0",
                           "from": "ansi@~0.3.0",
                           "resolved": "https://registry.npmjs.org/ansi/-/ansi-0.3.0.tgz"
+                        },
+                        "are-we-there-yet": {
+                          "version": "1.0.4",
+                          "from": "are-we-there-yet@~1.0.0",
+                          "resolved": "https://registry.npmjs.org/are-we-there-yet/-/are-we-there-yet-1.0.4.tgz"
                         },
                         "block-stream": {
                           "version": "0.0.8",
@@ -2731,15 +2731,15 @@
                           "from": "isarray@0.0.1",
                           "resolved": "https://registry.npmjs.org/isarray/-/isarray-0.0.1.tgz"
                         },
-                        "lodash._createpadding": {
-                          "version": "3.6.1",
-                          "from": "lodash._createpadding@^3.0.0",
-                          "resolved": "https://registry.npmjs.org/lodash._createpadding/-/lodash._createpadding-3.6.1.tgz"
-                        },
                         "lodash.pad": {
                           "version": "3.1.1",
                           "from": "lodash.pad@^3.0.0",
                           "resolved": "https://registry.npmjs.org/lodash.pad/-/lodash.pad-3.1.1.tgz"
+                        },
+                        "lodash._createpadding": {
+                          "version": "3.6.1",
+                          "from": "lodash._createpadding@^3.0.0",
+                          "resolved": "https://registry.npmjs.org/lodash._createpadding/-/lodash._createpadding-3.6.1.tgz"
                         },
                         "lodash.padleft": {
                           "version": "3.1.1",
