@@ -55,7 +55,9 @@ class MessageList extends Component {
     }
     if (this.props.isAggregation)
       params.isAggregation = true;
-    Actions.messageList(params);
+
+    utils.onNextTransitionEnd(this.props.navigator, () => Actions.messageList(params));
+    // Actions.messageList(params)
   }
   componentDidMount() {
     this.listenTo(Store, 'onAction');
@@ -199,8 +201,8 @@ class MessageList extends Component {
   }
 
   render() {
-    if (this.state.isLoading)
-      return <View />
+    // if (this.state.isLoading)
+    //   return <View />
     // if (this.state.message) {
     //   return (
     //     <View style={{flex: 1}} onLayout={() =>
