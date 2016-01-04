@@ -1401,14 +1401,14 @@ var Store = Reflux.createStore({
              continue;
         }
         // Show only the last 'Choose the product' message
-        else if (r[TYPE] === PRODUCT_LIST) {
-          if (!lastPL  ||  lastPL.time < r.time) {
-            var id = utils.getId(r.from)
-            if (utils.getId(list[id].value.organization) === toId)
-              lastPL = r
-          }
-          continue;
-        }
+        // else if (r[TYPE] === PRODUCT_LIST) {
+          // if (!lastPL  ||  lastPL.time < r.time) {
+          //   var id = utils.getId(r.from)
+          //   if (utils.getId(list[id].value.organization) === toId)
+          //     lastPL = r
+          // }
+          // continue;
+        // }
         // else if (m.length === 2  &&  m[0] === '[application for') {
           // continue
           // var id = utils.getId(r.to)
@@ -1503,11 +1503,21 @@ var Store = Reflux.createStore({
 
     // find possible verifications for the requests that were not yet fulfilled from other verification providers
 
-    result.sort(function(a,b) {
-      // Turn your strings into dates, and then subtract them
-      // to get a value that is either negative, positive, or zero.
-      return new Date(a.time) - new Date(b.time);
+    result.sort(function(a, b) {
+      return a.time - b.time;
     });
+
+    result = result.filter((r, i) => {
+      if (r[TYPE] === PRODUCT_LIST) {
+        var next = result[i + 1]
+        if (next && next[TYPE] === PRODUCT_LIST) {
+          return false
+        }
+      }
+
+      return true
+    })
+
     // not for subreddit
     result.forEach((r) =>  {
       r.from.photos = list[utils.getId(r.from)].value.photos;
