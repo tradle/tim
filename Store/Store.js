@@ -51,6 +51,7 @@ var ORGANIZATION = constants.TYPES.ORGANIZATION
 var IDENTITY = constants.TYPES.IDENTITY
 var MESSAGE = constants.TYPES.MESSAGE
 var SIMPLE_MESSAGE = constants.TYPES.SIMPLE_MESSAGE
+var FINANCIAL_PRODUCT = constants.TYPES.FINANCIAL_PRODUCT
 var PRODUCT_LIST = constants.TYPES.PRODUCT_LIST
 var FORGOT_YOU = 'tradle.ForgotYou'
 var PUB_ID = 'publishedIdentity'
@@ -985,6 +986,17 @@ var Store = Reflux.createStore({
     function handleMessage () {
       // TODO: fix hack
       // hack: we don't know root hash yet, use a fake
+      if (returnVal.documentCreated)  {
+        var params = {action: 'addItem', resource: returnVal}
+        self.trigger(params);
+        return self.waitForTransitionToEnd()
+        .then(function() {
+          return save()
+        })
+        .catch(function(err) {
+          err = err
+        })
+      }
       returnVal[ROOT_HASH] = returnVal[NONCE]
       var tmpKey = returnVal[TYPE] + '_' + returnVal[ROOT_HASH]
       list[tmpKey] = {key: tmpKey, value: returnVal};
@@ -1586,7 +1598,9 @@ var Store = Reflux.createStore({
       var id = utils.getId(val.to.id);
       var org = isOrg ? to : (to.organization ? to.organization : null)
       if (id === meId) {
-        var document = doc.id ? list[utils.getId(doc.id)].value : doc;
+        var document = doc.id ? list[utils.getId(doc.id)]  &&  list[utils.getId(doc.id)].value : doc;
+        if (!document)
+          continue;
         if (to  &&  org  &&  document.verifications) {
           var thisCompanyVerification;
           for (var i=0; i<document.verifications.length; i++) {
@@ -2232,7 +2246,7 @@ var Store = Reflux.createStore({
           var pList = JSON.parse(val.list)
           // var fOrg = obj.from.identity.toJSON().organization
           // org = list[utils.getId(fOrg)].value
-          org.list = []
+          org.products = []
           var self = this
           pList.forEach(function(m) {
             self.addNameAndTitleProps(m)
@@ -2240,7 +2254,8 @@ var Store = Reflux.createStore({
               key: m.id,
               value: m
             }
-            org.list.push(m.id)
+            if (m.subClassOf === FINANCIAL_PRODUCT)
+              org.products.push(m.id)
             if (!m[ROOT_HASH])
               m[ROOT_HASH] = sha(m)
             batch.push({type: 'put', key: m.id, value: m})
