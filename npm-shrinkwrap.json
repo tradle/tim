@@ -7490,8 +7490,9 @@
       "resolved": "https://registry.npmjs.org/thunky/-/thunky-0.1.0.tgz"
     },
     "tim": {
-      "version": "3.2.0",
-      "from": "tim@latest",
+      "version": "3.2.1",
+      "from": "tim@3.2.1",
+      "resolved": "https://registry.npmjs.org/tim/-/tim-3.2.1.tgz",
       "dependencies": {
         "@tradle/chainloader": {
           "version": "2.0.4",
