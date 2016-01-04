@@ -472,44 +472,47 @@ var Store = Reflux.createStore({
       }
       if (!me.published)
         self.publishMyIdentity(orgRep)
+
       var wmKey = SIMPLE_MESSAGE + '_Welcome' + toOrg.name.replace(' ', '_')// + '_' + new Date().getTime()
       // Create welcome message without saving it in DB
       welcomeMessage = {}
-      if (list[wmKey]) {
-        list[wmKey].value.time = new Date().getTime()
-        welcomeMessage = list[wmKey].value
-        return
-      }
+      // if (list[wmKey]) {
+      //   list[wmKey].value.time = new Date().getTime()
+      //   welcomeMessage = list[wmKey].value
+      //   return
+      // }
 
-      var w = welcome
+      // var w = welcome
 
-      welcomeMessage.message = w.msg.replace('{firstName}', me.firstName)
-      welcomeMessage.time = new Date().getTime()
-      welcomeMessage[TYPE] = SIMPLE_MESSAGE
-      welcomeMessage.welcome = true
-      welcomeMessage[NONCE] = self.getNonce()
-      welcomeMessage.to = {
-        id: me[TYPE] + '_' + me[ROOT_HASH],
-        title: utils.getDisplayName(me, self.getModel(constants.TYPES.IDENTITY).value.properties)
-      }
-      welcomeMessage.from = {
-        id: rr.to.id,
-        title: rr.to.title,
-        time: rr.to.time
-      }
-      welcomeMessage.organization = {
-        id: rr.to.id,
-        title: rr.to.title,
-        time: rr.to.time
-      }
-      welcomeMessage[ROOT_HASH] = wmKey
-      batch.push({type: 'put', key: welcomeMessage[TYPE] + '_' + wmKey, value: welcomeMessage});
-      list[welcomeMessage[ROOT_HASH]] = {
-        key: welcomeMessage[ROOT_HASH],
-        value: welcomeMessage
-      }
+      // welcomeMessage.message = w.msg.replace('{firstName}', me.firstName)
+      // welcomeMessage.time = new Date().getTime()
+      // welcomeMessage[TYPE] = SIMPLE_MESSAGE
+      // welcomeMessage.welcome = true
+      // welcomeMessage[NONCE] = self.getNonce()
+      // welcomeMessage.to = {
+      //   id: me[TYPE] + '_' + me[ROOT_HASH],
+      //   title: utils.getDisplayName(me, self.getModel(constants.TYPES.IDENTITY).value.properties)
+      // }
+      // welcomeMessage.from = {
+      //   id: rr.to.id,
+      //   title: rr.to.title,
+      //   time: rr.to.time
+      // }
+      // welcomeMessage.organization = {
+      //   id: rr.to.id,
+      //   title: rr.to.title,
+      //   time: rr.to.time
+      // }
+      // welcomeMessage[ROOT_HASH] = wmKey
+      // batch.push({type: 'put', key: welcomeMessage[TYPE] + '_' + wmKey, value: welcomeMessage});
+      // list[welcomeMessage[ROOT_HASH]] = {
+      //   key: welcomeMessage[ROOT_HASH],
+      //   value: welcomeMessage
+      // }
     })
     .then(function() {
+      if (isWelcome && utils.isEmpty(welcomeMessage))
+        return;
       // Temporary untill the real hash is known
       var key = rr[TYPE] + '_' + rr[ROOT_HASH];
       list[key] = {key: key, value: rr};
@@ -537,6 +540,8 @@ var Store = Reflux.createStore({
     })
     .then(function(data) {
       if (!requestForForm  &&  isWelcome)
+        return
+      if (isWelcome  &&  utils.isEmpty(welcomeMessage))
         return
       delete list[rr[TYPE] + '_' + dhtKey]
       if (data)  {
