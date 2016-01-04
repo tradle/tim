@@ -413,7 +413,8 @@ class MessageRow extends Component {
       titleTextColor: '#7AAAC3',
       passProps:  {
         model: model,
-        resource: resource
+        resource: resource,
+        originatingMessage: this.props.resource
       }
     });
   }
@@ -542,7 +543,7 @@ class MessageRow extends Component {
             msgModel = msgModel.value;
             if (!msgParts[0].length)
               msgParts[0] = 'I just sent you a request for '; // + msgModel.title;
-            if (!isMyMessage)
+            if (!isMyMessage  &&  !resource.documentCreated)
               onPressCall = self.createNewResource.bind(self, msgModel);
             isNewProduct = msgParts[0].length  &&  msgParts[0] === 'application for'
 
@@ -550,8 +551,8 @@ class MessageRow extends Component {
             var link = isMyMessage
                      ? <Text style={[style, color]}>{msgModel.title}</Text>
                      : <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                         <Text style={[style, {color: isMyMessage ? STRUCTURED_MESSAGE_COLOR : '#2892C6'}]}>{msgModel.title}</Text>
-                         <Icon style={styles.linkIcon} size={20} name={'ios-arrow-right'} />
+                         <Text style={[style, {color: isMyMessage ? STRUCTURED_MESSAGE_COLOR : (resource.documentCreated ?  '#757575' : '#2892C6')}]}>{msgModel.title}</Text>
+                         <Icon style={resource.documentCreated  ? styles.linkIconGreyed : styles.linkIcon} size={20} name={'ios-arrow-right'} />
                        </View>
 
             var msg;
@@ -618,6 +619,8 @@ class MessageRow extends Component {
       var ret = {}
       if (onPressCall)
         ret.onPressCall = onPressCall;
+      else if (isForgetting)
+        return null
       else if (isSimpleMessage) {
         if (isNewProduct)
           ret.isNewProduct = true
@@ -1032,6 +1035,11 @@ var styles = StyleSheet.create({
     width: 20,
     height: 20,
     color: '#2892C6'
+  },
+  linkIconGreyed: {
+    width: 20,
+    height: 20,
+    color: '#cccccc'
   },
   description: {
     // flexWrap: 'wrap',
