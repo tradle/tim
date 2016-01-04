@@ -64,7 +64,7 @@ class ProductChooser extends Component {
   selectResource(resource) {
     var route = {
       component: MessageList,
-      backButtonTitle: 'Back',
+      backButtonTitle: 'Cancel',
       id: 11,
       title: this.props.resource.name,
       passProps: {
