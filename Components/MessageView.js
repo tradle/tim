@@ -88,7 +88,7 @@ class MessageView extends Component {
           <PhotoList photos={resource.photos} resource={resource} isView={true} navigator={this.props.navigator} numberInRow={inRow}/>
           <View style={styles.rowContainer}>
             <View><Text style={styles.itemTitle}>{resource.message}</Text></View>
-            <ShowPropertiesView resource={resource} excludedProperties={['tradle.Message.message', 'time', 'photos']} showRefResource={this.getRefResource.bind(this)}/>
+            <ShowPropertiesView navigator={this.props.navigator} resource={resource} excludedProperties={['tradle.Message.message', 'time', 'photos']} showRefResource={this.getRefResource.bind(this)}/>
             {embed}
           </View>
         </View>
