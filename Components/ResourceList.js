@@ -8,6 +8,7 @@ var ResourceView = require('./ResourceView');
 var VerificationRow = require('./VerificationRow');
 var NewResource = require('./NewResource');
 var MessageList = require('./MessageList');
+var MessageView = require('./MessageView')
 var utils = require('../utils/utils');
 var reactMixin = require('react-mixin');
 var Store = require('../Store/Store');
@@ -173,33 +174,44 @@ class ResourceList extends Component {
     var model = utils.getModel(this.props.modelName);
     var isIdentity = this.props.modelName === constants.TYPES.IDENTITY;
     var isOrganization = this.props.modelName === constants.TYPES.ORGANIZATION;
+    var isVerification = model.value.id === constants.TYPES.VERIFICATION
     if (!isIdentity         &&
         !isOrganization     &&
         !this.props.callback) {
       var m = utils.getModel(resource[constants.TYPE]).value;
       var title = utils.makeTitle(utils.getDisplayName(resource, m.properties))
-      this.props.navigator.push({
-        title: title,
-        id: 3,
-        component: ResourceView,
-        titleTextColor: '#7AAAC3',
-        backButtonTitle: 'Back',
-        rightButtonTitle: 'Edit',
-        onRightButtonPress: {
+      if (isVerification)
+        this.props.navigator.push({
           title: title,
-          id: 4,
-          component: NewResource,
+          id: 5,
+          component: MessageView,
           titleTextColor: '#7AAAC3',
           backButtonTitle: 'Back',
-          rightButtonTitle: 'Done',
-          passProps: {
-            model: m,
-            resource: resource
-          }
-        },
+          passProps: {resource: resource}
+        });
+      else
+        this.props.navigator.push({
+          title: title,
+          id: 3,
+          component: ResourceView,
+          titleTextColor: '#7AAAC3',
+          backButtonTitle: 'Back',
+          rightButtonTitle: 'Edit',
+          onRightButtonPress: {
+            title: title,
+            id: 4,
+            component: NewResource,
+            titleTextColor: '#7AAAC3',
+            backButtonTitle: 'Back',
+            rightButtonTitle: 'Done',
+            passProps: {
+              model: m,
+              resource: resource
+            }
+          },
 
-        passProps: {resource: resource}
-      });
+          passProps: {resource: resource}
+        });
       return;
     }
     if (this.props.prop) {
