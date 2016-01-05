@@ -421,7 +421,8 @@ var NewResourceMixin = {
   },
   // setting chosen from the list property on the resource like for ex. Organization on Contact
   setChosenValue(propName, value) {
-    var resource = this.state.resource;
+    var resource = {}
+    extend(resource, this.state.resource)
     var id = value[constants.TYPE] + '_' + value[constants.ROOT_HASH]
     resource[propName] = {
       id: id,
@@ -436,7 +437,7 @@ var NewResourceMixin = {
     }
 
     this.setState({
-      resource: this.state.resource,
+      resource: resource,
       prop: propName
     });
 
