@@ -527,7 +527,7 @@ class NewResource extends Component {
       }
       var title = bl.title || utils.makeLabel(p)
       arrayItems.push (
-        <View style={style.itemButton} key={this.getNextKey()} ref={bl.name}>
+        <View style={styles.itemButton} key={this.getNextKey()} ref={bl.name}>
           <TouchableHighlight underlayColor='transparent'
               onPress={self.onNewPressed.bind(self, bl)}>
             <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
