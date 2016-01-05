@@ -375,16 +375,29 @@ class MessageRow extends Component {
     else
        msg += ' You can tap on any items in the list below to share them with ';
     msg += this.props.to.organization ? (this.props.to.organization.title + '.') : this.props.to.name;
-    var st = [addStyle ? [styles.textContainer, addStyle] : styles.textContainer]
-    st.push({borderWidth: 1, borderColor: '#C1DBCE'})
+    // var st = [addStyle ? [styles.textContainer, addStyle] : styles.textContainer]
+    // st.push({borderWidth: 1, borderColor: '#C1DBCE'})
 
+    // return (
+    //   <View style={[rowStyle, viewStyle, {width: Device.width - 50}]} key={this.getNextKey()}>
+    //     <View style={{width: 30}} key={this.getNextKey()}/>
+    //     <View style={[addStyle ? [styles.textContainer, addStyle] : styles.textContainer]} key={this.getNextKey()}>
+    //       <View style={{flex: 1}} key={this.getNextKey()}>
+    //         <View style={{backgroundColor: '#c6e2ef', paddingVertical: 5, borderRadius: 5, paddingHorizontal: 7, marginTop: -7, marginHorizontal: -7}} key={this.getNextKey()}>
+    //           <Text style={{color: '#467E9C',  fontSize: 16}} key={this.getNextKey()}>{msg}</Text>
+    //         </View>
+    //         {vtt}
+    //      </View>
+    //     </View>
+    //   </View>
+    //  );
     return (
       <View style={[rowStyle, viewStyle, {width: Device.width - 50}]} key={this.getNextKey()}>
-        <View style={{width: 30}} key={this.getNextKey()}/>
-        <View style={[addStyle ? [styles.textContainer, addStyle] : styles.textContainer]} key={this.getNextKey()}>
-          <View style={{flex: 1}} key={this.getNextKey()}>
-            <View style={{backgroundColor: '#c6e2ef', paddingVertical: 5, borderRadius: 5, paddingHorizontal: 7, marginTop: -7, marginHorizontal: -7}} key={this.getNextKey()}>
-              <Text style={{color: '#467E9C',  fontSize: 16}} key={this.getNextKey()}>{msg}</Text>
+        <View style={{width: 30}}/>
+        <View style={[addStyle ? [styles.textContainer, addStyle] : styles.textContainer]}>
+          <View style={{flex: 1}}>
+            <View style={styles.assistentBox}>
+              <Text style={styles.assistentText}>{msg}</Text>
             </View>
             {vtt}
          </View>
@@ -1059,6 +1072,19 @@ var styles = StyleSheet.create({
     // flexWrap: 'wrap',
     color: '#ffffff',
     fontSize: 16,
+  },
+  assistentText: {
+    color: '#757575',
+    fontStyle: 'italic',
+    fontSize: 16
+  },
+  assistentBox: {
+    backgroundColor: '#efefef',
+    paddingVertical: 5,
+    borderRadius: 5,
+    paddingHorizontal: 7,
+    marginTop: -7,
+    marginHorizontal: -7
   },
   separator: {
     height: 0.5,
