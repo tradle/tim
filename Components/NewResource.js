@@ -526,13 +526,26 @@ class NewResource extends Component {
                   </View>
       }
       var title = bl.title || utils.makeLabel(p)
+      var err = this.state.missedRequired
+              ? this.state.missedRequired[meta.properties[p].name]
+              : null
+      var errTitle = 'Insert the valid ' + title
+      var error = err
+                ? <View style={{paddingLeft:5, position: 'absolute', top: 35, backgroundColor: '#ffffff'}}>
+                    <Text style={{fontSize: 12, color: '#a94442'}}>{errTitle}</Text>
+                  </View>
+                : <View/>
+      // var error = <View/>
       arrayItems.push (
         <View style={styles.itemButton} key={this.getNextKey()} ref={bl.name}>
           <TouchableHighlight underlayColor='transparent'
               onPress={self.onNewPressed.bind(self, bl)}>
-            <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-              <Text style={count ? styles.itemsText : styles.noItemsText}>{bl.title}</Text>
-              {counter}
+            <View>
+              <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                <Text style={count ? styles.itemsText : styles.noItemsText}>{bl.title}</Text>
+                {counter}
+              </View>
+              {error}
             </View>
           </TouchableHighlight>
         </View>
@@ -566,12 +579,12 @@ class NewResource extends Component {
                : <View style={{height: 0}} />
 
     // <FromToView resource={resource} model={meta} navigator={this.props.navigator} />
+          // <View style={{flexWrap: 'wrap'}}>
+          //   <Text style={errStyle}>{err}</Text>
+          // </View>
     var content =
       <ScrollView style={style} ref='scrollView' {...this.scrollviewProps}>
         <View style={styles.container}>
-          <View style={{flexWrap: 'wrap'}}>
-            <Text style={errStyle}>{err}</Text>
-          </View>
           <View style={photoStyle}>
             <PhotoView resource={resource} navigator={this.props.navigator}/>
           </View>
