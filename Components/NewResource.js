@@ -234,8 +234,19 @@ class NewResource extends Component {
     var msg
     required.forEach((p) =>  {
       var v = json[p] ? json[p] : resource[p];
+      if (v) {
+        if (typeof v === 'string'  &&  !v.length) {
+          v = null
+          delete json[p]
+        }
+        else if (typeof v === 'object'  &&  this.props.model.properties[p].ref == constants.TYPES.MONEY) {
+          if (v.value === '')
+            v = null
+          delete json[p]
+        }
+      }
       var isDate = Object.prototype.toString.call(v) === '[object Date]'
-      if (!v || (isDate  &&  isNaN(v.getTime())))  {
+      if (!v  ||  (isDate  &&  isNaN(v.getTime())))  {
         var prop = this.props.model.properties[p]
         if (prop.items  &&  prop.items.backlink)
           return
