@@ -76,6 +76,7 @@ class TimHome extends Component {
       this.restartTiM()
       return
     }
+    this.state.authenticated = true
     if (utils.getMe())
       this.showOfficialAccounts();
       // this.showContacts();
@@ -371,7 +372,9 @@ class TimHome extends Component {
     )
   }
   async _pressHandler() {
-    if (await authenticateUser()) {
+    if (this.state.authenticated)
+      this.showContactsOrRegister()
+    else if (await authenticateUser()) {
       this.showContactsOrRegister()
     }
   }
