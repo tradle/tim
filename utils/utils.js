@@ -1,6 +1,11 @@
 'use strict'
 
-var {AsyncStorage} = require('react-native')
+var {
+  AsyncStorage,
+  NativeModules,
+  findNodeHandle
+} = require('react-native')
+var RCTUIManager = NativeModules.UIManager
 var collect = require('stream-collector')
 var t = require('tcomb-form-native');
 var moment = require('moment');
@@ -301,6 +306,29 @@ var utils = {
             }
           })
       })
+  },
+
+  // measure(component, cb) {
+  //   let handle = typeof component === 'number'
+  //     ? component
+  //     : findNodeHandle(component)
+
+  //   RCTUIManager.measure(handle, cb)
+  // },
+
+  scrollComponentIntoView(scrollView, component) {
+    let handle = typeof component === 'number'
+      ? component
+      : findNodeHandle(component)
+
+    let scrollResponder = scrollView.getScrollResponder()
+    setTimeout(() => {
+      scrollResponder.scrollResponderScrollNativeHandleToKeyboard(
+        findNodeHandle(handle),
+        120, //additionalOffset
+        true
+      )
+    }, 50)
   },
 
   onNextTransitionEnd(navigator, fn) {

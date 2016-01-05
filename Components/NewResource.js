@@ -1,6 +1,7 @@
 'use strict';
 
 var React = require('react-native');
+var debug = require('debug')('NewResource')
 var utils = require('../utils/utils');
 var NewItem = require('./NewItem');
 var PhotoView = require('./PhotoView');
@@ -45,9 +46,9 @@ var {
   // LayoutAnimation,
   Component,
   Navigator,
-  TouchableHighlight,
-
+  TouchableHighlight
 } = React;
+
 class NewResource extends Component {
   constructor(props) {
     super(props);
@@ -124,6 +125,29 @@ class NewResource extends Component {
     // KeyboardEventEmitter.off(KeyboardEvents.KeyboardDidShowEvent, this.updateKeyboardSpace);
     // KeyboardEventEmitter.off(KeyboardEvents.KeyboardWillHideEvent, this.resetKeyboardSpace);
   }
+
+  componentDidUpdate() {
+    if (!this.state.missedRequired) return
+
+    let viewCols = this.props.model.viewCols
+    let first
+    for (let p in this.state.missedRequired) {
+      if (!viewCols) {
+        first = p
+        break
+      }
+
+      if (!first || viewCols.indexOf(p) < viewCols.indexOf(first)) {
+        first = p
+      }
+    }
+
+    let ref = this.refs.form.getComponent(first) || this.refs[first]
+    if (!ref) return
+
+    utils.scrollComponentIntoView(this.refs.scrollView, ref)
+  }
+
   itemAdded(params) {
     var resource = params.resource;
     if (params.action === 'getTemporary') {
@@ -472,7 +496,7 @@ class NewResource extends Component {
     for (var p in itemsMeta) {
       var bl = itemsMeta[p]
       if (bl.readOnly  ||  bl.items.backlink) {
-        arrayItems.push (<View key={this.getNextKey()} />)
+        arrayItems.push(<View key={this.getNextKey()} ref={bl.name} />)
         continue
       }
       var counter, count = 0
@@ -503,7 +527,7 @@ class NewResource extends Component {
       }
       var title = bl.title || utils.makeLabel(p)
       arrayItems.push (
-        <View style={styles.itemButton} key={this.getNextKey()}>
+        <View style={style.itemButton} key={this.getNextKey()} ref={bl.name}>
           <TouchableHighlight underlayColor='transparent'
               onPress={self.onNewPressed.bind(self, bl)}>
             <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>

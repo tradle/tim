@@ -278,7 +278,7 @@ var NewResourceMixin = {
             : null
     var error = err
               ? <View style={{paddingLeft: 15, backgroundColor: '#ffffff'}} key={this.getNextKey()}>
-                  <Text style={{fontSize: 12, color: '#a94442'}}>Insert the valid {params.prop.title}</Text>
+                  <Text style={{fontSize: 12, color: '#a94442'}}>Enter a valid {params.prop.title}</Text>
                 </View>
               : <View key={this.getNextKey()} />
     // return (
@@ -322,15 +322,9 @@ var NewResourceMixin = {
     );
   },
   inputFocused(refName) {
-    if (this.refs  &&  this.refs.scrollView)
-    setTimeout(()=>{
-      let scrollResponder=this.refs.scrollView.getScrollResponder();
-      scrollResponder.scrollResponderScrollNativeHandleToKeyboard(
-        React.findNodeHandle(this.refs.form.refs.input.refs[refName]),
-        120, //additionalOffset
-        true
-      );
-    }, 50);
+    if (this.refs  &&  this.refs.scrollView) {
+      utils.scrollComponentIntoView(this.refs.scrollView, this.refs.form.getComponent(refName))
+    }
   },
   // scrollDown (){
   //   if (this.refs  &&  this.refs.scrollView) {
@@ -369,7 +363,7 @@ var NewResourceMixin = {
             : null
     var error = err
               ? <View style={{paddingLeft: 15, backgroundColor: '#ffffff'}}>
-                  <Text style={{fontSize: 12, color: '#a94442'}}>Insert the valid {prop.title}</Text>
+                  <Text style={{fontSize: 12, color: '#a94442'}}>Enter a valid {prop.title}</Text>
                 </View>
               : <View />
     return (
