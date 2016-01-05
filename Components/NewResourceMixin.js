@@ -11,6 +11,8 @@ var t = require('tcomb-form-native');
 var Actions = require('../Actions/Actions');
 var Device = require('react-native-device')
 var extend = require('extend');
+var DEFAULT_CURRENCY_SYMBOL = '$';
+
 var cnt = 0;
 var propTypesMap = {
   'string': t.Str,
@@ -293,6 +295,17 @@ var NewResourceMixin = {
     //     {error}
     //   </View>
     // );
+
+    var label = params.label
+    if (params.prop.units) {
+      label += (params.prop.units.charAt(0) === '[')
+             ? ' ' + params.prop.units
+             : ' (' + params.prop.units + ')'
+    }
+    label += params.required ? '' : ' (optional)'
+    label += (params.prop.ref  &&  params.prop.ref === constants.TYPES.MONEY)
+           ?  ' (' + DEFAULT_CURRENCY_SYMBOL + ')'
+           : ''
     return (
       <View style={{paddingBottom: 10}}>
         <FloatLabel
@@ -303,7 +316,7 @@ var NewResourceMixin = {
           value={params.value}
           keyboardType={params.keyboard || 'default'}
           onChangeText={this.onChangeTextValue.bind(this, params.prop)}
-        >{params.label + (params.required ? '' : ' (optional)')}</FloatLabel>
+        >{label}</FloatLabel>
         {error}
       </View>
     );
