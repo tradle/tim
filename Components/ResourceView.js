@@ -108,6 +108,11 @@ class ResourceView extends Component {
       actionPanel = <View/>
     else
       actionPanel = <ShowRefList resource={resource} navigator={this.props.navigator} />
+    var qrcode = (Object.keys(model.properties).length === 2)
+               ? <View />
+               : <View>
+                  <QRCode inline={true} content={resource[constants.ROOT_HASH]} dimension={370} />
+                </View>
 
           // <AddNewIdentity resource={resource} navigator={this.props.navigator} />
           // <SwitchIdentity resource={resource} navigator={this.props.navigator} />
@@ -117,9 +122,7 @@ class ResourceView extends Component {
           <PhotoView resource={resource} navigator={this.props.navigator}/>
         </View>
         {actionPanel}
-        <View>
-          <QRCode inline={true} content={resource[constants.ROOT_HASH]} dimension={370} />
-        </View>
+        {qrcode}
         <PhotoList photos={photos} resource={this.props.resource} navigator={this.props.navigator} isView={true} numberInRow={photos.length > 4 ? 5 : photos.length} />
         <ShowPropertiesView resource={resource}
                             showItems={this.showResources.bind(this)}
