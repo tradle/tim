@@ -41,10 +41,10 @@ var RowMixin = {
     var val = utils.formatDate(new Date(resource[dateProp])); //utils.getFormattedDate(new Date(resource[dateProp]));
 
     return properties[dateProp].skipLabel
-        ? <Text style={style}>{val}</Text>
-        : <View style={{flexDirection: 'row'}}><Text style={style}>{properties[dateProp].title}</Text><Text style={style}>{val}</Text></View>
+        ? <Text style={style} key={this.getNextKey()}>{val}</Text>
+        : <View style={{flexDirection: 'row'}} key={this.getNextKey()}><Text style={style}>{properties[dateProp].title}</Text><Text style={style}>{val}</Text></View>
 
-    return <Text style={[style]} numberOfLines={1}>{val}</Text>;
+    return <Text style={[style]} numberOfLines={1} key={this.getNextKey()}>{val}</Text>;
   },
   getNextKey() {
     return this.props.resource[constants.ROOT_HASH] + '_' + cnt++
