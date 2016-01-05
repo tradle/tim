@@ -19,6 +19,7 @@ var reactMixin = require('react-mixin');
 var STRUCTURED_MESSAGE_BORDER = '#3260a5' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
 var STRUCTURED_MESSAGE_COLOR = '#77ADFC' //'#4BA0F2' //'#5482C7' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
 var VERIFICATION_BG = '#FBFFE5' //'#F6FFF0';
+var DEFAULT_CURRENCY_SYMBOL = '£'
 var newProduct = require('../data/newProduct.json')
 var Actions = require('../Actions/Actions');
 var Device = require('react-native-device')
@@ -201,13 +202,14 @@ class MessageRow extends Component {
     var messageBody;
     var isSimpleMessage = model.id === constants.TYPES.SIMPLE_MESSAGE;
     var w = Device.width
+    var msgWidth = isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
 
     if (showMessageBody) {
       var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? (isNewProduct ? 'center' : 'flex-end') : 'flex-start'};
       if (resource.message) {
         if (resource.message.charAt(0) === '['  ||  resource.message.length > 30) {
           // if (!isNewProduct)
-            viewStyle.width = isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
+            viewStyle.width = msgWidth; //isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
             // viewStyle.width = isMyMessage || !hasOwnerPhoto ? 305 : 325;
           // else {
           //   viewStyle.alignSelf = 'stretch'
@@ -216,7 +218,7 @@ class MessageRow extends Component {
         }
       }
       if (!isSimpleMessage)
-        viewStyle.width = isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
+        viewStyle.width = msgWidth; //isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
         // viewStyle.width = isMyMessage || !hasOwnerPhoto ? 305 : 325;
 
       if (isVerification) {
@@ -267,9 +269,16 @@ class MessageRow extends Component {
     var inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
     var photoStyle = {};
     var height;
+
     if (inRow > 0) {
-      if (inRow === 1)
-        photoStyle = styles.bigImage;
+      if (inRow === 1) {
+        var ww = Math.max(240, msgWidth / 2)
+        var hh = ww * 280 / 240
+        photoStyle = [styles.bigImage, {
+          width: ww,
+          height: hh
+        }]
+      }
       else if (inRow === 2)
         photoStyle = styles.mediumImage;
       else
@@ -375,7 +384,7 @@ class MessageRow extends Component {
         <View style={[addStyle ? [styles.textContainer, addStyle] : styles.textContainer]} key={this.getNextKey()}>
           <View style={{flex: 1}} key={this.getNextKey()}>
             <View style={{backgroundColor: '#c6e2ef', paddingVertical: 5, borderRadius: 5, paddingHorizontal: 7, marginTop: -7, marginHorizontal: -7}} key={this.getNextKey()}>
-              <Text style={{color: '#467E9C'}} key={this.getNextKey()}>{msg}</Text>
+              <Text style={{color: '#467E9C',  fontSize: 16}} key={this.getNextKey()}>{msg}</Text>
             </View>
             {vtt}
          </View>
@@ -659,7 +668,7 @@ class MessageRow extends Component {
             <Text style={[styles.descriptionW, {color: '#FFFFEE'}]}>{prop.title}</Text>
           </View>
           <View style={{flex: 1, flexDirection: 'column'}}>
-            <Text style={[styles.descriptionW, {fontWeight: '600'}]}>{val}</Text>
+            <Text style={[styles.descriptionW, {fontWeight: '600'}]}>{(prop.ref  &&  prop.ref === constants.TYPES.MONEY ? DEFAULT_CURRENCY_SYMBOL : '') + val + (prop.units ? ' ' + prop.units : '')}</Text>
           </View>
        </View>
       )
@@ -831,7 +840,7 @@ class MessageRow extends Component {
           if (properties[v].type === 'object') {
             if (properties[v].ref) {
               if (properties[v].ref === constants.TYPES.MONEY)
-                val = '£' + resource[v]
+                val = DEFAULT_CURRENCY_SYMBOL + resource[v]
               else {
                 var m = utils.getModel(properties[v].ref).value
                 if (m.subClassOf  &&  m.subClassOf == 'tradle.Enum')
@@ -970,7 +979,7 @@ var styles = StyleSheet.create({
   bigImage: {
     width: 240,
     height: 280,
-  margin: 1,
+    margin: 1,
     borderRadius: 10
   },
   bigImageH: {
@@ -992,7 +1001,7 @@ var styles = StyleSheet.create({
     borderRadius: 10
   },
   verySmallLetters: {
-    fontSize: 12,
+    fontSize: 16,
     // alignSelf: 'flex-end',
     color: '#757575'
     // color: '#b4c3cb'
@@ -1049,7 +1058,7 @@ var styles = StyleSheet.create({
   descriptionW: {
     // flexWrap: 'wrap',
     color: '#ffffff',
-    fontSize: 14,
+    fontSize: 16,
   },
   separator: {
     height: 0.5,
