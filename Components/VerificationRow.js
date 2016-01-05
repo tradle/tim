@@ -6,7 +6,7 @@ var constants = require('@tradle/constants');
 var Icon = require('react-native-vector-icons/Ionicons');
 var reactMixin = require('react-mixin');
 var RowMixin = require('./RowMixin');
-
+var DEFAULT_CURRENCY_SYMBOL = '£'
 var {
   Image,
   PixelRatio,
@@ -55,7 +55,7 @@ class VerificationRow extends Component {
     var backlink = this.props.prop.items.backlink;
 
     if (resource.to  &&  backlink !== 'to') {
-      var row = <View style={{flexDirection: 'row'}}>
+      var row = <View style={{flexDirection: 'row'}} key={this.getNextKey()}>
                   <Text style={[styles.description, {color: '#7AAAc3'}]}>submitted by </Text>
                   <Text style={styles.description}>{resource.to.title}</Text>
                 </View>;
@@ -74,9 +74,9 @@ class VerificationRow extends Component {
     if (resource.from) {
       var contentRows = [];
       // contentRows.push(<Text style={}>verified by {resource.to.title}></Text>);
-      contentRows.push(<Text style={[styles.description, {color: '#7AAAc3'}]}>verified by </Text>);
+      contentRows.push(<Text style={[styles.description, {color: '#7AAAc3'}]} key={this.getNextKey()}>verified by </Text>);
       if (resource.organization) {
-        var orgRow = <Text style={styles.description}>{resource.organization.title}</Text>
+        var orgRow = <Text style={styles.description} key={this.getNextKey()}>{resource.organization.title}</Text>
         // var orgRow = resource.organization.photos
         //            ?  <View style={{flexDirection: 'row', flex: 1}}>
         //                  <Text style={styles.description}>{resource.organization.title}</Text>
@@ -88,35 +88,35 @@ class VerificationRow extends Component {
         // if (resource.organization.photos)
         //   contentRows.push(<Image source={{uri: utils.getImageUri(resource.organization.photos[0].url)}} style={styles.icon} />);
       }
-      row = <View style={contentRows.length == 1 ? {flex: 1} : {flexDirection: 'row'}}>
+      row = <View style={contentRows.length == 1 ? {flex: 1} : {flexDirection: 'row'}} key={this.getNextKey()}>
               {contentRows}
             </View>
       rows.push(row);
       contentRows = [];
 
-      if (backlink !== 'from') {
-        contentRows.push(<Text style={[styles.description, {color: '#7AAAc3'}]}>representative</Text>);
-        contentRows.push(<Text style={styles.description}>{resource.from.title}</Text>);
-      }
+      // if (backlink !== 'from') {
+      //   contentRows.push(<Text style={[styles.description, {color: '#7AAAc3'}]} key={this.getNextKey()}>representative</Text>);
+      //   contentRows.push(<Text style={styles.description} key={this.getNextKey()}>{resource.from.title}</Text>);
+      // }
       // if (resource.to.photos)
       //   contentRows.push(<Image source={{uri: resource.from.photos[0].url}} style={styles.icon}/>);
 
-      row = <View style={{flexDirection: 'row'}}>
+      row = <View style={{flexDirection: 'row'}} key={this.getNextKey()}>
               {contentRows}
             </View>
       rows.push(row);
     }
-    rows.push(<View style={{alignSelf: 'flex-end', marginTop: 7}}><Text style={styles.verySmallLetters}>{verificationRequest.title}</Text></View>);
+    rows.push(<View style={{alignSelf: 'flex-end', marginTop: 7}} key={this.getNextKey()}><Text style={styles.verySmallLetters}>{verificationRequest.title}</Text></View>);
 
     // var verification = <View style={{alignSelf: 'center'}}><Text style={styles.verySmallLettersCenter}>{verificationRequest.title}</Text></View>
 
     return (
-      <View key={this.props.key} style={{backgroundColor: 'white'}}>
+      <View style={{backgroundColor: 'white'}}>
         <TouchableHighlight onPress={this.props.onSelect.bind(this)}>
           <View style={{backgroundColor: '#E0EDFA', paddingVertical: 2}}>
-          <View style={styles.row} key={this.props.key + '1'}>
+          <View style={styles.row}>
             {photo}
-            <View style={styles.textContainer} key={this.props.key + '2'}>
+            <View style={styles.textContainer}>
               {rows}
             </View>
           </View>
@@ -141,15 +141,29 @@ class VerificationRow extends Component {
     var onPressCall;
 
     var isSimpleMessage = model.id === constants.TYPES.SIMPLE_MESSAGE;
-
+    var style = styles.resourceTitle
+    var labelStyle = styles.resourceTitleL
     viewCols.forEach(function(v) {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date')
         return;
-      var style = styles.resourceTitle; //(first) ? styles.resourceTitle : styles.description;
+      if (!resource[v]  &&  !properties[v].displayAs)
+        return
+       //(first) ? styles.resourceTitle : styles.description;
+
+      var units = properties[v].units ? ' (' + properties[v].units + ')': ''
 
       if (properties[v].ref) {
         if (resource[v]) {
-          vCols.push(<Text style={style} numberOfLines={first ? 2 : 1}>{resource[v].title}</Text>);
+          var symbol = (properties[v].ref === constants.TYPES.MONEY)
+                     ? DEFAULT_CURRENCY_SYMBOL
+                     : ''
+          var val = symbol + (resource[v].title || resource[v])
+          vCols.push(
+            <View style={{flexDirection: 'row', justifyContent: 'space-between'}} key={self.getNextKey()}>
+              <Text style={labelStyle}>{properties[v].title + units}</Text>
+              <Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>
+            </View>
+          );
           first = false;
         }
 
@@ -157,12 +171,12 @@ class VerificationRow extends Component {
       }
 
       if (resource[v]  &&  properties[v].type === 'string'  &&  (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0))
-        row = <Text style={style} numberOfLines={first ? 2 : 1}>{resource[v]}</Text>;
+        row = <Text style={style} numberOfLines={first ? 2 : 1} key={self.getNextKey()}>{resource[v]}</Text>;
       else if (!model.autoCreate) {
         var val = (properties[v].displayAs)
                 ? utils.templateIt(properties[v], resource)
                 : resource[v];
-        row = <Text style={style} numberOfLines={first ? 2 : 1}>{val}</Text>
+        row = <Text style={style} key={self.getNextKey()}>{val}</Text>
       }
       else {
         if (!resource[v]  ||  !resource[v].length)
@@ -172,24 +186,30 @@ class VerificationRow extends Component {
         if (msgParts.length === 2) {
           var msgModel = utils.getModel(msgParts[1]);
           if (msgModel) {
-            vCols.push(<View>
+            vCols.push(<View key={self.getNextKey()}>
                          <Text style={style}>{msgParts[0]}</Text>
                          <Text style={[style, {color: isMyMessage ? '#efffe5' : '#7AAAC3'}]}>{msgModel.value.title}</Text>
                        </View>);
             return;
           }
         }
-        var row = <Text style={style}>{resource[v]}</Text>;
+        var row = <Text style={style} key={self.getNextKey()}>{resource[v]}</Text>;
 
       }
-      if (first) {
-        row = <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                <View>{row}</View>
-                <View><Text style={styles.verySmallLetters}>{renderedRow[0]}</Text></View>
-              </View>
-        renderedRow.splice(0, 1);
-      }
-      vCols.push(row);
+      // if (first) {
+      //   row = <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+      //           <View>{row}</View>
+      //           <View><Text style={styles.verySmallLetters}>{renderedRow[0]}</Text></View>
+      //         </View>
+      //   renderedRow.splice(0, 1);
+      // }
+
+      vCols.push(
+        <View style={{flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between'}} key={self.getNextKey()}>
+          <Text style={labelStyle}>{properties[v].title + units}</Text>
+          {row}
+        </View>
+      );
       first = false;
     });
     // if (model.style)
@@ -201,110 +221,6 @@ class VerificationRow extends Component {
       });
     }
   }
-  /*
-  formatRow1(resource) {
-    var self = this;
-    var model = utils.getModel(resource[constants.TYPE]).value;
-    var viewCols = model.gridCols || model.viewCols;
-    var renderedViewCols;
-    if (!viewCols) {
-      var vCols = utils.getDisplayName(resource, model.properties);
-      return <Text style={styles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
-    }
-    var idx = viewCols.indexOf(this.props.prop.items.backlink);
-
-    // var isIdentity = model[constants.TYPE] === constants.TYPES.IDENTITY;
-    // var isOrganization = model[constants.TYPE] === 'model.Organization';
-    // switch (this.props.prop.name) {
-    // case 'myVerifications':
-    //   idx = viewCols.indexOf(prop.items.backlink);
-    //   break;
-    // case 'verifiedByMe':
-    //   idx = viewCols.indexOf('from');
-    //   break;
-    // case 'verifications':
-    //   if (isOrganization)
-    //     idx = viewCols.indexOf('organization');
-    //   break;
-    // }
-    if (idx !== -1)
-      viewCols.splice(idx, 1);
-    var vCols = [];
-    var properties = model.properties;
-    var first = true
-    var dateProp = 'time';
-
-    viewCols.forEach(function(v) {
-      if (v === dateProp)
-        return;
-
-      if (!resource[v]  &&  !properties[v].displayAs)
-        return;
-      var style = (first) ? styles.resourceTitle : styles.description;
-      if (properties[v].style)
-        style = [style, properties[v].style];
-      var ref = properties[v].ref;
-      if (ref) {
-        if (!resource[v])
-          return;
-        var row;
-        if (ref == MONEY_TYPE) {
-          row = this.getMoneyValue(ref, properties[v]);
-          if (!row)
-            return;
-        }
-        else  {
-          row = <Text style={style} numberOfLines={first ? 2 : 1}>{resource[v].title}</Text>
-          if (resource[v].photos  &&  v != 'organization') {
-            row = <View style={styles.row}>
-                    <Image source={{uri: resource[v].photos[0].url}} style={styles.icon}/>
-                    {row}
-                  </View>
-          }
-        }
-        if (first  &&  dateProp) {
-          var val = utils.formatDate(new Date(resource[dateProp]));
-          row = <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                  <View>{row}</View>
-                  <View><Text style={styles.verySmallLetters}>{val}</Text></View>
-                </View>
-        }
-
-        vCols.push(row);
-        first = false;
-      }
-      else if (properties[v].type === 'date') {
-        if (!dateProp)
-          vCols.push(self.addDateProp(v));
-        else
-          return;
-      }
-      else  {
-        // row = self.anyOtherRow(properties[v], null, style);
-        if (resource[v]  &&  (typeof resource[v] != 'string'))
-          row = <Text style={style} numberOfLines={1}>{resource[v]}</Text>;
-        // else if (!backlink  &&  resource[v]  && (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0))
-        //   row = <Text style={style} onPress={self.onPress.bind(self)} numberOfLines={1}>{resource[v]}</Text>;
-        else {
-          var val = properties[v].displayAs ? utils.templateIt(properties[v], resource) : resource[v];
-          row = <Text style={style}>{val}</Text>;
-        }
-        if (first  &&  dateProp) {
-          var val = utils.formatDate(new Date(resource[dateProp]));
-          row = <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                  <View>{row}</View>
-                  <View><Text style={styles.verySmallLetters}>{val}</Text></View>
-                </View>
-        }
-        vCols.push(row);
-        first = false;
-      }
-    });
-    if (vCols)
-      renderedViewCols = vCols;
-    return renderedViewCols;
-  }
-  */
 }
 reactMixin(VerificationRow.prototype, RowMixin);
 
@@ -314,8 +230,16 @@ var styles = StyleSheet.create({
   },
   resourceTitle: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '400',
+    // marginBottom: 2,
+  },
+  resourceTitleL: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '400',
+    paddingRight: 5,
+    color: '#999999'
     // marginBottom: 2,
   },
   description: {
@@ -329,13 +253,6 @@ var styles = StyleSheet.create({
     // justifyContent: 'space-around',
     flexDirection: 'row',
     padding: 5,
-  },
-  cellText: {
-    marginTop: 16,
-    alignSelf: 'center',
-    color: '#ffffff',
-    fontSize: 20,
-    backgroundColor: 'transparent'
   },
   cellImage: {
     backgroundColor: '#dddddd',
@@ -365,10 +282,10 @@ var styles = StyleSheet.create({
     alignSelf: 'flex-end',
     color: '#b4c3cb'
   },
-  verySmallLettersCenter: {
-    fontSize: 12,
-    color: '#2E3B4E'
-  },
+  // verySmallLettersCenter: {
+  //   fontSize: 12,
+  //   color: '#2E3B4E'
+  // },
 });
 
 module.exports = VerificationRow;
