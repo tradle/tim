@@ -33,8 +33,7 @@ class ProductChooser extends Component {
     }
     else {
       var productList = utils.getAllSubclasses(constants.TYPES.FINANCIAL_PRODUCT);
-      productList.forEach(function(p) {
-        var m = utils.getModel(p)
+      productList.forEach(function(m) {
         if (m.forms)
           products.push(m)
       })
