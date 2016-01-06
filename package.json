@@ -57,6 +57,7 @@
     "react-native-custom-action-sheet": "0.0.6",
     "react-native-device": "^1.0.1",
     "react-native-ecc": "^1.2.0",
+    "react-native-env": "tradle/react-native-env",
     "react-native-floating-label-text-input": "0.0.8",
     "react-native-floating-labels": "pgmemk/react-native-floating-labels",
     "react-native-http": "tradle/react-native-http#834492d",

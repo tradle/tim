@@ -14,7 +14,13 @@ case "$CONFIGURATION" in
   Debug)
     DEV=true
     ;;
-  Release)
+  RABOBANK)
+    DEV=false
+    ;;
+  LLOYDS)
+    DEV=false
+    ;;
+  TRADLE)
     DEV=false
     ;;
   "")

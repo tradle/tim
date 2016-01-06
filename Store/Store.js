@@ -17,6 +17,7 @@ Q.onerror = function (err) {
   throw err
 }
 
+var ENV = require('react-native-env')
 var AddressBook = require('NativeModules').AddressBook;
 var sampleData = require('../data/data');
 var voc = require('@tradle/models');
@@ -124,11 +125,11 @@ var publishedIdentity
 var driverPromise
 var ready;
 var networkName = 'testnet'
-var SERVICE_PROVIDERS = require('../data/serviceProviders')
-var SERVICE_PROVIDERS_HOST = __DEV__ ? '127.0.0.1:44444' : 'tradle.io:44444'
-// var SERVICE_PROVIDERS_HOST = __DEV__ ? '192.168.0.107:44444' : 'tradle.io:44444'
-
-// var SERVICE_PROVIDERS_HOST = 'tradle.io:44444'
+// var SERVICE_PROVIDERS_BASE_URL = __DEV__ ? 'http://127.0.0.1:44444' : ENV.bankBaseUrl
+var TOP_LEVEL_PROVIDER = ENV.topLevelProvider
+var SERVICE_PROVIDERS_BASE_URL = __DEV__ ? 'http://192.168.0.118:44444' : TOP_LEVEL_PROVIDER.baseUrl
+var HOSTED_BY = TOP_LEVEL_PROVIDER.name
+var SERVICE_PROVIDERS = ENV.providers
 
 var Store = Reflux.createStore({
   // this will set up listeners to all publishers in TodoActions, using onKeyname (or keyname) as callbacks
@@ -174,6 +175,7 @@ var Store = Reflux.createStore({
 
     // change to true if you want to wipe
     // everything and start from scratch
+    // if (true) {
     if (false) {
       await AsyncStorage.clear()
       // await BeSafe.clear()
@@ -265,6 +267,7 @@ var Store = Reflux.createStore({
         valueEncoding: 'binary'
       }),
       fallbacks: ['http://tradle.io:25667']
+      // fallbacks: ['http://localhost:25667']
     })
 
     var blockchain = new Blockchain(networkName)
@@ -302,7 +305,7 @@ var Store = Reflux.createStore({
       messenger.addRecipient(
         SERVICE_PROVIDERS[name].hash,
         // e.g. http://tradle.io:44444/rabobank/send
-        `http://${SERVICE_PROVIDERS_HOST}/${name}/send`
+        `${SERVICE_PROVIDERS_BASE_URL}/${name}/send`
       )
     }
 
@@ -2096,7 +2099,7 @@ var Store = Reflux.createStore({
         })
       })
       meDriver.on('unchained-self', function () {
-        // console.log('unchained', obj)
+        console.log('unchained self!')
         // meDriver.lookupObject(obj)
         // .then(function(obj) {
         //   // return

@@ -1,0 +1,12 @@
+{
+  "appName": "Tradle-Lloyds",
+  "topLevelProvider": {
+    "name": "Lloyds",
+    "baseUrl": "https://www.lloyds.com/tradle/"
+  },
+  "providers": {
+    "lloyds": {
+    "hash": "3a55cc6346fdd73a4ac4debd311d80cbaa53ebcd",
+    "on": false
+  }
+}

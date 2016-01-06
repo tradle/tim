@@ -16,22 +16,24 @@
 		133E29F31AD74F7200F7D852 /* libRCTLinking.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 78C398B91ACF4ADC00677621 /* libRCTLinking.a */; };
 		139105C61AF99C1200B5F7CC /* libRCTSettings.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 139105C11AF99BAD00B5F7CC /* libRCTSettings.a */; };
 		139FDEF61B0652A700C62182 /* libRCTWebSocket.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 139FDEF41B06529B00C62182 /* libRCTWebSocket.a */; };
-		13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
-		13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB11A68108700A75B9A /* LaunchScreen.xib */; };
-		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
-		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		146834051AC3E58100842450 /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 146834041AC3E56700842450 /* libReact.a */; };
+		73034A391C3C7F110028C738 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 73034A381C3C7F110028C738 /* main.m */; };
 		731F233C1C31BB4900C3B09D /* libCodePush.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 731F23291C31BB2D00C3B09D /* libCodePush.a */; };
 		731F233E1C31BB6600C3B09D /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 731F233D1C31BB6600C3B09D /* libz.tbd */; };
+		73218F171C3C8CEE00BF3C61 /* RNEnvironmentManagerIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = 73034A251C3C78990028C738 /* RNEnvironmentManagerIOS.m */; };
+		73218F181C3C8CEE00BF3C61 /* UIImagePickerManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 73FE35B91BFA137100EFB313 /* UIImagePickerManager.m */; };
+		73218F191C3C8CEE00BF3C61 /* DeviceUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 736E4EEC1C134354000AA599 /* DeviceUtil.m */; };
+		73218F1B1C3C9FA600BF3C61 /* environment.json in Resources */ = {isa = PBXBuildFile; fileRef = 73218F1A1C3C9FA600BF3C61 /* environment.json */; };
 		732EA0C81C24AB99000EFAA6 /* libRNRandomBytes.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732EA0C41C24AB90000EFAA6 /* libRNRandomBytes.a */; };
 		7365BF2E1C3461F900B0A512 /* libRNKeychain.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7365BF2D1C3461E700B0A512 /* libRNKeychain.a */; };
-		736E4EEE1C134354000AA599 /* DeviceUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 736E4EEC1C134354000AA599 /* DeviceUtil.m */; };
 		7375AA881C34766300F36CF3 /* libRNECC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7364872F1C34703500713F09 /* libRNECC.a */; };
+		73A04D811C3C87E0008E37A1 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 73A04D801C3C87E0008E37A1 /* main.m */; };
+		73A04D841C3C8843008E37A1 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 73A04D831C3C8843008E37A1 /* Images.xcassets */; };
+		73A04D871C3C8940008E37A1 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 73A04D861C3C8940008E37A1 /* AppDelegate.m */; };
 		73FE359E1BFA124200EFB313 /* libUdpSockets.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73FE359D1BFA123200EFB313 /* libUdpSockets.a */; };
 		73FE35A81BFA127A00EFB313 /* libRCTAddressBook.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73FE35A51BFA127300EFB313 /* libRCTAddressBook.a */; };
 		73FE35AF1BFA12B800EFB313 /* libLFQRCode.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73FE35AE1BFA12B300EFB313 /* libLFQRCode.a */; };
 		73FE35B61BFA132800EFB313 /* libRCTCamera.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73FE35B51BFA132200EFB313 /* libRCTCamera.a */; };
-		73FE35BA1BFA137100EFB313 /* UIImagePickerManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 73FE35B91BFA137100EFB313 /* UIImagePickerManager.m */; };
 		73FE35C11BFA13EA00EFB313 /* libBVLinearGradient.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73FE35C01BFA13E400EFB313 /* libBVLinearGradient.a */; };
 		73FE35C81BFA145500EFB313 /* libRNSearchBar.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73FE35C71BFA144F00EFB313 /* libRNSearchBar.a */; };
 		73FE35CF1BFA148B00EFB313 /* libTouchID.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73FE35CE1BFA148600EFB313 /* libTouchID.a */; };
@@ -81,7 +83,7 @@
 			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 13B07F861A680F5B00A75B9A;
-			remoteInfo = Identity;
+			remoteInfo = Tradle;
 		};
 		139105C01AF99BAD00B5F7CC /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -103,6 +105,13 @@
 			proxyType = 2;
 			remoteGlobalIDString = 83CBBA2E1A601D0E00E9B192;
 			remoteInfo = React;
+		};
+		73034A3F1C3C7F350028C738 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 73034A351C3C7F100028C738;
+			remoteInfo = "Environment Switch Script";
 		};
 		731F23281C31BB2D00C3B09D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -211,6 +220,18 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		73034A341C3C7F100028C738 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		00C302A71ABCB8CE00DB3ED1 /* RCTActionSheet.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTActionSheet.xcodeproj; path = "../node_modules/react-native/Libraries/ActionSheetIOS/RCTActionSheet.xcodeproj"; sourceTree = "<group>"; };
 		00C302B51ABCB90400DB3ED1 /* RCTGeolocation.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTGeolocation.xcodeproj; path = "../node_modules/react-native/Libraries/Geolocation/RCTGeolocation.xcodeproj"; sourceTree = "<group>"; };
@@ -223,20 +244,29 @@
 		139105B61AF99BAD00B5F7CC /* RCTSettings.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTSettings.xcodeproj; path = "../node_modules/react-native/Libraries/Settings/RCTSettings.xcodeproj"; sourceTree = "<group>"; };
 		139FDEE61B06529A00C62182 /* RCTWebSocket.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTWebSocket.xcodeproj; path = "../node_modules/react-native/Libraries/WebSocket/RCTWebSocket.xcodeproj"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* Tradle.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tradle.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = Identity/AppDelegate.h; sourceTree = "<group>"; };
-		13B07FB01A68108700A75B9A /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = Identity/AppDelegate.m; sourceTree = "<group>"; };
+		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = Tradle/AppDelegate.h; sourceTree = "<group>"; };
+		13B07FB01A68108700A75B9A /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = Tradle/AppDelegate.m; sourceTree = "<group>"; };
 		13B07FB21A68108700A75B9A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
-		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Identity/Images.xcassets; sourceTree = "<group>"; };
-		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Identity/Info.plist; sourceTree = "<group>"; };
-		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = Identity/main.m; sourceTree = "<group>"; };
+		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Tradle/Images.xcassets; sourceTree = "<group>"; };
+		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; name = Info.plist; path = Tradle/Info.plist; sourceTree = "<group>"; };
+		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = Tradle/main.m; sourceTree = "<group>"; };
 		146833FF1AC3E56700842450 /* React.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = React.xcodeproj; path = "../node_modules/react-native/React/React.xcodeproj"; sourceTree = "<group>"; };
 		52C9F227A7304496B8DC2A2A /* CodePush.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = CodePush.xcodeproj; path = "../node_modules/react-native-code-push/CodePush.xcodeproj"; sourceTree = "<group>"; };
+		73034A241C3C78990028C738 /* RNEnvironmentManagerIOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNEnvironmentManagerIOS.h; sourceTree = "<group>"; };
+		73034A251C3C78990028C738 /* RNEnvironmentManagerIOS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNEnvironmentManagerIOS.m; sourceTree = "<group>"; };
+		73034A361C3C7F100028C738 /* Environment Switch Script */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Environment Switch Script"; sourceTree = BUILT_PRODUCTS_DIR; };
+		73034A381C3C7F110028C738 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		731F233D1C31BB6600C3B09D /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
+		73218F1A1C3C9FA600BF3C61 /* environment.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = environment.json; path = Tradle/environment.json; sourceTree = "<group>"; };
 		732EA0AF1C24AB90000EFAA6 /* RNRandomBytes.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNRandomBytes.xcodeproj; path = "../node_modules/react-native-randombytes/RNRandomBytes.xcodeproj"; sourceTree = "<group>"; };
 		7364872A1C34703500713F09 /* RNECC.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNECC.xcodeproj; path = "../node_modules/react-native-ecc/ios/RNECC.xcodeproj"; sourceTree = "<group>"; };
 		7365BF281C3461E600B0A512 /* RNKeychain.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNKeychain.xcodeproj; path = "../node_modules/react-native-keychain/RNKeychain.xcodeproj"; sourceTree = "<group>"; };
 		736E4EEC1C134354000AA599 /* DeviceUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DeviceUtil.m; path = "../node_modules/react-native-device/DeviceUtil.m"; sourceTree = "<group>"; };
 		736E4EED1C134354000AA599 /* DeviceUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DeviceUtil.h; path = "../node_modules/react-native-device/DeviceUtil.h"; sourceTree = "<group>"; };
+		73A04D7D1C3C87CC008E37A1 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = Tradle/AppDelegate.h; sourceTree = "<group>"; };
+		73A04D801C3C87E0008E37A1 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = main.m; path = Tradle/main.m; sourceTree = "<group>"; };
+		73A04D831C3C8843008E37A1 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Tradle/Images.xcassets; sourceTree = "<group>"; };
+		73A04D861C3C8940008E37A1 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = Tradle/AppDelegate.m; sourceTree = "<group>"; };
 		73FE358E1BFA123100EFB313 /* UdpSockets.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = UdpSockets.xcodeproj; path = "../node_modules/react-native-udp/ios/UdpSockets.xcodeproj"; sourceTree = "<group>"; };
 		73FE359F1BFA127200EFB313 /* RCTAddressBook.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTAddressBook.xcodeproj; path = "../node_modules/react-native-addressbook/RCTAddressBook.xcodeproj"; sourceTree = "<group>"; };
 		73FE35A91BFA12B200EFB313 /* LFQRCode.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LFQRCode.xcodeproj; path = "../node_modules/react-native-barcode/QR/LFQRCode.xcodeproj"; sourceTree = "<group>"; };
@@ -287,6 +317,13 @@
 				7365BF2E1C3461F900B0A512 /* libRNKeychain.a in Frameworks */,
 				00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */,
 				7375AA881C34766300F36CF3 /* libRNECC.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		73034A331C3C7F100028C738 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -366,7 +403,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		13B07FAE1A68108700A75B9A /* Identity */ = {
+		13B07FAE1A68108700A75B9A /* Tradle */ = {
 			isa = PBXGroup;
 			children = (
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
@@ -378,7 +415,7 @@
 				736E4EEC1C134354000AA599 /* DeviceUtil.m */,
 				736E4EED1C134354000AA599 /* DeviceUtil.h */,
 			);
-			name = Identity;
+			name = Tradle;
 			sourceTree = "<group>";
 		};
 		146834001AC3E56700842450 /* Products */ = {
@@ -387,6 +424,24 @@
 				146834041AC3E56700842450 /* libReact.a */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		73034A231C3C78990028C738 /* RNEnvironmentManagerIOS */ = {
+			isa = PBXGroup;
+			children = (
+				73034A241C3C78990028C738 /* RNEnvironmentManagerIOS.h */,
+				73034A251C3C78990028C738 /* RNEnvironmentManagerIOS.m */,
+			);
+			name = RNEnvironmentManagerIOS;
+			path = "../node_modules/react-native-env/RNEnvironmentManagerIOS";
+			sourceTree = "<group>";
+		};
+		73034A371C3C7F110028C738 /* Environment Switch Script */ = {
+			isa = PBXGroup;
+			children = (
+				73034A381C3C7F110028C738 /* main.m */,
+			);
+			path = "Environment Switch Script";
 			sourceTree = "<group>";
 		};
 		731F23231C31BB2D00C3B09D /* Products */ = {
@@ -536,12 +591,19 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				73218F1A1C3C9FA600BF3C61 /* environment.json */,
+				73A04D861C3C8940008E37A1 /* AppDelegate.m */,
+				73A04D831C3C8843008E37A1 /* Images.xcassets */,
+				73A04D801C3C87E0008E37A1 /* main.m */,
+				73A04D7D1C3C87CC008E37A1 /* AppDelegate.h */,
+				73034A231C3C78990028C738 /* RNEnvironmentManagerIOS */,
 				731F233D1C31BB6600C3B09D /* libz.tbd */,
 				73FE35D01BFA14F600EFB313 /* Ionicons.ttf */,
 				73FE35B71BFA137100EFB313 /* UIImagePickerManager */,
-				13B07FAE1A68108700A75B9A /* Identity */,
+				13B07FAE1A68108700A75B9A /* Tradle */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* IdentityTests */,
+				73034A371C3C7F110028C738 /* Environment Switch Script */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 			);
 			indentWidth = 2;
@@ -553,6 +615,7 @@
 			children = (
 				13B07F961A680F5B00A75B9A /* Tradle.app */,
 				00E356EE1AD99517003FC87E /* Tradle.xctest */,
+				73034A361C3C7F100028C738 /* Environment Switch Script */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -598,11 +661,30 @@
 			buildRules = (
 			);
 			dependencies = (
+				73034A401C3C7F350028C738 /* PBXTargetDependency */,
 			);
 			name = Tradle;
 			productName = "Hello World";
 			productReference = 13B07F961A680F5B00A75B9A /* Tradle.app */;
 			productType = "com.apple.product-type.application";
+		};
+		73034A351C3C7F100028C738 /* Environment Switch Script */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 73034A3A1C3C7F110028C738 /* Build configuration list for PBXNativeTarget "Environment Switch Script" */;
+			buildPhases = (
+				73034A321C3C7F100028C738 /* Sources */,
+				73034A331C3C7F100028C738 /* Frameworks */,
+				73034A341C3C7F100028C738 /* CopyFiles */,
+				73034A411C3C7F840028C738 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Environment Switch Script";
+			productName = "Environment Switch Script";
+			productReference = 73034A361C3C7F100028C738 /* Environment Switch Script */;
+			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
 
@@ -619,6 +701,9 @@
 					};
 					13B07F861A680F5B00A75B9A = {
 						DevelopmentTeam = 94V7783F74;
+					};
+					73034A351C3C7F100028C738 = {
+						CreatedOnToolsVersion = 7.2;
 					};
 				};
 			};
@@ -727,6 +812,7 @@
 			targets = (
 				13B07F861A680F5B00A75B9A /* Tradle */,
 				00E356ED1AD99517003FC87E /* TradleTests */,
+				73034A351C3C7F100028C738 /* Environment Switch Script */,
 			);
 		};
 /* End PBXProject section */
@@ -907,8 +993,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
-				13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */,
+				73A04D841C3C8843008E37A1 /* Images.xcassets in Resources */,
+				73218F1B1C3C9FA600BF3C61 /* environment.json in Resources */,
 				73FE35D11BFA14F600EFB313 /* Ionicons.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -930,6 +1016,19 @@
 			shellPath = /bin/sh;
 			shellScript = "PATH=$(bash -l -c 'echo $PATH') ../install-app.sh";
 		};
+		73034A411C3C7F840028C738 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "function getJsonVal () {\n    python -c \"import json,sys;sys.stdout.write(json.dumps(json.load(sys.stdin)$1, sort_keys=True, indent=4))\";\n}\n\ndir=${PROJECT_DIR}/${PROJECT_NAME}\necho \"Starting environment configuration for project: \" $dir\n\n# environment variable from value passed in to xcodebuild.\n# if not specified, we default to DEV\nenv=${BDF_ENVIRONMENT}\nif [ -z \"$env\" ]\nthen\nenv=\"DEV\"\nfi\necho \"Using $env environment\"\n\n# copy the environment-specific file\ncp $dir/environment_$env.json $dir/environment.json\n\n# Date and time that we are running this build\nbuildDate=`date \"+%F %H:%M:%S\"`\ntodaysDay=`date \"+%d\"`\n\n# app settings\n#appName=`/usr/libexec/PlistBuddy -c \"Print :appName\" \"$dir/environment.plist\"`\nappName=`cat \"$dir/environment.json\" | getJsonVal \"['appName']\"`\nversion=`/usr/libexec/PlistBuddy -c \"Print :CFBundleShortVersionString\" \"${PROJECT_DIR}/${PROJECT_NAME}/Info.plist\"`\n\n#if [ \"$env\" != \"PROD\" ]\n#then\n# need to dynamically append today's day for non-prod\n#appName=\"$appName $todaysDay\"\n# Last hash from the current branch\n#version=`git log --pretty=format:\"%h\" -1`\n#fi\n\n# Build the preprocess file\ncd ${PROJECT_DIR}/${PROJECT_NAME}\npreprocessFile=\"environment_preprocess.h\"\necho \"Creating header file\"\n\necho -e \"//-----------------------------------------\" > $preprocessFile\necho -e \"// Auto generated file\" >> $preprocessFile\necho -e \"// Created $buildDate\" >> $preprocessFile\necho -e \"//-----------------------------------------\" >> $preprocessFile\necho -e \"\" >> $preprocessFile\necho -e \"#define BDF_ENVIRONMENT              $env\" >> $preprocessFile\necho -e \"#define BDF_ENVIRONMENT_LAST_COMMIT  $version\" >> $preprocessFile\necho -e \"#define BDF_ENVIRONMENT_APP_NAME     $appName\" >> $preprocessFile\n\n# dump out file to build log\ncat $preprocessFile\n\n# Force the system to process the plist file\necho \"Touching plist at: \" ${PROJECT_DIR}/${PROJECT_NAME}/${PROJECT_NAME}-Info.plist\ntouch ${PROJECT_DIR}/${PROJECT_NAME}/${PROJECT_NAME}-Info.plist\n\n# done\necho \"Done.\"";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -945,10 +1044,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
-				736E4EEE1C134354000AA599 /* DeviceUtil.m in Sources */,
-				13B07FC11A68108700A75B9A /* main.m in Sources */,
-				73FE35BA1BFA137100EFB313 /* UIImagePickerManager.m in Sources */,
+				73218F171C3C8CEE00BF3C61 /* RNEnvironmentManagerIOS.m in Sources */,
+				73218F181C3C8CEE00BF3C61 /* UIImagePickerManager.m in Sources */,
+				73218F191C3C8CEE00BF3C61 /* DeviceUtil.m in Sources */,
+				73A04D871C3C8940008E37A1 /* AppDelegate.m in Sources */,
+				73A04D811C3C87E0008E37A1 /* main.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		73034A321C3C7F100028C738 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				73034A391C3C7F110028C738 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -960,6 +1068,11 @@
 			target = 13B07F861A680F5B00A75B9A /* Tradle */;
 			targetProxy = 00E356F41AD99517003FC87E /* PBXContainerItemProxy */;
 		};
+		73034A401C3C7F350028C738 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 73034A351C3C7F100028C738 /* Environment Switch Script */;
+			targetProxy = 73034A3F1C3C7F350028C738 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
@@ -969,7 +1082,7 @@
 				13B07FB21A68108700A75B9A /* Base */,
 			);
 			name = LaunchScreen.xib;
-			path = Identity;
+			path = Tradle;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -1001,7 +1114,7 @@
 			};
 			name = Debug;
 		};
-		00E356F71AD99517003FC87E /* Release */ = {
+		00E356F71AD99517003FC87E /* TRADLE */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -1022,7 +1135,7 @@
 				PRODUCT_NAME = Tradle;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Tradle.app/Tradle";
 			};
-			name = Release;
+			name = TRADLE;
 		};
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -1037,22 +1150,23 @@
 					"$(SRCROOT)/../node_modules/react-native-ecc/ios",
 					"$(SRCROOT)/../node_modules/react-native-keychain/RNKeychainManager/**",
 				);
-				INFOPLIST_FILE = Identity/Info.plist;
+				INFOPLIST_FILE = "${PROJECT_NAME}/Info.plist";
+				INFOPLIST_PREFIX_HEADER = "${PROJECT_NAME}/environment_preprocess.h";
+				INFOPLIST_PREPROCESS = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/TiM\"",
-					"\"$(SRCROOT)/TiM\"",
+					"\"$(SRCROOT)/Tradle\"",
 				);
 				OTHER_LDFLAGS = "-ObjC";
-				PRODUCT_BUNDLE_IDENTIFIER = io.tradle;
+				PRODUCT_BUNDLE_IDENTIFIER = io.tradle.dev;
 				PRODUCT_NAME = Tradle;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
-		13B07F951A680F5B00A75B9A /* Release */ = {
+		13B07F951A680F5B00A75B9A /* TRADLE */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -1064,25 +1178,376 @@
 					"$(SRCROOT)/../node_modules/react-native-ecc/ios",
 					"$(SRCROOT)/../node_modules/react-native-keychain/RNKeychainManager/**",
 				);
-				INFOPLIST_FILE = Identity/Info.plist;
+				INFOPLIST_FILE = "${PROJECT_NAME}/Info.plist";
+				INFOPLIST_PREFIX_HEADER = "${PROJECT_NAME}/environment_preprocess.h";
+				INFOPLIST_PREPROCESS = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/Tradle\"",
+				);
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_BUNDLE_IDENTIFIER = io.tradle.lloyds;
+				PRODUCT_NAME = Tradle;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = TRADLE;
+		};
+		73034A2A1C3C79DF0028C738 /* RABOBANK */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				BDF_BUNDLE_ID = io.tradle.rabobank;
+				BDF_ENVIRONMENT = RABOBANK;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					"$(SRCROOT)/../node_modules/react-native/React/**",
+					"$(SRCROOT)/../node_modules/react-native-code-push/**",
+					"$(SRCROOT)/../node_modules/react-native-ecc/ios",
+					"$(SRCROOT)/../node_modules/react-native-keychain/RNKeychainManager/**",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = RABOBANK;
+		};
+		73034A2B1C3C79DF0028C738 /* RABOBANK */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					"$(SRCROOT)/../node_modules/react-native/React/**",
+					"$(SRCROOT)/../node_modules/react-native-code-push/**",
+					"$(SRCROOT)/../node_modules/react-native-ecc/ios",
+					"$(SRCROOT)/../node_modules/react-native-keychain/RNKeychainManager/**",
+				);
+				INFOPLIST_FILE = "${PROJECT_NAME}/Info.plist";
+				INFOPLIST_PREFIX_HEADER = "${PROJECT_NAME}/environment_preprocess.h";
+				INFOPLIST_PREPROCESS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/Tradle\"",
+				);
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_BUNDLE_IDENTIFIER = io.tradle.rabobank;
+				PRODUCT_NAME = Tradle;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = RABOBANK;
+		};
+		73034A2C1C3C79DF0028C738 /* RABOBANK */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = IdentityTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/TiM\"",
 					"\"$(SRCROOT)/TiM\"",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = Tradle;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Tradle.app/Tradle";
+			};
+			name = RABOBANK;
+		};
+		73034A2D1C3C79E90028C738 /* LLOYDS */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				BDF_BUNDLE_ID = io.tradle.lloyds;
+				BDF_ENVIRONMENT = LLOYDS;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					"$(SRCROOT)/../node_modules/react-native/React/**",
+					"$(SRCROOT)/../node_modules/react-native-code-push/**",
+					"$(SRCROOT)/../node_modules/react-native-ecc/ios",
+					"$(SRCROOT)/../node_modules/react-native-keychain/RNKeychainManager/**",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = LLOYDS;
+		};
+		73034A2E1C3C79E90028C738 /* LLOYDS */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					"$(SRCROOT)/../node_modules/react-native/React/**",
+					"$(SRCROOT)/../node_modules/react-native-code-push/**",
+					"$(SRCROOT)/../node_modules/react-native-ecc/ios",
+					"$(SRCROOT)/../node_modules/react-native-keychain/RNKeychainManager/**",
+				);
+				INFOPLIST_FILE = "${PROJECT_NAME}/Info.plist";
+				INFOPLIST_PREFIX_HEADER = "${PROJECT_NAME}/environment_preprocess.h";
+				INFOPLIST_PREPROCESS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/Tradle\"",
+				);
 				OTHER_LDFLAGS = "-ObjC";
-				PRODUCT_BUNDLE_IDENTIFIER = io.tradle.tim;
-				PRODUCT_NAME = TiM;
+				PRODUCT_BUNDLE_IDENTIFIER = io.tradle.lloyds;
+				PRODUCT_NAME = Tradle;
+				PUBLIC_HEADERS_FOLDER_PATH = "$(CONTENTS_FOLDER_PATH)/Headers";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
-			name = Release;
+			name = LLOYDS;
+		};
+		73034A2F1C3C79E90028C738 /* LLOYDS */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = IdentityTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/TiM\"",
+					"\"$(SRCROOT)/TiM\"",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = Tradle;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Tradle.app/Tradle";
+			};
+			name = LLOYDS;
+		};
+		73034A3B1C3C7F110028C738 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		73034A3C1C3C7F110028C738 /* TRADLE */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+			};
+			name = TRADLE;
+		};
+		73034A3D1C3C7F110028C738 /* RABOBANK */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+			};
+			name = RABOBANK;
+		};
+		73034A3E1C3C7F110028C738 /* LLOYDS */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+			};
+			name = LLOYDS;
 		};
 		83CBBA201A601CBA00E9B192 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				BDF_BUNDLE_ID = io.tradle.dev;
+				BDF_ENVIRONMENT = DEV;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -1122,17 +1587,19 @@
 					"$(SRCROOT)/../node_modules/react-native-ecc/ios",
 					"$(SRCROOT)/../node_modules/react-native-keychain/RNKeychainManager/**",
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 			};
 			name = Debug;
 		};
-		83CBBA211A601CBA00E9B192 /* Release */ = {
+		83CBBA211A601CBA00E9B192 /* TRADLE */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				BDF_BUNDLE_ID = io.tradle.tradle;
+				BDF_ENVIRONMENT = TRADLE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -1165,12 +1632,12 @@
 					"$(SRCROOT)/../node_modules/react-native-ecc/ios",
 					"$(SRCROOT)/../node_modules/react-native-keychain/RNKeychainManager/**",
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
 			};
-			name = Release;
+			name = TRADLE;
 		};
 /* End XCBuildConfiguration section */
 
@@ -1179,28 +1646,45 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				00E356F61AD99517003FC87E /* Debug */,
-				00E356F71AD99517003FC87E /* Release */,
+				00E356F71AD99517003FC87E /* TRADLE */,
+				73034A2C1C3C79DF0028C738 /* RABOBANK */,
+				73034A2F1C3C79E90028C738 /* LLOYDS */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = TRADLE;
 		};
 		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Tradle" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				13B07F941A680F5B00A75B9A /* Debug */,
-				13B07F951A680F5B00A75B9A /* Release */,
+				13B07F951A680F5B00A75B9A /* TRADLE */,
+				73034A2B1C3C79DF0028C738 /* RABOBANK */,
+				73034A2E1C3C79E90028C738 /* LLOYDS */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = TRADLE;
+		};
+		73034A3A1C3C7F110028C738 /* Build configuration list for PBXNativeTarget "Environment Switch Script" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				73034A3B1C3C7F110028C738 /* Debug */,
+				73034A3C1C3C7F110028C738 /* TRADLE */,
+				73034A3D1C3C7F110028C738 /* RABOBANK */,
+				73034A3E1C3C7F110028C738 /* LLOYDS */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = TRADLE;
 		};
 		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "Tradle" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				83CBBA201A601CBA00E9B192 /* Debug */,
-				83CBBA211A601CBA00E9B192 /* Release */,
+				83CBBA211A601CBA00E9B192 /* TRADLE */,
+				73034A2A1C3C79DF0028C738 /* RABOBANK */,
+				73034A2D1C3C79E90028C738 /* LLOYDS */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = TRADLE;
 		};
 /* End XCConfigurationList section */
 	};
