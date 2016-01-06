@@ -1306,7 +1306,7 @@ var Store = Reflux.createStore({
     var modelName = params.modelName;
     var meta = this.getModel(modelName).value;
     var isVerification = modelName === VERIFICATION  ||  (meta.subClassOf  &&  meta.subClassOf === VERIFICATION);
-    var chatTo = params.to;
+    var chatTo = params.to
     var prop = params.prop;
     if (typeof prop === 'string')
       prop = meta[prop];
@@ -1396,8 +1396,12 @@ var Store = Reflux.createStore({
               r.organization.photos = [orgPhotos[0]];
           }
         }
-        if (r.document  &&  r.document.id)
-          r.document = list[utils.getId(r.document.id)].value;
+        if (r.document  &&  r.document.id) {
+          var d = list[utils.getId(r.document.id)]
+          if (!d)
+            continue
+          r.document = d.value;
+        }
       }
       // HACK to not show service message in customer stream
       else if (r.message  &&  r.message.length)  {
@@ -1444,6 +1448,11 @@ var Store = Reflux.createStore({
 
         var isVerificationR = r[TYPE] === VERIFICATION  ||  this.getModel(r[TYPE]).value.subClassOf === VERIFICATION;
         var isForm = this.getModel(r[TYPE]).value.subClassOf === FORM
+        var isChatToForm = this.getModel(chatTo[TYPE]).value.subClassOf === FORM
+        if (isChatToForm  &&  r.document) {
+          if (r.document  &&  utils.getId(chatTo)  !==  utils.getId(r.document))
+            continue;
+        }
         if ((!r.message  ||  r.message.trim().length === 0) && !r.photos &&  !isVerificationR  &&  !isForm)
           // check if this is verification resource
           continue;
@@ -1452,6 +1461,8 @@ var Store = Reflux.createStore({
 
         if (fromID !== meId  &&  toID !== meId  &&  toID != meOrgId)
           continue;
+        if (!isChatToForm) {
+
         var id = toModelName + '_' + chatTo[ROOT_HASH];
         // if (isChatWithOrg) {
         //   var toOrgId = null, fromOrgId = null;
@@ -1473,6 +1484,7 @@ var Store = Reflux.createStore({
         // else
         if (fromID !== id  &&  toID != id  &&  toID != meOrgId)
           continue;
+        }
       }
       if (isVerificationR  ||  r[TYPE] === ADDITIONAL_INFO) {
         var doc = {};
@@ -2256,6 +2268,18 @@ var Store = Reflux.createStore({
             }
             if (m.subClassOf === FINANCIAL_PRODUCT)
               org.products.push(m.id)
+            else if (m.subClassOf == FORM  &&  !m.verifications) {
+              m.properties.verifications = {
+                type: 'array',
+                readOnly: true,
+                title: 'Verifications',
+                name: 'verifications',
+                items: {
+                  backlink: 'document',
+                  ref: VERIFICATION
+                }
+              }
+            }
             if (!m[ROOT_HASH])
               m[ROOT_HASH] = sha(m)
             batch.push({type: 'put', key: m.id, value: m})
