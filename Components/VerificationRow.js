@@ -29,7 +29,7 @@ class VerificationRow extends Component {
     if (resource.document  &&  resource.document.photos)
       photo = <Image source={{uri: utils.getImageUri(resource.document.photos[0].url)}}  style={styles.cellImage} />
     else
-      photo = <View style={{width: 70}} />
+      photo = <View  style={{width:10}}/> //<View style={{width: 70}} />
 
 
     // else if (resource.organization  &&  resource.organization.photos)
