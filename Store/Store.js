@@ -127,9 +127,10 @@ var ready;
 var networkName = 'testnet'
 // var SERVICE_PROVIDERS_BASE_URL = __DEV__ ? 'http://127.0.0.1:44444' : ENV.bankBaseUrl
 var TOP_LEVEL_PROVIDER = ENV.topLevelProvider
-var SERVICE_PROVIDERS_BASE_URL = __DEV__ ? 'http://192.168.0.118:44444' : TOP_LEVEL_PROVIDER.baseUrl
+var SERVICE_PROVIDERS_BASE_URL = __DEV__ ? 'http://127.0.0.1:44444' : TOP_LEVEL_PROVIDER.baseUrl
 var HOSTED_BY = TOP_LEVEL_PROVIDER.name
-var SERVICE_PROVIDERS = ENV.providers
+var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
+var SERVICE_PROVIDERS = ALL_SERVICE_PROVIDERS.topLevelProvider[TOP_LEVEL_PROVIDER.name.toLowerCase()] //ENV.providers
 
 var Store = Reflux.createStore({
   // this will set up listeners to all publishers in TodoActions, using onKeyname (or keyname) as callbacks
@@ -296,18 +297,28 @@ var Store = Reflux.createStore({
       //   port: 25778
       // }
     })
-
-    for (var name in SERVICE_PROVIDERS) {
-      if (SERVICE_PROVIDERS[name].on === false) {
-        continue
-      }
+    SERVICE_PROVIDERS.forEach(function(name) {
+      var bank = ALL_SERVICE_PROVIDERS.providers[name]
+      if (bank.on === false)
+        return
 
       messenger.addRecipient(
-        SERVICE_PROVIDERS[name].hash,
+        bank.hash,
         // e.g. http://tradle.io:44444/rabobank/send
         `${SERVICE_PROVIDERS_BASE_URL}/${name}/send`
       )
-    }
+    })
+    // for (var name in SERVICE_PROVIDERS) {
+    //   if (SERVICE_PROVIDERS[name].on === false) {
+    //     continue
+    //   }
+
+    //   messenger.addRecipient(
+    //     SERVICE_PROVIDERS[name].hash,
+    //     // e.g. http://tradle.io:44444/rabobank/send
+    //     `${SERVICE_PROVIDERS_BASE_URL}/${name}/send`
+    //   )
+    // }
 
     meDriver.ready().then(function () {
       messenger.setRootHash(meDriver.myRootHash())
@@ -2650,13 +2661,22 @@ var Store = Reflux.createStore({
       sampleData.getResources().forEach(function(r) {
         if (!r[ROOT_HASH])
           r[ROOT_HASH] = sha(r);
+        if (r[TYPE] === ORGANIZATION  &&  SERVICE_PROVIDERS)  {
+          var org
+          SERVICE_PROVIDERS.forEach(function(name) {
+            var title = ALL_SERVICE_PROVIDERS.providers[name].title
+            if (!title)
+              title = name.charAt(0).toUpperCase() + name.substring(1)
+            if (title === r.name)
+              org = r
+          })
+          if (!org)
+            return
+        }
+
         r[CUR_HASH] = r[ROOT_HASH];
         var key = r[TYPE] + '_' + r[ROOT_HASH];
-        // if (r[TYPE] === IDENTITY_MODEL)
-        //   batch.push({type: 'put', key: key, value: r, prefix: identityDb});
-        // else
-          batch.push({type: 'put', key: key, value: r});
-
+        batch.push({type: 'put', key: key, value: r});
       });
       var self = this;
       return db.batch(batch)
