@@ -116,6 +116,9 @@ class ShowPropertiesView extends Component {
             })
           }
         }
+        // Could be enum like props
+        else if (Object.keys(utils.getModel(pMeta.ref).value.properties).length === 2)
+          val = val.title
         else if (self.props.showRefResource) {
           // ex. property that is referencing to the Organization for the contact
           var value = val[constants.TYPE] ? utils.getDisplayName(val, utils.getModel(val[constants.TYPE]).value.properties) : val.title;
