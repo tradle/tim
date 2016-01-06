@@ -3,28 +3,5 @@
   "topLevelProvider": {
     "name": "Tradle",
     "baseUrl": "https://tradle.io/bank/"
-  },
-  "providers": {
-    "digibank": {
-      "hash": "4ab4e9953c2a10fbc9bc884bd447b1003540995c"
-    },
-    "relia": {
-      "hash": "178cbc9f29c68728e56122d4981c34439dbf77cc"
-    },
-    "easy": {
-      "hash": "179d536d4fc033b0e074be8d756413302ea62805"
-    },
-    "safe": {
-      "hash": "3b31cbee623a1795fd6ecb6fe650cc2d874be958"
-    },
-    "friendly": {
-      "hash": "19b1bf07e11b921b0334e711caae9eedf6748af2"
-    },
-    "europi": {
-      "hash": "d0b3f6780215cb8adfb9524810599b4f1f6444ae"
-    },
-    "people": {
-      "hash": "57bfdcacb61d2c0cbb0adb97f8eabced780e1d79"
-    }
   }
 }
