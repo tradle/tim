@@ -39,3 +39,4 @@ environment.plist
 environment.json
 environment_preprocess.h
 Info.plist
+release/
