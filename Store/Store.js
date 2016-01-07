@@ -7,7 +7,6 @@ var {
   AlertIOS
 } = React
 
-var path = require('path')
 var BeSafe = require('asyncstorage-backup')
 var Reflux = require('reflux');
 var Actions = require('../Actions/Actions');
@@ -77,9 +76,7 @@ Blockchain.throttleGet(100)
 Blockchain.throttlePost(1000)
 var midentity = require('@tradle/identity')
 var Identity = midentity.Identity
-ec.setServiceID('io.tradle.tim')
-import * as Keychain from '../utils/keychain'
-import * as ec from 'react-native-ecc'
+var defaultKeySet = midentity.defaultKeySet
 var Keeper = require('@tradle/http-keeper')
 var Wallet = require('@tradle/simple-wallet')
 var crypto = require('crypto')
@@ -130,7 +127,7 @@ var ready;
 var networkName = 'testnet'
 // var SERVICE_PROVIDERS_BASE_URL = __DEV__ ? 'http://127.0.0.1:44444' : ENV.bankBaseUrl
 var TOP_LEVEL_PROVIDER = ENV.topLevelProvider
-var SERVICE_PROVIDERS_BASE_URL = __DEV__ ? 'http://127.0.0.1:44444' : TOP_LEVEL_PROVIDER.baseUrl
+var SERVICE_PROVIDERS_BASE_URL = __DEV__ ? 'http://192.168.0.118:44444' : TOP_LEVEL_PROVIDER.baseUrl
 var HOSTED_BY = TOP_LEVEL_PROVIDER.name
 var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
 var SERVICE_PROVIDERS = ALL_SERVICE_PROVIDERS.topLevelProvider[TOP_LEVEL_PROVIDER.name.toLowerCase()] //ENV.providers
@@ -271,6 +268,8 @@ var Store = Reflux.createStore({
         valueEncoding: 'binary'
       }),
       fallbacks: ['https://tradle.io/keeper']
+      // fallbacks: ['http://tradle.io:25667']
+      // fallbacks: ['http://localhost:25667']
     })
 
     var blockchain = new Blockchain(networkName)
@@ -1810,8 +1809,8 @@ var Store = Reflux.createStore({
       }
     }
   },
-  async getDriver(me) {
-    if (driverPromise) return await driverPromise
+  getDriver(me) {
+    if (driverPromise) return driverPromise
 
     var allMyIdentities = list[MY_IDENTITIES_MODEL + '_1']
 
@@ -1860,22 +1859,22 @@ var Store = Reflux.createStore({
         }
         if (!me.organization) {
           this.trigger({action:'addItem', resource: me, error: 'The code was not registered with'})
-          throw new Error('The code was not registered with')
+          return Q.reject(new Error('The code was not registered with'))
         }
       }
       if (!mePub) {
-        mePriv = await Keychain.generateNewSet({
+        var keys = defaultKeySet({
           networkName: 'testnet'
         })
-
         mePub = []
-        mePriv.forEach(function(key) {
+        mePriv = []
+        keys.forEach(function(key) {
+          mePriv.push(key.exportPrivate())
           mePub.push(key.exportPublic())
         })
       }
-
       me['pubkeys'] = mePub
-      // me['privkeys'] = mePriv
+      me['privkeys'] = mePriv
       me[NONCE] = me[NONCE] || this.getNonce()
     }
 
@@ -1907,13 +1906,7 @@ var Store = Reflux.createStore({
       // db.put(key, me)
     }
 
-    if (!mePriv) {
-      mePriv = await Keychain.lookupKeys(mePub)
-    }
-
-    mePriv = mePriv.map(kiki.toKey, kiki)
-    driverPromise = this.buildDriver(Identity.fromJSON(publishedIdentity), mePriv, PORT)
-    return await driverPromise
+    return driverPromise = this.buildDriver(Identity.fromJSON(publishedIdentity), mePriv, PORT)
   },
 
   makePublishingIdentity(me) {
@@ -1955,6 +1948,15 @@ var Store = Reflux.createStore({
         })
       }
     })
+    // .then(function(status) {
+    //   if (!status.queued  &&  !status.current) {
+    //     return Q.ninvoke(meDriver.wallet, 'balance')
+    //   }
+    // })
+    // .then(function(balance) {
+    //   if (balance)
+    //     return meDriver.publishMyIdentity()
+    // })
     .catch(function(err) {
       debugger
     })
@@ -1980,27 +1982,6 @@ var Store = Reflux.createStore({
       }
     })
   },
-  // loadAddressBook() {
-  //   return
-
-  //   var self = this;
-  //   return Q.ninvoke(AddressBook, 'checkPermission')
-  //   .then(function(permission) {
-  //     // AddressBook.PERMISSION_AUTHORIZED || AddressBook.PERMISSION_UNDEFINED || AddressBook.PERMISSION_DENIED
-  //     if(permission === AddressBook.PERMISSION_UNDEFINED)
-  //       return Q.ninvoke(AddressBook, 'requestPermission')
-  //              .then(function(permission) {
-  //                if (permission === AddressBook.PERMISSION_AUTHORIZED)
-  //                  return self.storeContacts.bind(self);
-  //              });
-  //     else if (permission === AddressBook.PERMISSION_AUTHORIZED)
-  //       return self.storeContacts()
-  //     else if (permission === AddressBook.PERMISSION_DENIED) {
-  //       //handle permission denied
-  //       return
-  //     }
-  //   })
-  // },
   storeContacts() {
     var dfd = Q.defer();
     var self = this;
