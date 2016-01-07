@@ -85,7 +85,7 @@ class MessageRow extends Component {
     var isNewProduct, isConfirmation
     var isVerification = resource[constants.TYPE] === constants.TYPES.VERIFICATION;
     if (isVerification)
-      onPressCall = this.props.onSelect;
+      onPressCall = this.verify.bind(this);
     else {
       var ret = this.formatRow(isMyMessage, model, resource, renderedRow);
       onPressCall = ret ? ret.onPressCall : null
@@ -432,17 +432,15 @@ class MessageRow extends Component {
   verify(event) {
     var resource = this.props.resource;
     var isVerification = resource[constants.TYPE] === constants.TYPES.VERIFICATION;
-    if (isVerification)
-      resource = resource.document;
+    var r = isVerification ? resource.document : resource
 
     var passProps = {
-      resource: resource,
+      resource: r
     }
     if (!isVerification)
       passProps.verify = true
 
-
-    var model = utils.getModel(resource[constants.TYPE]).value;
+    var model = utils.getModel(r[constants.TYPE]).value;
     var route = {
       id: 5,
       component: MessageView,
@@ -450,19 +448,20 @@ class MessageRow extends Component {
       passProps: passProps,
       title: model.title
     }
+    if (isVerification)
+      route.verification = resource
     if (this.isMyMessage()) {
       route.rightButtonTitle = 'Edit';
       route.onRightButtonPress = {
-          title: 'Edit',
-          component: NewResource,
-          titleTextColor: '#7AAAC3',
-          id: 4,
-          passProps: {
-            resource: resource,
-            metadata: model,
-            callback: this.props.onSelect,
-            resourceKey: model.id + '_' + resource[constants.ROOT_HASH]
-          }
+        title: 'Edit',
+        component: NewResource,
+        titleTextColor: '#7AAAC3',
+        id: 4,
+        passProps: {
+          resource: r,
+          metadata: model,
+          callback: this.props.onSelect
+        }
       };
     }
     this.props.navigator.push(route);
