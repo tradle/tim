@@ -2263,7 +2263,7 @@ var Store = Reflux.createStore({
 
         var fOrg = from.organization
         var org = fOrg ? list[utils.getId(fOrg)].value : null
-        if (val[TYPE] === FORGOT_YOU) {
+        if (onMessage  &&  val[TYPE] === FORGOT_YOU) {
           this.forgotYou(org)
           return
         }
