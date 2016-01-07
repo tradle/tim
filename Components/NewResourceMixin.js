@@ -2,7 +2,6 @@
 
 var React = require('react-native');
 var ResourceList = require('./ResourceList')
-// var FloatLabelTextInput = require('react-native-floating-label-text-input');
 var FloatLabel = require('react-native-floating-labels')
 var Icon = require('react-native-vector-icons/Ionicons');
 var utils = require('../utils/utils');
