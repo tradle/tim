@@ -38,8 +38,13 @@ class PhotoView extends Component {
     var currentPhoto = this.state.currentPhoto || (hasPhoto  &&  resource.photos[0]);
     if (!currentPhoto) {
       var icon;
-      if (model.id === constants.TYPES.IDENTITY)
-        return <Icon name={'person'} size={200}  color='#f6f6f4'  style={styles.icon} />
+      if (model.id === constants.TYPES.IDENTITY) {
+        return (
+          <View style={{height: 250, alignSelf: 'center', justifyContent: 'center'}}>
+            <Icon name={'person'} size={200}  color='#f6f6f4'  style={styles.icon} />
+          </View>
+        )
+      }
 
         // icon = 'ion|person';
       else
@@ -83,9 +88,9 @@ var styles = StyleSheet.create({
     alignSelf: 'stretch'
   },
   icon: {
-    // marginTop: 50,
-    width: 200,
-    height: 200,
+    marginTop: -20,
+    width: 210,
+    height: 230,
     alignSelf: 'center'
   },
 });
