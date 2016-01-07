@@ -224,18 +224,6 @@ class MessageRow extends Component {
       if (isVerification) {
         var msgModel = utils.getModel(resource.document[constants.TYPE]).value;
         var orgName = resource.organization  ? resource.organization.title : ''
-        // renderedRow = <View key={this.getNextKey()}>
-        //                 <View style={{flexDirection: 'row', backgroundColor: '#289427', paddingVertical: 5, paddingHorizontal: 7, marginHorizontal: -7, marginTop: -5, justifyContent: 'center'}} key={this.getNextKey()}>
-        //                   <Icon style={styles.verificationIcon} size={20} name={'android-done'} />
-        //                   <Text style={{fontSize: 16, fontWeight: '600', color: '#FBFFE5', alignSelf: 'center'}}> Verified by {orgName}</Text>
-        //                 </View>
-        //                 <View style={{paddingTop: 5}} key={this.getNextKey()}>
-        //                   {this.formatDocument(msgModel, resource, this.verify.bind(this))}
-        //                 </View>
-        //                 <View style={{paddingTop: 5}} key={this.getNextKey()}>
-        //                   <Text style={[styles.resourceTitle, {alignSelf:'flex-end', fontSize: 18, color: '#CCCCB2'}]}>{msgModel.title}</Text>
-        //                 </View>
-        //               </View>
         renderedRow = <View>
                         <View style={{flexDirection: 'row', backgroundColor: '#289427', paddingVertical: 5, paddingHorizontal: 7, marginHorizontal: -7, marginTop: -5, borderRadius: 5, justifyContent: 'center'}}>
                           <Icon style={styles.verificationIcon} size={20} name={'android-done'} />
