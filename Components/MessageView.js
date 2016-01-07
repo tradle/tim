@@ -76,6 +76,11 @@ class MessageView extends Component {
           <ShowMessageRefList  resource={resource} navigator={this.props.navigator} additionalInfo={this.additionalInfo.bind(this)}/>
         // <FromToView resource={resource} navigator={this.props.navigator} />
         // <MoreLikeThis resource={resource} navigator={this.props.navigator}/>
+    var verificationTxID
+    if (this.props.verification  &&  this.props.verification.txId)
+      verificationTxID = <Text style={styles.itemTitle}>{'http://tbtc.blockr.io/tx/info/' + verificationTxID}</Text>
+    else
+      verificationTxID = <View />
     return (
       <ScrollView  ref='this' style={styles.container}>
         <View style={styles.band}><Text style={styles.date}>{date}</Text></View>
@@ -91,6 +96,7 @@ class MessageView extends Component {
             <ShowPropertiesView navigator={this.props.navigator} resource={resource} excludedProperties={['tradle.Message.message', 'time', 'photos']} showRefResource={this.getRefResource.bind(this)}/>
             {embed}
           </View>
+          {verificationTxID}
         </View>
       </ScrollView>
     );
