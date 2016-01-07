@@ -332,8 +332,8 @@ var NewResourceMixin = {
   //   }
   // },
   myCustomTemplate(params) {
-    var labelStyle = {color: '#cccccc', fontSize: 20, paddingLeft: 10, paddingBottom: 10};
-    var textStyle = {color: '#000000', fontSize: 20, paddingLeft: 10, paddingBottom: 10};
+    var labelStyle = {color: '#cccccc', fontSize: 18, paddingLeft: 10, paddingBottom: 10};
+    var textStyle = {color: '#000000', fontSize: 18, paddingLeft: 10, paddingBottom: 10};
     var resource = /*this.props.resource ||*/ this.state.resource
     var label, style
     var propLabel, propName
