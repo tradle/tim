@@ -22,7 +22,6 @@ var reactMixin = require('react-mixin');
 var Device = require('react-native-device');
 var BG_IMAGE = require('../img/bg.png')
 var equal = require('deep-equal')
-var FloatLabelTextInput = require('react-native-floating-label-text-input');
 var CustomActionSheet = require('react-native-custom-action-sheet');
 
 // var KeyboardEvents = require('react-native-keyboardevents');
