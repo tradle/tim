@@ -24,6 +24,7 @@ var {
   ScrollView,
   View,
   Text,
+  ArticleView,
   Component
 } = React;
 
@@ -76,11 +77,19 @@ class MessageView extends Component {
           <ShowMessageRefList  resource={resource} navigator={this.props.navigator} additionalInfo={this.additionalInfo.bind(this)}/>
         // <FromToView resource={resource} navigator={this.props.navigator} />
         // <MoreLikeThis resource={resource} navigator={this.props.navigator}/>
-    var verificationTxID
-    if (this.props.verification  &&  this.props.verification.txId)
-      verificationTxID = <Text style={styles.itemTitle}>{'http://tbtc.blockr.io/tx/info/' + verificationTxID}</Text>
-    else
+    var verificationTxID, separator
+    if (this.props.verification  &&  this.props.verification.txId) {
+      verificationTxID =
+          <View style={{padding :10, flex: 1}}>
+            <Text style={styles.title}>Verification Transaction Id</Text>
+            <Text style={styles.verification} onPress={this.onPress.bind(this, 'http://tbtc.blockr.io/tx/info/' + this.props.verification.txId)}>{this.props.verification.txId}</Text>
+          </View>
+      separator = <View style={styles.separator}></View>
+    }
+    else {
       verificationTxID = <View />
+      separator = <View />
+    }
     return (
       <ScrollView  ref='this' style={styles.container}>
         <View style={styles.band}><Text style={styles.date}>{date}</Text></View>
@@ -94,9 +103,10 @@ class MessageView extends Component {
           <View style={styles.rowContainer}>
             <View><Text style={styles.itemTitle}>{resource.message}</Text></View>
             <ShowPropertiesView navigator={this.props.navigator} resource={resource} excludedProperties={['tradle.Message.message', 'time', 'photos']} showRefResource={this.getRefResource.bind(this)}/>
+            {separator}
+            {verificationTxID}
             {embed}
           </View>
-          {verificationTxID}
         </View>
       </ScrollView>
     );
@@ -172,6 +182,7 @@ class MessageView extends Component {
     this.props.navigator.push({
       id: 7,
       component: ArticleView,
+      backButtonTitle: 'Back',
       passProps: {url: url}
     });
   }
@@ -206,6 +217,23 @@ var styles = StyleSheet.create({
     margin: 5,
     marginBottom: 0,
     color: '#7AAAC3'
+  },
+  title: {
+    fontSize: 16,
+    fontFamily: 'Avenir Next',
+    marginHorizontal: 7,
+    color: '#9b9b9b'
+  },
+  verification: {
+    fontSize: 16,
+    marginVertical: 3,
+    marginHorizontal: 7,
+    color: '#7AAAC3',
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#eeeeee',
+    marginHorizontal: 15
   },
   photoBG: {
     backgroundColor: '#CEE7F5',
