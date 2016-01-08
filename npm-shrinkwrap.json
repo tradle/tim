@@ -2815,15 +2815,15 @@
                           "from": "node-pre-gyp@>=0.6.17 <0.7.0",
                           "resolved": "https://registry.npmjs.org/node-pre-gyp/-/node-pre-gyp-0.6.17.tgz"
                         },
-                        "are-we-there-yet": {
-                          "version": "1.0.4",
-                          "from": "are-we-there-yet@~1.0.0",
-                          "resolved": "https://registry.npmjs.org/are-we-there-yet/-/are-we-there-yet-1.0.4.tgz"
-                        },
                         "ansi": {
                           "version": "0.3.0",
                           "from": "ansi@~0.3.0",
                           "resolved": "https://registry.npmjs.org/ansi/-/ansi-0.3.0.tgz"
+                        },
+                        "are-we-there-yet": {
+                          "version": "1.0.4",
+                          "from": "are-we-there-yet@~1.0.0",
+                          "resolved": "https://registry.npmjs.org/are-we-there-yet/-/are-we-there-yet-1.0.4.tgz"
                         },
                         "core-util-is": {
                           "version": "1.0.2",
@@ -6438,7 +6438,7 @@
     "react-native-env": {
       "version": "0.0.5",
       "from": "tradle/react-native-env",
-      "resolved": "git://github.com/tradle/react-native-env.git#7236cee9d9df4d013e5a9fcefaa89eb678d6c841"
+      "resolved": "git://github.com/tradle/react-native-env.git#19361827c84ad4a3a9d761fdadd8d65f0e814856"
     },
     "react-native-floating-labels": {
       "version": "1.0.0",
