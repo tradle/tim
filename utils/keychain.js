@@ -8,6 +8,8 @@ import * as RNKeychain from 'react-native-keychain'
 import { pick } from './utils'
 import { ec as ellipticEC } from 'elliptic'
 
+let debug = require('debug')('tim-keychain')
+
 let notFound = Q.reject(new Error('NotFound'))
 let ellipticCurves = {}
 let getCurve = function (name) {
@@ -168,6 +170,28 @@ function extendKey (key, keyProps) {
   }, keyProps))
 
   kikiKey._sign = key.sign
-  kikiKey._verify = key.verify
+  // let maxAttempts = 3
+  // kikiKey._sign = function (hash, cb) {
+  //   let attempts = 0
+  //   trySign()
+
+  //   function trySign () {
+  //     key.sign(hash, function (err, sig) {
+  //       if (!err) return cb(null, sig)
+
+  //       if (!/34018/.test(err.message)) {
+  //         if (attempts++ < maxAttempts) {
+  //           debug('34018...trying again')
+  //           trySign()
+  //         }
+
+  //         debug('giving up on 34018')
+  //         return cb(err)
+  //       }
+
+  //       return trySign()
+  //     })
+  //   }
+  // }
   return kikiKey
 }
