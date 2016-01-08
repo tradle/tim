@@ -439,6 +439,8 @@ class MessageRow extends Component {
     }
     if (!isVerification)
       passProps.verify = true
+    else
+      passProps.verification = resource
 
     var model = utils.getModel(r[constants.TYPE]).value;
     var route = {
@@ -448,8 +450,6 @@ class MessageRow extends Component {
       passProps: passProps,
       title: model.title
     }
-    if (isVerification)
-      route.verification = resource
     if (this.isMyMessage()) {
       route.rightButtonTitle = 'Edit';
       route.onRightButtonPress = {
