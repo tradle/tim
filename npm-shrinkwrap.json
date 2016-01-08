@@ -2820,15 +2820,15 @@
                           "from": "ansi@~0.3.0",
                           "resolved": "https://registry.npmjs.org/ansi/-/ansi-0.3.0.tgz"
                         },
-                        "are-we-there-yet": {
-                          "version": "1.0.4",
-                          "from": "are-we-there-yet@~1.0.0",
-                          "resolved": "https://registry.npmjs.org/are-we-there-yet/-/are-we-there-yet-1.0.4.tgz"
-                        },
                         "core-util-is": {
                           "version": "1.0.2",
                           "from": "core-util-is@~1.0.0",
                           "resolved": "https://registry.npmjs.org/core-util-is/-/core-util-is-1.0.2.tgz"
+                        },
+                        "are-we-there-yet": {
+                          "version": "1.0.4",
+                          "from": "are-we-there-yet@~1.0.0",
+                          "resolved": "https://registry.npmjs.org/are-we-there-yet/-/are-we-there-yet-1.0.4.tgz"
                         },
                         "debug": {
                           "version": "0.7.4",
@@ -2845,15 +2845,15 @@
                           "from": "delegates@^0.1.0",
                           "resolved": "https://registry.npmjs.org/delegates/-/delegates-0.1.0.tgz"
                         },
-                        "gauge": {
-                          "version": "1.2.2",
-                          "from": "gauge@~1.2.0",
-                          "resolved": "https://registry.npmjs.org/gauge/-/gauge-1.2.2.tgz"
-                        },
                         "isarray": {
                           "version": "0.0.1",
                           "from": "isarray@0.0.1",
                           "resolved": "https://registry.npmjs.org/isarray/-/isarray-0.0.1.tgz"
+                        },
+                        "gauge": {
+                          "version": "1.2.2",
+                          "from": "gauge@~1.2.0",
+                          "resolved": "https://registry.npmjs.org/gauge/-/gauge-1.2.2.tgz"
                         },
                         "lodash._createpadding": {
                           "version": "3.6.1",
@@ -6433,7 +6433,7 @@
     "react-native-ecc": {
       "version": "1.2.2",
       "from": "react-native-ecc@latest",
-      "resolved": "file:../react-native-ecc"
+      "resolved": "https://registry.npmjs.org/react-native-ecc/-/react-native-ecc-1.2.2.tgz"
     },
     "react-native-env": {
       "version": "0.0.5",
