@@ -27,9 +27,9 @@
 		732EA0C81C24AB99000EFAA6 /* libRNRandomBytes.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732EA0C41C24AB90000EFAA6 /* libRNRandomBytes.a */; };
 		7365BF2E1C3461F900B0A512 /* libRNKeychain.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7365BF2D1C3461E700B0A512 /* libRNKeychain.a */; };
 		7375AA881C34766300F36CF3 /* libRNECC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7364872F1C34703500713F09 /* libRNECC.a */; };
-		73A04D811C3C87E0008E37A1 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 73A04D801C3C87E0008E37A1 /* main.m */; };
-		73A04D841C3C8843008E37A1 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 73A04D831C3C8843008E37A1 /* Images.xcassets */; };
-		73A04D871C3C8940008E37A1 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 73A04D861C3C8940008E37A1 /* AppDelegate.m */; };
+		7378BB5B1C3F5B5600D57C92 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
+		7378BB5C1C3F5B5600D57C92 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
+		7378BB5D1C3F5B7300D57C92 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		73FE359E1BFA124200EFB313 /* libUdpSockets.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73FE359D1BFA123200EFB313 /* libUdpSockets.a */; };
 		73FE35A81BFA127A00EFB313 /* libRCTAddressBook.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73FE35A51BFA127300EFB313 /* libRCTAddressBook.a */; };
 		73FE35AF1BFA12B800EFB313 /* libLFQRCode.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73FE35AE1BFA12B300EFB313 /* libLFQRCode.a */; };
@@ -263,10 +263,6 @@
 		7365BF281C3461E600B0A512 /* RNKeychain.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNKeychain.xcodeproj; path = "../node_modules/react-native-keychain/RNKeychain.xcodeproj"; sourceTree = "<group>"; };
 		736E4EEC1C134354000AA599 /* DeviceUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DeviceUtil.m; path = "../node_modules/react-native-device/DeviceUtil.m"; sourceTree = "<group>"; };
 		736E4EED1C134354000AA599 /* DeviceUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DeviceUtil.h; path = "../node_modules/react-native-device/DeviceUtil.h"; sourceTree = "<group>"; };
-		73A04D7D1C3C87CC008E37A1 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = Tradle/AppDelegate.h; sourceTree = "<group>"; };
-		73A04D801C3C87E0008E37A1 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = main.m; path = Tradle/main.m; sourceTree = "<group>"; };
-		73A04D831C3C8843008E37A1 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Tradle/Images.xcassets; sourceTree = "<group>"; };
-		73A04D861C3C8940008E37A1 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = Tradle/AppDelegate.m; sourceTree = "<group>"; };
 		73FE358E1BFA123100EFB313 /* UdpSockets.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = UdpSockets.xcodeproj; path = "../node_modules/react-native-udp/ios/UdpSockets.xcodeproj"; sourceTree = "<group>"; };
 		73FE359F1BFA127200EFB313 /* RCTAddressBook.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTAddressBook.xcodeproj; path = "../node_modules/react-native-addressbook/RCTAddressBook.xcodeproj"; sourceTree = "<group>"; };
 		73FE35A91BFA12B200EFB313 /* LFQRCode.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LFQRCode.xcodeproj; path = "../node_modules/react-native-barcode/QR/LFQRCode.xcodeproj"; sourceTree = "<group>"; };
@@ -406,6 +402,7 @@
 		13B07FAE1A68108700A75B9A /* Tradle */ = {
 			isa = PBXGroup;
 			children = (
+				73218F1A1C3C9FA600BF3C61 /* environment.json */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
@@ -591,11 +588,6 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				73218F1A1C3C9FA600BF3C61 /* environment.json */,
-				73A04D861C3C8940008E37A1 /* AppDelegate.m */,
-				73A04D831C3C8843008E37A1 /* Images.xcassets */,
-				73A04D801C3C87E0008E37A1 /* main.m */,
-				73A04D7D1C3C87CC008E37A1 /* AppDelegate.h */,
 				73034A231C3C78990028C738 /* RNEnvironmentManagerIOS */,
 				731F233D1C31BB6600C3B09D /* libz.tbd */,
 				73FE35D01BFA14F600EFB313 /* Ionicons.ttf */,
@@ -993,9 +985,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				73A04D841C3C8843008E37A1 /* Images.xcassets in Resources */,
 				73218F1B1C3C9FA600BF3C61 /* environment.json in Resources */,
 				73FE35D11BFA14F600EFB313 /* Ionicons.ttf in Resources */,
+				7378BB5D1C3F5B7300D57C92 /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1027,7 +1019,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "function getJsonVal () {\n    python -c \"import json,sys;sys.stdout.write(json.dumps(json.load(sys.stdin)$1, sort_keys=True, indent=4))\";\n}\n\ndir=${PROJECT_DIR}/${PROJECT_NAME}\necho \"Starting environment configuration for project: \" $dir\n\n# environment variable from value passed in to xcodebuild.\n# if not specified, we default to DEV\nenv=${BDF_ENVIRONMENT}\nif [ -z \"$env\" ]\nthen\nenv=\"DEV\"\nfi\necho \"Using $env environment\"\n\n# copy the environment-specific file\ncp $dir/environment_$env.json $dir/environment.json\n\n# Date and time that we are running this build\nbuildDate=`date \"+%F %H:%M:%S\"`\ntodaysDay=`date \"+%d\"`\n\n# app settings\n#appName=`/usr/libexec/PlistBuddy -c \"Print :appName\" \"$dir/environment.plist\"`\nappName=`cat \"$dir/environment.json\" | getJsonVal \"['appName']\"`\nversion=`/usr/libexec/PlistBuddy -c \"Print :CFBundleShortVersionString\" \"${PROJECT_DIR}/${PROJECT_NAME}/Info.plist\"`\n\n#if [ \"$env\" != \"PROD\" ]\n#then\n# need to dynamically append today's day for non-prod\n#appName=\"$appName $todaysDay\"\n# Last hash from the current branch\n#version=`git log --pretty=format:\"%h\" -1`\n#fi\n\n# Build the preprocess file\ncd ${PROJECT_DIR}/${PROJECT_NAME}\npreprocessFile=\"environment_preprocess.h\"\necho \"Creating header file\"\n\necho -e \"//-----------------------------------------\" > $preprocessFile\necho -e \"// Auto generated file\" >> $preprocessFile\necho -e \"// Created $buildDate\" >> $preprocessFile\necho -e \"//-----------------------------------------\" >> $preprocessFile\necho -e \"\" >> $preprocessFile\necho -e \"#define BDF_ENVIRONMENT              $env\" >> $preprocessFile\necho -e \"#define BDF_ENVIRONMENT_LAST_COMMIT  $version\" >> $preprocessFile\necho -e \"#define BDF_ENVIRONMENT_APP_NAME     $appName\" >> $preprocessFile\n\n# dump out file to build log\ncat $preprocessFile\n\n# Force the system to process the plist file\necho \"Touching plist at: \" ${PROJECT_DIR}/${PROJECT_NAME}/${PROJECT_NAME}-Info.plist\ntouch ${PROJECT_DIR}/${PROJECT_NAME}/${PROJECT_NAME}-Info.plist\n\n# done\necho \"Done.\"";
+			shellScript = ../setup_env.sh;
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -1044,11 +1036,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7378BB5B1C3F5B5600D57C92 /* AppDelegate.m in Sources */,
+				7378BB5C1C3F5B5600D57C92 /* main.m in Sources */,
 				73218F171C3C8CEE00BF3C61 /* RNEnvironmentManagerIOS.m in Sources */,
 				73218F181C3C8CEE00BF3C61 /* UIImagePickerManager.m in Sources */,
 				73218F191C3C8CEE00BF3C61 /* DeviceUtil.m in Sources */,
-				73A04D871C3C8940008E37A1 /* AppDelegate.m in Sources */,
-				73A04D811C3C87E0008E37A1 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
