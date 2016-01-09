@@ -11,13 +11,10 @@ module.exports = {
     ],
     lloyds: ['lloyds'],
     tradle: [
-      "digibank",
-      "relia",
       "easy",
       "safe",
       "friendly",
-      "europi",
-      "people"
+      "europi"
     ]
   },
   providers: {
