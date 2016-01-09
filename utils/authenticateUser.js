@@ -5,7 +5,7 @@ import Q from 'q'
 
 var SETUP_MSG = 'Please set up Touch ID first, so the app can better protect your data.'
 var AUTH_FAILED_MSG = 'Authentication failed'
-var AUTHENTICATION_EXPIRES_IN = 60000
+var AUTHENTICATION_EXPIRES_IN = 300000
 var authenticated = false
 
 export function unauthenticateUser () {
