@@ -69,8 +69,8 @@ class ResourceList extends Component {
     if (this.props.prop)
       params.prop = utils.getModel(this.props.resource[constants.TYPE]).value.properties[this.props.prop.name];
 
-    this.state.isLoading = true;
-    Actions.list(params);
+    // this.state.isLoading = true;
+    utils.onNextTransitionEnd(this.props.navigator, () => Actions.list(params));
   }
   componentDidMount() {
     this.listenTo(Store, 'onListUpdate');
@@ -246,7 +246,7 @@ class ResourceList extends Component {
     }
     if (isIdentity)
       route.title = resource.firstName
-    if (isIdentity  ||  isOrganization) {
+    if (isIdentity) { //  ||  isOrganization) {
       route.rightButtonTitle = 'Profile'
       route.onRightButtonPress = {
         title: title,
@@ -578,11 +578,14 @@ class ResourceList extends Component {
   }
   render() {
     // AlertIOS.alert('Rendering list ' + this.state.isLoading)
-    if (this.state.isLoading)
-      return <View/>
+    // if (this.state.isLoading)
+    //   return <View/>
     var content;
     var model = utils.getModel(this.props.modelName).value;
-    if (this.state.dataSource.getRowCount() === 0  &&  this.props.modelName !== constants.TYPES.IDENTITY) {
+    if (this.state.dataSource.getRowCount() === 0              &&
+        this.props.modelName !== constants.TYPES.IDENTITY      &&
+        this.props.modelName !== constants.TYPES.VERIFICATION  &&
+        this.props.modelName !== constants.TYPES.ORGANIZATION) {
       content = <NoResources
                   filter={this.state.filter}
                   model={model}
