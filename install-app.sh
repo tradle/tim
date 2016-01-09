@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Copyright (c) 2015-present, Facebook, Inc.
 # All rights reserved.
 #
@@ -10,6 +11,8 @@
 # This script is supposed to be invoked as part of Xcode build process
 # and relies on envoronment variables (including PWD) set by Xcode
 
+DATE=`date +%Y-%m-%d:%H:%M:%S`
+LOCAL_RELEASE_DIR="release-$DATE"
 DEV=false
 case "$CONFIGURATION" in
   Debug)
@@ -24,7 +27,7 @@ case "$CONFIGURATION" in
   TRADLE)
     ;;
   "")
-    DEST="release" # build bundle to local dir
+    DEST=$LOCAL_RELEASE_DIR # build bundle to local dir
     ;;
   *)
     echo "Unsupported value of \$CONFIGURATION=$CONFIGURATION"
@@ -49,15 +52,18 @@ elif [[ -x "$(command -v brew)" && -s "$(brew --prefix nvm)/nvm.sh" ]]; then
   . "$(brew --prefix nvm)/nvm.sh"
 fi
 
-# if [ -f ios/main.jsbundle ]; then
-#   cp ios/main.jsbundle $DEST/main.jsbundle
-#   cp -r ios/assets $DEST/
-# else
-  react-native bundle \
-    --entry-file index.ios.js \
-    --platform ios \
-    --dev $DEV \
-    --bundle-output "$DEST/main.jsbundle" \
-    --assets-dest "$DEST" \
-    --verbose
-# fi
+echo "writing bundle and assets to $DEST"
+react-native bundle \
+  --entry-file index.ios.js \
+  --platform ios \
+  --dev $DEV \
+  --bundle-output "$DEST/main.jsbundle" \
+  --assets-dest "$DEST" \
+  --verbose
+
+if [ "$DEV" == false ]; then
+  echo "copying bundle and assets to $LOCAL_RELEASE_DIR"
+  mkdir -p "$LOCAL_RELEASE_DIR"
+  cp "$DEST/main.jsbundle" "$LOCAL_RELEASE_DIR/"
+  cp -r "$DEST/assets" "$LOCAL_RELEASE_DIR/"
+fi
