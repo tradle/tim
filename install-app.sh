@@ -11,7 +11,7 @@
 # This script is supposed to be invoked as part of Xcode build process
 # and relies on envoronment variables (including PWD) set by Xcode
 
-DATE=`date +%Y-%m-%d:%H:%M:%S`
+DATE=`date +%Y-%m-%d-%H-%M-%S`
 LOCAL_RELEASE_DIR="release-$DATE"
 DEV=false
 case "$CONFIGURATION" in
@@ -57,6 +57,7 @@ react-native bundle \
   --entry-file index.ios.js \
   --platform ios \
   --dev $DEV \
+  --sourcemap-output "$DEST/main.jsbundle.map" \
   --bundle-output "$DEST/main.jsbundle" \
   --assets-dest "$DEST" \
   --verbose
@@ -65,5 +66,6 @@ if [ "$DEV" == false ]; then
   echo "copying bundle and assets to $LOCAL_RELEASE_DIR"
   mkdir -p "$LOCAL_RELEASE_DIR"
   cp "$DEST/main.jsbundle" "$LOCAL_RELEASE_DIR/"
+  cp "$DEST/main.jsbundle.map" "$LOCAL_RELEASE_DIR/"
   cp -r "$DEST/assets" "$LOCAL_RELEASE_DIR/"
 fi
