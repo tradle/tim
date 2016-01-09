@@ -150,7 +150,9 @@ class VerificationRow extends Component {
         return
        //(first) ? styles.resourceTitle : styles.description;
 
-      var units = properties[v].units ? ' (' + properties[v].units + ')': ''
+      var units = properties[v].units && properties[v].units.charAt(0) !== '['
+                ? ' (' + properties[v].units + ')'
+                : ''
 
       if (properties[v].ref) {
         if (resource[v]) {
