@@ -56,18 +56,22 @@ class MessageTypeRow extends Component {
                  ? [styles.row, {backgroundColor: STRUCTURED_MESSAGE_COLOR}]
                  /*: noMessage ? {}*/ : styles.row;
 
+    // var messageBody =
+    //   <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
+    //     <View style={[rowStyle, {paddingLeft: 10}]}>
+    //       <View style={addStyle ? [styles.textContainer, addStyle] : styles.textContainer}>
+    //         <View style={{flex: 1}}>
+    //           {renderedRow}
+    //        </View>
+    //       </View>
+    //       {ownerPhoto}
+    //     </View>
+    //   </TouchableHighlight>
+
     var messageBody =
       <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
-        <View style={[rowStyle, {paddingLeft: 10}]}>
-          <View style={addStyle ? [styles.textContainer, addStyle] : styles.textContainer}>
-            <View style={{flex: 1}}>
-              {renderedRow}
-           </View>
-          </View>
-          {ownerPhoto}
-        </View>
+          {renderedRow}
       </TouchableHighlight>
-
     var viewStyle = { margin:1, backgroundColor: '#f7f7f7' }
 
     return (
@@ -89,6 +93,7 @@ var styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: '400',
     marginVertical: 15,
+    paddingLeft: 10
   },
   resourceTitle: {
     flex: 1,
@@ -117,15 +122,6 @@ var styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: '#569bff',
   },
-  warnImage: {
-    backgroundColor: '#dddddd',
-    height: 45,
-    marginRight: 5,
-    width: 45,
-    borderRadius: 10,
-    borderColor: '#cccccc',
-    borderWidth: 1
-  },
   msgImage: {
     backgroundColor: '#dddddd',
     height: 40,
@@ -134,30 +130,6 @@ var styles = StyleSheet.create({
     borderRadius: 20,
     borderColor: '#cccccc',
     borderWidth: 1
-  },
-  bigImage: {
-    width: 240,
-    height: 280,
-    margin: 1,
-    borderRadius: 10
-  },
-  bigImageH: {
-    width: 240,
-    height: 170,
-    margin: 1,
-    borderRadius: 10
-  },
-  mediumImage: {
-    width: 120,
-    height: 120,
-    margin: 1,
-    borderRadius: 10
-  },
-  image: {
-    width: 80,
-    height: 80,
-    margin: 1,
-    borderRadius: 10
   },
   ownerImage: {
     backgroundColor: '#dddddd',
@@ -169,12 +141,6 @@ var styles = StyleSheet.create({
     borderRadius: 15,
     borderColor: '#cccccc',
     borderWidth: 1
-  },
-  verySmallLetters: {
-    fontSize: 12,
-    alignSelf: 'flex-end',
-    color: '#757575'
-    // color: '#b4c3cb'
   },
 });
 
