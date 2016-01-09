@@ -10,28 +10,21 @@
 # This script is supposed to be invoked as part of Xcode build process
 # and relies on envoronment variables (including PWD) set by Xcode
 
+DEV=false
 case "$CONFIGURATION" in
   Debug)
     DEV=true
     ;;
+  Release)
+    ;;
   RABOBANK)
-    DEV=false
     ;;
   LLOYDS)
-    DEV=false
     ;;
   TRADLE)
-    DEV=false
     ;;
   "")
-    react-native bundle \
-      --entry-file index.ios.js \
-      --platform ios \
-      --dev false \
-      --bundle-output "ios/main.jsbundle" \
-      --assets-dest "ios/"
-    # echo "$0 must be invoked by Xcode"
-    exit 1
+    DEST="release" # build bundle to local dir
     ;;
   *)
     echo "Unsupported value of \$CONFIGURATION=$CONFIGURATION"
@@ -43,7 +36,9 @@ esac
 cd ..
 
 set -x
-DEST=$CONFIGURATION_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH
+if [ -z "$DEST" ]; then
+  DEST=$CONFIGURATION_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH
+fi
 
 # Define NVM_DIR and source the nvm.sh setup script
 [ -z "$NVM_DIR" ] && export NVM_DIR="$HOME/.nvm"
