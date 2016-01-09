@@ -1093,7 +1093,7 @@
 				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = io.tradle.tim;
-				PRODUCT_NAME = TiM;
+				PRODUCT_NAME = Tradle;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
