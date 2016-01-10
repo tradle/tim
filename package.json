@@ -120,6 +120,8 @@
     "babel-plugin-transform-async-functions": "^6.3.13",
     "babel-plugin-transform-object-rest-spread": "^6.3.13",
     "babel-plugin-transform-regenerator": "^6.3.13",
-    "memdown": "^1.1.0"
+    "memdown": "^1.1.0",
+    "minimist": "^1.2.0",
+    "source-map": "^0.5.3"
   }
 }
