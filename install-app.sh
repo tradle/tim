@@ -11,7 +11,7 @@
 # This script is supposed to be invoked as part of Xcode build process
 # and relies on envoronment variables (including PWD) set by Xcode
 
-DATE=`date +%Y-%m-%d-%H-%M-%S`
+DATE=`date +%s`
 LOCAL_RELEASE_DIR="release-$DATE"
 DEV=false
 case "$CONFIGURATION" in
