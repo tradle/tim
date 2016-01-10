@@ -11,8 +11,11 @@
 # This script is supposed to be invoked as part of Xcode build process
 # and relies on envoronment variables (including PWD) set by Xcode
 
-DATE=`date +%s`
-LOCAL_RELEASE_DIR="release-$DATE"
+buildPlist="$PRODUCT_NAME/Info.plist"
+bundleVersion=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" $buildPlist)
+gitHash=$(git rev-parse HEAD)
+LOCAL_RELEASE_DIR="release/$bundleVersion/${gitHash:0:10}"
+echo $LOCAL_RELEASE_DIR
 DEV=false
 case "$CONFIGURATION" in
   Debug)
