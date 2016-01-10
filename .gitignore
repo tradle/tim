@@ -41,3 +41,6 @@ environment_preprocess.h
 Tradle/Info.plist
 Identity/Info.plist
 release/
+release-*/
+Dockerfile*
+*.sublime*
