@@ -39,4 +39,5 @@ environment.plist
 environment.json
 environment_preprocess.h
 Tradle/Info.plist
+Identity/Info.plist
 release/
