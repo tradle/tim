@@ -45,7 +45,7 @@ class MessageRow extends Component {
     var isMyMessage;
   }
   shouldComponentUpdate(nextProps, nextState) {
-    return !equal(this.props.resource, nextProps.resource)
+    return !equal(this.props.resource, nextProps && nextProps.resource)
   }
   render() {
     var resource = this.props.resource;
