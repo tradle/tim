@@ -92,7 +92,7 @@ class TiMApp extends Component {
 
   componentDidMount() {
     if (CodePush) {
-      CodePush.sync({ updateDialog: true, installMode: CodePush.InstallMode.ON_NEXT_RESUME });
+      CodePush.sync({ updateDialog: true, installMode: CodePush.InstallMode.IMMEDIATE });
     }
 
     LinkingIOS.addEventListener('url', this._handleOpenURL.bind(this));
