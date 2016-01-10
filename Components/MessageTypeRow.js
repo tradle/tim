@@ -68,17 +68,21 @@ class MessageTypeRow extends Component {
     //     </View>
     //   </TouchableHighlight>
 
-    var messageBody =
-      <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
+    var viewStyle = { margin:1, backgroundColor: '#f7f7f7' }
+    return (
+      <TouchableHighlight style={viewStyle} onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
           {renderedRow}
       </TouchableHighlight>
-    var viewStyle = { margin:1, backgroundColor: '#f7f7f7' }
-
-    return (
-      <View style={viewStyle} key={resource}>
-        {messageBody}
-      </View>
     );
+    // var messageBody =
+    //   <TouchableHighlight style={viewStyle} onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
+    //       {renderedRow}
+    //   </TouchableHighlight>
+    // return (
+    //   <View style={viewStyle} key={resource}>
+    //     {messageBody}
+    //   </View>
+    // );
   }
 }
 
