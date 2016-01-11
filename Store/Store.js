@@ -48,13 +48,24 @@ var TYPE = constants.TYPE
 var ROOT_HASH = constants.ROOT_HASH
 var CUR_HASH  = constants.CUR_HASH
 var PREV_HASH  = constants.CUR_HASH
+
 var ORGANIZATION = constants.TYPES.ORGANIZATION
 var IDENTITY = constants.TYPES.IDENTITY
 var MESSAGE = constants.TYPES.MESSAGE
 var SIMPLE_MESSAGE = constants.TYPES.SIMPLE_MESSAGE
 var FINANCIAL_PRODUCT = constants.TYPES.FINANCIAL_PRODUCT
 var PRODUCT_LIST = constants.TYPES.PRODUCT_LIST
+var IDENTITY_MODEL = constants.TYPES.IDENTITY;
+var ADDITIONAL_INFO = constants.TYPES.ADDITIONAL_INFO;
+var VERIFICATION = constants.TYPES.VERIFICATION;
+var FORM = constants.TYPES.FORM;
+var MODEL = constants.TYPES.MODEL;
+var CUSTOMER_WAITING = constants.TYPES.CUSTOMER_WAITING
+var MY_IDENTITIES_MODEL = 'tradle.MyIdentities';
+
 var FORGOT_YOU = 'tradle.ForgotYou'
+
+
 var PUB_ID = 'publishedIdentity'
 var WELCOME_INTERVAL = 600000
 
@@ -102,13 +113,6 @@ var PORT = 51086
 // var jsonqueryEngine = require('jsonquery-engine');
 // var Device = require('react-native-device');
 // var Sublevel = require('level-sublevel')
-var IDENTITY_MODEL = constants.TYPES.IDENTITY;
-
-var ADDITIONAL_INFO = constants.TYPES.ADDITIONAL_INFO;
-var VERIFICATION = constants.TYPES.VERIFICATION;
-var FORM = constants.TYPES.FORM;
-var MODEL = constants.TYPES.MODEL;
-var MY_IDENTITIES_MODEL = 'tradle.MyIdentities';
 var TIM_PATH_PREFIX = 'me'
 
 var models = {};
@@ -1062,12 +1066,12 @@ var Store = Reflux.createStore({
     var me  = utils.getMe()
     if (!me)
       return
-    var result = this.searchMessages({to: me, modelName: constants.TYPES.CUSTOMER_WAITING, isForgetting: true});
+    var result = this.searchMessages({to: me, modelName: CUSTOMER_WAITING, isForgetting: true});
     if (result.length)
       delete result[result.length - 1]
     return this.cleanup(result)
     .then(() => {
-      result = this.searchMessages({to: me, modelName: constants.TYPES.PRODUCT_LIST, isForgetting: true});
+      result = this.searchMessages({to: me, modelName: PRODUCT_LIST, isForgetting: true});
       if (result.length)
         delete result[result.length - 1]
       return this.cleanup(result)
@@ -2336,13 +2340,25 @@ var Store = Reflux.createStore({
           batch.push({type: 'put', key: utils.getId(org), value: org})
         }
         var to = list[IDENTITY + '_' + obj.to[ROOT_HASH]].value
-        val.to = {
-          id: to[TYPE] + '_' + to[ROOT_HASH],
-          title: obj.to.identity.toJSON().name.formatted
+        if (model.subClassOf  &&  model.subClassOf === FORM) {
+          val.to = {
+            id: from[TYPE] + '_' + from[ROOT_HASH],
+            title: obj.from.identity.toJSON().name.formatted
+          }
+          val.from = {
+            id: to[TYPE] + '_' + to[ROOT_HASH],
+            title: obj.to.identity.toJSON().name.formatted
+          }
         }
-        val.from = {
-          id: from[TYPE] + '_' + from[ROOT_HASH],
-          title: obj.from.identity.toJSON().name.formatted
+        else {
+          val.to = {
+            id: to[TYPE] + '_' + to[ROOT_HASH],
+            title: obj.to.identity.toJSON().name.formatted
+          }
+          val.from = {
+            id: from[TYPE] + '_' + from[ROOT_HASH],
+            title: obj.from.identity.toJSON().name.formatted
+          }
         }
         if (!val.time)
           val.time = obj.timestamp
@@ -2593,7 +2609,7 @@ var Store = Reflux.createStore({
   },
   cleanup(result) {
     if (!result.length)
-      return
+      return Q()
     var batch = []
     result.forEach(function(r){
       batch.push({type: 'del', key: r[TYPE] + '_' + r[ROOT_HASH], value: r})
