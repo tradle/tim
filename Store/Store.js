@@ -1058,7 +1058,23 @@ var Store = Reflux.createStore({
         })
     }
   },
-  onShare(resource, to) {
+  onCleanup() {
+    var me  = utils.getMe()
+    if (!me)
+      return
+    var result = this.searchMessages({to: me, modelName: constants.TYPES.CUSTOMER_WAITING, isForgetting: true});
+    if (result.length)
+      delete result[result.length - 1]
+    return this.cleanup(result)
+    .then(() => {
+      result = this.searchMessages({to: me, modelName: constants.TYPES.PRODUCT_LIST, isForgetting: true});
+      if (result.length)
+        delete result[result.length - 1]
+      return this.cleanup(result)
+    })
+
+  },
+  onShare(resource, to, formResource) {
     if (to[TYPE] === ORGANIZATION)
       to = this.getRepresentative(ORGANIZATION + '_' + to[ROOT_HASH])
     if (!to)
@@ -1070,7 +1086,17 @@ var Store = Reflux.createStore({
     }
 
     opts[CUR_HASH] = resource[CUR_HASH]
+    var key = formResource[TYPE] + '_' + formResource[ROOT_HASH]
     return meDriver.share(opts)
+    .then(function() {
+      var key = formResource[TYPE] + '_' + formResource[ROOT_HASH]
+       var r = list[key].value
+       r.documentCreated = true
+       return db.put(key, r)
+    })
+    .catch(function(err) {
+      debugger
+    })
   },
   checkRequired(resource, meta) {
     var type = resource[TYPE];
@@ -1430,8 +1456,15 @@ var Store = Reflux.createStore({
         }
         if (chatTo.organization  &&  r[TYPE] === constants.TYPES.CUSTOMER_WAITING) {
           var rid = utils.getId(chatTo.organization);
-          if (rid.indexOf(ORGANIZATION) == 0  &&  (!me.organization  ||  rid !== utils.getId(me.organization)))
+
+          if (rid.indexOf(ORGANIZATION) == 0) {
+            var org = list[utils.getId(r.to)].value.organization
+            var orgId = utils.getId(org)
+            if (params.isForgetting  &&  orgId === rid)
+              foundResources[key] = r
+            if (!me.organization  ||  rid !== utils.getId(me.organization))
              continue;
+           }
         }
         // Show only the last 'Choose the product' message
         // else if (r[TYPE] === PRODUCT_LIST) {
@@ -1543,7 +1576,6 @@ var Store = Reflux.createStore({
       result.push(lastPL)
 
     // find possible verifications for the requests that were not yet fulfilled from other verification providers
-
     result.sort(function(a, b) {
       return a.time - b.time;
     });
@@ -2523,21 +2555,25 @@ var Store = Reflux.createStore({
     })
   },
   forgotYou(resource) {
-    var result = this.searchMessages({to: resource, modelName: MESSAGE});
+    var result = this.searchMessages({to: resource, modelName: MESSAGE, isForgetting: true});
     if (!result || !result.length) {
       this.trigger({action: 'messageList', message: 'There is nothing to forget', resource: resource})
       return
     }
-    var batch = []
-    result.forEach(function(r){
-      batch.push({type: 'del', key: r[TYPE] + '_' + r[ROOT_HASH], value: r})
-    })
     var self = this
-    return db.batch(batch)
+    return this.cleanup(result)
     .then(function() {
-      result.forEach(function(r) {
-        delete list[r[TYPE] + '_' + r[ROOT_HASH]]
-      })
+
+    // var batch = []
+    // result.forEach(function(r){
+    //   batch.push({type: 'del', key: r[TYPE] + '_' + r[ROOT_HASH], value: r})
+    // })
+
+    // return db.batch(batch)
+    // .then(function() {
+    //   result.forEach(function(r) {
+    //     delete list[r[TYPE] + '_' + r[ROOT_HASH]]
+    //   })
       var msg = {
         _t: FORGOT_YOU,
         _z: self.getNonce(),
@@ -2553,6 +2589,22 @@ var Store = Reflux.createStore({
       }
       msg.id = sha(msg)
       self.trigger({action: 'messageList', list: [msg], resource: resource})
+    })
+  },
+  cleanup(result) {
+    if (!result.length)
+      return
+    var batch = []
+    result.forEach(function(r){
+      batch.push({type: 'del', key: r[TYPE] + '_' + r[ROOT_HASH], value: r})
+    })
+    var self = this
+    return db.batch(batch)
+    .then(function() {
+      result.forEach(function(r) {
+        delete list[r[TYPE] + '_' + r[ROOT_HASH]]
+      })
+      return Q()
     })
   },
   onTalkToRepresentative(resource, org) {
