@@ -1,10 +1,11 @@
 
 import { AlertIOS } from 'react-native'
-import TouchID from 'react-native-touch-id'
+import LocalAuth from 'react-native-local-auth'
 import Q from 'q'
 
-var SETUP_MSG = 'Please set up Touch ID first, so the app can better protect your data.'
+// var SETUP_MSG = 'Please set up Touch ID first, so the app can better protect your data.'
 var AUTH_FAILED_MSG = 'Authentication failed'
+var timeout
 var AUTHENTICATION_EXPIRES_IN = 300000
 var authenticated = false
 
@@ -15,9 +16,14 @@ export function unauthenticateUser () {
 export function authenticateUser () {
   if (authenticated) return Q(authenticated)
 
-  return TouchID.authenticate('please unlock the app', true) // fall back to passcode
+  return LocalAuth.authenticate({
+      reason: 'please unlock the app',
+      fallbackToPasscode: true,
+      suppressEnterPassword: true
+    })
     .then(() => {
-      setTimeout(unauthenticateUser, AUTHENTICATION_EXPIRES_IN)
+      if (timeout) clearTimeout(timeout)
+      timeout = setTimeout(unauthenticateUser, AUTHENTICATION_EXPIRES_IN)
       return authenticated = true
     })
     .catch((err) => {
@@ -25,13 +31,13 @@ export function authenticateUser () {
       switch (err.name) {
         case 'LAErrorUserCancel':
           break
-        case 'RCTTouchIDNotSupported':
-          // fall through
-        case 'LAErrorTouchIDNotAvailable':
-          throw new Error('device not supported')
-        case 'LAErrorTouchIDNotEnrolled':
-          message = SETUP_MSG
-          break
+        // case 'RCTTouchIDNotSupported':
+        //   // fall through
+        // case 'LAErrorTouchIDNotAvailable':
+        //   throw new Error('device not supported')
+        // case 'LAErrorTouchIDNotEnrolled':
+        //   message = SETUP_MSG
+        //   break
         default:
           message = AUTH_FAILED_MSG
           break

@@ -18,8 +18,15 @@ require('./utils/crypto')
 require('stream')
 // require('./timmy')
 var React = require('react-native');
+// require('ErrorUtils').setGlobalHandler(function (e, isFatal) {
+//   console.error('Failed to handle error:')
+//   console.error(e)
+//   if (__DEV__) throw e
+// })
+
 var CodePush = !__DEV__ && require('react-native-code-push')
 var ResourceList = require('./Components/ResourceList');
+var VideoPlayer = require('./Components/VideoPlayer')
 // var GridList = require('./Components/GridList');
 var TimHome = require('./Components/TimHome');
 var ResourceTypesScreen = require('./Components/ResourceTypesScreen');
@@ -340,18 +347,11 @@ class TiMApp extends Component {
                 content={props.content}
                 fullScreen={props.fullScreen}
                 dimension={props.dimension} />
+    case 18:
+      return <VideoPlayer {...props} />
     case 10:
     default: // 10
-      return <ResourceList navigator={nav}
-                  filter={props.filter}
-                  resource={props.resource}
-                  prop={props.prop}
-                  returnRoute={props.returnRoute}
-                  callback={props.callback}
-                  isAggregation={props.isAggregation}
-                  isRegistration={props.isRegistration}
-                  sortProperty={props.sortProperty}
-                  modelName={props.modelName} />;
+      return <ResourceList navigator={nav} {...props} />;
     }
   }
 }

@@ -2,6 +2,7 @@
 
 var React = require('react-native');
 var ResourceList = require('./ResourceList');
+var VideoPlayer = require('./VideoPlayer')
 var AddNewIdentity = require('./AddNewIdentity');
 var NewResource = require('./NewResource');
 var ResourceView = require('./ResourceView');
@@ -14,6 +15,7 @@ var sampleData = require('../data/data');
 var constants = require('@tradle/constants');
 var BACKUPS = require('asyncstorage-backup')
 var Device = require('react-native-device');
+var debug = require('debug')('Tradle-Home')
 var TradleLogo = require('../img/Tradle.png')
 var TradleWhite = require('../img/TradleW.png')
 var BG_IMAGE = require('../img/bg.png')
@@ -208,11 +210,36 @@ class TimHome extends Component {
     }
     else {
       // route.title = 'Introduce yourself';
-      route.passProps.callback = this.popToTop.bind(this);
+      route.passProps.callback = (me) => {
+        this.showVideoTour(() => this.popToTop(me))
+      }
+
       route.passProps.editCols = ['firstName', 'lastName']
       route.titleTintColor = '#ffffff'
     }
     this.props.navigator.push(route);
+  }
+  showVideoTour(cb) {
+    let onEnd = (err) => {
+      if (err) debug('failed to load video', err)
+      cb()
+    }
+
+    this.props.navigator.replace({
+      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      id: 18,
+//      title: 'Tradle',
+//      titleTintColor: '#eeeeee',
+      component: VideoPlayer,
+      rightButtonTitle: __DEV__ ? 'Skip' : undefined,
+      passProps: {
+        uri: 'videotour',
+        onEnd: onEnd,
+        onError: onEnd,
+        navigator: this.props.navigator
+      },
+      onRightButtonPress: onEnd
+    })
   }
   popToTop(resource) {
     utils.setMe(resource);
@@ -372,11 +399,11 @@ class TimHome extends Component {
     )
   }
   async _pressHandler() {
-    if (this.state.authenticated)
-      this.showContactsOrRegister()
-    else if (await authenticateUser()) {
-      this.showContactsOrRegister()
+    if (!this.state.authenticated) {
+      if (!await authenticateUser()) return
     }
+
+    this.showContactsOrRegister()
   }
 }
           // {spinner}

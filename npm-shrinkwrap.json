@@ -86,7 +86,6 @@
     "@tradle/cb-blockr": {
       "version": "3.1.2",
       "from": "@tradle/cb-blockr@3.1.2",
-      "resolved": "https://registry.npmjs.org/@tradle/cb-blockr/-/cb-blockr-3.1.2.tgz",
       "dependencies": {
         "async": {
           "version": "0.9.2",
@@ -120,12 +119,10 @@
     "@tradle/http-keeper": {
       "version": "3.0.4",
       "from": "@tradle/http-keeper@3.0.4",
-      "resolved": "https://registry.npmjs.org/@tradle/http-keeper/-/http-keeper-3.0.4.tgz",
       "dependencies": {
         "@tradle/bitkeeper-client": {
           "version": "2.0.1",
-          "from": "@tradle/bitkeeper-client@2.0.1",
-          "resolved": "https://registry.npmjs.org/@tradle/bitkeeper-client/-/bitkeeper-client-2.0.1.tgz"
+          "from": "@tradle/bitkeeper-client@2.0.1"
         },
         "@tradle/offline-keeper": {
           "version": "3.0.3",
@@ -144,7 +141,6 @@
     "@tradle/identity": {
       "version": "1.1.0",
       "from": "@tradle/identity@1.1.0",
-      "resolved": "https://registry.npmjs.org/@tradle/identity/-/identity-1.1.0.tgz",
       "dependencies": {
         "hashmap": {
           "version": "2.0.4",
@@ -172,8 +168,8 @@
     },
     "@tradle/models": {
       "version": "1.2.2",
-      "from": "../models",
-      "resolved": "file:../models"
+      "from": "@tradle/models@1.2.2",
+      "resolved": "https://registry.npmjs.org/@tradle/models/-/models-1.2.2.tgz"
     },
     "@tradle/otr": {
       "version": "0.2.15",
@@ -188,12 +184,10 @@
     "@tradle/simple-wallet": {
       "version": "1.0.0",
       "from": "@tradle/simple-wallet@1.0.0",
-      "resolved": "https://registry.npmjs.org/@tradle/simple-wallet/-/simple-wallet-1.0.0.tgz",
       "dependencies": {
         "@tradle/spender": {
           "version": "1.0.4",
-          "from": "@tradle/spender@1.0.4",
-          "resolved": "https://registry.npmjs.org/@tradle/spender/-/spender-1.0.4.tgz"
+          "from": "@tradle/spender@1.0.4"
         }
       }
     },
@@ -2859,15 +2853,15 @@
                           "from": "lodash._createpadding@^3.0.0",
                           "resolved": "https://registry.npmjs.org/lodash._createpadding/-/lodash._createpadding-3.6.1.tgz"
                         },
-                        "lodash.pad": {
-                          "version": "3.1.1",
-                          "from": "lodash.pad@^3.0.0",
-                          "resolved": "https://registry.npmjs.org/lodash.pad/-/lodash.pad-3.1.1.tgz"
-                        },
                         "lodash.padleft": {
                           "version": "3.1.1",
                           "from": "lodash.padleft@^3.0.0",
                           "resolved": "https://registry.npmjs.org/lodash.padleft/-/lodash.padleft-3.1.1.tgz"
+                        },
+                        "lodash.pad": {
+                          "version": "3.1.1",
+                          "from": "lodash.pad@^3.0.0",
+                          "resolved": "https://registry.npmjs.org/lodash.pad/-/lodash.pad-3.1.1.tgz"
                         },
                         "lodash.padright": {
                           "version": "3.1.1",
@@ -2894,15 +2888,15 @@
                           "from": "readable-stream@^1.1.13",
                           "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-1.1.13.tgz"
                         },
-                        "semver": {
-                          "version": "5.1.0",
-                          "from": "semver@~5.1.0",
-                          "resolved": "https://registry.npmjs.org/semver/-/semver-5.1.0.tgz"
-                        },
                         "strip-json-comments": {
                           "version": "1.0.4",
                           "from": "strip-json-comments@~1.0.4",
                           "resolved": "https://registry.npmjs.org/strip-json-comments/-/strip-json-comments-1.0.4.tgz"
+                        },
+                        "semver": {
+                          "version": "5.1.0",
+                          "from": "semver@~5.1.0",
+                          "resolved": "https://registry.npmjs.org/semver/-/semver-5.1.0.tgz"
                         },
                         "uid-number": {
                           "version": "0.0.3",
@@ -5450,15 +5444,15 @@
           "from": "https://registry.npmjs.org/arrify/-/arrify-1.0.1.tgz",
           "resolved": "https://registry.npmjs.org/arrify/-/arrify-1.0.1.tgz"
         },
-        "babel-helper-define-map": {
-          "version": "6.3.13",
-          "from": "https://registry.npmjs.org/babel-helper-define-map/-/babel-helper-define-map-6.3.13.tgz",
-          "resolved": "https://registry.npmjs.org/babel-helper-define-map/-/babel-helper-define-map-6.3.13.tgz"
-        },
         "babel-helper-function-name": {
           "version": "6.3.15",
           "from": "https://registry.npmjs.org/babel-helper-function-name/-/babel-helper-function-name-6.3.15.tgz",
           "resolved": "https://registry.npmjs.org/babel-helper-function-name/-/babel-helper-function-name-6.3.15.tgz"
+        },
+        "babel-helper-define-map": {
+          "version": "6.3.13",
+          "from": "https://registry.npmjs.org/babel-helper-define-map/-/babel-helper-define-map-6.3.13.tgz",
+          "resolved": "https://registry.npmjs.org/babel-helper-define-map/-/babel-helper-define-map-6.3.13.tgz"
         },
         "babel-helper-get-function-arity": {
           "version": "6.3.13",
@@ -6394,8 +6388,8 @@
     },
     "react-native-floating-labels": {
       "version": "1.0.0",
-      "from": "pgmemk/react-native-floating-labels",
-      "resolved": "git://github.com/pgmemk/react-native-floating-labels.git#28f6727ce3c440af72bf276583d4fdecee95d3cf"
+      "from": "git://github.com/pgmemk/react-native-floating-labels.git#2af308c915dc44adb256714d24a28f85436a12e4",
+      "resolved": "git://github.com/pgmemk/react-native-floating-labels.git#2af308c915dc44adb256714d24a28f85436a12e4"
     },
     "react-native-http": {
       "version": "1.0.0",
@@ -6547,6 +6541,11 @@
       "from": "https://registry.npmjs.org/react-native-linear-gradient/-/react-native-linear-gradient-1.3.0.tgz",
       "resolved": "https://registry.npmjs.org/react-native-linear-gradient/-/react-native-linear-gradient-1.3.0.tgz"
     },
+    "react-native-local-auth": {
+      "version": "1.0.0",
+      "from": "git+https://github.com/tradle/react-native-local-auth.git#ff799a7cedf083eb16d84eaa8d2a69c184cf997e",
+      "resolved": "git+https://github.com/tradle/react-native-local-auth.git#ff799a7cedf083eb16d84eaa8d2a69c184cf997e"
+    },
     "react-native-progress": {
       "version": "2.2.0",
       "from": "https://registry.npmjs.org/react-native-progress/-/react-native-progress-2.2.0.tgz",
@@ -6566,11 +6565,6 @@
       "version": "2.5.0",
       "from": "git+https://github.com/tradle/react-native-search-bar.git#352772007f5312a61ce4c826781bda9ffce73ae2",
       "resolved": "git+https://github.com/tradle/react-native-search-bar.git#352772007f5312a61ce4c826781bda9ffce73ae2"
-    },
-    "react-native-touch-id": {
-      "version": "1.2.2",
-      "from": "git://github.com/tradle/react-native-touch-id.git#abe40389736b0d0e823e026c10cdfc483f73d8a8",
-      "resolved": "git://github.com/tradle/react-native-touch-id.git#abe40389736b0d0e823e026c10cdfc483f73d8a8"
     },
     "react-native-udp": {
       "version": "1.2.0",
@@ -6670,6 +6664,18 @@
               "resolved": "https://registry.npmjs.org/y18n/-/y18n-3.2.0.tgz"
             }
           }
+        }
+      }
+    },
+    "react-native-video": {
+      "version": "0.6.1",
+      "from": "https://registry.npmjs.org/react-native-video/-/react-native-video-0.6.1.tgz",
+      "resolved": "https://registry.npmjs.org/react-native-video/-/react-native-video-0.6.1.tgz",
+      "dependencies": {
+        "keymirror": {
+          "version": "0.1.1",
+          "from": "https://registry.npmjs.org/keymirror/-/keymirror-0.1.1.tgz",
+          "resolved": "https://registry.npmjs.org/keymirror/-/keymirror-0.1.1.tgz"
         }
       }
     },
@@ -7010,11 +7016,6 @@
           "from": "https://registry.npmjs.org/recast/-/recast-0.10.33.tgz",
           "resolved": "https://registry.npmjs.org/recast/-/recast-0.10.33.tgz",
           "dependencies": {
-            "source-map": {
-              "version": "0.5.3",
-              "from": "https://registry.npmjs.org/source-map/-/source-map-0.5.3.tgz",
-              "resolved": "https://registry.npmjs.org/source-map/-/source-map-0.5.3.tgz"
-            },
             "ast-types": {
               "version": "0.8.12",
               "from": "https://registry.npmjs.org/ast-types/-/ast-types-0.8.12.tgz",
@@ -7352,7 +7353,6 @@
     "tim": {
       "version": "3.5.0",
       "from": "tim@3.5.0",
-      "resolved": "https://registry.npmjs.org/tim/-/tim-3.5.0.tgz",
       "dependencies": {
         "@tradle/chainloader": {
           "version": "2.0.4",

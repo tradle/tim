@@ -331,6 +331,18 @@ var utils = {
     }, 50)
   },
 
+  onNextTransitionStart(navigator, fn) {
+    var removeListener = navigator.navigationContext.addListener('willfocus', () => {
+      if (removeListener.remove) {
+        removeListener.remove()
+      } else {
+        removeListener()
+      }
+
+      setTimeout(fn, 0)
+    })
+  },
+
   onNextTransitionEnd(navigator, fn) {
     var removeListener = navigator.navigationContext.addListener('didfocus', () => {
       if (removeListener.remove) {
