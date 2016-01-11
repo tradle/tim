@@ -185,7 +185,7 @@ class MessageList extends Component {
     currentMessageTime = resource.time;
     return  (
       <MessageRow
-        onSelect={this.selectResource.bind(this, resource)}
+        onSelect={this.selectResource.bind(this)}
         share={this.share.bind(this)}
         resource={resource}
         messageNumber={rowId}
