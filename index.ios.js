@@ -401,7 +401,10 @@ var NavigationBarRouteMapper = {
       <TouchableOpacity
         onPress={() => {
                   // 'Done' button case for creating new resources
-                  if (route.onRightButtonPress.stateChange) {
+                  if (typeof route.onRightButtonPress === 'function') {
+                    route.onRightButtonPress()
+                  }
+                  else if (route.onRightButtonPress.stateChange) {
                     if (route.onRightButtonPress.before)
                       route.onRightButtonPress.before();
                     route.onRightButtonPress.stateChange();
