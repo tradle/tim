@@ -106,7 +106,7 @@ var NewResourceMixin = {
       var isRange
       if (props[p].units) {
         if (props[p].units.charAt(0) === '[') {
-          options.fields[p].placeholder = label // + ' ' + props[p].units
+          options.fields[p].placeholder = label  + ' ' + props[p].units
           // isRange = type === 'number'  &&  props[p].units == '[min - max]'
           // if (isRange) {
           //   formType = t.Str
@@ -262,9 +262,10 @@ var NewResourceMixin = {
     // this.state.resource[prop] = value
     if (!this.state.floatingProps)
       this.state.floatingProps = {}
-    this.state.floatingProps[prop.name] = prop.type === 'object' && prop.ref === constants.TYPES.MONEY
-                                        ? {value: value}
-                                        : value
+    this.state.floatingProps[prop.name] = value;
+    // prop.type === 'object' && prop.ref === constants.TYPES.MONEY
+    //                                     ? {value: value}
+    //                                     : value
     var r = {}
     extend(r, this.state.resource)
     for (var p in this.state.floatingProps)
@@ -298,7 +299,7 @@ var NewResourceMixin = {
     var label = params.label
     if (params.prop.units) {
       label += (params.prop.units.charAt(0) === '[')
-             ? '' //' ' + params.prop.units
+             ? ' ' + params.prop.units
              : ' (' + params.prop.units + ')'
     }
     label += params.required ? '' : ' (optional)'
