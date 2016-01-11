@@ -375,6 +375,8 @@ var NavigationBarRouteMapper = {
                     {lbTitle}
                  </Text>
               : <Icon name={lbTitle.substring(4)} size={20} color='#7AAAC3' style={styles.icon}/>;
+    if (route.component === ResourceList  &&  index === 1)
+      Actions.cleanup()
     return (
       <TouchableOpacity
         onPress={() => navigator.pop()}>

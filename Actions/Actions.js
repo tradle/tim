@@ -27,6 +27,7 @@ var Actions = Reflux.createActions([
   'talkToRepresentative',
   'saveTemporary',
   'getTemporary',
+  'cleanup',
   'forgetMe'
 ]);
 
