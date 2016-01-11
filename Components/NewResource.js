@@ -70,9 +70,11 @@ class NewResource extends Component {
     }
     var currentRoutes = this.props.navigator.getCurrentRoutes();
     var currentRoutesLength = currentRoutes.length;
-    currentRoutes[currentRoutesLength - 1].onRightButtonPress = {
-      stateChange: this.onSavePressed.bind(this)
-    };
+    // currentRoutes[currentRoutesLength - 1].onRightButtonPress = {
+    //   stateChange: this.onSavePressed.bind(this)
+    // };
+    currentRoutes[currentRoutesLength - 1].onRightButtonPress = this.onSavePressed.bind(this)
+
     this.scrollviewProps={
       automaticallyAdjustContentInsets:true,
       scrollEventThrottle:200,
