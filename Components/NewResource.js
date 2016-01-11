@@ -265,9 +265,14 @@ class NewResource extends Component {
           delete json[p]
         }
         else if (typeof v === 'object'  &&  this.props.model.properties[p].ref == constants.TYPES.MONEY) {
-          if (v.value === '')
-            v = null
-          delete json[p]
+          var units = this.props.model.properties[p].units
+          if (units)
+            v = v.value
+          else {
+            if (v.value === '')
+              v = null
+            delete json[p]
+          }
         }
       }
       var isDate = Object.prototype.toString.call(v) === '[object Date]'
