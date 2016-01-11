@@ -8,7 +8,7 @@ var {
   View,
   TouchableOpacity,
   AlertIOS,
-  PropTypes
+  PropTypes,
 } = React
 
 var Video = require('react-native-video')
@@ -32,7 +32,7 @@ class VideoPlayer extends React.Component {
       duration: 0.0,
       currentTime: 0.0,
       controls: false,
-      paused: false,
+      paused: true,
       skin: 'native'
     }
 
@@ -45,6 +45,10 @@ class VideoPlayer extends React.Component {
     utils.onNextTransitionStart(this.props.navigator, this.pause)
   }
 
+  componentDidMount() {
+    this.play()
+  }
+
   pause() {
     this.setState({paused: true})
   }
@@ -54,7 +58,7 @@ class VideoPlayer extends React.Component {
   }
 
   onLoad(data) {
-    this.setState({duration: data.duration})
+    this.setState({duration: data.duration, loaded:true})
   }
 
   onProgress(data) {
