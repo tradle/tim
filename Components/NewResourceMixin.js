@@ -10,7 +10,7 @@ var t = require('tcomb-form-native');
 var Actions = require('../Actions/Actions');
 var Device = require('react-native-device')
 var extend = require('extend');
-var DEFAULT_CURRENCY_SYMBOL = '$';
+var DEFAULT_CURRENCY_SYMBOL = '£';
 
 var cnt = 0;
 var propTypesMap = {
