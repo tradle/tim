@@ -133,9 +133,9 @@ class MessageList extends Component {
     }
     return isDiff
   }
-  share(resource, to) {
+  share(resource, to, formResource) {
     console.log('Share')
-    Actions.share(resource, to)
+    Actions.share(resource, to, formResource)
   }
 
   selectResource(resource) {
