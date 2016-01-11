@@ -175,7 +175,10 @@ class ResourceRow extends Component {
     var renderedViewCols;
     if (!viewCols) {
       var vCols = utils.getDisplayName(resource, model.properties);
-      return <Text style={styles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
+      if (vCols && vCols.length)
+        return <Text style={styles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
+      else
+        return <Text style={styles.resourceTitle} numberOfLines={2}>{model.title + ' ' + utils.getFormattedDate(resource.time)}</Text>;
     }
     var vCols = [];
     var properties = model.properties;
