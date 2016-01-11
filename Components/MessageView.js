@@ -90,6 +90,7 @@ class MessageView extends Component {
       verificationTxID = <View />
       separator = <View />
     }
+        // <VerificationButton  resource={resource} verify={this.verify.bind(this)} verificationList={this.showResources.bind(this)}/>
     return (
       <ScrollView  ref='this' style={styles.container}>
         <View style={styles.band}><Text style={styles.date}>{date}</Text></View>
@@ -97,7 +98,6 @@ class MessageView extends Component {
           <PhotoView resource={resource} navigator={this.props.navigator}/>
         </View>
         {actionPanel}
-        <VerificationButton  resource={resource} verify={this.verify.bind(this)} verificationList={this.showResources.bind(this)}/>
         <View style={{marginTop: -3}}>
           <PhotoList photos={resource.photos} resource={resource} isView={true} navigator={this.props.navigator} numberInRow={inRow}/>
           <View style={styles.rowContainer}>
