@@ -8,7 +8,7 @@ var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin')
 var reactMixin = require('react-mixin')
 
-var DEFAULT_CURRENCY_SYMBOL = '$';
+var DEFAULT_CURRENCY_SYMBOL = '£';
 var cnt = 0;
 
 var {
