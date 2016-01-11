@@ -862,7 +862,7 @@ class MessageRow extends Component {
         var val = (properties[v].displayAs)
                 ? utils.templateIt(properties[v], resource)
                 : resource[v];
-        row = self.getPropRow(properties[v], resource, resource[v], true)
+        row = self.getPropRow(properties[v], resource, val || resource[v], true)
       }
       else {
         if (!resource[v]  ||  !resource[v].length)
