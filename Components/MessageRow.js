@@ -655,13 +655,13 @@ class MessageRow extends Component {
             <Text style={[styles.verySmallLetters, {color: '#555555'}]}>{prop.title}</Text>
           </View>
           <View style={{flex: 1, flexDirection: 'column'}}>
-            <Text style={styles.verySmallLetters}>{val + (prop.units ? ' ' + prop.units : '')}</Text>
+            <Text style={styles.verySmallLetters}>{val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')}</Text>
           </View>
         </View>
     )
     }
     else {
-      if (!this.propsisAggregation)
+      if (!this.props.isAggregation)
         style = [style, {borderWidth: 0.5, paddingVertical: 3, borderBottomColor: STRUCTURED_MESSAGE_BORDER, borderTopColor: STRUCTURED_MESSAGE_COLOR, borderLeftColor: STRUCTURED_MESSAGE_COLOR, borderRightColor: STRUCTURED_MESSAGE_COLOR}]
       return (
         <View style={style} key={this.getNextKey()}>
@@ -669,7 +669,7 @@ class MessageRow extends Component {
             <Text style={[styles.descriptionW, {color: '#FFFFEE'}]}>{prop.title}</Text>
           </View>
           <View style={{flex: 1, flexDirection: 'column'}}>
-            <Text style={[styles.descriptionW, {fontWeight: '600'}]}>{(prop.ref  &&  prop.ref === constants.TYPES.MONEY ? DEFAULT_CURRENCY_SYMBOL : '') + val + (prop.units ? ' ' + prop.units : '')}</Text>
+            <Text style={[styles.descriptionW, {fontWeight: '600'}]}>{(prop.ref  &&  prop.ref === constants.TYPES.MONEY ? DEFAULT_CURRENCY_SYMBOL : '') + val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')}</Text>
           </View>
        </View>
       )
