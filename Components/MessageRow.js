@@ -45,7 +45,8 @@ class MessageRow extends Component {
     var isMyMessage;
   }
   shouldComponentUpdate(nextProps, nextState) {
-    return !equal(this.props.resource, nextProps && nextProps.resource)
+    return !equal(this.props.resource, nextProps.resource) ||
+           !equal(this.props.to, nextProps.to)
   }
   render() {
     var resource = this.props.resource;
@@ -460,7 +461,7 @@ class MessageRow extends Component {
         passProps: {
           resource: r,
           metadata: model,
-          callback: this.props.onSelect
+          callback: this.props.onSelect.bund(this, r)
         }
       };
     }
@@ -639,7 +640,7 @@ class MessageRow extends Component {
           return null
       }
       else
-        ret.onPressCall = this.props.onSelect;
+        ret.onPressCall = this.props.onSelect.bind(this, resource);
       return ret
     }
   }
@@ -791,25 +792,27 @@ class MessageRow extends Component {
                  : (this.props.to.organization ? this.props.to.organization.title : null);
     var verifiedBy = verification.organization ? verification.organization.title : ''
     return (
-           <TouchableHighlight key={self.getNextKey()} underlayColor='transparent' onPress={onPress ? onPress : () =>
-              AlertIOS.alert(
-                'Sharing ' + docTitle + ' verified by ' + verifiedBy,
-                'with ' + orgTitle,
-                [
-                  {text: 'Share', onPress: this.props.share.bind(this, verification, this.props.to)},
-                  {text: 'Cancel', onPress: () => console.log('Canceled!')},
-                ]
-            )}>
-             <View style={{flex: 1, flexDirection: 'row', paddingVertical: 5}}>
+             <View style={{flex: 1, flexDirection: 'row', paddingVertical: 5}} key={self.getNextKey()}>
                <View>
                  {photo}
                </View>
                <View style={{flex:1}}>
-                 {msg}
+                 <TouchableHighlight onPress={self.props.onSelect.bind(this, resource)} underlayColor='transparent'>
+                   {msg}
+                 </TouchableHighlight>
+                 <TouchableHighlight key={self.getNextKey()} underlayColor='transparent' onPress={onPress ? onPress : () =>
+                    AlertIOS.alert(
+                      'Sharing ' + docTitle + ' verified by ' + verifiedBy,
+                      'with ' + orgTitle,
+                      [
+                        {text: 'Share', onPress: this.props.share.bind(this, verification, this.props.to)},
+                        {text: 'Cancel', onPress: () => console.log('Canceled!')},
+                      ]
+                  )}>
                  {orgRow}
+                </TouchableHighlight>
                </View>
              </View>
-           </TouchableHighlight>
            );
   }
   formatDocument1(model, resource, renderedRow) {
@@ -909,13 +912,6 @@ var styles = StyleSheet.create({
   textContainer: {
     flex: 1,
     flexDirection: 'row'
-  },
-  modelTitle: {
-    flex: 1,
-    flexWrap: 'wrap',
-    fontSize: 17,
-    fontWeight: '400',
-    marginVertical: 15,
   },
   resourceTitle: {
     flex: 1,
