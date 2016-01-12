@@ -1584,16 +1584,18 @@ var Store = Reflux.createStore({
       return a.time - b.time;
     });
 
-    result = result.filter((r, i) => {
-      if (r[TYPE] === PRODUCT_LIST) {
-        var next = result[i + 1]
-        if (next && next[TYPE] === PRODUCT_LIST) {
-          return false
+    if (!params.isForgetting) {
+      result = result.filter((r, i) => {
+        if (r[TYPE] === PRODUCT_LIST) {
+          var next = result[i + 1]
+          if (next && next[TYPE] === PRODUCT_LIST) {
+            return false
+          }
         }
-      }
 
-      return true
-    })
+        return true
+      })
+    }
 
     // not for subreddit
     result.forEach((r) =>  {
