@@ -459,13 +459,13 @@ var styles = StyleSheet.create({
     height: 20,
     // marginTop: 15,
   },
-  orgImage: {
-    width: 20,
-    height: 20,
-    marginTop: 15,
-    marginRight: 3,
-    borderRadius: 10
-  },
+  // orgImage: {
+  //   width: 20,
+  //   height: 20,
+  //   marginTop: 15,
+  //   marginRight: 3,
+  //   borderRadius: 10
+  // },
   container: {
     flex: 1
   },
@@ -480,7 +480,7 @@ var styles = StyleSheet.create({
   navBarTitleText: {
     color: '#2E3B4E',
     fontWeight: '400',
-    fontSize: 16,
+    fontSize: 17,
   },
   navBarLeftButton: {
     paddingLeft: 15,
