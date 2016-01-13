@@ -258,7 +258,7 @@ class NewResource extends Component {
     var missedRequired = {}
     var msg
     required.forEach((p) =>  {
-      var v = json[p] ? json[p] : resource[p];
+      var v = json[p] ? json[p] : this.props.resource[p]; //resource[p];
       if (v) {
         if (typeof v === 'string'  &&  !v.length) {
           v = null
@@ -498,7 +498,6 @@ class NewResource extends Component {
 
     var self = this;
     var arrayItems = [];
-
     for (var p in itemsMeta) {
       var bl = itemsMeta[p]
       if (bl.readOnly  ||  bl.items.backlink) {
@@ -508,11 +507,35 @@ class NewResource extends Component {
       var counter, count = 0
       if (resource  &&  resource[bl.name]) {
         count = resource[bl.name].length
-        if (count)
+        if (count) {
+          var items = []
+          var isPhoto = bl.name === 'photos'
+          var arr = resource[bl.name]
+          var n = isPhoto
+                ? Math.min(arr.length, 4)
+                : 3
+
+          for (var i=0; i<n; i++) {
+            if (isPhoto)
+              items.push(<Image style={styles.thumb} source={{uri: arr[i].url}} key={self.getNextKey()}/>)
+            // else {
+            //   items.push
+            // }
+          }
+          var itemsArray = isPhoto
+                         ? <View style={{flexDirection: 'row', alignSelf: 'flex-end'}}>{items}</View>
+                         : <View />
+
           counter =
-            <View style={styles.itemsCounter}>
-              <Text>{resource[bl.name] ? resource[bl.name].length : ''}</Text>
+            <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
+              <View style={{paddingRight:5}}>
+                {itemsArray}
+              </View>
+              <View style={styles.itemsCounter}>
+                <Text>{resource[bl.name] ? resource[bl.name].length : ''}</Text>
+              </View>
             </View>;
+        }
         else if (model.required  &&  model.required.indexOf(bl.name) != -1)
           counter =
             <View>
@@ -849,6 +872,12 @@ var styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     // paddingHorizontal: 80,
+  },
+  thumb: {
+    width: 45,
+    height: 45,
+    marginRight: 2,
+    borderRadius: 5
   },
   tradle: {
     // color: '#7AAAC3',
