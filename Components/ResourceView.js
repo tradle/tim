@@ -122,7 +122,6 @@ class ResourceView extends Component {
           <PhotoView resource={resource} navigator={this.props.navigator}/>
         </View>
         {actionPanel}
-        {qrcode}
         <PhotoList photos={photos} resource={this.props.resource} navigator={this.props.navigator} isView={true} numberInRow={photos.length > 4 ? 5 : photos.length} />
         <ShowPropertiesView resource={resource}
                             showItems={this.showResources.bind(this)}
