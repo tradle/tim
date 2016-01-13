@@ -368,7 +368,8 @@ class NewResource extends Component {
     }
     items.push(item);
     var itemsCount = this.state.itemsCount ? this.state.itemsCount  + 1 : 1
-    delete this.state.missedRequired[propName]
+    if (this.state.missedRequired)
+      delete this.state.missedRequired[propName]
     this.setState({
       resource: resource,
       itemsCount: itemsCount,
@@ -530,16 +531,21 @@ class NewResource extends Component {
               <Text style={{fontSize: 12, marginTop: 25, marginBottom: 5, marginLeft: 10, color: '#bbbbbb'}}>{bl.title}</Text>
               <View style={{flexDirection: 'row', marginLeft: 10}}>{items}</View>
             </View>
-          }
-          else
-            itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{bl.title}</Text>
-
-          counter =
+            counter =
             <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
               <View style={[styles.itemsCounter, {marginTop: 60}]}>
                 <Text>{resource[bl.name] ? resource[bl.name].length : ''}</Text>
               </View>
             </View>;
+          }
+          else {
+            itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{bl.title}</Text>
+            counter =
+              <View style={styles.itemsCounter}>
+                <Text>{resource[bl.name] ? resource[bl.name].length : ''}</Text>
+              </View>
+          }
+
         }
         else {
           itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{bl.title}</Text>
