@@ -128,7 +128,7 @@ class NewResource extends Component {
   }
 
   componentDidUpdate() {
-    if (!this.state.missedRequired) return
+    if (!this.state.missedRequired  ||  !this.state.missedRequired.length) return
 
     let viewCols = this.props.model.viewCols
     let first
@@ -368,10 +368,10 @@ class NewResource extends Component {
     }
     items.push(item);
     var itemsCount = this.state.itemsCount ? this.state.itemsCount  + 1 : 1
+    delete this.state.missedRequired[propName]
     this.setState({
       resource: resource,
       itemsCount: itemsCount,
-      err: ''
     });
   }
   onNewPressed(bl) {
@@ -498,6 +498,7 @@ class NewResource extends Component {
 
     var self = this;
     var arrayItems = [];
+    var itemsArray
     for (var p in itemsMeta) {
       var bl = itemsMeta[p]
       if (bl.readOnly  ||  bl.items.backlink) {
@@ -505,6 +506,7 @@ class NewResource extends Component {
         continue
       }
       var counter, count = 0
+      itemsArray = null
       if (resource  &&  resource[bl.name]) {
         count = resource[bl.name].length
         if (count) {
@@ -512,7 +514,7 @@ class NewResource extends Component {
           var isPhoto = bl.name === 'photos'
           var arr = resource[bl.name]
           var n = isPhoto
-                ? Math.min(arr.length, 4)
+                ? Math.min(arr.length, 7)
                 : 3
 
           for (var i=0; i<n; i++) {
@@ -522,37 +524,48 @@ class NewResource extends Component {
             //   items.push
             // }
           }
-          var itemsArray = isPhoto
-                         ? <View style={{flexDirection: 'row', alignSelf: 'flex-end'}}>{items}</View>
-                         : <View />
+          if (isPhoto) {
+            itemsArray =
+            <View style={{height: 80}}>
+              <Text style={{fontSize: 12, marginTop: 25, marginBottom: 5, marginLeft: 10, color: '#bbbbbb'}}>{bl.title}</Text>
+              <View style={{flexDirection: 'row', marginLeft: 10}}>{items}</View>
+            </View>
+          }
+          else
+            itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{bl.title}</Text>
 
           counter =
             <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
-              <View style={{paddingRight:5}}>
-                {itemsArray}
-              </View>
-              <View style={styles.itemsCounter}>
+              <View style={[styles.itemsCounter, {marginTop: 60}]}>
                 <Text>{resource[bl.name] ? resource[bl.name].length : ''}</Text>
               </View>
             </View>;
         }
-        else if (model.required  &&  model.required.indexOf(bl.name) != -1)
+        else {
+          itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{bl.title}</Text>
+
+          if (model.required  &&  model.required.indexOf(bl.name) != -1)
+            counter =
+              <View>
+                <Icon name='asterisk'  size={15}  color='#96415A'  style={styles.icon1}/>
+              </View>;
+          else
+            counter = <View/>
+        }
+      }
+      else {
+        itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{bl.title}</Text>
+
+        if (self.props.model.required  &&  self.props.model.required.indexOf(bl.name) != -1)
           counter =
             <View>
-              <Icon name='asterisk'  size={15}  color='#96415A'  style={styles.icon1}/>
+              <Icon name='asterisk'  size={15}  color='#96415A'  style={styles.icon1} />
             </View>;
-        else
-          counter = <View/>
-      }
-      else if (self.props.model.required  &&  self.props.model.required.indexOf(bl.name) != -1)
-        counter =
-          <View>
-            <Icon name='asterisk'  size={15}  color='#96415A'  style={styles.icon1} />
-          </View>;
-      else {
-        counter = <View>
-                    <Icon name='plus'   size={15}  color='#7AAAC3'  style={styles.icon1} />
-                  </View>
+        else {
+          counter = <View>
+                      <Icon name='plus'   size={15}  color='#7AAAC3'  style={styles.icon1} />
+                    </View>
+        }
       }
       var title = bl.title || utils.makeLabel(p)
       var err = this.state.missedRequired
@@ -565,13 +578,14 @@ class NewResource extends Component {
                   </View>
                 : <View/>
       // var error = <View/>
+                // <Text style={count ? styles.itemsText : styles.noItemsText}>{bl.title}</Text>
       arrayItems.push (
         <View style={styles.itemButton} key={this.getNextKey()} ref={bl.name}>
           <TouchableHighlight underlayColor='transparent'
               onPress={self.onNewPressed.bind(self, bl)}>
             <View>
               <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                <Text style={count ? styles.itemsText : styles.noItemsText}>{bl.title}</Text>
+                {itemsArray}
                 {counter}
               </View>
               {error}
@@ -579,6 +593,13 @@ class NewResource extends Component {
           </TouchableHighlight>
         </View>
       );
+      // if (itemsArray) {
+      //   arrayItems.push(
+      //     <View style={styles.itemButton} key={this.getNextKey()} ref={bl.name}>
+      //       {itemsArray}
+      //     </View>
+      //   )
+      // }
     }
     // var FromToView = require('./FromToView');
     // var isRegistration = !utils.getMe()  &&  resource[constants.TYPE] === constants.TYPES.IDENTITY
@@ -782,18 +803,14 @@ var styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  buttons: {
-    width: 100,
-    alignSelf: 'center'
-  },
   noItemsText: {
-    fontSize: 20,
+    fontSize: 18,
     color: '#cccccc',
     alignSelf: 'center',
     paddingLeft: 10
   },
   itemsText: {
-    fontSize: 20,
+    fontSize: 18,
     color: '#000000',
     alignSelf: 'center',
     paddingLeft: 10
@@ -805,18 +822,6 @@ var styles = StyleSheet.create({
     alignSelf: 'center',
     paddingHorizontal: 5,
   },
-  submitButton: {
-    color: '#2B6493',
-    fontSize: 17,
-    backgroundColor: '#cccccc',
-    height: 56,
-    paddingHorizontal: 30,
-    padding: 17,
-    borderRadius: 10,
-    borderColor: '#cccccc',
-    borderWidth: 0.5,
-  },
-
   itemButton: {
     height: 70,
     marginLeft: 10,
@@ -825,11 +830,6 @@ var styles = StyleSheet.create({
     borderWidth: 0.5,
     paddingBottom: 10,
     justifyContent: 'flex-end',
-  },
-  buttonText: {
-    fontSize: 18,
-    color: 'white',
-    alignSelf: 'center',
   },
   photoBG: {
     // marginTop: -15,
@@ -874,8 +874,8 @@ var styles = StyleSheet.create({
     // paddingHorizontal: 80,
   },
   thumb: {
-    width: 45,
-    height: 45,
+    width:  40,
+    height: 40,
     marginRight: 2,
     borderRadius: 5
   },
