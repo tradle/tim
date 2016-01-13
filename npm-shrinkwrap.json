@@ -117,7 +117,7 @@
       "resolved": "https://registry.npmjs.org/@tradle/constants/-/constants-1.1.7.tgz"
     },
     "@tradle/http-keeper": {
-      "version": "3.1.0",
+      "version": "3.1.1",
       "from": "@tradle/http-keeper@latest",
       "dependencies": {
         "@tradle/bitkeeper-client": {
@@ -126,8 +126,8 @@
           "resolved": "https://registry.npmjs.org/@tradle/bitkeeper-client/-/bitkeeper-client-2.0.1.tgz"
         },
         "@tradle/offline-keeper": {
-          "version": "3.1.0",
-          "from": "@tradle/offline-keeper@>=3.1.0 <4.0.0",
+          "version": "3.1.1",
+          "from": "@tradle/offline-keeper@>=3.1.1 <4.0.0",
           "dependencies": {
             "bindall": {
               "version": "1.0.0",
@@ -2813,15 +2813,15 @@
                           "from": "ansi@~0.3.0",
                           "resolved": "https://registry.npmjs.org/ansi/-/ansi-0.3.0.tgz"
                         },
-                        "core-util-is": {
-                          "version": "1.0.2",
-                          "from": "core-util-is@~1.0.0",
-                          "resolved": "https://registry.npmjs.org/core-util-is/-/core-util-is-1.0.2.tgz"
-                        },
                         "are-we-there-yet": {
                           "version": "1.0.4",
                           "from": "are-we-there-yet@~1.0.0",
                           "resolved": "https://registry.npmjs.org/are-we-there-yet/-/are-we-there-yet-1.0.4.tgz"
+                        },
+                        "core-util-is": {
+                          "version": "1.0.2",
+                          "from": "core-util-is@~1.0.0",
+                          "resolved": "https://registry.npmjs.org/core-util-is/-/core-util-is-1.0.2.tgz"
                         },
                         "debug": {
                           "version": "0.7.4",
@@ -2863,15 +2863,15 @@
                           "from": "lodash.padleft@^3.0.0",
                           "resolved": "https://registry.npmjs.org/lodash.padleft/-/lodash.padleft-3.1.1.tgz"
                         },
-                        "lodash.padright": {
-                          "version": "3.1.1",
-                          "from": "lodash.padright@^3.0.0",
-                          "resolved": "https://registry.npmjs.org/lodash.padright/-/lodash.padright-3.1.1.tgz"
-                        },
                         "lodash.repeat": {
                           "version": "3.0.1",
                           "from": "lodash.repeat@^3.0.0",
                           "resolved": "https://registry.npmjs.org/lodash.repeat/-/lodash.repeat-3.0.1.tgz"
+                        },
+                        "lodash.padright": {
+                          "version": "3.1.1",
+                          "from": "lodash.padright@^3.0.0",
+                          "resolved": "https://registry.npmjs.org/lodash.padright/-/lodash.padright-3.1.1.tgz"
                         },
                         "npmlog": {
                           "version": "2.0.0",
@@ -6181,9 +6181,9 @@
       "resolved": "https://registry.npmjs.org/react-native-camera/-/react-native-camera-0.3.8.tgz"
     },
     "react-native-carousel": {
-      "version": "0.4.3",
-      "from": "https://registry.npmjs.org/react-native-carousel/-/react-native-carousel-0.4.3.tgz",
-      "resolved": "https://registry.npmjs.org/react-native-carousel/-/react-native-carousel-0.4.3.tgz"
+      "version": "0.4.4",
+      "from": "react-native-carousel@0.4.4",
+      "resolved": "https://registry.npmjs.org/react-native-carousel/-/react-native-carousel-0.4.4.tgz"
     },
     "react-native-clone-referenced-element": {
       "version": "1.0.0",
