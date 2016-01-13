@@ -278,7 +278,7 @@ var NewResourceMixin = {
             : null
     var error = err
               ? <View style={{paddingLeft: 15, backgroundColor: '#ffffff'}} key={this.getNextKey()}>
-                  <Text style={{fontSize: 12, color: '#a94442'}}>Enter a valid {params.prop.title}</Text>
+                  <Text style={{fontSize: 14, color: '#a94442'}}>Enter a valid {params.prop.title}</Text>
                 </View>
               : <View key={this.getNextKey()} />
     // return (
@@ -363,7 +363,7 @@ var NewResourceMixin = {
             : null
     var error = err
               ? <View style={{paddingLeft: 15, backgroundColor: '#ffffff'}}>
-                  <Text style={{fontSize: 12, color: '#a94442'}}>Enter a valid {prop.title}</Text>
+                  <Text style={{fontSize: 14, color: '#a94442'}}>Enter a valid {prop.title}</Text>
                 </View>
               : <View />
     return (
