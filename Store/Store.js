@@ -2256,8 +2256,8 @@ var Store = Reflux.createStore({
       }
       batch.push({type: 'put', key: key, value: val})
       if (val.organization) {
-        if (val.organization.title === 'Rabobank'  &&  val.securityCode)
-          return
+        // if (val.organization.title === 'Rabobank'  &&  val.securityCode)
+        //   return
         var org = list[utils.getId(val.organization)]  &&  list[utils.getId(val.organization)].value
         if (org) {
           var doAdd
