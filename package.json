@@ -50,7 +50,7 @@
     "react-native-addressbook": "^1.1.5",
     "react-native-barcode": "tradle/react-native-barcode",
     "react-native-camera": "^0.3.8",
-    "react-native-carousel": "^0.4.3",
+    "react-native-carousel": "^0.4.4",
     "react-native-clone-referenced-element": "^1.0.0",
     "react-native-code-push": "^1.5.2-beta",
     "react-native-crypto": "mvayngrib/react-native-crypto#92ebb1b",
