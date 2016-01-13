@@ -2343,7 +2343,7 @@ var Store = Reflux.createStore({
           batch.push({type: 'put', key: utils.getId(org), value: org})
         }
         var to = list[IDENTITY + '_' + obj.to[ROOT_HASH]].value
-        if (model.subClassOf  &&  model.subClassOf === FORM) {
+        if (!onMessage  &&  (model.subClassOf  &&  model.subClassOf === FORM)) {
           val.to = {
             id: from[TYPE] + '_' + from[ROOT_HASH],
             title: obj.from.identity.toJSON().name.formatted
