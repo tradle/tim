@@ -57,7 +57,7 @@ class ResourceList extends Component {
       this.state.isRegistration = isRegistration;
   }
   componentWillMount() {
-    StatusBarIOS.setHidden(false);
+    // StatusBarIOS.setHidden(false);
     var params = {
       modelName: this.props.modelName,
       to: this.props.resource
