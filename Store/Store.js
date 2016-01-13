@@ -2213,7 +2213,7 @@ var Store = Reflux.createStore({
       val.time = obj.timestamp
 
     var type = val[TYPE]
-
+    var isConfirmation
     var model = this.getModel(type)  &&  this.getModel(type).value
     if (!model) {
       if (val.message  &&  val.message.indexOf('Congratulations! You were approved for: ') != -1) {
@@ -2221,6 +2221,7 @@ var Store = Reflux.createStore({
         type = SIMPLE_MESSAGE
         val[TYPE] = type
         model = models[SIMPLE_MESSAGE].value
+        isConfirmation = true
       }
       else
         return;
@@ -2422,21 +2423,26 @@ var Store = Reflux.createStore({
 
     return db.batch(batch)
     .then(function() {
-      if (representativeAddedTo) {
+      if (isConfirmation) {
+        var from = list[IDENTITY + '_' + obj.from[ROOT_HASH]].value
+
+        var fOrg = from.organization
+        var org = fOrg ? list[utils.getId(fOrg)].value : null
+        if (onMessage  &&  val[TYPE] === FORGOT_YOU) {
+          this.forgotYou(org)
+          return
+        }
+        var msg = {
+          message: me.firstName + ' is waiting for the response',
+          _t: constants.TYPES.CUSTOMER_WAITING,
+          from: me,
+          to: org,
+          time: new Date().getTime()
+        }
+        self.onAddMessage(msg, true)
+      }
+      else if (representativeAddedTo) {
         var orgList = self.searchNotMessages({modelName: ORGANIZATION})
-        // for (var i=0; i<orgList.length; i++) {
-        //   var o = orgList[i]
-        //   if (o[ROOT_HASH] === representativeAddedTo) {
-        //     var oo = {}
-        //     extend(oo, o)
-        //     // oo.contactsCount = o.contacts.length
-        //     orgList[i] = oo
-        //     list[key] = {
-        //       key: key,
-        //       value: oo
-        //     }
-        //   }
-        // }
         self.trigger({action: 'list', list: orgList, forceUpdate: true})
       }
       else
@@ -2607,6 +2613,7 @@ var Store = Reflux.createStore({
       }
       msg.id = sha(msg)
       self.trigger({action: 'messageList', list: [msg], resource: resource})
+      return meDriver.forget(resource[ROOT_HASH])
     })
   },
   cleanup(result) {
