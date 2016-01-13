@@ -69,7 +69,11 @@ class PhotoCarousel extends Component {
       n = currentPhotoIndex
     }
     return (
-      <Carousel width={375} loop={false} animate={false}>
+      <Carousel width={375}
+                loop={false}
+                animate={false}
+                indicatorOffset={40}
+                indicatorColor={'#efefef'}>
         {photos}
       </Carousel>
     );
