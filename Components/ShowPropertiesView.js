@@ -145,18 +145,23 @@ class ShowPropertiesView extends Component {
           val = self.renderItems(val, pMeta);
           first = false;
         }
-        else if (typeof val === 'number') {
-          val = <Text style={styles.description}>{val}</Text>;
-          // isDirectionRow = true;
-        }
-        else if (pMeta.type !== 'object'  &&  (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0))
-          val = <Text onPress={self.onPress.bind(self, val)} style={[styles.description, {color: '#7AAAC3'}]}>{val}</Text>;
-        else {
-          // if (val.length < 30)
-          //   isDirectionRow = true;
-          val = <Text style={[styles.description]} numberOfLines={2}>{val}</Text>;
-          // val = <Text style={[styles.description, {flexWrap: 'wrap'}]} numberOfLines={2}>{val}</Text>;
-          // val = <Text style={[styles.description, isDirectionRow ? {alignSelf: 'flex-end'} : {alignSelf: 'flex-start'}]}>{val}</Text>;
+        else  {
+          if (props[p].units  &&  props[p].units.charAt(0) != '[') {
+            val += ' ' + props[p].units
+          }
+          if (typeof val === 'number') {
+            val = <Text style={styles.description}>{val}</Text>;
+            // isDirectionRow = true;
+          }
+          else if (pMeta.type !== 'object'  &&  (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0))
+            val = <Text onPress={self.onPress.bind(self, val)} style={[styles.description, {color: '#7AAAC3'}]}>{val}</Text>;
+          else {
+            // if (val.length < 30)
+            //   isDirectionRow = true;
+            val = <Text style={[styles.description]} numberOfLines={2}>{val}</Text>;
+            // val = <Text style={[styles.description, {flexWrap: 'wrap'}]} numberOfLines={2}>{val}</Text>;
+            // val = <Text style={[styles.description, isDirectionRow ? {alignSelf: 'flex-end'} : {alignSelf: 'flex-start'}]}>{val}</Text>;
+          }
         }
       }
       var separator = first
