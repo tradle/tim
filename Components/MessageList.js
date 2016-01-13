@@ -128,8 +128,13 @@ class MessageList extends Component {
       return true
     var isDiff = false
     for (var i=0; i<this.state.list.length  &&  !isDiff; i++) {
-      if (this.state.list[i][constants.ROOT_HASH] !== nextState.list[i][constants.ROOT_HASH])
-        isDiff = true
+      if (this.state.list[i][constants.ROOT_HASH] !== nextState.list[i][constants.ROOT_HASH]) {
+        if (i === this.state.list.length - 1                      &&
+            this.state.list[i][constants.TYPE] === nextState.list[i][constants.TYPE]  &&
+            this.state.list[i][constants.TYPE] === constants.TYPES.PRODUCT_LIST)
+        if (JSON.stringify(this.state.list[i].list) !== JSON.stringify(nextState.list[i].list))
+          isDiff = true
+      }
     }
     return isDiff
   }
@@ -257,7 +262,7 @@ class MessageList extends Component {
 
       content = <ListView ref='listview' style={{marginHorizontal: 10}}
           dataSource={this.state.dataSource}
-          initialListSize={1000}
+          initialListSize={10}
           renderRow={this.renderRow.bind(this)}
           automaticallyAdjustContentInsets={false}
           keyboardDismissMode='on-drag'
