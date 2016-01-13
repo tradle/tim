@@ -33,7 +33,7 @@ var {
   Component,
   ScrollView,
   LinkingIOS,
-  StatusBarIOS,
+  // StatusBarIOS,
   AlertIOS
 } = React;
 
@@ -274,6 +274,7 @@ class TimHome extends Component {
     }
   }
   render() {
+    // StatusBarIOS.setHidden(true);
     if (this.state.message) {
       this.restartTiM()
       return
@@ -281,7 +282,7 @@ class TimHome extends Component {
     var url = LinkingIOS.popInitialURL();
     var d = Device
     var h = d.height - 180
-    var cTop = h / 4
+    // var cTop = h / 4
 
     var thumb = {
       width: d.width / 2.2,
@@ -293,11 +294,9 @@ class TimHome extends Component {
           <ScrollView
             scrollEnabled={false}
             style={{height:h}}>
-            <View style={[styles.container, {marginTop: cTop}]}>
-              <View>
-                <Image style={thumb} source={require('../img/TradleW.png')}></Image>
-                <Text style={styles.tradle}>Tradle</Text>
-              </View>
+            <View style={[styles.container]}>
+              <Image style={thumb} source={require('../img/TradleW.png')}></Image>
+              <Text style={styles.tradle}>Tradle</Text>
             </View>
             <View style={{alignItems: 'center'}}>
               <ActivityIndicatorIOS hidden='true' size='large' color='#ffffff'/>
@@ -362,7 +361,6 @@ class TimHome extends Component {
           : <View />
 
 
-    StatusBarIOS.setHidden(true);
     return (
       <View style={styles.scroll}>
       <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: d.width, height: d.height}} />
@@ -372,7 +370,7 @@ class TimHome extends Component {
         >
           <TouchableHighlight style={[styles.thumbButton]}
                 underlayColor='transparent' onPress={this._pressHandler.bind(this)}>
-            <View style={[styles.container, {marginTop: cTop}]}>
+            <View style={[styles.container]}>
               <View>
                 <Image style={thumb} source={require('../img/TradleW.png')}></Image>
                 <Text style={styles.tradle}>Tradle</Text>
