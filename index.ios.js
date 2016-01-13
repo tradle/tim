@@ -100,12 +100,13 @@ class TiMApp extends Component {
   componentDidMount() {
     if (CodePush) {
       // every 10 mins
-      let syncPeriodically = (interval) => {
+      let interval = 10 * 60 * 1000
+      let syncPeriodically = () => {
         CodePush.sync({ updateDialog: true, installMode: CodePush.InstallMode.IMMEDIATE });
         setTimeout(syncPeriodically, interval)
       }
 
-      syncPeriodically(10 * 60 * 1000)
+      syncPeriodically()
     }
 
     LinkingIOS.addEventListener('url', this._handleOpenURL.bind(this));
