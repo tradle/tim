@@ -535,10 +535,10 @@ class NewResource extends Component {
       var err = this.state.missedRequired
               ? this.state.missedRequired[meta.properties[p].name]
               : null
-      var errTitle = 'Insert the valid ' + title
+      var errTitle = 'Enter a valid ' + title
       var error = err
                 ? <View style={{paddingLeft:5, position: 'absolute', top: 35, backgroundColor: '#ffffff'}}>
-                    <Text style={{fontSize: 12, color: '#a94442'}}>{errTitle}</Text>
+                    <Text style={{fontSize: 14, color: '#a94442'}}>{errTitle}</Text>
                   </View>
                 : <View/>
       // var error = <View/>
