@@ -71,6 +71,7 @@ var WELCOME_INTERVAL = 600000
 
 var Tim = require('tim')
 Tim.enableOptimizations()
+Tim.CATCH_UP_INTERVAL = 10000
 var Zlorp = Tim.Zlorp
 Zlorp.ANNOUNCE_INTERVAL = 10000
 Zlorp.LOOKUP_INTERVAL = 10000
