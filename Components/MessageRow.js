@@ -672,7 +672,7 @@ class MessageRow extends Component {
             <Text style={[styles.verySmallLetters, {color: '#555555'}]}>{prop.title}</Text>
           </View>
           <View style={{flex: 1, flexDirection: 'column'}}>
-            <Text style={styles.verySmallLetters}>{val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')}</Text>
+            <Text style={[styles.verySmallLetters, {fontWeight: '500'}]}>{val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')}</Text>
           </View>
         </View>
       )
@@ -875,7 +875,6 @@ class MessageRow extends Component {
       return
     var verPhoto;
     var vCols = [];
-    var first = true;
     var self = this;
 
     if (resource[constants.TYPE] != model.id)
@@ -890,7 +889,7 @@ class MessageRow extends Component {
     viewCols.forEach(function(v) {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date')
         return;
-      var style = styles.verySmallLetters; //(first) ? styles.resourceTitle : styles.description;
+      var style = styles.verySmallLetters;
       if (properties[v].ref) {
         if (resource[v]) {
           var val
@@ -908,13 +907,12 @@ class MessageRow extends Component {
           if (!val)
             val = resource[v].title
           vCols.push(self.getPropRow(properties[v], resource, val, true))
-          first = false;
         }
         return;
       }
       var row
       if (resource[v]  &&  properties[v].type === 'string'  &&  (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0))
-        row = <Text style={style} numberOfLines={first ? 2 : 1} key={self.getNextKey()}>{resource[v]}</Text>;
+        row = <Text style={style} key={self.getNextKey()}>{resource[v]}</Text>;
       else if (!model.autoCreate) {
         var val = (properties[v].displayAs)
                 ? utils.templateIt(properties[v], resource)
@@ -938,19 +936,7 @@ class MessageRow extends Component {
         }
         row = self.getPropRow(properties[v], resource, resource[v], /*style,*/ true)
       }
-      if (first) {
-        row = <View style={{flexDirection: 'row', justifyContent: 'space-between'}} key={self.getNextKey()}>
-                <View>
-                  {row}
-                </View>
-                <View>
-                  <Text style={styles.verySmallLetters}>{renderedRow[0]}</Text>
-                </View>
-              </View>
-        renderedRow.splice(0, 1);
-      }
       vCols.push(row);
-      first = false;
     });
 
     if (vCols  &&  vCols.length) {
