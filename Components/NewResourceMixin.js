@@ -310,6 +310,7 @@ var NewResourceMixin = {
       <View style={{paddingBottom: 10}}>
         <FloatLabel
           labelStyle={styles.labelInput}
+          autoCorrect={params.keyboard  &&  params.keyboard === 'email-address' ? false : true}
           onFocus={this.inputFocused.bind(this, params.prop.name)}
           inputStyle={this.state.isRegistration ? styles.regInput : styles.input}
           style={styles.formInput}
