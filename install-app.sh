@@ -19,7 +19,8 @@ echo $LOCAL_RELEASE_DIR
 DEV=false
 case "$CONFIGURATION" in
   Debug)
-    DEV=true
+  exit 0 # avoid building bundle in Debug mode
+    # DEV=true
     ;;
   Release)
     ;;
