@@ -222,7 +222,7 @@ var NewResourceMixin = {
                     label: label,
                     prop:  props[p],
                     value: data[p] ? data[p] + '' : null,
-                    keyboard: units  &&  units.charAt(0) === '[' ? 'default' : 'numeric',
+                    keyboard: units  &&  units.charAt(0) === '[' ? 'numbers-and-punctuation' : 'numeric',
                     required: !maybe,
                     onChangeTextValue: this.onChangeTextValue.bind(this, p)
                   })
@@ -370,7 +370,7 @@ var NewResourceMixin = {
               : <View />
     return (
       <View style={styles.chooserContainer} key={this.getNextKey()}>
-        <TouchableHighlight underlayColor='transparent' onPress={this.chooser.bind(this, prop, params.prop)}>
+        <TouchableHighlight underlayColor='white' onPress={this.chooser.bind(this, prop, params.prop)}>
           <View style={{ position: 'relative'}}>
             {propLabel}
             <View style={styles.chooserContentStyle}>
