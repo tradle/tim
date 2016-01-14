@@ -38,6 +38,33 @@ class PhotoCarousel extends Component {
         if (currentPhotoIndex == -1)
           currentPhotoIndex = i;
         var key = r[constants.ROOT_HASH] + cnt++
+        if (photo.width) {
+          var w = Device.width
+          var h, padding
+          if (photo.width > Device.width) {
+            h = photo.height * Device.width / photo.width
+            // if (photo.isVertical)
+            //   h = Device.width * 1.2
+            // else
+            //   h = Device.width / 1.2
+          }
+          else {
+            h = photo.height
+            w = photo.width
+            padding = (Device.width - photo.width) / 2
+          }
+
+          if (h > 3 * Device.height / 4)
+            h = 3 * Device.height / 4
+
+          photos.push(
+                        <View style={[styles.container, {paddingHorizontal: padding}]} key={key}>
+                          <Image source={{uri: photo.url}} style={{width: w, height: h}}/>
+                        </View>
+                     )
+
+        }
+        else
         photos.push(
           isVertical  ? <View style={styles.container} key={key}>
                           <Image source={{uri: photo.url}} style={styles.imageV}/>
