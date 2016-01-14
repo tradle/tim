@@ -7,6 +7,7 @@ var constants = require('@tradle/constants');
 var PhotoCarousel = require('./PhotoCarousel')
 var reactMixin = require('react-mixin');
 var PhotoCarouselMixin = require('./PhotoCarouselMixin');
+var equal = require('deep-equal')
 var Device = require('react-native-device')
 var {
   StyleSheet,
@@ -24,6 +25,12 @@ class PhotoView extends Component {
   }
   changePhoto(photo) {
     this.setState({currentPhoto: photo});
+  }
+  shouldComponentUpdate(nextProps, nextState) {
+    if (this.props.resource[constants.ROOT_HASH] !== nextProps.resource[constants.ROOT_HASH])
+      return true
+
+    return !equal(this.props.resource.photos, nextProps.resource.photos)
   }
   render() {
     var resource = this.props.resource;

@@ -8,6 +8,7 @@ var reactMixin = require('react-mixin');
 var PhotoCarouselMixin = require('./PhotoCarouselMixin');
 var RowMixin = require('./RowMixin')
 var Device = require('react-native-device')
+var equal = require('deep-equal')
 var cnt = 1000
 var {
   StyleSheet,
@@ -48,6 +49,12 @@ class PhotoList extends Component {
   //   ).start();                                // Start the animation
 
   // }
+  shouldComponentUpdate(nextProps, nextState) {
+    if (this.props.resource[constants.ROOT_HASH] !== nextProps.resource[constants.ROOT_HASH])
+      return true
+
+    return !equal(this.props.resource.photos, nextProps.resource.photos)
+  }
   render() {
     var photos = this.props.photos;
     if (!photos || !photos.length  ||  (photos.length <= 1  &&  this.props.isView))
