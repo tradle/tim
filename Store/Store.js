@@ -2343,26 +2343,48 @@ var Store = Reflux.createStore({
           batch.push({type: 'put', key: utils.getId(org), value: org})
         }
         var to = list[IDENTITY + '_' + obj.to[ROOT_HASH]].value
-        if (!onMessage  &&  (model.subClassOf  &&  model.subClassOf === FORM)) {
+        var whoAmI = obj.parsed.data._i.split(':')[0]
+
+        if (whoAmI === from[ROOT_HASH]) {
           val.to = {
-            id: from[TYPE] + '_' + from[ROOT_HASH],
-            title: obj.from.identity.toJSON().name.formatted
-          }
-          val.from = {
             id: to[TYPE] + '_' + to[ROOT_HASH],
             title: obj.to.identity.toJSON().name.formatted
+          }
+          val.from = {
+            id: from[TYPE] + '_' + from[ROOT_HASH],
+            title: obj.from.identity.toJSON().name.formatted
           }
         }
         else {
           val.to = {
-            id: to[TYPE] + '_' + to[ROOT_HASH],
-            title: obj.to.identity.toJSON().name.formatted
-          }
-          val.from = {
             id: from[TYPE] + '_' + from[ROOT_HASH],
             title: obj.from.identity.toJSON().name.formatted
           }
+          val.from = {
+            id: to[TYPE] + '_' + to[ROOT_HASH],
+            title: obj.to.identity.toJSON().name.formatted
+          }
         }
+        // if (!onMessage  &&  (model.subClassOf  &&  model.subClassOf === FORM)) {
+        //   val.to = {
+        //     id: from[TYPE] + '_' + from[ROOT_HASH],
+        //     title: obj.from.identity.toJSON().name.formatted
+        //   }
+        //   val.from = {
+        //     id: to[TYPE] + '_' + to[ROOT_HASH],
+        //     title: obj.to.identity.toJSON().name.formatted
+        //   }
+        // }
+        // else {
+        //   val.to = {
+        //     id: to[TYPE] + '_' + to[ROOT_HASH],
+        //     title: obj.to.identity.toJSON().name.formatted
+        //   }
+        //   val.from = {
+        //     id: from[TYPE] + '_' + from[ROOT_HASH],
+        //     title: obj.from.identity.toJSON().name.formatted
+        //   }
+        // }
         if (!val.time)
           val.time = obj.timestamp
 
