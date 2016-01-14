@@ -4,6 +4,7 @@ var React = require('react-native');
 var Carousel = require('react-native-carousel');
 var utils = require('../utils/utils');
 var constants = require('@tradle/constants');
+var Device = require('react-native-device')
 
 var {
   StyleSheet,
@@ -69,7 +70,7 @@ class PhotoCarousel extends Component {
       n = currentPhotoIndex
     }
     return (
-      <Carousel width={375}
+      <Carousel width={Device.width}
                 loop={false}
                 animate={false}
                 indicatorOffset={40}
@@ -82,19 +83,19 @@ class PhotoCarousel extends Component {
 
 var styles = StyleSheet.create({
   image: {
-    width: 375,
-    height: 400,
+    width: Device.width,
+    height: Device.height - 200,
   },
   imageH: {
-    width: 375,
-    height: 250
+    width: Device.width,
+    height: Device.width - 100
   },
   imageV: {
-    width: 375,
-    height: 450
+    width: Device.width,
+    height: Device.height - 200,
   },
   container: {
-    width: 375,
+    width: Device.width,
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
