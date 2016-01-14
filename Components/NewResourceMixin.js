@@ -217,11 +217,12 @@ var NewResourceMixin = {
           model[p] = maybe ? t.maybe(t.Num) : t.Num;
           if (data[p]  &&  (typeof data[p] != 'number'))
             data[p] = data[p].value
+          var units = props[p].units
           options.fields[p].template = textTemplate.bind(this, {
                     label: label,
                     prop:  props[p],
                     value: data[p] ? data[p] + '' : null,
-                    keyboard: 'numeric',
+                    keyboard: units  &&  units.charAt(0) === '[' ? 'default' : 'numeric',
                     required: !maybe,
                     onChangeTextValue: this.onChangeTextValue.bind(this, p)
                   })
