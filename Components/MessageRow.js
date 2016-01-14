@@ -230,7 +230,7 @@ class MessageRow extends Component {
                           <Icon style={styles.verificationIcon} size={20} name={'android-done'} />
                           <Text style={{fontSize: 16, fontWeight: '600', color: '#FBFFE5', alignSelf: 'center'}}> Verified by {orgName}</Text>
                         </View>
-                        <View style={{paddingTop: 5, flexWrap: 1}}>
+                        <View style={{paddingTop: 5}}>
                           {this.formatDocument(msgModel, resource, this.verify.bind(this))}
                         </View>
                         <View style={{paddingTop: 5}}>
