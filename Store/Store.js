@@ -84,8 +84,8 @@ var map = require('map-stream')
 // var bitcoin = require('@tradle/bitcoinjs-lib')
 var DHT = require('@tradle/bittorrent-dht') // use tradle/bittorrent-dht fork
 var Blockchain = require('@tradle/cb-blockr') // use tradle/cb-blockr fork
-Blockchain.throttleGet(100)
-Blockchain.throttlePost(1000)
+// Blockchain.throttleGet(100)
+// Blockchain.throttlePost(1000)
 var midentity = require('@tradle/identity')
 var Identity = midentity.Identity
 var defaultKeySet = midentity.defaultKeySet
