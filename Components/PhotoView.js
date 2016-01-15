@@ -45,9 +45,7 @@ class PhotoView extends Component {
     if (!currentPhoto) {
       if (model.id === constants.TYPES.IDENTITY) {
         return (
-          <View style={{height: 250, alignSelf: 'center', justifyContent: 'center'}}>
-            <Icon name={'person'} size={200}  color='#f6f6f4'  style={styles.icon} />
-          </View>
+          <Icon name={'person'} size={200}  color='#f6f6f4' />
         )
       }
       else
@@ -79,13 +77,7 @@ var styles = StyleSheet.create({
     width: React.Dimensions.get('window').width,
     height: React.Dimensions.get('window').height / 2,
     alignSelf: 'stretch'
-  },
-  icon: {
-    marginTop: -20,
-    width: 210,
-    height: 230,
-    alignSelf: 'center'
-  },
+  }
 });
 
 module.exports = PhotoView;
