@@ -57,7 +57,7 @@ class ResourceList extends Component {
       this.state.isRegistration = isRegistration;
   }
   componentWillMount() {
-    // StatusBarIOS.setHidden(false);
+    StatusBarIOS.setHidden(false);
     var params = {
       modelName: this.props.modelName,
       to: this.props.resource
@@ -102,11 +102,17 @@ class ResourceList extends Component {
     if (action !== 'list' ||  !params.list || params.isAggregation !== this.props.isAggregation)
       return;
     var list = params.list;
-    if (!list.length  &&  (!this.state.filter  ||  !this.state.filter.length))  {
-      this.setState({
-        isLoading: false
-      })
-
+    if (!list.length) {
+     if (!this.state.filter  ||  !this.state.filter.length)
+       this.setState({
+         isLoading: false
+       })
+      else
+       this.setState({
+         isLoading: false,
+         dataSource: this.state.dataSource.cloneWithRows(list),
+         list: list
+       })
       return;
     }
     var type = list[0][constants.TYPE];
@@ -418,6 +424,7 @@ class ResourceList extends Component {
   }
 
   onSearchChange(filter) {
+    this.state.filter = filter
     Actions.list({
       query: filter,
       modelName: this.props.modelName,
