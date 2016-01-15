@@ -35,7 +35,7 @@ class AddNewIdentity extends Component {
            ? <View style={[buttonStyles.container]}>
                <TouchableHighlight onPress={this.createNewIdentity.bind(this)} underlayColor='transparent'>
                  <View style={{alignItems: 'center'}}>
-                   <Icon name='plus'  size={25}  color='#f7f7f7'  style={buttonStyles.icon}/>
+                   <Icon name='plus'  size={25}  color='#f7f7f7' />
                    <Text style={[buttonStyles.text, {color: '#f7f7f7'}]}>Add Identity</Text>
                  </View>
                </TouchableHighlight>

@@ -147,7 +147,7 @@ class AddNewMessage extends Component {
     var menu = <TouchableHighlight underlayColor='transparent'
                     onPress={this.props.onMenu.bind(this)}>
                   <View style={{marginLeft: 15, paddingRight: 0, marginBottom: 5}}>
-                    <Icon name='android-more-vertical' style={styles.icon} size={30} color='#999999' />
+                    <Icon name='android-more-vertical' size={30} color='#999999' />
                   </View>
                 </TouchableHighlight>
     var camera = isOrg
@@ -155,7 +155,7 @@ class AddNewMessage extends Component {
                : <TouchableHighlight underlayColor='transparent'
                     onPress={this.showChoice.bind(this)}>
                   <View style={{paddingRight: 0, marginBottom: 5, marginRight: 10}}>
-                    <Icon name='ios-camera' style={styles.icon} size={30} color='#999999' />
+                    <Icon name='ios-camera' size={30} color='#999999' />
                   </View>
                 </TouchableHighlight>
 
