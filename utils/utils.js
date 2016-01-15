@@ -9,6 +9,14 @@ var RCTUIManager = NativeModules.UIManager
 var collect = require('stream-collector')
 var t = require('tcomb-form-native');
 var moment = require('moment');
+
+var levelErrors = require('levelup/lib/errors')
+// TODO: add logbase to deps
+var rebuf = require('tim/node_modules/logbase').rebuf
+var parseDBValue = function (pair) {
+  return pair[1] && rebuf(JSON.parse(pair[1]))
+}
+
 var constants = require('@tradle/constants');
 var TYPE = constants.TYPE
 var VERIFICATION = constants.TYPES.VERIFICATION
@@ -352,6 +360,41 @@ var utils = {
       }
 
       setTimeout(fn, 0)
+    })
+  },
+
+  /**
+   * optimized multi-get from levelup
+   * @param  {Object} opts
+   * @param  {levelup} opts.db
+   * @param  {Array} opts.keys
+   * @param  {Boolean} opts.strict (optional) - if true, fail if any keys is not found
+   * @return {[type]}      [description]
+   */
+  multiGet: function (opts) {
+    let strict = opts.strict
+    let loc = opts.db.location
+    let keys = opts.keys
+    return AsyncStorage.multiGet(keys.map(function (key) {
+      return loc + '!' + key
+    }))
+    .then(function (results) {
+      if (strict) {
+        if (results.some(function (r) {
+          return !r[1]
+        })) {
+          throw new levelErrors.NotFoundError()
+        }
+
+        return results.map(parseDBValue)
+      } else {
+        return results.map(function (pair) {
+          return {
+            value: parseDBValue(pair),
+            reason: pair[1] ? null : new levelErrors.NotFoundError()
+          }
+        })
+      }
     })
   }
 }

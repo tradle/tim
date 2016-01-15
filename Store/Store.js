@@ -304,6 +304,27 @@ var Store = Reflux.createStore({
       //   port: 25778
       // }
     })
+
+    var whitelist = []
+    meDriver._shouldLoadTx = function (tx) {
+      // if public, check if it's our infoHash
+      // or if it's in pre-determined list to load
+      // otherwise mark as ignored
+      if (tx.txType === 1) return true
+
+      return whitelist.indexOf(tx.txId) !== -1 ||
+        tx.txData.toString('hex') === meDriver.myCurrentHash()
+    }
+
+    meDriver._sortParsedTxs = function (txs) {
+      return txs.sort(function (a, b) {
+        return whitelist.indexOf(a.txId) !== -1 ? -1 :
+          whitelist.indexOf(b.txId) !== -1 ? 1 : 0
+      })
+    }
+
+    meDriver._multiGetFromDB = utils.multiGet
+
     SERVICE_PROVIDERS.forEach(function(name) {
       var bank = ALL_SERVICE_PROVIDERS.providers[name]
       if (bank.on === false)
@@ -314,6 +335,8 @@ var Store = Reflux.createStore({
         // e.g. http://tradle.io:44444/rabobank/send
         `${SERVICE_PROVIDERS_BASE_URL}/${name}/send`
       )
+
+      whitelist.push(bank.txId)
     })
     // for (var name in SERVICE_PROVIDERS) {
     //   if (SERVICE_PROVIDERS[name].on === false) {
@@ -1110,15 +1133,18 @@ var Store = Reflux.createStore({
       to = this.getRepresentative(ORGANIZATION + '_' + to[ROOT_HASH])
     if (!to)
       return
+
     var opts = {
       to: [{fingerprint: this.getFingerprint(to)}],
       deliver: true,
       chain: false
     }
 
-    opts[CUR_HASH] = resource[CUR_HASH]
     var key = formResource[TYPE] + '_' + formResource[ROOT_HASH]
-    return meDriver.share(opts)
+    return meDriver.share({...opts, [CUR_HASH]: resource[CUR_HASH]})
+    // .then(function () {
+    //   return meDriver.share({...opts, [CUR_HASH]: resource.document[ROOT_HASH]})
+    // })
     .then(function() {
       var key = formResource[TYPE] + '_' + formResource[ROOT_HASH]
        var r = list[key].value
@@ -2981,6 +3007,7 @@ var Store = Reflux.createStore({
     return defer.promise
   }
 });
+
 module.exports = Store;
 
 /*
