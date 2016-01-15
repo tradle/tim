@@ -53,11 +53,12 @@ class PhotoList extends Component {
     if (this.props.resource[constants.ROOT_HASH] !== nextProps.resource[constants.ROOT_HASH])
       return true
 
-    return !equal(this.props.resource.photos, nextProps.resource.photos)
+    return !equal(this.props.resource.photos, nextProps.resource.photos)  ||
+           !equal(this.props.photos, nextProps.photos)
   }
   render() {
     var photos = this.props.photos;
-    if (!photos || !photos.length  ||  (photos.length <= 1  &&  this.props.isView))
+    if (!photos || !photos.length) //  ||  (photos.length <= 1  &&  this.props.isView))
       return null;
 
     var inRow = photos.length, height;
@@ -149,7 +150,7 @@ class PhotoList extends Component {
 
       return (
         <View style={[{paddingTop: 2, margin: 1, flexDirection: 'column'}, imageStyle[0]]} key={this.getNextKey() + '_photo'}>
-          <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, photo)}>
+          <TouchableHighlight underlayColor='transparent' onPress={this.props.callback ? this.props.callback.bind(this, photo) : this.showCarousel.bind(this, {currentPhoto: photo})}>
              <Image style={[styles.thumbCommon, imageStyle]} source={source} />
           </TouchableHighlight>
         </View>
@@ -171,12 +172,6 @@ var styles = StyleSheet.create({
     flex: 1,
     paddingTop: 5,
     alignSelf: 'center',
-  },
-  photoTitle: {
-    fontSize: 14,
-    alignSelf: 'center',
-    marginBottom: 5,
-    color: '#656565',
   },
   thumb3: {
     width: d3,
