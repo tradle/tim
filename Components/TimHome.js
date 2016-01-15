@@ -33,7 +33,7 @@ var {
   Component,
   ScrollView,
   LinkingIOS,
-  // StatusBarIOS,
+  StatusBarIOS,
   AlertIOS
 } = React;
 
@@ -274,7 +274,7 @@ class TimHome extends Component {
     }
   }
   render() {
-    // StatusBarIOS.setHidden(true);
+    StatusBarIOS.setHidden(true);
     if (this.state.message) {
       this.restartTiM()
       return
