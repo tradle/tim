@@ -340,27 +340,21 @@ var utils = {
   },
 
   onNextTransitionStart(navigator, fn) {
-    var removeListener = navigator.navigationContext.addListener('willfocus', () => {
-      if (removeListener.remove) {
-        removeListener.remove()
-      } else {
-        removeListener()
-      }
-
+    let remove = normalizeRemoveListener(navigator.navigationContext.addListener('willfocus', () => {
+      remove()
       setTimeout(fn, 0)
-    })
+    }))
+
+    return remove
   },
 
   onNextTransitionEnd(navigator, fn) {
-    var removeListener = navigator.navigationContext.addListener('didfocus', () => {
-      if (removeListener.remove) {
-        removeListener.remove()
-      } else {
-        removeListener()
-      }
-
+    let remove = normalizeRemoveListener(navigator.navigationContext.addListener('didfocus', () => {
+      remove()
       setTimeout(fn, 0)
-    })
+    }))
+
+    return remove
   },
 
   /**
@@ -396,6 +390,16 @@ var utils = {
         })
       }
     })
+  }
+}
+
+function normalizeRemoveListener (addListenerRetVal) {
+  return () => {
+    if (addListenerRetVal.remove) {
+      addListenerRetVal.remove()
+    } else {
+      addListenerRetVal()
+    }
   }
 }
 

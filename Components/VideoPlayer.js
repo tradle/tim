@@ -41,12 +41,12 @@ class VideoPlayer extends React.Component {
     })
   }
 
-  componentWillMount() {
-    utils.onNextTransitionStart(this.props.navigator, this.pause)
-  }
-
   componentDidMount() {
     this.play()
+  }
+
+  componentWillUnmount() {
+    this.pause()
   }
 
   pause() {
