@@ -20,7 +20,7 @@ var TradleLogo = require('../img/Tradle.png')
 var TradleWhite = require('../img/TradleW.png')
 var BG_IMAGE = require('../img/bg.png')
 // var Progress = require('react-native-progress')
-import { authenticateUser } from '../utils/authenticateUser'
+import { authenticateUser } from '../utils/localAuth'
 var {
   StyleSheet,
   Text,

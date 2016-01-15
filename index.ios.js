@@ -23,7 +23,11 @@ var React = require('react-native');
 //   if (__DEV__) throw e
 // })
 
-var CodePush = !__DEV__ && require('react-native-code-push')
+import {
+  authenticateUser,
+  unauthenticateUser,
+  isAuthenticated
+} from './utils/localAuth'
 var ResourceList = require('./Components/ResourceList');
 var VideoPlayer = require('./Components/VideoPlayer')
 // var GridList = require('./Components/GridList');
@@ -48,6 +52,7 @@ var utils = require('./utils/utils');
 var constants = require('@tradle/constants');
 var Icon = require('react-native-vector-icons/Ionicons');
 var Actions = require('./Actions/Actions');
+import * as AutomaticUpdates from './utils/automaticUpdates'
 // var Device = require('react-native-device');
 
 var reactMixin = require('react-mixin');
@@ -70,10 +75,12 @@ var {
   // Text,
   TouchableOpacity,
   StyleSheet,
-  LinkingIOS
+  LinkingIOS,
+  AppStateIOS
 } = React;
 
 var ReactPerf = __DEV__ && require('react-addons-perf')
+var UNAUTHENTICATE_AFTER_BG_MILLIS = 10 * 60 * 1000
 
 class TiMApp extends Component {
   constructor(props) {
@@ -82,6 +89,8 @@ class TiMApp extends Component {
       modelName: constants.TYPES.IDENTITY
     }
     this.state = {
+      currentAppState: 'active',
+      dateAppStateChanged: Date.now(),
       initialRoute: {
         id: 1,
         // title: 'Trust in Motion',
@@ -96,28 +105,59 @@ class TiMApp extends Component {
     // var isIphone = Device.isIphone();
     // if (!isIphone)
     //   isIphone = isIphone;
+
+    ;['_handleOpenURL', '_handleAppStateChange'].forEach((method) => {
+      this[method] = this[method].bind(this)
+    })
   }
 
   componentDidMount() {
-    if (CodePush) {
-      // every 10 mins
-      let interval = 10 * 60 * 1000
-      let syncPeriodically = () => {
-        CodePush.sync({ updateDialog: true, installMode: CodePush.InstallMode.IMMEDIATE });
-        setTimeout(syncPeriodically, interval)
-      }
-
-      syncPeriodically()
-    }
-
-    LinkingIOS.addEventListener('url', this._handleOpenURL.bind(this));
+    AutomaticUpdates.on()
+    AppStateIOS.addEventListener('change', this._handleAppStateChange);
+    LinkingIOS.addEventListener('url', this._handleOpenURL);
     var url = LinkingIOS.popInitialURL();
     if (url)
       this._handleOpenURL({url});
   }
   componentWillUnmount() {
-    LinkingIOS.removeEventListener('url', this._handleOpenURL.bind(this));
+    AppStateIOS.removeEventListener('change', this._handleAppStateChange);
+    LinkingIOS.removeEventListener('url', this._handleOpenURL);
     this._navListeners.forEach((listener) => listener.remove())
+  }
+  _handleAppStateChange(currentAppState) {
+    let dateAppStateChanged = Date.now()
+    let lastDateAppStateChanged = this.state.dateAppStateChanged
+    let stateChange = { currentAppState, dateAppStateChanged }
+
+    switch (currentAppState) {
+      case 'active':
+        clearTimeout(this.state.unauthTimeout)
+        // ok to pop from defensive copy
+        let currentRoute = this.state.navigator.getCurrentRoutes().pop()
+        if (!isAuthenticated()) {
+          this.state.navigator.replace({
+            id: 1,
+            component: TimHome,
+            passProps: this.props,
+          })
+
+          // authenticateUser('Tradle locked down after a period of inactivity. Please unlock!')
+          authenticateUser('Welcome back! Please unlock the app')
+            .then(() => {
+              if (currentRoute) {
+                this.state.navigator.push(currentRoute)
+              }
+            })
+        }
+
+        AutomaticUpdates.sync()
+        break
+      case 'background':
+        stateChange.unauthTimeout = setTimeout(unauthenticateUser, UNAUTHENTICATE_AFTER_BG_MILLIS)
+        break
+    }
+
+    this.setState(stateChange)
   }
   _handleOpenURL(event) {
     var url = event.url.trim();

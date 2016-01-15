@@ -5,25 +5,25 @@ import Q from 'q'
 
 // var SETUP_MSG = 'Please set up Touch ID first, so the app can better protect your data.'
 var AUTH_FAILED_MSG = 'Authentication failed'
-var timeout
-var AUTHENTICATION_EXPIRES_IN = 300000
 var authenticated = false
+
+export function isAuthenticated () {
+  return authenticated
+}
 
 export function unauthenticateUser () {
   authenticated = false
 }
 
-export function authenticateUser () {
+export function authenticateUser (reason) {
   if (authenticated) return Q(authenticated)
 
   return LocalAuth.authenticate({
-      reason: 'please unlock the app',
+      reason: reason || 'please unlock the app',
       fallbackToPasscode: true,
       suppressEnterPassword: true
     })
     .then(() => {
-      if (timeout) clearTimeout(timeout)
-      timeout = setTimeout(unauthenticateUser, AUTHENTICATION_EXPIRES_IN)
       return authenticated = true
     })
     .catch((err) => {
