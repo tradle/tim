@@ -11,6 +11,10 @@
 # This script is supposed to be invoked as part of Xcode build process
 # and relies on envoronment variables (including PWD) set by Xcode
 
+function evil_git_dirty {
+  [[ $(git diff --shortstat 2> /dev/null | tail -n1) != "" ]] && echo "*"
+}
+
 buildPlist="$PRODUCT_NAME/Info.plist"
 bundleVersion=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" $buildPlist)
 gitHash=$(git rev-parse HEAD)
@@ -39,6 +43,9 @@ case "$CONFIGURATION" in
     ;;
 esac
 
+source ~/.bash_profile
+source ~/.bashrc
+
 # Xcode project file for React Native apps is located in ios/ subfolder
 cd ..
 
@@ -56,20 +63,30 @@ elif [[ -x "$(command -v brew)" && -s "$(brew --prefix nvm)/nvm.sh" ]]; then
   . "$(brew --prefix nvm)/nvm.sh"
 fi
 
-echo "writing bundle and assets to $DEST"
-react-native bundle \
-  --entry-file index.ios.js \
-  --platform ios \
-  --dev $DEV \
-  --sourcemap-output "$DEST/main.jsbundle.map" \
-  --bundle-output "$DEST/main.jsbundle" \
-  --assets-dest "$DEST" \
-  --verbose
+if [ -d "$LOCAL_RELEASE_DIR" ]; then
+  cp "$LOCAL_RELEASE_DIR/main.jsbundle" "$DEST/"
+  cp -r "$LOCAL_RELEASE_DIR/assets" "$DEST/"
+else
+  if [[ "$DEV" == false && "$(evil_git_dirty)" == "*" ]]; then
+    echo "yo! you have unstaged changes, please commit before building a release"
+    exit 1
+  fi
 
-if [ "$DEV" == false ]; then
-  echo "copying bundle and assets to $LOCAL_RELEASE_DIR"
-  mkdir -p "$LOCAL_RELEASE_DIR"
-  cp "$DEST/main.jsbundle" "$LOCAL_RELEASE_DIR/"
-  cp "$DEST/main.jsbundle.map" "$LOCAL_RELEASE_DIR/"
-  cp -r "$DEST/assets" "$LOCAL_RELEASE_DIR/"
+  echo "writing bundle and assets to $DEST"
+  react-native bundle \
+    --entry-file index.ios.js \
+    --platform ios \
+    --dev $DEV \
+    --sourcemap-output "$DEST/main.jsbundle.map" \
+    --bundle-output "$DEST/main.jsbundle" \
+    --assets-dest "$DEST" \
+    --verbose
+
+  if [ "$DEV" == false ]; then
+    echo "copying bundle and assets to $LOCAL_RELEASE_DIR"
+    mkdir -p "$LOCAL_RELEASE_DIR"
+    cp "$DEST/main.jsbundle" "$LOCAL_RELEASE_DIR/"
+    cp "$DEST/main.jsbundle.map" "$LOCAL_RELEASE_DIR/"
+    cp -r "$DEST/assets" "$LOCAL_RELEASE_DIR/"
+  fi
 fi
