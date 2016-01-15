@@ -20,6 +20,7 @@
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		146834051AC3E58100842450 /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 146834041AC3E56700842450 /* libReact.a */; };
+		730F1E2D1C487F560072D2D7 /* videotour.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 730F1E2C1C487F2D0072D2D7 /* videotour.mp4 */; };
 		731F233C1C31BB4900C3B09D /* libCodePush.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 731F23291C31BB2D00C3B09D /* libCodePush.a */; };
 		731F233E1C31BB6600C3B09D /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 731F233D1C31BB6600C3B09D /* libz.tbd */; };
 		732EA0C81C24AB99000EFAA6 /* libRNRandomBytes.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732EA0C41C24AB90000EFAA6 /* libRNRandomBytes.a */; };
@@ -28,7 +29,6 @@
 		7365BF2E1C3461F900B0A512 /* libRNKeychain.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7365BF2D1C3461E700B0A512 /* libRNKeychain.a */; };
 		736E4EEE1C134354000AA599 /* DeviceUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 736E4EEC1C134354000AA599 /* DeviceUtil.m */; };
 		7375AA881C34766300F36CF3 /* libRNECC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7364872F1C34703500713F09 /* libRNECC.a */; };
-		739316D81C43AE7500B0608D /* videotour.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 739316D71C43AE7500B0608D /* videotour.mp4 */; };
 		739F72C01C3F739700D9F2FB /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB11A68108700A75B9A /* LaunchScreen.xib */; };
 		739F72F01C3F742B00D9F2FB /* RNEnvironmentManagerIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = 739F72EF1C3F742B00D9F2FB /* RNEnvironmentManagerIOS.m */; };
 		739F73091C3F74AE00D9F2FB /* environment.json in Resources */ = {isa = PBXBuildFile; fileRef = 739F73081C3F74AE00D9F2FB /* environment.json */; };
@@ -246,6 +246,7 @@
 		29F90A6163024FE8B7A7022D /* libRNLocalAuth.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNLocalAuth.a; sourceTree = "<group>"; };
 		3D510339A825413A9733521D /* RCTVideo.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTVideo.xcodeproj; path = "../node_modules/react-native-video/RCTVideo.xcodeproj"; sourceTree = "<group>"; };
 		52C9F227A7304496B8DC2A2A /* CodePush.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = CodePush.xcodeproj; path = "../node_modules/react-native-code-push/CodePush.xcodeproj"; sourceTree = "<group>"; };
+		730F1E2C1C487F2D0072D2D7 /* videotour.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; name = videotour.mp4; path = ../video/videotour.mp4; sourceTree = "<group>"; };
 		731F233D1C31BB6600C3B09D /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		732EA0AF1C24AB90000EFAA6 /* RNRandomBytes.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNRandomBytes.xcodeproj; path = "../node_modules/react-native-randombytes/RNRandomBytes.xcodeproj"; sourceTree = "<group>"; };
 		7348C3B61C41C04F00B9CDF5 /* Fabric.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Fabric.framework; sourceTree = "<group>"; };
@@ -254,7 +255,6 @@
 		7365BF281C3461E600B0A512 /* RNKeychain.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNKeychain.xcodeproj; path = "../node_modules/react-native-keychain/RNKeychain.xcodeproj"; sourceTree = "<group>"; };
 		736E4EEC1C134354000AA599 /* DeviceUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DeviceUtil.m; path = "../node_modules/react-native-device/DeviceUtil.m"; sourceTree = "<group>"; };
 		736E4EED1C134354000AA599 /* DeviceUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DeviceUtil.h; path = "../node_modules/react-native-device/DeviceUtil.h"; sourceTree = "<group>"; };
-		739316D71C43AE7500B0608D /* videotour.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; name = videotour.mp4; path = ../video/videotour.mp4; sourceTree = "<group>"; };
 		739F72EE1C3F742B00D9F2FB /* RNEnvironmentManagerIOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNEnvironmentManagerIOS.h; sourceTree = "<group>"; };
 		739F72EF1C3F742B00D9F2FB /* RNEnvironmentManagerIOS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNEnvironmentManagerIOS.m; sourceTree = "<group>"; };
 		739F73081C3F74AE00D9F2FB /* environment.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = environment.json; path = Tradle/environment.json; sourceTree = "<group>"; };
@@ -580,7 +580,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				739316D71C43AE7500B0608D /* videotour.mp4 */,
+				730F1E2C1C487F2D0072D2D7 /* videotour.mp4 */,
 				739F73081C3F74AE00D9F2FB /* environment.json */,
 				7348C3B61C41C04F00B9CDF5 /* Fabric.framework */,
 				7348C3B71C41C04F00B9CDF5 /* Crashlytics.framework */,
@@ -970,9 +970,9 @@
 			files = (
 				739F72C01C3F739700D9F2FB /* LaunchScreen.xib in Resources */,
 				739F73091C3F74AE00D9F2FB /* environment.json in Resources */,
-				739316D81C43AE7500B0608D /* videotour.mp4 in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				73FE35D11BFA14F600EFB313 /* Ionicons.ttf in Resources */,
+				730F1E2D1C487F560072D2D7 /* videotour.mp4 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
