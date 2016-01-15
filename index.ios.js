@@ -32,6 +32,8 @@ var TimHome = require('./Components/TimHome');
 var ResourceTypesScreen = require('./Components/ResourceTypesScreen');
 var NewResource = require('./Components/NewResource');
 var NewItem = require('./Components/NewItem');
+var ItemsList = require('./Components/ItemsList')
+var GridItemsList = require('./Components/GridItemsList')
 var ResourceView = require('./Components/ResourceView');
 var MessageView = require('./Components/MessageView');
 var MessageList = require('./Components/MessageList');
@@ -305,6 +307,8 @@ class TiMApp extends Component {
                   list={props.list}
                   callback={props.callback}
                   modelName={props.modelName} />;
+    case 9:
+      return <ItemsList navigator={nav} {...props} />
     case 11:
       return <MessageList navigator={nav}
                   filter={props.filter}
@@ -329,7 +333,7 @@ class TiMApp extends Component {
                 onSelectingEnd={props.onSelectingEnd} />
 
     case 14:
-      return <PhotoCarousel photos={props.photos} currentPhoto={props.currentPhoto} resource={props.resource} />
+      return <PhotoCarousel {...props} />
     // case 15:
     //   return <GridList navigator={nav}
     //               filter={props.filter}
@@ -356,6 +360,8 @@ class TiMApp extends Component {
                 dimension={props.dimension} />
     case 18:
       return <VideoPlayer {...props} />
+    case 19:
+      return <GridItemsList navigator={nav} {...props} />
     case 10:
     default: // 10
       return <ResourceList navigator={nav} {...props} />;
