@@ -38,8 +38,13 @@ export function authenticateUser () {
         // case 'LAErrorTouchIDNotEnrolled':
         //   message = SETUP_MSG
         //   break
+        case 'LAErrorSystemCancel':
+          message = 'Authentication failed. Please restart the app before trying again.'
+          break
         default:
-          message = AUTH_FAILED_MSG
+          message = __DEV__
+            ? `error: ${err.message}, stack: ${err.stack}`
+            : AUTH_FAILED_MSG
           break
       }
 
