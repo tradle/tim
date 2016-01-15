@@ -64,7 +64,7 @@ class ShowRefList extends Component {
         <View style={buttonStyles.container} key={getNextKey(key)}>
            <TouchableHighlight onPress={this.showResources.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
              <View style={{alignItems: 'center'}} key={getNextKey(key)}>
-               <Icon name={icon}  size={30}  color='#ffffff'  style={[buttonStyles.icon, {paddingLeft: 5}]} />
+               <Icon name={icon}  size={30}  color='#ffffff' />
                <Text style={buttonStyles.text}>{props[p].title}</Text>
              </View>
            </TouchableHighlight>

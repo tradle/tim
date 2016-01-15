@@ -19,14 +19,7 @@ var {
   TouchableHighlight,
   Component
 } = React;
-// <View style={[buttonStyles.container1]}>
-//                <TouchableHighlight onPress={this.createNewIdentity.bind(this)} underlayColor='transparent'>
-//                  <View>
-//                    <Icon name='plus'  size={25}  color='#f7f7f7'  style={buttonStyles.icon}/>
-//                    <Text style={[buttonStyles.text, {color: '#f7f7f7'}]}>Add Identity</Text>
-//                  </View>
-//                </TouchableHighlight>
-//              </View>
+
 class ShowMessageRefList extends Component {
   constructor(props) {
     super(props);
@@ -42,19 +35,6 @@ class ShowMessageRefList extends Component {
     var refList = [];
     var isIdentity = model.id === constants.TYPES.IDENTITY;
     var isMe = isIdentity ? resource[constants.ROOT_HASH] === utils.getMe()[constants.ROOT_HASH] : true;
-    // The profile page for the device owner has 2 more profile specific links: add new identity and switch identity
-
-    // if (this.props.resource[constants.TYPE] !== 'tradle.SimpleMessage' && this.props.resource[constants.TYPE] !== 'tradle.Verification')
-    //   refList.push(
-    //     <View style={buttonStyles.container}>
-    //     <TouchableHighlight underlayColor='transparent' onPress={this.showMoreLikeThis.bind(this)}>
-    //        <View style={{alignItems: 'center'}}>
-    //          <Icon name='arrow-shrink'  size={35}  color='#ffffff'  style={[buttonStyles.icon, {paddingLeft: 1}]}/>
-    //          <Text style={buttonStyles.text}>More like this</Text>
-    //        </View>
-    //     </TouchableHighlight>
-    //     </View>
-    //   );
 
     for (var p in props) {
       if (isIdentity  &&  !isMe  &&  props[p].allowRoles  &&  props[p].allowRoles === 'me')
@@ -85,7 +65,7 @@ class ShowMessageRefList extends Component {
                  }
                } underlayColor='transparent'>
                  <View style={{alignItems: 'center'}}>
-                   <Icon name={icon}  size={35}  color='#ffffff'  style={[buttonStyles.icon, {paddingLeft: 7}]}/>
+                   <Icon name={icon}  size={35}  color='#ffffff' />
                    <Text style={buttonStyles.text}>{props[p].title}</Text>
                  </View>
                </TouchableHighlight>
@@ -97,7 +77,7 @@ class ShowMessageRefList extends Component {
           <View style={buttonStyles.container} key={this.getNextKey()}>
              <TouchableHighlight onPress={this.showResources.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
                <View style={{alignItems: 'center'}}>
-                 <Icon name={icon}  size={35}  color='#ffffff'  style={[buttonStyles.icon, {paddingLeft: 7}]}/>
+                 <Icon name={icon}  size={35}  color='#ffffff' />
                  <Text style={buttonStyles.text}>{props[p].title}</Text>
                </View>
              </TouchableHighlight>
