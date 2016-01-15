@@ -549,7 +549,8 @@ var Store = Reflux.createStore({
         return self.getDriver(me)
     })
     .then(function() {
-      if (list[utils.getId(r.to)].value.pubkeys) {
+      if (list[utils.getId(r.to)].value.pubkeys  &&
+         (me.published  ||  r[TYPE] !== CUSTOMER_WAITING)) {
         return utils.sendSigned(meDriver, {
           msg: toChain,
           to: [{fingerprint: self.getFingerprint(r.to)}],
@@ -1186,7 +1187,8 @@ var Store = Reflux.createStore({
       });
     }
   },
-  getList(params) { //query, modelName, resource, isAggregation, prop) {
+  getList(params) {
+    //query, modelName, resource, isAggregation, prop) {
     // meDriver.messages().byRootHash("41677f5827973883a3a5259c1337bda9a5360d38", function(err, r) {
     //   meDriver.lookupObject(r[0])
     //     .then(function (obj) {
