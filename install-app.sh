@@ -15,11 +15,6 @@ function evil_git_dirty {
   [[ $(git diff --shortstat 2> /dev/null | tail -n1) != "" ]] && echo "*"
 }
 
-buildPlist="$PRODUCT_NAME/Info.plist"
-bundleVersion=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" $buildPlist)
-gitHash=$(git rev-parse HEAD)
-LOCAL_RELEASE_DIR="release/$bundleVersion/${gitHash:0:10}"
-echo $LOCAL_RELEASE_DIR
 DEV=false
 case "$CONFIGURATION" in
   Debug)
@@ -43,6 +38,16 @@ case "$CONFIGURATION" in
     ;;
 esac
 
+plistName="Info"
+if [ "$DEV" == true ]; then
+  plistName="Dev"
+fi
+
+buildPlist="Tradle/$plistName.plist"
+bundleVersion=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" $buildPlist)
+gitHash=$(git rev-parse HEAD)
+LOCAL_RELEASE_DIR="release/$bundleVersion/${gitHash:0:10}"
+
 source ~/.bash_profile
 source ~/.bashrc
 
@@ -63,14 +68,15 @@ elif [[ -x "$(command -v brew)" && -s "$(brew --prefix nvm)/nvm.sh" ]]; then
   . "$(brew --prefix nvm)/nvm.sh"
 fi
 
-if [ -d "$LOCAL_RELEASE_DIR" ]; then
+if [ -f "$LOCAL_RELEASE_DIR/main.jsbundle" ]; then
+  mkdir -p "$DEST"
   cp "$LOCAL_RELEASE_DIR/main.jsbundle" "$DEST/"
   cp -r "$LOCAL_RELEASE_DIR/assets" "$DEST/"
 else
-  if [[ "$DEV" == false && "$(evil_git_dirty)" == "*" ]]; then
-    echo "yo! you have unstaged changes, please commit before building a release"
-    exit 1
-  fi
+  # if [[ "$DEV" == false && "$(evil_git_dirty)" == "*" ]]; then
+  #   echo "yo! you have unstaged changes, please commit before building a release"
+  #   exit 1
+  # fi
 
   echo "writing bundle and assets to $DEST"
   react-native bundle \
