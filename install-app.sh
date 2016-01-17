@@ -16,18 +16,21 @@ function evil_git_dirty {
 }
 
 DEV=false
+plistName="Info"
+if [ "$PRODUCT_NAME" == "Tradle-dev" ]; then
+  plistName="Dev"
+fi
+
 case "$CONFIGURATION" in
   Debug)
   exit 0 # avoid building bundle in Debug mode
     # DEV=true
     ;;
   Release)
-    ;;
-  RABOBANK)
-    ;;
-  LLOYDS)
-    ;;
-  TRADLE)
+    if [ "$(evil_git_dirty)" == "*" ]; then
+      echo "TRADLE DEVELOPER, YOU HAVE UNSTAGED CHANGES, PLEASE COMMIT BEFORE BUILDING A RELEASE"
+      exit 1
+    fi
     ;;
   "")
     DEST=$LOCAL_RELEASE_DIR # build bundle to local dir
@@ -37,11 +40,6 @@ case "$CONFIGURATION" in
     exit 1
     ;;
 esac
-
-plistName="Info"
-if [ "$DEV" == true ]; then
-  plistName="Dev"
-fi
 
 buildPlist="Tradle/$plistName.plist"
 bundleVersion=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" $buildPlist)
@@ -73,11 +71,6 @@ if [ -f "$LOCAL_RELEASE_DIR/main.jsbundle" ]; then
   cp "$LOCAL_RELEASE_DIR/main.jsbundle" "$DEST/"
   cp -r "$LOCAL_RELEASE_DIR/assets" "$DEST/"
 else
-  # if [[ "$DEV" == false && "$(evil_git_dirty)" == "*" ]]; then
-  #   echo "yo! you have unstaged changes, please commit before building a release"
-  #   exit 1
-  # fi
-
   echo "writing bundle and assets to $DEST"
   react-native bundle \
     --entry-file index.ios.js \
