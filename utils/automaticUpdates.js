@@ -20,9 +20,9 @@ export function sync () {
   }, (syncStatus) => {
     switch (syncStatus) {
       case CodePush.SyncStatus.UPDATE_INSTALLED:
-        AlertIOS.alert('Update available', 'Please install the update.', {
+        AlertIOS.alert('Update available', 'Please install the update.', [{
           onPress: () => CodePush.restartApp()
-        })
+        }])
         break
     }
   })
