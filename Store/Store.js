@@ -1142,9 +1142,9 @@ var Store = Reflux.createStore({
 
     var key = formResource[TYPE] + '_' + formResource[ROOT_HASH]
     return meDriver.share({...opts, [CUR_HASH]: resource[CUR_HASH]})
-    // .then(function () {
-    //   return meDriver.share({...opts, [CUR_HASH]: resource.document[ROOT_HASH]})
-    // })
+    .then(function () {
+      return meDriver.share({...opts, [CUR_HASH]: resource.document[ROOT_HASH]})
+    })
     .then(function() {
       var key = formResource[TYPE] + '_' + formResource[ROOT_HASH]
        var r = list[key].value
@@ -2215,9 +2215,9 @@ var Store = Reflux.createStore({
           debugger
         })
       })
-      meDriver.on('unchained-self', function () {
+      meDriver.on('unchained-self', function (info) {
         console.log('unchained self!')
-        // meDriver.lookupObject(obj)
+        // meDriver.lookupObject(info)
         // .then(function(obj) {
         //   // return
           return self.updateMe()
