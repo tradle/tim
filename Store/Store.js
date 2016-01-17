@@ -1,12 +1,12 @@
 'use strict';
 
-// __DEV__ = false
 var React = require('react-native')
 var {
   AsyncStorage,
   AlertIOS
 } = React
 
+var path = require('path')
 var BeSafe = require('asyncstorage-backup')
 var Reflux = require('reflux');
 var Actions = require('../Actions/Actions');
@@ -333,7 +333,7 @@ var Store = Reflux.createStore({
       messenger.addRecipient(
         bank.hash,
         // e.g. http://tradle.io:44444/rabobank/send
-        `${SERVICE_PROVIDERS_BASE_URL}/${name}/send`
+        path.join(SERVICE_PROVIDERS_BASE_URL, name, 'send')
       )
 
       whitelist.push(bank.txId)
