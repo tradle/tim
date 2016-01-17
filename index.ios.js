@@ -135,17 +135,22 @@ class TiMApp extends Component {
         // ok to pop from defensive copy
         let currentRoute = this.state.navigator.getCurrentRoutes().pop()
         if (!isAuthenticated()) {
-          this.state.navigator.replace({
-            id: 1,
-            component: TimHome,
-            passProps: this.props,
-          })
+          let needNav = currentRoute.component !== TimHome
+          if (needNav) {
+            this.state.navigator.replace({
+              id: 1,
+              component: TimHome,
+              passProps: this.props,
+            })
+          }
 
           // authenticateUser('Tradle locked down after a period of inactivity. Please unlock!')
           authenticateUser('Welcome back! Please unlock the app')
             .then(() => {
               if (currentRoute) {
-                this.state.navigator.push(currentRoute)
+                if (needNav) {
+                  this.state.navigator.push(currentRoute)
+                }
               }
             })
         }

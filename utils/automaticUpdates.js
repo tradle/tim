@@ -21,6 +21,7 @@ export function sync () {
     switch (syncStatus) {
       case CodePush.SyncStatus.UPDATE_INSTALLED:
         AlertIOS.alert('Update available', 'Please install the update.', [{
+          text: 'Install',
           onPress: () => CodePush.restartApp()
         }])
         break
