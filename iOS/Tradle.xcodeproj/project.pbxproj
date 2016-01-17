@@ -65,6 +65,7 @@
 		7365BF2E1C3461F900B0A512 /* libRNKeychain.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7365BF2D1C3461E700B0A512 /* libRNKeychain.a */; };
 		736E4EEE1C134354000AA599 /* DeviceUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 736E4EEC1C134354000AA599 /* DeviceUtil.m */; };
 		7375AA881C34766300F36CF3 /* libRNECC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7364872F1C34703500713F09 /* libRNECC.a */; };
+		7385C6BB1C4C24A700B92CDA /* Dev.plist in Resources */ = {isa = PBXBuildFile; fileRef = 7385C6BA1C4C24A700B92CDA /* Dev.plist */; };
 		739F72C01C3F739700D9F2FB /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB11A68108700A75B9A /* LaunchScreen.xib */; };
 		739F72F01C3F742B00D9F2FB /* RNEnvironmentManagerIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = 739F72EF1C3F742B00D9F2FB /* RNEnvironmentManagerIOS.m */; };
 		739F73091C3F74AE00D9F2FB /* environment.json in Resources */ = {isa = PBXBuildFile; fileRef = 739F73081C3F74AE00D9F2FB /* environment.json */; };
@@ -293,6 +294,7 @@
 		7365BF281C3461E600B0A512 /* RNKeychain.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNKeychain.xcodeproj; path = "../node_modules/react-native-keychain/RNKeychain.xcodeproj"; sourceTree = "<group>"; };
 		736E4EEC1C134354000AA599 /* DeviceUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DeviceUtil.m; path = "../node_modules/react-native-device/DeviceUtil.m"; sourceTree = "<group>"; };
 		736E4EED1C134354000AA599 /* DeviceUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DeviceUtil.h; path = "../node_modules/react-native-device/DeviceUtil.h"; sourceTree = "<group>"; };
+		7385C6BA1C4C24A700B92CDA /* Dev.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Dev.plist; path = Tradle/Dev.plist; sourceTree = "<group>"; };
 		739F72EE1C3F742B00D9F2FB /* RNEnvironmentManagerIOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNEnvironmentManagerIOS.h; sourceTree = "<group>"; };
 		739F72EF1C3F742B00D9F2FB /* RNEnvironmentManagerIOS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNEnvironmentManagerIOS.m; sourceTree = "<group>"; };
 		739F73081C3F74AE00D9F2FB /* environment.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = environment.json; path = Tradle/environment.json; sourceTree = "<group>"; };
@@ -465,6 +467,7 @@
 		13B07FAE1A68108700A75B9A /* Tradle */ = {
 			isa = PBXGroup;
 			children = (
+				7385C6BA1C4C24A700B92CDA /* Dev.plist */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
@@ -1063,6 +1066,7 @@
 			files = (
 				739F72C01C3F739700D9F2FB /* LaunchScreen.xib in Resources */,
 				739F73091C3F74AE00D9F2FB /* environment.json in Resources */,
+				7385C6BB1C4C24A700B92CDA /* Dev.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				73FE35D11BFA14F600EFB313 /* Ionicons.ttf in Resources */,
 				730F1E2D1C487F560072D2D7 /* videotour.mp4 in Resources */,
