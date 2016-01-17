@@ -38,10 +38,10 @@ npm-debug.log
 environment.plist
 environment.json
 environment_preprocess.h
-Tradle/Info.plist
-Identity/Info.plist
+iOS/Tradle/*.plist
 release/
 release-*/
 Dockerfile*
 *.sublime*
 run-fabric.sh
+config/
