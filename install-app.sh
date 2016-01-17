@@ -72,6 +72,7 @@ if [ -f "$LOCAL_RELEASE_DIR/main.jsbundle" ]; then
   cp -r "$LOCAL_RELEASE_DIR/assets" "$DEST/"
 else
   echo "writing bundle and assets to $DEST"
+  rm -rf $TMPDIR/react-*
   react-native bundle \
     --entry-file index.ios.js \
     --platform ios \
