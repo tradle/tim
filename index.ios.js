@@ -285,10 +285,10 @@ class TiMApp extends Component {
                   // originatingMessage={props.originatingMessage}
                   // callback={props.callback} />;
     case 5:
-      return <MessageView navigator={nav}
-                  resource={props.resource}
-                  verification={props.verification}
-                  verify={props.verify} />;
+      return <MessageView navigator={nav} {...props} />
+                  // resource={props.resource}
+                  // verification={props.verification}
+                  // verify={props.verify} />;
     case 6:
       return <NewItem navigator={nav}
                   resource={props.resource}
