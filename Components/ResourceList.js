@@ -16,16 +16,11 @@ var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var constants = require('@tradle/constants');
 var Icon = require('react-native-vector-icons/Ionicons');
-var FontAwesome = require('react-native-vector-icons/FontAwesome')
-// var ProductChooser = require('./ProductChooser')
 var QRCodeScanner = require('./QRCodeScanner')
 var QRCode = require('./QRCode')
 var buttonStyles = require('../styles/buttonStyles');
 var bankStyles = require('../styles/bankStyles')
 
-// var GridList = require('./GridList');
-// var DEAL_MODEL = 'tradle.Offer';
-// var VENDOR_MODEL = 'tradle.Organization';
 var {
   ListView,
   Component,
@@ -294,36 +289,6 @@ class ResourceList extends Component {
         // Actions.addMessage(msg, true, sendNotification)
         utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg, true))
       }
-      // }
-      // else if (resource.name === 'Lloyds') {
-      //   var currentRoutes = self.props.navigator.getCurrentRoutes();
-      //   this.props.navigator.push({
-      //     title: 'Financial Product',
-      //     id: 15,
-      //     component: ProductChooser,
-      //     sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      //     backButtonTitle: 'Back',
-      //     passProps: {
-      //       resource: resource,
-      //       returnRoute: currentRoutes[currentRoutes.length - 1],
-      //       callback: this.props.callback
-      //     },
-      //     rightButtonTitle: 'ion|plus',
-      //     onRightButtonPress: {
-      //       id: 4,
-      //       title: 'New product',
-      //       component: NewResource,
-      //       backButtonTitle: 'Back',
-      //       titleTextColor: '#7AAAC3',
-      //       rightButtonTitle: 'Done',
-      //       passProps: {
-      //         model: utils.getModel('tradle.NewMessageModel').value,
-      //         // callback: this.modelAdded.bind(this)
-      //       }
-      //     }
-      //   });
-      //   return;
-      // }
     }
 
     this.props.navigator.push(route);
