@@ -352,7 +352,7 @@ var NewResourceMixin = {
         label = resource[params.prop].title
       style = textStyle
       propLabel = <View style={{marginLeft: 10, marginTop: 5, marginBottom: 5, backgroundColor: '#ffffff'}}>
-                    <Text style={{fontSize: 9, height: 10, color: '#B1B1B1'}}>{params.label}</Text>
+                    <Text style={{fontSize: 12, height: 10, color: '#B1B1B1'}}>{params.label}</Text>
                   </View>
     }
     else {
@@ -369,7 +369,7 @@ var NewResourceMixin = {
                 </View>
               : <View />
     return (
-      <View style={styles.chooserContainer} key={this.getNextKey()}>
+      <View style={styles.chooserContainer} key={this.getNextKey()} ref={prop.name}>
         <TouchableHighlight underlayColor='white' onPress={this.chooser.bind(this, prop, params.prop)}>
           <View style={{ position: 'relative'}}>
             {propLabel}
@@ -419,19 +419,22 @@ var NewResourceMixin = {
   setChosenValue(propName, value) {
     var resource = {}
     extend(resource, this.state.resource)
-    var id = value[constants.TYPE] + '_' + value[constants.ROOT_HASH]
-    resource[propName] = {
-      id: id,
-      title: utils.getDisplayName(value, utils.getModel(value[constants.TYPE]).value.properties)
+    if (this.props.model.properties[propName].type === 'array')
+      resource[propName] = value
+    else {
+      var id = value[constants.TYPE] + '_' + value[constants.ROOT_HASH]
+      resource[propName] = {
+        id: id,
+        title: utils.getDisplayName(value, utils.getModel(value[constants.TYPE]).value.properties)
+      }
+      // resource[propame] = value;
+      var data = this.refs.form.refs.input.state.value;
+      if (data) {
+        for (var p in data)
+          if (!resource[p])
+            resource[p] = data[p];
+      }
     }
-    // resource[propName] = value;
-    var data = this.refs.form.refs.input.state.value;
-    if (data) {
-      for (var p in data)
-        if (!resource[p])
-          resource[p] = data[p];
-    }
-
     this.setState({
       resource: resource,
       prop: propName
@@ -442,7 +445,6 @@ var NewResourceMixin = {
     for (var p in this.state.floatingProps)
       r[p] = this.state.floatingProps[p]
     Actions.saveTemporary(r)
-
   }
 
 }
