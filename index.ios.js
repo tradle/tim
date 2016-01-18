@@ -1,7 +1,6 @@
 'use strict'
 
 // require('react-native-level')
-
 var debug = require('debug')
 if (__DEV__) {
   console.ignoredYellowBox = ['jsSchedulingOverhead']
@@ -277,14 +276,14 @@ class TiMApp extends Component {
                   prop={props.prop}
                   verify={props.verify} />;
     case 4:
-      return <NewResource navigator={nav}
-                  resource={props.resource}
-                  model={props.model}
-                  editCols={props.editCols}
-                  additionalInfo={props.additionalInfo}
-                  returnRoute={props.rπeturnRoute}
-                  originatingMessage={props.originatingMessage}
-                  callback={props.callback} />;
+      return <NewResource navigator={nav} {...props } />
+                  // resource={props.resource}
+                  // model={props.model}
+                  // editCols={props.editCols}
+                  // additionalInfo={props.additionalInfo}
+                  // returnRoute={props.rπeturnRoute}
+                  // originatingMessage={props.originatingMessage}
+                  // callback={props.callback} />;
     case 5:
       return <MessageView navigator={nav}
                   resource={props.resource}
@@ -345,11 +344,7 @@ class TiMApp extends Component {
     //               sortProperty={props.sortProperty}
     //               modelName={props.modelName} />;
     case 15:
-      return <ProductChooser navigator={nav}
-                  resource={props.resource}
-                  returnRoute={props.returnRoute}
-                  products={props.products}
-                  callback={props.callback} />;
+      return <ProductChooser navigator={nav} {...props} />
     case 16:
       return <QRCodeScanner navigator={nav}
                 onread={props.onread} />
@@ -373,6 +368,10 @@ var NavigationBarRouteMapper = {
     if (index === 0  ||  route.noLeftButton) {
       return null;
     }
+    var color = '#7AAAC3'
+    if (route.passProps.bankStyle)
+      color = route.passProps.bankStyle.LINK_COLOR || LINK_COLOR
+
     var previousRoute = navState.routeStack[index - 1];
     var lbTitle = route.backButtonTitle  ||  previousRoute.title;
     if (!lbTitle)
@@ -380,8 +379,11 @@ var NavigationBarRouteMapper = {
     var style = [styles.navBarText];
     if (route.tintColor)
       style.push(route.tintColor);
-    else
+    else {
       style.push(styles.navBarButtonText);
+      var st = {color: color}
+      style.push(st);
+    }
 
     var title = lbTitle.indexOf('|') == -1
               ?  <Text style={style}>
@@ -406,6 +408,8 @@ var NavigationBarRouteMapper = {
     var style = [styles.navBarText, styles.navBarButtonText];
     if (route.tintColor)
       style.push({color: route.tintColor});
+    else if (route.passProps.bankStyle)
+      style.push({color: route.passProps.bankStyle.LINK_COLOR || LINK_COLOR})
     var title = route.rightButtonTitle.indexOf('|') == -1
               ?  <Text style={style}>
                     {route.rightButtonTitle}
