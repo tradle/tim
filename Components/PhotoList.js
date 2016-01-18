@@ -58,7 +58,8 @@ class PhotoList extends Component {
   }
   render() {
     var photos = this.props.photos;
-    if (!photos || !photos.length) //  ||  (photos.length <= 1  &&  this.props.isView))
+    // if (!photos || !photos.length) //  ||  (photos.length <= 1  &&  this.props.isView))
+    if (!photos ||  (photos.length <= 1  &&  this.props.isView))
       return null;
 
     var inRow = photos.length, height;
@@ -150,7 +151,7 @@ class PhotoList extends Component {
 
       return (
         <View style={[{paddingTop: 2, margin: 1, flexDirection: 'column'}, imageStyle[0]]} key={this.getNextKey() + '_photo'}>
-          <TouchableHighlight underlayColor='transparent' onPress={this.props.callback ? this.props.callback.bind(this, photo) : this.showCarousel.bind(this, {currentPhoto: photo})}>
+          <TouchableHighlight underlayColor='transparent' onPress={this.props.callback ? this.props.callback.bind(this, photo) : this.showCarousel.bind(this, photo)}>
              <Image style={[styles.thumbCommon, imageStyle]} source={source} />
           </TouchableHighlight>
         </View>
@@ -187,9 +188,9 @@ var styles = StyleSheet.create({
   },
   thumbCommon: {
     borderRadius: 5,
-    borderWidth: 1,
+    borderWidth: 0.5,
     margin: 1,
-    borderColor: 'transparent'
+    borderColor: '#999999'
   },
   row: {
     flexDirection: 'row',
