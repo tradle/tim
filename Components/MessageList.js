@@ -20,7 +20,6 @@ var InvertibleScrollView = require('react-native-invertible-scroll-view');
 var constants = require('@tradle/constants');
 var bankStyles = require('../styles/bankStyles')
 var LINK_COLOR
-var bankStyle
 
 var {
   ListView,
@@ -51,9 +50,9 @@ class MessageList extends Component {
     };
     if (bankStyles) {
       var name = props.resource.name.split(' ')[0].toLowerCase()
-      bankStyle = bankStyles[name]
-      if (bankStyle)
-        LINK_COLOR = bankStyle.LINK_COLOR || '#cccccc'
+      this.state.bankStyle = bankStyles[name]
+      if (this.state.bankStyle)
+        LINK_COLOR = this.state.bankStyle.LINK_COLOR || '#cccccc'
       else
         LINK_COLOR = '#cccccc'
     }
@@ -177,7 +176,10 @@ class MessageList extends Component {
       backButtonTitle: 'Back',
       component: MessageView,
       parentMeta: model,
-      passProps: {resource: resource},
+      passProps: {
+        bankStyle: this.state.bankStyle,
+        resource: resource
+      },
     }
     this.props.navigator.push(route);
   }
@@ -208,7 +210,7 @@ class MessageList extends Component {
         messageNumber={rowId}
         isAggregation={isAggregation}
         navigator={this.props.navigator}
-        bankStyle={bankStyle}
+        bankStyle={this.state.bankStyle}
         verificationsToShare={this.state.verificationsToShare}
         previousMessageTime={previousMessageTime}
         to={isAggregation ? resource.to : this.props.resource} />

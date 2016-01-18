@@ -464,7 +464,8 @@ class MessageRow extends Component {
     var r = isVerification ? resource.document : resource
 
     var passProps = {
-      resource: r
+      resource: r,
+      bankStyle: this.props.bankStyle,
     }
     if (!isVerification)
       passProps.verify = true
