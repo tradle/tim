@@ -2,7 +2,8 @@
 
 var React = require('react-native');
 var PhotoList = require('./PhotoList')
-
+var extend = require('extend')
+var equal = require('deep-equal')
 var {
   Component,
   StyleSheet,
@@ -12,12 +13,8 @@ var {
 class GridItemsList extends Component {
   constructor(props) {
     super(props);
-    var dataSource = new ListView.DataSource({
-        rowHasChanged: (row1, row2) => row1 !== row2,
-      });
     this.state = {
       list: this.props.list,
-      dataSource: dataSource.cloneWithRows(this.props.list),
     };
     var currentRoutes = this.props.navigator.getCurrentRoutes();
     var currentRoutesLength = currentRoutes.length;
@@ -39,7 +36,6 @@ class GridItemsList extends Component {
     }
     this.setState({
       list: list,
-      dataSource: this.state.dataSource.cloneWithRows(list)
     })
   }
 
