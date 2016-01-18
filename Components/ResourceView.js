@@ -15,7 +15,7 @@ var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
 var ResourceViewMixin = require('./ResourceViewMixin');
 var QRCode = require('./QRCode')
-var buttonStyles = require('../styles/buttonStyles');
+// var buttonStyles = require('../styles/buttonStyles');
 
 var extend = require('extend');
 var constants = require('@tradle/constants');
