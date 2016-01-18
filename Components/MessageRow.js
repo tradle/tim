@@ -13,6 +13,7 @@ var groupByEveryN = require('groupByEveryN');
 var constants = require('@tradle/constants');
 var LinearGradient = require('react-native-linear-gradient');
 var RowMixin = require('./RowMixin');
+var Accordion = require('react-native-accordion')
 var extend = require('extend')
 var equal = require('deep-equal')
 var formDefaults = require('../data/formDefaults')
@@ -289,6 +290,7 @@ class MessageRow extends Component {
     var isLicense = model.id.indexOf('License') !== -1  ||  model.id.indexOf('Passport') !== -1;
     var photoStyle = (isLicense  &&  len === 1) ? styles.bigImageH : photoStyle;
     var verifications = this.showVerifications(rowStyle, viewStyle, addStyle);
+      // <View style={viewStyle} ref={resource[constants.ROOT_HASH]}>
 
     return (
       <View style={viewStyle}>
@@ -865,6 +867,125 @@ class MessageRow extends Component {
              </View>
            );
   }
+  // formatDocument(model, verification, onPress) {
+  //   var resource = verification.document;
+  //   var self = this;
+  //   var docModel = utils.getModel(resource[constants.TYPE]).value;
+  //   var docModelTitle = docModel.title;
+  //   var idx = docModelTitle.indexOf('Verification');
+  //   var docTitle = idx === -1 ? docModelTitle : docModelTitle.substring(0, idx);
+
+  //   var msg;
+  //   if (resource.message)
+  //     msg = <View><Text style={styles.description}>{resource.message}</Text></View>
+  //   else {
+  //     var rows = [];
+  //     this.formatDocument1(model, resource, rows);
+  //     var vRows = <View>{rows}</View>
+  //     var header = <View style={{paddingTop: 5}}>
+  //                   <Text style={[styles.resourceTitle, {fontSize: 18, color: '#CCCCB2'}]}>{model.title}</Text>
+  //                 </View>
+
+  //     msg = <View>
+  //            <Accordion
+  //              header={header}
+  //              style={{alignSelf: 'stretch', paddingBottom: 10}}
+  //              content={vRows}
+  //              underlayColor='transparent'
+  //              easing='easeOutQuad' />
+  //           </View>
+  //   }
+  //   var hasPhotos = resource  &&  resource.photos
+  //   var photo = hasPhotos
+  //             ? <Image source={{uri: utils.getImageUri(resource.photos[0].url)}}  style={styles.cellImage} />
+  //             : <View />;
+
+  //   var orgRow = <View/>
+  //   if (verification.organization) {
+  //     var orgPhoto = verification.organization.photo
+  //                  ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
+  //                  : <View />
+  //     var shareView = <View style={{flexDirection: 'row', marginLeft: hasPhotos ? -50 : 0, justifyContent: 'space-between', padding: 5, borderRadius: 10, borderWidth: 1, borderColor: '#eeeeee', backgroundColor: '#F0F0EE', opacity: this.props.resource.documentCreated ? 0.3 : 1}}>
+  //                       <Icon style={styles.shareIcon} size={20} name={'android-share-alt'} />
+  //                       <Text style={{color: '#2E3B4E', fontSize: 16, paddingRight: 5, marginTop: 2}}>Share</Text>
+  //                     </View>
+  //     var orgView =   <View style={{flexDirection: 'row', justifyContent: 'flex-end', marginTop: 10}}>
+  //                        <Text style={[styles.verySmallLetters]}>verified by </Text>
+  //                        <Text style={[styles.verySmallLetters, {color: '#2E3B4E'}]}>{verification.organization.title.length < 30 ? verification.organization.title : verification.organization.title.substring(0, 27) + '..'}</Text>
+  //                     </View>
+
+  //     if (onPress) {
+  //       if (!this.props.resource.documentCreated)
+  //           <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
+  //                     AlertIOS.alert(
+  //                       'Sharing ' + docTitle + ' verified by ' + verifiedBy,
+  //                       'with ' + orgTitle,
+  //                       [
+  //                         {text: 'Share', onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
+  //                         {text: 'Cancel', onPress: () => console.log('Canceled!')},
+  //                       ]
+  //                   )}>
+  //             {shareView}
+  //           </TouchableHighlight>
+
+  //     }
+  //     else if (this.props.resource.documentCreated)
+  //         orgRow = <View style={{flexDirection: 'row', marginTop: 10, justifyContent:'space-between'}}>
+  //                    {shareView}
+  //                   <TouchableHighlight onPress={self.props.onSelect.bind(this, resource)} underlayColor='transparent'>
+  //                     {orgView}
+  //                   </TouchableHighlight>
+  //                 </View>
+  //     else
+  //       orgRow = <View style={{flexDirection: 'row', marginTop: 10, justifyContent:'space-between'}}>
+  //         <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
+  //                   AlertIOS.alert(
+  //                     'Sharing ' + docTitle + ' verified by ' + verifiedBy,
+  //                     'with ' + orgTitle,
+  //                     [
+  //                       {text: 'Share', onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
+  //                       {text: 'Cancel', onPress: () => console.log('Canceled!')},
+  //                     ]
+  //                 )}>
+  //           {shareView}
+  //         </TouchableHighlight>
+  //         <TouchableHighlight onPress={self.props.onSelect.bind(this, resource)} underlayColor='transparent'>
+  //           {orgView}
+  //         </TouchableHighlight>
+  //       </View>
+  //   }
+  //   var orgTitle = this.props.to[constants.TYPE] === constants.TYPES.ORGANIZATION
+  //                ? this.props.to.name
+  //                : (this.props.to.organization ? this.props.to.organization.title : null);
+  //   var verifiedBy = verification.organization ? verification.organization.title : ''
+  //   // var shareRow = this.props.resource.documentCreated
+  //   //           ?  orgRow
+  //   //           :  <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
+  //   //                 AlertIOS.alert(
+  //   //                   'Sharing ' + docTitle + ' verified by ' + verifiedBy,
+  //   //                   'with ' + orgTitle,
+  //   //                   [
+  //   //                     {text: 'Share', onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
+  //   //                     {text: 'Cancel', onPress: () => console.log('Canceled!')},
+  //   //                   ]
+  //   //               )}>
+  //   //              {orgRow}
+  //   //             </TouchableHighlight>
+
+  //   return (
+  //            <View style={{flex: 1, flexDirection: 'row', paddingVertical: 5}} key={self.getNextKey()}>
+  //              <View>
+  //                {photo}
+  //              </View>
+  //              <View style={{flex:1}}>
+  //                <TouchableHighlight onPress={self.props.onSelect.bind(this, resource)} underlayColor='transparent'>
+  //                  {msg}
+  //                </TouchableHighlight>
+  //                {orgRow}
+  //              </View>
+  //            </View>
+  //          );
+  // }
   formatDocument1(model, resource, renderedRow) {
     var viewCols = model.gridCols || model.viewCols;
     if (!viewCols)
