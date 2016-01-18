@@ -67,7 +67,7 @@ class PhotoView extends Component {
       if (p === url)
         nextPhoto = i === len - 1 ? resource.photos[0] : resource.photos[i + 1];
     }
-    return <TouchableHighlight underlayColor='#ffffff' onPress={this.showCarousel.bind(this, {currentPhoto: resource.photos[0]})}>
+    return <TouchableHighlight underlayColor='#ffffff' onPress={this.showCarousel.bind(this, resource.photos[0])}>
               <Image source={source} style={styles.image} />
             </TouchableHighlight>
   }
