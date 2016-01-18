@@ -3,7 +3,10 @@
 var React = require('react-native');
 var utils = require('../utils/utils');
 var constants = require('@tradle/constants');
+var bankStyles = require('../styles/bankStyles')
 var STRUCTURED_MESSAGE_COLOR = '#F6FFF0';
+var PRODUCT_ROW_BG_COLOR = '#f7f7f7'
+var PRODUCT_ROW_TEXT_COLOR = '#999999'
 var {
   Image,
   StyleSheet,
@@ -16,6 +19,14 @@ var {
 class MessageTypeRow extends Component {
   constructor(props) {
     super(props);
+    if (bankStyles) {
+      var name = props.to.name.split(' ')[0].toLowerCase()
+      var bankStyle = bankStyles[name]
+      if (bankStyle) {
+        PRODUCT_ROW_BG_COLOR = bankStyle.PRODUCT_ROW_BG_COLOR || PRODUCT_ROW_BG_COLOR
+        PRODUCT_ROW_TEXT_COLOR = bankStyle.PRODUCT_ROW_TEXT_COLOR || PRODUCT_ROW_TEXT_COLOR
+      }
+    }
   }
   render() {
     var resource = this.props.resource;
@@ -44,7 +55,7 @@ class MessageTypeRow extends Component {
     if (!renderedRow.length) {
       var vCols = utils.getDisplayName(resource);
       if (vCols)
-        renderedRow = <Text style={styles.modelTitle} numberOfLines={2}>{vCols}</Text>;
+        renderedRow = <Text style={[styles.modelTitle, {color: PRODUCT_ROW_TEXT_COLOR}]} numberOfLines={2}>{vCols}</Text>;
     }
     var verPhoto;
     if (resource.owner  &&  resource.owner.photos) {
@@ -52,9 +63,9 @@ class MessageTypeRow extends Component {
       var url = utils.getImageUri(ownerImg);
       verPhoto = <Image source={{uri: ownerImg}} style={styles.ownerImage} />
     }
-    var rowStyle = model.style
-                 ? [styles.row, {backgroundColor: STRUCTURED_MESSAGE_COLOR}]
-                 /*: noMessage ? {}*/ : styles.row;
+    // var rowStyle = model.style
+    //              ? [styles.row, {backgroundColor: STRUCTURED_MESSAGE_COLOR}]
+    //             /*: noMessage ? {}*/ : styles.row;
 
     // var messageBody =
     //   <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
@@ -68,7 +79,7 @@ class MessageTypeRow extends Component {
     //     </View>
     //   </TouchableHighlight>
 
-    var viewStyle = { margin:1, backgroundColor: '#f7f7f7' }
+    var viewStyle = { marginVertical :1, backgroundColor: PRODUCT_ROW_BG_COLOR }
     return (
       <TouchableHighlight style={viewStyle} onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
           {renderedRow}
@@ -99,19 +110,6 @@ var styles = StyleSheet.create({
     marginVertical: 15,
     paddingLeft: 10
   },
-  resourceTitle: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: '400',
-    marginBottom: 2,
-  },
-  date: {
-    flex: 1,
-    color: '#999999',
-    fontSize: 12,
-    alignSelf: 'center',
-    paddingTop: 10
-  },
   row: {
     alignItems: 'center',
     backgroundColor: '#f7f7f7',
@@ -119,12 +117,6 @@ var styles = StyleSheet.create({
   },
   cell: {
     marginLeft: 10,
-  },
-  myCell: {
-    padding: 5,
-    justifyContent: 'flex-end',
-    borderRadius: 10,
-    backgroundColor: '#569bff',
   },
   msgImage: {
     backgroundColor: '#dddddd',

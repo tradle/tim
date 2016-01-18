@@ -439,6 +439,8 @@ var Store = Reflux.createStore({
     var error
     var welcomeMessage
     var dhtKey
+    var publishRequestSent
+
     var promise = getDHTKey(toChain)
     // var isServiceMessage = rr[TYPE] === 'tradle.ServiceMessage'
     return promise
@@ -491,12 +493,30 @@ var Store = Reflux.createStore({
         if (!isWelcome)
           return;
       }
-      if (!me.published)
-        self.publishMyIdentity(orgRep)
-
-      var wmKey = SIMPLE_MESSAGE + '_Welcome' + toOrg.name.replace(' ', '_')// + '_' + new Date().getTime()
+      // var wmKey = SIMPLE_MESSAGE + '_Welcome' + toOrg.name.replace(' ', '_')// + '_' + new Date().getTime()
       // Create welcome message without saving it in DB
-      welcomeMessage = {}
+      // welcomeMessage = {}
+      if (me.published)
+        return
+
+      publishRequestSent = true
+
+      return self.getDriver(me)
+      .then(function () {
+        if (publishRequestSent)
+          return meDriver.identityPublishStatus()
+      })
+      .then(function(status) {
+        if (!status.queued  &&  !status.current)
+          self.publishMyIdentity(orgRep)
+        else
+          self.updateMe()
+      })
+
+
+      // var wmKey = SIMPLE_MESSAGE + '_Welcome' + toOrg.name.replace(' ', '_')// + '_' + new Date().getTime()
+      // Create welcome message without saving it in DB
+      // welcomeMessage = {}
       // if (list[wmKey]) {
       //   list[wmKey].value.time = new Date().getTime()
       //   welcomeMessage = list[wmKey].value
@@ -550,7 +570,7 @@ var Store = Reflux.createStore({
     })
     .then(function() {
       if (list[utils.getId(r.to)].value.pubkeys  &&
-         (me.published  ||  r[TYPE] !== CUSTOMER_WAITING)) {
+         (!publishRequestSent  ||  r[TYPE] !== CUSTOMER_WAITING)) {
         return utils.sendSigned(meDriver, {
           msg: toChain,
           to: [{fingerprint: self.getFingerprint(r.to)}],
@@ -1024,6 +1044,9 @@ var Store = Reflux.createStore({
       list[tmpKey] = {key: tmpKey, value: returnVal};
 
       var params = {action: 'addItem', resource: returnVal}
+      // var m = self.getModel(returnVal[TYPE])
+      // if (m.subClassOf === FORM)
+      //   params.sending = true
       self.trigger(params);
       return self.waitForTransitionToEnd()
         .then(function () {
@@ -1970,12 +1993,12 @@ var Store = Reflux.createStore({
   },
   publishMyIdentity(orgRep) {
     var self = this
-    return this.getDriver(me)
-    .then(function () {
-      return meDriver.identityPublishStatus()
-    })
-    .then(function(status) {
-      if (!status.queued  &&  !status.current) {
+    // return this.getDriver(me)
+    // .then(function () {
+    //   return meDriver.identityPublishStatus()
+    // })
+    // .then(function(status) {
+    //   if (!status.queued  &&  !status.current) {
         var msg = {
           _t: constants.TYPES.IDENTITY_PUBLISHING_REQUEST,
           _z: self.getNonce(),
@@ -1987,8 +2010,10 @@ var Store = Reflux.createStore({
           deliver: true,
           public: true
         })
-      }
-    })
+      // }
+      // else
+      //   self.updateMe()
+    // })
     // .then(function(status) {
     //   if (!status.queued  &&  !status.current) {
     //     return Q.ninvoke(meDriver.wallet, 'balance')
@@ -2157,7 +2182,7 @@ var Store = Reflux.createStore({
         // meDriver.lookupObject(obj)
         // .then(function(obj) {
         //   // return
-        //   return self.updateMe(obj)
+          return self.updateMe(obj)
         // })
         // .catch(function (err) {
         //   debugger
@@ -2181,6 +2206,19 @@ var Store = Reflux.createStore({
       meDriver.on('error', function (err) {
         debugger
         console.log(err)
+      })
+
+      meDriver.on('sent', function (msg) {
+        meDriver.lookupObject(msg)
+        .then(function(obj) {
+          // return
+          var model = self.getModel(obj[TYPE])
+          if (model.subClassOf === FORM)
+           self.trigger({action: 'sent', resource: list[obj[TYPE] + '_' + obj[ROOT_HASH]].value})
+        })
+        .catch(function (err) {
+          debugger
+        })
       })
 
       meDriver.on('message', function (msg) {
@@ -2230,6 +2268,7 @@ var Store = Reflux.createStore({
     }
     if (obj.txId)
       val.txId = obj.txId
+    val.permissionKey = obj.permissionKey
     var key = type + '_' + val[ROOT_HASH]
     var v = list[key] ? list[key].value : null
     var inDB = !!v

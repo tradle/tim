@@ -18,6 +18,9 @@ var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var InvertibleScrollView = require('react-native-invertible-scroll-view');
 var constants = require('@tradle/constants');
+var bankStyles = require('../styles/bankStyles')
+var LINK_COLOR
+var bankStyle
 
 var {
   ListView,
@@ -46,6 +49,15 @@ class MessageList extends Component {
       filter: this.props.filter,
       userInput: ''
     };
+    if (bankStyles) {
+      var name = props.resource.name.split(' ')[0].toLowerCase()
+      bankStyle = bankStyles[name]
+      if (bankStyle)
+        LINK_COLOR = bankStyle.LINK_COLOR || '#cccccc'
+      else
+        LINK_COLOR = '#cccccc'
+    }
+
   }
   componentWillMount() {
     var params = {
@@ -196,6 +208,7 @@ class MessageList extends Component {
         messageNumber={rowId}
         isAggregation={isAggregation}
         navigator={this.props.navigator}
+        bankStyle={bankStyle}
         verificationsToShare={this.state.verificationsToShare}
         previousMessageTime={previousMessageTime}
         to={isAggregation ? resource.to : this.props.resource} />
@@ -300,6 +313,8 @@ class MessageList extends Component {
     else
       chooser = <View/>
 
+    var sepStyle = { height: 1,backgroundColor: LINK_COLOR }
+
     return (
       <View style={styles.container}>
         <View style={{flexDirection:'row'}}>
@@ -312,7 +327,7 @@ class MessageList extends Component {
           </View>
         </View>
 
-        <View style={styles.separator} />
+        <View style={ sepStyle } />
         {content}
         {addNew}
       </View>

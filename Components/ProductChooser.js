@@ -129,6 +129,8 @@ class ProductChooser extends Component {
       <MessageTypeRow
         onSelect={() => this.selectResource(resource)}
         resource={resource}
+        to={this.props.to}
+        bankStyle={this.props.bankStyle}
         navigator={this.props.navigator}
         to={this.props.resource} />
       );

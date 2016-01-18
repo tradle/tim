@@ -2,6 +2,7 @@
 
 var React = require('react-native');
 var utils = require('../utils/utils');
+
 var ArticleView = require('./ArticleView');
 var MessageView = require('./MessageView');
 var NewResource = require('./NewResource');
@@ -16,14 +17,15 @@ var extend = require('extend')
 var equal = require('deep-equal')
 var formDefaults = require('../data/formDefaults')
 var reactMixin = require('react-mixin');
+var Device = require('react-native-device')
+var newProduct = require('../data/newProduct.json')
 var STRUCTURED_MESSAGE_BORDER = '#3260a5' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
-var STRUCTURED_MESSAGE_COLOR = '#77ADFC' //'#4BA0F2' //'#5482C7' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
+// var STRUCTURED_MESSAGE_COLOR = '#77ADFC' //'#4BA0F2' //'#5482C7' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
 var VERIFICATION_BG = '#FBFFE5' //'#F6FFF0';
 var DEFAULT_CURRENCY_SYMBOL = '£'
-var newProduct = require('../data/newProduct.json')
-var Actions = require('../Actions/Actions');
-var Device = require('react-native-device')
 
+var LINK_COLOR, DEFAULT_LINK_COLOR = '#2892C6'
+var STRUCTURED_MESSAGE_COLOR, DEFAULT_STRUCTURED_MESSAGE_COLOR = '#77ADFC'
 var {
   Image,
   StyleSheet,
@@ -43,6 +45,14 @@ class MessageRow extends Component {
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
     var me = utils.getMe();
     var isMyMessage;
+    if (this.props.bankStyle) {
+      LINK_COLOR = this.props.bankStyle.LINK_COLOR || DEFAULT_LINK_COLOR
+      STRUCTURED_MESSAGE_COLOR = this.props.bankStyle.STRUCTURED_MESSAGE_COLOR || DEFAULT_STRUCTURED_MESSAGE_COLOR
+    }
+    else {
+      LINK_COLOR = DEFAULT_LINK_COLOR
+      STRUCTURED_MESSAGE_COLOR = DEFAULT_STRUCTURED_MESSAGE_COLOR
+    }
   }
   shouldComponentUpdate(nextProps, nextState) {
     return !equal(this.props.resource, nextProps.resource) ||
@@ -442,6 +452,7 @@ class MessageRow extends Component {
       passProps:  {
         model: model,
         resource: resource,
+        bankStyle: this.props.bankStyle,
         originatingMessage: this.props.resource
       }
     });
@@ -555,8 +566,8 @@ class MessageRow extends Component {
             msg = <View key={self.getNextKey()}>
                     <Text style={style}>{msgParts[0]}</Text>
                     <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                      <Text style={[style, {color: isMyMessage ? STRUCTURED_MESSAGE_COLOR : '#2892C6'}]}>{msgParts[1]} </Text>
-                      <Icon style={styles.linkIcon} size={20} name={'ios-arrow-right'} />
+                      <Text style={[style, {color: isMyMessage ? STRUCTURED_MESSAGE_COLOR : LINK_COLOR}]}>{msgParts[1]} </Text>
+                      <Icon style={[styles.linkIcon, {color: LINK_COLOR}]} size={20} name={'ios-arrow-right'} />
                     </View>
                   </View>
             vCols.push(msg);
@@ -574,12 +585,12 @@ class MessageRow extends Component {
               onPressCall = self.createNewResource.bind(self, msgModel);
             isNewProduct = msgParts[0].length  &&  msgParts[0] === 'application for'
 
-            var color = isMyMessage ? (isNewProduct ? {color: '#7AAAC3', fontWeight: '400', fontSize: 18} : {color: STRUCTURED_MESSAGE_COLOR}) : {color: '#2892C6'}
+            var color = isMyMessage ? (isNewProduct ? {color: LINK_COLOR, fontWeight: '400', fontSize: 18} : {color: STRUCTURED_MESSAGE_COLOR}) : {color: '#2892C6'}
             var link = isMyMessage
                      ? <Text style={[style, color]}>{msgModel.title}</Text>
                      : <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                         <Text style={[style, {color: isMyMessage ? STRUCTURED_MESSAGE_COLOR : (resource.documentCreated ?  '#757575' : '#2892C6')}]}>{msgModel.title}</Text>
-                         <Icon style={resource.documentCreated  ? styles.linkIconGreyed : styles.linkIcon} size={20} name={'ios-arrow-right'} />
+                         <Text style={[style, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{msgModel.title}</Text>
+                         <Icon style={resource.documentCreated  ? styles.linkIconGreyed : [self.linkIcon, {color: LINK_COLOR}]} size={20} name={'ios-arrow-right'} />
                        </View>
 
             var msg;
@@ -716,9 +727,11 @@ class MessageRow extends Component {
         backButtonTitle: 'Cancel',
         passProps: {
           resource: resource,
+          to: this.props.to,
           returnRoute: currentRoutes[currentRoutes.length - 1],
           products: JSON.parse(this.props.resource.list),
-          callback: this.props.callback
+          callback: this.props.callback,
+          bankStyle: this.props.bankStyle
         },
         // rightButtonTitle: 'ion|plus',
         // onRightButtonPress: {
@@ -735,24 +748,6 @@ class MessageRow extends Component {
         // }
       });
     }
-  // shareDocs() {
-  //   this.props.navigator.push({
-  //     title: m.title,
-  //     titleTextColor: '#7AAAC3',
-  //     id: 10,
-  //     component: ResourceList,
-  //     backButtonTitle: 'Back',
-  //     passProps: {
-  //       filter:      filter,
-  //       prop:        propName,
-  //       modelName:   prop.ref,
-  //       resource:    resource,
-  //       returnRoute: currentRoutes[currentRoutes.length - 1],
-  //       callback:    this.setChosenValue.bind(this)
-  //     }
-  //   });
-
-  // }
   isMyMessage() {
     if (this.props.isAggregation)
       return
@@ -929,7 +924,7 @@ class MessageRow extends Component {
           if (msgModel) {
             vCols.push(<View key={self.getNextKey()}>
                          <Text style={style}>{msgParts[0]}</Text>
-                         <Text style={[style, {color: isMyMessage ? STRUCTURED_MESSAGE_COLOR : '#7AAAC3'}]}>{msgModel.value.title}</Text>
+                         <Text style={[style, {color: isMyMessage ? STRUCTURED_MESSAGE_COLOR : LINK_COLOR}]}>{msgModel.value.title}</Text>
                        </View>);
             return;
           }

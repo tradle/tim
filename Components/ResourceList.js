@@ -21,6 +21,7 @@ var FontAwesome = require('react-native-vector-icons/FontAwesome')
 var QRCodeScanner = require('./QRCodeScanner')
 var QRCode = require('./QRCode')
 var buttonStyles = require('../styles/buttonStyles');
+var bankStyles = require('../styles/bankStyles')
 
 // var GridList = require('./GridList');
 // var DEAL_MODEL = 'tradle.Offer';
@@ -179,8 +180,8 @@ class ResourceList extends Component {
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     var model = utils.getModel(this.props.modelName);
     var isIdentity = this.props.modelName === constants.TYPES.IDENTITY;
-    var isOrganization = this.props.modelName === constants.TYPES.ORGANIZATION;
     var isVerification = model.value.id === constants.TYPES.VERIFICATION
+    var isOrganization = this.props.modelName === constants.TYPES.ORGANIZATION;
     if (!isIdentity         &&
         !isOrganization     &&
         !this.props.callback) {
@@ -250,9 +251,8 @@ class ResourceList extends Component {
         modelName: modelName,
       },
     }
-    if (isIdentity)
-      route.title = resource.firstName
     if (isIdentity) { //  ||  isOrganization) {
+      route.title = resource.firstName
       route.rightButtonTitle = 'Profile'
       route.onRightButtonPress = {
         title: title,
@@ -278,6 +278,7 @@ class ResourceList extends Component {
     }
     if (isOrganization) {
       route.title = resource.name
+      route.passProps.bankStyle = bankStyles[resource.name.split(' ')[0].toLowerCase()]
       // if (resource.name === 'Rabobank'  &&  (!me.organization  ||  me.organization.name !== 'Rabobank')) {
       var routes = this.props.navigator.getCurrentRoutes();
       if (routes[routes.length - 1].title === 'Official Accounts') {
