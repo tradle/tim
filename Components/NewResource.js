@@ -4,6 +4,7 @@ var React = require('react-native');
 var debug = require('debug')('NewResource')
 var utils = require('../utils/utils');
 var NewItem = require('./NewItem');
+var GridItemsList = require('./GridItemsList')
 var PhotoView = require('./PhotoView');
 var ResourceList = require('./ResourceList');
 var ResourceView = require('./ResourceView');
@@ -22,12 +23,11 @@ var reactMixin = require('react-mixin');
 var Device = require('react-native-device');
 var BG_IMAGE = require('../img/bg.png')
 var equal = require('deep-equal')
-var CustomActionSheet = require('react-native-custom-action-sheet');
-
-// var KeyboardEvents = require('react-native-keyboardevents');
-// var KeyboardEventEmitter = KeyboardEvents.Emitter;
+var DeviceHeight = require('Dimensions').get('window').height;
 var constants = require('@tradle/constants');
 var UIImagePickerManager = require('NativeModules').UIImagePickerManager;
+// var Modal = require('react-native-modal')
+// var PhotoCarouselMixin = require('./PhotoCarouselMixin')
 
 var Form = t.form.Form;
 var stylesheet = require('../styles/styles') //require('tcomb-form-native/lib/stylesheets/bootstrap');
@@ -66,7 +66,9 @@ class NewResource extends Component {
       modalVisible: false,
       date: new Date(),
       isUploading: !isRegistration  &&  !r[constants.ROOT_HASH],
-      isRegistration: isRegistration
+      isRegistration: isRegistration,
+      // isModalOpen: false,
+      // currentPhoto: r.photos &&  r.photos.length ? r.photos[0].url : null
     }
     var currentRoutes = this.props.navigator.getCurrentRoutes();
     var currentRoutesLength = currentRoutes.length;
@@ -97,6 +99,7 @@ class NewResource extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     return nextState.err                      ||
            nextState.missedRequired           ||
+           // nextState.isModalOpen !== this.state.isModalOpen  ||
            this.state.prop !== nextState.prop ||
            this.state.isUploading !== nextState.isUploading  ||
            this.state.itemsCount != nextState.itemsCount     ||
@@ -116,19 +119,12 @@ class NewResource extends Component {
 
     DeviceEventEmitter.addListener('keyboardWillHide', (e) => {
       this.resetKeyboardSpace(e)
-     // ...
     })
-    // KeyboardEventEmitter.on(KeyboardEvents.KeyboardDidShowEvent, this.updateKeyboardSpace);
-    // KeyboardEventEmitter.on(KeyboardEvents.KeyboardWillHideEvent, this.resetKeyboardSpace);
   }
 
-  componentWillUnmount() {
-    // KeyboardEventEmitter.off(KeyboardEvents.KeyboardDidShowEvent, this.updateKeyboardSpace);
-    // KeyboardEventEmitter.off(KeyboardEvents.KeyboardWillHideEvent, this.resetKeyboardSpace);
-  }
 
   componentDidUpdate() {
-    if (!this.state.missedRequired  ||  !this.state.missedRequired.length) return
+    if (!this.state.missedRequired  ||  utils.isEmpty(this.state.missedRequired)) return
 
     let viewCols = this.props.model.viewCols
     let first
@@ -142,7 +138,6 @@ class NewResource extends Component {
         first = p
       }
     }
-
     let ref = this.refs.form.getComponent(first) || this.refs[first]
     if (!ref) return
 
@@ -339,7 +334,7 @@ class NewResource extends Component {
     };
     if (this.props.additionalInfo)
       additionalInfo: additionalInfo
-
+    this.state.submitted = false
     Actions.addItem(params);
   }
 
@@ -485,7 +480,6 @@ class NewResource extends Component {
 
     var Model = t.struct(model);
 
-    var errStyle = err ? styles.err : {'padding': 0, 'height': 0};
     var itemsMeta
     if (this.props.editCols) {
       itemsMeta = []
@@ -508,11 +502,12 @@ class NewResource extends Component {
       }
       var counter, count = 0
       itemsArray = null
+      var isPhoto = false
       if (resource  &&  resource[bl.name]) {
         count = resource[bl.name].length
         if (count) {
           var items = []
-          var isPhoto = bl.name === 'photos'
+          isPhoto = bl.name === 'photos'
           var arr = resource[bl.name]
           var n = isPhoto
                 ? Math.min(arr.length, 7)
@@ -520,23 +515,41 @@ class NewResource extends Component {
 
           for (var i=0; i<n; i++) {
             if (isPhoto)
-              items.push(<Image style={styles.thumb} source={{uri: arr[i].url}} key={self.getNextKey()}/>)
+              items.push(
+                  <Image style={styles.thumb} source={{uri: arr[i].url}} key={self.getNextKey()} onPress={() => this.openModal(arr[i])}/>
+                  // CAROUSEL
+                // <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, arr[i], this.cancelItem.bind(this, arr[i]))}>
+                //   <Image style={styles.thumb} source={{uri: arr[i].url}} key={self.getNextKey()}/>
+                // </TouchableHighlight>
+
+                // this is for MODAL
+                // <TouchableHighlight underlayColor='transparent' onPress={this.openModal.bind(this, arr[i].url)}  key={self.getNextKey()}>
+                //   <Image style={styles.thumb} source={{uri: arr[i].url}}/>
+                // </TouchableHighlight>
+              )
+
+
             // else {
             //   items.push
             // }
           }
           if (isPhoto) {
             itemsArray =
-            <View style={{height: 80}}>
-              <Text style={{fontSize: 12, marginTop: 25, marginBottom: 5, marginLeft: 10, color: '#bbbbbb'}}>{bl.title}</Text>
-              <View style={{flexDirection: 'row', marginLeft: 10}}>{items}</View>
-            </View>
-            counter =
-            <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
-              <View style={[styles.itemsCounter, {marginTop: 60}]}>
-                <Text>{resource[bl.name] ? resource[bl.name].length : ''}</Text>
+              <View style={{height: 80, marginLeft: 10}}>
+                <Text style={styles.activePropTitle}>{bl.title}</Text>
+                <View style={{flexDirection: 'row'}}>{items}</View>
               </View>
-            </View>;
+            // counter =
+            //   <View>
+            //     <Icon name={'plus'} size={30} color='#7AAAC3' />
+            //   </View>
+              counter =
+                <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
+                  <View style={{marginTop: 60, paddingHorizontal: 5}}>
+                    <Icon name={'plus'} size={15} color='#7AAAC3' />
+                  </View>
+                </View>;
+                  // <Text>{resource[bl.name] ? resource[bl.name].length : ''}</Text>
           }
           else {
             itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{bl.title}</Text>
@@ -552,11 +565,13 @@ class NewResource extends Component {
 
           if (model.required  &&  model.required.indexOf(bl.name) != -1)
             counter =
-              <View>
-                <Icon name='asterisk'  size={15}  color='#96415A'  style={styles.icon1}/>
+              <View style={{paddingHorizontal: 5}}>
+                <Icon name='asterisk'  size={15}  color='#96415A'/>
               </View>;
           else
-            counter = <View/>
+            counter = <View style={{paddingHorizontal: 5}}>
+                        <Icon name='plus'   size={15}  color='#7AAAC3' />
+                      </View>
         }
       }
       else {
@@ -565,11 +580,11 @@ class NewResource extends Component {
         if (self.props.model.required  &&  self.props.model.required.indexOf(bl.name) != -1)
           counter =
             <View>
-              <Icon name='asterisk'  size={15}  color='#96415A'  style={styles.icon1} />
+              <Icon name='asterisk'  size={15}  color='#96415A' />
             </View>;
         else {
-          counter = <View>
-                      <Icon name='plus'   size={15}  color='#7AAAC3'  style={styles.icon1} />
+          counter = <View style={{paddingHorizontal: 5}}>
+                      <Icon name='plus'   size={15}  color='#7AAAC3' />
                     </View>
         }
       }
@@ -579,26 +594,74 @@ class NewResource extends Component {
               : null
       var errTitle = 'Enter a valid ' + title
       var error = err
-                ? <View style={{paddingLeft:5, position: 'absolute', top: 35, backgroundColor: '#ffffff'}}>
-                    <Text style={{fontSize: 14, color: '#a94442'}}>{errTitle}</Text>
+                ? <View style={styles.error}>
+                    <Text style={styles.errorText}>{errTitle}</Text>
                   </View>
                 : <View/>
       // var error = <View/>
                 // <Text style={count ? styles.itemsText : styles.noItemsText}>{bl.title}</Text>
+      // var actionableItem = isPhoto
+      //                    ? itemsArray
+      //                    : <TouchableHighlight underlayColor='transparent'
+      //                           onPress={self.onNewPressed.bind(self, bl, meta)}>
+      //                       {itemsArray}
+      //                     </TouchableHighlight>
+
+      // arrayItems.push (
+      //   <View style={styles.itemButton} key={this.getNextKey()} ref={bl.name}>
+      //       <View>
+      //         <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+      //           {actionableItem}
+      //           <TouchableHighlight underlayColor='transparent'
+      //                           onPress={self.onNewPressed.bind(self, bl, meta)}>
+      //             {counter}
+      //           </TouchableHighlight>
+      //         </View>
+      //         {error}
+      //       </View>
+      //   </View>
+      // );
+      var actionableItem = isPhoto && count
+                         ?  <TouchableHighlight underlayColor='transparent'
+                             onPress={self.showItems.bind(self, bl, meta)}>
+                            {itemsArray}
+                          </TouchableHighlight>
+                         : <TouchableHighlight underlayColor='transparent'
+                                onPress={self.onNewPressed.bind(self, bl, meta)}>
+                            {itemsArray}
+                          </TouchableHighlight>
       arrayItems.push (
         <View style={styles.itemButton} key={this.getNextKey()} ref={bl.name}>
-          <TouchableHighlight underlayColor='transparent'
-              onPress={self.onNewPressed.bind(self, bl)}>
-            <View>
-              <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                {itemsArray}
-                {counter}
-              </View>
-              {error}
-            </View>
-          </TouchableHighlight>
+          <View style={styles.items}>
+            {actionableItem}
+            <TouchableHighlight underlayColor='transparent'
+                onPress={self.onNewPressed.bind(self, bl, meta)}>
+              {counter}
+            </TouchableHighlight>
+          </View>
+          {error}
         </View>
       );
+
+      // arrayItems.push (
+      //   <View style={styles.itemButton} key={this.getNextKey()} ref={bl.name}>
+      //       <View>
+      //         <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+      //            <TouchableHighlight underlayColor='transparent'
+      //               onPress={self.onNewPressed.bind(self, bl, meta)}>
+      //              {itemsArray}
+      //            </TouchableHighlight>
+      //            <TouchableHighlight underlayColor='transparent'
+      //               onPress={self.showItems.bind(self, bl, meta)}>
+      //             {counter}
+      //           </TouchableHighlight>
+      //         </View>
+      //         {error}
+      //       </View>
+      //   </View>
+      // );
+
+
       // if (itemsArray) {
       //   arrayItems.push(
       //     <View style={styles.itemButton} key={this.getNextKey()} ref={bl.name}>
@@ -634,6 +697,7 @@ class NewResource extends Component {
                  </TouchableHighlight>
                : <View style={{height: 0}} />
 
+    // var errStyle = err ? styles.err : {'padding': 0, 'height': 0};
     // <FromToView resource={resource} model={meta} navigator={this.props.navigator} />
           // <View style={{flexWrap: 'wrap'}}>
           //   <Text style={errStyle}>{err}</Text>
@@ -654,69 +718,70 @@ class NewResource extends Component {
           <View style={{height: 300}}/>
         </View>
       </ScrollView>
-    // if (isMessage)
-    //   return (
-    //     <View>
-    //       {content}
-    //       <View stychle={{height: this.state.keyboardSpace}}>
-    //       <View style={{marginTop: -35}}>
-    //         <ChatMessage resource={resource}
-    //                      model={meta}
-    //                      onSubmitEditing={this.onSubmitEditing.bind(this)} />
-    //       </View>
-    //       </View>
-    //     </View>
-    //   );
-    // else
 
     StatusBarIOS.setHidden(true);
-    if (this.state.isRegistration) {
-      var cTop = Device.height / 6
+    if (!this.state.isRegistration)
+      return content
+    var cTop = Device.height / 6
 
-      var thumb = {
-        width: Device.width / 2.2,
-        height: Device.width / 2.2,
-      }
-          // <View>
-          //   <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: Device.width, height: Device.height}} />
-          //   <View style={{alignSelf: 'center', marginTop: cTop}}>
-          //     <View style={{opacity: 0.3}}>
-          //       <Image style={thumb} source={require('../img/TradleW.png')}></Image>
-          //       <Text style={styles.tradle}>Tradle</Text>
-          //     </View>
-          //   </View>
-          //   {content}
-          // </View>
+    var thumb = {
+      width: Device.width / 2.2,
+      height: Device.width / 2.2,
+    }
 
-      return (
-          <View>
-            <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: Device.width, height: Device.height}} />
-            <View style={{opacity: 0.7, marginLeft: 20, marginTop: 10, flexDirection: 'row'}}>
-              <Image style={{width: 50, height: 50}} source={require('../img/TradleW.png')}></Image>
-              <Text style={{fontSize: 25, marginTop: 10, paddingHorizontal: 10, color: '#cccccc'}}>Tradle</Text>
-            </View>
-
-            {content}
+    return (
+        <View>
+          <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: Device.width, height: Device.height}} />
+          <View style={{opacity: 0.7, marginLeft: 20, marginTop: 10, flexDirection: 'row'}}>
+            <Image style={{width: 50, height: 50}} source={require('../img/TradleW.png')}></Image>
+            <Text style={{fontSize: 25, marginTop: 10, paddingHorizontal: 10, color: '#cccccc'}}>Tradle</Text>
           </View>
 
-        )
-    }
-    else {
-      return content
-      //  (
-      // <View>
-      //   {content}
-      //   <View>
-      //     <CustomActionSheet modalVisible={this.state.modalVisible} onCancel={this.onCancel.bind(this, this.state.prop)}>
-      //       <View>
-      //         <DatePickerIOS mode={"date"} date={new Date()} onDateChange={this.onDateChange.bind(this, this.state.prop)} />
-      //       </View>
-      //     </CustomActionSheet>
-      //   </View>
-      // </View>
-      // )
-    }
+          {content}
+        </View>
+
+      )
   }
+    cancelItem(item) {
+    var list = this.state.resource.photos;
+    for (var i=0; i<list.length; i++) {
+      if (equal(list[i], item)) {
+        list.splice(i, 1);
+        break;
+      }
+    }
+    this.setState({
+      resource: this.state.resource
+    })
+    this.props.navigator.pop()
+  }
+
+  showItems(prop, model, event) {
+    var resource = this.state.resource;
+    var model = (this.props.model  ||  this.props.metadata)
+    if (!resource) {
+      resource = {};
+      resource[constants.TYPE] = model.id;
+    }
+
+    var currentRoutes = this.props.navigator.getCurrentRoutes();
+    this.props.navigator.push({
+      title: 'Tap to remove photos',
+      titleTintColor: 'red',
+      id: 19,
+      component: GridItemsList,
+      noLeftButton: true,
+      rightButtonTitle: 'Done',
+      passProps: {
+        prop:        prop.name,
+        resource:    resource,
+        list:        resource[prop.name],
+        returnRoute: currentRoutes[currentRoutes.length - 1],
+        callback:    this.setChosenValue.bind(this),
+      }
+    });
+  }
+
   onEndEditing(prop, event) {
     if (this.state.resource[prop]  ||  event.nativeEvent.text.length)
       this.state.resource[prop] = event.nativeEvent.text;
@@ -777,6 +842,7 @@ class NewResource extends Component {
   }
 }
 reactMixin(NewResource.prototype, Reflux.ListenerMixin);
+// reactMixin(NewResource.prototype, PhotoCarouselMixin);
 // var animations = {
 //   layout: {
 //     spring: {
@@ -806,6 +872,14 @@ reactMixin(NewResource.prototype, Reflux.ListenerMixin);
 reactMixin(NewResource.prototype, NewResourceMixin);
 
 var styles = StyleSheet.create({
+page: {
+    flex: 1,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    top: 0
+  },
   container: {
     flex: 1,
   },
@@ -840,17 +914,6 @@ var styles = StyleSheet.create({
   photoBG: {
     // marginTop: -15,
     alignItems: 'center',
-  },
-  icon1: {
-    width: 15,
-    height: 15,
-    marginVertical: 2
-  },
-  icon: {
-    width: 20,
-    height: 20,
-    marginLeft: -5,
-    marginRight: 5,
   },
   err: {
     // paddingVertical: 10,
@@ -891,6 +954,67 @@ var styles = StyleSheet.create({
     fontSize: 35,
     alignSelf: 'center',
   },
+  error: {
+    paddingLeft:5,
+    position: 'absolute',
+    bottom: -20,
+    backgroundColor: '#ffffff'
+  },
+  errorText: {
+    fontSize: 14,
+    color: '#a94442'
+  },
+  items: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  activePropTitle: {
+    fontSize: 12,
+    marginTop: 25,
+    marginBottom: 5,
+    color: '#bbbbbb'
+  }
 });
 
 module.exports = NewResource;
+    // var content =
+    //   <ScrollView style={[style, styles.page]} ref='scrollView' {...this.scrollviewProps}>
+    //     <View style={styles.container}>
+    //       <View style={photoStyle}>
+    //         <PhotoView resource={resource} navigator={this.props.navigator}/>
+    //       </View>
+    //       <View style={this.state.isRegistration ? {marginLeft: 30, marginRight: 30, paddingTop: 30} : {paddingRight: 15, paddingTop: 10, marginHorizontal: 10}}>
+    //         <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange.bind(this)}/>
+    //         {button}
+    //         <View style={{marginTop: -10}}>
+    //             {arrayItems}
+    //          </View>
+    //       </View>
+    //       <View style={{height: 300}}/>
+    //     </View>
+    //       <Modal forceToFront={true}
+    //              onPressBackdrop={() => {closeModal}}
+    //              isVisible={this.state.isModalOpen}
+    //              customShowHandler={this.showModalTransition}
+    //              customHideHandler={this.hideModalTransition}
+    //              onClose={this.closeModal.bind(this)}>
+    //         <Image source={{uri: this.state.currentPhoto}} style={{padding:0, width: Device.width - 80, height: 400}}/>
+    //         <View style={{height: 150, backgroundColor: 'transparent'}}/>
+    //       </Modal>
+    //   </ScrollView>
+  // showModalTransition(transition) {
+  //   transition('opacity', {duration: 1, begin: 0, end: 1});
+  //   transition('height', {duration: 1, begin: DeviceHeight * 2, end: DeviceHeight});
+  // }
+
+  // hideModalTransition(transition) {
+  //   transition('height', {duration: 200, begin: DeviceHeight, end: DeviceHeight * 2, reset: true});
+  //   transition('opacity', {duration: 200, begin: 1, end: 0});
+  // }
+  // openModal(currentPhoto) {
+  //   this.setState({isModalOpen: true, currentPhoto: currentPhoto});
+  // }
+
+  // closeModal() {
+  //   this.setState({isModalOpen: false, currentPhoto: null});
+  // }
