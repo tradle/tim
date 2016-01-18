@@ -10,8 +10,6 @@ var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
 var Reflux = require('reflux');
 var Actions = require('../Actions/Actions');
-// var KeyboardEvents = require('react-native-keyboardevents');
-// var KeyboardEventEmitter = KeyboardEvents.Emitter;
 var constants = require('@tradle/constants');
 
 var UIImagePickerManager = require('NativeModules').UIImagePickerManager;
@@ -67,19 +65,7 @@ class AddNewMessage extends Component {
 
     DeviceEventEmitter.addListener('keyboardWillHide', (e) => {
       this.resetKeyboardSpace(e)
-     // ...
     })
-    // KeyboardEventEmitter.on(KeyboardEvents.KeyboardDidShowEvent, this.updateKeyboardSpace);
-    // KeyboardEventEmitter.on(KeyboardEvents.KeyboardWillHideEvent, this.resetKeyboardSpace);
-  }
-
-  componentWillUnmount() {
-    // DeviceEventEmitter.addListener('keyboardWillHide', (e) => {
-    //   this.resetKeyboardSpace(e)
-    //  // ...
-    // })
-    // KeyboardEventEmitter.off(KeyboardEvents.KeyboardDidShowEvent, this.updateKeyboardSpace);
-    // KeyboardEventEmitter.off(KeyboardEvents.KeyboardWillHideEvent, this.resetKeyboardSpace);
   }
 
   onAddMessage(params) {
@@ -146,7 +132,7 @@ class AddNewMessage extends Component {
                </View>
     var menu = <TouchableHighlight underlayColor='transparent'
                     onPress={this.props.onMenu.bind(this)}>
-                  <View style={{marginLeft: 15, paddingRight: 0, marginBottom: 5}}>
+                  <View style={{marginLeft: 15, paddingRight: 0, marginRight: 10, marginBottom: 0}}>
                     <Icon name='android-more-vertical' size={30} color='#999999' />
                   </View>
                 </TouchableHighlight>
@@ -364,6 +350,7 @@ var styles = StyleSheet.create({
     padding: 10,
     paddingTop: 3,
     height: 45,
+    marginLeft: 5,
     paddingBottom: 13,
     flexDirection: 'row',
     alignItems: 'center',
