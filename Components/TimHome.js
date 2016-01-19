@@ -195,9 +195,10 @@ class TimHome extends Component {
     var route = {
       component: NewResource,
       // backButtonTitle: 'Back',
+      // title: 'Registration',
+      titleTextColor: '#BCD3E6',
       // rightButtonTitle: 'Done',
       id: 4,
-      titleTextColor: '#7AAAC3',
       passProps: {
         model: model
       },
@@ -284,10 +285,9 @@ class TimHome extends Component {
     var h = d.height - 180
     // var cTop = h / 4
 
-    var thumb = {
-      width: d.width / 2.2,
-      height: d.width / 2.2
-    }
+    var thumb = d.width > 400
+              ? { width: d.width / 3, height: d.width / 3 }
+              : styles.thumb
               // <Progress.CircleSnail color={'white'} size={70} thickness={5}/>
   	var spinner =  <View>
           <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: d.width, height: d.height}} />
@@ -357,8 +357,21 @@ class TimHome extends Component {
                   Load
                 </Text>
               </TouchableHighlight>
+              <TouchableHighlight
+                  underlayColor='transparent' onPress={this.onSettingsPressed.bind(this)}>
+                <Text style={styles.text}>
+                  Settings
+                </Text>
+              </TouchableHighlight>
             </View>
-          : <View />
+          : <View style={styles.dev}>
+              <TouchableHighlight
+                  underlayColor='transparent' onPress={this.onSettingsPressed.bind(this)}>
+                <Text style={styles.text}>
+                  Settings
+                </Text>
+              </TouchableHighlight>
+            </View>
 
 
     return (
@@ -390,6 +403,23 @@ class TimHome extends Component {
         <View style={{height: 200}}></View>
       </View>
     );
+  }
+  onSettingsPressed() {
+    var model = utils.getModel('tradle.Settings').value
+    var route = {
+      component: NewResource,
+      title: 'Settings',
+      backButtonTitle: 'Back',
+      rightButtonTitle: 'Done',
+      id: 4,
+      titleTextColor: '#7AAAC3',
+      passProps: {
+        model: model,
+        callback: this.props.navigator.pop
+      },
+    };
+
+    this.props.navigator.push(route)
   }
   restartTiM() {
     AlertIOS.alert(
@@ -430,13 +460,13 @@ reactMixin(TimHome.prototype, Reflux.ListenerMixin);
 var styles = StyleSheet.create({
   container: {
     padding: 30,
-    marginTop: 120,
+    marginTop: Device.height/5,
     alignItems: 'center',
   },
   tradle: {
     // color: '#7AAAC3',
     color: '#eeeeee',
-    fontSize: 35,
+    fontSize: Device.height > 400 ? 35 : 25,
     alignSelf: 'center',
   },
   text: {
@@ -477,7 +507,7 @@ var styles = StyleSheet.create({
   },
   getStartedText: {
     color: '#f0f0f0',
-    fontSize: 17,
+    fontSize: Device.width > 400 ? Device.height/30 : 17,
     fontWeight:'400'
   },
   getStarted: {
