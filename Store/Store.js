@@ -901,6 +901,7 @@ var Store = Reflux.createStore({
     var resource = params.resource;
     delete temporaryResources[resource[TYPE]]
     var meta = params.meta;
+
     var isRegistration = params.isRegistration;
     var additionalInfo = params.additionalInfo;
     // Check if there are references to other resources
@@ -908,6 +909,7 @@ var Store = Reflux.createStore({
     var promises = [];
     var foundRefs = [];
     var props = meta.properties;
+
     if (meta[TYPE] == VERIFICATION  ||  (meta.subClassOf  &&  meta.subClassOf == VERIFICATION))
       return this.onAddVerification(resource, true);
 
@@ -1797,6 +1799,15 @@ var Store = Reflux.createStore({
     //   return self.loadDB(db);
     // })
     // .then(function() {
+      if (value[TYPE] === 'tradle.Settings') {
+        var result = self.searchNotMessages({modelName: 'tradle.Settings'})
+        if (result) {
+          if (result[result.length - 1].url !== value.url);
+          // send forgetMe to result[result.length - 1]
+        }
+        SERVICE_PROVIDERS_BASE_URL = value.url + ':444444'
+      }
+
       var  params = {action: 'addItem', resource: value};
       // registration or profile editing
       self.trigger(params);
@@ -2182,7 +2193,7 @@ var Store = Reflux.createStore({
         // meDriver.lookupObject(obj)
         // .then(function(obj) {
         //   // return
-          return self.updateMe(obj)
+          return self.updateMe()
         // })
         // .catch(function (err) {
         //   debugger
@@ -2236,7 +2247,7 @@ var Store = Reflux.createStore({
     // })
     return meDriver.ready()
   },
-  updateMe(obj) {
+  updateMe() {
     me.published = true
     db.put({key: me[TYPE] + '_' + me[ROOT_HASH], value: me})
   },
@@ -2381,6 +2392,7 @@ var Store = Reflux.createStore({
               m[ROOT_HASH] = sha(m)
             batch.push({type: 'put', key: m.id, value: m})
           })
+          list[utils.getId(org)].value = org
           batch.push({type: 'put', key: utils.getId(org), value: org})
         }
         var to = list[IDENTITY + '_' + obj.to[ROOT_HASH]].value
