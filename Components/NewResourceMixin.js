@@ -127,7 +127,7 @@ var NewResourceMixin = {
           options.fields[p].placeholder = label + ' (' + props[p].units + ')'
       }
       // HACK for registration screen
-      if (params.isRegistration  &&  params.editCols.length === 1)
+      if (this.state.isRegistration  &&  params.editCols.length === 1)
         options.fields[p].placeholder = 'Enter your name'
 
       if (props[p].description)
@@ -278,8 +278,8 @@ var NewResourceMixin = {
             ? this.state.missedRequired[params.prop.name]
             : null
     var error = err
-              ? <View style={{paddingLeft: 15, backgroundColor: '#ffffff'}} key={this.getNextKey()}>
-                  <Text style={{fontSize: 14, color: '#a94442'}}>Enter a valid {params.prop.title}</Text>
+              ? <View style={{paddingLeft: 15, backgroundColor: 'transparent'}} key={this.getNextKey()}>
+                  <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>Enter a valid {params.prop.title}</Text>
                 </View>
               : <View key={this.getNextKey()} />
     // return (
@@ -311,7 +311,8 @@ var NewResourceMixin = {
       <View style={{paddingBottom: 10}}>
         <FloatLabel
           labelStyle={styles.labelInput}
-          autoCorrect={params.keyboard  &&  params.keyboard === 'email-address' ? false : true}
+          autoCorrect={false}
+          autoCapitalize='none'
           onFocus={this.inputFocused.bind(this, params.prop.name)}
           inputStyle={this.state.isRegistration ? styles.regInput : styles.input}
           style={styles.formInput}
@@ -324,7 +325,7 @@ var NewResourceMixin = {
     );
   },
   inputFocused(refName) {
-    if (this.refs  &&  this.refs.scrollView) {
+    if (!this.state.isRegistration && this.refs  &&  this.refs.scrollView) {
       utils.scrollComponentIntoView(this.refs.scrollView, this.refs.form.getComponent(refName))
     }
   },
@@ -364,8 +365,8 @@ var NewResourceMixin = {
             ? this.state.missedRequired[prop.name]
             : null
     var error = err
-              ? <View style={{paddingLeft: 15, backgroundColor: '#ffffff'}}>
-                  <Text style={{fontSize: 14, color: '#a94442'}}>Enter a valid {prop.title}</Text>
+              ? <View style={{paddingLeft: 15, backgroundColor: 'transparent'}}>
+                  <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>Enter a valid {prop.title}</Text>
                 </View>
               : <View />
     return (
