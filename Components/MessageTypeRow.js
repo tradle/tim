@@ -5,8 +5,9 @@ var utils = require('../utils/utils');
 var constants = require('@tradle/constants');
 var bankStyles = require('../styles/bankStyles')
 var STRUCTURED_MESSAGE_COLOR = '#F6FFF0';
-var PRODUCT_ROW_BG_COLOR = '#f7f7f7'
-var PRODUCT_ROW_TEXT_COLOR = '#999999'
+var DEFAULT_PRODUCT_ROW_BG_COLOR = '#f7f7f7'
+var DEFAULT_PRODUCT_ROW_TEXT_COLOR = '#757575'
+var PRODUCT_ROW_BG_COLOR, PRODUCT_ROW_TEXT_COLOR
 var {
   Image,
   StyleSheet,
@@ -19,13 +20,13 @@ var {
 class MessageTypeRow extends Component {
   constructor(props) {
     super(props);
-    if (bankStyles) {
-      var name = props.to.name.split(' ')[0].toLowerCase()
-      var bankStyle = bankStyles[name]
-      if (bankStyle) {
-        PRODUCT_ROW_BG_COLOR = bankStyle.PRODUCT_ROW_BG_COLOR || PRODUCT_ROW_BG_COLOR
-        PRODUCT_ROW_TEXT_COLOR = bankStyle.PRODUCT_ROW_TEXT_COLOR || PRODUCT_ROW_TEXT_COLOR
-      }
+    if (this.props.bankStyle) {
+      PRODUCT_ROW_BG_COLOR = this.props.bankStyle.PRODUCT_ROW_BG_COLOR || DEFAULT_PRODUCT_ROW_BG_COLOR
+      PRODUCT_ROW_TEXT_COLOR = this.props.bankStyle.PRODUCT_ROW_TEXT_COLOR || DEFAULT_PRODUCT_ROW_TEXT_COLOR
+    }
+    else {
+      PRODUCT_ROW_BG_COLOR = DEFAULT_PRODUCT_ROW_BG_COLOR
+      PRODUCT_ROW_TEXT_COLOR = DEFAULT_PRODUCT_ROW_TEXT_COLOR
     }
   }
   render() {
@@ -105,10 +106,10 @@ var styles = StyleSheet.create({
   modelTitle: {
     flex: 1,
     flexWrap: 'wrap',
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '400',
     marginVertical: 15,
-    paddingLeft: 10
+    paddingLeft: 15
   },
   row: {
     alignItems: 'center',
