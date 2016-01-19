@@ -122,6 +122,9 @@ class MessageList extends Component {
           utils.dedupeVerifications(params.verificationsToShare[formName])
         }
       }
+      list.sort(function(a, b) {
+        return b.time - a.time;
+      });
       this.setState({
         dataSource: this.state.dataSource.cloneWithRows(list),
         isLoading: false,
@@ -221,23 +224,6 @@ class MessageList extends Component {
   }
 
   render() {
-    // if (this.state.isLoading)
-    //   return <View />
-    // if (this.state.message) {
-    //   return (
-    //     <View style={{flex: 1}} onLayout={() =>
-    //       AlertIOS.alert(
-    //         this.state.message,
-    //         null,
-    //         [
-    //           {text: 'OK', onPress: () => console.log('OK Pressed!')}
-    //         ]
-    //       )
-    //     } />
-
-    //     )
-    // }
-
     currentMessageTime = null;
     var content;
     var model = utils.getModel(this.props.modelName).value;
@@ -247,17 +233,6 @@ class MessageList extends Component {
           <Text style={{fontSize: 16, alignSelf: 'center', marginTop: 80, color: '#629BCA'}}>{'Loading...'}</Text>
           <ActivityIndicatorIOS size='large' style={{alignSelf: 'center', marginTop: 20}} />
         </View>
-
-
-        // content = <View style={{flex: 1}} onLayout={() =>
-        //   AlertIOS.alert(
-        //     'Please wait ...',
-        //     'We will talk to you soon',
-        //     [
-        //       {text: 'OK', onPress: () => console.log('OK Pressed!')}
-        //     ]
-        //   )
-        // } />
       }
       else
         content =  <NoResources
@@ -267,31 +242,37 @@ class MessageList extends Component {
     }
     else {
       var isAllMessages = model.isInterface  &&  model.id === constants.TYPES.MESSAGE;
-          // renderScrollView={(props) => <InvertibleScrollView {...props} inverted />}
 
-      // content = <ListView ref='listview' style={{marginHorizontal: 10}}
-      //   renderScrollComponent={props => <InvertibleScrollView {...props} inverted />}
-      //   dataSource={this.state.dataSource}
-      //   renderRow={this.renderRow.bind(this)} />
-
-
-      content = <ListView ref='listview' style={{marginHorizontal: 10}}
+      if (isAllMessages) {
+        content = <ListView ref='ListView'
+          renderScrollComponent={props =>
+            <InvertibleScrollView
+              ref='messages'
+              inverted
+              style={{marginHorizontal: 10}}
+              automaticallyAdjustContentInsets={false}
+              scrollEventThrottle={200}/>
+          }
           dataSource={this.state.dataSource}
           initialListSize={10}
           renderRow={this.renderRow.bind(this)}
           automaticallyAdjustContentInsets={false}
           keyboardDismissMode='on-drag'
           keyboardShouldPersistTaps={true}
-          showsVerticalScrollIndicator={false} />;
-      if (isAllMessages)
-        content =
-          <InvertibleScrollView
-            ref='messages'
-            inverted
+          showsVerticalScrollIndicator={false} />
+
+      }
+      else {
+        content = <ListView ref='listview'
+            style={{marginHorizontal: 10}}
+            dataSource={this.state.dataSource}
+            initialListSize={10}
+            renderRow={this.renderRow.bind(this)}
             automaticallyAdjustContentInsets={false}
-            scrollEventThrottle={200}>
-          {content}
-          </InvertibleScrollView>
+            keyboardDismissMode='on-drag'
+            keyboardShouldPersistTaps={true}
+            showsVerticalScrollIndicator={false} />;
+      }
     }
 
     var addNew = (model.isInterface)
@@ -335,6 +316,86 @@ class MessageList extends Component {
       </View>
     );
   }
+  // render() {
+  //   currentMessageTime = null;
+  //   var content;
+  //   var model = utils.getModel(this.props.modelName).value;
+  //   if (this.state.dataSource.getRowCount() === 0) {
+  //     if (this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION) {
+  //       content = <View style={[styles.container]}>
+  //         <Text style={{fontSize: 16, alignSelf: 'center', marginTop: 80, color: '#629BCA'}}>{'Loading...'}</Text>
+  //         <ActivityIndicatorIOS size='large' style={{alignSelf: 'center', marginTop: 20}} />
+  //       </View>
+  //     }
+  //     else
+  //       content =  <NoResources
+  //                   filter={this.state.filter}
+  //                   model={model}
+  //                   isLoading={this.state.isLoading}/>
+  //   }
+  //   else {
+  //     var isAllMessages = model.isInterface  &&  model.id === constants.TYPES.MESSAGE;
+
+  //     content = <ListView ref='listview' style={{marginHorizontal: 10}}
+  //         dataSource={this.state.dataSource}
+  //         initialListSize={10}
+  //         renderRow={this.renderRow.bind(this)}
+  //         automaticallyAdjustContentInsets={false}
+  //         keyboardDismissMode='on-drag'
+  //         keyboardShouldPersistTaps={true}
+  //         showsVerticalScrollIndicator={false} />;
+  //     if (isAllMessages)
+  //       content =
+  //         <InvertibleScrollView
+  //           ref='messages'
+  //           inverted
+  //           automaticallyAdjustContentInsets={false}
+  //           scrollEventThrottle={200}>
+  //         {content}
+  //         </InvertibleScrollView>
+  //   }
+
+  //   var addNew = (model.isInterface)
+  //          ? <AddNewMessage navigator={this.props.navigator}
+  //                           resource={this.props.resource}
+  //                           modelName={this.props.modelName}
+  //                           onAddNewPressed={this.onAddNewPressed.bind(this)}
+  //                           onMenu={this.showMenu.bind(this)}
+  //                           onPhotoSelect={this.onPhotoSelect.bind(this)}
+  //                           callback={this.addedMessage.bind(this)} />
+  //          : <View/>;
+  //                           // onTakePicPressed={this.onTakePicPressed.bind(this)}
+  //   var isOrg = !this.props.isAggregation  &&  this.props.resource  &&  this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION
+  //   var chooser
+  //   if (isOrg)
+  //     chooser =  <View style={{flex:1, marginTop: 8}}>
+  //                 <TouchableHighlight underlayColor='transparent' onPress={this.onAddNewPressed.bind(this, true)}>
+  //                   <Icon name={'arrow-down-c'} size={25} style={styles.imageOutline} />
+  //                 </TouchableHighlight>
+  //               </View>
+  //   else
+  //     chooser = <View/>
+
+  //   var sepStyle = { height: 1,backgroundColor: LINK_COLOR }
+
+  //   return (
+  //     <View style={styles.container}>
+  //       <View style={{flexDirection:'row'}}>
+  //         <View style={{flex: 10}}>
+  //           <SearchBar
+  //             onChangeText={this.onSearchChange.bind(this)}
+  //             placeholder='Search'
+  //             showsCancelButton={false}
+  //             hideBackground={true} />
+  //         </View>
+  //       </View>
+
+  //       <View style={ sepStyle } />
+  //       {content}
+  //       {addNew}
+  //     </View>
+  //   );
+  // }
   showMenu() {
     // var buttons = ['Talk to representative', 'Forget me', 'Cancel']
     var buttons = ['Forget me', 'Cancel']
