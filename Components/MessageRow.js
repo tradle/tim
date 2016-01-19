@@ -13,7 +13,7 @@ var groupByEveryN = require('groupByEveryN');
 var constants = require('@tradle/constants');
 var LinearGradient = require('react-native-linear-gradient');
 var RowMixin = require('./RowMixin');
-// var Accordion = require('react-native-accordion')
+var Accordion = require('react-native-accordion')
 var extend = require('extend')
 var equal = require('deep-equal')
 var formDefaults = require('../data/formDefaults')
@@ -782,12 +782,19 @@ class MessageRow extends Component {
     var photo = hasPhotos
               ? <Image source={{uri: utils.getImageUri(resource.photos[0].url)}}  style={styles.cellImage} />
               : <View />;
-    var headerStyle = hasPhotos
-                    ? {paddingTop: 5, paddingLeft: 30}
-                    : {paddingTop: 5, alignSelf: 'center'}
+    var headerStyle = {paddingTop: 5, alignSelf: 'center'}
     var header =  <View style={headerStyle}>
-                    <Text style={[styles.resourceTitle, {fontSize: 18, color: '#CCCCB2'}]}>{model.title}</Text>
+                    <Text style={[styles.resourceTitle, {fontSize: 20, color: '#289427', opacity: 0.5, fontWeight: '600'}]}>{model.title}</Text>
                   </View>
+    header = hasPhotos
+            ?  <View style={{flexDirection: 'row', marginHorizontal: -7, marginTop: -10, padding: 7, backgroundColor: '#DFF8BB'}}>
+                 {photo}
+                 {header}
+               </View>
+            :  <View style={{alignSelf: 'stretch', marginHorizontal: -7, marginTop: -10, padding: 7, backgroundColor: '#DFF8BB'}}>
+                 {header}
+               </View>
+
 
     var orgRow = <View/>
     if (verification.organization) {
@@ -863,11 +870,7 @@ class MessageRow extends Component {
 
     return (
              <View style={{flex: 1, paddingVertical: 5}} key={self.getNextKey()}>
-               <View style={{flexDirection: 'row', paddingBottom: 10, paddingLeft: hasPhotos ? 0 : 90}}>
-                 {photo}
-                 {header}
-               </View>
-
+               {header}
                <View style={{flex:1}}>
                  <TouchableHighlight onPress={self.props.onSelect.bind(this, resource)} underlayColor='transparent'>
                    {msg}
@@ -877,7 +880,7 @@ class MessageRow extends Component {
              </View>
            );
   }
-  // formatDocument(model, verification, onPress) {
+  // formatDocumentOld(model, verification, onPress) {
   //   var resource = verification.document;
   //   var self = this;
   //   var docModel = utils.getModel(resource[constants.TYPE]).value;
