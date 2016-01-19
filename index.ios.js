@@ -456,8 +456,8 @@ var NavigationBarRouteMapper = {
     }
     if (!org)
       org = <View />;
-    if (route.titleTintColor)
-      style.push({color: route.titleTintColor});
+    if (route.titleTextColor)
+      style.push({color: route.titleTextColor});
     return (
       <View style={{flexDirection: 'row', flex: 1}}>
         <Text style={style}>
