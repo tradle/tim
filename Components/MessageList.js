@@ -402,7 +402,7 @@ class MessageList extends Component {
     var self = this;
     ActionSheetIOS.showActionSheetWithOptions({
       options: buttons,
-      cancelButtonIndex: 2
+      cancelButtonIndex: 1
     }, function(buttonIndex) {
       switch (buttonIndex) {
       // case 0:
