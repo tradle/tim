@@ -20,7 +20,7 @@ class VideoPlayer extends React.Component {
     onEnd: PropTypes.func.isRequired,
     onError: PropTypes.func.isRequired,
     navigator: PropTypes.object.isRequired
-  }
+  };
 
   constructor(props) {
     super(props)

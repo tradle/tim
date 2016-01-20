@@ -22,7 +22,7 @@ class QRCodeScannerView extends Component {
   }
   propTypes: {
     onread: React.PropTypes.func.isRequired
-  }
+  };
   render() {
     return (
       <Camera
