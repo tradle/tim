@@ -139,8 +139,10 @@ class MessageRow extends Component {
             addStyle = [addStyle, styles.myConfCell]
         }
       }
-      if (model.style  ||  isVerification)
-        addStyle = [addStyle, {paddingVertical: 5, paddingHorizontal: 7, borderRadius: 10, backgroundColor: (isVerification ? VERIFICATION_BG : STRUCTURED_MESSAGE_COLOR), borderWidth: 1, borderColor: '#deeeb4', marginVertical: 2}]; //model.style];
+      if (isVerification)
+        addStyle = [addStyle, {paddingVertical: 5, paddingHorizontal: 7, backgroundColor: VERIFICATION_BG, borderWidth: 1, borderColor: '#deeeb4', marginVertical: 2}]; //model.style];
+      else if (model.style)
+        addStyle = [addStyle, {paddingVertical: 5, paddingHorizontal: 7, borderRadius: 10, backgroundColor: STRUCTURED_MESSAGE_COLOR, borderWidth: 1, borderColor: '#deeeb4', marginVertical: 2}]; //model.style];
       else if (isAdditionalInfo)
         addStyle = [addStyle, {paddingVertical: 5, paddingHorizontal: 7, borderRadius: 10, backgroundColor: '#FCF1ED', borderWidth: 1, borderColor: '#FAE9E3', marginVertical: 2}]; //model.style];
       else {
@@ -237,7 +239,7 @@ class MessageRow extends Component {
         var msgModel = utils.getModel(resource.document[constants.TYPE]).value;
         var orgName = resource.organization  ? resource.organization.title : ''
         renderedRow = <View>
-                        <View style={{flexDirection: 'row', backgroundColor: '#289427', paddingVertical: 5, paddingHorizontal: 7, marginHorizontal: -7, marginTop: -5, borderRadius: 5, justifyContent: 'center'}}>
+                        <View style={{flexDirection: 'row', backgroundColor: '#289427', paddingVertical: 5, paddingHorizontal: 7, marginHorizontal: -7, marginTop: -5, justifyContent: 'center'}}>
                           <Icon style={styles.verificationIcon} size={20} name={'android-done'} />
                           <Text style={{fontSize: 16, fontWeight: '600', color: '#FBFFE5', alignSelf: 'center'}}> Verified by {orgName}</Text>
                         </View>
@@ -784,14 +786,14 @@ class MessageRow extends Component {
               : <View />;
     var headerStyle = {paddingTop: 5, alignSelf: 'center'}
     var header =  <View style={headerStyle}>
-                    <Text style={[styles.resourceTitle, {fontSize: 20, color: '#289427', opacity: 0.5, fontWeight: '600'}]}>{model.title}</Text>
+                    <Text style={[styles.resourceTitle, {fontSize: 20, color: '#B6C2A7', fontWeight: '600'}]}>{model.title}</Text>
                   </View>
     header = hasPhotos
-            ?  <View style={{flexDirection: 'row', marginHorizontal: -7, marginTop: -10, padding: 7, backgroundColor: '#DFF8BB'}}>
+            ?  <View style={{flexDirection: 'row', marginHorizontal: -7, marginTop: -10, padding: 7, backgroundColor: '#EDF2CE', justifyContent: 'space-between'}}>
                  {photo}
                  {header}
                </View>
-            :  <View style={{alignSelf: 'stretch', marginHorizontal: -7, marginTop: -10, padding: 7, backgroundColor: '#DFF8BB'}}>
+            :  <View style={{alignSelf: 'stretch', marginHorizontal: -7, marginTop: -10, padding: 7, backgroundColor: '#EDF2CE'}}>
                  {header}
                </View>
 
