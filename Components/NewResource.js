@@ -686,13 +686,21 @@ class NewResource extends Component {
     options.auto = 'placeholders';
     options.tintColor = 'red'
     var photoStyle = /*isMessage && !isFinancialProduct ? {marginTop: -35} :*/ styles.photoBG;
-
     var button = this.state.isRegistration
                ? <TouchableHighlight style={styles.thumbButton}
                       underlayColor='transparent' onPress={this.onSavePressed.bind(this)}>
-                     <Icon name={'power'} size={Device.width / 6} style={styles.power}/>
+                  <View style={styles.getStarted}>
+                     <Text style={styles.getStartedText}>ENTER</Text>
+                  </View>
                  </TouchableHighlight>
                : <View style={{height: 0}} />
+
+    // var button = this.state.isRegistration
+    //            ? <TouchableHighlight style={styles.thumbButton}
+    //                   underlayColor='transparent' onPress={this.onSavePressed.bind(this)}>
+    //                  <Icon name={'power'} size={Device.width / 6} style={styles.power}/>
+    //              </TouchableHighlight>
+    //            : <View style={{height: 0}} />
     // var alert = this.state.err
     //           ? <Text style={{color: 'darkred', alignSelf: 'center',fontSize: 18}}>{this.state.err}</Text>
     //           : <View/>
@@ -929,13 +937,14 @@ page: {
   getStartedText: {
     // color: '#f0f0f0',
     color: '#eeeeee',
-    fontSize: 28,
+    fontSize: 20,
     fontWeight:'300',
     alignSelf: 'center'
   },
   getStarted: {
     backgroundColor: '#467EAE', //'#2892C6',
     paddingVertical: 10,
+    marginLeft: 10,
     // paddingHorizontal: 50,
     alignSelf: 'stretch',
   },
