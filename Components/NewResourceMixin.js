@@ -11,6 +11,7 @@ var Actions = require('../Actions/Actions');
 var Device = require('react-native-device')
 var extend = require('extend');
 var DEFAULT_CURRENCY_SYMBOL = '£';
+var SETTINGS = 'tradle.Settings'
 
 var cnt = 0;
 var propTypesMap = {
@@ -325,7 +326,9 @@ var NewResourceMixin = {
     );
   },
   inputFocused(refName) {
-    if (!this.state.isRegistration && this.refs  &&  this.refs.scrollView) {
+    if (!this.state.isRegistration         &&
+         this.props.model.id !== SETTINGS  &&
+         this.refs  &&  this.refs.scrollView) {
       utils.scrollComponentIntoView(this.refs.scrollView, this.refs.form.getComponent(refName))
     }
   },
