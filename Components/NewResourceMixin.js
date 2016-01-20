@@ -313,7 +313,7 @@ var NewResourceMixin = {
         <FloatLabel
           labelStyle={styles.labelInput}
           autoCorrect={false}
-          autoCapitalize='none'
+          autoCapitalize={this.state.isRegistration ? 'sentences' : 'none'}
           onFocus={this.inputFocused.bind(this, params.prop.name)}
           inputStyle={this.state.isRegistration ? styles.regInput : styles.input}
           style={styles.formInput}
