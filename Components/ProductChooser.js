@@ -48,10 +48,24 @@ class ProductChooser extends Component {
       dataSource: dataSource.cloneWithRows(products),
     };
   }
+  componentWillMount() {
+    Actions.getItem(this.props.resource[constants.TYPE] + '_' + this.props.resource[constants.ROOT_HASH])
+  }
   componentDidMount() {
     this.listenTo(Store, 'onNewProductAdded');
   }
   onNewProductAdded(params) {
+    if (params.action === 'getItem') {
+      var products = []
+      params.resource.products.forEach(function(m) {
+        products.push(utils.getModel(m).value)
+      })
+      this.setState({
+        products: products,
+        dataSource: this.state.dataSource.cloneWithRows(products),
+      })
+      return
+    }
     if (params.action !== 'productList' || params.resource[constants.ROOT_HASH] !== this.props.resource[constants.ROOT_HASH])
       return;
     if (params.err) {
