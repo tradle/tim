@@ -325,7 +325,6 @@ var Store = Reflux.createStore({
       //   port: 25778
       // }
     })
-<<<<<<< 87875a25e338507eae4af07342ca2921f6d72edf
 
     var whitelist = []
     meDriver._shouldLoadTx = function (tx) {
@@ -347,7 +346,6 @@ var Store = Reflux.createStore({
 
     meDriver._multiGetFromDB = utils.multiGet
 
-=======
     if (!SERVICE_PROVIDERS_BASE_URL) {
       var settings = list[SETTINGS + '_1']
       if (settings)
@@ -355,7 +353,7 @@ var Store = Reflux.createStore({
       else
         SERVICE_PROVIDERS_BASE_URL = SERVICE_PROVIDERS_BASE_URL_DEFAULT
     }
->>>>>>> change server uri project
+
     SERVICE_PROVIDERS.forEach(function(name) {
       var bank = ALL_SERVICE_PROVIDERS.providers[name]
       if (bank.on === false)
@@ -730,15 +728,15 @@ var Store = Reflux.createStore({
         time: r.time
       };
 
-      if (!from.myVerifications)
-        from.myVerifications = [];
+      if (!from.verifiedByMe)
+        from.verifiedByMe = [];
 
-      from.myVerifications.push(newVerification);
-      if (!to.verifiedByMe)
-        to.verifiedByMe = [];
-      to.verifiedByMe.push(newVerification);
+      from.verifiedByMe.push(newVerification);
+      if (!to.myVerifications)
+        to.myVerifications = [];
+      to.myVerifications.push(newVerification);
 
-      batch.push({type: 'put', key: fromId, value: from});
+      batch.push({type: 'put', key: toId, value: to});
 
     // check if send returns somewhere roothash for the new resource
       return db.batch(batch)
@@ -1291,7 +1289,7 @@ var Store = Reflux.createStore({
       return
 
     // HACK
-    utils.dedupeVerifications(result)
+    // utils.dedupeVerifications(result)
 
     var resultList = [];
     result.forEach((r) =>  {
@@ -1636,8 +1634,12 @@ var Store = Reflux.createStore({
       if (isVerificationR  ||  r[TYPE] === ADDITIONAL_INFO) {
         var doc = {};
         var rDoc = list[utils.getId(r.document)]
-        if (!rDoc)
+        if (!rDoc) {
+          if (params.isForgetting)
+            foundResources[key] = r
           continue
+        }
+
         extend(true, doc, rDoc.value);
         delete doc.verifications;
         delete doc.additionalInfo;
@@ -1939,7 +1941,6 @@ var Store = Reflux.createStore({
 
       Q.all(promises)
       .then(function() {
-        debugger
         SERVICE_PROVIDERS_BASE_URL = v
         driverPromise = null
         var settings = list[key]
@@ -2816,9 +2817,38 @@ var Store = Reflux.createStore({
   cleanup(result) {
     if (!result.length)
       return Q()
+
     var batch = []
+    var docs = []
     result.forEach(function(r){
       batch.push({type: 'del', key: r[TYPE] + '_' + r[ROOT_HASH], value: r})
+      if (r[TYPE] === VERIFICATION)  {
+        var docID = utils.getId(r.document)
+        if (!list[docID])
+          return
+        let doc = list[docID].value
+        var to = list[utils.getId(doc.to)].value
+        var org = to.organization
+        if (utils.getId(org) !== utils.getId(r.organization)) {
+          var verID = utils.getId(r)
+          for (var i=0; i<doc.verifications.length; i++) {
+            var rr = doc.verifications[i]
+            if (utils.getId(rr) === verID) {
+              doc.verifications.splice(i, 1)
+              batch.push({type: 'put', key: docID, value: doc})
+              break;
+            }
+          }
+          for (var i=0; i<me.myVerifications.length; i++) {
+            var rr = me.myVerifications[i]
+            if (utils.getId(rr) === verID) {
+              me.myVerifications.splice(i, 1)
+              batch.push({type: 'put', key: utils.getId(me), value: me})
+              break;
+            }
+          }
+        }
+      }
     })
     var self = this
     return db.batch(batch)
