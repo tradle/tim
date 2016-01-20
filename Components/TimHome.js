@@ -397,11 +397,20 @@ class TimHome extends Component {
     )
   }
   async _pressHandler() {
+    if (this.state.authenticating) return
+
     if (!this.state.authenticated) {
-      if (!await authenticateUser()) return
+      this.setState({ authenticating: true })
+      if (!await authenticateUser()) {
+        this.setState({ authenticating: false })
+        return
+      }
     }
 
     this.showContactsOrRegister()
+    if (this.state.authenticating) {
+      this.setState({ authenticating: false })
+    }
   }
 }
           // {spinner}

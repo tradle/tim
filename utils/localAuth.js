@@ -6,6 +6,7 @@ import Q from 'q'
 // var SETUP_MSG = 'Please set up Touch ID first, so the app can better protect your data.'
 var AUTH_FAILED_MSG = 'Authentication failed'
 var authenticated = false
+var pendingAuth
 
 export function isAuthenticated () {
   return authenticated
@@ -17,14 +18,17 @@ export function unauthenticateUser () {
 
 export function authenticateUser (reason) {
   if (authenticated) return Q(authenticated)
+  // prevent two authentication requests from
+  // going in concurrently and causing problems
+  if (pendingAuth) return pendingAuth
 
-  return LocalAuth.authenticate({
+  return pendingAuth = LocalAuth.authenticate({
       reason: reason || 'please unlock the app',
       fallbackToPasscode: true,
       suppressEnterPassword: true
     })
     .then(() => {
-      return authenticated = true
+      authenticated = true
     })
     .catch((err) => {
       var message
@@ -50,6 +54,10 @@ export function authenticateUser (reason) {
 
       if (message) AlertIOS.alert(message)
 
-      return authenticated = false
+      authenticated = false
+    })
+    .then(() => {
+      pendingAuth = undefined
+      return authenticated
     })
 }
