@@ -10,7 +10,7 @@ var AddNewMessage = require('./AddNewMessage');
 var ProductChooser = require('./ProductChooser');
 // var CameraView = require('./CameraView');
 var Icon = require('react-native-vector-icons/Ionicons');
-
+var equal = require('deep-equal')
 var utils = require('../utils/utils');
 var reactMixin = require('react-mixin');
 var Store = require('../Store/Store');
@@ -43,7 +43,9 @@ class MessageList extends Component {
       isLoading: true,
       selectedAssets: {},
       dataSource: new ListView.DataSource({
-        rowHasChanged: (row1, row2) =>  row1 !== row2
+        rowHasChanged: (row1, row2) =>  {
+          !equal(row1, row2)
+        }
       }),
       filter: this.props.filter,
       userInput: ''
@@ -122,11 +124,9 @@ class MessageList extends Component {
       //     utils.dedupeVerifications(params.verificationsToShare[formName])
       //   }
       // }
-      list.sort(function(a, b) {
-        return b.time - a.time;
-      });
+
       this.setState({
-        dataSource: this.state.dataSource.cloneWithRows(list),
+        dataSource: this.state.dataSource.cloneWithRows(list, list.map((r, i) => i).reverse()),
         isLoading: false,
         list: list,
         verificationsToShare: params.verificationsToShare
@@ -209,6 +209,7 @@ class MessageList extends Component {
       <MessageRow
         onSelect={this.selectResource.bind(this)}
         share={this.share.bind(this)}
+        key={resource[constants.ROOT_HASH]}
         resource={resource}
         messageNumber={rowId}
         isAggregation={isAggregation}
