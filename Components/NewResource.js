@@ -42,6 +42,7 @@ var {
   DeviceEventEmitter,
   StatusBarIOS,
   DatePickerIOS,
+  AlertIOS,
   // LayoutAnimation,
   Component,
   Navigator,
@@ -253,7 +254,7 @@ class NewResource extends Component {
     var missedRequired = {}
     var msg
     required.forEach((p) =>  {
-      var v = json[p] ? json[p] : this.props.resource[p]; //resource[p];
+      var v = json[p] ? json[p] : (this.props.resource ? this.props.resource[p] : null); //resource[p];
       if (v) {
         if (typeof v === 'string'  &&  !v.length) {
           v = null
@@ -437,10 +438,9 @@ class NewResource extends Component {
   render() {
     if (this.state.isUploading)
       return <View/>
+
     var props = this.props;
     var parentBG = {backgroundColor: '#7AAAC3'};
-    var err = this.state.err;
-
     var resource = this.state.resource;
     var iKey = resource
              ? resource[constants.TYPE] + '_' + resource[constants.ROOT_HASH]
@@ -563,12 +563,12 @@ class NewResource extends Component {
         else {
           itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{bl.title}</Text>
 
-          if (model.required  &&  model.required.indexOf(bl.name) != -1)
-            counter =
-              <View style={{paddingHorizontal: 5}}>
-                <Icon name='asterisk'  size={15}  color='#96415A'/>
-              </View>;
-          else
+          // if (model.required  &&  model.required.indexOf(bl.name) != -1)
+          //   counter =
+          //     <View style={{paddingHorizontal: 5}}>
+          //       <Icon name='plus'  size={15}  color='#96415A'/>
+          //     </View>;
+          // else
             counter = <View style={{paddingHorizontal: 5}}>
                         <Icon name='plus'   size={15}  color='#7AAAC3' />
                       </View>
@@ -577,16 +577,15 @@ class NewResource extends Component {
       else {
         itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{bl.title}</Text>
 
-        if (self.props.model.required  &&  self.props.model.required.indexOf(bl.name) != -1)
-          counter =
-            <View>
-              <Icon name='asterisk'  size={15}  color='#96415A' />
-            </View>;
-        else {
+        // if (self.props.model.required  &&  self.props.model.required.indexOf(bl.name) != -1)
+        //   counter =
+        //     <View>
+        //       <Icon name='plus'  size={15}  color='#96415A' />
+        //     </View>;
+        // else
           counter = <View style={{paddingHorizontal: 5}}>
                       <Icon name='plus'   size={15}  color='#7AAAC3' />
                     </View>
-        }
       }
       var title = bl.title || utils.makeLabel(p)
       var err = this.state.missedRequired
@@ -681,7 +680,7 @@ class NewResource extends Component {
 
     var style
     if (this.state.isRegistration)
-      style = Device.height < 600 ? {marginTop: 90} : {marginTop: Device.height / 5}
+      style = Device.height < 600 ? {marginTop: 90} : {marginTop: Device.height / 4}
     else
       style = {marginTop: 64}
     options.auto = 'placeholders';
@@ -691,17 +690,13 @@ class NewResource extends Component {
     var button = this.state.isRegistration
                ? <TouchableHighlight style={styles.thumbButton}
                       underlayColor='transparent' onPress={this.onSavePressed.bind(this)}>
-                  <View style={styles.getStarted}>
-                     <Text style={styles.getStartedText}>Let me in</Text>
-                  </View>
+                     <Icon name={'power'} size={Device.width / 6} style={styles.power}/>
                  </TouchableHighlight>
                : <View style={{height: 0}} />
+    // var alert = this.state.err
+    //           ? <Text style={{color: 'darkred', alignSelf: 'center',fontSize: 18}}>{this.state.err}</Text>
+    //           : <View/>
 
-    // var errStyle = err ? styles.err : {'padding': 0, 'height': 0};
-    // <FromToView resource={resource} model={meta} navigator={this.props.navigator} />
-          // <View style={{flexWrap: 'wrap'}}>
-          //   <Text style={errStyle}>{err}</Text>
-          // </View>
     var content =
       <ScrollView style={style} ref='scrollView' {...this.scrollviewProps}>
         <View style={styles.container}>
@@ -719,9 +714,14 @@ class NewResource extends Component {
         </View>
       </ScrollView>
 
-    StatusBarIOS.setHidden(true);
-    if (!this.state.isRegistration)
+    // StatusBarIOS.setHidden(true);
+    if (!this.state.isRegistration) {
+      // if (this.state.err) {
+      //   AlertIOS.alert(this.state.err)
+      //   this.state.err = null
+      // }
       return content
+    }
     var cTop = Device.height / 6
 
     var thumb = {
@@ -730,19 +730,23 @@ class NewResource extends Component {
     }
 
     return (
-        <View>
+        <View style={{height: Device.height}}>
           <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: Device.width, height: Device.height}} />
-          <View style={{opacity: 0.7, marginLeft: 20, marginTop: 10, flexDirection: 'row'}}>
-            <Image style={{width: 50, height: 50}} source={require('../img/TradleW.png')}></Image>
-            <Text style={{fontSize: 25, marginTop: 10, paddingHorizontal: 10, color: '#cccccc'}}>Tradle</Text>
-          </View>
 
           {content}
+          <View style={{opacity: 0.7, position: 'absolute', bottom: 30, right: 20, flexDirection: 'row'}}>
+            <Image style={{width: 50, height: 50}} source={require('../img/TradleW.png')}></Image>
+          </View>
         </View>
 
       )
+            // <Text style={{fontSize: 25, marginTop: 10, paddingHorizontal: 10, color: '#cccccc'}}>Tradle</Text>
+          // <View style={{opacity: 0.7, position: 'absolute', bottom: 30, right: 20, flexDirection: 'row'}}>
+          //   <Image style={{width: 50, height: 50}} source={require('../img/TradleW.png')}></Image>
+          // </View>
   }
-    cancelItem(item) {
+
+  cancelItem(item) {
     var list = this.state.resource.photos;
     for (var i=0; i<list.length; i++) {
       if (equal(list[i], item)) {
@@ -955,10 +959,10 @@ page: {
     alignSelf: 'center',
   },
   error: {
-    paddingLeft:5,
+    paddingLeft: 5,
     position: 'absolute',
     bottom: -20,
-    backgroundColor: '#ffffff'
+    backgroundColor: 'tranparent'
   },
   errorText: {
     fontSize: 14,
@@ -973,6 +977,13 @@ page: {
     marginTop: 25,
     marginBottom: 5,
     color: '#bbbbbb'
+  },
+  power: {
+    color: '#BCD3E6',
+    shadowColor: '#6CA5D4',
+    shadowOffset: {width: 1, height: 1},
+    shadowOpacity: 1,
+    shadowRadius: 1
   }
 });
 
