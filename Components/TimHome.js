@@ -331,6 +331,48 @@ class TimHome extends Component {
     // }
         // <Text style={styles.title}>Trust in Motion (TiM)</Text>
     var me = utils.getMe()
+    // var dev = __DEV__
+    //         ? <View style={styles.dev}>
+    //           <TouchableHighlight
+    //               underlayColor='transparent' onPress={this.onReloadDBPressed.bind(this)}>
+    //             <Text style={styles.text}>
+    //               Reload DB
+    //             </Text>
+    //           </TouchableHighlight>
+    //           <TouchableHighlight
+    //               underlayColor='transparent' onPress={this.onReloadModels.bind(this)}>
+    //             <Text style={styles.text}>
+    //               Reload Models
+    //             </Text>
+    //           </TouchableHighlight>
+    //           <TouchableHighlight
+    //               underlayColor='transparent' onPress={this.onBackupPressed.bind(this)}>
+    //             <Text style={styles.text}>
+    //               Backup
+    //             </Text>
+    //           </TouchableHighlight>
+    //           <TouchableHighlight
+    //               underlayColor='transparent' onPress={this.onLoadFromBackupPressed.bind(this)}>
+    //             <Text style={styles.text}>
+    //               Load
+    //             </Text>
+    //           </TouchableHighlight>
+    //           <TouchableHighlight
+    //               underlayColor='transparent' onPress={this.onSettingsPressed.bind(this)}>
+    //             <Text style={styles.text}>
+    //               Settings
+    //             </Text>
+    //           </TouchableHighlight>
+    //         </View>
+    //       : <View style={styles.dev}>
+    //           <TouchableHighlight
+    //               underlayColor='transparent' onPress={this.onSettingsPressed.bind(this)}>
+    //             <Text style={styles.text}>
+    //               Settings
+    //             </Text>
+    //           </TouchableHighlight>
+    //         </View>
+
     var dev = __DEV__
             ? <View style={styles.dev}>
               <TouchableHighlight
@@ -357,22 +399,8 @@ class TimHome extends Component {
                   Load
                 </Text>
               </TouchableHighlight>
-              <TouchableHighlight
-                  underlayColor='transparent' onPress={this.onSettingsPressed.bind(this)}>
-                <Text style={styles.text}>
-                  Settings
-                </Text>
-              </TouchableHighlight>
             </View>
-          : <View style={styles.dev}>
-              <TouchableHighlight
-                  underlayColor='transparent' onPress={this.onSettingsPressed.bind(this)}>
-                <Text style={styles.text}>
-                  Settings
-                </Text>
-              </TouchableHighlight>
-            </View>
-
+          : <View/>
 
     return (
       <View style={styles.scroll}>
@@ -404,7 +432,10 @@ class TimHome extends Component {
       </View>
     );
   }
-  onSettingsPressed() {
+  async onSettingsPressed() {
+    if (!this.state.authenticated)  {
+      if (!await authenticateUser()) return
+    }
     var model = utils.getModel('tradle.Settings').value
     var route = {
       component: NewResource,
@@ -417,7 +448,7 @@ class TimHome extends Component {
         model: model,
         callback: this.props.navigator.pop
       },
-    };
+    }
 
     this.props.navigator.push(route)
   }
