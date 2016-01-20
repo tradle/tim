@@ -16,7 +16,7 @@
     "@tradle/http-keeper": "^3.1.1",
     "@tradle/identity": "^1.2.2",
     "@tradle/kiki": "^1.1.13",
-    "@tradle/models": "^1.2.2",
+    "@tradle/models": "^1.2.5",
     "@tradle/simple-wallet": "^1.0.0",
     "@tradle/utils": "^1.0.0",
     "@tradle/utp": "0.0.8",
