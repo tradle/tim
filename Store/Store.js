@@ -1,5 +1,7 @@
 'use strict';
 
+// __DEV__ = false
+var path = require('path')
 var React = require('react-native')
 var {
   AsyncStorage,
@@ -61,10 +63,10 @@ var VERIFICATION = constants.TYPES.VERIFICATION;
 var FORM = constants.TYPES.FORM;
 var MODEL = constants.TYPES.MODEL;
 var CUSTOMER_WAITING = constants.TYPES.CUSTOMER_WAITING
-var MY_IDENTITIES_MODEL = 'tradle.MyIdentities';
+var FORGOT_YOU = constants.TYPES.FORGOT_YOU
 
-var FORGOT_YOU = 'tradle.ForgotYou'
-
+var MY_IDENTITIES_MODEL = 'tradle.MyIdentities'
+var SETTINGS = 'tradle.Settings'
 
 var PUB_ID = 'publishedIdentity'
 var WELCOME_INTERVAL = 600000
@@ -132,8 +134,9 @@ var ready;
 var networkName = 'testnet'
 // var SERVICE_PROVIDERS_BASE_URL = __DEV__ ? 'http://127.0.0.1:44444' : ENV.bankBaseUrl
 var TOP_LEVEL_PROVIDER = ENV.topLevelProvider
-var SERVICE_PROVIDERS_BASE_URL = __DEV__ ? 'http://127.0.0.1:44444' : TOP_LEVEL_PROVIDER.baseUrl
+var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://127.0.0.1:44444' : TOP_LEVEL_PROVIDER.baseUrl
 // var SERVICE_PROVIDERS_BASE_URL = __DEV__ ? 'http://192.168.0.121:44444' : TOP_LEVEL_PROVIDER.baseUrl
+var SERVICE_PROVIDERS_BASE_URL
 var HOSTED_BY = TOP_LEVEL_PROVIDER.name
 var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
 var SERVICE_PROVIDERS = ALL_SERVICE_PROVIDERS.topLevelProvider[TOP_LEVEL_PROVIDER.name.toLowerCase()] //ENV.providers
@@ -196,6 +199,7 @@ var Store = Reflux.createStore({
 
     try {
       await self.getMe()
+      await self.getSettings()
       self.loadMyResources()
     } catch (err) {
       throw err
@@ -221,6 +225,7 @@ var Store = Reflux.createStore({
   },
   getMe() {
     var self = this
+
     return db.get(MY_IDENTITIES_MODEL + '_1')
     .then(function(value) {
       if (value) {
@@ -239,6 +244,22 @@ var Store = Reflux.createStore({
       list[key] = {
         key: key,
         value: value
+      }
+    })
+    .catch(function(err) {
+      return self.loadModels()
+    })
+  },
+  getSettings() {
+    var self = this
+    var key = SETTINGS + '_1'
+    return db.get(key)
+    .then(function(value) {
+      if (value) {
+        list[key] = {
+          key:   key,
+          value: value
+        }
       }
     })
     .catch(function(err) {
@@ -304,6 +325,7 @@ var Store = Reflux.createStore({
       //   port: 25778
       // }
     })
+<<<<<<< 87875a25e338507eae4af07342ca2921f6d72edf
 
     var whitelist = []
     meDriver._shouldLoadTx = function (tx) {
@@ -325,6 +347,15 @@ var Store = Reflux.createStore({
 
     meDriver._multiGetFromDB = utils.multiGet
 
+=======
+    if (!SERVICE_PROVIDERS_BASE_URL) {
+      var settings = list[SETTINGS + '_1']
+      if (settings)
+        SERVICE_PROVIDERS_BASE_URL = settings.value.url
+      else
+        SERVICE_PROVIDERS_BASE_URL = SERVICE_PROVIDERS_BASE_URL_DEFAULT
+    }
+>>>>>>> change server uri project
     SERVICE_PROVIDERS.forEach(function(name) {
       var bank = ALL_SERVICE_PROVIDERS.providers[name]
       if (bank.on === false)
@@ -918,7 +949,13 @@ var Store = Reflux.createStore({
     temporaryResources[resource[TYPE]] = resource
   },
   onGetTemporary(type) {
-    this.trigger({action: 'getTemporary', resource: temporaryResources[type] || {_t: type}})
+    var r = temporaryResources[type]
+    if (!r) {
+      r = {_t: type}
+      if (type === SETTINGS)
+        r.url = SERVICE_PROVIDERS_BASE_URL
+    }
+    this.trigger({action: 'getTemporary', resource: r})
   },
   onAddItem(params) {
     var value = params.value;
@@ -1361,7 +1398,8 @@ var Store = Reflux.createStore({
         })
       }
     }
-
+    if (utils.isEmpty(foundResources))
+      return
     var result = utils.objectToArray(foundResources);
     if (isIdentity) {
       result.forEach(function(r) {
@@ -1375,7 +1413,8 @@ var Store = Reflux.createStore({
         }
       });
     }
-
+    if (result.length === 1)
+      return result
     var sortProp = params.sortProperty;
     if (sortProp) {
       var asc = (typeof params.asc != 'undefined') ? params.asc : false;
@@ -1384,9 +1423,9 @@ var Store = Reflux.createStore({
           var aVal = a[sortProp] ? a[sortProp] : 0;
           var bVal = b[sortProp] ? b[sortProp] : 0;
           if (asc)
-            return new Date(aVal) - new Date(bVal);
+            return aVal - bVal;
           else
-            return new Date(bVal) - new Date(aVal);
+            return bVal - aVal;
         });
       }
       else if (props[sortProp].type == 'string')  {
@@ -1823,18 +1862,10 @@ var Store = Reflux.createStore({
       list[iKey] = {key: iKey, value: value};
       if (mid)
         list[MY_IDENTITIES_MODEL + '_1'] = {key: MY_IDENTITIES_MODEL + '_1', value: mid};
-    //   return self.loadDB(db);
-    // })
-    // .then(function() {
-      if (value[TYPE] === 'tradle.Settings') {
-        var result = self.searchNotMessages({modelName: 'tradle.Settings'})
-        if (result) {
-          if (result[result.length - 1].url !== value.url);
-          // send forgetMe to result[result.length - 1]
-        }
-        SERVICE_PROVIDERS_BASE_URL = value.url + ':444444'
-      }
-
+      if (value[TYPE] === SETTINGS)
+        return self.changeSettings(value)
+    })
+    .then(function() {
       var  params = {action: 'addItem', resource: value};
       // registration or profile editing
       self.trigger(params);
@@ -1852,7 +1883,7 @@ var Store = Reflux.createStore({
     var batch = [];
     batch.push({type: 'put', key: iKey, value: me});
     var mid = {
-      _type: MY_IDENTITIES_MODEL,
+      _t: MY_IDENTITIES_MODEL,
       currentIdentity: iKey,
       allIdentities: [{
         id: iKey,
@@ -1875,6 +1906,70 @@ var Store = Reflux.createStore({
     .catch(function(err) {
       err = err;
     });
+  },
+  changeSettings(value) {
+    var v = value.url
+    if (v.charAt(v.length - 1) === '/')
+      v = v.splice(v.length - 1)
+    if (v === SERVICE_PROVIDERS_BASE_URL) {
+      this.trigger({action: 'addItem', resource: value})
+      return
+    }
+    var self = this
+    var key = SETTINGS + '_1'
+
+    Q.race([
+      fetch(path.join(v, 'ping')),
+      Q.Promise(function (resolve, reject) {
+        setTimeout(function () {
+          reject(new Error('timed out'))
+        }, 5000)
+      })
+    ])
+    .then(response => {
+      return response.text()
+    })
+    .then(function(text) {
+      if (text !== '') throw new Error('Expected empty response')
+
+      var orgs = self.searchNotMessages({modelName: ORGANIZATION})
+      var promises = []
+      for (let org of orgs)
+        promises.push(self.onForgetMe(org))
+
+      Q.all(promises)
+      .then(function() {
+        debugger
+        SERVICE_PROVIDERS_BASE_URL = v
+        driverPromise = null
+        var settings = list[key]
+        if (settings)
+          list[key].value.url = v
+        else
+          list[key] = {
+            key: key,
+            value: {url: v}
+          }
+        return meDriver.destroy()
+     })
+     .then(function() {
+        debugger
+        driverPromise = null
+        return self.getDriver(me)
+     })
+     .then(function() {
+        debugger
+        self.trigger({action: 'addItem', resource: value})
+        db.put(key, list[key].value)
+      })
+      .catch((error) => {
+        error = error
+      })
+    })
+    .catch((error) => {
+      if (error)
+        self.trigger({action: 'addItem', resource: value, error: error.message})
+    })
   },
   getFingerprint(r) {
     var pubkeys = r.pubkeys
@@ -2519,7 +2614,7 @@ var Store = Reflux.createStore({
       retParams.resource = to
     }
       // resultList = searchMessages({to: list[obj.to.identity.toJSON()[TYPE] + '_' + obj.to[ROOT_HASH]], modelName: MESSAGE})
-    else if (!onMessage  ||  val[TYPE] != IDENTITY)
+    else if (!onMessage  &&  val[TYPE] != IDENTITY)
       resultList = self.searchNotMessages({modelName: val[TYPE]})
     retParams.list = resultList
 
