@@ -117,11 +117,11 @@ class MessageList extends Component {
           return;
       }
 
-      if (params.verificationsToShare) {
-        for (var formName in params.verificationsToShare) {
-          utils.dedupeVerifications(params.verificationsToShare[formName])
-        }
-      }
+      // if (params.verificationsToShare) {
+      //   for (var formName in params.verificationsToShare) {
+      //     utils.dedupeVerifications(params.verificationsToShare[formName])
+      //   }
+      // }
       list.sort(function(a, b) {
         return b.time - a.time;
       });
