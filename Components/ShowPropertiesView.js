@@ -139,7 +139,7 @@ class ShowPropertiesView extends Component {
       if (!isRef) {
         if (val instanceof Array) {
           if (pMeta.items.backlink)
-            return <View  key={this.getNextKey()} />
+            return <View  key={self.getNextKey()} />
           var vCols = pMeta.viewCols;
           var cnt = val.length;
           val = self.renderItems(val, pMeta);
