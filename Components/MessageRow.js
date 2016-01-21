@@ -395,19 +395,6 @@ class MessageRow extends Component {
     // var st = [addStyle ? [styles.textContainer, addStyle] : styles.textContainer]
     // st.push({borderWidth: 1, borderColor: '#C1DBCE'})
 
-    // return (
-    //   <View style={[rowStyle, viewStyle, {width: Device.width - 50}]} key={this.getNextKey()}>
-    //     <View style={{width: 30}} key={this.getNextKey()}/>
-    //     <View style={[addStyle ? [styles.textContainer, addStyle] : styles.textContainer]} key={this.getNextKey()}>
-    //       <View style={{flex: 1}} key={this.getNextKey()}>
-    //         <View style={{backgroundColor: '#c6e2ef', paddingVertical: 5, borderRadius: 5, paddingHorizontal: 7, marginTop: -7, marginHorizontal: -7}} key={this.getNextKey()}>
-    //           <Text style={{color: '#467E9C',  fontSize: 16}} key={this.getNextKey()}>{msg}</Text>
-    //         </View>
-    //         {vtt}
-    //      </View>
-    //     </View>
-    //   </View>
-    //  );
     return (
       <View style={[rowStyle, viewStyle, {width: Device.width - 50}]} key={this.getNextKey()}>
         <View style={{width: 30}}/>
@@ -422,9 +409,9 @@ class MessageRow extends Component {
       </View>
      );
   }
-  showVerificationsFor(r, verificationsToShare) {
+  // showVerificationsFor(r, verificationsToShare) {
 
-  }
+  // }
           // I just sent you a request for {msgModel.title}. {utils.getMe().firstName}, this is your Tradle assistent talking. Tap on one of the items below to share with {isMyMessage ? resource.to.title : resource.from.title}
 
   onPress(event) {
@@ -695,7 +682,7 @@ class MessageRow extends Component {
     }
     else {
       if (!this.props.isAggregation)
-        style = [style, {borderWidth: 0.5, paddingVertical: 3, borderBottomColor: STRUCTURED_MESSAGE_BORDER, borderTopColor: STRUCTURED_MESSAGE_COLOR, borderLeftColor: STRUCTURED_MESSAGE_COLOR, borderRightColor: STRUCTURED_MESSAGE_COLOR}]
+        style = [style, {borderWidth: 0.5, paddingVertical: 3, borderBottomColor: STRUCTURED_MESSAGE_BORDER, borderTopColor: '#eeeeee', borderLeftColor: STRUCTURED_MESSAGE_COLOR, borderRightColor: STRUCTURED_MESSAGE_COLOR}]
       return (
         <View style={style} key={this.getNextKey()}>
           <View style={{flex: 1, flexDirection: 'column'}}>
@@ -828,14 +815,14 @@ class MessageRow extends Component {
 
       }
       else if (this.props.resource.documentCreated)
-          orgRow = <View style={{flexDirection: 'row', marginTop: 10, justifyContent:'space-between'}}>
+          orgRow = <View style={{flexDirection: 'row', marginTop: 10, paddingBottom: 5, justifyContent:'space-between'}}>
                      {shareView}
                     <TouchableHighlight onPress={self.props.onSelect.bind(this, resource)} underlayColor='transparent'>
                       {orgView}
                     </TouchableHighlight>
                   </View>
       else
-        orgRow = <View style={{flexDirection: 'row', marginTop: 10, justifyContent:'space-between'}}>
+        orgRow = <View style={{flexDirection: 'row', marginTop: 10, paddingBottom: 5, justifyContent:'space-between'}}>
           <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
                     AlertIOS.alert(
                       'Sharing ' + docTitle + ' verified by ' + verifiedBy,
