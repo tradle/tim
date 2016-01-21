@@ -79,6 +79,7 @@ Zlorp.ANNOUNCE_INTERVAL = 10000
 Zlorp.LOOKUP_INTERVAL = 10000
 Zlorp.KEEP_ALIVE_INTERVAL = 10000
 
+var Transport = require('@tradle/transport-http')
 var getDHTKey = require('tim/lib/utils').getDHTKey
 
 var dns = require('dns')
@@ -134,8 +135,7 @@ var ready;
 var networkName = 'testnet'
 // var SERVICE_PROVIDERS_BASE_URL = __DEV__ ? 'http://127.0.0.1:44444' : ENV.bankBaseUrl
 var TOP_LEVEL_PROVIDER = ENV.topLevelProvider
-// var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://127.0.0.1:44444' : TOP_LEVEL_PROVIDER.baseUrl
-var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.0.149:44444' : TOP_LEVEL_PROVIDER.baseUrl
+var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.0.140:44444' : TOP_LEVEL_PROVIDER.baseUrl
 var SERVICE_PROVIDERS_BASE_URL
 var HOSTED_BY = TOP_LEVEL_PROVIDER.name
 var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
@@ -304,7 +304,7 @@ var Store = Reflux.createStore({
     // return Q.ninvoke(dns, 'resolve4', 'tradle.io')
     //   .then(function (addrs) {
     //     console.log('tradle is at', addrs)
-    messenger = new Tim.Messengers.HttpClient()
+    messenger = new Transport.HttpClient()
     meDriver = new Tim({
       pathPrefix: TIM_PATH_PREFIX,
       networkName: networkName,
@@ -379,6 +379,7 @@ var Store = Reflux.createStore({
     //   )
     // }
 
+    meDriver.watchTxs(whitelist)
     meDriver.ready().then(function () {
       messenger.setRootHash(meDriver.myRootHash())
     })
