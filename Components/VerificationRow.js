@@ -15,6 +15,7 @@ var {
   Text,
   TouchableHighlight,
   Component,
+  ArticleView,
   View
 } = React;
 
@@ -41,7 +42,9 @@ class VerificationRow extends Component {
     //   photo = <View style={styles.cellImage} />
 
     var model = utils.getModel(resource[constants.TYPE]).value;
-    var verificationRequest = utils.getModel(resource.document[constants.TYPE]).value;
+    var verificationRequest = resource.document
+                            ? utils.getModel(resource.document[constants.TYPE]).value
+                            : utils.getModel(resource[constants.TYPE]).value;
 
     var rows = [];
 
@@ -53,7 +56,14 @@ class VerificationRow extends Component {
     if (resource.document)
       this.formatDocument(verificationRequest, resource.document, rows);
 
-    var backlink = this.props.prop.items.backlink;
+    var backlink = this.props.prop &&  this.props.prop.items.backlink;
+    if (resource.txId)
+      rows.push(
+          <View style={{flexDirection: 'row'}} key={this.getNextKey()}>
+            <Text style={styles.resourceTitleL}>Verification Transaction Id</Text>
+            <Text style={[styles.description, {color: '#7AAAc3'}]} onPress={this.onPress.bind(this, 'http://tbtc.blockr.io/tx/info/' + resource.txId)}>{resource.txId}</Text>
+          </View>
+        )
 
     if (resource.to  &&  backlink !== 'to') {
       var row = <View style={{flexDirection: 'row'}} key={this.getNextKey()}>
@@ -87,7 +97,9 @@ class VerificationRow extends Component {
     }
     else
       verifiedBy = <View/>
-    var date = this.addDateProp('time', [styles.verySmallLetters, {position: 'absolute', right: 10}])
+    var date = resource.document
+             ? this.addDateProp('time', [styles.verySmallLetters, {position: 'absolute', right: 10}])
+             : <View />
     var header =  <View style={{borderColor: '#ffffff', backgroundColor: '#ffffff', borderBottomColor: '#cccccc', borderWidth: 0.5}} key={this.getNextKey()}>
                     <View style={{flexDirection: 'row', marginHorizontal: 10,  marginVertical: 3, paddingBottom: 4}}>
                     {photo}
@@ -216,6 +228,14 @@ class VerificationRow extends Component {
         renderedRow.push(v);
       });
     }
+  }
+  onPress(url) {
+    this.props.navigator.push({
+      id: 7,
+      component: ArticleView,
+      backButtonTitle: 'Back',
+      passProps: {url: url}
+    });
   }
 }
 reactMixin(VerificationRow.prototype, RowMixin);
