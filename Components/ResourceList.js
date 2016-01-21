@@ -181,17 +181,19 @@ class ResourceList extends Component {
         !isOrganization     &&
         !this.props.callback) {
       var m = utils.getModel(resource[constants.TYPE]).value;
-      var title = utils.makeTitle(utils.getDisplayName(resource, m.properties))
-      if (isVerification)
+
+      if (isVerification) {
         this.props.navigator.push({
-          title: title,
+          title: m.title,
           id: 5,
           component: MessageView,
           titleTextColor: '#7AAAC3',
           backButtonTitle: 'Back',
           passProps: {resource: resource}
         });
-      else
+      }
+      else {
+        var title = utils.makeTitle(utils.getDisplayName(resource, m.properties))
         this.props.navigator.push({
           title: title,
           id: 3,
@@ -214,6 +216,7 @@ class ResourceList extends Component {
 
           passProps: {resource: resource}
         });
+      }
       return;
     }
     if (this.props.prop) {
@@ -409,11 +412,12 @@ class ResourceList extends Component {
 
   renderRow(resource)  {
     var model = utils.getModel(this.props.modelName).value;
-
-    return model.id === constants.TYPES.VERIFICATION ||  (model.subClassOf  &&  model.subClassOf === constants.TYPES.VERIFICATION)
+ // || (model.id === 'tradle.Form')
+    return model.id === constants.TYPES.VERIFICATION  || (model.subClassOf  &&  model.subClassOf === constants.TYPES.VERIFICATION)
     ? (<VerificationRow
         onSelect={() => this.selectResource(resource.document)}
         key={resource[constants.ROOT_HASH]}
+        navigator={this.props.navigator}
         prop={this.props.prop}
         resource={resource} />
       )
