@@ -157,7 +157,7 @@ class MessageList extends Component {
     Actions.share(resource, to, formResource)
   }
 
-  selectResource(resource) {
+  selectResource(resource, verification) {
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     if (!resource[constants.TYPE])
       return;
@@ -173,6 +173,7 @@ class MessageList extends Component {
         newTitle += newTitle.length ? ' ' + word : word;
       })
     }
+
     var route = {
       title: newTitle,
       id: 5,
@@ -181,7 +182,8 @@ class MessageList extends Component {
       parentMeta: model,
       passProps: {
         bankStyle: this.state.bankStyle,
-        resource: resource
+        resource: resource,
+        verification: verification
       },
     }
     this.props.navigator.push(route);
