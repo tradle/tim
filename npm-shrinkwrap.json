@@ -2856,40 +2856,40 @@
                           "from": "ansi@~0.3.0",
                           "resolved": "https://registry.npmjs.org/ansi/-/ansi-0.3.0.tgz"
                         },
-                        "are-we-there-yet": {
-                          "version": "1.0.4",
-                          "from": "are-we-there-yet@~1.0.0",
-                          "resolved": "https://registry.npmjs.org/are-we-there-yet/-/are-we-there-yet-1.0.4.tgz"
-                        },
                         "core-util-is": {
                           "version": "1.0.2",
                           "from": "core-util-is@~1.0.0",
                           "resolved": "https://registry.npmjs.org/core-util-is/-/core-util-is-1.0.2.tgz"
+                        },
+                        "are-we-there-yet": {
+                          "version": "1.0.4",
+                          "from": "are-we-there-yet@~1.0.0",
+                          "resolved": "https://registry.npmjs.org/are-we-there-yet/-/are-we-there-yet-1.0.4.tgz"
                         },
                         "debug": {
                           "version": "0.7.4",
                           "from": "debug@~0.7.2",
                           "resolved": "https://registry.npmjs.org/debug/-/debug-0.7.4.tgz"
                         },
-                        "deep-extend": {
-                          "version": "0.4.0",
-                          "from": "deep-extend@~0.4.0",
-                          "resolved": "https://registry.npmjs.org/deep-extend/-/deep-extend-0.4.0.tgz"
-                        },
                         "delegates": {
                           "version": "0.1.0",
                           "from": "delegates@^0.1.0",
                           "resolved": "https://registry.npmjs.org/delegates/-/delegates-0.1.0.tgz"
                         },
-                        "gauge": {
-                          "version": "1.2.2",
-                          "from": "gauge@~1.2.0",
-                          "resolved": "https://registry.npmjs.org/gauge/-/gauge-1.2.2.tgz"
+                        "deep-extend": {
+                          "version": "0.4.0",
+                          "from": "deep-extend@~0.4.0",
+                          "resolved": "https://registry.npmjs.org/deep-extend/-/deep-extend-0.4.0.tgz"
                         },
                         "isarray": {
                           "version": "0.0.1",
                           "from": "isarray@0.0.1",
                           "resolved": "https://registry.npmjs.org/isarray/-/isarray-0.0.1.tgz"
+                        },
+                        "gauge": {
+                          "version": "1.2.2",
+                          "from": "gauge@~1.2.0",
+                          "resolved": "https://registry.npmjs.org/gauge/-/gauge-1.2.2.tgz"
                         },
                         "lodash._createpadding": {
                           "version": "3.6.1",
@@ -5462,15 +5462,15 @@
           "from": "https://registry.npmjs.org/array-union/-/array-union-1.0.1.tgz",
           "resolved": "https://registry.npmjs.org/array-union/-/array-union-1.0.1.tgz"
         },
-        "array-uniq": {
-          "version": "1.0.2",
-          "from": "https://registry.npmjs.org/array-uniq/-/array-uniq-1.0.2.tgz",
-          "resolved": "https://registry.npmjs.org/array-uniq/-/array-uniq-1.0.2.tgz"
-        },
         "arrify": {
           "version": "1.0.1",
           "from": "https://registry.npmjs.org/arrify/-/arrify-1.0.1.tgz",
           "resolved": "https://registry.npmjs.org/arrify/-/arrify-1.0.1.tgz"
+        },
+        "array-uniq": {
+          "version": "1.0.2",
+          "from": "https://registry.npmjs.org/array-uniq/-/array-uniq-1.0.2.tgz",
+          "resolved": "https://registry.npmjs.org/array-uniq/-/array-uniq-1.0.2.tgz"
         },
         "babel-helper-define-map": {
           "version": "6.4.5",
@@ -7376,7 +7376,7 @@
       "resolved": "https://registry.npmjs.org/thunky/-/thunky-0.1.0.tgz"
     },
     "tim": {
-      "version": "3.12.0",
+      "version": "3.12.1",
       "from": "tim@latest",
       "dependencies": {
         "@tradle/chainloader": {
