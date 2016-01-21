@@ -133,9 +133,9 @@ var publishedIdentity
 var driverPromise
 var ready;
 var networkName = 'testnet'
-// var SERVICE_PROVIDERS_BASE_URL = __DEV__ ? 'http://127.0.0.1:44444' : ENV.bankBaseUrl
+// var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://127.0.0.1:44444' : ENV.bankBaseUrl
 var TOP_LEVEL_PROVIDER = ENV.topLevelProvider
-var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.0.140:44444' : TOP_LEVEL_PROVIDER.baseUrl
+var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://127.0.0.1:44444' : TOP_LEVEL_PROVIDER.baseUrl
 var SERVICE_PROVIDERS_BASE_URL
 var HOSTED_BY = TOP_LEVEL_PROVIDER.name
 var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
@@ -731,11 +731,22 @@ var Store = Reflux.createStore({
 
       if (!from.verifiedByMe)
         from.verifiedByMe = [];
-
-      from.verifiedByMe.push(newVerification);
       if (!to.myVerifications)
         to.myVerifications = [];
-      to.myVerifications.push(newVerification);
+      if (!r.txId) {
+        from.verifiedByMe.push(newVerification);
+        to.myVerifications.push(newVerification);
+      }
+      // else  {
+      //   for (var i=0; i<from.verifiedByMe.length; i++) {
+      //     if (utils.getId(from.verifiedByMe[i]).split('_')[1] === r[ROOT_HASH])
+      //       from.verifiedByMe[i] = r
+      //   }
+      //   for (var i=0; i<to.myVerifications.length; i++) {
+      //     if (utils.getId(to.myVerifications[i]).split('_')[1] === r[ROOT_HASH])
+      //       to.myVerifications[i] = r
+      //   }
+      // }
 
       batch.push({type: 'put', key: toId, value: to});
 
@@ -744,20 +755,27 @@ var Store = Reflux.createStore({
     })
     .then(function() {
       var rr = {};
-      extend(rr, to);
-      rr.verifiedByMe = r;
+      // extend(rr, from);
+      // rr.verifiedByMe = r;
       list[key] = {key: key, value: r};
 
       if (notOneClickVerification)
-        self.trigger({action: 'addItem', resource: rr});
+        self.trigger({action: 'addItem', resource: from});
       else
-        self.trigger({action: 'addVerification', resource: rr});
+        self.trigger({action: 'addVerification', resource: from});
 
       var verificationRequestId = utils.getId(r.document);
       var verificationRequest = list[verificationRequestId].value;
-      if (!verificationRequest.verifiedBy)
+      if (!verificationRequest.verifications)
         verificationRequest.verifications = [];
-      verificationRequest.verifications.push(newVerification);
+      if (!r.txId)
+        verificationRequest.verifications.push(newVerification);
+      // else {
+      //   for (var i=0; i<verificationRequest.verifications.length; i++) {
+      //     if (utils.getId(verificationRequest.verifications).split('_')[1] === r[ROOT_HASH])
+      //       verificationRequest.verifications = newVerification
+      //   }
+      // }
       return db.put(verificationRequestId, verificationRequest);
     })
     .then(function(data) {
