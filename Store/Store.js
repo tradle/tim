@@ -737,16 +737,27 @@ var Store = Reflux.createStore({
         from.verifiedByMe.push(newVerification);
         to.myVerifications.push(newVerification);
       }
-      // else  {
-      //   for (var i=0; i<from.verifiedByMe.length; i++) {
-      //     if (utils.getId(from.verifiedByMe[i]).split('_')[1] === r[ROOT_HASH])
-      //       from.verifiedByMe[i] = r
-      //   }
-      //   for (var i=0; i<to.myVerifications.length; i++) {
-      //     if (utils.getId(to.myVerifications[i]).split('_')[1] === r[ROOT_HASH])
-      //       to.myVerifications[i] = r
-      //   }
-      // }
+      else  {
+        var found
+        for (var i=0; i<from.verifiedByMe.length  &&  !found; i++) {
+          if (utils.getId(from.verifiedByMe[i]).split('_')[1] === r[ROOT_HASH]) {
+            from.verifiedByMe[i] = r
+            found = true
+          }
+        }
+        if (!found)
+          from.verifiedByMe.push(newVerification);
+        else
+          found = false
+        for (var i=0; i<to.myVerifications.length  &&  !found; i++) {
+          if (utils.getId(to.myVerifications[i]).split('_')[1] === r[ROOT_HASH]) {
+            to.myVerifications[i] = r
+            found = true
+          }
+          if (!found)
+            to.myVerifications.push(newVerification);
+        }
+      }
 
       batch.push({type: 'put', key: toId, value: to});
 
@@ -770,12 +781,12 @@ var Store = Reflux.createStore({
         verificationRequest.verifications = [];
       if (!r.txId)
         verificationRequest.verifications.push(newVerification);
-      // else {
-      //   for (var i=0; i<verificationRequest.verifications.length; i++) {
-      //     if (utils.getId(verificationRequest.verifications).split('_')[1] === r[ROOT_HASH])
-      //       verificationRequest.verifications = newVerification
-      //   }
-      // }
+      else {
+        for (var i=0; i<verificationRequest.verifications.length; i++) {
+          if (utils.getId(verificationRequest.verifications).split('_')[1] === r[ROOT_HASH])
+            verificationRequest.verifications = newVerification
+        }
+      }
       return db.put(verificationRequestId, verificationRequest);
     })
     .then(function(data) {
@@ -2427,6 +2438,7 @@ var Store = Reflux.createStore({
     var inDB = !!v
     var batch = []
     var representativeAddedTo
+    var self = this
     // var isServiceMessage
     if (model.id === IDENTITY) {
       // if (!me  ||  obj[ROOT_HASH] !== me[ROOT_HASH]) {
@@ -2509,7 +2521,6 @@ var Store = Reflux.createStore({
           // var fOrg = obj.from.identity.toJSON().organization
           // org = list[utils.getId(fOrg)].value
           org.products = []
-          var self = this
           pList.forEach(function(m) {
             self.addNameAndTitleProps(m)
             models[m.id] = {
@@ -2586,6 +2597,14 @@ var Store = Reflux.createStore({
         var isVerification = type === VERIFICATION  ||  (model.subClassOf  &&  model.subClassOf === VERIFICATION);
         if (isVerification) {
           this.onAddVerification(val, false, true)
+          // if (!val.txId) {
+          //   var o = {}
+          //   extend(o, obj)
+          //   o.txId = Math.random() + '';
+          //   setTimeout(() => {
+          //     self.putInDb(o)
+          //   }, 5000);
+          // }
           return
         }
           // else
@@ -2876,6 +2895,9 @@ var Store = Reflux.createStore({
         delete list[r[TYPE] + '_' + r[ROOT_HASH]]
       })
       return Q()
+    })
+    .catch(function(err) {
+      err = err
     })
   },
   onTalkToRepresentative(resource, org) {
