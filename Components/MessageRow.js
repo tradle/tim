@@ -660,7 +660,7 @@ class MessageRow extends Component {
           return null
       }
       else
-        ret.onPressCall = this.props.onSelect.bind(this, resource);
+        ret.onPressCall = this.props.onSelect.bind(this, resource, null);
       return ret
     }
   }
@@ -817,7 +817,7 @@ class MessageRow extends Component {
       else if (this.props.resource.documentCreated)
           orgRow = <View style={{flexDirection: 'row', marginTop: 10, paddingBottom: 5, justifyContent:'space-between'}}>
                      {shareView}
-                    <TouchableHighlight onPress={self.props.onSelect.bind(this, resource)} underlayColor='transparent'>
+                    <TouchableHighlight onPress={self.props.onSelect.bind(this, resource, verification)} underlayColor='transparent'>
                       {orgView}
                     </TouchableHighlight>
                   </View>
@@ -834,7 +834,7 @@ class MessageRow extends Component {
                   )}>
             {shareView}
           </TouchableHighlight>
-          <TouchableHighlight onPress={self.props.onSelect.bind(this, resource)} underlayColor='transparent'>
+          <TouchableHighlight onPress={self.props.onSelect.bind(this, resource, verification)} underlayColor='transparent'>
             {orgView}
           </TouchableHighlight>
         </View>
@@ -861,7 +861,7 @@ class MessageRow extends Component {
              <View style={{flex: 1, paddingVertical: 5}} key={self.getNextKey()}>
                {header}
                <View style={{flex:1}}>
-                 <TouchableHighlight onPress={self.props.onSelect.bind(this, resource)} underlayColor='transparent'>
+                 <TouchableHighlight onPress={self.props.onSelect.bind(this, resource, verification)} underlayColor='transparent'>
                    {msg}
                  </TouchableHighlight>
                  {orgRow}
