@@ -192,29 +192,6 @@ class ShowPropertiesView extends Component {
     }
     return viewCols;
   }
-  getMoneyProp(ref, moneyProp, moneyValue) {
-    var moneyValue = this.props.resource[moneyProp.name];
-    var currencies = utils.getModel(ref).value.properties.currency.oneOf;
-    var style = {fontSize: 16}
-    if (!currencies)
-      return <Text style={style} key={this.getNextKey()}>${moneyValue}</Text>
-
-    var valCurrency = moneyValue.currency;
-    currencies.forEach((c) => {
-      var currencySymbol = c[valCurrency];
-      if (currencySymbol) {
-        var val = (valCurrency == 'USD') ? currencySymbol + moneyValue.value : moneyValue.value + currencySymbol;
-        return properties[v].skipLabel
-            ? <Text style={style} key={this.getNextKey()}>{moneyValue}</Text>
-            : <View style={{flexDirection: 'row'}} key={this.getNextKey()}>
-                <Text style={style}>{moneyProp.title}</Text>
-                <Text style={style}>{moneyValue}</Text>
-              </View>
-      }
-    })
-
-  }
-
   renderItems(val, pMeta) {
     var itemsMeta = pMeta.items.properties;
     if (!itemsMeta) {
