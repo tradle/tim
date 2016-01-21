@@ -10,7 +10,7 @@ var AddNewMessage = require('./AddNewMessage');
 var ProductChooser = require('./ProductChooser');
 // var CameraView = require('./CameraView');
 var Icon = require('react-native-vector-icons/Ionicons');
-var equal = require('deep-equal')
+
 var utils = require('../utils/utils');
 var reactMixin = require('react-mixin');
 var Store = require('../Store/Store');
@@ -43,9 +43,7 @@ class MessageList extends Component {
       isLoading: true,
       selectedAssets: {},
       dataSource: new ListView.DataSource({
-        rowHasChanged: (row1, row2) =>  {
-          !equal(row1, row2)
-        }
+        rowHasChanged: (row1, row2) =>  row1 !== row2
       }),
       filter: this.props.filter,
       userInput: ''
@@ -124,9 +122,8 @@ class MessageList extends Component {
       //     utils.dedupeVerifications(params.verificationsToShare[formName])
       //   }
       // }
-
       this.setState({
-        dataSource: this.state.dataSource.cloneWithRows(list, list.map((r, i) => i).reverse()),
+        dataSource: this.state.dataSource.cloneWithRows(list),
         isLoading: false,
         list: list,
         verificationsToShare: params.verificationsToShare
@@ -173,7 +170,6 @@ class MessageList extends Component {
         newTitle += newTitle.length ? ' ' + word : word;
       })
     }
-
     var route = {
       title: newTitle,
       id: 5,
@@ -211,7 +207,6 @@ class MessageList extends Component {
       <MessageRow
         onSelect={this.selectResource.bind(this)}
         share={this.share.bind(this)}
-        key={resource[constants.ROOT_HASH]}
         resource={resource}
         messageNumber={rowId}
         isAggregation={isAggregation}
@@ -246,36 +241,23 @@ class MessageList extends Component {
     else {
       var isAllMessages = model.isInterface  &&  model.id === constants.TYPES.MESSAGE;
 
-      if (isAllMessages) {
-        content = <ListView ref='ListView'
-          renderScrollComponent={props =>
-            <InvertibleScrollView
-              ref='messages'
-              inverted
-              style={{marginHorizontal: 10}}
-              automaticallyAdjustContentInsets={false}
-              scrollEventThrottle={200}/>
-          }
+      content = <ListView ref='listview' style={{marginHorizontal: 10}}
           dataSource={this.state.dataSource}
           initialListSize={10}
           renderRow={this.renderRow.bind(this)}
           automaticallyAdjustContentInsets={false}
           keyboardDismissMode='on-drag'
           keyboardShouldPersistTaps={true}
-          showsVerticalScrollIndicator={false} />
-
-      }
-      else {
-        content = <ListView ref='listview'
-            style={{marginHorizontal: 10}}
-            dataSource={this.state.dataSource}
-            initialListSize={10}
-            renderRow={this.renderRow.bind(this)}
+          showsVerticalScrollIndicator={false} />;
+      if (isAllMessages)
+        content =
+          <InvertibleScrollView
+            ref='messages'
+            inverted
             automaticallyAdjustContentInsets={false}
-            keyboardDismissMode='on-drag'
-            keyboardShouldPersistTaps={true}
-            showsVerticalScrollIndicator={false} />;
-      }
+            scrollEventThrottle={200}>
+          {content}
+          </InvertibleScrollView>
     }
 
     var addNew = (model.isInterface)
@@ -319,86 +301,6 @@ class MessageList extends Component {
       </View>
     );
   }
-  // render() {
-  //   currentMessageTime = null;
-  //   var content;
-  //   var model = utils.getModel(this.props.modelName).value;
-  //   if (this.state.dataSource.getRowCount() === 0) {
-  //     if (this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION) {
-  //       content = <View style={[styles.container]}>
-  //         <Text style={{fontSize: 16, alignSelf: 'center', marginTop: 80, color: '#629BCA'}}>{'Loading...'}</Text>
-  //         <ActivityIndicatorIOS size='large' style={{alignSelf: 'center', marginTop: 20}} />
-  //       </View>
-  //     }
-  //     else
-  //       content =  <NoResources
-  //                   filter={this.state.filter}
-  //                   model={model}
-  //                   isLoading={this.state.isLoading}/>
-  //   }
-  //   else {
-  //     var isAllMessages = model.isInterface  &&  model.id === constants.TYPES.MESSAGE;
-
-  //     content = <ListView ref='listview' style={{marginHorizontal: 10}}
-  //         dataSource={this.state.dataSource}
-  //         initialListSize={10}
-  //         renderRow={this.renderRow.bind(this)}
-  //         automaticallyAdjustContentInsets={false}
-  //         keyboardDismissMode='on-drag'
-  //         keyboardShouldPersistTaps={true}
-  //         showsVerticalScrollIndicator={false} />;
-  //     if (isAllMessages)
-  //       content =
-  //         <InvertibleScrollView
-  //           ref='messages'
-  //           inverted
-  //           automaticallyAdjustContentInsets={false}
-  //           scrollEventThrottle={200}>
-  //         {content}
-  //         </InvertibleScrollView>
-  //   }
-
-  //   var addNew = (model.isInterface)
-  //          ? <AddNewMessage navigator={this.props.navigator}
-  //                           resource={this.props.resource}
-  //                           modelName={this.props.modelName}
-  //                           onAddNewPressed={this.onAddNewPressed.bind(this)}
-  //                           onMenu={this.showMenu.bind(this)}
-  //                           onPhotoSelect={this.onPhotoSelect.bind(this)}
-  //                           callback={this.addedMessage.bind(this)} />
-  //          : <View/>;
-  //                           // onTakePicPressed={this.onTakePicPressed.bind(this)}
-  //   var isOrg = !this.props.isAggregation  &&  this.props.resource  &&  this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION
-  //   var chooser
-  //   if (isOrg)
-  //     chooser =  <View style={{flex:1, marginTop: 8}}>
-  //                 <TouchableHighlight underlayColor='transparent' onPress={this.onAddNewPressed.bind(this, true)}>
-  //                   <Icon name={'arrow-down-c'} size={25} style={styles.imageOutline} />
-  //                 </TouchableHighlight>
-  //               </View>
-  //   else
-  //     chooser = <View/>
-
-  //   var sepStyle = { height: 1,backgroundColor: LINK_COLOR }
-
-  //   return (
-  //     <View style={styles.container}>
-  //       <View style={{flexDirection:'row'}}>
-  //         <View style={{flex: 10}}>
-  //           <SearchBar
-  //             onChangeText={this.onSearchChange.bind(this)}
-  //             placeholder='Search'
-  //             showsCancelButton={false}
-  //             hideBackground={true} />
-  //         </View>
-  //       </View>
-
-  //       <View style={ sepStyle } />
-  //       {content}
-  //       {addNew}
-  //     </View>
-  //   );
-  // }
   showMenu() {
     // var buttons = ['Talk to representative', 'Forget me', 'Cancel']
     var buttons = ['Forget me', 'Cancel']
