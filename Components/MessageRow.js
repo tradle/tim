@@ -682,7 +682,7 @@ class MessageRow extends Component {
     }
     else {
       if (!this.props.isAggregation)
-        style = [style, {borderWidth: 0.5, paddingVertical: 3, borderBottomColor: STRUCTURED_MESSAGE_BORDER, borderTopColor: '#eeeeee', borderLeftColor: STRUCTURED_MESSAGE_COLOR, borderRightColor: STRUCTURED_MESSAGE_COLOR}]
+        style = [style, {borderWidth: 0.5, paddingVertical: 3, borderBottomColor: STRUCTURED_MESSAGE_BORDER, borderTopColor: STRUCTURED_MESSAGE_COLOR, borderLeftColor: STRUCTURED_MESSAGE_COLOR, borderRightColor: STRUCTURED_MESSAGE_COLOR}]
       return (
         <View style={style} key={this.getNextKey()}>
           <View style={{flex: 1, flexDirection: 'column'}}>
