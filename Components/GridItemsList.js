@@ -34,9 +34,14 @@ class GridItemsList extends Component {
         break;
       }
     }
-    this.setState({
-      list: list,
-    })
+    if (list.length !== 0)
+      this.setState({
+        list: list,
+      })
+    else {
+      this.props.callback(this.props.prop, list)
+      this.props.navigator.popToRoute(this.props.returnRoute);
+    }
   }
 
   render() {
@@ -51,6 +56,9 @@ class GridItemsList extends Component {
 var styles = StyleSheet.create({
   container: {
     flex: 1,
+    borderColor: 'transparent',
+    borderTopColor: 'red',
+    borderTopWidth: 0.5,
     marginTop: 60,
   },
 });
