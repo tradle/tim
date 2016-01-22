@@ -1671,9 +1671,24 @@ var Store = Reflux.createStore({
           continue
         }
 
-        extend(true, doc, rDoc.value);
-        delete doc.verifications;
-        delete doc.additionalInfo;
+        // extend(true, doc, rDoc.value);
+        // TODO: check if we can copy by reference
+        for (var p in rDoc.value) {
+          if (p === 'verifications' || p === 'additionalInfo') continue
+
+          var val = rDoc.value[p]
+          switch (typeof val) {
+            case 'object':
+              if (val) {
+                doc[p] = extend(true, val)
+              }
+              break
+            default:
+              doc[p] = val
+              break
+          }
+        }
+
         r.document = doc;
       }
 
