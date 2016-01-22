@@ -326,9 +326,11 @@ var NewResourceMixin = {
     );
   },
   inputFocused(refName) {
-    if (!this.state.isRegistration         &&
-         this.props.model.id !== SETTINGS  &&
-         this.refs  &&  this.refs.scrollView) {
+    if (!this.state.isRegistration   &&
+         this.refs                   &&
+         this.refs.scrollView        &&
+         this.props.model            &&
+         Object.keys(this.props.model.properties).length > 5) {
       utils.scrollComponentIntoView(this.refs.scrollView, this.refs.form.getComponent(refName))
     }
   },
@@ -468,7 +470,7 @@ var styles = StyleSheet.create({
     height: 60,
     borderColor: '#ffffff',
     borderBottomColor: '#cccccc',
-    borderWidth: 0.5,
+    borderBottomWidth: 0.5,
     marginLeft: 10,
     marginBottom: 10,
     flex: 1
