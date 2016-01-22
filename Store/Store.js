@@ -2869,7 +2869,7 @@ var Store = Reflux.createStore({
         var org = to.organization
         if (utils.getId(org) !== utils.getId(r.organization)) {
           var verID = utils.getId(r)
-          for (var i=0; i<doc.verifications.length; i++) {
+          for (var i=0; doc.verifications  &&  i<doc.verifications.length; i++) {
             var rr = doc.verifications[i]
             if (utils.getId(rr) === verID) {
               doc.verifications.splice(i, 1)
@@ -2877,7 +2877,7 @@ var Store = Reflux.createStore({
               break;
             }
           }
-          for (var i=0; i<me.myVerifications.length; i++) {
+          for (var i=0; me.myVerifications && i<me.myVerifications.length; i++) {
             var rr = me.myVerifications[i]
             if (utils.getId(rr) === verID) {
               me.myVerifications.splice(i, 1)
