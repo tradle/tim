@@ -286,7 +286,7 @@ class TimHome extends Component {
     // var cTop = h / 4
 
     var thumb = d.width > 400
-              ? { width: d.width / 3, height: d.width / 3 }
+              ? { width: d.width / 2.2, height: d.width / 2.2 }
               : styles.thumb
               // <Progress.CircleSnail color={'white'} size={70} thickness={5}/>
   	var spinner =  <View>
@@ -497,7 +497,7 @@ var styles = StyleSheet.create({
   tradle: {
     // color: '#7AAAC3',
     color: '#eeeeee',
-    fontSize: Device.height > 400 ? 35 : 25,
+    fontSize: Device.height > 450 ? 35 : 25,
     alignSelf: 'center',
   },
   text: {
@@ -538,7 +538,7 @@ var styles = StyleSheet.create({
   },
   getStartedText: {
     color: '#f0f0f0',
-    fontSize: Device.width > 400 ? Device.height/30 : 17,
+    fontSize: Device.width > 450 ? 35 : 20,
     fontWeight:'400'
   },
   getStarted: {
