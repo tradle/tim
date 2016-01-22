@@ -1335,6 +1335,7 @@ var Store = Reflux.createStore({
     var retParams = {
       action: isMessage  &&  !params.prop ? 'messageList' : 'list',
       list: resultList,
+      spinner: params.spinner,
       isAggregation: params.isAggregation
     }
     if (verificationsToShare)
@@ -2376,7 +2377,7 @@ var Store = Reflux.createStore({
         meDriver.lookupObject(msg)
         .then(function(obj) {
           // return
-          var model = self.getModel(obj[TYPE])
+          var model = self.getModel(obj[TYPE]).value
           if (model.subClassOf === FORM)
            self.trigger({action: 'sent', resource: list[obj[TYPE] + '_' + obj[ROOT_HASH]].value})
         })
