@@ -356,7 +356,7 @@ var NewResourceMixin = {
         label = resource[params.prop].title
       style = textStyle
       propLabel = <View style={{marginLeft: 10, marginTop: 5, marginBottom: 5, backgroundColor: '#ffffff'}}>
-                    <Text style={{fontSize: 12, height: 10, color: '#B1B1B1'}}>{params.label}</Text>
+                    <Text style={{fontSize: 12, height: 12, color: '#B1B1B1'}}>{params.label}</Text>
                   </View>
     }
     else {
