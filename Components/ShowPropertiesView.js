@@ -7,6 +7,8 @@ var utils = require('../utils/utils');
 var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin')
 var reactMixin = require('react-mixin')
+var Accordion = require('react-native-accordion')
+var Icon = require('react-native-vector-icons/Ionicons')
 
 var DEFAULT_CURRENCY_SYMBOL = '£';
 var cnt = 0;
@@ -92,6 +94,7 @@ class ShowPropertiesView extends Component {
       var val = resource[p];
       var pMeta = model.properties[p];
       var isRef;
+      var isItems
       var isDirectionRow;
       if (!val) {
         if (pMeta.displayAs)
@@ -143,7 +146,22 @@ class ShowPropertiesView extends Component {
           var vCols = pMeta.viewCols;
           var cnt = val.length;
           val = self.renderItems(val, pMeta);
+          isItems = true
+               // <View style={[styles.textContainer, {padding: 10}, isDirectionRow ? {flexDirection: 'row'} : {flexDirection: 'column'}]}>
           first = false;
+          title = <View style={{flexDirection: 'row'}}>
+                    <Text style={styles.title}>{pMeta.title || utils.makeLabel(p)}</Text>
+                    <Icon name={'ios-arrow-down'} size={15} color='#7AAAC3' style={{position: 'absolute', right: 10, top: 10}}/>
+                  </View>
+
+          val = <View key={self.getNextKey()}>
+                  {separator}
+                  <Accordion
+                    header={title}
+                    content={val}
+                    underlayColor='transparent'
+                    easing='easeOutQuad' />
+               </View>
         }
         else  {
           if (props[p].units  &&  props[p].units.charAt(0) != '[') {
@@ -164,13 +182,13 @@ class ShowPropertiesView extends Component {
           }
         }
       }
+      var title = pMeta.skipLabel  ||  isItems
+                ? <View />
+                : <Text style={styles.title}>{pMeta.title || utils.makeLabel(p)}</Text>
       var separator = first
                     ? <View />
                     : <View style={styles.separator}></View>;
 
-      var title = model.properties[p].skipLabel
-                ? <View />
-                : <Text style={styles.title}>{model.properties[p].title || utils.makeLabel(p)}</Text>
       first = false;
       return (<View key={self.getNextKey()}>
                {separator}
