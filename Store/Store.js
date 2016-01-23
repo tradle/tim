@@ -981,7 +981,7 @@ var Store = Reflux.createStore({
     if (!r) {
       r = {_t: type}
       if (type === SETTINGS)
-        r.url = SERVICE_PROVIDERS_BASE_URL
+        r.url = SERVICE_PROVIDERS_BASE_URL || SERVICE_PROVIDERS_BASE_URL_DEFAULT
     }
     this.trigger({action: 'getTemporary', resource: r})
   },
@@ -1919,6 +1919,7 @@ var Store = Reflux.createStore({
       self.trigger(params);
     })
     .catch(function(err) {
+      self.trigger({action: 'addItem', error: err.message, resource: value})
       err = err;
     });
   },
@@ -1966,7 +1967,7 @@ var Store = Reflux.createStore({
     var self = this
     var key = SETTINGS + '_1'
 
-    Q.race([
+    return Q.race([
       fetch(path.join(v, 'ping')),
       Q.Promise(function (resolve, reject) {
         setTimeout(function () {
@@ -1978,44 +1979,38 @@ var Store = Reflux.createStore({
       return response.text()
     })
     .then(function(text) {
-      if (text !== '') throw new Error('Expected empty response')
+      if (text !== '')
+        throw new Error('Expected empty response')
 
       var orgs = self.searchNotMessages({modelName: ORGANIZATION})
       var promises = []
       for (let org of orgs)
         promises.push(self.onForgetMe(org))
 
-      Q.all(promises)
-      .then(function() {
-        SERVICE_PROVIDERS_BASE_URL = v
-        driverPromise = null
-        var settings = list[key]
-        if (settings)
-          list[key].value.url = v
-        else
-          list[key] = {
-            key: key,
-            value: {url: v}
-          }
-        return meDriver.destroy()
-     })
-     .then(function() {
-        debugger
-        driverPromise = null
-        return self.getDriver(me)
-     })
-     .then(function() {
-        debugger
-        self.trigger({action: 'addItem', resource: value})
-        db.put(key, list[key].value)
-      })
-      .catch((error) => {
-        error = error
-      })
+      return Q.all(promises)
     })
-    .catch((error) => {
-      if (error)
-        self.trigger({action: 'addItem', resource: value, error: error.message})
+    .then(function() {
+      SERVICE_PROVIDERS_BASE_URL = v
+      driverPromise = null
+      var settings = list[key]
+      if (settings)
+        list[key].value.url = v
+      else
+        list[key] = {
+          key: key,
+          value: {url: v}
+        }
+      return meDriver.destroy()
+   })
+   .then(function() {
+      debugger
+      driverPromise = null
+      return self.getDriver(me)
+   })
+   .then(function() {
+      debugger
+      self.trigger({action: 'addItem', resource: value})
+      db.put(key, list[key].value)
     })
   },
   getFingerprint(r) {
