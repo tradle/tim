@@ -279,11 +279,6 @@ class NewResource extends Component {
         if ((prop.ref) ||  isDate  ||  prop.items) {
           if (resource && resource[p])
             return;
-          if (!msg)
-            msg = 'Please specify: '
-          else
-            msg += ', ';
-          msg += '\'' + this.props.model.properties[p].title + '\'';
           missedRequired[p] = prop
         }
         else if (!prop.displayAs)
@@ -715,7 +710,7 @@ class NewResource extends Component {
             <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange.bind(this)}/>
             {button}
             <View style={{marginTop: -10}}>
-                {arrayItems}
+              {arrayItems}
              </View>
           </View>
           <View style={{height: 300}}/>
@@ -724,10 +719,10 @@ class NewResource extends Component {
 
     // StatusBarIOS.setHidden(true);
     if (!this.state.isRegistration) {
-      // if (this.state.err) {
-      //   AlertIOS.alert(this.state.err)
-      //   this.state.err = null
-      // }
+      if (this.state.err) {
+        AlertIOS.alert(this.state.err)
+        this.state.err = null
+      }
       return content
     }
     var cTop = Device.height / 6
@@ -919,7 +914,7 @@ page: {
     marginLeft: 10,
     borderColor: '#ffffff',
     borderBottomColor: '#cccccc',
-    borderWidth: 0.5,
+    borderBottomWidth: 0.5,
     paddingBottom: 10,
     justifyContent: 'flex-end',
   },
