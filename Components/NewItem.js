@@ -55,13 +55,22 @@ class NewItem extends Component {
     }
 
     if (this.state.floatingProps) {
-      for (var p in this.state.floatingProps) {
+      for (var p in this.state.floatingProps)
         value[p] = this.state.floatingProps[p]
-      }
     }
     var propName = this.props.metadata.name;
     var resource = this.props.resource
     var item = JSON.parse(JSON.stringify(value));
+    var missedRequired = this.checkRequired(this.props.metadata, item, resource)
+    if (!utils.isEmpty(missedRequired)) {
+      this.state.submitted = false
+      var state = {
+        missedRequired: missedRequired
+      }
+      this.setState(state)
+      return;
+    }
+
     if (this.props.metadata.items) {
       // HACK ref props of array type props reside on resource for now
       var props = this.props.metadata.items.properties
@@ -98,6 +107,51 @@ class NewItem extends Component {
     }
     this.state.submitted = false
     this.props.navigator.pop();
+  }
+
+  checkRequired(metadata, json, resource) {
+    var required = metadata.required;
+    if (!required) {
+      required = []
+      for (var p in metadata.items.properties) {
+        if (p.charAt(0) !== '_')
+          required.push(p)
+      }
+    }
+    var missedRequired = {}
+    required.forEach((p) =>  {
+      var v = json[p] ? json[p] : (this.props.resource ? this.props.resource[p] : null); //resource[p];
+      if (v) {
+        if (typeof v === 'string'  &&  !v.length) {
+          v = null
+          delete json[p]
+        }
+        else if (typeof v === 'object'  &&  metadata.items.properties[p].ref == constants.TYPES.MONEY) {
+          var units = metadata.items.properties[p].units
+          if (units)
+            v = v.value
+          else {
+            if (v.value === '')
+              v = null
+            delete json[p]
+          }
+        }
+      }
+      var isDate = Object.prototype.toString.call(v) === '[object Date]'
+      if (!v  ||  (isDate  &&  isNaN(v.getTime())))  {
+        var prop = metadata
+        if (prop.items  &&  prop.items.backlink)
+          return
+        if ((prop.ref) ||  isDate  ||  prop.items) {
+          if (resource && resource[p])
+            return;
+          missedRequired[p] = prop
+        }
+        else if (!prop.displayAs)
+          missedRequired[p] = prop
+      }
+    })
+    return missedRequired
   }
   validateValues(prop, item) {
     var required = prop.required;
