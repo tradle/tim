@@ -370,7 +370,7 @@ var NewResourceMixin = {
             ? this.state.missedRequired[prop.name]
             : null
     var error = err
-              ? <View style={{paddingLeft: 15, backgroundColor: 'transparent'}}>
+              ? <View style={{paddingLeft: 5, backgroundColor: 'transparent'}}>
                   <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>Enter a valid {prop.title}</Text>
                 </View>
               : <View />
@@ -425,7 +425,14 @@ var NewResourceMixin = {
   setChosenValue(propName, value) {
     var resource = {}
     extend(resource, this.state.resource)
-    if (this.props.model.properties[propName].type === 'array')
+    // clause for the items properies - need to redesign
+    if (this.props.metadata  &&  this.props.metadata.type === 'array') {
+      if (!this.state.floatingProps)
+        this.state.floatingProps = {}
+      this.state.floatingProps[propName] = value
+      resource[propName] = value
+    }
+    else if (this.props.model.properties[propName].type === 'array')
       resource[propName] = value
     else {
       var id = value[constants.TYPE] + '_' + value[constants.ROOT_HASH]
