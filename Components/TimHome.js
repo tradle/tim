@@ -96,7 +96,7 @@ class TimHome extends Component {
       // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       id: 10,
       title: 'Contacts',
-      titleTextColor: '#7AAAC3',
+      // titleTextColor: '#7AAAC3',
       backButtonTitle: 'Back',
       component: ResourceList,
       rightButtonTitle: 'Profile',
@@ -105,13 +105,13 @@ class TimHome extends Component {
         title: utils.getDisplayName(me, utils.getModel(me[constants.TYPE]).value.properties),
         id: 3,
         component: ResourceView,
-        titleTextColor: '#7AAAC3',
+        // titleTextColor: '#7AAAC3',
         rightButtonTitle: 'Edit',
         onRightButtonPress: {
           title: me.firstName,
           id: 4,
           component: NewResource,
-          titleTextColor: '#7AAAC3',
+          // titleTextColor: '#7AAAC3',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
           passProps: {
@@ -131,7 +131,7 @@ class TimHome extends Component {
       id: 10,
       component: ResourceList,
       backButtonTitle: 'Back',
-      titleTextColor: '#7AAAC3',
+      // titleTextColor: '#7AAAC3',
       passProps: {
         modelName: constants.TYPES.ORGANIZATION
       },
@@ -140,14 +140,14 @@ class TimHome extends Component {
         title: title,
         id: 3,
         component: ResourceView,
-        titleTextColor: '#7AAAC3',
+        // titleTextColor: '#7AAAC3',
         backButtonTitle: 'Back',
         rightButtonTitle: 'Edit',
         onRightButtonPress: {
           title: title,
           id: 4,
           component: NewResource,
-          titleTextColor: '#7AAAC3',
+          // titleTextColor: '#7AAAC3',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
           passProps: {
