@@ -374,7 +374,7 @@ class MessageList extends Component {
           title: 'New product',
           component: NewResource,
           backButtonTitle: 'Back',
-          titleTextColor: '#7AAAC3',
+          // titleTextColor: '#999999',
           rightButtonTitle: 'Done',
           passProps: {
             model: utils.getModel('tradle.NewMessageModel').value,
