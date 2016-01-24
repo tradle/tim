@@ -1982,16 +1982,41 @@ var Store = Reflux.createStore({
     .then(function(text) {
       if (text !== '')
         throw new Error('Expected empty response')
-
-      var orgs = self.searchNotMessages({modelName: ORGANIZATION})
-      togo = orgs.length
-      var promises = []
-
-      for (let org of orgs)
-        promises.push(self.onForgetMe(org, true))
-
-      return Q.all(promises)
+      if (me)
+        return forgetAndReset()
     })
+   .then(function() {
+      // debugger
+      SERVICE_PROVIDERS_BASE_URL = v
+      driverPromise = null
+      var settings = list[key]
+      if (settings)
+        list[key].value.url = v
+      else
+        list[key] = {
+          key: key,
+          value: {url: v}
+        }
+      if (me)
+        return self.getDriver(me)
+   })
+   .then(function() {
+      debugger
+      if (me)
+        monitorTim()
+      self.trigger({action: 'addItem', resource: value})
+      db.put(key, list[key].value)
+    })
+  },
+  forgetAndReset() {
+    var orgs = self.searchNotMessages({modelName: ORGANIZATION})
+    togo = orgs.length
+    var promises = []
+
+    for (let org of orgs)
+      promises.push(self.onForgetMe(org, true))
+
+    return Q.all(promises)
     .then(function() {
       // debugger
       // wait for all ForgotYou messages or timeout before changing the server url
@@ -2011,26 +2036,7 @@ var Store = Reflux.createStore({
       // debugger
       return meDriver.destroy()
    })
-   .then(function() {
-      // debugger
-      SERVICE_PROVIDERS_BASE_URL = v
-      driverPromise = null
-      var settings = list[key]
-      if (settings)
-        list[key].value.url = v
-      else
-        list[key] = {
-          key: key,
-          value: {url: v}
-        }
-      return self.getDriver(me)
-   })
-   .then(function() {
-      debugger
-      self.monitorTim()
-      self.trigger({action: 'addItem', resource: value})
-      db.put(key, list[key].value)
-    })
+
   },
   getFingerprint(r) {
     var pubkeys = r.pubkeys
