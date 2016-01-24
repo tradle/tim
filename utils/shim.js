@@ -10,6 +10,11 @@ if (typeof process === 'undefined') {
     }
   }
 }
+try {
+  window.navigator.userAgent = 'react-native'
+} catch (err) {
+  // must be read-only
+}
 
 process.browser = false
 process.env.NODE_ENV = __DEV__ ? 'development' : 'production'

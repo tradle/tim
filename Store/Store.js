@@ -1,6 +1,7 @@
 'use strict';
 
 var path = require('path')
+var parseURL = require('url').parse
 var React = require('react-native')
 var {
   AsyncStorage,
@@ -16,6 +17,7 @@ var Debug = require('debug')
 var debug = Debug('Store')
 var timerDebug = Debug('TIMER')
 var Q = require('q');
+Q.longStackSupport = true
 Q.onerror = function (err) {
   console.error(err)
   throw err
@@ -83,7 +85,7 @@ Tim.CATCH_UP_INTERVAL = 10000
 // Zlorp.LOOKUP_INTERVAL = 10000
 // Zlorp.KEEP_ALIVE_INTERVAL = 10000
 
-var Transport = require('@tradle/transport-http')
+var WebSocketClient = require('@tradle/ws-client')
 var getDHTKey = require('tim/lib/utils').getDHTKey
 
 var dns = require('dns')
@@ -134,7 +136,6 @@ var isLoaded;
 var me;
 var isAuthenticated
 var meDriver
-var messenger
 var publishedIdentity
 var driverPromise
 var ready;
@@ -332,7 +333,6 @@ var Store = Reflux.createStore(timeFunctions({
       // port: port,
       syncInterval: 120000,
       afterBlockTimestamp: constants.afterBlockTimestamp,
-      _send: messenger.send.bind(messenger)
       // afterBlockTimestamp: 1445976998,
       // relay: {
       //   // address: addrs[0],
@@ -388,6 +388,7 @@ var Store = Reflux.createStore(timeFunctions({
           whitelist.push(o.value.txId)
         }
       })
+
       meDriver.watchTxs(whitelist)
       meDriver.sync()
       // END  HTTP specific stuff
@@ -398,6 +399,59 @@ var Store = Reflux.createStore(timeFunctions({
     .catch(function(err) {
       // debugger
     })
+
+    var messengers = {}
+    var serviceProvidersHost = 'http://' + parseURL(SERVICE_PROVIDERS_BASE_URL).hostname
+    SERVICE_PROVIDERS.forEach(function (name, i) {
+      var provider = ALL_SERVICE_PROVIDERS.providers[name]
+      var wsPort = provider.wsPort // TODO: get port from /bankName/info
+      var otrKey = meDriver.keys.filter((k) => k.type === 'dsa')[0]
+      if (!otrKey) return
+
+      var messenger = new WebSocketClient({
+        url: `${serviceProvidersHost}:${wsPort}`,
+        otrKey: kiki.toKey(otrKey).priv(),
+        autoconnect: true,
+        // rootHash: meDriver.myRootHash()
+      })
+
+      // will need to do this on demand too
+      // e.g. when scanning an employee QR Code at the bank
+      messenger.on('message', meDriver.receiveMsg)
+      messengers[provider.hash] = messenger
+    })
+
+    meDriver._send = function (rootHash, msg, recipientInfo) {
+      var messenger = messengers[rootHash]
+      if (!messenger) {
+        return Q.reject(new Error('recipient not found'))
+      }
+
+      var args = arguments
+      return meDriver.ready().then(() => {
+        return messenger.send.apply(messenger, args)
+      })
+    }
+
+    meDriver.ready().then(function () {
+      var myHash = meDriver.myRootHash()
+      for (var hash in messengers) {
+        messengers[hash].setRootHash(myHash)
+      }
+    })
+
+    // END  HTTP specific stuff
+
+      // })
+    return Q.resolve(meDriver)
+
+    // var log = d.log;
+    // d.log = function () {
+    //   console.log('log', arguments);
+    //   return log.apply(this, arguments);
+    // }
+
+    // return d
   },
   onGetEmployeeInfo(code) {
     let pair = code.split(':')
@@ -2531,6 +2585,14 @@ var Store = Reflux.createStore(timeFunctions({
         var keys = defaultKeySet({
           networkName: 'testnet'
         })
+
+        // bringing it back!
+        if (!keys.some((k) => k.type() === 'dsa')) {
+          keys.push(Keys.DSA.gen({
+            purpose: 'sign'
+          }))
+        }
+
         mePub = []
         mePriv = []
         keys.forEach(function(key) {

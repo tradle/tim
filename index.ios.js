@@ -17,6 +17,7 @@ require('./utils/crypto')
 require('stream')
 // require('./timmy')
 var React = require('react-native');
+
 // require('ErrorUtils').setGlobalHandler(function (e, isFatal) {
 //   console.error('Failed to handle error:')
 //   console.error(e)
