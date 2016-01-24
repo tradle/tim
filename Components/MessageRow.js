@@ -313,7 +313,7 @@ class MessageRow extends Component {
       title: title,
       id: 4,
       component: NewResource,
-      titleTextColor: '#7AAAC3',
+      // titleTextColor: '#999999',
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
       passProps: {
@@ -439,7 +439,7 @@ class MessageRow extends Component {
       rightButtonTitle: 'Done',
       backButtonTitle: 'Back',
       component: NewResource,
-      titleTextColor: '#7AAAC3',
+      // titleTextColor: '#7AAAC3',
       passProps:  {
         model: model,
         resource: resource,
@@ -476,7 +476,7 @@ class MessageRow extends Component {
       route.onRightButtonPress = {
         title: 'Edit',
         component: NewResource,
-        titleTextColor: '#7AAAC3',
+        // titleTextColor: '#7AAAC3',
         id: 4,
         passProps: {
           resource: r,
