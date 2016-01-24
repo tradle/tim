@@ -55,7 +55,7 @@ class ProductChooser extends Component {
     this.listenTo(Store, 'onNewProductAdded');
   }
   onNewProductAdded(params) {
-    if (params.action === 'getItem') {
+    if (params.action === 'getItem'  &&  this.props.resource[constants.ROOT_HASH] === params.resource[constants.ROOT_HASH]) {
       var products = []
       params.resource.products.forEach(function(m) {
         products.push(utils.getModel(m).value)
