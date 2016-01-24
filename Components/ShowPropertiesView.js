@@ -145,7 +145,8 @@ class ShowPropertiesView extends Component {
             return <View  key={self.getNextKey()} />
           var vCols = pMeta.viewCols;
           var cnt = val.length;
-          val = self.renderItems(val, pMeta);
+          val = <View>{self.renderItems(val, pMeta)}</View>
+
           isItems = true
                // <View style={[styles.textContainer, {padding: 10}, isDirectionRow ? {flexDirection: 'row'} : {flexDirection: 'column'}]}>
           first = false;
@@ -160,7 +161,7 @@ class ShowPropertiesView extends Component {
                     header={title}
                     content={val}
                     underlayColor='transparent'
-                    easing='easeOutQuad' />
+                    easing='easeInCirc' />
                </View>
         }
         else  {
