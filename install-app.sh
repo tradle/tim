@@ -27,10 +27,10 @@ case "$CONFIGURATION" in
     # DEV=true
     ;;
   Release)
-    if [ "$(evil_git_dirty)" == "*" ]; then
-      echo "TRADLE DEVELOPER, YOU HAVE UNSTAGED CHANGES, PLEASE COMMIT BEFORE BUILDING A RELEASE"
-      exit 1
-    fi
+    # if [ "$(evil_git_dirty)" == "*" ]; then
+    #   echo "TRADLE DEVELOPER, YOU HAVE UNSTAGED CHANGES, PLEASE COMMIT BEFORE BUILDING A RELEASE"
+    #   exit 1
+    # fi
     ;;
   "")
     DEST=$LOCAL_RELEASE_DIR # build bundle to local dir
@@ -66,11 +66,11 @@ elif [[ -x "$(command -v brew)" && -s "$(brew --prefix nvm)/nvm.sh" ]]; then
   . "$(brew --prefix nvm)/nvm.sh"
 fi
 
-if [ -f "$LOCAL_RELEASE_DIR/main.jsbundle" ]; then
-  mkdir -p "$DEST"
-  cp "$LOCAL_RELEASE_DIR/main.jsbundle" "$DEST/"
-  cp -r "$LOCAL_RELEASE_DIR/assets" "$DEST/"
-else
+# if [ -f "$LOCAL_RELEASE_DIR/main.jsbundle" ]; then
+#   mkdir -p "$DEST"
+#   cp "$LOCAL_RELEASE_DIR/main.jsbundle" "$DEST/"
+#   cp -r "$LOCAL_RELEASE_DIR/assets" "$DEST/"
+# else
   echo "writing bundle and assets to $DEST"
   rm -rf $TMPDIR/react-*
   react-native bundle \
@@ -89,4 +89,4 @@ else
     cp "$DEST/main.jsbundle.map" "$LOCAL_RELEASE_DIR/"
     cp -r "$DEST/assets" "$LOCAL_RELEASE_DIR/"
   fi
-fi
+# fi

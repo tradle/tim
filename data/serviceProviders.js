@@ -64,22 +64,26 @@ module.exports = {
     easy: {
       hash: '179d536d4fc033b0e074be8d756413302ea62805',
       title: 'Easy Bank',
-      txId: '0080491d1b9d870c6dcc8a60f87fa0ba1fcc617f76e8f414ecb1dd86188367a9'
+      txId: '0080491d1b9d870c6dcc8a60f87fa0ba1fcc617f76e8f414ecb1dd86188367a9',
+      wsPort: 44544
     },
     safe: {
       hash: '3b31cbee623a1795fd6ecb6fe650cc2d874be958',
       title: 'Safe Bank',
-      txId: 'a605b1b60a8616a7e145834e1831d498689eb5fc212d1e8c11c45a27ea59b5f8'
+      txId: 'a605b1b60a8616a7e145834e1831d498689eb5fc212d1e8c11c45a27ea59b5f8',
+      wsPort: 44547
     },
     friendly: {
       hash: '19b1bf07e11b921b0334e711caae9eedf6748af2',
       title: 'Friendly Bank',
-      txId: '235f8ffd7a3f5ecd5de3408cfaad0d01a36a96195ff491850257bc5c3098b28b'
+      txId: '235f8ffd7a3f5ecd5de3408cfaad0d01a36a96195ff491850257bc5c3098b28b',
+      wsPort: 44546
     },
     europi: {
       hash: 'd0b3f6780215cb8adfb9524810599b4f1f6444ae',
       title: 'Europi Bank',
-      txId: '90c357e9f37a95d849677f6048838bc70a6694829c30988add3fe16af38955ac'
+      txId: '90c357e9f37a95d849677f6048838bc70a6694829c30988add3fe16af38955ac',
+      wsPort: 44545
     },
     people: {
       hash: '57bfdcacb61d2c0cbb0adb97f8eabced780e1d79',
