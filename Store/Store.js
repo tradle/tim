@@ -135,7 +135,7 @@ var ready;
 var networkName = 'testnet'
 // var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://127.0.0.1:44444' : ENV.bankBaseUrl
 var TOP_LEVEL_PROVIDER = ENV.topLevelProvider
-var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://127.0.0.1:44444' : TOP_LEVEL_PROVIDER.baseUrl
+var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.0.149:44444' : TOP_LEVEL_PROVIDER.baseUrl
 var SERVICE_PROVIDERS_BASE_URL
 var HOSTED_BY = TOP_LEVEL_PROVIDER.name
 var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
@@ -1983,7 +1983,7 @@ var Store = Reflux.createStore({
       if (text !== '')
         throw new Error('Expected empty response')
       if (me)
-        return forgetAndReset()
+        return self.forgetAndReset()
     })
    .then(function() {
       // debugger
@@ -2003,18 +2003,18 @@ var Store = Reflux.createStore({
    .then(function() {
       debugger
       if (me)
-        monitorTim()
+        self.monitorTim()
       self.trigger({action: 'addItem', resource: value})
       db.put(key, list[key].value)
     })
   },
   forgetAndReset() {
-    var orgs = self.searchNotMessages({modelName: ORGANIZATION})
-    togo = orgs.length
+    var orgs = this.searchNotMessages({modelName: ORGANIZATION})
+    var togo = orgs.length
     var promises = []
 
     for (let org of orgs)
-      promises.push(self.onForgetMe(org, true))
+      promises.push(this.onForgetMe(org, true))
 
     return Q.all(promises)
     .then(function() {
