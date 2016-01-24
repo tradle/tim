@@ -971,7 +971,7 @@ page: {
     paddingLeft: 5,
     position: 'absolute',
     bottom: -20,
-    backgroundColor: 'tranparent'
+    backgroundColor: 'transparent'
   },
   errorText: {
     fontSize: 14,
