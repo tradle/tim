@@ -216,7 +216,7 @@ var Store = Reflux.createStore({
         throw err
       }
 
-      self.loadResources()
+      self.monitorTim()
       // self.initIdentity(me)
     }
 
@@ -362,7 +362,7 @@ var Store = Reflux.createStore({
       messenger.addRecipient(
         bank.hash,
         // e.g. http://tradle.io:44444/rabobank/send
-        path.join(SERVICE_PROVIDERS_BASE_URL, name, 'send')
+        [SERVICE_PROVIDERS_BASE_URL, name, 'send'].join('/')
       )
 
       whitelist.push(bank.txId)
@@ -804,6 +804,7 @@ var Store = Reflux.createStore({
   },
   onGetItem(key, action) {
     var resource = {};
+
     extend(resource, list[utils.getId(key)].value);
     var props = this.getModel(resource[TYPE]).value.properties;
     for (var p in props) {
@@ -1949,7 +1950,7 @@ var Store = Reflux.createStore({
       list[iKey] = {key: iKey, value: me};
       if (mid)
         list[MY_IDENTITIES_MODEL + '_1'] = {key: MY_IDENTITIES_MODEL + '_1', value: mid};
-      self.loadResources();
+      self.monitorTim()
       // return self.initIdentity(me)
     })
     .catch(function(err) {
@@ -1966,7 +1967,7 @@ var Store = Reflux.createStore({
     }
     var self = this
     var key = SETTINGS + '_1'
-
+    var togo
     return Q.race([
       fetch(path.join(v, 'ping')),
       Q.Promise(function (resolve, reject) {
@@ -1983,13 +1984,35 @@ var Store = Reflux.createStore({
         throw new Error('Expected empty response')
 
       var orgs = self.searchNotMessages({modelName: ORGANIZATION})
+      togo = orgs.length
       var promises = []
+
       for (let org of orgs)
-        promises.push(self.onForgetMe(org))
+        promises.push(self.onForgetMe(org, true))
 
       return Q.all(promises)
     })
     .then(function() {
+      // debugger
+      // wait for all ForgotYou messages or timeout before changing the server url
+      var defer = Q.defer()
+      setTimeout(() => {defer.reject('forget me request was timed out')}, 10000)
+      meDriver.on('message', function (meta) {
+        if (meta[TYPE] === 'tradle.ForgotYou') {
+          if (--togo === 0) {
+            defer.resolve()
+          }
+        }
+      })
+
+      return defer.promise
+   })
+   .then(function() {
+      // debugger
+      return meDriver.destroy()
+   })
+   .then(function() {
+      // debugger
       SERVICE_PROVIDERS_BASE_URL = v
       driverPromise = null
       var settings = list[key]
@@ -2000,15 +2023,11 @@ var Store = Reflux.createStore({
           key: key,
           value: {url: v}
         }
-      return meDriver.destroy()
-   })
-   .then(function() {
-      debugger
-      driverPromise = null
       return self.getDriver(me)
    })
    .then(function() {
       debugger
+      self.monitorTim()
       self.trigger({action: 'addItem', resource: value})
       db.put(key, list[key].value)
     })
@@ -2285,7 +2304,7 @@ var Store = Reflux.createStore({
     })
     return dfd.promise;
   },
-  loadResources() {
+  monitorTim() {
     var self = this
     // meDriver.ready()
     // .then(function() {
@@ -2958,7 +2977,7 @@ var Store = Reflux.createStore({
       deliver: true
     })
   },
-  onForgetMe(resource) {
+  onForgetMe(resource, noTrigger) {
     var me = utils.getMe()
     var msg = {
       _t: constants.TYPES.FORGET_ME,
@@ -2974,6 +2993,8 @@ var Store = Reflux.createStore({
       deliver: true
     })
     .then(function() {
+      if (noTrigger)
+        return
       var result = self.searchMessages({to: resource, modelName: MESSAGE});
       msg.message = 'Your request is in progress'
       msg.from = {
