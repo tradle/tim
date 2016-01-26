@@ -373,15 +373,15 @@ class TimHome extends Component {
     //           </TouchableHighlight>
     //         </View>
 
-    var settings = <View/>
-    // var settings = utils.getMe()
-    //              ? <View />
-    //              : <TouchableHighlight
-    //                   underlayColor='transparent' onPress={this.onSettingsPressed.bind(this)}>
-    //                  <Text style={styles.text}>
-    //                    Settings
-    //                  </Text>
-    //               </TouchableHighlight>
+    // var settings = <View/>
+    var settings = utils.getMe()
+                 ? <View />
+                 : <TouchableHighlight
+                      underlayColor='transparent' onPress={this.onSettingsPressed.bind(this)}>
+                     <Text style={styles.text}>
+                       Settings
+                     </Text>
+                  </TouchableHighlight>
 
     var dev = __DEV__
             ? <View style={styles.dev}>
