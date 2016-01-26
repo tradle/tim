@@ -133,9 +133,9 @@ var publishedIdentity
 var driverPromise
 var ready;
 var networkName = 'testnet'
-// var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://127.0.0.1:44444' : ENV.bankBaseUrl
+var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://localhost:44444' : TOP_LEVEL_PROVIDER.baseUrl
 var TOP_LEVEL_PROVIDER = ENV.topLevelProvider
-var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.0.149:44444' : TOP_LEVEL_PROVIDER.baseUrl
+// var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.0.149:44444' : TOP_LEVEL_PROVIDER.baseUrl
 var SERVICE_PROVIDERS_BASE_URL
 var HOSTED_BY = TOP_LEVEL_PROVIDER.name
 var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
@@ -1136,39 +1136,39 @@ var Store = Reflux.createStore({
       list[tmpKey] = {key: tmpKey, value: returnVal};
 
       var params = {action: 'addItem', resource: returnVal}
-      // var m = self.getModel(returnVal[TYPE])
-      // if (m.subClassOf === FORM)
-      //   params.sending = true
+      var m = self.getModel(returnVal[TYPE]).value
+      if (m.subClassOf === FORM)
+        params.sendStatus = 'Sending'
       self.trigger(params);
       return self.waitForTransitionToEnd()
-        .then(function () {
-          var to = list[utils.getId(returnVal.to)].value;
+      .then(function () {
+        var to = list[utils.getId(returnVal.to)].value;
 
-          var toChain = {}
-          extend(toChain, returnVal)
-          delete toChain.from
-          delete toChain.to
-          delete toChain[ROOT_HASH]
-          if (toChain[CUR_HASH])
-            toChain[PREV_HASH] = toChain[CUR_HASH]
-          toChain.time = returnVal.time
+        var toChain = {}
+        extend(toChain, returnVal)
+        delete toChain.from
+        delete toChain.to
+        delete toChain[ROOT_HASH]
+        if (toChain[CUR_HASH])
+          toChain[PREV_HASH] = toChain[CUR_HASH]
+        toChain.time = returnVal.time
 
-          return utils.sendSigned(meDriver, {
-            msg: toChain,
-            to: [{fingerprint: self.getFingerprint(to)}],
-            deliver: true
-          })
+        return utils.sendSigned(meDriver, {
+          msg: toChain,
+          to: [{fingerprint: self.getFingerprint(to)}],
+          deliver: true
         })
-        .then(function (entries) {
-          var entry = entries[0]
-          // TODO: fix hack
-          // we now have a real root hash,
-          // scrap the placeholder
-          delete list[tmpKey]
-          returnVal[CUR_HASH] = entry.get(CUR_HASH)
-          returnVal[ROOT_HASH] = entry.get(ROOT_HASH)
-          return save()
-        })
+      })
+      .then(function (entries) {
+        var entry = entries[0]
+        // TODO: fix hack
+        // we now have a real root hash,
+        // scrap the placeholder
+        delete list[tmpKey]
+        returnVal[CUR_HASH] = entry.get(CUR_HASH)
+        returnVal[ROOT_HASH] = entry.get(ROOT_HASH)
+        return save()
+      })
     }
 
     function save () {
@@ -1641,24 +1641,6 @@ var Store = Reflux.createStore({
         if (!isChatToForm) {
 
         var id = toModelName + '_' + chatTo[ROOT_HASH];
-        // if (isChatWithOrg) {
-        //   var toOrgId = null, fromOrgId = null;
-
-        //   if (list[fromID].value.organization)
-        //     fromOrgId = utils.getId(list[fromID].value.organization);
-        //   else if (fromID.split('_')[0] === ORGANIZATION)
-        //     fromOrgId = utils.getId(list[fromID].value);
-        //   if (list[toID].value.organization)
-        //     toOrgId = utils.getId(list[toID].value.organization);
-        //   else if (toID.split('_')[0] === ORGANIZATION)
-        //     toOrgId = utils.getId(list[toID].value);
-
-        //   if (chatId !== toOrgId  &&  chatId !== fromOrgId)
-        //     continue;
-        //   if (fromID != meId  &&  toID != meId)
-        //     continue
-        // }
-        // else
         if (fromID !== id  &&  toID != id  &&  toID != meOrgId)
           continue;
         }
@@ -1769,6 +1751,8 @@ var Store = Reflux.createStore({
     return resource;
   },
   getVerificationsToShare(foundResources, to) {
+    if (!foundResources)
+      return
     var verTypes = [];
     var meId = me[TYPE] + '_' + me[ROOT_HASH];
     var isOrg = to  &&  to[TYPE] === ORGANIZATION
@@ -1878,8 +1862,8 @@ var Store = Reflux.createStore({
     }
 
     value.time = value.time || new Date().getTime();
-
-    if (model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1)) {
+    var isMessage = model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1)
+    if (isMessage) {
       if (props['to']  &&  props['from']) {
         var to = list[utils.getId(value.to)].value;
         var from = list[utils.getId(value.from)].value;
@@ -1982,8 +1966,8 @@ var Store = Reflux.createStore({
     .then(function(text) {
       if (text !== '')
         throw new Error('Expected empty response')
-      if (me)
-        return self.forgetAndReset()
+      // if (me)
+      //   return self.forgetAndReset()
     })
    .then(function() {
       // debugger
@@ -1997,8 +1981,8 @@ var Store = Reflux.createStore({
           key: key,
           value: {url: v}
         }
-      if (me)
-        return self.getDriver(me)
+      // if (me)
+      //   return self.getDriver(me)
    })
    .then(function() {
       debugger
@@ -2413,8 +2397,18 @@ var Store = Reflux.createStore({
         .then(function(obj) {
           // return
           var model = self.getModel(obj[TYPE]).value
-          if (model.subClassOf === FORM)
-           self.trigger({action: 'sent', resource: list[obj[TYPE] + '_' + obj[ROOT_HASH]].value})
+          if (model.subClassOf === FORM) {
+            self.trigger({action: 'updateItem', sendStatus: 'Sent', resource: list[obj[TYPE] + '_' + obj[ROOT_HASH]].value})
+            // var o = {}
+            // extend(o, obj)
+            // var from = o.from
+            // o.from = o.to
+            // o.to = from
+            // o.txId = Math.random() + '';
+            // setTimeout(() => {
+            //   self.putInDb(o)
+            // }, 5000);
+          }
         })
         .catch(function (err) {
           debugger
@@ -2440,6 +2434,7 @@ var Store = Reflux.createStore({
     me.published = true
     db.put({key: me[TYPE] + '_' + me[ROOT_HASH], value: me})
   },
+
   putInDb(obj, onMessage) {
     // defensive copy
     var val = extend(true, obj.parsed.data)
@@ -3451,4 +3446,281 @@ module.exports = Store;
       value.organization.photo = photos[0].url;
   },
 
+*/
+/*
+  putInDb1(obj, onMessage) {
+    // defensive copy
+    var val = extend(true, obj.parsed.data)
+    if (!val)
+      return
+
+
+    val[ROOT_HASH] = obj[ROOT_HASH]
+    val[CUR_HASH] = obj[CUR_HASH]
+    if (!val.time)
+      val.time = obj.timestamp
+
+    var type = val[TYPE]
+    var model = this.getModel(type)  &&  this.getModel(type).value
+    var isConfirmation
+    if (!model) {
+      if (val.message  &&  val.message.indexOf('Congratulations! You were approved for: ') != -1) {
+        isMessage = true
+        type = SIMPLE_MESSAGE
+        val[TYPE] = type
+        model = models[SIMPLE_MESSAGE].value
+        isConfirmation = true
+      }
+      else
+        return;
+    }
+    if (obj.txId)
+      val.txId = obj.txId
+    val.permissionKey = obj.permissionKey
+    var key = type + '_' + val[ROOT_HASH]
+    // var v = list[key] ? list[key].value : null
+    // var inDB = !!v
+    var batch = []
+    var representativeAddedTo
+    var self = this
+    // var isServiceMessage
+    if (model.id === IDENTITY)
+      representativeAddedTo = this.addIdentity(val, batch)
+    else {
+      var isMessage = model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1
+      if (isMessage) {
+        this.addMessage(obj, val, onMessage, batch)
+        if (type === VERIFICATION  ||  (model.subClassOf  &&  model.subClassOf === VERIFICATION))
+          return
+        if (onMessage  &&  type === FORGOT_YOU)
+          return
+      }
+    }
+    list[key] = {
+      key: key,
+      value: val
+    }
+    var retParams = {
+      action: isMessage ? 'messageList' : 'list',
+    }
+    var resultList
+    if (isMessage) {
+      var toId = IDENTITY + '_' + obj.to[ROOT_HASH]
+      var meId = IDENTITY + '_' + me[ROOT_HASH]
+      var id = toId === meId ? IDENTITY + '_' + obj.from[ROOT_HASH] : toId
+      var to = list[id].value
+      var isUpdate
+      if (onMessage)
+        retParams.list = this.searchMessages({to: to, modelName: MESSAGE})
+      else {
+        retParams.action= 'updateItem'
+        retParams.sendStatus = 'Chained'
+        retParams.resource = val
+        isUpdate = true
+      }
+      if (!isUpdate) {
+        var verificationsToShare = this.getVerificationsToShare(resultList, to);
+        if (verificationsToShare)
+          retParams.verificationsToShare = verificationsToShare
+        retParams.resource = to
+      }
+    }
+      // resultList = searchMessages({to: list[obj.to.identity.toJSON()[TYPE] + '_' + obj.to[ROOT_HASH]], modelName: MESSAGE})
+    else if (!onMessage  &&  val[TYPE] != IDENTITY)
+      retParams.list = this.searchNotMessages({modelName: val[TYPE]})
+
+    var self = this
+    return db.batch(batch)
+    .then(function() {
+      if (isConfirmation) {
+        var from = list[IDENTITY + '_' + obj.from[ROOT_HASH]].value
+
+        var fOrg = from.organization
+        var org = fOrg ? list[utils.getId(fOrg)].value : null
+        if (onMessage  &&  val[TYPE] === FORGOT_YOU) {
+          this.forgotYou(org)
+          return
+        }
+        var msg = {
+          message: me.firstName + ' is waiting for the response',
+          _t: constants.TYPES.CUSTOMER_WAITING,
+          from: me,
+          to: org,
+          time: new Date().getTime()
+        }
+        self.onAddMessage(msg, true)
+      }
+      else if (representativeAddedTo) {
+        var orgList = self.searchNotMessages({modelName: ORGANIZATION})
+        self.trigger({action: 'list', list: orgList, forceUpdate: true})
+      }
+      else
+        self.trigger(retParams)
+    })
+  },
+  addIdentity(val, batch) {
+    var key = val[TYPE] + '_' + val[ROOT_HASH]
+    var v = list[key] ? list[key].value : null
+    if (val.name) {
+      for (var p in val.name)
+        val[p] = val.name[p]
+      delete val.name
+    }
+    if (val.location) {
+      for (var p in val.location)
+        val[p] = val.location[p]
+      delete val.location
+    }
+    if (!v  &&  me  &&  val[ROOT_HASH] === me[ROOT_HASH])
+      v = me
+    if (v)  {
+      var vv = {}
+      extend(vv, v)
+      extend(vv, val)
+      val = vv
+    }
+    batch.push({type: 'put', key: key, value: val})
+    if (!val.organization)
+      return
+      // if (val.organization.title === 'Rabobank'  &&  val.securityCode)
+      //   return
+    var org = list[utils.getId(val.organization)]  &&  list[utils.getId(val.organization)].value
+    if (!org)
+      return
+    var doAdd
+    if (!org.contacts)
+      doAdd = true
+    else {
+      var i = 0
+      for (; i<org.contacts.length; i++) {
+        if (org.contacts[i][ROOT_HASH] === key)
+          break
+      }
+      doAdd = i !== org.contacts.length
+    }
+    if (doAdd)  {
+      var representative = {
+        id: key,
+        title: val.formatted
+      }
+      var oo = {}
+      extend(oo, org)
+      if (!oo.contacts)
+        oo.contacts = []
+      oo.contacts.push(representative)
+      var orgKey = org[TYPE] + '_' + org[ROOT_HASH];
+      list[orgKey] = {
+        key: orgKey,
+        value: oo
+      }
+      batch.push({type: 'put', key: orgKey, value: oo})
+      return org[ROOT_HASH]
+    }
+  },
+  addMessage(obj, val, onMessage, batch) {
+    var fromR = list[IDENTITY + '_' + obj.from[ROOT_HASH]]
+    if (!fromR)
+      return
+    var from = fromR.value
+    if (me  &&  from[ROOT_HASH] === me[ROOT_HASH])
+      return
+
+    var fOrg = from.organization
+    var org = fOrg ? list[utils.getId(fOrg)].value : null
+    if (onMessage  &&  val[TYPE] === FORGOT_YOU) {
+      this.forgotYou(org)
+      return
+    }
+    var type = val[TYPE]
+    var model = this.getModel(type)  &&  this.getModel(type).value
+    var isProductList = type === PRODUCT_LIST
+    var self = this
+    if (isProductList) {
+      var pList = JSON.parse(val.list)
+      // var fOrg = obj.from.identity.toJSON().organization
+      // org = list[utils.getId(fOrg)].value
+      org.products = []
+      pList.forEach(function(m) {
+        self.addNameAndTitleProps(m)
+        models[m.id] = {
+          key: m.id,
+          value: m
+        }
+        if (m.subClassOf === FINANCIAL_PRODUCT)
+          org.products.push(m.id)
+        else if (m.subClassOf == FORM  &&  !m.verifications) {
+          m.properties.verifications = {
+            type: 'array',
+            readOnly: true,
+            title: 'Verifications',
+            name: 'verifications',
+            items: {
+              backlink: 'document',
+              ref: VERIFICATION
+            }
+          }
+        }
+        if (!m[ROOT_HASH])
+          m[ROOT_HASH] = sha(m)
+        batch.push({type: 'put', key: m.id, value: m})
+      })
+      list[utils.getId(org)].value = org
+      batch.push({type: 'put', key: utils.getId(org), value: org})
+    }
+    var to = list[IDENTITY + '_' + obj.to[ROOT_HASH]].value
+    var whoAmI = obj.parsed.data._i.split(':')[0]
+
+    if (whoAmI === from[ROOT_HASH]) {
+      val.to = {
+        id: to[TYPE] + '_' + to[ROOT_HASH],
+        title: obj.to.identity.toJSON().name.formatted
+      }
+      val.from = {
+        id: from[TYPE] + '_' + from[ROOT_HASH],
+        title: obj.from.identity.toJSON().name.formatted
+      }
+    }
+    else {
+      val.to = {
+        id: from[TYPE] + '_' + from[ROOT_HASH],
+        title: obj.from.identity.toJSON().name.formatted
+      }
+      val.from = {
+        id: to[TYPE] + '_' + to[ROOT_HASH],
+        title: obj.to.identity.toJSON().name.formatted
+      }
+    }
+    if (!val.time)
+      val.time = obj.timestamp
+
+    var isVerification = type === VERIFICATION  ||  (model.subClassOf  &&  model.subClassOf === VERIFICATION);
+    if (isVerification) {
+      this.onAddVerification(val, false, true)
+      // if (!val.txId) {
+      //   var o = {}
+      //   extend(o, obj)
+      //   o.txId = Math.random() + '';
+      //   setTimeout(() => {
+      //     self.putInDb(o)
+      //   }, 5000);
+      // }
+      return
+    }
+    var key = type + '_' + val[ROOT_HASH]
+
+    if (!isProductList) {
+      var dn = val.message || utils.getDisplayName(val, model.properties);
+      to.lastMessage = (obj.from[ROOT_HASH] === me[ROOT_HASH]) ? 'You: ' + dn : dn;
+      to.lastMessageTime = val.time;
+      from.lastMessage = val.message;
+      from.lastMessageTime = val.time;
+      batch.push({type: 'put', key: to[TYPE] + '_' + obj.to[ROOT_HASH], value: to});
+      batch.push({type: 'put', key: from[TYPE] + '_' + obj.from[ROOT_HASH], value: from});
+      batch.push({type: 'put', key: key, value: val})
+    }
+    else {
+      if (!from.lastMessageTime || (new Date() - from.lastMessageTime) > WELCOME_INTERVAL)
+        batch.push({type: 'put', key: key, value: val})
+    }
+  },
 */
