@@ -372,6 +372,8 @@ class TimHome extends Component {
     //             </Text>
     //           </TouchableHighlight>
     //         </View>
+
+    // var settings = <View/>
     var settings = utils.getMe()
                  ? <View />
                  : <TouchableHighlight
