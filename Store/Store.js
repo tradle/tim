@@ -541,8 +541,8 @@ var Store = Reflux.createStore({
       //   result = result.reverse();
       //   isWelcome = (!result[0].welcome  &&  !result[0].list)  &&  new Date().getTime() - result[0].time > 600 * 1000
       if (orgRep.lastMessageTime) {
-        isWelcome = new Date() - orgRep.lastMessageTime > WELCOME_INTERVAL
-        var msg = welcome.msg.replace('{firstName}', me.firstName)
+        // isWelcome = new Date() - orgRep.lastMessageTime > WELCOME_INTERVAL
+        // var msg = welcome.msg.replace('{firstName}', me.firstName)
         isWelcome = orgRep.lastMessage === r.message
         if (!isWelcome)
           return;
@@ -550,7 +550,7 @@ var Store = Reflux.createStore({
       // var wmKey = SIMPLE_MESSAGE + '_Welcome' + toOrg.name.replace(' ', '_')// + '_' + new Date().getTime()
       // Create welcome message without saving it in DB
       // welcomeMessage = {}
-      if (me.published)
+      if (me.txId)
         return
 
       publishRequestSent = true
@@ -2398,7 +2398,9 @@ var Store = Reflux.createStore({
           // return
           var model = self.getModel(obj[TYPE]).value
           if (model.subClassOf === FORM) {
-            self.trigger({action: 'updateItem', sendStatus: 'Sent', resource: list[obj[TYPE] + '_' + obj[ROOT_HASH]].value})
+            var r = list[obj[TYPE] + '_' + obj[ROOT_HASH]]
+            if (r)
+              self.trigger({action: 'updateItem', sendStatus: 'Sent', resource: r.value})
             // var o = {}
             // extend(o, obj)
             // var from = o.from
@@ -2431,7 +2433,6 @@ var Store = Reflux.createStore({
     return meDriver.ready()
   },
   updateMe() {
-    me.published = true
     db.put({key: me[TYPE] + '_' + me[ROOT_HASH], value: me})
   },
 
