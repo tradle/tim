@@ -9,7 +9,9 @@ var ResourceTypesScreen = require('./ResourceTypesScreen');
 var AddNewMessage = require('./AddNewMessage');
 var ProductChooser = require('./ProductChooser');
 // var CameraView = require('./CameraView');
+var Device = require('react-native-device')
 var Icon = require('react-native-vector-icons/Ionicons');
+// var Progress = require('react-native-progress')
 
 var utils = require('../utils/utils');
 var reactMixin = require('react-mixin');
@@ -19,6 +21,8 @@ var Reflux = require('reflux');
 var InvertibleScrollView = require('react-native-invertible-scroll-view');
 var constants = require('@tradle/constants');
 var bankStyles = require('../styles/bankStyles')
+// var LoadingOverlay = require('./LoadingOverlay')
+
 var LINK_COLOR
 
 var {
@@ -28,6 +32,7 @@ var {
   Navigator,
   View,
   Text,
+  TouchableOpacity,
   AlertIOS,
   ActionSheetIOS,
   ActivityIndicatorIOS,
@@ -46,7 +51,9 @@ class MessageList extends Component {
         rowHasChanged: (row1, row2) =>  row1 !== row2
       }),
       filter: this.props.filter,
-      userInput: ''
+      userInput: '',
+      progress: 0,
+      indeterminate: true,
     };
     if (bankStyles) {
       var name = props.resource.name.split(' ')[0].toLowerCase()
@@ -83,9 +90,20 @@ class MessageList extends Component {
         modelName: this.props.modelName,
         to: this.props.resource,
       }
+      if (params.sendStatus) {
+        this.state.sendStatus = params.sendStatus
+        this.state.sendResource = params.resource
+      }
 
       Actions.messageList(actionParams);
       return;
+    }
+    if (params.action === 'updateItem') {
+      this.setState({
+        sendStatus: params.sendStatus,
+        sendResource: params.resource
+      })
+      return
     }
     if (params.action === 'addMessage') {
       Actions.messageList({modelName: this.props.modelName, to: this.props.resource});
@@ -126,7 +144,7 @@ class MessageList extends Component {
         dataSource: this.state.dataSource.cloneWithRows(list),
         isLoading: false,
         list: list,
-        verificationsToShare: params.verificationsToShare
+        verificationsToShare: params.verificationsToShare,
       });
     }
     else {
@@ -135,7 +153,10 @@ class MessageList extends Component {
     }
   }
   shouldComponentUpdate(nextProps, nextState) {
-    if (!this.state.list  ||  !nextState.list  ||  this.state.list.length !== nextState.list.length)
+    if (!this.state.list  ||
+        !nextState.list   ||
+         this.state.sendStatus !== nextState.sendStatus ||
+         this.state.list.length !== nextState.list.length)
       return true
     var isDiff = false
     for (var i=0; i<this.state.list.length  &&  !isDiff; i++) {
@@ -209,6 +230,7 @@ class MessageList extends Component {
         share={this.share.bind(this)}
         resource={resource}
         messageNumber={rowId}
+        sendStatus={this.state.sendStatus &&  this.state.sendResource[constants.ROOT_HASH] === resource[constants.ROOT_HASH] ? this.state.sendStatus : null}
         isAggregation={isAggregation}
         navigator={this.props.navigator}
         bankStyle={this.state.bankStyle}
@@ -225,6 +247,24 @@ class MessageList extends Component {
     currentMessageTime = null;
     var content;
     var model = utils.getModel(this.props.modelName).value;
+                    // <Text style={{fontSize: 16, alignSelf: 'center', color: '#ffffff'}}>{'Sending...'}</Text>
+    // var isVisible = this.state.sendStatus  &&  this.state.sendStatus !== null
+    // var spinner = isVisible
+    //             ? <Text style={{alignSelf: 'flex-end', fontSize: 14, color: '#757575', marginHorizontal: 15}}>{thus.state.sendStatus}</Text>
+    //             : <View/>
+    // var spinner = <LoadingOverlay isVisible={isVisible} onDismiss={() => {this.setState({isVisible:false})}} position="bottom">
+    //                 <TouchableOpacity onPress={() => { AlertIOS.alert('Pressed on text!') }}>
+    //                   <Text style={styles.bannerText}>{this.state.sendStatus}</Text>
+    //                 </TouchableOpacity>
+    //               </LoadingOverlay>
+
+    // var spinner = isVisible
+    //             ? <Progress.Bar
+    //                 style={styles.progress}
+    //                 progress={this.state.progress}
+    //                 indeterminate={this.state.indeterminate}
+    //               />
+    //             : <View/>
     if (this.state.dataSource.getRowCount() === 0) {
       if (this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION) {
         content = <View style={[styles.container]}>
@@ -242,17 +282,18 @@ class MessageList extends Component {
       var isAllMessages = model.isInterface  &&  model.id === constants.TYPES.MESSAGE;
 
       content = <ListView ref='listview' style={{marginHorizontal: 10}}
-          dataSource={this.state.dataSource}
-          initialListSize={10}
-          renderRow={this.renderRow.bind(this)}
-          automaticallyAdjustContentInsets={false}
-          keyboardDismissMode='on-drag'
-          keyboardShouldPersistTaps={true}
-          showsVerticalScrollIndicator={false} />;
+                  dataSource={this.state.dataSource}
+                  initialListSize={10}
+                  renderRow={this.renderRow.bind(this)}
+                  automaticallyAdjustContentInsets={false}
+                  keyboardDismissMode='on-drag'
+                  keyboardShouldPersistTaps={true}
+                  showsVerticalScrollIndicator={false} />;
       if (isAllMessages)
         content =
           <InvertibleScrollView
             ref='messages'
+                  onContentSizeChange={this.checkStart.bind(this)}
             inverted
             automaticallyAdjustContentInsets={false}
             scrollEventThrottle={200}>
@@ -294,12 +335,14 @@ class MessageList extends Component {
               hideBackground={true} />
           </View>
         </View>
-
         <View style={ sepStyle } />
         {content}
         {addNew}
       </View>
     );
+  }
+  checkStart(evt) {
+    evt = evt
   }
   showMenu() {
     // var buttons = ['Talk to representative', 'Forget me', 'Cancel']
@@ -470,7 +513,21 @@ var styles = StyleSheet.create({
     borderWidth: 1,
     color: '#79AAF2'
   },
-
+  bannerText: {
+    color: '#ffffff',
+    padding: 15,
+    backgroundColor: 'transparent',
+    fontSize: 22,
+    fontWeight: '600',
+    alignSelf: 'center'
+  },
+  progress: {
+    // width: Device.width,
+    // height: 3,
+    backgroundColor: 'transparent',
+    alignSelf: 'center',
+    marginTop: 12,
+  },
 });
 module.exports = MessageList;
 

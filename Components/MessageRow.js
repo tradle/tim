@@ -33,6 +33,7 @@ var {
   Text,
   TouchableHighlight,
   AlertIOS,
+  Modal,
   Component,
   Navigator,
   View,
@@ -57,7 +58,8 @@ class MessageRow extends Component {
   }
   shouldComponentUpdate(nextProps, nextState) {
     return !equal(this.props.resource, nextProps.resource) ||
-           !equal(this.props.to, nextProps.to)
+           !equal(this.props.to, nextProps.to)             ||
+           this.props.sendStatus !== nextProps.sendStatus
   }
   render() {
     var resource = this.props.resource;
@@ -293,6 +295,26 @@ class MessageRow extends Component {
     var photoStyle = (isLicense  &&  len === 1) ? styles.bigImageH : photoStyle;
     var verifications = this.showVerifications(rowStyle, viewStyle, addStyle);
       // <View style={viewStyle} ref={resource[constants.ROOT_HASH]}>
+    var sendStatus = <View />
+    if (this.props.sendStatus  &&  this.props.sendStatus !== null) {
+      switch (this.props.sendStatus) {
+      case 'Sent':
+        sendStatus = <View style={{alignSelf: 'flex-end', flexDirection: 'row', marginHorizontal: 5}}>
+                       <Text style={{fontSize: 14, color: '#009900', marginRight: 3}}>{this.props.sendStatus}</Text>
+                       <Icon name={'ios-checkmark-outline'} size={15} color='#009900' />
+                     </View>
+        break
+      case 'Chained':
+        sendStatus = <View style={{alignSelf: 'flex-end', flexDirection: 'row', marginHorizontal: 5}}>
+                       <Text style={{fontSize: 14, color: '#316A99', marginRight: 3}}>{this.props.sendStatus}</Text>
+                       <Icon name={'ios-checkmark'} size={15} color='#316A99' />
+                     </View>
+        break
+      default:
+        sendStatus = <Text style={{alignSelf: 'flex-end', fontSize: 14, color: '#757575', marginHorizontal: 5}}>{this.props.sendStatus}</Text>
+        break
+      }
+    }
 
     return (
       <View style={viewStyle}>
@@ -301,6 +323,7 @@ class MessageRow extends Component {
         <View style={photoListStyle}>
           <PhotoList photos={photoUrls} resource={this.props.resource} style={[photoStyle, {marginTop: -5}]} navigator={this.props.navigator} numberInRow={inRow} />
         </View>
+        {sendStatus}
         {verifications}
       </View>
     );
@@ -429,9 +452,9 @@ class MessageRow extends Component {
     }
     resource[constants.TYPE] = model.id;
 
-    if (model.id in formDefaults) {
+    // Prefill for testing and demoing
+    if (model.id in formDefaults)
       extend(true, resource, formDefaults[model.id])
-    }
 
     this.props.navigator.push({
       id: 4,
@@ -856,7 +879,16 @@ class MessageRow extends Component {
     //               )}>
     //              {orgRow}
     //             </TouchableHighlight>
+    // var modal = <Modal
+    //                animated={false}
+    //                transparent={true}
+    //                visible={this.state.visible}>
+    //                <View style={{backgroundColor: 'rgba(0, 0, 0, 0.5', flex: 1, justifyContent: 'center'}}>
+    //                  <Text style={{color: '#ffffff', alignSelf: 'center', fontSize: 24}}>Hello world</Text>
+    //                </View>
+    //             </Modal>
 
+               // {modal}
     return (
              <View style={{flex: 1, paddingVertical: 5}} key={self.getNextKey()}>
                {header}
