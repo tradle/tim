@@ -76,7 +76,7 @@ class TimHome extends Component {
       this.popToTop(params.me)
     }
   }
-  showContactsOrRegister() {
+  showOfficialAccountsOrRegister() {
     if (this.state.message) {
       this.restartTiM()
       return
@@ -86,7 +86,7 @@ class TimHome extends Component {
       this.showOfficialAccounts();
       // this.showContacts();
     else
-      this.onEditProfilePressed();
+      this.register();
   }
 	showContacts() {
     var passProps = {
@@ -183,7 +183,7 @@ class TimHome extends Component {
   //     passProps: passProps,
   //   });
   // }
-  onEditProfilePressed() {
+  register() {
     if (this.state.message) {
       this.restartTiM()
       return
@@ -217,6 +217,7 @@ class TimHome extends Component {
       route.passProps.callback = (me) => {
         this.showVideoTour(() => {
           Actions.getMe()
+          // Actions.getInfo()
           // this.popToTop(me)
         })
       }
@@ -318,7 +319,7 @@ class TimHome extends Component {
 
     if (utils.getMe()) {
       editProfile = <TouchableHighlight
-                        underlayColor='#2E3B4E' onPress={this.onEditProfilePressed.bind(this)}>
+                        underlayColor='#2E3B4E' onPress={this.register.bind(this)}>
                       <Text style={styles.text}>
                         {'Edit Profile'}
                       </Text>
@@ -438,7 +439,7 @@ class TimHome extends Component {
             </View>
           </TouchableHighlight>
         </ScrollView>
-        <View style={{height: 100}}></View>
+        <View style={{height: 90}}></View>
         <TouchableHighlight style={[styles.thumbButton]}
               underlayColor='transparent' onPress={this._pressHandler.bind(this)}>
           <View style={styles.getStarted}>
@@ -466,7 +467,7 @@ class TimHome extends Component {
       passProps: {
         model: model,
         callback: this.props.navigator.pop
-        // callback: this.onEditProfilePressed.bind(this)
+        // callback: this.register.bind(this)
       },
     }
 
@@ -488,7 +489,7 @@ class TimHome extends Component {
       }
     }
 
-    this.showContactsOrRegister()
+    this.showOfficialAccountsOrRegister()
     if (this.state.authenticating) {
       this.setState({ authenticating: false })
     }
@@ -524,7 +525,7 @@ var styles = StyleSheet.create({
     color: '#7AAAC3',
     paddingLeft: 10,
     paddingRight: 10,
-    fontSize: 12,
+    fontSize: 14,
   },
   thumbButton: {
     // marginBottom: 10,
