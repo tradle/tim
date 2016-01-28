@@ -1950,7 +1950,7 @@ var Store = Reflux.createStore({
   changeSettings(value) {
     var v = value.url
     if (v.charAt(v.length - 1) === '/')
-      v = v.splice(v.length - 1)
+      v = v.substring(0, v.length - 1)
     if (v === SERVICE_PROVIDERS_BASE_URL) {
       this.trigger({action: 'addItem', resource: value})
       return
