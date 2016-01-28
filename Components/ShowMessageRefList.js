@@ -84,9 +84,10 @@ class ShowMessageRefList extends Component {
            </View>
           );
      }
+     var backlinksBg = this.props.bankStyle && this.props.bankStyle.BANKLINKS ? {backgroundColor: this.props.bankStyle.BANKLINKS} : {backgroundColor: '#a0a0a0'}
      return refList.length
              ? (
-               <View style={[buttonStyles.buttons, {flexDirection: 'row'}]}>
+               <View style={[buttonStyles.buttons, backlinksBg, {flexDirection: 'row'}]}>
                   {refList}
                 </View>
               )
