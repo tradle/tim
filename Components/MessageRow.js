@@ -141,8 +141,10 @@ class MessageRow extends Component {
             addStyle = [addStyle, styles.myConfCell]
         }
       }
-      if (isVerification)
-        addStyle = [addStyle, {paddingVertical: 5, paddingHorizontal: 7, backgroundColor: VERIFICATION_BG, borderWidth: 1, borderColor: '#deeeb4', marginVertical: 2}]; //model.style];
+      if (isVerification) {
+        var vBorder = this.props.bankStyle  &&  this.props.bankStyle.VERIFIED_BORDER_COLOR ? {borderColor: this.props.bankStyle.VERIFIED_BORDER_COLOR} : {borderColor: '#deeeb4'}
+        addStyle = [addStyle, {paddingVertical: 5, paddingHorizontal: 7, backgroundColor: VERIFICATION_BG, borderWidth: 1, marginVertical: 2}, vBorder]; //model.style];
+      }
       else if (model.style)
         addStyle = [addStyle, {paddingVertical: 5, paddingHorizontal: 7, borderRadius: 10, backgroundColor: STRUCTURED_MESSAGE_COLOR, borderWidth: 1, borderColor: '#deeeb4', marginVertical: 2}]; //model.style];
       else if (isAdditionalInfo)
@@ -180,7 +182,8 @@ class MessageRow extends Component {
       else
         verPhoto = <View style={{height: 0, width:0}} />
     }
-    var rowStyle = styles.row;
+    var bgStyle = this.props.bankStyle  &&  this.props.bankStyle.BACKGROUND_COLOR ? {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR} : {backgroundColor: '#f7f7f7'}
+    var rowStyle = [styles.row, bgStyle];
     var val;
     var date;
     if (resource.time) {
@@ -240,8 +243,11 @@ class MessageRow extends Component {
       if (isVerification) {
         var msgModel = utils.getModel(resource.document[constants.TYPE]).value;
         var orgName = resource.organization  ? resource.organization.title : ''
+
+        var hdrStyle = this.props.bankStyle  &&  this.props.bankStyle.VERIFIED_HEADER_COLOR ? {backgroundColor: this.props.bankStyle.VERIFIED_HEADER_COLOR} : {backgroundColor: '#289427'}
+
         renderedRow = <View>
-                        <View style={{flexDirection: 'row', backgroundColor: '#289427', paddingVertical: 5, paddingHorizontal: 7, marginHorizontal: -7, marginTop: -5, justifyContent: 'center'}}>
+                        <View style={[styles.verifiedHeader, hdrStyle]}>
                           <Icon style={styles.verificationIcon} size={20} name={'android-done'} />
                           <Text style={{fontSize: 16, fontWeight: '600', color: '#FBFFE5', alignSelf: 'center'}}> Verified by {orgName}</Text>
                         </View>
@@ -316,8 +322,9 @@ class MessageRow extends Component {
       }
     }
 
+    var bgStyle = this.props.bankStyle  &&  this.props.bankStyle.BACKGROUND_COLOR ? {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR} : {backgroundColor: '#f7f7f7'}
     return (
-      <View style={viewStyle}>
+      <View style={[viewStyle, bgStyle]}>
         {date}
         {messageBody}
         <View style={photoListStyle}>
@@ -504,6 +511,7 @@ class MessageRow extends Component {
         passProps: {
           resource: r,
           metadata: model,
+          bankStyle: this.props.bankStyle,
           callback: this.props.onSelect.bund(this, r)
         }
       };
@@ -1374,7 +1382,15 @@ var styles = StyleSheet.create({
     opacity: 0.5,
     alignSelf: 'flex-end',
     marginTop: 10
-  }
+  },
+  verifiedHeader: {
+    flexDirection: 'row',
+    paddingVertical: 5,
+    paddingHorizontal: 7,
+    marginHorizontal: -7,
+    marginTop: -5,
+    justifyContent: 'center'
+  },
 });
 reactMixin(MessageRow.prototype, RowMixin);
 

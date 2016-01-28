@@ -74,7 +74,7 @@ class MessageView extends Component {
     if (inRow  &&  inRow > 4)
       inRow = 5;
     var actionPanel =
-          <ShowMessageRefList  resource={resource} navigator={this.props.navigator} additionalInfo={this.additionalInfo.bind(this)}/>
+          <ShowMessageRefList resource={resource} navigator={this.props.navigator} additionalInfo={this.additionalInfo.bind(this)} bankStyle={this.props.bankStyle} />
         // <FromToView resource={resource} navigator={this.props.navigator} />
         // <MoreLikeThis resource={resource} navigator={this.props.navigator}/>
     var verificationTxID, separator

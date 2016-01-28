@@ -265,9 +265,10 @@ class MessageList extends Component {
     //                 indeterminate={this.state.indeterminate}
     //               />
     //             : <View/>
+    var bgStyle = this.state.bankStyle  &&  this.state.bankStyle.BACKGROUND_COLOR ? {backgroundColor: this.state.bankStyle.BACKGROUND_COLOR} : {backgroundColor: '#f7f7f7'}
     if (this.state.dataSource.getRowCount() === 0) {
       if (this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION) {
-        content = <View style={[styles.container]}>
+        content = <View style={[styles.container, bgStyle]}>
           <Text style={{fontSize: 16, alignSelf: 'center', marginTop: 80, color: '#629BCA'}}>{'Loading...'}</Text>
           <ActivityIndicatorIOS size='large' style={{alignSelf: 'center', marginTop: 20}} />
         </View>
@@ -325,7 +326,7 @@ class MessageList extends Component {
     var sepStyle = { height: 1,backgroundColor: LINK_COLOR }
 
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, bgStyle]}>
         <View style={{flexDirection:'row'}}>
           <View style={{flex: 10}}>
             <SearchBar
