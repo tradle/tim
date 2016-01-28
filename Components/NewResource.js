@@ -170,7 +170,11 @@ class NewResource extends Component {
         this.setState({err: params.error, resource: resource, isRegistration: this.state.isRegistration});
       return;
     }
-    // if registration or after editing your own profile
+    if (this.props.callback) {
+      // this.props.navigator.pop();
+      this.props.callback(resource);
+      return;
+    }    // if registration or after editing your own profile
     // if (this.state.isRegistration  ||  (params.me  &&  resource[constants.ROOT_HASH] === params.me[constants.ROOT_HASH]))
     //   utils.setMe(params.me);
     var self = this;
