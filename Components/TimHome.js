@@ -282,7 +282,7 @@ class TimHome extends Component {
     }
     var url = LinkingIOS.popInitialURL();
     var d = Device
-    var h = d.height - 180
+    var h = d.height > 800 ? d.height - 220 : d.height - 180
     // var cTop = h / 4
 
     var thumb = d.width > 400
@@ -504,7 +504,7 @@ reactMixin(TimHome.prototype, Reflux.ListenerMixin);
 var styles = StyleSheet.create({
   container: {
     padding: 30,
-    marginTop: Device.height/5,
+    marginTop: Device.height > 800 ? Device.height/7 : Device.height / 5,
     alignItems: 'center',
   },
   tradle: {
