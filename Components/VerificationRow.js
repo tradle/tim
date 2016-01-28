@@ -26,10 +26,13 @@ class VerificationRow extends Component {
   render() {
     var resource = this.props.resource;
     var photo;
+
+    var isForm = !resource.document
     // if (resource.from  &&  resource.from.photos)
     //   photo = <Image source={{uri: utils.getImageUri(resource.from.photos[0].url)}} style={styles.cellImage} />
-    if (resource.document  &&  resource.document.photos)
-      photo = <Image source={{uri: utils.getImageUri(resource.document.photos[0].url), position: 'absolute', left: 10}}  style={styles.cellImage} />
+    var r = isForm ? resource : resource.document
+    if (r  &&  r.photos)
+      photo = <Image source={{uri: utils.getImageUri(r.photos[0].url), position: 'absolute', left: 10}}  style={styles.cellImage} />
     else
       photo = <View style={{width: 70}} />
 
@@ -53,9 +56,8 @@ class VerificationRow extends Component {
     // var val = utils.formatDate(new Date(resource.time));
     // rows.push(<View><Text style={styles.resourceTitle}>{val}</Text></View>);
 
-    if (resource.document)
-      this.formatDocument(verificationRequest, resource.document, rows);
-
+    if (r)
+      this.formatDocument(verificationRequest, r, rows);
     var backlink = this.props.prop &&  this.props.prop.items.backlink;
     if (resource.txId)
       rows.push(
@@ -65,7 +67,7 @@ class VerificationRow extends Component {
           </View>
         )
 
-    if (resource.to  &&  backlink !== 'to') {
+    if (!isForm  &&  resource.to  &&  backlink !== 'to') {
       var row = <View style={{flexDirection: 'row'}} key={this.getNextKey()}>
                   <Text style={[styles.description, {color: '#7AAAc3'}]}>submitted by </Text>
                   <Text style={styles.description}>{resource.to.title}</Text>
@@ -83,7 +85,7 @@ class VerificationRow extends Component {
       rows.push(row);
     }
     var verifiedBy
-    if (resource.from) {
+    if (!isForm  &&  resource.from) {
       var contentRows = [];
       // contentRows.push(<Text style={}>verified by {resource.to.title}></Text>);
       contentRows.push(<Text style={[styles.description, {color: '#7AAAc3'}]} key={this.getNextKey()}>verified by </Text>);
@@ -97,7 +99,8 @@ class VerificationRow extends Component {
     }
     else
       verifiedBy = <View/>
-    var date = resource.document
+
+    var date = r
              ? this.addDateProp('time', [styles.verySmallLetters, {position: 'absolute', right: 10}])
              : <View />
     var header =  <View style={{borderColor: '#ffffff', backgroundColor: '#ffffff', borderBottomColor: '#cccccc', borderWidth: 0.5}} key={this.getNextKey()}>
