@@ -14,11 +14,11 @@ var RowMixin = {
     var resource = this.props.resource;
     var properties = utils.getModel(resource[constants.TYPE] || resource.id).value.properties;
     // var style = styles.description;
-    if (properties[dateProp].style)
+    if (properties[dateProp]  &&  properties[dateProp].style)
       style = [style, properties[dateProp].style];
     var val = utils.formatDate(new Date(resource[dateProp])); //utils.getFormattedDate(new Date(resource[dateProp]));
 
-    return properties[dateProp].skipLabel
+    return !properties[dateProp]  ||  properties[dateProp].skipLabel
         ? <Text style={style} key={this.getNextKey()}>{val}</Text>
         : <View style={{flexDirection: 'row'}} key={this.getNextKey()}><Text style={style}>{properties[dateProp].title}</Text><Text style={style}>{val}</Text></View>
 
