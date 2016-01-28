@@ -157,6 +157,12 @@ class NewResource extends Component {
       })
       return
     }
+    if (params.action === 'runVideo'  && this.state.isRegistration) {
+      if (this.props.callback)
+        // this.props.navigator.pop();
+        this.props.callback(resource)
+        return;
+    }
     if (!resource  ||  (params.action !== 'addItem'  &&  params.action !== 'addMessage'))
       return;
     if (params.error) {
@@ -172,11 +178,6 @@ class NewResource extends Component {
     var isMessage = this.props.model.interfaces  &&  this.props.model.interfaces.indexOf(constants.TYPES.MESSAGE) != -1;
     // When message created the return page is the chat window,
     // When profile or some contact info changed/added the return page is Profile view page
-    if (this.props.callback) {
-      // this.props.navigator.pop();
-      this.props.callback(resource);
-      return;
-    }
     if (isMessage) {
       if (this.props.originatingMessage  &&  resource[constants.ROOT_HASH] !== this.props.originatingMessage[constants.ROOT_HASH]) {
         var params = {

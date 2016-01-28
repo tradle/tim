@@ -1101,6 +1101,7 @@ var Store = Reflux.createStore({
     })
 
     function handleRegistration () {
+      self.trigger({action: 'runVideo'})
       return self.loadDB()
         .then(function () {
           return self.getDriver(returnVal)
@@ -1177,6 +1178,9 @@ var Store = Reflux.createStore({
           debugger
         })
     }
+  },
+  onGetMe() {
+    this.trigger({action: 'getMe', me: me})
   },
   onCleanup() {
     var me  = utils.getMe()
