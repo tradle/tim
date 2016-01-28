@@ -17,13 +17,11 @@ var {
   View,
 } = React;
 
-
 class ProductChooser extends Component {
   constructor(props) {
     super(props);
 
     var products = []
-
     var orgProducts = this.props.resource.products
     if (orgProducts) {
       orgProducts.forEach(function(m) {
@@ -162,8 +160,9 @@ class ProductChooser extends Component {
     var err = this.state.err
             ? <View style={styles.errContainer}><Text style={styles.err}>{this.state.err}</Text></View>
             : <View />;
+    var bgStyle = this.props.bankStyle  &&  this.props.bankStyle.BACKGROUND_COLOR ? {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR} : {backgroundColor: '#ffffff'}
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, bgStyle]}>
         {err}
         {content}
       </View>
