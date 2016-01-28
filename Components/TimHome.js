@@ -523,8 +523,7 @@ var styles = StyleSheet.create({
   },
   text: {
     color: '#7AAAC3',
-    paddingLeft: 10,
-    paddingRight: 10,
+    paddingHorizontal: 5,
     fontSize: 14,
   },
   thumbButton: {
