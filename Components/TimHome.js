@@ -466,6 +466,7 @@ class TimHome extends Component {
       passProps: {
         model: model,
         callback: this.props.navigator.pop
+        // callback: this.onEditProfilePressed.bind(this)
       },
     }
 
