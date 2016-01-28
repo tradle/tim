@@ -146,7 +146,6 @@ class NewResource extends Component {
   }
 
   itemAdded(params) {
-    this.state.submitted = false
     var resource = params.resource;
     if (params.action === 'getTemporary') {
       var r = {}
@@ -227,6 +226,7 @@ class NewResource extends Component {
     });
     if (currentRoutesLength != 2)
       this.props.navigator.pop();
+    this.state.submitted = false
   }
   onSavePressed() {
     if (this.state.submitted)
