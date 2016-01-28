@@ -72,6 +72,9 @@ class TimHome extends Component {
       utils.setModels(params.models);
       this.setState({isLoading: false});
     }
+    else if (params.action === 'getMe') {
+      this.popToTop(params.me)
+    }
   }
   showContactsOrRegister() {
     if (this.state.message) {
@@ -212,7 +215,10 @@ class TimHome extends Component {
     else {
       // route.title = 'Introduce yourself';
       route.passProps.callback = (me) => {
-        this.showVideoTour(() => this.popToTop(me))
+        this.showVideoTour(() => {
+          Actions.getMe()
+          // this.popToTop(me)
+        })
       }
 
       route.passProps.editCols = ['firstName', 'lastName']
