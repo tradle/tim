@@ -57,7 +57,7 @@ var MESSAGE = constants.TYPES.MESSAGE
 var SIMPLE_MESSAGE = constants.TYPES.SIMPLE_MESSAGE
 var FINANCIAL_PRODUCT = constants.TYPES.FINANCIAL_PRODUCT
 var PRODUCT_LIST = constants.TYPES.PRODUCT_LIST
-var IDENTITY_MODEL = constants.TYPES.IDENTITY;
+var IDENTITY = constants.TYPES.IDENTITY;
 var ADDITIONAL_INFO = constants.TYPES.ADDITIONAL_INFO;
 var VERIFICATION = constants.TYPES.VERIFICATION;
 var FORM = constants.TYPES.FORM;
@@ -353,6 +353,25 @@ var Store = Reflux.createStore({
       else
         SERVICE_PROVIDERS_BASE_URL = SERVICE_PROVIDERS_BASE_URL_DEFAULT
     }
+/*
+    var promise = SERVICE_PROVIDERS ? Q() : getInfo
+    return promise
+    .then(function(data) {
+      if (data)
+        SERVICE_PROVIDERS = data
+
+      for (var name in SERVICE_PROVIDERS) {
+        var hash = SERVICE_PROVIDERS[name].organization[ROOT_HASH]
+        var taxId = SERVICE_PROVIDERS[name].organization.txId
+        messenger.addRecipient(
+          hash,
+          // e.g. http://tradle.io:44444/rabobank/send
+          [SERVICE_PROVIDERS_BASE_URL, name, 'send'].join('/')
+        )
+        whitelist.push(txId)
+      })
+    })
+*/
 
     SERVICE_PROVIDERS.forEach(function(name) {
       var bank = ALL_SERVICE_PROVIDERS.providers[name]
@@ -396,6 +415,35 @@ var Store = Reflux.createStore({
 
     // return d
   },
+
+  getInfo() {
+    var settings = list[SETTINGS + '_1']
+    var url = settings ? settings.url : SERVICE_PROVIDERS_BASE_URL
+
+    var self = this
+    var key = SETTINGS + '_1'
+    var togo
+    return Q.race([
+      fetch(path.join(v, 'info')),
+      Q.Promise(function (resolve, reject) {
+        setTimeout(function () {
+          reject(new Error('timed out'))
+        }, 5000)
+      })
+    ])
+    .then(function(response) {
+      var json = JSON.parse(response.text())
+      SERVICE_PROVIDERS = Object.keys(json.serviceProviders)
+      var batch = []
+      SERVICE_PROVIDERS.forEach(function(sp) {
+        var org = json[sp].organization
+        batch.add({type: 'put', key: org[TYPE] + '_' + org[ROOT_HASH], value: org})
+      })
+      return db.batch(batch)
+    })
+    .then(() => SERVICE_PROVIDERS)
+  },
+
   dhtFor (identity, port) {
     var dht = new DHT({
       nodeId: this.nodeIdFor(identity),
@@ -942,8 +990,8 @@ var Store = Reflux.createStore({
       var rootHash = sha(model);
       model[ROOT_HASH] = rootHash;
       model[constants.OWNER] = {
-        key: IDENTITY_MODEL + '_' + me[ROOT_HASH],
-        title: utils.getDisplayName(me, self.getModel(IDENTITY_MODEL).value.properties),
+        key: IDENTITY + '_' + me[ROOT_HASH],
+        title: utils.getDisplayName(me, self.getModel(IDENTITY).value.properties),
         photos: me.photos
       }
       // Wil need to publish new model
@@ -1381,7 +1429,7 @@ var Store = Reflux.createStore({
 
     var required = meta.required;
     var meRootHash = me  &&  me[ROOT_HASH];
-    var meId = IDENTITY_MODEL + '_' + meRootHash;
+    var meId = IDENTITY + '_' + meRootHash;
     var subclasses = utils.getAllSubclasses(modelName).map(function(r) {
       return r.id
     })
@@ -1422,10 +1470,10 @@ var Store = Reflux.createStore({
        }
     }
     // Don't show current 'me' contact in contact list or my identities list
-    var isIdentity = modelName === IDENTITY_MODEL;
+    var isIdentity = modelName === IDENTITY;
     if (!containerProp  &&  me  &&  isIdentity) {
       if (sampleData.getMyId())
-        delete foundResources[IDENTITY_MODEL + '_' + me[ROOT_HASH]];
+        delete foundResources[IDENTITY + '_' + me[ROOT_HASH]];
       else if (!isTest) {
         var myIdentities = list[MY_IDENTITIES_MODEL + '_1'].value.allIdentities;
         myIdentities.forEach((meId) =>  {
@@ -1495,7 +1543,7 @@ var Store = Reflux.createStore({
 
     var required = meta.required;
     var meRootHash = me  &&  me[ROOT_HASH];
-    var meId = IDENTITY_MODEL + '_' + meRootHash;
+    var meId = IDENTITY + '_' + meRootHash;
     var meOrgId = me.organization ? utils.getId(me.organization) : null;
 
     var chatId = chatTo ? chatTo[TYPE] + '_' + chatTo[ROOT_HASH] : null;
@@ -1846,8 +1894,8 @@ var Store = Reflux.createStore({
                   :  isRegistration ? value : null;
       if (creator) {
         value[constants.OWNER] = {
-          id: IDENTITY_MODEL + '_' + creator[ROOT_HASH] + '_' + creator[CUR_HASH],
-          title: utils.getDisplayName(me, this.getModel(IDENTITY_MODEL))
+          id: IDENTITY + '_' + creator[ROOT_HASH] + '_' + creator[CUR_HASH],
+          title: utils.getDisplayName(me, this.getModel(IDENTITY))
         };
       }
 
@@ -2242,7 +2290,7 @@ var Store = Reflux.createStore({
     var dfd = Q.defer();
     var self = this;
     var batch = [];
-    var props = models[IDENTITY_MODEL].value.properties;
+    var props = models[IDENTITY].value.properties;
     AddressBook.getContacts(function(err, contacts) {
       contacts.forEach(function(contact) {
         var contactInfo = [];
@@ -2252,7 +2300,7 @@ var Store = Reflux.createStore({
           // formatted: contact.firstName + ' ' + contact.lastName,
           contactInfo: contactInfo
         };
-        newIdentity[TYPE] = IDENTITY_MODEL;
+        newIdentity[TYPE] = IDENTITY;
         var me = list[MY_IDENTITIES_MODEL + '_1'];
         if (me)  {
           var currentIdentity = me.value.currentIdentity;
@@ -2279,7 +2327,7 @@ var Store = Reflux.createStore({
           });
         newIdentity[ROOT_HASH] = sha(newIdentity);
         newIdentity[CUR_HASH] = newIdentity[ROOT_HASH];
-        var key = IDENTITY_MODEL + '_' + newIdentity[ROOT_HASH];
+        var key = IDENTITY + '_' + newIdentity[ROOT_HASH];
         if (!list[key])
           batch.push({type: 'put', key: key, value: newIdentity});
       });
@@ -2742,7 +2790,7 @@ var Store = Reflux.createStore({
   loadMyResources() {
     var myId = sampleData.getMyId();
     if (myId)
-      myId = IDENTITY_MODEL + '_' + myId;
+      myId = IDENTITY + '_' + myId;
     var self = this;
     var loadingModels = false;
 
@@ -3138,7 +3186,7 @@ var Store = Reflux.createStore({
       list = {};
       return self.loadMyResources()
             .then(function() {
-              var result = self.searchResources('', IDENTITY_MODEL, me);
+              var result = self.searchResources('', IDENTITY, me);
               self.trigger({action: 'changeIdentity', list: result, me: me});
             });
     })
@@ -3283,7 +3331,7 @@ module.exports = Store;
 
     var required = meta.required;
     var meRootHash = me  &&  me[ROOT_HASH];
-    var meId = IDENTITY_MODEL + '_' + meRootHash;
+    var meId = IDENTITY + '_' + meRootHash;
     var meOrgId = me.organization ? utils.getId(me.organization) : null;
 
     var chatId = chatTo ? chatTo[TYPE] + '_' + chatTo[ROOT_HASH] : null;
