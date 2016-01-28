@@ -176,18 +176,19 @@ class ResourceList extends Component {
     var model = utils.getModel(this.props.modelName);
     var isIdentity = this.props.modelName === constants.TYPES.IDENTITY;
     var isVerification = model.value.id === constants.TYPES.VERIFICATION
+    var isForm = model.value.id === constants.TYPES.FORM
     var isOrganization = this.props.modelName === constants.TYPES.ORGANIZATION;
     if (!isIdentity         &&
         !isOrganization     &&
         !this.props.callback) {
       var m = utils.getModel(resource[constants.TYPE]).value;
 
-      if (isVerification) {
+      if (isVerification || isForm) {
         this.props.navigator.push({
           title: m.title,
           id: 5,
           component: MessageView,
-          titleTextColor: '#7AAAC3',
+          // titleTextColor: '#7AAAC3',
           backButtonTitle: 'Back',
           passProps: {resource: resource}
         });
@@ -198,7 +199,7 @@ class ResourceList extends Component {
           title: title,
           id: 3,
           component: ResourceView,
-          titleTextColor: '#7AAAC3',
+          // titleTextColor: '#7AAAC3',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Edit',
           onRightButtonPress: {
@@ -413,9 +414,11 @@ class ResourceList extends Component {
   renderRow(resource)  {
     var model = utils.getModel(this.props.modelName).value;
  // || (model.id === 'tradle.Form')
-    return model.id === constants.TYPES.VERIFICATION  || (model.subClassOf  &&  model.subClassOf === constants.TYPES.VERIFICATION)
+    var isVerification = model.id === constants.TYPES.VERIFICATION
+    var isForm = model.id === constants.TYPES.FORM
+    return isVerification  || isForm || (model.subClassOf  &&  (model.subClassOf === constants.TYPES.VERIFICATION  ||  model.subClassOf === constants.TYPES.FORM))
     ? (<VerificationRow
-        onSelect={() => this.selectResource(resource.document)}
+        onSelect={() => this.selectResource(isVerification ? resource.document : resource)}
         key={resource[constants.ROOT_HASH]}
         navigator={this.props.navigator}
         prop={this.props.prop}
