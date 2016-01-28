@@ -6,6 +6,7 @@
 // var SERVICE_PROVIDERS = ALL_SERVICE_PROVIDERS.topLevelProvider[TOP_LEVEL_PROVIDER.name.toLowerCase()] //ENV.providers
 var styles = {
   easy: require('./easy'),
+  europi: require('./europi'),
 }
 
 // SERVICE_PROVIDERS.forEach(function(name) {
