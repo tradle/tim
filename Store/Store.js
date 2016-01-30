@@ -146,7 +146,7 @@ var Store = Reflux.createStore({
   // this will set up listeners to all publishers in TodoActions, using onKeyname (or keyname) as callbacks
   listenables: [Actions],
   // this will be called by all listening components as they register their listeners
-  async init() {
+  init() {
     // Setup components:
     var ldb = level('TiM.db', { valueEncoding: 'json' });
     // ldb = levelQuery(level('TiM.db', { valueEncoding: 'json' }));
@@ -181,48 +181,47 @@ var Store = Reflux.createStore({
     })
 
     // console.time('loadMyResources')
-    var readyDefer = Q.defer()
-    this.ready = readyDefer.promise
+    return this.ready = this.getMe()
+      .then(maybeWipe)
+      .then(() => this.getSettings())
+      .then(() => {
+        this.loadMyResources()
+        if (!utils.isEmpty(list))
+          isLoaded = true;
 
+        if (me) {
+          return this.getDriver(me)
+            .then(() => this.monitorTim())
+        }
+      })
+
+    async function maybeWipe () {
     // change to true if you want to wipe
     // everything and start from scratch
-    // if (true) {
-    if (false) {
-      await AsyncStorage.clear()
-      // await BeSafe.clear()
-    } else if (false) {
-      try {
-        await BeSafe.loadFromLastBackup()
-      } catch (err) {
-        await BeSafe.clear()
+      if (true) {
+      // if (false) {
+        return await AsyncStorage.clear()
+        // throw new Error('intentional error')
+        // await BeSafe.clear()
+      } else if (false) {
+        try {
+          await BeSafe.loadFromLastBackup()
+        } catch (err) {
+          await BeSafe.clear()
+        }
       }
+
     }
 
-    try {
-      await self.getMe()
-      await self.getSettings()
-      self.loadMyResources()
-    } catch (err) {
-      throw err
-    }
+    // try {
+    //   await self.getMe()
+    //   await self.getSettings()
+    //   self.loadMyResources()
+    // } catch (err) {
+    //   throw err
+    // }
 
       // console.timeEnd('loadMyResources')
-    if (!utils.isEmpty(list))
-      isLoaded = true;
-
-    if (me) {
-      try {
-        await self.getDriver(me)
-      } catch (err) {
-        throw err
-      }
-
-      self.monitorTim()
-      // self.initIdentity(me)
-    }
-
-    readyDefer.resolve()
-    await this.ready
   },
   getMe() {
     var self = this
