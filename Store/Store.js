@@ -52,12 +52,14 @@ var CUR_HASH  = constants.CUR_HASH
 var PREV_HASH  = constants.CUR_HASH
 
 var ORGANIZATION = constants.TYPES.ORGANIZATION
+var PROFILE = constants.TYPES.PROFILE
 var IDENTITY = constants.TYPES.IDENTITY
 var MESSAGE = constants.TYPES.MESSAGE
 var SIMPLE_MESSAGE = constants.TYPES.SIMPLE_MESSAGE
 var FINANCIAL_PRODUCT = constants.TYPES.FINANCIAL_PRODUCT
 var PRODUCT_LIST = constants.TYPES.PRODUCT_LIST
-var IDENTITY = constants.TYPES.IDENTITY;
+var PROFILE = constants.TYPES.PROFILE;
+var PUBLISHED_IDENTITY = constants.TYPES.PROFILE;
 var ADDITIONAL_INFO = constants.TYPES.ADDITIONAL_INFO;
 var VERIFICATION = constants.TYPES.VERIFICATION;
 var FORM = constants.TYPES.FORM;
@@ -65,10 +67,9 @@ var MODEL = constants.TYPES.MODEL;
 var CUSTOMER_WAITING = constants.TYPES.CUSTOMER_WAITING
 var FORGOT_YOU = constants.TYPES.FORGOT_YOU
 
-var MY_IDENTITIES_MODEL = 'tradle.MyIdentities'
-var SETTINGS = 'tradle.Settings'
+var MY_IDENTITIES = 'tradle.MyIdentities'
+var SETTINGS = constants.TYPES.SETTINGS
 
-var PUB_ID = 'publishedIdentity'
 var WELCOME_INTERVAL = 600000
 
 var Tim = require('tim')
@@ -226,10 +227,10 @@ var Store = Reflux.createStore({
   getMe() {
     var self = this
 
-    return db.get(MY_IDENTITIES_MODEL + '_1')
+    return db.get(MY_IDENTITIES + '_1')
     .then(function(value) {
       if (value) {
-        var key = MY_IDENTITIES_MODEL + '_1'
+        var key = MY_IDENTITIES + '_1'
         list[key] = {
           key:   key,
           value: value
@@ -636,7 +637,7 @@ var Store = Reflux.createStore({
       // welcomeMessage[NONCE] = self.getNonce()
       // welcomeMessage.to = {
       //   id: me[TYPE] + '_' + me[ROOT_HASH],
-      //   title: utils.getDisplayName(me, self.getModel(constants.TYPES.IDENTITY).value.properties)
+      //   title: utils.getDisplayName(me, self.getModel(constants.TYPES.PROFILE).value.properties)
       // }
       // welcomeMessage.from = {
       //   id: rr.to.id,
@@ -669,15 +670,17 @@ var Store = Reflux.createStore({
         params.error = error
 
       self.trigger(params);
-      if (batch.length  &&  !error  &&  list[utils.getId(r.to)].value.pubkeys)
+      var key = IDENTITY + '_' + r.to[ROOT_HASH]
+      if (batch.length  &&  !error  &&  list[key].value.pubkeys)
         return self.getDriver(me)
     })
     .then(function() {
-      if (list[utils.getId(r.to)].value.pubkeys  &&
+      var key = IDENTITY + '_' + r.to[ROOT_HASH]
+      if (list[key].value.pubkeys  &&
          (!publishRequestSent  ||  r[TYPE] !== CUSTOMER_WAITING)) {
         return utils.sendSigned(meDriver, {
           msg: toChain,
-          to: [{fingerprint: self.getFingerprint(r.to)}],
+          to: [{fingerprint: self.getFingerprint(list[key].value)}],
           deliver: true
         })
         .catch(function (err) {
@@ -715,7 +718,7 @@ var Store = Reflux.createStore({
   },
 
   getRepresentative(orgId) {
-    var result = this.searchNotMessages({modelName: IDENTITY})
+    var result = this.searchNotMessages({modelName: PROFILE})
     var orgRep;
     result.some((ir) =>  {
       if (!ir.organization) return
@@ -751,12 +754,13 @@ var Store = Reflux.createStore({
       toChain.time = r.time
     }
     var self = this;
+    var key = IDENTITY + '_' + r.to[ROOT_HASH]
 
     var promise = dontSend
                  ? Q()
                  :  utils.sendSigned(meDriver, {
                       msg: toChain,
-                      to: [{fingerprint: this.getFingerprint(r.to)}],
+                      to: [{fingerprint: this.getFingerprint(list[key].value)}],
                       deliver: true
                   })
     var newVerification
@@ -877,27 +881,6 @@ var Store = Reflux.createStore({
     }
     this.trigger({ resource: resource, action: action || 'getItem'});
   },
-  onShowIdentityList() {
-    if (sampleData.getMyId()) {
-      this.trigger({action: 'showIdentityList', list: []});
-      return;
-    }
-    var allIdentities = list[MY_IDENTITIES_MODEL + '_1'].value.allIdentities;
-    var meId = me[TYPE] + '_' + me[ROOT_HASH];
-    var result = [];
-    if (allIdentities) {
-      allIdentities.forEach((id) => {
-        if (id.id != meId) {
-          var resource = {};
-          if (list[id.id].value.canceled)
-            return;
-          extend(resource, list[id.id].value);
-          result.push(resource);
-        }
-      })
-    }
-    this.trigger({action: 'showIdentityList', list: result});
-  },
 
   getItem(resource) {
     var modelName = resource[TYPE];
@@ -972,11 +955,11 @@ var Store = Reflux.createStore({
       var message = model.message;
       var from = props.from;
       if (!from)
-        err += '"from" is required. Should have {ref: "tradle.Identity"}';
+        err += '"from" is required. Should have {ref: "' + PROFILE + '"}';
 
       var to = props.to;
       if (!to)
-        err += '"to" is required. Should have {ref: "tradle.Identity"}';
+        err += '"to" is required. Should have {ref: "' + PROFILE + '"}';
       var time = props.time;
       if (!time)
         err += '"time" is required';
@@ -990,8 +973,8 @@ var Store = Reflux.createStore({
       var rootHash = sha(model);
       model[ROOT_HASH] = rootHash;
       model[constants.OWNER] = {
-        key: IDENTITY + '_' + me[ROOT_HASH],
-        title: utils.getDisplayName(me, self.getModel(IDENTITY).value.properties),
+        key: PROFILE + '_' + me[ROOT_HASH],
+        title: utils.getDisplayName(me, self.getModel(PROFILE).value.properties),
         photos: me.photos
       }
       // Wil need to publish new model
@@ -1138,7 +1121,7 @@ var Store = Reflux.createStore({
       }
       if (!isRegistration) {
         // HACK to not to republish identity
-        if (returnVal[TYPE] !== IDENTITY)
+        if (returnVal[TYPE] !== PROFILE)
           returnVal[NONCE] = self.getNonce()
       }
 
@@ -1204,9 +1187,10 @@ var Store = Reflux.createStore({
           toChain[PREV_HASH] = toChain[CUR_HASH]
         toChain.time = returnVal.time
 
+        var key = IDENTITY + '_' + to[ROOT_HASH]
         return utils.sendSigned(meDriver, {
           msg: toChain,
-          to: [{fingerprint: self.getFingerprint(to)}],
+          to: [{fingerprint: self.getFingerprint(list[key].value)}],
           deliver: true
         })
       })
@@ -1429,7 +1413,7 @@ var Store = Reflux.createStore({
 
     var required = meta.required;
     var meRootHash = me  &&  me[ROOT_HASH];
-    var meId = IDENTITY + '_' + meRootHash;
+    var meId = PROFILE + '_' + meRootHash;
     var subclasses = utils.getAllSubclasses(modelName).map(function(r) {
       return r.id
     })
@@ -1470,12 +1454,12 @@ var Store = Reflux.createStore({
        }
     }
     // Don't show current 'me' contact in contact list or my identities list
-    var isIdentity = modelName === IDENTITY;
+    var isIdentity = modelName === PROFILE;
     if (!containerProp  &&  me  &&  isIdentity) {
       if (sampleData.getMyId())
-        delete foundResources[IDENTITY + '_' + me[ROOT_HASH]];
+        delete foundResources[PROFILE + '_' + me[ROOT_HASH]];
       else if (!isTest) {
-        var myIdentities = list[MY_IDENTITIES_MODEL + '_1'].value.allIdentities;
+        var myIdentities = list[MY_IDENTITIES + '_1'].value.allIdentities;
         myIdentities.forEach((meId) =>  {
           if (foundResources[meId.id])
              delete foundResources[meId.id];
@@ -1543,7 +1527,7 @@ var Store = Reflux.createStore({
 
     var required = meta.required;
     var meRootHash = me  &&  me[ROOT_HASH];
-    var meId = IDENTITY + '_' + meRootHash;
+    var meId = PROFILE + '_' + meRootHash;
     var meOrgId = me.organization ? utils.getId(me.organization) : null;
 
     var chatId = chatTo ? chatTo[TYPE] + '_' + chatTo[ROOT_HASH] : null;
@@ -1578,10 +1562,10 @@ var Store = Reflux.createStore({
       }
 
       isTest = true;
-      var meId = constants.TYPES.IDENTITY + '_' + testMe;
+      var meId = constants.TYPES.PROFILE + '_' + testMe;
       me = list[meId].value;
       utils.setMe(me);
-      var myIdentities = list[MY_IDENTITIES_MODEL + '_1'].value;
+      var myIdentities = list[MY_IDENTITIES + '_1'].value;
       if (myIdentities)
         myIdentities.currentIdentity = meId;
     }
@@ -1632,7 +1616,7 @@ var Store = Reflux.createStore({
         var m = utils.splitMessage(r.message)
 
         if (m.length === 2) {
-          if (m[1] === IDENTITY)
+          if (m[1] === PROFILE)
             continue;
         }
         if (chatTo.organization  &&  r[TYPE] === constants.TYPES.CUSTOMER_WAITING) {
@@ -1894,8 +1878,8 @@ var Store = Reflux.createStore({
                   :  isRegistration ? value : null;
       if (creator) {
         value[constants.OWNER] = {
-          id: IDENTITY + '_' + creator[ROOT_HASH] + '_' + creator[CUR_HASH],
-          title: utils.getDisplayName(me, this.getModel(IDENTITY))
+          id: PROFILE + '_' + creator[ROOT_HASH] + '_' + creator[CUR_HASH],
+          title: utils.getDisplayName(me, this.getModel(PROFILE))
         };
       }
 
@@ -1948,7 +1932,7 @@ var Store = Reflux.createStore({
     .then(function(value) {
       list[iKey] = {key: iKey, value: value};
       if (mid)
-        list[MY_IDENTITIES_MODEL + '_1'] = {key: MY_IDENTITIES_MODEL + '_1', value: mid};
+        list[MY_IDENTITIES + '_1'] = {key: MY_IDENTITIES + '_1', value: mid};
       if (value[TYPE] === SETTINGS)
         return self.changeSettings(value)
     })
@@ -1967,27 +1951,35 @@ var Store = Reflux.createStore({
     isLoaded = true;
     me = value
     // meDriver = null
-    var iKey = me[TYPE] + '_' + me[ROOT_HASH];
+    var pKey = me[TYPE] + '_' + me[ROOT_HASH];
     var batch = [];
-    batch.push({type: 'put', key: iKey, value: me});
     var mid = {
-      _t: MY_IDENTITIES_MODEL,
-      currentIdentity: iKey,
+      _t: MY_IDENTITIES,
+      currentIdentity: pKey,
       allIdentities: [{
-        id: iKey,
+        id: pKey,
         title: utils.getDisplayName(value, models[me[TYPE]].value.properties),
-        privkeys: me.privkeys
+        privkeys: me.privkeys,
+        publishedIdentity: publishedIdentity
       }]};
-    batch.push({type: 'put', key: MY_IDENTITIES_MODEL + '_1', value: mid});///
+    delete me.privkeys
+    batch.push({type: 'put', key: pKey, value: me});
+    batch.push({type: 'put', key: MY_IDENTITIES + '_1', value: mid});///
+    var identity = {}
+    identity[ROOT_HASH] = me[ROOT_HASH]
+    extend(true, identity, publishedIdentity)
+    var iKey = IDENTITY + '_' + identity[ROOT_HASH]
+    batch.push({type: 'put', key: iKey, value: identity});
     return db.batch(batch)
     .then(function() {
       var  params = {action: 'addItem', resource: value, me: value};
       return self.trigger(params);
     })
     .then(function(value) {
-      list[iKey] = {key: iKey, value: me};
+      list[iKey] = {key: iKey, value: identity};
+      list[pKey] = {key: pKey, value: me};
       if (mid)
-        list[MY_IDENTITIES_MODEL + '_1'] = {key: MY_IDENTITIES_MODEL + '_1', value: mid};
+        list[MY_IDENTITIES + '_1'] = {key: MY_IDENTITIES + '_1', value: mid};
       self.monitorTim()
       // return self.initIdentity(me)
     })
@@ -2082,7 +2074,7 @@ var Store = Reflux.createStore({
       // Choose any employee from the company to send the notification about the customer
       if (r[TYPE] === ORGANIZATION) {
         var secCodes = this.searchNotMessages({modelName: 'tradle.SecurityCode', to: r})
-        var employees = this.searchNotMessages({modelName: IDENTITY, prop: 'organization', to: r})
+        var employees = this.searchNotMessages({modelName: PROFILE, prop: 'organization', to: r})
 
         if (employees) {
           // RABOBANK case
@@ -2093,13 +2085,14 @@ var Store = Reflux.createStore({
             })
 
             for (var i=0; i<employees.length  &&  !pubkeys; i++) {
-              if (employees[i].securityCode  && codes.indexOf(employees[i].securityCode) != -1)
-                pubkeys = employees[i].pubkeys
+              if (employees[i].securityCode  && codes.indexOf(employees[i].securityCode) != -1) {
+                pubkeys = list[IDENTITY + employees[i][ROOT_HASH]].pubkeys
+              }
             }
           }
           // LLOYDS case
           else
-            pubkeys = employees[0].pubkeys
+            pubkeys = list[IDENTITY + employees[0][ROOT_HASH]].pubkeys
         }
       }
     }
@@ -2114,17 +2107,17 @@ var Store = Reflux.createStore({
   getDriver(me) {
     if (driverPromise) return driverPromise
 
-    var allMyIdentities = list[MY_IDENTITIES_MODEL + '_1']
+    var allMyIdentities = list[MY_IDENTITIES + '_1']
+    var currentIdentity
 
-    var mePub = me['pubkeys']
-    var mePriv;
-    if (!allMyIdentities)
-      mePriv = me['privkeys']
-    else {
+    var mePub = me[ROOT_HASH] ? list[IDENTITY + '_' + me[ROOT_HASH]] : me['pubkeys']
+    var mePriv
+    if (allMyIdentities) {
       var all = allMyIdentities.value.allIdentities
       var curId = allMyIdentities.value.currentIdentity
       all.forEach(function(id) {
         if (id.id === curId) {
+          currentIdentity = id
           mePriv = list[id.id].value.privkeys
           mePub = list[id.id].value.pubkeys
         }
@@ -2132,38 +2125,55 @@ var Store = Reflux.createStore({
     }
     if (!mePub  &&  !mePriv) {
       if (!me.securityCode) {
-        for (var i=0; i<myIdentity.length  &&  !mePub; i++) {
-          if (!myIdentity[i].securityCode  &&  me.firstName === myIdentity[i].firstName) {
-            mePub = myIdentity[i].pubkeys  // hardcoded on device
-            mePriv = myIdentity[i].privkeys
-            me[NONCE] = myIdentity[i][NONCE]
-          }
-        }
-      }
-      else {
+        var profiles = {}
+        var identities = {}
         myIdentity.forEach(function(r) {
-          if (r.securityCode === me.securityCode  &&  me.firstName === r.firstName) {
-            mePub = r.pubkeys  // hardcoded on device
-            mePriv = r.privkeys
-            me[NONCE] = r[NONCE]
-          }
+          if (r[TYPE] == IDENTITY)
+            identities[r[ROOT_HASH]] = r
+          else
+            profiles[r[ROOT_HASH]] = r
         })
-
-          // var org = list[utils.getId(me.organization)].value
-        var secCodes = this.searchNotMessages({modelName: 'tradle.SecurityCode'})
-        for (var i=0; i<secCodes.length; i++) {
-          if (secCodes[i].code === me.securityCode) {
-            me.organization = secCodes[i].organization
-            if (employees[me.securityCode])
-              employees[me.securityCode] = me
+        for (var hash in profiles) {
+          if (!profiles[hash].securityCode  &&  me.firstName === profiles[hash].firstName) {
+            var identity = identities[hash]
+            mePub = identity.pubkeys  // hardcoded on device
+            mePriv = identity.privkeys
+            me[NONCE] = identity[NONCE]
             break
           }
         }
-        if (!me.organization) {
-          this.trigger({action:'addItem', resource: me, error: 'The code was not registered with'})
-          return Q.reject(new Error('The code was not registered with'))
-        }
+        // for (var i=0; i<myIdentity.length  &&  !mePub; i++) {
+        //   if (!myIdentity[i].securityCode  &&  me.firstName === myIdentity[i].firstName) {
+        //     mePub = myIdentity[i].pubkeys  // hardcoded on device
+        //     mePriv = myIdentity[i].privkeys
+        //     me[NONCE] = myIdentity[i][NONCE]
+        //   }
+        // }
       }
+      // else {
+      //   myIdentity.forEach(function(r) {
+      //     if (r.securityCode === me.securityCode  &&  me.firstName === r.firstName) {
+      //       mePub = r.pubkeys  // hardcoded on device
+      //       mePriv = r.privkeys
+      //       me[NONCE] = r[NONCE]
+      //     }
+      //   })
+
+      //     // var org = list[utils.getId(me.organization)].value
+      //   var secCodes = this.searchNotMessages({modelName: 'tradle.SecurityCode'})
+      //   for (var i=0; i<secCodes.length; i++) {
+      //     if (secCodes[i].code === me.securityCode) {
+      //       me.organization = secCodes[i].organization
+      //       if (employees[me.securityCode])
+      //         employees[me.securityCode] = me
+      //       break
+      //     }
+      //   }
+      //   if (!me.organization) {
+      //     this.trigger({action:'addItem', resource: me, error: 'The code was not registered with'})
+      //     return Q.reject(new Error('The code was not registered with'))
+      //   }
+      // }
       if (!mePub) {
         var keys = defaultKeySet({
           networkName: 'testnet'
@@ -2175,43 +2185,112 @@ var Store = Reflux.createStore({
           mePub.push(key.exportPublic())
         })
       }
-      me['pubkeys'] = mePub
       me['privkeys'] = mePriv
       me[NONCE] = me[NONCE] || this.getNonce()
     }
 
-    if (me[PUB_ID])
-      publishedIdentity = me[PUB_ID]
-    else {
-      // var meIdentity = new Identity()
-      //                     .name({
-      //                       firstName: me.firstName,
-      //                       formatted: me.firstName + (me.lastName ? ' ' + me.lastName : '')
-      //                     })
-      //                     .set('_z', me[NONCE] || this.getNonce())
-      // if (me.organization) {
-      //   var org = {
-      //     id: me.organization.id,
-      //     title: me.organization.title
-      //   }
-      //   meIdentity.set('organization', org)
-      // }
-
-      // me.pubkeys.forEach(meIdentity.addKey, meIdentity)
-
-      // publishedIdentity = meIdentity.toJSON()
-      publishedIdentity = this.makePublishingIdentity(me)
-      me[PUB_ID] = publishedIdentity
-      // var key = IDENTITY + '_' + me[ROOT_HASH]
-      // list[key].value = me
-
-      // db.put(key, me)
-    }
+    if (currentIdentity)
+      publishedIdentity = currentIdentity.publishedIdentity
+    else
+      publishedIdentity = this.makePublishingIdentity(me, mePub)
 
     return driverPromise = this.buildDriver(Identity.fromJSON(publishedIdentity), mePriv, PORT)
   },
 
-  makePublishingIdentity(me) {
+  getDriver1(me) {
+    if (driverPromise) return driverPromise
+
+    var allMyIdentities = list[MY_IDENTITIES + '_1']
+
+    var mePub = me['pubkeys']
+    var mePriv
+    var currentIdentity
+    if (allMyIdentities) {
+      var all = allMyIdentities.value.allIdentities
+      var curId = allMyIdentities.value.currentIdentity
+      all.forEach(function(id) {
+        if (id.id === curId) {
+          publishedIdentity = id.publishedIdentity
+          mePub = publishedIdentity.pubkeys
+          mePriv = id.privkeys
+        }
+      })
+    }
+    if (!mePub  &&  !mePriv) {
+      if (!me.securityCode) {
+        var profiles = {}
+        var identities = {}
+        myIdentity.forEach(function(r) {
+          if (r[TYPE] == IDENTITY)
+            identities[r[ROOT_HASH]] = r
+          else
+            profiles[r[ROOT_HASH]] = r
+        })
+        for (var hash in profiles) {
+          if (!profiles[hash].securityCode  &&  me.firstName === profiles[hash].firstName) {
+            var identity = identities[hash]
+            mePub = identity.pubkeys  // hardcoded on device
+            mePriv = identity.privkeys
+            me[NONCE] = identity[NONCE]
+            break
+          }
+        }
+      }
+      // else {
+      //   myIdentity.forEach(function(r) {
+      //     if (r.securityCode === me.securityCode  &&  me.firstName === r.firstName) {
+      //       mePub = r.pubkeys  // hardcoded on device
+      //       mePriv = r.privkeys
+      //       me[NONCE] = r[NONCE]
+      //     }
+      //   })
+
+      //     // var org = list[utils.getId(me.organization)].value
+      //   var secCodes = this.searchNotMessages({modelName: 'tradle.SecurityCode'})
+      //   for (var i=0; i<secCodes.length; i++) {
+      //     if (secCodes[i].code === me.securityCode) {
+      //       me.organization = secCodes[i].organization
+      //       if (employees[me.securityCode])
+      //         employees[me.securityCode] = me
+      //       break
+      //     }
+      //   }
+      //   if (!me.organization) {
+      //     this.trigger({action:'addItem', resource: me, error: 'The code was not registered with'})
+      //     return Q.reject(new Error('The code was not registered with'))
+      //   }
+      // }
+      if (!mePub) {
+        var keys = defaultKeySet({
+          networkName: 'testnet'
+        })
+        mePub = []
+        mePriv = []
+        keys.forEach(function(key) {
+          mePriv.push(key.exportPrivate())
+          mePub.push(key.exportPublic())
+        })
+      }
+      else {
+        me['pubkeys'] = mePub
+        me['privkeys'] = mePriv
+        me[NONCE] = me[NONCE] || this.getNonce()
+      }
+    }
+
+    if (currentIdentity  &&  currentIdentity.publishedIdentity)
+      publishedIdentity = currentIdentity.publishedIdentity
+    else {
+      publishedIdentity = this.makePublishingIdentity(me)
+      me[PUB_ID] = publishedIdentity
+      if (currentIdentity) {
+        currentIdentity.publishedIdentity = publishedIdentity
+      }
+    }
+
+    return driverPromise = this.buildDriver(Identity.fromJSON(publishedIdentity), mePriv, PORT)
+  },
+  makePublishingIdentity(me, pubkeys) {
     var meIdentity = new Identity()
                         .name({
                           firstName: me.firstName,
@@ -2226,7 +2305,7 @@ var Store = Reflux.createStore({
       meIdentity.set('organization', org)
     }
 
-    me.pubkeys.forEach(meIdentity.addKey, meIdentity)
+    pubkeys.forEach(meIdentity.addKey, meIdentity)
     return meIdentity.toJSON()
   },
   publishMyIdentity(orgRep) {
@@ -2242,9 +2321,11 @@ var Store = Reflux.createStore({
           _z: self.getNonce(),
           identity: publishedIdentity
         }
+        var key = IDENTITY + '_' + orgRep[ROOT_HASH]
+
         return utils.sendSigned(meDriver, {
           msg: msg,
-          to: [{fingerprint: self.getFingerprint(orgRep)}],
+          to: [{fingerprint: self.getFingerprint(list[key].value)}],
           deliver: true,
           public: true
         })
@@ -2290,7 +2371,7 @@ var Store = Reflux.createStore({
     var dfd = Q.defer();
     var self = this;
     var batch = [];
-    var props = models[IDENTITY].value.properties;
+    var props = models[PROFILE].value.properties;
     AddressBook.getContacts(function(err, contacts) {
       contacts.forEach(function(contact) {
         var contactInfo = [];
@@ -2300,8 +2381,8 @@ var Store = Reflux.createStore({
           // formatted: contact.firstName + ' ' + contact.lastName,
           contactInfo: contactInfo
         };
-        newIdentity[TYPE] = IDENTITY;
-        var me = list[MY_IDENTITIES_MODEL + '_1'];
+        newIdentity[TYPE] = PROFILE;
+        var me = list[MY_IDENTITIES + '_1'];
         if (me)  {
           var currentIdentity = me.value.currentIdentity;
           newIdentity[constants.OWNER] = {id: currentIdentity, title: utils.getDisplayName(me, props)};
@@ -2327,7 +2408,7 @@ var Store = Reflux.createStore({
           });
         newIdentity[ROOT_HASH] = sha(newIdentity);
         newIdentity[CUR_HASH] = newIdentity[ROOT_HASH];
-        var key = IDENTITY + '_' + newIdentity[ROOT_HASH];
+        var key = PROFILE + '_' + newIdentity[ROOT_HASH];
         if (!list[key])
           batch.push({type: 'put', key: key, value: newIdentity});
       });
@@ -2359,7 +2440,7 @@ var Store = Reflux.createStore({
       // .on('data', function (data) {
       //   console.log(data)
       // })
-      //   var key = IDENTITY + '_' + data.key
+      //   var key = PROFILE + '_' + data.key
       //   var v;
       //   if (me  &&  data.key == me[ROOT_HASH])
       //     v = me
@@ -2528,59 +2609,79 @@ var Store = Reflux.createStore({
     // var isServiceMessage
     if (model.id === IDENTITY) {
       // if (!me  ||  obj[ROOT_HASH] !== me[ROOT_HASH]) {
+      var profile = {}
+
       if (val.name) {
-        for (var p in val.name)
-          val[p] = val.name[p]
+        for (var p in val.name) {
+          profile[p] = val.name[p]
+        }
         delete val.name
       }
       if (val.location) {
         for (var p in val.location)
-          val[p] = val.location[p]
+          profile[p] = val.location[p]
         delete val.location
       }
+      extend(true, profile, val)
+      profile[TYPE] = PROFILE
+      delete profile.pubkeys
+      delete profile.v
+      var profileKey = PROFILE + '_' + profile[ROOT_HASH]
+      v = list[key] ? list[profileKey].value : null
       if (!v  &&  me  &&  val[ROOT_HASH] === me[ROOT_HASH])
         v = me
       if (v)  {
         var vv = {}
         extend(vv, v)
-        extend(vv, val)
-        val = vv
+        extend(vv, profile)
+        profile = vv
       }
-      batch.push({type: 'put', key: key, value: val})
+      var org
       if (val.organization) {
         // if (val.organization.title === 'Rabobank'  &&  val.securityCode)
         //   return
-        var org = list[utils.getId(val.organization)]  &&  list[utils.getId(val.organization)].value
+        org = list[utils.getId(val.organization)]  &&  list[utils.getId(val.organization)].value
         if (org) {
-          var doAdd
-          if (!org.contacts)
-            doAdd = true
-          else {
-            var i = 0
-            for (; i<org.contacts.length; i++) {
-              if (org.contacts[i][ROOT_HASH] === key)
-                break
-            }
-            doAdd = i !== org.contacts.length
+          profile.organization = val.organization
+          delete val.organization
+        }
+      }
+      batch.push({type: 'put', key: profileKey, value: profile})
+      list[profileKey] = {
+        key: profileKey,
+        value: profile
+      }
+
+      batch.push({type: 'put', key: key, value: val})
+      if (org) {
+        var doAdd
+        if (!org.contacts)
+          doAdd = true
+        else {
+          var i = 0
+          for (; i<org.contacts.length; i++) {
+            if (org.contacts[i][ROOT_HASH] === key)
+              break
           }
-          if (doAdd)  {
-            var representative = {
-              id: key,
-              title: val.formatted
-            }
-            var oo = {}
-            extend(oo, org)
-            if (!oo.contacts)
-              oo.contacts = []
-            oo.contacts.push(representative)
-            var orgKey = org[TYPE] + '_' + org[ROOT_HASH];
-            list[orgKey] = {
-              key: orgKey,
-              value: oo
-            }
-            batch.push({type: 'put', key: orgKey, value: oo})
-            representativeAddedTo = org[ROOT_HASH]
+          doAdd = i !== org.contacts.length
+        }
+        if (doAdd)  {
+          var representative = {
+            id: key,
+            title: val.formatted
           }
+          var oo = {}
+          extend(oo, org)
+          if (!oo.contacts)
+            oo.contacts = []
+          oo.contacts.push(representative)
+          var orgKey = org[TYPE] + '_' + org[ROOT_HASH];
+          list[orgKey] = {
+            key: orgKey,
+            value: oo
+          }
+          batch.push({type: 'put', key: orgKey, value: oo})
+          representativeAddedTo = org[ROOT_HASH]
         }
       }
       // }
@@ -2588,7 +2689,7 @@ var Store = Reflux.createStore({
     else {
       var isMessage = model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1
       if (isMessage) {
-        var fromR = list[IDENTITY + '_' + obj.from[ROOT_HASH]]
+        var fromR = list[PROFILE + '_' + obj.from[ROOT_HASH]]
         if (!fromR)
           return
         var from = fromR.value
@@ -2634,29 +2735,8 @@ var Store = Reflux.createStore({
           list[utils.getId(org)].value = org
           batch.push({type: 'put', key: utils.getId(org), value: org})
         }
-        var to = list[IDENTITY + '_' + obj.to[ROOT_HASH]].value
-        var whoAmI = obj.parsed.data._i.split(':')[0]
-
-        if (whoAmI === from[ROOT_HASH]) {
-          val.to = {
-            id: to[TYPE] + '_' + to[ROOT_HASH],
-            title: obj.to.identity.toJSON().name.formatted
-          }
-          val.from = {
-            id: from[TYPE] + '_' + from[ROOT_HASH],
-            title: obj.from.identity.toJSON().name.formatted
-          }
-        }
-        else {
-          val.to = {
-            id: from[TYPE] + '_' + from[ROOT_HASH],
-            title: obj.from.identity.toJSON().name.formatted
-          }
-          val.from = {
-            id: to[TYPE] + '_' + to[ROOT_HASH],
-            title: obj.to.identity.toJSON().name.formatted
-          }
-        }
+        var to = list[PROFILE + '_' + obj.to[ROOT_HASH]].value
+        self.fillFromAndTo(obj, val)
         // if (!onMessage  &&  (model.subClassOf  &&  model.subClassOf === FORM)) {
         //   val.to = {
         //     id: from[TYPE] + '_' + from[ROOT_HASH],
@@ -2727,9 +2807,9 @@ var Store = Reflux.createStore({
     }
     var resultList
     if (isMessage) {
-      var toId = IDENTITY + '_' + obj.to[ROOT_HASH]
-      var meId = IDENTITY + '_' + me[ROOT_HASH]
-      var id = toId === meId ? IDENTITY + '_' + obj.from[ROOT_HASH] : toId
+      var toId = PROFILE + '_' + obj.to[ROOT_HASH]
+      var meId = PROFILE + '_' + me[ROOT_HASH]
+      var id = toId === meId ? PROFILE + '_' + obj.from[ROOT_HASH] : toId
       var to = list[id].value
 
       resultList = self.searchMessages({to: to, modelName: MESSAGE})
@@ -2739,14 +2819,14 @@ var Store = Reflux.createStore({
       retParams.resource = to
     }
       // resultList = searchMessages({to: list[obj.to.identity.toJSON()[TYPE] + '_' + obj.to[ROOT_HASH]], modelName: MESSAGE})
-    else if (!onMessage  &&  val[TYPE] != IDENTITY)
+    else if (!onMessage  &&  val[TYPE] != PROFILE)
       resultList = self.searchNotMessages({modelName: val[TYPE]})
     retParams.list = resultList
 
     return db.batch(batch)
     .then(function() {
       if (isConfirmation) {
-        var from = list[IDENTITY + '_' + obj.from[ROOT_HASH]].value
+        var from = list[PROFILE + '_' + obj.from[ROOT_HASH]].value
 
         var fOrg = from.organization
         var org = fOrg ? list[utils.getId(fOrg)].value : null
@@ -2771,6 +2851,32 @@ var Store = Reflux.createStore({
         self.trigger(retParams)
     })
   },
+  fillFromAndTo(obj, val) {
+    var whoAmI = obj.parsed.data._i.split(':')[0]
+    var from = list[PROFILE + '_' + obj.from[ROOT_HASH]].value
+    var to = list[PROFILE + '_' + obj.to[ROOT_HASH]].value
+
+    if (whoAmI === from[ROOT_HASH]) {
+      val.to = {
+        id: to[TYPE] + '_' + to[ROOT_HASH],
+        title: to.formatted
+      }
+      val.from = {
+        id: from[TYPE] + '_' + from[ROOT_HASH],
+        title: from.formatted
+      }
+    }
+    else {
+      val.to = {
+        id: from[TYPE] + '_' + from[ROOT_HASH],
+        title: from.formatted
+      }
+      val.from = {
+        id: to[TYPE] + '_' + to[ROOT_HASH],
+        title: to.formatted
+      }
+    }
+  },
   addNameAndTitleProps(m, aprops) {
     var mprops = aprops  ||  m.properties
     for (var p in mprops) {
@@ -2790,7 +2896,7 @@ var Store = Reflux.createStore({
   loadMyResources() {
     var myId = sampleData.getMyId();
     if (myId)
-      myId = IDENTITY + '_' + myId;
+      myId = PROFILE + '_' + myId;
     var self = this;
     var loadingModels = false;
 
@@ -2807,14 +2913,14 @@ var Store = Reflux.createStore({
         }
         else {
           isLoaded = true
-          if (!myId  &&  data.key === MY_IDENTITIES_MODEL + '_1') {
+          if (!myId  &&  data.key === MY_IDENTITIES + '_1') {
             myId = data.value.currentIdentity;
             if (list[myId])
               me = list[myId].value;
           }
           if (!me  &&  myId  && data.key == myId)
             me = data.value;
-          if (data.value[TYPE] === IDENTITY) {
+          if (data.value[TYPE] === PROFILE) {
             if (data.value.securityCode)
               employees[data.value.securityCode] = data.value
             if (data.value.organization) {
@@ -2823,7 +2929,7 @@ var Store = Reflux.createStore({
               var c = orgContacts[utils.getId(data.value.organization)]
               c.push({
                 id: utils.getId(data.value),
-                title: utils.getDisplayName(data.value, self.getModel(IDENTITY).value.properties)
+                title: utils.getDisplayName(data.value, self.getModel(PROFILE).value.properties)
               })
             }
           }
@@ -3027,9 +3133,11 @@ var Store = Reflux.createStore({
     msg.id = sha(msg)
     result.push(msg)
     self.trigger({action: 'messageList', list: result, resource: resource})
+    var key = IDENTITY + '_' + orgRep[ROOT_HASH]
+
     return utils.sendSigned(meDriver, {
       msg: msg,
-      to: [{fingerprint: self.getFingerprint(orgRep)}],
+      to: [{fingerprint: self.getFingerprint(list[key].value)}],
       deliver: true
     })
   },
@@ -3043,9 +3151,10 @@ var Store = Reflux.createStore({
                ? this.getRepresentative(resource[TYPE] + '_' + resource[ROOT_HASH])
                : resource
     var self = this
+    var key = IDENTITY + '_' + orgRep[ROOT_HASH]
     return utils.sendSigned(meDriver, {
       msg: msg,
-      to: [{fingerprint: self.getFingerprint(orgRep)}],
+      to: [{fingerprint: self.getFingerprint(list[key].value)}],
       deliver: true
     })
     .then(function() {
@@ -3168,76 +3277,6 @@ var Store = Reflux.createStore({
     })
   },
 
-  onChangeIdentity(newMe) {
-    var myIdentities = list[MY_IDENTITIES_MODEL + '_1'].value;
-    myIdentities.currentIdentity = newMe[TYPE] + '_' + newMe[ROOT_HASH];
-      var self = this;
-    db.put(MY_IDENTITIES_MODEL + '_1', myIdentities)
-    .then(function() {
-      return self.loadMyResources()
-    })
-    .then(function() {
-      me = newMe;
-      if (me.organization) {
-        var photos = list[utils.getId(me.organization.id)].value.photos;
-        if (photos)
-          me.organization.photo = photos[0].url;
-      }
-      list = {};
-      return self.loadMyResources()
-            .then(function() {
-              var result = self.searchResources('', IDENTITY, me);
-              self.trigger({action: 'changeIdentity', list: result, me: me});
-            });
-    })
-    .catch(function(err) {
-      err = err;
-    });
-  },
-
-  onAddNewIdentity(resource) {
-    var newIdentity = {
-      id: resource[TYPE] + '_' + resource[ROOT_HASH],
-      title: utils.getDisplayName(resource, this.getModel(resource[TYPE]).value.properties),
-    };
-    var myIdentities = list[MY_IDENTITIES_MODEL + '_1'].value;
-    myIdentities.allIdentities.push(newIdentity);
-    var self = this;
-    db.put(MY_IDENTITIES_MODEL + '_1', myIdentities)
-    .then(function() {
-      list[MY_IDENTITIES_MODEL + '_1'].value = myIdentities;
-      self.trigger({action: 'addNewIdentity', resource: me});
-    })
-    .catch (function(err) {
-      err = err;
-    })
-  },
-  onRemoveIdentity(resource) {
-    var myIdentity = list[MY_IDENTITIES_MODEL + '_1'].value;
-    var iKey = resource[TYPE] + '_' + resource[ROOT_HASH];
-    var allIdentities = myIdentity.allIdentities;
-    for (var i=0; i<allIdentities.length; i++)
-      if (allIdentities[i].id === iKey) {
-        allIdentities.splice(i, 1);
-        break;
-      }
-
-    var batch = [];
-    resource.canceled = true;
-    batch.push({type: 'put', key: iKey, value: resource});
-    batch.push({type: 'put', key: MY_IDENTITIES_MODEL + '_1', value: myIdentity});
-
-    var self = this;
-    db.batch(batch)
-    .then(function() {
-      delete list[resource[TYPE] + '_' + resource[ROOT_HASH]];
-      self.trigger({action: 'removeIdentity', resource: resource});
-    })
-    .catch (function(err) {
-      err = err;
-    })
-
-  },
   onStartTransition() {
     if (meDriver) meDriver.pause(2000)
   },
@@ -3263,7 +3302,99 @@ var Store = Reflux.createStore({
 });
 
 module.exports = Store;
+/*
+  onShowIdentityList() {
+    if (sampleData.getMyId()) {
+      this.trigger({action: 'showIdentityList', list: []});
+      return;
+    }
+    var allIdentities = list[MY_IDENTITIES + '_1'].value.allIdentities;
+    var meId = me[TYPE] + '_' + me[ROOT_HASH];
+    var result = [];
+    if (allIdentities) {
+      allIdentities.forEach((id) => {
+        if (id.id != meId) {
+          var resource = {};
+          if (list[id.id].value.canceled)
+            return;
+          extend(resource, list[id.id].value);
+          result.push(resource);
+        }
+      })
+    }
+    this.trigger({action: 'showIdentityList', list: result});
+  },
+  onChangeIdentity(newMe) {
+    var myIdentities = list[MY_IDENTITIES + '_1'].value;
+    myIdentities.currentIdentity = newMe[TYPE] + '_' + newMe[ROOT_HASH];
+      var self = this;
+    db.put(MY_IDENTITIES + '_1', myIdentities)
+    .then(function() {
+      return self.loadMyResources()
+    })
+    .then(function() {
+      me = newMe;
+      if (me.organization) {
+        var photos = list[utils.getId(me.organization.id)].value.photos;
+        if (photos)
+          me.organization.photo = photos[0].url;
+      }
+      list = {};
+      return self.loadMyResources()
+            .then(function() {
+              var result = self.searchResources('', PROFILE, me);
+              self.trigger({action: 'changeIdentity', list: result, me: me});
+            });
+    })
+    .catch(function(err) {
+      err = err;
+    });
+  },
 
+  onAddNewIdentity(resource) {
+    var newIdentity = {
+      id: resource[TYPE] + '_' + resource[ROOT_HASH],
+      title: utils.getDisplayName(resource, this.getModel(resource[TYPE]).value.properties),
+    };
+    var myIdentities = list[MY_IDENTITIES + '_1'].value;
+    myIdentities.allIdentities.push(newIdentity);
+    var self = this;
+    db.put(MY_IDENTITIES + '_1', myIdentities)
+    .then(function() {
+      list[MY_IDENTITIES + '_1'].value = myIdentities;
+      self.trigger({action: 'addNewIdentity', resource: me});
+    })
+    .catch (function(err) {
+      err = err;
+    })
+  },
+  onRemoveIdentity(resource) {
+    var myIdentity = list[MY_IDENTITIES + '_1'].value;
+    var iKey = resource[TYPE] + '_' + resource[ROOT_HASH];
+    var allIdentities = myIdentity.allIdentities;
+    for (var i=0; i<allIdentities.length; i++)
+      if (allIdentities[i].id === iKey) {
+        allIdentities.splice(i, 1);
+        break;
+      }
+
+    var batch = [];
+    resource.canceled = true;
+    batch.push({type: 'put', key: iKey, value: resource});
+    batch.push({type: 'put', key: MY_IDENTITIES + '_1', value: myIdentity});
+
+    var self = this;
+    db.batch(batch)
+    .then(function() {
+      delete list[resource[TYPE] + '_' + resource[ROOT_HASH]];
+      self.trigger({action: 'removeIdentity', resource: resource});
+    })
+    .catch (function(err) {
+      err = err;
+    })
+
+  },
+*/
 /*
   put(args) {
     var data = JSON.parse(args.data)
@@ -3331,7 +3462,7 @@ module.exports = Store;
 
     var required = meta.required;
     var meRootHash = me  &&  me[ROOT_HASH];
-    var meId = IDENTITY + '_' + meRootHash;
+    var meId = PROFILE + '_' + meRootHash;
     var meOrgId = me.organization ? utils.getId(me.organization) : null;
 
     var chatId = chatTo ? chatTo[TYPE] + '_' + chatTo[ROOT_HASH] : null;
@@ -3348,10 +3479,10 @@ module.exports = Store;
       }
 
       isTest = true;
-      var meId = constants.TYPES.IDENTITY + '_' + testMe;
+      var meId = constants.TYPES.PROFILE + '_' + testMe;
       me = list[meId].value;
       utils.setMe(me);
-      var myIdentities = list[MY_IDENTITIES_MODEL + '_1'].value;
+      var myIdentities = list[MY_IDENTITIES + '_1'].value;
       if (myIdentities)
         myIdentities.currentIdentity = meId;
     }
@@ -3539,7 +3670,7 @@ module.exports = Store;
     var representativeAddedTo
     var self = this
     // var isServiceMessage
-    if (model.id === IDENTITY)
+    if (model.id === PROFILE)
       representativeAddedTo = this.addIdentity(val, batch)
     else {
       var isMessage = model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1
@@ -3560,16 +3691,16 @@ module.exports = Store;
     }
     var resultList
     if (isMessage) {
-      var toId = IDENTITY + '_' + obj.to[ROOT_HASH]
-      var meId = IDENTITY + '_' + me[ROOT_HASH]
-      var id = toId === meId ? IDENTITY + '_' + obj.from[ROOT_HASH] : toId
+      var toId = PROFILE + '_' + obj.to[ROOT_HASH]
+      var meId = PROFILE + '_' + me[ROOT_HASH]
+      var id = toId === meId ? PROFILE + '_' + obj.from[ROOT_HASH] : toId
       var to = list[id].value
       var isUpdate
       if (onMessage)
         retParams.list = this.searchMessages({to: to, modelName: MESSAGE})
       else {
         retParams.action= 'updateItem'
-        retParams.sendStatus = 'Chained'
+        retParams.sendStatus = 'Sealed'
         retParams.resource = val
         isUpdate = true
       }
@@ -3581,14 +3712,14 @@ module.exports = Store;
       }
     }
       // resultList = searchMessages({to: list[obj.to.identity.toJSON()[TYPE] + '_' + obj.to[ROOT_HASH]], modelName: MESSAGE})
-    else if (!onMessage  &&  val[TYPE] != IDENTITY)
+    else if (!onMessage  &&  val[TYPE] != PROFILE)
       retParams.list = this.searchNotMessages({modelName: val[TYPE]})
 
     var self = this
     return db.batch(batch)
     .then(function() {
       if (isConfirmation) {
-        var from = list[IDENTITY + '_' + obj.from[ROOT_HASH]].value
+        var from = list[PROFILE + '_' + obj.from[ROOT_HASH]].value
 
         var fOrg = from.organization
         var org = fOrg ? list[utils.getId(fOrg)].value : null
@@ -3673,7 +3804,7 @@ module.exports = Store;
     }
   },
   addMessage(obj, val, onMessage, batch) {
-    var fromR = list[IDENTITY + '_' + obj.from[ROOT_HASH]]
+    var fromR = list[PROFILE + '_' + obj.from[ROOT_HASH]]
     if (!fromR)
       return
     var from = fromR.value
@@ -3722,7 +3853,7 @@ module.exports = Store;
       list[utils.getId(org)].value = org
       batch.push({type: 'put', key: utils.getId(org), value: org})
     }
-    var to = list[IDENTITY + '_' + obj.to[ROOT_HASH]].value
+    var to = list[PROFILE + '_' + obj.to[ROOT_HASH]].value
     var whoAmI = obj.parsed.data._i.split(':')[0]
 
     if (whoAmI === from[ROOT_HASH]) {
