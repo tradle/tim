@@ -86,7 +86,7 @@ class TiMApp extends Component {
   constructor(props) {
     super(props)
     var props = {
-      modelName: constants.TYPES.IDENTITY
+      modelName: constants.TYPES.PROFILE
     }
     this.state = {
       currentAppState: 'active',
@@ -307,7 +307,7 @@ class TiMApp extends Component {
 
     switch (route.id) {
     case 1:
-      return <TimHome navigator={nav} modelName={constants.TYPES.IDENTITY} filter={props.filter} />;
+      return <TimHome navigator={nav} modelName={constants.TYPES.PROFILE} filter={props.filter} />;
     case 2:
       return <ResourceTypesScreen navigator={nav}
                   modelName={props.modelName}
@@ -491,7 +491,7 @@ var NavigationBarRouteMapper = {
     var style = [styles.navBarText, styles.navBarTitleText];
     if (route.passProps.modelName) {
       if (route.passProps.modelName === 'tradle.Message') {
-        if (route.passProps.resource  &&  route.passProps.resource[constants.TYPE] === constants.TYPES.IDENTITY) {
+        if (route.passProps.resource  &&  route.passProps.resource[constants.TYPE] === constants.TYPES.PROFILE) {
           // if (route.passProps.resource.organization  &&  route.passProps.resource.organization.photo)
           //   org = <Image source={{uri: route.passProps.resource.organization.photo}} style={styles.orgImage} />
           if (route.passProps.resource.organization)
