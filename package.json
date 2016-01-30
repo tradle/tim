@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "react-native start",
-    "postinstall": "rn-nodeify --hack"
+    "postinstall": "./node_modules/.bin/rn-nodeify --hack"
   },
   "dependencies": {
     "@tradle/bitcoinjs-lib": "^1.5.7",
@@ -124,6 +124,7 @@
     "babel-plugin-transform-object-rest-spread": "^6.3.13",
     "babel-plugin-transform-regenerator": "^6.3.13",
     "memdown": "^1.1.0",
+    "rn-nodeify": "^4.1.0",
     "source-map": "^0.5.3"
   }
 }
