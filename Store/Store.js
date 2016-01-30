@@ -2197,99 +2197,99 @@ var Store = Reflux.createStore({
     return driverPromise = this.buildDriver(Identity.fromJSON(publishedIdentity), mePriv, PORT)
   },
 
-  getDriver1(me) {
-    if (driverPromise) return driverPromise
+  // getDriver1(me) {
+  //   if (driverPromise) return driverPromise
 
-    var allMyIdentities = list[MY_IDENTITIES + '_1']
+  //   var allMyIdentities = list[MY_IDENTITIES + '_1']
 
-    var mePub = me['pubkeys']
-    var mePriv
-    var currentIdentity
-    if (allMyIdentities) {
-      var all = allMyIdentities.value.allIdentities
-      var curId = allMyIdentities.value.currentIdentity
-      all.forEach(function(id) {
-        if (id.id === curId) {
-          publishedIdentity = id.publishedIdentity
-          mePub = publishedIdentity.pubkeys
-          mePriv = id.privkeys
-        }
-      })
-    }
-    if (!mePub  &&  !mePriv) {
-      if (!me.securityCode) {
-        var profiles = {}
-        var identities = {}
-        myIdentity.forEach(function(r) {
-          if (r[TYPE] == IDENTITY)
-            identities[r[ROOT_HASH]] = r
-          else
-            profiles[r[ROOT_HASH]] = r
-        })
-        for (var hash in profiles) {
-          if (!profiles[hash].securityCode  &&  me.firstName === profiles[hash].firstName) {
-            var identity = identities[hash]
-            mePub = identity.pubkeys  // hardcoded on device
-            mePriv = identity.privkeys
-            me[NONCE] = identity[NONCE]
-            break
-          }
-        }
-      }
-      // else {
-      //   myIdentity.forEach(function(r) {
-      //     if (r.securityCode === me.securityCode  &&  me.firstName === r.firstName) {
-      //       mePub = r.pubkeys  // hardcoded on device
-      //       mePriv = r.privkeys
-      //       me[NONCE] = r[NONCE]
-      //     }
-      //   })
+  //   var mePub = me['pubkeys']
+  //   var mePriv
+  //   var currentIdentity
+  //   if (allMyIdentities) {
+  //     var all = allMyIdentities.value.allIdentities
+  //     var curId = allMyIdentities.value.currentIdentity
+  //     all.forEach(function(id) {
+  //       if (id.id === curId) {
+  //         publishedIdentity = id.publishedIdentity
+  //         mePub = publishedIdentity.pubkeys
+  //         mePriv = id.privkeys
+  //       }
+  //     })
+  //   }
+  //   if (!mePub  &&  !mePriv) {
+  //     if (!me.securityCode) {
+  //       var profiles = {}
+  //       var identities = {}
+  //       myIdentity.forEach(function(r) {
+  //         if (r[TYPE] == IDENTITY)
+  //           identities[r[ROOT_HASH]] = r
+  //         else
+  //           profiles[r[ROOT_HASH]] = r
+  //       })
+  //       for (var hash in profiles) {
+  //         if (!profiles[hash].securityCode  &&  me.firstName === profiles[hash].firstName) {
+  //           var identity = identities[hash]
+  //           mePub = identity.pubkeys  // hardcoded on device
+  //           mePriv = identity.privkeys
+  //           me[NONCE] = identity[NONCE]
+  //           break
+  //         }
+  //       }
+  //     }
+  //     // else {
+  //     //   myIdentity.forEach(function(r) {
+  //     //     if (r.securityCode === me.securityCode  &&  me.firstName === r.firstName) {
+  //     //       mePub = r.pubkeys  // hardcoded on device
+  //     //       mePriv = r.privkeys
+  //     //       me[NONCE] = r[NONCE]
+  //     //     }
+  //     //   })
 
-      //     // var org = list[utils.getId(me.organization)].value
-      //   var secCodes = this.searchNotMessages({modelName: 'tradle.SecurityCode'})
-      //   for (var i=0; i<secCodes.length; i++) {
-      //     if (secCodes[i].code === me.securityCode) {
-      //       me.organization = secCodes[i].organization
-      //       if (employees[me.securityCode])
-      //         employees[me.securityCode] = me
-      //       break
-      //     }
-      //   }
-      //   if (!me.organization) {
-      //     this.trigger({action:'addItem', resource: me, error: 'The code was not registered with'})
-      //     return Q.reject(new Error('The code was not registered with'))
-      //   }
-      // }
-      if (!mePub) {
-        var keys = defaultKeySet({
-          networkName: 'testnet'
-        })
-        mePub = []
-        mePriv = []
-        keys.forEach(function(key) {
-          mePriv.push(key.exportPrivate())
-          mePub.push(key.exportPublic())
-        })
-      }
-      else {
-        me['pubkeys'] = mePub
-        me['privkeys'] = mePriv
-        me[NONCE] = me[NONCE] || this.getNonce()
-      }
-    }
+  //     //     // var org = list[utils.getId(me.organization)].value
+  //     //   var secCodes = this.searchNotMessages({modelName: 'tradle.SecurityCode'})
+  //     //   for (var i=0; i<secCodes.length; i++) {
+  //     //     if (secCodes[i].code === me.securityCode) {
+  //     //       me.organization = secCodes[i].organization
+  //     //       if (employees[me.securityCode])
+  //     //         employees[me.securityCode] = me
+  //     //       break
+  //     //     }
+  //     //   }
+  //     //   if (!me.organization) {
+  //     //     this.trigger({action:'addItem', resource: me, error: 'The code was not registered with'})
+  //     //     return Q.reject(new Error('The code was not registered with'))
+  //     //   }
+  //     // }
+  //     if (!mePub) {
+  //       var keys = defaultKeySet({
+  //         networkName: 'testnet'
+  //       })
+  //       mePub = []
+  //       mePriv = []
+  //       keys.forEach(function(key) {
+  //         mePriv.push(key.exportPrivate())
+  //         mePub.push(key.exportPublic())
+  //       })
+  //     }
+  //     else {
+  //       me['pubkeys'] = mePub
+  //       me['privkeys'] = mePriv
+  //       me[NONCE] = me[NONCE] || this.getNonce()
+  //     }
+  //   }
 
-    if (currentIdentity  &&  currentIdentity.publishedIdentity)
-      publishedIdentity = currentIdentity.publishedIdentity
-    else {
-      publishedIdentity = this.makePublishingIdentity(me)
-      me[PUB_ID] = publishedIdentity
-      if (currentIdentity) {
-        currentIdentity.publishedIdentity = publishedIdentity
-      }
-    }
+  //   if (currentIdentity  &&  currentIdentity.publishedIdentity)
+  //     publishedIdentity = currentIdentity.publishedIdentity
+  //   else {
+  //     publishedIdentity = this.makePublishingIdentity(me)
+  //     me[PUB_ID] = publishedIdentity
+  //     if (currentIdentity) {
+  //       currentIdentity.publishedIdentity = publishedIdentity
+  //     }
+  //   }
 
-    return driverPromise = this.buildDriver(Identity.fromJSON(publishedIdentity), mePriv, PORT)
-  },
+  //   return driverPromise = this.buildDriver(Identity.fromJSON(publishedIdentity), mePriv, PORT)
+  // },
   makePublishingIdentity(me, pubkeys) {
     var meIdentity = new Identity()
                         .name({
@@ -3910,3 +3910,96 @@ module.exports = Store;
     }
   },
 */
+  // getDriver1(me) {
+  //   if (driverPromise) return driverPromise
+
+  //   var allMyIdentities = list[MY_IDENTITIES + '_1']
+
+  //   var mePub = me['pubkeys']
+  //   var mePriv
+  //   var currentIdentity
+  //   if (allMyIdentities) {
+  //     var all = allMyIdentities.value.allIdentities
+  //     var curId = allMyIdentities.value.currentIdentity
+  //     all.forEach(function(id) {
+  //       if (id.id === curId) {
+  //         publishedIdentity = id.publishedIdentity
+  //         mePub = publishedIdentity.pubkeys
+  //         mePriv = id.privkeys
+  //       }
+  //     })
+  //   }
+  //   if (!mePub  &&  !mePriv) {
+  //     if (!me.securityCode) {
+  //       var profiles = {}
+  //       var identities = {}
+  //       myIdentity.forEach(function(r) {
+  //         if (r[TYPE] == IDENTITY)
+  //           identities[r[ROOT_HASH]] = r
+  //         else
+  //           profiles[r[ROOT_HASH]] = r
+  //       })
+  //       for (var hash in profiles) {
+  //         if (!profiles[hash].securityCode  &&  me.firstName === profiles[hash].firstName) {
+  //           var identity = identities[hash]
+  //           mePub = identity.pubkeys  // hardcoded on device
+  //           mePriv = identity.privkeys
+  //           me[NONCE] = identity[NONCE]
+  //           break
+  //         }
+  //       }
+  //     }
+  //     // else {
+  //     //   myIdentity.forEach(function(r) {
+  //     //     if (r.securityCode === me.securityCode  &&  me.firstName === r.firstName) {
+  //     //       mePub = r.pubkeys  // hardcoded on device
+  //     //       mePriv = r.privkeys
+  //     //       me[NONCE] = r[NONCE]
+  //     //     }
+  //     //   })
+
+  //     //     // var org = list[utils.getId(me.organization)].value
+  //     //   var secCodes = this.searchNotMessages({modelName: 'tradle.SecurityCode'})
+  //     //   for (var i=0; i<secCodes.length; i++) {
+  //     //     if (secCodes[i].code === me.securityCode) {
+  //     //       me.organization = secCodes[i].organization
+  //     //       if (employees[me.securityCode])
+  //     //         employees[me.securityCode] = me
+  //     //       break
+  //     //     }
+  //     //   }
+  //     //   if (!me.organization) {
+  //     //     this.trigger({action:'addItem', resource: me, error: 'The code was not registered with'})
+  //     //     return Q.reject(new Error('The code was not registered with'))
+  //     //   }
+  //     // }
+  //     if (!mePub) {
+  //       var keys = defaultKeySet({
+  //         networkName: 'testnet'
+  //       })
+  //       mePub = []
+  //       mePriv = []
+  //       keys.forEach(function(key) {
+  //         mePriv.push(key.exportPrivate())
+  //         mePub.push(key.exportPublic())
+  //       })
+  //     }
+  //     else {
+  //       me['pubkeys'] = mePub
+  //       me['privkeys'] = mePriv
+  //       me[NONCE] = me[NONCE] || this.getNonce()
+  //     }
+  //   }
+
+  //   if (currentIdentity  &&  currentIdentity.publishedIdentity)
+  //     publishedIdentity = currentIdentity.publishedIdentity
+  //   else {
+  //     publishedIdentity = this.makePublishingIdentity(me)
+  //     me[PUB_ID] = publishedIdentity
+  //     if (currentIdentity) {
+  //       currentIdentity.publishedIdentity = publishedIdentity
+  //     }
+  //   }
+
+  //   return driverPromise = this.buildDriver(Identity.fromJSON(publishedIdentity), mePriv, PORT)
+  // },
