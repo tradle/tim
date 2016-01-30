@@ -305,21 +305,21 @@ class MessageRow extends Component {
     if (this.props.sendStatus  &&  this.props.sendStatus !== null) {
       switch (this.props.sendStatus) {
       case 'Sent':
-        sendStatus = <View style={{alignSelf: 'flex-end', flexDirection: 'row', marginHorizontal: 5}}>
+        sendStatus = <View style={styles.sendStatus}>
                        <Text style={{fontSize: 14, color: '#009900', marginRight: 3}}>{this.props.sendStatus}</Text>
                        <Icon name={'ios-checkmark-outline'} size={15} color='#009900' />
-                     </View>
-        break
-      case 'Chained':
-        sendStatus = <View style={{alignSelf: 'flex-end', flexDirection: 'row', marginHorizontal: 5}}>
-                       <Text style={{fontSize: 14, color: '#316A99', marginRight: 3}}>{this.props.sendStatus}</Text>
-                       <Icon name={'ios-checkmark'} size={15} color='#316A99' />
                      </View>
         break
       default:
         sendStatus = <Text style={{alignSelf: 'flex-end', fontSize: 14, color: '#757575', marginHorizontal: 5}}>{this.props.sendStatus}</Text>
         break
       }
+    }
+    if (resource.txId) {
+      sendStatus = <View style={styles.sendStatus}>
+                     <Text style={{fontSize: 14, color: '#316A99', marginRight: 3}}>{this.props.sendStatus}</Text>
+                     <Icon name={'ios-checkmark'} size={15} color='#316A99' />
+                   </View>
     }
 
     var bgStyle = this.props.bankStyle  &&  this.props.bankStyle.BACKGROUND_COLOR ? {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR} : {backgroundColor: '#f7f7f7'}
@@ -1390,6 +1390,11 @@ var styles = StyleSheet.create({
     marginHorizontal: -7,
     marginTop: -5,
     justifyContent: 'center'
+  },
+  sendStatus: {
+    alignSelf: 'flex-end',
+    flexDirection: 'row',
+    marginHorizontal: 5
   },
 });
 reactMixin(MessageRow.prototype, RowMixin);
