@@ -198,8 +198,8 @@ var Store = Reflux.createStore({
     async function maybeWipe () {
     // change to true if you want to wipe
     // everything and start from scratch
-      if (true) {
-      // if (false) {
+      // if (true) {
+      if (false) {
         return await AsyncStorage.clear()
         // throw new Error('intentional error')
         // await BeSafe.clear()
