@@ -24,7 +24,7 @@ class ShowMessageRefList extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      startTop: props.resource[constants.TYPE] == constants.TYPES.IDENTITY && props.resource[constants.ROOT_HASH] === utils.getMe()[constants.ROOT_HASH] ? 70 : 15
+      startTop: props.resource[constants.TYPE] == constants.TYPES.PROFILE && props.resource[constants.ROOT_HASH] === utils.getMe()[constants.ROOT_HASH] ? 70 : 15
     }
   }
   render() {
@@ -33,7 +33,7 @@ class ShowMessageRefList extends Component {
     var props = model.properties;
 
     var refList = [];
-    var isIdentity = model.id === constants.TYPES.IDENTITY;
+    var isIdentity = model.id === constants.TYPES.PROFILE;
     var isMe = isIdentity ? resource[constants.ROOT_HASH] === utils.getMe()[constants.ROOT_HASH] : true;
 
     for (var p in props) {

@@ -62,7 +62,7 @@ class ResourceRow extends Component {
   render() {
     var resource = this.props.resource;
     var photo;
-    var isIdentity = resource[constants.TYPE] === constants.TYPES.IDENTITY;
+    var isIdentity = resource[constants.TYPE] === constants.TYPES.PROFILE;
     var noImage;
     if (resource.photos &&  resource.photos.length) {
       var uri = utils.getImageUri(resource.photos[0].url);
@@ -209,7 +209,7 @@ class ResourceRow extends Component {
     if (datePropsCounter > 1)
       dateProp = null;
 
-    var isIdentity = resource[constants.TYPE] === constants.TYPES.IDENTITY;
+    var isIdentity = resource[constants.TYPE] === constants.TYPES.PROFILE;
     viewCols.forEach(function(v) {
       if (v === dateProp)
         return;

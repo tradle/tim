@@ -59,7 +59,7 @@ class NewResource extends Component {
       r = props.resource
     else
       r[constants.TYPE] = props.model.id;
-    var isRegistration = !utils.getMe()  && this.props.model.id === constants.TYPES.IDENTITY  &&  (!this.props.resource || !this.props.resource[constants.ROOT_HASH]);
+    var isRegistration = !utils.getMe()  && this.props.model.id === constants.TYPES.PROFILE  &&  (!this.props.resource || !this.props.resource[constants.ROOT_HASH]);
 
     this.state = {
       resource: r,
@@ -325,7 +325,7 @@ class NewResource extends Component {
       resource = {};
       resource[constants.TYPE] = this.props.model.id;
     }
-    // var isRegistration = !utils.getMe()  && this.props.model.id === constants.TYPES.IDENTITY  &&  (!resource || !resource[constants.ROOT_HASH]);
+    // var isRegistration = !utils.getMe()  && this.props.model.id === constants.TYPES.PROFILE  &&  (!resource || !resource[constants.ROOT_HASH]);
     // if (isRegistration)
     //   this.state.isRegistration = true;
     var params = {
@@ -670,7 +670,7 @@ class NewResource extends Component {
       // }
     }
     // var FromToView = require('./FromToView');
-    // var isRegistration = !utils.getMe()  &&  resource[constants.TYPE] === constants.TYPES.IDENTITY
+    // var isRegistration = !utils.getMe()  &&  resource[constants.TYPE] === constants.TYPES.PROFILE
     if (this.state.isRegistration)
       Form.stylesheet = rStyles
     else

@@ -137,8 +137,10 @@ class MessageRow extends Component {
       else {
         if (!model.style) {
           addStyle = {paddingVertical: 5, paddingHorizontal: 7, borderRadius: 10, borderColor: '#cccccc', backgroundColor: '#ffffff', marginVertical: 2};
-          if (isConfirmation)
-            addStyle = [addStyle, styles.myConfCell]
+          if (isConfirmation) {
+            var bg = this.props.bankStyle  &&  this.props.bankStyle.CONFIRMATION_BACKGROUND_COLOR ? {backgroundColor: this.props.bankStyle.CONFIRMATION_BACKGROUND_COLOR} : {backgroundColor: '#ffffff'}
+            addStyle = [addStyle, styles.myConfCell, bg]
+          }
         }
       }
       if (isVerification) {
@@ -641,12 +643,14 @@ class MessageRow extends Component {
               // <Icon style={[{color: '#289427', alignSelf: 'flex-end', width: 50, height: 50, marginTop: -45, opacity: 0.1}]} size={50} name={'ios-flower'} />
 
         if (isConfirmation) {
-          style = [style, {color: '#289427', fontSize: 16}]
+          var confirmationColor = self.props.bankStyle  &&  self.props.bankStyle.CONFIRMATION_COLOR ? self.props.bankStyle.CONFIRMATION_COLOR : '#289427'
+
+          style = [style, {color: confirmationColor, fontSize: 16}]
           vCols.push(
             <View key={self.getNextKey()}>
               <Text style={[style]}>{resource[v]}</Text>
-              <Icon style={[{color: '#289427', alignSelf: 'flex-end', width: 50, height: 50, marginTop: -45, opacity: 0.2}]} size={50} name={'ios-flower'} />
-              <Icon style={{color: '#289427', alignSelf: 'flex-end', marginTop: -10}} size={20} name={'android-done-all'} />
+              <Icon style={[{color: confirmationColor, alignSelf: 'flex-end', width: 50, height: 50, marginTop: -45, opacity: 0.2}]} size={50} name={'ios-flower'} />
+              <Icon style={{color: confirmationColor, alignSelf: 'flex-end', marginTop: -10}} size={20} name={'android-done-all'} />
             </View>
           );
 

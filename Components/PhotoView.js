@@ -43,7 +43,7 @@ class PhotoView extends Component {
     var hasPhoto = resource.photos && resource.photos.length;
     var currentPhoto = this.state.currentPhoto || (hasPhoto  &&  resource.photos[0]);
     if (!currentPhoto) {
-      if (model.id === constants.TYPES.IDENTITY) {
+      if (model.id === constants.TYPES.PROFILE) {
         return (
           <Icon name={'person'} size={200}  color='#f6f6f4' />
         )

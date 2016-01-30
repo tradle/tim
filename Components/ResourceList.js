@@ -48,7 +48,7 @@ class ResourceList extends Component {
       filter: this.props.filter,
       userInput: ''
     };
-    var isRegistration = this.props.isRegistration ||  (this.props.resource  &&  this.props.resource[constants.TYPE] === constants.TYPES.IDENTITY  &&  !this.props.resource[constants.ROOT_HASH]);
+    var isRegistration = this.props.isRegistration ||  (this.props.resource  &&  this.props.resource[constants.TYPE] === constants.TYPES.PROFILE  &&  !this.props.resource[constants.ROOT_HASH]);
     if (isRegistration)
       this.state.isRegistration = isRegistration;
   }
@@ -82,7 +82,7 @@ class ResourceList extends Component {
                 : utils.getModel(params.resource[constants.TYPE]).value;
       if (action === 'addItem'  &&  model.id !== this.props.modelName)
         return
-      if (action === 'addMessage'  &&  this.props.modelName !== constants.TYPES.IDENTITY)
+      if (action === 'addMessage'  &&  this.props.modelName !== constants.TYPES.PROFILE)
         return
       // this.state.isLoading = true;
       Actions.list({
@@ -133,7 +133,7 @@ class ResourceList extends Component {
     //   list[rnd].online = true;
     // }
     /*
-    if (type === constants.TYPES.IDENTITY) {
+    if (type === constants.TYPES.PROFILE) {
       // // var routes = this.props.navigator.getCurrentRoutes();
       // // if (routes.length == 2) {
         var l = []
@@ -174,7 +174,7 @@ class ResourceList extends Component {
     var me = utils.getMe();
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     var model = utils.getModel(this.props.modelName);
-    var isIdentity = this.props.modelName === constants.TYPES.IDENTITY;
+    var isIdentity = this.props.modelName === constants.TYPES.PROFILE;
     var isVerification = model.value.id === constants.TYPES.VERIFICATION
     var isForm = model.value.id === constants.TYPES.FORM
     var isOrganization = this.props.modelName === constants.TYPES.ORGANIZATION;
@@ -221,7 +221,7 @@ class ResourceList extends Component {
       return;
     }
     if (this.props.prop) {
-      if (me  &&  this.props.modelName != constants.TYPES.IDENTITY) {
+      if (me  &&  this.props.modelName != constants.TYPES.PROFILE) {
         this._selectResource(resource);
         return;
       }
@@ -329,7 +329,7 @@ class ResourceList extends Component {
     }
     if (me                       &&
        !model.value.isInterface  &&
-       (resource[constants.ROOT_HASH] === me[constants.ROOT_HASH]  ||  resource[constants.TYPE] !== constants.TYPES.IDENTITY)) {
+       (resource[constants.ROOT_HASH] === me[constants.ROOT_HASH]  ||  resource[constants.TYPE] !== constants.TYPES.PROFILE)) {
       var self = this ;
       route.rightButtonTitle = 'Edit';
       route.onRightButtonPress = /*() =>*/ {
@@ -438,7 +438,7 @@ class ResourceList extends Component {
     var model = utils.getModel(this.props.modelName).value;
     if (model.subClassOf  &&  model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT)
       return <View />
-    // var qrInfo = (model.id === constants.TYPES.IDENTITY)
+    // var qrInfo = (model.id === constants.TYPES.PROFILE)
     //            ? <View style={styles.row}>
     //                <TouchableHighlight underlayColor='transparent'
     //                   onPress={this.showQRCode.bind(this, 'Contact Info', me[constants.ROOT_HASH])}>
@@ -563,7 +563,7 @@ class ResourceList extends Component {
     var content;
     var model = utils.getModel(this.props.modelName).value;
     if (this.state.dataSource.getRowCount() === 0              &&
-        this.props.modelName !== constants.TYPES.IDENTITY      &&
+        this.props.modelName !== constants.TYPES.PROFILE      &&
         this.props.modelName !== constants.TYPES.VERIFICATION  &&
         this.props.modelName !== constants.TYPES.ORGANIZATION) {
       content = <NoResources
@@ -604,7 +604,7 @@ class ResourceList extends Component {
   }
 
   renderHeader() {
-    return (this.props.modelName === constants.TYPES.IDENTITY)
+    return (this.props.modelName === constants.TYPES.PROFILE)
           ? <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
               <TouchableHighlight underlayColor='transparent' onPress={this.showBanks.bind(this)}>
                 <View style={styles.row}>

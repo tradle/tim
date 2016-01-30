@@ -99,7 +99,7 @@ class ResourceView extends Component {
       photos.splice(0, 1);
     }
     var actionPanel;
-    var isIdentity = model.id === constants.TYPES.IDENTITY;
+    var isIdentity = model.id === constants.TYPES.PROFILE;
     var isOrg = model.id === constants.TYPES.ORGANIZATION;
     var me = utils.getMe()
     var isMe = isIdentity ? resource[constants.ROOT_HASH] === me[constants.ROOT_HASH] : true;

@@ -22,7 +22,7 @@ var {
 //                <TouchableHighlight onPress={this.createNewIdentity.bind(this)} underlayColor='transparent'>
 //                  <View>
 //                    <Icon name='plus'  size={25}  color='#f7f7f7'  style={buttonStyles.icon}/>
-//                    <Text style={[buttonStyles.text, {color: '#f7f7f7'}]}>Add Identity</Text>
+//                    <Text style={[buttonStyles.text, {color: '#f7f7f7'}]}>Add PROFILE</Text>
 //                  </View>
 //                </TouchableHighlight>
 //              </View>
@@ -30,7 +30,7 @@ class ShowRefList extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      startTop: props.resource[constants.TYPE] == constants.TYPES.IDENTITY && props.resource[constants.ROOT_HASH] === utils.getMe()[constants.ROOT_HASH] ? 70 : 15
+      startTop: props.resource[constants.TYPE] == constants.TYPES.PROFILE && props.resource[constants.ROOT_HASH] === utils.getMe()[constants.ROOT_HASH] ? 70 : 15
     }
   }
   render() {
@@ -39,10 +39,10 @@ class ShowRefList extends Component {
     var props = model.properties;
 
     var refList = [];
-    var isIdentity = model.id === constants.TYPES.IDENTITY;
+    var isIdentity = model.id === constants.TYPES.PROFILE;
     var me = utils.getMe()
     var isMe = isIdentity ? resource[constants.ROOT_HASH] === me[constants.ROOT_HASH] : true;
-    // The profile page for the device owner has 2 more profile specific links: add new identity and switch identity
+    // The profile page for the device owner has 2 more profile specific links: add new PROFILE and switch PROFILE
     for (var p in props) {
       if (isIdentity) {
         if (!isMe  &&  props[p].allowRoles  &&  props[p].allowRoles === 'me')
