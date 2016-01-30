@@ -23,7 +23,7 @@ export function authenticateUser (reason) {
   if (pendingAuth) return pendingAuth
 
   return pendingAuth = LocalAuth.authenticate({
-      reason: reason || 'please unlock the app',
+      reason: reason || 'unlock Tradle with your fingerprint',
       fallbackToPasscode: true,
       suppressEnterPassword: true
     })
