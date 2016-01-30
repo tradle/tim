@@ -1237,6 +1237,7 @@ var Store = Reflux.createStore({
     if (!to)
       return
 
+    var key = IDENTITY + '_' + to[ROOT_HASH]
     var opts = {
       to: [{fingerprint: this.getFingerprint(to)}],
       deliver: true,
