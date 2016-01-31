@@ -824,9 +824,9 @@ var Store = Reflux.createStore({
       list[key] = {key: key, value: r};
 
       if (notOneClickVerification)
-        self.trigger({action: 'addItem', resource: from});
+        self.trigger({action: 'addItem', resource: r});
       else
-        self.trigger({action: 'addVerification', resource: from});
+        self.trigger({action: 'addVerification', resource: r});
 
       var verificationRequestId = utils.getId(r.document);
       var verificationRequest = list[verificationRequestId].value;
@@ -1239,7 +1239,7 @@ var Store = Reflux.createStore({
 
     var key = IDENTITY + '_' + to[ROOT_HASH]
     var opts = {
-      to: [{fingerprint: this.getFingerprint(to)}],
+      to: [{fingerprint: this.getFingerprint(list[key].value)}],
       deliver: true,
       chain: false
     }
