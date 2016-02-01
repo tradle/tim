@@ -58,7 +58,10 @@
   self.window.rootViewController = rootViewController;
   [self.window makeKeyAndVisible];
 
+#ifdef DEBUG
+#else
   [Fabric with:@[[Crashlytics class]]];
+#endif
 
   return YES;
 }
