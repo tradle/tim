@@ -60,7 +60,8 @@ class NewItem extends Component {
     }
     var propName = this.props.metadata.name;
     var resource = this.props.resource
-    var item = JSON.parse(JSON.stringify(value));
+    // var item = JSON.parse(JSON.stringify(value));
+    var item = value
     var missedRequired = this.checkRequired(this.props.metadata, item, resource)
     if (!utils.isEmpty(missedRequired)) {
       this.state.submitted = false

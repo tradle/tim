@@ -56,9 +56,9 @@ class NewResource extends Component {
     this.resetKeyboardSpace = this.resetKeyboardSpace.bind(this);
     var r = {};
     if (props.resource)
-      r = props.resource
+      extend(true, r, props.resource)
     else
-      r[constants.TYPE] = props.model.id;
+      r[constants.TYPE] = props.model.id
     var isRegistration = !utils.getMe()  && this.props.model.id === constants.TYPES.PROFILE  &&  (!this.props.resource || !this.props.resource[constants.ROOT_HASH]);
 
     this.state = {
@@ -104,7 +104,7 @@ class NewResource extends Component {
            this.state.prop !== nextState.prop ||
            this.state.isUploading !== nextState.isUploading  ||
            this.state.itemsCount != nextState.itemsCount     ||
-           this.state.modalVisible != nextState.modalVisible ||
+           // this.state.modalVisible != nextState.modalVisible ||
           !equal(this.state.resource, nextState.resource)
   }
   componentWillMount() {
@@ -242,7 +242,7 @@ class NewResource extends Component {
         value = {}
       }
     }
-    var json = JSON.parse(JSON.stringify(value));
+    var json = value //JSON.parse(JSON.stringify(value));
 
     if (this.state.floatingProps) {
       for (var p in this.state.floatingProps) {
@@ -341,7 +341,8 @@ class NewResource extends Component {
 
   addFormValues() {
     var value = this.refs.form.getValue();
-    var json = value ? JSON.parse(JSON.stringify(value)) : this.refs.form.refs.input.state.value;
+    // var json = value ? JSON.parse(JSON.stringify(value)) : this.refs.form.refs.input.state.value;
+    var json = value ? value : this.refs.form.refs.input.state.value;
     var resource = this.state.resource;
     if (!resource) {
       resource = {};
