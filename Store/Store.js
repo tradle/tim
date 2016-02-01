@@ -135,7 +135,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDER = ENV.topLevelProvider
-var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://127.0.0.1:44444' : TOP_LEVEL_PROVIDER.baseUrl
+var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://localhost:44444' : TOP_LEVEL_PROVIDER.baseUrl
 // var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.0.149:44444' : TOP_LEVEL_PROVIDER.baseUrl
 var SERVICE_PROVIDERS_BASE_URL
 var HOSTED_BY = TOP_LEVEL_PROVIDER.name
@@ -2110,7 +2110,7 @@ var Store = Reflux.createStore({
     var allMyIdentities = list[MY_IDENTITIES + '_1']
     var currentIdentity
 
-    var mePub = me[ROOT_HASH] ? list[IDENTITY + '_' + me[ROOT_HASH]] : me['pubkeys']
+    var mePub = me[ROOT_HASH] ? list[IDENTITY + '_' + me[ROOT_HASH]]['pubkey'] : me['pubkeys']
     var mePriv
     if (allMyIdentities) {
       var all = allMyIdentities.value.allIdentities
@@ -2118,8 +2118,9 @@ var Store = Reflux.createStore({
       all.forEach(function(id) {
         if (id.id === curId) {
           currentIdentity = id
-          mePriv = list[id.id].value.privkeys
-          mePub = list[id.id].value.pubkeys
+          mePriv = id.privkeys
+          publishedIdentity = id.publishedIdentity
+          mePub = publishedIdentity.pubkeys
         }
       })
     }
@@ -2189,9 +2190,7 @@ var Store = Reflux.createStore({
       me[NONCE] = me[NONCE] || this.getNonce()
     }
 
-    if (currentIdentity)
-      publishedIdentity = currentIdentity.publishedIdentity
-    else
+    if (!publishedIdentity)
       publishedIdentity = this.makePublishingIdentity(me, mePub)
 
     return driverPromise = this.buildDriver(Identity.fromJSON(publishedIdentity), mePriv, PORT)
