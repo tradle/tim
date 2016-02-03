@@ -75,10 +75,10 @@ var WELCOME_INTERVAL = 600000
 var Tim = require('tim')
 Tim.enableOptimizations()
 Tim.CATCH_UP_INTERVAL = 10000
-var Zlorp = Tim.Zlorp
-Zlorp.ANNOUNCE_INTERVAL = 10000
-Zlorp.LOOKUP_INTERVAL = 10000
-Zlorp.KEEP_ALIVE_INTERVAL = 10000
+// var Zlorp = Tim.Zlorp
+// Zlorp.ANNOUNCE_INTERVAL = 10000
+// Zlorp.LOOKUP_INTERVAL = 10000
+// Zlorp.KEEP_ALIVE_INTERVAL = 10000
 
 var Transport = require('@tradle/transport-http')
 var getDHTKey = require('tim/lib/utils').getDHTKey
@@ -86,7 +86,7 @@ var getDHTKey = require('tim/lib/utils').getDHTKey
 var dns = require('dns')
 var map = require('map-stream')
 // var bitcoin = require('@tradle/bitcoinjs-lib')
-var DHT = require('@tradle/bittorrent-dht') // use tradle/bittorrent-dht fork
+// var DHT = require('@tradle/bittorrent-dht') // use tradle/bittorrent-dht fork
 var Blockchain = require('@tradle/cb-blockr') // use tradle/cb-blockr fork
 // Blockchain.throttleGet(100)
 // Blockchain.throttlePost(1000)
@@ -266,7 +266,7 @@ var Store = Reflux.createStore({
   buildDriver(identity, keys, port) {
     var iJSON = identity.toJSON()
     // var prefix = iJSON.name.firstName.toLowerCase()
-    var dht = null; //this.dhtFor(iJSON, port)
+    // var dht = null; //this.dhtFor(iJSON, port)
     var keeper = new Keeper({
       // storage: prefix + '-storage',
       // flat: true, // flat directory structure
@@ -286,6 +286,7 @@ var Store = Reflux.createStore({
     //   .then(function (addrs) {
     //     console.log('tradle is at', addrs)
     messenger = new Transport.HttpClient()
+    // messenger = new Transport.WebSocketClient()
     meDriver = new Tim({
       pathPrefix: TIM_PATH_PREFIX,
       networkName: networkName,
@@ -293,12 +294,12 @@ var Store = Reflux.createStore({
       blockchain: blockchain,
       leveldown: leveldown,
       identity: identity,
-      identityKeys: keys,
-      dht: dht,
-      port: port,
-      syncInterval: 60000,
+      keys: keys,
+      // dht: dht,
+      // port: port,
+      syncInterval: 120000,
       afterBlockTimestamp: constants.afterBlockTimestamp,
-      messenger: messenger
+      _send: messenger.send.bind(messenger)
       // afterBlockTimestamp: 1445976998,
       // relay: {
       //   // address: addrs[0],
@@ -306,6 +307,8 @@ var Store = Reflux.createStore({
       //   port: 25778
       // }
     })
+
+    messenger.on('message', meDriver.receiveMsg)
 
     var whitelist = []
     meDriver._shouldLoadTx = function (tx) {
