@@ -322,8 +322,6 @@ var Store = Reflux.createStore(timeFunctions({
     // return Q.ninvoke(dns, 'resolve4', 'tradle.io')
     //   .then(function (addrs) {
     //     console.log('tradle is at', addrs)
-    messenger = new Transport.HttpClient()
-    // messenger = new Transport.WebSocketClient()
     meDriver = new Tim({
       pathPrefix: TIM_PATH_PREFIX,
       networkName: networkName,
@@ -344,9 +342,15 @@ var Store = Reflux.createStore(timeFunctions({
       // }
     })
 
-    messenger.on('message', meDriver.receiveMsg)
+    var whitelist = SERVICE_PROVIDERS.map(function(name) {
+      var bank = ALL_SERVICE_PROVIDERS.providers[name]
+      return bank.txId
+    })
 
-    var whitelist = []
+    meDriver.watchTxs(whitelist.filter(function (txId) {
+      return txId
+    }))
+
     meDriver._shouldLoadTx = function (tx) {
       // if public, check if it's our infoHash
       // or if it's in pre-determined list to load
@@ -414,7 +418,7 @@ var Store = Reflux.createStore(timeFunctions({
       var messenger = new WebSocketClient({
         url: `${serviceProvidersHost}:${wsPort}`,
         otrKey: kiki.toKey(otrKey).priv(),
-        autoconnect: true,
+        autoconnect: false,
         // rootHash: meDriver.myRootHash()
       })
 

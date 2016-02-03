@@ -22,7 +22,6 @@
     "@tradle/models": "^2.0.0",
     "@tradle/simple-wallet": "^1.0.0",
     "@tradle/transport-http": "^1.0.0",
-    "@tradle/transport-ws": "^1.1.1",
     "@tradle/utils": "^1.0.0",
     "@tradle/utp": "0.0.8",
     "@tradle/ws-client": "^1.0.0",
