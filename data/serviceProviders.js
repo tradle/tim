@@ -65,7 +65,7 @@ module.exports = {
       hash: '179d536d4fc033b0e074be8d756413302ea62805',
       title: 'Easy Bank',
       txId: '0080491d1b9d870c6dcc8a60f87fa0ba1fcc617f76e8f414ecb1dd86188367a9',
-      wsPort: 44544
+      wsPort: 44445
     },
     safe: {
       hash: '3b31cbee623a1795fd6ecb6fe650cc2d874be958',
