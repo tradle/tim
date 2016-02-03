@@ -182,7 +182,6 @@ var Store = Reflux.createStore({
 
     // console.time('loadMyResources')
     return this.ready = this.getMe()
-      .then(maybeWipe)
       .then(() => this.getSettings())
       .then(() => {
         this.loadMyResources()
@@ -194,24 +193,6 @@ var Store = Reflux.createStore({
             .then(() => this.monitorTim())
         }
       })
-
-    async function maybeWipe () {
-    // change to true if you want to wipe
-    // everything and start from scratch
-      // if (true) {
-      if (false) {
-        return await AsyncStorage.clear()
-        // throw new Error('intentional error')
-        // await BeSafe.clear()
-      } else if (false) {
-        try {
-          await BeSafe.loadFromLastBackup()
-        } catch (err) {
-          await BeSafe.clear()
-        }
-      }
-
-    }
 
     // try {
     //   await self.getMe()
@@ -1207,9 +1188,6 @@ var Store = Reflux.createStore({
 
     function save () {
       return self._putResourceInDB(returnVal[TYPE], returnVal, returnVal[ROOT_HASH], isRegistration)
-        .catch(function(err) {
-          debugger
-        })
     }
   },
   onGetMe() {
@@ -2855,25 +2833,19 @@ var Store = Reflux.createStore({
     var from = list[PROFILE + '_' + obj.from[ROOT_HASH]].value
     var to = list[PROFILE + '_' + obj.to[ROOT_HASH]].value
 
-    if (whoAmI === from[ROOT_HASH]) {
-      val.to = {
-        id: to[TYPE] + '_' + to[ROOT_HASH],
-        title: to.formatted
-      }
-      val.from = {
-        id: from[TYPE] + '_' + from[ROOT_HASH],
-        title: from.formatted
-      }
+    if (whoAmI !== from[ROOT_HASH]) {
+      // swap from and to
+      [from, to] = [to, from]
     }
-    else {
-      val.to = {
-        id: from[TYPE] + '_' + from[ROOT_HASH],
-        title: from.formatted
-      }
-      val.from = {
-        id: to[TYPE] + '_' + to[ROOT_HASH],
-        title: to.formatted
-      }
+
+    val.to = {
+      id: to[TYPE] + '_' + to[ROOT_HASH],
+      title: to.formatted || to.firstName
+    }
+
+    val.from = {
+      id: from[TYPE] + '_' + from[ROOT_HASH],
+      title: from.formatted || from.firstName
     }
   },
   addNameAndTitleProps(m, aprops) {
