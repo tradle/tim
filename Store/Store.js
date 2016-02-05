@@ -332,6 +332,7 @@ var Store = Reflux.createStore(timeFunctions({
       keys: keys,
       // dht: dht,
       // port: port,
+      // sendThrottle: 10000,
       syncInterval: 120000,
       afterBlockTimestamp: constants.afterBlockTimestamp,
       // afterBlockTimestamp: 1445976998,
@@ -435,9 +436,13 @@ var Store = Reflux.createStore(timeFunctions({
       }
 
       var args = arguments
-      return meDriver.ready().then(() => {
+      if (meDriver.isReady()) return doSend()
+
+      return meDriver.ready().then(doSend)
+
+      function doSend () {
         return messenger.send.apply(messenger, args)
-      })
+      }
     }
 
     meDriver.ready().then(function () {
