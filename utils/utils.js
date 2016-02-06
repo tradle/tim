@@ -12,7 +12,7 @@ var moment = require('moment');
 
 var levelErrors = require('levelup/lib/errors')
 // TODO: add logbase to deps
-var rebuf = require('tim/node_modules/logbase').rebuf
+var rebuf = require('logbase').rebuf
 var parseDBValue = function (pair) {
   return pair[1] && rebuf(JSON.parse(pair[1]))
 }

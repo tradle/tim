@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "react-native start",
-    "postinstall": "./node_modules/.bin/rn-nodeify --hack"
+    "postinstall": "./node_modules/.bin/rn-nodeify --hack && npm run streamhack",
+    "streamhack": "rm -rf ./node_modules/@tradle/utils/node_modules/create-torrent/node_modules/block-stream2/node_modules/readable-stream"
   },
   "dependencies": {
     "@tradle/bitcoinjs-lib": "^1.5.7",
@@ -38,6 +39,7 @@
     "https-browserify": "0.0.1",
     "inherits": "^2.0.1",
     "levelup": "^0.18.6",
+    "logbase": "^3.4.2",
     "map-stream": "0.0.6",
     "mockery": "^1.4.0",
     "moment": "~2.10.2",
@@ -63,6 +65,7 @@
     "react-native-ecc": "^1.2.2",
     "react-native-env": "tradle/react-native-env",
     "react-native-floating-labels": "pgmemk/react-native-floating-labels",
+    "react-native-gesture-password": "mvayngrib/react-native-gesture-password",
     "react-native-http": "tradle/react-native-http#834492d",
     "react-native-image-picker": "^0.9.0",
     "react-native-invertible-scroll-view": "^0.1.0",
@@ -81,7 +84,6 @@
     "reflux": "^0.2.12",
     "regenerator": "^0.8.42",
     "rimraf": "^2.4.3",
-    "rn-nodeify": "mvayngrib/rn-nodeify#q",
     "stable-sha1": "~1.0.1",
     "stream-browserify": "^1.0.0",
     "stream-collector": "^1.0.1",
@@ -89,7 +91,7 @@
     "tcomb": "^2.2.0",
     "tcomb-form-native": "^0.3.3",
     "tcomb-validation": "^2.2.0",
-    "tim": "^5.1.0",
+    "tim": "^5.2.2",
     "typeforce": "^1.5.5",
     "url": "^0.10.3",
     "util": "^0.10.3",
