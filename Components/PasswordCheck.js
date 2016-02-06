@@ -24,6 +24,8 @@ module.exports = React.createClass({
     promptRetrySet: PropTypes.string,
     promptRetryCheck: PropTypes.string,
     promptInvalidSet: PropTypes.string,
+    successMsg: PropTypes.string,
+    failMsg: PropTypes.string,
     mode: function (props, propName) {
       return props[propName] in MODES ? null : new Error('Invalid mode')
     }
@@ -32,13 +34,14 @@ module.exports = React.createClass({
   getDefaultProps: function () {
     return {
       validate: () => true,
-      isCorrect: () => true,
       promptSet: 'Please choose a gesture-based password',
       promptCheck: 'You know what to do',
       promptReenter: 'Please re-enter the gesture',
       promptInvalidSet: 'Invalid gesture password, please try again',
       promptRetrySet: 'Gestures didn\'t match. Please start again',
       promptRetryCheck: 'Please try again',
+      successMsg: 'Correct gesture detected',
+      failMsg: 'Authentication failed',
       maxAttempts: Infinity
     }
   },
@@ -59,7 +62,11 @@ module.exports = React.createClass({
     }
   },
 
-  _onEntered: function(password) {
+  _onStart: function () {
+    this.setState({ status: 'normal' })
+  },
+
+  _onEntered: function (password) {
     switch (this.props.mode) {
       case MODES.check:
         return this._checkPassword(password)
@@ -86,10 +93,19 @@ module.exports = React.createClass({
     }
 
     if (this.state.password === password) {
+      this.setState({
+        status: 'right',
+        message: ''
+      })
+
       return this.props.onSuccess(password)
     }
 
-    return this.setState({ ...this.getInitialState(), message: this.props.promptRetrySet })
+    return this.setState({
+      attempts: 0,
+      status: 'wrong',
+      message: this.props.promptRetrySet
+    })
   },
 
   _checkPassword: function (password) {
@@ -97,13 +113,20 @@ module.exports = React.createClass({
       .then((isCorrect) => {
         if (isCorrect) {
           this.setState({
-            status: 'right'
+            status: 'right',
+            message: this.props.successMsg
           })
 
           return this.props.onSuccess()
         }
 
         if (++this.state.attempts >= this.props.maxAttempts) {
+          this.setState({
+            status: 'wrong',
+            attempts: this.state.attempts,
+            message: this.props.failMsg
+          })
+
           return this.props.onFail()
         }
 
@@ -129,13 +152,14 @@ module.exports = React.createClass({
               msgText: { fontSize: 18 }
             }
           }
-          rightColor={'#ffffff'}
-          wrongColor={'#ff0000'}
+          baseColor={'#ffffff'}
+          rightColor={'#55ff55'}
+          wrongColor={'#ff5555'}
           radius={{ inner: 20, outer: 30 }}
           status={this.state.status}
           message={this.state.message}
           msgStyle={{fontSize:30}}
-          // onStart={() => this.onStart()}
+          onStart={() => this._onStart()}
           onEnd={(password) => this._onEntered(password)}
         />
       </View>
