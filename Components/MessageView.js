@@ -209,7 +209,7 @@ reactMixin(MessageView.prototype, ResourceViewMixin);
 
 var styles = StyleSheet.create({
   container: {
-    marginTop: 60,
+    marginTop: 64,
     flex: 1,
   },
   itemTitle: {
