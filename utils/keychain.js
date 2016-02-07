@@ -10,7 +10,10 @@ import { ec as ellipticEC } from 'elliptic'
 
 let debug = require('debug')('tim-keychain')
 
-let notFound = Q.reject(new Error('NotFound'))
+let rejectNotFound = function () {
+  return Q.reject(new Error('NotFound'))
+}
+
 let ellipticCurves = {}
 let getCurve = function (name) {
   if (!ellipticCurves[name]) ellipticCurves[name] = new ellipticEC(name)
@@ -43,8 +46,14 @@ let defaultKeySet = [
     curve: 'p256',
     purpose: 'update',
     secureEnclave: true
+  },
+  {
+    type: 'dsa',
+    purpose: 'sign'
   }
 ]
+
+export const PASSWORD_ITEM_KEY = 'app-password'
 
 export function generateNewSet (opts = {}) {
   typeforce({
@@ -93,10 +102,10 @@ function lookupKey (pubKey) {
   let isInSecureEnclave = pubKey.curve && pubKey.type !== 'bitcoin'
   let secureEnclaveLookup = isInSecureEnclave
     ? lookupSecureEnclaveKey(pubKey)
-    : notFound
+    : rejectNotFound()
 
   let keychainLookup = isInSecureEnclave
-    ? notFound
+    ? rejectNotFound()
     : lookupKeychainKey(pubKey)
 
   let pubKeyString = pubKey.value
