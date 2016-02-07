@@ -1398,7 +1398,8 @@ var styles = StyleSheet.create({
   sendStatus: {
     alignSelf: 'flex-end',
     flexDirection: 'row',
-    marginHorizontal: 5
+    marginHorizontal: 5,
+    marginTop: -5
   },
 });
 reactMixin(MessageRow.prototype, RowMixin);
