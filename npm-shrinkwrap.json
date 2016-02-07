@@ -5671,15 +5671,15 @@
           "from": "https://registry.npmjs.org/array-differ/-/array-differ-1.0.0.tgz",
           "resolved": "https://registry.npmjs.org/array-differ/-/array-differ-1.0.0.tgz"
         },
-        "array-union": {
-          "version": "1.0.1",
-          "from": "https://registry.npmjs.org/array-union/-/array-union-1.0.1.tgz",
-          "resolved": "https://registry.npmjs.org/array-union/-/array-union-1.0.1.tgz"
-        },
         "array-uniq": {
           "version": "1.0.2",
           "from": "https://registry.npmjs.org/array-uniq/-/array-uniq-1.0.2.tgz",
           "resolved": "https://registry.npmjs.org/array-uniq/-/array-uniq-1.0.2.tgz"
+        },
+        "array-union": {
+          "version": "1.0.1",
+          "from": "https://registry.npmjs.org/array-union/-/array-union-1.0.1.tgz",
+          "resolved": "https://registry.npmjs.org/array-union/-/array-union-1.0.1.tgz"
         },
         "arrify": {
           "version": "1.0.1",
@@ -5726,6 +5726,11 @@
           "from": "https://registry.npmjs.org/dateformat/-/dateformat-1.0.12.tgz",
           "resolved": "https://registry.npmjs.org/dateformat/-/dateformat-1.0.12.tgz"
         },
+        "esutils": {
+          "version": "2.0.2",
+          "from": "https://registry.npmjs.org/esutils/-/esutils-2.0.2.tgz",
+          "resolved": "https://registry.npmjs.org/esutils/-/esutils-2.0.2.tgz"
+        },
         "diff": {
           "version": "2.2.1",
           "from": "https://registry.npmjs.org/diff/-/diff-2.2.1.tgz",
@@ -5735,11 +5740,6 @@
           "version": "2.7.2",
           "from": "https://registry.npmjs.org/esprima/-/esprima-2.7.2.tgz",
           "resolved": "https://registry.npmjs.org/esprima/-/esprima-2.7.2.tgz"
-        },
-        "esutils": {
-          "version": "2.0.2",
-          "from": "https://registry.npmjs.org/esutils/-/esutils-2.0.2.tgz",
-          "resolved": "https://registry.npmjs.org/esutils/-/esutils-2.0.2.tgz"
         },
         "get-stdin": {
           "version": "4.0.1",

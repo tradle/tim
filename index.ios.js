@@ -32,6 +32,8 @@ var ResourceList = require('./Components/ResourceList');
 var VideoPlayer = require('./Components/VideoPlayer')
 // var GridList = require('./Components/GridList');
 var TimHome = require('./Components/TimHome');
+var PasswordCheck = require('./Components/PasswordCheck');
+var TouchIDOptIn = require('./Components/TouchIDOptIn');
 var ResourceTypesScreen = require('./Components/ResourceTypesScreen');
 var NewResource = require('./Components/NewResource');
 var NewItem = require('./Components/NewItem');
@@ -403,39 +405,9 @@ class TiMApp extends Component {
     case 19:
       return <GridItemsList navigator={nav} {...props} />
     case 20:
-      // return <PasswordCheck
-      //           navigator={nav}
-      //           mode={PasswordCheck.Modes.set}
-      //           validate={(pass) => { return pass.length > 4 }}
-      //           promptSet='Please choose a gesture password'
-      //           promptInvalidSet='Password must have 5 or more points'
-      //           onSuccess={(pass) => {
-      //             React.AsyncStorage.setItem('password', pass)
-      //               .then(() => {
-      //                 nav.push({
-      //                   component: PasswordCheck,
-      //                   id: 1,
-      //                   passProps: {
-      //                     mode: PasswordCheck.Modes.check,
-      //                     maxAttempts: 3,
-      //                     isCorrect: (pass) => {
-      //                       return React.AsyncStorage.getItem('password')
-      //                         .then(stored => stored === pass)
-      //                         .catch(err => false)
-      //                     },
-      //                     onSuccess: () => {
-      //                       React.Alert.alert('Yay!')
-      //                     },
-      //                     onFail: () => {
-      //                       React.Alert.alert('Boo!')
-      //                     }
-      //                   }
-      //                 })
-      //               })
-      //           }}
-      //           {...props}
-      //         />;
-      return <PasswordCheck {...props} />
+      return <PasswordCheck navigator={nav} {...props} />
+    case 21:
+      return <TouchIDOptIn navigator={nav} { ...props } />
     case 10:
     default: // 10
       return <ResourceList navigator={nav} {...props} />;
