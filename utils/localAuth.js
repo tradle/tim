@@ -8,6 +8,10 @@ var AUTH_FAILED_MSG = 'Authentication failed'
 var authenticated = false
 var pendingAuth
 
+export function hasTouchID () {
+  return LocalAuth.hasTouchID()
+}
+
 export function isAuthenticated () {
   return authenticated
 }
