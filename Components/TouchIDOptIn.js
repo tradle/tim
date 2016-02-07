@@ -14,7 +14,7 @@ let {
 // import Device from 'react-native-device'
 import ArticleView from './ArticleView'
 const BG_IMAGE = require('../img/bg.png')
-const TOUCH_ID_IMG = require('../img/touchid.png')
+const TOUCH_ID_IMG = require('../img/touchid2.png')
 const LINK_COLOR = '#7AAAC3'
 const BTN_COLOR = LINK_COLOR
 
@@ -42,9 +42,12 @@ class TouchIDOptIn extends Component {
           <Text style={[styles.text, { fontSize: 30 }]}>
             Enable Touch ID?
           </Text>
+          <Text style={[styles.text, { paddingTop: 20, fontSize: 15 }]}>
+            You can always enable/disable it on your profile
+          </Text>
         </View>
         <View style={styles.imgContainer}>
-          <Image resizeMode='contain' source={TOUCH_ID_IMG} width={ width / 4 } />
+          <Image resizeMode='contain' source={TOUCH_ID_IMG} />
         </View>
         <View style={styles.quoteContainer}>
           <Text style={[styles.text, styles.quoteText]}>
@@ -78,6 +81,7 @@ var styles = StyleSheet.create({
   },
   headingContainer: {
     flex: 0.3,
+    alignItems: 'center',
     justifyContent: 'center',
   },
   imgContainer: {
