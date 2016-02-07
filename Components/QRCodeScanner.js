@@ -43,9 +43,8 @@ class QRCodeScannerView extends Component {
     this.props.onread(e)
   }
   _switchCamera() {
-    var state = this.state
-    state.cameraType = state.cameraType === Dir.back ? Dir.front : Dir.back
-    this.setState(state)
+    var cameraType = this.state.cameraType === Dir.back ? Dir.front : Dir.back
+    this.setState({cameraType})
   }
 }
 
