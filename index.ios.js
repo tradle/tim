@@ -543,7 +543,7 @@ var styles = StyleSheet.create({
   },
   navBarText: {
     fontSize: 16,
-    marginBottom: 7
+    // marginBottom: 7
   },
   navBarTitleText: {
     color: '#2E3B4E',
@@ -553,12 +553,12 @@ var styles = StyleSheet.create({
   navBarLeftButton: {
     paddingLeft: 15,
     paddingRight: 25,
-    paddingBottom: 10
+    // paddingBottom: 10
   },
   navBarRightButton: {
     paddingLeft: 25,
     paddingRight: 15,
-    paddingBottom: 10
+    // paddingBottom: 10
   },
   navBarButtonText: {
     color: '#7AAAC3',
