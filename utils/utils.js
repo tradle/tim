@@ -22,7 +22,6 @@ var parseDBValue = function (pair) {
 var constants = require('@tradle/constants');
 var TYPE = constants.TYPE
 var VERIFICATION = constants.TYPES.VERIFICATION
-var MONEY_TYPE = 'tradle.Money';
 var propTypesMap = {
   'string': t.Str,
   'boolean': t.Bool,
@@ -278,6 +277,36 @@ var utils = {
       }
     }
   },
+
+  optimizeResource(res) {
+    var properties = this.getModel(res[TYPE]).value.properties
+    for (var p in res) {
+      if (p.charAt(0) === '_'  ||  !properties[p])
+        continue
+      if (res[p].id  &&  res[p].title)
+        continue
+      if (properties[p].type === 'object'  &&  properties[p].ref !== constants.TYPES.MONEY) {
+        res[p] = {
+          id: this.getId(res[p]),
+          title: this.getDisplayName(res[p], properties)
+        }
+      }
+      else if (properties[p].type === 'array'  &&  properties[p].items.ref) {
+        var arr = []
+        res[p].forEach(function(r) {
+          if (r.id)
+            return
+          var rr = {}
+          rr.id = utils.getId(r)
+          var m = utils.getModel(r[TYPE])
+          rr.title = utils.getDisplayName(r, m.properties)
+          arr.push(rr)
+        })
+        res[p] = arr
+      }
+    }
+  },
+
 
   readDB(db) {
     // return new Promise((resolve, reject) => {
