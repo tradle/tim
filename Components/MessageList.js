@@ -3,6 +3,7 @@
 var React = require('react-native');
 var SearchBar = require('react-native-search-bar');
 var MessageView = require('./MessageView');
+var MessageRow = require('./MessageRow');
 var NoResources = require('./NoResources');
 var NewResource = require('./NewResource');
 var ResourceTypesScreen = require('./ResourceTypesScreen');
@@ -12,15 +13,18 @@ var ProductChooser = require('./ProductChooser');
 var Device = require('react-native-device')
 var Icon = require('react-native-vector-icons/Ionicons');
 // var Progress = require('react-native-progress')
-
+var extend = require('extend')
 var utils = require('../utils/utils');
 var reactMixin = require('react-mixin');
+var equal = require('deep-equal')
 var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var InvertibleScrollView = require('react-native-invertible-scroll-view');
 var constants = require('@tradle/constants');
 var bankStyles = require('../styles/bankStyles')
+var GiftedMessenger = require('react-native-gifted-messenger');
+
 // var LoadingOverlay = require('./LoadingOverlay')
 
 var LINK_COLOR
@@ -29,6 +33,7 @@ var {
   ListView,
   Component,
   StyleSheet,
+  Dimensions,
   Navigator,
   View,
   Text,
@@ -47,13 +52,18 @@ class MessageList extends Component {
     this.state = {
       isLoading: true,
       selectedAssets: {},
-      dataSource: new ListView.DataSource({
-        rowHasChanged: (row1, row2) =>  row1 !== row2
-      }),
+      // dataSource: new ListView.DataSource({
+      //   rowHasChanged: (row1, row2) => {
+      //     if (row1 !== row2) {
+      //       return true
+      //     }
+      //   }
+      // }),
       filter: this.props.filter,
       userInput: '',
       progress: 0,
       indeterminate: true,
+      allLoaded: false
     };
     if (bankStyles) {
       var name = props.resource.name.split(' ')[0].toLowerCase()
@@ -90,14 +100,24 @@ class MessageList extends Component {
         modelName: this.props.modelName,
         to: this.props.resource,
       }
+      this.state.newItem = true
       if (params.sendStatus) {
         this.state.sendStatus = params.sendStatus
         this.state.sendResource = params.resource
       }
-
-      Actions.messageList(actionParams);
+      var l = this.state.list
+      if (l)
+        l.push(params.resource)
+      else
+        l = [params.resource]
+      this.setState({list: l})
+      // if (params.action === 'addItem')
+      //   this._GiftedMessenger.appendMessage(params.resource);
+      // else
+        // Actions.messageList(actionParams);
       return;
     }
+    this.state.newItem = false
     if (params.action === 'updateItem') {
       this.setState({
         sendStatus: params.sendStatus,
@@ -123,6 +143,21 @@ class MessageList extends Component {
         return;
     }
     var list = params.list;
+
+    if (params.loadingEarlierMessages) {
+      if (!list || !list.length) {
+        this.state.postLoad([], true)
+        this.setState({allLoaded: true, isLoading: false, noScroll: true})
+      }
+      else {
+        this.state.postLoad(list, false)
+        this.state.list.forEach((r) => {
+          list.push(r)
+        })
+      }
+      return
+    }
+
     if (list.length || (this.state.filter  &&  this.state.filter.length)) {
       var type = list[0][constants.TYPE];
       if (type  !== this.props.modelName) {
@@ -141,10 +176,11 @@ class MessageList extends Component {
       //   }
       // }
       this.setState({
-        dataSource: this.state.dataSource.cloneWithRows(list),
+        // dataSource: this.state.dataSource.cloneWithRows(list),
         isLoading: false,
         list: list,
         verificationsToShare: params.verificationsToShare,
+        allLoaded: false
       });
     }
     else {
@@ -155,7 +191,8 @@ class MessageList extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     if (!this.state.list  ||
         !nextState.list   ||
-         this.state.sendStatus !== nextState.sendStatus ||
+         this.state.allLoaded !== nextState.allLoaded    ||
+         this.state.sendStatus !== nextState.sendStatus  ||
          this.state.list.length !== nextState.list.length)
       return true
     var isDiff = false
@@ -164,7 +201,9 @@ class MessageList extends Component {
         if (i === this.state.list.length - 1                      &&
             this.state.list[i][constants.TYPE] === nextState.list[i][constants.TYPE]  &&
             this.state.list[i][constants.TYPE] === constants.TYPES.PRODUCT_LIST)
-        if (JSON.stringify(this.state.list[i].list) !== JSON.stringify(nextState.list[i].list))
+
+        // if (JSON.stringify(this.state.list[i].list) !== JSON.stringify(nextState.list[i].list))
+        if (!equal(this.state.list[i].list, nextState.list[i].list))
           isDiff = true
       }
     }
@@ -212,7 +251,7 @@ class MessageList extends Component {
       modelName: this.props.modelName,
       to: this.props.resource,
     }
-
+    this.state.emptySearch = true
     Actions.messageList(actionParams);
   }
 
@@ -221,7 +260,7 @@ class MessageList extends Component {
     var isMessage = model.interfaces  &&  model.interfaces.indexOf(constants.TYPES.MESSAGE) != -1;
     var isAggregation = this.props.isAggregation;
     var me = utils.getMe();
-    var MessageRow = require('./MessageRow');
+    // var MessageRow = require('./MessageRow');
     var previousMessageTime = currentMessageTime;
     currentMessageTime = resource.time;
     return  (
@@ -241,6 +280,17 @@ class MessageList extends Component {
   }
   addedMessage(text) {
     Actions.messageList({modelName: this.props.modelName, to: this.props.resource});
+  }
+
+  componentDidUpdate() {
+    clearTimeout(this._scrollTimeout)
+    if (this.state.allLoaded  &&  this.state.noScroll)
+      this.state.noScroll = false
+    else
+      this._scrollTimeout = setTimeout(() => {
+        // inspired by http://stackoverflow.com/a/34838513/1385109
+        this._GiftedMessenger  &&  this._GiftedMessenger.scrollToBottom()
+      }, 200)
   }
 
   render() {
@@ -266,7 +316,7 @@ class MessageList extends Component {
     //               />
     //             : <View/>
     var bgStyle = this.state.bankStyle  &&  this.state.bankStyle.BACKGROUND_COLOR ? {backgroundColor: this.state.bankStyle.BACKGROUND_COLOR} : {backgroundColor: '#f7f7f7'}
-    if (this.state.dataSource.getRowCount() === 0) {
+    if (!this.state.list || !this.state.list.length) {
       if (this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION) {
         content = <View style={[styles.container, bgStyle]}>
           <Text style={{fontSize: 16, alignSelf: 'center', marginTop: 80, color: '#629BCA'}}>{'Loading...'}</Text>
@@ -282,24 +332,43 @@ class MessageList extends Component {
     else {
       var isAllMessages = model.isInterface  &&  model.id === constants.TYPES.MESSAGE;
 
-      content = <ListView ref='listview' style={{marginHorizontal: 10}}
-                  dataSource={this.state.dataSource}
-                  initialListSize={10}
-                  renderRow={this.renderRow.bind(this)}
-                  automaticallyAdjustContentInsets={false}
-                  keyboardDismissMode='on-drag'
-                  keyboardShouldPersistTaps={true}
-                  showsVerticalScrollIndicator={false} />;
-      if (isAllMessages)
-        content =
-          <InvertibleScrollView
-            ref='messages'
-                  onContentSizeChange={this.checkStart.bind(this)}
-            inverted
-            automaticallyAdjustContentInsets={false}
-            scrollEventThrottle={200}>
-          {content}
-          </InvertibleScrollView>
+      content = <GiftedMessenger style={{paddingHorizontal: 10, marginTop: 5}}
+        ref={(c) => this._GiftedMessenger = c}
+        loadEarlierMessagesButton={this.state.list ? this.state.list.length > 100 : false}
+        onLoadEarlierMessages={this.onLoadEarlierMessages.bind(this)}
+        messages={this.state.list}
+        autoFocus={false}
+        textRef={'chat'}
+        renderCustomMessage={this.renderRow.bind(this)}
+        handleSend={this.onSubmitEditing.bind(this)}
+        submitOnReturn={true}
+        menu={this.generateMenu.bind(this)}
+        keyboardShouldPersistTaps={false}
+        maxHeight={Dimensions.get('window').height - 64} // 64 for the navBar; 110 - with SearchBar
+      />
+        // returnKeyType={false}
+        // keyboardShouldPersistTaps={false}
+        // keyboardDismissMode='none'
+
+
+    //   content = <ListView ref='listview' style={{marginHorizontal: 10}}
+    //               dataSource={this.state.dataSource}
+    //               initialListSize={10}
+    //               renderRow={this.renderRow.bind(this)}
+    //               automaticallyAdjustContentInsets={false}
+    //               keyboardDismissMode='on-drag'
+    //               keyboardShouldPersistTaps={true}
+    //               showsVerticalScrollIndicator={false} />;
+    //   if (isAllMessages)
+    //     content =
+    //       <InvertibleScrollView
+    //         ref='messages'
+    //               onContentSizeChange={this.checkStart.bind(this)}
+    //         inverted
+    //         automaticallyAdjustContentInsets={false}
+    //         scrollEventThrottle={200}>
+    //       {content}
+    //       </InvertibleScrollView>
     }
 
     var addNew = (model.isInterface)
@@ -324,23 +393,62 @@ class MessageList extends Component {
       chooser = <View/>
 
     var sepStyle = { height: 1,backgroundColor: LINK_COLOR }
+    if (this.state.allLoaded)
+       AlertIOS.alert('There is no earlier messages!')
+          // <View style={{flex: 10}}>
+          //   <SearchBar
+          //     onChangeText={this.onSearchChange.bind(this)}
+          //     placeholder='Search'
+          //     showsCancelButton={false}
+          //     hideBackground={true} />
+          // </View>
 
     return (
       <View style={[styles.container, bgStyle]}>
         <View style={{flexDirection:'row'}}>
-          <View style={{flex: 10}}>
-            <SearchBar
-              onChangeText={this.onSearchChange.bind(this)}
-              placeholder='Search'
-              showsCancelButton={false}
-              hideBackground={true} />
-          </View>
         </View>
         <View style={ sepStyle } />
         {content}
-        {addNew}
+        {alert}
       </View>
     );
+        // {addNew}
+  }
+  generateMenu() {
+    return <TouchableHighlight underlayColor='transparent'
+              onPress={this.showMenu.bind(this)}>
+             <View style={{marginLeft: 5, paddingRight: 0, marginTop: 5, marginRight: 10, marginBottom: 0}}>
+               <Icon name='android-more-vertical' size={30} color='#999999' />
+             </View>
+           </TouchableHighlight>
+  }
+
+
+  onLoadEarlierMessages(oldestMessage = {}, callback = () => {}) {
+    this.state.loadingEarlierMessages = true
+    // Your logic here
+    // Eg: Retrieve old messages from your server
+
+    // newest messages have to be at the begining of the array
+    var list = this.state.list;
+    var id = utils.getId(list[0])
+    Actions.messageList({
+      lastId: id,
+      limit: 10,
+      loadingEarlierMessages: true,
+      modelName: this.props.modelName,
+      to: this.props.resource,
+    })
+    // var list = this.state.list
+    var earlierMessages = []
+    //   list[list.length - 1],
+    //   list[list.length - 2],
+    //   list[list.length - 3]
+    // ];
+    this.state.postLoad = callback
+    // setTimeout(() => {
+    //   callback(earlierMessages, false); // when second parameter is true, the "Load earlier messages" button will be hidden
+    // }, 1000);
   }
   checkStart(evt) {
     evt = evt
@@ -488,13 +596,49 @@ class MessageList extends Component {
     this.props.navigator.pop();
     Actions.addMessage(msg);
   }
+  onSubmitEditing(msg) {
+    // msg = msg ? msg : this.state.userInput;
+    // var assets = this.state.selectedAssets;
+    // var isNoAssets = utils.isEmpty(assets);
+    // if (!msg  &&  isNoAssets)
+    //   return;
+    var me = utils.getMe();
+    var resource = {from: utils.getMe(), to: this.props.resource};
+    var model = utils.getModel(this.props.modelName).value;
+
+    var toName = utils.getDisplayName(resource.to, utils.getModel(resource.to[constants.TYPE]).value.properties);
+    var meta = utils.getModel(me[constants.TYPE]).value.properties;
+    var meName = utils.getDisplayName(me, meta);
+    var modelName = constants.TYPES.SIMPLE_MESSAGE;
+    var value = {
+      message: msg
+              ?  model.isInterface ? msg : '[' + this.state.userInput + '](' + this.props.model.id + ')'
+              : '',
+      from: me,
+      to: resource.to,
+      time: new Date().getTime()
+    }
+    value[constants.TYPE] = modelName;
+    // if (!isNoAssets) {
+    //   var photos = [];
+    //   for (var a in assets)
+    //     photos.push({url: assets[a].url, isVertical: assets[a].isVertical, title: 'photo'});
+
+    //   value.photos = photos;
+    // }
+    this.setState({userInput: '', selectedAssets: {}});
+    if (this.state.clearCallback)
+      this.state.clearCallback();
+    Actions.addMessage(value); //, this.state.resource, utils.getModel(modelName).value);
+  }
+
 }
 reactMixin(MessageList.prototype, Reflux.ListenerMixin);
 
 var styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: 60,
+    marginTop: 64,
     backgroundColor: '#f7f7f7',
   },
   centerText: {
