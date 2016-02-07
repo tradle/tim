@@ -26,6 +26,8 @@ var equal = require('deep-equal')
 var DeviceHeight = require('Dimensions').get('window').height;
 var constants = require('@tradle/constants');
 var UIImagePickerManager = require('NativeModules').UIImagePickerManager;
+var SETTINGS = 'tradle.Settings'
+var delayedRegistration
 // var Modal = require('react-native-modal')
 // var PhotoCarouselMixin = require('./PhotoCarouselMixin')
 
@@ -100,16 +102,18 @@ class NewResource extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     return nextState.err                      ||
            nextState.missedRequired           ||
-           // nextState.isModalOpen !== this.state.isModalOpen  ||
-           this.state.prop !== nextState.prop ||
+           this.state.prop !== nextState.prop                ||
            this.state.isUploading !== nextState.isUploading  ||
            this.state.itemsCount != nextState.itemsCount     ||
-           // this.state.modalVisible != nextState.modalVisible ||
           !equal(this.state.resource, nextState.resource)
+           // nextState.isModalOpen !== this.state.isModalOpen  ||
+           // this.state.modalVisible != nextState.modalVisible ||
   }
   componentWillMount() {
     if (this.state.isUploading)
       Actions.getTemporary(this.state.resource[constants.TYPE])
+    // else if (this.state.isRegistration)
+    //   Actions.getTemporary(SETTINGS)
   }
 
   componentDidMount() {
@@ -121,6 +125,17 @@ class NewResource extends Component {
     DeviceEventEmitter.addListener('keyboardWillHide', (e) => {
       this.resetKeyboardSpace(e)
     })
+      // if (this.state.isRegistration) {
+      //   var r = {}
+      //   extend(true, r, this.state.resource)
+      //   r.url = params.resource.url
+      //   this.setState({
+      //     settings: {_t: SETTINGS, url: params.resource.url},
+      //     resource: r,
+      //     isUploading: false
+      //   })
+      // }
+
   }
 
 
@@ -168,17 +183,33 @@ class NewResource extends Component {
     if (params.error) {
       if (resource[constants.TYPE] == this.state.resource[constants.TYPE])
         this.setState({err: params.error, resource: resource, isRegistration: this.state.isRegistration});
+      if (resource[constants.TYPE] == SETTINGS) {
+        var missedRequired = {url:  params.error}
+        // this.state.resource.url = params.resource.url
+        this.setState({
+          missedRequired: missedRequired
+        })
+      }
+      this.state.submitted = false
       return;
+    }
+    if (params.resource[constants.TYPE] === SETTINGS  &&  !this.state.settings) {
+      Actions.addItem(this.delayedRegistration)
+      this.state.settings = params.resource
+      this.state.submitted = false
+      return
     }
     if (this.props.callback) {
       // this.props.navigator.pop();
       this.props.callback(resource);
       return;
-    }    // if registration or after editing your own profile
+    }
+
+    // if registration or after editing your own profile
     // if (this.state.isRegistration  ||  (params.me  &&  resource[constants.ROOT_HASH] === params.me[constants.ROOT_HASH]))
     //   utils.setMe(params.me);
     var self = this;
-    var title = utils.getDisplayName(resource, self.props.model.properties);
+    var title = utils.getDisplayName(resource, this.props.model.properties);
     var isMessage = this.props.model.interfaces  &&  this.props.model.interfaces.indexOf(constants.TYPES.MESSAGE) != -1;
     // When message created the return page is the chat window,
     // When profile or some contact info changed/added the return page is Profile view page
@@ -242,11 +273,12 @@ class NewResource extends Component {
         value = {}
       }
     }
-    var json = value //JSON.parse(JSON.stringify(value));
+    // value is a tcomb Struct
+    var json = JSON.parse(JSON.stringify(value));
 
-    if (this.state.floatingProps) {
-      for (var p in this.state.floatingProps) {
-        json[p] = this.state.floatingProps[p]
+    if (this.floatingProps) {
+      for (var p in this.floatingProps) {
+        json[p] = this.floatingProps[p]
       }
     }
     var required = this.props.model.required;
@@ -328,15 +360,32 @@ class NewResource extends Component {
     // var isRegistration = !utils.getMe()  && this.props.model.id === constants.TYPES.PROFILE  &&  (!resource || !resource[constants.ROOT_HASH]);
     // if (isRegistration)
     //   this.state.isRegistration = true;
+    var r = {}
+    extend(true, r, resource)
+    delete r.url
     var params = {
       value: json,
-      resource: resource,
+      resource: r,
       meta: this.props.model,
       isRegistration: this.state.isRegistration
     };
     if (this.props.additionalInfo)
       additionalInfo: additionalInfo
-    Actions.addItem(params);
+    if (this.state.isRegistration  && json.url && json.url.length) {
+      var r = {
+        type: SETTINGS,
+        url: json.url
+      }
+      delete json.url
+      Actions.addItem({
+        value: r,
+        resource: r,
+        meta: utils.getModel(SETTINGS).value,
+      })
+      this.delayedRegistration = params
+    }
+    else
+      Actions.addItem(params)
   }
 
   addFormValues() {
@@ -712,7 +761,7 @@ class NewResource extends Component {
           <View style={photoStyle}>
             <PhotoView resource={resource} navigator={this.props.navigator}/>
           </View>
-          <View style={this.state.isRegistration ? {marginLeft: 30, marginRight: 30, paddingTop: 30} : {paddingRight: 15, paddingTop: 10, marginHorizontal: 10}}>
+          <View style={this.state.isRegistration ? {marginHorizontal: DeviceHeight > 1000 ? 50 : 30, paddingTop: 30} : {paddingRight: 15, paddingTop: 10, marginHorizontal: 10}}>
             <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange.bind(this)}/>
             {button}
             <View style={{marginTop: -10}}>
