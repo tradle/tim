@@ -171,7 +171,6 @@ var NewResourceMixin = {
                     value: data  &&  data[p] ? data[p] + '' : null,
                     required: !maybe,
                     keyboard: props[p].keyboard ||  (type === 'number' ? 'numeric' : 'default'),
-                    onChangeTextValue: this.onChangeTextValue.bind(this, p)
                   })
 
           options.fields[p].onSubmitEditing = onSubmitEditing.bind(this);
@@ -225,7 +224,6 @@ var NewResourceMixin = {
                     value: data[p] ? data[p] + '' : null,
                     keyboard: units  &&  units.charAt(0) === '[' ? 'numbers-and-punctuation' : 'numeric',
                     required: !maybe,
-                    onChangeTextValue: this.onChangeTextValue.bind(this, p)
                   })
 
           // options.fields[p].template = moneyTemplate.bind({}, props[p])
@@ -255,23 +253,45 @@ var NewResourceMixin = {
         options.fields[p].nullOption = {value: '', label: 'Choose your ' + utils.makeLabel(p)};
       }
     }
+    if (this.state.isRegistration) {
+      model.url = t.maybe(t.Str)
+      var label = 'Server url'
+      options.fields.url = {
+        error: 'Insert a valid ' + label,
+        bufferDelay: 20, // to eliminate missed keystrokes
+        autoCorrect: false
+      }
+      if (onSubmitEditing)
+        options.fields.url.onSubmitEditing = onSubmitEditing.bind(this);
+      if (onEndEditing)
+        options.fields.url.onEndEditing = onEndEditing.bind(this, 'url')
+      options.fields.url.template = textTemplate.bind(this, {
+                label: label,
+                prop:  utils.getModel(SETTINGS).value.properties.url,
+                value: this.state.resource.url,
+                required: false,
+                keyboard: 'url'
+              })
+    }
     return options;
   },
   getNextKey() {
     return (this.props.model  ||  this.props.metadata).id + '_' + cnt++
   },
   onChangeTextValue(prop, value, event) {
-    // this.state.resource[prop] = value
-    if (!this.state.floatingProps)
-      this.state.floatingProps = {}
-    this.state.floatingProps[prop.name] = value;
+    console.log(arguments)
+    this.state.resource[prop.name] = value
+    // this.setState({resource: this.state.resource})
+    if (!this.floatingProps)
+      this.floatingProps = {}
+    this.floatingProps[prop.name] = value;
     // prop.type === 'object' && prop.ref === constants.TYPES.MONEY
     //                                     ? {value: value}
     //                                     : value
     var r = {}
     extend(r, this.state.resource)
-    for (var p in this.state.floatingProps)
-      r[p] = this.state.floatingProps[p]
+    for (var p in this.floatingProps)
+      r[p] = this.floatingProps[p]
     Actions.saveTemporary(r)
   },
   myTextInputTemplate(params) {
@@ -283,21 +303,6 @@ var NewResourceMixin = {
                   <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>Enter a valid {params.prop.title}</Text>
                 </View>
               : <View key={this.getNextKey()} />
-    // return (
-    //   <View style={{paddingBottom: 10}}>
-    //     <FloatLabelTextInput
-    //       ref={params.prop.name}
-    //       placeHolder={params.label}
-    //       onFocus={this.inputFocused.bind(this, params.prop.name)}
-    //       value={params.value}
-    //       style={{fontSize: 30}}
-    //       keyboardType={params.keyboard || 'default'}
-    //       onChangeTextValue={this.onChangeTextValue.bind(this, params.prop)}
-    //     />
-    //     {error}
-    //   </View>
-    // );
-
     var label = params.label
     if (params.prop.units) {
       label += (params.prop.units.charAt(0) === '[')
@@ -313,13 +318,25 @@ var NewResourceMixin = {
         <FloatLabel
           labelStyle={styles.labelInput}
           autoCorrect={false}
-          autoCapitalize={this.state.isRegistration ? 'sentences' : 'none'}
+          autoCapitalize={this.state.isRegistration &&  params.prop.name !== 'url' ? 'sentences' : 'none'}
           onFocus={this.inputFocused.bind(this, params.prop.name)}
           inputStyle={this.state.isRegistration ? styles.regInput : styles.input}
           style={styles.formInput}
           value={params.value}
           keyboardType={params.keyboard || 'default'}
-          onChangeText={this.onChangeTextValue.bind(this, params.prop)}
+          onChangeText={(value) => {
+            var r = {}
+            extend(true, r, this.state.resource)
+            if(params.prop.type === 'number'  ||  params.prop.ref === constants.TYPES.MONEY)
+              value = Number(value)
+            r[params.prop.name] = value
+            if (!this.floatingProps)
+              this.floatingProps = {}
+            this.floatingProps[params.prop.name] = value
+            this.setState({resource: r})
+            if (this.state.resource[constants.TYPE] !== SETTINGS)
+              Actions.saveTemporary(r)
+          }}
         >{label}</FloatLabel>
         {error}
       </View>
@@ -427,9 +444,9 @@ var NewResourceMixin = {
     extend(resource, this.state.resource)
     // clause for the items properies - need to redesign
     if (this.props.metadata  &&  this.props.metadata.type === 'array') {
-      if (!this.state.floatingProps)
-        this.state.floatingProps = {}
-      this.state.floatingProps[propName] = value
+      if (!this.floatingProps)
+        this.floatingProps = {}
+      this.floatingProps[propName] = value
       resource[propName] = value
     }
     else if (this.props.model.properties[propName].type === 'array')
@@ -455,8 +472,8 @@ var NewResourceMixin = {
 
     var r = {}
     extend(r, this.state.resource)
-    for (var p in this.state.floatingProps)
-      r[p] = this.state.floatingProps[p]
+    for (var p in this.floatingProps)
+      r[p] = this.floatingProps[p]
     Actions.saveTemporary(r)
   }
 
