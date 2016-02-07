@@ -6,6 +6,8 @@ var {
   findNodeHandle
 } = require('react-native')
 var RCTUIManager = NativeModules.UIManager
+var crypto = require('crypto')
+var Q = require('q')
 var collect = require('stream-collector')
 var t = require('tcomb-form-native');
 var moment = require('moment');
@@ -390,6 +392,15 @@ var utils = {
         })
       }
     })
+  },
+
+  hashPassword: function (pass) {
+    return crypto.createHash('sha256').update(pass).digest('base64')
+    // return Q.ninvoke(crypto, 'randomBytes', 64)
+    //   .then((salt) => {
+    //     let key = crypto.pbkdf2Sync(pass, salt, 10000, 256, 'sha256')
+    //     return `${key.toString('base64')}:${salt.toString('base64')}`
+    //   })
   }
 }
 
