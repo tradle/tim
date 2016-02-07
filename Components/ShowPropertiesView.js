@@ -104,20 +104,20 @@ class ShowPropertiesView extends Component {
       }
       else if (pMeta.ref) {
         if (pMeta.ref == constants.TYPES.MONEY) {
-          if (typeof val === 'string'  ||  typeof val === 'number')
+          // if (typeof val === 'string'  ||  typeof val === 'number')
             val = DEFAULT_CURRENCY_SYMBOL + val;
 
-          else {
-            var currencies = utils.getModel(pMeta.ref).value.properties.currency.oneOf;
-            var valCurrency = val.currency;
-            currencies.some((c) =>  {
-              var currencySymbol = c[valCurrency];
-              if (currencySymbol) {
-                val = (valCurrency == 'USD') ? currencySymbol + val.value : val.value + currencySymbol;
-                return true
-              }
-            })
-          }
+          // else {
+          //   var currencies = utils.getModel(pMeta.ref).value.properties.currency.oneOf;
+          //   var valCurrency = val.currency;
+          //   currencies.some((c) =>  {
+          //     var currencySymbol = c[valCurrency];
+          //     if (currencySymbol) {
+          //       val = (valCurrency == 'USD') ? currencySymbol + val.value : val.value + currencySymbol;
+          //       return true
+          //     }
+          //   })
+          // }
         }
         // Could be enum like props
         else if (Object.keys(utils.getModel(pMeta.ref).value.properties).length === 2)
