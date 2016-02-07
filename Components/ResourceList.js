@@ -658,7 +658,7 @@ var styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f7f7f7',
     // backgroundColor: 'white',
-    marginTop: 60
+    marginTop: 64
   },
   centerText: {
     alignItems: 'center',
