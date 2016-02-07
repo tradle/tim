@@ -3021,15 +3021,15 @@
                           "from": "debug@~0.7.2",
                           "resolved": "https://registry.npmjs.org/debug/-/debug-0.7.4.tgz"
                         },
-                        "delegates": {
-                          "version": "0.1.0",
-                          "from": "delegates@^0.1.0",
-                          "resolved": "https://registry.npmjs.org/delegates/-/delegates-0.1.0.tgz"
-                        },
                         "deep-extend": {
                           "version": "0.4.0",
                           "from": "deep-extend@~0.4.0",
                           "resolved": "https://registry.npmjs.org/deep-extend/-/deep-extend-0.4.0.tgz"
+                        },
+                        "delegates": {
+                          "version": "0.1.0",
+                          "from": "delegates@^0.1.0",
+                          "resolved": "https://registry.npmjs.org/delegates/-/delegates-0.1.0.tgz"
                         },
                         "gauge": {
                           "version": "1.2.2",
@@ -3046,15 +3046,15 @@
                           "from": "lodash._createpadding@^3.0.0",
                           "resolved": "https://registry.npmjs.org/lodash._createpadding/-/lodash._createpadding-3.6.1.tgz"
                         },
-                        "lodash.pad": {
-                          "version": "3.1.1",
-                          "from": "lodash.pad@^3.0.0",
-                          "resolved": "https://registry.npmjs.org/lodash.pad/-/lodash.pad-3.1.1.tgz"
-                        },
                         "lodash.padleft": {
                           "version": "3.1.1",
                           "from": "lodash.padleft@^3.0.0",
                           "resolved": "https://registry.npmjs.org/lodash.padleft/-/lodash.padleft-3.1.1.tgz"
+                        },
+                        "lodash.pad": {
+                          "version": "3.1.1",
+                          "from": "lodash.pad@^3.0.0",
+                          "resolved": "https://registry.npmjs.org/lodash.pad/-/lodash.pad-3.1.1.tgz"
                         },
                         "lodash.padright": {
                           "version": "3.1.1",
@@ -3086,15 +3086,15 @@
                           "from": "readable-stream@^2.0.0 || ^1.1.13",
                           "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.0.5.tgz"
                         },
-                        "semver": {
-                          "version": "5.1.0",
-                          "from": "semver@~5.1.0",
-                          "resolved": "https://registry.npmjs.org/semver/-/semver-5.1.0.tgz"
-                        },
                         "strip-json-comments": {
                           "version": "1.0.4",
                           "from": "strip-json-comments@~1.0.4",
                           "resolved": "https://registry.npmjs.org/strip-json-comments/-/strip-json-comments-1.0.4.tgz"
+                        },
+                        "semver": {
+                          "version": "5.1.0",
+                          "from": "semver@~5.1.0",
+                          "resolved": "https://registry.npmjs.org/semver/-/semver-5.1.0.tgz"
                         },
                         "uid-number": {
                           "version": "0.0.3",
@@ -7645,9 +7645,9 @@
       "resolved": "https://registry.npmjs.org/thunky/-/thunky-0.1.0.tgz"
     },
     "tim": {
-      "version": "5.2.2",
-      "from": "../tradling",
-      "resolved": "file:../tradling",
+      "version": "5.2.3",
+      "from": "tim@latest",
+      "resolved": "https://registry.npmjs.org/tim/-/tim-5.2.3.tgz",
       "dependencies": {
         "@tradle/chainloader": {
           "version": "2.2.0",
