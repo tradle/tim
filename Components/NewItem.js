@@ -54,14 +54,14 @@ class NewItem extends Component {
         value = {}
     }
 
-    if (this.state.floatingProps) {
-      for (var p in this.state.floatingProps)
-        value[p] = this.state.floatingProps[p]
+    if (this.floatingProps) {
+      for (var p in this.floatingProps)
+        value[p] = this.floatingProps[p]
     }
     var propName = this.props.metadata.name;
     var resource = this.props.resource
-    // var item = JSON.parse(JSON.stringify(value));
-    var item = value
+    // value is a tcomb Struct
+    var item = JSON.parse(JSON.stringify(value));
     var missedRequired = this.checkRequired(this.props.metadata, item, resource)
     if (!utils.isEmpty(missedRequired)) {
       this.state.submitted = false
