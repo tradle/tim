@@ -375,7 +375,7 @@ class TimHome extends Component {
       passProps: {
         model: model,
         callback: () => {
-          this.setPassword(() => this.showOfficialAccounts())
+          this.setPassword(() => this.showOfficialAccounts(true))
         }
       },
     };
@@ -387,9 +387,10 @@ class TimHome extends Component {
     }
     else {
       var self = this
-      route.passProps.callback = this.setPassword.bind(this, function(err) {
-        self.showOfficialAccounts(true)
-      })
+      route.passProps.callback = () => {
+        this.setPassword(() => self.showOfficialAccounts(true))
+      }
+
       // }
       // route.passProps.callback = (me) => {
       //   this.showVideoTour(() => {
