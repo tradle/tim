@@ -106,8 +106,10 @@ class TimHome extends Component {
       : passwordAuth()
 
     return authPromise
-      .then(setAuthenticated)
-      .then(() => self.showOfficialAccounts(true))
+      .then(() => {
+        setAuthenticated(true)
+        self.showOfficialAccounts(true)
+      })
       .catch(err => {
         if (err.name == 'LAErrorUserCancel' || err.name === 'LAErrorSystemCancel') {
           self.props.navigator.popToTop()
