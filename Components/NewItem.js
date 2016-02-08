@@ -5,7 +5,7 @@ var t = require('tcomb-form-native');
 var utils = require('../utils/utils');
 var extend = require('extend');
 var logError = require('logError');
-var SelectPhotoList = require('./SelectPhotoList');
+// var SelectPhotoList = require('./SelectPhotoList');
 var myStyles = require('../styles/styles');
 var constants = require('@tradle/constants');
 var NewResourceMixin = require('./NewResourceMixin');
@@ -24,6 +24,13 @@ var {
 } = React;
 
 class NewItem extends Component {
+  props: {
+    navigator: PropTypes.object.isRequired,
+    metadata: PropTypes.object.isRequired,
+    resource: PropTypes.object.isRequired,
+    onAddItem: PropTypes.func,
+  };
+
   constructor(props) {
     super(props);
     this.state = {
@@ -182,7 +189,6 @@ class NewItem extends Component {
   }
   render() {
     var props = this.props;
-    var parentBG = {backgroundColor: '#7AAAC3'};
     var err = props.err || this.state.err || '';
     var errStyle = err ? styles.err : {'padding': 0, 'height': 0};
     var error = err
