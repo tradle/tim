@@ -83,10 +83,12 @@ class TimHome extends Component {
       utils.setMe(params.me);
       utils.setModels(params.models);
       this.setState({isLoading: false});
-      if (params.me.useTouchId)
+      if (params.me  &&  params.me.useTouchId) {
         this._pressHandler()
-      else
-        this.enterOrRegister()
+        return
+      }
+
+      this.enterOrRegister()
     }
     else if (params.action === 'getMe') {
       this.popToTop(params.me)
@@ -165,7 +167,9 @@ class TimHome extends Component {
           })
           .then((askTouchID) => {
             if (askTouchID) {
-              return self.props.navigator.replace({
+              var nav = self.props.navigator
+              nav.immediatelyResetRouteStack(nav.getCurrentRoutes().splice(-1,1));
+              return nav.push({
                 component: TouchIDOptIn,
                 id: 21,
                 rightButtonTitle: 'Skip',
@@ -225,10 +229,8 @@ class TimHome extends Component {
         }
       }
     }
-    if (doReplace)
-      nav.replace(route)
-    else
-      nav.push(route)
+
+    nav.push(route)
   }
 	showContacts() {
     var passProps = {
