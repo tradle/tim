@@ -1,6 +1,7 @@
 'use strict';
 
 var React = require('react-native');
+var Keychain = require('react-native-keychain')
 var ResourceList = require('./ResourceList');
 var VideoPlayer = require('./VideoPlayer')
 var AddNewIdentity = require('./AddNewIdentity');
@@ -19,8 +20,14 @@ var debug = require('debug')('Tradle-Home')
 var TradleLogo = require('../img/Tradle.png')
 var TradleWhite = require('../img/TradleW.png')
 var BG_IMAGE = require('../img/bg.png')
+var PasswordCheck = require('./PasswordCheck')
+var TouchIDOptIn = require('./TouchIDOptIn')
+
+
 // var Progress = require('react-native-progress')
-import { authenticateUser } from '../utils/localAuth'
+import { authenticateUser, hasTouchID } from '../utils/localAuth'
+const PASSWORD_ITEM_KEY = 'app-password'
+
 var {
   StyleSheet,
   Text,
@@ -39,10 +46,15 @@ var {
 
 
 class TimHome extends Component {
+  props: {
+    modelName: PropTypes.string.isRequired,
+    navigator: PropTypes.object.isRequired
+  };
 	constructor(props) {
 	  super(props);
 	  this.state = {
 	    isLoading: true,
+      isModalOpen: false,
 	  };
 	}
   componentWillMount() {
@@ -71,22 +83,152 @@ class TimHome extends Component {
       utils.setMe(params.me);
       utils.setModels(params.models);
       this.setState({isLoading: false});
+      if (params.me.useTouchId)
+        this._pressHandler()
+      else
+        this.enterOrRegister()
     }
     else if (params.action === 'getMe') {
       this.popToTop(params.me)
     }
   }
-  showOfficialAccountsOrRegister() {
+  enterOrRegister() {
     if (this.state.message) {
       this.restartTiM()
       return
     }
-    this.state.authenticated = true
-    if (utils.getMe())
-      this.showOfficialAccounts();
+    if (utils.getMe()) {
+      var self = this
+      return Keychain.getGenericPassword(PASSWORD_ITEM_KEY)
+      .then(() => {
+         this.checkPassword(succeedOrFail)
+      })
+      .catch(err => {
+        this.setPassword(this.showOfficialAccounts(true))
+      })
+
+    }
       // this.showContacts();
     else
       this.register();
+
+    var self = this
+    var doneWaiting
+
+    function succeedOrFail(err) {
+      if (err) {
+        self.setState({isModalOpen: true})
+        loopAlert(err)
+        setTimeout(() => {
+          doneWaiting = true
+          AlertIOS.alert('Please try again', null, [{
+            text: 'OK',
+            onPress: () => self.checkPassword(succeedOrFail, true)
+          }])
+        }, 5000)
+      }
+      else {
+        self.state.authenticated = true
+        self.showOfficialAccounts(true)
+      }
+    }
+
+    function loopAlert (err) {
+      AlertIOS.alert(err, null, [
+        {
+          text: 'OK',
+          onPress: () => !doneWaiting && loopAlert(err)
+        }
+      ])
+    }
+  }
+  setPassword(cb) {
+    var self = this
+    this.props.navigator.push({
+      component: PasswordCheck,
+      id: 20,
+      passProps: {
+        mode: PasswordCheck.Modes.set,
+        validate: (pass) => { return pass.length > 4 },
+        promptSet: 'Please choose a gesture password',
+        promptInvalidSet: 'Password must have 5 or more points',
+        onSuccess: (pass) => {
+          Keychain.setGenericPassword(PASSWORD_ITEM_KEY, utils.hashPassword(pass))
+          .then(() => {
+            return hasTouchID()
+              .then(() => {
+                return true
+              })
+              .catch((err) => {
+                return false
+              })
+          })
+          .then((askTouchID) => {
+            if (askTouchID) {
+              return self.props.navigator.replace({
+                component: TouchIDOptIn,
+                id: 21,
+                rightButtonTitle: 'Skip',
+                passProps: {
+                  optIn: () => {
+                    var me = utils.getMe()
+                    me.useTouchId = true
+                    Actions.addItem({
+                      resource: me,
+                      value: me,
+                      meta: utils.getModel(me[constants.TYPE]).value
+                    })
+                    self.showOfficialAccounts()
+                  }
+                },
+                onRightButtonPress: cb.bind(this)
+              })
+            }
+
+            cb()
+          })
+          .catch(err => {
+            debugger
+          })
+        },
+        onFail: () => {
+          React.Alert.alert('Oops!')
+        }
+      }
+    })
+  }
+  checkPassword(cb, doReplace) {
+    var nav = this.props.navigator
+
+    var route = {
+      component: PasswordCheck,
+      id: 20,
+      passProps: {
+        mode: PasswordCheck.Modes.check,
+        maxAttempts: 3,
+        promptRetryCheck:'Gesture not recognized, please try again',
+        isCorrect: (pass) => {
+          return Keychain.getGenericPassword(PASSWORD_ITEM_KEY)
+            .then((stored) => {
+              return stored === utils.hashPassword(pass)
+            })
+            .catch(err => {
+              return false
+            })
+        },
+        onSuccess: () => {
+          cb()
+        },
+        onFail: (err) => {
+          cb(err || 'You used allowed number of attemps. Please try in 5 minutes')
+          // lock up the app for 10 mins? idk
+        }
+      }
+    }
+    if (doReplace)
+      nav.replace(route)
+    else
+      nav.push(route)
   }
 	showContacts() {
     var passProps = {
@@ -184,10 +326,10 @@ class TimHome extends Component {
   //   });
   // }
   register() {
-    if (this.state.message) {
-      this.restartTiM()
-      return
-    }
+    // if (this.state.message) {
+    //   this.restartTiM()
+    //   return
+    // }
 
     var modelName = this.props.modelName;
     if (!utils.getModel(modelName)) {
@@ -197,13 +339,11 @@ class TimHome extends Component {
     var model = utils.getModel(modelName).value;
     var route = {
       component: NewResource,
-      // backButtonTitle: 'Back',
-      // title: 'Registration',
       titleTextColor: '#BCD3E6',
-      // rightButtonTitle: 'Done',
       id: 4,
       passProps: {
-        model: model
+        model: model,
+        callback: this.setPassword.bind(this, this.showOfficialAccounts)
       },
     };
 
@@ -213,14 +353,16 @@ class TimHome extends Component {
       route.title = 'Edit Profile';
     }
     else {
-      // route.title = 'Introduce yourself';
-      route.passProps.callback = (me) => {
-        this.showVideoTour(() => {
-          Actions.getMe()
-          // Actions.getInfo()
-          // this.popToTop(me)
-        })
-      }
+      var self = this
+      route.passProps.callback = this.setPassword.bind(this, function(err) {
+        self.showOfficialAccounts(true)
+      })
+      // }
+      // route.passProps.callback = (me) => {
+      //   this.showVideoTour(() => {
+      //     Actions.getMe()
+      //   })
+      // }
 
       route.passProps.editCols = ['firstName', 'lastName']
       route.titleTintColor = '#ffffff'
@@ -315,23 +457,23 @@ class TimHome extends Component {
     var err = this.state.err || '';
     var errStyle = err ? styles.err : {'padding': 0, 'height': 0};
     var myId = sampleData.getMyId() || utils.getMe();
-    var editProfile, communities;
+    // var editProfile, communities;
 
-    if (utils.getMe()) {
-      editProfile = <TouchableHighlight
-                        underlayColor='#2E3B4E' onPress={this.register.bind(this)}>
-                      <Text style={styles.text}>
-                        {'Edit Profile'}
-                      </Text>
-                    </TouchableHighlight>
-      // communities = <TouchableWithoutFeedback style={styles.communities} onPress={this.showCommunities.bind(this)}>
-      //                 <Text style={styles.communitiesText}>Communities</Text>
-      //               </TouchableWithoutFeedback>
-    }
-    else {
-      editProfile = <View />;
-      // communities = <View style={{marginTop: 20}}/>;
-    }
+    // if (utils.getMe()) {
+    //   editProfile = <TouchableHighlight
+    //                     underlayColor='#2E3B4E' onPress={this.register.bind(this)}>
+    //                   <Text style={styles.text}>
+    //                     {'Edit Profile'}
+    //                   </Text>
+    //                 </TouchableHighlight>
+    //   // communities = <TouchableWithoutFeedback style={styles.communities} onPress={this.showCommunities.bind(this)}>
+    //   //                 <Text style={styles.communitiesText}>Communities</Text>
+    //   //               </TouchableWithoutFeedback>
+    // }
+    // else {
+    //   editProfile = <View />;
+    //   // communities = <View style={{marginTop: 20}}/>;
+    // }
     // else  {
     //   var r = {_t: this.props.modelName};
     //   editProfile = <AddNewIdentity resource={r} isRegistration={true} navigator={this.props.navigator} />;
@@ -489,7 +631,7 @@ class TimHome extends Component {
       }
     }
 
-    this.showOfficialAccountsOrRegister()
+    this.showOfficialAccounts()
     if (this.state.authenticating) {
       this.setState({ authenticating: false })
     }
