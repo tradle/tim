@@ -7,10 +7,19 @@ var equal = require('deep-equal')
 var {
   Component,
   StyleSheet,
+  PropTypes,
   View,
 } = React;
 
 class GridItemsList extends Component {
+  props: {
+    navigator: PropTypes.object.isRequired,
+    list: PropTypes.array.isRequired,
+    callback: PropTypes.func.isRequired,
+    resource: PropTypes.object.isRequired,
+    returnRoute: PropTypes.object.isRequired,
+    prop: PropTypes.string.isRequired
+  };
   constructor(props) {
     super(props);
     this.state = {
