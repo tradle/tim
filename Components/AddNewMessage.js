@@ -3,7 +3,7 @@
 var React = require('react-native');
 var utils = require('../utils/utils');
 var ChatMessage = require('./ChatMessage');
-var SelectPhotoList = require('./SelectPhotoList');
+// var SelectPhotoList = require('./SelectPhotoList');
 var Icon = require('react-native-vector-icons/Ionicons');
 var extend = require('extend');
 var Store = require('../Store/Store');
