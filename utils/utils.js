@@ -430,6 +430,16 @@ var utils = {
     //     let key = crypto.pbkdf2Sync(pass, salt, 10000, 256, 'sha256')
     //     return `${key.toString('base64')}:${salt.toString('base64')}`
     //   })
+  },
+
+  joinURL: function (...parts) {
+    var first = parts.shift()
+    var rest = parts.join('/')
+    var addSlash
+    if (first[first.length - 1] === '/') first = first.slice(0, -1)
+    if (rest[0] === '/') rest = rest.slice(1)
+
+    return first + '/' + rest
   }
 }
 

@@ -1,6 +1,5 @@
 'use strict';
 
-// __DEV__ = false
 var path = require('path')
 var React = require('react-native')
 var {
@@ -183,12 +182,13 @@ var Store = Reflux.createStore({
     })
 
     // if (true)
-    if (false)
+    if (false) {
       return this.ready = AsyncStorage.clear()
         .then(() => {
           AlertIOS.alert('please refresh')
           return Q.Promise(function (resolve) {})
         })
+    }
     // console.time('loadMyResources')
 
     return this.ready = this.getMe()
@@ -357,7 +357,7 @@ var Store = Reflux.createStore({
         if (o.state === 'fulfilled') {
           messenger.addRecipient(
             o.value.hash,
-            [SERVICE_PROVIDERS_BASE_URL, o.value.id, 'send'].join('/')
+            utils.joinURL(SERVICE_PROVIDERS_BASE_URL, o.value.id, 'send')
           )
           whitelist.push(o.value.txId)
         }
@@ -381,7 +381,7 @@ var Store = Reflux.createStore({
   getInfo() {
     var self = this
     return Q.race([
-      fetch(path.join(SERVICE_PROVIDERS_BASE_URL, 'info')),
+      fetch(utils.joinURL(SERVICE_PROVIDERS_BASE_URL, 'info')),
       Q.Promise(function (resolve, reject) {
         setTimeout(function () {
           reject(new Error('timed out'))
@@ -2213,7 +2213,7 @@ var Store = Reflux.createStore({
     var key = SETTINGS + '_1'
     var togo
     return Q.race([
-      fetch(path.join(v, 'info')),
+      fetch(utils.joinURL(v, 'info')),
       Q.Promise(function (resolve, reject) {
         setTimeout(function () {
           reject(new Error('timed out'))
