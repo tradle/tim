@@ -472,11 +472,9 @@ class NewResource extends Component {
       // },
       passProps: {
         metadata: bl,
-        // chooser: this.chooser.bind(this),
         resource: this.state.resource,
         parentMeta: this.props.parentMeta,
         onAddItem: this.onAddItem.bind(this),
-        template: this.myCustomTemplate.bind(this),
       }
     });
   }
