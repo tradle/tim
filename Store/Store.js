@@ -19,6 +19,7 @@ Q.onerror = function (err) {
 }
 
 var ENV = require('react-native-env')
+var Keychain = require('react-native-keychain')
 var AddressBook = require('NativeModules').AddressBook;
 var sampleData = require('../data/data');
 var voc = require('@tradle/models');
@@ -135,7 +136,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDER = ENV.topLevelProvider
-var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://127.0.0.1:44444' : TOP_LEVEL_PROVIDER.baseUrl
+var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.0.163:44444' : TOP_LEVEL_PROVIDER.baseUrl
 // var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.0.149:44444' : TOP_LEVEL_PROVIDER.baseUrl
 var SERVICE_PROVIDERS_BASE_URL
 var HOSTED_BY = TOP_LEVEL_PROVIDER.name
@@ -183,7 +184,10 @@ var Store = Reflux.createStore({
 
     // if (true) {
     if (false) {
-      return this.ready = AsyncStorage.clear()
+      return this.ready = Q.all([
+          AsyncStorage.clear(),
+          Keychain.resetGenericPasswords()
+        ])
         .then(() => {
           AlertIOS.alert('please refresh')
           return Q.Promise(function (resolve) {})

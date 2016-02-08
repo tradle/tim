@@ -36,14 +36,14 @@ class TouchIDOptIn extends Component {
   render() {
         // <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: Device.width, height: Device.height}} />
     let { width, height } = Dimensions.get('window')
+          // <Text style={[styles.text, { paddingTop: 20, fontSize: 15 }]}>
+          //   You can always enable/disable it on your profile
+          // </Text>
     return (
       <View style={styles.container}>
         <View style={styles.headingContainer}>
           <Text style={[styles.text, { fontSize: 30 }]}>
             Enable Touch ID?
-          </Text>
-          <Text style={[styles.text, { paddingTop: 20, fontSize: 15 }]}>
-            You can always enable/disable it on your profile
           </Text>
         </View>
         <View style={styles.imgContainer}>

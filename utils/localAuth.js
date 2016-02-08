@@ -1,12 +1,23 @@
 
+const debug = require('debug')('tim:local-auth')
 import { AlertIOS } from 'react-native'
 import LocalAuth from 'react-native-local-auth'
+import Errors from 'react-native-local-auth/data/errors'
+
 import Q from 'q'
 
-// var SETUP_MSG = 'Please set up Touch ID first, so the app can better protect your data.'
-var AUTH_FAILED_MSG = 'Authentication failed'
-var authenticated = false
-var pendingAuth
+// const SETUP_MSG = 'Please set up Touch ID first, so the app can better protect your data.'
+const AUTH_FAILED_MSG = 'Authentication failed'
+const DEFAULT_OPTS = {
+  reason: 'unlock Tradle to proceed',
+  fallbackToPasscode: false,
+  suppressEnterPassword: false
+}
+
+let authenticated = false
+let pendingAuth
+
+exports.Errors = require('react-native-local-auth/data/errors')
 
 export function hasTouchID () {
   return LocalAuth.hasTouchID()
@@ -16,52 +27,37 @@ export function isAuthenticated () {
   return authenticated
 }
 
+export function setAuthenticated (val) {
+  authenticated = val
+}
+
 export function unauthenticateUser () {
   authenticated = false
 }
 
-export function authenticateUser (reason) {
+export function authenticateUser (opts) {
   if (authenticated) return Q(authenticated)
   // prevent two authentication requests from
   // going in concurrently and causing problems
   if (pendingAuth) return pendingAuth
 
-  return pendingAuth = LocalAuth.authenticate({
-      reason: reason || 'unlock Tradle with your fingerprint',
-      fallbackToPasscode: true,
-      suppressEnterPassword: true
-    })
+  opts = typeof opts === 'string' ? { reason: opts} : opts || {}
+  opts = { ...DEFAULT_OPTS, ...opts }
+  return pendingAuth = LocalAuth.authenticate(opts)
     .then(() => {
       authenticated = true
+      pendingAuth = undefined
     })
     .catch((err) => {
-      var message
-      switch (err.name) {
-        case 'LAErrorUserCancel':
-          break
-        // case 'RCTTouchIDNotSupported':
-        //   // fall through
-        // case 'LAErrorTouchIDNotAvailable':
-        //   throw new Error('device not supported')
-        // case 'LAErrorTouchIDNotEnrolled':
-        //   message = SETUP_MSG
-        //   break
-        case 'LAErrorSystemCancel':
-          message = 'Authentication failed. Please restart the app before trying again.'
-          break
-        default:
-          message = __DEV__
-            ? `error: ${err.message}, stack: ${err.stack}`
-            : AUTH_FAILED_MSG
-          break
+      authenticated = false
+      pendingAuth = undefined
+
+      if (__DEV__ && !(err.name in Errors)) {
+        let message = `error: ${err.message}, stack: ${err.stack}`
+        debug(JSON.stringify(err))
+        AlertIOS.alert(message)
       }
 
-      if (message) AlertIOS.alert(message)
-
-      authenticated = false
-    })
-    .then(() => {
-      pendingAuth = undefined
-      return authenticated
+      throw err
     })
 }

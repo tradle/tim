@@ -1,6 +1,7 @@
 'use strict';
 
 var React = require('react-native');
+var Q = require('q')
 var Keychain = require('react-native-keychain')
 var ResourceList = require('./ResourceList');
 var VideoPlayer = require('./VideoPlayer')
@@ -25,7 +26,7 @@ var TouchIDOptIn = require('./TouchIDOptIn')
 
 
 // var Progress = require('react-native-progress')
-import { authenticateUser, hasTouchID } from '../utils/localAuth'
+import { authenticateUser, hasTouchID, setAuthenticated } from '../utils/localAuth'
 const PASSWORD_ITEM_KEY = 'app-password'
 
 var {
@@ -83,56 +84,69 @@ class TimHome extends Component {
       utils.setMe(params.me);
       utils.setModels(params.models);
       this.setState({isLoading: false});
-      if (params.me  &&  params.me.useTouchId) {
-        this._pressHandler()
-        return
-      }
-
-      this.enterOrRegister()
+      this.signIn()
     }
     else if (params.action === 'getMe') {
       this.popToTop(params.me)
     }
   }
-  enterOrRegister() {
+  signIn() {
+    let self = this
     if (this.state.message) {
       this.restartTiM()
       return
     }
-    if (utils.getMe()) {
-      var self = this
-      return Keychain.getGenericPassword(PASSWORD_ITEM_KEY)
-      .then(() => {
-         this.checkPassword(succeedOrFail)
-      })
+
+    let me = utils.getMe()
+    if (!me) return this.register()
+
+    let doneWaiting
+    let authPromise = me.useTouchId
+      ? touchIDWithFallback()
+      : passwordAuth()
+
+    return authPromise
+      .then(setAuthenticated)
+      .then(() => self.showOfficialAccounts(true))
       .catch(err => {
-        this.setPassword(this.showOfficialAccounts(true))
+        if (err.name == 'LAErrorUserCancel' || err.name === 'LAErrorSystemCancel') {
+          self.props.navigator.popToTop()
+        } else {
+          lockUp(err.message || 'Authentication failed')
+        }
       })
 
+    function touchIDWithFallback() {
+      return authenticateUser()
+      .catch((err) => {
+        if (err.name === 'LAErrorUserFallback' || err.name.indexOf('TouchID') !== -1) {
+          return passwordAuth()
+        }
+
+        throw err
+      })
     }
-      // this.showContacts();
-    else
-      this.register();
 
-    var self = this
-    var doneWaiting
+    function passwordAuth () {
+      return Keychain.getGenericPassword(PASSWORD_ITEM_KEY)
+        .catch(err => {
+          // registration must have been aborted.
+          // ask user to set a password
+          return Q.ninvoke(self, 'setPassword')
+        })
+        .then(() => {
+          return Q.ninvoke(self, 'checkPassword')
+        })
+    }
 
-    function succeedOrFail(err) {
-      if (err) {
-        self.setState({isModalOpen: true})
-        loopAlert(err)
-        setTimeout(() => {
-          doneWaiting = true
-          AlertIOS.alert('Please try again', null, [{
-            text: 'OK',
-            onPress: () => self.checkPassword(succeedOrFail, true)
-          }])
-        }, 5000)
-      }
-      else {
-        self.state.authenticated = true
-        self.showOfficialAccounts(true)
-      }
+    function lockUp (err) {
+      self.setState({isModalOpen: true})
+      loopAlert(err)
+      setTimeout(() => {
+        doneWaiting = true
+        // let the user try again
+        self.signIn()
+      }, __DEV__ ? 5000 : 5 * 60 * 1000)
     }
 
     function loopAlert (err) {
@@ -152,7 +166,7 @@ class TimHome extends Component {
       passProps: {
         mode: PasswordCheck.Modes.set,
         validate: (pass) => { return pass.length > 4 },
-        promptSet: 'Please choose a gesture password',
+        promptSet: 'Please draw a gesture password',
         promptInvalidSet: 'Password must have 5 or more points',
         onSuccess: (pass) => {
           Keychain.setGenericPassword(PASSWORD_ITEM_KEY, utils.hashPassword(pass))
@@ -210,7 +224,8 @@ class TimHome extends Component {
       passProps: {
         mode: PasswordCheck.Modes.check,
         maxAttempts: 3,
-        promptRetryCheck:'Gesture not recognized, please try again',
+        promptCheck: 'Draw your gesture password',
+        promptRetryCheck: 'Gesture not recognized, please try again',
         isCorrect: (pass) => {
           return Keychain.getGenericPassword(PASSWORD_ITEM_KEY)
             .then((stored) => {
@@ -224,7 +239,9 @@ class TimHome extends Component {
           cb()
         },
         onFail: (err) => {
-          cb(err || 'You used allowed number of attemps. Please try in 5 minutes')
+          cb(err || new Error('For the safety of your data, ' +
+            'this application has been temporarily locked. ' +
+            'Please try in 5 minutes.'))
           // lock up the app for 10 mins? idk
         }
       }
@@ -574,7 +591,7 @@ class TimHome extends Component {
           style={{height:h}}
         >
           <TouchableHighlight style={[styles.thumbButton]}
-                underlayColor='transparent' onPress={this._pressHandler.bind(this)}>
+            underlayColor='transparent' onPress={() => this._pressHandler()}>
             <View style={[styles.container]}>
               <View>
                 <Image style={thumb} source={require('../img/TradleW.png')}></Image>
@@ -584,12 +601,12 @@ class TimHome extends Component {
           </TouchableHighlight>
         </ScrollView>
         <View style={{height: 90}}></View>
-        <TouchableHighlight style={[styles.thumbButton]}
-              underlayColor='transparent' onPress={this._pressHandler.bind(this)}>
-          <View style={styles.getStarted}>
-             <Text style={styles.getStartedText}>Get started</Text>
-          </View>
-        </TouchableHighlight>
+          <TouchableHighlight style={[styles.thumbButton]}
+                underlayColor='transparent' onPress={() => this._pressHandler()}>
+            <View style={styles.getStarted}>
+               <Text style={styles.getStartedText}>Get started</Text>
+            </View>
+          </TouchableHighlight>
           <Text style={errStyle}>{err}</Text>
           {dev}
         <View style={{height: 200}}></View>
@@ -597,9 +614,12 @@ class TimHome extends Component {
     );
   }
   async onSettingsPressed() {
-    if (!this.state.authenticated)  {
-      if (!await authenticateUser()) return
+    try {
+      await authenticateUser()
+    } catch (err) {
+      return
     }
+
     var model = utils.getModel('tradle.Settings').value
     var route = {
       component: NewResource,
@@ -622,22 +642,28 @@ class TimHome extends Component {
       'Please restart TiM'
     )
   }
-  async _pressHandler() {
-    if (this.state.authenticating) return
 
-    if (!this.state.authenticated) {
-      this.setState({ authenticating: true })
-      if (!await authenticateUser()) {
-        this.setState({ authenticating: false })
-        return
-      }
-    }
-
-    this.showOfficialAccounts()
-    if (this.state.authenticating) {
-      this.setState({ authenticating: false })
-    }
+  _pressHandler() {
+    this.signIn()
   }
+  // async _localAuth() {
+    // if (this.state.authenticating) return
+
+    // if (!this.state.authenticated) {
+    //   this.setState({ authenticating: true })
+    //   try {
+    //     await authenticateUser()
+    //   } catch (err)  {
+    //     this.setState({ authenticating: false })
+    //     throw err
+    //   }
+    // }
+
+    // this.showOfficialAccounts()
+    // if (this.state.authenticating) {
+    //   this.setState({ authenticating: false })
+    // }
+  // }
 }
           // {spinner}
           // <View style={{height: 400}}></View>

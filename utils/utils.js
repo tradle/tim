@@ -440,6 +440,12 @@ var utils = {
     if (rest[0] === '/') rest = rest.slice(1)
 
     return first + '/' + rest
+  },
+
+  promiseDelay: function (millis) {
+    return Q.Promise((resolve) => {
+      setTimeout(resolve, millis)
+    })
   }
 }
 

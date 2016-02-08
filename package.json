@@ -74,7 +74,7 @@
     "react-native-level": "tradle/react-native-level",
     "react-native-level-fs": "tradle/react-native-level-fs",
     "react-native-linear-gradient": "^1.1.0-alpha",
-    "react-native-local-auth": "^1.0.2",
+    "react-native-local-auth": "^1.0.3",
     "react-native-randombytes": "^1.0.1",
     "react-native-scrollable-mixin": "0.0.2",
     "react-native-search-bar": "tradle/react-native-search-bar",

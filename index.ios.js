@@ -82,7 +82,7 @@ var {
 } = React;
 
 var ReactPerf = __DEV__ && require('react-addons-perf')
-var UNAUTHENTICATE_AFTER_BG_MILLIS = 10 * 60 * 1000
+var UNAUTHENTICATE_AFTER_BG_MILLIS = __DEV__ ? 1000 : 10 * 60 * 1000
 
 class TiMApp extends Component {
   constructor(props) {
@@ -139,22 +139,23 @@ class TiMApp extends Component {
         if (!isAuthenticated()) {
           let needNav = currentRoute.component !== TimHome
           if (needNav) {
-            this.state.navigator.replace({
+            this.state.navigator.push({
               id: 1,
               component: TimHome,
               passProps: this.props,
             })
           }
 
+          Actions.start()
           // authenticateUser('Tradle locked down after a period of inactivity. Please unlock!')
-          authenticateUser('Welcome back! Please unlock the app')
-            .then(() => {
-              if (currentRoute) {
-                if (needNav) {
-                  this.state.navigator.push(currentRoute)
-                }
-              }
-            })
+          // authenticateUser('Welcome back! Please unlock the app')
+          //   .then(() => {
+          //     if (currentRoute) {
+          //       if (needNav) {
+          //         this.state.navigator.push(currentRoute)
+          //       }
+          //     }
+          //   })
         }
 
         AutomaticUpdates.sync()
