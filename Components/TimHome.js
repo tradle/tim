@@ -23,10 +23,15 @@ var TradleWhite = require('../img/TradleW.png')
 var BG_IMAGE = require('../img/bg.png')
 var PasswordCheck = require('./PasswordCheck')
 var TouchIDOptIn = require('./TouchIDOptIn')
-
+var commitHash = require('react-native-env').commit
 
 // var Progress = require('react-native-progress')
-import { authenticateUser, hasTouchID, setAuthenticated } from '../utils/localAuth'
+import {
+  authenticateUser,
+  hasTouchID,
+  setAuthenticated,
+  isAuthenticated
+} from '../utils/localAuth'
 const PASSWORD_ITEM_KEY = 'app-password'
 
 var {
@@ -84,13 +89,13 @@ class TimHome extends Component {
       utils.setMe(params.me);
       utils.setModels(params.models);
       this.setState({isLoading: false});
-      this.signIn()
+      this.signIn(() => this.showOfficialAccounts(true))
     }
     else if (params.action === 'getMe') {
       this.popToTop(params.me)
     }
   }
-  signIn() {
+  signIn(cb) {
     let self = this
     if (this.state.message) {
       this.restartTiM()
@@ -100,15 +105,19 @@ class TimHome extends Component {
     let me = utils.getMe()
     if (!me) return this.register()
 
+    if (isAuthenticated()) {
+      return cb()
+    }
+
     let doneWaiting
-    let authPromise = me.useTouchId
-      ? touchIDWithFallback()
+    let authPromise = isAuthenticated() ? Q()
+      : me.useTouchId ? touchIDWithFallback()
       : passwordAuth()
 
     return authPromise
       .then(() => {
         setAuthenticated(true)
-        self.showOfficialAccounts(true)
+        cb()
       })
       .catch(err => {
         if (err.name == 'LAErrorUserCancel' || err.name === 'LAErrorSystemCancel') {
@@ -147,7 +156,7 @@ class TimHome extends Component {
       setTimeout(() => {
         doneWaiting = true
         // let the user try again
-        self.signIn()
+        self.signIn(cb)
       }, __DEV__ ? 5000 : 5 * 60 * 1000)
     }
 
@@ -198,7 +207,8 @@ class TimHome extends Component {
                       value: me,
                       meta: utils.getModel(me[constants.TYPE]).value
                     })
-                    self.showOfficialAccounts()
+
+                    cb()
                   }
                 },
                 onRightButtonPress: cb.bind(this)
@@ -364,7 +374,9 @@ class TimHome extends Component {
       id: 4,
       passProps: {
         model: model,
-        callback: this.setPassword.bind(this, this.showOfficialAccounts)
+        callback: () => {
+          this.setPassword(() => this.showOfficialAccounts())
+        }
       },
     };
 
@@ -581,13 +593,14 @@ class TimHome extends Component {
               </TouchableHighlight>
               {settings}
             </View>
-          : <View style={styles.dev}>
+          : <View style={[styles.dev, { flexDirection: 'column' }]}>
               {settings}
+              <View><Text style={[styles.version, {flexDirection: 'column'}]}>git: {commitHash}</Text></View>
             </View>
 
     return (
       <View style={styles.scroll}>
-      <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: d.width, height: d.height}} />
+        <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: d.width, height: d.height}} />
         <ScrollView
           scrollEnabled={false}
           style={{height:h}}
@@ -646,7 +659,7 @@ class TimHome extends Component {
   }
 
   _pressHandler() {
-    this.signIn()
+    this.signIn(() => this.showOfficialAccounts())
   }
   // async _localAuth() {
     // if (this.state.authenticating) return
@@ -738,6 +751,11 @@ var styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 30
   },
+  version: {
+    color: '#ffffff',
+    fontSize: 10,
+    textAlign:'center'
+  }
 });
 
 
