@@ -407,7 +407,7 @@ class TimHome extends Component {
     }
 
     this.props.navigator.replace({
-      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       id: 18,
 //      title: 'Tradle',
 //      titleTintColor: '#eeeeee',
@@ -424,12 +424,16 @@ class TimHome extends Component {
   }
   signUp(resource) {
     utils.setMe(resource);
+
+    var nav = this.props.navigator
+    nav.immediatelyResetRouteStack(nav.getCurrentRoutes().splice(0,1));
     let self = this
     this.setPassword(function(err) {
       if (err)
         debug('failed to set password', err)
-      else
+      else {
         self.showOfficialAccounts(true)
+      }
     })
     // this.showOfficialAccounts(true);
     // this.props.navigator.popToTop();
