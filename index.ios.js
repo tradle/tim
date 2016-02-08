@@ -44,7 +44,7 @@ var MessageView = require('./Components/MessageView');
 var MessageList = require('./Components/MessageList');
 var ArticleView = require('./Components/ArticleView');
 var IdentitiesList = require('./Components/IdentitiesList');
-var SelectPhotoList = require('./Components/SelectPhotoList');
+// var SelectPhotoList = require('./Components/SelectPhotoList');
 var ProductChooser = require('./Components/ProductChooser')
 // var CameraView = require('./Components/CameraView');
 var PhotoCarousel = require('./Components/PhotoCarousel');
@@ -325,27 +325,10 @@ class TiMApp extends Component {
                   verify={props.verify} />;
     case 4:
       return <NewResource navigator={nav} {...props } />
-                  // resource={props.resource}
-                  // model={props.model}
-                  // editCols={props.editCols}
-                  // additionalInfo={props.additionalInfo}
-                  // returnRoute={props.rπeturnRoute}
-                  // originatingMessage={props.originatingMessage}
-                  // callback={props.callback} />;
     case 5:
       return <MessageView navigator={nav} {...props} />
-                  // resource={props.resource}
-                  // verification={props.verification}
-                  // verify={props.verify} />;
     case 6:
-      return <NewItem navigator={nav}
-                  resource={props.resource}
-                  metadata={props.metadata}
-                  onAddItem={props.onAddItem}
-                  model={props.model}
-                  chooser={props.chooser}
-                  template={props.template}
-                  parentMeta={props.parentMeta}    />;
+      return <NewItem navigator={nav} {...props} />
     case 7:
       return <ArticleView navigator={nav} url={props.url} />;
     case 8:
@@ -357,27 +340,20 @@ class TiMApp extends Component {
     case 9:
       return <ItemsList navigator={nav} {...props} />
     case 11:
-      return <MessageList navigator={nav}
-                  filter={props.filter}
-                  resource={props.resource}
-                  prop={props.prop}
-                  returnRoute={props.returnRoute}
-                  callback={props.callback}
-                  isAggregation={props.isAggregation}
-                  modelName={props.modelName} />;
+      return <MessageList navigator={nav} {...props} />
     // case 12:
     //   return <CameraView />
       // <CameraView navigator={nav}
       //             onTakePic={props.onTakePic}
       //             resource={props.resource}
       //             prop={props.prop}/>
-    case 13:
-      return <SelectPhotoList
-                metadata={props.metadata}
-                style={styles.style}
-                navigator={props.navigator}
-                onSelect={props.onSelect}
-                onSelectingEnd={props.onSelectingEnd} />
+    // case 13:
+    //   return <SelectPhotoList
+    //             metadata={props.metadata}
+    //             style={styles.style}
+    //             navigator={props.navigator}
+    //             onSelect={props.onSelect}
+    //             onSelectingEnd={props.onSelectingEnd} />
 
     case 14:
       return <PhotoCarousel {...props} />
