@@ -1162,7 +1162,7 @@ var Store = Reflux.createStore({
     })
 
     function handleRegistration () {
-      self.trigger({action: 'runVideo'})
+      // self.trigger({action: 'runVideo'})
       return self.loadDB()
         .then(function () {
           return self.getDriver(returnVal)
@@ -2187,6 +2187,7 @@ var Store = Reflux.createStore({
     .then(function() {
       delete me.privkeys
       var  params = {action: 'addItem', resource: value, me: value};
+      utils.setMe(me)
       return self.trigger(params);
     })
     .then(function(value) {
