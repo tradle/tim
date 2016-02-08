@@ -64,7 +64,7 @@ class TimHome extends Component {
 	  };
 	}
   componentWillMount() {
-    var url = LinkingIOS.popInitialURL();
+    let url = LinkingIOS.popInitialURL();
     Actions.start();
   }
   componentDidMount() {
@@ -92,7 +92,7 @@ class TimHome extends Component {
       this.signIn(() => this.showOfficialAccounts(true))
     }
     else if (params.action === 'getMe') {
-      this.popToTop(params.me)
+      this.signUp(params.me)
     }
   }
   signIn(cb) {
@@ -170,7 +170,7 @@ class TimHome extends Component {
     }
   }
   setPassword(cb) {
-    var self = this
+    let self = this
     this.props.navigator.push({
       component: PasswordCheck,
       id: 20,
@@ -222,15 +222,16 @@ class TimHome extends Component {
           })
         },
         onFail: () => {
+          debugger
           React.Alert.alert('Oops!')
         }
       }
     })
   }
   checkPassword(cb, doReplace) {
-    var nav = this.props.navigator
+    let nav = this.props.navigator
 
-    var route = {
+    let route = {
       component: PasswordCheck,
       id: 20,
       passProps: {
@@ -262,12 +263,12 @@ class TimHome extends Component {
     nav.push(route)
   }
 	showContacts() {
-    var passProps = {
+    let passProps = {
         filter: '',
         modelName: this.props.modelName,
         sortProperty: 'lastMessageTime'
       };
-    var me = utils.getMe();
+    let me = utils.getMe();
     this.props.navigator.push({
       // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       id: 10,
@@ -300,14 +301,13 @@ class TimHome extends Component {
     });
 	}
   showOfficialAccounts(isReplace) {
-    var resource = utils.getMe()
-    var title = resource.firstName;
-    var route = {
+    let resource = utils.getMe()
+    let title = resource.firstName;
+    let route = {
       title: 'Official Accounts',
       id: 10,
       component: ResourceList,
       backButtonTitle: 'Back',
-      // titleTextColor: '#7AAAC3',
       passProps: {
         modelName: constants.TYPES.ORGANIZATION
       },
@@ -316,14 +316,12 @@ class TimHome extends Component {
         title: title,
         id: 3,
         component: ResourceView,
-        // titleTextColor: '#7AAAC3',
         backButtonTitle: 'Back',
         rightButtonTitle: 'Edit',
         onRightButtonPress: {
           title: title,
           id: 4,
           component: NewResource,
-          // titleTextColor: '#7AAAC3',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
           passProps: {
@@ -362,13 +360,13 @@ class TimHome extends Component {
     //   return
     // }
 
-    var modelName = this.props.modelName;
+    let modelName = this.props.modelName;
     if (!utils.getModel(modelName)) {
       this.setState({err: 'Can find model: ' + modelName});
       return;
     }
-    var model = utils.getModel(modelName).value;
-    var route = {
+    let model = utils.getModel(modelName).value;
+    let route = {
       component: NewResource,
       titleTextColor: '#BCD3E6',
       id: 4,
@@ -380,23 +378,22 @@ class TimHome extends Component {
       },
     };
 
-    var me = utils.getMe();
+    let me = utils.getMe();
     if (me) {
       route.passProps.resource = me;
       route.title = 'Edit Profile';
     }
     else {
-      var self = this
-      route.passProps.callback = () => {
-        this.setPassword(() => self.showOfficialAccounts(true))
-      }
+      let self = this
+      // route.passProps.callback = this.setPassword.bind(this, function(err) {
+      //   self.showOfficialAccounts(true)
+      // })
 
-      // }
-      // route.passProps.callback = (me) => {
-      //   this.showVideoTour(() => {
-      //     Actions.getMe()
-      //   })
-      // }
+      route.passProps.callback = (me) => {
+        this.showVideoTour(() => {
+          Actions.getMe()
+        })
+      }
 
       route.passProps.editCols = ['firstName', 'lastName']
       route.titleTintColor = '#ffffff'
@@ -425,9 +422,16 @@ class TimHome extends Component {
       onRightButtonPress: onEnd
     })
   }
-  popToTop(resource) {
+  signUp(resource) {
     utils.setMe(resource);
-    this.showOfficialAccounts(true);
+    let self = this
+    this.setPassword(function(err) {
+      if (err)
+        debug('failed to set password', err)
+      else
+        self.showOfficialAccounts(true)
+    })
+    // this.showOfficialAccounts(true);
     // this.props.navigator.popToTop();
   }
   onReloadDBPressed() {
