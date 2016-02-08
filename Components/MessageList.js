@@ -1,18 +1,12 @@
 'use strict';
 
 var React = require('react-native');
-var SearchBar = require('react-native-search-bar');
 var MessageView = require('./MessageView');
 var MessageRow = require('./MessageRow');
 var NoResources = require('./NoResources');
 var NewResource = require('./NewResource');
-var ResourceTypesScreen = require('./ResourceTypesScreen');
-var AddNewMessage = require('./AddNewMessage');
 var ProductChooser = require('./ProductChooser');
-// var CameraView = require('./CameraView');
-var Device = require('react-native-device')
 var Icon = require('react-native-vector-icons/Ionicons');
-// var Progress = require('react-native-progress')
 var extend = require('extend')
 var utils = require('../utils/utils');
 var reactMixin = require('react-mixin');
@@ -20,12 +14,18 @@ var equal = require('deep-equal')
 var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
-var InvertibleScrollView = require('react-native-invertible-scroll-view');
 var constants = require('@tradle/constants');
 var bankStyles = require('../styles/bankStyles')
 var GiftedMessenger = require('react-native-gifted-messenger');
 
+// var AddNewMessage = require('./AddNewMessage');
+// var SearchBar = require('react-native-search-bar');
+// var InvertibleScrollView = require('react-native-invertible-scroll-view');
 // var LoadingOverlay = require('./LoadingOverlay')
+// var ResourceTypesScreen = require('./ResourceTypesScreen');
+// var CameraView = require('./CameraView');
+// var Device = require('react-native-device')
+// var Progress = require('react-native-progress')
 
 var LINK_COLOR
 
@@ -34,6 +34,7 @@ var {
   Component,
   StyleSheet,
   Dimensions,
+  PropTypes,
   Navigator,
   View,
   Text,
@@ -47,6 +48,15 @@ var {
 var currentMessageTime;
 
 class MessageList extends Component {
+  props: {
+    navigator: PropTypes.object.isRequired,
+    modelName: PropTypes.string.isRequired,
+    resource: PropTypes.object.isRequired,
+    returnRoute: PropTypes.object,
+    callback: PropTypes.func,
+    filter: PropTypes.string,
+    isAggregation: PropTypes.bool
+  };
   constructor(props) {
     super(props);
     this.state = {
@@ -349,37 +359,17 @@ class MessageList extends Component {
         // returnKeyType={false}
         // keyboardShouldPersistTaps={false}
         // keyboardDismissMode='none'
-
-
-    //   content = <ListView ref='listview' style={{marginHorizontal: 10}}
-    //               dataSource={this.state.dataSource}
-    //               initialListSize={10}
-    //               renderRow={this.renderRow.bind(this)}
-    //               automaticallyAdjustContentInsets={false}
-    //               keyboardDismissMode='on-drag'
-    //               keyboardShouldPersistTaps={true}
-    //               showsVerticalScrollIndicator={false} />;
-    //   if (isAllMessages)
-    //     content =
-    //       <InvertibleScrollView
-    //         ref='messages'
-    //               onContentSizeChange={this.checkStart.bind(this)}
-    //         inverted
-    //         automaticallyAdjustContentInsets={false}
-    //         scrollEventThrottle={200}>
-    //       {content}
-    //       </InvertibleScrollView>
     }
 
-    var addNew = (model.isInterface)
-           ? <AddNewMessage navigator={this.props.navigator}
-                            resource={this.props.resource}
-                            modelName={this.props.modelName}
-                            onAddNewPressed={this.onAddNewPressed.bind(this)}
-                            onMenu={this.showMenu.bind(this)}
-                            onPhotoSelect={this.onPhotoSelect.bind(this)}
-                            callback={this.addedMessage.bind(this)} />
-           : <View/>;
+    // var addNew = (model.isInterface)
+    //        ? <AddNewMessage navigator={this.props.navigator}
+    //                         resource={this.props.resource}
+    //                         modelName={this.props.modelName}
+    //                         onAddNewPressed={this.onAddNewPressed.bind(this)}
+    //                         onMenu={this.showMenu.bind(this)}
+    //                         onPhotoSelect={this.onPhotoSelect.bind(this)}
+    //                         callback={this.addedMessage.bind(this)} />
+    //        : <View/>;
                             // onTakePicPressed={this.onTakePicPressed.bind(this)}
     var isOrg = !this.props.isAggregation  &&  this.props.resource  &&  this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION
     var chooser
@@ -612,7 +602,7 @@ class MessageList extends Component {
     var modelName = constants.TYPES.SIMPLE_MESSAGE;
     var value = {
       message: msg
-              ?  model.isInterface ? msg : '[' + this.state.userInput + '](' + this.props.model.id + ')'
+              ?  model.isInterface ? msg : '[' + this.state.userInput + '](' + this.props.modelName + ')'
               : '',
       from: me,
       to: resource.to,
@@ -641,13 +631,6 @@ var styles = StyleSheet.create({
     marginTop: 64,
     backgroundColor: '#f7f7f7',
   },
-  centerText: {
-    alignItems: 'center',
-  },
-  separator: {
-    height: 1,
-    backgroundColor: '#cccccc',
-  },
   imageOutline: {
     width: 25,
     height: 25,
@@ -658,21 +641,28 @@ var styles = StyleSheet.create({
     borderWidth: 1,
     color: '#79AAF2'
   },
-  bannerText: {
-    color: '#ffffff',
-    padding: 15,
-    backgroundColor: 'transparent',
-    fontSize: 22,
-    fontWeight: '600',
-    alignSelf: 'center'
-  },
-  progress: {
-    // width: Device.width,
-    // height: 3,
-    backgroundColor: 'transparent',
-    alignSelf: 'center',
-    marginTop: 12,
-  },
+  // separator: {
+  //   height: 1,
+  //   backgroundColor: '#cccccc',
+  // },
+  // centerText: {
+  //   alignItems: 'center',
+  // },
+  // bannerText: {
+  //   color: '#ffffff',
+  //   padding: 15,
+  //   backgroundColor: 'transparent',
+  //   fontSize: 22,
+  //   fontWeight: '600',
+  //   alignSelf: 'center'
+  // },
+  // progress: {
+  //   // width: Device.width,
+  //   // height: 3,
+  //   backgroundColor: 'transparent',
+  //   alignSelf: 'center',
+  //   marginTop: 12,
+  // },
 });
 module.exports = MessageList;
 

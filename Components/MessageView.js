@@ -24,11 +24,18 @@ var {
   ScrollView,
   View,
   Text,
+  PropTypes,
   ArticleView,
   Component
 } = React;
 
 class MessageView extends Component {
+  props: {
+    navigator: PropTypes.object.isRequired,
+    resource: PropTypes.object.isRequired,
+    verification: PropTypes.object,
+    // verify: PropTypes.func
+  };
   constructor(props) {
     super(props);
     this.state = {
