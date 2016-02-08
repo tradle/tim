@@ -45,6 +45,7 @@ var {
   StatusBarIOS,
   DatePickerIOS,
   AlertIOS,
+  PropTypes,
   // LayoutAnimation,
   Component,
   Navigator,
@@ -52,6 +53,17 @@ var {
 } = React;
 
 class NewResource extends Component {
+  props: {
+    navigator: PropTypes.object.isRequired,
+    model: PropTypes.object.isRequired,
+    resource: PropTypes.object.isRequired,
+    originatingMessage: PropTypes.object,
+    editCols: PropTypes.string,
+    callback: PropTypes.func,
+    returnRoute: PropTypes.object,
+    additionalInfo: PropTypes.bool
+  };
+
   constructor(props) {
     super(props);
     this.updateKeyboardSpace = this.updateKeyboardSpace.bind(this);
@@ -370,7 +382,7 @@ class NewResource extends Component {
       isRegistration: this.state.isRegistration
     };
     if (this.props.additionalInfo)
-      additionalInfo: additionalInfo
+      params.additionalInfo = additionalInfo
     if (this.state.isRegistration  && json.url && json.url.length) {
       var r = {
         type: SETTINGS,
