@@ -181,7 +181,7 @@ var Store = Reflux.createStore({
       }
     })
 
-    // if (true)
+    // if (true) {
     if (false) {
       return this.ready = AsyncStorage.clear()
         .then(() => {
@@ -1144,6 +1144,8 @@ var Store = Reflux.createStore({
         for (var p in json)
           if (!returnVal[p])
             returnVal[p] = json[p];
+          else if (!props[p])
+            continue
           else if (!props[p].readOnly  &&  !props[p].immutable)
             returnVal[p] = json[p];
       }
