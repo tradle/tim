@@ -2,11 +2,6 @@
 
 var React = require('react-native');
 var reactMixin = require('react-mixin');
-var SearchBar = require('./SearchBar');
-var ResourceRow = require('./ResourceRow');
-var ResourceView = require('./ResourceView');
-var NewResource = require('./NewResource');
-var ResourceList = require('./ResourceList');
 var utils = require('../utils/utils');
 var RowMixin = require('./RowMixin');
 var reactMixin = require('react-mixin');

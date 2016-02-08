@@ -22,7 +22,7 @@ class QRCodeView extends React.Component {
   propTypes: {
     content: React.PropTypes.string.isRequired,
     dimension: React.PropTypes.number,
-    fullScreen: React.PropTypes.boolean
+    fullScreen: React.PropTypes.bool
   };
   componentDidMount() {
     InteractionManager.runAfterInteractions(() => {

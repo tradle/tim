@@ -27,6 +27,7 @@ var {
   StyleSheet,
   Navigator,
   AlertIOS,
+  PropTypes,
   TouchableHighlight,
   Image,
   StatusBarIOS,
@@ -35,6 +36,18 @@ var {
 } = React;
 
 class ResourceList extends Component {
+  props: {
+    navigator: PropTypes.object.isRequired,
+    modelName: PropTypes.string.isRequired,
+    resource: PropTypes.object.isRequired,
+    returnRoute: PropTypes.object,
+    callback: PropTypes.func,
+    filter: PropTypes.string,
+    sortProperty: PropTypes.string,
+    prop: PropTypes.object,
+    isAggregation: PropTypes.bool,
+    isRegistration: PropTypes.bool,
+  };
   constructor(props) {
     super(props);
 
@@ -112,39 +125,11 @@ class ResourceList extends Component {
       return;
     }
     var type = list[0][constants.TYPE];
-    // if (type === 'tradle.Organization')
-    //   return;
-    // if (type  !== this.props.modelName)
-    //   return;
     if (type  !== this.props.modelName) {
       var m = utils.getModel(type).value;
       if (!m.subClassOf  ||  m.subClassOf != this.props.modelName)
         return;
-
-      // if (!params.prop  ||  !params.prop.items  ||  !params.prop.items.ref  ||  !params.prop.items.backlink)
-      //   return;
-      // var m = utils.getModel(params.prop.items.ref).value;
-      // if (m.properties[params.prop.items.backlink].ref !== this.props.modelName)
-      //   return;
     }
-    // var n = Math.floor(5, list.length);
-    // for (var i=0; i<n; i++) {
-    //   var rnd = this.getRandomInt(1, list.length - 1);
-    //   list[rnd].online = true;
-    // }
-    /*
-    if (type === constants.TYPES.PROFILE) {
-      // // var routes = this.props.navigator.getCurrentRoutes();
-      // // if (routes.length == 2) {
-        var l = []
-        list.forEach(function(r) {
-          if (!r.organization)
-            l.push(r)
-        })
-        list = l
-      // // }
-    }
-    */
     this.setState({
       dataSource: this.state.dataSource.cloneWithRows(list),
       list: list,
@@ -166,9 +151,6 @@ class ResourceList extends Component {
     }
     return isDiff
   }
-  // getRandomInt(min, max) {
-  //   return Math.floor(Math.random() * (max - min + 1)) + min;
-  // }
 
   selectResource(resource) {
     var me = utils.getMe();
@@ -402,15 +384,6 @@ class ResourceList extends Component {
     });
   }
 
-  onSearchChange1(event) {
-    var filter = event.nativeEvent.text.toLowerCase();
-    Actions.list({
-      query: filter,
-      modelName: this.props.modelName,
-      to: this.props.resource
-    });
-  }
-
   renderRow(resource)  {
     var model = utils.getModel(this.props.modelName).value;
  // || (model.id === 'tradle.Form')
@@ -489,21 +462,6 @@ class ResourceList extends Component {
         //     </View>
         //   </TouchableHighlight>
         // </View>
-  // showDeals(modelName) {
-  //   var model = utils.getModel(modelName).value;
-  //   // var model = utils.getModel(this.props.modelName).value;
-  //   this.props.navigator.push({
-  //     title: model.title,
-  //     id: 10,
-  //     component: ResourceList,
-  //     titleTextColor: '#7AAAC3',
-  //     backButtonTitle: 'Back',
-  //     passProps: {
-  //       filter: '',
-  //       modelName: DEAL_MODEL,
-  //     },
-  //   })
-  // }
   showBanks() {
     this.props.navigator.push({
       title: 'Official Accounts',
@@ -611,7 +569,7 @@ class ResourceList extends Component {
                   <View>
                     <Image source={require('../img/banking.png')} style={styles.cellImage} />
                   </View>
-                  <View style={styles.textContainer} key={this.props.key + '2'}>
+                  <View style={styles.textContainer}>
                     <Text style={styles.resourceTitle}>Official Accounts</Text>
                   </View>
                 </View>
@@ -729,3 +687,26 @@ var styles = StyleSheet.create({
 
 module.exports = ResourceList;
 
+  // showDeals(modelName) {
+  //   var model = utils.getModel(modelName).value;
+  //   // var model = utils.getModel(this.props.modelName).value;
+  //   this.props.navigator.push({
+  //     title: model.title,
+  //     id: 10,
+  //     component: ResourceList,
+  //     titleTextColor: '#7AAAC3',
+  //     backButtonTitle: 'Back',
+  //     passProps: {
+  //       filter: '',
+  //       modelName: DEAL_MODEL,
+  //     },
+  //   })
+  // }
+  // onSearchChange1(event) {
+  //   var filter = event.nativeEvent.text.toLowerCase();
+  //   Actions.list({
+  //     query: filter,
+  //     modelName: this.props.modelName,
+  //     to: this.props.resource
+  //   });
+  // }
