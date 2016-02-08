@@ -309,7 +309,7 @@ class TiMApp extends Component {
 
     switch (route.id) {
     case 1:
-      return <TimHome navigator={nav} modelName={constants.TYPES.PROFILE} filter={props.filter} />;
+      return <TimHome navigator={nav} modelName={constants.TYPES.PROFILE} />;
     case 2:
       return <ResourceTypesScreen navigator={nav}
                   modelName={props.modelName}
