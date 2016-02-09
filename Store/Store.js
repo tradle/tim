@@ -86,6 +86,7 @@ Tim.CATCH_UP_INTERVAL = 10000
 // Zlorp.KEEP_ALIVE_INTERVAL = 10000
 
 var WebSocketClient = require('@tradle/ws-client')
+var HttpClient = require('@tradle/transport-http').HttpClient
 var getDHTKey = require('tim/lib/utils').getDHTKey
 
 var dns = require('dns')
@@ -319,6 +320,13 @@ var Store = Reflux.createStore(timeFunctions({
     // return Q.ninvoke(dns, 'resolve4', 'tradle.io')
     //   .then(function (addrs) {
     //     console.log('tradle is at', addrs)
+    var httpClient = new HttpClient()
+    httpClient.on('message', function () {
+      meDriver.receiveMsg.apply(meDriver, arguments)
+    })
+
+    var wsClients = {}
+    var whitelist = []
     meDriver = new Tim({
       pathPrefix: TIM_PATH_PREFIX,
       networkName: networkName,
@@ -339,15 +347,6 @@ var Store = Reflux.createStore(timeFunctions({
       //   port: 25778
       // }
     })
-
-    var whitelist = SERVICE_PROVIDERS.map(function(name) {
-      var bank = ALL_SERVICE_PROVIDERS.providers[name]
-      return bank.txId
-    })
-
-    meDriver.watchTxs(whitelist.filter(function (txId) {
-      return txId
-    }))
 
     meDriver._shouldLoadTx = function (tx) {
       // if public, check if it's our infoHash
@@ -376,54 +375,10 @@ var Store = Reflux.createStore(timeFunctions({
         SERVICE_PROVIDERS_BASE_URL = SERVICE_PROVIDERS_BASE_URL_DEFAULT
     }
 
-    var promise = SERVICE_PROVIDERS ? Q() : this.getInfo()
-    var batch
-    return promise
-    .then(function(data) {
-      data.forEach(function(o) {
-        if (o.state === 'fulfilled') {
-          messenger.addRecipient(
-            o.value.hash,
-            utils.joinURL(SERVICE_PROVIDERS_BASE_URL, o.value.id, 'send')
-          )
-          whitelist.push(o.value.txId)
-        }
-      })
-
-      meDriver.watchTxs(whitelist)
-      meDriver.sync()
-      // END  HTTP specific stuff
-
-        // })
-      return meDriver
-    })
-    .catch(function(err) {
-      // debugger
-    })
-
-    var messengers = {}
-    var serviceProvidersHost = 'http://' + parseURL(SERVICE_PROVIDERS_BASE_URL).hostname
-    SERVICE_PROVIDERS.forEach(function (name, i) {
-      var provider = ALL_SERVICE_PROVIDERS.providers[name]
-      var wsPort = provider.wsPort // TODO: get port from /bankName/info
-      var otrKey = meDriver.keys.filter((k) => k.type === 'dsa')[0]
-      if (!otrKey) return
-
-      var messenger = new WebSocketClient({
-        url: `${serviceProvidersHost}:${wsPort}`,
-        otrKey: kiki.toKey(otrKey).priv(),
-        autoconnect: false,
-        // rootHash: meDriver.myRootHash()
-      })
-
-      // will need to do this on demand too
-      // e.g. when scanning an employee QR Code at the bank
-      messenger.on('message', meDriver.receiveMsg)
-      messengers[provider.hash] = messenger
-    })
-
     meDriver._send = function (rootHash, msg, recipientInfo) {
-      var messenger = messengers[rootHash]
+      var messenger = wsClients[rootHash] ||
+        (httpClient.hasEndpointFor(rootHash) && httpClient)
+
       if (!messenger) {
         return Q.reject(new Error('recipient not found'))
       }
@@ -438,17 +393,55 @@ var Store = Reflux.createStore(timeFunctions({
       }
     }
 
-    meDriver.ready().then(function () {
-      var myHash = meDriver.myRootHash()
-      for (var hash in messengers) {
-        messengers[hash].setRootHash(myHash)
-      }
+    var batch
+    var otrKey = keys.filter((k) => k.type === 'dsa')[0]
+    if (otrKey) otrKey = kiki.toKey(otrKey).priv()
+
+    return this.getInfo()
+    .then(function(providers) {
+      providers.forEach(function(provider) {
+        httpClient.addRecipient(
+          provider.hash,
+          utils.joinURL(SERVICE_PROVIDERS_BASE_URL, provider.id, 'send')
+        )
+
+        if (provider.txId) {
+          whitelist.push(provider.txId)
+        }
+
+        if (!otrKey) return
+
+        // self.addWebSocketClient()
+        var wsClient = new WebSocketClient({
+          url: utils.joinURL(SERVICE_PROVIDERS_BASE_URL, 'ws', provider.id),
+          otrKey: otrKey,
+          autoconnect: false,
+          // rootHash: meDriver.myRootHash()
+        })
+
+        // will need to do this on demand too
+        // e.g. when scanning an employee QR Code at the bank
+        wsClient.on('message', meDriver.receiveMsg)
+        wsClients[provider.hash] = wsClient
+      })
+
+      meDriver.watchTxs(whitelist)
+      // TODO: replace with meDriver.sync()
+      meDriver.sync()
+      meDriver.ready().then(function () {
+        var myHash = meDriver.myRootHash()
+        httpClient.setRootHash(myHash)
+
+        for (var hash in wsClients) {
+          wsClients[hash].setRootHash(myHash)
+        }
+      })
+
+      return meDriver
     })
-
-    // END  HTTP specific stuff
-
-      // })
-    return Q.resolve(meDriver)
+    .catch(function(err) {
+      debugger
+    })
 
     // var log = d.log;
     // d.log = function () {
@@ -505,7 +498,13 @@ var Store = Reflux.createStore(timeFunctions({
         SERVICE_PROVIDERS.push({name: sp.id, org: utils.getId(sp.org)})
         promises.push(self.addInfo(sp))
       })
+
       return Q.allSettled(promises)
+    })
+    .then((results) => {
+      return results
+        .filter(r => r.state === 'fulfilled')
+        .map(r => r.value)
     })
   },
   addInfo(sp) {
@@ -554,7 +553,7 @@ var Store = Reflux.createStore(timeFunctions({
         return db.batch(batch)
     })
     .then(function() {
-      return Q.resolve({hash: hash, txId: sp.bot.txId, id: sp.id})
+      return {hash: hash, txId: sp.bot.txId, id: sp.id}
     })
   },
   dhtFor (identity, port) {
