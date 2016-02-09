@@ -129,6 +129,7 @@ var db;
 var ldb;
 var isLoaded;
 var me;
+var isAuthenticated
 var meDriver
 var messenger
 var publishedIdentity
@@ -249,9 +250,10 @@ var Store = Reflux.createStore({
   },
   onSetAuthenticated() {
     var meId = utils.getId(me)
-    let r = list[meId].value
+    var r = {}
+    extend(true, r, me)
     r.isAuthenticated = true
-    me = r
+    utils.setMe(r)
     this.trigger({action: 'authenticated'})
     // return db.put(meId, r)
     // .then(() => {
@@ -2205,6 +2207,7 @@ var Store = Reflux.createStore({
         privkeys: me.privkeys,
         publishedIdentity: publishedIdentity
       }]};
+    delete me.privkeys
     batch.push({type: 'put', key: pKey, value: me});
     batch.push({type: 'put', key: MY_IDENTITIES + '_1', value: mid});///
     var identity = {}
