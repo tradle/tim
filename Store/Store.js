@@ -137,7 +137,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDER = ENV.topLevelProvider
-var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://137.117.106.253:44444' : TOP_LEVEL_PROVIDER.baseUrl
+var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://127.0.0.1:44444' : TOP_LEVEL_PROVIDER.baseUrl
 // var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.0.149:44444' : TOP_LEVEL_PROVIDER.baseUrl
 var SERVICE_PROVIDERS_BASE_URL
 var HOSTED_BY = TOP_LEVEL_PROVIDER.name
@@ -732,7 +732,7 @@ var Store = Reflux.createStore({
       if (error)
         params.error = error
 
-      self.trigger(params);
+      // self.trigger(params);
       return db.batch(batch)
     })
     .catch(function(err) {
@@ -1133,8 +1133,8 @@ var Store = Reflux.createStore({
     var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
     Q.allSettled(promises)
     .then(function(results) {
-      extend(foundRefs, results);
-      foundRefs.forEach(function(val) {
+      let allFoundRefs = foundRefs.concat(results);
+      allFoundRefs.forEach(function(val) {
         if (val.state === 'fulfilled') {
           var value = val.value;
           var propValue = value[TYPE] + '_' + value[ROOT_HASH];
