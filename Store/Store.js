@@ -1199,6 +1199,8 @@ var Store = Reflux.createStore({
           err = err
         })
       }
+      // Trigger painting before send. for that set ROOT_HASH to some temporary value like NONCE
+      // and reset it after the real root hash will be known
       returnVal[ROOT_HASH] = returnVal[NONCE]
       var tmpKey = returnVal[TYPE] + '_' + returnVal[ROOT_HASH]
       list[tmpKey] = {key: tmpKey, value: returnVal};
@@ -1430,12 +1432,12 @@ var Store = Reflux.createStore({
     // HACK
     // utils.dedupeVerifications(result)
 
-    // var resultList = [];
-    // result.forEach((r) =>  {
-    //   var rr = {};
-    //   extend(rr, r);
-    //   resultList.push(rr);
-    // })
+    var resultList = [];
+    result.forEach((r) =>  {
+      var rr = {};
+      extend(rr, r);
+      resultList.push(rr);
+    })
     var resultList = result
     var verificationsToShare;
     if (isMessage  &&  !params.isAggregation  &&  params.to)
