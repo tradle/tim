@@ -59,7 +59,7 @@ class PhotoList extends Component {
   render() {
     var photos = this.props.photos;
     // if (!photos || !photos.length) //  ||  (photos.length <= 1  &&  this.props.isView))
-    if (!photos ||  (photos.length <= 1  &&  this.props.isView))
+    if (!photos ||  !photos.length || (photos.length == 1  &&  this.props.isView))
       return null;
 
     var inRow = photos.length, height;
