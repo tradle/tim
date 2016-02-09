@@ -86,28 +86,32 @@ class TimHome extends Component {
       utils.setModels(params.models);
     }
     else if (params.action === 'start') {
+      if (this.state.message) {
+        this.restartTiM()
+        return
+      }
+
       utils.setMe(params.me);
       utils.setModels(params.models);
       this.setState({isLoading: false});
-      this.signIn(() => this.showOfficialAccounts(true))
+      this.signIn(() => this.showOfficialAccounts())
     }
     else if (params.action === 'getMe') {
-      this.signUp(params.me)
+      utils.setMe(params.me)
+      var nav = this.props.navigator
+      this.signIn(() => this.showOfficialAccounts())
     }
   }
+
   signIn(cb) {
     let self = this
-    if (this.state.message) {
-      this.restartTiM()
-      return
-    }
 
     let me = utils.getMe()
-    if (!me) return this.register()
+    if (!me)
+      return this.register(cb)
 
-    if (isAuthenticated()) {
+    if (me.isAuthenticated)
       return cb()
-    }
 
     let doneWaiting
     let authPromise = isAuthenticated() ? Q()
@@ -117,6 +121,7 @@ class TimHome extends Component {
     return authPromise
       .then(() => {
         setAuthenticated(true)
+        Actions.setAuthenticated({me: me, authenticated: true})
         cb()
       })
       .catch(err => {
@@ -140,14 +145,12 @@ class TimHome extends Component {
 
     function passwordAuth () {
       return Keychain.getGenericPassword(PASSWORD_ITEM_KEY)
-        .catch(err => {
+        .then(
+          () =>  Q.ninvoke(self, 'checkPassword'),
           // registration must have been aborted.
           // ask user to set a password
-          return Q.ninvoke(self, 'setPassword')
-        })
-        .then(() => {
-          return Q.ninvoke(self, 'checkPassword')
-        })
+          (err) => Q.ninvoke(self, 'setPassword')
+        )
     }
 
     function lockUp (err) {
@@ -192,9 +195,7 @@ class TimHome extends Component {
           })
           .then((askTouchID) => {
             if (askTouchID) {
-              var nav = self.props.navigator
-              nav.immediatelyResetRouteStack(nav.getCurrentRoutes().splice(-1,1));
-              return nav.push({
+              return self.props.navigator.push({
                 component: TouchIDOptIn,
                 id: 21,
                 rightButtonTitle: 'Skip',
@@ -300,10 +301,12 @@ class TimHome extends Component {
       }
     });
 	}
-  showOfficialAccounts(isReplace) {
+  showOfficialAccounts() {
+    var nav = this.props.navigator
+    nav.immediatelyResetRouteStack(nav.getCurrentRoutes().splice(0,1));
     let resource = utils.getMe()
     let title = resource.firstName;
-    let route = {
+    nav.push({
       title: 'Official Accounts',
       id: 10,
       component: ResourceList,
@@ -331,11 +334,7 @@ class TimHome extends Component {
         },
         passProps: {resource: resource}
       }
-    }
-    if (isReplace)
-      this.props.navigator.replace(route)
-    else
-      this.props.navigator.push(route)
+    })
   }
 
   // showCommunities() {
@@ -354,12 +353,7 @@ class TimHome extends Component {
   //     passProps: passProps,
   //   });
   // }
-  register() {
-    // if (this.state.message) {
-    //   this.restartTiM()
-    //   return
-    // }
-
+  register(cb) {
     let modelName = this.props.modelName;
     if (!utils.getModel(modelName)) {
       this.setState({err: 'Can find model: ' + modelName});
@@ -373,31 +367,25 @@ class TimHome extends Component {
       passProps: {
         model: model,
         callback: () => {
-          this.setPassword(() => this.showOfficialAccounts(true))
+          cb()
         }
       },
     };
 
-    let me = utils.getMe();
-    if (me) {
-      route.passProps.resource = me;
-      route.title = 'Edit Profile';
+    let self = this
+    // route.passProps.callback = this.setPassword.bind(this, function(err) {
+    //   self.showOfficialAccounts(true)
+    // })
+    let nav = self.props.navigator
+    route.passProps.callback = (me) => {
+      this.showVideoTour(() => {
+        Actions.getMe()
+        nav.immediatelyResetRouteStack(nav.getCurrentRoutes().splice(0,1));
+      })
     }
-    else {
-      let self = this
-      // route.passProps.callback = this.setPassword.bind(this, function(err) {
-      //   self.showOfficialAccounts(true)
-      // })
 
-      route.passProps.callback = (me) => {
-        this.showVideoTour(() => {
-          Actions.getMe()
-        })
-      }
-
-      route.passProps.editCols = ['firstName', 'lastName']
-      route.titleTintColor = '#ffffff'
-    }
+    route.passProps.editCols = ['firstName', 'lastName']
+    route.titleTintColor = '#ffffff'
     this.props.navigator.push(route);
   }
   showVideoTour(cb) {
@@ -421,22 +409,6 @@ class TimHome extends Component {
       },
       onRightButtonPress: onEnd
     })
-  }
-  signUp(resource) {
-    utils.setMe(resource);
-
-    var nav = this.props.navigator
-    nav.immediatelyResetRouteStack(nav.getCurrentRoutes().splice(0,1));
-    let self = this
-    this.setPassword(function(err) {
-      if (err)
-        debug('failed to set password', err)
-      else {
-        self.showOfficialAccounts(true)
-      }
-    })
-    // this.showOfficialAccounts(true);
-    // this.props.navigator.popToTop();
   }
   onReloadDBPressed() {
     utils.setMe(null);
@@ -786,4 +758,92 @@ module.exports = TimHome;
   //       // toValue: {x:200, y:-30},
   //       // delay: 30000
   //     })
+  // }
+  // signIn(cb) {
+  //   let self = this
+  //   if (this.state.message) {
+  //     this.restartTiM()
+  //     return
+  //   }
+
+  //   let me = utils.getMe()
+  //   if (!me) return this.register()
+
+  //   if (isAuthenticated()) {
+  //     return cb()
+  //   }
+
+  //   let doneWaiting
+  //   let authPromise = isAuthenticated() ? Q()
+  //     : me.useTouchId ? touchIDWithFallback()
+  //     : passwordAuth()
+
+  //   return authPromise
+  //     .then(() => {
+  //       setAuthenticated(true)
+  //       cb()
+  //     })
+  //     .catch(err => {
+  //       if (err.name == 'LAErrorUserCancel' || err.name === 'LAErrorSystemCancel') {
+  //         self.props.navigator.popToTop()
+  //       } else {
+  //         lockUp(err.message || 'Authentication failed')
+  //       }
+  //     })
+
+  //   function touchIDWithFallback() {
+  //     return authenticateUser()
+  //     .catch((err) => {
+  //       if (err.name === 'LAErrorUserFallback' || err.name.indexOf('TouchID') !== -1) {
+  //         return passwordAuth()
+  //       }
+
+  //       throw err
+  //     })
+  //   }
+
+  //   function passwordAuth () {
+  //     return Keychain.getGenericPassword(PASSWORD_ITEM_KEY)
+  //       .catch(err => {
+  //         // registration must have been aborted.
+  //         // ask user to set a password
+  //         return Q.ninvoke(self, 'setPassword')
+  //       })
+  //       .then(() => {
+  //         return Q.ninvoke(self, 'checkPassword')
+  //       })
+  //   }
+
+  //   function lockUp (err) {
+  //     self.setState({isModalOpen: true})
+  //     loopAlert(err)
+  //     setTimeout(() => {
+  //       doneWaiting = true
+  //       // let the user try again
+  //       self.signIn(cb)
+  //     }, __DEV__ ? 5000 : 5 * 60 * 1000)
+  //   }
+
+  //   function loopAlert (err) {
+  //     AlertIOS.alert(err, null, [
+  //       {
+  //         text: 'OK',
+  //         onPress: () => !doneWaiting && loopAlert(err)
+  //       }
+  //     ])
+  //   }
+  // }
+  // signUp(cb) {
+  //   var nav = this.props.navigator
+  //   nav.immediatelyResetRouteStack(nav.getCurrentRoutes().splice(0,1));
+  //   let self = this
+  //   this.setPassword(function(err) {
+  //     if (err)
+  //       debug('failed to set password', err)
+  //     else {
+  //       cb()
+  //     }
+  //   })
+  //   // this.showOfficialAccounts(true);
+  //   // this.props.navigator.popToTop();
   // }
