@@ -187,7 +187,7 @@ var styles = StyleSheet.create({
     height: d5,
   },
   thumbCommon: {
-    borderRadius: 5,
+    // borderRadius: 5,
     borderWidth: 0.5,
     margin: 1,
     borderColor: '#999999'
