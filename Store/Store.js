@@ -136,7 +136,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDER = ENV.topLevelProvider
-var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.0.149:44444' : TOP_LEVEL_PROVIDER.baseUrl
+var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://137.117.106.253:44444' : TOP_LEVEL_PROVIDER.baseUrl
 // var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.0.149:44444' : TOP_LEVEL_PROVIDER.baseUrl
 var SERVICE_PROVIDERS_BASE_URL
 var HOSTED_BY = TOP_LEVEL_PROVIDER.name
@@ -246,6 +246,17 @@ var Store = Reflux.createStore({
     .catch(function(err) {
       return self.loadModels()
     })
+  },
+  onSetAuthenticated() {
+    var meId = utils.getId(me)
+    let r = list[meId].value
+    r.isAuthenticated = true
+    me = r
+    this.trigger({action: 'authenticated'})
+    // return db.put(meId, r)
+    // .then(() => {
+    //   self.trigger({action: 'authenticated'})
+    // })
   },
   getSettings() {
     var self = this
@@ -1344,7 +1355,17 @@ var Store = Reflux.createStore({
   },
   onReloadDB() {
     var self = this
-    Q.ninvoke(AsyncStorage, 'clear')
+
+      Q.all([
+          AsyncStorage.clear(),
+          Keychain.resetGenericPasswords()
+        ])
+        .then(() => {
+          AlertIOS.alert('please refresh')
+          return Q.Promise(function (resolve) {})
+        })
+
+    // Q.ninvoke(AsyncStorage, 'clear')
     .then(function() {
       list = {};
       models = {};
@@ -1432,12 +1453,12 @@ var Store = Reflux.createStore({
     // HACK
     // utils.dedupeVerifications(result)
 
-    var resultList = [];
-    result.forEach((r) =>  {
-      var rr = {};
-      extend(rr, r);
-      resultList.push(rr);
-    })
+    // var resultList = [];
+    // result.forEach((r) =>  {
+    //   var rr = {};
+    //   extend(rr, r);
+    //   resultList.push(rr);
+    // })
     var resultList = result
     var verificationsToShare;
     if (isMessage  &&  !params.isAggregation  &&  params.to)
