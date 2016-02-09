@@ -29,7 +29,8 @@ var Actions = Reflux.createActions([
   'saveTemporary',
   'getTemporary',
   'cleanup',
-  'forgetMe'
+  'forgetMe',
+  'setAuthenticated',
 ]);
 
 Object.keys(Actions).forEach((name) => {
