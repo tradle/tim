@@ -110,21 +110,27 @@ class MessageList extends Component {
         modelName: this.props.modelName,
         to: this.props.resource,
       }
-      this.state.newItem = true
-      if (params.sendStatus) {
-        this.state.sendStatus = params.sendStatus
-        this.state.sendResource = params.resource
-      }
-      var l = this.state.list
-      if (l)
-        l.push(params.resource)
-      else
-        l = [params.resource]
-      this.setState({list: l})
-      // if (params.action === 'addItem')
-      //   this._GiftedMessenger.appendMessage(params.resource);
+      // this.state.newItem = true
+
+      // if (params.sendStatus) {
+      //   this.state.sendStatus = params.sendStatus
+      //   this.state.sendResource = params.resource
+      // }
+      this.setState({
+        sendStatus: params.sendStatus,
+        sendResource: params.resource
+      })
+
+      // var l = this.state.list
+      // if (l)
+      //   l.push(params.resource)
       // else
-        // Actions.messageList(actionParams);
+      //   l = [params.resource]
+      // this.setState({list: l})
+      // if (params.action === 'addItem')
+        // this._GiftedMessenger.appendMessages([params.resource]);
+      // else
+        Actions.messageList(actionParams);
       return;
     }
     this.state.newItem = false
