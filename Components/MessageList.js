@@ -112,14 +112,14 @@ class MessageList extends Component {
       }
       // this.state.newItem = true
 
-      // if (params.sendStatus) {
-      //   this.state.sendStatus = params.sendStatus
-      //   this.state.sendResource = params.resource
-      // }
-      this.setState({
-        sendStatus: params.sendStatus,
-        sendResource: params.resource
-      })
+      if (params.sendStatus) {
+        this.state.sendStatus = params.sendStatus
+        this.state.sendResource = params.resource
+      }
+      // this.setState({
+      //   sendStatus: params.sendStatus,
+      //   sendResource: params.resource
+      // })
 
       // var l = this.state.list
       // if (l)
@@ -130,7 +130,7 @@ class MessageList extends Component {
       // if (params.action === 'addItem')
         // this._GiftedMessenger.appendMessages([params.resource]);
       // else
-        Actions.messageList(actionParams);
+      Actions.messageList(actionParams);
       return;
     }
     this.state.newItem = false
