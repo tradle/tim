@@ -170,7 +170,7 @@ class VerificationRow extends Component {
                      : ''
           var val = symbol + (resource[v].title || resource[v])
           vCols.push(
-            <View style={{flexDirection: 'row', justifyContent: 'space-between'}} key={self.getNextKey()}>
+            <View style={{flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 3}} key={self.getNextKey()}>
               <Text style={labelStyle}>{properties[v].title + units}</Text>
               <Text style={style}>{val}</Text>
             </View>
