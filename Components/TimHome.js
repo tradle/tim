@@ -23,7 +23,7 @@ var TradleWhite = require('../img/TradleW.png')
 var BG_IMAGE = require('../img/bg.png')
 var PasswordCheck = require('./PasswordCheck')
 var TouchIDOptIn = require('./TouchIDOptIn')
-var commitHash = require('../version').commit
+var commitHash = require('../version').commit.slice(0, 7)
 
 // var Progress = require('react-native-progress')
 import {
