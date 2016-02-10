@@ -23,11 +23,6 @@ var React = require('react-native');
 //   if (__DEV__) throw e
 // })
 
-import {
-  authenticateUser,
-  unauthenticateUser,
-  isAuthenticated
-} from './utils/localAuth'
 var ResourceList = require('./Components/ResourceList');
 var VideoPlayer = require('./Components/VideoPlayer')
 // var GridList = require('./Components/GridList');
@@ -127,45 +122,45 @@ class TiMApp extends Component {
     this._navListeners.forEach((listener) => listener.remove())
   }
   _handleAppStateChange(currentAppState) {
+    // TODO:
+    // Actions.appState(currentAppState)
+    // and check if authentication expired in store
+
     let dateAppStateChanged = Date.now()
     let lastDateAppStateChanged = this.state.dateAppStateChanged
-    let stateChange = { currentAppState, dateAppStateChanged }
+    let newState = { currentAppState, dateAppStateChanged }
 
     switch (currentAppState) {
       case 'active':
         clearTimeout(this.state.unauthTimeout)
         // ok to pop from defensive copy
         let currentRoute = this.state.navigator.getCurrentRoutes().pop()
-        if (!isAuthenticated()) {
+        let me = utils.getMe()
+        if (me && !me.isAuthenticated) {
           let needNav = currentRoute.component !== TimHome
           if (needNav) {
             this.state.navigator.push({
               id: 1,
+              backButtonTitle: null,
               component: TimHome,
               passProps: this.props,
             })
           }
 
           Actions.start()
-          // authenticateUser('Tradle locked down after a period of inactivity. Please unlock!')
-          // authenticateUser('Welcome back! Please unlock the app')
-          //   .then(() => {
-          //     if (currentRoute) {
-          //       if (needNav) {
-          //         this.state.navigator.push(currentRoute)
-          //       }
-          //     }
-          //   })
         }
 
         AutomaticUpdates.sync()
         break
       case 'background':
-        stateChange.unauthTimeout = setTimeout(unauthenticateUser, UNAUTHENTICATE_AFTER_BG_MILLIS)
+        newState.unauthTimeout = setTimeout(() => {
+          Actions.setAuthenticated({ authenticated: false })
+        }, UNAUTHENTICATE_AFTER_BG_MILLIS)
+
         break
     }
 
-    this.setState(stateChange)
+    this.setState(newState)
   }
   _handleOpenURL(event) {
     var url = event.url.trim();
@@ -401,7 +396,7 @@ var NavigationBarRouteMapper = {
       color = route.passProps.bankStyle.LINK_COLOR || LINK_COLOR
 
     var previousRoute = navState.routeStack[index - 1];
-    var lbTitle = route.backButtonTitle  ||  previousRoute.title;
+    var lbTitle = 'backButtonTitle' in route ? route.backButtonTitle : previousRoute.title;
     if (!lbTitle)
       return null;
     var style = [styles.navBarText];

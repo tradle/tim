@@ -14,7 +14,6 @@ const DEFAULT_OPTS = {
   suppressEnterPassword: false
 }
 
-let authenticated = false
 let pendingAuth
 
 exports.Errors = require('react-native-local-auth/data/errors')
@@ -23,20 +22,7 @@ export function hasTouchID () {
   return LocalAuth.hasTouchID()
 }
 
-export function isAuthenticated () {
-  return authenticated
-}
-
-export function setAuthenticated (val) {
-  authenticated = val
-}
-
-export function unauthenticateUser () {
-  authenticated = false
-}
-
 export function authenticateUser (opts) {
-  if (authenticated) return Q(authenticated)
   // prevent two authentication requests from
   // going in concurrently and causing problems
   if (pendingAuth) return pendingAuth
@@ -45,11 +31,9 @@ export function authenticateUser (opts) {
   opts = { ...DEFAULT_OPTS, ...opts }
   return pendingAuth = LocalAuth.authenticate(opts)
     .then(() => {
-      authenticated = true
       pendingAuth = undefined
     })
     .catch((err) => {
-      authenticated = false
       pendingAuth = undefined
 
       if (__DEV__ && !(err.name in Errors)) {

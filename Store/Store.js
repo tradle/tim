@@ -248,11 +248,11 @@ var Store = Reflux.createStore({
       return self.loadModels()
     })
   },
-  onSetAuthenticated() {
+  onSetAuthenticated(params) {
     var meId = utils.getId(me)
     var r = {}
     extend(true, r, me)
-    r.isAuthenticated = true
+    r.isAuthenticated = params.authenticated
     utils.setMe(r)
     this.trigger({action: 'authenticated'})
     // return db.put(meId, r)
@@ -509,7 +509,8 @@ var Store = Reflux.createStore({
       self.trigger({
         action: 'start',
         models: models,
-        me: me});
+        me: me
+      });
     });
   },
 

@@ -28,9 +28,7 @@ var commitHash = require('react-native-env').commit
 // var Progress = require('react-native-progress')
 import {
   authenticateUser,
-  hasTouchID,
-  setAuthenticated,
-  isAuthenticated
+  hasTouchID
 } from '../utils/localAuth'
 const PASSWORD_ITEM_KEY = 'app-password'
 
@@ -114,13 +112,12 @@ class TimHome extends Component {
       return cb()
 
     let doneWaiting
-    let authPromise = isAuthenticated() ? Q()
-      : me.useTouchId ? touchIDWithFallback()
+    let authPromise = me.useTouchId
+      ? touchIDWithFallback()
       : passwordAuth()
 
     return authPromise
       .then(() => {
-        setAuthenticated(true)
         Actions.setAuthenticated({me: me, authenticated: true})
         cb()
       })
@@ -303,7 +300,7 @@ class TimHome extends Component {
 	}
   showOfficialAccounts() {
     var nav = this.props.navigator
-    nav.immediatelyResetRouteStack(nav.getCurrentRoutes().splice(0,1));
+    nav.immediatelyResetRouteStack(nav.getCurrentRoutes().slice(0,1));
     let resource = utils.getMe()
     let title = resource.firstName;
     nav.push({
@@ -380,7 +377,7 @@ class TimHome extends Component {
     route.passProps.callback = (me) => {
       this.showVideoTour(() => {
         Actions.getMe()
-        nav.immediatelyResetRouteStack(nav.getCurrentRoutes().splice(0,1));
+        nav.immediatelyResetRouteStack(nav.getCurrentRoutes().slice(0,1));
       })
     }
 
@@ -835,7 +832,7 @@ module.exports = TimHome;
   // }
   // signUp(cb) {
   //   var nav = this.props.navigator
-  //   nav.immediatelyResetRouteStack(nav.getCurrentRoutes().splice(0,1));
+  //   nav.immediatelyResetRouteStack(nav.getCurrentRoutes().slice(0,1));
   //   let self = this
   //   this.setPassword(function(err) {
   //     if (err)
