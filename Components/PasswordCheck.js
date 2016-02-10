@@ -151,7 +151,7 @@ module.exports = React.createClass({
         <Image source={BG_IMAGE} style={[styles.bg, { width, height }]} />
         <PasswordGesture
           ref='pg'
-          hollow={false}
+          hollow={true}
           styles={
             {
               frame: { backgroundColor: 'transparent' },
@@ -162,10 +162,10 @@ module.exports = React.createClass({
           baseColor={'#ffffff'}
           rightColor={'#55ff55'}
           wrongColor={'#ff5555'}
-          radius={{ inner: 20, outer: 30 }}
+          radius={{ inner: 18, outer: 25 }}
           status={this.state.status}
           message={this.state.message}
-          msgStyle={{fontSize:30}}
+          msgStyle={{fontSize:20}}
           onStart={() => this._onStart()}
           onEnd={(password) => this._onEntered(password)}
         />
