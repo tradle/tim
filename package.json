@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "start": "react-native start",
-    "postinstall": "./node_modules/.bin/rn-nodeify --hack && npm run streamhack",
+    "postinstall": "npm run nodeify && npm run installhooks",
+    "nodeify": "./node_modules/.bin/rn-nodeify --hack && npm run streamhack",
+    "installhooks": "cp hooks/* .git/hooks/",
     "streamhack": "rm -rf ./node_modules/@tradle/utils/node_modules/create-torrent/node_modules/block-stream2/node_modules/readable-stream"
   },
   "dependencies": {
