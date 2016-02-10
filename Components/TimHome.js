@@ -573,7 +573,9 @@ class TimHome extends Component {
             </View>
           : <View style={[styles.dev, { flexDirection: 'column' }]}>
               {settings}
-              <View><Text style={[styles.version, {flexDirection: 'column'}]}>git: {commitHash}</Text></View>
+              <View>
+                <Text style={styles.version}>git: {commitHash}</Text>
+              </View>
             </View>
 
     return (
@@ -732,7 +734,9 @@ var styles = StyleSheet.create({
   version: {
     color: '#ffffff',
     fontSize: 10,
-    textAlign:'center'
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center'
   }
 });
 
