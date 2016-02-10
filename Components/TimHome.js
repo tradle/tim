@@ -23,7 +23,11 @@ var TradleWhite = require('../img/TradleW.png')
 var BG_IMAGE = require('../img/bg.png')
 var PasswordCheck = require('./PasswordCheck')
 var TouchIDOptIn = require('./TouchIDOptIn')
-var commitHash = require('../version').commit.slice(0, 7)
+try {
+  var commitHash = require('../version').commit.slice(0, 7)
+} catch (err) {
+  // no version info available
+}
 
 // var Progress = require('react-native-progress')
 import {
@@ -93,7 +97,7 @@ class TimHome extends Component {
       utils.setMe(params.me);
       utils.setModels(params.models);
       this.setState({isLoading: false});
-      this.signIn(() => this.showOfficialAccounts())
+      // this.signIn(() => this.showOfficialAccounts())
     }
     else if (params.action === 'getMe') {
       utils.setMe(params.me)
@@ -535,49 +539,51 @@ class TimHome extends Component {
     //         </View>
 
     // var settings = <View/>
-    var settings = utils.getMe()
-                 ? <View />
-                 : <TouchableHighlight
+    var settings = !utils.getMe() &&
+                  <TouchableHighlight
                       underlayColor='transparent' onPress={this.onSettingsPressed.bind(this)}>
                      <Text style={styles.text}>
                        Settings
                      </Text>
                   </TouchableHighlight>
 
-    var dev = __DEV__
-            ? <View style={styles.dev}>
-              <TouchableHighlight
-                  underlayColor='transparent' onPress={this.onReloadDBPressed.bind(this)}>
-                <Text style={styles.text}>
-                  Reload DB
-                </Text>
-              </TouchableHighlight>
-              <TouchableHighlight
-                  underlayColor='transparent' onPress={this.onReloadModels.bind(this)}>
-                <Text style={styles.text}>
-                  Reload Models
-                </Text>
-              </TouchableHighlight>
-              <TouchableHighlight
-                  underlayColor='transparent' onPress={this.onBackupPressed.bind(this)}>
-                <Text style={styles.text}>
-                  Backup
-                </Text>
-              </TouchableHighlight>
-              <TouchableHighlight
-                  underlayColor='transparent' onPress={this.onLoadFromBackupPressed.bind(this)}>
-                <Text style={styles.text}>
-                  Load
-                </Text>
-              </TouchableHighlight>
-              {settings}
-            </View>
-          : <View style={[styles.dev, { flexDirection: 'column' }]}>
-              {settings}
+    var version = !__DEV__ &&
               <View>
                 <Text style={styles.version}>git: {commitHash}</Text>
               </View>
-            </View>
+
+    var dev = __DEV__
+            ? <View style={styles.dev}>
+                <TouchableHighlight
+                    underlayColor='transparent' onPress={this.onReloadDBPressed.bind(this)}>
+                  <Text style={styles.text}>
+                    Reload DB
+                  </Text>
+                </TouchableHighlight>
+                <TouchableHighlight
+                    underlayColor='transparent' onPress={this.onReloadModels.bind(this)}>
+                  <Text style={styles.text}>
+                    Reload Models
+                  </Text>
+                </TouchableHighlight>
+                <TouchableHighlight
+                    underlayColor='transparent' onPress={this.onBackupPressed.bind(this)}>
+                  <Text style={styles.text}>
+                    Backup
+                  </Text>
+                </TouchableHighlight>
+                <TouchableHighlight
+                    underlayColor='transparent' onPress={this.onLoadFromBackupPressed.bind(this)}>
+                  <Text style={styles.text}>
+                    Load
+                  </Text>
+                </TouchableHighlight>
+                {settings}
+              </View>
+            : <View style={[styles.dev, { flexDirection: 'column' }]}>
+                {settings}
+                {version}
+              </View>
 
     return (
       <View style={styles.scroll}>
@@ -720,7 +726,9 @@ var styles = StyleSheet.create({
     marginTop: 10,
     flexDirection: 'row',
     marginBottom: 500,
-    alignSelf: 'center'
+    alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   getStartedText: {
     color: '#f0f0f0',
@@ -734,10 +742,7 @@ var styles = StyleSheet.create({
   },
   version: {
     color: '#ffffff',
-    fontSize: 10,
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center'
+    fontSize: 10
   }
 });
 
