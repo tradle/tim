@@ -1,11 +1,16 @@
 var React = require('react-native')
-var { View, Image, PropTypes } = React
+var {
+  View,
+  Image,
+  PropTypes,
+  Dimensions,
+  StyleSheet
+} = React
 var PasswordGesture = require('react-native-gesture-password')
 
 var MIN_LENGTH = 5
 var Password1 = ''
 var BG_IMAGE = require('../img/bg.png')
-var Device = require('react-native-device')
 var MODES = {
   check: 'check',
   set: 'set'
@@ -140,16 +145,18 @@ module.exports = React.createClass({
   },
 
   render: function() {
+    var { width, height } = Dimensions.get('window')
     return (
       <View>
-        <Image source={BG_IMAGE} style={getBackgroundImgStyle()} />
+        <Image source={BG_IMAGE} style={[styles.bg, { width, height }]} />
         <PasswordGesture
           ref='pg'
           hollow={false}
           styles={
             {
               frame: { backgroundColor: 'transparent' },
-              msgText: { fontSize: 18 }
+              msgText: { fontSize: 18 },
+              line: { height: 5, backgroundColor: '#ffffff' }
             }
           }
           baseColor={'#ffffff'}
@@ -167,14 +174,12 @@ module.exports = React.createClass({
   }
 })
 
-function getBackgroundImgStyle () {
-  return {
+var styles = StyleSheet.create({
+  bg: {
     position:'absolute',
     left: 0,
-    top: 0,
-    width: Device.width,
-    height: Device.height
+    top: 0
   }
-}
+})
 
 module.exports.Modes = MODES
