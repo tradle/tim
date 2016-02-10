@@ -12,6 +12,9 @@ var BeSafe = require('asyncstorage-backup')
 var Reflux = require('reflux');
 var Actions = require('../Actions/Actions');
 var extend = require('extend');
+var Debug = require('debug')
+var debug = Debug('Store')
+var timerDebug = Debug('TIMER')
 var Q = require('q');
 Q.onerror = function (err) {
   console.error(err)
@@ -4327,7 +4330,7 @@ function timeFunctions (obj) {
         var ms = stopTimer()
         total += ms
         numCalls++
-        console.log(`TIMER: ${k} took ${ms}ms. ${numCalls} calls totaled ${total}ms`)
+        timerDebug(`${k} took ${ms}ms. ${numCalls} calls totaled ${total}ms`)
       }
     }
   })
