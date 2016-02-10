@@ -137,7 +137,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDER = ENV.topLevelProvider
-var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://127.0.0.1:44444' : TOP_LEVEL_PROVIDER.baseUrl
+var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.0.163:44444' : TOP_LEVEL_PROVIDER.baseUrl
 // var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.0.149:44444' : TOP_LEVEL_PROVIDER.baseUrl
 var SERVICE_PROVIDERS_BASE_URL
 var HOSTED_BY = TOP_LEVEL_PROVIDER.name
@@ -145,7 +145,7 @@ var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
 var SERVICE_PROVIDERS
 // var SERVICE_PROVIDERS = ALL_SERVICE_PROVIDERS.topLevelProvider[TOP_LEVEL_PROVIDER.name.toLowerCase()] //ENV.providers
 
-var Store = Reflux.createStore({
+var Store = Reflux.createStore(timeFunctions({
   // this will set up listeners to all publishers in TodoActions, using onKeyname (or keyname) as callbacks
   listenables: [Actions],
   // this will be called by all listening components as they register their listeners
@@ -193,8 +193,10 @@ var Store = Reflux.createStore({
     }
     // console.time('loadMyResources')
 
-    return this.ready = this.getMe()
-      .then(() => this.getSettings())
+    return this.ready = Q.all([
+        this.getMe(),
+        this.getSettings()
+      ])
       .then(() => {
         this.loadMyResources()
         if (!utils.isEmpty(list))
@@ -205,6 +207,7 @@ var Store = Reflux.createStore({
             .then(() => this.monitorTim())
         }
       })
+
     // try {
     //   await self.getMe()
     //   await self.getSettings()
@@ -388,7 +391,7 @@ var Store = Reflux.createStore({
       return meDriver
     })
     .catch(function(err) {
-      debugger
+      // debugger
     })
   },
   // Gets info about companies in this app, their bot representatives and their styles
@@ -1044,10 +1047,11 @@ var Store = Reflux.createStore({
   },
   setPropertyNames(props) {
     for (var p in props) {
-      if (!props[p].name)
+      var val = props[p]
+      if (!val.name && typeof val !== 'function')
         props[p].name = p;
-      if (!props[p].title)
-        props[p].title = utils.makeLabel(p);
+      if (!val.title)
+        val.title = utils.makeLabel(p);
     }
   },
   onSaveTemporary(resource) {
@@ -2720,7 +2724,7 @@ var Store = Reflux.createStore({
         })
       })
     // })
-    return meDriver.ready()
+    // return meDriver.ready()
   },
   updateMe() {
     db.put(me[TYPE] + '_' + me[ROOT_HASH], me)
@@ -3134,6 +3138,7 @@ var Store = Reflux.createStore({
       utils.setModels(models);
     })
     .catch(err => {
+      debugger
       console.error('err:' + err);
     })
   },
@@ -3479,7 +3484,7 @@ var Store = Reflux.createStore({
     this._transitionCallbacks.push(defer.resolve)
     return defer.promise
   }
-});
+}));
 
 module.exports = Store;
 /*
@@ -4276,3 +4281,56 @@ module.exports = Store;
 
   //   return driverPromise = this.buildDriver(Identity.fromJSON(publishedIdentity), mePriv, PORT)
   // },
+
+function timeSomething (name) {
+  var start = Date.now()
+  return (print) => {
+    var ms = Date.now() - start
+    if (print) {
+      console.log(`TIMER: ${name} took ${ms}ms`)
+    }
+
+    return ms
+  }
+}
+
+function timeFunctions (obj) {
+  var timed = {}
+  Object.keys(obj).forEach((k) => {
+    var orig = obj[k]
+    if (typeof orig !== 'function') {
+      timed[k] = orig
+      return
+    }
+
+    var total = 0
+    var numCalls = 0
+    timed[k] = function () {
+      var stopTimer = timeSomething(k)
+      var ret = orig.apply(this, arguments)
+      if (!Q.isPromiseAlike(ret)) {
+        recordDuration()
+        return ret
+      }
+
+      return ret
+        .catch(err => {
+          recordDuration()
+          throw err
+        })
+        .then(val => {
+          recordDuration()
+          return val
+        })
+
+      function recordDuration () {
+        var ms = stopTimer()
+        total += ms
+        numCalls++
+        console.log(`TIMER: ${k} took ${ms}ms. ${numCalls} calls totaled ${total}ms`)
+      }
+    }
+  })
+
+  return timed
+}
