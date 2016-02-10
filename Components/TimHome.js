@@ -45,7 +45,8 @@ var {
   ScrollView,
   LinkingIOS,
   StatusBarIOS,
-  AlertIOS
+  AlertIOS,
+  Dimensions
 } = React;
 
 
@@ -441,16 +442,16 @@ class TimHome extends Component {
       return
     }
     var url = LinkingIOS.popInitialURL();
-    var d = Device
-    var h = d.height > 800 ? d.height - 220 : d.height - 180
+    var { width, height } = Dimensions.get('window')
+    var h = height > 800 ? height - 220 : height - 180
     // var cTop = h / 4
 
-    var thumb = d.width > 400
-              ? { width: d.width / 2.2, height: d.width / 2.2 }
+    var thumb = width > 400
+              ? { width: width / 2.2, height: width / 2.2 }
               : styles.thumb
               // <Progress.CircleSnail color={'white'} size={70} thickness={5}/>
   	var spinner =  <View>
-          <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: d.width, height: d.height}} />
+          <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width, height }} />
           <ScrollView
             scrollEnabled={false}
             style={{height:h}}>
@@ -580,7 +581,7 @@ class TimHome extends Component {
 
     return (
       <View style={styles.scroll}>
-        <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: d.width, height: d.height}} />
+        <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width, height}} />
         <ScrollView
           scrollEnabled={false}
           style={{height:h}}
