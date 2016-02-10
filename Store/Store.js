@@ -185,10 +185,7 @@ var Store = Reflux.createStore({
 
     // if (true) {
     if (false) {
-      return this.ready = Q.all([
-          AsyncStorage.clear(),
-          Keychain.resetGenericPasswords()
-        ])
+      return this.ready = this.wipe()
         .then(() => {
           AlertIOS.alert('please refresh')
           return Q.Promise(function (resolve) {})
@@ -1359,13 +1356,16 @@ var Store = Reflux.createStore({
   onReloadModels() {
     this.loadModels()
   },
+  wipe() {
+    return Q.all([
+      AsyncStorage.clear(),
+      Keychain.resetGenericPasswords()
+    ])
+  },
   onReloadDB() {
     var self = this
 
-    Q.all([
-        AsyncStorage.clear(),
-        Keychain.resetGenericPasswords()
-      ])
+    this.wipe()
       .then(() => {
         AlertIOS.alert('please refresh')
         return Q.Promise(function (resolve) {})
