@@ -1183,7 +1183,10 @@ var Store = Reflux.createStore({
 
     function handleRegistration () {
       self.trigger({action: 'runVideo'})
-      return self.loadDB()
+      return Q.all([
+          self.loadDB(),
+          Keychain.resetGenericPasswords()
+        ])
         .then(function () {
           return self.getDriver(returnVal)
         })
@@ -1359,29 +1362,27 @@ var Store = Reflux.createStore({
   onReloadDB() {
     var self = this
 
-      Q.all([
-          AsyncStorage.clear(),
-          Keychain.resetGenericPasswords()
-        ])
-        .then(() => {
-          AlertIOS.alert('please refresh')
-          return Q.Promise(function (resolve) {})
-        })
-
-    // Q.ninvoke(AsyncStorage, 'clear')
-    .then(function() {
-      list = {};
-      models = {};
-      me = null;
-      return
-      // return self.loadModels()
-    })
-    .then(function() {
-      self.trigger({action: 'reloadDB', models: models});
-    })
-    .catch(function(err) {
-      err = err;
-    });
+    Q.all([
+        AsyncStorage.clear(),
+        Keychain.resetGenericPasswords()
+      ])
+      .then(() => {
+        AlertIOS.alert('please refresh')
+        return Q.Promise(function (resolve) {})
+      })
+      .then(function() {
+        list = {};
+        models = {};
+        me = null;
+        return
+        // return self.loadModels()
+      })
+      .then(function() {
+        self.trigger({action: 'reloadDB', models: models});
+      })
+      .catch(function(err) {
+        err = err;
+      });
     // var togo = 1;
     // // this.loadModels()
     // // var name = me.firstName.toLowerCase();
