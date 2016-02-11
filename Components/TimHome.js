@@ -97,7 +97,7 @@ class TimHome extends Component {
       utils.setMe(params.me);
       utils.setModels(params.models);
       this.setState({isLoading: false});
-      // this.signIn(() => this.showOfficialAccounts())
+      this.signIn(() => this.showOfficialAccounts())
     }
     else if (params.action === 'getMe') {
       utils.setMe(params.me)
@@ -538,14 +538,14 @@ class TimHome extends Component {
     //           </TouchableHighlight>
     //         </View>
 
-    // var settings = <View/>
-    var settings = !utils.getMe() &&
-                  <TouchableHighlight
-                      underlayColor='transparent' onPress={this.onSettingsPressed.bind(this)}>
-                     <Text style={styles.text}>
-                       Settings
-                     </Text>
-                  </TouchableHighlight>
+    var settings = <View/>
+    // var settings = !utils.getMe() &&
+    //               <TouchableHighlight
+    //                   underlayColor='transparent' onPress={this.onSettingsPressed.bind(this)}>
+    //                  <Text style={styles.text}>
+    //                    Settings
+    //                  </Text>
+    //               </TouchableHighlight>
 
     var version = !__DEV__ &&
               <View>
