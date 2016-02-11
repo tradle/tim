@@ -651,7 +651,7 @@ class NewResource extends Component {
       var err = this.state.missedRequired
               ? this.state.missedRequired[meta.properties[p].name]
               : null
-      var errTitle = 'Enter a valid ' + title
+      var errTitle = 'This field is required'
       var error = err
                 ? <View style={styles.error}>
                     <Text style={styles.errorText}>{errTitle}</Text>
