@@ -521,9 +521,10 @@ class ResourceList extends Component {
     var content;
     var model = utils.getModel(this.props.modelName).value;
     if (this.state.dataSource.getRowCount() === 0              &&
-        this.props.modelName !== constants.TYPES.PROFILE      &&
+        this.props.modelName !== constants.TYPES.PROFILE       &&
         this.props.modelName !== constants.TYPES.VERIFICATION  &&
-        this.props.modelName !== constants.TYPES.ORGANIZATION) {
+        this.props.modelName !== constants.TYPES.ORGANIZATION  &&
+        (!model.subClassOf  ||  model.subClassOf !== 'tradle.Enum')) {
       content = <NoResources
                   filter={this.state.filter}
                   model={model}
