@@ -140,7 +140,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDER = ENV.topLevelProvider
-var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.0.163:44444' : TOP_LEVEL_PROVIDER.baseUrl
+var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://127.0.0.1:44444' : TOP_LEVEL_PROVIDER.baseUrl
 // var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.0.149:44444' : TOP_LEVEL_PROVIDER.baseUrl
 var SERVICE_PROVIDERS_BASE_URL
 var HOSTED_BY = TOP_LEVEL_PROVIDER.name
@@ -198,10 +198,11 @@ var Store = Reflux.createStore(timeFunctions({
 
     return this.ready = Q.all([
         this.getMe(),
-        this.getSettings()
+        this.getSettings(),
+        this.loadModels()
       ])
       .then(() => {
-        this.loadMyResources()
+        // this.loadMyResources()
         if (!utils.isEmpty(list))
           isLoaded = true;
 
@@ -248,7 +249,8 @@ var Store = Reflux.createStore(timeFunctions({
       }
     })
     .catch(function(err) {
-      return self.loadModels()
+      // debugger
+      // return self.loadModels()
     })
   },
   onSetAuthenticated(params) {
@@ -276,7 +278,8 @@ var Store = Reflux.createStore(timeFunctions({
       }
     })
     .catch(function(err) {
-      return self.loadModels()
+      // debugger
+      // return self.loadModels()
     })
   },
   createFromIdentity(r) {
@@ -816,7 +819,7 @@ var Store = Reflux.createStore(timeFunctions({
         r.organization = from.organization;
       if (!r.sharedWith) {
         r.sharedWith = []
-        r.sharedWith.push(self.createSharedWith(utils.getId(r.from), new Date().getTime()))
+        r.sharedWith.push(self.createSharedWith(utils.getId(r.from), r.time))
       }
 
       batch.push({type: 'put', key: key, value: r});
@@ -1760,7 +1763,7 @@ var Store = Reflux.createStore(timeFunctions({
         return
       chatTo = rep
       chatId = chatTo[TYPE] + '_' + chatTo[ROOT_HASH]
-      isChatWithOrg = false
+      // isChatWithOrg = false
       toId = utils.getId(params.to)
       toOrg = list[toId].value
     }
@@ -1791,6 +1794,7 @@ var Store = Reflux.createStore(timeFunctions({
     }
     var toModelName = chatTo ? chatId.split('_')[0] : null;
     var lastPL
+    var sharedWithTimePairs = []
     for (var key in list) {
       var iMeta = null;
       if (isAllMessages) {
@@ -1847,8 +1851,13 @@ var Store = Reflux.createStore(timeFunctions({
           if (rid.indexOf(ORGANIZATION) == 0) {
             var org = list[utils.getId(r.to)].value.organization
             var orgId = utils.getId(org)
-            if (params.isForgetting  &&  orgId === rid)
-              foundResources[key] = r
+            if (params.isForgetting  &&  orgId === rid) {
+              // foundResources[key] = r
+              sharedWithTimePairs.push({
+                 time: r.time,
+                 resource: r
+              })
+            }
             if (!me.organization  ||  rid !== utils.getId(me.organization))
              continue;
            }
@@ -1871,11 +1880,31 @@ var Store = Reflux.createStore(timeFunctions({
           // }
         // }
       }
+      var isSharedWith = false, timeResourcePair = null
+      if (r.sharedWith  &&  toId) {
+        var sharedWith = r.sharedWith.filter(function(r) {
+          return utils.getId(list[r.bankRepresentative].value.organization) === toId
+        })
+        isSharedWith = sharedWith.length !== 0
+        if (isSharedWith) {
+          timeResourcePair = {
+            time: sharedWith[0].timeShared,
+            resource: r
+          }
+        }
+      }
 
       if (chatTo) {
         if (backlink  &&  r[backlink]) {
           if (chatId === utils.getId(r[backlink])) {
             foundResources[key] = r;
+            if (timeResourcePair)
+              sharedWithTimePairs.push(timeResourcePair)
+            else
+              sharedWithTimePairs.push({
+                time: r.time,
+                resource: r
+              })
             if (params.limit  &&  Object.keys(foundResources).length === params.limit)
               break;
           }
@@ -1898,26 +1927,44 @@ var Store = Reflux.createStore(timeFunctions({
 
         if (fromID !== meId  &&  toID !== meId  &&  toID != meOrgId)
           continue;
-        if (!isChatToForm) {
-
-        var id = toModelName + '_' + chatTo[ROOT_HASH];
-        if (fromID !== id  &&  toID != id  &&  toID != meOrgId)
-          continue;
+        if (isChatWithOrg) {
+          var msgOrg = list[toID].value.organization
+          if (!msgOrg)
+            msgOrg = list[fromID].value.organization
+          let msgOrgId = utils.getId(msgOrg)
+          if (toId !== msgOrgId  &&  (!isSharedWith || isVerificationR)) // do not show shared verifications
+            continue
+        }
+        else if (!isChatToForm) {
+          if (fromID !== chatId  &&  toID != chatId  &&  toID != meOrgId)
+            continue;
         }
       }
-      if (r.sharedWith  &&  toId) {
-        var arr = r.sharedWith.filter(function(r) {
-          return utils.getId(list[r.bankRepresentative].value.organization) === toId
-        })
-        if (!arr.length)
-          continue
-      }
-      if (isVerificationR  ||  r[TYPE] === ADDITIONAL_INFO) {
+      if (r.sharedWith  &&  toId  &&  !isSharedWith)
+        continue
+      // if (r.sharedWith  &&  toId) {
+      //   var arr = r.sharedWith.filter(function(r) {
+      //     return utils.getId(list[r.bankRepresentative].value.organization) === toId
+      //   })
+      //   if (!arr.length)
+      //     continue
+      //  }
+       if (isVerificationR  ||  r[TYPE] === ADDITIONAL_INFO) {
+        // if (!isSharedWith)
+        //   continue
         var doc = {};
         var rDoc = list[utils.getId(r.document)]
         if (!rDoc) {
-          if (params.isForgetting)
+          if (params.isForgetting) {
             foundResources[key] = r
+            if (timeResourcePair)
+              sharedWithTimePairs.push(timeResourcePair)
+            else
+              sharedWithTimePairs.push({
+                time: r.time,
+                resource: r
+              })
+          }
           continue
         }
 
@@ -1943,13 +1990,21 @@ var Store = Reflux.createStore(timeFunctions({
       }
 
       if (!query) {
-        // foundResources[key] = r;
         var msg = this.fillMessage(r);
-        if (msg) {
-          foundResources[key] = msg;
-          if (params.limit  &&  Object.keys(foundResources).length === params.limit)
-            break;
+        if (!msg)
+          msg = r
+        foundResources[key] = msg;
+        if (!timeResourcePair)
+          sharedWithTimePairs.push({
+            time: r.time,
+            resource: msg
+          })
+        else {
+          timeResourcePair.resource = msg
+          sharedWithTimePairs.push(timeResourcePair)
         }
+        if (params.limit  &&  Object.keys(foundResources).length === params.limit)
+          break;
         continue;
       }
        // primitive filtering for this commit
@@ -1961,19 +2016,36 @@ var Store = Reflux.createStore(timeFunctions({
       }
       if (!combinedValue  ||  (combinedValue  &&  (!query || combinedValue.toLowerCase().indexOf(query.toLowerCase()) != -1))) {
         foundResources[key] = this.fillMessage(r);
+        if (timeResourcePair)
+          sharedWithTimePairs.push(timeResourcePair)
+        else
+          sharedWithTimePairs.push({
+            time: r.time,
+            resource: r
+          })
+
         if (params.limit  &&  Object.keys(foundResources).length === params.limit)
           break;
       }
     }
 
-    var result = utils.objectToArray(foundResources);
-    if (lastPL)
-      result.push(lastPL)
-
-    // find possible verifications for the requests that were not yet fulfilled from other verification providers
-    result.sort(function(a, b) {
+    sharedWithTimePairs.sort(function(a, b) {
       return a.time - b.time;
     });
+
+    var result = []
+    sharedWithTimePairs.forEach((r) => {
+      result.push(r.resource)
+    })
+
+    // var result = utils.objectToArray(foundResources);
+    // if (lastPL)
+    //   result.push(lastPL)
+
+    // find possible verifications for the requests that were not yet fulfilled from other verification providers
+    // result.sort(function(a, b) {
+    //   return a.time - b.time;
+    // });
 
     if (!params.isForgetting) {
       result = result.filter((r, i) => {
@@ -2953,8 +3025,12 @@ var Store = Reflux.createStore(timeFunctions({
       var meId = PROFILE + '_' + me[ROOT_HASH]
       var id = toId === meId ? PROFILE + '_' + obj.from[ROOT_HASH] : toId
       var to = list[id].value
-
-      resultList = self.searchMessages({to: to, modelName: MESSAGE})
+      if (to.organization) {
+        var org =  list[utils.getId(to.organization)].value
+        resultList = self.searchMessages({to: org, modelName: MESSAGE})
+      }
+      else
+        resultList = self.searchMessages({to: to, modelName: MESSAGE})
       var verificationsToShare = this.getVerificationsToShare(resultList, to);
       if (verificationsToShare)
         retParams.verificationsToShare = verificationsToShare
