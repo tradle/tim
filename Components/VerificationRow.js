@@ -67,11 +67,11 @@ class VerificationRow extends Component {
           </View>
         )
 
-    if (!isForm  &&  resource.to  &&  backlink !== 'to') {
-      var row = <View style={{flexDirection: 'row'}} key={this.getNextKey()}>
-                  <Text style={[styles.description, {color: '#7AAAc3'}]}>submitted by </Text>
-                  <Text style={styles.description}>{resource.to.title}</Text>
-                </View>;
+    // if (!isForm  &&  resource.to  &&  backlink !== 'to') {
+    //   var row = <View style={{flexDirection: 'row'}} key={this.getNextKey()}>
+    //               <Text style={[styles.description, {color: '#7AAAc3'}]}>submitted by </Text>
+    //               <Text style={styles.description}>{resource.to.title}</Text>
+    //             </View>;
       // var row = resource.to.photos
       //         ? <View style={{flexDirection: 'row'}}>
       //             <Text style={[styles.description, {color: '#7AAAc3'}]}>submitted by </Text>
@@ -82,8 +82,8 @@ class VerificationRow extends Component {
       //             <Text style={[styles.description, {color: '#7AAAc3'}]}>submitted by </Text>
       //             <Text style={styles.description}>{resource.to.title}</Text>
       //           </View>;
-      rows.push(row);
-    }
+    //   rows.push(row);
+    // }
     var verifiedBy
     if (!isForm  &&  resource.from) {
       var contentRows = [];
@@ -170,7 +170,7 @@ class VerificationRow extends Component {
                      : ''
           var val = symbol + (resource[v].title || resource[v])
           vCols.push(
-            <View style={{flexDirection: 'row', justifyContent: 'space-between', borderColor: '#ffffff', borderWidth: 0.5, paddingVertical: 15, borderBottomColor: '#f0f0f0', paddingVertical: 3}} key={self.getNextKey()}>
+            <View style={{flexDirection: 'row', justifyContent: 'space-between', borderColor: '#F2FAED', borderWidth: 0.5, paddingVertical: 15, borderBottomColor: '#f0f0f0', paddingVertical: 3}} key={self.getNextKey()}>
               <Text style={labelStyle}>{properties[v].title + units}</Text>
               <Text style={style}>{val}</Text>
             </View>
@@ -197,7 +197,7 @@ class VerificationRow extends Component {
         if (msgParts.length === 2) {
           var msgModel = utils.getModel(msgParts[1]);
           if (msgModel) {
-            vCols.push(<View key={self.getNextKey()} style={{borderColor: '#ffffff', borderWidth: 0.5, paddingVertical: 5, borderBottomColor: '#f0f0f0'}}>
+            vCols.push(<View key={self.getNextKey()} style={{borderColor: '#F2FAED', borderWidth: 0.5, paddingVertical: 5, borderBottomColor: '#f0f0f0'}}>
                          <Text style={style}>{msgParts[0]}</Text>
                          <Text style={[style, {color: isMyMessage ? '#efffe5' : '#7AAAC3'}]}>{msgModel.value.title}</Text>
                        </View>);
@@ -216,7 +216,7 @@ class VerificationRow extends Component {
       // }
 
       vCols.push(
-        <View style={{flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 5, borderColor: '#ffffff', borderWidth: 0.5, borderBottomColor: '#f7f7f7'}} key={self.getNextKey()}>
+        <View style={{flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 5, borderColor: '#F2FAED', borderWidth: 0.5, borderBottomColor: '#f7f7f7'}} key={self.getNextKey()}>
           <Text style={labelStyle}>{properties[v].title + units}</Text>
           {row}
         </View>
@@ -276,7 +276,7 @@ var styles = StyleSheet.create({
     fontSize: 14,
   },
   row: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#F2FAED',
     flexDirection: 'row',
     marginHorizontal: 10,
     padding: 5,
