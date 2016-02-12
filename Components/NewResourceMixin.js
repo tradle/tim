@@ -2,6 +2,7 @@
 
 var React = require('react-native');
 var ResourceList = require('./ResourceList')
+// var EnumList = require('./EnumList')
 var FloatLabel = require('react-native-floating-labels')
 var Icon = require('react-native-vector-icons/Ionicons');
 var utils = require('../utils/utils');
@@ -101,7 +102,7 @@ var NewResourceMixin = {
       if (!label)
         label = utils.makeLabel(p);
       options.fields[p] = {
-        error: 'Insert a valid ' + label,
+        error: 'This field is required',
         bufferDelay: 20, // to eliminate missed keystrokes
       }
       var isRange
@@ -218,6 +219,18 @@ var NewResourceMixin = {
           if (data[p]  &&  (typeof data[p] != 'number'))
             data[p] = data[p].value
           var units = props[p].units
+          // options.fields[p].onFocus = chooser.bind(this, props[p], p)
+
+          // options.fields[p].template = this.myMoneyInputTemplate.bind(this, {
+          //           label: label,
+          //           prop:  props[p],
+          //           value: data[p] ? data[p] + '' : null,
+          //           keyboard: 'numeric',
+          //           required: !maybe,
+          //           chooser: options.fields[p].onFocus
+          //         })
+
+
           options.fields[p].template = textTemplate.bind(this, {
                     label: label,
                     prop:  props[p],
@@ -257,7 +270,7 @@ var NewResourceMixin = {
       model.url = t.maybe(t.Str)
       var label = 'Server url'
       options.fields.url = {
-        error: 'Insert a valid ' + label,
+        error: 'This field is required',
         bufferDelay: 20, // to eliminate missed keystrokes
         autoCorrect: false
       }
@@ -300,7 +313,7 @@ var NewResourceMixin = {
             : null
     var error = err
               ? <View style={{paddingLeft: 15, backgroundColor: 'transparent'}} key={this.getNextKey()}>
-                  <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>Enter a valid {params.prop.title}</Text>
+                  <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>This field is required</Text>
                 </View>
               : <View key={this.getNextKey()} />
     var label = params.label
@@ -314,7 +327,7 @@ var NewResourceMixin = {
            ?  ' (' + DEFAULT_CURRENCY_SYMBOL + ')'
            : ''
     return (
-      <View style={{paddingBottom: 10}}>
+      <View style={{paddingBottom: 10, flex: 5}}>
         <FloatLabel
           labelStyle={styles.labelInput}
           autoCorrect={false}
@@ -388,7 +401,7 @@ var NewResourceMixin = {
             : null
     var error = err
               ? <View style={{paddingLeft: 5, backgroundColor: 'transparent'}}>
-                  <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>Enter a valid {prop.title}</Text>
+                  <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>This field is required</Text>
                 </View>
               : <View />
     return (
@@ -406,7 +419,8 @@ var NewResourceMixin = {
       </View>
     );
   },
-  chooser(prop, propName, event) {
+
+  chooser(prop, propName,event) {
     var resource = this.state.resource;
     var model = (this.props.model  ||  this.props.metadata)
     if (!resource) {
@@ -429,7 +443,7 @@ var NewResourceMixin = {
       sceneConfig: isFinancialProduct ? Navigator.SceneConfigs.FloatFromBottom : Navigator.SceneConfigs.FloatFromRight,
       passProps: {
         filter:      filter,
-        prop:        propName,
+        prop:        prop.name,
         modelName:   prop.ref,
         resource:    resource,
         isRegistration: this.state.isRegistration,
@@ -438,6 +452,7 @@ var NewResourceMixin = {
       }
     });
   },
+
   // setting chosen from the list property on the resource like for ex. Organization on Contact
   setChosenValue(propName, value) {
     var resource = {}
@@ -522,3 +537,121 @@ var styles = StyleSheet.create({
   }
 });
 module.exports = NewResourceMixin;
+
+  /* MONEY value and curency template
+  myMoneyInputTemplate(params) {
+    var err = this.state.missedRequired
+            ? this.state.missedRequired[params.prop.name]
+            : null
+    var error = err
+              ? <View style={{paddingLeft: 15, backgroundColor: 'transparent'}} key={this.getNextKey()}>
+                  <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>Enter a valid {params.prop.title}</Text>
+                </View>
+              : <View key={this.getNextKey()} />
+    var label = params.label
+    if (params.prop.units) {
+      label += (params.prop.units.charAt(0) === '[')
+            ? ' ' + params.prop.units
+            : ' (' + params.prop.units + ')'
+    }
+    label += params.required ? '' : ' (optional)'
+    label += (params.prop.ref  &&  params.prop.ref === constants.TYPES.MONEY)
+           ?  ' (' + DEFAULT_CURRENCY_SYMBOL + ')'
+           : ''
+    return (
+      <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+          {this.myTextInputTemplate({
+                    label: label,
+                    prop:  params.prop,
+                    value: params.value,
+                    required: params.required,
+                    keyboard: 'numeric',
+                  })
+          }
+          {this.myEnumTemplate({
+            // label:    label,
+            prop:     params.prop,
+            enumProp: utils.getModel(constants.TYPES.MONEY).value.properties.currency,
+            required: params.required
+          })}
+        {error}
+      </View>
+    );
+  },
+
+  myEnumTemplate(params) {
+    var labelStyle = {color: '#cccccc', fontSize: 18, paddingLeft: 10, paddingBottom: 10};
+    var textStyle = {color: '#000000', fontSize: 18, paddingLeft: 10, paddingBottom: 10};
+    var resource = this.state.resource
+    var label, style
+    var prop = params.prop
+    var enumProp = params.enumProp
+    var err = this.state.missedRequired
+            ? this.state.missedRequired[prop.name]
+            : null
+    var error = err
+              ? <View style={{paddingLeft: 5, backgroundColor: 'transparent'}}>
+                  <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>Enter a valid {prop.title}</Text>
+                </View>
+              : <View />
+
+    var value = prop ? resource[prop.name][enumProp.name] : resource[enumProp.name]
+    return (
+      <View style={[styles.chooserContainer, {width: 40}]} key={this.getNextKey()} ref={enumProp.name}>
+        <TouchableHighlight underlayColor='white' onPress={this.enumChooser.bind(this, prop, enumProp)}>
+          <View style={{ position: 'relative'}}>
+            <View style={styles.chooserContentStyle}>
+              <Text style={style}>{value}</Text>
+              <Icon name='ios-arrow-down'  size={15}  color='#96415A'  style={[styles.icon1, {marginTop: 30}]} />
+            </View>
+           {error}
+          </View>
+        </TouchableHighlight>
+      </View>
+    );
+  },
+  enumChooser(prop, enumProp, event) {
+    var resource = this.state.resource;
+    var model = (this.props.model  ||  this.props.metadata)
+    if (!resource) {
+      resource = {};
+      resource[constants.TYPE] = model.id;
+    }
+
+    var value = this.refs.form.input;
+
+    var currentRoutes = this.props.navigator.getCurrentRoutes();
+    this.props.navigator.push({
+      title: enumProp.title,
+      titleTextColor: '#7AAAC3',
+      id: 22,
+      component: EnumList,
+      backButtonTitle: 'Back',
+      passProps: {
+        prop:        prop,
+        enumProp:    enumProp,
+        resource:    resource,
+        returnRoute: currentRoutes[currentRoutes.length - 1],
+        callback:    this.setChosenEnumValue.bind(this),
+      }
+    });
+  },
+  setChosenEnumValue(propName, enumPropName, value) {
+    var resource = {}
+    extend(resource, this.state.resource)
+    // clause for the items properies - need to redesign
+    // resource[propName][enumPropName] = value
+    resource[propName][enumPropName] = value[Object.keys(value)[0]]
+    // resource[propame] = value;
+    var data = this.refs.form.refs.input.state.value;
+    if (data) {
+      for (var p in data)
+        if (!resource[p])
+          resource[p] = data[p];
+    }
+    this.setState({
+      resource: resource,
+      prop: propName
+    });
+  },
+*/
