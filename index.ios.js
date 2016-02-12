@@ -25,6 +25,7 @@ var React = require('react-native');
 
 var ResourceList = require('./Components/ResourceList');
 var VideoPlayer = require('./Components/VideoPlayer')
+var EnumList = require('./Components/EnumList')
 // var GridList = require('./Components/GridList');
 var TimHome = require('./Components/TimHome');
 var PasswordCheck = require('./Components/PasswordCheck');
@@ -380,6 +381,9 @@ class TiMApp extends Component {
       return <PasswordCheck navigator={nav} {...props} />
     case 21:
       return <TouchIDOptIn navigator={nav} { ...props } />
+    case 22:
+      return <EnumList navigator={nav} { ...props } />
+
     case 10:
     default: // 10
       return <ResourceList navigator={nav} {...props} />;
