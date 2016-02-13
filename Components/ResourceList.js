@@ -230,6 +230,7 @@ class ResourceList extends Component {
         resource: resource,
         filter: '',
         modelName: modelName,
+        currency: resource.currency,
       },
     }
     if (isIdentity) { //  ||  isOrganization) {
@@ -251,7 +252,8 @@ class ResourceList extends Component {
           rightButtonTitle: 'Done',
           passProps: {
             model: utils.getModel(resource[constants.TYPE]).value,
-            resource: resource
+            resource: resource,
+            currency: this.props.currency,
           }
         },
         passProps: {resource: resource}
@@ -300,7 +302,10 @@ class ResourceList extends Component {
       component: ResourceView,
       parentMeta: model,
       backButtonTitle: 'Back',
-      passProps: {resource: resource},
+      passProps: {
+        resource: resource,
+        currency: this.props.currency
+      },
     }
     // Edit resource
     var me = utils.getMe();
@@ -370,7 +375,10 @@ class ResourceList extends Component {
           }
         },
 
-        passProps: {resource: resource}
+        passProps: {
+          resource: resource,
+          currency: this.props.currency
+        }
       }
     });
   }
@@ -395,11 +403,13 @@ class ResourceList extends Component {
         key={resource[constants.ROOT_HASH]}
         navigator={this.props.navigator}
         prop={this.props.prop}
+        currency={this.props.currency}
         resource={resource} />
       )
     : (<ResourceRow
         onSelect={() => this.selectResource(resource)}
         key={resource[constants.ROOT_HASH]}
+        currency={this.props.currency}
         showRefResources={this.showRefResources.bind(this)}
         resource={resource} />
     );

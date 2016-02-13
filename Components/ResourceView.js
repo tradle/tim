@@ -107,7 +107,7 @@ class ResourceView extends Component {
     // if (isIdentity  &&  !isMe)
       actionPanel = <View/>
     else
-      actionPanel = <ShowRefList resource={resource} navigator={this.props.navigator} />
+      actionPanel = <ShowRefList resource={resource} currency={this.props.currency} navigator={this.props.navigator} />
     var qrcode = (Object.keys(model.properties).length === 2)
                ? <View />
                : <View>
@@ -126,6 +126,7 @@ class ResourceView extends Component {
         <ShowPropertiesView resource={resource}
                             showItems={this.showResources.bind(this)}
                             showRefResource={this.getRefResource.bind(this)}
+                            currency={this.props.currency}
                             excludedProperties={['photos']}
                             navigator={this.props.navigator} />
       </ScrollView>

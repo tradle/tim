@@ -227,11 +227,8 @@ class ResourceRow extends Component {
       if (ref) {
         if (resource[v]) {
           var row;
-          if (ref == constants.TYPES.MONEY) {
-            row = self.getMoneyProp(ref, properties[v]);
-            if (!row)
-              return;
-          }
+          if (ref == constants.TYPES.MONEY)
+            row = <Text style={style} numberOfLines={first ? 2 : 1} key={self.getNextKey()}>{(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value}</Text>
           else
             row = <Text style={style} numberOfLines={first ? 2 : 1} key={self.getNextKey()}>{resource[v].title}</Text>
 
