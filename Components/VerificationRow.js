@@ -8,6 +8,7 @@ var reactMixin = require('react-mixin');
 var RowMixin = require('./RowMixin');
 var Accordion = require('react-native-accordion')
 var DEFAULT_CURRENCY_SYMBOL = '£'
+var CURRENCY_SYMBOL
 var {
   Image,
   PixelRatio,
@@ -22,6 +23,7 @@ var {
 class VerificationRow extends Component {
   constructor(props) {
     super(props);
+    CURRENCY_SYMBOL = props.currency ? props.currency.symbol : DEFAULT_CURRENCY_SYMBOL
   }
   render() {
     var resource = this.props.resource;
@@ -114,10 +116,10 @@ class VerificationRow extends Component {
                   </View>
                   </View>
 
-    var content = <View style={{backgroundColor: '#ffffff', borderColor: '#ffffff', borderBottomColor: '#cccccc', paddingVertical: 10, borderWidth: 0.5}}>
+    var content = <View style={{paddingVertical: 10, backgroundColor: '#ffffff'}}>
                     <TouchableHighlight onPress={this.props.onSelect.bind(this)}>
                       <View style={styles.row}>
-                        <View style={styles.textContainer}>
+                        <View style={[styles.textContainer, {margin: -5, paddingLeft: 3, borderWidth: 0.5, borderColor: '#edf2ce'}]}>
                           {rows}
                         </View>
                       </View>
@@ -165,10 +167,9 @@ class VerificationRow extends Component {
 
       if (properties[v].ref) {
         if (resource[v]) {
-          var symbol = (properties[v].ref === constants.TYPES.MONEY)
-                     ? DEFAULT_CURRENCY_SYMBOL
-                     : ''
-          var val = symbol + (resource[v].title || resource[v])
+          let val = (properties[v].ref === constants.TYPES.MONEY)
+                  ? (resource[v].currency || CURRENCY_SYMBOL) + resource[v].value
+                  : (resource[v].title || resource[v])
           vCols.push(
             <View style={{flexDirection: 'row', justifyContent: 'space-between', borderColor: '#F2FAED', borderWidth: 0.5, paddingVertical: 15, borderBottomColor: '#f0f0f0', paddingVertical: 3}} key={self.getNextKey()}>
               <Text style={labelStyle}>{properties[v].title + units}</Text>
@@ -246,6 +247,7 @@ reactMixin(VerificationRow.prototype, RowMixin);
 var styles = StyleSheet.create({
   textContainer: {
     flex: 1,
+    borderColor: 'green'
   },
   rTitle: {
     flex: 1,
@@ -276,7 +278,7 @@ var styles = StyleSheet.create({
     fontSize: 14,
   },
   row: {
-    backgroundColor: '#F2FAED',
+    backgroundColor: '#FBFFE5',
     flexDirection: 'row',
     marginHorizontal: 10,
     padding: 5,
@@ -290,11 +292,6 @@ var styles = StyleSheet.create({
     borderColor: '#7AAAc3',
     // borderRadius:10,
     borderWidth: 0.5,
-  },
-  cellBorder: {
-    backgroundColor: '#eeeeee',
-    height: 0.5,
-    marginLeft: 4,
   },
   icon: {
     width: 20,

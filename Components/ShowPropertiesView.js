@@ -10,7 +10,8 @@ var reactMixin = require('react-mixin')
 var Accordion = require('react-native-accordion')
 var Icon = require('react-native-vector-icons/Ionicons')
 
-var DEFAULT_CURRENCY_SYMBOL = '£';
+var DEFAULT_CURRENCY_SYMBOL = '£'
+var CURRENCY_SYMBOL
 var cnt = 0;
 
 var {
@@ -36,6 +37,7 @@ class ShowPropertiesView extends Component {
       viewStyle: {margin: 3},
       dataSource: dataSource
     }
+    CURRENCY_SYMBOL = props.currency ? props.currency.symbol : DEFAULT_CURRENCY_SYMBOL
   }
 
   render() {
@@ -103,22 +105,8 @@ class ShowPropertiesView extends Component {
           return;
       }
       else if (pMeta.ref) {
-        if (pMeta.ref == constants.TYPES.MONEY) {
-          // if (typeof val === 'string'  ||  typeof val === 'number')
-            val = DEFAULT_CURRENCY_SYMBOL + val;
-
-          // else {
-          //   var currencies = utils.getModel(pMeta.ref).value.properties.currency.oneOf;
-          //   var valCurrency = val.currency;
-          //   currencies.some((c) =>  {
-          //     var currencySymbol = c[valCurrency];
-          //     if (currencySymbol) {
-          //       val = (valCurrency == 'USD') ? currencySymbol + val.value : val.value + currencySymbol;
-          //       return true
-          //     }
-          //   })
-          // }
-        }
+        if (pMeta.ref == constants.TYPES.MONEY)
+          val = (val.currency || CURRENCY_SYMBOL) + val.value
         // Could be enum like props
         else if (Object.keys(utils.getModel(pMeta.ref).value.properties).length === 2)
           val = val.title
@@ -131,7 +119,6 @@ class ShowPropertiesView extends Component {
                </TouchableHighlight>
 
           isRef = true;
-          // isDirectionRow = true;
         }
       }
       else if (pMeta.type === 'date')

@@ -91,11 +91,10 @@
     "street": "34 South Hill Road"
   },
   "tradle.YourMoney": {
-    "employer": {
-      "title": "Friendly Bank",
-      "id": "tradle.Organization_71e4b7cd6c11ab7221537275988f113a87902frb_71e4b7cd6c11ab7221537275988f113a87902frb"
-    },
+    "employer": "SBC",
     "howLongHaveYouWorkedHere": 5,
-    "monthlyIncome": 100000
+    "monthlyIncome": {
+      "value": 100000
+    }
   }
 }
