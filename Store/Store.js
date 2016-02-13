@@ -140,7 +140,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDER = ENV.topLevelProvider
-var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://127.0.0.1:44444' : TOP_LEVEL_PROVIDER.baseUrl
+var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.0.114:44444' : TOP_LEVEL_PROVIDER.baseUrl
 // var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.0.149:44444' : TOP_LEVEL_PROVIDER.baseUrl
 var SERVICE_PROVIDERS_BASE_URL
 var HOSTED_BY = TOP_LEVEL_PROVIDER.name
@@ -341,6 +341,10 @@ var Store = Reflux.createStore(timeFunctions({
       // }
     })
 
+    meDriver.ready().then(function () {
+      messenger.setRootHash(meDriver.myRootHash())
+    })
+
     messenger.on('message', meDriver.receiveMsg)
 
     var whitelist = []
@@ -385,11 +389,7 @@ var Store = Reflux.createStore(timeFunctions({
         }
       })
       meDriver.watchTxs(whitelist)
-      // TODO: replace with meDriver.sync()
-      meDriver._fetchTxs().then(meDriver._processTxs)
-      meDriver.ready().then(function () {
-        messenger.setRootHash(meDriver.myRootHash())
-      })
+      meDriver.sync()
       // END  HTTP specific stuff
 
         // })
