@@ -66,22 +66,16 @@ class MessageView extends Component {
     var resource = this.state.resource;
     var modelName = resource[constants.TYPE];
     var model = utils.getModel(modelName).value;
-    var embed = /*modelName === 'tradle.AssetVerification'
-              ? <View style={{marginLeft: 15}}>
-                  <Text style={{fontSize: 20, paddingTop: 15, paddingBottom: 15, color: '#2E3B4E'}}>Verified By</Text>
-                  <Image style={styles.imageVerifiedBy} source={{uri: 'http://upload.wikimedia.org/wikipedia/en/thumb/7/7e/Barclays_logo.svg/391px-Barclays_logo.svg.png'}}/>
-                  <Text style={styles.buttonText} onPress={self.showEmbed.bind(self)}>Embed</Text>
-                  <View style={styles.separator}></View>
-                  <Text style={self.state.embedHeight}>{"<iframe width='420' height='315' src='https://tradle.io/embed/aifSjuyeE5M' frameborder='0' allowfullscreen></iframe>"}</Text>
-                  <View style={{height: 50}} />
-                </View>
-              :*/ <View></View>
-    var date = utils.getFormattedDate(new Date(resource.time));
-    var inRow = resource.photos ? resource.photos.length : 0;
+    var date = utils.getFormattedDate(new Date(resource.time))
+    var inRow = resource.photos ? resource.photos.length : 0
     if (inRow  &&  inRow > 4)
       inRow = 5;
     var actionPanel =
-          <ShowMessageRefList resource={resource} navigator={this.props.navigator} additionalInfo={this.additionalInfo.bind(this)} bankStyle={this.props.bankStyle} />
+          <ShowMessageRefList resource={resource}
+                              navigator={this.props.navigator}
+                              additionalInfo={this.additionalInfo.bind(this)}
+                              currency={this.props.currency}
+                              bankStyle={this.props.bankStyle} />
         // <FromToView resource={resource} navigator={this.props.navigator} />
         // <MoreLikeThis resource={resource} navigator={this.props.navigator}/>
     var verificationTxID, separator
@@ -109,81 +103,19 @@ class MessageView extends Component {
           <PhotoList photos={resource.photos} resource={resource} isView={true} navigator={this.props.navigator} numberInRow={inRow}/>
           <View style={styles.rowContainer}>
             <View><Text style={styles.itemTitle}>{resource.message}</Text></View>
-            <ShowPropertiesView navigator={this.props.navigator} resource={resource} excludedProperties={['tradle.Message.message', 'time', 'photos']} showRefResource={this.getRefResource.bind(this)}/>
+            <ShowPropertiesView navigator={this.props.navigator}
+                                resource={resource}
+                                currency={this.props.currency}
+                                excludedProperties={['tradle.Message.message', 'time', 'photos']}
+                                showRefResource={this.getRefResource.bind(this)}/>
             {separator}
             {verificationTxID}
-            {embed}
           </View>
         </View>
       </ScrollView>
     );
   }
-          // <ShowPropertiesView resource={resource} callback={this.showResources.bind(this)} excludedProperties={['tradle.Message.message', 'tradle.Message.time', 'tradle.message.photos']} />
-  // showRefResources(resource, prop) {
-  //   var meta = utils.getModel(resource[constants.TYPE]).value.properties;
-  //   this.props.navigator.push({
-  //     id: 10,
-  //     title: utils.makeLabel(prop),
-  //     titleTextColor: '#7AAAC3',
-  //     backButtonTitle: 'Back',
-  //     component: MessageList,
-  //     passProps: {
-  //       modelName: meta[prop].items.ref,
-  //       filter: '',
-  //       resource: resource,
-  //       prop: prop
-  //     }
-  //   });
-  // }
-  showEmbed() {
-    this.setState({embedHeight: {height: 60, padding: 5, marginRight: 10, borderColor: '#2E3B4E', backgroundColor: '#eeeeee'}});
-  }
 
-  verify() {
-    var resource = this.props.resource;
-    var model = utils.getModel(resource[constants.TYPE]).value;
-    // this.props.navigator.pop();
-    var me = utils.getMe();
-    var from = this.props.resource.from;
-    var verificationModel = model.properties.verifications.items.ref;
-    var verification = {
-      document: {
-        id: resource[constants.TYPE] + '_' + resource[constants.ROOT_HASH] + '_' + resource[constants.CUR_HASH],
-        title: resource.message ? resource.message : model.title
-      },
-      to: {
-        id: from.id,
-        title: from.title
-      },
-      from: {
-        id: me[constants.TYPE] + '_' + me[constants.ROOT_HASH] + '_' + me[constants.CUR_HASH],
-        title: utils.getDisplayName(me, utils.getModel(me[constants.TYPE]).value.properties)
-      },
-      time: new Date().getTime()
-    }
-    verification[constants.TYPE] = verificationModel;
-
-    if (verificationModel === constants.TYPES.VERIFICATION)
-      Actions.addVerification(verification);
-    else {
-      this.props.navigator.replace({
-        title: resource.message,
-        id: 4,
-        component: NewResource,
-        backButtonTitle: resource.firstName,
-        rightButtonTitle: 'Done',
-        titleTextColor: '#7AAAC3',
-        passProps: {
-          model: utils.getModel(verificationModel).value,
-          resource: verification,
-          // callback: this.createVerification.bind(self)
-        }
-      });
-    }
-  }
-  // createVerification(resource) {
-  //   Actions.addVerification(resource, true);
-  // }
 
   onPress(url) {
     this.props.navigator.push({
@@ -269,3 +201,48 @@ var styles = StyleSheet.create({
 });
 
 module.exports = MessageView;
+  // verify() {
+  //   var resource = this.props.resource;
+  //   var model = utils.getModel(resource[constants.TYPE]).value;
+  //   // this.props.navigator.pop();
+  //   var me = utils.getMe();
+  //   var from = this.props.resource.from;
+  //   var verificationModel = model.properties.verifications.items.ref;
+  //   var verification = {
+  //     document: {
+  //       id: resource[constants.TYPE] + '_' + resource[constants.ROOT_HASH] + '_' + resource[constants.CUR_HASH],
+  //       title: resource.message ? resource.message : model.title
+  //     },
+  //     to: {
+  //       id: from.id,
+  //       title: from.title
+  //     },
+  //     from: {
+  //       id: me[constants.TYPE] + '_' + me[constants.ROOT_HASH] + '_' + me[constants.CUR_HASH],
+  //       title: utils.getDisplayName(me, utils.getModel(me[constants.TYPE]).value.properties)
+  //     },
+  //     time: new Date().getTime()
+  //   }
+  //   verification[constants.TYPE] = verificationModel;
+
+  //   if (verificationModel === constants.TYPES.VERIFICATION)
+  //     Actions.addVerification(verification);
+  //   else {
+  //     this.props.navigator.replace({
+  //       title: resource.message,
+  //       id: 4,
+  //       component: NewResource,
+  //       backButtonTitle: resource.firstName,
+  //       rightButtonTitle: 'Done',
+  //       titleTextColor: '#7AAAC3',
+  //       passProps: {
+  //         model: utils.getModel(verificationModel).value,
+  //         resource: verification,
+  //         // callback: this.createVerification.bind(self)
+  //       }
+  //     });
+  //   }
+  // }
+  // createVerification(resource) {
+  //   Actions.addVerification(resource, true);
+  // }
