@@ -255,6 +255,7 @@ class MessageList extends Component {
       passProps: {
         bankStyle: this.state.bankStyle,
         resource: resource,
+        currency: this.props.currency,
         verification: verification
       },
     }
@@ -287,6 +288,7 @@ class MessageList extends Component {
         messageNumber={rowId}
         sendStatus={this.state.sendStatus &&  this.state.sendResource[constants.ROOT_HASH] === resource[constants.ROOT_HASH] ? this.state.sendStatus : null}
         isAggregation={isAggregation}
+        currency={this.props.currency}
         navigator={this.props.navigator}
         bankStyle={this.state.bankStyle}
         verificationsToShare={this.state.verificationsToShare}
@@ -526,6 +528,7 @@ class MessageList extends Component {
           rightButtonTitle: 'Done',
           passProps: {
             model: utils.getModel('tradle.NewMessageModel').value,
+            currency: resource.currency,
             // callback: this.modelAdded.bind(this)
           }
         }
