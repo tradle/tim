@@ -2,7 +2,7 @@
 
 var React = require('react-native');
 var ResourceList = require('./ResourceList')
-// var EnumList = require('./EnumList')
+var EnumList = require('./EnumList')
 var FloatLabel = require('react-native-floating-labels')
 var Icon = require('react-native-vector-icons/Ionicons');
 var utils = require('../utils/utils');
@@ -12,6 +12,8 @@ var Actions = require('../Actions/Actions');
 var Device = require('react-native-device')
 var extend = require('extend');
 var DEFAULT_CURRENCY_SYMBOL = '£';
+var CURRENCY_SYMBOL
+
 var SETTINGS = 'tradle.Settings'
 
 var cnt = 0;
@@ -31,6 +33,7 @@ var {
 
 var NewResourceMixin = {
   getFormFields(params) {
+    CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol : DEFAULT_CURRENCY_SYMBOL
     var meta = this.props.model  ||  this.props.metadata;
     var model = params.model;  // For the form
     var isMessage = meta.interfaces
@@ -216,28 +219,42 @@ var NewResourceMixin = {
         }
         if (ref === constants.TYPES.MONEY) {
           model[p] = maybe ? t.maybe(t.Num) : t.Num;
-          if (data[p]  &&  (typeof data[p] != 'number'))
-            data[p] = data[p].value
+          // if (data[p]  &&  (typeof data[p] != 'number'))
+          //   data[p] = data[p].value
           var units = props[p].units
           // options.fields[p].onFocus = chooser.bind(this, props[p], p)
+          var value = data[p]
+          if (value) {
+            if (typeof value !== 'object') {
+              value = {
+                value: value,
+                currency: CURRENCY_SYMBOL
+              }
+            }
+            else if (!value.currency)
+              value.currency = CURRENCY_SYMBOL
+          }
+          else {
+            value = {
+              currency: CURRENCY_SYMBOL
+            }
+          }
+          options.fields[p].template = this.myMoneyInputTemplate.bind(this, {
+                    label: label,
+                    prop:  props[p],
+                    value: value,
+                    keyboard: 'numeric',
+                    required: !maybe,
+                  })
 
-          // options.fields[p].template = this.myMoneyInputTemplate.bind(this, {
+
+          // options.fields[p].template = textTemplate.bind(this, {
           //           label: label,
           //           prop:  props[p],
           //           value: data[p] ? data[p] + '' : null,
-          //           keyboard: 'numeric',
+          //           keyboard: units  &&  units.charAt(0) === '[' ? 'numbers-and-punctuation' : 'numeric',
           //           required: !maybe,
-          //           chooser: options.fields[p].onFocus
           //         })
-
-
-          options.fields[p].template = textTemplate.bind(this, {
-                    label: label,
-                    prop:  props[p],
-                    value: data[p] ? data[p] + '' : null,
-                    keyboard: units  &&  units.charAt(0) === '[' ? 'numbers-and-punctuation' : 'numeric',
-                    required: !maybe,
-                  })
 
           // options.fields[p].template = moneyTemplate.bind({}, props[p])
 
@@ -291,6 +308,29 @@ var NewResourceMixin = {
   getNextKey() {
     return (this.props.model  ||  this.props.metadata).id + '_' + cnt++
   },
+  onChangeText(prop, value) {
+    var r = {}
+    extend(true, r, this.state.resource)
+    if(prop.type === 'number')
+      value = Number(value)
+    if (!this.floatingProps)
+      this.floatingProps = {}
+    if (prop.ref == constants.TYPES.MONEY) {
+      if (!this.floatingProps[prop.name])
+        this.floatingProps[prop.name] = {}
+      this.floatingProps[prop.name].value = value
+      if (!r[prop.name])
+        r[prop.name] = {}
+      r[prop.name].value = value
+    }
+    else {
+      r[prop.name] = value
+      this.floatingProps[prop.name] = value
+    }
+    this.setState({resource: r})
+    if (this.state.resource[constants.TYPE] !== SETTINGS)
+      Actions.saveTemporary(r)
+  },
   onChangeTextValue(prop, value, event) {
     console.log(arguments)
     this.state.resource[prop.name] = value
@@ -323,9 +363,9 @@ var NewResourceMixin = {
              : ' (' + params.prop.units + ')'
     }
     label += params.required ? '' : ' (optional)'
-    label += (params.prop.ref  &&  params.prop.ref === constants.TYPES.MONEY)
-           ?  ' (' + DEFAULT_CURRENCY_SYMBOL + ')'
-           : ''
+    // label += (params.prop.ref  &&  params.prop.ref === constants.TYPES.MONEY)
+    //        ?  ' (' + CURRENCY_SYMBOL + ')'
+    //        : ''
     return (
       <View style={{paddingBottom: 10, flex: 5}}>
         <FloatLabel
@@ -337,19 +377,7 @@ var NewResourceMixin = {
           style={styles.formInput}
           value={params.value}
           keyboardType={params.keyboard || 'default'}
-          onChangeText={(value) => {
-            var r = {}
-            extend(true, r, this.state.resource)
-            if(params.prop.type === 'number'  ||  params.prop.ref === constants.TYPES.MONEY)
-              value = Number(value)
-            r[params.prop.name] = value
-            if (!this.floatingProps)
-              this.floatingProps = {}
-            this.floatingProps[params.prop.name] = value
-            this.setState({resource: r})
-            if (this.state.resource[constants.TYPE] !== SETTINGS)
-              Actions.saveTemporary(r)
-          }}
+          onChangeText={this.onChangeText.bind(this, params.prop)}
         >{label}</FloatLabel>
         {error}
       </View>
@@ -490,10 +518,149 @@ var NewResourceMixin = {
     for (var p in this.floatingProps)
       r[p] = this.floatingProps[p]
     Actions.saveTemporary(r)
-  }
+  },
 
+  // MONEY value and curency template
+  myMoneyInputTemplate(params) {
+    var err = this.state.missedRequired
+            ? this.state.missedRequired[params.prop.name]
+            : null
+    var error = err
+              ? <View style={{paddingLeft: 15, backgroundColor: 'transparent'}} key={this.getNextKey()}>
+                  <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>Enter a valid {params.prop.title}</Text>
+                </View>
+              : <View key={this.getNextKey()} />
+    var label = params.label
+    label += params.required ? '' : ' (optional)'
+    label += (params.prop.ref  &&  params.prop.ref === constants.TYPES.MONEY)
+           ?  ' (' + CURRENCY_SYMBOL + ')'
+           : ''
+    return (
+      <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+          {this.myTextInputTemplate({
+                    label: label,
+                    prop:  params.prop,
+                    value: params.value.value + '',
+                    required: params.required,
+                    keyboard: 'numeric',
+                  })
+          }
+          {this.myEnumTemplate({
+            // label:    label,
+            prop:     params.prop,
+            enumProp: utils.getModel(constants.TYPES.MONEY).value.properties.currency,
+            required: params.required,
+            value:    params.value.currency
+          })}
+        {error}
+      </View>
+    );
+  },
+
+  myEnumTemplate(params) {
+    var labelStyle = {color: '#cccccc', fontSize: 18, paddingLeft: 10, paddingBottom: 10};
+    var textStyle = {color: '#000000', fontSize: 18, paddingLeft: 10, paddingBottom: 10};
+    var label
+    var prop = params.prop
+    var enumProp = params.enumProp
+    var err = this.state.missedRequired
+            ? this.state.missedRequired[prop.name]
+            : null
+    var error = err
+              ? <View style={{paddingLeft: 5, backgroundColor: 'transparent'}}>
+                  <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>Enter a valid {prop.title}</Text>
+                </View>
+              : <View />
+    var style = {marginTop: 30}
+    var value = prop ? params.value : resource[enumProp.name]
+    return (
+      <View style={[styles.chooserContainer, {width: 40}]} key={this.getNextKey()} ref={enumProp.name}>
+        <TouchableHighlight underlayColor='white' onPress={this.enumChooser.bind(this, prop, enumProp)}>
+          <View style={{ position: 'relative'}}>
+            <View style={styles.chooserContentStyle}>
+              <Text style={styles.enumText}>{value}</Text>
+              <Icon name='ios-arrow-down'  size={15}  color='#96415A'  style={[styles.icon1, styles.enumProp]} />
+            </View>
+           {error}
+          </View>
+        </TouchableHighlight>
+      </View>
+    );
+  },
+  enumChooser(prop, enumProp, event) {
+    var resource = this.state.resource;
+    var model = (this.props.model  ||  this.props.metadata)
+    if (!resource) {
+      resource = {};
+      resource[constants.TYPE] = model.id;
+    }
+
+    var value = this.refs.form.input;
+
+    var currentRoutes = this.props.navigator.getCurrentRoutes();
+    this.props.navigator.push({
+      title: enumProp.title,
+      titleTextColor: '#7AAAC3',
+      id: 22,
+      component: EnumList,
+      backButtonTitle: 'Back',
+      passProps: {
+        prop:        prop,
+        enumProp:    enumProp,
+        resource:    resource,
+        returnRoute: currentRoutes[currentRoutes.length - 1],
+        callback:    this.setChosenEnumValue.bind(this),
+      }
+    });
+  },
+  setChosenEnumValue(propName, enumPropName, value) {
+    var resource = {}
+    extend(true, resource, this.state.resource)
+    // clause for the items properies - need to redesign
+    // resource[propName][enumPropName] = value
+    if (resource[propName]) {
+      if (typeof resource[propName] === 'object')
+        resource[propName][enumPropName] = value[Object.keys(value)[0]]
+      else {
+        resource[propName] = {
+          value: resource[propName],
+          [enumPropName]: value[Object.keys(value)[0]]
+        }
+      }
+    }
+    if (!this.floatingProps)
+      this.floatingProps = {}
+    if (!this.floatingProps[propName])
+      this.floatingProps[propName] = {}
+    this.floatingProps[propName][enumPropName] = value[Object.keys(value)[0]]
+
+
+    // resource[propame] = value
+    var data = this.refs.form.refs.input.state.value;
+    if (data) {
+      for (var p in data)
+        if (!resource[p])
+          resource[p] = data[p];
+    }
+
+    this.setState({
+      resource: resource,
+      prop: propName
+    });
+  },
 }
+
+
 var styles = StyleSheet.create({
+  enumProp: {
+    marginTop: 30,
+  },
+  enumText: {
+    marginTop: 25,
+    marginLeft: 20,
+    color: '#757575',
+    fontSize: 18
+  },
   icon1: {
     width: 15,
     height: 15,
@@ -538,120 +705,3 @@ var styles = StyleSheet.create({
 });
 module.exports = NewResourceMixin;
 
-  /* MONEY value and curency template
-  myMoneyInputTemplate(params) {
-    var err = this.state.missedRequired
-            ? this.state.missedRequired[params.prop.name]
-            : null
-    var error = err
-              ? <View style={{paddingLeft: 15, backgroundColor: 'transparent'}} key={this.getNextKey()}>
-                  <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>Enter a valid {params.prop.title}</Text>
-                </View>
-              : <View key={this.getNextKey()} />
-    var label = params.label
-    if (params.prop.units) {
-      label += (params.prop.units.charAt(0) === '[')
-            ? ' ' + params.prop.units
-            : ' (' + params.prop.units + ')'
-    }
-    label += params.required ? '' : ' (optional)'
-    label += (params.prop.ref  &&  params.prop.ref === constants.TYPES.MONEY)
-           ?  ' (' + DEFAULT_CURRENCY_SYMBOL + ')'
-           : ''
-    return (
-      <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-          {this.myTextInputTemplate({
-                    label: label,
-                    prop:  params.prop,
-                    value: params.value,
-                    required: params.required,
-                    keyboard: 'numeric',
-                  })
-          }
-          {this.myEnumTemplate({
-            // label:    label,
-            prop:     params.prop,
-            enumProp: utils.getModel(constants.TYPES.MONEY).value.properties.currency,
-            required: params.required
-          })}
-        {error}
-      </View>
-    );
-  },
-
-  myEnumTemplate(params) {
-    var labelStyle = {color: '#cccccc', fontSize: 18, paddingLeft: 10, paddingBottom: 10};
-    var textStyle = {color: '#000000', fontSize: 18, paddingLeft: 10, paddingBottom: 10};
-    var resource = this.state.resource
-    var label, style
-    var prop = params.prop
-    var enumProp = params.enumProp
-    var err = this.state.missedRequired
-            ? this.state.missedRequired[prop.name]
-            : null
-    var error = err
-              ? <View style={{paddingLeft: 5, backgroundColor: 'transparent'}}>
-                  <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>Enter a valid {prop.title}</Text>
-                </View>
-              : <View />
-
-    var value = prop ? resource[prop.name][enumProp.name] : resource[enumProp.name]
-    return (
-      <View style={[styles.chooserContainer, {width: 40}]} key={this.getNextKey()} ref={enumProp.name}>
-        <TouchableHighlight underlayColor='white' onPress={this.enumChooser.bind(this, prop, enumProp)}>
-          <View style={{ position: 'relative'}}>
-            <View style={styles.chooserContentStyle}>
-              <Text style={style}>{value}</Text>
-              <Icon name='ios-arrow-down'  size={15}  color='#96415A'  style={[styles.icon1, {marginTop: 30}]} />
-            </View>
-           {error}
-          </View>
-        </TouchableHighlight>
-      </View>
-    );
-  },
-  enumChooser(prop, enumProp, event) {
-    var resource = this.state.resource;
-    var model = (this.props.model  ||  this.props.metadata)
-    if (!resource) {
-      resource = {};
-      resource[constants.TYPE] = model.id;
-    }
-
-    var value = this.refs.form.input;
-
-    var currentRoutes = this.props.navigator.getCurrentRoutes();
-    this.props.navigator.push({
-      title: enumProp.title,
-      titleTextColor: '#7AAAC3',
-      id: 22,
-      component: EnumList,
-      backButtonTitle: 'Back',
-      passProps: {
-        prop:        prop,
-        enumProp:    enumProp,
-        resource:    resource,
-        returnRoute: currentRoutes[currentRoutes.length - 1],
-        callback:    this.setChosenEnumValue.bind(this),
-      }
-    });
-  },
-  setChosenEnumValue(propName, enumPropName, value) {
-    var resource = {}
-    extend(resource, this.state.resource)
-    // clause for the items properies - need to redesign
-    // resource[propName][enumPropName] = value
-    resource[propName][enumPropName] = value[Object.keys(value)[0]]
-    // resource[propame] = value;
-    var data = this.refs.form.refs.input.state.value;
-    if (data) {
-      for (var p in data)
-        if (!resource[p])
-          resource[p] = data[p];
-    }
-    this.setState({
-      resource: resource,
-      prop: propName
-    });
-  },
-*/
