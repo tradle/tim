@@ -60,17 +60,20 @@ class EnumList extends Component {
   }
 
   renderRow(value) {
-    var key = Object.keys(value)[0]
-    var val = (typeof key === 'object')
-            ? key + ' ' + value[key]
-            : key
+    var label
+    if (typeof value === 'object') {
+      var key = Object.keys(value)[0]
+      label = key + ' ' + value[key]
+    }
+    else
+      label = value
 
     return (
       <View style={{padding: 5}}>
         <TouchableHighlight underlayColor='transparent' onPress={this.selectResource.bind(this, value)}>
           <View style={styles.row}>
             <View style={styles.textContainer}>
-              <Text style={styles.resourceTitle}>{val}</Text>
+              <Text style={styles.resourceTitle}>{label}</Text>
             </View>
           </View>
         </TouchableHighlight>
@@ -83,16 +86,19 @@ class EnumList extends Component {
 var styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f7f7f7',
+    backgroundColor: '#ffffff',
     marginTop: 64
   },
+  resourceTitle: {
+    fontSize: 20
+  },
   separator: {
-    height: 1,
-    backgroundColor: '#cccccc',
+    height: 0.5,
+    backgroundColor: '#eeeeee',
   },
   row: {
     flexDirection: 'row',
-    padding: 5,
+    padding: 10,
   },
   textContainer: {
     flex: 1,
