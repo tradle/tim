@@ -417,7 +417,7 @@ var Store = Reflux.createStore(timeFunctions({
 
         // self.addWebSocketClient()
         var wsClient = new WebSocketClient({
-          url: utils.joinURL(SERVICE_PROVIDERS_BASE_URL, 'ws', provider.id),
+          url: utils.joinURL(SERVICE_PROVIDERS_BASE_URL, provider.id, 'ws'),
           otrKey: otrKey,
           autoconnect: false,
           // rootHash: meDriver.myRootHash()
