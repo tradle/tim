@@ -24,6 +24,7 @@ var STRUCTURED_MESSAGE_BORDER = '#3260a5' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
 // var STRUCTURED_MESSAGE_COLOR = '#77ADFC' //'#4BA0F2' //'#5482C7' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
 var VERIFICATION_BG = '#FBFFE5' //'#F6FFF0';
 var DEFAULT_CURRENCY_SYMBOL = '£'
+var CURRENCY_SYMBOL
 
 var LINK_COLOR, DEFAULT_LINK_COLOR = '#2892C6'
 var STRUCTURED_MESSAGE_COLOR, DEFAULT_STRUCTURED_MESSAGE_COLOR = '#77ADFC'
@@ -55,6 +56,7 @@ class MessageRow extends Component {
       LINK_COLOR = DEFAULT_LINK_COLOR
       STRUCTURED_MESSAGE_COLOR = DEFAULT_STRUCTURED_MESSAGE_COLOR
     }
+    CURRENCY_SYMBOL = (props.currency) ? props.currency.symbol : DEFAULT_CURRENCY_SYMBOL
   }
   shouldComponentUpdate(nextProps, nextState) {
     return !equal(this.props.resource, nextProps.resource) ||
@@ -475,6 +477,7 @@ class MessageRow extends Component {
       passProps:  {
         model: model,
         resource: resource,
+        currency: this.props.currency,
         bankStyle: this.props.bankStyle,
         originatingMessage: this.props.resource
       }
@@ -489,6 +492,7 @@ class MessageRow extends Component {
     var passProps = {
       resource: r,
       bankStyle: this.props.bankStyle,
+      currency: this.props.currency
     }
     if (!isVerification)
       passProps.verify = true
@@ -514,6 +518,7 @@ class MessageRow extends Component {
           resource: r,
           metadata: model,
           bankStyle: this.props.bankStyle,
+          currency: this.props.currency,
           callback: this.props.onSelect.bund(this, r)
         }
       };
@@ -549,15 +554,6 @@ class MessageRow extends Component {
       if (properties[v].ref) {
         if (resource[v]) {
           vCols.push(self.getPropRow(properties[v], resource, resource[v].title || resource[v]))
-          // var dn = resource[v].title;
-          // if (!dn) {
-          //   if (typeof resource[v] !== Object)
-          //     dn = resource[v]
-          //   else
-          //     dn = utils.getDisplayName(resource[v], utils.getModel(resource[v][constants.TYPE]).value.properties)
-          // }
-
-          // vCols.push(self.getPropRow(dn))
           first = false;
         }
         return;
@@ -701,6 +697,9 @@ class MessageRow extends Component {
   }
   getPropRow(prop, resource, val, isVerification) {
     var style = {flexDirection: 'row'}
+    if (prop.ref  &&  prop.ref === constants.TYPES.MONEY) {
+      val = (val.currency || CURRENCY_SYMBOL) + val.value
+    }
     if (isVerification) {
       if (!this.props.isAggregation)
         style = [style, {borderWidth: 0.5, paddingVertical: 3, borderTopColor: '#eeeeee', borderBottomColor: VERIFICATION_BG, borderLeftColor: VERIFICATION_BG, borderRightColor: VERIFICATION_BG}]
@@ -724,7 +723,7 @@ class MessageRow extends Component {
             <Text style={[styles.descriptionW, {color: '#FFFFEE'}]}>{prop.title}</Text>
           </View>
           <View style={{flex: 1, flexDirection: 'column'}}>
-            <Text style={[styles.descriptionW, {fontWeight: '600'}]}>{(prop.ref  &&  prop.ref === constants.TYPES.MONEY ? DEFAULT_CURRENCY_SYMBOL : '') + val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')}</Text>
+            <Text style={[styles.descriptionW, {fontWeight: '600'}]}>{val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')}</Text>
           </View>
        </View>
       )
@@ -1166,7 +1165,7 @@ class MessageRow extends Component {
           if (properties[v].type === 'object') {
             if (properties[v].ref) {
               if (properties[v].ref === constants.TYPES.MONEY)
-                val = DEFAULT_CURRENCY_SYMBOL + resource[v]
+                val = resource[v] //(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value
               else {
                 var m = utils.getModel(properties[v].ref).value
                 if (m.subClassOf  &&  m.subClassOf == 'tradle.Enum')
