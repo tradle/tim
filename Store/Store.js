@@ -320,11 +320,8 @@ var Store = Reflux.createStore(timeFunctions({
     // return Q.ninvoke(dns, 'resolve4', 'tradle.io')
     //   .then(function (addrs) {
     //     console.log('tradle is at', addrs)
-    var httpClient = new HttpClient()
-    httpClient.on('message', function () {
-      meDriver.receiveMsg.apply(meDriver, arguments)
-    })
 
+    var httpClient
     var wsClients = {}
     var whitelist = []
     meDriver = new Tim({
@@ -376,8 +373,10 @@ var Store = Reflux.createStore(timeFunctions({
     }
 
     meDriver._send = function (rootHash, msg, recipientInfo) {
-      var messenger = wsClients[rootHash] ||
-        (httpClient.hasEndpointFor(rootHash) && httpClient)
+      var messenger = wsClients[rootHash]
+      if (!messenger && httpClient.hasEndpointFor(rootHash)) {
+        messenger = httpClient
+      }
 
       if (!messenger) {
         return Q.reject(new Error('recipient not found'))
@@ -399,6 +398,11 @@ var Store = Reflux.createStore(timeFunctions({
 
     return this.getInfo()
     .then(function(providers) {
+      var httpClient = new HttpClient()
+      httpClient.on('message', function () {
+        meDriver.receiveMsg.apply(meDriver, arguments)
+      })
+
       providers.forEach(function(provider) {
         httpClient.addRecipient(
           provider.hash,
@@ -431,10 +435,6 @@ var Store = Reflux.createStore(timeFunctions({
       meDriver.ready().then(function () {
         var myHash = meDriver.myRootHash()
         httpClient.setRootHash(myHash)
-
-        for (var hash in wsClients) {
-          wsClients[hash].setRootHash(myHash)
-        }
       })
 
       return meDriver
