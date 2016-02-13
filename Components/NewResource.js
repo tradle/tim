@@ -6,9 +6,7 @@ var utils = require('../utils/utils');
 var NewItem = require('./NewItem');
 var GridItemsList = require('./GridItemsList')
 var PhotoView = require('./PhotoView');
-var ResourceList = require('./ResourceList');
 var ResourceView = require('./ResourceView');
-var ChatMessage = require('./ChatMessage');
 var t = require('tcomb-form-native');
 var extend = require('extend');
 var Actions = require('../Actions/Actions');
@@ -20,10 +18,10 @@ var myStyles = require('../styles/styles');
 var rStyles = require('../styles/registrationStyles');
 var NewResourceMixin = require('./NewResourceMixin');
 var reactMixin = require('react-mixin');
-var Device = require('react-native-device');
 var BG_IMAGE = require('../img/bg.png')
 var equal = require('deep-equal')
-var DeviceHeight = require('Dimensions').get('window').height;
+var DeviceHeight
+var DeviceWidth
 var constants = require('@tradle/constants');
 var UIImagePickerManager = require('NativeModules').UIImagePickerManager;
 var SETTINGS = 'tradle.Settings'
@@ -45,6 +43,7 @@ var {
   StatusBarIOS,
   DatePickerIOS,
   AlertIOS,
+  Dimensions,
   PropTypes,
   // LayoutAnimation,
   Component,
@@ -96,6 +95,9 @@ class NewResource extends Component {
       automaticallyAdjustContentInsets:true,
       scrollEventThrottle:200,
     };
+    let d = Dimensions.get('window')
+    DeviceHeight = d.height;
+    DeviceWidth = d.width
     // pass on any props we don't own to ScrollView
     // Object.keys(this.props).filter((n)=>{return n!='children'})
     // .forEach((e)=>{if(!myProps[e])this.scrollviewProps[e]=this.props[e]});
@@ -260,11 +262,13 @@ class NewResource extends Component {
         titleTextColor: '#7AAAC3',
         passProps: {
           model: self.props.model,
-          resource: resource
+          resource: resource,
+          currency: this.props.currency
         }
       },
       passProps: {
-        resource: resource
+        resource: resource,
+        currency: this.props.currency
       }
     });
     if (currentRoutesLength != 2)
@@ -310,7 +314,7 @@ class NewResource extends Component {
           v = null
           delete json[p]
         }
-        else if (typeof v === 'object'  &&  this.props.model.properties[p].ref == constants.TYPES.MONEY) {
+        else if (typeof v === 'object'  &&  this.props.model.properties[p].ref !== constants.TYPES.MONEY) {
           var units = this.props.model.properties[p].units
           if (units)
             v = v.value
@@ -475,6 +479,7 @@ class NewResource extends Component {
         resource: this.state.resource,
         parentMeta: this.props.parentMeta,
         onAddItem: this.onAddItem.bind(this),
+        currency: this.props.currency
       }
     });
   }
@@ -740,7 +745,7 @@ class NewResource extends Component {
 
     var style
     if (this.state.isRegistration)
-      style = Device.height < 600 ? {marginTop: 90} : {marginTop: Device.height / 4}
+      style = DeviceHeight < 600 ? {marginTop: 90} : {marginTop: DeviceHeight / 4}
     else
       style = {marginTop: 64}
     options.auto = 'placeholders';
@@ -790,16 +795,16 @@ class NewResource extends Component {
       }
       return content
     }
-    var cTop = Device.height / 6
+    var cTop = DeviceHeight / 6
 
     var thumb = {
-      width: Device.width / 2.2,
-      height: Device.width / 2.2,
+      width: DeviceWidth / 2.2,
+      height: DeviceWidth / 2.2,
     }
 
     return (
-        <View style={{height: Device.height}}>
-          <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: Device.width, height: Device.height}} />
+        <View style={{height: DeviceHeight}}>
+          <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: DeviceWidth, height: DeviceHeight}} />
 
           {content}
           <View style={{opacity: 0.7, position: 'absolute', bottom: 30, right: 20, flexDirection: 'row'}}>
