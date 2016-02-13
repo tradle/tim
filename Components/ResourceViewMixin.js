@@ -22,7 +22,11 @@ var ResourceViewMixin = {
       titleTextColor: '#7AAAC3',
       // rightButtonTitle: 'Edit',
       backButtonTitle: 'Back',
-      passProps: {resource: resource, prop: prop}
+      passProps: {
+        resource: resource,
+        prop: prop,
+        currency: this.props.currency
+      }
     });
   },
   showResources(resource, prop) {
@@ -36,7 +40,8 @@ var ResourceViewMixin = {
         modelName: prop.items.ref,
         filter: '',
         resource: resource,
-        prop: prop
+        prop: prop,
+        currency: this.props.currency
       }
     });
   }
