@@ -144,9 +144,8 @@ var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://127.0.0.1:44444' : TO
 // var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.0.149:44444' : TOP_LEVEL_PROVIDER.baseUrl
 var SERVICE_PROVIDERS_BASE_URL
 var HOSTED_BY = TOP_LEVEL_PROVIDER.name
-var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
+// var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
 var SERVICE_PROVIDERS
-// var SERVICE_PROVIDERS = ALL_SERVICE_PROVIDERS.topLevelProvider[TOP_LEVEL_PROVIDER.name.toLowerCase()] //ENV.providers
 
 var Store = Reflux.createStore(timeFunctions({
   // this will set up listeners to all publishers in TodoActions, using onKeyname (or keyname) as callbacks
@@ -400,6 +399,31 @@ var Store = Reflux.createStore(timeFunctions({
       // debugger
     })
   },
+  onGetEmployeeInfo(code) {
+    let pair = code.split(':')
+    let orgId = ORGANIZATION + '_' + pair[0]
+    let serviceProviderName
+    SERVICE_PROVIDERS.filter(function(json) {
+      if (json.org === orgId)
+        serviceProviderName = json.name
+    })
+    var self = this
+    return Q.race([
+      fetch(utils.joinURL(SERVICE_PROVIDERS_BASE_URL, serviceProviderName + '/employee/' + pair[1])),
+      Q.Promise(function (resolve, reject) {
+        setTimeout(function () {
+          reject(new Error('timed out'))
+        }, 5000)
+      })
+      .then(function(data) {
+        data.org = list[orgId].value
+        self.addInfo(data)
+      })
+      .catch((err) => {
+        debugger
+      })
+    ])
+  },
   // Gets info about companies in this app, their bot representatives and their styles
   getInfo() {
     var self = this
@@ -419,7 +443,7 @@ var Store = Reflux.createStore(timeFunctions({
       SERVICE_PROVIDERS = []
       var promises = []
       json.providers.forEach(function(sp) {
-        SERVICE_PROVIDERS.push(sp.id)
+        SERVICE_PROVIDERS.push({name: sp.id, org: utils.getId(sp.org)})
         promises.push(self.addInfo(sp))
       })
       return Q.allSettled(promises)
@@ -830,39 +854,39 @@ var Store = Reflux.createStore(timeFunctions({
         time: r.time
       };
 
-      if (!from.verifiedByMe)
-        from.verifiedByMe = [];
-      if (!to.myVerifications)
-        to.myVerifications = [];
-      if (!r.txId) {
-        from.verifiedByMe.push(newVerification);
-        to.myVerifications.push(newVerification);
-        if (me[ROOT_HASH] === to[ROOT_HASH])
-          me.myVerifications = to.myVerifications
-      }
-      else  {
-        var found
-        for (var i=0; i<from.verifiedByMe.length  &&  !found; i++) {
-          if (utils.getId(from.verifiedByMe[i]).split('_')[1] === r[ROOT_HASH]) {
-            from.verifiedByMe[i] = r
-            found = true
-          }
-        }
-        if (!found)
-          from.verifiedByMe.push(newVerification);
-        else
-          found = false
-        for (var i=0; i<to.myVerifications.length  &&  !found; i++) {
-          if (utils.getId(to.myVerifications[i]).split('_')[1] === r[ROOT_HASH]) {
-            to.myVerifications[i] = r
-            found = true
-          }
-          if (!found)
-            to.myVerifications.push(newVerification);
-        }
-      }
+      // if (!from.verifiedByMe)
+      //   from.verifiedByMe = [];
+      // if (!to.myVerifications)
+      //   to.myVerifications = [];
+      // if (!r.txId) {
+      //   from.verifiedByMe.push(newVerification);
+      //   to.myVerifications.push(newVerification);
+      //   if (me[ROOT_HASH] === to[ROOT_HASH])
+      //     me.myVerifications = to.myVerifications
+      // }
+      // else  {
+      //   var found
+      //   for (var i=0; i<from.verifiedByMe.length  &&  !found; i++) {
+      //     if (utils.getId(from.verifiedByMe[i]).split('_')[1] === r[ROOT_HASH]) {
+      //       from.verifiedByMe[i] = r
+      //       found = true
+      //     }
+      //   }
+      //   if (!found)
+      //     from.verifiedByMe.push(newVerification);
+      //   else
+      //     found = false
+      //   for (var i=0; i<to.myVerifications.length  &&  !found; i++) {
+      //     if (utils.getId(to.myVerifications[i]).split('_')[1] === r[ROOT_HASH]) {
+      //       to.myVerifications[i] = r
+      //       found = true
+      //     }
+      //     if (!found)
+      //       to.myVerifications.push(newVerification);
+      //   }
+      // }
 
-      batch.push({type: 'put', key: toId, value: to});
+      // batch.push({type: 'put', key: toId, value: to});
 
     // check if send returns somewhere roothash for the new resource
       return db.batch(batch)
@@ -3278,17 +3302,17 @@ var Store = Reflux.createStore(timeFunctions({
             batch.push({type: 'put', key: rId, value: res})
           }
           if (isVerification) {
-            var myVerifications = me.myVerifications.filter(function(r) {
-              var verification = list[utils.getId(r)]
-              if (!verification)
-                return false
-              verification = verification.value
-              return utils.getId(verification) === rId ? false : true
-            })
-            if (myVerifications.length != me.myVerifications.length) {
-              me.myVerifications = myVerifications
-              batch.push({type: 'put', key: utils.getId(me), value: me})
-            }
+            // var myVerifications = me.myVerifications.filter(function(r) {
+            //   var verification = list[utils.getId(r)]
+            //   if (!verification)
+            //     return false
+            //   verification = verification.value
+            //   return utils.getId(verification) === rId ? false : true
+            // })
+            // if (myVerifications.length != me.myVerifications.length) {
+            //   me.myVerifications = myVerifications
+            //   batch.push({type: 'put', key: utils.getId(me), value: me})
+            // }
             // Cleanup form from the deleted verification
             if (r.deleted) {
               var docPair = list[utils.getId(res.document)]
@@ -3470,18 +3494,6 @@ var Store = Reflux.createStore(timeFunctions({
       sampleData.getResources().forEach(function(r) {
         if (!r[ROOT_HASH])
           r[ROOT_HASH] = sha(r);
-        if (r[TYPE] === ORGANIZATION  &&  SERVICE_PROVIDERS)  {
-          var org
-          SERVICE_PROVIDERS.forEach(function(name) {
-            var title = ALL_SERVICE_PROVIDERS.providers[name].title
-            if (!title)
-              title = name.charAt(0).toUpperCase() + name.substring(1)
-            if (title === r.name)
-              org = r
-          })
-          if (!org)
-            return
-        }
 
         r[CUR_HASH] = r[ROOT_HASH];
         var key = r[TYPE] + '_' + r[ROOT_HASH];
