@@ -172,7 +172,7 @@
     },
     "@tradle/models": {
       "version": "2.0.0",
-      "from": "@tradle/models@latest",
+      "from": "@tradle/models@2.0.0",
       "resolved": "https://registry.npmjs.org/@tradle/models/-/models-2.0.0.tgz"
     },
     "@tradle/otr": {
@@ -187,17 +187,20 @@
     },
     "@tradle/simple-wallet": {
       "version": "1.1.1",
-      "from": "@tradle/simple-wallet@1.1.1",
+      "from": "https://registry.npmjs.org/@tradle/simple-wallet/-/simple-wallet-1.1.1.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/simple-wallet/-/simple-wallet-1.1.1.tgz",
       "dependencies": {
         "@tradle/spender": {
           "version": "1.2.0",
-          "from": "@tradle/spender@1.2.0"
+          "from": "https://registry.npmjs.org/@tradle/spender/-/spender-1.2.0.tgz",
+          "resolved": "https://registry.npmjs.org/@tradle/spender/-/spender-1.2.0.tgz"
         }
       }
     },
     "@tradle/transport-http": {
       "version": "1.0.0",
-      "from": "@tradle/transport-http@1.0.0"
+      "from": "https://registry.npmjs.org/@tradle/transport-http/-/transport-http-1.0.0.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/transport-http/-/transport-http-1.0.0.tgz"
     },
     "@tradle/tx-data": {
       "version": "1.0.3",
@@ -1328,7 +1331,8 @@
     },
     "logbase": {
       "version": "3.4.2",
-      "from": "logbase@3.4.2",
+      "from": "https://registry.npmjs.org/logbase/-/logbase-3.4.2.tgz",
+      "resolved": "https://registry.npmjs.org/logbase/-/logbase-3.4.2.tgz",
       "dependencies": {
         "add-stream": {
           "version": "1.0.0",
@@ -1644,7 +1648,8 @@
     },
     "q-level": {
       "version": "1.1.3",
-      "from": "q-level@1.1.3",
+      "from": "https://registry.npmjs.org/q-level/-/q-level-1.1.3.tgz",
+      "resolved": "https://registry.npmjs.org/q-level/-/q-level-1.1.3.tgz",
       "dependencies": {
         "level-manifest": {
           "version": "1.2.0",
@@ -3211,15 +3216,15 @@
                           "from": "are-we-there-yet@~1.0.0",
                           "resolved": "https://registry.npmjs.org/are-we-there-yet/-/are-we-there-yet-1.0.5.tgz"
                         },
-                        "core-util-is": {
-                          "version": "1.0.2",
-                          "from": "core-util-is@~1.0.0",
-                          "resolved": "https://registry.npmjs.org/core-util-is/-/core-util-is-1.0.2.tgz"
-                        },
                         "debug": {
                           "version": "0.7.4",
                           "from": "debug@~0.7.2",
                           "resolved": "https://registry.npmjs.org/debug/-/debug-0.7.4.tgz"
+                        },
+                        "core-util-is": {
+                          "version": "1.0.2",
+                          "from": "core-util-is@~1.0.0",
+                          "resolved": "https://registry.npmjs.org/core-util-is/-/core-util-is-1.0.2.tgz"
                         },
                         "deep-extend": {
                           "version": "0.4.0",
@@ -3231,30 +3236,30 @@
                           "from": "delegates@^0.1.0",
                           "resolved": "https://registry.npmjs.org/delegates/-/delegates-0.1.0.tgz"
                         },
-                        "gauge": {
-                          "version": "1.2.2",
-                          "from": "gauge@~1.2.0",
-                          "resolved": "https://registry.npmjs.org/gauge/-/gauge-1.2.2.tgz"
-                        },
                         "isarray": {
                           "version": "0.0.1",
                           "from": "isarray@0.0.1",
                           "resolved": "https://registry.npmjs.org/isarray/-/isarray-0.0.1.tgz"
                         },
-                        "lodash.padleft": {
-                          "version": "3.1.1",
-                          "from": "lodash.padleft@^3.0.0",
-                          "resolved": "https://registry.npmjs.org/lodash.padleft/-/lodash.padleft-3.1.1.tgz"
+                        "gauge": {
+                          "version": "1.2.2",
+                          "from": "gauge@~1.2.0",
+                          "resolved": "https://registry.npmjs.org/gauge/-/gauge-1.2.2.tgz"
+                        },
+                        "lodash._createpadding": {
+                          "version": "3.6.1",
+                          "from": "lodash._createpadding@^3.0.0",
+                          "resolved": "https://registry.npmjs.org/lodash._createpadding/-/lodash._createpadding-3.6.1.tgz"
                         },
                         "lodash.pad": {
                           "version": "3.1.1",
                           "from": "lodash.pad@^3.0.0",
                           "resolved": "https://registry.npmjs.org/lodash.pad/-/lodash.pad-3.1.1.tgz"
                         },
-                        "lodash._createpadding": {
-                          "version": "3.6.1",
-                          "from": "lodash._createpadding@^3.0.0",
-                          "resolved": "https://registry.npmjs.org/lodash._createpadding/-/lodash._createpadding-3.6.1.tgz"
+                        "lodash.padleft": {
+                          "version": "3.1.1",
+                          "from": "lodash.padleft@^3.0.0",
+                          "resolved": "https://registry.npmjs.org/lodash.padleft/-/lodash.padleft-3.1.1.tgz"
                         },
                         "lodash.padright": {
                           "version": "3.1.1",
@@ -5951,15 +5956,15 @@
           "from": "https://registry.npmjs.org/glob-parent/-/glob-parent-2.0.0.tgz",
           "resolved": "https://registry.npmjs.org/glob-parent/-/glob-parent-2.0.0.tgz"
         },
-        "is-glob": {
-          "version": "2.0.1",
-          "from": "https://registry.npmjs.org/is-glob/-/is-glob-2.0.1.tgz",
-          "resolved": "https://registry.npmjs.org/is-glob/-/is-glob-2.0.1.tgz"
-        },
         "is-extglob": {
           "version": "1.0.0",
           "from": "https://registry.npmjs.org/is-extglob/-/is-extglob-1.0.0.tgz",
           "resolved": "https://registry.npmjs.org/is-extglob/-/is-extglob-1.0.0.tgz"
+        },
+        "is-glob": {
+          "version": "2.0.1",
+          "from": "https://registry.npmjs.org/is-glob/-/is-glob-2.0.1.tgz",
+          "resolved": "https://registry.npmjs.org/is-glob/-/is-glob-2.0.1.tgz"
         },
         "lodash._basetostring": {
           "version": "3.0.1",
@@ -6906,18 +6911,18 @@
     },
     "react-native-gesture-password": {
       "version": "0.1.4",
-      "from": "mvayngrib/react-native-gesture-password",
-      "resolved": "git://github.com/mvayngrib/react-native-gesture-password.git#82687a34b046839ebdfe57d58c82b864f10eeea0"
+      "from": "git://github.com/mvayngrib/react-native-gesture-password.git#3fe0534ae4ab1ed993a08f58ddea9c393b9ca895",
+      "resolved": "git://github.com/mvayngrib/react-native-gesture-password.git#3fe0534ae4ab1ed993a08f58ddea9c393b9ca895"
     },
     "react-native-gifted-messenger": {
       "version": "0.0.16",
-      "from": "git://github.com/pgmemk/react-native-gifted-messenger.git#d5ffbc458c082fedf1e35a25f59a489a4a6347f1",
-      "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#d5ffbc458c082fedf1e35a25f59a489a4a6347f1",
+      "from": "git://github.com/pgmemk/react-native-gifted-messenger.git#aaa360287370bafe9dac70e299c4654ab2a032ea",
+      "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#aaa360287370bafe9dac70e299c4654ab2a032ea",
       "dependencies": {
         "react-native-button": {
-          "version": "1.3.1",
-          "from": "https://registry.npmjs.org/react-native-button/-/react-native-button-1.3.1.tgz",
-          "resolved": "https://registry.npmjs.org/react-native-button/-/react-native-button-1.3.1.tgz"
+          "version": "1.4.2",
+          "from": "https://registry.npmjs.org/react-native-button/-/react-native-button-1.4.2.tgz",
+          "resolved": "https://registry.npmjs.org/react-native-button/-/react-native-button-1.4.2.tgz"
         },
         "react-native-gifted-spinner": {
           "version": "0.0.3",
@@ -7078,7 +7083,8 @@
     },
     "react-native-local-auth": {
       "version": "1.0.4",
-      "from": "react-native-local-auth@latest"
+      "from": "https://registry.npmjs.org/react-native-local-auth/-/react-native-local-auth-1.0.4.tgz",
+      "resolved": "https://registry.npmjs.org/react-native-local-auth/-/react-native-local-auth-1.0.4.tgz"
     },
     "react-native-randombytes": {
       "version": "1.0.1",

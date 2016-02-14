@@ -374,7 +374,7 @@ var Store = Reflux.createStore(timeFunctions({
 
     meDriver._send = function (rootHash, msg, recipientInfo) {
       var messenger = wsClients[rootHash]
-      if (!messenger && httpClient.hasEndpointFor(rootHash)) {
+      if (!messenger && httpClient && httpClient.hasEndpointFor(rootHash)) {
         messenger = httpClient
       }
 
@@ -398,9 +398,14 @@ var Store = Reflux.createStore(timeFunctions({
 
     return this.getInfo()
     .then(function(providers) {
-      var httpClient = new HttpClient()
+      httpClient = new HttpClient()
       httpClient.on('message', function () {
         meDriver.receiveMsg.apply(meDriver, arguments)
+      })
+
+      meDriver.ready().then(function () {
+        var myHash = meDriver.myRootHash()
+        httpClient.setRootHash(myHash)
       })
 
       providers.forEach(function(provider) {
@@ -432,11 +437,6 @@ var Store = Reflux.createStore(timeFunctions({
       meDriver.watchTxs(whitelist)
       // TODO: replace with meDriver.sync()
       meDriver.sync()
-      meDriver.ready().then(function () {
-        var myHash = meDriver.myRootHash()
-        httpClient.setRootHash(myHash)
-      })
-
       return meDriver
     })
     .catch(function(err) {
