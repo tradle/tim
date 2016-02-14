@@ -123,7 +123,7 @@ class TimHome extends Component {
 
     return authPromise
       .then(() => {
-        Actions.setAuthenticated({me: me, authenticated: true})
+        Actions.setAuthenticated(true)
         cb()
       })
       .catch(err => {
@@ -187,6 +187,7 @@ class TimHome extends Component {
         onSuccess: (pass) => {
           Keychain.setGenericPassword(PASSWORD_ITEM_KEY, utils.hashPassword(pass))
           .then(() => {
+            Actions.updateMe({ isRegistered: true })
             return hasTouchID()
               .then(() => {
                 return true
@@ -203,14 +204,7 @@ class TimHome extends Component {
                 rightButtonTitle: 'Skip',
                 passProps: {
                   optIn: () => {
-                    var me = utils.getMe()
-                    me.useTouchId = true
-                    Actions.addItem({
-                      resource: me,
-                      value: me,
-                      meta: utils.getModel(me[constants.TYPE]).value
-                    })
-
+                    Actions.updateMe({ useTouchId: true })
                     cb()
                   }
                 },

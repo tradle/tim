@@ -138,7 +138,7 @@ class TiMApp extends Component {
         // ok to pop from defensive copy
         let currentRoute = this.state.navigator.getCurrentRoutes().pop()
         let me = utils.getMe()
-        if (me && !me.isAuthenticated) {
+        if (me && me.isRegistered && !me.isAuthenticated) {
           let needNav = currentRoute.component !== TimHome
           if (needNav) {
             this.state.navigator.push({
@@ -156,7 +156,7 @@ class TiMApp extends Component {
         break
       case 'background':
         newState.unauthTimeout = setTimeout(() => {
-          Actions.setAuthenticated({ authenticated: false })
+          Actions.setAuthenticated(false)
         }, UNAUTHENTICATE_AFTER_BG_MILLIS)
 
         break

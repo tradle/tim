@@ -242,7 +242,7 @@ var Store = Reflux.createStore(timeFunctions({
     })
     .then(function(value) {
       me = value
-      utils.setMe(me)
+      self.setMe(me)
       var key = value[TYPE] + '_' + value[ROOT_HASH]
       list[key] = {
         key: key,
@@ -254,13 +254,33 @@ var Store = Reflux.createStore(timeFunctions({
       // return self.loadModels()
     })
   },
-  onSetAuthenticated(params) {
-    var meId = utils.getId(me)
-    var r = {}
-    extend(true, r, me)
-    r.isAuthenticated = params.authenticated
-    utils.setMe(r)
-    this.trigger({action: 'authenticated'})
+  setMe(newMe) {
+    me = newMe
+    utils.setMe(me)
+  },
+  onUpdateMe(params) {
+    let r = {}
+    extend(true, r, me, params)
+    this.setMe(r)
+    let meId = utils.getId(r)
+    list[meId].value  = r
+    return db.put(meId, r)
+      // .then(() => {
+      //   if (params.registered) {
+      //     this.trigger({action: 'registered'})
+      //   } else if (params)
+      // })
+  },
+  onSetAuthenticated(authenticated) {
+    let meId = utils.getId(me)
+    let r = {}
+    extend(true, r, me, {
+      isAuthenticated: authenticated,
+      dateAuthenticated: Date.now()
+    })
+
+    this.setMe(r)
+    this.trigger({ action: 'authenticated', value: authenticated })
     // return db.put(meId, r)
     // .then(() => {
     //   self.trigger({action: 'authenticated'})
@@ -440,7 +460,7 @@ var Store = Reflux.createStore(timeFunctions({
       return meDriver
     })
     .catch(function(err) {
-      debugger
+      // debugger
     })
 
     // var log = d.log;
@@ -1869,7 +1889,7 @@ var Store = Reflux.createStore(timeFunctions({
       isTest = true;
       var meId = constants.TYPES.PROFILE + '_' + testMe;
       me = list[meId].value;
-      utils.setMe(me);
+      this.setMe(me);
       var myIdentities = list[MY_IDENTITIES + '_1'].value;
       if (myIdentities)
         myIdentities.currentIdentity = meId;
@@ -2382,7 +2402,7 @@ var Store = Reflux.createStore(timeFunctions({
     .then(function() {
       delete me.privkeys
       var  params = {action: 'addItem', resource: value, me: value};
-      utils.setMe(me)
+      self.setMe(me)
       return self.trigger(params);
     })
     .then(function(value) {
