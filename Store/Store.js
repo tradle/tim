@@ -4472,6 +4472,8 @@ function timeSomething (name) {
 }
 
 function timeFunctions (obj) {
+  if (!__DEV__) return obj
+
   var timed = {}
   Object.keys(obj).forEach((k) => {
     var orig = obj[k]
