@@ -138,6 +138,9 @@ class TiMApp extends Component {
         // ok to pop from defensive copy
         let currentRoute = this.state.navigator.getCurrentRoutes().pop()
         let me = utils.getMe()
+        // TODO: auth flow should not be here OR in TimHome
+        // it should be more like Actions.auth()
+        // and then handled in one place
         if (me && me.isRegistered && !me.isAuthenticated) {
           let needNav = currentRoute.component !== TimHome
           if (needNav) {
