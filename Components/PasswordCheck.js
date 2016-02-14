@@ -151,7 +151,8 @@ module.exports = React.createClass({
         <Image source={BG_IMAGE} style={[styles.bg, { width, height }]} />
         <PasswordGesture
           ref='pg'
-          hollow={true}
+          shell={true}
+          nucleus={true}
           styles={
             {
               frame: { backgroundColor: 'transparent' },
