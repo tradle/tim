@@ -10,6 +10,7 @@ var Actions = Reflux.createActions([
   'getMe',
   'getTo',
   'getFrom',
+  'getEmployeeInfo',
   'addNewIdentity',
   'removeIdentity',
   'showIdentityList',
