@@ -634,6 +634,13 @@ var NewResourceMixin = {
       this.floatingProps[propName] = {}
     this.floatingProps[propName][enumPropName] = value[Object.keys(value)[0]]
 
+    // HACK
+    var props = (this.props.model  ||  this.props.metadata).properties
+    if (props[propName].ref  &&  props[propName].ref === constants.TYPES.MONEY) {
+      if (!this.floatingProps[propName].value  &&  resource[propName]  &&  resource[propName].value)
+        this.floatingProps[propName].value = resource[propName].value
+    }
+    // end HACK
 
     // resource[propame] = value
     var data = this.refs.form.refs.input.state.value;
