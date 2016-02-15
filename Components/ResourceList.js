@@ -462,18 +462,18 @@ class ResourceList extends Component {
     //             </View>
     //           : <View />
 
-    // return (
-    //   <View />
-    //   )
     return (
-      <View style={styles.footer}>
-        <TouchableHighlight underlayColor='transparent' onPress={this.scanQRCode.bind(this)}>
-          <View style={{marginTop: -10}}>
-            <Icon name='qrcode'  size={45}  color='#ffffff' style={styles.icon} />
-          </View>
-        </TouchableHighlight>
-      </View>
-    );
+      <View />
+      )
+    // return (
+    //   <View style={styles.footer}>
+    //     <TouchableHighlight underlayColor='transparent' onPress={this.scanQRCode.bind(this)}>
+    //       <View style={{marginTop: -10}}>
+    //         <Icon name='qrcode'  size={45}  color='#ffffff' style={styles.icon} />
+    //       </View>
+    //     </TouchableHighlight>
+    //   </View>
+    // );
   }
         // <TouchableHighlight underlayColor='transparent' onPress={this.showBanks.bind(this)}>
         //   <View>
