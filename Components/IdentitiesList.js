@@ -71,7 +71,6 @@ class IdentitiesList extends Component {
       return;
     var me = params.me;
     var modelName = me[constants.TYPE];
-    utils.setMe(me);
     var model = utils.getModel(modelName).value;
     var meName = utils.getDisplayName(me, model.properties);
     var self = this;
