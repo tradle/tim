@@ -369,16 +369,16 @@ class TimHome extends Component {
     };
 
     let self = this
-    // route.passProps.callback = this.setPassword.bind(this, function(err) {
-    //   self.showOfficialAccounts(true)
-    // })
-    let nav = self.props.navigator
-    route.passProps.callback = (me) => {
-      this.showVideoTour(() => {
-        Actions.getMe()
-        nav.immediatelyResetRouteStack(nav.getCurrentRoutes().slice(0,1));
-      })
-    }
+    route.passProps.callback = this.setPassword.bind(this, function(err) {
+      self.showOfficialAccounts(true)
+    })
+    // let nav = self.props.navigator
+    // route.passProps.callback = (me) => {
+    //   this.showVideoTour(() => {
+    //     Actions.getMe()
+    //     nav.immediatelyResetRouteStack(nav.getCurrentRoutes().slice(0,1));
+    //   })
+    // }
 
     route.passProps.editCols = ['firstName', 'lastName']
     route.titleTintColor = '#ffffff'
@@ -449,7 +449,7 @@ class TimHome extends Component {
               : styles.thumb
               // <Progress.CircleSnail color={'white'} size={70} thickness={5}/>
   	var spinner =  <View>
-          <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width, height }} />
+          <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: width, height: height }} />
           <ScrollView
             scrollEnabled={false}
             style={{height:h}}>
