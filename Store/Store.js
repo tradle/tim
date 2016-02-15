@@ -116,6 +116,7 @@ var Parser = ChainedObj.Parser;
 // var billPub = require('../TiMTests/fixtures/bill-pub.json');
 
 var isTest, originalMe;
+var currentEmployees = {}
 
 // var tim;
 var PORT = 51086
@@ -148,6 +149,8 @@ var SERVICE_PROVIDERS_BASE_URL
 var HOSTED_BY = TOP_LEVEL_PROVIDER.name
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
 var SERVICE_PROVIDERS
+
+var employee = require('../data/employee.json')
 
 var Store = Reflux.createStore(timeFunctions({
   // this will set up listeners to all publishers in TodoActions, using onKeyname (or keyname) as callbacks
@@ -479,22 +482,30 @@ var Store = Reflux.createStore(timeFunctions({
       if (json.org === orgId)
         serviceProviderName = json.name
     })
+
     var self = this
-    return Q.race([
-      fetch(utils.joinURL(SERVICE_PROVIDERS_BASE_URL, serviceProviderName + '/employee/' + pair[1])),
-      Q.Promise(function (resolve, reject) {
-        setTimeout(function () {
-          reject(new Error('timed out'))
-        }, 5000)
+    // return Q.race([
+    //   fetch(utils.joinURL(SERVICE_PROVIDERS_BASE_URL, serviceProviderName + '/employee/' + pair[1])),
+    //   Q.Promise(function (resolve, reject) {
+    //     setTimeout(function () {
+    //       reject(new Error('timed out'))
+    //     }, 5000)
+    //   })
+    var org
+    return Q(employee)
+      .then(function(data) {
+        org = list[orgId].value
+        data.org = org
+        return self.addInfo(data, true)
       })
       .then(function(data) {
-        data.org = list[orgId].value
-        self.addInfo(data)
+        var employee = list[PROFILE + '_' + data.hash].value
+        currentEmployees[utils.getId(org)] = employee
+        self.trigger({action: 'talkToEmployee', to: org})
       })
       .catch((err) => {
         debugger
       })
-    ])
   },
   // Gets info about companies in this app, their bot representatives and their styles
   getInfo() {
@@ -527,7 +538,7 @@ var Store = Reflux.createStore(timeFunctions({
         .map(r => r.value)
     })
   },
-  addInfo(sp) {
+  addInfo(sp, notBot) {
     var hash
     return getDHTKey(sp.bot.pub)
     .then(function(dhtKey) {
@@ -550,6 +561,8 @@ var Store = Reflux.createStore(timeFunctions({
             title: sp.org.name
           }
         }
+        if (!notBot)
+          profile.bot = true
         // profile[ROOT_HASH] = r.pub[ROOT_HASH] //?????
         var identity = {
           _r:   dhtKey,
@@ -863,6 +876,8 @@ var Store = Reflux.createStore(timeFunctions({
   },
 
   getRepresentative(orgId) {
+    if (currentEmployees[orgId])
+      return currentEmployees[orgId]
     var result = this.searchNotMessages({modelName: PROFILE})
     var orgRep;
     result.some((ir) =>  {
@@ -1607,6 +1622,8 @@ var Store = Reflux.createStore(timeFunctions({
     var meta = this.getModel(modelName).value;
     var props = meta.properties;
     var containerProp, resourceId;
+
+    currentEmployees = {}
     // to variable if present is a container resource as for example subreddit for posts or post for comments
     // if to is passed then resources only of this container need to be returned
     if (to) {

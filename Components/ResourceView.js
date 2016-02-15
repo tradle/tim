@@ -63,12 +63,12 @@ class ResourceView extends Component {
   }
   onResourceUpdate(params) {
     var resource = params.resource;
-    if (resource  &&  this.props.resource[constants.ROOT_HASH] === resource[constants.ROOT_HASH]) {
-      var me = utils.getMe();
-      if (resource[constants.ROOT_HASH] === me[constants.ROOT_HASH])
-        utils.setMe(resource);
+    // if (resource  &&  this.props.resource[constants.ROOT_HASH] === resource[constants.ROOT_HASH]) {
+    //   var me = utils.getMe();
+    //   if (resource[constants.ROOT_HASH] === me[constants.ROOT_HASH])
+    //     utils.setMe(resource);
       this.setState({resource: resource});
-    }
+    // }
   }
   changePhoto(photo) {
     this.setState({currentPhoto: photo});

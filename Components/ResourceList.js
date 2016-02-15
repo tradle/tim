@@ -15,7 +15,7 @@ var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var constants = require('@tradle/constants');
-var Icon = require('react-native-vector-icons/Ionicons');
+var Icon = require('react-native-vector-icons/FontAwesome');
 var QRCodeScanner = require('./QRCodeScanner')
 var QRCode = require('./QRCode')
 var buttonStyles = require('../styles/buttonStyles');
@@ -107,7 +107,22 @@ class ResourceList extends Component {
 
       return;
     }
-
+    if (action === 'talkToEmployee') {
+      if (!params.to)
+        return
+      this.props.navigator.push({
+        component: MessageList,
+        id: 11,
+        backButtonTitle: 'Back',
+        passProps: {
+          resource: params.to,
+          filter: '',
+          modelName: params.to[constants.TYPE],
+          currency: params.to.currency,
+        },
+      })
+      return
+    }
     if (action !== 'list' ||  !params.list || params.isAggregation !== this.props.isAggregation)
       return;
     var list = params.list;
@@ -447,18 +462,18 @@ class ResourceList extends Component {
     //             </View>
     //           : <View />
 
-    return (
-      <View />
-      )
     // return (
-    //   <View style={styles.footer}>
-    //     <TouchableHighlight underlayColor='transparent' onPress={this.scanQRCode.bind(this)}>
-    //       <View style={{marginTop: -10}}>
-    //         <Icon name='plus-circled'  size={45}  color='#ffffff' style={styles.icon} />
-    //       </View>
-    //     </TouchableHighlight>
-    //   </View>
-    // );
+    //   <View />
+    //   )
+    return (
+      <View style={styles.footer}>
+        <TouchableHighlight underlayColor='transparent' onPress={this.scanQRCode.bind(this)}>
+          <View style={{marginTop: -10}}>
+            <Icon name='qrcode'  size={45}  color='#ffffff' style={styles.icon} />
+          </View>
+        </TouchableHighlight>
+      </View>
+    );
   }
         // <TouchableHighlight underlayColor='transparent' onPress={this.showBanks.bind(this)}>
         //   <View>
@@ -590,7 +605,7 @@ class ResourceList extends Component {
 
   }
 
-  showQRCode(purpose, content) {
+  showQRCode1(purpose, content) {
     this.props.navigator.push({
       title: 'QR Code: ' + purpose,
       id: 17,
@@ -605,19 +620,24 @@ class ResourceList extends Component {
   }
 
   scanQRCode() {
-    this.props.navigator.push({
-      title: 'Scan QR Code of contact',
-      id: 16,
-      component: QRCodeScanner,
-      titleTintColor: '#eeeeee',
-      backButtonTitle: 'Cancel',
-      // rightButtonTitle: 'ion|ios-reverse-camera',
-      passProps: {
-        onread: function (result) {
-          console.log(result)
-        }
-      }
-    })
+    var qrcode = {
+      code: '71e4b7cd6c11ab7221537275988f113a879029eu:d0b3f6780215cb8adfb9524810599b4f1f6444ae'
+    }
+    Actions.getEmployeeInfo(qrcode.code)
+    return
+    // this.props.navigator.push({
+    //   title: 'Scan QR Code of contact',
+    //   id: 16,
+    //   component: QRCodeScanner,
+    //   titleTintColor: '#eeeeee',
+    //   backButtonTitle: 'Cancel',
+    //   // rightButtonTitle: 'ion|ios-reverse-camera',
+    //   passProps: {
+    //     onread: function (result) {
+    //       console.log(result)
+    //     }
+    //   }
+    // })
   }
 }
 reactMixin(ResourceList.prototype, Reflux.ListenerMixin);
