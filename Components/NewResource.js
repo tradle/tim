@@ -45,6 +45,7 @@ var {
   AlertIOS,
   Dimensions,
   PropTypes,
+  ActivityIndicatorIOS,
   // LayoutAnimation,
   Component,
   Navigator,
@@ -81,6 +82,7 @@ class NewResource extends Component {
       date: new Date(),
       isUploading: !isRegistration  &&  !r[constants.ROOT_HASH],
       isRegistration: isRegistration,
+      isLoading: false
       // isModalOpen: false,
       // currentPhoto: r.photos &&  r.photos.length ? r.photos[0].url : null
     }
@@ -118,6 +120,7 @@ class NewResource extends Component {
            nextState.missedRequired           ||
            this.state.prop !== nextState.prop                ||
            this.state.isUploading !== nextState.isUploading  ||
+           this.state.isLoading !== nextState.isLoading      ||
            this.state.itemsCount != nextState.itemsCount     ||
           !equal(this.state.resource, nextState.resource)
            // nextState.isModalOpen !== this.state.isModalOpen  ||
@@ -189,7 +192,8 @@ class NewResource extends Component {
     if (params.action === 'runVideo'  && this.state.isRegistration) {
       if (this.props.callback)
         // this.props.navigator.pop();
-        this.props.callback(resource)
+        this.setState({isLoading: true})
+        // this.props.callback(resource)
         return;
     }
     if (!resource  ||  (params.action !== 'addItem'  &&  params.action !== 'addMessage'))
@@ -503,7 +507,6 @@ class NewResource extends Component {
   render() {
     if (this.state.isUploading)
       return <View/>
-
     var props = this.props;
     var parentBG = {backgroundColor: '#7AAAC3'};
     var resource = this.state.resource;
@@ -745,7 +748,7 @@ class NewResource extends Component {
 
     var style
     if (this.state.isRegistration)
-      style = DeviceHeight < 600 ? {marginTop: 90} : {marginTop: DeviceHeight / 4}
+      style = DeviceHeight < 600 ? {marginTop: 50} : {marginTop: DeviceHeight / 4 - 40}
     else
       style = {marginTop: 64}
     options.auto = 'placeholders';
@@ -775,6 +778,9 @@ class NewResource extends Component {
         <View style={styles.container}>
           <View style={photoStyle}>
             <PhotoView resource={resource} navigator={this.props.navigator}/>
+          </View>
+          <View style={{alignItems: 'center'}}>
+            <ActivityIndicatorIOS animating={this.state.isLoading ? true : false} size='large' color='#ffffff'/>
           </View>
           <View style={this.state.isRegistration ? {marginHorizontal: DeviceHeight > 1000 ? 50 : 30, paddingTop: 30} : {paddingRight: 15, paddingTop: 10, marginHorizontal: 10}}>
             <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange.bind(this)}/>
