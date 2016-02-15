@@ -321,7 +321,7 @@ class MessageRow extends Component {
     }
     if (resource.txId) {
       sendStatus = <View style={styles.sendStatus}>
-                     <Text style={{fontSize: 14, color: '#316A99', marginRight: 3}}>{this.props.sendStatus}</Text>
+                     <Text style={{fontSize: 14, color: '#316A99', marginRight: 3}}>Sealed</Text>
                      <Icon name={'ios-checkmark'} size={15} color='#316A99' />
                    </View>
     }
@@ -464,7 +464,8 @@ class MessageRow extends Component {
     resource[constants.TYPE] = model.id;
 
     // Prefill for testing and demoing
-    if (model.id in formDefaults)
+    var isPrefilled = model.id in formDefaults
+    if (isPrefilled)
       extend(true, resource, formDefaults[model.id])
 
     this.props.navigator.push({
@@ -477,6 +478,7 @@ class MessageRow extends Component {
       passProps:  {
         model: model,
         resource: resource,
+        isPrefilled: isPrefilled,
         currency: this.props.currency,
         bankStyle: this.props.bankStyle,
         originatingMessage: this.props.resource

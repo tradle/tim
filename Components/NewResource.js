@@ -82,7 +82,8 @@ class NewResource extends Component {
       date: new Date(),
       isUploading: !isRegistration  &&  !r[constants.ROOT_HASH],
       isRegistration: isRegistration,
-      isLoading: false
+      isLoading: false,
+      isPrefilled: this.props.isPrefilled
       // isModalOpen: false,
       // currentPhoto: r.photos &&  r.photos.length ? r.photos[0].url : null
     }
