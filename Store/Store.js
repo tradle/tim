@@ -143,7 +143,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDER = ENV.topLevelProvider
-var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.0.114:44444' : TOP_LEVEL_PROVIDER.baseUrl
+var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://127.0.0.1:44444' : TOP_LEVEL_PROVIDER.baseUrl
 // var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.0.149:44444' : TOP_LEVEL_PROVIDER.baseUrl
 var SERVICE_PROVIDERS_BASE_URL
 var HOSTED_BY = TOP_LEVEL_PROVIDER.name
@@ -152,7 +152,9 @@ var SERVICE_PROVIDERS
 
 var employee = require('../data/employee.json')
 
-var Store = Reflux.createStore(timeFunctions({
+// var Store = Reflux.createStore(timeFunctions({
+var Store = Reflux.createStore({
+
   // this will set up listeners to all publishers in TodoActions, using onKeyname (or keyname) as callbacks
   listenables: [Actions],
   // this will be called by all listening components as they register their listeners
@@ -237,7 +239,7 @@ var Store = Reflux.createStore(timeFunctions({
           key:   key,
           value: value
         }
-        return db.get(IDENTITY + value.currentIdentity.split('_')[1])
+        return db.get(IDENTITY + '_' + value.currentIdentity.split('_')[1])
       }
     })
     .then (function(value) {
@@ -883,7 +885,7 @@ var Store = Reflux.createStore(timeFunctions({
     result.some((ir) =>  {
       if (!ir.organization) return
 
-      if (utils.getId(ir.organization) === orgId) {
+      if (utils.getId(ir.organization) === orgId  &&  ir.bot) {
         orgRep = ir
         return true
       }
@@ -2533,13 +2535,13 @@ var Store = Reflux.createStore(timeFunctions({
 
             for (var i=0; i<employees.length  &&  !pubkeys; i++) {
               if (employees[i].securityCode  && codes.indexOf(employees[i].securityCode) != -1) {
-                pubkeys = list[IDENTITY + employees[i][ROOT_HASH]].pubkeys
+                pubkeys = list[IDENTITY + '_' + employees[i][ROOT_HASH]].pubkeys
               }
             }
           }
           // LLOYDS case
           else
-            pubkeys = list[IDENTITY + employees[0][ROOT_HASH]].pubkeys
+            pubkeys = list[IDENTITY + '_' + employees[0][ROOT_HASH]].pubkeys
         }
       }
     }
@@ -3678,7 +3680,8 @@ var Store = Reflux.createStore(timeFunctions({
     this._transitionCallbacks.push(defer.resolve)
     return defer.promise
   }
-}));
+})
+// );
 
 module.exports = Store;
 /*
