@@ -370,6 +370,7 @@ class TimHome extends Component {
 
     let self = this
     route.passProps.callback = this.setPassword.bind(this, function(err) {
+      Actions.setAuthenticated(true)
       self.showOfficialAccounts(true)
     })
     // let nav = self.props.navigator
