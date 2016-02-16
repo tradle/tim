@@ -157,7 +157,7 @@ module.exports = React.createClass({
             {
               frame: { backgroundColor: 'transparent' },
               msgText: { fontSize: 18 },
-              line: { height: 5, backgroundColor: '#ffffff' }
+              line: { height: 2, backgroundColor: '#ffffff' }
             }
           }
           baseColor={'#ffffff'}
