@@ -226,6 +226,7 @@ class MessageRow extends Component {
     var isSimpleMessage = model.id === constants.TYPES.SIMPLE_MESSAGE;
     var w = Device.width
     var msgWidth = isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
+    var sendStatus = <View />
 
     if (showMessageBody) {
       var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? (isNewProduct ? 'center' : 'flex-end') : 'flex-start'};
@@ -264,6 +265,25 @@ class MessageRow extends Component {
                         // </View>
       }
       // var rowId = <Text style={{fontWeight: '600', fontSize: 16, color: isMyMessage ? '#ffffff' : '#289427', paddingRight: 3}}>{this.props.messageNumber + '.'}</Text>;
+
+      if (this.props.sendStatus  &&  this.props.sendStatus !== null) {
+        switch (this.props.sendStatus) {
+        case 'Sent':
+          sendStatus = <View style={styles.sendStatus}>
+                         <Text style={{fontSize: 14, color: '#009900', marginRight: 3}}>{this.props.sendStatus}</Text>
+                         <Icon name={'ios-checkmark-outline'} size={15} color='#009900' />
+                       </View>
+          break
+        default:
+          sendStatus = <Text style={{alignSelf: 'flex-end', fontSize: 14, color: '#757575', marginHorizontal: 5}}>{this.props.sendStatus}</Text>
+          break
+        }
+      }
+      var sealedStatus = (resource.txId)
+                       ? <View style={styles.sendStatus}>
+                           <Icon name={'locked'} size={25} color='#316A99' style={{opacity: 0.5}} />
+                         </View>
+                       : <View />
       messageBody =
         <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
           <View style={[rowStyle, viewStyle]}>
@@ -272,6 +292,7 @@ class MessageRow extends Component {
               <View style={{flex: 1}}>
                 {renderedRow}
              </View>
+             {sealedStatus}
             </View>
           </View>
         </TouchableHighlight>
@@ -305,26 +326,6 @@ class MessageRow extends Component {
     var photoStyle = (isLicense  &&  len === 1) ? styles.bigImageH : photoStyle;
     var verifications = this.showVerifications(rowStyle, viewStyle, addStyle);
       // <View style={viewStyle} ref={resource[constants.ROOT_HASH]}>
-    var sendStatus = <View />
-    if (this.props.sendStatus  &&  this.props.sendStatus !== null) {
-      switch (this.props.sendStatus) {
-      case 'Sent':
-        sendStatus = <View style={styles.sendStatus}>
-                       <Text style={{fontSize: 14, color: '#009900', marginRight: 3}}>{this.props.sendStatus}</Text>
-                       <Icon name={'ios-checkmark-outline'} size={15} color='#009900' />
-                     </View>
-        break
-      default:
-        sendStatus = <Text style={{alignSelf: 'flex-end', fontSize: 14, color: '#757575', marginHorizontal: 5}}>{this.props.sendStatus}</Text>
-        break
-      }
-    }
-    if (resource.txId) {
-      sendStatus = <View style={styles.sendStatus}>
-                     <Text style={{fontSize: 14, color: '#316A99', marginRight: 3}}>Sealed</Text>
-                     <Icon name={'ios-checkmark'} size={15} color='#316A99' />
-                   </View>
-    }
 
     var bgStyle = this.props.bankStyle  &&  this.props.bankStyle.BACKGROUND_COLOR ? {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR} : {backgroundColor: '#f7f7f7'}
     return (
