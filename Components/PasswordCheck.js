@@ -39,12 +39,12 @@ module.exports = React.createClass({
   getDefaultProps: function () {
     return {
       validate: () => true,
-      promptSet: 'Please choose a gesture-based password',
-      promptCheck: 'You know what to do',
-      promptReenter: 'Please re-enter the gesture',
-      promptInvalidSet: 'Invalid gesture password, please try again',
-      promptRetrySet: 'Gestures didn\'t match. Please start again',
-      promptRetryCheck: 'Please try again',
+      promptSet: 'Please draw a pattern',
+      promptCheck: 'Draw your pattern',
+      promptReenter: 'Please draw your pattern again',
+      promptInvalidSet: 'Invalid pattern, please try again',
+      promptRetrySet: 'Patterns didn\'t match. Please start again',
+      promptRetryCheck: 'Wrong pattern',
       successMsg: 'Correct gesture detected',
       failMsg: 'Authentication failed',
       maxAttempts: Infinity
