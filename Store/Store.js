@@ -143,7 +143,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDER = ENV.topLevelProvider
-var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://127.0.0.1:44444' : TOP_LEVEL_PROVIDER.baseUrl
+var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.0.102:44444' : TOP_LEVEL_PROVIDER.baseUrl
 // var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.0.149:44444' : TOP_LEVEL_PROVIDER.baseUrl
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDER.name
@@ -347,7 +347,6 @@ var Store = Reflux.createStore({
 
     var blockchain = new Blockchain(networkName)
     var wsClients = driverInfo.wsClients
-    var httpClient = driverInfo.httpClient
     var whitelist = driverInfo.whitelist
     var otrKey = driverInfo.otrKey
 
@@ -366,7 +365,8 @@ var Store = Reflux.createStore({
       // dht: dht,
       // port: port,
       // sendThrottle: 10000,
-      syncInterval: 120000,
+      syncInterval: 10 * 60 * 1000,
+      unchainThrottle: 10 * 60 * 1000,
       afterBlockTimestamp: constants.afterBlockTimestamp,
       // afterBlockTimestamp: 1445976998,
       // relay: {
@@ -406,6 +406,7 @@ var Store = Reflux.createStore({
 
     meDriver._send = function (rootHash, msg, recipientInfo) {
       var messenger = wsClients[rootHash]
+      var httpClient = driverInfo.httpClient
       if (!messenger && httpClient && httpClient.hasEndpointFor(rootHash)) {
         messenger = httpClient
       }
@@ -460,15 +461,16 @@ var Store = Reflux.createStore({
         if (!httpClient) {
           httpClient = new HttpClient()
           driverInfo.httpClient = httpClient
-        }
-        httpClient.on('message', function () {
-          meDriver.receiveMsg.apply(meDriver, arguments)
-        })
+          meDriver.ready().then(function () {
+            var myHash = meDriver.myRootHash()
+            httpClient.setRootHash(myHash)
+          })
 
-        meDriver.ready().then(function () {
-          var myHash = meDriver.myRootHash()
-          httpClient.setRootHash(myHash)
-        })
+          httpClient.on('message', function () {
+            meDriver.receiveMsg.apply(meDriver, arguments)
+          })
+        }
+
         providers.forEach(function(provider) {
           httpClient.addRecipient(
             provider.hash,
@@ -493,12 +495,11 @@ var Store = Reflux.createStore({
           wsClient.on('message', meDriver.receiveMsg)
           wsClients[provider.hash] = wsClient
         })
-
-        meDriver.watchTxs(whitelist)
-        // TODO: replace with meDriver.sync()
-        meDriver.sync()
-        return meDriver
       })
+
+      meDriver.watchTxs(whitelist)
+      meDriver.sync()
+      return meDriver
     })
   },
   onGetEmployeeInfo(code) {
@@ -1532,7 +1533,9 @@ var Store = Reflux.createStore({
   onReloadDB() {
     var self = this
 
-    this.wipe()
+    var destroyTim = meDriver ? meDriver.destroy() : Q()
+    return destroyTim
+      .then(() => this.wipe())
       .then(() => {
         AlertIOS.alert('please refresh')
         return Q.Promise(function (resolve) {})
@@ -2481,7 +2484,6 @@ var Store = Reflux.createStore({
     var togo
     return this.getInfo([v])
     .then(function(json) {
-      driverPromise = null
       var settings = list[key]
       if (settings)
         list[key].value.urls.push(v)
@@ -2495,8 +2497,8 @@ var Store = Reflux.createStore({
     })
     .then(function() {
       debugger
-      if (me)
-        self.monitorTim()
+      // if (me)
+      //   self.monitorTim()
       self.trigger({action: 'addItem', resource: value})
       db.put(key, list[key].value)
     })
