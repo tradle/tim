@@ -403,8 +403,7 @@ class MessageList extends Component {
 
     return (
       <View style={[styles.container, bgStyle]}>
-        <View style={{flexDirection:'row'}}>
-        </View>
+        <View style={{flexDirection:'row'}} />
         <View style={ sepStyle } />
         {content}
         {alert}
