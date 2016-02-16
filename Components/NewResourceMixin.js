@@ -283,6 +283,7 @@ var NewResourceMixin = {
         options.fields[p].nullOption = {value: '', label: 'Choose your ' + utils.makeLabel(p)};
       }
     }
+    /* Setting default server url on registration
     if (this.state.isRegistration) {
       model.url = t.maybe(t.Str)
       var label = 'Server url'
@@ -303,6 +304,7 @@ var NewResourceMixin = {
                 keyboard: 'url'
               })
     }
+    */
     return options;
   },
   getNextKey() {
