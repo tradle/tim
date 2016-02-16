@@ -33,7 +33,7 @@ case "$CONFIGURATION" in
     # fi
     ;;
   "")
-    DEST=$LOCAL_RELEASE_DIR # build bundle to local dir
+    DEST=$THIS_RELEASE_DIR # build bundle to local dir
     ;;
   *)
     echo "Unsupported value of \$CONFIGURATION=$CONFIGURATION"
@@ -44,7 +44,8 @@ esac
 buildPlist="Tradle/$plistName.plist"
 bundleVersion=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" $buildPlist)
 gitHash=$(git rev-parse HEAD)
-LOCAL_RELEASE_DIR="release/$bundleVersion/${gitHash:0:10}"
+RELEASES_DIR="release"
+THIS_RELEASE_DIR="$RELEASES_DIR/$bundleVersion/${gitHash:0:10}"
 
 source ~/.bash_profile
 source ~/.bashrc
@@ -66,10 +67,10 @@ elif [[ -x "$(command -v brew)" && -s "$(brew --prefix nvm)/nvm.sh" ]]; then
   . "$(brew --prefix nvm)/nvm.sh"
 fi
 
-# if [ -f "$LOCAL_RELEASE_DIR/main.jsbundle" ]; then
+# if [ -f "$THIS_RELEASE_DIR/main.jsbundle" ]; then
 #   mkdir -p "$DEST"
-#   cp "$LOCAL_RELEASE_DIR/main.jsbundle" "$DEST/"
-#   cp -r "$LOCAL_RELEASE_DIR/assets" "$DEST/"
+#   cp "$THIS_RELEASE_DIR/main.jsbundle" "$DEST/"
+#   cp -r "$THIS_RELEASE_DIR/assets" "$DEST/"
 # else
   echo "writing bundle and assets to $DEST"
   rm -rf $TMPDIR/react-*
@@ -83,10 +84,13 @@ fi
     --verbose
 
   if [ "$DEV" == false ]; then
-    echo "copying bundle and assets to $LOCAL_RELEASE_DIR"
-    mkdir -p "$LOCAL_RELEASE_DIR"
-    cp "$DEST/main.jsbundle" "$LOCAL_RELEASE_DIR/"
-    cp "$DEST/main.jsbundle.map" "$LOCAL_RELEASE_DIR/"
-    cp -r "$DEST/assets" "$LOCAL_RELEASE_DIR/"
+    echo "copying bundle and assets to $THIS_RELEASE_DIR"
+    mkdir -p "$THIS_RELEASE_DIR"
+    cp "$DEST/main.jsbundle" "$THIS_RELEASE_DIR/"
+    cp "$DEST/main.jsbundle.map" "$THIS_RELEASE_DIR/"
+    cp -r "$DEST/assets" "$THIS_RELEASE_DIR/"
   fi
+
+  rm -rf "$RELEASES_DIR/latest"
+  cp -r "$THIS_RELEASE_DIR" "$RELEASES_DIR/latest"
 # fi
