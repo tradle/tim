@@ -1,5 +1,4 @@
 {
-  "bot": {
   "pub": {
     "_t": "tradle.Identity",
     "_z": "906ad67cf634bf1ae8deac465d38a50f17977674b16aae388cba9d26257780cb",
@@ -7,6 +6,7 @@
       "firstName": "Monza",
       "formatted": "Monza"
     },
+    "organization": {
       "title": "Safe Bank",
       "id": "tradle.Organization_96e460ca282d62e41d4b59c85b212d102d7a5adi_96e460ca282d62e41d4b59c85b212d102d7a5adi",
       "photo": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEB9AH0AAD/7Q8sUGhvdG9zaG9wIDMuMAA4…EBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBEBF//9k="
