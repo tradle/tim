@@ -145,10 +145,15 @@ var networkName = 'testnet'
 var TOP_LEVEL_PROVIDER = ENV.topLevelProvider
 var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://127.0.0.1:44444' : TOP_LEVEL_PROVIDER.baseUrl
 // var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.0.149:44444' : TOP_LEVEL_PROVIDER.baseUrl
-var SERVICE_PROVIDERS_BASE_URL
+var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDER.name
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
 var SERVICE_PROVIDERS
+
+var driverInfo = {
+  wsClients: {},
+  whitelist: [],
+}
 
 var employee = require('../data/employee.json')
 
@@ -341,14 +346,15 @@ var Store = Reflux.createStore({
     })
 
     var blockchain = new Blockchain(networkName)
+    var wsClients = driverInfo.wsClients
+    var httpClient = driverInfo.httpClient
+    var whitelist = driverInfo.whitelist
+    var otrKey = driverInfo.otrKey
 
     // return Q.ninvoke(dns, 'resolve4', 'tradle.io')
     //   .then(function (addrs) {
     //     console.log('tradle is at', addrs)
 
-    var httpClient
-    var wsClients = {}
-    var whitelist = []
     meDriver = new Tim({
       pathPrefix: TIM_PATH_PREFIX,
       networkName: networkName,
@@ -389,12 +395,13 @@ var Store = Reflux.createStore({
 
     meDriver._multiGetFromDB = utils.multiGet
 
-    if (!SERVICE_PROVIDERS_BASE_URL) {
+    let noProviders
+    if (!SERVICE_PROVIDERS_BASE_URLS) {
       var settings = list[SETTINGS + '_1']
-      if (settings)
-        SERVICE_PROVIDERS_BASE_URL = settings.value.url
+      if (settings  &&  settings.value.urls)
+        SERVICE_PROVIDERS_BASE_URLS = settings.value.urls
       else
-        SERVICE_PROVIDERS_BASE_URL = SERVICE_PROVIDERS_BASE_URL_DEFAULT
+        SERVICE_PROVIDERS_BASE_URLS = [SERVICE_PROVIDERS_BASE_URL_DEFAULT]
     }
 
     meDriver._send = function (rootHash, msg, recipientInfo) {
@@ -417,55 +424,15 @@ var Store = Reflux.createStore({
       }
     }
 
-    var batch
-    var otrKey = keys.filter((k) => k.type === 'dsa')[0]
+    otrKey = keys.filter((k) => k.type === 'dsa')[0]
+
     if (otrKey) otrKey = kiki.toKey(otrKey).priv()
 
-    return this.getInfo()
-    .then(function(providers) {
-      httpClient = new HttpClient()
-      httpClient.on('message', function () {
-        meDriver.receiveMsg.apply(meDriver, arguments)
-      })
+    driverInfo.otrKey = otrKey
 
-      meDriver.ready().then(function () {
-        var myHash = meDriver.myRootHash()
-        httpClient.setRootHash(myHash)
-      })
-
-      providers.forEach(function(provider) {
-        httpClient.addRecipient(
-          provider.hash,
-          utils.joinURL(SERVICE_PROVIDERS_BASE_URL, provider.id, 'send')
-        )
-
-        if (provider.txId) {
-          whitelist.push(provider.txId)
-        }
-
-        if (!otrKey) return
-
-        // self.addWebSocketClient()
-        var wsClient = new WebSocketClient({
-          url: utils.joinURL(SERVICE_PROVIDERS_BASE_URL, provider.id, 'ws'),
-          otrKey: otrKey,
-          autoconnect: false,
-          // rootHash: meDriver.myRootHash()
-        })
-
-        // will need to do this on demand too
-        // e.g. when scanning an employee QR Code at the bank
-        wsClient.on('message', meDriver.receiveMsg)
-        wsClients[provider.hash] = wsClient
-      })
-
-      meDriver.watchTxs(whitelist)
-      // TODO: replace with meDriver.sync()
-      meDriver.sync()
-      return meDriver
-    })
+    return this.getInfo(SERVICE_PROVIDERS_BASE_URLS)
     .catch(function(err) {
-      // debugger
+      debugger
     })
 
     // var log = d.log;
@@ -475,6 +442,64 @@ var Store = Reflux.createStore({
     // }
 
     // return d
+  },
+
+  getInfo(serverUrls) {
+    let promises = []
+    let self = this
+    serverUrls.forEach(function(url) {
+      promises.push(self.getServiceProviders(url))
+    })
+    return Q.all(promises)
+    .then(function(results) {
+      var httpClient = driverInfo.httpClient
+      var wsClients = driverInfo.wsClients
+      var whitelist = driverInfo.whitelist
+      var otrKey = driverInfo.otrKey
+      results.forEach(function(providers) {
+        if (!httpClient) {
+          httpClient = new HttpClient()
+          driverInfo.httpClient = httpClient
+        }
+        httpClient.on('message', function () {
+          meDriver.receiveMsg.apply(meDriver, arguments)
+        })
+
+        meDriver.ready().then(function () {
+          var myHash = meDriver.myRootHash()
+          httpClient.setRootHash(myHash)
+        })
+        providers.forEach(function(provider) {
+          httpClient.addRecipient(
+            provider.hash,
+            utils.joinURL(provider.url, provider.id, 'send')
+          )
+
+          if (provider.txId) {
+            whitelist.push(provider.txId)
+          }
+
+          if (!otrKey) return
+
+          // self.addWebSocketClient()
+          var wsClient = new WebSocketClient({
+            url: utils.joinURL(provider.url, provider.id, 'ws'),
+            otrKey: otrKey,
+            autoconnect: false,
+            // rootHash: meDriver.myRootHash()
+          })
+          // will need to do this on demand too
+          // e.g. when scanning an employee QR Code at the bank
+          wsClient.on('message', meDriver.receiveMsg)
+          wsClients[provider.hash] = wsClient
+        })
+
+        meDriver.watchTxs(whitelist)
+        // TODO: replace with meDriver.sync()
+        meDriver.sync()
+        return meDriver
+      })
+    })
   },
   onGetEmployeeInfo(code) {
     let pair = code.split(':')
@@ -497,8 +522,11 @@ var Store = Reflux.createStore({
     return Q(employee)
       .then(function(data) {
         org = list[orgId].value
-        data.org = org
-        return self.addInfo(data, true)
+        var info = {
+          bot: data,
+          org: list[orgId].value
+        }
+        return self.addInfo(info, true)
       })
       .then(function(data) {
         var employee = list[PROFILE + '_' + data.hash].value
@@ -510,10 +538,10 @@ var Store = Reflux.createStore({
       })
   },
   // Gets info about companies in this app, their bot representatives and their styles
-  getInfo() {
+  getServiceProviders(url) {
     var self = this
     return Q.race([
-      fetch(utils.joinURL(SERVICE_PROVIDERS_BASE_URL, 'info')),
+      fetch(utils.joinURL(url, 'info')),
       Q.Promise(function (resolve, reject) {
         setTimeout(function () {
           reject(new Error('timed out'))
@@ -521,15 +549,25 @@ var Store = Reflux.createStore({
       })
     ])
     .then((response) =>  {
+      if (response.status > 300)
+        throw new Error('Cannot access: ' + url)
       return response.json()
     })
     .then(function(json) {
       // var json = JSON.parse(text)
-      SERVICE_PROVIDERS = []
+      if (!SERVICE_PROVIDERS)
+        SERVICE_PROVIDERS = []
       var promises = []
       json.providers.forEach(function(sp) {
-        SERVICE_PROVIDERS.push({name: sp.id, org: utils.getId(sp.org)})
-        promises.push(self.addInfo(sp))
+        let duplicateSP = null
+        SERVICE_PROVIDERS.forEach((r) => {
+          if (r.org === utils.getId(sp.org))
+            duplicateSP = r
+        })
+        if (duplicateSP)
+          return
+        SERVICE_PROVIDERS.push({name: sp.id, org: utils.getId(sp.org), url: url})
+        promises.push(self.addInfo(sp, url))
       })
 
       return Q.allSettled(promises)
@@ -540,7 +578,7 @@ var Store = Reflux.createStore({
         .map(r => r.value)
     })
   },
-  addInfo(sp, notBot) {
+  addInfo(sp, url, notBot) {
     var hash
     return getDHTKey(sp.bot.pub)
     .then(function(dhtKey) {
@@ -588,7 +626,7 @@ var Store = Reflux.createStore({
         return db.batch(batch)
     })
     .then(function() {
-      return {hash: hash, txId: sp.bot.txId, id: sp.id}
+      return {hash: hash, txId: sp.bot.txId, id: sp.id, url: url}
     })
   },
   dhtFor (identity, port) {
@@ -1184,11 +1222,11 @@ var Store = Reflux.createStore({
   },
   onGetTemporary(type) {
     var r = temporaryResources[type]
-    if (!r) {
-      r = {_t: type}
-      if (type === SETTINGS)
-        r.url = SERVICE_PROVIDERS_BASE_URL || SERVICE_PROVIDERS_BASE_URL_DEFAULT
-    }
+    // if (!r) {
+    //   r = {_t: type}
+    //   if (type === SETTINGS)
+    //     r.url = SERVICE_PROVIDERS_BASE_URL || SERVICE_PROVIDERS_BASE_URL_DEFAULT
+    // }
     this.trigger({action: 'getTemporary', resource: r})
   },
   onAddItem(params) {
@@ -2292,16 +2330,22 @@ var Store = Reflux.createStore({
     if (!value[TYPE])
       value[TYPE] = modelName;
 
+    var model = this.getModel(modelName).value;
+    var props = model.properties;
     var isNew = !value[ROOT_HASH]
-    if (isNew  &&  value[TYPE] === SETTINGS) {
-      value[ROOT_HASH] = 1
-      value[CUR_HASH] = 1
+    if (value[TYPE] === SETTINGS) {
+      if (isNew) {
+        value[ROOT_HASH] = 1
+        value[CUR_HASH] = 1
+      }
+      if (value.urls  &&  value.urls.indexOf(value.url) !== -1) {
+        self.trigger({action: 'addItem', resource: value, error: 'The "' + props.url.title + '" was already added'})
+        return
+      }
     }
     else
       value[CUR_HASH] = isNew ? dhtKey : value[ROOT_HASH]
 
-    var model = this.getModel(modelName).value;
-    var props = model.properties;
     var batch = [];
     if (isNew) {
       var creator =  me
@@ -2361,13 +2405,9 @@ var Store = Reflux.createStore({
       return
     }
 
-      // if (value[TYPE] === SETTINGS)
-      //   return self.changeSettings(value)
-    var promise = value[TYPE] === SETTINGS ? this.changeSettings(value) :  Q()
-    return promise
-    .then(function() {
-      db.batch(batch)
-    })
+    if (value[TYPE] === SETTINGS)
+      return this.addSettings(value)
+    db.batch(batch)
     .then(function() {
       return db.get(iKey)
     })
@@ -2375,8 +2415,6 @@ var Store = Reflux.createStore({
       list[iKey] = {key: iKey, value: value};
       if (mid)
         list[MY_IDENTITIES + '_1'] = {key: MY_IDENTITIES + '_1', value: mid};
-      // if (value[TYPE] === SETTINGS)
-      //   return self.changeSettings(value)
     })
     .then(function() {
       var  params = {action: 'addItem', resource: value};
@@ -2386,8 +2424,6 @@ var Store = Reflux.createStore({
     })
     .catch(function(err) {
       if (!noTrigger) {
-        if (value[TYPE] === SETTINGS)
-          delete list[SETTINGS + '_1']
         self.trigger({action: 'addItem', error: err.message, resource: value})
       }
       err = err;
@@ -2436,55 +2472,36 @@ var Store = Reflux.createStore({
       err = err;
     });
   },
-  changeSettings(value) {
+  addSettings(value) {
     var v = value.url
     if (v.charAt(v.length - 1) === '/')
       v = v.substring(0, v.length - 1)
-    if (v === SERVICE_PROVIDERS_BASE_URL) {
-      // this.trigger({action: 'addItem', resource: value})
-      return
-    }
     var self = this
     var key = SETTINGS + '_1'
     var togo
-    return Q.race([
-      fetch(utils.joinURL(v, 'info')),
-      Q.Promise(function (resolve, reject) {
-        setTimeout(function () {
-          reject(new Error('timed out'))
-        }, 5000)
-      })
-    ])
-    .then(response => {
-      return response.json()
-    })
-    // .then(function(json) {
-    //   if (text !== '')
-    //     throw new Error('Expected empty response')
-    //   // if (me)
-    //   //   return self.forgetAndReset()
-    // })
-   .then(function() {
-      // debugger
-      SERVICE_PROVIDERS_BASE_URL = v
+    return this.getInfo([v])
+    .then(function(json) {
       driverPromise = null
       var settings = list[key]
       if (settings)
-        list[key].value.url = v
-      else
+        list[key].value.urls.push(v)
+      else {
+        value.urls = [SERVICE_PROVIDERS_BASE_URL_DEFAULT, v]
         list[key] = {
           key: key,
-          value: {url: v}
+          value: value
         }
-      // if (me)
-      //   return self.getDriver(me)
-   })
-   .then(function() {
+      }
+    })
+    .then(function() {
       debugger
       if (me)
         self.monitorTim()
       self.trigger({action: 'addItem', resource: value})
       db.put(key, list[key].value)
+    })
+    .catch((err) => {
+      self.trigger({action: 'addItem', error: err.message, resource: value})
     })
   },
   forgetAndReset() {
@@ -2574,7 +2591,7 @@ var Store = Reflux.createStore({
       })
     }
     if (!mePub  &&  !mePriv) {
-      if (!me.securityCode) {
+      if (__DEV__  &&  !me.securityCode) {
         var profiles = {}
         var identities = {}
         myIdentity.forEach(function(r) {
@@ -2592,38 +2609,7 @@ var Store = Reflux.createStore({
             break
           }
         }
-        // for (var i=0; i<myIdentity.length  &&  !mePub; i++) {
-        //   if (!myIdentity[i].securityCode  &&  me.firstName === myIdentity[i].firstName) {
-        //     mePub = myIdentity[i].pubkeys  // hardcoded on device
-        //     mePriv = myIdentity[i].privkeys
-        //     me[NONCE] = myIdentity[i][NONCE]
-        //   }
-        // }
       }
-      // else {
-      //   myIdentity.forEach(function(r) {
-      //     if (r.securityCode === me.securityCode  &&  me.firstName === r.firstName) {
-      //       mePub = r.pubkeys  // hardcoded on device
-      //       mePriv = r.privkeys
-      //       me[NONCE] = r[NONCE]
-      //     }
-      //   })
-
-      //     // var org = list[utils.getId(me.organization)].value
-      //   var secCodes = this.searchNotMessages({modelName: 'tradle.SecurityCode'})
-      //   for (var i=0; i<secCodes.length; i++) {
-      //     if (secCodes[i].code === me.securityCode) {
-      //       me.organization = secCodes[i].organization
-      //       if (employees[me.securityCode])
-      //         employees[me.securityCode] = me
-      //       break
-      //     }
-      //   }
-      //   if (!me.organization) {
-      //     this.trigger({action:'addItem', resource: me, error: 'The code was not registered with'})
-      //     return Q.reject(new Error('The code was not registered with'))
-      //   }
-      // }
       if (!mePub) {
         var keys = defaultKeySet({
           networkName: 'testnet'

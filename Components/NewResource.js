@@ -25,7 +25,7 @@ var DeviceWidth
 var constants = require('@tradle/constants');
 var UIImagePickerManager = require('NativeModules').UIImagePickerManager;
 var SETTINGS = 'tradle.Settings'
-var delayedRegistration
+// var delayedRegistration
 // var Modal = require('react-native-modal')
 // var PhotoCarouselMixin = require('./PhotoCarouselMixin')
 
@@ -212,12 +212,12 @@ class NewResource extends Component {
       this.state.submitted = false
       return;
     }
-    if (params.resource[constants.TYPE] === SETTINGS  &&  !this.state.settings) {
-      Actions.addItem(this.delayedRegistration)
-      this.state.settings = params.resource
-      this.state.submitted = false
-      return
-    }
+    // if (params.resource[constants.TYPE] === SETTINGS  &&  !this.state.settings) {
+    //   Actions.addItem(this.delayedRegistration)
+    //   this.state.settings = params.resource
+    //   this.state.submitted = false
+    //   return
+    // }
     if (this.props.callback) {
       // this.props.navigator.pop();
       this.props.callback(resource);
@@ -392,20 +392,21 @@ class NewResource extends Component {
     };
     if (this.props.additionalInfo)
       params.additionalInfo = additionalInfo
-    if (this.state.isRegistration  && json.url && json.url.length) {
-      var r = {
-        type: SETTINGS,
-        url: json.url
-      }
-      delete json.url
-      Actions.addItem({
-        value: r,
-        resource: r,
-        meta: utils.getModel(SETTINGS).value,
-      })
-      this.delayedRegistration = params
-    }
-    else
+    // Server URL gets chosen at registration time
+    // if (this.state.isRegistration  && json.url && json.url.length) {
+    //   var r = {
+    //     type: SETTINGS,
+    //     url: json.url
+    //   }
+    //   delete json.url
+    //   Actions.addItem({
+    //     value: r,
+    //     resource: r,
+    //     meta: utils.getModel(SETTINGS).value,
+    //   })
+    //   this.delayedRegistration = params
+    // }
+    // else
       Actions.addItem(params)
   }
 
@@ -749,7 +750,7 @@ class NewResource extends Component {
 
     var style
     if (this.state.isRegistration)
-      style = DeviceHeight < 600 ? {marginTop: 50} : {marginTop: DeviceHeight / 4 - 40}
+      style = DeviceHeight < 600 ? {marginTop: 90} : {marginTop: DeviceHeight / 4}
     else
       style = {marginTop: 64}
     options.auto = 'placeholders';
@@ -780,15 +781,15 @@ class NewResource extends Component {
           <View style={photoStyle}>
             <PhotoView resource={resource} navigator={this.props.navigator}/>
           </View>
-          <View style={{alignItems: 'center'}}>
-            <ActivityIndicatorIOS animating={this.state.isLoading ? true : false} size='large' color='#ffffff'/>
-          </View>
           <View style={this.state.isRegistration ? {marginHorizontal: DeviceHeight > 1000 ? 50 : 30, paddingTop: 30} : {paddingRight: 15, paddingTop: 10, marginHorizontal: 10}}>
             <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange.bind(this)}/>
             {button}
             <View style={{marginTop: -10}}>
               {arrayItems}
              </View>
+            <View style={{alignItems: 'center', marginTop: 50}}>
+              <ActivityIndicatorIOS animating={this.state.isLoading ? true : false} size='large' color='#ffffff'/>
+            </View>
           </View>
           <View style={{height: 300}}/>
         </View>
@@ -814,7 +815,7 @@ class NewResource extends Component {
           <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: DeviceWidth, height: DeviceHeight}} />
 
           {content}
-          <View style={{opacity: 0.7, position: 'absolute', bottom: 30, right: 20, flexDirection: 'row'}}>
+          <View style={{opacity: 0.7, position: 'absolute', top: 20, right: 20, flexDirection: 'row'}}>
             <Image style={{width: 50, height: 50}} source={require('../img/TradleW.png')}></Image>
           </View>
         </View>
