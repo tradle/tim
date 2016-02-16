@@ -15,7 +15,7 @@ var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var constants = require('@tradle/constants');
-var Icon = require('react-native-vector-icons/FontAwesome');
+var Icon = require('react-native-vector-icons/Ionicons');
 var QRCodeScanner = require('./QRCodeScanner')
 var QRCode = require('./QRCode')
 var buttonStyles = require('../styles/buttonStyles');
@@ -29,6 +29,7 @@ var {
   AlertIOS,
   PropTypes,
   TouchableHighlight,
+  ActionSheetIOS,
   Image,
   StatusBarIOS,
   View,
@@ -463,8 +464,14 @@ class ResourceList extends Component {
     //           : <View />
 
     return (
-      <View />
-      )
+      <View style={styles.footer}>
+        <TouchableHighlight underlayColor='transparent' onPress={this.showMenu.bind(this)}>
+          <View style={{marginTop: -10}}>
+            <Icon name='plus-circled'  size={55}  color='#ffffff' style={styles.icon} />
+          </View>
+        </TouchableHighlight>
+      </View>
+    );
     // return (
     //   <View style={styles.footer}>
     //     <TouchableHighlight underlayColor='transparent' onPress={this.scanQRCode.bind(this)}>
@@ -475,6 +482,49 @@ class ResourceList extends Component {
     //   </View>
     // );
   }
+  showMenu() {
+    var buttons = [/*'Scan QR code', */ 'Add server url', 'Cancel']
+    var self = this;
+    ActionSheetIOS.showActionSheetWithOptions({
+      options: buttons,
+      cancelButtonIndex: 1
+    }, function(buttonIndex) {
+      switch (buttonIndex) {
+      // case 0:
+      //   Actions.talkToRepresentative(self.props.resource)
+      //   break
+      case 0:
+        self.showQRCode()
+        break;
+      case 1:
+        self.onSettingsPressed()
+      default:
+        return
+      }
+    });
+  }
+  onSettingsPressed() {
+    var model = utils.getModel('tradle.Settings').value
+    var route = {
+      component: NewResource,
+      title: 'Settings',
+      backButtonTitle: 'Back',
+      rightButtonTitle: 'Done',
+      id: 4,
+      titleTextColor: '#7AAAC3',
+      passProps: {
+        model: model,
+        callback: () => {
+          this.props.navigator.pop()
+          Actions.list({modelName: this.props.modelName})
+        }
+        // callback: this.register.bind(this)
+      },
+    }
+
+    this.props.navigator.push(route)
+  }
+
         // <TouchableHighlight underlayColor='transparent' onPress={this.showBanks.bind(this)}>
         //   <View>
         //     <Image source={require('../img/banking.png')} style={styles.image} />
@@ -657,16 +707,10 @@ var styles = StyleSheet.create({
     backgroundColor: '#cccccc',
   },
   icon: {
-    width: 55,
-    height: 60,
-    // marginRight: 5,
     marginLeft: -30,
-    marginTop: -20,
-    // backgroundColor: 'red',
-    // borderRadius: 25,
-    // marginTop: -10,
-    color: '#629BCA',
-    // color: '#cccccc'
+    marginTop: -25,
+    // color: '#629BCA',
+    color: 'red'
   },
   image: {
     width: 25,
