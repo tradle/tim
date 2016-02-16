@@ -493,9 +493,9 @@ class ResourceList extends Component {
       // case 0:
       //   Actions.talkToRepresentative(self.props.resource)
       //   break
-      case 1:
-        self.showQRCode()
-        break;
+      // case 1:
+      //   self.showQRCode()
+      //   break;
       case 0:
         self.onSettingsPressed()
       default:
