@@ -202,13 +202,6 @@ class NewResource extends Component {
     if (params.error) {
       if (resource[constants.TYPE] == this.state.resource[constants.TYPE])
         this.setState({err: params.error, resource: resource, isRegistration: this.state.isRegistration});
-      if (resource[constants.TYPE] == SETTINGS) {
-        var missedRequired = {url:  params.error}
-        // this.state.resource.url = params.resource.url
-        this.setState({
-          missedRequired: missedRequired
-        })
-      }
       this.state.submitted = false
       return;
     }
