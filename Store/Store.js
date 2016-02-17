@@ -143,7 +143,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDER = ENV.topLevelProvider
-var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.0.102:44444' : TOP_LEVEL_PROVIDER.baseUrl
+var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://127.0.0.1:44444' : TOP_LEVEL_PROVIDER.baseUrl
 // var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.0.149:44444' : TOP_LEVEL_PROVIDER.baseUrl
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDER.name
@@ -2338,11 +2338,15 @@ var Store = Reflux.createStore({
     var isNew = !value[ROOT_HASH]
     if (value[TYPE] === SETTINGS) {
       if (isNew) {
-        value[ROOT_HASH] = 1
-        value[CUR_HASH] = 1
+        if (value.url === SERVICE_PROVIDERS_BASE_URL_DEFAULT)
+          isNew = false
+        else {
+          value[ROOT_HASH] = 1
+          value[CUR_HASH] = 1
+        }
       }
-      if (value.urls  &&  value.urls.indexOf(value.url) !== -1) {
-        self.trigger({action: 'addItem', resource: value, error: 'The "' + props.url.title + '" was already added'})
+      if (!isNew  &&  (!value.urls  ||  (value.urls  &&  value.urls.indexOf(value.url) !== -1))) {
+        this.trigger({action: 'addItem', resource: value, error: 'The "' + props.url.title + '" was already added'})
         return
       }
     }
