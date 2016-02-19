@@ -111,17 +111,31 @@ class ResourceList extends Component {
     if (action === 'talkToEmployee') {
       if (!params.to)
         return
-      this.props.navigator.push({
+      var route = {
+        title: params.to.name,
         component: MessageList,
         id: 11,
         backButtonTitle: 'Back',
         passProps: {
           resource: params.to,
           filter: '',
-          modelName: params.to[constants.TYPE],
+          modelName: constants.TYPES.MESSAGE,
           currency: params.to.currency,
+          bankStyle: params.to.bankStyle
         },
-      })
+      }
+      var me = utils.getMe()
+      var msg = {
+        message: me.firstName + ' is waiting for the response',
+        _t: constants.TYPES.SELF_INTRODUCTION,
+        identity: params.myIdentity,
+        from: me,
+        to: params.to
+      }
+      // var sendNotification = (resource.name === 'Rabobank'  &&  (!me.organization  ||  me.organization.name !== 'Rabobank'))
+      // Actions.addMessage(msg, true, sendNotification)
+      utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg, true))
+      this.props.navigator.push(route)
       return
     }
     if (action !== 'list' ||  !params.list || params.isAggregation !== this.props.isAggregation)
@@ -483,18 +497,19 @@ class ResourceList extends Component {
     // );
   }
   showMenu() {
-    var buttons = [/*'Scan QR code', */ 'Add server url', 'Cancel']
+    var buttons = [/*'Scan QR code',*/  'Add server url', 'Cancel']
     var self = this;
     ActionSheetIOS.showActionSheetWithOptions({
       options: buttons,
+      // cancelButtonIndex: 2
       cancelButtonIndex: 1
     }, function(buttonIndex) {
       switch (buttonIndex) {
       // case 0:
       //   Actions.talkToRepresentative(self.props.resource)
       //   break
-      // case 1:
-      //   self.showQRCode()
+      // case 0:
+      //   self.scanQRCode()
       //   break;
       case 0:
         self.onSettingsPressed()
