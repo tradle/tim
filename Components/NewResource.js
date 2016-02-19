@@ -24,7 +24,6 @@ var DeviceHeight
 var DeviceWidth
 var constants = require('@tradle/constants');
 var UIImagePickerManager = require('NativeModules').UIImagePickerManager;
-var SETTINGS = 'tradle.Settings'
 // var delayedRegistration
 // var Modal = require('react-native-modal')
 // var PhotoCarouselMixin = require('./PhotoCarouselMixin')
@@ -118,7 +117,7 @@ class NewResource extends Component {
   }
   shouldComponentUpdate(nextProps, nextState) {
     return nextState.err                      ||
-           nextState.missedRequired           ||
+           nextState.missedRequiredOrErrorValue           ||
            this.state.prop !== nextState.prop                ||
            this.state.isUploading !== nextState.isUploading  ||
            this.state.isLoading !== nextState.isLoading      ||
@@ -158,11 +157,11 @@ class NewResource extends Component {
 
 
   componentDidUpdate() {
-    if (!this.state.missedRequired  ||  utils.isEmpty(this.state.missedRequired)) return
+    if (!this.state.missedRequiredOrErrorValue  ||  utils.isEmpty(this.state.missedRequiredOrErrorValue)) return
 
     let viewCols = this.props.model.viewCols
     let first
-    for (let p in this.state.missedRequired) {
+    for (let p in this.state.missedRequiredOrErrorValue) {
       if (!viewCols) {
         first = p
         break
@@ -303,7 +302,7 @@ class NewResource extends Component {
           required.push(p)
       }
     }
-    var missedRequired = {}
+    var missedRequiredOrErrorValue = {}
     var msg
     required.forEach((p) =>  {
       var v = json[p] ? json[p] : (this.props.resource ? this.props.resource[p] : null); //resource[p];
@@ -331,17 +330,20 @@ class NewResource extends Component {
         if ((prop.ref) ||  isDate  ||  prop.items) {
           if (resource && resource[p])
             return;
-          missedRequired[p] = prop
+          missedRequiredOrErrorValue[p] = 'This field is required'
         }
         else if (!prop.displayAs)
-          missedRequired[p] = prop
+          missedRequiredOrErrorValue[p] = 'This field is required'
       }
     })
+    var err = this.validateProperties(value)
+    for (var p in err)
+      missedRequiredOrErrorValue[p] = err[p]
 
-    if (!utils.isEmpty(missedRequired)) {
+    if (!utils.isEmpty(missedRequiredOrErrorValue)) {
       this.state.submitted = false
       var state = {
-        missedRequired: missedRequired
+        missedRequiredOrErrorValue: missedRequiredOrErrorValue
       }
       if (msg)
         state.err = msg
@@ -429,8 +431,8 @@ class NewResource extends Component {
     }
     items.push(item);
     var itemsCount = this.state.itemsCount ? this.state.itemsCount  + 1 : 1
-    if (this.state.missedRequired)
-      delete this.state.missedRequired[propName]
+    if (this.state.missedRequiredOrErrorValue)
+      delete this.state.missedRequiredOrErrorValue[propName]
     this.setState({
       resource: resource,
       itemsCount: itemsCount,
@@ -651,8 +653,8 @@ class NewResource extends Component {
                     </View>
       }
       var title = bl.title || utils.makeLabel(p)
-      var err = this.state.missedRequired
-              ? this.state.missedRequired[meta.properties[p].name]
+      var err = this.state.missedRequiredOrErrorValue
+              ? this.state.missedRequiredOrErrorValue[meta.properties[p].name]
               : null
       var errTitle = 'This field is required'
       var error = err

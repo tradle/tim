@@ -350,14 +350,20 @@ var NewResourceMixin = {
     Actions.saveTemporary(r)
   },
   myTextInputTemplate(params) {
-    var err = this.state.missedRequired
-            ? this.state.missedRequired[params.prop.name]
-            : null
-    var error = err
-              ? <View style={{paddingLeft: 15, backgroundColor: 'transparent'}} key={this.getNextKey()}>
-                  <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>This field is required</Text>
-                </View>
-              : <View key={this.getNextKey()} />
+    var error
+    if (params.noError)
+      error = <View />
+    else {
+      var err = this.state.missedRequiredOrErrorValue
+              ? this.state.missedRequiredOrErrorValue[params.prop.name]
+              : null
+
+      error = err
+                ? <View style={{paddingLeft: 15, backgroundColor: 'transparent'}} key={this.getNextKey()}>
+                    <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>{err}</Text>
+                  </View>
+                : <View key={this.getNextKey()} />
+    }
     var label = params.label
     if (params.prop.units) {
       label += (params.prop.units.charAt(0) === '[')
@@ -426,8 +432,8 @@ var NewResourceMixin = {
       style = labelStyle
       propLabel = <View style={{marginTop: 20}}/>
     }
-    var err = this.state.missedRequired
-            ? this.state.missedRequired[prop.name]
+    var err = this.state.missedRequiredOrErrorValue
+            ? this.state.missedRequiredOrErrorValue[prop.name]
             : null
     var error = err
               ? <View style={{paddingLeft: 5, backgroundColor: 'transparent'}}>
@@ -524,14 +530,6 @@ var NewResourceMixin = {
 
   // MONEY value and curency template
   myMoneyInputTemplate(params) {
-    var err = this.state.missedRequired
-            ? this.state.missedRequired[params.prop.name]
-            : null
-    var error = err
-              ? <View style={{paddingLeft: 15, backgroundColor: 'transparent'}} key={this.getNextKey()}>
-                  <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>Enter a valid {params.prop.title}</Text>
-                </View>
-              : <View key={this.getNextKey()} />
     var label = params.label
     label += params.required ? '' : ' (optional)'
     label += (params.prop.ref  &&  params.prop.ref === constants.TYPES.MONEY)
@@ -539,7 +537,8 @@ var NewResourceMixin = {
            : ''
     return (
       <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-          {this.myTextInputTemplate({
+          {
+             this.myTextInputTemplate({
                     label: label,
                     prop:  params.prop,
                     value: params.value.value + '',
@@ -547,14 +546,15 @@ var NewResourceMixin = {
                     keyboard: 'numeric',
                   })
           }
-          {this.myEnumTemplate({
-            // label:    label,
-            prop:     params.prop,
-            enumProp: utils.getModel(constants.TYPES.MONEY).value.properties.currency,
-            required: params.required,
-            value:    params.value.currency
-          })}
-        {error}
+          {
+             this.myEnumTemplate({
+                    prop:     params.prop,
+                    enumProp: utils.getModel(constants.TYPES.MONEY).value.properties.currency,
+                    required: params.required,
+                    value:    params.value.currency,
+                    noError: true
+                  })
+        }
       </View>
     );
   },
@@ -565,14 +565,19 @@ var NewResourceMixin = {
     var label
     var prop = params.prop
     var enumProp = params.enumProp
-    var err = this.state.missedRequired
-            ? this.state.missedRequired[prop.name]
-            : null
-    var error = err
-              ? <View style={{paddingLeft: 5, backgroundColor: 'transparent'}}>
-                  <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>Enter a valid {prop.title}</Text>
-                </View>
-              : <View />
+    var error
+    if (!params.noError) {
+      var err = this.state.missedRequiredOrErrorValue
+              ? this.state.missedRequiredOrErrorValue[prop.name]
+              : null
+      error = err
+                ? <View style={{paddingLeft: 5, backgroundColor: 'transparent'}}>
+                    <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>Enter a valid {prop.title}</Text>
+                  </View>
+                : <View />
+    }
+    else
+      error = <View/>
     var style = {marginTop: 30}
     var value = prop ? params.value : resource[enumProp.name]
     return (
@@ -657,6 +662,55 @@ var NewResourceMixin = {
       prop: propName
     });
   },
+  validateProperties(value) {
+    let properties = this.props.model.properties
+    let err = []
+    for (var p in value) {
+      let prop = properties[p]
+      if (!prop  ||  p.charAt(0) === '_')
+        continue
+      if (prop.type === 'number' || prop.ref === constants.TYPES.MONEY)
+        this.checkNumber(value[p], prop, err)
+      else if (prop.units && prop.units === '[min - max]') {
+        let v = value[p].split('-').forEach((n) => trim(n))
+        if (v.length === 1)
+          checkNumber(v, prop, err)
+        else if (v.length === 2) {
+          checkNumber(v[0], prop, err)
+          if (err[p])
+            continue
+          checkNumber(v[1], prop, err)
+          if (!err[p])
+            continue
+          if (v[1] < v[0])
+            err[p] = 'The min value for the range should be smaller then the max value'
+        }
+        else
+          err[p] = 'The property with [min-max] range can have only two numbers'
+      }
+      else if (prop.type === 'email' || prop.name.indexOf('email') === 0)
+        this.checkEmail(value[p], prop, err)
+    }
+    return err
+  },
+  checkNumber(v, prop, err) {
+    var p = prop.name
+    if (prop.ref === constants.TYPES.MONEY)
+      v = v.value
+    if (isNaN(v))
+      err[p] = 'Please enter a valid number'
+    else {
+      if (prop.max && v > prop.max)
+        err[p] = 'The maximum value for is ' + prop.max
+      else if (prop.min && v < prop.min)
+        err[p] = 'The minimum value for is ' + prop.min
+    }
+  },
+  checkEmail(v, prop, err) {
+    var validated = /(.)+@(.)+/.test(v);
+    if (!validated)
+      err[prop.name] = 'Invalid email'
+  }
 }
 
 
