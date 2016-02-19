@@ -72,8 +72,8 @@ var MODEL = constants.TYPES.MODEL;
 var CUSTOMER_WAITING = constants.TYPES.CUSTOMER_WAITING
 var FORGOT_YOU = constants.TYPES.FORGOT_YOU
 
-var MY_IDENTITIES = 'tradle.MyIdentities'
-var SETTINGS = 'tradle.Settings' //constants.TYPES.SETTINGS
+var MY_IDENTITIES = constants.TYPES.MY_IDENTITIES
+var SETTINGS = constants.TYPES.SETTINGS
 
 var WELCOME_INTERVAL = 600000
 
@@ -519,20 +519,27 @@ var Store = Reflux.createStore({
     //       reject(new Error('timed out'))
     //     }, 5000)
     //   })
-    var org
+    var org = list[orgId].value
     return Q(employee)
       .then(function(data) {
-        org = list[orgId].value
-        var info = {
+        let info = {
           bot: data,
-          org: list[orgId].value
+          org: list[orgId].value,
+          isEmployee: true
         }
-        return self.addInfo(info, true)
+        return self.addInfo(info)
       })
       .then(function(data) {
-        var employee = list[PROFILE + '_' + data.hash].value
+        let employee = list[PROFILE + '_' + data.hash].value
         currentEmployees[utils.getId(org)] = employee
-        self.trigger({action: 'talkToEmployee', to: org})
+        let myIdentities = list[MY_IDENTITIES].value
+        let currentIdentity = myIdentities.currentIdentity
+        let identity = myIdentities.allIdentities.filter(function(i) {
+          if (i.id === currentIdentity)
+            return true
+        })[0].publishedIdentity
+
+        self.trigger({action: 'talkToEmployee', to: org, myIdentity: identity})
       })
       .catch((err) => {
         debugger
@@ -579,7 +586,7 @@ var Store = Reflux.createStore({
         .map(r => r.value)
     })
   },
-  addInfo(sp, url, notBot) {
+  addInfo(sp, url) {
     var hash
     return getDHTKey(sp.bot.pub)
     .then(function(dhtKey) {
@@ -602,7 +609,7 @@ var Store = Reflux.createStore({
             title: sp.org.name
           }
         }
-        if (!notBot)
+        if (!sp.isEmployee)
           profile.bot = true
         // profile[ROOT_HASH] = r.pub[ROOT_HASH] //?????
         var identity = {
@@ -1727,7 +1734,7 @@ var Store = Reflux.createStore({
       if (sampleData.getMyId())
         delete foundResources[PROFILE + '_' + me[ROOT_HASH]];
       else if (!isTest) {
-        var myIdentities = list[MY_IDENTITIES + '_1'].value.allIdentities;
+        var myIdentities = list[MY_IDENTITIES].value.allIdentities;
         myIdentities.forEach((meId) =>  {
           if (foundResources[meId.id])
              delete foundResources[meId.id];
@@ -1950,7 +1957,7 @@ var Store = Reflux.createStore({
       var meId = constants.TYPES.PROFILE + '_' + testMe;
       me = list[meId].value;
       this.setMe(me);
-      var myIdentities = list[MY_IDENTITIES + '_1'].value;
+      var myIdentities = list[MY_IDENTITIES].value;
       if (myIdentities)
         myIdentities.currentIdentity = meId;
     }
@@ -2421,7 +2428,7 @@ var Store = Reflux.createStore({
     .then(function(value) {
       list[iKey] = {key: iKey, value: value};
       if (mid)
-        list[MY_IDENTITIES + '_1'] = {key: MY_IDENTITIES + '_1', value: mid};
+        list[MY_IDENTITIES] = {key: MY_IDENTITIES, value: mid};
     })
     .then(function() {
       var  params = {action: 'addItem', resource: value};
@@ -2454,7 +2461,7 @@ var Store = Reflux.createStore({
       }]};
     delete me.privkeys
     batch.push({type: 'put', key: pKey, value: me});
-    batch.push({type: 'put', key: MY_IDENTITIES + '_1', value: mid});///
+    batch.push({type: 'put', key: MY_IDENTITIES, value: mid});///
     var identity = {}
     identity[ROOT_HASH] = me[ROOT_HASH]
     extend(true, identity, publishedIdentity)
@@ -2471,7 +2478,7 @@ var Store = Reflux.createStore({
       list[iKey] = {key: iKey, value: identity};
       list[pKey] = {key: pKey, value: me};
       if (mid)
-        list[MY_IDENTITIES + '_1'] = {key: MY_IDENTITIES + '_1', value: mid};
+        list[MY_IDENTITIES] = {key: MY_IDENTITIES, value: mid};
       self.monitorTim()
       // return self.initIdentity(me)
     })
@@ -2525,7 +2532,7 @@ var Store = Reflux.createStore({
       var defer = Q.defer()
       setTimeout(() => {defer.reject('forget me request was timed out')}, 10000)
       meDriver.on('message', function (meta) {
-        if (meta[TYPE] === 'tradle.ForgotYou') {
+        if (meta[TYPE] === FORGOT_YOU) {
           if (--togo === 0) {
             defer.resolve()
           }
@@ -2579,7 +2586,7 @@ var Store = Reflux.createStore({
   getDriver(me) {
     if (driverPromise) return driverPromise
 
-    var allMyIdentities = list[MY_IDENTITIES + '_1']
+    var allMyIdentities = list[MY_IDENTITIES]
     var currentIdentity
 
     var mePub = me[ROOT_HASH] ? list[IDENTITY + '_' + me[ROOT_HASH]]['pubkey'] : me['pubkeys']
@@ -2737,7 +2744,7 @@ var Store = Reflux.createStore({
           contactInfo: contactInfo
         };
         newIdentity[TYPE] = PROFILE;
-        var me = list[MY_IDENTITIES + '_1'];
+        var me = list[MY_IDENTITIES];
         if (me)  {
           var currentIdentity = me.value.currentIdentity;
           newIdentity[constants.OWNER] = {id: currentIdentity, title: utils.getDisplayName(me, props)};
@@ -3246,7 +3253,7 @@ var Store = Reflux.createStore({
         }
         else {
           isLoaded = true
-          if (!myId  &&  data.key === MY_IDENTITIES + '_1') {
+          if (!myId  &&  data.key === MY_IDENTITIES) {
             myId = data.value.currentIdentity;
             if (list[myId])
               me = list[myId].value;
