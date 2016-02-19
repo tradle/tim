@@ -280,8 +280,8 @@ class MessageRow extends Component {
         }
       }
       var sealedStatus = (resource.txId)
-                       ? <View style={styles.sendStatus}>
-                           <Icon name={'locked'} size={25} color='#316A99' style={{opacity: 0.5}} />
+                       ? <View style={styles.sealedStatus}>
+                           <Icon name={'ribbon-b'} size={35} color='#316A99' style={{opacity: 0.3}} />
                          </View>
                        : <View />
       messageBody =
@@ -1402,6 +1402,13 @@ var styles = StyleSheet.create({
     flexDirection: 'row',
     marginHorizontal: 5,
     marginTop: -5
+  },
+  sealedStatus: {
+    alignSelf: 'flex-end',
+    flexDirection: 'row',
+    position: 'absolute',
+    bottom: 5,
+    right: 10,
   },
 });
 reactMixin(MessageRow.prototype, RowMixin);
