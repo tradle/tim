@@ -20,12 +20,8 @@ var GiftedMessenger = require('react-native-gifted-messenger');
 
 // var AddNewMessage = require('./AddNewMessage');
 // var SearchBar = require('react-native-search-bar');
-// var InvertibleScrollView = require('react-native-invertible-scroll-view');
-// var LoadingOverlay = require('./LoadingOverlay')
 // var ResourceTypesScreen = require('./ResourceTypesScreen');
-// var CameraView = require('./CameraView');
 // var Device = require('react-native-device')
-// var Progress = require('react-native-progress')
 
 var LINK_COLOR
 
@@ -590,7 +586,7 @@ class MessageList extends Component {
         url: data
       }]
     }
-    msg[constants.TYPE] = 'tradle.SimpleMessage';
+    msg[constants.TYPE] = constants.TYPES.SIMPLE_MESSAGE;
     this.props.navigator.pop();
     Actions.addMessage(msg);
   }
@@ -649,28 +645,6 @@ var styles = StyleSheet.create({
     borderWidth: 1,
     color: '#79AAF2'
   },
-  // separator: {
-  //   height: 1,
-  //   backgroundColor: '#cccccc',
-  // },
-  // centerText: {
-  //   alignItems: 'center',
-  // },
-  // bannerText: {
-  //   color: '#ffffff',
-  //   padding: 15,
-  //   backgroundColor: 'transparent',
-  //   fontSize: 22,
-  //   fontWeight: '600',
-  //   alignSelf: 'center'
-  // },
-  // progress: {
-  //   // width: Device.width,
-  //   // height: 3,
-  //   backgroundColor: 'transparent',
-  //   alignSelf: 'center',
-  //   marginTop: 12,
-  // },
 });
 module.exports = MessageList;
 
