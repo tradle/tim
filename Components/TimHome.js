@@ -617,7 +617,7 @@ class TimHome extends Component {
       return
     }
 
-    var model = utils.getModel('tradle.Settings').value
+    var model = utils.getModel(constants.TYPES.SETTINGS).value
     var route = {
       component: NewResource,
       title: 'Settings',
