@@ -156,8 +156,6 @@ var driverInfo = {
   whitelist: [],
 }
 
-var employee = require('../data/employee.json')
-
 // var Store = Reflux.createStore(timeFunctions({
 var Store = Reflux.createStore({
 
