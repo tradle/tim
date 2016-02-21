@@ -688,8 +688,31 @@ var NewResourceMixin = {
         else
           err[p] = 'The property with [min-max] range can have only two numbers'
       }
-      else if (prop.type === 'email' || prop.name.indexOf('email') === 0)
-        this.checkEmail(value[p], prop, err)
+      // 'pattern' can be regex pattern or property where the pattern is defined.
+      // It is for country specific patterns like 'phone number'
+      else if (prop.pattern) {
+        if (!(new RegExp(prop.pattern).test(value[p])))
+          err[prop.name] = 'Invalid ' + prop.title
+      }
+      else if (prop.patterns) {
+        let cprops = []
+        for (let pr in properties) {
+          if (pr.ref && p.ref === 'tradle.Country')
+            cprops.push(pr)
+        }
+        if (!cprops.length)
+          continue
+
+        let patternCountry = cprops.find((p) => {
+          let val = value[p.name]  ||  resource[p.name]
+          return val ? val : undefined
+        })
+        if (!patternCountry)
+          continue
+        let pattern = prop.patterns[patternCountry[0]]
+        if (pattern  &&  !(new RegExp(pattern).test(value[p])))
+          err[prop.name] = 'Invalid ' + prop.title
+      }
     }
     return err
   },
@@ -706,11 +729,6 @@ var NewResourceMixin = {
         err[p] = 'The minimum value for is ' + prop.min
     }
   },
-  checkEmail(v, prop, err) {
-    var validated = /(.)+@(.)+/.test(v);
-    if (!validated)
-      err[prop.name] = 'Invalid email'
-  }
 }
 
 
