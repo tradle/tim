@@ -2693,11 +2693,11 @@ var Store = Reflux.createStore({
         })
 
         // bringing it back!
-        if (__DEV__  &&  !keys.some((k) => k.type() === 'dsa')) {
-          keys.push(Keys.DSA.gen({
-            purpose: 'sign'
-          }))
-        }
+        // if (__DEV__  &&  !keys.some((k) => k.type() === 'dsa')) {
+        //   keys.push(Keys.DSA.gen({
+        //     purpose: 'sign'
+        //   }))
+        // }
 
         mePub = []
         mePriv = []
