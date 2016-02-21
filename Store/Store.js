@@ -14,6 +14,7 @@ var Reflux = require('reflux');
 var Actions = require('../Actions/Actions');
 var extend = require('extend');
 var Debug = require('debug')
+// var deepEqual = require('deep-equal')
 var debug = Debug('Store')
 var timerDebug = Debug('TIMER')
 var Q = require('q');
@@ -498,7 +499,6 @@ var Store = Reflux.createStore({
       })
 
       meDriver.watchTxs(whitelist)
-      meDriver.sync()
       return meDriver
     })
   },
@@ -533,7 +533,6 @@ var Store = Reflux.createStore({
         if (provider.txId) {
           meDriver.addContactIdentity(provider.identity)
           meDriver.watchTxs(driverInfo.whitelist)
-          meDriver.sync()
         }
 
         let employee = list[PROFILE + '_' + provider.hash].value
@@ -579,7 +578,7 @@ var Store = Reflux.createStore({
   getServiceProviders(url) {
     var self = this
     return Q.race([
-      fetch(utils.joinURL(url, 'info')),
+      fetch(utils.joinURL(url, 'info'), { headers: { cache: 'no-cache' } }),
       Q.Promise(function (resolve, reject) {
         setTimeout(function () {
           reject(new Error('timed out'))
@@ -591,18 +590,29 @@ var Store = Reflux.createStore({
         throw new Error('Cannot access: ' + url)
       return response.json()
     })
-    .then(function(json) {
+    .then(function (json) {
+      return Q.allSettled(json.providers.map(p => {
+        if (p.org[ROOT_HASH]) return p
+
+        return getDHTKey(p.org)
+          .then(hash => p.org[ROOT_HASH] = hash)
+      }))
+      .then(() => json)
+    })
+    .then(function (json) {
       // var json = JSON.parse(text)
       if (!SERVICE_PROVIDERS)
         SERVICE_PROVIDERS = []
       var promises = []
       json.providers.forEach(function(sp) {
         let duplicateSP = null
-        SERVICE_PROVIDERS.forEach((r) => {
+        let isDuplicate = SERVICE_PROVIDERS.some((r) => {
+          // return deepEqual(r.org, sp.org)
           if (r.org === utils.getId(sp.org))
             duplicateSP = r
         })
-        if (duplicateSP)
+
+        if (isDuplicate)
           return
         SERVICE_PROVIDERS.push({id: sp.id, org: utils.getId(sp.org), url: url})
         promises.push(self.addInfo(sp, url))
@@ -628,6 +638,7 @@ var Store = Reflux.createStore({
         batch.push({type: 'put', key: okey, value: sp.org})
         list[okey] = {key: okey, value: sp.org}
       }
+
       if (!list[ikey]) {
         var profile = {
           _t: PROFILE,
@@ -663,8 +674,23 @@ var Store = Reflux.createStore({
         list[ikey] = {key: ikey, value: identity}
         list[pkey] = {key: pkey, value: profile}
       }
+      if (!list[okey].value.contacts)
+        list[okey].value.contacts = []
+      var pkey = PROFILE + '_' + dhtKey
+      list[okey].value.contacts.push({
+        id:     pkey,
+        titile: list[pkey].formatted
+      })
+
+      var promises = [
+        // TODO: evaluate the security of this
+        meDriver.addContactIdentity(sp.bot.pub)
+      ]
+
       if (batch.length)
-        return db.batch(batch)
+        promises.push(db.batch(batch))
+
+      return Q.allSettled(promises)
     })
     .then(function() {
       if (!sp.isEmployee)
@@ -2546,7 +2572,6 @@ var Store = Reflux.createStore({
       }
     })
     .then(function() {
-      debugger
       // if (me)
       //   self.monitorTim()
       self.trigger({action: 'addItem', resource: value})
