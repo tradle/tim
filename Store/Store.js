@@ -72,7 +72,8 @@ var MODEL = constants.TYPES.MODEL;
 var CUSTOMER_WAITING = constants.TYPES.CUSTOMER_WAITING
 var FORGOT_YOU = constants.TYPES.FORGOT_YOU
 
-var MY_IDENTITIES = constants.TYPES.MY_IDENTITIES
+var MY_IDENTITIES_TYPE = 'tradle.MyIdentities'
+var MY_IDENTITIES = MY_IDENTITIES_TYPE + '_1'
 var SETTINGS = constants.TYPES.SETTINGS
 
 var WELCOME_INTERVAL = 600000
@@ -236,10 +237,10 @@ var Store = Reflux.createStore({
   getMe() {
     var self = this
 
-    return db.get(MY_IDENTITIES + '_1')
+    return db.get(MY_IDENTITIES)
     .then(function(value) {
       if (value) {
-        var key = MY_IDENTITIES + '_1'
+        var key = MY_IDENTITIES
         list[key] = {
           key:   key,
           value: value
@@ -472,28 +473,29 @@ var Store = Reflux.createStore({
         }
 
         providers.forEach(function(provider) {
-          httpClient.addRecipient(
-            provider.hash,
-            utils.joinURL(provider.url, provider.id, 'send')
-          )
+          self.addProvider(provider)
+          // httpClient.addRecipient(
+          //   provider.hash,
+          //   utils.joinURL(provider.url, provider.id, 'send')
+          // )
 
-          if (provider.txId) {
-            whitelist.push(provider.txId)
-          }
+          // if (provider.txId) {
+          //   whitelist.push(provider.txId)
+          // }
 
-          if (!otrKey) return
+          // if (!otrKey) return
 
-          // self.addWebSocketClient()
-          var wsClient = new WebSocketClient({
-            url: utils.joinURL(provider.url, provider.id, 'ws'),
-            otrKey: otrKey,
-            autoconnect: false,
-            // rootHash: meDriver.myRootHash()
-          })
-          // will need to do this on demand too
-          // e.g. when scanning an employee QR Code at the bank
-          wsClient.on('message', meDriver.receiveMsg)
-          wsClients[provider.hash] = wsClient
+          // // self.addWebSocketClient()
+          // var wsClient = new WebSocketClient({
+          //   url: utils.joinURL(provider.url, provider.id, 'ws'),
+          //   otrKey: otrKey,
+          //   autoconnect: false,
+          //   // rootHash: meDriver.myRootHash()
+          // })
+          // // will need to do this on demand too
+          // // e.g. when scanning an employee QR Code at the bank
+          // wsClient.on('message', meDriver.receiveMsg)
+          // wsClients[provider.hash] = wsClient
         })
       })
 
@@ -505,22 +507,21 @@ var Store = Reflux.createStore({
   onGetEmployeeInfo(code) {
     let pair = code.split(':')
     let orgId = ORGANIZATION + '_' + pair[0]
-    let serviceProviderName
-    SERVICE_PROVIDERS.filter(function(json) {
-      if (json.org === orgId)
-        serviceProviderName = json.name
-    })
+    let serviceProvider =  SERVICE_PROVIDERS.filter((json) => json.org === orgId)[0]
 
-    var self = this
-    // return Q.race([
-    //   fetch(utils.joinURL(SERVICE_PROVIDERS_BASE_URL, serviceProviderName + '/employee/' + pair[1])),
-    //   Q.Promise(function (resolve, reject) {
-    //     setTimeout(function () {
-    //       reject(new Error('timed out'))
-    //     }, 5000)
-    //   })
     var org = list[orgId].value
-    return Q(employee)
+    var self = this
+    return Q.race([
+      fetch(utils.joinURL(serviceProvider.url, serviceProvider.id + '/employee/' + pair[1])),
+      Q.Promise(function (resolve, reject) {
+        setTimeout(function () {
+          reject(new Error('timed out'))
+        }, 5000)
+      })])
+    // return Q(employee)
+      .then((response) => {
+        return response.json()
+      })
       .then(function(data) {
         let info = {
           bot: data,
@@ -529,8 +530,15 @@ var Store = Reflux.createStore({
         }
         return self.addInfo(info)
       })
-      .then(function(data) {
-        let employee = list[PROFILE + '_' + data.hash].value
+      .then(function(provider) {
+        self.addProvider(provider)
+        if (provider.txId) {
+          meDriver.addContactIdentity(provider.identity)
+          meDriver.watchTxs(driverInfo.whitelist)
+          meDriver.sync()
+        }
+
+        let employee = list[PROFILE + '_' + provider.hash].value
         currentEmployees[utils.getId(org)] = employee
         let myIdentities = list[MY_IDENTITIES].value
         let currentIdentity = myIdentities.currentIdentity
@@ -544,6 +552,30 @@ var Store = Reflux.createStore({
       .catch((err) => {
         debugger
       })
+  },
+  addProvider(provider) {
+    let httpClient = driverInfo.httpClient
+    httpClient.addRecipient(
+      provider.hash,
+      utils.joinURL(provider.url, provider.id, 'send')
+    )
+    let whitelist = driverInfo.whitelist
+    if (provider.txId)
+      whitelist.push(provider.txId)
+
+    if (driverInfo.otrKey) {
+        // self.addWebSocketClient()
+      var wsClient = new WebSocketClient({
+        url: utils.joinURL(provider.url, provider.id, 'ws'),
+        otrKey: driverInfo.otrKey,
+        autoconnect: false,
+        // rootHash: meDriver.myRootHash()
+      })
+      // will need to do this on demand too
+      // e.g. when scanning an employee QR Code at the bank
+      wsClient.on('message', meDriver.receiveMsg)
+      driverInfo.wsClients[provider.hash] = wsClient
+    }
   },
   // Gets info about companies in this app, their bot representatives and their styles
   getServiceProviders(url) {
@@ -574,7 +606,7 @@ var Store = Reflux.createStore({
         })
         if (duplicateSP)
           return
-        SERVICE_PROVIDERS.push({name: sp.id, org: utils.getId(sp.org), url: url})
+        SERVICE_PROVIDERS.push({id: sp.id, org: utils.getId(sp.org), url: url})
         promises.push(self.addInfo(sp, url))
       })
 
@@ -588,10 +620,10 @@ var Store = Reflux.createStore({
   },
   addInfo(sp, url) {
     var hash
+    var okey = utils.getId(sp.org)
     return getDHTKey(sp.bot.pub)
     .then(function(dhtKey) {
       hash = dhtKey
-      var okey = utils.getId(sp.org)
       var ikey = IDENTITY + '_' + dhtKey
       var batch = []
       if (!list[okey]) {
@@ -603,12 +635,15 @@ var Store = Reflux.createStore({
           _t: PROFILE,
           _r: dhtKey,
           firstName: sp.bot.profile.name.firstName || sp.id + 'Bot',
-          formatted: sp.bot.profile.name.formatted || sp.id + 'Bot',
           organization: {
             id: okey,
             title: sp.org.name
           }
         }
+        if (sp.bot.profile.name.lastName)
+          profile.lastName = sp.bot.profile.name.lastName
+        profile.formatted = sp.bot.profile.name.formatted || (profile.lastName ? profile.firstName + ' ' + profile.lastName : profile.firstName)
+
         if (!sp.isEmployee)
           profile.bot = true
         // profile[ROOT_HASH] = r.pub[ROOT_HASH] //?????
@@ -634,7 +669,10 @@ var Store = Reflux.createStore({
         return db.batch(batch)
     })
     .then(function() {
-      return {hash: hash, txId: sp.bot.txId, id: sp.id, url: url}
+      if (!sp.isEmployee)
+        return {hash: hash, txId: sp.bot.txId, id: sp.id, url: url}
+      let orgSp = SERVICE_PROVIDERS.filter((r) => utils.getId(r.org) === okey)[0]
+      return {hash: hash, txId: sp.bot.txId, id: orgSp.id, url: orgSp.url, identity: sp.bot.pub}
     })
   },
   dhtFor (identity, port) {
@@ -704,6 +742,8 @@ var Store = Reflux.createStore({
       r.to = orgRep
     }
     for (var p in r) {
+      if (!props[p])
+        continue
       if (props[p].ref  &&  !props[p].id) {
         var type = r[p][TYPE];
         var id = type ? type + '_' + r[p][ROOT_HASH]/* + '_' + r[p][CUR_HASH]*/ : r[p].id;
@@ -1673,7 +1713,8 @@ var Store = Reflux.createStore({
     var props = meta.properties;
     var containerProp, resourceId;
 
-    currentEmployees = {}
+    if (params.modelName == ORGANIZATION)
+      currentEmployees = {}
     // to variable if present is a container resource as for example subreddit for posts or post for comments
     // if to is passed then resources only of this container need to be returned
     if (to) {
@@ -2451,7 +2492,7 @@ var Store = Reflux.createStore({
     var pKey = me[TYPE] + '_' + me[ROOT_HASH];
     var batch = [];
     var mid = {
-      _t: MY_IDENTITIES,
+      _t: MY_IDENTITIES_TYPE,
       currentIdentity: pKey,
       allIdentities: [{
         id: pKey,
@@ -2629,11 +2670,11 @@ var Store = Reflux.createStore({
         })
 
         // bringing it back!
-        // if (!keys.some((k) => k.type() === 'dsa')) {
-        //   keys.push(Keys.DSA.gen({
-        //     purpose: 'sign'
-        //   }))
-        // }
+        if (__DEV__  &&  !keys.some((k) => k.type() === 'dsa')) {
+          keys.push(Keys.DSA.gen({
+            purpose: 'sign'
+          }))
+        }
 
         mePub = []
         mePriv = []
