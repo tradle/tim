@@ -431,10 +431,12 @@ var Store = Reflux.createStore({
 
     driverInfo.otrKey = otrKey
 
-    return this.getInfo(SERVICE_PROVIDERS_BASE_URLS)
-    .catch(function(err) {
-      debugger
-    })
+    this.getInfo(SERVICE_PROVIDERS_BASE_URLS, true)
+      .catch(function(err) {
+        debugger
+      })
+
+    return Q()
 
     // var log = d.log;
     // d.log = function () {
@@ -445,13 +447,9 @@ var Store = Reflux.createStore({
     // return d
   },
 
-  getInfo(serverUrls) {
-    let promises = []
+  getInfo(serverUrls, retry) {
     let self = this
-    serverUrls.forEach(function(url) {
-      promises.push(self.getServiceProviders(url))
-    })
-    return Q.all(promises)
+    return Q.all(serverUrls.map(url => self.getServiceProviders(url, retry)))
     .then(function(results) {
       var httpClient = driverInfo.httpClient
       var wsClients = driverInfo.wsClients
@@ -575,16 +573,21 @@ var Store = Reflux.createStore({
     }
   },
   // Gets info about companies in this app, their bot representatives and their styles
-  getServiceProviders(url) {
+  getServiceProviders(url, retry) {
     var self = this
-    return Q.race([
-      fetch(utils.joinURL(url, 'info'), { headers: { cache: 'no-cache' } }),
-      Q.Promise(function (resolve, reject) {
-        setTimeout(function () {
-          reject(new Error('timed out'))
-        }, 5000)
-      })
-    ])
+    // return Q.race([
+    //   fetch(utils.joinURL(url, 'info'), { headers: { cache: 'no-cache' } }),
+    //   Q.Promise(function (resolve, reject) {
+    //     setTimeout(function () {
+    //       reject(new Error('timed out'))
+    //     }, 5000)
+    //   })
+    // ])
+    const doFetch = retry
+      ? utils.fetchWithBackoff
+      : utils.fetchWithTimeout
+
+    return doFetch(utils.joinURL(url, 'info'), { headers: { cache: 'no-cache' } }, 5000)
     .then((response) =>  {
       if (response.status > 300)
         throw new Error('Cannot access: ' + url)

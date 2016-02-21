@@ -11,7 +11,8 @@ var Q = require('q')
 var collect = require('stream-collector')
 var t = require('tcomb-form-native');
 var moment = require('moment');
-
+var Backoff = require('backoff')
+var extend = require('xtend')
 var levelErrors = require('levelup/lib/errors')
 // TODO: add logbase to deps
 var rebuf = require('logbase').rebuf
@@ -29,7 +30,13 @@ var propTypesMap = {
   'number': t.Num
 };
 var models, me;
+var BACKOFF_DEFAULTS = {
+  randomisationFactor: 0,
+  initialDelay: 1000,
+  maxDelay: 60000
+}
 
+var DEFAULT_FETCH_TIMEOUT = 5000
 var utils = {
   isEmpty(obj) {
     for(var prop in obj) {
@@ -445,6 +452,41 @@ var utils = {
   promiseDelay: function (millis) {
     return Q.Promise((resolve) => {
       setTimeout(resolve, millis)
+    })
+  },
+
+  tryWithExponentialBackoff: function (fn, opts) {
+    const backoff = Backoff.exponential(extend(BACKOFF_DEFAULTS, opts))
+    return loop()
+
+    function loop () {
+      const defer = Q.defer()
+      backoff.once('ready', defer.resolve)
+      backoff.backoff()
+      return defer.promise
+        .then(fn)
+        .catch(loop)
+    }
+  },
+
+  fetchWithTimeout: function (url, opts, timeout) {
+    return Q.race([
+      fetch(url, opts)
+        .then(response => {
+          console.log("GOT RESPONSE")
+          return response
+        }),
+      Q.Promise(function (resolve, reject) {
+        setTimeout(function () {
+          reject(new Error('timed out'))
+        }, timeout)
+      })
+    ])
+  },
+
+  fetchWithBackoff: function (url, opts, requestTimeout) {
+    return utils.tryWithExponentialBackoff(() => {
+      return utils.fetchWithTimeout(url, opts, requestTimeout || DEFAULT_FETCH_TIMEOUT)
     })
   }
 }
