@@ -403,7 +403,7 @@ var utils = {
    * @param  {Boolean} opts.strict (optional) - if true, fail if any keys is not found
    * @return {[type]}      [description]
    */
-  multiGet: function (opts) {
+  multiGet(opts) {
     let strict = opts.strict
     let loc = opts.db.location
     let keys = opts.keys
@@ -430,7 +430,7 @@ var utils = {
     })
   },
 
-  hashPassword: function (pass) {
+  hashPassword(pass) {
     return crypto.createHash('sha256').update(pass).digest('base64')
     // return Q.ninvoke(crypto, 'randomBytes', 64)
     //   .then((salt) => {
@@ -439,7 +439,7 @@ var utils = {
     //   })
   },
 
-  joinURL: function (...parts) {
+  joinURL(...parts) {
     var first = parts.shift()
     var rest = parts.join('/')
     var addSlash
@@ -449,13 +449,13 @@ var utils = {
     return first + '/' + rest
   },
 
-  promiseDelay: function (millis) {
+  promiseDelay(millis) {
     return Q.Promise((resolve) => {
       setTimeout(resolve, millis)
     })
   },
 
-  tryWithExponentialBackoff: function (fn, opts) {
+  tryWithExponentialBackoff(fn, opts) {
     const backoff = Backoff.exponential(extend(BACKOFF_DEFAULTS, opts))
     return loop()
 
@@ -469,13 +469,9 @@ var utils = {
     }
   },
 
-  fetchWithTimeout: function (url, opts, timeout) {
+  fetchWithTimeout(url, opts, timeout) {
     return Q.race([
-      fetch(url, opts)
-        .then(response => {
-          console.log("GOT RESPONSE")
-          return response
-        }),
+      fetch(url, opts),
       Q.Promise(function (resolve, reject) {
         setTimeout(function () {
           reject(new Error('timed out'))
@@ -484,7 +480,7 @@ var utils = {
     ])
   },
 
-  fetchWithBackoff: function (url, opts, requestTimeout) {
+  fetchWithBackoff(url, opts, requestTimeout) {
     return utils.tryWithExponentialBackoff(() => {
       return utils.fetchWithTimeout(url, opts, requestTimeout || DEFAULT_FETCH_TIMEOUT)
     })
@@ -502,198 +498,3 @@ function normalizeRemoveListener (addListenerRetVal) {
 }
 
 module.exports = utils;
-/*
-  getFormFields(params) {
-    var meta = params.meta;
-    var model = params.model;
-    var models = this.getModels();
-    var data = params.data;
-    var chooser = params.chooser;
-    var content = params.content
-    var onSubmitEditing = params.onSubmitEditing;
-    var onEndEditing = params.onEndEditing;
-    var onChange = params.onChange;
-    var myCustomTemplate = params.template
-    var moneyTemplate = params.moneyTemplate
-    var options = {};
-    options.fields = {};
-
-    var props, bl;
-    if (!meta.items)
-      props = meta.properties;
-    else {
-      bl = meta.items.backlink;
-      if (!meta.items.ref)
-        props = meta.items.properties;
-      else
-        props = this.getModel(meta.items.ref).value.properties;
-    }
-    // var currency = t.enums({
-    //   USD: '$',
-    //   GBR: '£',
-    //   CNY: '¥'
-    // });
-
-    // var moneyModel = t.struct({
-    //    value: t.Num,
-    //    currency: currency
-    // });
-
-    var dModel = data  &&  models[data[constants.TYPE]];
-    if (!this.isEmpty(data)) {
-      if (!meta.items && data[constants.TYPE] !== meta.id) {
-        var interfaces = meta.interfaces;
-        if (!interfaces  ||  interfaces.indexOf(data[constants.TYPE]) == -1)
-           return;
-
-        data[constants.TYPE] = meta.id;
-        for (let p in data) {
-          if (p == constants.TYPE)
-            continue;
-          if (props[p])
-            continue;
-          // var cloneOf = this.getCloneOf(dModel.value.id + '.' + p, props);
-          // if (cloneOf) {
-          //   data[cloneOf] = data[p];
-          //   delete data[p];
-          // }
-        }
-      }
-    }
-
-    var editCols;
-    if (params.editCols) {
-      editCols = {};
-      params.editCols.forEach(function(r) {
-        editCols[r] = props[r];
-      })
-    }
-    else
-      editCols = this.arrayToObject(meta.editCols);
-
-    var eCols = editCols ? editCols : props;
-    var required = this.arrayToObject(meta.required);
-    // var d = data ? data[i] : null;
-    for (let p in eCols) {
-      if (p === constants.TYPE  ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink))
-        continue;
-
-      var maybe = required  &&  !required.hasOwnProperty(p);
-
-      var type = props[p].type;
-      var formType = propTypesMap[type];
-      // Don't show readOnly property in edit mode if not set
-      if (props[p].readOnly) //  &&  (type === 'date'  ||  !data  ||  !data[p]))
-        continue;
-
-      var label = props[p].title;
-      if (!label)
-        label = utils.makeLabel(p);
-      options.fields[p] = {
-        error: 'Insert a valid ' + label,
-        bufferDelay: 20, // to eliminate missed keystrokes
-      }
-      if (props[p].description)
-        options.fields[p].help = props[p].description;
-      if (props[p].readOnly  ||  (props[p].immutable  &&  data  &&  data[p]))
-        options.fields[p] = {'editable':  false };
-      if (formType) {
-        // if (onChange)
-        //   options.fields[p].onChange = onChange;
-        model[p] = maybe ? t.maybe(formType) : formType;
-        if (data  &&  (type == 'date')) {
-          data[p] = new Date(data[p]);
-          // options.fields[p] = { mode: 'date'};
-          options.fields[p].mode = 'date';
-          options.fields[p].auto = 'labels';
-          options.fields[p].label = label
-        }
-        else if (type === 'string') {
-          if (props[p].maxLength > 100)
-            options.fields[p].multiline = true;
-          options.fields[p].autoCorrect = false;
-          if (props[p].oneOf) {
-            model[p] = t.enums(props[p].oneOf);
-            options.fields[p].auto = 'labels';
-          }
-        }
-        if (!options.fields[p].multiline && (type === 'string'  ||  type === 'number')) {
-          if (onSubmitEditing)
-            options.fields[p].onSubmitEditing = onSubmitEditing;
-          if (onEndEditing)
-            options.fields[p].onEndEditing = onEndEditing.bind({}, p);
-          if (props[p].maxLength)
-            options.fields[p].maxLength = props[p].maxLength;
-        }
-      }
-      else if (props[p].oneOf) {
-        model[p] = t.enums(props[p].oneOf);
-        options.fields[p].auto = 'labels';
-      }
-      else if (type == 'enum') {
-        var facet = props[p].facet;
-        var values = models.filter(mod => {
-           return mod.type === facet ? mod.values : null;
-        });
-        if (values && values.length) {
-          var enumValues = {};
-          values[0].values.forEach(function(val) {
-            enumValues[val.label] = val.displayName;
-          });
-          // options.fields[p].factory = t.form.radio;
-          model[p] = t.enums(enumValues);
-        }
-        options.fields[p].auto = 'labels';
-      }
-      else {
-        var ref = props[p].ref;
-        if (!ref)
-          continue;
-        if (ref === MONEY_TYPE) {
-          model[p] = maybe ? t.maybe(t.Str) : t.Str;
-          // model[p] = maybe ? t.maybe(t.Num) : t.Num;
-          if (data[p]  &&  (typeof data[p] != 'number'))
-            data[p] = data[p].value
-
-          // options.fields[p].template = moneyTemplate.bind({}, props[p])
-
-          // model[p] = maybe ? t.maybe(moneyModel) : moneyModel;
-          // options.fields[p].auto = 'labels';
-          // options.fields[p].options = {
-          //   fields: {
-          //     value: {
-          //       auto: 'placeholders'
-          //     }
-          //   }
-          // }
-          if (onSubmitEditing)
-            options.fields[p].onSubmitEditing = onSubmitEditing;
-          if (onEndEditing)
-            options.fields[p].onEndEditing = onEndEditing.bind({}, p);
-          continue;
-        }
-        model[p] = maybe ? t.maybe(t.Str) : t.Str;
-
-        var subModel = models[ref];
-        if (data  &&  data[p]) {
-          options.fields[p].value = data[p][constants.TYPE]
-                                  ? data[p][constants.TYPE] + '_' + data[p][constants.ROOT_HASH]
-                                  : data[p].id;
-          data[p] = utils.getDisplayName(data[p], subModel.value.properties) || data[p].title;
-        }
-
-        options.fields[p].onFocus = chooser.bind({}, props[p], p)
-        options.fields[p].template = myCustomTemplate.bind({}, {
-            label: label,
-            prop:  p,
-            chooser: options.fields[p].onFocus
-          })
-
-        options.fields[p].nullOption = {value: '', label: 'Choose your ' + utils.makeLabel(p)};
-      }
-    }
-    return options;
-  },
-
-
-*/
