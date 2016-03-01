@@ -9,6 +9,7 @@ var AddNewIdentity = require('./AddNewIdentity');
 var NewResource = require('./NewResource');
 var ResourceView = require('./ResourceView');
 var utils = require('../utils/utils');
+var translate = utils.translate
 var Reflux = require('reflux');
 var Actions = require('../Actions/Actions');
 var Store = require('../Store/Store');
@@ -67,10 +68,20 @@ class TimHome extends Component {
 	  };
 	}
   componentWillMount() {
-    let url = LinkingIOS.popInitialURL();
+    LinkingIOS.addEventListener('url', this._handleOpenURL);
+
+    // var url = LinkingIOS.popInitialURL()
+    // if (url)
+    //   this._handleOpenURL({url});
     Actions.start();
   }
+  componentWillUnmount() {
+    LinkingIOS.removeEventListener('url', this._handleOpenURL);
+  }
   componentDidMount() {
+    var url = LinkingIOS.popInitialURL()
+    if (url)
+      this._handleOpenURL({url});
     this.listenTo(Store, 'handleEvent');
   }
   shouldComponentUpdate(nextProps, nextState) {
@@ -80,11 +91,26 @@ class TimHome extends Component {
     else
       return false
   }
+
+  _handleOpenURL(event) {
+    var url = event.url.trim();
+    var idx = url.indexOf('://');
+    var url = url.substring(idx + 3)
+    idx = url.indexOf('/')
+
+    url = url.replace('/', '://')
+    Actions.addItem({
+      resource: {_t: constants.TYPES.SETTINGS, url: url},
+      value: {_t: constants.TYPES.SETTINGS, url: url},
+      meta: utils.getModel(constants.TYPES.SETTINGS).value
+    })
+  }
+
   handleEvent(params) {
     if (params.action === 'reloadDB') {
       this.setState({
         isLoading: false,
-        message: 'Please restart TiM'
+        message: translate('pleaseRestartTIM'), //Please restart TiM'
       });
       utils.setModels(params.models);
     }
@@ -182,8 +208,8 @@ class TimHome extends Component {
       passProps: {
         mode: PasswordCheck.Modes.set,
         validate: (pass) => { return pass.length > 4 },
-        promptSet: 'Please draw a gesture password',
-        promptInvalidSet: 'Password must have 5 or more points',
+        promptSet: translate('pleaseDrawPassword'),
+        promptInvalidSet: translate('passwordLimitations'),
         onSuccess: (pass) => {
           Keychain.setGenericPassword(PASSWORD_ITEM_KEY, utils.hashPassword(pass))
           .then(() => {
@@ -234,8 +260,8 @@ class TimHome extends Component {
       passProps: {
         mode: PasswordCheck.Modes.check,
         maxAttempts: 3,
-        promptCheck: 'Draw your gesture password',
-        promptRetryCheck: 'Gesture not recognized, please try again',
+        promptCheck: translate('drawYourPassword'), //Draw your gesture password',
+        promptRetryCheck: translate('gestureNotRecognized'), //Gesture not recognized, please try again',
         isCorrect: (pass) => {
           return Keychain.getGenericPassword(PASSWORD_ITEM_KEY)
             .then((stored) => {
@@ -271,23 +297,23 @@ class TimHome extends Component {
       id: 10,
       title: 'Contacts',
       // titleTextColor: '#7AAAC3',
-      backButtonTitle: 'Back',
+      backButtonTitle: translate('back'),
       component: ResourceList,
-      rightButtonTitle: 'Profile',
+      rightButtonTitle: translate('profile'),
       passProps: passProps,
       onRightButtonPress: {
         title: utils.getDisplayName(me, utils.getModel(me[constants.TYPE]).value.properties),
         id: 3,
         component: ResourceView,
         // titleTextColor: '#7AAAC3',
-        rightButtonTitle: 'Edit',
+        rightButtonTitle: translate('edit'),
         onRightButtonPress: {
           title: me.firstName,
           id: 4,
           component: NewResource,
           // titleTextColor: '#7AAAC3',
-          backButtonTitle: 'Back',
-          rightButtonTitle: 'Done',
+          backButtonTitle: translate('back'),
+          rightButtonTitle: translate('done'),
           passProps: {
             model: utils.getModel(me[constants.TYPE]).value,
             resource: me,
@@ -300,35 +326,35 @@ class TimHome extends Component {
   showOfficialAccounts() {
     var nav = this.props.navigator
     nav.immediatelyResetRouteStack(nav.getCurrentRoutes().slice(0,1));
-    let resource = utils.getMe()
-    let title = resource.firstName;
+    let me = utils.getMe()
+    let title = me.firstName;
     nav.push({
-      title: 'Official Accounts',
+      title: translate('officialAccounts'),
       id: 10,
       component: ResourceList,
-      backButtonTitle: 'Back',
+      backButtonTitle: translate('back'),
       passProps: {
         modelName: constants.TYPES.ORGANIZATION
       },
-      rightButtonTitle: 'Profile',
+      rightButtonTitle: translate('profile'),
       onRightButtonPress: {
         title: title,
         id: 3,
         component: ResourceView,
-        backButtonTitle: 'Back',
-        rightButtonTitle: 'Edit',
+        backButtonTitle: translate('back'),
+        rightButtonTitle: translate('edit'),
         onRightButtonPress: {
           title: title,
           id: 4,
           component: NewResource,
-          backButtonTitle: 'Back',
-          rightButtonTitle: 'Done',
+          backButtonTitle: translate('back'),
+          rightButtonTitle: translate('done'),
           passProps: {
-            model: utils.getModel(resource[constants.TYPE]).value,
-            resource: resource
+            model: utils.getModel(me[constants.TYPE]).value,
+            resource: me
           }
         },
-        passProps: {resource: resource}
+        passProps: {resource: me}
       }
     })
   }
@@ -381,7 +407,7 @@ class TimHome extends Component {
     //   })
     // }
 
-    route.passProps.editCols = ['firstName', 'lastName']
+    route.passProps.editCols = ['firstName', 'lastName', 'language']
     route.titleTintColor = '#ffffff'
     this.props.navigator.push(route);
   }
@@ -620,9 +646,9 @@ class TimHome extends Component {
     var model = utils.getModel(constants.TYPES.SETTINGS).value
     var route = {
       component: NewResource,
-      title: 'Settings',
-      backButtonTitle: 'Back',
-      rightButtonTitle: 'Done',
+      title: translate('settings'),
+      backButtonTitle: translate('back'),
+      rightButtonTitle: translate('done'),
       id: 4,
       titleTextColor: '#7AAAC3',
       passProps: {
