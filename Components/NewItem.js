@@ -69,11 +69,11 @@ class NewItem extends Component {
     var resource = this.props.resource
     // value is a tcomb Struct
     var item = JSON.parse(JSON.stringify(value));
-    var missedRequiredOrErrorValue = this.checkRequired(this.props.metadata, item, resource)
-    if (!utils.isEmpty(missedRequiredOrErrorValue)) {
+    var noRequiredOrErrorValue = this.checkRequired(this.props.metadata, item, resource)
+    if (!utils.isEmpty(noRequiredOrErrorValue)) {
       this.state.submitted = false
       var state = {
-        missedRequiredOrErrorValue: missedRequiredOrErrorValue
+        noRequiredOrErrorValue: noRequiredOrErrorValue
       }
       this.setState(state)
       return;
@@ -126,7 +126,7 @@ class NewItem extends Component {
           required.push(p)
       }
     }
-    var missedRequiredOrErrorValue = {}
+    var noRequiredOrErrorValue = {}
     required.forEach((p) =>  {
       var v = json[p] ? json[p] : (this.props.resource ? this.props.resource[p] : null); //resource[p];
       if (v) {
@@ -153,13 +153,13 @@ class NewItem extends Component {
         if ((prop.ref) ||  isDate  ||  prop.items) {
           if (resource && resource[p])
             return;
-          missedRequiredOrErrorValue[p] = prop
+          noRequiredOrErrorValue[p] = prop
         }
         else if (!prop.displayAs)
-          missedRequiredOrErrorValue[p] = prop
+          noRequiredOrErrorValue[p] = prop
       }
     })
-    return missedRequiredOrErrorValue
+    return noRequiredOrErrorValue
   }
   validateValues(prop, item) {
     var required = prop.required;
