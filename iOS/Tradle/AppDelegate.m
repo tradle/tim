@@ -9,6 +9,7 @@
 
 #import "AppDelegate.h"
 #import "RCTRootView.h"
+#import "RCTLinkingManager.h"
 #import "CodePush.h"
 #import <Fabric/Fabric.h>
 #import <Crashlytics/Crashlytics.h>
@@ -34,7 +35,7 @@
    */
 
 #ifdef DEBUG
-    jsCodeLocation = [NSURL URLWithString:@"http://192.168.0.154:8081/index.ios.bundle?platform=ios&dev=true"];
+    jsCodeLocation = [NSURL URLWithString:@"http://localhost:8081/index.ios.bundle?platform=ios&dev=true"];
 #else
     jsCodeLocation = [CodePush bundleURL];
 #endif
@@ -65,5 +66,10 @@
 
   return YES;
 }
+
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
+  return [RCTLinkingManager application:application openURL:url sourceApplication:sourceApplication annotation:annotation];
+}
+
 
 @end
