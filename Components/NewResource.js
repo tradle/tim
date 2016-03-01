@@ -3,6 +3,7 @@
 var React = require('react-native');
 var debug = require('debug')('NewResource')
 var utils = require('../utils/utils');
+var translate = utils.translate
 var NewItem = require('./NewItem');
 var GridItemsList = require('./GridItemsList')
 var PhotoView = require('./PhotoView');
@@ -117,7 +118,7 @@ class NewResource extends Component {
   }
   shouldComponentUpdate(nextProps, nextState) {
     return nextState.err                      ||
-           nextState.missedRequiredOrErrorValue           ||
+           nextState.noRequiredOrErrorValue           ||
            this.state.prop !== nextState.prop                ||
            this.state.isUploading !== nextState.isUploading  ||
            this.state.isLoading !== nextState.isLoading      ||
@@ -157,11 +158,11 @@ class NewResource extends Component {
 
 
   componentDidUpdate() {
-    if (!this.state.missedRequiredOrErrorValue  ||  utils.isEmpty(this.state.missedRequiredOrErrorValue)) return
+    if (!this.state.noRequiredOrErrorValue  ||  utils.isEmpty(this.state.noRequiredOrErrorValue)) return
 
     let viewCols = this.props.model.viewCols
     let first
-    for (let p in this.state.missedRequiredOrErrorValue) {
+    for (let p in this.state.noRequiredOrErrorValue) {
       if (!viewCols) {
         first = p
         break
@@ -179,6 +180,11 @@ class NewResource extends Component {
 
   itemAdded(params) {
     var resource = params.resource;
+    if (params.action === 'languageChange') {
+      this.props.navigator.popToTop()
+      return
+    }
+
     if (params.action === 'getTemporary') {
       var r = {}
       extend(r, this.state.resource)
@@ -248,14 +254,14 @@ class NewResource extends Component {
       title: title,
       component: ResourceView,
       titleTextColor: '#7AAAC3',
-      rightButtonTitle: 'Edit',
-      backButtonTitle: 'Back',
+      rightButtonTitle: translate('edit'),
+      backButtonTitle: translate('back'),
       onRightButtonPress: {
         title: title,
         id: 4,
         component: NewResource,
-        rightButtonTitle: 'Done',
-        backButtonTitle: 'Back',
+        rightButtonTitle: translate('done'),
+        backButtonTitle: translate('back'),
         titleTextColor: '#7AAAC3',
         passProps: {
           model: self.props.model,
@@ -302,7 +308,7 @@ class NewResource extends Component {
           required.push(p)
       }
     }
-    var missedRequiredOrErrorValue = {}
+    var noRequiredOrErrorValue = {}
     var msg
     required.forEach((p) =>  {
       var v = json[p] ? json[p] : (this.props.resource ? this.props.resource[p] : null); //resource[p];
@@ -330,20 +336,20 @@ class NewResource extends Component {
         if ((prop.ref) ||  isDate  ||  prop.items) {
           if (resource && resource[p])
             return;
-          missedRequiredOrErrorValue[p] = 'This field is required'
+          noRequiredOrErrorValue[p] = translate('thisFieldIsRequired') //'This field is required'
         }
         else if (!prop.displayAs)
-          missedRequiredOrErrorValue[p] = 'This field is required'
+          noRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
       }
     })
     var err = this.validateProperties(value)
     for (var p in err)
-      missedRequiredOrErrorValue[p] = err[p]
+      noRequiredOrErrorValue[p] = err[p]
 
-    if (!utils.isEmpty(missedRequiredOrErrorValue)) {
+    if (!utils.isEmpty(noRequiredOrErrorValue)) {
       this.state.submitted = false
       var state = {
-        missedRequiredOrErrorValue: missedRequiredOrErrorValue
+        noRequiredOrErrorValue: noRequiredOrErrorValue
       }
       if (msg)
         state.err = msg
@@ -431,8 +437,8 @@ class NewResource extends Component {
     }
     items.push(item);
     var itemsCount = this.state.itemsCount ? this.state.itemsCount  + 1 : 1
-    if (this.state.missedRequiredOrErrorValue)
-      delete this.state.missedRequiredOrErrorValue[propName]
+    if (this.state.noRequiredOrErrorValue)
+      delete this.state.noRequiredOrErrorValue[propName]
     this.setState({
       resource: resource,
       itemsCount: itemsCount,
@@ -465,12 +471,13 @@ class NewResource extends Component {
       this.showChoice();
       return;
     }
+    var blmodel = utils.getModel(bl.items.ref).value
     this.props.navigator.push({
       id: 6,
-      title: 'Add new ' + bl.title,
-      backButtonTitle: 'Back',
+      title: translate('addNew', translate(bl, blmodel)), // Add new ' + bl.title,
+      backButtonTitle: translate('back'),
       component: NewItem,
-      rightButtonTitle: 'Done',
+      rightButtonTitle: translate('done'),
       // onRightButtonPress: {
       //   stateChange: this.onAddItem.bind(this, bl, ),
       //   before: this.done.bind(this)
@@ -653,10 +660,10 @@ class NewResource extends Component {
                     </View>
       }
       var title = bl.title || utils.makeLabel(p)
-      var err = this.state.missedRequiredOrErrorValue
-              ? this.state.missedRequiredOrErrorValue[meta.properties[p].name]
+      var err = this.state.noRequiredOrErrorValue
+              ? this.state.noRequiredOrErrorValue[meta.properties[p].name]
               : null
-      var errTitle = 'This field is required'
+      var errTitle = translate('thisFieldIsRequired')
       var error = err
                 ? <View style={styles.error}>
                     <Text style={styles.errorText}>{errTitle}</Text>
@@ -846,12 +853,12 @@ class NewResource extends Component {
 
     var currentRoutes = this.props.navigator.getCurrentRoutes();
     this.props.navigator.push({
-      title: 'Tap to remove photos',
+      title: translate('tapToRemovePhotos'), //Tap to remove photos',
       titleTintColor: 'red',
       id: 19,
       component: GridItemsList,
       noLeftButton: true,
-      rightButtonTitle: 'Done',
+      rightButtonTitle: translate('done'),
       passProps: {
         prop:        prop.name,
         resource:    resource,

@@ -2,6 +2,7 @@
 
 var React = require('react-native');
 var utils = require('../utils/utils');
+var translate = utils.translate
 var LinearGradient = require('react-native-linear-gradient');
 var ArticleView = require('./ArticleView');
 var constants = require('@tradle/constants');
@@ -175,8 +176,12 @@ class ResourceRow extends Component {
     var renderedViewCols;
     if (!viewCols) {
       var vCols = utils.getDisplayName(resource, model.properties);
-      if (vCols && vCols.length)
+      if (vCols && vCols.length) {
+        if (model.subClassOf  &&  model.subClassOf === 'tradle.Enum')
+          vCols = utils.createAndTranslate(vCols)
+
         return <Text style={styles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
+      }
       else
         return <Text style={styles.resourceTitle} numberOfLines={2}>{model.title + ' ' + utils.getFormattedDate(resource.time)}</Text>;
     }

@@ -9,13 +9,14 @@ var ProductChooser = require('./ProductChooser');
 var Icon = require('react-native-vector-icons/Ionicons');
 var extend = require('extend')
 var utils = require('../utils/utils');
+var translate = utils.translate
 var reactMixin = require('react-mixin');
 var equal = require('deep-equal')
 var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var constants = require('@tradle/constants');
-var bankStyles = require('../styles/bankStyles')
+// var bankStyles = require('../styles/bankStyles')
 var GiftedMessenger = require('react-native-gifted-messenger');
 
 // var AddNewMessage = require('./AddNewMessage');
@@ -71,14 +72,14 @@ class MessageList extends Component {
       indeterminate: true,
       allLoaded: false
     };
-    if (bankStyles) {
-      var name = props.resource.name.split(' ')[0].toLowerCase()
-      this.state.bankStyle = bankStyles[name]
-      if (this.state.bankStyle)
-        LINK_COLOR = this.state.bankStyle.LINK_COLOR || '#cccccc'
-      else
-        LINK_COLOR = '#cccccc'
-    }
+    // if (bankStyles) {
+    //   var name = props.resource.name.split(' ')[0].toLowerCase()
+    //   this.state.bankStyle = bankStyles[name]
+    //   if (this.state.bankStyle)
+    //     LINK_COLOR = this.state.bankStyle.LINK_COLOR || '#cccccc'
+    //   else
+    //     LINK_COLOR = '#cccccc'
+    // }
 
   }
   componentWillMount() {
@@ -169,6 +170,15 @@ class MessageList extends Component {
       }
       return
     }
+    if (params.style)
+      this.state.bankStyle = params.style
+      // var name = props.resource.name.split(' ')[0].toLowerCase()
+      // this.state.bankStyle = bankStyles[name]
+    if (this.state.bankStyle)
+      LINK_COLOR = this.state.bankStyle.LINK_COLOR || '#cccccc'
+    else
+      LINK_COLOR = '#cccccc'
+    // }
 
     if (list.length || (this.state.filter  &&  this.state.filter.length)) {
       var type = list[0][constants.TYPE];
@@ -245,7 +255,7 @@ class MessageList extends Component {
     var route = {
       title: newTitle,
       id: 5,
-      backButtonTitle: 'Back',
+      backButtonTitle: translate('back'),
       component: MessageView,
       parentMeta: model,
       passProps: {
@@ -448,7 +458,7 @@ class MessageList extends Component {
   }
   showMenu() {
     // var buttons = ['Talk to representative', 'Forget me', 'Cancel']
-    var buttons = ['Forget me', 'Cancel']
+    var buttons = [translate('forgetMe'), translate('cancel')] // ['Forget me', 'Cancel']
     var self = this;
     ActionSheetIOS.showActionSheetWithOptions({
       options: buttons,
@@ -470,14 +480,14 @@ class MessageList extends Component {
   forgetMe() {
     var resource = this.props.resource
     AlertIOS.alert(
-      'Are you sure you want \'' + utils.getDisplayName(resource, utils.getModel(resource[constants.TYPE]).value.properties) + '\' to forget you',
-      'This is a test mechanism to reset all communications with this provider',
+      translate('confirmForgetMe', utils.getDisplayName(resource, utils.getModel(resource[constants.TYPE]).value.properties)), //Are you sure you want \'' + utils.getDisplayName(resource, utils.getModel(resource[constants.TYPE]).value.properties) + '\' to forget you',
+      translate('testForgetMe'), //'This is a test mechanism to reset all communications with this provider',
       [
         {text: 'OK', onPress: () => {
             Actions.forgetMe(resource)
           }
         },
-        {text: 'Cancel', onPress: () => console.log('Cancel')}
+        {text: translate('cancel'), onPress: () => console.log('Cancel')}
       ]
     )
   }
@@ -503,11 +513,11 @@ class MessageList extends Component {
     // if (resource.name === 'Lloyds') {
       var currentRoutes = self.props.navigator.getCurrentRoutes();
       this.props.navigator.push({
-        title: 'Financial Product',
+        title: translate(utils.getModel(constants.TYPES.FINANCIAL_PRODUCT).value),
         id: 15,
         component: ProductChooser,
         sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-        backButtonTitle: 'Cancel',
+        backButtonTitle: translate('cancel'),
         passProps: {
           resource: resource,
           returnRoute: currentRoutes[currentRoutes.length - 1],
@@ -516,11 +526,11 @@ class MessageList extends Component {
         rightButtonTitle: 'ion|plus',
         onRightButtonPress: {
           id: 4,
-          title: 'New product',
+          title: translate('newProduct'),
           component: NewResource,
-          backButtonTitle: 'Back',
+          backButtonTitle: translate('back'),
           // titleTextColor: '#999999',
-          rightButtonTitle: 'Done',
+          rightButtonTitle: translate('done'),
           passProps: {
             model: utils.getModel('tradle.NewMessageModel').value,
             currency: resource.currency,

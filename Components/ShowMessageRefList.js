@@ -2,6 +2,7 @@
 
 var React = require('react-native');
 var utils = require('../utils/utils');
+var translate = utils.translate
 var ResourceList = require('./ResourceList');
 var MessageList = require('./MessageList');
 var Icon = require('react-native-vector-icons/Ionicons');
@@ -66,7 +67,7 @@ class ShowMessageRefList extends Component {
                } underlayColor='transparent'>
                  <View style={{alignItems: 'center'}}>
                    <Icon name={icon}  size={35}  color='#ffffff' />
-                   <Text style={buttonStyles.text}>{props[p].title}</Text>
+                   <Text style={buttonStyles.text}>{translate(props[p], model)}</Text>
                  </View>
                </TouchableHighlight>
              </View>
@@ -78,13 +79,13 @@ class ShowMessageRefList extends Component {
              <TouchableHighlight onPress={this.showResources.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
                <View style={{alignItems: 'center'}}>
                  <Icon name={icon}  size={35}  color='#ffffff' />
-                 <Text style={buttonStyles.text}>{props[p].title}</Text>
+                 <Text style={buttonStyles.text}>{translate(props[p], model)}</Text>
                </View>
              </TouchableHighlight>
            </View>
           );
      }
-     var backlinksBg = this.props.bankStyle && this.props.bankStyle.BANKLINKS ? {backgroundColor: this.props.bankStyle.BANKLINKS} : {backgroundColor: '#a0a0a0'}
+     var backlinksBg = this.props.bankStyle && this.props.bankStyle.PRODUCT_ROW_BG_COLOR ? {backgroundColor: this.props.bankStyle.PRODUCT_ROW_BG_COLOR} : {backgroundColor: '#a0a0a0'}
      return refList.length
              ? (
                <View style={[buttonStyles.buttons, backlinksBg, {flexDirection: 'row'}]}>

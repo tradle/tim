@@ -7,7 +7,7 @@ var {
   StyleSheet
 } = React
 var PasswordGesture = require('react-native-gesture-password')
-
+var translate = require('../utils/utils').translate
 var MIN_LENGTH = 5
 var Password1 = ''
 var BG_IMAGE = require('../img/bg.png')
@@ -39,14 +39,14 @@ module.exports = React.createClass({
   getDefaultProps: function () {
     return {
       validate: () => true,
-      promptSet: 'Please draw a pattern',
-      promptCheck: 'Draw your pattern',
-      promptReenter: 'Please draw your pattern again',
-      promptInvalidSet: 'Invalid pattern, please try again',
-      promptRetrySet: 'Patterns didn\'t match. Please start again',
-      promptRetryCheck: 'Wrong pattern',
-      successMsg: 'Correct gesture detected',
-      failMsg: 'Authentication failed',
+      promptSet: translate('pleaseDrawPattern'), //'Please draw a pattern',
+      promptCheck: translate('drawYourPattern'), //Draw your pattern',
+      promptReenter: translate('pleaseDrawYourPatternAgain'), // Please draw your pattern again',
+      promptInvalidSet: translate('invalidPattern'), //Invalid pattern, please try again',
+      promptRetrySet: translate('patternNotMatching'), //Patterns didn\'t match. Please start again',
+      promptRetryCheck: translate('wrongPattern'), //Wrong pattern',
+      successMsg: translate('correctGesture'), //Correct gesture detected',
+      failMsg: translate('authenticationFailed'), //Authentication failed',
       maxAttempts: Infinity
     }
   },

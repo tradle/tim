@@ -2,6 +2,7 @@
 
 var React = require('react-native');
 var utils = require('../utils/utils');
+var translate = utils.translate
 var ResourceList = require('./ResourceList');
 var Icon = require('react-native-vector-icons/Ionicons');
 // var { Icon } = require('react-native-icons');
@@ -65,7 +66,7 @@ class ShowRefList extends Component {
            <TouchableHighlight onPress={this.showResources.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
              <View style={{alignItems: 'center'}} key={getNextKey(key)}>
                <Icon name={icon}  size={30}  color='#ffffff' />
-               <Text style={buttonStyles.text}>{props[p].title}</Text>
+               <Text style={buttonStyles.text}>{translate(props[p], model)}</Text>
              </View>
            </TouchableHighlight>
          </View>

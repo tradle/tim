@@ -2,7 +2,7 @@
 
 var React = require('react-native');
 var utils = require('../utils/utils');
-
+var translate = utils.translate
 var ArticleView = require('./ArticleView');
 var MessageView = require('./MessageView');
 var NewResource = require('./NewResource');
@@ -20,6 +20,7 @@ var formDefaults = require('../data/formDefaults')
 var reactMixin = require('react-mixin');
 var Device = require('react-native-device')
 var newProduct = require('../data/newProduct.json')
+
 var STRUCTURED_MESSAGE_BORDER = '#3260a5' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
 // var STRUCTURED_MESSAGE_COLOR = '#77ADFC' //'#4BA0F2' //'#5482C7' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
 var VERIFICATION_BG = '#FBFFE5' //'#F6FFF0';
@@ -349,8 +350,8 @@ class MessageRow extends Component {
       id: 4,
       component: NewResource,
       // titleTextColor: '#999999',
-      backButtonTitle: 'Back',
-      rightButtonTitle: 'Done',
+      backButtonTitle: translate('back'),
+      rightButtonTitle: translate('done'),
       passProps: {
         model: rmodel,
         resource: resource,
@@ -471,9 +472,9 @@ class MessageRow extends Component {
 
     this.props.navigator.push({
       id: 4,
-      title: model.title,
-      rightButtonTitle: 'Done',
-      backButtonTitle: 'Back',
+      title: translate(model),
+      rightButtonTitle: translate('done'),
+      backButtonTitle: translate('back'),
       component: NewResource,
       // titleTextColor: '#7AAAC3',
       passProps:  {
@@ -506,14 +507,14 @@ class MessageRow extends Component {
     var route = {
       id: 5,
       component: MessageView,
-      backButtonTitle: 'Back',
+      backButtonTitle: translate('back'),
       passProps: passProps,
       title: model.title
     }
     if (this.isMyMessage()) {
-      route.rightButtonTitle = 'Edit';
+      route.rightButtonTitle = translate('edit');
       route.onRightButtonPress = {
-        title: 'Edit',
+        title: translate('edit'),
         component: NewResource,
         // titleTextColor: '#7AAAC3',
         id: 4,
@@ -588,9 +589,9 @@ class MessageRow extends Component {
         if (msgParts.length === 2) {
           if (resource.welcome) {
             msg = <View key={self.getNextKey()}>
-                    <Text style={style}>{msgParts[0]}</Text>
+                    <Text style={style}>{isProductList ? translate('hello', utils.getMe().firstName) : msgParts[0]}</Text>
                     <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                      <Text style={[style, {color: isMyMessage ? STRUCTURED_MESSAGE_COLOR : LINK_COLOR}]}>{msgParts[1]} </Text>
+                      <Text style={[style, {color: isMyMessage ? STRUCTURED_MESSAGE_COLOR : LINK_COLOR}]}>{isProductList ? translate('listOfProducts') : msgParts[1]} </Text>
                       <Icon style={[styles.linkIcon, {color: LINK_COLOR}]} size={20} name={'ios-arrow-right'} />
                     </View>
                   </View>
@@ -613,7 +614,7 @@ class MessageRow extends Component {
             var link = isMyMessage
                      ? <Text style={[style, color]}>{msgModel.title}</Text>
                      : <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                         <Text style={[style, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{msgModel.title}</Text>
+                         <Text style={[style, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(msgModel)}</Text>
                          <Icon style={resource.documentCreated  ? styles.linkIconGreyed : [self.linkIcon, {color: LINK_COLOR}]} size={20} name={'ios-arrow-right'} />
                        </View>
 
@@ -749,11 +750,11 @@ class MessageRow extends Component {
     // if (resource.name === 'Lloyds') {
       var currentRoutes = self.props.navigator.getCurrentRoutes();
       this.props.navigator.push({
-        title: 'I need...',
+        title: translate('iNeed'), //I need...',
         id: 15,
         component: ProductChooser,
         sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-        backButtonTitle: 'Cancel',
+        backButtonTitle: translate('cancel'),
         passProps: {
           resource: resource,
           to: this.props.to,

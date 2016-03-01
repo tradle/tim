@@ -10,6 +10,7 @@ var NewResource = require('./NewResource');
 var MessageList = require('./MessageList');
 var MessageView = require('./MessageView')
 var utils = require('../utils/utils');
+var translate = utils.translate
 var reactMixin = require('react-mixin');
 var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
@@ -121,7 +122,8 @@ class ResourceList extends Component {
           filter: '',
           modelName: constants.TYPES.MESSAGE,
           currency: params.to.currency,
-          bankStyle: params.to.bankStyle
+          bankStyle: params.to.bankStyle,
+          dictionary: params.dictionary
         },
       }
       var me = utils.getMe()
@@ -164,6 +166,7 @@ class ResourceList extends Component {
       dataSource: this.state.dataSource.cloneWithRows(list),
       list: list,
       forceUpdate: params.forceUpdate,
+      dictionary: params.dictionary,
       isLoading: false
     })
   }
@@ -201,7 +204,7 @@ class ResourceList extends Component {
           id: 5,
           component: MessageView,
           // titleTextColor: '#7AAAC3',
-          backButtonTitle: 'Back',
+          backButtonTitle: translate('back'),
           passProps: {resource: resource}
         });
       }
@@ -212,15 +215,15 @@ class ResourceList extends Component {
           id: 3,
           component: ResourceView,
           // titleTextColor: '#7AAAC3',
-          backButtonTitle: 'Back',
-          rightButtonTitle: 'Edit',
+          backButtonTitle: translate('back'),
+          rightButtonTitle: translate('edit'),
           onRightButtonPress: {
             title: title,
             id: 4,
             component: NewResource,
             titleTextColor: '#7AAAC3',
-            backButtonTitle: 'Back',
-            rightButtonTitle: 'Done',
+            backButtonTitle: translate('back'),
+            rightButtonTitle: translate('done'),
             passProps: {
               model: m,
               resource: resource
@@ -255,7 +258,7 @@ class ResourceList extends Component {
     var route = {
       component: MessageList,
       id: 11,
-      backButtonTitle: 'Back',
+      backButtonTitle: translate('back'),
       passProps: {
         resource: resource,
         filter: '',
@@ -265,21 +268,21 @@ class ResourceList extends Component {
     }
     if (isIdentity) { //  ||  isOrganization) {
       route.title = resource.firstName
-      route.rightButtonTitle = 'Profile'
+      route.rightButtonTitle = translate('profile')
       route.onRightButtonPress = {
         title: title,
         id: 3,
         component: ResourceView,
         titleTextColor: '#7AAAC3',
-        backButtonTitle: 'Back',
-        rightButtonTitle: 'Edit',
+        backButtonTitle: translate('back'),
+        rightButtonTitle: translate('edit'),
         onRightButtonPress: {
           title: title,
           id: 4,
           component: NewResource,
           titleTextColor: '#7AAAC3',
-          backButtonTitle: 'Back',
-          rightButtonTitle: 'Done',
+          backButtonTitle: translate('back'),
+          rightButtonTitle: translate('done'),
           passProps: {
             model: utils.getModel(resource[constants.TYPE]).value,
             resource: resource,
@@ -294,7 +297,8 @@ class ResourceList extends Component {
       route.passProps.bankStyle = bankStyles[resource.name.split(' ')[0].toLowerCase()]
       // if (resource.name === 'Rabobank'  &&  (!me.organization  ||  me.organization.name !== 'Rabobank')) {
       var routes = this.props.navigator.getCurrentRoutes();
-      if (routes[routes.length - 1].title === 'Official Accounts') {
+      // if (routes[routes.length - 1].title === 'Official Accounts') {
+      if (routes.length === 2) {
         var msg = {
           message: me.firstName + ' is waiting for the response',
           _t: constants.TYPES.CUSTOMER_WAITING,
@@ -331,7 +335,7 @@ class ResourceList extends Component {
       id: 3,
       component: ResourceView,
       parentMeta: model,
-      backButtonTitle: 'Back',
+      backButtonTitle: translate('back'),
       passProps: {
         resource: resource,
         currency: this.props.currency
@@ -348,12 +352,12 @@ class ResourceList extends Component {
        !model.value.isInterface  &&
        (resource[constants.ROOT_HASH] === me[constants.ROOT_HASH]  ||  resource[constants.TYPE] !== constants.TYPES.PROFILE)) {
       var self = this ;
-      route.rightButtonTitle = 'Edit';
+      route.rightButtonTitle = translate('edit')
       route.onRightButtonPress = /*() =>*/ {
-        title: 'Edit',
+        title: translate('edit'),
         id: 4,
         component: NewResource,
-        rightButtonTitle: 'Done',
+        rightButtonTitle: translate('done'),
         titleTextColor: '#7AAAC3',
         passProps: {
           model: utils.getModel(resource[constants.TYPE]).value,
@@ -377,28 +381,28 @@ class ResourceList extends Component {
       title: backlinksTitle,
       id: 10,
       component: ResourceList,
-      backButtonTitle: 'Back',
+      backButtonTitle: translate('back'),
       titleTextColor: '#7AAAC3',
       passProps: {
         resource: resource,
         prop: prop,
         modelName: modelName
       },
-      rightButtonTitle: 'Details',
+      rightButtonTitle: translate('details'),
       onRightButtonPress: {
         title: resourceTitle,
         id: 3,
         component: ResourceView,
         titleTextColor: '#7AAAC3',
-        backButtonTitle: 'Back',
-        rightButtonTitle: 'Edit',
+        backButtonTitle: translate('back'),
+        rightButtonTitle: translate('edit'),
         onRightButtonPress: {
           title: resourceTitle,
           id: 4,
           component: NewResource,
           titleTextColor: '#7AAAC3',
-          backButtonTitle: 'Back',
-          rightButtonTitle: 'Done',
+          backButtonTitle: translate('back'),
+          rightButtonTitle: translate('done'),
           passProps: {
             model: utils.getModel(resource[constants.TYPE]).value,
             resource: resource
@@ -497,7 +501,7 @@ class ResourceList extends Component {
     // );
   }
   showMenu() {
-    var buttons = ['Add server url', /*'Scan QR code',*/ 'Cancel']
+    var buttons = [translate('addServerUrl'), /*'Scan QR code',*/ translate('cancel')]
     var self = this;
     ActionSheetIOS.showActionSheetWithOptions({
       options: buttons,
@@ -524,8 +528,8 @@ class ResourceList extends Component {
     var route = {
       component: NewResource,
       title: 'Settings',
-      backButtonTitle: 'Back',
-      rightButtonTitle: 'Done',
+      backButtonTitle: translate('back'),
+      rightButtonTitle: translate('done'),
       id: 4,
       titleTextColor: '#7AAAC3',
       passProps: {
@@ -555,10 +559,10 @@ class ResourceList extends Component {
         // </View>
   showBanks() {
     this.props.navigator.push({
-      title: 'Official Accounts',
+      title: translate('officialAccounts'),
       id: 10,
       component: ResourceList,
-      backButtonTitle: 'Back',
+      backButtonTitle: translate('back'),
       titleTextColor: '#7AAAC3',
       passProps: {
         modelName: constants.TYPES.ORGANIZATION
@@ -593,8 +597,8 @@ class ResourceList extends Component {
       id: 4,
       component: NewResource,
       titleTextColor: '#7AAAC3',
-      backButtonTitle: 'Back',
-      rightButtonTitle: 'Done',
+      backButtonTitle: translate('back'),
+      rightButtonTitle: translate('done'),
       passProps: {
         model: model,
         resource: r,
@@ -642,7 +646,7 @@ class ResourceList extends Component {
       <View style={styles.container}>
         <SearchBar
           onChangeText={this.onSearchChange.bind(this)}
-          placeholder='Search'
+          placeholder={translate('search')}
           showsCancelButton={false}
           hideBackground={true}
           />
@@ -677,7 +681,7 @@ class ResourceList extends Component {
       id: 17,
       component: QRCode,
       titleTextColor: '#eeeeee',
-      backButtonTitle: 'Back',
+      backButtonTitle: translate('back'),
       passProps: {
         fullScreen: true,
         content: content

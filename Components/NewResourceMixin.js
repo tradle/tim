@@ -6,6 +6,8 @@ var EnumList = require('./EnumList')
 var FloatLabel = require('react-native-floating-labels')
 var Icon = require('react-native-vector-icons/Ionicons');
 var utils = require('../utils/utils');
+var translate = utils.translate
+
 var constants = require('@tradle/constants');
 var t = require('tcomb-form-native');
 var Actions = require('../Actions/Actions');
@@ -41,7 +43,6 @@ var NewResourceMixin = {
     var onEndEditing = this.onEndEditing  ||  params.onEndEditing
     var chooser = this.chooser  ||  this.props.chooser
     var myCustomTemplate = this.myCustomTemplate //  || this.props.template
-    var textTemplate = this.myTextInputTemplate
     // var myDateTemplate = this.myDateTemplate
     var models = utils.getModels();
     var data = params.data;
@@ -101,11 +102,11 @@ var NewResourceMixin = {
       if (props[p].readOnly) //  &&  (type === 'date'  ||  !data  ||  !data[p]))
         continue;
 
-      var label = props[p].title;
+      var label = translate(props[p], meta) //props[p].title;
       if (!label)
         label = utils.makeLabel(p);
       options.fields[p] = {
-        error: 'This field is required',
+        error: translate('thisFieldIsRequired'), //'This field is required',
         bufferDelay: 20, // to eliminate missed keystrokes
       }
       var isRange
@@ -169,9 +170,10 @@ var NewResourceMixin = {
           }
         }
         if (!options.fields[p].multiline && (type === 'string'  ||  type === 'number')) {
-          options.fields[p].template = textTemplate.bind(this, {
+          options.fields[p].template = this.myTextInputTemplate.bind(this, {
                     label: label,
                     prop:  props[p],
+                    model: meta,
                     value: data  &&  data[p] ? data[p] + '' : null,
                     required: !maybe,
                     keyboard: props[p].keyboard ||  (type === 'number' ? 'numeric' : 'default'),
@@ -243,6 +245,7 @@ var NewResourceMixin = {
                     label: label,
                     prop:  props[p],
                     value: value,
+                    model: meta,
                     keyboard: 'numeric',
                     required: !maybe,
                   })
@@ -364,13 +367,13 @@ var NewResourceMixin = {
                   </View>
                 : <View key={this.getNextKey()} />
     }
-    var label = params.label
+    var label = translate(params.prop, params.model)
     if (params.prop.units) {
       label += (params.prop.units.charAt(0) === '[')
              ? ' ' + params.prop.units
              : ' (' + params.prop.units + ')'
     }
-    label += params.required ? '' : ' (optional)'
+    label += params.required ? '' : ' (' + translate('optional') + ')'
     // label += (params.prop.ref  &&  params.prop.ref === constants.TYPES.MONEY)
     //        ?  ' (' + CURRENCY_SYMBOL + ')'
     //        : ''
@@ -407,7 +410,7 @@ var NewResourceMixin = {
   // },
   myCustomTemplate(params) {
     var labelStyle = {color: '#cccccc', fontSize: 18, paddingLeft: 10, paddingBottom: 10};
-    var textStyle = {color: '#000000', fontSize: 18, paddingLeft: 10, paddingBottom: 10};
+    var textStyle = {color: this.state.isRegistration ? '#ffffff' : '#000000', fontSize: 18, paddingLeft: 10, paddingBottom: 10};
     var resource = /*this.props.resource ||*/ this.state.resource
     var label, style
     var propLabel, propName
@@ -422,9 +425,11 @@ var NewResourceMixin = {
 
       if (!label)
         label = resource[params.prop].title
+      if (rModel.subClassOf  &&  rModel.subClassOf === 'tradle.Enum')
+        label = utils.createAndTranslate(label)
       style = textStyle
-      propLabel = <View style={{marginLeft: 10, marginTop: 5, marginBottom: 5, backgroundColor: '#ffffff'}}>
-                    <Text style={{fontSize: 12, height: 12, color: '#B1B1B1'}}>{params.label}</Text>
+      propLabel = <View style={{marginLeft: 10, marginTop: 5, marginBottom: 5, backgroundColor: this.state.isRegistration ? 'transparent' : '#ffffff'}}>
+                    <Text style={{fontSize: 12, height: 12, color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}}>{params.label}</Text>
                   </View>
     }
     else {
@@ -442,12 +447,12 @@ var NewResourceMixin = {
               : <View />
     return (
       <View style={styles.chooserContainer} key={this.getNextKey()} ref={prop.name}>
-        <TouchableHighlight underlayColor='white' onPress={this.chooser.bind(this, prop, params.prop)}>
+        <TouchableHighlight underlayColor='transparent' onPress={this.chooser.bind(this, prop, params.prop)}>
           <View style={{ position: 'relative'}}>
             {propLabel}
             <View style={styles.chooserContentStyle}>
               <Text style={style}>{label}</Text>
-              <Icon name='ios-arrow-down'  size={15}  color='#96415A'  style={styles.icon1} />
+              <Icon name='ios-arrow-down'  size={15}  color={this.state.isRegistration ? '#eeeeee' : '#96415A'}  style={styles.icon1} />
             </View>
            {error}
           </View>
@@ -471,7 +476,7 @@ var NewResourceMixin = {
     var m = utils.getModel(prop.ref).value;
     var currentRoutes = this.props.navigator.getCurrentRoutes();
     this.props.navigator.push({
-      title: m.title,
+      title: translate(m), //m.title,
       titleTextColor: '#7AAAC3',
       id: 10,
       component: ResourceList,
@@ -543,6 +548,7 @@ var NewResourceMixin = {
                     prop:  params.prop,
                     value: params.value.value + '',
                     required: params.required,
+                    model: params.model,
                     keyboard: 'numeric',
                   })
           }
@@ -582,7 +588,7 @@ var NewResourceMixin = {
     var value = prop ? params.value : resource[enumProp.name]
     return (
       <View style={[styles.chooserContainer, {width: 40}]} key={this.getNextKey()} ref={enumProp.name}>
-        <TouchableHighlight underlayColor='white' onPress={this.enumChooser.bind(this, prop, enumProp)}>
+        <TouchableHighlight underlayColor='transparent' onPress={this.enumChooser.bind(this, prop, enumProp)}>
           <View style={{ position: 'relative'}}>
             <View style={styles.chooserContentStyle}>
               <Text style={styles.enumText}>{value}</Text>
@@ -683,17 +689,17 @@ var NewResourceMixin = {
           if (!err[p])
             continue
           if (v[1] < v[0])
-            err[p] = 'The min value for the range should be smaller then the max value'
+            err[p] = translate('theMinValueBiggerThenMaxValue') //'The min value for the range should be smaller then the max value'
         }
         else
-          err[p] = 'The property with [min-max] range can have only two numbers'
+          err[p] = translate('thePropertyWithMinMaxRangeError') // The property with [min-max] range can have only two numbers'
       }
       // 'pattern' can be regex pattern or property where the pattern is defined.
       // It is for country specific patterns like 'phone number'
 
       else if (prop.pattern) {
         if (!(new RegExp(prop.pattern).test(value[p])))
-          err[prop.name] = 'Invalid ' + prop.title
+          err[prop.name] = translate('invalidProperty', prop.title)
       }
       // else if (prop.patterns) {
       //   let cprops = []
