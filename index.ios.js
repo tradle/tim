@@ -67,14 +67,12 @@ Text.defaultProps = function() {
 
 var {
   Component,
-  // NavigatorIOS,
   Navigator,
   Image,
   View,
-  // Text,
   TouchableOpacity,
   StyleSheet,
-  LinkingIOS,
+  // LinkingIOS,
   AppStateIOS
 } = React;
 
@@ -113,14 +111,14 @@ class TiMApp extends Component {
   componentDidMount() {
     AutomaticUpdates.on()
     AppStateIOS.addEventListener('change', this._handleAppStateChange);
-    LinkingIOS.addEventListener('url', this._handleOpenURL);
-    var url = LinkingIOS.popInitialURL();
-    if (url)
-      this._handleOpenURL({url});
+    // LinkingIOS.addEventListener('url', this._handleOpenURL);
+    // var url = LinkingIOS.popInitialURL();
+    // if (url)
+    //   this._handleOpenURL({url});
   }
   componentWillUnmount() {
     AppStateIOS.removeEventListener('change', this._handleAppStateChange);
-    LinkingIOS.removeEventListener('url', this._handleOpenURL);
+    // LinkingIOS.removeEventListener('url', this._handleOpenURL);
     this._navListeners.forEach((listener) => listener.remove())
   }
   _handleAppStateChange(currentAppState) {
@@ -401,7 +399,7 @@ var NavigationBarRouteMapper = {
     }
     var color = '#7AAAC3'
     if (route.passProps.bankStyle)
-      color = route.passProps.bankStyle.LINK_COLOR || LINK_COLOR
+      color = route.passProps.bankStyle.LINK_COLOR || '#cccccc'
 
     var previousRoute = navState.routeStack[index - 1];
     var lbTitle = 'backButtonTitle' in route ? route.backButtonTitle : previousRoute.title;
@@ -440,7 +438,7 @@ var NavigationBarRouteMapper = {
     if (route.tintColor)
       style.push({color: route.tintColor});
     else if (route.passProps.bankStyle)
-      style.push({color: route.passProps.bankStyle.LINK_COLOR || LINK_COLOR})
+      style.push({color: route.passProps.bankStyle.LINK_COLOR || '#cccccc'})
     var title = route.rightButtonTitle.indexOf('|') == -1
               ?  <Text style={style}>
                     {route.rightButtonTitle}
