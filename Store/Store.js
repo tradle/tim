@@ -138,6 +138,8 @@ var db;
 var ldb;
 var isLoaded;
 var me;
+var language
+var dictionary = {}
 var isAuthenticated
 var meDriver
 var publishedIdentity
@@ -282,6 +284,8 @@ var Store = Reflux.createStore({
       // })
   },
   onSetAuthenticated(authenticated) {
+    if (!me)
+      return
     let meId = utils.getId(me)
     let r = {}
     extend(true, r, me, {
@@ -584,16 +588,36 @@ var Store = Reflux.createStore({
     //   })
     // ])
     const doFetch = retry
-      ? utils.fetchWithBackoff
-      : utils.fetchWithTimeout
+                  ? utils.fetchWithBackoff
+                  : utils.fetchWithTimeout
 
-    return doFetch(utils.joinURL(url, 'info'), { headers: { cache: 'no-cache' } }, 5000)
+    let originalUrl = url
+    url = utils.joinURL(url, 'info')
+    if (me)
+      language = list[utils.getId(me.language)].value
+
+    if (language)
+      url += '?lang=' + language.code
+
+    return doFetch(url, { headers: { cache: 'no-cache' } }, 5000)
+    .catch((err) => {
+      debugger
+    })
     .then((response) =>  {
       if (response.status > 300)
         throw new Error('Cannot access: ' + url)
       return response.json()
     })
     .then(function (json) {
+      if (json.dictionary) {
+        extend(true, dictionary, json.dictionary)
+        if (me) {
+          me.dictionary = dictionary
+          me.language = language
+          utils.setMe(me)
+        }
+      }
+
       return Q.allSettled(json.providers.map(p => {
         if (p.org[ROOT_HASH]) return p
 
@@ -617,8 +641,8 @@ var Store = Reflux.createStore({
 
         if (isDuplicate)
           return
-        SERVICE_PROVIDERS.push({id: sp.id, org: utils.getId(sp.org), url: url})
-        promises.push(self.addInfo(sp, url))
+        SERVICE_PROVIDERS.push({id: sp.id, org: utils.getId(sp.org), url: originalUrl, style: sp.style})
+        promises.push(self.addInfo(sp, originalUrl))
       })
 
       return Q.allSettled(promises)
@@ -631,6 +655,7 @@ var Store = Reflux.createStore({
   },
   addInfo(sp, url) {
     var hash
+    var self = this
     var okey = utils.getId(sp.org)
     return getDHTKey(sp.bot.pub)
     .then(function(dhtKey) {
@@ -647,10 +672,11 @@ var Store = Reflux.createStore({
           _t: PROFILE,
           _r: dhtKey,
           firstName: sp.bot.profile.name.firstName || sp.id + 'Bot',
-          organization: {
-            id: okey,
-            title: sp.org.name
-          }
+          organization: self.buildRef(sp.org)
+          // organization: {
+          //   id: okey,
+          //   title: sp.org.name
+          // }
         }
         if (sp.bot.profile.name.lastName)
           profile.lastName = sp.bot.profile.name.lastName
@@ -773,13 +799,14 @@ var Store = Reflux.createStore({
         continue
       if (props[p].ref  &&  !props[p].id) {
         var type = r[p][TYPE];
-        var id = type ? type + '_' + r[p][ROOT_HASH]/* + '_' + r[p][CUR_HASH]*/ : r[p].id;
-        var title = type ? utils.getDisplayName(r[p], this.getModel(type).value.properties) : r[p].title
-        rr[p] = {
-          id: id,
-          title: title,
-          time: r.time
-        }
+        // var id = type ? type + '_' + r[p][ROOT_HASH]/* + '_' + r[p][CUR_HASH]*/ : r[p].id;
+        // var title = type ? utils.getDisplayName(r[p], this.getModel(type).value.properties) : r[p].title
+        rr[p] = this.buildRef(r[p])
+        // rr[p] = {
+        //   id: id,
+        //   title: title,
+        //   time: r.time
+        // }
       }
       else
         rr[p] = r[p];
@@ -1055,12 +1082,13 @@ var Store = Reflux.createStore({
       }
 
       batch.push({type: 'put', key: key, value: r});
+      newVerification = self.buildRef(r)
 
-      newVerification = {
-        id: key + '_' + r[CUR_HASH],
-        title: r.document.title ? r.document.title : '',
-        time: r.time
-      };
+      // newVerification = {
+      //   id: key + '_' + r[CUR_HASH],
+      //   title: r.document.title ? r.document.title : '',
+      //   time: r.time
+      // };
 
       // if (!from.verifiedByMe)
       //   from.verifiedByMe = [];
@@ -1256,11 +1284,12 @@ var Store = Reflux.createStore({
       model.interfaces.push(MESSAGE);
       var rootHash = sha(model);
       model[ROOT_HASH] = rootHash;
-      model[constants.OWNER] = {
-        key: PROFILE + '_' + me[ROOT_HASH],
-        title: utils.getDisplayName(me, self.getModel(PROFILE).value.properties),
-        photos: me.photos
-      }
+      model[constants.OWNER] = self.buildRef(me)
+      // model[constants.OWNER] = {
+      //   id: PROFILE + '_' + me[ROOT_HASH],
+      //   title: utils.getDisplayName(me, self.getModel(PROFILE).value.properties),
+        // photos: me.photos
+      // }
       // Wil need to publish new model
       return db.put(key, model);
     })
@@ -1381,11 +1410,12 @@ var Store = Reflux.createStore({
           var prop = refProps[propValue];
 
           var title = utils.getDisplayName(value, self.getModel(value[TYPE]).value.properties);
-          json[prop] = {
-            title: title,
-            id: propValue  + '_' + value[CUR_HASH],
-            time: value.time
-          }
+          json[prop] = self.buildRef(value)
+          // json[prop] = {
+          //   title: title,
+          //   id: propValue  + '_' + value[CUR_HASH],
+          //   time: value.time
+          // }
           if (isMessage)
             json.time = new Date().getTime();
         }
@@ -1717,6 +1747,16 @@ var Store = Reflux.createStore({
       spinner: params.spinner,
       isAggregation: params.isAggregation
     }
+    if (isMessage) {
+      let orgId = utils.getId(params.to)
+      let styles = SERVICE_PROVIDERS.filter((sp) => {
+        if (sp.org === orgId)
+          return true
+      })
+      if (styles  &&  styles.length)
+        retParams.style = styles[0].style
+    }
+
     if (verificationsToShare)
       retParams.verificationsToShare = verificationsToShare;
     if (params.prop)
@@ -2410,6 +2450,7 @@ var Store = Reflux.createStore({
 
     var model = this.getModel(modelName).value;
     var props = model.properties;
+    var newLanguage
     var isNew = !value[ROOT_HASH]
     if (value[TYPE] === SETTINGS) {
       if (isNew) {
@@ -2434,10 +2475,11 @@ var Store = Reflux.createStore({
                   ?  me
                   :  isRegistration ? value : null;
       if (creator) {
-        value[constants.OWNER] = {
-          id: PROFILE + '_' + creator[ROOT_HASH] + '_' + creator[CUR_HASH],
-          title: utils.getDisplayName(me, this.getModel(PROFILE))
-        };
+        value[constants.OWNER] = this.buildRef(creator)
+        // value[constants.OWNER] = {
+        //   id: PROFILE + '_' + creator[ROOT_HASH] + '_' + creator[CUR_HASH],
+        //   title: utils.getDisplayName(me, this.getModel(PROFILE))
+        // };
       }
 
       if (value[TYPE] === ADDITIONAL_INFO) {
@@ -2447,11 +2489,12 @@ var Store = Reflux.createStore({
         var vr = list[vrId].value;
         if (!vr.additionalInfo  ||  !vr.additionalInfo.length)
           vr.additionalInfo = [];
-        vr.additionalInfo.push({
-          id: ADDITIONAL_INFO + '_' + value[ROOT_HASH],
-          title: value.message,
-          time: value.time
-        });
+        vr.additionalInfo.push(this.buildRef(value))
+        // vr.additionalInfo.push({
+        //   id: ADDITIONAL_INFO + '_' + value[ROOT_HASH],
+        //   title: value.message,
+        //   time: value.time
+        // });
         batch.push({type: 'put', key: vrId, value: vr});
       }
     }
@@ -2496,10 +2539,37 @@ var Store = Reflux.createStore({
     .then(function(value) {
       list[iKey] = {key: iKey, value: value};
       if (mid)
-        list[MY_IDENTITIES] = {key: MY_IDENTITIES, value: mid};
+        list[MY_IDENTITIES] = {key: MY_IDENTITIES, value: mid}
+      else if (!isNew  &&  iKey === utils.getId(me)) {
+        if (me.language || value.language) {
+          if (me.language   &&  value.language) {
+            if (utils.getId(me.language) !== utils.getId(value.language))
+              newLanguage = list[utils.getId(value.language)].value
+          }
+        }
+
+        me = value
+        utils.setMe(me)
+        if (newLanguage) {
+          let lang = list[utils.getId(me.language)].value
+          value.languageCode = lang.code
+          db.put(iKey, value)
+
+          me.language = lang
+          me.languageCode = lang.code
+          utils.setMe(me)
+          var urls = []
+
+          SERVICE_PROVIDERS.forEach((sp) => {
+            if (urls.indexOf(sp.url) === -1)
+              urls.push(sp.url)
+          })
+          return self.getInfo(urls)
+        }
+      }
     })
     .then(function() {
-      var  params = {action: 'addItem', resource: value};
+      var  params = {action: newLanguage ? 'languageChange' : 'addItem', resource: value};
       // registration or profile editing
       if (!noTrigger)
         self.trigger(params);
@@ -2528,12 +2598,17 @@ var Store = Reflux.createStore({
         publishedIdentity: publishedIdentity
       }]};
     delete me.privkeys
+
     batch.push({type: 'put', key: pKey, value: me});
     batch.push({type: 'put', key: MY_IDENTITIES, value: mid});///
     var identity = {}
     identity[ROOT_HASH] = me[ROOT_HASH]
     extend(true, identity, publishedIdentity)
     var iKey = IDENTITY + '_' + identity[ROOT_HASH]
+    if (me.language) {
+      me.language = list[utils.getId(me.language)].value
+      me.languageCode = me.language.code
+    }
     batch.push({type: 'put', key: iKey, value: identity});
     return db.batch(batch)
     .then(function() {
@@ -2715,7 +2790,8 @@ var Store = Reflux.createStore({
 
     if (!publishedIdentity)
       publishedIdentity = this.makePublishingIdentity(me, mePub)
-
+    if (me.language)
+      language = list[utils.getId(me.language)].value
     return driverPromise = this.buildDriver(Identity.fromJSON(publishedIdentity), mePriv, PORT)
   },
 
@@ -2727,10 +2803,11 @@ var Store = Reflux.createStore({
                         })
                         .set('_z', me[NONCE] || this.getNonce())
     if (me.organization) {
-      var org = {
-        id: me.organization.id,
-        title: me.organization.title
-      }
+      var org = this.buildRef(me.organization)
+      // var org = {
+      //   id: me.organization.id,
+      //   title: me.organization.title
+      // }
       meIdentity.set('organization', org)
     }
 
@@ -2814,7 +2891,10 @@ var Store = Reflux.createStore({
         var me = list[MY_IDENTITIES];
         if (me)  {
           var currentIdentity = me.value.currentIdentity;
-          newIdentity[constants.OWNER] = {id: currentIdentity, title: utils.getDisplayName(me, props)};
+          newIdentity[constants.OWNER] = {
+            id: currentIdentity,
+            title: utils.getDisplayName(me, props)
+          };
           if (me.organization) {
             var photos = list[utils.getId(me.organization.id)].value.photos;
             if (photos)
@@ -3334,10 +3414,11 @@ var Store = Reflux.createStore({
               if (!orgContacts[utils.getId(data.value.organization)])
                 orgContacts[utils.getId(data.value.organization)] = []
               var c = orgContacts[utils.getId(data.value.organization)]
-              c.push({
-                id: utils.getId(data.value),
-                title: utils.getDisplayName(data.value, self.getModel(PROFILE).value.properties)
-              })
+              c.push(self.buildRef(data.value))
+              // c.push({
+              //   id: utils.getId(data.value),
+              //   title: utils.getDisplayName(data.value, self.getModel(PROFILE).value.properties)
+              // })
             }
           }
           list[data.key] = data;
@@ -3423,14 +3504,16 @@ var Store = Reflux.createStore({
       _t: FORGOT_YOU,
       _z: this.getNonce(),
       message: 'You\'ve been successfully forgotten',
-      from: {
-        id: orgId,
-        title: utils.getDisplayName(resource)
-      },
-      to: {
-        id: me[TYPE] + '_' + me[ROOT_HASH],
-        title: me.firstName
-      }
+      from: this.buildRef(resource),
+      to: this.buildRef(me)
+      // from: {
+      //   id: orgId,
+      //   title: utils.getDisplayName(resource)
+      // },
+      // to: {
+      //   id: me[TYPE] + '_' + me[ROOT_HASH],
+      //   title: me.firstName
+      // }
     }
     msg.id = sha(msg)
     this.trigger({action: 'messageList', list: [msg], resource: resource})
@@ -3562,14 +3645,17 @@ var Store = Reflux.createStore({
         _z: this.getNonce(),
         message: 'All representatives are currently assisting other customers. Please try again later'
       }
-      msg.from = {
-        id: resource[TYPE] + '_' + resource[ROOT_HASH],
-        title: utils.getDisplayName(resource)
-      }
-      msg.to = {
-        id: me[TYPE] + '_' + me[ROOT_HASH],
-        title: me.firstName
-      }
+      msgFrom.from = this.buildRef(resource)
+      msgFrom.to = this.buildRef(me)
+
+      // msg.from = {
+      //   id: resource[TYPE] + '_' + resource[ROOT_HASH],
+      //   title: utils.getDisplayName(resource)
+      // }
+      // msg.to = {
+      //   id: me[TYPE] + '_' + me[ROOT_HASH],
+      //   title: me.firstName
+      // }
       msg.id = sha(msg)
       result.push(msg)
       self.trigger({action: 'messageList', list: result, resource: resource})
@@ -3581,14 +3667,16 @@ var Store = Reflux.createStore({
       _z: this.getNonce(),
       message: 'Representative will be with you shortly. Please tell us how can we help you today?'
     }
-    msg.from = {
-      id: resource[TYPE] + '_' + resource[ROOT_HASH],
-      title: utils.getDisplayName(resource)
-    }
-    msg.to = {
-      id: me[TYPE] + '_' + me[ROOT_HASH],
-      title: me.firstName
-    }
+    msgFrom.from = this.buildRef(resource)
+    msgFrom.to = this.buildRef(me)
+    // msg.from = {
+    //   id: resource[TYPE] + '_' + resource[ROOT_HASH],
+    //   title: utils.getDisplayName(resource)
+    // }
+    // msg.to = {
+    //   id: me[TYPE] + '_' + me[ROOT_HASH],
+    //   title: me.firstName
+    // }
     msg.id = sha(msg)
     result.push(msg)
     self.trigger({action: 'messageList', list: result, resource: resource})
@@ -3621,14 +3709,16 @@ var Store = Reflux.createStore({
         return
       var result = self.searchMessages({to: resource, modelName: MESSAGE});
       msg.message = 'Your request is in progress'
-      msg.from = {
-        id: resource[TYPE] + '_' + resource[ROOT_HASH],
-        title: utils.getDisplayName(resource)
-      }
-      msg.to = {
-        id: me[TYPE] + '_' + me[ROOT_HASH],
-        title: me.firstName
-      }
+      msgFrom.from = self.buildRef(resource)
+      msgFrom.to = self.buildRef(me)
+      // msg.from = {
+      //   id: resource[TYPE] + '_' + resource[ROOT_HASH],
+      //   title: utils.getDisplayName(resource)
+      // }
+      // msg.to = {
+      //   id: me[TYPE] + '_' + me[ROOT_HASH],
+      //   title: me.firstName
+      // }
       msg.id = sha(msg)
       result.push(msg)
       self.trigger({action: 'messageList', list: result, resource: resource})
@@ -3745,7 +3835,16 @@ var Store = Reflux.createStore({
     var defer = Q.defer()
     this._transitionCallbacks.push(defer.resolve)
     return defer.promise
-  }
+  },
+  buildRef(resource) {
+    let ref = {
+      id: utils.getId(resource) + (resource[CUR_HASH] ? '_' + resource[CUR_HASH] : ''),
+      title: resource.id ? resource.title : utils.getDisplayName(resource, this.getModel(resource[TYPE]).value.properties)
+    }
+    if (resource.time)
+      ref.time = resource.time
+    return ref
+  },
 })
 // );
 
