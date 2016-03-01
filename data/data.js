@@ -196,6 +196,21 @@ var resources = [
   purpose: 'Borrowing more'
 },
 {
+  _t: 'tradle.Language',
+  language: 'English',
+  code: 'en'
+},
+{
+  _t: 'tradle.Language',
+  language: 'Dutch',
+  code: 'nl'
+},
+// {
+//   _t: 'tradle.Language',
+//   language: 'Russian',
+//   code: 'ru'
+// },
+{
   _t: 'tradle.Country',
   country: 'UK',
 },
