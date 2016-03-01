@@ -19,10 +19,20 @@ var rebuf = require('logbase').rebuf
 var parseDBValue = function (pair) {
   return pair[1] && rebuf(JSON.parse(pair[1]))
 }
-
+var translatedStrings = {
+  en: require('./strings_en.json'),
+  nl: require('./strings_nl.json')
+}
 var constants = require('@tradle/constants');
 var TYPE = constants.TYPE
 var VERIFICATION = constants.TYPES.VERIFICATION
+var LocalizedStrings = require('react-native-localization')
+let defaultLanguage = new LocalizedStrings({ en: {}, nl: {} }).getLanguage()
+var dictionaries = require('@tradle/models').dict
+
+var strings = translatedStrings[defaultLanguage]
+var dictionary = dictionaries[defaultLanguage]
+
 var propTypesMap = {
   'string': t.Str,
   'boolean': t.Bool,
@@ -47,6 +57,15 @@ var utils = {
   },
   setMe(meR) {
     me = meR;
+    if (!me)
+      return
+
+    if (me.languageCode)
+      strings = translatedStrings[me.languageCode]
+    if (!strings)
+      strings = translatedStrings['en']
+    if (me.dictionary)
+      dictionary = me.dictionary
   },
   getMe() {
     return me;
@@ -59,6 +78,52 @@ var utils = {
   },
   getModel(modelName) {
     return models ? models[modelName] : null;
+  },
+  translate(...args) {
+    if (typeof args[0] === 'string')
+      return utils.translateString(...args)
+    if (args.length === 1)
+      return utils.translateModel(args[0])
+    else
+      return utils.translateProperty(args[0], args[1])
+  },
+  translateProperty(property, model) {
+    if (!dictionary)
+      return property.title || utils.makeLabel(property.name)
+    let translations = dictionary.properties[property.name]
+    return (translations) ? translations[model.id] || translations.Default : property.title || utils.makeLabel(property.name)
+  },
+  translateModel(model) {
+    if (!dictionary)
+      return model.title
+    return dictionary.models[model.id] || model.title
+
+  },
+  translateString(...args) {
+    if (!strings)
+      return args[0]
+
+    let s = strings[args[0]]
+
+    if (args.length > 1) {
+      for (let i=1; i<args.length; i++) {
+        let insert = '{' + i + '}'
+        let idx = s.indexOf(insert)
+        if (idx === -1)
+          continue
+        s = s.substring(0, idx) + args[i] + s.substring(idx + insert.length)
+      }
+    }
+    return s ? utils.makeLabel(s) : args[0]
+  },
+  createAndTranslate(s) {
+    let stringName = s.replace(/\w\S*/g, function(txt) {
+      return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+    })
+    stringName = stringName.replace(/[^a-zA-Z0-9]/g, '')
+    // stringName = stringName.charAt(0).toLowerCase() + stringName.slice(1)
+    let t = utils.translate(stringName)
+    return t !== stringName ? t : utils.makeLabel(s)
   },
   makeLabel(label) {
     return label
