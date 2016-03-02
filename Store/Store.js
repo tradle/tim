@@ -1354,8 +1354,9 @@ var Store = Reflux.createStore({
       if (props[p] &&  props[p].type === 'object') {
         var ref = props[p].ref;
         if (ref  &&  resource[p])  {
-          if (props[p].ref  &&  this.getModel(props[p].ref).value.inlined)
+          if (this.getModel(ref).value.inlined)
             continue;
+
           var rValue = resource[p][ROOT_HASH] ? resource[p][TYPE] + '_' + resource[p][ROOT_HASH] : utils.getId(resource[p].id);
           refProps[rValue] = p;
           if (list[rValue]) {
@@ -3709,8 +3710,8 @@ var Store = Reflux.createStore({
         return
       var result = self.searchMessages({to: resource, modelName: MESSAGE});
       msg.message = 'Your request is in progress'
-      msgFrom.from = self.buildRef(resource)
-      msgFrom.to = self.buildRef(me)
+      msg.from = self.buildRef(resource)
+      msg.to = self.buildRef(me)
       // msg.from = {
       //   id: resource[TYPE] + '_' + resource[ROOT_HASH],
       //   title: utils.getDisplayName(resource)
