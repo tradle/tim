@@ -104,6 +104,8 @@ var utils = {
       return args[0]
 
     let s = strings[args[0]]
+    if (!s)
+      return args[0]
 
     if (args.length > 1) {
       for (let i=1; i<args.length; i++) {
@@ -114,16 +116,16 @@ var utils = {
         s = s.substring(0, idx) + args[i] + s.substring(idx + insert.length)
       }
     }
-    return s ? utils.makeLabel(s) : args[0]
+    return s ? s : args[0]
   },
-  createAndTranslate(s) {
+  createAndTranslate(s, isEnumValue) {
     let stringName = s.replace(/\w\S*/g, function(txt) {
       return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
     })
     stringName = stringName.replace(/[^a-zA-Z0-9]/g, '')
     // stringName = stringName.charAt(0).toLowerCase() + stringName.slice(1)
     let t = utils.translate(stringName)
-    return t !== stringName ? t : utils.makeLabel(s)
+    return t !== stringName ? t : (isEnumValue ? s : utils.makeLabel(s))
   },
   makeLabel(label) {
     return label
