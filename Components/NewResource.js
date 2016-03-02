@@ -294,7 +294,7 @@ class NewResource extends Component {
     }
     // value is a tcomb Struct
     var json = JSON.parse(JSON.stringify(value));
-
+    this.checkEnums(json, resource)
     if (this.floatingProps) {
       for (var p in this.floatingProps) {
         json[p] = this.floatingProps[p]
@@ -317,14 +317,21 @@ class NewResource extends Component {
           v = null
           delete json[p]
         }
-        else if (typeof v === 'object'  &&  this.props.model.properties[p].ref !== constants.TYPES.MONEY) {
-          var units = this.props.model.properties[p].units
-          if (units)
-            v = v.value
-          else {
-            if (v.value === '')
-              v = null
-            delete json[p]
+        else if (typeof v === 'object')  {
+          let ref = this.props.model.properties[p].ref
+          if (ref) {
+            let rModel = utils.getModel(ref).value
+            if (ref !== constants.TYPES.MONEY  && (!rModel.subClassOf  ||  rModel.subClassOf !== 'tradle.Enum')) {
+              var units = this.props.model.properties[p].units
+              if (units)
+                v = v.value
+              else {
+                if (v.value === '')
+                  v = null
+                delete json[p]
+              }
+              return
+            }
           }
         }
       }
@@ -410,7 +417,18 @@ class NewResource extends Component {
     // else
       Actions.addItem(params)
   }
-
+  // HACK: the value for property of the type that is subClassOf Enum is set on resource
+  // and it is different from what tcomb sets in the text field
+  checkEnums(json, resource) {
+    var props = this.props.model.properties
+    for (var p in json) {
+      if (!props[p]  ||  !props[p].ref)
+        continue
+      let m = utils.getModel(props[p].ref).value
+      if (m.subClassOf  &&  m.subClassOf === 'tradle.Enum')
+        json[p] = resource[p]
+    }
+  }
   addFormValues() {
     var value = this.refs.form.getValue();
     // var json = value ? JSON.parse(JSON.stringify(value)) : this.refs.form.refs.input.state.value;
