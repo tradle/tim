@@ -2,9 +2,10 @@
 
 var React = require('react-native');
 var utils = require('../utils/utils');
+var translate = utils.translate
 var constants = require('@tradle/constants');
 var ArticleView = require('./ArticleView');
-var FromToView = require('./FromToView');
+// var FromToView = require('./FromToView');
 var PhotoList = require('./PhotoList');
 var PhotoView = require('./PhotoView');
 var ShowPropertiesView = require('./ShowPropertiesView');
@@ -121,7 +122,7 @@ class MessageView extends Component {
     this.props.navigator.push({
       id: 7,
       component: ArticleView,
-      backButtonTitle: 'Back',
+      backButtonTitle: translate('back'),
       passProps: {url: url}
     });
   }
