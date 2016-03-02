@@ -251,11 +251,10 @@ class MessageRow extends Component {
         var orgName = resource.organization  ? resource.organization.title : ''
 
         var hdrStyle = this.props.bankStyle  &&  this.props.bankStyle.VERIFIED_HEADER_COLOR ? {backgroundColor: this.props.bankStyle.VERIFIED_HEADER_COLOR} : {backgroundColor: '#289427'}
-
         renderedRow = <View>
                         <View style={[styles.verifiedHeader, hdrStyle]}>
                           <Icon style={styles.verificationIcon} size={20} name={'android-done'} />
-                          <Text style={{fontSize: 16, fontWeight: '600', color: '#FBFFE5', alignSelf: 'center'}}> Verified by {orgName}</Text>
+                          <Text style={{fontSize: 16, fontWeight: '600', color: '#FBFFE5', alignSelf: 'center'}}>{translate('verifiedBy', orgName)}</Text>
                         </View>
                         <View style={{paddingTop: 5}}>
                           {this.formatDocument(msgModel, resource, this.verify.bind(this))}
