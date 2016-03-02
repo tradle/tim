@@ -134,7 +134,7 @@ var NewResourceMixin = {
       }
       // HACK for registration screen
       if (this.state.isRegistration  &&  params.editCols.length === 1)
-        options.fields[p].placeholder = 'Enter your name'
+        options.fields[p].placeholder = translate('enterYourName')
 
       if (props[p].description)
         options.fields[p].help = props[p].description;
@@ -426,7 +426,7 @@ var NewResourceMixin = {
       if (!label)
         label = resource[params.prop].title
       if (rModel.subClassOf  &&  rModel.subClassOf === 'tradle.Enum')
-        label = utils.createAndTranslate(label)
+        label = utils.createAndTranslate(label, true)
       style = textStyle
       propLabel = <View style={{marginLeft: 10, marginTop: 5, marginBottom: 5, backgroundColor: this.state.isRegistration ? 'transparent' : '#ffffff'}}>
                     <Text style={{fontSize: 12, height: 12, color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}}>{params.label}</Text>
@@ -480,7 +480,7 @@ var NewResourceMixin = {
       titleTextColor: '#7AAAC3',
       id: 10,
       component: ResourceList,
-      backButtonTitle: 'Back',
+      backButtonTitle: translate('back'),
       sceneConfig: isFinancialProduct ? Navigator.SceneConfigs.FloatFromBottom : Navigator.SceneConfigs.FloatFromRight,
       passProps: {
         filter:      filter,
@@ -513,7 +513,6 @@ var NewResourceMixin = {
         id: id,
         title: utils.getDisplayName(value, utils.getModel(value[constants.TYPE]).value.properties)
       }
-      // resource[propame] = value;
       var data = this.refs.form.refs.input.state.value;
       if (data) {
         for (var p in data)
