@@ -129,7 +129,7 @@ class ShowMessageRefList extends Component {
     var self = this;
     var modelName = this.props.resource[constants.TYPE];
     this.props.navigator.push({
-      title: utils.getModel(modelName).value.title,
+      title: translate(utils.getModel(modelName).value),
       component: MessageList,
       id: 11,
       backButtonTitle: 'Back',

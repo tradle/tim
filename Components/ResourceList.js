@@ -501,12 +501,12 @@ class ResourceList extends Component {
     // );
   }
   showMenu() {
-    var buttons = [translate('addServerUrl'), /*'Scan QR code',*/ translate('cancel')]
+    var buttons = [translate('addServerUrl'), 'Scan QR code', translate('cancel')]
     var self = this;
     ActionSheetIOS.showActionSheetWithOptions({
       options: buttons,
-      // cancelButtonIndex: 2
-      cancelButtonIndex: 1
+      cancelButtonIndex: 2
+      // cancelButtonIndex: 1
     }, function(buttonIndex) {
       switch (buttonIndex) {
       // case 0:
@@ -515,9 +515,9 @@ class ResourceList extends Component {
       case 0:
         self.onSettingsPressed()
         break
-      // case 1:
-      //   self.scanQRCode()
-      //   break;
+      case 1:
+        self.scanQRCode()
+        break;
       default:
         return
       }
@@ -691,7 +691,7 @@ class ResourceList extends Component {
 
   scanQRCode() {
     var qrcode = {
-      code: '71e4b7cd6c11ab7221537275988f113a879029eb:0d3c6d0fe4f1d2539f1e5e80836629cd47c11f65'
+      code: '71e4b7cd6c11ab7221537275988f113a879029eb:6aefc09f4da125095409770592eb96ac142fb579'
     }
     Actions.getEmployeeInfo(qrcode.code)
     return

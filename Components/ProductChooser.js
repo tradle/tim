@@ -3,6 +3,7 @@
 var React = require('react-native');
 var NewResource = require('./NewResource');
 var utils = require('../utils/utils');
+var translate = utils.translate
 var reactMixin = require('react-mixin');
 var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
@@ -81,7 +82,7 @@ class ProductChooser extends Component {
   selectResource(resource) {
     var route = {
       component: MessageList,
-      backButtonTitle: 'Cancel',
+      backButtonTitle: translate('cancel'),
       id: 11,
       title: this.props.resource.name,
       passProps: {
@@ -125,8 +126,8 @@ class ProductChooser extends Component {
     this.props.navigator.replace({
       id: 4,
       title: resource.title,
-      rightButtonTitle: 'Done',
-      backButtonTitle: 'Back',
+      rightButtonTitle: translate('done'),
+      backButtonTitle: translate('back'),
       component: NewResource,
       titleTextColor: '#7AAAC3',
       resource: resource,

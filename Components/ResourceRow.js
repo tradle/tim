@@ -8,8 +8,11 @@ var ArticleView = require('./ArticleView');
 var constants = require('@tradle/constants');
 var Icon = require('react-native-vector-icons/Ionicons');
 var RowMixin = require('./RowMixin');
+var Swipeout = require('react-native-swipeout')
 var reactMixin = require('react-mixin');
-var equal = require('deep-equal');
+var equal = require('deep-equal')
+var extend = require('extend')
+var Actions = require('../Actions/Actions');
 
 var {
   Image,
@@ -141,6 +144,7 @@ class ResourceRow extends Component {
         )
     else
       return (
+      <Swipeout right={[{text: 'Hide', backgroundColor: 'red', onPress: this.hideResource.bind(this, resource)}]} autoClose={true} scroll={(event) => this._allowScroll(event)} >
         <View key={this.getNextKey()} style={{opacity: 1}}>
           <TouchableHighlight onPress={this.props.onSelect} underlayColor='transparent' key={this.getNextKey()}>
             <View style={styles.row} key={this.getNextKey()}>
@@ -155,7 +159,17 @@ class ResourceRow extends Component {
           </TouchableHighlight>
           <View style={styles.cellBorder}  key={this.getNextKey()} />
         </View>
+      </Swipeout>
       );
+  }
+  hideResource(resource) {
+    let r = {}
+    extend(true, r, resource)
+    r.hide = true
+    Actions.addItem({resource: resource, value: r, meta: utils.getModel(resource[constants.TYPE]).value})
+  }
+  _allowScroll(scrollEnabled) {
+    this.setState({scrollEnabled: scrollEnabled})
   }
   rowContent() {
     return

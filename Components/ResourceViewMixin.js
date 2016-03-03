@@ -1,6 +1,7 @@
 'use strict';
 
 var utils = require('../utils/utils');
+var translate = utils.translate
 var ResourceView = require('./ResourceView');
 var ResourceList = require('./ResourceList');
 var constants = require('@tradle/constants');
@@ -21,7 +22,7 @@ var ResourceViewMixin = {
       component: ResourceView,
       titleTextColor: '#7AAAC3',
       // rightButtonTitle: 'Edit',
-      backButtonTitle: 'Back',
+      backButtonTitle: translate('back'),
       passProps: {
         resource: resource,
         prop: prop,
@@ -32,9 +33,9 @@ var ResourceViewMixin = {
   showResources(resource, prop) {
     this.props.navigator.push({
       id: 10,
-      title: utils.makeLabel(prop.title),
+      title: translate(prop, utils.getModel(resource[constants.TYPE]).value),
       titleTextColor: '#7AAAC3',
-      backButtonTitle: 'Back',
+      backButtonTitle: translate('back'),
       component: ResourceList,
       passProps: {
         modelName: prop.items.ref,
