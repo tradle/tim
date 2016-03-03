@@ -564,16 +564,22 @@ var Store = Reflux.createStore({
 
     if (driverInfo.otrKey) {
         // self.addWebSocketClient()
-      var wsClient = new WebSocketClient({
-        url: utils.joinURL(provider.url, provider.id, 'ws'),
-        otrKey: driverInfo.otrKey,
-        autoconnect: false,
-        // rootHash: meDriver.myRootHash()
-      })
+      var wsUrl = utils.joinURL(provider.url, provider.id, 'ws')
+      var wsClients = driverInfo.wsClients
+      var wsClient = wsClients[wsUrl] ||
+        wsClients[provider.hash] ||
+        new WebSocketClient({
+          url: wsUrl,
+          otrKey: driverInfo.otrKey,
+          autoconnect: false,
+          // rootHash: meDriver.myRootHash()
+        })
+
       // will need to do this on demand too
       // e.g. when scanning an employee QR Code at the bank
       wsClient.on('message', meDriver.receiveMsg)
-      driverInfo.wsClients[provider.hash] = wsClient
+      wsClients[provider.hash] =
+      wsClients[wsUrl] = wsClient
     }
   },
   // Gets info about companies in this app, their bot representatives and their styles
@@ -1347,17 +1353,18 @@ var Store = Reflux.createStore({
     var foundRefs = [];
     var props = meta.properties;
 
-    if (meta[TYPE] == VERIFICATION  ||  (meta.subClassOf  &&  meta.subClassOf == VERIFICATION))
+    if (meta[TYPE] == VERIFICATION  ||  meta.subClassOf === VERIFICATION)
       return this.onAddVerification(resource, true);
 
     for (var p in resource) {
       if (props[p] &&  props[p].type === 'object') {
         var ref = props[p].ref;
         if (ref  &&  resource[p])  {
-          if (this.getModel(ref).value.inlined)
+          let refModel = this.getModel(ref).value
+          if (refModel.inlined  ||  refModel.subClassOf === 'tradle.Enum')
             continue;
 
-          var rValue = resource[p][ROOT_HASH] ? resource[p][TYPE] + '_' + resource[p][ROOT_HASH] : utils.getId(resource[p].id);
+          var rValue = utils.getId(resource[p])
           refProps[rValue] = p;
           if (list[rValue]) {
             var elm = {value: list[rValue].value, state: 'fulfilled'};
@@ -1893,6 +1900,7 @@ var Store = Reflux.createStore({
     }
     return result;
   },
+
   searchMessagesNew(params) {
     var self = this
     var list = {}
@@ -1908,6 +1916,7 @@ var Store = Reflux.createStore({
              ? this.getRepresentatives(bankID)
              : [params.to]
     var messages = {}
+    var references = {}
     bankMessages[bankID] = messages
     return meDriver.getConversation(reps[0][ROOT_HASH])
     .then(function(data) {
@@ -1935,9 +1944,13 @@ var Store = Reflux.createStore({
           var res = obj.parsed.data
           var val = extend(true, res)
           self.fillFromAndTo(obj, val)
+
           val[ROOT_HASH] = obj[ROOT_HASH]
           result.push(val)
-          list[val[TYPE] + '_' + val[ROOT_HASH]] = val
+          let rid = utils.getId(val)
+          list[id] = val
+          references[id] = self.extractReferences(val)
+
           if (val[TYPE] === VERIFICATION)
             hasVerifications = true
 
@@ -1985,6 +1998,20 @@ var Store = Reflux.createStore({
       debugger
     })
   },
+
+  extractReferences(val) {
+    let props = utils.getModel(val[TYPE]).value.properties
+    let r = {_t: val[TYPE]}
+    for (let p in val) {
+      if (props[p].ref) {
+        if (props[p].ref !== constants.TYPE.MONEY)
+          r[p] = val[p]
+      }
+      else if (props[p].type === 'array') {
+
+      }
+    }
+  },
   getMessagesBefore(params) {
     var bankID = utils.getId(params.to)
     var messages
@@ -2014,7 +2041,7 @@ var Store = Reflux.createStore({
     var query = params.query;
     var modelName = params.modelName;
     var meta = this.getModel(modelName).value;
-    var isVerification = modelName === VERIFICATION  ||  (meta.subClassOf  &&  meta.subClassOf === VERIFICATION);
+    var isVerification = modelName === VERIFICATION  ||  meta.subClassOf === VERIFICATION;
     var chatTo = params.to
     var prop = params.prop;
     if (typeof prop === 'string')
@@ -2089,7 +2116,7 @@ var Store = Reflux.createStore({
       }
       else if (key.indexOf(modelName + '_') === -1) {
         var rModel = this.getModel(key.split('_')[0]).value;
-        if (!rModel.subClassOf  ||  rModel.subClassOf !== modelName)
+        if (rModel.subClassOf !== modelName)
           continue;
       }
       if (!iMeta)
@@ -2190,7 +2217,7 @@ var Store = Reflux.createStore({
           continue;
         }
 
-        var isVerificationR = r[TYPE] === VERIFICATION  ||  this.getModel(r[TYPE]).value.subClassOf === VERIFICATION;
+        var isVerificationR = r[TYPE] === VERIFICATION  ||  this.getModel(r[TYPE]).value.subClassOf === VERIFICATION
         var isForm = this.getModel(r[TYPE]).value.subClassOf === FORM
         var isChatToForm = this.getModel(chatTo[TYPE]).value.subClassOf === FORM
         if (isChatToForm  &&  r.document) {
@@ -2394,7 +2421,7 @@ var Store = Reflux.createStore({
     var org = isOrg ? to : (to.organization ? list[utils.getId(to.organization)].value : null)
     var reps
     if (isOrg)
-      reps = this.getRepresentatives(org)
+      reps = this.getRepresentatives(utils.getId(org))
     else
       reps = [utils.getId(to)]
 
@@ -2503,7 +2530,7 @@ var Store = Reflux.createStore({
     value.time = value.time || new Date().getTime();
     var isMessage = model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1)
     if (isMessage) {
-      if (model.subClassOf  &&  model.subClassOf === FORM) {
+      if (model.subClassOf === FORM) {
         if (!value.sharedWith)
           value.sharedWith = []
         value.sharedWith.push(this.createSharedWith(utils.getId(value.to), new Date().getTime()))
@@ -2772,11 +2799,11 @@ var Store = Reflux.createStore({
         })
 
         // bringing it back!
-        // if (__DEV__  &&  !keys.some((k) => k.type() === 'dsa')) {
-        //   keys.push(Keys.DSA.gen({
-        //     purpose: 'sign'
-        //   }))
-        // }
+        if (__DEV__  &&  !keys.some((k) => k.type() === 'dsa')) {
+          keys.push(Keys.DSA.gen({
+            purpose: 'sign'
+          }))
+        }
 
         mePub = []
         mePriv = []
@@ -3250,7 +3277,7 @@ var Store = Reflux.createStore({
         if (!val.time)
           val.time = obj.timestamp
 
-        var isVerification = type === VERIFICATION  ||  (model.subClassOf  &&  model.subClassOf === VERIFICATION);
+        var isVerification = type === VERIFICATION  ||  model.subClassOf === VERIFICATION;
         if (isVerification) {
           this.onAddVerification(val, false, true)
           // if (!val.txId) {
@@ -3539,7 +3566,7 @@ var Store = Reflux.createStore({
           var res = list[rId].value
           var isVerification = r[TYPE] === VERIFICATION
           var model = utils.getModel(r[TYPE])
-          var isForm = !isVerification  &&  model.subClassOf  &&  model.subClassOf === FORM
+          var isForm = !isVerification  &&  model.subClassOf === FORM
           if (!r.deleted) {
             var fromId = utils.getId(res.from)
             var toId = utils.getId(res.to)
