@@ -674,8 +674,13 @@ var NewResourceMixin = {
       let prop = properties[p]
       if (!prop  ||  p.charAt(0) === '_')
         continue
-      if (prop.type === 'number' || prop.ref === constants.TYPES.MONEY)
+      if (prop.type === 'number')
         this.checkNumber(value[p], prop, err)
+      else if (prop.ref === constants.TYPES.MONEY) {
+        this.checkNumber(value[p], prop, err)
+        if (!value[p].currency)
+          value[p].currency = this.props.currency
+      }
       else if (prop.units && prop.units === '[min - max]') {
         let v = value[p].split('-').forEach((n) => trim(n))
         if (v.length === 1)
