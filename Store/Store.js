@@ -1778,10 +1778,12 @@ var Store = Reflux.createStore({
     }
     if (isMessage) {
       let orgId = utils.getId(params.to)
-      let styles = SERVICE_PROVIDERS.filter((sp) => {
-        if (sp.org === orgId)
-          return true
-      })
+      let styles
+      if (SERVICE_PROVIDERS)
+         SERVICE_PROVIDERS.filter((sp) => {
+            if (sp.org === orgId)
+              return true
+          })
       if (styles  &&  styles.length)
         retParams.style = styles[0].style
     }
