@@ -80,7 +80,7 @@ class NewResource extends Component {
       keyboardSpace: 0,
       modalVisible: false,
       date: new Date(),
-      isUploading: !isRegistration  &&  !r[constants.ROOT_HASH],
+      isUploading: !isRegistration  &&  (!r[constants.ROOT_HASH] || Object.keys(r).length === 2),
       isRegistration: isRegistration,
       isLoading: false,
       isPrefilled: this.props.isPrefilled
@@ -128,7 +128,9 @@ class NewResource extends Component {
            // this.state.modalVisible != nextState.modalVisible ||
   }
   componentWillMount() {
-    if (this.state.isUploading)
+    if (this.state.resource[constants.ROOT_HASH]  &&  Object.keys(this.state.resource).length === 2)
+      Actions.getItem(utils.getId(this.state.resource))
+    else if (this.state.isUploading)
       Actions.getTemporary(this.state.resource[constants.TYPE])
     // else if (this.state.isRegistration)
     //   Actions.getTemporary(SETTINGS)
@@ -184,7 +186,13 @@ class NewResource extends Component {
       this.props.navigator.popToTop()
       return
     }
-
+    if (params.action === 'getItem'  &&  utils.getId(this.state.resource) === utils.getId(params.resource)) {
+      this.setState({
+        resource: params.resource,
+        isUploading: false
+      })
+      return
+    }
     if (params.action === 'getTemporary') {
       var r = {}
       extend(r, this.state.resource)
@@ -349,7 +357,7 @@ class NewResource extends Component {
           noRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
       }
     })
-    var err = this.validateProperties(value)
+    var err = this.validateProperties(json)
     for (var p in err)
       noRequiredOrErrorValue[p] = err[p]
 
