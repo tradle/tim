@@ -19,7 +19,7 @@ var equal = require('deep-equal')
 var formDefaults = require('../data/formDefaults')
 var reactMixin = require('react-mixin');
 var Device = require('react-native-device')
-var newProduct = require('../data/newProduct.json')
+// var newProduct = require('../data/newProduct.json')
 
 var STRUCTURED_MESSAGE_BORDER = '#3260a5' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
 // var STRUCTURED_MESSAGE_COLOR = '#77ADFC' //'#4BA0F2' //'#5482C7' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
@@ -48,7 +48,6 @@ class MessageRow extends Component {
     var resource = this.props.resource;
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
     var me = utils.getMe();
-    var isMyMessage;
     if (this.props.bankStyle) {
       LINK_COLOR = this.props.bankStyle.LINK_COLOR || DEFAULT_LINK_COLOR
       STRUCTURED_MESSAGE_COLOR = this.props.bankStyle.STRUCTURED_MESSAGE_COLOR || DEFAULT_STRUCTURED_MESSAGE_COLOR
@@ -139,6 +138,7 @@ class MessageRow extends Component {
         addStyle = styles.forgetCell
       else {
         if (!model.style) {
+          // var msgBorder = isMyMessage ? '#cccccc' : this.props.bankStyle  &&  this.props.bankStyle.STRUCTURED_MESSAGE_BORDER ? this.props.bankStyle.STRUCTURED_MESSAGE_BORDER : '#deeeb4'
           addStyle = {paddingVertical: 5, paddingHorizontal: 7, borderRadius: 10, borderColor: '#cccccc', backgroundColor: '#ffffff', marginVertical: 2};
           if (isConfirmation) {
             var bg = this.props.bankStyle  &&  this.props.bankStyle.CONFIRMATION_BACKGROUND_COLOR ? {backgroundColor: this.props.bankStyle.CONFIRMATION_BACKGROUND_COLOR} : {backgroundColor: '#ffffff'}
@@ -413,7 +413,7 @@ class MessageRow extends Component {
     //   )
     // }
 
-    var modelTitle = msgModel.title;
+    var modelTitle = translate(msgModel)
     var idx = modelTitle.indexOf('Verification');
     var docType;
     if (idx === -1)
@@ -508,7 +508,7 @@ class MessageRow extends Component {
       component: MessageView,
       backButtonTitle: translate('back'),
       passProps: passProps,
-      title: model.title
+      title: translate(model)
     }
     if (this.isMyMessage()) {
       route.rightButtonTitle = translate('edit');
@@ -570,13 +570,21 @@ class MessageRow extends Component {
         onPressCall = self.onPress.bind(self);
         vCols.push(<Text style={style} numberOfLines={first ? 2 : 1} key={self.getNextKey()}>{resource[v]}</Text>);
       }
+      else if (model.id === 'tradle.SelfIntroduction') {
+        vCols.push(
+          <View key={self.getNextKey()}>
+            <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+              <Text style={[style, {color: STRUCTURED_MESSAGE_COLOR}]}>{translate('requestForRepresentative')} </Text>
+            </View>
+          </View>)
+      }
       else if (!isProductList  &&  !isForgetting  &&  !model.autoCreate) {
         var val = (properties[v].displayAs)
                 ? utils.templateIt(properties[v], resource)
                 : resource[v];
         if (model.properties.verifications  &&  !isMyMessage)
           onPressCall = self.verify.bind(self);
-        if (isAdditionalInfo)
+        if (isAdditionalInfo  ||  !isMyMessage)
           style = [style, {paddingBottom: 10, color: '#2892C6'}];
         vCols.push(self.getPropRow(properties[v], resource, val))
       }
@@ -598,20 +606,23 @@ class MessageRow extends Component {
             onPressCall = self.onChooseProduct.bind(self, true)
             return;
           }
-          var msgModel = utils.getModel(msgParts[1]);
+          let s = msgParts[1].split('_')
+          var msgModel = utils.getModel(s[0]);
           if (msgModel) {
             if (self.props.verificationsToShare)
               style = isSimpleMessage ? styles.resourceTitle : styles.description;
             msgModel = msgModel.value;
             if (!msgParts[0].length)
               msgParts[0] = 'I just sent you a request for '; // + msgModel.title;
-            if (!isMyMessage  &&  !resource.documentCreated)
+            if (s.length === 2  &&  msgModel.subClassOf === constants.TYPES.FORM)
+              onPressCall = self.editForm.bind(self, msgParts[1], msgParts[0])
+            else if (!isMyMessage  &&  !resource.documentCreated)
               onPressCall = self.createNewResource.bind(self, msgModel);
             isNewProduct = msgParts[0].length  &&  msgParts[0] === 'application for'
 
             var color = isMyMessage ? (isNewProduct ? {color: LINK_COLOR, fontWeight: '400', fontSize: 18} : {color: STRUCTURED_MESSAGE_COLOR}) : {color: '#2892C6'}
             var link = isMyMessage
-                     ? <Text style={[style, color]}>{msgModel.title}</Text>
+                     ? <Text style={[style, color]}>{translate(msgModel)}</Text>
                      : <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                          <Text style={[style, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(msgModel)}</Text>
                          <Icon style={resource.documentCreated  ? styles.linkIconGreyed : [self.linkIcon, {color: LINK_COLOR}]} size={20} name={'ios-arrow-right'} />
@@ -619,19 +630,22 @@ class MessageRow extends Component {
 
             var msg;
             if (isNewProduct) {
-              var newMsg = newProduct.msg.replace('{firstName}', utils.getMe().firstName);
-              newMsg = newMsg.replace('{product}', msgModel.title)
+              var newMsg = translate('newProductMsg', utils.getMe().firstName, translate(msgModel));
+              // newMsg = newMsg.replace('{product}', translate(msgModel))
 
               msg = <View key={self.getNextKey()}>
                        <Text style={[style, {color: '#000000'}]}>{newMsg}</Text>
                     </View>
                        // {link}
             }
-            else
+            else {
+               let strName = utils.getStringName(msgParts[0])
+               let str = strName ? utils.translate(strName) : msgParts[0]
                msg = <View key={self.getNextKey()}>
-                       <Text style={style}>{msgParts[0]}</Text>
+                       <Text style={style}>{str}</Text>
                        {link}
                      </View>
+            }
             vCols.push(msg);
             return;
           }
@@ -662,14 +676,14 @@ class MessageRow extends Component {
     });
 
     if (!isSimpleMessage  &&  !isForgetting)  {
-      var t = model.title.split(' ');
-      var s = '';
-      t.forEach(function(p) {
-        if (p.indexOf('Verif') === -1)
-          s += p + ' ';
-      });
+      // var t = model.title.split(' ');
+      // var s = '';
+      // t.forEach(function(p) {
+      //   if (p.indexOf('Verif') === -1)
+      //     s += p + ' ';
+      // });
 
-      vCols.push(<Text style={[styles.resourceTitle, styles.formType]} key={this.getNextKey()}>{s}</Text>);
+      vCols.push(<Text style={[styles.resourceTitle, styles.formType]} key={this.getNextKey()}>{translate(model)}</Text>);
     }
     if (vCols  &&  vCols.length) {
       vCols.forEach(function(v) {
@@ -698,18 +712,45 @@ class MessageRow extends Component {
       return ret
     }
   }
+  editForm(rUri, message) {
+    let s = rUri.split('_')
+    let resource = {
+      [constants.TYPE]: s[0],
+      [constants.ROOT_HASH]: s[1]
+    }
+
+    let rmodel = utils.getModel(s[0]).value;
+    let title = translate(rmodel);
+    this.props.navigator.push({
+      title: title,
+      id: 4,
+      component: NewResource,
+      // titleTextColor: '#999999',
+      backButtonTitle: translate('back'),
+      rightButtonTitle: translate('done'),
+      passProps: {
+        model: rmodel,
+        resource: resource,
+        message: message
+      }
+    })
+  }
+
   getPropRow(prop, resource, val, isVerification) {
     var style = {flexDirection: 'row'}
-    if (prop.ref  &&  prop.ref === constants.TYPES.MONEY) {
+    if (prop.ref  &&  prop.ref === constants.TYPES.MONEY)
       val = (val.currency || CURRENCY_SYMBOL) + val.value
-    }
+
+    let model = utils.getModel(resource[constants.TYPE]).value
+    let propTitle = translate(prop, model)
+
     if (isVerification) {
       if (!this.props.isAggregation)
         style = [style, {borderWidth: 0.5, paddingVertical: 3, borderTopColor: '#eeeeee', borderBottomColor: VERIFICATION_BG, borderLeftColor: VERIFICATION_BG, borderRightColor: VERIFICATION_BG}]
       return (
         <View style={style} key={this.getNextKey()}>
           <View style={{flex: 1, flexDirection: 'column'}}>
-            <Text style={[styles.verySmallLetters, {color: '#555555'}]}>{prop.title}</Text>
+            <Text style={[styles.verySmallLetters, {color: '#555555'}]}>{propTitle}</Text>
           </View>
           <View style={{flex: 1, flexDirection: 'column'}}>
             <Text style={[styles.verySmallLetters, {fontWeight: '500'}]}>{val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')}</Text>
@@ -718,15 +759,16 @@ class MessageRow extends Component {
       )
     }
     else {
-      if (!this.props.isAggregation)
+      if (!this.props.isAggregation  &&  this.isMyMessage())
         style = [style, {borderWidth: 0.5, paddingVertical: 3, borderBottomColor: STRUCTURED_MESSAGE_BORDER, borderTopColor: STRUCTURED_MESSAGE_COLOR, borderLeftColor: STRUCTURED_MESSAGE_COLOR, borderRightColor: STRUCTURED_MESSAGE_COLOR}]
+      let color = this.isMyMessage() ? {color: '#FFFFEE'} : {color: this.props.bankStyle.LINK_COLOR}
       return (
         <View style={style} key={this.getNextKey()}>
           <View style={{flex: 1, flexDirection: 'column'}}>
-            <Text style={[styles.descriptionW, {color: '#FFFFEE'}]}>{prop.title}</Text>
+            <Text style={[styles.descriptionW, color]}>{propTitle}</Text>
           </View>
           <View style={{flex: 1, flexDirection: 'column'}}>
-            <Text style={[styles.descriptionW, {fontWeight: '600'}]}>{val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')}</Text>
+            <Text style={[styles.descriptionW, color, {fontWeight: '600'}]}>{val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')}</Text>
           </View>
        </View>
       )
