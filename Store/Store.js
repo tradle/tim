@@ -1780,7 +1780,7 @@ var Store = Reflux.createStore({
       let orgId = utils.getId(params.to)
       let styles
       if (SERVICE_PROVIDERS)
-         SERVICE_PROVIDERS.filter((sp) => {
+         styles = SERVICE_PROVIDERS.filter((sp) => {
             if (sp.org === orgId)
               return true
           })
@@ -3813,14 +3813,19 @@ var Store = Reflux.createStore({
   loadDB(loadTest) {
     loadTest = true;
     // var lt = !Device.isIphone();
-    var batch = [];
+    // var batch = [];
 
     if (loadTest) {
       if (utils.isEmpty(models)) {
         voc.forEach(function(m) {
           if (!m[ROOT_HASH])
             m[ROOT_HASH] = sha(m);
-          batch.push({type: 'put', key: m.id, value: m});
+          let key = utils.getId(m)
+          models[key] = {
+            key: key,
+            value: m
+          }
+          // batch.push({type: 'put', key: m.id, value: m});
         });
       }
       sampleData.getResources().forEach(function(r) {
@@ -3829,15 +3834,24 @@ var Store = Reflux.createStore({
 
         r[CUR_HASH] = r[ROOT_HASH];
         var key = r[TYPE] + '_' + r[ROOT_HASH];
-        batch.push({type: 'put', key: key, value: r});
+        list[key] = {
+          key: key,
+          value: r
+        }
+        // batch.push({type: 'put', key: key, value: r});
       });
       var self = this;
-      return db.batch(batch)
-            .then(self.loadMyResources)
+      return self.loadMyResources()
             // .then(self.loadAddressBook)
             .catch(function(err) {
               err = err;
               });
+      // return db.batch(batch)
+      //       .then(self.loadMyResources)
+      //       // .then(self.loadAddressBook)
+      //       .catch(function(err) {
+      //         err = err;
+      //         });
     }
     // else {
     //   return this.loadAddressBook()
