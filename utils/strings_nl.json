@@ -25,7 +25,7 @@
     "cancel": "Intrekken",
     "details": "Details",
     "addServerUrl": "Add server url",
-    "search": "Search",
+    "search": "Zoeken",
     "listOfProducts": "Klik hier voor een lijst van producten", //Click for a list of products
     "hello": "Hallo {1}!",  // {1} is the first name of the customer
     "testForgetMe": "This is a test mechanism to reset all communications with this provider",
@@ -53,6 +53,8 @@
     "tapToRemovePhotos": "Tap to remove photos",
     "addNew": "Add new {1}", // {1} is items property type like 'tradle.Profile' for property 'contacts' of 'tradle.Organization'
     "switchToRepresentative": "Switching to representative mode is not yet implemented.",
-    "fillTheForm": "Please fill out this form and attach a snapshot of the original document",
+    "fillTheForm": "Vul dit formulier in en voeg een momentopname van het originele document",
     "verifiedBy": "Geverifieërd door",
+    "typeMessage": "Type a message",
+    "newProductMsg": "{1}, we're very happy to assist you with your application for {2}. Please hold just a moment.",
 }

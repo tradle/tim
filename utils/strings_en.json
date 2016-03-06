@@ -55,4 +55,5 @@
     "tapToRemovePhotos": "Tap to remove photos",
     "addNew": "Add new {1}", // {1} is items property type like 'tradle.Profile' for property 'contacts' of 'tradle.Organization'
     "verifiedBy": "Verified by {1}",
+    "typeMessage": "Type a message",
 }
