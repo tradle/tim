@@ -19,6 +19,9 @@ var rebuf = require('logbase').rebuf
 var parseDBValue = function (pair) {
   return pair[1] && rebuf(JSON.parse(pair[1]))
 }
+var strMap = {
+  'Please fill out this form and attach a snapshot of the original document': 'fillTheForm'
+}
 var translatedStrings = {
   en: require('./strings_en.json'),
   nl: require('./strings_nl.json')
@@ -60,12 +63,15 @@ var utils = {
     if (!me)
       return
 
-    if (me.languageCode)
+    if (me.languageCode) {
       strings = translatedStrings[me.languageCode]
+      if (me.dictionary)
+        dictionary = me.dictionary
+      else if (dictionaries[me.languageCode])
+        dictionary = dictionaries[me.languageCode]
+    }
     if (!strings)
-      strings = translatedStrings['en']
-    if (me.dictionary)
-      dictionary = me.dictionary
+      strings = translatedStrings[defaultLanguage]
   },
   getMe() {
     return me;
@@ -107,6 +113,19 @@ var utils = {
     if (!s)
       return args[0]
 
+    // if (args.length === 2  &&  typeof args[1] === 'object') {
+    //   let pos = 0
+    //   do {
+    //     let i1 = s.indexOf('{', pos)
+    //     if (i1 === -1)
+    //       break
+    //     let i2 = s.indexOf('}, i1')
+    //     if (i2 === -1)
+    //       break
+    //     s = s.substring(0, i1) + args[1][s.substring(i1 + 1, i2)] + s.substring(i2 + 1)
+    //   } while(true)
+    // }
+    // else
     if (args.length > 1) {
       for (let i=1; i<args.length; i++) {
         let insert = '{' + i + '}'
@@ -117,6 +136,9 @@ var utils = {
       }
     }
     return s ? s : args[0]
+  },
+  getStringName(str) {
+    return strMap[str]
   },
   createAndTranslate(s, isEnumValue) {
     let stringName = s.replace(/\w\S*/g, function(txt) {
