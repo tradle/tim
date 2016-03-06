@@ -631,7 +631,7 @@ var Store = Reflux.createStore({
         if (me) {
           me.dictionary = dictionary
           me.language = language
-          utils.setMe(me)
+          self.setMe(me)
         }
       }
 
@@ -2604,8 +2604,8 @@ var Store = Reflux.createStore({
           }
         }
 
-        me = value
-        utils.setMe(me)
+        extend(true, me, value)
+        self.setMe(me)
         if (newLanguage) {
           let lang = list[utils.getId(me.language)].value
           value.languageCode = lang.code
@@ -2613,7 +2613,7 @@ var Store = Reflux.createStore({
 
           me.language = lang
           me.languageCode = lang.code
-          utils.setMe(me)
+          self.setMe(me)
           var urls = []
           if (SERVICE_PROVIDERS) {
             SERVICE_PROVIDERS.forEach((sp) => {
