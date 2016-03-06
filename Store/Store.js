@@ -105,6 +105,7 @@ var Keeper = require('@tradle/http-keeper')
 var Wallet = require('@tradle/simple-wallet')
 var crypto = require('crypto')
 var rimraf = require('rimraf')
+
 // var fs = require('fs')
 var kiki = require('@tradle/kiki')
 var Keys = kiki.Keys
@@ -147,7 +148,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDER = ENV.topLevelProvider
-var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.1.106:44444' : TOP_LEVEL_PROVIDER.baseUrl
+var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://127.0.0.1:44444' : TOP_LEVEL_PROVIDER.baseUrl
 // var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.0.149:44444' : TOP_LEVEL_PROVIDER.baseUrl
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDER.name
@@ -158,6 +159,9 @@ var driverInfo = {
   wsClients: {},
   whitelist: [],
 }
+
+var LocalizedStrings = require('react-native-localization')
+let defaultLanguage = new LocalizedStrings({ en: {}, nl: {} }).getLanguage()
 
 // var Store = Reflux.createStore(timeFunctions({
 var Store = Reflux.createStore({
@@ -599,11 +603,18 @@ var Store = Reflux.createStore({
 
     let originalUrl = url
     url = utils.joinURL(url, 'info')
-    if (me)
-      language = list[utils.getId(me.language)].value
-
-    if (language)
-      url += '?lang=' + language.code
+    let languageCode
+    if (me) {
+      language = me.language
+      if (language) {
+        language = list[utils.getId(language)].value
+        languageCode = language.code
+      }
+    }
+    if (!languageCode)
+      languageCode = defaultLanguage
+    if (languageCode)
+      url += '?lang=' + languageCode
 
     return doFetch(url, { headers: { cache: 'no-cache' } }, 5000)
     .catch((err) => {
@@ -2585,8 +2596,8 @@ var Store = Reflux.createStore({
         list[MY_IDENTITIES] = {key: MY_IDENTITIES, value: mid}
       else if (!isNew  &&  iKey === utils.getId(me)) {
         if (me.language || value.language) {
-          if (me.language   &&  value.language) {
-            if (utils.getId(me.language) !== utils.getId(value.language))
+          if (value.language) {
+            if (!me.language  ||  (utils.getId(me.language) !== utils.getId(value.language)))
               newLanguage = list[utils.getId(value.language)].value
           }
         }
