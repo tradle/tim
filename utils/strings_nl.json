@@ -54,7 +54,7 @@
     "addNew": "Add new {1}", // {1} is items property type like 'tradle.Profile' for property 'contacts' of 'tradle.Organization'
     "switchToRepresentative": "Switching to representative mode is not yet implemented.",
     "fillTheForm": "Vul dit formulier in en voeg een momentopname van het originele document",
-    "verifiedBy": "Geverifieërd door",
+    "verifiedBy": "Geverifieërd door {1}",
     "typeMessage": "Type a message",
     "newProductMsg": "{1}, we're very happy to assist you with your application for {2}. Please hold just a moment.",
 }
