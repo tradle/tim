@@ -2615,12 +2615,13 @@ var Store = Reflux.createStore({
           me.languageCode = lang.code
           utils.setMe(me)
           var urls = []
-
-          SERVICE_PROVIDERS.forEach((sp) => {
-            if (urls.indexOf(sp.url) === -1)
-              urls.push(sp.url)
-          })
-          return self.getInfo(urls)
+          if (SERVICE_PROVIDERS) {
+            SERVICE_PROVIDERS.forEach((sp) => {
+              if (urls.indexOf(sp.url) === -1)
+                urls.push(sp.url)
+            })
+            return self.getInfo(urls)
+          }
         }
       }
     })
