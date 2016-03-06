@@ -55,7 +55,7 @@ var NONCE = constants.NONCE
 var TYPE = constants.TYPE
 var ROOT_HASH = constants.ROOT_HASH
 var CUR_HASH  = constants.CUR_HASH
-var PREV_HASH  = constants.CUR_HASH
+var PREV_HASH  = constants.PREV_HASH
 
 var ORGANIZATION = constants.TYPES.ORGANIZATION
 var PROFILE = constants.TYPES.PROFILE
@@ -147,7 +147,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDER = ENV.topLevelProvider
-var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://127.0.0.1:44444' : TOP_LEVEL_PROVIDER.baseUrl
+var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.1.106:44444' : TOP_LEVEL_PROVIDER.baseUrl
 // var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.0.149:44444' : TOP_LEVEL_PROVIDER.baseUrl
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDER.name
@@ -1407,6 +1407,9 @@ var Store = Reflux.createStore({
     var returnVal
     var identity
     var isNew = !resource[ROOT_HASH];
+    if (!isNew) // make sure that the values of ref props are not the whole resources but their references
+      utils.optimizeResource(resource)
+
     var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
     Q.allSettled(promises)
     .then(function(results) {
@@ -1495,7 +1498,10 @@ var Store = Reflux.createStore({
       }
       // Trigger painting before send. for that set ROOT_HASH to some temporary value like NONCE
       // and reset it after the real root hash will be known
-      returnVal[ROOT_HASH] = returnVal[NONCE]
+      let isNew = returnVal[ROOT_HASH] == null
+      if (isNew)
+        returnVal[ROOT_HASH] = returnVal[NONCE]
+
       var tmpKey = returnVal[TYPE] + '_' + returnVal[ROOT_HASH]
       list[tmpKey] = {key: tmpKey, value: returnVal};
 
@@ -1509,12 +1515,16 @@ var Store = Reflux.createStore({
         var to = list[utils.getId(returnVal.to)].value;
 
         var toChain = {}
+        if (!isNew)
+          toChain[PREV_HASH] = returnVal[CUR_HASH] || returnVal[ROOT_HASH]
+
+        let exclude = ['to', 'from', 'verifications', CUR_HASH, 'sharedWith']
+        if (isNew)
+          exclude.push(ROOT_HASH)
         extend(toChain, returnVal)
-        delete toChain.from
-        delete toChain.to
-        delete toChain[ROOT_HASH]
-        if (toChain[CUR_HASH])
-          toChain[PREV_HASH] = toChain[CUR_HASH]
+        for (let p of exclude)
+          delete toChain[p]
+
         toChain.time = returnVal.time
 
         var key = IDENTITY + '_' + to[ROOT_HASH]
@@ -1916,7 +1926,6 @@ var Store = Reflux.createStore({
              ? this.getRepresentatives(bankID)
              : [params.to]
     var messages = {}
-    var references = {}
     bankMessages[bankID] = messages
     return meDriver.getConversation(reps[0][ROOT_HASH])
     .then(function(data) {
@@ -1948,8 +1957,7 @@ var Store = Reflux.createStore({
           val[ROOT_HASH] = obj[ROOT_HASH]
           result.push(val)
           let rid = utils.getId(val)
-          list[id] = val
-          references[id] = self.extractReferences(val)
+          list[rid] = val
 
           if (val[TYPE] === VERIFICATION)
             hasVerifications = true
@@ -1999,19 +2007,19 @@ var Store = Reflux.createStore({
     })
   },
 
-  extractReferences(val) {
-    let props = utils.getModel(val[TYPE]).value.properties
-    let r = {_t: val[TYPE]}
-    for (let p in val) {
-      if (props[p].ref) {
-        if (props[p].ref !== constants.TYPE.MONEY)
-          r[p] = val[p]
-      }
-      else if (props[p].type === 'array') {
-
-      }
-    }
-  },
+  // extractReferences(val) {
+  //   let props = utils.getModel(val[TYPE]).value.properties
+  //   let r = {_t: val[TYPE]}
+  //   for (let p in val) {
+  //     if (props[p].ref) {
+  //       if (props[p].ref !== constants.TYPE.MONEY)
+  //         r[p] = val[p]
+  //     }
+  //     else if (props[p].type === 'array') {
+  //       if
+  //     }
+  //   }
+  // },
   getMessagesBefore(params) {
     var bankID = utils.getId(params.to)
     var messages
@@ -2035,6 +2043,13 @@ var Store = Reflux.createStore({
     })
   },
   searchMessages(params) {
+    let self = this
+  //   return this.searchMessagesNew(params)
+  //   .then(function(data) {
+  //     return self.searchMessages_old(params)
+  //   })
+  // },
+  // searchMessages_old(params) {
     if (params.loadingEarlierMessages) {
       return this.getMessagesBefore(params)
     }
@@ -2799,11 +2814,11 @@ var Store = Reflux.createStore({
         })
 
         // bringing it back!
-        if (__DEV__  &&  !keys.some((k) => k.type() === 'dsa')) {
-          keys.push(Keys.DSA.gen({
-            purpose: 'sign'
-          }))
-        }
+        // if (__DEV__  &&  !keys.some((k) => k.type() === 'dsa')) {
+        //   keys.push(Keys.DSA.gen({
+        //     purpose: 'sign'
+        //   }))
+        // }
 
         mePub = []
         mePriv = []
@@ -3115,7 +3130,7 @@ var Store = Reflux.createStore({
       return
 
 
-    val[ROOT_HASH] = obj[ROOT_HASH]
+    val[ROOT_HASH] = val[ROOT_HASH]  ||  obj[ROOT_HASH]
     val[CUR_HASH] = obj[CUR_HASH]
     if (!val.time)
       val.time = obj.timestamp
