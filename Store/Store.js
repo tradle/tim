@@ -3505,6 +3505,21 @@ var Store = Reflux.createStore({
         else
           sameContactList[p] = p
       }
+      if (!utils.isEmpty(list)) {
+        sampleData.getResources().forEach(function(r) {
+          if (!r[ROOT_HASH])
+            r[ROOT_HASH] = sha(r)
+
+          r[CUR_HASH] = r[ROOT_HASH]
+          let id = utils.getId(r)
+          if (!list[id])
+            list[id] = {
+              key: id,
+              value: r
+            }
+        })
+      }
+
       for (var s in sameContactList)
         delete orgContacts[s]
       if (!utils.isEmpty(orgContacts)) {
