@@ -501,12 +501,12 @@ class ResourceList extends Component {
     // );
   }
   showMenu() {
-    var buttons = [translate('addServerUrl'), 'Scan QR code', translate('cancel')]
+    var buttons = [translate('addServerUrl')/*, 'Scan QR code'*/, translate('cancel')]
     var self = this;
     ActionSheetIOS.showActionSheetWithOptions({
       options: buttons,
-      cancelButtonIndex: 2
-      // cancelButtonIndex: 1
+      // cancelButtonIndex: 2
+      cancelButtonIndex: 1
     }, function(buttonIndex) {
       switch (buttonIndex) {
       // case 0:
