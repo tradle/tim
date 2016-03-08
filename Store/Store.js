@@ -2213,7 +2213,8 @@ var Store = Reflux.createStore({
       var isSharedWith = false, timeResourcePair = null
       if (r.sharedWith  &&  toId) {
         var sharedWith = r.sharedWith.filter(function(r) {
-          return utils.getId(list[r.bankRepresentative].value.organization) === toId
+          let org = list[r.bankRepresentative].value.organization
+          return (org) ? utils.getId(org) === toId : false
         })
         isSharedWith = sharedWith.length !== 0
         if (isSharedWith) {
@@ -3165,7 +3166,6 @@ var Store = Reflux.createStore({
     val.permissionKey = obj.permissionKey
     var key = type + '_' + val[ROOT_HASH]
     var v = list[key] ? list[key].value : null
-    var inDB = !!v
     var batch = []
     var representativeAddedTo
     var self = this
@@ -3299,7 +3299,24 @@ var Store = Reflux.createStore({
           batch.push({type: 'put', key: utils.getId(org), value: org})
         }
         var to = list[PROFILE + '_' + obj.to[ROOT_HASH]].value
-        self.fillFromAndTo(obj, val)
+        if (onMessage) {
+          let profileModel = utils.getModel(PROFILE).value
+          val.from = {
+            id: utils.getId(from),
+            title: from.formatted || from.firstName
+          }
+          val.to = {
+            id: utils.getId(to),
+            title: to.formatted || to.firstName
+          }
+
+          // self.fillFromAndTo(obj, val)
+        }
+        else {
+          let inDB = list[key].value
+          val.from = inDB.from
+          val.to = inDB.to
+        }
         if (!val.time)
           val.time = obj.timestamp
 
