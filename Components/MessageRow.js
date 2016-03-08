@@ -21,7 +21,7 @@ var reactMixin = require('react-mixin');
 var Device = require('react-native-device')
 // var newProduct = require('../data/newProduct.json')
 
-var STRUCTURED_MESSAGE_BORDER = '#3260a5' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
+var STRUCTURED_MESSAGE_BORDER = '#5089DE' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
 // var STRUCTURED_MESSAGE_COLOR = '#77ADFC' //'#4BA0F2' //'#5482C7' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
 var VERIFICATION_BG = '#FBFFE5' //'#F6FFF0';
 var DEFAULT_CURRENCY_SYMBOL = '£'
@@ -281,7 +281,7 @@ class MessageRow extends Component {
       }
       var sealedStatus = (resource.txId)
                        ? <View style={styles.sealedStatus}>
-                           <Icon name={'ribbon-b'} size={35} color='#316A99' style={{opacity: 0.3}} />
+                           <Icon name={'ribbon-b'} size={30} color='#316A99' style={{opacity: 0.3}} />
                          </View>
                        : <View />
       messageBody =
@@ -582,6 +582,8 @@ class MessageRow extends Component {
         var val = (properties[v].displayAs)
                 ? utils.templateIt(properties[v], resource)
                 : resource[v];
+        if (!val)
+          return
         if (model.properties.verifications  &&  !isMyMessage)
           onPressCall = self.verify.bind(self);
         if (isAdditionalInfo  ||  !isMyMessage)
@@ -746,7 +748,7 @@ class MessageRow extends Component {
 
     if (isVerification) {
       if (!this.props.isAggregation)
-        style = [style, {borderWidth: 0.5, paddingVertical: 3, borderTopColor: '#eeeeee', borderBottomColor: VERIFICATION_BG, borderLeftColor: VERIFICATION_BG, borderRightColor: VERIFICATION_BG}]
+        style = [style, {borderWidth: 1, paddingVertical: 3, borderTopColor: '#eeeeee', borderBottomColor: VERIFICATION_BG, borderLeftColor: VERIFICATION_BG, borderRightColor: VERIFICATION_BG}]
       return (
         <View style={style} key={this.getNextKey()}>
           <View style={{flex: 1, flexDirection: 'column'}}>
@@ -760,15 +762,15 @@ class MessageRow extends Component {
     }
     else {
       if (!this.props.isAggregation  &&  this.isMyMessage())
-        style = [style, {borderWidth: 0.5, paddingVertical: 3, borderBottomColor: STRUCTURED_MESSAGE_BORDER, borderTopColor: STRUCTURED_MESSAGE_COLOR, borderLeftColor: STRUCTURED_MESSAGE_COLOR, borderRightColor: STRUCTURED_MESSAGE_COLOR}]
+        style = [style, {borderWidth: 1, paddingVertical: 3, borderBottomColor: STRUCTURED_MESSAGE_BORDER, borderTopColor: STRUCTURED_MESSAGE_COLOR, borderLeftColor: STRUCTURED_MESSAGE_COLOR, borderRightColor: STRUCTURED_MESSAGE_COLOR}]
       let color = this.isMyMessage() ? {color: '#FFFFEE'} : {color: this.props.bankStyle.LINK_COLOR}
       return (
         <View style={style} key={this.getNextKey()}>
           <View style={{flex: 1, flexDirection: 'column'}}>
-            <Text style={[styles.descriptionW, color]}>{propTitle}</Text>
+            <Text style={[styles.descriptionB, color]}>{propTitle}</Text>
           </View>
           <View style={{flex: 1, flexDirection: 'column'}}>
-            <Text style={[styles.descriptionW, color, {fontWeight: '600'}]}>{val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')}</Text>
+            <Text style={[styles.descriptionB, color, {fontWeight: '600'}]}>{val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')}</Text>
           </View>
        </View>
       )
@@ -1231,6 +1233,8 @@ class MessageRow extends Component {
         var val = (properties[v].displayAs)
                 ? utils.templateIt(properties[v], resource)
                 : resource[v];
+        if (!val)
+          return
         row = self.getPropRow(properties[v], resource, val || resource[v], true)
       }
       else {
@@ -1405,9 +1409,9 @@ var styles = StyleSheet.create({
     color: '#757575',
     fontSize: 14,
   },
-  descriptionW: {
+  descriptionB: {
     // flexWrap: 'wrap',
-    color: '#ffffff',
+    // color: '#757575',
     fontSize: 16,
   },
   assistentText: {
@@ -1449,7 +1453,7 @@ var styles = StyleSheet.create({
     alignSelf: 'flex-end',
     flexDirection: 'row',
     position: 'absolute',
-    bottom: 5,
+    bottom: 1,
     right: 10,
   },
 });
