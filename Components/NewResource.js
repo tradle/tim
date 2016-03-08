@@ -497,7 +497,7 @@ class NewResource extends Component {
       this.showChoice();
       return;
     }
-    var blmodel = utils.getModel(bl.items.ref).value
+    var blmodel = bl.items.ref ? utils.getModel(bl.items.ref).value : this.props.model
     this.props.navigator.push({
       id: 6,
       title: translate('addNew', translate(bl, blmodel)), // Add new ' + bl.title,
