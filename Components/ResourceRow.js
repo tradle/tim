@@ -192,7 +192,7 @@ class ResourceRow extends Component {
       var vCols = utils.getDisplayName(resource, model.properties);
       if (vCols && vCols.length) {
         if (model.subClassOf  &&  model.subClassOf === 'tradle.Enum')
-          vCols = utils.createAndTranslate(vCols)
+          vCols = utils.createAndTranslate(vCols, true)
 
         return <Text style={styles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
       }
