@@ -617,9 +617,6 @@ var Store = Reflux.createStore({
       url += '?lang=' + languageCode
 
     return doFetch(url, { headers: { cache: 'no-cache' } }, 5000)
-    .catch((err) => {
-      debugger
-    })
     .then((response) =>  {
       if (response.status > 300)
         throw new Error('Cannot access: ' + url)
