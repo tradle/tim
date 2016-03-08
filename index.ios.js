@@ -398,8 +398,8 @@ var NavigationBarRouteMapper = {
       return null;
     }
     var color = '#7AAAC3'
-    if (route.passProps.bankStyle)
-      color = route.passProps.bankStyle.LINK_COLOR || '#cccccc'
+    if (route.passProps.bankStyle  &&  route.passProps.bankStyle.LINK_COLOR)
+      color = route.passProps.bankStyle.LINK_COLOR
 
     var previousRoute = navState.routeStack[index - 1];
     var lbTitle = 'backButtonTitle' in route ? route.backButtonTitle : previousRoute.title;
@@ -438,7 +438,7 @@ var NavigationBarRouteMapper = {
     if (route.tintColor)
       style.push({color: route.tintColor});
     else if (route.passProps.bankStyle)
-      style.push({color: route.passProps.bankStyle.LINK_COLOR || '#cccccc'})
+      style.push({color: route.passProps.bankStyle.LINK_COLOR || '#7AAAC3'})
     var title = route.rightButtonTitle.indexOf('|') == -1
               ?  <Text style={style}>
                     {route.rightButtonTitle}
