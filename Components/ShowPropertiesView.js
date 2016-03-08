@@ -37,7 +37,7 @@ class ShowPropertiesView extends Component {
       viewStyle: {margin: 3},
       dataSource: dataSource
     }
-    CURRENCY_SYMBOL = props.currency ? props.currency.symbol : DEFAULT_CURRENCY_SYMBOL
+    CURRENCY_SYMBOL = props.currency ? props.currency.symbol || props.currency : DEFAULT_CURRENCY_SYMBOL
   }
 
   render() {

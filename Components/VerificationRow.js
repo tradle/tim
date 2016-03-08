@@ -23,7 +23,7 @@ var {
 class VerificationRow extends Component {
   constructor(props) {
     super(props);
-    CURRENCY_SYMBOL = props.currency ? props.currency.symbol : DEFAULT_CURRENCY_SYMBOL
+    CURRENCY_SYMBOL = props.currency ? props.currency.symbol || props.currency : DEFAULT_CURRENCY_SYMBOL
   }
   render() {
     var resource = this.props.resource;

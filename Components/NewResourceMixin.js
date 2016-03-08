@@ -16,6 +16,9 @@ var extend = require('extend');
 var DEFAULT_CURRENCY_SYMBOL = '£';
 var CURRENCY_SYMBOL
 
+// var Picker = require('react-native-picker')
+// var NewDatePicker = require('./NewDatePicker')
+
 var SETTINGS = 'tradle.Settings'
 
 var cnt = 0;
@@ -29,21 +32,21 @@ var {
   Text,
   View,
   TouchableHighlight,
+  // TouchableOpacity,
   StyleSheet,
-  Navigator
+  Navigator,
+  Dimensions
 } = React;
 
 var NewResourceMixin = {
   getFormFields(params) {
-    CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol : DEFAULT_CURRENCY_SYMBOL
+    CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol ||  this.props.currency : DEFAULT_CURRENCY_SYMBOL
     var meta = this.props.model  ||  this.props.metadata;
     var model = params.model;  // For the form
     var isMessage = meta.interfaces
     var onSubmitEditing = isMessage ? this.onSubmitEditing  ||  params.onSubmitEditing : this.onSavePressed
     var onEndEditing = this.onEndEditing  ||  params.onEndEditing
     var chooser = this.chooser  ||  this.props.chooser
-    var myCustomTemplate = this.myCustomTemplate //  || this.props.template
-    // var myDateTemplate = this.myDateTemplate
     var models = utils.getModels();
     var data = params.data;
     var options = {};
@@ -152,7 +155,13 @@ var NewResourceMixin = {
         model[p] = !model[p]  &&  (maybe ? t.maybe(formType) : formType);
         if (data  &&  (type == 'date')) {
           // model[p] = t.Str
-          // options.fields[p].template = this.myDateTemplate.bind(this, props[p])
+          // options.fields[p].template = this.myDateTemplate.bind(this, {
+          //           label: label,
+          //           prop:  props[p],
+          //           model: meta,
+          //           value: data[p] ? new Date(data[p]) : data[p]
+          //         })
+
           if (data[p])
             data[p] = new Date(data[p]);
           options.fields[p].mode = 'date';
@@ -276,7 +285,7 @@ var NewResourceMixin = {
         }
 
         options.fields[p].onFocus = chooser.bind(this, props[p], p)
-        options.fields[p].template = myCustomTemplate.bind(this, {
+        options.fields[p].template = this.myCustomTemplate.bind(this, {
             label: label,
             prop:  p,
             required: !maybe,
@@ -394,6 +403,10 @@ var NewResourceMixin = {
       </View>
     );
   },
+  // myDateTemplate (prop) {
+  //   return (<NewDatePicker prop={prop}/>)
+  // },
+
   inputFocused(refName) {
     if (!this.state.isRegistration   &&
          this.refs                   &&
@@ -545,7 +558,7 @@ var NewResourceMixin = {
              this.myTextInputTemplate({
                     label: label,
                     prop:  params.prop,
-                    value: params.value.value + '',
+                    value: params.value.value ? params.value.value + '' : '',
                     required: params.required,
                     model: params.model,
                     keyboard: 'numeric',
@@ -740,6 +753,7 @@ var NewResourceMixin = {
         err[p] = 'The minimum value for is ' + prop.min
     }
   },
+
 }
 
 
