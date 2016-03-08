@@ -98,7 +98,7 @@
     "tcomb": "^2.2.0",
     "tcomb-form-native": "^0.3.3",
     "tcomb-validation": "^2.2.0",
-    "tim": "^6.0.6",
+    "tim": "^6.0.7",
     "typeforce": "^1.5.5",
     "url": "^0.10.3",
     "util": "^0.10.3",
