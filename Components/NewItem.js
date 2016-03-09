@@ -3,6 +3,7 @@
 var React = require('react-native');
 var t = require('tcomb-form-native');
 var utils = require('../utils/utils');
+var translate = utils.translate
 var extend = require('extend');
 var logError = require('logError');
 // var SelectPhotoList = require('./SelectPhotoList');
@@ -69,11 +70,11 @@ class NewItem extends Component {
     var resource = this.props.resource
     // value is a tcomb Struct
     var item = JSON.parse(JSON.stringify(value));
-    var noRequiredOrErrorValue = this.checkRequired(this.props.metadata, item, resource)
-    if (!utils.isEmpty(noRequiredOrErrorValue)) {
+    var missedRequiredOrErrorValue = this.checkRequired(this.props.metadata, item, resource)
+    if (!utils.isEmpty(missedRequiredOrErrorValue)) {
       this.state.submitted = false
       var state = {
-        noRequiredOrErrorValue: noRequiredOrErrorValue
+        missedRequiredOrErrorValue: missedRequiredOrErrorValue
       }
       this.setState(state)
       return;
@@ -126,7 +127,7 @@ class NewItem extends Component {
           required.push(p)
       }
     }
-    var noRequiredOrErrorValue = {}
+    var missedRequiredOrErrorValue = {}
     required.forEach((p) =>  {
       var v = json[p] ? json[p] : (this.props.resource ? this.props.resource[p] : null); //resource[p];
       if (v) {
@@ -153,13 +154,13 @@ class NewItem extends Component {
         if ((prop.ref) ||  isDate  ||  prop.items) {
           if (resource && resource[p])
             return;
-          noRequiredOrErrorValue[p] = prop
+          missedRequiredOrErrorValue[p] = missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired') //'This field is required'
         }
         else if (!prop.displayAs)
-          noRequiredOrErrorValue[p] = prop
+          missedRequiredOrErrorValue[p] = missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired') //'This field is required'
       }
     })
-    return noRequiredOrErrorValue
+    return missedRequiredOrErrorValue
   }
   validateValues(prop, item) {
     var required = prop.required;

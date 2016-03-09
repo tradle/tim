@@ -118,7 +118,7 @@ class NewResource extends Component {
   }
   shouldComponentUpdate(nextProps, nextState) {
     return nextState.err                      ||
-           nextState.noRequiredOrErrorValue           ||
+           nextState.missedRequiredOrErrorValue           ||
            this.state.prop !== nextState.prop                ||
            this.state.isUploading !== nextState.isUploading  ||
            this.state.isLoading !== nextState.isLoading      ||
@@ -160,11 +160,11 @@ class NewResource extends Component {
 
 
   componentDidUpdate() {
-    if (!this.state.noRequiredOrErrorValue  ||  utils.isEmpty(this.state.noRequiredOrErrorValue)) return
+    if (!this.state.missedRequiredOrErrorValue  ||  utils.isEmpty(this.state.missedRequiredOrErrorValue)) return
 
     let viewCols = this.props.model.viewCols
     let first
-    for (let p in this.state.noRequiredOrErrorValue) {
+    for (let p in this.state.missedRequiredOrErrorValue) {
       if (!viewCols) {
         first = p
         break
@@ -316,7 +316,7 @@ class NewResource extends Component {
           required.push(p)
       }
     }
-    var noRequiredOrErrorValue = {}
+    var missedRequiredOrErrorValue = {}
     var msg
     required.forEach((p) =>  {
       var v = json[p] ? json[p] : (this.props.resource ? this.props.resource[p] : null); //resource[p];
@@ -351,20 +351,20 @@ class NewResource extends Component {
         if ((prop.ref) ||  isDate  ||  prop.items) {
           if (resource && resource[p])
             return;
-          noRequiredOrErrorValue[p] = translate('thisFieldIsRequired') //'This field is required'
+          missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired') //'This field is required'
         }
         else if (!prop.displayAs)
-          noRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
+          missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
       }
     })
     var err = this.validateProperties(json)
     for (var p in err)
-      noRequiredOrErrorValue[p] = err[p]
+      missedRequiredOrErrorValue[p] = err[p]
 
-    if (!utils.isEmpty(noRequiredOrErrorValue)) {
+    if (!utils.isEmpty(missedRequiredOrErrorValue)) {
       this.state.submitted = false
       var state = {
-        noRequiredOrErrorValue: noRequiredOrErrorValue
+        missedRequiredOrErrorValue: missedRequiredOrErrorValue
       }
       if (msg)
         state.err = msg
@@ -463,8 +463,8 @@ class NewResource extends Component {
     }
     items.push(item);
     var itemsCount = this.state.itemsCount ? this.state.itemsCount  + 1 : 1
-    if (this.state.noRequiredOrErrorValue)
-      delete this.state.noRequiredOrErrorValue[propName]
+    if (this.state.missedRequiredOrErrorValue)
+      delete this.state.missedRequiredOrErrorValue[propName]
     this.setState({
       resource: resource,
       itemsCount: itemsCount,
@@ -686,8 +686,8 @@ class NewResource extends Component {
                     </View>
       }
       var title = bl.title || utils.makeLabel(p)
-      var err = this.state.noRequiredOrErrorValue
-              ? this.state.noRequiredOrErrorValue[meta.properties[p].name]
+      var err = this.state.missedRequiredOrErrorValue
+              ? this.state.missedRequiredOrErrorValue[meta.properties[p].name]
               : null
       var errTitle = translate('thisFieldIsRequired')
       var error = err
