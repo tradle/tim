@@ -56,7 +56,7 @@ class MessageRow extends Component {
       LINK_COLOR = DEFAULT_LINK_COLOR
       STRUCTURED_MESSAGE_COLOR = DEFAULT_STRUCTURED_MESSAGE_COLOR
     }
-    CURRENCY_SYMBOL = (props.currency) ? props.currency.symbol : DEFAULT_CURRENCY_SYMBOL
+    CURRENCY_SYMBOL = props.currency ? props.currency.symbol || props.currency : DEFAULT_CURRENCY_SYMBOL
   }
   shouldComponentUpdate(nextProps, nextState) {
     return !equal(this.props.resource, nextProps.resource) ||
