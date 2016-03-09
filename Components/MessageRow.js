@@ -21,7 +21,7 @@ var reactMixin = require('react-mixin');
 var Device = require('react-native-device')
 // var newProduct = require('../data/newProduct.json')
 
-var STRUCTURED_MESSAGE_BORDER = '#5089DE' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
+var STRUCTURED_MESSAGE_BORDER = '#3260a5' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
 // var STRUCTURED_MESSAGE_COLOR = '#77ADFC' //'#4BA0F2' //'#5482C7' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
 var VERIFICATION_BG = '#FBFFE5' //'#F6FFF0';
 var DEFAULT_CURRENCY_SYMBOL = '£'
