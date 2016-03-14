@@ -248,7 +248,7 @@ reactMixin(NewItem.prototype, NewResourceMixin);
 var styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: 50
+    marginTop: 64
   },
   imageContainer: {
     flex: 1,
