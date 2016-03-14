@@ -177,7 +177,10 @@ class NewResource extends Component {
     let ref = this.refs.form.getComponent(first) || this.refs[first]
     if (!ref) return
 
-    utils.scrollComponentIntoView(this.refs.scrollView, ref)
+    if (!utils.isEmpty(this.state.missedRequiredOrErrorValue)  &&  !this.state.noScroll) {
+      utils.scrollComponentIntoView(this.refs.scrollView, ref)
+      this.state.noScroll = true
+    }
   }
 
   itemAdded(params) {
@@ -290,6 +293,7 @@ class NewResource extends Component {
     if (this.state.submitted)
       return
     this.state.submitted = true
+    this.state.noScroll = false
     var resource = this.state.resource;
     var value = this.refs.form.getValue();
     if (!value) {
@@ -329,7 +333,7 @@ class NewResource extends Component {
           let ref = this.props.model.properties[p].ref
           if (ref) {
             let rModel = utils.getModel(ref).value
-            if (ref !== constants.TYPES.MONEY  && (!rModel.subClassOf  ||  rModel.subClassOf !== 'tradle.Enum')) {
+            if (ref !== constants.TYPES.MONEY  && (!rModel.subClassOf  ||  rModel.subClassOf !== constants.TYPES.ENUM)) {
               var units = this.props.model.properties[p].units
               if (units)
                 v = v.value
@@ -433,7 +437,7 @@ class NewResource extends Component {
       if (!props[p]  ||  !props[p].ref)
         continue
       let m = utils.getModel(props[p].ref).value
-      if (m.subClassOf  &&  m.subClassOf === 'tradle.Enum')
+      if (m.subClassOf  &&  m.subClassOf === constants.TYPES.ENUM)
         json[p] = resource[p]
     }
   }
