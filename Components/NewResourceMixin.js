@@ -100,7 +100,7 @@ var NewResourceMixin = {
       var maybe = required  &&  !required.hasOwnProperty(p);
 
       var type = props[p].type;
-      var formType = propTypesMap[type];
+      var formType = type !== 'boolean'  &&  propTypesMap[type];
       // Don't show readOnly property in edit mode if not set
       if (props[p].readOnly) //  &&  (type === 'date'  ||  !data  ||  !data[p]))
         continue;
@@ -225,8 +225,13 @@ var NewResourceMixin = {
         if (!ref) {
           if (type === 'number'  ||  type === 'string')
             ref = constants.TYPES.MONEY
+          else if (type === 'boolean') {
+            ref = 'tradle.Boolean'
+            model[p] = maybe ? t.maybe(t.Str) : t.Str
+          }
           else
             continue;
+
         }
         if (ref === constants.TYPES.MONEY) {
           model[p] = maybe ? t.maybe(t.Num) : t.Num;
@@ -438,7 +443,7 @@ var NewResourceMixin = {
 
       if (!label)
         label = resource[params.prop].title
-      if (rModel.subClassOf  &&  rModel.subClassOf === 'tradle.Enum')
+      if (rModel.subClassOf  &&  rModel.subClassOf === constants.TYPES.ENUM)
         label = utils.createAndTranslate(label, true)
       style = textStyle
       propLabel = <View style={{marginLeft: 10, marginTop: 5, marginBottom: 5, backgroundColor: this.state.isRegistration ? 'transparent' : '#ffffff'}}>
@@ -486,7 +491,8 @@ var NewResourceMixin = {
     var value = this.refs.form.input;
 
     var filter = event.nativeEvent.text;
-    var m = utils.getModel(prop.ref).value;
+    var propRef = prop.ref  ||  'tradle.Boolean'
+    var m = utils.getModel(propRef).value;
     var currentRoutes = this.props.navigator.getCurrentRoutes();
     this.props.navigator.push({
       title: translate(m), //m.title,
@@ -498,7 +504,7 @@ var NewResourceMixin = {
       passProps: {
         filter:      filter,
         prop:        prop.name,
-        modelName:   prop.ref,
+        modelName:   propRef,
         resource:    resource,
         isRegistration: this.state.isRegistration,
         returnRoute: currentRoutes[currentRoutes.length - 1],
