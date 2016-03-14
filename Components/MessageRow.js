@@ -421,14 +421,18 @@ class MessageRow extends Component {
     else
       docType = modelTitle.substring(0, idx) + (modelTitle.length === idx + 12 ? '' : modelTitle.substring(idx + 12))
 
-    var msg = utils.getMe().firstName + ', this is your personal privacy assistant. I see you\'ve already had your ' + docType + ' verified.'
-    if (vtt.length === 1)
-       msg += ' You can tap below to share it with ';
-    else
-       msg += ' You can tap on any items in the list below to share them with ';
-    msg += this.props.to.organization ? (this.props.to.organization.title + '.') : this.props.to.name;
-    // var st = [addStyle ? [styles.textContainer, addStyle] : styles.textContainer]
-    // st.push({borderWidth: 1, borderColor: '#C1DBCE'})
+    // var msg = utils.getMe().firstName + ', this is your personal privacy assistant. I see you\'ve already had your ' + docType + ' verified.'
+    // if (vtt.length === 1)
+    //    msg += ' You can tap below to share it with ';
+    // else
+    //    msg += ' You can tap on any items in the list below to share them with ';
+    // msg += this.props.to.organization ? (this.props.to.organization.title + '.') : this.props.to.name;
+
+    let org = this.props.to.organization ? (this.props.to.organization.title + '.') : this.props.to.name;
+    let msg = (vtt.length === 1)
+            ? translate('shareOne', utils.getMe().firstName, docType, org)
+            : translate('shareOneOfMany', utils.getMe().firstName, docType, org)
+
 
     return (
       <View style={[rowStyle, viewStyle, {width: Device.width - 50}]} key={this.getNextKey()}>
@@ -570,7 +574,7 @@ class MessageRow extends Component {
         onPressCall = self.onPress.bind(self);
         vCols.push(<Text style={style} numberOfLines={first ? 2 : 1} key={self.getNextKey()}>{resource[v]}</Text>);
       }
-      else if (model.id === 'tradle.SelfIntroduction') {
+      else if (model.id ===constants.TYPES.SELF_INTRODUCTION) {
         vCols.push(
           <View key={self.getNextKey()}>
             <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
@@ -740,10 +744,21 @@ class MessageRow extends Component {
 
   getPropRow(prop, resource, val, isVerification) {
     var style = {flexDirection: 'row'}
-    if (prop.ref  &&  prop.ref === constants.TYPES.MONEY)
-      val = (val.currency || CURRENCY_SYMBOL) + val.value
-
+    if (prop.ref) {
+      if (prop.ref === constants.TYPES.MONEY)
+        val = (val.currency || CURRENCY_SYMBOL) + val.value
+      else {
+        let m = utils.getModel(prop.ref).value
+        if (m.subClassOf === constants.TYPES.ENUM) {
+          if (typeof val === 'string')
+            val = utils.createAndTranslate(val)
+          else
+            val = utils.createAndTranslate(val.title)
+        }
+      }
+    }
     let model = utils.getModel(resource[constants.TYPE]).value
+
     let propTitle = translate(prop, model)
 
     if (isVerification) {
@@ -854,7 +869,7 @@ class MessageRow extends Component {
               : <View />;
     var headerStyle = {paddingTop: 5, alignSelf: 'center'}
     var header =  <View style={headerStyle}>
-                    <Text style={[styles.resourceTitle, {fontSize: 20, color: '#B6C2A7', fontWeight: '600'}]}>{model.title}</Text>
+                    <Text style={[styles.resourceTitle, {fontSize: 20, color: '#B6C2A7', fontWeight: '600'}]}>{translate(model)}</Text>
                   </View>
     header = hasPhotos
             ?  <View style={{flexDirection: 'row', marginHorizontal: -7, marginTop: -10, padding: 7, backgroundColor: '#EDF2CE', justifyContent: 'space-between'}}>
@@ -873,13 +888,17 @@ class MessageRow extends Component {
                    : <View />
       var shareView = <View style={{flexDirection: 'row', marginLeft: 0, justifyContent: 'space-between', padding: 5, borderRadius: 10, borderWidth: 1, borderColor: '#eeeeee', backgroundColor: '#F0F0EE', opacity: this.props.resource.documentCreated ? 0.3 : 1}}>
                         <Icon style={styles.shareIcon} size={20} name={'android-share-alt'} />
-                        <Text style={{color: '#2E3B4E', fontSize: 16, paddingRight: 5, marginTop: 2}}>Share</Text>
+                        <Text style={{color: '#2E3B4E', fontSize: 16, paddingRight: 5, marginTop: 2}}>{translate('Share')}</Text>
                       </View>
-      var orgView =   <View style={{flexDirection: 'row', justifyContent: 'flex-end', marginTop: 10}}>
-                         <Text style={[styles.verySmallLetters]}>verified by </Text>
-                         <Text style={[styles.verySmallLetters, {color: '#2E3B4E'}]}>{verification.organization.title.length < 30 ? verification.organization.title : verification.organization.title.substring(0, 27) + '..'}</Text>
+      // let o = verification.organization.title.length < 25 ? verification.organization.title : verification.organization.title.substring(0, 27) + '..'
+      let verifiedBy = translate('verifiedBy', verification.organization.title)
+      if (verifiedBy.length > 40)
+        verification.organization.title.substring(0, 40) + '..'
+      var orgView =   <View style={{flexDirection: 'row', justifyContent: 'flex-end', marginTop: 15}}>
+                         <Text style={[styles.verySmallLetters, {fontSize: 14}]}>{verifiedBy}</Text>
                       </View>
 
+                         // <Text style={[styles.verySmallLetters, {color: '#2E3B4E'}]}>{verification.organization.title.length < 30 ? verification.organization.title : verification.organization.title.substring(0, 27) + '..'}</Text>
       if (onPress) {
         if (!this.props.resource.documentCreated)
             <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
@@ -887,8 +906,8 @@ class MessageRow extends Component {
                         'Sharing ' + docTitle + ' verified by ' + verifiedBy,
                         'with ' + orgTitle,
                         [
-                          {text: 'Share', onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
-                          {text: 'Cancel', onPress: () => console.log('Canceled!')},
+                          {text: translate('Share'), onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
+                          {text: translate('Cancel'), onPress: () => console.log('Canceled!')},
                         ]
                     )}>
               {shareView}
@@ -909,8 +928,8 @@ class MessageRow extends Component {
                       'Sharing ' + docTitle + ' verified by ' + verifiedBy,
                       'with ' + orgTitle,
                       [
-                        {text: 'Share', onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
-                        {text: 'Cancel', onPress: () => console.log('Canceled!')},
+                        {text: translate('Share'), onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
+                        {text: translate('Cancel'), onPress: () => console.log('Canceled!')},
                       ]
                   )}>
             {shareView}
@@ -1215,7 +1234,7 @@ class MessageRow extends Component {
                 val = resource[v] //(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value
               else {
                 var m = utils.getModel(properties[v].ref).value
-                if (m.subClassOf  &&  m.subClassOf == 'tradle.Enum')
+                if (m.subClassOf  &&  m.subClassOf == constants.TYPES.ENUM)
                   val = resource[v].title
               }
             }
