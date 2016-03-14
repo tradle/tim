@@ -20,6 +20,15 @@ var resources = [
   }
 },
 {
+  _t: 'tradle.Boolean',
+  boolean: 'Yes'
+},
+{
+  _t: 'tradle.Boolean',
+  boolean: 'No'
+},
+
+{
   _t: 'tradle.PurposeOfTheAccount',
   purpose: 'Benefit Payments'
 },
@@ -81,8 +90,9 @@ var resources = [
 },
 {
   _t: 'tradle.MaritalStatus',
-  status: 'Married / civil partnership',
+  status: 'Married',
 },
+/*
 {
   _t: 'tradle.MaritalStatus',
   status: 'Widowed',
@@ -95,6 +105,242 @@ var resources = [
   _t: 'tradle.MaritalStatus',
   status: 'Separated'
 },
+*/
+
+{
+  _t: 'tradle.MaritalStatus',
+  status:  "Married with prenuptial agreement"
+},
+{
+  _t: 'tradle.MaritalStatus',
+  status: 'Civil partnership'
+},
+{
+  _t: 'tradle.MaritalStatus',
+  status: 'Living together with agreement'
+},
+///
+{
+  _t: 'tradle.EducationNL',
+  education: 'Elementary School'
+},
+{
+  _t: 'tradle.EducationNL',
+  education: 'High School'
+},
+{
+  _t: 'tradle.EducationNL',
+  education: 'Vocational Secondary School (Junior)'  // LBO
+},
+{
+  _t: 'tradle.EducationNL',
+  education: 'Vocational Secondary School (Senior)'  // MBO
+},
+{
+  _t: 'tradle.EducationNL',
+  education: 'College'                               // HBO
+},
+{
+  _t: 'tradle.EducationNL',
+  education: 'University'
+},
+{
+  _t: "tradle.IDCardType",
+  idCardType: 'Passport'
+},
+{
+  _t: "tradle.IDCardType",
+  idCardType: 'ID Card'
+},
+{
+  _t: "tradle.IDCardType",
+  idCardType: 'Residence permit'
+},
+{
+  _t: 'tradle.SourceOfIncome',
+  sourceOfIncome: 'Employed'
+},
+{
+  _t: 'tradle.SourceOfIncome',
+  sourceOfIncome: 'Self-Employed'
+},
+{
+  _t: 'tradle.SourceOfIncome',
+  sourceOfIncome: 'Alimony'
+},
+{
+  _t: 'tradle.SourceOfIncome',
+  sourceOfIncome: 'Income Out Of Renting Or Leasing'
+},
+{
+  _t: 'tradle.SourceOfIncome',
+  sourceOfIncome: 'Pension'
+},
+{
+  _t: 'tradle.SourceOfIncome',
+  sourceOfIncome: 'Pre-Pension'
+},
+{
+  _t: 'tradle.SourceOfIncome',
+  sourceOfIncome: 'Old age benefits'
+},
+{
+  _t: 'tradle.SourceOfIncome',
+  sourceOfIncome: 'Insurance Policy / Pension (Out Of Insurance)'
+},
+{
+  _t: 'tradle.KindOfEngagement',
+  kindOfEngagement: 'Fulltime Employee'
+},
+{
+  _t: 'tradle.KindOfEngagement',
+  kindOfEngagement: 'Temporary Employment'
+},
+{
+  _t: 'tradle.KindOfEngagement',
+  kindOfEngagement: 'Flex Encome'
+},
+{
+  _t: "tradle.KindOfConstruction",
+  kindOfConstruction: "Existing house"
+},
+{
+  _t: "tradle.KindOfConstruction",
+  kindOfConstruction: "New house"
+},
+{
+  _t: "tradle.KindOfConstruction",
+  kindOfConstruction: "Build it your self"
+},
+{
+  _t: "tradle.KindOfHouse",
+  kindOfHouse:  "Detached"
+},
+{
+  _t: "tradle.KindOfHouse",
+  kindOfHouse:  "Semi-Detached"
+},
+{
+  _t: "tradle.KindOfHouse",
+  kindOfHouse:  "Semi-Detached"
+},
+{
+  _t: "tradle.KindOfHouse",
+  kindOfHouse:  "Terraced house"
+},
+{
+  _t: "tradle.KindOfHouse",
+  kindOfHouse:  "Appartment"
+},
+{
+  _t: "tradle.KindOfObligation",
+  kindOfObligation: "Partner alimony"
+},
+{
+  _t: "tradle.KindOfObligation",
+  kindOfObligation: "Revolving Credit"
+},
+{
+  _t: "tradle.KindOfObligation",
+  kindOfObligation: "Personal Loan"
+},
+{
+  _t: "tradle.KindOfObligation",
+  kindOfObligation: "Overdraw"
+},
+{
+  _t: "tradle.KindOfObligation",
+  kindOfObligation: "Credit card"
+},
+{
+  _t: "tradle.KindOfObligation",
+  kindOfObligation: "Partner alimony"
+},
+{
+  _t: "tradle.KindOfObligation",
+  kindOfObligation: "Shopping credit"
+},
+{
+  _t: "tradle.KindOfObligation",
+  kindOfObligation: "Private Loan"
+},
+{
+  _t: "tradle.KindOfObligation",
+  kindOfObligation: "Study Loan"
+},
+{
+  _t: "tradle.PaymentPeriod",
+  paymentPeriod: "Monthly"
+},
+{
+  _t: "tradle.PaymentPeriod",
+  paymentPeriod: "Quarterly"
+},
+{
+  _t: "tradle.PaymentPeriod",
+  paymentPeriod: "Half Yearly"
+},
+{
+  _t: "tradle.PaymentPeriod",
+  paymentPeriod: "Yearly"
+},
+
+{
+  _t: "tradle.EnergyLabel",
+  energyLabel: "A"
+},
+{
+  _t: "tradle.EnergyLabel",
+  energyLabel: "A"
+},
+{
+  _t: "tradle.EnergyLabel",
+  energyLabel: "B"
+},
+{
+  _t: "tradle.EnergyLabel",
+  energyLabel: "C"
+},
+{
+  _t: "tradle.EnergyLabel",
+  energyLabel: "D"
+},
+{
+  _t: "tradle.EnergyLabel",
+  energyLabel: "E"
+},
+{
+  _t: "tradle.EnergyLabel",
+  energyLabel: "F"
+},
+{
+  _t: "tradle.EnergyLabel",
+  energyLabel: "G"
+},
+{
+  _t: "tradle.StatusOfInsurance",
+  statusOfInsurance: "Existing Insurance"
+},
+{
+  _t: "tradle.StatusOfInsurance",
+  statusOfInsurance: "Temporary Coverage"
+},
+{
+  _t: "tradle.StatusOfInsurance",
+  statusOfInsurance: "To Be Arranged"
+},
+{
+  _t: "tradle.KindOfInsurance",
+  kindOfInsurance: "Equal Over Time"
+},
+{
+  _t: "tradle.KindOfInsurance",
+  kindOfInsurance: "Yearly Decreasing"
+},
+{
+  _t: "tradle.KindOfInsurance",
+  kindOfInsurance: "Lineary Decreasing"
+},
 {
   _t: 'tradle.Nationality',
   nationality: 'British',
@@ -103,7 +349,6 @@ var resources = [
   _t: 'tradle.Nationality',
   nationality: 'American',
 },
-
 {
   _t: 'tradle.Nationality',
   nationality: 'French',
@@ -120,7 +365,6 @@ var resources = [
   _t: 'tradle.PropertyType',
   propertyType: 'Freehold'
 },
-
 {
   _t: 'tradle.PropertyType',
   propertyType: 'Leasehold'
@@ -270,6 +514,78 @@ var resources = [
   currency: 'GBR',
   symbol: '£'
 },
+{
+  _t: 'tradle.MortgageProductType',
+  mortgageProductType: 'Obvion Basis'
+},
+{
+  _t: 'tradle.MortgageProductType',
+  mortgageProductType: 'Obvion Compact'
+},
+{
+  _t: 'tradle.TypeOfCoverage',
+  repaymentType: 'Annuity'
+},
+{
+  _t: 'tradle.TypeOfCoverage',
+  repaymentType: 'Liniar'
+},
+{
+  _t: 'tradle.TypeOfCoverage',
+  repaymentType: 'Interest Only'
+},
+{
+  _t: 'tradle.LoanTypes',
+  loanType: 'New Mortgage'
+},
+{
+  _t: 'tradle.LoanTypes',
+  loanType: 'Second Mortgage'
+},
+{
+  _t: 'tradle.LoanTypes',
+  loanType: 'Additional Mortgage Within Existing Contract'
+},
+{
+  _t: 'tradle.LoanTypes',
+  loanType: 'Coming Form Other Mortgage Supplier'
+},
+{
+  _t: 'tradle.LoanTypes',
+  loanType: 'Change Mortgage Construction'
+},
+{
+  _t: 'tradle.InterestType',
+  interestType: '30 years fixed'
+},
+{
+  _t: 'tradle.InterestType',
+  interestType: '15 years fixed'
+},
+{
+  _t: 'tradle.InterestType',
+  interestType: '10 years fixed'
+},
+{
+  _t: 'tradle.InterestType',
+  interestType: '5 adjustable'
+},
+{
+  _t: 'tradle.InterestType',
+  interestType: 'Variable'
+},
+{
+  _t: 'tradle.RoleInContract',
+  role: 'Co-signer'
+},
+{
+  _t: 'tradle.ContractType',
+  contractType: 'fixed'
+},
+{
+  _t: 'tradle.ContractType',
+  contractType: 'self-employed'
+}
 
 ];
 
