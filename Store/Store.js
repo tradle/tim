@@ -1792,6 +1792,93 @@ var Store = Reflux.createStore({
 
     this.trigger(retParams);
   },
+
+  getList1(params) {
+    var model = this.getModel(params.modelName).value;
+    var isMessage = model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1);
+    if (isMessage) {
+      return this.searchMessagesNew(params)
+      .then((result) => {
+        if (params.isAggregation)
+          result = this.getDependencies(result);
+        if (!result)
+          return
+        if (!params.isAggregation  &&  params.to)
+          verificationsToShare = this.getVerificationsToShare(result, params.to);
+        var retParams = {
+          action: isMessage  &&  !params.prop ? 'messageList' : 'list',
+          list: resultList,
+          spinner: params.spinner,
+          isAggregation: params.isAggregation
+        }
+        if (isMessage) {
+          let orgId = utils.getId(params.to)
+          let styles
+          if (SERVICE_PROVIDERS)
+             styles = SERVICE_PROVIDERS.filter((sp) => {
+                if (sp.org === orgId)
+                  return true
+              })
+          if (styles  &&  styles.length)
+            retParams.style = styles[0].style
+        }
+
+        if (verificationsToShare)
+          retParams.verificationsToShare = verificationsToShare;
+        if (params.prop)
+          retParams.prop = params.prop;
+
+        this.trigger(retParams);
+        return
+      })
+    }
+    var result = this.searchNotMessages(params);
+    if (params.isAggregation)
+      result = this.getDependencies(result);
+    if (!result)
+      return
+
+
+    // if (!isMessage)
+    //   return
+    // HACK
+    // utils.dedupeVerifications(result)
+
+    // var resultList = [];
+    // result.forEach((r) =>  {
+    //   var rr = {};
+    //   extend(rr, r);
+    //   resultList.push(rr);
+    // })
+    var resultList = result
+    // var verificationsToShare;
+    // if (isMessage  &&  !params.isAggregation  &&  params.to)
+    //   verificationsToShare = this.getVerificationsToShare(result, params.to);
+    var retParams = {
+      action: isMessage  &&  !params.prop ? 'messageList' : 'list',
+      list: resultList,
+      spinner: params.spinner,
+      isAggregation: params.isAggregation
+    }
+    // if (isMessage) {
+    //   let orgId = utils.getId(params.to)
+    //   let styles
+    //   if (SERVICE_PROVIDERS)
+    //      styles = SERVICE_PROVIDERS.filter((sp) => {
+    //         if (sp.org === orgId)
+    //           return true
+    //       })
+    //   if (styles  &&  styles.length)
+    //     retParams.style = styles[0].style
+    // }
+
+    // if (verificationsToShare)
+    //   retParams.verificationsToShare = verificationsToShare;
+    if (params.prop)
+      retParams.prop = params.prop;
+
+    this.trigger(retParams);
+  },
   searchResources(params) {
     var meta = this.getModel(params.modelName).value;
     var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
@@ -1920,8 +2007,41 @@ var Store = Reflux.createStore({
     }
     return result;
   },
-
   searchMessagesNew(params) {
+    let bankID = utils.getId(params.to)
+    let messages = bankMessages[bankID]
+    let promise = messages ? Q() : this.getConversation(params)
+    let result = []
+    let self = this
+    return promise
+    .then((data) => {
+      if (data)
+        return data
+      data = Object.keys(messages)
+      var defer = Q.defer()
+      var togo = Object.keys(data).length
+      for (let r of data) {
+        meDriver.lookupObjectsByRootHash(r.split('_')[1])
+        .then(function (objs) {
+          var obj = objs[objs.length - 1]
+          var res = obj.parsed.data
+          var val = extend(true, res)
+          self.fillFromAndTo(obj, val)
+
+          val[ROOT_HASH] = obj[ROOT_HASH]
+          result.push(val)
+          if (--togo === 0)
+            defer.resolve(result)
+        })
+        .catch((err) => {
+          debugger
+        })
+      }
+      return result
+    })
+  },
+
+  getConversation(params) {
     var self = this
     var list = {}
     var hasVerifications
@@ -1967,8 +2087,16 @@ var Store = Reflux.createStore({
           val[ROOT_HASH] = obj[ROOT_HASH]
           result.push(val)
           let rid = utils.getId(val)
-          list[rid] = val
-
+          list[rid] = {
+            key: rid,
+            value: {
+              id: rid,
+              title: utils.getDisplayName(val, utils.getModel(obj[TYPE]).value.properties),
+              time: val.time
+            }
+          }
+          if (val.photos)
+            list[rid].value.photos = [val.photos[0]]
           if (val[TYPE] === VERIFICATION)
             hasVerifications = true
 
@@ -2053,16 +2181,9 @@ var Store = Reflux.createStore({
     })
   },
   searchMessages(params) {
-    let self = this
-  //   return this.searchMessagesNew(params)
-  //   .then(function(data) {
-  //     return self.searchMessages_old(params)
-  //   })
-  // },
-  // searchMessages_old(params) {
-    if (params.loadingEarlierMessages) {
+    if (params.loadingEarlierMessages)
       return this.getMessagesBefore(params)
-    }
+
     var query = params.query;
     var modelName = params.modelName;
     var meta = this.getModel(modelName).value;
@@ -2140,7 +2261,10 @@ var Store = Reflux.createStore({
         }
       }
       else if (key.indexOf(modelName + '_') === -1) {
-        var rModel = this.getModel(key.split('_')[0]).value;
+        var rModel = this.getModel(key.split('_')[0])
+        if (!rModel)
+          continue
+        rModel = rModel.value;
         if (rModel.subClassOf !== modelName)
           continue;
       }
