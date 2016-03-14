@@ -428,7 +428,7 @@ class ResourceList extends Component {
 
   renderRow(resource)  {
     var model = utils.getModel(this.props.modelName).value;
- // || (model.id === 'tradle.Form')
+ // || (model.id === constants.TYPES.FORM)
     var isVerification = model.id === constants.TYPES.VERIFICATION
     var isForm = model.id === constants.TYPES.FORM
     return isVerification  || isForm || (model.subClassOf  &&  (model.subClassOf === constants.TYPES.VERIFICATION  ||  model.subClassOf === constants.TYPES.FORM))
@@ -524,7 +524,7 @@ class ResourceList extends Component {
     });
   }
   onSettingsPressed() {
-    var model = utils.getModel('tradle.Settings').value
+    var model = utils.getModel(constants.TYPES.SETTINGS).value
     var route = {
       component: NewResource,
       title: 'Settings',
@@ -616,10 +616,11 @@ class ResourceList extends Component {
     var content;
     var model = utils.getModel(this.props.modelName).value;
     if (this.state.dataSource.getRowCount() === 0              &&
+        model.subClassOf !== constants.TYPES.ENUM              &&
         this.props.modelName !== constants.TYPES.PROFILE       &&
         this.props.modelName !== constants.TYPES.VERIFICATION  &&
         this.props.modelName !== constants.TYPES.ORGANIZATION  &&
-        (!model.subClassOf  ||  model.subClassOf !== 'tradle.Enum')) {
+        (!model.subClassOf  ||  model.subClassOf !== constants.TYPES.ENUM)) {
       content = <NoResources
                   filter={this.state.filter}
                   model={model}
