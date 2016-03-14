@@ -147,7 +147,8 @@ var utils = {
     stringName = stringName.replace(/[^a-zA-Z0-9]/g, '')
     // stringName = stringName.charAt(0).toLowerCase() + stringName.slice(1)
     let t = utils.translate(stringName)
-    return t !== stringName ? t : (isEnumValue ? s : utils.makeLabel(s))
+    // return t !== stringName ? t : (isEnumValue ? s : utils.makeLabel(s))
+    return t !== stringName ? t : s
   },
   makeLabel(label) {
     return label
