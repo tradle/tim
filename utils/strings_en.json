@@ -59,4 +59,7 @@
     "verifiedBy": "Verified by {1}",
     "typeMessage": "Type a message",
     "newProductMsg": "{1}, we're very happy to assist you with your application for {2}. Please hold just a moment.",
+    "shareOne": "{1}, this is your personal privacy assistant. I see you've already had your {2} verified. You can tap below to share it with {3}.",
+    "shareOneOfMany": "{1}, this is your personal privacy assistant. I see you've already had your {2} verified. You can tap on any items in the list below to share them with {3}.",
+    "verificationTransactionID": "Verification Transaction Id",
 }
