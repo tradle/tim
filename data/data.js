@@ -342,6 +342,18 @@ var resources = [
   kindOfInsurance: "Lineary Decreasing"
 },
 {
+  _t: "tradle.TypeOfCoverage",
+  typeOfCoverage: "Equal Insured Amount"
+},
+{
+  _t: "tradle.TypeOfCoverage",
+  typeOfCoverage: "Lineair Decreasing Amount"
+},
+{
+  _t: "tradle.TypeOfCoverage",
+  typeOfCoverage: "Yearly decreasing based on a interest of 4% until the insured amount reaches 0%"
+},
+{
   _t: 'tradle.Nationality',
   nationality: 'British',
 },
@@ -515,23 +527,31 @@ var resources = [
   symbol: '£'
 },
 {
-  _t: 'tradle.MortgageProductType',
-  mortgageProductType: 'Obvion Basis'
+  _t: 'tradle.CommercialProduct',
+  mortgageProductType: 'Obvion'
 },
 {
-  _t: 'tradle.MortgageProductType',
-  mortgageProductType: 'Obvion Compact'
+  _t: 'tradle.CommercialProduct',
+  mortgageProductType: 'Basis'
 },
 {
-  _t: 'tradle.TypeOfCoverage',
+  _t: 'tradle.CommercialProduct',
+  mortgageProductType: 'Compact'
+},
+{
+  _t: 'tradle.CommercialProduct',
+  mortgageProductType: 'ABP'
+},
+{
+  _t: 'tradle.RepaymentType',
   repaymentType: 'Annuity'
 },
 {
-  _t: 'tradle.TypeOfCoverage',
+  _t: 'tradle.RepaymentType',
   repaymentType: 'Liniar'
 },
 {
-  _t: 'tradle.TypeOfCoverage',
+  _t: 'tradle.RepaymentType',
   repaymentType: 'Interest Only'
 },
 {
