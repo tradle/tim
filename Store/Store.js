@@ -96,8 +96,14 @@ Tim.CATCH_UP_INTERVAL = 10000
 // Zlorp.LOOKUP_INTERVAL = 10000
 // Zlorp.KEEP_ALIVE_INTERVAL = 10000
 
-var WebSocketClient = require('@tradle/ws-client')
-var HttpClient = require('@tradle/transport-http').HttpClient
+const Sendy = require('sendy')
+const SendyWS = require('sendy-ws')
+const OTRClient = require('sendy-otr')
+const SENDY_OPTS = { resendInterval: 2000, mtu: 10000 }
+// const newOTRSwitchboard = require('sendy-otr-ws').Switchboard
+const newSwitchboard = SendyWS.Switchboard
+const WebSocketClient = SendyWS.Client
+// const HttpClient = require('@tradle/transport-http').HttpClient
 var getDHTKey = require('tim/lib/utils').getDHTKey
 
 var dns = require('dns')
@@ -414,32 +420,40 @@ var Store = Reflux.createStore({
         SERVICE_PROVIDERS_BASE_URLS = SERVICE_PROVIDERS_BASE_URL_DEFAULTS.slice()
     }
 
-    meDriver._send = function (rootHash, msg, recipientInfo) {
-      var messenger = wsClients[rootHash]
-      var httpClient = driverInfo.httpClient
-      if (!messenger && httpClient && httpClient.hasEndpointFor(rootHash)) {
-        messenger = httpClient
-      }
-
-      if (!messenger) {
-        return Q.reject(new Error('recipient not found'))
-      }
-
-      var args = arguments
-      if (meDriver.isReady()) return doSend()
-
-      return meDriver.ready().then(doSend)
-
-      function doSend () {
-        return messenger.send.apply(messenger, args)
-      }
-    }
-
     otrKey = keys.filter((k) => k.type === 'dsa')[0]
 
     if (otrKey) otrKey = kiki.toKey(otrKey).priv()
 
     driverInfo.otrKey = otrKey
+    meDriver._send = function (recipientHash, msg, recipientInfo) {
+      const messenger = wsClients[recipientHash]
+      if (!messenger) {
+        return Q.reject(new Error('recipient not found'))
+      }
+
+      const args = arguments
+      // return meDriver.ready()
+      //   .then(function doSend () {
+          // if (messenger === httpClient) {
+          //   return messenger.send.apply(messenger, args)
+          // }
+
+          let identifier
+          if (otrKey) {
+            identifier = recipientInfo.identity.pubkeys.filter(function (k) {
+              return k.type === 'dsa'
+            })[0].fingerprint
+          } else {
+            identifier = recipientHash
+          }
+
+          // this timeout is not for sending the entire message
+          // but rather an idle connection timeout
+          messenger.setTimeout(5000)
+
+          return Q.ninvoke(messenger, 'send', identifier, msg)
+        // })
+    }
 
     this.getInfo(SERVICE_PROVIDERS_BASE_URLS, true)
       .catch(function(err) {
@@ -599,34 +613,96 @@ var Store = Reflux.createStore({
       })
   },
   addProvider(provider) {
-    let httpClient = driverInfo.httpClient
-    httpClient.addRecipient(
-      provider.hash,
-      utils.joinURL(provider.url, provider.id, 'send')
-    )
+    // let httpClient = driverInfo.httpClient
+    // httpClient.addRecipient(
+    //   provider.hash,
+    //   utils.joinURL(provider.url, provider.id, 'send')
+    // )
+
     let whitelist = driverInfo.whitelist
     if (provider.txId)
       whitelist.push(provider.txId)
 
-    if (driverInfo.otrKey) {
-        // self.addWebSocketClient()
-      var wsUrl = utils.joinURL(provider.url, provider.id, 'ws')
-      var wsClients = driverInfo.wsClients
-      var wsClient = wsClients[wsUrl] ||
-        wsClients[provider.hash] ||
-        new WebSocketClient({
-          url: wsUrl,
-          otrKey: driverInfo.otrKey,
-          autoconnect: false,
-          // rootHash: meDriver.myRootHash()
+    const otrKey = driverInfo.otrKey
+    const wsClients = driverInfo.wsClients
+    meDriver.ready()
+      .then(() => {
+        const identifier = otrKey ? otrKey.fingerprint() : meDriver.myRootHash()
+        const url = utils.joinURL(provider.url, provider.id, 'ws?from=' + identifier)
+        if (wsClients[url]) return wsClients[url]
+
+        const wsClient = new WebSocketClient({
+          url: url,
+          autoConnect: true
         })
 
-      // will need to do this on demand too
-      // e.g. when scanning an employee QR Code at the bank
-      wsClient.on('message', meDriver.receiveMsg)
-      wsClients[provider.hash] =
-      wsClients[wsUrl] = wsClient
-    }
+        let transport
+        if (otrKey) {
+          transport = newSwitchboard({
+            identifier: identifier,
+            unreliable: wsClient,
+            clientForRecipient: function (recipient) {
+              return new OTRClient({
+                key: otrKey,
+                client: new Sendy(SENDY_OPTS),
+                theirFingerprint: recipient
+              })
+            }
+          })
+        } else {
+          transport = newSwitchboard({
+            identifier: identifier,
+            unreliable: wsClient,
+            clientForRecipient: function () {
+              return new Sendy(SENDY_OPTS)
+            }
+          })
+        }
+
+        wsClient.on('disconnect', function () {
+          transport.clients().forEach(function (c) {
+            // reset OTR session, restart on connect
+            debug('aborting pending sends due to disconnect')
+            c.reset(true)
+          })
+        })
+
+        wsClients[url] = transport
+
+        let timeouts = {}
+        transport.on('receiving', function (msg) {
+          clearTimeout(timeouts[msg.from])
+          delete timeouts[msg.from]
+        })
+
+        transport.on('404', function (recipient) {
+          if (!timeouts[recipient]) {
+            timeout = setTimeout(function () {
+              delete timeouts[recipient]
+              transport.cancelPending(recipient)
+            }, 10000)
+          }
+        })
+
+        transport.on('message', function (msg, from) {
+          const prop = otrKey ? 'fingerprint' : ROOT_HASH
+          meDriver.receiveMsg(msg, {
+            [prop]: from
+          })
+        })
+
+        transport.on('timeout', function (identifier) {
+          transport.cancelPending(identifier)
+        })
+
+        return transport
+      })
+      .then(wsClient => {
+        wsClients[provider.hash] = wsClient
+      })
+      .catch(err => {
+        debugger
+      })
   },
   // Gets info about companies in this app, their bot representatives and their styles
   getServiceProviders(url, retry) {
@@ -3283,6 +3359,7 @@ var Store = Reflux.createStore({
 
         // bringing it back!
         // if (__DEV__  &&  !keys.some((k) => k.type() === 'dsa')) {
+        // if (!keys.some((k) => k.type() === 'dsa')) {
         //   keys.push(Keys.DSA.gen({
         //     purpose: 'sign'
         //   }))
