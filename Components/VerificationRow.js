@@ -2,6 +2,7 @@
 
 var React = require('react-native');
 var utils = require('../utils/utils');
+var translate = utils.tradle
 var constants = require('@tradle/constants');
 var Icon = require('react-native-vector-icons/Ionicons');
 var reactMixin = require('react-mixin');
@@ -15,12 +16,22 @@ var {
   StyleSheet,
   Text,
   TouchableHighlight,
+  PropTypes,
   Component,
   ArticleView,
   View
 } = React;
 
 class VerificationRow extends Component {
+  props: {
+    key: PropTypes.string.isRequired,
+    navigator: PropTypes.object.isRequired,
+    resource: PropTypes.object.isRequired,
+    onSelect: PropTypes.func.isRequired,
+    prop: PropTypes.object,
+    currency: PropTypes.object,
+    isChooser: PropTypes.boolean
+  };
   constructor(props) {
     super(props);
     CURRENCY_SYMBOL = props.currency ? props.currency.symbol || props.currency : DEFAULT_CURRENCY_SYMBOL
@@ -60,7 +71,7 @@ class VerificationRow extends Component {
 
     if (r)
       this.formatDocument(verificationRequest, r, rows);
-    var backlink = this.props.prop &&  this.props.prop.items.backlink;
+    var backlink = this.props.prop &&  this.props.prop.items  &&  this.props.prop.items.backlink;
     if (resource.txId)
       rows.push(
           <View style={{flexDirection: 'row'}} key={this.getNextKey()}>
@@ -110,8 +121,8 @@ class VerificationRow extends Component {
                     {photo}
                     {date}
                     <View style={{flexDirection: 'column'}}>
-                      <Text style={styles.rTitle}>{verificationRequest.title}</Text>
-                      {verifiedBy}
+                      <Text style={styles.rTitle}>{this.props.isChooser ? utils.getDisplayName(resource, model.properties) : verificationRequest.title}</Text>
+                       {verifiedBy}
                     </View>
                   </View>
                   </View>
@@ -127,14 +138,20 @@ class VerificationRow extends Component {
                   </View>
 
     return (
-       <View>
-         <Accordion
-           header={header}
-           style={{alignSelf: 'stretch'}}
-           content={content}
-           underlayColor='transparent'
-           easing='easeOutQuad' />
-        </View>
+      this.props.isChooser
+       ? <View>
+          <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>
+           {header}
+          </TouchableHighlight>
+         </View>
+       : <View>
+           <Accordion
+             header={header}
+             style={{alignSelf: 'stretch'}}
+             content={content}
+             underlayColor='transparent'
+             easing='easeOutQuad' />
+          </View>
     );
   }
   formatDocument(model, resource, renderedRow) {
