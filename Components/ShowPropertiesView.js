@@ -155,10 +155,8 @@ class ShowPropertiesView extends Component {
           if (props[p].units  &&  props[p].units.charAt(0) != '[') {
             val += ' ' + props[p].units
           }
-          if (typeof val === 'number') {
+          if (typeof val === 'number'  ||  typeof val === 'boolean')
             val = <Text style={styles.description}>{val}</Text>;
-            // isDirectionRow = true;
-          }
           else if (pMeta.type !== 'object'  &&  (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0))
             val = <Text onPress={self.onPress.bind(self, val)} style={[styles.description, {color: '#7AAAC3'}]}>{val}</Text>;
           else {
