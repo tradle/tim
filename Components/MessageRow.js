@@ -26,6 +26,7 @@ var STRUCTURED_MESSAGE_BORDER = '#3260a5' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
 var VERIFICATION_BG = '#FBFFE5' //'#F6FFF0';
 var DEFAULT_CURRENCY_SYMBOL = '£'
 var CURRENCY_SYMBOL
+var ENUM = 'tradle.Enum'
 
 var LINK_COLOR, DEFAULT_LINK_COLOR = '#2892C6'
 var STRUCTURED_MESSAGE_COLOR, DEFAULT_STRUCTURED_MESSAGE_COLOR = '#77ADFC'
@@ -749,7 +750,7 @@ class MessageRow extends Component {
         val = (val.currency || CURRENCY_SYMBOL) + val.value
       else {
         let m = utils.getModel(prop.ref).value
-        if (m.subClassOf === constants.TYPES.ENUM) {
+        if (m.subClassOf === ENUM) {
           if (typeof val === 'string')
             val = utils.createAndTranslate(val)
           else
@@ -1234,13 +1235,13 @@ class MessageRow extends Component {
                 val = resource[v] //(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value
               else {
                 var m = utils.getModel(properties[v].ref).value
-                if (m.subClassOf  &&  m.subClassOf == constants.TYPES.ENUM)
+                if (m.subClassOf  &&  m.subClassOf == ENUM)
                   val = resource[v].title
               }
             }
           }
           if (!val)
-            val = resource[v].title
+            val = resource[v].title  ||  resource[v]
           vCols.push(self.getPropRow(properties[v], resource, val, true))
         }
         return;
