@@ -21,6 +21,7 @@ var QRCodeScanner = require('./QRCodeScanner')
 var QRCode = require('./QRCode')
 var buttonStyles = require('../styles/buttonStyles');
 var bankStyles = require('../styles/bankStyles')
+var ENUM = 'tradle.Enum'
 
 var {
   ListView,
@@ -79,7 +80,13 @@ class ResourceList extends Component {
       params.sortProperty = this.props.sortProperty;
     if (this.props.prop)
       params.prop = utils.getModel(this.props.resource[constants.TYPE]).value.properties[this.props.prop.name];
-
+    if (params.prop) {
+      let m = utils.getModel(this.props.resource[constants.TYPE]).value
+      if (m.interfaces) {
+        if (utils.getModel(this.props.modelName).value.interfaces)
+          params.to = this.props.resource.to
+      }
+    }
     // this.state.isLoading = true;
     utils.onNextTransitionEnd(this.props.navigator, () => Actions.list(params));
   }
@@ -431,13 +438,15 @@ class ResourceList extends Component {
  // || (model.id === constants.TYPES.FORM)
     var isVerification = model.id === constants.TYPES.VERIFICATION
     var isForm = model.id === constants.TYPES.FORM
-    return isVerification  || isForm || (model.subClassOf  &&  (model.subClassOf === constants.TYPES.VERIFICATION  ||  model.subClassOf === constants.TYPES.FORM))
+    // let hasBacklink = this.props.prop && this.props.prop.items  &&  this.props.prop.backlink
+    return /*hasBacklink  &&*/  (isVerification  || isForm || (model.subClassOf  &&  (model.subClassOf === constants.TYPES.VERIFICATION  ||  model.subClassOf === constants.TYPES.FORM)))
     ? (<VerificationRow
         onSelect={() => this.selectResource(isVerification ? resource.document : resource)}
         key={resource[constants.ROOT_HASH]}
         navigator={this.props.navigator}
         prop={this.props.prop}
         currency={this.props.currency}
+        isChooser={this.props.isChooser}
         resource={resource} />
       )
     : (<ResourceRow
@@ -502,21 +511,31 @@ class ResourceList extends Component {
   }
   showMenu() {
     var buttons = [translate('addServerUrl')/*, 'Scan QR code'*/, translate('cancel')]
+    let allowToAdd = this.props.prop  &&  this.props.prop.allowToAdd
+    var buttons = allowToAdd
+                ? [translate('add'), translate('addServerUrl')/*, 'Scan QR code'*/, translate('cancel')]
+                : [translate('addServerUrl')/*, 'Scan QR code'*/, translate('cancel')]
     var self = this;
     ActionSheetIOS.showActionSheetWithOptions({
       options: buttons,
       // cancelButtonIndex: 2
-      cancelButtonIndex: 1
+      cancelButtonIndex: allowToAdd ? 2 : 1
     }, function(buttonIndex) {
       switch (buttonIndex) {
       // case 0:
       //   Actions.talkToRepresentative(self.props.resource)
       //   break
       case 0:
-        self.onSettingsPressed()
+        if (allowToAdd)
+          self.addNew()
+        else
+          self.onSettingsPressed()
         break
       case 1:
-        self.scanQRCode()
+        if (allowToAdd)
+          self.onSettingsPressed()
+        // else
+        // self.scanQRCode()
         break;
       default:
         return
@@ -592,6 +611,15 @@ class ResourceList extends Component {
         }
       }
     }
+    // Setting some property like insured person. The value for it will be another form
+    //
+    if (this.props.prop  &&  model.subClassOf === constants.TYPES.FORM) {
+      if (!r)
+        r = {}
+      r[constants.TYPE] = this.props.prop.ref;
+      r.from = this.props.resource.from
+      r.to = this.props.resource.to
+    }
     this.props.navigator.push({
       title: model.title,
       id: 4,
@@ -616,11 +644,12 @@ class ResourceList extends Component {
     var content;
     var model = utils.getModel(this.props.modelName).value;
     if (this.state.dataSource.getRowCount() === 0              &&
-        model.subClassOf !== constants.TYPES.ENUM              &&
+        model.subClassOf !== ENUM                              &&
         this.props.modelName !== constants.TYPES.PROFILE       &&
         this.props.modelName !== constants.TYPES.VERIFICATION  &&
         this.props.modelName !== constants.TYPES.ORGANIZATION  &&
-        (!model.subClassOf  ||  model.subClassOf !== constants.TYPES.ENUM)) {
+        !this.props.isChooser                                  &&
+        (!model.subClassOf  ||  model.subClassOf !== ENUM)) {
       content = <NoResources
                   filter={this.state.filter}
                   model={model}
