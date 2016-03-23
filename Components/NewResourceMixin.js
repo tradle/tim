@@ -1,8 +1,10 @@
 'use strict';
 
 var React = require('react-native');
+var moment = require('moment')
 var ResourceList = require('./ResourceList')
 var EnumList = require('./EnumList')
+var Picker = require('./Picker')
 var FloatLabel = require('react-native-floating-labels')
 var Icon = require('react-native-vector-icons/Ionicons');
 var utils = require('../utils/utils');
@@ -15,7 +17,7 @@ var Device = require('react-native-device')
 var extend = require('extend');
 var DEFAULT_CURRENCY_SYMBOL = '£';
 var CURRENCY_SYMBOL
-
+var ENUM = 'tradle.Enum'
 // var Picker = require('react-native-picker')
 // var NewDatePicker = require('./NewDatePicker')
 
@@ -154,13 +156,15 @@ var NewResourceMixin = {
         //   options.fields[p].onChange = this.onChange.bind(this);
         model[p] = !model[p]  &&  (maybe ? t.maybe(formType) : formType);
         if (data  &&  (type == 'date')) {
-          // model[p] = t.Str
-          // options.fields[p].template = this.myDateTemplate.bind(this, {
-          //           label: label,
-          //           prop:  props[p],
-          //           model: meta,
-          //           value: data[p] ? new Date(data[p]) : data[p]
-          //         })
+          model[p] = t.Str
+          options.fields[p].template = this.myDateTemplate.bind(this, {
+                    label: label,
+                    prop:  props[p],
+                    model: meta,
+                    value: data[p] ? new Date(data[p]) : data[p]
+                  })
+          // if (!this.state.modal || typeof this.state.modal[p] === 'undefined')
+          //   this.state.modal[p] = false
 
           if (data[p])
             data[p] = new Date(data[p]);
@@ -322,6 +326,10 @@ var NewResourceMixin = {
               })
     }
     */
+    var order = []
+    for (var p in model)
+      order.push(p)
+
     return options;
   },
   getNextKey() {
@@ -408,6 +416,79 @@ var NewResourceMixin = {
       </View>
     );
   },
+  myDateTemplate(params) {
+    var labelStyle = {color: '#cccccc', fontSize: 17, paddingLeft: 10, paddingBottom: 10};
+    var textStyle = {color: this.state.isRegistration ? '#ffffff' : '#000000', fontSize: 17, paddingLeft: 10, paddingBottom: 10};
+    var prop = params.prop
+    let resource = this.state.resource
+    let label, style, propLabel
+    if (resource && resource[prop.name]) {
+      label = resource[prop.name].title
+      style = textStyle
+      propLabel = <View style={{marginLeft: 10, marginTop: 5, marginBottom: 5, backgroundColor: this.state.isRegistration ? 'transparent' : '#ffffff'}}>
+                    <Text style={{fontSize: 12, height: 12, color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}}>{params.label}</Text>
+                  </View>
+    }
+    else {
+      label = params.label
+      style = labelStyle
+      propLabel = <View style={{marginTop: 20}}/>
+    }
+
+    var err = this.state.missedRequiredOrErrorValue
+            ? this.state.missedRequiredOrErrorValue[prop.name]
+            : null
+    var error = err
+              ? <View style={{paddingLeft: 5, backgroundColor: 'transparent'}}>
+                  <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>This field is required</Text>
+                </View>
+              : <View />
+
+    return (
+      <View style={styles.dateContainer}>
+       {propLabel}
+       <TouchableHighlight style={styles.button} underlayColor="transparent" onPress={this.showModal.bind(this, prop, true)}>
+         <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+           <Text style={style}>{(params.value &&  moment(params.value).format('MMMM Do, YYYY')) || translate(params.prop)}</Text>
+          <Icon name='ios-calendar-outline'  size={17}  color='#a94442'  style={styles.icon1} />
+         </View>
+       </TouchableHighlight>
+       { /*this.state.modal[prop.name]*/ this.state.modal  &&  this.state.modal[prop.name]
+        ? <Picker closeModal={() => {
+           this.showModal(prop, false)
+        }} offSet={this.state.offSet} value={params.value} prop={params.prop} changeTime={this.changeTime.bind(this, params.prop)}  />
+        : (err ? error : null) }
+      </View>
+    );
+  },
+  // showModal(prop, show) {
+  //   this.setState({modal: show})
+  // },
+  showModal(prop, show) {
+    let m = {}
+    extend(true, m, this.state.modal)
+    if (show)
+      m[prop.name] = show
+    else {
+      for (let p in m)
+        m[p] = false
+    }
+
+    this.setState({modal: m})
+  },
+  changeTime: function(prop, time) {
+    var r = {}
+    extend(true, r, this.state.resource)
+    r[prop.name] = time.getTime()
+    if (!this.floatingProps)
+      this.floatingProps = {}
+    this.floatingProps[prop.name] = time
+    this.setState({
+      resource: r,
+    });
+
+   },
+
   // myDateTemplate (prop) {
   //   return (<NewDatePicker prop={prop}/>)
   // },
@@ -427,8 +508,8 @@ var NewResourceMixin = {
   //   }
   // },
   myCustomTemplate(params) {
-    var labelStyle = {color: '#cccccc', fontSize: 18, paddingLeft: 10, paddingBottom: 10};
-    var textStyle = {color: this.state.isRegistration ? '#ffffff' : '#000000', fontSize: 18, paddingLeft: 10, paddingBottom: 10};
+    var labelStyle = {color: '#cccccc', fontSize: 17, paddingLeft: 10, paddingBottom: 10};
+    var textStyle = {color: this.state.isRegistration ? '#ffffff' : '#000000', fontSize: 17, paddingLeft: 10, paddingBottom: 10};
     var resource = /*this.props.resource ||*/ this.state.resource
     var label, style
     var propLabel, propName
@@ -443,7 +524,7 @@ var NewResourceMixin = {
 
       if (!label)
         label = resource[params.prop].title
-      if (rModel.subClassOf  &&  rModel.subClassOf === constants.TYPES.ENUM)
+      if (rModel.subClassOf  &&  rModel.subClassOf === ENUM)
         label = utils.createAndTranslate(label, true)
       style = textStyle
       propLabel = <View style={{marginLeft: 10, marginTop: 5, marginBottom: 5, backgroundColor: this.state.isRegistration ? 'transparent' : '#ffffff'}}>
@@ -502,13 +583,14 @@ var NewResourceMixin = {
       backButtonTitle: translate('back'),
       sceneConfig: isFinancialProduct ? Navigator.SceneConfigs.FloatFromBottom : Navigator.SceneConfigs.FloatFromRight,
       passProps: {
-        filter:      filter,
-        prop:        prop.name,
-        modelName:   propRef,
-        resource:    resource,
+        filter:         filter,
+        isChooser:      true,
+        prop:           prop,
+        modelName:      propRef,
+        resource:       resource,
         isRegistration: this.state.isRegistration,
-        returnRoute: currentRoutes[currentRoutes.length - 1],
-        callback:    this.setChosenValue.bind(this),
+        returnRoute:    currentRoutes[currentRoutes.length - 1],
+        callback:       this.setChosenValue.bind(this),
       }
     });
   },
@@ -517,6 +599,8 @@ var NewResourceMixin = {
   setChosenValue(propName, value) {
     var resource = {}
     extend(resource, this.state.resource)
+    if (typeof propName === 'object')
+      propName = propName.name
     // clause for the items properies - need to redesign
     if (this.props.metadata  &&  this.props.metadata.type === 'array') {
       if (!this.floatingProps)
@@ -584,8 +668,8 @@ var NewResourceMixin = {
   },
 
   myEnumTemplate(params) {
-    var labelStyle = {color: '#cccccc', fontSize: 18, paddingLeft: 10, paddingBottom: 10};
-    var textStyle = {color: '#000000', fontSize: 18, paddingLeft: 10, paddingBottom: 10};
+    var labelStyle = {color: '#cccccc', fontSize: 17, paddingLeft: 10, paddingBottom: 10};
+    var textStyle = {color: '#000000', fontSize: 17, paddingLeft: 10, paddingBottom: 10};
     var label
     var prop = params.prop
     var enumProp = params.enumProp
@@ -771,7 +855,7 @@ var styles = StyleSheet.create({
     marginTop: 25,
     marginLeft: 20,
     color: '#757575',
-    fontSize: 18
+    fontSize: 17
   },
   icon1: {
     width: 15,
@@ -783,6 +867,15 @@ var styles = StyleSheet.create({
     height: 20,
     marginLeft: -5,
     marginRight: 5,
+  },
+  dateContainer: {
+    // height: 60,
+    borderColor: '#ffffff',
+    borderBottomColor: '#cccccc',
+    borderBottomWidth: 0.5,
+    marginLeft: 10,
+    marginBottom: 10,
+    flex: 1
   },
   chooserContainer: {
     height: 60,
@@ -813,7 +906,26 @@ var styles = StyleSheet.create({
   },
   input: {
     borderWidth: 0,
-  }
+  },
+  closeButtonContainer: {
+   flexDirection: 'row',
+    justifyContent: 'flex-end',
+    borderTopColor: '#e2e2e2',
+    borderTopWidth: 1,
+    borderBottomColor: '#e2e2e2',
+    borderBottomWidth:1
+  },
+  closeButton: {
+   paddingRight:10,
+    paddingTop:10,
+    paddingBottom:10
+  },
+  buttonText: {
+   textAlign: 'center'
+  },
+  closeButtonText: {
+   color: '027afe'
+  },
 });
 module.exports = NewResourceMixin;
 
