@@ -49,7 +49,8 @@ var {
   // LayoutAnimation,
   Component,
   Navigator,
-  TouchableHighlight
+  TouchableHighlight,
+  Animated
 } = React;
 
 class NewResource extends Component {
@@ -83,7 +84,10 @@ class NewResource extends Component {
       isUploading: !isRegistration  &&  (!r[constants.ROOT_HASH] || Object.keys(r).length === 2),
       isRegistration: isRegistration,
       isLoading: false,
-      isPrefilled: this.props.isPrefilled
+      isPrefilled: this.props.isPrefilled,
+      // modal: false,
+      modal: {},
+      offSet: new Animated.Value(Dimensions.get('window').height)
       // isModalOpen: false,
       // currentPhoto: r.photos &&  r.photos.length ? r.photos[0].url : null
     }
@@ -118,7 +122,8 @@ class NewResource extends Component {
   }
   shouldComponentUpdate(nextProps, nextState) {
     return nextState.err                      ||
-           nextState.missedRequiredOrErrorValue           ||
+           nextState.missedRequiredOrErrorValue              ||
+           this.state.modal !== nextState.modal              ||
            this.state.prop !== nextState.prop                ||
            this.state.isUploading !== nextState.isUploading  ||
            this.state.isLoading !== nextState.isLoading      ||
