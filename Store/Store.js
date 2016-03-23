@@ -2189,10 +2189,13 @@ var Store = Reflux.createStore({
     var meta = this.getModel(modelName).value;
     var isVerification = modelName === VERIFICATION  ||  meta.subClassOf === VERIFICATION;
     var chatTo = params.to
+    if (chatTo  &&  chatTo.id)
+      chatTo = list[utils.getId(chatTo)].value
+
     var prop = params.prop;
     if (typeof prop === 'string')
       prop = meta[prop];
-    var backlink = prop ? prop.items.backlink : prop;
+    var backlink = prop ? (prop.items ? prop.items.backlink : prop) : null;
     var foundResources = {};
     var isAllMessages = meta.isInterface;
     var props = meta.properties;
@@ -2391,7 +2394,7 @@ var Store = Reflux.createStore({
             continue
         }
         else if (!isChatToForm) {
-          if (fromID !== chatId  &&  toID != chatId  &&  toID != meOrgId)
+          if (!isSharedWith  &&  fromID !== chatId  &&  toID != chatId  &&  toID != meOrgId)
             continue;
         }
       }
