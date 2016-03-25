@@ -8,6 +8,9 @@ var Picker = require('./Picker')
 var FloatLabel = require('react-native-floating-labels')
 var Icon = require('react-native-vector-icons/Ionicons');
 var utils = require('../utils/utils');
+var CameraView = require('./CameraView')
+import Camera from 'react-native-camera'
+
 var translate = utils.translate
 
 var constants = require('@tradle/constants');
@@ -39,10 +42,17 @@ var {
   Navigator,
   Dimensions
 } = React;
+var LINK_COLOR, DEFAULT_LINK_COLOR = '#a94442'
 
 var NewResourceMixin = {
   getFormFields(params) {
     CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol ||  this.props.currency : DEFAULT_CURRENCY_SYMBOL
+
+    if (this.props.bankStyle)
+      LINK_COLOR = this.props.bankStyle.LINK_COLOR || DEFAULT_LINK_COLOR
+    else
+      LINK_COLOR = DEFAULT_LINK_COLOR
+
     var meta = this.props.model  ||  this.props.metadata;
     var model = params.model;  // For the form
     var isMessage = meta.interfaces
@@ -62,10 +72,10 @@ var NewResourceMixin = {
       if (!meta.items.ref)
         props = meta.items.properties;
       else
-        props = this.getModel(meta.items.ref).value.properties;
+        props = utils.getModel(meta.items.ref).value.properties;
     }
 
-    var dModel = data  &&  models[data[constants.TYPE]];
+    var dModel = data  &&  models[data[constants.TYPE]]
     if (!utils.isEmpty(data)) {
       if (!meta.items && data[constants.TYPE] !== meta.id) {
         var interfaces = meta.interfaces;
@@ -95,7 +105,7 @@ var NewResourceMixin = {
     var eCols = editCols ? editCols : props;
     var required = utils.arrayToObject(meta.required);
     // var d = data ? data[i] : null;
-    for (let p in eCols) {
+    for (var p in eCols) {
       if (p === constants.TYPE  ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink))
         continue;
 
@@ -235,7 +245,6 @@ var NewResourceMixin = {
           }
           else
             continue;
-
         }
         if (ref === constants.TYPES.MONEY) {
           model[p] = maybe ? t.maybe(t.Num) : t.Num;
@@ -326,9 +335,22 @@ var NewResourceMixin = {
               })
     }
     */
-    var order = []
-    for (var p in model)
-      order.push(p)
+    // var order = []
+    // for (var p in model)
+    //   order.push(p)
+
+    // HACK for video
+    if (eCols.video) {
+      var maybe = required  &&  !required.hasOwnProperty('video');
+
+      model.video = maybe ? t.maybe(t.Str) : t.Str;
+
+      options.fields.video.template = this.myCustomTemplate.bind(this, {
+          label: translate(props.video, meta),
+          prop:  'video',
+          required: !maybe,
+        })
+    }
 
     return options;
   },
@@ -374,6 +396,46 @@ var NewResourceMixin = {
       r[p] = this.floatingProps[p]
     Actions.saveTemporary(r)
   },
+  showCamera(params) {
+    var self = this;
+    this.props.navigator.push({
+      title: 'Take a pic',
+      backButtonTitle: 'Cancel',
+      id: 12,
+      component: CameraView,
+      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      passProps: {
+        onTakePic: this.onTakePic.bind(this, params)
+      }
+    });
+  },
+  // showCamera(params) {
+
+  //   return (
+  //     <View style={styles.container}>
+  //       <Camera
+  //         ref={(cam) => {
+  //           this.camera = cam;
+  //         }}
+  //         style={styles.preview}
+  //         aspect={Camera.constants.Aspect.fill}>
+  //         <Text style={styles.capture} onPress={this.takePicture.bind(this)}>[CAPTURE]</Text>
+  //       </Camera>
+  //     </View>
+  //   );
+  // },
+
+  onTakePic(params, data) {
+    if (!data)
+      return
+    this.props.resource.video = data
+    if (!this.floatingProps)
+      this.floatingProps = {}
+
+    this.floatingProps.video = data
+    this.props.navigator.pop();
+  },
+
   myTextInputTemplate(params) {
     var error
     if (params.noError)
@@ -450,7 +512,7 @@ var NewResourceMixin = {
        <TouchableHighlight style={styles.button} underlayColor="transparent" onPress={this.showModal.bind(this, prop, true)}>
          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
            <Text style={style}>{(params.value &&  moment(params.value).format('MMMM Do, YYYY')) || translate(params.prop)}</Text>
-          <Icon name='ios-calendar-outline'  size={17}  color='#a94442'  style={styles.icon1} />
+          <Icon name='ios-calendar-outline'  size={17}  color={LINK_COLOR}  style={styles.icon1} />
          </View>
        </TouchableHighlight>
        { /*this.state.modal[prop.name]*/ this.state.modal  &&  this.state.modal[prop.name]
@@ -544,14 +606,21 @@ var NewResourceMixin = {
                   <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>This field is required</Text>
                 </View>
               : <View />
+    let isVideo = prop.name === 'video'
+    let isPhoto = prop.name === 'photos'
     return (
       <View style={styles.chooserContainer} key={this.getNextKey()} ref={prop.name}>
-        <TouchableHighlight underlayColor='transparent' onPress={this.chooser.bind(this, prop, params.prop)}>
+        <TouchableHighlight underlayColor='transparent' onPress={
+          isVideo ? this.showCamera.bind(this, params) : this.chooser.bind(this, prop, params.prop)
+        }>
           <View style={{ position: 'relative'}}>
             {propLabel}
             <View style={styles.chooserContentStyle}>
               <Text style={style}>{label}</Text>
-              <Icon name='ios-arrow-down'  size={15}  color={this.state.isRegistration ? '#eeeeee' : '#96415A'}  style={styles.icon1} />
+              {isVideo
+                ? <Icon name='ios-play-outline'  size={25}  color={LINK_COLOR} />
+                : <Icon name='ios-arrow-down'  size={15}  color={this.state.isRegistration ? '#eeeeee' : LINK_COLOR}  style={styles.icon1} />
+              }
             </View>
            {error}
           </View>
@@ -907,25 +976,24 @@ var styles = StyleSheet.create({
   input: {
     borderWidth: 0,
   },
-  closeButtonContainer: {
-   flexDirection: 'row',
-    justifyContent: 'flex-end',
-    borderTopColor: '#e2e2e2',
-    borderTopWidth: 1,
-    borderBottomColor: '#e2e2e2',
-    borderBottomWidth:1
-  },
-  closeButton: {
-   paddingRight:10,
-    paddingTop:10,
-    paddingBottom:10
-  },
   buttonText: {
    textAlign: 'center'
   },
-  closeButtonText: {
-   color: '027afe'
+  preview: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    height: Dimensions.get('window').height,
+    width: Dimensions.get('window').width
   },
-});
+  capture: {
+    flex: 0,
+    backgroundColor: '#fff',
+    borderRadius: 5,
+    color: '#000',
+    padding: 10,
+    margin: 40
+  }
+})
 module.exports = NewResourceMixin;
 
