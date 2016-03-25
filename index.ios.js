@@ -43,7 +43,7 @@ var ArticleView = require('./Components/ArticleView');
 var IdentitiesList = require('./Components/IdentitiesList');
 // var SelectPhotoList = require('./Components/SelectPhotoList');
 var ProductChooser = require('./Components/ProductChooser')
-// var CameraView = require('./Components/CameraView');
+var CameraView = require('./Components/CameraView');
 var PhotoCarousel = require('./Components/PhotoCarousel');
 var QRCode = require('./Components/QRCode')
 var QRCodeScanner = require('./Components/QRCodeScanner')
@@ -339,8 +339,8 @@ class TiMApp extends Component {
       return <ItemsList navigator={nav} {...props} />
     case 11:
       return <MessageList navigator={nav} {...props} />
-    // case 12:
-    //   return <CameraView />
+    case 12:
+      return <CameraView navigator={nav} {...props}/>
       // <CameraView navigator={nav}
       //             onTakePic={props.onTakePic}
       //             resource={props.resource}
