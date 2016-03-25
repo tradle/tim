@@ -26,6 +26,8 @@ var DeviceWidth
 var constants = require('@tradle/constants');
 var UIImagePickerManager = require('NativeModules').UIImagePickerManager;
 // var delayedRegistration
+var LINK_COLOR, DEFAULT_LINK_COLOR = '#a94442'
+
 // var Modal = require('react-native-modal')
 // var PhotoCarouselMixin = require('./PhotoCarouselMixin')
 
@@ -69,6 +71,10 @@ class NewResource extends Component {
     super(props);
     this.updateKeyboardSpace = this.updateKeyboardSpace.bind(this);
     this.resetKeyboardSpace = this.resetKeyboardSpace.bind(this);
+    if (this.props.bankStyle)
+      LINK_COLOR = this.props.bankStyle.LINK_COLOR || DEFAULT_LINK_COLOR
+    else
+      LINK_COLOR = DEFAULT_LINK_COLOR
     var r = {};
     if (props.resource)
       extend(true, r, props.resource)
@@ -691,7 +697,10 @@ class NewResource extends Component {
         //     </View>;
         // else
           counter = <View style={{paddingHorizontal: 5}}>
-                      <Icon name='plus'   size={15}  color='#7AAAC3' />
+                    { bl.name === 'photos'
+                      ? <Icon name='ios-camera-outline'   size={25}  color={LINK_COLOR} />
+                      : <Icon name='plus'   size={15}  color='#7AAAC3' />
+                    }
                     </View>
       }
       var title = bl.title || utils.makeLabel(p)
