@@ -579,6 +579,8 @@ var NewResourceMixin = {
     var prop = this.props.model
              ? this.props.model.properties[params.prop]
              : this.props.metadata.items.properties[params.prop]
+
+    let isRequired = this.props.model && this.props.model.required  &&  this.props.model.required.indexOf(params.prop) !== -1
     if (resource && resource[params.prop]) {
       var m = utils.getId(resource[params.prop]).split('_')[0]
       var rModel = utils.getModel(m).value
@@ -590,7 +592,7 @@ var NewResourceMixin = {
         label = utils.createAndTranslate(label, true)
       style = textStyle
       propLabel = <View style={{marginLeft: 10, marginTop: 5, marginBottom: 5, backgroundColor: this.state.isRegistration ? 'transparent' : '#ffffff'}}>
-                    <Text style={{fontSize: 12, height: 12, color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}}>{params.label}</Text>
+                    <Text style={{fontSize: 12, height: 12, color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}}>{params.label + (isRequired ? '' : ' ' + translate('optional'))}</Text>
                   </View>
     }
     else {
@@ -616,7 +618,7 @@ var NewResourceMixin = {
           <View style={{ position: 'relative'}}>
             {propLabel}
             <View style={styles.chooserContentStyle}>
-              <Text style={style}>{label}</Text>
+              <Text style={style}>{label + (isRequired ? '' : ' ' + translate('optional'))}</Text>
               {isVideo
                 ? <Icon name='ios-play-outline'  size={25}  color={LINK_COLOR} />
                 : <Icon name='ios-arrow-down'  size={15}  color={this.state.isRegistration ? '#eeeeee' : LINK_COLOR}  style={styles.icon1} />
@@ -845,6 +847,8 @@ var NewResourceMixin = {
     for (var p in value) {
       let prop = properties[p]
       if (!prop  ||  p.charAt(0) === '_')
+        continue
+      if (!value[p])
         continue
       if (prop.type === 'number')
         this.checkNumber(value[p], prop, err)
