@@ -4,12 +4,12 @@ var React = require('react-native');
 var Carousel = require('react-native-carousel');
 var utils = require('../utils/utils');
 var constants = require('@tradle/constants');
-var Device = require('react-native-device')
 
 var {
   StyleSheet,
   Component,
   Image,
+  Dimensions,
   View,
 } = React;
 
