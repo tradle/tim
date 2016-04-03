@@ -103,6 +103,8 @@ class MessageRow extends Component {
     var isVerification = resource[constants.TYPE] === constants.TYPES.VERIFICATION;
     if (isVerification)
       onPressCall = this.verify.bind(this);
+    else if (resource[constants.TYPE] === 'tradle.FormError')
+      onPressCall = this.showEditResource.bind(this)
     else {
       var ret = this.formatRow(isMyMessage, model, resource, renderedRow);
       onPressCall = ret ? ret.onPressCall : null
@@ -359,6 +361,44 @@ class MessageRow extends Component {
         editCols: ['photos']
       }
     })
+  }
+  showEditResource() {
+    let editCols = []
+    let errs = []
+    for (let p of this.props.resource.errors) {
+      editCols.push(p.name)
+      errs.push(p.error)
+    }
+    var r = this.props.resource.form
+    var me = utils.getMe()
+    r.from = {
+      id: utils.getId(me)
+      title: utils.getDisplayName(me, utils.getModel(constants.TYPES.Profile).value.properties)
+    }
+    r.to = this.props.resource.from
+
+    // Prefill for testing and demoing
+    var isPrefilled = model.id in formDefaults
+    if (isPrefilled)
+      extend(true, resource, formDefaults[model.id])
+
+    this.props.navigator.push({
+      id: 4,
+      title: translate(model),
+      rightButtonTitle: translate('done'),
+      backButtonTitle: translate('back'),
+      component: NewResource,
+      // titleTextColor: '#7AAAC3',
+      passProps:  {
+        model: utils.getModel(r[constants.TYPE]).value,
+        resource: r,
+        isPrefilled: isPrefilled,
+        currency: this.props.currency,
+        bankStyle: this.props.bankStyle,
+        originatingMessage: this.props.resource
+      }
+    });
+
   }
   showVerifications(rowStyle, viewStyle, addStyle) {
     if (!this.props.verificationsToShare || !this.props.resource.message)
