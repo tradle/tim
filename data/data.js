@@ -528,19 +528,19 @@ var resources = [
 },
 {
   _t: 'tradle.CommercialProduct',
-  mortgageProductType: 'Obvion'
+  productType: 'Obvion'
 },
 {
   _t: 'tradle.CommercialProduct',
-  mortgageProductType: 'Basis'
+  productType: 'Basis'
 },
 {
   _t: 'tradle.CommercialProduct',
-  mortgageProductType: 'Compact'
+  productType: 'Compact'
 },
 {
   _t: 'tradle.CommercialProduct',
-  mortgageProductType: 'ABP'
+  productType: 'ABP'
 },
 {
   _t: 'tradle.RepaymentType',
