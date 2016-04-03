@@ -739,6 +739,22 @@ class ResourceList extends Component {
     //   }
     // })
   }
+  scanFormsQRCode() {
+    this.props.navigator.push({
+      title: 'Scan QR Code',
+      id: 16,
+      component: QRCodeScanner,
+      titleTintColor: '#eeeeee',
+      backButtonTitle: 'Cancel',
+      // rightButtonTitle: 'ion|ios-reverse-camera',
+      passProps: {
+        onread: function (result) {
+          // post to server request for the forms that were filled on the web
+          console.log(result)
+        }
+      }
+    })
+  }
 }
 reactMixin(ResourceList.prototype, Reflux.ListenerMixin);
 
