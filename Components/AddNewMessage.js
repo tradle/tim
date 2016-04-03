@@ -12,7 +12,7 @@ var Reflux = require('reflux');
 var Actions = require('../Actions/Actions');
 var constants = require('@tradle/constants');
 
-var UIImagePickerManager = require('NativeModules').UIImagePickerManager;
+var UIImagePickerManager = require('NativeModules').ImagePickerManager;
 
 var {
   View,
