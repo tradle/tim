@@ -62,4 +62,5 @@
     "shareOne": "{1}, this is your personal privacy assistant. I see you've already had your {2} verified. You can tap below to share it with {3}.",
     "shareOneOfMany": "{1}, this is your personal privacy assistant. I see you've already had your {2} verified. You can tap on any items in the list below to share them with {3}.",
     "verificationTransactionID": "Verification Transaction Id",
+    "setDateValue": "Set"
 }

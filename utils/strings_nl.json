@@ -27,12 +27,12 @@
     "details": "Details",
     "addServerUrl": "Add server url",
     "search": "Zoeken",
-    "listOfProducts": "Klik hier voor een lijst van producten", //Click for a list of products
-    "hello": "Hallo {1}!",  // {1} is the first name of the customer
+    "listOfProducts": "Klik hier voor een lijst van producten",
+    "hello": "Hallo {1}!",
     "testForgetMe": "This is a test mechanism to reset all communications with this provider",
-    "confirmForgetMe": "Bent u zeker dat u willen {1} om u te vergeten", //Are you sure you want \\'{1}\\' to forget you", //{1} is the bank name
+    "confirmForgetMe": "Bent u zeker dat u willen {1} om u te vergeten",
     "forgetMe": "Vergeet me",
-    "iNeed": "Ik heb nodig", //"I need...",
+    "iNeed": "Ik heb nodig",
     "LivingWithParents": "Leven met ouders",
     "HomeOwnerWithMortgage": "Home owner (with mortgage)",
     "HomeOwnerWithoutMortgage": "Home owner (without mortgage)",
@@ -55,13 +55,13 @@
     "shareOneOfMany": "{1}, dit is uw persoonlijke privacy assistent. Ik zie dat je al hebt gehad uw {2} geverifieerd. U kunt tikken op alle items in de lijst hieronder om ze te delen met {3}.",
     "Share": "Delen",
     "tapToRemovePhotos": "Tap to remove photos",
-    "addNew": "Add new {1}", // {1} is items property type like 'tradle.Profile' for property 'contacts' of 'tradle.Organization'
+    "addNew": "Add new {1}",
     "switchToRepresentative": "Switching to representative mode is not yet implemented.",
     "fillTheForm": "Vul dit formulier in en voeg een momentopname van het originele document",
     "verifiedBy": "Geverifieërd door {1}",
     "typeMessage": "Type a message",
     "newProductMsg": "{1}, we're very happy to assist you with your application for {2}. Please hold just a moment.",
-    "FulltimeEmployment": "Vast dienstverband onbepaalde tijd",
+    "FulltimeEmployee": "Vast dienstverband onbepaalde tijd",
     "TemporaryEmployment": "Tijdelijk dienstverband",
     "FlexIncome": "Flexibel dienstverband",
     "Employed": "Loondienst",
@@ -107,4 +107,5 @@
     "College": "HBO",
     "University": "Universitair",
     "verificationTransactionID": "Verificatie Transaction Id",
+    "setDateValue": "Set"
 }
