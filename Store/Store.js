@@ -201,6 +201,7 @@ var Store = Reflux.createStore({
         key: m.id,
         value: m
       }
+      self.addNameAndTitleProps(m)
     })
 
     // if (true) {
@@ -215,8 +216,8 @@ var Store = Reflux.createStore({
 
     return this.ready = Q.all([
         this.getMe(),
-        this.getSettings(),
-        this.loadModels()
+        this.getSettings()
+        // this.loadModels()
       ])
       .then(() => {
         // this.loadMyResources()
@@ -254,6 +255,10 @@ var Store = Reflux.createStore({
       }
     })
     .then (function(value) {
+      list[IDENTITY + '_' + value[ROOT_HASH]] = {
+        key: IDENTITY + '_' + value[ROOT_HASH],
+        value: value
+      }
       return db.get(PROFILE + '_' + value[ROOT_HASH])
     })
     .then(function(value) {
@@ -3583,12 +3588,14 @@ var Store = Reflux.createStore({
     if (myId)
       myId = PROFILE + '_' + myId;
     var self = this;
-    var loadingModels = false;
 
     // console.time('dbStream')
     var orgContacts = {}
     return utils.readDB(db)
     .then((results) => {
+      if (!results.length)
+        return self.loadModels();
+
       results.forEach((data) => {
         if (data.value == null) return
 
