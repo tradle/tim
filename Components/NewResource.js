@@ -24,7 +24,7 @@ var equal = require('deep-equal')
 var DeviceHeight
 var DeviceWidth
 var constants = require('@tradle/constants');
-var UIImagePickerManager = require('NativeModules').UIImagePickerManager;
+var UIImagePickerManager = require('NativeModules').ImagePickerManager;
 // var delayedRegistration
 var LINK_COLOR, DEFAULT_LINK_COLOR = '#a94442'
 
@@ -534,7 +534,10 @@ class NewResource extends Component {
   }
   showChoice() {
     var self = this;
-    UIImagePickerManager.showImagePicker({returnIsVertical: true}, (doCancel, response) => {
+    UIImagePickerManager.showImagePicker({
+      returnIsVertical: true,
+      chooseFromLibraryButtonTitle: null
+    }, (doCancel, response) => {
       if (doCancel)
         return;
 
@@ -543,7 +546,7 @@ class NewResource extends Component {
         url: 'data:image/jpeg;base64,' + response.data,
         isVertical: response.isVertical,
         width: response.width,
-        height: response.height
+        height: response.height,
       };
       self.onAddItem('photos', item);
     });
