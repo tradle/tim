@@ -28,7 +28,7 @@ class QRCodeScannerView extends Component {
       <Camera
         ref="cam"
         style={styles.container}
-        onBarCodeRead={this._onBarCodeRead}
+        onBarCodeRead={this._onBarCodeRead.bind(this)}
         type={this.state.cameraType}>
         <TouchableHighlight onPress={this._switchCamera.bind(this)} style={styles.flip}>
           <Icon name='ios-reverse-camera' size={25} color='#eeeeee' style={styles.icon} />

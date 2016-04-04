@@ -39,23 +39,23 @@ class PhotoCarousel extends Component {
           currentPhotoIndex = i;
         var key = r[constants.ROOT_HASH] + cnt++
         if (photo.width) {
-          var w = Device.width
+          var w = Dimensions.get('window').width
           var h, padding
-          if (photo.width > Device.width) {
-            h = photo.height * Device.width / photo.width
+          if (photo.width > Dimensions.get('window').width) {
+            h = photo.height * Dimensions.get('window').width / photo.width
             // if (photo.isVertical)
-            //   h = Device.width * 1.2
+            //   h = Dimensions.get('window').width * 1.2
             // else
-            //   h = Device.width / 1.2
+            //   h = Dimensions.get('window').width / 1.2
           }
           else {
             h = photo.height
             w = photo.width
-            padding = (Device.width - photo.width) / 2
+            padding = (Dimensions.get('window').width - photo.width) / 2
           }
 
-          if (h > 3 * Device.height / 4)
-            h = 3 * Device.height / 4
+          if (h > 3 * Dimensions.get('window').height / 4)
+            h = 3 * Dimensions.get('window').height / 4
 
           photos.push(
                         <View style={[styles.container, {paddingHorizontal: padding}]} key={key}>
@@ -97,7 +97,7 @@ class PhotoCarousel extends Component {
       n = currentPhotoIndex
     }
     return (
-      <Carousel width={Device.width}
+      <Carousel width={Dimensions.get('window').width}
                 loop={false}
                 animate={false}
                 indicatorOffset={40}
@@ -110,19 +110,19 @@ class PhotoCarousel extends Component {
 
 var styles = StyleSheet.create({
   image: {
-    width: Device.width,
-    height: Device.height - 200,
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height - 200,
   },
   imageH: {
-    width: Device.width,
-    height: Device.width - 100
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').width - 100
   },
   imageV: {
-    width: Device.width,
-    height: Device.height - 200,
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height - 200,
   },
   container: {
-    width: Device.width,
+    width: Dimensions.get('window').width,
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',

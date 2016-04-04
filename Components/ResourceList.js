@@ -116,6 +116,35 @@ class ResourceList extends Component {
 
       return;
     }
+    if (action === 'getForms') {
+      if (!params.to)
+        return
+      var route = {
+        title: params.to.name,
+        component: MessageList,
+        id: 11,
+        backButtonTitle: 'Back',
+        passProps: {
+          resource: params.to,
+          filter: '',
+          modelName: constants.TYPES.MESSAGE,
+          currency: params.to.currency,
+          bankStyle: params.to.bankStyle,
+          dictionary: params.dictionary
+        }
+      }
+      // var me = utils.getMe()
+      // var msg = {
+      //   message: me.firstName + ' is waiting for the response',
+      //   _t: constants.TYPES.SELF_INTRODUCTION,
+      //   identity: params.myIdentity,
+      //   from: me,
+      //   to: params.to
+      // }
+      // utils.onNextTransitionEnd(this.props.navigator, () => Actions.messageList({modelName: constants.TYPES.MESSAGE, to: params.to}))
+      this.props.navigator.push(route)
+      return
+    }
     if (action === 'talkToEmployee') {
       if (!params.to)
         return
@@ -509,39 +538,39 @@ class ResourceList extends Component {
     //   </View>
     // );
   }
-  showMenu() {
-    var buttons = [translate('addServerUrl')/*, 'Scan QR code'*/, translate('cancel')]
-    let allowToAdd = this.props.prop  &&  this.props.prop.allowToAdd
-    var buttons = allowToAdd
-                ? [translate('add'), translate('addServerUrl')/*, 'Scan QR code'*/, translate('cancel')]
-                : [translate('addServerUrl')/*, 'Scan QR code'*/, translate('cancel')]
-    var self = this;
-    ActionSheetIOS.showActionSheetWithOptions({
-      options: buttons,
-      // cancelButtonIndex: 2
-      cancelButtonIndex: allowToAdd ? 2 : 1
-    }, function(buttonIndex) {
-      switch (buttonIndex) {
-      // case 0:
-      //   Actions.talkToRepresentative(self.props.resource)
-      //   break
-      case 0:
-        if (allowToAdd)
-          self.addNew()
-        else
-          self.onSettingsPressed()
-        break
-      case 1:
-        if (allowToAdd)
-          self.onSettingsPressed()
-        // else
-        // self.scanQRCode()
-        break;
-      default:
-        return
-      }
-    });
-  }
+  // showMenu() {
+  //   var buttons = [translate('addServerUrl')/*, 'Scan QR code'*/, translate('cancel')]
+  //   let allowToAdd = this.props.prop  &&  this.props.prop.allowToAdd
+  //   var buttons = allowToAdd
+  //               ? [translate('add'), translate('addServerUrl')/*, 'Scan QR code'*/, translate('cancel')]
+  //               : [translate('addServerUrl')/*, 'Scan QR code'*/, translate('cancel')]
+  //   var self = this;
+  //   ActionSheetIOS.showActionSheetWithOptions({
+  //     options: buttons,
+  //     // cancelButtonIndex: 2
+  //     cancelButtonIndex: allowToAdd ? 2 : 1
+  //   }, function(buttonIndex) {
+  //     switch (buttonIndex) {
+  //     // case 0:
+  //     //   Actions.talkToRepresentative(self.props.resource)
+  //     //   break
+  //     case 0:
+  //       if (allowToAdd)
+  //         self.addNew()
+  //       else
+  //         self.onSettingsPressed()
+  //       break
+  //     case 1:
+  //       if (allowToAdd)
+  //         self.onSettingsPressed()
+  //       // else
+  //       // self.scanQRCode()
+  //       break;
+  //     default:
+  //       return
+  //     }
+  //   });
+  // }
   onSettingsPressed() {
     var model = utils.getModel(constants.TYPES.SETTINGS).value
     var route = {
@@ -718,6 +747,42 @@ class ResourceList extends Component {
       }
     })
   }
+  showMenu() {
+    var buttons = [translate('addServerUrl'), translate('scanQRcode'), translate('cancel')]
+    let allowToAdd = this.props.prop  &&  this.props.prop.allowToAdd
+    var buttons = allowToAdd
+                ? [translate('add'), translate('addServerUrl'), translate('scanQRcode'), translate('cancel')]
+                : buttons
+    var self = this;
+    ActionSheetIOS.showActionSheetWithOptions({
+      options: buttons,
+      cancelButtonIndex: allowToAdd ? 3 : 2
+    }, function(buttonIndex) {
+      switch (buttonIndex) {
+      // case 0:
+      //   Actions.talkToRepresentative(self.props.resource)
+      //   break
+      case 0:
+        if (allowToAdd)
+          self.addNew()
+        else
+          self.onSettingsPressed()
+        break
+      case 1:
+        if (allowToAdd)
+          self.onSettingsPressed()
+        else
+          self.scanFormsQRCode()
+        break;
+      case 2:
+        if (allowToAdd)
+          self.scanFormsQRCode()
+        break;
+      default:
+        return
+      }
+    });
+  }
 
   scanQRCode() {
     var qrcode = {
@@ -740,6 +805,7 @@ class ResourceList extends Component {
     // })
   }
   scanFormsQRCode() {
+    let self = this
     this.props.navigator.push({
       title: 'Scan QR Code',
       id: 16,
@@ -750,7 +816,21 @@ class ResourceList extends Component {
       passProps: {
         onread: function (result) {
           // post to server request for the forms that were filled on the web
-          console.log(result)
+          let h = result.data.split(':')
+          let me = utils.getMe()
+          let r = {
+            _t: 'tradle.GuestSessionProof',
+            session: h[0],
+            from: {
+              id: utils.getId(me),
+              title: utils.getDisplayName(me)
+            },
+            to: {
+              id: constants.TYPES.PROFILE + '_' + h[1]
+            }
+          }
+          self.props.navigator.pop()
+          Actions.addItem({resource: r, value: r, meta: utils.getModel('tradle.GuestSessionProof').value})
         }
       }
     })

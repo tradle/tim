@@ -372,8 +372,8 @@ class MessageRow extends Component {
     var r = this.props.resource.form
     var me = utils.getMe()
     r.from = {
-      id: utils.getId(me)
-      title: utils.getDisplayName(me, utils.getModel(constants.TYPES.Profile).value.properties)
+      id: utils.getId(me),
+      title: utils.getDisplayName(me)
     }
     r.to = this.props.resource.from
 

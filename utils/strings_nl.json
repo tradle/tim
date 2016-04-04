@@ -107,5 +107,6 @@
     "College": "HBO",
     "University": "Universitair",
     "verificationTransactionID": "Verificatie Transaction Id",
-    "setDateValue": "Set"
+    "setDateValue": "Set",
+    "scanQRcode": "Scan QR code"
 }

@@ -148,7 +148,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDER = ENV.topLevelProvider
-var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://127.0.0.1:44444' : TOP_LEVEL_PROVIDER.baseUrl
+var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.1.61:44444' : TOP_LEVEL_PROVIDER.baseUrl
 // var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.0.149:44444' : TOP_LEVEL_PROVIDER.baseUrl
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDER.name
@@ -216,8 +216,8 @@ var Store = Reflux.createStore({
 
     return this.ready = Q.all([
         this.getMe(),
-        this.getSettings()
-        // this.loadModels()
+        this.getSettings(),
+        this.loadModels()
       ])
       .then(() => {
         // this.loadMyResources()
@@ -1518,11 +1518,22 @@ var Store = Reflux.createStore({
       var tmpKey = returnVal[TYPE] + '_' + returnVal[ROOT_HASH]
       list[tmpKey] = {key: tmpKey, value: returnVal};
 
-      var params = {action: 'addItem', resource: returnVal}
+      var params;
+      if (returnVal[TYPE] === 'tradle.GuestSessionProof') {
+        let org = list[utils.getId(returnVal.to)].value.organization
+        org = list[utils.getId(org)].value
+        params = {action: 'getForms', to: org}
+      }
+      else
+        params = {
+          action: 'addItem',
+          resource: returnVal
+        }
       var m = self.getModel(returnVal[TYPE]).value
       if (m.subClassOf === FORM)
         params.sendStatus = 'Sending'
       self.trigger(params);
+
       return self.waitForTransitionToEnd()
       .then(function () {
         var to = list[utils.getId(returnVal.to)].value;
