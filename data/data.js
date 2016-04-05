@@ -284,11 +284,6 @@ var resources = [
   _t: "tradle.PaymentPeriod",
   paymentPeriod: "Yearly"
 },
-
-{
-  _t: "tradle.EnergyLabel",
-  energyLabel: "A"
-},
 {
   _t: "tradle.EnergyLabel",
   energyLabel: "A"
