@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "react-native start",
-    "postinstall": "npm run nodeify && npm run installhooks",
+    "postinstall": "npm run nodeify && npm run installhooks && npm run fixreact",
+    "fixreact": "find ./node_modules -type d -path \"*node_modules/react\" -and -not -path ./node_modules/react -print -exec rm -rf \"{}\" \\;",
     "nodeify": "./node_modules/.bin/rn-nodeify --hack && npm run streamhack",
     "installhooks": "cp hooks/* .git/hooks/",
     "streamhack": "rm -rf ./node_modules/@tradle/utils/node_modules/create-torrent/node_modules/block-stream2/node_modules/readable-stream"
