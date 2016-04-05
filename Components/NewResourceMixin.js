@@ -690,6 +690,11 @@ var NewResourceMixin = {
         id: id,
         title: utils.getDisplayName(value, utils.getModel(value[constants.TYPE]).value.properties)
       }
+
+      if (!this.floatingProps)
+        this.floatingProps = {}
+      this.floatingProps[propName] = resource[propName]
+
       var data = this.refs.form.refs.input.state.value;
       if (data) {
         for (var p in data)
