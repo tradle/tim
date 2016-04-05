@@ -120,8 +120,11 @@ var NewResourceMixin = {
       var label = translate(props[p], meta) //props[p].title;
       if (!label)
         label = utils.makeLabel(p);
+      let errMessage = (this.props.errs  &&  this.props.errs[p])
+                     ? this.props.errs[p]
+                     : translate('thisFieldIsRequired')
       options.fields[p] = {
-        error: translate('thisFieldIsRequired'), //'This field is required',
+        error: errMessage, //'This field is required',
         bufferDelay: 20, // to eliminate missed keystrokes
       }
       var isRange
@@ -592,7 +595,7 @@ var NewResourceMixin = {
         label = utils.createAndTranslate(label, true)
       style = textStyle
       propLabel = <View style={{marginLeft: 10, marginTop: 5, marginBottom: 5, backgroundColor: this.state.isRegistration ? 'transparent' : '#ffffff'}}>
-                    <Text style={{fontSize: 12, height: 12, color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}}>{params.label + (isRequired ? '' : ' ' + translate('optional'))}</Text>
+                    <Text style={{fontSize: 12, height: 12, color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}}>{params.label}</Text>
                   </View>
     }
     else {
@@ -618,7 +621,7 @@ var NewResourceMixin = {
           <View style={{ position: 'relative'}}>
             {propLabel}
             <View style={styles.chooserContentStyle}>
-              <Text style={style}>{label + (isRequired ? '' : ' ' + translate('optional'))}</Text>
+              <Text style={style}>{label}</Text>
               {isVideo
                 ? <Icon name='ios-play-outline'  size={25}  color={LINK_COLOR} />
                 : <Icon name='ios-arrow-down'  size={15}  color={this.state.isRegistration ? '#eeeeee' : LINK_COLOR}  style={styles.icon1} />
