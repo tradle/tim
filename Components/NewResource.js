@@ -537,16 +537,20 @@ class NewResource extends Component {
     UIImagePickerManager.showImagePicker({
       returnIsVertical: true,
       chooseFromLibraryButtonTitle: null
-    }, (doCancel, response) => {
-      if (doCancel)
+    }, (response) => {
+      if (response.didCancel)
         return;
-
+      if (response.error) {
+        console.log('ImagePickerManager Error: ', response.error);
+        return
+      }
       var item = {
         // title: 'photo',
         url: 'data:image/jpeg;base64,' + response.data,
         isVertical: response.isVertical,
         width: response.width,
         height: response.height,
+        chooseFromLibraryButtonTitle: ''
       };
       self.onAddItem('photos', item);
     });

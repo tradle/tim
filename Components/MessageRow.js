@@ -364,15 +364,13 @@ class MessageRow extends Component {
     })
   }
   showEditResource() {
-    let editCols = []
-    let errs = []
+    let errs = {}
     let r = this.props.resource.prefill
 
-    for (let p of this.props.resource.errors) {
-      editCols.push(p.name)
-      errs.push(p.error)
-    }
-    var me = utils.getMe()
+    for (let p of this.props.resource.errors)
+      errs[p.name] = p.error
+
+    let me = utils.getMe()
     r.from = {
       id: utils.getId(me),
       title: utils.getDisplayName(me)
@@ -383,18 +381,19 @@ class MessageRow extends Component {
     // var isPrefilled = model.id in formDefaults
     // if (isPrefilled)
     //   extend(true, resource, formDefaults[model.id])
-
+    let model = utils.getModel(r[constants.TYPE]).value
     this.props.navigator.push({
       id: 4,
-      title: translate(this.props.resource.message),
+      title: translate(model),
       rightButtonTitle: translate('done'),
       backButtonTitle: translate('back'),
       component: NewResource,
       // titleTextColor: '#7AAAC3',
       passProps:  {
-        model: utils.getModel(r[constants.TYPE]).value,
+        model: model,
         resource: r,
         isPrefilled: true,
+        errs: errs,
         currency: this.props.currency,
         bankStyle: this.props.bankStyle,
         originatingMessage: this.props.resource
@@ -600,7 +599,7 @@ class MessageRow extends Component {
     viewCols.forEach(function(v) {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date')
         return;
-      var style = isSimpleMessage ? styles.resourceTitle : styles.description; //resourceTitle; //(first) ? styles.resourceTitle : styles.description;
+      var style = isSimpleMessage || isFormError ? styles.resourceTitle : styles.description; //resourceTitle; //(first) ? styles.resourceTitle : styles.description;
 
       if (properties[v].ref) {
         if (resource[v]) {
@@ -618,7 +617,17 @@ class MessageRow extends Component {
         onPressCall = self.onPress.bind(self);
         vCols.push(<Text style={style} numberOfLines={first ? 2 : 1} key={self.getNextKey()}>{resource[v]}</Text>);
       }
-      else if (model.id ===constants.TYPES.SELF_INTRODUCTION) {
+      else if (isFormError) {
+        vCols.push(
+          <View key={self.getNextKey()}>
+            <Text style={style}>{resource[v]} </Text>
+            <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+              <Text style={[style, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(utils.getModel(resource.prefill[constants.TYPE]).value)}</Text>
+              <Icon style={resource.documentCreated  ? styles.linkIconGreyed : [self.linkIcon, {color: LINK_COLOR}]} size={20} name={'ios-arrow-right'} />
+            </View>
+          </View>)
+      }
+      else if (model.id === constants.TYPES.SELF_INTRODUCTION) {
         vCols.push(
           <View key={self.getNextKey()}>
             <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
