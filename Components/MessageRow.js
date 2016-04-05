@@ -101,16 +101,17 @@ class MessageRow extends Component {
     var onPressCall;
     var isNewProduct, isConfirmation
     var isVerification = resource[constants.TYPE] === constants.TYPES.VERIFICATION;
+    var isFormError = resource[constants.TYPE] === 'tradle.FormError'
     if (isVerification)
       onPressCall = this.verify.bind(this);
-    else if (resource[constants.TYPE] === 'tradle.FormError')
-      onPressCall = this.showEditResource.bind(this)
     else {
       var ret = this.formatRow(isMyMessage, model, resource, renderedRow);
       onPressCall = ret ? ret.onPressCall : null
       isNewProduct = ret ? ret.isNewProduct : null
       isConfirmation = ret ? ret.isConfirmation : null
     }
+    if (isFormError)
+      onPressCall = this.showEditResource.bind(this)
     if (isNewProduct) {
       if (to  &&  to.photos) {
         var uri = utils.getImageUri(to.photos[0].url);
@@ -365,11 +366,12 @@ class MessageRow extends Component {
   showEditResource() {
     let editCols = []
     let errs = []
+    let r = this.props.resource.prefill
+
     for (let p of this.props.resource.errors) {
       editCols.push(p.name)
       errs.push(p.error)
     }
-    var r = this.props.resource.form
     var me = utils.getMe()
     r.from = {
       id: utils.getId(me),
@@ -378,13 +380,13 @@ class MessageRow extends Component {
     r.to = this.props.resource.from
 
     // Prefill for testing and demoing
-    var isPrefilled = model.id in formDefaults
-    if (isPrefilled)
-      extend(true, resource, formDefaults[model.id])
+    // var isPrefilled = model.id in formDefaults
+    // if (isPrefilled)
+    //   extend(true, resource, formDefaults[model.id])
 
     this.props.navigator.push({
       id: 4,
-      title: translate(model),
+      title: translate(this.props.resource.message),
       rightButtonTitle: translate('done'),
       backButtonTitle: translate('back'),
       component: NewResource,
@@ -392,7 +394,7 @@ class MessageRow extends Component {
       passProps:  {
         model: utils.getModel(r[constants.TYPE]).value,
         resource: r,
-        isPrefilled: isPrefilled,
+        isPrefilled: true,
         currency: this.props.currency,
         bankStyle: this.props.bankStyle,
         originatingMessage: this.props.resource
@@ -589,6 +591,7 @@ class MessageRow extends Component {
 
     var isProductList = model.id === constants.TYPES.PRODUCT_LIST
     var isSimpleMessage = isProductList ||  model.id === constants.TYPES.SIMPLE_MESSAGE
+    var isFormError = model.id === 'tradle.FormError'
     var isForgetting = model.id === constants.TYPES.FORGET_ME || model.id === constants.TYPES.FORGOT_YOU
     var isAdditionalInfo = !isSimpleMessage  &&  resource[constants.TYPE] === constants.TYPES.ADDITIONAL_INFO
     var cnt = 0;

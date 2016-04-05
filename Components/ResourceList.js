@@ -142,7 +142,7 @@ class ResourceList extends Component {
       //   to: params.to
       // }
       // utils.onNextTransitionEnd(this.props.navigator, () => Actions.messageList({modelName: constants.TYPES.MESSAGE, to: params.to}))
-      this.props.navigator.push(route)
+      this.props.navigator.replace(route)
       return
     }
     if (action === 'talkToEmployee') {
@@ -829,7 +829,7 @@ class ResourceList extends Component {
               id: constants.TYPES.PROFILE + '_' + h[1]
             }
           }
-          self.props.navigator.pop()
+          // self.props.navigator.pop()
           Actions.addItem({resource: r, value: r, meta: utils.getModel('tradle.GuestSessionProof').value})
         }
       }
