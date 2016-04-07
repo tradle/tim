@@ -339,7 +339,7 @@ var resources = [
 },
 {
   _t: "tradle.KindOfInsurance",
-  kindOfInsurance: "Lineary Decreasing"
+  kindOfInsurance: "Linearly Decreasing"
 },
 {
   _t: "tradle.TypeOfCoverage",
@@ -347,7 +347,7 @@ var resources = [
 },
 {
   _t: "tradle.TypeOfCoverage",
-  typeOfCoverage: "Lineair Decreasing Amount"
+  typeOfCoverage: "Linearly Decreasing Amount"
 },
 {
   _t: "tradle.TypeOfCoverage",
@@ -548,7 +548,7 @@ var resources = [
 },
 {
   _t: 'tradle.RepaymentType',
-  repaymentType: 'Liniar'
+  repaymentType: 'Linear'
 },
 {
   _t: 'tradle.RepaymentType',
