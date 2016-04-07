@@ -25,6 +25,7 @@ var DeviceHeight
 var DeviceWidth
 var constants = require('@tradle/constants');
 var UIImagePickerManager = require('NativeModules').ImagePickerManager;
+var ENUM = 'tradle.Enum'
 // var delayedRegistration
 var LINK_COLOR, DEFAULT_LINK_COLOR = '#a94442'
 
@@ -344,7 +345,7 @@ class NewResource extends Component {
           let ref = this.props.model.properties[p].ref
           if (ref) {
             let rModel = utils.getModel(ref).value
-            if (ref !== constants.TYPES.MONEY  && (!rModel.subClassOf  ||  rModel.subClassOf !== constants.TYPES.ENUM)) {
+            if (ref !== constants.TYPES.MONEY  && (!rModel.subClassOf  ||  rModel.subClassOf !== ENUM)) {
               var units = this.props.model.properties[p].units
               if (units)
                 v = v.value
@@ -448,7 +449,7 @@ class NewResource extends Component {
       if (!props[p]  ||  !props[p].ref)
         continue
       let m = utils.getModel(props[p].ref).value
-      if (m.subClassOf  &&  m.subClassOf === constants.TYPES.ENUM)
+      if (m.subClassOf  &&  m.subClassOf === ENUM)
         json[p] = resource[p]
     }
   }
