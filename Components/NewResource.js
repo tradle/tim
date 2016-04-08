@@ -537,7 +537,7 @@ class NewResource extends Component {
     var self = this;
     UIImagePickerManager.showImagePicker({
       returnIsVertical: true,
-      chooseFromLibraryButtonTitle: null
+      chooseFromLibraryButtonTitle: __DEV__ ? 'Choose from Library' : null
     }, (response) => {
       if (response.didCancel)
         return;
