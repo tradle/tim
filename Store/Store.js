@@ -147,11 +147,10 @@ var publishedIdentity
 var driverPromise
 var ready;
 var networkName = 'testnet'
-var TOP_LEVEL_PROVIDER = ENV.topLevelProvider
-var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.1.61:44444' : TOP_LEVEL_PROVIDER.baseUrl
-// var SERVICE_PROVIDERS_BASE_URL_DEFAULT = __DEV__ ? 'http://192.168.0.149:44444' : TOP_LEVEL_PROVIDER.baseUrl
+var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
+var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://192.168.1.61:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
 var SERVICE_PROVIDERS_BASE_URLS
-var HOSTED_BY = TOP_LEVEL_PROVIDER.name
+var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
 var SERVICE_PROVIDERS
 
@@ -414,7 +413,7 @@ var Store = Reflux.createStore({
       if (settings  &&  settings.value.urls)
         SERVICE_PROVIDERS_BASE_URLS = settings.value.urls
       else
-        SERVICE_PROVIDERS_BASE_URLS = [SERVICE_PROVIDERS_BASE_URL_DEFAULT]
+        SERVICE_PROVIDERS_BASE_URLS = SERVICE_PROVIDERS_BASE_URL_DEFAULTS.slice()
     }
 
     meDriver._send = function (rootHash, msg, recipientInfo) {
@@ -2651,7 +2650,7 @@ var Store = Reflux.createStore({
     var isNew = !value[ROOT_HASH]
     if (value[TYPE] === SETTINGS) {
       if (isNew) {
-        if (value.url === SERVICE_PROVIDERS_BASE_URL_DEFAULT)
+        if (SERVICE_PROVIDERS_BASE_URL_DEFAULTS.includes(value.url))
           isNew = false
         else {
           value[ROOT_HASH] = 1
@@ -2840,7 +2839,7 @@ var Store = Reflux.createStore({
       if (settings)
         list[key].value.urls.push(v)
       else {
-        value.urls = [SERVICE_PROVIDERS_BASE_URL_DEFAULT, v]
+        value.urls = SERVICE_PROVIDERS_BASE_URL_DEFAULTS.concat(v)
         list[key] = {
           key: key,
           value: value
