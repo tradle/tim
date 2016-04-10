@@ -5,6 +5,7 @@ var debug = require('debug')('NewResource')
 var utils = require('../utils/utils');
 var translate = utils.translate
 var NewItem = require('./NewItem');
+var ResourceList = require('./ResourceList')
 var GridItemsList = require('./GridItemsList')
 var PhotoView = require('./PhotoView');
 var ResourceView = require('./ResourceView');
@@ -514,6 +515,24 @@ class NewResource extends Component {
       return;
     }
     var blmodel = bl.items.ref ? utils.getModel(bl.items.ref).value : this.props.model
+    if (bl.items.ref  &&  bl.allowToAdd) {
+      this.props.navigator.push({
+        id: 10,
+        title: translate(bl, blmodel), // Add new ' + bl.title,
+        backButtonTitle: translate('back'),
+        component: ResourceList,
+        passProps: {
+          modelName: bl.items.ref,
+          to: this.state.resource.to,
+          resource: this.state.resource,
+          prop: bl,
+          // onAddItem: this.onAddItem.bind(this),
+          bankStyle: this.props.bankStyle,
+          currency: this.props.currency
+        }
+      });
+      return
+    }
     this.props.navigator.push({
       id: 6,
       title: translate('addNew', translate(bl, blmodel)), // Add new ' + bl.title,

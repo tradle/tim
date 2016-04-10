@@ -109,6 +109,9 @@ var NewResourceMixin = {
       if (p === constants.TYPE  ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink))
         continue;
 
+      if (meta  &&  meta.hidden  &&  meta.hidden.indexOf(p) !== -1)
+        continue
+
       var maybe = required  &&  !required.hasOwnProperty(p);
 
       var type = props[p].type;
@@ -213,7 +216,7 @@ var NewResourceMixin = {
           if (type === 'number') {
             if (!props[p].keyboard)
               options.fields[p].keyboardType = 'numeric'
-            if (data[p]  &&  (typeof data[p] != 'number'))
+            if (data  &&  data[p]  &&  (typeof data[p] != 'number'))
               data[p] = parseFloat(data[p])
           }
         }
