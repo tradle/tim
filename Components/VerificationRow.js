@@ -2,7 +2,7 @@
 
 var React = require('react-native');
 var utils = require('../utils/utils');
-var translate = utils.tradle
+var translate = utils.translate
 var constants = require('@tradle/constants');
 var Icon = require('react-native-vector-icons/Ionicons');
 var reactMixin = require('react-mixin');
