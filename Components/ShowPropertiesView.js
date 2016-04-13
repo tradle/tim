@@ -265,6 +265,16 @@ class ShowPropertiesView extends Component {
          </View>
         );
       })
+      if (v.title) {
+        ret.push(
+          <View style={{padding: 10}} key={self.getNextKey()}>
+           <View style={styles.itemColContainer} key={self.getNextKey()}>
+             <Text style={styles.description} key={self.getNextKey()}>{v.title}</Text>
+           </View>
+         </View>
+        );
+      }
+
       return (
         <View key={self.getNextKey()}>
            {ret}

@@ -525,7 +525,9 @@ class NewResource extends Component {
           modelName: bl.items.ref,
           to: this.state.resource.to,
           resource: this.state.resource,
+          isChooser: true,
           prop: bl,
+          callback:    this.setChosenValue.bind(this),
           // onAddItem: this.onAddItem.bind(this),
           bankStyle: this.props.bankStyle,
           currency: this.props.currency

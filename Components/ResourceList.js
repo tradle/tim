@@ -381,7 +381,10 @@ class ResourceList extends Component {
     var me = utils.getMe();
     if ((me || this.state.isRegistration) &&  this.props.prop) {
       this.props.callback(this.props.prop, resource); // HACK for now
-      this.props.navigator.popToRoute(this.props.returnRoute);
+      if (this.props.returnRoute)
+        this.props.navigator.popToRoute(this.props.returnRoute);
+      else
+        this.props.navigator.pop()
       return;
     }
     if (me                       &&

@@ -16,7 +16,6 @@ var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var constants = require('@tradle/constants');
-// var bankStyles = require('../styles/bankStyles')
 var GiftedMessenger = require('react-native-gifted-messenger');
 
 // var AddNewMessage = require('./AddNewMessage');
@@ -72,15 +71,6 @@ class MessageList extends Component {
       indeterminate: true,
       allLoaded: false
     };
-    // if (bankStyles) {
-    //   var name = props.resource.name.split(' ')[0].toLowerCase()
-    //   this.state.bankStyle = bankStyles[name]
-    //   if (this.state.bankStyle)
-    //     LINK_COLOR = this.state.bankStyle.LINK_COLOR || '#cccccc'
-    //   else
-    //     LINK_COLOR = '#cccccc'
-    // }
-
   }
   componentWillMount() {
     var params = {
@@ -170,12 +160,10 @@ class MessageList extends Component {
       }
       return
     }
-    if (params.style)
-      this.state.bankStyle = params.style
       // var name = props.resource.name.split(' ')[0].toLowerCase()
-      // this.state.bankStyle = bankStyles[name]
-    if (this.state.bankStyle)
-      LINK_COLOR = this.state.bankStyle.LINK_COLOR || '#cccccc'
+      // this.props.bankStyle = bankStyles[name]
+    if (this.props.bankStyle)
+      LINK_COLOR = this.props.bankStyle.LINK_COLOR || '#cccccc'
     else
       LINK_COLOR = '#cccccc'
     // }
@@ -259,7 +247,7 @@ class MessageList extends Component {
       component: MessageView,
       parentMeta: model,
       passProps: {
-        bankStyle: this.state.bankStyle,
+        bankStyle: this.props.bankStyle,
         resource: resource,
         currency: this.props.currency,
         verification: verification
@@ -296,7 +284,7 @@ class MessageList extends Component {
         isAggregation={isAggregation}
         currency={this.props.currency}
         navigator={this.props.navigator}
-        bankStyle={this.state.bankStyle}
+        bankStyle={this.props.bankStyle}
         verificationsToShare={this.state.verificationsToShare}
         previousMessageTime={previousMessageTime}
         to={isAggregation ? resource.to : this.props.resource} />
@@ -339,7 +327,7 @@ class MessageList extends Component {
     //                 indeterminate={this.state.indeterminate}
     //               />
     //             : <View/>
-    var bgStyle = this.state.bankStyle  &&  this.state.bankStyle.BACKGROUND_COLOR ? {backgroundColor: this.state.bankStyle.BACKGROUND_COLOR} : {backgroundColor: '#f7f7f7'}
+    var bgStyle = this.props.bankStyle  &&  this.props.bankStyle.BACKGROUND_COLOR ? {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR} : {backgroundColor: '#f7f7f7'}
     if (!this.state.list || !this.state.list.length) {
       if (this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION) {
         content = <View style={[styles.container, bgStyle]}>
