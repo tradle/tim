@@ -104,12 +104,16 @@ class NewResource extends Component {
     // currentRoutes[currentRoutesLength - 1].onRightButtonPress = {
     //   stateChange: this.onSavePressed.bind(this)
     // };
+
     currentRoutes[currentRoutesLength - 1].onRightButtonPress = this.onSavePressed.bind(this)
 
-    this.scrollviewProps={
+    this._contentOffset = { x: 0, y: 0 }
+    this.scrollviewProps = {
       automaticallyAdjustContentInsets:true,
-      scrollEventThrottle:200,
+      scrollEventThrottle: 50,
+      onScroll: this.onScroll.bind(this)
     };
+
     let d = Dimensions.get('window')
     DeviceHeight = d.height;
     DeviceWidth = d.width
@@ -191,7 +195,7 @@ class NewResource extends Component {
     if (!ref) return
 
     if (!utils.isEmpty(this.state.missedRequiredOrErrorValue)  &&  !this.state.noScroll) {
-      utils.scrollComponentIntoView(this.refs.scrollView, ref)
+      utils.scrollComponentIntoView(this, ref)
       this.state.noScroll = true
     }
   }

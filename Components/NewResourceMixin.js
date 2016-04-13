@@ -45,6 +45,12 @@ var {
 var LINK_COLOR, DEFAULT_LINK_COLOR = '#a94442'
 
 var NewResourceMixin = {
+  onScroll(e) {
+    this._contentOffset = { ...e.nativeEvent.contentOffset }
+  },
+  getScrollOffset() {
+    return { ...this._contentOffset }
+  },
   getFormFields(params) {
     CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol ||  this.props.currency : DEFAULT_CURRENCY_SYMBOL
 
@@ -567,7 +573,7 @@ var NewResourceMixin = {
          this.refs.scrollView        &&
          this.props.model            &&
          Object.keys(this.props.model.properties).length > 5) {
-      utils.scrollComponentIntoView(this.refs.scrollView, this.refs.form.getComponent(refName))
+      utils.scrollComponentIntoView(this, this.refs.form.getComponent(refName))
     }
   },
   // scrollDown (){

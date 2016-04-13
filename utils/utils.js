@@ -3,7 +3,8 @@
 var {
   AsyncStorage,
   NativeModules,
-  findNodeHandle
+  findNodeHandle,
+  Dimensions
 } = require('react-native')
 var RCTUIManager = NativeModules.UIManager
 var crypto = require('crypto')
@@ -452,19 +453,74 @@ var utils = {
   //   RCTUIManager.measure(handle, cb)
   // },
 
-  scrollComponentIntoView(scrollView, component) {
-    let handle = typeof component === 'number'
+  scrollComponentIntoView(container, component) {
+    const handle = typeof component === 'number'
       ? component
       : findNodeHandle(component)
 
-    let scrollResponder = scrollView.getScrollResponder()
-    setTimeout(() => {
+    const currentScrollOffset = container.getScrollOffset && container.getScrollOffset().y
+    const scrollView = container.refs && container.refs.scrollView || container
+    const scrollResponder = scrollView.getScrollResponder()
+    const additionalOffset = 120
+    const doScroll = typeof currentScrollOffset === 'undefined'
+      ? autoScroll
+      : manualScroll
+
+    setTimeout(doScroll, 50)
+
+    // const measureLayout = typeof component === 'object' && component.measureLayout
+    //   ? component.measureLayout.bind(component)
+    //   : RCTUIManager.measureLayout.bind(RCTUIManager)
+
+    // measureLayout(
+
+    function manualScroll () {
+      RCTUIManager.measureLayout(
+        handle,
+        findNodeHandle(scrollView.getInnerViewNode()),
+        function (err) {
+          debugger
+        },
+        function (left: number, top: number, width: number, height: number) {
+          // left,top,width,right describe the offset
+          // and size of the component we want to scroll into view
+          //
+          // currentScrollOffset is how far down we've scrolled already
+
+          let keyboardScreenY = Dimensions.get('window').height;
+          if (scrollResponder.keyboardWillOpenTo) {
+            keyboardScreenY = scrollResponder.keyboardWillOpenTo.endCoordinates.screenY;
+          }
+
+          // how much space we have from the component's bottom to the keyboard's top
+          // top + height
+          let componentBottomY = top + height
+          let keyboardTopY = currentScrollOffset + keyboardScreenY
+          let bottomExpansionNeeded = componentBottomY - keyboardTopY + additionalOffset
+
+          let topExpansionNeeded = currentScrollOffset - top
+          let scrollOffsetY
+          if (bottomExpansionNeeded > 0) {
+            scrollOffsetY = currentScrollOffset + bottomExpansionNeeded
+          } else if (topExpansionNeeded > 0) {
+            scrollOffsetY = currentScrollOffset - topExpansionNeeded
+          } else {
+            return
+          }
+
+          scrollResponder.scrollResponderScrollTo(0, scrollOffsetY);
+        }
+      );
+    }
+
+    function autoScroll () {
+      // debugger
       scrollResponder.scrollResponderScrollNativeHandleToKeyboard(
         findNodeHandle(handle),
-        120, //additionalOffset
+        additionalOffset,
         true
       )
-    }, 50)
+    }
   },
 
   onNextTransitionStart(navigator, fn) {
