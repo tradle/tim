@@ -766,19 +766,21 @@ class NewResource extends Component {
       //   </View>
       // );
       var actionableItem = isPhoto && count
-                         ?  <TouchableHighlight underlayColor='transparent'
+                         ?  <TouchableHighlight style={{paddingTop: 20}} underlayColor='transparent'
                              onPress={self.showItems.bind(self, bl, meta)}>
                             {itemsArray}
-                          </TouchableHighlight>
-                         : <TouchableHighlight underlayColor='transparent'
+                            </TouchableHighlight>
+                         :  <TouchableHighlight style={{paddingTop: 20}} underlayColor='transparent'
                                 onPress={self.onNewPressed.bind(self, bl, meta)}>
-                            {itemsArray}
-                          </TouchableHighlight>
+                              {itemsArray}
+                            </TouchableHighlight>
       arrayItems.push (
         <View style={styles.itemButton} key={this.getNextKey()} ref={bl.name}>
           <View style={styles.items}>
-            {actionableItem}
-            <TouchableHighlight underlayColor='transparent'
+            <View style={{flex: 5}}>
+              {actionableItem}
+            </View>
+            <TouchableHighlight underlayColor='transparent' style={{paddingTop: 20}}
                 onPress={self.onNewPressed.bind(self, bl, meta)}>
               {counter}
             </TouchableHighlight>
@@ -828,6 +830,8 @@ class NewResource extends Component {
       style = DeviceHeight < 600 ? {marginTop: 90} : {marginTop: DeviceHeight / 4}
     else
       style = {marginTop: 64}
+    if (!options)
+      options = {}
     options.auto = 'placeholders';
     options.tintColor = 'red'
     var photoStyle = /*isMessage && !isFinancialProduct ? {marginTop: -35} :*/ styles.photoBG;
@@ -1046,13 +1050,13 @@ page: {
   noItemsText: {
     fontSize: 18,
     color: '#cccccc',
-    alignSelf: 'center',
+    // alignSelf: 'center',
     paddingLeft: 10
   },
   itemsText: {
     fontSize: 18,
     color: '#000000',
-    alignSelf: 'center',
+    // alignSelf: 'center',
     paddingLeft: 10
   },
   itemsCounter: {
@@ -1065,6 +1069,7 @@ page: {
   itemButton: {
     height: 70,
     marginLeft: 10,
+    // marginLeft: 10,
     borderColor: '#ffffff',
     borderBottomColor: '#cccccc',
     borderBottomWidth: 0.5,
