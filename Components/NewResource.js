@@ -677,7 +677,7 @@ class NewResource extends Component {
           }
           if (isPhoto) {
             itemsArray =
-              <View style={{height: 80, marginLeft: 10}}>
+              <View style={{height: 70, marginLeft: 10}}>
                 <Text style={styles.activePropTitle}>{bl.title}</Text>
                 <View style={{flexDirection: 'row'}}>{items}</View>
               </View>
@@ -1137,7 +1137,7 @@ page: {
   activePropTitle: {
     fontSize: 12,
     marginTop: 25,
-    marginBottom: 5,
+    // marginBottom: 5,
     color: '#bbbbbb'
   },
   power: {
