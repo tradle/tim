@@ -8,6 +8,7 @@ var ArticleView = require('./ArticleView');
 var constants = require('@tradle/constants');
 var Icon = require('react-native-vector-icons/Ionicons');
 var RowMixin = require('./RowMixin');
+var ResourceList = require('./ResourceList')
 var Swipeout = require('react-native-swipeout')
 var reactMixin = require('react-mixin');
 var equal = require('deep-equal')
@@ -125,6 +126,7 @@ class ResourceRow extends Component {
                          </View>
                        : <View />;
     var textStyle = noImage ? [styles.textContainer, {marginVertical: 7}] : styles.textContainer;
+    // Grey out if not loaded provider info yet
     var isOpaque = resource[constants.TYPE] === constants.TYPES.ORGANIZATION && !resource.contacts
     if (isOpaque)
       return (
@@ -157,6 +159,30 @@ class ResourceRow extends Component {
               {cancelResource}
             </View>
           </TouchableHighlight>
+          {this.props.isOfficialAccounts
+          ? <TouchableHighlight underlayColor='transparent' style={{position: 'absolute', right: 20, top: 25, backgroundColor: 'white'}} onPress={() => {
+              this.props.navigator.push({
+                component: ResourceList,
+                title: translate("myDocuments"),
+                backButtonTitle: translate('back'),
+                passProps: {
+                  modelName: constants.TYPES.FORM,
+                  resource: this.props.resource
+                }
+              })
+            }}>
+              <View style={[textStyle]}>
+                 {resource.numberOfForms
+                    ? <View style={{flexDirection: 'row'}}>
+                         <Icon name={'ios-paper-outline'} color={'#cccccc'} size={25} />
+                         <Text style={{fontWeight: '600', marginLeft: -5, marginTop: -5, color: 'red'}}>{resource.numberOfForms}</Text>
+                      </View>
+                    : <View />
+                 }
+              </View>
+            </TouchableHighlight>
+            : <View />}
+
           <View style={styles.cellBorder}  key={this.getNextKey()} />
         </View>
       </Swipeout>
