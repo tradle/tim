@@ -484,7 +484,9 @@ class ResourceList extends Component {
     : (<ResourceRow
         onSelect={() => this.selectResource(resource)}
         key={resource[constants.ROOT_HASH]}
+        navigator={this.props.navigator}
         currency={this.props.currency}
+        isOfficialAccounts={this.props.officialAccounts}
         showRefResources={this.showRefResources.bind(this)}
         resource={resource} />
     );
@@ -494,8 +496,11 @@ class ResourceList extends Component {
     if (!me  ||  (this.props.prop  &&  (this.props.prop.readOnly || (this.props.prop.items  &&  this.props.prop.items.readOnly))))
       return <View />;
     var model = utils.getModel(this.props.modelName).value;
-    if (model.subClassOf  &&  model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT)
+    if (model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT ||  model.subClassOf === ENUM)
       return <View />
+    if (this.props.prop  &&  !this.props.prop.allowToAdd)
+      return <View />
+
     // var qrInfo = (model.id === constants.TYPES.PROFILE)
     //            ? <View style={styles.row}>
     //                <TouchableHighlight underlayColor='transparent'
@@ -648,7 +653,7 @@ class ResourceList extends Component {
     if (this.props.prop  &&  model.subClassOf === constants.TYPES.FORM) {
       if (!r)
         r = {}
-      r[constants.TYPE] = this.props.prop.ref;
+      r[constants.TYPE] = this.props.prop.items.ref;
       r.from = this.props.resource.from
       r.to = this.props.resource.to
     }
@@ -754,7 +759,7 @@ class ResourceList extends Component {
     var buttons = [translate('addServerUrl'), translate('scanQRcode'), translate('cancel')]
     let allowToAdd = this.props.prop  &&  this.props.prop.allowToAdd
     var buttons = allowToAdd
-                ? [translate('add'), translate('addServerUrl'), translate('scanQRcode'), translate('cancel')]
+                ? [translate('add', this.props.prop.title), translate('addServerUrl'), translate('scanQRcode'), translate('cancel')]
                 : buttons
     var self = this;
     ActionSheetIOS.showActionSheetWithOptions({
