@@ -14,10 +14,8 @@ var Reflux = require('reflux');
 var Actions = require('../Actions/Actions');
 var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
-var sampleData = require('../data/data');
 var constants = require('@tradle/constants');
 var BACKUPS = require('asyncstorage-backup')
-var Device = require('react-native-device');
 var debug = require('debug')('Tradle-Home')
 var TradleLogo = require('../img/Tradle.png')
 var TradleWhite = require('../img/TradleW.png')
@@ -48,6 +46,7 @@ var {
   Image,
   Component,
   ScrollView,
+  Dimensions,
   LinkingIOS,
   StatusBarIOS,
   AlertIOS,
@@ -334,7 +333,8 @@ class TimHome extends Component {
       component: ResourceList,
       backButtonTitle: translate('back'),
       passProps: {
-        modelName: constants.TYPES.ORGANIZATION
+        modelName: constants.TYPES.ORGANIZATION,
+        officialAccounts: true
       },
       rightButtonTitle: translate('profile'),
       onRightButtonPress: {
@@ -493,7 +493,7 @@ class TimHome extends Component {
       return spinner
     var err = this.state.err || '';
     var errStyle = err ? styles.err : {'padding': 0, 'height': 0};
-    var myId = sampleData.getMyId() || utils.getMe();
+    var myId = utils.getMe();
     // var editProfile, communities;
 
     // if (utils.getMe()) {
@@ -705,13 +705,13 @@ reactMixin(TimHome.prototype, Reflux.ListenerMixin);
 var styles = StyleSheet.create({
   container: {
     padding: 30,
-    marginTop: Device.height > 800 ? Device.height/7 : Device.height / 5,
+    marginTop: Dimensions.get('window').height > 800 ? Dimensions.get('window').height/7 : Dimensions.get('window').height / 5,
     alignItems: 'center',
   },
   tradle: {
     // color: '#7AAAC3',
     color: '#eeeeee',
-    fontSize: Device.height > 450 ? 35 : 25,
+    fontSize: Dimensions.get('window').height > 450 ? 35 : 25,
     alignSelf: 'center',
   },
   text: {
@@ -753,7 +753,7 @@ var styles = StyleSheet.create({
   },
   getStartedText: {
     color: '#f0f0f0',
-    fontSize: Device.width > 450 ? 35 : 20,
+    fontSize: Dimensions.get('window').width > 450 ? 35 : 20,
     fontWeight:'400'
   },
   getStarted: {
