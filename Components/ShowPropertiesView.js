@@ -157,6 +157,8 @@ class ShowPropertiesView extends Component {
           }
           if (typeof val === 'number'  ||  typeof val === 'boolean')
             val = <Text style={styles.description}>{val}</Text>;
+          else if (pMeta.type === 'boolean')
+            val = <Text style={styles.description}>{val.title}</Text>;
           else if (pMeta.type !== 'object'  &&  (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0))
             val = <Text onPress={self.onPress.bind(self, val)} style={[styles.description, {color: '#7AAAC3'}]}>{val}</Text>;
           else {
