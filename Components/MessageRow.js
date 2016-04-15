@@ -16,7 +16,8 @@ var RowMixin = require('./RowMixin');
 // var Accordion = require('react-native-accordion')
 var extend = require('extend')
 var equal = require('deep-equal')
-var formDefaults = require('../data/formDefaults')
+var formDefaults = require('@tradle/models').formDefaults;
+
 var reactMixin = require('react-mixin');
 var Device = require('react-native-device')
 // var newProduct = require('../data/newProduct.json')
@@ -426,7 +427,7 @@ class MessageRow extends Component {
         ver.forEach(function(r) {
           if (chatOrg  &&  utils.getId(r.organization) === chatOrg)
             return
-          // if (!cnt) {
+          if (!cnt) {
             var vModel = utils.getModel(r[constants.TYPE]);
             var doc = self.formatDocument(msgModel, r);
             if (cnt) {
@@ -434,9 +435,8 @@ class MessageRow extends Component {
                       <View style={{height: 1, backgroundColor: '#dddddd'}} />
                       {doc}
                     </View>
-
             }
-          // }
+          }
           vtt.push(doc);
           cnt++;
         })
@@ -601,7 +601,7 @@ class MessageRow extends Component {
         return;
       var style = isSimpleMessage || isFormError ? styles.resourceTitle : styles.description; //resourceTitle; //(first) ? styles.resourceTitle : styles.description;
 
-      if (properties[v].ref) {
+      if (properties[v].ref  ||  properties[v].type === 'boolean') {
         if (resource[v]) {
           vCols.push(self.getPropRow(properties[v], resource, resource[v].title || resource[v]))
           first = false;
@@ -831,7 +831,7 @@ class MessageRow extends Component {
     else {
       if (!this.props.isAggregation  &&  this.isMyMessage())
         style = [style, {borderWidth: 1, paddingVertical: 3, borderBottomColor: STRUCTURED_MESSAGE_BORDER, borderTopColor: STRUCTURED_MESSAGE_COLOR, borderLeftColor: STRUCTURED_MESSAGE_COLOR, borderRightColor: STRUCTURED_MESSAGE_COLOR}]
-      let color = this.isMyMessage() ? {color: '#FFFFEE'} : {color: this.props.bankStyle.LINK_COLOR}
+      let color = this.isMyMessage() ? {color: '#FFFFEE'} : {color: '#757575'}
       return (
         <View style={style} key={this.getNextKey()}>
           <View style={{flex: 1, flexDirection: 'column'}}>
@@ -893,15 +893,23 @@ class MessageRow extends Component {
     if (this.props.isAggregation)
       return
 
-    var fromHash = utils.getId(this.props.resource.from);
+    var r = this.props.resource
+    var fromHash = utils.getId(r.from);
     var me = utils.getMe()
     if (fromHash == me[constants.TYPE] + '_' + me[constants.ROOT_HASH])
       return true;
+    if (utils.getModel(r[constants.TYPE]).value.subClassOf == 'tradle.MyProduct') {
+      let org = r.from.organization
+      if (org  &&  utils.getId(r.from.organization) !== utils.getId(this.props.to))
+        return true
+    }
   }
   formatDocument(model, verification, onPress) {
     var resource = verification.document;
+
     var self = this;
     var docModel = utils.getModel(resource[constants.TYPE]).value;
+    var isMyProduct = docModel.subClassOf === 'tradle.MyProduct'
     var docModelTitle = docModel.title;
     var idx = docModelTitle.indexOf('Verification');
     var docTitle = idx === -1 ? docModelTitle : docModelTitle.substring(0, idx);
@@ -935,7 +943,7 @@ class MessageRow extends Component {
 
 
     var orgRow = <View/>
-    if (verification.organization) {
+    if (verification  &&  verification.organization) {
       var orgPhoto = verification.organization.photo
                    ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
                    : <View />
@@ -946,7 +954,7 @@ class MessageRow extends Component {
       // let o = verification.organization.title.length < 25 ? verification.organization.title : verification.organization.title.substring(0, 27) + '..'
       let verifiedBy = translate('verifiedBy', verification.organization.title)
       if (verifiedBy.length > 40)
-        verification.organization.title.substring(0, 40) + '..'
+        verifiedBy = verifiedBy(0, 40) + '..'
       var orgView =   <View style={{flexDirection: 'row', justifyContent: 'flex-end', marginTop: 15}}>
                          <Text style={[styles.verySmallLetters, {fontSize: 14}]}>{verifiedBy}</Text>
                       </View>
@@ -995,7 +1003,7 @@ class MessageRow extends Component {
     var orgTitle = this.props.to[constants.TYPE] === constants.TYPES.ORGANIZATION
                  ? this.props.to.name
                  : (this.props.to.organization ? this.props.to.organization.title : null);
-    var verifiedBy = verification.organization ? verification.organization.title : ''
+    var verifiedBy = verification && verification.organization ? verification.organization.title : ''
     // var shareRow = this.props.resource.documentCreated
     //           ?  orgRow
     //           :  <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
@@ -1278,7 +1286,8 @@ class MessageRow extends Component {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date')
         return;
       var style = styles.verySmallLetters;
-      if (properties[v].ref) {
+      if (properties[v].ref  ||  properties[v].type === 'boolean') {
+      // if (properties[v].ref) {
         if (resource[v]) {
           var val
           if (properties[v].type === 'object') {
