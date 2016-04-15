@@ -127,8 +127,8 @@ class VerificationRow extends Component {
                   </View>
                   </View>
 
-    var content = <View style={{paddingVertical: 10, backgroundColor: '#ffffff'}}>
-                    <TouchableHighlight onPress={this.props.onSelect.bind(this)}>
+    var content = <View style={{paddingVertical: 10, backgroundColor: 'transparent'}}>
+                    <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>
                       <View style={styles.row}>
                         <View style={[styles.textContainer, {margin: -5, paddingLeft: 3, borderWidth: 0.5, borderColor: '#edf2ce'}]}>
                           {rows}
