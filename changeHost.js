@@ -35,8 +35,9 @@ fs.readFile(storePath, { encoding: 'utf8' }, function (err, contents) {
   if (err) throw err
   if (hostname === 'localhost')
     hostname = '127.0.0.1'
+
   var hacked = contents.replace(
-    /(SERVICE_PROVIDERS_BASE_URL_DEFAULT.*\'http\:\/\/)[^:]+(\:\d+\'[^\n]*)/,
+    /(SERVICE_PROVIDERS_BASE_URL_DEFAULT.*\'http\:\/\/)[^:]+(\:\d+\/?\'[^\n]*)/,
     '$1' + hostname + '$2'
   )
 
