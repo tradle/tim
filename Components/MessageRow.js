@@ -529,7 +529,7 @@ class MessageRow extends Component {
     resource[constants.TYPE] = model.id;
 
     // Prefill for testing and demoing
-    var isPrefilled = model.id in formDefaults
+    var isPrefilled = __DEV__ && model.id in formDefaults
     if (isPrefilled)
       extend(true, resource, formDefaults[model.id])
 
