@@ -31,7 +31,7 @@ var AddressBook = require('NativeModules').AddressBook;
 var voc = require('@tradle/models');
 var sampleData = voc.data
 
-var myIdentity = require('../data/myIdentity.json');
+var myIdentity = __DEV__ ? require('../data/myIdentity.json') : []
 var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
