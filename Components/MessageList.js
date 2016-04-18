@@ -460,10 +460,7 @@ class MessageList extends Component {
       translate('confirmForgetMe', utils.getDisplayName(resource, utils.getModel(resource[constants.TYPE]).value.properties)), //Are you sure you want \'' + utils.getDisplayName(resource, utils.getModel(resource[constants.TYPE]).value.properties) + '\' to forget you',
       translate('testForgetMe'), //'This is a test mechanism to reset all communications with this provider',
       [
-        {text: 'OK', onPress: () => {
-            Actions.forgetMe(resource)
-          }
-        },
+        {text: 'OK', onPress: () =>  Actions.forgetMe(resource)},
         {text: translate('cancel'), onPress: () => console.log('Cancel')}
       ]
     )
