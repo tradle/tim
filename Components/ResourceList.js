@@ -31,7 +31,7 @@ var {
   Component,
   StyleSheet,
   Navigator,
-  AlertIOS,
+  // AlertIOS,
   PropTypes,
   TouchableHighlight,
   ActionSheetIOS,
@@ -475,10 +475,11 @@ class ResourceList extends Component {
   renderRow(resource)  {
     var model = utils.getModel(this.props.modelName).value;
  // || (model.id === constants.TYPES.FORM)
-    var isVerification = model.id === constants.TYPES.VERIFICATION
-    var isForm = model.id === constants.TYPES.FORM
+    var isVerification = model.id === constants.TYPES.VERIFICATION  ||  model.subClassOf === constants.TYPES.VERIFICATION
+    var isForm = model.id === constants.TYPES.FORM || model.subClassOf === constants.TYPES.FORM
+    var isMyProduct = model.id === 'tradle.MyProduct'  ||  model.subClassOf === 'tradle.MyProduct'
     // let hasBacklink = this.props.prop && this.props.prop.items  &&  this.props.prop.backlink
-    return /*hasBacklink  &&*/  (isVerification  || isForm || (model.subClassOf  &&  (model.subClassOf === constants.TYPES.VERIFICATION  ||  model.subClassOf === constants.TYPES.FORM)))
+    return /*hasBacklink  &&*/  (isVerification  || isForm || isMyProduct)
     ? (<VerificationRow
         onSelect={() => this.selectResource(isVerification ? resource.document : resource)}
         key={resource[constants.ROOT_HASH]}
@@ -887,9 +888,10 @@ var styles = StyleSheet.create({
     paddingTop: 5,
     paddingHorizontal: 10,
     backgroundColor: '#eeeeee',
-    borderBottomColor: '#eeeeee',
-    borderRightColor: '#eeeeee',
-    borderLeftColor: '#eeeeee',
+    borderColor: '#eeeeee',
+    // borderBottomColor: '#eeeeee',
+    // borderRightColor: '#eeeeee',
+    // borderLeftColor: '#eeeeee',
     borderWidth: 1,
     borderTopColor: '#cccccc',
   },
