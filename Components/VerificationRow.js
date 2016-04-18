@@ -8,8 +8,11 @@ var Icon = require('react-native-vector-icons/Ionicons');
 var reactMixin = require('react-mixin');
 var RowMixin = require('./RowMixin');
 var Accordion = require('react-native-accordion')
+var Swipeout = require('react-native-swipeout')
+
 var DEFAULT_CURRENCY_SYMBOL = '£'
 var CURRENCY_SYMBOL
+
 var {
   Image,
   PixelRatio,
@@ -19,6 +22,7 @@ var {
   PropTypes,
   Component,
   ArticleView,
+  AlertIOS,
   View
 } = React;
 
@@ -40,12 +44,21 @@ class VerificationRow extends Component {
     var resource = this.props.resource;
     var photo;
 
-    var isForm = !resource.document
     // if (resource.from  &&  resource.from.photos)
     //   photo = <Image source={{uri: utils.getImageUri(resource.from.photos[0].url)}} style={styles.cellImage} />
-    var r = isForm ? resource : resource.document
-    if (r  &&  r.photos)
-      photo = <Image source={{uri: utils.getImageUri(r.photos[0].url), position: 'absolute', left: 10}}  style={styles.cellImage} />
+    var model = utils.getModel(resource[constants.TYPE]).value;
+    var isMyProduct = model.subClassOf === 'tradle.MyProduct'
+    var isForm = model.subClassOf === 'tradle.Form'
+    var isVerification = resource.document
+    var r = isVerification ? resource.document : resource
+    if (r  &&  isMyProduct) {
+      let photos = resource.from.organization.photos
+      photo = photos.length ? photos[0] : null
+    }
+    else if (r  &&  r.photos)
+      photo = r.photos[0]
+    if (photo)
+      photo = <Image source={{uri: utils.getImageUri(photo.url), position: 'absolute', left: 10}}  style={styles.cellImage} />
     else
       photo = <View style={{width: 70}} />
 
@@ -57,7 +70,6 @@ class VerificationRow extends Component {
     // else
     //   photo = <View style={styles.cellImage} />
 
-    var model = utils.getModel(resource[constants.TYPE]).value;
     var verificationRequest = resource.document
                             ? utils.getModel(resource.document[constants.TYPE]).value
                             : utils.getModel(resource[constants.TYPE]).value;
@@ -98,12 +110,18 @@ class VerificationRow extends Component {
     //   rows.push(row);
     // }
     var verifiedBy
-    if (!isForm  &&  resource.from) {
+    if ((isVerification || isMyProduct  ||  isForm) &&  resource.from) {
       var contentRows = [];
       // contentRows.push(<Text style={}>verified by {resource.to.title}></Text>);
-      contentRows.push(<Text style={[styles.description, {color: '#7AAAc3'}]} key={this.getNextKey()}>verified by </Text>);
-      if (resource.organization) {
-        var orgRow = <Text style={styles.description} key={this.getNextKey()}>{resource.organization.title}</Text>
+      contentRows.push(<Text style={[styles.description, {color: '#7AAAc3'}]} key={this.getNextKey()}>{isMyProduct ? 'issued by ' : 'verified by '}</Text>);
+      let org = isMyProduct
+              ? resource.from.organization
+              : isForm
+                  ? resource.to.organization
+                  : resource.organization
+
+      if (org) {
+        var orgRow = <Text style={styles.description} key={this.getNextKey()}>{org.title}</Text>
         contentRows.push(orgRow);
       }
       verifiedBy = <View style={contentRows.length == 1 ? {flex: 1} : {flexDirection: 'row'}} key={this.getNextKey()}>
@@ -118,14 +136,18 @@ class VerificationRow extends Component {
              : <View />
     var header =  <View style={{borderColor: '#ffffff', backgroundColor: '#ffffff', borderBottomColor: '#cccccc', borderWidth: 0.5}} key={this.getNextKey()}>
                     <View style={{flexDirection: 'row', marginHorizontal: 10,  marginVertical: 3, paddingBottom: 4}}>
-                    {photo}
-                    {date}
-                    <View style={{flexDirection: 'column'}}>
-                      <Text style={styles.rTitle}>{this.props.isChooser ? utils.getDisplayName(resource, model.properties) : verificationRequest.title}</Text>
-                       {verifiedBy}
+                      {photo}
+                      {date}
+                      <View style={{flexDirection: 'column'}}>
+                        <Text style={styles.rTitle}>{this.props.isChooser ? utils.getDisplayName(resource, model.properties) : verificationRequest.title}</Text>
+                         {verifiedBy}
+                      </View>
                     </View>
                   </View>
-                  </View>
+   // if (isForm  &&  !isMyProduct)
+   //   header = <Swipeout right={[{text: 'Revoke', backgroundColor: 'red', onPress: this.revokeDocument.bind(this, resource)}]} autoClose={true} scroll={(event) => this._allowScroll(event)}>
+   //              {header}
+   //            </Swipeout>
 
     var content = <View style={{paddingVertical: 10, backgroundColor: 'transparent'}}>
                     <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>
@@ -144,15 +166,35 @@ class VerificationRow extends Component {
            {header}
           </TouchableHighlight>
          </View>
-       : <View>
-           <Accordion
-             header={header}
-             style={{alignSelf: 'stretch'}}
-             content={content}
-             underlayColor='transparent'
-             easing='easeOutQuad' />
-          </View>
+       :  !isMyProduct  &&  !isVerification
+          ? <Swipeout right={[{text: 'Revoke', backgroundColor: 'red', onPress: this.revokeDocument.bind(this)}]} autoClose={true} scroll={(event) => this._allowScroll(event)}>
+              <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>
+               {header}
+              </TouchableHighlight>
+            </Swipeout>
+          : <View>
+             <Accordion
+               header={header}
+               style={{alignSelf: 'stretch'}}
+               content={content}
+               underlayColor='transparent'
+               easing='easeOutQuad' />
+            </View>
     );
+  }
+  revokeDocument() {
+    var resource = this.props.resource
+    AlertIOS.alert(
+      translate('confirmRevoke', utils.getDisplayName(resource, utils.getModel(resource[constants.TYPE]).value.properties)),
+      null,
+      [
+        {text: 'OK', onPress: () =>  AlertIOS.alert(translate('willBeAvailable'))},
+        {text: translate('cancel'), onPress: () => console.log('Cancel')}
+      ]
+    )
+  }
+  _allowScroll(scrollEnabled) {
+    this.setState({scrollEnabled: scrollEnabled})
   }
   formatDocument(model, resource, renderedRow) {
     var viewCols = model.gridCols || model.viewCols;
@@ -295,7 +337,7 @@ var styles = StyleSheet.create({
     fontSize: 14,
   },
   row: {
-    backgroundColor: '#FBFFE5',
+    // backgroundColor: '#FBFFE5',
     flexDirection: 'row',
     marginHorizontal: 10,
     padding: 5,
