@@ -662,11 +662,17 @@ var Store = Reflux.createStore({
           return
         SERVICE_PROVIDERS.push({id: sp.id, org: utils.getId(sp.org), url: originalUrl, style: sp.style})
         promises.push(self.addInfo(sp, originalUrl))
+        list[utils.getId(sp.org)].value.style = sp.style
       })
 
       return Q.allSettled(promises)
     })
     .then((results) => {
+      let list = self.searchNotMessages({modelName: ORGANIZATION})
+      this.trigger({
+        action: 'list',
+        list: list,
+      })
       return results
         .filter(r => r.state === 'fulfilled')
         .map(r => r.value)
@@ -1369,6 +1375,20 @@ var Store = Reflux.createStore({
     if (meta[TYPE] == VERIFICATION  ||  meta.subClassOf === VERIFICATION)
       return this.onAddVerification(resource, true);
 
+    var self = this;
+    if (meta.id === 'tradle.GuestSessionProof') {
+      this.getDriver(me)
+      .then(function () {
+        // if (publishRequestSent)
+          return meDriver.identityPublishStatus()
+      })
+      .then(function(status) {
+        if (!status.queued  &&  !status.current) {
+          let orgRep = list[utils.getId(resource.to)].value
+          self.publishMyIdentity(orgRep)
+        }
+      })
+    }
     for (var p in resource) {
       if (props[p] &&  props[p].type === 'object') {
         var ref = props[p].ref;
@@ -1416,7 +1436,6 @@ var Store = Reflux.createStore({
     //   this.listenables[0].addItem.failed(error);
     //   return;
     // }
-    var self = this;
     var returnVal
     var identity
     var isNew = !resource[ROOT_HASH];
@@ -1791,17 +1810,17 @@ var Store = Reflux.createStore({
       spinner: params.spinner,
       isAggregation: params.isAggregation
     }
-    if (isMessage) {
-      let orgId = utils.getId(params.to)
-      let styles
-      if (SERVICE_PROVIDERS)
-         styles = SERVICE_PROVIDERS.filter((sp) => {
-            if (sp.org === orgId)
-              return true
-          })
-      if (styles  &&  styles.length)
-        retParams.style = styles[0].style
-    }
+    // if (isMessage) {
+    //   let orgId = utils.getId(params.to)
+    //   let styles
+    //   if (SERVICE_PROVIDERS)
+    //      styles = SERVICE_PROVIDERS.filter((sp) => {
+    //         if (sp.org === orgId)
+    //           return true
+    //       })
+    //   if (styles  &&  styles.length)
+    //     retParams.style = styles[0].style
+    // }
 
     if (verificationsToShare)
       retParams.verificationsToShare = verificationsToShare;
@@ -1829,17 +1848,17 @@ var Store = Reflux.createStore({
           spinner: params.spinner,
           isAggregation: params.isAggregation
         }
-        if (isMessage) {
-          let orgId = utils.getId(params.to)
-          let styles
-          if (SERVICE_PROVIDERS)
-             styles = SERVICE_PROVIDERS.filter((sp) => {
-                if (sp.org === orgId)
-                  return true
-              })
-          if (styles  &&  styles.length)
-            retParams.style = styles[0].style
-        }
+        // if (isMessage) {
+        //   let orgId = utils.getId(params.to)
+        //   let styles
+        //   if (SERVICE_PROVIDERS)
+        //      styles = SERVICE_PROVIDERS.filter((sp) => {
+        //         if (sp.org === orgId)
+        //           return true
+        //       })
+        //   if (styles  &&  styles.length)
+        //     retParams.style = styles[0].style
+        // }
 
         if (verificationsToShare)
           retParams.verificationsToShare = verificationsToShare;
@@ -2040,10 +2059,18 @@ var Store = Reflux.createStore({
         });
       }
     }
+
     if (isOrg) {
+      // cloning orgs to re-render the org list with the correct number of forms
+      let retOrgs = []
       result.forEach((r) => {
-        r.numberOfForms = orgToForm[utils.getId(r)]
+        let oId = utils.getId(r)
+        let rr = {}
+        extend(true, rr, r)
+        retOrgs.push(rr)
+        rr.numberOfForms = orgToForm[oId]
       })
+      result = retOrgs
     }
     return result;
   },
@@ -2797,6 +2824,18 @@ var Store = Reflux.createStore({
     var formsToShare = this.searchMessages({modelName: 'tradle.MyProduct', to: utils.getMe(), strict: true})
     if (formsToShare  &&  formsToShare.length) {
       formsToShare.forEach((r) => {
+        let fromId = utils.getId(r.from)
+        if (r.sharedWith) {
+          let sw = r.sharedWith.filter((r) => {
+            if (reps.filter((rep) => {
+                    if (utils.getId(rep) === r)
+                      return true
+                  }).length)
+              return true
+          })
+          if (sw.length)
+            return
+        }
         var docType = r[TYPE]
         var v = verificationsToShare[docType];
         if (!v)
@@ -2987,6 +3026,11 @@ var Store = Reflux.createStore({
       // registration or profile editing
       if (!noTrigger)
         self.trigger(params);
+      if (model.subClassOf === FORM) {
+        let mlist = self.searchMessages({modelName: FORM})
+        let olist = self.searchNotMessages({modelName: ORGANIZATION})
+        self.trigger({action: 'list', modelName: ORGANIZATION, list: olist, forceUpdate: true})
+      }
     })
     .catch(function(err) {
       if (!noTrigger) {
