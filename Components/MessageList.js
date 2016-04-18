@@ -160,13 +160,7 @@ class MessageList extends Component {
       }
       return
     }
-      // var name = props.resource.name.split(' ')[0].toLowerCase()
-      // this.props.bankStyle = bankStyles[name]
-    if (this.props.bankStyle)
-      LINK_COLOR = this.props.bankStyle.LINK_COLOR || '#cccccc'
-    else
-      LINK_COLOR = '#cccccc'
-    // }
+    LINK_COLOR = this.props.bankStyle.LINK_COLOR
 
     if (list.length || (this.state.filter  &&  this.state.filter.length)) {
       var type = list[0][constants.TYPE];
@@ -180,11 +174,6 @@ class MessageList extends Component {
           return;
       }
 
-      // if (params.verificationsToShare) {
-      //   for (var formName in params.verificationsToShare) {
-      //     utils.dedupeVerifications(params.verificationsToShare[formName])
-      //   }
-      // }
       this.setState({
         // dataSource: this.state.dataSource.cloneWithRows(list),
         isLoading: false,
@@ -327,7 +316,7 @@ class MessageList extends Component {
     //                 indeterminate={this.state.indeterminate}
     //               />
     //             : <View/>
-    var bgStyle = this.props.bankStyle  &&  this.props.bankStyle.BACKGROUND_COLOR ? {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR} : {backgroundColor: '#f7f7f7'}
+    var bgStyle = this.props.bankStyle.BACKGROUND_COLOR ? {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR} : {backgroundColor: '#f7f7f7'}
     if (!this.state.list || !this.state.list.length) {
       if (this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION) {
         content = <View style={[styles.container, bgStyle]}>
