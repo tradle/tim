@@ -175,7 +175,7 @@ class ResourceRow extends Component {
                  {resource.numberOfForms
                     ? <View style={{flexDirection: 'row'}}>
                          <Icon name={'ios-paper-outline'} color={'#cccccc'} size={25} />
-                         <Text style={{fontWeight: '600', marginLeft: -5, marginTop: -5, color: 'red'}}>{resource.numberOfForms}</Text>
+                         <Text style={{fontWeight: '600', marginLeft: -5, marginTop: -5, color: '#cccccc'}}>{resource.numberOfForms}</Text>
                       </View>
                     : <View />
                  }
