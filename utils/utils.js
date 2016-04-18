@@ -300,7 +300,7 @@ var utils = {
     var val;
     switch (dayDiff) {
     case 0:
-      val = moment(date).fromNow();
+      val = moment(date).format('h:mA') //moment(date).fromNow();
       break;
     case 1:
       val = moment(date).format('[yesterday], h:mA');
