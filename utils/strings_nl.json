@@ -47,9 +47,9 @@
     "Savings": "Savings",
     "SpendingMoney": "Spending Money",
     "Student": "Student",
-    "Home": "Home",
-    "Mobile": "Mobile",
-    "Work": "Work",
+    "Home": "Thuis",
+    "Mobile": "Mobiel",
+    "Work": "Werk",
     "newProduct": "New product",
     "shareOne": "{1}, dit is uw persoonlijke privacy assistent. Ik zie dat je al hebt uw {2} geverifieerd. U kunt hieronder tikken op het te delen met {3}.",
     "shareOneOfMany": "{1}, dit is uw persoonlijke privacy assistent. Ik zie dat je al hebt gehad uw {2} geverifieerd. U kunt tikken op alle items in de lijst hieronder om ze te delen met {3}.",
@@ -111,5 +111,12 @@
     "setDateValue": "Set",
     "scanQRcode": "Scan QR code",
     "myDocuments": "My Documents",
-    "shareMyProduct": "I see you've already had your {1} verified"
+    "shareMyProduct": "I see you've already had your {1} verified",
+    "confirmRevoke": "Are you sure you want to revoke access to {1}",
+    "netherlands": "Nederland",
+    "dutch": "Nederlandse",
+    "passport": "Passpoort",
+    "residencePermit": "Verblijfsvergunning",
+    "shareProduct": "I see you\\'ve already had your {1} verified",
+    "willBeAvailable": "This functionality will be available soon"
 }
