@@ -730,9 +730,9 @@ var Store = Reflux.createStore({
       if (!list[okey]) {
         batch.push({type: 'put', key: okey, value: sp.org})
         list[okey] = {key: okey, value: sp.org}
-        list[okey].value.style = sp.style
       }
-
+      if (sp.style)
+        list[okey].value.style = sp.style
       if (!list[ikey]) {
         var profile = {
           _t: PROFILE,
@@ -2802,12 +2802,17 @@ var Store = Reflux.createStore({
 
     // not for subreddit
     result.forEach((r) =>  {
+      let m = utils.getModel(r[TYPE]).value
+      let isMyProduct = m.subClassOf === 'tradle.MyProduct'
+      let isForm = !isMyProduct && m.subClassOf === FORM
       r.from.photos = list[utils.getId(r.from)].value.photos;
       var to = list[utils.getId(r.to)]
       if (!to) console.log(r.to)
-      r.to.photos = to && to.value.photos;
-      if (utils.getModel(r[TYPE]).value.subClassOf === 'tradle.MyProduct')
+      r.to.photos = to  &&  to.value.photos;
+      if (isMyProduct)
         r.from.organization = list[utils.getId(r.from)].value.organization
+      else if (isForm)
+        r.to.organization = list[utils.getId(r.to)].value.organization
     })
     return result;
   },
