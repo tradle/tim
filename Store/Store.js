@@ -462,13 +462,17 @@ var Store = Reflux.createStore({
 
   getInfo(serverUrls, retry) {
     let self = this
-    return Q.all(serverUrls.map(url => self.getServiceProviders(url, retry)))
-    .then(function(results) {
-      var httpClient = driverInfo.httpClient
-      var wsClients = driverInfo.wsClients
-      var whitelist = driverInfo.whitelist
-      var otrKey = driverInfo.otrKey
-      results.forEach(function(providers) {
+
+    let results = []
+    let defer = Q.defer()
+    let togo = serverUrls.length
+    serverUrls.forEach((url) => {
+      self.getServiceProviders(url, retry)
+      .then((results) => {
+        var httpClient = driverInfo.httpClient
+        var wsClients = driverInfo.wsClients
+        var whitelist = driverInfo.whitelist
+        var otrKey = driverInfo.otrKey
         if (!httpClient) {
           httpClient = new HttpClient()
           driverInfo.httpClient = httpClient
@@ -481,37 +485,73 @@ var Store = Reflux.createStore({
             meDriver.receiveMsg.apply(meDriver, arguments)
           })
         }
-
-        providers.forEach(function(provider) {
+        results.forEach(function(provider) {
           self.addProvider(provider)
-          // httpClient.addRecipient(
-          //   provider.hash,
-          //   utils.joinURL(provider.url, provider.id, 'send')
-          // )
-
-          // if (provider.txId) {
-          //   whitelist.push(provider.txId)
-          // }
-
-          // if (!otrKey) return
-
-          // // self.addWebSocketClient()
-          // var wsClient = new WebSocketClient({
-          //   url: utils.joinURL(provider.url, provider.id, 'ws'),
-          //   otrKey: otrKey,
-          //   autoconnect: false,
-          //   // rootHash: meDriver.myRootHash()
-          // })
-          // // will need to do this on demand too
-          // // e.g. when scanning an employee QR Code at the bank
-          // wsClient.on('message', meDriver.receiveMsg)
-          // wsClients[provider.hash] = wsClient
         })
+        if (--togo === 0) {
+          defer.resolve()
+          meDriver.watchTxs(whitelist)
+          return meDriver
+        }
       })
-
-      meDriver.watchTxs(whitelist)
-      return meDriver
+      .catch((err) => {
+        debugger
+      })
     })
+    return defer.promise
+
+
+
+    // return Q.all(serverUrls.map(url => self.getServiceProviders(url, retry)))
+    // .then(function(results) {
+    //   var httpClient = driverInfo.httpClient
+    //   var wsClients = driverInfo.wsClients
+    //   var whitelist = driverInfo.whitelist
+    //   var otrKey = driverInfo.otrKey
+    //   results.forEach(function(providers) {
+    //     if (!httpClient) {
+    //       httpClient = new HttpClient()
+    //       driverInfo.httpClient = httpClient
+    //       meDriver.ready().then(function () {
+    //         var myHash = meDriver.myRootHash()
+    //         httpClient.setRootHash(myHash)
+    //       })
+
+    //       httpClient.on('message', function () {
+    //         meDriver.receiveMsg.apply(meDriver, arguments)
+    //       })
+    //     }
+
+    //     providers.forEach(function(provider) {
+    //       self.addProvider(provider)
+    //       // httpClient.addRecipient(
+    //       //   provider.hash,
+    //       //   utils.joinURL(provider.url, provider.id, 'send')
+    //       // )
+
+    //       // if (provider.txId) {
+    //       //   whitelist.push(provider.txId)
+    //       // }
+
+    //       // if (!otrKey) return
+
+    //       // // self.addWebSocketClient()
+    //       // var wsClient = new WebSocketClient({
+    //       //   url: utils.joinURL(provider.url, provider.id, 'ws'),
+    //       //   otrKey: otrKey,
+    //       //   autoconnect: false,
+    //       //   // rootHash: meDriver.myRootHash()
+    //       // })
+    //       // // will need to do this on demand too
+    //       // // e.g. when scanning an employee QR Code at the bank
+    //       // wsClient.on('message', meDriver.receiveMsg)
+    //       // wsClients[provider.hash] = wsClient
+    //     })
+    //   })
+
+    //   meDriver.watchTxs(whitelist)
+    //   return meDriver
+    // })
   },
   onGetEmployeeInfo(code) {
     let pair = code.split(':')
