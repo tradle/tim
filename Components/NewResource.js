@@ -642,6 +642,7 @@ class NewResource extends Component {
         arrayItems.push(<View key={this.getNextKey()} ref={bl.name} />)
         continue
       }
+      let blmodel = meta
       var counter, count = 0
       itemsArray = null
       var isPhoto = false
@@ -678,7 +679,7 @@ class NewResource extends Component {
           if (isPhoto) {
             itemsArray =
               <View style={{height: 70, marginLeft: 10}}>
-                <Text style={styles.activePropTitle}>{bl.title}</Text>
+                <Text style={styles.activePropTitle}>{translate(bl, blmodel)}</Text>
                 <View style={{flexDirection: 'row'}}>{items}</View>
               </View>
             // counter =
@@ -694,7 +695,7 @@ class NewResource extends Component {
                   // <Text>{resource[bl.name] ? resource[bl.name].length : ''}</Text>
           }
           else {
-            itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{bl.title}</Text>
+            itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{translate(bl, blmodel)}</Text>
             counter =
               <View style={styles.itemsCounter}>
                 <Text>{resource[bl.name] ? resource[bl.name].length : ''}</Text>
@@ -703,7 +704,7 @@ class NewResource extends Component {
 
         }
         else {
-          itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{bl.title}</Text>
+          itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{translate(bl, blmodel)}</Text>
 
           // if (model.required  &&  model.required.indexOf(bl.name) != -1)
           //   counter =
@@ -717,7 +718,7 @@ class NewResource extends Component {
         }
       }
       else {
-        itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{bl.title}</Text>
+        itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{translate(bl, blmodel)}</Text>
 
         // if (self.props.model.required  &&  self.props.model.required.indexOf(bl.name) != -1)
         //   counter =
@@ -732,7 +733,7 @@ class NewResource extends Component {
                     }
                     </View>
       }
-      var title = bl.title || utils.makeLabel(p)
+      var title = translate(bl, blmodel) //.title || utils.makeLabel(p)
       var err = this.state.missedRequiredOrErrorValue
               ? this.state.missedRequiredOrErrorValue[meta.properties[p].name]
               : null
