@@ -535,6 +535,7 @@ var Store = Reflux.createStore({
         let info = {
           bot: data,
           org: list[orgId].value,
+          style: list[orgId].value.style,
           isEmployee: true
         }
         return self.addInfo(info)
@@ -662,7 +663,6 @@ var Store = Reflux.createStore({
           return
         SERVICE_PROVIDERS.push({id: sp.id, org: utils.getId(sp.org), url: originalUrl, style: sp.style})
         promises.push(self.addInfo(sp, originalUrl))
-        list[utils.getId(sp.org)].value.style = sp.style
       })
 
       return Q.allSettled(promises)
@@ -690,6 +690,7 @@ var Store = Reflux.createStore({
       if (!list[okey]) {
         batch.push({type: 'put', key: okey, value: sp.org})
         list[okey] = {key: okey, value: sp.org}
+        list[okey].value.style = sp.style
       }
 
       if (!list[ikey]) {
