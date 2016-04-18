@@ -50,14 +50,16 @@ class MessageRow extends Component {
     var resource = this.props.resource;
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
     var me = utils.getMe();
-    if (this.props.bankStyle) {
-      LINK_COLOR = this.props.bankStyle.LINK_COLOR || DEFAULT_LINK_COLOR
-      STRUCTURED_MESSAGE_COLOR = this.props.bankStyle.STRUCTURED_MESSAGE_COLOR || DEFAULT_STRUCTURED_MESSAGE_COLOR
-    }
-    else {
-      LINK_COLOR = DEFAULT_LINK_COLOR
-      STRUCTURED_MESSAGE_COLOR = DEFAULT_STRUCTURED_MESSAGE_COLOR
-    }
+    LINK_COLOR = this.props.bankStyle.LINK_COLOR
+    STRUCTURED_MESSAGE_COLOR = this.props.bankStyle.STRUCTURED_MESSAGE_COLOR
+    // if (this.props.bankStyle) {
+    //   LINK_COLOR = this.props.bankStyle.LINK_COLOR || DEFAULT_LINK_COLOR
+    //   STRUCTURED_MESSAGE_COLOR = this.props.bankStyle.STRUCTURED_MESSAGE_COLOR || DEFAULT_STRUCTURED_MESSAGE_COLOR
+    // }
+    // else {
+    //   LINK_COLOR = DEFAULT_LINK_COLOR
+    //   STRUCTURED_MESSAGE_COLOR = DEFAULT_STRUCTURED_MESSAGE_COLOR
+    // }
     CURRENCY_SYMBOL = props.currency ? props.currency.symbol || props.currency : DEFAULT_CURRENCY_SYMBOL
   }
   shouldComponentUpdate(nextProps, nextState) {
@@ -126,6 +128,7 @@ class MessageRow extends Component {
     var addStyle, inRow;
     var noMessage = !resource.message  ||  !resource.message.length;
     var isSimpleMessage = resource[constants.TYPE] === constants.TYPES.SIMPLE_MESSAGE
+    var isMyProduct = model.subClassOf === 'tradle.MyProduct'
     var isForgetting = model.id === constants.TYPES.FORGET_ME || model.id === constants.TYPES.FORGOT_YOU
     var isAdditionalInfo = !isSimpleMessage  &&  resource[constants.TYPE] === constants.TYPES.ADDITIONAL_INFO;
     if (!renderedRow.length  &&  !isVerification) {
@@ -135,21 +138,25 @@ class MessageRow extends Component {
     }
     else {
       var fromHash = resource.from.id;
-      if (isMyMessage) {
+      if (isMyProduct) { //  &&  this.props.bankStyle  &&  this.props.bankStyle.PRODUCT_BG_COLOR) {
+        var confirmationColor = this.props.bankStyle.CONFIRMATION_COLOR ? this.props.bankStyle.CONFIRMATION_COLOR : '#289427'
+        addStyle = [addStyle, {paddingVertical: 5, paddingHorizontal: 7, borderRadius: 10, backgroundColor: this.props.bankStyle &&  this.props.bankStyle.PRODUCT_BG_COLOR ? this.props.bankStyle.PRODUCT_BG_COLOR : '#ffffff' , borderWidth: 1, borderColor: confirmationColor, marginVertical: 2}];
+      }
+      else if (isMyMessage) {
         if (!noMessage)
           addStyle = /*isNewProduct ? styles.myAdCell :*/ styles.myCell;
       }
       else if (isForgetting)
         addStyle = styles.forgetCell
       else {
-        if (!model.style) {
+        // if (!model.style) {
           // var msgBorder = isMyMessage ? '#cccccc' : this.props.bankStyle  &&  this.props.bankStyle.STRUCTURED_MESSAGE_BORDER ? this.props.bankStyle.STRUCTURED_MESSAGE_BORDER : '#deeeb4'
           addStyle = {paddingVertical: 5, paddingHorizontal: 7, borderRadius: 10, borderColor: '#cccccc', backgroundColor: '#ffffff', marginVertical: 2};
           if (isConfirmation) {
             var bg = this.props.bankStyle  &&  this.props.bankStyle.CONFIRMATION_BACKGROUND_COLOR ? {backgroundColor: this.props.bankStyle.CONFIRMATION_BACKGROUND_COLOR} : {backgroundColor: '#ffffff'}
             addStyle = [addStyle, styles.myConfCell, bg]
           }
-        }
+        // }
       }
       if (isVerification) {
         var vBorder = this.props.bankStyle  &&  this.props.bankStyle.VERIFIED_BORDER_COLOR ? {borderColor: this.props.bankStyle.VERIFIED_BORDER_COLOR} : {borderColor: '#deeeb4'}
@@ -160,7 +167,7 @@ class MessageRow extends Component {
       else if (isAdditionalInfo)
         addStyle = [addStyle, {paddingVertical: 5, paddingHorizontal: 7, borderRadius: 10, backgroundColor: '#FCF1ED', borderWidth: 1, borderColor: '#FAE9E3', marginVertical: 2}]; //model.style];
       else {
-        if (isMyMessage  &&  !isSimpleMessage)
+        if (isMyMessage  &&  !isSimpleMessage  &&  !isMyProduct)
           addStyle = [addStyle, {paddingVertical: 5, paddingHorizontal: 7, borderRadius: 10, backgroundColor: STRUCTURED_MESSAGE_COLOR, borderWidth: 1, borderColor: '#C1E3E8', marginVertical: 2}]; //model.style];
       }
     }
@@ -269,6 +276,17 @@ class MessageRow extends Component {
                         //   <Text style={[styles.resourceTitle, {alignSelf:'flex-end', fontSize: 18, color: '#CCCCB2'}]}>{msgModel.title}</Text>
                         // </View>
       }
+      else if (isMyProduct) {
+        var hdrStyle = {backgroundColor: '#289427'} //this.props.bankStyle.PRODUCT_BG_COLOR ? {backgroundColor: this.props.bankStyle.PRODUCT_BG_COLOR} : {backgroundColor: '#289427'}
+        var msgModel = utils.getModel(resource[constants.TYPE]).value;
+        var orgName = resource.from.organization  ? resource.from.organization.title : ''
+        var confirmationColor = this.props.bankStyle.CONFIRMATION_COLOR ? this.props.bankStyle.CONFIRMATION_COLOR : '#289427'
+        renderedRow.splice(0, 0, <View  key={this.getNextKey()} style={[styles.verifiedHeader, hdrStyle, {marginHorizontal: -8, marginTop: -7, marginBottom: 7, paddingBottom: 5}]}>
+                           <Text style={{fontSize: 16, fontWeight: '600', color: '#fff', alignSelf: 'center'}}>{translate('issuedBy', orgName)}</Text>
+                        </View>
+                        );
+        renderedRow.push(<Text  key={this.getNextKey()} style={[styles.formType, {fontWeight: '600', color: '#289427', alignSelf: 'flex-end'}]}>{translate(model)}</Text>);
+      }
       // var rowId = <Text style={{fontWeight: '600', fontSize: 16, color: isMyMessage ? '#ffffff' : '#289427', paddingRight: 3}}>{this.props.messageNumber + '.'}</Text>;
 
       if (this.props.sendStatus  &&  this.props.sendStatus !== null) {
@@ -284,7 +302,7 @@ class MessageRow extends Component {
           break
         }
       }
-      var sealedStatus = (resource.txId)
+      var sealedStatus = (resource.txId  &&  !isMyProduct)
                        ? <View style={styles.sealedStatus}>
                            <Icon name={'ribbon-b'} size={30} color='#316A99' style={{opacity: 0.3}} />
                          </View>
@@ -592,7 +610,7 @@ class MessageRow extends Component {
     var isSimpleMessage = isProductList ||  model.id === constants.TYPES.SIMPLE_MESSAGE
     var isFormError = model.id === 'tradle.FormError'
     var isForgetting = model.id === constants.TYPES.FORGET_ME || model.id === constants.TYPES.FORGOT_YOU
-    var isAdditionalInfo = !isSimpleMessage  &&  resource[constants.TYPE] === constants.TYPES.ADDITIONAL_INFO
+    // var isAdditionalInfo = !isSimpleMessage  &&  resource[constants.TYPE] === constants.TYPES.ADDITIONAL_INFO
     var cnt = 0;
     var isNewProduct, isConfirmation
     var self = this
@@ -608,8 +626,9 @@ class MessageRow extends Component {
         }
         return;
       }
+      var isMyProduct = model.subClassOf === 'tradle.MyProduct'
       if (isMyMessage)
-        style = [style, {justifyContent: 'flex-end', color: isAdditionalInfo ? '#2892C6' : '#ffffff'}];
+        style = [style, {justifyContent: 'flex-end', color: isMyProduct ? '#2892C6' : '#ffffff'}];
 
       if (resource[v]                      &&
           properties[v].type === 'string'  &&
@@ -643,7 +662,8 @@ class MessageRow extends Component {
           return
         if (model.properties.verifications  &&  !isMyMessage)
           onPressCall = self.verify.bind(self);
-        if (isAdditionalInfo  ||  !isMyMessage)
+        // if (isAdditionalInfo  ||  !isMyMessage)
+        if (!isMyMessage)
           style = [style, {paddingBottom: 10, color: '#2892C6'}];
         vCols.push(self.getPropRow(properties[v], resource, val))
       }
@@ -667,26 +687,42 @@ class MessageRow extends Component {
           }
           let s = msgParts[1].split('_')
           var msgModel = utils.getModel(s[0]);
+          let color, link
           if (msgModel) {
             if (self.props.verificationsToShare)
               style = isSimpleMessage ? styles.resourceTitle : styles.description;
             msgModel = msgModel.value;
-            if (!msgParts[0].length)
-              msgParts[0] = 'I just sent you a request for '; // + msgModel.title;
-            if (s.length === 2  &&  msgModel.subClassOf === constants.TYPES.FORM)
-              onPressCall = self.editForm.bind(self, msgParts[1], msgParts[0])
-            else if (!isMyMessage  &&  !resource.documentCreated)
-              onPressCall = self.createNewResource.bind(self, msgModel);
-            isNewProduct = msgParts[0].length  &&  msgParts[0] === 'application for'
+            let shareMyProduct = msgModel.subClassOf === 'tradle.MyProduct'
+            if (shareMyProduct) {
+              color = {color: '#aaaaaa'}
+              onPressCall = null
+              link = <Text style={[style, color]}>{translate(msgModel)}</Text>
+            }
+            else {
+              if (!msgParts[0].length)
+                msgParts[0] = 'I just sent you a request for '; // + msgModel.title;
+              if (s.length === 2)
+                onPressCall = self.editForm.bind(self, msgParts[1], msgParts[0])
+              else if (!isMyMessage  &&  !resource.documentCreated)
+                onPressCall = self.createNewResource.bind(self, msgModel);
+              isNewProduct = msgParts[0].length  &&  msgParts[0] === 'application for'
 
-            var color = isMyMessage ? (isNewProduct ? {color: LINK_COLOR, fontWeight: '400', fontSize: 18} : {color: STRUCTURED_MESSAGE_COLOR}) : {color: '#2892C6'}
-            var link = isMyMessage
-                     ? <Text style={[style, color]}>{translate(msgModel)}</Text>
-                     : <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                         <Text style={[style, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(msgModel)}</Text>
-                         <Icon style={resource.documentCreated  ? styles.linkIconGreyed : [self.linkIcon, {color: LINK_COLOR}]} size={20} name={'ios-arrow-right'} />
+              if (isMyMessage) {
+                if (isNewProduct)
+                  color = {color: LINK_COLOR, fontWeight: '400', fontSize: 18}
+                else
+                  color = {color: STRUCTURED_MESSAGE_COLOR}
+              }
+              else
+                color = {color: '#2892C6'}
+              if (isMyMessage)
+                link = <Text style={[style, color]}>{translate(msgModel)}</Text>
+              else
+                link = <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                           <Text style={[style, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(msgModel)}</Text>
+                           <Icon style={resource.documentCreated  ? styles.linkIconGreyed : [self.linkIcon, {color: LINK_COLOR}]} size={20} name={'ios-arrow-right'} />
                        </View>
-
+            }
             var msg;
             if (isNewProduct) {
               var newMsg = translate('newProductMsg', utils.getMe().firstName, translate(msgModel));
@@ -749,10 +785,6 @@ class MessageRow extends Component {
         renderedRow.push(v);
       })
     }
-    if (isAdditionalInfo) {
-      return isMyMessage ? onPressCall : this.editVerificationRequest.bind(this);
-    }
-    else {
       var ret = {}
       if (onPressCall)
         ret.onPressCall = onPressCall;
@@ -769,7 +801,7 @@ class MessageRow extends Component {
       else
         ret.onPressCall = this.props.onSelect.bind(this, resource, null);
       return ret
-    }
+    // }
   }
   editForm(rUri, message) {
     let s = rUri.split('_')
@@ -813,7 +845,6 @@ class MessageRow extends Component {
     let model = utils.getModel(resource[constants.TYPE]).value
 
     let propTitle = translate(prop, model)
-
     if (isVerification) {
       if (!this.props.isAggregation)
         style = [style, {borderWidth: 1, paddingVertical: 3, borderTopColor: '#eeeeee', borderBottomColor: VERIFICATION_BG, borderLeftColor: VERIFICATION_BG, borderRightColor: VERIFICATION_BG}]
@@ -829,9 +860,10 @@ class MessageRow extends Component {
       )
     }
     else {
-      if (!this.props.isAggregation  &&  this.isMyMessage())
+      let isMyProduct = model.subClassOf === 'tradle.MyProduct'
+      if (!this.props.isAggregation  &&  this.isMyMessage()  &&  !isMyProduct)
         style = [style, {borderWidth: 1, paddingVertical: 3, borderBottomColor: STRUCTURED_MESSAGE_BORDER, borderTopColor: STRUCTURED_MESSAGE_COLOR, borderLeftColor: STRUCTURED_MESSAGE_COLOR, borderRightColor: STRUCTURED_MESSAGE_COLOR}]
-      let color = this.isMyMessage() ? {color: '#FFFFEE'} : {color: '#757575'}
+      let color = this.isMyMessage() && !isMyProduct ? {color: '#FFFFEE'} : {color: '#757575'}
       return (
         <View style={style} key={this.getNextKey()}>
           <View style={{flex: 1, flexDirection: 'column'}}>
