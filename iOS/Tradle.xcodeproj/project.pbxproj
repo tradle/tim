@@ -60,6 +60,7 @@
 		7348C3B81C41C04F00B9CDF5 /* Fabric.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7348C3B61C41C04F00B9CDF5 /* Fabric.framework */; };
 		7348C3B91C41C04F00B9CDF5 /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7348C3B71C41C04F00B9CDF5 /* Crashlytics.framework */; };
 		7365BF2E1C3461F900B0A512 /* libRNKeychain.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7365BF2D1C3461E700B0A512 /* libRNKeychain.a */; };
+		73683CFC1CC443B300E178CF /* QTouchposeApplication.m in Sources */ = {isa = PBXBuildFile; fileRef = 73683CFB1CC443B300E178CF /* QTouchposeApplication.m */; };
 		736E4EEE1C134354000AA599 /* DeviceUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 736E4EEC1C134354000AA599 /* DeviceUtil.m */; };
 		7375AA881C34766300F36CF3 /* libRNECC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7364872F1C34703500713F09 /* libRNECC.a */; };
 		73855D2E1CB42638000B6A0B /* libRNImagePicker.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B2E51601CAD7DBC000439E6 /* libRNImagePicker.a */; };
@@ -307,6 +308,8 @@
 		7348C3B71C41C04F00B9CDF5 /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Crashlytics.framework; sourceTree = "<group>"; };
 		7364872A1C34703500713F09 /* RNECC.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNECC.xcodeproj; path = "../node_modules/react-native-ecc/ios/RNECC.xcodeproj"; sourceTree = "<group>"; };
 		7365BF281C3461E600B0A512 /* RNKeychain.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNKeychain.xcodeproj; path = "../node_modules/react-native-keychain/RNKeychain.xcodeproj"; sourceTree = "<group>"; };
+		73683CFA1CC443B300E178CF /* QTouchposeApplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QTouchposeApplication.h; sourceTree = "<group>"; };
+		73683CFB1CC443B300E178CF /* QTouchposeApplication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QTouchposeApplication.m; sourceTree = "<group>"; };
 		736E4EEC1C134354000AA599 /* DeviceUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DeviceUtil.m; path = "../node_modules/react-native-device/DeviceUtil.m"; sourceTree = "<group>"; };
 		736E4EED1C134354000AA599 /* DeviceUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DeviceUtil.h; path = "../node_modules/react-native-device/DeviceUtil.h"; sourceTree = "<group>"; };
 		7385C6BA1C4C24A700B92CDA /* Dev.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Dev.plist; path = Tradle/Dev.plist; sourceTree = "<group>"; };
@@ -488,6 +491,8 @@
 		13B07FAE1A68108700A75B9A /* Tradle */ = {
 			isa = PBXGroup;
 			children = (
+				73683CFA1CC443B300E178CF /* QTouchposeApplication.h */,
+				73683CFB1CC443B300E178CF /* QTouchposeApplication.m */,
 				7385C6BA1C4C24A700B92CDA /* Dev.plist */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
@@ -1223,6 +1228,7 @@
 				73261E151C4AB9FE00292FEE /* DeviceUtil.m in Sources */,
 				73261E161C4AB9FE00292FEE /* main.m in Sources */,
 				73261E171C4AB9FE00292FEE /* RNEnvironmentManagerIOS.m in Sources */,
+				73683CFC1CC443B300E178CF /* QTouchposeApplication.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
