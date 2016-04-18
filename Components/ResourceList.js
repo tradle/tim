@@ -12,6 +12,7 @@ var MessageView = require('./MessageView')
 var utils = require('../utils/utils');
 var translate = utils.translate
 var reactMixin = require('react-mixin');
+var extend = require('extend')
 var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
@@ -20,7 +21,9 @@ var Icon = require('react-native-vector-icons/Ionicons');
 var QRCodeScanner = require('./QRCodeScanner')
 var QRCode = require('./QRCode')
 var buttonStyles = require('../styles/buttonStyles');
-var bankStyles = require('../styles/bankStyles')
+var defaultBankStyle = require('../styles/bankStyle.json')
+
+// var bankStyles = require('../styles/bankStyles')
 var ENUM = 'tradle.Enum'
 
 var {
@@ -291,6 +294,9 @@ class ResourceList extends Component {
     var title = isIdentity ? resource.firstName : resource.name; //utils.getDisplayName(resource, model.value.properties);
     var modelName = constants.TYPES.MESSAGE;
     var self = this;
+    var style = defaultBankStyle
+    if (resource.style)
+      style = extend(style, resource.style)
     var route = {
       component: MessageList,
       id: 11,
@@ -300,6 +306,7 @@ class ResourceList extends Component {
         filter: '',
         modelName: modelName,
         currency: resource.currency,
+        bankStyle: style
       },
     }
     if (isIdentity) { //  ||  isOrganization) {
@@ -330,7 +337,7 @@ class ResourceList extends Component {
     }
     if (isOrganization) {
       route.title = resource.name
-      route.passProps.bankStyle = bankStyles[resource.name.split(' ')[0].toLowerCase()]
+      // route.passProps.bankStyle = this.props.bankStyle //bankStyles[resource.name.split(' ')[0].toLowerCase()]
       // if (resource.name === 'Rabobank'  &&  (!me.organization  ||  me.organization.name !== 'Rabobank')) {
       var routes = this.props.navigator.getCurrentRoutes();
       // if (routes[routes.length - 1].title === 'Official Accounts') {
