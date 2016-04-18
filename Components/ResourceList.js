@@ -132,7 +132,7 @@ class ResourceList extends Component {
           filter: '',
           modelName: constants.TYPES.MESSAGE,
           currency: params.to.currency,
-          bankStyle: params.to.bankStyle,
+          bankStyle: params.to.bankStyle || params.to.style,
           dictionary: params.dictionary
         }
       }
