@@ -31,7 +31,7 @@ var buttonStyles = Object.freeze({
   container: {
     alignSelf: 'center',
     paddingHorizontal: 7,
-    marginTop: 3,
+    marginTop: 10,
     // marginTop: 16,
     width: 120
 
