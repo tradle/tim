@@ -734,7 +734,9 @@ class MessageRow extends Component {
                        // {link}
             }
             else {
-               let strName = utils.getStringName(msgParts[0])
+               let strName = isMyProduct
+                           ? translate('shareProduct', translate(msgModel))
+                           : utils.getStringName(msgParts[0])
                let str = strName ? utils.translate(strName) : msgParts[0]
                msg = <View key={self.getNextKey()}>
                        <Text style={style}>{str}</Text>
