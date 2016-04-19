@@ -630,6 +630,9 @@ var utils = {
     return utils.tryWithExponentialBackoff(() => {
       return utils.fetchWithTimeout(url, opts, requestTimeout || DEFAULT_FETCH_TIMEOUT)
     })
+  },
+  normalizeCurrencySymbol(symbol) {
+    return symbol ? (symbol === '¬' ? '€' : symbol) : symbol
   }
 }
 
@@ -642,5 +645,6 @@ function normalizeRemoveListener (addListenerRetVal) {
     }
   }
 }
+
 
 module.exports = utils;
