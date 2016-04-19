@@ -105,8 +105,10 @@ class ShowPropertiesView extends Component {
           return;
       }
       else if (pMeta.ref) {
-        if (pMeta.ref == constants.TYPES.MONEY)
-          val = (val.currency || CURRENCY_SYMBOL) + val.value
+        if (pMeta.ref == constants.TYPES.MONEY) {
+          let c = utils.normalizeCurrencySymbol(val.currency)
+          val = (c || CURRENCY_SYMBOL) + val.value
+        }
         // Could be enum like props
         else if (Object.keys(utils.getModel(pMeta.ref).value.properties).length === 2)
           val = val.title

@@ -832,8 +832,11 @@ class MessageRow extends Component {
   getPropRow(prop, resource, val, isVerification) {
     var style = {flexDirection: 'row'}
     if (prop.ref) {
-      if (prop.ref === constants.TYPES.MONEY)
-        val = (val.currency || CURRENCY_SYMBOL) + val.value
+      if (prop.ref === constants.TYPES.MONEY) {
+        let c = utils.normalizeCurrencySymbol(val.currency)
+        val = (c || CURRENCY_SYMBOL) + val.value
+        // val = (val.currency || CURRENCY_SYMBOL) + val.value
+      }
       else {
         let m = utils.getModel(prop.ref).value
         if (m.subClassOf === ENUM) {
@@ -1326,8 +1329,11 @@ class MessageRow extends Component {
           var val
           if (properties[v].type === 'object') {
             if (properties[v].ref) {
-              if (properties[v].ref === constants.TYPES.MONEY)
+              if (properties[v].ref === constants.TYPES.MONEY) {
                 val = resource[v] //(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value
+                let c = utils.normalizeCurrencySymbol(val.currency)
+                val.currency = c
+              }
               else {
                 var m = utils.getModel(properties[v].ref).value
                 if (m.subClassOf  &&  m.subClassOf == ENUM)

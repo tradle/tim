@@ -2,6 +2,7 @@
 
 var React = require('react-native');
 var utils = require('../utils/utils');
+var translate = utils.translate
 var ShowPropertiesView = require('./ShowPropertiesView');
 var PhotoView = require('./PhotoView');
 var PhotoList = require('./PhotoList');
@@ -15,7 +16,8 @@ var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
 var ResourceViewMixin = require('./ResourceViewMixin');
 var QRCode = require('./QRCode')
-// var buttonStyles = require('../styles/buttonStyles');
+var buttonStyles = require('../styles/buttonStyles');
+const TOUCH_ID_IMG = require('../img/touchid2.png')
 
 var extend = require('extend');
 var constants = require('@tradle/constants');
@@ -113,7 +115,23 @@ class ResourceView extends Component {
                : <View>
                   <QRCode inline={true} content={resource[constants.ROOT_HASH]} dimension={370} />
                 </View>
+    // var switchTouchId = isIdentity
+    //                   ? <TouchableHighlight style={{backgroundColor: '#eeeeee'}} underlayColor='transparent' onPress={() => {
+    //                       let r = {
+    //                         _r: me[constants.ROOT_HASH],
+    //                         _t: constants.TYPES.PROFILE,
+    //                         useTouchId: !me.useTouchId
+    //                       }
 
+    //                       Actions.addItem({resource: me, value: r, meta: utils.getModel(constants.TYPES.PROFILE).value})
+    //                    }}>
+    //                      <View style={{flexDirection: 'row'}}>
+    //                         <Image source={{TOUCH_ID_IMG}} style={{color: 'red', width: 50, height: 50}} />
+    //                         <Text style={{color: '#2E3B4E', fontSize: 20, paddingVertical: 10, alignSelf: 'center'}}>{me.useTouchId ? translate('switchTouchIdOff') : translate('switchTouchIdOn')} </Text>
+    //                       </View>
+    //                     </TouchableHighlight>
+    //                  : <View />
+    var switchTouchId = <View />
           // <AddNewIdentity resource={resource} navigator={this.props.navigator} />
           // <SwitchIdentity resource={resource} navigator={this.props.navigator} />
     return (
@@ -129,6 +147,7 @@ class ResourceView extends Component {
                             currency={this.props.currency}
                             excludedProperties={['photos']}
                             navigator={this.props.navigator} />
+        {switchTouchId}
       </ScrollView>
     );
   }
