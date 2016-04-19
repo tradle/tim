@@ -100,7 +100,7 @@
     "tcomb-form-native": "^0.4.0",
     "tcomb-validation": "^2.3.0",
     "thunky": "^0.1.0",
-    "tim": "^6.0.7",
+    "tim": "^6.3.0",
     "typeforce": "^1.5.5",
     "url": "^0.10.3",
     "util": "^0.10.3",
