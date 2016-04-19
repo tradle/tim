@@ -113,7 +113,7 @@ class VerificationRow extends Component {
     if ((isVerification || isMyProduct  ||  isForm) &&  resource.from) {
       var contentRows = [];
       // contentRows.push(<Text style={}>verified by {resource.to.title}></Text>);
-      contentRows.push(<Text style={[styles.description, {color: '#7AAAc3'}]} key={this.getNextKey()}>{isMyProduct ? 'issued by ' : 'verified by '}</Text>);
+      contentRows.push(<Text style={[styles.description, {color: '#7AAAc3'}]} key={this.getNextKey()}>{isMyProduct ? 'issued by ' : (isForm ? 'sent to ' : 'verified by ')}</Text>);
       let org = isMyProduct
               ? resource.from.organization
               : isForm
