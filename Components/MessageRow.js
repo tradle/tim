@@ -772,7 +772,7 @@ class MessageRow extends Component {
 
     });
 
-    if (!isSimpleMessage  &&  !isForgetting)  {
+    if (!isSimpleMessage  &&  !isForgetting  &&  !isFormError)  {
       // var t = model.title.split(' ');
       // var s = '';
       // t.forEach(function(p) {
