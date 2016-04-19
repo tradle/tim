@@ -40,6 +40,11 @@ class VerificationRow extends Component {
     super(props);
     CURRENCY_SYMBOL = props.currency ? props.currency.symbol || props.currency : DEFAULT_CURRENCY_SYMBOL
   }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return false
+  }
+
   render() {
     var resource = this.props.resource;
     var photo;
@@ -166,7 +171,7 @@ class VerificationRow extends Component {
            {header}
           </TouchableHighlight>
          </View>
-       :  !isMyProduct  &&  !isVerification
+       :  !isMyProduct  &&  !isVerification  &&  !this.props.prop
           ? <Swipeout right={[{text: 'Revoke', backgroundColor: 'red', onPress: this.revokeDocument.bind(this)}]} autoClose={true} scroll={(event) => this._allowScroll(event)}>
               <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>
                {header}
