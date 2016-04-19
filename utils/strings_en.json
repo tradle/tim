@@ -70,5 +70,7 @@
     "shareMyProduct": "I see you've already had your {1} verified",
     "confirmRevoke": "Are you sure you want to revoke access to {1}",
     "shareProduct": "I see you\\'ve already had your {1} verified",
-    "willBeAvailable": "This functionality will be available soon"
+    "willBeAvailable": "This functionality will be available soon",
+    "switchTouchIdOff": "Switch touch ID off",
+    "switchTouchIdOn": "Switch touch ID on",
 }
