@@ -190,7 +190,7 @@ class VerificationRow extends Component {
   revokeDocument() {
     var resource = this.props.resource
     AlertIOS.alert(
-      translate('confirmRevoke', utils.getDisplayName(resource, utils.getModel(resource[constants.TYPE]).value.properties)),
+      translate('confirmRevoke', resource.to.organization.title),
       null,
       [
         {text: 'OK', onPress: () =>  AlertIOS.alert(translate('willBeAvailable'))},
