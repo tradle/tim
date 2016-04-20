@@ -659,7 +659,7 @@ var NewResourceMixin = {
     var m = utils.getModel(propRef).value;
     var currentRoutes = this.props.navigator.getCurrentRoutes();
     this.props.navigator.push({
-      title: translate(m), //m.title,
+      title: m.id === 'tradle.Boolean' ? translate(prop, model) : translate(m), //m.title,
       titleTextColor: '#7AAAC3',
       id: 10,
       component: ResourceList,
