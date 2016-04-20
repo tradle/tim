@@ -1005,7 +1005,7 @@ class MessageRow extends Component {
                         'with ' + orgTitle,
                         [
                           {text: translate('Share'), onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
-                          {text: translate('Cancel'), onPress: () => console.log('Canceled!')},
+                          {text: translate('cancel'), onPress: () => console.log('Canceled!')},
                         ]
                     )}>
               {shareView}
@@ -1027,7 +1027,7 @@ class MessageRow extends Component {
                       'with ' + orgTitle,
                       [
                         {text: translate('Share'), onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
-                        {text: translate('Cancel'), onPress: () => console.log('Canceled!')},
+                        {text: translate('cancel'), onPress: () => console.log('Canceled!')},
                       ]
                   )}>
             {shareView}
