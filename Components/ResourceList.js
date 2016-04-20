@@ -89,6 +89,7 @@ class ResourceList extends Component {
         if (utils.getModel(this.props.modelName).value.interfaces)
           params.to = this.props.resource.to
       }
+      params.resource = this.props.resource
     }
     // this.state.isLoading = true;
     utils.onNextTransitionEnd(this.props.navigator, () => Actions.list(params));
