@@ -232,7 +232,7 @@ class VerificationRow extends Component {
       if (properties[v].ref  ||  properties[v].type === 'boolean') {
         if (resource[v]) {
           let val = (properties[v].ref === constants.TYPES.MONEY)
-                  ? (resource[v].currency || CURRENCY_SYMBOL) + resource[v].value
+                  ? utils.normalizeCurrencySymbol(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value
                   : (resource[v].title || resource[v])
           vCols.push(
             <View style={{flexDirection: 'row', justifyContent: 'space-between', borderColor: '#F2FAED', borderWidth: 0.5, paddingVertical: 15, borderBottomColor: '#f0f0f0', paddingVertical: 3}} key={self.getNextKey()}>
