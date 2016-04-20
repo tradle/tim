@@ -68,7 +68,7 @@
     "add": "Add {1}",
     "myDocuments": "My Documents",
     "shareMyProduct": "I see you've already had your {1} verified",
-    "confirmRevoke": "Are you sure you want to revoke access to {1}",
+    "confirmRevoke": "Ask {1} to delete this document from their records?",
     "shareProduct": "I see you\\'ve already had your {1} verified",
     "willBeAvailable": "This functionality will be available soon",
     "switchTouchIdOff": "Switch touch ID off",

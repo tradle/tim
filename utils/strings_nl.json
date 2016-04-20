@@ -112,7 +112,7 @@
     "scanQRcode": "Scan QR code",
     "myDocuments": "My Documents",
     "shareMyProduct": "I see you've already had your {1} verified",
-    "confirmRevoke": "Are you sure you want to revoke access to {1}",
+    "confirmRevoke": "Ask {1} to delete this document from their records?",
     "netherlands": "Nederland",
     "dutch": "Nederlandse",
     "passport": "Passpoort",
