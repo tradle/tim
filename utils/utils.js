@@ -632,6 +632,7 @@ var utils = {
     })
   },
   normalizeCurrencySymbol(symbol) {
+    // TODO: remove this after fixing encoding bug
     return symbol ? (symbol === '¬' ? '€' : symbol) : symbol
   }
 }
