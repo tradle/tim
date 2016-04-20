@@ -21,8 +21,6 @@ var extend = require('extend');
 var DEFAULT_CURRENCY_SYMBOL = '£';
 var CURRENCY_SYMBOL
 var ENUM = 'tradle.Enum'
-// var Picker = require('react-native-picker')
-// var NewDatePicker = require('./NewDatePicker')
 
 var SETTINGS = 'tradle.Settings'
 
@@ -37,7 +35,6 @@ var {
   Text,
   View,
   TouchableHighlight,
-  // TouchableOpacity,
   StyleSheet,
   Navigator,
   Dimensions
@@ -766,7 +763,7 @@ var NewResourceMixin = {
                     prop:     params.prop,
                     enumProp: utils.getModel(constants.TYPES.MONEY).value.properties.currency,
                     required: params.required,
-                    value:    params.value.currency,
+                    value:    utils.normalizeCurrencySymbol(params.value.currency),
                     noError: true
                   })
         }
