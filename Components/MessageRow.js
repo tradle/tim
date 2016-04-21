@@ -490,7 +490,10 @@ class MessageRow extends Component {
 
     let org = this.props.to.organization ? (this.props.to.organization.title + '.') : this.props.to.name;
     let msg = (vtt.length === 1)
-            ? translate('shareOne', utils.getMe().firstName, docType, org)
+            ? (msgModel.subClassOf === 'tradle.MyProduct'
+                ? translate('shareMyProduct', utils.getMe().firstName, docType, org)
+                : translate('shareOne', utils.getMe().firstName, docType, org)
+              )
             : translate('shareOneOfMany', utils.getMe().firstName, docType, org)
 
 

@@ -112,7 +112,6 @@
     "setDateValue": "Set",
     "scanQRcode": "Scan QR code",
     "myDocuments": "My Documents",
-    "shareMyProduct": "I see you've already had your {1} verified",
     "confirmRevoke": "Ask {1} to delete this document from their records?",
     "Netherlands": "Nederland",
     "France": "Frankrijk",
@@ -126,6 +125,7 @@
     "ResidencePermit": "Verblijfsvergunning",
     "IdCard": "Identiteitskaart",
     "shareProduct": "I see you\\'ve already had your {1} verified",
+    "shareMyProduct": "You can tap below to share {1} with {2}",
     "switchTouchIdOff": "Switch touch ID off",
     "switchTouchIdOn": "Switch touch ID on",
 }
