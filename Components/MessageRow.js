@@ -992,7 +992,7 @@ class MessageRow extends Component {
                         <Text style={{color: '#2E3B4E', fontSize: 16, paddingRight: 5, marginTop: 2}}>{translate('Share')}</Text>
                       </View>
       // let o = verification.organization.title.length < 25 ? verification.organization.title : verification.organization.title.substring(0, 27) + '..'
-      let verifiedBy = translate('verifiedBy', verification.organization.title)
+      let verifiedBy = translate(isMyProduct ? 'issuedBy' : 'verifiedBy', verification.organization.title)
       if (verifiedBy.length > 40)
         verifiedBy = verifiedBy(0, 40) + '..'
       var orgView =   <View style={{flexDirection: 'row', justifyContent: 'flex-end', marginTop: 15}}>
