@@ -545,49 +545,7 @@ class ResourceList extends Component {
         </TouchableHighlight>
       </View>
     );
-    // return (
-    //   <View style={styles.footer}>
-    //     <TouchableHighlight underlayColor='transparent' onPress={this.scanQRCode.bind(this)}>
-    //       <View style={{marginTop: -10}}>
-    //         <Icon name='qrcode'  size={45}  color='#ffffff' style={styles.icon} />
-    //       </View>
-    //     </TouchableHighlight>
-    //   </View>
-    // );
   }
-  // showMenu() {
-  //   var buttons = [translate('addServerUrl')/*, 'Scan QR code'*/, translate('cancel')]
-  //   let allowToAdd = this.props.prop  &&  this.props.prop.allowToAdd
-  //   var buttons = allowToAdd
-  //               ? [translate('add'), translate('addServerUrl')/*, 'Scan QR code'*/, translate('cancel')]
-  //               : [translate('addServerUrl')/*, 'Scan QR code'*/, translate('cancel')]
-  //   var self = this;
-  //   ActionSheetIOS.showActionSheetWithOptions({
-  //     options: buttons,
-  //     // cancelButtonIndex: 2
-  //     cancelButtonIndex: allowToAdd ? 2 : 1
-  //   }, function(buttonIndex) {
-  //     switch (buttonIndex) {
-  //     // case 0:
-  //     //   Actions.talkToRepresentative(self.props.resource)
-  //     //   break
-  //     case 0:
-  //       if (allowToAdd)
-  //         self.addNew()
-  //       else
-  //         self.onSettingsPressed()
-  //       break
-  //     case 1:
-  //       if (allowToAdd)
-  //         self.onSettingsPressed()
-  //       // else
-  //       // self.scanQRCode()
-  //       break;
-  //     default:
-  //       return
-  //     }
-  //   });
-  // }
   onSettingsPressed() {
     var model = utils.getModel(constants.TYPES.SETTINGS).value
     var route = {
@@ -609,19 +567,6 @@ class ResourceList extends Component {
 
     this.props.navigator.push(route)
   }
-
-        // <TouchableHighlight underlayColor='transparent' onPress={this.showBanks.bind(this)}>
-        //   <View>
-        //     <Image source={require('../img/banking.png')} style={styles.image} />
-        //   </View>
-        // </TouchableHighlight>
-      // <View>
-        //   <TouchableHighlight underlayColor='transparent' onPress={this.showDeals.bind(this, DEAL_MODEL)}>
-        //     <View>
-        //       <Icon name='ion|nuclear'  size={30}  color='#999999'  style={styles.icon} />
-        //     </View>
-        //   </TouchableHighlight>
-        // </View>
   showBanks() {
     this.props.navigator.push({
       title: translate('officialAccounts'),
@@ -662,7 +607,7 @@ class ResourceList extends Component {
     if (this.props.prop  &&  model.subClassOf === constants.TYPES.FORM) {
       if (!r)
         r = {}
-      r[constants.TYPE] = this.props.prop.items.ref;
+      r[constants.TYPE] = this.props.prop.ref || this.props.prop.items.ref;
       r.from = this.props.resource.from
       r.to = this.props.resource.to
     }
@@ -676,10 +621,12 @@ class ResourceList extends Component {
       passProps: {
         model: model,
         resource: r,
-        callback: () => Actions.list({
-          modelName: this.props.modelName,
-          to: this.props.resource
-        }),
+        callback: () => {
+          Actions.list({
+            modelName: this.props.modelName,
+            to: this.props.resource
+          })
+        },
       }
     })
   }
@@ -768,12 +715,12 @@ class ResourceList extends Component {
     var buttons = [translate('addServerUrl'), translate('scanQRcode'), translate('cancel')]
     let allowToAdd = this.props.prop  &&  this.props.prop.allowToAdd
     var buttons = allowToAdd
-                ? [translate('add', this.props.prop.title), translate('addServerUrl'), translate('scanQRcode'), translate('cancel')]
+                ? [translate('addNew', this.props.prop.title), translate('cancel')]
                 : buttons
     var self = this;
     ActionSheetIOS.showActionSheetWithOptions({
       options: buttons,
-      cancelButtonIndex: allowToAdd ? 3 : 2
+      cancelButtonIndex: allowToAdd ? 1 : 2
     }, function(buttonIndex) {
       switch (buttonIndex) {
       // case 0:
@@ -786,14 +733,7 @@ class ResourceList extends Component {
           self.onSettingsPressed()
         break
       case 1:
-        if (allowToAdd)
-          self.onSettingsPressed()
-        else
-          self.scanFormsQRCode()
-        break;
-      case 2:
-        if (allowToAdd)
-          self.scanFormsQRCode()
+        self.scanFormsQRCode()
         break;
       default:
         return
