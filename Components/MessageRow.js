@@ -491,7 +491,7 @@ class MessageRow extends Component {
     let org = this.props.to.organization ? (this.props.to.organization.title + '.') : this.props.to.name;
     let msg = (vtt.length === 1)
             ? (msgModel.subClassOf === 'tradle.MyProduct'
-                ? translate('shareMyProduct', utils.getMe().firstName, docType, org)
+                ? translate('shareMyProduct', translate(msgModel), org)
                 : translate('shareOne', utils.getMe().firstName, docType, org)
               )
             : translate('shareOneOfMany', utils.getMe().firstName, docType, org)
@@ -1026,7 +1026,7 @@ class MessageRow extends Component {
         orgRow = <View style={{flexDirection: 'row', marginTop: 10, paddingBottom: 5, justifyContent:'space-between'}}>
           <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
                     AlertIOS.alert(
-                      'Sharing ' + docTitle + ' verified by ' + verifiedBy,
+                      'Sharing ' + docTitle + ' ' + verifiedBy,
                       'with ' + orgTitle,
                       [
                         {text: translate('Share'), onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
