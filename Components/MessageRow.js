@@ -1001,7 +1001,7 @@ class MessageRow extends Component {
         if (!this.props.resource.documentCreated)
             <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
                       AlertIOS.alert(
-                        'Sharing ' + docTitle + ' verified by ' + verifiedBy,
+                        'Sharing ' + docTitle + ' ' + verifiedBy,
                         'with ' + orgTitle,
                         [
                           {text: translate('Share'), onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
