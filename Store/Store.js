@@ -149,7 +149,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
-var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://127.0.0.1:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
+var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://192.168.0.119:44444', 'http://127.0.0.1:80'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
@@ -463,7 +463,6 @@ var Store = Reflux.createStore({
   getInfo(serverUrls, retry) {
     let self = this
 
-    let results = []
     let defer = Q.defer()
     let togo = serverUrls.length
     serverUrls.forEach((url) => {
@@ -2633,7 +2632,8 @@ var Store = Reflux.createStore({
 
       if (chatTo) {
         if (backlink  &&  r[backlink]) {
-          if (chatId === utils.getId(r[backlink])) {
+          var s = params.resource ? utils.getId(params.resource) : chatId
+          if (s === utils.getId(r[backlink])) {
             foundResources[key] = r;
             if (timeResourcePair)
               sharedWithTimePairs.push(timeResourcePair)
@@ -2782,23 +2782,22 @@ var Store = Reflux.createStore({
     // if (lastPL)
     //   result.push(lastPL)
 
-    // find possible verifications for the requests that were not yet fulfilled from other verification providers
-    // result.sort(function(a, b) {
-    //   return a.time - b.time;
-    // });
+    if (params.isForgetting)
+      return result
 
-    if (!params.isForgetting) {
-      result = result.filter((r, i) => {
-        if (r[TYPE] === PRODUCT_LIST) {
-          var next = result[i + 1]
-          if (next && next[TYPE] === PRODUCT_LIST) {
-            return false
-          }
+    result = result.filter((r, i) => {
+      if (r[TYPE] === PRODUCT_LIST) {
+        var next = result[i + 1]
+        if (next && next[TYPE] === PRODUCT_LIST) {
+          return false
         }
+      }
 
-        return true
-      })
-    }
+      return true
+    })
+    result.sort(function(a, b) {
+      return a.time - b.time;
+    });
 
     // not for subreddit
     result.forEach((r) =>  {
