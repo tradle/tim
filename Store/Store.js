@@ -149,7 +149,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
-var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://192.168.0.119:44444', 'http://192.168.0.119:80'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
+var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://127.0.0.1:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
@@ -1416,8 +1416,9 @@ var Store = Reflux.createStore({
       return this.onAddVerification(resource, true);
 
     var self = this;
+    var checkPublish
     if (meta.id === 'tradle.GuestSessionProof') {
-      this.getDriver(me)
+      checkPublish = this.getDriver(me)
       .then(function () {
         // if (publishRequestSent)
           return meDriver.identityPublishStatus()
@@ -1428,216 +1429,222 @@ var Store = Reflux.createStore({
           self.publishMyIdentity(orgRep)
         }
       })
+    } else {
+      checkPublish = Q()
     }
-    for (var p in resource) {
-      if (props[p] &&  props[p].type === 'object') {
-        var ref = props[p].ref;
-        if (ref  &&  resource[p])  {
-          let refModel = this.getModel(ref).value
-          if (refModel.inlined  ||  refModel.subClassOf === 'tradle.Enum')
-            continue;
 
-          var rValue = utils.getId(resource[p])
-          refProps[rValue] = p;
-          if (list[rValue]) {
-            var elm = {value: list[rValue].value, state: 'fulfilled'};
-            foundRefs.push(elm);
+    return checkPublish
+    .then(() => {
+      for (var p in resource) {
+        if (props[p] &&  props[p].type === 'object') {
+          var ref = props[p].ref;
+          if (ref  &&  resource[p])  {
+            let refModel = this.getModel(ref).value
+            if (refModel.inlined  ||  refModel.subClassOf === 'tradle.Enum')
+              continue;
+
+            var rValue = utils.getId(resource[p])
+            refProps[rValue] = p;
+            if (list[rValue]) {
+              var elm = {value: list[rValue].value, state: 'fulfilled'};
+              foundRefs.push(elm);
+            }
+            else
+              promises.push(Q.ninvoke(db, 'get', rValue));
           }
-          else
-            promises.push(Q.ninvoke(db, 'get', rValue));
         }
       }
-    }
-    // Add items properties if they were created
-    var json = JSON.parse(JSON.stringify(value));
-    for (p in resource) {
-      if (props[p]  &&  props[p].type === 'array')
-        json[p] = resource[p];
-    }
-    if (!json[TYPE])
-      json[TYPE] = meta.id;
-    var error = this.checkRequired(json, props);
-    if (error) {
-      foundRefs.forEach(function(val) {
-        var propValue = val.value[TYPE] + '_' + val.value[ROOT_HASH];
-        var prop = refProps[propValue];
-        json[prop] = val.value;
-      });
-
-      this.trigger({
-        action: 'addItem',
-        // list: list,
-        resource: json,
-        error: error
-      });
-      return;
-    }
-    // if (error) {
-    //   this.listenables[0].addItem.failed(error);
-    //   return;
-    // }
-    var returnVal
-    var identity
-    var isNew = !resource[ROOT_HASH];
-    if (!isNew) // make sure that the values of ref props are not the whole resources but their references
-      utils.optimizeResource(resource)
-
-    var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
-    Q.allSettled(promises)
-    .then(function(results) {
-      let allFoundRefs = foundRefs.concat(results);
-      allFoundRefs.forEach(function(val) {
-        if (val.state === 'fulfilled') {
-          var value = val.value;
-          var propValue = value[TYPE] + '_' + value[ROOT_HASH];
+      // Add items properties if they were created
+      var json = JSON.parse(JSON.stringify(value));
+      for (p in resource) {
+        if (props[p]  &&  props[p].type === 'array')
+          json[p] = resource[p];
+      }
+      if (!json[TYPE])
+        json[TYPE] = meta.id;
+      var error = this.checkRequired(json, props);
+      if (error) {
+        foundRefs.forEach(function(val) {
+          var propValue = val.value[TYPE] + '_' + val.value[ROOT_HASH];
           var prop = refProps[propValue];
+          json[prop] = val.value;
+        });
 
-          var title = utils.getDisplayName(value, self.getModel(value[TYPE]).value.properties);
-          json[prop] = self.buildRef(value)
-          // json[prop] = {
-          //   title: title,
-          //   id: propValue  + '_' + value[CUR_HASH],
-          //   time: value.time
-          // }
-          if (isMessage)
-            json.time = new Date().getTime();
-        }
-      });
-      if (isNew  &&  !resource.time)
-        resource.time = new Date().getTime();
-
-      if (!resource  ||  isNew)
-        returnVal = json
-      else {
-        returnVal = {};
-        extend(true, returnVal, resource);
-        for (var p in json)
-          if (!returnVal[p])
-            returnVal[p] = json[p];
-          else if (!props[p])
-            continue
-          else if (!props[p].readOnly  &&  !props[p].immutable)
-            returnVal[p] = json[p];
-      }
-      if (!isRegistration) {
-        // HACK to not to republish identity
-        if (returnVal[TYPE] !== PROFILE)
-          returnVal[NONCE] = self.getNonce()
-      }
-
-      if (isRegistration)
-        return handleRegistration()
-      else if (isMessage)
-        return handleMessage()
-      else
-        return save()
-    })
-
-    function handleRegistration () {
-      self.trigger({action: 'runVideo'})
-      return Q.all([
-          self.loadDB(),
-          Keychain.resetGenericPasswords()
-        ])
-        .then(function () {
-          return self.getDriver(returnVal)
-        })
-        .then(function () {
-          return getDHTKey(publishedIdentity)
-        })
-        .then(function (dhtKey) {
-          if (!resource || isNew) {
-            returnVal[ROOT_HASH] = dhtKey
-          }
-
-          return save()
-        })
-    }
-
-    function handleMessage () {
-      // TODO: fix hack
-      // hack: we don't know root hash yet, use a fake
-      if (returnVal.documentCreated)  {
-        var params = {action: 'addItem', resource: returnVal}
-        self.trigger(params);
-        return self.waitForTransitionToEnd()
-        .then(function() {
-          return save()
-        })
-        .catch(function(err) {
-          err = err
-        })
-      }
-      // Trigger painting before send. for that set ROOT_HASH to some temporary value like NONCE
-      // and reset it after the real root hash will be known
-      let isNew = returnVal[ROOT_HASH] == null
-      if (isNew)
-        returnVal[ROOT_HASH] = returnVal[NONCE]
-
-      var tmpKey = returnVal[TYPE] + '_' + returnVal[ROOT_HASH]
-      list[tmpKey] = {key: tmpKey, value: returnVal};
-
-      var params;
-      if (returnVal[TYPE] === 'tradle.GuestSessionProof') {
-        let org = list[utils.getId(returnVal.to)].value.organization
-        org = list[utils.getId(org)].value
-        params = {action: 'getForms', to: org}
-      }
-      else
-        params = {
+        this.trigger({
           action: 'addItem',
-          resource: returnVal
+          // list: list,
+          resource: json,
+          error: error
+        });
+        return;
+      }
+      // if (error) {
+      //   this.listenables[0].addItem.failed(error);
+      //   return;
+      // }
+      var returnVal
+      var identity
+      var isNew = !resource[ROOT_HASH];
+      if (!isNew) // make sure that the values of ref props are not the whole resources but their references
+        utils.optimizeResource(resource)
+
+      var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
+      Q.allSettled(promises)
+      .then(function(results) {
+        let allFoundRefs = foundRefs.concat(results);
+        allFoundRefs.forEach(function(val) {
+          if (val.state === 'fulfilled') {
+            var value = val.value;
+            var propValue = value[TYPE] + '_' + value[ROOT_HASH];
+            var prop = refProps[propValue];
+
+            var title = utils.getDisplayName(value, self.getModel(value[TYPE]).value.properties);
+            json[prop] = self.buildRef(value)
+            // json[prop] = {
+            //   title: title,
+            //   id: propValue  + '_' + value[CUR_HASH],
+            //   time: value.time
+            // }
+            if (isMessage)
+              json.time = new Date().getTime();
+          }
+        });
+        if (isNew  &&  !resource.time)
+          resource.time = new Date().getTime();
+
+        if (!resource  ||  isNew)
+          returnVal = json
+        else {
+          returnVal = {};
+          extend(true, returnVal, resource);
+          for (var p in json)
+            if (!returnVal[p])
+              returnVal[p] = json[p];
+            else if (!props[p])
+              continue
+            else if (!props[p].readOnly  &&  !props[p].immutable)
+              returnVal[p] = json[p];
         }
-      var m = self.getModel(returnVal[TYPE]).value
-      if (m.subClassOf === FORM)
-        params.sendStatus = 'Sending'
-      self.trigger(params);
+        if (!isRegistration) {
+          // HACK to not to republish identity
+          if (returnVal[TYPE] !== PROFILE)
+            returnVal[NONCE] = self.getNonce()
+        }
 
-      return self.waitForTransitionToEnd()
-      .then(function () {
-        var to = list[utils.getId(returnVal.to)].value;
-
-        var toChain = {}
-        if (!isNew)
-          toChain[PREV_HASH] = returnVal[CUR_HASH] || returnVal[ROOT_HASH]
-
-        let exclude = ['to', 'from', 'verifications', CUR_HASH, 'sharedWith']
-        if (isNew)
-          exclude.push(ROOT_HASH)
-        extend(toChain, returnVal)
-        for (let p of exclude)
-          delete toChain[p]
-
-        toChain.time = returnVal.time
-
-        var key = IDENTITY + '_' + to[ROOT_HASH]
-        return utils.sendSigned(meDriver, {
-          msg: toChain,
-          to: [{fingerprint: self.getFingerprint(list[key].value)}],
-          deliver: true
-        })
+        if (isRegistration)
+          return handleRegistration()
+        else if (isMessage)
+          return handleMessage()
+        else
+          return save()
       })
-      .then(function (entries) {
-        var entry = entries[0]
+
+      function handleRegistration () {
+        self.trigger({action: 'runVideo'})
+        return Q.all([
+            self.loadDB(),
+            Keychain.resetGenericPasswords()
+          ])
+          .then(function () {
+            return self.getDriver(returnVal)
+          })
+          .then(function () {
+            return getDHTKey(publishedIdentity)
+          })
+          .then(function (dhtKey) {
+            if (!resource || isNew) {
+              returnVal[ROOT_HASH] = dhtKey
+            }
+
+            return save()
+          })
+      }
+
+      function handleMessage () {
         // TODO: fix hack
-        // we now have a real root hash,
-        // scrap the placeholder
-        delete list[tmpKey]
-        returnVal[CUR_HASH] = entry.get(CUR_HASH)
-        returnVal[ROOT_HASH] = entry.get(ROOT_HASH)
-        return save(true)
-      })
-    }
+        // hack: we don't know root hash yet, use a fake
+        if (returnVal.documentCreated)  {
+          var params = {action: 'addItem', resource: returnVal}
+          self.trigger(params);
+          return self.waitForTransitionToEnd()
+          .then(function() {
+            return save()
+          })
+          .catch(function(err) {
+            err = err
+          })
+        }
+        // Trigger painting before send. for that set ROOT_HASH to some temporary value like NONCE
+        // and reset it after the real root hash will be known
+        let isNew = returnVal[ROOT_HASH] == null
+        if (isNew)
+          returnVal[ROOT_HASH] = returnVal[NONCE]
 
-    function save (noTrigger) {
-      return self._putResourceInDB({
-        type: returnVal[TYPE],
-        resource: returnVal,
-        rootHash: returnVal[ROOT_HASH],
-        isRegistration: isRegistration,
-        noTrigger: noTrigger
-      })
-    }
+        var tmpKey = returnVal[TYPE] + '_' + returnVal[ROOT_HASH]
+        list[tmpKey] = {key: tmpKey, value: returnVal};
+
+        var params;
+        if (returnVal[TYPE] === 'tradle.GuestSessionProof') {
+          let org = list[utils.getId(returnVal.to)].value.organization
+          org = list[utils.getId(org)].value
+          params = {action: 'getForms', to: org}
+        }
+        else
+          params = {
+            action: 'addItem',
+            resource: returnVal
+          }
+        var m = self.getModel(returnVal[TYPE]).value
+        if (m.subClassOf === FORM)
+          params.sendStatus = 'Sending'
+        self.trigger(params);
+
+        return self.waitForTransitionToEnd()
+        .then(function () {
+          var to = list[utils.getId(returnVal.to)].value;
+
+          var toChain = {}
+          if (!isNew)
+            toChain[PREV_HASH] = returnVal[CUR_HASH] || returnVal[ROOT_HASH]
+
+          let exclude = ['to', 'from', 'verifications', CUR_HASH, 'sharedWith']
+          if (isNew)
+            exclude.push(ROOT_HASH)
+          extend(toChain, returnVal)
+          for (let p of exclude)
+            delete toChain[p]
+
+          toChain.time = returnVal.time
+
+          var key = IDENTITY + '_' + to[ROOT_HASH]
+          return utils.sendSigned(meDriver, {
+            msg: toChain,
+            to: [{fingerprint: self.getFingerprint(list[key].value)}],
+            deliver: true
+          })
+        })
+        .then(function (entries) {
+          var entry = entries[0]
+          // TODO: fix hack
+          // we now have a real root hash,
+          // scrap the placeholder
+          delete list[tmpKey]
+          returnVal[CUR_HASH] = entry.get(CUR_HASH)
+          returnVal[ROOT_HASH] = entry.get(ROOT_HASH)
+          return save(true)
+        })
+      }
+
+      function save (noTrigger) {
+        return self._putResourceInDB({
+          type: returnVal[TYPE],
+          resource: returnVal,
+          rootHash: returnVal[ROOT_HASH],
+          isRegistration: isRegistration,
+          noTrigger: noTrigger
+        })
+      }
+    })
   },
   onGetMe() {
     this.trigger({action: 'getMe', me: me})
