@@ -143,7 +143,9 @@ var utils = {
   },
   createAndTranslate(s, isEnumValue) {
     let stringName = s.replace(/\w\S*/g, function(txt) {
-      return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+      return  isEnumValue
+            ? txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+            : txt
     })
     stringName = stringName.replace(/[^a-zA-Z0-9]/g, '')
     // stringName = stringName.charAt(0).toLowerCase() + stringName.slice(1)
