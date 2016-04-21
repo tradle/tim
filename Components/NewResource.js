@@ -232,6 +232,8 @@ class NewResource extends Component {
     }
     if (!resource  ||  (params.action !== 'addItem'  &&  params.action !== 'addMessage'))
       return;
+    if (this.state.resource[constants.TYPE] !== resource[constants.TYPE])
+      return
     if (params.error) {
       if (resource[constants.TYPE] == this.state.resource[constants.TYPE])
         this.setState({err: params.error, resource: resource, isRegistration: this.state.isRegistration});
@@ -267,7 +269,7 @@ class NewResource extends Component {
         }
         Actions.addItem(params)
       }
-      else
+      // else
         this.props.navigator.pop();
       return;
     }

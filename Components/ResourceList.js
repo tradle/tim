@@ -217,7 +217,7 @@ class ResourceList extends Component {
       return true
     if (!this.state.list  ||  !nextState.list  ||  this.state.list.length !== nextState.list.length)
       return true
-    var isDiff = false
+    let isDiff = false
     for (var i=0; i<this.state.list.length  &&  !isDiff; i++) {
       if (this.state.list[i][constants.ROOT_HASH] !== nextState.list[i][constants.ROOT_HASH])
         isDiff = true
@@ -611,6 +611,7 @@ class ResourceList extends Component {
       r.from = this.props.resource.from
       r.to = this.props.resource.to
     }
+    let self = this
     this.props.navigator.push({
       title: model.title,
       id: 4,
@@ -621,12 +622,24 @@ class ResourceList extends Component {
       passProps: {
         model: model,
         resource: r,
-        callback: () => {
-          Actions.list({
-            modelName: this.props.modelName,
-            to: this.props.resource
+        callback: (resource) => {
+          this.props.navigator.pop()
+          let l = []
+
+          this.state.list.forEach((r) => {
+            let rr = {}
+            extend(rr, r)
+            l.push(rr)
           })
-        },
+          l.push(resource)
+
+          this.setState({
+            list: l,
+            dataSource: this.state.dataSource.cloneWithRows(l)
+          })
+          // this.props.navigator.jumpTo(routes[routes.length - 2])
+          // routes[routes.length - 2].passProps.callback(resource)
+        }
       }
     })
   }
