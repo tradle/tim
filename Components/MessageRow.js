@@ -280,7 +280,6 @@ class MessageRow extends Component {
         var hdrStyle = {backgroundColor: '#289427'} //this.props.bankStyle.PRODUCT_BG_COLOR ? {backgroundColor: this.props.bankStyle.PRODUCT_BG_COLOR} : {backgroundColor: '#289427'}
         var msgModel = utils.getModel(resource[constants.TYPE]).value;
         var orgName = resource.from.organization  ? resource.from.organization.title : ''
-        var confirmationColor = this.props.bankStyle.CONFIRMATION_COLOR ? this.props.bankStyle.CONFIRMATION_COLOR : '#289427'
         renderedRow.splice(0, 0, <View  key={this.getNextKey()} style={[styles.verifiedHeader, hdrStyle, {marginHorizontal: -8, marginTop: -7, marginBottom: 7, paddingBottom: 5}]}>
                            <Text style={{fontSize: 16, fontWeight: '600', color: '#fff', alignSelf: 'center'}}>{translate('issuedBy', orgName)}</Text>
                         </View>
@@ -609,6 +608,7 @@ class MessageRow extends Component {
     var noMessage = !resource.message  ||  !resource.message.length;
     var onPressCall;
 
+    let isMyProduct = model.subClassOf === 'tradle.MyProduct'
     var isProductList = model.id === constants.TYPES.PRODUCT_LIST
     var isSimpleMessage = isProductList ||  model.id === constants.TYPES.SIMPLE_MESSAGE
     var isFormError = model.id === 'tradle.FormError'
@@ -775,7 +775,7 @@ class MessageRow extends Component {
 
     });
 
-    if (!isSimpleMessage  &&  !isForgetting  &&  !isFormError)  {
+    if (!isSimpleMessage  &&  !isForgetting  &&  !isFormError  &&  !isMyProduct)  {
       // var t = model.title.split(' ');
       // var s = '';
       // t.forEach(function(p) {
@@ -790,22 +790,22 @@ class MessageRow extends Component {
         renderedRow.push(v);
       })
     }
-      var ret = {}
-      if (onPressCall)
-        ret.onPressCall = onPressCall;
-      else if (isForgetting)
-        return null
-      else if (isSimpleMessage) {
-        if (isNewProduct)
-          ret.isNewProduct = true
-        else if (isConfirmation)
-          ret.isConfirmation = true
-        else
-          return null
-      }
+    var ret = {}
+    if (onPressCall)
+      ret.onPressCall = onPressCall;
+    else if (isForgetting)
+      return null
+    else if (isSimpleMessage) {
+      if (isNewProduct)
+        ret.isNewProduct = true
+      else if (isConfirmation)
+        ret.isConfirmation = true
       else
-        ret.onPressCall = this.props.onSelect.bind(this, resource, null);
-      return ret
+        return null
+    }
+    else
+      ret.onPressCall = this.props.onSelect.bind(this, resource, null);
+    return ret
     // }
   }
   editForm(rUri, message) {
