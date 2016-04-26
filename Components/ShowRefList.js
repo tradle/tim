@@ -5,12 +5,11 @@ var utils = require('../utils/utils');
 var translate = utils.translate
 var ResourceList = require('./ResourceList');
 var Icon = require('react-native-vector-icons/Ionicons');
-// var { Icon } = require('react-native-icons');
-
 var buttonStyles = require('../styles/buttonStyles');
 var constants = require('@tradle/constants');
 var reactMixin = require('react-mixin');
-var ResourceViewMixin = require('./ResourceViewMixin');
+var RowMixin = require('./RowMixin');
+var ResourceMixin = require('./ResourceMixin');
 
 var {
   View,
@@ -19,14 +18,7 @@ var {
   TouchableHighlight,
   Component
 } = React;
-// <View style={[buttonStyles.container1]}>
-//                <TouchableHighlight onPress={this.createNewIdentity.bind(this)} underlayColor='transparent'>
-//                  <View>
-//                    <Icon name='plus'  size={25}  color='#f7f7f7'  style={buttonStyles.icon}/>
-//                    <Text style={[buttonStyles.text, {color: '#f7f7f7'}]}>Add PROFILE</Text>
-//                  </View>
-//                </TouchableHighlight>
-//              </View>
+
 class ShowRefList extends Component {
   constructor(props) {
     super(props);
@@ -38,7 +30,7 @@ class ShowRefList extends Component {
     var resource = this.props.resource;
     var model = utils.getModel(resource[constants.TYPE]).value;
     var props = model.properties;
-
+    let self = this
     var refList = [];
     var isIdentity = model.id === constants.TYPES.PROFILE;
     var me = utils.getMe()
@@ -62,9 +54,9 @@ class ShowRefList extends Component {
       var key = p
       var cnt = 1
       refList.push(
-        <View style={buttonStyles.container} key={getNextKey(key)}>
+        <View style={buttonStyles.container} key={this.getNextKey()}>
            <TouchableHighlight onPress={this.showResources.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
-             <View style={{alignItems: 'center'}} key={getNextKey(key)}>
+             <View style={{alignItems: 'center'}}>
                <Icon name={icon}  size={30}  color='#ffffff' />
                <Text style={buttonStyles.text}>{translate(props[p], model)}</Text>
              </View>
@@ -79,11 +71,9 @@ class ShowRefList extends Component {
                   </View>
                 </View>
              : <View/>;
-    function getNextKey(key) {
-      return key + '_' + cnt++
-    }
   }
 }
-reactMixin(ShowRefList.prototype, ResourceViewMixin);
+reactMixin(ShowRefList.prototype, ResourceMixin);
+reactMixin(ShowRefList.prototype, RowMixin);
 
 module.exports = ShowRefList;
