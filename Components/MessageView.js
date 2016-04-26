@@ -17,7 +17,7 @@ var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
-var ResourceViewMixin = require('./ResourceViewMixin');
+var ResourceMixin = require('./ResourceMixin');
 var buttonStyles = require('../styles/buttonStyles');
 
 var {
@@ -145,7 +145,7 @@ class MessageView extends Component {
   }
 }
 reactMixin(MessageView.prototype, Reflux.ListenerMixin);
-reactMixin(MessageView.prototype, ResourceViewMixin);
+reactMixin(MessageView.prototype, ResourceMixin);
 
 var styles = StyleSheet.create({
   container: {
