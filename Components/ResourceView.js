@@ -14,7 +14,7 @@ var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
-var ResourceViewMixin = require('./ResourceViewMixin');
+var ResourceMixin = require('./ResourceMixin');
 var QRCode = require('./QRCode')
 var buttonStyles = require('../styles/buttonStyles');
 const TOUCH_ID_IMG = require('../img/touchid2.png')
@@ -162,7 +162,7 @@ class ResourceView extends Component {
 
 }
 reactMixin(ResourceView.prototype, Reflux.ListenerMixin);
-reactMixin(ResourceView.prototype, ResourceViewMixin);
+reactMixin(ResourceView.prototype, ResourceMixin);
 
 var styles = StyleSheet.create({
   container: {
