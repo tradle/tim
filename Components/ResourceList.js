@@ -58,7 +58,8 @@ class ResourceList extends Component {
     super(props);
 
     this.state = {
-      isLoading: utils.getModels() ? false : true,
+      // isLoading: utils.getModels() ? false : true,
+      isLoading: true,
       dataSource: new ListView.DataSource({
         rowHasChanged: function(row1, row2) {
           return row1 !== row2
@@ -101,6 +102,7 @@ class ResourceList extends Component {
   onListUpdate(params) {
     if (params.error)
       return;
+
     var action = params.action;
     if (action === 'addItem'  ||  action === 'addMessage') {
       var model = action === 'addMessage'
@@ -182,6 +184,7 @@ class ResourceList extends Component {
     }
     if (action !== 'list' ||  !params.list || params.isAggregation !== this.props.isAggregation)
       return;
+
     var list = params.list;
     if (!list.length) {
      if (!this.state.filter  ||  !this.state.filter.length)
@@ -217,12 +220,14 @@ class ResourceList extends Component {
       return true
     if (!this.state.list  ||  !nextState.list  ||  this.state.list.length !== nextState.list.length)
       return true
-    let isDiff = false
-    for (var i=0; i<this.state.list.length  &&  !isDiff; i++) {
+    let isOrg = this.props.modelName === constants.TYPES.ORGANIZATION
+    for (var i=0; i<this.state.list.length; i++) {
+      if (this.state.list[i].numberOfForms !== nextState.list[i].numberOfForms)
+        return true
       if (this.state.list[i][constants.ROOT_HASH] !== nextState.list[i][constants.ROOT_HASH])
-        isDiff = true
+        return true
     }
-    return isDiff
+    return false
   }
 
   selectResource(resource) {
@@ -243,7 +248,6 @@ class ResourceList extends Component {
           title: m.title,
           id: 5,
           component: MessageView,
-          // titleTextColor: '#7AAAC3',
           backButtonTitle: translate('back'),
           passProps: {resource: resource}
         });
@@ -502,11 +506,13 @@ class ResourceList extends Component {
   }
   renderFooter() {
     var me = utils.getMe();
-    if (!me  ||  (this.props.prop  &&  (this.props.prop.readOnly || (this.props.prop.items  &&  this.props.prop.items.readOnly))))
-      return <View />;
+    // if (!me  ||  (this.props.prop  &&  (this.props.prop.readOnly || (this.props.prop.items  &&  this.props.prop.items.readOnly))))
+    //   return <View />;
     var model = utils.getModel(this.props.modelName).value;
-    if (model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT ||  model.subClassOf === ENUM)
+    if (!this.props.prop  &&  model.id !== constants.TYPES.ORGANIZATION)
       return <View />
+    // if (model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT ||  model.subClassOf === ENUM)
+    //   return <View />
     if (this.props.prop  &&  !this.props.prop.allowToAdd)
       return <View />
 
@@ -651,8 +657,8 @@ class ResourceList extends Component {
     var model = utils.getModel(this.props.modelName).value;
     if (this.state.dataSource.getRowCount() === 0              &&
         model.subClassOf !== ENUM                              &&
-        this.props.modelName !== constants.TYPES.PROFILE       &&
-        this.props.modelName !== constants.TYPES.VERIFICATION  &&
+        // this.props.modelName !== constants.TYPES.PROFILE       &&
+        // this.props.modelName !== constants.TYPES.VERIFICATION  &&
         this.props.modelName !== constants.TYPES.ORGANIZATION  &&
         !this.props.isChooser                                  &&
         (!model.subClassOf  ||  model.subClassOf !== ENUM)) {
