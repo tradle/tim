@@ -9,7 +9,7 @@ var Icon = require('react-native-vector-icons/Ionicons');
 var buttonStyles = require('../styles/buttonStyles');
 var constants = require('@tradle/constants');
 var reactMixin = require('react-mixin');
-var ResourceViewMixin = require('./ResourceViewMixin');
+var ResourceMixin = require('./ResourceMixin');
 var RowMixin = require('./RowMixin');
 
 var {
@@ -18,6 +18,7 @@ var {
   Text,
   TextInput,
   TouchableHighlight,
+  Dimensions,
   Component
 } = React;
 
@@ -36,12 +37,19 @@ class ShowMessageRefList extends Component {
     var refList = [];
     var isIdentity = model.id === constants.TYPES.PROFILE;
     var isMe = isIdentity ? resource[constants.ROOT_HASH] === utils.getMe()[constants.ROOT_HASH] : true;
-
+    let backlinks = []
     for (var p in props) {
       if (isIdentity  &&  !isMe  &&  props[p].allowRoles  &&  props[p].allowRoles === 'me')
         continue;
       if (p.charAt(0) === '_'  ||  !props[p].items  ||  !props[p].items.backlink)
         continue;
+      backlinks.push(props[p])
+    }
+    backlinks.forEach((prop) => {
+      // if (isIdentity  &&  !isMe  &&  props[p].allowRoles  &&  props[p].allowRoles === 'me')
+      //   continue;
+      // if (p.charAt(0) === '_'  ||  !props[p].items  ||  !props[p].items.backlink)
+      //   continue;
       var icon = props[p].icon  ||  utils.getModel(props[p].items.ref).value.icon;
       if (!icon)
         icon = 'ios-checkmark-empty';
@@ -73,9 +81,12 @@ class ShowMessageRefList extends Component {
              </View>
           );
       }
-      else
+      else {
+        let style = (backlinks.length === 1)
+                  ? [buttonStyles.container, {width: Dimensions.get('window').width}]
+                  :  buttonStyles.container
         refList.push(
-          <View style={buttonStyles.container} key={this.getNextKey()}>
+          <View style={style} key={this.getNextKey()}>
              <TouchableHighlight onPress={this.showResources.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
                <View style={{alignItems: 'center'}}>
                  <Icon name={icon}  size={35}  color='#ffffff' />
@@ -84,7 +95,9 @@ class ShowMessageRefList extends Component {
              </TouchableHighlight>
            </View>
           );
-     }
+      }
+     })
+
      var backlinksBg = this.props.bankStyle && this.props.bankStyle.PRODUCT_ROW_BG_COLOR ? {backgroundColor: this.props.bankStyle.PRODUCT_ROW_BG_COLOR} : {backgroundColor: '#a0a0a0'}
      return refList.length
              ? (
@@ -142,7 +155,7 @@ class ShowMessageRefList extends Component {
     });
   }
 }
-reactMixin(ShowMessageRefList.prototype, ResourceViewMixin);
+reactMixin(ShowMessageRefList.prototype, ResourceMixin);
 reactMixin(ShowMessageRefList.prototype, RowMixin);
 
 module.exports = ShowMessageRefList;
