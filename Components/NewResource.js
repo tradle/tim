@@ -9,6 +9,7 @@ var ResourceList = require('./ResourceList')
 var GridItemsList = require('./GridItemsList')
 var PhotoView = require('./PhotoView');
 var ResourceView = require('./ResourceView');
+var ResourceMixin = require('./ResourceMixin');
 var t = require('tcomb-form-native');
 var extend = require('extend');
 var Actions = require('../Actions/Actions');
@@ -27,14 +28,10 @@ var DeviceWidth
 var constants = require('@tradle/constants');
 var UIImagePickerManager = require('NativeModules').ImagePickerManager;
 var ENUM = 'tradle.Enum'
-// var delayedRegistration
 var LINK_COLOR, DEFAULT_LINK_COLOR = '#a94442'
 
-// var Modal = require('react-native-modal')
-// var PhotoCarouselMixin = require('./PhotoCarouselMixin')
-
 var Form = t.form.Form;
-var stylesheet = require('../styles/styles') //require('tcomb-form-native/lib/stylesheets/bootstrap');
+var stylesheet = require('../styles/styles')
 
 var {
   StyleSheet,
@@ -44,13 +41,11 @@ var {
   ScrollView,
   Image,
   DeviceEventEmitter,
-  StatusBarIOS,
-  DatePickerIOS,
+  // StatusBarIOS,
   AlertIOS,
   Dimensions,
   PropTypes,
   ActivityIndicatorIOS,
-  // LayoutAnimation,
   Component,
   Navigator,
   TouchableHighlight,
@@ -93,11 +88,8 @@ class NewResource extends Component {
       isRegistration: isRegistration,
       isLoading: false,
       isPrefilled: this.props.isPrefilled,
-      // modal: false,
       modal: {},
       offSet: new Animated.Value(Dimensions.get('window').height)
-      // isModalOpen: false,
-      // currentPhoto: r.photos &&  r.photos.length ? r.photos[0].url : null
     }
     var currentRoutes = this.props.navigator.getCurrentRoutes();
     var currentRoutesLength = currentRoutes.length;
@@ -117,13 +109,8 @@ class NewResource extends Component {
     let d = Dimensions.get('window')
     DeviceHeight = d.height;
     DeviceWidth = d.width
-    // pass on any props we don't own to ScrollView
-    // Object.keys(this.props).filter((n)=>{return n!='children'})
-    // .forEach((e)=>{if(!myProps[e])this.scrollviewProps[e]=this.props[e]});
   }
   updateKeyboardSpace(frames) {
-    // LayoutAnimation.configureNext(animations.layout.spring);
-    // var height = frames.end ? frames.end.height : frames.endCoordinates.height
     var height = frames.endCoordinates ? frames.endCoordinates.height : 0
     this.setState({keyboardSpace: height});
   }
@@ -133,7 +120,7 @@ class NewResource extends Component {
     this.setState({keyboardSpace: 0});
   }
   shouldComponentUpdate(nextProps, nextState) {
-    return nextState.err                      ||
+    let isUpdate = nextState.err                             ||
            nextState.missedRequiredOrErrorValue              ||
            this.state.modal !== nextState.modal              ||
            this.state.prop !== nextState.prop                ||
@@ -141,6 +128,7 @@ class NewResource extends Component {
            this.state.isLoading !== nextState.isLoading      ||
            this.state.itemsCount != nextState.itemsCount     ||
           !equal(this.state.resource, nextState.resource)
+    return isUpdate
            // nextState.isModalOpen !== this.state.isModalOpen  ||
            // this.state.modalVisible != nextState.modalVisible ||
   }
@@ -149,8 +137,6 @@ class NewResource extends Component {
       Actions.getItem(utils.getId(this.state.resource))
     else if (this.state.isUploading)
       Actions.getTemporary(this.state.resource[constants.TYPE])
-    // else if (this.state.isRegistration)
-    //   Actions.getTemporary(SETTINGS)
   }
 
   componentDidMount() {
@@ -162,17 +148,6 @@ class NewResource extends Component {
     DeviceEventEmitter.addListener('keyboardWillHide', (e) => {
       this.resetKeyboardSpace(e)
     })
-      // if (this.state.isRegistration) {
-      //   var r = {}
-      //   extend(true, r, this.state.resource)
-      //   r.url = params.resource.url
-      //   this.setState({
-      //     settings: {_t: SETTINGS, url: params.resource.url},
-      //     resource: r,
-      //     isUploading: false
-      //   })
-      // }
-
   }
 
 
@@ -225,9 +200,7 @@ class NewResource extends Component {
     }
     if (params.action === 'runVideo'  && this.state.isRegistration) {
       if (this.props.callback)
-        // this.props.navigator.pop();
         this.setState({isLoading: true})
-        // this.props.callback(resource)
         return;
     }
     if (!resource  ||  (params.action !== 'addItem'  &&  params.action !== 'addMessage'))
@@ -240,21 +213,11 @@ class NewResource extends Component {
       this.state.submitted = false
       return;
     }
-    // if (params.resource[constants.TYPE] === SETTINGS  &&  !this.state.settings) {
-    //   Actions.addItem(this.delayedRegistration)
-    //   this.state.settings = params.resource
-    //   this.state.submitted = false
-    //   return
-    // }
     if (this.props.callback) {
-      // this.props.navigator.pop();
       this.props.callback(resource);
       return;
     }
 
-    // if registration or after editing your own profile
-    // if (this.state.isRegistration  ||  (params.me  &&  resource[constants.ROOT_HASH] === params.me[constants.ROOT_HASH]))
-    //   utils.setMe(params.me);
     var self = this;
     var title = utils.getDisplayName(resource, this.props.model.properties);
     var isMessage = this.props.model.interfaces  &&  this.props.model.interfaces.indexOf(constants.TYPES.MESSAGE) != -1;
@@ -269,8 +232,7 @@ class NewResource extends Component {
         }
         Actions.addItem(params)
       }
-      // else
-        this.props.navigator.pop();
+      this.props.navigator.pop();
       return;
     }
     var currentRoutes = self.props.navigator.getCurrentRoutes();
@@ -317,11 +279,8 @@ class NewResource extends Component {
     var value = this.refs.form.getValue();
     if (!value) {
       value = this.refs.form.refs.input.state.value;
-      if (!value) {
-        // this.state.submitted = false
-        // return;
+      if (!value)
         value = {}
-      }
     }
     // value is a tcomb Struct
     var json = JSON.parse(JSON.stringify(value));
@@ -431,22 +390,7 @@ class NewResource extends Component {
     };
     if (this.props.additionalInfo)
       params.additionalInfo = additionalInfo
-    // Server URL gets chosen at registration time
-    // if (this.state.isRegistration  && json.url && json.url.length) {
-    //   var r = {
-    //     type: SETTINGS,
-    //     url: json.url
-    //   }
-    //   delete json.url
-    //   Actions.addItem({
-    //     value: r,
-    //     resource: r,
-    //     meta: utils.getModel(SETTINGS).value,
-    //   })
-    //   this.delayedRegistration = params
-    // }
-    // else
-      Actions.addItem(params)
+    Actions.addItem(params)
   }
   // HACK: the value for property of the type that is subClassOf Enum is set on resource
   // and it is different from what tcomb sets in the text field
@@ -491,6 +435,7 @@ class NewResource extends Component {
     this.setState({
       resource: resource,
       itemsCount: itemsCount,
+      prop: propName
     });
   }
   onNewPressed(bl) {
@@ -652,92 +597,64 @@ class NewResource extends Component {
       var counter, count = 0
       itemsArray = null
       var isPhoto = false
-      if (resource  &&  resource[bl.name]) {
-        count = resource[bl.name].length
-        if (count) {
-          var items = []
-          isPhoto = bl.name === 'photos'
-          var arr = resource[bl.name]
-          var n = isPhoto
-                ? Math.min(arr.length, 7)
-                : 3
+      var count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
+      if (count) {
+        var items = []
+        isPhoto = bl.name === 'photos'
+        var arr = resource[bl.name]
+        var n = isPhoto
+              ? Math.min(arr.length, 7)
+              : 3
 
-          for (var i=0; i<n; i++) {
-            if (isPhoto)
-              items.push(
-                  <Image style={styles.thumb} source={{uri: arr[i].url}} key={self.getNextKey()} onPress={() => this.openModal(arr[i])}/>
-                  // CAROUSEL
-                // <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, arr[i], this.cancelItem.bind(this, arr[i]))}>
-                //   <Image style={styles.thumb} source={{uri: arr[i].url}} key={self.getNextKey()}/>
-                // </TouchableHighlight>
-
-                // this is for MODAL
-                // <TouchableHighlight underlayColor='transparent' onPress={this.openModal.bind(this, arr[i].url)}  key={self.getNextKey()}>
-                //   <Image style={styles.thumb} source={{uri: arr[i].url}}/>
-                // </TouchableHighlight>
-              )
-
-
-            // else {
-            //   items.push
-            // }
-          }
-          if (isPhoto) {
-            itemsArray =
-              <View style={{height: 70, marginLeft: 10}}>
-                <Text style={styles.activePropTitle}>{translate(bl, blmodel)}</Text>
-                <View style={{flexDirection: 'row'}}>{items}</View>
+        for (var i=0; i<n; i++) {
+          if (isPhoto)
+            items.push(<Image style={styles.thumb} source={{uri: arr[i].url}} onPress={() => this.openModal(arr[i])}/>)
+        }
+        if (isPhoto) {
+          itemsArray =
+            <View style={[styles.photoStrip, count ? {marginTop: -30} : {marginTop: 0}]}>
+              <Text style={styles.activePropTitle}>{translate(bl, blmodel)}</Text>
+              <View style={styles.photoStripItems}>{items}</View>
+            </View>
+          counter =
+            <View>
+              <View style={{marginTop: 15, paddingHorizontal: 5}}>
+                <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
               </View>
-            // counter =
-            //   <View>
-            //     <Icon name={'plus'} size={30} color='#7AAAC3' />
-            //   </View>
-              counter =
-                <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
-                  <View style={{marginTop: 60, paddingHorizontal: 5}}>
-                    <Icon name={'plus'} size={15} color='#7AAAC3' />
-                  </View>
-                </View>;
-                  // <Text>{resource[bl.name] ? resource[bl.name].length : ''}</Text>
-          }
-          else {
-            itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{translate(bl, blmodel)}</Text>
-            counter =
-              <View style={styles.itemsCounter}>
-                <Text>{resource[bl.name] ? resource[bl.name].length : ''}</Text>
-              </View>
-          }
-
+            </View>;
         }
         else {
-          itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{translate(bl, blmodel)}</Text>
+          var vCols = bl.viewCols;
+          var cnt = resource[bl.name].length;
+          let val = <View>{self.renderItems(resource[bl.name], bl)}</View>
 
-          // if (model.required  &&  model.required.indexOf(bl.name) != -1)
-          //   counter =
-          //     <View style={{paddingHorizontal: 5}}>
-          //       <Icon name='plus'  size={15}  color='#96415A'/>
-          //     </View>;
-          // else
-            counter = <View style={{paddingHorizontal: 5}}>
-                        <Icon name='plus'   size={15}  color='#7AAAC3' />
-                      </View>
+          var separator = <View style={styles.separator}></View>
+          let cstyle = []
+          if (count) {
+            cstyle.push(styles.activePropTitle)
+            cstyle.push({marginTop: 20})
+          }
+          else
+            cstyle.push(styles.noItemsText)
+          cstyle.push({paddingLeft: 10})
+          itemsArray = <View>
+                         <Text style={cstyle}>{translate(bl, model)}</Text>
+                         {val}
+                       </View>
+
+          counter = <View style={[styles.itemsCounterEmpty, {marginTop: 15, paddingBottom: 10}]}>
+                      <Icon name={bl.icon || 'plus'} size={bl.icon ? 25 : 15}  color={LINK_COLOR} />
+                    </View>
         }
       }
       else {
         itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{translate(bl, blmodel)}</Text>
-
-        // if (self.props.model.required  &&  self.props.model.required.indexOf(bl.name) != -1)
-        //   counter =
-        //     <View>
-        //       <Icon name='plus'  size={15}  color='#96415A' />
-        //     </View>;
-        // else
-          counter = <View style={{paddingHorizontal: 5}}>
-                    { bl.name === 'photos'
-                      ? <Icon name='ios-camera-outline'   size={25}  color={LINK_COLOR} />
-                      : <Icon name='plus'   size={15}  color='#7AAAC3' />
-                    }
-                    </View>
+        counter = <View style={[styles.itemsCounterEmpty]}>
+                  { bl.name === 'photos'
+                    ? <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
+                    : <Icon name={bl.icon || 'plus'}   size={bl.icon ? 25 : 15} color={LINK_COLOR} />
+                  }
+                  </View>
       }
       var title = translate(bl, blmodel) //.title || utils.makeLabel(p)
       var err = this.state.missedRequiredOrErrorValue
@@ -749,45 +666,44 @@ class NewResource extends Component {
                     <Text style={styles.errorText}>{errTitle}</Text>
                   </View>
                 : <View/>
-      // var error = <View/>
-                // <Text style={count ? styles.itemsText : styles.noItemsText}>{bl.title}</Text>
-      // var actionableItem = isPhoto
-      //                    ? itemsArray
-      //                    : <TouchableHighlight underlayColor='transparent'
-      //                           onPress={self.onNewPressed.bind(self, bl, meta)}>
-      //                       {itemsArray}
-      //                     </TouchableHighlight>
-
-      // arrayItems.push (
-      //   <View style={styles.itemButton} key={this.getNextKey()} ref={bl.name}>
-      //       <View>
-      //         <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-      //           {actionableItem}
-      //           <TouchableHighlight underlayColor='transparent'
-      //                           onPress={self.onNewPressed.bind(self, bl, meta)}>
-      //             {counter}
-      //           </TouchableHighlight>
-      //         </View>
-      //         {error}
-      //       </View>
-      //   </View>
-      // );
       var actionableItem = isPhoto && count
-                         ?  <TouchableHighlight style={{paddingTop: 20}} underlayColor='transparent'
+                         ?  <TouchableHighlight style={{paddingTop: 15}} underlayColor='transparent'
                              onPress={self.showItems.bind(self, bl, meta)}>
                             {itemsArray}
                             </TouchableHighlight>
-                         :  <TouchableHighlight style={{paddingTop: 20}} underlayColor='transparent'
+                         :  <TouchableHighlight style={count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}} underlayColor='transparent'
                                 onPress={self.onNewPressed.bind(self, bl, meta)}>
                               {itemsArray}
                             </TouchableHighlight>
+
+      let istyle = []
+      if (isPhoto) {
+        if (count)
+          istyle.push(styles.photoButton)
+        else {
+          istyle.push(styles.itemButton)
+          // istyle.push({paddingBottom: 10})
+          istyle.push({height: 70})
+        }
+      }
+      else {
+        istyle.push(styles.itemButton)
+        if (err)
+          istyle.push({marginBottom: 10})
+        else if (!count)
+          istyle.push({paddingBottom: 0})
+        else {
+          istyle.push({paddingBottom: 0, height: count * (resource[bl.name].photo ? 55 : 32) + 35})
+        }
+      }
+
       arrayItems.push (
-        <View style={styles.itemButton} key={this.getNextKey()} ref={bl.name}>
+        <View style={istyle} key={this.getNextKey()} ref={bl.name}>
           <View style={styles.items}>
             <View style={{flex: 5}}>
               {actionableItem}
             </View>
-            <TouchableHighlight underlayColor='transparent' style={{paddingTop: 20}}
+            <TouchableHighlight underlayColor='transparent' style={isPhoto  &&  count ? {marginTop: 15} : count ? {paddingTop: 0} : {marginTop: 15, paddingBottom: 7}}
                 onPress={self.onNewPressed.bind(self, bl, meta)}>
               {counter}
             </TouchableHighlight>
@@ -795,33 +711,6 @@ class NewResource extends Component {
           {error}
         </View>
       );
-
-      // arrayItems.push (
-      //   <View style={styles.itemButton} key={this.getNextKey()} ref={bl.name}>
-      //       <View>
-      //         <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-      //            <TouchableHighlight underlayColor='transparent'
-      //               onPress={self.onNewPressed.bind(self, bl, meta)}>
-      //              {itemsArray}
-      //            </TouchableHighlight>
-      //            <TouchableHighlight underlayColor='transparent'
-      //               onPress={self.showItems.bind(self, bl, meta)}>
-      //             {counter}
-      //           </TouchableHighlight>
-      //         </View>
-      //         {error}
-      //       </View>
-      //   </View>
-      // );
-
-
-      // if (itemsArray) {
-      //   arrayItems.push(
-      //     <View style={styles.itemButton} key={this.getNextKey()} ref={bl.name}>
-      //       {itemsArray}
-      //     </View>
-      //   )
-      // }
     }
     // var FromToView = require('./FromToView');
     // var isRegistration = !utils.getMe()  &&  resource[constants.TYPE] === constants.TYPES.PROFILE
@@ -850,16 +739,6 @@ class NewResource extends Component {
                   </View>
                  </TouchableHighlight>
                : <View style={{height: 0}} />
-
-    // var button = this.state.isRegistration
-    //            ? <TouchableHighlight style={styles.thumbButton}
-    //                   underlayColor='transparent' onPress={this.onSavePressed.bind(this)}>
-    //                  <Icon name={'power'} size={Device.width / 6} style={styles.power}/>
-    //              </TouchableHighlight>
-    //            : <View style={{height: 0}} />
-    // var alert = this.state.err
-    //           ? <Text style={{color: 'darkred', alignSelf: 'center',fontSize: 18}}>{this.state.err}</Text>
-    //           : <View/>
 
     var content =
       <ScrollView style={style} ref='scrollView' {...this.scrollviewProps}>
@@ -897,22 +776,16 @@ class NewResource extends Component {
     }
 
     return (
-        <View style={{height: DeviceHeight}}>
-          <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: DeviceWidth, height: DeviceHeight}} />
+      <View style={{height: DeviceHeight}}>
+        <Image source={BG_IMAGE} style={styles.bgImage} />
 
-          {content}
-          <View style={{opacity: 0.7, position: 'absolute', top: 20, right: 20, flexDirection: 'row'}}>
-            <Image style={{width: 50, height: 50}} source={require('../img/TradleW.png')}></Image>
-          </View>
+        {content}
+        <View style={{opacity: 0.7, position: 'absolute', top: 20, right: 20, flexDirection: 'row'}}>
+          <Image style={{width: 50, height: 50}} source={require('../img/TradleW.png')}></Image>
         </View>
-
-      )
-            // <Text style={{fontSize: 25, marginTop: 10, paddingHorizontal: 10, color: '#cccccc'}}>Tradle</Text>
-          // <View style={{opacity: 0.7, position: 'absolute', bottom: 30, right: 20, flexDirection: 'row'}}>
-          //   <Image style={{width: 50, height: 50}} source={require('../img/TradleW.png')}></Image>
-          // </View>
+      </View>
+    )
   }
-
   cancelItem(item) {
     var list = this.state.resource.photos;
     for (var i=0; i<list.length; i++) {
@@ -946,6 +819,7 @@ class NewResource extends Component {
       passProps: {
         prop:        prop.name,
         resource:    resource,
+        onAddItem:   this.onAddItem.bind(this),
         list:        resource[prop.name],
         returnRoute: currentRoutes[currentRoutes.length - 1],
         callback:    this.setChosenValue.bind(this),
@@ -1013,44 +887,10 @@ class NewResource extends Component {
   }
 }
 reactMixin(NewResource.prototype, Reflux.ListenerMixin);
-// reactMixin(NewResource.prototype, PhotoCarouselMixin);
-// var animations = {
-//   layout: {
-//     spring: {
-//       duration: 400,
-//       create: {
-//         duration: 300,
-//         type: LayoutAnimation.Types.easeInEaseOut,
-//         property: LayoutAnimation.Properties.opacity,
-//       },
-//       update: {
-//         type: LayoutAnimation.Types.spring,
-//         springDamping: 1,
-//       },
-//     },
-//     easeInEaseOut: {
-//       duration: 400,
-//       create: {
-//         type: LayoutAnimation.Types.easeInEaseOut,
-//         property: LayoutAnimation.Properties.scaleXY,
-//       },
-//       update: {
-//         type: LayoutAnimation.Types.easeInEaseOut,
-//       },
-//     },
-//   },
-// };
 reactMixin(NewResource.prototype, NewResourceMixin);
+reactMixin(NewResource.prototype, ResourceMixin);
 
 var styles = StyleSheet.create({
-page: {
-    flex: 1,
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    top: 0
-  },
   container: {
     flex: 1,
   },
@@ -1065,6 +905,9 @@ page: {
     color: '#000000',
     // alignSelf: 'center',
     paddingLeft: 10
+  },
+  itemsCounterEmpty: {
+    paddingHorizontal: 5
   },
   itemsCounter: {
     borderColor: '#2E3B4E',
@@ -1083,6 +926,14 @@ page: {
     paddingBottom: 10,
     justifyContent: 'flex-end',
   },
+  photoButton: {
+    marginLeft: 10,
+    borderColor: '#ffffff',
+    borderBottomColor: '#cccccc',
+    borderBottomWidth: 0.5,
+    // paddingBottom: 5,
+  },
+
   photoBG: {
     // marginTop: -15,
     alignItems: 'center',
@@ -1121,12 +972,6 @@ page: {
     marginRight: 2,
     borderRadius: 5
   },
-  tradle: {
-    // color: '#7AAAC3',
-    color: '#eeeeee',
-    fontSize: 35,
-    alignSelf: 'center',
-  },
   error: {
     paddingLeft: 5,
     position: 'absolute',
@@ -1140,61 +985,30 @@ page: {
   items: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    // paddingBottom: 5
   },
   activePropTitle: {
     fontSize: 12,
-    marginTop: 25,
+    marginTop: 20,
+    paddingBottom: 5,
     // marginBottom: 5,
     color: '#bbbbbb'
   },
-  power: {
-    color: '#BCD3E6',
-    shadowColor: '#6CA5D4',
-    shadowOffset: {width: 1, height: 1},
-    shadowOpacity: 1,
-    shadowRadius: 1
+  photoStrip: {
+    marginLeft: 10,
+    // marginTop: -30,
+    paddingBottom: 5
+  },
+  photoStripItems: {
+    flexDirection: 'row'
+  },
+  bgImage: {
+    position:'absolute',
+    left: 0,
+    top: 0,
+    width: DeviceWidth,
+    height: DeviceHeight
   }
 });
 
 module.exports = NewResource;
-    // var content =
-    //   <ScrollView style={[style, styles.page]} ref='scrollView' {...this.scrollviewProps}>
-    //     <View style={styles.container}>
-    //       <View style={photoStyle}>
-    //         <PhotoView resource={resource} navigator={this.props.navigator}/>
-    //       </View>
-    //       <View style={this.state.isRegistration ? {marginLeft: 30, marginRight: 30, paddingTop: 30} : {paddingRight: 15, paddingTop: 10, marginHorizontal: 10}}>
-    //         <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange.bind(this)}/>
-    //         {button}
-    //         <View style={{marginTop: -10}}>
-    //             {arrayItems}
-    //          </View>
-    //       </View>
-    //       <View style={{height: 300}}/>
-    //     </View>
-    //       <Modal forceToFront={true}
-    //              onPressBackdrop={() => {closeModal}}
-    //              isVisible={this.state.isModalOpen}
-    //              customShowHandler={this.showModalTransition}
-    //              customHideHandler={this.hideModalTransition}
-    //              onClose={this.closeModal.bind(this)}>
-    //         <Image source={{uri: this.state.currentPhoto}} style={{padding:0, width: Device.width - 80, height: 400}}/>
-    //         <View style={{height: 150, backgroundColor: 'transparent'}}/>
-    //       </Modal>
-    //   </ScrollView>
-  // showModalTransition(transition) {
-  //   transition('opacity', {duration: 1, begin: 0, end: 1});
-  //   transition('height', {duration: 1, begin: DeviceHeight * 2, end: DeviceHeight});
-  // }
-
-  // hideModalTransition(transition) {
-  //   transition('height', {duration: 200, begin: DeviceHeight, end: DeviceHeight * 2, reset: true});
-  //   transition('opacity', {duration: 200, begin: 1, end: 0});
-  // }
-  // openModal(currentPhoto) {
-  //   this.setState({isModalOpen: true, currentPhoto: currentPhoto});
-  // }
-
-  // closeModal() {
-  //   this.setState({isModalOpen: false, currentPhoto: null});
-  // }
