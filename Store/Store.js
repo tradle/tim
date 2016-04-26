@@ -1485,8 +1485,8 @@ var Store = Reflux.createStore({
       var returnVal
       var identity
       var isNew = !resource[ROOT_HASH];
-      if (!isNew) // make sure that the values of ref props are not the whole resources but their references
-        utils.optimizeResource(resource)
+      // if (!isNew) // make sure that the values of ref props are not the whole resources but their references
+      utils.optimizeResource(resource)
 
       var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
       Q.allSettled(promises)
@@ -1525,6 +1525,7 @@ var Store = Reflux.createStore({
             else if (!props[p].readOnly  &&  !props[p].immutable)
               returnVal[p] = json[p];
         }
+        // utils.optimizeResource(returnVal)
         if (!isRegistration) {
           // HACK to not to republish identity
           if (returnVal[TYPE] !== PROFILE)
@@ -1711,6 +1712,9 @@ var Store = Reflux.createStore({
       utils.optimizeResource(form)
       batch.push({type: 'put', key: formId, value: form})
       return db.batch(batch)
+    })
+    .then(() => {
+      self.trigger({action: 'list', list: self.searchNotMessages({modelName: ORGANIZATION, to: resource})})
     })
     .catch(function(err) {
       debugger
@@ -2007,16 +2011,31 @@ var Store = Reflux.createStore({
         if (isOrg) {
           if (this.getModel(s).value.subClassOf === FORM) {
             let toId = utils.getId(list[key].value.to)
-            let org = list[toId].value.organization
-            if (!org) {
-              let fromId = utils.getId(list[key].value.from)
-              org = list[fromId].value.organization
+            let form = list[key].value
+            // The resource was never shared or it has a shared with party in it
+            if (form.sharedWith) {
+              let wasShared
+              form.sharedWith.forEach((o) => {
+                let org = list[o.bankRepresentative].value.organization
+                let orgId = utils.getId(org)
+                if (orgToForm[orgId])
+                  orgToForm[orgId] = ++orgToForm[orgId]
+                else
+                  orgToForm[orgId] = 1
+              })
             }
-            let orgId = utils.getId(org)
-            if (orgToForm[orgId])
-              orgToForm[orgId] = ++orgToForm[orgId]
-            else
-              orgToForm[orgId] = 1
+            else {
+              let org = list[toId].value.organization
+              if (!org) {
+                let fromId = utils.getId(list[key].value.from)
+                org = list[fromId].value.organization
+              }
+              let orgId = utils.getId(org)
+              if (orgToForm[orgId])
+                orgToForm[orgId] = ++orgToForm[orgId]
+              else
+                orgToForm[orgId] = 1
+            }
           }
           continue
         }
@@ -2795,9 +2814,36 @@ var Store = Reflux.createStore({
     result = result.filter((r, i) => {
       if (r[TYPE] === PRODUCT_LIST) {
         var next = result[i + 1]
-        if (next && next[TYPE] === PRODUCT_LIST) {
+        if (next && next[TYPE] === PRODUCT_LIST)
           return false
+      }
+      let m = utils.getModel(r[TYPE]).value
+      let isMyProduct = m.subClassOf === 'tradle.MyProduct'
+      let isForm = !isMyProduct && m.subClassOf === FORM
+      // r.from.photos = list[utils.getId(r.from)].value.photos;
+      // var to = list[utils.getId(r.to)]
+      // if (!to) console.log(r.to)
+      // r.to.photos = to  &&  to.value.photos;
+      if (isMyProduct)
+        r.from.organization = list[utils.getId(r.from)].value.organization
+      else if (isForm  &&  !params.isForgetting) {
+        // set organization and photos for items properties for better displaying
+        let form = list[utils.getId(r.to)].value
+        r.to.organization = form.organization
+        for (var p in r) {
+          if (!m.properties[p]  ||  m.properties[p].type !== 'array' ||  !m.properties[p].items.ref)
+            continue
+          let pModel = utils.getModel(m.properties[p].items.ref).value
+          if (pModel.properties.photos) {
+            let items = r[p]
+            items.forEach((ir) => {
+              let itemPhotos = list[utils.getId(ir)].value.photos
+              if (itemPhotos)
+                ir.photo = itemPhotos[0].url
+            })
+          }
         }
+
       }
 
       return true
@@ -2807,19 +2853,19 @@ var Store = Reflux.createStore({
     // });
 
     // not for subreddit
-    result.forEach((r) =>  {
-      let m = utils.getModel(r[TYPE]).value
-      let isMyProduct = m.subClassOf === 'tradle.MyProduct'
-      let isForm = !isMyProduct && m.subClassOf === FORM
-      r.from.photos = list[utils.getId(r.from)].value.photos;
-      var to = list[utils.getId(r.to)]
-      if (!to) console.log(r.to)
-      r.to.photos = to  &&  to.value.photos;
-      if (isMyProduct)
-        r.from.organization = list[utils.getId(r.from)].value.organization
-      else if (isForm)
-        r.to.organization = list[utils.getId(r.to)].value.organization
-    })
+    // result.forEach((r) =>  {
+    //   let m = utils.getModel(r[TYPE]).value
+    //   let isMyProduct = m.subClassOf === 'tradle.MyProduct'
+    //   let isForm = !isMyProduct && m.subClassOf === FORM
+    //   r.from.photos = list[utils.getId(r.from)].value.photos;
+    //   var to = list[utils.getId(r.to)]
+    //   if (!to) console.log(r.to)
+    //   r.to.photos = to  &&  to.value.photos;
+    //   if (isMyProduct)
+    //     r.from.organization = list[utils.getId(r.from)].value.organization
+    //   else if (isForm)
+    //     r.to.organization = list[utils.getId(r.to)].value.organization
+    // })
     return result;
   },
   fillMessage(r) {
@@ -4153,6 +4199,8 @@ var Store = Reflux.createStore({
           delete list[id]
         }
       })
+      self.trigger({action: 'list', list: self.searchNotMessages({modelName: ORGANIZATION, to: resource})})
+      // resource.numberOfForms = 0
       if (batch.length)
         return db.batch(batch)
     })
