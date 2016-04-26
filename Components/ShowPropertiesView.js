@@ -6,6 +6,7 @@ var ArticleView = require('./ArticleView');
 var utils = require('../utils/utils');
 var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin')
+var ResourceMixin = require('./ResourceMixin')
 var reactMixin = require('react-mixin')
 var Accordion = require('react-native-accordion')
 var Icon = require('react-native-vector-icons/Ionicons')
@@ -200,93 +201,6 @@ class ShowPropertiesView extends Component {
     }
     return viewCols;
   }
-  renderItems(val, pMeta) {
-    var itemsMeta = pMeta.items.properties;
-    if (!itemsMeta) {
-      var ref = pMeta.items.ref;
-      if (ref) {
-        pMeta = utils.getModel(ref).value;
-        itemsMeta = pMeta.properties;
-      }
-    }
-    var counter = 0;
-    var vCols = pMeta.viewCols;
-    if (!vCols) {
-      vCols = [];
-      for (var p in itemsMeta)
-        vCols.push(p);
-    }
-    var cnt = val.length;
-    var self = this;
-    return val.map(function(v) {
-      var ret = [];
-      counter++;
-      vCols.forEach((p) =>  {
-        var itemMeta = itemsMeta[p];
-        if (!v[p]  &&  !itemMeta.displayAs)
-          return
-        if (itemMeta.displayName)
-          return
-        var value;
-        if (itemMeta.displayAs)
-          value = utils.templateIt(itemMeta, v)
-        else if (itemMeta.type === 'date')
-          value = utils.formatDate(v[p]);
-        else if (itemMeta.type !== 'object') {
-          if (p == 'photos') {
-            var photos = [];
-            ret.push(
-               <PhotoList photos={v.photos} navigator={self.props.navigator} numberInRow={4} resource={resource}/>
-            );
-            return
-          }
-          else
-            value = v[p];
-        }
-        else if (itemMeta.ref)
-          value = v[p].title  ||  utils.getDisplayName(v[p], utils.getModel(itemMeta.ref).value.properties);
-        else
-          value = v[p].title;
-
-        if (!value)
-          return
-
-          // ret.push(
-          //   <View>
-          //     <TouchableHighlight onPress={self.showResource.bind(this, value)} underlayColor='transparent'>
-          //       <View style={value.length > 60 ? styles.itemColContainer : styles.itemContainer}>
-          //         <Text style={itemMeta.skipLabel ? {height: 0} : styles.title}>{itemMeta.skipLabel ? '' : utils.makeLabel(p)}</Text>
-          //         <Text style={styles.description}>{value.title}</Text>
-          //       </View>
-          //      </TouchableHighlight>
-          //  </View>);
-        ret.push(
-          <View style={{padding: 10}} key={self.getNextKey()}>
-           <View style={styles.itemColContainer} key={self.getNextKey()}>
-             <Text style={itemMeta.skipLabel ? {height: 0} : styles.title} key={self.getNextKey()}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
-             <Text style={styles.description} key={self.getNextKey()}>{value}</Text>
-           </View>
-         </View>
-        );
-      })
-      if (v.title) {
-        ret.push(
-          <View style={{padding: 10}} key={self.getNextKey()}>
-           <View style={styles.itemColContainer} key={self.getNextKey()}>
-             <Text style={styles.description} key={self.getNextKey()}>{v.title}</Text>
-           </View>
-         </View>
-        );
-      }
-
-      return (
-        <View key={self.getNextKey()}>
-           {ret}
-           {counter == cnt ? <View></View> : <View style={styles.itemSeparator}></View>}
-        </View>
-      )
-    });
-  }
   onPress(url, event) {
     var model = utils.getModel(this.props.resource[constants.TYPE]).value;
     this.props.navigator.push({
@@ -299,29 +213,15 @@ class ShowPropertiesView extends Component {
   }
 }
 reactMixin(ShowPropertiesView.prototype, RowMixin);
-
+reactMixin(ShowPropertiesView.prototype, ResourceMixin);
 var styles = StyleSheet.create({
   textContainer: {
     flex: 1,
-    // flexWrap: 'wrap'
-  },
-  itemContainer: {
-    flex: 1,
-    flexDirection: 'row',
-  },
-  itemColContainer: {
-    flex: 1,
-    // flexWrap: 'wrap',
   },
   separator: {
     height: 1,
     backgroundColor: '#eeeeee',
     marginHorizontal: 15
-  },
-  itemSeparator: {
-    height: 1,
-    backgroundColor: '#D7E6ED',
-    marginHorizontal: 7
   },
   title: {
     fontSize: 16,
@@ -348,7 +248,106 @@ var styles = StyleSheet.create({
   icon: {
     width: 40,
     height: 40
-  }
+  },
+  // itemContainer: {
+  //   flex: 1,
+  //   flexDirection: 'row',
+  // },
+  // itemColContainer: {
+  //   flex: 1,
+  // },
+  // itemSeparator: {
+  //   height: 1,
+  //   backgroundColor: '#D7E6ED',
+  //   marginHorizontal: 7
+  // },
 });
 
 module.exports = ShowPropertiesView;
+  // renderItems(val, pMeta) {
+  //   var itemsMeta = pMeta.items.properties;
+  //   if (!itemsMeta) {
+  //     var ref = pMeta.items.ref;
+  //     if (ref) {
+  //       pMeta = utils.getModel(ref).value;
+  //       itemsMeta = pMeta.properties;
+  //     }
+  //   }
+  //   var counter = 0;
+  //   var vCols = pMeta.viewCols;
+  //   if (!vCols) {
+  //     vCols = [];
+  //     for (var p in itemsMeta)
+  //       vCols.push(p);
+  //   }
+  //   var cnt = val.length;
+  //   var self = this;
+  //   return val.map(function(v) {
+  //     var ret = [];
+  //     counter++;
+  //     vCols.forEach((p) =>  {
+  //       var itemMeta = itemsMeta[p];
+  //       if (!v[p]  &&  !itemMeta.displayAs)
+  //         return
+  //       if (itemMeta.displayName)
+  //         return
+  //       var value;
+  //       if (itemMeta.displayAs)
+  //         value = utils.templateIt(itemMeta, v)
+  //       else if (itemMeta.type === 'date')
+  //         value = utils.formatDate(v[p]);
+  //       else if (itemMeta.type !== 'object') {
+  //         if (p == 'photos') {
+  //           var photos = [];
+  //           ret.push(
+  //              <PhotoList photos={v.photos} navigator={self.props.navigator} numberInRow={4} resource={resource}/>
+  //           );
+  //           return
+  //         }
+  //         else
+  //           value = v[p];
+  //       }
+  //       else if (itemMeta.ref)
+  //         value = v[p].title  ||  utils.getDisplayName(v[p], utils.getModel(itemMeta.ref).value.properties);
+  //       else
+  //         value = v[p].title;
+
+  //       if (!value)
+  //         return
+
+  //         // ret.push(
+  //         //   <View>
+  //         //     <TouchableHighlight onPress={self.showResource.bind(this, value)} underlayColor='transparent'>
+  //         //       <View style={value.length > 60 ? styles.itemColContainer : styles.itemContainer}>
+  //         //         <Text style={itemMeta.skipLabel ? {height: 0} : styles.title}>{itemMeta.skipLabel ? '' : utils.makeLabel(p)}</Text>
+  //         //         <Text style={styles.description}>{value.title}</Text>
+  //         //       </View>
+  //         //      </TouchableHighlight>
+  //         //  </View>);
+  //       ret.push(
+  //         <View style={{padding: 10}} key={self.getNextKey()}>
+  //          <View style={styles.itemColContainer} key={self.getNextKey()}>
+  //            <Text style={itemMeta.skipLabel ? {height: 0} : styles.title} key={self.getNextKey()}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
+  //            <Text style={styles.description} key={self.getNextKey()}>{value}</Text>
+  //          </View>
+  //        </View>
+  //       );
+  //     })
+  //     if (v.title) {
+  //       ret.push(
+  //         <View style={{padding: 10}} key={self.getNextKey()}>
+  //          <View style={styles.itemColContainer} key={self.getNextKey()}>
+  //            <Text style={styles.description} key={self.getNextKey()}>{v.title}</Text>
+  //          </View>
+  //        </View>
+  //       );
+  //     }
+
+  //     return (
+  //       <View key={self.getNextKey()}>
+  //          {ret}
+  //          {counter == cnt ? <View></View> : <View style={styles.itemSeparator}></View>}
+  //       </View>
+  //     )
+  //   });
+  // }
