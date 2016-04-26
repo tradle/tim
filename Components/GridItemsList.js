@@ -1,13 +1,20 @@
 'use strict';
 
-var React = require('react-native');
+var React = require('react-native')
 var PhotoList = require('./PhotoList')
+var utils = require('../utils/utils');
+var translate = utils.translate
+var UIImagePickerManager = require('NativeModules').ImagePickerManager;
 var extend = require('extend')
 var equal = require('deep-equal')
+var Icon = require('react-native-vector-icons/Ionicons')
+var constants = require('@tradle/constants');
 var {
   Component,
   StyleSheet,
   PropTypes,
+  TouchableHighlight,
+  ActionSheetIOS,
   View,
 } = React;
 
@@ -33,7 +40,11 @@ class GridItemsList extends Component {
     }
 
   }
-
+  shouldComponentUpdate(nextProps, nextState) {
+    return nextState.err                         ||
+           nextState.forceUpdate                 ||
+           this.state.list.length != nextState.list.length
+  }
   cancelItem(item) {
     var list = [];
     extend(list, this.state.list);
@@ -56,9 +67,63 @@ class GridItemsList extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <PhotoList photos={this.state.list} callback={this.cancelItem.bind(this)} navigator={this.props.navigator} numberInRow={3} resource={this.props.resource}/>
+        <PhotoList photos={this.state.list} forceUpdate={this.state.forceUpdate} callback={this.cancelItem.bind(this)} navigator={this.props.navigator} numberInRow={3} resource={this.props.resource}/>
+      <View style={styles.footer}>
+        <TouchableHighlight underlayColor='transparent' onPress={this.showMenu.bind(this)}>
+          <View style={{marginTop: -10}}>
+            <Icon name='plus-circled'  size={55}  color='#ffffff' style={styles.icon} />
+          </View>
+        </TouchableHighlight>
+      </View>
       </View>
     )
+  }
+  showMenu() {
+    var m = utils.getModel(this.props.resource[constants.TYPE]).value
+    var buttons = [translate('addNew', m.properties[this.props.prop].title), translate('cancel')]
+    var self = this;
+    ActionSheetIOS.showActionSheetWithOptions({
+      options: buttons,
+      cancelButtonIndex: 1
+    }, function(buttonIndex) {
+      switch (buttonIndex) {
+      case 0:
+        self.showChoice();
+        break
+      }
+    });
+  }
+  showChoice() {
+    var self = this;
+    UIImagePickerManager.showImagePicker({
+      returnIsVertical: true,
+      chooseFromLibraryButtonTitle: __DEV__ ? 'Choose from Library' : null
+    }, (response) => {
+      if (response.didCancel)
+        return;
+      if (response.error) {
+        console.log('ImagePickerManager Error: ', response.error);
+        return
+      }
+      var item = {
+        // title: 'photo',
+        url: 'data:image/jpeg;base64,' + response.data,
+        isVertical: response.isVertical,
+        width: response.width,
+        height: response.height,
+        chooseFromLibraryButtonTitle: ''
+      };
+      let l = []
+      self.state.list.forEach((r) => {
+        let lr = {}
+        extend(lr, r)
+        l.push(lr)
+      })
+      l.push(item)
+      self.props.onAddItem('photos', item);
+      self.setState({list: l, forceUpdate: true})
+      // this.setState({resouce: resource})
+    });
   }
 }
 
@@ -69,6 +134,24 @@ var styles = StyleSheet.create({
     borderTopColor: 'red',
     borderTopWidth: 0.5,
     marginTop: 60,
+  },
+  footer: {
+    flexDirection: 'row',
+    flexWrap: 'nowrap',
+    justifyContent: 'flex-end',
+    height: 45,
+    paddingTop: 5,
+    paddingHorizontal: 10,
+    backgroundColor: '#eeeeee',
+    borderColor: '#eeeeee',
+    borderWidth: 1,
+    borderTopColor: '#cccccc',
+  },
+  icon: {
+    marginLeft: -30,
+    marginTop: -25,
+    // color: '#629BCA',
+    color: 'red'
   },
 });
 
