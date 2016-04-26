@@ -258,23 +258,28 @@ var utils = {
       else
         meta = this.getModel(resource[constants.TYPE]).value.properties
     }
+    let m = this.getModel(resource[constants.TYPE])
     var displayName = '';
     for (var p in meta) {
-      if (meta[p].displayName) {
-        if (resource[p]) {
-          if (meta[p].type == 'object') {
-            var title = resource[p].title || this.getDisplayName(resource[p], utils.getModel(resource[p][constants.TYPE]).value.properties);
-            displayName += displayName.length ? ' ' + title : title;
-          }
-          else
-            displayName += displayName.length ? ' ' + resource[p] : resource[p];
+      if (p.charAt(0) === '_')
+        continue
+      if (!meta[p].displayName) {
+        if (m  &&  resource[p]  &&  m.value.subClassOf === 'tradle.Enum')
+          return resource[p];
+        continue
+      }
+      if (resource[p]) {
+        if (meta[p].type == 'object') {
+          var title = resource[p].title || this.getDisplayName(resource[p], utils.getModel(resource[p][constants.TYPE]).value.properties);
+          displayName += displayName.length ? ' ' + title : title;
         }
-        else if (meta[p].displayAs) {
-          var dn = this.templateIt(meta[p], resource);
-          if (dn)
-            displayName += displayName.length ? ' ' + dn : dn;
-        }
-
+        else
+          displayName += displayName.length ? ' ' + resource[p] : resource[p];
+      }
+      else if (meta[p].displayAs) {
+        var dn = this.templateIt(meta[p], resource);
+        if (dn)
+          displayName += displayName.length ? ' ' + dn : dn;
       }
     }
     return displayName;
@@ -283,13 +288,24 @@ var utils = {
   templateIt(prop, resource) {
     var template = prop.displayAs;
     var val = '';
+    let self = this
     if (template instanceof Array) {
       template.forEach(function(t) {
         if (t.match(/[a-z]/i)) {
           if (resource[t]) {
             if (val  &&  val.charAt(val.length - 1).match(/[a-z,]/i))
               val += ' ';
-            val += (typeof resource[t] === 'object') ? resource[t].title : resource[t];
+
+            if ((typeof resource[t] !== 'object'))
+              val += resource[t]
+            else {
+              if (resource[t].title)
+                val += resource[t]
+              else {
+                let m = self.getModel(resource[t][constants.TYPE]).value
+                val += self.getDisplayName(resource[t], m.properties)
+              }
+            }
           }
         }
         else if (val.length  &&  val.indexOf(t) != val.length - 1)
@@ -383,19 +399,25 @@ var utils = {
     for (var p in res) {
       if (p.charAt(0) === '_'  ||  !properties[p])
         continue
-      if (res[p].id  &&  res[p].title)
-        continue
-      if (properties[p].type === 'object'  &&  properties[p].ref !== constants.TYPES.MONEY) {
-        res[p] = {
-          id: this.getId(res[p]),
-          title: this.getDisplayName(res[p], properties)
+      if (properties[p].type === 'object') {
+        if (res[p]  &&  res[p].id  &&  res[p].title)
+          continue
+        if (properties[p].ref !== constants.TYPES.MONEY) {
+          res[p] = {
+            id: this.getId(res[p]),
+            title: this.getDisplayName(res[p], properties)
+          }
         }
       }
       else if (properties[p].type === 'array'  &&  properties[p].items.ref) {
         var arr = []
         res[p].forEach(function(r) {
-          if (r.id)
+          if (r.id) {
+            if (r.photo)
+              delete r.photo
+            arr.push(r)
             return
+          }
           var rr = {}
           rr.id = utils.getId(r)
           var m = utils.getModel(r[TYPE])
