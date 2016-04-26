@@ -738,6 +738,8 @@ var NewResourceMixin = {
       resource: resource,
       prop: propName
     }
+    if (this.state.missedRequiredOrErrorValue)
+      delete this.state.missedRequiredOrErrorValue[propName]
     if (setItemCount)
       state.itemsCount = resource[propName].length
     this.setState(state);
