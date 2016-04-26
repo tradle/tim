@@ -385,6 +385,8 @@ var NewResourceMixin = {
       r[prop.name] = value
       this.floatingProps[prop.name] = value
     }
+    if (this.state.missedRequiredOrErrorValue)
+      delete this.state.missedRequiredOrErrorValue[prop.name]
     this.setState({resource: r})
     if (this.state.resource[constants.TYPE] !== SETTINGS)
       Actions.saveTemporary(r)
@@ -579,8 +581,8 @@ var NewResourceMixin = {
   //   }
   // },
   myCustomTemplate(params) {
-    var labelStyle = {color: '#cccccc', fontSize: 17, paddingLeft: 10, paddingBottom: 10};
-    var textStyle = {color: this.state.isRegistration ? '#ffffff' : '#000000', fontSize: 17, paddingLeft: 10, paddingBottom: 10};
+    var labelStyle = {color: '#cccccc', fontSize: 17, paddingLeft: 10, paddingBottom: 10, marginTop: -5};
+    var textStyle = {color: this.state.isRegistration ? '#ffffff' : '#000000', fontSize: 17, paddingLeft: 10, paddingBottom: 10, marginTop: -5};
     var resource = /*this.props.resource ||*/ this.state.resource
     var label, style
     var propLabel, propName
@@ -681,6 +683,7 @@ var NewResourceMixin = {
     extend(resource, this.state.resource)
     if (typeof propName === 'object')
       propName = propName.name
+    let setItemCount
     // clause for the items properies - need to redesign
     if (this.props.metadata  &&  this.props.metadata.type === 'array') {
       if (!this.floatingProps)
@@ -694,6 +697,8 @@ var NewResourceMixin = {
           id: utils.getId(value),
           title: utils.getDisplayName(value, utils.getModel(value[constants.TYPE]).properties)
         }
+        if (value.photos)
+          v.photo = value.photos[0].url
         if (!resource[propName]) {
           resource[propName] = []
           resource[propName].push(v)
@@ -705,6 +710,8 @@ var NewResourceMixin = {
           if (!arr.length)
             resource[propName].push(v)
         }
+
+        setItemCount = true
       }
       else
         resource[propName] = value
@@ -727,10 +734,13 @@ var NewResourceMixin = {
             resource[p] = data[p];
       }
     }
-    this.setState({
+    let state = {
       resource: resource,
       prop: propName
-    });
+    }
+    if (setItemCount)
+      state.itemsCount = resource[propName].length
+    this.setState(state);
 
     var r = {}
     extend(r, this.state.resource)
@@ -772,8 +782,8 @@ var NewResourceMixin = {
   },
 
   myEnumTemplate(params) {
-    var labelStyle = {color: '#cccccc', fontSize: 17, paddingLeft: 10, paddingBottom: 10};
-    var textStyle = {color: '#000000', fontSize: 17, paddingLeft: 10, paddingBottom: 10};
+    var labelStyle = {color: '#cccccc', fontSize: 17, paddingLeft: 10} //, paddingBottom: 10};
+    var textStyle = {color: '#000000', fontSize: 17, paddingLeft: 10} //, paddingBottom: 10};
     var label
     var prop = params.prop
     var enumProp = params.enumProp
@@ -790,10 +800,9 @@ var NewResourceMixin = {
     }
     else
       error = <View/>
-    var style = {marginTop: 30}
     var value = prop ? params.value : resource[enumProp.name]
     return (
-      <View style={[styles.chooserContainer, {width: 40}]} key={this.getNextKey()} ref={enumProp.name}>
+      <View style={[styles.chooserContainer, {width: 40, height: 51}]} key={this.getNextKey()} ref={enumProp.name}>
         <TouchableHighlight underlayColor='transparent' onPress={this.enumChooser.bind(this, prop, enumProp)}>
           <View style={{ position: 'relative'}}>
             <View style={styles.chooserContentStyle}>
@@ -955,10 +964,10 @@ var NewResourceMixin = {
 
 var styles = StyleSheet.create({
   enumProp: {
-    marginTop: 30,
+    marginTop: 20,
   },
   enumText: {
-    marginTop: 25,
+    marginTop: 15,
     marginLeft: 20,
     color: '#757575',
     fontSize: 17
@@ -984,7 +993,7 @@ var styles = StyleSheet.create({
     flex: 1
   },
   chooserContainer: {
-    height: 60,
+    height: 55,
     borderColor: '#ffffff',
     borderBottomColor: '#cccccc',
     borderBottomWidth: 0.5,
