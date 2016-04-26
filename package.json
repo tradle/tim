@@ -97,7 +97,7 @@
     "stream-collector": "^1.0.1",
     "string_decoder": "^0.10.31",
     "tcomb": "^2.7.0",
-    "tcomb-form-native": "^0.4.0",
+    "tcomb-form-native": "^0.4.2",
     "tcomb-validation": "^2.3.0",
     "thunky": "^0.1.0",
     "tim": "^6.2.0",
