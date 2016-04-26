@@ -26,28 +26,28 @@ var RowMixin = {
   },
   getNextKey() {
     return this.props.resource[constants.ROOT_HASH] + '_' + cnt++
-  },
-  anyOtherRow(prop, backlink, styles) {
-    var row;
-    var resource = this.props.resource;
-    var propValue = resource[prop.name];
-    if (propValue  &&  (typeof propValue != 'string'))
-      row = <Text style={style} numberOfLines={1}>{propValue}</Text>;
-    else if (!backlink  &&  propValue  && (propValue.indexOf('http://') == 0  ||  propValue.indexOf('https://') == 0))
-      row = <Text style={style} onPress={this.onPress.bind(this)} numberOfLines={1}>{propValue}</Text>;
-    else {
-      var val = prop.displayAs ? utils.templateIt(prop, resource) : propValue;
-      let msgParts = utils.splitMessage(val);
-      if (msgParts.length <= 2)
-        val = msgParts[0];
-      else {
-        val = '';
-        for (let i=0; i<msgParts.length - 1; i++)
-          val += msgParts[i];
-      }
-      row = <Text style={style}>{val}</Text>;
-    }
-    return row;
   }
+  // anyOtherRow(prop, backlink, styles) {
+  //   var row;
+  //   var resource = this.props.resource;
+  //   var propValue = resource[prop.name];
+  //   if (propValue  &&  (typeof propValue != 'string'))
+  //     row = <Text style={style} numberOfLines={1}>{propValue}</Text>;
+  //   else if (!backlink  &&  propValue  && (propValue.indexOf('http://') == 0  ||  propValue.indexOf('https://') == 0))
+  //     row = <Text style={style} onPress={this.onPress.bind(this)} numberOfLines={1}>{propValue}</Text>;
+  //   else {
+  //     var val = prop.displayAs ? utils.templateIt(prop, resource) : propValue;
+  //     let msgParts = utils.splitMessage(val);
+  //     if (msgParts.length <= 2)
+  //       val = msgParts[0];
+  //     else {
+  //       val = '';
+  //       for (let i=0; i<msgParts.length - 1; i++)
+  //         val += msgParts[i];
+  //     }
+  //     row = <Text style={style}>{val}</Text>;
+  //   }
+  //   return row;
+  // }
 }
 module.exports = RowMixin;
