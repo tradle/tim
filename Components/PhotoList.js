@@ -30,7 +30,7 @@ class PhotoList extends Component {
   constructor(props) {
     super(props);
     var dataSource = new ListView.DataSource({
-      rowHasChanged: (row1, row2) => row1 !== row2,
+      rowHasChanged: (row1, row2) => row1 !== row2
     });
     this.state = {
       photos: this.props.photos,
@@ -53,7 +53,7 @@ class PhotoList extends Component {
     if (this.props.resource[constants.ROOT_HASH] !== nextProps.resource[constants.ROOT_HASH])
       return true
 
-    return !equal(this.props.resource.photos, nextProps.resource.photos)  ||
+    return nextProps.forceUpdate  ||  !equal(this.props.resource.photos, nextProps.resource.photos)  ||
            !equal(this.props.photos, nextProps.photos)
   }
   render() {
