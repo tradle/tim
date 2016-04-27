@@ -82,11 +82,11 @@ class NewResource extends Component {
     this.state = {
       resource: r,
       keyboardSpace: 0,
-      modalVisible: false,
+      // modalVisible: false,
       date: new Date(),
       isUploading: !isRegistration  &&  (!r[constants.ROOT_HASH] || Object.keys(r).length === 2),
       isRegistration: isRegistration,
-      isLoading: false,
+      isLoadingVideo: false,
       isPrefilled: this.props.isPrefilled,
       modal: {},
       offSet: new Animated.Value(Dimensions.get('window').height)
@@ -125,7 +125,7 @@ class NewResource extends Component {
            this.state.modal !== nextState.modal              ||
            this.state.prop !== nextState.prop                ||
            this.state.isUploading !== nextState.isUploading  ||
-           this.state.isLoading !== nextState.isLoading      ||
+           this.state.isLoadingVideo !== nextState.isLoadingVideo      ||
            this.state.itemsCount != nextState.itemsCount     ||
           !equal(this.state.resource, nextState.resource)
     return isUpdate
@@ -200,7 +200,7 @@ class NewResource extends Component {
     }
     if (params.action === 'runVideo'  && this.state.isRegistration) {
       if (this.props.callback)
-        this.setState({isLoading: true})
+        this.setState({isLoadingVideo: true})
         return;
     }
     if (!resource  ||  (params.action !== 'addItem'  &&  params.action !== 'addMessage'))
@@ -626,7 +626,7 @@ class NewResource extends Component {
         else {
           var vCols = bl.viewCols;
           var cnt = resource[bl.name].length;
-          let val = <View>{self.renderItems(resource[bl.name], bl)}</View>
+          let val = <View>{self.renderItems(resource[bl.name], bl, this.cancelItem.bind(this))}</View>
 
           var separator = <View style={styles.separator}></View>
           let cstyle = []
@@ -693,7 +693,12 @@ class NewResource extends Component {
         else if (!count)
           istyle.push({paddingBottom: 0})
         else {
-          istyle.push({paddingBottom: 0, height: count * (resource[bl.name].photo ? 55 : 32) + 35})
+          let height = 32
+          if (resource[bl.name].photo)
+            height = 55
+          // else if (resource[bl.name][0].photo)
+          //   height = 38
+          istyle.push({paddingBottom: 0, height: count * height + 35})
         }
       }
 
@@ -753,7 +758,7 @@ class NewResource extends Component {
               {arrayItems}
              </View>
             <View style={{alignItems: 'center', marginTop: 50}}>
-              <ActivityIndicatorIOS animating={this.state.isLoading ? true : false} size='large' color='#ffffff'/>
+              <ActivityIndicatorIOS animating={this.state.isLoadingVideo ? true : false} size='large' color='#ffffff'/>
             </View>
           </View>
           <View style={{height: 300}}/>
@@ -786,18 +791,18 @@ class NewResource extends Component {
       </View>
     )
   }
-  cancelItem(item) {
-    var list = this.state.resource.photos;
+  cancelItem(pMeta, item) {
+    var list = this.state.resource[pMeta.name];
     for (var i=0; i<list.length; i++) {
       if (equal(list[i], item)) {
         list.splice(i, 1);
-        break;
+        this.setState({
+          resource: this.state.resource,
+          itemsCount: list.length
+        })
+        return
       }
     }
-    this.setState({
-      resource: this.state.resource
-    })
-    this.props.navigator.pop()
   }
 
   showItems(prop, model, event) {
