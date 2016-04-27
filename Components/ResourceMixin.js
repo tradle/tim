@@ -5,6 +5,8 @@ var utils = require('../utils/utils');
 var UIImagePickerManager = require('NativeModules').ImagePickerManager;
 var extend = require('extend');
 var translate = utils.translate
+var Icon = require('react-native-vector-icons/Ionicons');
+var equal = require('deep-equal')
 // var ResourceView = require('./ResourceView');
 // var ResourceList = require('./ResourceList');
 var PhotoList = require('./PhotoList')
@@ -13,6 +15,7 @@ var constants = require('@tradle/constants');
 var {
   Text,
   View,
+  TouchableHighlight,
   StyleSheet,
   Image,
   Navigator
@@ -58,8 +61,10 @@ var ResourceMixin = {
     });
   },
 
-  renderItems(val, pMeta) {
+  renderItems(val, pMeta, cancelItem) {
+    let LINK_COLOR = (this.props.bankStyle  &&  this.props.bankStyle.LINK_COLOR) || '#7AAAC3'
     var itemsMeta = pMeta.items.properties;
+    var prop = pMeta
     if (!itemsMeta) {
       var ref = pMeta.items.ref;
       if (ref) {
@@ -108,26 +113,55 @@ var ResourceMixin = {
 
         if (!value)
           return
+        let item = <View style={styles.itemColContainer}>
+                     <Text style={itemMeta.skipLabel ? {height: 0} : styles.itemText}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
+                     <Text style={styles.itemText}>{value}</Text>
+                   </View>
+
         ret.push(
-          <View style={styles.item} key={self.getNextKey()}>
-           <View style={styles.itemColContainer}>
-             <Text style={itemMeta.skipLabel ? {height: 0} : styles.itemText}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
-             <Text style={styles.itemText}>{value}</Text>
-           </View>
-         </View>
+            <View style={styles.item} key={self.getNextKey()}>
+            {cancelItem
+              ? <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                  {item}
+                  <TouchableHighlight underlayColor='transparent' onPress={cancelItem.bind(self, prop, v)}>
+                    <Icon name='ios-close-empty' size={25} color={LINK_COLOR} />
+                  </TouchableHighlight>
+                </View>
+              : item
+            }
+            </View>
         );
       })
       if (!ret.length  && v.title) {
-        ret.push(
-          <View style={{padding: 5}} key={self.getNextKey()}>
-           <View style={[styles.itemColContainer, {flexDirection: 'row'}]}>
-             {v.photo
-              ? <Image source={{uri: v.photo}} style={styles.thumb} />
-              : <View />
-             }
-             <Text style={styles.itemText}>{v.title}</Text>
+        let item = <View style={[styles.itemColContainer, {flexDirection: 'row'}]}>
+                    {v.photo
+                      ? <Image source={{uri: v.photo}} style={styles.thumb} />
+                      : <View />
+                    }
+                    <Text style={[styles.itemText, {color: cancelItem ? '#000000' : LINK_COLOR}]}>{v.title}</Text>
+                  </View>
 
-           </View>
+        ret.push(
+          <View style={{paddingBottom: 5}} key={self.getNextKey()}>
+           {cancelItem
+            ? <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+               {item}
+               <TouchableHighlight underlayColor='transparent' onPress={cancelItem.bind(self, prop, v)}>
+                 <Icon name='ios-close-empty' size={25} color={LINK_COLOR} />
+               </TouchableHighlight>
+              </View>
+            : <TouchableHighlight underlayColor='transparent' onPress={() => {
+                self.props.navigator.push({
+                 title: v.title,
+                 id: 3,
+                 component: require('./ResourceView'),
+                 backButtonTitle: translate('back'),
+                 passProps: {resource: v}
+                })
+              }}>
+             {item}
+             </TouchableHighlight>
+            }
          </View>
         );
       }
