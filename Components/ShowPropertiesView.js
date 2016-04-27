@@ -142,17 +142,27 @@ class ShowPropertiesView extends Component {
           first = false;
           title = <View style={{flexDirection: 'row'}}>
                     <Text style={styles.title}>{pMeta.title || utils.makeLabel(p)}</Text>
-                    <Icon name={'ios-arrow-down'} size={15} color='#7AAAC3' style={{position: 'absolute', right: 10, top: 10}}/>
+                    {cnt > 3
+                      ? <Icon name={'ios-arrow-down'} size={15} color='#7AAAC3' style={{position: 'absolute', right: 10, top: 10}}/>
+                      : <View />
+                    }
                   </View>
 
-          val = <View key={self.getNextKey()}>
-                  {separator}
-                  <Accordion
-                    header={title}
-                    content={val}
-                    underlayColor='transparent'
-                    easing='easeInCirc' />
-               </View>
+          if (cnt > 3)
+            val = <View key={self.getNextKey()}>
+                    {separator}
+                    <Accordion
+                      header={title}
+                      content={val}
+                      underlayColor='transparent'
+                      easing='easeInCirc' />
+                 </View>
+          else {
+            val = <View key={self.getNextKey()}>
+                   {title}
+                   {val}
+                 </View>
+          }
         }
         else  {
           if (props[p].units  &&  props[p].units.charAt(0) != '[') {
