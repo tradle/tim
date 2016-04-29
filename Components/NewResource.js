@@ -311,7 +311,13 @@ class NewResource extends Component {
           let ref = this.props.model.properties[p].ref
           if (ref) {
             let rModel = utils.getModel(ref).value
-            if (ref !== constants.TYPES.MONEY  && (!rModel.subClassOf  ||  rModel.subClassOf !== ENUM)) {
+            if (ref === constants.TYPES.MONEY) {
+              if (!v.value || !v.value.length) {
+                missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
+                return
+              }
+            }
+            else if (!rModel.subClassOf  ||  rModel.subClassOf !== ENUM) {
               var units = this.props.model.properties[p].units
               if (units)
                 v = v.value
