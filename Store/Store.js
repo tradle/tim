@@ -2778,7 +2778,7 @@ var Store = Reflux.createStore({
       if (msgParts.length !== 2)
         continue;
       var msgModel = this.getModel(msgParts[1]);
-      if (msgModel)
+      if (msgModel  &&  msgModel.value.subClassOf !== 'tradle.MyProduct')
         verTypes.push(msgModel.value.id);
     }
     var shareableResources = {};
@@ -2800,7 +2800,7 @@ var Store = Reflux.createStore({
         if (r.sharedWith) {
           let sw = r.sharedWith.filter((r) => {
             if (reps.filter((rep) => {
-                    if (utils.getId(rep) === r)
+                    if (utils.getId(rep) === r.bankRepresentative)
                       return true
                   }).length)
               return true
