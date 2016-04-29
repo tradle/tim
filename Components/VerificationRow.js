@@ -118,19 +118,28 @@ class VerificationRow extends Component {
     if ((isVerification || isMyProduct  ||  isForm) &&  resource.from) {
       var contentRows = [];
       // contentRows.push(<Text style={}>verified by {resource.to.title}></Text>);
-      contentRows.push(<Text style={[styles.description, {color: '#7AAAc3'}]} key={this.getNextKey()}>{isMyProduct ? 'issued by ' : (isForm ? 'sent to ' : 'verified by ')}</Text>);
       let org = isMyProduct
               ? resource.from.organization
               : isForm
                   ? resource.to.organization
                   : resource.organization
 
-      if (org) {
-        var orgRow = <Text style={styles.description} key={this.getNextKey()}>{org.title}</Text>
-        contentRows.push(orgRow);
-      }
+      let by
+      if (isMyProduct)
+        by = translate('issuedBy', org.title)
+      else if (isForm)
+        by = translate('sentTo', org.title)
+      else
+        by = translate('verifiedBy', org.title)
+
+      // contentRows.push(<Text style={[styles.description, {color: '#7AAAc3'}]} key={this.getNextKey()}>{isMyProduct ? 'issued by ' : (isForm ? 'sent to ' : 'verified by ')}</Text>);
+
+      // if (org) {
+      //   var orgRow = <Text style={styles.description} key={this.getNextKey()}>{org.title}</Text>
+      //   contentRows.push(orgRow);
+      // }
       verifiedBy = <View style={contentRows.length == 1 ? {flex: 1} : {flexDirection: 'row'}} key={this.getNextKey()}>
-                    {contentRows}
+                    <Text style={styles.description}>{by}</Text>
                   </View>
     }
     else
