@@ -58,6 +58,7 @@
     "fillTheForm": "Please fill out this form and attach a snapshot of the original document",
     "verifiedBy": "Verified by {1}",
     "issuedBy": "Issued by {1}",
+    "sentTo": "Sent to {1}",
     "typeMessage": "Type a message",
     "newProductMsg": "{1}, we're very happy to assist you with your application for {2}. Please hold just a moment.",
     "shareOne": "{1}, this is your personal privacy assistant. I see you've already had your {2} verified. You can tap below to share it with {3}.",

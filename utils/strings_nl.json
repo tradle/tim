@@ -60,6 +60,7 @@
     "fillTheForm": "Vul dit formulier in en voeg een momentopname van het originele document",
     "verifiedBy": "Geverifieërd door {1}",
     "issuedBy": "Issued by {1}",
+    "sentTo": "Sent to {1}",
     "typeMessage": "Type a message",
     "newProductMsg": "{1}, we're very happy to assist you with your application for {2}. Please hold just a moment.",
     "FulltimeEmployee": "Vast dienstverband onbepaalde tijd",
