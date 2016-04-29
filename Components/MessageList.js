@@ -178,7 +178,7 @@ class MessageList extends Component {
         // dataSource: this.state.dataSource.cloneWithRows(list),
         isLoading: false,
         list: list,
-        verificationsToShare: params.verificationsToShare,
+        shareableResources: params.shareableResources,
         allLoaded: false
       });
     }
@@ -274,7 +274,7 @@ class MessageList extends Component {
         currency={this.props.currency}
         navigator={this.props.navigator}
         bankStyle={this.props.bankStyle}
-        verificationsToShare={this.state.verificationsToShare}
+        shareableResources={this.state.shareableResources}
         previousMessageTime={previousMessageTime}
         to={isAggregation ? resource.to : this.props.resource} />
       );
