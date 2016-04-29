@@ -891,8 +891,12 @@ var NewResourceMixin = {
     });
   },
   validateProperties(value) {
-    let m = utils.getModel(value[constants.TYPE]).value
-    let properties = m.properties
+
+    let properties = value[constants.TYPE]
+                   ? utils.getModel(value[constants.TYPE]).value.properties
+                   : this.props.model.properties
+    // let m = utils.getModel(value[constants.TYPE]).value
+    // let properties = m.properties
     let err = []
     let deleteProps = []
     for (var p in value) {
