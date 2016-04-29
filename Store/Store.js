@@ -1149,46 +1149,6 @@ var Store = Reflux.createStore({
       batch.push({type: 'put', key: key, value: r});
       newVerification = self.buildRef(r)
 
-      // newVerification = {
-      //   id: key + '_' + r[CUR_HASH],
-      //   title: r.document.title ? r.document.title : '',
-      //   time: r.time
-      // };
-
-      // if (!from.verifiedByMe)
-      //   from.verifiedByMe = [];
-      // if (!to.myVerifications)
-      //   to.myVerifications = [];
-      // if (!r.txId) {
-      //   from.verifiedByMe.push(newVerification);
-      //   to.myVerifications.push(newVerification);
-      //   if (me[ROOT_HASH] === to[ROOT_HASH])
-      //     me.myVerifications = to.myVerifications
-      // }
-      // else  {
-      //   var found
-      //   for (var i=0; i<from.verifiedByMe.length  &&  !found; i++) {
-      //     if (utils.getId(from.verifiedByMe[i]).split('_')[1] === r[ROOT_HASH]) {
-      //       from.verifiedByMe[i] = r
-      //       found = true
-      //     }
-      //   }
-      //   if (!found)
-      //     from.verifiedByMe.push(newVerification);
-      //   else
-      //     found = false
-      //   for (var i=0; i<to.myVerifications.length  &&  !found; i++) {
-      //     if (utils.getId(to.myVerifications[i]).split('_')[1] === r[ROOT_HASH]) {
-      //       to.myVerifications[i] = r
-      //       found = true
-      //     }
-      //     if (!found)
-      //       to.myVerifications.push(newVerification);
-      //   }
-      // }
-
-      // batch.push({type: 'put', key: toId, value: to});
-
     // check if send returns somewhere roothash for the new resource
       return db.batch(batch)
     })
@@ -1500,11 +1460,6 @@ var Store = Reflux.createStore({
 
             var title = utils.getDisplayName(value, self.getModel(value[TYPE]).value.properties);
             json[prop] = self.buildRef(value)
-            // json[prop] = {
-            //   title: title,
-            //   id: propValue  + '_' + value[CUR_HASH],
-            //   time: value.time
-            // }
             if (isMessage)
               json.time = new Date().getTime();
           }
@@ -1852,9 +1807,9 @@ var Store = Reflux.createStore({
     //   resultList.push(rr);
     // })
     var resultList = result
-    var verificationsToShare;
+    var shareableResources;
     if (isMessage  &&  !params.isAggregation  &&  params.to)
-      verificationsToShare = this.getVerificationsToShare(result, params.to);
+      shareableResources = this.getShareableResources(result, params.to);
     var retParams = {
       action: isMessage  &&  !params.prop ? 'messageList' : 'list',
       list: resultList,
@@ -1873,100 +1828,14 @@ var Store = Reflux.createStore({
     //     retParams.style = styles[0].style
     // }
 
-    if (verificationsToShare)
-      retParams.verificationsToShare = verificationsToShare;
+    if (shareableResources)
+      retParams.shareableResources = shareableResources;
     if (params.prop)
       retParams.prop = params.prop;
 
     this.trigger(retParams);
   },
 
-  getList1(params) {
-    var model = this.getModel(params.modelName).value;
-    var isMessage = model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1);
-    if (isMessage) {
-      return this.searchMessagesNew(params)
-      .then((result) => {
-        if (params.isAggregation)
-          result = this.getDependencies(result);
-        if (!result)
-          return
-        if (!params.isAggregation  &&  params.to)
-          verificationsToShare = this.getVerificationsToShare(result, params.to);
-        var retParams = {
-          action: isMessage  &&  !params.prop ? 'messageList' : 'list',
-          list: resultList,
-          spinner: params.spinner,
-          isAggregation: params.isAggregation
-        }
-        // if (isMessage) {
-        //   let orgId = utils.getId(params.to)
-        //   let styles
-        //   if (SERVICE_PROVIDERS)
-        //      styles = SERVICE_PROVIDERS.filter((sp) => {
-        //         if (sp.org === orgId)
-        //           return true
-        //       })
-        //   if (styles  &&  styles.length)
-        //     retParams.style = styles[0].style
-        // }
-
-        if (verificationsToShare)
-          retParams.verificationsToShare = verificationsToShare;
-        if (params.prop)
-          retParams.prop = params.prop;
-
-        this.trigger(retParams);
-        return
-      })
-    }
-    var result = this.searchNotMessages(params);
-    if (params.isAggregation)
-      result = this.getDependencies(result);
-    if (!result)
-      return
-
-
-    // if (!isMessage)
-    //   return
-    // HACK
-    // utils.dedupeVerifications(result)
-
-    // var resultList = [];
-    // result.forEach((r) =>  {
-    //   var rr = {};
-    //   extend(rr, r);
-    //   resultList.push(rr);
-    // })
-    var resultList = result
-    // var verificationsToShare;
-    // if (isMessage  &&  !params.isAggregation  &&  params.to)
-    //   verificationsToShare = this.getVerificationsToShare(result, params.to);
-    var retParams = {
-      action: isMessage  &&  !params.prop ? 'messageList' : 'list',
-      list: resultList,
-      spinner: params.spinner,
-      isAggregation: params.isAggregation
-    }
-    // if (isMessage) {
-    //   let orgId = utils.getId(params.to)
-    //   let styles
-    //   if (SERVICE_PROVIDERS)
-    //      styles = SERVICE_PROVIDERS.filter((sp) => {
-    //         if (sp.org === orgId)
-    //           return true
-    //       })
-    //   if (styles  &&  styles.length)
-    //     retParams.style = styles[0].style
-    // }
-
-    // if (verificationsToShare)
-    //   retParams.verificationsToShare = verificationsToShare;
-    if (params.prop)
-      retParams.prop = params.prop;
-
-    this.trigger(retParams);
-  },
   searchResources(params) {
     var meta = this.getModel(params.modelName).value;
     var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
@@ -1975,10 +1844,12 @@ var Store = Reflux.createStore({
     else
       return this.searchNotMessages(params);
   },
+
   searchNotMessages(params) {
     var foundResources = {};
     var modelName = params.modelName;
     var to = params.to;
+    var notVerified = params.notVerified
     var meta = this.getModel(modelName).value;
     var props = meta.properties;
     var containerProp, resourceId;
@@ -2006,36 +1877,36 @@ var Store = Reflux.createStore({
     })
     let orgToForm = {}
     for (var key in list) {
+      var r = list[key].value;
       if (key.indexOf(modelName + '_') == -1) {
         var s = key.split('_')[0]
         if (isOrg) {
-          if (this.getModel(s).value.subClassOf === FORM) {
-            let toId = utils.getId(list[key].value.to)
-            let form = list[key].value
-            // The resource was never shared or it has a shared with party in it
-            if (form.sharedWith) {
-              let wasShared
-              form.sharedWith.forEach((o) => {
-                let org = list[o.bankRepresentative].value.organization
-                let orgId = utils.getId(org)
-                if (orgToForm[orgId])
-                  orgToForm[orgId] = ++orgToForm[orgId]
-                else
-                  orgToForm[orgId] = 1
-              })
-            }
-            else {
-              let org = list[toId].value.organization
-              if (!org) {
-                let fromId = utils.getId(list[key].value.from)
-                org = list[fromId].value.organization
-              }
+          if (this.getModel(s).value.subClassOf !== FORM)
+            continue
+          let toId = utils.getId(list[key].value.to)
+          // The resource was never shared or it has a shared with party in it
+          if (r.sharedWith) {
+            let wasShared
+            r.sharedWith.forEach((o) => {
+              let org = list[o.bankRepresentative].value.organization
               let orgId = utils.getId(org)
               if (orgToForm[orgId])
                 orgToForm[orgId] = ++orgToForm[orgId]
               else
                 orgToForm[orgId] = 1
+            })
+          }
+          else {
+            let org = list[toId].value.organization
+            if (!org) {
+              let fromId = utils.getId(list[key].value.from)
+              org = list[fromId].value.organization
             }
+            let orgId = utils.getId(org)
+            if (orgToForm[orgId])
+              orgToForm[orgId] = ++orgToForm[orgId]
+            else
+              orgToForm[orgId] = 1
           }
           continue
         }
@@ -2046,7 +1917,8 @@ var Store = Reflux.createStore({
         else
           continue
       }
-      var r = list[key].value;
+      else if (notVerified  &&  (r.verifications  &&  r.verifications.length))
+        continue
       if (r.canceled)
         continue;
       // if (r[constants.OWNER]) {
@@ -2255,9 +2127,9 @@ var Store = Reflux.createStore({
       result.forEach(function(r) {
         messages[utils.getId(r)] = r.time
       })
-      // var verificationsToShare;
+      // var shareableResources;
       // if (!params.isAggregation  &&  params.to)
-      //   verificationsToShare = self.getVerificationsToShare(result, params.to);
+      //   shareableResources = self.getShareableResources(result, params.to);
 
       // var retParams = {
       //   action: !params.prop ? 'messageList' : 'list',
@@ -2265,8 +2137,8 @@ var Store = Reflux.createStore({
       //   spinner: params.spinner,
       //   isAggregation: params.isAggregation
       // }
-      // if (verificationsToShare)
-      //   retParams.verificationsToShare = verificationsToShare;
+      // if (shareableResources)
+      //   retParams.shareableResources = shareableResources;
       // if (params.prop)
       //   retParams.prop = params.prop;
 
@@ -2888,7 +2760,7 @@ var Store = Reflux.createStore({
     }
     return resource;
   },
-  getVerificationsToShare(foundResources, to) {
+  getShareableResources(foundResources, to) {
     if (!foundResources)
       return
     var verTypes = [];
@@ -2897,7 +2769,9 @@ var Store = Reflux.createStore({
       var r = foundResources[i];
       if (me  &&  utils.getId(r.to) !== meId  &&  utils.getId(r.from) !== meId)
         continue;
-      if (r[TYPE] !== SIMPLE_MESSAGE  ||  r.verifications  ||  r.documentCreated)
+      // DocumentCreated is set when the document of this type was created and we don't want to create it again
+      // from this same notification
+      if (r[TYPE] !== SIMPLE_MESSAGE  ||  r.documentCreated)
         continue;
       var msgParts = utils.splitMessage(r.message);
       // Case when the needed form was sent along with the message
@@ -2907,7 +2781,7 @@ var Store = Reflux.createStore({
       if (msgModel)
         verTypes.push(msgModel.value.id);
     }
-    var verificationsToShare = {};
+    var shareableResources = {};
     if (!verTypes.length)
       return;
 
@@ -2919,9 +2793,9 @@ var Store = Reflux.createStore({
     else
       reps = [utils.getId(to)]
 
-    var formsToShare = this.searchMessages({modelName: 'tradle.MyProduct', to: utils.getMe(), strict: true})
-    if (formsToShare  &&  formsToShare.length) {
-      formsToShare.forEach((r) => {
+    var productsToShare = this.searchMessages({modelName: 'tradle.MyProduct', to: utils.getMe(), strict: true})
+    if (productsToShare  &&  productsToShare.length) {
+      productsToShare.forEach((r) => {
         let fromId = utils.getId(r.from)
         if (r.sharedWith) {
           let sw = r.sharedWith.filter((r) => {
@@ -2935,15 +2809,15 @@ var Store = Reflux.createStore({
             return
         }
         var docType = r[TYPE]
-        var v = verificationsToShare[docType];
+        var v = shareableResources[docType];
         if (!v)
-          verificationsToShare[docType] = [];
+          shareableResources[docType] = [];
         let rr = {
           _t: VERIFICATION,
           document: r,
           organization: list[utils.getId(r.from)].value.organization
         }
-        verificationsToShare[docType].push(rr);
+        shareableResources[docType].push(rr);
       })
     }
 
@@ -2974,12 +2848,31 @@ var Store = Reflux.createStore({
       var value = {};
       extend(value, val);
       value.document = document;
-      var v = verificationsToShare[docType];
+      var v = shareableResources[docType];
       if (!v)
-        verificationsToShare[docType] = [];
-      verificationsToShare[docType].push(value);
+        shareableResources[docType] = [];
+      shareableResources[docType].push(value);
     })
-    return verificationsToShare;
+    // Allow sharing non-verified forms
+    verTypes.forEach((verType) => {
+      var l = this.searchNotMessages({modelName: verType, notVerified: true})
+      if (!l)
+        return
+      l.forEach((r) => {
+        let docType = r[TYPE]
+        var v = shareableResources[docType];
+        if (!v)
+          shareableResources[docType] = [];
+        let rr = {
+          _t: VERIFICATION,
+          document: r,
+          organization: list[utils.getId(r.to)].value.organization
+        }
+        shareableResources[docType].push(rr)
+      })
+    })
+
+    return shareableResources;
   },
   getNonce() {
     return crypto.randomBytes(32).toString('hex')
@@ -3024,13 +2917,8 @@ var Store = Reflux.createStore({
       var creator =  me
                   ?  me
                   :  isRegistration ? value : null;
-      if (creator) {
+      if (creator)
         value[constants.OWNER] = this.buildRef(creator)
-        // value[constants.OWNER] = {
-        //   id: PROFILE + '_' + creator[ROOT_HASH] + '_' + creator[CUR_HASH],
-        //   title: utils.getDisplayName(me, this.getModel(PROFILE))
-        // };
-      }
 
       if (value[TYPE] === ADDITIONAL_INFO) {
         var verificationRequest = value.document;
@@ -3040,11 +2928,6 @@ var Store = Reflux.createStore({
         if (!vr.additionalInfo  ||  !vr.additionalInfo.length)
           vr.additionalInfo = [];
         vr.additionalInfo.push(this.buildRef(value))
-        // vr.additionalInfo.push({
-        //   id: ADDITIONAL_INFO + '_' + value[ROOT_HASH],
-        //   title: value.message,
-        //   time: value.time
-        // });
         batch.push({type: 'put', key: vrId, value: vr});
       }
     }
@@ -3360,10 +3243,6 @@ var Store = Reflux.createStore({
                         .set('_z', me[NONCE] || this.getNonce())
     if (me.organization) {
       var org = this.buildRef(me.organization)
-      // var org = {
-      //   id: me.organization.id,
-      //   title: me.organization.title
-      // }
       meIdentity.set('organization', org)
     }
 
@@ -3372,38 +3251,19 @@ var Store = Reflux.createStore({
   },
   publishMyIdentity(orgRep) {
     var self = this
-    // return this.getDriver(me)
-    // .then(function () {
-    //   return meDriver.identityPublishStatus()
-    // })
-    // .then(function(status) {
-    //   if (!status.queued  &&  !status.current) {
-        var msg = {
-          _t: constants.TYPES.IDENTITY_PUBLISHING_REQUEST,
-          _z: self.getNonce(),
-          identity: publishedIdentity
-        }
-        var key = IDENTITY + '_' + orgRep[ROOT_HASH]
+    var msg = {
+      _t: constants.TYPES.IDENTITY_PUBLISHING_REQUEST,
+      _z: self.getNonce(),
+      identity: publishedIdentity
+    }
+    var key = IDENTITY + '_' + orgRep[ROOT_HASH]
 
-        return utils.sendSigned(meDriver, {
-          msg: msg,
-          to: [{fingerprint: self.getFingerprint(list[key].value)}],
-          deliver: true,
-          public: true
-        })
-      // }
-      // else
-      //   self.updateMe()
-    // })
-    // .then(function(status) {
-    //   if (!status.queued  &&  !status.current) {
-    //     return Q.ninvoke(meDriver.wallet, 'balance')
-    //   }
-    // })
-    // .then(function(balance) {
-    //   if (balance)
-    //     return meDriver.publishMyIdentity()
-    // })
+    return utils.sendSigned(meDriver, {
+      msg: msg,
+      to: [{fingerprint: self.getFingerprint(list[key].value)}],
+      deliver: true,
+      public: true
+    })
     .catch(function(err) {
       debugger
     })
@@ -3881,9 +3741,9 @@ var Store = Reflux.createStore({
       }
       else
         resultList = self.searchMessages({to: to, modelName: MESSAGE})
-      var verificationsToShare = this.getVerificationsToShare(resultList, to);
-      if (verificationsToShare)
-        retParams.verificationsToShare = verificationsToShare
+      var shareableResources = this.getShareableResources(resultList, to);
+      if (shareableResources)
+        retParams.shareableResources = shareableResources
 
       retParams.resource = to
     }
@@ -4458,800 +4318,6 @@ var Store = Reflux.createStore({
 // );
 
 module.exports = Store;
-/*
-  onShowIdentityList() {
-    if (sampleData.getMyId()) {
-      this.trigger({action: 'showIdentityList', list: []});
-      return;
-    }
-    var allIdentities = list[MY_IDENTITIES + '_1'].value.allIdentities;
-    var meId = me[TYPE] + '_' + me[ROOT_HASH];
-    var result = [];
-    if (allIdentities) {
-      allIdentities.forEach((id) => {
-        if (id.id != meId) {
-          var resource = {};
-          if (list[id.id].value.canceled)
-            return;
-          extend(resource, list[id.id].value);
-          result.push(resource);
-        }
-      })
-    }
-    this.trigger({action: 'showIdentityList', list: result});
-  },
-  onChangeIdentity(newMe) {
-    var myIdentities = list[MY_IDENTITIES + '_1'].value;
-    myIdentities.currentIdentity = newMe[TYPE] + '_' + newMe[ROOT_HASH];
-      var self = this;
-    db.put(MY_IDENTITIES + '_1', myIdentities)
-    .then(function() {
-      return self.loadMyResources()
-    })
-    .then(function() {
-      me = newMe;
-      if (me.organization) {
-        var photos = list[utils.getId(me.organization.id)].value.photos;
-        if (photos)
-          me.organization.photo = photos[0].url;
-      }
-      list = {};
-      return self.loadMyResources()
-            .then(function() {
-              var result = self.searchResources('', PROFILE, me);
-              self.trigger({action: 'changeIdentity', list: result, me: me});
-            });
-    })
-    .catch(function(err) {
-      err = err;
-    });
-  },
-
-  onAddNewIdentity(resource) {
-    var newIdentity = {
-      id: resource[TYPE] + '_' + resource[ROOT_HASH],
-      title: utils.getDisplayName(resource, this.getModel(resource[TYPE]).value.properties),
-    };
-    var myIdentities = list[MY_IDENTITIES + '_1'].value;
-    myIdentities.allIdentities.push(newIdentity);
-    var self = this;
-    db.put(MY_IDENTITIES + '_1', myIdentities)
-    .then(function() {
-      list[MY_IDENTITIES + '_1'].value = myIdentities;
-      self.trigger({action: 'addNewIdentity', resource: me});
-    })
-    .catch (function(err) {
-      err = err;
-    })
-  },
-  onRemoveIdentity(resource) {
-    var myIdentity = list[MY_IDENTITIES + '_1'].value;
-    var iKey = resource[TYPE] + '_' + resource[ROOT_HASH];
-    var allIdentities = myIdentity.allIdentities;
-    for (var i=0; i<allIdentities.length; i++)
-      if (allIdentities[i].id === iKey) {
-        allIdentities.splice(i, 1);
-        break;
-      }
-
-    var batch = [];
-    resource.canceled = true;
-    batch.push({type: 'put', key: iKey, value: resource});
-    batch.push({type: 'put', key: MY_IDENTITIES + '_1', value: myIdentity});
-
-    var self = this;
-    db.batch(batch)
-    .then(function() {
-      delete list[resource[TYPE] + '_' + resource[ROOT_HASH]];
-      self.trigger({action: 'removeIdentity', resource: resource});
-    })
-    .catch (function(err) {
-      err = err;
-    })
-
-  },
-*/
-/*
-  put(args) {
-    var data = JSON.parse(args.data)
-
-    var attachments
-    if (args.attachment) {
-      attachments = Array.isArray(args.attachment) ? args.attachment : [args.attachment]
-      attachments = attachments.map(function (a) {
-        a = a.split('=')
-        return {
-          name: a[0],
-          path: path.resolve(a[1])
-        }
-      })
-
-      attachments.every(function (a) {
-        if (!fs.existsSync(a.path)) {
-          throw new Error('attachment not found: ' + a.path)
-        }
-      })
-    }
-
-    var Client = require('./')
-    var client = new Client('http://' + args.host + ':' + args.port)
-
-    var builder = new Builder().data(args.data)
-    if (attachments) {
-      attachments.forEach(builder.attach, builder)
-    }
-
-    builder.build(function (err, build) {
-      if (err) throw err
-
-      var buf = build.form
-      utils.getInfoHash(buf, function (err, infoHash) {
-        if (err) throw err
-
-        console.log(infoHash)
-        if (args.printOnly) return
-
-        return client.put(infoHash, buf)
-          .then(function (resp) {
-            if (resp) console.log(resp)
-          })
-          .done()
-      })
-    })
-  },
-
-  searchMessages1(params) {
-    var query = params.query;
-    var modelName = params.modelName;
-    var meta = this.getModel(modelName).value;
-    var isVerification = modelName === constants.TYPES.VERIFICATION  ||  (meta.subClassOf  &&  meta.subClassOf === constants.TYPES.VERIFICATION);
-    var chatTo = params.to;
-    var prop = params.prop;
-    if (typeof prop === 'string')
-      prop = meta[prop];
-    var backlink = prop ? prop.items.backlink : prop;
-    var foundResources = {};
-    var isAllMessages = meta.isInterface;
-    var props = meta.properties;
-
-    var implementors = isAllMessages ? utils.getImplementors(modelName) : null;
-
-    var required = meta.required;
-    var meRootHash = me  &&  me[ROOT_HASH];
-    var meId = PROFILE + '_' + meRootHash;
-    var meOrgId = me.organization ? utils.getId(me.organization) : null;
-
-    var chatId = chatTo ? chatTo[TYPE] + '_' + chatTo[ROOT_HASH] : null;
-    var isChatWithOrg = chatTo  &&  chatTo[TYPE] === constants.TYPES.ORGANIZATION;
-    if (isChatWithOrg  &&  !chatTo.name) {
-      chatTo = list[chatId].value;
-    }
-    var testMe = chatTo ? chatTo.me : null;
-    if (testMe) {
-      if (testMe === 'me') {
-        if (!originalMe)
-          originalMe = me;
-        testMe = originalMe[ROOT_HASH];
-      }
-
-      isTest = true;
-      var meId = constants.TYPES.PROFILE + '_' + testMe;
-      me = list[meId].value;
-      utils.setMe(me);
-      var myIdentities = list[MY_IDENTITIES + '_1'].value;
-      if (myIdentities)
-        myIdentities.currentIdentity = meId;
-    }
-    var toModelName = chatTo ? chatId.split('_')[0] : null;
-    for (var key in list) {
-      var iMeta = null;
-      if (isAllMessages) {
-        if (implementors) {
-          implementors.forEach((impl) =>  {
-            if (impl.id.indexOf(key.substring(0, key.indexOf('_'))) === 0) {
-              iMeta = impl;
-              break;
-            }
-          })
-          if (!iMeta)
-            continue;
-        }
-      }
-      else if (key.indexOf(modelName + '_') === -1) {
-        var rModel = this.getModel(key.split('_')[0]).value;
-        if (!rModel.subClassOf  ||  rModel.subClassOf !== modelName)
-          continue;
-      }
-      if (!iMeta)
-        iMeta = meta;
-      var r = list[key].value;
-      if (r.canceled)
-        continue;
-      // Make sure that the messages that are showing in chat belong to the conversation between these participants
-      if (isVerification) {
-        if (r.organization) {
-          if (!r.organization.photos) {
-            var orgPhotos = list[utils.getId(r.organization.id)].value.photos;
-            if (orgPhotos)
-              r.organization.photos = [orgPhotos[0]];
-          }
-        }
-        if (r.document  &&  r.document.id)
-          r.document = list[utils.getId(r.document.id)].value;
-      }
-      if (chatTo) {
-        if (backlink  &&  r[backlink]) {
-          if (chatId === utils.getId(r[backlink]))
-            foundResources[key] = r;
-
-          continue;
-        }
-        var isVerificationR = r[TYPE] === VERIFICATION  ||  r[TYPE].subClassOf === VERIFICATION;
-        if ((!r.message  ||  r.message.trim().length === 0) && !r.photos &&  !isVerificationR)
-          // check if this is verification resource
-          continue;
-        var fromID = utils.getId(r.from);
-        var toID = utils.getId(r.to);
-
-        if (fromID !== meId  &&  toID !== meId  &&  toID != meOrgId)
-          continue;
-        var id = toModelName + '_' + chatTo[ROOT_HASH];
-        if (isChatWithOrg) {
-          var toOrgId = null, fromOrgId = null;
-
-          if (list[fromID].value.organization)
-            fromOrgId = utils.getId(list[fromID].value.organization);
-          else if (fromID.split('_')[0] === ORGANIZATION)
-            fromOrgId = utils.getId(list[fromID].value);
-          if (list[toID].value.organization)
-            toOrgId = utils.getId(list[toID].value.organization);
-          else if (toID.split('_')[0] === ORGANIZATION)
-            toOrgId = utils.getId(list[toID].value);
-
-          if (chatId !== toOrgId  &&  chatId !== fromOrgId)
-            continue;
-          if (fromID != meId  &&  toID != meId)
-            continue
-        }
-        else if (fromID !== id  &&  toID != id  &&  toID != meOrgId)
-          continue;
-      }
-      if (isVerificationR  ||  r[TYPE] === ADDITIONAL_INFO) {
-        var doc = {};
-        extend(true, doc, list[utils.getId(r.document)].value);
-        delete doc.verifications;
-        delete doc.additionalInfo;
-        r.document = doc;
-      }
-
-      if (!query) {
-        // foundResources[key] = r;
-        var msg = this.fillMessage(r);
-        if (msg)
-          foundResources[key] = msg;
-        continue;
-      }
-       // primitive filtering for this commit
-      var combinedValue = '';
-      for (var rr in props) {
-        if (r[rr] instanceof Array)
-         continue;
-        combinedValue += combinedValue ? ' ' + r[rr] : r[rr];
-      }
-      if (!combinedValue  ||  (combinedValue  &&  (!query || combinedValue.toLowerCase().indexOf(query.toLowerCase()) != -1))) {
-        foundResources[key] = this.fillMessage(r);
-      }
-    }
-
-    var result = utils.objectToArray(foundResources);
-
-    // find possible verifications for the requests that were not yet fulfilled from other verification providers
-
-    result.sort(function(a,b) {
-      // Turn your strings into dates, and then subtract them
-      // to get a value that is either negative, positive, or zero.
-      return new Date(a.time) - new Date(b.time);
-    });
-    // not for subreddit
-    result.forEach((r) =>  {
-      r.from.photos = list[utils.getId(r.from)].value.photos;
-      r.to.photos = list[utils.getId(r.to)].value.photos;
-    })
-    return result;
-  },
-  setOrg(value) {
-  // var org = list[utils.getId(value.organization)].value
-    var result = this.searchNotMessages({modelName: 'tradle.SecurityCode'})
-    if (!result) {
-      var err = 'The security code you specified was not registered with ' + value.organization.title
-      this.trigger({action: 'addItem', resource: value, error: err})
-      return
-    }
-
-    var i = 0
-    for (; i<result.length; i++) {
-      if (result[i].code === value.securityCode) {
-        value.organization = result[i].organization
-        break
-      }
-    }
-    if (!value.organization) {
-      var err = 'The security code you specified was not registered with ' + value.organization.title
-      this.trigger({action: 'addItem', resource: value, error: err})
-      return
-    }
-
-    // var org = list[utils.getId(value.organization)].value
-
-    var photos = list[utils.getId(value.organization.id)].value.photos;
-    if (photos)
-      value.organization.photo = photos[0].url;
-  },
-
-*/
-/*
-  putInDb1(obj, onMessage) {
-    // defensive copy
-    var val = extend(true, obj.parsed.data)
-    if (!val)
-      return
-
-
-    val[ROOT_HASH] = obj[ROOT_HASH]
-    val[CUR_HASH] = obj[CUR_HASH]
-    if (!val.time)
-      val.time = obj.timestamp
-
-    var type = val[TYPE]
-    var model = this.getModel(type)  &&  this.getModel(type).value
-    var isConfirmation
-    if (!model) {
-      if (val.message  &&  val.message.indexOf('Congratulations! You were approved for: ') != -1) {
-        isMessage = true
-        type = SIMPLE_MESSAGE
-        val[TYPE] = type
-        model = models[SIMPLE_MESSAGE].value
-        isConfirmation = true
-      }
-      else
-        return;
-    }
-    if (obj.txId)
-      val.txId = obj.txId
-    val.permissionKey = obj.permissionKey
-    var key = type + '_' + val[ROOT_HASH]
-    // var v = list[key] ? list[key].value : null
-    // var inDB = !!v
-    var batch = []
-    var representativeAddedTo
-    var self = this
-    // var isServiceMessage
-    if (model.id === PROFILE)
-      representativeAddedTo = this.addIdentity(val, batch)
-    else {
-      var isMessage = model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1
-      if (isMessage) {
-        this.addMessage(obj, val, onMessage, batch)
-        if (type === VERIFICATION  ||  (model.subClassOf  &&  model.subClassOf === VERIFICATION))
-          return
-        if (onMessage  &&  type === FORGOT_YOU)
-          return
-      }
-    }
-    list[key] = {
-      key: key,
-      value: val
-    }
-    var retParams = {
-      action: isMessage ? 'messageList' : 'list',
-    }
-    var resultList
-    if (isMessage) {
-      var toId = PROFILE + '_' + obj.to[ROOT_HASH]
-      var meId = PROFILE + '_' + me[ROOT_HASH]
-      var id = toId === meId ? PROFILE + '_' + obj.from[ROOT_HASH] : toId
-      var to = list[id].value
-      var isUpdate
-      if (onMessage)
-        retParams.list = this.searchMessages({to: to, modelName: MESSAGE})
-      else {
-        retParams.action= 'updateItem'
-        retParams.sendStatus = 'Sealed'
-        retParams.resource = val
-        isUpdate = true
-      }
-      if (!isUpdate) {
-        var verificationsToShare = this.getVerificationsToShare(resultList, to);
-        if (verificationsToShare)
-          retParams.verificationsToShare = verificationsToShare
-        retParams.resource = to
-      }
-    }
-      // resultList = searchMessages({to: list[obj.to.identity.toJSON()[TYPE] + '_' + obj.to[ROOT_HASH]], modelName: MESSAGE})
-    else if (!onMessage  &&  val[TYPE] != PROFILE)
-      retParams.list = this.searchNotMessages({modelName: val[TYPE]})
-
-    var self = this
-    return db.batch(batch)
-    .then(function() {
-      if (isConfirmation) {
-        var from = list[PROFILE + '_' + obj.from[ROOT_HASH]].value
-
-        var fOrg = from.organization
-        var org = fOrg ? list[utils.getId(fOrg)].value : null
-        if (onMessage  &&  val[TYPE] === FORGOT_YOU) {
-          this.forgotYou(org)
-          return
-        }
-        var msg = {
-          message: me.firstName + ' is waiting for the response',
-          _t: constants.TYPES.CUSTOMER_WAITING,
-          from: me,
-          to: org,
-          time: new Date().getTime()
-        }
-        self.onAddMessage(msg, true)
-      }
-      else if (representativeAddedTo) {
-        var orgList = self.searchNotMessages({modelName: ORGANIZATION})
-        self.trigger({action: 'list', list: orgList, forceUpdate: true})
-      }
-      else
-        self.trigger(retParams)
-    })
-  },
-  addIdentity(val, batch) {
-    var key = val[TYPE] + '_' + val[ROOT_HASH]
-    var v = list[key] ? list[key].value : null
-    if (val.name) {
-      for (var p in val.name)
-        val[p] = val.name[p]
-      delete val.name
-    }
-    if (val.location) {
-      for (var p in val.location)
-        val[p] = val.location[p]
-      delete val.location
-    }
-    if (!v  &&  me  &&  val[ROOT_HASH] === me[ROOT_HASH])
-      v = me
-    if (v)  {
-      var vv = {}
-      extend(vv, v)
-      extend(vv, val)
-      val = vv
-    }
-    batch.push({type: 'put', key: key, value: val})
-    if (!val.organization)
-      return
-      // if (val.organization.title === 'Rabobank'  &&  val.securityCode)
-      //   return
-    var org = list[utils.getId(val.organization)]  &&  list[utils.getId(val.organization)].value
-    if (!org)
-      return
-    var doAdd
-    if (!org.contacts)
-      doAdd = true
-    else {
-      var i = 0
-      for (; i<org.contacts.length; i++) {
-        if (org.contacts[i][ROOT_HASH] === key)
-          break
-      }
-      doAdd = i !== org.contacts.length
-    }
-    if (doAdd)  {
-      var representative = {
-        id: key,
-        title: val.formatted
-      }
-      var oo = {}
-      extend(oo, org)
-      if (!oo.contacts)
-        oo.contacts = []
-      oo.contacts.push(representative)
-      var orgKey = org[TYPE] + '_' + org[ROOT_HASH];
-      list[orgKey] = {
-        key: orgKey,
-        value: oo
-      }
-      batch.push({type: 'put', key: orgKey, value: oo})
-      return org[ROOT_HASH]
-    }
-  },
-  addMessage(obj, val, onMessage, batch) {
-    var fromR = list[PROFILE + '_' + obj.from[ROOT_HASH]]
-    if (!fromR)
-      return
-    var from = fromR.value
-    if (me  &&  from[ROOT_HASH] === me[ROOT_HASH])
-      return
-
-    var fOrg = from.organization
-    var org = fOrg ? list[utils.getId(fOrg)].value : null
-    if (onMessage  &&  val[TYPE] === FORGOT_YOU) {
-      this.forgotYou(org)
-      return
-    }
-    var type = val[TYPE]
-    var model = this.getModel(type)  &&  this.getModel(type).value
-    var isProductList = type === PRODUCT_LIST
-    var self = this
-    if (isProductList) {
-      var pList = JSON.parse(val.list)
-      // var fOrg = obj.from.identity.toJSON().organization
-      // org = list[utils.getId(fOrg)].value
-      org.products = []
-      pList.forEach(function(m) {
-        self.addNameAndTitleProps(m)
-        models[m.id] = {
-          key: m.id,
-          value: m
-        }
-        if (m.subClassOf === FINANCIAL_PRODUCT)
-          org.products.push(m.id)
-        else if (m.subClassOf == FORM  &&  !m.verifications) {
-          m.properties.verifications = {
-            type: 'array',
-            readOnly: true,
-            title: 'Verifications',
-            name: 'verifications',
-            items: {
-              backlink: 'document',
-              ref: VERIFICATION
-            }
-          }
-        }
-        if (!m[ROOT_HASH])
-          m[ROOT_HASH] = sha(m)
-        batch.push({type: 'put', key: m.id, value: m})
-      })
-      list[utils.getId(org)].value = org
-      batch.push({type: 'put', key: utils.getId(org), value: org})
-    }
-    var to = list[PROFILE + '_' + obj.to[ROOT_HASH]].value
-    var whoAmI = obj.parsed.data._i.split(':')[0]
-
-    if (whoAmI === from[ROOT_HASH]) {
-      val.to = {
-        id: to[TYPE] + '_' + to[ROOT_HASH],
-        title: obj.to.identity.toJSON().name.formatted
-      }
-      val.from = {
-        id: from[TYPE] + '_' + from[ROOT_HASH],
-        title: obj.from.identity.toJSON().name.formatted
-      }
-    }
-    else {
-      val.to = {
-        id: from[TYPE] + '_' + from[ROOT_HASH],
-        title: obj.from.identity.toJSON().name.formatted
-      }
-      val.from = {
-        id: to[TYPE] + '_' + to[ROOT_HASH],
-        title: obj.to.identity.toJSON().name.formatted
-      }
-    }
-    if (!val.time)
-      val.time = obj.timestamp
-
-    var isVerification = type === VERIFICATION  ||  (model.subClassOf  &&  model.subClassOf === VERIFICATION);
-    if (isVerification) {
-      this.onAddVerification(val, false, true)
-      // if (!val.txId) {
-      //   var o = {}
-      //   extend(o, obj)
-      //   o.txId = Math.random() + '';
-      //   setTimeout(() => {
-      //     self.putInDb(o)
-      //   }, 5000);
-      // }
-      return
-    }
-    var key = type + '_' + val[ROOT_HASH]
-
-    if (!isProductList) {
-      var dn = val.message || utils.getDisplayName(val, model.properties);
-      to.lastMessage = (obj.from[ROOT_HASH] === me[ROOT_HASH]) ? 'You: ' + dn : dn;
-      to.lastMessageTime = val.time;
-      from.lastMessage = val.message;
-      from.lastMessageTime = val.time;
-      batch.push({type: 'put', key: to[TYPE] + '_' + obj.to[ROOT_HASH], value: to});
-      batch.push({type: 'put', key: from[TYPE] + '_' + obj.from[ROOT_HASH], value: from});
-      batch.push({type: 'put', key: key, value: val})
-    }
-    else {
-      if (!from.lastMessageTime || (new Date() - from.lastMessageTime) > WELCOME_INTERVAL)
-        batch.push({type: 'put', key: key, value: val})
-    }
-  },
-*/
-  // getDriver1(me) {
-  //   if (driverPromise) return driverPromise
-
-  //   var allMyIdentities = list[MY_IDENTITIES + '_1']
-
-  //   var mePub = me['pubkeys']
-  //   var mePriv
-  //   var currentIdentity
-  //   if (allMyIdentities) {
-  //     var all = allMyIdentities.value.allIdentities
-  //     var curId = allMyIdentities.value.currentIdentity
-  //     all.forEach(function(id) {
-  //       if (id.id === curId) {
-  //         publishedIdentity = id.publishedIdentity
-  //         mePub = publishedIdentity.pubkeys
-  //         mePriv = id.privkeys
-  //       }
-  //     })
-  //   }
-  //   if (!mePub  &&  !mePriv) {
-  //     if (!me.securityCode) {
-  //       var profiles = {}
-  //       var identities = {}
-  //       myIdentity.forEach(function(r) {
-  //         if (r[TYPE] == IDENTITY)
-  //           identities[r[ROOT_HASH]] = r
-  //         else
-  //           profiles[r[ROOT_HASH]] = r
-  //       })
-  //       for (var hash in profiles) {
-  //         if (!profiles[hash].securityCode  &&  me.firstName === profiles[hash].firstName) {
-  //           var identity = identities[hash]
-  //           mePub = identity.pubkeys  // hardcoded on device
-  //           mePriv = identity.privkeys
-  //           me[NONCE] = identity[NONCE]
-  //           break
-  //         }
-  //       }
-  //     }
-  //     // else {
-  //     //   myIdentity.forEach(function(r) {
-  //     //     if (r.securityCode === me.securityCode  &&  me.firstName === r.firstName) {
-  //     //       mePub = r.pubkeys  // hardcoded on device
-  //     //       mePriv = r.privkeys
-  //     //       me[NONCE] = r[NONCE]
-  //     //     }
-  //     //   })
-
-  //     //     // var org = list[utils.getId(me.organization)].value
-  //     //   var secCodes = this.searchNotMessages({modelName: 'tradle.SecurityCode'})
-  //     //   for (var i=0; i<secCodes.length; i++) {
-  //     //     if (secCodes[i].code === me.securityCode) {
-  //     //       me.organization = secCodes[i].organization
-  //     //       if (employees[me.securityCode])
-  //     //         employees[me.securityCode] = me
-  //     //       break
-  //     //     }
-  //     //   }
-  //     //   if (!me.organization) {
-  //     //     this.trigger({action:'addItem', resource: me, error: 'The code was not registered with'})
-  //     //     return Q.reject(new Error('The code was not registered with'))
-  //     //   }
-  //     // }
-  //     if (!mePub) {
-  //       var keys = defaultKeySet({
-  //         networkName: 'testnet'
-  //       })
-  //       mePub = []
-  //       mePriv = []
-  //       keys.forEach(function(key) {
-  //         mePriv.push(key.exportPrivate())
-  //         mePub.push(key.exportPublic())
-  //       })
-  //     }
-  //     else {
-  //       me['pubkeys'] = mePub
-  //       me['privkeys'] = mePriv
-  //       me[NONCE] = me[NONCE] || this.getNonce()
-  //     }
-  //   }
-
-  //   if (currentIdentity  &&  currentIdentity.publishedIdentity)
-  //     publishedIdentity = currentIdentity.publishedIdentity
-  //   else {
-  //     publishedIdentity = this.makePublishingIdentity(me)
-  //     me[PUB_ID] = publishedIdentity
-  //     if (currentIdentity) {
-  //       currentIdentity.publishedIdentity = publishedIdentity
-  //     }
-  //   }
-
-  //   return driverPromise = this.buildDriver(Identity.fromJSON(publishedIdentity), mePriv, PORT)
-  // },
-  // getDriver1(me) {
-  //   if (driverPromise) return driverPromise
-
-  //   var allMyIdentities = list[MY_IDENTITIES + '_1']
-
-  //   var mePub = me['pubkeys']
-  //   var mePriv
-  //   var currentIdentity
-  //   if (allMyIdentities) {
-  //     var all = allMyIdentities.value.allIdentities
-  //     var curId = allMyIdentities.value.currentIdentity
-  //     all.forEach(function(id) {
-  //       if (id.id === curId) {
-  //         publishedIdentity = id.publishedIdentity
-  //         mePub = publishedIdentity.pubkeys
-  //         mePriv = id.privkeys
-  //       }
-  //     })
-  //   }
-  //   if (!mePub  &&  !mePriv) {
-  //     if (!me.securityCode) {
-  //       var profiles = {}
-  //       var identities = {}
-  //       myIdentity.forEach(function(r) {
-  //         if (r[TYPE] == IDENTITY)
-  //           identities[r[ROOT_HASH]] = r
-  //         else
-  //           profiles[r[ROOT_HASH]] = r
-  //       })
-  //       for (var hash in profiles) {
-  //         if (!profiles[hash].securityCode  &&  me.firstName === profiles[hash].firstName) {
-  //           var identity = identities[hash]
-  //           mePub = identity.pubkeys  // hardcoded on device
-  //           mePriv = identity.privkeys
-  //           me[NONCE] = identity[NONCE]
-  //           break
-  //         }
-  //       }
-  //     }
-  //     // else {
-  //     //   myIdentity.forEach(function(r) {
-  //     //     if (r.securityCode === me.securityCode  &&  me.firstName === r.firstName) {
-  //     //       mePub = r.pubkeys  // hardcoded on device
-  //     //       mePriv = r.privkeys
-  //     //       me[NONCE] = r[NONCE]
-  //     //     }
-  //     //   })
-
-  //     //     // var org = list[utils.getId(me.organization)].value
-  //     //   var secCodes = this.searchNotMessages({modelName: 'tradle.SecurityCode'})
-  //     //   for (var i=0; i<secCodes.length; i++) {
-  //     //     if (secCodes[i].code === me.securityCode) {
-  //     //       me.organization = secCodes[i].organization
-  //     //       if (employees[me.securityCode])
-  //     //         employees[me.securityCode] = me
-  //     //       break
-  //     //     }
-  //     //   }
-  //     //   if (!me.organization) {
-  //     //     this.trigger({action:'addItem', resource: me, error: 'The code was not registered with'})
-  //     //     return Q.reject(new Error('The code was not registered with'))
-  //     //   }
-  //     // }
-  //     if (!mePub) {
-  //       var keys = defaultKeySet({
-  //         networkName: 'testnet'
-  //       })
-  //       mePub = []
-  //       mePriv = []
-  //       keys.forEach(function(key) {
-  //         mePriv.push(key.exportPrivate())
-  //         mePub.push(key.exportPublic())
-  //       })
-  //     }
-  //     else {
-  //       me['pubkeys'] = mePub
-  //       me['privkeys'] = mePriv
-  //       me[NONCE] = me[NONCE] || this.getNonce()
-  //     }
-  //   }
-
-  //   if (currentIdentity  &&  currentIdentity.publishedIdentity)
-  //     publishedIdentity = currentIdentity.publishedIdentity
-  //   else {
-  //     publishedIdentity = this.makePublishingIdentity(me)
-  //     me[PUB_ID] = publishedIdentity
-  //     if (currentIdentity) {
-  //       currentIdentity.publishedIdentity = publishedIdentity
-  //     }
-  //   }
-
-  //   return driverPromise = this.buildDriver(Identity.fromJSON(publishedIdentity), mePriv, PORT)
-  // },
 
 function timeSomething (name) {
   var start = Date.now()
