@@ -858,19 +858,24 @@ var NewResourceMixin = {
         }
       }
     }
-    if (!this.floatingProps)
-      this.floatingProps = {}
-    if (!this.floatingProps[propName])
-      this.floatingProps[propName] = {}
-    this.floatingProps[propName][enumPropName] = value[Object.keys(value)[0]]
-
-    if (this.state.isPrefilled) {
-      var props = (this.props.model  ||  this.props.metadata).properties
-      if (props[propName].ref  &&  props[propName].ref === constants.TYPES.MONEY) {
-        if (!this.floatingProps[propName].value  &&  resource[propName]  &&  resource[propName].value)
-          this.floatingProps[propName].value = resource[propName].value
-      }
+    // if no value set only currency
+    else {
+      resource[propName] = {}
+      resource[propName][enumPropName] = value[Object.keys(value)[0]]
+      if (!this.floatingProps)
+        this.floatingProps = {}
+      if (!this.floatingProps[propName])
+        this.floatingProps[propName] = {}
+      this.floatingProps[propName][enumPropName] = value[Object.keys(value)[0]]
     }
+
+    // if (this.state.isPrefilled) {
+    //   var props = (this.props.model  ||  this.props.metadata).properties
+    //   if (props[propName].ref  &&  props[propName].ref === constants.TYPES.MONEY) {
+    //     if (this.floatingProps  &&  this.floatingProps[propName]  &&  !this.floatingProps[propName].value  &&  resource[propName]  &&  resource[propName].value)
+    //       this.floatingProps[propName].value = resource[propName].value
+    //   }
+    // }
 
     // resource[propame] = value
     var data = this.refs.form.refs.input.state.value;
@@ -886,19 +891,23 @@ var NewResourceMixin = {
     });
   },
   validateProperties(value) {
-    let properties = this.props.model.properties
+    let m = utils.getModel(value[constants.TYPE]).value
+    let properties = m.properties
     let err = []
+    let deleteProps = []
     for (var p in value) {
-      let prop = properties[p]
-      if (!prop  ||  p.charAt(0) === '_')
+      if (p.charAt(0) === '_')
         continue
       if (!value[p])
         continue
+      let prop = properties[p]
       if (prop.type === 'number')
         this.checkNumber(value[p], prop, err)
       else if (prop.ref === constants.TYPES.MONEY) {
-        this.checkNumber(value[p], prop, err)
-        if (!value[p].currency)
+        let error = this.checkNumber(value[p], prop, err)
+        if (error  &&  m.required.indexOf(p) === -1)
+          deleteProps.push(p)
+        else if (!value[p].currency)
           value[p].currency = this.props.currency
       }
       else if (prop.units && prop.units === '[min - max]') {
@@ -945,20 +954,29 @@ var NewResourceMixin = {
       //     err[prop.name] = 'Invalid ' + prop.title
       // }
     }
+    if (deleteProps)
+      deleteProps.forEach((p) => {
+        delete value[p]
+        delete err[p]
+      })
     return err
   },
   checkNumber(v, prop, err) {
     var p = prop.name
+    var error
     if (prop.ref === constants.TYPES.MONEY)
       v = v.value
     if (isNaN(v))
-      err[p] = 'Please enter a valid number'
+      error = 'Please enter a valid number'
     else {
       if (prop.max && v > prop.max)
-        err[p] = 'The maximum value for is ' + prop.max
+        error = 'The maximum value for is ' + prop.max
       else if (prop.min && v < prop.min)
-        err[p] = 'The minimum value for is ' + prop.min
+        error = 'The minimum value for is ' + prop.min
     }
+    if (error)
+      err[p] = error
+    return error
   },
 
 }
