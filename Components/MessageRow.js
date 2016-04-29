@@ -20,7 +20,6 @@ var formDefaults = require('@tradle/models').formDefaults;
 
 var reactMixin = require('react-mixin');
 var Device = require('react-native-device')
-// var newProduct = require('../data/newProduct.json')
 
 var STRUCTURED_MESSAGE_BORDER = '#3260a5' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
 // var STRUCTURED_MESSAGE_COLOR = '#77ADFC' //'#4BA0F2' //'#5482C7' //'#2E3B4E' //'#77ADFC' //'#F4F5E6'
@@ -94,9 +93,6 @@ class MessageRow extends Component {
         ownerPhoto = <LinearGradient colors={['#2B6493', '#417AA9', '#568FBE'].map(processColor)} style={styles.cellRoundImage}>
                        <Text style={styles.cellText}>{title}</Text>
                      </LinearGradient>
-        // ownerPhoto = <LinearGradient colors={['#A4CCE0', '#7AAAc3', '#5E92AD']} style={styles.cellRoundImage}>
-        //   <Text style={styles.cellText}>{title}</Text>
-        // </LinearGradient>
       }
     }
 
@@ -244,19 +240,11 @@ class MessageRow extends Component {
     if (showMessageBody) {
       var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? (isNewProduct ? 'center' : 'flex-end') : 'flex-start'};
       if (resource.message) {
-        if (resource.message.charAt(0) === '['  ||  resource.message.length > 30) {
-          // if (!isNewProduct)
-            viewStyle.width = msgWidth; //isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
-            // viewStyle.width = isMyMessage || !hasOwnerPhoto ? 305 : 325;
-          // else {
-          //   viewStyle.alignSelf = 'stretch'
-          //   viewStyle.justifyContent = 'center'
-          // }
-        }
+        if (resource.message.charAt(0) === '['  ||  resource.message.length > 30)
+          viewStyle.width = msgWidth; //isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
       }
       if (!isSimpleMessage)
-        viewStyle.width = msgWidth; //isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
-        // viewStyle.width = isMyMessage || !hasOwnerPhoto ? 305 : 325;
+        viewStyle.width = msgWidth
 
       if (isVerification) {
         var msgModel = utils.getModel(resource.document[constants.TYPE]).value;
@@ -266,22 +254,19 @@ class MessageRow extends Component {
         renderedRow = <View>
                         <View style={[styles.verifiedHeader, hdrStyle]}>
                           <Icon style={styles.verificationIcon} size={20} name={'android-done'} />
-                          <Text style={{fontSize: 16, fontWeight: '600', color: '#FBFFE5', alignSelf: 'center'}}>{translate('verifiedBy', orgName)}</Text>
+                          <Text style={{fontSize: 16, fontWeight: '600', alignSelf: 'center', color: '#FBFFE5'}}>{translate('verifiedBy', orgName)}</Text>
                         </View>
                         <View style={{paddingTop: 5}}>
                           {this.formatDocument(msgModel, resource, this.verify.bind(this))}
                         </View>
                       </View>
-                        // <View style={{paddingTop: 5}}>
-                        //   <Text style={[styles.resourceTitle, {alignSelf:'flex-end', fontSize: 18, color: '#CCCCB2'}]}>{msgModel.title}</Text>
-                        // </View>
       }
       else if (isMyProduct) {
         var hdrStyle = {backgroundColor: '#289427'} //this.props.bankStyle.PRODUCT_BG_COLOR ? {backgroundColor: this.props.bankStyle.PRODUCT_BG_COLOR} : {backgroundColor: '#289427'}
         var msgModel = utils.getModel(resource[constants.TYPE]).value;
         var orgName = resource.from.organization  ? resource.from.organization.title : ''
         renderedRow.splice(0, 0, <View  key={this.getNextKey()} style={[styles.verifiedHeader, hdrStyle, {marginHorizontal: -8, marginTop: -7, marginBottom: 7, paddingBottom: 5}]}>
-                           <Text style={{fontSize: 16, fontWeight: '600', color: '#fff', alignSelf: 'center'}}>{translate('issuedBy', orgName)}</Text>
+                           <Text style={{fontSize: 16, fontWeight: '600', alignSelf: 'center', color: '#fff'}}>{translate('issuedBy', orgName)}</Text>
                         </View>
                         );
         renderedRow.push(<Text  key={this.getNextKey()} style={[styles.formType, {fontWeight: '600', color: '#289427', alignSelf: 'flex-end'}]}>{translate(model)}</Text>);
@@ -346,7 +331,7 @@ class MessageRow extends Component {
     var model = utils.getModel(this.props.resource[constants.TYPE]).value;
     var isLicense = model.id.indexOf('License') !== -1  ||  model.id.indexOf('Passport') !== -1;
     var photoStyle = (isLicense  &&  len === 1) ? styles.bigImageH : photoStyle;
-    var verifications = this.showVerifications(rowStyle, viewStyle, addStyle);
+    var shareables = this.showShareableResources(rowStyle, viewStyle, addStyle);
       // <View style={viewStyle} ref={resource[constants.ROOT_HASH]}>
 
     var bgStyle = this.props.bankStyle  &&  this.props.bankStyle.BACKGROUND_COLOR ? {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR} : {backgroundColor: '#f7f7f7'}
@@ -358,7 +343,7 @@ class MessageRow extends Component {
           <PhotoList photos={photoUrls} resource={this.props.resource} style={[photoStyle, {marginTop: -5}]} navigator={this.props.navigator} numberInRow={inRow} />
         </View>
         {sendStatus}
-        {verifications}
+        {shareables}
       </View>
     );
   }
@@ -419,8 +404,8 @@ class MessageRow extends Component {
     });
 
   }
-  showVerifications(rowStyle, viewStyle, addStyle) {
-    if (!this.props.verificationsToShare || !this.props.resource.message)
+  showShareableResources(rowStyle, viewStyle, addStyle) {
+    if (!this.props.shareableResources || !this.props.resource.message)
       return <View/>;
 
     var resource = this.props.resource;
@@ -437,9 +422,9 @@ class MessageRow extends Component {
     var cnt = 0;
     var self = this;
     var chatOrg = this.props.to[constants.TYPE] === constants.TYPES.ORGANIZATION  &&  this.props.to[constants.TYPE] + '_' + this.props.to[constants.ROOT_HASH]
-    for (var t in  this.props.verificationsToShare) {
+    for (var t in  this.props.shareableResources) {
       if (t === msgModel.id) {
-        var ver = this.props.verificationsToShare[t];
+        var ver = this.props.shareableResources[t];
         var r = ver[0]
         ver.forEach(function(r) {
           if (chatOrg  &&  utils.getId(r.organization) === chatOrg)
@@ -461,16 +446,6 @@ class MessageRow extends Component {
     }
     if (!vtt.length)
       return <View />;
-    // if (cnt > 1) {
-    //   vtt.push(
-    //     <View key={this.getNextKey()}>
-    //       <View style={{height: 0.5, marginBottom: 5, backgroundColor: '#dddddd'}} />
-    //       <TouchableHighlight underlayColor='transparent' onPress={this.showVerificationsFor.bind(this, r, ver)}>
-    //         <Text style={styles.verySmallLetters}>{'See ' + (cnt - 1) + ' more verifications here'}</Text>
-    //       </TouchableHighlight>
-    //     </View>
-    //   )
-    // }
 
     var modelTitle = translate(msgModel)
     var idx = modelTitle.indexOf('Verification');
@@ -479,13 +454,6 @@ class MessageRow extends Component {
       docType = modelTitle;
     else
       docType = modelTitle.substring(0, idx) + (modelTitle.length === idx + 12 ? '' : modelTitle.substring(idx + 12))
-
-    // var msg = utils.getMe().firstName + ', this is your personal privacy assistant. I see you\'ve already had your ' + docType + ' verified.'
-    // if (vtt.length === 1)
-    //    msg += ' You can tap below to share it with ';
-    // else
-    //    msg += ' You can tap on any items in the list below to share them with ';
-    // msg += this.props.to.organization ? (this.props.to.organization.title + '.') : this.props.to.name;
 
     let org = this.props.to.organization ? (this.props.to.organization.title + '.') : this.props.to.name;
     let msg = (vtt.length === 1)
@@ -510,10 +478,6 @@ class MessageRow extends Component {
       </View>
      );
   }
-  // showVerificationsFor(r, verificationsToShare) {
-
-  // }
-          // I just sent you a request for {msgModel.title}. {utils.getMe().firstName}, this is your Tradle assistent talking. Tap on one of the items below to share with {isMyMessage ? resource.to.title : resource.from.title}
 
   onPress(event) {
     this.props.navigator.push({
@@ -620,7 +584,6 @@ class MessageRow extends Component {
     viewCols.forEach(function(v) {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date')
         return;
-      var style = isSimpleMessage || isFormError ? styles.resourceTitle : styles.description; //resourceTitle; //(first) ? styles.resourceTitle : styles.description;
 
       if (properties[v].ref  ||  properties[v].type === 'boolean') {
         if (resource[v]) {
@@ -629,6 +592,7 @@ class MessageRow extends Component {
         }
         return;
       }
+      var style = isSimpleMessage || isFormError ? styles.resourceTitle : styles.description; //resourceTitle; //(first) ? styles.resourceTitle : styles.description;
       var isMyProduct = model.subClassOf === 'tradle.MyProduct'
       if (isMyMessage)
         style = [style, {justifyContent: 'flex-end', color: isMyProduct ? '#2892C6' : '#ffffff'}];
@@ -643,7 +607,7 @@ class MessageRow extends Component {
         vCols.push(
           <View key={self.getNextKey()}>
             <Text style={style}>{resource[v]} </Text>
-            <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+            <View style={styles.rowContainer}>
               <Text style={[style, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(utils.getModel(resource.prefill[constants.TYPE]).value)}</Text>
               <Icon style={resource.documentCreated  ? styles.linkIconGreyed : [self.linkIcon, {color: LINK_COLOR}]} size={20} name={'ios-arrow-right'} />
             </View>
@@ -652,7 +616,7 @@ class MessageRow extends Component {
       else if (model.id === constants.TYPES.SELF_INTRODUCTION) {
         vCols.push(
           <View key={self.getNextKey()}>
-            <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+            <View style={styles.rowContainer}>
               <Text style={[style, {color: STRUCTURED_MESSAGE_COLOR}]}>{translate('requestForRepresentative')} </Text>
             </View>
           </View>)
@@ -679,7 +643,7 @@ class MessageRow extends Component {
           if (resource.welcome) {
             msg = <View key={self.getNextKey()}>
                     <Text style={style}>{isProductList ? translate('hello', utils.getMe().firstName) : msgParts[0]}</Text>
-                    <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                    <View style={styles.rowContainer}>
                       <Text style={[style, {color: isMyMessage ? STRUCTURED_MESSAGE_COLOR : LINK_COLOR}]}>{isProductList ? translate('listOfProducts') : msgParts[1]} </Text>
                       <Icon style={[styles.linkIcon, {color: LINK_COLOR}]} size={20} name={'ios-arrow-right'} />
                     </View>
@@ -692,7 +656,7 @@ class MessageRow extends Component {
           var msgModel = utils.getModel(s[0]);
           let color, link
           if (msgModel) {
-            if (self.props.verificationsToShare)
+            if (self.props.shareableResources)
               style = isSimpleMessage ? styles.resourceTitle : styles.description;
             msgModel = msgModel.value;
             let shareMyProduct = msgModel.subClassOf === 'tradle.MyProduct'
@@ -721,7 +685,7 @@ class MessageRow extends Component {
               if (isMyMessage)
                 link = <Text style={[style, color]}>{translate(msgModel)}</Text>
               else
-                link = <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                link = <View style={styles.rowContainer}>
                            <Text style={[style, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(msgModel)}</Text>
                            <Icon style={resource.documentCreated  ? styles.linkIconGreyed : [self.linkIcon, {color: LINK_COLOR}]} size={20} name={'ios-arrow-right'} />
                        </View>
@@ -914,19 +878,6 @@ class MessageRow extends Component {
           callback: this.props.callback,
           bankStyle: this.props.bankStyle
         },
-        // rightButtonTitle: 'ion|plus',
-        // onRightButtonPress: {
-        //   id: 4,
-        //   title: 'New product',
-        //   component: NewResource,
-        //   backButtonTitle: 'Back',
-        //   titleTextColor: '#7AAAC3',
-        //   rightButtonTitle: 'Done',
-        //   passProps: {
-        //     model: utils.getModel('tradle.NewMessageModel').value,
-        //     // callback: this.modelAdded.bind(this)
-        //   }
-        // }
       });
     }
   isMyMessage() {
@@ -973,17 +924,17 @@ class MessageRow extends Component {
                     <Text style={[styles.resourceTitle, {fontSize: 20, color: '#B6C2A7', fontWeight: '600'}]}>{translate(model)}</Text>
                   </View>
     header = hasPhotos
-            ?  <View style={{flexDirection: 'row', marginHorizontal: -7, marginTop: -10, padding: 7, backgroundColor: '#EDF2CE', justifyContent: 'space-between'}}>
+            ?  <View style={[styles.rowContainer, styles.verification]}>
                  {photo}
                  {header}
                </View>
-            :  <View style={{alignSelf: 'stretch', marginHorizontal: -7, marginTop: -10, padding: 7, backgroundColor: '#EDF2CE'}}>
+            :  <View style={[{alignSelf: 'stretch'}, styles.verification]}>
                  {header}
                </View>
 
 
     var orgRow = <View/>
-    if (verification  &&  verification.organization) {
+    if (verification  && verification.organization) {
       var orgPhoto = verification.organization.photo
                    ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
                    : <View />
@@ -992,7 +943,15 @@ class MessageRow extends Component {
                         <Text style={{color: '#2E3B4E', fontSize: 16, paddingRight: 5, marginTop: 2}}>{translate('Share')}</Text>
                       </View>
       // let o = verification.organization.title.length < 25 ? verification.organization.title : verification.organization.title.substring(0, 27) + '..'
-      let verifiedBy = translate(isMyProduct ? 'issuedBy' : 'verifiedBy', verification.organization.title)
+      let verifiedBy
+      if (isMyProduct)
+        verifiedBy = translate('issuedBy', verification.organization.title)
+      // Not verified Form - still shareable
+      else if (verification[constants.ROOT_HASH])
+        verifiedBy = translate('verifiedBy', verification.organization.title)
+      else
+        verifiedBy = translate('sentTo', verification.organization.title)
+
       if (verifiedBy.length > 40)
         verifiedBy = verifiedBy(0, 40) + '..'
       var orgView =   <View style={{flexDirection: 'row', justifyContent: 'flex-end', marginTop: 15}}>
@@ -1079,232 +1038,6 @@ class MessageRow extends Component {
              </View>
            );
   }
-  // formatDocumentOld(model, verification, onPress) {
-  //   var resource = verification.document;
-  //   var self = this;
-  //   var docModel = utils.getModel(resource[constants.TYPE]).value;
-  //   var docModelTitle = docModel.title;
-  //   var idx = docModelTitle.indexOf('Verification');
-  //   var docTitle = idx === -1 ? docModelTitle : docModelTitle.substring(0, idx);
-
-  //   var msg;
-  //   if (resource.message)
-  //     msg = <View><Text style={styles.description}>{resource.message}</Text></View>
-  //   else {
-  //     var rows = [];
-  //     this.formatDocument1(model, resource, rows);
-  //     msg = <View>{rows}</View>
-  //   }
-  //   var hasPhotos = resource  &&  resource.photos
-  //   var photo = hasPhotos
-  //             ? <Image source={{uri: utils.getImageUri(resource.photos[0].url)}}  style={styles.cellImage} />
-  //             : <View />;
-
-  //   var orgRow = <View/>
-  //   if (verification.organization) {
-  //     var orgPhoto = verification.organization.photo
-  //                  ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
-  //                  : <View />
-  //     var shareView = <View style={{flexDirection: 'row', marginLeft: hasPhotos ? -50 : 0, justifyContent: 'space-between', padding: 5, borderRadius: 10, borderWidth: 1, borderColor: '#eeeeee', backgroundColor: '#F0F0EE', opacity: this.props.resource.documentCreated ? 0.3 : 1}}>
-  //                       <Icon style={styles.shareIcon} size={20} name={'android-share-alt'} />
-  //                       <Text style={{color: '#2E3B4E', fontSize: 16, paddingRight: 5, marginTop: 2}}>Share</Text>
-  //                     </View>
-  //     var orgView =   <View style={{flexDirection: 'row', justifyContent: 'flex-end', marginTop: 10}}>
-  //                        <Text style={[styles.verySmallLetters]}>verified by </Text>
-  //                        <Text style={[styles.verySmallLetters, {color: '#2E3B4E'}]}>{verification.organization.title.length < 30 ? verification.organization.title : verification.organization.title.substring(0, 27) + '..'}</Text>
-  //                     </View>
-
-  //     if (onPress) {
-  //       if (!this.props.resource.documentCreated)
-  //           <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
-  //                     AlertIOS.alert(
-  //                       'Sharing ' + docTitle + ' verified by ' + verifiedBy,
-  //                       'with ' + orgTitle,
-  //                       [
-  //                         {text: 'Share', onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
-  //                         {text: 'Cancel', onPress: () => console.log('Canceled!')},
-  //                       ]
-  //                   )}>
-  //             {shareView}
-  //           </TouchableHighlight>
-
-  //     }
-  //     else if (this.props.resource.documentCreated)
-  //         orgRow = <View style={{flexDirection: 'row', marginTop: 10, justifyContent:'space-between'}}>
-  //                    {shareView}
-  //                   <TouchableHighlight onPress={self.props.onSelect.bind(this, resource)} underlayColor='transparent'>
-  //                     {orgView}
-  //                   </TouchableHighlight>
-  //                 </View>
-  //     else
-  //       orgRow = <View style={{flexDirection: 'row', marginTop: 10, justifyContent:'space-between'}}>
-  //         <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
-  //                   AlertIOS.alert(
-  //                     'Sharing ' + docTitle + ' verified by ' + verifiedBy,
-  //                     'with ' + orgTitle,
-  //                     [
-  //                       {text: 'Share', onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
-  //                       {text: 'Cancel', onPress: () => console.log('Canceled!')},
-  //                     ]
-  //                 )}>
-  //           {shareView}
-  //         </TouchableHighlight>
-  //         <TouchableHighlight onPress={self.props.onSelect.bind(this, resource)} underlayColor='transparent'>
-  //           {orgView}
-  //         </TouchableHighlight>
-  //       </View>
-  //   }
-  //   var orgTitle = this.props.to[constants.TYPE] === constants.TYPES.ORGANIZATION
-  //                ? this.props.to.name
-  //                : (this.props.to.organization ? this.props.to.organization.title : null);
-  //   var verifiedBy = verification.organization ? verification.organization.title : ''
-  //   // var shareRow = this.props.resource.documentCreated
-  //   //           ?  orgRow
-  //   //           :  <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
-  //   //                 AlertIOS.alert(
-  //   //                   'Sharing ' + docTitle + ' verified by ' + verifiedBy,
-  //   //                   'with ' + orgTitle,
-  //   //                   [
-  //   //                     {text: 'Share', onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
-  //   //                     {text: 'Cancel', onPress: () => console.log('Canceled!')},
-  //   //                   ]
-  //   //               )}>
-  //   //              {orgRow}
-  //   //             </TouchableHighlight>
-
-  //   return (
-  //            <View style={{flex: 1, flexDirection: 'row', paddingVertical: 5}} key={self.getNextKey()}>
-  //              <View>
-  //                {photo}
-  //              </View>
-  //              <View style={{flex:1}}>
-  //                <TouchableHighlight onPress={self.props.onSelect.bind(this, resource)} underlayColor='transparent'>
-  //                  {msg}
-  //                </TouchableHighlight>
-  //                {orgRow}
-  //              </View>
-  //            </View>
-  //          );
-  // }
-  // formatDocumentAccordion(model, verification, onPress) {
-  //   var resource = verification.document;
-  //   var self = this;
-  //   var docModel = utils.getModel(resource[constants.TYPE]).value;
-  //   var docModelTitle = docModel.title;
-  //   var idx = docModelTitle.indexOf('Verification');
-  //   var docTitle = idx === -1 ? docModelTitle : docModelTitle.substring(0, idx);
-
-  //   var msg;
-  //   if (resource.message)
-  //     msg = <View><Text style={styles.description}>{resource.message}</Text></View>
-  //   else {
-  //     var rows = [];
-  //     this.formatDocument1(model, resource, rows);
-  //     var vRows = <View>{rows}</View>
-  //     var header = <View style={{paddingTop: 5}}>
-  //                   <Text style={[styles.resourceTitle, {fontSize: 18, color: '#CCCCB2'}]}>{model.title}</Text>
-  //                 </View>
-
-  //     msg = <View>
-  //            <Accordion
-  //              header={header}
-  //              style={{alignSelf: 'stretch', paddingBottom: 10}}
-  //              content={vRows}
-  //              underlayColor='transparent'
-  //              easing='easeOutQuad' />
-  //           </View>
-  //   }
-  //   var hasPhotos = resource  &&  resource.photos
-  //   var photo = hasPhotos
-  //             ? <Image source={{uri: utils.getImageUri(resource.photos[0].url)}}  style={styles.cellImage} />
-  //             : <View />;
-
-  //   var orgRow = <View/>
-  //   if (verification.organization) {
-  //     var orgPhoto = verification.organization.photo
-  //                  ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
-  //                  : <View />
-  //     var shareView = <View style={{flexDirection: 'row', marginLeft: hasPhotos ? -50 : 0, justifyContent: 'space-between', padding: 5, borderRadius: 10, borderWidth: 1, borderColor: '#eeeeee', backgroundColor: '#F0F0EE', opacity: this.props.resource.documentCreated ? 0.3 : 1}}>
-  //                       <Icon style={styles.shareIcon} size={20} name={'android-share-alt'} />
-  //                       <Text style={{color: '#2E3B4E', fontSize: 16, paddingRight: 5, marginTop: 2}}>Share</Text>
-  //                     </View>
-  //     var orgView =   <View style={{flexDirection: 'row', justifyContent: 'flex-end', marginTop: 10}}>
-  //                        <Text style={[styles.verySmallLetters]}>verified by </Text>
-  //                        <Text style={[styles.verySmallLetters, {color: '#2E3B4E'}]}>{verification.organization.title.length < 30 ? verification.organization.title : verification.organization.title.substring(0, 27) + '..'}</Text>
-  //                     </View>
-
-  //     if (onPress) {
-  //       if (!this.props.resource.documentCreated)
-  //           <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
-  //                     AlertIOS.alert(
-  //                       'Sharing ' + docTitle + ' verified by ' + verifiedBy,
-  //                       'with ' + orgTitle,
-  //                       [
-  //                         {text: 'Share', onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
-  //                         {text: 'Cancel', onPress: () => console.log('Canceled!')},
-  //                       ]
-  //                   )}>
-  //             {shareView}
-  //           </TouchableHighlight>
-
-  //     }
-  //     else if (this.props.resource.documentCreated)
-  //         orgRow = <View style={{flexDirection: 'row', marginTop: 10, justifyContent:'space-between'}}>
-  //                    {shareView}
-  //                   <TouchableHighlight onPress={self.props.onSelect.bind(this, resource)} underlayColor='transparent'>
-  //                     {orgView}
-  //                   </TouchableHighlight>
-  //                 </View>
-  //     else
-  //       orgRow = <View style={{flexDirection: 'row', marginTop: 10, justifyContent:'space-between'}}>
-  //         <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
-  //                   AlertIOS.alert(
-  //                     'Sharing ' + docTitle + ' verified by ' + verifiedBy,
-  //                     'with ' + orgTitle,
-  //                     [
-  //                       {text: 'Share', onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
-  //                       {text: 'Cancel', onPress: () => console.log('Canceled!')},
-  //                     ]
-  //                 )}>
-  //           {shareView}
-  //         </TouchableHighlight>
-  //         <TouchableHighlight onPress={self.props.onSelect.bind(this, resource)} underlayColor='transparent'>
-  //           {orgView}
-  //         </TouchableHighlight>
-  //       </View>
-  //   }
-  //   var orgTitle = this.props.to[constants.TYPE] === constants.TYPES.ORGANIZATION
-  //                ? this.props.to.name
-  //                : (this.props.to.organization ? this.props.to.organization.title : null);
-  //   var verifiedBy = verification.organization ? verification.organization.title : ''
-  //   // var shareRow = this.props.resource.documentCreated
-  //   //           ?  orgRow
-  //   //           :  <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
-  //   //                 AlertIOS.alert(
-  //   //                   'Sharing ' + docTitle + ' verified by ' + verifiedBy,
-  //   //                   'with ' + orgTitle,
-  //   //                   [
-  //   //                     {text: 'Share', onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
-  //   //                     {text: 'Cancel', onPress: () => console.log('Canceled!')},
-  //   //                   ]
-  //   //               )}>
-  //   //              {orgRow}
-  //   //             </TouchableHighlight>
-
-  //   return (
-  //            <View style={{flex: 1, flexDirection: 'row', paddingVertical: 5}} key={self.getNextKey()}>
-  //              <View>
-  //                {photo}
-  //              </View>
-  //              <View style={{flex:1}}>
-  //                <TouchableHighlight onPress={self.props.onSelect.bind(this, resource)} underlayColor='transparent'>
-  //                  {msg}
-  //                </TouchableHighlight>
-  //                {orgRow}
-  //              </View>
-  //            </View>
-  //          );
-  // }
   formatDocument1(model, resource, renderedRow) {
     var viewCols = model.gridCols || model.viewCols;
     if (!viewCols)
@@ -1580,6 +1313,16 @@ var styles = StyleSheet.create({
     bottom: 1,
     right: 10,
   },
+  rowContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+  },
+  verification: {
+    marginHorizontal: -7,
+    marginTop: -10,
+    padding: 7,
+    backgroundColor: '#EDF2CE'
+  }
 });
 reactMixin(MessageRow.prototype, RowMixin);
 
