@@ -51,6 +51,8 @@ var {
   TouchableHighlight,
   Animated
 } = React;
+DeviceHeight = Dimensions.get('window').height;
+DeviceWidth = Dimensions.get('window').width
 
 class NewResource extends Component {
   props: {
@@ -105,10 +107,6 @@ class NewResource extends Component {
       scrollEventThrottle: 50,
       onScroll: this.onScroll.bind(this)
     };
-
-    let d = Dimensions.get('window')
-    DeviceHeight = d.height;
-    DeviceWidth = d.width
   }
   updateKeyboardSpace(frames) {
     var height = frames.endCoordinates ? frames.endCoordinates.height : 0
