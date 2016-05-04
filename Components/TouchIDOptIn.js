@@ -11,7 +11,6 @@ let {
   Dimensions
 } = React
 
-// import Device from 'react-native-device'
 import ArticleView from './ArticleView'
 const BG_IMAGE = require('../img/bg.png')
 const TOUCH_ID_IMG = require('../img/touchid2.png')
