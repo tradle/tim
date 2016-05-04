@@ -10,6 +10,7 @@ var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var constants = require('@tradle/constants');
 var MessageList = require('./MessageList')
+const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 var {
   ListView,
   Text,
@@ -92,11 +93,11 @@ class ProductChooser extends Component {
       },
     }
     var msg = {
-      message: '[application for](' + resource.id + ')',
-      _t: constants.TYPES.SIMPLE_MESSAGE,
-      from: utils.getMe(),
-      to: this.props.resource,
-      time: new Date().getTime()
+      product: resource.id, // '[application for](' + resource.id + ')',
+      _t:      PRODUCT_APPLICATION, // constants.TYPES.SIMPLE_MESSAGE,
+      from:    utils.getMe(),
+      to:      this.props.resource,
+      time:    new Date().getTime()
     }
 
     utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg, true, true))
