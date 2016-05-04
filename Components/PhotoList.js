@@ -7,7 +7,6 @@ var constants = require('@tradle/constants');
 var reactMixin = require('react-mixin');
 var PhotoCarouselMixin = require('./PhotoCarouselMixin');
 var RowMixin = require('./RowMixin')
-var Device = require('react-native-device')
 var equal = require('deep-equal')
 var cnt = 1000
 var {
@@ -16,14 +15,15 @@ var {
   View,
   ListView,
   Text,
-  // Animated,
+  Dimensions,
   TextInput,
   TouchableHighlight,
   Component
 } = React;
-var d3 = (Device.width / 3) - 5
-var d4 = (Device.width / 4) - 5
-var d5 = (Device.width / 5) - 5
+var width = Dimensions.get('window').width
+var d3 = (width / 3) - 5
+var d4 = (width / 4) - 5
+var d5 = (width / 5) - 5
 
 // var Animated = require('Animated');
 class PhotoList extends Component {
