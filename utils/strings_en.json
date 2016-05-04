@@ -74,4 +74,5 @@
     "willBeAvailable": "This functionality will be available soon",
     "switchTouchIdOff": "Switch touch ID off",
     "switchTouchIdOn": "Switch touch ID on",
+    "noConnection": "Tradle requires a working internet connection which you don't have at the moment"
 }
