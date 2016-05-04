@@ -201,8 +201,23 @@ class NewResource extends Component {
         this.setState({isLoadingVideo: true})
         return;
     }
-    if (!resource  ||  (params.action !== 'addItem'  &&  params.action !== 'addMessage'))
+    if (!resource  &&  params.error &&  params.action === 'addItem') {
+      this.state.submitted = false
+      AlertIOS.alert(
+        params.error,
+        // this.props.navigator.pop()
+      )
+      var actionParams = {
+        query: this.state.filter,
+        modelName: this.props.modelName,
+        to: this.props.resource,
+      }
+      return
+    }
+    if (!resource  ||  (params.action !== 'addItem'  &&  params.action !== 'addMessage')) {
+      this.state.submitted = false
       return;
+    }
     if (this.state.resource[constants.TYPE] !== resource[constants.TYPE])
       return
     if (params.error) {
@@ -212,6 +227,7 @@ class NewResource extends Component {
       return;
     }
     if (this.props.callback) {
+      this.state.submitted = false
       this.props.callback(resource);
       return;
     }
@@ -612,7 +628,7 @@ class NewResource extends Component {
 
         for (var i=0; i<n; i++) {
           if (isPhoto)
-            items.push(<Image style={styles.thumb} source={{uri: arr[i].url}} onPress={() => this.openModal(arr[i])}/>)
+            items.push(<Image style={styles.thumb} source={{uri: arr[i].url}}  key={this.getNextKey()} onPress={() => this.openModal(arr[i])}/>)
         }
         if (isPhoto) {
           itemsArray =
