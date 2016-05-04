@@ -5,7 +5,8 @@ var parseURL = require('url').parse
 var React = require('react-native')
 var {
   AsyncStorage,
-  AlertIOS
+  AlertIOS,
+  NetInfo
 } = React
 
 var path = require('path')
@@ -16,6 +17,9 @@ var extend = require('extend');
 var Debug = require('debug')
 // var deepEqual = require('deep-equal')
 var debug = Debug('Store')
+
+// var isConnected
+
 var timerDebug = Debug('TIMER')
 var Q = require('q');
 Q.longStackSupport = true
@@ -36,6 +40,7 @@ var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
+var translate = utils.translate
 var promisify = require('q-level');
 var asyncstorageDown = require('asyncstorage-down')
 var levelup = require('levelup')
@@ -52,33 +57,36 @@ var level = function (loc, opts) {
 }
 
 var constants = require('@tradle/constants');
-var NONCE = constants.NONCE
-var TYPE = constants.TYPE
-var ROOT_HASH = constants.ROOT_HASH
-var CUR_HASH  = constants.CUR_HASH
-var PREV_HASH  = constants.PREV_HASH
+const NONCE = constants.NONCE
+const TYPE = constants.TYPE
+const ROOT_HASH = constants.ROOT_HASH
+const CUR_HASH  = constants.CUR_HASH
+const PREV_HASH  = constants.PREV_HASH
 
-var ORGANIZATION = constants.TYPES.ORGANIZATION
-var PROFILE = constants.TYPES.PROFILE
-var IDENTITY = constants.TYPES.IDENTITY
-var MESSAGE = constants.TYPES.MESSAGE
-var SIMPLE_MESSAGE = constants.TYPES.SIMPLE_MESSAGE
-var FINANCIAL_PRODUCT = constants.TYPES.FINANCIAL_PRODUCT
-var PRODUCT_LIST = constants.TYPES.PRODUCT_LIST
-var PROFILE = constants.TYPES.PROFILE;
-var PUBLISHED_IDENTITY = constants.TYPES.PROFILE;
-var ADDITIONAL_INFO = constants.TYPES.ADDITIONAL_INFO;
-var VERIFICATION = constants.TYPES.VERIFICATION;
-var FORM = constants.TYPES.FORM;
-var MODEL = constants.TYPES.MODEL;
-var CUSTOMER_WAITING = constants.TYPES.CUSTOMER_WAITING
-var FORGOT_YOU = constants.TYPES.FORGOT_YOU
+const ORGANIZATION = constants.TYPES.ORGANIZATION
+const IDENTITY = constants.TYPES.IDENTITY
+const MESSAGE = constants.TYPES.MESSAGE
+const SIMPLE_MESSAGE = constants.TYPES.SIMPLE_MESSAGE
+const FINANCIAL_PRODUCT = constants.TYPES.FINANCIAL_PRODUCT
+const PRODUCT_LIST = constants.TYPES.PRODUCT_LIST
+const PROFILE = constants.TYPES.PROFILE;
+const PUBLISHED_IDENTITY = constants.TYPES.PROFILE;
+const ADDITIONAL_INFO = constants.TYPES.ADDITIONAL_INFO;
+const VERIFICATION = constants.TYPES.VERIFICATION;
+const FORM = constants.TYPES.FORM;
+const MODEL = constants.TYPES.MODEL;
+const CUSTOMER_WAITING = constants.TYPES.CUSTOMER_WAITING
+const FORGOT_YOU = constants.TYPES.FORGOT_YOU
 
-var MY_IDENTITIES_TYPE = 'tradle.MyIdentities'
-var MY_IDENTITIES = MY_IDENTITIES_TYPE + '_1'
-var SETTINGS = constants.TYPES.SETTINGS
+const MY_IDENTITIES_TYPE  = 'tradle.MyIdentities'
+const PRODUCT_APPLICATION = 'tradle.ProductApplication'
+const MY_PRODUCT          = 'tradle.MyProduct'
+const ENUM                = 'tradle.Enum'
+const GUEST_SESSION_PROOF = 'tradle.GuestSessionProof'
+const MY_IDENTITIES = MY_IDENTITIES_TYPE + '_1'
+const SETTINGS = constants.TYPES.SETTINGS
 
-var WELCOME_INTERVAL = 600000
+const WELCOME_INTERVAL = 600000
 
 var Tim = require('tim')
 Tim.enableOptimizations()
@@ -127,7 +135,6 @@ var PORT = 51086
 
 // var levelQuery = require('level-queryengine');
 // var jsonqueryEngine = require('jsonquery-engine');
-// var Device = require('react-native-device');
 // var Sublevel = require('level-sublevel')
 var TIM_PATH_PREFIX = 'me'
 
@@ -176,25 +183,18 @@ var Store = Reflux.createStore({
     // ldb.query.use(jsonqueryEngine());
     db = promisify(ldb);
 
-    // this.loadModels()
+    NetInfo.isConnected.addEventListener(
+      'change',
+      this._handleConnectivityChange.bind(this)
+    );
+    NetInfo.isConnected.fetch().done(
+      (isConnected) => {
+        this.isConnected = isConnected
+      }
+    );
+
+    this.loadModels()
     var self = this
-
-    // ;[
-    //   'addressBook.db',
-    //   'msg-log.db',
-    //   'messages.db',
-    //   'txs.db'
-    // ].forEach(function (dbName) {
-    //   level(TIM_PATH_PREFIX + '-' + dbName, {
-    //     valueEncoding: 'json'
-    //   }).createValueStream()
-    //     .on('data', console.log.bind(console))
-    //     .on('end', console.log.bind(console, 'done'))
-    // })
-
-    // return this.ready = Q.Promise(function (resolve) {
-    //   //
-    // })
 
     voc.forEach(function(m) {
       models[m.id] = {
@@ -212,12 +212,11 @@ var Store = Reflux.createStore({
           return Q.Promise(function (resolve) {})
         })
     }
-    // console.time('loadMyResources')
 
     return this.ready = Q.all([
         this.getMe(),
         this.getSettings(),
-        this.loadModels()
+        // this.loadModels()
       ])
       .then(() => {
         // this.loadMyResources()
@@ -229,17 +228,15 @@ var Store = Reflux.createStore({
             .then(() => this.monitorTim())
         }
       })
-
-    // try {
-    //   await self.getMe()
-    //   await self.getSettings()
-    //   self.loadMyResources()
-    // } catch (err) {
-    //   throw err
-    // }
-
-      // console.timeEnd('loadMyResources')
   },
+
+  _handleConnectivityChange(isConnected) {
+    this.isConnected = isConnected
+    // this.setState({
+    //   isConnected,
+    // });
+  },
+
   getMe() {
     var self = this
 
@@ -840,7 +837,20 @@ var Store = Reflux.createStore({
   },
 
   onAddMessage(r, isWelcome, requestForForm) {
-    var props = this.getModel(r[TYPE]).value.properties;
+// NetInfo.isConnected.fetch().then(isConnected => {
+//   console.log('First, is ' + (isConnected ? 'online' : 'offline'));
+// });
+    if (!this.isConnected) {
+      var params = {
+        action: 'addMessage',
+        error: translate('noConnection'),
+        noConnection: true
+      }
+      this.trigger(params);
+      return
+    }
+    let m = this.getModel(r[TYPE]).value
+    var props = m.properties;
     var rr = {};
     if (!r.time)
       r.time = new Date().getTime();
@@ -862,21 +872,26 @@ var Store = Reflux.createStore({
     for (var p in r) {
       if (!props[p])
         continue
-      if (props[p].ref  &&  !props[p].id) {
-        var type = r[p][TYPE];
-        // var id = type ? type + '_' + r[p][ROOT_HASH]/* + '_' + r[p][CUR_HASH]*/ : r[p].id;
-        // var title = type ? utils.getDisplayName(r[p], this.getModel(type).value.properties) : r[p].title
+      if (props[p].ref  &&  !props[p].id)
         rr[p] = this.buildRef(r[p])
-        // rr[p] = {
-        //   id: id,
-        //   title: title,
-        //   time: r.time
-        // }
-      }
       else
         rr[p] = r[p];
     }
 
+    if (r[TYPE] === PRODUCT_APPLICATION) {
+      let result = this.searchMessages({modelName: PRODUCT_APPLICATION, to: toOrg})
+      if (result) {
+        result.filter(() => {
+          if (result.message === r.message  &&  !r.documentCreated)
+            return true
+        })
+        if (result.length) {
+          result.forEach((r) => {
+            list[utils.getId(r)].value.documentCreated = true
+          })
+        }
+      }
+    }
     rr[NONCE] = this.getNonce()
     var toChain = {
       _t: rr[TYPE],
@@ -889,6 +904,15 @@ var Store = Reflux.createStore({
       toChain.photos = rr.photos
     if (r.list)
       rr.list = r.list
+    let required = m.required
+    if (required) {
+      required.forEach((p) => {
+        toChain[p] = rr[p]
+      })
+      // HACK
+      delete toChain.from
+      delete toChain.to
+    }
     var batch = []
     var self = this
     var error
@@ -941,6 +965,7 @@ var Store = Reflux.createStore({
       //   });
       //   result = result.reverse();
       //   isWelcome = (!result[0].welcome  &&  !result[0].list)  &&  new Date().getTime() - result[0].time > 600 * 1000
+
       if (orgRep.lastMessageTime) {
         // isWelcome = new Date() - orgRep.lastMessageTime > WELCOME_INTERVAL
         // var msg = welcome.msg.replace('{firstName}', me.firstName)
@@ -964,7 +989,7 @@ var Store = Reflux.createStore({
       .then(function(status) {
         if (!status.queued  &&  !status.current) {
           self.publishMyIdentity(orgRep)
-          publishRequestSent = true
+          // publishRequestSent = true
         }
         else
           self.updateMe()
@@ -1028,8 +1053,10 @@ var Store = Reflux.createStore({
     })
     .then(function() {
       var key = IDENTITY + '_' + r.to[ROOT_HASH]
-      if (list[key].value.pubkeys  &&
-         (!publishRequestSent  ||  r[TYPE] !== CUSTOMER_WAITING)) {
+      if (list[key].value.pubkeys) {
+        // if (publishRequestSent)
+        //    return
+        // if (r[TYPE] !== CUSTOMER_WAITING) {
         return utils.sendSigned(meDriver, {
           msg: toChain,
           to: [{fingerprint: self.getFingerprint(list[key].value)}],
@@ -1039,6 +1066,7 @@ var Store = Reflux.createStore({
           debugger
         })
       }
+    // }
     })
     .then(function(data) {
       if (!requestForForm  &&  isWelcome)
@@ -1359,6 +1387,16 @@ var Store = Reflux.createStore({
     this.trigger({action: 'getTemporary', resource: r})
   },
   onAddItem(params) {
+    if (!this.isConnected) {
+      var params = {
+        action: 'addItem',
+        error: translate('noConnection'),
+        noConnection: true
+      }
+      this.trigger(params);
+      return
+    }
+
     var value = params.value;
     var resource = params.resource;
     delete temporaryResources[resource[TYPE]]
@@ -1377,7 +1415,7 @@ var Store = Reflux.createStore({
 
     var self = this;
     var checkPublish
-    if (meta.id === 'tradle.GuestSessionProof') {
+    if (meta.id === GUEST_SESSION_PROOF) {
       checkPublish = this.getDriver(me)
       .then(function () {
         // if (publishRequestSent)
@@ -1400,7 +1438,7 @@ var Store = Reflux.createStore({
           var ref = props[p].ref;
           if (ref  &&  resource[p])  {
             let refModel = this.getModel(ref).value
-            if (refModel.inlined  ||  refModel.subClassOf === 'tradle.Enum')
+            if (refModel.inlined  ||  refModel.subClassOf === ENUM)
               continue;
 
             var rValue = utils.getId(resource[p])
@@ -1553,8 +1591,11 @@ var Store = Reflux.createStore({
         var m = self.getModel(returnVal[TYPE]).value
         if (m.subClassOf === FORM)
           params.sendStatus = 'Sending'
-        self.trigger(params);
-
+        try {
+          self.trigger(params);
+        } catch (err) {
+          debugger
+        }
         return self.waitForTransitionToEnd()
         .then(function () {
           var to = list[utils.getId(returnVal.to)].value;
@@ -1612,6 +1653,7 @@ var Store = Reflux.createStore({
     var result = this.searchMessages({to: me, modelName: CUSTOMER_WAITING, isForgetting: true});
     if (result.length)
       delete result[result.length - 1]
+
     return this.cleanup(result)
     .then(() => {
       result = this.searchMessages({to: me, modelName: PRODUCT_LIST, isForgetting: true});
@@ -2546,11 +2588,12 @@ var Store = Reflux.createStore({
 
           continue;
         }
-
-        var isVerificationR = r[TYPE] === VERIFICATION  ||  this.getModel(r[TYPE]).value.subClassOf === VERIFICATION
-        var isForm = this.getModel(r[TYPE]).value.subClassOf === FORM
-        var isMyProduct = this.getModel(r[TYPE]).value.subClassOf === 'tradle.MyProduct'
-        if ((!r.message  ||  r.message.trim().length === 0) && !r.photos &&  !isVerificationR  &&  !isForm  &&  !isMyProduct)
+        var m = this.getModel(r[TYPE]).value
+        var isVerificationR = r[TYPE] === VERIFICATION  ||  m.subClassOf === VERIFICATION
+        var isForm = m.subClassOf === FORM
+        var isMyProduct = m.subClassOf === MY_PRODUCT
+        let isProductApplication = m.id === PRODUCT_APPLICATION
+        if ((!r.message  ||  r.message.trim().length === 0) && !r.photos &&  !isVerificationR  &&  !isForm  &&  !isMyProduct && !isProductApplication)
           // check if this is verification resource
           continue;
         var fromID = utils.getId(r.from);
@@ -2682,15 +2725,34 @@ var Store = Reflux.createStore({
 
     if (params.isForgetting)
       return result
-
+    let paRequests = {}
+    let formRequests = {}
     result = result.filter((r, i) => {
       if (r[TYPE] === PRODUCT_LIST) {
         var next = result[i + 1]
         if (next && next[TYPE] === PRODUCT_LIST)
           return false
       }
+      // Gather info about duplicate requests for the same product
+      // if (r[TYPE] === PRODUCT_APPLICATION)  {
+      //   if (!paRequests[r.product])
+      //     paRequests[r.product] = []
+      //   paRequests[r.product].push(i)
+      // }
+      // if (r[TYPE] === SIMPLE_MESSAGE  &&  r.message) {
+      //   let parts = utils.splitMessage(r.message)
+      //   if (parts.length === 2) {
+      //     let formM = utils.getModel(parts[1])
+      //     if (formM) {
+      //       if (!formRequests[parts[1]])
+      //         formRequests[parts[1]] = []
+      //       formRequests[parts[1]].push(i)
+      //     }
+      //   }
+      // }
+
       let m = utils.getModel(r[TYPE]).value
-      let isMyProduct = m.subClassOf === 'tradle.MyProduct'
+      let isMyProduct = m.subClassOf === MY_PRODUCT
       let isForm = !isMyProduct && m.subClassOf === FORM
       // r.from.photos = list[utils.getId(r.from)].value.photos;
       // var to = list[utils.getId(r.to)]
@@ -2720,24 +2782,7 @@ var Store = Reflux.createStore({
 
       return true
     })
-    // result.sort(function(a, b) {
-    //   return a.time - b.time;
-    // });
 
-    // not for subreddit
-    // result.forEach((r) =>  {
-    //   let m = utils.getModel(r[TYPE]).value
-    //   let isMyProduct = m.subClassOf === 'tradle.MyProduct'
-    //   let isForm = !isMyProduct && m.subClassOf === FORM
-    //   r.from.photos = list[utils.getId(r.from)].value.photos;
-    //   var to = list[utils.getId(r.to)]
-    //   if (!to) console.log(r.to)
-    //   r.to.photos = to  &&  to.value.photos;
-    //   if (isMyProduct)
-    //     r.from.organization = list[utils.getId(r.from)].value.organization
-    //   else if (isForm)
-    //     r.to.organization = list[utils.getId(r.to)].value.organization
-    // })
     return result;
   },
   fillMessage(r) {
@@ -2760,30 +2805,42 @@ var Store = Reflux.createStore({
     }
     return resource;
   },
+
+  // Gathers resources that were created on this official account to figure out if the
+  // customer has some other official accounts where he already submitted this information
   getShareableResources(foundResources, to) {
     if (!foundResources)
       return
     var verTypes = [];
     var meId = me[TYPE] + '_' + me[ROOT_HASH];
+    var simpleLinkMessages = {}
     for (var i=0; i<foundResources.length; i++) {
       var r = foundResources[i];
       if (me  &&  utils.getId(r.to) !== meId  &&  utils.getId(r.from) !== meId)
         continue;
-      // DocumentCreated is set when the document of this type was created and we don't want to create it again
-      // from this same notification
+      // documentCreated identifier is set when the document of this type was created
+      // and we don't want to create it again from this same notification
       if (r[TYPE] !== SIMPLE_MESSAGE  ||  r.documentCreated)
         continue;
       var msgParts = utils.splitMessage(r.message);
       // Case when the needed form was sent along with the message
       if (msgParts.length !== 2)
         continue;
+      // Case when customer already has resource to SHARE on the screen but accidentally
+      // or otherwise clicked on PRODUCT list link. To avoid the multiple shares
+      // of the same resource with the same financial institution
+      let rr = simpleLinkMessages[msgParts[1]]
+      if (rr) {
+        rr.documentCreated = true
+        list[utils.getId(rr)].value.documentCreated = true
+        continue
+      }
+      simpleLinkMessages[msgParts[1]] = r
       var msgModel = this.getModel(msgParts[1]);
-      if (msgModel  &&  msgModel.value.subClassOf !== 'tradle.MyProduct')
+      if (msgModel  &&  msgModel.value.subClassOf !== MY_PRODUCT)
         verTypes.push(msgModel.value.id);
     }
     var shareableResources = {};
-    if (!verTypes.length)
-      return;
 
     var isOrg = to  &&  to[TYPE] === ORGANIZATION
     var org = isOrg ? to : (to.organization ? list[utils.getId(to.organization)].value : null)
@@ -2793,7 +2850,7 @@ var Store = Reflux.createStore({
     else
       reps = [utils.getId(to)]
 
-    var productsToShare = this.searchMessages({modelName: 'tradle.MyProduct', to: utils.getMe(), strict: true})
+    var productsToShare = this.searchMessages({modelName: MY_PRODUCT, to: utils.getMe(), strict: true})
     if (productsToShare  &&  productsToShare.length) {
       productsToShare.forEach((r) => {
         let fromId = utils.getId(r.from)
@@ -2820,6 +2877,8 @@ var Store = Reflux.createStore({
         shareableResources[docType].push(rr);
       })
     }
+    if (!verTypes.length)
+      return shareableResources
 
     var l = this.searchMessages({modelName: VERIFICATION})
     l.forEach(function(val) {
@@ -2838,7 +2897,20 @@ var Store = Reflux.createStore({
         for (var i=0; i<document.verifications.length; i++) {
           var v = document.verifications[i];
           if (v.organization  &&  utils.getId(org) === utils.getId(v.organization)) {
-            thisCompanyVerification = true;
+            let sharedWith = doc.sharedWith
+            if (!sharedWith)
+              thisCompanyVerification = true;
+            else {
+              let sw = sharedWith.filter((r) => {
+                if (reps.filter((rep) => {
+                        if (utils.getId(rep) === r.bankRepresentative)
+                          return true
+                      }).length)
+                  return true
+              })
+              if (sw.length)
+                thisCompanyVerification = true
+            }
             break;
           }
         }
@@ -3694,9 +3766,6 @@ var Store = Reflux.createStore({
           // }
           return
         }
-          // else
-          //   isServiceMessage = val.list  &&  type === 'tradle.ServiceMessage'  ||  (model.subClassOf  &&  model.subClassOf === 'tradle.ServiceMessage')
-
         if (!isProductList) {
           var dn = val.message || utils.getDisplayName(val, model.properties);
           to.lastMessage = (obj.from[ROOT_HASH] === me[ROOT_HASH]) ? 'You: ' + dn : dn;
@@ -3718,7 +3787,7 @@ var Store = Reflux.createStore({
     var self = this
     // return db.batch(batch)
     // .then(function() {
-    if (model.subClassOf === 'tradle.MyProduct')
+    if (model.subClassOf === MY_PRODUCT)
       val.sharedWith = [self.createSharedWith(utils.getId(val.from.id), new Date().getTime())]
 
     list[key] = {
@@ -3853,10 +3922,6 @@ var Store = Reflux.createStore({
                 orgContacts[utils.getId(data.value.organization)] = []
               var c = orgContacts[utils.getId(data.value.organization)]
               c.push(self.buildRef(data.value))
-              // c.push({
-              //   id: utils.getId(data.value),
-              //   title: utils.getDisplayName(data.value, self.getModel(PROFILE).value.properties)
-              // })
             }
           }
           list[data.key] = data;
@@ -3959,14 +4024,6 @@ var Store = Reflux.createStore({
       message: 'You\'ve been successfully forgotten',
       from: this.buildRef(resource),
       to: this.buildRef(me)
-      // from: {
-      //   id: orgId,
-      //   title: utils.getDisplayName(resource)
-      // },
-      // to: {
-      //   id: me[TYPE] + '_' + me[ROOT_HASH],
-      //   title: me.firstName
-      // }
     }
     msg.id = sha(msg)
     this.trigger({action: 'messageList', list: [msg], resource: resource})
@@ -4102,15 +4159,6 @@ var Store = Reflux.createStore({
       }
       msgFrom.from = this.buildRef(resource)
       msgFrom.to = this.buildRef(me)
-
-      // msg.from = {
-      //   id: resource[TYPE] + '_' + resource[ROOT_HASH],
-      //   title: utils.getDisplayName(resource)
-      // }
-      // msg.to = {
-      //   id: me[TYPE] + '_' + me[ROOT_HASH],
-      //   title: me.firstName
-      // }
       msg.id = sha(msg)
       result.push(msg)
       self.trigger({action: 'messageList', list: result, resource: resource})
@@ -4124,14 +4172,6 @@ var Store = Reflux.createStore({
     }
     msgFrom.from = this.buildRef(resource)
     msgFrom.to = this.buildRef(me)
-    // msg.from = {
-    //   id: resource[TYPE] + '_' + resource[ROOT_HASH],
-    //   title: utils.getDisplayName(resource)
-    // }
-    // msg.to = {
-    //   id: me[TYPE] + '_' + me[ROOT_HASH],
-    //   title: me.firstName
-    // }
     msg.id = sha(msg)
     result.push(msg)
     self.trigger({action: 'messageList', list: result, resource: resource})
