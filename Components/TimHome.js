@@ -44,6 +44,7 @@ var {
   TouchableWithoutFeedback,
   ActivityIndicatorIOS,
   Image,
+  NetInfo,
   Component,
   ScrollView,
   Dimensions,
@@ -63,7 +64,7 @@ class TimHome extends Component {
 	  super(props);
 	  this.state = {
 	    isLoading: true,
-      isModalOpen: false,
+      isModalOpen: false
 	  };
 	}
   componentWillMount() {
@@ -83,6 +84,7 @@ class TimHome extends Component {
       this._handleOpenURL({url});
     this.listenTo(Store, 'handleEvent');
   }
+
   shouldComponentUpdate(nextProps, nextState) {
     if (this.state.isLoading  !== nextState.isLoading  ||
         this.state.message !== nextState.message)
@@ -359,22 +361,6 @@ class TimHome extends Component {
     })
   }
 
-  // showCommunities() {
-  //   var passProps = {
-  //       filter: '',
-  //       modelName: 'tradle.Community',
-  //     };
-  //   var me = utils.getMe();
-  //   this.props.navigator.push({
-  //     // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-  //     id: 10,
-  //     title: 'Communities',
-  //     titleTextColor: '#7AAAC3',
-  //     backButtonTitle: 'Back',
-  //     component: ResourceList,
-  //     passProps: passProps,
-  //   });
-  // }
   register(cb) {
     let modelName = this.props.modelName;
     if (!utils.getModel(modelName)) {
@@ -494,79 +480,8 @@ class TimHome extends Component {
     var err = this.state.err || '';
     var errStyle = err ? styles.err : {'padding': 0, 'height': 0};
     var myId = utils.getMe();
-    // var editProfile, communities;
-
-    // if (utils.getMe()) {
-    //   editProfile = <TouchableHighlight
-    //                     underlayColor='#2E3B4E' onPress={this.register.bind(this)}>
-    //                   <Text style={styles.text}>
-    //                     {'Edit Profile'}
-    //                   </Text>
-    //                 </TouchableHighlight>
-    //   // communities = <TouchableWithoutFeedback style={styles.communities} onPress={this.showCommunities.bind(this)}>
-    //   //                 <Text style={styles.communitiesText}>Communities</Text>
-    //   //               </TouchableWithoutFeedback>
-    // }
-    // else {
-    //   editProfile = <View />;
-    //   // communities = <View style={{marginTop: 20}}/>;
-    // }
-    // else  {
-    //   var r = {_t: this.props.modelName};
-    //   editProfile = <AddNewIdentity resource={r} isRegistration={true} navigator={this.props.navigator} />;
-    // }
-        // <Text style={styles.title}>Trust in Motion (TiM)</Text>
     var me = utils.getMe()
-    // var dev = __DEV__
-    //         ? <View style={styles.dev}>
-    //           <TouchableHighlight
-    //               underlayColor='transparent' onPress={this.onReloadDBPressed.bind(this)}>
-    //             <Text style={styles.text}>
-    //               Reload DB
-    //             </Text>
-    //           </TouchableHighlight>
-    //           <TouchableHighlight
-    //               underlayColor='transparent' onPress={this.onReloadModels.bind(this)}>
-    //             <Text style={styles.text}>
-    //               Reload Models
-    //             </Text>
-    //           </TouchableHighlight>
-    //           <TouchableHighlight
-    //               underlayColor='transparent' onPress={this.onBackupPressed.bind(this)}>
-    //             <Text style={styles.text}>
-    //               Backup
-    //             </Text>
-    //           </TouchableHighlight>
-    //           <TouchableHighlight
-    //               underlayColor='transparent' onPress={this.onLoadFromBackupPressed.bind(this)}>
-    //             <Text style={styles.text}>
-    //               Load
-    //             </Text>
-    //           </TouchableHighlight>
-    //           <TouchableHighlight
-    //               underlayColor='transparent' onPress={this.onSettingsPressed.bind(this)}>
-    //             <Text style={styles.text}>
-    //               Settings
-    //             </Text>
-    //           </TouchableHighlight>
-    //         </View>
-    //       : <View style={styles.dev}>
-    //           <TouchableHighlight
-    //               underlayColor='transparent' onPress={this.onSettingsPressed.bind(this)}>
-    //             <Text style={styles.text}>
-    //               Settings
-    //             </Text>
-    //           </TouchableHighlight>
-    //         </View>
-
     var settings = <View/>
-    // var settings = !utils.getMe() &&
-    //               <TouchableHighlight
-    //                   underlayColor='transparent' onPress={this.onSettingsPressed.bind(this)}>
-    //                  <Text style={styles.text}>
-    //                    Settings
-    //                  </Text>
-    //               </TouchableHighlight>
 
     var version = !__DEV__ &&
               <View>
@@ -688,17 +603,6 @@ class TimHome extends Component {
     // }
   // }
 }
-          // {spinner}
-          // <View style={{height: 400}}></View>
-          // <View style={styles.dev}>
-          //   {editProfile}
-          //   <TouchableHighlight
-          //       underlayColor='#2E3B4E' onPress={this.onReloadDBPressed.bind(this)}>
-          //     <Text style={styles.text}>
-          //       Reload DB
-          //     </Text>
-          //   </TouchableHighlight>
-          // </View>
 
 reactMixin(TimHome.prototype, Reflux.ListenerMixin);
 
