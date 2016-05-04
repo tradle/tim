@@ -16,7 +16,6 @@ var translate = utils.translate
 var constants = require('@tradle/constants');
 var t = require('tcomb-form-native');
 var Actions = require('../Actions/Actions');
-var Device = require('react-native-device')
 var extend = require('extend');
 var DEFAULT_CURRENCY_SYMBOL = '£';
 var CURRENCY_SYMBOL
@@ -577,7 +576,7 @@ var NewResourceMixin = {
   },
   // scrollDown (){
   //   if (this.refs  &&  this.refs.scrollView) {
-  //      this.refs.scrollView.scrollTo(Device.height * 2/3);
+  //      this.refs.scrollView.scrollTo(Dimensions.get('window').height * 2/3);
   //   }
   // },
   myCustomTemplate(params) {
