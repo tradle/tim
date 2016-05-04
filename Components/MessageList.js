@@ -21,7 +21,6 @@ var GiftedMessenger = require('react-native-gifted-messenger');
 // var AddNewMessage = require('./AddNewMessage');
 // var SearchBar = require('react-native-search-bar');
 // var ResourceTypesScreen = require('./ResourceTypesScreen');
-// var Device = require('react-native-device')
 
 var LINK_COLOR
 
@@ -58,6 +57,7 @@ class MessageList extends Component {
     this.state = {
       isLoading: true,
       selectedAssets: {},
+      isConnected: null,
       // dataSource: new ListView.DataSource({
       //   rowHasChanged: (row1, row2) => {
       //     if (row1 !== row2) {
@@ -89,8 +89,21 @@ class MessageList extends Component {
   }
 
   onAction(params) {
-    if (params.error)
+    if (params.error) {
+      if (params.noConnection  &&  params.action === 'addMessage') {
+        AlertIOS.alert(
+          params.error,
+          // this.props.navigator.pop()
+        )
+        var actionParams = {
+          query: this.state.filter,
+          modelName: this.props.modelName,
+          to: this.props.resource,
+        }
+        Actions.messageList(actionParams);
+      }
       return;
+    }
     if (params.action === 'addItem'  ||  params.action === 'addVerification') {
       var actionParams = {
         query: this.state.filter,
@@ -297,6 +310,7 @@ class MessageList extends Component {
   render() {
     currentMessageTime = null;
     var content;
+
     var model = utils.getModel(this.props.modelName).value;
                     // <Text style={{fontSize: 16, alignSelf: 'center', color: '#ffffff'}}>{'Sending...'}</Text>
     // var isVisible = this.state.sendStatus  &&  this.state.sendStatus !== null
