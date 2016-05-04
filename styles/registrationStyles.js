@@ -5,7 +5,7 @@
 */
 'use strict';
 
-var Device = require('react-native-device')
+var React = require('react-native')
 
 var LABEL_COLOR = '#000000';
 var INPUT_COLOR = '#000000';
@@ -16,7 +16,7 @@ var DISABLED_COLOR = '#777777';
 var DISABLED_BACKGROUND_COLOR = '#eeeeee';
 var FONT_SIZE = 24;
 var HELP_FONT_SIZE = 26;
-var height = Device.height < 600 ? 55 : 66
+var height = React.Dimensions.get('window').height < 600 ? 55 : 66
 
 var FONT_WEIGHT = '400';
 
