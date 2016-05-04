@@ -95,6 +95,7 @@ class ResourceList extends Component {
     // this.state.isLoading = true;
     utils.onNextTransitionEnd(this.props.navigator, () => Actions.list(params));
   }
+
   componentDidMount() {
     this.listenTo(Store, 'onListUpdate');
   }
@@ -169,6 +170,7 @@ class ResourceList extends Component {
         },
       }
       var me = utils.getMe()
+
       var msg = {
         message: me.firstName + ' is waiting for the response',
         _t: constants.TYPES.SELF_INTRODUCTION,
@@ -216,6 +218,7 @@ class ResourceList extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     if (nextState.forceUpdate)
       return true
+    if (this.state.isConnected !== nextState.isConnected)
     if (!this.state.list && !nextState.list)
       return true
     if (!this.state.list  ||  !nextState.list  ||  this.state.list.length !== nextState.list.length)
@@ -299,7 +302,8 @@ class ResourceList extends Component {
     var title = isIdentity ? resource.firstName : resource.name; //utils.getDisplayName(resource, model.value.properties);
     var modelName = constants.TYPES.MESSAGE;
     var self = this;
-    var style = defaultBankStyle
+    var style = {}
+    extend(style, defaultBankStyle)
     if (resource.style)
       style = extend(style, resource.style)
     var route = {
