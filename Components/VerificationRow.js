@@ -115,7 +115,7 @@ class VerificationRow extends Component {
     //   rows.push(row);
     // }
     var verifiedBy
-    if ((isVerification || isMyProduct  ||  isForm) &&  resource.from) {
+    if (!this.props.isChooser  &&  (isVerification || isMyProduct  ||  isForm) &&  resource.from) {
       var contentRows = [];
       // contentRows.push(<Text style={}>verified by {resource.to.title}></Text>);
       let org = isMyProduct
@@ -132,12 +132,6 @@ class VerificationRow extends Component {
       else
         by = translate('verifiedBy', org.title)
 
-      // contentRows.push(<Text style={[styles.description, {color: '#7AAAc3'}]} key={this.getNextKey()}>{isMyProduct ? 'issued by ' : (isForm ? 'sent to ' : 'verified by ')}</Text>);
-
-      // if (org) {
-      //   var orgRow = <Text style={styles.description} key={this.getNextKey()}>{org.title}</Text>
-      //   contentRows.push(orgRow);
-      // }
       verifiedBy = <View style={contentRows.length == 1 ? {flex: 1} : {flexDirection: 'row'}} key={this.getNextKey()}>
                     <Text style={styles.description}>{by}</Text>
                   </View>
