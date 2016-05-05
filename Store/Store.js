@@ -479,22 +479,22 @@ var Store = Reflux.createStore({
     serverUrls.forEach((url) => {
       self.getServiceProviders(url, retry)
       .then((results) => {
-        var httpClient = driverInfo.httpClient
+        // var httpClient = driverInfo.httpClient
         var wsClients = driverInfo.wsClients
         var whitelist = driverInfo.whitelist
         var otrKey = driverInfo.otrKey
-        if (!httpClient) {
-          httpClient = new HttpClient()
-          driverInfo.httpClient = httpClient
-          meDriver.ready().then(function () {
-            var myHash = meDriver.myRootHash()
-            httpClient.setRootHash(myHash)
-          })
+        // if (!httpClient) {
+        //   httpClient = new HttpClient()
+        //   driverInfo.httpClient = httpClient
+        //   meDriver.ready().then(function () {
+        //     var myHash = meDriver.myRootHash()
+        //     httpClient.setRootHash(myHash)
+        //   })
 
-          httpClient.on('message', function () {
-            meDriver.receiveMsg.apply(meDriver, arguments)
-          })
-        }
+        //   httpClient.on('message', function () {
+        //     meDriver.receiveMsg.apply(meDriver, arguments)
+        //   })
+        // }
         results.forEach(function(provider) {
           self.addProvider(provider)
         })
