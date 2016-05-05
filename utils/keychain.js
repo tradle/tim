@@ -67,8 +67,8 @@ export function generateNewSet (opts = {}) {
     let isInSecureEnclave = keyProps.secureEnclave
     delete keyProps.secureEnclave
     return isInSecureEnclave
-      ? newSecureEnclaveKey(keyProps)
-      : newKeychainKey(keyProps, opts.networkName)
+      ? createSecureEnclaveKey(keyProps)
+      : createKeychainKey(keyProps, opts.networkName)
   }))
 }
 
@@ -153,7 +153,7 @@ async function lookupSecureEnclaveKey (pub) {
   return key
 }
 
-function newKeychainKey (keyProps, networkName) {
+function createKeychainKey (keyProps, networkName) {
   let key = extend({}, keyProps)
   if (key.type === 'bitcoin') {
     key.networkName = networkName
@@ -164,7 +164,7 @@ function newKeychainKey (keyProps, networkName) {
     .then(() => key)
 }
 
-function newSecureEnclaveKey (keyProps) {
+function createSecureEnclaveKey (keyProps) {
   // { sign, verify, pub }
   return Q.ninvoke(ec, 'keyPair', keyProps.curve)
     .then((key) => {
