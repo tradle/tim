@@ -601,6 +601,7 @@ var utils = {
   },
 
   hashPassword(pass) {
+    // TODO: pbkdf2Sync with ~100000 iterations
     return crypto.createHash('sha256').update(pass).digest('base64')
     // return Q.ninvoke(crypto, 'randomBytes', 64)
     //   .then((salt) => {
@@ -657,7 +658,8 @@ var utils = {
   },
   normalizeCurrencySymbol(symbol) {
     // TODO: remove this after fixing encoding bug
-    return symbol ? (symbol === '¬' ? '€' : symbol) : symbol
+    return symbol
+    // return symbol ? (symbol === '¬' ? '€' : symbol) : symbol
   }
 }
 
