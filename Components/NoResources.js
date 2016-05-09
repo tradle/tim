@@ -5,6 +5,7 @@ var {
   Text,
   Component,
   StyleSheet,
+  Dimensions,
   View,
 } = React;
 
@@ -37,7 +38,7 @@ var styles = StyleSheet.create({
     alignItems: 'center',
   },
   NoResourcesText: {
-    marginTop: 80,
+    marginTop: Dimensions.get('window').height > 800 ? Dimensions.get('window').height/5 : Dimensions.get('window').height / 4,
     color: '#888888',
   }
 });
