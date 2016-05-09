@@ -57,7 +57,6 @@ class MessageList extends Component {
     this.state = {
       isLoading: true,
       selectedAssets: {},
-      isConnected: null,
       // dataSource: new ListView.DataSource({
       //   rowHasChanged: (row1, row2) => {
       //     if (row1 !== row2) {
@@ -82,27 +81,25 @@ class MessageList extends Component {
       params.isAggregation = true;
 
     utils.onNextTransitionEnd(this.props.navigator, () => Actions.messageList(params));
-    // Actions.messageList(params)
   }
   componentDidMount() {
     this.listenTo(Store, 'onAction');
   }
 
   onAction(params) {
-    if (params.error) {
-      if (params.noConnection  &&  params.action === 'addMessage') {
-        AlertIOS.alert(
-          params.error,
-          // this.props.navigator.pop()
-        )
-        var actionParams = {
-          query: this.state.filter,
-          modelName: this.props.modelName,
-          to: this.props.resource,
-        }
-        Actions.messageList(actionParams);
+    if (params.error)
+      return
+    if (params.action === 'connectivity'  &&  params.isConnected  &&  !this.state.isForgetting) {
+      let me = utils.getMe()
+      let msg = {
+        message: me.firstName + ' is waiting for the response',
+        _t: constants.TYPES.CUSTOMER_WAITING,
+        from: me,
+        to: this.props.resource,
+        time: new Date().getTime()
       }
-      return;
+      Actions.addMessage(msg, true)
+      return
     }
     if (params.action === 'addItem'  ||  params.action === 'addVerification') {
       var actionParams = {
@@ -110,26 +107,11 @@ class MessageList extends Component {
         modelName: this.props.modelName,
         to: this.props.resource,
       }
-      // this.state.newItem = true
 
       if (params.sendStatus) {
         this.state.sendStatus = params.sendStatus
         this.state.sendResource = params.resource
       }
-      // this.setState({
-      //   sendStatus: params.sendStatus,
-      //   sendResource: params.resource
-      // })
-
-      // var l = this.state.list
-      // if (l)
-      //   l.push(params.resource)
-      // else
-      //   l = [params.resource]
-      // this.setState({list: l})
-      // if (params.action === 'addItem')
-        // this._GiftedMessenger.appendMessages([params.resource]);
-      // else
       Actions.messageList(actionParams);
       return;
     }
@@ -195,14 +177,16 @@ class MessageList extends Component {
         allLoaded: false
       });
     }
-    else {
-      var first = true
+    else
       this.setState({isLoading: false})
-    }
   }
   shouldComponentUpdate(nextProps, nextState) {
-    if (!this.state.list  ||
-        !nextState.list   ||
+    // Eliminating repeated alerts when connection returns after ForgetMe action
+    if (!this.props.navigator.isConnected && !this.state.list  && !nextState.list && this.state.isLoading === nextState.isLoading)
+      return false
+
+    if (!this.state.list                                 ||
+        !nextState.list                                  ||
          this.state.allLoaded !== nextState.allLoaded    ||
          this.state.sendStatus !== nextState.sendStatus  ||
          this.state.list.length !== nextState.list.length)
@@ -289,6 +273,7 @@ class MessageList extends Component {
         bankStyle={this.props.bankStyle}
         shareableResources={this.state.shareableResources}
         previousMessageTime={previousMessageTime}
+        isLast={rowId === this.state.list.length - 1}
         to={isAggregation ? resource.to : this.props.resource} />
       );
   }
@@ -331,18 +316,25 @@ class MessageList extends Component {
     //               />
     //             : <View/>
     var bgStyle = this.props.bankStyle.BACKGROUND_COLOR ? {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR} : {backgroundColor: '#f7f7f7'}
+    var alert = <View />
     if (!this.state.list || !this.state.list.length) {
-      if (this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION) {
+      if (this.props.navigator.isConnected  &&  this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION) {
         content = <View style={[styles.container, bgStyle]}>
           <Text style={{fontSize: 16, alignSelf: 'center', marginTop: 80, color: '#629BCA'}}>{'Loading...'}</Text>
           <ActivityIndicatorIOS size='large' style={{alignSelf: 'center', marginTop: 20}} />
         </View>
       }
-      else
+      else {
+        if (!this.state.isLoading  &&  !this.props.navigator.isConnected) {
+          alert = (this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION)
+                ? AlertIOS.alert(translate('noConnectionForPL', this.props.resource.name))
+                : AlertIOS.alert(translate('noConnection'))
+        }
         content =  <NoResources
                     filter={this.state.filter}
                     model={model}
                     isLoading={this.state.isLoading}/>
+      }
     }
     else {
       var isAllMessages = model.isInterface  &&  model.id === constants.TYPES.MESSAGE;
@@ -389,7 +381,9 @@ class MessageList extends Component {
 
     var sepStyle = { height: 1,backgroundColor: LINK_COLOR }
     if (this.state.allLoaded)
-       AlertIOS.alert('There is no earlier messages!')
+      AlertIOS.alert('There is no earlier messages!')
+    else if (!this.props.navigator.isConnected  &&  this.state.isForgetting)
+      AlertIOS.alert(translate('noConnectionWillProcessLater'))
           // <View style={{flex: 10}}>
           //   <SearchBar
           //     onChangeText={this.onSearchChange.bind(this)}
@@ -474,7 +468,10 @@ class MessageList extends Component {
       translate('confirmForgetMe', utils.getDisplayName(resource, utils.getModel(resource[constants.TYPE]).value.properties)), //Are you sure you want \'' + utils.getDisplayName(resource, utils.getModel(resource[constants.TYPE]).value.properties) + '\' to forget you',
       translate('testForgetMe'), //'This is a test mechanism to reset all communications with this provider',
       [
-        {text: 'OK', onPress: () =>  Actions.forgetMe(resource)},
+        {text: 'OK', onPress: () => {
+          this.state.isForgetting = true
+          Actions.forgetMe(resource)
+        }},
         {text: translate('cancel'), onPress: () => console.log('Cancel')}
       ]
     )
@@ -498,83 +495,47 @@ class MessageList extends Component {
     var self = this;
     var currentRoutes = self.props.navigator.getCurrentRoutes();
     var resource = this.props.resource
-    // if (resource.name === 'Lloyds') {
-      var currentRoutes = self.props.navigator.getCurrentRoutes();
-      this.props.navigator.push({
-        title: translate(utils.getModel(constants.TYPES.FINANCIAL_PRODUCT).value),
-        id: 15,
-        component: ProductChooser,
-        sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-        backButtonTitle: translate('cancel'),
-        passProps: {
-          resource: resource,
-          returnRoute: currentRoutes[currentRoutes.length - 1],
-          callback: this.props.callback
-        },
-        rightButtonTitle: 'ion|plus',
-        onRightButtonPress: {
-          id: 4,
-          title: translate('newProduct'),
-          component: NewResource,
-          backButtonTitle: translate('back'),
-          // titleTextColor: '#999999',
-          rightButtonTitle: translate('done'),
-          passProps: {
-            model: utils.getModel('tradle.NewMessageModel').value,
-            currency: resource.currency,
-            // callback: this.modelAdded.bind(this)
-          }
-        }
-      });
-    //   return;
-    // }
-/*
+    var currentRoutes = self.props.navigator.getCurrentRoutes();
     this.props.navigator.push({
-      title: utils.makeLabel(model.title) + ' type',
-      id: 2,
-      component: ResourceTypesScreen,
+      title: translate(utils.getModel(constants.TYPES.FINANCIAL_PRODUCT).value),
+      id: 15,
+      component: ProductChooser,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      backButtonTitle: 'Chat',
+      backButtonTitle: translate('cancel'),
       passProps: {
-        resource: self.props.resource,
+        resource: resource,
         returnRoute: currentRoutes[currentRoutes.length - 1],
-        modelName: modelName,
-        sendForm: sendForm,
         callback: this.props.callback
       },
       rightButtonTitle: 'ion|plus',
       onRightButtonPress: {
         id: 4,
-        title: 'New model url',
+        title: translate('newProduct'),
         component: NewResource,
-        backButtonTitle: 'Back',
-        titleTextColor: '#7AAAC3',
-        rightButtonTitle: 'Done',
+        backButtonTitle: translate('back'),
+        // titleTextColor: '#999999',
+        rightButtonTitle: translate('done'),
         passProps: {
           model: utils.getModel('tradle.NewMessageModel').value,
-          callback: this.modelAdded.bind(this)
+          currency: resource.currency,
+          // callback: this.modelAdded.bind(this)
         }
       }
     });
-*/
   }
-  modelAdded(resource) {
-    if (resource.url)
-      Actions.addModelFromUrl(resource.url);
+  onTakePicPressed() {
+    var self = this;
+    this.props.navigator.push({
+      title: 'Take a pic',
+      backButtonTitle: 'Cancel',
+      id: 12,
+      component: CameraView,
+      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      passProps: {
+        onTakePic: self.onTakePic.bind(this),
+      }
+    });
   }
-  // onTakePicPressed() {
-  //   var self = this;
-  //   this.props.navigator.push({
-  //     title: 'Take a pic',
-  //     backButtonTitle: 'Cancel',
-  //     id: 12,
-  //     component: CameraView,
-  //     sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-  //     passProps: {
-  //       onTakePic: self.onTakePic.bind(this),
-  //     }
-  //   });
-  // }
   onTakePic(data) {
     var msg = {
       from: utils.getMe(),
@@ -589,11 +550,6 @@ class MessageList extends Component {
     Actions.addMessage(msg);
   }
   onSubmitEditing(msg) {
-    // msg = msg ? msg : this.state.userInput;
-    // var assets = this.state.selectedAssets;
-    // var isNoAssets = utils.isEmpty(assets);
-    // if (!msg  &&  isNoAssets)
-    //   return;
     var me = utils.getMe();
     var resource = {from: utils.getMe(), to: this.props.resource};
     var model = utils.getModel(this.props.modelName).value;
@@ -611,13 +567,6 @@ class MessageList extends Component {
       time: new Date().getTime()
     }
     value[constants.TYPE] = modelName;
-    // if (!isNoAssets) {
-    //   var photos = [];
-    //   for (var a in assets)
-    //     photos.push({url: assets[a].url, isVertical: assets[a].isVertical, title: 'photo'});
-
-    //   value.photos = photos;
-    // }
     this.setState({userInput: '', selectedAssets: {}});
     if (this.state.clearCallback)
       this.state.clearCallback();
@@ -646,3 +595,37 @@ var styles = StyleSheet.create({
 });
 module.exports = MessageList;
 
+/* Adding new model from URL
+    this.props.navigator.push({
+      title: utils.makeLabel(model.title) + ' type',
+      id: 2,
+      component: ResourceTypesScreen,
+      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      backButtonTitle: 'Chat',
+      passProps: {
+        resource: self.props.resource,
+        returnRoute: currentRoutes[currentRoutes.length - 1],
+        modelName: modelName,
+        sendForm: sendForm,
+        callback: this.props.callback
+      },
+      rightButtonTitle: 'ion|plus',
+      onRightButtonPress: {
+        id: 4,
+        title: 'New model url',
+        component: NewResource,
+        backButtonTitle: 'Back',
+        titleTextColor: '#7AAAC3',
+        rightButtonTitle: 'Done',
+        passProps: {
+          model: utils.getModel('tradle.NewMessageModel').value,
+          callback: this.modelAdded.bind(this)
+        }
+      }
+    });
+
+  modelAdded(resource) {
+    if (resource.url)
+      Actions.addModelFromUrl(resource.url);
+  }
+*/
