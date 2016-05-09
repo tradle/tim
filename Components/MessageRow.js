@@ -633,9 +633,15 @@ class MessageRow extends Component {
 
     var isProductApplication = model.id === PRODUCT_APPLICATION
     if (isProductApplication) {
-      let msgModel = utils.getModel(resource.product)
+      let msgModel = utils.getModel(resource.product).value
       let color = {color: LINK_COLOR, fontWeight: '400', fontSize: 18}
-      let msg = <View key={this.getNextKey()}>
+
+
+      let msg = !this.props.navigator.isConnected  &&  this.props.isLast
+              ? <View key={this.getNextKey()}>
+                  <Text style={[styles.resourceTitle, {color: '#FF6D0D'}]}>{translate('noConnectionForNewProduct', utils.getMe().firstName, translate(msgModel))}</Text>
+                </View>
+              : <View key={this.getNextKey()}>
                   <Text style={[styles.resourceTitle, {color: '#000000'}]}>{translate('newProductMsg', utils.getMe().firstName, translate(msgModel))}</Text>
                 </View>
       renderedRow.push(msg);
