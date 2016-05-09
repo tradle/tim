@@ -238,6 +238,7 @@ var Store = Reflux.createStore({
 
   _handleConnectivityChange(isConnected) {
     this.isConnected = isConnected
+    this.trigger({action: 'connectivity', isConnected: isConnected})
     // this.setState({
     //   isConnected,
     // });
@@ -914,17 +915,8 @@ var Store = Reflux.createStore({
 
   onAddMessage(r, isWelcome, requestForForm) {
 // NetInfo.isConnected.fetch().then(isConnected => {
-//   console.log('First, is ' + (isConnected ? 'online' : 'offline'));
+//   console.log(isConnected ? 'online' : 'offline');
 // });
-    if (!this.isConnected) {
-      var params = {
-        action: 'addMessage',
-        error: translate('noConnection'),
-        noConnection: true
-      }
-      this.trigger(params);
-      return
-    }
     let m = this.getModel(r[TYPE]).value
     var props = m.properties;
     var rr = {};
@@ -953,7 +945,7 @@ var Store = Reflux.createStore({
       else
         rr[p] = r[p];
     }
-
+    let firstTime
     if (r[TYPE] === PRODUCT_APPLICATION) {
       let result = this.searchMessages({modelName: PRODUCT_APPLICATION, to: toOrg})
       if (result) {
@@ -966,6 +958,12 @@ var Store = Reflux.createStore({
             list[utils.getId(r)].value.documentCreated = true
           })
         }
+      }
+    }
+    else if (r[TYPE] === CUSTOMER_WAITING) {
+      if (!this.isConnected) {
+        let result = this.searchMessages({modelName: PRODUCT_LIST, to: toOrg})
+        firstTime = !result  ||  !result.length
       }
     }
     rr[NONCE] = this.getNonce()
@@ -994,8 +992,6 @@ var Store = Reflux.createStore({
     var error
     var welcomeMessage
     var dhtKey
-    var publishRequestSent
-
     var promise = getDHTKey(toChain)
     // var isServiceMessage = rr[TYPE] === 'tradle.ServiceMessage'
     return promise
@@ -1055,63 +1051,27 @@ var Store = Reflux.createStore({
       if (me.txId)
         return
 
-      // publishRequestSent = true
-
       return self.getDriver(me)
       .then(function () {
-        // if (publishRequestSent)
-          return meDriver.identityPublishStatus()
+        if (!self.isConnected  ||  self.publishRequestSent)
+          return
+        return meDriver.identityPublishStatus()
       })
       .then(function(status) {
+        if (!status || !self.isConnected)
+          return
         if (!status.queued  &&  !status.current) {
           self.publishMyIdentity(orgRep)
-          // publishRequestSent = true
+          self.publishRequestSent = true
         }
         else
           self.updateMe()
       })
-
-
-      // var wmKey = SIMPLE_MESSAGE + '_Welcome' + toOrg.name.replace(' ', '_')// + '_' + new Date().getTime()
-      // Create welcome message without saving it in DB
-      // welcomeMessage = {}
-      // if (list[wmKey]) {
-      //   list[wmKey].value.time = new Date().getTime()
-      //   welcomeMessage = list[wmKey].value
-      //   return
-      // }
-
-      // var w = welcome
-
-      // welcomeMessage.message = w.msg.replace('{firstName}', me.firstName)
-      // welcomeMessage.time = new Date().getTime()
-      // welcomeMessage[TYPE] = SIMPLE_MESSAGE
-      // welcomeMessage.welcome = true
-      // welcomeMessage[NONCE] = self.getNonce()
-      // welcomeMessage.to = {
-      //   id: me[TYPE] + '_' + me[ROOT_HASH],
-      //   title: utils.getDisplayName(me, self.getModel(constants.TYPES.PROFILE).value.properties)
-      // }
-      // welcomeMessage.from = {
-      //   id: rr.to.id,
-      //   title: rr.to.title,
-      //   time: rr.to.time
-      // }
-      // welcomeMessage.organization = {
-      //   id: rr.to.id,
-      //   title: rr.to.title,
-      //   time: rr.to.time
-      // }
-      // welcomeMessage[ROOT_HASH] = wmKey
-      // batch.push({type: 'put', key: welcomeMessage[TYPE] + '_' + wmKey, value: welcomeMessage});
-      // list[welcomeMessage[ROOT_HASH]] = {
-      //   key: welcomeMessage[ROOT_HASH],
-      //   value: welcomeMessage
-      // }
     })
     .then(function() {
       if (isWelcome && utils.isEmpty(welcomeMessage))
         return;
+
       // Temporary untill the real hash is known
       var key = rr[TYPE] + '_' + rr[ROOT_HASH];
       list[key] = {key: key, value: rr};
@@ -1158,12 +1118,12 @@ var Store = Reflux.createStore({
       var key = rr[TYPE] + '_' + rr[ROOT_HASH];
       batch.push({type: 'put', key: key, value: rr})
       list[key] = {key: key, value: rr};
-      var params = {
-        action: 'addMessage',
-        resource: isWelcome ? welcomeMessage : rr
-      }
-      if (error)
-        params.error = error
+      // var params = {
+      //   action: 'addMessage',
+      //   resource: isWelcome ? welcomeMessage : rr
+      // }
+      // if (error)
+      //   params.error = error
 
       // self.trigger(params);
       return db.batch(batch)
@@ -1463,16 +1423,6 @@ var Store = Reflux.createStore({
     this.trigger({action: 'getTemporary', resource: r})
   },
   onAddItem(params) {
-    if (!this.isConnected) {
-      var params = {
-        action: 'addItem',
-        error: translate('noConnection'),
-        noConnection: true
-      }
-      this.trigger(params);
-      return
-    }
-
     var value = params.value;
     var resource = params.resource;
     delete temporaryResources[resource[TYPE]]
@@ -1654,19 +1604,24 @@ var Store = Reflux.createStore({
         list[tmpKey] = {key: tmpKey, value: returnVal};
 
         var params;
-        if (returnVal[TYPE] === 'tradle.GuestSessionProof') {
+        if (returnVal[TYPE] === GUEST_SESSION_PROOF) {
           let org = list[utils.getId(returnVal.to)].value.organization
           org = list[utils.getId(org)].value
           params = {action: 'getForms', to: org}
         }
-        else
+        else {
           params = {
             action: 'addItem',
             resource: returnVal
           }
+        }
         var m = self.getModel(returnVal[TYPE]).value
-        if (m.subClassOf === FORM)
-          params.sendStatus = 'Sending'
+        if (m.subClassOf === FORM) {
+          if (self.isConnected)
+            params.sendStatus = 'Sending'
+          else
+            params.sendStatus = 'Queued'
+        }
         try {
           self.trigger(params);
         } catch (err) {
@@ -1907,8 +1862,13 @@ var Store = Reflux.createStore({
     var result = this.searchResources(params);
     if (params.isAggregation)
       result = this.getDependencies(result);
-    if (!result)
+    if (!result) {
+      // First time. No connection no providers yet loaded
+      if (!this.isConnected  &&  params.modelName === ORGANIZATION)
+        this.trigger({action: 'list', alert: translate('noConnection')})
+
       return
+    }
 
     var model = this.getModel(params.modelName).value;
     var isMessage = model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1);
@@ -3153,8 +3113,9 @@ var Store = Reflux.createStore({
     .then(function() {
       var  params = {action: newLanguage ? 'languageChange' : 'addItem', resource: value};
       // registration or profile editing
-      if (!noTrigger)
+      if (!noTrigger) {
         self.trigger(params);
+      }
       if (model.subClassOf === FORM) {
         let mlist = self.searchMessages({modelName: FORM})
         let olist = self.searchNotMessages({modelName: ORGANIZATION})
@@ -4276,11 +4237,11 @@ var Store = Reflux.createStore({
       to: [{fingerprint: self.getFingerprint(list[key].value)}],
       deliver: true
     })
-    .then(function() {
+    .then(() => {
       if (noTrigger)
         return
       var result = self.searchMessages({to: resource, modelName: MESSAGE});
-      msg.message = 'Your request is in progress'
+      msg.message = translate('inProgress')
       msg.from = self.buildRef(resource)
       msg.to = self.buildRef(me)
       // msg.from = {
