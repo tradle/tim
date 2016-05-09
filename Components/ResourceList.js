@@ -31,7 +31,7 @@ var {
   Component,
   StyleSheet,
   Navigator,
-  // AlertIOS,
+  AlertIOS,
   PropTypes,
   TouchableHighlight,
   ActionSheetIOS,
@@ -66,7 +66,7 @@ class ResourceList extends Component {
         }
       }),
       filter: this.props.filter,
-      userInput: ''
+      userInput: '',
     };
     var isRegistration = this.props.isRegistration ||  (this.props.resource  &&  this.props.resource[constants.TYPE] === constants.TYPES.PROFILE  &&  !this.props.resource[constants.ROOT_HASH]);
     if (isRegistration)
@@ -137,7 +137,7 @@ class ResourceList extends Component {
           modelName: constants.TYPES.MESSAGE,
           currency: params.to.currency,
           bankStyle: params.to.bankStyle || params.to.style,
-          dictionary: params.dictionary
+          dictionary: params.dictionary,
         }
       }
       // var me = utils.getMe()
@@ -184,6 +184,13 @@ class ResourceList extends Component {
       this.props.navigator.push(route)
       return
     }
+    if (action === 'list') {
+      // First time connecting to server. No connection no providers yet loaded
+      if (!params.list  &&  params.alert) {
+        AlertIOS.alert(params.alert)
+        return
+      }
+    }
     if (action !== 'list' ||  !params.list || params.isAggregation !== this.props.isAggregation)
       return;
 
@@ -218,9 +225,9 @@ class ResourceList extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     if (nextState.forceUpdate)
       return true
-    if (this.state.isConnected !== nextState.isConnected)
-    if (!this.state.list && !nextState.list)
-      return true
+    // if (this.state.isConnected !== nextState.isConnected)
+    //   if (!this.state.list && !nextState.list)
+    //     return true
     if (!this.state.list  ||  !nextState.list  ||  this.state.list.length !== nextState.list.length)
       return true
     let isOrg = this.props.modelName === constants.TYPES.ORGANIZATION
@@ -315,7 +322,7 @@ class ResourceList extends Component {
         filter: '',
         modelName: modelName,
         currency: resource.currency,
-        bankStyle: style
+        bankStyle: style,
       },
     }
     if (isIdentity) { //  ||  isOrganization) {
