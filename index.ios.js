@@ -397,6 +397,7 @@ var NavigationBarRouteMapper = {
     if (index === 0  ||  route.noLeftButton) {
       return null;
     }
+
     var color = '#7AAAC3'
     if (route.passProps.bankStyle  &&  route.passProps.bankStyle.LINK_COLOR)
       color = route.passProps.bankStyle.LINK_COLOR
@@ -413,24 +414,30 @@ var NavigationBarRouteMapper = {
       var st = {color: color}
       style.push(st);
     }
-
+    style.push({paddingLeft: 5})
     var title = lbTitle.indexOf('|') == -1
               ?  <Text style={style}>
                     {lbTitle}
                  </Text>
               : <Icon name={lbTitle.substring(4)} size={20} color='#7AAAC3' style={styles.icon}/>;
-    if (route.component === ResourceList  &&  index === 1)
+    if (route.component === ResourceList  &&  index === 1 &&  navigator.getCurrentRoutes().length === 2)
       Actions.cleanup()
+
+
+    let status = navigator.isConnected
+               ? <Icon name={'ios-checkmark'} size={18} color='#7DBC00' />
+               : <Icon name={'ios-circle-outline'} size={18} color='green' />
+
     return (
       <TouchableOpacity
         onPress={() => navigator.pop()}>
-        <View style={styles.navBarLeftButton}>
+        <View style={[styles.navBarLeftButton, {flexDirection: 'row'}]}>
+          {status}
           {title}
         </View>
       </TouchableOpacity>
-    );
+      )
   },
-
   RightButton: function(route, navigator, index, navState) {
     if (!route.rightButtonTitle)
       return <View/>

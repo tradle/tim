@@ -60,28 +60,62 @@ class TimHome extends Component {
     modelName: PropTypes.string.isRequired,
     navigator: PropTypes.object.isRequired
   };
-	constructor(props) {
-	  super(props);
-	  this.state = {
-	    isLoading: true,
+  constructor(props) {
+    super(props);
+    this.state = {
+      isLoading: true,
       isModalOpen: false
-	  };
-	}
+    };
+  }
   componentWillMount() {
     LinkingIOS.addEventListener('url', this._handleOpenURL);
 
     // var url = LinkingIOS.popInitialURL()
     // if (url)
     //   this._handleOpenURL({url});
+    NetInfo.isConnected.addEventListener(
+      'change',
+      this._handleConnectivityChange.bind(this)
+    );
+    NetInfo.isConnected.fetch().done(
+      (isConnected) => {
+        this._handleConnectivityChange(isConnected)
+      }
+    );
     Actions.start();
+  }
+
+  componentDidMount() {
+    AutomaticUpdates.on()
+    AppStateIOS.addEventListener('change', this._handleAppStateChange);
+    // LinkingIOS.addEventListener('url', this._handleOpenURL);
+    // var url = LinkingIOS.popInitialURL();
+    // if (url)
+    //   this._handleOpenURL({url});
+  }
+  _handleConnectivityChange(isConnected) {
+    this.props.navigator.getCurrentRoutes()[0].isConnected = isConnected
+    // To re-render NavBar with new status
+    this.props.navigator._navBar.setState({isConnected: isConnected})
+    this.props.navigator.isConnected = isConnected
   }
   componentWillUnmount() {
     LinkingIOS.removeEventListener('url', this._handleOpenURL);
+    NetInfo.isConnected.removeEventListener(
+      'change',
+      this._handleConnectivityChange.bind(this)
+    );
   }
   componentDidMount() {
     var url = LinkingIOS.popInitialURL()
     if (url)
       this._handleOpenURL({url});
+    NetInfo.isConnected.fetch().done(
+      (isConnected) => {
+        let firstRoute = this.props.navigator.getCurrentRoutes()[0]
+        firstRoute.isConnected = isConnected
+      }
+    );
     this.listenTo(Store, 'handleEvent');
   }
 
@@ -108,6 +142,10 @@ class TimHome extends Component {
   }
 
   handleEvent(params) {
+    if (params.action === 'connectivity') {
+      this._handleConnectivityChange(params.isConnected)
+      return
+    }
     if (params.action === 'reloadDB') {
       this.setState({
         isLoading: false,
@@ -336,6 +374,7 @@ class TimHome extends Component {
       backButtonTitle: translate('back'),
       passProps: {
         modelName: constants.TYPES.ORGANIZATION,
+        isConnected: this.state.isConnected,
         officialAccounts: true
       },
       rightButtonTitle: translate('profile'),
@@ -374,6 +413,7 @@ class TimHome extends Component {
       id: 4,
       passProps: {
         model: model,
+        isConnected: this.state.isConnected,
         callback: () => {
           cb()
         }
@@ -568,6 +608,7 @@ class TimHome extends Component {
       titleTextColor: '#7AAAC3',
       passProps: {
         model: model,
+        isConnected: this.state.isConnected,
         callback: this.props.navigator.pop
         // callback: this.register.bind(this)
       },
