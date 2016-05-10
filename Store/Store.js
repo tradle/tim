@@ -167,6 +167,7 @@ var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
 var SERVICE_PROVIDERS
+var publishRequestSent = []
 
 var driverInfo = {
   wsClients: {},
@@ -511,8 +512,6 @@ var Store = Reflux.createStore({
     })
     return defer.promise
 
-
-
     // return Q.all(serverUrls.map(url => self.getServiceProviders(url, retry)))
     // .then(function(results) {
     //   var httpClient = driverInfo.httpClient
@@ -613,6 +612,70 @@ var Store = Reflux.createStore({
         debugger
       })
   },
+/*
+  onGetEmployeeInfo(code) {
+    let parts = code.split(':')
+
+    let orgId = ORGANIZATION + '_' + parts[1]
+    let serviceProvider =  SERVICE_PROVIDERS.filter((json) => json.org === orgId)
+
+    serviceProvider = (serviceProvider  &&  serviceProvider.length) ? serviceProvider[0] : null
+      // let serviceProvider =  SERVICE_PROVIDERS.filter((json) => json.url === serverUrl)
+
+    var org = list[orgId].value
+    var self = this
+    let promise = serviceProvider ? Q() : this.getInfo([parts[0]])
+
+    return promise
+    .then(function() {
+      if (!serviceProvider)
+        serviceProvider = SERVICE_PROVIDERS.filter((json) => json.org === orgId)[0]
+
+      return Q.race([
+        fetch(utils.joinURL(serviceProvider.url, serviceProvider.id + '/employee/' + parts[1])),
+        Q.Promise(function (resolve, reject) {
+          setTimeout(function () {
+            reject(new Error('timed out'))
+          }, 5000)
+        })]
+      )
+    })
+    // return Q(employee)
+    .then((response) => {
+      return response.json()
+    })
+    .then(function(data) {
+      let info = {
+        bot: data,
+        org: list[orgId].value,
+        style: list[orgId].value.style,
+        isEmployee: true
+      }
+      return self.addInfo(info)
+    })
+    .then(function(provider) {
+      self.addProvider(provider)
+      if (provider.txId) {
+        meDriver.addContactIdentity(provider.identity)
+        meDriver.watchTxs(driverInfo.whitelist)
+      }
+
+      let employee = list[PROFILE + '_' + provider.hash].value
+      currentEmployees[utils.getId(org)] = employee
+      let myIdentities = list[MY_IDENTITIES].value
+      let currentIdentity = myIdentities.currentIdentity
+      let identity = myIdentities.allIdentities.filter(function(i) {
+        if (i.id === currentIdentity)
+          return true
+      })[0].publishedIdentity
+
+      self.trigger({action: 'talkToEmployee', to: org, myIdentity: identity})
+    })
+    .catch((err) => {
+      debugger
+    })
+  },
+*/
   addProvider(provider) {
     // let httpClient = driverInfo.httpClient
     // httpClient.addRecipient(
@@ -1053,7 +1116,7 @@ var Store = Reflux.createStore({
 
       return self.getDriver(me)
       .then(function () {
-        if (!self.isConnected  ||  self.publishRequestSent)
+        if (!self.isConnected  ||  publishRequestSent[orgId])
           return
         return meDriver.identityPublishStatus()
       })
@@ -1062,7 +1125,7 @@ var Store = Reflux.createStore({
           return
         if (!status.queued  &&  !status.current) {
           self.publishMyIdentity(orgRep)
-          self.publishRequestSent = true
+          publishRequestSent[orgId] = true
         }
         else
           self.updateMe()
@@ -4068,9 +4131,9 @@ var Store = Reflux.createStore({
 
     var reps = this.getRepresentatives(utils.getId(resource))
     var promises = []
-    for (var i=0; i<reps.length; i++)
-      promises.push(meDriver.forget(reps[i][ROOT_HASH]))
-
+    reps.forEach((r) =>
+      promises.push(meDriver.forget(r[ROOT_HASH]))
+    )
     var batch = []
     var self = this
     return Q.allSettled(promises)
@@ -4156,6 +4219,12 @@ var Store = Reflux.createStore({
       })
       self.trigger({action: 'list', list: self.searchNotMessages({modelName: ORGANIZATION, to: resource})})
       // resource.numberOfForms = 0
+
+      reps.forEach((r) => {
+        r.lastMessageTime = null
+        r.lastMessage = null
+        delete publishRequestSent[utils.getId(r.organization)]
+      })
       if (batch.length)
         return db.batch(batch)
     })
