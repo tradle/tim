@@ -10,6 +10,8 @@ var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var constants = require('@tradle/constants');
 var MessageList = require('./MessageList')
+var SearchBar = require('react-native-search-bar');
+
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 var {
   ListView,
@@ -49,17 +51,23 @@ class ProductChooser extends Component {
     };
   }
   componentWillMount() {
-    Actions.getItem(this.props.resource[constants.TYPE] + '_' + this.props.resource[constants.ROOT_HASH])
+    Actions.getItem(utils.getId(this.props.resource))
   }
   componentDidMount() {
     this.listenTo(Store, 'onNewProductAdded');
   }
   onNewProductAdded(params) {
     if (params.action === 'getItem'  &&  this.props.resource[constants.ROOT_HASH] === params.resource[constants.ROOT_HASH]) {
-      var products = []
-      params.resource.products.forEach(function(m) {
-        products.push(utils.getModel(m).value)
-      })
+      let products
+      if (params.resource.products) {
+        products = []
+        params.resource.products.forEach(function(m) {
+          products.push(utils.getModel(m).value)
+        })
+      }
+      else
+        products = utils.getAllSubclasses(constants.TYPES.FORM)
+
       this.setState({
         products: products,
         dataSource: this.state.dataSource.cloneWithRows(products),
@@ -80,7 +88,7 @@ class ProductChooser extends Component {
     });
   }
 
-  selectResource(resource) {
+  selectResource(model) {
     var route = {
       component: MessageList,
       backButtonTitle: translate('cancel'),
@@ -93,17 +101,42 @@ class ProductChooser extends Component {
       },
     }
     var msg = {
-      product: resource.id, // '[application for](' + resource.id + ')',
-      _t:      PRODUCT_APPLICATION, // constants.TYPES.SIMPLE_MESSAGE,
-      from:    utils.getMe(),
-      to:      this.props.resource,
-      time:    new Date().getTime()
+      from: utils.getMe(),
+      to:   this.props.resource,
+      time: new Date().getTime()
+    }
+    if (model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT) {
+      msg._t = PRODUCT_APPLICATION
+      msg.product = model.id // '[application for](' + model.id + ')',
+      utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg, true, true))
+    }
+    else {
+      msg._t = constants.TYPES.SIMPLE_MESSAGE
+      msg.message = '[' + translate('fillTheForm') + '](' + model.id + ')'
+      utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg))
     }
 
-    utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg, true, true))
-    this.props.navigator.pop();
+    // var msg = {
+    //   product: model.id, // '[application for](' + model.id + ')',
+    //   _t:      PRODUCT_APPLICATION, // constants.TYPES.SIMPLE_MESSAGE,
+    //   from:    utils.getMe(),
+    //   to:      this.props.resource,
+    //   time:    new Date().getTime()
+    // }
 
+    this.props.navigator.pop();
   }
+
+  buildSimpleMsg(msg, type) {
+    var sMsg = {}
+    sMsg[constants.TYPE] = constants.TYPES.SIMPLE_MESSAGE
+    sMsg.message = type
+      ? '[' + msg + ']' + '(' + type + ')'
+      : msg
+
+    return sMsg
+  }
+
   selectResource1(resource) {
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     var model = utils.getModel(this.state.modelName);
@@ -149,7 +182,17 @@ class ProductChooser extends Component {
         to={this.props.resource} />
       );
   }
+
   render() {
+    // var sb = this.props.type === constants.TYPES.FORM
+    //        ?  <SearchBar
+    //             onChangeText={this.onSearchChange.bind(this)}
+    //             placeholder={translate('search')}
+    //             showsCancelButton={false}
+    //             hideBackground={true}
+    //           />
+    //       : <View />
+
     var content =
     <ListView ref='listview' style={styles.listview}
       dataSource={this.state.dataSource}

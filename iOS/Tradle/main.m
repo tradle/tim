@@ -10,7 +10,7 @@
 #import <UIKit/UIKit.h>
 
 #import "AppDelegate.h"
-#import "QTouchposeApplication.h"
+//#import "QTouchposeApplication.h"
 
 //int main(int argc, char * argv[]) {
 //  @autoreleasepool {
@@ -22,12 +22,12 @@ int main(int argc, char *argv[])
 {
   @autoreleasepool
   {
-#ifdef DEBUG
-    return UIApplicationMain(argc, argv,
-                             NSStringFromClass([QTouchposeApplication class]),
-                             NSStringFromClass([AppDelegate class]));
-#else
+//#ifdef DEBUG
+//    return UIApplicationMain(argc, argv,
+//                             NSStringFromClass([QTouchposeApplication class]),
+//                             NSStringFromClass([AppDelegate class]));
+//#else
     return UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));
-#endif
+//#endif
   }
 }

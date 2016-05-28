@@ -22,6 +22,8 @@ var QRCodeScanner = require('./QRCodeScanner')
 var QRCode = require('./QRCode')
 var buttonStyles = require('../styles/buttonStyles');
 var defaultBankStyle = require('../styles/bankStyle.json')
+var WEB_TO_MOBILE = '0'
+var TALK_TO_EMPLOYEEE = '1'
 
 // var bankStyles = require('../styles/bankStyles')
 var ENUM = 'tradle.Enum'
@@ -105,6 +107,33 @@ class ResourceList extends Component {
       return;
 
     var action = params.action;
+    if (action === 'newContact') {
+      let routes = this.props.navigator.getCurrentRoutes()
+      let curRoute = routes[routes.length - 1]
+      if (curRoute.id === 11  &&  curRoute.passProps.resource[constants.ROOT_HASH] === params.to[constants.ROOT_HASH])
+        return
+      let style = {}
+      extend(style, defaultBankStyle)
+      if (params.to.style)
+        style = extend(style, params.to.style)
+
+      this.props.navigator.push({
+        title: params.to.firstName,
+        component: MessageList,
+        id: 11,
+        backButtonTitle: 'Back',
+        passProps: {
+          resource: params.to,
+          filter: '',
+          modelName: constants.TYPES.MESSAGE,
+          // currency: params.organization.currency,
+          bankStyle: style,
+          // dictionary: params.dictionary,
+        }
+      })
+
+      return
+    }
     if (action === 'addItem'  ||  action === 'addMessage') {
       var model = action === 'addMessage'
                 ? utils.getModel(this.props.modelName).value
@@ -165,7 +194,7 @@ class ResourceList extends Component {
           filter: '',
           modelName: constants.TYPES.MESSAGE,
           currency: params.to.currency,
-          bankStyle: params.to.bankStyle,
+          bankStyle: params.to.style,
           dictionary: params.dictionary
         },
       }
@@ -180,7 +209,7 @@ class ResourceList extends Component {
       }
       // var sendNotification = (resource.name === 'Rabobank'  &&  (!me.organization  ||  me.organization.name !== 'Rabobank'))
       // Actions.addMessage(msg, true, sendNotification)
-      utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg, true))
+      utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg)) //, true))
       this.props.navigator.push(route)
       return
     }
@@ -328,14 +357,19 @@ class ResourceList extends Component {
     if (isIdentity) { //  ||  isOrganization) {
       route.title = resource.firstName
       route.rightButtonTitle = translate('profile')
+
       route.onRightButtonPress = {
         title: title,
         id: 3,
         component: ResourceView,
         titleTextColor: '#7AAAC3',
         backButtonTitle: translate('back'),
-        rightButtonTitle: translate('edit'),
-        onRightButtonPress: {
+        passProps: {resource: resource}
+      }
+      var isMe = isIdentity ? resource[constants.ROOT_HASH] === me[constants.ROOT_HASH] : true;
+      if (isMe) {
+        route.onRightButtonPress.rightButtonTitle = translate('edit')
+        route.onRightButtonPress.onRightButtonPress = {
           title: title,
           id: 4,
           component: NewResource,
@@ -347,8 +381,7 @@ class ResourceList extends Component {
             resource: resource,
             currency: this.props.currency,
           }
-        },
-        passProps: {resource: resource}
+        }
       }
     }
     if (isOrganization) {
@@ -357,7 +390,12 @@ class ResourceList extends Component {
       // if (resource.name === 'Rabobank'  &&  (!me.organization  ||  me.organization.name !== 'Rabobank')) {
       var routes = this.props.navigator.getCurrentRoutes();
       // if (routes[routes.length - 1].title === 'Official Accounts') {
-      if (routes.length === 2) {
+      let sendCustomerWaiting = routes.length === 2 || routes.length === 3
+      // if (!sendCustomerWaiting  &&  routes.length === 3) {
+      //   if (me.organization  &&  utils.getId(me.organization) !== utils.getId(resource))
+      //     sendCustomerWaiting = true
+      // }
+      if (sendCustomerWaiting) {
         var msg = {
           message: me.firstName + ' is waiting for the response',
           _t: constants.TYPES.CUSTOMER_WAITING,
@@ -667,6 +705,7 @@ class ResourceList extends Component {
     var content;
     var model = utils.getModel(this.props.modelName).value;
     if (this.state.dataSource.getRowCount() === 0              &&
+        !utils.getMe().organization                            &&
         model.subClassOf !== ENUM                              &&
         // this.props.modelName !== constants.TYPES.PROFILE       &&
         // this.props.modelName !== constants.TYPES.VERIFICATION  &&
@@ -742,7 +781,7 @@ class ResourceList extends Component {
     })
   }
   showMenu() {
-    var buttons = [translate('addServerUrl'), translate('scanQRcode'), translate('cancel')]
+    var buttons = [translate('addServerUrl'), translate('scanQRcode'), 'Talk to employee', translate('cancel')]
     let allowToAdd = this.props.prop  &&  this.props.prop.allowToAdd
     var buttons = allowToAdd
                 ? [translate('addNew', this.props.prop.title), translate('cancel')]
@@ -750,12 +789,9 @@ class ResourceList extends Component {
     var self = this;
     ActionSheetIOS.showActionSheetWithOptions({
       options: buttons,
-      cancelButtonIndex: allowToAdd ? 1 : 2
+      cancelButtonIndex: allowToAdd ? 2 : 3
     }, function(buttonIndex) {
       switch (buttonIndex) {
-      // case 0:
-      //   Actions.talkToRepresentative(self.props.resource)
-      //   break
       case 0:
         if (allowToAdd)
           self.addNew()
@@ -765,34 +801,25 @@ class ResourceList extends Component {
       case 1:
         self.scanFormsQRCode()
         break;
+      case 2:
+        self.talkToEmployee()
+        break
       default:
         return
       }
     });
   }
 
-  scanQRCode() {
-    var qrcode = {
-      code: '71e4b7cd6c11ab7221537275988f113a879029eb:6aefc09f4da125095409770592eb96ac142fb579'
-    }
-    Actions.getEmployeeInfo(qrcode.code)
+  talkToEmployee(qrcode) {
+    if (!qrcode)
+      // qrcode = 'http://127.0.0.1:444444;71e4b7cd6c11ab7221537275988f113a879029eu;6aefc09f4da125095409770592eb96ac142fb579'
+      // qrcode = 'http://192.168.0.104:44444/;71e4b7cd6c11ab7221537275988f113a879029eu;3497c6ce074f1bc66c05e204fd3a7fbcd5e0fb08'
+      qrcode = 'http://192.168.0.136:44444/;71e4b7cd6c11ab7221537275988f113a879029eu;c3adf2d26304133265c3e28b5c9037614880aec5'
+
+    Actions.getEmployeeInfo(qrcode)
     return
-    // this.props.navigator.push({
-    //   title: 'Scan QR Code of contact',
-    //   id: 16,
-    //   component: QRCodeScanner,
-    //   titleTintColor: '#eeeeee',
-    //   backButtonTitle: 'Cancel',
-    //   // rightButtonTitle: 'ion|ios-reverse-camera',
-    //   passProps: {
-    //     onread: function (result) {
-    //       console.log(result)
-    //     }
-    //   }
-    // })
   }
   scanFormsQRCode() {
-    let self = this
     this.props.navigator.push({
       title: 'Scan QR Code',
       id: 16,
@@ -801,26 +828,36 @@ class ResourceList extends Component {
       backButtonTitle: 'Cancel',
       // rightButtonTitle: 'ion|ios-reverse-camera',
       passProps: {
-        onread: function (result) {
-          // post to server request for the forms that were filled on the web
-          let h = result.data.split(':')
-          let me = utils.getMe()
-          let r = {
-            _t: 'tradle.GuestSessionProof',
-            session: h[0],
-            from: {
-              id: utils.getId(me),
-              title: utils.getDisplayName(me)
-            },
-            to: {
-              id: constants.TYPES.PROFILE + '_' + h[1]
-            }
-          }
-          // self.props.navigator.pop()
-          Actions.addItem({resource: r, value: r, meta: utils.getModel('tradle.GuestSessionProof').value})
-        }
+        onread: this.onread.bind(this)
       }
     })
+  }
+
+  onread(result) {
+    // post to server request for the forms that were filled on the web
+    let h = result.data.split(';')
+
+    let me = utils.getMe()
+    switch (h[0]) {
+    case WEB_TO_MOBILE:
+      let r = {
+        _t: 'tradle.GuestSessionProof',
+        session: h[1],
+        from: {
+          id: utils.getId(me),
+          title: utils.getDisplayName(me)
+        },
+        to: {
+          id: constants.TYPES.PROFILE + '_' + h[2]
+        }
+      }
+      // self.props.navigator.pop()
+      Actions.addItem({resource: r, value: r, meta: utils.getModel('tradle.GuestSessionProof').value})
+      break
+    case TALK_TO_EMPLOYEEE:
+      Actions.getEmployeeInfo(result.data.substring(h[0].length + 1))
+      break
+    }
   }
 }
 reactMixin(ResourceList.prototype, Reflux.ListenerMixin);

@@ -59,13 +59,15 @@ var buttonStyles = Object.freeze({
 
   row1: {
     flexDirection: 'row',
+    alignSelf: 'center',
     position: 'absolute',
-    left: 10,
+    left: 30,
     top: 5
   },
   icon1: {
     width: 25,
     height: 25,
+    paddingTop: 2
     // paddingLeft: 5,
     // borderWidth: 1,
     // borderColor: ICON_BORDER_COLOR,
@@ -75,20 +77,23 @@ var buttonStyles = Object.freeze({
   },
   container1: {
     flex: 1,
-    position: 'absolute',
-    right: 10
+    // position: 'absolute',
+    // right: 10
+    paddingHorizontal: 10
   },
   buttonContent: {
-    padding: 15,
+    // padding: 15,
+    alignSelf: 'center',
     width: 150,
     height: 40,
     borderRadius: 10,
     backgroundColor: BACKGROUND_COLOR,
-    opacity: 0.5,
+    opacity: 0.7,
     borderWidth: 1,
     borderColor: '#466690'
   },
   text1: {
+    paddingTop: 3,
     color: '#ffffff',
     fontFamily: 'Avenir Next',
     // fontWeight: '800',

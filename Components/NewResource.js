@@ -29,6 +29,7 @@ var constants = require('@tradle/constants');
 var UIImagePickerManager = require('NativeModules').ImagePickerManager;
 var ENUM = 'tradle.Enum'
 var LINK_COLOR, DEFAULT_LINK_COLOR = '#a94442'
+var FORM_ERROR = 'tradle.FormError'
 
 var Form = t.form.Form;
 var stylesheet = require('../styles/styles')
@@ -588,6 +589,12 @@ class NewResource extends Component {
       params.editCols = this.props.editCols;
     if (this.state.isRegistration)
       params.isRegistration = true
+    if (this.props.originatingMessage  &&  this.props.originatingMessage[constants.TYPE] === FORM_ERROR) {
+      params.errors = {}
+      this.props.originatingMessage.errors.forEach((r) => {
+        params.errors[r.name] = r.error
+      })
+    }
 
     var options = this.getFormFields(params);
 

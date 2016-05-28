@@ -19,42 +19,16 @@ var {
 class VerificationButton extends Component {
   render() {
     var resource = this.props.resource;
+    if (utils.isVerifiedByMe(resource))
+      return <View />;
+
     var model = utils.getModel(resource[constants.TYPE]).value;
 
-    if (!model.properties.verifications)
-      return null;
-
-    var me = utils.getMe();
-    var meId = me[constants.TYPE] + '_' + me[constants.ROOT_HASH];
-    var s = resource.from.id.split('_');
-    var fromId = s[0] + '_' + s[1];
-
-    if (!resource.from  ||  fromId === meId)
-      return <View />
-
-    var verifiedByMe;
-    if (resource.verifications) {
-      var lastAdditionalInfoTime;
-      if (resource.additionalInfo) {
-        resource.additionalInfo.forEach(function(r) {
-          if (lastAdditionalInfoTime  &&  lastAdditionalInfoTime < r.time)
-            lastAdditionalInfoTime = r.time;
-        });
-      }
-      resource.verifications.forEach(function(r) {
-        var rh = r.from[constants.ROOT_HASH];
-        if (!rh)
-          rh = utils.getId(r.from).split('_')[1];
-
-        if (rh === me[constants.ROOT_HASH]  &&  (!lastAdditionalInfoTime  ||  lastAdditionalInfoTime < r.time))
-          verifiedByMe = true;
-      });
-    }
-    if (verifiedByMe)
-      return <View />;
+    let self = this
     return (
-       <View style={[buttonStyles.container1, {top: 80}]}>
-         <TouchableHighlight underlayColor='transparent' onPress={() =>
+      <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+        <View style={[buttonStyles.container1, {paddingVertical: 3}]}>
+          <TouchableHighlight underlayColor='transparent' onPress={() =>
             AlertIOS.alert(
               'Verify ' + utils.getDisplayName(resource, model.properties),
               null,
@@ -63,8 +37,7 @@ class VerificationButton extends Component {
                 {text: 'Cancel', onPress: () => console.log('Canceled!')},
               ]
             )
-
-         }>
+          }>
            <View>
              <View style={buttonStyles.buttonContent} />
              <View style={buttonStyles.row1}>
@@ -72,22 +45,24 @@ class VerificationButton extends Component {
                <Text style={buttonStyles.text1}>{'Verify'}</Text>
              </View>
            </View>
-         </TouchableHighlight>
-       </View>
-    );
+          </TouchableHighlight>
+        </View>
+        <View style={[buttonStyles.container1, {paddingVertical: 3}]}>
+          <TouchableHighlight underlayColor='transparent' onPress={() =>
+            self.props.edit()
+          }>
+            <View>
+               <View style={buttonStyles.buttonContent} />
+               <View style={buttonStyles.row1}>
+                 <Icon name='ios-compose-outline' size={25}  color='#ffffff' style={buttonStyles.icon1}/>
+                 <Text style={buttonStyles.text1}>{'Edit'}</Text>
+               </View>
+            </View>
+          </TouchableHighlight>
+        </View>
+      </View>
+      )
   }
-
 }
-
-var styles = StyleSheet.create({
-  icon: {
-    width: 40,
-    height: 40,
-    borderWidth: 2,
-    borderColor: '#D7E6ED',
-    backgroundColor: '#7AAAC3',
-    borderRadius: 20,
-  },
-});
 
 module.exports = VerificationButton;

@@ -11,7 +11,8 @@ var crypto = require('crypto')
 var Q = require('q')
 var collect = require('stream-collector')
 var t = require('tcomb-form-native');
-var moment = require('moment');
+// var moment = require('moment');
+var dateformat = require('dateformat')
 var Backoff = require('backoff')
 var extend = require('xtend')
 var levelErrors = require('levelup/lib/errors')
@@ -220,22 +221,6 @@ var utils = {
     else
       return r[constants.TYPE] + '_' + r[constants.ROOT_HASH];
   },
-  getFormattedDate(dateTime) {
-    var date = new Date(dateTime);
-    var dayDiff = moment(new Date()).dayOfYear() - moment(date).dayOfYear();
-    var val;
-    switch (dayDiff) {
-    case 0:
-      val = moment(date).format('[today], h:mA');
-      break;
-    case 1:
-      val = moment(date).format('[yesterday], h:m');
-      break;
-    default:
-      val = moment(date).format('MMMM Do YYYY, h:mm:ss a');
-    }
-    return val;
-  },
   getItemsMeta(metadata) {
     var props = metadata.properties;
     var required = utils.arrayToObject(metadata.required);
@@ -314,20 +299,33 @@ var utils = {
     }
     return val;
   },
-  formatDate(date) {
-    var dayDiff = moment(new Date()).dayOfYear() - moment(date).dayOfYear();
+  formatDate(date, noTime) {
+    // var dayDiff = moment(new Date()).dayOfYear() - moment(date).dayOfYear();
+    var date = new Date(date);
+    var now = new Date()
+
+    var dayDiff = Math.floor((now.getTime() - date.getTime()) / (3600 * 24 * 1000))
+
     var val;
     switch (dayDiff) {
     case 0:
-      val = moment(date).format('h:mA') //moment(date).fromNow();
+      val = dateformat(date, 'h:mm TT')
+      // val = moment(date).format('h:mA') //moment(date).fromNow();
       break;
     case 1:
-      val = moment(date).format('[yesterday], h:mA');
+      val = 'yesterday, ' + noTime ? '' : dateformat(date, 'h:mm TT')
+      // val = moment(date).format('[yesterday], h:mA');
       break;
     default:
-      val = moment(date).format('LL');
+      val = dateformat(date, 'mmmm dS yyyy' + (noTime ? '' : ', h:MM:ss TT'));
+      // val = moment(date).format('LL');
     }
     return val;
+  },
+  keyByValue: function (map, value) {
+    for (var k in map) {
+      if (map[k] === value) return k
+    }
   },
   splitMessage(message) {
     if (!message)
@@ -366,6 +364,10 @@ var utils = {
       return 'http://' + url;
   },
   sendSigned(driver, opts) {
+    if (opts.msg[TYPE] == 'tradle.SelfIntroduction') {
+      opts.public = true
+    }
+
     return driver.sign(opts.msg)
       .then((signed) => {
         opts.msg = signed
@@ -394,6 +396,37 @@ var utils = {
     }
   },
 
+  isMyMessage(r) {
+    var fromHash = utils.getId(r.from);
+    var me = utils.getMe()
+    if (fromHash == me[constants.TYPE] + '_' + me[constants.ROOT_HASH])
+      return true;
+    if (utils.getModel(r[constants.TYPE]).value.subClassOf == 'tradle.MyProduct') {
+      let org = r.from.organization
+      if (org  &&  utils.getId(r.from.organization) !== utils.getId(this.props.to))
+        return true
+    }
+  },
+  isVerifiedByMe(resource) {
+    if (!resource.verifications)
+      return false
+    var lastAdditionalInfoTime, verifiedByMe
+    if (resource.additionalInfo) {
+      resource.additionalInfo.forEach(function(r) {
+        if (lastAdditionalInfoTime  &&  lastAdditionalInfoTime < r.time)
+          lastAdditionalInfoTime = r.time;
+      });
+    }
+    resource.verifications.forEach(function(r) {
+      var rh = r.from[constants.ROOT_HASH];
+      if (!rh)
+        rh = utils.getId(r.from).split('_')[1];
+
+      if (rh === me[constants.ROOT_HASH]  &&  (!lastAdditionalInfoTime  ||  lastAdditionalInfoTime < r.time))
+        verifiedByMe = true
+    });
+    return verifiedByMe
+  },
   optimizeResource(res) {
     var properties = this.getModel(res[TYPE]).value.properties
     for (var p in res) {

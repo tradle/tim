@@ -306,11 +306,11 @@ class ResourceRow extends Component {
           row = <Text style={style} key={self.getNextKey()}>{val}</Text>;
         }
         if (first  &&  dateProp) {
-          var val = utils.formatDate(new Date(resource[dateProp]));
+          var val = utils.formatDate(new Date(resource[dateProp]), true);
           // var dateBlock = self.addDateProp(resource, dateProp, true);
-          row = <View style={{flexDirection: 'row', justifyContent: 'space-between'}} key={this.getNextKey()}>
+          row = <View style={{flexDirection: 'row', justifyContent: 'space-between'}} key={self.getNextKey()}>
                   <View>{row}</View>
-                  <View>
+                  <View style={{marginTop: -10}}>
                     <Text style={styles.verySmallLetters}>{val}</Text>
                   </View>
                 </View>

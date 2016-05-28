@@ -12,11 +12,12 @@ var ShowPropertiesView = require('./ShowPropertiesView');
 var ShowMessageRefList = require('./ShowMessageRefList');
 // var MoreLikeThis = require('./MoreLikeThis');
 var NewResource = require('./NewResource');
-var VerificationButton = require('./VerificationButton');
+// var VerificationButton = require('./VerificationButton');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
+var extend = require('extend');
 var ResourceMixin = require('./ResourceMixin');
 var buttonStyles = require('../styles/buttonStyles');
 
@@ -27,6 +28,7 @@ var {
   Text,
   PropTypes,
   ArticleView,
+  AlertIOS,
   Component
 } = React;
 
@@ -42,6 +44,10 @@ class MessageView extends Component {
     this.state = {
       resource: props.resource,
     };
+    var currentRoutes = this.props.navigator.getCurrentRoutes();
+    var currentRoutesLength = currentRoutes.length;
+    if (currentRoutes[currentRoutesLength - 1].rightButtonTitle)
+      currentRoutes[currentRoutesLength - 1].onRightButtonPress = this.verifyOrCreateError.bind(this)
   }
   componentDidMount() {
     this.listenTo(Store, 'onAddVerification');
@@ -55,6 +61,60 @@ class MessageView extends Component {
       });
     }
   }
+  verifyOrCreateError() {
+    let resource = this.props.resource
+    let model = utils.getModel(resource[constants.TYPE]).value
+    if (utils.isEmpty(this.state.errorProps)) {
+      AlertIOS.alert(
+        'Verify ' + utils.getDisplayName(resource, model.properties),
+        null,
+        [
+          {text: 'Verify', onPress: this.verify.bind(this)},
+          {text: 'Cancel', onPress: () => console.log('Canceled!')},
+        ]
+      )
+    }
+    else {
+      AlertIOS.prompt(
+        'Please write a message to the customer',
+        [
+          {text: 'Submit', onPress: this.createError.bind(this)},
+          {text: 'Cancel', null},
+        ]
+      )
+   }
+  }
+  createError(text) {
+    let errors = []
+    for (let p in this.state.errorProps) {
+      errors.push({name: p, error: 'Please correct this property'})
+    }
+    let resource = this.props.resource
+
+    let formError = {
+      _t: 'tradle.FormError',
+      errors: errors,
+      prefill: resource,
+      from: resource.to,
+      to: resource.from,
+      message: text || translate('pleaseCorrectTheErrors')
+    }
+    Actions.addMessage(formError)
+    this.props.navigator.pop()
+
+  }
+  onCheck(prop) {
+    let errorProps = {}
+
+    if (this.state.errorProps)
+      extend(errorProps, this.state.errorProps)
+    if (this.state.errorProps  &&  this.state.errorProps[prop.name])
+      delete errorProps[prop.name]
+    else
+      errorProps[prop.name] = prop
+    this.setState({errorProps: errorProps})
+  }
+
   getRefResource(resource, prop) {
     var model = utils.getModel(this.props.resource[constants.TYPE]).value;
 
@@ -67,7 +127,7 @@ class MessageView extends Component {
     var resource = this.state.resource;
     var modelName = resource[constants.TYPE];
     var model = utils.getModel(modelName).value;
-    var date = utils.getFormattedDate(new Date(resource.time))
+    var date = utils.formatDate(new Date(resource.time))
     var inRow = resource.photos ? resource.photos.length : 0
     if (inRow  &&  inRow > 4)
       inRow = 5;
@@ -92,7 +152,16 @@ class MessageView extends Component {
       verificationTxID = <View />
       separator = <View />
     }
-        // <VerificationButton  resource={resource} verify={this.verify.bind(this)} verificationList={this.showResources.bind(this)}/>
+
+    // let verificationButton = this.props.isVerifier
+    //                        ? <VerificationButton resource={resource} verify={this.verify.bind(this)} verificationList={this.showResources.bind(this)} edit={this.edit.bind(this)} />
+    //                        : <View />
+    // let editButton = this.props.isVerifier
+    //                ? <VerificationButton resource={resource} edit={this.edit.bind(this)} />
+    //                : <View />
+    // let message = <View style={{padding: 10}}>
+    //                 <Text style={styles.itemTitle}>click done for verifying or check the properties that should be corrected and click Done button</Text>
+    //               </View>
     return (
       <ScrollView  ref='this' style={styles.container}>
         <View style={styles.band}><Text style={styles.date}>{date}</Text></View>
@@ -106,7 +175,10 @@ class MessageView extends Component {
             <View><Text style={styles.itemTitle}>{resource.message}</Text></View>
             <ShowPropertiesView navigator={this.props.navigator}
                                 resource={resource}
+                                bankStyle={this.props.bankStyle}
+                                errorProps={this.state.errorProps}
                                 currency={this.props.currency}
+                                checkProperties={this.props.isVerifier ? this.onCheck.bind(this) : null}
                                 excludedProperties={['tradle.Message.message', 'time', 'photos']}
                                 showRefResource={this.getRefResource.bind(this)}/>
             {separator}
@@ -116,8 +188,6 @@ class MessageView extends Component {
       </ScrollView>
     );
   }
-
-
   onPress(url) {
     this.props.navigator.push({
       id: 7,
@@ -142,6 +212,52 @@ class MessageView extends Component {
       title: utils.getDisplayName(resource, rmodel.properties)
     }
     Actions.addVerification(r);
+  }
+
+  verify() {
+    var resource = this.props.resource;
+    var model = utils.getModel(resource[constants.TYPE]).value;
+    // this.props.navigator.pop();
+    var me = utils.getMe();
+    var from = this.props.resource.from;
+    var verificationModel = constants.TYPES.VERIFICATION // model.properties.verifications.items.ref;
+    var verification = {
+      document: {
+        id: resource[constants.TYPE] + '_' + resource[constants.ROOT_HASH] + '_' + resource[constants.CUR_HASH],
+        title: resource.message ? resource.message : model.title
+      },
+      to: {
+        id: from.id,
+        title: from.title
+      },
+      from: {
+        id: me[constants.TYPE] + '_' + me[constants.ROOT_HASH] + '_' + me[constants.CUR_HASH],
+        title: utils.getDisplayName(me, utils.getModel(me[constants.TYPE]).value.properties)
+      },
+      time: new Date().getTime()
+    }
+    verification[constants.TYPE] = verificationModel;
+
+    if (verificationModel === constants.TYPES.VERIFICATION)
+      Actions.addVerification(verification);
+    else {
+      this.props.navigator.replace({
+        title: resource.message,
+        id: 4,
+        component: NewResource,
+        backButtonTitle: resource.firstName,
+        rightButtonTitle: 'Done',
+        titleTextColor: '#7AAAC3',
+        passProps: {
+          model: utils.getModel(verificationModel).value,
+          resource: verification,
+          // callback: this.createVerification.bind(self)
+        }
+      });
+    }
+  }
+  createVerification(resource) {
+    Actions.addVerification(resource, true);
   }
 }
 reactMixin(MessageView.prototype, Reflux.ListenerMixin);
@@ -202,48 +318,29 @@ var styles = StyleSheet.create({
 });
 
 module.exports = MessageView;
-  // verify() {
-  //   var resource = this.props.resource;
-  //   var model = utils.getModel(resource[constants.TYPE]).value;
-  //   // this.props.navigator.pop();
-  //   var me = utils.getMe();
-  //   var from = this.props.resource.from;
-  //   var verificationModel = model.properties.verifications.items.ref;
-  //   var verification = {
-  //     document: {
-  //       id: resource[constants.TYPE] + '_' + resource[constants.ROOT_HASH] + '_' + resource[constants.CUR_HASH],
-  //       title: resource.message ? resource.message : model.title
-  //     },
-  //     to: {
-  //       id: from.id,
-  //       title: from.title
-  //     },
-  //     from: {
-  //       id: me[constants.TYPE] + '_' + me[constants.ROOT_HASH] + '_' + me[constants.CUR_HASH],
-  //       title: utils.getDisplayName(me, utils.getModel(me[constants.TYPE]).value.properties)
-  //     },
-  //     time: new Date().getTime()
-  //   }
-  //   verification[constants.TYPE] = verificationModel;
+  // edit() {
+  //   let rmodel = utils.getModel('tradle.FormError').value
+  //   let title = translate(rmodel)
+  //   // let form = this.props.resource
 
-  //   if (verificationModel === constants.TYPES.VERIFICATION)
-  //     Actions.addVerification(verification);
-  //   else {
-  //     this.props.navigator.replace({
-  //       title: resource.message,
-  //       id: 4,
-  //       component: NewResource,
-  //       backButtonTitle: resource.firstName,
-  //       rightButtonTitle: 'Done',
-  //       titleTextColor: '#7AAAC3',
-  //       passProps: {
-  //         model: utils.getModel(verificationModel).value,
-  //         resource: verification,
-  //         // callback: this.createVerification.bind(self)
-  //       }
-  //     });
-  //   }
-  // }
-  // createVerification(resource) {
-  //   Actions.addVerification(resource, true);
+  //   this.props.navigator.push({
+  //     title: title,
+  //     id: 4,
+  //     component: MessageView,
+  //     // titleTextColor: '#999999',
+  //     backButtonTitle: translate('back'),
+  //     rightButtonTitle: translate('done'),
+  //     passProps: {
+  //       model: rmodel,
+  //       createFormError: true,
+  //       resource: this.props.resource,
+  //       // resource: {
+  //       //   to: form.from,
+  //       //   from: form.to,
+  //       //   _t: 'tradle.FormError',
+  //       //   prefill: form,
+  //       //   message: translate('pleaseCorrectTheErrors', translate(rmodel), form.from.formatted)
+  //       // },
+  //     }
+  //   })
   // }

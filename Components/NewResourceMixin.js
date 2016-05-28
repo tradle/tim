@@ -1,7 +1,7 @@
 'use strict';
 
 var React = require('react-native');
-var moment = require('moment')
+var dateformat = require('dateformat')
 var ResourceList = require('./ResourceList')
 var EnumList = require('./EnumList')
 var Picker = require('./Picker')
@@ -119,7 +119,8 @@ var NewResourceMixin = {
       var type = props[p].type;
       var formType = type !== 'boolean'  &&  propTypesMap[type];
       // Don't show readOnly property in edit mode if not set
-      if (props[p].readOnly) //  &&  (type === 'date'  ||  !data  ||  !data[p]))
+      let isReadOnly = props[p].readOnly
+      if (isReadOnly) //  &&  (type === 'date'  ||  !data  ||  !data[p]))
         continue;
 
       var label = translate(props[p], meta) //props[p].title;
@@ -207,6 +208,7 @@ var NewResourceMixin = {
                     model: meta,
                     value: data  &&  data[p] ? data[p] + '' : null,
                     required: !maybe,
+                    errors: params.errors,
                     keyboard: props[p].keyboard ||  (type === 'number' ? 'numeric' : 'default'),
                   })
 
@@ -283,6 +285,7 @@ var NewResourceMixin = {
                     model: meta,
                     keyboard: 'numeric',
                     required: !maybe,
+                    errors: params.errors,
                   })
 
 
@@ -315,6 +318,7 @@ var NewResourceMixin = {
             label: label,
             prop:  p,
             required: !maybe,
+            errors: params.errors,
             chooser: options.fields[p].onFocus
           })
 
@@ -356,6 +360,7 @@ var NewResourceMixin = {
       options.fields.video.template = this.myCustomTemplate.bind(this, {
           label: translate(props.video, meta),
           prop:  'video',
+          errors: params.errors,
           required: !maybe,
         })
     }
@@ -368,8 +373,13 @@ var NewResourceMixin = {
   onChangeText(prop, value) {
     var r = {}
     extend(true, r, this.state.resource)
-    if(prop.type === 'number')
-      value = Number(value)
+    if(prop.type === 'number') {
+      let val = Number(value)
+      if (value.charAt(value.length - 1) === '.')
+        value = val + .00
+      else
+        value = val
+    }
     if (!this.floatingProps)
       this.floatingProps = {}
     if (prop.ref == constants.TYPES.MONEY) {
@@ -387,7 +397,7 @@ var NewResourceMixin = {
     if (this.state.missedRequiredOrErrorValue)
       delete this.state.missedRequiredOrErrorValue[prop.name]
     this.setState({resource: r})
-    if (this.state.resource[constants.TYPE] !== SETTINGS)
+    if (r[constants.TYPE] !== SETTINGS)
       Actions.saveTemporary(r)
   },
   onChangeTextValue(prop, value, event) {
@@ -454,6 +464,8 @@ var NewResourceMixin = {
       var err = this.state.missedRequiredOrErrorValue
               ? this.state.missedRequiredOrErrorValue[params.prop.name]
               : null
+      if (!err  &&  params.errors  &&  params.errors[params.prop.name])
+        err = params.errors[params.prop.name]
 
       error = err
                 ? <View style={{paddingLeft: 15, backgroundColor: 'transparent'}} key={this.getNextKey()}>
@@ -510,6 +522,8 @@ var NewResourceMixin = {
     var err = this.state.missedRequiredOrErrorValue
             ? this.state.missedRequiredOrErrorValue[prop.name]
             : null
+    if (!err  &&  params.errors  &&  params.errors[prop.name])
+      err = params.errors[prop.name]
     var error = err
               ? <View style={{paddingLeft: 5, backgroundColor: 'transparent'}}>
                   <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>This field is required</Text>
@@ -521,7 +535,7 @@ var NewResourceMixin = {
        {propLabel}
        <TouchableHighlight style={styles.button} underlayColor="transparent" onPress={this.showModal.bind(this, prop, true)}>
          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-           <Text style={style}>{(params.value &&  moment(params.value).format('MMMM Do, YYYY')) || translate(params.prop)}</Text>
+           <Text style={style}>{(params.value &&  dateformat(new Date(params.value), 'mmmm dS, yyyy')) || translate(params.prop)}</Text>
           <Icon name='ios-calendar-outline'  size={17}  color={LINK_COLOR}  style={styles.icon1} />
          </View>
        </TouchableHighlight>
@@ -592,10 +606,17 @@ var NewResourceMixin = {
 
     let isRequired = this.props.model && this.props.model.required  &&  this.props.model.required.indexOf(params.prop) !== -1
     if (resource && resource[params.prop]) {
-      var m = utils.getId(resource[params.prop]).split('_')[0]
-      var rModel = utils.getModel(m).value
-      label = utils.getDisplayName(resource[params.prop], rModel.properties)
-
+      let rModel
+      // HACK for Boolean
+      if (prop.type === 'boolean'  &&  (resource[params.prop] === 'No' || resource[params.prop] === 'Yes')) {
+        rModel = utils.getModel('tradle.Boolean')
+        label = translate(resource[params.prop])
+      }
+      else {
+        var m = utils.getId(resource[params.prop]).split('_')[0]
+        rModel = utils.getModel(m).value
+        label = utils.getDisplayName(resource[params.prop], rModel.properties)
+      }
       if (!label)
         label = resource[params.prop].title
       if (rModel.subClassOf  &&  rModel.subClassOf === ENUM)
@@ -613,6 +634,8 @@ var NewResourceMixin = {
     var err = this.state.missedRequiredOrErrorValue
             ? this.state.missedRequiredOrErrorValue[prop.name]
             : null
+    if (!err  &&  params.errors  &&  params.errors[prop.name])
+      err = params.errors[prop.name]
     var error = err
               ? <View style={{paddingLeft: 5, backgroundColor: 'transparent'}}>
                   <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>This field is required</Text>
@@ -766,6 +789,7 @@ var NewResourceMixin = {
                     value: params.value.value ? params.value.value + '' : '',
                     required: params.required,
                     model: params.model,
+                    errors: params.errors,
                     keyboard: 'numeric',
                   })
           }
@@ -775,6 +799,8 @@ var NewResourceMixin = {
                     enumProp: utils.getModel(constants.TYPES.MONEY).value.properties.currency,
                     required: params.required,
                     value:    utils.normalizeCurrencySymbol(params.value.currency),
+                    errors:   params.errors,
+                    noError:  params.errors && params.errors[params.prop] ? true : false,
                     noError: true
                   })
         }
@@ -793,17 +819,22 @@ var NewResourceMixin = {
       var err = this.state.missedRequiredOrErrorValue
               ? this.state.missedRequiredOrErrorValue[prop.name]
               : null
+      if (!err  &&  params.errors  &&  params.errors[prop.name])
+        err = params.errors[prop.name]
+      // error = err
+      //           ? <View style={{paddingLeft: 5, backgroundColor: 'transparent'}}>
+      //               <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>Enter a valid {prop.title}</Text>
+      //             </View>
+      //           : <View />
       error = err
-                ? <View style={{paddingLeft: 5, backgroundColor: 'transparent'}}>
-                    <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>Enter a valid {prop.title}</Text>
-                  </View>
+                ? <View style={{paddingLeft: 5, height: 14, backgroundColor: 'transparent'}} />
                 : <View />
     }
     else
       error = <View/>
     var value = prop ? params.value : resource[enumProp.name]
     return (
-      <View style={[styles.chooserContainer, {width: 40, height: 51}]} key={this.getNextKey()} ref={enumProp.name}>
+      <View style={[styles.chooserContainer, {width: 40, marginTop: 10, height: 51}]} key={this.getNextKey()} ref={enumProp.name}>
         <TouchableHighlight underlayColor='transparent' onPress={this.enumChooser.bind(this, prop, enumProp)}>
           <View style={{ position: 'relative'}}>
             <View style={styles.chooserContentStyle}>
@@ -890,20 +921,16 @@ var NewResourceMixin = {
     });
   },
   validateProperties(value) {
-
-    let properties = value[constants.TYPE]
-                   ? utils.getModel(value[constants.TYPE]).value.properties
-                   : this.props.model.properties
-    // let m = utils.getModel(value[constants.TYPE]).value
-    // let properties = m.properties
+    let m = value[constants.TYPE]
+                   ? utils.getModel(value[constants.TYPE]).value
+                   : this.props.model
+    let properties = m.properties
     let err = []
     let deleteProps = []
     for (var p in value) {
-      if (p.charAt(0) === '_')
-        continue
-      if (!value[p])
-        continue
       let prop = properties[p]
+      if (!prop  ||  !value[p]) // properties like _t, _r, time
+        continue
       if (prop.type === 'number')
         this.checkNumber(value[p], prop, err)
       else if (prop.ref === constants.TYPES.MONEY) {

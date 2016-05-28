@@ -48,6 +48,7 @@ var PhotoCarousel = require('./Components/PhotoCarousel');
 var QRCode = require('./Components/QRCode')
 var QRCodeScanner = require('./Components/QRCodeScanner')
 var utils = require('./utils/utils');
+var translate = utils.translate
 var constants = require('@tradle/constants');
 var Icon = require('react-native-vector-icons/Ionicons');
 var Actions = require('./Actions/Actions');
@@ -72,6 +73,7 @@ var {
   View,
   TouchableOpacity,
   StyleSheet,
+  AlertIOS,
   // LinkingIOS,
   AppStateIOS
 } = React;
@@ -446,13 +448,30 @@ var NavigationBarRouteMapper = {
       style.push({color: route.tintColor});
     else if (route.passProps.bankStyle)
       style.push({color: route.passProps.bankStyle.LINK_COLOR || '#7AAAC3'})
-    var title = route.rightButtonTitle.indexOf('|') == -1
-              ?  <Text style={style}>
-                    {route.rightButtonTitle}
-                 </Text>
-              : <Icon name={route.rightButtonTitle.substring(4)} size={20} color='#7AAAC3' style={styles.icon}/>;
+    var title
+    if (route.rightButtonTitle.indexOf('|') == -1)
+      title =  <Text style={style}>
+                  {route.rightButtonTitle}
+               </Text>
+    else {
+      let iconsList = route.rightButtonTitle.split('|')
+      let icons = []
+      iconsList.forEach((i) => {
+        icons.push(<Icon name={i} key={i} size={20} color='#7AAAC3' style={{paddingLeft: 3}} />)
+      })
 
+      title = <View style={{flexDirection: 'row'}}>
+               {icons}
+              </View>
+    }
     return (
+      <View style={{flexDirection: 'row'}}>
+      {route.help
+        ? <TouchableOpacity onPress={() =>  AlertIOS.alert(translate(route.help))}>
+            <Icon name={'ios-help'} key={'ios-help'} size={20} color='#29ABE2' style={{paddingLeft: 3}}/>
+          </TouchableOpacity>
+        : <View />
+      }
       <TouchableOpacity
         onPress={() => {
                   // 'Done' button case for creating new resources
@@ -474,6 +493,7 @@ var NavigationBarRouteMapper = {
           {title}
         </View>
       </TouchableOpacity>
+      </View>
     );
   },
 

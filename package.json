@@ -44,7 +44,7 @@
     "https-browserify": "0.0.1",
     "inherits": "^2.0.1",
     "levelup": "^0.18.6",
-    "logbase": "^3.4.2",
+    "logbase": "^4.0.0",
     "map-stream": "0.0.6",
     "mockery": "^1.4.0",
     "moment": "^2.13.0",

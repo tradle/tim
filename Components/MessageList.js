@@ -23,6 +23,7 @@ var GiftedMessenger = require('react-native-gifted-messenger');
 // var ResourceTypesScreen = require('./ResourceTypesScreen');
 
 var LINK_COLOR
+const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 
 var {
   ListView,
@@ -127,10 +128,15 @@ class MessageList extends Component {
       Actions.messageList({modelName: this.props.modelName, to: this.props.resource});
       return
     }
-    if ( params.action !== 'messageList'   ||
-        !params.list                       ||
+    if ( params.action !== 'messageList'                   ||
+        (!params.list  &&  !params.forgetMeFromCustomer)   ||
         params.isAggregation !== this.props.isAggregation)
       return;
+    if (params.forgetMeFromCustomer) {
+      Actions.list({modelName: constants.TYPES.PROFILE})
+      this.props.navigator.pop()
+      return
+    }
     if (params.resource  &&  params.resource[constants.ROOT_HASH] != this.props.resource[constants.ROOT_HASH]) {
       var doUpdate
       if (this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION  &&  params.resource.organization) {
@@ -174,36 +180,32 @@ class MessageList extends Component {
         isLoading: false,
         list: list,
         shareableResources: params.shareableResources,
-        allLoaded: false
+        allLoaded: false,
+        isEmployee: params.isEmployee
       });
     }
     else
-      this.setState({isLoading: false})
+      this.setState({isLoading: false, isEmployee: params.isEmployee})
   }
   shouldComponentUpdate(nextProps, nextState) {
     // Eliminating repeated alerts when connection returns after ForgetMe action
     if (!this.props.navigator.isConnected && !this.state.list  && !nextState.list && this.state.isLoading === nextState.isLoading)
       return false
-
     if (!this.state.list                                 ||
         !nextState.list                                  ||
          this.state.allLoaded !== nextState.allLoaded    ||
          this.state.sendStatus !== nextState.sendStatus  ||
          this.state.list.length !== nextState.list.length)
       return true
-    var isDiff = false
-    for (var i=0; i<this.state.list.length  &&  !isDiff; i++) {
-      if (this.state.list[i][constants.ROOT_HASH] !== nextState.list[i][constants.ROOT_HASH]) {
-        if (i === this.state.list.length - 1                      &&
-            this.state.list[i][constants.TYPE] === nextState.list[i][constants.TYPE]  &&
-            this.state.list[i][constants.TYPE] === constants.TYPES.PRODUCT_LIST)
-
-        // if (JSON.stringify(this.state.list[i].list) !== JSON.stringify(nextState.list[i].list))
-        if (!equal(this.state.list[i].list, nextState.list[i].list))
-          isDiff = true
-      }
+    for (var i=0; i<this.state.list.length; i++) {
+      let r = this.state.list[i]
+      let nr = nextState.list[i]
+      if (r[constants.TYPE] !== nr[constants.TYPE]            ||
+          r[constants.ROOT_HASH] !== nr[constants.ROOT_HASH]  ||
+          r[constants.CUR_HASH] !== nr[constants.CUR_HASH])
+        return true
     }
-    return isDiff
+    return false
   }
   share(resource, to, formResource) {
     console.log('Share')
@@ -226,6 +228,13 @@ class MessageList extends Component {
         newTitle += newTitle.length ? ' ' + word : word;
       })
     }
+    let me = utils.getMe()
+    // Check if I am a customer or a verifier and if I already verified this resource
+    let isVerifier = me.organization  &&
+                    !verification     &&
+                     utils.getId(me) === utils.getId(resource.to) &&
+                    !utils.isVerifiedByMe(resource)               && // !verification  &&  utils.getId(resource.to) === utils.getId(me)  &&
+                     model.subClassOf === constants.TYPES.FORM
     var route = {
       title: newTitle,
       id: 5,
@@ -236,9 +245,16 @@ class MessageList extends Component {
         bankStyle: this.props.bankStyle,
         resource: resource,
         currency: this.props.currency,
-        verification: verification
-      },
+        verification: verification,
+        // createFormError: isVerifier && !utils.isMyMessage(resource),
+        isVerifier: isVerifier
+      }
     }
+    if (isVerifier) {
+      route.rightButtonTitle = 'ribbon-b|ios-close'
+      route.help = translate('verifierHelp')  // will show in alert when clicked on help icon in navbar
+    }
+
     this.props.navigator.push(route);
   }
 
@@ -319,10 +335,12 @@ class MessageList extends Component {
     var alert = <View />
     if (!this.state.list || !this.state.list.length) {
       if (this.props.navigator.isConnected  &&  this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION) {
-        content = <View style={[styles.container, bgStyle]}>
-          <Text style={{fontSize: 16, alignSelf: 'center', marginTop: 80, color: '#629BCA'}}>{'Loading...'}</Text>
-          <ActivityIndicatorIOS size='large' style={{alignSelf: 'center', marginTop: 20}} />
-        </View>
+        if (this.state.isLoading) {
+          content = <View style={[styles.container, bgStyle]}>
+            <Text style={{fontSize: 16, alignSelf: 'center', marginTop: 80, color: '#629BCA'}}>{'Loading...'}</Text>
+            <ActivityIndicatorIOS size='large' style={{alignSelf: 'center', marginTop: 20}} />
+          </View>
+        }
       }
       else {
         if (!this.state.isLoading  &&  !this.props.navigator.isConnected) {
@@ -330,13 +348,14 @@ class MessageList extends Component {
                 ? AlertIOS.alert(translate('noConnectionForPL', this.props.resource.name))
                 : AlertIOS.alert(translate('noConnection'))
         }
-        content =  <NoResources
-                    filter={this.state.filter}
-                    model={model}
-                    isLoading={this.state.isLoading}/>
+        // content =  <NoResources
+        //             filter={this.state.filter}
+        //             model={model}
+        //             isLoading={this.state.isLoading}/>
       }
     }
-    else {
+
+    if (!content) {
       var isAllMessages = model.isInterface  &&  model.id === constants.TYPES.MESSAGE;
 
       content = <GiftedMessenger style={{paddingHorizontal: 10, marginTop: 5}}
@@ -403,12 +422,24 @@ class MessageList extends Component {
         // {addNew}
   }
   generateMenu() {
-    return <TouchableHighlight underlayColor='transparent'
-              onPress={this.showMenu.bind(this)}>
-             <View style={{marginLeft: 5, paddingRight: 0, marginTop: 5, marginRight: 10, marginBottom: 0}}>
-               <Icon name='android-more-vertical' size={30} color='#999999' />
-             </View>
-           </TouchableHighlight>
+    if (this.state.isEmployee)
+      return <View style={{paddingLeft: 10}}/>
+
+    if (this.props.resource[constants.TYPE] === constants.TYPES.PROFILE &&
+        utils.getMe().organization) {
+      return <TouchableHighlight underlayColor='transparent'
+                onPress={this.chooseFormForCustomer.bind(this)}>
+               <View style={{marginLeft: 5, paddingRight: 0, marginTop: 5, marginRight: 10, marginBottom: 0}}>
+                 <Icon name='android-more-vertical' size={30} color='#999999' />
+               </View>
+             </TouchableHighlight>
+    }
+    return  <TouchableHighlight underlayColor='transparent'
+                onPress={this.showMenu.bind(this)}>
+               <View style={{marginLeft: 5, paddingRight: 0, marginTop: 5, marginRight: 10, marginBottom: 0}}>
+                 <Icon name='android-more-vertical' size={30} color='#999999' />
+               </View>
+             </TouchableHighlight>
   }
 
 
@@ -441,6 +472,40 @@ class MessageList extends Component {
   checkStart(evt) {
     evt = evt
   }
+
+  chooseFormForCustomer() {
+    var currentRoutes = this.props.navigator.getCurrentRoutes();
+    var resource = this.props.resource
+    var currentRoutes = this.props.navigator.getCurrentRoutes();
+    this.props.navigator.push({
+      title: translate(utils.getModel(constants.TYPES.FINANCIAL_PRODUCT).value),
+      id: 15,
+      component: ProductChooser,
+      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      backButtonTitle: translate('cancel'),
+      passProps: {
+        resource: resource,
+        returnRoute: currentRoutes[currentRoutes.length - 1],
+        callback: this.props.callback,
+        type: constants.TYPES.FORM
+      },
+      // rightButtonTitle: 'ion|plus',
+      // onRightButtonPress: {
+      //   id: 4,
+      //   title: translate('newProduct'),
+      //   component: NewResource,
+      //   backButtonTitle: translate('back'),
+      //   // titleTextColor: '#999999',
+      //   rightButtonTitle: translate('done'),
+      //   passProps: {
+      //     model: utils.getModel('tradle.NewMessageModel').value,
+      //     currency: resource.currency,
+      //     // callback: this.modelAdded.bind(this)
+      //   }
+      // }
+    });
+  }
+
   showMenu() {
     // var buttons = ['Talk to representative', 'Forget me', 'Cancel']
     var buttons = [translate('forgetMe'), translate('cancel')] // ['Forget me', 'Cancel']
@@ -505,7 +570,8 @@ class MessageList extends Component {
       passProps: {
         resource: resource,
         returnRoute: currentRoutes[currentRoutes.length - 1],
-        callback: this.props.callback
+        callback: this.props.callback,
+        type: PRODUCT_APPLICATION
       },
       rightButtonTitle: 'ion|plus',
       onRightButtonPress: {

@@ -324,7 +324,7 @@ class TimHome extends Component {
 
     nav.push(route)
   }
-	showContacts() {
+  showContacts() {
     let passProps = {
         filter: '',
         modelName: this.props.modelName,
@@ -334,7 +334,7 @@ class TimHome extends Component {
     this.props.navigator.push({
       // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       id: 10,
-      title: 'Contacts',
+      title: translate('Accounts'),
       // titleTextColor: '#7AAAC3',
       backButtonTitle: translate('back'),
       component: ResourceList,
@@ -361,12 +361,17 @@ class TimHome extends Component {
         passProps: {resource: me}
       }
     });
-	}
+  }
   showOfficialAccounts() {
     var nav = this.props.navigator
     nav.immediatelyResetRouteStack(nav.getCurrentRoutes().slice(0,1));
     let me = utils.getMe()
+    if (me.organization) {
+      this.showContacts()
+      return
+    }
     let title = me.firstName;
+
     nav.push({
       title: translate('officialAccounts'),
       id: 10,

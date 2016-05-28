@@ -41,6 +41,9 @@ var Picker = React.createClass({
         <DatePickerIOS
           date={this.props.value || new Date()}
           mode='date'
+          onFocus={(time) => {
+            this.props.changeTime(time, this.props.prop)
+          }}
           onDateChange={(time) => this.props.changeTime(time, this.props.prop)}>
         </DatePickerIOS>
       </Animated.View>

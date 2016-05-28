@@ -36,9 +36,9 @@
    */
 
 #ifdef DEBUG
-    jsCodeLocation = [NSURL URLWithString:@"http://localhost:8081/index.ios.bundle?platform=ios&dev=true"];
-    QTouchposeApplication *touchposeApplication = (QTouchposeApplication *)application;
-    touchposeApplication.alwaysShowTouches = YES;
+    jsCodeLocation = [NSURL URLWithString:@"http://192.168.0.136:8081/index.ios.bundle?platform=ios&dev=true"];
+//    QTouchposeApplication *touchposeApplication = (QTouchposeApplication *)application;
+//    touchposeApplication.alwaysShowTouches = YES;
 #else
     jsCodeLocation = [CodePush bundleURL];
 #endif

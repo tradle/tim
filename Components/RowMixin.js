@@ -16,7 +16,7 @@ var RowMixin = {
     // var style = styles.description;
     if (properties[dateProp]  &&  properties[dateProp].style)
       style = [style, properties[dateProp].style];
-    var val = utils.formatDate(new Date(resource[dateProp])); //utils.getFormattedDate(new Date(resource[dateProp]));
+    var val = utils.formatDate(new Date(resource[dateProp]));
 
     return !properties[dateProp]  ||  properties[dateProp].skipLabel
         ? <Text style={style} key={this.getNextKey()}>{val}</Text>
