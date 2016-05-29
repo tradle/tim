@@ -20,6 +20,7 @@ var reactMixin = require('react-mixin');
 var extend = require('extend');
 var ResourceMixin = require('./ResourceMixin');
 var buttonStyles = require('../styles/buttonStyles');
+var HELP_COLOR = 'blue'
 
 var {
   StyleSheet,
@@ -172,7 +173,7 @@ class MessageView extends Component {
         <View style={{marginTop: -3}}>
           <PhotoList photos={resource.photos} resource={resource} isView={true} navigator={this.props.navigator} numberInRow={inRow}/>
           <View style={styles.rowContainer}>
-            <View><Text style={styles.itemTitle}>{resource.message}</Text></View>
+            <View><Text style={resource.message ? styles.itemTitle : {height: 0}}>{resource.message}</Text></View>
             <ShowPropertiesView navigator={this.props.navigator}
                                 resource={resource}
                                 bankStyle={this.props.bankStyle}
