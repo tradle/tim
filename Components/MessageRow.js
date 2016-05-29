@@ -286,18 +286,26 @@ class MessageRow extends Component {
     var msgModel = utils.getModel(resource.document[constants.TYPE]).value;
     var orgName = resource.organization  ? resource.organization.title : ''
 
+    let me = utils.getMe()
+    let isThirdPartyVerification
+    if (me.organization  &&  !this.props.to.organization) {
+      let orgId = utils.getId(resource.organization)
+      if (orgId !== utils.getId(me.organization))
+        isThirdPartyVerification = true
+    }
+
     renderedRow = <View>
-                    <View style={[styles.verifiedHeader, {backgroundColor: this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>
+                    <View style={[styles.verifiedHeader, {backgroundColor: isThirdPartyVerification ? '#93BEBA' : this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>
                       <Icon style={styles.verificationIcon} size={20} name={'android-done'} />
                       <Text style={styles.verificationHeaderText}>{translate('verifiedBy', orgName)}</Text>
                     </View>
                     <View style={{paddingTop: 5}}>
-                      {this.formatDocument(msgModel, resource, this.verify.bind(this))}
+                      {this.formatDocument(msgModel, resource, this.verify.bind(this), isThirdPartyVerification)}
                     </View>
                   </View>
 
     var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start', width: msgWidth, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}
-    let addStyle = [styles.verificationBody, {backgroundColor: VERIFICATION_BG, borderColor: this.props.bankStyle.VERIFIED_BORDER_COLOR}];
+    let addStyle = [styles.verificationBody, {backgroundColor: VERIFICATION_BG, borderColor: isThirdPartyVerification ? '#93BEBA' : this.props.bankStyle.VERIFIED_BORDER_COLOR}];
     let messageBody =
           <TouchableHighlight onPress={this.verify.bind(this, resource)} underlayColor='transparent'>
             <View style={[styles.row, viewStyle]}>
@@ -345,7 +353,7 @@ class MessageRow extends Component {
     let title = translate(model)
     if (title.length > 30)
       title = title.substring(0, 27) + '...'
-    renderedRow.push(<Text  key={this.getNextKey()} style={[styles.formType, {fontWeight: '600', color: '#289427', alignSelf: 'flex-end'}]}>{title}</Text>);
+    renderedRow.push(<Text  key={this.getNextKey()} style={[styles.formType, {color: '#289427'}]}>{title}</Text>);
 
     let messageBody =
       <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
@@ -682,7 +690,7 @@ class MessageRow extends Component {
       let msg = <View key={this.getNextKey()}>
                   <View style={styles.rowContainer}>
                     <Text style={[styles.resourceTitle, {color: isMyMessage ? '#ffffff' : '#757575'}]}>{resource.message}</Text>
-                    <Icon style={[styles.linkIcon, {color: LINK_COLOR, paddingLeft: 5}]} size={20} name={'ios-personadd'} />
+                    <Icon style={[styles.linkIcon, {color: LINK_COLOR, paddingLeft: 5}]} size={20} name={'ios-person'} />
                   </View>
                 </View>
       renderedRow.push(msg);
@@ -881,7 +889,7 @@ class MessageRow extends Component {
       if (title.length > 30)
         title = title.substring(0, 27) + '...'
 
-      vCols.push(<Text style={[styles.resourceTitle, styles.formType]} key={this.getNextKey()}>{title}</Text>);
+      vCols.push(<Text style={[styles.resourceTitle, styles.formType, {color: isMyMessage ? '#EBFCFF' : this.props.bankStyle.STRUCTURED_MESSAGE_BORDER}]} key={this.getNextKey()}>{title}</Text>);
     }
     if (vCols  &&  vCols.length) {
       vCols.forEach(function(v) {
@@ -1420,8 +1428,8 @@ var styles = StyleSheet.create({
     flexDirection: 'row',
     paddingVertical: 5,
     paddingHorizontal: 7,
-    marginHorizontal: -7,
-    marginTop: -5,
+    marginHorizontal: -8,
+    marginTop: -6,
     justifyContent: 'center'
   },
   sendStatus: {
