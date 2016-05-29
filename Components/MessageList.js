@@ -134,7 +134,10 @@ class MessageList extends Component {
       return;
     if (params.forgetMeFromCustomer) {
       Actions.list({modelName: constants.TYPES.PROFILE})
-      this.props.navigator.pop()
+      let routes = this.props.navigator.getCurrentRoutes()
+      if (routes[routes.length - 1].component )
+      this.props.navigator.popToRoute(routes[1])
+      // ComponentUtils.showContacts(this.props.navigator, constants.TYPES.PROFILE)
       return
     }
     if (params.resource  &&  params.resource[constants.ROOT_HASH] != this.props.resource[constants.ROOT_HASH]) {
@@ -251,7 +254,7 @@ class MessageList extends Component {
       }
     }
     if (isVerifier) {
-      route.rightButtonTitle = 'ribbon-b|ios-close'
+      route.rightButtonTitle = 'Done' //ribbon-b|ios-close'
       route.help = translate('verifierHelp')  // will show in alert when clicked on help icon in navbar
     }
 
