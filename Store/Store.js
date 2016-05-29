@@ -165,7 +165,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
-var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://192.168.0.136:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
+var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://192.168.0.137:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
@@ -754,10 +754,18 @@ var Store = Reflux.createStore({
           if (parsed.data) {
             // cleartext msg
             parsed = JSON.parse(new Buffer(parsed.data, 'base64'))
-            parsed.name = parsed.name ? parsed.name.charAt(0).toUpperCase() + parsed.name.slice(1) : ''
+            let name = parsed.name
+            if (!name  ||  !name.length()) {
+              name = parsed.identity.name
+              if (name)
+                name = name.formatted
+            }
+            // if (name)
+            //   name = name.charAt(0).toUpperCase() + name.slice(1)
+
             if (parsed[TYPE] === SELF_INTRODUCTION) {
               AlertIOS.alert(
-                translate('newContactRequest', parsed.name),
+                translate('newContactRequest', name),
                 parsed.message || null,
                 [
                   {text: translate('Ok'),
@@ -1005,14 +1013,21 @@ var Store = Reflux.createStore({
 
     this.trigger({action: 'newContact', to: profile, newContact: true})
 
-    return newContact ? db.batch(batch) : Q()
-    .then(() => {
+    // return newContact ? db.batch(batch) : Q()
+    // .then(() => {
       return this.onAddMessage({
           _t: SIMPLE_MESSAGE,
           message: translate('howCanIHelpYou', profile.formatted, utils.getMe().firstName),
           from: this.buildRef(utils.getMe()),
           to: list[pkey].value
         })
+      .then(() => {
+        if (newContact)
+          return db.batch(batch)
+      })
+    // })
+    .catch((err) => {
+      debugger
     })
   },
 
@@ -1891,8 +1906,10 @@ var Store = Reflux.createStore({
       }
       var formId = utils.getId(resource.document)
       var form = list[formId].value
-      if (!form.sharedWith)
+      if (!form.sharedWith) {
         form.sharedWith = []
+        form.sharedWith.push(self.createSharedWith(utils.getId(form.to), form.time))
+      }
 
       form.sharedWith.push(self.createSharedWith(toId, time))
 
@@ -2656,14 +2673,34 @@ var Store = Reflux.createStore({
         if (fromID !== meId  &&  toID !== meId  &&  toID != meOrgId)
           continue;
         if (isChatWithOrg) {
-          var msgOrg = list[toID].value.organization
+          if (isVerificationR) {
+            let org = list[fromID].value.organization
+            if (!org)
+              org = list[toID].value.organization
+
+            let msgOrgId = utils.getId(org)
+            if (toId !== msgOrgId) {
+              // if (!isSharedWith)
+                continue
+              // let sharedWithThisOrg = r.sharedWith.filter((s) => {
+              //   let rep = list[s.bankRepresentative].value
+              //   if (utils.getId(rep.organization) === toId)
+              //     return true
+              // })
+              // if (!sharedWithThisOrg  ||  !sharedWithThisOrg.length)
+              //   continue
+            }
+          }
+          else {
+            let msgOrg = list[toID].value.organization
           // if (toID === meId)
           //   continue
-          if (!msgOrg)
-            msgOrg = list[fromID].value.organization
-          let msgOrgId = utils.getId(msgOrg)
-          if (toId !== msgOrgId  &&  (!isSharedWith || isVerificationR)) // do not show shared verifications
-            continue
+            if (!msgOrg)
+              msgOrg = list[fromID].value.organization
+            let msgOrgId = utils.getId(msgOrg)
+            if (toId !== msgOrgId  &&  !isSharedWith)
+              continue
+          }
         }
         else {
           if (!isSharedWith  &&  fromID !== chatId  &&  toID != chatId  &&  toID != meOrgId)
@@ -3274,25 +3311,25 @@ var Store = Reflux.createStore({
     if (!pubkeys) {
       // Choose any employee from the company to send the notification about the customer
       if (r[TYPE] === ORGANIZATION) {
-        var secCodes = this.searchNotMessages({modelName: 'tradle.SecurityCode', to: r})
+        // var secCodes = this.searchNotMessages({modelName: 'tradle.SecurityCode', to: r})
         var employees = this.searchNotMessages({modelName: PROFILE, prop: 'organization', to: r})
 
         if (employees) {
           // RABOBANK case
-          if (secCodes) {
-            var codes = [];
-            secCodes.forEach(function(sc) {
-              codes.push(sc.code)
-            })
+          // if (secCodes) {
+          //   var codes = [];
+          //   secCodes.forEach(function(sc) {
+          //     codes.push(sc.code)
+          //   })
 
-            for (var i=0; i<employees.length  &&  !pubkeys; i++) {
-              if (employees[i].securityCode  && codes.indexOf(employees[i].securityCode) != -1) {
-                pubkeys = list[IDENTITY + '_' + employees[i][ROOT_HASH]].pubkeys
-              }
-            }
-          }
-          // LLOYDS case
-          else
+          //   for (var i=0; i<employees.length  &&  !pubkeys; i++) {
+          //     if (employees[i].securityCode  && codes.indexOf(employees[i].securityCode) != -1) {
+          //       pubkeys = list[IDENTITY + '_' + employees[i][ROOT_HASH]].pubkeys
+          //     }
+          //   }
+          // }
+          // // LLOYDS case
+          // else
             pubkeys = list[IDENTITY + '_' + employees[0][ROOT_HASH]].pubkeys
         }
       }
@@ -3649,10 +3686,11 @@ var Store = Reflux.createStore({
     if (!val.time)
       val.time = obj.timestamp
 
+    var from = list[PROFILE + '_' + obj.from[ROOT_HASH]].value
     var type = val[TYPE]
     if (type === FORGET_ME) {
       // AlertIOS.alert("Received ForgetMe from " + obj.from[ROOT_HASH])
-      this.forgetMe(list[utils.getId(PROFILE + '_' + obj.from[ROOT_HASH])].value)
+      this.forgetMe(from)
       return
     }
     var isConfirmation
@@ -3683,9 +3721,6 @@ var Store = Reflux.createStore({
       if (isMessage)
         this.putMessageInDB(val, obj, batch, onMessage)
     }
-    // if (batch.length)
-    // return db.batch(batch)
-    // .then(function() {
     if (model.subClassOf === MY_PRODUCT)
       val.sharedWith = [this.createSharedWith(utils.getId(val.from.id), new Date().getTime())]
 
@@ -3716,27 +3751,21 @@ var Store = Reflux.createStore({
 
       retParams.resource = to
       if (to.organization) {
-        // let rep = this.getRepresentative(to.organization)
          if (!to.bot)
           retParams.isEmployee = true
       }
     }
-      // resultList = searchMessages({to: list[obj.to.identity.toJSON()[TYPE] + '_' + obj.to[ROOT_HASH]], modelName: MESSAGE})
     else if (!onMessage  &&  val[TYPE] != PROFILE)
       resultList = this.searchNotMessages({modelName: val[TYPE]})
     retParams.list = resultList
 
     return db.batch(batch)
     .then(() => {
-      if (isConfirmation) {
-        var from = list[PROFILE + '_' + obj.from[ROOT_HASH]].value
-
+      if (onMessage  &&  val[TYPE] === FORGOT_YOU)
+        this.forgotYou(from)
+      else if (isConfirmation) {
         var fOrg = from.organization
         var org = fOrg ? list[utils.getId(fOrg)].value : null
-        if (onMessage  &&  val[TYPE] === FORGOT_YOU) {
-          this.forgotYou(org)
-          return
-        }
         var msg = {
           message: me.firstName + ' is waiting for the response',
           _t: constants.TYPES.CUSTOMER_WAITING,
@@ -4096,14 +4125,14 @@ var Store = Reflux.createStore({
       // //   return self.loadAddressBook();
 
       if (me  &&  me.organization) {
-        if (me.securityCode) {
-          var org = list[utils.getId(me.organization)].value
-          var secCodes = self.searchNotMessages({modelName: 'tradle.SecurityCode', to: org})
-          if (!org.securityCodes  ||  org.securityCodes[!me.securityCode]) {
-            self.trigger({err: 'The code was not registered with ' + me.organization.title})
-            return;
-          }
-        }
+        // if (me.securityCode) {
+        //   var org = list[utils.getId(me.organization)].value
+        //   var secCodes = self.searchNotMessages({modelName: 'tradle.SecurityCode', to: org})
+        //   if (!org.securityCodes  ||  org.securityCodes[!me.securityCode]) {
+        //     self.trigger({err: 'The code was not registered with ' + me.organization.title})
+        //     return;
+        //   }
+        // }
         var photos = list[utils.getId(me.organization.id)].value.photos;
         if (photos)
           me.organization.photo = photos[0].url;
@@ -4135,6 +4164,14 @@ var Store = Reflux.createStore({
     .then(() => {
       ids.forEach((id) => delete list[id])
       self.trigger({action: 'messageList', modelName: MESSAGE, forgetMeFromCustomer: true})
+      return self.sendSigned(meDriver, {
+        msg: {_t: FORGOT_YOU},
+        to: [{roothash: resource[ROOT_HASH]}],
+        deliver: true
+      })
+    })
+    .catch((err) => {
+      debugger
     })
   },
   forgotYou(resource) {
