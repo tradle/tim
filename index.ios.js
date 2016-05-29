@@ -433,7 +433,7 @@ var NavigationBarRouteMapper = {
     return (
       <TouchableOpacity
         onPress={() => navigator.pop()}>
-        <View style={[styles.navBarLeftButton, {flexDirection: 'row'}]}>
+        <View style={[styles.navBarLeftButton, styles.row]}>
           {status}
           {title}
         </View>
@@ -460,12 +460,12 @@ var NavigationBarRouteMapper = {
         icons.push(<Icon name={i} key={i} size={20} color='#7AAAC3' style={{paddingLeft: 3}} />)
       })
 
-      title = <View style={{flexDirection: 'row'}}>
+      title = <View style={styles.row}>
                {icons}
               </View>
     }
     return (
-      <View style={{flexDirection: 'row'}}>
+      <View style={styles.row}>
       {route.help
         ? <TouchableOpacity onPress={() =>  AlertIOS.alert(translate(route.help))}>
             <Icon name={'ios-help'} key={'ios-help'} size={20} color='#29ABE2' style={{paddingLeft: 3}}/>
@@ -489,7 +489,7 @@ var NavigationBarRouteMapper = {
                     navigator.push(route.onRightButtonPress)
                }
         }>
-        <View style={styles.navBarRightButton}>
+        <View style={[styles.navBarRightButton, route.help ? {paddingLeft: 5} : {paddingLeft: 25}]}>
           {title}
         </View>
       </TouchableOpacity>
@@ -515,7 +515,7 @@ var NavigationBarRouteMapper = {
     if (route.titleTextColor)
       style.push({color: route.titleTextColor});
     return (
-      <View style={{flexDirection: 'row', flex: 1}}>
+      <View style={styles.row}>
         <Text style={style}>
           {route.title}
         </Text>
@@ -531,6 +531,9 @@ var styles = StyleSheet.create({
     width: 20,
     height: 20,
     // marginTop: 15,
+  },
+  row: {
+    flexDirection: 'row'
   },
   // orgImage: {
   //   width: 20,
