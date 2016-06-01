@@ -233,11 +233,7 @@ class MessageList extends Component {
     }
     let me = utils.getMe()
     // Check if I am a customer or a verifier and if I already verified this resource
-    let isVerifier = me.organization  &&
-                    !verification     &&
-                     utils.getId(me) === utils.getId(resource.to) &&
-                    !utils.isVerifiedByMe(resource)               && // !verification  &&  utils.getId(resource.to) === utils.getId(me)  &&
-                     model.subClassOf === constants.TYPES.FORM
+    let isVerifier = !verification && utils.isVerifier(resource)
     var route = {
       title: newTitle,
       id: 5,

@@ -693,6 +693,14 @@ var utils = {
     // TODO: remove this after fixing encoding bug
     return symbol
     // return symbol ? (symbol === '¬' ? '€' : symbol) : symbol
+  },
+  isVerifier(resource, verification) {
+    let me = this.getMe()
+    let model = this.getModel(resource[constants.TYPE]).value
+    return (me.organization  &&
+            utils.getId(me) === utils.getId(resource.to) &&
+           !utils.isVerifiedByMe(resource)               && // !verification  &&  utils.getId(resource.to) === utils.getId(me)  &&
+            model.subClassOf === constants.TYPES.FORM)
   }
 }
 
