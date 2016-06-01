@@ -17,7 +17,6 @@ var reactMixin = require('react-mixin');
 var constants = require('@tradle/constants');
 var BACKUPS = require('asyncstorage-backup')
 var debug = require('debug')('Tradle-Home')
-var TradleLogo = require('../img/Tradle.png')
 var TradleWhite = require('../img/TradleW.png')
 var BG_IMAGE = require('../img/bg.png')
 var PasswordCheck = require('./PasswordCheck')
@@ -512,7 +511,7 @@ class TimHome extends Component {
             scrollEnabled={false}
             style={{height:h}}>
             <View style={[styles.container]}>
-              <Image style={thumb} source={require('../img/TradleW.png')}></Image>
+              <Image style={thumb} source={TradleWhite}></Image>
               <Text style={styles.tradle}>Tradle</Text>
             </View>
             <View style={{alignItems: 'center'}}>
@@ -577,7 +576,7 @@ class TimHome extends Component {
             underlayColor='transparent' onPress={() => this._pressHandler()}>
             <View style={[styles.container]}>
               <View>
-                <Image style={thumb} source={require('../img/TradleW.png')}></Image>
+                <Image style={thumb} source={TradleWhite}></Image>
                 <Text style={styles.tradle}>Tradle</Text>
               </View>
             </View>
