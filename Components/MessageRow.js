@@ -78,6 +78,7 @@ class MessageRow extends Component {
     var me = utils.getMe();
 
     var isMyMessage = this.isMyMessage();
+    // var isVerifier = utils.isVerifier(resource)
     var to = this.props.to;
     var ownerPhoto = this.getOwnerPhoto(isMyMessage)
     let hasOwnerPhoto = !isMyMessage &&  to  &&  to.photos;
@@ -123,7 +124,7 @@ class MessageRow extends Component {
         if (isConfirmation)
           addStyle = [styles.verificationBody, {borderColor: '#cccccc', backgroundColor: this.props.bankStyle.CONFIRMATION_BG}, styles.myConfCell]
         else
-          addStyle = [styles.verificationBody, {borderColor: '#efefef', backgroundColor: '#ffffff'}];
+          addStyle = [styles.verificationBody, {borderColor: isFormError ? this.props.bankStyle.REQUEST_FULFILLED : '#efefef', backgroundColor: '#ffffff'}];
       }
       // if (model.style)
       //   addStyle = [addStyle, styles.verificationBody, {backgroundColor: STRUCTURED_MESSAGE_COLOR, borderColor: '#deeeb4'}]; //model.style];
@@ -131,7 +132,7 @@ class MessageRow extends Component {
       //   addStyle = [addStyle, styles.verificationBody, {backgroundColor: '#FCF1ED', borderColor: '#FAE9E3'}]; //model.style];
       // else {
       if (isFormError)
-        addStyle = [addStyle, styles.verificationBody, {backgroundColor: this.props.bankStyle.FORM_ERROR_BG, borderColor: this.props.bankStyle.FORM_ERROR_BORDER}]; //model.style];
+        addStyle = [addStyle, styles.verificationBody, {backgroundColor: this.props.bankStyle.FORM_ERROR_BG, borderColor: resource.documentCreated ? this.props.bankStyle.REQUEST_FULFILLED : this.props.bankStyle.FORM_ERROR_BORDER}]; //model.style];
       if (isMyMessage  &&  !isSimpleMessage && !isFormError)
         addStyle = [addStyle, styles.verificationBody, {backgroundColor: STRUCTURED_MESSAGE_COLOR, borderColor: '#C1E3E8'}]; //model.style];
       // }
@@ -514,10 +515,10 @@ class MessageRow extends Component {
         var r = ver[0]
         var totalShareables = ver.length
         ver.forEach(function(r) {
-          if (chatOrg  &&  utils.getId(r.organization) === chatOrg) {
-            totalShareables--
-            return
-          }
+          // if (chatOrg  &&  utils.getId(r.organization) === chatOrg) {
+          //   totalShareables--
+          //   return
+          // }
           // if (!cnt) {x
             var vModel = utils.getModel(r[constants.TYPE]);
             var doc = self.formatDocument(msgModel, r, null, totalShareables > 1);
@@ -765,7 +766,7 @@ class MessageRow extends Component {
           <View key={self.getNextKey()}>
             <Text style={[style, {color: '757575'}]}>{isMyMessage ? translate('errorNotification') : resource[v]} </Text>
             <Text style={[style, {color: resource.documentCreated ?  '#757575' : self.props.bankStyle.FORM_ERROR_COLOR}]}>{translate(utils.getModel(rtype).value)}</Text>
-            <Icon name={iconName} size={iconSize} color={self.props.bankStyle.FORM_ERROR_COLOR} style={styles.errorBadge} />
+            <Icon name={iconName} size={iconSize} color={resource.documentCreated ? self.props.bankStyle.REQUEST_FULFILLED : self.props.bankStyle.FORM_ERROR_COLOR} style={styles.errorBadge} />
           </View>
           // isMyMessage
           //   ? <View key={self.getNextKey()}>
