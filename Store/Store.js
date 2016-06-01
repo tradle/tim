@@ -1179,37 +1179,20 @@ var Store = Reflux.createStore({
             var m = self.getModel(msgParts[1]);
             dn = m ? m.value.title + ' request' : msgParts[1];
           }
-          // else {
-          //   var result = self.searchMessages({to: toOrg, modelName: MESSAGE});
-          //   for (var i=result.length - 1; i>=0; i++) {
-          //     if (result[i].type !== constants.TYPES.SIMPLE_MESSAGE)
-          //       break
-          //   }
-          // }
         }
 
         rr[ROOT_HASH] = dhtKey
         to.lastMessage = (from[ROOT_HASH] === me[ROOT_HASH]) ? 'You: ' + dn : dn;
         to.lastMessageTime = rr.time;
         from.lastMessage = rr.message;
-        from.lastMessageTime = r.time;
+        from.lastMessageTime = rr.time;
         batch.push({type: 'put', key: to[TYPE] + '_' + to[ROOT_HASH], value: to});
         batch.push({type: 'put', key: from[TYPE] + '_' + from[ROOT_HASH], value: from});
       }
       if (!isWelcome  ||  (me.organization  &&  utils.getId(me.organization) === utils.getId(r.to)))
         return
-      // Check whose message was the last one
-      // var result = self.searchMessages({to: toOrg, modelName: MESSAGE});
-      // if (result && result.length > 0) {
-      //   result.sort(function(a,b) {
-      //     return new Date(b.time) - new Date(a.time);
-      //   });
-      //   result = result.reverse();
-      //   isWelcome = (!result[0].welcome  &&  !result[0].list)  &&  new Date().getTime() - result[0].time > 600 * 1000
 
       if (orgRep.lastMessageTime) {
-        // isWelcome = new Date() - orgRep.lastMessageTime > WELCOME_INTERVAL
-        // var msg = welcome.msg.replace('{firstName}', me.firstName)
         isWelcome = orgRep.lastMessage === r.message
         if (!isWelcome)
           return;
@@ -3016,8 +2999,8 @@ var Store = Reflux.createStore({
             break;
           }
         }
-        if (thisCompanyVerification)
-          return;
+        // if (thisCompanyVerification)
+        //   return;
       }
       var value = {};
       extend(value, val);
