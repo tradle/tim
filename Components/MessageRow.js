@@ -17,6 +17,7 @@ var Accordion = require('react-native-accordion')
 var extend = require('extend')
 var equal = require('deep-equal')
 var formDefaults = require('@tradle/models').formDefaults;
+var TradleW = require('../img/TradleW.png')
 
 var reactMixin = require('react-mixin');
 
@@ -1083,9 +1084,9 @@ class MessageRow extends Component {
       var orgPhoto = verification.organization.photo
                    ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
                    : <View />
-      var shareView = <View style={{flexDirection: 'row', marginLeft: 0, justifyContent: 'space-between', padding: 5, borderRadius: 10, borderWidth: 1, borderColor: '#eeeeee', backgroundColor: '#F0F0EE', opacity: this.props.resource.documentCreated ? 0.3 : 1}}>
-                        <Icon style={styles.shareIcon} size={20} name={'android-share-alt'} />
-                        <Text style={{color: '#2E3B4E', fontSize: 16, paddingRight: 5, marginTop: 2}}>{translate('Share')}</Text>
+      var shareView = <View style={{flexDirection: 'row', marginLeft: 0, justifyContent: 'space-between', padding: 5, borderRadius: 10, borderWidth: 1, borderColor: '#215A89', backgroundColor: '#4982B1', opacity: this.props.resource.documentCreated ? 0.3 : 1}}>
+                        <Image source={TradleW} style={{width: 35, height: 35}}/>
+                        <Text style={{color: '#fefefe', fontSize: 20, paddingHorizontal: 3, marginTop: 6}}>{translate('Share')}</Text>
                       </View>
       var orgTitle = this.props.to[constants.TYPE] === constants.TYPES.ORGANIZATION
                    ? this.props.to.name
@@ -1123,14 +1124,14 @@ class MessageRow extends Component {
 
       }
       else if (this.props.resource.documentCreated)
-          orgRow = <View style={{flexDirection: 'row', marginTop: 10, paddingBottom: 5, justifyContent:'space-between'}}>
+          orgRow = <View style={{flexDirection: 'row', marginTop: 5, paddingBottom: 5, justifyContent:'space-between'}}>
                      {shareView}
                     <TouchableHighlight onPress={this.props.onSelect.bind(this, resource, verification)} underlayColor='transparent'>
                       {orgView}
                     </TouchableHighlight>
                   </View>
       else
-        orgRow = <View style={{flexDirection: 'row', marginTop: 10, paddingBottom: 5, justifyContent:'space-between'}}>
+        orgRow = <View style={{flexDirection: 'row', marginTop: 5, paddingBottom: 5, justifyContent:'space-between'}}>
           <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
                     AlertIOS.alert(
                       'Sharing ' + docTitle + ' ' + verifiedBy,
