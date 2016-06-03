@@ -314,7 +314,7 @@ class AddNewMessage extends Component {
     this.setState({userInput: '', selectedAssets: {}});
     if (this.state.clearCallback)
       this.state.clearCallback();
-    Actions.addMessage(value); //, this.state.resource, utils.getModel(modelName).value);
+    Actions.addMessage({message: value}); //, this.state.resource, utils.getModel(modelName).value);
   }
 }
 reactMixin(AddNewMessage.prototype, Reflux.ListenerMixin);

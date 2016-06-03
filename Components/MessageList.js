@@ -23,6 +23,7 @@ var GiftedMessenger = require('react-native-gifted-messenger');
 // var ResourceTypesScreen = require('./ResourceTypesScreen');
 
 var LINK_COLOR
+var LIMIT = 10
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 
 var {
@@ -77,6 +78,7 @@ class MessageList extends Component {
       modelName: this.props.modelName,
       to: this.props.resource,
       prop: this.props.prop,
+      // limit: LIMIT
     }
     if (this.props.isAggregation)
       params.isAggregation = true;
@@ -99,7 +101,7 @@ class MessageList extends Component {
         to: this.props.resource,
         time: new Date().getTime()
       }
-      Actions.addMessage(msg, true)
+      Actions.addMessage({message: msg, isWelcome: true, count: this.state.list ? this.state.list.length : 0})
       return
     }
     if (params.action === 'addItem'  ||  params.action === 'addVerification') {
@@ -125,7 +127,15 @@ class MessageList extends Component {
       return
     }
     if (params.action === 'addMessage') {
-      Actions.messageList({modelName: this.props.modelName, to: this.props.resource});
+      // let l = []
+      // this.state.list.forEach((r) => {l.push(r)})
+      // l.push(params.resource)
+      // this.setState({list: l})
+      // Actions.messageList({modelName: this.props.modelName, to: this.props.resource, limit: params.limit || LIMIT});
+      let paramList = {modelName: this.props.modelName, to: this.props.resource}
+      if (this.state.list)
+        paramList.limit = this.state.list.length + 1
+      Actions.messageList(paramList);
       return
     }
     if ( params.action !== 'messageList'                   ||
@@ -157,14 +167,19 @@ class MessageList extends Component {
         this.setState({allLoaded: true, isLoading: false, noScroll: true})
       }
       else {
-        this.state.postLoad(list, false)
-        this.state.list.forEach((r) => {
-          list.push(r)
-        })
+        if (!this.state.list)
+          this.setState({list: list})
+        else {
+          // let allLoaded = list.length < LIMIT ? true : false
+          this.state.postLoad(list, allLoaded)
+          this.state.list.forEach((r) => {
+            list.push(r)
+          })
+          this.setState({list: list, allLoaded: allLoaded})
+        }
       }
       return
     }
-    LINK_COLOR = this.props.bankStyle.LINK_COLOR
 
     if (list.length || (this.state.filter  &&  this.state.filter.length)) {
       var type = list[0][constants.TYPE];
@@ -183,7 +198,7 @@ class MessageList extends Component {
         isLoading: false,
         list: list,
         shareableResources: params.shareableResources,
-        allLoaded: false,
+        allLoaded: list.length <= LIMIT,
         isEmployee: params.isEmployee
       });
     }
@@ -303,7 +318,8 @@ class MessageList extends Component {
     else
       this._scrollTimeout = setTimeout(() => {
         // inspired by http://stackoverflow.com/a/34838513/1385109
-        this._GiftedMessenger  &&  this._GiftedMessenger.scrollToBottom()
+        // if (!this.state.loadingEarlierMessages)
+          this._GiftedMessenger  &&  this._GiftedMessenger.scrollToBottom()
       }, 200)
   }
 
@@ -357,9 +373,10 @@ class MessageList extends Component {
     if (!content) {
       var isAllMessages = model.isInterface  &&  model.id === constants.TYPES.MESSAGE;
 
+        // loadEarlierMessagesButton={this.state.allLoaded ? false : true}
       content = <GiftedMessenger style={{paddingHorizontal: 10, marginTop: 5}}
         ref={(c) => this._GiftedMessenger = c}
-        loadEarlierMessagesButton={this.state.list ? this.state.list.length > 100 : false}
+        loadEarlierMessagesButton={this.state.list ? this.state.list.length > 10 : false}
         onLoadEarlierMessages={this.onLoadEarlierMessages.bind(this)}
         messages={this.state.list}
         autoFocus={false}
@@ -398,9 +415,12 @@ class MessageList extends Component {
       chooser = <View/>
 
     var sepStyle = { height: 1,backgroundColor: LINK_COLOR }
+    /*
     if (this.state.allLoaded)
       AlertIOS.alert('There is no earlier messages!')
-    else if (!this.props.navigator.isConnected  &&  this.state.isForgetting)
+    else
+    */
+    if (!this.props.navigator.isConnected  &&  this.state.isForgetting)
       AlertIOS.alert(translate('noConnectionWillProcessLater'))
           // <View style={{flex: 10}}>
           //   <SearchBar
@@ -452,7 +472,7 @@ class MessageList extends Component {
     var id = utils.getId(list[0])
     Actions.messageList({
       lastId: id,
-      limit: 10,
+      limit: LIMIT,
       loadingEarlierMessages: true,
       modelName: this.props.modelName,
       to: this.props.resource,
@@ -612,7 +632,7 @@ class MessageList extends Component {
     }
     msg[constants.TYPE] = constants.TYPES.SIMPLE_MESSAGE;
     this.props.navigator.pop();
-    Actions.addMessage(msg);
+    Actions.addMessage({message: msg, count: this.state.list ? this.state.list.length : 0});
   }
   onSubmitEditing(msg) {
     var me = utils.getMe();
@@ -635,7 +655,7 @@ class MessageList extends Component {
     this.setState({userInput: '', selectedAssets: {}});
     if (this.state.clearCallback)
       this.state.clearCallback();
-    Actions.addMessage(value); //, this.state.resource, utils.getModel(modelName).value);
+    Actions.addMessage({message: value, count: this.state.list ? this.state.list.length : 0}); //, this.state.resource, utils.getModel(modelName).value);
   }
 
 }

@@ -137,6 +137,6 @@
     "newContactRequest": "{1} sent you contact request",
     "howCanIHelpYou": "Hello {1}. My name is {2}. How can I help you today?",
     "pleaseCorrectTheErrors": "Please correct error in the form",
-    "verifierHelp": "Click 'Done' button after reviewing the form. If some fields require correction check them them first and then click the 'Done' button",
+    "verifierHelp": "Review the form and check the fields that need to be modified. Click 'Done'. You will be able to enter the message to the customer. Or verify the form if all the entered information was correct.",
     "errorNotification": "Error notification has been sent to the customer to correct"
 }

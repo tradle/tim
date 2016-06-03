@@ -395,7 +395,9 @@ var utils = {
       }
     }
   },
-
+  isMessage(model) {
+    return model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(constants.TYPES.MESSAGE) != -1)
+  },
   isMyMessage(r) {
     var fromHash = utils.getId(r.from);
     var me = utils.getMe()

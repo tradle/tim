@@ -765,7 +765,7 @@ class MessageRow extends Component {
         let iconSize = resource.documentCreated ? 20 : 30
         vCols.push(
           <View key={self.getNextKey()}>
-            <Text style={[style, {color: '757575'}]}>{isMyMessage ? translate('errorNotification') : resource[v]} </Text>
+            <Text style={[style, {color: '757575'}]}>{isMyMessage ? translate('errorNotification') + ' ' + resource[v] : resource[v]} </Text>
             <Text style={[style, {color: resource.documentCreated ?  '#757575' : self.props.bankStyle.FORM_ERROR_COLOR}]}>{translate(utils.getModel(rtype).value)}</Text>
             <Icon name={iconName} size={iconSize} color={resource.documentCreated ? self.props.bankStyle.REQUEST_FULFILLED : self.props.bankStyle.FORM_ERROR_COLOR} style={styles.errorBadge} />
           </View>

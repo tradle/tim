@@ -209,7 +209,7 @@ class ResourceList extends Component {
       }
       // var sendNotification = (resource.name === 'Rabobank'  &&  (!me.organization  ||  me.organization.name !== 'Rabobank'))
       // Actions.addMessage(msg, true, sendNotification)
-      utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg)) //, true))
+      utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage({message: msg})) //, true))
       this.props.navigator.push(route)
       return
     }
@@ -406,7 +406,7 @@ class ResourceList extends Component {
 
         // var sendNotification = (resource.name === 'Rabobank'  &&  (!me.organization  ||  me.organization.name !== 'Rabobank'))
         // Actions.addMessage(msg, true, sendNotification)
-        utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg, true))
+        utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage({message: msg, isWelcome: true}))
       }
     }
 
@@ -814,7 +814,7 @@ class ResourceList extends Component {
     if (!qrcode)
       // qrcode = 'http://127.0.0.1:444444;71e4b7cd6c11ab7221537275988f113a879029eu;6aefc09f4da125095409770592eb96ac142fb579'
       // qrcode = 'http://192.168.0.104:44444/;71e4b7cd6c11ab7221537275988f113a879029eu;3497c6ce074f1bc66c05e204fd3a7fbcd5e0fb08'
-      qrcode = 'http://192.168.0.136:44444/;71e4b7cd6c11ab7221537275988f113a879029eu;c3adf2d26304133265c3e28b5c9037614880aec5'
+      qrcode = 'http://192.168.0.144:44444/;71e4b7cd6c11ab7221537275988f113a879029eu;c3adf2d26304133265c3e28b5c9037614880aec5'
 
     Actions.getEmployeeInfo(qrcode)
     return

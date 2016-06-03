@@ -108,12 +108,12 @@ class ProductChooser extends Component {
     if (model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT) {
       msg._t = PRODUCT_APPLICATION
       msg.product = model.id // '[application for](' + model.id + ')',
-      utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg, true, true))
+      utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage({message: msg, isWelcome: true, requestForForm: true}))
     }
     else {
       msg._t = constants.TYPES.SIMPLE_MESSAGE
       msg.message = '[' + translate('fillTheForm') + '](' + model.id + ')'
-      utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg))
+      utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage({message: msg}))
     }
 
     // var msg = {

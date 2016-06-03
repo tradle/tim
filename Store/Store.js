@@ -149,6 +149,8 @@ var TIM_PATH_PREFIX = 'me'
 
 var models = {};
 var list = {};
+var resourceTimeMapping = []
+
 var bankMessages = {}
 var temporaryResources = {}
 var employees = {};
@@ -165,7 +167,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
-var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://192.168.0.137:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
+var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://192.168.0.144:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
@@ -1015,12 +1017,13 @@ var Store = Reflux.createStore({
 
     // return newContact ? db.batch(batch) : Q()
     // .then(() => {
-      return this.onAddMessage({
+      let message = {
           _t: SIMPLE_MESSAGE,
           message: translate('howCanIHelpYou', profile.formatted, utils.getMe().firstName),
           from: this.buildRef(utils.getMe()),
           to: list[pkey].value
-        })
+        }
+      return this.onAddMessage({message: message})
       .then(() => {
         if (newContact)
           return db.batch(batch)
@@ -1078,10 +1081,12 @@ var Store = Reflux.createStore({
     });
   },
 
-  onAddMessage(r, isWelcome, requestForForm) {
+  onAddMessage(params) {
+    let r = params.message
+    let isWelcome = params.isWelcome
+    let requestForForm = params.requestForForm
     let m = this.getModel(r[TYPE]).value
     var props = m.properties;
-    var rr = {};
     if (!r.time)
       r.time = new Date().getTime();
     var toOrg
@@ -1101,6 +1106,7 @@ var Store = Reflux.createStore({
     }
     let isSelfIntroduction = r[TYPE] === SELF_INTRODUCTION
 
+    var rr = {};
     for (var p in r) {
       if (!props[p])
         continue
@@ -1225,15 +1231,18 @@ var Store = Reflux.createStore({
         return;
 
       // Temporary untill the real hash is known
-      var key = rr[TYPE] + '_' + rr[ROOT_HASH];
+      var key = utils.getId(rr)
       list[key] = {key: key, value: rr};
+      if (rr[TYPE] !== constants.TYPES.IDENTITY_PUBLISHING_REQUEST)
+        resourceTimeMapping.push({key: key, time: rr.time})
       var params = {
         action: 'addMessage',
         resource: isWelcome ? welcomeMessage : rr
       }
       if (error)
         params.error = error
-
+      if (params.count)
+        params.limit = params.count + 1
       self.trigger(params);
       if (batch.length  &&  !error  &&  list[toId].value.pubkeys)
         return self.getDriver(me)
@@ -1259,7 +1268,10 @@ var Store = Reflux.createStore({
         return
       if (isWelcome  &&  utils.isEmpty(welcomeMessage))
         return
-      delete list[rr[TYPE] + '_' + dhtKey]
+      let tmpKey = rr[TYPE] + '_' + dhtKey
+      delete list[tmpKey]
+      if (rr[TYPE] !== constants.TYPES.IDENTITY_PUBLISHING_REQUEST)
+        deleteKeyFromMapping(tmpKey)
       if (data)  {
         var roothash = data[0]._props[ROOT_HASH]
         rr[ROOT_HASH] = roothash
@@ -1268,6 +1280,8 @@ var Store = Reflux.createStore({
       var key = rr[TYPE] + '_' + rr[ROOT_HASH];
       batch.push({type: 'put', key: key, value: rr})
       list[key] = {key: key, value: rr};
+      if (rr[TYPE] !== constants.TYPES.IDENTITY_PUBLISHING_REQUEST)
+        resourceTimeMapping.push({key: key, time: rr.time})
       // var params = {
       //   action: 'addMessage',
       //   resource: isWelcome ? welcomeMessage : rr
@@ -1367,10 +1381,11 @@ var Store = Reflux.createStore({
       return db.batch(batch)
     })
     .then(function() {
-      var rr = {};
+      // var rr = {};
       // extend(rr, from);
       // rr.verifiedByMe = r;
       list[key] = {key: key, value: r};
+      resourceTimeMapping.push({key: key, time: r.time})
 
       if (notOneClickVerification)
         self.trigger({action: 'addItem', resource: r});
@@ -1665,7 +1680,7 @@ var Store = Reflux.createStore({
       if (!isSelfIntroduction)
         utils.optimizeResource(resource)
 
-      var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
+      var isMessage = utils.isMessage(meta)
       Q.allSettled(promises)
       .then(function(results) {
         let allFoundRefs = foundRefs.concat(results);
@@ -1756,6 +1771,7 @@ var Store = Reflux.createStore({
 
         var tmpKey = returnVal[TYPE] + '_' + returnVal[ROOT_HASH]
         list[tmpKey] = {key: tmpKey, value: returnVal};
+        resourceTimeMapping.push({key: tmpKey, time: returnVal.time})
 
         var params;
         if (returnVal[TYPE] === GUEST_SESSION_PROOF) {
@@ -1813,6 +1829,7 @@ var Store = Reflux.createStore({
           // we now have a real root hash,
           // scrap the placeholder
           delete list[tmpKey]
+          deleteKeyFromMapping(tmpKey)
 
           returnVal[CUR_HASH] = entry.get(CUR_HASH)
           returnVal[ROOT_HASH] = entry.get(ROOT_HASH)
@@ -2030,7 +2047,7 @@ var Store = Reflux.createStore({
     }
 
     var model = this.getModel(params.modelName).value;
-    var isMessage = model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1);
+    var isMessage = utils.isMessage(model)
 
     // if (!isMessage)
     //   return
@@ -2071,6 +2088,10 @@ var Store = Reflux.createStore({
             retParams.isEmployee = true
         }
       }
+      if (params.limit) { //  &&  resultList.length > params.limit) {
+        // retParams.loadingEarlierMessages = true
+        resultList = resultList.slice(0, params.limit)
+      }
     }
     // if (isMessage) {
     //   let orgId = utils.getId(params.to)
@@ -2088,13 +2109,14 @@ var Store = Reflux.createStore({
       retParams.shareableResources = shareableResources;
     if (params.prop)
       retParams.prop = params.prop;
-
+    if (params.loadingEarlierMessages)
+      retParams.loadingEarlierMessages = true
     this.trigger(retParams);
   },
 
   searchResources(params) {
     var meta = this.getModel(params.modelName).value;
-    var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
+    var isMessage = utils.isMessage(meta)
     if (isMessage  ||  meta.id === FORM)
       return this.searchMessages(params);
     else {
@@ -2269,182 +2291,26 @@ var Store = Reflux.createStore({
     }
     return result;
   },
-  searchMessagesNew(params) {
-    let bankID = utils.getId(params.to)
-    let messages = bankMessages[bankID]
-    let promise = messages ? Q() : this.getConversation(params)
-    let result = []
-    let self = this
-    return promise
-    .then((data) => {
-      if (data)
-        return data
-      data = Object.keys(messages)
-      var defer = Q.defer()
-      var togo = Object.keys(data).length
-      for (let r of data) {
-        meDriver.lookupObjectsByRootHash(r.split('_')[1])
-        .then(function (objs) {
-          var obj = objs[objs.length - 1]
-          var res = obj.parsed.data
-          var val = extend(true, res)
-          self.fillFromAndTo(obj, val)
-
-          val[ROOT_HASH] = obj[ROOT_HASH]
-          result.push(val)
-          if (--togo === 0)
-            defer.resolve(result)
-        })
-        .catch((err) => {
-          debugger
-        })
-      }
-      return result
-    })
-  },
-
-  getConversation(params) {
-    var self = this
-    var list = {}
-    var hasVerifications
-    var excludeTypes = [
-      CUSTOMER_WAITING,
-      FORGOT_YOU,
-      FORGET_ME,
-      constants.TYPES.IDENTITY_PUBLISHING_REQUEST
-    ]
-    var bankID = utils.getId(params.to)
-    var reps = params.to[TYPE] === constants.TYPES.ORGANIZATION
-             ? this.getRepresentatives(bankID)
-             : [params.to]
-    var messages = {}
-    bankMessages[bankID] = messages
-    return meDriver.getConversation(reps[0][ROOT_HASH])
-    .then(function(data) {
-      var result = []
-      var defer = Q.defer()
-      var togo = data.length
-      var hasPL
-      for (var i=data.length - 1; i>=0; i--) {
-        var r = data[i]
-        if (excludeTypes.indexOf(r[TYPE]) !== -1 ||
-            !self.getModel(r[TYPE])) {
-          --togo
-          continue
-        }
-        if (r[TYPE] === PRODUCT_LIST) {
-          if (hasPL) {
-            --togo
-            continue
-          }
-          hasPL = true
-        }
-
-        meDriver.lookupObject(r)
-        .then(function (obj) {
-          var res = obj.parsed.data
-          var val = extend(true, res)
-          self.fillFromAndTo(obj, val)
-
-          val[ROOT_HASH] = obj[ROOT_HASH]
-          result.push(val)
-          let rid = utils.getId(val)
-          list[rid] = {
-            key: rid,
-            value: {
-              id: rid,
-              title: utils.getDisplayName(val, utils.getModel(obj[TYPE]).value.properties),
-              time: val.time
-            }
-          }
-          if (val.photos)
-            list[rid].value.photos = [val.photos[0]]
-          if (val[TYPE] === VERIFICATION)
-            hasVerifications = true
-
-          if (--togo === 0)
-            defer.resolve(result)
-        })
-        .catch(function(err) {
-          debugger
-        })
-      }
-      return defer.promise
-    })
-    .then(function(result) {
-      if (hasVerifications) {
-        result.forEach(function(r) {
-          if (r[TYPE] === VERIFICATION)
-            r.document = list[utils.getId(r.document)]
-        })
-      }
-      result.sort(function(a, b) {
-        return a.time - b.time;
-      });
-      result.forEach(function(r) {
-        messages[utils.getId(r)] = r.time
-      })
-      // var shareableResources;
-      // if (!params.isAggregation  &&  params.to)
-      //   shareableResources = self.getShareableResources(result, params.to);
-
-      // var retParams = {
-      //   action: !params.prop ? 'messageList' : 'list',
-      //   list: result,
-      //   spinner: params.spinner,
-      //   isAggregation: params.isAggregation
-      // }
-      // if (shareableResources)
-      //   retParams.shareableResources = shareableResources;
-      // if (params.prop)
-      //   retParams.prop = params.prop;
-
-      // self.trigger(retParams);
-      return result
-    })
-    .catch(function(err) {
-      debugger
-    })
-  },
-
-  // extractReferences(val) {
-  //   let props = utils.getModel(val[TYPE]).value.properties
-  //   let r = {_t: val[TYPE]}
-  //   for (let p in val) {
-  //     if (props[p].ref) {
-  //       if (props[p].ref !== constants.TYPE.MONEY)
-  //         r[p] = val[p]
-  //     }
-  //     else if (props[p].type === 'array') {
-  //       if
-  //     }
-  //   }
-  // },
-  getMessagesBefore(params) {
-    var bankID = utils.getId(params.to)
-    var messages
-    var self = this
-    var promise = bankMessages[bankID] ? Q() : this.searchMessagesNew(params)
-    return promise
-    .then(function(result) {
-      var limit = params.limit
-      var allMessages = bankMessages[bankID]
-
-      var ids = Object.keys(allMessages)
-      var start = ids.indexOf(utils.getId(params.lastId))
-      var end = Math.max(0, start - limit)
-      var result = []
-      for (var i=start - 1; i > end &&  i >= 0; i--) {
-        var val = list[ids[i]]
-        if (val)
-          result.push(val.value)
-      }
-      self.trigger({action: 'messageList', loadingEarlierMessages: true, list: result})
-    })
-  },
   searchMessages(params) {
-    if (params.loadingEarlierMessages)
-      return this.getMessagesBefore(params)
+    // if (!resourceTimeMapping.length)
+    //   return []
+
+    let idx = resourceTimeMapping.length ? resourceTimeMapping.length - 1 : 0
+    if (params.loadingEarlierMessages  ||  params.limit) {
+      if (params.lastId) {
+        for (let i=0; i<resourceTimeMapping.length; i++) {
+          if (resourceTimeMapping[i].key === params.lastId) {
+            idx = i - 1
+            break
+          }
+        }
+      }
+      else
+        idx = resourceTimeMapping.length - 1
+
+      // if (!list[params.lastId])
+        // return this.getMessagesBefore(params)
+    }
 
     var query = params.query;
     var modelName = params.modelName;
@@ -2510,7 +2376,9 @@ var Store = Reflux.createStore({
     var isAllMessages = meta.isInterface;
     var implementors = isAllMessages ? utils.getImplementors(modelName) : null;
     var isVerification = modelName === VERIFICATION  ||  meta.subClassOf === VERIFICATION;
-    for (var key in list) {
+    for (let i=idx; i>=0 && idx; i--) {
+      let key = resourceTimeMapping[i].key
+    // for (var key in list) {
       var iMeta = null;
       if (isAllMessages) {
         if (implementors) {
@@ -2632,7 +2500,7 @@ var Store = Reflux.createStore({
                 time: r.time,
                 resource: r
               })
-            if (params.limit  &&  Object.keys(foundResources).length === params.limit)
+            if (params.limit  &&  Object.keys(foundResources).length === (params.limit + 1))
               break;
           }
 
@@ -2756,7 +2624,7 @@ var Store = Reflux.createStore({
           timeResourcePair.resource = msg
           sharedWithTimePairs.push(timeResourcePair)
         }
-        if (params.limit  &&  Object.keys(foundResources).length === params.limit)
+        if (params.limit  &&  Object.keys(foundResources).length === (params.limit + 1))
           break;
         continue;
       }
@@ -2777,7 +2645,7 @@ var Store = Reflux.createStore({
             resource: r
           })
 
-        if (params.limit  &&  Object.keys(foundResources).length === params.limit)
+        if (params.limit  &&  Object.keys(foundResources).length === (params.limit + 1))
           break;
       }
     }
@@ -3090,7 +2958,7 @@ var Store = Reflux.createStore({
     }
 
     value.time = value.time || new Date().getTime();
-    var isMessage = model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1)
+    var isMessage = utils.isMessage(model)
     if (isMessage) {
       if (isNew  &&  model.subClassOf === FORM) {
         if (!value.sharedWith)
@@ -3669,7 +3537,10 @@ var Store = Reflux.createStore({
     if (!val.time)
       val.time = obj.timestamp
 
-    var from = list[PROFILE + '_' + obj.from[ROOT_HASH]].value
+    var fromL = list[PROFILE + '_' + obj.from[ROOT_HASH]]
+    if (!fromL && val[TYPE] === SELF_INTRODUCTION)
+      return
+    var from = fromL.value
     var type = val[TYPE]
     if (type === FORGET_ME) {
       // AlertIOS.alert("Received ForgetMe from " + obj.from[ROOT_HASH])
@@ -3700,7 +3571,7 @@ var Store = Reflux.createStore({
     if (model.id === IDENTITY)
       representativeAddedTo = this.putIdentityInDB(val, batch)
     else {
-      var isMessage = model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1
+      var isMessage = utils.isMessage(model)
       if (isMessage)
         this.putMessageInDB(val, obj, batch, onMessage)
     }
@@ -3717,6 +3588,8 @@ var Store = Reflux.createStore({
     }
     var resultList
     if (isMessage) {
+      if (val[TYPE] !== constants.TYPES.IDENTITY_PUBLISHING_REQUEST)
+        resourceTimeMapping.push({key: key, time: val.time})
       var toId = PROFILE + '_' + obj.to[ROOT_HASH]
       var meId = PROFILE + '_' + me[ROOT_HASH]
       var isSelfIntroduction = model.id === SELF_INTRODUCTION
@@ -3960,6 +3833,13 @@ var Store = Reflux.createStore({
       let v = {}
       extend(true, v, val)
       list[key].value = v
+
+      // let rtm = resourceTimeMapping.filter((r) => {
+      //   return (r.key === key) ? false : true
+      // })
+      deleteKeyFromMapping(key)
+      if (rr[TYPE] !== constants.TYPES.IDENTITY_PUBLISHING_REQUEST)
+        resourceTimeMapping.push({key: key, time: val.time})
     }
     batch.push({type: 'put', key: key, value: val})
   },
@@ -4039,6 +3919,11 @@ var Store = Reflux.createStore({
               c.push(self.buildRef(data.value))
             }
           }
+          else if (data.value.time) {
+            if (utils.isMessage(utils.getModel(data.value[TYPE]).value)  &&  data.value[TYPE] !== constants.TYPES.IDENTITY_PUBLISHING_REQUEST)
+              resourceTimeMapping.push({key: data.key, time: data.value.time})
+          }
+
           list[data.key] = data;
         }
       })
@@ -4074,11 +3959,12 @@ var Store = Reflux.createStore({
 
           r[CUR_HASH] = r[ROOT_HASH]
           let id = utils.getId(r)
-          if (!list[id])
+          if (!list[id]) {
             list[id] = {
               key: id,
               value: r
             }
+          }
         })
       }
 
@@ -4088,7 +3974,11 @@ var Store = Reflux.createStore({
         var results = this.searchNotMessages({modelName: constants.TYPES.ORGANIZATION})
         self.trigger({action: 'list', list: results})
       }
-
+      if (resourceTimeMapping.length) {
+        resourceTimeMapping.sort(function(a, b) {
+          return a.time - b.time;
+        });
+      }
       console.log('Stream ended');
       // console.timeEnd('dbStream')
       // if (me)
@@ -4130,11 +4020,11 @@ var Store = Reflux.createStore({
       console.error('err:' + err);
     })
   },
+
   forgetMe(resource) {
-    let result = this.searchMessages({modelName: MESSAGE, to: resource})
     let batch = []
     let ids = []
-    let self = this
+    let result = this.searchMessages({modelName: MESSAGE, to: resource})
     result.forEach((r) => {
       let id = utils.getId(r)
       batch.push({type: 'del', key: id})
@@ -4143,9 +4033,13 @@ var Store = Reflux.createStore({
     let id = utils.getId(resource)
     ids.push(id)
     batch.push({type: 'del', key: id})
+    let self = this
     return db.batch(batch)
     .then(() => {
-      ids.forEach((id) => delete list[id])
+      ids.forEach((id) => {
+        delete list[id]
+        deleteKeyFromMapping(id)
+      })
       self.trigger({action: 'messageList', modelName: MESSAGE, forgetMeFromCustomer: true})
       return self.sendSigned(meDriver, {
         msg: {_t: FORGOT_YOU},
@@ -4242,8 +4136,9 @@ var Store = Reflux.createStore({
             }
           }
           if (r.deleted) {
-            delete list[rId]
             batch.push({type: 'del', key: rId})
+            delete list[rId]
+            deleteKeyFromMapping(rId)
           }
         })
       })
@@ -4258,6 +4153,7 @@ var Store = Reflux.createStore({
           var id = utils.getId(r)
           batch.push({type: 'del', key: id})
           delete list[id]
+          deleteKeyFromMapping(id)
         }
       })
 
@@ -4284,13 +4180,15 @@ var Store = Reflux.createStore({
     var batch = []
     var docs = []
     result.forEach(function(r){
-      batch.push({type: 'del', key: r[TYPE] + '_' + r[ROOT_HASH], value: r})
+      batch.push({type: 'del', key: utils.getId(r), value: r})
     })
     var self = this
     return db.batch(batch)
     .then(function() {
       result.forEach(function(r) {
-        delete list[r[TYPE] + '_' + r[ROOT_HASH]]
+        let id = utils.getId(r)
+        delete list[id]
+        deleteKeyFromMapping(id)
       })
     })
     .catch(function(err) {
@@ -4541,6 +4439,17 @@ function timeFunctions (obj) {
 
   return timed
 }
+function getProviderUrl (provider) {
+  return provider.id ? utils.joinURL(provider.url, provider.id) : provider.url
+}
+function deleteKeyFromMapping(key) {
+  for (let i=resourceTimeMapping.length - 1; i>=0; i--) {
+    if (resourceTimeMapping[i].key === key) {
+      resourceTimeMapping.splice(i, 1)
+      break
+    }
+  }
+}
   // searchFormsToShare(params) {
   //   var modelName = params.modelName;
   //   var meta = this.getModel(modelName).value;
@@ -4749,6 +4658,199 @@ function timeFunctions (obj) {
 
   // },
 
-function getProviderUrl (provider) {
-  return provider.id ? utils.joinURL(provider.url, provider.id) : provider.url
-}
+  // searchMessagesNew(params) {
+  //   let bankID = utils.getId(params.to)
+  //   let messages = bankMessages[bankID]
+  //   let promise = messages ? Q() : this.getConversation(params)
+  //   let result = []
+  //   let self = this
+  //   return promise
+  //   .then((data) => {
+  //     if (data)
+  //       return data
+  //     data = Object.keys(messages)
+  //     var defer = Q.defer()
+  //     var togo = Object.keys(data).length
+  //     for (let r of data) {
+  //       meDriver.lookupObjectsByRootHash(r.split('_')[1])
+  //       .then(function (objs) {
+  //         var obj = objs[objs.length - 1]
+  //         var res = obj.parsed.data
+  //         var val = extend(true, res)
+  //         self.fillFromAndTo(obj, val)
+
+  //         val[ROOT_HASH] = obj[ROOT_HASH]
+  //         result.push(val)
+  //         if (--togo === 0)
+  //           defer.resolve(result)
+  //       })
+  //       .catch((err) => {
+  //         debugger
+  //       })
+  //     }
+  //     return result
+  //   })
+  // },
+
+  // getConversation(params) {
+  //   var self = this
+  //   var list = {}
+  //   var hasVerifications
+  //   var excludeTypes = [
+  //     CUSTOMER_WAITING,
+  //     FORGOT_YOU,
+  //     FORGET_ME,
+  //     constants.TYPES.IDENTITY_PUBLISHING_REQUEST
+  //   ]
+  //   var bankID = utils.getId(params.to)
+  //   var reps = params.to[TYPE] === constants.TYPES.ORGANIZATION
+  //            ? this.getRepresentatives(bankID)
+  //            : [params.to]
+  //   var messages = {}
+  //   var ids = []
+  //   bankMessages[bankID] = {
+  //     messages: messages,
+  //     ids: ids
+  //   }
+  //   return meDriver.getConversation(reps[0][ROOT_HASH])
+  //   .then(function(data) {
+  //     var result = []
+  //     var defer = Q.defer()
+  //     var togo = data.length
+  //     var hasPL
+  //     for (var i=data.length - 1; i>=0; i--) {
+  //       var r = data[i]
+  //       if (excludeTypes.indexOf(r[TYPE]) !== -1 ||
+  //           !self.getModel(r[TYPE])) {
+  //         --togo
+  //         continue
+  //       }
+  //       if (r[TYPE] === PRODUCT_LIST) {
+  //         if (hasPL) {
+  //           --togo
+  //           continue
+  //         }
+  //         hasPL = true
+  //       }
+
+  //       meDriver.lookupObject(r)
+  //       .then(function (obj) {
+  //         var res = obj.parsed.data
+  //         var val = extend(true, res)
+  //         self.fillFromAndTo(obj, val)
+
+  //         val[ROOT_HASH] = obj[ROOT_HASH]
+  //         result.push(val)
+  //         let rid = utils.getId(val)
+  //         list[rid] = {
+  //           key: rid,
+  //           value: {
+  //             id: rid,
+  //             title: utils.getDisplayName(val, utils.getModel(obj[TYPE]).value.properties),
+  //             time: val.time
+  //           }
+  //         }
+  //         if (val.photos)
+  //           list[rid].value.photos = [val.photos[0]]
+  //         if (val[TYPE] === VERIFICATION)
+  //           hasVerifications = true
+
+  //         if (--togo === 0)
+  //           defer.resolve(result)
+  //       })
+  //       .catch(function(err) {
+  //         debugger
+  //       })
+  //     }
+  //     return defer.promise
+  //   })
+  //   .then(function(result) {
+  //     if (hasVerifications) {
+  //       result.forEach(function(r) {
+  //         if (r[TYPE] === VERIFICATION)
+  //           r.document = list[utils.getId(r.document)]
+  //       })
+  //     }
+  //     result.sort(function(a, b) {
+  //       return a.time - b.time;
+  //     });
+
+  //     var duplicates = {}
+  //     result.forEach(function(r) {
+  //       let id = utils.getId(r)
+  //       messages[id] = r.time
+  //       ids.push(id)
+  //     })
+  //     // var shareableResources;
+  //     // if (!params.isAggregation  &&  params.to)
+  //     //   shareableResources = self.getShareableResources(result, params.to);
+
+  //     // var retParams = {
+  //     //   action: !params.prop ? 'messageList' : 'list',
+  //     //   list: result,
+  //     //   spinner: params.spinner,
+  //     //   isAggregation: params.isAggregation
+  //     // }
+  //     // if (shareableResources)
+  //     //   retParams.shareableResources = shareableResources;
+  //     // if (params.prop)
+  //     //   retParams.prop = params.prop;
+
+  //     // self.trigger(retParams);
+  //     return result
+  //   })
+  //   .catch(function(err) {
+  //     debugger
+  //   })
+  // },
+
+  // // extractReferences(val) {
+  // //   let props = utils.getModel(val[TYPE]).value.properties
+  // //   let r = {_t: val[TYPE]}
+  // //   for (let p in val) {
+  // //     if (props[p].ref) {
+  // //       if (props[p].ref !== constants.TYPE.MONEY)
+  // //         r[p] = val[p]
+  // //     }
+  // //     else if (props[p].type === 'array') {
+  // //       if
+  // //     }
+  // //   }
+  // // },
+  // getMessagesBefore(params) {
+  //   var bankID = utils.getId(params.to)
+  //   var messages
+  //   var self = this
+  //   var promise = bankMessages[bankID] ? Q() : this.searchMessagesNew(params)
+  //   return promise
+  //   .then(function(results) {
+  //     var limit = params.limit
+
+  //     var allMessages = bankMessages[bankID].messages
+  //     var ids = bankMessages[bankID].ids
+
+  //     var start = params.lastId ? ids.indexOf(utils.getId(params.lastId)) : ids.length
+  //     start = start < limit ? 0 : start - limit - 1
+  //     let end = start < limit ? ids.length : start + limit
+  //     var result = []
+  //     var idToIdx = {}
+  //     for (var i=start, k=0; i <= end && i<ids.length && k<=limit; i++) {
+  //       var val = list[ids[i]]
+  //       if (!val)
+  //         continue
+  //       let idx = idToIdx[ids[i]]
+  //       if (typeof idx !== 'undefined')
+  //         continue
+
+  //       if (val.value[TYPE] === VERIFICATION)
+  //         val.value.document = list[utils.getId(val.value.document)].value
+  //       result.push(val.value)
+  //       idToIdx[ids[i]] = result.length - 1
+  //       k++
+  //     }
+  //     // var r = []
+  //     // for (let i=result.length - 1; i>=0; i--)
+  //     //   r.push(result[i])
+  //     self.trigger({action: 'messageList', loadingEarlierMessages: true, list: result})
+  //   })
+  // },
