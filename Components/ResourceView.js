@@ -18,6 +18,8 @@ var ResourceMixin = require('./ResourceMixin');
 var QRCode = require('./QRCode')
 var buttonStyles = require('../styles/buttonStyles');
 const TOUCH_ID_IMG = require('../img/touchid2.png')
+const TALK_TO_EMPLOYEE = '1'
+const SERVER_URL = 'http://192.168.0.144:44444/'
 
 var extend = require('extend');
 var constants = require('@tradle/constants');
@@ -61,7 +63,6 @@ class ResourceView extends Component {
       // this.showRefResource(params.resource)
     else  if (params.resource)
       this.onResourceUpdate(params);
-
   }
   onResourceUpdate(params) {
     var resource = params.resource;
@@ -110,11 +111,13 @@ class ResourceView extends Component {
       actionPanel = <View/>
     else
       actionPanel = <ShowRefList resource={resource} currency={this.props.currency} navigator={this.props.navigator} />
-    var qrcode = (Object.keys(model.properties).length === 2)
-               ? <View />
-               : <View>
-                  <QRCode inline={true} content={resource[constants.ROOT_HASH]} dimension={370} />
-                </View>
+    var qrcode
+    if (isMe && me.organization)
+      qrcode = <View>
+                 <QRCode inline={true} content={TALK_TO_EMPLOYEE + ';' + SERVER_URL + ';' + utils.getId(me.organization).split('_')[1] + ';' + me[constants.ROOT_HASH]} dimension={370} />
+               </View>
+    else
+      qrcode = <View />
     // var switchTouchId = isIdentity
     //                   ? <TouchableHighlight style={{backgroundColor: '#eeeeee'}} underlayColor='transparent' onPress={() => {
     //                       let r = {
@@ -140,6 +143,7 @@ class ResourceView extends Component {
           <PhotoView resource={resource} navigator={this.props.navigator}/>
         </View>
         {actionPanel}
+        {qrcode}
         <PhotoList photos={photos} resource={this.props.resource} navigator={this.props.navigator} isView={true} numberInRow={photos.length > 4 ? 5 : photos.length} />
         <ShowPropertiesView resource={resource}
                             showItems={this.showResources.bind(this)}

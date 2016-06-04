@@ -22,11 +22,12 @@ var QRCodeScanner = require('./QRCodeScanner')
 var QRCode = require('./QRCode')
 var buttonStyles = require('../styles/buttonStyles');
 var defaultBankStyle = require('../styles/bankStyle.json')
-var WEB_TO_MOBILE = '0'
-var TALK_TO_EMPLOYEEE = '1'
+
+const WEB_TO_MOBILE = '0'
+const TALK_TO_EMPLOYEEE = '1'
 
 // var bankStyles = require('../styles/bankStyles')
-var ENUM = 'tradle.Enum'
+const ENUM = 'tradle.Enum'
 
 var {
   ListView,
@@ -210,7 +211,10 @@ class ResourceList extends Component {
       // var sendNotification = (resource.name === 'Rabobank'  &&  (!me.organization  ||  me.organization.name !== 'Rabobank'))
       // Actions.addMessage(msg, true, sendNotification)
       utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg)) //, true))
-      this.props.navigator.push(route)
+      if (this.props.navigator.getCurrentRoutes().length === 3)
+        this.props.navigator.replace(route)
+      else
+        this.props.navigator.push(route)
       return
     }
     if (action === 'list') {
@@ -678,19 +682,19 @@ class ResourceList extends Component {
         model: model,
         resource: r,
         callback: (resource) => {
-          this.props.navigator.pop()
+          self.props.navigator.pop()
           let l = []
 
-          this.state.list.forEach((r) => {
+          self.state.list.forEach((r) => {
             let rr = {}
             extend(rr, r)
             l.push(rr)
           })
           l.push(resource)
 
-          this.setState({
+          self.setState({
             list: l,
-            dataSource: this.state.dataSource.cloneWithRows(l)
+            dataSource: self.state.dataSource.cloneWithRows(l)
           })
           // this.props.navigator.jumpTo(routes[routes.length - 2])
           // routes[routes.length - 2].passProps.callback(resource)
