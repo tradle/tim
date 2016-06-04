@@ -165,7 +165,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
-var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://192.168.0.137:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
+var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://192.168.0.144:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
@@ -271,6 +271,10 @@ var Store = Reflux.createStore({
     })
     .then(function(value) {
       me = value
+      if (me.isAuthenticated) {
+        delete me.isAuthenticated
+        db.put(utils.getId(me), me)
+      }
       self.setMe(me)
       var key = value[TYPE] + '_' + value[ROOT_HASH]
       list[key] = {
@@ -279,7 +283,7 @@ var Store = Reflux.createStore({
       }
     })
     .catch(function(err) {
-      // debugger
+      debugger
       // return self.loadModels()
     })
   },
@@ -1186,8 +1190,8 @@ var Store = Reflux.createStore({
         to.lastMessageTime = rr.time;
         from.lastMessage = rr.message;
         from.lastMessageTime = rr.time;
-        batch.push({type: 'put', key: to[TYPE] + '_' + to[ROOT_HASH], value: to});
-        batch.push({type: 'put', key: from[TYPE] + '_' + from[ROOT_HASH], value: from});
+        batch.push({type: 'put', key: utils.getId(to), value: to});
+        batch.push({type: 'put', key: utils.getId(from), value: from});
       }
       if (!isWelcome  ||  (me.organization  &&  utils.getId(me.organization) === utils.getId(r.to)))
         return
@@ -1225,7 +1229,7 @@ var Store = Reflux.createStore({
         return;
 
       // Temporary untill the real hash is known
-      var key = rr[TYPE] + '_' + rr[ROOT_HASH];
+      var key = utils.getId(rr)
       list[key] = {key: key, value: rr};
       var params = {
         action: 'addMessage',
@@ -1265,7 +1269,7 @@ var Store = Reflux.createStore({
         rr[ROOT_HASH] = roothash
         rr[CUR_HASH] = data[0]._props[CUR_HASH]
       }
-      var key = rr[TYPE] + '_' + rr[ROOT_HASH];
+      var key = utils.getId(rr)
       batch.push({type: 'put', key: key, value: rr})
       list[key] = {key: key, value: rr};
       // var params = {
@@ -1352,7 +1356,7 @@ var Store = Reflux.createStore({
         r[ROOT_HASH] = roothash
         r[CUR_HASH] = data[0]._props[CUR_HASH]
       }
-      key = r[TYPE] + '_' + r[ROOT_HASH];
+      key = utils.getId(r)
       if (from.organization)
         r.organization = from.organization;
       if (!r.sharedWith) {
@@ -1445,10 +1449,10 @@ var Store = Reflux.createStore({
      // foundRefs.forEach(function(val) {
        var val = foundRefs[i];
        if (val.state === 'fulfilled') {
-         var propValue = val.value[TYPE] + '_' + val.value[ROOT_HASH];
+         var propValue = utils.getId(val.value)
          var prop = refProps[propValue];
          newResource[prop] = val.value;
-         newResource[prop].id = val.value[TYPE] + '_' + val.value[ROOT_HASH];
+         newResource[prop].id = propValue
          if (!newResource[prop].title)
             newResource[prop].title = utils.getDisplayName(newResource, meta);
        }
@@ -1468,13 +1472,9 @@ var Store = Reflux.createStore({
       if (props[p] &&  props[p].type === 'object') {
         var ref = props[p].ref;
         if (ref  &&  resource[p]) {
-          var rValue;
           // reference property could be set as a full resource (for char to have all info at hand when displaying the message)
           // or resource id
-          if (resource[p][ROOT_HASH])
-            rValue = resource[p][TYPE] + '_' + resource[p][ROOT_HASH];
-          else
-            rValue = utils.getId(resource[p]);
+          let rValue = utils.getId(resource[p])
 
           refProps[rValue] = p;
           if (list[rValue]) {
@@ -1641,7 +1641,7 @@ var Store = Reflux.createStore({
       var error = this.checkRequired(json, props);
       if (error) {
         foundRefs.forEach(function(val) {
-          var propValue = val.value[TYPE] + '_' + val.value[ROOT_HASH];
+          var propValue = utils.getId(val.value)
           var prop = refProps[propValue];
           json[prop] = val.value;
         });
@@ -1672,7 +1672,7 @@ var Store = Reflux.createStore({
         allFoundRefs.forEach(function(val) {
           if (val.state === 'fulfilled') {
             var value = val.value;
-            var propValue = value[TYPE] + '_' + value[ROOT_HASH];
+            var propValue = utils.getId(value)
             var prop = refProps[propValue];
 
             var title = utils.getDisplayName(value, self.getModel(value[TYPE]).value.properties);
@@ -1754,7 +1754,7 @@ var Store = Reflux.createStore({
         if (isNew)
           returnVal[ROOT_HASH] = returnVal[NONCE]
 
-        var tmpKey = returnVal[TYPE] + '_' + returnVal[ROOT_HASH]
+        var tmpKey = utils.getId(returnVal)
         list[tmpKey] = {key: tmpKey, value: returnVal};
 
         var params;
@@ -1870,7 +1870,7 @@ var Store = Reflux.createStore({
       return meDriver.share({...opts, [CUR_HASH]: resource.document[ROOT_HASH]})
     })
     .then(function() {
-      var key = formResource[TYPE] + '_' + formResource[ROOT_HASH]
+      var key = utils.getId(formResource)
       var r = list[key].value
       r.documentCreated = true
       var batch = []
@@ -1878,7 +1878,7 @@ var Store = Reflux.createStore({
       var toId = utils.getId(to)
       var time = new Date().getTime()
       if (resource[ROOT_HASH]) {
-        key = resource[TYPE] + '_' + resource[ROOT_HASH]
+        key = utils.getId(resource)
         var ver = list[key].value
         if (!ver.sharedWith)
           ver.sharedWith = []
@@ -2120,7 +2120,7 @@ var Store = Reflux.createStore({
       for (var p in props) {
         if (props[p].ref  &&  props[p].ref === to[TYPE]) {
           containerProp = p;
-          resourceId = to[TYPE] + '_' + to[ROOT_HASH];
+          resourceId = utils.getId(to)
         }
       }
     }
@@ -2204,7 +2204,7 @@ var Store = Reflux.createStore({
     // Don't show current 'me' contact in contact list or my identities list
     if (!containerProp  &&  me  &&  isIdentity) {
       if (sampleData.getMyId())
-        delete foundResources[PROFILE + '_' + me[ROOT_HASH]];
+        delete foundResources[utils.getId(me)];
       else if (!isTest) {
         var myIdentities = list[MY_IDENTITIES].value.allIdentities;
         myIdentities.forEach((meId) =>  {
@@ -2474,7 +2474,7 @@ var Store = Reflux.createStore({
       if (!rep)
         return
       chatTo = rep
-      chatId = chatTo[TYPE] + '_' + chatTo[ROOT_HASH]
+      chatId = utils.getId(chatTo)
       // isChatWithOrg = false
       toId = utils.getId(params.to)
       toOrg = list[toId].value
@@ -2874,7 +2874,7 @@ var Store = Reflux.createStore({
       return resource;
     for (var i=0; i<resource.verifications.length; i++) {
       var v = resource.verifications[i];
-      var vId = v.id ? utils.getId(v.id) : v[TYPE] + '_' + v[ROOT_HASH];
+      var vId = utils.getId(v)
       var ver = {};
       extend(ver, list[vId].value);
       resource.verifications[i] = ver;
@@ -2894,7 +2894,7 @@ var Store = Reflux.createStore({
     if (!foundResources)
       return
     var verTypes = [];
-    var meId = me[TYPE] + '_' + me[ROOT_HASH];
+    var meId = utils.getId(me)
     var simpleLinkMessages = {}
     var meId = utils.getId(utils.getMe())
     for (var i=0; i<foundResources.length; i++) {
@@ -3108,8 +3108,8 @@ var Store = Reflux.createStore({
         to.lastMessageTime = value.time;
         // from.lastMessage = value.message;
         from.lastMessageTime = value.time;
-        batch.push({type: 'put', key: to[TYPE] + '_' + to[ROOT_HASH], value: to});
-        batch.push({type: 'put', key: from[TYPE] + '_' + from[ROOT_HASH], value: from});
+        batch.push({type: 'put', key: utils.getId(to), value: to});
+        batch.push({type: 'put', key: utils.getId(from), value: from});
       }
     }
     var iKey = modelName + '_' + value[ROOT_HASH];
@@ -3186,7 +3186,7 @@ var Store = Reflux.createStore({
     isLoaded = true;
     me = value
     // meDriver = null
-    var pKey = me[TYPE] + '_' + me[ROOT_HASH];
+    var pKey = utils.getId(me)
     var batch = [];
     var mid = {
       _t: MY_IDENTITIES_TYPE,
@@ -3655,7 +3655,7 @@ var Store = Reflux.createStore({
     // return meDriver.ready()
   },
   updateMe() {
-    db.put(me[TYPE] + '_' + me[ROOT_HASH], me)
+    db.put(utils.getId(me), me)
   },
 
   putInDb(obj, onMessage) {
@@ -3834,7 +3834,7 @@ var Store = Reflux.createStore({
         if (!oo.contacts)
           oo.contacts = []
         oo.contacts.push(representative)
-        var orgKey = org[TYPE] + '_' + org[ROOT_HASH];
+        var orgKey = utils.getId(org)
         list[orgKey] = {
           key: orgKey,
           value: oo
@@ -3975,12 +3975,12 @@ var Store = Reflux.createStore({
     }
 
     val.to = {
-      id: to[TYPE] + '_' + to[ROOT_HASH],
+      id: utils.getId(to),
       title: to.formatted || to.firstName
     }
 
     val.from = {
-      id: from[TYPE] + '_' + from[ROOT_HASH],
+      id: utils.getId(from),
       title: from.formatted || from.firstName
     }
   },
@@ -4284,13 +4284,13 @@ var Store = Reflux.createStore({
     var batch = []
     var docs = []
     result.forEach(function(r){
-      batch.push({type: 'del', key: r[TYPE] + '_' + r[ROOT_HASH], value: r})
+      batch.push({type: 'del', key: utils.getId(r), value: r})
     })
     var self = this
     return db.batch(batch)
     .then(function() {
       result.forEach(function(r) {
-        delete list[r[TYPE] + '_' + r[ROOT_HASH]]
+        delete list[utils.getId(r)]
       })
     })
     .catch(function(err) {
@@ -4299,7 +4299,7 @@ var Store = Reflux.createStore({
   },
   onTalkToRepresentative(resource, org) {
     var orgRep = resource[TYPE] === ORGANIZATION
-               ? this.getRepresentative(resource[TYPE] + '_' + resource[ROOT_HASH])
+               ? this.getRepresentative(utils.getId(resource))
                : resource
     var self = this
     if (!orgRep) {
@@ -4341,7 +4341,7 @@ var Store = Reflux.createStore({
       _z: this.getNonce()
     }
     var orgReps = resource[TYPE] === ORGANIZATION
-                ? this.getRepresentatives(resource[TYPE] + '_' + resource[ROOT_HASH])
+                ? this.getRepresentatives(utils.getId(resource))
                 : [resource]
 
     let promises = []
@@ -4399,7 +4399,7 @@ var Store = Reflux.createStore({
         r[ROOT_HASH] = sha(r);
 
       r[CUR_HASH] = r[ROOT_HASH];
-      var key = r[TYPE] + '_' + r[ROOT_HASH];
+      var key = utils.getId(r)
       list[key] = {
         key: key,
         value: r
