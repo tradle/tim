@@ -69,7 +69,7 @@ class MessageView extends Component {
         'Verify ' + utils.getDisplayName(resource, model.properties),
         null,
         [
-          {text: 'Verify', onPress: this.verify.bind(this)},
+          {text: 'Ok', onPress: this.verify.bind(this)},
           {text: 'Cancel', onPress: () => console.log('Canceled!')},
         ]
       )
@@ -87,7 +87,7 @@ class MessageView extends Component {
   createError(text) {
     let errors = []
     for (let p in this.state.errorProps) {
-      errors.push({name: p, error: 'Please correct this property'})
+      errors.push({name: p, error: this.state.errorProps[p] || 'Please correct this property'})
     }
     let resource = this.props.resource
 
@@ -103,7 +103,7 @@ class MessageView extends Component {
     this.props.navigator.pop()
 
   }
-  onCheck(prop) {
+  onCheck(prop, message) {
     let errorProps = {}
 
     if (this.state.errorProps)
@@ -111,7 +111,7 @@ class MessageView extends Component {
     if (this.state.errorProps  &&  this.state.errorProps[prop.name])
       delete errorProps[prop.name]
     else
-      errorProps[prop.name] = prop
+      errorProps[prop.name] = message
     this.setState({errorProps: errorProps})
   }
 

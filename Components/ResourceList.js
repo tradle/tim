@@ -183,6 +183,10 @@ class ResourceList extends Component {
     if (action === 'talkToEmployee') {
       if (!params.to)
         return
+      let style = {}
+      extend(style, defaultBankStyle)
+      if (params.to.style)
+        style = extend(style, params.to.style)
       var route = {
         title: params.to.name,
         component: MessageList,
@@ -193,7 +197,7 @@ class ResourceList extends Component {
           filter: '',
           modelName: constants.TYPES.MESSAGE,
           currency: params.to.currency,
-          bankStyle: params.to.style,
+          bankStyle: style,
           dictionary: params.dictionary
         },
       }
