@@ -22,6 +22,7 @@ import {
   Text,
   TextInput,
   TouchableHighlight,
+  AlertIOS,
 } from 'react-native'
 
 import React, { Component } from 'react'
@@ -202,7 +203,15 @@ class ShowPropertiesView extends Component {
       first = false;
       let canReject = this.props.checkProperties
                     ? <View style={{flex: 1, justifyContent: 'flex-end', alignSelf: 'center'}}>
-                      <TouchableHighlight underlayColor='transparent' onPress={this.props.checkProperties.bind(this, pMeta)}>
+                      <TouchableHighlight underlayColor='transparent' onPress={() => {
+                        AlertIOS.prompt(
+                          'Please write a message to the customer',
+                          [
+                            {text: 'Ok', onPress: this.props.checkProperties.bind(this, pMeta)},
+                            {text: 'Cancel', null},
+                          ]
+                        )
+                      }}>
                         <Icon name={this.props.errorProps && this.props.errorProps[p] ? 'ios-close' : 'ios-circle-outline'} size={25} color={this.props.errorProps && this.props.errorProps[p] ? 'red' : this.props.bankStyle.LINK_COLOR} style={{paddingRight: 10, marginTop: 10}}/>
                       </TouchableHighlight>
                       </View>
