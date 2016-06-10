@@ -1,6 +1,5 @@
 'use strict';
 
-var React = require('react-native');
 var Q = require('q')
 var Keychain = require('react-native-keychain')
 var ResourceList = require('./ResourceList');
@@ -34,7 +33,7 @@ import {
 } from '../utils/localAuth'
 const PASSWORD_ITEM_KEY = 'app-password'
 
-var {
+import {
   StyleSheet,
   Text,
   Navigator,
@@ -44,15 +43,15 @@ var {
   ActivityIndicatorIOS,
   Image,
   NetInfo,
-  Component,
   ScrollView,
-  Dimensions,
   LinkingIOS,
   StatusBarIOS,
   AlertIOS,
-  Dimensions
-} = React;
+  Dimensions,
+  Alert
+} from 'react-native'
 
+import React, { Component } from 'react'
 
 class TimHome extends Component {
   props: {
@@ -95,7 +94,10 @@ class TimHome extends Component {
   _handleConnectivityChange(isConnected) {
     this.props.navigator.getCurrentRoutes()[0].isConnected = isConnected
     // To re-render NavBar with new status
-    this.props.navigator._navBar.setState({isConnected: isConnected})
+    if (this.props.navigator._navBar) {
+      this.props.navigator._navBar.setState({isConnected: isConnected})
+    }
+
     this.props.navigator.isConnected = isConnected
   }
   componentWillUnmount() {
@@ -284,7 +286,7 @@ class TimHome extends Component {
         },
         onFail: () => {
           debugger
-          React.Alert.alert('Oops!')
+          Alert.alert('Oops!')
         }
       }
     })
@@ -505,7 +507,8 @@ class TimHome extends Component {
               ? { width: width / 2.2, height: width / 2.2 }
               : styles.thumb
               // <Progress.CircleSnail color={'white'} size={70} thickness={5}/>
-  	var spinner =  <View>
+  	var spinner = (
+      <View>
           <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: width, height: height }} />
           <ScrollView
             scrollEnabled={false}
@@ -518,7 +521,9 @@ class TimHome extends Component {
               <ActivityIndicatorIOS hidden='true' size='large' color='#ffffff'/>
             </View>
           </ScrollView>
-          </View>
+      </View>
+    )
+
     if (this.state.isLoading)
       return spinner
     var err = this.state.err || '';

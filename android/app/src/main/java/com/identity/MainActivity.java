@@ -12,6 +12,8 @@ import com.facebook.react.modules.core.DefaultHardwareBackBtnHandler;
 import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
 
+import com.lwansbrough.RCTCamera.*;
+
 public class MainActivity extends Activity implements DefaultHardwareBackBtnHandler {
 
     private ReactInstanceManager mReactInstanceManager;
@@ -27,8 +29,12 @@ public class MainActivity extends Activity implements DefaultHardwareBackBtnHand
                 .setBundleAssetName("index.android.bundle")
                 .setJSMainModuleName("index.android")
                 .addPackage(new MainReactPackage(),
-        new RCTCameraPackage(),
-        new ReactNativeLocalizationPackage())
+            new ReactVideoPackage(),
+            new VectorIconsPackage(),
+            new UdpSocketsModule(),
+            new LinearGradientPackage())
+                .addPackage(new RCTCameraPackage())
+                .addPackage(new ReactNativeLocalizationPackage())
                 .addPackage(new CodePushReactPackage())
                 .setUseDeveloperSupport(BuildConfig.DEBUG)
                 .setInitialLifecycleState(LifecycleState.RESUMED)

@@ -1,6 +1,5 @@
 'use strict';
 
-var React = require('react-native');
 var Reflux = require('reflux');
 var reactMixin = require('react-mixin');
 var utils = require('../utils/utils');
@@ -11,14 +10,15 @@ var Actions = require('../Actions/Actions');
 var Icon = require('react-native-vector-icons/Ionicons');
 var constants = require('@tradle/constants');
 
-var {
+import {
   StyleSheet,
   Image,
   View,
   Text,
-  Component,
   TouchableHighlight
-} = React;
+} from 'react-native'
+
+import React, { Component } from 'react'
 
 class FromToView extends Component {
   componentDidMount() {

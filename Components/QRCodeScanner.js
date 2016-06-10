@@ -4,9 +4,10 @@ var {
   StyleSheet,
   Text,
   View,
-  Component,
   TouchableHighlight
 } = React
+
+import { Component, PropTypes } from 'react'
 
 var ICON_BORDER_COLOR = '#D7E6ED'
 var Camera = require('react-native-camera')
@@ -21,7 +22,7 @@ class QRCodeScannerView extends Component {
     }
   }
   propTypes: {
-    onread: React.PropTypes.func.isRequired
+    onread: PropTypes.func.isRequired
   };
   render() {
     return (

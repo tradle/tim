@@ -1,11 +1,10 @@
-var React = require('react-native')
-var {
+import React, { PropTypes } from 'react'
+import {
   View,
   Image,
-  PropTypes,
   Dimensions,
   StyleSheet
-} = React
+} from 'react-native'
 var PasswordGesture = require('react-native-gesture-password')
 var translate = require('../utils/utils').translate
 var MIN_LENGTH = 5

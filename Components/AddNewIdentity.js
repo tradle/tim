@@ -1,6 +1,5 @@
 'use strict';
 
-var React = require('react-native');
 var utils = require('../utils/utils');
 var NewResource = require('./NewResource');
 var Reflux = require('reflux');
@@ -11,13 +10,14 @@ var Icon = require('react-native-vector-icons/Ionicons');
 var buttonStyles = require('../styles/buttonStyles');
 var constants = require('@tradle/constants');
 
-var {
+import {
   View,
   Text,
   TextInput,
   TouchableHighlight,
-  Component
-} = React;
+} from 'react-native'
+
+import React, { Component } from 'react'
 
 class AddNewIdentity extends Component {
   componentDidMount() {

@@ -1,6 +1,5 @@
 'use strict';
 
-var React = require('react-native');
 var t = require('tcomb-form-native');
 var utils = require('../utils/utils');
 var logError = require('logError');
@@ -10,16 +9,17 @@ var Icon = require('react-native-vector-icons/Ionicons');
 
 var Form = t.form.Form;
 
-var {
+import {
   StyleSheet,
   View,
   Image,
   Text,
   CameraRoll,
   ListView,
-  Component,
   TouchableHighlight,
-} = React;
+} from 'react-native'
+
+import React, { Component } from 'react'
 
 class SelectPhotoList extends Component {
   constructor(props) {

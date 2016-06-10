@@ -1,6 +1,5 @@
 'use strict';
 
-var React = require('react-native');
 var NewResource = require('./NewResource');
 var utils = require('../utils/utils');
 var translate = utils.translate
@@ -10,16 +9,17 @@ var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var constants = require('@tradle/constants');
 var MessageList = require('./MessageList')
-var SearchBar = require('react-native-search-bar');
+// var SearchBar = require('react-native-search-bar');
 
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
-var {
+import {
   ListView,
   Text,
-  Component,
   StyleSheet,
   View,
-} = React;
+} from 'react-native'
+
+import React, { Component } from 'react'
 
 class ProductChooser extends Component {
   constructor(props) {

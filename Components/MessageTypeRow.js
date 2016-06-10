@@ -1,6 +1,5 @@
 'use strict';
 
-var React = require('react-native');
 var utils = require('../utils/utils');
 var constants = require('@tradle/constants');
 var translate = utils.translate
@@ -9,14 +8,15 @@ var STRUCTURED_MESSAGE_COLOR = '#F6FFF0';
 var DEFAULT_PRODUCT_ROW_BG_COLOR = '#f7f7f7'
 var DEFAULT_PRODUCT_ROW_TEXT_COLOR = '#757575'
 var PRODUCT_ROW_BG_COLOR, PRODUCT_ROW_TEXT_COLOR
-var {
+import {
   Image,
   StyleSheet,
   Text,
   TouchableHighlight,
-  Component,
   View
-} = React;
+} from 'react-native'
+
+import React, { Component } from 'react'
 
 class MessageTypeRow extends Component {
   constructor(props) {

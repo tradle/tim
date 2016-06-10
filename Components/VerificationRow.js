@@ -19,12 +19,12 @@ var {
   StyleSheet,
   Text,
   TouchableHighlight,
-  PropTypes,
-  Component,
   ArticleView,
   AlertIOS,
   View
 } = React;
+
+import { Component, PropTypes } from 'react'
 
 class VerificationRow extends Component {
   props: {

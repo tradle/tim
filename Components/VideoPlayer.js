@@ -1,15 +1,14 @@
 'use strict'
 
-var React = require('react-native')
-var {
+import React, { PropTypes } from 'react'
+import {
   AppRegistry,
   StyleSheet,
   Text,
   View,
   TouchableOpacity,
   AlertIOS,
-  PropTypes,
-} = React
+} from 'react-native'
 
 var Video = require('react-native-video')
 var utils = require('../utils/utils')

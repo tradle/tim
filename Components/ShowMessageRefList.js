@@ -1,6 +1,5 @@
 'use strict';
 
-var React = require('react-native');
 var utils = require('../utils/utils');
 var translate = utils.translate
 var ResourceList = require('./ResourceList');
@@ -12,15 +11,16 @@ var reactMixin = require('react-mixin');
 var ResourceMixin = require('./ResourceMixin');
 var RowMixin = require('./RowMixin');
 
-var {
+import {
   View,
   AlertIOS,
   Text,
   TextInput,
   TouchableHighlight,
   Dimensions,
-  Component
-} = React;
+} from 'react-native'
+
+import React, { Component } from 'react'
 
 class ShowMessageRefList extends Component {
   constructor(props) {

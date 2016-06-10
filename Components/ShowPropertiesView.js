@@ -1,6 +1,5 @@
 'use strict';
 
-var React = require('react-native');
 var PhotoList = require('./PhotoList');
 var ArticleView = require('./ArticleView');
 var utils = require('../utils/utils');
@@ -14,7 +13,7 @@ var NOT_SPECIFIED = 'Not specified'
 var DEFAULT_CURRENCY_SYMBOL = '£'
 var CURRENCY_SYMBOL
 
-var {
+import {
   StyleSheet,
   Image,
   View,
@@ -23,8 +22,9 @@ var {
   Text,
   TextInput,
   TouchableHighlight,
-  Component
-} = React;
+} from 'react-native'
+
+import React, { Component } from 'react'
 
 class ShowPropertiesView extends Component {
   constructor(props) {

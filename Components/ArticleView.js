@@ -1,13 +1,13 @@
-var React = require('react-native')
-var {
+import {
   WebView,
   View,
-  Component,
   Text,
   ActivityIndicatorIOS,
   ScrollView,
   StyleSheet,
-} = React
+} from 'react-native'
+
+import React, { Component } from 'react'
 
 class ArticleView extends Component {
   constructor(props) {

@@ -1,6 +1,5 @@
 'use strict';
 
-var React = require('react-native');
 var utils = require('../utils/utils');
 var translate = utils.translate
 var ShowPropertiesView = require('./ShowPropertiesView');
@@ -24,7 +23,7 @@ const SERVER_URL = 'http://192.168.0.144:44444/'
 var extend = require('extend');
 var constants = require('@tradle/constants');
 
-var {
+import {
   StyleSheet,
   ScrollView,
   Image,
@@ -32,8 +31,9 @@ var {
   Text,
   TextInput,
   TouchableHighlight,
-  Component
-} = React;
+} from 'react-native'
+
+import React, { Component } from 'react'
 
 class ResourceView extends Component {
   constructor(props) {

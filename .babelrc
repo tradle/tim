@@ -1,7 +1,0 @@
-{
-  "plugins": [
-    "transform-async-functions",
-    "transform-object-rest-spread",
-    "transform-regenerator"
-  ]
-}

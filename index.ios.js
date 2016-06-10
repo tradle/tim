@@ -11,12 +11,11 @@ if (__DEV__) {
 
 debug = debug('tim:main')
 
-require('regenerator/runtime') // support es7.asyncFunctions
+// require('regenerator/runtime') // support es7.asyncFunctions
 require('./utils/shim')
 require('./utils/crypto')
 require('stream')
 // require('./timmy')
-var React = require('react-native');
 
 // require('ErrorUtils').setGlobalHandler(function (e, isFatal) {
 //   console.error('Failed to handle error:')
@@ -56,7 +55,18 @@ import * as AutomaticUpdates from './utils/automaticUpdates'
 // var Device = require('react-native-device');
 
 var reactMixin = require('react-mixin');
-import { Text } from 'react-native';
+import {
+  Navigator,
+  Image,
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  AlertIOS,
+  // LinkingIOS,
+  AppStateIOS,
+  AppRegistry,
+  Text
+} from 'react-native';
 
 let originalGetDefaultProps = Text.getDefaultProps;
 Text.defaultProps = function() {
@@ -66,17 +76,7 @@ Text.defaultProps = function() {
   };
 };
 
-var {
-  Component,
-  Navigator,
-  Image,
-  View,
-  TouchableOpacity,
-  StyleSheet,
-  AlertIOS,
-  // LinkingIOS,
-  AppStateIOS
-} = React;
+import React, { Component } from 'react'
 
 var ReactPerf = __DEV__ && require('react-addons-perf')
 var UNAUTHENTICATE_AFTER_BG_MILLIS = __DEV__ ? 1000 : 10 * 60 * 1000
@@ -377,8 +377,8 @@ class TiMApp extends Component {
                 content={props.content}
                 fullScreen={props.fullScreen}
                 dimension={props.dimension} />
-    case 18:
-      return <VideoPlayer {...props} />
+    // case 18:
+      // return <VideoPlayer {...props} />
     case 19:
       return <GridItemsList navigator={nav} {...props} />
     case 20:
@@ -573,7 +573,7 @@ var styles = StyleSheet.create({
   },
 });
 
-React.AppRegistry.registerComponent('Tradle', function() { return TiMApp });
+AppRegistry.registerComponent('Tradle', function() { return TiMApp });
 
   // render() {
   //   var props = {db: this.state.db};

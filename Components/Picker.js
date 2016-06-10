@@ -1,6 +1,5 @@
 'use strict'
 
-var React = require('react-native')
 var translate = require('../utils/utils').translate
 var {
   DatePickerIOS,
@@ -11,8 +10,9 @@ var {
   Dimensions,
   Easing,
   Animated
-} = React
+} = require('react-native')
 
+var React = require('react')
 var deviceWidth = Dimensions.get('window').width;
 var deviceHeight = Dimensions.get('window').height;
 

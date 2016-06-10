@@ -1,6 +1,5 @@
 'use strict';
 
-var React = require('react-native');
 var utils = require('../utils/utils');
 var translate = utils.translate
 var ArticleView = require('./ArticleView');
@@ -37,19 +36,20 @@ var STRUCTURED_MESSAGE_COLOR
 const DEFAULT_CURRENCY_SYMBOL = '£'
 const DEFAULT_LINK_COLOR = '#2892C6'
 
-var {
+import {
   Image,
   StyleSheet,
   Text,
   TouchableHighlight,
   AlertIOS,
   Modal,
-  Component,
   Navigator,
   Dimensions,
   View,
   processColor
-} = React;
+} from 'react-native'
+
+import React, { Component } from 'react'
 
 var DeviceWidth = Dimensions.get('window').width
 

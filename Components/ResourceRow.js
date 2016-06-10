@@ -1,6 +1,5 @@
 'use strict';
 
-var React = require('react-native');
 var utils = require('../utils/utils');
 var translate = utils.translate
 var LinearGradient = require('react-native-linear-gradient');
@@ -15,17 +14,18 @@ var equal = require('deep-equal')
 var extend = require('extend')
 var Actions = require('../Actions/Actions');
 
-var {
+import {
   Image,
   PixelRatio,
   StyleSheet,
   Text,
   TouchableHighlight,
-  Component,
   View,
   ActivityIndicatorIOS,
   processColor
-} = React;
+} from 'react-native';
+
+import React, { Component } from 'react'
 
 class ResourceRow extends Component {
   constructor(props) {

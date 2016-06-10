@@ -1,6 +1,5 @@
 'use strict';
 
-var React = require('react-native');
 var utils = require('../utils/utils');
 var Icon = require('react-native-vector-icons/Ionicons');
 var constants = require('@tradle/constants');
@@ -8,14 +7,16 @@ var PhotoCarousel = require('./PhotoCarousel')
 var reactMixin = require('react-mixin');
 var PhotoCarouselMixin = require('./PhotoCarouselMixin');
 var equal = require('deep-equal')
-var {
+import {
   StyleSheet,
   Image,
   View,
   Text,
   TouchableHighlight,
-  Component
-} = React;
+  Dimensions
+} from 'react-native'
+
+import React, { Component } from 'react'
 
 class PhotoView extends Component {
   constructor(props) {
@@ -74,8 +75,8 @@ reactMixin(PhotoView.prototype, PhotoCarouselMixin);
 
 var styles = StyleSheet.create({
   image: {
-    width: React.Dimensions.get('window').width,
-    height: React.Dimensions.get('window').height / 2,
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height / 2,
     alignSelf: 'stretch'
   }
 });

@@ -1,14 +1,13 @@
 'use strict'
 
-var React = require('react-native');
-var {
+import {
   Text,
-  Component,
   StyleSheet,
   Dimensions,
   View,
-} = React;
+} from 'react-native';
 
+import React, { Component } from 'react'
 
 class NoResources extends Component {
   render() {

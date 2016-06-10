@@ -1,6 +1,5 @@
 'use strict';
 
-var React = require('react-native');
 var utils = require('../utils/utils');
 var translate = utils.translate
 var constants = require('@tradle/constants');
@@ -22,16 +21,16 @@ var ResourceMixin = require('./ResourceMixin');
 var buttonStyles = require('../styles/buttonStyles');
 var HELP_COLOR = 'blue'
 
-var {
+import {
   StyleSheet,
   ScrollView,
   View,
   Text,
   PropTypes,
-  ArticleView,
   AlertIOS,
-  Component
-} = React;
+} from 'react-native'
+
+import React, { Component } from 'react'
 
 class MessageView extends Component {
   props: {

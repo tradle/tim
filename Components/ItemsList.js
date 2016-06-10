@@ -1,6 +1,5 @@
 'use strict';
 
-var React = require('react-native');
 var reactMixin = require('react-mixin');
 var utils = require('../utils/utils');
 var RowMixin = require('./RowMixin');
@@ -10,16 +9,15 @@ var equal = require('deep-equal')
 var constants = require('@tradle/constants');
 var Icon = require('react-native-vector-icons/Ionicons');
 
-
-var {
+import React, { Component } from 'react'
+import {
   ListView,
-  Component,
   StyleSheet,
   Text,
   Image,
   TouchableHighlight,
   View,
-} = React;
+} from 'react-native'
 
 class ItemsList extends Component {
   constructor(props) {

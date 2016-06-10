@@ -1,16 +1,17 @@
-var React = require('react-native')
-var {
+import {
   StyleSheet,
   View,
   ActivityIndicatorIOS,
   InteractionManager
-} = React
+} from 'react-native'
 
 var extend = require('xtend')
 var QRCode = require('react-native-barcode/QR/QRCode')
 var DEFAULT_DIM = 370
 
-class QRCodeView extends React.Component {
+import { Component, PropTypes } from 'react'
+
+class QRCodeView extends Component {
   constructor(props) {
     super(props)
 
@@ -20,9 +21,9 @@ class QRCodeView extends React.Component {
     }
   }
   propTypes: {
-    content: React.PropTypes.string.isRequired,
-    dimension: React.PropTypes.number,
-    fullScreen: React.PropTypes.bool
+    content: PropTypes.string.isRequired,
+    dimension: PropTypes.number,
+    fullScreen: PropTypes.bool
   };
   componentDidMount() {
     InteractionManager.runAfterInteractions(() => {

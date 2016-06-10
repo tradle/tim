@@ -1,17 +1,17 @@
 'use strict'
 
-var React = require('react-native');
 var Carousel = require('react-native-carousel');
 var utils = require('../utils/utils');
 var constants = require('@tradle/constants');
 
-var {
+import {
   StyleSheet,
-  Component,
   Image,
   Dimensions,
   View,
-} = React;
+} from 'react-native'
+
+import React, { Component } from 'react'
 
 class PhotoCarousel extends Component {
   constructor(props) {

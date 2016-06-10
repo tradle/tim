@@ -45,13 +45,14 @@ var {
   // StatusBarIOS,
   AlertIOS,
   Dimensions,
-  PropTypes,
   ActivityIndicatorIOS,
-  Component,
   Navigator,
   TouchableHighlight,
   Animated
 } = React;
+
+import { Component, PropTypes } from 'react'
+
 DeviceHeight = Dimensions.get('window').height;
 DeviceWidth = Dimensions.get('window').width
 

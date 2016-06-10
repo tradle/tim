@@ -1,6 +1,5 @@
 'use strict';
 
-var React = require('react-native');
 var reactMixin = require('react-mixin');
 var SearchBar = require('./SearchBar');
 var ResourceRow = require('./ResourceRow');
@@ -15,15 +14,16 @@ var reactMixin = require('react-mixin');
 var extend = require('extend');
 var constants = require('@tradle/constants');
 
-var {
+import {
   ListView,
-  Component,
   StyleSheet,
   Text,
   ActivityIndicatorIOS,
   TouchableHighlight,
   View,
-} = React;
+} from 'react-native'
+
+import React, { Component } from 'react'
 
 class IdentitiesList extends Component {
   constructor(props) {

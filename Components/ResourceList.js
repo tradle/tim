@@ -1,6 +1,5 @@
 'use strict';
 
-var React = require('react-native');
 var SearchBar = require('react-native-search-bar'); //('./SearchBar');
 var NoResources = require('./NoResources');
 var ResourceRow = require('./ResourceRow');
@@ -29,20 +28,19 @@ const TALK_TO_EMPLOYEEE = '1'
 // var bankStyles = require('../styles/bankStyles')
 const ENUM = 'tradle.Enum'
 
-var {
+import React, { Component, PropTypes } from 'react'
+import {
   ListView,
-  Component,
   StyleSheet,
   Navigator,
   AlertIOS,
-  PropTypes,
   TouchableHighlight,
   ActionSheetIOS,
   Image,
   StatusBarIOS,
   View,
   Text
-} = React;
+} from 'react-native';
 
 class ResourceList extends Component {
   props: {

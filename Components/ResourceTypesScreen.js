@@ -1,6 +1,5 @@
 'use strict';
 
-var React = require('react-native');
 var NewResource = require('./NewResource');
 var utils = require('../utils/utils');
 var reactMixin = require('react-mixin');
@@ -9,15 +8,15 @@ var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var constants = require('@tradle/constants');
 
-var {
+import React, { Component } from 'react'
+
+import {
   ListView,
   Text,
-  Component,
   StyleSheet,
   View,
   AlertIOS
-} = React;
-
+} from 'react-native'
 
 class ResourceTypesScreen extends Component {
   constructor(props) {

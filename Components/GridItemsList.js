@@ -1,6 +1,5 @@
 'use strict';
 
-var React = require('react-native')
 var PhotoList = require('./PhotoList')
 var utils = require('../utils/utils');
 var translate = utils.translate
@@ -9,14 +8,15 @@ var extend = require('extend')
 var equal = require('deep-equal')
 var Icon = require('react-native-vector-icons/Ionicons')
 var constants = require('@tradle/constants');
-var {
-  Component,
+import {
   StyleSheet,
   PropTypes,
   TouchableHighlight,
   ActionSheetIOS,
   View,
-} = React;
+} from 'react-native'
+
+import React, { Component } from 'react'
 
 class GridItemsList extends Component {
   props: {

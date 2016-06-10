@@ -1,14 +1,14 @@
-var React = require('react-native');
-var {
+import {
   AppRegistry,
   StyleSheet,
   Text,
   View,
-  Component,
   TouchableHighlight
-} = React;
+} from 'react-native'
 var Camera = require('react-native-camera');
 var Icon = require('react-native-vector-icons/Ionicons')
+
+import React, { Component } from 'react'
 
 class CameraView extends Component {
   constructor(props) {

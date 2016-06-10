@@ -1,6 +1,5 @@
 'use strict';
 
-var React = require('react-native');
 var utils = require('../utils/utils');
 var groupByEveryN = require('groupByEveryN');
 var constants = require('@tradle/constants');
@@ -9,7 +8,7 @@ var PhotoCarouselMixin = require('./PhotoCarouselMixin');
 var RowMixin = require('./RowMixin')
 var equal = require('deep-equal')
 var cnt = 1000
-var {
+import {
   StyleSheet,
   Image,
   View,
@@ -18,12 +17,13 @@ var {
   Dimensions,
   TextInput,
   TouchableHighlight,
-  Component
-} = React;
+} from 'react-native'
 var width = Dimensions.get('window').width
 var d3 = (width / 3) - 5
 var d4 = (width / 4) - 5
 var d5 = (width / 5) - 5
+
+import React, { Component } from 'react'
 
 // var Animated = require('Animated');
 class PhotoList extends Component {

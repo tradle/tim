@@ -1,16 +1,14 @@
 'use strict';
 
-var React = require('react-native');
-
-var {
+import React, { Component } from 'react'
+import {
   ListView,
-  Component,
   StyleSheet,
   PropTypes,
   TouchableHighlight,
   View,
   Text
-} = React;
+} from 'react-native'
 
 class EnumList extends Component {
   props: {

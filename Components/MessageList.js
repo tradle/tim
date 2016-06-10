@@ -1,6 +1,5 @@
 'use strict';
 
-var React = require('react-native');
 var MessageView = require('./MessageView');
 var MessageRow = require('./MessageRow');
 var NoResources = require('./NoResources');
@@ -25,9 +24,9 @@ var GiftedMessenger = require('react-native-gifted-messenger');
 var LINK_COLOR
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 
-var {
+import React, { Component } from 'react'
+import {
   ListView,
-  Component,
   StyleSheet,
   Dimensions,
   PropTypes,
@@ -39,7 +38,7 @@ var {
   ActionSheetIOS,
   ActivityIndicatorIOS,
   TouchableHighlight
-} = React;
+} from 'react-native'
 
 var currentMessageTime;
 

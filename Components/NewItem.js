@@ -1,6 +1,5 @@
 'use strict';
 
-var React = require('react-native');
 var t = require('tcomb-form-native');
 var utils = require('../utils/utils');
 var translate = utils.translate
@@ -15,14 +14,15 @@ var reactMixin = require('react-mixin');
 var Form = t.form.Form;
 Form.stylesheet = myStyles;
 
-var {
+import {
   StyleSheet,
   View,
   Text,
   ScrollView,
-  Component,
   TouchableHighlight,
-} = React;
+} from 'react-native'
+
+import React, { Component } from 'react'
 
 class NewItem extends Component {
   props: {

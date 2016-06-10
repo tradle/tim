@@ -1,15 +1,15 @@
 'use strict'
 
-var React = require('react-native');
 var utils = require('../utils/utils');
 var constants = require('@tradle/constants');
-var {
-  Component,
+import {
   View,
   TextInput,
   Text,
   StyleSheet
-} = React;
+} from 'react-native'
+
+import React, { Component } from 'react'
 // Component is used in 2 other components
 // 1. NewResource for sending the correct verification form to your friend/customer to help them with finding the right one
 // 2. AddNewMessage for submitting regular chat message. AddNewResource is used in ResourceList component when it shows chat messages
