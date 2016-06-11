@@ -46,7 +46,7 @@ class PhotoView extends Component {
     if (!currentPhoto) {
       if (model.id === constants.TYPES.PROFILE) {
         return (
-          <Icon name={'person'} size={200}  color='#f6f6f4' />
+          <Icon name='ios-person' size={200}  color='#f6f6f4' />
         )
       }
       else

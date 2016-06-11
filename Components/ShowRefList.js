@@ -49,7 +49,7 @@ class ShowRefList extends Component {
         continue;
       var icon = props[p].icon  ||  utils.getModel(props[p].items.ref).value.icon;
       if (!icon)
-        icon = 'ios-checkmark-empty';
+        icon = 'ios-checkmark';
         // icon = 'ios-checkmark-outline';
       var key = p
       var cnt = 1

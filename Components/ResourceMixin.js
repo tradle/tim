@@ -1,6 +1,5 @@
 'use strict';
 
-var React = require('react-native')
 var utils = require('../utils/utils');
 var UIImagePickerManager = require('NativeModules').ImagePickerManager;
 var extend = require('extend');
@@ -12,14 +11,16 @@ var equal = require('deep-equal')
 var PhotoList = require('./PhotoList')
 var constants = require('@tradle/constants');
 
-var {
+import {
   Text,
   View,
   TouchableHighlight,
   StyleSheet,
   Image,
   Navigator
-} = React;
+} from 'react-native'
+
+import React, { Component } from 'react'
 
 var ResourceMixin = {
   showRefResource(resource, prop) {
@@ -124,7 +125,7 @@ var ResourceMixin = {
               ? <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                   {item}
                   <TouchableHighlight underlayColor='transparent' onPress={cancelItem.bind(self, prop, v)}>
-                    <Icon name='ios-close-empty' size={25} color={LINK_COLOR} />
+                    <Icon name='ios-close' size={25} color={LINK_COLOR} />
                   </TouchableHighlight>
                 </View>
               : item
@@ -147,7 +148,7 @@ var ResourceMixin = {
             ? <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                {item}
                <TouchableHighlight underlayColor='transparent' onPress={cancelItem.bind(self, prop, v)}>
-                 <Icon name='ios-close-empty' size={25} color={LINK_COLOR} />
+                 <Icon name='ios-close' size={25} color={LINK_COLOR} />
                </TouchableHighlight>
               </View>
             : <TouchableHighlight underlayColor='transparent' onPress={() => {

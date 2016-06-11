@@ -37,7 +37,7 @@ import {
   TouchableHighlight,
   ActionSheetIOS,
   Image,
-  StatusBarIOS,
+  StatusBar,
   View,
   Text
 } from 'react-native';
@@ -74,7 +74,7 @@ class ResourceList extends Component {
       this.state.isRegistration = isRegistration;
   }
   componentWillMount() {
-    StatusBarIOS.setHidden(false);
+    StatusBar.setHidden(false);
     var params = {
       modelName: this.props.modelName,
       to: this.props.resource
@@ -597,7 +597,7 @@ class ResourceList extends Component {
       <View style={styles.footer}>
         <TouchableHighlight underlayColor='transparent' onPress={this.showMenu.bind(this)}>
           <View style={{marginTop: -10}}>
-            <Icon name='plus-circled'  size={55}  color='#ffffff' style={styles.icon} />
+            <Icon name='ios-add-circle'  size={55}  color='#ffffff' style={styles.icon} />
           </View>
         </TouchableHighlight>
       </View>

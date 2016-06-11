@@ -1,6 +1,5 @@
 'use strict';
 
-var React = require('react-native');
 var debug = require('debug')('NewResource')
 var utils = require('../utils/utils');
 var translate = utils.translate
@@ -34,24 +33,25 @@ var FORM_ERROR = 'tradle.FormError'
 var Form = t.form.Form;
 var stylesheet = require('../styles/styles')
 
-var {
+import Native, {
   StyleSheet,
   View,
   Text,
   TextInput,
   ScrollView,
   Image,
-  DeviceEventEmitter,
   // StatusBarIOS,
   AlertIOS,
   Dimensions,
   ActivityIndicatorIOS,
   Navigator,
   TouchableHighlight,
-  Animated
-} = React;
+  Animated,
+  NativeModules
+} from 'react-native';
 
-import { Component, PropTypes } from 'react'
+import Keyboard from 'Keyboard'
+import React, { Component, PropTypes } from 'react'
 
 DeviceHeight = Dimensions.get('window').height;
 DeviceWidth = Dimensions.get('window').width
@@ -141,11 +141,12 @@ class NewResource extends Component {
 
   componentDidMount() {
     this.listenTo(Store, 'itemAdded');
-    DeviceEventEmitter.addListener('keyboardWillShow', (e) => {
+    var n = Native
+    Keyboard.addListener('keyboardWillShow', (e) => {
       this.updateKeyboardSpace(e)
     });
 
-    DeviceEventEmitter.addListener('keyboardWillHide', (e) => {
+    Keyboard.addListener('keyboardWillHide', (e) => {
       this.resetKeyboardSpace(e)
     })
   }
@@ -617,6 +618,10 @@ class NewResource extends Component {
     var itemsArray
     for (var p in itemsMeta) {
       var bl = itemsMeta[p]
+      if (bl.icon === 'ios-telephone-outline') {
+        bl.icon = 'ios-call-outline'
+      }
+
       if (bl.readOnly  ||  bl.items.backlink) {
         arrayItems.push(<View key={this.getNextKey()} ref={bl.name} />)
         continue
@@ -671,7 +676,7 @@ class NewResource extends Component {
                        </View>
 
           counter = <View style={[styles.itemsCounterEmpty, {marginTop: 15, paddingBottom: 10}]}>
-                      <Icon name={bl.icon || 'plus'} size={bl.icon ? 25 : 15}  color={LINK_COLOR} />
+                      <Icon name={bl.icon || 'ios-add'} size={bl.icon ? 25 : 15}  color={LINK_COLOR} />
                     </View>
         }
       }
@@ -680,7 +685,7 @@ class NewResource extends Component {
         counter = <View style={[styles.itemsCounterEmpty]}>
                   { bl.name === 'photos'
                     ? <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
-                    : <Icon name={bl.icon || 'plus'}   size={bl.icon ? 25 : 15} color={LINK_COLOR} />
+                    : <Icon name={bl.icon || 'ios-add'}   size={bl.icon ? 25 : 15} color={LINK_COLOR} />
                   }
                   </View>
       }

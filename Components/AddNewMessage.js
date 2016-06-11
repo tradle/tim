@@ -1,6 +1,5 @@
 'use strict'
 
-var React = require('react-native');
 var utils = require('../utils/utils');
 var ChatMessage = require('./ChatMessage');
 // var SelectPhotoList = require('./SelectPhotoList');
@@ -14,7 +13,7 @@ var constants = require('@tradle/constants');
 
 var UIImagePickerManager = require('NativeModules').ImagePickerManager;
 
-var {
+import {
   View,
   TouchableHighlight,
   Navigator,
@@ -22,9 +21,11 @@ var {
   LayoutAnimation,
   Image,
   Text,
-  DeviceEventEmitter,
-  Component
-} = React;
+  Keyboard
+} from 'react-native';
+
+import Keyboard from 'Keyboard'
+import React, { Component } from 'react'
 
 var interfaceToTypeMapping = {
   'tradle.Message': constants.TYPES.SIMPLE_MESSAGE
@@ -59,11 +60,11 @@ class AddNewMessage extends Component {
   }
   componentDidMount() {
     this.listenTo(Store, 'onAddMessage');
-    DeviceEventEmitter.addListener('keyboardWillShow', (e) => {
+    Keyboard.addListener('keyboardWillShow', (e) => {
       this.updateKeyboardSpace(e)
     });
 
-    DeviceEventEmitter.addListener('keyboardWillHide', (e) => {
+    Keyboard.addListener('keyboardWillHide', (e) => {
       this.resetKeyboardSpace(e)
     })
   }
@@ -133,7 +134,7 @@ class AddNewMessage extends Component {
     var menu = <TouchableHighlight underlayColor='transparent'
                     onPress={this.props.onMenu.bind(this)}>
                   <View style={{marginLeft: 15, paddingRight: 0, marginRight: 10, marginBottom: 0}}>
-                    <Icon name='android-more-vertical' size={30} color='#999999' />
+                    <Icon name='md-more' size={30} color='#999999' />
                   </View>
                 </TouchableHighlight>
     var camera = isOrg

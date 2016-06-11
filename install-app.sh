@@ -21,6 +21,12 @@ if [ "$PRODUCT_NAME" == "Tradle-dev" ]; then
   plistName="Dev"
 fi
 
+buildPlist="Tradle/$plistName.plist"
+bundleVersion=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" $buildPlist)
+gitHash=$(git rev-parse HEAD)
+RELEASES_DIR="release"
+THIS_RELEASE_DIR="$RELEASES_DIR/$bundleVersion/${gitHash:0:10}"
+
 case "$CONFIGURATION" in
   Debug)
   exit 0 # avoid building bundle in Debug mode
@@ -40,12 +46,6 @@ case "$CONFIGURATION" in
     exit 1
     ;;
 esac
-
-buildPlist="Tradle/$plistName.plist"
-bundleVersion=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" $buildPlist)
-gitHash=$(git rev-parse HEAD)
-RELEASES_DIR="release"
-THIS_RELEASE_DIR="$RELEASES_DIR/$bundleVersion/${gitHash:0:10}"
 
 source ~/.bash_profile
 source ~/.bashrc
@@ -67,6 +67,11 @@ elif [[ -x "$(command -v brew)" && -s "$(brew --prefix nvm)/nvm.sh" ]]; then
   . "$(brew --prefix nvm)/nvm.sh"
 fi
 
+REACT_NATIVE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# Xcode project file for React Native apps is located in ios/ subfolder
+cd ..
+
 # if [ -f "$THIS_RELEASE_DIR/main.jsbundle" ]; then
 #   mkdir -p "$DEST"
 #   cp "$THIS_RELEASE_DIR/main.jsbundle" "$DEST/"
@@ -74,14 +79,23 @@ fi
 # else
   echo "writing bundle and assets to $DEST"
   rm -rf $TMPDIR/react-*
-  react-native bundle \
+  # react-native bundle \
+  #   --entry-file index.ios.js \
+  #   --platform ios \
+  #   --dev $DEV \
+  #   --sourcemap-output "$DEST/main.jsbundle.map" \
+  #   --bundle-output "$DEST/main.jsbundle" \
+  #   --assets-dest "$DEST" \
+  #   --verbose
+  set -x
+  node "$REACT_NATIVE_DIR/local-cli/cli.js" bundle \
     --entry-file index.ios.js \
     --platform ios \
     --dev $DEV \
+    --reset-cache true \
     --sourcemap-output "$DEST/main.jsbundle.map" \
     --bundle-output "$DEST/main.jsbundle" \
-    --assets-dest "$DEST" \
-    --verbose
+    --assets-dest "$DEST"
 
   if [ "$DEV" == false ]; then
     echo "copying bundle and assets to $THIS_RELEASE_DIR"

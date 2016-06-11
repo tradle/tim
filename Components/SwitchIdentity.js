@@ -1,6 +1,5 @@
 'use strict';
 
-var React = require('react-native');
 var utils = require('../utils/utils');
 var Reflux = require('reflux');
 var Actions = require('../Actions/Actions');
@@ -9,13 +8,14 @@ var buttonStyles = require('../styles/buttonStyles');
 var constants = require('@tradle/constants');
 var Icon = require('react-native-vector-icons/Ionicons');
 
-
-var {
+import {
   View,
   Text,
   TouchableHighlight,
-  Component
-} = React;
+} from 'react-native'
+
+import React, { Component } from 'react'
+
 class SwitchIdentity extends Component {
   render() {
     var resource = this.props.resource;

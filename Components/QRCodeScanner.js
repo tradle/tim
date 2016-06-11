@@ -1,13 +1,12 @@
 
-var React = require('react-native')
-var {
+import {
   StyleSheet,
   Text,
   View,
   TouchableHighlight
-} = React
+} from 'react-native'
 
-import { Component, PropTypes } from 'react'
+import React, { Component, PropTypes } from 'react'
 
 var ICON_BORDER_COLOR = '#D7E6ED'
 var Camera = require('react-native-camera')

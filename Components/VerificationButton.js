@@ -1,20 +1,20 @@
 'use strict';
 
-var React = require('react-native');
 var utils = require('../utils/utils');
 var Icon = require('react-native-vector-icons/Ionicons');
 var reactMixin = require('react-mixin');
 var constants = require('@tradle/constants');
 var buttonStyles = require('../styles/buttonStyles');
 
-var {
+import {
   StyleSheet,
   View,
   AlertIOS,
   Text,
   TouchableHighlight,
-  Component
-} = React;
+} from 'react-native'
+
+import React, { Component } from 'react'
 
 class VerificationButton extends Component {
   render() {

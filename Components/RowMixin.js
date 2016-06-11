@@ -1,13 +1,13 @@
 'use strict';
 
-var React = require('react-native');
+var React = require('react');
 var utils = require('../utils/utils');
 var constants = require('@tradle/constants');
 var cnt = 0;
-var {
+import {
   Text,
   View
-} = React;
+} from 'react-native';
 
 var RowMixin = {
   addDateProp(dateProp, style) {

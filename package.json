@@ -85,7 +85,7 @@
     "rimraf": "^2.4.3",
     "sendy": "^1.6.2",
     "sendy-otr": "^1.1.0",
-    "sendy-ws": "^1.2.3",
+    "sendy-ws": "^1.2.5",
     "stable-sha1": "~1.0.1",
     "stream-browserify": "^1.0.0",
     "stream-collector": "^1.0.1",

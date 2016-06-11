@@ -2,12 +2,11 @@
 
 var path = require('path')
 var parseURL = require('url').parse
-var React = require('react-native')
-var {
+import {
   AsyncStorage,
   AlertIOS,
   NetInfo
-} = React
+} from 'react-native'
 
 var path = require('path')
 var BeSafe = require('asyncstorage-backup')
@@ -165,7 +164,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
-var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://127.0.0.1:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
+var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://192.168.0.113:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
@@ -701,7 +700,10 @@ var Store = Reflux.createStore({
       const url = utils.joinURL(base, 'ws?from=' + identifier)
       const wsClient = new WebSocketClient({
         url: url,
-        autoConnect: true
+        autoConnect: true,
+        // for now, till we figure out why binary
+        // doesn't work (socket.io parser errors on decode)
+        forceBase64: true
       })
 
       let transport

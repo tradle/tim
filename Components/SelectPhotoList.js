@@ -88,7 +88,7 @@ class SelectPhotoList extends Component {
                ?
                  <TouchableHighlight onPress={this.onSelect.bind(this, asset)} underlayColor='#ffffff'>
                    <View>
-                     <Icon name={'ios-checkmark-empty'} size={20} color='#eeeeee' style={styles.icon} />
+                     <Icon name={'ios-checkmark'} size={20} color='#eeeeee' style={styles.icon} />
                    </View>
                  </TouchableHighlight>
                : <View />

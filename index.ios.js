@@ -61,8 +61,8 @@ import {
   View,
   TouchableOpacity,
   StyleSheet,
-  AlertIOS,
-  // LinkingIOS,
+  Alert,
+  // Linking,
   AppStateIOS,
   AppRegistry,
   Text
@@ -113,14 +113,14 @@ class TiMApp extends Component {
   componentDidMount() {
     AutomaticUpdates.on()
     AppStateIOS.addEventListener('change', this._handleAppStateChange);
-    // LinkingIOS.addEventListener('url', this._handleOpenURL);
-    // var url = LinkingIOS.popInitialURL();
+    // Linking.addEventListener('url', this._handleOpenURL);
+    // var url = Linking.popInitialURL();
     // if (url)
     //   this._handleOpenURL({url});
   }
   componentWillUnmount() {
     AppStateIOS.removeEventListener('change', this._handleAppStateChange);
-    // LinkingIOS.removeEventListener('url', this._handleOpenURL);
+    // Linking.removeEventListener('url', this._handleOpenURL);
     this._navListeners.forEach((listener) => listener.remove())
   }
   _handleAppStateChange(currentAppState) {
@@ -394,6 +394,8 @@ class TiMApp extends Component {
     }
   }
 }
+
+var HIT_SLOP = {top:10,right:10,bottom:10,left:10}
 var NavigationBarRouteMapper = {
   LeftButton: function(route, navigator, index, navState) {
     if (index === 0  ||  route.noLeftButton) {
@@ -432,6 +434,7 @@ var NavigationBarRouteMapper = {
 
     return (
       <TouchableOpacity
+        hitSlop={HIT_SLOP}
         onPress={() => navigator.pop()}>
         <View style={[styles.navBarLeftButton, styles.row]}>
           {status}
@@ -467,12 +470,15 @@ var NavigationBarRouteMapper = {
     return (
       <View style={styles.row}>
       {route.help
-        ? <TouchableOpacity onPress={() =>  AlertIOS.alert(translate(route.help))}>
+        ? <TouchableOpacity
+            hitSlop={HIT_SLOP}
+            onPress={() =>  Alert.alert(translate(route.help))}>
             <Icon name={'ios-help'} key={'ios-help'} size={20} color='#29ABE2' style={{paddingLeft: 3}}/>
           </TouchableOpacity>
         : <View />
       }
       <TouchableOpacity
+        hitSlop={HIT_SLOP}
         onPress={() => {
                   // 'Done' button case for creating new resources
                   if (typeof route.onRightButtonPress === 'function') {

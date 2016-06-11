@@ -45,8 +45,7 @@ import {
   NetInfo,
   ScrollView,
   LinkingIOS,
-  StatusBarIOS,
-  AlertIOS,
+  StatusBar,
   Dimensions,
   Alert
 } from 'react-native'
@@ -232,7 +231,7 @@ class TimHome extends Component {
     }
 
     function loopAlert (err) {
-      AlertIOS.alert(err, null, [
+      Alert.alert(err, null, [
         {
           text: 'OK',
           onPress: () => !doneWaiting && loopAlert(err)
@@ -476,24 +475,24 @@ class TimHome extends Component {
   }
   async onBackupPressed() {
     let backupNumber = await BACKUPS.backup()
-    AlertIOS.alert(
+    Alert.alert(
       `Backed up to #${backupNumber}`
     )
   }
   async onLoadFromBackupPressed() {
     try {
       let backupNumber = await BACKUPS.loadFromBackup()
-      AlertIOS.alert(
+      Alert.alert(
         `Loaded from backup #${backupNumber}. Please refresh`
       )
     } catch (err) {
-      AlertIOS.alert(
+      Alert.alert(
         `${err.message}`
       )
     }
   }
   render() {
-    StatusBarIOS.setHidden(true);
+    StatusBar.setHidden(true);
     if (this.state.message) {
       this.restartTiM()
       return
@@ -626,7 +625,7 @@ class TimHome extends Component {
     this.props.navigator.push(route)
   }
   restartTiM() {
-    AlertIOS.alert(
+    Alert.alert(
       'Please restart TiM'
     )
   }
@@ -807,7 +806,7 @@ module.exports = TimHome;
   //   }
 
   //   function loopAlert (err) {
-  //     AlertIOS.alert(err, null, [
+  //     Alert.alert(err, null, [
   //       {
   //         text: 'OK',
   //         onPress: () => !doneWaiting && loopAlert(err)

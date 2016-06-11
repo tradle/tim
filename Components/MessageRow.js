@@ -298,7 +298,7 @@ class MessageRow extends Component {
 
     renderedRow = <View>
                     <View style={[styles.verifiedHeader, {backgroundColor: isThirdPartyVerification ? '#93BEBA' : this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>
-                      <Icon style={styles.verificationIcon} size={20} name={'android-done'} />
+                      <Icon style={styles.verificationIcon} size={20} name={'ios-checkmark'} />
                       <Text style={styles.verificationHeaderText}>{translate('verifiedBy', orgName)}</Text>
                     </View>
                     <View style={{paddingTop: 5}}>
@@ -679,7 +679,7 @@ class MessageRow extends Component {
                 <Text style={styles.resourceTitle}>{translate('hello', utils.getMe().firstName)}</Text>
                 <View style={styles.rowContainer}>
                   <Text style={[styles.resourceTitle, {color: LINK_COLOR}]}>{translate('listOfProducts')} </Text>
-                  <Icon style={[styles.linkIcon, {color: LINK_COLOR}]} size={20} name={'ios-arrow-right'} />
+                  <Icon style={[styles.linkIcon, {color: LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
                 </View>
               </View>
         renderedRow.push(msg);
@@ -702,7 +702,7 @@ class MessageRow extends Component {
     var isForgetting = model.id === constants.TYPES.FORGET_ME || model.id === constants.TYPES.FORGOT_YOU
     if (isForgetting) {
       let msg = <View key={this.getNextKey()}>
-                  <Text style={[styles.resourceTitle, {fontSize: 18, color: 'ffffff'}]} key={this.getNextKey()}>{resource.message}</Text>
+                  <Text style={[styles.resourceTitle, {fontSize: 18, color: '#ffffff'}]} key={this.getNextKey()}>{resource.message}</Text>
                 </View>
       renderedRow.push(msg)
       return null
@@ -714,7 +714,7 @@ class MessageRow extends Component {
     //       <Text style={styles.resourceTitle}>{resource.message} </Text>
     //       <View style={styles.rowContainer}>
     //         <Text style={[styles.resourceTitle, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(utils.getModel(resource.prefill[constants.TYPE]).value)}</Text>
-    //         <Icon style={resource.documentCreated  ? styles.linkIconGreyed : [self.linkIcon, {color: LINK_COLOR}]} size={20} name={'ios-arrow-right'} />
+    //         <Icon style={resource.documentCreated  ? styles.linkIconGreyed : [self.linkIcon, {color: LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
     //       </View>
     //     </View>)
     //   return null
@@ -761,7 +761,7 @@ class MessageRow extends Component {
       }
       else if (isFormError) {
         let rtype = (resource.prefill[constants.TYPE]) ? resource.prefill[constants.TYPE] : utils.getId(resource.prefill).split('_')[0]
-        let iconName = resource.documentCreated ? 'android-done-all' : 'ios-information-outline'
+        let iconName = resource.documentCreated ? 'ios-done-all' : 'ios-information-outline'
         let iconSize = resource.documentCreated ? 20 : 30
         vCols.push(
           <View key={self.getNextKey()}>
@@ -778,7 +778,7 @@ class MessageRow extends Component {
           //       <Text style={[style, {color: '757575'}]}>{isMyMessage ? translate('errorNotification') : resource[v]} </Text>
           //       <View style={styles.rowContainer}>
           //         <Text style={[style, {color: resource.documentCreated ?  '#757575' : self.props.bankStyle.FORM_ERROR_COLOR}]}>{translate(utils.getModel(rtype).value)}</Text>
-          //         <Icon style={resource.documentCreated  ? styles.linkIconGreyed : [self.linkIcon, {color: self.props.bankStyle.FORM_ERROR_COLOR}]} size={20} name={'ios-arrow-right'} />
+          //         <Icon style={resource.documentCreated  ? styles.linkIconGreyed : [self.linkIcon, {color: self.props.bankStyle.FORM_ERROR_COLOR}]} size={20} name={'ios-arrow-forward'} />
           //       </View>
           //    </View>
 
@@ -815,7 +815,7 @@ class MessageRow extends Component {
                     <Text style={style}>{msgParts[0]}</Text>
                     <View style={styles.rowContainer}>
                       <Text style={[style, {color: isMyMessage ? STRUCTURED_MESSAGE_COLOR : isMyMessage ? self.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]}>{msgParts[1]} </Text>
-                      <Icon style={[styles.linkIcon, {color: LINK_COLOR}]} size={20} name={'ios-arrow-right'} />
+                      <Icon style={[styles.linkIcon, {color: LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
                     </View>
                   </View>
             vCols.push(msg);
@@ -851,7 +851,7 @@ class MessageRow extends Component {
               else
                 link = <View style={styles.rowContainer}>
                            <Text style={[style, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(msgModel)}</Text>
-                           <Icon style={resource.documentCreated  ? styles.linkIconGreyed : [self.linkIcon, {color: isMyMessage ? self.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-right'} />
+                           <Icon style={resource.documentCreated  ? styles.linkIconGreyed : [self.linkIcon, {color: isMyMessage ? self.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
                        </View>
             }
             let strName = isMyProduct
@@ -875,7 +875,7 @@ class MessageRow extends Component {
             <View key={self.getNextKey()}>
               <Text style={[style]}>{resource[v]}</Text>
               <Icon style={[{color: self.props.bankStyle.CONFIRMATION_COLOR, alignSelf: 'flex-end', width: 50, height: 50, marginTop: -45, opacity: 0.2}]} size={50} name={'ios-flower'} />
-              <Icon style={{color: self.props.bankStyle.CONFIRMATION_COLOR, alignSelf: 'flex-end', marginTop: -10}} size={20} name={'android-done-all'} />
+              <Icon style={{color: self.props.bankStyle.CONFIRMATION_COLOR, alignSelf: 'flex-end', marginTop: -10}} size={20} name={'ios-done-all'} />
             </View>
           );
 

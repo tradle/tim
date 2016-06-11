@@ -1,6 +1,5 @@
 'use strict';
 
-var React = require('react-native');
 var utils = require('../utils/utils');
 var translate = utils.translate
 var constants = require('@tradle/constants');
@@ -13,7 +12,7 @@ var Swipeout = require('react-native-swipeout')
 var DEFAULT_CURRENCY_SYMBOL = '£'
 var CURRENCY_SYMBOL
 
-var {
+import {
   Image,
   PixelRatio,
   StyleSheet,
@@ -22,9 +21,9 @@ var {
   ArticleView,
   AlertIOS,
   View
-} = React;
+} from 'react-native';
 
-import { Component, PropTypes } from 'react'
+import React, { Component, PropTypes } from 'react'
 
 class VerificationRow extends Component {
   props: {

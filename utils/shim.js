@@ -17,7 +17,7 @@ try {
 }
 
 process.browser = false
-process.env.NODE_ENV = __DEV__ ? 'development' : 'production'
+process.env['NODE_ENV'] = __DEV__ ? 'development' : 'production'
 if (typeof localStorage !== 'undefined') {
   localStorage.debug = __DEV__ ? '*' : ''
 }

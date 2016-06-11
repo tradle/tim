@@ -71,7 +71,7 @@ class GridItemsList extends Component {
       <View style={styles.footer}>
         <TouchableHighlight underlayColor='transparent' onPress={this.showMenu.bind(this)}>
           <View style={{marginTop: -10}}>
-            <Icon name='plus-circled'  size={55}  color='#ffffff' style={styles.icon} />
+            <Icon name='ios-add-circle'  size={55}  color='#ffffff' style={styles.icon} />
           </View>
         </TouchableHighlight>
       </View>

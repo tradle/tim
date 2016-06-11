@@ -1,6 +1,6 @@
 'use strict';
 
-var React = require('react-native');
+var React = require('react');
 var dateformat = require('dateformat')
 var ResourceList = require('./ResourceList')
 var EnumList = require('./EnumList')
@@ -30,14 +30,14 @@ var propTypesMap = {
   'date': t.Dat,
   'number': t.Num
 };
-var {
+import {
   Text,
   View,
   TouchableHighlight,
   StyleSheet,
   Navigator,
   Dimensions
-} = React;
+} from 'react-native';
 var LINK_COLOR, DEFAULT_LINK_COLOR = '#a94442'
 
 var NewResourceMixin = {

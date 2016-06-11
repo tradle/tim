@@ -1,18 +1,18 @@
 'use strict';
 
-var React = require('react-native');
 var utils = require('../utils/utils');
 var MessageList = require('./MessageList');
 var Icon = require('react-native-vector-icons/Ionicons');
 var constants = require('@tradle/constants');
 var buttonStyles = require('../styles/buttonStyles');
 
-var {
+import {
   View,
   Text,
-  TouchableHighlight,
-  Component
-} = React;
+  TouchableHighlight
+} from 'react-native'
+
+import React, { Component } from 'react'
 
 class MoreLikeThis extends Component {
   showMoreLikeThis() {

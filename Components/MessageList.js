@@ -390,7 +390,7 @@ class MessageList extends Component {
     if (isOrg)
       chooser =  <View style={{flex:1, marginTop: 8}}>
                   <TouchableHighlight underlayColor='transparent' onPress={this.onAddNewPressed.bind(this, true)}>
-                    <Icon name={'arrow-down-c'} size={25} style={styles.imageOutline} />
+                    <Icon name={'ios-arrow-round-down'} size={25} style={styles.imageOutline} />
                   </TouchableHighlight>
                 </View>
     else
@@ -428,14 +428,14 @@ class MessageList extends Component {
       return <TouchableHighlight underlayColor='transparent'
                 onPress={this.chooseFormForCustomer.bind(this)}>
                <View style={{marginLeft: 5, paddingRight: 0, marginTop: 5, marginRight: 10, marginBottom: 0}}>
-                 <Icon name='android-more-vertical' size={30} color='#999999' />
+                 <Icon name='md-more' size={30} color='#999999' />
                </View>
              </TouchableHighlight>
     }
     return  <TouchableHighlight underlayColor='transparent'
                 onPress={this.showMenu.bind(this)}>
                <View style={{marginLeft: 5, paddingRight: 0, marginTop: 5, marginRight: 10, marginBottom: 0}}>
-                 <Icon name='android-more-vertical' size={30} color='#999999' />
+                 <Icon name='md-more' size={30} color='#999999' />
                </View>
              </TouchableHighlight>
   }

@@ -52,7 +52,7 @@ class ShowMessageRefList extends Component {
       //   continue;
       var icon = props[p].icon  ||  utils.getModel(props[p].items.ref).value.icon;
       if (!icon)
-        icon = 'ios-checkmark-empty';
+        icon = 'ios-checkmark';
       if (props[p].items.ref === constants.TYPES.ADDITIONAL_INFO) {
         if (utils.getMe().organization)
           refList.push(

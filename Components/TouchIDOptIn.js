@@ -1,15 +1,14 @@
 
-import React from 'react-native'
-let {
+import {
   View,
   Text,
   Image,
   StyleSheet,
   TouchableHighlight,
   Dimensions
-} = React
+} from 'react-native'
 
-import { Component, PropTypes } from 'react'
+import React, { Component, PropTypes } from 'react'
 import ArticleView from './ArticleView'
 const BG_IMAGE = require('../img/bg.png')
 const TOUCH_ID_IMG = require('../img/touchid2.png')
