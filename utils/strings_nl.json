@@ -138,5 +138,8 @@
     "howCanIHelpYou": "Hello {1}. My name is {2}. How can I help you today?",
     "pleaseCorrectTheErrors": "Please correct error in the form",
     "verifierHelp": "Click 'Done' button after reviewing the form. If some fields require correction check them them first and then click the 'Done' button",
-    "errorNotification": "Error notification has been sent to the customer to correct"
+    "addAnotherFormOrGetNext": "Add another {1} or get next form",
+    "getNextForm": "Get next form",
+    "addSameForm": "Add same form",
+    "areYouSureAboutNextForm": "Are you sure you are done with {1}."
 }
