@@ -390,7 +390,7 @@ class TiMApp extends Component {
 
     case 10:
     default: // 10
-      return <ResourceList navigator={nav} {...props} />;
+      return <ResourceList navigator={nav} {...props} />
     }
   }
 }
@@ -418,20 +418,15 @@ var NavigationBarRouteMapper = {
       var st = {color: color}
       style.push(st);
     }
-    style.push({paddingLeft: 5})
     var title = lbTitle.indexOf('|') == -1
-              ?  <Text style={style}>
-                    {lbTitle}
-                 </Text>
+              ? <Text style={style}>
+                  {lbTitle}
+                </Text>
               : <Icon name={lbTitle.substring(4)} size={20} color='#7AAAC3' style={styles.icon}/>;
     if (route.component === ResourceList  &&  index === 1 &&  navigator.getCurrentRoutes().length === 2)
       Actions.cleanup()
 
-
-    let status = navigator.isConnected
-               ? <Icon name={'ios-checkmark'} size={18} color='#7DBC00' />
-               : <Icon name={'ios-circle-outline'} size={18} color='green' />
-
+    let status = <View/>
     return (
       <TouchableOpacity
         hitSlop={HIT_SLOP}
@@ -556,7 +551,7 @@ var styles = StyleSheet.create({
     padding: 3
   },
   navBarText: {
-    fontSize: 16,
+    fontSize: 17,
     // marginBottom: 7
   },
   navBarTitleText: {
@@ -565,13 +560,13 @@ var styles = StyleSheet.create({
     fontSize: 17,
   },
   navBarLeftButton: {
-    paddingLeft: 15,
+    paddingLeft: 10,
     paddingRight: 25,
     // paddingBottom: 10
   },
   navBarRightButton: {
     paddingLeft: 25,
-    paddingRight: 15,
+    paddingRight: 10,
     // paddingBottom: 10
   },
   navBarButtonText: {
