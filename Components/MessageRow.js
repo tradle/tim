@@ -17,6 +17,7 @@ var extend = require('extend')
 var equal = require('deep-equal')
 var formDefaults = require('@tradle/models').formDefaults;
 var TradleW = require('../img/TradleW.png')
+var Actions = require('../Actions/Actions');
 
 var reactMixin = require('react-mixin');
 
@@ -26,7 +27,10 @@ const VERIFICATION_BG = '#FBFFE5' //'#F6FFF0';
 
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_ERROR = 'tradle.FormError'
+const FORM = 'tradle.Form'
+const FORM_REQUEST = 'tradle.FormRequest'
 const ENUM = 'tradle.Enum'
+const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 
 var CURRENCY_SYMBOL
@@ -254,7 +258,7 @@ class MessageRow extends Component {
     var model = utils.getModel(this.props.resource[constants.TYPE]).value;
     var isLicense = model.id.indexOf('License') !== -1  ||  model.id.indexOf('Passport') !== -1;
     var photoStyle = (isLicense  &&  len === 1) ? styles.bigImageH : photoStyle;
-    var shareables = resource.documentCreated
+    var shareables = resource.documentCreated || model.id !== FORM_REQUEST
                    ? <View />
                    : this.showShareableResources(rowStyle, viewStyle, addStyle);
       // <View style={viewStyle} ref={resource[constants.ROOT_HASH]}>
@@ -349,7 +353,7 @@ class MessageRow extends Component {
     var hdrStyle = {backgroundColor: '#289427'} //this.props.bankStyle.PRODUCT_BG_COLOR ? {backgroundColor: this.props.bankStyle.PRODUCT_BG_COLOR} : {backgroundColor: '#289427'}
     var orgName = resource.from.organization  ? resource.from.organization.title : ''
     renderedRow.splice(0, 0, <View  key={this.getNextKey()} style={[styles.verifiedHeader, hdrStyle, {marginHorizontal: -8, marginTop: -7, marginBottom: 7, paddingBottom: 5}]}>
-                       <Text style={{fontSize: 16, fontWeight: '600', alignSelf: 'center', color: '#fff'}}>{translate('issuedBy', orgName)}</Text>
+                       <Text style={{fontSize: 17, fontWeight: '600', alignSelf: 'center', color: '#fff'}}>{translate('issuedBy', orgName)}</Text>
                     </View>
                     );
     let title = translate(model)
@@ -493,36 +497,43 @@ class MessageRow extends Component {
 
   }
   showShareableResources(rowStyle, viewStyle, addStyle) {
-    if (!this.props.shareableResources || !this.props.resource.message)
+    if (!this.props.shareableResources) // || !this.props.resource.message)
       return <View/>;
 
     var resource = this.props.resource;
-    var msgParts = utils.splitMessage(resource.message);
-    // Case when the needed form was sent along with the message
-    if (msgParts.length != 2)
-      return <View/>
+    // var msgParts = utils.splitMessage(resource.message);
+    // // Case when the needed form was sent along with the message
+    // if (msgParts.length != 2)
+    //   return <View/>
 
-    var msgModel = utils.getModel(msgParts[1]);
-    if (!msgModel)
-      return <View/>;
-    msgModel = msgModel.value;
+    // var msgModel = utils.getModel(msgParts[1]);
+    let formModel = utils.getModel(resource.form).value
+    let isMultientryForm = isMultientry(resource)
+    let entries = (isMultientryForm && this.props.productToForms[resource.product])
+                ? this.props.productToForms[resource.product][resource.form]
+                : null
+    // if (!formModel)
+    //   return <View/>;
+    // formModel = formModel.value;
     var vtt = [];
     var cnt = 0;
     var self = this;
     var chatOrg = this.props.to[constants.TYPE] === constants.TYPES.ORGANIZATION  &&  this.props.to[constants.TYPE] + '_' + this.props.to[constants.ROOT_HASH]
     for (var t in  this.props.shareableResources) {
-      if (t === msgModel.id) {
+      if (t === formModel.id) {
         var ver = this.props.shareableResources[t];
         var r = ver[0]
         var totalShareables = ver.length
         ver.forEach(function(r) {
+          if (entries  &&  (entries.indexOf(utils.getId(r.document)) !== -1  ||  entries.indexOf(r.document[constants.NONCE]) !== -1))
+            return
           // if (chatOrg  &&  utils.getId(r.organization) === chatOrg) {
           //   totalShareables--
           //   return
           // }
           // if (!cnt) {x
             var vModel = utils.getModel(r[constants.TYPE]);
-            var doc = self.formatDocument(msgModel, r, null, totalShareables > 1);
+            var doc = self.formatDocument(formModel, r, null, totalShareables > 1);
             if (cnt) {
               doc = <View key={self.getNextKey()}>
                       <View style={{height: 1, backgroundColor: '#dddddd'}} />
@@ -538,7 +549,7 @@ class MessageRow extends Component {
     if (!vtt.length)
       return <View />;
 
-    var modelTitle = translate(msgModel)
+    var modelTitle = translate(formModel)
     var idx = modelTitle.indexOf('Verification');
     var docType;
     if (idx === -1)
@@ -548,8 +559,8 @@ class MessageRow extends Component {
 
     let org = this.props.to.organization ? (this.props.to.organization.title + '.') : this.props.to.name;
     let msg = (vtt.length === 1)
-            ? (msgModel.subClassOf === MY_PRODUCT
-                ? translate('shareMyProduct', translate(msgModel), org)
+            ? (formModel.subClassOf === MY_PRODUCT
+                ? translate('shareMyProduct', translate(formModel), org)
                 : translate('shareOne', utils.getMe().firstName, docType, org)
               )
             : translate('shareOneOfMany', utils.getMe().firstName, docType, org)
@@ -581,8 +592,9 @@ class MessageRow extends Component {
     var resource = {
       'from': this.props.resource.to,
       'to': this.props.resource.from,
-      'message': this.props.resource.message,
     }
+    if (this.props.resource[constants.TYPE] !== FORM_REQUEST)
+      resource.message = this.props.resource.message;
     resource[constants.TYPE] = model.id;
 
     // Prefill for testing and demoing
@@ -707,6 +719,9 @@ class MessageRow extends Component {
       renderedRow.push(msg)
       return null
     }
+    if (model.id === FORM_REQUEST)
+      return {onPressCall: this.formRequest(resource, renderedRow)}
+
     var isFormError = model.id === FORM_ERROR
     // if (isFormError) {
     //   renderedRow.push(
@@ -870,7 +885,7 @@ class MessageRow extends Component {
           isConfirmation = resource[v].indexOf('Congratulations!') !== -1
 
         if (isConfirmation) {
-          style = [style, {color: self.props.bankStyle.CONFIRMATION_COLOR, fontSize: 16}]
+          style = [style, {color: self.props.bankStyle.CONFIRMATION_COLOR, fontSize: 17}]
           vCols.push(
             <View key={self.getNextKey()}>
               <Text style={[style]}>{resource[v]}</Text>
@@ -909,6 +924,93 @@ class MessageRow extends Component {
     if (isSimpleMessage)
       return isConfirmation ? {isConfirmation: true} : null
     return {onPressCall: this.props.onSelect.bind(this, resource, null)}
+  }
+
+  formRequest(resource, vCols) {
+    let form = utils.getModel(resource.form).value
+    let multiEntryForms = utils.getModel(resource.product).value.multiEntryForms
+    // if (this.props.shareableResources)
+    //   style = styles.description;
+    let message = resource.message
+    let onPressCall
+    // if (s.length === 2)
+    //   onPressCall = this.editForm.bind(self, msgParts[1], msgParts[0])
+    let sameFormRequestForm
+    if (!resource.documentCreated) {
+      if (multiEntryForms  &&  multiEntryForms.indexOf(form.id) !== -1) {
+        let productToForms = this.props.productToForms
+        if (productToForms) {
+          let product = productToForms[resource.product]
+          if (product) {
+            let formsArray = product[resource.form]
+            if (formsArray)
+              sameFormRequestForm = true
+          }
+          // onPressCall = this.getNextFormAlert.bind(this)
+        }
+      }
+      if (!sameFormRequestForm)
+        onPressCall = this.createNewResource.bind(this, form, isMyMessage);
+    }
+    var isMyMessage = this.isMyMessage();
+
+    let color = isMyMessage
+              ? {color: this.props.bankStyle.MY_MESSAGE_LINK_COLOR} //{color: STRUCTURED_MESSAGE_COLOR}
+              : {color: '#2892C6'}
+    let link = sameFormRequestForm  &&  !resource.documentCreated
+             ? <View style={[styles.rowContainer, {paddingVertical: 10, alignSelf: 'center'}]}>
+                 <View style={styles.textContainer}>
+                 <TouchableHighlight underlayColor='transparent' style={{paddingRight: 15}} onPress={() => {
+                   this.createNewResource(form, isMyMessage)
+                 }}>
+                   <View style={styles.multiEntryButton}>
+                     <Text style={styles.multiEntryText}>{translate('addSameForm')}</Text>
+                   </View>
+                 </TouchableHighlight>
+                 <TouchableHighlight underlayColor='transparent' onPress={() => {
+                    AlertIOS.alert(
+                      translate('areYouSureAboutNextForm', translate(form)),
+                      null,
+                      [
+                        {text: translate('Ok'), onPress: () => {
+                          Actions.addMessage({
+                            from: resource.to,
+                            to: resource.from,
+                            [constants.TYPE]: NEXT_FORM_REQUEST,
+                            after: form.id
+                          })
+                          var params = {
+                            value: {documentCreated: true},
+                            resource: resource,
+                            meta: utils.getModel(resource[constants.TYPE]).value
+                          }
+                          Actions.addItem(params)
+                         }},
+                        {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+                      ]
+                    )
+                 }}>
+                   <View style={styles.multiEntryButton}>
+                     <Text style={styles.multiEntryText}>{translate('getNextForm')}</Text>
+                   </View>
+                </TouchableHighlight>
+                </View>
+               </View>
+              : isMyMessage
+                 ? <Text style={[style, color]}>{translate(form)}</Text>
+                 : <View style={styles.rowContainer}>
+                     <Text style={[styles.resourceTitle, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(form)}</Text>
+                     <Icon style={resource.documentCreated  ? styles.linkIconGreyed : [this.linkIcon, {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-right'} />
+                   </View>
+
+    let strName = sameFormRequestForm ? translate('addAnotherFormOrGetNext', translate(form)) : utils.getStringName(message)
+    let str = strName ? utils.translate(strName) : message
+    let msg = <View key={this.getNextKey()}>
+               <Text style={styles.resourceTitle}>{str}</Text>
+               {link}
+             </View>
+    vCols.push(msg);
+    return onPressCall
   }
   addContact() {
     AlertIOS.alert(
@@ -1052,7 +1154,7 @@ class MessageRow extends Component {
     var docTitle = idx === -1 ? docModelTitle : docModelTitle.substring(0, idx);
 
     var msg;
-    if (resource.message)
+    if (resource.message  &&  docModel.subClassOf !== FORM)
       msg = <View><Text style={styles.description}>{resource.message}</Text></View>
     else {
       var rows = [];
@@ -1255,6 +1357,13 @@ class MessageRow extends Component {
 
 }
 
+function isMultientry(resource) {
+  let form = utils.getModel(resource.form).value
+  let product = utils.getModel(resource.product).value
+  let multiEntryForms = product.multiEntryForms
+  return  multiEntryForms && multiEntryForms.indexOf(form.id) !== -1 ? true : false
+}
+
 var styles = StyleSheet.create({
   textContainer: {
     flex: 1,
@@ -1262,7 +1371,7 @@ var styles = StyleSheet.create({
   },
   resourceTitle: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '400',
     marginBottom: 2,
   },
@@ -1346,7 +1455,7 @@ var styles = StyleSheet.create({
     borderRadius: 10
   },
   verySmallLetters: {
-    fontSize: 16,
+    fontSize: 17,
     // alignSelf: 'flex-end',
     color: '#757575'
     // color: '#b4c3cb'
@@ -1403,12 +1512,12 @@ var styles = StyleSheet.create({
   descriptionB: {
     // flexWrap: 'wrap',
     // color: '#757575',
-    fontSize: 16,
+    fontSize: 17,
   },
   assistentText: {
     color: '#757575',
     fontStyle: 'italic',
-    fontSize: 16
+    fontSize: 17
   },
   assistentBox: {
     backgroundColor: '#efefef',
@@ -1464,7 +1573,7 @@ var styles = StyleSheet.create({
     backgroundColor: '#EDF2CE'
   },
   verificationHeaderText: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
     alignSelf: 'center',
     color: '#FBFFE5'
@@ -1475,6 +1584,15 @@ var styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     marginVertical: 2
+  },
+  multiEntryButton:  {
+    borderRadius: 10,
+    borderColor: '#77ADFC',
+    borderWidth: 1,
+    padding: 10
+  },
+  multiEntryText: {
+    fontSize: 17
   }
 
 });
@@ -1671,7 +1789,7 @@ module.exports = MessageRow;
         renderedRow = <View>
                         <View style={[styles.verifiedHeader, hdrStyle]}>
                           <Icon style={styles.verificationIcon} size={20} name={'android-done'} />
-                          <Text style={{fontSize: 16, fontWeight: '600', alignSelf: 'center', color: '#FBFFE5'}}>{translate('verifiedBy', orgName)}</Text>
+                          <Text style={{fontSize: 17, fontWeight: '600', alignSelf: 'center', color: '#FBFFE5'}}>{translate('verifiedBy', orgName)}</Text>
                         </View>
                         <View style={{paddingTop: 5}}>
                           {this.formatDocument(msgModel, resource, this.verify.bind(this))}
@@ -1683,7 +1801,7 @@ module.exports = MessageRow;
         var msgModel = utils.getModel(resource[constants.TYPE]).value;
         var orgName = resource.from.organization  ? resource.from.organization.title : ''
         renderedRow.splice(0, 0, <View  key={this.getNextKey()} style={[styles.verifiedHeader, hdrStyle, {marginHorizontal: -8, marginTop: -7, marginBottom: 7, paddingBottom: 5}]}>
-                           <Text style={{fontSize: 16, fontWeight: '600', alignSelf: 'center', color: '#fff'}}>{translate('issuedBy', orgName)}</Text>
+                           <Text style={{fontSize: 17, fontWeight: '600', alignSelf: 'center', color: '#fff'}}>{translate('issuedBy', orgName)}</Text>
                         </View>
                         );
         let title = translate(model)
@@ -1691,7 +1809,7 @@ module.exports = MessageRow;
           title = title.substring(0, 27) + '...'
         renderedRow.push(<Text  key={this.getNextKey()} style={[styles.formType, {fontWeight: '600', color: '#289427', alignSelf: 'flex-end'}]}>{title}</Text>);
       }
-      // var rowId = <Text style={{fontWeight: '600', fontSize: 16, color: isMyMessage ? '#ffffff' : '#289427', paddingRight: 3}}>{this.props.messageNumber + '.'}</Text>;
+      // var rowId = <Text style={{fontWeight: '600', fontSize: 17, color: isMyMessage ? '#ffffff' : '#289427', paddingRight: 3}}>{this.props.messageNumber + '.'}</Text>;
 
       if (this.props.sendStatus  &&  this.props.sendStatus !== null) {
         switch (this.props.sendStatus) {
