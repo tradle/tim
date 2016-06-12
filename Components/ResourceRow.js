@@ -310,7 +310,7 @@ class ResourceRow extends Component {
           // var dateBlock = self.addDateProp(resource, dateProp, true);
           row = <View style={{flexDirection: 'row', justifyContent: 'space-between'}} key={self.getNextKey()}>
                   <View>{row}</View>
-                  <View style={{marginTop: -10}}>
+                  <View style={{marginTop: -7}}>
                     <Text style={styles.verySmallLetters}>{val}</Text>
                   </View>
                 </View>
