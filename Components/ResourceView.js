@@ -18,7 +18,7 @@ var QRCode = require('./QRCode')
 var buttonStyles = require('../styles/buttonStyles');
 const TOUCH_ID_IMG = require('../img/touchid2.png')
 const TALK_TO_EMPLOYEE = '1'
-const SERVER_URL = 'http://192.168.0.144:44444/'
+// const SERVER_URL = 'http://192.168.0.162:44444/'
 
 var extend = require('extend');
 var constants = require('@tradle/constants');
@@ -112,9 +112,9 @@ class ResourceView extends Component {
     else
       actionPanel = <ShowRefList resource={resource} currency={this.props.currency} navigator={this.props.navigator} />
     var qrcode
-    if (isMe && me.organization)
+    if (isMe && me.organization && me.organization.url)
       qrcode = <View>
-                 <QRCode inline={true} content={TALK_TO_EMPLOYEE + ';' + SERVER_URL + ';' + utils.getId(me.organization).split('_')[1] + ';' + me[constants.ROOT_HASH]} dimension={370} />
+                 <QRCode inline={true} content={TALK_TO_EMPLOYEE + ';' + me.organization.url + ';' + utils.getId(me.organization).split('_')[1] + ';' + me[constants.ROOT_HASH]} dimension={370} />
                </View>
     else
       qrcode = <View />
