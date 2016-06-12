@@ -126,28 +126,27 @@
       }
     },
     "@tradle/models": {
-      "version": "4.9.4",
-      "from": "https://registry.npmjs.org/@tradle/models/-/models-4.9.4.tgz",
-      "resolved": "https://registry.npmjs.org/@tradle/models/-/models-4.9.4.tgz",
+      "version": "4.10.1",
+      "from": "@tradle/models@latest",
       "dependencies": {
         "minimist": {
           "version": "1.2.0",
-          "from": "https://registry.npmjs.org/minimist/-/minimist-1.2.0.tgz",
+          "from": "minimist@>=1.2.0 <2.0.0",
           "resolved": "https://registry.npmjs.org/minimist/-/minimist-1.2.0.tgz"
         },
         "write-file-atomic": {
           "version": "1.1.4",
-          "from": "https://registry.npmjs.org/write-file-atomic/-/write-file-atomic-1.1.4.tgz",
+          "from": "write-file-atomic@>=1.1.4 <2.0.0",
           "resolved": "https://registry.npmjs.org/write-file-atomic/-/write-file-atomic-1.1.4.tgz",
           "dependencies": {
             "imurmurhash": {
               "version": "0.1.4",
-              "from": "https://registry.npmjs.org/imurmurhash/-/imurmurhash-0.1.4.tgz",
+              "from": "imurmurhash@>=0.1.4 <0.2.0",
               "resolved": "https://registry.npmjs.org/imurmurhash/-/imurmurhash-0.1.4.tgz"
             },
             "slide": {
               "version": "1.1.6",
-              "from": "https://registry.npmjs.org/slide/-/slide-1.1.6.tgz",
+              "from": "slide@>=1.1.5 <2.0.0",
               "resolved": "https://registry.npmjs.org/slide/-/slide-1.1.6.tgz"
             }
           }
