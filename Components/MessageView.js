@@ -20,6 +20,7 @@ var extend = require('extend');
 var ResourceMixin = require('./ResourceMixin');
 var buttonStyles = require('../styles/buttonStyles');
 var HELP_COLOR = 'blue'
+var NetworkInfoProvider = require('./NetworkInfoProvider')
 
 import {
   StyleSheet,
@@ -43,6 +44,7 @@ class MessageView extends Component {
     super(props);
     this.state = {
       resource: props.resource,
+      isConnected: this.props.navigator.isConnected
     };
     var currentRoutes = this.props.navigator.getCurrentRoutes();
     var currentRoutesLength = currentRoutes.length;
@@ -50,15 +52,18 @@ class MessageView extends Component {
       currentRoutes[currentRoutesLength - 1].onRightButtonPress = this.verifyOrCreateError.bind(this)
   }
   componentDidMount() {
-    this.listenTo(Store, 'onAddVerification');
+    this.listenTo(Store, 'onAction');
   }
-  onAddVerification(params) {
+  onAction(params) {
     if (params.action === 'addVerification' ||  params.action === 'addAdditionalInfo') {
       this.props.navigator.pop();
       Actions.messageList({
         modelName: constants.TYPES.MESSAGE,
         to: params.resource
       });
+    }
+    else if (params.action == 'connectivity') {
+      this.setState({isConnected: params.isConnected})
     }
   }
   verifyOrCreateError() {
@@ -164,6 +169,7 @@ class MessageView extends Component {
     //               </View>
     return (
       <ScrollView  ref='this' style={styles.container}>
+        <NetworkInfoProvider connected={this.state.isConnected} />
         <View style={styles.band}><Text style={styles.date}>{date}</Text></View>
         <View style={styles.photoBG}>
           <PhotoView resource={resource} navigator={this.props.navigator}/>
