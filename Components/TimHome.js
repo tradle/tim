@@ -91,12 +91,6 @@ class TimHome extends Component {
     //   this._handleOpenURL({url});
   }
   _handleConnectivityChange(isConnected) {
-    this.props.navigator.getCurrentRoutes()[0].isConnected = isConnected
-    // To re-render NavBar with new status
-    if (this.props.navigator._navBar) {
-      this.props.navigator._navBar.setState({isConnected: isConnected})
-    }
-
     this.props.navigator.isConnected = isConnected
   }
   componentWillUnmount() {
