@@ -114,7 +114,6 @@ class NewItem extends Component {
         this.props.onAddItem(propName, newItem);
       }
     }
-    this.state.submitted = false
     this.props.navigator.pop();
   }
 
