@@ -16,6 +16,7 @@ var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var constants = require('@tradle/constants');
 var GiftedMessenger = require('react-native-gifted-messenger');
+var NetworkInfoProvider = require('./NetworkInfoProvider')
 
 // var AddNewMessage = require('./AddNewMessage');
 // var SearchBar = require('react-native-search-bar');
@@ -23,6 +24,7 @@ var GiftedMessenger = require('react-native-gifted-messenger');
 
 var LINK_COLOR
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
+const FORM_REQUEST = 'tradle.FormRequest'
 
 import React, { Component } from 'react'
 import {
@@ -57,6 +59,7 @@ class MessageList extends Component {
     this.state = {
       isLoading: true,
       selectedAssets: {},
+      isConnected: this.props.navigator.isConnected,
       // dataSource: new ListView.DataSource({
       //   rowHasChanged: (row1, row2) => {
       //     if (row1 !== row2) {
@@ -89,16 +92,22 @@ class MessageList extends Component {
   onAction(params) {
     if (params.error)
       return
-    if (params.action === 'connectivity'  &&  params.isConnected  &&  !this.state.isForgetting) {
-      let me = utils.getMe()
-      let msg = {
-        message: me.firstName + ' is waiting for the response',
-        _t: constants.TYPES.CUSTOMER_WAITING,
-        from: me,
-        to: this.props.resource,
-        time: new Date().getTime()
-      }
-      Actions.addMessage(msg, true)
+    if (params.action === 'connectivity') {
+      // if (params.isConnected  &&  !this.state.isForgetting) {
+      //   this.state.isConnected = params.isConnected
+      //   let me = utils.getMe()
+      //   let msg = {
+      //     message: me.firstName + ' is waiting for the response',
+      //     _t: constants.TYPES.CUSTOMER_WAITING,
+      //     from: me,
+      //     to: this.props.resource,
+      //     time: new Date().getTime()
+      //   }
+      //   Actions.addMessage(msg, true)
+      // }
+      // else
+      this.setState({isConnected: params.isConnected})
+
       return
     }
     if (params.action === 'addItem'  ||  params.action === 'addVerification') {
@@ -166,6 +175,23 @@ class MessageList extends Component {
     LINK_COLOR = this.props.bankStyle.LINK_COLOR
 
     if (list.length || (this.state.filter  &&  this.state.filter.length)) {
+      let productToForms = {}
+      list.forEach((r) => {
+        if (r[constants.TYPE] === FORM_REQUEST  &&  r.documentCreated && r.document) {
+          var l = productToForms[r.product]
+          if (!l) {
+            l = {}
+            productToForms[r.product] = l
+          }
+          let forms = l[r.form]
+          if (!forms) {
+            forms = []
+            l[r.form] = forms
+          }
+          forms.push(r.document)
+        }
+      })
+
       var type = list[0][constants.TYPE];
       if (type  !== this.props.modelName) {
         var model = utils.getModel(this.props.modelName).value;
@@ -183,7 +209,8 @@ class MessageList extends Component {
         list: list,
         shareableResources: params.shareableResources,
         allLoaded: false,
-        isEmployee: params.isEmployee
+        isEmployee: params.isEmployee,
+        productToForms: productToForms
       });
     }
     else
@@ -191,8 +218,10 @@ class MessageList extends Component {
   }
   shouldComponentUpdate(nextProps, nextState) {
     // Eliminating repeated alerts when connection returns after ForgetMe action
-    if (!this.props.navigator.isConnected && !this.state.list  && !nextState.list && this.state.isLoading === nextState.isLoading)
+    if (!this.state.isConnected && !this.state.list  && !nextState.list && this.state.isLoading === nextState.isLoading)
       return false
+    if (nextState.isConnected !== this.state.isConnected)
+      return true
     if (!this.state.list                                 ||
         !nextState.list                                  ||
          this.state.allLoaded !== nextState.allLoaded    ||
@@ -284,6 +313,7 @@ class MessageList extends Component {
         isAggregation={isAggregation}
         currency={this.props.currency}
         navigator={this.props.navigator}
+        productToForms={this.state.productToForms}
         bankStyle={this.props.bankStyle}
         shareableResources={this.state.shareableResources}
         previousMessageTime={previousMessageTime}
@@ -311,7 +341,7 @@ class MessageList extends Component {
     var content;
 
     var model = utils.getModel(this.props.modelName).value;
-                    // <Text style={{fontSize: 16, alignSelf: 'center', color: '#ffffff'}}>{'Sending...'}</Text>
+                    // <Text style={{fontSize: 17, alignSelf: 'center', color: '#ffffff'}}>{'Sending...'}</Text>
     // var isVisible = this.state.sendStatus  &&  this.state.sendStatus !== null
     // var spinner = isVisible
     //             ? <Text style={{alignSelf: 'flex-end', fontSize: 14, color: '#757575', marginHorizontal: 15}}>{thus.state.sendStatus}</Text>
@@ -335,7 +365,7 @@ class MessageList extends Component {
       if (this.props.navigator.isConnected  &&  this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION) {
         if (this.state.isLoading) {
           content = <View style={[styles.container, bgStyle]}>
-            <Text style={{fontSize: 16, alignSelf: 'center', marginTop: 80, color: '#629BCA'}}>{'Loading...'}</Text>
+            <Text style={{fontSize: 17, alignSelf: 'center', marginTop: 80, color: '#629BCA'}}>{'Loading...'}</Text>
             <ActivityIndicatorIOS size='large' style={{alignSelf: 'center', marginTop: 20}} />
           </View>
         }
@@ -411,6 +441,7 @@ class MessageList extends Component {
 
     return (
       <View style={[styles.container, bgStyle]}>
+        <NetworkInfoProvider connected={this.state.isConnected} />
         <View style={{flexDirection:'row'}} />
         <View style={ sepStyle } />
         {content}
@@ -426,7 +457,7 @@ class MessageList extends Component {
     if (this.props.resource[constants.TYPE] === constants.TYPES.PROFILE &&
         utils.getMe().organization) {
       return <TouchableHighlight underlayColor='transparent'
-                onPress={this.chooseFormForCustomer.bind(this)}>
+                onPress={this.showEmployeeMenu.bind(this)}>
                <View style={{marginLeft: 5, paddingRight: 0, marginTop: 5, marginRight: 10, marginBottom: 0}}>
                  <Icon name='md-more' size={30} color='#999999' />
                </View>
@@ -476,7 +507,7 @@ class MessageList extends Component {
     var resource = this.props.resource
     var currentRoutes = this.props.navigator.getCurrentRoutes();
     this.props.navigator.push({
-      title: translate(utils.getModel(constants.TYPES.FINANCIAL_PRODUCT).value),
+      title: translate(utils.getModel(constants.TYPES.FORM).value),
       id: 15,
       component: ProductChooser,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
@@ -501,6 +532,27 @@ class MessageList extends Component {
       //     // callback: this.modelAdded.bind(this)
       //   }
       // }
+    });
+  }
+
+  showEmployeeMenu() {
+    // var buttons = ['Talk to representative', 'Forget me', 'Cancel']
+    var buttons = [translate('formChooser'), translate('cancel')] // ['Forget me', 'Cancel']
+    var self = this;
+    ActionSheetIOS.showActionSheetWithOptions({
+      options: buttons,
+      cancelButtonIndex: 1
+    }, function(buttonIndex) {
+      switch (buttonIndex) {
+      // case 0:
+      //   Actions.talkToRepresentative(self.props.resource)
+      //   break
+      case 0:
+        self.chooseFormForCustomer()
+        break;
+      default:
+        return
+      }
     });
   }
 
@@ -612,6 +664,14 @@ class MessageList extends Component {
     msg[constants.TYPE] = constants.TYPES.SIMPLE_MESSAGE;
     this.props.navigator.pop();
     Actions.addMessage(msg);
+  }
+  getNextFrom(resource) {
+    Actions.addMessage({
+      from: resource.from,
+      to: resource.to,
+      [constants.TYPE]: NEW_FORM_REQUEST,
+      after: resource.form
+    })
   }
   onSubmitEditing(msg) {
     var me = utils.getMe();
