@@ -165,11 +165,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
-<<<<<<< bf4acd368218ac9e2030389ee7557333463a045c
-var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://192.168.0.113:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
-=======
 var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://192.168.0.103:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
->>>>>>> code cleanup, multi-entry forms
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
