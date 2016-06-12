@@ -125,7 +125,7 @@ var ResourceMixin = {
               ? <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                   {item}
                   <TouchableHighlight underlayColor='transparent' onPress={cancelItem.bind(self, prop, v)}>
-                    <Icon name='ios-close' size={25} color={LINK_COLOR} />
+                    <Icon name='ios-close-circle-outline' size={25} color={LINK_COLOR} />
                   </TouchableHighlight>
                 </View>
               : item
