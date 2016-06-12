@@ -21,6 +21,7 @@ var QRCodeScanner = require('./QRCodeScanner')
 var QRCode = require('./QRCode')
 var buttonStyles = require('../styles/buttonStyles');
 var defaultBankStyle = require('../styles/bankStyle.json')
+var NetworkInfoProvider = require('./NetworkInfoProvider')
 
 const WEB_TO_MOBILE = '0'
 const TALK_TO_EMPLOYEEE = '1'
@@ -67,6 +68,7 @@ class ResourceList extends Component {
         }
       }),
       filter: this.props.filter,
+      isConnected: this.props.navigator.isConnected,
       userInput: '',
     };
     var isRegistration = this.props.isRegistration ||  (this.props.resource  &&  this.props.resource[constants.TYPE] === constants.TYPES.PROFILE  &&  !this.props.resource[constants.ROOT_HASH]);
@@ -133,6 +135,11 @@ class ResourceList extends Component {
 
       return
     }
+    if (action === 'connectivity') {
+      this.setState({isConnected: params.isConnected})
+      return
+    }
+
     if (action === 'addItem'  ||  action === 'addMessage') {
       var model = action === 'addMessage'
                 ? utils.getModel(this.props.modelName).value
@@ -259,6 +266,8 @@ class ResourceList extends Component {
   }
   shouldComponentUpdate(nextProps, nextState) {
     if (nextState.forceUpdate)
+      return true
+    if (nextState.isConnected !== this.state.isConnected)
       return true
     // if (this.state.isConnected !== nextState.isConnected)
     //   if (!this.state.list && !nextState.list)
@@ -725,10 +734,10 @@ class ResourceList extends Component {
     }
     else {
       var model = utils.getModel(this.props.modelName).value;
+          // renderHeader={this.renderHeader.bind(this)}
       content = <ListView
           dataSource={this.state.dataSource}
           renderRow={this.renderRow.bind(this)}
-          renderHeader={this.renderHeader.bind(this)}
           automaticallyAdjustContentInsets={false}
           keyboardDismissMode='on-drag'
           keyboardShouldPersistTaps={true}
@@ -740,8 +749,14 @@ class ResourceList extends Component {
     var model = utils.getModel(this.props.modelName).value;
     var Footer = this.renderFooter();
     var header = this.renderHeader();
+    // let connectivity = (!this.props.navigator.isConnected)
+    //                   ? <View style={{backgroundColor: '#FF6D0D', borderColor: '#FF6D0D', borderWidth: 1, borderBottomColor: '#3A5280'}}>
+    //                       <Text style={{fontSize: 18, color: '#ffffff', padding: 3, alignSelf: 'center' }}>waiting for the network</Text>
+    //                     </View>
+    //                   : <View/>
     return (
       <View style={styles.container}>
+        <NetworkInfoProvider connected={this.state.isConnected} />
         <SearchBar
           onChangeText={this.onSearchChange.bind(this)}
           placeholder={translate('search')}
