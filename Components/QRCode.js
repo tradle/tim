@@ -6,7 +6,7 @@ import {
 } from 'react-native'
 
 var extend = require('xtend')
-var QRCode = require('react-native-barcode/QR/QRCode')
+var QRCode = require('react-native-qrcode')
 var DEFAULT_DIM = 370
 
 import React, { Component, PropTypes } from 'react'
@@ -16,14 +16,21 @@ class QRCodeView extends Component {
     super(props)
 
     this.state = {
-      style: getStyle(this.props.dimension || DEFAULT_DIM),
       renderPlaceholderOnly: true
     }
   }
   propTypes: {
     content: PropTypes.string.isRequired,
     dimension: PropTypes.number,
+    bgColor: PropTypes.string.isRequired,
+    fgColor: PropTypes.string.isRequired,
     fullScreen: PropTypes.bool
+  };
+  defaultProps: {
+    dimension: 200,
+    bgColor: 'white',
+    fgColor: 'black',
+    fullScreen: false
   };
   componentDidMount() {
     InteractionManager.runAfterInteractions(() => {
@@ -38,7 +45,14 @@ class QRCodeView extends Component {
       return <ActivityIndicatorIOS hidden='true' size='large' style={this.state.style} />
     }
 
-    var code = <QRCode content={this.props.content} style={this.state.style} />
+    var code = <QRCode
+      value={this.props.content}
+      style={this.state.style}
+      size={this.props.dimension}
+      bgColor={this.props.bgColor}
+      fgColor={this.props.fgColor}
+      />
+
     if (!this.props.fullScreen) return code
 
     return (
@@ -49,13 +63,13 @@ class QRCodeView extends Component {
   }
 }
 
-function getStyle (dim) {
-  return {
-    alignSelf: 'center',
-    height: dim,
-    width: dim
-  }
-}
+// function getStyle (dim) {
+//   return {
+//     alignSelf: 'center',
+//     height: dim,
+//     width: dim
+//   }
+// }
 
 var styles = StyleSheet.create({
   container: {
@@ -65,5 +79,11 @@ var styles = StyleSheet.create({
     backgroundColor: 'transparent'
   }
 })
+
+// QRCodeView.PropTypes = {
+//   size: PropTypes.number.isRequired,
+//   bgColor: PropTypes.string.isRequired,
+//   fgColor: PropTypes.string.isRequired,
+// }
 
 module.exports = QRCodeView
