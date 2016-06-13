@@ -82,6 +82,7 @@ class MessageView extends Component {
     else {
       AlertIOS.prompt(
         'Please write a message to the customer',
+        null,
         [
           {text: 'Submit', onPress: this.createError.bind(this)},
           {text: 'Cancel', null},
