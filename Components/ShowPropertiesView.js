@@ -206,13 +206,14 @@ class ShowPropertiesView extends Component {
                       <TouchableHighlight underlayColor='transparent' onPress={() => {
                         AlertIOS.prompt(
                           'Please write a message to the customer',
+                          null,
                           [
                             {text: 'Ok', onPress: this.props.checkProperties.bind(this, pMeta)},
-                            {text: 'Cancel', null},
+                            {text: 'Cancel', null}
                           ]
                         )
                       }}>
-                        <Icon name={this.props.errorProps && this.props.errorProps[p] ? 'ios-close' : 'ios-circle-outline'} size={25} color={this.props.errorProps && this.props.errorProps[p] ? 'red' : this.props.bankStyle.LINK_COLOR} style={{paddingRight: 10, marginTop: 10}}/>
+                        <Icon name={this.props.errorProps && this.props.errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={25} color={this.props.errorProps && this.props.errorProps[p] ? 'red' : this.props.bankStyle.LINK_COLOR} style={{paddingRight: 10, marginTop: 10}}/>
                       </TouchableHighlight>
                       </View>
                     : <View />
