@@ -87,5 +87,6 @@
     "addAnotherFormOrGetNext": "Add another {1} or get next form",
     "getNextForm": "Get next form",
     "addSameForm": "Add same form",
-    "areYouSureAboutNextForm": "Are you sure you are done with {1}."
+    "areYouSureAboutNextForm": "Are you sure you are done with {1}.",
+    "formChooser": "Form list"
 }
