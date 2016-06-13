@@ -2,7 +2,7 @@
 
 var utils = require('../utils/utils');
 var translate = utils.translate
-var LinearGradient = require('react-native-linear-gradient');
+import LinearGradient from 'react-native-linear-gradient';
 var ArticleView = require('./ArticleView');
 var constants = require('@tradle/constants');
 var Icon = require('react-native-vector-icons/Ionicons');
@@ -84,12 +84,9 @@ class ResourceRow extends Component {
           return <View/>
         var name = (resource.firstName ? resource.firstName.charAt(0) : '');
         name += (resource.lastName ? resource.lastName.charAt(0) : '');
-        photo = <LinearGradient colors={['#A4CCE0', '#7AAAc3', '#5E92AD'].map(processColor)} style={styles.cellRoundImage}>
+        photo = <LinearGradient colors={['#A4CCE0', '#7AAAc3', '#5E92AD']} style={styles.cellRoundImage}>
            <Text style={styles.cellText}>{name}</Text>
         </LinearGradient>
-        // photo = <LinearGradient colors={['#A4CCE0', '#7AAAc3', '#5E92AD']} style={styles.cellRoundImage}>
-        //    <Text style={styles.cellText}>{name}</Text>
-        // </LinearGradient>
       }
       else  {
         var model = utils.getModel(resource[constants.TYPE]).value;
@@ -147,7 +144,7 @@ class ResourceRow extends Component {
     else
       return (
       <Swipeout right={[{text: 'Hide', backgroundColor: 'red', onPress: this.hideResource.bind(this, resource)}]} autoClose={true} scroll={(event) => this._allowScroll(event)} >
-        <View key={this.getNextKey()} style={{opacity: 1}}>
+        <View key={this.getNextKey()} style={{opacity: 1, justifyContent: 'center'}}>
           <TouchableHighlight onPress={this.props.onSelect} underlayColor='transparent' key={this.getNextKey()}>
             <View style={styles.row} key={this.getNextKey()}>
               {photo}
@@ -171,11 +168,11 @@ class ResourceRow extends Component {
                 }
               })
             }}>
-              <View style={[textStyle]}>
+              <View style={textStyle}>
                  {resource.numberOfForms
                     ? <View style={{flexDirection: 'row'}}>
                          <Icon name={'ios-paper-outline'} color={'#cccccc'} size={35} style={{marginTop: -5}}/>
-                         <Text style={{fontWeight: '600', marginLeft: -5, marginTop: -10, color: '#cccccc'}}>{resource.numberOfForms}</Text>
+                         <Text style={{fontWeight: '600', marginLeft: 0, marginTop: -10, color: '#cccccc'}}>{resource.numberOfForms}</Text>
                       </View>
                     : <View />
                  }
