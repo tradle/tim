@@ -237,7 +237,7 @@ class VerificationRow extends Component {
                   ? utils.normalizeCurrencySymbol(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value
                   : (resource[v].title || resource[v])
           vCols.push(
-            <View style={{flexDirection: 'row', justifyContent: 'space-between', borderColor: '#F2FAED', borderWidth: 0.5, paddingVertical: 15, borderBottomColor: '#f0f0f0', paddingVertical: 3}} key={self.getNextKey()}>
+            <View style={{flexDirection: 'row', justifyContent: 'space-between', borderColor: '#F2FAED', borderWidth: 0.5, borderBottomColor: '#f0f0f0', paddingVertical: 3}} key={self.getNextKey()}>
               <Text style={labelStyle}>{properties[v].title + units}</Text>
               <Text style={style}>{val}</Text>
             </View>

@@ -324,7 +324,7 @@ class MessageRow extends Component {
             </View>
           </TouchableHighlight>
 
-    var viewStyle = { margin :1, backgroundColor: '#f7f7f7', backgroundColor: this.props.bankStyle.BACKGROUND_COLOR }
+    var viewStyle = { margin :1, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR }
     return (
       <View style={viewStyle} key={this.getNextKey()}>
         {date}
@@ -374,7 +374,7 @@ class MessageRow extends Component {
       </TouchableHighlight>
 
 
-    var viewStyle = { margin: 1, paddingTop: 7, backgroundColor: '#f7f7f7', backgroundColor: this.props.bankStyle.BACKGROUND_COLOR }
+    var viewStyle = { margin: 1, paddingTop: 7, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR }
     return (
       <View style={viewStyle} key={this.getNextKey()}>
         {date}

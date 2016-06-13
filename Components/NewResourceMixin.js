@@ -800,7 +800,7 @@ var NewResourceMixin = {
                     required: params.required,
                     value:    utils.normalizeCurrencySymbol(params.value.currency),
                     errors:   params.errors,
-                    noError:  params.errors && params.errors[params.prop] ? true : false,
+                    // noError:  params.errors && params.errors[params.prop],
                     noError: true
                   })
         }
