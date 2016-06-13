@@ -391,6 +391,7 @@ class MessageList extends Component {
         loadEarlierMessagesButton={this.state.list ? this.state.list.length > 100 : false}
         onLoadEarlierMessages={this.onLoadEarlierMessages.bind(this)}
         messages={this.state.list}
+        enableEmptySections={true}
         autoFocus={false}
         textRef={'chat'}
         renderCustomMessage={this.renderRow.bind(this)}
