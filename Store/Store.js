@@ -88,6 +88,7 @@ const GUEST_SESSION_PROOF = 'tradle.GuestSessionProof'
 const FORM_ERROR          = 'tradle.FormError'
 const MY_IDENTITIES = MY_IDENTITIES_TYPE + '_1'
 const SETTINGS = constants.TYPES.SETTINGS
+const EMPLOYEE_ONBOARDING = 'tradle.EmployeeOnboarding'
 
 const WELCOME_INTERVAL = 600000
 
@@ -165,7 +166,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
-var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://192.168.0.103:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
+var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://192.168.0.121:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
@@ -1705,6 +1706,8 @@ var Store = Reflux.createStore({
       var returnVal
       var identity
       var isNew = !resource[ROOT_HASH];
+      var isSwitchingToEmployeeMode = isNew ? false : self.isSwitchingToEmployeeMode(resource)
+
       // if (!isNew) // make sure that the values of ref props are not the whole resources but their references
       if (!isSelfIntroduction)
         utils.optimizeResource(resource)
@@ -1726,7 +1729,7 @@ var Store = Reflux.createStore({
           }
         });
         // if (isNew  &&  !resource.time)
-        if (isNew  ||  (meta.id !== FORM_ERROR  &&  meta.id !== FORM_REQUEST))
+        if (isNew  ||  !value.documentCreated) //(meta.id !== FORM_ERROR  &&  meta.id !== FORM_REQUEST  &&  !meta.id === FORM_ERROR))
           resource.time = new Date().getTime();
 
         if (!resource  ||  isNew)
@@ -1753,8 +1756,30 @@ var Store = Reflux.createStore({
           return handleRegistration()
         else if (isMessage)
           return handleMessage()
-        else
+        else {
           return save()
+        }
+      })
+      .then(() => {
+        if (isSwitchingToEmployeeMode) {
+          let orgId = utils.getId(resource.organization)
+          let orgRep = self.getRepresentative(orgId)
+          let msg = {
+            [TYPE]: PRODUCT_APPLICATION,
+            product: EMPLOYEE_ONBOARDING,
+            from: utils.getMe(),
+            to:   orgRep,
+          }
+          self.trigger({action: 'employeeOnboarding', to: list[orgId]})
+          utils.sendSigned(meDriver, {
+            msg: msg,
+            to: [{fingerprint: self.getFingerprint(list[utils.getId(orgRep)].value)}],
+            deliver: true
+          })
+          .catch(function (err) {
+            debugger
+          })
+        }
       })
 
       function handleRegistration () {
@@ -1905,7 +1930,6 @@ var Store = Reflux.createStore({
           }
         })
       }
-
       function save (noTrigger) {
         return self._putResourceInDB({
           type: returnVal[TYPE],
@@ -1916,6 +1940,20 @@ var Store = Reflux.createStore({
         })
       }
     })
+  },
+  isSwitchingToEmployeeMode(resource) {
+    if (resource[TYPE] !== PROFILE)
+      return
+    let org = list[utils.getId(resource)].value.organization
+    let newOrgId = utils.getId(resource.organization)
+    let settingOrg = !org || utils.getId(org) !== newOrgId
+    if (settingOrg) {
+      let o = SERVICE_PROVIDERS.filter((r) => {
+        return r.org == newOrgId ? true : false
+      })
+      if (o  &&  o.length)
+        return true
+    }
   },
   onGetMe() {
     this.trigger({action: 'getMe', me: me})
@@ -2892,6 +2930,11 @@ var Store = Reflux.createStore({
         if (next && next[TYPE] === PRODUCT_LIST)
           return false
       }
+      // if (r[TYPE] === SELF_INTRODUCTION) {
+      //   var next = result[i + 1]
+      //   if (next && next[TYPE] === SELF_INTRODUCTION)
+      //     return false
+      // }
       // Check if there was request for the next form after multy-entry form
       if (r[TYPE] === FORM_REQUEST  &&  !r.document && r.documentCreated)
         return false
@@ -4230,7 +4273,7 @@ var Store = Reflux.createStore({
     .then(() => {
       ids.forEach((id) => delete list[id])
       self.trigger({action: 'messageList', modelName: MESSAGE, forgetMeFromCustomer: true})
-      return self.sendSigned(meDriver, {
+      return utils.sendSigned(meDriver, {
         msg: {_t: FORGOT_YOU},
         to: [{roothash: resource[ROOT_HASH]}],
         deliver: true
