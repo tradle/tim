@@ -285,7 +285,7 @@ var utils = {
               val += resource[t]
             else {
               if (resource[t].title)
-                val += resource[t]
+                val += resource[t].title
               else {
                 let m = self.getModel(resource[t][constants.TYPE]).value
                 val += self.getDisplayName(resource[t], m.properties)
