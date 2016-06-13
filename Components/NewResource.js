@@ -25,7 +25,7 @@ var equal = require('deep-equal')
 var DeviceHeight
 var DeviceWidth
 var constants = require('@tradle/constants');
-var UIImagePickerManager = require('NativeModules').ImagePickerManager;
+import ImagePicker from 'react-native-image-picker';
 var ENUM = 'tradle.Enum'
 var LINK_COLOR, DEFAULT_LINK_COLOR = '#a94442'
 var FORM_ERROR = 'tradle.FormError'
@@ -531,7 +531,7 @@ class NewResource extends Component {
   }
   showChoice() {
     var self = this;
-    UIImagePickerManager.showImagePicker({
+    ImagePicker.showImagePicker({
       returnIsVertical: true,
       chooseFromLibraryButtonTitle: __DEV__ ? 'Choose from Library' : null
     }, (response) => {
