@@ -37,6 +37,9 @@ function cleanup (err) {
 if (typeof Buffer === 'undefined') global.Buffer = require('buffer').Buffer
 
 if (typeof btoa === 'undefined') global.btoa = require('btoa')
+
+require('debug').formatters.j = require('json-stringify-safe')
+
 // global.location = global.location || { port: 80 }
 
 // ;[
