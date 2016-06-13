@@ -1,88 +1,56 @@
 package com.identity;
 
-import android.app.Activity;
-import com.microsoft.codepush.react.CodePushReactPackage;
-import android.os.Bundle;
-import android.view.KeyEvent;
+import java.util.Arrays;
+import java.util.List;
 
-import com.facebook.react.LifecycleState;
-import com.facebook.react.ReactInstanceManager;
-import com.facebook.react.ReactRootView;
-import com.facebook.react.modules.core.DefaultHardwareBackBtnHandler;
+import com.facebook.react.ReactActivity;
+import com.brentvatne.react.ReactVideoPackage;
+import com.oblador.vectoricons.VectorIconsPackage;
+import com.tradle.react.UdpSocketsModule;
+import com.babisoft.ReactNativeLocalization.ReactNativeLocalizationPackage;
+import com.BV.LinearGradient.LinearGradientPackage.*;
+import com.microsoft.codepush.react.CodePush;
+import com.lwansbrough.RCTCamera.RCTCameraPackage;
+import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
-import com.facebook.soloader.SoLoader;
 
+import com.microsoft.codepush.react.CodePush;
 import com.lwansbrough.RCTCamera.*;
+import com.brentvatne.react.*;
+import com.oblador.vectoricons.*;
+import com.tradle.react.*;
+import com.BV.LinearGradient.*;
+import com.babisoft.ReactNativeLocalization.*;
 
-public class MainActivity extends Activity implements DefaultHardwareBackBtnHandler {
-
-    private ReactInstanceManager mReactInstanceManager;
-    private ReactRootView mReactRootView;
+public class MainActivity extends ReactActivity {
+    @Override
+    protected String getMainComponentName() {
+        return "Tradle";
+    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mReactRootView = new ReactRootView(this);
+    protected boolean getUseDeveloperSupport() {
+        return BuildConfig.DEBUG;
+    }
 
-        mReactInstanceManager = ReactInstanceManager.builder()
-                .setApplication(getApplication())
-                .setBundleAssetName("index.android.bundle")
-                .setJSMainModuleName("index.android")
-                .addPackage(new MainReactPackage(),
+    @Override
+    protected String getJSBundleFile() {
+        return BuildConfig.DEBUG ? super.getJSBundleFile() : CodePush.getBundleUrl();
+    }
+
+    @Override
+    protected List<ReactPackage> getPackages() {
+        return Arrays.asList(
+            new MainReactPackage(),
             new ReactVideoPackage(),
             new VectorIconsPackage(),
             new UdpSocketsModule(),
-            new LinearGradientPackage())
-                .addPackage(new RCTCameraPackage())
-                .addPackage(new ReactNativeLocalizationPackage())
-                .addPackage(new CodePushReactPackage())
-                .setUseDeveloperSupport(BuildConfig.DEBUG)
-                .setInitialLifecycleState(LifecycleState.RESUMED)
-                .build();
-
-        mReactRootView.startReactApplication(mReactInstanceManager, "Identity", null);
-
-        setContentView(mReactRootView);
-    }
-
-    @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_MENU && mReactInstanceManager != null) {
-            mReactInstanceManager.showDevOptionsDialog();
-            return true;
-        }
-        return super.onKeyUp(keyCode, event);
-    }
-
-    @Override
-    public void onBackPressed() {
-      if (mReactInstanceManager != null) {
-        mReactInstanceManager.onBackPressed();
-      } else {
-        super.onBackPressed();
-      }
-    }
-
-    @Override
-    public void invokeDefaultOnBackPressed() {
-      super.onBackPressed();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        if (mReactInstanceManager != null) {
-            mReactInstanceManager.onPause();
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        if (mReactInstanceManager != null) {
-            mReactInstanceManager.onResume(this);
-        }
+            new ReactNativeLocalizationPackage(),
+            new LinearGradientPackage(),
+            new CodePush(this.getResources().getString(R.string.reactNativeCodePush_androidDeploymentKey), this, BuildConfig.DEBUG),
+            new RCTCameraPackage()
+//                ,
+//            new CodePush(BuildConfig.CODEPUSH_KEY, this, BuildConfig.DEBUG)
+        );
     }
 }
