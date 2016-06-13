@@ -27,7 +27,7 @@ Q.onerror = function (err) {
   throw err
 }
 
-var ENV = require('react-native-env')
+var ENV = require('react-native-env') || require('../environment')
 var Keychain = require('react-native-keychain')
 var AddressBook = require('NativeModules').AddressBook;
 
