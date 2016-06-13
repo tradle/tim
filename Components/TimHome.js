@@ -210,14 +210,16 @@ class TimHome extends Component {
     }
 
     function passwordAuth () {
-      return Q()
-      // return Keychain.getGenericPassword(PASSWORD_ITEM_KEY)
-      //   .then(
-      //     () =>  Q.ninvoke(self, 'checkPassword'),
-      //     // registration must have been aborted.
-      //     // ask user to set a password
-      //     (err) => Q.ninvoke(self, 'setPassword')
-      //   )
+      // TODO: auth on android
+      if (isAndroid) return Q()
+
+      return Keychain.getGenericPassword(PASSWORD_ITEM_KEY)
+        .then(
+          () =>  Q.ninvoke(self, 'checkPassword'),
+          // registration must have been aborted.
+          // ask user to set a password
+          (err) => Q.ninvoke(self, 'setPassword')
+        )
     }
 
     function lockUp (err) {
