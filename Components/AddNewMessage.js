@@ -11,7 +11,7 @@ var Reflux = require('reflux');
 var Actions = require('../Actions/Actions');
 var constants = require('@tradle/constants');
 
-var UIImagePickerManager = require('NativeModules').ImagePickerManager;
+import ImagePicker from 'react-native-image-picker'
 
 import {
   View,
@@ -165,7 +165,7 @@ class AddNewMessage extends Component {
   }
   showChoice() {
     var self = this;
-    UIImagePickerManager.showImagePicker({returnBase64Image: true, returnIsVertical: true}, (doCancel, response) => {
+    ImagePicker.showImagePicker({returnBase64Image: true, returnIsVertical: true}, (doCancel, response) => {
       if (!doCancel) {
         var selectedAssets = self.state.selectedAssets;
         var dataUri = 'data:image/jpeg;base64,' + response.data

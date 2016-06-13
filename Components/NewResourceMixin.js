@@ -9,7 +9,6 @@ var FloatLabel = require('react-native-floating-labels')
 var Icon = require('react-native-vector-icons/Ionicons');
 var utils = require('../utils/utils');
 var CameraView = require('./CameraView')
-import Camera from 'react-native-camera'
 
 var translate = utils.translate
 

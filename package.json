@@ -67,6 +67,7 @@
     "react-native-gesture-password": "mvayngrib/react-native-gesture-password",
     "react-native-gifted-messenger": "pgmemk/react-native-gifted-messenger",
     "react-native-http": "tradle/react-native-http#834492d",
+    "react-native-image-picker": "^0.19.3",
     "react-native-keychain": "mvayngrib/react-native-keychain",
     "react-native-level": "tradle/react-native-level",
     "react-native-level-fs": "tradle/react-native-level-fs",

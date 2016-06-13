@@ -3346,15 +3346,15 @@
                           "from": "block-stream@*",
                           "resolved": "https://registry.npmjs.org/block-stream/-/block-stream-0.0.8.tgz"
                         },
-                        "core-util-is": {
-                          "version": "1.0.2",
-                          "from": "core-util-is@~1.0.0",
-                          "resolved": "https://registry.npmjs.org/core-util-is/-/core-util-is-1.0.2.tgz"
-                        },
                         "delegates": {
                           "version": "1.0.0",
                           "from": "delegates@^1.0.0",
                           "resolved": "https://registry.npmjs.org/delegates/-/delegates-1.0.0.tgz"
+                        },
+                        "core-util-is": {
+                          "version": "1.0.2",
+                          "from": "core-util-is@~1.0.0",
+                          "resolved": "https://registry.npmjs.org/core-util-is/-/core-util-is-1.0.2.tgz"
                         },
                         "fstream": {
                           "version": "1.0.8",
@@ -3386,6 +3386,11 @@
                           "from": "lodash.padend@^4.1.0",
                           "resolved": "https://registry.npmjs.org/lodash.padend/-/lodash.padend-4.2.0.tgz"
                         },
+                        "lodash.repeat": {
+                          "version": "4.0.0",
+                          "from": "lodash.repeat@^4.0.0",
+                          "resolved": "https://registry.npmjs.org/lodash.repeat/-/lodash.repeat-4.0.0.tgz"
+                        },
                         "lodash.padstart": {
                           "version": "4.2.0",
                           "from": "lodash.padstart@^4.1.0",
@@ -3395,11 +3400,6 @@
                           "version": "4.1.2",
                           "from": "lodash.tostring@^4.0.0",
                           "resolved": "https://registry.npmjs.org/lodash.tostring/-/lodash.tostring-4.1.2.tgz"
-                        },
-                        "lodash.repeat": {
-                          "version": "4.0.0",
-                          "from": "lodash.repeat@^4.0.0",
-                          "resolved": "https://registry.npmjs.org/lodash.repeat/-/lodash.repeat-4.0.0.tgz"
                         },
                         "npmlog": {
                           "version": "2.0.3",
@@ -6910,6 +6910,11 @@
           "resolved": "https://registry.npmjs.org/Base64/-/Base64-0.2.1.tgz"
         }
       }
+    },
+    "react-native-image-picker": {
+      "version": "0.19.3",
+      "from": "react-native-image-picker@latest",
+      "resolved": "https://registry.npmjs.org/react-native-image-picker/-/react-native-image-picker-0.19.3.tgz"
     },
     "react-native-keychain": {
       "version": "0.3.1",
