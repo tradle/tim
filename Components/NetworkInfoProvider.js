@@ -36,7 +36,7 @@ class NetworkInfoProvider extends Component {
     return this.props.connected
           ? <View/>
           : <View style={styles.bar}>
-              <Text style={styles.text}>waiting for the network</Text>
+              <Text style={styles.text}>no network</Text>
             </View>
 
   }
