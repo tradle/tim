@@ -10,7 +10,7 @@ var PhotoList = require('./PhotoList');
 var Icon = require('react-native-vector-icons/Ionicons');
 var groupByEveryN = require('groupByEveryN');
 var constants = require('@tradle/constants');
-var LinearGradient = require('react-native-linear-gradient');
+import LinearGradient from 'react-native-linear-gradient'
 var RowMixin = require('./RowMixin');
 var Accordion = require('react-native-accordion')
 var extend = require('extend')
@@ -215,7 +215,7 @@ class MessageRow extends Component {
       }
       var sealedStatus = (resource.txId)
                        ? <View style={styles.sealedStatus}>
-                           <Icon name={'ribbon-b'} size={30} color='#316A99' style={{opacity: 0.3}} />
+                           <Icon name={'ios-ribbon'} size={30} color='#316A99' style={{opacity: 0.3}} />
                          </View>
                        : <View />
       messageBody =
@@ -409,7 +409,7 @@ class MessageRow extends Component {
         }).join('');
 
         ownerPhoto = <View style={{paddingRight: 3}}>
-                       <LinearGradient colors={['#2B6493', '#417AA9', '#568FBE'].map(processColor)} style={styles.cellRoundImage}>
+                       <LinearGradient colors={['#2B6493', '#417AA9', '#568FBE']} style={styles.cellRoundImage}>
                          <Text style={styles.cellText}>{title}</Text>
                        </LinearGradient>
                      </View>
@@ -776,11 +776,11 @@ class MessageRow extends Component {
       }
       else if (isFormError) {
         let rtype = (resource.prefill[constants.TYPE]) ? resource.prefill[constants.TYPE] : utils.getId(resource.prefill).split('_')[0]
-        let iconName = resource.documentCreated ? 'ios-done-all' : 'ios-information-outline'
-        let iconSize = resource.documentCreated ? 20 : 30
+        let iconName = resource.documentCreated ? 'ios-done-all' : 'ios-information-circle-outline'
+        let iconSize = 30
         vCols.push(
           <View key={self.getNextKey()}>
-            <Text style={[style, {color: '757575'}]}>{isMyMessage ? translate('errorNotification') : resource[v]} </Text>
+            <Text style={[style, {color: '#757575'}]}>{isMyMessage ? translate('errorNotification') : resource[v]} </Text>
             <Text style={[style, {color: resource.documentCreated ?  '#757575' : self.props.bankStyle.FORM_ERROR_COLOR}]}>{translate(utils.getModel(rtype).value)}</Text>
             <Icon name={iconName} size={iconSize} color={resource.documentCreated ? self.props.bankStyle.REQUEST_FULFILLED : self.props.bankStyle.FORM_ERROR_COLOR} style={styles.errorBadge} />
           </View>
@@ -890,7 +890,7 @@ class MessageRow extends Component {
             <View key={self.getNextKey()}>
               <Text style={[style]}>{resource[v]}</Text>
               <Icon style={[{color: self.props.bankStyle.CONFIRMATION_COLOR, alignSelf: 'flex-end', width: 50, height: 50, marginTop: -45, opacity: 0.2}]} size={50} name={'ios-flower'} />
-              <Icon style={{color: self.props.bankStyle.CONFIRMATION_COLOR, alignSelf: 'flex-end', marginTop: -10}} size={20} name={'ios-done-all'} />
+              <Icon style={{color: self.props.bankStyle.CONFIRMATION_COLOR, alignSelf: 'flex-end', marginTop: -10}} size={30} name={'ios-done-all'} />
             </View>
           );
 
@@ -1000,7 +1000,7 @@ class MessageRow extends Component {
                  ? <Text style={[style, color]}>{translate(form)}</Text>
                  : <View style={styles.rowContainer}>
                      <Text style={[styles.resourceTitle, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(form)}</Text>
-                     <Icon style={resource.documentCreated  ? styles.linkIconGreyed : [this.linkIcon, {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-right'} />
+                     <Icon style={resource.documentCreated  ? styles.linkIconGreyed : [this.linkIcon, {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
                    </View>
 
     let strName = sameFormRequestForm ? translate('addAnotherFormOrGetNext', translate(form)) : utils.getStringName(message)
@@ -1121,7 +1121,6 @@ class MessageRow extends Component {
       backButtonTitle: translate('cancel'),
       passProps: {
         resource: resource,
-        to: this.props.to,
         returnRoute: currentRoutes[currentRoutes.length - 1],
         products: JSON.parse(this.props.resource.list),
         callback: this.props.callback,
@@ -1826,7 +1825,7 @@ module.exports = MessageRow;
       }
       var sealedStatus = (resource.txId  &&  !isMyProduct)
                        ? <View style={styles.sealedStatus}>
-                           <Icon name={'ribbon-b'} size={30} color='#316A99' style={{opacity: 0.3}} />
+                           <Icon name={'ios-ribbon'} size={30} color='#316A99' style={{opacity: 0.3}} />
                          </View>
                        : <View />
       messageBody =
