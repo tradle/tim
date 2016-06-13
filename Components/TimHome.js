@@ -44,7 +44,8 @@ import {
   Image,
   NetInfo,
   ScrollView,
-  LinkingIOS,
+  Linking,
+  // LinkingIOS,
   StatusBar,
   Dimensions,
   Alert
@@ -65,7 +66,7 @@ class TimHome extends Component {
     };
   }
   componentWillMount() {
-    LinkingIOS.addEventListener('url', this._handleOpenURL);
+    Linking.addEventListener('url', this._handleOpenURL);
 
     // var url = LinkingIOS.popInitialURL()
     // if (url)
@@ -94,23 +95,30 @@ class TimHome extends Component {
     this.props.navigator.isConnected = isConnected
   }
   componentWillUnmount() {
-    LinkingIOS.removeEventListener('url', this._handleOpenURL);
+    Linking.removeEventListener('url', this._handleOpenURL);
     NetInfo.isConnected.removeEventListener(
       'change',
       this._handleConnectivityChange.bind(this)
     );
   }
   componentDidMount() {
-    var url = LinkingIOS.popInitialURL()
-    if (url)
-      this._handleOpenURL({url});
-    NetInfo.isConnected.fetch().done(
-      (isConnected) => {
-        let firstRoute = this.props.navigator.getCurrentRoutes()[0]
-        firstRoute.isConnected = isConnected
-      }
-    );
-    this.listenTo(Store, 'handleEvent');
+    Linking.getInitialURL()
+    .then((url) => {
+      if (url)
+        this._handleOpenURL({url});
+
+      NetInfo.isConnected.fetch().done(
+        (isConnected) => {
+          let firstRoute = this.props.navigator.getCurrentRoutes()[0]
+          firstRoute.isConnected = isConnected
+        }
+      );
+      this.listenTo(Store, 'handleEvent');
+    })
+    .catch((e) => {
+      debugger
+    })
+
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -491,7 +499,7 @@ class TimHome extends Component {
       this.restartTiM()
       return
     }
-    var url = LinkingIOS.popInitialURL();
+    // var url = Linking.getInitialURL();
     var { width, height } = Dimensions.get('window')
     var h = height > 800 ? height - 220 : height - 180
     // var cTop = h / 4
