@@ -1,6 +1,5 @@
 'use strict';
 
-var SearchBar = require('react-native-search-bar'); //('./SearchBar');
 var NoResources = require('./NoResources');
 var ResourceRow = require('./ResourceRow');
 var ResourceView = require('./ResourceView');
@@ -41,8 +40,11 @@ import {
   Image,
   StatusBar,
   View,
-  Text
+  Text,
+  Platform
 } from 'react-native';
+
+const SearchBar = Platform.OS === 'android' ? null : require('react-native-search-bar')
 
 class ResourceList extends Component {
   props: {
@@ -760,15 +762,23 @@ class ResourceList extends Component {
     let buttons = this.state.allowToAdd
                 ? [translate('addNew', this.props.prop.title), translate('cancel')]
                 : [translate('addServerUrl'), translate('scanQRcode'), 'Talk to employee', translate('cancel')]
-    return (
-      <View style={styles.container}>
-        <NetworkInfoProvider connected={this.state.isConnected} />
+
+    var searchBar
+    if (SearchBar) {
+      searchBar = (
         <SearchBar
           onChangeText={this.onSearchChange.bind(this)}
           placeholder={translate('search')}
           showsCancelButton={false}
           hideBackground={true}
           />
+      )
+    }
+
+    return (
+      <View style={styles.container}>
+        <NetworkInfoProvider connected={this.state.isConnected} />
+        {searchBar}
         <View style={styles.separator} />
         {content}
         {Footer}

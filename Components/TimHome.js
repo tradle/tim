@@ -49,9 +49,11 @@ import {
   StatusBar,
   Dimensions,
   Alert,
-  AppState
+  AppState,
+  Platform
 } from 'react-native'
 
+const isAndroid = Platform.OS === 'android'
 import React, { Component } from 'react'
 
 class TimHome extends Component {
@@ -203,6 +205,8 @@ class TimHome extends Component {
       })
 
     function touchIDWithFallback() {
+      if (isAndroid) return passwordAuth()
+
       return authenticateUser()
       .catch((err) => {
         if (err.name === 'LAErrorUserFallback' || err.name.indexOf('TouchID') !== -1) {
@@ -214,13 +218,14 @@ class TimHome extends Component {
     }
 
     function passwordAuth () {
-      return Keychain.getGenericPassword(PASSWORD_ITEM_KEY)
-        .then(
-          () =>  Q.ninvoke(self, 'checkPassword'),
-          // registration must have been aborted.
-          // ask user to set a password
-          (err) => Q.ninvoke(self, 'setPassword')
-        )
+      return Q()
+      // return Keychain.getGenericPassword(PASSWORD_ITEM_KEY)
+      //   .then(
+      //     () =>  Q.ninvoke(self, 'checkPassword'),
+      //     // registration must have been aborted.
+      //     // ask user to set a password
+      //     (err) => Q.ninvoke(self, 'setPassword')
+      //   )
     }
 
     function lockUp (err) {

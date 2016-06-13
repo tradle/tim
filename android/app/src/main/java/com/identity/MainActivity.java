@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.facebook.react.ReactActivity;
+import com.bitgo.randombytes.RandomBytesPackage;
+import com.oblador.keychain.KeychainPackage;
 import com.brentvatne.react.ReactVideoPackage;
 import com.oblador.vectoricons.VectorIconsPackage;
 import com.tradle.react.UdpSocketsModule;
@@ -42,6 +44,8 @@ public class MainActivity extends ReactActivity {
     protected List<ReactPackage> getPackages() {
         return Arrays.asList(
             new MainReactPackage(),
+            new RandomBytesPackage(),
+            new KeychainPackage(),
             new ReactVideoPackage(),
             new VectorIconsPackage(),
             new UdpSocketsModule(),
