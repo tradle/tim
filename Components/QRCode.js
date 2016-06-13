@@ -9,7 +9,7 @@ var extend = require('xtend')
 var QRCode = require('react-native-barcode/QR/QRCode')
 var DEFAULT_DIM = 370
 
-import { Component, PropTypes } from 'react'
+import React, { Component, PropTypes } from 'react'
 
 class QRCodeView extends Component {
   constructor(props) {
