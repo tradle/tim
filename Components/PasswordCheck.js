@@ -146,7 +146,7 @@ module.exports = React.createClass({
   render: function() {
     var { width, height } = Dimensions.get('window')
     return (
-      <View>
+      <View style={styles.container}>
         <Image source={BG_IMAGE} style={[styles.bg, { width, height }]} />
         <PasswordGesture
           ref='pg'
@@ -154,7 +154,7 @@ module.exports = React.createClass({
           nucleus={true}
           styles={
             {
-              frame: { backgroundColor: 'transparent' },
+              frame: containerRawStyle,
               msgText: { fontSize: 18 },
               line: { height: 2, backgroundColor: '#ffffff' }
             }
@@ -174,12 +174,19 @@ module.exports = React.createClass({
   }
 })
 
+var containerRawStyle = {
+  backgroundColor: 'transparent',
+  flex: 1,
+  alignSelf: 'stretch'
+}
+
 var styles = StyleSheet.create({
   bg: {
     position:'absolute',
     left: 0,
     top: 0
-  }
+  },
+  container: containerRawStyle
 })
 
 module.exports.Modes = MODES

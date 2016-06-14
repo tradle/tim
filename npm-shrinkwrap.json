@@ -3540,20 +3540,25 @@
                           "from": "node-pre-gyp@0.6.25",
                           "resolved": "https://registry.npmjs.org/node-pre-gyp/-/node-pre-gyp-0.6.25.tgz"
                         },
-                        "are-we-there-yet": {
-                          "version": "1.1.2",
-                          "from": "are-we-there-yet@~1.1.2",
-                          "resolved": "https://registry.npmjs.org/are-we-there-yet/-/are-we-there-yet-1.1.2.tgz"
-                        },
                         "ansi": {
                           "version": "0.3.1",
                           "from": "ansi@~0.3.1",
                           "resolved": "https://registry.npmjs.org/ansi/-/ansi-0.3.1.tgz"
                         },
+                        "are-we-there-yet": {
+                          "version": "1.1.2",
+                          "from": "are-we-there-yet@~1.1.2",
+                          "resolved": "https://registry.npmjs.org/are-we-there-yet/-/are-we-there-yet-1.1.2.tgz"
+                        },
                         "block-stream": {
                           "version": "0.0.8",
                           "from": "block-stream@*",
                           "resolved": "https://registry.npmjs.org/block-stream/-/block-stream-0.0.8.tgz"
+                        },
+                        "delegates": {
+                          "version": "1.0.0",
+                          "from": "delegates@^1.0.0",
+                          "resolved": "https://registry.npmjs.org/delegates/-/delegates-1.0.0.tgz"
                         },
                         "core-util-is": {
                           "version": "1.0.2",
@@ -3565,15 +3570,15 @@
                           "from": "fstream@^1.0.2",
                           "resolved": "https://registry.npmjs.org/fstream/-/fstream-1.0.8.tgz"
                         },
-                        "delegates": {
-                          "version": "1.0.0",
-                          "from": "delegates@^1.0.0",
-                          "resolved": "https://registry.npmjs.org/delegates/-/delegates-1.0.0.tgz"
-                        },
                         "has-unicode": {
                           "version": "2.0.0",
                           "from": "has-unicode@^2.0.0",
                           "resolved": "https://registry.npmjs.org/has-unicode/-/has-unicode-2.0.0.tgz"
+                        },
+                        "lodash.pad": {
+                          "version": "4.1.0",
+                          "from": "lodash.pad@^4.1.0",
+                          "resolved": "https://registry.npmjs.org/lodash.pad/-/lodash.pad-4.1.0.tgz"
                         },
                         "gauge": {
                           "version": "1.2.7",
@@ -3584,11 +3589,6 @@
                           "version": "1.0.0",
                           "from": "isarray@~1.0.0",
                           "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
-                        },
-                        "lodash.pad": {
-                          "version": "4.1.0",
-                          "from": "lodash.pad@^4.1.0",
-                          "resolved": "https://registry.npmjs.org/lodash.pad/-/lodash.pad-4.1.0.tgz"
                         },
                         "lodash.padend": {
                           "version": "4.2.0",
@@ -7413,8 +7413,8 @@
     },
     "react-native-gesture-password": {
       "version": "0.1.4",
-      "from": "git+https://github.com/mvayngrib/react-native-gesture-password.git#3ef177e0cbd9e587e478217a3db27d15732522a0",
-      "resolved": "git+https://github.com/mvayngrib/react-native-gesture-password.git#3ef177e0cbd9e587e478217a3db27d15732522a0"
+      "from": "mvayngrib/react-native-gesture-password",
+      "resolved": "git://github.com/mvayngrib/react-native-gesture-password.git#a00c1679449f5bc66bd11be6e586ee672620ac76"
     },
     "react-native-gifted-messenger": {
       "version": "0.0.16",
