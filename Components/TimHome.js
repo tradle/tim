@@ -210,9 +210,6 @@ class TimHome extends Component {
     }
 
     function passwordAuth () {
-      // TODO: auth on android
-      if (isAndroid) return Q()
-
       return Keychain.getGenericPassword(PASSWORD_ITEM_KEY)
         .then(
           () =>  Q.ninvoke(self, 'checkPassword'),
