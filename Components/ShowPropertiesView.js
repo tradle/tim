@@ -9,9 +9,11 @@ var ResourceMixin = require('./ResourceMixin')
 var reactMixin = require('react-mixin')
 var Accordion = require('react-native-accordion')
 var Icon = require('react-native-vector-icons/Ionicons')
+var extend = require('extend');
 var NOT_SPECIFIED = 'Not specified'
 var DEFAULT_CURRENCY_SYMBOL = '£'
 var CURRENCY_SYMBOL
+import Prompt from 'react-native-prompt'
 
 import {
   StyleSheet,
@@ -26,8 +28,18 @@ import {
 } from 'react-native'
 
 import React, { Component } from 'react'
-
 class ShowPropertiesView extends Component {
+  props: {
+    navigator: PropTypes.object.isRequired,
+    resource: PropTypes.object.isRequired,
+    checkProperties: PropTypes.func,
+    currency: PropTypes.string,
+    showRefResources: PropTypes.func,
+    showItems: PropTypes.func,
+    bankStyle: PropTypes.object,
+    errorProps: PropTypes.object,
+    excludedProperties: PropTypes.array
+  };
   constructor(props) {
     super(props);
     var dataSource = new ListView.DataSource({
@@ -37,7 +49,12 @@ class ShowPropertiesView extends Component {
       resource: this.props.resource,
       viewStyle: {margin: 3},
       dataSource: dataSource,
+      promptVisible: null
     }
+    // let vCols = this.getViewColsNames()
+    // vCols.forEach((c) => {
+    //   this.state.promptVisible[c] = false
+    // })
     CURRENCY_SYMBOL = props.currency ? props.currency.symbol || props.currency : DEFAULT_CURRENCY_SYMBOL
   }
 
@@ -50,11 +67,60 @@ class ShowPropertiesView extends Component {
     );
   }
   shouldComponentUpdate(nextProps, nextState) {
+    if (this.state.promptVisible !== nextState.promptVisible)
+      return true
     if (!this.props.errorProps  &&  !nextProps.errorProps)
       return false
     if (!this.props.errorProps  ||  !nextProps.errorProps)
       return true
     return (this.props.errorProps != nextProps.errorProps) ? true : false
+  }
+  getViewColsNames() {
+    var resource = this.state.resource;
+    var modelName = resource[constants.TYPE];
+    var model = utils.getModel(modelName).value;
+    var vCols = []
+    if (this.props.checkProperties) {
+      let props = model.properties
+      for (let p in props) {
+        if (p.charAt(0) === '_'  ||  props[p].hidden  ||  props[p].readOnly)
+          continue
+        vCols.push(p)
+      }
+    }
+    else
+      vCols = model.viewCols
+
+    var excludedProperties = this.props.excludedProperties;
+    var props = model.properties;
+    if (excludedProperties) {
+      var mapped = [];
+      excludedProperties.forEach((p) =>  {
+        if (props[p]) {
+          mapped.push(p);
+        }
+      })
+      excludedProperties = mapped;
+    }
+
+    if (!vCols) {
+      vCols = [];
+      for (var p in props) {
+        if (p != constants.TYPE)
+          vCols.push(p)
+      }
+    }
+    var isMessage = model.interfaces;
+    if (!isMessage) {
+      var len = vCols.length;
+      for (var i=0; i<len; i++) {
+        if (props[vCols[i]].displayName) {
+          vCols.splice(i, 1);
+          len--;
+        }
+      }
+    }
+    return vCols
   }
   getViewCols(resource, model) {
     var resource = this.state.resource;
@@ -102,6 +168,7 @@ class ShowPropertiesView extends Component {
       }
     }
     var first = true;
+    let self = this
     var viewCols = vCols.map((p) => {
       if (excludedProperties  &&  excludedProperties.indexOf(p) !== -1)
         return;
@@ -201,21 +268,39 @@ class ShowPropertiesView extends Component {
                     : <View style={styles.separator}></View>;
 
       first = false;
-      let canReject = this.props.checkProperties
+      let isPromptVisible = self.state.promptVisible !== null
+      if (isPromptVisible)
+        console.log(self.state.promptVisible)
+      let canReject = self.props.checkProperties || !self.props.checkProperties
                     ? <View style={{flex: 1, justifyContent: 'flex-end', alignSelf: 'center'}}>
-                      <TouchableHighlight underlayColor='transparent' onPress={() => {
-                        AlertIOS.prompt(
-                          'Please write a message to the customer',
-                          null,
-                          [
-                            {text: 'Ok', onPress: this.props.checkProperties.bind(this, pMeta)},
-                            {text: 'Cancel', null}
-                          ]
-                        )
-                      }}>
-                        <Icon name={this.props.errorProps && this.props.errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={25} color={this.props.errorProps && this.props.errorProps[p] ? 'red' : this.props.bankStyle.LINK_COLOR} style={{paddingRight: 10, marginTop: 10}}/>
-                      </TouchableHighlight>
+                        <Icon key={p} name={self.props.errorProps && self.props.errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={25} color={self.props.errorProps && self.props.errorProps[p] ? 'red' : self.props.bankStyle.LINK_COLOR} style={{paddingRight: 10, marginTop: 10}}
+                        onPress={() => {
+                          self.setState({promptVisible: pMeta})
+                        }}/>
+                        <Prompt
+                          title='Please write a message to the customer'
+                          placeholder="Start typing"
+                          visible={isPromptVisible}
+                          onCancel={() => self.setState({ promptVisible: null })}
+                          onSubmit={(value) => {
+                            self.setState({ promptVisible: null})
+                            self.props.checkProperties(self.state.promptVisible, value)
+                          }}/>
                       </View>
+                      // <View style={{flex: 1, justifyContent: 'flex-end', alignSelf: 'center'}}>
+                      // <TouchableHighlight underlayColor='transparent' onPress={() => {
+                      //   AlertIOS.prompt(
+                      //     'Please write a message to the customer',
+                      //     null,
+                      //     [
+                      //       {text: 'Ok', onPress: this.props.checkProperties.bind(this, pMeta)},
+                      //       {text: 'Cancel', null}
+                      //     ]
+                      //   )
+                      // }}>
+                      //   <Icon name={this.props.errorProps && this.props.errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={25} color={this.props.errorProps && this.props.errorProps[p] ? 'red' : this.props.bankStyle.LINK_COLOR} style={{paddingRight: 10, marginTop: 10}}/>
+                      // </TouchableHighlight>
+                      // </View>
                     : <View />
       if (this.props.checkProperties)
         isDirectionRow = true
