@@ -4,7 +4,7 @@ var path = require('path')
 var parseURL = require('url').parse
 import {
   AsyncStorage,
-  AlertIOS,
+  Alert,
   NetInfo
 } from 'react-native'
 
@@ -89,6 +89,7 @@ const FORM_ERROR          = 'tradle.FormError'
 const MY_IDENTITIES = MY_IDENTITIES_TYPE + '_1'
 const SETTINGS = constants.TYPES.SETTINGS
 const EMPLOYEE_ONBOARDING = 'tradle.EmployeeOnboarding'
+const MY_EMPLOYEE_PASS = 'tradle.MyEmployeePass'
 
 const WELCOME_INTERVAL = 600000
 
@@ -166,7 +167,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
-var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://192.168.0.121:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
+var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://192.168.0.101:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
@@ -219,7 +220,7 @@ var Store = Reflux.createStore({
     if (false) {
       return this.ready = this.wipe()
         .then(() => {
-          AlertIOS.alert('please refresh')
+          Alert.alert('please refresh')
           return Q.Promise(function (resolve) {})
         })
     }
@@ -508,7 +509,7 @@ var Store = Reflux.createStore({
         messenger = wsClients[url]
       }
       if (!messenger) {
-        // AlertIOS.alert('meDriver._send recipient not found ' + recipientHash)
+        // Alert.alert('meDriver._send recipient not found ' + recipientHash)
         return Q.reject(new Error('recipient not found'))
       }
 
@@ -809,7 +810,7 @@ var Store = Reflux.createStore({
             //   name = name.charAt(0).toUpperCase() + name.slice(1)
 
             if (parsed[TYPE] === SELF_INTRODUCTION) {
-              AlertIOS.alert(
+              Alert.alert(
                 translate('newContactRequest', name),
                 parsed.message || null,
                 [
@@ -1757,7 +1758,7 @@ var Store = Reflux.createStore({
         else if (isMessage)
           return handleMessage()
         else {
-          return save()
+          return save(isSwitchingToEmployeeMode)
         }
       })
       .then(() => {
@@ -1767,13 +1768,12 @@ var Store = Reflux.createStore({
           let msg = {
             [TYPE]: PRODUCT_APPLICATION,
             product: EMPLOYEE_ONBOARDING,
-            from: utils.getMe(),
-            to:   orgRep,
+            [NONCE]: self.getNonce()
           }
-          self.trigger({action: 'employeeOnboarding', to: list[orgId]})
+          self.trigger({action: 'employeeOnboarding', to: list[orgId].value})
           utils.sendSigned(meDriver, {
             msg: msg,
-            to: [{fingerprint: self.getFingerprint(list[utils.getId(orgRep)].value)}],
+            to: [{fingerprint: self.getFingerprint(list[utils.getId(IDENTITY + '_' + orgRep[ROOT_HASH])].value)}],
             deliver: true
           })
           .catch(function (err) {
@@ -2068,7 +2068,7 @@ var Store = Reflux.createStore({
     return destroyTim
       .then(() => this.wipe())
       .then(() => {
-        AlertIOS.alert('please refresh')
+        Alert.alert('please refresh')
         return Q.Promise(function (resolve) {})
       })
       .then(function() {
@@ -2800,11 +2800,16 @@ var Store = Reflux.createStore({
             }
           }
           else {
-            let msgOrg = list[toID].value.organization
+            let msgOrgTo = list[toID].value.organization
+            let msgOrgFrom = list[fromID].value.organization
           // if (toID === meId)
           //   continue
-            if (!msgOrg)
-              msgOrg = list[fromID].value.organization
+            let msgOrg
+            if (!msgOrgTo  ||  (msgOrgFrom  &&  toID !== meId))
+              msgOrg = msgOrgFrom
+            else
+              msgOrg = msgOrgTo
+
             let msgOrgId = utils.getId(msgOrg)
             if (toId !== msgOrgId  &&  !isSharedWith)
               continue
@@ -3806,7 +3811,7 @@ var Store = Reflux.createStore({
     var from = list[PROFILE + '_' + obj.from[ROOT_HASH]].value
     var type = val[TYPE]
     if (type === FORGET_ME) {
-      // AlertIOS.alert("Received ForgetMe from " + obj.from[ROOT_HASH])
+      // Alert.alert("Received ForgetMe from " + obj.from[ROOT_HASH])
       this.forgetMe(from)
       return
     }
@@ -3847,7 +3852,7 @@ var Store = Reflux.createStore({
     }
 
     var retParams = {
-      action: isMessage ? 'messageList' : 'list',
+      action: isMessage ? (MY_EMPLOYEE_PASS ? 'employeeConfirmation' : 'messageList') : 'list',
     }
     var resultList
     if (isMessage) {
@@ -3867,10 +3872,10 @@ var Store = Reflux.createStore({
         retParams.shareableResources = shareableResources
 
       retParams.resource = to
-      if (to.organization) {
-         if (!to.bot)
-          retParams.isEmployee = true
-      }
+      // if (to.organization) {
+      //    if (!to.bot)
+      //     retParams.isEmployee = true
+      // }
     }
     else if (!onMessage  &&  val[TYPE] != PROFILE)
       resultList = this.searchNotMessages({modelName: val[TYPE]})
@@ -3880,6 +3885,7 @@ var Store = Reflux.createStore({
     .then(() => {
       if (onMessage  &&  val[TYPE] === FORGOT_YOU)
         this.forgotYou(from)
+
       else if (isConfirmation) {
         var fOrg = from.organization
         var org = fOrg ? list[utils.getId(fOrg)].value : null
@@ -4082,6 +4088,9 @@ var Store = Reflux.createStore({
     //     batch.push({type: 'put', key: key, value: val})
     // }
     // else {
+      if (val[TYPE] === MY_EMPLOYEE_PASS)
+        to.isEmployee = true
+
       var dn = val.message || utils.getDisplayName(val, model.properties);
       to.lastMessage = (obj.from[ROOT_HASH] === me[ROOT_HASH]) ? 'You: ' + dn : dn;
       to.lastMessageTime = val.time;
