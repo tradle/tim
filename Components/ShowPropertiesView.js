@@ -268,23 +268,23 @@ class ShowPropertiesView extends Component {
                     : <View style={styles.separator}></View>;
 
       first = false;
-      let isPromptVisible = self.state.promptVisible !== null
+      let isPromptVisible = this.state.promptVisible !== null
       if (isPromptVisible)
-        console.log(self.state.promptVisible)
-      let canReject = self.props.checkProperties || !self.props.checkProperties
+        console.log(this.state.promptVisible)
+      let canReject = this.props.checkProperties
                     ? <View style={{flex: 1, justifyContent: 'flex-end', alignSelf: 'center'}}>
-                        <Icon key={p} name={self.props.errorProps && self.props.errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={25} color={self.props.errorProps && self.props.errorProps[p] ? 'red' : self.props.bankStyle.LINK_COLOR} style={{paddingRight: 10, marginTop: 10}}
+                        <Icon key={p} name={this.props.errorProps && this.props.errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={25} color={this.props.errorProps && this.props.errorProps[p] ? 'red' : this.props.bankStyle.LINK_COLOR} style={{paddingRight: 10, marginTop: 10}}
                         onPress={() => {
-                          self.setState({promptVisible: pMeta})
+                          this.setState({promptVisible: pMeta})
                         }}/>
                         <Prompt
                           title='Please write a message to the customer'
                           placeholder="Start typing"
                           visible={isPromptVisible}
-                          onCancel={() => self.setState({ promptVisible: null })}
+                          onCancel={() => this.setState({ promptVisible: null })}
                           onSubmit={(value) => {
-                            self.setState({ promptVisible: null})
-                            self.props.checkProperties(self.state.promptVisible, value)
+                            this.setState({ promptVisible: null})
+                            this.props.checkProperties(this.state.promptVisible, value)
                           }}/>
                       </View>
                       // <View style={{flex: 1, justifyContent: 'flex-end', alignSelf: 'center'}}>
