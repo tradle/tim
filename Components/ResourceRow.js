@@ -21,8 +21,7 @@ import {
   Text,
   TouchableHighlight,
   View,
-  ActivityIndicatorIOS,
-  processColor
+  ActivityIndicatorIOS
 } from 'react-native';
 
 import React, { Component } from 'react'
