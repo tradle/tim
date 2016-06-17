@@ -8,11 +8,13 @@ var extend = require('extend')
 var equal = require('deep-equal')
 var Icon = require('react-native-vector-icons/Ionicons')
 var constants = require('@tradle/constants');
+import ActionSheet from 'react-native-actionsheet'
+
 import {
   StyleSheet,
   PropTypes,
   TouchableHighlight,
-  ActionSheetIOS,
+  // ActionSheetIOS,
   View,
 } from 'react-native'
 
@@ -31,6 +33,7 @@ class GridItemsList extends Component {
     super(props);
     this.state = {
       list: this.props.list,
+      show: false
     };
     var currentRoutes = this.props.navigator.getCurrentRoutes();
     var currentRoutesLength = currentRoutes.length;
@@ -43,6 +46,7 @@ class GridItemsList extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     return nextState.err                         ||
            nextState.forceUpdate                 ||
+           nextState.show !== this.state.show    ||
            this.state.list.length != nextState.list.length
   }
   cancelItem(item) {
@@ -65,36 +69,35 @@ class GridItemsList extends Component {
   }
 
   render() {
+    var m = utils.getModel(this.props.resource[constants.TYPE]).value
+    var buttons = [translate('addNew', m.properties[this.props.prop].title), translate('cancel')]
     return (
       <View style={styles.container}>
         <PhotoList photos={this.state.list} forceUpdate={this.state.forceUpdate} callback={this.cancelItem.bind(this)} navigator={this.props.navigator} numberInRow={3} resource={this.props.resource}/>
       <View style={styles.footer}>
-        <TouchableHighlight underlayColor='transparent' onPress={this.showMenu.bind(this)}>
+        <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
           <View style={{marginTop: -10}}>
             <Icon name='ios-add-circle'  size={55}  color='#ffffff' style={styles.icon} />
           </View>
         </TouchableHighlight>
       </View>
+      <ActionSheet
+        ref={(o) => {
+          this.ActionSheet = o
+        }}
+        options={buttons}
+        cancelButtonIndex={buttons.length - 1}
+        onPress={(index) => {
+          if (index === 0)
+            this.showChoice()
+        }}
+      />
       </View>
     )
   }
-  showMenu() {
-    var m = utils.getModel(this.props.resource[constants.TYPE]).value
-    var buttons = [translate('addNew', m.properties[this.props.prop].title), translate('cancel')]
-    var self = this;
-    ActionSheetIOS.showActionSheetWithOptions({
-      options: buttons,
-      cancelButtonIndex: 1
-    }, function(buttonIndex) {
-      switch (buttonIndex) {
-      case 0:
-        self.showChoice();
-        break
-      }
-    });
-  }
   showChoice() {
     var self = this;
+    this.setState({show: false})
     UIImagePickerManager.showImagePicker({
       returnIsVertical: true,
       chooseFromLibraryButtonTitle: __DEV__ ? 'Choose from Library' : null
@@ -157,3 +160,18 @@ var styles = StyleSheet.create({
 
 module.exports = GridItemsList;
 
+  // showMenu() {
+  //   var m = utils.getModel(this.props.resource[constants.TYPE]).value
+  //   var buttons = [translate('addNew', m.properties[this.props.prop].title), translate('cancel')]
+  //   var self = this;
+  //   ActionSheetIOS.showActionSheetWithOptions({
+  //     options: buttons,
+  //     cancelButtonIndex: 1
+  //   }, function(buttonIndex) {
+  //     switch (buttonIndex) {
+  //     case 0:
+  //       self.showChoice();
+  //       break
+  //     }
+  //   });
+  // }

@@ -17,7 +17,7 @@ var Reflux = require('reflux');
 var constants = require('@tradle/constants');
 var GiftedMessenger = require('react-native-gifted-messenger');
 var NetworkInfoProvider = require('./NetworkInfoProvider')
-
+import ActionSheet from 'react-native-actionsheet';
 // var AddNewMessage = require('./AddNewMessage');
 // var SearchBar = require('react-native-search-bar');
 // var ResourceTypesScreen = require('./ResourceTypesScreen');
@@ -36,8 +36,8 @@ import {
   View,
   Text,
   TouchableOpacity,
-  AlertIOS,
-  ActionSheetIOS,
+  Alert,
+  // ActionSheetIOS,
   ActivityIndicatorIOS,
   TouchableHighlight
 } from 'react-native'
@@ -60,6 +60,7 @@ class MessageList extends Component {
       isLoading: true,
       selectedAssets: {},
       isConnected: this.props.navigator.isConnected,
+      show: false,
       // dataSource: new ListView.DataSource({
       //   rowHasChanged: (row1, row2) => {
       //     if (row1 !== row2) {
@@ -202,25 +203,27 @@ class MessageList extends Component {
         if (!rModel.interfaces  ||  rModel.interfaces.indexOf(this.props.modelName) === -1)
           return;
       }
-
+      let me = utils.getMe()
       this.setState({
         // dataSource: this.state.dataSource.cloneWithRows(list),
         isLoading: false,
         list: list,
         shareableResources: params.shareableResources,
         allLoaded: false,
-        isEmployee: params.isEmployee,
+        isEmployee: me.isEmployee,
         productToForms: productToForms
       });
     }
     else
-      this.setState({isLoading: false, isEmployee: params.isEmployee})
+      this.setState({isLoading: false, isEmployee: utils.getMe().isEmployee})
   }
   shouldComponentUpdate(nextProps, nextState) {
     // Eliminating repeated alerts when connection returns after ForgetMe action
     if (!this.state.isConnected && !this.state.list  && !nextState.list && this.state.isLoading === nextState.isLoading)
       return false
     if (nextState.isConnected !== this.state.isConnected)
+      return true
+    if (this.state.show !== nextState.show)
       return true
     if (!this.state.list                                 ||
         !nextState.list                                  ||
@@ -347,7 +350,7 @@ class MessageList extends Component {
     //             ? <Text style={{alignSelf: 'flex-end', fontSize: 14, color: '#757575', marginHorizontal: 15}}>{thus.state.sendStatus}</Text>
     //             : <View/>
     // var spinner = <LoadingOverlay isVisible={isVisible} onDismiss={() => {this.setState({isVisible:false})}} position="bottom">
-    //                 <TouchableOpacity onPress={() => { AlertIOS.alert('Pressed on text!') }}>
+    //                 <TouchableOpacity onPress={() => { Alert.alert('Pressed on text!') }}>
     //                   <Text style={styles.bannerText}>{this.state.sendStatus}</Text>
     //                 </TouchableOpacity>
     //               </LoadingOverlay>
@@ -373,8 +376,8 @@ class MessageList extends Component {
       else {
         if (!this.state.isLoading  &&  !this.props.navigator.isConnected) {
           alert = (this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION)
-                ? AlertIOS.alert(translate('noConnectionForPL', this.props.resource.name))
-                : AlertIOS.alert(translate('noConnection'))
+                ? Alert.alert(translate('noConnectionForPL', this.props.resource.name))
+                : Alert.alert(translate('noConnection'))
         }
         // content =  <NoResources
         //             filter={this.state.filter}
@@ -429,9 +432,9 @@ class MessageList extends Component {
 
     var sepStyle = { height: 1,backgroundColor: LINK_COLOR }
     if (this.state.allLoaded)
-      AlertIOS.alert('There is no earlier messages!')
+      Alert.alert('There is no earlier messages!')
     else if (!this.props.navigator.isConnected  &&  this.state.isForgetting)
-      AlertIOS.alert(translate('noConnectionWillProcessLater'))
+      Alert.alert(translate('noConnectionWillProcessLater'))
           // <View style={{flex: 10}}>
           //   <SearchBar
           //     onChangeText={this.onSearchChange.bind(this)}
@@ -439,13 +442,31 @@ class MessageList extends Component {
           //     showsCancelButton={false}
           //     hideBackground={true} />
           // </View>
-
+    // if (this.state.isEmployee) {
+      // let buttons = {[
+      //   {
+      //     onPress: this.chooseFormForCustomer.bind(this)
+      //     title: translate('formChooser')
+      //   }
+      // ]}
+    let buttons = [translate('forgetMe'), translate('cancel')]
     return (
       <View style={[styles.container, bgStyle]}>
         <NetworkInfoProvider connected={this.state.isConnected} />
         <View style={{flexDirection:'row'}} />
         <View style={ sepStyle } />
         {content}
+        <ActionSheet
+          ref={(o) => {
+            this.ActionSheet = o
+          }}
+          options={buttons}
+          cancelButtonIndex={1}
+          onPress={(index) => {
+            if (index === 0)
+              this.forgetMe()
+          }}
+        />
         {alert}
       </View>
     );
@@ -458,14 +479,14 @@ class MessageList extends Component {
     if (this.props.resource[constants.TYPE] === constants.TYPES.PROFILE &&
         utils.getMe().organization) {
       return <TouchableHighlight underlayColor='transparent'
-                onPress={this.showEmployeeMenu.bind(this)}>
+                onPress={() => this.ActionSheet.show()}>
                <View style={{marginLeft: 5, paddingRight: 0, marginTop: 5, marginRight: 10, marginBottom: 0}}>
                  <Icon name='md-more' size={30} color='#999999' />
                </View>
              </TouchableHighlight>
     }
     return  <TouchableHighlight underlayColor='transparent'
-                onPress={this.showMenu.bind(this)}>
+                onPress={() => this.ActionSheet.show()}>
                <View style={{marginLeft: 5, paddingRight: 0, marginTop: 5, marginRight: 10, marginBottom: 0}}>
                  <Icon name='md-more' size={30} color='#999999' />
                </View>
@@ -507,6 +528,7 @@ class MessageList extends Component {
     var currentRoutes = this.props.navigator.getCurrentRoutes();
     var resource = this.props.resource
     var currentRoutes = this.props.navigator.getCurrentRoutes();
+    this.setState({show: false})
     this.props.navigator.push({
       title: translate(utils.getModel(constants.TYPES.FORM).value),
       id: 15,
@@ -535,52 +557,51 @@ class MessageList extends Component {
       // }
     });
   }
+  // showEmployeeMenu() {
+  //   // var buttons = ['Talk to representative', 'Forget me', 'Cancel']
+  //   var buttons = [translate('formChooser'), translate('cancel')] // ['Forget me', 'Cancel']
+  //   var self = this;
 
-  showEmployeeMenu() {
-    // var buttons = ['Talk to representative', 'Forget me', 'Cancel']
-    var buttons = [translate('formChooser'), translate('cancel')] // ['Forget me', 'Cancel']
-    var self = this;
-    ActionSheetIOS.showActionSheetWithOptions({
-      options: buttons,
-      cancelButtonIndex: 1
-    }, function(buttonIndex) {
-      switch (buttonIndex) {
-      // case 0:
-      //   Actions.talkToRepresentative(self.props.resource)
-      //   break
-      case 0:
-        self.chooseFormForCustomer()
-        break;
-      default:
-        return
-      }
-    });
-  }
-
-  showMenu() {
-    // var buttons = ['Talk to representative', 'Forget me', 'Cancel']
-    var buttons = [translate('forgetMe'), translate('cancel')] // ['Forget me', 'Cancel']
-    var self = this;
-    ActionSheetIOS.showActionSheetWithOptions({
-      options: buttons,
-      cancelButtonIndex: 1
-    }, function(buttonIndex) {
-      switch (buttonIndex) {
-      // case 0:
-      //   Actions.talkToRepresentative(self.props.resource)
-      //   break
-      case 0:
-        self.forgetMe()
-        break;
-      default:
-        return
-      }
-    });
-  }
+  //   ActionSheetIOS.showActionSheetWithOptions({
+  //     options: buttons,
+  //     cancelButtonIndex: 1
+  //   }, function(buttonIndex) {
+  //     switch (buttonIndex) {
+  //     // case 0:
+  //     //   Actions.talkToRepresentative(self.props.resource)
+  //     //   break
+  //     case 0:
+  //       self.chooseFormForCustomer()
+  //       break;
+  //     default:
+  //       return
+  //     }
+  //   });
+  // }
+  // showMenu() {
+  //   // var buttons = ['Talk to representative', 'Forget me', 'Cancel']
+  //   var self = this;
+  //   ActionSheetIOS.showActionSheetWithOptions({
+  //     options: buttons,
+  //     cancelButtonIndex: 1
+  //   }, function(buttonIndex) {
+  //     switch (buttonIndex) {
+  //     // case 0:
+  //     //   Actions.talkToRepresentative(self.props.resource)
+  //     //   break
+  //     case 0:
+  //       self.forgetMe()
+  //       break;
+  //     default:
+  //       return
+  //     }
+  //   });
+  // }
       // 'Are you sure you want \'' + utils.getDisplayName(resource, utils.getModel(resource[constants.TYPE]).value.properties) + '\' to forget you',
   forgetMe() {
     var resource = this.props.resource
-    AlertIOS.alert(
+    this.setState({show: false})
+    Alert.alert(
       translate('confirmForgetMe', utils.getDisplayName(resource, utils.getModel(resource[constants.TYPE]).value.properties)), //Are you sure you want \'' + utils.getDisplayName(resource, utils.getModel(resource[constants.TYPE]).value.properties) + '\' to forget you',
       translate('testForgetMe'), //'This is a test mechanism to reset all communications with this provider',
       [
