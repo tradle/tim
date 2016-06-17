@@ -8,6 +8,7 @@ var VerificationRow = require('./VerificationRow');
 var NewResource = require('./NewResource');
 var MessageList = require('./MessageList');
 var MessageView = require('./MessageView')
+import ActionSheet from 'react-native-actionsheet'
 var utils = require('../utils/utils');
 var translate = utils.translate
 var reactMixin = require('react-mixin');
@@ -34,9 +35,9 @@ import {
   ListView,
   StyleSheet,
   Navigator,
-  AlertIOS,
+  // AlertIOS,
+  // ActionSheetIOS,
   TouchableHighlight,
-  ActionSheetIOS,
   Image,
   StatusBar,
   View,
@@ -67,7 +68,9 @@ class ResourceList extends Component {
           return row1 !== row2
         }
       }),
+      allowToAdd: this.props.prop  &&  this.props.prop.allowToAdd,
       filter: this.props.filter,
+      show: false,
       isConnected: this.props.navigator.isConnected,
       userInput: '',
     };
@@ -266,6 +269,8 @@ class ResourceList extends Component {
   }
   shouldComponentUpdate(nextProps, nextState) {
     if (nextState.forceUpdate)
+      return true
+    if (this.state.show !== nextState.show)
       return true
     if (nextState.isConnected !== this.state.isConnected)
       return true
@@ -608,7 +613,7 @@ class ResourceList extends Component {
 
     return (
       <View style={styles.footer}>
-        <TouchableHighlight underlayColor='transparent' onPress={this.showMenu.bind(this)}>
+        <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
           <View style={{marginTop: -10}}>
             <Icon name='ios-add-circle'  size={55}  color='#ffffff' style={styles.icon} />
           </View>
@@ -618,6 +623,7 @@ class ResourceList extends Component {
   }
   onSettingsPressed() {
     var model = utils.getModel(constants.TYPES.SETTINGS).value
+    this.setState({show: false})
     var route = {
       component: NewResource,
       title: 'Settings',
@@ -652,6 +658,7 @@ class ResourceList extends Component {
   addNew() {
     var model = utils.getModel(this.props.modelName).value;
     var r;
+    this.setState({show: false})
     // resource if present is a container resource as for example subreddit for posts or post for comments
     // if to is passed then resources only of this container need to be returned
     if (this.props.resource) {
@@ -734,9 +741,9 @@ class ResourceList extends Component {
     }
     else {
       var model = utils.getModel(this.props.modelName).value;
-          // renderHeader={this.renderHeader.bind(this)}
       content = <ListView
           dataSource={this.state.dataSource}
+          renderHeader={this.renderHeader.bind(this)}
           renderRow={this.renderRow.bind(this)}
           automaticallyAdjustContentInsets={false}
           keyboardDismissMode='on-drag'
@@ -749,11 +756,10 @@ class ResourceList extends Component {
     var model = utils.getModel(this.props.modelName).value;
     var Footer = this.renderFooter();
     var header = this.renderHeader();
-    // let connectivity = (!this.props.navigator.isConnected)
-    //                   ? <View style={{backgroundColor: '#FF6D0D', borderColor: '#FF6D0D', borderWidth: 1, borderBottomColor: '#3A5280'}}>
-    //                       <Text style={{fontSize: 18, color: '#ffffff', padding: 3, alignSelf: 'center' }}>waiting for the network</Text>
-    //                     </View>
-    //                   : <View/>
+
+    let buttons = this.state.allowToAdd
+                ? [translate('addNew', this.props.prop.title), translate('cancel')]
+                : [translate('addServerUrl'), translate('scanQRcode'), 'Talk to employee', translate('cancel')]
     return (
       <View style={styles.container}>
         <NetworkInfoProvider connected={this.state.isConnected} />
@@ -766,6 +772,31 @@ class ResourceList extends Component {
         <View style={styles.separator} />
         {content}
         {Footer}
+        <ActionSheet
+          ref={(o) => {
+            this.ActionSheet = o
+          }}
+          options={buttons}
+          cancelButtonIndex={buttons.length - 1}
+          onPress={(index) => {
+            switch (index) {
+            case 0:
+              if (this.state.allowToAdd)
+                this.addNew()
+              else
+                this.onSettingsPressed()
+              break
+            case 1:
+              this.scanFormsQRCode()
+              break;
+            case 2:
+              this.talkToEmployee()
+              break
+            default:
+              return
+            }
+          }}
+        />
       </View>
     );
   }
@@ -801,37 +832,9 @@ class ResourceList extends Component {
       }
     })
   }
-  showMenu() {
-    var buttons = [translate('addServerUrl'), translate('scanQRcode'), 'Talk to employee', translate('cancel')]
-    let allowToAdd = this.props.prop  &&  this.props.prop.allowToAdd
-    var buttons = allowToAdd
-                ? [translate('addNew', this.props.prop.title), translate('cancel')]
-                : buttons
-    var self = this;
-    ActionSheetIOS.showActionSheetWithOptions({
-      options: buttons,
-      cancelButtonIndex: allowToAdd ? 2 : 3
-    }, function(buttonIndex) {
-      switch (buttonIndex) {
-      case 0:
-        if (allowToAdd)
-          self.addNew()
-        else
-          self.onSettingsPressed()
-        break
-      case 1:
-        self.scanFormsQRCode()
-        break;
-      case 2:
-        self.talkToEmployee()
-        break
-      default:
-        return
-      }
-    });
-  }
 
   talkToEmployee(qrcode) {
+    this.setState({show: false})
     if (!qrcode)
       // qrcode = 'http://127.0.0.1:444444;71e4b7cd6c11ab7221537275988f113a879029eu;6aefc09f4da125095409770592eb96ac142fb579'
       // qrcode = 'http://192.168.0.104:44444/;71e4b7cd6c11ab7221537275988f113a879029eu;3497c6ce074f1bc66c05e204fd3a7fbcd5e0fb08'
@@ -841,6 +844,7 @@ class ResourceList extends Component {
     return
   }
   scanFormsQRCode() {
+    this.setState({show: false})
     this.props.navigator.push({
       title: 'Scan QR Code',
       id: 16,
@@ -975,5 +979,34 @@ module.exports = ResourceList;
   //     query: filter,
   //     modelName: this.props.modelName,
   //     to: this.props.resource
+  //   });
+  // }
+  // showMenu() {
+  //   var buttons = [translate('addServerUrl'), translate('scanQRcode'), 'Talk to employee', translate('cancel')]
+  //   let allowToAdd = this.props.prop  &&  this.props.prop.allowToAdd
+  //   var buttons = allowToAdd
+  //               ? [translate('addNew', this.props.prop.title), translate('cancel')]
+  //               : buttons
+  //   var self = this;
+  //   ActionSheetIOS.showActionSheetWithOptions({
+  //     options: buttons,
+  //     cancelButtonIndex: allowToAdd ? 2 : 3
+  //   }, function(buttonIndex) {
+  //     switch (buttonIndex) {
+  //     case 0:
+  //       if (allowToAdd)
+  //         self.addNew()
+  //       else
+  //         self.onSettingsPressed()
+  //       break
+  //     case 1:
+  //       self.scanFormsQRCode()
+  //       break;
+  //     case 2:
+  //       self.talkToEmployee()
+  //       break
+  //     default:
+  //       return
+  //     }
   //   });
   // }

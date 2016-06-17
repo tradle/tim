@@ -21,6 +21,7 @@ var ResourceMixin = require('./ResourceMixin');
 var buttonStyles = require('../styles/buttonStyles');
 var HELP_COLOR = 'blue'
 var NetworkInfoProvider = require('./NetworkInfoProvider')
+import Prompt from 'react-native-prompt'
 
 import {
   StyleSheet,
@@ -28,7 +29,7 @@ import {
   View,
   Text,
   PropTypes,
-  AlertIOS,
+  // AlertIOS,
 } from 'react-native'
 
 import React, { Component } from 'react'
@@ -44,7 +45,8 @@ class MessageView extends Component {
     super(props);
     this.state = {
       resource: props.resource,
-      isConnected: this.props.navigator.isConnected
+      isConnected: this.props.navigator.isConnected,
+      promptVisible: false
     };
     var currentRoutes = this.props.navigator.getCurrentRoutes();
     var currentRoutesLength = currentRoutes.length;

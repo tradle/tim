@@ -41,7 +41,7 @@ import Native, {
   ScrollView,
   Image,
   // StatusBarIOS,
-  AlertIOS,
+  Alert,
   Dimensions,
   ActivityIndicatorIOS,
   Navigator,
@@ -199,6 +199,7 @@ class NewResource extends Component {
       })
       return
     }
+
     if (params.action === 'runVideo'  && this.state.isRegistration) {
       if (this.props.callback)
         this.setState({isLoadingVideo: true})
@@ -206,7 +207,7 @@ class NewResource extends Component {
     }
     if (!resource  &&  params.error &&  params.action === 'addItem') {
       this.state.submitted = false
-      AlertIOS.alert(
+      Alert.alert(
         params.error,
         // this.props.navigator.pop()
       )
@@ -801,7 +802,7 @@ class NewResource extends Component {
     // StatusBarIOS.setHidden(true);
     if (!this.state.isRegistration) {
       if (this.state.err) {
-        AlertIOS.alert(this.state.err)
+        Alert.alert(this.state.err)
         this.state.err = null
       }
       return content
