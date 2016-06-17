@@ -7,7 +7,6 @@ import {
   Text,
   View,
   TouchableOpacity,
-  AlertIOS,
 } from 'react-native'
 
 var Video = require('react-native-video')
