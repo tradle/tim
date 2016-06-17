@@ -29,12 +29,12 @@ class CameraView extends Component {
           onBarCodeRead={this._onBarCodeRead.bind(this)}
           type={this.state.cameraType}>
           <TouchableHighlight onPress={this._switchCamera.bind(this)}>
-            <Icon name='ios-reverse-camera-outline' size={50} color='#eeeeee' />
+            <Icon name='ios-reverse-camera' size={50} color='#eeeeee' />
           </TouchableHighlight>
         </Camera>
         <View style={{backgroundColor: '#000000', paddingTop: 7, height: 125, alignSelf: 'stretch'}}>
           <TouchableHighlight onPress={this._takePicture.bind(this)}>
-             <Icon name='ios-circle-filled'  size={85}  color='#eeeeee'  style={styles.icon}/>
+             <Icon name='ios-radio-button-on'  size={85}  color='#eeeeee'  style={styles.icon}/>
           </TouchableHighlight>
         </View>
       </View>
