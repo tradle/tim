@@ -9,7 +9,7 @@ var buttonStyles = require('../styles/buttonStyles');
 import {
   StyleSheet,
   View,
-  AlertIOS,
+  Alert,
   Text,
   TouchableHighlight,
 } from 'react-native'
@@ -29,7 +29,7 @@ class VerificationButton extends Component {
       <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
         <View style={[buttonStyles.container1, {paddingVertical: 3}]}>
           <TouchableHighlight underlayColor='transparent' onPress={() =>
-            AlertIOS.alert(
+            Alert.alert(
               'Verify ' + utils.getDisplayName(resource, model.properties),
               null,
               [
