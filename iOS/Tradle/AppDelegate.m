@@ -36,11 +36,7 @@
    */
 
 #ifdef DEBUG
-<<<<<<< 27fa1fd4c4f66187c523073e6ffaf1bc1d523441
-    jsCodeLocation = [NSURL URLWithString:@"http://192.168.0.121:8081/index.ios.bundle?platform=ios&dev=true"];
-=======
-    jsCodeLocation = [NSURL URLWithString:@"http://192.168.0.113:8081/index.ios.bundle?platform=ios&dev=true"];
->>>>>>> android wip
+    jsCodeLocation = [NSURL URLWithString:@"http://localhost:8081/index.ios.bundle?platform=ios&dev=true"];
 //    QTouchposeApplication *touchposeApplication = (QTouchposeApplication *)application;
 //    touchposeApplication.alwaysShowTouches = YES;
 #else
