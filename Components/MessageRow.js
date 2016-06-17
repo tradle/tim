@@ -45,7 +45,7 @@ import {
   StyleSheet,
   Text,
   TouchableHighlight,
-  AlertIOS,
+  Alert,
   Modal,
   Navigator,
   Dimensions,
@@ -968,7 +968,7 @@ class MessageRow extends Component {
                    </View>
                  </TouchableHighlight>
                  <TouchableHighlight underlayColor='transparent' onPress={() => {
-                    AlertIOS.alert(
+                    Alert.alert(
                       translate('areYouSureAboutNextForm', translate(form)),
                       null,
                       [
@@ -1013,7 +1013,7 @@ class MessageRow extends Component {
     return onPressCall
   }
   addContact() {
-    AlertIOS.alert(
+    Alert.alert(
       translate('addContact', utils.getDisplayName(this.props.resource.from)),
       null,
       [
@@ -1212,7 +1212,7 @@ class MessageRow extends Component {
       if (onPress) {
         if (!this.props.resource.documentCreated)
             <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
-                      AlertIOS.alert(
+                      Alert.alert(
                         'Sharing ' + docTitle + ' ' + verifiedBy,
                         'with ' + orgTitle,
                         [
@@ -1234,7 +1234,7 @@ class MessageRow extends Component {
       else
         orgRow = <View style={{flexDirection: 'row', marginTop: 5, paddingBottom: 5, justifyContent:'space-between'}}>
           <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
-                    AlertIOS.alert(
+                    Alert.alert(
                       'Sharing ' + docTitle + ' ' + verifiedBy,
                       'with ' + orgTitle,
                       [
