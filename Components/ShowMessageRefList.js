@@ -53,35 +53,35 @@ class ShowMessageRefList extends Component {
       var icon = props[p].icon  ||  utils.getModel(props[p].items.ref).value.icon;
       if (!icon)
         icon = 'ios-checkmark';
-      if (props[p].items.ref === constants.TYPES.ADDITIONAL_INFO) {
-        if (utils.getMe().organization)
-          refList.push(
-            <View style={buttonStyles.container} key={this.getNextKey()}>
-               <TouchableHighlight onPress={() => {
-                  var buttons = [{
-                    text: 'Cancel',
-                  },
-                  {
-                    text: 'OK',
-                    onPress: this.props.additionalInfo.bind(this, this.props.resource, props[p])
-                  }];
-                  var to = this.props.resource;
-                  AlertIOS.prompt(
-                    'Sending ' + resource.title + ' form to ' + utils.getDisplayName(to, utils.getModel(to[constants.TYPE]).value.properties),
-                    buttons
-                  );
+      // if (props[p].items.ref === constants.TYPES.ADDITIONAL_INFO) {
+      //   if (utils.getMe().organization)
+      //     refList.push(
+      //       <View style={buttonStyles.container} key={this.getNextKey()}>
+      //          <TouchableHighlight onPress={() => {
+      //             var buttons = [{
+      //               text: 'Cancel',
+      //             },
+      //             {
+      //               text: 'OK',
+      //               onPress: this.props.additionalInfo.bind(this, this.props.resource, props[p])
+      //             }];
+      //             var to = this.props.resource;
+      //             AlertIOS.prompt(
+      //               'Sending ' + resource.title + ' form to ' + utils.getDisplayName(to, utils.getModel(to[constants.TYPE]).value.properties),
+      //               buttons
+      //             );
 
-                 }
-               } underlayColor='transparent'>
-                 <View style={{alignItems: 'center'}}>
-                   <Icon name={icon}  size={35}  color='#ffffff' />
-                   <Text style={buttonStyles.text}>{translate(props[p], model)}</Text>
-                 </View>
-               </TouchableHighlight>
-             </View>
-          );
-      }
-      else {
+      //            }
+      //          } underlayColor='transparent'>
+      //            <View style={{alignItems: 'center'}}>
+      //              <Icon name={icon}  size={35}  color='#ffffff' />
+      //              <Text style={buttonStyles.text}>{translate(props[p], model)}</Text>
+      //            </View>
+      //          </TouchableHighlight>
+      //        </View>
+      //     );
+      // }
+      // else {
         let style = (backlinks.length === 1)
                   ? [buttonStyles.container, {width: Dimensions.get('window').width}]
                   :  buttonStyles.container
@@ -95,7 +95,7 @@ class ShowMessageRefList extends Component {
              </TouchableHighlight>
            </View>
           );
-      }
+      // }
      })
 
      var backlinksBg = this.props.bankStyle && this.props.bankStyle.PRODUCT_ROW_BG_COLOR ? {backgroundColor: this.props.bankStyle.PRODUCT_ROW_BG_COLOR} : {backgroundColor: '#a0a0a0'}
