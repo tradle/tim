@@ -15,6 +15,8 @@ var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
 var ResourceMixin = require('./ResourceMixin');
 var QRCode = require('./QRCode')
+var MessageList = require('./MessageList')
+var defaultBankStyle = require('../styles/bankStyle.json')
 var buttonStyles = require('../styles/buttonStyles');
 const TOUCH_ID_IMG = require('../img/touchid2.png')
 const TALK_TO_EMPLOYEE = '1'
@@ -60,9 +62,31 @@ class ResourceView extends Component {
         isLoading: false
       })
     }
-      // this.showRefResource(params.resource)
     else  if (params.resource)
       this.onResourceUpdate(params);
+    else if (params.action === 'employeeOnboarding') {
+      let routes = this.props.navigator.getCurrentRoutes()
+      // this.props.navigator.jumpTo(routes[1])
+      let style = {}
+      extend(style, defaultBankStyle)
+      if (params.to.style)
+        style = extend(style, params.to.style)
+      this.props.navigator.replacePreviousAndPop({
+        component: MessageList,
+        title: utils.getDisplayName(params.to),
+        id: 11,
+        backButtonTitle: 'Back',
+        passProps: {
+          resource: params.to,
+          filter: '',
+          modelName: constants.TYPES.MESSAGE,
+          // currency: params.organization.currency,
+          bankStyle: style,
+          // dictionary: params.dictionary,
+        }
+      }, 2)
+      // this.props.navigator.jumpTo(routes[2])
+    }
   }
   onResourceUpdate(params) {
     var resource = params.resource;
