@@ -51,10 +51,6 @@ class ShowPropertiesView extends Component {
       dataSource: dataSource,
       promptVisible: null
     }
-    // let vCols = this.getViewColsNames()
-    // vCols.forEach((c) => {
-    //   this.state.promptVisible[c] = false
-    // })
     CURRENCY_SYMBOL = props.currency ? props.currency.symbol || props.currency : DEFAULT_CURRENCY_SYMBOL
   }
 
@@ -74,53 +70,6 @@ class ShowPropertiesView extends Component {
     if (!this.props.errorProps  ||  !nextProps.errorProps)
       return true
     return (this.props.errorProps != nextProps.errorProps) ? true : false
-  }
-  getViewColsNames() {
-    var resource = this.state.resource;
-    var modelName = resource[constants.TYPE];
-    var model = utils.getModel(modelName).value;
-    var vCols = []
-    if (this.props.checkProperties) {
-      let props = model.properties
-      for (let p in props) {
-        if (p.charAt(0) === '_'  ||  props[p].hidden  ||  props[p].readOnly)
-          continue
-        vCols.push(p)
-      }
-    }
-    else
-      vCols = model.viewCols
-
-    var excludedProperties = this.props.excludedProperties;
-    var props = model.properties;
-    if (excludedProperties) {
-      var mapped = [];
-      excludedProperties.forEach((p) =>  {
-        if (props[p]) {
-          mapped.push(p);
-        }
-      })
-      excludedProperties = mapped;
-    }
-
-    if (!vCols) {
-      vCols = [];
-      for (var p in props) {
-        if (p != constants.TYPE)
-          vCols.push(p)
-      }
-    }
-    var isMessage = model.interfaces;
-    if (!isMessage) {
-      var len = vCols.length;
-      for (var i=0; i<len; i++) {
-        if (props[vCols[i]].displayName) {
-          vCols.splice(i, 1);
-          len--;
-        }
-      }
-    }
-    return vCols
   }
   getViewCols(resource, model) {
     var resource = this.state.resource;
