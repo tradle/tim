@@ -63,7 +63,7 @@ import {
   StyleSheet,
   Alert,
   // Linking,
-  AppStateIOS,
+  AppState,
   AppRegistry,
   Text
 } from 'react-native';
@@ -112,14 +112,14 @@ class TiMApp extends Component {
 
   componentDidMount() {
     AutomaticUpdates.on()
-    AppStateIOS.addEventListener('change', this._handleAppStateChange);
+    AppState.addEventListener('change', this._handleAppStateChange);
     // Linking.addEventListener('url', this._handleOpenURL);
     // var url = Linking.popInitialURL();
     // if (url)
     //   this._handleOpenURL({url});
   }
   componentWillUnmount() {
-    AppStateIOS.removeEventListener('change', this._handleAppStateChange);
+    AppState.removeEventListener('change', this._handleAppStateChange);
     // Linking.removeEventListener('url', this._handleOpenURL);
     this._navListeners.forEach((listener) => listener.remove())
   }
