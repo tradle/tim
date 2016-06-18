@@ -3,10 +3,11 @@
 var path = require('path')
 var parseURL = require('url').parse
 import {
-  AsyncStorage,
   Alert,
   NetInfo
 } from 'react-native'
+
+import AsyncStorage from './Storage'
 
 var path = require('path')
 var BeSafe = require('asyncstorage-backup')
@@ -3411,16 +3412,18 @@ var Store = Reflux.createStore({
       // debugger
       // wait for all ForgotYou messages or timeout before changing the server url
       var defer = Q.defer()
-      setTimeout(() => {defer.reject('forget me request was timed out')}, 10000)
-      meDriver.on('message', function (meta) {
+      setTimeout(() => defer.reject('forget me request was timed out'), 10000)
+      meDriver.on('message', onMessage)
+      return defer.promise
+
+      function onMessage (meta) {
         if (meta[TYPE] === FORGOT_YOU) {
           if (--togo === 0) {
+            meDriver.removeListener('message', onMessage)
             defer.resolve()
           }
         }
-      })
-
-      return defer.promise
+      }
    })
    .then(function() {
       // debugger
