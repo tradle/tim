@@ -136,7 +136,7 @@ class ResourceView extends Component {
     else
       actionPanel = <ShowRefList resource={resource} currency={this.props.currency} navigator={this.props.navigator} />
     var qrcode
-    if (isMe && me.organization && me.organization.url)
+    if (isMe  &&  me.isEmployee  &&  me.organization && me.organization.url)
       qrcode = <View>
                  <QRCode inline={true} content={TALK_TO_EMPLOYEE + ';' + me.organization.url + ';' + utils.getId(me.organization).split('_')[1] + ';' + me[constants.ROOT_HASH]} dimension={370} />
                </View>
