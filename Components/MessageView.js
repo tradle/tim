@@ -21,7 +21,7 @@ var ResourceMixin = require('./ResourceMixin');
 var buttonStyles = require('../styles/buttonStyles');
 var HELP_COLOR = 'blue'
 var NetworkInfoProvider = require('./NetworkInfoProvider')
-import Prompt from 'react-native-prompt'
+// import Prompt from 'react-native-prompt'
 
 import {
   StyleSheet,
@@ -29,7 +29,7 @@ import {
   View,
   Text,
   PropTypes,
-  // AlertIOS,
+  Alert,
 } from 'react-native'
 
 import React, { Component } from 'react'
@@ -72,7 +72,7 @@ class MessageView extends Component {
     let resource = this.props.resource
     let model = utils.getModel(resource[constants.TYPE]).value
     if (utils.isEmpty(this.state.errorProps)) {
-      AlertIOS.alert(
+      Alert.alert(
         'Verify ' + utils.getDisplayName(resource, model.properties),
         null,
         [
@@ -82,14 +82,22 @@ class MessageView extends Component {
       )
     }
     else {
-      AlertIOS.prompt(
-        'Please write a message to the customer',
+      Alert.alert(
+        'Please correct the errors and re-submit',
         null,
         [
-          {text: 'Submit', onPress: this.createError.bind(this)},
-          {text: 'Cancel', null},
+          {text: 'Ok', onPress: this.createError.bind(this)},
+          {text: 'Cancel', onPress: () => console.log('Canceled!')},
         ]
       )
+      // AlertIOS.prompt(
+      //   'Please write a message to the customer',
+      //   null,
+      //   [
+      //     {text: 'Submit', onPress: this.createError.bind(this)},
+      //     {text: 'Cancel', null},
+      //   ]
+      // )
    }
   }
   createError(text) {
