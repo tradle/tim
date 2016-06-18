@@ -1,11 +1,12 @@
 'use strict'
 
-var {
-  AsyncStorage,
+import {
   NativeModules,
   findNodeHandle,
   Dimensions
-} = require('react-native')
+} from 'react-native'
+
+import AsyncStorage from '../Store/Storage'
 var RCTUIManager = NativeModules.UIManager
 var crypto = require('crypto')
 var Q = require('q')
