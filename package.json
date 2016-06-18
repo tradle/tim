@@ -68,6 +68,7 @@
     "react-native-fs": "^1.5.1",
     "react-native-gesture-password": "mvayngrib/react-native-gesture-password",
     "react-native-gifted-messenger": "pgmemk/react-native-gifted-messenger",
+    "react-native-gifted-spinner": "0.0.4",
     "react-native-http": "tradle/react-native-http#834492d",
     "react-native-image-picker": "^0.19.3",
     "react-native-keychain": "mvayngrib/react-native-keychain",

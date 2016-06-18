@@ -40,7 +40,6 @@ import {
   View,
   TouchableHighlight,
   TouchableWithoutFeedback,
-  ActivityIndicatorIOS,
   Image,
   NetInfo,
   ScrollView,
@@ -52,6 +51,8 @@ import {
   AppState,
   Platform
 } from 'react-native'
+
+import ActivityIndicator from './ActivityIndicator'
 
 const isAndroid = Platform.OS === 'android'
 import React, { Component } from 'react'
@@ -524,7 +525,7 @@ class TimHome extends Component {
               <Text style={styles.tradle}>Tradle</Text>
             </View>
             <View style={{alignItems: 'center'}}>
-              <ActivityIndicatorIOS hidden='true' size='large' color='#ffffff'/>
+              <ActivityIndicator hidden='true' size='large' color='#ffffff'/>
             </View>
           </ScrollView>
       </View>

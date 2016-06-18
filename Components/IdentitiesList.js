@@ -18,7 +18,6 @@ import {
   ListView,
   StyleSheet,
   Text,
-  ActivityIndicatorIOS,
   TouchableHighlight,
   View,
 } from 'react-native'

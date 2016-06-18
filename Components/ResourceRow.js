@@ -20,11 +20,11 @@ import {
   StyleSheet,
   Text,
   TouchableHighlight,
-  View,
-  ActivityIndicatorIOS
+  View
 } from 'react-native';
 
 import React, { Component } from 'react'
+import ActivityIndicator from './ActivityIndicator'
 
 class ResourceRow extends Component {
   constructor(props) {
@@ -133,7 +133,7 @@ class ResourceRow extends Component {
           {onlineStatus}
           <View style={[textStyle, {flexDirection: 'row', justifyContent: 'space-between'}]} key={this.getNextKey()}>
             {this.formatRow(resource)}
-            <ActivityIndicatorIOS hidden='true' color='#629BCA'/>
+            <ActivityIndicator hidden='true' color='#629BCA'/>
           </View>
           {cancelResource}
         </View>

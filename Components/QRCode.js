@@ -1,9 +1,10 @@
 import {
   StyleSheet,
   View,
-  ActivityIndicatorIOS,
   InteractionManager
 } from 'react-native'
+
+import ActivityIndicator from './ActivityIndicator'
 
 var extend = require('xtend')
 var QRCode = require('react-native-qrcode')
@@ -42,7 +43,7 @@ class QRCodeView extends Component {
   render() {
     var code
     if (this.state.renderPlaceholderOnly) {
-      return <ActivityIndicatorIOS hidden='true' size='large' style={this.state.style} />
+      return <ActivityIndicator hidden='true' size='large' style={this.state.style} />
     }
 
     var code = <QRCode

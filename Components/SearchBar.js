@@ -2,11 +2,12 @@
 
 import React, { Component } from 'react'
 import {
-  ActivityIndicatorIOS,
   View,
   StyleSheet,
   TextInput
 } from 'react-native'
+
+import ActivityIndicator from './ActivityIndicator'
 
 class SearchBar extends Component {
   render() {
@@ -25,7 +26,7 @@ class SearchBar extends Component {
           style={styles.searchBarInput}
           value={value}
         />
-        <ActivityIndicatorIOS
+        <ActivityIndicator
           animating={this.props.isLoading}
           style={styles.spinner}
         />

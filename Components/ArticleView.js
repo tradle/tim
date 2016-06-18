@@ -2,12 +2,12 @@ import {
   WebView,
   View,
   Text,
-  ActivityIndicatorIOS,
   ScrollView,
   StyleSheet,
 } from 'react-native'
 
 import React, { Component } from 'react'
+import ActivityIndicator from './ActivityIndicator'
 
 class ArticleView extends Component {
   constructor(props) {
@@ -22,7 +22,7 @@ class ArticleView extends Component {
         <View style={styles.container}>
           <View style={styles.loading}>
             <Text>Loading...</Text>
-            <ActivityIndicatorIOS style={{alignSelf: 'center'}} />
+            <ActivityIndicator style={{alignSelf: 'center'}} />
           </View>
         </View>
       </ScrollView>

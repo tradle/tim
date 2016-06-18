@@ -38,9 +38,10 @@ import {
   TouchableOpacity,
   Alert,
   // ActionSheetIOS,
-  ActivityIndicatorIOS,
   TouchableHighlight
 } from 'react-native'
+
+import ActivityIndicator from './ActivityIndicator'
 
 var currentMessageTime;
 
@@ -369,7 +370,7 @@ class MessageList extends Component {
         if (this.state.isLoading) {
           content = <View style={[styles.container, bgStyle]}>
             <Text style={{fontSize: 17, alignSelf: 'center', marginTop: 80, color: '#629BCA'}}>{'Loading...'}</Text>
-            <ActivityIndicatorIOS size='large' style={{alignSelf: 'center', marginTop: 20}} />
+            <ActivityIndicator size='large' style={{alignSelf: 'center', marginTop: 20}} />
           </View>
         }
       }

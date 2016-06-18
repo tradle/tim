@@ -43,7 +43,6 @@ import Native, {
   // StatusBarIOS,
   Alert,
   Dimensions,
-  ActivityIndicatorIOS,
   Navigator,
   TouchableHighlight,
   Animated,
@@ -52,6 +51,7 @@ import Native, {
 
 import Keyboard from 'Keyboard'
 import React, { Component, PropTypes } from 'react'
+import ActivityIndicator from './ActivityIndicator'
 
 DeviceHeight = Dimensions.get('window').height;
 DeviceWidth = Dimensions.get('window').width
@@ -792,7 +792,7 @@ class NewResource extends Component {
               {arrayItems}
              </View>
             <View style={{alignItems: 'center', marginTop: 50}}>
-              <ActivityIndicatorIOS animating={this.state.isLoadingVideo ? true : false} size='large' color='#ffffff'/>
+              <ActivityIndicator animating={this.state.isLoadingVideo ? true : false} size='large' color='#ffffff'/>
             </View>
           </View>
           <View style={{height: 300}}/>
