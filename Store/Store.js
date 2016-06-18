@@ -1239,7 +1239,7 @@ var Store = Reflux.createStore({
         batch.push({type: 'put', key: utils.getId(to), value: to});
         batch.push({type: 'put', key: utils.getId(from), value: from});
       }
-      if (!isWelcome  ||  (me.organization  &&  utils.getId(me.organization) === utils.getId(r.to)))
+      if (!isWelcome  ||  (me.isEmployee  &&  utils.getId(me.organization) === utils.getId(r.to)))
         return
       if (!orgRep)
         return
@@ -2586,7 +2586,7 @@ var Store = Reflux.createStore({
 
     // var required = meta.required;
     var meId = utils.getId(me)
-    var meOrgId = me.organization ? utils.getId(me.organization) : null;
+    var meOrgId = me.isEmployee ? utils.getId(me.organization) : null;
 
     var chatTo = params.to
     if (chatTo  &&  chatTo.id)
@@ -2708,7 +2708,7 @@ var Store = Reflux.createStore({
                  resource: r
               })
             }
-            if (!me.organization  ||  rid !== utils.getId(me.organization))
+            if (!me.isEmployee  ||  rid !== utils.getId(me.organization))
              continue;
            }
         }
@@ -2801,19 +2801,30 @@ var Store = Reflux.createStore({
             }
           }
           else {
-            let msgOrgTo = list[toID].value.organization
-            let msgOrgFrom = list[fromID].value.organization
-          // if (toID === meId)
-          //   continue
             let msgOrg
-            if (!msgOrgTo  ||  (msgOrgFrom  &&  toID !== meId))
-              msgOrg = msgOrgFrom
+            if (toID !== meId) {
+              msgOrg = list[toID].value.organization
+              if (!msgOrg)
+                msgOrg = list[fromID].value.organization
+            }
             else
-              msgOrg = msgOrgTo
-
+              msgOrg = list[fromID].value.organization
             let msgOrgId = utils.getId(msgOrg)
-            if (toId !== msgOrgId  &&  !isSharedWith)
+            if (toId !== msgOrgId  &&  (!isSharedWith || isVerificationR)) // do not show shared verifications
               continue
+           //   let msgOrgTo = list[toID].value.organization
+          //   let msgOrgFrom = list[fromID].value.organization
+          // // if (toID === meId)
+          // //   continue
+          //   let msgOrg
+          //   if (!msgOrgTo  ||  (msgOrgFrom  &&  toID !== meId))
+          //     msgOrg = msgOrgFrom
+          //   else
+          //     msgOrg = msgOrgTo
+
+          //   let msgOrgId = utils.getId(msgOrg)
+          //   if (toId !== msgOrgId  &&  !isSharedWith)
+          //     continue
           }
         }
         else {
@@ -2936,6 +2947,8 @@ var Store = Reflux.createStore({
         if (next && next[TYPE] === PRODUCT_LIST)
           return false
       }
+      if (r[TYPE] === CUSTOMER_WAITING  &&  utils.getId(from.organization) === utils.getId(to.organization))
+        return false
       // if (r[TYPE] === SELF_INTRODUCTION) {
       //   var next = result[i + 1]
       //   if (next && next[TYPE] === SELF_INTRODUCTION)
@@ -2962,7 +2975,7 @@ var Store = Reflux.createStore({
       //   }
       // }
       let fromId = utils.getId(r.from)
-      if (!me.organization && fromId !== meId  &&  list[fromId]) {
+      if (!me.isEmployee  &&  fromId !== meId  &&  list[fromId]) {
         let rFrom = list[fromId].value
         if (!rFrom.bot) {
           let photos = list[fromId].value.photos
@@ -3545,7 +3558,7 @@ var Store = Reflux.createStore({
                           formatted: me.firstName + (me.lastName ? ' ' + me.lastName : '')
                         })
                         .set([NONCE], me[NONCE] || this.getNonce())
-    if (me.organization) {
+    if (me.isEmployee) {
       var org = this.buildRef(me.organization)
       meIdentity.set('organization', org)
     }
@@ -4253,11 +4266,11 @@ var Store = Reflux.createStore({
       // // else
       // //   return self.loadAddressBook();
 
-      if (me  &&  me.organization) {
+      // if (me  &&  me.organization) {
         // var photos = list[utils.getId(me.organization.id)].value.photos;
         // if (photos)
         //   me.organization.photo = photos[0].url;
-      }
+      // }
       if (me  &&  (!list[me[TYPE] + '_' + me[ROOT_HASH]] || !list[IDENTITY + '_' + me[ROOT_HASH]]))
         me = null
       console.log('Stream closed');
