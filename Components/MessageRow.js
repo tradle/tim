@@ -294,7 +294,7 @@ class MessageRow extends Component {
 
     let me = utils.getMe()
     let isThirdPartyVerification
-    if (me.organization  &&  !this.props.to.organization) {
+    if (me.isEmployee  &&  !this.props.to.organization) {
       let orgId = utils.getId(resource.organization)
       if (orgId !== utils.getId(me.organization))
         isThirdPartyVerification = true
