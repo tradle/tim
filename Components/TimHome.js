@@ -374,7 +374,7 @@ class TimHome extends Component {
     var nav = this.props.navigator
     nav.immediatelyResetRouteStack(nav.getCurrentRoutes().slice(0,1));
     let me = utils.getMe()
-    if (me.organization) {
+    if (me.isEmployee) {
       this.showContacts()
       return
     }
