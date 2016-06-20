@@ -70,7 +70,8 @@ class TimHome extends Component {
     };
   }
   componentWillMount() {
-    Linking.addEventListener('url', this._handleOpenURL);
+    if (!isAndroid)
+      Linking.addEventListener('url', this._handleOpenURL);
 
     // var url = LinkingIOS.popInitialURL()
     // if (url)
@@ -99,7 +100,8 @@ class TimHome extends Component {
     this.props.navigator.isConnected = isConnected
   }
   componentWillUnmount() {
-    Linking.removeEventListener('url', this._handleOpenURL);
+    if (!isAndroid)
+      Linking.removeEventListener('url', this._handleOpenURL);
     NetInfo.isConnected.removeEventListener(
       'change',
       this._handleConnectivityChange.bind(this)
