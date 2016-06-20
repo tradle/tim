@@ -1,19 +1,17 @@
 
 import {
   StyleSheet,
-  Text,
-  View,
   TouchableHighlight
 } from 'react-native'
 
 import React, { Component, PropTypes } from 'react'
+import Camera from 'react-native-camera'
 
 var ICON_BORDER_COLOR = '#D7E6ED'
-var Camera = require('react-native-camera')
 var Icon = require('react-native-vector-icons/Ionicons')
 var Dir = Camera.constants.Type
 
-class QRCodeScannerView extends Component {
+class QRCodeScanner extends Component {
   constructor(props) {
     super(props)
     this.state = {
@@ -22,13 +20,24 @@ class QRCodeScannerView extends Component {
   }
   propTypes: {
     onread: PropTypes.func.isRequired
-  };
+  }
+    // !(element && (typeof element.type === 'function' || typeof element.type === 'string'))
+    // ? process.env.NODE_ENV !== 'production'
+    //       ? invariant(false, 'Element type is invalid: expected a string (for built-in components) ' + 'or a class/function (for composite components) but got: %s.%s', element.type == null
+    //         ? element.type
+    //         : typeof element.type, getDeclarationErrorAddendum(element._owner))
+    //       : invariant(false)
+    // : void 0;
+
+
   render() {
     return (
       <Camera
-        ref="cam"
         style={styles.container}
         onBarCodeRead={this._onBarCodeRead.bind(this)}
+        ref={(cam) => {
+            this.camera = cam;
+          }}
         type={this.state.cameraType}>
         <TouchableHighlight onPress={this._switchCamera.bind(this)} style={styles.flip}>
           <Icon name='ios-reverse-camera' size={25} color='#eeeeee' style={styles.icon} />
@@ -66,4 +75,4 @@ var styles = {
   }
 }
 
-module.exports = QRCodeScannerView
+module.exports = QRCodeScanner
