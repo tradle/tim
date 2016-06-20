@@ -15,6 +15,7 @@ import {
   Text,
   TextInput,
   TouchableHighlight,
+  Dimensions
 } from 'react-native';
 
 import React, { Component } from 'react'
@@ -36,6 +37,8 @@ class ShowRefList extends Component {
     var me = utils.getMe()
     var isMe = isIdentity ? resource[constants.ROOT_HASH] === me[constants.ROOT_HASH] : true;
     // The profile page for the device owner has 2 more profile specific links: add new PROFILE and switch PROFILE
+    let propsToShow = []
+
     for (var p in props) {
       if (isIdentity) {
         if (!isMe  &&  props[p].allowRoles  &&  props[p].allowRoles === 'me')
@@ -51,10 +54,13 @@ class ShowRefList extends Component {
       if (!icon)
         icon = 'ios-checkmark';
         // icon = 'ios-checkmark-outline';
-      var key = p
-      var cnt = 1
+      propsToShow.push(p)
+    }
+    let showQR = utils.getId(me) === utils.getId(resource)  &&  me.isEmployee
+    let width = Dimensions.get('window').width  / (propsToShow.length + (showQR ? 1 : 0))
+    propsToShow.forEach((p) => {
       refList.push(
-        <View style={buttonStyles.container} key={this.getNextKey()}>
+        <View style={[buttonStyles.container, {width: width}]} key={this.getNextKey()}>
            <TouchableHighlight onPress={this.showResources.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
              <View style={{alignItems: 'center'}}>
                <Icon name={icon}  size={30}  color='#ffffff' />
@@ -63,6 +69,20 @@ class ShowRefList extends Component {
            </TouchableHighlight>
          </View>
         );
+    })
+
+    if (utils.getId(me) === utils.getId(resource)  &&  me.isEmployee) {
+      refList.push(
+        <View style={buttonStyles.container} key={this.getNextKey()}>
+           <TouchableHighlight onPress={this.props.showQR.bind(this)} underlayColor='transparent'>
+             <View style={{alignItems: 'center'}}>
+               <Icon name={'ios-qr-scanner'}  size={30}  color='#ffffff' />
+               <Text style={buttonStyles.text}>{translate('showQR')}</Text>
+             </View>
+           </TouchableHighlight>
+         </View>
+        )
+
      }
      return refList.length
              ?  <View style={buttonStyles.buttons} key={'ShowRefList'}>
