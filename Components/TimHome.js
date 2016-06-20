@@ -271,7 +271,7 @@ class TimHome extends Component {
           })
           .then((askTouchID) => {
             if (askTouchID) {
-              return self.props.navigator.push({
+              return self.props.navigator.replace({
                 component: TouchIDOptIn,
                 id: 21,
                 rightButtonTitle: 'Skip',
