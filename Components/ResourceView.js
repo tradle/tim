@@ -8,6 +8,7 @@ var PhotoList = require('./PhotoList');
 // var AddNewIdentity = require('./AddNewIdentity');
 // var SwitchIdentity = require('./SwitchIdentity');
 var ShowRefList = require('./ShowRefList');
+// var Icon = require('react-native-vector-icons/Ionicons');
 // var IdentitiesList = require('./IdentitiesList');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
@@ -32,6 +33,8 @@ import {
   View,
   Text,
   TextInput,
+  Dimensions,
+  Modal,
   TouchableHighlight,
 } from 'react-native'
 
@@ -43,8 +46,9 @@ class ResourceView extends Component {
     this.state = {
       resource: props.resource,
       embedHeight: {height: 0},
-      isLoading: props.resource.id ? true : false
-    };
+      isLoading: props.resource.id ? true : false,
+      isModalOpen: false
+    }
   }
   componentWillMount() {
     if (this.props.resource.id)
@@ -56,12 +60,14 @@ class ResourceView extends Component {
   handleEvent(params) {
     if (params.action === 'showIdentityList')
       this.onShowIdentityList(params);
-    else if (params.action == 'getItem') {
+    else if (params.action === 'getItem') {
       this.setState({
         resource: params.resource,
         isLoading: false
       })
     }
+    else if (params.action === 'newContact')
+      this.closeModal()
     else  if (params.resource)
       this.onResourceUpdate(params);
     else if (params.action === 'employeeOnboarding') {
@@ -87,6 +93,9 @@ class ResourceView extends Component {
       }, 2)
       // this.props.navigator.jumpTo(routes[2])
     }
+  }
+  shouldComponentUpdate(nextProps, nextState) {
+    return (this.state.isModalOpen  !== nextState.isModalOpen) ? true : false
   }
   onResourceUpdate(params) {
     var resource = params.resource;
@@ -125,20 +134,19 @@ class ResourceView extends Component {
       extend(photos, resource.photos);
       photos.splice(0, 1);
     }
-    var actionPanel;
+
     var isIdentity = model.id === constants.TYPES.PROFILE;
     var isOrg = model.id === constants.TYPES.ORGANIZATION;
     var me = utils.getMe()
     var isMe = isIdentity ? resource[constants.ROOT_HASH] === me[constants.ROOT_HASH] : true;
-    if ((isIdentity  &&  !isMe) || (isOrg  &&  (!me.organization  ||  utils.getId(me.organization) !== utils.getId(resource))))
+    var actionPanel = ((isIdentity  &&  !isMe) || (isOrg  &&  (!me.organization  ||  utils.getId(me.organization) !== utils.getId(resource))))
     // if (isIdentity  &&  !isMe)
-      actionPanel = <View/>
-    else
-      actionPanel = <ShowRefList resource={resource} currency={this.props.currency} navigator={this.props.navigator} />
+                    ? <View/>
+                    : <ShowRefList showQR={this.openModal.bind(this)} resource={resource} currency={this.props.currency} navigator={this.props.navigator} />
     var qrcode
     if (isMe  &&  me.isEmployee  &&  me.organization && me.organization.url)
-      qrcode = <View>
-                 <QRCode inline={true} content={TALK_TO_EMPLOYEE + ';' + me.organization.url + ';' + utils.getId(me.organization).split('_')[1] + ';' + me[constants.ROOT_HASH]} dimension={370} />
+      qrcode = <View style={{alignSelf: 'center', justifyContent: 'center', backgroundColor: '#ffffff', padding:10}} onPress={()=> this.setState({isModalOpen: true})}>
+                 <QRCode inline={true} content={TALK_TO_EMPLOYEE + ';' + me.organization.url + ';' + utils.getId(me.organization).split('_')[1] + ';' + me[constants.ROOT_HASH]} dimension={250} />
                </View>
     else
       qrcode = <View />
@@ -161,13 +169,20 @@ class ResourceView extends Component {
     var switchTouchId = <View />
           // <AddNewIdentity resource={resource} navigator={this.props.navigator} />
           // <SwitchIdentity resource={resource} navigator={this.props.navigator} />
+              // <Icon  onPress={() => this.closeModal()} name={} size={30} style={{fontSize: 20, color: '#ffffff', paddingHorizontal: 30, paddingVertical: 15}}>Close</Text>
     return (
       <ScrollView  ref='this' style={styles.container}>
         <View style={[styles.photoBG]}>
           <PhotoView resource={resource} navigator={this.props.navigator}/>
         </View>
         {actionPanel}
-        {qrcode}
+        <Modal animationType={'fade'} visible={this.state.isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
+          <TouchableHighlight  onPress={() => this.closeModal()} underlayColor='transparent'>
+            <View style={styles.modalBackgroundStyle}>
+              {qrcode}
+            </View>
+          </TouchableHighlight>
+        </Modal>
         <PhotoList photos={photos} resource={this.props.resource} navigator={this.props.navigator} isView={true} numberInRow={photos.length > 4 ? 5 : photos.length} />
         <ShowPropertiesView resource={resource}
                             showItems={this.showResources.bind(this)}
@@ -179,7 +194,12 @@ class ResourceView extends Component {
       </ScrollView>
     );
   }
-
+  openModal() {
+    this.setState({isModalOpen: true});
+  }
+  closeModal() {
+    this.setState({isModalOpen: false});
+  }
   getRefResource(resource, prop) {
     var model = utils.getModel(this.props.resource[constants.TYPE]).value;
 
@@ -196,6 +216,12 @@ var styles = StyleSheet.create({
   container: {
     marginTop: 64,
     flex: 1,
+  },
+  modalBackgroundStyle: {
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    padding: 20,
+    height: Dimensions.get('window').height
   },
   photoBG: {
     backgroundColor: '#245D8C',
