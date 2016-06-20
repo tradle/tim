@@ -408,16 +408,7 @@ class ResourceList extends Component {
     }
     if (isOrganization) {
       route.title = resource.name
-      // route.passProps.bankStyle = this.props.bankStyle //bankStyles[resource.name.split(' ')[0].toLowerCase()]
-      // if (resource.name === 'Rabobank'  &&  (!me.organization  ||  me.organization.name !== 'Rabobank')) {
-      var routes = this.props.navigator.getCurrentRoutes();
-      // if (routes[routes.length - 1].title === 'Official Accounts') {
-      let sendCustomerWaiting = routes.length === 2 || routes.length === 3
-      // if (!sendCustomerWaiting  &&  routes.length === 3) {
-      //   if (me.organization  &&  utils.getId(me.organization) !== utils.getId(resource))
-      //     sendCustomerWaiting = true
-      // }
-      if (sendCustomerWaiting) {
+      if (this.props.officialAccounts) {
         var msg = {
           message: me.firstName + ' is waiting for the response',
           _t: constants.TYPES.CUSTOMER_WAITING,
@@ -426,8 +417,6 @@ class ResourceList extends Component {
           time: new Date().getTime()
         }
 
-        // var sendNotification = (resource.name === 'Rabobank'  &&  (!me.organization  ||  me.organization.name !== 'Rabobank'))
-        // Actions.addMessage(msg, true, sendNotification)
         utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg, true))
       }
     }
@@ -756,12 +745,12 @@ class ResourceList extends Component {
           showsVerticalScrollIndicator={false} />;
     }
     var model = utils.getModel(this.props.modelName).value;
-    var Footer = this.renderFooter();
+    var footer = this.renderFooter();
     var header = this.renderHeader();
 
     let buttons = this.state.allowToAdd
                 ? [translate('addNew', this.props.prop.title), translate('cancel')]
-                : [translate('addServerUrl'), translate('scanQRcode'), 'Talk to employee', translate('cancel')]
+                : [translate('addServerUrl'), translate('scanQRcode')/*, 'Talk to employee'*/, translate('cancel')]
 
     var searchBar
     if (SearchBar) {
@@ -781,7 +770,7 @@ class ResourceList extends Component {
         {searchBar}
         <View style={styles.separator} />
         {content}
-        {Footer}
+        {footer}
         <ActionSheet
           ref={(o) => {
             this.ActionSheet = o
@@ -799,9 +788,9 @@ class ResourceList extends Component {
             case 1:
               this.scanFormsQRCode()
               break;
-            case 2:
-              this.talkToEmployee()
-              break
+            // case 2:
+            //   this.talkToEmployee()
+            //   break
             default:
               return
             }
