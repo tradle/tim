@@ -450,7 +450,10 @@ class MessageList extends Component {
       //     title: translate('formChooser')
       //   }
       // ]}
-    let buttons = [translate('forgetMe'), translate('cancel')]
+    let isEmployee = utils.getMe().isEmployee
+    let buttons = isEmployee
+                ? [translate('formChooser'), translate('cancel')]
+                : [translate('forgetMe'), translate('cancel')]
     return (
       <View style={[styles.container, bgStyle]}>
         <NetworkInfoProvider connected={this.state.isConnected} />
@@ -464,8 +467,12 @@ class MessageList extends Component {
           options={buttons}
           cancelButtonIndex={1}
           onPress={(index) => {
-            if (index === 0)
-              this.forgetMe()
+            if (index === 0) {
+              if (isEmployee)
+                this.chooseFormForCustomer()
+              else
+                this.forgetMe()
+            }
           }}
         />
         {alert}
@@ -474,24 +481,12 @@ class MessageList extends Component {
         // {addNew}
   }
   generateMenu() {
-    if (this.state.isEmployee)
-      return <View style={{paddingLeft: 10}}/>
-
-    if (this.props.resource[constants.TYPE] === constants.TYPES.PROFILE &&
-        utils.getMe().organization) {
-      return <TouchableHighlight underlayColor='transparent'
-                onPress={() => this.ActionSheet.show()}>
-               <View style={{marginLeft: 5, paddingRight: 0, marginTop: 5, marginRight: 10, marginBottom: 0}}>
-                 <Icon name='md-more' size={30} color='#999999' />
-               </View>
-             </TouchableHighlight>
-    }
-    return  <TouchableHighlight underlayColor='transparent'
-                onPress={() => this.ActionSheet.show()}>
-               <View style={{marginLeft: 5, paddingRight: 0, marginTop: 5, marginRight: 10, marginBottom: 0}}>
-                 <Icon name='md-more' size={30} color='#999999' />
-               </View>
-             </TouchableHighlight>
+    return <TouchableHighlight underlayColor='transparent'
+            onPress={() => this.ActionSheet.show()}>
+            <View style={{marginLeft: 5, paddingRight: 0, marginTop: 5, marginRight: 10, marginBottom: 0}}>
+              <Icon name='md-more' size={30} color='#999999' />
+            </View>
+          </TouchableHighlight>
   }
 
 
