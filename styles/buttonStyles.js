@@ -33,7 +33,7 @@ var buttonStyles = Object.freeze({
     paddingHorizontal: 7,
     marginTop: 10,
     // marginTop: 16,
-    width: 120
+    // width: 120
   },
   buttons: {
     // marginTop: -80,
