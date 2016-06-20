@@ -964,7 +964,7 @@ class MessageRow extends Component {
                    this.createNewResource(form, isMyMessage)
                  }}>
                    <View style={styles.multiEntryButton}>
-                     <Text style={styles.multiEntryText}>{translate('addSameForm')}</Text>
+                     <Text style={styles.multiEntryText}>   {translate('addSameForm')}   </Text>
                    </View>
                  </TouchableHighlight>
                  <TouchableHighlight underlayColor='transparent' onPress={() => {
@@ -991,7 +991,7 @@ class MessageRow extends Component {
                     )
                  }}>
                    <View style={styles.multiEntryButton}>
-                     <Text style={styles.multiEntryText}>{translate('getNextForm')}</Text>
+                     <Text style={styles.multiEntryText}>   {translate('getNextForm')}   </Text>
                    </View>
                 </TouchableHighlight>
                 </View>
