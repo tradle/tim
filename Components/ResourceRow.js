@@ -412,7 +412,7 @@ var styles = StyleSheet.create({
     backgroundColor: 'transparent'
   },
   cellImage: {
-    backgroundColor: '#dddddd',
+    backgroundColor: '#ffffff',
     height: 60,
     marginRight: 10,
     width: 60,
