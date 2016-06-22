@@ -13,6 +13,7 @@ import {
   StyleSheet,
   Text,
   TouchableHighlight,
+  Platform,
   View
 } from 'react-native'
 
@@ -82,7 +83,7 @@ var styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '400',
     marginVertical: 15,
-    paddingLeft: 15
+    marginLeft: 15
   },
   row: {
     alignItems: 'center',
@@ -90,7 +91,7 @@ var styles = StyleSheet.create({
     flexDirection: 'row',
   },
   cell: {
-    marginLeft: 10,
+    paddingLeft: 20
   },
   msgImage: {
     backgroundColor: '#dddddd',

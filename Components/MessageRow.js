@@ -677,7 +677,7 @@ class MessageRow extends Component {
                   <Text style={[styles.resourceTitle, {color: '#FF6D0D'}]}>{translate('noConnectionForNewProduct', utils.getMe().firstName, translate(msgModel))}</Text>
                 </View>
               : <View key={this.getNextKey()}>
-                  <Text style={[styles.resourceTitle, {color: '#000000'}]}>{translate('newProductMsg', utils.getMe().firstName, translate(msgModel))}</Text>
+                  <Text style={[styles.resourceTitle, {color: '#757575'}]}>{translate('newProductMsg', utils.getMe().firstName, translate(msgModel))}</Text>
                 </View>
       renderedRow.push(msg);
       return {isNewProduct: true}
@@ -1412,7 +1412,7 @@ var styles = StyleSheet.create({
     width: 20,
   },
   employeeImage: {
-    backgroundColor: '#dddddd',
+    // backgroundColor: '#dddddd',
     height: 30,
     marginRight: 3,
     marginLeft: 0,
@@ -1420,7 +1420,7 @@ var styles = StyleSheet.create({
   },
 
   msgImage: {
-    backgroundColor: '#dddddd',
+    // backgroundColor: '#dddddd',
     height: 30,
     marginRight: 3,
     marginLeft: 0,
@@ -1479,7 +1479,7 @@ var styles = StyleSheet.create({
     backgroundColor: 'transparent'
   },
   cellImage: {
-    backgroundColor: '#dddddd',
+    // backgroundColor: '#dddddd',
     height: 40,
     width: 40,
     marginRight: 10,

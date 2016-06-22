@@ -18,6 +18,7 @@ var constants = require('@tradle/constants');
 var GiftedMessenger = require('react-native-gifted-messenger');
 var NetworkInfoProvider = require('./NetworkInfoProvider')
 import ActionSheet from 'react-native-actionsheet';
+import platformStyles from '../styles/platformStyles'
 // var AddNewMessage = require('./AddNewMessage');
 // var SearchBar = require('react-native-search-bar');
 // var ResourceTypesScreen = require('./ResourceTypesScreen');
@@ -37,7 +38,6 @@ import {
   Text,
   TouchableOpacity,
   Alert,
-  // ActionSheetIOS,
   TouchableHighlight
 } from 'react-native'
 
@@ -368,7 +368,7 @@ class MessageList extends Component {
     if (!this.state.list || !this.state.list.length) {
       if (this.props.navigator.isConnected  &&  this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION) {
         if (this.state.isLoading) {
-          content = <View style={[styles.container, bgStyle]}>
+          content = <View style={[platformStyles.container, bgStyle]}>
             <Text style={{fontSize: 17, alignSelf: 'center', marginTop: 80, color: '#629BCA'}}>{'Loading...'}</Text>
             <ActivityIndicator size='large' style={{alignSelf: 'center', marginTop: 20}} />
           </View>
@@ -455,7 +455,7 @@ class MessageList extends Component {
                 ? [translate('formChooser'), translate('cancel')]
                 : [translate('forgetMe'), translate('cancel')]
     return (
-      <View style={[styles.container, bgStyle]}>
+      <View style={[platformStyles.container, bgStyle]}>
         <NetworkInfoProvider connected={this.state.isConnected} />
         <View style={{flexDirection:'row'}} />
         <View style={ sepStyle } />
@@ -719,11 +719,11 @@ class MessageList extends Component {
 reactMixin(MessageList.prototype, Reflux.ListenerMixin);
 
 var styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    marginTop: 64,
-    backgroundColor: '#f7f7f7',
-  },
+  // container: {
+  //   flex: 1,
+  //   marginTop: Platform.OS === 'ios' ? 64 : 44,
+  //   backgroundColor: '#f7f7f7',
+  // },
   imageOutline: {
     width: 25,
     height: 25,

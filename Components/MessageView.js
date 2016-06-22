@@ -21,6 +21,7 @@ var ResourceMixin = require('./ResourceMixin');
 var buttonStyles = require('../styles/buttonStyles');
 var HELP_COLOR = 'blue'
 var NetworkInfoProvider = require('./NetworkInfoProvider')
+import platformStyles from '../styles/platformStyles'
 // import Prompt from 'react-native-prompt'
 
 import {
@@ -179,7 +180,7 @@ class MessageView extends Component {
     //                 <Text style={styles.itemTitle}>click done for verifying or check the properties that should be corrected and click Done button</Text>
     //               </View>
     return (
-      <ScrollView  ref='this' style={styles.container}>
+      <ScrollView  ref='this' style={platformStyles.container}>
         <NetworkInfoProvider connected={this.state.isConnected} />
         <View style={styles.band}><Text style={styles.date}>{date}</Text></View>
         <View style={styles.photoBG}>
@@ -281,10 +282,6 @@ reactMixin(MessageView.prototype, Reflux.ListenerMixin);
 reactMixin(MessageView.prototype, ResourceMixin);
 
 var styles = StyleSheet.create({
-  container: {
-    marginTop: 64,
-    flex: 1,
-  },
   itemTitle: {
     fontSize: 18,
     margin: 5,
