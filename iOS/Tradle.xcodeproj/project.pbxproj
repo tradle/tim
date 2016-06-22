@@ -78,6 +78,8 @@
 		9B10B2EC1C1A05F400A20159 /* libART.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B10B2EB1C1A05EE00A20159 /* libART.a */; };
 		9B2E51661CAD7DD7000439E6 /* libRNImagePicker.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B2E51601CAD7DBC000439E6 /* libRNImagePicker.a */; };
 		9B41626D1C6F9BBD00A93B7C /* FontAwesome.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9B41626C1C6F9BBD00A93B7C /* FontAwesome.ttf */; };
+		9B4748041D18C1E1008703E3 /* libRNFS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73030AF61D14DC4B0096A864 /* libRNFS.a */; };
+		9B47481D1D18C1E6008703E3 /* libCodePush.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732AB4B21D18B45600F2DE1C /* libCodePush.a */; };
 		B9960E5EDF0C47B789285122 /* libReactNativeLocalization.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0BD5B3365E2D454AB5703454 /* libReactNativeLocalization.a */; };
 		BA4A894818DA4F889E58F732 /* libRCTVideo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ABE7159BBFD14FFDB6BBF084 /* libRCTVideo.a */; };
 		BC686B7EA43346EC98F13734 /* Foundation.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7792D3B3CB564D30820C6FBC /* Foundation.ttf */; };
@@ -299,7 +301,6 @@
 		73030AF11D14DC4B0096A864 /* RNFS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNFS.xcodeproj; path = "../node_modules/react-native-fs/RNFS.xcodeproj"; sourceTree = "<group>"; };
 		731F233D1C31BB6600C3B09D /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		73261E3F1C4AB9FE00292FEE /* Tradle-dev.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Tradle-dev.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		73261E401C4AB9FF00292FEE /* Tradle copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Tradle copy-Info.plist"; path = "/Users/tenaciousmv/Code/tim/ios/Tradle copy-Info.plist"; sourceTree = "<absolute>"; };
 		732AB4AD1D18B45600F2DE1C /* CodePush.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = CodePush.xcodeproj; path = "../node_modules/react-native-code-push/ios/CodePush.xcodeproj"; sourceTree = "<group>"; };
 		732EA0AF1C24AB90000EFAA6 /* RNRandomBytes.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNRandomBytes.xcodeproj; path = "../node_modules/react-native-randombytes/RNRandomBytes.xcodeproj"; sourceTree = "<group>"; };
 		7348C3B61C41C04F00B9CDF5 /* Fabric.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Fabric.framework; sourceTree = "<group>"; };
@@ -371,6 +372,8 @@
 				9B2E51661CAD7DD7000439E6 /* libRNImagePicker.a in Frameworks */,
 				8DF0B09C8F2B4028AA380CF0 /* libRCTCamera.a in Frameworks */,
 				27C0899D8D7943A3B5913F26 /* libRNVectorIcons.a in Frameworks */,
+				9B4748041D18C1E1008703E3 /* libRNFS.a in Frameworks */,
+				9B47481D1D18C1E6008703E3 /* libCodePush.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -668,7 +671,6 @@
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* IdentityTests */,
 				83CBBA001A601CBA00E9B192 /* Products */,
-				73261E401C4AB9FF00292FEE /* Tradle copy-Info.plist */,
 				EE2D4A8F3033431CB4B55B5B /* Resources */,
 			);
 			indentWidth = 2;
