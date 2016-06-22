@@ -168,7 +168,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
-var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://127.0.0.1:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
+var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://192.168.0.101:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
@@ -467,6 +467,7 @@ var Store = Reflux.createStore({
       let updateSettings
       if (__DEV__  &&  settings  &&  settings.value.urls) {
         let urls = settings.value.urls
+        // HACK for non-static ip
         if (SERVICE_PROVIDERS_BASE_URL_DEFAULTS) {
           SERVICE_PROVIDERS_BASE_URL_DEFAULTS.forEach((url) => {
             let found
@@ -1637,10 +1638,13 @@ var Store = Reflux.createStore({
       return this.onAddVerification(resource, true);
 
     let isSelfIntroduction = meta[TYPE] === SELF_INTRODUCTION
+    var isNew = !resource[ROOT_HASH];
 
     var self = this;
     var checkPublish
-    if (meta.id === GUEST_SESSION_PROOF) {
+    var isSwitchingToEmployeeMode = isNew ? false : self.isSwitchingToEmployeeMode(resource)
+    // Data were obtained by scanning QR code of the forms that were entered on Web
+    if (meta.id === GUEST_SESSION_PROOF || isSwitchingToEmployeeMode) {
       checkPublish = this.getDriver(me)
       .then(function () {
         // if (publishRequestSent)
@@ -1648,8 +1652,10 @@ var Store = Reflux.createStore({
       })
       .then(function(status) {
         if (!status.queued  &&  !status.current) {
-          let orgRep = list[utils.getId(resource.to)].value
-          self.publishMyIdentity(orgRep)
+          if (isSwitchingToEmployeeMode)
+            self.publishMyIdentity(self.getRepresentative(utils.getId(resource.organization)))
+          else
+            self.publishMyIdentity(list[utils.getId(resource.to)].value)
         }
       })
     } else {
@@ -1707,9 +1713,6 @@ var Store = Reflux.createStore({
       // }
       var returnVal
       var identity
-      var isNew = !resource[ROOT_HASH];
-      var isSwitchingToEmployeeMode = isNew ? false : self.isSwitchingToEmployeeMode(resource)
-
       // if (!isNew) // make sure that the values of ref props are not the whole resources but their references
       if (!isSelfIntroduction)
         utils.optimizeResource(resource)
@@ -1758,9 +1761,8 @@ var Store = Reflux.createStore({
           return handleRegistration()
         else if (isMessage)
           return handleMessage()
-        else {
-          return save(isSwitchingToEmployeeMode)
-        }
+        else
+          return save()
       })
       .then(() => {
         if (isSwitchingToEmployeeMode) {
@@ -2807,8 +2809,11 @@ var Store = Reflux.createStore({
               if (!msgOrg)
                 msgOrg = list[fromID].value.organization
             }
-            else
+            else {
               msgOrg = list[fromID].value.organization
+              if (!msgOrg)
+                msgOrg = list[toID].value.organization
+            }
             let msgOrgId = utils.getId(msgOrg)
             if (toId !== msgOrgId  &&  (!isSharedWith || isVerificationR)) // do not show shared verifications
               continue
@@ -2947,8 +2952,12 @@ var Store = Reflux.createStore({
         if (next && next[TYPE] === PRODUCT_LIST)
           return false
       }
-      if (r[TYPE] === CUSTOMER_WAITING  &&  utils.getId(from.organization) === utils.getId(to.organization))
-        return false
+      if (r[TYPE] === CUSTOMER_WAITING) {
+        let f = list[utils.getId(r.from)].value.organization
+        let t = list[utils.getId(r.to)].value.organization
+        if (utils.getId(f) === utils.getId(t))
+          return false
+      }
       // if (r[TYPE] === SELF_INTRODUCTION) {
       //   var next = result[i + 1]
       //   if (next && next[TYPE] === SELF_INTRODUCTION)
@@ -3868,7 +3877,7 @@ var Store = Reflux.createStore({
     }
 
     var retParams = {
-      action: isMessage ? (MY_EMPLOYEE_PASS ? 'employeeConfirmation' : 'messageList') : 'list',
+      action: isMessage ? (type === MY_EMPLOYEE_PASS ? 'employeeConfirmation' : 'messageList') : 'list',
     }
     var resultList
     if (isMessage) {
