@@ -26,12 +26,15 @@ var DeviceHeight
 var DeviceWidth
 var constants = require('@tradle/constants');
 import ImagePicker from 'react-native-image-picker';
+import platformStyles from '../styles/platformStyles'
 var ENUM = 'tradle.Enum'
 var LINK_COLOR, DEFAULT_LINK_COLOR = '#a94442'
 var FORM_ERROR = 'tradle.FormError'
 
 var Form = t.form.Form;
 var stylesheet = require('../styles/styles')
+
+
 
 import Native, {
   StyleSheet,
@@ -40,6 +43,7 @@ import Native, {
   TextInput,
   ScrollView,
   Image,
+  Platform,
   // StatusBarIOS,
   Alert,
   Dimensions,
@@ -319,7 +323,7 @@ class NewResource extends Component {
     var missedRequiredOrErrorValue = {}
     var msg
     required.forEach((p) =>  {
-      var v = json[p] ? json[p] : (this.props.resource ? this.props.resource[p] : null); //resource[p];
+      var v = (typeof json[p] !== 'undefined') || json[p] ? json[p] : (this.props.resource ? this.props.resource[p] : null); //resource[p];
       if (v) {
         if (typeof v === 'string'  &&  !v.length) {
           v = null
@@ -735,11 +739,13 @@ class NewResource extends Component {
           istyle.push({paddingBottom: 0, height: count * height + 35})
         }
       }
+      if (Platform.OS === 'android')
+        istyle.push({paddingLeft: 10})
 
       arrayItems.push (
         <View style={istyle} key={this.getNextKey()} ref={bl.name}>
           <View style={styles.items}>
-            <View style={{flex: 5}}>
+            <View style={{flex: 4}}>
               {actionableItem}
             </View>
             <TouchableHighlight underlayColor='transparent' style={isPhoto  &&  count ? {marginTop: 15} : count ? {paddingTop: 0} : {marginTop: 15, paddingBottom: 7}}
@@ -764,7 +770,8 @@ class NewResource extends Component {
     if (this.state.isRegistration)
       style = DeviceHeight < 600 ? {marginTop: 90} : {marginTop: DeviceHeight / 4}
     else
-      style = {marginTop: 64}
+      style = platformStyles.container
+      // style = {flex: 1, marginTop: Platform.OS === 'ios' ? 64 : 44 }
     if (!options)
       options = {}
     options.auto = 'placeholders';
@@ -791,9 +798,12 @@ class NewResource extends Component {
             <View style={{marginTop: -10}}>
               {arrayItems}
              </View>
-            <View style={{alignItems: 'center', marginTop: 50}}>
-              <ActivityIndicator animating={this.state.isLoadingVideo ? true : false} size='large' color='#ffffff'/>
-            </View>
+           {  this.state.isLoadingVideo
+             ? <View style={{alignItems: 'center', marginTop: 50}}>
+                <ActivityIndicator animating={true} size='large' color='#ffffff'/>
+              </View>
+             : <View/>
+            }
           </View>
           <View style={{height: 300}}/>
         </View>
@@ -961,7 +971,7 @@ var styles = StyleSheet.create({
     // marginLeft: 10,
     borderColor: '#ffffff',
     borderBottomColor: '#cccccc',
-    borderBottomWidth: 0.5,
+    borderBottomWidth: 1,
     paddingBottom: 10,
     justifyContent: 'flex-end',
   },
@@ -969,7 +979,7 @@ var styles = StyleSheet.create({
     marginLeft: 10,
     borderColor: '#ffffff',
     borderBottomColor: '#cccccc',
-    borderBottomWidth: 0.5,
+    borderBottomWidth: 1,
     // paddingBottom: 5,
   },
 

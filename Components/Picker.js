@@ -34,21 +34,27 @@ var Picker = React.createClass({
     return (
       <Animated.View style={{ transform: [{translateY: this.props.offSet}] }}>
         <View style={styles.closeButtonContainer}>
-          <TouchableHighlight onPress={ this.closeModal } underlayColor="transparent" style={styles.closeButton}>
+          <TouchableHighlight onPress={ () => {
+            if (Platform.OS === 'ios')
+              this.closeModal()
+            else
+              this.showPicker('preset', {date: new Date()})
+          }} underlayColor="transparent" style={styles.closeButton}>
             <Text style={styles.closeButtonText}>{translate('setDateValue')}</Text>
           </TouchableHighlight>
         </View>
         <DatePickerIOS
-          date={this.props.value || new Date()}
-          mode='date'
-          onFocus={(time) => {
-            this.props.changeTime(time, this.props.prop)
-          }}
-          onDateChange={(time) => this.props.changeTime(time, this.props.prop)}>
-        </DatePickerIOS>
+            date={this.props.value || new Date()}
+            mode='date'
+            onFocus={(time) => {
+              this.props.changeTime(time, this.props.prop)
+            }}
+            onDateChange={(time) => this.props.changeTime(time, this.props.prop)}>
+          </DatePickerIOS>
       </Animated.View>
     )
-  }
+  },
+
 })
 
 var styles = StyleSheet.create({

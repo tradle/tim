@@ -33,8 +33,10 @@ import {
   Text,
   View,
   TouchableHighlight,
+  Platform,
   StyleSheet,
   Navigator,
+  DatePickerAndroid,
   Dimensions
 } from 'react-native';
 var LINK_COLOR, DEFAULT_LINK_COLOR = '#a94442'
@@ -508,8 +510,13 @@ var NewResourceMixin = {
     if (resource && resource[prop.name]) {
       label = resource[prop.name].title
       style = textStyle
-      propLabel = <View style={{marginLeft: 10, marginTop: 5, marginBottom: 5, backgroundColor: this.state.isRegistration ? 'transparent' : '#ffffff'}}>
-                    <Text style={{fontSize: 12, height: 12, color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}}>{params.label}</Text>
+
+      let vStyle = Platform.OS === 'android'
+                 ? {paddingLeft: 0, marginTop: 5}
+                 : {marginLeft: 10, marginTop: 5, marginBottom: 5, backgroundColor: 'transparent'}
+
+      propLabel = <View style={vStyle}>
+                    <Text style={{fontSize: 12, color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}}>{params.label}</Text>
                   </View>
     }
     else {
@@ -532,34 +539,60 @@ var NewResourceMixin = {
     return (
       <View style={styles.dateContainer}>
        {propLabel}
-       <TouchableHighlight style={styles.button} underlayColor="transparent" onPress={this.showModal.bind(this, prop, true)}>
-         <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+       <TouchableHighlight underlayColor="transparent" onPress={this.showModal.bind(this, prop, true)}>
+         <View style={[{flexDirection: 'row', justifyContent: 'space-between'}, Platform.OS === 'ios' ? {paddingLeft: 0} : {paddingLeft: 10}]}>
            <Text style={style}>{(params.value &&  dateformat(new Date(params.value), 'mmmm dS, yyyy')) || translate(params.prop)}</Text>
-          <Icon name='ios-calendar-outline'  size={17}  color={LINK_COLOR}  style={styles.icon1} />
+           <Icon name='ios-calendar-outline'  size={17}  color={LINK_COLOR}  style={styles.icon1} />
          </View>
        </TouchableHighlight>
-       { /*this.state.modal[prop.name]*/ this.state.modal  &&  this.state.modal[prop.name]
-        ? <Picker closeModal={() => {
-           this.showModal(prop, false)
-        }} offSet={this.state.offSet} value={params.value} prop={params.prop} changeTime={this.changeTime.bind(this, params.prop)}  />
-        : (err ? error : null) }
+       { Platform.OS === 'ios'
+          ? this.state.modal  &&  this.state.modal[prop.name]
+              ? <Picker closeModal={() => {
+                 this.showModal(prop, false)
+              }} offSet={this.state.offSet} value={params.value} prop={params.prop} changeTime={this.changeTime.bind(this, params.prop)}  />
+              : (err ? error : null)
+          : <View />
+        }
       </View>
     );
   },
+
+  async showPicker(prop, stateKey, options) {
+    try {
+      // var newState = {};
+      const {action, year, month, day} = await DatePickerAndroid.open(options);
+      if (action !== DatePickerAndroid.dismissedAction) {
+      //   newState[stateKey + 'Text'] = 'dismissed';
+      // } else {
+        var date = new Date(year, month, day);
+        // newState[stateKey + 'Text'] = date.toLocaleDateString();
+        // newState[stateKey + 'Date'] = date;
+      }
+      // this.setState(newState);
+      this.changeTime(prop, date)
+    } catch ({code, message}) {
+      console.warn(`Error in example '${stateKey}': `, message);
+    }
+  },
+
   // showModal(prop, show) {
   //   this.setState({modal: show})
   // },
   showModal(prop, show) {
-    let m = {}
-    extend(true, m, this.state.modal)
-    if (show)
-      m[prop.name] = show
-    else {
-      for (let p in m)
-        m[p] = false
-    }
+    if (Platform.OS === 'ios') {
+      let m = {}
+      extend(true, m, this.state.modal)
+      if (show)
+        m[prop.name] = show
+      else {
+        for (let p in m)
+          m[p] = false
+      }
 
-    this.setState({modal: m})
+      this.setState({modal: m})
+    }
+    else
+      this.showPicker(prop, 'preset', {date: new Date()})
   },
   changeTime: function(prop, time) {
     var r = {}
@@ -621,8 +654,11 @@ var NewResourceMixin = {
       if (rModel.subClassOf  &&  rModel.subClassOf === ENUM)
         label = utils.createAndTranslate(label, true)
       style = textStyle
-      propLabel = <View style={{marginLeft: 10, marginTop: 5, marginBottom: 5, backgroundColor: this.state.isRegistration ? 'transparent' : '#ffffff'}}>
-                    <Text style={{fontSize: 12, height: 12, color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}}>{params.label}</Text>
+      let vStyle = Platform.OS === 'android'
+                 ? {paddingLeft: 0, marginTop: 5}
+                 : {marginLeft: 10, marginTop: 5, marginBottom: 5, backgroundColor: 'transparent'}
+      propLabel = <View style={vStyle}>
+                    <Text style={{fontSize: 12, color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}}>{params.label}</Text>
                   </View>
     }
     else {
@@ -644,12 +680,12 @@ var NewResourceMixin = {
     let isPhoto = prop.name === 'photos'
     return (
       <View style={styles.chooserContainer} key={this.getNextKey()} ref={prop.name}>
+        {propLabel}
         <TouchableHighlight underlayColor='transparent' onPress={
           isVideo ? this.showCamera.bind(this, params) : this.chooser.bind(this, prop, params.prop)
         }>
           <View style={{ position: 'relative'}}>
-            {propLabel}
-            <View style={styles.chooserContentStyle}>
+            <View style={[styles.chooserContentStyle, Platform.OS === 'ios' ? {paddingLeft: 0} : {paddingLeft: 10}]}>
               <Text style={style}>{label}</Text>
               {isVideo
                 ? <Icon name='ios-play-outline'  size={25}  color={LINK_COLOR} />
@@ -1036,16 +1072,16 @@ var styles = StyleSheet.create({
     // height: 60,
     borderColor: '#ffffff',
     borderBottomColor: '#cccccc',
-    borderBottomWidth: 0.5,
+    borderBottomWidth: 1,
     marginLeft: 10,
     marginBottom: 10,
     flex: 1
   },
   chooserContainer: {
-    height: 55,
+    height: 60,
     borderColor: '#ffffff',
     borderBottomColor: '#cccccc',
-    borderBottomWidth: 0.5,
+    borderBottomWidth: 1,
     marginLeft: 10,
     marginBottom: 10,
     flex: 1
@@ -1060,7 +1096,7 @@ var styles = StyleSheet.create({
     color: '#cccccc',
   },
   formInput: {
-    borderBottomWidth: 0.5,
+    borderBottomWidth: 1,
     marginLeft: 10,
     borderColor: '#cccccc',
   },

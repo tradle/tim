@@ -32,6 +32,7 @@ import {
   Image,
   View,
   Text,
+  Platform,
   TextInput,
   Dimensions,
   Modal,
@@ -214,7 +215,7 @@ reactMixin(ResourceView.prototype, ResourceMixin);
 
 var styles = StyleSheet.create({
   container: {
-    marginTop: 64,
+    marginTop: Platform.OS === 'ios' ? 64 : 44,
     flex: 1,
   },
   modalBackgroundStyle: {

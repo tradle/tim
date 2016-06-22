@@ -15,6 +15,7 @@ import {
   Text,
   TextInput,
   TouchableHighlight,
+  Platform,
   Dimensions
 } from 'react-native';
 
@@ -64,7 +65,7 @@ class ShowRefList extends Component {
            <TouchableHighlight onPress={this.showResources.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
              <View style={{alignItems: 'center'}}>
                <Icon name={icon}  size={30}  color='#ffffff' />
-               <Text style={buttonStyles.text}>{translate(props[p], model)}</Text>
+               <Text style={[buttonStyles.text, Platform.OS === 'android' ? {marginTop: 3} : {marginTop: 0}]}>{translate(props[p], model)}</Text>
              </View>
            </TouchableHighlight>
          </View>
@@ -77,7 +78,7 @@ class ShowRefList extends Component {
            <TouchableHighlight onPress={this.props.showQR.bind(this)} underlayColor='transparent'>
              <View style={{alignItems: 'center'}}>
                <Icon name={'ios-qr-scanner'}  size={30}  color='#ffffff' />
-               <Text style={buttonStyles.text}>{translate('showQR')}</Text>
+               <Text style={[buttonStyles.text, Platform.OS === 'android' ? {marginTop: 3} : {marginTop: 0}]}>{translate('showQR')}</Text>
              </View>
            </TouchableHighlight>
          </View>

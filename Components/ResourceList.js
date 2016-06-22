@@ -22,6 +22,7 @@ var QRCode = require('./QRCode')
 var buttonStyles = require('../styles/buttonStyles');
 var defaultBankStyle = require('../styles/bankStyle.json')
 var NetworkInfoProvider = require('./NetworkInfoProvider')
+import platformStyles from '../styles/platformStyles'
 
 const WEB_TO_MOBILE = '0'
 const TALK_TO_EMPLOYEEE = '1'
@@ -765,7 +766,7 @@ class ResourceList extends Component {
     }
 
     return (
-      <View style={styles.container}>
+      <View style={platformStyles.container}>
         <NetworkInfoProvider connected={this.state.isConnected} />
         {searchBar}
         <View style={styles.separator} />
@@ -887,12 +888,12 @@ class ResourceList extends Component {
 reactMixin(ResourceList.prototype, Reflux.ListenerMixin);
 
 var styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f7f7f7',
-    // backgroundColor: 'white',
-    marginTop: 64
-  },
+  // container: {
+  //   flex: 1,
+  //   backgroundColor: '#f7f7f7',
+  //   // backgroundColor: 'white',
+  //   marginTop: Platform.OS === 'ios' ? 64 : 44,
+  // },
   centerText: {
     alignItems: 'center',
   },
