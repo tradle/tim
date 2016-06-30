@@ -114,7 +114,7 @@
     "zlib": "browserify-zlib",
     "crypto": "react-native-crypto",
     "dns": "dns.js",
-    "net": "@tradle/utp",
+    "net": "react-native-tcp",
     "http": "react-native-http",
     "https": "https-browserify",
     "os": "os-browserify",
