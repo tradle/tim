@@ -79,7 +79,7 @@ Text.defaultProps = function() {
 import React, { Component } from 'react'
 
 var ReactPerf = __DEV__ && require('react-addons-perf')
-var UNAUTHENTICATE_AFTER_BG_MILLIS = __DEV__ ? 1000 : 10 * 60 * 1000
+var UNAUTHENTICATE_AFTER_BG_MILLIS = __DEV__ ? 10000 : 10 * 60 * 1000
 
 class TiMApp extends Component {
   constructor(props) {
