@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.facebook.react.ReactActivity;
+import com.learnium.RNDeviceInfo.RNDeviceInfo;
 import com.rnfs.RNFSPackage;
 import com.imagepicker.ImagePickerPackage;
 import com.bitgo.randombytes.RandomBytesPackage;
@@ -46,6 +47,7 @@ public class MainActivity extends ReactActivity {
     protected List<ReactPackage> getPackages() {
         return Arrays.asList(
             new MainReactPackage(),
+            new RNDeviceInfo(),
             new RNFSPackage(),
             new ImagePickerPackage(),
             new RandomBytesPackage(),

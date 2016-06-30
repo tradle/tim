@@ -7,6 +7,8 @@ import {
 } from 'react-native'
 
 import AsyncStorage from '../Store/Storage'
+import DeviceInfo from 'react-native-device-info'
+
 var RCTUIManager = NativeModules.UIManager
 var crypto = require('crypto')
 var Q = require('q')
@@ -704,6 +706,10 @@ var utils = {
             utils.getId(me) === utils.getId(resource.to) &&
            !utils.isVerifiedByMe(resource)               && // !verification  &&  utils.getId(resource.to) === utils.getId(me)  &&
             model.subClassOf === constants.TYPES.FORM)
+  },
+  isSimulator: function () {
+    console.log(DeviceInfo.getModel())
+    return DeviceInfo.getModel() === 'Simulator'
   }
 }
 
