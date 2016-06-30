@@ -34,8 +34,6 @@ var FORM_ERROR = 'tradle.FormError'
 var Form = t.form.Form;
 var stylesheet = require('../styles/styles')
 
-
-
 import Native, {
   StyleSheet,
   View,
@@ -537,7 +535,8 @@ class NewResource extends Component {
     var self = this;
     ImagePicker.showImagePicker({
       returnIsVertical: true,
-      chooseFromLibraryButtonTitle: __DEV__ ? 'Choose from Library' : null
+      chooseFromLibraryButtonTitle: utils.isSimulator() ? 'Choose from Library' : null,
+      takePhotoButtonTitle: utils.isSimulator() ? null : 'Take Photo…'
     }, (response) => {
       if (response.didCancel)
         return;
