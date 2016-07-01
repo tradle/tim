@@ -31,9 +31,15 @@ var translatedStrings = {
   en: require('./strings_en.json'),
   nl: require('./strings_nl.json')
 }
+
+const tradle = require('@tradle/engine')
+const protocol = tradle.protocol
 var constants = require('@tradle/constants');
 var TYPE = constants.TYPE
 var VERIFICATION = constants.TYPES.VERIFICATION
+const CUR_HASH = constants.CUR_HASH
+const ROOT_HASH = constants.ROOT_HASH
+const SIG = constants.SIG
 var LocalizedStrings = require('react-native-localization')
 let defaultLanguage = new LocalizedStrings({ en: {}, nl: {} }).getLanguage()
 var dictionaries = require('@tradle/models').dict
@@ -710,6 +716,29 @@ var utils = {
   isSimulator: function () {
     console.log(DeviceInfo.getModel())
     return DeviceInfo.getModel() === 'Simulator'
+  },
+  toOldStyleWrapper: function (wrapper) {
+    if (!wrapper.permalink) return wrapper
+
+    if (wrapper.object) {
+      const payload = wrapper.object[TYPE] === 'tradle.Message' ? wrapper.object.object : wrapper.object
+      const link = protocol.linkString(payload)
+      wrapper[CUR_HASH] = link
+      wrapper[ROOT_HASH] = payload[ROOT_HASH] || link
+      wrapper.from = { [ROOT_HASH]: wrapper.author }
+      // wrapper.to = wrapper.author
+      wrapper.parsed = {
+        data: payload
+      }
+
+      wrapper[TYPE] = payload[TYPE]
+    } else {
+      wrapper[CUR_HASH] = wrapper.link
+      wrapper[ROOT_HASH] = wrapper.permalink
+      wrapper[TYPE] = wrapper.type
+    }
+
+    return wrapper
   }
 }
 

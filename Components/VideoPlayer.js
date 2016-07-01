@@ -11,7 +11,6 @@ import {
 
 var Video = require('react-native-video')
 var utils = require('../utils/utils')
-var tradleUtils = require('@tradle/utils')
 
 class VideoPlayer extends React.Component {
   propTypes: {

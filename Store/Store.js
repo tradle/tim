@@ -56,9 +56,13 @@ var level = function (loc, opts) {
   return levelup(loc, opts)
 }
 
-var constants = require('@tradle/constants');
+const tradle = require('@tradle/engine')
+const tradleUtils = tradle.utils
+const protocol = tradle.protocol
+const constants = require('@tradle/constants') // tradle.constants
 const NONCE = constants.NONCE
 const TYPE = constants.TYPE
+const SIG = constants.SIG
 const ROOT_HASH = constants.ROOT_HASH
 const CUR_HASH  = constants.CUR_HASH
 const PREV_HASH  = constants.PREV_HASH
@@ -70,7 +74,6 @@ const SIMPLE_MESSAGE = constants.TYPES.SIMPLE_MESSAGE
 const FINANCIAL_PRODUCT = constants.TYPES.FINANCIAL_PRODUCT
 const PRODUCT_LIST = constants.TYPES.PRODUCT_LIST
 const PROFILE = constants.TYPES.PROFILE;
-const PUBLISHED_IDENTITY = constants.TYPES.PROFILE;
 const ADDITIONAL_INFO = constants.TYPES.ADDITIONAL_INFO;
 const VERIFICATION = constants.TYPES.VERIFICATION;
 const FORM = constants.TYPES.FORM;
@@ -94,9 +97,9 @@ const MY_EMPLOYEE_PASS = 'tradle.MyEmployeePass'
 
 const WELCOME_INTERVAL = 600000
 
-var Tim = require('tim')
-Tim.enableOptimizations()
-Tim.CATCH_UP_INTERVAL = 10000
+// var Tim = require('tim')
+// Tim.enableOptimizations()
+// Tim.CATCH_UP_INTERVAL = 10000
 // var Zlorp = Tim.Zlorp
 // Zlorp.ANNOUNCE_INTERVAL = 10000
 // Zlorp.LOOKUP_INTERVAL = 10000
@@ -105,49 +108,26 @@ Tim.CATCH_UP_INTERVAL = 10000
 const Sendy = require('sendy')
 const SendyWS = require('sendy-ws')
 const OTRClient = require('sendy-otr')
+const DSA = require('@tradle/otr').DSA
 const SENDY_OPTS = { resendInterval: 2000, mtu: 10000 }
 // const newOTRSwitchboard = require('sendy-otr-ws').Switchboard
 const newSwitchboard = SendyWS.Switchboard
 const WebSocketClient = SendyWS.Client
 // const HttpClient = require('@tradle/transport-http').HttpClient
-var getDHTKey = require('tim/lib/utils').getDHTKey
+// var getDHTKey = require('tim/lib/utils').getDHTKey
 
 var dns = require('dns')
 var map = require('map-stream')
-// var bitcoin = require('@tradle/bitcoinjs-lib')
-// var DHT = require('@tradle/bittorrent-dht') // use tradle/bittorrent-dht fork
 var Blockchain = require('@tradle/cb-blockr') // use tradle/cb-blockr fork
-// Blockchain.throttleGet(100)
-// Blockchain.throttlePost(1000)
-var midentity = require('@tradle/identity')
-var Identity = midentity.Identity
-var defaultKeySet = midentity.defaultKeySet
-var Keeper = require('@tradle/http-keeper')
-var Wallet = require('@tradle/simple-wallet')
+// var defaultKeySet = midentity.defaultKeySet
+var createKeeper = require('@tradle/keeper')
 var crypto = require('crypto')
-var rimraf = require('rimraf')
-
-// var fs = require('fs')
-var kiki = require('@tradle/kiki')
-var Keys = kiki.Keys
-
-var tutils = require('@tradle/utils')
-var ChainedObj = require('@tradle/chained-obj');
-var Builder = ChainedObj.Builder;
-var Parser = ChainedObj.Parser;
-
-// var billPriv = require('../TiMTests/fixtures/bill-priv.json');
-// var billPub = require('../TiMTests/fixtures/bill-pub.json');
-
+// var tutils = require('@tradle/utils')
 var isTest, originalMe;
 var currentEmployees = {}
 
 // var tim;
 var PORT = 51086
-
-// var levelQuery = require('level-queryengine');
-// var jsonqueryEngine = require('jsonquery-engine');
-// var Sublevel = require('level-sublevel')
 var TIM_PATH_PREFIX = 'me'
 
 var models = {};
@@ -168,7 +148,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
-var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://192.168.0.101:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
+var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://127.0.0.1:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
@@ -177,7 +157,7 @@ var publishRequestSent = []
 
 var driverInfo = {
   wsClients: {},
-  whitelist: [],
+  // whitelist: [],
 }
 
 var LocalizedStrings = require('react-native-localization')
@@ -275,7 +255,7 @@ var Store = Reflux.createStore({
     .then(function(value) {
       me = value
       if (me.isAuthenticated) {
-        delete me.isAuthenticated
+        // delete me.isAuthenticated
         db.put(utils.getId(me), me)
       }
       // HACK for the case if employee removed
@@ -346,22 +326,22 @@ var Store = Reflux.createStore({
       [NONCE]: this.getNonce(),
       state: 'background'
     }
-    for (let id in settings.hashToUrl) {
+
+    Object.keys(settings.hashToUrl).forEach(id => {
       let to = list[id].value
-      if (!to.pubkeys)
-        continue
+      if (!to.pubkeys) return
+
       let result = this.searchMessages({modelName: MESSAGE, to: to, limit: 1})
       if (result  &&  time - result[0].time < 36000) {
-        utils.sendSigned(meDriver, {
-          msg: toChain,
-          to: [{fingerprint: self.getFingerprint(list[toId].value)}],
-          deliver: true
+        meDriver.signAndSend({
+          object: toChain,
+          to: { fingerprint: self.getFingerprint(list[toId].value) }
         })
         .catch(function (err) {
           debugger
         })
       }
-    }
+    })
     // return db.put(meId, r)
     // .then(() => {
     //   self.trigger({action: 'authenticated'})
@@ -400,46 +380,37 @@ var Store = Reflux.createStore({
         rr[p] = r[p];
     return rr;
   },
-  buildDriver(identity, keys, port) {
-    var iJSON = identity.toJSON()
-    // var prefix = iJSON.name.firstName.toLowerCase()
-    // var dht = null; //this.dhtFor(iJSON, port)
-    var keeper = new Keeper({
-      // storage: prefix + '-storage',
-      // flat: true, // flat directory structure
-      storeOnFetch: true,
-      db: level('storage', {
-        db: leveldown,
-        valueEncoding: 'binary'
-      }),
-      fallbacks: ['https://tradle.io/keeper']
-      // fallbacks: ['http://tradle.io:25667']
-      // fallbacks: ['http://localhost:25667']
+  buildDriver ({ keys, identity, password, salt }) {
+    var keeper = createKeeper({
+      path: path.join(TIM_PATH_PREFIX, 'keeper'),
+      db: leveldown,
+      encryption: { password, salt },
+      validateOnPut: false
     })
 
     var blockchain = new Blockchain(networkName)
     var wsClients = driverInfo.wsClients
-    var whitelist = driverInfo.whitelist
+    // var whitelist = driverInfo.whitelist
     var otrKey = driverInfo.otrKey
 
     // return Q.ninvoke(dns, 'resolve4', 'tradle.io')
     //   .then(function (addrs) {
     //     console.log('tradle is at', addrs)
 
-    meDriver = new Tim({
-      pathPrefix: TIM_PATH_PREFIX,
-      networkName: networkName,
-      keeper: keeper,
-      blockchain: blockchain,
-      leveldown: leveldown,
+    meDriver = new tradle.node({
+      dir: TIM_PATH_PREFIX,
       identity: identity,
       keys: keys,
+      keeper: keeper,
+      networkName: networkName,
+      blockchain: blockchain,
+      leveldown: leveldown,
       // dht: dht,
       // port: port,
       // sendThrottle: 10000,
       syncInterval: 10 * 60 * 1000,
-      unchainThrottle: 10 * 60 * 1000,
-      afterBlockTimestamp: constants.afterBlockTimestamp,
+      // unchainThrottle: 10 * 60 * 1000,
+      // afterBlockTimestamp: constants.afterBlockTimestamp,
       // afterBlockTimestamp: 1445976998,
       // relay: {
       //   // address: addrs[0],
@@ -448,21 +419,11 @@ var Store = Reflux.createStore({
       // }
     })
 
-    meDriver._shouldLoadTx = function (tx) {
-      // if public, check if it's our infoHash
-      // or if it's in pre-determined list to load
-      // otherwise mark as ignored
-      if (tx.txType === 1) return true
+    meDriver = tradleUtils.promisifyNode(meDriver)
 
-      return whitelist.indexOf(tx.txId) !== -1 ||
-        tx.txData.toString('hex') === meDriver.myCurrentHash()
-    }
-
-    meDriver._sortParsedTxs = function (txs) {
-      return txs.sort(function (a, b) {
-        return whitelist.indexOf(a.txId) !== -1 ? -1 :
-          whitelist.indexOf(b.txId) !== -1 ? 1 : 0
-      })
+    // TODO: figure out of we need to publish identities
+    meDriver.identityPublishStatus = function () {
+      return Q({ /*current: true*/ })
     }
 
     meDriver._multiGetFromDB = utils.multiGet
@@ -508,10 +469,14 @@ var Store = Reflux.createStore({
 
     otrKey = keys.filter((k) => k.type === 'dsa')[0]
 
-    if (otrKey) otrKey = kiki.toKey(otrKey).priv()
+    // otrKey = null
+    if (otrKey) otrKey = DSA.parsePrivate(otrKey.priv)
+
+    // if (otrKey) otrKey = kiki.toKey(otrKey).priv()
 
     driverInfo.otrKey = otrKey
-    meDriver._send = function (recipientHash, msg, recipientInfo) {
+    meDriver._send = function (msg, recipientInfo, cb) {
+      const recipientHash = recipientInfo.permalink
       let messenger = wsClients[recipientHash]
       if (!messenger) {
         let url = list[SETTINGS + '_1'].value.hashToUrl[recipientHash]
@@ -519,31 +484,23 @@ var Store = Reflux.createStore({
       }
       if (!messenger) {
         // Alert.alert('meDriver._send recipient not found ' + recipientHash)
-        return Q.reject(new Error('recipient not found'))
+        return cb(new Error('recipient not found'))
       }
 
       const args = arguments
-      // return meDriver.ready()
-      //   .then(function doSend () {
-          // if (messenger === httpClient) {
-          //   return messenger.send.apply(messenger, args)
-          // }
+      let identifier
+      if (otrKey) {
+        identifier = recipientInfo.object.pubkeys.filter(function (k) {
+          return k.type === 'dsa'
+        })[0].fingerprint
+      } else {
+        identifier = recipientHash
+      }
 
-          let identifier
-          if (otrKey) {
-            identifier = recipientInfo.identity.pubkeys.filter(function (k) {
-              return k.type === 'dsa'
-            })[0].fingerprint
-          } else {
-            identifier = recipientHash
-          }
-
-          // this timeout is not for sending the entire message
-          // but rather an idle connection timeout
-          messenger.setTimeout(30000)
-
-          return Q.ninvoke(messenger, 'send', identifier, msg)
-        // })
+      // this timeout is not for sending the entire message
+      // but rather an idle connection timeout
+      messenger.setTimeout(60000)
+      messenger.send(identifier, msg, cb)
     }
 
     this.getInfo(SERVICE_PROVIDERS_BASE_URLS, true)
@@ -551,15 +508,7 @@ var Store = Reflux.createStore({
         debugger
       })
 
-    return Q()
-
-    // var log = d.log;
-    // d.log = function () {
-    //   console.log('log', arguments);
-    //   return log.apply(this, arguments);
-    // }
-
-    // return d
+    return Q(meDriver)
   },
 
   getInfo(serverUrls, retry) {
@@ -572,7 +521,7 @@ var Store = Reflux.createStore({
       .then((results) => {
         // var httpClient = driverInfo.httpClient
         var wsClients = driverInfo.wsClients
-        var whitelist = driverInfo.whitelist
+        // var whitelist = driverInfo.whitelist
         var otrKey = driverInfo.otrKey
         // if (!httpClient) {
         //   httpClient = new HttpClient()
@@ -589,9 +538,10 @@ var Store = Reflux.createStore({
         results.forEach(function(provider) {
           self.addProvider(provider)
         })
+
         if (--togo === 0) {
           defer.resolve()
-          meDriver.watchTxs(whitelist)
+          // meDriver.watchTxs(whitelist)
           return meDriver
         }
       })
@@ -734,131 +684,122 @@ var Store = Reflux.createStore({
     //   utils.joinURL(provider.url, provider.id, 'send')
     // )
 
-    let whitelist = driverInfo.whitelist
-    if (provider.txId)
-      whitelist.push(provider.txId)
+    // let whitelist = driverInfo.whitelist
+    // if (provider.txId)
+    //   whitelist.push(provider.txId)
     let self = this
     const otrKey = driverInfo.otrKey
     const wsClients = driverInfo.wsClients
-    meDriver.ready()
-    .then(() => {
-      const identifier = otrKey ? otrKey.fingerprint() : meDriver.myRootHash()
-      const base = getProviderUrl(provider)
-      if (wsClients[base]) return wsClients[base]
+    const identifier = otrKey ? otrKey.fingerprint() : meDriver.permalink
+    const base = getProviderUrl(provider)
+    if (wsClients[base]) return wsClients[base]
 
-      const url = utils.joinURL(base, 'ws?from=' + identifier)
-      const wsClient = new WebSocketClient({
-        url: url,
-        autoConnect: true,
-        // for now, till we figure out why binary
-        // doesn't work (socket.io parser errors on decode)
-        forceBase64: true
-      })
+    const url = utils.joinURL(base, 'ws?from=' + identifier)
+    const wsClient = new WebSocketClient({
+      url: url,
+      autoConnect: true,
+      // for now, till we figure out why binary
+      // doesn't work (socket.io parser errors on decode)
+      forceBase64: true
+    })
 
-      let transport
-      if (otrKey) {
-        transport = newSwitchboard({
-          identifier: identifier,
-          unreliable: wsClient,
-          clientForRecipient: function (recipient) {
-            return new OTRClient({
-              key: otrKey,
-              client: new Sendy(SENDY_OPTS),
-              theirFingerprint: recipient
-            })
-          }
-        })
-      } else {
-        transport = newSwitchboard({
-          identifier: identifier,
-          unreliable: wsClient,
-          clientForRecipient: function () {
-            return new Sendy(SENDY_OPTS)
-          }
-        })
-      }
-
-      wsClient.on('disconnect', function () {
-        transport.clients().forEach(function (c) {
-          // reset OTR session, restart on connect
-          debug('aborting pending sends due to disconnect')
-          c.reset(true)
-        })
-      })
-
-      wsClients[base] = transport
-
-      let timeouts = {}
-      transport.on('receiving', function (msg) {
-        clearTimeout(timeouts[msg.from])
-        delete timeouts[msg.from]
-      })
-
-      transport.on('404', function (recipient) {
-        if (!timeouts[recipient]) {
-          timeout = setTimeout(function () {
-            delete timeouts[recipient]
-            transport.cancelPending(recipient)
-          }, 10000)
+    let transport
+    if (otrKey) {
+      transport = newSwitchboard({
+        identifier: identifier,
+        unreliable: wsClient,
+        clientForRecipient: function (recipient) {
+          return new OTRClient({
+            key: otrKey,
+            client: new Sendy(SENDY_OPTS),
+            theirFingerprint: recipient
+          })
         }
       })
-
-      transport.on('message', function (msg, from) {
-       try {
-          var parsed = JSON.parse(msg)
-          if (parsed.data) {
-            // cleartext msg
-            parsed = JSON.parse(new Buffer(parsed.data, 'base64'))
-            let name = parsed.name
-            if (!name  ||  !name.length()) {
-              name = parsed.identity.name
-              if (name)
-                name = name.formatted
-            }
-            // if (name)
-            //   name = name.charAt(0).toUpperCase() + name.slice(1)
-
-            if (parsed[TYPE] === SELF_INTRODUCTION) {
-              Alert.alert(
-                translate('newContactRequest', name),
-                parsed.message || null,
-                [
-                  {text: translate('Ok'),
-                  onPress: () => {
-                    return meDriver.addContactIdentity(parsed.identity)
-                    .then(() => {
-                      return self.addContact(parsed, from)
-                    })
-                    .then(() => {
-                      const url = utils.keyByValue(wsClients, transport)
-                      self.addToSettings({hash: from, url: url})
-                    })
-                  }},
-                  {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-                ]
-              )
-            }          
-          }
-        } catch (err) {}
-
-        const prop = otrKey ? 'fingerprint' : ROOT_HASH
-        meDriver.receiveMsg(msg, {
-          [prop]: from
-        })
-
+    } else {
+      transport = newSwitchboard({
+        identifier: identifier,
+        unreliable: wsClient,
+        clientForRecipient: function () {
+          return new Sendy(SENDY_OPTS)
+        }
       })
+    }
 
-      transport.on('timeout', function (identifier) {
-        transport.cancelPending(identifier)
+    wsClient.on('disconnect', function () {
+      transport.clients().forEach(function (c) {
+        // reset OTR session, restart on connect
+        debug('aborting pending sends due to disconnect')
+        c.destroy()
       })
+    })
 
-      return transport
+    wsClients[base] = transport
+    wsClients[provider.hash] = transport
+
+    let timeouts = {}
+    transport.on('receiving', function (msg) {
+      clearTimeout(timeouts[msg.from])
+      delete timeouts[msg.from]
     })
-    .then(wsClient => {
-      wsClients[provider.hash] = wsClient
+
+    transport.on('404', function (recipient) {
+      if (!timeouts[recipient]) {
+        timeout = setTimeout(function () {
+          delete timeouts[recipient]
+          transport.cancelPending(recipient)
+        }, 10000)
+      }
     })
-    .catch(err => {
-      debugger
+
+    transport.on('message', function (msg, from) {
+      try {
+        msg = protocol.unserializeMessage(msg)
+        const payload = msg.object
+        switch (payload[TYPE]) {
+        case SELF_INTRODUCTION:
+          let name = payload.name
+          if (!name  ||  !name.length) {
+            name = payload.identity.name
+            if (name)
+              name = name.formatted
+          }
+
+          Alert.alert(
+            translate('newContactRequest', name),
+            parsed.message || null,
+            [
+              {text: translate('Ok'),
+              onPress: () => {
+                return meDriver.addContactIdentity(parsed.identity)
+                .then(() => {
+                  return self.addContact(parsed, from)
+                })
+                .then(() => {
+                  const url = utils.keyByValue(wsClients, transport)
+                  self.addToSettings({hash: from, url: url})
+                })
+              }},
+              {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+            ]
+          )
+
+          // if (name)
+          //   name = name.charAt(0).toUpperCase() + name.slice(1)
+
+
+          return
+        default:
+          break
+        }
+      } catch (err) {}
+
+      const prop = otrKey ? 'fingerprint' : 'permalink'
+      meDriver.receive(msg, { [prop]: from })
+    })
+
+    transport.on('timeout', function (identifier) {
+      transport.cancelPending(identifier)
     })
   },
   // Gets info about companies in this app, their bot representatives and their styles
@@ -907,20 +848,15 @@ var Store = Reflux.createStore({
         }
       }
 
-      return Q.allSettled(json.providers.map(p => {
-        if (p.org[ROOT_HASH]) return p
-
-        return getDHTKey(p.org)
-          .then(hash => p.org[ROOT_HASH] = hash)
-      }))
-      .then(() => json)
-    })
-    .then(function (json) {
-      // var json = JSON.parse(text)
       if (!SERVICE_PROVIDERS)
         SERVICE_PROVIDERS = []
+
       var promises = []
-      json.providers.forEach(function(sp) {
+      json.providers.forEach(sp => {
+        if (!sp.org[ROOT_HASH]) {
+          sp.org[ROOT_HASH] = protocol.linkString(sp.org)
+        }
+
         let duplicateSP = null
         let isDuplicate = SERVICE_PROVIDERS.some((r) => {
           // return deepEqual(r.org, sp.org)
@@ -949,80 +885,76 @@ var Store = Reflux.createStore({
     })
   },
   addInfo(sp, url) {
-    var hash
     var self = this
     var okey = sp.org ? utils.getId(sp.org) : null
-    return getDHTKey(sp.bot.pub)
-    .then(function(dhtKey) {
-      hash = dhtKey
-      var ikey = IDENTITY + '_' + dhtKey
-      var batch = []
-      if (!list[okey]) {
-        batch.push({type: 'put', key: okey, value: sp.org})
-        list[okey] = {key: okey, value: sp.org}
+    var hash = protocol.linkString(sp.bot.pub)
+    var ikey = IDENTITY + '_' + hash
+    var batch = []
+    if (!list[okey]) {
+      batch.push({type: 'put', key: okey, value: sp.org})
+      list[okey] = {key: okey, value: sp.org}
+    }
+    if (sp.style)
+      list[okey].value.style = sp.style
+    if (!list[ikey]) {
+      var profile = {
+        [TYPE]: PROFILE,
+        [ROOT_HASH]: hash,
+        firstName: sp.bot.profile.name.firstName || sp.id + 'Bot',
+        organization: self.buildRef(sp.org)
+        // organization: {
+        //   id: okey,
+        //   title: sp.org.name
+        // }
       }
-      if (sp.style)
-        list[okey].value.style = sp.style
-      if (!list[ikey]) {
-        var profile = {
-          [TYPE]: PROFILE,
-          [ROOT_HASH]: dhtKey,
-          firstName: sp.bot.profile.name.firstName || sp.id + 'Bot',
-          organization: self.buildRef(sp.org)
-          // organization: {
-          //   id: okey,
-          //   title: sp.org.name
-          // }
-        }
-        if (sp.bot.profile.name.lastName)
-          profile.lastName = sp.bot.profile.name.lastName
-        profile.formatted = sp.bot.profile.name.formatted || (profile.lastName ? profile.firstName + ' ' + profile.lastName : profile.firstName)
-        profile.photos = []
-        if (sp.bot.profile.photo)
-          profile.photos.push(sp.bot.profile.photo)
-        else
-          profile.photos.push(employee)
-        if (sp.isEmployee)
-          profile.isEmployee = true
-        else
-          profile.bot = true
-        // profile[ROOT_HASH] = r.pub[ROOT_HASH] //?????
-        var identity = {
-          [ROOT_HASH]:   dhtKey,
-          txId: sp.bot.txId
-        }
-        extend(true, identity, sp.bot.pub)
-        if (identity.name) {
-          identity.firstName = identity.name.firstName
-          identity.formatted = identity.name.formatted || identity.firstName
-          delete identity.name
-        }
-
-        var pkey = utils.getId(profile)
-
-        batch.push({type: 'put', key: ikey, value: identity })
-        batch.push({type: 'put', key: pkey, value: profile })
-        list[ikey] = {key: ikey, value: identity}
-        list[pkey] = {key: pkey, value: profile}
+      if (sp.bot.profile.name.lastName)
+        profile.lastName = sp.bot.profile.name.lastName
+      profile.formatted = sp.bot.profile.name.formatted || (profile.lastName ? profile.firstName + ' ' + profile.lastName : profile.firstName)
+      profile.photos = []
+      if (sp.bot.profile.photo)
+        profile.photos.push(sp.bot.profile.photo)
+      else
+        profile.photos.push(employee)
+      if (sp.isEmployee)
+        profile.isEmployee = true
+      else
+        profile.bot = true
+      // profile[ROOT_HASH] = r.pub[ROOT_HASH] //?????
+      var identity = {
+        [ROOT_HASH]:   hash,
+        txId: sp.bot.txId
       }
-      if (!list[okey].value.contacts)
-        list[okey].value.contacts = []
-      var pkey = PROFILE + '_' + dhtKey
-      list[okey].value.contacts.push({
-        id:     pkey,
-        titile: list[pkey].formatted
-      })
+      extend(true, identity, sp.bot.pub)
+      if (identity.name) {
+        identity.firstName = identity.name.firstName
+        identity.formatted = identity.name.formatted || identity.firstName
+        delete identity.name
+      }
 
-      var promises = [
-        // TODO: evaluate the security of this
-        meDriver.addContactIdentity(sp.bot.pub)
-      ]
+      var pkey = utils.getId(profile)
 
-      if (batch.length)
-        promises.push(db.batch(batch))
-
-      return Q.allSettled(promises)
+      batch.push({type: 'put', key: ikey, value: identity })
+      batch.push({type: 'put', key: pkey, value: profile })
+      list[ikey] = {key: ikey, value: identity}
+      list[pkey] = {key: pkey, value: profile}
+    }
+    if (!list[okey].value.contacts)
+      list[okey].value.contacts = []
+    var pkey = PROFILE + '_' + hash
+    list[okey].value.contacts.push({
+      id:     pkey,
+      titile: list[pkey].formatted
     })
+
+    var promises = [
+      // TODO: evaluate the security of this
+      meDriver.addContactIdentity(sp.bot.pub)
+    ]
+
+    if (batch.length)
+      promises.push(db.batch(batch))
+
+    return Q.allSettled(promises)
     .then(function() {
       if (!sp.isEmployee)
         return {hash: hash, txId: sp.bot.txId, id: sp.id, url: url}
@@ -1089,28 +1021,28 @@ var Store = Reflux.createStore({
     })
   },
 
+  // dhtFor (identity, port) {
+  //   var dht = new DHT({
+  //     nodeId: this.nodeIdFor(identity),
+  //     bootstrap: ['tradle.io:25778']
+  //   })
 
-  dhtFor (identity, port) {
-    var dht = new DHT({
-      nodeId: this.nodeIdFor(identity),
-      bootstrap: ['tradle.io:25778']
-    })
+  //   dht.on('error', function (err) {
+  //     debugger
+  //     throw err
+  //   })
 
-    dht.on('error', function (err) {
-      debugger
-      throw err
-    })
-
-    dht.listen(port)
-    // dht.socket.filterMessages(tutils.isDHTMessage)
-    return dht
-  },
-  nodeIdFor (identity) {
-    return crypto.createHash('sha256')
-      .update(this.findKey(identity.pubkeys, { type: 'dsa' }).fingerprint)
-      .digest()
-      .slice(0, 20)
-  },
+  //   dht.listen(port)
+  //   // dht.socket.filterMessages(tutils.isDHTMessage)
+  //   return dht
+  // },
+  //
+  // nodeIdFor (identity) {
+  //   return crypto.createHash('sha256')
+  //     .update(this.findKey(identity.pubkeys, { type: 'dsa' }).fingerprint)
+  //     .digest()
+  //     .slice(0, 20)
+  // },
   findKey (keys, where) {
     var match
     keys.some(function (k) {
@@ -1213,18 +1145,18 @@ var Store = Reflux.createStore({
     var self = this
     var error
     var welcomeMessage
-    var dhtKey
-    var promise = getDHTKey(toChain)
+    var tmpKey
+    // var promise = Q(protocol.linkString(toChain))
     let hash = r.to[ROOT_HASH]
     if (!hash)
       hash = list[utils.getId(r.to)].value[ROOT_HASH]
     var toId = IDENTITY + '_' + hash
 
     // var isServiceMessage = rr[TYPE] === 'tradle.ServiceMessage'
-    return promise
-    .then(function(data) {
+    return meDriver.sign({ object: toChain })
+    .then(function(result) {
+      tmpKey = rr[ROOT_HASH] = result.sig
       if (!isWelcome) {
-        dhtKey = data
         var to = list[utils.getId(r.to)].value;
         var from = list[utils.getId(r.from)].value;
         var dn = r.message; // || utils.getDisplayName(r, props);
@@ -1239,7 +1171,7 @@ var Store = Reflux.createStore({
           }
         }
 
-        rr[ROOT_HASH] = dhtKey
+        // rr[ROOT_HASH] = tmpKey
         to.lastMessage = (from[ROOT_HASH] === me[ROOT_HASH]) ? 'You: ' + dn : dn;
         to.lastMessageTime = rr.time;
         from.lastMessage = rr.message;
@@ -1266,6 +1198,8 @@ var Store = Reflux.createStore({
       .then(function () {
         if (!self.isConnected  ||  publishRequestSent[orgId])
           return
+        // TODO:
+        // do we need identity publish status anymore
         return meDriver.identityPublishStatus()
       })
       .then(function(status) {
@@ -1302,10 +1236,10 @@ var Store = Reflux.createStore({
         // if (publishRequestSent)
         //    return
         // if (r[TYPE] !== CUSTOMER_WAITING) {
-        return utils.sendSigned(meDriver, {
-          msg: toChain,
-          to: [{fingerprint: self.getFingerprint(list[toId].value)}],
-          deliver: true
+        const method = toChain[SIG] ? 'send' : 'signAndSend'
+        return meDriver[method]({
+          object: toChain,
+          to: { fingerprint: self.getFingerprint(list[toId].value) }
         })
         .catch(function (err) {
           debugger
@@ -1313,16 +1247,16 @@ var Store = Reflux.createStore({
       }
     // }
     })
-    .then(function(data) {
+    .then(function(result) {
+      const data = utils.toOldStyleWrapper(result.message)
       if (!requestForForm  &&  isWelcome)
         return
       if (isWelcome  &&  utils.isEmpty(welcomeMessage))
         return
-      delete list[rr[TYPE] + '_' + dhtKey]
+      delete list[rr[TYPE] + '_' + tmpKey]
       if (data)  {
-        var roothash = data[0]._props[ROOT_HASH]
-        rr[ROOT_HASH] = roothash
-        rr[CUR_HASH] = data[0]._props[CUR_HASH]
+        rr[ROOT_HASH] = data[ROOT_HASH]
+        rr[CUR_HASH] = data[CUR_HASH]
       }
       var key = utils.getId(rr)
       batch.push({type: 'put', key: key, value: rr})
@@ -1398,9 +1332,9 @@ var Store = Reflux.createStore({
 
     var promise = dontSend
                  ? Q()
-                 :  utils.sendSigned(meDriver, {
-                      msg: toChain,
-                      to: [{fingerprint: this.getFingerprint(list[key].value)}],
+                 :  meDriver.signAndSend({
+                      object: toChain,
+                      to: { fingerprint: this.getFingerprint(list[key].value) },
                       deliver: true
                   })
     var newVerification
@@ -1783,10 +1717,9 @@ var Store = Reflux.createStore({
             time: new Date().getTime()
           }
           self.trigger({action: 'employeeOnboarding', to: list[orgId].value})
-          utils.sendSigned(meDriver, {
-            msg: msg,
-            to: [{fingerprint: self.getFingerprint(list[utils.getId(IDENTITY + '_' + orgRep[ROOT_HASH])].value)}],
-            deliver: true
+          meDriver.signAndSend({
+            object: msg,
+            to: { fingerprint: self.getFingerprint(list[utils.getId(IDENTITY + '_' + orgRep[ROOT_HASH])].value) }
           })
           .catch(function (err) {
             debugger
@@ -1804,11 +1737,8 @@ var Store = Reflux.createStore({
             return self.getDriver(returnVal)
           })
           .then(function () {
-            return getDHTKey(publishedIdentity)
-          })
-          .then(function (dhtKey) {
             if (!resource || isNew) {
-              returnVal[ROOT_HASH] = dhtKey
+              returnVal[ROOT_HASH] = protocol.linkString(publishedIdentity)
             }
 
             return save()
@@ -1906,21 +1836,19 @@ var Store = Reflux.createStore({
           toChain.time = returnVal.time
 
           var key = IDENTITY + '_' + to[ROOT_HASH]
-          return utils.sendSigned(meDriver, {
-            msg: toChain,
-            to: [{fingerprint: self.getFingerprint(list[key].value)}],
-            deliver: true
+          return meDriver.signAndSend({
+            object: toChain,
+            to: { fingerprint: self.getFingerprint(list[key].value) }
           })
         })
-        .then(function (entries) {
-          var entry = entries[0]
+        .then(function (result) {
           // TODO: fix hack
           // we now have a real root hash,
           // scrap the placeholder
           delete list[tmpKey]
 
-          returnVal[CUR_HASH] = entry.get(CUR_HASH)
-          returnVal[ROOT_HASH] = entry.get(ROOT_HASH)
+          returnVal[CUR_HASH] = result.message.link
+          returnVal[ROOT_HASH] = result.message.permalink
           return save(true)
         })
         .then(() => {
@@ -1995,15 +1923,14 @@ var Store = Reflux.createStore({
 
     var ikey = IDENTITY + '_' + to[ROOT_HASH]
     var opts = {
-      to: [{fingerprint: this.getFingerprint(list[ikey].value)}],
-      deliver: true,
-      chain: false
+      to: {fingerprint: this.getFingerprint(list[ikey].value)}
     }
+
     var self = this
-    var promise = resource[CUR_HASH] ? meDriver.share({...opts, [CUR_HASH]: resource[CUR_HASH]}) : Q()
+    var promise = resource[CUR_HASH] ? meDriver.share({...opts, link: resource[CUR_HASH]}) : Q()
     return promise
     .then(function () {
-      return meDriver.share({...opts, [CUR_HASH]: resource.document[ROOT_HASH]})
+      return meDriver.send({...opts, link: resource.document[ROOT_HASH]})
     })
     .then(function() {
       var key = utils.getId(formResource)
@@ -3328,6 +3255,7 @@ var Store = Reflux.createStore({
   getDriver(me) {
     if (driverPromise) return driverPromise
 
+    var createPromise
     var allMyIdentities = list[MY_IDENTITIES]
     var currentIdentity
 
@@ -3366,7 +3294,7 @@ var Store = Reflux.createStore({
       //   }
       // }
       if (!mePub) {
-        var keys = defaultKeySet({
+        createPromise = Q.ninvoke(tradleUtils, 'newIdentity', {
           networkName: 'testnet'
         })
 
@@ -3378,39 +3306,46 @@ var Store = Reflux.createStore({
         //   }))
         // }
 
-        mePub = []
-        mePriv = []
-        keys.forEach(function(key) {
-          mePriv.push(key.exportPrivate())
-          mePub.push(key.exportPublic())
-        })
       }
-      me['privkeys'] = mePriv
-      me[NONCE] = me[NONCE] || this.getNonce()
     }
 
-    if (!publishedIdentity)
-      publishedIdentity = this.makePublishingIdentity(me, mePub)
     if (me.language)
       language = list[utils.getId(me.language)].value
-    return driverPromise = this.buildDriver(Identity.fromJSON(publishedIdentity), mePriv, PORT)
+
+    return driverPromise = (createPromise || Q())
+      .then(identityInfo => {
+        if (createPromise) {
+          publishedIdentity = identityInfo.identity
+          mePub = publishedIdentity.pubkeys
+          mePriv = identityInfo.keys
+        }
+
+        me['privkeys'] = mePriv
+        me[NONCE] = me[NONCE] || this.getNonce()
+        return this.buildDriver({
+          identity: publishedIdentity,
+          keys: mePriv,
+          password: 'testing',
+          salt: new Buffer('testingsalt')
+        })
+      })
   },
 
-  makePublishingIdentity(me, pubkeys) {
-    var meIdentity = new Identity()
-                        .name({
-                          firstName: me.firstName,
-                          formatted: me.firstName + (me.lastName ? ' ' + me.lastName : '')
-                        })
-                        .set([NONCE], me[NONCE] || this.getNonce())
-    if (me.isEmployee) {
-      var org = this.buildRef(me.organization)
-      meIdentity.set('organization', org)
-    }
+  // makePublishingIdentity(me, pubkeys) {
+  //   var meIdentity = new Identity()
+  //                       .name({
+  //                         firstName: me.firstName,
+  //                         formatted: me.firstName + (me.lastName ? ' ' + me.lastName : '')
+  //                       })
+  //                       .set([NONCE], me[NONCE] || this.getNonce())
+  //   if (me.isEmployee) {
+  //     var org = this.buildRef(me.organization)
+  //     meIdentity.set('organization', org)
+  //   }
 
-    pubkeys.forEach(meIdentity.addKey, meIdentity)
-    return meIdentity.toJSON()
-  },
+  //   pubkeys.forEach(meIdentity.addKey, meIdentity)
+  //   return meIdentity.toJSON()
+  // },
   publishMyIdentity(orgRep) {
     var self = this
     var msg = {
@@ -3420,11 +3355,9 @@ var Store = Reflux.createStore({
     }
     var key = IDENTITY + '_' + orgRep[ROOT_HASH]
 
-    return utils.sendSigned(meDriver, {
-      msg: msg,
-      to: [{fingerprint: self.getFingerprint(list[key].value)}],
-      deliver: true,
-      public: true
+    return meDriver.signAndSend({
+      object: msg,
+      to: { fingerprint: self.getFingerprint(list[key].value) }
     })
     .catch(function(err) {
       debugger
@@ -3572,42 +3505,31 @@ var Store = Reflux.createStore({
       // })
 
       // Object was successfully read off chain
-      meDriver.on('unchained', function (obj) {
+      meDriver.on('readseal', function (obj) {
         // console.log('unchained', obj)
-        meDriver.lookupObject(obj)
-        .then(function(obj) {
-          // return
-          return self.putInDb(obj)
-        })
-        .catch(function (err) {
-          debugger
-        })
+        debugger
+        meDriver.objects.get(obj.link, true)
+          .then(function(obj) {
+            // return
+            obj = utils.toOldStyleWrapper(obj)
+            return self.putInDb(obj)
+          })
+          .catch(function (err) {
+            debugger
+          })
       })
-      meDriver.on('unchained-self', function (info) {
-        console.log('unchained self!')
-        // meDriver.lookupObject(info)
-        // .then(function(obj) {
-        //   // return
-          return self.updateMe()
-        // })
-        // .catch(function (err) {
-        //   debugger
-        // })
-      })
-      meDriver.on('lowbalance', function () {
-        // debugger
-        console.log('lowbalance')
-      })
-      // Object was successfully put on chain but not yet confirmed
-      meDriver.on('chained', function (obj) {
-        // debugger
-        // console.log('chained', obj)
-        meDriver.lookupObject(obj)
-        .then(function(obj) {
-          obj = obj
-          // return putInDb(obj)
-        })
-      })
+
+      // meDriver.on('unchained-self', function (info) {
+      //   console.log('unchained self!')
+      //   // meDriver.lookupObject(info)
+      //   // .then(function(obj) {
+      //   //   // return
+      //     return self.updateMe()
+      //   // })
+      //   // .catch(function (err) {
+      //   //   debugger
+      //   // })
+      // })
 
       meDriver.on('error', function (err) {
         debugger
@@ -3615,41 +3537,34 @@ var Store = Reflux.createStore({
       })
 
       meDriver.on('sent', function (msg) {
-        meDriver.lookupObject(msg)
-        .then(function(obj) {
-          // return
-          var model = self.getModel(obj[TYPE]).value
-          if (model.subClassOf === FORM) {
-            var r = list[obj[TYPE] + '_' + obj[ROOT_HASH]]
-            if (r)
-              self.trigger({action: 'updateItem', sendStatus: 'Sent', resource: r.value})
-            // var o = {}
-            // extend(o, obj)
-            // var from = o.from
-            // o.from = o.to
-            // o.to = from
-            // o.txId = Math.random() + '';
-            // setTimeout(() => {
-            //   self.putInDb(o)
-            // }, 5000);
-          }
-        })
-        .catch(function (err) {
-          debugger
-        })
+        const obj = utils.toOldStyleWrapper(msg)
+        var model = self.getModel(obj[TYPE]).value
+        if (model.subClassOf === FORM) {
+          var r = list[obj[TYPE] + '_' + obj[ROOT_HASH]]
+          if (r)
+            self.trigger({action: 'updateItem', sendStatus: 'Sent', resource: r.value})
+          // var o = {}
+          // extend(o, obj)
+          // var from = o.from
+          // o.from = o.to
+          // o.to = from
+          // o.txId = Math.random() + '';
+          // setTimeout(() => {
+          //   self.putInDb(o)
+          // }, 5000);
+        }
       })
 
       meDriver.on('message', function (msg) {
         // debugger
         // console.log(msg)
-        meDriver.lookupObject(msg)
-        .then(function(obj) {
-          // return
-          return self.putInDb(obj, true)
-        })
-        .catch(function (err) {
-          debugger
-        })
+
+        const old = utils.toOldStyleWrapper(msg)
+        old.to = { [ROOT_HASH]: meDriver.permalink }
+        self.putInDb(old, true)
+          .catch(function (err) {
+            debugger
+          })
       })
     // })
     // return meDriver.ready()
@@ -4146,10 +4061,9 @@ var Store = Reflux.createStore({
     .then(() => {
       ids.forEach((id) => delete list[id])
       self.trigger({action: 'messageList', modelName: MESSAGE, forgetMeFromCustomer: true})
-      return utils.sendSigned(meDriver, {
-        msg: {_t: FORGOT_YOU},
-        to: [{roothash: resource[ROOT_HASH]}],
-        deliver: true
+      return meDriver.signAndSend({
+        object: { [TYPE]: FORGOT_YOU },
+        to: { [ROOT_HASH]: resource[ROOT_HASH] }
       })
     })
     .catch((err) => {
@@ -4183,6 +4097,7 @@ var Store = Reflux.createStore({
         if (data.state !== 'fulfilled')
           return
         data.value.forEach(function(r) {
+          r = utils.toOldStyleWrapper(r)
           delete r.id
           var rId = utils.getId(r)
           if (!list[rId])
@@ -4194,7 +4109,7 @@ var Store = Reflux.createStore({
           if (!r.deleted) {
             var fromId = utils.getId(res.from)
             var toId = utils.getId(res.to)
-            var sharedWith = res.sharedWith
+            var sharedWith = res.sharedWith || []
             var sharedWithKeys = sharedWith.map(function(r) {
               return r.bankRepresentative
             })
@@ -4327,10 +4242,9 @@ var Store = Reflux.createStore({
     self.trigger({action: 'messageList', list: result, resource: resource})
     var key = IDENTITY + '_' + orgRep[ROOT_HASH]
 
-    return utils.sendSigned(meDriver, {
-      msg: msg,
-      to: [{fingerprint: self.getFingerprint(list[key].value)}],
-      deliver: true
+    return meDriver.signAndSend({
+      object: msg,
+      to: { fingerprint: self.getFingerprint(list[key].value) }
     })
   },
   onForgetMe(resource, noTrigger) {
@@ -4346,10 +4260,9 @@ var Store = Reflux.createStore({
     let promises = []
 
     for (let rep of orgReps) {
-      promises.push(utils.sendSigned(meDriver, {
-        msg: msg,
-        to: [{fingerprint: this.getFingerprint(list[IDENTITY + '_' + rep[ROOT_HASH]].value)}],
-        deliver: true
+      promises.push(meDriver.signAndSend({
+        object: msg,
+        to: { fingerprint: this.getFingerprint(list[IDENTITY + '_' + rep[ROOT_HASH]].value) }
       })
     )}
 
