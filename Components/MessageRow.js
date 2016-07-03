@@ -1122,7 +1122,7 @@ class MessageRow extends Component {
       passProps: {
         resource: resource,
         returnRoute: currentRoutes[currentRoutes.length - 1],
-        products: JSON.parse(this.props.resource.list),
+        products: this.props.resource.list,
         callback: this.props.callback,
         bankStyle: this.props.bankStyle
       },

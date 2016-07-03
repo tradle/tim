@@ -1625,7 +1625,7 @@ var Store = Reflux.createStore({
         }
       }
       // Add items properties if they were created
-      var json = JSON.parse(JSON.stringify(value));
+      var json = JSON.parse(JSON.stringify(value)); // maybe not the best way to copy, try `clone`?
       for (p in resource) {
         if (props[p]  &&  props[p].type === 'array')
           json[p] = resource[p];
@@ -3556,9 +3556,6 @@ var Store = Reflux.createStore({
       })
 
       meDriver.on('message', function (msg) {
-        // debugger
-        // console.log(msg)
-
         const old = utils.toOldStyleWrapper(msg)
         old.to = { [ROOT_HASH]: meDriver.permalink }
         self.putInDb(old, true)
@@ -3577,7 +3574,7 @@ var Store = Reflux.createStore({
     // defensive copy
     var val = extend(true, obj.parsed.data)
     if (!val)
-      return
+      return Q()
 
     val[ROOT_HASH] = val[ROOT_HASH]  ||  obj[ROOT_HASH]
     val[CUR_HASH] = obj[CUR_HASH]
@@ -3589,7 +3586,7 @@ var Store = Reflux.createStore({
     if (type === FORGET_ME) {
       // Alert.alert("Received ForgetMe from " + obj.from[ROOT_HASH])
       this.forgetMe(from)
-      return
+      return Q()
     }
     var isConfirmation
     var model = this.getModel(type)  &&  this.getModel(type).value
@@ -3602,7 +3599,7 @@ var Store = Reflux.createStore({
         isConfirmation = true
       }
       else
-        return;
+        return Q();
     }
     if (obj.txId)
       val.txId = obj.txId
@@ -3662,8 +3659,9 @@ var Store = Reflux.createStore({
 
     return db.batch(batch)
     .then(() => {
-      if (onMessage  &&  val[TYPE] === FORGOT_YOU)
+      if (onMessage  &&  val[TYPE] === FORGOT_YOU) {
         this.forgotYou(from)
+      }
 
       else if (isConfirmation) {
         var fOrg = from.organization
@@ -3786,6 +3784,26 @@ var Store = Reflux.createStore({
 
     var fOrg = from.organization
     var org = fOrg ? list[utils.getId(fOrg)].value : null
+    var to = list[PROFILE + '_' + obj.to[ROOT_HASH]].value
+    if (onMessage) {
+      let profileModel = utils.getModel(PROFILE).value
+      val.from = {
+        id: utils.getId(from),
+        title: from.formatted || from.firstName
+      }
+      val.to = {
+        id: utils.getId(to),
+        title: to.formatted || to.firstName
+      }
+
+      // self.fillFromAndTo(obj, val)
+    }
+    else {
+      let inDB = list[key].value
+      val.from = inDB.from
+      val.to = inDB.to
+    }
+
     if (onMessage  &&  val[TYPE] === FORGOT_YOU) {
       this.forgotYou(from)
       return
@@ -3793,7 +3811,7 @@ var Store = Reflux.createStore({
 
     var isProductList = val[TYPE] === PRODUCT_LIST
     if (isProductList) {
-      var pList = JSON.parse(val.list)
+      var pList = val.list
       // var fOrg = obj.from.identity.toJSON().organization
       // org = list[utils.getId(fOrg)].value
       org.products = []
@@ -3824,26 +3842,7 @@ var Store = Reflux.createStore({
       list[utils.getId(org)].value = org
       batch.push({type: 'put', key: utils.getId(org), value: org})
     }
-    var to = list[PROFILE + '_' + obj.to[ROOT_HASH]].value
     let key = utils.getId(val)
-    if (onMessage) {
-      let profileModel = utils.getModel(PROFILE).value
-      val.from = {
-        id: utils.getId(from),
-        title: from.formatted || from.firstName
-      }
-      val.to = {
-        id: utils.getId(to),
-        title: to.formatted || to.firstName
-      }
-
-      // self.fillFromAndTo(obj, val)
-    }
-    else {
-      let inDB = list[key].value
-      val.from = inDB.from
-      val.to = inDB.to
-    }
     if (!val.time)
       val.time = obj.timestamp
 
