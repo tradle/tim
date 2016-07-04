@@ -306,19 +306,21 @@ var utils = {
     var now = new Date()
 
     var dayDiff = Math.floor((now.getTime() - date.getTime()) / (3600 * 24 * 1000))
-
+    var noTime = true
     var val;
     switch (dayDiff) {
     case 0:
+      noTime = false
       val = dateformat(date, 'h:mm TT')
       // val = moment(date).format('h:mA') //moment(date).fromNow();
       break;
     case 1:
+      noTime = false
       val = 'yesterday, ' + noTime ? '' : dateformat(date, 'h:mm TT')
       // val = moment(date).format('[yesterday], h:mA');
       break;
     default:
-      val = dateformat(date, 'mmmm dS yyyy' + (noTime ? '' : ', h:MM TT'));
+      val = dateformat(date, 'mmmm dS, yyyy' + (noTime ? '' : ', h:MM TT'));
       // val = moment(date).format('LL');
     }
     return val;
@@ -566,7 +568,7 @@ var utils = {
             return
           }
 
-          scrollResponder.scrollResponderScrollTo(0, scrollOffsetY);
+          scrollResponder.scrollResponderScrollTo({x: 0, y: scrollOffsetY, animated: true});
         }
       );
     }
