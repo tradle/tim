@@ -44,7 +44,6 @@ import {
   NetInfo,
   ScrollView,
   Linking,
-  // LinkingIOS,
   StatusBar,
   Dimensions,
   Alert,
