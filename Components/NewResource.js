@@ -44,7 +44,7 @@ import Native, {
   ScrollView,
   Image,
   Platform,
-  // StatusBarIOS,
+  // StatusBar,
   Alert,
   Dimensions,
   Navigator,
@@ -74,8 +74,6 @@ class NewResource extends Component {
 
   constructor(props) {
     super(props);
-    this.updateKeyboardSpace = this.updateKeyboardSpace.bind(this);
-    this.resetKeyboardSpace = this.resetKeyboardSpace.bind(this);
     if (this.props.bankStyle)
       LINK_COLOR = this.props.bankStyle.LINK_COLOR || DEFAULT_LINK_COLOR
     else
@@ -87,6 +85,8 @@ class NewResource extends Component {
       r[constants.TYPE] = props.model.id
     var isRegistration = !utils.getMe()  && this.props.model.id === constants.TYPES.PROFILE  &&  (!this.props.resource || !this.props.resource[constants.ROOT_HASH]);
 
+    // this.updateKeyboardSpace = this.updateKeyboardSpace.bind(this);
+    // this.resetKeyboardSpace = this.resetKeyboardSpace.bind(this);
     this.state = {
       resource: r,
       keyboardSpace: 0,
@@ -809,7 +809,7 @@ class NewResource extends Component {
         </View>
       </ScrollView>
 
-    // StatusBarIOS.setHidden(true);
+    // StatusBar.setHidden(true);
     if (!this.state.isRegistration) {
       if (this.state.err) {
         Alert.alert(this.state.err)
