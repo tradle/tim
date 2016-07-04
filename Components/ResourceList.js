@@ -167,6 +167,11 @@ class ResourceList extends Component {
     if (action === 'getForms') {
       if (!params.to)
         return
+      let style = {}
+        extend(style, defaultBankStyle)
+      if (params.to.style)
+        extend(style, params.to.style)
+
       var route = {
         title: params.to.name,
         component: MessageList,
@@ -177,7 +182,7 @@ class ResourceList extends Component {
           filter: '',
           modelName: constants.TYPES.MESSAGE,
           currency: params.to.currency,
-          bankStyle: params.to.bankStyle || params.to.style,
+          bankStyle:  style,
           dictionary: params.dictionary,
         }
       }
@@ -922,9 +927,6 @@ var styles = StyleSheet.create({
     paddingHorizontal: 10,
     backgroundColor: '#eeeeee',
     borderColor: '#eeeeee',
-    // borderBottomColor: '#eeeeee',
-    // borderRightColor: '#eeeeee',
-    // borderLeftColor: '#eeeeee',
     borderWidth: 1,
     borderTopColor: '#cccccc',
   },
