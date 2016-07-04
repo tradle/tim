@@ -145,10 +145,12 @@ class ResourceView extends Component {
                     ? <View/>
                     : <ShowRefList showQR={this.openModal.bind(this)} resource={resource} currency={this.props.currency} navigator={this.props.navigator} />
     var qrcode
-    if (isMe  &&  me.isEmployee  &&  me.organization && me.organization.url)
+    if (isMe  &&  me.isEmployee  &&  me.organization && me.organization.url) {
+      let width = Math.floor((Dimensions.get('window').width / 3) * 2)
       qrcode = <View style={{alignSelf: 'center', justifyContent: 'center', backgroundColor: '#ffffff', padding:10}} onPress={()=> this.setState({isModalOpen: true})}>
-                 <QRCode inline={true} content={TALK_TO_EMPLOYEE + ';' + me.organization.url + ';' + utils.getId(me.organization).split('_')[1] + ';' + me[constants.ROOT_HASH]} dimension={250} />
+                 <QRCode inline={true} content={TALK_TO_EMPLOYEE + ';' + me.organization.url + ';' + utils.getId(me.organization).split('_')[1] + ';' + me[constants.ROOT_HASH]} dimension={width} />
                </View>
+    }
     else
       qrcode = <View />
     // var switchTouchId = isIdentity
