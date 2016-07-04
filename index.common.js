@@ -4,7 +4,9 @@
 var debug = require('debug')
 if (__DEV__) {
   console.ignoredYellowBox = ['jsSchedulingOverhead']
-  debug.enable('*')
+  debug.enable([
+    'tradle:*'
+  ].join(','))
 } else {
   debug.disable()
 }

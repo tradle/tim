@@ -4,11 +4,12 @@ var path = require('path')
 var parseURL = require('url').parse
 import {
   Alert,
-  NetInfo
+  NetInfo,
 } from 'react-native'
 
 import AsyncStorage from './Storage'
 
+global.AsyncStorage = AsyncStorage
 var path = require('path')
 var BeSafe = require('asyncstorage-backup')
 var Reflux = require('reflux');
@@ -56,6 +57,7 @@ var level = function (loc, opts) {
   return levelup(loc, opts)
 }
 
+const collect = require('stream-collector')
 const tradle = require('@tradle/engine')
 const tradleUtils = tradle.utils
 const protocol = tradle.protocol
@@ -170,6 +172,7 @@ var Store = Reflux.createStore({
   listenables: [Actions],
   // this will be called by all listening components as they register their listeners
   init() {
+    var self = this
     // Setup components:
     var ldb = level('TiM.db', { valueEncoding: 'json' });
     // ldb = levelQuery(level('TiM.db', { valueEncoding: 'json' }));
@@ -187,7 +190,6 @@ var Store = Reflux.createStore({
     );
 
     this.loadModels()
-    var self = this
 
     voc.forEach(function(m) {
       models[m.id] = {
@@ -238,18 +240,12 @@ var Store = Reflux.createStore({
     .then(function(value) {
       if (value) {
         var key = MY_IDENTITIES
-        list[key] = {
-          key:   key,
-          value: value
-        }
+        self._setItem(key, value)
         return db.get(IDENTITY + '_' + value.currentIdentity.split('_')[1])
       }
     })
     .then (function(value) {
-      list[IDENTITY + '_' + value[ROOT_HASH]] = {
-        key: IDENTITY + '_' + value[ROOT_HASH],
-        value: value
-      }
+      self._setItem(IDENTITY + '_' + value[ROOT_HASH], value)
       return db.get(PROFILE + '_' + value[ROOT_HASH])
     })
     .then(function(value) {
@@ -265,10 +261,7 @@ var Store = Reflux.createStore({
       }
       self.setMe(me)
       var key = value[TYPE] + '_' + value[ROOT_HASH]
-      list[key] = {
-        key: key,
-        value: value
-      }
+      self._setItem(key, value)
     })
     .catch(function(err) {
       debugger
@@ -294,7 +287,7 @@ var Store = Reflux.createStore({
     extend(true, r, me, params)
     this.setMe(r)
     let meId = utils.getId(r)
-    list[meId].value  = r
+    this._setItem(meId, r)
     return db.put(meId, r)
       // .then(() => {
       //   if (params.registered) {
@@ -354,10 +347,7 @@ var Store = Reflux.createStore({
     return db.get(key)
     .then(function(value) {
       if (value) {
-        list[key] = {
-          key:   key,
-          value: value
-        }
+        self._setItem(key, value)
       }
     })
     .catch(function(err) {
@@ -462,7 +452,7 @@ var Store = Reflux.createStore({
           urls: SERVICE_PROVIDERS_BASE_URLS,
           hashToUrl: {}
         }
-        list[settingsId] = {key: settingsId, value: settings}
+        this._setItem(settingsId, settings)
         db.put(settingsId, settings)
       }
     }
@@ -604,6 +594,7 @@ var Store = Reflux.createStore({
   },
 
   onGetEmployeeInfo(code) {
+    var self = this
     let parts = code.split(';')
 
     let orgId = ORGANIZATION + '_' + parts[1]
@@ -613,7 +604,6 @@ var Store = Reflux.createStore({
       // let serviceProvider =  SERVICE_PROVIDERS.filter((json) => json.url === serverUrl)
 
     var org = list[orgId].value
-    var self = this
     let promise = serviceProvider ? Q() : this.getInfo([parts[0]])
 
     return promise
@@ -892,7 +882,7 @@ var Store = Reflux.createStore({
     var batch = []
     if (!list[okey]) {
       batch.push({type: 'put', key: okey, value: sp.org})
-      list[okey] = {key: okey, value: sp.org}
+      this._setItem(okey, sp.org)
     }
     if (sp.style)
       list[okey].value.style = sp.style
@@ -935,16 +925,27 @@ var Store = Reflux.createStore({
 
       batch.push({type: 'put', key: ikey, value: identity })
       batch.push({type: 'put', key: pkey, value: profile })
-      list[ikey] = {key: ikey, value: identity}
-      list[pkey] = {key: pkey, value: profile}
+      self._setItem(ikey, identity)
+      self._setItem(pkey, profile)
     }
-    if (!list[okey].value.contacts)
-      list[okey].value.contacts = []
+    if (!list[okey].value.contacts) {
+      self._setItem(okey, { ...list[okey].value, contacts: [] })
+      // list[okey].value.contacts = []
+    }
+
     var pkey = PROFILE + '_' + hash
-    list[okey].value.contacts.push({
+
+    var curOkeyVal = list[okey].value
+    var newContact = {
       id:     pkey,
       titile: list[pkey].formatted
-    })
+    }
+
+    self._setItem(okey, { ...curOkeyVal, contacts: [...curOkeyVal.contacts, newContact] })
+    // list[okey].value.contacts.push({
+    //   id:     pkey,
+    //   titile: list[pkey].formatted
+    // })
 
     var promises = [
       // TODO: evaluate the security of this
@@ -992,8 +993,8 @@ var Store = Reflux.createStore({
       var batch = []
       batch.push({type: 'put', key: ikey, value: identity })
       batch.push({type: 'put', key: pkey, value: profile })
-      list[ikey] = {key: ikey, value: identity}
-      list[pkey] = {key: pkey, value: profile}
+      self._setItem(ikey, identity)
+      self._setItem(pkey, profile)
     }
     // HACK
     if (!profile.firstName.length) {
@@ -1069,6 +1070,7 @@ var Store = Reflux.createStore({
   },
 
   onAddMessage(r, isWelcome, requestForForm) {
+    var self = this
     let m = this.getModel(r[TYPE]).value
     var props = m.properties;
     var rr = {};
@@ -1109,7 +1111,9 @@ var Store = Reflux.createStore({
         })
         if (result.length) {
           result.forEach((r) => {
-            list[utils.getId(r)].value.documentCreated = true
+            const rid = utils.getId(r)
+            const curVal = list[rid]
+            self._setItem(rid, { ...curVal, documentCreated: true })
           })
         }
       }
@@ -1142,7 +1146,6 @@ var Store = Reflux.createStore({
       delete toChain.to
     }
     var batch = []
-    var self = this
     var error
     var welcomeMessage
     var tmpKey
@@ -1219,7 +1222,7 @@ var Store = Reflux.createStore({
 
       // Temporary untill the real hash is known
       var key = utils.getId(rr)
-      list[key] = {key: key, value: rr};
+      self._setItem(key, rr)
       var params = {
         action: 'addMessage',
         resource: isWelcome ? welcomeMessage : rr
@@ -1260,7 +1263,7 @@ var Store = Reflux.createStore({
       }
       var key = utils.getId(rr)
       batch.push({type: 'put', key: key, value: rr})
-      list[key] = {key: key, value: rr};
+      self._setItem(key, rr)
       // var params = {
       //   action: 'addMessage',
       //   resource: isWelcome ? welcomeMessage : rr
@@ -1306,6 +1309,7 @@ var Store = Reflux.createStore({
     return orgRep
   },
   onAddVerification(r, notOneClickVerification, dontSend) {
+    var self = this;
     var batch = [];
     var key;
     var fromId = utils.getId(r.from);
@@ -1327,7 +1331,6 @@ var Store = Reflux.createStore({
       delete toChain.to
       toChain.time = r.time
     }
-    var self = this;
     var key = IDENTITY + '_' + (r.to[TYPE] ? r.to[ROOT_HASH] : utils.getId(r.to).split('_')[1])
 
     var promise = dontSend
@@ -1363,7 +1366,7 @@ var Store = Reflux.createStore({
       var rr = {};
       // extend(rr, from);
       // rr.verifiedByMe = r;
-      list[key] = {key: key, value: r};
+      self._setItem(key, r)
 
       if (notOneClickVerification)
         self.trigger({action: 'addItem', resource: r});
@@ -1427,11 +1430,11 @@ var Store = Reflux.createStore({
   },
 
   getItem(resource) {
+    var self = this;
     var modelName = resource[TYPE];
     var meta = this.getModel(modelName).value;
     var foundRefs = [];
     var refProps = this.getRefs(resource, foundRefs, meta.properties);
-    var self = this;
     var newResource = {};
     extend(newResource, resource);
     for (var i=0; i<foundRefs.length; i++) {
@@ -1562,6 +1565,7 @@ var Store = Reflux.createStore({
     this.trigger({action: 'getTemporary', resource: r})
   },
   onAddItem(params) {
+    var self = this;
     var value = params.value;
     var resource = params.resource;
     delete temporaryResources[resource[TYPE]]
@@ -1581,7 +1585,6 @@ var Store = Reflux.createStore({
     let isSelfIntroduction = meta[TYPE] === SELF_INTRODUCTION
     var isNew = !resource[ROOT_HASH];
 
-    var self = this;
     var checkPublish
     var isSwitchingToEmployeeMode = isNew ? false : self.isSwitchingToEmployeeMode(resource)
     // Data were obtained by scanning QR code of the forms that were entered on Web
@@ -1766,7 +1769,7 @@ var Store = Reflux.createStore({
           returnVal[ROOT_HASH] = returnVal[NONCE]
 
         var tmpKey = utils.getId(returnVal)
-        list[tmpKey] = {key: tmpKey, value: returnVal};
+        self._setItem(tmpKey, returnVal)
 
         var params;
         if (returnVal[TYPE] === GUEST_SESSION_PROOF) {
@@ -1847,8 +1850,8 @@ var Store = Reflux.createStore({
           // scrap the placeholder
           delete list[tmpKey]
 
-          returnVal[CUR_HASH] = result.message.link
-          returnVal[ROOT_HASH] = result.message.permalink
+          returnVal[CUR_HASH] = result.object.link
+          returnVal[ROOT_HASH] = result.object.permalink
           return save(true)
         })
         .then(() => {
@@ -1916,6 +1919,7 @@ var Store = Reflux.createStore({
 
   },
   onShare(resource, to, formResource) {
+    var self = this
     if (to[TYPE] === ORGANIZATION)
       to = this.getRepresentative(ORGANIZATION + '_' + to[ROOT_HASH])
     if (!to)
@@ -1926,8 +1930,7 @@ var Store = Reflux.createStore({
       to: {fingerprint: this.getFingerprint(list[ikey].value)}
     }
 
-    var self = this
-    var promise = resource[CUR_HASH] ? meDriver.share({...opts, link: resource[CUR_HASH]}) : Q()
+    var promise = resource[CUR_HASH] ? meDriver.send({...opts, link: resource[CUR_HASH]}) : Q()
     return promise
     .then(function () {
       return meDriver.send({...opts, link: resource.document[ROOT_HASH]})
@@ -2063,10 +2066,10 @@ var Store = Reflux.createStore({
     this.onList(params);
   },
   onList(params) {
+    var self = this;
     if (isLoaded)
       this.getList(params);
     else {
-      var self = this;
       this.loadDB()
       .then(function() {
         isLoaded = true;
@@ -2334,6 +2337,20 @@ var Store = Reflux.createStore({
     }
     return result;
   },
+
+  // extractReferences(val) {
+  //   let props = utils.getModel(val[TYPE]).value.properties
+  //   let r = {_t: val[TYPE]}
+  //   for (let p in val) {
+  //     if (props[p].ref) {
+  //       if (props[p].ref !== constants.TYPE.MONEY)
+  //         r[p] = val[p]
+  //     }
+  //     else if (props[p].type === 'array') {
+  //       if
+  //     }
+  //   }
+  // },
   searchMessages(params) {
     if (params.loadingEarlierMessages)
       return this.getMessagesBefore(params)
@@ -2960,6 +2977,7 @@ var Store = Reflux.createStore({
     return crypto.randomBytes(32).toString('hex')
   },
   _putResourceInDB(params) {
+    var self = this;
     var modelName = params.type
     var value = params.resource
     var dhtKey = params.roothash
@@ -3042,7 +3060,6 @@ var Store = Reflux.createStore({
 
     var mid;
 
-    var self = this;
     if (isRegistration) {
       this.registration(value)
       return
@@ -3055,9 +3072,9 @@ var Store = Reflux.createStore({
       return db.get(iKey)
     })
     .then(function(value) {
-      list[iKey] = {key: iKey, value: value};
+      self._setItem(iKey, value)
       if (mid)
-        list[MY_IDENTITIES] = {key: MY_IDENTITIES, value: mid}
+        self._setItem(MY_IDENTITIES, mid)
       else if (!isNew  &&  iKey === utils.getId(me)) {
         if (me.language || value.language) {
           if (value.language) {
@@ -3143,10 +3160,10 @@ var Store = Reflux.createStore({
       return self.trigger(params);
     })
     .then(function(value) {
-      list[iKey] = {key: iKey, value: identity};
-      list[pKey] = {key: pKey, value: me};
+      self._setItem(iKey, identity)
+      self._setItem(pKey, me)
       if (mid)
-        list[MY_IDENTITIES] = {key: MY_IDENTITIES, value: mid};
+        self._setItem(MY_IDENTITIES, mid)
       self.monitorTim()
       // return self.initIdentity(me)
     })
@@ -3155,23 +3172,23 @@ var Store = Reflux.createStore({
     });
   },
   addSettings(value) {
+    var self = this
     var v = value.url
     if (v.charAt(v.length - 1) === '/')
       v = v.substring(0, v.length - 1)
-    var self = this
     var key = SETTINGS + '_1'
     var togo
     return this.getInfo([v])
     .then(function(json) {
       var settings = list[key]
-      if (settings)
-        list[key].value.urls.push(v)
+      if (settings) {
+        const curVal = list[key].value
+        debugger
+        self._setItem(key, { ...curVal, urls: [...curVal.urls, v] })
+      }
       else {
         value.urls = SERVICE_PROVIDERS_BASE_URL_DEFAULTS.concat(v)
-        list[key] = {
-          key: key,
-          value: value
-        }
+        self._setItem(key, value)
       }
     })
     .then(function() {
@@ -3364,7 +3381,7 @@ var Store = Reflux.createStore({
     })
   },
   loadAddressBook() {
-    return
+    return // method not used currently
 
     var self = this;
     return Q.ninvoke(AddressBook, 'checkPermission')
@@ -3385,8 +3402,8 @@ var Store = Reflux.createStore({
     })
   },
   storeContacts() {
-    var dfd = Q.defer();
     var self = this;
+    var dfd = Q.defer();
     var batch = [];
     var props = models[PROFILE].value.properties;
     AddressBook.getContacts(function(err, contacts) {
@@ -3505,18 +3522,46 @@ var Store = Reflux.createStore({
       // })
 
       // Object was successfully read off chain
-      meDriver.on('readseal', function (obj) {
-        // console.log('unchained', obj)
-        debugger
-        meDriver.objects.get(obj.link, true)
+      meDriver.on('readseal', function (seal) {
+        const link = seal.link
+        let wrapper
+        meDriver.objects.get(link, true)
           .then(function(obj) {
             // return
-            obj = utils.toOldStyleWrapper(obj)
-            return self.putInDb(obj)
+            wrapper = { ...seal, ...obj }
+            if (wrapper.type === 'tradle.Message') return wrapper
+
+            return getAuthorForObject(wrapper)
+          })
+          .then(msgInfo => {
+            wrapper.from = { [ROOT_HASH]: msgInfo.author }
+            wrapper.to = { [ROOT_HASH]: msgInfo.recipient }
+            wrapper = utils.toOldStyleWrapper(wrapper)
+            return self.putInDb(wrapper)
           })
           .catch(function (err) {
             debugger
           })
+
+        function getAuthorForObject (obj) {
+          // objects don't really have a from/to
+          // so this will need to be redesigned
+          const msgStream = meDriver.objects.messagesWithObject({
+            permalink: obj.permalink,
+            link: link
+          })
+
+          return Q.all([
+            meDriver.addressBook.lookupIdentity({ permalink: obj.author }),
+            Q.nfcall(collect, msgStream)
+          ])
+          .spread(function (authorInfo, messages) {
+            const match = messages.filter(m => m.author === authorInfo.permalink)[0]
+            if (!match) throw new Error('unable to get message for object')
+
+            return match
+          })
+        }
       })
 
       // meDriver.on('unchained-self', function (info) {
@@ -3553,6 +3598,8 @@ var Store = Reflux.createStore({
           //   self.putInDb(o)
           // }, 5000);
         }
+
+        self.maybeWatchSeal(msg)
       })
 
       meDriver.on('message', function (msg) {
@@ -3562,16 +3609,53 @@ var Store = Reflux.createStore({
           .catch(function (err) {
             debugger
           })
+
+        self.maybeWatchSeal(msg)
       })
     // })
     // return meDriver.ready()
   },
+
+  maybeWatchSeal(msg) {
+    const type = msg.object.object[TYPE]
+    let model = utils.getModel(type)
+    if (!model) return
+
+    model = model.value
+    const sup = model.subClassOf
+    switch (sup) {
+    case FORM:
+    case MY_PRODUCT:
+    case VERIFICATION:
+      break
+    default:
+      return
+    }
+
+    let otherGuy = msg.author === meDriver.permalink ? msg.recipient : msg.author
+    return meDriver.addressBook.lookupIdentity({ permalink: otherGuy })
+      .then(identityInfo => {
+        const chainPubKey = tradleUtils.chainPubKey(identityInfo.object)
+        return meDriver.watchSeal({
+          link: protocol.linkString(msg.object.object),
+          basePubKey: chainPubKey
+        })
+      })
+      .done()
+
+    // meDriver.watchSeal({
+    //   link: msg.link,
+    //   basePubKey: msg.object.recipientPubKey
+    // }).done()
+  },
+
   updateMe() {
     db.put(utils.getId(me), me)
   },
 
   putInDb(obj, onMessage) {
     // defensive copy
+    var self = this
     var val = extend(true, obj.parsed.data)
     if (!val)
       return Q()
@@ -3607,7 +3691,6 @@ var Store = Reflux.createStore({
     var key = utils.getId(val)
     var batch = []
     var representativeAddedTo
-    var self = this
     // var isServiceMessage
     if (model.id === IDENTITY)
       representativeAddedTo = this.putIdentityInDB(val, batch)
@@ -3622,10 +3705,7 @@ var Store = Reflux.createStore({
     if (model.subClassOf === MY_PRODUCT)
       val.sharedWith = [this.createSharedWith(utils.getId(val.from.id), new Date().getTime())]
 
-    list[key] = {
-      key: key,
-      value: val
-    }
+    self._updateItem(key, val)
 
     var retParams = {
       action: isMessage ? 'messageList' : 'list'
@@ -3723,10 +3803,7 @@ var Store = Reflux.createStore({
       }
     }
     batch.push({type: 'put', key: profileKey, value: profile})
-    list[profileKey] = {
-      key: profileKey,
-      value: profile
-    }
+    this._setItem(profileKey, profile)
     var representativeAddedTo
     batch.push({type: 'put', key: key, value: val})
     if (org) {
@@ -3752,10 +3829,7 @@ var Store = Reflux.createStore({
           oo.contacts = []
         oo.contacts.push(representative)
         var orgKey = utils.getId(org)
-        list[orgKey] = {
-          key: orgKey,
-          value: oo
-        }
+        this._setItem(orgKey, oo)
         batch.push({type: 'put', key: orgKey, value: oo})
         representativeAddedTo = org[ROOT_HASH]
       }
@@ -3880,7 +3954,7 @@ var Store = Reflux.createStore({
     if (list[key]) {
       let v = {}
       extend(true, v, val)
-      list[key].value = v
+      this._setItem(key, v)
     }
     batch.push({type: 'put', key: key, value: val})
   },
@@ -3922,10 +3996,10 @@ var Store = Reflux.createStore({
     }
   },
   loadMyResources() {
+    var self = this;
     var myId = sampleData.getMyId();
     if (myId)
       myId = PROFILE + '_' + myId;
-    var self = this;
 
     // console.time('dbStream')
     var orgContacts = {}
@@ -3960,7 +4034,7 @@ var Store = Reflux.createStore({
               c.push(self.buildRef(data.value))
             }
           }
-          list[data.key] = data;
+          self._setItem(data.key, data.value)
         }
       })
       var sameContactList = {}
@@ -3996,10 +4070,7 @@ var Store = Reflux.createStore({
           r[CUR_HASH] = r[ROOT_HASH]
           let id = utils.getId(r)
           if (!list[id])
-            list[id] = {
-              key: id,
-              value: r
-            }
+            self._setItem(id, r)
         })
       }
 
@@ -4044,10 +4115,10 @@ var Store = Reflux.createStore({
     })
   },
   forgetMe(resource) {
+    let self = this
     let result = this.searchMessages({modelName: MESSAGE, to: resource})
     let batch = []
     let ids = []
-    let self = this
     result.forEach((r) => {
       let id = utils.getId(r)
       batch.push({type: 'del', key: id})
@@ -4070,6 +4141,7 @@ var Store = Reflux.createStore({
     })
   },
   forgotYou(resource) {
+    var self = this
     var org = list[utils.getId(resource.organization)].value
 
     var orgId = utils.getId(org)
@@ -4089,7 +4161,6 @@ var Store = Reflux.createStore({
       promises.push(meDriver.forget(r[ROOT_HASH]))
     )
     var batch = []
-    var self = this
     return Q.allSettled(promises)
     .then(function(result) {
       result.forEach(function(data) {
@@ -4105,7 +4176,8 @@ var Store = Reflux.createStore({
           var isVerification = r[TYPE] === VERIFICATION
           var model = utils.getModel(r[TYPE])
           var isForm = !isVerification  &&  model.subClassOf === FORM
-          if (!r.deleted) {
+          var deleted = !(res.sharedWith && res.sharedWith.length > 1)
+          if (!deleted) {
             var fromId = utils.getId(res.from)
             var toId = utils.getId(res.to)
             var sharedWith = res.sharedWith || []
@@ -4134,7 +4206,7 @@ var Store = Reflux.createStore({
             //   batch.push({type: 'put', key: utils.getId(me), value: me})
             // }
             // Cleanup form from the deleted verification
-            if (r.deleted) {
+            if (deleted) {
               var docPair = list[utils.getId(res.document)]
               if (docPair) {
                 var doc = list[utils.getId(res.document)].value
@@ -4154,7 +4226,7 @@ var Store = Reflux.createStore({
               }
             }
           }
-          if (r.deleted) {
+          if (deleted) {
             delete list[rId]
             batch.push({type: 'del', key: rId})
           }
@@ -4191,6 +4263,7 @@ var Store = Reflux.createStore({
   },
 
   cleanup(result) {
+    var self = this
     if (!result.length)
       return Q()
 
@@ -4199,7 +4272,6 @@ var Store = Reflux.createStore({
     result.forEach(function(r){
       batch.push({type: 'del', key: utils.getId(r), value: r})
     })
-    var self = this
     return db.batch(batch)
     .then(function() {
       result.forEach(function(r) {
@@ -4211,10 +4283,10 @@ var Store = Reflux.createStore({
     })
   },
   onTalkToRepresentative(resource, org) {
+    var self = this
     var orgRep = resource[TYPE] === ORGANIZATION
                ? this.getRepresentative(utils.getId(resource))
                : resource
-    var self = this
     if (!orgRep) {
       var msg = {
         [TYPE]: SIMPLE_MESSAGE,
@@ -4294,6 +4366,7 @@ var Store = Reflux.createStore({
     return models[modelName];
   },
   loadDB() {
+    const self = this
     if (utils.isEmpty(models)) {
       voc.forEach(function(m) {
         if (!m[ROOT_HASH])
@@ -4311,12 +4384,9 @@ var Store = Reflux.createStore({
 
       r[CUR_HASH] = r[ROOT_HASH];
       var key = utils.getId(r)
-      list[key] = {
-        key: key,
-        value: r
-      }
+      self._setItem(key, r)
     });
-    var self = this;
+
     return self.loadMyResources()
           // .then(self.loadAddressBook)
           .catch(function(err) {
@@ -4324,8 +4394,8 @@ var Store = Reflux.createStore({
             });
   },
   loadModels() {
-    var batch = [];
     var self = this
+    var batch = [];
     voc.forEach(function(m) {
       if (!m[ROOT_HASH]) {
         m[ROOT_HASH] = sha(m);
@@ -4334,7 +4404,7 @@ var Store = Reflux.createStore({
 
       batch.push({type: 'put', key: m.id, value: m});
     });
-    var self = this;
+
     return db.batch(batch)
           .then(function() {
             return self.loadMyResources();
@@ -4392,6 +4462,13 @@ var Store = Reflux.createStore({
     if (resource.time)
       ref.time = resource.time
     return ref
+  },
+  _setItem(key, value) {
+    list[key] = { key, value }
+  },
+  _updateItem(key, value) {
+    const current = list[key] || {}
+    list[key] = { key, value: { ...current.value, ...value } }
   },
 })
 // );
