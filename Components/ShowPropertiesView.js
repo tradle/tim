@@ -10,10 +10,11 @@ var reactMixin = require('react-mixin')
 var Accordion = require('react-native-accordion')
 var Icon = require('react-native-vector-icons/Ionicons')
 var extend = require('extend');
-var NOT_SPECIFIED = 'Not specified'
+var NOT_SPECIFIED = '[not specified]'
 var DEFAULT_CURRENCY_SYMBOL = '£'
 var CURRENCY_SYMBOL
 import Prompt from 'react-native-prompt'
+// import Communications from 'react-native-communications'
 
 import {
   StyleSheet,
@@ -23,8 +24,7 @@ import {
   LayoutAnimation,
   Text,
   TextInput,
-  TouchableHighlight,
-  AlertIOS,
+  TouchableOpacity,
 } from 'react-native'
 
 import React, { Component } from 'react'
@@ -63,6 +63,7 @@ class ShowPropertiesView extends Component {
     );
   }
   shouldComponentUpdate(nextProps, nextState) {
+    // Prompt for employee to write a correction message
     if (this.state.promptVisible !== nextState.promptVisible)
       return true
     if (!this.props.errorProps  &&  !nextProps.errorProps)
@@ -127,6 +128,7 @@ class ShowPropertiesView extends Component {
       var isRef;
       var isItems
       var isDirectionRow;
+      // var isEmail
       if (!val) {
         if (pMeta.displayAs)
           val = utils.templateIt(pMeta, resource);
@@ -147,15 +149,22 @@ class ShowPropertiesView extends Component {
           // ex. property that is referencing to the Organization for the contact
           var value = val[constants.TYPE] ? utils.getDisplayName(val, utils.getModel(val[constants.TYPE]).value.properties) : val.title;
 
-          val = <TouchableHighlight onPress={this.props.showRefResource.bind(this, val, pMeta)} underlayColor='transparent'>
+          val = <TouchableOpacity onPress={this.props.showRefResource.bind(this, val, pMeta)}>
                  <Text style={[styles.title, styles.linkTitle]}>{value}</Text>
-               </TouchableHighlight>
+               </TouchableOpacity>
 
           isRef = true;
         }
       }
       else if (pMeta.type === 'date')
         val = utils.formatDate(val);
+      // else if (pMeta[constants.SUB_TYPE] === 'email') {
+      //   isEmail = true
+      //   val = <TouchableOpacity onPress={() => Communications.email([val], null, null, 'My Subject','My body text')}>
+      //       <Text  style={[styles.title, styles.linkTitle]}>{val}</Text>
+      //   </TouchableOpacity>
+
+      // }
 
       if (!val)
         return <View key={this.getNextKey()}></View>;
@@ -198,15 +207,21 @@ class ShowPropertiesView extends Component {
             val += ' ' + props[p].units
 
           if (val === NOT_SPECIFIED)
-            val = <Text style={[styles.description, {color: this.props.bankStyle.FORM_ERROR_COLOR}]}>{val}</Text>
+            val = <Text style={[styles.description, {color: this.props.bankStyle.LINK}]}>{val}</Text>
           else if (typeof val === 'number'  ||  typeof val === 'boolean')
             val = <Text style={styles.description}>{val}</Text>;
           else if (pMeta.type === 'boolean')
             val = <Text style={styles.description}>{val.title}</Text>;
           else if (pMeta.type !== 'object'  &&  (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0))
             val = <Text onPress={this.onPress.bind(this, val)} style={[styles.description, {color: '#7AAAC3'}]}>{val}</Text>;
-          else
+          else {
+        // val = <TouchableOpacity onPress={() => {
+        //   Communications.text()
+        // }}>
+        //     <Text  style={[styles.title, styles.linkTitle]}>{val}</Text>
+        // </TouchableOpacity>
             val = <Text style={[styles.description]} numberOfLines={2}>{val}</Text>;
+          }
         }
       }
       var title = pMeta.skipLabel  ||  isItems
@@ -222,7 +237,7 @@ class ShowPropertiesView extends Component {
         console.log(this.state.promptVisible)
       let canReject = this.props.checkProperties
                     ? <View style={{flex: 1, justifyContent: 'flex-end', alignSelf: 'center'}}>
-                        <Icon key={p} name={this.props.errorProps && this.props.errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={25} color={this.props.errorProps && this.props.errorProps[p] ? 'red' : this.props.bankStyle.LINK_COLOR} style={{paddingRight: 10, marginTop: 10}}
+                        <Icon key={p} name={this.props.errorProps && this.props.errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={25} color={this.props.errorProps && this.props.errorProps[p] ? 'red' : this.props.bankStyle.LINK_COLOR} style={{marginTop: 10}}
                         onPress={() => {
                           this.setState({promptVisible: pMeta})
                         }}/>
@@ -236,20 +251,6 @@ class ShowPropertiesView extends Component {
                             this.props.checkProperties(this.state.promptVisible, value)
                           }}/>
                       </View>
-                      // <View style={{flex: 1, justifyContent: 'flex-end', alignSelf: 'center'}}>
-                      // <TouchableHighlight underlayColor='transparent' onPress={() => {
-                      //   AlertIOS.prompt(
-                      //     'Please write a message to the customer',
-                      //     null,
-                      //     [
-                      //       {text: 'Ok', onPress: this.props.checkProperties.bind(this, pMeta)},
-                      //       {text: 'Cancel', null}
-                      //     ]
-                      //   )
-                      // }}>
-                      //   <Icon name={this.props.errorProps && this.props.errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={25} color={this.props.errorProps && this.props.errorProps[p] ? 'red' : this.props.bankStyle.LINK_COLOR} style={{paddingRight: 10, marginTop: 10}}/>
-                      // </TouchableHighlight>
-                      // </View>
                     : <View />
       if (this.props.checkProperties)
         isDirectionRow = true
