@@ -83,11 +83,16 @@ class MessageView extends Component {
       )
     }
     else {
+      let properties = utils.getModel(this.state.resource[constants.TYPE]).value.properties
+      let msg = ''
+      for (var p in this.state.errorProps)
+        msg += msg ? ', ' + properties[p].title : properties[p].title
+      msg = 'Please correct or fill out the following fields: ' + msg
       Alert.alert(
-        'Please correct the errors and re-submit',
+        msg,
         null,
         [
-          {text: 'Ok', onPress: this.createError.bind(this)},
+          {text: 'Ok', onPress: this.createError.bind(this, msg)},
           {text: 'Cancel', onPress: () => console.log('Canceled!')},
         ]
       )
