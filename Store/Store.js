@@ -131,6 +131,8 @@ var currentEmployees = {}
 // var tim;
 var PORT = 51086
 var TIM_PATH_PREFIX = 'me'
+// If app restarts in less then 10 minutes keep it authenticated
+const AUTHENTICATED_TIME = 3600 * 10
 
 var models = {};
 var list = {};
@@ -150,7 +152,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
-var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://127.0.0.1:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
+var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://192.168.0.101:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
@@ -251,8 +253,10 @@ var Store = Reflux.createStore({
     .then(function(value) {
       me = value
       if (me.isAuthenticated) {
-        // delete me.isAuthenticated
-        db.put(utils.getId(me), me)
+        if (new Date().now - me.dateAuthenticated > AUTHENTICATED_TIME) {
+          delete me.isAuthenticated
+          db.put(utils.getId(me), me)
+        }
       }
       // HACK for the case if employee removed
       if (me.isEmployee  &&  !me.organization) {
@@ -296,45 +300,49 @@ var Store = Reflux.createStore({
       // })
   },
   onSetAuthenticated(authenticated) {
-    if (!me)
-      return
+    // if (!me)
+    //   return
     let meId = utils.getId(me)
     let r = {}
-    extend(true, r, me, {
+    // extend(true, r, me, {
+    //   isAuthenticated: authenticated,
+    //   dateAuthenticated: Date.now()
+    // })
+    this.onUpdateMe({
       isAuthenticated: authenticated,
       dateAuthenticated: Date.now()
     })
 
-    this.setMe(r)
+    // this.setMe(r)
     this.trigger({ action: 'authenticated', value: authenticated })
-    if (authenticated)
-      return
-    let me = utils.getMe()
-    let settings = list[SETTINGS + '_1'].value
-    if (utils.isEmpty(settings.hashToUrl))
-      return
-    let time = new Date().getTime()
-    let toChain = {
-      [TYPE]: 'tradle.AppState',
-      [NONCE]: this.getNonce(),
-      state: 'background'
-    }
+    // if (authenticated)
+    //   return
+    // let me = utils.getMe()
+    // let settings = list[SETTINGS + '_1'].value
+    // if (utils.isEmpty(settings.hashToUrl))
+    //   return
+    // let time = new Date().getTime()
+    // let toChain = {
+    //   [TYPE]: 'tradle.AppState',
+    //   [NONCE]: this.getNonce(),
+    //   state: 'background'
+    // }
 
-    Object.keys(settings.hashToUrl).forEach(id => {
-      let to = list[id].value
-      if (!to.pubkeys) return
+    // Object.keys(settings.hashToUrl).forEach(id => {
+    //   let to = list[id].value
+    //   if (!to.pubkeys) return
 
-      let result = this.searchMessages({modelName: MESSAGE, to: to, limit: 1})
-      if (result  &&  time - result[0].time < 36000) {
-        meDriver.signAndSend({
-          object: toChain,
-          to: { fingerprint: self.getFingerprint(list[toId].value) }
-        })
-        .catch(function (err) {
-          debugger
-        })
-      }
-    })
+    //   let result = this.searchMessages({modelName: MESSAGE, to: to, limit: 1})
+    //   if (result  &&  time - result[0].time < 36000) {
+    //     meDriver.signAndSend({
+    //       object: toChain,
+    //       to: { fingerprint: self.getFingerprint(list[toId].value) }
+    //     })
+    //     .catch(function (err) {
+    //       debugger
+    //     })
+    //   }
+    // })
     // return db.put(meId, r)
     // .then(() => {
     //   self.trigger({action: 'authenticated'})
@@ -1902,7 +1910,7 @@ var Store = Reflux.createStore({
     this.trigger({action: 'getMe', me: me})
   },
   onCleanup() {
-    var me  = utils.getMe()
+    // var me  = utils.getMe()
     if (!me)
       return
     var result = this.searchMessages({to: me, modelName: CUSTOMER_WAITING, isForgetting: true});
@@ -3416,12 +3424,12 @@ var Store = Reflux.createStore({
           contactInfo: contactInfo
         };
         newIdentity[TYPE] = PROFILE;
-        var me = list[MY_IDENTITIES];
-        if (me)  {
-          var currentIdentity = me.value.currentIdentity;
+        var myIdentities = list[MY_IDENTITIES];
+        if (myIdentities)  {
+          var currentIdentity = myIdentities.value.currentIdentity;
           newIdentity[constants.OWNER] = {
             id: currentIdentity,
-            title: utils.getDisplayName(me, props)
+            title: utils.getDisplayName(currentIdentity, props)
           };
           // if (me.organization) {
           //   var photos = list[utils.getId(me.organization.id)].value.photos;
@@ -3765,7 +3773,7 @@ var Store = Reflux.createStore({
   },
   putIdentityInDB(val, batch) {
     var profile = {}
-    var me = utils.getMe()
+    // var me = utils.getMe()
     if (val.name) {
       for (var p in val.name) {
         profile[p] = val.name[p]
@@ -4319,7 +4327,7 @@ var Store = Reflux.createStore({
     })
   },
   onForgetMe(resource, noTrigger) {
-    var me = utils.getMe()
+    // var me = utils.getMe()
     var msg = {
       [TYPE]: FORGET_ME,
       [NONCE]: this.getNonce()
