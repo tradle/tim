@@ -300,8 +300,8 @@ var Store = Reflux.createStore({
       // })
   },
   onSetAuthenticated(authenticated) {
-    // if (!me)
-    //   return
+    if (!me) me = utils.getMe()
+
     let meId = utils.getId(me)
     let r = {}
     // extend(true, r, me, {
@@ -877,6 +877,7 @@ var Store = Reflux.createStore({
         action: 'list',
         list: list,
       })
+
       return results
         .filter(r => r.state === 'fulfilled')
         .map(r => r.value)
@@ -937,7 +938,7 @@ var Store = Reflux.createStore({
       self._setItem(pkey, profile)
     }
     if (!list[okey].value.contacts) {
-      self._setItem(okey, { ...list[okey].value, contacts: [] })
+      self._mergeItem(okey, { contacts: [] })
       // list[okey].value.contacts = []
     }
 
@@ -949,7 +950,7 @@ var Store = Reflux.createStore({
       titile: list[pkey].formatted
     }
 
-    self._setItem(okey, { ...curOkeyVal, contacts: [...curOkeyVal.contacts, newContact] })
+    self._mergeItem(okey, { contacts: [...curOkeyVal.contacts, newContact] })
     // list[okey].value.contacts.push({
     //   id:     pkey,
     //   titile: list[pkey].formatted
@@ -1120,8 +1121,7 @@ var Store = Reflux.createStore({
         if (result.length) {
           result.forEach((r) => {
             const rid = utils.getId(r)
-            const curVal = list[rid]
-            self._setItem(rid, { ...curVal, documentCreated: true })
+            self._mergeItem(rid, { documentCreated: true })
           })
         }
       }
@@ -2554,6 +2554,7 @@ var Store = Reflux.createStore({
 
           continue;
         }
+
         var m = this.getModel(r[TYPE]).value
         var isVerificationR = r[TYPE] === VERIFICATION  ||  m.subClassOf === VERIFICATION
         var isForm = m.subClassOf === FORM
@@ -3191,8 +3192,7 @@ var Store = Reflux.createStore({
       var settings = list[key]
       if (settings) {
         const curVal = list[key].value
-        debugger
-        self._setItem(key, { ...curVal, urls: [...curVal.urls, v] })
+        self._mergeItem(key, { urls: [...curVal.urls, v] })
       }
       else {
         value.urls = SERVICE_PROVIDERS_BASE_URL_DEFAULTS.concat(v)
@@ -3280,7 +3280,8 @@ var Store = Reflux.createStore({
   getDriver(me) {
     if (driverPromise) return driverPromise
 
-    var createPromise
+    var getPassAndSalt
+    var genIdentity
     var allMyIdentities = list[MY_IDENTITIES]
     var currentIdentity
 
@@ -3318,10 +3319,21 @@ var Store = Reflux.createStore({
       //     }
       //   }
       // }
-      if (!mePub) {
-        createPromise = Q.ninvoke(tradleUtils, 'newIdentity', {
-          networkName: 'testnet'
+
+      // const pass = crypto.randomBytes(32).toString('hex')
+      // const salt = crypto.randomBytes(32).toString('hex')
+      genIdentity = Q.ninvoke(tradleUtils, 'newIdentity', { networkName })
+        .then(identityInfo => {
+          publishedIdentity = identityInfo.identity
+          mePub = publishedIdentity.pubkeys
+          mePriv = identityInfo.keys
         })
+
+      // getPassAndSalt = Q.all([
+      //   Keychain.setGenericPassword(ACCOUNT_PASS_KEY, pass).then(() => pass),
+      //   Keychain.setGenericPassword(ACCOUNT_SALT_KEY, salt).then(() => salt),
+      //   genIdentity
+      // ])
 
         // bringing it back!
         // if (__DEV__  &&  !keys.some((k) => k.type() === 'dsa')) {
@@ -3331,20 +3343,18 @@ var Store = Reflux.createStore({
         //   }))
         // }
 
-      }
+    } else {
+      // getPassAndSalt = Q.all([
+      //   Keychain.getGenericPassword(ACCOUNT_PASS_KEY),
+      //   Keychain.getGenericPassword(ACCOUNT_SALT_KEY)
+      // ])
     }
 
     if (me.language)
       language = list[utils.getId(me.language)].value
 
-    return driverPromise = (createPromise || Q())
-      .then(identityInfo => {
-        if (createPromise) {
-          publishedIdentity = identityInfo.identity
-          mePub = publishedIdentity.pubkeys
-          mePriv = identityInfo.keys
-        }
-
+    return driverPromise = (genIdentity || Q()).then(() => {
+      // .spread((pass, salt) => {
         me['privkeys'] = mePriv
         me[NONCE] = me[NONCE] || this.getNonce()
         return this.buildDriver({
@@ -3352,6 +3362,8 @@ var Store = Reflux.createStore({
           keys: mePriv,
           password: 'testing',
           salt: new Buffer('testingsalt')
+          // password: new Buffer(pass, 'hex'),
+          // salt: new Buffer(salt, 'hex')
         })
       })
   },
@@ -3707,13 +3719,13 @@ var Store = Reflux.createStore({
       if (isMessage) {
         this.putMessageInDB(val, obj, batch, onMessage)
         if (type === VERIFICATION)
-          return
+          return Q()
       }
     }
     if (model.subClassOf === MY_PRODUCT)
       val.sharedWith = [this.createSharedWith(utils.getId(val.from.id), new Date().getTime())]
 
-    self._updateItem(key, val)
+    self._mergeItem(key, val)
 
     var retParams = {
       action: isMessage ? 'messageList' : 'list'
@@ -4474,7 +4486,7 @@ var Store = Reflux.createStore({
   _setItem(key, value) {
     list[key] = { key, value }
   },
-  _updateItem(key, value) {
+  _mergeItem(key, value) {
     const current = list[key] || {}
     list[key] = { key, value: { ...current.value, ...value } }
   },
