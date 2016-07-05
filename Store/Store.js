@@ -2657,7 +2657,7 @@ var Store = Reflux.createStore({
           switch (typeof val) {
             case 'object':
               if (val) {
-                doc[p] = extend(true, val)
+                doc[p] = extend(true, {}, val)
               }
               break
             default:
@@ -3656,7 +3656,7 @@ var Store = Reflux.createStore({
   putInDb(obj, onMessage) {
     // defensive copy
     var self = this
-    var val = extend(true, obj.parsed.data)
+    var val = extend(true, {}, obj.parsed.data)
     if (!val)
       return Q()
 
