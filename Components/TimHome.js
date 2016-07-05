@@ -47,7 +47,6 @@ import {
   StatusBar,
   Dimensions,
   Alert,
-  AppState,
   Platform
 } from 'react-native'
 
@@ -89,7 +88,6 @@ class TimHome extends Component {
 
   componentDidMount() {
     AutomaticUpdates.on()
-    AppState.addEventListener('change', this._handleAppStateChange);
     // LinkingIOS.addEventListener('url', this._handleOpenURL);
     // var url = LinkingIOS.popInitialURL();
     // if (url)
