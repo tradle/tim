@@ -212,7 +212,7 @@ class ShowPropertiesView extends Component {
             val = <Text style={styles.description}>{val}</Text>;
           else if (pMeta.type === 'boolean')
             val = <Text style={styles.description}>{val.title}</Text>;
-          else if (pMeta.type !== 'object'  &&  (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0))
+          else if (pMeta.type !== 'object'  &&  (typeof val === 'string')  &&  (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0))
             val = <Text onPress={this.onPress.bind(this, val)} style={[styles.description, {color: '#7AAAC3'}]}>{val}</Text>;
           else {
         // val = <TouchableOpacity onPress={() => {
