@@ -81,6 +81,7 @@
 		9B41626D1C6F9BBD00A93B7C /* FontAwesome.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9B41626C1C6F9BBD00A93B7C /* FontAwesome.ttf */; };
 		9B4748041D18C1E1008703E3 /* libRNFS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73030AF61D14DC4B0096A864 /* libRNFS.a */; };
 		9B47481D1D18C1E6008703E3 /* libCodePush.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732AB4B21D18B45600F2DE1C /* libCodePush.a */; };
+		9BB6F53D1D2D819400DFDD41 /* libRNDeviceInfo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 737540931D25941500A81EC1 /* libRNDeviceInfo.a */; };
 		B9960E5EDF0C47B789285122 /* libReactNativeLocalization.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0BD5B3365E2D454AB5703454 /* libReactNativeLocalization.a */; };
 		BA4A894818DA4F889E58F732 /* libRCTVideo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ABE7159BBFD14FFDB6BBF084 /* libRCTVideo.a */; };
 		BC686B7EA43346EC98F13734 /* Foundation.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7792D3B3CB564D30820C6FBC /* Foundation.ttf */; };
@@ -360,6 +361,7 @@
 				00C302E71ABCBA2D00DB3ED1 /* libRCTGeolocation.a in Frameworks */,
 				00C302E81ABCBA2D00DB3ED1 /* libRCTImage.a in Frameworks */,
 				133E29F31AD74F7200F7D852 /* libRCTLinking.a in Frameworks */,
+				9BB6F53D1D2D819400DFDD41 /* libRNDeviceInfo.a in Frameworks */,
 				00C302E91ABCBA2D00DB3ED1 /* libRCTNetwork.a in Frameworks */,
 				139105C61AF99C1200B5F7CC /* libRCTSettings.a in Frameworks */,
 				832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */,
