@@ -47,8 +47,7 @@ import Native, {
   Dimensions,
   Navigator,
   TouchableHighlight,
-  Animated,
-  NativeModules
+  Animated
 } from 'react-native';
 
 import Keyboard from 'Keyboard'
