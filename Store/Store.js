@@ -253,8 +253,9 @@ var Store = Reflux.createStore({
     .then(function(value) {
       me = value
       if (me.isAuthenticated) {
-        if (new Date().now - me.dateAuthenticated > AUTHENTICATED_TIME) {
+        if (new Date.now() - me.dateAuthenticated > AUTHENTICATED_TIME) {
           delete me.isAuthenticated
+          delete me.dateAuthenticated
           db.put(utils.getId(me), me)
         }
       }
@@ -1947,6 +1948,11 @@ var Store = Reflux.createStore({
       var key = utils.getId(formResource)
       var r = list[key].value
       r.documentCreated = true
+      if (r[TYPE] === FORM_REQUEST)
+        r.document = resource[TYPE] === VERIFICATION
+                   ? utils.getId(resource.document)
+                   : utils.getId(resource)
+
       var batch = []
       batch.push({type: 'put', key: key, value: r})
       var toId = utils.getId(to)
@@ -3545,7 +3551,7 @@ var Store = Reflux.createStore({
       meDriver.on('readseal', function (seal) {
         const link = seal.link
         let wrapper
-        meDriver.objects.get(link, true)
+        meDriver.objects.get(link)
           .then(function(obj) {
             // return
             wrapper = { ...seal, ...obj }
@@ -3674,11 +3680,14 @@ var Store = Reflux.createStore({
   },
 
   putInDb(obj, onMessage) {
+    return this._putInDb(obj, onMessage) || Q()
+  },
+  _putInDb(obj, onMessage) {
     // defensive copy
     var self = this
     var val = extend(true, {}, obj.parsed.data)
     if (!val)
-      return Q()
+      return
 
     val[ROOT_HASH] = val[ROOT_HASH]  ||  obj[ROOT_HASH]
     val[CUR_HASH] = obj[CUR_HASH]
@@ -3690,7 +3699,12 @@ var Store = Reflux.createStore({
     if (type === FORGET_ME) {
       // Alert.alert("Received ForgetMe from " + obj.from[ROOT_HASH])
       this.forgetMe(from)
-      return Q()
+      return
+    }
+    if (onMessage  &&  val[TYPE] === FORGOT_YOU) {
+      // this.trigger({action: 'messageList', to: me})
+      this.forgotYou(from)
+      return
     }
     var isConfirmation
     var model = this.getModel(type)  &&  this.getModel(type).value
@@ -3703,7 +3717,7 @@ var Store = Reflux.createStore({
         isConfirmation = true
       }
       else
-        return Q();
+        return;
     }
     if (obj.txId)
       val.txId = obj.txId
@@ -3719,17 +3733,17 @@ var Store = Reflux.createStore({
       if (isMessage) {
         this.putMessageInDB(val, obj, batch, onMessage)
         if (type === VERIFICATION)
-          return Q()
+          return
       }
     }
     if (model.subClassOf === MY_PRODUCT)
       val.sharedWith = [this.createSharedWith(utils.getId(val.from.id), new Date().getTime())]
 
     self._mergeItem(key, val)
-
     var retParams = {
       action: isMessage ? 'messageList' : 'list'
     }
+
     var resultList
     if (isMessage) {
       var toId = PROFILE + '_' + obj.to[ROOT_HASH]
@@ -3759,11 +3773,12 @@ var Store = Reflux.createStore({
 
     return db.batch(batch)
     .then(() => {
-      if (onMessage  &&  val[TYPE] === FORGOT_YOU) {
-        this.forgotYou(from)
-      }
+      // if (onMessage  &&  val[TYPE] === FORGOT_YOU) {
+      //   this.forgotYou(from)
+      // }
 
-      else if (isConfirmation) {
+      // else
+      if (isConfirmation) {
         var fOrg = from.organization
         var org = fOrg ? list[utils.getId(fOrg)].value : null
         var msg = {
@@ -3898,10 +3913,10 @@ var Store = Reflux.createStore({
       val.to = inDB.to
     }
 
-    if (onMessage  &&  val[TYPE] === FORGOT_YOU) {
-      this.forgotYou(from)
-      return
-    }
+    // if (onMessage  &&  val[TYPE] === FORGOT_YOU) {
+    //   this.forgotYou(from)
+    //   return
+    // }
 
     var isProductList = val[TYPE] === PRODUCT_LIST
     if (isProductList) {
@@ -4194,7 +4209,7 @@ var Store = Reflux.createStore({
             return
           var res = list[rId].value
           var isVerification = r[TYPE] === VERIFICATION
-          var model = utils.getModel(r[TYPE])
+          var model = utils.getModel(r[TYPE]).value
           var isForm = !isVerification  &&  model.subClassOf === FORM
           var deleted = !(res.sharedWith && res.sharedWith.length > 1)
           if (!deleted) {
