@@ -166,6 +166,8 @@ var driverInfo = {
 
 var LocalizedStrings = require('react-native-localization')
 let defaultLanguage = new LocalizedStrings({ en: {}, nl: {} }).getLanguage()
+const ENCRYPTION_KEY = 'accountkey'
+const ENCRYPTION_SALT = 'accountsalt'
 
 // var Store = Reflux.createStore(timeFunctions({
 var Store = Reflux.createStore({
@@ -378,11 +380,11 @@ var Store = Reflux.createStore({
         rr[p] = r[p];
     return rr;
   },
-  buildDriver ({ keys, identity, password, salt }) {
+  buildDriver ({ keys, identity, encryption }) {
     var keeper = createKeeper({
       path: path.join(TIM_PATH_PREFIX, 'keeper'),
       db: leveldown,
-      encryption: { password, salt },
+      encryption: encryption,
       validateOnPut: false
     })
 
@@ -3280,8 +3282,7 @@ var Store = Reflux.createStore({
   getDriver(me) {
     if (driverPromise) return driverPromise
 
-    var getPassAndSalt
-    var genIdentity
+    var loadIdentityAndKeys
     var allMyIdentities = list[MY_IDENTITIES]
     var currentIdentity
 
@@ -3320,20 +3321,20 @@ var Store = Reflux.createStore({
       //   }
       // }
 
-      // const pass = crypto.randomBytes(32).toString('hex')
-      // const salt = crypto.randomBytes(32).toString('hex')
-      genIdentity = Q.ninvoke(tradleUtils, 'newIdentity', { networkName })
+      const encryptionKey = crypto.randomBytes(32).toString('hex')
+      const globalSalt = crypto.randomBytes(32).toString('hex')
+      const genIdentity = Q.ninvoke(tradleUtils, 'newIdentity', { networkName })
         .then(identityInfo => {
           publishedIdentity = identityInfo.identity
           mePub = publishedIdentity.pubkeys
           mePriv = identityInfo.keys
         })
 
-      // getPassAndSalt = Q.all([
-      //   Keychain.setGenericPassword(ACCOUNT_PASS_KEY, pass).then(() => pass),
-      //   Keychain.setGenericPassword(ACCOUNT_SALT_KEY, salt).then(() => salt),
-      //   genIdentity
-      // ])
+      loadIdentityAndKeys = Q.all([
+        Keychain.setGenericPassword(ENCRYPTION_KEY, encryptionKey).then(() => encryptionKey),
+        Keychain.setGenericPassword(ENCRYPTION_SALT, globalSalt).then(() => globalSalt),
+        genIdentity
+      ])
 
         // bringing it back!
         // if (__DEV__  &&  !keys.some((k) => k.type() === 'dsa')) {
@@ -3344,28 +3345,27 @@ var Store = Reflux.createStore({
         // }
 
     } else {
-      // getPassAndSalt = Q.all([
-      //   Keychain.getGenericPassword(ACCOUNT_PASS_KEY),
-      //   Keychain.getGenericPassword(ACCOUNT_SALT_KEY)
-      // ])
+      loadIdentityAndKeys = Q.all([
+        Keychain.getGenericPassword(ENCRYPTION_KEY),
+        Keychain.getGenericPassword(ENCRYPTION_SALT)
+      ])
     }
 
     if (me.language)
       language = list[utils.getId(me.language)].value
 
-    return driverPromise = (genIdentity || Q()).then(() => {
-      // .spread((pass, salt) => {
-        me['privkeys'] = mePriv
-        me[NONCE] = me[NONCE] || this.getNonce()
-        return this.buildDriver({
-          identity: publishedIdentity,
-          keys: mePriv,
-          password: 'testing',
-          salt: new Buffer('testingsalt')
-          // password: new Buffer(pass, 'hex'),
-          // salt: new Buffer(salt, 'hex')
-        })
+    return driverPromise = loadIdentityAndKeys.spread((encryptionKey, globalSalt) => {
+      me['privkeys'] = mePriv
+      me[NONCE] = me[NONCE] || this.getNonce()
+      return this.buildDriver({
+        identity: publishedIdentity,
+        keys: mePriv,
+        encryption: {
+          key: new Buffer(encryptionKey, 'hex'),
+          salt: new Buffer(globalSalt, 'hex')
+        }
       })
+    })
   },
 
   // makePublishingIdentity(me, pubkeys) {
@@ -3545,7 +3545,7 @@ var Store = Reflux.createStore({
       meDriver.on('readseal', function (seal) {
         const link = seal.link
         let wrapper
-        meDriver.objects.get(link, true)
+        meDriver.objects.get(link)
           .then(function(obj) {
             // return
             wrapper = { ...seal, ...obj }
