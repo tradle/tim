@@ -45,6 +45,7 @@ var translate = utils.translate
 var promisify = require('q-level');
 var asyncstorageDown = require('asyncstorage-down')
 var levelup = require('levelup')
+// var levelupdown = require('level-updown')
 var leveldown = require('cachedown')
 leveldown.setLeveldown(asyncstorageDown)
 var level = function (loc, opts) {
@@ -152,7 +153,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
-var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://192.168.0.101:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
+var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://192.168.0.114:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
@@ -3338,9 +3339,9 @@ var Store = Reflux.createStore({
 
       loadIdentityAndKeys = Q.all([
         Keychain.setGenericPassword(ENCRYPTION_KEY, encryptionKey).then(() => encryptionKey),
-        Keychain.setGenericPassword(ENCRYPTION_SALT, globalSalt).then(() => globalSalt),
         genIdentity
       ])
+      .spread(encryptionKey => encryptionKey)
 
         // bringing it back!
         // if (__DEV__  &&  !keys.some((k) => k.type() === 'dsa')) {
@@ -3351,24 +3352,20 @@ var Store = Reflux.createStore({
         // }
 
     } else {
-      loadIdentityAndKeys = Q.all([
-        Keychain.getGenericPassword(ENCRYPTION_KEY),
-        Keychain.getGenericPassword(ENCRYPTION_SALT)
-      ])
+      loadIdentityAndKeys = Keychain.getGenericPassword(ENCRYPTION_KEY)
     }
 
     if (me.language)
       language = list[utils.getId(me.language)].value
 
-    return driverPromise = loadIdentityAndKeys.spread((encryptionKey, globalSalt) => {
+    return driverPromise = loadIdentityAndKeys.then(encryptionKey => {
       me['privkeys'] = mePriv
       me[NONCE] = me[NONCE] || this.getNonce()
       return this.buildDriver({
         identity: publishedIdentity,
         keys: mePriv,
         encryption: {
-          key: new Buffer(encryptionKey, 'hex'),
-          salt: new Buffer(globalSalt, 'hex')
+          key: new Buffer(encryptionKey, 'hex')
         }
       })
     })
