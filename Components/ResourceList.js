@@ -741,6 +741,7 @@ class ResourceList extends Component {
       content = <ListView
           dataSource={this.state.dataSource}
           renderHeader={this.renderHeader.bind(this)}
+          enableEmptySections={true}
           renderRow={this.renderRow.bind(this)}
           automaticallyAdjustContentInsets={false}
           keyboardDismissMode='on-drag'

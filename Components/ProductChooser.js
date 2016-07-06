@@ -196,6 +196,7 @@ class ProductChooser extends Component {
     <ListView ref='listview' style={styles.listview}
       dataSource={this.state.dataSource}
       renderRow={this.renderRow.bind(this)}
+      enableEmptySections={true}
       automaticallyAdjustContentInsets={false}
       keyboardDismissMode='on-drag'
       keyboardShouldPersistTaps={true}
