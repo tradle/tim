@@ -177,22 +177,7 @@ class MessageList extends Component {
     LINK_COLOR = this.props.bankStyle.LINK_COLOR
 
     if (list.length || (this.state.filter  &&  this.state.filter.length)) {
-      let productToForms = {}
-      list.forEach((r) => {
-        if (r[constants.TYPE] === FORM_REQUEST  &&  r.documentCreated && r.document) {
-          var l = productToForms[r.product]
-          if (!l) {
-            l = {}
-            productToForms[r.product] = l
-          }
-          let forms = l[r.form]
-          if (!forms) {
-            forms = []
-            l[r.form] = forms
-          }
-          forms.push(r.document)
-        }
-      })
+      let productToForms = this.gatherForms(list)
 
       var type = list[0][constants.TYPE];
       if (type  !== this.props.modelName) {
@@ -217,6 +202,25 @@ class MessageList extends Component {
     }
     else
       this.setState({isLoading: false, isEmployee: utils.getMe().isEmployee})
+  }
+  gatherForms(list) {
+    let productToForms = {}
+    list.forEach((r) => {
+      if (r[constants.TYPE] === FORM_REQUEST  &&  r.documentCreated  &&  r.document) {
+        var l = productToForms[r.product]
+        if (!l) {
+          l = {}
+          productToForms[r.product] = l
+        }
+        let forms = l[r.form]
+        if (!forms) {
+          forms = []
+          l[r.form] = forms
+        }
+        forms.push(r.document)
+      }
+    })
+    return productToForms
   }
   shouldComponentUpdate(nextProps, nextState) {
     // Eliminating repeated alerts when connection returns after ForgetMe action
