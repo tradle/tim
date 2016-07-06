@@ -87,7 +87,7 @@
     "addAnotherFormOrGetNext": "Add another {1} or move on to the next form",
     "getNextForm": "Next",
     "addSameForm": "Add",
-    "areYouSureAboutNextForm": "Are you sure you are done with {1}.",
+    "areYouSureAboutNextForm": "Are you sure you are done with {1}?",
     "formChooser": "Form list",
     "showQR": "My QR code"
 }
