@@ -258,7 +258,7 @@ var Store = Reflux.createStore({
     .then(function(value) {
       me = value
       if (me.isAuthenticated) {
-        if (new Date.now() - me.dateAuthenticated > AUTHENTICATED_TIME) {
+        if (new Date().now - me.dateAuthenticated > AUTHENTICATED_TIME) {
           delete me.isAuthenticated
           delete me.dateAuthenticated
           db.put(utils.getId(me), me)
