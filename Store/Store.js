@@ -155,7 +155,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
-var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://192.168.0.114:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
+var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://192.168.0.101:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
@@ -258,7 +258,7 @@ var Store = Reflux.createStore({
     .then(function(value) {
       me = value
       if (me.isAuthenticated) {
-        if (new Date().now - me.dateAuthenticated > AUTHENTICATED_TIME) {
+        if (Date.now() - me.dateAuthenticated > AUTHENTICATED_TIME) {
           delete me.isAuthenticated
           delete me.dateAuthenticated
           db.put(utils.getId(me), me)
