@@ -45,7 +45,8 @@ var translate = utils.translate
 var promisify = require('q-level');
 var asyncstorageDown = require('asyncstorage-down')
 var levelup = require('levelup')
-// var levelupdown = require('level-updown')
+// var updown = require('level-updown')
+
 var leveldown = require('cachedown')
 leveldown.setLeveldown(asyncstorageDown)
 var level = function (loc, opts) {
@@ -124,6 +125,7 @@ var map = require('map-stream')
 var Blockchain = require('@tradle/cb-blockr') // use tradle/cb-blockr fork
 // var defaultKeySet = midentity.defaultKeySet
 var createKeeper = require('@tradle/keeper')
+var cachifyKeeper = require('@tradle/keeper/cachify')
 var crypto = require('crypto')
 // var tutils = require('@tradle/utils')
 var isTest, originalMe;
@@ -385,9 +387,13 @@ var Store = Reflux.createStore({
   buildDriver ({ keys, identity, encryption }) {
     var keeper = createKeeper({
       path: path.join(TIM_PATH_PREFIX, 'keeper'),
-      db: leveldown,
+      db: asyncstorageDown,
       encryption: encryption,
       validateOnPut: false
+    })
+
+    cachifyKeeper(keeper, {
+      max: 100
     })
 
     var blockchain = new Blockchain(networkName)
