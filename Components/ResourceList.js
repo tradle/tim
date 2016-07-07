@@ -611,8 +611,8 @@ class ResourceList extends Component {
     return (
       <View style={styles.footer}>
         <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
-          <View style={{marginTop: -10}}>
-            <Icon name='ios-add-circle'  size={55}  color='#ffffff' style={styles.icon} />
+          <View style={styles.menuButton}>
+            <Icon name='md-more'  size={33}  color='#ffffff' />
           </View>
         </TouchableHighlight>
       </View>
@@ -908,7 +908,7 @@ var styles = StyleSheet.create({
     backgroundColor: '#cccccc',
   },
   icon: {
-    marginLeft: -30,
+    marginLeft: -23,
     marginTop: -25,
     // color: '#629BCA',
     color: 'red'
@@ -956,6 +956,21 @@ var styles = StyleSheet.create({
     // borderRadius: 30,
     // borderWidth: 1,
   },
+  menuButton: {
+    marginTop: -30,
+    paddingVertical: 5,
+    paddingHorizontal: 21,
+    borderRadius: 24,
+    // shadowOffset:{width: 5, height: 5},
+    shadowOpacity: 1,
+    shadowRadius: 5,
+    shadowColor: '#afafaf',
+    backgroundColor: 'red'
+  },
+
+  // menuButton1: {
+  //   marginTop: -30, paddingVertical: 5, paddingHorizontal: 21, borderRadius: 24, backgroundColor: 'red'
+  // }
 
 });
 

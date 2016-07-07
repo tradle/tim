@@ -485,12 +485,22 @@ class MessageList extends Component {
         // {addNew}
   }
   generateMenu() {
-    return <TouchableHighlight underlayColor='transparent'
-            onPress={() => this.ActionSheet.show()}>
-            <View style={{marginLeft: 5, paddingRight: 0, marginTop: 5, marginRight: 10, marginBottom: 0}}>
-              <Icon name='md-more' size={30} color='#999999' />
-            </View>
-          </TouchableHighlight>
+    let me = utils.getMe()
+    if (me.isEmployee  &&  utils.getId(me.organization) === utils.getId(this.props.resource))
+      return <View/>
+    return  <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
+              <View style={styles.menuButton}>
+                <Icon name='md-more'  size={33}  color='#ffffff' />
+              </View>
+            </TouchableHighlight>
+
+
+    // return <TouchableHighlight underlayColor='transparent'
+    //         onPress={() => this.ActionSheet.show()}>
+    //         <View style={{marginLeft: 5, paddingRight: 0, marginTop: 5, marginRight: 10, marginBottom: 0}}>
+    //           <Icon name='md-more' size={30} color='#999999' />
+    //         </View>
+    //       </TouchableHighlight>
   }
 
 
@@ -738,6 +748,27 @@ var styles = StyleSheet.create({
     borderWidth: 1,
     color: '#79AAF2'
   },
+  menuButton: {
+    marginTop: -23,
+    paddingVertical: 5,
+    paddingHorizontal: 21,
+    borderRadius: 24,
+    // shadowOffset:{width: 5, height: 5},
+    shadowOpacity: 1,
+    shadowRadius: 5,
+    shadowColor: '#afafaf',
+    backgroundColor: 'red'
+  },
+  // menuButton1: {
+  //   marginTop: -20,
+  //   paddingVertical: 5,
+  //   paddingHorizontal: 21,
+  //   borderRadius: 24,
+  //   shadowOffset:{width: 5, height: 5},
+  //   shadowOpacity: 1,
+  //   shadowColor: '#cccccc',
+  //   backgroundColor: 'red'
+  // }
 });
 module.exports = MessageList;
 
