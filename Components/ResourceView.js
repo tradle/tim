@@ -8,7 +8,7 @@ var PhotoList = require('./PhotoList');
 // var AddNewIdentity = require('./AddNewIdentity');
 // var SwitchIdentity = require('./SwitchIdentity');
 var ShowRefList = require('./ShowRefList');
-// var Icon = require('react-native-vector-icons/Ionicons');
+var Icon = require('react-native-vector-icons/Ionicons');
 // var IdentitiesList = require('./IdentitiesList');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
@@ -19,7 +19,8 @@ var QRCode = require('./QRCode')
 var MessageList = require('./MessageList')
 var defaultBankStyle = require('../styles/bankStyle.json')
 var buttonStyles = require('../styles/buttonStyles');
-const TOUCH_ID_IMG = require('../img/touchid2.png')
+import ActionSheet from 'react-native-actionsheet'
+
 const TALK_TO_EMPLOYEE = '1'
 // const SERVER_URL = 'http://192.168.0.162:44444/'
 
@@ -48,7 +49,8 @@ class ResourceView extends Component {
       resource: props.resource,
       embedHeight: {height: 0},
       isLoading: props.resource.id ? true : false,
-      isModalOpen: false
+      isModalOpen: false,
+      useTouchId: utils.getMe().useTouchId
     }
   }
   componentWillMount() {
@@ -96,7 +98,9 @@ class ResourceView extends Component {
     }
   }
   shouldComponentUpdate(nextProps, nextState) {
-    return (this.state.isModalOpen  !== nextState.isModalOpen) ? true : false
+    return (this.state.isModalOpen  !== nextState.isModalOpen || this.state.useTouchId !== nextState.useTouchId)
+           ? true
+           : false
   }
   onResourceUpdate(params) {
     var resource = params.resource;
@@ -153,27 +157,26 @@ class ResourceView extends Component {
     }
     else
       qrcode = <View />
-    // var switchTouchId = isIdentity
-    //                   ? <TouchableHighlight style={{backgroundColor: '#eeeeee'}} underlayColor='transparent' onPress={() => {
-    //                       let r = {
-    //                         _r: me[constants.ROOT_HASH],
-    //                         _t: constants.TYPES.PROFILE,
-    //                         useTouchId: !me.useTouchId
-    //                       }
 
-    //                       Actions.addItem({resource: me, value: r, meta: utils.getModel(constants.TYPES.PROFILE).value})
-    //                    }}>
-    //                      <View style={{flexDirection: 'row'}}>
-    //                         <Image source={{TOUCH_ID_IMG}} style={{color: 'red', width: 50, height: 50}} />
-    //                         <Text style={{color: '#2E3B4E', fontSize: 20, paddingVertical: 10, alignSelf: 'center'}}>{me.useTouchId ? translate('switchTouchIdOff') : translate('switchTouchIdOn')} </Text>
-    //                       </View>
-    //                     </TouchableHighlight>
-    //                  : <View />
-    var switchTouchId = <View />
+    let msg = translate(this.state.useTouchId ? 'touchIdOn' : 'touchIdOff')
+    let switchTouchId = isIdentity && !utils.isSimulator()
+                      ? <View style={styles.footer}>
+                          <Text style={{color: '#2E3B4E', fontSize: 18, paddingVertical: 10, paddingLeft: 15, alignSelf: 'flex-start'}}>{msg}</Text>
+                          <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
+                             <View style={[styles.menuButton, this.state.useTouchId ? {opacity: 1} : {opacity: 0.3}]}>
+                                <Icon name='md-finger-print' color='#ffffff' size={33} />
+                              </View>
+                            </TouchableHighlight>
+                        </View>
+                     : <View />
+    // var switchTouchId = <View />
           // <AddNewIdentity resource={resource} navigator={this.props.navigator} />
           // <SwitchIdentity resource={resource} navigator={this.props.navigator} />
               // <Icon  onPress={() => this.closeModal()} name={} size={30} style={{fontSize: 20, color: '#ffffff', paddingHorizontal: 30, paddingVertical: 15}}>Close</Text>
+    let buttons = [translate('turnTouchIdOn'), translate('turnTouchIdOff'), translate('cancel')]
+
     return (
+      <View>
       <ScrollView  ref='this' style={styles.container}>
         <View style={[styles.photoBG]}>
           <PhotoView resource={resource} navigator={this.props.navigator}/>
@@ -193,8 +196,21 @@ class ResourceView extends Component {
                             currency={this.props.currency}
                             excludedProperties={['photos']}
                             navigator={this.props.navigator} />
-        {switchTouchId}
       </ScrollView>
+      {switchTouchId}
+        <ActionSheet
+          ref={(o) => {
+            this.ActionSheet = o
+          }}
+          options={buttons}
+          cancelButtonIndex={buttons.length - 1}
+          onPress={(index) => {
+            if (index < 2)
+              this.changePreferences(index)
+          }}
+        />
+
+      </View>
     );
   }
   openModal() {
@@ -210,7 +226,16 @@ class ResourceView extends Component {
     this.state.propValue = utils.getId(resource.id);
     Actions.getItem(resource.id);
   }
-
+  changePreferences() {
+    let me = utils.getMe()
+    let r = {
+      _r: me[constants.ROOT_HASH],
+      _t: constants.TYPES.PROFILE,
+      useTouchId: !me.useTouchId
+    }
+    this.setState({useTouchId: !this.state.useTouchId})
+    Actions.addItem({resource: me, value: r, meta: utils.getModel(constants.TYPES.PROFILE).value})
+  }
 }
 reactMixin(ResourceView.prototype, Reflux.ListenerMixin);
 reactMixin(ResourceView.prototype, ResourceMixin);
@@ -230,6 +255,34 @@ var styles = StyleSheet.create({
     backgroundColor: '#245D8C',
     alignItems: 'center',
   },
+  menuButton: {
+    marginTop: -20,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 24,
+    // shadowOffset:{width: 5, height: 5},
+    shadowOpacity: 1,
+    shadowRadius: 5,
+    shadowColor: '#afafaf',
+    backgroundColor: 'red'
+  },
+  footer: {
+    flexDirection: 'row',
+    flexWrap: 'nowrap',
+    justifyContent: 'space-between',
+    height: 45,
+    // paddingTop: 5,
+    width: Dimensions.get('window').width,
+    // paddingHorizontal: 13,
+    backgroundColor: '#eeeeee',
+    borderColor: '#eeeeee',
+    borderWidth: 1,
+    borderTopColor: '#cccccc',
+    position: 'absolute',
+    top: Dimensions.get('window').height - 45,
+    paddingRight: 10
+  },
+
   // footer: {
   //   flexDirection: 'row',
   //   alignItems: 'center',
