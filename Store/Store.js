@@ -97,7 +97,7 @@ const FORM_ERROR          = 'tradle.FormError'
 const MY_IDENTITIES = MY_IDENTITIES_TYPE + '_1'
 const SETTINGS = constants.TYPES.SETTINGS
 const EMPLOYEE_ONBOARDING = 'tradle.EmployeeOnboarding'
-const MY_EMPLOYEE_PASS = 'tradle.MyEmployeePass'
+const MY_EMPLOYEE_PASS = 'tradle.MyEmployeeOnboarding'
 
 const WELCOME_INTERVAL = 600000
 
@@ -135,7 +135,7 @@ var currentEmployees = {}
 var PORT = 51086
 var TIM_PATH_PREFIX = 'me'
 // If app restarts in less then 10 minutes keep it authenticated
-const AUTHENTICATED_TIME = 3600 * 10
+const AUTHENTICATED_TIME = 600// 0000
 
 var models = {};
 var list = {};
@@ -772,20 +772,23 @@ var Store = Reflux.createStore({
             if (name)
               name = name.formatted
           }
+          if (!name && payload.message)
+            name = payload.message.split(' ')[0]
 
+          const rootHash = payload.identity[ROOT_HASH] || protocol.linkString(payload.identity)
           Alert.alert(
             translate('newContactRequest', name),
-            parsed.message || null,
+            payload.message || null,
             [
               {text: translate('Ok'),
               onPress: () => {
-                return meDriver.addContactIdentity(parsed.identity)
+                return meDriver.addContactIdentity(payload.identity)
                 .then(() => {
-                  return self.addContact(parsed, from)
+                  return self.addContact(payload, rootHash)
                 })
                 .then(() => {
                   const url = utils.keyByValue(wsClients, transport)
-                  self.addToSettings({hash: from, url: url})
+                  self.addToSettings({hash: rootHash, url: url})
                 })
               }},
               {text: translate('cancel'), onPress: () => console.log('Canceled!')},
@@ -830,7 +833,7 @@ var Store = Reflux.createStore({
     let languageCode
     if (me) {
       language = me.language
-      if (language) {
+      if (language && list[utils.getId(language)]) {
         language = list[utils.getId(language)].value
         languageCode = language.code
       }
@@ -1012,8 +1015,8 @@ var Store = Reflux.createStore({
       var batch = []
       batch.push({type: 'put', key: ikey, value: identity })
       batch.push({type: 'put', key: pkey, value: profile })
-      self._setItem(ikey, identity)
-      self._setItem(pkey, profile)
+      this._setItem(ikey, identity)
+      this._setItem(pkey, profile)
     }
     // HACK
     if (!profile.firstName.length) {
@@ -1355,9 +1358,8 @@ var Store = Reflux.createStore({
                  ? Q()
                  :  meDriver.signAndSend({
                       object: toChain,
-                      to: { fingerprint: this.getFingerprint(list[key].value) },
-                      deliver: true
-                  })
+                      to: { fingerprint: this.getFingerprint(list[key].value) }
+                    })
     var newVerification
     return promise
     .then(function(data) {
@@ -3362,7 +3364,7 @@ var Store = Reflux.createStore({
     }
 
     if (me.language)
-      language = list[utils.getId(me.language)].value
+      language = list[utils.getId(me.language)] && list[utils.getId(me.language)].value
 
     return driverPromise = loadIdentityAndKeys.then(encryptionKey => {
       me['privkeys'] = mePriv
@@ -4171,7 +4173,7 @@ var Store = Reflux.createStore({
       self.trigger({action: 'messageList', modelName: MESSAGE, forgetMeFromCustomer: true})
       return meDriver.signAndSend({
         object: { [TYPE]: FORGOT_YOU },
-        to: { [ROOT_HASH]: resource[ROOT_HASH] }
+        to: { permalink: resource[ROOT_HASH] }
       })
     })
     .catch((err) => {
