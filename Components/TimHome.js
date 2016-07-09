@@ -20,6 +20,8 @@ var TradleWhite = require('../img/TradleW.png')
 var BG_IMAGE = require('../img/bg.png')
 var PasswordCheck = require('./PasswordCheck')
 var TouchIDOptIn = require('./TouchIDOptIn')
+var defaultBankStyle = require('../styles/bankStyle.json')
+
 try {
   var commitHash = require('../version').commit.slice(0, 7)
 } catch (err) {
@@ -335,7 +337,8 @@ class TimHome extends Component {
     let passProps = {
         filter: '',
         modelName: this.props.modelName,
-        sortProperty: 'lastMessageTime'
+        sortProperty: 'lastMessageTime',
+        bankStyle: defaultBankStyle
       };
     let me = utils.getMe();
     this.props.navigator.push({
@@ -363,6 +366,7 @@ class TimHome extends Component {
           passProps: {
             model: utils.getModel(me[constants.TYPE]).value,
             resource: me,
+            bankStyle: defaultBankStyle
           }
         },
         passProps: {resource: me}
@@ -387,7 +391,8 @@ class TimHome extends Component {
       passProps: {
         modelName: constants.TYPES.ORGANIZATION,
         isConnected: this.state.isConnected,
-        officialAccounts: true
+        officialAccounts: true,
+        bankStyle: defaultBankStyle
       },
       rightButtonTitle: translate('profile'),
       onRightButtonPress: {
@@ -404,7 +409,8 @@ class TimHome extends Component {
           rightButtonTitle: translate('done'),
           passProps: {
             model: utils.getModel(me[constants.TYPE]).value,
-            resource: me
+            resource: me,
+            bankStyle: defaultBankStyle
           }
         },
         passProps: {resource: me}
