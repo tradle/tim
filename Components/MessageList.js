@@ -373,9 +373,12 @@ class MessageList extends Component {
       if (this.props.navigator.isConnected  &&  this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION) {
         if (this.state.isLoading) {
           content = <View style={[platformStyles.container, bgStyle]}>
-            <Text style={{fontSize: 17, alignSelf: 'center', marginTop: 80, color: '#629BCA'}}>{'Loading...'}</Text>
-            <ActivityIndicator size='large' style={{alignSelf: 'center', marginTop: 20}} />
-          </View>
+                      <Text style={{fontSize: 17, alignSelf: 'center', marginTop: 80, color: '#629BCA'}}>{'Loading...'}</Text>
+                      <ActivityIndicator size='large' style={{alignSelf: 'center', marginTop: 20}} />
+                      <View style={styles.footer}>
+                        {this.paintMenuButton()}
+                      </View>
+                    </View>
         }
       }
       else {
@@ -489,9 +492,7 @@ class MessageList extends Component {
     if (me.isEmployee  &&  utils.getId(me.organization) === utils.getId(this.props.resource))
       return <View/>
     return  <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
-              <View style={styles.menuButton}>
-                <Icon name='md-more'  size={33}  color='#ffffff' />
-              </View>
+              {this.paintMenuButton()}
             </TouchableHighlight>
 
 
@@ -501,6 +502,11 @@ class MessageList extends Component {
     //           <Icon name='md-more' size={30} color='#999999' />
     //         </View>
     //       </TouchableHighlight>
+  }
+  paintMenuButton() {
+    return  <View style={styles.menuButton}>
+              <Icon name='md-more'  size={33}  color='#ffffff' />
+            </View>
   }
 
 
@@ -748,10 +754,29 @@ var styles = StyleSheet.create({
     borderWidth: 1,
     color: '#79AAF2'
   },
+  footer: {
+    flexDirection: 'row',
+    flexWrap: 'nowrap',
+    justifyContent: 'flex-end',
+    height: 45,
+    // paddingTop: 5,
+    width: Dimensions.get('window').width,
+    // paddingHorizontal: 13,
+    backgroundColor: '#eeeeee',
+    borderColor: '#eeeeee',
+    borderWidth: 1,
+    borderTopColor: '#cccccc',
+    position: 'absolute',
+    bottom: 0,
+    // top: Dimensions.get('window').height - 173,
+    paddingRight: 10
+  },
+
   menuButton: {
     marginTop: -23,
     paddingVertical: 5,
     paddingHorizontal: 21,
+    height: 45,
     borderRadius: 24,
     // shadowOffset:{width: 5, height: 5},
     shadowOpacity: 1,
