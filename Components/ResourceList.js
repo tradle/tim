@@ -392,7 +392,7 @@ class ResourceList extends Component {
         component: ResourceView,
         titleTextColor: '#7AAAC3',
         backButtonTitle: translate('back'),
-        passProps: {resource: resource}
+        passProps: {resource: resource, bankStyle: defaultBankStyle}
       }
       var isMe = isIdentity ? resource[constants.ROOT_HASH] === me[constants.ROOT_HASH] : true;
       if (isMe) {
@@ -408,6 +408,7 @@ class ResourceList extends Component {
             model: utils.getModel(resource[constants.TYPE]).value,
             resource: resource,
             currency: this.props.currency,
+            bankStyle: defaultBankStyle
           }
         }
       }
@@ -415,15 +416,17 @@ class ResourceList extends Component {
     if (isOrganization) {
       route.title = resource.name
       if (this.props.officialAccounts) {
-        var msg = {
-          message: me.firstName + ' is waiting for the response',
-          _t: constants.TYPES.CUSTOMER_WAITING,
-          from: me,
-          to: resource,
-          time: new Date().getTime()
-        }
+        if (!me.isEmployee  ||  utils.getId(me.organization) !== utils.getId(resource)) {
+          var msg = {
+            message: me.firstName + ' is waiting for the response',
+            _t: constants.TYPES.CUSTOMER_WAITING,
+            from: me,
+            to: resource,
+            time: new Date().getTime()
+          }
 
-        utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg, true))
+          utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg, true))
+        }
       }
     }
 
@@ -478,7 +481,8 @@ class ResourceList extends Component {
         titleTextColor: '#7AAAC3',
         passProps: {
           model: utils.getModel(resource[constants.TYPE]).value,
-          resource: me
+          resource: me,
+          bankStyle: defaultBankStyle
         }
       };
     }
@@ -608,15 +612,24 @@ class ResourceList extends Component {
     //             </View>
     //           : <View />
 
+    // return (
+    //   <View style={styles.footer}>
+    //     <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
+    //       <View style={styles.menuButton1}>
+    //         <Icon name='md-menu'  size={30}  color='#ffffff' />
+    //       </View>
+    //     </TouchableHighlight>
+    //   </View>
+    // );
     return (
-      <View style={styles.footer}>
-        <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
-          <View style={styles.menuButton}>
-            <Icon name='md-more'  size={33}  color='#ffffff' />
-          </View>
-        </TouchableHighlight>
-      </View>
-    );
+       <View style={styles.footer}>
+         <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
+           <View style={styles.menuButton}>
+             <Icon name='md-more'  size={33}  color='#ffffff' />
+           </View>
+         </TouchableHighlight>
+       </View>
+    )
   }
   onSettingsPressed() {
     var model = utils.getModel(constants.TYPES.SETTINGS).value
@@ -648,6 +661,7 @@ class ResourceList extends Component {
       backButtonTitle: translate('back'),
       titleTextColor: '#7AAAC3',
       passProps: {
+        officialAccounts: true,
         modelName: constants.TYPES.ORGANIZATION
       }
     });
@@ -968,9 +982,16 @@ var styles = StyleSheet.create({
     backgroundColor: 'red'
   },
 
-  // menuButton1: {
-  //   marginTop: -30, paddingVertical: 5, paddingHorizontal: 21, borderRadius: 24, backgroundColor: 'red'
-  // }
+  menuButton1: {
+    marginTop: -30,
+    paddingVertical: 7,
+    paddingHorizontal: 13,
+    borderRadius: 25,
+    backgroundColor: 'red',
+    shadowOpacity: 1,
+    shadowRadius: 5,
+    shadowColor: '#afafaf',
+  }
 
 });
 
