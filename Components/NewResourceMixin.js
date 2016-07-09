@@ -202,7 +202,14 @@ var NewResourceMixin = {
             options.fields[p].auto = 'labels';
           }
         }
-        if (!options.fields[p].multiline && (type === 'string'  ||  type === 'number')) {
+        if (type === 'string'  &&  p.length > 7  &&  p.indexOf('_group') === p.length - 6) {
+          options.fields[p].template = this.myTextTemplate.bind(this, {
+                    label: label,
+                    prop:  props[p],
+                    model: meta,
+                  })
+        }
+        else if (!options.fields[p].multiline && (type === 'string'  ||  type === 'number')) {
           options.fields[p].template = this.myTextInputTemplate.bind(this, {
                     label: label,
                     prop:  props[p],
@@ -455,6 +462,16 @@ var NewResourceMixin = {
 
     this.floatingProps.video = data
     this.props.navigator.pop();
+  },
+
+  myTextTemplate(params) {
+    var label = translate(params.prop, params.model)
+
+    return (
+      <View style={{height: 60, marginLeft: 10, justifyContent: 'center'}}>
+        <Text style={{backgroundColor: LINK_COLOR, padding: 10, fontSize: 18, color: '#ffffff'}}>{label}</Text>
+      </View>
+    );
   },
 
   myTextInputTemplate(params) {
