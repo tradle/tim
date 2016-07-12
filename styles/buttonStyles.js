@@ -32,6 +32,7 @@ var buttonStyles = Object.freeze({
     alignSelf: 'center',
     paddingHorizontal: 7,
     marginTop: 10,
+    // marginBottom: Platform.OS === 'ios' ? 10 : 0
     // marginTop: 16,
     // width: 120
   },
@@ -39,22 +40,22 @@ var buttonStyles = Object.freeze({
     // marginTop: -80,
     // opacity: 0.8,
     // height: 63,
+    // height: 90,
+    // backgroundColor: BACKGROUND_COLOR,
     flexDirection: 'row',
     backgroundColor: '#a0a0a0',
-    // height: 90,
-
-    // backgroundColor: BACKGROUND_COLOR,
     justifyContent: 'center',
     alignSelf: 'stretch'
   },
   text: {
     color: '#ffffff',
-    paddingTop: 10,
+    paddingBottom: 10,
     fontWeight: FONT_WEIGHT,
     fontSize: FONT_SIZE,
-    marginTop: -6,
     alignSelf: 'center',
-    height: 45
+    // marginTop: -6,
+    // paddingTop: 10,
+    // height: 45
   },
 
   row1: {
