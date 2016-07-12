@@ -89,5 +89,11 @@
     "addSameForm": "Add",
     "areYouSureAboutNextForm": "Are you sure you are done with {1}?",
     "formChooser": "Form list",
-    "showQR": "My QR code"
+    "showQR": "My QR code",
+    "touchIdOn": "Touch ID is ON",
+    "passwordOn": "Gesture Password is ON",
+    "bothOn": "Both are ON",
+    "turnTouchIdOn": "Turn touch ID on",
+    "turnPasswordOn": "Turn Gesture Password on",
+    "turnBothOn": "Turn Both on",
 }
