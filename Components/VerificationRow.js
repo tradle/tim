@@ -64,8 +64,12 @@ class VerificationRow extends Component {
     let hasPhoto = photo !== null
     if (photo)
       photo = <Image source={{uri: utils.getImageUri(photo.url), position: 'absolute', left: 10}}  style={styles.cellImage} />
-    else
-      photo = <View style={{width: 70}} />
+    else {
+      if (isForm)
+        photo = <Icon name={model.icon || 'ios-paper-outline'} size={40} style={{marginTop: 8, width: 70}} color='#cccccc' />
+      else
+        photo = <View style={{width: 70}} />
+    }
 
 
     // else if (resource.organization  &&  resource.organization.photos)
