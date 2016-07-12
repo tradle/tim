@@ -18,6 +18,7 @@ import {
   Image,
   PixelRatio,
   StyleSheet,
+  Platform,
   Text,
   TouchableHighlight,
   View
@@ -143,7 +144,7 @@ class ResourceRow extends Component {
     else
       return (
       <Swipeout right={[{text: 'Hide', backgroundColor: 'red', onPress: this.hideResource.bind(this, resource)}]} autoClose={true} scroll={(event) => this._allowScroll(event)} >
-        <View key={this.getNextKey()} style={{opacity: 1, justifyContent: 'center'}}>
+        <View key={this.getNextKey()} style={{opacity: 1, flex: 1, justifyContent: 'center'}}>
           <TouchableHighlight onPress={this.props.onSelect} underlayColor='transparent' key={this.getNextKey()}>
             <View style={styles.row} key={this.getNextKey()}>
               {photo}
@@ -170,8 +171,8 @@ class ResourceRow extends Component {
               <View style={textStyle}>
                  {resource.numberOfForms
                     ? <View style={{flexDirection: 'row'}}>
-                         <Icon name={'ios-paper-outline'} color={'#cccccc'} size={35} style={{marginTop: -5}}/>
-                         <Text style={{fontWeight: '600', marginLeft: 0, marginTop: -10, color: '#cccccc'}}>{resource.numberOfForms}</Text>
+                         <Icon name='ios-paper-outline' color='#cccccc' size={35} style={{marginTop: Platform.OS === 'ios' ? -5 : 0}}/>
+                         <Text style={{fontWeight: '600', marginLeft: 0, marginTop: Platform.OS === 'ios' ? -10 : -6, color: '#cccccc'}}>{resource.numberOfForms}</Text>
                       </View>
                     : <View />
                  }
