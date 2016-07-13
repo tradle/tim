@@ -223,6 +223,7 @@ var utils = {
       var idArr = r.split('_');
       return idArr.length === 2 ? r : idArr[0] + '_' + idArr[1];
     }
+    if (!r) debugger
     if (r.id) {
       var idArr = r.id.split('_');
       return idArr.length === 2 ? r.id : idArr[0] + '_' + idArr[1];

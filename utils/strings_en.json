@@ -90,6 +90,11 @@
     "areYouSureAboutNextForm": "Are you sure you are done with {1}?",
     "formChooser": "Form list",
     "showQR": "My QR code",
+
+    "useTouchId": "Use Touch ID",
+    "useGesturePassword": "Use Gesture Password",
+    "useTouchIdAndGesturePassword": "Use Touch ID and Gesture",
+
     "touchIdOn": "Touch ID is ON",
     "passwordOn": "Gesture Password is ON",
     "bothOn": "Both are ON",
