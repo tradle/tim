@@ -59,13 +59,17 @@ class ShowRefList extends Component {
     }
     let showQR = utils.getId(me) === utils.getId(resource)  &&  me.isEmployee
     let width = Dimensions.get('window').width  / (propsToShow.length + (showQR ? 1 : 0))
+    let maxLetters = 2 + (width/10)
     propsToShow.forEach((p) => {
+      let propTitle = translate(props[p], model)
+      if (propTitle.length > maxLetters)
+        propTitle = propTitle.substring(0, maxLetters)
       refList.push(
         <View style={[buttonStyles.container, {width: width}]} key={this.getNextKey()}>
            <TouchableHighlight onPress={this.showResources.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
              <View style={{alignItems: 'center'}}>
                <Icon name={icon}  size={30}  color='#ffffff' />
-               <Text style={[buttonStyles.text, Platform.OS === 'android' ? {marginTop: 3} : {marginTop: 0}]}>{translate(props[p], model)}</Text>
+               <Text style={[buttonStyles.text, Platform.OS === 'android' ? {marginTop: 3} : {marginTop: 0}]}>{propTitle}</Text>
              </View>
            </TouchableHighlight>
          </View>
