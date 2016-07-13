@@ -1,27 +1,26 @@
 'use strict';
 
-var MessageView = require('./MessageView');
-var MessageRow = require('./MessageRow');
-var NoResources = require('./NoResources');
-var NewResource = require('./NewResource');
-var ProductChooser = require('./ProductChooser');
-var Icon = require('react-native-vector-icons/Ionicons');
+var MessageView = require('./MessageView')
+var MessageRow = require('./MessageRow')
+var NoResources = require('./NoResources')
+var NewResource = require('./NewResource')
+var ProductChooser = require('./ProductChooser')
+var Icon = require('react-native-vector-icons/Ionicons')
 var extend = require('extend')
-var utils = require('../utils/utils');
+var utils = require('../utils/utils')
 var translate = utils.translate
-var reactMixin = require('react-mixin');
+var reactMixin = require('react-mixin')
 var equal = require('deep-equal')
-var Store = require('../Store/Store');
-var Actions = require('../Actions/Actions');
-var Reflux = require('reflux');
-var constants = require('@tradle/constants');
-var GiftedMessenger = require('react-native-gifted-messenger');
+var Store = require('../Store/Store')
+var Actions = require('../Actions/Actions')
+var Reflux = require('reflux')
+var constants = require('@tradle/constants')
+var GiftedMessenger = require('react-native-gifted-messenger')
 var NetworkInfoProvider = require('./NetworkInfoProvider')
-import ActionSheet from 'react-native-actionsheet';
-import platformStyles from '../styles/platformStyles'
-// var AddNewMessage = require('./AddNewMessage');
-// var SearchBar = require('react-native-search-bar');
-// var ResourceTypesScreen = require('./ResourceTypesScreen');
+import ActionSheet from 'react-native-actionsheet'
+// var AddNewMessage = require('./AddNewMessage')
+// var SearchBar = require('react-native-search-bar')
+// var ResourceTypesScreen = require('./ResourceTypesScreen')
 
 var LINK_COLOR
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
@@ -34,6 +33,7 @@ import {
   Dimensions,
   PropTypes,
   Navigator,
+  Platform,
   View,
   Text,
   TouchableOpacity,
@@ -43,7 +43,14 @@ import {
 
 import ActivityIndicator from './ActivityIndicator'
 
-var currentMessageTime;
+import iosStyles from '../styles/iosStyles'
+import androidStyles from '../styles/androidStyles'
+var platformStyles = Platform.OS === 'ios' ? iosStyles : androidStyles
+import {MenuIconIOS} from '../styles/iosStyles'
+import {MenuIconAndroid} from '../styles/androidStyles'
+var MenuIcon = Platform.OS === 'ios' ? MenuIconIOS : MenuIconAndroid
+
+var currentMessageTime
 
 class MessageList extends Component {
   props: {
@@ -372,9 +379,11 @@ class MessageList extends Component {
     if (!this.state.list || !this.state.list.length) {
       if (this.props.navigator.isConnected  &&  this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION) {
         if (this.state.isLoading) {
-          content = <View style={[platformStyles.container, bgStyle]}>
-                      <Text style={{fontSize: 17, alignSelf: 'center', marginTop: 80, color: '#629BCA'}}>{'Loading...'}</Text>
-                      <ActivityIndicator size='large' style={{alignSelf: 'center', marginTop: 20}} />
+          content = <View style={{flex: 1}}>
+                      <View style={[platformStyles.container, bgStyle]}>
+                        <Text style={{fontSize: 17, alignSelf: 'center', marginTop: 80, color: '#629BCA'}}>{'Loading...'}</Text>
+                        <ActivityIndicator size='large' style={{alignSelf: 'center', marginTop: 20}} />
+                      </View>
                       <View style={styles.footer}>
                         {this.paintMenuButton()}
                       </View>
@@ -396,7 +405,7 @@ class MessageList extends Component {
 
     if (!content) {
       var isAllMessages = model.isInterface  &&  model.id === constants.TYPES.MESSAGE;
-
+      var maxHeight = Dimensions.get('window').height - (Platform.OS === 'android' ? 77 : 64) - (this.state.isConnected ? 0 : 30)
       content = <GiftedMessenger style={{paddingHorizontal: 10, marginTop: 5}}
         ref={(c) => this._GiftedMessenger = c}
         loadEarlierMessagesButton={this.state.list ? this.state.list.length > 100 : false}
@@ -410,7 +419,7 @@ class MessageList extends Component {
         submitOnReturn={true}
         menu={this.generateMenu.bind(this)}
         keyboardShouldPersistTaps={false}
-        maxHeight={Dimensions.get('window').height - 64} // 64 for the navBar; 110 - with SearchBar
+        maxHeight={maxHeight} // 64 for the navBar; 110 - with SearchBar
       />
         // returnKeyType={false}
         // keyboardShouldPersistTaps={false}
@@ -464,7 +473,6 @@ class MessageList extends Component {
     return (
       <View style={[platformStyles.container, bgStyle]}>
         <NetworkInfoProvider connected={this.state.isConnected} />
-        <View style={{flexDirection:'row'}} />
         <View style={ sepStyle } />
         {content}
         <ActionSheet
@@ -504,8 +512,12 @@ class MessageList extends Component {
     //       </TouchableHighlight>
   }
   paintMenuButton() {
-    return  <View style={styles.menuButton}>
-              <Icon name='md-more'  size={33}  color='#ffffff' />
+    // let style = Platform.OS === 'ios' ? styles.menuButton : styles.menuButtonA
+    // let icon = Platform.OS === 'ios' ?  'md-more' : 'md-menu'
+    // let color = Platform.OS === 'ios' ? '#ffffff' : 'red'
+
+    return  <View style={platformStyles.menuButtonNarrow}>
+              <Icon name={MenuIcon.name}  size={33}  color={MenuIcon.color} />
             </View>
   }
 
@@ -739,18 +751,12 @@ class MessageList extends Component {
 reactMixin(MessageList.prototype, Reflux.ListenerMixin);
 
 var styles = StyleSheet.create({
-  // container: {
-  //   flex: 1,
-  //   marginTop: Platform.OS === 'ios' ? 64 : 44,
-  //   backgroundColor: '#f7f7f7',
-  // },
   imageOutline: {
     width: 25,
     height: 25,
     borderRadius: 13,
     borderColor: '#aaaaaa',
     paddingLeft: 6,
-    // paddingLeft: 8,
     borderWidth: 1,
     color: '#79AAF2'
   },
@@ -759,41 +765,13 @@ var styles = StyleSheet.create({
     flexWrap: 'nowrap',
     justifyContent: 'flex-end',
     height: 45,
-    // paddingTop: 5,
     width: Dimensions.get('window').width,
-    // paddingHorizontal: 13,
     backgroundColor: '#eeeeee',
     borderColor: '#eeeeee',
     borderWidth: 1,
     borderTopColor: '#cccccc',
-    position: 'absolute',
-    bottom: 0,
-    // top: Dimensions.get('window').height - 173,
     paddingRight: 10
   },
-
-  menuButton: {
-    marginTop: -23,
-    paddingVertical: 5,
-    paddingHorizontal: 21,
-    height: 45,
-    borderRadius: 24,
-    // shadowOffset:{width: 5, height: 5},
-    shadowOpacity: 1,
-    shadowRadius: 5,
-    shadowColor: '#afafaf',
-    backgroundColor: 'red'
-  },
-  // menuButton1: {
-  //   marginTop: -20,
-  //   paddingVertical: 5,
-  //   paddingHorizontal: 21,
-  //   borderRadius: 24,
-  //   shadowOffset:{width: 5, height: 5},
-  //   shadowOpacity: 1,
-  //   shadowColor: '#cccccc',
-  //   backgroundColor: 'red'
-  // }
 });
 module.exports = MessageList;
 
