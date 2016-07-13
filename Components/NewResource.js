@@ -26,7 +26,6 @@ var DeviceHeight
 var DeviceWidth
 var constants = require('@tradle/constants');
 import ImagePicker from 'react-native-image-picker';
-import platformStyles from '../styles/platformStyles'
 var ENUM = 'tradle.Enum'
 var LINK_COLOR, DEFAULT_LINK_COLOR = '#a94442'
 var FORM_ERROR = 'tradle.FormError'
@@ -53,6 +52,10 @@ import Native, {
 import Keyboard from 'Keyboard'
 import React, { Component, PropTypes } from 'react'
 import ActivityIndicator from './ActivityIndicator'
+
+import iosStyles from '../styles/iosStyles'
+import androidStyles from '../styles/androidStyles'
+var platformStyles = Platform.OS === 'ios' ? iosStyles : androidStyles
 
 DeviceHeight = Dimensions.get('window').height;
 DeviceWidth = Dimensions.get('window').width
@@ -277,12 +280,14 @@ class NewResource extends Component {
         passProps: {
           model: self.props.model,
           resource: resource,
-          currency: this.props.currency
+          currency: this.props.currency,
+          bankStyle: this.props.bankStyle
         }
       },
       passProps: {
         resource: resource,
-        currency: this.props.currency
+        currency: this.props.currency,
+        bankStyle: this.props.bankStyle
       }
     });
     if (currentRoutesLength != 2)
@@ -487,7 +492,7 @@ class NewResource extends Component {
     var resource = this.addFormValues();
     this.setState({resource: resource, err: ''});
     if (bl.name === 'photos') {
-      this.showChoice();
+      this.showChoice(bl);
       return;
     }
     var blmodel = bl.items.ref ? utils.getModel(bl.items.ref).value : this.props.model
@@ -530,11 +535,11 @@ class NewResource extends Component {
       }
     });
   }
-  showChoice() {
+  showChoice(prop) {
     var self = this;
     ImagePicker.showImagePicker({
       returnIsVertical: true,
-      chooseFromLibraryButtonTitle: utils.isSimulator() ? 'Choose from Library' : null,
+      chooseFromLibraryButtonTitle: utils.isSimulator() || prop._allowPicturesFromLibrary ? 'Choose from Library' : null,
       takePhotoButtonTitle: utils.isSimulator() ? null : 'Take Photo…'
     }, (response) => {
       if (response.didCancel)
@@ -984,6 +989,7 @@ var styles = StyleSheet.create({
   photoBG: {
     // marginTop: -15,
     alignItems: 'center',
+    backgroundColor: '#245D8C'
   },
   err: {
     // paddingVertical: 10,
