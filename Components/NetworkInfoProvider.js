@@ -46,15 +46,15 @@ reactMixin(NetworkInfoProvider.prototype, Reflux.ListenerMixin);
 
 var styles = StyleSheet.create({
   bar: {
-    backgroundColor: '#FF6D0D',
-    borderColor: '#FF6D0D',
-    borderWidth: 1,
-    borderBottomColor: '#3A5280'
+    backgroundColor: '#FF9B30',
+    // borderColor: '#FF9B30',
+    // borderWidth: 1,
+    // borderBottomColor: '#FF6D0D'
   },
   text: {
     fontSize: 18,
     color: '#ffffff',
-    padding: 3,
+    padding: 5,
     alignSelf: 'center'
   },
 });
