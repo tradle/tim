@@ -5,6 +5,8 @@ var translate = utils.translate
 var ShowPropertiesView = require('./ShowPropertiesView');
 var PhotoView = require('./PhotoView');
 var PhotoList = require('./PhotoList');
+var TimHome = require('./TimHome')
+// var SignIn = require('./SignIn')
 // var AddNewIdentity = require('./AddNewIdentity');
 // var SwitchIdentity = require('./SwitchIdentity');
 var ShowRefList = require('./ShowRefList');
@@ -20,7 +22,9 @@ var MessageList = require('./MessageList')
 var defaultBankStyle = require('../styles/bankStyle.json')
 var buttonStyles = require('../styles/buttonStyles');
 import ActionSheet from 'react-native-actionsheet'
-
+import iosStyles from '../styles/iosStyles'
+import androidStyles from '../styles/androidStyles'
+import { signIn } from '../utils/localAuth'
 const TALK_TO_EMPLOYEE = '1'
 // const SERVER_URL = 'http://192.168.0.162:44444/'
 
@@ -41,16 +45,19 @@ import {
 } from 'react-native'
 
 import React, { Component } from 'react'
+let platformStyles = Platform.OS === 'ios' ? iosStyles : androidStyles
 
 class ResourceView extends Component {
   constructor(props) {
     super(props);
+    let me = utils.getMe()
     this.state = {
       resource: props.resource,
       embedHeight: {height: 0},
       isLoading: props.resource.id ? true : false,
       isModalOpen: false,
-      useTouchId: utils.getMe().useTouchId
+      useTouchId: me.useTouchId,
+      useGesturePassword: me.useGesturePassword
     }
   }
   componentWillMount() {
@@ -98,7 +105,9 @@ class ResourceView extends Component {
     }
   }
   shouldComponentUpdate(nextProps, nextState) {
-    return (this.state.isModalOpen  !== nextState.isModalOpen || this.state.useTouchId !== nextState.useTouchId)
+    return (this.state.isModalOpen  !== nextState.isModalOpen              ||
+            this.state.useGesturePassword !== nextState.useGesturePassword ||
+            this.state.useTouchId !== nextState.useTouchId)
            ? true
            : false
   }
@@ -158,13 +167,22 @@ class ResourceView extends Component {
     else
       qrcode = <View />
 
-    let msg = translate(this.state.useTouchId ? 'touchIdOn' : 'touchIdOff')
-    let switchTouchId = isIdentity && !utils.isSimulator()
+
+    let msg
+    if (this.state.useTouchId  &&  this.state.useGesturePassword)
+      msg = translate('bothOn')
+    else if (this.state.useTouchId)
+      msg = translate('touchIdOn')
+    else
+      msg = translate('passwordOn')
+
+    let showSwitch = isIdentity && Platform.OS === 'ios'  && !utils.isSimulator()
+    let switchTouchId = showSwitch
                       ? <View style={styles.footer}>
-                          <Text style={{color: '#2E3B4E', fontSize: 18, paddingVertical: 10, paddingLeft: 15, alignSelf: 'flex-start'}}>{msg}</Text>
+                          <Text style={styles.touchIdText}>{msg}</Text>
                           <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
-                             <View style={[styles.menuButton, this.state.useTouchId ? {opacity: 1} : {opacity: 0.3}]}>
-                                <Icon name='md-finger-print' color='#ffffff' size={33} />
+                             <View style={[platformStyles.menuButtonRegular, this.state.useTouchId ? {opacity: 1} : {opacity: 0.3}]}>
+                                <Icon name='md-finger-print' color={Platform.OS === 'ios' ? '#ffffff': 'red'} size={33} />
                               </View>
                             </TouchableHighlight>
                         </View>
@@ -173,11 +191,13 @@ class ResourceView extends Component {
           // <AddNewIdentity resource={resource} navigator={this.props.navigator} />
           // <SwitchIdentity resource={resource} navigator={this.props.navigator} />
               // <Icon  onPress={() => this.closeModal()} name={} size={30} style={{fontSize: 20, color: '#ffffff', paddingHorizontal: 30, paddingVertical: 15}}>Close</Text>
-    let buttons = [translate('turnTouchIdOn'), translate('turnTouchIdOff'), translate('cancel')]
+    let buttons = showSwitch
+                ? [translate('useTouchId') + (this.state.useTouchId ? '    ✔️' : ''), translate('useGesturePassword') + (this.state.useGesturePassword ? '    ✔️' : ''), translate('cancel')]
+                : [translate('cancel')]
 
     return (
-      <View>
-      <ScrollView  ref='this' style={styles.container}>
+      <View style={{flex:1}}>
+      <ScrollView  ref='this' style={platformStyles.container}>
         <View style={[styles.photoBG]}>
           <PhotoView resource={resource} navigator={this.props.navigator}/>
         </View>
@@ -196,8 +216,6 @@ class ResourceView extends Component {
                             currency={this.props.currency}
                             excludedProperties={['photos']}
                             navigator={this.props.navigator} />
-      </ScrollView>
-      {switchTouchId}
         <ActionSheet
           ref={(o) => {
             this.ActionSheet = o
@@ -205,10 +223,12 @@ class ResourceView extends Component {
           options={buttons}
           cancelButtonIndex={buttons.length - 1}
           onPress={(index) => {
-            if (index < 2)
+            if (index < buttons.length - 1)
               this.changePreferences(index)
           }}
         />
+      </ScrollView>
+      {switchTouchId}
 
       </View>
     );
@@ -226,25 +246,58 @@ class ResourceView extends Component {
     this.state.propValue = utils.getId(resource.id);
     Actions.getItem(resource.id);
   }
-  changePreferences() {
+  changePreferences(id) {
     let me = utils.getMe()
     let r = {
       _r: me[constants.ROOT_HASH],
       _t: constants.TYPES.PROFILE,
-      useTouchId: !me.useTouchId
     }
-    this.setState({useTouchId: !this.state.useTouchId})
-    Actions.addItem({resource: me, value: r, meta: utils.getModel(constants.TYPES.PROFILE).value})
+    switch (id) {
+    case 0:
+      r.useTouchId = me.useTouchId ? (me.useGesturePassword ? false : true) : true
+      r.useGesturePassword = me.useGesturePassword
+      break
+    case 1:
+      r.useGesturePassword = me.useGesturePassword ? (me.useTouchId ? false : true) : true
+      r.useTouchId = me.useTouchId
+      break
+    }
+    if (!r.useGesturePassword  &&  !r.useTouchId)
+      r.useGesturePassword = true
+    if (me.useTouchId === r.useTouchId  &&  me.useGesturePassword === r.useGesturePassword)
+      return
+    let self = this
+    signIn(() => {
+      Actions.addItem({resource: me, value: r, meta: utils.getModel(constants.TYPES.PROFILE).value})
+      let popToThePreviousScreen = me.useGesturePassword  &&  (!r.useGesturePassword  ||  r.useTouchId)
+
+      if (popToThePreviousScreen)
+        self.props.navigator.pop()
+      self.setState({useGesturePassword: r.useGesturePassword, useTouchId: r.useTouchId})
+    }, self.props.navigator, r)
+    // this.props.navigator.push({
+    //   id: 1,
+    //   backButtonTitle: null,
+    //   component: TimHome,
+    //   passProps: {
+    //     navigator: this.props.navigator,
+    //     modelName: constants.TYPES.PROFILE,
+    //     newMe: r
+    //   }
+    // })
+
+    // this.setState({useGesturePassword: r.useGesturePassword, useTouchId: r.useTouchId})
+    // Actions.addItem({resource: me, value: r, meta: utils.getModel(constants.TYPES.PROFILE).value})
   }
 }
 reactMixin(ResourceView.prototype, Reflux.ListenerMixin);
 reactMixin(ResourceView.prototype, ResourceMixin);
 
 var styles = StyleSheet.create({
-  container: {
-    marginTop: Platform.OS === 'ios' ? 64 : 44,
-    flex: 1,
-  },
+  // container: {
+  //   marginTop: Platform.OS === 'ios' ? 64 : 44,
+  //   flex: 1,
+  // },
   modalBackgroundStyle: {
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
     justifyContent: 'center',
@@ -255,49 +308,25 @@ var styles = StyleSheet.create({
     backgroundColor: '#245D8C',
     alignItems: 'center',
   },
-  menuButton: {
-    marginTop: -20,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 24,
-    // shadowOffset:{width: 5, height: 5},
-    shadowOpacity: 1,
-    shadowRadius: 5,
-    shadowColor: '#afafaf',
-    backgroundColor: 'red'
-  },
   footer: {
     flexDirection: 'row',
     flexWrap: 'nowrap',
     justifyContent: 'space-between',
     height: 45,
-    // paddingTop: 5,
     width: Dimensions.get('window').width,
-    // paddingHorizontal: 13,
     backgroundColor: '#eeeeee',
     borderColor: '#eeeeee',
     borderWidth: 1,
     borderTopColor: '#cccccc',
-    position: 'absolute',
-    top: Dimensions.get('window').height - 45,
     paddingRight: 10
   },
-
-  // footer: {
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   backgroundColor: '#eeeeee',
-  //   borderBottomColor: '#eeeeee',
-  //   borderRightColor: '#eeeeee',
-  //   borderLeftColor: '#eeeeee',
-  //   borderWidth: 1,
-  //   borderTopColor: '#cccccc',
-  //   height: 35,
-  //   paddingVertical: 5,
-  //   paddingHorizontal: 10,
-  //   alignSelf: 'stretch'
-  // }
-
+  touchIdText: {
+    color: '#2E3B4E',
+    fontSize: 18,
+    marginVertical: 10,
+    marginLeft: 15,
+    alignSelf: 'flex-start'
+  }
 });
 
 module.exports = ResourceView;
