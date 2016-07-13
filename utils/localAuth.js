@@ -5,6 +5,17 @@ import LocalAuth from 'react-native-local-auth'
 import Errors from 'react-native-local-auth/data/errors'
 
 import Q from 'q'
+import Keychain from 'react-native-keychain'
+import PasswordCheck from '../Components/PasswordCheck'
+
+var utils = require('../utils/utils')
+var translate = utils.translate
+var TouchIDOptIn = require('../Components/TouchIDOptIn')
+var Actions = require('../Actions/Actions');
+
+const PASSWORD_ITEM_KEY = 'app-password'
+
+const isAndroid = Platform.OS === 'android'
 
 // const SETUP_MSG = 'Please set up Touch ID first, so the app can better protect your data.'
 const AUTH_FAILED_MSG = 'Authentication failed'
@@ -46,17 +57,6 @@ export function authenticateUser (opts) {
       throw err
     })
 }
-
-import Keychain from 'react-native-keychain'
-var utils = require('../utils/utils')
-var translate = utils.translate
-import PasswordCheck from '../Components/PasswordCheck'
-var TouchIDOptIn = require('../Components/TouchIDOptIn')
-var Actions = require('../Actions/Actions');
-
-const PASSWORD_ITEM_KEY = 'app-password'
-
-const isAndroid = Platform.OS === 'android'
 
 export function signIn(cb, navigator, newMe) {
   let me = utils.getMe()
