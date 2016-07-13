@@ -468,8 +468,8 @@ var NewResourceMixin = {
     var label = translate(params.prop, params.model)
 
     return (
-      <View style={{height: 60, marginLeft: 10, justifyContent: 'center'}}>
-        <Text style={{backgroundColor: LINK_COLOR, padding: 10, fontSize: 18, color: '#ffffff'}}>{label}</Text>
+      <View style={{marginLeft: 10, justifyContent: 'center', backgroundColor: LINK_COLOR}}>
+        <Text style={{marginVertical: 10, marginLeft: 10, fontSize: 18, color: '#ffffff'}}>{label}</Text>
       </View>
     );
   },
@@ -981,8 +981,12 @@ var NewResourceMixin = {
     let deleteProps = []
     for (var p in value) {
       let prop = properties[p]
-      if (!prop  ||  !value[p]) // properties like _t, _r, time
+      if (!prop) // properties like _t, _r, time
         continue
+      if (typeof value[p] === 'undefined'  ||  value[p] === null) {
+        deleteProps.push(p)
+        continue
+      }
       if (prop.type === 'number')
         this.checkNumber(value[p], prop, err)
       else if (prop.ref === constants.TYPES.MONEY) {
