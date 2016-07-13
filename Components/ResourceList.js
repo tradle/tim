@@ -20,9 +20,8 @@ var Icon = require('react-native-vector-icons/Ionicons');
 var QRCodeScanner = require('./QRCodeScanner')
 var QRCode = require('./QRCode')
 var buttonStyles = require('../styles/buttonStyles');
-var defaultBankStyle = require('../styles/bankStyle.json')
 var NetworkInfoProvider = require('./NetworkInfoProvider')
-import platformStyles from '../styles/platformStyles'
+var defaultBankStyle = require('../styles/bankStyle.json')
 
 const WEB_TO_MOBILE = '0'
 const TALK_TO_EMPLOYEEE = '1'
@@ -44,6 +43,10 @@ import {
   Text,
   Platform
 } from 'react-native';
+
+import iosStyles from '../styles/iosStyles'
+import androidStyles from '../styles/androidStyles'
+var platformStyles = Platform.OS === 'ios' ? iosStyles : androidStyles
 
 const SearchBar = Platform.OS === 'android' ? null : require('react-native-search-bar')
 
@@ -82,7 +85,6 @@ class ResourceList extends Component {
       this.state.isRegistration = isRegistration;
   }
   componentWillMount() {
-    StatusBar.setHidden(false);
     var params = {
       modelName: this.props.modelName,
       to: this.props.resource
@@ -102,7 +104,11 @@ class ResourceList extends Component {
       params.resource = this.props.resource
     }
     // this.state.isLoading = true;
-    utils.onNextTransitionEnd(this.props.navigator, () => Actions.list(params));
+    utils.onNextTransitionEnd(this.props.navigator, () => {
+      Actions.list(params)
+      StatusBar.setHidden(false);
+
+    });
   }
 
   componentDidMount() {
@@ -119,11 +125,7 @@ class ResourceList extends Component {
       let curRoute = routes[routes.length - 1]
       if (curRoute.id === 11  &&  curRoute.passProps.resource[constants.ROOT_HASH] === params.to[constants.ROOT_HASH])
         return
-      let style = {}
-      extend(style, defaultBankStyle)
-      if (params.to.style)
-        style = extend(style, params.to.style)
-
+      let style = this.mergeStyle(params.to.style)
       this.props.navigator.push({
         title: params.to.firstName,
         component: MessageList,
@@ -167,10 +169,7 @@ class ResourceList extends Component {
     if (action === 'getForms') {
       if (!params.to)
         return
-      let style = {}
-        extend(style, defaultBankStyle)
-      if (params.to.style)
-        extend(style, params.to.style)
+      let style = this.mergeStyle(params.to.style)
 
       var route = {
         title: params.to.name,
@@ -201,10 +200,7 @@ class ResourceList extends Component {
     if (action === 'talkToEmployee') {
       if (!params.to)
         return
-      let style = {}
-      extend(style, defaultBankStyle)
-      if (params.to.style)
-        style = extend(style, params.to.style)
+      let style = this.mergeStyle(params.to.style)
       var route = {
         title: params.to.name,
         component: MessageList,
@@ -275,6 +271,13 @@ class ResourceList extends Component {
       isLoading: false
     })
   }
+  mergeStyle(newStyle) {
+    let style = {}
+    extend(style, defaultBankStyle)
+    if (newStyle)
+      style = extend(style, newStyle)
+    return style
+  }
   shouldComponentUpdate(nextProps, nextState) {
     if (nextState.forceUpdate)
       return true
@@ -316,7 +319,10 @@ class ResourceList extends Component {
           id: 5,
           component: MessageView,
           backButtonTitle: translate('back'),
-          passProps: {resource: resource}
+          passProps: {
+            resource: resource,
+            bankStyle: this.props.bankStyle
+          }
         });
       }
       else {
@@ -337,7 +343,8 @@ class ResourceList extends Component {
             rightButtonTitle: translate('done'),
             passProps: {
               model: m,
-              resource: resource
+              resource: resource,
+              bankStyle: this.props.bankStyle
             }
           },
 
@@ -366,10 +373,7 @@ class ResourceList extends Component {
     var title = isIdentity ? resource.firstName : resource.name; //utils.getDisplayName(resource, model.value.properties);
     var modelName = constants.TYPES.MESSAGE;
     var self = this;
-    var style = {}
-    extend(style, defaultBankStyle)
-    if (resource.style)
-      style = extend(style, resource.style)
+    let style = this.mergeStyle(resource.style)
     var route = {
       component: MessageList,
       id: 11,
@@ -392,7 +396,10 @@ class ResourceList extends Component {
         component: ResourceView,
         titleTextColor: '#7AAAC3',
         backButtonTitle: translate('back'),
-        passProps: {resource: resource, bankStyle: defaultBankStyle}
+        passProps: {
+          bankStyle: style,
+          resource: resource
+        }
       }
       var isMe = isIdentity ? resource[constants.ROOT_HASH] === me[constants.ROOT_HASH] : true;
       if (isMe) {
@@ -405,10 +412,10 @@ class ResourceList extends Component {
           backButtonTitle: translate('back'),
           rightButtonTitle: translate('done'),
           passProps: {
+            bankStyle: style,
             model: utils.getModel(resource[constants.TYPE]).value,
             resource: resource,
             currency: this.props.currency,
-            bankStyle: defaultBankStyle
           }
         }
       }
@@ -455,6 +462,7 @@ class ResourceList extends Component {
       backButtonTitle: translate('back'),
       passProps: {
         resource: resource,
+        bankStyle: this.props.style,
         currency: this.props.currency
       },
     }
@@ -481,8 +489,8 @@ class ResourceList extends Component {
         titleTextColor: '#7AAAC3',
         passProps: {
           model: utils.getModel(resource[constants.TYPE]).value,
-          resource: me,
-          bankStyle: defaultBankStyle
+          bankStyle: this.props.style,
+          resource: me
         }
       };
     }
@@ -507,6 +515,7 @@ class ResourceList extends Component {
       passProps: {
         resource: resource,
         prop: prop,
+        bankStyle: this.props.style,
         modelName: modelName
       },
       rightButtonTitle: translate('details'),
@@ -526,11 +535,13 @@ class ResourceList extends Component {
           rightButtonTitle: translate('done'),
           passProps: {
             model: utils.getModel(resource[constants.TYPE]).value,
+            bankStyle: this.props.style,
             resource: resource
           }
         },
 
         passProps: {
+          bankStyle: this.props.style,
           resource: resource,
           currency: this.props.currency
         }
@@ -621,11 +632,14 @@ class ResourceList extends Component {
     //     </TouchableHighlight>
     //   </View>
     // );
+    // let style = Platform.OS === 'ios' ? styles.menuButton : styles.menuButtonA
+    let icon = Platform.OS === 'ios' ?  'md-more' : 'md-menu'
+    let color = Platform.OS === 'ios' ? '#ffffff' : 'red'
     return (
        <View style={styles.footer}>
          <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
-           <View style={styles.menuButton}>
-             <Icon name='md-more'  size={33}  color='#ffffff' />
+           <View style={platformStyles.menuButtonNarrow}>
+             <Icon name={icon}  size={33}  color={color} />
            </View>
          </TouchableHighlight>
        </View>
@@ -643,6 +657,7 @@ class ResourceList extends Component {
       titleTextColor: '#7AAAC3',
       passProps: {
         model: model,
+        bankStyle: this.props.style,
         callback: () => {
           this.props.navigator.pop()
           Actions.list({modelName: this.props.modelName})
@@ -662,6 +677,7 @@ class ResourceList extends Component {
       titleTextColor: '#7AAAC3',
       passProps: {
         officialAccounts: true,
+        bankStyle: this.props.style,
         modelName: constants.TYPES.ORGANIZATION
       }
     });
@@ -709,6 +725,7 @@ class ResourceList extends Component {
       rightButtonTitle: translate('done'),
       passProps: {
         model: model,
+        bankStyle: this.props.style,
         resource: r,
         callback: (resource) => {
           self.props.navigator.pop()
@@ -767,7 +784,6 @@ class ResourceList extends Component {
     }
     var model = utils.getModel(this.props.modelName).value;
     var footer = this.renderFooter();
-    var header = this.renderHeader();
 
     let buttons = this.state.allowToAdd
                 ? [translate('addNew', this.props.prop.title), translate('cancel')]
@@ -839,30 +855,30 @@ class ResourceList extends Component {
 
   }
 
-  showQRCode1(purpose, content) {
-    this.props.navigator.push({
-      title: 'QR Code: ' + purpose,
-      id: 17,
-      component: QRCode,
-      titleTextColor: '#eeeeee',
-      backButtonTitle: translate('back'),
-      passProps: {
-        fullScreen: true,
-        content: content
-      }
-    })
-  }
+  // showQRCode1(purpose, content) {
+  //   this.props.navigator.push({
+  //     title: 'QR Code: ' + purpose,
+  //     id: 17,
+  //     component: QRCode,
+  //     titleTextColor: '#eeeeee',
+  //     backButtonTitle: translate('back'),
+  //     passProps: {
+  //       fullScreen: true,
+  //       content: content
+  //     }
+  //   })
+  // }
 
-  talkToEmployee(qrcode) {
-    this.setState({show: false})
-    if (!qrcode)
-      // qrcode = 'http://127.0.0.1:444444;71e4b7cd6c11ab7221537275988f113a879029eu;6aefc09f4da125095409770592eb96ac142fb579'
-      // qrcode = 'http://192.168.0.104:44444/;71e4b7cd6c11ab7221537275988f113a879029eu;3497c6ce074f1bc66c05e204fd3a7fbcd5e0fb08'
-      qrcode = 'http://192.168.0.136:44444/;71e4b7cd6c11ab7221537275988f113a879029eu;c3adf2d26304133265c3e28b5c9037614880aec5'
+  // talkToEmployee(qrcode) {
+  //   this.setState({show: false})
+  //   if (!qrcode)
+  //     // qrcode = 'http://127.0.0.1:444444;71e4b7cd6c11ab7221537275988f113a879029eu;6aefc09f4da125095409770592eb96ac142fb579'
+  //     // qrcode = 'http://192.168.0.104:44444/;71e4b7cd6c11ab7221537275988f113a879029eu;3497c6ce074f1bc66c05e204fd3a7fbcd5e0fb08'
+  //     qrcode = 'http://192.168.0.136:44444/;71e4b7cd6c11ab7221537275988f113a879029eu;c3adf2d26304133265c3e28b5c9037614880aec5'
 
-    Actions.getEmployeeInfo(qrcode)
-    return
-  }
+  //   Actions.getEmployeeInfo(qrcode)
+  //   return
+  // }
   scanFormsQRCode() {
     this.setState({show: false})
     this.props.navigator.push({
@@ -938,9 +954,10 @@ var styles = StyleSheet.create({
     flexWrap: 'nowrap',
     justifyContent: 'flex-end',
     height: 45,
-    paddingTop: 5,
+    // paddingTop: 5,
     paddingHorizontal: 10,
-    backgroundColor: '#eeeeee',
+    backgroundColor: 'transparent',
+    // backgroundColor: '#eeeeee',
     borderColor: '#eeeeee',
     borderWidth: 1,
     borderTopColor: '#cccccc',
@@ -971,7 +988,7 @@ var styles = StyleSheet.create({
     // borderWidth: 1,
   },
   menuButton: {
-    marginTop: -30,
+    marginTop: -23,
     paddingVertical: 5,
     paddingHorizontal: 21,
     borderRadius: 24,
@@ -980,6 +997,10 @@ var styles = StyleSheet.create({
     shadowRadius: 5,
     shadowColor: '#afafaf',
     backgroundColor: 'red'
+  },
+  menuButtonA: {
+    paddingVertical: 5,
+    paddingHorizontal: 5
   },
 
   menuButton1: {
