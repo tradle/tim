@@ -21,7 +21,6 @@ var ResourceMixin = require('./ResourceMixin');
 var buttonStyles = require('../styles/buttonStyles');
 var HELP_COLOR = 'blue'
 var NetworkInfoProvider = require('./NetworkInfoProvider')
-import platformStyles from '../styles/platformStyles'
 // import Prompt from 'react-native-prompt'
 
 import {
@@ -31,9 +30,13 @@ import {
   Text,
   PropTypes,
   Alert,
+  Platform
 } from 'react-native'
 
 import React, { Component } from 'react'
+import iosStyles from '../styles/iosStyles'
+import androidStyles from '../styles/androidStyles'
+var platformStyles = Platform.OS === 'ios' ? iosStyles : androidStyles
 
 class MessageView extends Component {
   props: {
