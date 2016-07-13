@@ -14,9 +14,9 @@ if (__DEV__) {
 debug = debug('tim:main')
 
 // require('regenerator/runtime') // support es7.asyncFunctions
-require('./utils/shim')
-require('./utils/crypto')
-require('stream')
+import './utils/shim'
+import './utils/crypto'
+import 'stream'
 // require('./timmy')
 
 // require('ErrorUtils').setGlobalHandler(function (e, isFatal) {
@@ -53,7 +53,8 @@ var translate = utils.translate
 var constants = require('@tradle/constants');
 var Icon = require('react-native-vector-icons/Ionicons');
 var Actions = require('./Actions/Actions');
-import * as AutomaticUpdates from './utils/automaticUpdates'
+import * as AutomaticUpdates from './utils/automaticUpdates';
+import { signIn } from './utils/localAuth'
 // var Device = require('react-native-device');
 
 var reactMixin = require('react-mixin');
@@ -64,11 +65,16 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  Platform,
   // Linking,
   AppState,
   AppRegistry,
   Text
 } from 'react-native';
+
+import iosStyles from './styles/iosStyles'
+import androidStyles from './styles/androidStyles'
+var platformStyles = Platform.OS === 'ios' ? iosStyles : androidStyles
 
 let originalGetDefaultProps = Text.getDefaultProps;
 Text.defaultProps = function() {
@@ -81,7 +87,7 @@ Text.defaultProps = function() {
 import React, { Component } from 'react'
 
 var ReactPerf = __DEV__ && require('react-addons-perf')
-var UNAUTHENTICATE_AFTER_BG_MILLIS = __DEV__ ? 10000 : 10 * 60 * 1000
+var UNAUTHENTICATE_AFTER_BG_MILLIS = __DEV__ ? 1000 : 10 * 60 * 1000
 
 class TiMApp extends Component {
   constructor(props) {
@@ -135,7 +141,11 @@ class TiMApp extends Component {
     let newState = { currentAppState, dateAppStateChanged }
 
     switch (currentAppState) {
+      case 'inactive':
+        return
       case 'active':
+        if (this.state.currentAppState === 'active') return
+
         clearTimeout(this.state.unauthTimeout)
         // ok to pop from defensive copy
         let currentRoute = this.state.navigator.getCurrentRoutes().pop()
@@ -144,17 +154,23 @@ class TiMApp extends Component {
         // it should be more like Actions.auth()
         // and then handled in one place
         if (me && me.isRegistered && !me.isAuthenticated) {
-          let needNav = currentRoute.component !== TimHome
-          if (needNav) {
-            this.state.navigator.push({
-              id: 1,
-              backButtonTitle: null,
-              component: TimHome,
-              passProps: this.props,
-            })
-          }
-
+          signIn(() => {
+            me = utils.getMe()
+            if (me.useGesturePassword)
+              this.state.navigator.pop()
+          }, this.state.navigator)
           Actions.start()
+          // let needNav = currentRoute.component !== TimHome
+          // if (needNav) {
+          //   this.state.navigator.push({
+          //     id: 1,
+          //     backButtonTitle: null,
+          //     component: TimHome,
+          //     passProps: this.props,
+          //   })
+          // }
+
+          // Actions.start()
         }
 
         AutomaticUpdates.sync()
@@ -312,7 +328,7 @@ class TiMApp extends Component {
 
     switch (route.id) {
     case 1:
-      return <TimHome navigator={nav} modelName={constants.TYPES.PROFILE} />;
+      return <TimHome navigator={nav} {...props}/>;
     case 2:
       return <ResourceTypesScreen navigator={nav}
                   modelName={props.modelName}
@@ -412,7 +428,7 @@ var NavigationBarRouteMapper = {
     var lbTitle = 'backButtonTitle' in route ? route.backButtonTitle : previousRoute.title;
     if (!lbTitle)
       return null;
-    var style = [styles.navBarText];
+    var style = [platformStyles.navBarText];
     if (route.tintColor)
       style.push(route.tintColor);
     else {
@@ -443,7 +459,7 @@ var NavigationBarRouteMapper = {
   RightButton: function(route, navigator, index, navState) {
     if (!route.rightButtonTitle)
       return <View/>
-    var style = [styles.navBarText, styles.navBarButtonText];
+    var style = [platformStyles.navBarText, styles.navBarButtonText];
     if (route.tintColor)
       style.push({color: route.tintColor});
     else if (route.passProps.bankStyle)
@@ -502,7 +518,7 @@ var NavigationBarRouteMapper = {
 
   Title: function(route, navigator, index, navState) {
     var org;
-    var style = [styles.navBarText, styles.navBarTitleText];
+    var style = [platformStyles.navBarText, styles.navBarTitleText];
     if (route.passProps.modelName) {
       if (route.passProps.modelName === 'tradle.Message') {
         if (route.passProps.resource  &&  route.passProps.resource[constants.TYPE] === constants.TYPES.PROFILE) {
@@ -548,14 +564,16 @@ var styles = StyleSheet.create({
   container: {
     flex: 1
   },
-  navBar: {
-    marginTop: 10,
-    padding: 3
-  },
-  navBarText: {
-    fontSize: 17,
-    // marginBottom: 7
-  },
+
+  // navBar: {
+  //   marginTop: 10,
+  //   padding: 3
+  // },
+  // navBarText: {
+  //   fontSize: 17,
+  //   // marginBottom: 7
+  // },
+
   navBarTitleText: {
     color: '#2E3B4E',
     fontWeight: '400',
