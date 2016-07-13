@@ -8,6 +8,9 @@ import {
 } from 'react-native'
 
 import AsyncStorage from './Storage'
+import {
+  hasTouchID
+} from '../utils/localAuth'
 
 global.AsyncStorage = AsyncStorage
 var path = require('path')
@@ -135,7 +138,7 @@ var currentEmployees = {}
 var PORT = 51086
 var TIM_PATH_PREFIX = 'me'
 // If app restarts in less then 10 minutes keep it authenticated
-const AUTHENTICATED_TIME = 600// 0000
+const AUTHENTICATED_TIME = 600//0000
 
 var models = {};
 var list = {};
@@ -155,7 +158,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
-var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://192.168.0.101:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
+var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://127.0.0.1:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
@@ -205,6 +208,7 @@ var Store = Reflux.createStore({
       }
       self.addNameAndTitleProps(m)
     })
+    utils.setModels(models);
 
     // if (true) {
     if (false) {
@@ -854,7 +858,8 @@ var Store = Reflux.createStore({
         extend(true, dictionary, json.dictionary)
         if (me) {
           me.dictionary = dictionary
-          me.language = language
+          if (language)
+            me.language = language
           self.setMe(me)
         }
       }
@@ -1081,12 +1086,17 @@ var Store = Reflux.createStore({
   },
   onStart() {
     var self = this;
-    this.ready.then(function() {
+    Q.all([
+      hasTouchID(),
+      this.ready
+    ])
+    .spread(hasTouchID => {
       // isLoaded = true
       self.trigger({
         action: 'start',
         models: models,
-        me: me
+        me: me,
+        hasTouchID
       });
     });
   },
@@ -3011,7 +3021,7 @@ var Store = Reflux.createStore({
     var noTrigger = params.noTrigger
     // Cleanup null form values
     for (var p in value) {
-      if (!value[p])
+      if (!value[p]  &&  (typeof value[p] === 'undefined'))
         delete value[p];
     }
     if (!value[TYPE])
