@@ -158,7 +158,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
-var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://127.0.0.1:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
+var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://192.168.0.101:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
@@ -1213,7 +1213,7 @@ var Store = Reflux.createStore({
         batch.push({type: 'put', key: utils.getId(to), value: to});
         batch.push({type: 'put', key: utils.getId(from), value: from});
       }
-      if (!isWelcome  ||  (me.isEmployee  &&  utils.getId(me.organization) === utils.getId(r.to)))
+      if (!isWelcome  ||  utils.isEmployee(r.to))
         return
       if (!orgRep)
         return
@@ -2515,19 +2515,20 @@ var Store = Reflux.createStore({
         if (chatTo.organization  &&  r[TYPE] === constants.TYPES.CUSTOMER_WAITING) {
           var rid = utils.getId(chatTo.organization);
 
-          if (rid.indexOf(ORGANIZATION) == 0) {
-            var org = list[utils.getId(r.to)].value.organization
-            var orgId = utils.getId(org)
-            if (params.isForgetting  &&  orgId === rid) {
-              // foundResources[key] = r
-              sharedWithTimePairs.push({
-                 time: r.time,
-                 resource: r
-              })
-            }
-            if (!me.isEmployee  ||  rid !== utils.getId(me.organization))
-             continue;
-           }
+          // if (rid.indexOf(ORGANIZATION) === 0) {
+          var org = list[utils.getId(r.to)].value.organization
+          var orgId = utils.getId(org)
+          if (params.isForgetting  &&  orgId === rid) {
+            // foundResources[key] = r
+            sharedWithTimePairs.push({
+               time: r.time,
+               resource: r
+            })
+          }
+          if (!utils.isEmployee(chat.organization))
+          // if (!me.isEmployee  ||  rid !== utils.getId(me.organization))
+            continue;
+         // }
         }
 
         // Show only the last 'Choose the product' message
