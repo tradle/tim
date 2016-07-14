@@ -9,7 +9,6 @@ var FloatLabel = require('react-native-floating-labels')
 var Icon = require('react-native-vector-icons/Ionicons');
 var utils = require('../utils/utils');
 var CameraView = require('./CameraView')
-
 var translate = utils.translate
 
 var constants = require('@tradle/constants');
@@ -19,7 +18,6 @@ var extend = require('extend');
 var DEFAULT_CURRENCY_SYMBOL = '£';
 var CURRENCY_SYMBOL
 var ENUM = 'tradle.Enum'
-
 var SETTINGS = 'tradle.Settings'
 
 var cnt = 0;
@@ -36,6 +34,7 @@ import {
   Platform,
   StyleSheet,
   Navigator,
+  Switch,
   DatePickerAndroid,
   Dimensions
 } from 'react-native';
@@ -118,7 +117,7 @@ var NewResourceMixin = {
       var maybe = required  &&  !required.hasOwnProperty(p);
 
       var type = props[p].type;
-      var formType = type !== 'boolean'  &&  propTypesMap[type];
+      var formType = propTypesMap[type];
       // Don't show readOnly property in edit mode if not set
       let isReadOnly = props[p].readOnly
       if (isReadOnly) //  &&  (type === 'date'  ||  !data  ||  !data[p]))
@@ -193,6 +192,36 @@ var NewResourceMixin = {
           options.fields[p].label = label
           options.fields[p].onDateChange = this.onDateChange
         }
+        else if (type === 'boolean') {
+          // HACK for old values
+          let v = data && data[p]
+          if (v) {
+            if (typeof v !== 'boolean')
+              v = v.title === 'No' ? false : true
+          }
+
+          options.fields[p].template = this.myBooleanTemplate.bind(this, {
+                    label: label,
+                    prop:  props[p],
+                    model: meta,
+                    value: v,
+                    required: !maybe,
+                    errors: params.errors
+                  })
+
+          options.fields[p].onSubmitEditing = onSubmitEditing.bind(this);
+          if (onEndEditing)
+            options.fields[p].onEndEditing = onEndEditing.bind(this, p);
+          if (props[p].maxLength)
+            options.fields[p].maxLength = props[p].maxLength;
+          if (type === 'number') {
+            if (!props[p].keyboard)
+              options.fields[p].keyboardType = 'numeric'
+            if (data  &&  data[p]  &&  (typeof data[p] != 'number'))
+              data[p] = parseFloat(data[p])
+          }
+
+        }
         else if (type === 'string') {
           if (props[p].maxLength > 100)
             options.fields[p].multiline = true;
@@ -257,10 +286,6 @@ var NewResourceMixin = {
         if (!ref) {
           if (type === 'number'  ||  type === 'string')
             ref = constants.TYPES.MONEY
-          else if (type === 'boolean') {
-            ref = 'tradle.Boolean'
-            model[p] = maybe ? t.maybe(t.Str) : t.Str
-          }
           else
             continue;
         }
@@ -518,6 +543,66 @@ var NewResourceMixin = {
       </View>
     );
   },
+
+  myBooleanTemplate(params) {
+    var error
+    if (params.noError)
+      error = <View />
+    else {
+      var err = this.state.missedRequiredOrErrorValue
+              ? this.state.missedRequiredOrErrorValue[params.prop.name]
+              : null
+      if (!err  &&  params.errors  &&  params.errors[params.prop.name])
+        err = params.errors[params.prop.name]
+
+      error = err
+                ? <View style={{paddingLeft: 15, backgroundColor: 'transparent'}} key={this.getNextKey()}>
+                    <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>{err}</Text>
+                  </View>
+                : <View key={this.getNextKey()} />
+    }
+    var labelStyle = {color: '#cccccc', fontSize: 18, paddingLeft: 10};
+    var textStyle = {color: '#000000', fontSize: 18, paddingLeft: 10};
+    let resource = this.state.resource
+    let style
+    if (resource && (typeof resource[params.prop.name] !== 'undefined'))
+      style = textStyle
+    else
+      style = labelStyle
+
+    var label = translate(params.prop, params.model)
+    if (params.prop.units) {
+      label += (params.prop.units.charAt(0) === '[')
+             ? ' ' + params.prop.units
+             : ' (' + params.prop.units + ')'
+    }
+    label += params.required ? '' : ' (' + translate('optional') + ')'
+    // if (label.length > 30)
+    //   label = label.substring(0, 30)
+
+    var prop = params.prop
+    var value = params.value
+    var doWrap = label.length > 30
+    return (
+      <View style={styles.booleanContainer} key={this.getNextKey()} ref={prop.name}>
+        <View style={{marginTop: 22}} />
+        <TouchableHighlight underlayColor='transparent' onPress={
+          this.onChangeText.bind(this, prop, !value)
+        }>
+          <View>
+            <View style={[styles.booleanContentStyle, Platform.OS === 'ios' ? {paddingLeft: 0} : {paddingLeft: 10}]}>
+              <Text style={[style, doWrap ? {flexWrap: 'wrap', width: Dimensions.get('window').width - 100, marginTop: -18} : {}]}>{label}</Text>
+              <Switch onValueChange={value => this.onChangeText(prop, value)} style={{marginTop: -5}} value={value} onTintColor={LINK_COLOR} />
+            </View>
+           {error}
+          </View>
+        </TouchableHighlight>
+      </View>
+    )
+  },
+/*
+              <Icon name={value ? 'ios-checkmark-circle' : 'ios-radio-button-off'}  size={40} color={value ? '#007aff' : '#007aff' } style={{marginTop: -15}} />
+*/
   myDateTemplate(params) {
     var labelStyle = {color: '#cccccc', fontSize: 17, paddingLeft: 10, paddingBottom: 10};
     var textStyle = {color: this.state.isRegistration ? '#ffffff' : '#000000', fontSize: 17, paddingLeft: 10, paddingBottom: 10};
@@ -656,16 +741,9 @@ var NewResourceMixin = {
     let isRequired = this.props.model && this.props.model.required  &&  this.props.model.required.indexOf(params.prop) !== -1
     if (resource && resource[params.prop]) {
       let rModel
-      // HACK for Boolean
-      if (prop.type === 'boolean'  &&  (resource[params.prop] === 'No' || resource[params.prop] === 'Yes')) {
-        rModel = utils.getModel('tradle.Boolean')
-        label = translate(resource[params.prop])
-      }
-      else {
-        var m = utils.getId(resource[params.prop]).split('_')[0]
-        rModel = utils.getModel(m).value
-        label = utils.getDisplayName(resource[params.prop], rModel.properties)
-      }
+      var m = utils.getId(resource[params.prop]).split('_')[0]
+      rModel = utils.getModel(m).value
+      label = utils.getDisplayName(resource[params.prop], rModel.properties)
       if (!label)
         label = resource[params.prop].title
       if (rModel.subClassOf  &&  rModel.subClassOf === ENUM)
@@ -728,11 +806,11 @@ var NewResourceMixin = {
     var value = this.refs.form.input;
 
     var filter = event.nativeEvent.text;
-    var propRef = prop.ref  ||  'tradle.Boolean'
+    var propRef = prop.ref
     var m = utils.getModel(propRef).value;
     var currentRoutes = this.props.navigator.getCurrentRoutes();
     this.props.navigator.push({
-      title: m.id === 'tradle.Boolean' ? translate(prop, model) : translate(m), //m.title,
+      title: m.id === translate(m), //m.title,
       titleTextColor: '#7AAAC3',
       id: 10,
       component: ResourceList,
@@ -1097,6 +1175,21 @@ var styles = StyleSheet.create({
     marginLeft: 10,
     marginBottom: 10,
     flex: 1
+  },
+  booleanContainer: {
+    height: 60,
+    borderColor: '#ffffff',
+    borderBottomColor: '#cccccc',
+    borderBottomWidth: 1,
+    marginLeft: 10,
+    // marginTop: 10,
+    // justifyContent: 'center',
+    flex: 1
+  },
+  booleanContentStyle: {
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+    borderRadius: 4
   },
   chooserContainer: {
     height: 60,
