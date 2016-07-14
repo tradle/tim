@@ -2525,7 +2525,7 @@ var Store = Reflux.createStore({
                resource: r
             })
           }
-          if (!utils.isEmployee(chat.organization))
+          if (!utils.isEmployee(chatTo.organization))
           // if (!me.isEmployee  ||  rid !== utils.getId(me.organization))
             continue;
          // }
