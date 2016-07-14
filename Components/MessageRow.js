@@ -295,9 +295,11 @@ class MessageRow extends Component {
     let me = utils.getMe()
     let isThirdPartyVerification
     if (me.isEmployee  &&  !this.props.to.organization) {
-      let orgId = utils.getId(resource.organization)
-      if (orgId !== utils.getId(me.organization))
-        isThirdPartyVerification = true
+      // Check if I am the employee of the organization I opened a chat with or the customer
+      isThirdPartyVerification = !utils.isEmployee(resource.organization)
+      // let orgId = utils.getId(resource.organization)
+      // if (orgId !== utils.getId(me.organization))
+      //   isThirdPartyVerification = true
     }
 
     renderedRow = <View>
@@ -756,7 +758,7 @@ class MessageRow extends Component {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date')
         return;
 
-      if (properties[v].ref  ||  properties[v].type === 'boolean') {
+      if (properties[v].ref) {
         if (resource[v]) {
           vCols.push(self.getPropRow(properties[v], resource, resource[v].title || resource[v]))
           first = false;
@@ -810,7 +812,8 @@ class MessageRow extends Component {
       else if (!model.autoCreate) {
         var val = (properties[v].displayAs)
                 ? utils.templateIt(properties[v], resource)
-                : resource[v];
+                : properties[v].type === 'boolean' ? (resource[v] ? 'Yes' : 'No') : resource[v];
+
         if (!val)
           return
         if (model.properties.verifications  &&  !isMyMessage)
@@ -1288,7 +1291,7 @@ class MessageRow extends Component {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date')
         return;
       var style = styles.verySmallLetters;
-      if (properties[v].ref  ||  properties[v].type === 'boolean') {
+      if (properties[v].ref) {
       // if (properties[v].ref) {
         if (resource[v]) {
           var val
@@ -1322,7 +1325,7 @@ class MessageRow extends Component {
       else if (!model.autoCreate) {
         var val = (properties[v].displayAs)
                 ? utils.templateIt(properties[v], resource)
-                : resource[v];
+                : properties[v].type === 'boolean' ? (resource[v] ? 'Yes' : 'No') : resource[v];
         if (!val)
           return
         row = self.getPropRow(properties[v], resource, val || resource[v], true)
