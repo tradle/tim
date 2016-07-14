@@ -19,11 +19,7 @@ var dateformat = require('dateformat')
 var Backoff = require('backoff')
 var extend = require('xtend')
 var levelErrors = require('levelup/lib/errors')
-// TODO: add logbase to deps
-var rebuf = require('logbase').rebuf
-var parseDBValue = function (pair) {
-  return pair[1] && rebuf(JSON.parse(pair[1]))
-}
+const Cache = require('lru-cache')
 var strMap = {
   'Please fill out this form and attach a snapshot of the original document': 'fillTheForm'
 }
@@ -769,6 +765,33 @@ var utils = {
     }
 
     return wrapper
+  },
+  setupSHACaching: function setupSHACaching (protocol) {
+    const merkle = protocol.DEFAULT_MERKLE_OPTS
+    if (merkle._caching) return
+
+    const cache = new Cache({ max: 500 })
+    protocol.DEFAULT_MERKLE_OPTS = {
+      _caching: true,
+      leaf: function leaf (a) {
+        const key = 'l:' + a.data.toString('hex')
+        const cached = cache.get(key)
+        if (cached) return cached
+
+        const val = merkle.leaf(a)
+        cache.set(key, val)
+        return val
+      },
+      parent: function parent (a, b) {
+        const key = 'p:' + a.hash.toString('hex') + b.hash.toString('hex')
+        const cached = cache.get(key)
+        if (cached) return cached
+
+        const val = merkle.parent(a, b)
+        cache.set(key, val)
+        return val
+      }
+    }
   }
 }
 
@@ -782,5 +805,31 @@ function normalizeRemoveListener (addListenerRetVal) {
   }
 }
 
+/**
+ * recover Buffer objects
+ * @param  {Object} json
+ * @return {Object} json with recovered Buffer-valued properties
+ */
+function rebuf (json) {
+  if (Object.prototype.toString.call(json) !== '[object Object]') return json
+
+  if (json &&
+    json.type === 'Buffer' &&
+    json.data &&
+    !Buffer.isBuffer(json) &&
+    Object.keys(json).length === 2) {
+    return new Buffer(json.data)
+  } else {
+    for (var p in json) {
+      json[p] = rebuf(json[p])
+    }
+
+    return json
+  }
+}
+
+function parseDBValue (pair) {
+  return pair[1] && rebuf(JSON.parse(pair[1]))
+}
 
 module.exports = utils;

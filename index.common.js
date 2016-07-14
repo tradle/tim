@@ -20,6 +20,7 @@ import 'stream'
 // require('./timmy')
 
 // require('ErrorUtils').setGlobalHandler(function (e, isFatal) {
+//   Alert.alert(e.stack)
 //   console.error('Failed to handle error:')
 //   console.error(e)
 //   if (__DEV__) throw e

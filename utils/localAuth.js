@@ -36,7 +36,9 @@ module.exports = {
   authenticateUser
 }
 
-function hasTouchID () {
+export const TIMEOUT = __DEV__ ? 1000 : 3600 * 1000
+
+export function hasTouchID () {
   return LocalAuth.hasTouchID()
     .then(() => true, err => false)
 }
