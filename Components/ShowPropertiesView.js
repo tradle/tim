@@ -209,7 +209,7 @@ class ShowPropertiesView extends Component {
           if (val === NOT_SPECIFIED)
             val = <Text style={[styles.description, {color: this.props.bankStyle.LINK}]}>{val}</Text>
           else if (typeof val === 'number'  ||  typeof val === 'boolean')
-            val = <Text style={styles.description}>{val}</Text>;
+            val = <Text style={styles.description}>{val ? 'Yes' : 'No'}</Text>;
           else if (pMeta.type === 'boolean')
             val = <Text style={styles.description}>{val.title}</Text>;
           else if (pMeta.type !== 'object'  &&  (typeof val === 'string')  &&  (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0))
