@@ -513,7 +513,9 @@ var utils = {
           })
       })
   },
-
+  isEmployee(resource) {
+    return me.isEmployee  &&  (this.getId(me.organization) === this.getId(resource))
+  },
   // measure(component, cb) {
   //   let handle = typeof component === 'number'
   //     ? component
