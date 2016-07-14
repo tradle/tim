@@ -182,7 +182,7 @@ class MessageList extends Component {
       return
     }
     LINK_COLOR = this.props.bankStyle.LINK_COLOR
-
+    let isEmployee = utils.isEmployee(this.props.resource)
     if (list.length || (this.state.filter  &&  this.state.filter.length)) {
       let productToForms = this.gatherForms(list)
 
@@ -203,12 +203,12 @@ class MessageList extends Component {
         list: list,
         shareableResources: params.shareableResources,
         allLoaded: false,
-        isEmployee: me.isEmployee,
+        isEmployee: isEmployee,
         productToForms: productToForms
       });
     }
     else
-      this.setState({isLoading: false, isEmployee: utils.getMe().isEmployee})
+      this.setState({isLoading: false, isEmployee: isEmployee})
   }
   gatherForms(list) {
     let productToForms = {}
@@ -466,8 +466,8 @@ class MessageList extends Component {
       //     title: translate('formChooser')
       //   }
       // ]}
-    let isEmployee = utils.getMe().isEmployee
-    let buttons = isEmployee
+    let me = utils.getMe()
+    let buttons = this.state.isEmployee
                 ? [translate('formChooser'), translate('cancel')]
                 : [translate('forgetMe'), translate('cancel')]
     return (
@@ -483,7 +483,7 @@ class MessageList extends Component {
           cancelButtonIndex={1}
           onPress={(index) => {
             if (index === 0) {
-              if (isEmployee)
+              if (this.state.isEmployee)
                 this.chooseFormForCustomer()
               else
                 this.forgetMe()
@@ -497,7 +497,7 @@ class MessageList extends Component {
   }
   generateMenu() {
     let me = utils.getMe()
-    if (me.isEmployee  &&  utils.getId(me.organization) === utils.getId(this.props.resource))
+    if (this.state.isEmployee)
       return <View/>
     return  <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
               {this.paintMenuButton()}
