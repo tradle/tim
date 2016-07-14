@@ -423,7 +423,7 @@ class ResourceList extends Component {
     if (isOrganization) {
       route.title = resource.name
       if (this.props.officialAccounts) {
-        if (!me.isEmployee  ||  utils.getId(me.organization) !== utils.getId(resource)) {
+        if (!utils.isEmployee(resource)) {
           var msg = {
             message: me.firstName + ' is waiting for the response',
             _t: constants.TYPES.CUSTOMER_WAITING,
