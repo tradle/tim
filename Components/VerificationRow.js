@@ -236,7 +236,7 @@ class VerificationRow extends Component {
                 ? ' (' + properties[v].units + ')'
                 : ''
 
-      if (properties[v].ref  ||  properties[v].type === 'boolean') {
+      if (properties[v].ref) {
         if (resource[v]) {
           let val = (properties[v].ref === constants.TYPES.MONEY)
                   ? utils.normalizeCurrencySymbol(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value
