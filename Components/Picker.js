@@ -9,6 +9,7 @@ var {
   StyleSheet,
   Dimensions,
   Easing,
+  Platform,
   Animated
 } = require('react-native')
 
