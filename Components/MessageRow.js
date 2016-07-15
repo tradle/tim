@@ -215,7 +215,7 @@ class MessageRow extends Component {
       }
       var sealedStatus = (resource.txId)
                        ? <View style={styles.sealedStatus}>
-                           <Icon name={'ios-ribbon'} size={30} color='#316A99' style={{opacity: 0.3}} />
+                           <Icon name={'ios-ribbon'} size={30} color='#316A99' style={{opacity: 0.5}} />
                          </View>
                        : <View />
       messageBody =
@@ -1556,7 +1556,7 @@ var styles = StyleSheet.create({
     // flexDirection: 'row',
     position: 'absolute',
     bottom: 1,
-    right: 10,
+    left: 10,
   },
   errorBadge: {
     position: 'absolute',
