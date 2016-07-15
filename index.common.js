@@ -283,7 +283,7 @@ class TiMApp extends Component {
     if (ReactPerf) {
       setTimeout(function () {
         ReactPerf.stop()
-        console.log(ReactPerf.printWasted())
+        // console.log(ReactPerf.printWasted())
       }, 500)
     }
 
