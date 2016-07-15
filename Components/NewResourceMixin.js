@@ -500,22 +500,6 @@ var NewResourceMixin = {
   },
 
   myTextInputTemplate(params) {
-    var error
-    if (params.noError)
-      error = <View />
-    else {
-      var err = this.state.missedRequiredOrErrorValue
-              ? this.state.missedRequiredOrErrorValue[params.prop.name]
-              : null
-      if (!err  &&  params.errors  &&  params.errors[params.prop.name])
-        err = params.errors[params.prop.name]
-
-      error = err
-                ? <View style={{paddingLeft: 15, backgroundColor: 'transparent'}} key={this.getNextKey()}>
-                    <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>{err}</Text>
-                  </View>
-                : <View key={this.getNextKey()} />
-    }
     var label = translate(params.prop, params.model)
     if (params.prop.units) {
       label += (params.prop.units.charAt(0) === '[')
@@ -539,12 +523,12 @@ var NewResourceMixin = {
           keyboardType={params.keyboard || 'default'}
           onChangeText={this.onChangeText.bind(this, params.prop)}
         >{label}</FloatLabel>
-        {error}
+        {this.getErrorView(params)}
       </View>
     );
   },
 
-  myBooleanTemplate(params) {
+  getErrorView(params) {
     var error
     if (params.noError)
       error = <View />
@@ -561,14 +545,18 @@ var NewResourceMixin = {
                   </View>
                 : <View key={this.getNextKey()} />
     }
-    var labelStyle = {color: '#cccccc', fontSize: 18, paddingLeft: 10};
-    var textStyle = {color: '#000000', fontSize: 18, paddingLeft: 10};
+    return error
+  },
+  myBooleanTemplate(params) {
+    var labelStyle = {color: '#cccccc', fontSize: 18, paddingBottom: 10};
+    var textStyle = {color: this.state.isRegistration ? '#ffffff' : '#000000', fontSize: 17, paddingBottom: 10};
+
+    let prop = params.prop
     let resource = this.state.resource
-    let style
-    if (resource && (typeof resource[params.prop.name] !== 'undefined'))
-      style = textStyle
-    else
-      style = labelStyle
+
+    let style = (resource && (typeof resource[params.prop.name] !== 'undefined'))
+              ? textStyle
+              : labelStyle
 
     var label = translate(params.prop, params.model)
     if (params.prop.units) {
@@ -577,26 +565,28 @@ var NewResourceMixin = {
              : ' (' + params.prop.units + ')'
     }
     label += params.required ? '' : ' (' + translate('optional') + ')'
-    // if (label.length > 30)
-    //   label = label.substring(0, 30)
 
-    var prop = params.prop
     var value = params.value
     var doWrap = label.length > 30
+    if (doWrap  && Platform.OS === 'android') {
+      label = label.substring(0, 27) + '...'
+      doWrap = false
+    }
+// , Platform.OS === 'ios' ? {paddingLeft: 0} : {paddingLeft: 10}
     return (
-      <View style={styles.booleanContainer} key={this.getNextKey()} ref={prop.name}>
-        <View style={{marginTop: 22}} />
+
+      <View style={{paddingBottom: 10, flex: 5}} key={this.getNextKey()} ref={prop.name}>
         <TouchableHighlight underlayColor='transparent' onPress={
           this.onChangeText.bind(this, prop, !value)
         }>
-          <View>
-            <View style={[styles.booleanContentStyle, Platform.OS === 'ios' ? {paddingLeft: 0} : {paddingLeft: 10}]}>
-              <Text style={[style, doWrap ? {flexWrap: 'wrap', width: Dimensions.get('window').width - 100, marginTop: -18} : {}]}>{label}</Text>
-              <Switch onValueChange={value => this.onChangeText(prop, value)} style={{marginTop: -5}} value={value} onTintColor={LINK_COLOR} />
+          <View style={styles.booleanContainer}>
+            <View style={[styles.booleanContentStyle]}>
+              <Text style={[style, doWrap ? {flexWrap: 'wrap', width: Dimensions.get('window').width - 100} : {}]}>{label}</Text>
+              <Switch onValueChange={value => this.onChangeText(prop, value)} value={value} onTintColor={LINK_COLOR} />
             </View>
-           {error}
           </View>
         </TouchableHighlight>
+        {this.getErrorView(params)}
       </View>
     )
   },
@@ -609,13 +599,14 @@ var NewResourceMixin = {
     var prop = params.prop
     let resource = this.state.resource
     let label, style, propLabel
+    let hasValue = resource && resource[prop.name]
     if (resource && resource[prop.name]) {
       label = resource[prop.name].title
       style = textStyle
 
       let vStyle = Platform.OS === 'android'
-                 ? {paddingLeft: 0, marginTop: 5}
-                 : {marginLeft: 10, marginTop: 5, marginBottom: 5, backgroundColor: 'transparent'}
+                 ? {paddingLeft: 10, marginTop: 5}
+                 : {marginLeft: 20, marginTop: 5, marginBottom: 5, backgroundColor: 'transparent'}
 
       propLabel = <View style={vStyle}>
                     <Text style={{fontSize: 12, color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}}>{params.label}</Text>
@@ -632,17 +623,14 @@ var NewResourceMixin = {
             : null
     if (!err  &&  params.errors  &&  params.errors[prop.name])
       err = params.errors[prop.name]
-    var error = err
-              ? <View style={{paddingLeft: 5, backgroundColor: 'transparent'}}>
-                  <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>This field is required</Text>
-                </View>
-              : <View />
+
+    let valuePadding = Platform.OS === 'ios' ? 0 : (hasValue ? 10 : 0)
 
     return (
-      <View style={styles.dateContainer}>
+      <View style={{paddingBottom: 10, flex: 5}} key={this.getNextKey()} ref={prop.name}>
        {propLabel}
        <TouchableHighlight underlayColor="transparent" onPress={this.showModal.bind(this, prop, true)}>
-         <View style={[{flexDirection: 'row', justifyContent: 'space-between'}, Platform.OS === 'ios' ? {paddingLeft: 0} : {paddingLeft: 10}]}>
+         <View style={[styles.dateContainer, {flexDirection: 'row', justifyContent: 'space-between', paddingLeft: valuePadding}]}>
            <Text style={style}>{(params.value &&  dateformat(new Date(params.value), 'mmmm dS, yyyy')) || translate(params.prop)}</Text>
            <Icon name='ios-calendar-outline'  size={17}  color={LINK_COLOR}  style={styles.icon1} />
          </View>
@@ -652,7 +640,7 @@ var NewResourceMixin = {
               ? <Picker closeModal={() => {
                  this.showModal(prop, false)
               }} offSet={this.state.offSet} value={params.value} prop={params.prop} changeTime={this.changeTime.bind(this, params.prop)}  />
-              : (err ? error : null)
+              : (err ? this.getErrorView(params) : null)
           : <View />
         }
       </View>
@@ -761,16 +749,6 @@ var NewResourceMixin = {
       style = labelStyle
       propLabel = <View style={{marginTop: 20}}/>
     }
-    var err = this.state.missedRequiredOrErrorValue
-            ? this.state.missedRequiredOrErrorValue[prop.name]
-            : null
-    if (!err  &&  params.errors  &&  params.errors[prop.name])
-      err = params.errors[prop.name]
-    var error = err
-              ? <View style={{paddingLeft: 5, backgroundColor: 'transparent'}}>
-                  <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>This field is required</Text>
-                </View>
-              : <View />
     let isVideo = prop.name === 'video'
     let isPhoto = prop.name === 'photos'
     return (
@@ -787,7 +765,7 @@ var NewResourceMixin = {
                 : <Icon name='ios-arrow-down'  size={15}  color={this.state.isRegistration ? '#eeeeee' : LINK_COLOR}  style={styles.icon1} />
               }
             </View>
-           {error}
+           {this.getErrorView(params)}
           </View>
         </TouchableHighlight>
       </View>
@@ -1173,22 +1151,22 @@ var styles = StyleSheet.create({
     borderBottomColor: '#cccccc',
     borderBottomWidth: 1,
     marginLeft: 10,
-    marginBottom: 10,
+    // marginBottom: 10,
     flex: 1
   },
   booleanContainer: {
-    height: 60,
+    // height: 55,
     borderColor: '#ffffff',
     borderBottomColor: '#cccccc',
     borderBottomWidth: 1,
     marginLeft: 10,
-    // marginTop: 10,
-    // justifyContent: 'center',
+    // marginBottom: 10,
     flex: 1
   },
   booleanContentStyle: {
     justifyContent: 'space-between',
     flexDirection: 'row',
+    paddingVertical: 5,
     borderRadius: 4
   },
   chooserContainer: {
