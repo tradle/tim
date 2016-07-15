@@ -13,6 +13,7 @@ var extend = require('extend');
 var NOT_SPECIFIED = '[not specified]'
 var DEFAULT_CURRENCY_SYMBOL = '£'
 var CURRENCY_SYMBOL
+const ENUM = 'tradle.Enum'
 import Prompt from 'react-native-prompt'
 // import Communications from 'react-native-communications'
 
@@ -143,7 +144,7 @@ class ShowPropertiesView extends Component {
           val = (c || CURRENCY_SYMBOL) + val.value
         }
         // Could be enum like props
-        else if (Object.keys(utils.getModel(pMeta.ref).value.properties).length === 2)
+        else if (utils.getModel(pMeta.ref).value.subClassOf === ENUM)
           val = val.title
         else if (this.props.showRefResource) {
           // ex. property that is referencing to the Organization for the contact
