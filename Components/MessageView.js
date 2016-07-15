@@ -187,10 +187,12 @@ class MessageView extends Component {
     // let message = <View style={{padding: 10}}>
     //                 <Text style={styles.itemTitle}>click done for verifying or check the properties that should be corrected and click Done button</Text>
     //               </View>
+    let msg = resource.message
+            ? <View><Text style={styles.itemTitle}>{resource.message}</Text></View>
+            : <View/>
     return (
       <ScrollView  ref='this' style={platformStyles.container}>
-        <NetworkInfoProvider connected={this.state.isConnected} />
-        <View style={styles.band}><Text style={styles.date}>{date}</Text></View>
+        <View style={[styles.band, {borderBottomColor: this.props.bankStyle.PRODUCT_ROW_BG_COLOR, borderTopColor: '#dddddd'}]}><Text style={styles.date}>{date}</Text></View>
         <View style={styles.photoBG}>
           <PhotoView resource={resource} navigator={this.props.navigator}/>
         </View>
@@ -198,7 +200,7 @@ class MessageView extends Component {
         <View style={{marginTop: -3}}>
           <PhotoList photos={resource.photos} resource={resource} isView={true} navigator={this.props.navigator} numberInRow={inRow}/>
           <View style={styles.rowContainer}>
-            <View><Text style={resource.message ? styles.itemTitle : {height: 0}}>{resource.message}</Text></View>
+            {msg}
             <ShowPropertiesView navigator={this.props.navigator}
                                 resource={resource}
                                 bankStyle={this.props.bankStyle}
@@ -320,6 +322,8 @@ var styles = StyleSheet.create({
   band: {
     height: 30,
     backgroundColor: '#f7f7f7',
+    borderColor:  '#f7f7f7',
+    borderWidth: 1,
     alignSelf: 'stretch',
     // paddingRight: 10,
     // paddingTop: 3,
