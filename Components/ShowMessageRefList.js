@@ -53,48 +53,19 @@ class ShowMessageRefList extends Component {
       var icon = props[p].icon  ||  utils.getModel(props[p].items.ref).value.icon;
       if (!icon)
         icon = 'ios-checkmark';
-      // if (props[p].items.ref === constants.TYPES.ADDITIONAL_INFO) {
-      //   if (utils.getMe().organization)
-      //     refList.push(
-      //       <View style={buttonStyles.container} key={this.getNextKey()}>
-      //          <TouchableHighlight onPress={() => {
-      //             var buttons = [{
-      //               text: 'Cancel',
-      //             },
-      //             {
-      //               text: 'OK',
-      //               onPress: this.props.additionalInfo.bind(this, this.props.resource, props[p])
-      //             }];
-      //             var to = this.props.resource;
-      //             AlertIOS.prompt(
-      //               'Sending ' + resource.title + ' form to ' + utils.getDisplayName(to, utils.getModel(to[constants.TYPE]).value.properties),
-      //               buttons
-      //             );
-
-      //            }
-      //          } underlayColor='transparent'>
-      //            <View style={{alignItems: 'center'}}>
-      //              <Icon name={icon}  size={35}  color='#ffffff' />
-      //              <Text style={buttonStyles.text}>{translate(props[p], model)}</Text>
-      //            </View>
-      //          </TouchableHighlight>
-      //        </View>
-      //     );
-      // }
-      // else {
-        let style = (backlinks.length === 1)
-                  ? [buttonStyles.container, {width: Dimensions.get('window').width}]
-                  :  buttonStyles.container
-        refList.push(
-          <View style={style} key={this.getNextKey()}>
-             <TouchableHighlight onPress={this.showResources.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
-               <View style={{alignItems: 'center'}}>
-                 <Icon name={icon}  size={35}  color='#ffffff' />
-                 <Text style={buttonStyles.text}>{translate(props[p], model)}</Text>
-               </View>
-             </TouchableHighlight>
-           </View>
-          );
+      let style = (backlinks.length === 1)
+                ? [buttonStyles.container, {width: Dimensions.get('window').width}]
+                :  buttonStyles.container
+      refList.push(
+        <View style={style} key={this.getNextKey()}>
+           <TouchableHighlight onPress={this.showResources.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
+             <View style={{alignItems: 'center'}}>
+               <Icon name={icon}  size={35}  color='#ffffff' />
+               <Text style={buttonStyles.text}>{translate(props[p], model)}</Text>
+             </View>
+           </TouchableHighlight>
+         </View>
+        );
       // }
      })
 
@@ -107,6 +78,28 @@ class ShowMessageRefList extends Component {
               )
              : <View/>;
   }
+  showMoreLikeThis() {
+    var self = this;
+    var modelName = this.props.resource[constants.TYPE];
+    this.props.navigator.push({
+      title: translate(utils.getModel(modelName).value),
+      component: MessageList,
+      id: 11,
+      backButtonTitle: 'Back',
+      passProps: {
+        resource: utils.getMe(),
+        filter: '',
+        isAggregation: true,
+        modelName: modelName,
+      }
+    });
+  }
+}
+reactMixin(ShowMessageRefList.prototype, ResourceMixin);
+reactMixin(ShowMessageRefList.prototype, RowMixin);
+
+module.exports = ShowMessageRefList;
+
   // additionalInfo(resource, prop) {
   //   var rmodel = utils.getModel(resource[constants.TYPE]).value;
   //   var r = {
@@ -138,24 +131,34 @@ class ShowMessageRefList extends Component {
   //   })
 
   // }
-  showMoreLikeThis() {
-    var self = this;
-    var modelName = this.props.resource[constants.TYPE];
-    this.props.navigator.push({
-      title: translate(utils.getModel(modelName).value),
-      component: MessageList,
-      id: 11,
-      backButtonTitle: 'Back',
-      passProps: {
-        resource: utils.getMe(),
-        filter: '',
-        isAggregation: true,
-        modelName: modelName,
-      }
-    });
-  }
-}
-reactMixin(ShowMessageRefList.prototype, ResourceMixin);
-reactMixin(ShowMessageRefList.prototype, RowMixin);
 
-module.exports = ShowMessageRefList;
+
+      // if (props[p].items.ref === constants.TYPES.ADDITIONAL_INFO) {
+      //   if (utils.getMe().organization)
+      //     refList.push(
+      //       <View style={buttonStyles.container} key={this.getNextKey()}>
+      //          <TouchableHighlight onPress={() => {
+      //             var buttons = [{
+      //               text: 'Cancel',
+      //             },
+      //             {
+      //               text: 'OK',
+      //               onPress: this.props.additionalInfo.bind(this, this.props.resource, props[p])
+      //             }];
+      //             var to = this.props.resource;
+      //             AlertIOS.prompt(
+      //               'Sending ' + resource.title + ' form to ' + utils.getDisplayName(to, utils.getModel(to[constants.TYPE]).value.properties),
+      //               buttons
+      //             );
+
+      //            }
+      //          } underlayColor='transparent'>
+      //            <View style={{alignItems: 'center'}}>
+      //              <Icon name={icon}  size={35}  color='#ffffff' />
+      //              <Text style={buttonStyles.text}>{translate(props[p], model)}</Text>
+      //            </View>
+      //          </TouchableHighlight>
+      //        </View>
+      //     );
+      // }
+      // else {
