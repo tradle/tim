@@ -280,8 +280,35 @@ var utils = {
     return displayName;
   },
 
+  template (t, o) {
+    return t.replace(/{([^{}]*)}/g,
+        function (a, b) {
+          var r = o[b - 1];
+          return typeof r === 'string' ||
+                 typeof r === 'number' ?
+                 r : a;
+        }
+     )
+  },
+  templateIt1(prop, resource) {
+    var pgroup = prop.group
+    var group = []
+    pgroup.forEach((p) => {
+      if (!p.match(/[a-z]/i))
+        group.push(p)
+      else {
+        let v =  resource[p] ? resource[p] : ''
+        group.push(v)
+      }
+    })
+
+    return this.template(prop.displayAs, group);
+  },
+
   templateIt(prop, resource) {
     var template = prop.displayAs;
+    if (typeof template === 'string')
+      return this.templateIt1(prop, resource)
     var val = '';
     let self = this
     if (template instanceof Array) {
