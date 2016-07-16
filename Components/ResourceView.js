@@ -267,14 +267,15 @@ class ResourceView extends Component {
     if (me.useTouchId === r.useTouchId  &&  me.useGesturePassword === r.useGesturePassword)
       return
     let self = this
-    signIn(() => {
-      Actions.addItem({resource: me, value: r, meta: utils.getModel(constants.TYPES.PROFILE).value})
-      let popToThePreviousScreen = me.useGesturePassword  &&  (!r.useGesturePassword  ||  r.useTouchId)
+    signIn(self.props.navigator, r)
+      .then(() => {
+        Actions.addItem({resource: me, value: r, meta: utils.getModel(constants.TYPES.PROFILE).value})
+        let popToThePreviousScreen = me.useGesturePassword  &&  (!r.useGesturePassword  ||  r.useTouchId)
 
-      if (popToThePreviousScreen)
-        self.props.navigator.pop()
-      self.setState({useGesturePassword: r.useGesturePassword, useTouchId: r.useTouchId})
-    }, self.props.navigator, r)
+        if (popToThePreviousScreen)
+          self.props.navigator.pop()
+        self.setState({useGesturePassword: r.useGesturePassword, useTouchId: r.useTouchId})
+      })
     // this.props.navigator.push({
     //   id: 1,
     //   backButtonTitle: null,
