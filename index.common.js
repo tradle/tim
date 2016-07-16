@@ -65,6 +65,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  StatusBar,
   Platform,
   // Linking,
   AppState,
@@ -87,7 +88,7 @@ Text.defaultProps = function() {
 import React, { Component } from 'react'
 
 var ReactPerf = __DEV__ && require('react-addons-perf')
-var UNAUTHENTICATE_AFTER_BG_MILLIS = __DEV__ ? 1000 : 10 * 60 * 1000
+var UNAUTHENTICATE_AFTER_BG_MILLIS = require('./utils/localAuth').TIMEOUT
 
 class TiMApp extends Component {
   constructor(props) {
@@ -154,11 +155,13 @@ class TiMApp extends Component {
         // it should be more like Actions.auth()
         // and then handled in one place
         if (me && me.isRegistered && !me.isAuthenticated) {
-          signIn(() => {
-            me = utils.getMe()
-            if (me.useGesturePassword)
-              this.state.navigator.pop()
-          }, this.state.navigator)
+          signIn(this.state.navigator)
+            .then(() => {
+              me = utils.getMe()
+              if (me.useGesturePassword)
+                this.state.navigator.pop()
+            })
+
           Actions.start()
           // let needNav = currentRoute.component !== TimHome
           // if (needNav) {
@@ -419,7 +422,6 @@ var NavigationBarRouteMapper = {
     if (index === 0  ||  route.noLeftButton) {
       return null;
     }
-
     var color = '#7AAAC3'
     if (route.passProps.bankStyle  &&  route.passProps.bankStyle.LINK_COLOR)
       color = route.passProps.bankStyle.LINK_COLOR
