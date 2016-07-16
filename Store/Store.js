@@ -138,7 +138,7 @@ var currentEmployees = {}
 var PORT = 51086
 var TIM_PATH_PREFIX = 'me'
 // If app restarts in less then 10 minutes keep it authenticated
-const AUTHENTICATED_TIME = 600//0000
+const AUTHENTICATED_TIME = require('../utils/localAuth').TIMEOUT
 
 var models = {};
 var list = {};
@@ -158,7 +158,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
-var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://192.168.0.101:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
+var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://127.0.0.1:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
