@@ -84,6 +84,10 @@ class ResourceList extends Component {
     if (isRegistration)
       this.state.isRegistration = isRegistration;
   }
+  componentWillUnmount() {
+    if (this.props.navigator.getCurrentRoutes().length === 1)
+      StatusBar.setHidden(true)
+  }
   componentWillMount() {
     var params = {
       modelName: this.props.modelName,
