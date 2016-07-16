@@ -177,7 +177,8 @@ class TimHome extends Component {
         return
       }
 
-      signIn(() => {
+      signIn(this.props.navigator)
+        .then(() => {
         // if (this.state.newMe)
           //{
         //   let me = utils.getMe()
@@ -188,13 +189,14 @@ class TimHome extends Component {
         //   this.props.navigator.popToRoute(routes[routes.length - 3])
         // }
         // else
-          this.showOfficialAccounts()
-      }, this.props.navigator)
+        return this.showOfficialAccounts()
+      })
       break
     case 'getMe':
       utils.setMe(params.me)
       var nav = this.props.navigator
-      signIn(() => this.showOfficialAccounts(), this.props.navigator)
+      signIn(this.props.navigator)
+        .then(() => this.showOfficialAccounts())
       break
     }
   }
@@ -316,10 +318,15 @@ class TimHome extends Component {
     };
 
     let self = this
-    route.passProps.callback = this.setPassword.bind(this, function(err) {
-      Actions.setAuthenticated(true)
-      self.showOfficialAccounts(true)
-    })
+    route.passProps.callback = () => {
+      setPassword(this.props.navigator)
+      .then (() => {
+        Actions.setAuthenticated(true)
+        this.showOfficialAccounts(true)
+        // cb()
+      })
+
+    }
     // let nav = self.props.navigator
     // route.passProps.callback = (me) => {
     //   this.showVideoTour(() => {
@@ -331,9 +338,6 @@ class TimHome extends Component {
     route.passProps.editCols = ['firstName', 'lastName', 'language']
     route.titleTintColor = '#ffffff'
     this.props.navigator.push(route);
-  }
-  setPassword(cb) {
-    setPassword(cb, this.props.navigator)
   }
   showVideoTour(cb) {
     let onEnd = (err) => {
@@ -453,6 +457,7 @@ class TimHome extends Component {
                 <Text style={styles.version}>git: {commitHash}</Text>
               </View>
 
+    // var dev = <View/>
     var dev = __DEV__
             ? <View style={styles.dev}>
                 <TouchableHighlight
@@ -550,7 +555,8 @@ class TimHome extends Component {
   }
 
   _pressHandler() {
-    signIn(() => this.showOfficialAccounts(), this.props.navigator)
+    signIn(this.props.navigator)
+      .then(() => this.showOfficialAccounts())
   }
 }
 
