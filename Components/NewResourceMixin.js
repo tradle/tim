@@ -101,8 +101,18 @@ var NewResourceMixin = {
         editCols[r] = props[r];
       })
     }
-    else
-      editCols = utils.arrayToObject(meta.editCols);
+    else if (meta.editCols) {
+      utils.arrayToObject(meta.editCols);
+      editCols = {}
+      meta.editCols.forEach((p) => {
+        let idx = p.indexOf('_group')
+        if (idx === -1  ||  !props[p].list || props[p].title.toLowerCase() !== p)
+          editCols[p] = props[p]
+
+        if (idx !== -1  &&  props[p].list)
+          props[p].list.forEach((p) => editCols[p] = props[p])
+      })
+    }
 
     var eCols = editCols ? editCols : props;
     var required = utils.arrayToObject(meta.required);
@@ -549,7 +559,7 @@ var NewResourceMixin = {
   },
   myBooleanTemplate(params) {
     var labelStyle = {color: '#cccccc', fontSize: 18, paddingBottom: 10};
-    var textStyle = {color: this.state.isRegistration ? '#ffffff' : '#000000', fontSize: 17, paddingBottom: 10};
+    var textStyle =  {color: this.state.isRegistration ? '#ffffff' : '#000000', fontSize: 17, paddingBottom: 10};
 
     let prop = params.prop
     let resource = this.state.resource
@@ -557,6 +567,8 @@ var NewResourceMixin = {
     let style = (resource && (typeof resource[params.prop.name] !== 'undefined'))
               ? textStyle
               : labelStyle
+    if (Platform.OS === 'ios')
+      style = [style, {paddingLeft: 10}]
 
     var label = translate(params.prop, params.model)
     if (params.prop.units) {
@@ -572,9 +584,9 @@ var NewResourceMixin = {
       label = label.substring(0, 27) + '...'
       doWrap = false
     }
+
 // , Platform.OS === 'ios' ? {paddingLeft: 0} : {paddingLeft: 10}
     return (
-
       <View style={{paddingBottom: 10, flex: 5}} key={this.getNextKey()} ref={prop.name}>
         <TouchableHighlight underlayColor='transparent' onPress={
           this.onChangeText.bind(this, prop, !value)
@@ -582,7 +594,7 @@ var NewResourceMixin = {
           <View style={styles.booleanContainer}>
             <View style={[styles.booleanContentStyle]}>
               <Text style={[style, doWrap ? {flexWrap: 'wrap', width: Dimensions.get('window').width - 100} : {}]}>{label}</Text>
-              <Switch onValueChange={value => this.onChangeText(prop, value)} value={value} onTintColor={LINK_COLOR} />
+              <Switch onValueChange={value => this.onChangeText(prop, value)} value={value} onTintColor={LINK_COLOR} style={{marginTop: -5}} />
             </View>
           </View>
         </TouchableHighlight>
