@@ -67,7 +67,7 @@ elif [[ -x "$(command -v brew)" && -s "$(brew --prefix nvm)/nvm.sh" ]]; then
   . "$(brew --prefix nvm)/nvm.sh"
 fi
 
-REACT_NATIVE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+REACT_NATIVE_DIR="$(pwd)/node_modules/react-native"
 
 # Xcode project file for React Native apps is located in ios/ subfolder
 cd ..
