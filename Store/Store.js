@@ -113,8 +113,8 @@ const WELCOME_INTERVAL = 600000
 
 const Sendy = require('sendy')
 const SendyWS = require('sendy-ws')
-const OTRClient = require('sendy-otr')
-const DSA = require('@tradle/otr').DSA
+// const OTRClient = require('sendy-otr')
+// const DSA = require('@tradle/otr').DSA
 // const BigInt = require('@tradle/otr/vendor/bigint')
 // const BigIntTimes = {}
 // Object.keys(BigInt).forEach(function (method) {
@@ -181,6 +181,13 @@ var driverInfo = {
   wsClients: {},
   // whitelist: [],
 }
+
+const KEY_SET = [
+  { type: 'bitcoin', purpose: 'payment' },
+  { type: 'bitcoin', purpose: 'messaging' },
+  { type: 'ec', purpose: 'sign' },
+  { type: 'ec', purpose: 'update' }
+]
 
 var LocalizedStrings = require('react-native-localization')
 let defaultLanguage = new LocalizedStrings({ en: {}, nl: {} }).getLanguage()
@@ -492,10 +499,10 @@ var Store = Reflux.createStore({
       }
     }
 
-    if (OTR_ENABLED) {
-      otrKey = keys.filter((k) => k.type === 'dsa')[0]
-      if (otrKey) otrKey = DSA.parsePrivate(otrKey.priv)
-    }
+    // if (OTR_ENABLED) {
+    //   otrKey = keys.filter((k) => k.type === 'dsa')[0]
+    //   if (otrKey) otrKey = DSA.parsePrivate(otrKey.priv)
+    // }
 
     // if (otrKey) otrKey = kiki.toKey(otrKey).priv()
 
@@ -713,13 +720,13 @@ var Store = Reflux.createStore({
     // if (provider.txId)
     //   whitelist.push(provider.txId)
     let self = this
-    const otrKey = driverInfo.otrKey
+    const otrKey = null//driverInfo.otrKey
     const wsClients = driverInfo.wsClients
     const identifier = otrKey ? otrKey.fingerprint() : meDriver.permalink
     const base = getProviderUrl(provider)
     if (wsClients[base]) return wsClients[base]
 
-    const url = utils.joinURL(base, 'ws?from=' + identifier)
+    const url = utils.joinURL(base, 'ws?from=' + identifier).replace(/^http/, 'ws')
     const wsClient = new WebSocketClient({
       url: url,
       autoConnect: true,
@@ -729,19 +736,19 @@ var Store = Reflux.createStore({
     })
 
     let transport
-    if (otrKey) {
-      transport = newSwitchboard({
-        identifier: identifier,
-        unreliable: wsClient,
-        clientForRecipient: function (recipient) {
-          return new OTRClient({
-            key: otrKey,
-            client: new Sendy(SENDY_OPTS),
-            theirFingerprint: recipient
-          })
-        }
-      })
-    } else {
+    // if (otrKey) {
+    //   transport = newSwitchboard({
+    //     identifier: identifier,
+    //     unreliable: wsClient,
+    //     clientForRecipient: function (recipient) {
+    //       return new OTRClient({
+    //         key: otrKey,
+    //         client: new Sendy(SENDY_OPTS),
+    //         theirFingerprint: recipient
+    //       })
+    //     }
+    //   })
+    // } else {
       transport = newSwitchboard({
         identifier: identifier,
         unreliable: wsClient,
@@ -749,7 +756,7 @@ var Store = Reflux.createStore({
           return new Sendy(SENDY_OPTS)
         }
       })
-    }
+    // }
 
     wsClient.on('disconnect', function () {
       transport.clients().forEach(function (c) {
@@ -3367,7 +3374,10 @@ var Store = Reflux.createStore({
 
       const encryptionKey = crypto.randomBytes(32).toString('hex')
       const globalSalt = crypto.randomBytes(32).toString('hex')
-      const genIdentity = Q.ninvoke(tradleUtils, 'newIdentity', { networkName })
+      const genIdentity = Q.ninvoke(tradleUtils, 'newIdentity', {
+          networkName,
+          keys: KEY_SET
+        })
         .then(identityInfo => {
           publishedIdentity = identityInfo.identity
           mePub = publishedIdentity.pubkeys
