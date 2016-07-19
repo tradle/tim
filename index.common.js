@@ -184,7 +184,9 @@ class TiMApp extends Component {
         break
       case 'background':
         newState.unauthTimeout = setTimeout(() => {
-          Actions.setAuthenticated(false)
+          if (me && me.isRegistered) {
+            Actions.setAuthenticated(false)
+          }
         }, UNAUTHENTICATE_AFTER_BG_MILLIS)
 
         break
