@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.facebook.react.ReactActivity;
+import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.learnium.RNDeviceInfo.RNDeviceInfo;
 import com.rnfs.RNFSPackage;
 import com.imagepicker.ImagePickerPackage;
@@ -47,6 +48,7 @@ public class MainActivity extends ReactActivity {
     protected List<ReactPackage> getPackages() {
         return Arrays.asList(
             new MainReactPackage(),
+            new ReactNativePushNotificationPackage(),
             new RNDeviceInfo(),
             new RNFSPackage(),
             new ImagePickerPackage(),

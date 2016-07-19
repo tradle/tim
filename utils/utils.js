@@ -3,11 +3,13 @@
 import {
   NativeModules,
   findNodeHandle,
-  Dimensions
+  Dimensions,
+  Alert
 } from 'react-native'
 
 import AsyncStorage from '../Store/Storage'
 import DeviceInfo from 'react-native-device-info'
+import PushNotifications from 'react-native-push-notification'
 
 var RCTUIManager = NativeModules.UIManager
 var crypto = require('crypto')
@@ -792,6 +794,71 @@ var utils = {
         return val
       }
     }
+  },
+  setupPushNotifications: function (opts) {
+    opts = opts || {}
+    PushNotifications.configure({
+      // (optional) Called when Token is generated (iOS and Android)
+      onRegister: function(token) {
+        Alert.alert('device token: ' + JSON.stringify(token))
+        console.log(token)
+        // fetch('https://tradle.io/pn/' {
+        //   method: 'POST',
+        //   headers: {
+        //     'Accept': 'application/json',
+        //     'Content-Type': 'application/json'
+        //   },
+        //   body: JSON.stringify({
+        //     name: 'Hubot',
+        //     login: 'hubot',
+        //   })
+        // })
+      },
+
+      // (required) Called when a remote or local notification is opened or received
+      onNotification: function(notification) {
+        // {
+        //     foreground: false, // BOOLEAN: If the notification was received in foreground or not
+        //     message: 'My Notification Message', // STRING: The notification message
+        //     data: {}, // OBJECT: The push data
+        // }
+        console.log( 'NOTIFICATION:', notification )
+        // example
+        // const foreground = notification.foreground ? 'foreground' : 'background'
+        // PushNotifications.localNotification({
+        //     /* Android Only Properties */
+        //     // title: `${notification.message} [${foreground}]`, // (optional)
+        //     // ticker: "My Notification Ticker", // (optional)
+        //     // autoCancel: true, (optional) default: true,
+        //     // largeIcon: "ic_launcher", // (optional) default: "ic_launcher"
+        //     // smallIcon: "ic_notification", // (optional) default: "ic_notification" with fallback for "ic_launcher"
+        //     // bigText: "My big text that will be shown when notification is expanded", // (optional) default: "message" prop
+        //     // subText: "This is a subText", // (optional) default: none
+        //     // number: 10, // (optional) default: none (Cannot be zero)
+        //     // color: "red", // (optional) default: system default
+
+        //     /* iOS and Android properties */
+        //   message: `${notification.message} [${foreground}]`
+        // });
+      },
+
+      // ANDROID ONLY: (optional) GCM Sender ID.
+      // senderID: "YOUR GCM SENDER ID",
+
+      // IOS ONLY (optional): default: all - Permissions to register.
+      permissions: {
+        alert: true,
+        badge: true,
+        sound: true
+      },
+
+      /**
+        * IOS ONLY: (optional) default: true
+        * - Specified if permissions will requested or not,
+        * - if not, you must call PushNotificationsHandler.requestPermissions() later
+        */
+      requestPermissions: opts.requestPermissions !== false
+    })
   }
 }
 

@@ -1,5 +1,8 @@
 'use strict'
 
+// see issue: https://github.com/facebook/react-native/issues/6227
+var NativeAppEventEmitter = require('RCTNativeAppEventEmitter')
+
 // require('react-native-level')
 var debug = require('debug')
 if (__DEV__) {

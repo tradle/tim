@@ -3398,6 +3398,7 @@ var Store = Reflux.createStore({
         //   }))
         // }
 
+      utils.setupPushNotifications()
     } else {
       loadIdentityAndKeys = Keychain.getGenericPassword(ENCRYPTION_KEY)
     }
