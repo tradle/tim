@@ -34,6 +34,7 @@ import {
   ListView,
   StyleSheet,
   Navigator,
+  Alert,
   // AlertIOS,
   // ActionSheetIOS,
   TouchableHighlight,
@@ -240,7 +241,7 @@ class ResourceList extends Component {
     if (action === 'list') {
       // First time connecting to server. No connection no providers yet loaded
       if (!params.list  &&  params.alert) {
-        AlertIOS.alert(params.alert)
+        Alert.alert(params.alert)
         return
       }
     }
