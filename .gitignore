@@ -45,3 +45,4 @@ Dockerfile*
 *.sublime*
 run-fabric.sh
 config/
+*.iml

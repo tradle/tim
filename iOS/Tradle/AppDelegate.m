@@ -38,8 +38,9 @@
    */
 
 #ifdef DEBUG
-  jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
-//    jsCodeLocation = [NSURL URLWithString:@"http://172.20.10.2:8081/index.ios.bundle?platform=ios&dev=true"];
+  // [[RCTBundleURLProvider sharedSettings] setDefaults];
+//  jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
+  jsCodeLocation = [NSURL URLWithString:@"http://192.168.0.101:8081/index.ios.bundle?platform=ios&dev=true"];
 //    QTouchposeApplication *touchposeApplication = (QTouchposeApplication *)application;
 //    touchposeApplication.alwaysShowTouches = YES;
 #else
