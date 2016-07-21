@@ -18,6 +18,7 @@ var Actions = Reflux.createActions([
   'reloadDB',
   'reloadModels',
   'list',
+  'listSharedWith',
   'messageList',
   'productList',
   'addModelFromUrl',
