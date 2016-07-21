@@ -520,7 +520,7 @@ class MessageRow extends Component {
     var vtt = [];
     var cnt = 0;
     var self = this;
-    var chatOrg = this.props.to[constants.TYPE] === constants.TYPES.ORGANIZATION  &&  this.props.to[constants.TYPE] + '_' + this.props.to[constants.ROOT_HASH]
+    var chatOrg = this.props.to[constants.TYPE] === constants.TYPES.ORGANIZATION  &&  utils.getId(this.props.to)
     for (var t in  this.props.shareableResources) {
       if (t === formModel.id) {
         var ver = this.props.shareableResources[t];
@@ -1138,7 +1138,7 @@ class MessageRow extends Component {
     var r = this.props.resource
     var fromHash = utils.getId(r.from);
     var me = utils.getMe()
-    if (fromHash == me[constants.TYPE] + '_' + me[constants.ROOT_HASH])
+    if (fromHash === utils.getId(me))
       return true;
     if (utils.getModel(r[constants.TYPE]).value.subClassOf == MY_PRODUCT) {
       let org = r.from.organization
