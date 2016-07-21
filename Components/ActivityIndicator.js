@@ -1,2 +1,2 @@
 
-module.exports = require('react-native-gifted-spinner')
+module.exports = require('react-native').ActivityIndicator

@@ -1,5 +1,8 @@
 'use strict'
 
+// see issue: https://github.com/facebook/react-native/issues/6227
+var NativeAppEventEmitter = require('RCTNativeAppEventEmitter')
+
 // require('react-native-level')
 var debug = require('debug')
 if (__DEV__) {
@@ -20,6 +23,7 @@ import 'stream'
 // require('./timmy')
 
 // require('ErrorUtils').setGlobalHandler(function (e, isFatal) {
+//   Alert.alert(e.stack)
 //   console.error('Failed to handle error:')
 //   console.error(e)
 //   if (__DEV__) throw e
@@ -180,7 +184,9 @@ class TiMApp extends Component {
         break
       case 'background':
         newState.unauthTimeout = setTimeout(() => {
-          Actions.setAuthenticated(false)
+          if (me && me.isRegistered) {
+            Actions.setAuthenticated(false)
+          }
         }, UNAUTHENTICATE_AFTER_BG_MILLIS)
 
         break

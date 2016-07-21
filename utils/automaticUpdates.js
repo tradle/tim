@@ -1,7 +1,7 @@
 
 import { AlertIOS } from 'react-native'
 
-let CodePush = false && !__DEV__ && require('react-native-code-push')
+let CodePush = !__DEV__ && require('react-native-code-push')
 
 let noop = () => {}
 let ON = false

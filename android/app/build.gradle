@@ -55,12 +55,34 @@ import com.android.build.OutputFile
  *   // date; if you have any other folders that you want to ignore for performance reasons (gradle
  *   // indexes the entire tree), add them here. Alternatively, if you have JS files in android/
  *   // for example, you might want to remove it from here.
- *   inputExcludes: ["android/**", "ios/**"]
+ *   inputExcludes: ["android/**", "ios/**"],
+ *
+ *   // override which node gets called and with what additional arguments
+ *   nodeExecutableAndArgs: ["node"]
+ *
+ *   // supply additional arguments to the packager
+ *   extraPackagerArgs: []
  * ]
  */
 
 apply from: "../../node_modules/react-native/react.gradle"
-apply from: "../../node_modules/react-native-code-push/android/codepush.gradle"
+
+def getPassword(String currentUser, String keyChain) {
+   def stdout = new ByteArrayOutputStream()
+   def stderr = new ByteArrayOutputStream()
+   exec {
+       commandLine 'security', '-q', 'find-generic-password', '-a', currentUser, '-s', keyChain, '-w'
+       standardOutput = stdout
+       errorOutput = stderr
+       ignoreExitValue true
+   }
+   //noinspection GroovyAssignabilityCheck
+   stdout.toString().trim()
+}
+
+def pass = getPassword("tradle", "android_keystore")
+def codePushStagingKey = getPassword("tradle", "android_code_push_staging")
+def codePushProductionKey = getPassword("tradle", "android_code_push_production")
 
 /**
  * Set this to true to create two separate APKs instead of one:
@@ -82,13 +104,21 @@ android {
     buildToolsVersion "23.0.1"
 
     defaultConfig {
-        applicationId "com.identity"
+        applicationId "io.tradle"
         minSdkVersion 16
         targetSdkVersion 22
         versionCode 1
         versionName "1.0"
         ndk {
             abiFilters "armeabi-v7a", "x86"
+        }
+    }
+    signingConfigs {
+        release {
+            storeFile file(MYAPP_RELEASE_STORE_FILE)
+            storePassword pass
+            keyAlias MYAPP_RELEASE_KEY_ALIAS
+            keyPassword pass
         }
     }
     splits {
@@ -100,9 +130,14 @@ android {
         }
     }
     buildTypes {
+        debug {
+            buildConfigField "String", "CODEPUSH_KEY", "\"${codePushStagingKey}\""
+        }
         release {
-            minifyEnabled enableProguardInReleaseBuilds
-            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            // minifyEnabled enableProguardInReleaseBuilds
+            // proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            signingConfig signingConfigs.release
+            buildConfigField "String", "CODEPUSH_KEY", "\"${codePushProductionKey}\""
         }
     }
     // applicationVariants are e.g. debug, release
@@ -121,16 +156,17 @@ android {
 }
 
 dependencies {
-    compile project(':react-native-device-info')
-    compile project(':react-native-fs')
-    compile project(':react-native-image-picker')
-    compile project(':react-native-randombytes')
-    compile project(':react-native-keychain')
     compile project(':react-native-video')
     compile project(':react-native-vector-icons')
     compile project(':react-native-udp')
+    compile project(':react-native-randombytes')
+    compile project(':react-native-push-notification')
     compile project(':react-native-localization')
     compile project(':react-native-linear-gradient')
+    compile project(':react-native-keychain')
+    compile project(':react-native-image-picker')
+    compile project(':react-native-fs')
+    compile project(':react-native-device-info')
     compile project(':react-native-code-push')
     compile project(':react-native-camera')
     compile fileTree(dir: "libs", include: ["*.jar"])

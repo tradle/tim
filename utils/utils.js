@@ -3,11 +3,13 @@
 import {
   NativeModules,
   findNodeHandle,
-  Dimensions
+  Dimensions,
+  Alert
 } from 'react-native'
 
 import AsyncStorage from '../Store/Storage'
 import DeviceInfo from 'react-native-device-info'
+import PushNotifications from 'react-native-push-notification'
 
 var RCTUIManager = NativeModules.UIManager
 var crypto = require('crypto')
@@ -19,11 +21,7 @@ var dateformat = require('dateformat')
 var Backoff = require('backoff')
 var extend = require('xtend')
 var levelErrors = require('levelup/lib/errors')
-// TODO: add logbase to deps
-var rebuf = require('logbase').rebuf
-var parseDBValue = function (pair) {
-  return pair[1] && rebuf(JSON.parse(pair[1]))
-}
+const Cache = require('lru-cache')
 var strMap = {
   'Please fill out this form and attach a snapshot of the original document': 'fillTheForm'
 }
@@ -784,6 +782,116 @@ var utils = {
     }
 
     return wrapper
+  },
+  setupSHACaching: function setupSHACaching (protocol) {
+    const merkle = protocol.DEFAULT_MERKLE_OPTS
+    if (merkle._caching) return
+
+    const cache = new Cache({ max: 500 })
+    protocol.DEFAULT_MERKLE_OPTS = {
+      _caching: true,
+      leaf: function leaf (a) {
+        const key = 'l:' + a.data.toString('hex')
+        const cached = cache.get(key)
+        if (cached) return cached
+
+        const val = merkle.leaf(a)
+        cache.set(key, val)
+        return val
+      },
+      parent: function parent (a, b) {
+        const key = 'p:' + a.hash.toString('hex') + b.hash.toString('hex')
+        const cached = cache.get(key)
+        if (cached) return cached
+
+        const val = merkle.parent(a, b)
+        cache.set(key, val)
+        return val
+      }
+    }
+  },
+  setupPushNotifications: function (opts) {
+    return new Promise(resolve => {
+      PushNotifications.configure({
+        // (optional) Called when Token is generated (iOS and Android)
+        onRegister: function(token) {
+          // Alert.alert('device token: ' + JSON.stringify(token))
+          // console.log(token)
+          const tim = opts.tim
+          tim.sign({
+            object: {
+              [TYPE]: 'tradle.PNSRegistration',
+              identity: tim.identity,
+              token: token.device,
+              // apple push notifications service
+              protocol: 'apns'
+            }
+          })
+          .then(result => {
+            // TODO: encode body with protocol buffers to save space
+            return utils.fetchWithBackoff('https://tradle.io/pn/subscriber', {
+              method: 'POST',
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(result.object)
+            }, 10000)
+          })
+          .then(resolve)
+        },
+
+        // (required) Called when a remote or local notification is opened or received
+        onNotification: function(notification) {
+          // {
+          //     foreground: false, // BOOLEAN: If the notification was received in foreground or not
+          //     message: 'My Notification Message', // STRING: The notification message
+          //     data: {}, // OBJECT: The push data
+          // }
+          console.log( 'NOTIFICATION:', notification )
+          setTimeout(function () {
+            PushNotifications.localNotification({
+              message: 'You have unread messages'
+            })
+          }, 5000)
+
+          // example
+          // const foreground = notification.foreground ? 'foreground' : 'background'
+          // PushNotifications.localNotification({
+          //     /* Android Only Properties */
+          //     // title: `${notification.message} [${foreground}]`, // (optional)
+          //     // ticker: "My Notification Ticker", // (optional)
+          //     // autoCancel: true, (optional) default: true,
+          //     // largeIcon: "ic_launcher", // (optional) default: "ic_launcher"
+          //     // smallIcon: "ic_notification", // (optional) default: "ic_notification" with fallback for "ic_launcher"
+          //     // bigText: "My big text that will be shown when notification is expanded", // (optional) default: "message" prop
+          //     // subText: "This is a subText", // (optional) default: none
+          //     // number: 10, // (optional) default: none (Cannot be zero)
+          //     // color: "red", // (optional) default: system default
+
+          //     /* iOS and Android properties */
+          //   message: `${notification.message} [${foreground}]`
+          // });
+        },
+
+        // ANDROID ONLY: (optional) GCM Sender ID.
+        // senderID: "YOUR GCM SENDER ID",
+
+        // IOS ONLY (optional): default: all - Permissions to register.
+        permissions: {
+          alert: true,
+          badge: true,
+          sound: true
+        },
+
+        /**
+          * IOS ONLY: (optional) default: true
+          * - Specified if permissions will requested or not,
+          * - if not, you must call PushNotificationsHandler.requestPermissions() later
+          */
+        requestPermissions: opts.requestPermissions !== false
+      })
+    })
   }
 }
 
@@ -797,5 +905,31 @@ function normalizeRemoveListener (addListenerRetVal) {
   }
 }
 
+/**
+ * recover Buffer objects
+ * @param  {Object} json
+ * @return {Object} json with recovered Buffer-valued properties
+ */
+function rebuf (json) {
+  if (Object.prototype.toString.call(json) !== '[object Object]') return json
+
+  if (json &&
+    json.type === 'Buffer' &&
+    json.data &&
+    !Buffer.isBuffer(json) &&
+    Object.keys(json).length === 2) {
+    return new Buffer(json.data)
+  } else {
+    for (var p in json) {
+      json[p] = rebuf(json[p])
+    }
+
+    return json
+  }
+}
+
+function parseDBValue (pair) {
+  return pair[1] && rebuf(JSON.parse(pair[1]))
+}
 
 module.exports = utils;

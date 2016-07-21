@@ -21,10 +21,12 @@ if [ "$PRODUCT_NAME" == "Tradle-dev" ]; then
   plistName="Dev"
 fi
 
+# Xcode project file for React Native apps is located in ios/ subfolder
+
 buildPlist="Tradle/$plistName.plist"
 bundleVersion=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" $buildPlist)
 gitHash=$(git rev-parse HEAD)
-RELEASES_DIR="release"
+RELEASES_DIR="$(pwd)/../release" # up from iOS
 THIS_RELEASE_DIR="$RELEASES_DIR/$bundleVersion/${gitHash:0:10}"
 
 case "$CONFIGURATION" in
@@ -50,10 +52,9 @@ esac
 source ~/.bash_profile
 source ~/.bashrc
 
-# Xcode project file for React Native apps is located in ios/ subfolder
 cd ..
 
-set -x
+REACT_NATIVE_DIR="$(pwd)/node_modules/react-native"
 if [ -z "$DEST" ]; then
   DEST=$CONFIGURATION_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH
 fi
@@ -67,26 +68,26 @@ elif [[ -x "$(command -v brew)" && -s "$(brew --prefix nvm)/nvm.sh" ]]; then
   . "$(brew --prefix nvm)/nvm.sh"
 fi
 
-REACT_NATIVE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-
-# Xcode project file for React Native apps is located in ios/ subfolder
-cd ..
+copy_bundle() {
+  if [ "$DEV" == false ]; then
+    echo "copying bundle and assets to $THIS_RELEASE_DIR"
+    mkdir -p "$THIS_RELEASE_DIR"
+    cp "$DEST/main.jsbundle" "$THIS_RELEASE_DIR/"
+    cp "$DEST/main.jsbundle.map" "$THIS_RELEASE_DIR/"
+    cp -r "$DEST/assets" "$THIS_RELEASE_DIR/"
+    rm -rf "$RELEASES_DIR/latest"
+    cp -r "$THIS_RELEASE_DIR" "$RELEASES_DIR/latest"
+  fi
+}
 
 # if [ -f "$THIS_RELEASE_DIR/main.jsbundle" ]; then
+#   echo "build exists in $THIS_RELEASE_DIR, copying"
 #   mkdir -p "$DEST"
 #   cp "$THIS_RELEASE_DIR/main.jsbundle" "$DEST/"
 #   cp -r "$THIS_RELEASE_DIR/assets" "$DEST/"
 # else
   echo "writing bundle and assets to $DEST"
-  rm -rf $TMPDIR/react-*
-  # react-native bundle \
-  #   --entry-file index.ios.js \
-  #   --platform ios \
-  #   --dev $DEV \
-  #   --sourcemap-output "$DEST/main.jsbundle.map" \
-  #   --bundle-output "$DEST/main.jsbundle" \
-  #   --assets-dest "$DEST" \
-  #   --verbose
+  # rm -rf $TMPDIR/react-*
   set -x
   node "$REACT_NATIVE_DIR/local-cli/cli.js" bundle \
     --entry-file index.ios.js \
@@ -95,16 +96,5 @@ cd ..
     --reset-cache true \
     --sourcemap-output "$DEST/main.jsbundle.map" \
     --bundle-output "$DEST/main.jsbundle" \
-    --assets-dest "$DEST"
-
-  if [ "$DEV" == false ]; then
-    echo "copying bundle and assets to $THIS_RELEASE_DIR"
-    mkdir -p "$THIS_RELEASE_DIR"
-    cp "$DEST/main.jsbundle" "$THIS_RELEASE_DIR/"
-    cp "$DEST/main.jsbundle.map" "$THIS_RELEASE_DIR/"
-    cp -r "$DEST/assets" "$THIS_RELEASE_DIR/"
-  fi
-
-  rm -rf "$RELEASES_DIR/latest"
-  cp -r "$THIS_RELEASE_DIR" "$RELEASES_DIR/latest"
+    --assets-dest "$DEST" && copy_bundle
 # fi

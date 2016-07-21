@@ -5,12 +5,11 @@ var parseURL = require('url').parse
 import {
   Alert,
   NetInfo,
+  Platform
 } from 'react-native'
 
 import AsyncStorage from './Storage'
-import {
-  hasTouchID
-} from '../utils/localAuth'
+import * as LocalAuth from '../utils/localAuth'
 
 global.AsyncStorage = AsyncStorage
 var path = require('path')
@@ -32,7 +31,7 @@ Q.onerror = function (err) {
   throw err
 }
 
-var ENV = require('react-native-env') || require('../environment')
+var ENV = Platform.OS === 'android' ? require('../environment') : require('react-native-env')
 var Keychain = require('react-native-keychain')
 var AddressBook = require('NativeModules').AddressBook;
 
@@ -76,6 +75,7 @@ const PREV_HASH  = constants.PREV_HASH
 
 const ORGANIZATION = constants.TYPES.ORGANIZATION
 const IDENTITY = constants.TYPES.IDENTITY
+const IDENTITY_PUBLISHING_REQUEST = constants.TYPES.IDENTITY_PUBLISHING_REQUEST
 const MESSAGE = constants.TYPES.MESSAGE
 const SIMPLE_MESSAGE = constants.TYPES.SIMPLE_MESSAGE
 const FINANCIAL_PRODUCT = constants.TYPES.FINANCIAL_PRODUCT
@@ -114,8 +114,21 @@ const WELCOME_INTERVAL = 600000
 
 const Sendy = require('sendy')
 const SendyWS = require('sendy-ws')
-const OTRClient = require('sendy-otr')
-const DSA = require('@tradle/otr').DSA
+// const OTRClient = require('sendy-otr')
+// const DSA = require('@tradle/otr').DSA
+// const BigInt = require('@tradle/otr/vendor/bigint')
+// const BigIntTimes = {}
+// Object.keys(BigInt).forEach(function (method) {
+//   const orig = BigInt[method]
+//   BigIntTimes[method] = 0
+//   BigInt[method] = function () {
+//     var now = Date.now()
+//     var result = orig.apply(this, arguments)
+//     BigIntTimes[method] += Date.now() - now
+//     return result
+//   }
+// })
+
 const SENDY_OPTS = { resendInterval: 2000, mtu: 10000 }
 // const newOTRSwitchboard = require('sendy-otr-ws').Switchboard
 const newSwitchboard = SendyWS.Switchboard
@@ -138,7 +151,7 @@ var currentEmployees = {}
 var PORT = 51086
 var TIM_PATH_PREFIX = 'me'
 // If app restarts in less then 10 minutes keep it authenticated
-const AUTHENTICATED_TIME = require('../utils/localAuth').TIMEOUT
+const AUTHENTICATION_TIMEOUT = LocalAuth.TIMEOUT
 
 var models = {};
 var list = {};
@@ -158,7 +171,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
-var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://192.168.0.101:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
+var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://192.168.0.102:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
@@ -170,10 +183,18 @@ var driverInfo = {
   // whitelist: [],
 }
 
+const KEY_SET = [
+  { type: 'bitcoin', purpose: 'payment' },
+  { type: 'bitcoin', purpose: 'messaging' },
+  { type: 'ec', purpose: 'sign' },
+  { type: 'ec', purpose: 'update' }
+]
+
 var LocalizedStrings = require('react-native-localization')
 let defaultLanguage = new LocalizedStrings({ en: {}, nl: {} }).getLanguage()
 const ENCRYPTION_KEY = 'accountkey'
-const ENCRYPTION_SALT = 'accountsalt'
+// const ENCRYPTION_SALT = 'accountsalt'
+const OTR_ENABLED = false
 
 // var Store = Reflux.createStore(timeFunctions({
 var Store = Reflux.createStore({
@@ -234,6 +255,53 @@ var Store = Reflux.createStore({
             .then(() => this.monitorTim())
         }
       })
+    //   .then(testPush)
+
+    // function testPush () {
+    //   if (!meDriver) return
+
+    //   meDriver.sign({
+    //     object: {
+    //       [TYPE]: 'tradle.PNSRegistration',
+    //       identity: meDriver.identity,
+    //       token: '8bd61aee1eb8ec83075de0012a5f97f995c14bd15c956a64866d0bb5403e5d5f',
+    //       // apple push notifications service
+    //       protocol: 'apns'
+    //     }
+    //   })
+    //   .then(result => {
+    //     // TODO: encode body with protocol buffers to save space
+    //     return utils.fetchWithBackoff('http://localhost:48284/subscriber', {
+    //       method: 'POST',
+    //       headers: {
+    //         'Accept': 'application/json',
+    //         'Content-Type': 'application/json'
+    //       },
+    //       body: JSON.stringify(result.object)
+    //     }, 10000)
+    //   })
+    //   .then(() => {
+    //     console.log('registered for push notifications')
+    //     return meDriver.sign({
+    //       object: {
+    //         [TYPE]: 'tradle.PNSSubscription',
+    //         publisher: '67ebfc677865f613f6ddf38027aeba92ecbe16b3f41b1948c6f48af6f3c9a5d0',
+    //         subscriber: meDriver.link
+    //       }
+    //     })
+    //   })
+    //   .then(result => {
+    //     return utils.fetchWithBackoff('http://localhost:48284/subscription', {
+    //       method: 'POST',
+    //       headers: {
+    //         'Accept': 'application/json',
+    //         'Content-Type': 'application/json'
+    //       },
+    //       body: JSON.stringify(result.object)
+    //     }, 10000)
+    //   })
+    //   .catch(err => console.log('failed to register for push notifications'))
+    // }
   },
 
   _handleConnectivityChange(isConnected) {
@@ -263,7 +331,7 @@ var Store = Reflux.createStore({
     .then(function(value) {
       me = value
       if (me.isAuthenticated) {
-        if (Date.now() - me.dateAuthenticated > AUTHENTICATED_TIME) {
+        if (Date.now() - me.dateAuthenticated > AUTHENTICATION_TIMEOUT) {
           delete me.isAuthenticated
           delete me.dateAuthenticated
           db.put(utils.getId(me), me)
@@ -436,7 +504,7 @@ var Store = Reflux.createStore({
 
     // TODO: figure out of we need to publish identities
     meDriver.identityPublishStatus = function () {
-      return Q({ /*current: true*/ })
+      return Q.ninvoke(meDriver, 'identitySealStatus')  // Q({ /*current: true*/ })
     }
 
     meDriver._multiGetFromDB = utils.multiGet
@@ -480,10 +548,10 @@ var Store = Reflux.createStore({
       }
     }
 
-    otrKey = keys.filter((k) => k.type === 'dsa')[0]
-
-    // otrKey = null
-    if (otrKey) otrKey = DSA.parsePrivate(otrKey.priv)
+    // if (OTR_ENABLED) {
+    //   otrKey = keys.filter((k) => k.type === 'dsa')[0]
+    //   if (otrKey) otrKey = DSA.parsePrivate(otrKey.priv)
+    // }
 
     // if (otrKey) otrKey = kiki.toKey(otrKey).priv()
 
@@ -701,13 +769,13 @@ var Store = Reflux.createStore({
     // if (provider.txId)
     //   whitelist.push(provider.txId)
     let self = this
-    const otrKey = driverInfo.otrKey
+    const otrKey = null//driverInfo.otrKey
     const wsClients = driverInfo.wsClients
     const identifier = otrKey ? otrKey.fingerprint() : meDriver.permalink
     const base = getProviderUrl(provider)
     if (wsClients[base]) return wsClients[base]
 
-    const url = utils.joinURL(base, 'ws?from=' + identifier)
+    const url = utils.joinURL(base, 'ws?from=' + identifier).replace(/^http/, 'ws')
     const wsClient = new WebSocketClient({
       url: url,
       autoConnect: true,
@@ -717,19 +785,19 @@ var Store = Reflux.createStore({
     })
 
     let transport
-    if (otrKey) {
-      transport = newSwitchboard({
-        identifier: identifier,
-        unreliable: wsClient,
-        clientForRecipient: function (recipient) {
-          return new OTRClient({
-            key: otrKey,
-            client: new Sendy(SENDY_OPTS),
-            theirFingerprint: recipient
-          })
-        }
-      })
-    } else {
+    // if (otrKey) {
+    //   transport = newSwitchboard({
+    //     identifier: identifier,
+    //     unreliable: wsClient,
+    //     clientForRecipient: function (recipient) {
+    //       return new OTRClient({
+    //         key: otrKey,
+    //         client: new Sendy(SENDY_OPTS),
+    //         theirFingerprint: recipient
+    //       })
+    //     }
+    //   })
+    // } else {
       transport = newSwitchboard({
         identifier: identifier,
         unreliable: wsClient,
@@ -737,7 +805,7 @@ var Store = Reflux.createStore({
           return new Sendy(SENDY_OPTS)
         }
       })
-    }
+    // }
 
     wsClient.on('disconnect', function () {
       transport.clients().forEach(function (c) {
@@ -812,6 +880,10 @@ var Store = Reflux.createStore({
 
       const prop = otrKey ? 'fingerprint' : 'permalink'
       meDriver.receive(msg, { [prop]: from })
+        .catch(err => {
+          console.error('failed to receive msg:', err)
+          debugger
+        })
     })
 
     transport.on('timeout', function (identifier) {
@@ -1088,7 +1160,7 @@ var Store = Reflux.createStore({
   onStart() {
     var self = this;
     Q.all([
-      hasTouchID(),
+      LocalAuth.hasTouchID(),
       this.ready
     ])
     .spread(hasTouchID => {
@@ -1190,6 +1262,7 @@ var Store = Reflux.createStore({
     // var isServiceMessage = rr[TYPE] === 'tradle.ServiceMessage'
     return meDriver.sign({ object: toChain })
     .then(function(result) {
+      toChain = result.object
       tmpKey = rr[ROOT_HASH] = result.sig
       if (!isWelcome) {
         var to = list[utils.getId(r.to)].value;
@@ -1240,7 +1313,7 @@ var Store = Reflux.createStore({
       .then(function(status) {
         if (!status || !self.isConnected)
           return
-        if (!status.queued  &&  !status.current) {
+        if (!status.watches.link  &&  !status.link) {
           self.publishMyIdentity(orgRep)
           publishRequestSent[orgId] = true
         }
@@ -1628,7 +1701,7 @@ var Store = Reflux.createStore({
           return meDriver.identityPublishStatus()
       })
       .then(function(status) {
-        if (!status.queued  &&  !status.current) {
+        if (!status.watches.link  &&  !status.link) {
           if (isSwitchingToEmployeeMode)
             self.publishMyIdentity(self.getRepresentative(utils.getId(resource.organization)))
           else
@@ -1968,7 +2041,9 @@ var Store = Reflux.createStore({
 
     var ikey = IDENTITY + '_' + to[ROOT_HASH]
     var opts = {
-      to: {fingerprint: this.getFingerprint(list[ikey].value)}
+      to: {fingerprint: this.getFingerprint(list[ikey].value)},
+      // share seal if it exists
+      seal: true
     }
 
     var promise = resource[CUR_HASH] ? meDriver.send({...opts, link: resource[CUR_HASH]}) : Q()
@@ -3430,7 +3505,10 @@ var Store = Reflux.createStore({
 
       const encryptionKey = crypto.randomBytes(32).toString('hex')
       const globalSalt = crypto.randomBytes(32).toString('hex')
-      const genIdentity = Q.ninvoke(tradleUtils, 'newIdentity', { networkName })
+      const genIdentity = Q.ninvoke(tradleUtils, 'newIdentity', {
+          networkName,
+          keys: KEY_SET
+        })
         .then(identityInfo => {
           publishedIdentity = identityInfo.identity
           mePub = publishedIdentity.pubkeys
@@ -3450,7 +3528,6 @@ var Store = Reflux.createStore({
         //     purpose: 'sign'
         //   }))
         // }
-
     } else {
       loadIdentityAndKeys = Keychain.getGenericPassword(ENCRYPTION_KEY)
     }
@@ -3459,6 +3536,13 @@ var Store = Reflux.createStore({
       language = list[utils.getId(me.language)] && list[utils.getId(me.language)].value
 
     return driverPromise = loadIdentityAndKeys.then(encryptionKey => {
+      if (!me.registeredForPushNotifications) {
+        utils.setupPushNotifications({ tim: meDriver })
+          .then(() => Actions.updateMe({ registeredForPushNotifications: true }))
+      } else {
+        utils.setupPushNotifications({ requestPermissions: false })
+      }
+
       me['privkeys'] = mePriv
       me[NONCE] = me[NONCE] || this.getNonce()
       return this.buildDriver({
@@ -3489,7 +3573,7 @@ var Store = Reflux.createStore({
   publishMyIdentity(orgRep) {
     var self = this
     var msg = {
-      [TYPE]: constants.TYPES.IDENTITY_PUBLISHING_REQUEST,
+      [TYPE]: IDENTITY_PUBLISHING_REQUEST,
       [NONCE]: self.getNonce(),
       identity: publishedIdentity
     }
@@ -3647,35 +3731,44 @@ var Store = Reflux.createStore({
       // Object was successfully read off chain
       meDriver.on('readseal', function (seal) {
         const link = seal.link
-        let wrapper
         meDriver.objects.get(link)
           .then(function(obj) {
+            if (obj.object[TYPE] === IDENTITY && obj.link === meDriver.link) {
+              return
+            }
+
+            const wrapper = { ...seal, ...obj }
+            save(wrapper)
+          })
+
+        function save (wrapper) {
             // return
-            wrapper = { ...seal, ...obj }
-            if (wrapper.type === 'tradle.Message') return wrapper
+          const getFromTo = wrapper.type === 'tradle.Message'
+            ? Q(wrapper)
+            : getAuthorForObject(wrapper)
 
-            return getAuthorForObject(wrapper)
-          })
-          .then(msgInfo => {
-            wrapper.from = { [ROOT_HASH]: msgInfo.author }
-            wrapper.to = { [ROOT_HASH]: msgInfo.recipient }
-            wrapper = utils.toOldStyleWrapper(wrapper)
-            return self.putInDb(wrapper)
-          })
-          .catch(function (err) {
-            debugger
-          })
+          return getFromTo
+            .then(msgInfo => {
+              wrapper.from = { [ROOT_HASH]: msgInfo.author }
+              wrapper.to = { [ROOT_HASH]: msgInfo.recipient }
+              wrapper = utils.toOldStyleWrapper(wrapper)
+              return self.putInDb(wrapper)
+            })
+            .catch(function (err) {
+              debugger
+            })
+        }
 
-        function getAuthorForObject (obj) {
+        function getAuthorForObject (wrapper) {
           // objects don't really have a from/to
           // so this will need to be redesigned
           const msgStream = meDriver.objects.messagesWithObject({
-            permalink: obj.permalink,
+            permalink: wrapper.permalink,
             link: link
           })
 
           return Q.all([
-            meDriver.addressBook.lookupIdentity({ permalink: obj.author }),
+            meDriver.addressBook.lookupIdentity({ permalink: wrapper.author }),
             Q.nfcall(collect, msgStream)
           ])
           .spread(function (authorInfo, messages) {
@@ -3740,19 +3833,26 @@ var Store = Reflux.createStore({
   },
 
   maybeWatchSeal(msg) {
-    const type = msg.object.object[TYPE]
+    const payload = msg.object.object
+    const type = payload[TYPE]
     let model = utils.getModel(type)
     if (!model) return
 
     model = model.value
     const sup = model.subClassOf
-    switch (sup) {
-    case FORM:
-    case MY_PRODUCT:
-    case VERIFICATION:
-      break
-    default:
-      return
+    let link
+    if (type === IDENTITY_PUBLISHING_REQUEST) {
+      link = protocol.linkString(payload.identity)
+    } else {
+      switch (sup) {
+      case FORM:
+      case MY_PRODUCT:
+      case VERIFICATION:
+        link = protocol.linkString(payload)
+        break
+      default:
+        return
+      }
     }
 
     let otherGuy = msg.author === meDriver.permalink ? msg.recipient : msg.author
@@ -3760,7 +3860,7 @@ var Store = Reflux.createStore({
       .then(identityInfo => {
         const chainPubKey = tradleUtils.chainPubKey(identityInfo.object)
         return meDriver.watchSeal({
-          link: protocol.linkString(msg.object.object),
+          link: link,
           basePubKey: chainPubKey
         })
       })
@@ -4916,7 +5016,7 @@ function getProviderUrl (provider) {
   //     CUSTOMER_WAITING,
   //     FORGOT_YOU,
   //     FORGET_ME,
-  //     constants.TYPES.IDENTITY_PUBLISHING_REQUEST
+  //     IDENTITY_PUBLISHING_REQUEST
   //   ]
   //   var bankID = utils.getId(params.to)
   //   var reps = params.to[TYPE] === constants.TYPES.ORGANIZATION
