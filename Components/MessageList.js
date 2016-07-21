@@ -6,7 +6,6 @@ var NoResources = require('./NoResources')
 var NewResource = require('./NewResource')
 var ProductChooser = require('./ProductChooser')
 var Icon = require('react-native-vector-icons/Ionicons')
-var extend = require('extend')
 var utils = require('../utils/utils')
 var translate = utils.translate
 var reactMixin = require('react-mixin')
@@ -76,6 +75,7 @@ class MessageList extends Component {
       //     }
       //   }
       // }),
+      isEmployee: utils.isEmployee(props.resource),
       filter: this.props.filter,
       userInput: '',
       progress: 0,
@@ -277,6 +277,7 @@ class MessageList extends Component {
     let me = utils.getMe()
     // Check if I am a customer or a verifier and if I already verified this resource
     let isVerifier = !verification && utils.isVerifier(resource)
+    let isEmployee = utils.isEmployee(this.props.resource)
     var route = {
       title: newTitle,
       id: 5,
@@ -290,6 +291,22 @@ class MessageList extends Component {
         verification: verification,
         // createFormError: isVerifier && !utils.isMyMessage(resource),
         isVerifier: isVerifier
+      }
+    }
+    if (!isEmployee) {
+      route.rightButtonTitle = translate('edit')
+      route.onRightButtonPress = {
+        title: utils.getDisplayName(resource),
+        id: 4,
+        component: NewResource,
+        // titleTextColor: '#7AAAC3',
+        backButtonTitle: translate('back'),
+        rightButtonTitle: translate('done'),
+        passProps: {
+          model: model,
+          resource: resource,
+          bankStyle: this.props.bankStyle
+        }
       }
     }
     if (isVerifier) {
@@ -472,7 +489,7 @@ class MessageList extends Component {
                 : [translate('forgetMe'), translate('cancel')]
     return (
       <View style={[platformStyles.container, bgStyle]}>
-        <NetworkInfoProvider connected={this.state.isConnected} />
+        <NetworkInfoProvider connected={this.state.isConnected} resource={this.props.resource} />
         <View style={ sepStyle } />
         {content}
         <ActionSheet
@@ -497,8 +514,8 @@ class MessageList extends Component {
   }
   generateMenu() {
     let me = utils.getMe()
-    if (this.state.isEmployee)
-      return <View/>
+    // if (this.state.isEmployee)
+    //   return <View/>
     return  <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
               {this.paintMenuButton()}
             </TouchableHighlight>
