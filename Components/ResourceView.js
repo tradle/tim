@@ -30,7 +30,9 @@ const TALK_TO_EMPLOYEE = '1'
 
 var extend = require('extend');
 var constants = require('@tradle/constants');
-
+const USE_TOUCH_ID = 0
+const USE_GESTURE_PASSWORD = 1
+const CHANGE_GESTURE_PASSWORD = 2
 import {
   StyleSheet,
   ScrollView,
@@ -175,26 +177,53 @@ class ResourceView extends Component {
       msg = translate('touchIdOn')
     else
       msg = translate('passwordOn')
-
-    let showSwitch = isIdentity && Platform.OS === 'ios'  && !utils.isSimulator()
-    let switchTouchId = showSwitch
+//, this.state.useTouchId ? {opacity: 1} : {opacity: 0.3}
+    let switchTouchId = isIdentity
                       ? <View style={styles.footer}>
                           <Text style={styles.touchIdText}>{msg}</Text>
                           <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
-                             <View style={[platformStyles.menuButtonRegular, this.state.useTouchId ? {opacity: 1} : {opacity: 0.3}]}>
+                             <View style={[platformStyles.menuButtonRegular]}>
                                 <Icon name='md-finger-print' color={Platform.OS === 'ios' ? '#ffffff': 'red'} size={33} />
                               </View>
                             </TouchableHighlight>
                         </View>
-                     : <View />
+                      : <View/>
+    // let showSwitch = isIdentity && Platform.OS === 'ios'  && !utils.isSimulator()
+    // let switchTouchId = showSwitch
+    //                   ? <View style={styles.footer}>
+    //                       <Text style={styles.touchIdText}>{msg}</Text>
+    //                       <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
+    //                          <View style={[platformStyles.menuButtonRegular, this.state.useTouchId ? {opacity: 1} : {opacity: 0.3}]}>
+    //                             <Icon name='md-finger-print' color={Platform.OS === 'ios' ? '#ffffff': 'red'} size={33} />
+    //                           </View>
+    //                         </TouchableHighlight>
+    //                     </View>
+    //                  : <View />
     // var switchTouchId = <View />
           // <AddNewIdentity resource={resource} navigator={this.props.navigator} />
           // <SwitchIdentity resource={resource} navigator={this.props.navigator} />
               // <Icon  onPress={() => this.closeModal()} name={} size={30} style={{fontSize: 20, color: '#ffffff', paddingHorizontal: 30, paddingVertical: 15}}>Close</Text>
-    let buttons = showSwitch
-                ? [translate('useTouchId') + (this.state.useTouchId ? '    ✔️' : ''), translate('useGesturePassword') + (this.state.useGesturePassword ? '    ✔️' : ''), translate('cancel')]
-                : [translate('cancel')]
+    // let buttons = showSwitch
+    //             ? [translate('useTouchId') + (this.state.useTouchId ? '    ✔️' : ''), translate('useGesturePassword') + (this.state.useGesturePassword ? '    ✔️' : '')]
+    //             : []
 
+    let buttons = []
+    let actions = []
+    if (isIdentity) {
+      if (Platform.OS === 'ios') {
+        if (!utils.isSimulator()) {
+          buttons.push(translate('useTouchId') + (this.state.useTouchId ? ' ✓' : ''))
+          actions.push(USE_TOUCH_ID)
+        }
+        buttons.push(translate('useGesturePassword') + (this.state.useGesturePassword ? ' ✓' : ''))
+        actions.push(USE_GESTURE_PASSWORD)
+      }
+      if (this.state.useGesturePassword) {
+        buttons.push(translate('changeGesturePassword'))
+        actions.push(CHANGE_GESTURE_PASSWORD)
+      }
+    }
+    buttons.push(translate('cancel'))
     return (
       <View style={{flex:1}}>
       <ScrollView  ref='this' style={platformStyles.container}>
@@ -224,7 +253,7 @@ class ResourceView extends Component {
           cancelButtonIndex={buttons.length - 1}
           onPress={(index) => {
             if (index < buttons.length - 1)
-              this.changePreferences(index)
+              this.changePreferences(index, actions[index])
           }}
         />
       </ScrollView>
@@ -246,34 +275,43 @@ class ResourceView extends Component {
     this.state.propValue = utils.getId(resource.id);
     Actions.getItem(resource.id);
   }
-  changePreferences(id) {
+  changePreferences(id, action) {
     let me = utils.getMe()
     let r = {
       _r: me[constants.ROOT_HASH],
       _t: constants.TYPES.PROFILE,
     }
-    switch (id) {
-    case 0:
+    let isChangeGesturePassword
+    switch (action) {
+    case USE_TOUCH_ID:
       r.useTouchId = me.useTouchId ? (me.useGesturePassword ? false : true) : true
       r.useGesturePassword = me.useGesturePassword
       break
-    case 1:
+    case USE_GESTURE_PASSWORD:
       r.useGesturePassword = me.useGesturePassword ? (me.useTouchId ? false : true) : true
       r.useTouchId = me.useTouchId
+      break
+    case CHANGE_GESTURE_PASSWORD:
+      isChangeGesturePassword = true
       break
     }
     if (!r.useGesturePassword  &&  !r.useTouchId)
       r.useGesturePassword = true
-    if (me.useTouchId === r.useTouchId  &&  me.useGesturePassword === r.useGesturePassword)
+    if (!isChangeGesturePassword          &&
+        me.useTouchId === r.useTouchId    &&
+        me.useGesturePassword === r.useGesturePassword)
       return
     let self = this
-    signIn(self.props.navigator, r)
+    signIn(self.props.navigator, r, isChangeGesturePassword)
       .then(() => {
         Actions.addItem({resource: me, value: r, meta: utils.getModel(constants.TYPES.PROFILE).value})
         let popToThePreviousScreen = me.useGesturePassword  &&  (!r.useGesturePassword  ||  r.useTouchId)
-
+        let popTwoScreensBack = isChangeGesturePassword
+        let routes = self.props.navigator.getCurrentRoutes()
         if (popToThePreviousScreen)
           self.props.navigator.pop()
+        else if (popTwoScreensBack)
+          self.props.navigator.popToRoute(routes[routes.length - 3])
         self.setState({useGesturePassword: r.useGesturePassword, useTouchId: r.useTouchId})
       })
     // this.props.navigator.push({
