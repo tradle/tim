@@ -83,12 +83,26 @@ class ResourceList extends Component {
     var isRegistration = this.props.isRegistration ||  (this.props.resource  &&  this.props.resource[constants.TYPE] === constants.TYPES.PROFILE  &&  !this.props.resource[constants.ROOT_HASH]);
     if (isRegistration)
       this.state.isRegistration = isRegistration;
+    if (this.props.sharedWith) {
+      this.state.sharedWith = {}
+      var routes = this.props.navigator.getCurrentRoutes()
+      routes[routes.length - 1].onRightButtonPress = this.done.bind(this)
+    }
+  }
+  done() {
+    this.props.callback(this.state.sharedWith)
   }
   componentWillUnmount() {
     if (this.props.navigator.getCurrentRoutes().length === 1)
       StatusBar.setHidden(true)
   }
   componentWillMount() {
+    if (this.props.sharedWith) {
+      utils.onNextTransitionEnd(this.props.navigator, () => {
+        Actions.listSharedWith(this.props.resource)
+      });
+      return
+    }
     var params = {
       modelName: this.props.modelName,
       to: this.props.resource
@@ -111,7 +125,6 @@ class ResourceList extends Component {
     utils.onNextTransitionEnd(this.props.navigator, () => {
       Actions.list(params)
       StatusBar.setHidden(false);
-
     });
   }
 
@@ -130,7 +143,7 @@ class ResourceList extends Component {
       if (curRoute.id === 11  &&  curRoute.passProps.resource[constants.ROOT_HASH] === params.to[constants.ROOT_HASH])
         return
       let style = this.mergeStyle(params.to.style)
-      this.props.navigator.push({
+      this.props.navigator[curRoute.id === 3 ? 'replace' : 'push']({
         title: params.to.firstName,
         component: MessageList,
         id: 11,
@@ -244,10 +257,11 @@ class ResourceList extends Component {
         return
       }
     }
-    if (action !== 'list' ||  !params.list || params.isAggregation !== this.props.isAggregation)
+    if ((action !== 'list' &&  action !== 'listSharedWith')  ||  !params.list || params.isAggregation !== this.props.isAggregation)
       return;
 
     var list = params.list;
+
     if (!list.length) {
      if (!this.state.filter  ||  !this.state.filter.length)
        this.setState({
@@ -267,13 +281,23 @@ class ResourceList extends Component {
       if (!m.subClassOf  ||  m.subClassOf != this.props.modelName)
         return;
     }
-    this.setState({
+    let state = {
       dataSource: this.state.dataSource.cloneWithRows(list),
       list: list,
       forceUpdate: params.forceUpdate,
       dictionary: params.dictionary,
-      isLoading: false
-    })
+      isLoading: false,
+    }
+    if (params.sharedWithMapping) {
+      state.sharedWithMapping = params.sharedWithMapping
+      let sharedWith = {}
+      list.forEach((r) => {
+        sharedWith[utils.getId(r)] = true
+      })
+      state.sharedWith = sharedWith
+    }
+
+    this.setState(state)
   }
   mergeStyle(newStyle) {
     let style = {}
@@ -568,6 +592,7 @@ class ResourceList extends Component {
     var isVerification = model.id === constants.TYPES.VERIFICATION  ||  model.subClassOf === constants.TYPES.VERIFICATION
     var isForm = model.id === constants.TYPES.FORM || model.subClassOf === constants.TYPES.FORM
     var isMyProduct = model.id === 'tradle.MyProduct'  ||  model.subClassOf === 'tradle.MyProduct'
+
     // let hasBacklink = this.props.prop && this.props.prop.items  &&  this.props.prop.backlink
     return /*hasBacklink  &&*/  (isVerification  || isForm || isMyProduct)
     ? (<VerificationRow
@@ -583,6 +608,7 @@ class ResourceList extends Component {
         onSelect={() => this.selectResource(resource)}
         key={resource[constants.ROOT_HASH]}
         navigator={this.props.navigator}
+        sharedWith={this.state.sharedWith}
         currency={this.props.currency}
         isOfficialAccounts={this.props.officialAccounts}
         showRefResources={this.showRefResources.bind(this)}
@@ -758,13 +784,14 @@ class ResourceList extends Component {
     //   return <View/>
     var content;
     var model = utils.getModel(this.props.modelName).value;
-    if (this.state.dataSource.getRowCount() === 0              &&
-        !utils.getMe().organization                            &&
-        model.subClassOf !== ENUM                              &&
+    if (this.state.dataSource.getRowCount() === 0   &&
+        utils.getMe()                               &&
+        !utils.getMe().organization                 &&
+        model.subClassOf !== ENUM                   &&
+        !this.props.isChooser                       &&
         // this.props.modelName !== constants.TYPES.PROFILE       &&
         // this.props.modelName !== constants.TYPES.VERIFICATION  &&
         this.props.modelName !== constants.TYPES.ORGANIZATION  &&
-        !this.props.isChooser                                  &&
         (!model.subClassOf  ||  model.subClassOf !== ENUM)) {
       content = <NoResources
                   filter={this.state.filter}
