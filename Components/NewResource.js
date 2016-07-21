@@ -80,7 +80,7 @@ class NewResource extends Component {
       LINK_COLOR = DEFAULT_LINK_COLOR
     var r = {};
     if (props.resource)
-      extend(true, r, props.resource)
+      r = utils.clone(props.resource) //extend(true, r, props.resource)
     else
       r[constants.TYPE] = props.model.id
     var isRegistration = !utils.getMe()  && this.props.model.id === constants.TYPES.PROFILE  &&  (!this.props.resource || !this.props.resource[constants.ROOT_HASH]);
@@ -99,12 +99,8 @@ class NewResource extends Component {
       modal: {},
       offSet: new Animated.Value(Dimensions.get('window').height)
     }
-    var currentRoutes = this.props.navigator.getCurrentRoutes();
-    var currentRoutesLength = currentRoutes.length;
-    // currentRoutes[currentRoutesLength - 1].onRightButtonPress = {
-    //   stateChange: this.onSavePressed.bind(this)
-    // };
-
+    var currentRoutes = this.props.navigator.getCurrentRoutes()
+    var currentRoutesLength = currentRoutes.length
     currentRoutes[currentRoutesLength - 1].onRightButtonPress = this.onSavePressed.bind(this)
 
     this._contentOffset = { x: 0, y: 0 }
@@ -295,6 +291,42 @@ class NewResource extends Component {
     this.state.submitted = false
   }
   onSavePressed() {
+    if (!this.props.resource.sharedWith) {
+      this.onSavePressed1()
+      return
+    }
+    this.props.navigator.push({
+      id: 10,
+      title: translate('shareChangesWith'),
+      backButtonTitle: translate('back'),
+      component: ResourceList,
+      rightButtonTitle: translate('Done'),
+      passProps: {
+        message: translate('chooseCompaniesToShareChangesWith'),
+        modelName: constants.TYPES.ORGANIZATION,
+        to: this.state.resource.to,
+        resource: this.state.resource,
+        callback:  this.onSavePressed1.bind(this),
+        sharedWith: true,
+        // onAddItem: this.onAddItem.bind(this),
+        bankStyle: this.props.bankStyle,
+        currency: this.props.currency
+      }
+    });
+  }
+
+  onSavePressed1(list) {
+    if (this.props.resource.sharedWith) {
+      if (!list)
+        return
+      let l = []
+      for (let r in list) {
+        if (list[r])
+          l.push(r)
+      }
+      if (!l.length)
+        return
+    }
     if (this.state.submitted)
       return
     this.state.submitted = true
@@ -355,6 +387,8 @@ class NewResource extends Component {
           }
         }
       }
+      if (this.props.model.properties[p].type  === 'boolean'  &&  typeof v !== 'undefined')
+        return
       var isDate = Object.prototype.toString.call(v) === '[object Date]'
       if (!v  ||  (isDate  &&  isNaN(v.getTime())))  {
         var prop = this.props.model.properties[p]
@@ -420,6 +454,8 @@ class NewResource extends Component {
     };
     if (this.props.additionalInfo)
       params.additionalInfo = additionalInfo
+    if (list)
+      params.shareWith = list
     Actions.addItem(params)
   }
   // HACK: the value for property of the type that is subClassOf Enum is set on resource
@@ -567,7 +603,7 @@ class NewResource extends Component {
     var parentBG = {backgroundColor: '#7AAAC3'};
     var resource = this.state.resource;
     var iKey = resource
-             ? resource[constants.TYPE] + '_' + resource[constants.ROOT_HASH]
+             ? utils.getId(resource)
              : null;
 
     var meta =  props.model;
@@ -742,8 +778,6 @@ class NewResource extends Component {
           istyle.push({paddingBottom: 0, height: count * height + 35})
         }
       }
-      if (Platform.OS === 'android')
-        istyle.push({paddingLeft: 10})
 
       arrayItems.push (
         <View style={istyle} key={this.getNextKey()} ref={bl.name}>
@@ -767,14 +801,9 @@ class NewResource extends Component {
     else
       Form.stylesheet = stylesheet
 
-    // var style = isMessage ? {height: 570} : {height: 867};
-
-    var style
-    if (this.state.isRegistration)
-      style = DeviceHeight < 600 ? {marginTop: 90} : {marginTop: DeviceHeight / 4}
-    else
-      style = platformStyles.container
-      // style = {flex: 1, marginTop: Platform.OS === 'ios' ? 64 : 44 }
+    var style = this.state.isRegistration
+              ? DeviceHeight < 600 ? {marginTop: 90} : {marginTop: DeviceHeight / 4}
+              : platformStyles.container
     if (!options)
       options = {}
     options.auto = 'placeholders';
@@ -795,7 +824,7 @@ class NewResource extends Component {
           <View style={photoStyle}>
             <PhotoView resource={resource} navigator={this.props.navigator}/>
           </View>
-          <View style={this.state.isRegistration ? {marginHorizontal: DeviceHeight > 1000 ? 50 : 30, paddingTop: 30} : {paddingRight: 15, paddingTop: 10, marginHorizontal: 10}}>
+          <View style={this.state.isRegistration ? {marginHorizontal: DeviceHeight > 1000 ? 50 : 30, paddingTop: 30} : {paddingTop: 10, marginHorizontal: 10}}>
             <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange.bind(this)}/>
             {button}
             <View style={{marginTop: -10}}>
@@ -911,11 +940,11 @@ class NewResource extends Component {
               : '',
 
       from: {
-        id: me[constants.TYPE] + '_' + me[constants.ROOT_HASH] + '_' + me[constants.CUR_HASH],
+        id: utils.getId(me),
         title: meName
       },
       to: {
-        id: resource.to[constants.TYPE] + '_' + resource.to[constants.ROOT_HASH] + '_' + resource.to[constants.CUR_HASH],
+        id: utils.getId(resource),
         title: toName
       },
 
@@ -950,7 +979,7 @@ var styles = StyleSheet.create({
     fontSize: 18,
     color: '#cccccc',
     // alignSelf: 'center',
-    paddingLeft: 10
+    // paddingLeft: 10
   },
   itemsText: {
     fontSize: 18,
