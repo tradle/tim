@@ -36,6 +36,8 @@ const tradle = require('@tradle/engine')
 const protocol = tradle.protocol
 var constants = require('@tradle/constants');
 var TYPE = constants.TYPE
+var TYPES = constants.TYPES
+
 var VERIFICATION = constants.TYPES.VERIFICATION
 const CUR_HASH = constants.CUR_HASH
 const ROOT_HASH = constants.ROOT_HASH
@@ -148,6 +150,10 @@ var utils = {
     }
     return s ? s : args[0]
   },
+  clone(resource) {
+    return JSON.parse(JSON.stringify(resource))
+  },
+
   getStringName(str) {
     return strMap[str]
   },
@@ -229,7 +235,7 @@ var utils = {
       return idArr.length === 2 ? r.id : idArr[0] + '_' + idArr[1];
     }
     else
-      return r[constants.TYPE] + '_' + r[constants.ROOT_HASH];
+      return r[TYPE] + '_' + r[ROOT_HASH];
   },
   getItemsMeta(metadata) {
     var props = metadata.properties;
@@ -251,9 +257,9 @@ var utils = {
       if (resource.title)
         return resource.title
       else
-        meta = this.getModel(resource[constants.TYPE]).value.properties
+        meta = this.getModel(resource[TYPE]).value.properties
     }
-    let m = this.getModel(resource[constants.TYPE])
+    let m = this.getModel(resource[TYPE])
     var displayName = '';
     for (var p in meta) {
       if (p.charAt(0) === '_')
@@ -265,7 +271,7 @@ var utils = {
       }
       if (resource[p]) {
         if (meta[p].type == 'object') {
-          var title = resource[p].title || this.getDisplayName(resource[p], utils.getModel(resource[p][constants.TYPE]).value.properties);
+          var title = resource[p].title || this.getDisplayName(resource[p], utils.getModel(resource[p][TYPE]).value.properties);
           displayName += displayName.length ? ' ' + title : title;
         }
         else
@@ -291,18 +297,19 @@ var utils = {
      )
   },
   templateIt1(prop, resource) {
-    var pgroup = prop.group
-    var group = []
+    let pgroup = prop.group
+    let group = []
+    let hasSetProps
     pgroup.forEach((p) => {
-      if (!p.match(/[a-z]/i))
-        group.push(p)
-      else {
-        let v =  resource[p] ? resource[p] : ''
-        group.push(v)
-      }
+      let v =  resource[p] ? resource[p] : ''
+      if (v)
+        hasSetProps = true
+      group.push(v)
     })
-
-    return this.template(prop.displayAs, group);
+    if (!hasSetProps)
+      return
+    else
+      return this.template(prop.displayAs, group).trim()
   },
 
   templateIt(prop, resource) {
@@ -324,7 +331,7 @@ var utils = {
               if (resource[t].title)
                 val += resource[t].title
               else {
-                let m = self.getModel(resource[t][constants.TYPE]).value
+                let m = self.getModel(resource[t][TYPE]).value
                 val += self.getDisplayName(resource[t], m.properties)
               }
             }
@@ -438,9 +445,9 @@ var utils = {
   isMyMessage(r) {
     var fromHash = utils.getId(r.from);
     var me = utils.getMe()
-    if (fromHash == me[constants.TYPE] + '_' + me[constants.ROOT_HASH])
+    if (fromHash == this.getId(me))
       return true;
-    if (utils.getModel(r[constants.TYPE]).value.subClassOf == 'tradle.MyProduct') {
+    if (utils.getModel(r[TYPE]).value.subClassOf == 'tradle.MyProduct') {
       let org = r.from.organization
       if (org  &&  utils.getId(r.from.organization) !== utils.getId(this.props.to))
         return true
@@ -457,11 +464,11 @@ var utils = {
       });
     }
     resource.verifications.forEach(function(r) {
-      var rh = r.from[constants.ROOT_HASH];
+      var rh = r.from[ROOT_HASH];
       if (!rh)
         rh = utils.getId(r.from).split('_')[1];
 
-      if (rh === me[constants.ROOT_HASH]  &&  (!lastAdditionalInfoTime  ||  lastAdditionalInfoTime < r.time))
+      if (rh === me[ROOT_HASH]  &&  (!lastAdditionalInfoTime  ||  lastAdditionalInfoTime < r.time))
         verifiedByMe = true
     });
     return verifiedByMe
@@ -474,7 +481,7 @@ var utils = {
       if (properties[p].type === 'object') {
         if (res[p]  &&  res[p].id  &&  res[p].title)
           continue
-        if (properties[p].ref !== constants.TYPES.MONEY) {
+        if (properties[p].ref !== TYPES.MONEY) {
           res[p] = {
             id: this.getId(res[p]),
             title: this.getDisplayName(res[p], properties)
@@ -541,7 +548,15 @@ var utils = {
       })
   },
   isEmployee(resource) {
-    return me.isEmployee  &&  (this.getId(me.organization) === this.getId(resource))
+    if (!me.isEmployee)
+      return false
+    let myId = this.getId(me.organization)
+    if (resource[TYPE] === TYPES.ORGANIZATION)
+      return this.getId(resource) === myId ? true : false
+    if (!resource.organization)
+      return true
+    if (utils.getId(resource.organization) === utils.getId(me.organization))
+      return true
   },
   // measure(component, cb) {
   //   let handle = typeof component === 'number'
@@ -737,13 +752,13 @@ var utils = {
   },
   isVerifier(resource, verification) {
     let me = this.getMe()
-    let model = this.getModel(resource[constants.TYPE]).value
+    let model = this.getModel(resource[TYPE]).value
     return (me.organization  &&
             utils.getId(me) === utils.getId(resource.to) &&
            !utils.isVerifiedByMe(resource)               && // !verification  &&  utils.getId(resource.to) === utils.getId(me)  &&
-            model.subClassOf === constants.TYPES.FORM)
+            model.subClassOf === TYPES.FORM)
   },
-  isSimulator: function () {
+  isSimulator() {
     console.log(DeviceInfo.getModel())
     return DeviceInfo.getModel() === 'Simulator'
   },
