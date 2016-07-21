@@ -61,7 +61,7 @@
     "react-native-actionsheet": "^2.0.3",
     "react-native-camera": "lwansbrough/react-native-camera",
     "react-native-carousel": "^0.8.0",
-    "react-native-code-push": "^1.12.2-beta",
+    "react-native-code-push": "^1.13.5-beta",
     "react-native-crypto": "^2.0.1",
     "react-native-device-info": "^0.9.3",
     "react-native-ecc": "^1.2.2",

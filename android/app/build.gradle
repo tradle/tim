@@ -77,7 +77,7 @@ def getPassword(String currentUser, String keyChain) {
        ignoreExitValue true
    }
    //noinspection GroovyAssignabilityCheck
-      stdout.toString().trim()
+   stdout.toString().trim()
 }
 
 def pass = getPassword("tradle", "android_keystore")
@@ -131,13 +131,13 @@ android {
     }
     buildTypes {
         debug {
-            buildConfigField "String", "CODEPUSH_KEY", codePushStagingKey
+            buildConfigField "String", "CODEPUSH_KEY", "\"${codePushStagingKey}\""
         }
         release {
             // minifyEnabled enableProguardInReleaseBuilds
             // proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
             signingConfig signingConfigs.release
-            buildConfigField "String", "CODEPUSH_KEY", codePushProductionKey
+            buildConfigField "String", "CODEPUSH_KEY", "\"${codePushProductionKey}\""
         }
     }
     // applicationVariants are e.g. debug, release

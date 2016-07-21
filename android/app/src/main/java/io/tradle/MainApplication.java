@@ -47,7 +47,7 @@ public class MainApplication extends Application implements ReactApplication {
         new UdpSocketsModule(),
         new ReactNativeLocalizationPackage(),
         new LinearGradientPackage(),
-        new CodePush(BuildConfig.CODEPUSH_KEY, this, BuildConfig.DEBUG),
+        new CodePush(BuildConfig.CODEPUSH_KEY, MainApplication.this, BuildConfig.DEBUG),
         new RCTCameraPackage()
       );
     }
