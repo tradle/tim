@@ -1,4 +1,4 @@
-package com.identity;
+package io.tradle;
 
 import com.facebook.react.ReactActivity;
 

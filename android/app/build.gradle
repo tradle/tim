@@ -81,6 +81,8 @@ def getPassword(String currentUser, String keyChain) {
 }
 
 def pass = getPassword("tradle", "android_keystore")
+def codePushStagingKey = getPassword("tradle", "android_code_push_staging")
+def codePushProductionKey = getPassword("tradle", "android_code_push_production")
 
 /**
  * Set this to true to create two separate APKs instead of one:
@@ -102,7 +104,7 @@ android {
     buildToolsVersion "23.0.1"
 
     defaultConfig {
-        applicationId "com.identity"
+        applicationId "io.tradle"
         minSdkVersion 16
         targetSdkVersion 22
         versionCode 1
@@ -128,10 +130,14 @@ android {
         }
     }
     buildTypes {
+        debug {
+            buildConfigField "String", "CODEPUSH_KEY", codePushStagingKey
+        }
         release {
             // minifyEnabled enableProguardInReleaseBuilds
             // proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
             signingConfig signingConfigs.release
+            buildConfigField "String", "CODEPUSH_KEY", codePushProductionKey
         }
     }
     // applicationVariants are e.g. debug, release

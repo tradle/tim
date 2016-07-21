@@ -1,4 +1,3 @@
 <resources>
-    <string moduleConfig="true" name="reactNativeCodePush_androidDeploymentKey">eGI8n3EkbEUXhlQ1zmsqFBXOB7FNNkknaH9Ue</string>
-    <string name="app_name">TiM</string>
+    <string name="app_name">Tradle-dev</string>
 </resources>

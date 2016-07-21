@@ -1,4 +1,4 @@
-package com.identity;
+package io.tradle;
 
 import android.app.Application;
 import android.util.Log;
@@ -47,7 +47,7 @@ public class MainApplication extends Application implements ReactApplication {
         new UdpSocketsModule(),
         new ReactNativeLocalizationPackage(),
         new LinearGradientPackage(),
-        // new CodePush(this.getResources().getString(R.string.reactNativeCodePush_androidDeploymentKey), this, BuildConfig.DEBUG),
+        new CodePush(BuildConfig.CODEPUSH_KEY, this, BuildConfig.DEBUG),
         new RCTCameraPackage()
       );
     }

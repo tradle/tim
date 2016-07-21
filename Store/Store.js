@@ -5,6 +5,7 @@ var parseURL = require('url').parse
 import {
   Alert,
   NetInfo,
+  Platform
 } from 'react-native'
 
 import AsyncStorage from './Storage'
@@ -30,7 +31,7 @@ Q.onerror = function (err) {
   throw err
 }
 
-var ENV = require('react-native-env') || require('../environment')
+var ENV = Platform.OS === 'android' ? require('../environment') : require('react-native-env')
 var Keychain = require('react-native-keychain')
 var AddressBook = require('NativeModules').AddressBook;
 
@@ -254,6 +255,53 @@ var Store = Reflux.createStore({
             .then(() => this.monitorTim())
         }
       })
+    //   .then(testPush)
+
+    // function testPush () {
+    //   if (!meDriver) return
+
+    //   meDriver.sign({
+    //     object: {
+    //       [TYPE]: 'tradle.PNSRegistration',
+    //       identity: meDriver.identity,
+    //       token: '8bd61aee1eb8ec83075de0012a5f97f995c14bd15c956a64866d0bb5403e5d5f',
+    //       // apple push notifications service
+    //       protocol: 'apns'
+    //     }
+    //   })
+    //   .then(result => {
+    //     // TODO: encode body with protocol buffers to save space
+    //     return utils.fetchWithBackoff('http://localhost:48284/subscriber', {
+    //       method: 'POST',
+    //       headers: {
+    //         'Accept': 'application/json',
+    //         'Content-Type': 'application/json'
+    //       },
+    //       body: JSON.stringify(result.object)
+    //     }, 10000)
+    //   })
+    //   .then(() => {
+    //     console.log('registered for push notifications')
+    //     return meDriver.sign({
+    //       object: {
+    //         [TYPE]: 'tradle.PNSSubscription',
+    //         publisher: '67ebfc677865f613f6ddf38027aeba92ecbe16b3f41b1948c6f48af6f3c9a5d0',
+    //         subscriber: meDriver.link
+    //       }
+    //     })
+    //   })
+    //   .then(result => {
+    //     return utils.fetchWithBackoff('http://localhost:48284/subscription', {
+    //       method: 'POST',
+    //       headers: {
+    //         'Accept': 'application/json',
+    //         'Content-Type': 'application/json'
+    //       },
+    //       body: JSON.stringify(result.object)
+    //     }, 10000)
+    //   })
+    //   .catch(err => console.log('failed to register for push notifications'))
+    // }
   },
 
   _handleConnectivityChange(isConnected) {
@@ -1982,7 +2030,9 @@ var Store = Reflux.createStore({
 
     var ikey = IDENTITY + '_' + to[ROOT_HASH]
     var opts = {
-      to: {fingerprint: this.getFingerprint(list[ikey].value)}
+      to: {fingerprint: this.getFingerprint(list[ikey].value)},
+      // share seal if it exists
+      seal: true
     }
 
     var promise = resource[CUR_HASH] ? meDriver.send({...opts, link: resource[CUR_HASH]}) : Q()
@@ -3397,8 +3447,6 @@ var Store = Reflux.createStore({
         //     purpose: 'sign'
         //   }))
         // }
-
-      utils.setupPushNotifications()
     } else {
       loadIdentityAndKeys = Keychain.getGenericPassword(ENCRYPTION_KEY)
     }
@@ -3407,6 +3455,13 @@ var Store = Reflux.createStore({
       language = list[utils.getId(me.language)] && list[utils.getId(me.language)].value
 
     return driverPromise = loadIdentityAndKeys.then(encryptionKey => {
+      if (!me.registeredForPushNotifications) {
+        utils.setupPushNotifications({ tim: meDriver })
+          .then(() => Actions.updateMe({ registeredForPushNotifications: true }))
+      } else {
+        utils.setupPushNotifications({ requestPermissions: false })
+      }
+
       me['privkeys'] = mePriv
       me[NONCE] = me[NONCE] || this.getNonce()
       return this.buildDriver({
