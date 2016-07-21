@@ -14,8 +14,10 @@ var NOT_SPECIFIED = '[not specified]'
 var DEFAULT_CURRENCY_SYMBOL = '£'
 var CURRENCY_SYMBOL
 const ENUM = 'tradle.Enum'
+
+import ActionSheet from 'react-native-actionsheet'
 import Prompt from 'react-native-prompt'
-// import Communications from 'react-native-communications'
+import Communications from 'react-native-communications'
 
 import {
   StyleSheet,
@@ -54,15 +56,34 @@ class ShowPropertiesView extends Component {
     }
     CURRENCY_SYMBOL = props.currency ? props.currency.symbol || props.currency : DEFAULT_CURRENCY_SYMBOL
   }
-
   render() {
-    var viewCols = this.getViewCols();
     return (
       <View key={this.getNextKey()}>
-        {viewCols}
+        {this.getViewCols()}
       </View>
     );
   }
+  // let buttons = {[translate('sendEmail'), translate('sendSMS'), translate('cancel')]}
+        // <ActionSheet
+        //   ref={(o) => {
+        //     this.ActionSheet = o
+        //   }}
+        //   options={buttons}
+        //   cancelButtonIndex={buttons.length - 1}
+        //   onPress={(index) => {
+        //     switch (index) {
+        //     case 0:
+        //       Communications.email([val], null, null, 'My Subject','My body text')
+        //       break
+        //     case 1:
+        //       Communications.text(val)
+        //       break;
+        //     default:
+        //       return
+        //     }
+        //   }}
+        // />
+
   shouldComponentUpdate(nextProps, nextState) {
     // Prompt for employee to write a correction message
     if (this.state.promptVisible !== nextState.promptVisible)
@@ -215,14 +236,20 @@ class ShowPropertiesView extends Component {
             val = <Text style={styles.description}>{val.title}</Text>;
           else if (pMeta.type !== 'object'  &&  (typeof val === 'string')  &&  (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0))
             val = <Text onPress={this.onPress.bind(this, val)} style={[styles.description, {color: '#7AAAC3'}]}>{val}</Text>;
-          else {
-        // val = <TouchableOpacity onPress={() => {
-        //   Communications.text()
-        // }}>
-        //     <Text  style={[styles.title, styles.linkTitle]}>{val}</Text>
-        // </TouchableOpacity>
+          // else if (pMeta.range) {
+          //   if (pMeta.range === 'email')
+          //     val = <TouchableOpacity onPress={this.sendEmail.bind(this, val)}>
+          //             <Text  style={[styles.title, styles.linkTitle]}>{val}</Text>
+          //           </TouchableOpacity>
+          //   else if (pMeta.range === 'phone') {
+          //     val = <TouchableOpacity onPress={this.sendSMS.bind(this, val)}>
+          //             <Text  style={[styles.title, styles.linkTitle]}>{val}</Text>
+          //           </TouchableOpacity>
+          //   }
+          // }
+          else
             val = <Text style={[styles.description]} numberOfLines={2}>{val}</Text>;
-          }
+
         }
       }
       var title = pMeta.skipLabel  ||  isItems
@@ -289,7 +316,43 @@ class ShowPropertiesView extends Component {
     }
     return viewCols;
   }
+  // sendEmail(val) {
+  //   Communications.email([val], null, null, 'My Subject','My body text')
+  // }
+  // sendSMS(val) {
+  //   // Communications.text(val)
+  //   var Composer = require('NativeModules').RNMessageComposer
+  //   Composer.messagingSupported(supported => {
+  //     let s = 'may be show something'
+  //   });
 
+  //   // inside your code where you would like to send a message
+  //   Composer.composeMessageWithArgs({
+  //       'messageText':'My sample message body text',
+  //       // 'subject':'My Sample Subject',
+  //       'recipients':[val]
+  //     },
+  //     (result) => {
+  //       switch(result) {
+  //       case Composer.Sent:
+  //         console.log('the message has been sent');
+  //         break;
+  //       case Composer.Cancelled:
+  //         console.log('user cancelled sending the message');
+  //         break;
+  //       case Composer.Failed:
+  //         console.log('failed to send the message');
+  //         break;
+  //       case Composer.NotSupported:
+  //         console.log('this device does not support sending texts');
+  //         break;
+  //       default:
+  //         console.log('something unexpected happened');
+  //         break;
+  //       }
+  //     }
+  //   );
+  // }
   onPress(url, event) {
     var model = utils.getModel(this.props.resource[constants.TYPE]).value;
     this.props.navigator.push({
