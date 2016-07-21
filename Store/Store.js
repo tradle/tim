@@ -158,7 +158,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
-var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://127.0.0.1:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
+var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://192.168.0.101:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
@@ -239,6 +239,7 @@ var Store = Reflux.createStore({
   _handleConnectivityChange(isConnected) {
     this.isConnected = isConnected
     this.trigger({action: 'connectivity', isConnected: isConnected})
+    // Alert.alert('Store: ' + isConnected)
     // this.setState({
     //   isConnected,
     // });
@@ -1311,7 +1312,7 @@ var Store = Reflux.createStore({
   },
 
   getRepresentatives(orgId) {
-    var result = this.searchNotMessages({modelName: PROFILE})
+    var result = this.searchNotMessages({modelName: PROFILE, all: true})
     var orgRep = [];
     result.some((ir) =>  {
       if (!ir.organization) return
@@ -1326,7 +1327,7 @@ var Store = Reflux.createStore({
   getRepresentative(orgId) {
     if (currentEmployees[orgId])
       return currentEmployees[orgId]
-    var result = this.searchNotMessages({modelName: PROFILE})
+    var result = this.searchNotMessages({modelName: PROFILE, all: true})
     var orgRep;
     result.some((ir) =>  {
       if (!ir.organization) return
@@ -1407,12 +1408,13 @@ var Store = Reflux.createStore({
       var verificationRequest = list[verificationRequestId].value;
       if (!verificationRequest.verifications)
         verificationRequest.verifications = [];
-      if (!r.txId)
-        verificationRequest.verifications.push(newVerification);
+      if (!r.txId) {
+        verificationRequest.verifications.push(self.buildRef(newVerification));
+      }
       else {
         for (var i=0; i<verificationRequest.verifications.length; i++) {
           if (utils.getId(verificationRequest.verifications).split('_')[1] === r[ROOT_HASH])
-            verificationRequest.verifications = newVerification
+            verificationRequest.verifications = self.buildRef(newVerification)
         }
       }
       // if (!verificationRequest.sharedWith)
@@ -1600,6 +1602,7 @@ var Store = Reflux.createStore({
     var resource = params.resource;
     delete temporaryResources[resource[TYPE]]
     var meta = params.meta;
+    var shareWith = params.shareWith
 
     var isRegistration = params.isRegistration;
     var additionalInfo = params.additionalInfo;
@@ -1878,10 +1881,18 @@ var Store = Reflux.createStore({
           // TODO: fix hack
           // we now have a real root hash,
           // scrap the placeholder
-          delete list[tmpKey]
+          // if (isNew ||  !shareWith)
+            delete list[tmpKey]
 
           returnVal[CUR_HASH] = result.object.link
           returnVal[ROOT_HASH] = result.object.permalink
+          // if (shareWith) {
+          //   let oldValue = list[tmpKey]
+          //   for (let p in shareWith) {
+          //     if (shareWith[p])
+          //       this.onShare(returnVal, list[p].value)
+          //   }
+          // }
           return save(true)
         })
         .then(() => {
@@ -2205,7 +2216,20 @@ var Store = Reflux.createStore({
       return this.searchNotMessages(params);
     }
   },
-
+  onListSharedWith(resource) {
+    let sharedWith = resource.sharedWith
+    if (!sharedWith)
+      return null
+    let shareWithMapping = {}
+    let result = []
+    sharedWith.forEach((r) => {
+      let bot = list[r.bankRepresentative].value
+      let org = list[utils.getId(bot.organization)].value
+      result.push(org)
+      shareWithMapping[r.bankRepresentative] = org
+    })
+    this.trigger({action: 'listSharedWith', list: result, sharedWith: shareWithMapping})
+  },
   searchNotMessages(params) {
     var foundResources = {};
     var modelName = params.modelName;
@@ -2331,6 +2355,26 @@ var Store = Reflux.createStore({
     //     }
     //   });
     // }
+    if (isIdentity  && !params.all && me.isEmployee) {
+      let retPeople = []
+      // Filter out the employees of other service providers from contact list
+      // This will go away when thru-bot communications will deployed
+      result.forEach((r) => {
+        if (!r.organization) {
+          retPeople.push(r)
+          return
+        }
+        let orgId = utils.getId(r.organization)
+        if (r.isEmployee  &&  utils.getId(r.organization) !== orgId) {
+          let orgs = SERVICE_PROVIDERS.filter((rr) => {
+            return rr.org === orgId ? true : false
+          })
+          if (!orgs.length)
+            retPeople.push(r)
+        }
+      })
+      result = retPeople
+    }
     if (result.length === 1)
       return result
     var sortProp = params.sortProperty;
@@ -2525,7 +2569,7 @@ var Store = Reflux.createStore({
                resource: r
             })
           }
-          if (!utils.isEmployee(chatTo.organization))
+          if (!utils.isEmployee(list[utils.getId(chatTo.organization)].value))
           // if (!me.isEmployee  ||  rid !== utils.getId(me.organization))
             continue;
          // }
@@ -2694,7 +2738,10 @@ var Store = Reflux.createStore({
           switch (typeof val) {
             case 'object':
               if (val) {
-                doc[p] = extend(true, {}, val)
+                if (Array.isArray(val))
+                  doc[p] = val.slice(0)
+                else
+                  doc[p] = extend(true, {}, val)
               }
               break
             default:
@@ -2842,10 +2889,37 @@ var Store = Reflux.createStore({
 
       return true
     })
-
+    // There was a case when FormRequest was following ProductList over and over with the same form
+    // let curFormRequest
+    // let removeNext
+    // result = result.filter((r, i) => {
+    //   if (r[TYPE] === PRODUCT_LIST) {
+    //     var next = result[i + 1]
+    //     if (next) {
+    //        if (next[TYPE] === PRODUCT_LIST)
+    //         return false
+    //       else if (next[TYPE] === FORM_REQUEST  &&  !next.documentCreated) {
+    //         if (!curFormRequest)
+    //           return true
+    //         if (curFormRequest === next.product)
+    //           return false
+    //       }
+    //     }
+    //   }
+    //   else if (r[TYPE] === FORM_REQUEST) {
+    //     if (r.documentCreated)
+    //       return true
+    //     if (r.product === curFormRequest)
+    //      return false
+    //     curFormRequest = r.product
+    //   }
+    //   return true
+    // })
     return result;
   },
   fillMessage(r) {
+    return r
+
     var resource = {};
     extend(resource, r);
     if (!r.verifications  ||  !r.verifications.length)
@@ -2944,6 +3018,7 @@ var Store = Reflux.createStore({
     if (!verTypes.length)
       return shareableResources
 
+    let toId = utils.getId(to)
     var l = this.searchMessages({modelName: VERIFICATION})
     l.forEach(function(val) {
       var doc = val.document
@@ -2953,13 +3028,19 @@ var Store = Reflux.createStore({
       var id = utils.getId(val.to.id);
       if (id !== meId)
         return
+      // Filter out the verification from the same company
+      var fromId = utils.getId(val.from)
+      var fromOrgId = utils.getId(list[fromId].value.organization)
+      if (fromOrgId === toId)
+        return
       var document = doc.id ? list[utils.getId(doc.id)]  &&  list[utils.getId(doc.id)].value : doc;
       if (!document)
         return;
       if (to  &&  org  &&  document.verifications) {
         var thisCompanyVerification;
         for (var i=0; i<document.verifications.length; i++) {
-          var v = document.verifications[i];
+          var v = list[utils.getId(document.verifications[i])].value;
+
           if (v.organization  &&  utils.getId(org) === utils.getId(v.organization)) {
             let sharedWith = doc.sharedWith
             if (!sharedWith)
@@ -3991,9 +4072,11 @@ var Store = Reflux.createStore({
     //     batch.push({type: 'put', key: key, value: val})
     // }
     // else {
-      if (val[TYPE] === MY_EMPLOYEE_PASS)
+      if (val[TYPE] === MY_EMPLOYEE_PASS) {
         to.isEmployee = true
-
+        to.organization = this.buildRef(org)
+        this.setMe(to)
+      }
       var dn = val.message || utils.getDisplayName(val, model.properties);
       to.lastMessage = (obj.from[ROOT_HASH] === me[ROOT_HASH]) ? 'You: ' + dn : dn;
       to.lastMessageTime = val.time;
