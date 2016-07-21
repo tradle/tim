@@ -28,7 +28,7 @@ const DEFAULT_OPTS = {
 let pendingAuth
 
 module.exports = {
-  TIMEOUT: __DEV__ ? 1000 : 10 * 60 * 1000,
+  TIMEOUT: __DEV__ ? 10000 : 10 * 60 * 1000,
   Errors,
   setPassword,
   signIn,
@@ -65,7 +65,7 @@ function authenticateUser (opts) {
     })
 }
 
-function signIn(navigator, newMe) {
+function signIn(navigator, newMe, isChangeGesturePassword) {
   let me = utils.getMe()
   // if (!me)
   //   return register(cb)
@@ -73,7 +73,9 @@ function signIn(navigator, newMe) {
     return Q()
 
   let authPromise
-  if (me.useTouchId  &&  me.useGesturePassword) {
+  if (isChangeGesturePassword)
+    authPromise = changePasswordAuth(navigator, newMe)
+  else if (me.useTouchId  &&  me.useGesturePassword) {
     if (newMe) {
       if (!newMe.useTouchId)
         authPromise = touchIDWithFallback(navigator)
@@ -112,6 +114,12 @@ function touchIDAndPasswordAuth(navigator) {
       throw err
     })
   }
+function changePasswordAuth(navigator) {
+  return checkPassword(navigator)
+  .then(() => {
+    return setPassword(navigator)
+  })
+}
 
 function touchIDWithFallback(navigator) {
   if (isAndroid) return passwordAuth(navigator)
