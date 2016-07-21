@@ -53,9 +53,9 @@ class MessageView extends Component {
       promptVisible: false
     };
     var currentRoutes = this.props.navigator.getCurrentRoutes();
-    var currentRoutesLength = currentRoutes.length;
-    if (currentRoutes[currentRoutesLength - 1].rightButtonTitle)
-      currentRoutes[currentRoutesLength - 1].onRightButtonPress = this.verifyOrCreateError.bind(this)
+    var len = currentRoutes.length;
+    if (!currentRoutes[len - 1].onRightButtonPress  &&  currentRoutes[len - 1].rightButtonTitle)
+      currentRoutes[len - 1].onRightButtonPress = this.verifyOrCreateError.bind(this)
   }
   componentDidMount() {
     this.listenTo(Store, 'onAction');
@@ -91,9 +91,10 @@ class MessageView extends Component {
       for (var p in this.state.errorProps)
         msg += msg ? ', ' + properties[p].title : properties[p].title
       msg = 'Please correct or fill out the following fields: ' + msg
+
       Alert.alert(
+        'Sending message to ' + resource.from.title,
         msg,
-        null,
         [
           {text: 'Ok', onPress: this.createError.bind(this, msg)},
           {text: 'Cancel', onPress: () => console.log('Canceled!')},
@@ -187,7 +188,7 @@ class MessageView extends Component {
     // let message = <View style={{padding: 10}}>
     //                 <Text style={styles.itemTitle}>click done for verifying or check the properties that should be corrected and click Done button</Text>
     //               </View>
-    let msg = resource.message
+    let msg = resource.message  &&  resource.message.length
             ? <View><Text style={styles.itemTitle}>{resource.message}</Text></View>
             : <View/>
     return (
@@ -236,7 +237,7 @@ class MessageView extends Component {
       message: msg
     };
     r[prop.items.backlink] = {
-      id: resource[constants.TYPE] + '_' + resource[constants.ROOT_HASH],
+      id: utils.getId(resource),
       title: utils.getDisplayName(resource, rmodel.properties)
     }
     Actions.addVerification(r);
