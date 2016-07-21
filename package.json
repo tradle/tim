@@ -7,7 +7,8 @@
     "postinstall": "npm run nodeify && npm run installhooks && ./fbdedupe.sh",
     "nodeify": "./node_modules/.bin/rn-nodeify --hack && npm run streamhack",
     "installhooks": "cp hooks/* .git/hooks/",
-    "streamhack": "rm -rf ./node_modules/@tradle/utils/node_modules/create-torrent/node_modules/block-stream2/node_modules/readable-stream"
+    "streamhack": "rm -rf ./node_modules/@tradle/utils/node_modules/create-torrent/node_modules/block-stream2/node_modules/readable-stream",
+    "rmsymlinks": "find -L . -type l -exec rm {} \\;"
   },
   "dependencies": {
     "@tradle/cb-blockr": "^3.1.4",
@@ -56,7 +57,7 @@
     "react-addons-perf": "^15.2.0",
     "react-mixin": "~1.2.2",
     "react-native": "^0.29.2",
-    "react-native-accordion": "^1.0.0",
+    "react-native-accordion": "mvayngrib/react-native-accordion",
     "react-native-actionsheet": "^2.0.3",
     "react-native-camera": "lwansbrough/react-native-camera",
     "react-native-carousel": "^0.8.0",
@@ -75,7 +76,7 @@
     "react-native-level": "tradle/react-native-level",
     "react-native-level-fs": "tradle/react-native-level-fs",
     "react-native-linear-gradient": "^1.1.0-alpha",
-    "react-native-local-auth": "^1.0.4",
+    "react-native-local-auth": "^1.1.1",
     "react-native-localization": "^0.1.12",
     "react-native-prompt": "pgmemk/react-native-prompt",
     "react-native-push-notification": "^2.0.0",
