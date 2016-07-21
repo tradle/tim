@@ -17,7 +17,7 @@ const ENUM = 'tradle.Enum'
 
 import ActionSheet from 'react-native-actionsheet'
 import Prompt from 'react-native-prompt'
-import Communications from 'react-native-communications'
+// import Communications from 'react-native-communications'
 
 import {
   StyleSheet,
@@ -316,6 +316,7 @@ class ShowPropertiesView extends Component {
     }
     return viewCols;
   }
+  // npm i react-native-message-composer
   // sendEmail(val) {
   //   Communications.email([val], null, null, 'My Subject','My body text')
   // }
