@@ -29,12 +29,16 @@ import ActivityIndicator from './ActivityIndicator'
 
 class ResourceRow extends Component {
   constructor(props) {
-    super(props);
+    super(props)
+    if (this.props.sharedWith)
+      this.state = {sharedWith: true}
   }
   shouldComponentUpdate(nextProps, nextState) {
     if (Object.keys(this.props).length  !== Object.keys(nextProps).length)
       return true
     if (this.state || nextState) {
+      if (nextState.sharedWith  &&  nextState.sharedWith === this.state.sharedWith)
+        return true
       if (this.state  &&  nextState) {
         if (Object.keys(this.state).length  !== Object.keys(nextState).length)
           return true
@@ -113,14 +117,18 @@ class ResourceRow extends Component {
                      ? <View style={styles.online}></View>
                      : <View style={[styles.online, {backgroundColor: 'transparent'}]}></View>
 
-    var cancelResource = (this.props.onCancel)
-                       ? <View>
-                         <TouchableHighlight onPress={this.props.onCancel} underlayColor='transparent'>
-                           <View>
-                             <Icon name='close-circled'  size={30}  color='#B1010E'  style={styles.cancelIcon} />
+    var rId = utils.getId(this.props.resource)
+    // var cancelResource = (this.props.onCancel ||  this.state)
+    //                    ? <TouchableHighlight onPress={this.action.bind(this)} underlayColor='transparent' style={{position: 'absolute', right: 0, top: 20}}>
+    //                        <View>
+    //                          <Icon name={this.state.sharedWith[rId] ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color={this.state.sharedWith[rId] ? '#B1010E' : '#dddddd'}  style={styles.cancelIcon} />
+    //                        </View>
+    //                      </TouchableHighlight>
+    //                    : <View />;
+    var cancelResource = (this.props.onCancel ||  this.state)
+                       ?  <View style={{position: 'absolute', right: 0, top: 20, backgroundColor: 'transparent'}}>
+                             <Icon name={this.state.sharedWith ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color={this.state.sharedWith ? '#B1010E' : '#dddddd'}  style={styles.cancelIcon} />
                            </View>
-                         </TouchableHighlight>
-                         </View>
                        : <View />;
     var textStyle = noImage ? [styles.textContainer, {marginVertical: 7}] : styles.textContainer;
     // Grey out if not loaded provider info yet
@@ -145,7 +153,7 @@ class ResourceRow extends Component {
       return (
       <Swipeout right={[{text: 'Hide', backgroundColor: 'red', onPress: this.hideResource.bind(this, resource)}]} autoClose={true} scroll={(event) => this._allowScroll(event)} >
         <View key={this.getNextKey()} style={{opacity: 1, flex: 1, justifyContent: 'center'}}>
-          <TouchableHighlight onPress={this.props.onSelect} underlayColor='transparent' key={this.getNextKey()}>
+          <TouchableHighlight onPress={this.state ? this.action.bind(this) : this.props.onSelect} underlayColor='transparent' key={this.getNextKey()}>
             <View style={styles.row} key={this.getNextKey()}>
               {photo}
               {orgPhoto}
@@ -179,11 +187,20 @@ class ResourceRow extends Component {
               </View>
             </TouchableHighlight>
             : <View />}
-
+          {cancelResource}
           <View style={styles.cellBorder}  key={this.getNextKey()} />
         </View>
       </Swipeout>
       );
+  }
+  action() {
+    if (this.props.onCancel)
+      this.props.onCancel()
+    else {
+      let id = utils.getId(this.props.resource)
+      this.setState({sharedWith: this.state.sharedWith ? false : true})
+      this.props.sharedWith[id] = this.state.sharedWith ? false : true
+    }
   }
   hideResource(resource) {
     let r = {}
