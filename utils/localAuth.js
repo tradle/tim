@@ -104,27 +104,38 @@ function signIn(navigator, newMe) {
     })
 
 }
+
 function touchIDAndPasswordAuth(navigator) {
   if (isAndroid) return passwordAuth(navigator)
 
   return authenticateUser()
-    .then(() => passwordAuth(navigator))
-    .catch((err) => {
-      debugger
-      throw err
-    })
+    .then(
+      () => passwordAuth(navigator),
+      err => {
+        if (err.name !== 'RCTTouchIDNotSupported') {
+          // the user may have enabled touch id but then disabled it from
+          // the Settings app
+          //
+          // there's not much we can do short of demanding the user
+          // turn touch id back on
+          throw err
+        }
+
+        return passwordAuth(navigator)
+      }
+    )
   }
 
 function touchIDWithFallback(navigator) {
   if (isAndroid) return passwordAuth(navigator)
 
   return authenticateUser()
-  .catch((err) => {
-    if (err.name === 'LAErrorUserFallback' || err.name.indexOf('TouchID') !== -1)
-      return passwordAuth(navigator)
+    .catch((err) => {
+      if (err.name === 'LAErrorUserFallback' || err.name.indexOf('TouchID') !== -1)
+        return passwordAuth(navigator)
 
-    throw err
-  })
+      throw err
+    })
 }
 
 function passwordAuth (navigator) {
