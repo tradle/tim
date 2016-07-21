@@ -351,7 +351,7 @@ var NewResourceMixin = {
         var subModel = models[ref];
         if (data  &&  data[p]) {
           options.fields[p].value = data[p][constants.TYPE]
-                                  ? data[p][constants.TYPE] + '_' + data[p][constants.ROOT_HASH]
+                                  ? utils.getId(data[p])
                                   : data[p].id;
           data[p] = utils.getDisplayName(data[p], subModel.value.properties) || data[p].title;
         }
@@ -503,7 +503,7 @@ var NewResourceMixin = {
     var label = translate(params.prop, params.model)
 
     return (
-      <View style={{marginLeft: 10, justifyContent: 'center', backgroundColor: LINK_COLOR}}>
+      <View style={{marginHorizontal: 10, justifyContent: 'center', backgroundColor: LINK_COLOR}}>
         <Text style={{marginVertical: 10, marginLeft: 10, fontSize: 18, color: '#ffffff'}}>{label}</Text>
       </View>
     );
@@ -550,7 +550,7 @@ var NewResourceMixin = {
         err = params.errors[params.prop.name]
 
       error = err
-                ? <View style={{paddingLeft: 15, backgroundColor: 'transparent'}} key={this.getNextKey()}>
+                ? <View style={{paddingLeft: 10, backgroundColor: 'transparent'}} key={this.getNextKey()}>
                     <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>{err}</Text>
                   </View>
                 : <View key={this.getNextKey()} />
@@ -567,8 +567,8 @@ var NewResourceMixin = {
     let style = (resource && (typeof resource[params.prop.name] !== 'undefined'))
               ? textStyle
               : labelStyle
-    if (Platform.OS === 'ios')
-      style = [style, {paddingLeft: 10}]
+    // if (Platform.OS === 'ios')
+    //   style = [style, {paddingLeft: 10}]
 
     var label = translate(params.prop, params.model)
     if (params.prop.units) {
@@ -618,7 +618,7 @@ var NewResourceMixin = {
 
       let vStyle = Platform.OS === 'android'
                  ? {paddingLeft: 10, marginTop: 5}
-                 : {marginLeft: 20, marginTop: 5, marginBottom: 5, backgroundColor: 'transparent'}
+                 : {marginLeft: 10, marginTop: 5, marginBottom: 5, backgroundColor: 'transparent'}
 
       propLabel = <View style={vStyle}>
                     <Text style={{fontSize: 12, color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}}>{params.label}</Text>
@@ -728,8 +728,8 @@ var NewResourceMixin = {
   //   }
   // },
   myCustomTemplate(params) {
-    var labelStyle = {color: '#cccccc', fontSize: 17, paddingLeft: 10, paddingBottom: 10, marginTop: -5};
-    var textStyle = {color: this.state.isRegistration ? '#ffffff' : '#000000', fontSize: 17, paddingLeft: 10, paddingBottom: 10, marginTop: -5};
+    var labelStyle = {color: '#cccccc', fontSize: 17, paddingBottom: 10, marginTop: -5};
+    var textStyle = {color: this.state.isRegistration ? '#ffffff' : '#000000', fontSize: 17, paddingBottom: 10, marginTop: -5};
     var resource = /*this.props.resource ||*/ this.state.resource
     var label, style
     var propLabel, propName
@@ -751,7 +751,7 @@ var NewResourceMixin = {
       style = textStyle
       let vStyle = Platform.OS === 'android'
                  ? {paddingLeft: 0, marginTop: 5}
-                 : {marginLeft: 10, marginTop: 5, marginBottom: 5, backgroundColor: 'transparent'}
+                 : {marginTop: 5, marginBottom: 5, backgroundColor: 'transparent'}
       propLabel = <View style={vStyle}>
                     <Text style={{fontSize: 12, color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}}>{params.label}</Text>
                   </View>
@@ -770,7 +770,7 @@ var NewResourceMixin = {
           isVideo ? this.showCamera.bind(this, params) : this.chooser.bind(this, prop, params.prop)
         }>
           <View style={{ position: 'relative'}}>
-            <View style={[styles.chooserContentStyle, Platform.OS === 'ios' ? {paddingLeft: 0} : {paddingLeft: 10}]}>
+            <View style={styles.chooserContentStyle}>
               <Text style={style}>{label}</Text>
               {isVideo
                 ? <Icon name='ios-play-outline'  size={25}  color={LINK_COLOR} />
@@ -859,7 +859,7 @@ var NewResourceMixin = {
         resource[propName] = value
     }
     else {
-      var id = value[constants.TYPE] + '_' + value[constants.ROOT_HASH]
+      var id = utils.getId(value)
       resource[propName] = {
         id: id,
         title: utils.getDisplayName(value, utils.getModel(value[constants.TYPE]).value.properties)
@@ -1162,7 +1162,7 @@ var styles = StyleSheet.create({
     borderColor: '#ffffff',
     borderBottomColor: '#cccccc',
     borderBottomWidth: 1,
-    marginLeft: 10,
+    // marginLeft: 10,
     // marginBottom: 10,
     flex: 1
   },
@@ -1186,7 +1186,7 @@ var styles = StyleSheet.create({
     borderColor: '#ffffff',
     borderBottomColor: '#cccccc',
     borderBottomWidth: 1,
-    marginLeft: 10,
+    marginHorizontal: 10,
     marginBottom: 10,
     flex: 1
   },
@@ -1201,7 +1201,7 @@ var styles = StyleSheet.create({
   },
   formInput: {
     borderBottomWidth: 1,
-    marginLeft: 10,
+    marginHorizontal: 10,
     borderColor: '#cccccc',
   },
   regInput: {
