@@ -1505,9 +1505,6 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/TiM\"",
-					"\"$(SRCROOT)/TiM\"",
-					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 				);
 				OTHER_LDFLAGS = "-ObjC";
@@ -1546,9 +1543,6 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/TiM\"",
-					"\"$(SRCROOT)/TiM\"",
-					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 				);
 				OTHER_LDFLAGS = "-ObjC";
