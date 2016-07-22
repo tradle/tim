@@ -3536,13 +3536,6 @@ var Store = Reflux.createStore({
       language = list[utils.getId(me.language)] && list[utils.getId(me.language)].value
 
     return driverPromise = loadIdentityAndKeys.then(encryptionKey => {
-      if (!me.registeredForPushNotifications) {
-        utils.setupPushNotifications({ tim: meDriver })
-          .then(() => Actions.updateMe({ registeredForPushNotifications: true }))
-      } else {
-        utils.setupPushNotifications({ requestPermissions: false })
-      }
-
       me['privkeys'] = mePriv
       me[NONCE] = me[NONCE] || this.getNonce()
       return this.buildDriver({
@@ -3552,6 +3545,16 @@ var Store = Reflux.createStore({
           key: new Buffer(encryptionKey, 'hex')
         }
       })
+    })
+    .then(node => {
+      if (!me.registeredForPushNotifications) {
+        return utils.setupPushNotifications({ node })
+          .then(() => Actions.updateMe({ registeredForPushNotifications: true }))
+      } else {
+        return utils.setupPushNotifications({ requestPermissions: false })
+      }
+
+      return node
     })
   },
 

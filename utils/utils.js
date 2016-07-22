@@ -817,11 +817,11 @@ var utils = {
         onRegister: function(token) {
           // Alert.alert('device token: ' + JSON.stringify(token))
           // console.log(token)
-          const tim = opts.tim
-          tim.sign({
+          const node = opts.node
+          node.sign({
             object: {
               [TYPE]: 'tradle.PNSRegistration',
-              identity: tim.identity,
+              identity: node.identity,
               token: token.device,
               // apple push notifications service
               protocol: 'apns'
