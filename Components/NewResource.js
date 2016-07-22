@@ -291,7 +291,7 @@ class NewResource extends Component {
     this.state.submitted = false
   }
   onSavePressed() {
-    if (!this.props.resource.sharedWith) {
+    if (!this.props.resource  ||  !this.props.resource.sharedWith) {
       this.onSavePressed1()
       return
     }
@@ -316,7 +316,7 @@ class NewResource extends Component {
   }
 
   onSavePressed1(list) {
-    if (this.props.resource.sharedWith) {
+    if (this.props.resource  &&  this.props.resource.sharedWith) {
       if (!list)
         return
       let l = []
