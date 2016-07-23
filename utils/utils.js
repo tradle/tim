@@ -4,7 +4,8 @@ import {
   NativeModules,
   findNodeHandle,
   Dimensions,
-  Alert
+  Alert,
+  Platform
 } from 'react-native'
 
 import AsyncStorage from '../Store/Storage'
@@ -766,7 +767,6 @@ var utils = {
             model.subClassOf === TYPES.FORM)
   },
   isSimulator() {
-    console.log(DeviceInfo.getModel())
     return DeviceInfo.getModel() === 'Simulator'
   },
   toOldStyleWrapper: function (wrapper) {
@@ -821,6 +821,8 @@ var utils = {
   },
   setupPushNotifications: function (opts) {
     return new Promise(resolve => {
+      if (utils.isSimulator() || Platform.OS === 'android') return resolve()
+
       PushNotifications.configure({
         // (optional) Called when Token is generated (iOS and Android)
         onRegister: function(token) {
