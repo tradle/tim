@@ -56,7 +56,7 @@
     "react": "^15.2.0",
     "react-addons-perf": "^15.2.0",
     "react-mixin": "~1.2.2",
-    "react-native": "^0.29.2",
+    "react-native": "^0.30.0",
     "react-native-accordion": "mvayngrib/react-native-accordion",
     "react-native-actionsheet": "^2.0.3",
     "react-native-camera": "lwansbrough/react-native-camera",
