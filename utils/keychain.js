@@ -4,8 +4,10 @@ import extend from 'xtend/mutable'
 import Q from 'q'
 import kiki from '@tradle/kiki'
 import * as ec from 'react-native-ecc'
-import * as RNKeychain from 'react-native-keychain'
+// import * as RNKeychain from 'react-native-keychain'
 import { pick } from './utils'
+ec.setServiceID(utils.serviceID)
+
 import { ec as ellipticEC } from 'elliptic'
 
 let debug = require('debug')('tim-keychain')
@@ -60,8 +62,6 @@ export function generateNewSet (opts = {}) {
     networkName: 'String'
   }, opts)
 
-  typeforce('String', ec.getServiceID())
-
   return Q.all(defaultKeySet.map(function (keyProps) {
     keyProps = extend({}, keyProps)
     let isInSecureEnclave = keyProps.secureEnclave
@@ -73,15 +73,12 @@ export function generateNewSet (opts = {}) {
 }
 
 export function saveKey (pub, priv) {
-  let serviceID = ec.getServiceID()
   typeforce('String', pub)
   typeforce('String', priv)
-  typeforce('String', serviceID)
   console.log('saving', pub)
-  return RNKeychain.setGenericPassword(
+  return utils.setPassword(
     pub,
-    priv,
-    serviceID
+    priv
   )
 }
 
@@ -134,7 +131,7 @@ function lookupKey (pubKey) {
 }
 
 function lookupKeychainKey (pub) {
-  return Q.ninvoke(RNKeychain, 'getGenericPassword', pub.value, ec.getServiceID())
+  return utils.getPassword(pub.value)
 }
 
 async function lookupSecureEnclaveKey (pub) {

@@ -10,6 +10,7 @@ import {
 
 import AsyncStorage from './Storage'
 import * as LocalAuth from '../utils/localAuth'
+import Keychain from 'react-native-keychain'
 
 global.AsyncStorage = AsyncStorage
 var path = require('path')
@@ -32,7 +33,6 @@ Q.onerror = function (err) {
 }
 
 var ENV = Platform.OS === 'android' ? require('../environment') : require('react-native-env')
-var Keychain = require('react-native-keychain')
 var AddressBook = require('NativeModules').AddressBook;
 
 var voc = require('@tradle/models');
@@ -171,7 +171,8 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
-var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://192.168.0.102:44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
+var LOCAL_IP = '192.168.0.114'
+var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://' + LOCAL_IP + ':44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
@@ -255,54 +256,32 @@ var Store = Reflux.createStore({
             .then(() => this.monitorTim())
         }
       })
+      .then(testPush)
 
-    //   .then(testPush)
+    function testPush () {
+      if (!meDriver) return
 
-    // function testPush () {
-    //   if (!meDriver) return
-
-    //   meDriver.sign({
-    //     object: {
-    //       [TYPE]: 'tradle.PNSRegistration',
-    //       identity: meDriver.identity,
-    //       token: '8bd61aee1eb8ec83075de0012a5f97f995c14bd15c956a64866d0bb5403e5d5f',
-    //       // apple push notifications service
-    //       protocol: 'apns'
-    //     }
-    //   })
-    //   .then(result => {
-    //     // TODO: encode body with protocol buffers to save space
-    //     return utils.fetchWithBackoff('http://localhost:48284/subscriber', {
-    //       method: 'POST',
-    //       headers: {
-    //         'Accept': 'application/json',
-    //         'Content-Type': 'application/json'
-    //       },
-    //       body: JSON.stringify(result.object)
-    //     }, 10000)
-    //   })
-    //   .then(() => {
-    //     console.log('registered for push notifications')
-    //     return meDriver.sign({
-    //       object: {
-    //         [TYPE]: 'tradle.PNSSubscription',
-    //         publisher: '67ebfc677865f613f6ddf38027aeba92ecbe16b3f41b1948c6f48af6f3c9a5d0',
-    //         subscriber: meDriver.link
-    //       }
-    //     })
-    //   })
-    //   .then(result => {
-    //     return utils.fetchWithBackoff('http://localhost:48284/subscription', {
-    //       method: 'POST',
-    //       headers: {
-    //         'Accept': 'application/json',
-    //         'Content-Type': 'application/json'
-    //       },
-    //       body: JSON.stringify(result.object)
-    //     }, 10000)
-    //   })
-    //   .catch(err => console.log('failed to register for push notifications'))
-    // }
+      meDriver.sign({
+        object: {
+          [TYPE]: 'tradle.PNSRegistration',
+          identity: meDriver.identity,
+          token: '8bd61aee1eb8ec83075de0012a5f97f995c14bd15c956a64866d0bb5403e5d5f',
+          // apple push notifications service
+          protocol: 'apns'
+        }
+      })
+      .then(result => {
+        // TODO: encode body with protocol buffers to save space
+        return utils.fetchWithBackoff(`http://${LOCAL_IP}:48284/subscriber`, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(result.object)
+        }, 10000)
+      })
+    }
   },
 
   _handleConnectivityChange(isConnected) {
@@ -643,6 +622,7 @@ var Store = Reflux.createStore({
         // }
         results.forEach(function(provider) {
           self.addProvider(provider)
+          testPush(provider.hash)
         })
 
         if (--togo === 0) {
@@ -655,6 +635,30 @@ var Store = Reflux.createStore({
         debugger
       })
     })
+
+    function testPush (publisher) {
+      if (!meDriver) return
+
+      return meDriver.sign({
+        object: {
+          [TYPE]: 'tradle.PNSSubscription',
+          publisher: publisher,
+          subscriber: meDriver.link
+        }
+      })
+      .then(result => {
+        return utils.fetchWithBackoff(`http://${LOCAL_IP}:48284/subscription`, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(result.object)
+        }, 10000)
+      })
+      .catch(err => console.log('failed to register for push notifications'))
+    }
+
     return defer.promise
 
     // return Q.all(serverUrls.map(url => self.getServiceProviders(url, retry)))
@@ -3587,7 +3591,7 @@ var Store = Reflux.createStore({
         })
 
       loadIdentityAndKeys = Q.all([
-        Keychain.setGenericPassword(ENCRYPTION_KEY, encryptionKey, utils.serviceID).then(() => encryptionKey),
+        utils.setPassword(ENCRYPTION_KEY, encryptionKey).then(() => encryptionKey),
         genIdentity
       ])
       .spread(encryptionKey => encryptionKey)
@@ -3600,7 +3604,7 @@ var Store = Reflux.createStore({
         //   }))
         // }
     } else {
-      loadIdentityAndKeys = Keychain.getGenericPassword(ENCRYPTION_KEY, utils.serviceID)
+      loadIdentityAndKeys = utils.getPassword(ENCRYPTION_KEY)
     }
 
     if (me.language)
@@ -3618,7 +3622,14 @@ var Store = Reflux.createStore({
       })
     })
     .then(node => {
-      // debugger
+      // no need to wait for this to finish
+      if (!me.registeredForPushNotifications) {
+        utils.setupPushNotifications({ node })
+          .then(() => Actions.updateMe({ registeredForPushNotifications: true }))
+      } else {
+        utils.setupPushNotifications({ requestPermissions: false })
+      }
+
       return node
     }, err => {
       debugger

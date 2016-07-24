@@ -28,15 +28,13 @@ const DEFAULT_OPTS = {
 let pendingAuth
 
 module.exports = {
-  TIMEOUT: __DEV__ ? 10000 : 10 * 60 * 1000,
+  TIMEOUT: __DEV__ ? 1000 : 10 * 60 * 1000,
   Errors,
   setPassword,
   signIn,
   hasTouchID,
   authenticateUser
 }
-
-export const TIMEOUT = __DEV__ ? 1000 : 3600 * 1000
 
 export function hasTouchID () {
   return LocalAuth.hasTouchID()
@@ -97,8 +95,12 @@ function signIn(navigator, newMe, isChangeGesturePassword) {
       Actions.setAuthenticated(true)
     })
     .catch(err => {
-      if (err.name == 'LAErrorUserCancel' || err.name === 'LAErrorSystemCancel') {
-        return navigator.popToTop()
+      if (err.name === 'LAErrorUserCancel') {
+        return passwordAuth(navigator)
+      }
+
+      if (err.name === 'LAErrorSystemCancel') {
+        throw err
       }
 
       return lockUp(err.message || 'Authentication failed')
@@ -107,6 +109,11 @@ function signIn(navigator, newMe, isChangeGesturePassword) {
 
 }
 
+/**
+ * Get touch ID, then get password
+ * @param  {[type]} navigator [description]
+ * @return {[type]}           [description]
+ */
 function touchIDAndPasswordAuth(navigator) {
   if (isAndroid) return passwordAuth(navigator)
 
@@ -115,14 +122,14 @@ function touchIDAndPasswordAuth(navigator) {
       () => passwordAuth(navigator),
       err => {
         if (err.name !== 'RCTTouchIDNotSupported') {
-          // the user may have enabled touch id but then disabled it from
-          // the Settings app
-          //
-          // there's not much we can do short of demanding the user
-          // turn touch id back on
           throw err
         }
 
+        // the user may have enabled touch id but then disabled it from
+        // the Settings app
+        //
+        // there's not much we can do short of demanding that the user
+        // turn touch id back on
         return passwordAuth(navigator)
       }
     )
@@ -148,7 +155,7 @@ function touchIDWithFallback(navigator) {
 
 function passwordAuth (navigator) {
   // check if we have a password stored already
-  return Keychain.getGenericPassword(PASSWORD_ITEM_KEY, utils.serviceID)
+  return utils.getPassword(PASSWORD_ITEM_KEY)
     .then(
       () => checkPassword(navigator),
       // registration must have been aborted.
@@ -186,7 +193,7 @@ function setPassword(navigator) {
         promptSet: translate('pleaseDrawPassword'),
         promptInvalidSet: translate('passwordLimitations'),
         onSuccess: (pass) => {
-          Keychain.setGenericPassword(PASSWORD_ITEM_KEY, utils.hashPassword(pass), utils.serviceID)
+          utils.setPassword(PASSWORD_ITEM_KEY, utils.hashPassword(pass))
           .then(() => {
             Actions.updateMe({ isRegistered: true, useGesturePassword: true })
             return hasTouchID()
@@ -231,7 +238,7 @@ function checkPassword(navigator) {
       promptCheck: translate('drawYourPassword'), //Draw your gesture password',
       promptRetryCheck: translate('gestureNotRecognized'), //Gesture not recognized, please try again',
       isCorrect: (pass) => {
-        return Keychain.getGenericPassword(PASSWORD_ITEM_KEY, utils.serviceID)
+        return utils.getPassword(PASSWORD_ITEM_KEY)
           .then((stored) => {
             return stored === utils.hashPassword(pass)
           })

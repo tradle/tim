@@ -11,6 +11,7 @@ import {
 import AsyncStorage from '../Store/Storage'
 import DeviceInfo from 'react-native-device-info'
 import PushNotifications from 'react-native-push-notification'
+import Keychain from 'react-native-keychain'
 
 var RCTUIManager = NativeModules.UIManager
 var crypto = require('crypto')
@@ -904,7 +905,13 @@ var utils = {
       })
     })
   },
-  serviceID: 'tradle'
+  serviceID: 'tradle',
+  getPassword: function (username) {
+    return Keychain.getGenericPassword(username, utils.serviceID)
+  },
+  setPassword: function (username, password) {
+    return Keychain.setGenericPassword(username, password, utils.serviceID)
+  }
 }
 
 function normalizeRemoveListener (addListenerRetVal) {
