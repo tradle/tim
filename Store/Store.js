@@ -186,8 +186,8 @@ var driverInfo = {
 const KEY_SET = [
   { type: 'bitcoin', purpose: 'payment' },
   { type: 'bitcoin', purpose: 'messaging' },
-  { type: 'ec', purpose: 'sign' },
-  { type: 'ec', purpose: 'update' }
+  { type: 'ec', purpose: 'sign', curve: 'p256' },
+  { type: 'ec', purpose: 'update', curve: 'p256' }
 ]
 
 var LocalizedStrings = require('react-native-localization')
