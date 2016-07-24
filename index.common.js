@@ -144,6 +144,7 @@ class TiMApp extends Component {
     let dateAppStateChanged = Date.now()
     let lastDateAppStateChanged = this.state.dateAppStateChanged
     let newState = { currentAppState, dateAppStateChanged }
+    let me = utils.getMe()
 
     switch (currentAppState) {
       case 'inactive':
@@ -153,12 +154,18 @@ class TiMApp extends Component {
 
         clearTimeout(this.state.unauthTimeout)
         // ok to pop from defensive copy
-        let currentRoute = this.state.navigator.getCurrentRoutes().pop()
-        let me = utils.getMe()
-        // TODO: auth flow should not be here OR in TimHome
-        // it should be more like Actions.auth()
-        // and then handled in one place
-        if (me && me.isRegistered && !me.isAuthenticated) {
+
+        AutomaticUpdates.sync()
+        break
+      case 'background':
+        newState.unauthTimeout = setTimeout(() => {
+          if (!me || !me.isRegistered) return
+
+          Actions.setAuthenticated(false)
+          let currentRoute = this.state.navigator.getCurrentRoutes().pop()
+          // TODO: auth flow should not be here OR in TimHome
+          // it should be more like Actions.auth()
+          // and then handled in one place
           signIn(this.state.navigator)
             .then(() => {
               me = utils.getMe()
@@ -167,26 +174,6 @@ class TiMApp extends Component {
             })
 
           Actions.start()
-          // let needNav = currentRoute.component !== TimHome
-          // if (needNav) {
-          //   this.state.navigator.push({
-          //     id: 1,
-          //     backButtonTitle: null,
-          //     component: TimHome,
-          //     passProps: this.props,
-          //   })
-          // }
-
-          // Actions.start()
-        }
-
-        AutomaticUpdates.sync()
-        break
-      case 'background':
-        newState.unauthTimeout = setTimeout(() => {
-          if (me && me.isRegistered) {
-            Actions.setAuthenticated(false)
-          }
         }, UNAUTHENTICATE_AFTER_BG_MILLIS)
 
         break
