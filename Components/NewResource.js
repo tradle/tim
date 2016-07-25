@@ -230,6 +230,10 @@ class NewResource extends Component {
       this.state.submitted = false
       return;
     }
+    if (params.action === 'addItem'  &&  resource.sharedWith  &&  resource.sharedWith.length > 1) {
+      this.showSharedWithList(params.resource)
+      return
+    }
     if (this.props.callback) {
       this.state.submitted = false
       this.props.callback(resource);
@@ -290,12 +294,11 @@ class NewResource extends Component {
       this.props.navigator.pop();
     this.state.submitted = false
   }
-  onSavePressed() {
-    if (!this.props.resource  ||  !this.props.resource.sharedWith) {
-      this.onSavePressed1()
+  showSharedWithList(newResource) {
+    if (!this.props.resource  ||  !this.props.resource.sharedWith)
+      // this.onSavePressed1()
       return
-    }
-    this.props.navigator.push({
+    this.props.navigator.replace({
       id: 10,
       title: translate('shareChangesWith'),
       backButtonTitle: translate('back'),
@@ -305,28 +308,31 @@ class NewResource extends Component {
         message: translate('chooseCompaniesToShareChangesWith'),
         modelName: constants.TYPES.ORGANIZATION,
         to: this.state.resource.to,
-        resource: this.state.resource,
-        callback:  this.onSavePressed1.bind(this),
-        sharedWith: true,
-        // onAddItem: this.onAddItem.bind(this),
+        resource: this.props.resource,
+        callback:  this.shareWith.bind(this, newResource),
+        chat: this.props.chat,
         bankStyle: this.props.bankStyle,
         currency: this.props.currency
       }
     });
   }
-
-  onSavePressed1(list) {
-    if (this.props.resource  &&  this.props.resource.sharedWith) {
-      if (!list)
-        return
-      let l = []
-      for (let r in list) {
-        if (list[r])
-          l.push(r)
-      }
-      if (!l.length)
-        return
-    }
+  shareWith(newResource, list) {
+    if (list.length)
+      Actions.share(newResource, list)
+    this.props.navigator.pop()
+  }
+  onSavePressed() {
+    // if (this.props.resource  &&  this.props.resource.sharedWith) {
+    //   if (!list)
+    //     return
+    //   let l = []
+    //   for (let r in list) {
+    //     if (list[r])
+    //       l.push(r)
+    //   }
+    //   if (!l.length)
+    //     return
+    // }
     if (this.state.submitted)
       return
     this.state.submitted = true
@@ -339,7 +345,7 @@ class NewResource extends Component {
         value = {}
     }
     // value is a tcomb Struct
-    var json = JSON.parse(JSON.stringify(value));
+    var json = utils.clone(value);
     this.checkEnums(json, resource)
     if (this.floatingProps) {
       for (var p in this.floatingProps) {
@@ -355,7 +361,6 @@ class NewResource extends Component {
       }
     }
     var missedRequiredOrErrorValue = {}
-    var msg
     required.forEach((p) =>  {
       var v = (typeof json[p] !== 'undefined') || json[p] ? json[p] : (this.props.resource ? this.props.resource[p] : null); //resource[p];
       if (v) {
@@ -403,6 +408,14 @@ class NewResource extends Component {
           missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
       }
     })
+    if (this.props.resource                      &&
+        this.props.resource[constants.ROOT_HASH] &&
+        this.compare(json, this.props.resource)  &&
+        this.compare(resource, this.props.resource)) {
+      this.setState({err: translate('nothingChanged'), submitted: false})
+      return
+    }
+
     var err = this.validateProperties(json)
     for (var p in err)
       missedRequiredOrErrorValue[p] = err[p]
@@ -412,27 +425,26 @@ class NewResource extends Component {
       var state = {
         missedRequiredOrErrorValue: missedRequiredOrErrorValue
       }
-      if (msg)
-        state.err = msg
       this.setState(state)
       return;
     }
-    if (msg) {
-      this.setState({ err: msg });
-      this.state.submitted = false
-      return;
-    }
-
-    if (!value) {
-      var errors = this.refs.form.refs.input.getValue().errors;
-      var msg = '';
-      var errMsg = errors.forEach(function(err) {
-         msg += ' ' + err.message;
-      });
-      this.setState({ err: msg });
-      this.state.submitted = false
-      return;
-    }
+    // if (msg) {
+    //   this.setState({ err: msg });
+    //   this.state.submitted = false
+    //   return;
+    // }
+    if (!value)
+      debugger
+    // if (!value) {
+    //   var errors = this.refs.form.refs.input.getValue().errors;
+    //   var msg = '';
+    //   var errMsg = errors.forEach(function(err) {
+    //      msg += ' ' + err.message;
+    //   });
+    //   this.setState({ err: msg });
+    //   this.state.submitted = false
+    //   return;
+    // }
 
     // var json = JSON.parse(JSON.stringify(value));
 
@@ -443,6 +455,30 @@ class NewResource extends Component {
     // var isRegistration = !utils.getMe()  && this.props.model.id === constants.TYPES.PROFILE  &&  (!resource || !resource[constants.ROOT_HASH]);
     // if (isRegistration)
     //   this.state.isRegistration = true;
+    // if (this.props.chat) {
+    //   let toId = utils.getId(resource.to)
+    //   // resource modifications should be related to the chat where it was changed
+    //   // Check if the resource modified was originally created in this chat
+    //   let chatReps = this.props.chat.contacts
+    //   let foundRep = this.props.chat.contacts.filter((rep) => {
+    //     return rep.id === toId
+    //   })
+    //   if (foundRep.length)
+    //     foundRep = foundRep[0]
+    //   else {
+    //     // find the right representative from the sharedWith property of the resource
+    //     let sharedWith = resource.sharedWith
+    //     sharedWith.forEach(rep => {
+    //       let r = chatReps.filter(r => {
+    //         return r.id === rep.bankRepresentative
+    //       })
+    //       if (r.length)
+    //         foundRep = r[0]
+    //     })
+    //   }
+    //   json.to = foundRep
+    // }
+
     var r = {}
     extend(true, r, resource)
     delete r.url
@@ -454,9 +490,24 @@ class NewResource extends Component {
     };
     if (this.props.additionalInfo)
       params.additionalInfo = additionalInfo
-    if (list)
-      params.shareWith = list
+    if (this.props.chat)
+      params.chat = this.props.chat
+    // if (list)
+    //   params.shareWith = list
     Actions.addItem(params)
+  }
+  compare(r1, r2) {
+    for (var p in r1) {
+      if (r1[p] === r2[p])
+        continue
+      if (typeof r1[p] === 'object') {
+        if (!this.compare(r1[p], r2[p]))
+          return false
+      }
+      else if (r1[p]  ||  r2[p])
+        return false
+    }
+    return true
   }
   // HACK: the value for property of the type that is subClassOf Enum is set on resource
   // and it is different from what tcomb sets in the text field
@@ -602,9 +653,6 @@ class NewResource extends Component {
     var props = this.props;
     var parentBG = {backgroundColor: '#7AAAC3'};
     var resource = this.state.resource;
-    var iKey = resource
-             ? utils.getId(resource)
-             : null;
 
     var meta =  props.model;
     if (this.props.setProperty)
@@ -780,9 +828,9 @@ class NewResource extends Component {
       }
 
       arrayItems.push (
-        <View style={istyle} key={this.getNextKey()} ref={bl.name}>
+        <View style={[istyle, {marginHorizontal: 10}]} key={this.getNextKey()} ref={bl.name}>
           <View style={styles.items}>
-            <View style={{flex: 4}}>
+            <View>
               {actionableItem}
             </View>
             <TouchableHighlight underlayColor='transparent' style={isPhoto  &&  count ? {marginTop: 15} : count ? {paddingTop: 0} : {marginTop: 15, paddingBottom: 7}}
