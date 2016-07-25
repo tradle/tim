@@ -255,6 +255,7 @@ var Store = Reflux.createStore({
             .then(() => this.monitorTim())
         }
       })
+
     //   .then(testPush)
 
     // function testPush () {
@@ -321,12 +322,12 @@ var Store = Reflux.createStore({
       if (value) {
         var key = MY_IDENTITIES
         self._setItem(key, value)
-        return db.get(IDENTITY + '_' + value.currentIdentity.split('_')[1])
+        return db.get(value.currentIdentity.replace(PROFILE, IDENTITY))
       }
     })
     .then (function(value) {
-      self._setItem(IDENTITY + '_' + value[ROOT_HASH], value)
-      return db.get(PROFILE + '_' + value[ROOT_HASH])
+      self._setItem(utils.getId(value), value)
+      return db.get(utils.getId(value).replace(IDENTITY, PROFILE))
     })
     .then(function(value) {
       me = value
@@ -503,10 +504,7 @@ var Store = Reflux.createStore({
     meDriver = tradleUtils.promisifyNode(meDriver)
 
     // TODO: figure out of we need to publish identities
-    meDriver.identityPublishStatus = function () {
-      return Q.ninvoke(meDriver, 'identitySealStatus')  // Q({ /*current: true*/ })
-    }
-
+    meDriver.identityPublishStatus = meDriver.identitySealStatus
     meDriver._multiGetFromDB = utils.multiGet
 
     let noProviders
@@ -1038,7 +1036,7 @@ var Store = Reflux.createStore({
     var curOkeyVal = list[okey].value
     var newContact = {
       id:     pkey,
-      titile: list[pkey].formatted
+      // title: list[pkey].value.formatted
     }
 
     self._mergeItem(okey, { contacts: [...curOkeyVal.contacts, newContact] })
@@ -1171,7 +1169,7 @@ var Store = Reflux.createStore({
         me: me,
         hasTouchID
       });
-    });
+    })
   },
 
   onAddMessage(r, isWelcome, requestForForm) {
@@ -1304,21 +1302,35 @@ var Store = Reflux.createStore({
 
       return self.getDriver(me)
       .then(function () {
-        if (!self.isConnected  ||  publishRequestSent[orgId])
+        if (/*!self.isConnected  || */ publishRequestSent[orgId])
           return
         // TODO:
         // do we need identity publish status anymore
         return meDriver.identityPublishStatus()
       })
       .then(function(status) {
-        if (!status || !self.isConnected)
+        if (!status/* || !self.isConnected*/)
           return
-        if (!status.watches.link  &&  !status.link) {
-          self.publishMyIdentity(orgRep)
-          publishRequestSent[orgId] = true
+        publishRequestSent[orgId] = true
+        if (!status.watches.link  &&  !status.link)
+          return self.publishMyIdentity(orgRep)
+        else {
+          // self.updateMe()
+          var allMyIdentities = list[MY_IDENTITIES].value
+          var all = allMyIdentities.allIdentities
+          var curId = allMyIdentities.currentIdentity
+
+          let identity = all.filter((id) => id.id === curId)
+
+          var msg = {
+            message: me.firstName + ' is waiting for the response',
+            _t: constants.TYPES.SELF_INTRODUCTION,
+            identity: identity[0].publishedIdentity,
+            from: me,
+            to: r.to
+          }
+          return self.onAddMessage(msg)
         }
-        else
-          self.updateMe()
       })
     })
     .then(function() {
@@ -1734,7 +1746,7 @@ var Store = Reflux.createStore({
         }
       }
       // Add items properties if they were created
-      var json = JSON.parse(JSON.stringify(value)); // maybe not the best way to copy, try `clone`?
+      var json = utils.clone(value) // maybe not the best way to copy, try `clone`?
       for (p in resource) {
         if (props[p]  &&  props[p].type === 'array')
           json[p] = resource[p];
@@ -1800,11 +1812,16 @@ var Store = Reflux.createStore({
             else if (!props[p].readOnly  &&  !props[p].immutable)
               returnVal[p] = json[p];
         }
+
         // utils.optimizeResource(returnVal)
         if (!isRegistration) {
           // HACK to not to republish identity
           if (returnVal[TYPE] !== PROFILE)
             returnVal[NONCE] = self.getNonce()
+        }
+        if (params.chat) {
+          let chatId = utils.getId(params.chat)
+          returnVal.to = self.buildRef(self.getRepresentative(chatId))
         }
 
         if (isRegistration)
@@ -1871,11 +1888,16 @@ var Store = Reflux.createStore({
         // Trigger painting before send. for that set ROOT_HASH to some temporary value like NONCE
         // and reset it after the real root hash will be known
         let isNew = returnVal[ROOT_HASH] == null
+        let isForm = utils.getModel(returnVal[TYPE]).value.subClassOf === FORM
         if (isNew)
           returnVal[ROOT_HASH] = returnVal[NONCE]
+        else if (isForm) {
+          returnVal[PREV_HASH] = returnVal[CUR_HASH]
+          returnVal[CUR_HASH] = returnVal[NONCE]
+        }
 
-        var tmpKey = utils.getId(returnVal)
-        self._setItem(tmpKey, returnVal)
+        var returnValKey = utils.getId(returnVal)
+        self._setItem(returnValKey, returnVal)
 
         var params;
         if (returnVal[TYPE] === GUEST_SESSION_PROOF) {
@@ -1886,7 +1908,7 @@ var Store = Reflux.createStore({
         else {
           params = {
             action: 'addItem',
-            resource: returnVal
+            resource: utils.clone(returnVal)
           }
         }
         var m = self.getModel(returnVal[TYPE]).value
@@ -1931,7 +1953,7 @@ var Store = Reflux.createStore({
 
           var toChain = {}
           if (!isNew) {
-            returnVal[PREV_HASH] = returnVal[CUR_HASH] || returnVal[ROOT_HASH]
+            // returnVal[PREV_HASH] = returnVal[CUR_HASH] || returnVal[ROOT_HASH]
             toChain[PREV_HASH] = returnVal[PREV_HASH]
           }
 
@@ -1945,6 +1967,7 @@ var Store = Reflux.createStore({
           toChain.time = returnVal.time
 
           var key = IDENTITY + '_' + to[ROOT_HASH]
+
           return meDriver.signAndSend({
             object: toChain,
             to: { fingerprint: self.getFingerprint(list[key].value) }
@@ -1955,12 +1978,15 @@ var Store = Reflux.createStore({
           // we now have a real root hash,
           // scrap the placeholder
           // if (isNew ||  !shareWith)
-            delete list[tmpKey]
+          if (isNew  ||  isForm)
+            delete list[returnValKey]
 
           returnVal[CUR_HASH] = result.object.link
           returnVal[ROOT_HASH] = result.object.permalink
+          delete returnVal.sharedWith
+          delete returnVal.verifications
           // if (shareWith) {
-          //   let oldValue = list[tmpKey]
+          //   let oldValue = list[returnValKey]
           //   for (let p in shareWith) {
           //     if (shareWith[p])
           //       this.onShare(returnVal, list[p].value)
@@ -2032,7 +2058,20 @@ var Store = Reflux.createStore({
     })
 
   },
-  onShare(resource, to, formResource) {
+  onShare(resource, shareWithList, formResource) {
+    if (!Array.isArray(shareWithList))
+      return this.onShareOne(resource, shareWithList, formResource)
+    let promisses = []
+    shareWithList.forEach((r) => {
+      promisses.push(this.onShareOne(resource, list[r].value))
+    })
+    Q.all(promisses)
+    .then((results) => {
+      debugger
+    })
+  },
+
+  onShareOne(resource, to, formResource) {
     var self = this
     if (to[TYPE] === ORGANIZATION)
       to = this.getRepresentative(ORGANIZATION + '_' + to[ROOT_HASH])
@@ -2049,7 +2088,8 @@ var Store = Reflux.createStore({
     var promise = resource[CUR_HASH] ? meDriver.send({...opts, link: resource[CUR_HASH]}) : Q()
     return promise
     .then(function () {
-      return meDriver.send({...opts, link: resource.document[ROOT_HASH]})
+      return meDriver.send({...opts, link: resource.document[CUR_HASH]})
+      // return meDriver.send({...opts, link: resource.document[ROOT_HASH]})
     })
     .then(function() {
       var key = utils.getId(formResource)
@@ -2291,15 +2331,18 @@ var Store = Reflux.createStore({
       return this.searchNotMessages(params);
     }
   },
-  onListSharedWith(resource) {
+  onListSharedWith(resource, chat) {
     let sharedWith = resource.sharedWith
     if (!sharedWith)
       return null
+    let chatId = utils.getId(chat)
     let shareWithMapping = {}
     let result = []
     sharedWith.forEach((r) => {
       let bot = list[r.bankRepresentative].value
       let org = list[utils.getId(bot.organization)].value
+      if (utils.getId(org) === chatId)
+        return
       result.push(org)
       shareWithMapping[r.bankRepresentative] = org
     })
@@ -3228,7 +3271,7 @@ var Store = Reflux.createStore({
     value.time = value.time || new Date().getTime();
     var isMessage = model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1)
     if (isMessage) {
-      if (isNew  &&  model.subClassOf === FORM) {
+      if (/*isNew  &&*/  model.subClassOf === FORM) {
         if (!value.sharedWith)
           value.sharedWith = []
         value.sharedWith.push(this.createSharedWith(utils.getId(value.to), new Date().getTime()))
@@ -3248,7 +3291,7 @@ var Store = Reflux.createStore({
         batch.push({type: 'put', key: utils.getId(from), value: from});
       }
     }
-    var iKey = modelName + '_' + value[ROOT_HASH];
+    var iKey = utils.getId(value) //modelName + '_' + value[ROOT_HASH];
     batch.push({type: 'put', key: iKey, value: value});
 
     var mid;
@@ -3482,6 +3525,7 @@ var Store = Reflux.createStore({
         }
       })
     }
+    // debugger
     if (!mePub  &&  !mePriv) {
       // if (__DEV__  &&  !me.securityCode) {
       //   var profiles = {}
@@ -3516,7 +3560,7 @@ var Store = Reflux.createStore({
         })
 
       loadIdentityAndKeys = Q.all([
-        Keychain.setGenericPassword(ENCRYPTION_KEY, encryptionKey).then(() => encryptionKey),
+        Keychain.setGenericPassword(ENCRYPTION_KEY, encryptionKey, utils.serviceID).then(() => encryptionKey),
         genIdentity
       ])
       .spread(encryptionKey => encryptionKey)
@@ -3529,7 +3573,7 @@ var Store = Reflux.createStore({
         //   }))
         // }
     } else {
-      loadIdentityAndKeys = Keychain.getGenericPassword(ENCRYPTION_KEY)
+      loadIdentityAndKeys = Keychain.getGenericPassword(ENCRYPTION_KEY, utils.serviceID)
     }
 
     if (me.language)
@@ -3547,15 +3591,22 @@ var Store = Reflux.createStore({
       })
     })
     .then(node => {
-      if (!me.registeredForPushNotifications) {
-        return utils.setupPushNotifications({ node })
-          .then(() => Actions.updateMe({ registeredForPushNotifications: true }))
-      } else {
-        return utils.setupPushNotifications({ requestPermissions: false })
-      }
-
+      // debugger
       return node
+    }, err => {
+      debugger
+      throw err
     })
+    // .then(node => {
+    //   if (!me.registeredForPushNotifications) {
+    //     return utils.setupPushNotifications({ node })
+    //       .then(() => Actions.updateMe({ registeredForPushNotifications: true }))
+    //   } else {
+    //     return utils.setupPushNotifications({ requestPermissions: false })
+    //   }
+
+    //   return node
+    // })
   },
 
   // makePublishingIdentity(me, pubkeys) {
@@ -3875,9 +3926,9 @@ var Store = Reflux.createStore({
     // }).done()
   },
 
-  updateMe() {
-    db.put(utils.getId(me), me)
-  },
+  // updateMe() {
+  //   db.put(utils.getId(me), me)
+  // },
 
   putInDb(obj, onMessage) {
     return this._putInDb(obj, onMessage) || Q()
@@ -4692,8 +4743,14 @@ var Store = Reflux.createStore({
     return defer.promise
   },
   buildRef(resource) {
+    if (!resource[TYPE] && resource.id)
+      return resource
+    let isForm = utils.getModel(resource[TYPE]).value.subClassOf === FORM
+    // let id = utils.getId(resource)
+    // if (isForm)
+    //   id += '_' + resource[CUR_HASH]
     let ref = {
-      id: utils.getId(resource) + (resource[CUR_HASH] ? '_' + resource[CUR_HASH] : ''),
+      id: utils.getId(resource),
       title: resource.id ? resource.title : utils.getDisplayName(resource, this.getModel(resource[TYPE]).value.properties)
     }
     if (resource.time)
