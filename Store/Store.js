@@ -5,12 +5,14 @@ var parseURL = require('url').parse
 import {
   Alert,
   NetInfo,
-  Platform
+  Platform,
+  AppState
 } from 'react-native'
 
 import AsyncStorage from './Storage'
 import * as LocalAuth from '../utils/localAuth'
 import Keychain from 'react-native-keychain'
+import Push from '../utils/push'
 
 global.AsyncStorage = AsyncStorage
 var path = require('path')
@@ -171,8 +173,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
-var LOCAL_IP = '192.168.0.114'
-var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://' + LOCAL_IP + ':44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
+var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://' + utils.localIP + ':44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
@@ -256,32 +257,12 @@ var Store = Reflux.createStore({
             .then(() => this.monitorTim())
         }
       })
-      .then(testPush)
-
-    function testPush () {
-      if (!meDriver) return
-
-      meDriver.sign({
-        object: {
-          [TYPE]: 'tradle.PNSRegistration',
-          identity: meDriver.identity,
-          token: '8bd61aee1eb8ec83075de0012a5f97f995c14bd15c956a64866d0bb5403e5d5f',
-          // apple push notifications service
-          protocol: 'apns'
+      .then(() => {
+        if (me && me.registeredForPushNotifications) {
+          // console.log('me: ' + meDriver.permalink)
+          Push.resetBadgeNumber()
         }
       })
-      .then(result => {
-        // TODO: encode body with protocol buffers to save space
-        return utils.fetchWithBackoff(`http://${LOCAL_IP}:48284/subscriber`, {
-          method: 'POST',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(result.object)
-        }, 10000)
-      })
-    }
   },
 
   _handleConnectivityChange(isConnected) {
@@ -622,7 +603,8 @@ var Store = Reflux.createStore({
         // }
         results.forEach(function(provider) {
           self.addProvider(provider)
-          testPush(provider.hash)
+          Push.subscribe(provider.hash)
+            .catch(err => console.log('failed to register for push notifications'))
         })
 
         if (--togo === 0) {
@@ -635,29 +617,6 @@ var Store = Reflux.createStore({
         debugger
       })
     })
-
-    function testPush (publisher) {
-      if (!meDriver) return
-
-      return meDriver.sign({
-        object: {
-          [TYPE]: 'tradle.PNSSubscription',
-          publisher: publisher,
-          subscriber: meDriver.link
-        }
-      })
-      .then(result => {
-        return utils.fetchWithBackoff(`http://${LOCAL_IP}:48284/subscription`, {
-          method: 'POST',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(result.object)
-        }, 10000)
-      })
-      .catch(err => console.log('failed to register for push notifications'))
-    }
 
     return defer.promise
 
@@ -3623,13 +3582,7 @@ var Store = Reflux.createStore({
     })
     .then(node => {
       // no need to wait for this to finish
-      if (!me.registeredForPushNotifications) {
-        utils.setupPushNotifications({ node })
-          .then(() => Actions.updateMe({ registeredForPushNotifications: true }))
-      } else {
-        utils.setupPushNotifications({ requestPermissions: false })
-      }
-
+      Push.init({ node, me, Store: this })
       return node
     }, err => {
       debugger
@@ -3914,7 +3867,10 @@ var Store = Reflux.createStore({
         const old = utils.toOldStyleWrapper(msg)
         old.to = { [ROOT_HASH]: meDriver.permalink }
         self.putInDb(old, true)
-          .catch(function (err) {
+          .then(() => {
+            self.trigger({ action: 'receivedMessage', msg: msg })
+          }, err => {
+            console.error(err)
             debugger
           })
 

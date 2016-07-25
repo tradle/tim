@@ -30,19 +30,15 @@ var hostname = process.argv[2] || 'rnhost'
   })
 })
 
-var storePath = path.resolve('Store/Store.js')
-fs.readFile(storePath, { encoding: 'utf8' }, function (err, contents) {
+var localIP = path.resolve('utils/localIP.json')
+fs.readFile(localIP, { encoding: 'utf8' }, function (err, contents) {
   if (err) throw err
   if (hostname === 'localhost')
     hostname = '127.0.0.1'
 
-  var hacked = contents.replace(
-    /(SERVICE_PROVIDERS_BASE_URL_DEFAULT.*\'http\:\/\/)[^:]+(\:\d+\/?\'[^\n]*)/,
-    '$1' + hostname + '$2'
-  )
-
-  if (hacked !== contents) {
-    fs.writeFile(storePath, hacked, function (err) {
+  hostname = JSON.stringify(hostname)
+  if (hostname !== contents) {
+    fs.writeFile(localIP, hostname, function (err) {
       if (err) throw err
     })
   }

@@ -90,6 +90,7 @@ Text.defaultProps = function() {
 };
 
 import React, { Component } from 'react'
+import Push from './utils/push'
 
 var ReactPerf = __DEV__ && require('react-addons-perf')
 var UNAUTHENTICATE_AFTER_BG_MILLIS = require('./utils/localAuth').TIMEOUT
@@ -150,6 +151,7 @@ class TiMApp extends Component {
       case 'inactive':
         return
       case 'active':
+        Push.resetBadgeNumber()
         if (this.state.currentAppState === 'active') return
 
         clearTimeout(this.state.unauthTimeout)
