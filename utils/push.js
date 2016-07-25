@@ -15,77 +15,81 @@ const Actions = require('../Actions/Actions')
 const pushServerURL = __DEV__ ? `http://${utils.localIP}:48284` : 'https://push.tradle.io'
 const noop = () => {}
 
-let INSTANCE
-let onInitialized
-let promiseInit = new Promise(resolve => {
-  onInitialized = resolve
-})
+let promiseInit
 
 exports.init = function (opts) {
-  if (INSTANCE) throw new Error('init can only be called once')
+  if (promiseInit) throw new Error('init can only be called once')
 
-  INSTANCE = createPusher(opts)
-  onInitialized()
+  return promiseInit = createPusher(opts)
 }
 
 exports.subscribe = function (publisher) {
-  return promiseInit.then(() => INSTANCE.subscribe && INSTANCE.subscribe(publisher))
+  return promiseInit.then(pusher => pusher.subscribe && pusher.subscribe(publisher))
 }
 
 exports.resetBadgeNumber = function () {
-  return promiseInit.then(() => INSTANCE.resetBadgeNumber && INSTANCE.resetBadgeNumber())
+  return promiseInit.then(pusher => pusher.resetBadgeNumber && pusher.resetBadgeNumber())
 }
 
 function createPusher (opts) {
+  if (utils.isSimulator() || Platform.OS === 'android') return Promise.resolve({})
+
   const node = opts.node
   const Store = opts.Store
   const me = opts.me
-  if (utils.isSimulator() || Platform.OS === 'android') return {}
+  const registered = me.registeredForPushNotifications
+  return new Promise(resolve => {
+    const identity = node.identity
+    Push.configure({
+      // (optional) Called when Token is generated (iOS and Android)
+      onRegister: device => {
+        // Alert.alert('device token: ' + JSON.stringify(device))
+        // console.log(device)
+        post('/subscriber', {
+          [TYPE]: 'tradle.PNSRegistration',
+          identity: identity,
+          token: device.token,
+          // apple push notifications service
+          protocol: 'apns'
+        })
+        .then(
+          () => {
+            Actions.updateMe({ registeredForPushNotifications: true })
+            resolve()
+          },
+          err => console.error('failed to register for push notifications', err)
+        )
+      },
 
-  const identity = node.identity
-  Push.configure({
-    // (optional) Called when Token is generated (iOS and Android)
-    onRegister: device => {
-      // Alert.alert('device token: ' + JSON.stringify(device))
-      // console.log(device)
-      post('/subscriber', {
-        [TYPE]: 'tradle.PNSRegistration',
-        identity: identity,
-        token: device.token,
-        // apple push notifications service
-        protocol: 'apns'
-      })
-      .then(
-        () => Actions.updateMe({ registeredForPushNotifications: true }),
-        err => console.error('failed to register for push notifications', err)
-      )
-    },
+      // (required) Called when a remote or local notification is opened or received
+      onNotification: onNotification,
 
-    // (required) Called when a remote or local notification is opened or received
-    onNotification: onNotification,
+      // ANDROID ONLY: (optional) GCM Sender ID.
+      // senderID: "YOUR GCM SENDER ID",
 
-    // ANDROID ONLY: (optional) GCM Sender ID.
-    // senderID: "YOUR GCM SENDER ID",
+      // IOS ONLY (optional): default: all - Permissions to register.
+      permissions: {
+        alert: true,
+        badge: true,
+        sound: true
+      },
 
-    // IOS ONLY (optional): default: all - Permissions to register.
-    permissions: {
-      alert: true,
-      badge: true,
-      sound: true
-    },
+      /**
+        * IOS ONLY: (optional) default: true
+        * - Specified if permissions will requested or not,
+        * - if not, you must call PushNotificationsHandler.requestPermissions() later
+        */
+      requestPermissions: !registered
+    })
 
-    /**
-      * IOS ONLY: (optional) default: true
-      * - Specified if permissions will requested or not,
-      * - if not, you must call PushNotificationsHandler.requestPermissions() later
-      */
-    requestPermissions: !me.registeredForPushNotifications
+    if (registered) resolve()
   })
-
-  return {
-    subscribe,
-    resetBadgeNumber
-  }
+  .then(() => {
+    return {
+      subscribe,
+      resetBadgeNumber
+    }
+  })
 
   function post (path, body) {
     if (path[0] === '/') path = path.slice(1)
