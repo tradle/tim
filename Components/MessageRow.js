@@ -1227,14 +1227,15 @@ class MessageRow extends Component {
             </TouchableHighlight>
 
       }
-      else if (this.props.resource.documentCreated)
+      else if (this.props.resource.documentCreated) {
           orgRow = <View style={{flexDirection: 'row', marginTop: 5, paddingBottom: 5, justifyContent:'space-between'}}>
                      {shareView}
                     <TouchableHighlight onPress={this.props.onSelect.bind(this, resource, verification)} underlayColor='transparent'>
                       {orgView}
                     </TouchableHighlight>
                   </View>
-      else
+      }
+      else {
         orgRow = <View style={{flexDirection: 'row', marginTop: 5, paddingBottom: 5, justifyContent:'space-between'}}>
           <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
                     Alert.alert(
@@ -1251,6 +1252,7 @@ class MessageRow extends Component {
             {orgView}
           </TouchableHighlight>
         </View>
+      }
     }
     let content = <View style={{flex:1}}>
                      <TouchableHighlight onPress={this.props.onSelect.bind(this, resource, verification)} underlayColor='transparent'>
@@ -1276,6 +1278,7 @@ class MessageRow extends Component {
              </View>
            );
   }
+
   formatDocument1(model, resource, renderedRow) {
     var viewCols = model.gridCols || model.viewCols;
     if (!viewCols)
@@ -1385,7 +1388,7 @@ var styles = StyleSheet.create({
     paddingTop: 10
   },
   row: {
-    alignItems: 'center',
+    // alignItems: 'center',
     backgroundColor: '#f7f7f7',
     flexDirection: 'row',
   },
