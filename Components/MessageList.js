@@ -293,6 +293,7 @@ class MessageList extends Component {
         isVerifier: isVerifier
       }
     }
+    // Allow to edit resource
     if (!isEmployee) {
       route.rightButtonTitle = translate('edit')
       route.onRightButtonPress = {
@@ -305,6 +306,7 @@ class MessageList extends Component {
         passProps: {
           model: model,
           resource: resource,
+          chat: this.props.resource,
           bankStyle: this.props.bankStyle
         }
       }
