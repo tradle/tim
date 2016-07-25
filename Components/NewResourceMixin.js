@@ -504,7 +504,7 @@ var NewResourceMixin = {
 
     return (
       <View style={{marginHorizontal: 10, justifyContent: 'center', backgroundColor: LINK_COLOR}}>
-        <Text style={{marginVertical: 10, marginLeft: 10, fontSize: 18, color: '#ffffff'}}>{label}</Text>
+        <Text style={{marginVertical: 10, marginLeft: 10, fontSize: 18, alignSelf: 'center', color: '#ffffff'}}>{label}</Text>
       </View>
     );
   },
@@ -594,7 +594,7 @@ var NewResourceMixin = {
           <View style={styles.booleanContainer}>
             <View style={[styles.booleanContentStyle]}>
               <Text style={[style, doWrap ? {flexWrap: 'wrap', width: Dimensions.get('window').width - 100} : {}]}>{label}</Text>
-              <Switch onValueChange={value => this.onChangeText(prop, value)} value={value} onTintColor={LINK_COLOR} style={{marginTop: -5}} />
+              <Switch onValueChange={value => this.onChangeText(prop, value)} value={value} onTintColor={LINK_COLOR} />
             </View>
           </View>
         </TouchableHighlight>
@@ -606,8 +606,8 @@ var NewResourceMixin = {
               <Icon name={value ? 'ios-checkmark-circle' : 'ios-radio-button-off'}  size={40} color={value ? '#007aff' : '#007aff' } style={{marginTop: -15}} />
 */
   myDateTemplate(params) {
-    var labelStyle = {color: '#cccccc', fontSize: 17, paddingLeft: 10, paddingBottom: 10};
-    var textStyle = {color: this.state.isRegistration ? '#ffffff' : '#000000', fontSize: 17, paddingLeft: 10, paddingBottom: 10};
+    var labelStyle = {color: '#cccccc', fontSize: 17, paddingBottom: 10};
+    var textStyle = {color: this.state.isRegistration ? '#ffffff' : '#000000', fontSize: 17, paddingBottom: 10};
     var prop = params.prop
     let resource = this.state.resource
     let label, style, propLabel
@@ -728,7 +728,7 @@ var NewResourceMixin = {
   //   }
   // },
   myCustomTemplate(params) {
-    var labelStyle = {color: '#cccccc', fontSize: 17, paddingBottom: 10, marginTop: -5};
+    var labelStyle = {color: '#cccccc', fontSize: 18, paddingBottom: 10, marginTop: -5};
     var textStyle = {color: this.state.isRegistration ? '#ffffff' : '#000000', fontSize: 17, paddingBottom: 10, marginTop: -5};
     var resource = /*this.props.resource ||*/ this.state.resource
     var label, style
@@ -770,7 +770,7 @@ var NewResourceMixin = {
           isVideo ? this.showCamera.bind(this, params) : this.chooser.bind(this, prop, params.prop)
         }>
           <View style={{ position: 'relative'}}>
-            <View style={styles.chooserContentStyle}>
+            <View style={[styles.chooserContentStyle, {marginTop: 10}]}>
               <Text style={style}>{label}</Text>
               {isVideo
                 ? <Icon name='ios-play-outline'  size={25}  color={LINK_COLOR} />
@@ -1162,6 +1162,7 @@ var styles = StyleSheet.create({
     borderColor: '#ffffff',
     borderBottomColor: '#cccccc',
     borderBottomWidth: 1,
+    marginHorizontal: 10,
     // marginLeft: 10,
     // marginBottom: 10,
     flex: 1
@@ -1178,11 +1179,12 @@ var styles = StyleSheet.create({
   booleanContentStyle: {
     justifyContent: 'space-between',
     flexDirection: 'row',
-    paddingVertical: 5,
+    // paddingVertical: 5,
+    marginRight: 10,
     borderRadius: 4
   },
   chooserContainer: {
-    height: 60,
+    height: 50,
     borderColor: '#ffffff',
     borderBottomColor: '#cccccc',
     borderBottomWidth: 1,
