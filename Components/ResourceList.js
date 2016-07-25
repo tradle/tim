@@ -84,23 +84,35 @@ class ResourceList extends Component {
     var isRegistration = this.props.isRegistration ||  (this.props.resource  &&  this.props.resource[constants.TYPE] === constants.TYPES.PROFILE  &&  !this.props.resource[constants.ROOT_HASH]);
     if (isRegistration)
       this.state.isRegistration = isRegistration;
-    if (this.props.sharedWith) {
+    if (this.props.chat) {
       this.state.sharedWith = {}
       var routes = this.props.navigator.getCurrentRoutes()
       routes[routes.length - 1].onRightButtonPress = this.done.bind(this)
     }
   }
   done() {
-    this.props.callback(this.state.sharedWith)
+    let orgs = []
+    for (let orgId in this.state.sharedWith) {
+      if (!this.state.sharedWith[orgId])
+        continue
+      orgs.push(orgId)
+//       for (var rep in this.state.sharedWithMapping) {
+//         let org = this.state.sharedWithMapping[rep]
+//         if (utils.getId(org) === orgId)
+//           reps.push(rep)
+//       }
+    }
+    // if (reps.length)
+    this.props.callback(orgs)
   }
   componentWillUnmount() {
     if (this.props.navigator.getCurrentRoutes().length === 1)
       StatusBar.setHidden(true)
   }
   componentWillMount() {
-    if (this.props.sharedWith) {
+    if (this.props.chat) {
       utils.onNextTransitionEnd(this.props.navigator, () => {
-        Actions.listSharedWith(this.props.resource)
+        Actions.listSharedWith(this.props.resource, this.props.chat)
       });
       return
     }
@@ -260,7 +272,10 @@ class ResourceList extends Component {
     }
     if ((action !== 'list' &&  action !== 'listSharedWith')  ||  !params.list || params.isAggregation !== this.props.isAggregation)
       return;
-
+    if (action === 'list'  &&  this.props.chat)
+      return
+    if (action === 'listSharedWith'  &&  !this.props.chat)
+      return
     var list = params.list;
 
     if (!list.length) {
@@ -289,8 +304,8 @@ class ResourceList extends Component {
       dictionary: params.dictionary,
       isLoading: false,
     }
-    if (params.sharedWithMapping) {
-      state.sharedWithMapping = params.sharedWithMapping
+    if (params.sharedWith) {
+      state.sharedWithMapping = params.sharedWith
       let sharedWith = {}
       list.forEach((r) => {
         sharedWith[utils.getId(r)] = true
@@ -609,12 +624,15 @@ class ResourceList extends Component {
         onSelect={() => this.selectResource(resource)}
         key={resource[constants.ROOT_HASH]}
         navigator={this.props.navigator}
-        sharedWith={this.state.sharedWith}
+        changeSharedWithList={this.props.chat ? this.changeSharedWithList.bind(this) : null}
         currency={this.props.currency}
         isOfficialAccounts={this.props.officialAccounts}
         showRefResources={this.showRefResources.bind(this)}
         resource={resource} />
     );
+  }
+  changeSharedWithList(id, value) {
+    this.state.sharedWith[id] = value
   }
   renderFooter() {
     var me = utils.getMe();
