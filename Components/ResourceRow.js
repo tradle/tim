@@ -30,7 +30,7 @@ import ActivityIndicator from './ActivityIndicator'
 class ResourceRow extends Component {
   constructor(props) {
     super(props)
-    if (this.props.sharedWith)
+    if (this.props.changeSharedWithList)
       this.state = {sharedWith: true}
   }
   shouldComponentUpdate(nextProps, nextState) {
@@ -154,7 +154,7 @@ class ResourceRow extends Component {
       <Swipeout right={[{text: 'Hide', backgroundColor: 'red', onPress: this.hideResource.bind(this, resource)}]} autoClose={true} scroll={(event) => this._allowScroll(event)} >
         <View key={this.getNextKey()} style={{opacity: 1, flex: 1, justifyContent: 'center'}}>
           <TouchableHighlight onPress={this.state ? this.action.bind(this) : this.props.onSelect} underlayColor='transparent' key={this.getNextKey()}>
-            <View style={styles.row} key={this.getNextKey()}>
+            <View style={[styles.row]} key={this.getNextKey()}>
               {photo}
               {orgPhoto}
               {onlineStatus}
@@ -196,10 +196,10 @@ class ResourceRow extends Component {
   action() {
     if (this.props.onCancel)
       this.props.onCancel()
-    else {
+    else if (typeof this.props.changeSharedWithList) {
       let id = utils.getId(this.props.resource)
       this.setState({sharedWith: this.state.sharedWith ? false : true})
-      this.props.sharedWith[id] = this.state.sharedWith ? false : true
+      this.props.changeSharedWithList(id, this.state.sharedWith ? false : true)
     }
   }
   hideResource(resource) {
@@ -371,7 +371,7 @@ var styles = StyleSheet.create({
   // TODO: remove when you figure out v-centering
   // HACK FOR VERTICAL CENTERING
   resourceTitle: {
-    flex: 1,
+    // flex: 1,
     fontSize: 17,
     fontWeight: '400',
     // paddingTop: 18,
