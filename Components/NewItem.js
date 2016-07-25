@@ -69,7 +69,7 @@ class NewItem extends Component {
     var propName = this.props.metadata.name;
     var resource = this.props.resource
     // value is a tcomb Struct
-    var item = JSON.parse(JSON.stringify(value));
+    var item = utils.clone(value);
     var missedRequiredOrErrorValue = this.checkRequired(this.props.metadata, item, resource)
     if (!utils.isEmpty(missedRequiredOrErrorValue)) {
       this.state.submitted = false
@@ -183,7 +183,7 @@ class NewItem extends Component {
   }
   addItem() {
     var propName = this.props.metadata.name;
-    var json = JSON.parse(JSON.stringify(value));
+    var json = utils.clone(value);
     this.props.onAddItem(propName, json);
     return true;
   }
