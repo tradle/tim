@@ -40,6 +40,8 @@ var VERIFICATION = constants.TYPES.VERIFICATION
 const CUR_HASH = constants.CUR_HASH
 const ROOT_HASH = constants.ROOT_HASH
 const SIG = constants.SIG
+const FORM = constants.TYPES.FORM
+
 var LocalizedStrings = require('react-native-localization')
 let defaultLanguage = new LocalizedStrings({ en: {}, nl: {} }).getLanguage()
 var dictionaries = require('@tradle/models').dict
@@ -224,16 +226,23 @@ var utils = {
   },
   getId(r) {
     if (typeof r === 'string') {
-      var idArr = r.split('_');
-      return idArr.length === 2 ? r : idArr[0] + '_' + idArr[1];
+      return r
+      // var idArr = r.split('_');
+      // return idArr.length === 2 ? r : idArr[0] + '_' + idArr[1];
     }
     if (!r) debugger
     if (r.id) {
-      var idArr = r.id.split('_');
-      return idArr.length === 2 ? r.id : idArr[0] + '_' + idArr[1];
+      return r.id
+      // var idArr = r.id.split('_');
+      // return idArr.length === 2 ? r.id : idArr[0] + '_' + idArr[1];
     }
-    else
-      return r[TYPE] + '_' + r[ROOT_HASH];
+    else {
+      let m = utils.getModel(r[TYPE])
+      if (m  &&  m.value.subClassOf === FORM)
+        return r[TYPE] + '_' + r[ROOT_HASH] + '_' + (r[CUR_HASH] || r[ROOT_HASH])
+      else
+        return r[TYPE] + '_' + r[ROOT_HASH];
+    }
   },
   getItemsMeta(metadata) {
     var props = metadata.properties;
@@ -892,7 +901,8 @@ var utils = {
         requestPermissions: opts.requestPermissions !== false
       })
     })
-  }
+  },
+  serviceID: 'tradle'
 }
 
 function normalizeRemoveListener (addListenerRetVal) {
