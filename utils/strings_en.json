@@ -106,4 +106,5 @@
     "noNetwork": "No network",
     "learnMoreDescription": "You can still write messages in Offline Mode even though your device is not connected. When you reconnect all your messages will be automatically sent.",
     "shareChangesWith": "Share changes with",
+    "nothingChanged": "Nothing changed",
 }
