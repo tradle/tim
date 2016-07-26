@@ -171,9 +171,8 @@ reactMixin(PhotoList.prototype, RowMixin);
 
 var styles = StyleSheet.create({
   photoContainer: {
-    flex: 1,
     paddingTop: 5,
-    alignSelf: 'center',
+    // alignSelf: 'center',
   },
   thumb3: {
     width: d3,
@@ -188,15 +187,14 @@ var styles = StyleSheet.create({
     height: d5,
   },
   thumbCommon: {
-    // borderRadius: 5,
     borderWidth: 0.5,
     margin: 1,
     borderColor: '#999999'
   },
   row: {
     flexDirection: 'row',
-    marginTop: 3,
-    flex: 1,
+    // marginTop: 3,
+    // flex: 1,
   },
 
 });
