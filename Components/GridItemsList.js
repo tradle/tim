@@ -14,7 +14,6 @@ import {
   StyleSheet,
   PropTypes,
   TouchableHighlight,
-  // ActionSheetIOS,
   View,
 } from 'react-native'
 
@@ -71,27 +70,30 @@ class GridItemsList extends Component {
   render() {
     var m = utils.getModel(this.props.resource[constants.TYPE]).value
     var buttons = [translate('addNew', m.properties[this.props.prop].title), translate('cancel')]
+
     return (
       <View style={styles.container}>
-        <PhotoList photos={this.state.list} forceUpdate={this.state.forceUpdate} callback={this.cancelItem.bind(this)} navigator={this.props.navigator} numberInRow={3} resource={this.props.resource}/>
-      <View style={styles.footer}>
-        <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
-          <View style={{marginTop: -10}}>
-            <Icon name='ios-add-circle'  size={55}  color='#ffffff' style={styles.icon} />
-          </View>
-        </TouchableHighlight>
-      </View>
-      <ActionSheet
-        ref={(o) => {
-          this.ActionSheet = o
-        }}
-        options={buttons}
-        cancelButtonIndex={buttons.length - 1}
-        onPress={(index) => {
-          if (index === 0)
-            this.showChoice()
-        }}
-      />
+        <View style={{flex: 1}}>
+          <PhotoList photos={this.state.list} forceUpdate={this.state.forceUpdate} callback={this.cancelItem.bind(this)} navigator={this.props.navigator} numberInRow={3} resource={this.props.resource}/>
+        </View>
+        <View style={styles.footer}>
+          <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
+            <View style={{marginTop: -10}}>
+              <Icon name='ios-add-circle'  size={55}  color='#ffffff' style={styles.icon} />
+            </View>
+          </TouchableHighlight>
+        </View>
+        <ActionSheet
+          ref={(o) => {
+            this.ActionSheet = o
+          }}
+          options={buttons}
+          cancelButtonIndex={buttons.length - 1}
+          onPress={(index) => {
+            if (index === 0)
+              this.showChoice()
+          }}
+        />
       </View>
     )
   }
@@ -133,14 +135,10 @@ class GridItemsList extends Component {
 var styles = StyleSheet.create({
   container: {
     flex: 1,
-    borderColor: 'transparent',
-    borderTopColor: 'red',
-    borderTopWidth: 0.5,
     marginTop: 60,
   },
   footer: {
     flexDirection: 'row',
-    flexWrap: 'nowrap',
     justifyContent: 'flex-end',
     height: 45,
     paddingTop: 5,
@@ -153,7 +151,6 @@ var styles = StyleSheet.create({
   icon: {
     marginLeft: -30,
     marginTop: -25,
-    // color: '#629BCA',
     color: 'red'
   },
 });
