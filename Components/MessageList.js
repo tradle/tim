@@ -88,6 +88,7 @@ class MessageList extends Component {
       modelName: this.props.modelName,
       to: this.props.resource,
       prop: this.props.prop,
+      limit: this.props.limit
     }
     if (this.props.isAggregation)
       params.isAggregation = true;

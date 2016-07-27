@@ -583,9 +583,36 @@ var Store = Reflux.createStore({
     }
 
     this.getInfo(SERVICE_PROVIDERS_BASE_URLS, true)
-      .catch(function(err) {
-        debugger
-      })
+    .then(() => {
+      if (!SERVICE_PROVIDERS)
+        return
+      if (!me  ||  !SERVICE_PROVIDERS)
+        return
+      let meId = utils.getId(me)
+      for (var p in list) {
+        let r = list[p].value
+        let m = utils.getModel(r[TYPE]).value
+        if (m.interfaces  &&  m.interfaces.indexOf(MESSAGE) !== -1) {
+          let fromId = utils.getId(r.from)
+          let rep = list[meId === fromId ? utils.getId(r.to) : fromId].value
+          let orgId = utils.getId(rep.organization)
+          let messages = bankMessages[orgId]
+          if (!messages) {
+            messages = {}
+            bankMessages[orgId] = messages
+          }
+          messages[utils.getId(r)] = r.time
+        }
+      }
+      for (let messages in bankMessages) {
+        result.sort(function(a, b) {
+          return a.time - b.time;
+        })
+      }
+    })
+    .catch(function(err) {
+      debugger
+    })
 
     return Q(meDriver)
   },
@@ -2555,7 +2582,6 @@ var Store = Reflux.createStore({
     var query = params.query;
     var modelName = params.modelName;
     var meta = this.getModel(modelName).value;
-
     var prop = params.prop;
     if (typeof prop === 'string')
       prop = meta[prop];
@@ -2578,6 +2604,7 @@ var Store = Reflux.createStore({
       var rep = this.getRepresentative(chatId)
       if (!rep)
         return
+    let messages = bankMessages[chatId]
       chatTo = rep
       chatId = utils.getId(chatTo)
       // isChatWithOrg = false

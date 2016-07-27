@@ -165,6 +165,7 @@ class ResourceList extends Component {
         passProps: {
           resource: params.to,
           filter: '',
+          limit: LIMIT,
           modelName: constants.TYPES.MESSAGE,
           // currency: params.organization.currency,
           bankStyle: style,
@@ -210,6 +211,7 @@ class ResourceList extends Component {
         passProps: {
           resource: params.to,
           filter: '',
+          limit: LIMIT,
           modelName: constants.TYPES.MESSAGE,
           currency: params.to.currency,
           bankStyle:  style,

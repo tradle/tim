@@ -636,7 +636,7 @@ var NewResourceMixin = {
     if (!err  &&  params.errors  &&  params.errors[prop.name])
       err = params.errors[prop.name]
 
-    let valuePadding = Platform.OS === 'ios' ? 0 : (hasValue ? 10 : 0)
+    let valuePadding = 0 //Platform.OS === 'ios' ? 0 : (hasValue ? 10 : 0)
 
     return (
       <View style={{paddingBottom: 10, flex: 5}} key={this.getNextKey()} ref={prop.name}>

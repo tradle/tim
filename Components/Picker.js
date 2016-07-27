@@ -9,7 +9,6 @@ var {
   StyleSheet,
   Dimensions,
   Easing,
-  Platform,
   Animated
 } = require('react-native')
 
@@ -36,10 +35,7 @@ var Picker = React.createClass({
       <Animated.View style={{ transform: [{translateY: this.props.offSet}] }}>
         <View style={styles.closeButtonContainer}>
           <TouchableHighlight onPress={ () => {
-            if (Platform.OS === 'ios')
-              this.closeModal()
-            else
-              this.showPicker('preset', {date: new Date()})
+            this.closeModal()
           }} underlayColor="transparent" style={styles.closeButton}>
             <Text style={styles.closeButtonText}>{translate('setDateValue')}</Text>
           </TouchableHighlight>
@@ -64,7 +60,7 @@ var styles = StyleSheet.create({
     marginTop: 60
   },
   showtimeContainer: {
-   borderTopColor: '#ededed',
+    borderTopColor: '#ededed',
     borderTopWidth:1
   },
   showtime: {
