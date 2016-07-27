@@ -122,7 +122,7 @@ var ResourceMixin = {
         ret.push(
             <View style={styles.item} key={self.getNextKey()}>
             {cancelItem
-              ? <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+              ? <View style={styles.row}>
                   {item}
                   <TouchableHighlight underlayColor='transparent' onPress={cancelItem.bind(self, prop, v)}>
                     <Icon name='ios-close-circle-outline' size={25} color={LINK_COLOR} />
@@ -145,7 +145,7 @@ var ResourceMixin = {
         ret.push(
           <View style={{paddingBottom: 5}} key={self.getNextKey()}>
            {cancelItem
-            ? <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+            ? <View style={styles.row}>
                {item}
                <TouchableHighlight underlayColor='transparent' onPress={cancelItem.bind(self, prop, v)}>
                  <Icon name='ios-close' size={25} color={LINK_COLOR} />
@@ -197,12 +197,17 @@ var styles = StyleSheet.create({
     marginHorizontal: 15
   },
   itemColContainer: {
-    flex: 1,
+    // flex: 1,
     flexDirection: 'row',
-    paddingLeft: 20,
+    // paddingLeft: 20,
   },
   item: {
     paddingBottom: 7,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginRight: 3
   }
 })
 
