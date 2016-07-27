@@ -194,7 +194,7 @@ const KEY_SET = [
 ]
 
 var LocalizedStrings = require('react-native-localization')
-let defaultLanguage = new LocalizedStrings({ en: {}, nl: {} }).getLanguage()
+let defaultLanguage = new LocalizedStrings({ en: {name: 'English'}, nl: {name: 'Dutch'} }).getLanguage()
 const ENCRYPTION_KEY = 'accountkey'
 // const ENCRYPTION_SALT = 'accountsalt'
 const OTR_ENABLED = false
@@ -566,9 +566,9 @@ var Store = Reflux.createStore({
         }
       }
       for (let messages in bankMessages) {
-        result.sort(function(a, b) {
-          return a.time - b.time;
-        })
+//         messages.sort(function(a, b) {
+//           return a.time - b.time;
+//         })
       }
     })
     .catch(function(err) {
