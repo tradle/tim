@@ -253,8 +253,8 @@ class NewResource extends Component {
           meta: utils.getModel(this.props.originatingMessage[constants.TYPE]).value
         }
         Actions.addItem(params)
+        this.props.navigator.pop();
       }
-      this.props.navigator.pop();
       return;
     }
     var currentRoutes = self.props.navigator.getCurrentRoutes();
@@ -497,10 +497,24 @@ class NewResource extends Component {
     Actions.addItem(params)
   }
   compare(r1, r2) {
+    if (!r1 || !r2)
+      return true
+    let properties = this.props.model.properties
     for (var p in r1) {
       if (r1[p] === r2[p])
         continue
-      if (typeof r1[p] === 'object') {
+      if (Array.isArray(r1[p])) {
+        if (!r2[p])
+          return false
+        if (r1[p].length  !== r2[p].length)
+          return false
+        for (let i=0; i<r1.length; i++) {
+          let r = r1[i]
+          if (!r2.filter((rr2) => equal(r, rr2)).length)
+            return false
+        }
+      }
+      else if (typeof r1[p] === 'object') {
         if (!this.compare(r1[p], r2[p]))
           return false
       }
@@ -761,14 +775,14 @@ class NewResource extends Component {
           }
           else
             cstyle.push(styles.noItemsText)
-          cstyle.push({paddingLeft: 10})
+          // cstyle.push({paddingLeft: 10})
           itemsArray = <View>
                          <Text style={cstyle}>{translate(bl, model)}</Text>
                          {val}
                        </View>
 
           counter = <View style={[styles.itemsCounterEmpty, {marginTop: 15, paddingBottom: 10}]}>
-                      <Icon name={bl.icon || 'ios-add'} size={bl.icon ? 25 : 15}  color={LINK_COLOR} />
+                      <Icon name={bl.icon || 'md-add'} size={bl.icon ? 25 : 15}  color={LINK_COLOR} />
                     </View>
         }
       }
@@ -777,7 +791,7 @@ class NewResource extends Component {
         counter = <View style={[styles.itemsCounterEmpty]}>
                   { bl.name === 'photos'
                     ? <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
-                    : <Icon name={bl.icon || 'ios-add'}   size={bl.icon ? 25 : 15} color={LINK_COLOR} />
+                    : <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 15} color={LINK_COLOR} />
                   }
                   </View>
       }
@@ -792,11 +806,11 @@ class NewResource extends Component {
                   </View>
                 : <View/>
       var actionableItem = isPhoto && count
-                         ?  <TouchableHighlight style={{paddingTop: 15}} underlayColor='transparent'
+                         ?  <TouchableHighlight style={{flex: 7, paddingTop: 15}} underlayColor='transparent'
                              onPress={self.showItems.bind(self, bl, meta)}>
-                            {itemsArray}
+                              {itemsArray}
                             </TouchableHighlight>
-                         :  <TouchableHighlight style={count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}} underlayColor='transparent'
+                         :  <TouchableHighlight style={[{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]} underlayColor='transparent'
                                 onPress={self.onNewPressed.bind(self, bl, meta)}>
                               {itemsArray}
                             </TouchableHighlight>
@@ -830,10 +844,8 @@ class NewResource extends Component {
       arrayItems.push (
         <View style={[istyle, {marginHorizontal: 10}]} key={this.getNextKey()} ref={bl.name}>
           <View style={styles.items}>
-            <View>
-              {actionableItem}
-            </View>
-            <TouchableHighlight underlayColor='transparent' style={isPhoto  &&  count ? {marginTop: 15} : count ? {paddingTop: 0} : {marginTop: 15, paddingBottom: 7}}
+            {actionableItem}
+            <TouchableHighlight underlayColor='transparent' style={[{flex: 1, position: 'absolute', right: 0}, isPhoto  &&  count ? {marginTop: 15} : count ? {paddingTop: 0} : {marginTop: 15, paddingBottom: 7}]}
                 onPress={self.onNewPressed.bind(self, bl, meta)}>
               {counter}
             </TouchableHighlight>
@@ -875,7 +887,7 @@ class NewResource extends Component {
           <View style={this.state.isRegistration ? {marginHorizontal: DeviceHeight > 1000 ? 50 : 30, paddingTop: 30} : {paddingTop: 10, marginHorizontal: 10}}>
             <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange.bind(this)}/>
             {button}
-            <View style={{marginTop: -10}}>
+            <View style={{marginTop: -10, borderColor: '#ffffff', borderWidth: 0.5, borderTopColor: LINK_COLOR}}>
               {arrayItems}
              </View>
            {  this.state.isLoadingVideo
