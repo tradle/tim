@@ -237,7 +237,7 @@ class MessageRow extends Component {
     var len = photoUrls.length;
     var inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
     var photoStyle = {};
-    var height;
+    // var height;
 
     if (inRow > 0) {
       if (inRow === 1) {
@@ -301,9 +301,9 @@ class MessageRow extends Component {
       // if (orgId !== utils.getId(me.organization))
       //   isThirdPartyVerification = true
     }
-
+    let bgColor =  isThirdPartyVerification ? '#93BEBA' : this.props.bankStyle.VERIFIED_HEADER_COLOR
     renderedRow = <View>
-                    <View style={[styles.verifiedHeader, {backgroundColor: isThirdPartyVerification ? '#93BEBA' : this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>
+                    <View style={[styles.verifiedHeader, {backgroundColor: bgColor}]}>
                       <Icon style={styles.verificationIcon} size={20} name={'ios-checkmark'} />
                       <Text style={styles.verificationHeaderText}>{translate('verifiedBy', orgName)}</Text>
                     </View>
@@ -313,7 +313,7 @@ class MessageRow extends Component {
                   </View>
 
     var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start', width: msgWidth, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}
-    let addStyle = [styles.verificationBody, {backgroundColor: VERIFICATION_BG, borderColor: isThirdPartyVerification ? '#93BEBA' : this.props.bankStyle.VERIFIED_BORDER_COLOR}];
+    let addStyle = [styles.verificationBody, {backgroundColor: VERIFICATION_BG, borderColor: bgColor}];
     let messageBody =
           <TouchableHighlight onPress={this.verify.bind(this, resource)} underlayColor='transparent'>
             <View style={[styles.row, viewStyle]}>
@@ -326,7 +326,7 @@ class MessageRow extends Component {
             </View>
           </TouchableHighlight>
 
-    var viewStyle = { margin :1, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR }
+    var viewStyle = { margin: 1, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR }
     return (
       <View style={viewStyle} key={this.getNextKey()}>
         {date}
@@ -344,13 +344,13 @@ class MessageRow extends Component {
     let onPressCall = ret ? ret.onPressCall : null
 
     let addStyle = [addStyle, styles.verificationBody, {backgroundColor: this.props.bankStyle.PRODUCT_BG_COLOR , borderColor: this.props.bankStyle.CONFIRMATION_COLOR}];
-    var rowStyle = [styles.row,  {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}];
+    let rowStyle = [styles.row,  {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}];
     var val = this.getTime(resource);
     var date = val
              ? <Text style={styles.date} numberOfLines={1}>{val}</Text>
              : <View />;
 
-    var viewStyle = {flexDirection: 'row', alignSelf: 'flex-start', width: DeviceWidth - 50};
+    // var viewStyle = {flexDirection: 'row', alignSelf: 'flex-start', width: DeviceWidth - 50};
 
     var hdrStyle = {backgroundColor: '#289427'} //this.props.bankStyle.PRODUCT_BG_COLOR ? {backgroundColor: this.props.bankStyle.PRODUCT_BG_COLOR} : {backgroundColor: '#289427'}
     var orgName = resource.from.organization  ? resource.from.organization.title : ''
@@ -361,13 +361,14 @@ class MessageRow extends Component {
     let title = translate(model)
     if (title.length > 30)
       title = title.substring(0, 27) + '...'
-    renderedRow.push(<Text  key={this.getNextKey()} style={[styles.formType, {color: '#289427'}]}>{title}</Text>);
 
+    renderedRow.push(<Text  key={this.getNextKey()} style={[styles.formType, {color: '#289427'}]}>{title}</Text>);
+    rowStyle = addStyle ? [styles.textContainer, addStyle] : styles.textContainer
     let messageBody =
       <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
-        <View style={[rowStyle, viewStyle]}>
+        <View style={[rowStyle, styles.viewStyle]}>
           {this.getOwnerPhoto()}
-          <View style={addStyle ? [styles.textContainer, addStyle] : styles.textContainer}>
+          <View style={rowStyle}>
             <View style={{flex: 1}}>
               {renderedRow}
            </View>
@@ -721,8 +722,12 @@ class MessageRow extends Component {
       renderedRow.push(msg)
       return null
     }
-    if (model.id === FORM_REQUEST)
-      return {onPressCall: this.formRequest(resource, renderedRow)}
+    if (model.id === FORM_REQUEST) {
+      if (utils.getModel(resource.product).value.subClassOf !== MY_PRODUCT)
+        return {onPressCall: this.formRequest(resource, renderedRow)}
+      else
+        return
+    }
 
     var isFormError = model.id === FORM_ERROR
     // if (isFormError) {
@@ -1598,8 +1603,12 @@ var styles = StyleSheet.create({
   },
   multiEntryText: {
     fontSize: 17
+  },
+  viewStyle: {
+    flexDirection: 'row',
+    alignSelf: 'flex-start',
+    width: DeviceWidth - 50
   }
-
 });
 reactMixin(MessageRow.prototype, RowMixin);
 
