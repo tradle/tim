@@ -218,11 +218,21 @@ class MessageRow extends Component {
                            <Icon name={'ios-ribbon'} size={30} color='#316A99' style={{opacity: 0.5}} />
                          </View>
                        : <View />
+
+      let cellStyle
+      if (addStyle) {
+        if (hasOwnerPhoto  ||  !isSimpleMessage)
+          cellStyle = [styles.textContainer, addStyle]
+        else
+          cellStyle = addStyle
+      }
+      else
+        cellStyle = styles.textContainer
       messageBody =
         <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
           <View style={[rowStyle, viewStyle]}>
             {ownerPhoto}
-            <View style={addStyle ? [styles.textContainer, addStyle] : styles.textContainer}>
+            <View style={cellStyle}>
               <View style={{flex: 1}}>
                 {renderedRow}
              </View>
