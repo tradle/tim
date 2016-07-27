@@ -62,7 +62,10 @@ class MessageView extends Component {
   }
   onAction(params) {
     if (params.action === 'addVerification' ||  params.action === 'addAdditionalInfo') {
-      this.props.navigator.pop();
+      var currentRoutes = this.props.navigator.getCurrentRoutes();
+      var len = currentRoutes.length;
+      if (currentRoutes[len - 1].id === 5)
+        this.props.navigator.pop();
       Actions.messageList({
         modelName: constants.TYPES.MESSAGE,
         to: params.resource
@@ -191,6 +194,7 @@ class MessageView extends Component {
     let msg = resource.message  &&  resource.message.length
             ? <View><Text style={styles.itemTitle}>{resource.message}</Text></View>
             : <View/>
+
     return (
       <ScrollView  ref='this' style={platformStyles.container}>
         <View style={[styles.band, {borderBottomColor: this.props.bankStyle.PRODUCT_ROW_BG_COLOR, borderTopColor: '#dddddd'}]}><Text style={styles.date}>{date}</Text></View>
@@ -199,7 +203,9 @@ class MessageView extends Component {
         </View>
         {actionPanel}
         <View style={{marginTop: -3}}>
-          <PhotoList photos={resource.photos} resource={resource} isView={true} navigator={this.props.navigator} numberInRow={inRow}/>
+          <View style={styles.photoListStyle}>
+            <PhotoList photos={resource.photos} resource={resource} isView={true} navigator={this.props.navigator} numberInRow={inRow} />
+          </View>
           <View style={styles.rowContainer}>
             {msg}
             <ShowPropertiesView navigator={this.props.navigator}
@@ -319,6 +325,10 @@ var styles = StyleSheet.create({
   photoBG: {
     backgroundColor: '#CEE7F5',
     alignItems: 'center',
+  },
+  photoListStyle: {
+    flexDirection: 'row',
+    alignSelf: 'center',
   },
   band: {
     height: 30,
