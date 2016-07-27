@@ -1,7 +1,7 @@
 'use strict'
 
 var translate = require('../utils/utils').translate
-var {
+import {
   DatePickerIOS,
   View,
   Text,
@@ -10,9 +10,9 @@ var {
   Dimensions,
   Easing,
   Animated
-} = require('react-native')
+} from 'react-native'
 
-var React = require('react')
+import React from 'react'
 var deviceWidth = Dimensions.get('window').width;
 var deviceHeight = Dimensions.get('window').height;
 
@@ -41,13 +41,13 @@ var Picker = React.createClass({
           </TouchableHighlight>
         </View>
         <DatePickerIOS
-            date={this.props.value || new Date()}
-            mode='date'
-            onFocus={(time) => {
-              this.props.changeTime(time, this.props.prop)
-            }}
-            onDateChange={(time) => this.props.changeTime(time, this.props.prop)}>
-          </DatePickerIOS>
+          date={this.props.value || new Date()}
+          mode='date'
+          onFocus={(time) => {
+            this.props.changeTime(time, this.props.prop)
+          }}
+          onDateChange={(time) => this.props.changeTime(time, this.props.prop)}>
+        </DatePickerIOS>
       </Animated.View>
     )
   },
@@ -55,22 +55,6 @@ var Picker = React.createClass({
 })
 
 var styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    marginTop: 60
-  },
-  showtimeContainer: {
-    borderTopColor: '#ededed',
-    borderTopWidth:1
-  },
-  showtime: {
-   padding:20,
-    textAlign: 'center'
-  },
-  button: {
-   marginTop:25,
-    marginBottom:25
-  },
   closeButtonContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
@@ -84,14 +68,10 @@ var styles = StyleSheet.create({
     paddingTop:10,
     paddingBottom:10
   },
-  buttonText: {
-   textAlign: 'center'
-  },
   closeButtonText: {
-   color: 'red',
-   fontSize: 17
-  },
-
+    color: 'red',
+    fontSize: 17
+  }
 });
 
 module.exports = Picker
