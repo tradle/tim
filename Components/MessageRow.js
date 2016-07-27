@@ -366,7 +366,7 @@ class MessageRow extends Component {
     rowStyle = addStyle ? [styles.textContainer, addStyle] : styles.textContainer
     let messageBody =
       <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
-        <View style={[rowStyle, styles.viewStyle]}>
+        <View style={styles.viewStyle}>
           {this.getOwnerPhoto()}
           <View style={rowStyle}>
             <View style={{flex: 1}}>
@@ -377,7 +377,7 @@ class MessageRow extends Component {
       </TouchableHighlight>
 
 
-    var viewStyle = { margin: 1, paddingTop: 7, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR }
+    var viewStyle = { margin: 1, paddingTop: 7} //, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR }
     return (
       <View style={viewStyle} key={this.getNextKey()}>
         {date}
