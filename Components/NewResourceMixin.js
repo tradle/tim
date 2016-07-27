@@ -1168,10 +1168,11 @@ var styles = StyleSheet.create({
     flex: 1
   },
   booleanContainer: {
-    // height: 55,
+    height: 60,
     borderColor: '#ffffff',
     borderBottomColor: '#cccccc',
     borderBottomWidth: 1,
+    justifyContent: 'center',
     marginLeft: 10,
     // marginBottom: 10,
     flex: 1
