@@ -8,6 +8,7 @@ import {
 
 import Push from 'react-native-push-notification'
 const debug = require('debug')('tradle:push')
+import extend from 'xtend/mutable'
 import utils from './utils'
 import ENV from './env'
 const constants = require('@tradle/engine').constants
@@ -134,9 +135,11 @@ function createPusher (opts) {
 // }
 
     debug('NOTIFICATION:', notification)
-    if (notification.foreground || unread) {
+    if (notification.foreground) {
       return resetBadgeNumber()
     }
+
+    if (unread) return
 
     Actions.updateMe({ unreadPushNotifications: ++unread })
 
@@ -147,22 +150,29 @@ function createPusher (opts) {
       const msg = event.msg
 
       unsubscribe()
+      resetBadgeNumber()
+
       // const type = msg.object.object[TYPE]
 
-      Push.localNotification({
-        message: 'You have unread messages',
+      const localNotification = {
+        message: 'You have unread messages'
+      }
 
-        /* Android only */
-        id: 0, // only ever show one
-        title: "Tradle", // (optional)
-        // ticker: "My Notification Ticker", // (optional)
-        autoCancel: true, // (optional) default: true
-        largeIcon: "ic_launcher", // (optional) default: "ic_launcher"
-        smallIcon: "ic_notification", // (optional) default: "ic_notification" with fallback for "ic_launcher"
-        // subText: "This is a subText", // (optional) default: none
-        vibrate: true, // (optional) default: true
-        vibration: 300, // vibration length in milliseconds, ignored if vibrate=false, default: 1000
-      })
+      if (ENV.isAndroid()) {
+        extend(localNotification, {
+          id: 0, // only ever show one
+          title: "Tradle", // (optional)
+          // ticker: "My Notification Ticker", // (optional)
+          autoCancel: true, // (optional) default: true
+          largeIcon: "ic_launcher", // (optional) default: "ic_launcher"
+          smallIcon: "ic_notification", // (optional) default: "ic_notification" with fallback for "ic_launcher"
+          // subText: "This is a subText", // (optional) default: none
+          vibrate: true, // (optional) default: true
+          vibration: 300, // vibration length in milliseconds, ignored if vibrate=false, default: 1000
+        })
+      }
+
+      Push.localNotification(localNotification)
     })
 
     setTimeout(unsubscribe, 20000)
@@ -205,7 +215,7 @@ function createPusher (opts) {
   function resetBadgeNumber () {
     unread = 0
     Actions.updateMe({ unreadPushNotifications: 0 })
-    if (ENV.isIOS()) return
+    if (!ENV.isIOS()) return
 
     Push.getApplicationIconBadgeNumber(num => {
       if (!num) return
