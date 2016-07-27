@@ -2,17 +2,18 @@
 'use strict'
 
 import {
-  Platform,
-  AppState
+  AppState,
+  Alert
 } from 'react-native'
 
 import Push from 'react-native-push-notification'
 const debug = require('debug')('tradle:push')
 import utils from './utils'
+import ENV from './env'
 const constants = require('@tradle/engine').constants
 const TYPE = constants.TYPE
 const Actions = require('../Actions/Actions')
-const pushServerURL = __DEV__ ? `http://${utils.localIP}:48284` : 'https://push.tradle.io'
+const pushServerURL = __DEV__ ? `http://${ENV.LOCAL_IP}:48284` : 'https://push.tradle.io'
 const noop = () => {}
 
 let promiseInit
@@ -32,64 +33,70 @@ exports.resetBadgeNumber = function () {
 }
 
 function createPusher (opts) {
-  if (utils.isSimulator() || Platform.OS === 'android') return Promise.resolve({})
+  if (utils.isSimulator()) return Promise.resolve({})
 
+  const me = utils.getMe()
   const node = opts.node
   const Store = opts.Store
-  const me = opts.me
-  const registered = me.registeredForPushNotifications
-  return new Promise(resolve => {
-    const identity = node.identity
-    Push.configure({
-      // (optional) Called when Token is generated (iOS and Android)
-      onRegister: device => {
-        // Alert.alert('device token: ' + JSON.stringify(device))
-        // console.log(device)
-        post('/subscriber', {
-          [TYPE]: 'tradle.PNSRegistration',
-          identity: identity,
-          token: device.token,
-          // apple push notifications service
-          protocol: 'apns'
-        })
-        .then(
-          () => {
-            Actions.updateMe({ registeredForPushNotifications: true })
-            resolve()
-          },
-          err => console.error('failed to register for push notifications', err)
-        )
-      },
+  const identity = node.identity
 
-      // (required) Called when a remote or local notification is opened or received
-      onNotification: onNotification,
+  let registered = me.registeredForPushNotifications
+  let unread = me.unreadPushNotifications || 0
 
-      // ANDROID ONLY: (optional) GCM Sender ID.
-      // senderID: "YOUR GCM SENDER ID",
+  Push.configure({
+    // (optional) Called when Token is generated (iOS and Android)
+    onRegister: device => {
+      // console.log(device)
+      post('/subscriber', {
+        [TYPE]: 'tradle.PNSRegistration',
+        identity: identity,
+        token: device.token,
+        // apple push notifications service
+        protocol: ENV.isIOS() ? 'apns' : 'gcm'
+      })
+      .then(() => Actions.updateMe({ registeredForPushNotifications: true }))
+    },
 
-      // IOS ONLY (optional): default: all - Permissions to register.
-      permissions: {
-        alert: true,
-        badge: true,
-        sound: true
-      },
+    // (required) Called when a remote or local notification is opened or received
+    onNotification: onNotification,
 
-      /**
-        * IOS ONLY: (optional) default: true
-        * - Specified if permissions will requested or not,
-        * - if not, you must call PushNotificationsHandler.requestPermissions() later
-        */
-      requestPermissions: !registered
+    // ANDROID ONLY: (optional) GCM Sender ID.
+    senderID: ENV.GCM_SENDER_ID,
+
+    // IOS ONLY (optional): default: all - Permissions to register.
+    permissions: {
+      alert: true,
+      badge: true,
+      sound: true
+    },
+
+    /**
+      * IOS ONLY: (optional) default: true
+      * - Specified if permissions will requested or not,
+      * - if not, you must call PushNotificationsHandler.requestPermissions() later
+      */
+    requestPermissions: false
+  })
+
+  return register()
+    .then(() => {
+      // API
+      return { subscribe, resetBadgeNumber }
     })
 
-    if (registered) resolve()
-  })
-  .then(() => {
-    return {
-      subscribe,
-      resetBadgeNumber
-    }
-  })
+  function register () {
+    if (registered) return Promise.resolve()
+
+    return utils.tryWithExponentialBackoff(() => {
+      Push.requestPermissions()
+      // wait to see if permissions request goes through
+      // request timeout = 5000ms
+      return utils.promiseDelay(5000)
+        .then(() => {
+          if (!registered) throw new Error('failed to register')
+        })
+    }, { immediate: true })
+  }
 
   function post (path, body) {
     if (path[0] === '/') path = path.slice(1)
@@ -119,58 +126,86 @@ function createPusher (opts) {
   }
 
   function onNotification (notification) {
-    // {
-    //     foreground: false, // BOOLEAN: If the notification was received in foreground or not
-    //     message: 'My Notification Message', // STRING: The notification message
-    //     data: {}, // OBJECT: The push data
-    // }
+// {
+//     foreground: false, // BOOLEAN: If the notification was received in foreground or not
+//     userInteraction: false, // BOOLEAN: If the notification was opened by the user from the notification area or not
+//     message: 'My Notification Message', // STRING: The notification message
+//     data: {}, // OBJECT: The push data
+// }
 
     debug('NOTIFICATION:', notification)
-    if (notification.foreground) {
+    if (notification.foreground || unread) {
       return resetBadgeNumber()
     }
 
-    // Push.getApplicationIconBadgeNumber(num => {
-    //   if (num) return
+    Actions.updateMe({ unreadPushNotifications: ++unread })
 
-      const unsubscribe = Store.listen(function (event) {
-        if (AppState.currentState === 'active') return unsubscribe()
-        if (event.action !== 'receivedMessage') return
+    const unsubscribe = Store.listen(function (event) {
+      if (AppState.currentState === 'active') return unsubscribe()
+      if (event.action !== 'receivedMessage') return
 
-        const msg = event.msg
+      const msg = event.msg
 
-        unsubscribe()
-        // const type = msg.object.object[TYPE]
+      unsubscribe()
+      // const type = msg.object.object[TYPE]
 
-        Push.localNotification({
-          message: 'You have unread messages'
-        })
+      Push.localNotification({
+        message: 'You have unread messages',
+
+        /* Android only */
+        id: 0, // only ever show one
+        title: "Tradle", // (optional)
+        // ticker: "My Notification Ticker", // (optional)
+        autoCancel: true, // (optional) default: true
+        largeIcon: "ic_launcher", // (optional) default: "ic_launcher"
+        smallIcon: "ic_notification", // (optional) default: "ic_notification" with fallback for "ic_launcher"
+        // subText: "This is a subText", // (optional) default: none
+        vibrate: true, // (optional) default: true
+        vibration: 300, // vibration length in milliseconds, ignored if vibrate=false, default: 1000
       })
+    })
 
-      setTimeout(unsubscribe, 20000)
-    // })
+    setTimeout(unsubscribe, 20000)
 
     // example
     // const foreground = notification.foreground ? 'foreground' : 'background'
-    // Push.localNotification({
+    // PushNotification.localNotification({
     //     /* Android Only Properties */
-    //     // title: `${notification.message} [${foreground}]`, // (optional)
-    //     // ticker: "My Notification Ticker", // (optional)
-    //     // autoCancel: true, (optional) default: true,
-    //     // largeIcon: "ic_launcher", // (optional) default: "ic_launcher"
-    //     // smallIcon: "ic_notification", // (optional) default: "ic_notification" with fallback for "ic_launcher"
-    //     // bigText: "My big text that will be shown when notification is expanded", // (optional) default: "message" prop
-    //     // subText: "This is a subText", // (optional) default: none
-    //     // number: 10, // (optional) default: none (Cannot be zero)
-    //     // color: "red", // (optional) default: system default
+    //     id: 0, // (optional) default: Autogenerated Unique ID
+    //     title: "My Notification Title", // (optional)
+    //     ticker: "My Notification Ticker", // (optional)
+    //     autoCancel: true, (optional) default: true
+    //     largeIcon: "ic_launcher", // (optional) default: "ic_launcher"
+    //     smallIcon: "ic_notification", // (optional) default: "ic_notification" with fallback for "ic_launcher"
+    //     bigText: "My big text that will be shown when notification is expanded", // (optional) default: "message" prop
+    //     subText: "This is a subText", // (optional) default: none
+    //     color: "red", // (optional) default: system default
+    //     vibrate: true, // (optional) default: true
+    //     vibration: 300, // vibration length in milliseconds, ignored if vibrate=false, default: 1000
+    //     tag: 'some_tag', // (optional) add tag to message
+    //     group: "group", // (optional) add group to message
+
+    //     /* iOS only properties */
+    //     alertAction: // (optional) default: view
+    //     category: // (optional) default: null
+    //     userInfo: // (optional) default: null (object containing additional notification data)
 
     //     /* iOS and Android properties */
-    //   message: `${notification.message} [${foreground}]`
+    //     message: "My Notification Message" // (required)
+    //     playSound: false, // (optional) default: true
+    //     number: 10 // (optional) default: none (Cannot be zero)
+    // });
+
+    // PushNotification.localNotificationSchedule({
+    //     message: "My Notification Message", // (required)
+    //     date: new Date(Date.now() + (60 * 1000)) // in 60 secs
     // });
   }
 
   function resetBadgeNumber () {
-    if (Platform.OS !== 'ios') return
+    unread = 0
+    Actions.updateMe({ unreadPushNotifications: 0 })
+    if (ENV.isIOS()) return
 
     Push.getApplicationIconBadgeNumber(num => {
       if (!num) return

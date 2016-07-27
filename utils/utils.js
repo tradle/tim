@@ -12,6 +12,7 @@ import AsyncStorage from '../Store/Storage'
 import DeviceInfo from 'react-native-device-info'
 import PushNotifications from 'react-native-push-notification'
 import Keychain from 'react-native-keychain'
+import ENV from './env'
 
 var RCTUIManager = NativeModules.UIManager
 var crypto = require('crypto')
@@ -725,8 +726,10 @@ var utils = {
   },
 
   tryWithExponentialBackoff(fn, opts) {
+    opts = opts || {}
     const backoff = Backoff.exponential(extend(BACKOFF_DEFAULTS, opts))
-    return loop()
+    const maybeRun = opts.immediate ? fn() : Promise.resolve()
+    return maybeRun.then(loop)
 
     function loop () {
       const defer = Q.defer()
@@ -754,6 +757,7 @@ var utils = {
       return utils.fetchWithTimeout(url, opts, requestTimeout || DEFAULT_FETCH_TIMEOUT)
     })
   },
+
   normalizeCurrencySymbol(symbol) {
     // TODO: remove this after fixing encoding bug
     return symbol
@@ -820,13 +824,11 @@ var utils = {
       }
     }
   },
-  serviceID: 'tradle',
-  localIP: __DEV__ && require('./localIP'),
   getPassword: function (username) {
-    return Keychain.getGenericPassword(username, utils.serviceID)
+    return Keychain.getGenericPassword(username, ENV.serviceID)
   },
   setPassword: function (username, password) {
-    return Keychain.setGenericPassword(username, password, utils.serviceID)
+    return Keychain.setGenericPassword(username, password, ENV.serviceID)
   }
 }
 

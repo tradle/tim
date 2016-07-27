@@ -173,7 +173,8 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
-var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://' + utils.localIP + ':44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
+var COMMON_ENV = require('../utils/env')
+var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://' + COMMON_ENV.LOCAL_IP + ':44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
@@ -259,7 +260,7 @@ var Store = Reflux.createStore({
       })
       .then(() => {
         if (me && me.registeredForPushNotifications) {
-          // console.log('me: ' + meDriver.permalink)
+          console.log('me: ' + meDriver.permalink)
           Push.resetBadgeNumber()
         }
       })
@@ -3582,7 +3583,7 @@ var Store = Reflux.createStore({
     })
     .then(node => {
       // no need to wait for this to finish
-      Push.init({ node, me, Store: this })
+      Push.init({ node, Store: this })
       return node
     }, err => {
       debugger

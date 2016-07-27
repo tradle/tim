@@ -79,7 +79,7 @@
     "react-native-local-auth": "^1.1.1",
     "react-native-localization": "^0.1.12",
     "react-native-prompt": "pgmemk/react-native-prompt",
-    "react-native-push-notification": "^2.0.0",
+    "react-native-push-notification": "^2.0.2",
     "react-native-qrcode": "^0.2.2",
     "react-native-randombytes": "^2.1.0",
     "react-native-safe-async-storage": "mvayngrib/react-native-safe-async-storage",

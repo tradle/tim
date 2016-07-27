@@ -6,7 +6,8 @@ import kiki from '@tradle/kiki'
 import * as ec from 'react-native-ecc'
 // import * as RNKeychain from 'react-native-keychain'
 import { pick } from './utils'
-ec.setServiceID(utils.serviceID)
+import { serviceID } from './env'
+ec.setServiceID(env.serviceID)
 
 import { ec as ellipticEC } from 'elliptic'
 
