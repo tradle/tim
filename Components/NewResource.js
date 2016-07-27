@@ -128,6 +128,9 @@ class NewResource extends Component {
            this.state.isLoadingVideo !== nextState.isLoadingVideo      ||
            this.state.itemsCount != nextState.itemsCount     ||
           !equal(this.state.resource, nextState.resource)
+
+    if (!isUpdate)
+      this.compare(this.props.resource, nextProps.resource)
     return isUpdate
            // nextState.isModalOpen !== this.state.isModalOpen  ||
            // this.state.modalVisible != nextState.modalVisible ||
@@ -254,8 +257,8 @@ class NewResource extends Component {
         }
         Actions.addItem(params)
         this.props.navigator.pop();
+        return;
       }
-      return;
     }
     var currentRoutes = self.props.navigator.getCurrentRoutes();
     var currentRoutesLength = currentRoutes.length;
@@ -887,7 +890,7 @@ class NewResource extends Component {
           <View style={this.state.isRegistration ? {marginHorizontal: DeviceHeight > 1000 ? 50 : 30, paddingTop: 30} : {paddingTop: 10, marginHorizontal: 10}}>
             <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange.bind(this)}/>
             {button}
-            <View style={{marginTop: -10, borderColor: '#ffffff', borderWidth: 0.5, borderTopColor: LINK_COLOR}}>
+            <View style={{marginTop: -10}}>
               {arrayItems}
              </View>
            {  this.state.isLoadingVideo

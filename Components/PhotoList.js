@@ -68,18 +68,18 @@ class PhotoList extends Component {
       case 1:
       case 2:
       case 3:
-        height = d3 + 20;
+        height = d3 + 2;
         break;
       case 4:
-        height = d4 + 20;
+        height = d4 + 2;
         break;
       default:
       case 5:
-        height = d5 + 20;
+        height = d5 + 2;
         inRow = 5;
         break;
     }
-    var rows = photos.length / inRow;
+    var rows = Math.floor(photos.length / inRow)
     if (photos.length % inRow)
       rows++;
     height *= rows;

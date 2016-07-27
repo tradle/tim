@@ -23,6 +23,7 @@ var buttonStyles = require('../styles/buttonStyles');
 var NetworkInfoProvider = require('./NetworkInfoProvider')
 var defaultBankStyle = require('../styles/bankStyle.json')
 
+const LIMIT = 20
 const WEB_TO_MOBILE = '0'
 const TALK_TO_EMPLOYEEE = '1'
 
@@ -425,6 +426,7 @@ class ResourceList extends Component {
       passProps: {
         resource: resource,
         filter: '',
+        limit: LIMIT,
         modelName: modelName,
         currency: resource.currency,
         bankStyle: style,
