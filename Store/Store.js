@@ -193,8 +193,6 @@ const KEY_SET = [
   { type: 'ec', purpose: 'update', curve: 'p256' }
 ]
 
-var LocalizedStrings = require('react-native-localization')
-let defaultLanguage = new LocalizedStrings({ en: {name: 'English'}, nl: {name: 'Dutch'} }).getLanguage()
 const ENCRYPTION_KEY = 'accountkey'
 // const ENCRYPTION_SALT = 'accountsalt'
 const OTR_ENABLED = false
@@ -905,7 +903,7 @@ var Store = Reflux.createStore({
       }
     }
     if (!languageCode)
-      languageCode = defaultLanguage
+      languageCode = utils.getDefaultLanguage()
     if (languageCode)
       url += '?lang=' + languageCode
 
@@ -2363,7 +2361,7 @@ var Store = Reflux.createStore({
     var query = params.query;
 
     var required = meta.required;
-    var meId = utils.getId(me)
+    var meId = me ? utils.getId(me) : null
     var subclasses = utils.getAllSubclasses(modelName).map(function(r) {
       return r.id
     })
