@@ -1252,27 +1252,8 @@ var Store = Reflux.createStore({
       toChain = result.object
       tmpKey = rr[ROOT_HASH] = result.sig
       if (!isWelcome) {
-        var to = list[utils.getId(r.to)].value;
-        var from = list[utils.getId(r.from)].value;
-        var dn = r.message; // || utils.getDisplayName(r, props);
-
-        if (!dn)
-          dn = 'sent photo';
-        else {
-          var msgParts = utils.splitMessage(dn);
-          if (msgParts.length === 2) {
-            var m = self.getModel(msgParts[1]);
-            dn = m ? m.value.title + ' request' : msgParts[1];
-          }
-        }
-
-        // rr[ROOT_HASH] = tmpKey
-        to.lastMessage = (from[ROOT_HASH] === me[ROOT_HASH]) ? 'You: ' + dn : dn;
-        to.lastMessageTime = rr.time;
-        from.lastMessage = rr.message;
-        from.lastMessageTime = rr.time;
-        batch.push({type: 'put', key: utils.getId(to), value: to});
-        batch.push({type: 'put', key: utils.getId(from), value: from});
+        let len = batch.length
+        self.addLastMessage(r, batch)
       }
       if (!isWelcome  ||  utils.isEmployee(r.to))
         return
@@ -1463,8 +1444,8 @@ var Store = Reflux.createStore({
 
       batch.push({type: 'put', key: key, value: r});
       newVerification = self.buildRef(r)
-
-    // check if send returns somewhere roothash for the new resource
+      let len = batch.length
+      self.addLastMessage(r, batch)
       return db.batch(batch)
     })
     .then(function() {
@@ -2113,12 +2094,13 @@ var Store = Reflux.createStore({
       form.sharedWith.push(self.createSharedWith(toId, time))
 
       utils.optimizeResource(form)
+      self.addLastMessage(form, batch, to)
       batch.push({type: 'put', key: formId, value: form})
       return db.batch(batch)
     })
-    .then(() => {
-      self.trigger({action: 'list', list: self.searchNotMessages({modelName: ORGANIZATION, to: resource})})
-    })
+//     .then(() => {
+//       self.trigger({action: 'list', list: self.searchNotMessages({modelName: ORGANIZATION, to: resource})})
+//     })
     .catch(function(err) {
       debugger
     })
@@ -3265,20 +3247,8 @@ var Store = Reflux.createStore({
           value.sharedWith = []
         value.sharedWith.push(this.createSharedWith(utils.getId(value.to), new Date().getTime()))
       }
-      if (props['to']  &&  props['from']) {
-        var to = list[utils.getId(value.to)].value;
-        var from = list[utils.getId(value.from)].value;
-        var dn = value.message || utils.getDisplayName(value, props);
-        if (isNew)
-          to.lastMessage = (from[ROOT_HASH] === me[ROOT_HASH]) ? 'You: ' + dn : dn
-        else
-          to.lastMessage = (from[ROOT_HASH] === me[ROOT_HASH]) ? 'You: Modifying ' + dn : 'Modifying ' + dn
-        to.lastMessageTime = value.time;
-        // from.lastMessage = value.message;
-        from.lastMessageTime = value.time;
-        batch.push({type: 'put', key: utils.getId(to), value: to});
-        batch.push({type: 'put', key: utils.getId(from), value: from});
-      }
+      if (props['to']  &&  props['from'])
+        self.addLastMessage(value, batch)
     }
     var iKey = utils.getId(value) //modelName + '_' + value[ROOT_HASH];
     batch.push({type: 'put', key: iKey, value: value});
@@ -3347,6 +3317,80 @@ var Store = Reflux.createStore({
       }
       err = err;
     });
+  },
+  addLastMessage(value, batch, sharedWith) {
+    let model = this.getModel(value[TYPE]).value
+    if (model.id === CUSTOMER_WAITING || model.id === SELF_INTRODUCTION)
+      return
+
+    let to = list[utils.getId(value.to)].value;
+    let toId = utils.getId(to)
+    if (toId !== meId  &&  to.bot)
+      to = list[utils.getId(to.organization)].value
+
+    let dn
+    let messageType = model.id
+    if (sharedWith) {
+      let sharedWithOrg = list[utils.getId(sharedWith.organization)].value
+      let orgName = utils.getDisplayName(to, utils.getModel(ORGANIZATION).value.properties)
+      if (model.subClassOf !== MY_PRODUCT && model.subClassOf !== FORM)
+        return
+      dn = translate('sharedForm', translate(model), orgName)
+      sharedWithOrg.lastMessage = dn
+      sharedWithOrg.lastMessageTime = value.time;
+      sharedWithOrg.lastMessageType = messageType
+      batch.push({type: 'put', key: utils.getId(sharedWithOrg), value: sharedWithOrg});
+      this.trigger({action: 'list', list: this.searchNotMessages({modelName: ORGANIZATION}), forceUpdate: true})
+      return
+    }
+
+    let from = list[utils.getId(value.from)].value;
+    let fromId = utils.getId(from)
+    let meId = utils.getId(me)
+    let isNew = !value[ROOT_HASH] || !list[utils.getId(value)]
+
+    if (fromId !== meId  &&  from.bot)
+      from = list[utils.getId(from.organization)].value
+
+    if (model.id === FORM_REQUEST) {
+      let m = utils.getModel(value.product).value
+      if (m.forms.indexOf(value.form) !== 0)
+        return
+      dn = translate('formRequest', translate(utils.getModel(value.product).value))
+      messageType = FINANCIAL_PRODUCT
+    }
+    else if (model.id === VERIFICATION) {
+      let docType = utils.getId(value.document).split('_')[0]
+      dn = translate('receivedVerification', translate(utils.getModel(docType).value))
+    }
+    else if (model.subClassOf === MY_PRODUCT)
+      dn = translate('receivedProduct', translate(model))
+    else if (model.subClassOf === FORM) {
+      if (isNew)
+        dn = translate('submittingForm', translate(model))
+      else if (fromId !== meId)
+        dn = translate('receivedForm', translate(model))
+      else
+        dn = translate('submittingModifiedForm', translate(model))
+    }
+    else {
+      dn = value.message || utils.getDisplayName(value, model.properties);
+      if (!dn)
+        return
+    }
+    let r
+    if (toId !== meId) {
+      r = to
+      to.lastMessage = 'You: ' + dn
+    }
+    else {
+      r = from
+      from.lastMessage = dn
+    }
+    r.lastMessageTime = value.time;
+    r.lastMessageType = messageType
+    batch.push({type: 'put', key: utils.getId(r), value: r});
+    this.trigger({action: 'list', list: this.searchNotMessages({modelName: ORGANIZATION}), forceUpdate: true})
   },
   registration(value) {
     var self = this
@@ -3581,7 +3625,7 @@ var Store = Reflux.createStore({
     })
     .then(node => {
       // no need to wait for this to finish
-      Push.init({ node, Store: this })
+      Push.init({ me, node, Store: this })
       return node
     }, err => {
       debugger
@@ -4224,13 +4268,7 @@ var Store = Reflux.createStore({
         to.organization = this.buildRef(org)
         this.setMe(to)
       }
-      var dn = val.message || utils.getDisplayName(val, model.properties);
-      to.lastMessage = (obj.from[ROOT_HASH] === me[ROOT_HASH]) ? 'You: ' + dn : dn;
-      to.lastMessageTime = val.time;
-      from.lastMessage = val.message;
-      from.lastMessageTime = val.time;
-      batch.push({type: 'put', key: to[TYPE] + '_' + obj.to[ROOT_HASH], value: to});
-      batch.push({type: 'put', key: from[TYPE] + '_' + obj.from[ROOT_HASH], value: from});
+      this.addLastMessage(val, batch)
     }
     if (list[key]) {
       let v = {}
@@ -4429,12 +4467,11 @@ var Store = Reflux.createStore({
     var msg = {
       [TYPE]: FORGOT_YOU,
       [NONCE]: this.getNonce(),
-      message: 'You\'ve been successfully forgotten',
+      message: translate('youAreForgotten'),
       from: this.buildRef(org),
       to: this.buildRef(me)
     }
     msg.id = sha(msg)
-    this.trigger({action: 'messageList', list: [msg], resource: org})
 
     var reps = this.getRepresentatives(utils.getId(org))
     var promises = []
@@ -4513,6 +4550,8 @@ var Store = Reflux.createStore({
           }
         })
       })
+      this.trigger({action: 'messageList', list: [msg], resource: org})
+
       return db.batch(batch)
     })
     .then(function() {
@@ -4527,14 +4566,19 @@ var Store = Reflux.createStore({
         }
       })
 
-      self.trigger({action: 'list', list: self.searchNotMessages({modelName: ORGANIZATION, to: org})})
       // resource.numberOfForms = 0
 
-      reps.forEach((r) => {
-        r.lastMessageTime = null
-        r.lastMessage = null
-        delete publishRequestSent[utils.getId(r.organization)]
-      })
+      // reps.forEach((r) => {
+      //   r.lastMessageTime = null
+      //   r.lastMessage = null
+      //   delete publishRequestSent[utils.getId(r.organization)]
+      // })
+      delete publishRequestSent[orgId]
+      org.lastMessage = null
+      org.lastMessageTime = null
+      org.lastMessageType = null
+      self.trigger({action: 'list', list: self.searchNotMessages({modelName: ORGANIZATION, to: org})})
+      batch.push({type: 'put', key: orgId, value: org})
       if (batch.length)
         return db.batch(batch)
     })
@@ -4605,8 +4649,9 @@ var Store = Reflux.createStore({
       [TYPE]: FORGET_ME,
       [NONCE]: this.getNonce()
     }
+    var rId = utils.getId(resource)
     var orgReps = resource[TYPE] === ORGANIZATION
-                ? this.getRepresentatives(utils.getId(resource))
+                ? this.getRepresentatives(rId)
                 : [resource]
 
     let promises = []
@@ -4629,6 +4674,13 @@ var Store = Reflux.createStore({
       msg.id = sha(msg)
       result.push(msg)
       this.trigger({action: 'messageList', list: result, resource: resource})
+
+      resource.lastMessage = translate('requestedForgetMe')
+      resource.lastMessageTime = new Date().getTime()
+      resource.lastMessageType = FORGET_ME
+      this.trigger({action: 'list', list: this.searchNotMessages({modelName: ORGANIZATION}), forceUpdate: true})
+
+      db.put(rId, resource)
     })
     .catch(function (err) {
       debugger
