@@ -128,8 +128,13 @@ class MessageRow extends Component {
       else {
         if (isConfirmation)
           addStyle = [styles.verificationBody, {borderColor: '#cccccc', backgroundColor: this.props.bankStyle.CONFIRMATION_BG}, styles.myConfCell]
-        else
-          addStyle = [styles.verificationBody, {borderColor: isFormError ? this.props.bankStyle.REQUEST_FULFILLED : '#efefef', backgroundColor: '#ffffff'}];
+        else {
+          if (isSimpleMessage && resource.message.length < 30)
+            addStyle = [styles.verificationBody, {borderColor: isFormError ? this.props.bankStyle.REQUEST_FULFILLED : '#efefef', backgroundColor: '#ffffff'}];
+          else
+            addStyle = [styles.verificationBody, {flex: 1, borderColor: isFormError ? this.props.bankStyle.REQUEST_FULFILLED : '#efefef', backgroundColor: '#ffffff'}];
+
+        }
       }
       // if (model.style)
       //   addStyle = [addStyle, styles.verificationBody, {backgroundColor: STRUCTURED_MESSAGE_COLOR, borderColor: '#deeeb4'}]; //model.style];
@@ -189,11 +194,13 @@ class MessageRow extends Component {
     var w = Dimensions.get('window').width
     var msgWidth = isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
     var sendStatus = <View />
-
+    // HACK that solves the case when the message is short and we don't want it to be displayed
+    // in a bigger than needed bubble
+    let longMessage = isSimpleMessage  &&  resource.message ? (msgWidth / 11) < resource.message.length : false
     if (showMessageBody) {
       var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? (isNewProduct ? 'center' : 'flex-end') : 'flex-start'};
       if (resource.message) {
-        if (resource.message.charAt(0) === '['  ||  resource.message.length > 30)
+        if (resource.message.charAt(0) === '['  ||  longMessage)
           viewStyle.width = msgWidth; //isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
       }
       if (!isSimpleMessage)
@@ -221,7 +228,7 @@ class MessageRow extends Component {
 
       let cellStyle
       if (addStyle) {
-        if (hasOwnerPhoto  ||  !isSimpleMessage)
+        if (/*hasOwnerPhoto  ||  */!isSimpleMessage  ||  longMessage)
           cellStyle = [styles.textContainer, addStyle]
         else
           cellStyle = addStyle
@@ -399,36 +406,29 @@ class MessageRow extends Component {
 
   getOwnerPhoto(isMyMessage) {
     var to = this.props.to;
-    var ownerPhoto, hasOwnerPhoto = true;
 
-    if (isMyMessage  || !to /* ||  !to.photos*/) {
-      ownerPhoto = <View style={{marginVertical: 0}}/>
-      hasOwnerPhoto = false;
-    }
-    else if (to) {
-      if (!isMyMessage   &&  this.props.resource.from.photo) {
-        let uri = utils.getImageUri(this.props.resource.from.photo.url)
-        ownerPhoto = <Image source={{uri: uri}} style={styles.employeeImage} />
-        hasOwnerPhoto = true;
-      }
-      else if (to.photos) {
-        var uri = utils.getImageUri(to.photos[0].url);
-        ownerPhoto = <Image source={{uri: uri}} style={styles.msgImage} />
-        hasOwnerPhoto = true;
-      }
-      else if (!isMyMessage) {
-        var title = this.props.resource.from.title.split(' ').map(function(s) {
-          return s.charAt(0);
-        }).join('');
+    if (isMyMessage  || !to /* ||  !to.photos*/)
+      return <View style={{marginVertical: 0}}/>
 
-        ownerPhoto = <View style={{paddingRight: 3}}>
-                       <LinearGradient colors={['#2B6493', '#417AA9', '#568FBE']} style={styles.cellRoundImage}>
-                         <Text style={styles.cellText}>{title}</Text>
-                       </LinearGradient>
-                     </View>
-      }
+    if (!isMyMessage   &&  this.props.resource.from.photo) {
+      let uri = utils.getImageUri(this.props.resource.from.photo.url)
+      return <Image source={{uri: uri}} style={styles.employeeImage} />
     }
-    return ownerPhoto
+    if (to.photos) {
+      var uri = utils.getImageUri(to.photos[0].url);
+      return <Image source={{uri: uri}} style={styles.msgImage} />
+    }
+    if (!isMyMessage) {
+      var title = this.props.resource.from.title.split(' ').map(function(s) {
+        return s.charAt(0);
+      }).join('');
+
+      return <View style={{paddingRight: 3}}>
+               <LinearGradient colors={['#2B6493', '#417AA9', '#568FBE']} style={styles.cellRoundImage}>
+                 <Text style={styles.cellText}>{title}</Text>
+               </LinearGradient>
+             </View>
+    }
   }
   getTime(resource) {
     if (!resource.time)
