@@ -101,6 +101,9 @@ var utils = {
   getModel(modelName) {
     return models ? models[modelName] : null;
   },
+  getDefaultLanguage() {
+    return defaultLanguage
+  },
   translate(...args) {
     if (typeof args[0] === 'string')
       return utils.translateString(...args)
