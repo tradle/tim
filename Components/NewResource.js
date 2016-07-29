@@ -1118,7 +1118,7 @@ var styles = StyleSheet.create({
     borderRadius: 5
   },
   error: {
-    paddingLeft: 5,
+    // paddingLeft: 5,
     position: 'absolute',
     bottom: -20,
     backgroundColor: 'transparent'
@@ -1140,7 +1140,7 @@ var styles = StyleSheet.create({
     color: '#bbbbbb'
   },
   photoStrip: {
-    marginLeft: 10,
+    // marginLeft: 10,
     // marginTop: -30,
     paddingBottom: 5
   },
