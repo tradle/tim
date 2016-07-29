@@ -20,12 +20,14 @@ import {
   StyleSheet,
   Platform,
   Text,
+  Dimensions,
   TouchableHighlight,
   View
 } from 'react-native';
 
 import React, { Component } from 'react'
 import ActivityIndicator from './ActivityIndicator'
+var dateProp
 
 class ResourceRow extends Component {
   constructor(props) {
@@ -35,6 +37,8 @@ class ResourceRow extends Component {
   }
   shouldComponentUpdate(nextProps, nextState) {
     if (Object.keys(this.props).length  !== Object.keys(nextProps).length)
+      return true
+    if (this.props.resource.lastMessage !== nextProps.resource.lastMessage)
       return true
     if (this.state || nextState) {
       if (nextState.sharedWith  &&  nextState.sharedWith === this.state.sharedWith)
@@ -131,6 +135,18 @@ class ResourceRow extends Component {
                            </View>
                        : <View />;
     var textStyle = noImage ? [styles.textContainer, {marginVertical: 7}] : styles.textContainer;
+
+    let dateRow
+    if (dateProp  &&  resource[dateProp]) {
+      var val = utils.formatDate(new Date(resource[dateProp]), true)
+      // var dateBlock = self.addDateProp(resource, dateProp, true);
+      dateRow = <View style={{position: 'absolute', top: 2, backgroundColor: 'transparent', right: 10}}>
+              <Text style={styles.verySmallLetters}>{val}</Text>
+            </View>
+    }
+    else
+      dateRow = <View/>
+
     // Grey out if not loaded provider info yet
     var isOpaque = resource[constants.TYPE] === constants.TYPES.ORGANIZATION && !resource.contacts
     if (isOpaque)
@@ -144,6 +160,7 @@ class ResourceRow extends Component {
             {this.formatRow(resource)}
             <ActivityIndicator hidden='true' color='#629BCA'/>
           </View>
+          {dateRow}
           {cancelResource}
         </View>
         <View style={styles.cellBorder}  key={this.getNextKey()} />
@@ -151,10 +168,9 @@ class ResourceRow extends Component {
         )
     else
       return (
-      <Swipeout right={[{text: 'Hide', backgroundColor: 'red', onPress: this.hideResource.bind(this, resource)}]} autoClose={true} scroll={(event) => this._allowScroll(event)} >
-        <View key={this.getNextKey()} style={{opacity: 1, flex: 1, justifyContent: 'center'}}>
+        <View key={this.getNextKey()} style={{opacity: 1, justifyContent: 'center', backgroundColor: '#ffffff'}}>
           <TouchableHighlight onPress={this.state ? this.action.bind(this) : this.props.onSelect} underlayColor='transparent' key={this.getNextKey()}>
-            <View style={[styles.row]} key={this.getNextKey()}>
+            <View style={[styles.row, {width: Dimensions.get('window').width - 50}]} key={this.getNextKey()}>
               {photo}
               {orgPhoto}
               {onlineStatus}
@@ -165,7 +181,7 @@ class ResourceRow extends Component {
             </View>
           </TouchableHighlight>
           {this.props.isOfficialAccounts
-          ? <TouchableHighlight underlayColor='transparent' style={{position: 'absolute', right: 20, top: 25, backgroundColor: 'white'}} onPress={() => {
+          ? <TouchableHighlight underlayColor='transparent' style={{position: 'absolute', right: 10, top: 25, backgroundColor: 'white'}} onPress={() => {
               this.props.navigator.push({
                 component: ResourceList,
                 title: translate("myDocuments"),
@@ -179,20 +195,64 @@ class ResourceRow extends Component {
               <View style={textStyle}>
                  {resource.numberOfForms
                     ? <View style={{flexDirection: 'row'}}>
-                         <Icon name='ios-paper-outline' color='#cccccc' size={35} style={{marginTop: Platform.OS === 'ios' ? -5 : 0}}/>
-                         <Text style={{fontWeight: '600', marginLeft: 0, marginTop: Platform.OS === 'ios' ? -10 : -6, color: '#cccccc'}}>{resource.numberOfForms}</Text>
+                         <Icon name='ios-paper-outline' color={'#7AAAc3'} size={30} style={{marginTop: Platform.OS === 'ios' ? 0 : 0}}/>
+                         <Text style={{fontWeight: '600', marginLeft: 0, marginTop: Platform.OS === 'ios' ? -5 : -5, color: '#7AAAc3'}}>{resource.numberOfForms}</Text>
                       </View>
                     : <View />
                  }
               </View>
             </TouchableHighlight>
             : <View />}
+          {dateRow}
           {cancelResource}
-          <View style={styles.cellBorder}  key={this.getNextKey()} />
+          <View style={styles.cellBorder} />
         </View>
-      </Swipeout>
       );
   }
+      // return (
+      // <Swipeout right={[{text: 'Hide', backgroundColor: 'red', onPress: this.hideResource.bind(this, resource)}]} autoClose={true} scroll={(event) => this._allowScroll(event)} >
+      //   <View key={this.getNextKey()} style={{opacity: 1, flex: 1, justifyContent: 'center'}}>
+      //     <TouchableHighlight onPress={this.state ? this.action.bind(this) : this.props.onSelect} underlayColor='transparent' key={this.getNextKey()}>
+      //       <View style={[styles.row]} key={this.getNextKey()}>
+      //         {photo}
+      //         {orgPhoto}
+      //         {onlineStatus}
+      //         <View style={textStyle} key={this.getNextKey()}>
+      //           {this.formatRow(resource)}
+      //         </View>
+      //         {cancelResource}
+      //       </View>
+      //     </TouchableHighlight>
+      //     {this.props.isOfficialAccounts
+      //     ? <TouchableHighlight underlayColor='transparent' style={{position: 'absolute', right: 20, top: 25, backgroundColor: 'white'}} onPress={() => {
+      //         this.props.navigator.push({
+      //           component: ResourceList,
+      //           title: translate("myDocuments"),
+      //           backButtonTitle: translate('back'),
+      //           passProps: {
+      //             modelName: constants.TYPES.FORM,
+      //             resource: this.props.resource
+      //           }
+      //         })
+      //       }}>
+      //         <View style={textStyle}>
+      //            {resource.numberOfForms
+      //               ? <View style={{flexDirection: 'row'}}>
+      //                    <Icon name='ios-paper-outline' color='#cccccc' size={35} style={{marginTop: Platform.OS === 'ios' ? -5 : 0}}/>
+      //                    <Text style={{fontWeight: '600', marginLeft: 0, marginTop: Platform.OS === 'ios' ? -10 : -6, color: '#cccccc'}}>{resource.numberOfForms}</Text>
+      //                 </View>
+      //               : <View />
+      //            }
+      //         </View>
+      //       </TouchableHighlight>
+      //       : <View />}
+      //     {dateRow}
+      //     {cancelResource}
+      //     <View style={styles.cellBorder}  key={this.getNextKey()} />
+      //   </View>
+      // </Swipeout>
+      // );
+
   action() {
     if (this.props.onCancel)
       this.props.onCancel()
@@ -242,7 +302,6 @@ class ResourceRow extends Component {
     var vCols = [];
     var properties = model.properties;
     var first = true
-    var dateProp;
     var datePropIdx;
     var datePropsCounter = 0;
     var backlink;
@@ -268,6 +327,7 @@ class ResourceRow extends Component {
     if (datePropsCounter > 1)
       dateProp = null;
 
+    var isOfficialAccounts = this.props.isOfficialAccounts
     var isIdentity = resource[constants.TYPE] === constants.TYPES.PROFILE;
     viewCols.forEach(function(v) {
       if (v === dateProp)
@@ -317,22 +377,50 @@ class ResourceRow extends Component {
             for (let i=0; i<msgParts.length - 1; i++)
               val += msgParts[i];
           }
-          row = <Text style={style} key={self.getNextKey()}>{val}</Text>;
-        }
-        if (first  &&  dateProp) {
-          var val = utils.formatDate(new Date(resource[dateProp]), true);
-          // var dateBlock = self.addDateProp(resource, dateProp, true);
-          row = <View style={{flexDirection: 'row', justifyContent: 'space-between'}} key={self.getNextKey()}>
-                  <View>{row}</View>
-                  <View style={{marginTop: -7}}>
-                    <Text style={styles.verySmallLetters}>{val}</Text>
+          if (self.props.isOfficialAccounts  &&  v === 'lastMessage') {
+            let isMyLastMessage = val.indexOf('You: ') !== -1
+            let lastMessageTypeIcon = <View/>
+            if (isMyLastMessage) {
+              val = val.substring(5)
+              let lastMessageType = resource.lastMessageType
+              if (lastMessageType) {
+                let msgModel = utils.getModel(lastMessageType).value
+                let icon
+                if (msgModel.subClassOf === constants.TYPES.FINANCIAL_PRODUCT)
+                  icon = 'ios-usd'
+                else if (msgModel.subClassOf === constants.TYPES.FORM)
+                  icon = 'ios-paper'
+                // else if (model.id === constants.TYPES.VERIFICATION)
+                //   icon =
+                if (icon)
+                  lastMessageTypeIcon = <Icon name={icon} size={16} color='#cccccc' style={{paddingHorizontal: 2}}/>
+              }
+            }
+            let w = Dimensions.get('window').width - 145
+            row = <View style={{flexDirection: 'row'}} key={self.getNextKey()}>
+                    <Icon name='md-done-all' size={16} color={isMyLastMessage ? '#cccccc' : '#7AAAc3'}/>
+                    {lastMessageTypeIcon}
+                    <Text style={[style, {width: w, paddingLeft: 2}]}>{val}</Text>
                   </View>
-                </View>
+          }
+          else
+            row = <Text style={style} key={self.getNextKey()}>{val}</Text>;
         }
+        // if (first  &&  dateProp) {
+        //   var val = utils.formatDate(new Date(resource[dateProp]), true);
+        //   // var dateBlock = self.addDateProp(resource, dateProp, true);
+        //   row = <View style={{flexDirection: 'row', justifyContent: 'space-between'}} key={self.getNextKey()}>
+        //           <View>{row}</View>
+        //           <View style={{position: 'absolute', top: -3, right: 10}}>
+        //             <Text style={styles.verySmallLetters}>{val}</Text>
+        //           </View>
+        //         </View>
+        // }
         vCols.push(row);
         first = false;
       }
     });
+
     if (vCols  &&  vCols.length)
       renderedViewCols = vCols;
     else {
@@ -378,13 +466,14 @@ var styles = StyleSheet.create({
     // marginBottom: 2,
   },
   description: {
-    flex: 1,
+    // flex: 1,
     flexWrap: 'wrap',
     color: '#999999',
-    fontSize: 14,
+    fontSize: 16,
   },
   row: {
     backgroundColor: 'white',
+    justifyContent: 'center',
     // justifyContent: 'space-around',
     flexDirection: 'row',
     padding: 5,
