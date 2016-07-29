@@ -133,6 +133,7 @@ class ResourceTypesScreen extends Component {
     var content =
     <ListView ref='listview' style={styles.listview}
       dataSource={this.state.dataSource}
+      removeClippedSubviews={false}
       renderRow={this.renderRow.bind(this)}
       automaticallyAdjustContentInsets={false}
       keyboardDismissMode='on-drag'

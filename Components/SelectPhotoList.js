@@ -54,6 +54,7 @@ class SelectPhotoList extends Component {
     return (
       <ListView
         renderRow={this.renderRow.bind(this)}
+        removeClippedSubviews={false}
         style={this.props.style  ||  styles.photoContainer}
         dataSource={this.state.dataSource}
         onEndReached={this.onEndReached.bind(this)} />

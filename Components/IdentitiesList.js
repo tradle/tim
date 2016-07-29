@@ -134,6 +134,7 @@ class IdentitiesList extends Component {
         <ListView ref='listview'
           dataSource={this.state.dataSource}
           renderRow={this.renderRow.bind(this)}
+          removeClippedSubviews={false}
           automaticallyAdjustContentInsets={false}
           keyboardDismissMode='on-drag'
           keyboardShouldPersistTaps={true}

@@ -42,6 +42,7 @@ class EnumList extends Component {
           dataSource={this.state.dataSource}
           renderRow={this.renderRow.bind(this)}
           automaticallyAdjustContentInsets={false}
+          removeClippedSubviews={false}
           keyboardDismissMode='on-drag'
           keyboardShouldPersistTaps={true}
           initialListSize={10}
