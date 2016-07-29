@@ -191,6 +191,8 @@ class TimHome extends Component {
         // else
         return this.showOfficialAccounts()
       })
+      .catch((err) => {debugger
+      })
       break
     case 'getMe':
       utils.setMe(params.me)
