@@ -150,7 +150,6 @@ function createPusher (opts) {
       const msg = event.msg
 
       unsubscribe()
-      resetBadgeNumber()
 
       // const type = msg.object.object[TYPE]
 
