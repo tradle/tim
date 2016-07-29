@@ -107,4 +107,13 @@
     "learnMoreDescription": "You can still write messages in Offline Mode even though your device is not connected. When you reconnect all your messages will be automatically sent.",
     "shareChangesWith": "Share changes with",
     "nothingChanged": "Nothing changed",
+    "en": "English",
+    "nl": "Dutch",
+    "submittingForm": "Submittted new {1}",
+    "submittingModifiedForm": "Modifying {1}",
+    "receivedProduct": "Received {1}",
+    "receivedVerification": "Received verification for {1}",
+    "formRequest": "Request for {1}",
+    "sharedForm": "Shared {1} from {2}",
+    "youAreForgotten": "'You\\'ve been successfully forgotten",
 }
