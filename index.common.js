@@ -169,11 +169,11 @@ class TiMApp extends Component {
           // it should be more like Actions.auth()
           // and then handled in one place
           signIn(this.state.navigator)
-            .then(() => {
-              me = utils.getMe()
-              if (me.useGesturePassword)
-                this.state.navigator.pop()
-            })
+            // .then(() => {
+              // me = utils.getMe()
+              // if (me.useGesturePassword)
+              //   this.state.navigator.pop()
+            // })
 
           Actions.start()
         }, UNAUTHENTICATE_AFTER_BG_MILLIS)
