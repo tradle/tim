@@ -188,7 +188,7 @@ var styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: 'Avenir Next',
     marginBottom: 0,
-    marginHorizontal: 7,
+    // marginHorizontal: 7,
     color: '#000000',
   },
   itemSeparator: {
