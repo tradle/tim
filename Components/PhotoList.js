@@ -99,6 +99,7 @@ class PhotoList extends Component {
       <View style={styles.row}>
          <ListView
             scrollEnabled = {false}
+            removeClippedSubviews={false}
             enableEmptySections={true}
             renderRow={this.renderRow.bind(this)}
             dataSource={dataSource} />
