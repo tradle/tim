@@ -151,14 +151,23 @@ class TiMApp extends Component {
       case 'inactive':
         return
       case 'active':
-        Push.resetBadgeNumber()
-        if (this.state.currentAppState === 'active') return
+        AutomaticUpdates.hasUpdate().then(has => {
+          if (has) {
+            Alert.alert('installing update...')
+            return setTimeout(() => AutomaticUpdates.install(), 2000)
+          }
 
-        clearTimeout(this.state.unauthTimeout)
-        // ok to pop from defensive copy
+          Push.resetBadgeNumber()
+          if (this.state.currentAppState === 'active') return
 
-        AutomaticUpdates.sync()
-        break
+          clearTimeout(this.state.unauthTimeout)
+          // ok to pop from defensive copy
+
+          AutomaticUpdates.sync()
+          this.setState(newState)
+        })
+
+        return
       case 'background':
         newState.unauthTimeout = setTimeout(() => {
           if (!me || !me.isRegistered) return
@@ -314,6 +323,7 @@ class TiMApp extends Component {
           // return {...Navigator.SceneConfigs.FloatFromRight, springFriction:26, springTension:300};
 
   renderScene(route, nav) {
+    console.log('navigating to ' + route.component.displayName)
     var props = route.passProps;
     if (!this.state.navigator) {
       this._navListeners = [

@@ -33,7 +33,8 @@ var Actions = Reflux.createActions([
   'cleanup',
   'forgetMe',
   'setAuthenticated',
-  'updateMe'
+  'updateMe',
+  'scheduleUpdate'
 ]);
 
 Object.keys(Actions).forEach((name) => {
