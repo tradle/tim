@@ -501,7 +501,7 @@ class NewResource extends Component {
   }
   compare(r1, r2) {
     if (!r1 || !r2)
-      return true
+      return (r1 || r2) ? false : true
     let properties = this.props.model.properties
     for (var p in r1) {
       if (r1[p] === r2[p])
