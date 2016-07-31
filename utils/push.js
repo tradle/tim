@@ -15,7 +15,6 @@ const constants = require('@tradle/engine').constants
 const TYPE = constants.TYPE
 const Actions = require('../Actions/Actions')
 const pushServerURL = __DEV__ ? `http://${ENV.LOCAL_IP}:48284` : 'https://push.tradle.io'
-const noop = () => {}
 
 let promiseInit
 
@@ -36,7 +35,7 @@ exports.resetBadgeNumber = function () {
 function createPusher (opts) {
   if (utils.isSimulator()) return Promise.resolve({})
 
-  const me = utils.getMe()
+  const me = opts.me
   const node = opts.node
   const Store = opts.Store
   const identity = node.identity
