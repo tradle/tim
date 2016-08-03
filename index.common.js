@@ -4,17 +4,8 @@
 var NativeAppEventEmitter = require('RCTNativeAppEventEmitter')
 
 // require('react-native-level')
-var debug = require('debug')
-if (__DEV__) {
-  console.ignoredYellowBox = ['jsSchedulingOverhead']
-  debug.enable([
-    'tradle:*'
-  ].join(','))
-} else {
-  debug.disable()
-}
-
-debug = debug('tim:main')
+import Debug from './utils/debug'
+var debug = Debug('tradle:app')
 
 // require('regenerator/runtime') // support es7.asyncFunctions
 import './utils/shim'
@@ -323,7 +314,19 @@ class TiMApp extends Component {
           // return {...Navigator.SceneConfigs.FloatFromRight, springFriction:26, springTension:300};
 
   renderScene(route, nav) {
-    console.log('navigating to ' + route.component.displayName)
+    if (__DEV__) {
+      let displayName = route.component.displayName
+      if (!displayName) {
+        if (typeof route.component === 'function') {
+          displayName = route.component.name || route.component.toString().match(/function (.*?)\s*\(/)[1]
+        }
+      }
+
+      if (!displayName || displayName === 'exports') debugger
+
+      debug('navigating to ' + displayName)
+    }
+
     var props = route.passProps;
     if (!this.state.navigator) {
       this._navListeners = [
