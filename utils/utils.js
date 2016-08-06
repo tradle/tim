@@ -372,7 +372,7 @@ var utils = {
       break;
     case 1:
       noTime = false
-      val = 'yesterday, ' + noTime ? '' : dateformat(date, 'h:mm TT')
+      val = 'yesterday, ' + (noTime ? '' : dateformat(date, 'h:mm TT'))
       // val = moment(date).format('[yesterday], h:mA');
       break;
     default:
