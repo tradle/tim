@@ -36,7 +36,7 @@ exports.resetBadgeNumber = function () {
 function createPusher (opts) {
   if (utils.isSimulator()) return Promise.resolve({})
 
-  const me = utils.getMe()
+  const me = opts.me
   const node = opts.node
   const Store = opts.Store
   const identity = node.identity
