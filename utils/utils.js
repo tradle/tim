@@ -244,7 +244,7 @@ var utils = {
     }
     else {
       let m = utils.getModel(r[TYPE])
-      if (m  &&  m.value.subClassOf === FORM)
+      if (m  &&  (m.value.subClassOf === FORM  ||  m.value.id === VERIFICATION))
         return r[TYPE] + '_' + r[ROOT_HASH] + '_' + (r[CUR_HASH] || r[ROOT_HASH])
       else
         return r[TYPE] + '_' + r[ROOT_HASH];
@@ -768,6 +768,8 @@ var utils = {
   },
   isVerifier(resource, verification) {
     let me = this.getMe()
+    if (!this.isEmployee(resource))
+      return false
     let model = this.getModel(resource[TYPE]).value
     return (me.organization  &&
             utils.getId(me) === utils.getId(resource.to) &&
