@@ -1390,7 +1390,7 @@ var styles = StyleSheet.create({
     flexDirection: 'row'
   },
   resourceTitle: {
-    flex: 1,
+    // flex: 1,
     fontSize: 17,
     fontWeight: '400',
     marginBottom: 2,
