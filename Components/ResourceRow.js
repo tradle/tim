@@ -389,17 +389,19 @@ class ResourceRow extends Component {
                 if (msgModel.subClassOf === constants.TYPES.FINANCIAL_PRODUCT)
                   icon = 'ios-usd'
                 else if (msgModel.subClassOf === constants.TYPES.FORM)
-                  icon = 'ios-paper'
+                  icon = 'ios-paper-outline'
                 // else if (model.id === constants.TYPES.VERIFICATION)
                 //   icon =
                 if (icon)
-                  lastMessageTypeIcon = <Icon name={icon} size={16} color='#cccccc' style={{paddingHorizontal: 2}}/>
+                  lastMessageTypeIcon = <Icon name={icon} size={14} color='#7AAAc3' style={{paddingLeft: 1, marginTop: -2}}/>
               }
             }
             let w = Dimensions.get('window').width - 145
             row = <View style={{flexDirection: 'row'}} key={self.getNextKey()}>
+                    <View style={{flexDirection: 'column'}}>
                     <Icon name='md-done-all' size={16} color={isMyLastMessage ? '#cccccc' : '#7AAAc3'}/>
                     {lastMessageTypeIcon}
+                    </View>
                     <Text style={[style, {width: w, paddingLeft: 2}]}>{val}</Text>
                   </View>
           }
