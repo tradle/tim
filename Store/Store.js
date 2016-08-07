@@ -13,6 +13,7 @@ import AsyncStorage from './Storage'
 import * as LocalAuth from '../utils/localAuth'
 import Keychain from 'react-native-keychain'
 import Push from '../utils/push'
+import DeviceInfo from 'react-native-device-info'
 
 global.AsyncStorage = AsyncStorage
 
@@ -768,6 +769,7 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
     const otrKey = null//driverInfo.otrKey
     const wsClients = driverInfo.wsClients
     const identifier = otrKey ? otrKey.fingerprint() : meDriver.permalink
+    // const identifier = meDriver.permalink + '.' + (DeviceInfo.getUniqueID() || '')
     const base = getProviderUrl(provider)
 
     if (wsClients[base]) return wsClients[base]
@@ -812,25 +814,33 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
         debug('aborting pending sends due to disconnect')
         c.destroy()
       })
+
+      // pause all channels
+      meDriver.sender.pause()
+    })
+
+    wClient.on('connect', function (recipient) {
+      // resume all paused channels
+      meDriver.sender.resume()
     })
 
     wsClients[base] = transport
     wsClients[provider.hash] = transport
 
-    let timeouts = {}
-    transport.on('receiving', function (msg) {
-      clearTimeout(timeouts[msg.from])
-      delete timeouts[msg.from]
-    })
+    // let timeouts = {}
+    // transport.on('receiving', function (msg) {
+    //   clearTimeout(timeouts[msg.from])
+    //   delete timeouts[msg.from]
+    // })
 
-    transport.on('404', function (recipient) {
-      if (!timeouts[recipient]) {
-        timeout = setTimeout(function () {
-          delete timeouts[recipient]
-          transport.cancelPending(recipient)
-        }, 10000)
-      }
-    })
+    // transport.on('404', function (recipient) {
+    //   if (!timeouts[recipient]) {
+    //     timeout = setTimeout(function () {
+    //       delete timeouts[recipient]
+    //       transport.cancelPending(recipient)
+    //     }, 10000)
+    //   }
+    // })
 
     transport.on('message', function (msg, from) {
       try {
