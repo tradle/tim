@@ -22,6 +22,8 @@ import ActionSheet from 'react-native-actionsheet'
 // var ResourceTypesScreen = require('./ResourceTypesScreen')
 
 var LINK_COLOR
+var LIMIT = 10
+var NEXT_HASH = '_n'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const FORM_REQUEST = 'tradle.FormRequest'
 
@@ -88,7 +90,7 @@ class MessageList extends Component {
       modelName: this.props.modelName,
       to: this.props.resource,
       prop: this.props.prop,
-      limit: this.props.limit
+      limit: LIMIT
     }
     if (this.props.isAggregation)
       params.isAggregation = true;
@@ -125,6 +127,7 @@ class MessageList extends Component {
         query: this.state.filter,
         modelName: this.props.modelName,
         to: this.props.resource,
+        limit: this.state.list ? this.state.list.length + 1 : LIMIT
       }
 
       if (params.sendStatus) {
@@ -143,7 +146,7 @@ class MessageList extends Component {
       return
     }
     if (params.action === 'addMessage') {
-      Actions.messageList({modelName: this.props.modelName, to: this.props.resource});
+      Actions.messageList({modelName: this.props.modelName, to: this.props.resource, limit: this.state.list ? this.state.list.length + 1 : 10});
       return
     }
     if ( params.action !== 'messageList'                   ||
@@ -169,16 +172,23 @@ class MessageList extends Component {
     }
     var list = params.list;
 
-    if (params.loadingEarlierMessages) {
+    if (params.loadEarlierMessages  &&  this.state.postLoad) {
       if (!list || !list.length) {
         this.state.postLoad([], true)
-        this.setState({allLoaded: true, isLoading: false, noScroll: true})
+        this.state = {
+          allLoaded: true, isLoading: false, noScroll: true, loadEarlierMessages: false,
+          ...this.state
+        }
+//         this.setState({allLoaded: true, isLoading: false, noScroll: true, loadEarlierMessages: false})
       }
       else {
         this.state.postLoad(list, false)
+//         this.state.list = list
+        let allLoaded = list.length < LIMIT
         this.state.list.forEach((r) => {
           list.push(r)
         })
+        this.setState({list: list, noScroll: true, allLoaded: allLoaded, loadEarlierMessages: !allLoaded})
       }
       return
     }
@@ -205,6 +215,7 @@ class MessageList extends Component {
         shareableResources: params.shareableResources,
         allLoaded: false,
         isEmployee: isEmployee,
+        loadEarlierMessages: params.loadEarlierMessages,
         productToForms: productToForms
       });
     }
@@ -295,7 +306,7 @@ class MessageList extends Component {
       }
     }
     // Allow to edit resource
-    if (!isEmployee) {
+    if (!isEmployee  &&  !resource[NEXT_HASH]) {
       route.rightButtonTitle = translate('edit')
       route.onRightButtonPress = {
         title: utils.getDisplayName(resource),
@@ -325,6 +336,7 @@ class MessageList extends Component {
       query: text,
       modelName: this.props.modelName,
       to: this.props.resource,
+      limit: this.state.list ? this.state.list.length + 1 : LIMIT
     }
     this.state.emptySearch = true
     Actions.messageList(actionParams);
@@ -357,12 +369,12 @@ class MessageList extends Component {
       );
   }
   addedMessage(text) {
-    Actions.messageList({modelName: this.props.modelName, to: this.props.resource});
+    Actions.messageList({modelName: this.props.modelName, to: this.props.resource,  limit: this.state.list ? this.state.list.length + 1 : LIMIT});
   }
 
   componentDidUpdate() {
     clearTimeout(this._scrollTimeout)
-    if (this.state.allLoaded  &&  this.state.noScroll)
+    if (this.state.allLoaded  ||  this.state.noScroll)
       this.state.noScroll = false
     else
       this._scrollTimeout = setTimeout(() => {
@@ -428,7 +440,7 @@ class MessageList extends Component {
       var maxHeight = Dimensions.get('window').height - (Platform.OS === 'android' ? 77 : 64) - (this.state.isConnected ? 0 : 30)
       content = <GiftedMessenger style={{paddingHorizontal: 10, marginTop: 5}}
         ref={(c) => this._GiftedMessenger = c}
-        loadEarlierMessagesButton={this.state.list ? this.state.list.length > 100 : false}
+        loadEarlierMessagesButton={this.state.loadEarlierMessages}
         onLoadEarlierMessages={this.onLoadEarlierMessages.bind(this)}
         messages={this.state.list}
         enableEmptySections={true}
@@ -468,9 +480,7 @@ class MessageList extends Component {
       chooser = <View/>
 
     var sepStyle = { height: 1,backgroundColor: LINK_COLOR }
-    if (this.state.allLoaded)
-      Alert.alert('There is no earlier messages!')
-    else if (!this.props.navigator.isConnected  &&  this.state.isForgetting)
+    if (!this.state.allLoaded  && !this.props.navigator.isConnected  &&  this.state.isForgetting)
       Alert.alert(translate('noConnectionWillProcessLater'))
           // <View style={{flex: 10}}>
           //   <SearchBar
@@ -543,7 +553,7 @@ class MessageList extends Component {
 
 
   onLoadEarlierMessages(oldestMessage = {}, callback = () => {}) {
-    this.state.loadingEarlierMessages = true
+    this.state.loadEarlierMessages = true
     // Your logic here
     // Eg: Retrieve old messages from your server
 
@@ -553,7 +563,7 @@ class MessageList extends Component {
     Actions.messageList({
       lastId: id,
       limit: 10,
-      loadingEarlierMessages: true,
+      loadEarlierMessages: true,
       modelName: this.props.modelName,
       to: this.props.resource,
     })
