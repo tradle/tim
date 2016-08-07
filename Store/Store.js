@@ -2079,6 +2079,8 @@ var Store = Reflux.createStore({
     if (!me)
       return
     var result = this.searchMessages({to: me, modelName: CUSTOMER_WAITING, isForgetting: true});
+    if (!result)
+      return
     if (result.length)
       delete result[result.length - 1]
 
