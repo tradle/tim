@@ -59,6 +59,7 @@
     "react-native": "^0.30.0",
     "react-native-accordion": "mvayngrib/react-native-accordion",
     "react-native-actionsheet": "^2.0.3",
+    "react-native-animatable": "^0.6.1",
     "react-native-camera": "lwansbrough/react-native-camera",
     "react-native-carousel": "^0.8.0",
     "react-native-code-push": "^1.13.5-beta",
