@@ -210,6 +210,7 @@ class NewResource extends Component {
     }
     if (!resource  &&  params.error &&  params.action === 'addItem') {
       this.state.submitted = false
+      console.log('addItem: submitted = false')
       Alert.alert(
         params.error,
         // this.props.navigator.pop()
@@ -222,7 +223,8 @@ class NewResource extends Component {
       return
     }
     if (!resource  ||  (params.action !== 'addItem'  &&  params.action !== 'addMessage')) {
-      this.state.submitted = false
+//       console.log('addItem1: submitted = false')
+//       this.state.submitted = false
       return;
     }
     if (this.state.resource[constants.TYPE] !== resource[constants.TYPE])
@@ -230,6 +232,7 @@ class NewResource extends Component {
     if (params.error) {
       if (resource[constants.TYPE] == this.state.resource[constants.TYPE])
         this.setState({err: params.error, resource: resource, isRegistration: this.state.isRegistration});
+      console.log('addItem error: submitted = false')
       this.state.submitted = false
       return;
     }
@@ -239,6 +242,7 @@ class NewResource extends Component {
     }
     if (this.props.callback) {
       this.state.submitted = false
+      console.log('callback: submitted = false')
       this.props.callback(resource);
       return;
     }
@@ -265,7 +269,12 @@ class NewResource extends Component {
     var navigateTo = (currentRoutesLength == 2)
              ? this.props.navigator.replace
              : this.props.navigator.replacePrevious
-
+    // Editing form originated from chat
+    if (this.props.chat) {
+      let routes = this.props.navigator.getCurrentRoutes()
+      this.props.navigator.popToRoute(routes[routes.length - 3])
+      return 
+    }
     navigateTo({
       id: 3,
       title: title,
@@ -295,7 +304,8 @@ class NewResource extends Component {
     });
     if (currentRoutesLength != 2)
       this.props.navigator.pop();
-    this.state.submitted = false
+//     console.log('itemAdded: submitted = false')
+//     this.state.submitted = false
   }
   showSharedWithList(newResource) {
     if (!this.props.resource  ||  !this.props.resource.sharedWith)
@@ -325,17 +335,6 @@ class NewResource extends Component {
     this.props.navigator.pop()
   }
   onSavePressed() {
-    // if (this.props.resource  &&  this.props.resource.sharedWith) {
-    //   if (!list)
-    //     return
-    //   let l = []
-    //   for (let r in list) {
-    //     if (list[r])
-    //       l.push(r)
-    //   }
-    //   if (!l.length)
-    //     return
-    // }
     if (this.state.submitted)
       return
     this.state.submitted = true
@@ -424,6 +423,8 @@ class NewResource extends Component {
       missedRequiredOrErrorValue[p] = err[p]
 
     if (!utils.isEmpty(missedRequiredOrErrorValue)) {
+      console.log('onSavePressed not all required: submitted = false')
+
       this.state.submitted = false
       var state = {
         missedRequiredOrErrorValue: missedRequiredOrErrorValue
@@ -509,12 +510,23 @@ class NewResource extends Component {
       if (Array.isArray(r1[p])) {
         if (!r2[p])
           return false
-        if (r1[p].length  !== r2[p].length)
+        // else if (!r1[p])
+        //   return false
+        if (r1[p].length !== r2[p].length)
           return false
-        for (let i=0; i<r1.length; i++) {
+        // if (JSON.stringify(r1[p]) !== JSON.stringify(r2[p]))
+        //   return false
+        for (var i=0; i<r1.length; i++) {
           let r = r1[i]
-          if (!r2.filter((rr2) => equal(r, rr2)).length)
+          let found = r2.some((rr2) => {
+            equal(r, rr2)
+          })
+          if (!found)
             return false
+        //   // if (!r2.filter((rr2) => {
+        //   //   return equal(r, rr2)
+        //   //   }).length)
+        //   //   return false
         }
       }
       else if (typeof r1[p] === 'object') {
