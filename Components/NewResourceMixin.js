@@ -4,7 +4,6 @@ var React = require('react');
 var dateformat = require('dateformat')
 var ResourceList = require('./ResourceList')
 var EnumList = require('./EnumList')
-// var Picker = require('./Picker')
 var FloatLabel = require('react-native-floating-labels')
 var Icon = require('react-native-vector-icons/Ionicons');
 var utils = require('../utils/utils');
