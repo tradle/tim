@@ -25,6 +25,7 @@ import ActionSheet from 'react-native-actionsheet'
 import iosStyles from '../styles/iosStyles'
 import androidStyles from '../styles/androidStyles'
 import { signIn } from '../utils/localAuth'
+
 const TALK_TO_EMPLOYEE = '1'
 // const SERVER_URL = 'http://192.168.0.162:44444/'
 
@@ -227,7 +228,7 @@ class ResourceView extends Component {
     return (
       <View style={{flex:1}}>
       <ScrollView  ref='this' style={platformStyles.container}>
-        <View style={[styles.photoBG]}>
+        <View style={styles.photoBG}>
           <PhotoView resource={resource} navigator={this.props.navigator}/>
         </View>
         {actionPanel}
@@ -344,7 +345,7 @@ var styles = StyleSheet.create({
     height: Dimensions.get('window').height
   },
   photoBG: {
-    backgroundColor: '#245D8C',
+    // backgroundColor: '#245D8C',
     alignItems: 'center',
   },
   footer: {
