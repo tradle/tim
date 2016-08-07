@@ -3222,7 +3222,10 @@ var Store = Reflux.createStore({
     var model = this.getModel(modelName).value;
     var props = model.properties;
     var newLanguage
-    var isNew = !value[ROOT_HASH] || !value[CUR_HASH] || value[ROOT_HASH] === value[CUR_HASH]
+
+    var isMessage = model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1)
+    var originalR = list[utils.getId(value)]
+    var isNew = !value[ROOT_HASH] || !value[CUR_HASH] || (!isMessage  &&  !originalR)
     if (value[TYPE] === SETTINGS) {
       if (isNew) {
         if (SERVICE_PROVIDERS_BASE_URL_DEFAULTS.includes(value.url))
@@ -3261,7 +3264,6 @@ var Store = Reflux.createStore({
     }
 
     value.time = value.time || new Date().getTime();
-    var isMessage = model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1)
     if (isMessage) {
       if (/*isNew  &&*/  model.subClassOf === FORM) {
         if (!value.sharedWith)
@@ -3290,6 +3292,9 @@ var Store = Reflux.createStore({
 
     if (value[TYPE] === SETTINGS)
       return this.addSettings(value)
+
+    let meId = utils.getId(me)
+
     db.batch(batch)
     .then(function() {
       return db.get(iKey)
@@ -3297,7 +3302,6 @@ var Store = Reflux.createStore({
     .then(function(value) {
       self._setItem(iKey, value)
       if (isMessage) {
-        let meId = utils.getId(me)
         let toId = utils.getId(value.to)
         if (toId === meId)
           toId = utils.getId(value.from)
@@ -3307,7 +3311,7 @@ var Store = Reflux.createStore({
       }
       if (mid)
         self._setItem(MY_IDENTITIES, mid)
-      else if (!isNew  &&  iKey === utils.getId(me)) {
+      else if (!isNew  &&  iKey === meId) {
         if (me.language || value.language) {
           if (value.language) {
             if (!me.language  ||  (utils.getId(me.language) !== utils.getId(value.language)))
