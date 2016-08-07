@@ -305,7 +305,7 @@ class MessageList extends Component {
         isVerifier: isVerifier
       }
     }
-    // Allow to edit resource
+    // Allow to edit resource that was not previously changed
     if (!isEmployee  &&  !resource[NEXT_HASH]) {
       route.rightButtonTitle = translate('edit')
       route.onRightButtonPress = {
