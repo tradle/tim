@@ -23,7 +23,6 @@ var buttonStyles = require('../styles/buttonStyles');
 var NetworkInfoProvider = require('./NetworkInfoProvider')
 var defaultBankStyle = require('../styles/bankStyle.json')
 
-const LIMIT = 20
 const WEB_TO_MOBILE = '0'
 const TALK_TO_EMPLOYEEE = '1'
 
@@ -129,11 +128,14 @@ class ResourceList extends Component {
       params.prop = utils.getModel(this.props.resource[constants.TYPE]).value.properties[this.props.prop.name];
     if (params.prop) {
       let m = utils.getModel(this.props.resource[constants.TYPE]).value
+      // case when for example clicking on 'Verifications' on Form page
       if (m.interfaces) {
-        if (utils.getModel(this.props.modelName).value.interfaces)
+        if (utils.getModel(this.props.modelName).value.interfaces) 
           params.to = this.props.resource.to
+        params.resource = this.props.resource  
       }
-      params.resource = this.props.resource
+
+//       params.resource = this.props.resource
     }
     // this.state.isLoading = true;
     utils.onNextTransitionEnd(this.props.navigator, () => {
@@ -165,7 +167,6 @@ class ResourceList extends Component {
         passProps: {
           resource: params.to,
           filter: '',
-          limit: LIMIT,
           modelName: constants.TYPES.MESSAGE,
           // currency: params.organization.currency,
           bankStyle: style,
@@ -211,7 +212,6 @@ class ResourceList extends Component {
         passProps: {
           resource: params.to,
           filter: '',
-          limit: LIMIT,
           modelName: constants.TYPES.MESSAGE,
           currency: params.to.currency,
           bankStyle:  style,
@@ -368,7 +368,7 @@ class ResourceList extends Component {
           backButtonTitle: translate('back'),
           passProps: {
             resource: resource,
-            bankStyle: this.props.bankStyle
+            bankStyle: this.props.bankStyle || defaultBankStyle
           }
         });
       }
@@ -391,7 +391,7 @@ class ResourceList extends Component {
             passProps: {
               model: m,
               resource: resource,
-              bankStyle: this.props.bankStyle
+              bankStyle: this.props.bankStyle || defaultBankStyle
             }
           },
 
@@ -428,7 +428,6 @@ class ResourceList extends Component {
       passProps: {
         resource: resource,
         filter: '',
-        limit: LIMIT,
         modelName: modelName,
         currency: resource.currency,
         bankStyle: style,
