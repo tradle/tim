@@ -17,6 +17,8 @@ import {
 } from 'react-native'
 
 import React, { Component } from 'react'
+import * as Animatable from 'react-native-animatable'
+
 
 class PhotoView extends Component {
   constructor(props) {
@@ -46,7 +48,9 @@ class PhotoView extends Component {
     if (!currentPhoto) {
       if (model.id === constants.TYPES.PROFILE) {
         return (
-          <Icon name='ios-person' size={200}  color='#f6f6f4' />
+          <View style={styles.photoBG}>
+            <Icon name='ios-person' size={200}  color='#f6f6f4' />
+          </View>
         )
       }
       else
@@ -66,14 +70,23 @@ class PhotoView extends Component {
       if (p === url)
         nextPhoto = i === len - 1 ? resource.photos[0] : resource.photos[i + 1];
     }
-    return <TouchableHighlight underlayColor='#ffffff' onPress={this.showCarousel.bind(this, resource.photos[0])}>
+    return (
+          <Animatable.View animation="fadeIn" iterationCount={1} direction="normal">
+            <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, resource.photos[0])}>
               <Image source={source} style={styles.image} />
             </TouchableHighlight>
+          </Animatable.View>
+    )
   }
 }
 reactMixin(PhotoView.prototype, PhotoCarouselMixin);
 
 var styles = StyleSheet.create({
+  photoBG: {
+    backgroundColor: '#245D8C',
+    alignItems: 'center',
+    alignSelf: 'stretch'
+  },
   image: {
     width: Dimensions.get('window').width,
     height: Dimensions.get('window').height / 2,
