@@ -3268,16 +3268,20 @@ var Store = Reflux.createStore({
 
     value.time = value.time || new Date().getTime();
     if (isMessage) {
-      if (/*isNew  &&*/  model.subClassOf === FORM) {
+      let isForm = model.subClassOf === FORM
+      if (/*isNew  &&*/  isForm) {
         if (!value.sharedWith)
           value.sharedWith = []
         value.sharedWith.push(this.createSharedWith(utils.getId(value.to), new Date().getTime()))
       }
-      if (!isNew) {
-        let prevRes = list[value[TYPE] + '_' + value[ROOT_HASH] + '_' + value[PREV_HASH]].value
-        prevRes[NEXT_HASH] = value[CUR_HASH]
-        utils.optimizeResource(prevRes)
-        batch.push({type: 'put', key: utils.getId(prevRes), value: prevRes})
+      if (!isNew  &&  isForm) {
+        let prevRes = list[value[TYPE] + '_' + value[ROOT_HASH] + '_' + value[PREV_HASH]]
+        if (prevRes) {
+          prevRes = prevRes.value
+          prevRes[NEXT_HASH] = value[CUR_HASH]
+          utils.optimizeResource(prevRes)
+          batch.push({type: 'put', key: utils.getId(prevRes), value: prevRes})
+        }
       }
 
       if (props['to']  &&  props['from'])
