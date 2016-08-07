@@ -189,4 +189,5 @@ var styles = StyleSheet.create({
   container: containerRawStyle
 })
 
+module.exports.displayName = 'PasswordCheck'
 module.exports.Modes = MODES

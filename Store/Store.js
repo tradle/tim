@@ -448,6 +448,7 @@ var Store = Reflux.createStore({
     //     console.log('tradle is at', addrs)
 
     meDriver = new tradle.node({
+      name: 'me',
       dir: TIM_PATH_PREFIX,
       identity: identity,
       keys: keys,
