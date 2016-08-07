@@ -41,7 +41,9 @@ var TYPES = constants.TYPES
 
 var VERIFICATION = constants.TYPES.VERIFICATION
 const CUR_HASH = constants.CUR_HASH
+const NONCE = constants.NONCE
 const ROOT_HASH = constants.ROOT_HASH
+const PREV_HASH = constants.PREV_HASH
 const SIG = constants.SIG
 const FORM = constants.TYPES.FORM
 
@@ -346,17 +348,45 @@ var utils = {
     let pgroup = prop.group
     let group = []
     let hasSetProps
-    pgroup.forEach((p) => {
+    let m = this.getModel(resource[TYPE])
+    for (let i=0; i<=pgroup.length; i++) {
+      let p = pgroup[i]
       let v =  resource[p] ? resource[p] : ''
       if (v)
         hasSetProps = true
+      if (typeof v === 'object')
+        v = v.title ? v.title : utils.getDisplayName(v, this.getModel(props[p].ref).value.properties)
       group.push(v)
-    })
-    if (!hasSetProps)
-      return
-    else
-      return this.template(prop.displayAs, group).trim()
+    }
+    if (hasSetProps) {
+      let s = this.template(prop.displayAs, group).trim()
+      s = s.replace(/,\s+,/g, ',').trim()
+      s = s.replace(/^,/, '').trim()
+      s = s.replace(/,$/, '').trim()
+      if (s.charAt(s.length - 1) !== ',')
+        return s
+      let i = s.length - 2
+      while(s.charAt(i) === ' ')
+        i--
+      i = (i < s.length - 2) ? i : s.length - 1
+      return s.substring(0, i)
+    }
   },
+  // templateIt1(prop, resource) {
+  //   let pgroup = prop.group
+  //   let group = []
+  //   let hasSetProps
+  //   pgroup.forEach((p) => {
+  //     let v =  resource[p] ? resource[p] : ''
+  //     if (v)
+  //       hasSetProps = true
+  //     group.push(v)
+  //   })
+  //   if (!hasSetProps)
+  //     return
+  //   else
+  //     return this.template(prop.displayAs, group).trim()
+  // },
 
   templateIt(prop, resource) {
     var template = prop.displayAs;
