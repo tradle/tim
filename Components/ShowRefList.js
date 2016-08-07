@@ -10,6 +10,8 @@ var reactMixin = require('react-mixin');
 var RowMixin = require('./RowMixin');
 var ResourceMixin = require('./ResourceMixin');
 
+import * as Animatable from 'react-native-animatable'
+
 import {
   View,
   Text,
@@ -75,6 +77,23 @@ class ShowRefList extends Component {
          </View>
         );
     })
+    /*
+      refList.push(
+        <View style={[buttonStyles.container, {width: width}]} key={this.getNextKey()}>
+           <TouchableHighlight onPress={() => this.setState({currentProp: p})} underlayColor='transparent'>
+             <View style={{alignItems: 'center'}}>
+               {self.state.currentProp === p
+                ? <Animatable.View animation="bounceOut" iterationCount={1} direction="alternate" onAnimationEnd={this.showResources.bind(this, this.props.resource, props[p])}>
+                     <Icon name={icon}  size={30}  color='#ffffff' />
+                  </Animatable.View>
+                : <Icon name={icon}  size={30}  color='#ffffff' />
+               }
+               <Text style={[buttonStyles.text, Platform.OS === 'android' ? {marginTop: 3} : {marginTop: 0}]}>{propTitle}</Text>
+             </View>
+           </TouchableHighlight>
+         </View>
+        );
+    */
 
     if (utils.getId(me) === utils.getId(resource)  &&  me.isEmployee) {
       refList.push(
