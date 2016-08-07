@@ -118,7 +118,22 @@ var NewResourceMixin = {
       })
     }
 
-    var eCols = editCols ? editCols : props;
+    var eCols
+    if (editCols)
+      eCols = editCols
+    else if (!meta.viewCols)
+      eCols = props
+    else {
+      eCols = {}
+      meta.viewCols.forEach((p) => {
+        eCols[p] = props[p]
+      })
+      for (let p in props) {
+        if (!eCols[p]  &&  !props[p].readOnly  &&  !props[p].hidden)
+          eCols[p] = props[p]
+      }
+    }
+
     var required = utils.arrayToObject(meta.required);
     // var d = data ? data[i] : null;
     for (var p in eCols) {
