@@ -1911,6 +1911,11 @@ var Store = Reflux.createStore({
         if (isNew)
           returnVal[ROOT_HASH] = returnVal[NONCE]
         else if (isForm) {
+          let prevRes = list[returnVal[TYPE] + '_' + returnVal[ROOT_HASH] + '_' + returnVal[CUR_HASH]].value
+          if (utils.compare(returnVal, prevRes)) {
+            self.trigger({action: 'noChanges'})
+            return
+          }
           returnVal[PREV_HASH] = returnVal[CUR_HASH]
           returnVal[CUR_HASH] = returnVal[NONCE]
         }

@@ -130,7 +130,7 @@ class NewResource extends Component {
           !equal(this.state.resource, nextState.resource)
 
     if (!isUpdate)
-      this.compare(this.props.resource, nextProps.resource)
+      utils.compare(this.props.resource, nextProps.resource)
     return isUpdate
            // nextState.isModalOpen !== this.state.isModalOpen  ||
            // this.state.modalVisible != nextState.modalVisible ||
@@ -183,6 +183,10 @@ class NewResource extends Component {
     var resource = params.resource;
     if (params.action === 'languageChange') {
       this.props.navigator.popToTop()
+      return
+    }
+    if (params.action === 'noChanges') {
+      this.setState({err: translate('nothingChanged'), submitted: false})
       return
     }
     if (params.action === 'getItem'  &&  utils.getId(this.state.resource) === utils.getId(params.resource)) {
@@ -273,7 +277,7 @@ class NewResource extends Component {
     if (this.props.chat) {
       let routes = this.props.navigator.getCurrentRoutes()
       this.props.navigator.popToRoute(routes[routes.length - 3])
-      return 
+      return
     }
     navigateTo({
       id: 3,
@@ -410,13 +414,13 @@ class NewResource extends Component {
           missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
       }
     })
-    if (this.props.resource                      &&
-        this.props.resource[constants.ROOT_HASH] &&
-        this.compare(json, this.props.resource)  &&
-        this.compare(resource, this.props.resource)) {
-      this.setState({err: translate('nothingChanged'), submitted: false})
-      return
-    }
+    // if (this.props.resource                      &&
+    //     this.props.resource[constants.ROOT_HASH] &&
+    //     this.compare(json, this.props.resource)  &&
+    //     this.compare(resource, this.props.resource)) {
+    //   this.setState({err: translate('nothingChanged'), submitted: false})
+    //   return
+    // }
 
     var err = this.validateProperties(json)
     for (var p in err)
@@ -499,44 +503,6 @@ class NewResource extends Component {
     // if (list)
     //   params.shareWith = list
     Actions.addItem(params)
-  }
-  compare(r1, r2) {
-    if (!r1 || !r2)
-      return (r1 || r2) ? false : true
-    let properties = this.props.model.properties
-    for (var p in r1) {
-      if (r1[p] === r2[p])
-        continue
-      if (Array.isArray(r1[p])) {
-        if (!r2[p])
-          return false
-        // else if (!r1[p])
-        //   return false
-        if (r1[p].length !== r2[p].length)
-          return false
-        // if (JSON.stringify(r1[p]) !== JSON.stringify(r2[p]))
-        //   return false
-        for (var i=0; i<r1.length; i++) {
-          let r = r1[i]
-          let found = r2.some((rr2) => {
-            equal(r, rr2)
-          })
-          if (!found)
-            return false
-        //   // if (!r2.filter((rr2) => {
-        //   //   return equal(r, rr2)
-        //   //   }).length)
-        //   //   return false
-        }
-      }
-      else if (typeof r1[p] === 'object') {
-        if (!this.compare(r1[p], r2[p]))
-          return false
-      }
-      else if (r1[p]  ||  r2[p])
-        return false
-    }
-    return true
   }
   // HACK: the value for property of the type that is subClassOf Enum is set on resource
   // and it is different from what tcomb sets in the text field

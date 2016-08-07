@@ -159,6 +159,39 @@ var utils = {
   clone(resource) {
     return JSON.parse(JSON.stringify(resource))
   },
+  compare(r1, r2) {
+    if (!r1 || !r2)
+      return (r1 || r2) ? false : true
+    let properties = utils.getModel(r1[TYPE]).value.properties
+    let exclude = ['time', ROOT_HASH, CUR_HASH, PREV_HASH, NONCE, 'verifications', 'sharedWith']
+    for (var p in r1) {
+      if (exclude.indexOf(p) !== -1)
+        continue
+      if (r1[p] === r2[p])
+        continue
+      if (Array.isArray(r1[p])) {
+        if (!r2[p])
+          return false
+        if (r1[p].length !== r2[p].length)
+          return false
+        for (var i=0; i<r1.length; i++) {
+          let r = r1[i]
+          let found = r2.some((rr2) => {
+            equal(r, rr2)
+          })
+          if (!found)
+            return false
+        }
+      }
+      else if (typeof r1[p] === 'object') {
+        if (utils.getId(r1[p]) !== utils.getId(r2[p]))
+          return false
+      }
+      else if (r1[p]  ||  r2[p])
+        return false
+    }
+    return true
+  },
 
   getStringName(str) {
     return strMap[str]
