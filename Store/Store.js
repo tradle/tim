@@ -124,7 +124,7 @@ const WELCOME_INTERVAL = 600000
 
 const Sendy = require('sendy')
 const SendyWS = require('sendy-ws')
-// const OTRClient = require('sendy-otr')
+const TLSClient = require('sendy-axolotl')
 // const DSA = require('@tradle/otr').DSA
 // const BigInt = require('@tradle/otr/vendor/bigint')
 // const BigIntTimes = {}
@@ -203,7 +203,7 @@ const KEY_SET = [
 
 const ENCRYPTION_KEY = 'accountkey'
 // const ENCRYPTION_SALT = 'accountsalt'
-const OTR_ENABLED = false
+const TLS_ENABLED = true
 
 // var Store = Reflux.createStore(timeFunctions({
 var Store = Reflux.createStore({
@@ -448,7 +448,7 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
     var blockchain = new Blockchain(networkName)
     var wsClients = driverInfo.wsClients
     // var whitelist = driverInfo.whitelist
-    var otrKey = driverInfo.otrKey
+    // var tlsKey = driverInfo.tlsKey
 
     // return Q.ninvoke(dns, 'resolve4', 'tradle.io')
     //   .then(function (addrs) {
@@ -522,14 +522,14 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
       }
     }
 
-    // if (OTR_ENABLED) {
-    //   otrKey = keys.filter((k) => k.type === 'dsa')[0]
-    //   if (otrKey) otrKey = DSA.parsePrivate(otrKey.priv)
+    // if (TLS_ENABLED) {
+    //   tlsKey = keys.filter((k) => k.type === 'dsa')[0]
+    //   if (tlsKey) tlsKey = DSA.parsePrivate(tlsKey.priv)
     // }
 
-    // if (otrKey) otrKey = kiki.toKey(otrKey).priv()
+    // if (tlsKey) tlsKey = kiki.toKey(tlsKey).priv()
 
-    driverInfo.otrKey = otrKey
+    var tlsKey = driverInfo.tlsKey = TLS_ENABLED && meDriver.keys.filter(k => k.get('purpose') === 'tls')[0]
     meDriver._send = function (msg, recipientInfo, cb) {
       const recipientHash = recipientInfo.permalink
       let messenger = wsClients[recipientHash]
@@ -544,10 +544,10 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
 
       const args = arguments
       let identifier
-      if (otrKey) {
+      if (tlsKey) {
         identifier = recipientInfo.object.pubkeys.filter(function (k) {
-          return k.type === 'dsa'
-        })[0].fingerprint
+          return k.purpose === 'tls'
+        })[0].pub
       } else {
         identifier = recipientHash
       }
@@ -597,7 +597,7 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
         // var httpClient = driverInfo.httpClient
         var wsClients = driverInfo.wsClients
         // var whitelist = driverInfo.whitelist
-        var otrKey = driverInfo.otrKey
+        var tlsKey = driverInfo.tlsKey
         // if (!httpClient) {
         //   httpClient = new HttpClient()
         //   driverInfo.httpClient = httpClient
@@ -634,7 +634,7 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
     //   var httpClient = driverInfo.httpClient
     //   var wsClients = driverInfo.wsClients
     //   var whitelist = driverInfo.whitelist
-    //   var otrKey = driverInfo.otrKey
+    //   var tlsKey = driverInfo.tlsKey
     //   results.forEach(function(providers) {
     //     if (!httpClient) {
     //       httpClient = new HttpClient()
@@ -660,12 +660,12 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
     //       //   whitelist.push(provider.txId)
     //       // }
 
-    //       // if (!otrKey) return
+    //       // if (!tlsKey) return
 
     //       // // self.addWebSocketClient()
     //       // var wsClient = new WebSocketClient({
     //       //   url: utils.joinURL(provider.url, provider.id, 'ws'),
-    //       //   otrKey: otrKey,
+    //       //   tlsKey: tlsKey,
     //       //   autoconnect: false,
     //       //   // rootHash: meDriver.myRootHash()
     //       // })
@@ -766,9 +766,9 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
     // if (provider.txId)
     //   whitelist.push(provider.txId)
     let self = this
-    const otrKey = null//driverInfo.otrKey
+    let tlsKey = driverInfo.tlsKey
     const wsClients = driverInfo.wsClients
-    const identifier = otrKey ? otrKey.fingerprint() : meDriver.permalink
+    const identifier = tlsKey ? tlsKey.pubKeyString : meDriver.permalink
     // const identifier = meDriver.permalink + '.' + (DeviceInfo.getUniqueID() || '')
     const base = getProviderUrl(provider)
 
@@ -785,29 +785,6 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
     //   forceBase64: true
     // })
 
-    // let transport
-    // if (otrKey) {
-    //   transport = newSwitchboard({
-    //     identifier: identifier,
-    //     unreliable: wsClient,
-    //     clientForRecipient: function (recipient) {
-    //       return new OTRClient({
-    //         key: otrKey,
-    //         client: new Sendy(SENDY_OPTS),
-    //         theirFingerprint: recipient
-    //       })
-    //     }
-    //   })
-    // } else {
-    // let transport = newSwitchboard({
-    //     identifier: identifier,
-    //     unreliable: wsClient,
-    //     clientForRecipient: function () {
-    //       return new Sendy(SENDY_OPTS)
-    //     }
-    //   })
-
-
     wsClient.on('disconnect', function () {
       transport.clients().forEach(function (c) {
         // reset OTR session, restart on connect
@@ -819,7 +796,7 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
       meDriver.sender.pause()
     })
 
-    wClient.on('connect', function (recipient) {
+    wsClient.on('connect', function (recipient) {
       // resume all paused channels
       meDriver.sender.resume()
     })
@@ -927,8 +904,14 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
         }
       }
 
-      const prop = otrKey ? 'fingerprint' : 'permalink'
-      meDriver.receive(msg, { [prop]: from })
+      const prop = tlsKey ? 'pubKey' : 'permalink'
+      const identifier = prop === 'permalink' ? from : {
+        type: 'ec',
+        curve: 'curve25519',
+        pub: new Buffer(from, 'hex')
+      }
+
+      meDriver.receive(msg, { [prop]: identifier })
         .catch(err => {
           console.warn('failed to receive msg:', err, msg)
           debugger
@@ -961,11 +944,22 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
   },
 
   getTransport(wsClient, identifier) {
+    const tlsKey = driverInfo.tlsKey
     return newSwitchboard({
       identifier: identifier,
       unreliable: wsClient,
-      clientForRecipient: function () {
-        return new Sendy(SENDY_OPTS)
+      clientForRecipient: function (recipient) {
+        const sendy = new Sendy(SENDY_OPTS)
+        if (!tlsKey) return sendy
+
+        return new TLSClient({
+          key: {
+            secretKey: tlsKey.priv,
+            publicKey: tlsKey.pub
+          },
+          client: sendy,
+          theirPubKey: new Buffer(recipient, 'hex')
+        })
       }
     })
   },
