@@ -521,7 +521,7 @@ var NewResourceMixin = {
     var label = translate(params.prop, params.model)
 
     return (
-      <View style={{marginHorizontal: 10, justifyContent: 'center', backgroundColor: LINK_COLOR}}>
+      <View style={{marginHorizontal: -10, justifyContent: 'center', backgroundColor: LINK_COLOR}}>
         <Text style={{marginVertical: 10, marginLeft: 10, fontSize: 18, alignSelf: 'center', color: '#ffffff'}}>{label}</Text>
       </View>
     );
@@ -569,7 +569,7 @@ var NewResourceMixin = {
         err = params.errors[params.prop.name]
 
       error = err
-                ? <View style={{paddingLeft: 10, backgroundColor: 'transparent'}} key={this.getNextKey()}>
+                ? <View style={styles.err} key={this.getNextKey()}>
                     <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>{err}</Text>
                   </View>
                 : <View key={this.getNextKey()} />
@@ -649,22 +649,16 @@ var NewResourceMixin = {
       propLabel = <View style={{marginTop: 20}}/>
     }
 
-    var err = this.state.missedRequiredOrErrorValue
-            ? this.state.missedRequiredOrErrorValue[prop.name]
-            : null
-    if (!err  &&  params.errors  &&  params.errors[prop.name])
-      err = params.errors[prop.name]
-
     let valuePadding = 0 //Platform.OS === 'ios' ? 0 : (hasValue ? 10 : 0)
     let format = 'MMMM Do, YYYY'
     let value = params.value &&  moment(new Date(params.value)).format(format)
 
     if (!value)
       value = translate(params.prop)
-    return <View style={{paddingBottom: 10, paddingLeft: 10}} key={this.getNextKey()} ref={prop.name}>
+    return <View style={{paddingBottom: 10}} key={this.getNextKey()} ref={prop.name}>
           {propLabel}
           <DatePicker
-            style={{width: Dimensions.get('window').width - 30, justifyContent: 'flex-start', borderColor: '#f7f7f7'}}
+            style={{width: Dimensions.get('window').width - 30, paddingLeft: 10, justifyContent: 'flex-start', borderColor: '#f7f7f7'}}
             mode="date"
             placeholder={value}
             format={format}
@@ -690,7 +684,7 @@ var NewResourceMixin = {
                 color: '#000000'
               },
               placeholderText: {
-                color: '#000000',
+                color: params.value ? '#000000' : '#cccccc',
                 fontSize: 18
               },
               dateIcon: {
@@ -702,6 +696,7 @@ var NewResourceMixin = {
             }}
 
           />
+          {this.getErrorView(params)}
          </View>
   },
   // myDateTemplate1(params) {
@@ -1350,8 +1345,11 @@ var styles = StyleSheet.create({
     marginRight: 2,
     marginTop: -10,
     borderRadius: 5
+  },
+  err: {
+    paddingLeft: 10,
+    backgroundColor: 'transparent'
   }
-
 })
 module.exports = NewResourceMixin;
 
