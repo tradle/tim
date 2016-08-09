@@ -640,7 +640,7 @@ var NewResourceMixin = {
                  : {marginTop: 5, marginBottom: 5, backgroundColor: 'transparent'}
 
       propLabel = <View style={vStyle}>
-                    <Text style={{fontSize: 12, color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}}>{params.label}</Text>
+                    <Text style={{fontSize: 12, paddingLeft: 10, color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}}>{params.label}</Text>
                   </View>
     }
     else {
@@ -681,17 +681,20 @@ var NewResourceMixin = {
               },
               dateText: {
                 fontSize: 18,
-                color: '#000000'
+                color: '#000000',
               },
               placeholderText: {
                 color: params.value ? '#000000' : '#cccccc',
-                fontSize: 18
+                fontSize: 18,
+                paddingLeft: params.value ? 10 : 0
+              },
+              dateIconColor: {
+                color: LINK_COLOR,
               },
               dateIcon: {
-                width: 30,
-                height: 30,
-                marginLeft: 5,
-                marginRight: 5,
+                position: 'absolute',
+                right: 0,
+                top: 5
               },
             }}
 
