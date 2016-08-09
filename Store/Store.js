@@ -4330,16 +4330,18 @@ var Store = Reflux.createStore({
     batch.push({type: 'put', key: key, value: val})
     return noTrigger
   },
+  // if the last message showing was PRODUCT_LIST. No need to re-render
   hasNoTrigger(orgId) {
     let messages = chatMessages[orgId]
     if (!messages)
       return false
     let i=messages.length - 1
     let type
+    // Skip all SELF_INTRODUCTION messages since they are not showing anyways on customer screen
     for (; i>=0; i--) {
-      type = messages[i].id.split('_')[0]
-      if (type  === SELF_INTRODUCTION)
-        continue
+      type = messages[i].id.split('_')[0]     
+      if (type  !== SELF_INTRODUCTION)
+        break
     }
     if (type === PRODUCT_LIST)
       return true

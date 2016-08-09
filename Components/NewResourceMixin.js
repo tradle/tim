@@ -521,8 +521,8 @@ var NewResourceMixin = {
     var label = translate(params.prop, params.model)
 
     return (
-      <View style={{marginHorizontal: -10, justifyContent: 'center', backgroundColor: LINK_COLOR}}>
-        <Text style={{marginVertical: 10, marginLeft: 10, fontSize: 18, alignSelf: 'center', color: '#ffffff'}}>{label}</Text>
+      <View style={{justifyContent: 'center', backgroundColor: LINK_COLOR}}>
+        <Text style={{marginVertical: 10, fontSize: 18, alignSelf: 'center', color: '#ffffff'}}>{label}</Text>
       </View>
     );
   },
