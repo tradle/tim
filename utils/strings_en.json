@@ -18,7 +18,7 @@
     "pleaseDrawYourPatternAgain": "Please draw your pattern again",
     "passwordLimitations": "Password must have 5 or more points",
     "invalidPattern": "Invalid pattern, please try again",
-    "patternNotMatching": "Patterns didn\\'t match. Please start again",
+    "patternNotMatching": "Patterns didn't match. Please start again",
     "wrongPattern": "Wrong pattern",
     "correctGesture": "Correct gesture detected",
     "authenticationFailed": "Authentication failed",
@@ -120,5 +120,5 @@
     "invalidPairingRequest": "Invalid Pairing Request",
     "pairingRequest": "Pairing Request",
     "deviceDoesNotHaveMyKeys": "Received identity does not have my keys",
-    "pairingRequestWasProcesseed": "Pairing request was processeed",
+    "pairingRequestWasProcesseed": "Pairing request was processeed"
 }
