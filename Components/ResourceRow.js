@@ -2,7 +2,6 @@
 
 var utils = require('../utils/utils');
 var translate = utils.translate
-import LinearGradient from 'react-native-linear-gradient';
 var ArticleView = require('./ArticleView');
 var constants = require('@tradle/constants');
 var Icon = require('react-native-vector-icons/Ionicons');
@@ -18,13 +17,14 @@ import {
   Image,
   PixelRatio,
   StyleSheet,
-  Platform,
   Text,
   Dimensions,
   TouchableHighlight,
-  View
+  View,
+  Platform
 } from 'react-native';
 
+import LinearGradient from './LinearGradient'
 import React, { Component } from 'react'
 import ActivityIndicator from './ActivityIndicator'
 var dateProp

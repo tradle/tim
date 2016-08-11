@@ -42,6 +42,7 @@ import {
   Dimensions
 } from 'react-native';
 var LINK_COLOR, DEFAULT_LINK_COLOR = '#a94442'
+var FloatLabel = require('react-native-floating-labels')
 
 var NewResourceMixin = {
   onScroll(e) {

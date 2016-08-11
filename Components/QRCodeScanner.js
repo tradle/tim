@@ -1,15 +1,18 @@
 
 import {
   StyleSheet,
-  TouchableHighlight
+  TouchableHighlight,
+  Platform
 } from 'react-native'
 
 import React, { Component, PropTypes } from 'react'
-import Camera from 'react-native-camera'
+import utils from '../utils/utils'
+
+var Camera = utils.isWeb() ? null : require('react-native-camera').default
 
 var ICON_BORDER_COLOR = '#D7E6ED'
 var Icon = require('react-native-vector-icons/Ionicons')
-var Dir = Camera.constants.Type
+var Dir = Camera && Camera.Type
 
 class QRCodeScanner extends Component {
   constructor(props) {
@@ -75,4 +78,4 @@ var styles = {
   }
 }
 
-module.exports = QRCodeScanner
+module.exports = Camera && QRCodeScanner

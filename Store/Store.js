@@ -16,7 +16,7 @@ import Push from '../utils/push'
 // import DeviceInfo from 'react-native-device-info'
 
 var path = require('path')
-var BeSafe = require('asyncstorage-backup')
+// var BeSafe = require('asyncstorage-backup')
 var Reflux = require('reflux');
 var Actions = require('../Actions/Actions');
 var extend = require('extend');
@@ -36,8 +36,8 @@ Q.onerror = function (err) {
   throw err
 }
 
-var ENV = Platform.OS === 'android' ? require('../environment') : require('react-native-env')
-var AddressBook = require('NativeModules').AddressBook;
+var ENV = Platform.OS !== 'ios' ? require('../environment.json') : require('react-native-env')
+// var AddressBook = require('NativeModules').AddressBook;
 
 var voc = require('@tradle/models');
 var sampleData = voc.data
@@ -50,21 +50,8 @@ var utils = require('../utils/utils');
 var Keychain = utils.isIOS() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('q-level');
-var asyncstorageDown = require('asyncstorage-down')
-var levelup = require('levelup')
-// var updown = require('level-updown')
-
-var leveldown = require('cachedown')
-leveldown.setLeveldown(asyncstorageDown)
-var level = function (loc, opts) {
-  opts = opts || {}
-  opts.db = opts.db || function () {
-    return leveldown.apply(null, arguments)
-      .maxSize(100) // max cache size
-  }
-
-  return levelup(loc, opts)
-}
+var leveldown = require('./leveldown')
+var level = require('./level')
 
 const collect = require('stream-collector')
 const tradle = require('@tradle/engine')
@@ -147,7 +134,7 @@ const WebSocketClient = SendyWS.Client
 // const HttpClient = require('@tradle/transport-http').HttpClient
 // var getDHTKey = require('tim/lib/utils').getDHTKey
 
-var dns = require('dns')
+// var dns = require('dns')
 var map = require('map-stream')
 var Blockchain = require('@tradle/cb-blockr') // use tradle/cb-blockr fork
 // var defaultKeySet = midentity.defaultKeySet
@@ -221,21 +208,23 @@ var Store = Reflux.createStore({
     // ldb.query.use(jsonqueryEngine());
     db = promisify(ldb);
 
-    NetInfo.isConnected.addEventListener(
-      'change',
-      this._handleConnectivityChange.bind(this)
-    );
-
-    if (utils.isSimulator()) {
-      // isConnected always returns false on simulator
-      // https://github.com/facebook/react-native/issues/873
-      this.isConnected = true
-    } else {
-      NetInfo.isConnected.fetch().done(
-        (isConnected) => {
-          this.isConnected = isConnected
-        }
+    if (NetInfo) {
+      NetInfo.isConnected.addEventListener(
+        'change',
+        this._handleConnectivityChange.bind(this)
       );
+
+      if (utils.isSimulator()) {
+        // isConnected always returns false on simulator
+        // https://github.com/facebook/react-native/issues/873
+        this.isConnected = true
+      } else {
+        NetInfo.isConnected.fetch().done(
+          (isConnected) => {
+            this.isConnected = isConnected
+          }
+        );
+      }
     }
 
     this.loadModels()
@@ -325,7 +314,7 @@ var Store = Reflux.createStore({
       self._setItem(key, value)
     })
     .catch(function(err) {
-      // debugger
+      if (!err.notFound) debugger
       // return self.loadModels()
     })
   },
@@ -439,7 +428,7 @@ var Store = Reflux.createStore({
     var self = this
     var keeper = createKeeper({
       path: path.join(TIM_PATH_PREFIX, 'keeper'),
-      db: asyncstorageDown,
+      db: leveldown,
       encryption: encryption,
       validateOnPut: __DEV__
     })
@@ -973,7 +962,7 @@ var Store = Reflux.createStore({
   },
 
   getIdentifierPubKey(identityInfo) {
-    identityInfo = identityInfo || meDriver.identityInfo
+    identityInfo = identityInfo || meDriver
     const purpose = TLS_ENABLED ? 'tls' : 'sign'
     return tradleUtils.find(identityInfo.keys || identityInfo.object.pubkeys, k => {
       const kPurpose = k.purpose || k.get('purpose')
@@ -3958,7 +3947,7 @@ var Store = Reflux.createStore({
         identity: result.identity,
         keys: result.keys,
         encryption: {
-          key: new Buffer(result.encryptionKey, 'hex')
+          key: new Buffer(encryptionKey, 'hex')
         }
       })
     })
@@ -4029,92 +4018,92 @@ var Store = Reflux.createStore({
       debugger
     })
   },
-  loadAddressBook() {
-    return // method not used currently
+  // loadAddressBook() {
+  //   return
 
-    var self = this;
-    return Q.ninvoke(AddressBook, 'checkPermission')
-    .then(function(permission) {
-      // AddressBook.PERMISSION_AUTHORIZED || AddressBook.PERMISSION_UNDEFINED || AddressBook.PERMISSION_DENIED
-      if(permission === AddressBook.PERMISSION_UNDEFINED)
-        return Q.ninvoke(AddressBook, 'requestPermission')
-               .then(function(permission) {
-                 if (permission === AddressBook.PERMISSION_AUTHORIZED)
-                   return self.storeContacts.bind(self);
-               });
-      else if (permission === AddressBook.PERMISSION_AUTHORIZED)
-        return self.storeContacts()
-      else if (permission === AddressBook.PERMISSION_DENIED) {
-        //handle permission denied
-        return
-      }
-    })
-  },
-  storeContacts() {
-    var self = this;
-    var dfd = Q.defer();
-    var batch = [];
-    var props = models[PROFILE].value.properties;
-    AddressBook.getContacts(function(err, contacts) {
-      contacts.forEach(function(contact) {
-        var contactInfo = [];
-        var newIdentity = {
-          firstName: contact.firstName,
-          lastName: contact.lastName,
-          // formatted: contact.firstName + ' ' + contact.lastName,
-          contactInfo: contactInfo
-        };
-        newIdentity[TYPE] = PROFILE;
-        var myIdentities = list[MY_IDENTITIES];
-        if (myIdentities)  {
-          var currentIdentity = myIdentities.value.currentIdentity;
-          newIdentity[constants.OWNER] = {
-            id: currentIdentity,
-            title: utils.getDisplayName(currentIdentity, props)
-          };
-          // if (me.organization) {
-          //   var photos = list[utils.getId(me.organization.id)].value.photos;
-          //   if (photos)
-          //     me.organization.photo = photos[0].url;
-          // }
-        }
+  //   var self = this;
+  //   return Q.ninvoke(AddressBook, 'checkPermission')
+  //   .then(function(permission) {
+  //     // AddressBook.PERMISSION_AUTHORIZED || AddressBook.PERMISSION_UNDEFINED || AddressBook.PERMISSION_DENIED
+  //     if(permission === AddressBook.PERMISSION_UNDEFINED)
+  //       return Q.ninvoke(AddressBook, 'requestPermission')
+  //              .then(function(permission) {
+  //                if (permission === AddressBook.PERMISSION_AUTHORIZED)
+  //                  return self.storeContacts.bind(self);
+  //              });
+  //     else if (permission === AddressBook.PERMISSION_AUTHORIZED)
+  //       return self.storeContacts()
+  //     else if (permission === AddressBook.PERMISSION_DENIED) {
+  //       //handle permission denied
+  //       return
+  //     }
+  //   })
+  // },
+  // storeContacts() {
+  //   var dfd = Q.defer();
+  //   var self = this;
+  //   var batch = [];
+  //   var props = models[PROFILE].value.properties;
+  //   AddressBook.getContacts(function(err, contacts) {
+  //     contacts.forEach(function(contact) {
+  //       var contactInfo = [];
+  //       var newIdentity = {
+  //         firstName: contact.firstName,
+  //         lastName: contact.lastName,
+  //         // formatted: contact.firstName + ' ' + contact.lastName,
+  //         contactInfo: contactInfo
+  //       };
+  //       newIdentity[TYPE] = PROFILE;
+  //       var me = list[MY_IDENTITIES];
+  //       if (me)  {
+  //         var currentIdentity = me.value.currentIdentity;
+  //         newIdentity[constants.OWNER] = {
+  //           id: currentIdentity,
+  //           title: utils.getDisplayName(me, props)
+  //         };
+  //         // if (me.organization) {
+  //         //   var photos = list[utils.getId(me.organization.id)].value.photos;
+  //         //   if (photos)
+  //         //     me.organization.photo = photos[0].url;
+  //         // }
+  //       }
 
-        if (contact.thumbnailPath  &&  contact.thumbnailPath.length)
-          newIdentity.photos = [{type: 'address book', url: contact.thumbnailPath}];
-        var phoneNumbers = contact.phoneNumbers;
-        if (phoneNumbers) {
-          phoneNumbers.forEach(function(phone) {
-            contactInfo.push({identifier: phone.number, type: phone.label + ' phone'})
-          })
-        }
-        var emailAddresses = contact.emailAddresses;
-        if (emailAddresses)
-          emailAddresses.forEach(function(email) {
-            contactInfo.push({identifier: email.email, type: email.label + ' email'})
-          });
-        newIdentity[ROOT_HASH] = sha(newIdentity);
-        newIdentity[CUR_HASH] = newIdentity[ROOT_HASH];
-        var key = PROFILE + '_' + newIdentity[ROOT_HASH];
-        if (!list[key])
-          batch.push({type: 'put', key: key, value: newIdentity});
-      });
-      if (batch.length)
-        // identityDb.batch(batch, function(err, value) {
-        db.batch(batch, function(err, value) {
-          if (err)
-            dfd.reject(err);
-          else {
-            self.loadMyResources()
-            .then(function() {
-              dfd.resolve();
-            })
-          }
-        });
-      else
-        dfd.resolve();
-    })
-    return dfd.promise;
-  },
+  //       if (contact.thumbnailPath  &&  contact.thumbnailPath.length)
+  //         newIdentity.photos = [{type: 'address book', url: contact.thumbnailPath}];
+  //       var phoneNumbers = contact.phoneNumbers;
+  //       if (phoneNumbers) {
+  //         phoneNumbers.forEach(function(phone) {
+  //           contactInfo.push({identifier: phone.number, type: phone.label + ' phone'})
+  //         })
+  //       }
+  //       var emailAddresses = contact.emailAddresses;
+  //       if (emailAddresses)
+  //         emailAddresses.forEach(function(email) {
+  //           contactInfo.push({identifier: email.email, type: email.label + ' email'})
+  //         });
+  //       newIdentity[ROOT_HASH] = sha(newIdentity);
+  //       newIdentity[CUR_HASH] = newIdentity[ROOT_HASH];
+  //       var key = PROFILE + '_' + newIdentity[ROOT_HASH];
+  //       if (!list[key])
+  //         batch.push({type: 'put', key: key, value: newIdentity});
+  //     });
+  //     if (batch.length)
+  //       // identityDb.batch(batch, function(err, value) {
+  //       db.batch(batch, function(err, value) {
+  //         if (err)
+  //           dfd.reject(err);
+  //         else {
+  //           self.loadMyResources()
+  //           .then(function() {
+  //             dfd.resolve();
+  //           })
+  //         }
+  //       });
+  //     else
+  //       dfd.resolve();
+  //   })
+  //   return dfd.promise;
+  // },
   monitorTim() {
     var self = this
     // meDriver.ready()
@@ -4313,7 +4302,10 @@ var Store = Reflux.createStore({
           basePubKey: chainPubKey
         })
       })
-      .done()
+      .catch(err => {
+        console.error(err)
+        debugger
+      })
 
     // meDriver.watchSeal({
     //   link: msg.link,
@@ -5496,7 +5488,7 @@ var Store = Reflux.createStore({
           // .then(self.loadAddressBook)
           .catch(function(err) {
             err = err;
-            });
+          });
   },
   loadModels() {
     var self = this

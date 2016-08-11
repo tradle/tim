@@ -8,9 +8,9 @@ var NewResource = require('./NewResource');
 var ProductChooser = require('./ProductChooser');
 var PhotoList = require('./PhotoList');
 var Icon = require('react-native-vector-icons/Ionicons');
-var groupByEveryN = require('groupByEveryN');
+var groupByEveryN = utils.groupByEveryN
 var constants = require('@tradle/constants');
-import LinearGradient from 'react-native-linear-gradient'
+import LinearGradient from './LinearGradient'
 var RowMixin = require('./RowMixin');
 var Accordion = require('react-native-accordion')
 var extend = require('extend')

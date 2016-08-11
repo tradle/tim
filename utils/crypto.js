@@ -1,8 +1,7 @@
 
 // important that this comes before require('crypto')
 if (typeof window === 'object') {
-  var wCrypto = window.crypto = window.crypto || {}
-  wCrypto.getRandomValues = wCrypto.getRandomValues || getRandomValues
+  if (!window.crypto) window.crypto = { getRandomValues: getRandomValues }
 }
 
 var crypto = require('crypto')

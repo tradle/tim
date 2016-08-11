@@ -3,8 +3,10 @@ import {
   StyleSheet,
   Text,
   View,
-  TouchableHighlight
+  TouchableHighlight,
+  Platform
 } from 'react-native'
+
 var Camera = require('react-native-camera');
 var Icon = require('react-native-vector-icons/Ionicons')
 
@@ -75,4 +77,4 @@ var styles = StyleSheet.create({
   },
 });
 
-module.exports = CameraView;
+module.exports = Camera && CameraView;

@@ -21,10 +21,14 @@ import {
   LayoutAnimation,
   Image,
   Text,
-  Keyboard
+  Platform
 } from 'react-native';
 
-import Keyboard from 'Keyboard'
+var Keyboard
+if (Platform.OS !== 'web') {
+  Keyboard = require('Keyboard')
+}
+
 import React, { Component } from 'react'
 
 var interfaceToTypeMapping = {
@@ -60,6 +64,8 @@ class AddNewMessage extends Component {
   }
   componentDidMount() {
     this.listenTo(Store, 'onAddMessage');
+    if (!Keyboard) return
+
     Keyboard.addListener('keyboardWillShow', (e) => {
       this.updateKeyboardSpace(e)
     });

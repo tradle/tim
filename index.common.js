@@ -1,7 +1,11 @@
 'use strict'
 
 // see issue: https://github.com/facebook/react-native/issues/6227
-var NativeAppEventEmitter = require('RCTNativeAppEventEmitter')
+try {
+  var NativeAppEventEmitter = require('RCTNativeAppEventEmitter')
+} catch (err) {}
+
+require('babel-polyfill')
 
 // require('react-native-level')
 import Debug from './utils/debug'
@@ -11,6 +15,7 @@ var debug = Debug('tradle:app')
 import './utils/shim'
 import './utils/crypto'
 import 'stream'
+
 // require('./timmy')
 
 // require('ErrorUtils').setGlobalHandler(function (e, isFatal) {
@@ -60,7 +65,6 @@ import {
   StyleSheet,
   Alert,
   StatusBar,
-  Platform,
   // Linking,
   AppState,
   AppRegistry,
@@ -114,14 +118,14 @@ class TiMApp extends Component {
 
   componentDidMount() {
     AutomaticUpdates.on()
-    AppState.addEventListener('change', this._handleAppStateChange);
+    if (AppState) AppState.addEventListener('change', this._handleAppStateChange);
     // Linking.addEventListener('url', this._handleOpenURL);
     // var url = Linking.popInitialURL();
     // if (url)
     //   this._handleOpenURL({url});
   }
   componentWillUnmount() {
-    AppState.removeEventListener('change', this._handleAppStateChange);
+    if (AppState) AppState.removeEventListener('change', this._handleAppStateChange);
     // Linking.removeEventListener('url', this._handleOpenURL);
     this._navListeners.forEach((listener) => listener.remove())
   }
@@ -598,7 +602,14 @@ var styles = StyleSheet.create({
   },
 });
 
-AppRegistry.registerComponent('Tradle', function() { return TiMApp });
+AppRegistry.registerComponent('Tradle', () => TiMApp)
+if (utils.isWeb()){
+  var app = document.createElement('div')
+  document.body.appendChild(app)
+  AppRegistry.runApplication('Tradle', {
+    rootTag: app
+  })
+}
 
   // render() {
   //   var props = {db: this.state.db};

@@ -46,10 +46,15 @@ import Native, {
   Dimensions,
   Navigator,
   TouchableHighlight,
-  Animated
+  Animated,
+  NativeModules,
 } from 'react-native';
 
-import Keyboard from 'Keyboard'
+var Keyboard
+if (Platform.OS !== 'web') {
+  // Keyboard = require('Keyboard')
+}
+
 import React, { Component, PropTypes } from 'react'
 import ActivityIndicator from './ActivityIndicator'
 
@@ -142,7 +147,8 @@ class NewResource extends Component {
 
   componentDidMount() {
     this.listenTo(Store, 'itemAdded');
-    var n = Native
+    if (!Keyboard) return
+
     Keyboard.addListener('keyboardWillShow', (e) => {
       this.updateKeyboardSpace(e)
     });
@@ -208,7 +214,7 @@ class NewResource extends Component {
     if (params.action === 'runVideo'  && this.state.isRegistration) {
       if (this.props.callback)
         this.setState({isLoadingVideo: true})
-        return;
+      return;
     }
     if (!resource  &&  params.error &&  params.action === 'addItem') {
       this.state.submitted = false
@@ -964,6 +970,7 @@ class NewResource extends Component {
   }
 
   onSubmitEditing(msg) {
+    debugger
     msg = msg ? msg : this.state.userInput;
     var assets = this.state.selectedAssets;
     var isNoAssets = utils.isEmpty(assets);

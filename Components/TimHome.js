@@ -14,7 +14,7 @@ var Actions = require('../Actions/Actions');
 var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
 var constants = require('@tradle/constants');
-var BACKUPS = require('asyncstorage-backup')
+// var BACKUPS = require('asyncstorage-backup')
 var debug = require('debug')('Tradle-Home')
 var TradleWhite = require('../img/TradleW.png')
 var BG_IMAGE = require('../img/bg.png')
@@ -27,7 +27,7 @@ var QRCodeScanner = require('./QRCodeScanner')
 var QRCode = require('./QRCode')
 
 try {
-  var commitHash = require('../version').commit.slice(0, 7)
+  var commitHash = require('../version.json').commit.slice(0, 7)
 } catch (err) {
   // no version info available
 }
@@ -56,16 +56,15 @@ import {
   ScrollView,
   Linking,
   Animated,
-  StatusBar,
   Modal,
   Dimensions,
-  Alert,
-  Platform
+  Alert
 } from 'react-native'
 
 import ActivityIndicator from './ActivityIndicator'
+import StatusBar from './StatusBar'
 
-const isAndroid = Platform.OS === 'android'
+const isAndroid = utils.isAndroid()
 import React, { Component } from 'react'
 
 class TimHome extends Component {
@@ -81,21 +80,24 @@ class TimHome extends Component {
     };
   }
   componentWillMount() {
-    if (!isAndroid)
+    if (Linking && !isAndroid)
       Linking.addEventListener('url', this._handleOpenURL);
 
     // var url = LinkingIOS.popInitialURL()
     // if (url)
     //   this._handleOpenURL({url});
-    NetInfo.isConnected.addEventListener(
-      'change',
-      this._handleConnectivityChange.bind(this)
-    );
-    NetInfo.isConnected.fetch().done(
-      (isConnected) => {
-        this._handleConnectivityChange(isConnected)
-      }
-    );
+    if (NetInfo) {
+      NetInfo.isConnected.addEventListener(
+        'change',
+        this._handleConnectivityChange.bind(this)
+      );
+      NetInfo.isConnected.fetch().done(
+        (isConnected) => {
+          this._handleConnectivityChange(isConnected)
+        }
+      );
+    }
+
     Actions.start();
   }
 
@@ -110,26 +112,31 @@ class TimHome extends Component {
     this.props.navigator.isConnected = isConnected
   }
   componentWillUnmount() {
-    if (!isAndroid)
+    if (Linked && !isAndroid)
       Linking.removeEventListener('url', this._handleOpenURL);
-    NetInfo.isConnected.removeEventListener(
-      'change',
-      this._handleConnectivityChange.bind(this)
-    );
+    if (NetInfo) {
+      NetInfo.isConnected.removeEventListener(
+        'change',
+        this._handleConnectivityChange.bind(this)
+      );
+    }
   }
   componentDidMount() {
+    this.listenTo(Store, 'handleEvent');
+    if (!Linking) return
+
     Linking.getInitialURL()
     .then((url) => {
       if (url)
         this._handleOpenURL({url});
 
-      NetInfo.isConnected.fetch().done(
-        (isConnected) => {
-          let firstRoute = this.props.navigator.getCurrentRoutes()[0]
-          firstRoute.isConnected = isConnected
-        }
-      );
-      this.listenTo(Store, 'handleEvent');
+      const checkConnected = NetInfo ? NetInfo.isConnected.fetch() : Q(true)
+
+      checkConnected().then(isConnected => {
+        let firstRoute = this.props.navigator.getCurrentRoutes()[0]
+        firstRoute.isConnected = isConnected
+      })
+
     })
     .catch((e) => {
       debugger
@@ -472,24 +479,24 @@ class TimHome extends Component {
     utils.setModels(null)
     Actions.reloadModels()
   }
-  async onBackupPressed() {
-    let backupNumber = await BACKUPS.backup()
-    Alert.alert(
-      `Backed up to #${backupNumber}`
-    )
-  }
-  async onLoadFromBackupPressed() {
-    try {
-      let backupNumber = await BACKUPS.loadFromBackup()
-      Alert.alert(
-        `Loaded from backup #${backupNumber}. Please refresh`
-      )
-    } catch (err) {
-      Alert.alert(
-        `${err.message}`
-      )
-    }
-  }
+  // async onBackupPressed() {
+  //   let backupNumber = await BACKUPS.backup()
+  //   Alert.alert(
+  //     `Backed up to #${backupNumber}`
+  //   )
+  // }
+  // async onLoadFromBackupPressed() {
+  //   try {
+  //     let backupNumber = await BACKUPS.loadFromBackup()
+  //     Alert.alert(
+  //       `Loaded from backup #${backupNumber}. Please refresh`
+  //     )
+  //   } catch (err) {
+  //     Alert.alert(
+  //       `${err.message}`
+  //     )
+  //   }
+  // }
   render() {
     StatusBar.setHidden(true);
     if (this.state.message) {
@@ -550,7 +557,6 @@ class TimHome extends Component {
 
     var err = this.state.err || '';
     var errStyle = err ? styles.err : {'padding': 0, 'height': 0};
-    var myId = utils.getMe();
     var me = utils.getMe()
     var settings = <View/>
 
@@ -572,18 +578,6 @@ class TimHome extends Component {
                     underlayColor='transparent' onPress={this.onReloadModels.bind(this)}>
                   <Text style={styles.text}>
                     Reload Models
-                  </Text>
-                </TouchableHighlight>
-                <TouchableHighlight
-                    underlayColor='transparent' onPress={this.onBackupPressed.bind(this)}>
-                  <Text style={styles.text}>
-                    Backup
-                  </Text>
-                </TouchableHighlight>
-                <TouchableHighlight
-                    underlayColor='transparent' onPress={this.onLoadFromBackupPressed.bind(this)}>
-                  <Text style={styles.text}>
-                    Load
                   </Text>
                 </TouchableHighlight>
                 {settings}
@@ -618,6 +612,9 @@ class TimHome extends Component {
                         </View>
                       </TouchableHighlight>
                     </FadeInView>
+                 </View>
+                </View>
+/*
                     <FadeInView>
                       <TouchableHighlight  onPress={() => {
                         this.pairDevices(this.showOfficialAccounts.bind(this))
@@ -627,8 +624,8 @@ class TimHome extends Component {
                         </View>
                       </TouchableHighlight>
                     </FadeInView>
-                 </View>
-                </View>
+
+ */
 
     return (
       <View style={styles.scroll}>
@@ -696,6 +693,28 @@ class TimHome extends Component {
       }
     })
   }
+
+  renderSplashscreen({ thumb, width, height }) {
+    const splashscreen = (
+      <View>
+        <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: width, height: height }} />
+        <ScrollView
+          scrollEnabled={false}
+          style={{height}}>
+          <View style={[styles.container]}>
+            <Image style={thumb} source={TradleWhite}></Image>
+            <Text style={styles.tradle}>Tradle</Text>
+          </View>
+          <View style={{alignItems: 'center'}}>
+            <ActivityIndicator hidden='true' size='large' color='#ffffff'/>
+          </View>
+        </ScrollView>
+      </View>
+    )
+
+    return splashscreen
+  }
+
   async onSettingsPressed() {
     try {
       await authenticateUser()

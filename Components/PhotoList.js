@@ -1,7 +1,7 @@
 'use strict';
 
 var utils = require('../utils/utils');
-var groupByEveryN = require('groupByEveryN');
+var groupByEveryN = utils.groupByEveryN
 var constants = require('@tradle/constants');
 var reactMixin = require('react-mixin');
 var PhotoCarouselMixin = require('./PhotoCarouselMixin');

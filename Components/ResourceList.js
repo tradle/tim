@@ -39,15 +39,15 @@ import {
   // ActionSheetIOS,
   TouchableHighlight,
   Image,
-  StatusBar,
   View,
   Text,
   Platform
 } from 'react-native';
 
 import platformStyles from '../styles/platform'
+import StatusBar from './StatusBar'
 
-const SearchBar = Platform.OS === 'android' ? null : require('react-native-search-bar')
+const SearchBar = Platform.OS !== 'ios' ? null : require('react-native-search-bar')
 
 class ResourceList extends Component {
   props: {
@@ -895,21 +895,22 @@ class ResourceList extends Component {
   }
 
   renderHeader() {
-    return (this.props.modelName === constants.TYPES.PROFILE)
-          ? <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
-              <TouchableHighlight underlayColor='transparent' onPress={this.showBanks.bind(this)}>
-                <View style={styles.row}>
-                  <View>
-                    <Image source={require('../img/banking.png')} style={styles.cellImage} />
-                  </View>
-                  <View style={styles.textContainer}>
-                    <Text style={styles.resourceTitle}>Official Accounts</Text>
-                  </View>
-                </View>
-              </TouchableHighlight>
-            </View>
-          : <View />
+    if (this.props.modelName !== constants.TYPES.PROFILE) return <View />
 
+    return (
+      <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
+        <TouchableHighlight underlayColor='transparent' onPress={this.showBanks.bind(this)}>
+          <View style={styles.row}>
+            <View>
+              <Image source={require('../img/banking.png')} style={styles.cellImage} />
+            </View>
+            <View style={styles.textContainer}>
+              <Text style={styles.resourceTitle}>Official Accounts</Text>
+            </View>
+          </View>
+        </TouchableHighlight>
+      </View>
+    )
   }
 
   // showQRCode1(purpose, content) {

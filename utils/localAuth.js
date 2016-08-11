@@ -1,7 +1,7 @@
 
 const debug = require('debug')('tim:local-auth')
 import { Alert, Platform } from 'react-native'
-import LocalAuth from 'react-native-local-auth'
+const LocalAuth = Platform.OS !== 'web' && require('react-native-local-auth')
 import Errors from 'react-native-local-auth/data/errors'
 
 import Q from 'q'
@@ -37,6 +37,8 @@ module.exports = {
 }
 
 export function hasTouchID () {
+  if (!LocalAuth) return Promise.resolve(false)
+
   return LocalAuth.hasTouchID()
     .then(() => true, err => false)
 }
@@ -182,6 +184,8 @@ function lockUp (err) {
 }
 
 function setPassword(navigator) {
+  if (utils.isWeb()) return Promise.resolve()
+
   return Q.Promise((resolve, reject) => {
     navigator.push({
       component: PasswordCheck,
@@ -224,6 +228,8 @@ function setPassword(navigator) {
 }
 
 function checkPassword(navigator) {
+  if (utils.isWeb()) return Promise.resolve()
+
   // HACK
   let routes = navigator.getCurrentRoutes()
   let push = routes[routes.length - 1].id !== 20

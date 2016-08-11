@@ -1,6 +1,6 @@
 'use strict'
 
-var Carousel = require('react-native-carousel');
+import Carousel from 'react-native-carousel';
 var utils = require('../utils/utils');
 var constants = require('@tradle/constants');
 

@@ -25,6 +25,7 @@ var t = require('tcomb-form-native');
 var dateformat = require('dateformat')
 var Backoff = require('backoff')
 var extend = require('xtend')
+var fetch = global.fetch || require('whatwg-fetch')
 var levelErrors = require('levelup/lib/errors')
 const Cache = require('lru-cache')
 var strMap = {
@@ -601,6 +602,15 @@ var utils = {
     //   })
     // })
 
+    if (Platform.OS === 'web') {
+      return new Promise(function (resolve, reject) {
+        collect(db.createReadStream(), function (err, results) {
+          if (err) reject(err)
+          else resolve(results)
+        })
+      })
+    }
+
     var prefix = db.location + '!'
     return new Promise((resolve, reject) => {
         collect(db.createKeyStream(), (err, keys) => {
@@ -651,6 +661,10 @@ var utils = {
   // },
 
   scrollComponentIntoView(container, component) {
+    if (utils.isWeb()) {
+      return console.log('TODO: implement scrollComponentIntoView for Web')
+    }
+
     const handle = typeof component === 'number'
       ? component
       : findNodeHandle(component)
@@ -1006,6 +1020,36 @@ var utils = {
   isAndroid: ENV.isAndroid,
   isIOS: ENV.isIOS,
   isWeb: ENV.isWeb
+  fetch: fetch,
+  /* from react-native/Libraries/Utilities */
+  groupByEveryN: function groupByEveryN<T>(array: Array<T>, n: number): Array<Array<?T>> {
+    var result = [];
+    var temp = [];
+
+    for (var i = 0; i < array.length; ++i) {
+      if (i > 0 && i % n === 0) {
+        result.push(temp);
+        temp = [];
+      }
+      temp.push(array[i]);
+    }
+
+    if (temp.length > 0) {
+      while (temp.length !== n) {
+        temp.push(null);
+      }
+      result.push(temp);
+    }
+
+    return result;
+  },
+
+  promiseThunky: function (fn) {
+    let promise
+    return function () {
+      return promise ? promise : promise = fn()
+    }
+  }
 }
 
 function normalizeRemoveListener (addListenerRetVal) {
