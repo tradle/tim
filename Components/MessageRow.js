@@ -216,7 +216,7 @@ class MessageRow extends Component {
                        </View>
           break
         default:
-          sendStatus = <Text style={{alignSelf: 'flex-end', fontSize: 14, color: '#757575', marginHorizontal: 5}}>{this.props.sendStatus}</Text>
+          sendStatus = <Text style={{alignSelf: 'flex-end', fontSize: 14, color: '#757575', marginHorizontal: 5, paddingBottom: 20}}>{this.props.sendStatus}</Text>
           break
         }
       }
