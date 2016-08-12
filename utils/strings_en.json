@@ -100,6 +100,7 @@
     "turnTouchIdOn": "Turn touch ID on",
     "turnPasswordOn": "Turn Gesture Password on",
     "turnBothOn": "Turn Both on",
+    "pairDevices": "Pair devices",
     "learnMore": "Learn more",
     "offlineMode": "Offline Mode",
     "learnMoreDescriptionTo": "You can still write messages in Offline Mode even though your device is not connected. When you reconnect all your messages will be automatically sent to {1}.",
@@ -116,4 +117,6 @@
     "formRequest": "Request for {1}",
     "sharedForm": "Shared {1} from {2}",
     "youAreForgotten": "You've been successfully forgotten",
+    "invalidPairingRequest": "Invalid Pairing Request",
+    "pairingRequest": "Pairing Request",
 }
