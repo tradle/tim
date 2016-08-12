@@ -322,7 +322,7 @@ class TiMApp extends Component {
         }
       }
 
-      if (!displayName || displayName === 'exports') debugger
+      // if (!displayName || displayName === 'exports') debugger
 
       debug('navigating to ' + displayName)
     }
