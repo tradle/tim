@@ -1,6 +1,7 @@
 'use strict';
 
 var path = require('path')
+var querystring = require('querystring')
 var parseURL = require('url').parse
 import ReactNative, {
   Alert,
@@ -13,9 +14,7 @@ import AsyncStorage from './Storage'
 import * as LocalAuth from '../utils/localAuth'
 import Keychain from 'react-native-keychain'
 import Push from '../utils/push'
-import DeviceInfo from 'react-native-device-info'
-
-global.AsyncStorage = AsyncStorage
+// import DeviceInfo from 'react-native-device-info'
 
 var path = require('path')
 var BeSafe = require('asyncstorage-backup')
@@ -194,16 +193,17 @@ var driverInfo = {
   // whitelist: [],
 }
 
-const KEY_SET = [
-  { type: 'bitcoin', purpose: 'payment' },
-  { type: 'bitcoin', purpose: 'messaging' },
-  { type: 'ec', purpose: 'sign', curve: 'p256' },
-  { type: 'ec', purpose: 'update', curve: 'p256' }
-]
+// const KEY_SET = [
+//   { type: 'bitcoin', purpose: 'payment' },
+//   { type: 'bitcoin', purpose: 'messaging' },
+//   { type: 'ec', purpose: 'sign', curve: 'p256' },
+//   { type: 'ec', purpose: 'update', curve: 'p256' }
+// ]
 
 const ENCRYPTION_KEY = 'accountkey'
+const DEVICE_ID = 'deviceid'
 // const ENCRYPTION_SALT = 'accountsalt'
-const TLS_ENABLED = true
+const TLS_ENABLED = false
 
 // var Store = Reflux.createStore(timeFunctions({
 var Store = Reflux.createStore({
@@ -434,6 +434,7 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
     return rr;
   },
   buildDriver ({ keys, identity, encryption }) {
+    var self = this
     var keeper = createKeeper({
       path: path.join(TIM_PATH_PREFIX, 'keeper'),
       db: asyncstorageDown,
@@ -530,6 +531,7 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
     // if (tlsKey) tlsKey = kiki.toKey(tlsKey).priv()
 
     var tlsKey = driverInfo.tlsKey = TLS_ENABLED && meDriver.keys.filter(k => k.get('purpose') === 'tls')[0]
+    // var fromPubKey = meDriver.identity.pubkeys.filter(k => k.type === 'ec' && k.purpose === 'sign')[0]
     meDriver._send = function (msg, recipientInfo, cb) {
       const recipientHash = recipientInfo.permalink
       let messenger = wsClients[recipientHash]
@@ -543,14 +545,7 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
       }
 
       const args = arguments
-      let identifier
-      if (tlsKey) {
-        identifier = recipientInfo.object.pubkeys.filter(function (k) {
-          return k.purpose === 'tls'
-        })[0].pub
-      } else {
-        identifier = recipientHash
-      }
+      const identifier = self.getIdentifier(recipientInfo)
 
       // this timeout is not for sending the entire message
       // but rather an idle connection timeout
@@ -768,14 +763,15 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
     let self = this
     let tlsKey = driverInfo.tlsKey
     const wsClients = driverInfo.wsClients
-    const identifier = tlsKey ? tlsKey.pubKeyString : meDriver.permalink
-    // const identifier = meDriver.permalink + '.' + (DeviceInfo.getUniqueID() || '')
+    // const identifier = tlsKey ? tlsKey.pubKeyString : meDriver.permalink
+
+    // const identifier = tradle.utils.serializePubKey(identifierPubKey).toString('hex')
     const base = getProviderUrl(provider)
 
     if (wsClients[base]) return wsClients[base]
 
-    let wsClient = this.getWsClient(base, identifier)
-    let transport = this.getTransport(wsClient, identifier)
+    let wsClient = this.getWsClient(base)
+    let transport = this.getTransport(wsClient)
     // const url = utils.joinURL(base, 'ws?from=' + identifier).replace(/^http/, 'ws')
     // const wsClient = new WebSocketClient({
     //   url: url,
@@ -904,6 +900,9 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
         }
       }
 
+      // const prop = 'pubKey'
+      // const identifier = tradle.utils.deserializePubKey(new Buffer(from, 'hex'))
+
       const prop = tlsKey ? 'pubKey' : 'permalink'
       const identifier = prop === 'permalink' ? from : {
         type: 'ec',
@@ -932,8 +931,28 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
       this.trigger({action: 'invalidPairingRequest', error: (err.fullType === 'exists' ? translate('thisDeviceWasAlreadyPaired') : translate('invalidPairingRequest'))})
     })
   },
-  getWsClient(base, identifier) {
-    let url = utils.joinURL(base, 'ws?from=' + identifier).replace(/^http/, 'ws')
+
+  getIdentifier(identityInfo) {
+    identityInfo = identityInfo || meDriver.identityInfo
+    return identityInfo.permalink
+  },
+
+  getIdentifierPubKey(identityInfo) {
+    identityInfo = identityInfo || meDriver.identityInfo
+    const purpose = TLS_ENABLED ? 'tls' : 'sign'
+    return tradleUtils.find(identityInfo.keys || identityInfo.object.pubkeys, k => {
+      const kPurpose = k.purpose || k.get('purpose')
+      return kPurpose === purpose
+    }).pubKeyString
+  },
+
+  getWsClient(base) {
+    const tlsKey = driverInfo.tlsKey
+    const url = utils.joinURL(base, 'ws?' + querystring.stringify({
+      from: this.getIdentifier(),
+      pubKey: this.getIdentifierPubKey()
+    })).replace(/^http/, 'ws')
+
     return new WebSocketClient({
       url: url,
       autoConnect: true,
@@ -943,10 +962,10 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
     })
   },
 
-  getTransport(wsClient, identifier) {
+  getTransport(wsClient) {
     const tlsKey = driverInfo.tlsKey
     return newSwitchboard({
-      identifier: identifier,
+      identifier: this.getIdentifier(),
       unreliable: wsClient,
       clientForRecipient: function (recipient) {
         const sendy = new Sendy(SENDY_OPTS)
@@ -963,6 +982,7 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
       }
     })
   },
+
   // Gets info about companies in this app, their bot representatives and their styles
   getServiceProviders(url, retry) {
     var self = this
@@ -1383,8 +1403,9 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
         if (!status/* || !self.isConnected*/)
           return
         publishRequestSent[orgId] = true
-        if (!status.watches.link  &&  !status.link)
+        if (!status.watches.link  &&  !status.link) {
           return self.publishMyIdentity(orgRep)
+        }
         else {
           // self.updateMe()
           var allMyIdentities = list[MY_IDENTITIES].value
@@ -3781,6 +3802,7 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
     return driverPromise = loadIdentityAndKeys.then(encryptionKey => {
       me['privkeys'] = mePriv
       me[NONCE] = me[NONCE] || this.getNonce()
+      // driverInfo.deviceID = result.deviceID
       return this.buildDriver({
         identity: publishedIdentity,
         keys: mePriv,
@@ -3813,7 +3835,7 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
     // const globalSalt = crypto.randomBytes(32).toString('hex')
     const genIdentity = Q.ninvoke(tradleUtils, 'newIdentity', {
         networkName,
-        keys: KEY_SET
+        // keys: KEY_SET
       })
 
     return Q.all([
