@@ -791,19 +791,19 @@ var utils = {
     })
   },
 
+  // TODO: add maxTries
   tryWithExponentialBackoff(fn, opts) {
     opts = opts || {}
     const backoff = Backoff.exponential(extend(BACKOFF_DEFAULTS, opts))
-    const maybeRun = opts.immediate ? fn() : Promise.resolve()
-    return maybeRun.then(loop)
+    return fn().catch(backOffAndLoop)
 
-    function loop () {
+    function backOffAndLoop () {
       const defer = Q.defer()
       backoff.once('ready', defer.resolve)
       backoff.backoff()
       return defer.promise
         .then(fn)
-        .catch(loop)
+        .catch(backOffAndLoop)
     }
   },
 
@@ -897,6 +897,13 @@ var utils = {
   },
   setPassword: function (username, password) {
     return Keychain.setGenericPassword(username, password, ENV.serviceID)
+  },
+
+  resetPasswords: function () {
+    return Promise.all([
+      Keychain.resetGenericPasswords(),
+      Keychain.resetGenericPasswords(ENV.serviceID)
+    ])
   }
 }
 

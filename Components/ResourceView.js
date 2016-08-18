@@ -34,6 +34,7 @@ var constants = require('@tradle/constants');
 const USE_TOUCH_ID = 0
 const USE_GESTURE_PASSWORD = 1
 const CHANGE_GESTURE_PASSWORD = 2
+const PAIR_DEVICES = 3
 import {
   StyleSheet,
   ScrollView,
@@ -44,6 +45,7 @@ import {
   TextInput,
   Dimensions,
   Modal,
+  Alert,
   TouchableHighlight,
 } from 'react-native'
 
@@ -71,19 +73,41 @@ class ResourceView extends Component {
     this.listenTo(Store, 'handleEvent');
   }
   handleEvent(params) {
-    if (params.action === 'showIdentityList')
-      this.onShowIdentityList(params);
-    else if (params.action === 'getItem') {
+    switch (params.action) {
+    case 'showIdentityList':
+      this.onShowIdentityList(params)
+      break
+    case 'getItem':
       this.setState({
         resource: params.resource,
         isLoading: false
       })
-    }
-    else if (params.action === 'newContact')
+      break
+    case 'genPairingData':
+      if (params.error)
+        Alert.alert(params.error)
+      else
+        this.setState({pairingData: params.pairingData, isModalOpen: true})
+      break
+    case 'invalidPairingRequest':
+      this.props.navigator.pop()
+      Alert.alert(translate(params.error))
+      break
+    case 'acceptingPairingRequest':
       this.closeModal()
-    else  if (params.resource)
-      this.onResourceUpdate(params);
-    else if (params.action === 'employeeOnboarding') {
+      // check signature
+      signIn(this.props.navigator, utils.getMe())
+        .then(() => {
+          Actions.pairingRequestAccepted(params.resource)
+        })
+      break
+    case 'pairingRequestAccepted':
+      this.props.navigator.pop()
+      break
+    case 'newContact':
+      this.closeModal()
+      break
+    case 'employeeOnboarding':
       let routes = this.props.navigator.getCurrentRoutes()
       // this.props.navigator.jumpTo(routes[1])
       let style = {}
@@ -105,12 +129,18 @@ class ResourceView extends Component {
         }
       }, 2)
       // this.props.navigator.jumpTo(routes[2])
+      break
+    default:
+      if (params.resource)
+        this.onResourceUpdate(params)
+      break
     }
   }
   shouldComponentUpdate(nextProps, nextState) {
     return (this.state.isModalOpen  !== nextState.isModalOpen              ||
             this.state.useGesturePassword !== nextState.useGesturePassword ||
-            this.state.useTouchId !== nextState.useTouchId)
+            this.state.useTouchId !== nextState.useTouchId                 ||
+            this.state.pairingData !== nextState.pairingData)
            ? true
            : false
   }
@@ -160,9 +190,15 @@ class ResourceView extends Component {
     // if (isIdentity  &&  !isMe)
                     ? <View/>
                     : <ShowRefList showQR={this.openModal.bind(this)} resource={resource} currency={this.props.currency} navigator={this.props.navigator} />
-    var qrcode
-    if (isMe  &&  me.isEmployee  &&  me.organization && me.organization.url) {
-      let width = Math.floor((Dimensions.get('window').width / 3) * 2)
+    var qrcode, width
+    if (this.state.pairingData) {
+      width = Math.floor((Dimensions.get('window').width / 3) * 2)
+      qrcode = <View style={{alignSelf: 'center', justifyContent: 'center', backgroundColor: '#ffffff', padding:10}} onPress={()=> this.setState({isModalOpen: true})}>
+                 <QRCode inline={true} content={this.state.pairingData} dimension={width} />
+               </View>
+    }
+    else if (isMe  &&  me.isEmployee  &&  me.organization && me.organization.url) {
+      width = Math.floor((Dimensions.get('window').width / 3) * 2)
       qrcode = <View style={{alignSelf: 'center', justifyContent: 'center', backgroundColor: '#ffffff', padding:10}} onPress={()=> this.setState({isModalOpen: true})}>
                  <QRCode inline={true} content={TALK_TO_EMPLOYEE + ';' + me.organization.url + ';' + utils.getId(me.organization).split('_')[1] + ';' + me[constants.ROOT_HASH]} dimension={width} />
                </View>
@@ -210,7 +246,7 @@ class ResourceView extends Component {
 
     let buttons = []
     let actions = []
-    if (isIdentity) {
+    if (isIdentity  &&  isMe) {
       if (Platform.OS === 'ios') {
         if (!utils.isSimulator()) {
           buttons.push(translate('useTouchId') + (this.state.useTouchId ? ' ✓' : ''))
@@ -223,6 +259,8 @@ class ResourceView extends Component {
         buttons.push(translate('changeGesturePassword'))
         actions.push(CHANGE_GESTURE_PASSWORD)
       }
+      buttons.push(translate('pairDevices'))
+      actions.push(PAIR_DEVICES)
     }
     buttons.push(translate('cancel'))
     return (
@@ -295,6 +333,9 @@ class ResourceView extends Component {
     case CHANGE_GESTURE_PASSWORD:
       isChangeGesturePassword = true
       break
+    case PAIR_DEVICES:
+      Actions.genPairingData()
+      return
     }
     if (!r.useGesturePassword  &&  !r.useTouchId)
       r.useGesturePassword = true

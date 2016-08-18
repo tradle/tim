@@ -34,7 +34,12 @@ var Actions = Reflux.createActions([
   'forgetMe',
   'setAuthenticated',
   'updateMe',
-  'scheduleUpdate'
+  'scheduleUpdate',
+  'genPairingData',
+  'sendPairingRequest',
+  'processPairingRequest',
+  'processPairingResponse',
+  'pairingRequestAccepted'
 ]);
 
 Object.keys(Actions).forEach((name) => {

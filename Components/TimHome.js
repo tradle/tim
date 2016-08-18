@@ -19,8 +19,12 @@ var debug = require('debug')('Tradle-Home')
 var TradleWhite = require('../img/TradleW.png')
 var BG_IMAGE = require('../img/bg.png')
 var PasswordCheck = require('./PasswordCheck')
+var FadeInView = require('./FadeInView')
+var FlingItView = require('./FlingItView')
 var TouchIDOptIn = require('./TouchIDOptIn')
 var defaultBankStyle = require('../styles/bankStyle.json')
+var QRCodeScanner = require('./QRCodeScanner')
+var QRCode = require('./QRCode')
 
 try {
   var commitHash = require('../version').commit.slice(0, 7)
@@ -48,7 +52,9 @@ import {
   NetInfo,
   ScrollView,
   Linking,
+  Animated,
   StatusBar,
+  Modal,
   Dimensions,
   Alert,
   Platform
@@ -68,8 +74,7 @@ class TimHome extends Component {
     super(props);
     this.state = {
       isLoading: true,
-      isModalOpen: false,
-      newMe: props.newMe
+      hasMe: utils.getMe()
     };
   }
   componentWillMount() {
@@ -131,7 +136,8 @@ class TimHome extends Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     if (this.state.isLoading  !== nextState.isLoading  ||
-        this.state.message !== nextState.message)
+        this.state.message !== nextState.message       ||
+        this.state.hasMe !== nextState.hasMe)
       return true
     else
       return false
@@ -173,10 +179,11 @@ class TimHome extends Component {
       // utils.setModels(params.models);
       this.setState({isLoading: false});
       if (!utils.getMe()) {
-        this.register(() => this.showOfficialAccounts())
+        this.setState({isModalOpen: true})
+        // this.register(() => this.showOfficialAccounts())
         return
       }
-
+    case 'pairingSuccessful':
       signIn(this.props.navigator)
         .then(() => {
         // if (this.state.newMe)
@@ -196,6 +203,7 @@ class TimHome extends Component {
       break
     case 'getMe':
       utils.setMe(params.me)
+      this.setState({hasMe: params.me})
       var nav = this.props.navigator
       signIn(this.props.navigator)
         .then(() => this.showOfficialAccounts())
@@ -304,6 +312,7 @@ class TimHome extends Component {
       this.setState({err: 'Can find model: ' + modelName});
       return;
     }
+
     let model = utils.getModel(modelName).value;
     let route = {
       component: NewResource,
@@ -313,9 +322,9 @@ class TimHome extends Component {
         model: model,
         bankStyle: defaultBankStyle,
         isConnected: this.state.isConnected,
-        callback: () => {
-          cb()
-        }
+        // callback: () => {
+        //   cb()
+        // }
       },
     };
 
@@ -323,6 +332,7 @@ class TimHome extends Component {
     route.passProps.callback = () => {
       setPassword(this.props.navigator)
       .then (() => {
+        this.setState({hasMe: true})
         Actions.setAuthenticated(true)
         this.showOfficialAccounts(true)
         // cb()
@@ -341,6 +351,53 @@ class TimHome extends Component {
     route.titleTintColor = '#ffffff'
     this.props.navigator.push(route);
   }
+
+  pairDevices(cb) {
+    let modelName = this.props.modelName;
+    if (!utils.getModel(modelName)) {
+      this.setState({err: 'Can find model: ' + modelName});
+      return;
+    }
+
+    let model = utils.getModel(modelName).value;
+    let route = {
+      component: NewResource,
+      titleTextColor: '#BCD3E6',
+      id: 4,
+      passProps: {
+        model: model,
+        bankStyle: defaultBankStyle,
+        isConnected: this.state.isConnected,
+        // callback: () => {
+        //   cb()
+        // }
+      },
+    };
+
+    let self = this
+    route.passProps.callback = () => {
+      setPassword(this.props.navigator)
+      .then (() => {
+        this.setState({hasMe: true})
+        Actions.setAuthenticated(true)
+        this.showOfficialAccounts(true)
+        // cb()
+      })
+
+    }
+    // let nav = self.props.navigator
+    // route.passProps.callback = (me) => {
+    //   this.showVideoTour(() => {
+    //     Actions.getMe()
+    //     nav.immediatelyResetRouteStack(nav.getCurrentRoutes().slice(0,1));
+    //   })
+    // }
+
+    route.passProps.editCols = ['firstName', 'lastName', 'language']
+    route.titleTintColor = '#ffffff'
+    this.props.navigator.push(route);
+  }
+
   showVideoTour(cb) {
     let onEnd = (err) => {
       if (err) debug('failed to load video', err)
@@ -460,7 +517,7 @@ class TimHome extends Component {
               </View>
 
     // var dev = <View/>
-    var dev = __DEV__
+    var dev = __DEV__  // &&  utils.getMe()
             ? <View style={styles.dev}>
                 <TouchableHighlight
                     underlayColor='transparent' onPress={this.onReloadDBPressed.bind(this)}>
@@ -493,25 +550,62 @@ class TimHome extends Component {
                 {version}
               </View>
 
+    let hh = (height / 2) - 310
+    // let hh = height - 300
+    let left = (width - 300) / 2
+    let logo = <View style={[styles.container]}>
+                <View>
+                  <Image style={thumb} source={TradleWhite}></Image>
+                  <Text style={styles.tradle}>Tradle</Text>
+                </View>
+              </View>
+
+                          // <Image style={{position: 'absolute', left: 0, opacity: 0.5, width: 100, height: 100}} source={TradleWhite}></Image>
+    let regView = utils.getMe()
+                ? <View/>
+                : <View>
+                    {logo}
+                  <View  style={{marginTop: hh, alignSelf: 'center'}}>
+                    <FadeInView>
+                      <TouchableHighlight  onPress={() => {
+                        this.register(this.showOfficialAccounts.bind(this))
+                        }} underlayColor='transparent'>
+                        <View style={styles.signIn}>
+                          <Text style={{backgroundColor: 'transparent', color: 'lightblue', fontSize: 20, flexWrap: 'wrap', alignSelf: 'center'}}>{translate('This is my first Tradle device')}</Text>
+                        </View>
+                      </TouchableHighlight>
+                    </FadeInView>
+                    <FadeInView>
+                      <TouchableHighlight  onPress={() => {
+                        this.pairDevices(this.showOfficialAccounts.bind(this))
+                        }} underlayColor='transparent'>
+                        <View style={[styles.signIn, {shadowColor: '#245c8c', backgroundColor: 'lightblue'}]}>
+                          <Text style={{backgroundColor: 'transparent', color: '#467EAE', fontSize: 20, alignSelf: 'center', fontWeight: '600'}}>{translate('I have another Tradle device')}</Text>
+                        </View>
+                      </TouchableHighlight>
+                    </FadeInView>
+                 </View>
+                </View>
+
     return (
       <View style={styles.scroll}>
         <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width, height}} />
+        {regView}
+        { utils.getMe()
+           ? <View/>
+           :  <View>{dev}</View>
+        }
         <ScrollView
           scrollEnabled={false}
           style={{height:h}}
         >
           <TouchableHighlight style={[styles.thumbButton]}
             underlayColor='transparent' onPress={() => this._pressHandler()}>
-            <View style={[styles.container]}>
-              <View>
-                <Image style={thumb} source={TradleWhite}></Image>
-                <Text style={styles.tradle}>Tradle</Text>
-              </View>
-            </View>
+            {logo}
           </TouchableHighlight>
         </ScrollView>
-        <View style={{height: 90}}></View>
-          <TouchableHighlight style={[styles.thumbButton]}
+        <View style={{height: 90, opacity: utils.getMe() ? 1 : 0}}></View>
+          <TouchableHighlight style={[styles.thumbButton, {opacity: utils.getMe() ? 1 : 0}]}
                 underlayColor='transparent' onPress={() => this._pressHandler()}>
             <View style={styles.getStarted}>
                <Text style={styles.getStartedText}>Get started</Text>
@@ -522,6 +616,23 @@ class TimHome extends Component {
         <View style={{height: 200}}></View>
       </View>
     );
+  }
+
+  pairDevices() {
+    this.props.navigator.push({
+      title: 'Scan QR Code',
+      id: 16,
+      component: QRCodeScanner,
+      titleTintColor: '#eeeeee',
+      backButtonTitle: 'Cancel',
+      // rightButtonTitle: 'ion|ios-reverse-camera',
+      passProps: {
+        onread: (result) => {
+          Actions.sendPairingRequest(JSON.parse(result.data))
+          this.props.navigator.pop()
+        }
+      }
+    })
   }
   async onSettingsPressed() {
     try {
@@ -623,6 +734,19 @@ var styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 30
   },
+  signIn: {
+    flexDirection: 'row',
+    width: 300,
+    height: 80,
+    marginTop: 20,
+    justifyContent: 'center',
+    backgroundColor: '#467EAE',
+    shadowOpacity: 0.5,
+    shadowColor: 'lightblue',
+    shadowRadius: 10,
+    shadowOffset: {width: 0.5, height: 0.5},
+    shadowOpacity: 0.7
+  },
   version: {
     color: '#ffffff',
     fontSize: 10
@@ -631,24 +755,6 @@ var styles = StyleSheet.create({
 
 
 module.exports = TimHome;
-  // easeInQuad(t) {
-  //   return t * t;
-  // }
-  // f() {
-  //   var infiniteDuration = 1000;
-  //   var easeDuration = 300;
-  //     AnimationExperimental.startAnimation({
-  //       node: this.refs['search'],
-  //       duration: infiniteDuration,
-  //       // easing: 'easeInQuad',
-  //       easing: (t) => this.easeInQuad(Math.min(1, t*infiniteDuration/easeDuration)),
-  //       property: 'scaleXY',
-  //       toValue: [1,1]
-  //       // property: 'position',
-  //       // toValue: {x:200, y:-30},
-  //       // delay: 30000
-  //     })
-  // }
   // signIn(cb) {
   //   let self = this
   //   if (this.state.message) {

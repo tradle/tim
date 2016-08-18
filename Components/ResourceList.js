@@ -130,9 +130,9 @@ class ResourceList extends Component {
       let m = utils.getModel(this.props.resource[constants.TYPE]).value
       // case when for example clicking on 'Verifications' on Form page
       if (m.interfaces) {
-        if (utils.getModel(this.props.modelName).value.interfaces) 
+        if (utils.getModel(this.props.modelName).value.interfaces)
           params.to = this.props.resource.to
-        params.resource = this.props.resource  
+        params.resource = this.props.resource
       }
 
 //       params.resource = this.props.resource
@@ -949,9 +949,17 @@ class ResourceList extends Component {
   }
 
   onread(result) {
-    // post to server request for the forms that were filled on the web
+    // Pairing devices QRCode
+    if (result.data.charAt(0) === '{') {
+      h = JSON.parse(result.data)
+      Actions.sendPairingRequest(h)
+      this.props.navigator.pop()
+      return
+    }
     let h = result.data.split(';')
 
+
+    // post to server request for the forms that were filled on the web
     let me = utils.getMe()
     switch (h[0]) {
     case WEB_TO_MOBILE:
@@ -966,7 +974,6 @@ class ResourceList extends Component {
           id: constants.TYPES.PROFILE + '_' + h[2]
         }
       }
-      // self.props.navigator.pop()
       Actions.addItem({resource: r, value: r, meta: utils.getModel('tradle.GuestSessionProof').value})
       break
     case TALK_TO_EMPLOYEEE:

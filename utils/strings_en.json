@@ -119,4 +119,6 @@
     "youAreForgotten": "You've been successfully forgotten",
     "invalidPairingRequest": "Invalid Pairing Request",
     "pairingRequest": "Pairing Request",
+    "deviceDoesNotHaveMyKeys": "Received identity does not have my keys",
+    "pairingRequestWasProcesseed": "Pairing request was processeed",
 }

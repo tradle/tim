@@ -21,7 +21,9 @@ var Reflux = require('reflux');
 var Actions = require('../Actions/Actions');
 var extend = require('extend');
 var Debug = require('debug')
-// var deepEqual = require('deep-equal')
+var deepEqual = require('deep-equal')
+
+
 var debug = Debug('Store')
 var employee = require('../people/employee.json')
 // var isConnected
@@ -92,7 +94,6 @@ const CUSTOMER_WAITING  = constants.TYPES.CUSTOMER_WAITING
 const SELF_INTRODUCTION = constants.TYPES.SELF_INTRODUCTION
 const FORGET_ME         = constants.TYPES.FORGET_ME
 const FORGOT_YOU        = constants.TYPES.FORGOT_YOU
-const FORM_REQUEST      = 'tradle.FormRequest'
 
 const MY_IDENTITIES_TYPE  = 'tradle.MyIdentities'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
@@ -100,10 +101,14 @@ const MY_PRODUCT          = 'tradle.MyProduct'
 const ENUM                = 'tradle.Enum'
 const GUEST_SESSION_PROOF = 'tradle.GuestSessionProof'
 const FORM_ERROR          = 'tradle.FormError'
-const MY_IDENTITIES = MY_IDENTITIES_TYPE + '_1'
-const SETTINGS = constants.TYPES.SETTINGS
 const EMPLOYEE_ONBOARDING = 'tradle.EmployeeOnboarding'
-const MY_EMPLOYEE_PASS = 'tradle.MyEmployeeOnboarding'
+const MY_EMPLOYEE_PASS    = 'tradle.MyEmployeeOnboarding'
+const FORM_REQUEST        = 'tradle.FormRequest'
+const PAIRING_REQUEST     = 'tradle.PairingRequest'
+const PAIRING_RESPONSE    = 'tradle.PairingResponse'
+const PAIRING_DATA        = 'tradle.PairingData'
+const MY_IDENTITIES     = MY_IDENTITIES_TYPE + '_1'
+const SETTINGS          = constants.TYPES.SETTINGS
 
 const WELCOME_INTERVAL = 600000
 
@@ -169,7 +174,7 @@ var language
 var dictionary = {}
 var isAuthenticated
 var meDriver
-var publishedIdentity
+// var publishedIdentity
 var driverPromise
 var ready;
 var networkName = 'testnet'
@@ -316,7 +321,7 @@ var Store = Reflux.createStore({
       self._setItem(key, value)
     })
     .catch(function(err) {
-      debugger
+      // debugger
       // return self.loadModels()
     })
   },
@@ -431,7 +436,7 @@ var Store = Reflux.createStore({
       path: path.join(TIM_PATH_PREFIX, 'keeper'),
       db: asyncstorageDown,
       encryption: encryption,
-      validateOnPut: false
+      validateOnPut: __DEV__
     })
 
     cachifyKeeper(keeper, {
@@ -553,8 +558,6 @@ var Store = Reflux.createStore({
 
     this.getInfo(SERVICE_PROVIDERS_BASE_URLS, true)
     .then(() => {
-      if (!SERVICE_PROVIDERS)
-        return
       if (!me  ||  !SERVICE_PROVIDERS)
         return
       let meId = utils.getId(me)
@@ -765,18 +768,21 @@ var Store = Reflux.createStore({
     const wsClients = driverInfo.wsClients
     const identifier = otrKey ? otrKey.fingerprint() : meDriver.permalink
     const base = getProviderUrl(provider)
+
     if (wsClients[base]) return wsClients[base]
 
-    const url = utils.joinURL(base, 'ws?from=' + identifier).replace(/^http/, 'ws')
-    const wsClient = new WebSocketClient({
-      url: url,
-      autoConnect: true,
-      // for now, till we figure out why binary
-      // doesn't work (socket.io parser errors on decode)
-      forceBase64: true
-    })
+    let wsClient = this.getWsClient(base, identifier)
+    let transport = this.getTransport(wsClient, identifier)
+    // const url = utils.joinURL(base, 'ws?from=' + identifier).replace(/^http/, 'ws')
+    // const wsClient = new WebSocketClient({
+    //   url: url,
+    //   autoConnect: true,
+    //   // for now, till we figure out why binary
+    //   // doesn't work (socket.io parser errors on decode)
+    //   forceBase64: true
+    // })
 
-    let transport
+    // let transport
     // if (otrKey) {
     //   transport = newSwitchboard({
     //     identifier: identifier,
@@ -790,14 +796,14 @@ var Store = Reflux.createStore({
     //     }
     //   })
     // } else {
-      transport = newSwitchboard({
-        identifier: identifier,
-        unreliable: wsClient,
-        clientForRecipient: function () {
-          return new Sendy(SENDY_OPTS)
-        }
-      })
-    // }
+    // let transport = newSwitchboard({
+    //     identifier: identifier,
+    //     unreliable: wsClient,
+    //     clientForRecipient: function () {
+    //       return new Sendy(SENDY_OPTS)
+    //     }
+    //   })
+
 
     wsClient.on('disconnect', function () {
       transport.clients().forEach(function (c) {
@@ -869,19 +875,87 @@ var Store = Reflux.createStore({
           break
         }
       } catch (err) {
-        debugger
+        try {
+//           debugger
+          const payload = JSON.parse(msg)
+          if (payload[TYPE] === PAIRING_REQUEST) {
+            const rootHash = payload.identity[ROOT_HASH] || protocol.linkString(payload.identity)
+            Alert.alert(
+              translate('pairingRequest'),
+              null,
+              [
+                {text: translate('Ok'),
+                onPress: () => {
+                  self.trigger({action: 'acceptingPairingRequest', resource: payload})
+                  // return self.onProcessPairingRequest(list[PAIRING_DATA + '_1'].value, payload)
+                  // .then(() => {
+                  //   Alert.alert(translate('pairingRequestWasProcesseed'))
+                  // })
+                  // .catch((err) => {
+                  //   debugger
+                  // })
+                }},
+                {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+              ]
+            )
+          }
+          // else if (payload[TYPE] === PAIRING_RESPONSE) {
+          //   return self.onProcessPairingResponse(list[PAIRING_DATA + '_1'].value, payload)
+          //   .then(() => {
+          //     debugger
+          //     Alert.alert('Pairing was successful')
+          //   })
+          //   .catch((err) => {
+          //     debugger
+          //     Alert.alert(err)
+          //   })
+          // }
+          return
+        } catch (err) {
+          return
+        }
       }
 
       const prop = otrKey ? 'fingerprint' : 'permalink'
       meDriver.receive(msg, { [prop]: from })
         .catch(err => {
-          console.error('failed to receive msg:', err)
+          console.warn('failed to receive msg:', err, msg)
           debugger
         })
     })
 
     transport.on('timeout', function (identifier) {
       transport.cancelPending(identifier)
+    })
+  },
+  onPairingRequestAccepted(payload) {
+    return this.onProcessPairingRequest(list[PAIRING_DATA + '_1'].value, payload)
+    .then(() => {
+      this.trigger({action: 'pairingRequestAccepted'})
+    })
+    .catch((err) => {
+      debugger
+      this.trigger({action: 'invalidPairingRequest', error: (err.fullType === 'exists' ? translate('thisDeviceWasAlreadyPaired') : translate('invalidPairingRequest'))})
+    })
+  },
+  getWsClient(base, identifier) {
+    let url = utils.joinURL(base, 'ws?from=' + identifier).replace(/^http/, 'ws')
+    return new WebSocketClient({
+      url: url,
+      autoConnect: true,
+      // for now, till we figure out why binary
+      // doesn't work (socket.io parser errors on decode)
+      forceBase64: true
+    })
+  },
+
+  getTransport(wsClient, identifier) {
+    return newSwitchboard({
+      identifier: identifier,
+      unreliable: wsClient,
+      clientForRecipient: function () {
+        return new Sendy(SENDY_OPTS)
+      }
     })
   },
   // Gets info about companies in this app, their bot representatives and their styles
@@ -966,6 +1040,9 @@ var Store = Reflux.createStore({
       return results
         .filter(r => r.state === 'fulfilled')
         .map(r => r.value)
+    })
+    .catch((err) => {
+      debugger
     })
   },
   addInfo(sp, url) {
@@ -1070,15 +1147,26 @@ var Store = Reflux.createStore({
     var identity = list[ikey]  &&  list[ikey].value
 
     var newContact = !profile  ||  !identity
+    var isDevicePairing = data[TYPE]  &&  data[TYPE] === PAIRING_REQUEST
     if (newContact) {
       if (data.name === '')
         data.name = data.identity.name && data.identity.name.formatted
-      profile = {
-        [TYPE]: PROFILE,
-        [ROOT_HASH]: hash,
-        firstName: data.name || data.message.split(' ')[0],
-        formatted: data.name || data.message.split(' ')[0]
-      }
+      if (isDevicePairing)
+        profile = {
+          [TYPE]: PROFILE,
+          [ROOT_HASH]: hash,
+          firstName:  me.firstName,
+          formatted: me.formatted
+        }
+
+      else
+        profile = {
+          [TYPE]: PROFILE,
+          [ROOT_HASH]: hash,
+          firstName:  data.name || data.message.split(' ')[0],
+          formatted: data.name || data.message.split(' ')[0]
+        }
+
       profile.formatted = profile.firstName + (data && data.lastName ? ' ' + data.lastName : '')
       var identity = data.identity
       identity[ROOT_HASH] = hash
@@ -1095,12 +1183,12 @@ var Store = Reflux.createStore({
       profile.firstName = identity.name.firstName
       profile.formatted = identity.name.formatted || profile.firstName
     }
-
-    this.trigger({action: 'newContact', to: profile, newContact: true})
+    if (!isDevicePairing)
+      this.trigger({action: 'newContact', to: profile, newContact: true})
 
     // return newContact ? db.batch(batch) : Q()
     // .then(() => {
-      return this.onAddMessage({
+      return isDevicePairing ? Q() : this.onAddMessage({
           [TYPE]: SIMPLE_MESSAGE,
           message: translate('howCanIHelpYou', profile.formatted, utils.getMe().firstName),
           from: this.buildRef(utils.getMe()),
@@ -1874,14 +1962,14 @@ var Store = Reflux.createStore({
         self.trigger({action: 'runVideo'})
         return Q.all([
             self.loadDB(),
-            Keychain.resetGenericPasswords()
+            utils.resetPasswords()
           ])
           .then(function () {
             return self.getDriver(returnVal)
           })
           .then(function () {
             if (!resource || isNew) {
-              returnVal[ROOT_HASH] = protocol.linkString(publishedIdentity)
+              returnVal[ROOT_HASH] = protocol.linkString(meDriver.identity)
             }
 
             return save()
@@ -2195,7 +2283,7 @@ var Store = Reflux.createStore({
   wipe() {
     return Q.all([
       AsyncStorage.clear(),
-      Keychain.resetGenericPasswords()
+      utils.resetPasswords()
     ])
     .then(() => AsyncStorage.getAllKeys())
     .then(keys => console.log('AsyncStorage has ' + keys.length + ' keys'))
@@ -2644,9 +2732,12 @@ var Store = Reflux.createStore({
       thisChatMessages = []
       Object.keys(list).filter((key) => {
         let type = list[key].value[TYPE]
-        if (type === modelName                           ||
-           utils.getModel(type).value.subClassOf === modelName ||
-           (modelName === MESSAGE  &&  utils.getModel(type).value.interfaces)) {
+        let m = utils.getModel(type)
+        if (!m)
+          return false
+        if (type === modelName                      ||
+           m.value.subClassOf === modelName         ||
+           (modelName === MESSAGE  &&  m.value.interfaces)) {
           thisChatMessages.push({id: key, time: list[key].value.time})
           return true
         }
@@ -2924,7 +3015,7 @@ var Store = Reflux.createStore({
       }
     }
 
-    let result = this.filterResult(foundResources)
+    let result = this.filterResult(foundResources. lastId)
     if (params.isForgetting)
       return result
     return result //.reverse();
@@ -2937,9 +3028,13 @@ var Store = Reflux.createStore({
     return foundResources
 
   },
-  filterResult(result) {
+  filterResult(result, lastId) {
+    if (!result)
+      return
     if (!Array.isArray(result))
       result = Object.values(result) //.reverse()
+    if (!result  ||  !result.length)
+      return
 
     result.sort(function(a, b) {
       return a.time - b.time;
@@ -3026,6 +3121,12 @@ var Store = Reflux.createStore({
 
       return true
     })
+    if (lastId  &&  lastId.split('_')[0] === PRODUCT_LIST) {
+      for (let i=newResult.length - 1; i>=0; i--)
+        if (newResult[TYPE] !== PRODUCT_LIST)
+          break
+        newResult.splice(i, 1)
+    }
     return newResult
     // return newResult.reverse()
   },
@@ -3370,6 +3471,8 @@ var Store = Reflux.createStore({
     let model = this.getModel(value[TYPE]).value
     if (model.id === CUSTOMER_WAITING || model.id === SELF_INTRODUCTION)
       return
+    if (model.id === SIMPLE_MESSAGE  &&  value.message  && value.message === '[already published](tradle.Identity)')
+      return
 
     let to = list[utils.getId(value.to)].value;
     let toId = utils.getId(to)
@@ -3447,6 +3550,7 @@ var Store = Reflux.createStore({
     // meDriver = null
     var pKey = utils.getId(me)
     var batch = [];
+    var publishedIdentity = meDriver.identity
     var mid = {
       [TYPE]: MY_IDENTITIES_TYPE,
       currentIdentity: pKey,
@@ -3471,7 +3575,6 @@ var Store = Reflux.createStore({
     batch.push({type: 'put', key: iKey, value: identity});
     return db.batch(batch)
     .then(function() {
-      delete me.privkeys
       var  params = {action: 'addItem', resource: value, me: value};
       self.setMe(me)
       return self.trigger(params);
@@ -3592,8 +3695,9 @@ var Store = Reflux.createStore({
     var allMyIdentities = list[MY_IDENTITIES]
     var currentIdentity
 
-    var mePub = me[ROOT_HASH] ? list[IDENTITY + '_' + me[ROOT_HASH]]['pubkey'] : me['pubkeys']
+    var mePub = me[ROOT_HASH] ? list[IDENTITY + '_' + me[ROOT_HASH]].value.pubkeys : me.pubkeys
     var mePriv
+    var publishedIdentity
     if (allMyIdentities) {
       var all = allMyIdentities.value.allIdentities
       var curId = allMyIdentities.value.currentIdentity
@@ -3602,7 +3706,7 @@ var Store = Reflux.createStore({
           currentIdentity = id
           mePriv = id.privkeys
           publishedIdentity = id.publishedIdentity
-          mePub = publishedIdentity.pubkeys
+          mePub = mePub || publishedIdentity.pubkeys
         }
       })
     }
@@ -3627,24 +3731,32 @@ var Store = Reflux.createStore({
       //     }
       //   }
       // }
+      let encryptionKey
+      loadIdentityAndKeys = this.createNewIdentity()
+      .spread((eKey, identityInfo) => {
+        encryptionKey = eKey
+        publishedIdentity = identityInfo.identity
+        mePub = publishedIdentity.pubkeys
+        mePriv = identityInfo.keys
+        return encryptionKey
+      })
+      // const encryptionKey = crypto.randomBytes(32).toString('hex')
+      // const globalSalt = crypto.randomBytes(32).toString('hex')
+      // const genIdentity = Q.ninvoke(tradleUtils, 'newIdentity', {
+      //     networkName,
+      //     keys: KEY_SET
+      //   })
+      //   .then(identityInfo => {
+      //     publishedIdentity = identityInfo.identity
+      //     mePub = publishedIdentity.pubkeys
+      //     mePriv = identityInfo.keys
+      //   })
 
-      const encryptionKey = crypto.randomBytes(32).toString('hex')
-      const globalSalt = crypto.randomBytes(32).toString('hex')
-      const genIdentity = Q.ninvoke(tradleUtils, 'newIdentity', {
-          networkName,
-          keys: KEY_SET
-        })
-        .then(identityInfo => {
-          publishedIdentity = identityInfo.identity
-          mePub = publishedIdentity.pubkeys
-          mePriv = identityInfo.keys
-        })
-
-      loadIdentityAndKeys = Q.all([
-        utils.setPassword(ENCRYPTION_KEY, encryptionKey).then(() => encryptionKey),
-        genIdentity
-      ])
-      .spread(encryptionKey => encryptionKey)
+      // loadIdentityAndKeys = Q.all([
+      //   utils.setPassword(ENCRYPTION_KEY, encryptionKey).then(() => encryptionKey),
+      //   genIdentity
+      // ])
+      // .spread(encryptionKey => encryptionKey)
 
         // bringing it back!
         // if (__DEV__  &&  !keys.some((k) => k.type() === 'dsa')) {
@@ -3653,9 +3765,10 @@ var Store = Reflux.createStore({
         //     purpose: 'sign'
         //   }))
         // }
-    } else {
-      loadIdentityAndKeys = utils.getPassword(ENCRYPTION_KEY)
     }
+    else
+      loadIdentityAndKeys = utils.getPassword(ENCRYPTION_KEY)
+
 
     if (me.language)
       language = list[utils.getId(me.language)] && list[utils.getId(me.language)].value
@@ -3690,6 +3803,19 @@ var Store = Reflux.createStore({
     //   return node
     // })
   },
+  createNewIdentity() {
+    const encryptionKey = crypto.randomBytes(32).toString('hex')
+    // const globalSalt = crypto.randomBytes(32).toString('hex')
+    const genIdentity = Q.ninvoke(tradleUtils, 'newIdentity', {
+        networkName,
+        keys: KEY_SET
+      })
+
+    return Q.all([
+      utils.setPassword(ENCRYPTION_KEY, encryptionKey).then(() => encryptionKey),
+      genIdentity
+    ])
+  },
 
   // makePublishingIdentity(me, pubkeys) {
   //   var meIdentity = new Identity()
@@ -3706,12 +3832,13 @@ var Store = Reflux.createStore({
   //   pubkeys.forEach(meIdentity.addKey, meIdentity)
   //   return meIdentity.toJSON()
   // },
+
   publishMyIdentity(orgRep) {
     var self = this
     var msg = {
       [TYPE]: IDENTITY_PUBLISHING_REQUEST,
       [NONCE]: self.getNonce(),
-      identity: publishedIdentity,
+      identity: meDriver.identity,
       name: me.firstName
     }
     var key = IDENTITY + '_' + orgRep[ROOT_HASH]
@@ -4318,7 +4445,9 @@ var Store = Reflux.createStore({
         to.isEmployee = true
         to.organization = this.buildRef(org)
         this.setMe(to)
+        batch.push({type: 'put', key: utils.getId(to), value: to})
       }
+
       this.addLastMessage(val, batch)
     }
     if (list[key]) {
@@ -4339,7 +4468,7 @@ var Store = Reflux.createStore({
     let type
     // Skip all SELF_INTRODUCTION messages since they are not showing anyways on customer screen
     for (; i>=0; i--) {
-      type = messages[i].id.split('_')[0]     
+      type = messages[i].id.split('_')[0]
       if (type  !== SELF_INTRODUCTION)
         break
     }
@@ -4782,6 +4911,359 @@ var Store = Reflux.createStore({
     })
     .catch(function (err) {
       debugger
+    })
+  },
+  // Devices one
+  onGenPairingData() {
+    if (!SERVICE_PROVIDERS) {
+      this.trigger({action: 'genPairingData', error: 'Can\'t connect to server'})
+      return
+    }
+    let pairingData = {
+      nonce: crypto.randomBytes(32).toString('base64'),
+      identity: meDriver.link,
+      firstName: me.firstName,
+      rendezvous: {
+        url: SERVICE_PROVIDERS[0].url + '/' + SERVICE_PROVIDERS[0].id
+      }
+    }
+    let dbPairingData = utils.clone(pairingData)
+    dbPairingData[TYPE] = PAIRING_DATA
+    // db.put(PAIRING_DATA + '_1', pairingData)
+    list[PAIRING_DATA + '_1'] = {key: PAIRING_DATA + '_1', value: dbPairingData}
+    this.trigger({action: 'genPairingData', pairingData: JSON.stringify(pairingData)})
+  },
+
+  onSendPairingRequest (pairingData) {
+    // device 2 sends pairing request
+    let publishedIdentity
+    let deviceId
+
+    let myIdentities = list[MY_IDENTITIES]
+    if (myIdentities) {
+      myIdentities = myIdentities.value
+      publishedIdentity = myIdentities.allIdentities[0].publishedIdentity
+      deviceId = list[IDENTITY + '_' + pairingData.identity].value.deviceId
+    }
+
+    let promise = myIdentities
+                ? Q()
+                : this.createNewIdentity()
+                // : Q.ninvoke(tradleUtils, 'newIdentity', {
+                //       networkName,
+                //       keys: KEY_SET
+                //   })
+    return promise
+    .spread((encryptionKey, identityInfo) => {
+      if (!identityInfo)
+        return
+      publishedIdentity = identityInfo.identity
+      let mePub = publishedIdentity.pubkeys
+      let mePriv = identityInfo.keys
+      let currentIdentity = PROFILE + '_' + pairingData.identity
+      var myIdentities = {
+        [TYPE]: MY_IDENTITIES_TYPE,
+        currentIdentity: currentIdentity,
+        allIdentities: [{
+          id: currentIdentity,
+          // title: utils.getDisplayName(value, models[me[TYPE]].value.properties),
+          privkeys: mePriv,
+          publishedIdentity: publishedIdentity
+        }]
+      }
+      var profile = {
+        [TYPE]: PROFILE,
+        [ROOT_HASH]: pairingData.identity,
+        firstName: pairingData.firstName,
+        formatted: pairingData.firstName,
+      }
+      deviceId = identityInfo.link
+      var identity = {
+        [TYPE]: IDENTITY,
+        [ROOT_HASH]: pairingData.identity,
+        pubkeys: mePub,
+        deviceId: deviceId
+      }
+      let batch = []
+      list[currentIdentity] = {
+        key: currentIdentity,
+        value: profile
+      }
+      let identityId = utils.getId(identity)
+      list[identityId] = {
+        key: identityId,
+        value: identity
+      }
+      list[MY_IDENTITIES] = {
+        key: MY_IDENTITIES,
+        value: myIdentities
+      }
+      batch.push({type: 'put', key: MY_IDENTITIES, value: myIdentities})
+      batch.push({type: 'put', key: currentIdentity, value: profile})
+      batch.push({type: 'put', key: utils.getId(identity), value: identity})
+      db.batch(batch)
+    })
+   .then(() => {
+      const pairingReq = {
+        [TYPE]: PAIRING_REQUEST,
+        identity: publishedIdentity
+      }
+
+      const hmac = crypto.createHmac('sha256', pairingData.nonce)
+      hmac.update(tradleUtils.stringify(pairingReq))
+      pairingReq.auth = hmac.digest('base64')
+
+      const url = pairingData.rendezvous.url
+      let transport = driverInfo.wsClients[url]
+      if (!transport) {
+        let wsClient = this.getWsClient(url, deviceId)
+        transport = this.getTransport(wsClient, deviceId)
+        driverInfo.wsClients[url] = transport
+      }
+      let self = this
+      transport.on('message', function (msg, from) {
+        try {
+          const payload = JSON.parse(msg)
+          if (payload[TYPE] === PAIRING_RESPONSE) {
+            transport.destroy()
+            delete driverInfo.wsClients[url]
+
+            return self.onProcessPairingResponse(list[PAIRING_DATA + '_1'].value, payload)
+            .then(() => {
+              debugger
+              Alert.alert('Pairing was successful')
+              self.trigger({action: 'pairingSuccessful'})
+            })
+            .catch((err) => {
+              debugger
+              Alert.alert(err)
+            })
+          }
+        } catch (err) {
+          debugger
+        }
+      })
+
+      // if (!transport) {
+      //   let wsClient = this.getWsClient(url, meDriver.permalink)
+      //   transport = this.getTransport(wsClient, meDriver.permalink)
+      //   driverInfo.wsClients[url] = transport
+      // }
+      const pairingReqStr = tradleUtils.stringify(pairingReq)
+
+      function send () {
+        return Q.ninvoke(transport, 'send', pairingData.identity, pairingReqStr)
+          .then(() => {
+            // debugger
+            let dbPairingData = utils.clone(pairingData)
+            dbPairingData[TYPE] = PAIRING_DATA
+            // db.put(PAIRING_DATA + '_1', pairingData)
+            list[PAIRING_DATA + '_1'] = {key: PAIRING_DATA + '_1', value: dbPairingData}
+          })
+          .catch((err) => {
+            debugger
+          })
+      }
+
+      return utils.tryWithExponentialBackoff(send)
+    })
+      // .then(() => {
+      //   this.trigger({action: 'sentPairingRequest', pairingData: pairingData})
+      // })
+  },
+
+  onProcessPairingRequest(pairingData, pairingReq) {
+    const myPubKeys = meDriver.identity.pubkeys
+    const alreadyPaired = pairingReq.identity.pubkeys.some(a => {
+      return myPubKeys.some(b => {
+        return a.pub === b.pub
+      })
+    })
+
+    const verify = crypto.createHmac('sha256', pairingData.nonce)
+    verify.update(tradleUtils.stringify(tradleUtils.omit(pairingReq, 'auth')))
+    if (verify.digest('base64') !== pairingReq.auth) {
+      return Promise.reject(new Error('invalidPairingRequest'))
+    }
+
+    if (alreadyPaired) {
+      // won't work because prev is not right
+      return sendResponse()
+    }
+
+    const allPubKeys = meDriver.identity.pubkeys.concat(pairingReq.identity.pubkeys)
+    const pubkeys = allPubKeys.map(pk => tradleUtils.clone(pk))
+    let identity = {
+            keys: meDriver.keys.concat(pairingReq.identity.pubkeys),
+            identity: tradleUtils.clone(meDriver.identity, {
+              pubkeys: pubkeys // allPubKeys.map(pk => tradleUtils.clone(pk))
+            })
+          }
+    return Q.ninvoke(meDriver, 'updateIdentity', identity)
+    .then(() => {
+      let batch = []
+      batch.push({type: 'put', key: PAIRING_REQUEST + '_1', value: pairingReq})
+      this.updatePubkeys(batch)
+      // let batch = []
+      // let id = IDENTITY + '_' + utils.getMe()[ROOT_HASH]
+      // let myIdentity = list[id].value
+
+      // myIdentity.pubkeys = allPubKeys.map(pk => tradleUtils.clone(pk))
+
+      // updatePubkeys(myIdentity.pubkeys)
+      // let myIdentities = list[MY_IDENTITIES].value
+      // let currentIdentity = myIdentities.currentIdentity
+      // myIdentities.allIdentities.forEach((r) => {
+      //   if (r.id === currentIdentity)
+      //     r.publishedIdentity.pubkeys = utils.clone(myIdentity.pubkeys)
+      // })
+
+      // batch.push({type: 'put', key: MY_IDENTITIES, value: myIdentities})
+      // batch.push({type: 'put', key: id, value: myIdentity})
+      // batch.push({type: 'put', key: PAIRING_REQUEST + '_1', value: pairingReq})
+
+      // // If pairing request was not verified what do we want to do
+      // db.batch(batch)
+    })
+    .then(() => {
+      return sendResponse()
+    })
+
+    function sendResponse () {
+      const getPrev = meDriver.identity[PREV_HASH] ? Q.ninvoke(meDriver.keeper, 'get',  meDriver.identity[PREV_HASH]) : Promise.resolve(meDriver.identity)
+      return getPrev.then(prev => {
+        const pairingRes = {
+          [TYPE]: PAIRING_RESPONSE,
+          // can we make it secure without sending prev?
+          prev: prev,
+          identity: meDriver.identity
+        }
+
+        const url = pairingData.rendezvous.url
+        let transport = driverInfo.wsClients[url]
+        const pairingResStr = tradleUtils.stringify(pairingRes)
+        return utils.tryWithExponentialBackoff(send)
+
+        function send () {
+          return Q.ninvoke(transport, 'send', tradleUtils.hexLink(pairingReq.identity), pairingResStr)
+            .then(() => {
+              db.put(PAIRING_RESPONSE + '_1', pairingRes)
+              debugger
+            })
+            .catch((err) => {
+              debugger
+            })
+        }
+      })
+    }
+  },
+  updatePubkeys(batch, identity) {
+    let myIdentities = list[MY_IDENTITIES].value
+    let currentIdentity = myIdentities.currentIdentity
+
+    let id = currentIdentity.replace(PROFILE, IDENTITY)
+    list[id].value = identity || meDriver.identity
+
+    myIdentities.allIdentities.forEach((r) => {
+      if (r.id === currentIdentity)
+        r.publishedIdentity = list[id].value
+    })
+
+    batch.push({type: 'put', key: MY_IDENTITIES, value: myIdentities})
+    batch.push({type: 'put', key: id, value: list[id].value})
+
+    // If pairing request was not verified what do we want to do
+    db.batch(batch)
+  },
+
+  onProcessPairingResponse (pairingData, pairingRes) {
+    // device 2 validate response
+    if (tradleUtils.hexLink(pairingRes.prev) !== pairingData.identity)
+      return Promise.reject(new Error('prev identity does not match expected'))
+
+    let pubkeys = list[IDENTITY + '_' + pairingData.identity].value.pubkeys
+    const hasMyKeys = pubkeys.every(myKey => {
+      return pairingRes.identity.pubkeys.some(theirKey => {
+        return deepEqual(theirKey, myKey)
+      })
+    })
+    // const hasMyKeys = meDriver.identity.pubkeys.every(myKey => {
+    //   return pairingRes.identity.pubkeys.some(theirKey => {
+    //     return deepEqual(theirKey, myKey)
+    //   })
+    // })
+
+    if (!hasMyKeys)
+      return Promise.reject(new Error(translate('deviceDoesNotHaveMyKeys')))
+
+    let batch = []
+    this.updatePubkeys(batch, pairingRes.identity)
+
+
+    // let myIdentities = list[MY_IDENTITIES].value
+    // let currentIdentity = myIdentities.currentIdentity
+
+    // myIdentities.allIdentities.forEach((r) => {
+    //   if (r.id === currentIdentity)
+    //     r.publishedIdentity.pubkeys = pairingRes.identity.pubkeys
+    // })
+
+    // let id = IDENTITY + '_' + pairingData.identity
+    // list[id].value.pubkeys = utils.clone(pairingRes.identity.pubkeys)
+    // let batch = []
+    // batch.push({type: 'put', key: MY_IDENTITIES, value: myIdentities})
+    // batch.push({type: 'put', key: id, value: list[id].value})
+    // db.batch(batch)
+
+    let me = list[PROFILE + '_' + pairingData.identity].value
+    return this.getDriver(me)
+    .then(() =>  meDriver.addContact(pairingRes.prev))
+    .then(() => {
+      Q.ninvoke(meDriver, 'setIdentity', {
+        keys: meDriver.keys.concat(pairingRes.identity.pubkeys),
+        identity: pairingRes.identity
+      })
+    })
+    .then(() => {
+      this.setMe(me)
+      // let me = utils.getMe()
+      // let oldId = IDENTITY + '_' + me[ROOT_HASH]
+      // delete list[oldId]
+
+      // let oldProfileId = utils.getId(me)
+      // let profile = list[oldProfileId].value
+      // delete list[oldProfileId]
+
+      // profile[ROOT_HASH] = pairingRes.identity[ROOT_HASH]
+      // profile[CUR_HASH] = pairingRes.identity[ROOT_HASH]
+
+      // let newId = IDENTITY + '_' + pairingRes.identity[ROOT_HASH]
+      // list[newId] = {
+      //   key: newId,
+      //   value: utils.clone(pairingRes.identity)
+      // }
+      // let newProfileId = PROFILE + '_' +  pairingRes.identity[ROOT_HASH]
+      // list[newProfileId] = {
+      //   key: newProfileId,
+      //   value: profile
+      // }
+      // let myIdentities = list[MY_IDENTITIES].value
+      // myIdentities.currentIdentity = newProfileId
+      // myIdentities.allIdentities.forEach((r) => {
+      //   if (r.id !== oldProfileId)
+      //     return
+      //   r.id = newProfileId,
+      //   r.publishedIdentity.pubkeys = utils.clone(pairingRes.identity.pubkeys)
+      // })
+
+      // let batch = []
+      // batch.push({type: 'del', key: oldId})
+      // batch.push({type: 'del', key: oldProfileId})
+      // batch.push({type: 'put', key: MY_IDENTITIES, value: list[MY_IDENTITIES].value})
+      // batch.push({type: 'put', key: newId, value: list[newId].value})
+      // batch.push({type: 'put', key: newProfileId, value: list[newProfileId].value})
+      // batch.push({type: 'put', key: PAIRING_RESPONSE + '_1', value: pairingRes})
+      // db.batch(batch)
     })
   },
 
