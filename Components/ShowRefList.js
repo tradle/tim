@@ -26,9 +26,6 @@ import React, { Component } from 'react'
 class ShowRefList extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      startTop: props.resource[constants.TYPE] == constants.TYPES.PROFILE && props.resource[constants.ROOT_HASH] === utils.getMe()[constants.ROOT_HASH] ? 70 : 15
-    }
   }
   render() {
     var resource = this.props.resource;

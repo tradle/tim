@@ -9,7 +9,6 @@ var ResourceMixin = require('./ResourceMixin')
 var reactMixin = require('react-mixin')
 var Accordion = require('react-native-accordion')
 var Icon = require('react-native-vector-icons/Ionicons')
-var extend = require('extend');
 var NOT_SPECIFIED = '[not specified]'
 var DEFAULT_CURRENCY_SYMBOL = '£'
 var CURRENCY_SYMBOL
@@ -23,8 +22,6 @@ import {
   StyleSheet,
   Image,
   View,
-  ListView,
-  LayoutAnimation,
   Text,
   TextInput,
   TouchableOpacity,
@@ -45,13 +42,7 @@ class ShowPropertiesView extends Component {
   };
   constructor(props) {
     super(props);
-    var dataSource = new ListView.DataSource({
-      rowHasChanged: (row1, row2) => row1 !== row2,
-    });
     this.state = {
-      resource: this.props.resource,
-      viewStyle: {margin: 3},
-      dataSource: dataSource,
       promptVisible: null
     }
     CURRENCY_SYMBOL = props.currency ? props.currency.symbol || props.currency : DEFAULT_CURRENCY_SYMBOL
@@ -88,14 +79,12 @@ class ShowPropertiesView extends Component {
     // Prompt for employee to write a correction message
     if (this.state.promptVisible !== nextState.promptVisible)
       return true
-    if (!this.props.errorProps  &&  !nextProps.errorProps)
-      return false
     if (!this.props.errorProps  ||  !nextProps.errorProps)
       return true
     return (this.props.errorProps != nextProps.errorProps) ? true : false
   }
   getViewCols(resource, model) {
-    var resource = this.state.resource;
+    var resource = this.props.resource;
     var modelName = resource[constants.TYPE];
     var model = utils.getModel(modelName).value;
     var vCols = []
@@ -316,44 +305,6 @@ class ShowPropertiesView extends Component {
     }
     return viewCols;
   }
-  // npm i react-native-message-composer
-  // sendEmail(val) {
-  //   Communications.email([val], null, null, 'My Subject','My body text')
-  // }
-  // sendSMS(val) {
-  //   // Communications.text(val)
-  //   var Composer = require('NativeModules').RNMessageComposer
-  //   Composer.messagingSupported(supported => {
-  //     let s = 'may be show something'
-  //   });
-
-  //   // inside your code where you would like to send a message
-  //   Composer.composeMessageWithArgs({
-  //       'messageText':'My sample message body text',
-  //       // 'subject':'My Sample Subject',
-  //       'recipients':[val]
-  //     },
-  //     (result) => {
-  //       switch(result) {
-  //       case Composer.Sent:
-  //         console.log('the message has been sent');
-  //         break;
-  //       case Composer.Cancelled:
-  //         console.log('user cancelled sending the message');
-  //         break;
-  //       case Composer.Failed:
-  //         console.log('failed to send the message');
-  //         break;
-  //       case Composer.NotSupported:
-  //         console.log('this device does not support sending texts');
-  //         break;
-  //       default:
-  //         console.log('something unexpected happened');
-  //         break;
-  //       }
-  //     }
-  //   );
-  // }
   onPress(url, event) {
     var model = utils.getModel(this.props.resource[constants.TYPE]).value;
     this.props.navigator.push({
@@ -405,3 +356,41 @@ var styles = StyleSheet.create({
 });
 
 module.exports = ShowPropertiesView;
+  // npm i react-native-message-composer
+  // sendEmail(val) {
+  //   Communications.email([val], null, null, 'My Subject','My body text')
+  // }
+  // sendSMS(val) {
+  //   // Communications.text(val)
+  //   var Composer = require('NativeModules').RNMessageComposer
+  //   Composer.messagingSupported(supported => {
+  //     let s = 'may be show something'
+  //   });
+
+  //   // inside your code where you would like to send a message
+  //   Composer.composeMessageWithArgs({
+  //       'messageText':'My sample message body text',
+  //       // 'subject':'My Sample Subject',
+  //       'recipients':[val]
+  //     },
+  //     (result) => {
+  //       switch(result) {
+  //       case Composer.Sent:
+  //         console.log('the message has been sent');
+  //         break;
+  //       case Composer.Cancelled:
+  //         console.log('user cancelled sending the message');
+  //         break;
+  //       case Composer.Failed:
+  //         console.log('failed to send the message');
+  //         break;
+  //       case Composer.NotSupported:
+  //         console.log('this device does not support sending texts');
+  //         break;
+  //       default:
+  //         console.log('something unexpected happened');
+  //         break;
+  //       }
+  //     }
+  //   );
+  // }

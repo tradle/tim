@@ -58,7 +58,6 @@ class ResourceView extends Component {
     let me = utils.getMe()
     this.state = {
       resource: props.resource,
-      embedHeight: {height: 0},
       isLoading: props.resource.id ? true : false,
       isModalOpen: false,
       useTouchId: me.useTouchId,
