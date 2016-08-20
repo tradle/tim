@@ -20,7 +20,7 @@ var TradleWhite = require('../img/TradleW.png')
 var BG_IMAGE = require('../img/bg.png')
 var PasswordCheck = require('./PasswordCheck')
 var FadeInView = require('./FadeInView')
-var FlingItView = require('./FlingItView')
+// var FlingItView = require('./FlingItView')
 var TouchIDOptIn = require('./TouchIDOptIn')
 var defaultBankStyle = require('../styles/bankStyle.json')
 var QRCodeScanner = require('./QRCodeScanner')
@@ -482,25 +482,25 @@ class TimHome extends Component {
               ? { width: width / 2.2, height: width / 2.2 }
               : styles.thumb
               // <Progress.CircleSnail color={'white'} size={70} thickness={5}/>
-  	var splashscreen = (
-      <View>
-          <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: width, height: height }} />
-          <ScrollView
-            scrollEnabled={false}
-            style={{height:h}}>
-            <View style={[styles.container]}>
-              <Image style={thumb} source={TradleWhite}></Image>
-              <Text style={styles.tradle}>Tradle</Text>
-            </View>
-            <View style={{alignItems: 'center'}}>
-              <ActivityIndicator hidden='true' size='large' color='#ffffff'/>
-            </View>
-          </ScrollView>
-      </View>
-    )
+  	// var splashscreen = (
+   //    <View>
+   //        <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: width, height: height }} />
+   //        <ScrollView
+   //          scrollEnabled={false}
+   //          style={{height:h}}>
+   //          <View style={[styles.container]}>
+   //            <Image style={thumb} source={TradleWhite}></Image>
+   //            <Text style={styles.tradle}>Tradle</Text>
+   //          </View>
+   //          <View style={{alignItems: 'center'}}>
+   //            <ActivityIndicator hidden='true' size='large' color='#ffffff'/>
+   //          </View>
+   //        </ScrollView>
+   //    </View>
+   //  )
 
     if (this.state.isLoading)
-      return splashscreen
+      return this.getSplashScreen(h, thumb)
 
     // if (!me.isAuthenticated)
     //   return <PasswordCheck />
@@ -617,7 +617,26 @@ class TimHome extends Component {
       </View>
     );
   }
+  getSplashScreen(h, thumb) {
+    var { width, height } = Dimensions.get('window')
+    return (
+      <View>
+        <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: width, height: height }} />
+        <ScrollView
+          scrollEnabled={false}
+          style={{height:h}}>
+          <View style={[styles.container]}>
+            <Image style={thumb} source={TradleWhite}></Image>
+            <Text style={styles.tradle}>Tradle</Text>
+          </View>
+          <View style={{alignItems: 'center'}}>
+            <ActivityIndicator hidden='true' size='large' color='#ffffff'/>
+          </View>
+        </ScrollView>
+      </View>
+    )
 
+  }
   pairDevices() {
     this.props.navigator.push({
       title: 'Scan QR Code',
