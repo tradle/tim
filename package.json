@@ -9,7 +9,8 @@
     "installhooks": "cp hooks/* .git/hooks/",
     "streamhack": "rm -rf ./node_modules/@tradle/utils/node_modules/create-torrent/node_modules/block-stream2/node_modules/readable-stream",
     "rmsymlinks": "find -L . -type l -exec rm {} \\;",
-    "web-dev": "node --max_old_space_size=4096 $(which webpack-dev-server) --content-base web/public/ --config web/webpack/webpack.config.js --port 3001 --inline --hot --colors"
+    "web-dev": "node --max_old_space_size=4096 $(which webpack-dev-server) --content-base web/public/ --config web/webpack/webpack.config.js --port 3001 --inline --hot --colors",
+    "web-bundle": "NODE_ENV=production node --max_old_space_size=4096 $(which webpack) --config web/webpack/webpack.config.js --progress --colors"
   },
   "dependencies": {
     "@tradle/cb-blockr": "^3.1.4",
@@ -141,7 +142,7 @@
   },
   "browser": {
     "asyncstorage-down": "level-js",
-    "react-native-safe-async-storage": "react-web/lib/Storage/AsyncStorage.web",
+    "react-native-safe-async-storage": "./web/shims/AsyncStorage",
     "react-native-camera": false,
     "react-native-video": false,
     "react-native-floating-labels": "./web/shims/floating-labels.js",

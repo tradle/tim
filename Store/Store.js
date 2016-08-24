@@ -219,11 +219,7 @@ var Store = Reflux.createStore({
         // https://github.com/facebook/react-native/issues/873
         this.isConnected = true
       } else {
-        NetInfo.isConnected.fetch().done(
-          (isConnected) => {
-            this.isConnected = isConnected
-          }
-        );
+        NetInfo.isConnected.fetch().then(isConnected => this.isConnected = isConnected)
       }
     }
 

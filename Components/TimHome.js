@@ -91,11 +91,7 @@ class TimHome extends Component {
         'change',
         this._handleConnectivityChange.bind(this)
       );
-      NetInfo.isConnected.fetch().done(
-        (isConnected) => {
-          this._handleConnectivityChange(isConnected)
-        }
-      );
+      NetInfo.isConnected.fetch().then(isConnected => this._handleConnectivityChange(isConnected))
     }
 
     Actions.start();
@@ -112,7 +108,7 @@ class TimHome extends Component {
     this.props.navigator.isConnected = isConnected
   }
   componentWillUnmount() {
-    if (Linked && !isAndroid)
+    if (Linking && !isAndroid)
       Linking.removeEventListener('url', this._handleOpenURL);
     if (NetInfo) {
       NetInfo.isConnected.removeEventListener(

@@ -40,7 +40,9 @@ var config = module.exports = {
     //   'react-native': 'react-web/lib/react-web.js',
     // },
     alias: {
+      // 'react-native': 'react-web',
       'react-native': 'react-web/lib/react-web.js',
+      // 'react-native': 'react-web/Libraries/react-web.js',
       'RCTNativeAppEventEmitter': emptyObjPath,
       'Keyboard': emptyObjPath
     },
@@ -112,7 +114,9 @@ var config = module.exports = {
         // exclude: /node_modules\/[^\/]+\/node_modules\/[^\/]+\/node_modules/,
         // exclude: /node_modules\/[^\/]+\/node_modules\/[^\/]+\/node_modules/,
         exclude: [
-          /node_modules\/(^react-)/,
+          /node_modules\/(?!react)/,
+          // /node_modules\/(^react-)/,
+          // /node_modules\/[^\/]+\/node_modules\//,
           /errno/,
           // /error/,
           /xtend/
@@ -165,6 +169,13 @@ var config = module.exports = {
   }
 };
 
-if (DEV) {
+if (isProd) {
+  config.plugins.push(new webpack.optimize.UglifyJsPlugin({
+    compress: {
+      warnings: false
+    },
+    mangle: false
+  }))
+} else {
   config.plugins.push(new webpack.HotModuleReplacementPlugin())
 }
