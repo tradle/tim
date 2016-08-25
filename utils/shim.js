@@ -30,7 +30,7 @@ if (Platform.OS !== 'web') {
 }
 
 if (typeof localStorage !== 'undefined') {
-  localStorage.debug = __DEV__ ? '*' : ''
+  localStorage.debug = __DEV__ ? 'tradle:*' : ''
 }
 
 process.on('exit', cleanup)

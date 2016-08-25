@@ -8,7 +8,7 @@ var emptyObjPath = path.join(__dirname, './empty.js')
 
 var IP = '0.0.0.0';
 var PORT = 3000;
-var NODE_ENV = process.env.NODE_ENV;
+var NODE_ENV = process.env.NODE_ENV || 'development';
 // var ROOT_PATH = path.resolve(__dirname, '../');
 var PROD = 'production';
 var DEV = 'development';
@@ -36,13 +36,9 @@ var config = module.exports = {
     publicPath: '/',
   },
   resolve: {
-    // alias: {
-    //   'react-native': 'react-web/lib/react-web.js',
-    // },
     alias: {
-      // 'react-native': 'react-web',
       'react-native': 'react-web/lib/react-web.js',
-      // 'react-native': 'react-web/Libraries/react-web.js',
+      'ReactART': 'react-art',
       'RCTNativeAppEventEmitter': emptyObjPath,
       'Keyboard': emptyObjPath
     },
@@ -62,11 +58,11 @@ var config = module.exports = {
   plugins: [
     new HasteResolverPlugin({
       platform: 'web',
-      nodeModules: ['react-web']
+      blacklist: ['lib']
     }),
     new webpack.optimize.DedupePlugin(),
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify(isProd? PROD: DEV),
+      'process.env.NODE_ENV': JSON.stringify(NODE_ENV),
       __DEV__: isProd ? false : true
     }),
     // isProd? new webpack.ProvidePlugin({
@@ -114,7 +110,7 @@ var config = module.exports = {
         // exclude: /node_modules\/[^\/]+\/node_modules\/[^\/]+\/node_modules/,
         // exclude: /node_modules\/[^\/]+\/node_modules\/[^\/]+\/node_modules/,
         exclude: [
-          /node_modules\/(?!react)/,
+          /node_modules\/(?!react|tcomb)/,
           // /node_modules\/(^react-)/,
           // /node_modules\/[^\/]+\/node_modules\//,
           /errno/,

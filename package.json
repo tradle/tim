@@ -59,6 +59,7 @@
     "react-addons-perf": "^15.2.0",
     "react-dom": "^15.2.0",
     "react-hot-loader": "^1.3.0",
+    "react-icons": "^2.2.1",
     "react-mixin": "~1.2.2",
     "react-native": "^0.30.0",
     "react-native-accordion": "^1.0.1",
@@ -146,6 +147,7 @@
     "react-native-camera": false,
     "react-native-video": false,
     "react-native-floating-labels": "./web/shims/floating-labels.js",
-    "react-native-keychain": "./web/shims/keychain.js"
+    "react-native-keychain": "./web/shims/keychain.js",
+    "react-native-vector-icons/Ionicons": "./web/shims/vector-icons/Ionicons"
   }
 }
