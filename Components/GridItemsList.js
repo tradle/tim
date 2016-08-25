@@ -13,11 +13,13 @@ import ActionSheet from 'react-native-actionsheet'
 import {
   StyleSheet,
   PropTypes,
+  Platform,
   TouchableHighlight,
   View,
 } from 'react-native'
 
 import React, { Component } from 'react'
+import platformStyles from '../styles/platform'
 
 class GridItemsList extends Component {
   props: {
@@ -71,18 +73,22 @@ class GridItemsList extends Component {
     var m = utils.getModel(this.props.resource[constants.TYPE]).value
     var buttons = [translate('addNew', m.properties[this.props.prop].title), translate('cancel')]
 
+    let icon = Platform.OS === 'ios' ?  'md-add' : 'md-add'
+    let color = Platform.OS === 'ios' ? '#ffffff' : 'red'
     return (
       <View style={styles.container}>
         <View style={{flex: 1}}>
           <PhotoList photos={this.state.list} forceUpdate={this.state.forceUpdate} callback={this.cancelItem.bind(this)} navigator={this.props.navigator} numberInRow={3} resource={this.props.resource}/>
         </View>
+
         <View style={styles.footer}>
           <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
-            <View style={{marginTop: -10}}>
-              <Icon name='ios-add-circle'  size={55}  color='#ffffff' style={styles.icon} />
+            <View style={platformStyles.menuButton}>
+              <Icon name={icon}  size={33}  color={color} />
             </View>
           </TouchableHighlight>
         </View>
+
         <ActionSheet
           ref={(o) => {
             this.ActionSheet = o
@@ -141,7 +147,7 @@ var styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     height: 45,
-    paddingTop: 5,
+    // paddingTop: 5,
     paddingHorizontal: 10,
     backgroundColor: '#eeeeee',
     borderColor: '#eeeeee',
