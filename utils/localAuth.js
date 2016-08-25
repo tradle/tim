@@ -28,7 +28,7 @@ const DEFAULT_OPTS = {
 let pendingAuth
 
 module.exports = {
-  TIMEOUT: __DEV__ ? 1000 : 10 * 60 * 1000,
+  TIMEOUT: __DEV__ ? 60 * 1000 : 10 * 60 * 1000,
   Errors,
   setPassword,
   signIn,
