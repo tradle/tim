@@ -150,7 +150,7 @@ class VerificationRow extends Component {
     var date = r
              ? this.addDateProp('time', [styles.verySmallLetters, {position: 'absolute', right: 10}])
              : <View />
-    var header =  <View style={{borderColor: '#ffffff', backgroundColor: '#ffffff', borderBottomColor: '#cccccc', borderWidth: 0.5}} key={this.getNextKey()}>
+    var header =  <View style={{borderColor: '#ffffff', backgroundColor: '#ffffff', borderBottomColor: '#cccccc', borderBottomWidth: StyleSheet.hairlineWidth}} key={this.getNextKey()}>
                     <View style={{flexDirection: 'row', marginHorizontal: 10,  marginVertical: 3, paddingBottom: 4}}>
                       {photo}
                       {date}
@@ -165,10 +165,10 @@ class VerificationRow extends Component {
    //              {header}
    //            </Swipeout>
 
-    var content = <View style={{paddingVertical: 10, backgroundColor: 'transparent'}}>
+    var content = <View>
                     <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>
                       <View style={styles.row}>
-                        <View style={[styles.textContainer, {margin: -5, paddingLeft: 3, borderWidth: 0.5, borderColor: '#edf2ce'}]}>
+                        <View style={[styles.textContainer, {margin: -5, paddingLeft: 3, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: 'transparent'}]}>
                           {rows}
                         </View>
                       </View>
@@ -246,7 +246,7 @@ class VerificationRow extends Component {
                   ? utils.normalizeCurrencySymbol(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value
                   : (resource[v].title || resource[v])
           vCols.push(
-            <View style={{flexDirection: 'row', justifyContent: 'space-between', borderColor: '#F2FAED', borderWidth: 0.5, borderBottomColor: '#f0f0f0', paddingVertical: 3}} key={self.getNextKey()}>
+            <View style={{flexDirection: 'row', justifyContent: 'space-between', borderColor: '#F2FAED', borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#f0f0f0', paddingVertical: 3}} key={self.getNextKey()}>
               <Text style={labelStyle}>{properties[v].title + units}</Text>
               <Text style={style}>{val}</Text>
             </View>
@@ -273,7 +273,7 @@ class VerificationRow extends Component {
         if (msgParts.length === 2) {
           var msgModel = utils.getModel(msgParts[1]);
           if (msgModel) {
-            vCols.push(<View key={self.getNextKey()} style={{borderColor: '#F2FAED', borderWidth: 0.5, paddingVertical: 5, borderBottomColor: '#f0f0f0'}}>
+            vCols.push(<View key={self.getNextKey()} style={{borderColor: '#F2FAED', borderBottomWidth: StyleSheet.hairlineWidth, paddingVertical: 5, borderBottomColor: '#f0f0f0'}}>
                          <Text style={style}>{msgParts[0]}</Text>
                          <Text style={[style, {color: isMyMessage ? '#efffe5' : '#7AAAC3'}]}>{msgModel.value.title}</Text>
                        </View>);
@@ -292,7 +292,7 @@ class VerificationRow extends Component {
       // }
 
       vCols.push(
-        <View style={{flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 5, borderColor: '#F2FAED', borderWidth: 0.5, borderBottomColor: '#f7f7f7'}} key={self.getNextKey()}>
+        <View style={{flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 5, borderColor: '#F2FAED', borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#f0f0f0'}} key={self.getNextKey()}>
           <Text style={labelStyle}>{properties[v].title + units}</Text>
           {row}
         </View>
@@ -366,7 +366,7 @@ var styles = StyleSheet.create({
     width: 60,
     borderColor: '#7AAAc3',
     // borderRadius:10,
-    borderWidth: 0.5,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   icon: {
     width: 20,
