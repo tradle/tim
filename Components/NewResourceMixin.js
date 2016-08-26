@@ -521,7 +521,7 @@ var NewResourceMixin = {
     var label = translate(params.prop, params.model)
 
     return (
-      <View style={{justifyContent: 'center', backgroundColor: LINK_COLOR}}>
+      <View style={{justifyContent: 'center', marginHorizontal: 10, backgroundColor: LINK_COLOR}}>
         <Text style={{marginVertical: 10, fontSize: 18, alignSelf: 'center', color: '#ffffff'}}>{label}</Text>
       </View>
     );
@@ -539,8 +539,11 @@ var NewResourceMixin = {
     // label += (params.prop.ref  &&  params.prop.ref === constants.TYPES.MONEY)
     //        ?  ' (' + CURRENCY_SYMBOL + ')'
     //        : ''
+    // let paddingBottom = 20
+    var err = this.state.missedRequiredOrErrorValue &&  this.state.missedRequiredOrErrorValue[params.prop.name]
+
     return (
-      <View style={{paddingBottom: 10, flex: 5}}>
+      <View style={{flex: 5, paddingBottom: err ? 20 : 5}}>
         <FloatLabel
           labelStyle={styles.labelInput}
           autoCorrect={false}
@@ -552,7 +555,7 @@ var NewResourceMixin = {
           keyboardType={params.keyboard || 'default'}
           onChangeText={this.onChangeText.bind(this, params.prop)}
         >{label}</FloatLabel>
-        {this.getErrorView(params)}
+          {this.getErrorView(params)}
       </View>
     );
   },
@@ -636,7 +639,7 @@ var NewResourceMixin = {
       style = textStyle
 
       let vStyle = Platform.OS === 'android'
-                 ? {marginTop: 5}
+                 ? {marginTop: 5, paddingLeft: 10}
                  : {marginTop: 5, marginBottom: 5, backgroundColor: 'transparent'}
 
       propLabel = <View style={vStyle}>
@@ -884,9 +887,7 @@ var NewResourceMixin = {
             </View>
           </View>
         </TouchableHighlight>
-        <View style={{marginTop: -5, marginLeft: -10}}>
          {this.getErrorView({noError: params.noError, errors: params.errors, prop: prop})}
-       </View>
       </View>
     );
   },
@@ -1295,12 +1296,13 @@ var styles = StyleSheet.create({
     borderRadius: 4
   },
   chooserContainer: {
-    height: 50,
+    height: 60,
     borderColor: '#ffffff',
     borderBottomColor: '#cccccc',
     borderBottomWidth: 1,
     marginHorizontal: 10,
-    marginBottom: 10,
+    // marginBottom: 10,
+    paddingBottom: 10,
     flex: 1
   },
   chooserContentStyle: {
