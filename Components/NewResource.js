@@ -53,9 +53,7 @@ import Keyboard from 'Keyboard'
 import React, { Component, PropTypes } from 'react'
 import ActivityIndicator from './ActivityIndicator'
 
-import iosStyles from '../styles/iosStyles'
-import androidStyles from '../styles/androidStyles'
-var platformStyles = Platform.OS === 'ios' ? iosStyles : androidStyles
+import platformStyles from '../styles/platform'
 
 DeviceHeight = Dimensions.get('window').height;
 DeviceWidth = Dimensions.get('window').width
@@ -395,6 +393,10 @@ class NewResource extends Component {
               }
               return
             }
+          }
+          else if (this.props.model.properties[p].type === 'array'  &&  !v.length) {
+            missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
+            return
           }
         }
       }
@@ -752,7 +754,7 @@ class NewResource extends Component {
           let cstyle = []
           if (count) {
             cstyle.push(styles.activePropTitle)
-            cstyle.push({marginTop: 20})
+            // cstyle.push({marginTop: 20})
           }
           else
             cstyle.push(styles.noItemsText)
@@ -762,7 +764,7 @@ class NewResource extends Component {
                          {val}
                        </View>
 
-          counter = <View style={[styles.itemsCounterEmpty, {marginTop: 15, paddingBottom: 10}]}>
+          counter = <View style={[styles.itemsCounterEmpty, {paddingBottom: 10, marginTop: 15}]}>
                       <Icon name={bl.icon || 'md-add'} size={bl.icon ? 25 : 15}  color={LINK_COLOR} />
                     </View>
         }
@@ -803,7 +805,7 @@ class NewResource extends Component {
         else {
           istyle.push(styles.itemButton)
           // istyle.push({paddingBottom: 10})
-          istyle.push({height: 70})
+          // istyle.push({height: 70})
         }
       }
       else {
@@ -811,11 +813,9 @@ class NewResource extends Component {
         if (err)
           istyle.push({marginBottom: 10})
         else if (!count)
-          istyle.push({paddingBottom: 0})
+          istyle.push({paddingBottom: 0, height: 70})
         else {
-          let height = 32
-          if (resource[bl.name].photo)
-            height = 55
+          let height = resource[bl.name].photo ? 55 : 45
           // else if (resource[bl.name][0].photo)
           //   height = 38
           istyle.push({paddingBottom: 0, height: count * height + 35})
@@ -823,13 +823,15 @@ class NewResource extends Component {
       }
 
       arrayItems.push (
-        <View style={[istyle, {marginHorizontal: 10}]} key={this.getNextKey()} ref={bl.name}>
-          <View style={styles.items}>
-            {actionableItem}
-            <TouchableHighlight underlayColor='transparent' style={[{flex: 1, position: 'absolute', right: 0}, isPhoto  &&  count ? {marginTop: 15} : count ? {paddingTop: 0} : {marginTop: 15, paddingBottom: 7}]}
-                onPress={self.onNewPressed.bind(self, bl, meta)}>
-              {counter}
-            </TouchableHighlight>
+        <View key={this.getNextKey()}>
+          <View style={[istyle, {marginHorizontal: 10}]} ref={bl.name}>
+            <View style={styles.items}>
+              {actionableItem}
+              <TouchableHighlight underlayColor='transparent' style={[{flex: 1, position: 'absolute', right: 0}, isPhoto  &&  count ? {marginTop: 15} : count ? {paddingTop: 0} : {marginTop: 15, paddingBottom: 7}]}
+                  onPress={self.onNewPressed.bind(self, bl, meta)}>
+                {counter}
+              </TouchableHighlight>
+            </View>
           </View>
           {error}
         </View>
@@ -1039,7 +1041,7 @@ var styles = StyleSheet.create({
     paddingHorizontal: 5,
   },
   itemButton: {
-    height: 70,
+    height: 60,
     marginLeft: 10,
     // marginLeft: 10,
     borderColor: '#ffffff',
@@ -1097,12 +1099,15 @@ var styles = StyleSheet.create({
   },
   error: {
     // paddingLeft: 5,
-    position: 'absolute',
-    bottom: -20,
+    // position: 'absolute',
+    // top: 70,
+    // marginBottom: -30,
+    marginTop: -10,
     backgroundColor: 'transparent'
   },
   errorText: {
     fontSize: 14,
+    marginLeft: 10,
     color: '#a94442'
   },
   items: {
