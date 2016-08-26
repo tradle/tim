@@ -2,7 +2,7 @@
 
 var path = require('path')
 var parseURL = require('url').parse
-import {
+import ReactNative, {
   Alert,
   NetInfo,
   Platform,
@@ -15,6 +15,7 @@ import Keychain from 'react-native-keychain'
 import Push from '../utils/push'
 
 global.AsyncStorage = AsyncStorage
+
 var path = require('path')
 var BeSafe = require('asyncstorage-backup')
 var Reflux = require('reflux');
@@ -245,7 +246,7 @@ var Store = Reflux.createStore({
       self.addVerificationsToFormModel(m)
     })
     utils.setModels(models);
-
+AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.length))
     // if (true) {
     if (false) {
       return this.ready = this.wipe()
@@ -3015,7 +3016,7 @@ var Store = Reflux.createStore({
       }
     }
 
-    let result = this.filterResult(foundResources. lastId)
+    let result = this.filterResult(foundResources, lastId)
     if (params.isForgetting)
       return result
     return result //.reverse();
