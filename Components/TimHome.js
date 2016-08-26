@@ -608,9 +608,6 @@ class TimHome extends Component {
                         </View>
                       </TouchableHighlight>
                     </FadeInView>
-                 </View>
-                </View>
-/*
                     <FadeInView>
                       <TouchableHighlight  onPress={() => {
                         this.pairDevices(this.showOfficialAccounts.bind(this))
@@ -620,8 +617,8 @@ class TimHome extends Component {
                         </View>
                       </TouchableHighlight>
                     </FadeInView>
-
- */
+                 </View>
+                </View>
 
     return (
       <View style={styles.scroll}>
