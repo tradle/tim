@@ -760,7 +760,7 @@ var styles = StyleSheet.create({
     marginTop: 20,
     justifyContent: 'center',
     backgroundColor: '#467EAE',
-    shadowOpacity: 0.5,
+    // shadowOpacity: 0.5,
     shadowColor: 'lightblue',
     shadowRadius: 10,
     shadowOffset: {width: 0.5, height: 0.5},
