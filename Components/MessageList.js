@@ -44,12 +44,7 @@ import {
 
 import ActivityIndicator from './ActivityIndicator'
 
-import iosStyles from '../styles/iosStyles'
-import androidStyles from '../styles/androidStyles'
-var platformStyles = Platform.OS === 'ios' ? iosStyles : androidStyles
-import {MenuIconIOS} from '../styles/iosStyles'
-import {MenuIconAndroid} from '../styles/androidStyles'
-var MenuIcon = Platform.OS === 'ios' ? MenuIconIOS : MenuIconAndroid
+import platformStyles, {MenuIcon} from '../styles/platform'
 
 var currentMessageTime
 
@@ -438,7 +433,7 @@ class MessageList extends Component {
     if (!content) {
       var isAllMessages = model.isInterface  &&  model.id === constants.TYPES.MESSAGE;
       var maxHeight = Dimensions.get('window').height - (Platform.OS === 'android' ? 77 : 64) - (this.state.isConnected ? 0 : 30)
-      content = <GiftedMessenger style={{paddingHorizontal: 10, marginTop: 5}}
+      content = <GiftedMessenger style={{paddingHorizontal: 10}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
         ref={(c) => this._GiftedMessenger = c}
         loadEarlierMessagesButton={this.state.loadEarlierMessages}
         onLoadEarlierMessages={this.onLoadEarlierMessages.bind(this)}

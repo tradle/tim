@@ -372,7 +372,7 @@ class MessageRow extends Component {
     var hdrStyle = {backgroundColor: '#289427'} //this.props.bankStyle.PRODUCT_BG_COLOR ? {backgroundColor: this.props.bankStyle.PRODUCT_BG_COLOR} : {backgroundColor: '#289427'}
     var orgName = resource.from.organization  ? resource.from.organization.title : ''
     renderedRow.splice(0, 0, <View  key={this.getNextKey()} style={[styles.verifiedHeader, hdrStyle, {marginHorizontal: -8, marginTop: -7, marginBottom: 7, paddingBottom: 5}]}>
-                       <Text style={{fontSize: 17, fontWeight: '600', alignSelf: 'center', color: '#fff'}}>{translate('issuedBy', orgName)}</Text>
+                       <Text style={{fontSize: 17, alignSelf: 'center', color: '#fff'}}>{translate('issuedBy', orgName)}</Text>
                     </View>
                     );
     let title = translate(model)
@@ -1091,10 +1091,10 @@ class MessageRow extends Component {
       return (
         <View style={style} key={this.getNextKey()}>
           <View style={{flex: 1, flexDirection: 'column'}}>
-            <Text style={[styles.verySmallLetters, {color: '#555555'}]}>{propTitle}</Text>
+            <Text style={[styles.verySmallLetters, {color: '#333333'}]}>{propTitle}</Text>
           </View>
           <View style={{flex: 1, flexDirection: 'column'}}>
-            <Text style={[styles.verySmallLetters, {fontWeight: '500'}]}>{val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')}</Text>
+            <Text style={styles.verySmallLetters}>{val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')}</Text>
           </View>
         </View>
       )
@@ -1112,7 +1112,7 @@ class MessageRow extends Component {
             <Text style={[styles.descriptionB, color]}>{propTitle}</Text>
           </View>
           <View style={{flex: 1, flexDirection: 'column'}}>
-            <Text style={[styles.descriptionB, color, {fontWeight: '600'}]}>{val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')}</Text>
+            <Text style={[styles.descriptionB, color]}>{val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')}</Text>
           </View>
        </View>
       )
@@ -1180,13 +1180,13 @@ class MessageRow extends Component {
     }
 
 
-    var hasPhotos = resource  &&  resource.photos
+    var hasPhotos = resource  &&  resource.photos  &&  resource.photos.length
     var photo = hasPhotos
               ? <Image source={{uri: utils.getImageUri(resource.photos[0].url)}}  style={styles.cellImage} />
               : <View />;
     var headerStyle = {paddingTop: 5, alignSelf: 'center'}
     var header =  <View style={headerStyle}>
-                    <Text style={[styles.resourceTitle, {fontSize: 20, color: '#B6C2A7', fontWeight: '600'}]}>{translate(model)}</Text>
+                    <Text style={[styles.resourceTitle, {fontSize: 20, color: '#B6C2A7'}]}>{translate(model)}</Text>
                   </View>
     header = hasPhotos
             ?  <View style={[styles.rowContainer, styles.verification]}>
@@ -1594,7 +1594,7 @@ var styles = StyleSheet.create({
   },
   verificationHeaderText: {
     fontSize: 17,
-    fontWeight: '600',
+    fontWeight: '500',
     alignSelf: 'center',
     color: '#FBFFE5'
   },

@@ -22,8 +22,8 @@ var MessageList = require('./MessageList')
 var defaultBankStyle = require('../styles/bankStyle.json')
 var buttonStyles = require('../styles/buttonStyles');
 import ActionSheet from 'react-native-actionsheet'
-import iosStyles from '../styles/iosStyles'
-import androidStyles from '../styles/androidStyles'
+
+import platformStyles from '../styles/platform'
 import { signIn } from '../utils/localAuth'
 
 const TALK_TO_EMPLOYEE = '1'
@@ -50,7 +50,6 @@ import {
 } from 'react-native'
 
 import React, { Component } from 'react'
-let platformStyles = Platform.OS === 'ios' ? iosStyles : androidStyles
 
 class ResourceView extends Component {
   constructor(props) {

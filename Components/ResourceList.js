@@ -45,9 +45,7 @@ import {
   Platform
 } from 'react-native';
 
-import iosStyles from '../styles/iosStyles'
-import androidStyles from '../styles/androidStyles'
-var platformStyles = Platform.OS === 'ios' ? iosStyles : androidStyles
+import platformStyles from '../styles/platform'
 
 const SearchBar = Platform.OS === 'android' ? null : require('react-native-search-bar')
 

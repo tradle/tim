@@ -34,9 +34,7 @@ import {
 } from 'react-native'
 
 import React, { Component } from 'react'
-import iosStyles from '../styles/iosStyles'
-import androidStyles from '../styles/androidStyles'
-var platformStyles = Platform.OS === 'ios' ? iosStyles : androidStyles
+import platformStyles from '../styles/platform'
 
 class MessageView extends Component {
   props: {
