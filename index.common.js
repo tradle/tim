@@ -50,7 +50,6 @@ var Icon = require('react-native-vector-icons/Ionicons');
 var Actions = require('./Actions/Actions');
 import * as AutomaticUpdates from './utils/automaticUpdates';
 import { signIn } from './utils/localAuth'
-// var Device = require('react-native-device');
 
 var reactMixin = require('react-mixin');
 import {
@@ -68,9 +67,7 @@ import {
   Text
 } from 'react-native';
 
-import iosStyles from './styles/iosStyles'
-import androidStyles from './styles/androidStyles'
-var platformStyles = Platform.OS === 'ios' ? iosStyles : androidStyles
+import platformStyles from './styles/platform'
 
 let originalGetDefaultProps = Text.getDefaultProps;
 Text.defaultProps = function() {
