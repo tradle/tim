@@ -3,7 +3,8 @@ import * as MaterialIcons from 'react-icons/md'
 import { Text } from 'react-native'
 
 const normalized = {
-  'md-finger-print': 'md-fingerprint'
+  'md-finger-print': 'md-fingerprint',
+  'ios-checkmark-circle-outline': 'ios-checkmark-empty'
 }
 
 module.exports = props => {
