@@ -313,7 +313,7 @@ class MessageList extends Component {
         passProps: {
           model: model,
           resource: resource,
-          chat: this.props.resource,
+          chat: this.props.resource,  // chat is the FI
           bankStyle: this.props.bankStyle
         }
       }
