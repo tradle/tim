@@ -46,6 +46,7 @@ const ROOT_HASH = constants.ROOT_HASH
 const PREV_HASH = constants.PREV_HASH
 const SIG = constants.SIG
 const FORM = constants.TYPES.FORM
+const PASSWORD_ENC = 'hex'
 
 var LocalizedStrings = require('react-native-localization')
 let defaultLanguage = new LocalizedStrings({ en: {}, nl: {} }).getLanguage()
@@ -765,16 +766,6 @@ var utils = {
     })
   },
 
-  hashPassword(pass) {
-    // TODO: pbkdf2Sync with ~100000 iterations
-    return crypto.createHash('sha256').update(pass).digest('base64')
-    // return Q.ninvoke(crypto, 'randomBytes', 64)
-    //   .then((salt) => {
-    //     let key = crypto.pbkdf2Sync(pass, salt, 10000, 256, 'sha256')
-    //     return `${key.toString('base64')}:${salt.toString('base64')}`
-    //   })
-  },
-
   joinURL(...parts) {
     var first = parts.shift()
     var rest = parts.join('/')
@@ -892,11 +883,76 @@ var utils = {
       }
     }
   },
+
+  generateSalt: function (opts) {
+    opts = opts || {}
+    const salt = crypto.randomBytes(opts.length || 32)
+    return opts.enc ? salt.toString(opts.enc) : salt
+  },
+
+  hashPassword(opts) {
+    if (typeof opts === 'string') opts = { password: opts }
+
+    return crypto.createHash('sha256')
+      .update(opts.password + (opts.salt || ''))
+      .digest(opts.enc || PASSWORD_ENC)
+
+    // TODO: pbkdf2Sync with ~100000 iterations
+    // return utils.kdf(opts)
+  },
+
+  kdf: function (opts) {
+    if (typeof opts === 'string') opts = { password: opts }
+
+    const password = opts.password
+    const salt = opts.salt || utils.generateSalt({ length: opts.saltBytes || 32 })
+    const iterations = opts.iterations || 10000
+    const keyBytes = opts.keyBytes || 32
+    const digest = opts.digest || 'sha256'
+    const result = crypto.pbkdf2Sync(password, salt, iterations, keyBytes, digest)
+    const enc = opts.enc || PASSWORD_ENC
+    return result.toString(enc) + salt.toString(enc)
+  },
+
+  setPassword: function (username, password) {
+    return Keychain.setGenericPassword(username, password, ENV.serviceID)
+  },
+
   getPassword: function (username) {
     return Keychain.getGenericPassword(username, ENV.serviceID)
   },
-  setPassword: function (username, password) {
-    return Keychain.setGenericPassword(username, password, ENV.serviceID)
+
+  /**
+   * store hashed and salted password
+   * @param {[type]} username [description]
+   * @param {[type]} password [description]
+   */
+  setHashedPassword: function (username, password) {
+    const salt = utils.generateSalt({ enc: PASSWORD_ENC })
+    const hash = utils.hashPassword({ password, salt })
+    return utils.setPassword(username, hash + salt)
+  },
+
+  getHashedPassword: function (username) {
+    return utils.getPassword(username)
+      .then(encoded => {
+        const salt = encoded.slice(-64) // 32 bytes in hex
+        const hash = encoded.slice(0, encoded.length - 64)
+        return { hash, salt }
+      })
+  },
+
+  checkHashedPassword: function (username, password) {
+    return utils.getHashedPassword(username)
+      .then(stored => {
+        return stored.hash === utils.hashPassword({
+          password,
+          salt: stored.salt
+        })
+      })
+      .catch(err => {
+        return false
+      })
   },
 
   resetPasswords: function () {
