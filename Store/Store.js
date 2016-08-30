@@ -247,7 +247,7 @@ var Store = Reflux.createStore({
       self.addVerificationsToFormModel(m)
     })
     utils.setModels(models);
-AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.length))
+
     // if (true) {
     if (false) {
       return this.ready = this.wipe()
