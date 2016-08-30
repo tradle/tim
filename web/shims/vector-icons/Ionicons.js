@@ -9,6 +9,10 @@ const normalized = {
 
 module.exports = props => {
   const Icon = getIconComponent(props.name)
+  if (__DEV__ && !Icon) {
+    throw new Error('icon not found: ' + props.name)
+  }
+
   return Icon ? <Icon {...props} /> : <Text>{props.name} not found</Text>
 }
 
