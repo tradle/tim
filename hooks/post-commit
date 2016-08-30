@@ -1,2 +1,2 @@
 #!/bin/bash
-./update_version.sh
+./hooks/update_version.sh
