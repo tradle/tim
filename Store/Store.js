@@ -12,7 +12,7 @@ import ReactNative, {
 
 import AsyncStorage from './Storage'
 import * as LocalAuth from '../utils/localAuth'
-import Keychain from 'react-native-keychain'
+var Keychain// = require('../utils/keychain')
 import Push from '../utils/push'
 // import DeviceInfo from 'react-native-device-info'
 
@@ -3714,100 +3714,144 @@ var Store = Reflux.createStore({
       }
     }
   },
-  getDriver(me) {
-    if (driverPromise) return driverPromise
 
-    var loadIdentityAndKeys
-    var allMyIdentities = list[MY_IDENTITIES]
-    var currentIdentity
-
+  // TODO: simplify getDriver to use this
+  loadIdentityAndKeys(me) {
     var mePub = me[ROOT_HASH] ? list[IDENTITY + '_' + me[ROOT_HASH]].value.pubkeys : me.pubkeys
     var mePriv
-    var publishedIdentity
+    var identity
+    var allMyIdentities = list[MY_IDENTITIES]
     if (allMyIdentities) {
       var all = allMyIdentities.value.allIdentities
       var curId = allMyIdentities.value.currentIdentity
-      all.forEach(function(id) {
+      all.some(id => {
         if (id.id === curId) {
-          currentIdentity = id
+          // currentIdentity = id
           mePriv = id.privkeys
-          publishedIdentity = id.publishedIdentity
-          mePub = mePub || publishedIdentity.pubkeys
+          identity = id.publishedIdentity
+          mePub = mePub || identity.pubkeys
+          return true
         }
       })
     }
-    // debugger
-    if (!mePub  &&  !mePriv) {
-      // if (__DEV__  &&  !me.securityCode) {
-      //   var profiles = {}
-      //   var identities = {}
-      //   myIdentity.forEach(function(r) {
-      //     if (r[TYPE] == IDENTITY)
-      //       identities[r[ROOT_HASH]] = r
-      //     else
-      //       profiles[r[ROOT_HASH]] = r
-      //   })
-      //   for (var hash in profiles) {
-      //     if (!profiles[hash].securityCode  &&  me.firstName === profiles[hash].firstName) {
-      //       var identity = identities[hash]
-      //       mePub = identity.pubkeys  // hardcoded on device
-      //       mePriv = identity.privkeys
-      //       me[NONCE] = identity[NONCE]
-      //       break
-      //     }
-      //   }
-      // }
-      let encryptionKey
-      loadIdentityAndKeys = this.createNewIdentity()
-      .spread((eKey, identityInfo) => {
-        encryptionKey = eKey
-        publishedIdentity = identityInfo.identity
-        mePub = publishedIdentity.pubkeys
-        mePriv = identityInfo.keys
-        return encryptionKey
+
+    if (mePub) {
+      const lookupKeys = Keychain
+        ? Keychain.lookupKeys(mePub)
+        : Q.resolve(mePriv.map(k => tradleUtils.importKey(k)))
+
+      return Q.all([
+        lookupKeys,
+        utils.getPassword(ENCRYPTION_KEY)
+      ])
+      .spread((keys, encryptionKey) => {
+        return { keys, encryptionKey, identity }
       })
-      // const encryptionKey = crypto.randomBytes(32).toString('hex')
-      // const globalSalt = crypto.randomBytes(32).toString('hex')
-      // const genIdentity = Q.ninvoke(tradleUtils, 'newIdentity', {
-      //     networkName,
-      //     keys: KEY_SET
-      //   })
-      //   .then(identityInfo => {
-      //     publishedIdentity = identityInfo.identity
-      //     mePub = publishedIdentity.pubkeys
-      //     mePriv = identityInfo.keys
-      //   })
-
-      // loadIdentityAndKeys = Q.all([
-      //   utils.setPassword(ENCRYPTION_KEY, encryptionKey).then(() => encryptionKey),
-      //   genIdentity
-      // ])
-      // .spread(encryptionKey => encryptionKey)
-
-        // bringing it back!
-        // if (__DEV__  &&  !keys.some((k) => k.type() === 'dsa')) {
-        // if (!keys.some((k) => k.type() === 'dsa')) {
-        //   keys.push(Keys.DSA.gen({
-        //     purpose: 'sign'
-        //   }))
-        // }
     }
-    else
-      loadIdentityAndKeys = utils.getPassword(ENCRYPTION_KEY)
 
+    return this.createNewIdentity()
+      .spread((encryptionKey, identityInfo) => {
+        return {
+          ...identityInfo,
+          encryptionKey
+        }
+      })
+  },
+
+  getDriver(me) {
+    if (driverPromise) return driverPromise
+
+    // var loadIdentityAndKeys
+    // var allMyIdentities = list[MY_IDENTITIES]
+    // var currentIdentity
+
+    // var mePub = me[ROOT_HASH] ? list[IDENTITY + '_' + me[ROOT_HASH]].value.pubkeys : me.pubkeys
+    // var mePriv
+    // var publishedIdentity
+    // if (allMyIdentities) {
+    //   var all = allMyIdentities.value.allIdentities
+    //   var curId = allMyIdentities.value.currentIdentity
+    //   all.forEach(function(id) {
+    //     if (id.id === curId) {
+    //       currentIdentity = id
+    //       mePriv = id.privkeys
+    //       publishedIdentity = id.publishedIdentity
+    //       mePub = mePub || publishedIdentity.pubkeys
+    //     }
+    //   })
+    // }
+    // // debugger
+    // if (!mePub  &&  !mePriv) {
+    //   // if (__DEV__  &&  !me.securityCode) {
+    //   //   var profiles = {}
+    //   //   var identities = {}
+    //   //   myIdentity.forEach(function(r) {
+    //   //     if (r[TYPE] == IDENTITY)
+    //   //       identities[r[ROOT_HASH]] = r
+    //   //     else
+    //   //       profiles[r[ROOT_HASH]] = r
+    //   //   })
+    //   //   for (var hash in profiles) {
+    //   //     if (!profiles[hash].securityCode  &&  me.firstName === profiles[hash].firstName) {
+    //   //       var identity = identities[hash]
+    //   //       mePub = identity.pubkeys  // hardcoded on device
+    //   //       mePriv = identity.privkeys
+    //   //       me[NONCE] = identity[NONCE]
+    //   //       break
+    //   //     }
+    //   //   }
+    //   // }
+    //   let encryptionKey
+    //   loadIdentityAndKeys = this.createNewIdentity()
+    //   .spread((eKey, identityInfo) => {
+    //     encryptionKey = eKey
+    //     publishedIdentity = identityInfo.identity
+    //     mePub = publishedIdentity.pubkeys
+    //     mePriv = identityInfo.keys
+    //     return encryptionKey
+    //   })
+    //   // const encryptionKey = crypto.randomBytes(32).toString('hex')
+    //   // const globalSalt = crypto.randomBytes(32).toString('hex')
+    //   // const genIdentity = Q.ninvoke(tradleUtils, 'newIdentity', {
+    //   //     networkName,
+    //   //     keys: KEY_SET
+    //   //   })
+    //   //   .then(identityInfo => {
+    //   //     publishedIdentity = identityInfo.identity
+    //   //     mePub = publishedIdentity.pubkeys
+    //   //     mePriv = identityInfo.keys
+    //   //   })
+
+    //   // loadIdentityAndKeys = Q.all([
+    //   //   utils.setPassword(ENCRYPTION_KEY, encryptionKey).then(() => encryptionKey),
+    //   //   genIdentity
+    //   // ])
+    //   // .spread(encryptionKey => encryptionKey)
+
+    //     // bringing it back!
+    //     // if (__DEV__  &&  !keys.some((k) => k.type() === 'dsa')) {
+    //     // if (!keys.some((k) => k.type() === 'dsa')) {
+    //     //   keys.push(Keys.DSA.gen({
+    //     //     purpose: 'sign'
+    //     //   }))
+    //     // }
+    // }
+    // else
+    //   loadIdentityAndKeys = utils.getPassword(ENCRYPTION_KEY)
 
     if (me.language)
       language = list[utils.getId(me.language)] && list[utils.getId(me.language)].value
 
-    return driverPromise = loadIdentityAndKeys.then(encryptionKey => {
-      me['privkeys'] = mePriv
+    return driverPromise = this.loadIdentityAndKeys(me)
+    .then(result => {
+      if (!Keychain) me['privkeys'] = result.keys.map(k => k.toJSON(true))
       me[NONCE] = me[NONCE] || this.getNonce()
       // driverInfo.deviceID = result.deviceID
       return this.buildDriver({
-        identity: publishedIdentity,
-        keys: mePriv,
+        identity: result.identity,
+        keys: result.keys,
         encryption: {
-          key: new Buffer(encryptionKey, 'hex')
+          key: new Buffer(result.encryptionKey, 'hex')
         }
       })
     })
@@ -3833,10 +3877,10 @@ var Store = Reflux.createStore({
   createNewIdentity() {
     const encryptionKey = crypto.randomBytes(32).toString('hex')
     // const globalSalt = crypto.randomBytes(32).toString('hex')
-    const genIdentity = Q.ninvoke(tradleUtils, 'newIdentity', {
-        networkName,
-        // keys: KEY_SET
-      })
+    const genIdentity = Keychain
+      ? Keychain.generateNewSet({ networkName })
+          .then(keys => Q.ninvoke(tradleUtils, 'newIdentityForKeys', keys))
+      : Q.ninvoke(tradleUtils, 'newIdentity', { networkName })
 
     return Q.all([
       utils.setPassword(ENCRYPTION_KEY, encryptionKey).then(() => encryptionKey),

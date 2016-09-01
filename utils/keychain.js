@@ -1,60 +1,18 @@
 import { createHash } from 'crypto'
 import typeforce from 'typeforce'
-import extend from 'xtend/mutable'
 import Q from 'q'
-import kiki from '@tradle/kiki'
 import * as ec from 'react-native-ecc'
-// import * as RNKeychain from 'react-native-keychain'
-import { pick } from './utils'
+import utils from './utils'
 import { serviceID } from './env'
-ec.setServiceID(env.serviceID)
+ec.setServiceID(serviceID)
 
 import { ec as ellipticEC } from 'elliptic'
+import { utils as tradleUtils } from '@tradle/engine'
+import nkeySE from './nkey-se'
 
-let debug = require('debug')('tim-keychain')
-
-let rejectNotFound = function () {
-  return Q.reject(new Error('NotFound'))
-}
-
-let ellipticCurves = {}
-let getCurve = function (name) {
-  if (!ellipticCurves[name]) ellipticCurves[name] = new ellipticEC(name)
-
-  return ellipticCurves[name]
-}
-
-let defaultKeySet = [
-  {
-    type: 'bitcoin',
-    purpose: 'payment'
-  },
-  {
-    type: 'bitcoin',
-    purpose: 'messaging'
-  },
-  // {
-  //   type: 'bitcoin',
-  //   purpose: 'ecdh',
-  //   privExportable: true
-  // },
-  {
-    type: 'ec',
-    curve: 'p256',
-    purpose: 'sign',
-    secureEnclave: true
-  },
-  {
-    type: 'ec',
-    curve: 'p256',
-    purpose: 'update',
-    secureEnclave: true
-  },
-  {
-    type: 'dsa',
-    purpose: 'sign'
-  }
-]
+const debug = require('debug')('tradle:app:keychain')
+const ellipticCurves = {}
+const DEFAULT_KEY_SET = tradleUtils.defaultKeySet()
 
 export const PASSWORD_ITEM_KEY = 'app-password'
 
@@ -63,13 +21,16 @@ export function generateNewSet (opts = {}) {
     networkName: 'String'
   }, opts)
 
-  return Q.all(defaultKeySet.map(function (keyProps) {
-    keyProps = extend({}, keyProps)
-    let isInSecureEnclave = keyProps.secureEnclave
-    delete keyProps.secureEnclave
-    return isInSecureEnclave
+  return Q.all(DEFAULT_KEY_SET.map(function (keyProps) {
+    keyProps = { ...keyProps } // defensive copy
+    const gen = isKeyInSecureEnclave(keyProps)
       ? createSecureEnclaveKey(keyProps)
       : createKeychainKey(keyProps, opts.networkName)
+
+    return gen.then(key => {
+      key.set('purpose', keyProps.purpose)
+      return key
+    })
   }))
 }
 
@@ -83,21 +44,16 @@ export function saveKey (pub, priv) {
   )
 }
 
-// function toKey (keyProps) {
-//   let key = ec.keyFromPublic(new Buffer(keyProps.value, ec.encoding))
-//   return extendKey(key, keyProps)
-// }
-
 export function lookupKeys (keys) {
   return Q.all(keys.map(lookupKey))
 }
 
 function lookupKey (pubKey) {
   typeforce({
-    value: 'String'
+    pub: 'String'
   }, pubKey)
 
-  let isInSecureEnclave = pubKey.curve && pubKey.type !== 'bitcoin'
+  let isInSecureEnclave = isKeyInSecureEnclave(pubKey)
   let secureEnclaveLookup = isInSecureEnclave
     ? lookupSecureEnclaveKey(pubKey)
     : rejectNotFound()
@@ -106,12 +62,8 @@ function lookupKey (pubKey) {
     ? rejectNotFound()
     : lookupKeychainKey(pubKey)
 
-  let pubKeyString = pubKey.value
+  let pubKeyString = pubKey.pub
   return secureEnclaveLookup
-    .then(function (secKey) {
-      // console.log('found', pubKeyString)
-      return extendKey(secKey, pubKey)
-    })
     .catch(function (err) {
       if (err.message !== 'NotFound') throw err
 
@@ -121,8 +73,8 @@ function lookupKey (pubKey) {
   function fromKeychain () {
     return keychainLookup
       .then(function (priv) {
-        var priv = extend({ priv }, pubKey)
-        return kiki.toKey(priv)
+        var priv = { ...pubKey, priv }
+        return tradleUtils.importKey(priv)
       })
       .catch(function (err) {
         console.log('not found', pubKeyString)
@@ -131,16 +83,16 @@ function lookupKey (pubKey) {
   }
 }
 
-function lookupKeychainKey (pub) {
-  return utils.getPassword(pub.value)
+function lookupKeychainKey (pubKey) {
+  return utils.getPassword(pubKey.pub)
 }
 
-async function lookupSecureEnclaveKey (pub) {
-  let keyPair = getCurve(pub.curve).keyFromPublic(new Buffer(pub.value, 'hex'))
-  let compressed = keyPair.getPublic(true, true)
-  let uncompressed = keyPair.getPublic(false, true)
-  let tryCompressed = Q.ninvoke(ec, 'lookupKey', new Buffer(compressed))
-  let tryUncompressed = Q.ninvoke(ec, 'lookupKey', new Buffer(uncompressed))
+async function lookupSecureEnclaveKey (pubKey) {
+  const keyPair = getCurve(pubKey.curve).keyFromPublic(new Buffer(pubKey.pub, 'hex'))
+  const compressed = keyPair.getPublic(true, true)
+  const uncompressed = keyPair.getPublic(false, true)
+  const tryCompressed = Q.ninvoke(ec, 'lookupKey', new Buffer(compressed))
+  const tryUncompressed = Q.ninvoke(ec, 'lookupKey', new Buffer(uncompressed))
   let key
   try {
     key = await tryCompressed
@@ -148,57 +100,40 @@ async function lookupSecureEnclaveKey (pub) {
     key = await tryUncompressed
   }
 
-  return key
+  return nkeySE.fromJSON({ ...pubKey, ...key })
 }
 
 function createKeychainKey (keyProps, networkName) {
-  let key = extend({}, keyProps)
-  if (key.type === 'bitcoin') {
-    key.networkName = networkName
+  keyProps = { ...keyProps }
+  if (keyProps.type === 'bitcoin') {
+    keyProps.networkName = networkName
   }
 
-  key = kiki.toKey(key, true)
-  return saveKey(key.pubKeyString(), key.exportPrivate().priv)
+  const key = tradleUtils.genKey(keyProps)
+  return saveKey(key.pubKeyString, key.toJSON(true).priv)
     .then(() => key)
 }
 
 function createSecureEnclaveKey (keyProps) {
   // { sign, verify, pub }
-  return Q.ninvoke(ec, 'keyPair', keyProps.curve)
-    .then((key) => {
-      console.log('made', key.pub.toString('hex'))
-      return extendKey(key, keyProps)
-    })
+  return Q.ninvoke(nkeySE, 'gen', keyProps)
+  // return Q.ninvoke(ec, 'keyPair', keyProps.curve)
+  //   .then((key) => {
+  //     console.log('made', key.pub.toString('hex'))
+  //     return extendKey(key, keyProps)
+  //   })
 }
 
-function extendKey (key, keyProps) {
-  let kikiKey = kiki.toKey(extend({
-    pub: getCurve(keyProps.curve).keyFromPublic(key.pub)
-  }, keyProps))
+function rejectNotFound () {
+  return Q.reject(new Error('NotFound'))
+}
 
-  kikiKey._sign = key.sign
-  // let maxAttempts = 3
-  // kikiKey._sign = function (hash, cb) {
-  //   let attempts = 0
-  //   trySign()
+function getCurve (name) {
+  if (!ellipticCurves[name]) ellipticCurves[name] = new ellipticEC(name)
 
-  //   function trySign () {
-  //     key.sign(hash, function (err, sig) {
-  //       if (!err) return cb(null, sig)
+  return ellipticCurves[name]
+}
 
-  //       if (!/34018/.test(err.message)) {
-  //         if (attempts++ < maxAttempts) {
-  //           debug('34018...trying again')
-  //           trySign()
-  //         }
-
-  //         debug('giving up on 34018')
-  //         return cb(err)
-  //       }
-
-  //       return trySign()
-  //     })
-  //   }
-  // }
-  return kikiKey
+function isKeyInSecureEnclave (key) {
+  return key.curve === 'p256'
 }
