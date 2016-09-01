@@ -56,9 +56,13 @@ var config = module.exports = {
   //   filename: 'bundle.js'
   // },
   plugins: [
+    // new HasteResolverPlugin({
+    //   platform: 'web',
+    //   blacklist: ['lib']
+    // }),
     new HasteResolverPlugin({
       platform: 'web',
-      blacklist: ['lib']
+      nodeModules: ['react-web']
     }),
     new webpack.optimize.DedupePlugin(),
     new webpack.DefinePlugin({

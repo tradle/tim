@@ -594,6 +594,18 @@ class TimHome extends Component {
               </View>
 
                           // <Image style={{position: 'absolute', left: 0, opacity: 0.5, width: 100, height: 100}} source={TradleWhite}></Image>
+    let pairingButton = !utils.isWeb() && (
+      <FadeInView>
+        <TouchableHighlight  onPress={() => {
+          this.pairDevices(this.showOfficialAccounts.bind(this))
+          }} underlayColor='transparent'>
+          <View style={[styles.signIn, {shadowColor: '#245c8c', backgroundColor: 'lightblue'}]}>
+            <Text style={{backgroundColor: 'transparent', color: '#467EAE', fontSize: 20, alignSelf: 'center', fontWeight: '600'}}>{translate('I have another Tradle device')}</Text>
+          </View>
+        </TouchableHighlight>
+      </FadeInView>
+    )
+
     let regView = utils.getMe()
                 ? <View/>
                 : <View>
@@ -608,15 +620,7 @@ class TimHome extends Component {
                         </View>
                       </TouchableHighlight>
                     </FadeInView>
-                    <FadeInView>
-                      <TouchableHighlight  onPress={() => {
-                        this.pairDevices(this.showOfficialAccounts.bind(this))
-                        }} underlayColor='transparent'>
-                        <View style={[styles.signIn, {shadowColor: '#245c8c', backgroundColor: 'lightblue'}]}>
-                          <Text style={{backgroundColor: 'transparent', color: '#467EAE', fontSize: 20, alignSelf: 'center', fontWeight: '600'}}>{translate('I have another Tradle device')}</Text>
-                        </View>
-                      </TouchableHighlight>
-                    </FadeInView>
+                    {pairingButton}
                  </View>
                 </View>
 

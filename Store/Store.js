@@ -3943,7 +3943,7 @@ var Store = Reflux.createStore({
         identity: result.identity,
         keys: result.keys,
         encryption: {
-          key: new Buffer(encryptionKey, 'hex')
+          key: new Buffer(result.encryptionKey, 'hex')
         }
       })
     })
