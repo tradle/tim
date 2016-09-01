@@ -3893,7 +3893,12 @@ var Store = Reflux.createStore({
 
     return driverPromise = this.loadIdentityAndKeys(me)
     .then(result => {
-      if (!Keychain) me['privkeys'] = result.keys.map(k => k.toJSON(true))
+      if (!Keychain) {
+        me['privkeys'] = result.keys.map(k => {
+          return k.toJSON ? k.toJSON(true) : k
+        })
+      }
+
       me[NONCE] = me[NONCE] || this.getNonce()
       // driverInfo.deviceID = result.deviceID
       return this.buildDriver({
