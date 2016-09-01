@@ -96,6 +96,7 @@ const SELF_INTRODUCTION = constants.TYPES.SELF_INTRODUCTION
 const FORGET_ME         = constants.TYPES.FORGET_ME
 const FORGOT_YOU        = constants.TYPES.FORGOT_YOU
 
+const SHARED_RESOURCE     = 'tradle.SharedResource'
 const MY_IDENTITIES_TYPE  = 'tradle.MyIdentities'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const MY_PRODUCT          = 'tradle.MyProduct'
@@ -566,10 +567,18 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
         let r = list[p].value
         let m = utils.getModel(r[TYPE]).value
         if (m.interfaces  &&  m.interfaces.indexOf(MESSAGE) !== -1) {
-          let fromId = utils.getId(r.from)
-          let rep = list[meId === fromId ? utils.getId(r.to) : fromId].value
-          let orgId = rep.organization ? utils.getId(rep.organization) : utils.getId(rep)
-          this.addMessagesToChat(orgId, r, true)
+          if (r.sharedWith) {
+            r.sharedWith.forEach((shareInfo) => {
+              let orgId = utils.getId(list[shareInfo.bankRepresentative].value.organization)
+              this.addMessagesToChat(orgId, r, true, shareInfo.timeShared)
+            })
+          }
+          else {
+            let fromId = utils.getId(r.from)
+            let rep = list[meId === fromId ? utils.getId(r.to) : fromId].value
+            let orgId = rep.organization ? utils.getId(rep.organization) : utils.getId(rep)
+            this.addMessagesToChat(orgId, r, true)
+          }
         }
       }
       for (let id in chatMessages) {
@@ -1469,19 +1478,19 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
       debugger
     });
   },
-  addMessagesToChat(id, r, isInit) {
+  addMessagesToChat(id, r, isInit, timeShared) {
     if (r.documentCreated  &&  !isInit)
       return
     let messages = chatMessages[id]
     let rid = utils.getId(r)
     if (messages) {
       if (!isInit) {
-        let idx
+        let idx = -1
         for (let i=0; i<messages.length  &&  !idx; i++)
           if (messages[i].id === rid)
             idx = i
 
-        if (idx)
+        if (idx !== -1)
           messages.splice(idx, 1)
       }
     }
@@ -1489,7 +1498,7 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
       messages = []
       chatMessages[id] = messages
     }
-    messages.push({id: utils.getId(r), time: r.time})
+    messages.push({id: utils.getId(r), time: timeShared ? timeShared : r.time})
   },
   deleteMessageFromChat(id, r) {
     let messages = chatMessages[id]
@@ -2197,8 +2206,13 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
 
   onShareOne(resource, to, formResource) {
     var self = this
-    if (to[TYPE] === ORGANIZATION)
+    var toOrgId
+    if (to[TYPE] === ORGANIZATION) {
+      toOrgId = utils.getId(to)
       to = this.getRepresentative(ORGANIZATION + '_' + to[ROOT_HASH])
+    }
+    else
+      toOrgId = utils.getId(to.organization)
     if (!to)
       return
 
@@ -2228,6 +2242,15 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
       batch.push({type: 'put', key: key, value: r})
       var toId = utils.getId(to)
       var time = new Date().getTime()
+      let sh = {
+        [TYPE]: SHARED_RESOURCE,
+        [ROOT_HASH]: self.getNonce(),
+        resource: self.buildRef(resource),
+        from: resource.from,
+        to: resource.to,
+        time: time
+      }
+      batch.push({type: 'put', key: utils.getId(sh), value: sh})
       if (resource[ROOT_HASH]) {
         key = utils.getId(resource)
         var ver = list[key].value
@@ -2246,6 +2269,8 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
       }
 
       form.sharedWith.push(self.createSharedWith(toId, time))
+      self.addMessagesToChat(toOrgId, form, false, time)
+      self.addMessagesToChat(toOrgId, ver, false, time)
 
       utils.optimizeResource(form)
       self.addLastMessage(form, batch, to)
@@ -2565,19 +2590,19 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
       if (containerProp  &&  (!r[containerProp]  ||  utils.getId(r[containerProp]) !== resourceId))
         continue;
       if (!query) {
-         foundResources[key] = r;
-         continue;
-       }
+        foundResources[key] = r
+        continue;
+      }
        // primitive filtering for this commit
-       var combinedValue = '';
-       for (var rr in props) {
-         if (r[rr] instanceof Array)
+      var combinedValue = '';
+      for (var rr in props) {
+        if (r[rr] instanceof Array)
           continue;
-         combinedValue += combinedValue ? ' ' + r[rr] : r[rr];
-       }
-       if (!combinedValue  ||  (combinedValue  &&  (!query || combinedValue.toLowerCase().indexOf(query.toLowerCase()) != -1))) {
-         foundResources[key] = r;
-       }
+        combinedValue += combinedValue ? ' ' + r[rr] : r[rr];
+      }
+      if (!combinedValue  ||  (combinedValue  &&  (!query || combinedValue.toLowerCase().indexOf(query.toLowerCase()) != -1))) {
+        foundResources[key] = r
+      }
     }
     // Don't show current 'me' contact in contact list or my identities list
     if (!containerProp  &&  me  &&  isIdentity) {
@@ -2873,14 +2898,16 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
         if (backlink  &&  r[backlink]) {
           var s = params.resource ? utils.getId(params.resource) : chatId
           if (s === utils.getId(r[backlink])) {
-            foundResources[key] = r;
+            foundResources[key] = {
+              value: r,
+              time: thisChatMessages[i].time
+            }
             // for Loading earlier resources we don't need to check limit untill we get to the lastId
             if (limit  &&  Object.keys(foundResources).length === limit) {
               let result = this.filterResult(foundResources)
               if (result.length === limit)
-                return result
-              else
-                foundResources = this.packResult(result)
+                return this.getSearchResult(result)
+              foundResources = this.packResult(result)
             }
           }
 
@@ -2955,7 +2982,10 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
         var rDoc = list[utils.getId(r.document)]
         if (!rDoc) {
           if (params.isForgetting) {
-            foundResources[key] = r
+            foundResources[key] = {
+              value: r,
+              time: thisChatMessages[i].time
+            }
           }
           continue
         }
@@ -2987,11 +3017,15 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
         var msg = this.fillMessage(r);
         if (!msg)
           msg = r
-        foundResources[key] = msg;
+        // foundResources[key] = msg;
+        foundResources[key] = {
+          value: msg,
+          time: thisChatMessages[i].time
+        }
         if (limit  &&  Object.keys(foundResources).length === limit) {
           let result = this.filterResult(foundResources)
           if (result.length === limit)
-            return result
+            return this.getSearchResult(result)
           foundResources = this.packResult(result)
         }
 
@@ -3005,29 +3039,41 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
         combinedValue += combinedValue ? ' ' + r[rr] : r[rr];
       }
       if (!combinedValue  ||  (combinedValue  &&  (!query || combinedValue.toLowerCase().indexOf(query.toLowerCase()) != -1))) {
-        foundResources[key] = this.fillMessage(r);
+        // foundResources[key] = this.fillMessage(r);
+        foundResources[key] = {
+          value: this.fillMessage(r),
+          time: r.time
+        }
 
         if (limit  &&  Object.keys(foundResources).length === limit) {
           let result = this.filterResult(foundResources)
           if (result.length === limit)
-            return result
+            return this.getSearchResult(result)
           foundResources = this.packResult(result)
         }
       }
     }
 
     let result = this.filterResult(foundResources, lastId)
-    if (params.isForgetting)
-      return result
-    return result //.reverse();
+    if (!result)
+      return
+    return this.getSearchResult(result)
+
+    // if (params.isForgetting)
+    //   return result
+    // return result //.reverse();
+  },
+  getSearchResult(result) {
+    return result.map((r) => {
+      return r.value
+    })
   },
   packResult(result) {
     let foundResources = {}
     result.forEach((fr) => {
-      foundResources[utils.getId(fr)] = fr
+      foundResources[utils.getId(fr.value)] = fr
     })
     return foundResources
-
   },
   filterResult(result, lastId) {
     if (!result)
@@ -3042,9 +3088,11 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
     });
 
     let meId = utils.getId(me)
-    let newResult = result.filter((r, i) => {
-      if (r[TYPE] === PRODUCT_LIST) {
-        var next = result[i + 1]
+    let newResult = result.filter((rr, i) => {
+      let time = rr.time
+      let r = rr.value
+      if (r[TYPE] === PRODUCT_LIST  &&  i !== result.length - 1) {
+        var next = result[i + 1].value
         if (next && next[TYPE] === PRODUCT_LIST)
           return false
       }
@@ -3123,7 +3171,8 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
       return true
     })
     if (lastId  &&  lastId.split('_')[0] === PRODUCT_LIST) {
-      for (let i=newResult.length - 1; i>=0; i--)
+      let i=newResult.length - 1
+      for (; i>=0; i--)
         if (newResult[TYPE] !== PRODUCT_LIST)
           break
         newResult.splice(i, 1)
@@ -3164,7 +3213,7 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
     var simpleLinkMessages = {}
     var meId = utils.getId(utils.getMe())
     for (var i=0; i<foundResources.length; i++) {
-      var r = foundResources[i];
+      var r = foundResources[i]
       if (me  &&  utils.getId(r.to) !== meId  &&  utils.getId(r.from) !== meId)
         continue;
       // documentCreated identifier is set when the document of this type was created
@@ -4764,6 +4813,12 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
             }
           }
           if (deleted) {
+            if (res.sharedWith) {
+              res.sharedWith.forEach((r) => {
+                let org = list[r.bankRepresentative].value.organization
+                self.deleteMessageFromChat(utils.getId(org), res)
+              })
+            }
             delete list[rId]
             self.deleteMessageFromChat(orgId, r)
             batch.push({type: 'del', key: rId})
@@ -4771,20 +4826,22 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
         })
       })
       self.trigger({action: 'messageList', list: [msg], resource: org})
+      chatMessages[orgId] = []
 
       return db.batch(batch)
     })
     .then(function() {
       var result = self.searchMessages({to: org, modelName: MESSAGE, isForgetting: true});
       batch = []
-      result.forEach(function(r) {
-        let doDelete = r[TYPE] === SELF_INTRODUCTION  ||  (r[TYPE] === SIMPLE_MESSAGE  &&  r.message  &&  r.message.indexOf('Congratulations') === 0)
-        if (doDelete) {
-          var id = utils.getId(r)
-          batch.push({type: 'del', key: id})
-          delete list[id]
-        }
-      })
+      if (result)
+        result.forEach(function(r) {
+          let doDelete = r[TYPE] === SELF_INTRODUCTION  ||  (r[TYPE] === SIMPLE_MESSAGE  &&  r.message  &&  r.message.indexOf('Congratulations') === 0)
+          if (doDelete) {
+            var id = utils.getId(r)
+            batch.push({type: 'del', key: id})
+            delete list[id]
+          }
+        })
 
       // resource.numberOfForms = 0
 
