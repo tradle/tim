@@ -241,6 +241,13 @@ class MessageRow extends Component {
             {ownerPhoto}
             <View style={cellStyle}>
               <View style={{flex: 1}}>
+              {this.isShared()
+                ? <View style={[styles.verifiedHeader, {backgroundColor: this.props.bankStyle.SHARED_WITH_BG}]}>
+                    <Text style={{color: '#ffffff', fontSize: 18}}>{translate('youShared', resource.to.organization.title)}</Text>
+                  </View>
+                : <View />
+              }
+
                 {renderedRow}
              </View>
              {sealedStatus}
@@ -290,9 +297,16 @@ class MessageRow extends Component {
         {sendStatus}
         {shareables}
       </View>
-    );
+    )
   }
-
+  isShared() {
+    var resource = this.props.resource
+    var to = this.props.to
+    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
+    if (model.subClassOf !== constants.TYPES.FORM  ||  !resource.to.organization)
+      return false
+    return utils.getId(resource.to.organization) !== utils.getId(to)
+  }
   renderVerification() {
     var resource = this.props.resource;
     var model = utils.getModel(resource[constants.TYPE]).value;
@@ -330,7 +344,7 @@ class MessageRow extends Component {
                   </View>
 
     var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start', width: msgWidth, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}
-    let addStyle = [styles.verificationBody, {backgroundColor: VERIFICATION_BG, borderColor: bgColor}];
+    let addStyle = [styles.verificationBody, {backgroundColor: this.props.bankStyle.VERIFICATION_BG, borderColor: bgColor}];
     let messageBody =
           <TouchableHighlight onPress={this.verify.bind(this, resource)} underlayColor='transparent'>
             <View style={[styles.row, viewStyle]}>
