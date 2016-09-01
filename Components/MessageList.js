@@ -141,7 +141,7 @@ class MessageList extends Component {
       return
     }
     if (params.action === 'addMessage') {
-      Actions.messageList({modelName: this.props.modelName, to: this.props.resource, limit: this.state.list ? this.state.list.length + 1 : 10});
+      Actions.messageList({modelName: this.props.modelName, to: this.props.resource, limit: this.state.list ? this.state.list.length + 1 : LIMIT});
       return
     }
     if ( params.action !== 'messageList'                   ||
@@ -557,7 +557,7 @@ class MessageList extends Component {
     var id = utils.getId(list[0])
     Actions.messageList({
       lastId: id,
-      limit: 10,
+      limit: LIMIT,
       loadEarlierMessages: true,
       modelName: this.props.modelName,
       to: this.props.resource,
@@ -580,7 +580,6 @@ class MessageList extends Component {
   chooseFormForCustomer() {
     var currentRoutes = this.props.navigator.getCurrentRoutes();
     var resource = this.props.resource
-    var currentRoutes = this.props.navigator.getCurrentRoutes();
     this.setState({show: false})
     this.props.navigator.push({
       title: translate(utils.getModel(constants.TYPES.FORM).value),
