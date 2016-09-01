@@ -256,7 +256,7 @@ class VerificationRow extends Component {
 
         return;
       }
-
+      let row
       if (resource[v]  &&  properties[v].type === 'string'  &&  (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0))
         row = <Text style={style} key={self.getNextKey()}>{resource[v]}</Text>;
       else if (!model.autoCreate) {
@@ -280,8 +280,7 @@ class VerificationRow extends Component {
             return;
           }
         }
-        var row = <Text style={style} key={self.getNextKey()}>{resource[v]}</Text>;
-
+        row = <Text style={style} key={self.getNextKey()}>{resource[v]}</Text>;
       }
       // if (first) {
       //   row = <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
