@@ -121,4 +121,5 @@
     "pairingRequest": "Pairing Request",
     "deviceDoesNotHaveMyKeys": "Received identity does not have my keys",
     "pairingRequestWasProcesseed": "Pairing request was processeed",
+    "youShared": "You shared from {1}"
 }
