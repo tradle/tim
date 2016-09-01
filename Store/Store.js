@@ -1,6 +1,7 @@
 'use strict';
 
 var path = require('path')
+var querystring = require('querystring')
 var parseURL = require('url').parse
 import ReactNative, {
   Alert,
@@ -11,10 +12,9 @@ import ReactNative, {
 
 import AsyncStorage from './Storage'
 import * as LocalAuth from '../utils/localAuth'
-import Keychain from 'react-native-keychain'
+var Keychain// = require('../utils/keychain')
 import Push from '../utils/push'
-
-global.AsyncStorage = AsyncStorage
+// import DeviceInfo from 'react-native-device-info'
 
 var path = require('path')
 var BeSafe = require('asyncstorage-backup')
@@ -124,7 +124,7 @@ const WELCOME_INTERVAL = 600000
 
 const Sendy = require('sendy')
 const SendyWS = require('sendy-ws')
-// const OTRClient = require('sendy-otr')
+const TLSClient = require('sendy-axolotl')
 // const DSA = require('@tradle/otr').DSA
 // const BigInt = require('@tradle/otr/vendor/bigint')
 // const BigIntTimes = {}
@@ -194,16 +194,17 @@ var driverInfo = {
   // whitelist: [],
 }
 
-const KEY_SET = [
-  { type: 'bitcoin', purpose: 'payment' },
-  { type: 'bitcoin', purpose: 'messaging' },
-  { type: 'ec', purpose: 'sign', curve: 'p256' },
-  { type: 'ec', purpose: 'update', curve: 'p256' }
-]
+// const KEY_SET = [
+//   { type: 'bitcoin', purpose: 'payment' },
+//   { type: 'bitcoin', purpose: 'messaging' },
+//   { type: 'ec', purpose: 'sign', curve: 'p256' },
+//   { type: 'ec', purpose: 'update', curve: 'p256' }
+// ]
 
 const ENCRYPTION_KEY = 'accountkey'
+const DEVICE_ID = 'deviceid'
 // const ENCRYPTION_SALT = 'accountsalt'
-const OTR_ENABLED = false
+const TLS_ENABLED = false
 
 // var Store = Reflux.createStore(timeFunctions({
 var Store = Reflux.createStore({
@@ -247,7 +248,7 @@ var Store = Reflux.createStore({
       self.addVerificationsToFormModel(m)
     })
     utils.setModels(models);
-AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.length))
+
     // if (true) {
     if (false) {
       return this.ready = this.wipe()
@@ -434,6 +435,7 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
     return rr;
   },
   buildDriver ({ keys, identity, encryption }) {
+    var self = this
     var keeper = createKeeper({
       path: path.join(TIM_PATH_PREFIX, 'keeper'),
       db: asyncstorageDown,
@@ -448,7 +450,7 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
     var blockchain = new Blockchain(networkName)
     var wsClients = driverInfo.wsClients
     // var whitelist = driverInfo.whitelist
-    var otrKey = driverInfo.otrKey
+    // var tlsKey = driverInfo.tlsKey
 
     // return Q.ninvoke(dns, 'resolve4', 'tradle.io')
     //   .then(function (addrs) {
@@ -522,14 +524,15 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
       }
     }
 
-    // if (OTR_ENABLED) {
-    //   otrKey = keys.filter((k) => k.type === 'dsa')[0]
-    //   if (otrKey) otrKey = DSA.parsePrivate(otrKey.priv)
+    // if (TLS_ENABLED) {
+    //   tlsKey = keys.filter((k) => k.type === 'dsa')[0]
+    //   if (tlsKey) tlsKey = DSA.parsePrivate(tlsKey.priv)
     // }
 
-    // if (otrKey) otrKey = kiki.toKey(otrKey).priv()
+    // if (tlsKey) tlsKey = kiki.toKey(tlsKey).priv()
 
-    driverInfo.otrKey = otrKey
+    var tlsKey = driverInfo.tlsKey = TLS_ENABLED && meDriver.keys.filter(k => k.get('purpose') === 'tls')[0]
+    // var fromPubKey = meDriver.identity.pubkeys.filter(k => k.type === 'ec' && k.purpose === 'sign')[0]
     meDriver._send = function (msg, recipientInfo, cb) {
       const recipientHash = recipientInfo.permalink
       let messenger = wsClients[recipientHash]
@@ -543,14 +546,7 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
       }
 
       const args = arguments
-      let identifier
-      if (otrKey) {
-        identifier = recipientInfo.object.pubkeys.filter(function (k) {
-          return k.type === 'dsa'
-        })[0].fingerprint
-      } else {
-        identifier = recipientHash
-      }
+      const identifier = self.getIdentifier(recipientInfo)
 
       // this timeout is not for sending the entire message
       // but rather an idle connection timeout
@@ -605,7 +601,7 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
         // var httpClient = driverInfo.httpClient
         var wsClients = driverInfo.wsClients
         // var whitelist = driverInfo.whitelist
-        var otrKey = driverInfo.otrKey
+        var tlsKey = driverInfo.tlsKey
         // if (!httpClient) {
         //   httpClient = new HttpClient()
         //   driverInfo.httpClient = httpClient
@@ -642,7 +638,7 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
     //   var httpClient = driverInfo.httpClient
     //   var wsClients = driverInfo.wsClients
     //   var whitelist = driverInfo.whitelist
-    //   var otrKey = driverInfo.otrKey
+    //   var tlsKey = driverInfo.tlsKey
     //   results.forEach(function(providers) {
     //     if (!httpClient) {
     //       httpClient = new HttpClient()
@@ -668,12 +664,12 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
     //       //   whitelist.push(provider.txId)
     //       // }
 
-    //       // if (!otrKey) return
+    //       // if (!tlsKey) return
 
     //       // // self.addWebSocketClient()
     //       // var wsClient = new WebSocketClient({
     //       //   url: utils.joinURL(provider.url, provider.id, 'ws'),
-    //       //   otrKey: otrKey,
+    //       //   tlsKey: tlsKey,
     //       //   autoconnect: false,
     //       //   // rootHash: meDriver.myRootHash()
     //       // })
@@ -774,15 +770,17 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
     // if (provider.txId)
     //   whitelist.push(provider.txId)
     let self = this
-    const otrKey = null//driverInfo.otrKey
+    let tlsKey = driverInfo.tlsKey
     const wsClients = driverInfo.wsClients
-    const identifier = otrKey ? otrKey.fingerprint() : meDriver.permalink
+    // const identifier = tlsKey ? tlsKey.pubKeyString : meDriver.permalink
+
+    // const identifier = tradle.utils.serializePubKey(identifierPubKey).toString('hex')
     const base = getProviderUrl(provider)
 
     if (wsClients[base]) return wsClients[base]
 
-    let wsClient = this.getWsClient(base, identifier)
-    let transport = this.getTransport(wsClient, identifier)
+    let wsClient = this.getWsClient(base)
+    let transport = this.getTransport(wsClient)
     // const url = utils.joinURL(base, 'ws?from=' + identifier).replace(/^http/, 'ws')
     // const wsClient = new WebSocketClient({
     //   url: url,
@@ -792,54 +790,39 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
     //   forceBase64: true
     // })
 
-    // let transport
-    // if (otrKey) {
-    //   transport = newSwitchboard({
-    //     identifier: identifier,
-    //     unreliable: wsClient,
-    //     clientForRecipient: function (recipient) {
-    //       return new OTRClient({
-    //         key: otrKey,
-    //         client: new Sendy(SENDY_OPTS),
-    //         theirFingerprint: recipient
-    //       })
-    //     }
-    //   })
-    // } else {
-    // let transport = newSwitchboard({
-    //     identifier: identifier,
-    //     unreliable: wsClient,
-    //     clientForRecipient: function () {
-    //       return new Sendy(SENDY_OPTS)
-    //     }
-    //   })
-
-
     wsClient.on('disconnect', function () {
       transport.clients().forEach(function (c) {
         // reset OTR session, restart on connect
         debug('aborting pending sends due to disconnect')
         c.destroy()
       })
+
+      // pause all channels
+      meDriver.sender.pause()
+    })
+
+    wsClient.on('connect', function (recipient) {
+      // resume all paused channels
+      meDriver.sender.resume()
     })
 
     wsClients[base] = transport
     wsClients[provider.hash] = transport
 
-    let timeouts = {}
-    transport.on('receiving', function (msg) {
-      clearTimeout(timeouts[msg.from])
-      delete timeouts[msg.from]
-    })
+    // let timeouts = {}
+    // transport.on('receiving', function (msg) {
+    //   clearTimeout(timeouts[msg.from])
+    //   delete timeouts[msg.from]
+    // })
 
-    transport.on('404', function (recipient) {
-      if (!timeouts[recipient]) {
-        timeout = setTimeout(function () {
-          delete timeouts[recipient]
-          transport.cancelPending(recipient)
-        }, 10000)
-      }
-    })
+    // transport.on('404', function (recipient) {
+    //   if (!timeouts[recipient]) {
+    //     timeout = setTimeout(function () {
+    //       delete timeouts[recipient]
+    //       transport.cancelPending(recipient)
+    //     }, 10000)
+    //   }
+    // })
 
     transport.on('message', function (msg, from) {
       try {
@@ -926,8 +909,17 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
         }
       }
 
-      const prop = otrKey ? 'fingerprint' : 'permalink'
-      meDriver.receive(msg, { [prop]: from })
+      // const prop = 'pubKey'
+      // const identifier = tradle.utils.deserializePubKey(new Buffer(from, 'hex'))
+
+      const prop = tlsKey ? 'pubKey' : 'permalink'
+      const identifier = prop === 'permalink' ? from : {
+        type: 'ec',
+        curve: 'curve25519',
+        pub: new Buffer(from, 'hex')
+      }
+
+      meDriver.receive(msg, { [prop]: identifier })
         .catch(err => {
           console.warn('failed to receive msg:', err, msg)
           debugger
@@ -948,8 +940,28 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
       this.trigger({action: 'invalidPairingRequest', error: (err.fullType === 'exists' ? translate('thisDeviceWasAlreadyPaired') : translate('invalidPairingRequest'))})
     })
   },
-  getWsClient(base, identifier) {
-    let url = utils.joinURL(base, 'ws?from=' + identifier).replace(/^http/, 'ws')
+
+  getIdentifier(identityInfo) {
+    identityInfo = identityInfo || meDriver.identityInfo
+    return identityInfo.permalink
+  },
+
+  getIdentifierPubKey(identityInfo) {
+    identityInfo = identityInfo || meDriver.identityInfo
+    const purpose = TLS_ENABLED ? 'tls' : 'sign'
+    return tradleUtils.find(identityInfo.keys || identityInfo.object.pubkeys, k => {
+      const kPurpose = k.purpose || k.get('purpose')
+      return kPurpose === purpose
+    }).pubKeyString
+  },
+
+  getWsClient(base) {
+    const tlsKey = driverInfo.tlsKey
+    const url = utils.joinURL(base, 'ws?' + querystring.stringify({
+      from: this.getIdentifier(),
+      pubKey: this.getIdentifierPubKey()
+    })).replace(/^http/, 'ws')
+
     return new WebSocketClient({
       url: url,
       autoConnect: true,
@@ -959,15 +971,27 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
     })
   },
 
-  getTransport(wsClient, identifier) {
+  getTransport(wsClient) {
+    const tlsKey = driverInfo.tlsKey
     return newSwitchboard({
-      identifier: identifier,
+      identifier: this.getIdentifier(),
       unreliable: wsClient,
-      clientForRecipient: function () {
-        return new Sendy(SENDY_OPTS)
+      clientForRecipient: function (recipient) {
+        const sendy = new Sendy(SENDY_OPTS)
+        if (!tlsKey) return sendy
+
+        return new TLSClient({
+          key: {
+            secretKey: tlsKey.priv,
+            publicKey: tlsKey.pub
+          },
+          client: sendy,
+          theirPubKey: new Buffer(recipient, 'hex')
+        })
       }
     })
   },
+
   // Gets info about companies in this app, their bot representatives and their styles
   getServiceProviders(url, retry) {
     var self = this
@@ -1388,8 +1412,9 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
         if (!status/* || !self.isConnected*/)
           return
         publishRequestSent[orgId] = true
-        if (!status.watches.link  &&  !status.link)
+        if (!status.watches.link  &&  !status.link) {
           return self.publishMyIdentity(orgRep)
+        }
         else {
           // self.updateMe()
           var allMyIdentities = list[MY_IDENTITIES].value
@@ -3738,99 +3763,144 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
       }
     }
   },
-  getDriver(me) {
-    if (driverPromise) return driverPromise
 
-    var loadIdentityAndKeys
-    var allMyIdentities = list[MY_IDENTITIES]
-    var currentIdentity
-
+  // TODO: simplify getDriver to use this
+  loadIdentityAndKeys(me) {
     var mePub = me[ROOT_HASH] ? list[IDENTITY + '_' + me[ROOT_HASH]].value.pubkeys : me.pubkeys
     var mePriv
-    var publishedIdentity
+    var identity
+    var allMyIdentities = list[MY_IDENTITIES]
     if (allMyIdentities) {
       var all = allMyIdentities.value.allIdentities
       var curId = allMyIdentities.value.currentIdentity
-      all.forEach(function(id) {
+      all.some(id => {
         if (id.id === curId) {
-          currentIdentity = id
+          // currentIdentity = id
           mePriv = id.privkeys
-          publishedIdentity = id.publishedIdentity
-          mePub = mePub || publishedIdentity.pubkeys
+          identity = id.publishedIdentity
+          mePub = mePub || identity.pubkeys
+          return true
         }
       })
     }
-    // debugger
-    if (!mePub  &&  !mePriv) {
-      // if (__DEV__  &&  !me.securityCode) {
-      //   var profiles = {}
-      //   var identities = {}
-      //   myIdentity.forEach(function(r) {
-      //     if (r[TYPE] == IDENTITY)
-      //       identities[r[ROOT_HASH]] = r
-      //     else
-      //       profiles[r[ROOT_HASH]] = r
-      //   })
-      //   for (var hash in profiles) {
-      //     if (!profiles[hash].securityCode  &&  me.firstName === profiles[hash].firstName) {
-      //       var identity = identities[hash]
-      //       mePub = identity.pubkeys  // hardcoded on device
-      //       mePriv = identity.privkeys
-      //       me[NONCE] = identity[NONCE]
-      //       break
-      //     }
-      //   }
-      // }
-      let encryptionKey
-      loadIdentityAndKeys = this.createNewIdentity()
-      .spread((eKey, identityInfo) => {
-        encryptionKey = eKey
-        publishedIdentity = identityInfo.identity
-        mePub = publishedIdentity.pubkeys
-        mePriv = identityInfo.keys
-        return encryptionKey
+
+    if (mePub) {
+      const lookupKeys = Keychain
+        ? Keychain.lookupKeys(mePub)
+        : Q.resolve(mePriv.map(k => tradleUtils.importKey(k)))
+
+      return Q.all([
+        lookupKeys,
+        utils.getPassword(ENCRYPTION_KEY)
+      ])
+      .spread((keys, encryptionKey) => {
+        return { keys, encryptionKey, identity }
       })
-      // const encryptionKey = crypto.randomBytes(32).toString('hex')
-      // const globalSalt = crypto.randomBytes(32).toString('hex')
-      // const genIdentity = Q.ninvoke(tradleUtils, 'newIdentity', {
-      //     networkName,
-      //     keys: KEY_SET
-      //   })
-      //   .then(identityInfo => {
-      //     publishedIdentity = identityInfo.identity
-      //     mePub = publishedIdentity.pubkeys
-      //     mePriv = identityInfo.keys
-      //   })
-
-      // loadIdentityAndKeys = Q.all([
-      //   utils.setPassword(ENCRYPTION_KEY, encryptionKey).then(() => encryptionKey),
-      //   genIdentity
-      // ])
-      // .spread(encryptionKey => encryptionKey)
-
-        // bringing it back!
-        // if (__DEV__  &&  !keys.some((k) => k.type() === 'dsa')) {
-        // if (!keys.some((k) => k.type() === 'dsa')) {
-        //   keys.push(Keys.DSA.gen({
-        //     purpose: 'sign'
-        //   }))
-        // }
     }
-    else
-      loadIdentityAndKeys = utils.getPassword(ENCRYPTION_KEY)
 
+    return this.createNewIdentity()
+      .spread((encryptionKey, identityInfo) => {
+        return {
+          ...identityInfo,
+          encryptionKey
+        }
+      })
+  },
+
+  getDriver(me) {
+    if (driverPromise) return driverPromise
+
+    // var loadIdentityAndKeys
+    // var allMyIdentities = list[MY_IDENTITIES]
+    // var currentIdentity
+
+    // var mePub = me[ROOT_HASH] ? list[IDENTITY + '_' + me[ROOT_HASH]].value.pubkeys : me.pubkeys
+    // var mePriv
+    // var publishedIdentity
+    // if (allMyIdentities) {
+    //   var all = allMyIdentities.value.allIdentities
+    //   var curId = allMyIdentities.value.currentIdentity
+    //   all.forEach(function(id) {
+    //     if (id.id === curId) {
+    //       currentIdentity = id
+    //       mePriv = id.privkeys
+    //       publishedIdentity = id.publishedIdentity
+    //       mePub = mePub || publishedIdentity.pubkeys
+    //     }
+    //   })
+    // }
+    // // debugger
+    // if (!mePub  &&  !mePriv) {
+    //   // if (__DEV__  &&  !me.securityCode) {
+    //   //   var profiles = {}
+    //   //   var identities = {}
+    //   //   myIdentity.forEach(function(r) {
+    //   //     if (r[TYPE] == IDENTITY)
+    //   //       identities[r[ROOT_HASH]] = r
+    //   //     else
+    //   //       profiles[r[ROOT_HASH]] = r
+    //   //   })
+    //   //   for (var hash in profiles) {
+    //   //     if (!profiles[hash].securityCode  &&  me.firstName === profiles[hash].firstName) {
+    //   //       var identity = identities[hash]
+    //   //       mePub = identity.pubkeys  // hardcoded on device
+    //   //       mePriv = identity.privkeys
+    //   //       me[NONCE] = identity[NONCE]
+    //   //       break
+    //   //     }
+    //   //   }
+    //   // }
+    //   let encryptionKey
+    //   loadIdentityAndKeys = this.createNewIdentity()
+    //   .spread((eKey, identityInfo) => {
+    //     encryptionKey = eKey
+    //     publishedIdentity = identityInfo.identity
+    //     mePub = publishedIdentity.pubkeys
+    //     mePriv = identityInfo.keys
+    //     return encryptionKey
+    //   })
+    //   // const encryptionKey = crypto.randomBytes(32).toString('hex')
+    //   // const globalSalt = crypto.randomBytes(32).toString('hex')
+    //   // const genIdentity = Q.ninvoke(tradleUtils, 'newIdentity', {
+    //   //     networkName,
+    //   //     keys: KEY_SET
+    //   //   })
+    //   //   .then(identityInfo => {
+    //   //     publishedIdentity = identityInfo.identity
+    //   //     mePub = publishedIdentity.pubkeys
+    //   //     mePriv = identityInfo.keys
+    //   //   })
+
+    //   // loadIdentityAndKeys = Q.all([
+    //   //   utils.setPassword(ENCRYPTION_KEY, encryptionKey).then(() => encryptionKey),
+    //   //   genIdentity
+    //   // ])
+    //   // .spread(encryptionKey => encryptionKey)
+
+    //     // bringing it back!
+    //     // if (__DEV__  &&  !keys.some((k) => k.type() === 'dsa')) {
+    //     // if (!keys.some((k) => k.type() === 'dsa')) {
+    //     //   keys.push(Keys.DSA.gen({
+    //     //     purpose: 'sign'
+    //     //   }))
+    //     // }
+    // }
+    // else
+    //   loadIdentityAndKeys = utils.getPassword(ENCRYPTION_KEY)
 
     if (me.language)
       language = list[utils.getId(me.language)] && list[utils.getId(me.language)].value
 
-    return driverPromise = loadIdentityAndKeys.then(encryptionKey => {
-      me['privkeys'] = mePriv
+    return driverPromise = this.loadIdentityAndKeys(me)
+    .then(result => {
+      if (!Keychain) me['privkeys'] = result.keys.map(k => k.toJSON(true))
       me[NONCE] = me[NONCE] || this.getNonce()
+      // driverInfo.deviceID = result.deviceID
       return this.buildDriver({
-        identity: publishedIdentity,
-        keys: mePriv,
+        identity: result.identity,
+        keys: result.keys,
         encryption: {
-          key: new Buffer(encryptionKey, 'hex')
+          key: new Buffer(result.encryptionKey, 'hex')
         }
       })
     })
@@ -3856,10 +3926,10 @@ AsyncStorage.getAllKeys().then(keys => console.log('how many keys: ' + keys.leng
   createNewIdentity() {
     const encryptionKey = crypto.randomBytes(32).toString('hex')
     // const globalSalt = crypto.randomBytes(32).toString('hex')
-    const genIdentity = Q.ninvoke(tradleUtils, 'newIdentity', {
-        networkName,
-        keys: KEY_SET
-      })
+    const genIdentity = Keychain
+      ? Keychain.generateNewSet({ networkName })
+          .then(keys => Q.ninvoke(tradleUtils, 'newIdentityForKeys', keys))
+      : Q.ninvoke(tradleUtils, 'newIdentity', { networkName })
 
     return Q.all([
       utils.setPassword(ENCRYPTION_KEY, encryptionKey).then(() => encryptionKey),

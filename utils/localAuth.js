@@ -155,7 +155,7 @@ function touchIDWithFallback(navigator) {
 
 function passwordAuth (navigator) {
   // check if we have a password stored already
-  return utils.getPassword(PASSWORD_ITEM_KEY)
+  return utils.getHashedPassword(PASSWORD_ITEM_KEY)
     .then(
       () => checkPassword(navigator),
       // registration must have been aborted.
@@ -193,7 +193,7 @@ function setPassword(navigator) {
         promptSet: translate('pleaseDrawPassword'),
         promptInvalidSet: translate('passwordLimitations'),
         onSuccess: (pass) => {
-          utils.setPassword(PASSWORD_ITEM_KEY, utils.hashPassword(pass))
+          utils.setHashedPassword(PASSWORD_ITEM_KEY, pass)
           .then(() => {
             Actions.updateMe({ isRegistered: true, useGesturePassword: true })
             return hasTouchID()
@@ -238,13 +238,7 @@ function checkPassword(navigator) {
       promptCheck: translate('drawYourPassword'), //Draw your gesture password',
       promptRetryCheck: translate('gestureNotRecognized'), //Gesture not recognized, please try again',
       isCorrect: (pass) => {
-        return utils.getPassword(PASSWORD_ITEM_KEY)
-          .then((stored) => {
-            return stored === utils.hashPassword(pass)
-          })
-          .catch(err => {
-            return false
-          })
+        return utils.checkHashedPassword(PASSWORD_ITEM_KEY, pass)
       },
       onSuccess: () => defer.resolve(),
       onFail: (err) => {

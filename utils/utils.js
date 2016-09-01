@@ -18,6 +18,7 @@ var RCTUIManager = NativeModules.UIManager
 var crypto = require('crypto')
 var Q = require('q')
 var collect = require('stream-collector')
+var typeforce = require('typeforce')
 var t = require('tcomb-form-native');
 // var moment = require('moment');
 var dateformat = require('dateformat')
@@ -33,6 +34,11 @@ var translatedStrings = {
   nl: require('./strings_nl.json')
 }
 
+var encryptionOpts = {
+  algorithm:'aes-256-cbc',
+  ivBytes: 16
+}
+
 const tradle = require('@tradle/engine')
 const protocol = tradle.protocol
 var constants = require('@tradle/constants');
@@ -46,6 +52,7 @@ const ROOT_HASH = constants.ROOT_HASH
 const PREV_HASH = constants.PREV_HASH
 const SIG = constants.SIG
 const FORM = constants.TYPES.FORM
+const PASSWORD_ENC = 'hex'
 
 var LocalizedStrings = require('react-native-localization')
 let defaultLanguage = new LocalizedStrings({ en: {}, nl: {} }).getLanguage()
@@ -765,16 +772,6 @@ var utils = {
     })
   },
 
-  hashPassword(pass) {
-    // TODO: pbkdf2Sync with ~100000 iterations
-    return crypto.createHash('sha256').update(pass).digest('base64')
-    // return Q.ninvoke(crypto, 'randomBytes', 64)
-    //   .then((salt) => {
-    //     let key = crypto.pbkdf2Sync(pass, salt, 10000, 256, 'sha256')
-    //     return `${key.toString('base64')}:${salt.toString('base64')}`
-    //   })
-  },
-
   joinURL(...parts) {
     var first = parts.shift()
     var rest = parts.join('/')
@@ -892,11 +889,110 @@ var utils = {
       }
     }
   },
+
+  generateSalt: function (opts) {
+    opts = opts || {}
+    const salt = crypto.randomBytes(opts.length || 32)
+    return opts.enc ? salt.toString(opts.enc) : salt
+  },
+
+  hashPassword: function (opts) {
+    if (typeof opts === 'string') opts = { password: opts }
+
+    const salt = opts.salt || utils.generateSalt()
+    const saltStr = salt.toString(PASSWORD_ENC)
+    const hash = crypto.createHash('sha256')
+      .update(opts.password + saltStr)
+      .digest()
+
+    return { hash, salt }
+
+    // TODO: pbkdf2Sync with ~100000 iterations
+    // but currently kdf takes ~7 seconds for 10000!
+    // const result = utils.kdf(opts)
+    // return { hash: result.key, salt: result.salt }
+  },
+
+  kdf: function (opts) {
+    if (typeof opts === 'string') opts = { password: opts }
+
+    const password = opts.password
+    const salt = opts.salt || utils.generateSalt({ length: opts.saltBytes || 32 })
+    const iterations = opts.iterations || 10000
+    const keyBytes = opts.keyBytes || 32
+    const digest = opts.digest || 'sha256'
+    const key = crypto.pbkdf2Sync(password, salt, iterations, keyBytes, digest)
+    return { key, salt }
+  },
+
+  setPassword: function (username, password) {
+    return Keychain.setGenericPassword(username, password, ENV.serviceID)
+  },
+
   getPassword: function (username) {
     return Keychain.getGenericPassword(username, ENV.serviceID)
   },
-  setPassword: function (username, password) {
-    return Keychain.setGenericPassword(username, password, ENV.serviceID)
+
+  /**
+   * store hashed and salted password
+   * @param {[type]} username [description]
+   * @param {[type]} password [description]
+   */
+  setHashedPassword: function (username, password) {
+    const result = utils.hashPassword({ password })
+    return utils.setPassword(username, result.hash.toString(PASSWORD_ENC) + result.salt.toString(PASSWORD_ENC))
+  },
+
+  getHashedPassword: function (username) {
+    return utils.getPassword(username)
+      .then(encoded => {
+        const salt = encoded.slice(-64) // 32 bytes in hex
+        const hash = encoded.slice(0, encoded.length - 64)
+        return {
+          hash: new Buffer(hash, PASSWORD_ENC),
+          salt: new Buffer(salt, PASSWORD_ENC)
+        }
+      })
+  },
+
+  checkHashedPassword: function (username, password) {
+    return utils.getHashedPassword(username)
+      .then(stored => {
+        const hash = utils.hashPassword({
+          password,
+          salt: stored.salt
+        }).hash
+
+        return stored.hash.equals(hash)
+      })
+      .catch(err => {
+        return false
+      })
+  },
+
+  encrypt: function (data, opts) {
+    opts = { ...encryptionOpts, ...opts }
+    var key = opts.key
+    var iv = opts.iv || crypto.randomBytes(opts.ivBytes)
+    var cipher = crypto.createCipheriv(opts.algorithm, key, iv)
+    var ciphertext = Buffer.concat([cipher.update(data), cipher.final()])
+    var parts = [
+      iv,
+      ciphertext
+    ]
+
+    return serialize(parts)
+  },
+
+  decrypt: function (data, opts) {
+    opts = { ...encryptionOpts, ...opts }
+    var parts = unserialize(data)
+    var iv = parts[0]
+    var ciphertext = parts[1]
+    var key = opts.key
+    var decipher = crypto.createDecipheriv(opts.algorithm, key, iv)
+    var m = decipher.update(parts[1])
+    return Buffer.concat([m, decipher.final()])
   },
 
   resetPasswords: function () {
@@ -942,6 +1038,37 @@ function rebuf (json) {
 
 function parseDBValue (pair) {
   return pair[1] && rebuf(JSON.parse(pair[1]))
+}
+
+function serialize (buffers) {
+  var parts = [], idx = 0
+  buffers.forEach(function (part) {
+    var len = Buffer(4)
+    if (typeof part === 'string') part = Buffer(part)
+    len.writeUInt32BE(part.length, 0)
+    parts.push(len)
+    idx += len.length
+    parts.push(part)
+    idx += part.length
+  })
+
+  return Buffer.concat(parts)
+}
+
+function unserialize (buf) {
+  var parts = []
+  var l = buf.length, idx = 0
+  while (idx < l) {
+    var dlen = buf.readUInt32BE(idx)
+    idx += 4
+    var start = idx
+    var end = start + dlen
+    var part = buf.slice(start, end)
+    parts.push(part)
+    idx += part.length
+  }
+
+  return parts
 }
 
 module.exports = utils;
