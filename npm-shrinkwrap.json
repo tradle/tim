@@ -1778,7 +1778,7 @@
     },
     "nkey": {
       "version": "2.0.1",
-      "from": "nkey@2.0.1",
+      "from": "https://registry.npmjs.org/nkey/-/nkey-2.0.1.tgz",
       "resolved": "https://registry.npmjs.org/nkey/-/nkey-2.0.1.tgz"
     },
     "nkey-bitcoin": {
@@ -5482,11 +5482,6 @@
                           "from": "https://registry.npmjs.org/unique-stream/-/unique-stream-2.2.1.tgz",
                           "resolved": "https://registry.npmjs.org/unique-stream/-/unique-stream-2.2.1.tgz"
                         },
-                        "is-extendable": {
-                          "version": "0.1.1",
-                          "from": "https://registry.npmjs.org/is-extendable/-/is-extendable-0.1.1.tgz",
-                          "resolved": "https://registry.npmjs.org/is-extendable/-/is-extendable-0.1.1.tgz"
-                        },
                         "is-extglob": {
                           "version": "1.0.0",
                           "from": "https://registry.npmjs.org/is-extglob/-/is-extglob-1.0.0.tgz",
@@ -5496,6 +5491,11 @@
                           "version": "2.0.1",
                           "from": "https://registry.npmjs.org/is-glob/-/is-glob-2.0.1.tgz",
                           "resolved": "https://registry.npmjs.org/is-glob/-/is-glob-2.0.1.tgz"
+                        },
+                        "is-extendable": {
+                          "version": "0.1.1",
+                          "from": "https://registry.npmjs.org/is-extendable/-/is-extendable-0.1.1.tgz",
+                          "resolved": "https://registry.npmjs.org/is-extendable/-/is-extendable-0.1.1.tgz"
                         }
                       }
                     },
@@ -6331,15 +6331,15 @@
           "from": "https://registry.npmjs.org/os-tmpdir/-/os-tmpdir-1.0.1.tgz",
           "resolved": "https://registry.npmjs.org/os-tmpdir/-/os-tmpdir-1.0.1.tgz"
         },
-        "path-is-absolute": {
-          "version": "1.0.0",
-          "from": "https://registry.npmjs.org/path-is-absolute/-/path-is-absolute-1.0.0.tgz",
-          "resolved": "https://registry.npmjs.org/path-is-absolute/-/path-is-absolute-1.0.0.tgz"
-        },
         "pify": {
           "version": "2.3.0",
           "from": "https://registry.npmjs.org/pify/-/pify-2.3.0.tgz",
           "resolved": "https://registry.npmjs.org/pify/-/pify-2.3.0.tgz"
+        },
+        "path-is-absolute": {
+          "version": "1.0.0",
+          "from": "https://registry.npmjs.org/path-is-absolute/-/path-is-absolute-1.0.0.tgz",
+          "resolved": "https://registry.npmjs.org/path-is-absolute/-/path-is-absolute-1.0.0.tgz"
         },
         "rimraf": {
           "version": "2.2.8",
@@ -6706,18 +6706,18 @@
       }
     },
     "react-native-accordion": {
-      "version": "1.0.0",
-      "from": "git://github.com/mvayngrib/react-native-accordion.git#78081905ab14b0daf8c605bcfa8f03aa0218f930",
-      "resolved": "git://github.com/mvayngrib/react-native-accordion.git#78081905ab14b0daf8c605bcfa8f03aa0218f930",
+      "version": "1.0.1",
+      "from": "react-native-accordion@latest",
+      "resolved": "https://registry.npmjs.org/react-native-accordion/-/react-native-accordion-1.0.1.tgz",
       "dependencies": {
         "react-tween-state": {
           "version": "0.0.5",
-          "from": "https://registry.npmjs.org/react-tween-state/-/react-tween-state-0.0.5.tgz",
+          "from": "react-tween-state@0.0.5",
           "resolved": "https://registry.npmjs.org/react-tween-state/-/react-tween-state-0.0.5.tgz",
           "dependencies": {
             "tween-functions": {
               "version": "1.2.0",
-              "from": "https://registry.npmjs.org/tween-functions/-/tween-functions-1.2.0.tgz",
+              "from": "tween-functions@>=1.0.1 <2.0.0",
               "resolved": "https://registry.npmjs.org/tween-functions/-/tween-functions-1.2.0.tgz"
             }
           }
@@ -7903,12 +7903,12 @@
     },
     "sendy-axolotl": {
       "version": "1.0.1",
-      "from": "sendy-axolotl@1.0.1",
+      "from": "sendy-axolotl@latest",
       "dependencies": {
         "@tradle/wire": {
           "version": "1.2.0",
           "from": "@tradle/wire@>=1.1.0 <2.0.0",
-          "resolved": "file:../tradle-wire",
+          "resolved": "https://registry.npmjs.org/@tradle/wire/-/wire-1.2.0.tgz",
           "dependencies": {
             "forward-secrecy": {
               "version": "1.0.2",
