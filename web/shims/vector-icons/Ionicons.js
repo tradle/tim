@@ -2,9 +2,11 @@ import * as Ionicons from 'react-icons/io'
 import * as MaterialIcons from 'react-icons/md'
 import { Text } from 'react-native'
 
+const cached = {}
 const normalized = {
   'md-finger-print': 'md-fingerprint',
-  'ios-checkmark-circle-outline': 'ios-checkmark-empty'
+  'ios-checkmark-circle-outline': 'ios-checkmark-empty',
+  'ios-call-outline': 'ios-telephone'
 }
 
 module.exports = props => {
@@ -17,10 +19,23 @@ module.exports = props => {
 }
 
 function getIconComponent (nativeName) {
+  if (nativeName in cached) return cached[nativeName]
+
   nativeName = normalized[nativeName] || nativeName
   const IconSet = nativeName.indexOf('md-') === 0 ? MaterialIcons : Ionicons
   const parts = nativeName.split('-').map(part => part[0].toUpperCase() + part.slice(1))
-  if (IconSet === Ionicons) parts.unshift('Io')
+  const attempts = [
+    parts,
+    ['Io'].concat(parts)
+  ]
 
-  return IconSet[parts.join('')] || IconSet[parts.slice(1).join('')]
+  if (IconSet === Ionicons) {
+    if (parts[0].toLowerCase() === 'ios') {
+      attempts.push(['Io'].concat(parts.slice(1)))
+    }
+  }
+
+  return cached[nativeName] = attempts.reduce(function (match, next) {
+    return match || IconSet[next.join('')]
+  }, null)
 }

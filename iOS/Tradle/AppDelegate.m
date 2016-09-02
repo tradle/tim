@@ -14,7 +14,7 @@
 #import "CodePush.h"
 #import <Fabric/Fabric.h>
 #import <Crashlytics/Crashlytics.h>
-#import "QTouchposeApplication.h"
+// #import "QTouchposeApplication.h"
 #import "RCTPushNotificationManager.h"
 
 @implementation AppDelegate

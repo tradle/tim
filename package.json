@@ -58,6 +58,7 @@
     "querystring-es3": "^0.2.1",
     "react": "^15.2.0",
     "react-addons-perf": "^15.2.0",
+    "react-datepicker": "^0.29.0",
     "react-dom": "^15.2.0",
     "react-icons": "^2.2.1",
     "react-mixin": "~1.2.2",
