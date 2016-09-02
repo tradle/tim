@@ -1,7 +1,7 @@
 'use strict';
 
 import {StyleSheet, Platform} from 'react-native';
-export default StyleSheet.create({
+module.exports = exports = StyleSheet.create({
   container: {
     backgroundColor: '#f7f7f7',
     marginTop: 56,

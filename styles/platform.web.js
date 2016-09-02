@@ -1,4 +1,2 @@
 
-import styles from './platform.ios.js'
-console.log(styles)
-module.exports = styles
+module.exports = require('./platform.ios.js')

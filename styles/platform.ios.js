@@ -2,7 +2,7 @@
 
 import {StyleSheet} from 'react-native';
 
-export default StyleSheet.create({
+module.exports = exports = StyleSheet.create({
   container: {
     backgroundColor: '#f7f7f7',
     marginTop: 64,
@@ -51,11 +51,14 @@ export default StyleSheet.create({
     backgroundColor: 'red'
   },
 })
+
 var menuIcon = {
   name: 'md-more',
   color: '#ffffff'
 }
+
 exports.MenuIcon = menuIcon
+
 // Object.defineProperty(exports, 'MB', {
 //   icon: 'md-more',
 //   color: '#ffffff'
