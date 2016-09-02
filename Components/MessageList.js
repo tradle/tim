@@ -94,6 +94,27 @@ class MessageList extends Component {
   }
   componentDidMount() {
     this.listenTo(Store, 'onAction');
+    this._watchSubmit()
+  }
+
+  _watchSubmit() {
+    const self = this
+    if (!utils.isWeb() || !this._GiftedMessenger) return
+
+    const input = this._GiftedMessenger.refs.textInput.refs.input
+    if (this._watchedInput === input) return
+
+    this._watchedInput = input
+    input.addEventListener('keydown', e => {
+      if (!input.value) return
+
+      const code = e.keyCode ? e.keyCode : e.which
+      if (code == 13) { //Enter keycode
+        this.onSubmitEditing(input.value)
+        // yuckity yuck
+        this._GiftedMessenger.setState({text:''})
+      }
+    })
   }
 
   onAction(params) {
@@ -371,11 +392,14 @@ class MessageList extends Component {
     clearTimeout(this._scrollTimeout)
     if (this.state.allLoaded  ||  this.state.noScroll)
       this.state.noScroll = false
-    else
+    else {
       this._scrollTimeout = setTimeout(() => {
         // inspired by http://stackoverflow.com/a/34838513/1385109
         this._GiftedMessenger  &&  this._GiftedMessenger.scrollToBottom()
       }, 200)
+    }
+
+    this._watchSubmit()
   }
 
   render() {
