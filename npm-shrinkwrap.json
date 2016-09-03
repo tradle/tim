@@ -44,7 +44,6 @@
     "@tradle/engine": {
       "version": "2.4.0",
       "from": "@tradle/engine@2.4.0",
-      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-2.4.0.tgz",
       "dependencies": {
         "async": {
           "version": "2.0.1",
@@ -586,7 +585,7 @@
     "@tradle/models": {
       "version": "4.10.9",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#900e41e5dc1c699607b8e0ac7b80d5163c235621",
+      "resolved": "git://github.com/tradle/models.git#fe8dbc1ab376f613e4fd01d6d19e46c9ad857f64",
       "dependencies": {
         "minimist": {
           "version": "1.2.0",
@@ -1772,6 +1771,11 @@
       "from": "https://registry.npmjs.org/ms/-/ms-0.7.1.tgz",
       "resolved": "https://registry.npmjs.org/ms/-/ms-0.7.1.tgz"
     },
+    "my-local-ip": {
+      "version": "1.0.0",
+      "from": "my-local-ip@latest",
+      "resolved": "https://registry.npmjs.org/my-local-ip/-/my-local-ip-1.0.0.tgz"
+    },
     "nan": {
       "version": "2.4.0",
       "from": "https://registry.npmjs.org/nan/-/nan-2.4.0.tgz",
@@ -1784,13 +1788,11 @@
     },
     "nkey-bitcoin": {
       "version": "1.1.1",
-      "from": "nkey-bitcoin@1.1.1",
-      "resolved": "https://registry.npmjs.org/nkey-bitcoin/-/nkey-bitcoin-1.1.1.tgz"
+      "from": "nkey-bitcoin@1.1.1"
     },
     "nkey-dsa": {
       "version": "1.0.1",
       "from": "nkey-dsa@1.0.1",
-      "resolved": "https://registry.npmjs.org/nkey-dsa/-/nkey-dsa-1.0.1.tgz",
       "dependencies": {
         "@tradle/otr": {
           "version": "0.2.17",
@@ -1802,12 +1804,10 @@
     "nkey-ec": {
       "version": "2.0.1",
       "from": "nkey-ec@2.0.1",
-      "resolved": "https://registry.npmjs.org/nkey-ec/-/nkey-ec-2.0.1.tgz",
       "dependencies": {
         "nkey-curve25519": {
           "version": "1.0.1",
           "from": "nkey-curve25519@1.0.1",
-          "resolved": "https://registry.npmjs.org/nkey-curve25519/-/nkey-curve25519-1.0.1.tgz",
           "dependencies": {
             "tweetnacl": {
               "version": "0.14.3",
@@ -1818,8 +1818,7 @@
         },
         "nkey-secp256k1": {
           "version": "1.1.1",
-          "from": "nkey-secp256k1@1.1.1",
-          "resolved": "https://registry.npmjs.org/nkey-secp256k1/-/nkey-secp256k1-1.1.1.tgz"
+          "from": "nkey-secp256k1@1.1.1"
         }
       }
     },
@@ -6257,20 +6256,15 @@
           "from": "https://registry.npmjs.org/array-union/-/array-union-1.0.2.tgz",
           "resolved": "https://registry.npmjs.org/array-union/-/array-union-1.0.2.tgz"
         },
-        "array-differ": {
-          "version": "1.0.0",
-          "from": "https://registry.npmjs.org/array-differ/-/array-differ-1.0.0.tgz",
-          "resolved": "https://registry.npmjs.org/array-differ/-/array-differ-1.0.0.tgz"
+        "array-uniq": {
+          "version": "1.0.3",
+          "from": "https://registry.npmjs.org/array-uniq/-/array-uniq-1.0.3.tgz",
+          "resolved": "https://registry.npmjs.org/array-uniq/-/array-uniq-1.0.3.tgz"
         },
         "arrify": {
           "version": "1.0.1",
           "from": "https://registry.npmjs.org/arrify/-/arrify-1.0.1.tgz",
           "resolved": "https://registry.npmjs.org/arrify/-/arrify-1.0.1.tgz"
-        },
-        "array-uniq": {
-          "version": "1.0.3",
-          "from": "https://registry.npmjs.org/array-uniq/-/array-uniq-1.0.3.tgz",
-          "resolved": "https://registry.npmjs.org/array-uniq/-/array-uniq-1.0.3.tgz"
         },
         "babel-messages": {
           "version": "6.8.0",
@@ -6336,6 +6330,11 @@
           "version": "1.0.1",
           "from": "https://registry.npmjs.org/os-tmpdir/-/os-tmpdir-1.0.1.tgz",
           "resolved": "https://registry.npmjs.org/os-tmpdir/-/os-tmpdir-1.0.1.tgz"
+        },
+        "path-is-absolute": {
+          "version": "1.0.0",
+          "from": "https://registry.npmjs.org/path-is-absolute/-/path-is-absolute-1.0.0.tgz",
+          "resolved": "https://registry.npmjs.org/path-is-absolute/-/path-is-absolute-1.0.0.tgz"
         },
         "pify": {
           "version": "2.3.0",
@@ -7889,7 +7888,6 @@
     "sendy": {
       "version": "2.2.0",
       "from": "sendy@2.2.0",
-      "resolved": "https://registry.npmjs.org/sendy/-/sendy-2.2.0.tgz",
       "dependencies": {
         "browser-process-hrtime": {
           "version": "0.1.2",
@@ -7911,7 +7909,6 @@
     "sendy-axolotl": {
       "version": "1.0.1",
       "from": "sendy-axolotl@1.0.1",
-      "resolved": "https://registry.npmjs.org/sendy-axolotl/-/sendy-axolotl-1.0.1.tgz",
       "dependencies": {
         "@tradle/wire": {
           "version": "1.2.0",
@@ -8013,7 +8010,6 @@
     "sendy-ws": {
       "version": "1.4.0",
       "from": "sendy-ws@1.4.0",
-      "resolved": "https://registry.npmjs.org/sendy-ws/-/sendy-ws-1.4.0.tgz",
       "dependencies": {
         "sendy-protobufs": {
           "version": "1.0.0",

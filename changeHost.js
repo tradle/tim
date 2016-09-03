@@ -2,7 +2,8 @@
 
 var fs = require('fs')
 var path = require('path')
-var hostname = (process.argv[2] || 'rnhost').replace(/^\"(.*)\"$/, '$1')
+var myLocalIP = process.argv[2] || require('my-local-ip')()
+var hostname = myLocalIP.replace(/^\"(.*)\"$/, '$1')
 
 updateLocalIP()
 fixIP()
