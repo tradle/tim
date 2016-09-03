@@ -78,6 +78,7 @@ const ROOT_HASH = constants.ROOT_HASH
 const CUR_HASH  = constants.CUR_HASH
 const PREV_HASH  = constants.PREV_HASH
 const NEXT_HASH = '_n'
+const LAST_MESSAGE_TIME = 'lastMessageTime'
 
 const ORGANIZATION = constants.TYPES.ORGANIZATION
 const IDENTITY = constants.TYPES.IDENTITY
@@ -2564,6 +2565,10 @@ var Store = Reflux.createStore({
     var containerProp, resourceId;
 
     let isOrg = params.modelName == ORGANIZATION
+    let sortProp = params.sortProperty
+                 ? params.sortProperty
+                 : isOrg  &&  !params.sortProperty ? LAST_MESSAGE_TIME : null
+
     var isIdentity = modelName === PROFILE;
     // to variable if present is a container resource as for example subreddit for posts or post for comments
     // if to is passed then resources only of this container need to be returned
@@ -2701,7 +2706,7 @@ var Store = Reflux.createStore({
     }
     if (result.length === 1)
       return result
-    var sortProp = params.sortProperty;
+    // var sortProp = params.sortProperty;
     if (sortProp) {
       var asc = (typeof params.asc != 'undefined') ? params.asc : false;
       if (props[sortProp].type == 'date') {
