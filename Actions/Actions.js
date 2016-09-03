@@ -39,7 +39,8 @@ var Actions = Reflux.createActions([
   'sendPairingRequest',
   'processPairingRequest',
   'processPairingResponse',
-  'pairingRequestAccepted'
+  'pairingRequestAccepted',
+  'addApp'
 ]);
 
 Object.keys(Actions).forEach((name) => {

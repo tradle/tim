@@ -25,7 +25,7 @@ var defaultBankStyle = require('../styles/bankStyle.json')
 
 const WEB_TO_MOBILE = '0'
 const TALK_TO_EMPLOYEEE = '1'
-
+const APP_QR_CODE = '5'
 // var bankStyles = require('../styles/bankStyles')
 const ENUM = 'tradle.Enum'
 
@@ -976,6 +976,9 @@ class ResourceList extends Component {
       break
     case TALK_TO_EMPLOYEEE:
       Actions.getEmployeeInfo(result.data.substring(h[0].length + 1))
+      break
+    case APP_QR_CODE:
+      Actions.addApp(result.data.substring(h[0].length + 1))
       break
     }
   }
