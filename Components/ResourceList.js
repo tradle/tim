@@ -174,6 +174,11 @@ class ResourceList extends Component {
 
       return
     }
+    if (action === 'addApp') {
+      this.props.navigator.pop()
+      // Actions.list(constants.TYPES.ORGANIZATION)
+      return
+    }
     if (action === 'connectivity') {
       this.setState({isConnected: params.isConnected})
       return
