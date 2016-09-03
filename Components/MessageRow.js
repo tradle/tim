@@ -1234,8 +1234,8 @@ class MessageRow extends Component {
       else
         verifiedBy = translate('sentTo', verification.organization.title)
 
-      if (verifiedBy.length > 40)
-        verifiedBy = verifiedBy(0, 40) + '..'
+      if (verifiedBy.length > 25)
+        verifiedBy = verifiedBy.substring(0, 25) + '..'
       var orgView =   <View style={{flexDirection: 'row', justifyContent: 'flex-end', marginTop: 15}}>
                          <Text style={[styles.verySmallLetters, {fontSize: 14}]}>{verifiedBy}</Text>
                       </View>
