@@ -693,7 +693,12 @@ var Store = Reflux.createStore({
 
     return this.getInfo([parts[0]], false, parts[1])
     .then(() => {
-      this.trigger({action: 'list', modelName: ORGANIZATION})
+      this.trigger({action: 'addApp'})
+      // let list = self.searchNotMessages({modelName: ORGANIZATION})
+      // this.trigger({
+      //   action: 'list',
+      //   list: list,
+      // })
     })
   },
 
