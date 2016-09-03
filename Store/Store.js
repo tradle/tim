@@ -4414,6 +4414,12 @@ var Store = Reflux.createStore({
       // }
 
       // else
+      if (model.id === PRODUCT_LIST) {
+        // var orgList = this.searchNotMessages({modelName: ORGANIZATION})
+        // this.trigger({action: 'list', list: orgList, forceUpdate: true})
+        this.trigger({action: 'getItem', resource: list[utils.getId(from.organization)].value})
+      }
+
       if (isConfirmation) {
         var fOrg = from.organization
         var org = fOrg ? list[utils.getId(fOrg)].value : null
@@ -4428,7 +4434,7 @@ var Store = Reflux.createStore({
       }
       else if (isMessage  &&  !noTrigger)
         this.trigger({action: 'addItem', resource: val})
-      else if (representativeAddedTo) {
+      else if (representativeAddedTo  &&  !triggeredOrgs) {
         var orgList = this.searchNotMessages({modelName: ORGANIZATION})
         this.trigger({action: 'list', list: orgList, forceUpdate: true})
       }
