@@ -22,7 +22,7 @@ import ActionSheet from 'react-native-actionsheet'
 // var ResourceTypesScreen = require('./ResourceTypesScreen')
 
 var LINK_COLOR
-var LIMIT = 100
+var LIMIT = 10
 var NEXT_HASH = '_n'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const FORM_REQUEST = 'tradle.FormRequest'
