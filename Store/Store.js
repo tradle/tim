@@ -1065,7 +1065,7 @@ var Store = Reflux.createStore({
           if (sp.id !== id)
             return
         }
-        else if (sp.id !== 'eresidency')
+        else if (sp.id !== 'eres')
           return
         if (!sp.org[ROOT_HASH]) {
           sp.org[ROOT_HASH] = protocol.linkString(sp.org)
