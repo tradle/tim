@@ -96,7 +96,7 @@ const SELF_INTRODUCTION = constants.TYPES.SELF_INTRODUCTION
 const FORGET_ME         = constants.TYPES.FORGET_ME
 const FORGOT_YOU        = constants.TYPES.FORGOT_YOU
 
-const SHARED_RESOURCE     = 'tradle.SharedResource'
+// const SHARED_RESOURCE     = 'tradle.SharedResource'
 const MY_IDENTITIES_TYPE  = 'tradle.MyIdentities'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const MY_PRODUCT          = 'tradle.MyProduct'
@@ -590,13 +590,13 @@ var Store = Reflux.createStore({
     return Q(meDriver)
   },
 
-  getInfo(serverUrls, retry) {
+  getInfo(serverUrls, retry, id) {
     let self = this
 
     let defer = Q.defer()
     let togo = serverUrls.length
     serverUrls.forEach((url) => {
-      self.getServiceProviders(url, retry)
+      self.getServiceProviders(url, retry, id)
       .then((results) => {
         // var httpClient = driverInfo.httpClient
         var wsClients = driverInfo.wsClients
@@ -683,6 +683,18 @@ var Store = Reflux.createStore({
     //   meDriver.watchTxs(whitelist)
     //   return meDriver
     // })
+  },
+
+  onAddApp(serverUrl) {
+    let parts = serverUrl.split(';')
+    // let idx = serverUrl.lastIndexOf('/')
+    // let id = parts[parts.length - 1]
+    // let url = parts.slice(0, parts.length - 1).join('/')
+
+    return this.getInfo([parts[0]], false, parts[1])
+    .then(() => {
+      this.trigger({action: 'list', modelName: ORGANIZATION})
+    })
   },
 
   onGetEmployeeInfo(code) {
@@ -993,7 +1005,7 @@ var Store = Reflux.createStore({
   },
 
   // Gets info about companies in this app, their bot representatives and their styles
-  getServiceProviders(url, retry) {
+  getServiceProviders(url, retry, id) {
     var self = this
     // return Q.race([
     //   fetch(utils.joinURL(url, 'info'), { headers: { cache: 'no-cache' } }),
@@ -1044,6 +1056,12 @@ var Store = Reflux.createStore({
 
       var promises = []
       json.providers.forEach(sp => {
+        if (id)  {
+          if (sp.id !== id)
+            return
+        }
+        else if (sp.id !== 'eresidency')
+          return
         if (!sp.org[ROOT_HASH]) {
           sp.org[ROOT_HASH] = protocol.linkString(sp.org)
         }
@@ -2267,15 +2285,15 @@ var Store = Reflux.createStore({
       batch.push({type: 'put', key: key, value: r})
       var toId = utils.getId(to)
       var time = new Date().getTime()
-      let sh = {
-        [TYPE]: SHARED_RESOURCE,
-        [ROOT_HASH]: self.getNonce(),
-        resource: self.buildRef(resource),
-        from: resource.from,
-        to: resource.to,
-        time: time
-      }
-      batch.push({type: 'put', key: utils.getId(sh), value: sh})
+      // let sh = {
+      //   [TYPE]: SHARED_RESOURCE,
+      //   [ROOT_HASH]: self.getNonce(),
+      //   resource: self.buildRef(resource),
+      //   from: resource.from,
+      //   to: resource.to,
+      //   time: time
+      // }
+      // batch.push({type: 'put', key: utils.getId(sh), value: sh})
       if (resource[ROOT_HASH]) {
         key = utils.getId(resource)
         var ver = list[key].value
@@ -3079,7 +3097,7 @@ var Store = Reflux.createStore({
       }
     }
 
-    let result = this.filterResult(foundResources, lastId)
+    let result = this.filterResult(foundResources, lastId, toOrg ? utils.getId(toOrg) : null)
     if (!result)
       return
     return this.getSearchResult(result)
@@ -3100,7 +3118,7 @@ var Store = Reflux.createStore({
     })
     return foundResources
   },
-  filterResult(result, lastId) {
+  filterResult(result, lastId, toOrgId) {
     if (!result)
       return
     if (!Array.isArray(result))
@@ -3176,6 +3194,11 @@ var Store = Reflux.createStore({
       else if (isForm) {
         // set organization and photos for items properties for better displaying
         let form = list[utils.getId(r.to)].value
+        if (toOrgId  &&  r.sharedWith  &&  r.sharedWith.length > 1) {
+          // if (utils.getId(r.to.organization) !== toOrgId) {
+          //   let filteredVerifications = this.getSharedVerificationsAboutThisForm(r, toOrgId)
+          // }
+        }
         r.to.organization = form.organization
         for (var p in r) {
           if (!m.properties[p]  ||  m.properties[p].type !== 'array' ||  !m.properties[p].items.ref)
@@ -3190,9 +3213,7 @@ var Store = Reflux.createStore({
             })
           }
         }
-
       }
-
       return true
     })
     if (lastId  &&  lastId.split('_')[0] === PRODUCT_LIST) {
@@ -3205,6 +3226,19 @@ var Store = Reflux.createStore({
     return newResult
     // return newResult.reverse()
   },
+  // getSharedVerificationsAboutThisForm(form, toOrgId) {
+  //   let result = this.searchMessages({modelName: VERIFICATION, to: utils.getMe(), strict: true})
+  //   // let result = this.searchMessages({modelName: VERIFICATION, to: to, strict: true, filterProps: {from: utils.getMe(), document: utils.getId(form)}})
+  //   let formId = utils.getId(form)
+  //   return result.filter((r) => {
+  //     if (utils.getId(r.document) !== formId)
+  //       return false
+  //     let fromOrgId = utils.getId(list[utils.getId(r.from)].value.organization)
+  //     if (fromOrgId === toOrgId)
+  //       return false
+  //     return true
+  //   })
+  // },
   fillMessage(r) {
     return r
 
@@ -3899,6 +3933,7 @@ var Store = Reflux.createStore({
         })
       }
 
+      // if (!Keychain) me['privkeys'] = result.keys.map(k => k.toJSON(true))
       me[NONCE] = me[NONCE] || this.getNonce()
       // driverInfo.deviceID = result.deviceID
       return this.buildDriver({
