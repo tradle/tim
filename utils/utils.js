@@ -16,6 +16,7 @@ import ENV from './env'
 
 var RCTUIManager = NativeModules.UIManager
 var crypto = require('crypto')
+var debug = require('debug')('tradle:app:utils')
 var Q = require('q')
 var collect = require('stream-collector')
 var typeforce = require('typeforce')
@@ -926,6 +927,7 @@ var utils = {
   },
 
   setPassword: function (username, password) {
+    debug(`saving password for username "${username}", service ${ENV.serviceID}`)
     return Keychain.setGenericPassword(username, password, ENV.serviceID)
   },
 
