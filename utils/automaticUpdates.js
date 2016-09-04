@@ -1,14 +1,15 @@
 
-import { AsyncStorage } from 'react-native'
+import { AsyncStorage, Alert } from 'react-native'
 import utils from './utils'
 import Actions from '../Actions/Actions'
 
-let CodePush = false//!__DEV__ && require('react-native-code-push')
+let CodePush = !__DEV__ && require('react-native-code-push')
 let ON = false
 let CHECKING
 // every 10 mins
 let DEFAULT_INTERVAL = 10 * 60 * 1000
 let downloadedUpdate = false
+let currentSync
 const CODE_UPDATE_KEY = '~hascodeupdate'
 
 // remove on app start
@@ -24,17 +25,36 @@ module.exports = {
 }
 
 function hasUpdate () {
+  if (downloadedUpdate) return Promise.resolve(true)
+
   return AsyncStorage.getItem(CODE_UPDATE_KEY)
-    .then(item => !!item, err => false)
+    .then(
+      item => downloadedUpdate = !!item,
+      err => false
+    )
 }
 
-function install () {
+function install (opts = {
+  alert: 'Installing update...',
+  delay: 3000
+}) {
+  let { alert, delay } = opts
   return AsyncStorage.getItem(CODE_UPDATE_KEY)
     .then(item => {
-      if (item) {
-        return AsyncStorage.removeItem(CODE_UPDATE_KEY)
-          .then(() => CodePush.restartApp())
-      }
+      if (!item) return
+
+      return AsyncStorage.removeItem(CODE_UPDATE_KEY)
+        .then(() => {
+          if (alert) {
+            delay = delay || 3000
+            Alert.alert(typeof alert === 'string' ? alert: 'installing update...')
+          }
+
+          if (delay) {
+            return utils.promiseDelay(delay)
+          }
+        })
+        .then(() => CodePush.restartApp())
     })
 }
 
@@ -43,16 +63,22 @@ function checkPeriodically (millis) {
 
   millis = millis || DEFAULT_INTERVAL
   return CHECKING = sync()
-    .then(() => utils.promiseDelay(millis))
-    // loop
-    .then(() => ON && checkPeriodically(millis))
+    .then(() => {
+      if (!downloadedUpdate) return loop()
+    })
+
+  function loop () {
+    return utils.promiseDelay(millis)
+      .then(() => ON && checkPeriodically(millis))
+  }
 }
 
 function sync () {
   if (!(CodePush && ON)) return Promise.resolve(false)
   if (downloadedUpdate) return Promise.resolve(true)
+  if (currentSync) return currentSync
 
-  return CodePush.sync({
+  return currentSync = CodePush.sync({
     // use our own dialog below when the download completes
     updateDialog: false,
     installMode: CodePush.InstallMode.ON_NEXT_RESTART
@@ -60,12 +86,16 @@ function sync () {
   .then(
     syncStatus => {
       if (syncStatus === CodePush.SyncStatus.UPDATE_INSTALLED) {
-        AsyncStorage.setItem(CODE_UPDATE_KEY, '1')
-        return downloadedUpdate = true
+        return AsyncStorage.setItem(CODE_UPDATE_KEY, '1')
+          .then(() => downloadedUpdate = true)
       }
     },
     err => false
   )
+  .then(result => {
+    currentSync = null
+    return result
+  })
 }
 
 function on (period) {
