@@ -13,7 +13,7 @@
   "dependencies": {
     "@tradle/cb-blockr": "^3.1.4",
     "@tradle/constants": "^1.3.0",
-    "@tradle/engine": "^2.4.0",
+    "@tradle/engine": "^2.5.0",
     "@tradle/keeper": "^2.2.0",
     "@tradle/models": "tradle/models",
     "@tradle/protocol": "^2.0.0",
@@ -43,7 +43,7 @@
     "mockery": "^1.4.0",
     "moment": "^2.13.0",
     "my-local-ip": "^1.0.0",
-    "nkey": "^2.0.1",
+    "nkey": "^2.0.2",
     "nkey-bitcoin": "^1.1.1",
     "nkey-dsa": "^1.0.1",
     "nkey-ec": "^2.0.1",
