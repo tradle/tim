@@ -6,7 +6,8 @@ const cached = {}
 const normalized = {
   'md-finger-print': 'md-fingerprint',
   'ios-checkmark-circle-outline': 'ios-checkmark-empty',
-  'ios-call-outline': 'ios-telephone'
+  'ios-call-outline': 'ios-telephone',
+  'ios-close-circle-outline': 'ios-close-circled'
 }
 
 module.exports = props => {
