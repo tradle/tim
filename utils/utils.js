@@ -1002,7 +1002,10 @@ var utils = {
       Keychain.resetGenericPasswords(),
       Keychain.resetGenericPasswords(ENV.serviceID)
     ])
-  }
+  },
+  isAndroid: ENV.isAndroid,
+  isIOS: ENV.isIOS,
+  isWeb: ENV.isWeb
 }
 
 function normalizeRemoveListener (addListenerRetVal) {

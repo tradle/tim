@@ -6387,6 +6387,18 @@
             }
           }
         },
+        "babel-template": {
+          "version": "6.9.0",
+          "from": "https://registry.npmjs.org/babel-template/-/babel-template-6.9.0.tgz",
+          "resolved": "https://registry.npmjs.org/babel-template/-/babel-template-6.9.0.tgz",
+          "dependencies": {
+            "lodash": {
+              "version": "4.14.0",
+              "from": "https://registry.npmjs.org/lodash/-/lodash-4.14.0.tgz",
+              "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.14.0.tgz"
+            }
+          }
+        },
         "babel-traverse": {
           "version": "6.11.4",
           "from": "https://registry.npmjs.org/babel-traverse/-/babel-traverse-6.11.4.tgz",
@@ -6406,18 +6418,6 @@
               "version": "4.13.1",
               "from": "https://registry.npmjs.org/lodash/-/lodash-4.13.1.tgz",
               "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.13.1.tgz"
-            }
-          }
-        },
-        "babel-template": {
-          "version": "6.9.0",
-          "from": "https://registry.npmjs.org/babel-template/-/babel-template-6.9.0.tgz",
-          "resolved": "https://registry.npmjs.org/babel-template/-/babel-template-6.9.0.tgz",
-          "dependencies": {
-            "lodash": {
-              "version": "4.14.0",
-              "from": "https://registry.npmjs.org/lodash/-/lodash-4.14.0.tgz",
-              "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.14.0.tgz"
             }
           }
         },
@@ -6485,6 +6485,37 @@
               "version": "6.8.0",
               "from": "https://registry.npmjs.org/babel-helper-get-function-arity/-/babel-helper-get-function-arity-6.8.0.tgz",
               "resolved": "https://registry.npmjs.org/babel-helper-get-function-arity/-/babel-helper-get-function-arity-6.8.0.tgz"
+            }
+          }
+        },
+        "globby": {
+          "version": "4.1.0",
+          "from": "https://registry.npmjs.org/globby/-/globby-4.1.0.tgz",
+          "resolved": "https://registry.npmjs.org/globby/-/globby-4.1.0.tgz",
+          "dependencies": {
+            "glob": {
+              "version": "6.0.4",
+              "from": "https://registry.npmjs.org/glob/-/glob-6.0.4.tgz",
+              "resolved": "https://registry.npmjs.org/glob/-/glob-6.0.4.tgz",
+              "dependencies": {
+                "inflight": {
+                  "version": "1.0.5",
+                  "from": "https://registry.npmjs.org/inflight/-/inflight-1.0.5.tgz",
+                  "resolved": "https://registry.npmjs.org/inflight/-/inflight-1.0.5.tgz",
+                  "dependencies": {
+                    "wrappy": {
+                      "version": "1.0.2",
+                      "from": "https://registry.npmjs.org/wrappy/-/wrappy-1.0.2.tgz",
+                      "resolved": "https://registry.npmjs.org/wrappy/-/wrappy-1.0.2.tgz"
+                    }
+                  }
+                }
+              }
+            },
+            "object-assign": {
+              "version": "4.1.0",
+              "from": "https://registry.npmjs.org/object-assign/-/object-assign-4.1.0.tgz",
+              "resolved": "https://registry.npmjs.org/object-assign/-/object-assign-4.1.0.tgz"
             }
           }
         },
@@ -6678,37 +6709,6 @@
               "resolved": "https://registry.npmjs.org/sparkles/-/sparkles-1.0.0.tgz"
             }
           }
-        },
-        "globby": {
-          "version": "4.1.0",
-          "from": "https://registry.npmjs.org/globby/-/globby-4.1.0.tgz",
-          "resolved": "https://registry.npmjs.org/globby/-/globby-4.1.0.tgz",
-          "dependencies": {
-            "glob": {
-              "version": "6.0.4",
-              "from": "https://registry.npmjs.org/glob/-/glob-6.0.4.tgz",
-              "resolved": "https://registry.npmjs.org/glob/-/glob-6.0.4.tgz",
-              "dependencies": {
-                "inflight": {
-                  "version": "1.0.5",
-                  "from": "https://registry.npmjs.org/inflight/-/inflight-1.0.5.tgz",
-                  "resolved": "https://registry.npmjs.org/inflight/-/inflight-1.0.5.tgz",
-                  "dependencies": {
-                    "wrappy": {
-                      "version": "1.0.2",
-                      "from": "https://registry.npmjs.org/wrappy/-/wrappy-1.0.2.tgz",
-                      "resolved": "https://registry.npmjs.org/wrappy/-/wrappy-1.0.2.tgz"
-                    }
-                  }
-                }
-              }
-            },
-            "object-assign": {
-              "version": "4.1.0",
-              "from": "https://registry.npmjs.org/object-assign/-/object-assign-4.1.0.tgz",
-              "resolved": "https://registry.npmjs.org/object-assign/-/object-assign-4.1.0.tgz"
-            }
-          }
         }
       }
     },
@@ -6855,8 +6855,8 @@
     },
     "react-native-ecc": {
       "version": "1.2.2",
-      "from": "../react-native-ecc",
-      "resolved": "file:../react-native-ecc"
+      "from": "tradle/react-native-ecc",
+      "resolved": "git://github.com/tradle/react-native-ecc.git#f2aadd18a41e701f244c4c6ef90136a062797bd6"
     },
     "react-native-env": {
       "version": "0.0.5",

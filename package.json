@@ -68,7 +68,7 @@
     "react-native-crypto": "^2.0.1",
     "react-native-datepicker": "pgmemk/react-native-datepicker",
     "react-native-device-info": "^0.9.3",
-    "react-native-ecc": "^1.2.2",
+    "react-native-ecc": "tradle/react-native-ecc",
     "react-native-env": "tradle/react-native-env",
     "react-native-floating-labels": "pgmemk/react-native-floating-labels",
     "react-native-fs": "^1.5.1",

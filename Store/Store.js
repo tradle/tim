@@ -12,7 +12,6 @@ import ReactNative, {
 
 import AsyncStorage from './Storage'
 import * as LocalAuth from '../utils/localAuth'
-var Keychain// = require('../utils/keychain')
 import Push from '../utils/push'
 // import DeviceInfo from 'react-native-device-info'
 
@@ -48,6 +47,7 @@ var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
+var Keychain = utils.isIOS() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('q-level');
 var asyncstorageDown = require('asyncstorage-down')
