@@ -562,7 +562,7 @@ var Store = Reflux.createStore({
       let meId = utils.getId(me)
       for (var p in list) {
         let r = list[p].value
-        let m = utils.getModel(r[TYPE]).value
+        let m = this.getModel(r[TYPE]).value
         if (m.interfaces  &&  m.interfaces.indexOf(MESSAGE) !== -1) {
           if (r.sharedWith) {
             r.sharedWith.forEach((shareInfo) => {
@@ -1467,6 +1467,13 @@ var Store = Reflux.createStore({
       var key = utils.getId(rr)
       self._setItem(key, rr)
 
+      if (!toOrg) {
+        let to = list[utils.getId(r.to)].value
+        toOrg = to.organization ? to.organization : to
+      }
+
+      self.addMessagesToChat(utils.getId(toOrg), rr)
+
       var params = {
         action: 'addMessage',
         resource: isWelcome ? welcomeMessage : rr
@@ -1500,7 +1507,16 @@ var Store = Reflux.createStore({
         return
       if (isWelcome  &&  utils.isEmpty(welcomeMessage))
         return
+      // cleanup temporary resources from the chat message references and from the in-memory storage - 'list'
+      if (!toOrg) {
+        let to = list[utils.getId(r.to)].value
+        toOrg = to.organization ? to.organization : to
+      }
+      let orgId = utils.getId(toOrg)
+      self.deleteMessageFromChat(orgId, rr)
       delete list[rr[TYPE] + '_' + tmpKey]
+
+      // saving the new message
       if (data)  {
         rr[ROOT_HASH] = data[ROOT_HASH]
         rr[CUR_HASH] = data[CUR_HASH]
@@ -1508,25 +1524,15 @@ var Store = Reflux.createStore({
       var key = utils.getId(rr)
       batch.push({type: 'put', key: key, value: rr})
       self._setItem(key, rr)
-      if (!toOrg) {
-        let to = list[utils.getId(r.to)].value
-        toOrg = to.organization ? to.organization : to
-      }
-      self.addMessagesToChat(utils.getId(toOrg), rr)
-      // var params = {
-      //   action: 'addMessage',
-      //   resource: isWelcome ? welcomeMessage : rr
-      // }
-      // if (error)
-      //   params.error = error
-
-      // self.trigger(params);
+      self.addMessagesToChat(orgId, rr)
       return db.batch(batch)
     })
     .catch(function(err) {
       debugger
     });
   },
+  // Every chat has it's own messages array where
+  // all the messages present in order they were received
   addMessagesToChat(id, r, isInit, timeShared) {
     if (r.documentCreated  &&  !isInit)
       return
@@ -1549,6 +1555,7 @@ var Store = Reflux.createStore({
     }
     messages.push({id: utils.getId(r), time: timeShared ? timeShared : r.time})
   },
+  // cleanup
   deleteMessageFromChat(id, r) {
     let messages = chatMessages[id]
     if (messages) {
@@ -2055,7 +2062,7 @@ var Store = Reflux.createStore({
         // Trigger painting before send. for that set ROOT_HASH to some temporary value like NONCE
         // and reset it after the real root hash will be known
         let isNew = returnVal[ROOT_HASH] == null
-        let isForm = utils.getModel(returnVal[TYPE]).value.subClassOf === FORM
+        let isForm = this.getModel(returnVal[TYPE]).value.subClassOf === FORM
         if (isNew)
           returnVal[ROOT_HASH] = returnVal[NONCE]
         else if (isForm) {
@@ -2178,7 +2185,7 @@ var Store = Reflux.createStore({
           let rId = utils.getId(returnVal.to)
           let to = list[rId].value
 
-          if (!isNew  ||  utils.getModel(returnVal[TYPE]).value.subClassOf !== FORM)
+          if (!isNew  ||  this.getModel(returnVal[TYPE]).value.subClassOf !== FORM)
             return
           let allFormRequests = self.searchMessages({modelName: FORM_REQUEST, to: to})
           let formRequests = allFormRequests.filter((r) => {
@@ -2746,23 +2753,7 @@ var Store = Reflux.createStore({
     return result;
   },
 
-  // extractReferences(val) {
-  //   let props = utils.getModel(val[TYPE]).value.properties
-  //   let r = {_t: val[TYPE]}
-  //   for (let p in val) {
-  //     if (props[p].ref) {
-  //       if (props[p].ref !== constants.TYPE.MONEY)
-  //         r[p] = val[p]
-  //     }
-  //     else if (props[p].type === 'array') {
-  //       if
-  //     }
-  //   }
-  // },
   searchMessages(params) {
-    // if (params.loadingEarlierMessages)
-    //   return this.getMessagesBefore(params)
-
     var query = params.query;
     var modelName = params.modelName;
     var meta = this.getModel(modelName).value;
@@ -2811,7 +2802,7 @@ var Store = Reflux.createStore({
       thisChatMessages = []
       Object.keys(list).filter((key) => {
         let type = list[key].value[TYPE]
-        let m = utils.getModel(type)
+        let m = this.getModel(type)
         if (!m)
           return false
         if (type === modelName                      ||
@@ -3192,7 +3183,7 @@ var Store = Reflux.createStore({
             r.from.photo = employee
         }
       }
-      let m = utils.getModel(r[TYPE]).value
+      let m = this.getModel(r[TYPE]).value
       let isMyProduct = m.subClassOf === MY_PRODUCT
       let isForm = !isMyProduct && m.subClassOf === FORM
       // r.from.photos = list[utils.getId(r.from)].value.photos;
@@ -3213,7 +3204,7 @@ var Store = Reflux.createStore({
         for (var p in r) {
           if (!m.properties[p]  ||  m.properties[p].type !== 'array' ||  !m.properties[p].items.ref)
             continue
-          let pModel = utils.getModel(m.properties[p].items.ref).value
+          let pModel = this.getModel(m.properties[p].items.ref).value
           if (pModel.properties.photos) {
             let items = r[p]
             items.forEach((ir) => {
@@ -3602,7 +3593,7 @@ var Store = Reflux.createStore({
     let messageType = model.id
     if (sharedWith) {
       let sharedWithOrg = list[utils.getId(sharedWith.organization)].value
-      let orgName = utils.getDisplayName(to, utils.getModel(ORGANIZATION).value.properties)
+      let orgName = utils.getDisplayName(to, this.getModel(ORGANIZATION).value.properties)
       if (model.subClassOf !== MY_PRODUCT && model.subClassOf !== FORM)
         return
       dn = translate('sharedForm', translate(model), orgName)
@@ -3623,15 +3614,15 @@ var Store = Reflux.createStore({
       from = list[utils.getId(from.organization)].value
 
     if (model.id === FORM_REQUEST) {
-      let m = utils.getModel(value.product).value
+      let m = this.getModel(value.product).value
       if (m.forms.indexOf(value.form) !== 0)
         return
-      dn = translate('formRequest', translate(utils.getModel(value.product).value))
+      dn = translate('formRequest', translate(this.getModel(value.product).value))
       messageType = FINANCIAL_PRODUCT
     }
     else if (model.id === VERIFICATION) {
       let docType = utils.getId(value.document).split('_')[0]
-      dn = translate('receivedVerification', translate(utils.getModel(docType).value))
+      dn = translate('receivedVerification', translate(this.getModel(docType).value))
     }
     else if (model.subClassOf === MY_PRODUCT)
       dn = translate('receivedProduct', translate(model))
@@ -4276,7 +4267,7 @@ var Store = Reflux.createStore({
   maybeWatchSeal(msg) {
     const payload = msg.object.object
     const type = payload[TYPE]
-    let model = utils.getModel(type)
+    let model = this.getModel(type)
     if (!model) return
 
     model = model.value
@@ -4544,7 +4535,7 @@ var Store = Reflux.createStore({
     var org = fOrg ? list[utils.getId(fOrg)].value : null
     var to = list[PROFILE + '_' + obj.to[ROOT_HASH]].value
     if (onMessage) {
-      let profileModel = utils.getModel(PROFILE).value
+      let profileModel = this.getModel(PROFILE).value
       val.from = {
         id: utils.getId(from),
         title: from.formatted || from.firstName
@@ -4721,29 +4712,28 @@ var Store = Reflux.createStore({
 
         if (data.value.type === MODEL) {
           models[data.key] = data;
-          self.setPropertyNames(data.value.properties);
+          self.setPropertyNames(data.value.properties)
+          return
         }
-        else {
-          isLoaded = true
-          if (!myId  &&  data.key === MY_IDENTITIES) {
-            myId = data.value.currentIdentity;
-            if (list[myId])
-              me = list[myId].value;
-          }
-          if (!me  &&  myId  && data.key == myId)
-            me = data.value;
-          if (data.value[TYPE] === PROFILE) {
-            if (data.value.securityCode)
-              employees[data.value.securityCode] = data.value
-            if (data.value.organization) {
-              if (!orgContacts[utils.getId(data.value.organization)])
-                orgContacts[utils.getId(data.value.organization)] = []
-              var c = orgContacts[utils.getId(data.value.organization)]
-              c.push(self.buildRef(data.value))
-            }
-          }
-          self._setItem(data.key, data.value)
+        isLoaded = true
+        if (!myId  &&  data.key === MY_IDENTITIES) {
+          myId = data.value.currentIdentity;
+          if (list[myId])
+            me = list[myId].value;
         }
+        if (!me  &&  myId  && data.key == myId)
+          me = data.value;
+        if (data.value[TYPE] === PROFILE) {
+          if (data.value.securityCode)
+            employees[data.value.securityCode] = data.value
+          if (data.value.organization) {
+            if (!orgContacts[utils.getId(data.value.organization)])
+              orgContacts[utils.getId(data.value.organization)] = []
+            var c = orgContacts[utils.getId(data.value.organization)]
+            c.push(self.buildRef(data.value))
+          }
+        }
+        self._setItem(data.key, data.value)
       })
       var sameContactList = {}
       for (var p in orgContacts) {
@@ -4793,25 +4783,9 @@ var Store = Reflux.createStore({
       // console.timeEnd('dbStream')
       // if (me)
       //   utils.setMe(me);
-      var noModels = self.isEmpty(models);
+      var noModels = utils.isEmpty(models);
       if (noModels)
         return self.loadModels();
-      // if (noModels || Object.keys(list).length == 2)
-      //   if (me)
-      //     return self.loadDB();
-      //   else {
-      //     isLoaded = false;
-      //     if (noModels)
-      //       return self.loadModels();
-      //   }
-      // // else
-      // //   return self.loadAddressBook();
-
-      // if (me  &&  me.organization) {
-        // var photos = list[utils.getId(me.organization.id)].value.photos;
-        // if (photos)
-        //   me.organization.photo = photos[0].url;
-      // }
       if (me  &&  (!list[me[TYPE] + '_' + me[ROOT_HASH]] || !list[IDENTITY + '_' + me[ROOT_HASH]]))
         me = null
       console.log('Stream closed');
@@ -4822,9 +4796,10 @@ var Store = Reflux.createStore({
       console.error('err:' + err);
     })
   },
+  // Received by employee/bot request from customer. And all the customer resources on FI side gets deleted
   forgetMe(resource) {
     let self = this
-    let result = this.searchMessages({modelName: MESSAGE, to: resource})
+    let result = this.searchMessages({modelName: MESSAGE, to: resource, isForgetting: true})
     let batch = []
     let ids = []
     result.forEach((r) => {
@@ -4851,6 +4826,7 @@ var Store = Reflux.createStore({
       debugger
     })
   },
+  // Cleanup and notify customer that FI successfully forgotten him
   forgotYou(resource) {
     var self = this
     var org = list[utils.getId(resource.organization)].value
@@ -4881,12 +4857,12 @@ var Store = Reflux.createStore({
           var rId = utils.getId(r)
           if (!list[rId]) {
             let arr = rId.split('_')
-            self.deleteMessageFromChat(orgId, {[TYPE]: arr[0], [ROOT_HASH]: arr[1]})
+            // self.deleteMessageFromChat(orgId, {[TYPE]: arr[0], [ROOT_HASH]: arr[1]})
             return
           }
           var res = list[rId].value
           var isVerification = r[TYPE] === VERIFICATION
-          var model = utils.getModel(r[TYPE]).value
+          var model = this.getModel(r[TYPE]).value
           var isForm = !isVerification  &&  model.subClassOf === FORM
           var deleted = !(res.sharedWith && res.sharedWith.length > 1)
           if (!deleted) {
@@ -4942,11 +4918,11 @@ var Store = Reflux.createStore({
             if (res.sharedWith) {
               res.sharedWith.forEach((r) => {
                 let org = list[r.bankRepresentative].value.organization
-                self.deleteMessageFromChat(utils.getId(org), res)
+                // self.deleteMessageFromChat(utils.getId(org), res)
               })
             }
             delete list[rId]
-            self.deleteMessageFromChat(orgId, r)
+            // self.deleteMessageFromChat(orgId, r)
             batch.push({type: 'del', key: rId})
           }
         })
@@ -5004,7 +4980,7 @@ var Store = Reflux.createStore({
     return db.batch(batch)
     .then(function() {
       result.forEach(function(r) {
-        if (utils.getModel(r[TYPE]).value.interfaces) {
+        if (this.getModel(r[TYPE]).value.interfaces) {
           let id = (utils.getId(r.from) === meId) ? utils.getId(r.from) : utils.getId(r.to)
           let rep = list[id].value
           let orgId = rep.organization ? utils.getId(rep.organization) : utils.getId(rep)
@@ -5451,14 +5427,6 @@ var Store = Reflux.createStore({
     })
   },
 
-  isEmpty(obj) {
-    for(var prop in obj) {
-      if(obj.hasOwnProperty(prop))
-        return false;
-    }
-    return true;
-  },
-
   getModel(modelName) {
     return models[modelName];
   },
@@ -5554,7 +5522,7 @@ var Store = Reflux.createStore({
   buildRef(resource) {
     if (!resource[TYPE] && resource.id)
       return resource
-    let isForm = utils.getModel(resource[TYPE]).value.subClassOf === FORM
+    let isForm = this.getModel(resource[TYPE]).value.subClassOf === FORM
     // let id = utils.getId(resource)
     // if (isForm)
     //   id += '_' + resource[CUR_HASH]
