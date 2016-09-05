@@ -30,7 +30,7 @@ var employee = require('../people/employee.json')
 
 var timerDebug = Debug('TIMER')
 var Q = require('q');
-Q.longStackSupport = true
+Q.longStackSupport = __DEV__
 Q.onerror = function (err) {
   console.error(err)
   throw err
