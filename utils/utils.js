@@ -1019,7 +1019,7 @@ var utils = {
   },
   isAndroid: ENV.isAndroid,
   isIOS: ENV.isIOS,
-  isWeb: ENV.isWeb
+  isWeb: ENV.isWeb,
   fetch: fetch,
   /* from react-native/Libraries/Utilities */
   groupByEveryN: function groupByEveryN<T>(array: Array<T>, n: number): Array<Array<?T>> {

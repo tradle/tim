@@ -11,7 +11,7 @@ var CameraView = require('./CameraView')
 var translate = utils.translate
 var moment = require('moment')
 
-import DatePicker from './DatePicker'
+import DatePicker from 'react-native-datepicker'
 
 var constants = require('@tradle/constants');
 var t = require('tcomb-form-native');
