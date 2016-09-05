@@ -6389,6 +6389,18 @@
             }
           }
         },
+        "babel-template": {
+          "version": "6.9.0",
+          "from": "https://registry.npmjs.org/babel-template/-/babel-template-6.9.0.tgz",
+          "resolved": "https://registry.npmjs.org/babel-template/-/babel-template-6.9.0.tgz",
+          "dependencies": {
+            "lodash": {
+              "version": "4.14.0",
+              "from": "https://registry.npmjs.org/lodash/-/lodash-4.14.0.tgz",
+              "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.14.0.tgz"
+            }
+          }
+        },
         "babel-traverse": {
           "version": "6.11.4",
           "from": "https://registry.npmjs.org/babel-traverse/-/babel-traverse-6.11.4.tgz",
@@ -6408,18 +6420,6 @@
               "version": "4.13.1",
               "from": "https://registry.npmjs.org/lodash/-/lodash-4.13.1.tgz",
               "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.13.1.tgz"
-            }
-          }
-        },
-        "babel-template": {
-          "version": "6.9.0",
-          "from": "https://registry.npmjs.org/babel-template/-/babel-template-6.9.0.tgz",
-          "resolved": "https://registry.npmjs.org/babel-template/-/babel-template-6.9.0.tgz",
-          "dependencies": {
-            "lodash": {
-              "version": "4.14.0",
-              "from": "https://registry.npmjs.org/lodash/-/lodash-4.14.0.tgz",
-              "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.14.0.tgz"
             }
           }
         },
@@ -6857,8 +6857,8 @@
     },
     "react-native-ecc": {
       "version": "1.2.2",
-      "from": "../react-native-ecc",
-      "resolved": "file:../react-native-ecc"
+      "from": "tradle/react-native-ecc",
+      "resolved": "git://github.com/tradle/react-native-ecc.git#f2aadd18a41e701f244c4c6ef90136a062797bd6"
     },
     "react-native-env": {
       "version": "0.0.5",

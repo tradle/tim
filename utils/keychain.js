@@ -3,8 +3,9 @@ import typeforce from 'typeforce'
 import Q from 'q'
 import * as ec from 'react-native-ecc'
 import utils from './utils'
-import { serviceID } from './env'
+import { serviceID, accessGroup } from './env'
 ec.setServiceID(serviceID)
+if (accessGroup) ec.setAccessGroup(accessGroup)
 
 import { ec as ellipticEC } from 'elliptic'
 import { utils as tradleUtils } from '@tradle/engine'
@@ -53,17 +54,11 @@ function lookupKey (pubKey) {
     pub: 'String'
   }, pubKey)
 
-  let isInSecureEnclave = isKeyInSecureEnclave(pubKey)
-  let secureEnclaveLookup = isInSecureEnclave
-    ? lookupSecureEnclaveKey(pubKey)
-    : rejectNotFound()
+  if (!isKeyInSecureEnclave(pubKey)) {
+    return fromKeychain()
+  }
 
-  let keychainLookup = isInSecureEnclave
-    ? rejectNotFound()
-    : lookupKeychainKey(pubKey)
-
-  let pubKeyString = pubKey.pub
-  return secureEnclaveLookup
+  return lookupSecureEnclaveKey(pubKey)
     .catch(function (err) {
       if (err.message !== 'NotFound') throw err
 
@@ -71,14 +66,14 @@ function lookupKey (pubKey) {
     })
 
   function fromKeychain () {
-    return keychainLookup
+    return lookupKeychainKey(pubKey)
       .then(function (priv) {
         var priv = { ...pubKey, priv }
         return tradleUtils.importKey(priv)
       })
       .catch(function (err) {
-        console.log('not found', pubKeyString)
-        debugger
+        console.log('key not found', pubKeyString)
+        throw err
       })
   }
 }
@@ -125,7 +120,7 @@ function createSecureEnclaveKey (keyProps) {
 }
 
 function rejectNotFound () {
-  return Q.reject(new Error('NotFound'))
+  return Promise.reject(new Error('NotFound'))
 }
 
 function getCurve (name) {
