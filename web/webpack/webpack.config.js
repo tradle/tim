@@ -155,7 +155,8 @@ var config = module.exports = {
         loader: 'url-loader',
         query: { name: '[name].[ext]' }
       },
-      {test: /\.json$/, loaders: ['json']}
+      { test: /\.json$/, loader: 'json' },
+      { test: /\.css$/, loader: 'style-loader!css-loader' }
     ]
   },
   node: {

@@ -7,6 +7,9 @@ import {
 
 import React, { Component } from 'react'
 import DatePicker from 'react-datepicker'
+require('react-datepicker/dist/react-datepicker.css')
+
+import moment from 'moment'
 
 export default class DatePickerAdapter extends Component {
   constructor(props) {
@@ -14,9 +17,9 @@ export default class DatePickerAdapter extends Component {
   }
 
   render() {
-    <DatePicker
+    return <DatePicker
       dateFormat={this.props.format}
-      selected={this.props.date}
+      selected={moment(this.props.date)}
       placeholderText={this.props.placeholder}
       style={this.props.style}
       onChange={this.props.onDateChange}
