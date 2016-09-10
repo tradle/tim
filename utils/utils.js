@@ -546,6 +546,7 @@ var utils = {
           lastAdditionalInfoTime = r.time;
       });
     }
+    /*
     resource.verifications.forEach(function(r) {
       var rh = r.from[ROOT_HASH];
       if (!rh)
@@ -554,6 +555,7 @@ var utils = {
       if (rh === me[ROOT_HASH]  &&  (!lastAdditionalInfoTime  ||  lastAdditionalInfoTime < r.time))
         verifiedByMe = true
     });
+    */
     return verifiedByMe
   },
   optimizeResource(res) {
@@ -831,10 +833,13 @@ var utils = {
     if (!this.isEmployee(resource))
       return false
     let model = this.getModel(resource[TYPE]).value
-    return (me.organization  &&
-            utils.getId(me) === utils.getId(resource.to) &&
-           !utils.isVerifiedByMe(resource)               && // !verification  &&  utils.getId(resource.to) === utils.getId(me)  &&
-            model.subClassOf === TYPES.FORM)
+    if (!me.organization)
+      return false
+    if (model.subClassOf === TYPES.FORM)
+      return  utils.getId(me) === utils.getId(resource.to) &&
+             !utils.isVerifiedByMe(resource)               // !verification  &&  utils.getId(resource.to) === utils.getId(me)  &&
+    else if (model.id === TYPES.VERIFICATION)
+      return  utils.getId(me) === utils.getId(resource.from)
   },
   isSimulator() {
     return DeviceInfo.getModel() === 'Simulator'
