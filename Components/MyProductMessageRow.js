@@ -265,7 +265,7 @@ var styles = StyleSheet.create({
     fontSize: 14,
   },
   descriptionB: {
-    fontSize: 17,
+    fontSize: 18,
   },
   formType: {
     color: '#EBFCFF',

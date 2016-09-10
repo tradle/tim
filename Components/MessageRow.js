@@ -738,7 +738,7 @@ class MessageRow extends Component {
           isConfirmation = resource[v].indexOf('Congratulations!') !== -1
 
         if (isConfirmation) {
-          style = [style, {color: self.props.bankStyle.CONFIRMATION_COLOR, fontSize: 17}]
+          style = [style, {color: self.props.bankStyle.CONFIRMATION_COLOR, fontSize: 18}]
           vCols.push(
             <View key={self.getNextKey()}>
               <Text style={[style]}>{resource[v]}</Text>
@@ -910,7 +910,7 @@ var styles = StyleSheet.create({
   },
   resourceTitle: {
     // flex: 1,
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '400',
     marginBottom: 2,
   },
@@ -976,7 +976,7 @@ var styles = StyleSheet.create({
     borderRadius: 10
   },
   verySmallLetters: {
-    fontSize: 17,
+    fontSize: 18,
     // alignSelf: 'flex-end',
     color: '#757575'
     // color: '#b4c3cb'
@@ -1019,12 +1019,12 @@ var styles = StyleSheet.create({
   descriptionB: {
     // flexWrap: 'wrap',
     // color: '#757575',
-    fontSize: 17,
+    fontSize: 18,
   },
   assistentText: {
     color: '#757575',
     fontStyle: 'italic',
-    fontSize: 17
+    fontSize: 18
   },
   assistentBox: {
     backgroundColor: '#efefef',
@@ -1080,7 +1080,7 @@ var styles = StyleSheet.create({
     backgroundColor: '#EDF2CE'
   },
   verificationHeaderText: {
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '500',
     alignSelf: 'center',
     color: '#FBFFE5'
@@ -1099,7 +1099,7 @@ var styles = StyleSheet.create({
     padding: 10
   },
   multiEntryText: {
-    fontSize: 17
+    fontSize: 18
   },
   viewStyle: {
     flexDirection: 'row',
@@ -1223,7 +1223,7 @@ module.exports = MessageRow;
     var hdrStyle = {backgroundColor: '#289427'} //this.props.bankStyle.PRODUCT_BG_COLOR ? {backgroundColor: this.props.bankStyle.PRODUCT_BG_COLOR} : {backgroundColor: '#289427'}
     var orgName = resource.from.organization  ? resource.from.organization.title : ''
     renderedRow.splice(0, 0, <View  key={this.getNextKey()} style={[styles.verifiedHeader, hdrStyle, {marginHorizontal: -8, marginTop: -7, marginBottom: 7, paddingBottom: 5}]}>
-                       <Text style={{fontSize: 17, alignSelf: 'center', color: '#fff'}}>{translate('issuedBy', orgName)}</Text>
+                       <Text style={{fontSize: 18, alignSelf: 'center', color: '#fff'}}>{translate('issuedBy', orgName)}</Text>
                     </View>
                     );
     let title = translate(model)

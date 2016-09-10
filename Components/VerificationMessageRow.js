@@ -389,7 +389,7 @@ var styles = StyleSheet.create({
   },
   resourceTitle: {
     // flex: 1,
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '400',
     marginBottom: 2,
   },
@@ -424,7 +424,7 @@ var styles = StyleSheet.create({
     borderWidth: 1
   },
   verySmallLetters: {
-    fontSize: 17,
+    fontSize: 18,
     // alignSelf: 'flex-end',
     color: '#757575'
     // color: '#b4c3cb'
@@ -485,7 +485,7 @@ var styles = StyleSheet.create({
     backgroundColor: '#EDF2CE'
   },
   verificationHeaderText: {
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '500',
     alignSelf: 'center',
     color: '#FBFFE5'
