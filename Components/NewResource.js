@@ -740,7 +740,7 @@ class NewResource extends Component {
             </View>
           counter =
             <View>
-              <View style={{marginTop: 15, paddingHorizontal: 5}}>
+              <View style={{marginTop: 25, paddingHorizontal: 5}}>
                 <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
               </View>
             </View>;
@@ -862,12 +862,12 @@ class NewResource extends Component {
                : <View style={{height: 0}} />
 
     var content =
-      <ScrollView style={style} ref='scrollView' {...this.scrollviewProps}>
+      <ScrollView style={style} ref='scrollView' {...this.scrollviewProps} keyboardDismissMode={'on-drag'} keyboardShouldPersistTaps={true}>
         <View style={styles.container}>
           <View style={photoStyle}>
             <PhotoView resource={resource} navigator={this.props.navigator}/>
           </View>
-          <View style={this.state.isRegistration ? {marginHorizontal: DeviceHeight > 1000 ? 50 : 30, paddingTop: 30} : {paddingTop: 10, marginHorizontal: 10}}>
+          <View style={this.state.isRegistration ? {marginHorizontal: DeviceHeight > 1000 ? 50 : 30, paddingTop: 30} : {marginHorizontal: 10}}>
             <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange.bind(this)}/>
             {button}
             <View style={{marginTop: -10}}>
@@ -1061,7 +1061,8 @@ var styles = StyleSheet.create({
   photoBG: {
     // marginTop: -15,
     alignItems: 'center',
-    backgroundColor: '#245D8C'
+    paddingBottom: 10,
+    // backgroundColor: '#245D8C'
   },
   err: {
     // paddingVertical: 10,
