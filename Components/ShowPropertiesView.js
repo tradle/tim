@@ -339,7 +339,7 @@ var styles = StyleSheet.create({
     color: '#2892C6'
   },
   description: {
-    fontSize: 16,
+    fontSize: 18,
     marginVertical: 3,
     marginHorizontal: 7,
     color: '#2E3B4E',
