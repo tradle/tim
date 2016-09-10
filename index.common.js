@@ -493,7 +493,7 @@ var NavigationBarRouteMapper = {
         ? <TouchableOpacity
             hitSlop={HIT_SLOP}
             onPress={() =>  Alert.alert(translate(route.help))}>
-            <Icon name={'ios-information-circle'} key={'ios-help'} size={20} color='#29ABE2' style={{paddingLeft: 3}}/>
+            <Icon name={'ios-information-circle'} key={'ios-help'} size={20} color='#29ABE2' style={{paddingLeft: 3, marginTop: 10}}/>
           </TouchableOpacity>
         : <View />
       }
