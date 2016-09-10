@@ -12,6 +12,7 @@ var MessageList = require('./MessageList')
 // var SearchBar = require('react-native-search-bar');
 
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
+const FORM_REQUEST = 'tradle.FormRequest'
 import {
   ListView,
   Text,
@@ -107,13 +108,19 @@ class ProductChooser extends Component {
       time: new Date().getTime()
     }
     if (model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT) {
-      msg._t = PRODUCT_APPLICATION
+      msg[constants.TYPE] = PRODUCT_APPLICATION
       msg.product = model.id // '[application for](' + model.id + ')',
       utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg, true, true))
     }
     else {
+      // msg[constants.TYPE] =  FORM_REQUEST,
+      // msg.message = translate(model.properties.photos ? 'fillTheFormWithAttachments' : 'fillTheForm', translate(model.title)),
+      // // product: productModel.id,
+      // msg.form = model.id
+
+
       msg._t = constants.TYPES.SIMPLE_MESSAGE
-      msg.message = '[' + translate('fillTheForm') + '](' + model.id + ')'
+      msg.message = '[' + (model.properties.photos ? translate('fillTheFormWithAttachments') : translate('fillTheForm')) + '](' + model.id + ')'
       utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg))
     }
 
