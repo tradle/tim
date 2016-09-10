@@ -594,7 +594,6 @@ var utils = {
     }
   },
 
-
   readDB(db) {
     // return new Promise((resolve, reject) => {
     //   collect(db.createReadStream(), (err, data) => {
@@ -1010,7 +1009,13 @@ var utils = {
   },
   isAndroid: ENV.isAndroid,
   isIOS: ENV.isIOS,
-  isWeb: ENV.isWeb
+  isWeb: ENV.isWeb,
+  promiseThunky: function (fn) {
+    let promise
+    return function () {
+      return promise ? promise : promise = fn()
+    }
+  }
 }
 
 function normalizeRemoveListener (addListenerRetVal) {

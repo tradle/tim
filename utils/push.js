@@ -16,24 +16,27 @@ const TYPE = constants.TYPE
 const Actions = require('../Actions/Actions')
 const pushServerURL = __DEV__ ? `http://${ENV.LOCAL_IP}:48284` : 'https://push.tradle.io'
 
-let promiseInit
+let initialized
+let preinitialized
+const initialize = new Promise(resolve => initialized = resolve)
+const preinitialize = new Promise(resolve => preinitialized = resolve)
 
-exports.init = function (opts) {
-  if (promiseInit) throw new Error('init can only be called once')
-
-  return promiseInit = createPusher(opts)
-}
+// only allow this to run once
+exports.init = utils.promiseThunky(opts => {
+  preinitialized()
+  return createPusher(opts).then(initialized)
+})
 
 exports.subscribe = function (publisher) {
-  return promiseInit.then(pusher => pusher.subscribe && pusher.subscribe(publisher))
+  return initialize.then(pusher => pusher.subscribe && pusher.subscribe(publisher))
 }
 
 exports.resetBadgeNumber = function () {
-  return promiseInit.then(pusher => pusher.resetBadgeNumber && pusher.resetBadgeNumber())
+  return initialize.then(pusher => pusher.resetBadgeNumber && pusher.resetBadgeNumber())
 }
 
 function createPusher (opts) {
-  if (utils.isSimulator()) return Promise.resolve({})
+  if (utils.isWeb() || utils.isSimulator()) return Promise.resolve({})
 
   const me = opts.me
   const node = opts.node
