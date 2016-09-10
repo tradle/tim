@@ -256,7 +256,7 @@ class MessageView extends Component {
     var verificationModel = constants.TYPES.VERIFICATION // model.properties.verifications.items.ref;
     var verification = {
       document: {
-        id: resource[constants.TYPE] + '_' + resource[constants.ROOT_HASH] + '_' + resource[constants.CUR_HASH],
+        id: utils.getId(resource),
         title: resource.message ? resource.message : model.title
       },
       to: {
@@ -264,7 +264,7 @@ class MessageView extends Component {
         title: from.title
       },
       from: {
-        id: me[constants.TYPE] + '_' + me[constants.ROOT_HASH] + '_' + me[constants.CUR_HASH],
+        id: utils.getId(me),
         title: utils.getDisplayName(me, utils.getModel(me[constants.TYPE]).value.properties)
       },
       time: new Date().getTime()
@@ -304,13 +304,13 @@ var styles = StyleSheet.create({
     color: '#7AAAC3'
   },
   title: {
-    fontSize: 16,
+    fontSize: 18,
     fontFamily: 'Avenir Next',
     marginHorizontal: 7,
     color: '#9b9b9b'
   },
   verification: {
-    fontSize: 16,
+    fontSize: 18,
     marginVertical: 3,
     marginHorizontal: 7,
     color: '#7AAAC3',
