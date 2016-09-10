@@ -17,10 +17,14 @@ var constants = require('@tradle/constants');
 var t = require('tcomb-form-native');
 var Actions = require('../Actions/Actions');
 var extend = require('extend');
-var DEFAULT_CURRENCY_SYMBOL = '£';
+const DEFAULT_CURRENCY_SYMBOL = '£';
 var CURRENCY_SYMBOL
-var ENUM = 'tradle.Enum'
-var SETTINGS = 'tradle.Settings'
+const ENUM = 'tradle.Enum'
+const SETTINGS = 'tradle.Settings'
+const YEAR = 3600 * 1000 * 24 * 365
+const DAY  = 3600 * 1000 * 24
+const HOUR = 3600 * 1000
+const MINUTE = 60 * 1000
 
 var cnt = 0;
 var propTypesMap = {
@@ -41,7 +45,9 @@ import {
   DatePickerAndroid,
   Dimensions
 } from 'react-native';
+
 var LINK_COLOR, DEFAULT_LINK_COLOR = '#a94442'
+// import transform from 'tcomb-json-schema'
 
 var NewResourceMixin = {
   onScroll(e) {
@@ -134,6 +140,16 @@ var NewResourceMixin = {
     }
 
     var required = utils.arrayToObject(meta.required);
+
+// var TcombType = transform({
+//   "type": "string",
+//   "enum": ["Street", "Avenue", "Boulevard"]
+// });
+
+// model['test'] = TcombType
+// options.fields['test'] = {
+//   placeholder: 'Test'
+// }
     // var d = data ? data[i] : null;
     for (var p in eCols) {
       if (p === constants.TYPE  ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink))
@@ -543,7 +559,7 @@ var NewResourceMixin = {
     var err = this.state.missedRequiredOrErrorValue &&  this.state.missedRequiredOrErrorValue[params.prop.name]
 
     return (
-      <View style={{flex: 5, paddingBottom: err ? 20 : 5}}>
+      <View style={{flex: 5, marginTop: 5, paddingBottom: err ? 15 : 10}}>
         <FloatLabel
           labelStyle={styles.labelInput}
           autoCorrect={false}
@@ -552,6 +568,7 @@ var NewResourceMixin = {
           inputStyle={this.state.isRegistration ? styles.regInput : styles.input}
           style={styles.formInput}
           value={params.value}
+          keyboardShouldPersistTaps={true}
           keyboardType={params.keyboard || 'default'}
           onChangeText={this.onChangeText.bind(this, params.prop)}
         >{label}</FloatLabel>
@@ -572,7 +589,7 @@ var NewResourceMixin = {
         err = params.errors[params.prop.name]
 
       error = err
-                ? <View style={styles.err} key={this.getNextKey()}>
+                ? <View style={[styles.err, typeof params.paddingLeft !== 'undefined' ? {paddingLeft: params.paddingLeft} : {paddingLeft: 10}]} key={this.getNextKey()}>
                     <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>{err}</Text>
                   </View>
                 : <View key={this.getNextKey()} />
@@ -581,7 +598,7 @@ var NewResourceMixin = {
   },
   myBooleanTemplate(params) {
     var labelStyle = {color: '#cccccc', fontSize: 18};
-    var textStyle =  {marginTop: 5, color: this.state.isRegistration ? '#ffffff' : '#000000', fontSize: 17};
+    var textStyle =  {marginTop: 5, color: this.state.isRegistration ? '#ffffff' : '#000000', fontSize: 18};
 
     let prop = params.prop
     let resource = this.state.resource
@@ -628,8 +645,8 @@ var NewResourceMixin = {
               <Icon name={value ? 'ios-checkmark-circle' : 'ios-radio-button-off'}  size={40} color={value ? '#007aff' : '#007aff' } style={{marginTop: -15}} />
 */
   myDateTemplate(params) {
-    var labelStyle = {color: '#cccccc', fontSize: 17, paddingBottom: 10};
-    var textStyle = {color: this.state.isRegistration ? '#ffffff' : '#000000', fontSize: 17, paddingBottom: 10};
+    var labelStyle = {color: '#cccccc', fontSize: 18, paddingBottom: 10};
+    var textStyle = {color: this.state.isRegistration ? '#ffffff' : '#000000', fontSize: 18, paddingBottom: 10};
     var prop = params.prop
     let resource = this.state.resource
     let label, style, propLabel
@@ -655,10 +672,22 @@ var NewResourceMixin = {
     let valuePadding = 0 //Platform.OS === 'ios' ? 0 : (hasValue ? 10 : 0)
     let format = 'MMMM Do, YYYY'
     let value = params.value &&  moment(new Date(params.value)).format(format)
+    let dateProps = {}
+    let date
+    if (prop.maxDate  ||  prop.minDate) {
+      let maxDate = this.getDateRange(prop.maxDate)
+      let minDate = this.getDateRange(prop.minDate)
+      if (minDate  &&  maxDate)
+        dateProps = {maxDate: new Date(maxDate), minDate: new Date(minDate)}
+      else
+        dataProps = minDate ? {minDate: new Date(minDate)} : {maxDate: new Date(maxDate)}
+    }
+    if (prop.format)
+      dateProps.format = prop.format
 
     if (!value)
       value = translate(params.prop)
-    return <View style={{paddingBottom: 10}} key={this.getNextKey()} ref={prop.name}>
+    return <View style={{marginTop: 2, paddingBottom: 5}} key={this.getNextKey()} ref={prop.name}>
           {propLabel}
           <DatePicker
             style={{width: Dimensions.get('window').width - 30, paddingLeft: 10, justifyContent: 'flex-start', borderColor: '#f7f7f7'}}
@@ -667,7 +696,7 @@ var NewResourceMixin = {
             format={format}
             confirmBtnText="Confirm"
             cancelBtnText="Cancel"
-            date={params.value ? new Date(params.value) : null}
+            date={params.value ? new Date(params.value) : date ? date : null}
             onDateChange={(date) => {
               this.changeTime(params.prop, new Date(moment(date, format)))
             }}
@@ -676,6 +705,7 @@ var NewResourceMixin = {
                 flex: 1,
                 height: 35,
                 paddingBottom: 5,
+                marginTop: 5,
                 borderWidth: 1,
                 borderColor: '#f7f7f7',
                 borderBottomColor: '#cccccc',
@@ -700,10 +730,54 @@ var NewResourceMixin = {
                 top: 5
               },
             }}
-
+            {...dateProps}
           />
           {this.getErrorView(params)}
          </View>
+  },
+  // parseDate(dateStr) {
+  //   if (!dateStr.length)
+  //     return null
+  //   return new Date().getTime() - eval(dateStr) * YEAR
+  // },
+  getDateRange(dateStr) {
+    if (!dateStr)
+      return null
+    let parts = dateStr.split(' ')
+    if (parts.length === 1) {
+      switch(dateStr) {
+      case 'today':
+        return new Date().getTime()
+      case 'tomorrow':
+        return (new Date().getTime() + DAY)
+      }
+    }
+    let number = parts[0]
+    let measure = parts[1]
+    let beforeAfter = parts.length === 3 ? parts[2] : 'before'
+    let coef
+    switch (measure) {
+    case 'years':
+      coef = YEAR
+      break
+    case 'days':
+      coef = DAY
+      break
+    case 'hours':
+      coef = HOUR
+      break
+    case 'minutes':
+      coef = MINUTE
+      break
+    default:
+      coef = 1000
+    }
+    switch(beforeAfter) {
+    case 'before':
+      return new Date().getTime() - number * coef
+    case 'after':
+      return new Date().getTime() + number * coef
+    }
   },
   // myDateTemplate1(params) {
   //   var labelStyle = {color: '#cccccc', fontSize: 17, paddingBottom: 10};
@@ -827,9 +901,10 @@ var NewResourceMixin = {
   //      this.refs.scrollView.scrollTo(Dimensions.get('window').height * 2/3);
   //   }
   // },
+
   myCustomTemplate(params) {
     var labelStyle = {color: '#cccccc', fontSize: 18, paddingBottom: 10, marginTop: -5};
-    var textStyle = {color: this.state.isRegistration ? '#ffffff' : '#000000', fontSize: 17, paddingBottom: 10, marginTop: -5};
+    var textStyle = {color: this.state.isRegistration ? '#ffffff' : '#000000', fontSize: 18, paddingBottom: 10, marginTop: -5};
     var resource = /*this.props.resource ||*/ this.state.resource
     var label, style
     var propLabel, propName
@@ -850,8 +925,8 @@ var NewResourceMixin = {
         label = utils.createAndTranslate(label, true)
       style = textStyle
       let vStyle = Platform.OS === 'android'
-                 ? {paddingLeft: 0, marginTop: 5}
-                 : {marginTop: 5, marginBottom: 5, backgroundColor: 'transparent'}
+                 ? {marginTop: 7, paddingLeft: 0}
+                 : {marginTop: 7, marginBottom: 5, backgroundColor: 'transparent'}
       propLabel = <View style={vStyle}>
                     <Text style={{fontSize: 12, color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}}>{params.label}</Text>
                   </View>
@@ -861,6 +936,9 @@ var NewResourceMixin = {
       style = labelStyle
       propLabel = <View style={{marginTop: 20}}/>
     }
+    let maxChars = (Dimensions.get('window').width - 20)/10
+    if (maxChars < label.length)
+      label = label.substring(0, maxChars - 3) + '...'
     if (this.state.isRegistration  &&  prop.ref  &&  prop.ref === 'tradle.Language'  &&  !resource[prop.name])
       label += ' (' + utils.translate(utils.getDefaultLanguage()) + ')'
     let isVideo = prop.name === 'video'
@@ -871,8 +949,8 @@ var NewResourceMixin = {
         <TouchableHighlight underlayColor='transparent' onPress={
           isVideo ? this.showCamera.bind(this, params) : this.chooser.bind(this, prop, params.prop)
         }>
-          <View style={{ position: 'relative'}}>
-            <View style={[styles.chooserContentStyle, {marginTop: 10}]}>
+          <View>
+            <View style={[styles.chooserContentStyle, {marginTop: 20}]}>
                {this.state[prop.name + '_photo']
                  ? <View style={{flexDirection: 'row'}}>
                      <Image source={{uri: this.state[prop.name + '_photo'].url}} style={styles.thumb} />
@@ -887,7 +965,7 @@ var NewResourceMixin = {
             </View>
           </View>
         </TouchableHighlight>
-         {this.getErrorView({noError: params.noError, errors: params.errors, prop: prop})}
+         {this.getErrorView({noError: params.noError, errors: params.errors, prop: prop, paddingLeft: 0})}
       </View>
     );
   },
@@ -1040,8 +1118,8 @@ var NewResourceMixin = {
   },
 
   myEnumTemplate(params) {
-    var labelStyle = {color: '#cccccc', fontSize: 17, paddingLeft: 10} //, paddingBottom: 10};
-    var textStyle = {color: '#000000', fontSize: 17, paddingLeft: 10} //, paddingBottom: 10};
+    var labelStyle = {color: '#cccccc', fontSize: 18, paddingLeft: 10} //, paddingBottom: 10};
+    var textStyle = {color: '#000000', fontSize: 18, paddingLeft: 10} //, paddingBottom: 10};
     var label
     var prop = params.prop
     var enumProp = params.enumProp
@@ -1065,7 +1143,7 @@ var NewResourceMixin = {
       error = <View/>
     var value = prop ? params.value : resource[enumProp.name]
     return (
-      <View style={[styles.chooserContainer, {width: 40, marginTop: 10, height: 51}]} key={this.getNextKey()} ref={enumProp.name}>
+      <View style={[styles.chooserContainer, {width: 40, marginTop: 15, height: 51}]} key={this.getNextKey()} ref={enumProp.name}>
         <TouchableHighlight underlayColor='transparent' onPress={this.enumChooser.bind(this, prop, enumProp)}>
           <View style={{ position: 'relative'}}>
             <View style={styles.chooserContentStyle}>
@@ -1255,7 +1333,7 @@ var styles = StyleSheet.create({
     marginTop: 15,
     marginLeft: 20,
     color: '#757575',
-    fontSize: 17
+    fontSize: 18
   },
   icon1: {
     width: 15,
@@ -1302,13 +1380,13 @@ var styles = StyleSheet.create({
     borderBottomWidth: 1,
     marginHorizontal: 10,
     // marginBottom: 10,
-    paddingBottom: 10,
+    // paddingBottom: 10,
     flex: 1
   },
   chooserContentStyle: {
     justifyContent: 'space-between',
     flexDirection: 'row',
-    paddingVertical: 5,
+    // paddingVertical: 5,
     borderRadius: 4
   },
   labelInput: {
