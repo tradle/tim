@@ -2,6 +2,9 @@
 
 var MessageView = require('./MessageView')
 var MessageRow = require('./MessageRow')
+var MyProductMessageRow = require('./MyProductMessageRow')
+var VerificationMessageRow = require('./VerificationMessageRow')
+var FormMessageRow = require('./FormMessageRow')
 var NoResources = require('./NoResources')
 var NewResource = require('./NewResource')
 var ProductChooser = require('./ProductChooser')
@@ -345,23 +348,29 @@ class MessageList extends Component {
     // var MessageRow = require('./MessageRow');
     var previousMessageTime = currentMessageTime;
     currentMessageTime = resource.time;
-    return  (
-      <MessageRow
-        onSelect={this.selectResource.bind(this)}
-        share={this.share.bind(this)}
-        resource={resource}
-        messageNumber={rowId}
-        sendStatus={this.state.sendStatus &&  this.state.sendResource[constants.ROOT_HASH] === resource[constants.ROOT_HASH] ? this.state.sendStatus : null}
-        isAggregation={isAggregation}
-        currency={this.props.currency}
-        navigator={this.props.navigator}
-        productToForms={this.state.productToForms}
-        bankStyle={this.props.bankStyle}
-        shareableResources={this.state.shareableResources}
-        previousMessageTime={previousMessageTime}
-        isLast={rowId === this.state.list.length - 1}
-        to={isAggregation ? resource.to : this.props.resource} />
-      );
+    var props = {
+      onSelect: this.selectResource.bind(this),
+      share: this.share.bind(this),
+      resource: resource,
+      messageNumber: rowId,
+      sendStatus: this.state.sendStatus &&  this.state.sendResource[constants.ROOT_HASH] === resource[constants.ROOT_HASH] ? this.state.sendStatus : null,
+      isAggregation: isAggregation,
+      currency: this.props.currency,
+      navigator: this.props.navigator,
+      productToForms: this.state.productToForms,
+      bankStyle: this.props.bankStyle,
+      shareableResources: this.state.shareableResources,
+      previousMessageTime: previousMessageTime,
+      isLast: rowId === this.state.list.length - 1,
+      to: isAggregation ? resource.to : this.props.resource
+    }
+    if (model.subClassOf === 'tradle.MyProduct')
+      return  <MyProductMessageRow {...props} />
+    if (model.id === constants.TYPES.VERIFICATION)
+      return  <VerificationMessageRow {...props} />
+    if (model.subClassOf === constants.TYPES.FORM)
+      return <FormMessageRow {...props} />
+    return   <MessageRow {...props} />
   }
   addedMessage(text) {
     Actions.messageList({modelName: this.props.modelName, to: this.props.resource,  limit: this.state.list ? this.state.list.length + 1 : LIMIT});
@@ -433,7 +442,7 @@ class MessageList extends Component {
     if (!content) {
       var isAllMessages = model.isInterface  &&  model.id === constants.TYPES.MESSAGE;
       var maxHeight = Dimensions.get('window').height - (Platform.OS === 'android' ? 77 : 64) - (this.state.isConnected ? 0 : 30)
-      content = <GiftedMessenger style={{paddingHorizontal: 10}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
+      content = <GiftedMessenger style={{paddingHorizontal: 10, marginBottom: 30}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
         ref={(c) => this._GiftedMessenger = c}
         loadEarlierMessagesButton={this.state.loadEarlierMessages}
         onLoadEarlierMessages={this.onLoadEarlierMessages.bind(this)}
