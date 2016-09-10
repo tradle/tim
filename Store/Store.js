@@ -2250,7 +2250,7 @@ var Store = Reflux.createStore({
           let rId = utils.getId(returnVal.to)
           let to = list[rId].value
 
-          if (!isNew  ||  this.getModel(returnVal[TYPE]).value.subClassOf !== FORM)
+          if (!isNew  ||  self.getModel(returnVal[TYPE]).value.subClassOf !== FORM)
             return
           let allFormRequests = self.searchMessages({modelName: FORM_REQUEST, to: to})
           let formRequests = allFormRequests.filter((r) => {
