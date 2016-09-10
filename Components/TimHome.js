@@ -39,6 +39,9 @@ import {
   signIn,
   setPassword
 } from '../utils/localAuth'
+
+import AutomaticUpdates from '../utils/automaticUpdates'
+
 const PASSWORD_ITEM_KEY = 'app-password'
 
 import {
@@ -157,7 +160,8 @@ class TimHome extends Component {
     })
   }
 
-  handleEvent(params) {
+  async handleEvent(params) {
+    const self = this
     switch(params.action) {
     case 'connectivity':
       this._handleConnectivityChange(params.isConnected)
@@ -170,19 +174,58 @@ class TimHome extends Component {
       utils.setModels(params.models);
       break
     case 'start':
-      if (this.state.message) {
-        this.restartTiM()
+      // prior to registration
+      // force install updates before first interaction
+      if (!utils.getMe()) {
+        await AutomaticUpdates.sync()
+        const hasUpdate = await AutomaticUpdates.hasUpdate()
+        if (hasUpdate) return AutomaticUpdates.install()
+      }
+
+      if (self.state.message) {
+        self.restartTiM()
         return
       }
 
       // utils.setMe(params.me);
       // utils.setModels(params.models);
-      this.setState({isLoading: false});
+      self.setState({isLoading: false});
       if (!utils.getMe()) {
-        this.setState({isModalOpen: true})
+        self.setState({isModalOpen: true})
         // this.register(() => this.showOfficialAccounts())
         return
       }
+
+      /* fall through */
+
+      // if (!utils.getMe()) {
+      //   return AutomaticUpdates.sync()
+      //     .then(() => AutomaticUpdates.hasUpdate())
+      //     .then(hasUpdate => {
+      //       if (hasUpdate) AutomaticUpdates.install()
+      //       else start()
+      //     })
+      // } else {
+      //   start()
+      // }
+
+      // break
+
+      // function start () {
+      //   if (self.state.message) {
+      //     self.restartTiM()
+      //     return
+      //   }
+
+      //   // utils.setMe(params.me);
+      //   // utils.setModels(params.models);
+      //   self.setState({isLoading: false});
+      //   if (!utils.getMe()) {
+      //     self.setState({isModalOpen: true})
+      //     // this.register(() => this.showOfficialAccounts())
+      //     return
+      //   }
+      // }
     case 'pairingSuccessful':
       signIn(this.props.navigator)
         .then(() => {

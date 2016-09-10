@@ -48,8 +48,8 @@ class QRCodeScanner extends Component {
   _onBarCodeRead(e) {
     if (this._finished) return
 
-    this._finished = true
     this.props.onread(e)
+    this._finished = true
   }
   _switchCamera() {
     var cameraType = this.state.cameraType === Dir.back ? Dir.front : Dir.back

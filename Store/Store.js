@@ -843,6 +843,13 @@ var Store = Reflux.createStore({
     //   }
     // })
 
+    transport.on('404', function (recipient) {
+      meDriver.sender.pause(recipient)
+      transport.cancelPending(recipient)
+      // try again soon. Todo: make this smarter
+      setTimeout(() => meDriver.resume(), 10000)
+    })
+
     transport.on('message', function (msg, from) {
       try {
         msg = tradleUtils.unserializeMessage(msg)
@@ -950,6 +957,7 @@ var Store = Reflux.createStore({
         pub: new Buffer(from, 'hex')
       }
 
+      meDriver.sender.resume(identifier)
       meDriver.receive(msg, { [prop]: identifier })
         .catch(err => {
           console.warn('failed to receive msg:', err, msg)

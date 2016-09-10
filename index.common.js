@@ -140,10 +140,7 @@ class TiMApp extends Component {
         return
       case 'active':
         AutomaticUpdates.hasUpdate().then(has => {
-          if (has) {
-            Alert.alert('installing update...')
-            return setTimeout(() => AutomaticUpdates.install(), 2000)
-          }
+          if (has) return AutomaticUpdates.install()
 
           Push.resetBadgeNumber()
           if (this.state.currentAppState === 'active') return
