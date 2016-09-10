@@ -333,7 +333,7 @@ var styles = StyleSheet.create({
   },
   resourceTitle: {
     // flex: 1,
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '400',
     marginBottom: 2,
   },
@@ -420,7 +420,7 @@ var styles = StyleSheet.create({
   descriptionB: {
     // flexWrap: 'wrap',
     // color: '#757575',
-    fontSize: 17,
+    fontSize: 18,
   },
   formType: {
     color: '#EBFCFF',
