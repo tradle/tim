@@ -643,6 +643,19 @@ var utils = {
     if (utils.getId(resource.organization) === utils.getId(me.organization))
       return true
   },
+  isVerifier(resource, verification) {
+    let me = this.getMe()
+    if (!this.isEmployee(resource))
+      return false
+    let model = this.getModel(resource[TYPE]).value
+    if (!me.organization)
+      return false
+    if (model.subClassOf === TYPES.FORM)
+      return  utils.getId(me) === utils.getId(resource.to) &&
+             !utils.isVerifiedByMe(resource)               // !verification  &&  utils.getId(resource.to) === utils.getId(me)  &&
+    else if (model.id === TYPES.VERIFICATION)
+      return  utils.getId(me) === utils.getId(resource.from)
+  },
   // measure(component, cb) {
   //   let handle = typeof component === 'number'
   //     ? component
@@ -827,19 +840,6 @@ var utils = {
     // TODO: remove this after fixing encoding bug
     return symbol
     // return symbol ? (symbol === '¬' ? '€' : symbol) : symbol
-  },
-  isVerifier(resource, verification) {
-    let me = this.getMe()
-    if (!this.isEmployee(resource))
-      return false
-    let model = this.getModel(resource[TYPE]).value
-    if (!me.organization)
-      return false
-    if (model.subClassOf === TYPES.FORM)
-      return  utils.getId(me) === utils.getId(resource.to) &&
-             !utils.isVerifiedByMe(resource)               // !verification  &&  utils.getId(resource.to) === utils.getId(me)  &&
-    else if (model.id === TYPES.VERIFICATION)
-      return  utils.getId(me) === utils.getId(resource.from)
   },
   isSimulator() {
     return DeviceInfo.getModel() === 'Simulator'
