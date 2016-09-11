@@ -2391,7 +2391,8 @@ var Store = Reflux.createStore({
 
       form.sharedWith.push(self.createSharedWith(toId, time))
       self.addMessagesToChat(toOrgId, form, false, time)
-      self.addMessagesToChat(toOrgId, ver, false, time)
+      if (ver)
+        self.addMessagesToChat(toOrgId, ver, false, time)
 
       utils.optimizeResource(form)
       self.addLastMessage(form, batch, to)
@@ -4395,7 +4396,9 @@ var Store = Reflux.createStore({
     if (!val.time)
       val.time = obj.timestamp
 
-    var fromId = obj.objectinfo.author
+    var fromId = obj.objectinfo
+               ? obj.objectinfo.author
+               : obj.txId ? obj.from[ROOT_HASH] : null
     var from = list[PROFILE + '_' + fromId].value
     // var from = list[PROFILE + '_' + obj.from[ROOT_HASH]].value
     var type = val[TYPE]
@@ -4586,7 +4589,7 @@ var Store = Reflux.createStore({
     return representativeAddedTo
   },
   putMessageInDB(val, obj, batch, onMessage) {
-    var fromProfile = PROFILE + '_' + obj.objectinfo.author
+    var fromProfile = PROFILE + '_' + (obj.objectinfo ? obj.objectinfo.author : obj.from[ROOT_HASH])
     var fromR = list[fromProfile]
 
     if (!fromR) {
