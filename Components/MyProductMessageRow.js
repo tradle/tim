@@ -6,21 +6,12 @@ var ArticleView = require('./ArticleView');
 var NewResource = require('./NewResource');
 var Icon = require('react-native-vector-icons/Ionicons');
 var constants = require('@tradle/constants');
-import LinearGradient from 'react-native-linear-gradient'
 var RowMixin = require('./RowMixin');
 var equal = require('deep-equal')
 
 var reactMixin = require('react-mixin');
 
 const MY_PRODUCT = 'tradle.MyProduct'
-
-var CURRENCY_SYMBOL
-var LINK_COLOR
-var STRUCTURED_MESSAGE_COLOR
-
-const DEFAULT_CURRENCY_SYMBOL = '£'
-const DEFAULT_LINK_COLOR = '#2892C6'
-const ENUM = 'tradle.ENUM'
 
 import {
   Image,
@@ -41,12 +32,6 @@ var DeviceWidth = Dimensions.get('window').width
 class MyProductMessageRow extends Component {
   constructor(props) {
     super(props);
-    var resource = this.props.resource;
-    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
-    var me = utils.getMe();
-    LINK_COLOR = this.props.bankStyle.LINK_COLOR
-    STRUCTURED_MESSAGE_COLOR = this.props.bankStyle.STRUCTURED_MESSAGE_COLOR
-    CURRENCY_SYMBOL = props.currency ? props.currency.symbol || props.currency : DEFAULT_CURRENCY_SYMBOL
   }
   shouldComponentUpdate(nextProps, nextState) {
     return !equal(this.props.resource, nextProps.resource) ||
@@ -202,11 +187,6 @@ var styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row'
   },
-  resourceTitle: {
-    fontSize: 17,
-    fontWeight: '400',
-    marginBottom: 2,
-  },
   date: {
     flex: 1,
     color: '#999999',
@@ -218,54 +198,10 @@ var styles = StyleSheet.create({
     backgroundColor: '#f7f7f7',
     flexDirection: 'row',
   },
-  employeeImage: {
-    height: 30,
-    marginRight: 3,
-    marginLeft: 0,
-    width: 30,
-  },
-
-  msgImage: {
-    height: 30,
-    marginRight: 3,
-    marginLeft: 0,
-    width: 30,
-    borderRadius: 15,
-    borderColor: '#cccccc',
-    borderWidth: 1
-  },
-  verySmallLetters: {
-    fontSize: 17,
-    // alignSelf: 'flex-end',
-    color: '#757575'
-    // color: '#b4c3cb'
-  },
-  orgImage: {
-    width: 20,
-    height: 20,
-    borderRadius: 10
-  },
-  cellRoundImage: {
-    paddingVertical: 1,
-    borderRadius: 20,
-    height: 40,
-    width: 40,
-    alignSelf: 'center'
-  },
-  cellText: {
-    marginTop: 8,
-    alignSelf: 'center',
-    color: '#ffffff',
-    fontSize: 18,
-    backgroundColor: 'transparent'
-  },
   description: {
     // flexWrap: 'wrap',
     color: '#757575',
     fontSize: 14,
-  },
-  descriptionB: {
-    fontSize: 18,
   },
   formType: {
     color: '#EBFCFF',

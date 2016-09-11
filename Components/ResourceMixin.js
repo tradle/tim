@@ -193,8 +193,8 @@ var styles = StyleSheet.create({
   },
   itemSeparator: {
     height: 1,
-    backgroundColor: '#ffffff',
-    marginHorizontal: 15
+    backgroundColor: '#eeeeee',
+    // marginHorizontal: 15
   },
   itemColContainer: {
     // flex: 1,
@@ -202,7 +202,7 @@ var styles = StyleSheet.create({
     // paddingLeft: 20,
   },
   item: {
-    paddingBottom: 7,
+    paddingVertical: 7,
   },
   row: {
     flexDirection: 'row',

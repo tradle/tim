@@ -185,7 +185,7 @@ class ShowPropertiesView extends Component {
             return <View  key={this.getNextKey()} />
           var vCols = pMeta.viewCols;
           var cnt = val.length;
-          val = <View>{this.renderItems(val, pMeta)}</View>
+          val = <View style={{marginHorizontal: 7}}>{this.renderItems(val, pMeta)}</View>
 
           isItems = true
           first = false;

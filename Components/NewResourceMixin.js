@@ -559,7 +559,7 @@ var NewResourceMixin = {
     var err = this.state.missedRequiredOrErrorValue &&  this.state.missedRequiredOrErrorValue[params.prop.name]
 
     return (
-      <View style={{flex: 5, marginTop: 5, paddingBottom: err ? 15 : 10}}>
+      <View style={{flex: 5, marginTop: 5, paddingBottom: err ? 15 : 20}}>
         <FloatLabel
           labelStyle={styles.labelInput}
           autoCorrect={false}

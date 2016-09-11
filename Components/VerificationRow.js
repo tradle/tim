@@ -95,7 +95,7 @@ class VerificationRow extends Component {
     // rows.push(<View><Text style={styles.resourceTitle}>{val}</Text></View>);
 
     if (r)
-      this.formatDocument(verificationRequest, r, rows);
+      this.formatDoc(verificationRequest, r, rows);
     var backlink = this.props.prop &&  this.props.prop.items  &&  this.props.prop.items.backlink;
     if (resource.txId)
       rows.push(
@@ -154,7 +154,7 @@ class VerificationRow extends Component {
                     <View style={{flexDirection: 'row', marginHorizontal: 10,  marginVertical: 3, paddingBottom: 4}}>
                       {photo}
                       {date}
-                      <View style={{flexDirection: 'column', paddingTop: hasPhoto ? 0 : 10}}>
+                      <View style={{flexDirection: 'column', paddingTop: 10}}>
                         <Text style={styles.rTitle}>{this.props.isChooser ? utils.getDisplayName(resource, model.properties) : verificationRequest.title}</Text>
                          {verifiedBy}
                       </View>
@@ -212,7 +212,7 @@ class VerificationRow extends Component {
   _allowScroll(scrollEnabled) {
     this.setState({scrollEnabled: scrollEnabled})
   }
-  formatDocument(model, resource, renderedRow) {
+  formatDoc(model, resource, renderedRow) {
     var viewCols = model.gridCols || model.viewCols;
     if (!viewCols)
       return
