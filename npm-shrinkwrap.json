@@ -5073,7 +5073,7 @@
     "react-native-ecc": {
       "version": "1.2.2",
       "from": "tradle/react-native-ecc",
-      "resolved": "git://github.com/tradle/react-native-ecc.git#2b79b2dd0a22b05c2a6e22c468703027414de5ca"
+      "resolved": "git://github.com/tradle/react-native-ecc.git#29bd1cda91839631b58af5d16589aee45e7ab277"
     },
     "react-native-env": {
       "version": "0.0.5",
