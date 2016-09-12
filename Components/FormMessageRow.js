@@ -13,10 +13,7 @@ var equal = require('deep-equal')
 
 var reactMixin = require('react-mixin');
 
-var CURRENCY_SYMBOL
 var STRUCTURED_MESSAGE_COLOR
-
-const DEFAULT_CURRENCY_SYMBOL = '£'
 
 import {
   StyleSheet,
@@ -36,7 +33,6 @@ class FormMessageRow extends Component {
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
     var me = utils.getMe();
     STRUCTURED_MESSAGE_COLOR = this.props.bankStyle.STRUCTURED_MESSAGE_COLOR
-    CURRENCY_SYMBOL = props.currency ? props.currency.symbol || props.currency : DEFAULT_CURRENCY_SYMBOL
   }
   shouldComponentUpdate(nextProps, nextState) {
     return !equal(this.props.resource, nextProps.resource) ||
@@ -356,24 +352,6 @@ var styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: '#77ADFC' //#569bff',
   },
-  employeeImage: {
-    // backgroundColor: '#dddddd',
-    height: 30,
-    marginRight: 3,
-    marginLeft: 0,
-    width: 30,
-  },
-
-  msgImage: {
-    // backgroundColor: '#dddddd',
-    height: 30,
-    marginRight: 3,
-    marginLeft: 0,
-    width: 30,
-    borderRadius: 15,
-    borderColor: '#cccccc',
-    borderWidth: 1
-  },
   bigImage: {
     width: 240,
     height: 280,
@@ -397,30 +375,6 @@ var styles = StyleSheet.create({
     height: 88,
     margin: 1,
     borderRadius: 10
-  },
-  cellRoundImage: {
-    paddingVertical: 1,
-    borderRadius: 20,
-    height: 40,
-    width: 40,
-    alignSelf: 'center'
-  },
-  cellText: {
-    marginTop: 8,
-    alignSelf: 'center',
-    color: '#ffffff',
-    fontSize: 18,
-    backgroundColor: 'transparent'
-  },
-  description: {
-    // flexWrap: 'wrap',
-    color: '#757575',
-    fontSize: 14,
-  },
-  descriptionB: {
-    // flexWrap: 'wrap',
-    // color: '#757575',
-    fontSize: 18,
   },
   formType: {
     color: '#EBFCFF',
@@ -450,12 +404,6 @@ var styles = StyleSheet.create({
     position: 'absolute',
     bottom: 1,
     left: 10,
-  },
-  errorBadge: {
-    position: 'absolute',
-    opacity: 0.5,
-    bottom: -5,
-    right: 0
   },
   rowContainer: {
     flexDirection: 'row',
