@@ -3,6 +3,7 @@
 var NewResource = require('./NewResource');
 var utils = require('../utils/utils');
 var translate = utils.translate
+var equal = require('deep-equal')
 var reactMixin = require('react-mixin');
 var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
@@ -62,6 +63,8 @@ class ProductChooser extends Component {
     if (params.action === 'getItem'  &&  this.props.resource[constants.ROOT_HASH] === params.resource[constants.ROOT_HASH]) {
       let products
       if (params.resource.products) {
+        if (equal(params.resource.products, this.props.resource.products))
+          return
         products = []
         params.resource.products.forEach(function(m) {
           products.push(utils.getModel(m).value)
