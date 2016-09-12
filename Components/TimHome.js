@@ -672,7 +672,7 @@ class TimHome extends Component {
             <Image style={thumb} source={TradleWhite}></Image>
             <Text style={styles.tradle}>Tradle</Text>
           </View>
-          <View style={{alignItems: 'center'}}>
+          <View style={{alignItems: 'center', paddingTop: 30}}>
             <ActivityIndicator hidden='true' size='large' color='#ffffff'/>
           </View>
         </ScrollView>
@@ -739,7 +739,7 @@ reactMixin(TimHome.prototype, Reflux.ListenerMixin);
 
 var styles = StyleSheet.create({
   container: {
-    padding: 30,
+    // padding: 30,
     marginTop: Dimensions.get('window').height > 800 ? Dimensions.get('window').height/7 : Dimensions.get('window').height / 5,
     alignItems: 'center',
   },
