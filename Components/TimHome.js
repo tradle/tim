@@ -740,7 +740,7 @@ reactMixin(TimHome.prototype, Reflux.ListenerMixin);
 var styles = StyleSheet.create({
   container: {
     // padding: 30,
-    marginTop: Dimensions.get('window').height > 800 ? Dimensions.get('window').height/7 : Dimensions.get('window').height / 5,
+    marginTop: Dimensions.get('window').height / 4,
     alignItems: 'center',
   },
   tradle: {

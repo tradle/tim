@@ -563,6 +563,8 @@ var NewResourceMixin = {
       if (maxChars < label.length)
         lStyle = [styles.labelStyle, {marginTop: 0}]
     }
+    if (this.state.isRegistration)
+      lStyle = [lStyle, {color: '#cccccc'}]
     return (
       <View style={{flex: 5, marginTop: 5, paddingBottom: this.hasError(params) ? Platform.OS === 'ios' ?  0 : 10 : Platform.OS === 'ios' ? 10 : 7}}>
         <FloatLabel

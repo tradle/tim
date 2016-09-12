@@ -927,6 +927,7 @@ var styles = StyleSheet.create({
     paddingHorizontal: 7,
     justifyContent: 'flex-end',
     borderRadius: 10,
+    borderTopLeftRadius: 0,
     backgroundColor: '#77ADFC' //#569bff',
   },
   forgetCell: {
