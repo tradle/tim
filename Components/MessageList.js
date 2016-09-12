@@ -454,7 +454,8 @@ class MessageList extends Component {
         handleSend={this.onSubmitEditing.bind(this)}
         submitOnReturn={true}
         menu={this.generateMenu.bind(this)}
-        keyboardShouldPersistTaps={false}
+        keyboardShouldPersistTaps={true}
+        keyboardDismissMode='on-drag'
         maxHeight={maxHeight} // 64 for the navBar; 110 - with SearchBar
       />
         // returnKeyType={false}
