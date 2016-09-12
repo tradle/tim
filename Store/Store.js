@@ -47,7 +47,7 @@ var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
-var Keychain = utils.isIOS() && require('../utils/keychain')
+var Keychain = null //utils.isIOS() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('q-level');
 var asyncstorageDown = require('asyncstorage-down')
@@ -1378,9 +1378,8 @@ var Store = Reflux.createStore({
     if (r[TYPE] === PRODUCT_APPLICATION) {
       let result = this.searchMessages({modelName: PRODUCT_APPLICATION, to: toOrg})
       if (result) {
-        result.filter(() => {
-          if (result.message === r.message  &&  !r.documentCreated)
-            return true
+        result = result.filter((r) => {
+          return (r.message === r.message  &&  !r.documentCreated) ? true : false
         })
         if (result.length) {
           result.forEach((r) => {
@@ -3300,7 +3299,7 @@ var Store = Reflux.createStore({
     if (lastId  &&  lastId.split('_')[0] === PRODUCT_LIST) {
       let i=newResult.length - 1
       for (; i>=0; i--)
-        if (newResult[TYPE] !== PRODUCT_LIST)
+        if (newResult[i][TYPE] !== PRODUCT_LIST)
           break
         newResult.splice(i, 1)
     }
@@ -3733,6 +3732,7 @@ var Store = Reflux.createStore({
     batch.push({type: 'put', key: utils.getId(r), value: r});
     this.trigger({action: 'list', list: this.searchNotMessages({modelName: ORGANIZATION}), forceUpdate: true})
   },
+
   registration(value) {
     var self = this
     isLoaded = true;
@@ -4009,9 +4009,21 @@ var Store = Reflux.createStore({
     return driverPromise = this.loadIdentityAndKeys(me)
     .then(result => {
       if (!Keychain) {
-        me['privkeys'] = result.keys.map(k => {
+        let myIdentities = list[MY_IDENTITIES].value
+
+        let privkeys = result.keys.map(k => {
           return k.toJSON ? k.toJSON(true) : k
         })
+
+        let currentIdentity = myIdentities.currentIdentity
+        myIdentities.allIdentities.forEach((r) => {
+           if (r.id === currentIdentity)
+             r.privkeys = privkeys
+        })
+        db.put(MY_IDENTITIES, myIdentities)
+        // me['privkeys'] = result.keys.map(k => {
+        //   return k.toJSON ? k.toJSON(true) : k
+        // })
       }
 
       // if (!Keychain) me['privkeys'] = result.keys.map(k => k.toJSON(true))
