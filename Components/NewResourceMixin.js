@@ -556,12 +556,17 @@ var NewResourceMixin = {
     //        ?  ' (' + CURRENCY_SYMBOL + ')'
     //        : ''
     // let paddingBottom = 20
-    var err = this.state.missedRequiredOrErrorValue &&  this.state.missedRequiredOrErrorValue[params.prop.name]
-
+    let lStyle = styles.labelStyle
+    if (params.prop.ref  &&  params.prop.ref === constants.TYPES.MONEY  &&  !params.required) {
+      let d = Platform.OS === 'ios' ? 10 : 11
+      let maxChars = (Dimensions.get('window').width - 60)/d
+      if (maxChars < label.length)
+        lStyle = [styles.labelStyle, {marginTop: 0}]
+    }
     return (
-      <View style={{flex: 5, marginTop: 5, paddingBottom: err ? 15 : 20}}>
+      <View style={{flex: 5, marginTop: 5, paddingBottom: this.hasError(params) ? Platform.OS === 'ios' ?  0 : 10 : Platform.OS === 'ios' ? 10 : 7}}>
         <FloatLabel
-          labelStyle={styles.labelInput}
+          labelStyle={lStyle}
           autoCorrect={false}
           autoCapitalize={this.state.isRegistration  ||  (params.prop.name !== 'url' &&  (!params.prop.keyboard || params.prop.keyboard !== 'email-address')) ? 'sentences' : 'none'}
           onFocus={this.inputFocused.bind(this, params.prop.name)}
@@ -944,7 +949,7 @@ var NewResourceMixin = {
     let isVideo = prop.name === 'video'
     let isPhoto = prop.name === 'photos'
     return (
-      <View style={styles.chooserContainer} key={this.getNextKey()} ref={prop.name}>
+      <View style={[styles.chooserContainer, this.hasError(params) ? {paddingBottom: 5} : {paddingBottom: 0}]} key={this.getNextKey()} ref={prop.name}>
         {propLabel}
         <TouchableHighlight underlayColor='transparent' onPress={
           isVideo ? this.showCamera.bind(this, params) : this.chooser.bind(this, prop, params.prop)
@@ -969,7 +974,9 @@ var NewResourceMixin = {
       </View>
     );
   },
-
+  hasError(params) {
+    return (params.errors && params.errors[params.prop.name]) || this.state.missedRequiredOrErrorValue &&  this.state.missedRequiredOrErrorValue[params.prop.name]
+  },
   chooser(prop, propName,event) {
     var resource = this.state.resource;
     var model = (this.props.model  ||  this.props.metadata)
@@ -1362,7 +1369,7 @@ var styles = StyleSheet.create({
     borderBottomColor: '#cccccc',
     borderBottomWidth: 1,
     justifyContent: 'center',
-    marginLeft: 10,
+    marginHorizontal: 10,
     // marginBottom: 10,
     flex: 1
   },
