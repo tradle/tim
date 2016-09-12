@@ -567,10 +567,16 @@ var Store = Reflux.createStore({
         if (m.interfaces  &&  m.interfaces.indexOf(MESSAGE) !== -1) {
           if (r.sharedWith) {
             r.sharedWith.forEach((shareInfo) => {
-              let orgId = utils.getId(list[shareInfo.bankRepresentative].value.organization)
-              this.addMessagesToChat(orgId, r, true, shareInfo.timeShared)
+              if (shareInfo.bankRepresentative === meId)
+                this.addMessagesToChat(utils.getId(r.to), r, true, shareInfo.timeShared)
+              else  {
+                let orgId = utils.getId(list[shareInfo.bankRepresentative].value.organization)
+                this.addMessagesToChat(orgId, r, true, shareInfo.timeShared)
+              }
             })
           }
+          else if (m.id === VERIFICATION  &&  meId === utils.getId(r.from))
+            this.addMessagesToChat(utils.getId(r.to), r, true)
           else {
             let fromId = utils.getId(r.from)
             let rep = list[meId === fromId ? utils.getId(r.to) : fromId].value
@@ -1715,7 +1721,10 @@ var Store = Reflux.createStore({
       // extend(rr, from);
       // rr.verifiedByMe = r;
       self._setItem(key, r)
-      self.addMessagesToChat(from.organization ? utils.getId(from.organization) : fromId, r)
+      if (utils.getId(from) === utils.getId(me))
+        self.addMessagesToChat(utils.getId(r.to), r)
+      else
+        self.addMessagesToChat(from.organization ? utils.getId(from.organization) : fromId, r)
 
       if (notOneClickVerification)
         self.trigger({action: 'addItem', resource: r});
@@ -1744,6 +1753,7 @@ var Store = Reflux.createStore({
       var d = data
     })
     .catch(function(err) {
+      debugger
       err = err
     })
   },
@@ -4250,6 +4260,7 @@ var Store = Reflux.createStore({
               return self.putInDb(wrapper)
             })
             .catch(function (err) {
+              console.error('unable to get message for object', wrapper)
               debugger
             })
         }
