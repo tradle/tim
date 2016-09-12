@@ -856,7 +856,20 @@ var Store = Reflux.createStore({
       setTimeout(() => meDriver.resume(), 10000)
     })
 
+    const receiveLocks = {}
     transport.on('message', function (msg, from) {
+      if (!receiveLocks[from]) receiveLocks[from] = Promise.resolve()
+
+      return receiveLocks[from].finally(() => {
+        return receiveLocks[from] = receive(msg, from)
+      })
+    })
+
+    transport.on('timeout', function (identifier) {
+      transport.cancelPending(identifier)
+    })
+
+    function receive (msg, from) {
       try {
         msg = tradleUtils.unserializeMessage(msg)
         const payload = msg.object
@@ -964,16 +977,12 @@ var Store = Reflux.createStore({
       }
 
       meDriver.sender.resume(identifier)
-      meDriver.receive(msg, { [prop]: identifier })
+      return meDriver.receive(msg, { [prop]: identifier })
         .catch(err => {
           console.warn('failed to receive msg:', err, msg)
           debugger
         })
-    })
-
-    transport.on('timeout', function (identifier) {
-      transport.cancelPending(identifier)
-    })
+    }
   },
   onPairingRequestAccepted(payload) {
     return this.onProcessPairingRequest(list[PAIRING_DATA + '_1'].value, payload)
@@ -5674,6 +5683,7 @@ function timeFunctions (obj) {
   if (!__DEV__) return obj
 
   var timed = {}
+  var totals = {}
   Object.keys(obj).forEach((k) => {
     var orig = obj[k]
     if (typeof orig !== 'function') {
@@ -5681,8 +5691,11 @@ function timeFunctions (obj) {
       return
     }
 
-    var total = 0
-    var numCalls = 0
+    const total = totals[k] = {
+      calls: 0,
+      time: 0
+    }
+
     timed[k] = function () {
       var stopTimer = timeSomething(k)
       var ret = orig.apply(this, arguments)
@@ -5703,9 +5716,9 @@ function timeFunctions (obj) {
 
       function recordDuration () {
         var ms = stopTimer()
-        total += ms
-        numCalls++
-        timerDebug(`${k} took ${ms}ms. ${numCalls} calls totaled ${total}ms`)
+        total.time += ms
+        total.calls++
+        timerDebug(`${k} took ${ms}ms. ${total.calls} calls totaled ${total.time}ms`)
       }
     }
   })
