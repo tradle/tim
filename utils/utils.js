@@ -16,6 +16,7 @@ import ENV from './env'
 
 var RCTUIManager = NativeModules.UIManager
 var crypto = require('crypto')
+var debug = require('debug')('tradle:app:utils')
 var Q = require('q')
 var collect = require('stream-collector')
 var typeforce = require('typeforce')
@@ -593,7 +594,6 @@ var utils = {
     }
   },
 
-
   readDB(db) {
     // return new Promise((resolve, reject) => {
     //   collect(db.createReadStream(), (err, data) => {
@@ -931,6 +931,7 @@ var utils = {
   },
 
   setPassword: function (username, password) {
+    debug(`saving password for username "${username}", service ${ENV.serviceID}`)
     return Keychain.setGenericPassword(username, password, ENV.serviceID)
   },
 
@@ -1005,6 +1006,15 @@ var utils = {
       Keychain.resetGenericPasswords(),
       Keychain.resetGenericPasswords(ENV.serviceID)
     ])
+  },
+  isAndroid: ENV.isAndroid,
+  isIOS: ENV.isIOS,
+  isWeb: ENV.isWeb,
+  promiseThunky: function (fn) {
+    let promise
+    return function () {
+      return promise ? promise : promise = fn.apply(this, arguments)
+    }
   }
 }
 

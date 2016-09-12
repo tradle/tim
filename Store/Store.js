@@ -12,7 +12,6 @@ import ReactNative, {
 
 import AsyncStorage from './Storage'
 import * as LocalAuth from '../utils/localAuth'
-var Keychain// = require('../utils/keychain')
 import Push from '../utils/push'
 // import DeviceInfo from 'react-native-device-info'
 
@@ -48,6 +47,7 @@ var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
+var Keychain = utils.isIOS() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('q-level');
 var asyncstorageDown = require('asyncstorage-down')
@@ -277,7 +277,6 @@ var Store = Reflux.createStore({
       })
       .then(() => {
         if (me && me.registeredForPushNotifications) {
-          console.log('me: ' + meDriver.permalink)
           Push.resetBadgeNumber()
         }
       })
@@ -481,6 +480,7 @@ var Store = Reflux.createStore({
       // }
     })
 
+    console.log('me: ' + meDriver.permalink)
     meDriver = tradleUtils.promisifyNode(meDriver)
 
     // TODO: figure out of we need to publish identities
@@ -4257,6 +4257,10 @@ var Store = Reflux.createStore({
               wrapper.from = { [ROOT_HASH]: msgInfo.author }
               wrapper.to = { [ROOT_HASH]: msgInfo.recipient }
               wrapper = utils.toOldStyleWrapper(wrapper)
+              if (!wrapper.objectinfo) {
+                wrapper.objectinfo = tradleUtils.pick(wrapper, 'author', 'type', 'link', 'permalink', 'prevlink')
+              }
+
               return self.putInDb(wrapper)
             })
             .catch(function (err) {
