@@ -4009,18 +4009,23 @@ var Store = Reflux.createStore({
     return driverPromise = this.loadIdentityAndKeys(me)
     .then(result => {
       if (!Keychain) {
-        let myIdentities = list[MY_IDENTITIES].value
-
         let privkeys = result.keys.map(k => {
           return k.toJSON ? k.toJSON(true) : k
         })
+        let myIdentities = list[MY_IDENTITIES]
+        if (myIdentities) {
+          myIdentities = myIdentities.value
 
-        let currentIdentity = myIdentities.currentIdentity
-        myIdentities.allIdentities.forEach((r) => {
-           if (r.id === currentIdentity)
-             r.privkeys = privkeys
-        })
-        db.put(MY_IDENTITIES, myIdentities)
+
+          let currentIdentity = myIdentities.currentIdentity
+          myIdentities.allIdentities.forEach((r) => {
+             if (r.id === currentIdentity)
+               r.privkeys = privkeys
+          })
+          db.put(MY_IDENTITIES, myIdentities)
+        }
+        else
+          me.privkeys = privkeys
         // me['privkeys'] = result.keys.map(k => {
         //   return k.toJSON ? k.toJSON(true) : k
         // })
