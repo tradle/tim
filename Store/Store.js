@@ -277,7 +277,6 @@ var Store = Reflux.createStore({
       })
       .then(() => {
         if (me && me.registeredForPushNotifications) {
-          console.log('me: ' + meDriver.permalink)
           Push.resetBadgeNumber()
         }
       })
@@ -481,6 +480,7 @@ var Store = Reflux.createStore({
       // }
     })
 
+    console.log('me: ' + meDriver.permalink)
     meDriver = tradleUtils.promisifyNode(meDriver)
 
     // TODO: figure out of we need to publish identities
@@ -4257,6 +4257,10 @@ var Store = Reflux.createStore({
               wrapper.from = { [ROOT_HASH]: msgInfo.author }
               wrapper.to = { [ROOT_HASH]: msgInfo.recipient }
               wrapper = utils.toOldStyleWrapper(wrapper)
+              if (!wrapper.objectinfo) {
+                wrapper.objectinfo = tradleUtils.pick(wrapper, 'author', 'type', 'link', 'permalink', 'prevlink')
+              }
+
               return self.putInDb(wrapper)
             })
             .catch(function (err) {

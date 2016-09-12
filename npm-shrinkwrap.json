@@ -42,8 +42,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/constants/-/constants-1.3.0.tgz"
     },
     "@tradle/engine": {
-      "version": "2.5.0",
-      "from": "@tradle/engine@>=2.5.0 <3.0.0",
+      "version": "2.5.1",
+      "from": "@tradle/engine@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-2.5.1.tgz",
       "dependencies": {
         "async": {
           "version": "2.0.1",
@@ -584,7 +585,7 @@
     },
     "@tradle/models": {
       "version": "4.10.9",
-      "from": "tradle/models",
+      "from": "git://github.com/tradle/models.git#50540a33321b8d7184d8b216b2099e620c8e7012",
       "resolved": "git://github.com/tradle/models.git#50540a33321b8d7184d8b216b2099e620c8e7012",
       "dependencies": {
         "minimist": {
@@ -1773,7 +1774,7 @@
     },
     "my-local-ip": {
       "version": "1.0.0",
-      "from": "my-local-ip@>=1.0.0 <2.0.0",
+      "from": "https://registry.npmjs.org/my-local-ip/-/my-local-ip-1.0.0.tgz",
       "resolved": "https://registry.npmjs.org/my-local-ip/-/my-local-ip-1.0.0.tgz"
     },
     "nan": {
@@ -1783,16 +1784,16 @@
     },
     "nkey": {
       "version": "2.0.2",
-      "from": "nkey@latest"
+      "from": "nkey@2.0.2"
     },
     "nkey-bitcoin": {
       "version": "1.1.1",
-      "from": "nkey-bitcoin@1.1.1",
+      "from": "https://registry.npmjs.org/nkey-bitcoin/-/nkey-bitcoin-1.1.1.tgz",
       "resolved": "https://registry.npmjs.org/nkey-bitcoin/-/nkey-bitcoin-1.1.1.tgz"
     },
     "nkey-dsa": {
       "version": "1.0.1",
-      "from": "nkey-dsa@1.0.1",
+      "from": "https://registry.npmjs.org/nkey-dsa/-/nkey-dsa-1.0.1.tgz",
       "resolved": "https://registry.npmjs.org/nkey-dsa/-/nkey-dsa-1.0.1.tgz",
       "dependencies": {
         "@tradle/otr": {
@@ -1804,12 +1805,12 @@
     },
     "nkey-ec": {
       "version": "2.0.1",
-      "from": "nkey-ec@2.0.1",
+      "from": "https://registry.npmjs.org/nkey-ec/-/nkey-ec-2.0.1.tgz",
       "resolved": "https://registry.npmjs.org/nkey-ec/-/nkey-ec-2.0.1.tgz",
       "dependencies": {
         "nkey-curve25519": {
           "version": "1.0.1",
-          "from": "nkey-curve25519@1.0.1",
+          "from": "https://registry.npmjs.org/nkey-curve25519/-/nkey-curve25519-1.0.1.tgz",
           "resolved": "https://registry.npmjs.org/nkey-curve25519/-/nkey-curve25519-1.0.1.tgz",
           "dependencies": {
             "tweetnacl": {
@@ -1821,7 +1822,7 @@
         },
         "nkey-secp256k1": {
           "version": "1.1.1",
-          "from": "nkey-secp256k1@1.1.1",
+          "from": "https://registry.npmjs.org/nkey-secp256k1/-/nkey-secp256k1-1.1.1.tgz",
           "resolved": "https://registry.npmjs.org/nkey-secp256k1/-/nkey-secp256k1-1.1.1.tgz"
         }
       }
@@ -6310,15 +6311,15 @@
           "from": "https://registry.npmjs.org/convert-source-map/-/convert-source-map-1.2.0.tgz",
           "resolved": "https://registry.npmjs.org/convert-source-map/-/convert-source-map-1.2.0.tgz"
         },
-        "diff": {
-          "version": "2.2.3",
-          "from": "https://registry.npmjs.org/diff/-/diff-2.2.3.tgz",
-          "resolved": "https://registry.npmjs.org/diff/-/diff-2.2.3.tgz"
-        },
         "escape-string-regexp": {
           "version": "1.0.5",
           "from": "https://registry.npmjs.org/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz",
           "resolved": "https://registry.npmjs.org/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz"
+        },
+        "diff": {
+          "version": "2.2.3",
+          "from": "https://registry.npmjs.org/diff/-/diff-2.2.3.tgz",
+          "resolved": "https://registry.npmjs.org/diff/-/diff-2.2.3.tgz"
         },
         "esutils": {
           "version": "2.0.2",
@@ -6847,7 +6848,7 @@
     },
     "react-native-datepicker": {
       "version": "1.3.2",
-      "from": "pgmemk/react-native-datepicker",
+      "from": "git://github.com/pgmemk/react-native-datepicker.git#ce456393807d8a537fd30d6cb4cf60d77dba7840",
       "resolved": "git://github.com/pgmemk/react-native-datepicker.git#ce456393807d8a537fd30d6cb4cf60d77dba7840"
     },
     "react-native-device-info": {
@@ -6857,7 +6858,7 @@
     },
     "react-native-ecc": {
       "version": "1.2.2",
-      "from": "tradle/react-native-ecc",
+      "from": "git://github.com/tradle/react-native-ecc.git#f2aadd18a41e701f244c4c6ef90136a062797bd6",
       "resolved": "git://github.com/tradle/react-native-ecc.git#f2aadd18a41e701f244c4c6ef90136a062797bd6"
     },
     "react-native-env": {
@@ -7891,7 +7892,7 @@
     },
     "sendy": {
       "version": "2.2.0",
-      "from": "sendy@2.2.0",
+      "from": "https://registry.npmjs.org/sendy/-/sendy-2.2.0.tgz",
       "resolved": "https://registry.npmjs.org/sendy/-/sendy-2.2.0.tgz",
       "dependencies": {
         "browser-process-hrtime": {
@@ -7913,7 +7914,7 @@
     },
     "sendy-axolotl": {
       "version": "1.0.1",
-      "from": "sendy-axolotl@1.0.1",
+      "from": "https://registry.npmjs.org/sendy-axolotl/-/sendy-axolotl-1.0.1.tgz",
       "resolved": "https://registry.npmjs.org/sendy-axolotl/-/sendy-axolotl-1.0.1.tgz",
       "dependencies": {
         "@tradle/wire": {
@@ -8015,7 +8016,7 @@
     },
     "sendy-ws": {
       "version": "1.4.0",
-      "from": "sendy-ws@1.4.0",
+      "from": "https://registry.npmjs.org/sendy-ws/-/sendy-ws-1.4.0.tgz",
       "resolved": "https://registry.npmjs.org/sendy-ws/-/sendy-ws-1.4.0.tgz",
       "dependencies": {
         "sendy-protobufs": {
@@ -8314,17 +8315,17 @@
     },
     "tcomb": {
       "version": "3.2.13",
-      "from": "tcomb@latest",
+      "from": "https://registry.npmjs.org/tcomb/-/tcomb-3.2.13.tgz",
       "resolved": "https://registry.npmjs.org/tcomb/-/tcomb-3.2.13.tgz"
     },
     "tcomb-form-native": {
       "version": "0.6.1",
-      "from": "tcomb-form-native@latest",
+      "from": "https://registry.npmjs.org/tcomb-form-native/-/tcomb-form-native-0.6.1.tgz",
       "resolved": "https://registry.npmjs.org/tcomb-form-native/-/tcomb-form-native-0.6.1.tgz"
     },
     "tcomb-validation": {
       "version": "3.2.1",
-      "from": "tcomb-validation@latest",
+      "from": "https://registry.npmjs.org/tcomb-validation/-/tcomb-validation-3.2.1.tgz",
       "resolved": "https://registry.npmjs.org/tcomb-validation/-/tcomb-validation-3.2.1.tgz"
     },
     "through": {

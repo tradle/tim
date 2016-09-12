@@ -1013,7 +1013,7 @@ var utils = {
   promiseThunky: function (fn) {
     let promise
     return function () {
-      return promise ? promise : promise = fn()
+      return promise ? promise : promise = fn.apply(this, arguments)
     }
   }
 }
