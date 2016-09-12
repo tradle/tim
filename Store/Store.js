@@ -2315,9 +2315,10 @@ var Store = Reflux.createStore({
     return this.cleanup(result)
     .then(() => {
       result = this.searchMessages({to: me, modelName: PRODUCT_LIST, isForgetting: true});
-      if (result.length)
+      if (result  &&  result.length) {
         delete result[result.length - 1]
-      return this.cleanup(result)
+        return this.cleanup(result)
+      }
     })
 
   },
