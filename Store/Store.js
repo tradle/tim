@@ -47,7 +47,7 @@ var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
-var Keychain = utils.isIOS() && require('../utils/keychain')
+var Keychain = !utils.isWeb() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('q-level');
 var asyncstorageDown = require('asyncstorage-down')
@@ -207,6 +207,7 @@ const ENCRYPTION_KEY = 'accountkey'
 const DEVICE_ID = 'deviceid'
 // const ENCRYPTION_SALT = 'accountsalt'
 const TLS_ENABLED = false
+const PAUSE_ON_TRANSITION = true
 
 // var Store = Reflux.createStore(timeFunctions({
 var Store = Reflux.createStore({
@@ -997,23 +998,25 @@ var Store = Reflux.createStore({
 
   getIdentifier(identityInfo) {
     identityInfo = identityInfo || meDriver.identityInfo
-    return identityInfo.permalink
+    return TLS_ENABLED ? this.getIdentifierPubKey(identityInfo) : identityInfo.permalink
   },
 
   getIdentifierPubKey(identityInfo) {
     identityInfo = identityInfo || meDriver.identityInfo
     const purpose = TLS_ENABLED ? 'tls' : 'sign'
-    return tradleUtils.find(identityInfo.keys || identityInfo.object.pubkeys, k => {
+    const key = tradleUtils.find(identityInfo.keys || identityInfo.object.pubkeys, k => {
       const kPurpose = k.purpose || k.get('purpose')
       return kPurpose === purpose
-    }).pubKeyString
+    })
+
+    return key.pubKeyString || key.pub
   },
 
   getWsClient(base) {
     const tlsKey = driverInfo.tlsKey
     const url = utils.joinURL(base, 'ws?' + querystring.stringify({
       from: this.getIdentifier(),
-      pubKey: this.getIdentifierPubKey()
+      // pubKey: this.getIdentifierPubKey()
     })).replace(/^http/, 'ws')
 
     return new WebSocketClient({
@@ -5619,10 +5622,14 @@ var Store = Reflux.createStore({
   },
 
   onStartTransition() {
-    if (meDriver) meDriver.pause(2000)
+    if (PAUSE_ON_TRANSITION) {
+      if (meDriver) meDriver.pause(2000)
+    }
   },
   onEndTransition() {
-    if (meDriver) meDriver.resume()
+    if (PAUSE_ON_TRANSITION) {
+      if (meDriver) meDriver.resume()
+    }
 
     if (this._transitionCallbacks) {
       // defensive copy
