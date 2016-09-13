@@ -3,7 +3,9 @@
 var Reflux = require('reflux');
 var debug = require('debug')('Actions')
 
-var Actions = Reflux.createActions([
+var syncActions = {}
+
+;[
   'addItem',
   'addMessage',
   'getItem',
@@ -32,7 +34,6 @@ var Actions = Reflux.createActions([
   'getTemporary',
   'cleanup',
   'forgetMe',
-  'setAuthenticated',
   'updateMe',
   'scheduleUpdate',
   'genPairingData',
@@ -40,8 +41,15 @@ var Actions = Reflux.createActions([
   'processPairingRequest',
   'processPairingResponse',
   'pairingRequestAccepted',
-  'addApp'
-]);
+  'addApp',
+].forEach(name => syncActions[name] = {})
+
+var Actions = Reflux.createActions({
+  ...syncActions,
+  setAuthenticated: {
+    sync: true
+  }
+})
 
 Object.keys(Actions).forEach((name) => {
   var fn = Actions[name]
