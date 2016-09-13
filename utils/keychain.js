@@ -130,5 +130,5 @@ function getCurve (name) {
 }
 
 function isKeyInSecureEnclave (key) {
-  return key.curve === 'p256'
+  return utils.isIOS() && key.curve === 'p256'
 }
