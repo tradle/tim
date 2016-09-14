@@ -2,6 +2,7 @@
 
 var Q = require('q')
 var Keychain = require('react-native-keychain')
+var debounce = require('debounce')
 var ResourceList = require('./ResourceList');
 var VideoPlayer = require('./VideoPlayer')
 var AddNewIdentity = require('./AddNewIdentity');
@@ -81,6 +82,7 @@ class TimHome extends Component {
     };
   }
   componentWillMount() {
+    this._pressHandler = debounce(this._pressHandler, 500, true)
     if (!isAndroid)
       Linking.addEventListener('url', this._handleOpenURL);
 
@@ -227,23 +229,41 @@ class TimHome extends Component {
       //   }
       // }
     case 'pairingSuccessful':
-      signIn(this.props.navigator)
-        .then(() => {
-        // if (this.state.newMe)
-          //{
-        //   let me = utils.getMe()
-        //   Actions.addItem({resource: me, value: this.state.newMe, meta: utils.getModel(constants.TYPES.PROFILE).value})
-        //   let routes = this.props.navigator.getCurrentRoutes()
-        //   if (me.useTouchId  &&  !me.useGesturePassword)
-        //     return
-        //   this.props.navigator.popToRoute(routes[routes.length - 3])
-        // }
-        // else
-        return this.showOfficialAccounts()
-      })
-      .catch((err) => {debugger
-      })
-      break
+      const routes = this.props.navigator.getCurrentRoutes()
+      // get the top TimHome in the stack
+      const homeRoute = routes.filter(r => r.component === TimHome).pop()
+      const currentRoute = routes.pop()
+      try {
+        await signIn(this.props.navigator)
+      } catch (err) {
+        if (currentRoute && currentRoute.component === TimHome) return
+
+        if (homeRoute) {
+          return this.props.navigator.popToRoute(homeRoute)
+        }
+
+        return this.props.navigator.resetTo({
+          id: 1,
+          component: TimHome,
+          passProps: {}
+        })
+      }
+
+      if (currentRoute.component !== TimHome) {
+        return this.props.navigator.popToRoute(currentRoute)
+      }
+
+      // if (this.state.newMe)
+        //{
+      //   let me = utils.getMe()
+      //   Actions.addItem({resource: me, value: this.state.newMe, meta: utils.getModel(constants.TYPES.PROFILE).value})
+      //   let routes = this.props.navigator.getCurrentRoutes()
+      //   if (me.useTouchId  &&  !me.useGesturePassword)
+      //     return
+      //   this.props.navigator.popToRoute(routes[routes.length - 3])
+      // }
+      // else
+      return this.showOfficialAccounts()
     case 'getMe':
       utils.setMe(params.me)
       this.setState({hasMe: params.me})
@@ -374,6 +394,7 @@ class TimHome extends Component {
     let self = this
     route.passProps.callback = () => {
       setPassword(this.props.navigator)
+      .then(() => this.optInTouchID())
       .then (() => {
         this.setState({hasMe: true})
         Actions.setAuthenticated(true)
@@ -393,6 +414,27 @@ class TimHome extends Component {
     route.passProps.editCols = ['firstName', 'lastName', 'language']
     route.titleTintColor = '#ffffff'
     this.props.navigator.push(route);
+  }
+
+  optInTouchID() {
+    return hasTouchID().then(has => {
+      if (!has) return
+
+      return new Promise(resolve => {
+        this.props.navigator.replace({
+          component: TouchIDOptIn,
+          id: 21,
+          rightButtonTitle: 'Skip',
+          passProps: {
+            optIn: () => {
+              Actions.updateMe({ useTouchId: true })
+              resolve()
+            }
+          },
+          onRightButtonPress: resolve
+        })
+      })
+    })
   }
 
   pairDevices(cb) {

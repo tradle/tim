@@ -345,13 +345,13 @@ class ResourceView extends Component {
     signIn(self.props.navigator, r, isChangeGesturePassword)
       .then(() => {
         Actions.addItem({resource: me, value: r, meta: utils.getModel(constants.TYPES.PROFILE).value})
-        let popToThePreviousScreen = me.useGesturePassword  &&  (!r.useGesturePassword  ||  r.useTouchId)
-        let popTwoScreensBack = isChangeGesturePassword
-        let routes = self.props.navigator.getCurrentRoutes()
-        if (popToThePreviousScreen)
-          self.props.navigator.pop()
-        else if (popTwoScreensBack)
+        if (isChangeGesturePassword) {
+          let routes = self.props.navigator.getCurrentRoutes()
           self.props.navigator.popToRoute(routes[routes.length - 3])
+        } else {
+          self.props.navigator.pop()
+        }
+
         self.setState({useGesturePassword: r.useGesturePassword, useTouchId: r.useTouchId})
       })
     // this.props.navigator.push({

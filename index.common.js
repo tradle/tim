@@ -158,18 +158,10 @@ class TiMApp extends Component {
           if (!me || !me.isRegistered) return
 
           Actions.setAuthenticated(false)
-          let currentRoute = this.state.navigator.getCurrentRoutes().pop()
+          Actions.start()
           // TODO: auth flow should not be here OR in TimHome
           // it should be more like Actions.auth()
           // and then handled in one place
-          signIn(this.state.navigator)
-            // .then(() => {
-              // me = utils.getMe()
-              // if (me.useGesturePassword)
-              //   this.state.navigator.pop()
-            // })
-
-          Actions.start()
         }, UNAUTHENTICATE_AFTER_BG_MILLIS)
 
         break
@@ -298,7 +290,13 @@ class TiMApp extends Component {
         configureScene={(route) => {
           if (route.sceneConfig)
             return route.sceneConfig;
-          return {...Navigator.SceneConfigs.FloatFromRight, springFriction:26, springTension:200};
+
+          const config = {...Navigator.SceneConfigs.FloatFromRight, springFriction:26, springTension:200}
+          if (route.component === PasswordCheck) {
+            config.gestures = {}
+          }
+
+          return config
         }}
         />
     );

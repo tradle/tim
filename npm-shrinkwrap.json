@@ -1486,10 +1486,20 @@
       "from": "dargs@>=4.0.0 <5.0.0",
       "resolved": "https://registry.npmjs.org/dargs/-/dargs-4.1.0.tgz"
     },
+    "date-now": {
+      "version": "1.0.1",
+      "from": "date-now@1.0.1",
+      "resolved": "https://registry.npmjs.org/date-now/-/date-now-1.0.1.tgz"
+    },
     "dateformat": {
       "version": "1.0.12",
       "from": "dateformat@>=1.0.12 <2.0.0",
       "resolved": "https://registry.npmjs.org/dateformat/-/dateformat-1.0.12.tgz"
+    },
+    "debounce": {
+      "version": "1.0.0",
+      "from": "debounce@latest",
+      "resolved": "https://registry.npmjs.org/debounce/-/debounce-1.0.0.tgz"
     },
     "debug": {
       "version": "2.2.0",
