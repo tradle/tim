@@ -552,7 +552,7 @@ var NewResourceMixin = {
     if (this.state.isRegistration)
       lStyle = [lStyle, {color: '#eeeeee'}]
     return (
-      <View style={{flex: 5, paddingBottom: this.hasError(params.errors, params.prop.name) ? 0 : Platform.OS === 'ios' ? 10 : 7}}>
+      <View style={{flex: 5, paddingBottom: this.hasError(params.errors, params.prop.name) ? 10 : Platform.OS === 'ios' ? 10 : 7}}>
         <FloatLabel
           labelStyle={lStyle}
           autoCorrect={false}
