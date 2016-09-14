@@ -71,10 +71,10 @@ class FormMessageRow extends Component {
           addStyle = styles.myCell
       }
       else
-        addStyle = [styles.verificationBody, {flex: 1, borderColor: '#efefef', backgroundColor: '#ffffff'}];
+        addStyle = [styles.verificationBody, {flex: 1, borderColor: '#efefef', backgroundColor: '#ffffff', borderTopLeftRadius: 0}];
 
       if (isMyMessage)
-        addStyle = [addStyle, styles.verificationBody, {backgroundColor: STRUCTURED_MESSAGE_COLOR, borderColor: '#C1E3E8'}]; //model.style];
+        addStyle = [addStyle, styles.verificationBody, {backgroundColor: STRUCTURED_MESSAGE_COLOR, borderColor: '#C1E3E8', borderTopRightRadius: 0}]; //model.style];
       // }
     }
     var properties = model.properties;
@@ -347,6 +347,7 @@ var styles = StyleSheet.create({
   },
   myCell: {
     paddingVertical: 5,
+    // borderTopRightRadius: 0,
     paddingHorizontal: 7,
     justifyContent: 'flex-end',
     borderRadius: 10,
