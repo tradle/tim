@@ -119,9 +119,9 @@ class MessageRow extends Component {
           addStyle = [styles.verificationBody, {borderColor: '#cccccc', backgroundColor: this.props.bankStyle.CONFIRMATION_BG}, styles.myConfCell]
         else {
           if (isSimpleMessage && resource.message.length < 30)
-            addStyle = [styles.verificationBody, {borderColor: isFormError ? this.props.bankStyle.REQUEST_FULFILLED : '#efefef', backgroundColor: '#ffffff'}];
+            addStyle = [styles.verificationBody, {borderColor: isFormError ? this.props.bankStyle.REQUEST_FULFILLED : '#efefef', backgroundColor: '#ffffff', borderTopLeftRadius: 0}];
           else
-            addStyle = [styles.verificationBody, {flex: 1, borderColor: isFormError ? this.props.bankStyle.REQUEST_FULFILLED : '#efefef', backgroundColor: '#ffffff'}];
+            addStyle = [styles.verificationBody, {flex: 1, borderColor: isFormError ? this.props.bankStyle.REQUEST_FULFILLED : '#efefef', backgroundColor: '#ffffff', borderTopLeftRadius: 0}];
 
         }
       }
@@ -559,7 +559,7 @@ class MessageRow extends Component {
       let msg = <View key={this.getNextKey()}>
                   <View style={styles.rowContainer}>
                     <Text style={[styles.resourceTitle, {color: isMyMessage ? '#ffffff' : '#757575'}]}>{resource.message}</Text>
-                    <Icon style={[styles.linkIcon, {color: LINK_COLOR, paddingLeft: 5}]} size={20} name={'ios-person'} />
+                    <Icon style={[styles.linkIcon, {color: LINK_COLOR, backgroundColor: 'transparent',  paddingLeft: 5}]} size={20} name={'ios-person'} />
                   </View>
                 </View>
       renderedRow.push(msg);
@@ -575,7 +575,7 @@ class MessageRow extends Component {
       return null
     }
     if (model.id === FORM_REQUEST) {
-      if (resource.product  &&  utils.getModel(resource.product).value.subClassOf !== MY_PRODUCT)
+      if (!resource.product  || utils.getModel(resource.product).value.subClassOf !== MY_PRODUCT)
         return {onPressCall: this.formRequest(resource, renderedRow)}
       else
         return
@@ -754,7 +754,7 @@ class MessageRow extends Component {
 
   formRequest(resource, vCols) {
     let form = utils.getModel(resource.form).value
-    let multiEntryForms = utils.getModel(resource.product).value.multiEntryForms
+
     // if (this.props.shareableResources)
     //   style = styles.description;
     let message = resource.message
@@ -762,7 +762,8 @@ class MessageRow extends Component {
     // if (s.length === 2)
     //   onPressCall = this.editForm.bind(self, msgParts[1], msgParts[0])
     let sameFormRequestForm
-    if (!resource.documentCreated) {
+    if (!resource.documentCreated  &&  resource.product) {
+      let multiEntryForms = utils.getModel(resource.product).value.multiEntryForms
       if (multiEntryForms  &&  multiEntryForms.indexOf(form.id) !== -1) {
         let productToForms = this.props.productToForms
         if (productToForms) {
@@ -823,11 +824,16 @@ class MessageRow extends Component {
                 </View>
                </View>
               : isMyMessage
-                 ? <Text style={[style, color]}>{translate(form)}</Text>
-                 : <View style={styles.rowContainer}>
+                 ? <Text style={[styles.description, color]}>{translate(form)}</Text>
+                 : <TouchableHighlight underlayColor='transparent' style={{paddingRight: 15}} onPress={() => {
+                       this.createNewResource(form, isMyMessage)
+                     }}>
+
+                   <View style={styles.rowContainer}>
                      <Text style={[styles.resourceTitle, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(form)}</Text>
                      <Icon style={resource.documentCreated  ? styles.linkIconGreyed : [this.linkIcon, {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
                    </View>
+                  </TouchableHighlight>
 
     let strName = sameFormRequestForm ? translate('addAnotherFormOrGetNext', translate(form)) : utils.getStringName(message)
     let str = strName ? utils.translate(strName) : message
@@ -927,7 +933,7 @@ var styles = StyleSheet.create({
     paddingHorizontal: 7,
     justifyContent: 'flex-end',
     borderRadius: 10,
-    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
     backgroundColor: '#77ADFC' //#569bff',
   },
   forgetCell: {
@@ -935,12 +941,14 @@ var styles = StyleSheet.create({
     paddingHorizontal: 7,
     justifyContent: 'flex-end',
     borderRadius: 10,
+    borderTopLeftRadius: 0,
     backgroundColor: 'red',
   },
   myConfCell: {
     paddingVertical: 5,
     paddingHorizontal: 7,
     justifyContent: 'flex-end',
+    borderTopLeftRadius: 0,
     borderRadius: 10,
   },
   bigImage: {
@@ -997,6 +1005,7 @@ var styles = StyleSheet.create({
     backgroundColor: '#efefef',
     paddingVertical: 5,
     borderRadius: 5,
+    borderTopLeftRadius: 0,
     paddingHorizontal: 7,
     marginTop: -7,
     marginHorizontal: -7
