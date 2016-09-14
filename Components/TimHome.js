@@ -160,7 +160,7 @@ class TimHome extends Component {
     })
   }
 
-  handleEvent(params) {
+  async handleEvent(params) {
     const self = this
     switch(params.action) {
     case 'connectivity':
@@ -177,9 +177,9 @@ class TimHome extends Component {
       // prior to registration
       // force install updates before first interaction
       if (!utils.getMe()) {
-        return AutomaticUpdates.sync()
-          .then(() => AutomaticUpdates.hasUpdate())
-          .then(hasUpdate => AutomaticUpdates.install())
+        await AutomaticUpdates.sync()
+        const hasUpdate = await AutomaticUpdates.hasUpdate()
+        if (hasUpdate) return AutomaticUpdates.install()
       }
 
       if (self.state.message) {
@@ -231,23 +231,9 @@ class TimHome extends Component {
       // get the top TimHome in the stack
       const homeRoute = routes.filter(r => r.component === TimHome).pop()
       const currentRoute = routes.pop()
-      return signIn(this.props.navigator).then(() => {
-        if (currentRoute.component.displayName !== TimHome.displayName) {
-          return this.props.navigator.popToRoute(currentRoute)
-        }
-
-        // if (this.state.newMe)
-          //{
-        //   let me = utils.getMe()
-        //   Actions.addItem({resource: me, value: this.state.newMe, meta: utils.getModel(constants.TYPES.PROFILE).value})
-        //   let routes = this.props.navigator.getCurrentRoutes()
-        //   if (me.useTouchId  &&  !me.useGesturePassword)
-        //     return
-        //   this.props.navigator.popToRoute(routes[routes.length - 3])
-        // }
-        // else
-        return this.showOfficialAccounts()
-      }, err => {
+      try {
+        await signIn(this.props.navigator)
+      } catch (err) {
         if (currentRoute && currentRoute.component === TimHome) return
 
         if (homeRoute) {
@@ -259,7 +245,23 @@ class TimHome extends Component {
           component: TimHome,
           passProps: {}
         })
-      })
+      }
+
+      if (currentRoute.component !== TimHome) {
+        return this.props.navigator.popToRoute(currentRoute)
+      }
+
+      // if (this.state.newMe)
+        //{
+      //   let me = utils.getMe()
+      //   Actions.addItem({resource: me, value: this.state.newMe, meta: utils.getModel(constants.TYPES.PROFILE).value})
+      //   let routes = this.props.navigator.getCurrentRoutes()
+      //   if (me.useTouchId  &&  !me.useGesturePassword)
+      //     return
+      //   this.props.navigator.popToRoute(routes[routes.length - 3])
+      // }
+      // else
+      return this.showOfficialAccounts()
     case 'getMe':
       utils.setMe(params.me)
       this.setState({hasMe: params.me})
@@ -510,24 +512,23 @@ class TimHome extends Component {
     utils.setModels(null)
     Actions.reloadModels()
   }
-  onBackupPressed() {
-    return BACKUPS.backup().then(backupNumber => {
-      Alert.alert(
-        `Backed up to #${backupNumber}`
-      )
-    })
+  async onBackupPressed() {
+    let backupNumber = await BACKUPS.backup()
+    Alert.alert(
+      `Backed up to #${backupNumber}`
+    )
   }
-  onLoadFromBackupPressed() {
-    return BACKUPS.loadFromBackup()
-      .then(backupNumber => {
-        Alert.alert(
-          `Loaded from backup #${backupNumber}. Please refresh`
-        )
-      }, err => {
-        Alert.alert(
-          `${err.message}`
-        )
-      })
+  async onLoadFromBackupPressed() {
+    try {
+      let backupNumber = await BACKUPS.loadFromBackup()
+      Alert.alert(
+        `Loaded from backup #${backupNumber}. Please refresh`
+      )
+    } catch (err) {
+      Alert.alert(
+        `${err.message}`
+      )
+    }
   }
   render() {
     StatusBar.setHidden(true);
@@ -735,28 +736,32 @@ class TimHome extends Component {
       }
     })
   }
-  onSettingsPressed() {
-    return authenticateUser().then(() => {
-      var model = utils.getModel(constants.TYPES.SETTINGS).value
-      var route = {
-        component: NewResource,
-        title: translate('settings'),
-        backButtonTitle: translate('back'),
-        rightButtonTitle: translate('done'),
-        id: 4,
-        titleTextColor: '#7AAAC3',
-        passProps: {
-          model: model,
-          isConnected: this.state.isConnected,
-          callback: this.props.navigator.pop,
-          bankStyle: defaultBankStyle
+  async onSettingsPressed() {
+    try {
+      await authenticateUser()
+    } catch (err) {
+      return
+    }
 
-          // callback: this.register.bind(this)
-        },
-      }
+    var model = utils.getModel(constants.TYPES.SETTINGS).value
+    var route = {
+      component: NewResource,
+      title: translate('settings'),
+      backButtonTitle: translate('back'),
+      rightButtonTitle: translate('done'),
+      id: 4,
+      titleTextColor: '#7AAAC3',
+      passProps: {
+        model: model,
+        isConnected: this.state.isConnected,
+        callback: this.props.navigator.pop,
+        bankStyle: defaultBankStyle
 
-      this.props.navigator.push(route)
-    })
+        // callback: this.register.bind(this)
+      },
+    }
+
+    this.props.navigator.push(route)
   }
   restartTiM() {
     Alert.alert(
@@ -771,7 +776,6 @@ class TimHome extends Component {
 }
 
 reactMixin(TimHome.prototype, Reflux.ListenerMixin);
-// TimHome.displayName = 'TimHome'
 
 var styles = StyleSheet.create({
   container: {
