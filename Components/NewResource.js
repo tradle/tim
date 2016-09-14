@@ -718,124 +718,129 @@ class NewResource extends Component {
       let blmodel = meta
       var counter, count = 0
       itemsArray = null
-      var isPhoto = false
       var count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
-      if (count) {
-        var items = []
-        isPhoto = bl.name === 'photos'
-        var arr = resource[bl.name]
-        var n = isPhoto
-              ? Math.min(arr.length, 7)
-              : 3
+      if (count  &&  bl.name === 'photos')
+        arrayItems.push(this.getPhotoItem(bl))
+      else
+        arrayItems.push(this.getItem(bl))
 
-        for (var i=0; i<n; i++) {
-          if (isPhoto)
-            items.push(<Image style={styles.thumb} source={{uri: arr[i].url}}  key={this.getNextKey()} onPress={() => this.openModal(arr[i])}/>)
-        }
-        if (isPhoto) {
-          itemsArray =
-            <View style={[styles.photoStrip, count ? {marginTop: -30} : {marginTop: 0}]}>
-              <Text style={styles.activePropTitle}>{translate(bl, blmodel)}</Text>
-              <View style={styles.photoStripItems}>{items}</View>
-            </View>
-          counter =
-            <View>
-              <View style={{marginTop: 25, paddingHorizontal: 5}}>
-                <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
-              </View>
-            </View>;
-        }
-        else {
-          var vCols = bl.viewCols;
-          var cnt = resource[bl.name].length;
-          let val = <View>{self.renderItems(resource[bl.name], bl, this.cancelItem.bind(this))}</View>
+      // var isPhoto = false
+      // if (count) {
+      //   var items = []
+      //   isPhoto = bl.name === 'photos'
+      //   var arr = resource[bl.name]
+      //   var n = isPhoto
+      //         ? Math.min(arr.length, 7)
+      //         : 3
 
-          var separator = <View style={styles.separator}></View>
-          let cstyle = []
-          if (count) {
-            cstyle.push(styles.activePropTitle)
-            // cstyle.push({marginTop: 20})
-          }
-          else
-            cstyle.push(styles.noItemsText)
-          // cstyle.push({paddingLeft: 10})
-          itemsArray = <View>
-                         <Text style={cstyle}>{translate(bl, model)}</Text>
-                         {val}
-                       </View>
+      //   for (var i=0; i<n; i++) {
+      //     if (isPhoto)
+      //       items.push(<Image style={styles.thumb} source={{uri: arr[i].url}}  key={this.getNextKey()} onPress={() => this.openModal(arr[i])}/>)
+      //   }
+      //   if (isPhoto) {
+      //     itemsArray =
+      //       <View style={[styles.photoStrip, count ? {marginTop: -30} : {marginTop: 0}]}>
+      //         <Text style={styles.activePropTitle}>{translate(bl, blmodel)}</Text>
+      //         <View style={styles.photoStripItems}>{items}</View>
+      //       </View>
+      //     counter =
+      //       <View>
+      //         <View style={{marginTop: 25, paddingHorizontal: 5}}>
+      //           <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
+      //         </View>
+      //       </View>;
+      //   }
+      //   else {
+      //     var vCols = bl.viewCols;
+      //     var cnt = resource[bl.name].length;
+      //     let val = <View>{self.renderItems(resource[bl.name], bl, this.cancelItem.bind(this))}</View>
 
-          counter = <View style={[styles.itemsCounterEmpty, {paddingBottom: 10, marginTop: 15}]}>
-                      <Icon name={bl.icon || 'md-add'} size={bl.icon ? 25 : 15}  color={LINK_COLOR} />
-                    </View>
-        }
-      }
-      else {
-        itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{translate(bl, blmodel)}</Text>
-        counter = <View style={[styles.itemsCounterEmpty]}>
-                  { bl.name === 'photos'
-                    ? <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
-                    : <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 15} color={LINK_COLOR} />
-                  }
-                  </View>
-      }
-      var title = translate(bl, blmodel) //.title || utils.makeLabel(p)
-      var err = this.state.missedRequiredOrErrorValue
-              ? this.state.missedRequiredOrErrorValue[meta.properties[p].name]
-              : null
-      var errTitle = translate('thisFieldIsRequired')
-      var error = err
-                ? <View style={styles.error}>
-                    <Text style={styles.errorText}>{errTitle}</Text>
-                  </View>
-                : <View/>
-      var actionableItem = isPhoto && count
-                         ?  <TouchableHighlight style={{flex: 7, paddingTop: 15}} underlayColor='transparent'
-                             onPress={self.showItems.bind(self, bl, meta)}>
-                              {itemsArray}
-                            </TouchableHighlight>
-                         :  <TouchableHighlight style={[{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]} underlayColor='transparent'
-                                onPress={self.onNewPressed.bind(self, bl, meta)}>
-                              {itemsArray}
-                            </TouchableHighlight>
+      //     var separator = <View style={styles.separator}></View>
+      //     let cstyle = []
+      //     if (count) {
+      //       cstyle.push(styles.activePropTitle)
+      //       // cstyle.push({marginTop: 20})
+      //     }
+      //     else
+      //       cstyle.push(styles.noItemsText)
+      //     // cstyle.push({paddingLeft: 10})
+      //     itemsArray = <View>
+      //                    <Text style={cstyle}>{translate(bl, model)}</Text>
+      //                    {val}
+      //                  </View>
 
-      let istyle = []
-      if (isPhoto) {
-        if (count)
-          istyle.push(styles.photoButton)
-        else {
-          istyle.push(styles.itemButton)
-          // istyle.push({paddingBottom: 10})
-          // istyle.push({height: 70})
-        }
-      }
-      else {
-        istyle.push(styles.itemButton)
-        if (err)
-          istyle.push({marginBottom: 10})
-        else if (!count)
-          istyle.push({paddingBottom: 0, height: 70})
-        else {
-          let height = resource[bl.name].photo ? 55 : 45
-          // else if (resource[bl.name][0].photo)
-          //   height = 38
-          istyle.push({paddingBottom: 0, height: count * height + 35})
-        }
-      }
+      //     counter = <View style={[styles.itemsCounterEmpty, {paddingBottom: 10, marginTop: 15}]}>
+      //                 <Icon name={bl.icon || 'md-add'} size={bl.icon ? 25 : 15}  color={LINK_COLOR} />
+      //               </View>
+      //   }
+      // }
+      // else {
+      //   itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{translate(bl, blmodel)}</Text>
+      //   counter = <View style={[styles.itemsCounterEmpty]}>
+      //             { bl.name === 'photos'
+      //               ? <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
+      //               : <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color={LINK_COLOR} />
+      //             }
+      //             </View>
+      // }
+      // var title = translate(bl, blmodel) //.title || utils.makeLabel(p)
+      // var err = this.state.missedRequiredOrErrorValue
+      //         ? this.state.missedRequiredOrErrorValue[meta.properties[p].name]
+      //         : null
+      // var errTitle = translate('thisFieldIsRequired')
+      // var error = err
+      //           ? <View style={styles.error}>
+      //               <Text style={styles.errorText}>{errTitle}</Text>
+      //             </View>
+      //           : <View/>
+      // var actionableItem = isPhoto && count
+      //                    ?  <TouchableHighlight style={{flex: 7, paddingTop: 15}} underlayColor='transparent'
+      //                        onPress={self.showItems.bind(self, bl, meta)}>
+      //                         {itemsArray}
+      //                       </TouchableHighlight>
+      //                    :  <TouchableHighlight style={[{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]} underlayColor='transparent'
+      //                           onPress={self.onNewPressed.bind(self, bl, meta)}>
+      //                         {itemsArray}
+      //                       </TouchableHighlight>
 
-      arrayItems.push (
-        <View key={this.getNextKey()}>
-          <View style={[istyle, {marginHorizontal: 10}]} ref={bl.name}>
-            <View style={styles.items}>
-              {actionableItem}
-              <TouchableHighlight underlayColor='transparent' style={[{flex: 1, position: 'absolute', right: 0}, isPhoto  &&  count ? {marginTop: 15} : count ? {paddingTop: 0} : {marginTop: 15, paddingBottom: 7}]}
-                  onPress={self.onNewPressed.bind(self, bl, meta)}>
-                {counter}
-              </TouchableHighlight>
-            </View>
-          </View>
-          {error}
-        </View>
-      );
+      // let istyle = []
+      // if (isPhoto) {
+      //   if (count)
+      //     istyle.push(styles.photoButton)
+      //   else {
+      //     istyle.push(styles.itemButton)
+      //     // istyle.push({paddingBottom: 10})
+      //     // istyle.push({height: 70})
+      //   }
+      // }
+      // else {
+      //   istyle.push(styles.itemButton)
+      //   if (err)
+      //     istyle.push({marginBottom: 10})
+      //   else if (!count)
+      //     istyle.push({paddingBottom: 0, height: 70})
+      //   else {
+      //     let height = resource[bl.name].photo ? 55 : 45
+      //     // else if (resource[bl.name][0].photo)
+      //     //   height = 38
+      //     istyle.push({paddingBottom: 0, height: count * height + 35})
+      //   }
+      // }
+
+      // arrayItems.push (
+      //   <View key={this.getNextKey()}>
+      //     <View style={[istyle, {marginHorizontal: 10}]} ref={bl.name}>
+      //       <View style={styles.items}>
+      //         {actionableItem}
+      //         <TouchableHighlight underlayColor='transparent' style={[{flex: 1, position: 'absolute', right: 0}, isPhoto  &&  count ? {marginTop: 15} : count ? {paddingTop: 0} : {marginTop: 15, paddingBottom: 7}]}
+      //             onPress={self.onNewPressed.bind(self, bl, meta)}>
+      //           {counter}
+      //         </TouchableHighlight>
+      //       </View>
+      //     </View>
+      //     {error}
+      //   </View>
+      // );
     }
     // var FromToView = require('./FromToView');
     // var isRegistration = !utils.getMe()  &&  resource[constants.TYPE] === constants.TYPES.PROFILE
@@ -950,7 +955,145 @@ class NewResource extends Component {
       }
     });
   }
+  getItem(bl) {
+    let meta = this.props.model
+    let resource = this.state.resource
+    let blmodel = meta
+    var counter, count = 0
+    let itemsArray = null
+    var count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
 
+    if (count) {
+      let val = <View>{this.renderItems(resource[bl.name], bl, this.cancelItem.bind(this))}</View>
+
+      var separator = <View style={styles.separator}></View>
+      let cstyle = count ? styles.activePropTitle : styles.noItemsText
+      itemsArray = <View>
+                     <Text style={cstyle}>{translate(bl, blmodel)}</Text>
+                     {val}
+                   </View>
+
+      counter = <View style={[styles.itemsCounterEmpty, {paddingBottom: 10, marginTop: 15}]}>
+                  <Icon name={bl.icon || 'md-add'} size={bl.icon ? 25 : 20}  color={LINK_COLOR} />
+                </View>
+    }
+    else {
+      itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{translate(bl, blmodel)}</Text>
+      counter = <View style={[styles.itemsCounterEmpty]}>
+                   <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color={LINK_COLOR} />
+                </View>
+    }
+    var title = translate(bl, blmodel) //.title || utils.makeLabel(p)
+    var err = this.state.missedRequiredOrErrorValue
+            ? this.state.missedRequiredOrErrorValue[bl.name]
+            : null
+    var errTitle = translate('thisFieldIsRequired')
+    var error = err
+              ? <View style={styles.error}>
+                  <Text style={styles.errorText}>{errTitle}</Text>
+                </View>
+              : <View/>
+    var actionableItem =  <TouchableHighlight style={[{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]} underlayColor='transparent'
+                              onPress={this.onNewPressed.bind(this, bl, meta)}>
+                            {itemsArray}
+                          </TouchableHighlight>
+
+    let istyle = [styles.itemButton]
+    if (err)
+      istyle.push({marginBottom: 10})
+    else if (!count)
+      istyle.push({paddingBottom: 0, height: 70})
+    else {
+      let height = resource[bl.name].photo ? 55 : 45
+      istyle.push({paddingBottom: 0, height: count * height + 35})
+    }
+
+    return (
+      <View key={this.getNextKey()}>
+        <View style={[istyle, {marginHorizontal: 10}]} ref={bl.name}>
+          <View style={styles.items}>
+            {actionableItem}
+            <TouchableHighlight underlayColor='transparent' style={[{flex: 1, position: 'absolute', right: 0}, count ? {paddingTop: 0} : {marginTop: 15, paddingBottom: 7}]}
+                onPress={this.onNewPressed.bind(this, bl, meta)}>
+              {counter}
+            </TouchableHighlight>
+          </View>
+        </View>
+        {error}
+      </View>
+    );
+  }
+  getPhotoItem(bl) {
+    let meta = this.props.model
+    let resource = this.state.resource
+    let blmodel = meta
+    var counter, count = 0
+    let itemsArray = null
+    var count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
+    if (count) {
+      var items = []
+      var arr = resource[bl.name]
+      var n = Math.min(arr.length, 7)
+      for (var i=0; i<n; i++) {
+        items.push(<Image style={styles.thumb} source={{uri: arr[i].url}}  key={this.getNextKey()} onPress={() => {
+          this.openModal(arr[i])
+        }}/>)
+      }
+      itemsArray =
+        <View style={[styles.photoStrip, count ? {marginTop: -25} : {marginTop: 0}]}>
+          <Text style={styles.activePropTitle}>{translate(bl, blmodel)}</Text>
+          <View style={styles.photoStripItems}>{items}</View>
+        </View>
+      counter =
+        <View>
+          <View style={{marginTop: 25, paddingHorizontal: 5}}>
+            <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
+          </View>
+        </View>;
+    }
+    else {
+      itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{translate(bl, blmodel)}</Text>
+      counter = <View style={[styles.itemsCounterEmpty]}>
+                  <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
+                </View>
+    }
+    var title = translate(bl, blmodel) //.title || utils.makeLabel(p)
+    var err = this.state.missedRequiredOrErrorValue
+            ? this.state.missedRequiredOrErrorValue[bl.name]
+            : null
+    var errTitle = translate('thisFieldIsRequired')
+    var error = err
+              ? <View style={styles.error}>
+                  <Text style={styles.errorText}>{errTitle}</Text>
+                </View>
+              : <View/>
+    var actionableItem = count
+                       ?  <TouchableHighlight style={{flex: 7, paddingTop: 15}} underlayColor='transparent'
+                           onPress={this.showItems.bind(this, bl, meta)}>
+                            {itemsArray}
+                          </TouchableHighlight>
+                       :  <TouchableHighlight style={[{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]} underlayColor='transparent'
+                              onPress={this.onNewPressed.bind(this, bl, meta)}>
+                            {itemsArray}
+                          </TouchableHighlight>
+
+    let istyle = count ? styles.photoButton : styles.itemButton
+
+    return (
+      <View key={this.getNextKey()}>
+        <View style={[istyle, {marginHorizontal: 10}]} ref={bl.name}>
+          <View style={styles.items}>
+            {actionableItem}
+            <TouchableHighlight underlayColor='transparent' style={[{flex: 1, position: 'absolute', right: 0}, count ? {marginTop: 15} : {marginTop: 15, paddingBottom: 7}]}
+                onPress={this.onNewPressed.bind(this, bl, meta)}>
+              {counter}
+            </TouchableHighlight>
+          </View>
+        </View>
+        {error}
+      </View>
+    );
+  }
   onEndEditing(prop, event) {
     if (this.state.resource[prop]  ||  event.nativeEvent.text.length)
       this.state.resource[prop] = event.nativeEvent.text;

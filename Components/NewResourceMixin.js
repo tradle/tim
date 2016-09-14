@@ -506,21 +506,6 @@ var NewResourceMixin = {
       }
     });
   },
-  // showCamera(params) {
-
-  //   return (
-  //     <View style={styles.container}>
-  //       <Camera
-  //         ref={(cam) => {
-  //           this.camera = cam;
-  //         }}
-  //         style={styles.preview}
-  //         aspect={Camera.constants.Aspect.fill}>
-  //         <Text style={styles.capture} onPress={this.takePicture.bind(this)}>[CAPTURE]</Text>
-  //       </Camera>
-  //     </View>
-  //   );
-  // },
 
   onTakePic(params, data) {
     if (!data)
@@ -537,8 +522,8 @@ var NewResourceMixin = {
     var label = translate(params.prop, params.model)
 
     return (
-      <View style={{justifyContent: 'center', marginHorizontal: 10, backgroundColor: LINK_COLOR}}>
-        <Text style={{marginVertical: 10, fontSize: 18, alignSelf: 'center', color: '#ffffff'}}>{label}</Text>
+      <View style={[styles.divider, {backgroundColor: LINK_COLOR}]}>
+        <Text style={styles.dividerText}>{label}</Text>
       </View>
     );
   },
@@ -560,19 +545,20 @@ var NewResourceMixin = {
     if (params.prop.ref  &&  params.prop.ref === constants.TYPES.MONEY  &&  !params.required) {
       let d = Platform.OS === 'ios' ? 10 : 11
       let maxChars = (Dimensions.get('window').width - 60)/d
+      // let some space for wrapping
       if (maxChars < label.length)
         lStyle = [styles.labelStyle, {marginTop: 0}]
     }
     if (this.state.isRegistration)
-      lStyle = [lStyle, {color: '#cccccc'}]
+      lStyle = [lStyle, {color: '#eeeeee'}]
     return (
-      <View style={{flex: 5, marginTop: 5, paddingBottom: this.hasError(params) ? Platform.OS === 'ios' ?  0 : 10 : Platform.OS === 'ios' ? 10 : 7}}>
+      <View style={{flex: 5, paddingBottom: this.hasError(params.errors, params.prop.name) ? 0 : Platform.OS === 'ios' ? 10 : 7}}>
         <FloatLabel
           labelStyle={lStyle}
           autoCorrect={false}
           autoCapitalize={this.state.isRegistration  ||  (params.prop.name !== 'url' &&  (!params.prop.keyboard || params.prop.keyboard !== 'email-address')) ? 'sentences' : 'none'}
           onFocus={this.inputFocused.bind(this, params.prop.name)}
-          inputStyle={this.state.isRegistration ? styles.regInput : styles.input}
+          inputStyle={this.state.isRegistration ? styles.regInput : styles.textInput}
           style={styles.formInput}
           value={params.value}
           keyboardShouldPersistTaps={true}
@@ -648,31 +634,17 @@ var NewResourceMixin = {
       </View>
     )
   },
-/*
-              <Icon name={value ? 'ios-checkmark-circle' : 'ios-radio-button-off'}  size={40} color={value ? '#007aff' : '#007aff' } style={{marginTop: -15}} />
-*/
   myDateTemplate(params) {
-    var labelStyle = {color: '#cccccc', fontSize: 18, paddingBottom: 10};
-    var textStyle = {color: this.state.isRegistration ? '#ffffff' : '#000000', fontSize: 18, paddingBottom: 10};
     var prop = params.prop
     let resource = this.state.resource
     let label, style, propLabel
     let hasValue = resource && resource[prop.name]
     if (resource && resource[prop.name]) {
       label = resource[prop.name].title
-      style = textStyle
-
-      let vStyle = Platform.OS === 'android'
-                 ? {marginTop: 5, paddingLeft: 10}
-                 : {marginTop: 5, marginBottom: 5, backgroundColor: 'transparent'}
-
-      propLabel = <View style={vStyle}>
-                    <Text style={{fontSize: 12, paddingLeft: 10, color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}}>{params.label}</Text>
-                  </View>
+      propLabel = <Text style={{fontSize: 12, marginTop: 5, marginLeft: 10, color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}}>{params.label}</Text>
     }
     else {
       label = params.label
-      style = labelStyle
       propLabel = <View style={{marginTop: 20}}/>
     }
 
@@ -694,10 +666,10 @@ var NewResourceMixin = {
 
     if (!value)
       value = translate(params.prop)
-    return <View style={{marginTop: 2, paddingBottom: 5}} key={this.getNextKey()} ref={prop.name}>
+    return <View style={{paddingBottom: this.hasError(params.errors, prop.name) ?  0 : 10}} key={this.getNextKey()} ref={prop.name}>
           {propLabel}
           <DatePicker
-            style={{width: Dimensions.get('window').width - 30, paddingLeft: 10, justifyContent: 'flex-start', borderColor: '#f7f7f7'}}
+            style={styles.datePicker}
             mode="date"
             placeholder={value}
             format={format}
@@ -708,45 +680,20 @@ var NewResourceMixin = {
               this.changeTime(params.prop, new Date(moment(date, format)))
             }}
             customStyles={{
-              dateInput: {
-                flex: 1,
-                height: 35,
-                paddingBottom: 5,
-                marginTop: 5,
-                borderWidth: 1,
-                borderColor: '#f7f7f7',
-                borderBottomColor: '#cccccc',
-                alignItems: 'flex-start',
-                justifyContent: 'center'
-              },
-              dateText: {
-                fontSize: 18,
-                color: '#000000',
-              },
-              placeholderText: {
-                color: params.value ? '#000000' : '#cccccc',
-                fontSize: 18,
-                paddingLeft: params.value ? 10 : 0
-              },
-              dateIconColor: {
-                color: LINK_COLOR,
-              },
-              dateIcon: {
-                position: 'absolute',
-                right: 0,
-                top: 5
-              },
+              dateInput: styles.dateInput,
+              dateText: styles.dateText,
+              placeholderText: [styles.placeholderText, {
+                color: params.value ? '#000000' : '#aaaaaa',
+                  paddingLeft: params.value ? 10 : 0
+              }],
+              dateIconColor: {color: LINK_COLOR},
+              dateIcon: styles.dateIcon
             }}
             {...dateProps}
           />
           {this.getErrorView(params)}
          </View>
   },
-  // parseDate(dateStr) {
-  //   if (!dateStr.length)
-  //     return null
-  //   return new Date().getTime() - eval(dateStr) * YEAR
-  // },
   getDateRange(dateStr) {
     if (!dateStr)
       return null
@@ -786,60 +733,6 @@ var NewResourceMixin = {
       return new Date().getTime() + number * coef
     }
   },
-  // myDateTemplate1(params) {
-  //   var labelStyle = {color: '#cccccc', fontSize: 17, paddingBottom: 10};
-  //   var textStyle = {color: this.state.isRegistration ? '#ffffff' : '#000000', fontSize: 17, paddingBottom: 10};
-  //   var prop = params.prop
-  //   let resource = this.state.resource
-  //   let label, style, propLabel
-  //   let hasValue = resource && resource[prop.name]
-  //   if (resource && resource[prop.name]) {
-  //     label = resource[prop.name].title
-  //     style = textStyle
-
-  //     let vStyle = Platform.OS === 'android'
-  //                ? {paddingLeft: 10, marginTop: 5}
-  //                : {marginLeft: 10, marginTop: 5, marginBottom: 5, backgroundColor: 'transparent'}
-
-  //     propLabel = <View style={vStyle}>
-  //                   <Text style={{fontSize: 12, color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}}>{params.label}</Text>
-  //                 </View>
-  //   }
-  //   else {
-  //     label = params.label
-  //     style = labelStyle
-  //     propLabel = <View style={{marginTop: 20}}/>
-  //   }
-
-  //   var err = this.state.missedRequiredOrErrorValue
-  //           ? this.state.missedRequiredOrErrorValue[prop.name]
-  //           : null
-  //   if (!err  &&  params.errors  &&  params.errors[prop.name])
-  //     err = params.errors[prop.name]
-
-  //   let valuePadding = 0 //Platform.OS === 'ios' ? 0 : (hasValue ? 10 : 0)
-
-  //   return (
-  //     <View style={{paddingBottom: 10, flex: 5}} key={this.getNextKey()} ref={prop.name}>
-  //      {propLabel}
-  //      <TouchableHighlight underlayColor="transparent" onPress={this.showModal.bind(this, prop, true)}>
-  //        <View style={[styles.dateContainer, {flexDirection: 'row', justifyContent: 'space-between', paddingLeft: valuePadding}]}>
-  //          <Text style={style}>{(params.value &&  dateformat(new Date(params.value), 'mmmm dS, yyyy')) || translate(params.prop)}</Text>
-  //          <Icon name='ios-calendar-outline'  size={17}  color={LINK_COLOR}  style={styles.icon1} />
-  //        </View>
-  //      </TouchableHighlight>
-  //      { Platform.OS === 'ios'
-  //         ? this.state.modal  &&  this.state.modal[prop.name]
-  //             ? <Picker closeModal={() => {
-  //                this.showModal(prop, false)
-  //             }} offSet={this.state.offSet} value={params.value} prop={params.prop} changeTime={this.changeTime.bind(this, params.prop)}  />
-  //             : (err ? this.getErrorView(params) : null)
-  //         : <View />
-  //       }
-  //     </View>
-  //   );
-  // },
-
   async showPicker(prop, stateKey, options) {
     try {
       // var newState = {};
@@ -858,25 +751,6 @@ var NewResourceMixin = {
     }
   },
 
-  // showModal(prop, show) {
-  //   this.setState({modal: show})
-  // },
-  // showModal(prop, show) {
-  //   if (Platform.OS === 'ios') {
-  //     let m = {}
-  //     extend(true, m, this.state.modal)
-  //     if (show)
-  //       m[prop.name] = show
-  //     else {
-  //       for (let p in m)
-  //         m[p] = false
-  //     }
-
-  //     this.setState({modal: m})
-  //   }
-  //   else
-  //     this.showPicker(prop, 'preset', {date: new Date()})
-  // },
   changeTime: function(prop, date) {
     var r = {}
     extend(true, r, this.state.resource)
@@ -910,8 +784,8 @@ var NewResourceMixin = {
   // },
 
   myCustomTemplate(params) {
-    var labelStyle = {color: '#cccccc', fontSize: 18, paddingBottom: 10, marginTop: -5};
-    var textStyle = {color: this.state.isRegistration ? '#ffffff' : '#000000', fontSize: 18, paddingBottom: 10, marginTop: -5};
+    var labelStyle = styles.labelClean
+    var textStyle = styles.labelDirty
     var resource = /*this.props.resource ||*/ this.state.resource
     var label, style
     var propLabel, propName
@@ -931,17 +805,13 @@ var NewResourceMixin = {
       if (rModel.subClassOf  &&  rModel.subClassOf === ENUM)
         label = utils.createAndTranslate(label, true)
       style = textStyle
-      let vStyle = Platform.OS === 'android'
-                 ? {marginTop: 7, paddingLeft: 0}
-                 : {marginTop: 7, marginBottom: 5, backgroundColor: 'transparent'}
-      propLabel = <View style={vStyle}>
-                    <Text style={{fontSize: 12, color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}}>{params.label}</Text>
-                  </View>
+      propLabel = <Text style={[styles.labelDirty, {color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}]}>{params.label}</Text>
     }
     else {
+      let color = {color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}
       label = params.label
-      style = labelStyle
-      propLabel = <View style={{marginTop: 20}}/>
+      style = [labelStyle, color]
+      propLabel = <View/>
     }
     let maxChars = (Dimensions.get('window').width - 20)/10
     if (maxChars < label.length)
@@ -950,34 +820,35 @@ var NewResourceMixin = {
       label += ' (' + utils.translate(utils.getDefaultLanguage()) + ')'
     let isVideo = prop.name === 'video'
     let isPhoto = prop.name === 'photos'
+      // <View key={this.getNextKey()} style={this.hasError(params) ? {paddingBottom: 0} : {paddingBottom: 10}} ref={prop.name}>
+    let color = {color: resource && resource[params.prop] ? '#000000' : this.state.isRegistration ? '#eeeeee' : '#AAAAAA'}
+    let iconColor = this.state.isRegistration ? '#eeeeee' : LINK_COLOR
     return (
-      <View style={[styles.chooserContainer, this.hasError(params) ? {paddingBottom: 5} : {paddingBottom: 0}]} key={this.getNextKey()} ref={prop.name}>
+      <View key={this.getNextKey()} style={{paddingBottom: this.hasError(params.errors, prop.name) ? 0 : 10, margin: 0}} ref={prop.name}>
         {propLabel}
         <TouchableHighlight underlayColor='transparent' onPress={
           isVideo ? this.showCamera.bind(this, params) : this.chooser.bind(this, prop, params.prop)
         }>
-          <View>
-            <View style={[styles.chooserContentStyle, {marginTop: 20}]}>
-               {this.state[prop.name + '_photo']
-                 ? <View style={{flexDirection: 'row'}}>
-                     <Image source={{uri: this.state[prop.name + '_photo'].url}} style={styles.thumb} />
-                     <Text style={style}>{label}</Text>
-                   </View>
-                 : <Text style={style}>{label}</Text>
-               }
+          <View  style={[styles.chooserContainer, {flexDirection: 'row'}]}>
+            {this.state[prop.name + '_photo']
+             ? <View style={{flexDirection: 'row'}}>
+                 <Image source={{uri: this.state[prop.name + '_photo'].url}} style={styles.thumb} />
+                 <Text style={[styles.input, color]}>{label}</Text>
+               </View>
+             : <Text style={[styles.input, color]}>{label}</Text>
+            }
               {isVideo
                 ? <Icon name='ios-play-outline'  size={25}  color={LINK_COLOR} />
-                : <Icon name='ios-arrow-down'  size={15}  color={this.state.isRegistration ? '#eeeeee' : LINK_COLOR}  style={styles.icon1} />
+                : <Icon name='ios-arrow-down'  size={15}  color={iconColor}  style={[styles.icon1, styles.customIcon]} />
               }
-            </View>
           </View>
         </TouchableHighlight>
-         {this.getErrorView({noError: params.noError, errors: params.errors, prop: prop, paddingLeft: 0})}
+         {this.getErrorView({noError: params.noError, errors: params.errors, prop: prop, paddingBottom: 0})}
       </View>
     );
   },
-  hasError(params) {
-    return (params.errors && params.errors[params.prop.name]) || this.state.missedRequiredOrErrorValue &&  this.state.missedRequiredOrErrorValue[params.prop.name]
+  hasError(errors, propName) {
+    return (errors && errors[propName]) || this.state.missedRequiredOrErrorValue &&  this.state.missedRequiredOrErrorValue[propName]
   },
   chooser(prop, propName,event) {
     var resource = this.state.resource;
@@ -1127,8 +998,6 @@ var NewResourceMixin = {
   },
 
   myEnumTemplate(params) {
-    var labelStyle = {color: '#cccccc', fontSize: 18, paddingLeft: 10} //, paddingBottom: 10};
-    var textStyle = {color: '#000000', fontSize: 18, paddingLeft: 10} //, paddingBottom: 10};
     var label
     var prop = params.prop
     var enumProp = params.enumProp
@@ -1139,25 +1008,20 @@ var NewResourceMixin = {
               : null
       if (!err  &&  params.errors  &&  params.errors[prop.name])
         err = params.errors[prop.name]
-      // error = err
-      //           ? <View style={{paddingLeft: 5, backgroundColor: 'transparent'}}>
-      //               <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>Enter a valid {prop.title}</Text>
-      //             </View>
-      //           : <View />
       error = err
-                ? <View style={{paddingLeft: 5, height: 14, backgroundColor: 'transparent'}} />
+                ? <View style={styles.enumErrorLabel} />
                 : <View />
     }
     else
       error = <View/>
     var value = prop ? params.value : resource[enumProp.name]
     return (
-      <View style={[styles.chooserContainer, {width: 40, marginTop: 15, height: 51}]} key={this.getNextKey()} ref={enumProp.name}>
+      <View style={[styles.chooserContainer, styles.enumElement]} key={this.getNextKey()} ref={enumProp.name}>
         <TouchableHighlight underlayColor='transparent' onPress={this.enumChooser.bind(this, prop, enumProp)}>
-          <View style={{ position: 'relative'}}>
+          <View>
             <View style={styles.chooserContentStyle}>
               <Text style={styles.enumText}>{value}</Text>
-              <Icon name='ios-arrow-down'  size={15}  color='#96415A'  style={[styles.icon1, styles.enumProp]} />
+              <Icon name='ios-arrow-down'  size={15}  color={LINK_COLOR}  style={[styles.icon1, styles.enumProp]} />
             </View>
            {error}
           </View>
@@ -1336,10 +1200,10 @@ var NewResourceMixin = {
 
 var styles = StyleSheet.create({
   enumProp: {
-    marginTop: 20,
+    marginTop: 15,
   },
   enumText: {
-    marginTop: 15,
+    marginTop: 10,
     marginLeft: 20,
     color: '#757575',
     fontSize: 18
@@ -1348,22 +1212,6 @@ var styles = StyleSheet.create({
     width: 15,
     height: 15,
     marginVertical: 2
-  },
-  icon: {
-    width: 20,
-    height: 20,
-    marginLeft: -5,
-    marginRight: 5,
-  },
-  dateContainer: {
-    // height: 60,
-    borderColor: '#ffffff',
-    borderBottomColor: '#cccccc',
-    borderBottomWidth: 1,
-    marginHorizontal: 10,
-    // marginLeft: 10,
-    // marginBottom: 10,
-    flex: 1
   },
   booleanContainer: {
     height: 60,
@@ -1382,12 +1230,21 @@ var styles = StyleSheet.create({
     marginRight: 10,
     borderRadius: 4
   },
+  datePicker: {
+    width: Dimensions.get('window').width - 30,
+    paddingLeft: 10,
+    justifyContent: 'flex-start',
+    borderColor: '#f7f7f7'
+  },
   chooserContainer: {
-    height: 60,
+    height: 40,
+    marginTop: 20,
     borderColor: '#ffffff',
     borderBottomColor: '#cccccc',
     borderBottomWidth: 1,
     marginHorizontal: 10,
+    // justifyContent: 'center',
+    position: 'relative',
     // marginBottom: 10,
     // paddingBottom: 10,
     flex: 1
@@ -1398,8 +1255,15 @@ var styles = StyleSheet.create({
     // paddingVertical: 5,
     borderRadius: 4
   },
-  labelInput: {
-    color: '#cccccc',
+  enumElement: {
+    width: 40,
+    marginTop: 20,
+    height: 40
+  },
+  enumErrorLabel: {
+    paddingLeft: 5,
+    height: 14,
+    backgroundColor: 'transparent'
   },
   formInput: {
     borderBottomWidth: 1,
@@ -1410,38 +1274,205 @@ var styles = StyleSheet.create({
     borderWidth: 0,
     color: '#eeeeee'
   },
-  input: {
+  textInput: {
     borderWidth: 0,
-  },
-  buttonText: {
-   textAlign: 'center'
-  },
-  preview: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    height: Dimensions.get('window').height,
-    width: Dimensions.get('window').width
-  },
-  capture: {
-    flex: 0,
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    color: '#000',
-    padding: 10,
-    margin: 40
   },
   thumb: {
     width: 25,
     height: 25,
     marginRight: 2,
-    marginTop: -10,
+    marginTop: 7,
     borderRadius: 5
   },
   err: {
     paddingLeft: 10,
-    backgroundColor: 'transparent'
-  }
+    // backgroundColor: 'transparent'
+  },
+  element: {
+    position: 'relative'
+  },
+  input: {
+    backgroundColor: 'transparent',
+    color: '#aaaaaa',
+    fontSize: 18,
+    marginTop: 10,
+  },
+  labelClean: {
+    marginTop: 21,
+    color: '#AAA',
+    position: 'absolute',
+    fontSize: 18,
+    top: 7
+  },
+  labelDirty: {
+    marginTop: 21,
+    marginLeft: 10,
+    color: '#AAA',
+    position: 'absolute',
+    fontSize: 12,
+    top: -17,
+  },
+  customIcon: {
+    position: 'absolute',
+    right: 0,
+    marginTop: 15
+  },
+  dateInput: {
+    flex: 1,
+    height: 35,
+    paddingBottom: 5,
+    marginTop: 5,
+    borderWidth: 1,
+    borderColor: '#f7f7f7',
+    borderBottomColor: '#cccccc',
+    alignItems: 'flex-start',
+    justifyContent: 'center'
+  },
+  dateText: {
+    fontSize: 18,
+    color: '#000000',
+  },
+  placeholderText: {
+    fontSize: 18,
+  },
+  dateIcon: {
+    position: 'absolute',
+    right: 0,
+    top: 5
+  },
+  divider: {
+    justifyContent: 'center',
+    marginHorizontal: 10,
+    marginBottom: 5
+  },
+  dividerText: {
+    marginVertical: 10,
+    fontSize: 18,
+    alignSelf: 'center',
+    color: '#ffffff'
+  },
 })
 module.exports = NewResourceMixin;
+  // icon: {
+  //   width: 20,
+  //   height: 20,
+  //   marginLeft: -5,
+  //   marginRight: 5,
+  // },
+  // dateContainer: {
+  //   // height: 60,
+  //   borderColor: '#ffffff',
+  //   borderBottomColor: '#cccccc',
+  //   borderBottomWidth: 1,
+  //   marginHorizontal: 10,
+  //   // marginLeft: 10,
+  //   // marginBottom: 10,
+  //   flex: 1
+  // },
+  // labelInput: {
+  //   color: '#cccccc',
+  // },
+  // preview: {
+  //   flex: 1,
+  //   justifyContent: 'flex-end',
+  //   alignItems: 'center',
+  //   height: Dimensions.get('window').height,
+  //   width: Dimensions.get('window').width
+  // },
+  // capture: {
+  //   flex: 0,
+  //   backgroundColor: '#fff',
+  //   borderRadius: 5,
+  //   color: '#000',
+  //   padding: 10,
+  //   margin: 40
+  // },
 
+  // myDateTemplate1(params) {
+  //   var labelStyle = {color: '#cccccc', fontSize: 17, paddingBottom: 10};
+  //   var textStyle = {color: this.state.isRegistration ? '#ffffff' : '#000000', fontSize: 17, paddingBottom: 10};
+  //   var prop = params.prop
+  //   let resource = this.state.resource
+  //   let label, style, propLabel
+  //   let hasValue = resource && resource[prop.name]
+  //   if (resource && resource[prop.name]) {
+  //     label = resource[prop.name].title
+  //     style = textStyle
+
+  //     let vStyle = Platform.OS === 'android'
+  //                ? {paddingLeft: 10, marginTop: 5}
+  //                : {marginLeft: 10, marginTop: 5, marginBottom: 5, backgroundColor: 'transparent'}
+
+  //     propLabel = <View style={vStyle}>
+  //                   <Text style={{fontSize: 12, color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}}>{params.label}</Text>
+  //                 </View>
+  //   }
+  //   else {
+  //     label = params.label
+  //     style = labelStyle
+  //     propLabel = <View style={{marginTop: 20}}/>
+  //   }
+
+  //   var err = this.state.missedRequiredOrErrorValue
+  //           ? this.state.missedRequiredOrErrorValue[prop.name]
+  //           : null
+  //   if (!err  &&  params.errors  &&  params.errors[prop.name])
+  //     err = params.errors[prop.name]
+
+  //   let valuePadding = 0 //Platform.OS === 'ios' ? 0 : (hasValue ? 10 : 0)
+
+  //   return (
+  //     <View style={{paddingBottom: 10, flex: 5}} key={this.getNextKey()} ref={prop.name}>
+  //      {propLabel}
+  //      <TouchableHighlight underlayColor="transparent" onPress={this.showModal.bind(this, prop, true)}>
+  //        <View style={[styles.dateContainer, {flexDirection: 'row', justifyContent: 'space-between', paddingLeft: valuePadding}]}>
+  //          <Text style={style}>{(params.value &&  dateformat(new Date(params.value), 'mmmm dS, yyyy')) || translate(params.prop)}</Text>
+  //          <Icon name='ios-calendar-outline'  size={17}  color={LINK_COLOR}  style={styles.icon1} />
+  //        </View>
+  //      </TouchableHighlight>
+  //      { Platform.OS === 'ios'
+  //         ? this.state.modal  &&  this.state.modal[prop.name]
+  //             ? <Picker closeModal={() => {
+  //                this.showModal(prop, false)
+  //             }} offSet={this.state.offSet} value={params.value} prop={params.prop} changeTime={this.changeTime.bind(this, params.prop)}  />
+  //             : (err ? this.getErrorView(params) : null)
+  //         : <View />
+  //       }
+  //     </View>
+  //   );
+  // },
+
+  // showCamera(params) {
+
+  //   return (
+  //     <View style={styles.container}>
+  //       <Camera
+  //         ref={(cam) => {
+  //           this.camera = cam;
+  //         }}
+  //         style={styles.preview}
+  //         aspect={Camera.constants.Aspect.fill}>
+  //         <Text style={styles.capture} onPress={this.takePicture.bind(this)}>[CAPTURE]</Text>
+  //       </Camera>
+  //     </View>
+  //   );
+  // },
+  // showModal(prop, show) {
+  //   this.setState({modal: show})
+  // },
+  // showModal(prop, show) {
+  //   if (Platform.OS === 'ios') {
+  //     let m = {}
+  //     extend(true, m, this.state.modal)
+  //     if (show)
+  //       m[prop.name] = show
+  //     else {
+  //       for (let p in m)
+  //         m[p] = false
+  //     }
+
+  //     this.setState({modal: m})
+  //   }
+  //   else
+  //     this.showPicker(prop, 'preset', {date: new Date()})
+  // },
