@@ -229,7 +229,7 @@ class TimHome extends Component {
     case 'pairingSuccessful':
       const routes = this.props.navigator.getCurrentRoutes()
       // get the top TimHome in the stack
-      const homeRoute = routes.filter(r => r.component === TimHome).pop()
+      const homeRoute = routes.filter(r => r.component.displayName === TimHome.displayName).pop()
       const currentRoute = routes.pop()
       try {
         await signIn(this.props.navigator)
@@ -247,7 +247,7 @@ class TimHome extends Component {
         })
       }
 
-      if (currentRoute.component !== TimHome) {
+      if (currentRoute.component.displayName !== TimHome.displayName) {
         return this.props.navigator.popToRoute(currentRoute)
       }
 
