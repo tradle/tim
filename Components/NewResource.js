@@ -979,8 +979,12 @@ class NewResource extends Component {
     }
     else {
       itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{translate(bl, blmodel)}</Text>
-      counter = <View style={[styles.itemsCounterEmpty]}>
-                   <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color={LINK_COLOR} />
+      counter = <View style={[styles.itemsCounterEmpty]}>{
+                  bl.name === 'photos'
+                    ? <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
+                    : <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color={LINK_COLOR} />
+                  }
+
                 </View>
     }
     var title = translate(bl, blmodel) //.title || utils.makeLabel(p)
@@ -1163,7 +1167,7 @@ var styles = StyleSheet.create({
   },
   noItemsText: {
     fontSize: 18,
-    color: '#cccccc',
+    color: '#AAAAAA',
     // alignSelf: 'center',
     // paddingLeft: 10
   },
