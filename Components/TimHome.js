@@ -672,7 +672,7 @@ class TimHome extends Component {
             <Image style={thumb} source={TradleWhite}></Image>
             <Text style={styles.tradle}>Tradle</Text>
           </View>
-          <View style={{alignItems: 'center', paddingTop: 30}}>
+          <View style={{alignItems: 'center', paddingTop: 10}}>
             <ActivityIndicator hidden='true' size='large' color='#ffffff'/>
           </View>
         </ScrollView>
