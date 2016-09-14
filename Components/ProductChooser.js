@@ -116,14 +116,14 @@ class ProductChooser extends Component {
       utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg, true, true))
     }
     else {
-      // msg[constants.TYPE] =  FORM_REQUEST,
-      // msg.message = translate(model.properties.photos ? 'fillTheFormWithAttachments' : 'fillTheForm', translate(model.title)),
-      // // product: productModel.id,
-      // msg.form = model.id
+      msg[constants.TYPE] =  FORM_REQUEST,
+      msg.message = translate(model.properties.photos ? 'fillTheFormWithAttachments' : 'fillTheForm', translate(model.title)),
+      // product: productModel.id,
+      msg.form = model.id
 
 
-      msg._t = constants.TYPES.SIMPLE_MESSAGE
-      msg.message = '[' + (model.properties.photos ? translate('fillTheFormWithAttachments') : translate('fillTheForm')) + '](' + model.id + ')'
+      // msg._t = constants.TYPES.SIMPLE_MESSAGE
+      // msg.message = '[' + (model.properties.photos ? translate('fillTheFormWithAttachments') : translate('fillTheForm')) + '](' + model.id + ')'
       utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg))
     }
 
@@ -206,6 +206,8 @@ class ProductChooser extends Component {
     var content =
     <ListView ref='listview' style={styles.listview}
       dataSource={this.state.dataSource}
+      removeClippedSubviews={true}
+      initialListSize={100}
       renderRow={this.renderRow.bind(this)}
       enableEmptySections={true}
       automaticallyAdjustContentInsets={false}
