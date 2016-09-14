@@ -5,7 +5,6 @@ var Keychain = require('react-native-keychain')
 var debounce = require('debounce')
 var ResourceList = require('./ResourceList');
 var VideoPlayer = require('./VideoPlayer')
-var AddNewIdentity = require('./AddNewIdentity');
 var NewResource = require('./NewResource');
 var ResourceView = require('./ResourceView');
 var utils = require('../utils/utils');
@@ -21,11 +20,9 @@ var TradleWhite = require('../img/TradleW.png')
 var BG_IMAGE = require('../img/bg.png')
 var PasswordCheck = require('./PasswordCheck')
 var FadeInView = require('./FadeInView')
-// var FlingItView = require('./FlingItView')
 var TouchIDOptIn = require('./TouchIDOptIn')
 var defaultBankStyle = require('../styles/bankStyle.json')
 var QRCodeScanner = require('./QRCodeScanner')
-var QRCode = require('./QRCode')
 
 try {
   var commitHash = require('../version').commit.slice(0, 7)
@@ -70,6 +67,7 @@ const isAndroid = Platform.OS === 'android'
 import React, { Component } from 'react'
 
 class TimHome extends Component {
+  static displayName = 'TimHome'
   props: {
     modelName: PropTypes.string.isRequired,
     navigator: PropTypes.object.isRequired
@@ -773,7 +771,7 @@ class TimHome extends Component {
 }
 
 reactMixin(TimHome.prototype, Reflux.ListenerMixin);
-TimHome.displayName = 'TimHome'
+// TimHome.displayName = 'TimHome'
 
 var styles = StyleSheet.create({
   container: {
