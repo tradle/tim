@@ -552,7 +552,7 @@ class MessageList extends Component {
     // let icon = Platform.OS === 'ios' ?  'md-more' : 'md-menu'
     // let color = Platform.OS === 'ios' ? '#ffffff' : 'red'
 
-    return  <View style={platformStyles.menuButtonNarrow}>
+    return  <View style={[platformStyles.menuButtonNarrow, {opacity: 0.7}]}>
               <Icon name={MenuIcon.name}  size={33}  color={MenuIcon.color} />
             </View>
   }
