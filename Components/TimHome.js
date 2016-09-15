@@ -633,7 +633,7 @@ class TimHome extends Component {
                 {version}
               </View>
 
-    let hh = (height / 2) - 310
+    let hh = (height / 2) - (Platform.OS === 'ios' ? 280 : 240)
     // let hh = height - 300
     let left = (width - 300) / 2
     let logo = <View style={[styles.container]}>
@@ -654,7 +654,7 @@ class TimHome extends Component {
                         this.register(this.showOfficialAccounts.bind(this))
                         }} underlayColor='transparent'>
                         <View style={styles.signIn}>
-                          <Text style={{backgroundColor: 'transparent', color: 'lightblue', fontSize: 20, flexWrap: 'wrap', alignSelf: 'center'}}>{translate('This is my first Tradle device')}</Text>
+                          <Text style={{backgroundColor: 'transparent', color: 'lightblue', fontSize: 18, flexWrap: 'wrap', alignSelf: 'center'}}>{translate('This is my first Tradle device')}</Text>
                         </View>
                       </TouchableHighlight>
                     </FadeInView>
@@ -663,7 +663,7 @@ class TimHome extends Component {
                         this.pairDevices(this.showOfficialAccounts.bind(this))
                         }} underlayColor='transparent'>
                         <View style={[styles.signIn, {shadowColor: '#245c8c', backgroundColor: 'lightblue'}]}>
-                          <Text style={{backgroundColor: 'transparent', color: '#467EAE', fontSize: 20, alignSelf: 'center', fontWeight: '600'}}>{translate('I have another Tradle device')}</Text>
+                          <Text style={{backgroundColor: 'transparent', color: '#467EAE', fontSize: 18, alignSelf: 'center'}}>{translate('I have another Tradle device')}</Text>
                         </View>
                       </TouchableHighlight>
                     </FadeInView>
@@ -839,8 +839,8 @@ var styles = StyleSheet.create({
   signIn: {
     flexDirection: 'row',
     width: 300,
-    height: 80,
-    marginTop: 20,
+    height: Platform.OS === 'ios' ? 80 : 50,
+    marginTop: 10,
     justifyContent: 'center',
     backgroundColor: '#467EAE',
     // shadowOpacity: 0.5,
