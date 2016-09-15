@@ -1487,7 +1487,7 @@ var Store = Reflux.createStore({
 
           var msg = {
             message: me.firstName + ' is waiting for the response',
-            _t: constants.TYPES.SELF_INTRODUCTION,
+            [TYPE]: constants.TYPES.SELF_INTRODUCTION,
             identity: identity[0].publishedIdentity,
             name: me.firstName,
             from: me,
@@ -1581,7 +1581,8 @@ var Store = Reflux.createStore({
     if (!hash)
       hash = list[utils.getId(r.to)].value[ROOT_HASH]
     var toId = IDENTITY + '_' + hash
-    if (me.isEmployee) {
+    let isEmployee = me.isEmployee && (!r.to.organization || utils.getId(r.to.organization) === utils.getId(me.organization))
+    if (isEmployee) {
       let arr = SERVICE_PROVIDERS.filter((sp) => {
         let reps = this.getRepresentatives(sp.org)
         let talkingToBot = reps.forEach((r) => {
@@ -1972,6 +1973,20 @@ var Store = Reflux.createStore({
             self.publishMyIdentity(self.getRepresentative(utils.getId(resource.organization)))
           else
             self.publishMyIdentity(list[utils.getId(resource.to)].value)
+        }
+        else if (isSwitchingToEmployeeMode) {
+          let orgId = utils.getId(resource.organization)
+          let orgRep = self.getRepresentative(orgId)
+
+          var msg = {
+            message: me.firstName + ' is waiting for the response',
+            [TYPE]: constants.TYPES.SELF_INTRODUCTION,
+            identity: meDriver.identity,
+            name: me.firstName,
+            from: me,
+            to: orgRep
+          }
+          checkPublish = self.onAddMessage(msg)
         }
       })
     } else {
