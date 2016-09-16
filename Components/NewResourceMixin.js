@@ -543,8 +543,7 @@ var NewResourceMixin = {
     // let paddingBottom = 20
     let lStyle = styles.labelStyle
     if (params.prop.ref  &&  params.prop.ref === constants.TYPES.MONEY  &&  !params.required) {
-      let d = Platform.OS === 'ios' ? 10 : 11
-      let maxChars = (Dimensions.get('window').width - 60)/d
+      let maxChars = (Dimensions.get('window').width - 60)/10
       // let some space for wrapping
       if (maxChars < label.length)
         lStyle = [styles.labelStyle, {marginTop: 0}]
@@ -624,7 +623,7 @@ var NewResourceMixin = {
           this.onChangeText.bind(this, prop, !value)
         }>
           <View style={styles.booleanContainer}>
-            <View style={[styles.booleanContentStyle]}>
+            <View style={styles.booleanContentStyle}>
               <Text style={[style, doWrap ? {flexWrap: 'wrap', width: Dimensions.get('window').width - 100} : {}]}>{label}</Text>
               <Switch onValueChange={value => this.onChangeText(prop, value)} value={value} onTintColor={LINK_COLOR} />
             </View>
@@ -1227,7 +1226,7 @@ var styles = StyleSheet.create({
     justifyContent: 'space-between',
     flexDirection: 'row',
     // paddingVertical: 5,
-    marginRight: 10,
+    // marginRight: 10,
     borderRadius: 4
   },
   datePicker: {
@@ -1237,7 +1236,7 @@ var styles = StyleSheet.create({
     borderColor: '#f7f7f7'
   },
   chooserContainer: {
-    height: 40,
+    height: 45,
     marginTop: 20,
     borderColor: '#ffffff',
     borderBottomColor: '#cccccc',
@@ -1258,7 +1257,7 @@ var styles = StyleSheet.create({
   enumElement: {
     width: 40,
     marginTop: 20,
-    height: 40
+    height: 45
   },
   enumErrorLabel: {
     paddingLeft: 5,
