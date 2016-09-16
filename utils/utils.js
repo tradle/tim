@@ -194,7 +194,15 @@ var utils = {
         }
       }
       else if (typeof r1[p] === 'object') {
-        if (utils.getId(r1[p]) !== utils.getId(r2[p]))
+        if (!r2[p])
+          return false
+        if (properties[p].ref === TYPES.MONEY) {
+          if (r1[p].currency !== r2[p].currency)
+            return false
+          if (r1[p].value !== r1[p].value)
+            return false
+        }
+        else if (utils.getId(r1[p]) !== utils.getId(r2[p]))
           return false
       }
       else if (r1[p]  ||  r2[p])
