@@ -109,7 +109,9 @@ class MessageRow extends Component {
     else {
       var fromHash = resource.from.id;
       if (isMyMessage) {
-        if (!noMessage)
+        if (model.id === FORM_REQUEST)
+          addStyle = [styles.myCell, {backgroundColor: '#F1FFE7', borderColor: '#D7DACA', borderWidth: 1}]
+        else if (!noMessage)
           addStyle = styles.myCell
       }
       else if (isForgetting)
@@ -127,7 +129,7 @@ class MessageRow extends Component {
       }
       if (isFormError)
         addStyle = [addStyle, styles.verificationBody, {backgroundColor: this.props.bankStyle.FORM_ERROR_BG, borderColor: resource.documentCreated ? this.props.bankStyle.REQUEST_FULFILLED : this.props.bankStyle.FORM_ERROR_BORDER}]; //model.style];
-      if (isMyMessage  &&  !isSimpleMessage && !isFormError)
+      if (isMyMessage  &&  !isSimpleMessage && !isFormError && !model.id === FORM_REQUEST)
         addStyle = [addStyle, styles.verificationBody, {backgroundColor: STRUCTURED_MESSAGE_COLOR, borderColor: '#C1E3E8'}]; //model.style];
     }
     var properties = model.properties;
@@ -539,7 +541,6 @@ class MessageRow extends Component {
     }
     var isProductList = model.id === constants.TYPES.PRODUCT_LIST
     if (isProductList) {
-      var msgParts = utils.splitMessage(resource.message);
       // Case when the needed form was sent along with the message
       if (resource.welcome) {
         let msg = <View key={this.getNextKey()}>
@@ -782,7 +783,7 @@ class MessageRow extends Component {
     var isMyMessage = this.isMyMessage();
 
     let color = isMyMessage
-              ? {color: this.props.bankStyle.MY_MESSAGE_LINK_COLOR} //{color: STRUCTURED_MESSAGE_COLOR}
+              ? {color: '#AFBBA8'} //{color: STRUCTURED_MESSAGE_COLOR}
               : {color: '#2892C6'}
     let link = sameFormRequestForm  &&  !resource.documentCreated
              ? <View style={[styles.rowContainer, {paddingVertical: 10, alignSelf: 'center'}]}>
@@ -824,7 +825,7 @@ class MessageRow extends Component {
                 </View>
                </View>
               : isMyMessage
-                 ? <Text style={[styles.description, color]}>{translate(form)}</Text>
+                 ? <Text style={[styles.resourceTitle, color]}>{translate(form)}</Text>
                  : <TouchableHighlight underlayColor='transparent' style={{paddingRight: 15}} onPress={() => {
                        this.createNewResource(form, isMyMessage)
                      }}>
