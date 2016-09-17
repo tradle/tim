@@ -441,8 +441,7 @@ var Store = Reflux.createStore({
     var keeper = createKeeper({
       path: path.join(TIM_PATH_PREFIX, 'keeper'),
       db: asyncstorageDown,
-      encryption: encryption,
-      validateOnPut: __DEV__
+      encryption: encryption
     })
 
     cachifyKeeper(keeper, {
@@ -4841,7 +4840,7 @@ var Store = Reflux.createStore({
 
     // console.time('dbStream')
     var orgContacts = {}
-    return utils.readDB(db)
+    return utils.dangerousReadDB(db)
     .then((results) => {
       if (!results.length)
         return self.loadModels();

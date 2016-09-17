@@ -602,7 +602,12 @@ var utils = {
     }
   },
 
-  readDB(db) {
+  /**
+   * fast but dangerous way to read a levelup
+   * it's dangerous because it relies on the underlying implementation
+   * of levelup and asyncstorage-down, and their respective key/value encoding sechemes
+   */
+  dangerousReadDB(db) {
     // return new Promise((resolve, reject) => {
     //   collect(db.createReadStream(), (err, data) => {
     //     if (err) reject(err)
@@ -611,30 +616,23 @@ var utils = {
     // })
 
     var prefix = db.location + '!'
-    return new Promise((resolve, reject) => {
-        collect(db.createKeyStream(), (err, keys) => {
-          if (err) reject(err)
-          else resolve(keys)
-        })
-      })
-      .then((keys) => {
-        if (keys.length) {
-          return AsyncStorage.multiGet(keys.map((key) => prefix + key))
-        } else {
-          return []
-        }
-      })
+    // dangerous!
+    var keys = db.db._down.container._keys.slice()
+    if (!keys.length) return Promise.resolve([])
+
+    return AsyncStorage.multiGet(keys.map((key) => prefix + key))
       .then((pairs) => {
         return pairs
           .filter((pair) => typeof pair[1] !== 'undefined')
           .map((pair) => {
+            pair[1] = pair[1].slice(2)
             try {
               pair[1] = pair[1] && JSON.parse(pair[1])
             } catch (err) {
             }
 
             return {
-              key: pair[0].slice(prefix.length),
+              key: pair[0].slice(prefix.length + 2),
               value: pair[1]
             }
           })
@@ -1023,6 +1021,16 @@ var utils = {
     return function () {
       return promise ? promise : promise = fn.apply(this, arguments)
     }
+  },
+
+  getTopNonAuthRoute: function (navigator) {
+    const routes = navigator.getCurrentRoutes()
+    let top
+    while (top = routes.pop()) {
+      if (!top || top.component.displayName !== 'PasswordCheck') break
+    }
+
+    return top
   }
 }
 
