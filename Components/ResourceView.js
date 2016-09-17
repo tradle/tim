@@ -19,6 +19,7 @@ var QRCode = require('./QRCode')
 var MessageList = require('./MessageList')
 var defaultBankStyle = require('../styles/bankStyle.json')
 var buttonStyles = require('../styles/buttonStyles');
+var ENV = require('../utils/env')
 import ActionSheet from 'react-native-actionsheet'
 
 import platformStyles from '../styles/platform'
@@ -251,14 +252,14 @@ class ResourceView extends Component {
     let buttons = []
     let actions = []
     if (isIdentity  &&  isMe) {
-      if (Platform.OS === 'ios') {
-        if (!utils.isSimulator()) {
-          buttons.push(translate('useTouchId') + (this.state.useTouchId ? ' ✓' : ''))
-          actions.push(USE_TOUCH_ID)
-        }
+      if (utils.isIOS()) {
+        // when both auth methods are available, give the choice to disable one
+        buttons.push(translate('useTouchId') + (this.state.useTouchId ? ' ✓' : ''))
+        actions.push(USE_TOUCH_ID)
         buttons.push(translate('useGesturePassword') + (this.state.useGesturePassword ? ' ✓' : ''))
         actions.push(USE_GESTURE_PASSWORD)
       }
+
       if (this.state.useGesturePassword) {
         buttons.push(translate('changeGesturePassword'))
         actions.push(CHANGE_GESTURE_PASSWORD)

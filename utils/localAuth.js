@@ -8,6 +8,11 @@ import Q from 'q'
 import Keychain from 'react-native-keychain'
 import PasswordCheck from '../Components/PasswordCheck'
 
+const ENV = require('../utils/env')
+
+// hack!
+hasTouchID().then(ENV.setHasTouchID)
+
 var utils = require('../utils/utils')
 var translate = utils.translate
 var TouchIDOptIn = require('../Components/TouchIDOptIn')
@@ -42,9 +47,11 @@ const DEFAULT_OPTS = {
 }
 
 let pendingAuth
+let pendingEnrollRequest
+let TIMEOUT = __DEV__ ? 1000 : 10 * 60 * 1000
 
 module.exports = {
-  TIMEOUT: __DEV__ ? 1000 : 10 * 60 * 1000,
+  TIMEOUT,
   Errors,
   setPassword,
   signIn,
@@ -86,6 +93,27 @@ function authenticateUser (opts) {
     })
 }
 
+function touchIDOrNothing () {
+  return authenticateUser()
+    .catch(requestEnrollTouchID)
+}
+
+function requestEnrollTouchID () {
+  if (pendingEnrollRequest) return pendingEnrollRequest
+
+  return pendingEnrollRequest = new Promise(resolve => {
+    Alert.alert('Error', 'Please enable TouchID, then press OK', [
+      {
+        text: 'OK',
+        onPress: function () {
+          pendingEnrollRequest = null
+          touchIDOrNothing().then(resolve)
+        }
+      }
+    ])
+  })
+}
+
 function signIn(navigator, newMe, isChangePassword) {
   let me = utils.getMe()
   // if (!me)
@@ -98,7 +126,7 @@ function signIn(navigator, newMe, isChangePassword) {
   if (me.useTouchId  &&  me.useGesturePassword)
     authPromise = touchIDAndPasswordAuth(navigator, isChangePassword)
   else if (me.useTouchId)
-    authPromise = authenticateUser()
+    authPromise = touchIDOrNothing()
   else
     authPromise = passwordAuth(navigator, isChangePassword)
 
@@ -211,7 +239,8 @@ function setPassword (navigator, isChangePassword) {
 function checkPassword (navigator, isChangePassword) {
   // HACK
   let routes = navigator.getCurrentRoutes()
-  let push = routes[routes.length - 1].id !== 20
+  let currentRoute = routes[routes.length - 1]
+  let push = currentRoute.component.displayName !== PasswordCheck.displayName
   let defer = Q.defer()
   let route = {
     component: PasswordCheck,

@@ -5,6 +5,7 @@ import {
   Dimensions,
   StyleSheet
 } from 'react-native'
+
 var PasswordGesture = require('react-native-gesture-password')
 var translate = require('../utils/utils').translate
 var MIN_LENGTH = 5
@@ -15,7 +16,7 @@ var MODES = {
   set: 'set'
 }
 
-module.exports = React.createClass({
+var PasswordCheck = React.createClass({
   propTypes: {
     // whether the user already has a password
     // and is choosing a new one
@@ -195,6 +196,9 @@ module.exports = React.createClass({
     )
   }
 })
+
+PasswordCheck.displayName = 'PasswordCheck'
+module.exports = PasswordCheck
 
 var containerRawStyle = {
   backgroundColor: 'transparent',
