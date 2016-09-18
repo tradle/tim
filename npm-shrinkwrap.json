@@ -4430,9 +4430,9 @@
       }
     },
     "react-native-udp": {
-      "version": "1.2.5",
-      "from": "react-native-udp@>=1.2.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/react-native-udp/-/react-native-udp-1.2.5.tgz"
+      "version": "1.2.6",
+      "from": "react-native-udp@latest",
+      "resolved": "https://registry.npmjs.org/react-native-udp/-/react-native-udp-1.2.6.tgz"
     },
     "react-native-vector-icons": {
       "version": "2.1.0",
