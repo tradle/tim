@@ -226,15 +226,16 @@ class TimHome extends Component {
       //     return
       //   }
       // }
+      /* fall through */
     case 'pairingSuccessful':
       const routes = this.props.navigator.getCurrentRoutes()
       // get the top TimHome in the stack
       const homeRoute = routes.filter(r => r.component.displayName === TimHome.displayName).pop()
-      const currentRoute = routes.pop()
+      const afterAuthRoute = utils.getTopNonAuthRoute(this.props.navigator)
       try {
         await signIn(this.props.navigator)
       } catch (err) {
-        if (currentRoute && currentRoute.component === TimHome) return
+        if (afterAuthRoute.component.displayName === TimHome.displayName) return
 
         if (homeRoute) {
           return this.props.navigator.popToRoute(homeRoute)
@@ -247,8 +248,8 @@ class TimHome extends Component {
         })
       }
 
-      if (currentRoute.component.displayName !== TimHome.displayName) {
-        return this.props.navigator.popToRoute(currentRoute)
+      if (afterAuthRoute.component.displayName !== TimHome.displayName) {
+        return this.props.navigator.popToRoute(afterAuthRoute)
       }
 
       // if (this.state.newMe)
