@@ -48,8 +48,8 @@
     },
     "@tradle/models": {
       "version": "4.10.9",
-      "from": "git://github.com/tradle/models.git#9bc6f7a8ba22b4520829cc28987bcea619a2fb8b",
-      "resolved": "git://github.com/tradle/models.git#9bc6f7a8ba22b4520829cc28987bcea619a2fb8b"
+      "from": "tradle/models",
+      "resolved": "git://github.com/tradle/models.git#8ed4d76404f87e81f615c3ad9a9689c3e779bf31"
     },
     "@tradle/otr": {
       "version": "0.2.17",
@@ -4331,7 +4331,7 @@
     "react-native-gifted-messenger": {
       "version": "0.0.16",
       "from": "pgmemk/react-native-gifted-messenger",
-      "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#e7d95efa31439e23b09c94ab364c456e09a76866"
+      "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#9444be2f3664bc6524834a8c318917f2d058fd68"
     },
     "react-native-gifted-spinner": {
       "version": "0.0.4",
@@ -4985,15 +4985,15 @@
           "from": "https://registry.npmjs.org/through2/-/through2-0.4.2.tgz",
           "resolved": "https://registry.npmjs.org/through2/-/through2-0.4.2.tgz"
         },
-        "object-keys": {
-          "version": "0.4.0",
-          "from": "https://registry.npmjs.org/object-keys/-/object-keys-0.4.0.tgz",
-          "resolved": "https://registry.npmjs.org/object-keys/-/object-keys-0.4.0.tgz"
-        },
         "minimist": {
           "version": "0.0.8",
           "from": "https://registry.npmjs.org/minimist/-/minimist-0.0.8.tgz",
           "resolved": "https://registry.npmjs.org/minimist/-/minimist-0.0.8.tgz"
+        },
+        "object-keys": {
+          "version": "0.4.0",
+          "from": "https://registry.npmjs.org/object-keys/-/object-keys-0.4.0.tgz",
+          "resolved": "https://registry.npmjs.org/object-keys/-/object-keys-0.4.0.tgz"
         },
         "xtend": {
           "version": "2.1.2",
