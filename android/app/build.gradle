@@ -65,6 +65,11 @@ import com.android.build.OutputFile
  * ]
  */
 
+project.ext.react = [
+  // the name of the generated asset file containing your JS bundle
+  bundleAssetName: "main.jsbundle",
+]
+
 apply from: "../../node_modules/react-native/react.gradle"
 apply from: "../../node_modules/react-native-code-push/android/codepush.gradle"
 
