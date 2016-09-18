@@ -25,10 +25,13 @@ var equal = require('deep-equal')
 var DeviceHeight
 var DeviceWidth
 var constants = require('@tradle/constants');
+var termsAndConditions = require('../termsAndConditions.json')
+
 import ImagePicker from 'react-native-image-picker';
 var ENUM = 'tradle.Enum'
 var LINK_COLOR, DEFAULT_LINK_COLOR = '#a94442'
 var FORM_ERROR = 'tradle.FormError'
+
 
 var Form = t.form.Form;
 var stylesheet = require('../styles/styles')
@@ -95,7 +98,8 @@ class NewResource extends Component {
       isLoadingVideo: false,
       isPrefilled: this.props.isPrefilled,
       modal: {},
-      offSet: new Animated.Value(Dimensions.get('window').height)
+      offSet: new Animated.Value(Dimensions.get('window').height),
+      termsAccepted: isRegistration ? false : true
     }
     var currentRoutes = this.props.navigator.getCurrentRoutes()
     var currentRoutesLength = currentRoutes.length
@@ -123,8 +127,9 @@ class NewResource extends Component {
            this.state.modal !== nextState.modal              ||
            this.state.prop !== nextState.prop                ||
            this.state.isUploading !== nextState.isUploading  ||
-           this.state.isLoadingVideo !== nextState.isLoadingVideo      ||
-           this.state.itemsCount != nextState.itemsCount     ||
+           this.state.itemsCount !== nextState.itemsCount    ||
+           this.state.isLoadingVideo !== nextState.isLoadingVideo  ||
+           this.state.termsAccepted !== nextState.termsAccepted    ||
           !equal(this.state.resource, nextState.resource)
 
     if (!isUpdate)
@@ -339,6 +344,11 @@ class NewResource extends Component {
   onSavePressed() {
     if (this.state.submitted)
       return
+    if (this.state.isRegistration  &&  !this.state.termsAccepted) {
+      Alert.alert('Please accept Terms and Conditions')
+      return
+    }
+
     this.state.submitted = true
     this.state.noScroll = false
     var resource = this.state.resource;
@@ -858,12 +868,32 @@ class NewResource extends Component {
     options.tintColor = 'red'
     var photoStyle = /*isMessage && !isFinancialProduct ? {marginTop: -35} :*/ styles.photoBG;
     var button = this.state.isRegistration
-               ? <TouchableHighlight style={styles.thumbButton}
-                      underlayColor='transparent' onPress={this.onSavePressed.bind(this)}>
-                  <View style={styles.getStarted}>
-                     <Text style={styles.getStartedText}>ENTER</Text>
-                  </View>
-                 </TouchableHighlight>
+               ? <View>
+                   <TouchableHighlight style={styles.thumbButton}
+                        underlayColor='transparent' onPress={this.onSavePressed.bind(this)}>
+                      <View style={styles.getStarted}>
+                         <Text style={styles.getStartedText}>ENTER</Text>
+                      </View>
+                   </TouchableHighlight>
+                   <TouchableHighlight underlayColor='transparent' style={{flexDirection: 'row', alignSelf: 'center', paddingTop: 7}} onPress={() => {
+                      this.props.navigator.push({
+                        id: 3,
+                        component: ResourceView,
+                        title: translate('termsAndConditions'),
+                        backButtonTitle: translate('back'),
+                        rightButtonTitle: translate('Accept'),
+                        passProps: {
+                          resource: termsAndConditions,
+                          action: this.acceptTsAndCs.bind(this)
+                        }
+                     })
+                   }}>
+                     <View style={{flexDirection: 'row'}}>
+                       <Icon name={this.state.termsAccepted ? 'md-checkbox-outline' : 'md-square-outline'} color='#A6DBF5' size={20} style={{paddingRight: 3}}/>
+                       <Text style={{fontSize: 16, color: '#A6DBF5'}}>{translate('termsAndConditions')}</Text>
+                     </View>
+                   </TouchableHighlight>
+                 </View>
                : <View style={{height: 0}} />
 
     var content =
@@ -875,7 +905,7 @@ class NewResource extends Component {
           <View style={this.state.isRegistration ? {marginHorizontal: DeviceHeight > 1000 ? 50 : 30, paddingTop: 30} : {marginHorizontal: 10}}>
             <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange.bind(this)}/>
             {button}
-            <View style={{marginTop: -10}}>
+            <View style={{marginTop: this.state.isRegistration ? 0 : -10}}>
               {arrayItems}
              </View>
            {  this.state.isLoadingVideo
@@ -915,6 +945,20 @@ class NewResource extends Component {
       </View>
     )
   }
+  acceptTsAndCs() {
+    Alert.alert(
+      translate('acceptTermsAndConditions'),
+      null,
+      [
+        {text: 'Ok', onPress: () => {
+          this.props.navigator.pop()
+          this.setState({termsAccepted: true})
+        }},
+        {text: 'Cancel', onPress: () => console.log('Canceled!')}
+      ]
+    )
+  }
+
   cancelItem(pMeta, item) {
     var list = this.state.resource[pMeta.name];
     for (var i=0; i<list.length; i++) {
