@@ -57,9 +57,13 @@ class ResourceView extends Component {
       resource: props.resource,
       isLoading: props.resource.id ? true : false,
       isModalOpen: false,
-      useTouchId: me.useTouchId,
-      useGesturePassword: me.useGesturePassword
+      useTouchId: me && me.useTouchId,
+      useGesturePassword: me && me.useGesturePassword
     }
+    let currentRoutes = this.props.navigator.getCurrentRoutes()
+    let len = currentRoutes.length
+    if (!currentRoutes[len - 1].onRightButtonPress  &&  currentRoutes[len - 1].rightButtonTitle)
+      currentRoutes[len - 1].onRightButtonPress = this.props.action.bind(this)
   }
   componentWillMount() {
     if (this.props.resource.id)
@@ -181,11 +185,15 @@ class ResourceView extends Component {
     var isIdentity = model.id === constants.TYPES.PROFILE;
     var isOrg = model.id === constants.TYPES.ORGANIZATION;
     var me = utils.getMe()
-    var isMe = isIdentity ? resource[constants.ROOT_HASH] === me[constants.ROOT_HASH] : true;
-    var actionPanel = ((isIdentity  &&  !isMe) || (isOrg  &&  (!me.organization  ||  utils.getId(me.organization) !== utils.getId(resource))))
-    // if (isIdentity  &&  !isMe)
-                    ? <View/>
-                    : <ShowRefList showQR={this.openModal.bind(this)} resource={resource} currency={this.props.currency} navigator={this.props.navigator} />
+    var actionPanel
+    if (me) {
+      var isMe = isIdentity ? resource[constants.ROOT_HASH] === me[constants.ROOT_HASH] : true;
+      actionPanel = ((isIdentity  &&  !isMe) || (isOrg  &&  (!me.organization  ||  utils.getId(me.organization) !== utils.getId(resource))))
+                  ? <View/>
+                  : <ShowRefList showQR={this.openModal.bind(this)} resource={resource} currency={this.props.currency} navigator={this.props.navigator} />
+    }
+    else
+      actionPanel = <View/>
     var qrcode, width
     if (this.state.pairingData) {
       width = Math.floor((Dimensions.get('window').width / 3) * 2)
