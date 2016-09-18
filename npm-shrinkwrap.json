@@ -18,9 +18,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/constants/-/constants-1.3.0.tgz"
     },
     "@tradle/engine": {
-      "version": "3.0.1",
-      "from": "@tradle/engine@>=3.0.1 <4.0.0",
-      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-3.0.1.tgz",
+      "version": "3.1.0",
+      "from": "@tradle/engine@>=3.1.0 <4.0.0",
+      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-3.1.0.tgz",
       "dependencies": {
         "async": {
           "version": "2.0.1",
@@ -36,7 +36,7 @@
     },
     "@tradle/keeper": {
       "version": "3.1.0",
-      "from": "@tradle/keeper@latest",
+      "from": "@tradle/keeper@>=3.1.0 <4.0.0",
       "resolved": "https://registry.npmjs.org/@tradle/keeper/-/keeper-3.1.0.tgz",
       "dependencies": {
         "levelup": {
@@ -279,12 +279,12 @@
     },
     "asyncstorage-backup": {
       "version": "1.0.0",
-      "from": "mvayngrib/asyncstorage-backup",
+      "from": "mvayngrib/asyncstorage-backup#a59430c",
       "resolved": "git://github.com/mvayngrib/asyncstorage-backup.git#a59430c193d38e6dfa79a0c4fd2dd8e5816118d2"
     },
     "asyncstorage-down": {
       "version": "3.0.0",
-      "from": "asyncstorage-down@latest",
+      "from": "asyncstorage-down@>=3.0.0 <4.0.0",
       "resolved": "file:../asyncstorage-down",
       "dependencies": {
         "abstract-leveldown": {
@@ -995,7 +995,7 @@
     },
     "cachedown": {
       "version": "1.0.0",
-      "from": "mvayngrib/cachedown#old",
+      "from": "mvayngrib/cachedown#bb59815",
       "resolved": "git://github.com/mvayngrib/cachedown.git#bb59815b7a18a047ad7fc12b6644043d8d6aacf9",
       "dependencies": {
         "abstract-leveldown": {
@@ -1284,7 +1284,7 @@
     },
     "create-ecdh": {
       "version": "4.0.0",
-      "from": "mvayngrib/createECDH#private-key-import",
+      "from": "mvayngrib/createECDH#b5e05e40",
       "resolved": "git://github.com/mvayngrib/createECDH.git#b5e05e40c0a377bace5a985dc19e97499b1c3956"
     },
     "create-error-class": {
@@ -2166,8 +2166,8 @@
     },
     "forward-secrecy": {
       "version": "1.0.2",
-      "from": "tradle/forward-secrecy#dev",
-      "resolved": "git://github.com/tradle/forward-secrecy.git#5ad4c2ee429db4b10599efbd41c650b9debbf7fe",
+      "from": "git+https://github.com/tradle/forward-secrecy.git#dev",
+      "resolved": "git+https://github.com/tradle/forward-secrecy.git#5ad4c2ee429db4b10599efbd41c650b9debbf7fe",
       "dependencies": {
         "tweetnacl": {
           "version": "0.13.3",
@@ -2831,9 +2831,9 @@
       "resolved": "https://registry.npmjs.org/json5/-/json5-0.4.0.tgz"
     },
     "jsonfile": {
-      "version": "2.3.1",
+      "version": "2.4.0",
       "from": "jsonfile@>=2.1.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/jsonfile/-/jsonfile-2.3.1.tgz"
+      "resolved": "https://registry.npmjs.org/jsonfile/-/jsonfile-2.4.0.tgz"
     },
     "jsonify": {
       "version": "0.0.0",
@@ -2967,8 +2967,8 @@
     },
     "level-change-processor": {
       "version": "1.0.0",
-      "from": "mvayngrib/level-change-processor#7100404",
-      "resolved": "git://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b"
+      "from": "git+https://github.com/mvayngrib/level-change-processor.git#7100404",
+      "resolved": "git+https://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b"
     },
     "level-codec": {
       "version": "6.1.0",
@@ -3422,8 +3422,8 @@
     },
     "merkle-tree-stream": {
       "version": "3.0.3",
-      "from": "mvayngrib/merkle-tree-stream#finalize",
-      "resolved": "git://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
+      "from": "git+https://github.com/mvayngrib/merkle-tree-stream.git#finalize",
+      "resolved": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
       "dependencies": {
         "isarray": {
           "version": "1.0.0",
@@ -3659,7 +3659,7 @@
     },
     "node-haste": {
       "version": "2.12.0",
-      "from": "mvayngrib/node-haste#exclude",
+      "from": "mvayngrib/node-haste#766d7e6",
       "resolved": "git://github.com/mvayngrib/node-haste.git#766d7e6fd8822addd4a097f0fc00df6923da88c2"
     },
     "node-int64": {
@@ -3919,9 +3919,9 @@
       "resolved": "https://registry.npmjs.org/pause/-/pause-0.1.0.tgz"
     },
     "pbkdf2": {
-      "version": "3.0.6",
+      "version": "3.0.7",
       "from": "pbkdf2@>=3.0.3 <4.0.0",
-      "resolved": "https://registry.npmjs.org/pbkdf2/-/pbkdf2-3.0.6.tgz"
+      "resolved": "https://registry.npmjs.org/pbkdf2/-/pbkdf2-3.0.7.tgz"
     },
     "pbkdf2-sha256": {
       "version": "1.1.1",
@@ -4260,7 +4260,7 @@
     },
     "react-native-camera": {
       "version": "0.3.8",
-      "from": "lwansbrough/react-native-camera",
+      "from": "lwansbrough/react-native-camera#1747ec4b",
       "resolved": "git://github.com/lwansbrough/react-native-camera.git#1747ec4b0a52472cf2e8ad95f2c3603595e28e13"
     },
     "react-native-carousel": {
@@ -4297,7 +4297,7 @@
     },
     "react-native-datepicker": {
       "version": "1.3.2",
-      "from": "pgmemk/react-native-datepicker",
+      "from": "pgmemk/react-native-datepicker#ce456393",
       "resolved": "git://github.com/pgmemk/react-native-datepicker.git#ce456393807d8a537fd30d6cb4cf60d77dba7840"
     },
     "react-native-device-info": {
@@ -4317,7 +4317,7 @@
     },
     "react-native-floating-labels": {
       "version": "1.0.1",
-      "from": "pgmemk/react-native-floating-labels",
+      "from": "pgmemk/react-native-floating-labels#6a727f5b",
       "resolved": "git://github.com/pgmemk/react-native-floating-labels.git#6a727f5b9f5de4857380ddfb76b2a6faf95df1e9",
       "dependencies": {
         "lodash": {
@@ -4334,12 +4334,12 @@
     },
     "react-native-gesture-password": {
       "version": "0.1.4",
-      "from": "mvayngrib/react-native-gesture-password",
+      "from": "mvayngrib/react-native-gesture-password#a00c167",
       "resolved": "git://github.com/mvayngrib/react-native-gesture-password.git#a00c1679449f5bc66bd11be6e586ee672620ac76"
     },
     "react-native-gifted-messenger": {
       "version": "0.0.16",
-      "from": "pgmemk/react-native-gifted-messenger",
+      "from": "pgmemk/react-native-gifted-messenger#9444be2",
       "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#9444be2f3664bc6524834a8c318917f2d058fd68"
     },
     "react-native-gifted-spinner": {
@@ -4359,17 +4359,17 @@
     },
     "react-native-keychain": {
       "version": "0.3.1",
-      "from": "mvayngrib/react-native-keychain",
+      "from": "mvayngrib/react-native-keychain#6afb4e7",
       "resolved": "git://github.com/mvayngrib/react-native-keychain.git#6afb4e71f2cdca10dbb648421f2a9ab98ff8b30c"
     },
     "react-native-level": {
       "version": "3.0.0",
-      "from": "react-native-level@latest",
+      "from": "react-native-level@>=3.0.0 <4.0.0",
       "resolved": "https://registry.npmjs.org/react-native-level/-/react-native-level-3.0.0.tgz"
     },
     "react-native-level-fs": {
       "version": "3.0.0",
-      "from": "react-native-level-fs@latest",
+      "from": "react-native-level-fs@>=3.0.0 <4.0.0",
       "resolved": "https://registry.npmjs.org/react-native-level-fs/-/react-native-level-fs-3.0.0.tgz"
     },
     "react-native-linear-gradient": {
@@ -4409,7 +4409,7 @@
     },
     "react-native-safe-async-storage": {
       "version": "1.0.0",
-      "from": "mvayngrib/react-native-safe-async-storage",
+      "from": "mvayngrib/react-native-safe-async-storage#7afa8c65",
       "resolved": "git://github.com/mvayngrib/react-native-safe-async-storage.git#7afa8c65d0b858689122c7a49e0f403752726490"
     },
     "react-native-search-bar": {
@@ -4419,7 +4419,7 @@
     },
     "react-native-swipeout": {
       "version": "2.0.12",
-      "from": "mvayngrib/react-native-swipeout",
+      "from": "mvayngrib/react-native-swipeout#6939c109",
       "resolved": "git://github.com/mvayngrib/react-native-swipeout.git#6939c1091773baafd4128bd772fe75e04db623e3",
       "dependencies": {
         "react-tween-state": {
@@ -4458,7 +4458,7 @@
     },
     "react-native-video": {
       "version": "0.9.0",
-      "from": "tradle/react-native-video#stable",
+      "from": "tradle/react-native-video#8982843",
       "resolved": "git://github.com/tradle/react-native-video.git#89828433118d1cfbf1b85bb2985f8aec675018c7"
     },
     "react-proxy": {
