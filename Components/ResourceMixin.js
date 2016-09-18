@@ -197,9 +197,7 @@ var styles = StyleSheet.create({
     // marginHorizontal: 15
   },
   itemColContainer: {
-    // flex: 1,
-    flexDirection: 'row',
-    // paddingLeft: 20,
+    // flexDirection: 'row',
   },
   item: {
     paddingVertical: 7,
