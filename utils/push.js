@@ -14,7 +14,7 @@ import ENV from './env'
 const constants = require('@tradle/engine').constants
 const TYPE = constants.TYPE
 const Actions = require('../Actions/Actions')
-const pushServerURL = __DEV__ ? `http://${ENV.LOCAL_IP}:48284` : 'https://push.tradle.io'
+const pushServerURL = __DEV__ ? `http://${ENV.LOCAL_IP}:48284` : 'http://push1.tradle.io'
 
 let initialized
 let preinitialized
@@ -44,20 +44,16 @@ function createPusher (opts) {
   const identity = node.identity
 
   let registered = me.registeredForPushNotifications
+  let registrationInProgress
   let unread = me.unreadPushNotifications || 0
+  let resolveWithToken
+  let gotToken = new Promise(resolve => resolveWithToken = resolve)
 
   Push.configure({
     // (optional) Called when Token is generated (iOS and Android)
     onRegister: device => {
       // console.log(device)
-      post('/subscriber', {
-        [TYPE]: 'tradle.PNSRegistration',
-        identity: identity,
-        token: device.token,
-        // apple push notifications service
-        protocol: ENV.isIOS() ? 'apns' : 'gcm'
-      })
-      .then(() => Actions.updateMe({ registeredForPushNotifications: true }))
+      resolveWithToken(device.token)
     },
 
     // (required) Called when a remote or local notification is opened or received
@@ -89,19 +85,49 @@ function createPusher (opts) {
 
   function register () {
     if (registered) return Promise.resolve()
+    if (registrationInProgress) return registrationInProgress
 
-    return utils.tryWithExponentialBackoff(() => {
-      Push.requestPermissions()
-      // wait to see if permissions request goes through
-      // request timeout = 5000ms
-      return utils.promiseDelay(5000)
-        .then(() => {
-          if (!registered) throw new Error('failed to register')
+    return registrationInProgress = getToken()
+      .then(token => {
+        return postWithRetry('/subscriber', {
+          [TYPE]: 'tradle.PNSRegistration',
+          identity: identity,
+          token: token,
+          // apple push notifications service
+          protocol: ENV.isIOS() ? 'apns' : 'gcm'
         })
-    }, { immediate: true })
+      })
+      .then(() => {
+        registered = true
+        Actions.updateMe({ registeredForPushNotifications: true })
+      })
   }
 
-  function post (path, body) {
+  function getToken () {
+    return utils.tryWithExponentialBackoff(() => {
+      // retry requesting until we succeed
+      Push.requestPermissions()
+      return Promise.race([
+        gotToken,
+        failIn(5000)
+      ])
+    }, { initialDelay: 1000 })
+  }
+
+  function failIn (millis) {
+    return utils.promiseDelay(millis)
+      .then(() => {
+        throw new Error('timed out')
+      })
+  }
+
+  /**
+   * POST until successful
+   * @param  {[type]} path [description]
+   * @param  {[type]} body [description]
+   * @return {[type]}      [description]
+   */
+  function postWithRetry (path, body) {
     if (path[0] === '/') path = path.slice(1)
 
     return node.sign({
@@ -121,7 +147,7 @@ function createPusher (opts) {
   }
 
   function subscribe (publisher) {
-    return post('/subscription', {
+    return postWithRetry('/subscription', {
       [TYPE]: 'tradle.PNSSubscription',
       publisher: publisher,
       subscriber: node.permalink
@@ -221,7 +247,7 @@ function createPusher (opts) {
     Push.getApplicationIconBadgeNumber(num => {
       if (!num) return
 
-      post('/clearbadge', {
+      postWithRetry('/clearbadge', {
         // TODO: add nonce to prevent replays
         [TYPE]: 'tradle.APNSClearBadge',
         subscriber: node.permalink
