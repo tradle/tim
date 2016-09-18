@@ -123,5 +123,7 @@
     "pairingRequest": "Pairing Request",
     "deviceDoesNotHaveMyKeys": "Received identity does not have my keys",
     "pairingRequestWasProcesseed": "Pairing request was processeed",
-    "youShared": "You shared from {1}"
+    "youShared": "You shared from {1}",
+    "termsAndConditions": "Accept terms and conditions.",
+    "acceptTermsAndConditions": "By pressing OK button you are accepting Terms and Conditions"
 }
