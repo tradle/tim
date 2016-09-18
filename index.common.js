@@ -340,10 +340,7 @@ class TiMApp extends Component {
                   sendForm={props.sendForm}
                   callback={props.callback} />;
     case 3:
-      return <ResourceView navigator={nav}
-                  resource={props.resource}
-                  prop={props.prop}
-                  verify={props.verify} />;
+      return <ResourceView navigator={nav} {...props } />
     case 4:
       return <NewResource navigator={nav} {...props } />
     case 5:
@@ -408,7 +405,6 @@ class TiMApp extends Component {
       return <TouchIDOptIn navigator={nav} { ...props } />
     case 22:
       return <EnumList navigator={nav} { ...props } />
-
     case 10:
     default: // 10
       return <ResourceList navigator={nav} {...props} />
@@ -451,7 +447,7 @@ var NavigationBarRouteMapper = {
       <TouchableOpacity
         hitSlop={HIT_SLOP}
         onPress={() => navigator.pop()}>
-        <View style={[styles.navBarLeftButton, styles.row]}>
+        <View style={styles.navBarLeftButton}>
           {status}
           {title}
         </View>
@@ -475,7 +471,7 @@ var NavigationBarRouteMapper = {
       let iconsList = route.rightButtonTitle.split('|')
       let icons = []
       iconsList.forEach((i) => {
-        icons.push(<Icon name={i} key={i} size={20} color='#7AAAC3' style={{paddingLeft: 3}} />)
+        icons.push(<Icon name={i} key={i} size={20} color='#7AAAC3' style={styles.iconSpace} />)
       })
 
       title = <View style={styles.row}>
@@ -483,12 +479,12 @@ var NavigationBarRouteMapper = {
               </View>
     }
     return (
-      <View style={styles.row}>
+      <View>
       {route.help
         ? <TouchableOpacity
             hitSlop={HIT_SLOP}
             onPress={() =>  Alert.alert(translate(route.help))}>
-            <Icon name={'ios-information-circle'} key={'ios-help'} size={20} color='#29ABE2' style={{paddingLeft: 3, marginTop: 10}}/>
+            <Icon name={'ios-information-circle'} key={'ios-help'} size={20} color='#29ABE2' style={[styles.iconSpace, {marginTop: 10}]}/>
           </TouchableOpacity>
         : <View />
       }
@@ -536,7 +532,7 @@ var NavigationBarRouteMapper = {
     if (route.titleTextColor)
       style.push({color: route.titleTextColor});
     return (
-      <View style={styles.row}>
+      <View>
         <Text style={style}>
           {route.title}
         </Text>
@@ -556,25 +552,12 @@ var styles = StyleSheet.create({
   row: {
     flexDirection: 'row'
   },
-  // orgImage: {
-  //   width: 20,
-  //   height: 20,
-  //   marginTop: 15,
-  //   marginRight: 3,
-  //   borderRadius: 10
-  // },
+  iconSpace:  {
+    paddingLeft: 3
+  },
   container: {
     flex: 1
   },
-
-  // navBar: {
-  //   marginTop: 10,
-  //   padding: 3
-  // },
-  // navBarText: {
-  //   fontSize: 17,
-  //   // marginBottom: 7
-  // },
 
   navBarTitleText: {
     color: '#2E3B4E',
@@ -598,6 +581,21 @@ var styles = StyleSheet.create({
 
 AppRegistry.registerComponent('Tradle', function() { return TiMApp });
 
+  // orgImage: {
+  //   width: 20,
+  //   height: 20,
+  //   marginTop: 15,
+  //   marginRight: 3,
+  //   borderRadius: 10
+  // },
+  // navBar: {
+  //   marginTop: 10,
+  //   padding: 3
+  // },
+  // navBarText: {
+  //   fontSize: 17,
+  //   // marginBottom: 7
+  // },
   // render() {
   //   var props = {db: this.state.db};
   //   return (

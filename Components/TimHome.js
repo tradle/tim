@@ -293,6 +293,7 @@ class TimHome extends Component {
         title: utils.getDisplayName(me, utils.getModel(me[constants.TYPE]).value.properties),
         id: 3,
         component: ResourceView,
+        backButtonTitle: translate('back'),
         // titleTextColor: '#7AAAC3',
         rightButtonTitle: translate('edit'),
         onRightButtonPress: {

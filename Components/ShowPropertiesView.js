@@ -12,6 +12,7 @@ var Icon = require('react-native-vector-icons/Ionicons')
 var NOT_SPECIFIED = '[not specified]'
 var DEFAULT_CURRENCY_SYMBOL = '£'
 var CURRENCY_SYMBOL
+var TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
 const ENUM = 'tradle.Enum'
 
 import ActionSheet from 'react-native-actionsheet'
@@ -191,13 +192,13 @@ class ShowPropertiesView extends Component {
           first = false;
           title = <View style={{flexDirection: 'row'}}>
                     <Text style={styles.title}>{pMeta.title || utils.makeLabel(p)}</Text>
-                    {cnt > 3
+                    {cnt > 3  &&  modelName !== TERMS_AND_CONDITIONS
                       ? <Icon name={'ios-arrow-down'} size={15} color='#7AAAC3' style={{position: 'absolute', right: 10, top: 10}}/>
                       : <View />
                     }
                   </View>
 
-          if (cnt > 3)
+          if (cnt > 3  &&  modelName !== TERMS_AND_CONDITIONS)
             val = <View key={this.getNextKey()}>
                     {separator}
                     <Accordion
@@ -236,6 +237,8 @@ class ShowPropertiesView extends Component {
           //           </TouchableOpacity>
           //   }
           // }
+          else if (modelName === TERMS_AND_CONDITIONS)
+            val = <Text style={[styles.description, {flexWrap: 'wrap'}]}>{val}</Text>;
           else
             val = <Text style={[styles.description]} numberOfLines={2}>{val}</Text>;
 
