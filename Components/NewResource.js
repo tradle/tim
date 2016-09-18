@@ -890,7 +890,7 @@ class NewResource extends Component {
                    }}>
                      <View style={{flexDirection: 'row'}}>
                        <Icon name={this.state.termsAccepted ? 'md-checkbox-outline' : 'md-square-outline'} color='#A6DBF5' size={20} style={{paddingRight: 3}}/>
-                       <Text style={{fontSize: 16, color: '#A6DBF5'}}>{translate('termsAndConditions')}</Text>
+                       <Text style={{fontSize: 16, color: '#A6DBF5'}}>{translate('acceptTermsAndConditions')}</Text>
                      </View>
                    </TouchableHighlight>
                  </View>
@@ -947,7 +947,7 @@ class NewResource extends Component {
   }
   acceptTsAndCs() {
     Alert.alert(
-      translate('acceptTermsAndConditions'),
+      translate('acceptingTermsAndConditions'),
       null,
       [
         {text: 'Ok', onPress: () => {
