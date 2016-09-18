@@ -17,7 +17,7 @@ export default StyleSheet.create({
     fontSize: 17,
   },
   menuButtonNarrow: {
-    marginTop: 5,
+    marginTop: 2,
     paddingHorizontal: 5
   },
   menuButtonRegular: {
