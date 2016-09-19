@@ -42,7 +42,7 @@ var config = module.exports = {
       'RCTNativeAppEventEmitter': emptyObjPath,
       'Keyboard': emptyObjPath
     },
-    extensions: ['', '.js', '.jsx'],
+    extensions: ['', '.js', '.jsx', '.web.js'],
   },
   // entry: isProd? [
   //   paths.index

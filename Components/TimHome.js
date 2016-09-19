@@ -56,7 +56,8 @@ import {
   Animated,
   Modal,
   Dimensions,
-  Alert
+  Alert,
+  Platform
 } from 'react-native'
 
 import ActivityIndicator from './ActivityIndicator'

@@ -5,6 +5,8 @@ import { Text } from 'react-native'
 const cached = {}
 const normalized = {
   'md-finger-print': 'md-fingerprint',
+  'md-square-outline': 'md-crop-square',
+  'md-checkbox-outline': 'md-check-box',
   'ios-checkmark-circle-outline': 'ios-checkmark-empty',
   'ios-call-outline': 'ios-telephone',
   'ios-close-circle-outline': 'ios-close-circled'

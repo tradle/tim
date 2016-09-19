@@ -956,11 +956,11 @@ class NewResource extends Component {
       translate('acceptingTermsAndConditions'),
       null,
       [
+        {text: 'Cancel', onPress: () => console.log('Canceled!')},
         {text: 'Ok', onPress: () => {
           this.props.navigator.pop()
           this.setState({termsAccepted: true})
-        }},
-        {text: 'Cancel', onPress: () => console.log('Canceled!')}
+        }}
       ]
     )
   }

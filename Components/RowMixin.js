@@ -6,7 +6,7 @@ var translate = utils.translate
 var constants = require('@tradle/constants');
 var TradleW = require('../img/TradleW.png')
 var Accordion = require('react-native-accordion')
-import LinearGradient from 'react-native-linear-gradient'
+import LinearGradient from './LinearGradient'
 var cnt = 0;
 import {
   Text,
