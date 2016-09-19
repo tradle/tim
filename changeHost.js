@@ -39,7 +39,7 @@ function fixIP () {
 function updateLocalIP () {
   var localIP = path.resolve('utils/localIP.json')
   fs.readFile(localIP, { encoding: 'utf8' }, function (err, contents) {
-    if (err) throw err
+    // if (err) throw err
     if (hostname === 'localhost')
       hostname = '127.0.0.1'
 
