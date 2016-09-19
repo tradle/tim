@@ -21,12 +21,19 @@ export default StyleSheet.create({
     paddingHorizontal: 5
   },
   menuButtonRegular: {
-    marginTop: 5,
+    marginTop: 2,
     paddingHorizontal: 5
   },
   menuButton: {
     marginTop: 5,
     paddingHorizontal: 5
+  },
+  touchIdText: {
+    color: '#2E3B4E',
+    fontSize: 18,
+    marginTop: 7,
+    marginLeft: 15,
+    alignSelf: 'flex-start'
   }
 })
 var menuIcon = {
