@@ -425,7 +425,7 @@ var Store = Reflux.createStore({
     var self = this
     var keeper = createKeeper({
       path: path.join(TIM_PATH_PREFIX, 'keeper'),
-      db: asyncstorageDown,
+      db: leveldown,
       encryption: encryption
     })
 

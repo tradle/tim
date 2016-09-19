@@ -6,7 +6,7 @@ var levelup = require('levelup')
 // var updown = require('level-updown')
 var leveldown
 if (Platform.OS === 'web') {
-  leveldown = asyncstorageDown
+  leveldown = require('level-js')
 }
 
 else {
