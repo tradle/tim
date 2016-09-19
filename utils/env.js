@@ -4,7 +4,7 @@ import {
 } from 'react-native'
 
 module.exports = {
-  GCM_SENDER_ID: '1069381032456',
+  GCM_SENDER_ID: '633104277721',
   serviceID: 'tradle',
   accessGroup: '94V7783F74.io.tradle.dev',
   LOCAL_IP: __DEV__ && require('./localIP.json'),

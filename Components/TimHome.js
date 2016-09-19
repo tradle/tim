@@ -2,9 +2,9 @@
 
 var Q = require('q')
 var Keychain = require('react-native-keychain')
+var debounce = require('debounce')
 var ResourceList = require('./ResourceList');
 var VideoPlayer = require('./VideoPlayer')
-var AddNewIdentity = require('./AddNewIdentity');
 var NewResource = require('./NewResource');
 var ResourceView = require('./ResourceView');
 var utils = require('../utils/utils');
@@ -20,11 +20,9 @@ var TradleWhite = require('../img/TradleW.png')
 var BG_IMAGE = require('../img/bg.png')
 var PasswordCheck = require('./PasswordCheck')
 var FadeInView = require('./FadeInView')
-// var FlingItView = require('./FlingItView')
 var TouchIDOptIn = require('./TouchIDOptIn')
 var defaultBankStyle = require('../styles/bankStyle.json')
 var QRCodeScanner = require('./QRCodeScanner')
-var QRCode = require('./QRCode')
 
 try {
   var commitHash = require('../version.json').commit.slice(0, 7)
@@ -68,6 +66,7 @@ const isAndroid = utils.isAndroid()
 import React, { Component } from 'react'
 
 class TimHome extends Component {
+  static displayName = 'TimHome'
   props: {
     modelName: PropTypes.string.isRequired,
     navigator: PropTypes.object.isRequired
@@ -80,6 +79,7 @@ class TimHome extends Component {
     };
   }
   componentWillMount() {
+    this._pressHandler = debounce(this._pressHandler, 500, true)
     if (Linking && !isAndroid)
       Linking.addEventListener('url', this._handleOpenURL);
 
@@ -229,24 +229,43 @@ class TimHome extends Component {
       //     return
       //   }
       // }
+      /* fall through */
     case 'pairingSuccessful':
-      signIn(this.props.navigator)
-        .then(() => {
-        // if (this.state.newMe)
-          //{
-        //   let me = utils.getMe()
-        //   Actions.addItem({resource: me, value: this.state.newMe, meta: utils.getModel(constants.TYPES.PROFILE).value})
-        //   let routes = this.props.navigator.getCurrentRoutes()
-        //   if (me.useTouchId  &&  !me.useGesturePassword)
-        //     return
-        //   this.props.navigator.popToRoute(routes[routes.length - 3])
-        // }
-        // else
-        return this.showOfficialAccounts()
-      })
-      .catch((err) => {debugger
-      })
-      break
+      const routes = this.props.navigator.getCurrentRoutes()
+      // get the top TimHome in the stack
+      const homeRoute = routes.filter(r => r.component.displayName === TimHome.displayName).pop()
+      const afterAuthRoute = utils.getTopNonAuthRoute(this.props.navigator)
+      try {
+        await signIn(this.props.navigator)
+      } catch (err) {
+        if (afterAuthRoute.component.displayName === TimHome.displayName) return
+
+        if (homeRoute) {
+          return this.props.navigator.popToRoute(homeRoute)
+        }
+
+        return this.props.navigator.resetTo({
+          id: 1,
+          component: TimHome,
+          passProps: {}
+        })
+      }
+
+      if (afterAuthRoute.component.displayName !== TimHome.displayName) {
+        return this.props.navigator.popToRoute(afterAuthRoute)
+      }
+
+      // if (this.state.newMe)
+        //{
+      //   let me = utils.getMe()
+      //   Actions.addItem({resource: me, value: this.state.newMe, meta: utils.getModel(constants.TYPES.PROFILE).value})
+      //   let routes = this.props.navigator.getCurrentRoutes()
+      //   if (me.useTouchId  &&  !me.useGesturePassword)
+      //     return
+      //   this.props.navigator.popToRoute(routes[routes.length - 3])
+      // }
+      // else
+      return this.showOfficialAccounts()
     case 'getMe':
       utils.setMe(params.me)
       this.setState({hasMe: params.me})
@@ -278,6 +297,7 @@ class TimHome extends Component {
         title: utils.getDisplayName(me, utils.getModel(me[constants.TYPE]).value.properties),
         id: 3,
         component: ResourceView,
+        backButtonTitle: translate('back'),
         // titleTextColor: '#7AAAC3',
         rightButtonTitle: translate('edit'),
         onRightButtonPress: {
@@ -377,6 +397,7 @@ class TimHome extends Component {
     let self = this
     route.passProps.callback = () => {
       setPassword(this.props.navigator)
+      .then(() => this.optInTouchID())
       .then (() => {
         this.setState({hasMe: true})
         Actions.setAuthenticated(true)
@@ -396,6 +417,27 @@ class TimHome extends Component {
     route.passProps.editCols = ['firstName', 'lastName', 'language']
     route.titleTintColor = '#ffffff'
     this.props.navigator.push(route);
+  }
+
+  optInTouchID() {
+    return hasTouchID().then(has => {
+      if (!has) return
+
+      return new Promise(resolve => {
+        this.props.navigator.replace({
+          component: TouchIDOptIn,
+          id: 21,
+          rightButtonTitle: 'Skip',
+          passProps: {
+            optIn: () => {
+              Actions.updateMe({ useTouchId: true })
+              resolve()
+            }
+          },
+          onRightButtonPress: resolve
+        })
+      })
+    })
   }
 
   pairDevices(cb) {
@@ -583,7 +625,7 @@ class TimHome extends Component {
                 {version}
               </View>
 
-    let hh = (height / 2) - 310
+    let hh = (height / 2) - (Platform.OS === 'ios' ? 280 : 240)
     // let hh = height - 300
     let left = (width - 300) / 2
     let logo = <View style={[styles.container]}>
@@ -616,7 +658,7 @@ class TimHome extends Component {
                         this.register(this.showOfficialAccounts.bind(this))
                         }} underlayColor='transparent'>
                         <View style={styles.signIn}>
-                          <Text style={{backgroundColor: 'transparent', color: 'lightblue', fontSize: 20, flexWrap: 'wrap', alignSelf: 'center'}}>{translate('This is my first Tradle device')}</Text>
+                          <Text style={{backgroundColor: 'transparent', color: 'lightblue', fontSize: 18, flexWrap: 'wrap', alignSelf: 'center'}}>{translate('This is my first Tradle device')}</Text>
                         </View>
                       </TouchableHighlight>
                     </FadeInView>
@@ -666,7 +708,7 @@ class TimHome extends Component {
             <Image style={thumb} source={TradleWhite}></Image>
             <Text style={styles.tradle}>Tradle</Text>
           </View>
-          <View style={{alignItems: 'center'}}>
+          <View style={{alignItems: 'center', paddingTop: 10}}>
             <ActivityIndicator hidden='true' size='large' color='#ffffff'/>
           </View>
         </ScrollView>
@@ -755,8 +797,8 @@ reactMixin(TimHome.prototype, Reflux.ListenerMixin);
 
 var styles = StyleSheet.create({
   container: {
-    padding: 30,
-    marginTop: Dimensions.get('window').height > 800 ? Dimensions.get('window').height/7 : Dimensions.get('window').height / 5,
+    // padding: 30,
+    marginTop: Dimensions.get('window').height / 4,
     alignItems: 'center',
   },
   tradle: {
@@ -815,8 +857,8 @@ var styles = StyleSheet.create({
   signIn: {
     flexDirection: 'row',
     width: 300,
-    height: 80,
-    marginTop: 20,
+    height: Platform.OS === 'ios' ? 80 : 50,
+    marginTop: 10,
     justifyContent: 'center',
     backgroundColor: '#467EAE',
     // shadowOpacity: 0.5,

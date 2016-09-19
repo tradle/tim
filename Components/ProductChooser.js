@@ -3,6 +3,7 @@
 var NewResource = require('./NewResource');
 var utils = require('../utils/utils');
 var translate = utils.translate
+var equal = require('deep-equal')
 var reactMixin = require('react-mixin');
 var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
@@ -12,6 +13,7 @@ var MessageList = require('./MessageList')
 // var SearchBar = require('react-native-search-bar');
 
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
+const FORM_REQUEST = 'tradle.FormRequest'
 import {
   ListView,
   Text,
@@ -61,6 +63,8 @@ class ProductChooser extends Component {
     if (params.action === 'getItem'  &&  this.props.resource[constants.ROOT_HASH] === params.resource[constants.ROOT_HASH]) {
       let products
       if (params.resource.products) {
+        if (equal(params.resource.products, this.props.resource.products))
+          return
         products = []
         params.resource.products.forEach(function(m) {
           products.push(utils.getModel(m).value)
@@ -107,13 +111,19 @@ class ProductChooser extends Component {
       time: new Date().getTime()
     }
     if (model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT) {
-      msg._t = PRODUCT_APPLICATION
+      msg[constants.TYPE] = PRODUCT_APPLICATION
       msg.product = model.id // '[application for](' + model.id + ')',
       utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg, true, true))
     }
     else {
-      msg._t = constants.TYPES.SIMPLE_MESSAGE
-      msg.message = '[' + translate('fillTheForm') + '](' + model.id + ')'
+      msg[constants.TYPE] =  FORM_REQUEST,
+      msg.message = translate(model.properties.photos ? 'fillTheFormWithAttachments' : 'fillTheForm', translate(model.title)),
+      // product: productModel.id,
+      msg.form = model.id
+
+
+      // msg._t = constants.TYPES.SIMPLE_MESSAGE
+      // msg.message = '[' + (model.properties.photos ? translate('fillTheFormWithAttachments') : translate('fillTheForm')) + '](' + model.id + ')'
       utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg))
     }
 
@@ -196,6 +206,8 @@ class ProductChooser extends Component {
     var content =
     <ListView ref='listview' style={styles.listview}
       dataSource={this.state.dataSource}
+      removeClippedSubviews={true}
+      initialListSize={100}
       renderRow={this.renderRow.bind(this)}
       enableEmptySections={true}
       automaticallyAdjustContentInsets={false}

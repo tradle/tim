@@ -195,7 +195,15 @@ var utils = {
         }
       }
       else if (typeof r1[p] === 'object') {
-        if (utils.getId(r1[p]) !== utils.getId(r2[p]))
+        if (!r2[p])
+          return false
+        if (properties[p].ref === TYPES.MONEY) {
+          if (r1[p].currency !== r2[p].currency)
+            return false
+          if (r1[p].value !== r1[p].value)
+            return false
+        }
+        else if (utils.getId(r1[p]) !== utils.getId(r2[p]))
           return false
       }
       else if (r1[p]  ||  r2[p])
@@ -548,6 +556,7 @@ var utils = {
           lastAdditionalInfoTime = r.time;
       });
     }
+    /*
     resource.verifications.forEach(function(r) {
       var rh = r.from[ROOT_HASH];
       if (!rh)
@@ -556,6 +565,7 @@ var utils = {
       if (rh === me[ROOT_HASH]  &&  (!lastAdditionalInfoTime  ||  lastAdditionalInfoTime < r.time))
         verifiedByMe = true
     });
+    */
     return verifiedByMe
   },
   optimizeResource(res) {
@@ -593,8 +603,12 @@ var utils = {
     }
   },
 
-
-  readDB(db) {
+  /**
+   * fast but dangerous way to read a levelup
+   * it's dangerous because it relies on the underlying implementation
+   * of levelup and asyncstorage-down, and their respective key/value encoding sechemes
+   */
+  dangerousReadDB(db) {
     // return new Promise((resolve, reject) => {
     //   collect(db.createReadStream(), (err, data) => {
     //     if (err) reject(err)
@@ -612,30 +626,23 @@ var utils = {
     }
 
     var prefix = db.location + '!'
-    return new Promise((resolve, reject) => {
-        collect(db.createKeyStream(), (err, keys) => {
-          if (err) reject(err)
-          else resolve(keys)
-        })
-      })
-      .then((keys) => {
-        if (keys.length) {
-          return AsyncStorage.multiGet(keys.map((key) => prefix + key))
-        } else {
-          return []
-        }
-      })
+    // dangerous!
+    var keys = db.db._down.container._keys.slice()
+    if (!keys.length) return Promise.resolve([])
+
+    return AsyncStorage.multiGet(keys.map((key) => prefix + key))
       .then((pairs) => {
         return pairs
           .filter((pair) => typeof pair[1] !== 'undefined')
           .map((pair) => {
+            pair[1] = pair[1].slice(2)
             try {
               pair[1] = pair[1] && JSON.parse(pair[1])
             } catch (err) {
             }
 
             return {
-              key: pair[0].slice(prefix.length),
+              key: pair[0].slice(prefix.length + 2),
               value: pair[1]
             }
           })
@@ -651,6 +658,19 @@ var utils = {
       return true
     if (utils.getId(resource.organization) === utils.getId(me.organization))
       return true
+  },
+  isVerifier(resource, verification) {
+    let me = this.getMe()
+    if (!this.isEmployee(resource))
+      return false
+    let model = this.getModel(resource[TYPE]).value
+    if (!me.organization)
+      return false
+    if (model.subClassOf === TYPES.FORM)
+      return  utils.getId(me) === utils.getId(resource.to) &&
+             !utils.isVerifiedByMe(resource)               // !verification  &&  utils.getId(resource.to) === utils.getId(me)  &&
+    else if (model.id === TYPES.VERIFICATION)
+      return  utils.getId(me) === utils.getId(resource.from)
   },
   // measure(component, cb) {
   //   let handle = typeof component === 'number'
@@ -840,16 +860,6 @@ var utils = {
     // TODO: remove this after fixing encoding bug
     return symbol
     // return symbol ? (symbol === '¬' ? '€' : symbol) : symbol
-  },
-  isVerifier(resource, verification) {
-    let me = this.getMe()
-    if (!this.isEmployee(resource))
-      return false
-    let model = this.getModel(resource[TYPE]).value
-    return (me.organization  &&
-            utils.getId(me) === utils.getId(resource.to) &&
-           !utils.isVerifiedByMe(resource)               && // !verification  &&  utils.getId(resource.to) === utils.getId(me)  &&
-            model.subClassOf === TYPES.FORM)
   },
   isSimulator() {
     return DeviceInfo.getModel() === 'Simulator'
@@ -1047,8 +1057,18 @@ var utils = {
   promiseThunky: function (fn) {
     let promise
     return function () {
-      return promise ? promise : promise = fn()
+      return promise ? promise : promise = fn.apply(this, arguments)
     }
+  },
+
+  getTopNonAuthRoute: function (navigator) {
+    const routes = navigator.getCurrentRoutes()
+    let top
+    while (top = routes.pop()) {
+      if (!top || top.component.displayName !== 'PasswordCheck') break
+    }
+
+    return top
   }
 }
 

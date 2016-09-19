@@ -72,7 +72,7 @@ function lookupKey (pubKey) {
         return tradleUtils.importKey(priv)
       })
       .catch(function (err) {
-        console.log('key not found', pubKeyString)
+        console.error('key not found', pubKey)
         throw err
       })
   }
@@ -130,5 +130,5 @@ function getCurve (name) {
 }
 
 function isKeyInSecureEnclave (key) {
-  return key.curve === 'p256'
+  return utils.isIOS() && key.curve === 'p256'
 }

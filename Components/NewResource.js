@@ -25,10 +25,13 @@ var equal = require('deep-equal')
 var DeviceHeight
 var DeviceWidth
 var constants = require('@tradle/constants');
+var termsAndConditions = require('../termsAndConditions.json')
+
 import ImagePicker from 'react-native-image-picker';
 var ENUM = 'tradle.Enum'
 var LINK_COLOR, DEFAULT_LINK_COLOR = '#a94442'
 var FORM_ERROR = 'tradle.FormError'
+
 
 var Form = t.form.Form;
 var stylesheet = require('../styles/styles')
@@ -100,7 +103,8 @@ class NewResource extends Component {
       isLoadingVideo: false,
       isPrefilled: this.props.isPrefilled,
       modal: {},
-      offSet: new Animated.Value(Dimensions.get('window').height)
+      offSet: new Animated.Value(Dimensions.get('window').height),
+      termsAccepted: isRegistration ? false : true
     }
     var currentRoutes = this.props.navigator.getCurrentRoutes()
     var currentRoutesLength = currentRoutes.length
@@ -128,8 +132,9 @@ class NewResource extends Component {
            this.state.modal !== nextState.modal              ||
            this.state.prop !== nextState.prop                ||
            this.state.isUploading !== nextState.isUploading  ||
-           this.state.isLoadingVideo !== nextState.isLoadingVideo      ||
-           this.state.itemsCount != nextState.itemsCount     ||
+           this.state.itemsCount !== nextState.itemsCount    ||
+           this.state.isLoadingVideo !== nextState.isLoadingVideo  ||
+           this.state.termsAccepted !== nextState.termsAccepted    ||
           !equal(this.state.resource, nextState.resource)
 
     if (!isUpdate)
@@ -345,6 +350,11 @@ class NewResource extends Component {
   onSavePressed() {
     if (this.state.submitted)
       return
+    if (this.state.isRegistration  &&  !this.state.termsAccepted) {
+      Alert.alert('Please accept Terms and Conditions')
+      return
+    }
+
     this.state.submitted = true
     this.state.noScroll = false
     var resource = this.state.resource;
@@ -724,124 +734,129 @@ class NewResource extends Component {
       let blmodel = meta
       var counter, count = 0
       itemsArray = null
-      var isPhoto = false
       var count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
-      if (count) {
-        var items = []
-        isPhoto = bl.name === 'photos'
-        var arr = resource[bl.name]
-        var n = isPhoto
-              ? Math.min(arr.length, 7)
-              : 3
+      if (count  &&  bl.name === 'photos')
+        arrayItems.push(this.getPhotoItem(bl))
+      else
+        arrayItems.push(this.getItem(bl))
 
-        for (var i=0; i<n; i++) {
-          if (isPhoto)
-            items.push(<Image style={styles.thumb} source={{uri: arr[i].url}}  key={this.getNextKey()} onPress={() => this.openModal(arr[i])}/>)
-        }
-        if (isPhoto) {
-          itemsArray =
-            <View style={[styles.photoStrip, count ? {marginTop: -30} : {marginTop: 0}]}>
-              <Text style={styles.activePropTitle}>{translate(bl, blmodel)}</Text>
-              <View style={styles.photoStripItems}>{items}</View>
-            </View>
-          counter =
-            <View>
-              <View style={{marginTop: 15, paddingHorizontal: 5}}>
-                <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
-              </View>
-            </View>;
-        }
-        else {
-          var vCols = bl.viewCols;
-          var cnt = resource[bl.name].length;
-          let val = <View>{self.renderItems(resource[bl.name], bl, this.cancelItem.bind(this))}</View>
+      // var isPhoto = false
+      // if (count) {
+      //   var items = []
+      //   isPhoto = bl.name === 'photos'
+      //   var arr = resource[bl.name]
+      //   var n = isPhoto
+      //         ? Math.min(arr.length, 7)
+      //         : 3
 
-          var separator = <View style={styles.separator}></View>
-          let cstyle = []
-          if (count) {
-            cstyle.push(styles.activePropTitle)
-            // cstyle.push({marginTop: 20})
-          }
-          else
-            cstyle.push(styles.noItemsText)
-          // cstyle.push({paddingLeft: 10})
-          itemsArray = <View>
-                         <Text style={cstyle}>{translate(bl, model)}</Text>
-                         {val}
-                       </View>
+      //   for (var i=0; i<n; i++) {
+      //     if (isPhoto)
+      //       items.push(<Image style={styles.thumb} source={{uri: arr[i].url}}  key={this.getNextKey()} onPress={() => this.openModal(arr[i])}/>)
+      //   }
+      //   if (isPhoto) {
+      //     itemsArray =
+      //       <View style={[styles.photoStrip, count ? {marginTop: -30} : {marginTop: 0}]}>
+      //         <Text style={styles.activePropTitle}>{translate(bl, blmodel)}</Text>
+      //         <View style={styles.photoStripItems}>{items}</View>
+      //       </View>
+      //     counter =
+      //       <View>
+      //         <View style={{marginTop: 25, paddingHorizontal: 5}}>
+      //           <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
+      //         </View>
+      //       </View>;
+      //   }
+      //   else {
+      //     var vCols = bl.viewCols;
+      //     var cnt = resource[bl.name].length;
+      //     let val = <View>{self.renderItems(resource[bl.name], bl, this.cancelItem.bind(this))}</View>
 
-          counter = <View style={[styles.itemsCounterEmpty, {paddingBottom: 10, marginTop: 15}]}>
-                      <Icon name={bl.icon || 'md-add'} size={bl.icon ? 25 : 15}  color={LINK_COLOR} />
-                    </View>
-        }
-      }
-      else {
-        itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{translate(bl, blmodel)}</Text>
-        counter = <View style={[styles.itemsCounterEmpty]}>
-                  { bl.name === 'photos'
-                    ? <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
-                    : <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 15} color={LINK_COLOR} />
-                  }
-                  </View>
-      }
-      var title = translate(bl, blmodel) //.title || utils.makeLabel(p)
-      var err = this.state.missedRequiredOrErrorValue
-              ? this.state.missedRequiredOrErrorValue[meta.properties[p].name]
-              : null
-      var errTitle = translate('thisFieldIsRequired')
-      var error = err
-                ? <View style={styles.error}>
-                    <Text style={styles.errorText}>{errTitle}</Text>
-                  </View>
-                : <View/>
-      var actionableItem = isPhoto && count
-                         ?  <TouchableHighlight style={{flex: 7, paddingTop: 15}} underlayColor='transparent'
-                             onPress={self.showItems.bind(self, bl, meta)}>
-                              {itemsArray}
-                            </TouchableHighlight>
-                         :  <TouchableHighlight style={[{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]} underlayColor='transparent'
-                                onPress={self.onNewPressed.bind(self, bl, meta)}>
-                              {itemsArray}
-                            </TouchableHighlight>
+      //     var separator = <View style={styles.separator}></View>
+      //     let cstyle = []
+      //     if (count) {
+      //       cstyle.push(styles.activePropTitle)
+      //       // cstyle.push({marginTop: 20})
+      //     }
+      //     else
+      //       cstyle.push(styles.noItemsText)
+      //     // cstyle.push({paddingLeft: 10})
+      //     itemsArray = <View>
+      //                    <Text style={cstyle}>{translate(bl, model)}</Text>
+      //                    {val}
+      //                  </View>
 
-      let istyle = []
-      if (isPhoto) {
-        if (count)
-          istyle.push(styles.photoButton)
-        else {
-          istyle.push(styles.itemButton)
-          // istyle.push({paddingBottom: 10})
-          // istyle.push({height: 70})
-        }
-      }
-      else {
-        istyle.push(styles.itemButton)
-        if (err)
-          istyle.push({marginBottom: 10})
-        else if (!count)
-          istyle.push({paddingBottom: 0, height: 70})
-        else {
-          let height = resource[bl.name].photo ? 55 : 45
-          // else if (resource[bl.name][0].photo)
-          //   height = 38
-          istyle.push({paddingBottom: 0, height: count * height + 35})
-        }
-      }
+      //     counter = <View style={[styles.itemsCounterEmpty, {paddingBottom: 10, marginTop: 15}]}>
+      //                 <Icon name={bl.icon || 'md-add'} size={bl.icon ? 25 : 15}  color={LINK_COLOR} />
+      //               </View>
+      //   }
+      // }
+      // else {
+      //   itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{translate(bl, blmodel)}</Text>
+      //   counter = <View style={[styles.itemsCounterEmpty]}>
+      //             { bl.name === 'photos'
+      //               ? <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
+      //               : <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color={LINK_COLOR} />
+      //             }
+      //             </View>
+      // }
+      // var title = translate(bl, blmodel) //.title || utils.makeLabel(p)
+      // var err = this.state.missedRequiredOrErrorValue
+      //         ? this.state.missedRequiredOrErrorValue[meta.properties[p].name]
+      //         : null
+      // var errTitle = translate('thisFieldIsRequired')
+      // var error = err
+      //           ? <View style={styles.error}>
+      //               <Text style={styles.errorText}>{errTitle}</Text>
+      //             </View>
+      //           : <View/>
+      // var actionableItem = isPhoto && count
+      //                    ?  <TouchableHighlight style={{flex: 7, paddingTop: 15}} underlayColor='transparent'
+      //                        onPress={self.showItems.bind(self, bl, meta)}>
+      //                         {itemsArray}
+      //                       </TouchableHighlight>
+      //                    :  <TouchableHighlight style={[{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]} underlayColor='transparent'
+      //                           onPress={self.onNewPressed.bind(self, bl, meta)}>
+      //                         {itemsArray}
+      //                       </TouchableHighlight>
 
-      arrayItems.push (
-        <View key={this.getNextKey()}>
-          <View style={[istyle, {marginHorizontal: 10}]} ref={bl.name}>
-            <View style={styles.items}>
-              {actionableItem}
-              <TouchableHighlight underlayColor='transparent' style={[{flex: 1, position: 'absolute', right: 0}, isPhoto  &&  count ? {marginTop: 15} : count ? {paddingTop: 0} : {marginTop: 15, paddingBottom: 7}]}
-                  onPress={self.onNewPressed.bind(self, bl, meta)}>
-                {counter}
-              </TouchableHighlight>
-            </View>
-          </View>
-          {error}
-        </View>
-      );
+      // let istyle = []
+      // if (isPhoto) {
+      //   if (count)
+      //     istyle.push(styles.photoButton)
+      //   else {
+      //     istyle.push(styles.itemButton)
+      //     // istyle.push({paddingBottom: 10})
+      //     // istyle.push({height: 70})
+      //   }
+      // }
+      // else {
+      //   istyle.push(styles.itemButton)
+      //   if (err)
+      //     istyle.push({marginBottom: 10})
+      //   else if (!count)
+      //     istyle.push({paddingBottom: 0, height: 70})
+      //   else {
+      //     let height = resource[bl.name].photo ? 55 : 45
+      //     // else if (resource[bl.name][0].photo)
+      //     //   height = 38
+      //     istyle.push({paddingBottom: 0, height: count * height + 35})
+      //   }
+      // }
+
+      // arrayItems.push (
+      //   <View key={this.getNextKey()}>
+      //     <View style={[istyle, {marginHorizontal: 10}]} ref={bl.name}>
+      //       <View style={styles.items}>
+      //         {actionableItem}
+      //         <TouchableHighlight underlayColor='transparent' style={[{flex: 1, position: 'absolute', right: 0}, isPhoto  &&  count ? {marginTop: 15} : count ? {paddingTop: 0} : {marginTop: 15, paddingBottom: 7}]}
+      //             onPress={self.onNewPressed.bind(self, bl, meta)}>
+      //           {counter}
+      //         </TouchableHighlight>
+      //       </View>
+      //     </View>
+      //     {error}
+      //   </View>
+      // );
     }
     // var FromToView = require('./FromToView');
     // var isRegistration = !utils.getMe()  &&  resource[constants.TYPE] === constants.TYPES.PROFILE
@@ -859,24 +874,44 @@ class NewResource extends Component {
     options.tintColor = 'red'
     var photoStyle = /*isMessage && !isFinancialProduct ? {marginTop: -35} :*/ styles.photoBG;
     var button = this.state.isRegistration
-               ? <TouchableHighlight style={styles.thumbButton}
-                      underlayColor='transparent' onPress={this.onSavePressed.bind(this)}>
-                  <View style={styles.getStarted}>
-                     <Text style={styles.getStartedText}>ENTER</Text>
-                  </View>
-                 </TouchableHighlight>
+               ? <View>
+                   <TouchableHighlight style={styles.thumbButton}
+                        underlayColor='transparent' onPress={this.onSavePressed.bind(this)}>
+                      <View style={styles.getStarted}>
+                         <Text style={styles.getStartedText}>ENTER</Text>
+                      </View>
+                   </TouchableHighlight>
+                   <TouchableHighlight underlayColor='transparent' style={{flexDirection: 'row', alignSelf: 'center', paddingTop: 7}} onPress={() => {
+                      this.props.navigator.push({
+                        id: 3,
+                        component: ResourceView,
+                        title: translate('termsAndConditions'),
+                        backButtonTitle: translate('back'),
+                        rightButtonTitle: translate('Accept'),
+                        passProps: {
+                          resource: termsAndConditions,
+                          action: this.acceptTsAndCs.bind(this)
+                        }
+                     })
+                   }}>
+                     <View style={{flexDirection: 'row'}}>
+                       <Icon name={this.state.termsAccepted ? 'md-checkbox-outline' : 'md-square-outline'} color='#A6DBF5' size={20} style={{paddingRight: 3}}/>
+                       <Text style={{fontSize: 16, color: '#A6DBF5'}}>{translate('acceptTermsAndConditions')}</Text>
+                     </View>
+                   </TouchableHighlight>
+                 </View>
                : <View style={{height: 0}} />
 
     var content =
-      <ScrollView style={style} ref='scrollView' {...this.scrollviewProps}>
+      <ScrollView style={style} ref='scrollView' {...this.scrollviewProps} keyboardDismissMode={'on-drag'} keyboardShouldPersistTaps={true}>
         <View style={styles.container}>
           <View style={photoStyle}>
             <PhotoView resource={resource} navigator={this.props.navigator}/>
           </View>
-          <View style={this.state.isRegistration ? {marginHorizontal: DeviceHeight > 1000 ? 50 : 30, paddingTop: 30} : {paddingTop: 10, marginHorizontal: 10}}>
+          <View style={this.state.isRegistration ? {marginHorizontal: DeviceHeight > 1000 ? 50 : 30, paddingTop: 30} : {marginHorizontal: 10}}>
             <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange.bind(this)}/>
             {button}
-            <View style={{marginTop: -10}}>
+            <View style={{marginTop: this.state.isRegistration ? 0 : -10}}>
               {arrayItems}
              </View>
            {  this.state.isLoadingVideo
@@ -916,6 +951,20 @@ class NewResource extends Component {
       </View>
     )
   }
+  acceptTsAndCs() {
+    Alert.alert(
+      translate('acceptingTermsAndConditions'),
+      null,
+      [
+        {text: 'Ok', onPress: () => {
+          this.props.navigator.pop()
+          this.setState({termsAccepted: true})
+        }},
+        {text: 'Cancel', onPress: () => console.log('Canceled!')}
+      ]
+    )
+  }
+
   cancelItem(pMeta, item) {
     var list = this.state.resource[pMeta.name];
     for (var i=0; i<list.length; i++) {
@@ -956,7 +1005,149 @@ class NewResource extends Component {
       }
     });
   }
+  getItem(bl) {
+    let meta = this.props.model
+    let resource = this.state.resource
+    let blmodel = meta
+    var counter, count = 0
+    let itemsArray = null
+    var count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
 
+    if (count) {
+      let val = <View>{this.renderItems(resource[bl.name], bl, this.cancelItem.bind(this))}</View>
+
+      var separator = <View style={styles.separator}></View>
+      let cstyle = count ? styles.activePropTitle : styles.noItemsText
+      itemsArray = <View>
+                     <Text style={cstyle}>{translate(bl, blmodel)}</Text>
+                     {val}
+                   </View>
+
+      counter = <View style={[styles.itemsCounterEmpty, {paddingBottom: 10, marginTop: 15}]}>
+                  <Icon name={bl.icon || 'md-add'} size={bl.icon ? 25 : 20}  color={LINK_COLOR} />
+                </View>
+    }
+    else {
+      itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{translate(bl, blmodel)}</Text>
+      counter = <View style={[styles.itemsCounterEmpty]}>{
+                  bl.name === 'photos'
+                    ? <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
+                    : <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color={LINK_COLOR} />
+                  }
+
+                </View>
+    }
+    var title = translate(bl, blmodel) //.title || utils.makeLabel(p)
+    var err = this.state.missedRequiredOrErrorValue
+            ? this.state.missedRequiredOrErrorValue[bl.name]
+            : null
+    var errTitle = translate('thisFieldIsRequired')
+    var error = err
+              ? <View style={styles.error}>
+                  <Text style={styles.errorText}>{errTitle}</Text>
+                </View>
+              : <View/>
+    var actionableItem =  <TouchableHighlight style={[{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]} underlayColor='transparent'
+                              onPress={this.onNewPressed.bind(this, bl, meta)}>
+                            {itemsArray}
+                          </TouchableHighlight>
+
+    let istyle = [styles.itemButton]
+    if (err)
+      istyle.push({marginBottom: 10})
+    else if (!count)
+      istyle.push({paddingBottom: 0, height: 70})
+    else {
+      let height = resource[bl.name].photo ? 55 : 45
+      istyle.push({paddingBottom: 0, height: count * height + 35})
+    }
+
+    return (
+      <View key={this.getNextKey()}>
+        <View style={[istyle, {marginHorizontal: 10}]} ref={bl.name}>
+          <View style={styles.items}>
+            {actionableItem}
+            <TouchableHighlight underlayColor='transparent' style={[{flex: 1, position: 'absolute', right: 0}, count ? {paddingTop: 0} : {marginTop: 15, paddingBottom: 7}]}
+                onPress={this.onNewPressed.bind(this, bl, meta)}>
+              {counter}
+            </TouchableHighlight>
+          </View>
+        </View>
+        {error}
+      </View>
+    );
+  }
+  getPhotoItem(bl) {
+    let meta = this.props.model
+    let resource = this.state.resource
+    let blmodel = meta
+    var counter, count = 0
+    let itemsArray = null
+    var count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
+    if (count) {
+      var items = []
+      var arr = resource[bl.name]
+      var n = Math.min(arr.length, 7)
+      for (var i=0; i<n; i++) {
+        items.push(<Image style={styles.thumb} source={{uri: arr[i].url}}  key={this.getNextKey()} onPress={() => {
+          this.openModal(arr[i])
+        }}/>)
+      }
+      itemsArray =
+        <View style={[styles.photoStrip, count ? {marginTop: -25} : {marginTop: 0}]}>
+          <Text style={styles.activePropTitle}>{translate(bl, blmodel)}</Text>
+          <View style={styles.photoStripItems}>{items}</View>
+        </View>
+      counter =
+        <View>
+          <View style={{marginTop: 25, paddingHorizontal: 5}}>
+            <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
+          </View>
+        </View>;
+    }
+    else {
+      itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{translate(bl, blmodel)}</Text>
+      counter = <View style={[styles.itemsCounterEmpty]}>
+                  <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
+                </View>
+    }
+    var title = translate(bl, blmodel) //.title || utils.makeLabel(p)
+    var err = this.state.missedRequiredOrErrorValue
+            ? this.state.missedRequiredOrErrorValue[bl.name]
+            : null
+    var errTitle = translate('thisFieldIsRequired')
+    var error = err
+              ? <View style={styles.error}>
+                  <Text style={styles.errorText}>{errTitle}</Text>
+                </View>
+              : <View/>
+    var actionableItem = count
+                       ?  <TouchableHighlight style={{flex: 7, paddingTop: 15}} underlayColor='transparent'
+                           onPress={this.showItems.bind(this, bl, meta)}>
+                            {itemsArray}
+                          </TouchableHighlight>
+                       :  <TouchableHighlight style={[{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]} underlayColor='transparent'
+                              onPress={this.onNewPressed.bind(this, bl, meta)}>
+                            {itemsArray}
+                          </TouchableHighlight>
+
+    let istyle = count ? styles.photoButton : styles.itemButton
+
+    return (
+      <View key={this.getNextKey()}>
+        <View style={[istyle, {marginHorizontal: 10}]} ref={bl.name}>
+          <View style={styles.items}>
+            {actionableItem}
+            <TouchableHighlight underlayColor='transparent' style={[{flex: 1, position: 'absolute', right: 0}, count ? {marginTop: 15} : {marginTop: 15, paddingBottom: 7}]}
+                onPress={this.onNewPressed.bind(this, bl, meta)}>
+              {counter}
+            </TouchableHighlight>
+          </View>
+        </View>
+        {error}
+      </View>
+    );
+  }
   onEndEditing(prop, event) {
     if (this.state.resource[prop]  ||  event.nativeEvent.text.length)
       this.state.resource[prop] = event.nativeEvent.text;
@@ -1027,7 +1218,7 @@ var styles = StyleSheet.create({
   },
   noItemsText: {
     fontSize: 18,
-    color: '#cccccc',
+    color: '#AAAAAA',
     // alignSelf: 'center',
     // paddingLeft: 10
   },
@@ -1068,7 +1259,8 @@ var styles = StyleSheet.create({
   photoBG: {
     // marginTop: -15,
     alignItems: 'center',
-    backgroundColor: '#245D8C'
+    paddingBottom: 10,
+    // backgroundColor: '#245D8C'
   },
   err: {
     // paddingVertical: 10,

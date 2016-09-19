@@ -5,6 +5,7 @@ import {
   Dimensions,
   StyleSheet
 } from 'react-native'
+
 var PasswordGesture = require('react-native-gesture-password')
 var translate = require('../utils/utils').translate
 var MIN_LENGTH = 5
@@ -15,8 +16,11 @@ var MODES = {
   set: 'set'
 }
 
-module.exports = React.createClass({
+var PasswordCheck = React.createClass({
   propTypes: {
+    // whether the user already has a password
+    // and is choosing a new one
+    isChange: PropTypes.bool,
     isCorrect: PropTypes.func,
     validate: PropTypes.func,
     onSuccess: PropTypes.func,
@@ -38,12 +42,12 @@ module.exports = React.createClass({
   getDefaultProps: function () {
     return {
       validate: () => true,
-      promptSet: translate('pleaseDrawPattern'), //'Please draw a pattern',
-      promptCheck: translate('drawYourPattern'), //Draw your pattern',
-      promptReenter: translate('pleaseDrawYourPatternAgain'), // Please draw your pattern again',
+      // promptSet: translate('pleaseDrawPattern'), //'Please draw a pattern',
+      // promptCheck: translate('drawYourPattern'), //Draw your pattern',
+      // promptReenter: translate('pleaseDrawYourPatternAgain'), // Please draw your pattern again',
       promptInvalidSet: translate('invalidPattern'), //Invalid pattern, please try again',
       promptRetrySet: translate('patternNotMatching'), //Patterns didn\'t match. Please start again',
-      promptRetryCheck: translate('wrongPattern'), //Wrong pattern',
+      promptRetryCheck: translate('gestureNotRecognized'), //Wrong pattern',
       successMsg: translate('correctGesture'), //Correct gesture detected',
       failMsg: translate('authenticationFailed'), //Authentication failed',
       maxAttempts: Infinity
@@ -51,16 +55,29 @@ module.exports = React.createClass({
   },
 
   getInitialState: function() {
+    var state
     if (this.props.mode === MODES.check) {
+      var message = this.props.promptCheck
+      if (!message) {
+        if (this.props.isChange) message = translate('drawYourOldPassword')
+        else message = translate('drawYourPassword')
+      }
+
       return {
         status: 'normal',
-        message: this.props.promptCheck,
+        message: message,
         attempts: 0
       }
     } else {
+      var message = this.props.promptSet
+      if (!message) {
+        if (this.props.isChange) message = translate('drawYourNewPassword')
+        else message = translate('drawYourPassword')
+      }
+
       return {
         status: 'normal',
-        message: this.props.promptSet,
+        message: message,
         attempts: 0
       }
     }
@@ -88,8 +105,14 @@ module.exports = React.createClass({
         })
       }
 
+      var message = this.props.promptReenter
+      if (!message) {
+        if (this.props.isChange) message = translate('drawYourNewPasswordAgain')
+        else message = translate('drawYourPasswordAgain')
+      }
+
       return this.setState({
-        message: this.props.promptReenter,
+        message: message,
         attempts: 1,
         password: password,
         status: 'normal'
@@ -173,6 +196,9 @@ module.exports = React.createClass({
     )
   }
 })
+
+PasswordCheck.displayName = 'PasswordCheck'
+module.exports = PasswordCheck
 
 var containerRawStyle = {
   backgroundColor: 'transparent',

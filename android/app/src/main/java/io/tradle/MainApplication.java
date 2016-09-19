@@ -1,4 +1,4 @@
-package io.tradle;
+package io.tradle.dev;
 
 import android.app.Application;
 import android.util.Log;
@@ -27,6 +27,11 @@ import java.util.List;
 public class MainApplication extends Application implements ReactApplication {
 
   private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
+    @Override
+    protected String getJSBundleFile() {
+        return CodePush.getJSBundleFile("main.jsbundle");
+    }
+
     @Override
     protected boolean getUseDeveloperSupport() {
       return BuildConfig.DEBUG;

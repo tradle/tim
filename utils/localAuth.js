@@ -8,6 +8,11 @@ import Q from 'q'
 import Keychain from 'react-native-keychain'
 import PasswordCheck from '../Components/PasswordCheck'
 
+const ENV = require('../utils/env')
+
+// hack!
+hasTouchID().then(ENV.setHasTouchID)
+
 var utils = require('../utils/utils')
 var translate = utils.translate
 var TouchIDOptIn = require('../Components/TouchIDOptIn')
@@ -16,6 +21,22 @@ var Actions = require('../Actions/Actions');
 const PASSWORD_ITEM_KEY = 'app-password'
 
 const isAndroid = Platform.OS === 'android'
+const ForgivableTouchIDErrors = [
+  'LAErrorTouchIDNotAvailable',
+  'LAErrorTouchIDNotSupported',
+  'RCTTouchIDNotSupported'
+]
+
+const FallbackToPasswordErrors = [
+  'LAErrorUserCancel',
+  'LAErrorSystemCancel'
+]
+
+const LOCK_UP_MESSAGE = 'For the safety of your data, ' +
+                        'this application has been temporarily locked. ' +
+                        'Please try in 5 minutes.'
+
+const LOCK_TIME = __DEV__ ? 5000 : 5 * 60 * 1000
 
 // const SETUP_MSG = 'Please set up Touch ID first, so the app can better protect your data.'
 const AUTH_FAILED_MSG = 'Authentication failed'
@@ -26,9 +47,11 @@ const DEFAULT_OPTS = {
 }
 
 let pendingAuth
+let pendingEnrollRequest
+let TIMEOUT = __DEV__ ? 1000 : 10 * 60 * 1000
 
 module.exports = {
-  TIMEOUT: __DEV__ ? 60 * 1000 : 10 * 60 * 1000,
+  TIMEOUT,
   Errors,
   setPassword,
   signIn,
@@ -43,6 +66,11 @@ export function hasTouchID () {
     .then(() => true, err => false)
 }
 
+/**
+ * Native authentication, e.g. TouchID or PIN
+ * @param  {Object=DEFAULT_OPTS} opts
+ * @return {Promise}
+ */
 function authenticateUser (opts) {
   // prevent two authentication requests from
   // going in concurrently and causing problems
@@ -67,7 +95,28 @@ function authenticateUser (opts) {
     })
 }
 
-function signIn(navigator, newMe, isChangeGesturePassword) {
+function touchIDOrNothing () {
+  return authenticateUser()
+    .catch(requestEnrollTouchID)
+}
+
+function requestEnrollTouchID () {
+  if (pendingEnrollRequest) return pendingEnrollRequest
+
+  return pendingEnrollRequest = new Promise(resolve => {
+    Alert.alert('Error', 'Please enable TouchID, then press OK', [
+      {
+        text: 'OK',
+        onPress: function () {
+          pendingEnrollRequest = null
+          touchIDOrNothing().then(resolve)
+        }
+      }
+    ])
+  })
+}
+
+function signIn(navigator, newMe, isChangePassword) {
   let me = utils.getMe()
   // if (!me)
   //   return register(cb)
@@ -75,40 +124,21 @@ function signIn(navigator, newMe, isChangeGesturePassword) {
     return Q()
 
   let authPromise
-  if (isChangeGesturePassword)
-    authPromise = changePasswordAuth(navigator, newMe)
-  else if (me.useTouchId  &&  me.useGesturePassword) {
-    if (newMe) {
-      if (!newMe.useTouchId)
-        authPromise = touchIDWithFallback(navigator)
-      else
-        authPromise = passwordAuth(navigator)
-    }
-    else
-      authPromise = touchIDAndPasswordAuth(navigator)
-  }
+  let requireTouchID = me.useTouchId
+  if (me.useTouchId  &&  me.useGesturePassword)
+    authPromise = touchIDAndPasswordAuth(navigator, isChangePassword)
   else if (me.useTouchId)
-    authPromise = touchIDWithFallback(navigator)
+    authPromise = touchIDOrNothing()
   else
-    authPromise = passwordAuth(navigator)
+    authPromise = passwordAuth(navigator, isChangePassword)
 
   return authPromise
     .then(() => {
       Actions.setAuthenticated(true)
-    })
-    .catch(err => {
-      if (err.name === 'LAErrorUserCancel') {
-        return passwordAuth(navigator)
+      if (isChangePassword) {
+        return setPassword(navigator, isChangePassword)
       }
-
-      if (err.name === 'LAErrorSystemCancel') {
-        throw err
-      }
-
-      return lockUp(err.message || 'Authentication failed')
-        .then(() => signIn(navigator, newMe))
     })
-
 }
 
 /**
@@ -116,14 +146,14 @@ function signIn(navigator, newMe, isChangeGesturePassword) {
  * @param  {[type]} navigator [description]
  * @return {[type]}           [description]
  */
-function touchIDAndPasswordAuth(navigator) {
-  if (isAndroid) return passwordAuth(navigator)
+function touchIDAndPasswordAuth(navigator, isChangePassword) {
+  if (isAndroid) return passwordAuth(navigator, isChangePassword)
 
   return authenticateUser()
     .then(
-      () => passwordAuth(navigator),
+      () => passwordAuth(navigator, isChangePassword),
       err => {
-        if (err.name !== 'RCTTouchIDNotSupported') {
+        if (ForgivableTouchIDErrors.indexOf(err.name) === -1) {
           throw err
         }
 
@@ -132,37 +162,38 @@ function touchIDAndPasswordAuth(navigator) {
         //
         // there's not much we can do short of demanding that the user
         // turn touch id back on
-        return passwordAuth(navigator)
+        return passwordAuth(navigator, isChangePassword)
       }
     )
-  }
-function changePasswordAuth(navigator) {
-  return checkPassword(navigator)
-  .then(() => {
-    return setPassword(navigator)
-  })
 }
 
-function touchIDWithFallback(navigator) {
-  if (isAndroid) return passwordAuth(navigator)
+// function changePasswordAuth(navigator) {
+//   return checkPassword(navigator)
+//   .then(() => {
+//     return setPassword(navigator)
+//   })
+// }
 
-  return authenticateUser()
-    .catch((err) => {
-      if (err.name === 'LAErrorUserFallback' || err.name.indexOf('TouchID') !== -1)
-        return passwordAuth(navigator)
+// function touchIDWithFallback(navigator) {
+//   if (isAndroid) return passwordAuth(navigator)
 
-      throw err
-    })
-}
+//   return authenticateUser()
+//     .catch((err) => {
+//       if (err.name === 'LAErrorUserFallback' || err.name.indexOf('TouchID') !== -1)
+//         return passwordAuth(navigator)
 
-function passwordAuth (navigator) {
+//       throw err
+//     })
+// }
+
+function passwordAuth (navigator, isChangePassword) {
   // check if we have a password stored already
   return utils.getHashedPassword(PASSWORD_ITEM_KEY)
     .then(
-      () => checkPassword(navigator),
+      () => checkPassword(navigator, isChangePassword),
       // registration must have been aborted.
       // ask user to set a password
-      err => setPassword(navigator)
+      err => setPassword(navigator, isChangePassword)
     )
 }
 
@@ -170,7 +201,7 @@ function lockUp (err) {
   // self.setState({isModalOpen: true})
   loopAlert(err)
   let doneWaiting
-  return utils.promiseDelay(__DEV__ ? 5000 : 5 * 60 * 1000)
+  return utils.promiseDelay(LOCK_TIME)
     .then(() => doneWaiting = true)
 
   function loopAlert (err) {
@@ -183,7 +214,7 @@ function lockUp (err) {
   }
 }
 
-function setPassword(navigator) {
+function setPassword (navigator, isChangePassword) {
   if (utils.isWeb()) return Promise.resolve()
 
   return Q.Promise((resolve, reject) => {
@@ -194,45 +225,28 @@ function setPassword(navigator) {
       passProps: {
         mode: PasswordCheck.Modes.set,
         validate: (pass) => { return pass.length > 4 },
-        promptSet: translate('pleaseDrawPassword'),
+        isChange: isChangePassword,
         promptInvalidSet: translate('passwordLimitations'),
         onSuccess: (pass) => {
           utils.setHashedPassword(PASSWORD_ITEM_KEY, pass)
           .then(() => {
             Actions.updateMe({ isRegistered: true, useGesturePassword: true })
-            return hasTouchID()
-          })
-          .then((askTouchID) => {
-            if (askTouchID) {
-              return navigator.replace({
-                component: TouchIDOptIn,
-                id: 21,
-                rightButtonTitle: 'Skip',
-                passProps: {
-                  optIn: () => {
-                    Actions.updateMe({ useTouchId: true })
-                    resolve()
-                  }
-                },
-                onRightButtonPress: resolve
-              })
-            }
-
             resolve()
           })
-          .catch(err => reject(err))
+          .catch(reject)
         }
       }
     })
   })
 }
 
-function checkPassword(navigator) {
+function checkPassword (navigator, isChangePassword) {
   if (utils.isWeb()) return Promise.resolve()
 
   // HACK
   let routes = navigator.getCurrentRoutes()
-  let push = routes[routes.length - 1].id !== 20
+  let currentRoute = routes[routes.length - 1]
+  let push = currentRoute.component.displayName !== PasswordCheck.displayName
   let defer = Q.defer()
   let route = {
     component: PasswordCheck,
@@ -241,17 +255,15 @@ function checkPassword(navigator) {
     passProps: {
       mode: PasswordCheck.Modes.check,
       maxAttempts: 3,
-      promptCheck: translate('drawYourPassword'), //Draw your gesture password',
-      promptRetryCheck: translate('gestureNotRecognized'), //Gesture not recognized, please try again',
+      isChange: isChangePassword,
       isCorrect: (pass) => {
         return utils.checkHashedPassword(PASSWORD_ITEM_KEY, pass)
       },
       onSuccess: () => defer.resolve(),
       onFail: (err) => {
-        defer.reject(err || new Error('For the safety of your data, ' +
-          'this application has been temporarily locked. ' +
-          'Please try in 5 minutes.'))
-        // lock up the app for 10 mins? idk
+        lockUp(LOCK_UP_MESSAGE)
+          .then(() => checkPassword(navigator))
+          .then(() => defer.resolve())
       }
     }
   }
