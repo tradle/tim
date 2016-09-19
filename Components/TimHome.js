@@ -54,13 +54,13 @@ import {
   ScrollView,
   Linking,
   Animated,
+  BackAndroid,
   StatusBar,
   Modal,
   Dimensions,
   Alert,
   Platform
 } from 'react-native'
-
 import ActivityIndicator from './ActivityIndicator'
 
 const isAndroid = Platform.OS === 'android'
@@ -96,6 +96,12 @@ class TimHome extends Component {
         this._handleConnectivityChange(isConnected)
       }
     );
+    BackAndroid.addEventListener('hardwareBackPress', () => {
+      if (this.props.navigator.getCurrentRoutes().length > 1)
+        this.props.navigator.pop()
+      return true
+    })
+
     Actions.start();
   }
 
@@ -656,7 +662,7 @@ class TimHome extends Component {
                         this.register(this.showOfficialAccounts.bind(this))
                         }} underlayColor='transparent'>
                         <View style={styles.signIn}>
-                          <Text style={{backgroundColor: 'transparent', color: 'lightblue', fontSize: 18, flexWrap: 'wrap', alignSelf: 'center'}}>{translate('This is my first Tradle device')}</Text>
+                          <Text style={styles.signInText}>{translate('This is my first Tradle device')}</Text>
                         </View>
                       </TouchableHighlight>
                     </FadeInView>
@@ -665,7 +671,7 @@ class TimHome extends Component {
                         this.pairDevices(this.showOfficialAccounts.bind(this))
                         }} underlayColor='transparent'>
                         <View style={[styles.signIn, {shadowColor: '#245c8c', backgroundColor: 'lightblue'}]}>
-                          <Text style={{backgroundColor: 'transparent', color: '#467EAE', fontSize: 18, alignSelf: 'center'}}>{translate('I have another Tradle device')}</Text>
+                          <Text style={styles.pairDivicesText}>{translate('I have another Tradle device')}</Text>
                         </View>
                       </TouchableHighlight>
                     </FadeInView>
@@ -794,7 +800,7 @@ var styles = StyleSheet.create({
   text: {
     color: '#7AAAC3',
     paddingHorizontal: 5,
-    fontSize: 14,
+    fontSize: utils.getFontSize(14),
   },
   thumbButton: {
     // marginBottom: 10,
@@ -806,18 +812,10 @@ var styles = StyleSheet.create({
     width: 170,
     height: 170,
   },
-  communitiesText: {
-    color: '#f8920d',
-    fontSize: 20,
-  },
-  communities: {
-    paddingBottom: 40,
-    alignSelf: 'center',
-  },
   title: {
     marginTop: 30,
     alignSelf: 'center',
-    fontSize: 20,
+    fontSize: utils.getFontSize(20),
     color: '#7AAAC3'
   },
   dev: {
@@ -854,6 +852,18 @@ var styles = StyleSheet.create({
   version: {
     color: '#ffffff',
     fontSize: 10
+  },
+  pairDivicesText: {
+    backgroundColor: 'transparent',
+    color: '#467EAE',
+    fontSize: utils.getFontSize(18),
+    alignSelf: 'center'
+  },
+  signInText: {
+    backgroundColor: 'transparent',
+    color: 'lightblue',
+    fontSize: utils.getFontSize(18),
+    alignSelf: 'center'
   }
 });
 
