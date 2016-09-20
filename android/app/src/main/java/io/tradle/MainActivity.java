@@ -3,6 +3,8 @@ package io.tradle;
 import android.os.Bundle;
 import com.facebook.react.ReactActivity;
 import com.facebook.react.modules.storage.ReactDatabaseSupplier;
+import android.content.Intent;
+import android.content.res.Configuration;
 
 public class MainActivity extends ReactActivity {
     @Override
@@ -20,4 +22,13 @@ public class MainActivity extends ReactActivity {
     protected String getMainComponentName() {
         return "Tradle";
     }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+      super.onConfigurationChanged(newConfig);
+      Intent intent = new Intent("onConfigurationChanged");
+      intent.putExtra("newConfig", newConfig);
+      this.sendBroadcast(intent);
+    }
+
 }
