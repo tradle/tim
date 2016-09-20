@@ -345,7 +345,7 @@ class NewResource extends Component {
     if (this.state.submitted)
       return
     if (this.state.isRegistration  &&  !this.state.termsAccepted) {
-      Alert.alert('Please accept Terms and Conditions')
+      Alert.alert(translate('viewTerms'))
       return
     }
 
@@ -889,12 +889,12 @@ class NewResource extends Component {
                      })
                    }}>
                      <View style={{flexDirection: 'row'}}>
-                       <Icon name={this.state.termsAccepted ? 'md-checkbox-outline' : 'md-square-outline'} color='#A6DBF5' size={20} style={{paddingRight: 3}}/>
                        <Text style={{fontSize: 16, color: '#A6DBF5'}}>{translate('acceptTermsAndConditions')}</Text>
                      </View>
                    </TouchableHighlight>
                  </View>
                : <View style={{height: 0}} />
+                       // <Icon name={this.state.termsAccepted ? 'md-checkbox-outline' : 'md-square-outline'} color='#A6DBF5' size={20} style={{paddingRight: 3}}/>
 
     var content =
       <ScrollView style={style} ref='scrollView' {...this.scrollviewProps} keyboardDismissMode={'on-drag'} keyboardShouldPersistTaps={true}>
