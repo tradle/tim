@@ -20,6 +20,7 @@ var MessageList = require('./MessageList')
 var defaultBankStyle = require('../styles/bankStyle.json')
 var buttonStyles = require('../styles/buttonStyles');
 var ENV = require('../utils/env')
+
 import ActionSheet from 'react-native-actionsheet'
 
 import platformStyles from '../styles/platform'
@@ -59,7 +60,7 @@ class ResourceView extends Component {
       isLoading: props.resource.id ? true : false,
       isModalOpen: false,
       useTouchId: me && me.useTouchId,
-      useGesturePassword: me && me.useGesturePassword
+      useGesturePassword: me && me.useGesturePassword,
     }
     let currentRoutes = this.props.navigator.getCurrentRoutes()
     let len = currentRoutes.length
@@ -222,7 +223,7 @@ class ResourceView extends Component {
 //, this.state.useTouchId ? {opacity: 1} : {opacity: 0.3}
     let switchTouchId = isIdentity
                       ? <View style={styles.footer}>
-                          <Text style={styles.touchIdText}>{msg}</Text>
+                          <Text style={platformStyles.touchIdText}>{msg}</Text>
                           <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
                              <View style={[platformStyles.menuButtonRegular]}>
                                 <Icon name='md-finger-print' color={Platform.OS === 'ios' ? '#ffffff': 'red'} size={33} />
@@ -398,21 +399,15 @@ var styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'nowrap',
     justifyContent: 'space-between',
+    alignSelf: 'stretch',
     height: 45,
     width: Dimensions.get('window').width,
     backgroundColor: '#eeeeee',
     borderColor: '#eeeeee',
     borderWidth: 1,
     borderTopColor: '#cccccc',
-    paddingRight: 10
+    paddingRight: 10,
   },
-  touchIdText: {
-    color: '#2E3B4E',
-    fontSize: 18,
-    marginVertical: 10,
-    marginLeft: 15,
-    alignSelf: 'flex-start'
-  }
 });
 
 module.exports = ResourceView;
