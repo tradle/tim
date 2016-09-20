@@ -80,6 +80,9 @@ class TimHome extends Component {
       hasMe: utils.getMe(),
       // orientation: Orientation.getInitialOrientation()
     };
+
+    this._orientationDidChange = this._orientationDidChange.bind(this)
+    this._handleConnectivityChange = this._handleConnectivityChange.bind(this)
   }
   componentWillMount() {
     this._pressHandler = debounce(this._pressHandler, 500, true)
@@ -91,7 +94,7 @@ class TimHome extends Component {
     //   this._handleOpenURL({url});
     NetInfo.isConnected.addEventListener(
       'change',
-      this._handleConnectivityChange.bind(this)
+      this._handleConnectivityChange
     );
     NetInfo.isConnected.fetch().done(
       (isConnected) => {
@@ -121,7 +124,7 @@ class TimHome extends Component {
       Linking.removeEventListener('url', this._handleOpenURL);
     NetInfo.isConnected.removeEventListener(
       'change',
-      this._handleConnectivityChange.bind(this)
+      this._handleConnectivityChange
     );
     Orientation.removeOrientationListener(this._orientationDidChange);
   }
@@ -149,7 +152,7 @@ class TimHome extends Component {
     })
     Orientation.lockToPortrait()
     // this.setState({orientation: 'PORTRAIT'})
-    Orientation.addOrientationListener(this._orientationDidChange.bind(this));
+    Orientation.addOrientationListener(this._orientationDidChange);
   }
 
   shouldComponentUpdate(nextProps, nextState) {
