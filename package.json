@@ -85,6 +85,7 @@
     "react-native-linear-gradient": "^1.1.0-alpha",
     "react-native-local-auth": "^1.1.1",
     "react-native-localization": "^0.1.12",
+    "react-native-orientation": "yamill/react-native-orientation",
     "react-native-prompt": "github:pgmemk/react-native-prompt",
     "react-native-push-notification": "~2.0.2",
     "react-native-qrcode": "^0.2.2",
