@@ -434,6 +434,7 @@ var NavigationBarRouteMapper = {
       var st = {color: color}
       style.push(st);
     }
+    style.push({fontSize: utils.getFontSize(17)})
     var title = lbTitle.indexOf('|') == -1
               ? <Text style={style}>
                   {lbTitle}
@@ -462,6 +463,7 @@ var NavigationBarRouteMapper = {
       style.push({color: route.tintColor});
     else if (route.passProps.bankStyle)
       style.push({color: route.passProps.bankStyle.LINK_COLOR || '#7AAAC3'})
+    style.push({fontSize: utils.getFontSize(17)})
     var title
     if (route.rightButtonTitle.indexOf('|') == -1)
       title =  <Text style={style}>
@@ -562,7 +564,7 @@ var styles = StyleSheet.create({
   navBarTitleText: {
     color: '#2E3B4E',
     fontWeight: '400',
-    fontSize: 17,
+    fontSize: utils.getFontSize(17),
   },
   navBarLeftButton: {
     paddingLeft: 10,
