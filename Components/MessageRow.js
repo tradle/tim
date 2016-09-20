@@ -223,7 +223,9 @@ class MessageRow extends Component {
       messageBody =
         <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
           <View style={[rowStyle, viewStyle]}>
+            <View style={{marginTop: 2}}>
             {ownerPhoto}
+            </View>
             <View style={cellStyle}>
               <View style={{flex: 1}}>
               {this.isShared()
@@ -862,7 +864,7 @@ class MessageRow extends Component {
       id: 15,
       component: ProductChooser,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      backButtonTitle: translate('cancel'),
+      backButtonTitle: translate('back'),
       passProps: {
         resource: resource,
         returnRoute: currentRoutes[currentRoutes.length - 1],
