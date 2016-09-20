@@ -36,7 +36,7 @@ exports.resetBadgeNumber = function () {
 }
 
 function createPusher (opts) {
-  if (utils.isWeb() || utils.isSimulator()) return Promise.resolve({})
+  if (!(utils.isIOS() || utils.isAndroid())) return Promise.resolve({})
 
   const me = opts.me
   const node = opts.node
@@ -242,6 +242,7 @@ function createPusher (opts) {
   function resetBadgeNumber () {
     unread = 0
     Actions.updateMe({ unreadPushNotifications: 0 })
+    if (ENV.isAndroid()) return Push.cancelAllLocalNotifications()
     if (!ENV.isIOS()) return
 
     Push.getApplicationIconBadgeNumber(num => {

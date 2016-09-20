@@ -1,4 +1,4 @@
-package io.tradle;
+package io.tradle.dev;
 
 import android.os.Bundle;
 import com.facebook.react.ReactActivity;

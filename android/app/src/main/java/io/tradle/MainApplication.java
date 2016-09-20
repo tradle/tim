@@ -1,4 +1,4 @@
-package io.tradle;
+package io.tradle.dev;
 
 import android.app.Application;
 import android.util.Log;
