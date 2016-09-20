@@ -1,3 +1,5 @@
+require('promise.prototype.finally').shim()
+
 import { Platform } from 'react-native'
 
 if (Platform.OS !== 'web') {
