@@ -14,6 +14,10 @@ import DeviceInfo from 'react-native-device-info'
 import PushNotifications from 'react-native-push-notification'
 import Keychain from 'react-native-keychain'
 import ENV from './env'
+import Orientation from 'react-native-orientation'
+
+var orientation = Orientation.getInitialOrientation()
+Orientation.addOrientationListener(o => orientation = o)
 
 var RCTUIManager = NativeModules.UIManager
 var crypto = require('crypto')
@@ -1037,6 +1041,20 @@ var utils = {
     }
 
     return top
+  },
+  orientation() {
+    return orientation
+  },
+  dimensions(component) {
+    return component.lockToPortrait ? utils.portrait() : Dimensions.get('window')
+  },
+  portrait() {
+    var { width, height } = Dimensions.get('window')
+    if (width > height) {
+      [width, height] = [height, width]
+    }
+
+    return { width, height }
   }
 }
 

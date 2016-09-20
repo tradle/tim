@@ -23,7 +23,6 @@ var FadeInView = require('./FadeInView')
 var TouchIDOptIn = require('./TouchIDOptIn')
 var defaultBankStyle = require('../styles/bankStyle.json')
 var QRCodeScanner = require('./QRCodeScanner')
-var Orientation = require('react-native-orientation')
 
 try {
   var commitHash = require('../version').commit.slice(0, 7)
@@ -68,7 +67,8 @@ const isAndroid = Platform.OS === 'android'
 import React, { Component } from 'react'
 
 class TimHome extends Component {
-  static displayName = 'TimHome'
+  static displayName = 'TimHome';
+  static lockToPortrait = true;
   props: {
     modelName: PropTypes.string.isRequired,
     navigator: PropTypes.object.isRequired
@@ -77,11 +77,9 @@ class TimHome extends Component {
     super(props);
     this.state = {
       isLoading: true,
-      hasMe: utils.getMe(),
-      // orientation: Orientation.getInitialOrientation()
+      hasMe: utils.getMe()
     };
 
-    this._orientationDidChange = this._orientationDidChange.bind(this)
     this._handleConnectivityChange = this._handleConnectivityChange.bind(this)
   }
   componentWillMount() {
@@ -126,11 +124,6 @@ class TimHome extends Component {
       'change',
       this._handleConnectivityChange
     );
-    Orientation.removeOrientationListener(this._orientationDidChange);
-  }
-  _orientationDidChange(orientation) {
-    this.setState({orientation: orientation})
-    console.log(orientation)
   }
   componentDidMount() {
     AutomaticUpdates.on()
@@ -150,15 +143,11 @@ class TimHome extends Component {
     .catch((e) => {
       debugger
     })
-    Orientation.lockToPortrait()
-    // this.setState({orientation: 'PORTRAIT'})
-    Orientation.addOrientationListener(this._orientationDidChange);
   }
 
   shouldComponentUpdate(nextProps, nextState) {
     if (this.state.isLoading  !== nextState.isLoading   ||
         this.state.message !== nextState.message        ||
-        this.state.orientation != nextState.orientation ||
         this.state.hasMe !== nextState.hasMe)
       return true
     else
@@ -337,7 +326,6 @@ class TimHome extends Component {
     });
   }
   showOfficialAccounts(doReplace) {
-    Orientation.unlockAllOrientations()
     var nav = this.props.navigator
     nav.immediatelyResetRouteStack(nav.getCurrentRoutes().slice(0,1));
     let me = utils.getMe()
@@ -558,8 +546,9 @@ class TimHome extends Component {
       this.restartTiM()
       return
     }
+
     // var url = Linking.getInitialURL();
-    var {width, height} = Dimensions.get('window')
+    var {width, height} = utils.dimensions(TimHome)
     var h = height > 800 ? height - 220 : height - 180
     // var cTop = h / 4
 
@@ -567,6 +556,7 @@ class TimHome extends Component {
               ? { width: width / 2.2, height: width / 2.2 }
               : styles.thumb
               // <Progress.CircleSnail color={'white'} size={70} thickness={5}/>
+
     if (this.state.isLoading)
       return this.getSplashScreen(h, thumb)
 
@@ -684,7 +674,7 @@ class TimHome extends Component {
     );
   }
   getSplashScreen(h, thumb) {
-    var {width, height} = Dimensions.get('window')
+    var {width, height} = utils.dimensions(TimHome)
     return (
       <View>
         <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: width, height: height }} />
@@ -760,88 +750,91 @@ class TimHome extends Component {
 
 reactMixin(TimHome.prototype, Reflux.ListenerMixin);
 
-var styles = StyleSheet.create({
-  container: {
-    // padding: 30,
-    marginTop: Dimensions.get('window').height / 4,
-    alignItems: 'center',
-  },
-  tradle: {
-    // color: '#7AAAC3',
-    color: '#eeeeee',
-    fontSize: Dimensions.get('window').height > 450 ? 35 : 25,
-    alignSelf: 'center',
-  },
-  text: {
-    color: '#7AAAC3',
-    paddingHorizontal: 5,
-    fontSize: 14,
-  },
-  thumbButton: {
-    // marginBottom: 10,
-    alignSelf: 'center',
-    // justifyContent: isLandscape ? 'flex-start' : 'center',
-    // padding: 40,
-  },
-  thumb: {
-    width: 170,
-    height: 170,
-  },
-  title: {
-    marginTop: 30,
-    alignSelf: 'center',
-    fontSize: 20,
-    color: '#7AAAC3'
-  },
-  dev: {
-    marginTop: 10,
-    flexDirection: 'row',
-    marginBottom: 500,
-    alignSelf: 'center',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  getStartedText: {
-    color: '#f0f0f0',
-    fontSize: Dimensions.get('window').width > 450 ? 35 : 20,
-    fontWeight:'400'
-  },
-  getStarted: {
-    backgroundColor: '#568FBE', //'#2892C6',
-    paddingVertical: 10,
-    paddingHorizontal: 30
-  },
-  signIn: {
-    flexDirection: 'row',
-    width: 300,
-    height: Platform.OS === 'ios' ? 80 : 50,
-    marginTop: 10,
-    justifyContent: 'center',
-    backgroundColor: '#467EAE',
-    // shadowOpacity: 0.5,
-    shadowColor: 'lightblue',
-    shadowRadius: 10,
-    shadowOffset: {width: 0.5, height: 0.5},
-    shadowOpacity: 0.7
-  },
-  version: {
-    color: '#ffffff',
-    fontSize: 10
-  },
-  pairDivicesText: {
-    backgroundColor: 'transparent',
-    color: '#467EAE',
-    fontSize: 18,
-    alignSelf: 'center'
-  },
-  signInText: {
-    backgroundColor: 'transparent',
-    color: 'lightblue',
-    fontSize: 18,
-    alignSelf: 'center'
-  }
-});
-
+var styles = (function () {
+  var dimensions = utils.dimensions(TimHome)
+  var { width, height } = dimensions
+  return StyleSheet.create({
+    container: {
+      // padding: 30,
+      marginTop: height / 4,
+      alignItems: 'center',
+    },
+    tradle: {
+      // color: '#7AAAC3',
+      color: '#eeeeee',
+      fontSize: height > 450 ? 35 : 25,
+      alignSelf: 'center',
+    },
+    text: {
+      color: '#7AAAC3',
+      paddingHorizontal: 5,
+      fontSize: 14,
+    },
+    thumbButton: {
+      // marginBottom: 10,
+      alignSelf: 'center',
+      // justifyContent: isLandscape ? 'flex-start' : 'center',
+      // padding: 40,
+    },
+    thumb: {
+      width: 170,
+      height: 170,
+    },
+    title: {
+      marginTop: 30,
+      alignSelf: 'center',
+      fontSize: 20,
+      color: '#7AAAC3'
+    },
+    dev: {
+      marginTop: 10,
+      flexDirection: 'row',
+      marginBottom: 500,
+      alignSelf: 'center',
+      alignItems: 'center',
+      justifyContent: 'center'
+    },
+    getStartedText: {
+      color: '#f0f0f0',
+      fontSize: width > 450 ? 35 : 20,
+      fontWeight:'400'
+    },
+    getStarted: {
+      backgroundColor: '#568FBE', //'#2892C6',
+      paddingVertical: 10,
+      paddingHorizontal: 30
+    },
+    signIn: {
+      flexDirection: 'row',
+      width: 300,
+      height: Platform.OS === 'ios' ? 80 : 50,
+      marginTop: 10,
+      justifyContent: 'center',
+      backgroundColor: '#467EAE',
+      // shadowOpacity: 0.5,
+      shadowColor: 'lightblue',
+      shadowRadius: 10,
+      shadowOffset: {width: 0.5, height: 0.5},
+      shadowOpacity: 0.7
+    },
+    version: {
+      color: '#ffffff',
+      fontSize: 10
+    },
+    pairDivicesText: {
+      backgroundColor: 'transparent',
+      color: '#467EAE',
+      fontSize: 18,
+      alignSelf: 'center'
+    },
+    signInText: {
+      backgroundColor: 'transparent',
+      color: 'lightblue',
+      fontSize: 18,
+      alignSelf: 'center'
+    }
+  });
+})()
 
 module.exports = TimHome;
   // signIn(cb) {

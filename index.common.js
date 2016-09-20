@@ -67,6 +67,7 @@ import {
   Text
 } from 'react-native';
 
+import Orientation from 'react-native-orientation'
 import platformStyles from './styles/platform'
 
 let originalGetDefaultProps = Text.getDefaultProps;
@@ -107,7 +108,7 @@ class TiMApp extends Component {
     // if (!isIphone)
     //   isIphone = isIphone;
 
-    ;['_handleOpenURL', '_handleAppStateChange'].forEach((method) => {
+    ;['_handleOpenURL', '_handleAppStateChange', 'onNavigatorBeforeTransition', 'onNavigatorAfterTransition'].forEach((method) => {
       this[method] = this[method].bind(this)
     })
   }
@@ -154,6 +155,8 @@ class TiMApp extends Component {
 
         return
       case 'background':
+        // const nonAuthRoute = utils.getTopNonAuthRoute(this.state.navigator)
+        // this.state.navigator.popToRoute(nonAuthRoute)
         newState.unauthTimeout = setTimeout(() => {
           if (!me || !me.isRegistered) return
 
@@ -257,7 +260,7 @@ class TiMApp extends Component {
     }
   }
 
-  onNavigatorBeforeTransition() {
+  onNavigatorBeforeTransition(e) {
     if (ReactPerf) ReactPerf.start()
 
     Actions.startTransition()
@@ -272,6 +275,20 @@ class TiMApp extends Component {
     }
 
     Actions.endTransition()
+  }
+
+  _lockToPortrait() {
+    if (!this._lockedOrientation) {
+      this._lockedOrientation = true
+      Orientation.lockToPortrait()
+    }
+  }
+
+  _unlockOrientation() {
+    if (this._lockedOrientation) {
+      this._lockedOrientation = false
+      Orientation.unlockAllOrientations()
+    }
   }
 
   render() {
@@ -306,6 +323,12 @@ class TiMApp extends Component {
           // return {...Navigator.SceneConfigs.FloatFromRight, springFriction:26, springTension:300};
 
   renderScene(route, nav) {
+    if (route.id === 1 || route.id === 20) {
+      this._lockToPortrait()
+    } else {
+      this._unlockOrientation()
+    }
+
     if (__DEV__) {
       let displayName = route.component.displayName
       if (!displayName) {
