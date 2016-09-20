@@ -1233,7 +1233,8 @@ var styles = StyleSheet.create({
     width: Dimensions.get('window').width - 30,
     paddingLeft: 10,
     justifyContent: 'flex-start',
-    borderColor: '#f7f7f7'
+    borderColor: '#f7f7f7',
+    alignSelf: 'stretch'
   },
   chooserContainer: {
     height: 45,
