@@ -11,4 +11,3 @@ cd "node_modules/react-native-vector-icons/node_modules/yargs/node_modules/yargs
 # end hack
 
 npm shrinkwrap
-rn-nodeify --hack
