@@ -28,6 +28,7 @@ var constants = require('@tradle/constants');
 var termsAndConditions = require('../termsAndConditions.json')
 
 import ImagePicker from 'react-native-image-picker';
+import FileInput from 'react-file-input'
 var ENUM = 'tradle.Enum'
 var LINK_COLOR, DEFAULT_LINK_COLOR = '#a94442'
 var FORM_ERROR = 'tradle.FormError'
@@ -1047,10 +1048,12 @@ class NewResource extends Component {
                   <Text style={styles.errorText}>{errTitle}</Text>
                 </View>
               : <View/>
-    var actionableItem =  <TouchableHighlight style={[{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]} underlayColor='transparent'
-                              onPress={this.onNewPressed.bind(this, bl, meta)}>
-                            {itemsArray}
-                          </TouchableHighlight>
+    var actionableItem = utils.isWeb() && bl.name === 'photos'
+      ? this.renderImageFileInput(bl, meta, itemsArray, [{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}])
+      : <TouchableHighlight style={[{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]} underlayColor='transparent'
+            onPress={this.onNewPressed.bind(this, bl, meta)}>
+          {itemsArray}
+        </TouchableHighlight>
 
     let istyle = [styles.itemButton]
     if (err)
@@ -1148,6 +1151,27 @@ class NewResource extends Component {
       </View>
     );
   }
+
+  renderImageFileInput(bl, meta, itemsArray, style) {
+    const self = this
+    return (
+      <FileInput
+        name={bl.name}
+        placeholder={bl.title || bl.name}
+        style={style}
+        onChange={e => {
+          readImage(e.target.files[0], function (err, item) {
+            if (err) return Alert.alert('Unable to process file', err.message)
+
+            self.onAddItem(bl.name, {
+              ...item,
+              isVertical: true
+            })
+          })
+        }} />
+    )
+  }
+
   onEndEditing(prop, event) {
     if (this.state.resource[prop]  ||  event.nativeEvent.text.length)
       this.state.resource[prop] = event.nativeEvent.text;
@@ -1339,3 +1363,34 @@ var styles = StyleSheet.create({
 });
 
 module.exports = NewResource;
+
+function readFile (file, cb) {
+  var reader  = new FileReader();
+  reader.addEventListener('load', function () {
+    cb(null, reader.result)
+  }, false)
+
+  reader.addEventListener('error', cb)
+  reader.readAsDataURL(file)
+}
+
+function readImage (file, cb) {
+  readFile(file, function (err, dataUrl) {
+    var image = new window.Image()
+    image.addEventListener('error', function (err) {
+      if (!err) err = new Error('failed to load image')
+
+      cb(err)
+    })
+
+    image.addEventListener('load', function () {
+      cb(null, {
+        url: dataUrl,
+        width: image.width,
+        height: image.height
+      })
+    })
+
+    image.src = dataUrl
+  })
+}

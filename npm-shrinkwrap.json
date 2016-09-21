@@ -155,6 +155,11 @@
       "from": "anymatch@>=1.3.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/anymatch/-/anymatch-1.3.0.tgz"
     },
+    "aproba": {
+      "version": "1.0.4",
+      "from": "aproba@>=1.0.3 <2.0.0",
+      "resolved": "https://registry.npmjs.org/aproba/-/aproba-1.0.4.tgz"
+    },
     "archive-type": {
       "version": "3.2.0",
       "from": "archive-type@>=3.0.0 <4.0.0",
@@ -1319,6 +1324,11 @@
         }
       }
     },
+    "console-control-strings": {
+      "version": "1.1.0",
+      "from": "console-control-strings@>=1.1.0 <1.2.0",
+      "resolved": "https://registry.npmjs.org/console-control-strings/-/console-control-strings-1.1.0.tgz"
+    },
     "constants-browserify": {
       "version": "0.0.1",
       "from": "constants-browserify@0.0.1",
@@ -2449,12 +2459,12 @@
     },
     "forward-secrecy": {
       "version": "1.0.2",
-      "from": "git+https://github.com/tradle/forward-secrecy.git#dev",
-      "resolved": "git+https://github.com/tradle/forward-secrecy.git#5ad4c2ee429db4b10599efbd41c650b9debbf7fe",
+      "from": "tradle/forward-secrecy#dev",
+      "resolved": "git://github.com/tradle/forward-secrecy.git#5ad4c2ee429db4b10599efbd41c650b9debbf7fe",
       "dependencies": {
         "tweetnacl": {
           "version": "0.13.3",
-          "from": "tweetnacl@>=0.13.1 <0.14.0",
+          "from": "tweetnacl@^0.13.1",
           "resolved": "https://registry.npmjs.org/tweetnacl/-/tweetnacl-0.13.3.tgz"
         }
       }
@@ -2763,6 +2773,11 @@
       "version": "0.1.7",
       "from": "has-binary@0.1.7",
       "resolved": "https://registry.npmjs.org/has-binary/-/has-binary-0.1.7.tgz"
+    },
+    "has-color": {
+      "version": "0.1.7",
+      "from": "has-color@>=0.1.7 <0.2.0",
+      "resolved": "https://registry.npmjs.org/has-color/-/has-color-0.1.7.tgz"
     },
     "has-cors": {
       "version": "1.1.0",
@@ -3280,31 +3295,7 @@
     "key-encoder": {
       "version": "1.1.6",
       "from": "mvayngrib/key-encoder-js",
-      "resolved": "git://github.com/mvayngrib/key-encoder-js.git#9811b1d85ded6f6d8eb6b48389d80ed17df550ff",
-      "dependencies": {
-        "asn1.js": {
-          "version": "2.2.1",
-          "from": "asn1.js@>=2.2.0 <3.0.0",
-          "resolved": "https://registry.npmjs.org/asn1.js/-/asn1.js-2.2.1.tgz",
-          "dependencies": {
-            "bn.js": {
-              "version": "2.2.0",
-              "from": "bn.js@>=2.0.0 <3.0.0",
-              "resolved": "https://registry.npmjs.org/bn.js/-/bn.js-2.2.0.tgz"
-            }
-          }
-        },
-        "bn.js": {
-          "version": "3.3.0",
-          "from": "bn.js@>=3.1.2 <4.0.0",
-          "resolved": "https://registry.npmjs.org/bn.js/-/bn.js-3.3.0.tgz"
-        },
-        "elliptic": {
-          "version": "5.2.1",
-          "from": "elliptic@>=5.1.0 <6.0.0",
-          "resolved": "https://registry.npmjs.org/elliptic/-/elliptic-5.2.1.tgz"
-        }
-      }
+      "resolved": "git://github.com/mvayngrib/key-encoder-js.git#9811b1d85ded6f6d8eb6b48389d80ed17df550ff"
     },
     "keymirror": {
       "version": "0.1.1",
@@ -3367,8 +3358,8 @@
     },
     "level-change-processor": {
       "version": "1.0.0",
-      "from": "git+https://github.com/mvayngrib/level-change-processor.git#7100404",
-      "resolved": "git+https://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b"
+      "from": "mvayngrib/level-change-processor#7100404",
+      "resolved": "git://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b"
     },
     "level-codec": {
       "version": "6.1.0",
@@ -3814,20 +3805,8 @@
     },
     "merkle-tree-stream": {
       "version": "3.0.3",
-      "from": "git+https://github.com/mvayngrib/merkle-tree-stream.git#finalize",
-      "resolved": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
-      "dependencies": {
-        "isarray": {
-          "version": "1.0.0",
-          "from": "isarray@>=1.0.0 <1.1.0",
-          "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
-        },
-        "readable-stream": {
-          "version": "2.1.5",
-          "from": "readable-stream@>=2.0.5 <3.0.0",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.1.5.tgz"
-        }
-      }
+      "from": "mvayngrib/merkle-tree-stream#finalize",
+      "resolved": "git://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290"
     },
     "method-override": {
       "version": "2.3.6",
@@ -4059,6 +4038,16 @@
       "from": "node-libs-browser@>=0.4.0 <=0.6.0",
       "resolved": "https://registry.npmjs.org/node-libs-browser/-/node-libs-browser-0.6.0.tgz",
       "dependencies": {
+        "base64-js": {
+          "version": "1.1.2",
+          "from": "base64-js@>=1.0.2 <2.0.0",
+          "resolved": "https://registry.npmjs.org/base64-js/-/base64-js-1.1.2.tgz"
+        },
+        "buffer": {
+          "version": "4.9.1",
+          "from": "buffer@>=4.9.0 <5.0.0",
+          "resolved": "https://registry.npmjs.org/buffer/-/buffer-4.9.1.tgz"
+        },
         "crypto-browserify": {
           "version": "3.2.8",
           "from": "crypto-browserify@>=3.2.6 <3.3.0",
@@ -4068,6 +4057,11 @@
           "version": "0.0.0",
           "from": "https-browserify@0.0.0",
           "resolved": "https://registry.npmjs.org/https-browserify/-/https-browserify-0.0.0.tgz"
+        },
+        "isarray": {
+          "version": "1.0.0",
+          "from": "isarray@^1.0.0",
+          "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
         },
         "ripemd160": {
           "version": "0.2.0",
@@ -4084,7 +4078,24 @@
     "node-pre-gyp": {
       "version": "0.6.29",
       "from": "node-pre-gyp@>=0.6.29 <0.7.0",
-      "resolved": "https://registry.npmjs.org/node-pre-gyp/-/node-pre-gyp-0.6.29.tgz"
+      "resolved": "https://registry.npmjs.org/node-pre-gyp/-/node-pre-gyp-0.6.29.tgz",
+      "dependencies": {
+        "gauge": {
+          "version": "2.6.0",
+          "from": "gauge@>=2.6.0 <2.7.0",
+          "resolved": "https://registry.npmjs.org/gauge/-/gauge-2.6.0.tgz"
+        },
+        "npmlog": {
+          "version": "3.1.2",
+          "from": "npmlog@>=3.1.2 <3.2.0",
+          "resolved": "https://registry.npmjs.org/npmlog/-/npmlog-3.1.2.tgz"
+        },
+        "semver": {
+          "version": "5.2.0",
+          "from": "semver@>=5.2.0 <5.3.0",
+          "resolved": "https://registry.npmjs.org/semver/-/semver-5.2.0.tgz"
+        }
+      }
     },
     "node-status-codes": {
       "version": "1.0.0",
@@ -4667,8 +4678,8 @@
     },
     "react-file-input": {
       "version": "0.2.5",
-      "from": "react-file-input@latest",
-      "resolved": "https://registry.npmjs.org/react-file-input/-/react-file-input-0.2.5.tgz"
+      "from": "mvayngrib/react-file-input#472ef05",
+      "resolved": "git://github.com/mvayngrib/react-file-input.git#472ef05da1ae6ded7a8678178a5a2ffbb9680c10"
     },
     "react-icon-base": {
       "version": "2.0.3",
@@ -5202,7 +5213,44 @@
     "request": {
       "version": "2.73.0",
       "from": "request@>=2.0.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/request/-/request-2.73.0.tgz"
+      "resolved": "https://registry.npmjs.org/request/-/request-2.73.0.tgz",
+      "dependencies": {
+        "async": {
+          "version": "2.0.1",
+          "from": "async@>=2.0.1 <3.0.0",
+          "resolved": "https://registry.npmjs.org/async/-/async-2.0.1.tgz"
+        },
+        "bl": {
+          "version": "1.1.2",
+          "from": "bl@>=1.1.2 <1.2.0",
+          "resolved": "https://registry.npmjs.org/bl/-/bl-1.1.2.tgz"
+        },
+        "extend": {
+          "version": "3.0.0",
+          "from": "extend@>=3.0.0 <3.1.0",
+          "resolved": "https://registry.npmjs.org/extend/-/extend-3.0.0.tgz"
+        },
+        "form-data": {
+          "version": "1.0.1",
+          "from": "form-data@>=1.0.0-rc4 <1.1.0",
+          "resolved": "https://registry.npmjs.org/form-data/-/form-data-1.0.1.tgz"
+        },
+        "isarray": {
+          "version": "1.0.0",
+          "from": "isarray@~1.0.0",
+          "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
+        },
+        "qs": {
+          "version": "6.2.1",
+          "from": "qs@>=6.2.0 <6.3.0",
+          "resolved": "https://registry.npmjs.org/qs/-/qs-6.2.1.tgz"
+        },
+        "readable-stream": {
+          "version": "2.0.6",
+          "from": "readable-stream@>=2.0.5 <2.1.0",
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.0.6.tgz"
+        }
+      }
     },
     "require-directory": {
       "version": "2.1.1",
@@ -5569,6 +5617,11 @@
           "version": "1.0.0",
           "from": "assert-plus@>=1.0.0 <2.0.0",
           "resolved": "https://registry.npmjs.org/assert-plus/-/assert-plus-1.0.0.tgz"
+        },
+        "tweetnacl": {
+          "version": "0.13.3",
+          "from": "tweetnacl@>=0.13.0 <0.14.0",
+          "resolved": "https://registry.npmjs.org/tweetnacl/-/tweetnacl-0.13.3.tgz"
         }
       }
     },
@@ -5857,7 +5910,24 @@
     "tar-pack": {
       "version": "3.1.4",
       "from": "tar-pack@>=3.1.0 <3.2.0",
-      "resolved": "https://registry.npmjs.org/tar-pack/-/tar-pack-3.1.4.tgz"
+      "resolved": "https://registry.npmjs.org/tar-pack/-/tar-pack-3.1.4.tgz",
+      "dependencies": {
+        "isarray": {
+          "version": "1.0.0",
+          "from": "isarray@~1.0.0",
+          "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
+        },
+        "once": {
+          "version": "1.3.3",
+          "from": "once@>=1.3.3 <1.4.0",
+          "resolved": "https://registry.npmjs.org/once/-/once-1.3.3.tgz"
+        },
+        "readable-stream": {
+          "version": "2.1.5",
+          "from": "readable-stream@~2.1.4",
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.1.5.tgz"
+        }
+      }
     },
     "tar-stream": {
       "version": "1.5.2",
@@ -6446,6 +6516,11 @@
       "version": "1.0.0",
       "from": "which-module@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/which-module/-/which-module-1.0.0.tgz"
+    },
+    "wide-align": {
+      "version": "1.1.0",
+      "from": "wide-align@>=1.1.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/wide-align/-/wide-align-1.1.0.tgz"
     },
     "window-size": {
       "version": "0.1.0",
