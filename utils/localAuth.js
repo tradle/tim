@@ -59,7 +59,7 @@ module.exports = {
   authenticateUser
 }
 
-export function hasTouchID () {
+function hasTouchID () {
   return LocalAuth.hasTouchID()
     .then(() => true, err => false)
 }
