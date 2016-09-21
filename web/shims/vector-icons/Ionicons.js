@@ -7,6 +7,7 @@ const normalized = {
   'md-finger-print': 'md-fingerprint',
   'md-square-outline': 'md-crop-square',
   'md-checkbox-outline': 'md-check-box',
+  'md-checkmark': 'md-check',
   'ios-checkmark-circle-outline': 'ios-checkmark-empty',
   'ios-call-outline': 'ios-telephone',
   'ios-close-circle-outline': 'ios-close-circled'
