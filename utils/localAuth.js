@@ -59,7 +59,7 @@ module.exports = {
   authenticateUser
 }
 
-export function hasTouchID () {
+function hasTouchID () {
   if (!LocalAuth) return Promise.resolve(false)
 
   return LocalAuth.hasTouchID()
