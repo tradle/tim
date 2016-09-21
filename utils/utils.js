@@ -81,6 +81,8 @@ var BACKOFF_DEFAULTS = {
 }
 
 var DEFAULT_FETCH_TIMEOUT = 5000
+var stylesCache = {}
+
 var utils = {
   isEmpty(obj) {
     for(var prop in obj) {
@@ -1055,6 +1057,35 @@ var utils = {
     }
 
     return { width, height }
+  },
+  styleFactory(component, create) {
+    if (!component.displayName) throw new Error('component must have "displayName"')
+
+    return () => {
+      var key = component.displayName
+      if (!stylesCache[key]) {
+        stylesCache[key] = {}
+      }
+
+      var orientation = utils.orientation().replace('UPSIDEDOWN', '')
+      var subCache = stylesCache[key]
+      if (!subCache[utils.orientation()]) {
+        var dimensions = utils.dimensions(component)
+        var { width, height } = dimensions
+        var switchWidthHeight = (
+          (orientation === 'PORTRAIT' && width > height) ||
+          (orientation === 'LANDSCAPE' && width < height)
+        )
+
+        if (switchWidthHeight) {
+          dimensions = { width: height, height: width }
+        }
+
+        subCache[orientation] = create({ dimensions })
+      }
+
+      return subCache[orientation]
+    }
   }
 }
 

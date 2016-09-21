@@ -4305,8 +4305,8 @@
     },
     "react-native-gesture-password": {
       "version": "0.1.4",
-      "from": "mvayngrib/react-native-gesture-password#5f51414",
-      "resolved": "git://github.com/mvayngrib/react-native-gesture-password.git#5f5141435853b9a4d01723f1eb80377102f7fe75"
+      "from": "mvayngrib/react-native-gesture-password#6ccf2955",
+      "resolved": "git://github.com/mvayngrib/react-native-gesture-password.git#6ccf29558bdb75e78db18208a4f2c5eff512fe62"
     },
     "react-native-gifted-messenger": {
       "version": "0.0.16",

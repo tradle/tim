@@ -25,6 +25,7 @@ import ActionSheet from 'react-native-actionsheet'
 
 import platformStyles from '../styles/platform'
 import { signIn } from '../utils/localAuth'
+import makeResponsive from './makeResponsive'
 
 const TALK_TO_EMPLOYEE = '1'
 // const SERVER_URL = 'http://192.168.0.162:44444/'
@@ -52,6 +53,7 @@ import {
 import React, { Component } from 'react'
 
 class ResourceView extends Component {
+  static displayName = 'ResourceView';
   constructor(props) {
     super(props);
     let me = utils.getMe()
@@ -139,7 +141,8 @@ class ResourceView extends Component {
     }
   }
   shouldComponentUpdate(nextProps, nextState) {
-    return (this.state.isModalOpen  !== nextState.isModalOpen              ||
+    return this.props.orientation !== nextProps.orientation                ||
+            (this.state.isModalOpen  !== nextState.isModalOpen             ||
             this.state.useGesturePassword !== nextState.useGesturePassword ||
             this.state.useTouchId !== nextState.useTouchId                 ||
             this.state.pairingData !== nextState.pairingData)
@@ -175,6 +178,8 @@ class ResourceView extends Component {
   render() {
     if (this.state.isLoading)
       return <View/>
+
+    var styles = createStyles()
     var resource = this.state.resource;
     var modelName = resource[constants.TYPE];
     var model = utils.getModel(modelName).value;
@@ -377,37 +382,41 @@ class ResourceView extends Component {
     // Actions.addItem({resource: me, value: r, meta: utils.getModel(constants.TYPES.PROFILE).value})
   }
 }
+
 reactMixin(ResourceView.prototype, Reflux.ListenerMixin);
 reactMixin(ResourceView.prototype, ResourceMixin);
+ResourceView = makeResponsive(ResourceView)
 
-var styles = StyleSheet.create({
-  // container: {
-  //   marginTop: Platform.OS === 'ios' ? 64 : 44,
-  //   flex: 1,
-  // },
-  modalBackgroundStyle: {
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'center',
-    padding: 20,
-    height: Dimensions.get('window').height
-  },
-  photoBG: {
-    // backgroundColor: '#245D8C',
-    alignItems: 'center',
-  },
-  footer: {
-    flexDirection: 'row',
-    flexWrap: 'nowrap',
-    justifyContent: 'space-between',
-    alignSelf: 'stretch',
-    height: 45,
-    width: Dimensions.get('window').width,
-    backgroundColor: '#eeeeee',
-    borderColor: '#eeeeee',
-    borderWidth: 1,
-    borderTopColor: '#cccccc',
-    paddingRight: 10,
-  },
-});
+var createStyles = utils.styleFactory(ResourceView, function ({ dimensions }) {
+  return StyleSheet.create({
+    // container: {
+    //   marginTop: Platform.OS === 'ios' ? 64 : 44,
+    //   flex: 1,
+    // },
+    modalBackgroundStyle: {
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+      justifyContent: 'center',
+      padding: 20,
+      height: dimensions.height
+    },
+    photoBG: {
+      // backgroundColor: '#245D8C',
+      alignItems: 'center',
+    },
+    footer: {
+      flexDirection: 'row',
+      flexWrap: 'nowrap',
+      justifyContent: 'space-between',
+      alignSelf: 'stretch',
+      height: 45,
+      width: dimensions.width,
+      backgroundColor: '#eeeeee',
+      borderColor: '#eeeeee',
+      borderWidth: 1,
+      borderTopColor: '#cccccc',
+      paddingRight: 10,
+    }
+  })
+})
 
 module.exports = ResourceView;
