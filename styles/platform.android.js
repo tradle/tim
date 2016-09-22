@@ -1,6 +1,7 @@
 'use strict';
 
 import {StyleSheet, Platform} from 'react-native';
+import {getFontSize} from '../utils/utils'
 export default StyleSheet.create({
   container: {
     backgroundColor: '#f7f7f7',
