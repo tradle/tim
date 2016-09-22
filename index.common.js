@@ -323,7 +323,7 @@ class TiMApp extends Component {
           // return {...Navigator.SceneConfigs.FloatFromRight, springFriction:26, springTension:300};
 
   renderScene(route, nav) {
-    if (route.id === 1 || route.id === 20) {
+    if (route.id === 1 || route.id === 20  ||  (!utils.getMe()  ||  !utils.getMe().isRegistered  &&  route.id === 4)) {
       this._lockToPortrait()
     } else {
       this._unlockOrientation()
