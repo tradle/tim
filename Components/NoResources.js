@@ -3,10 +3,9 @@
 import {
   Text,
   StyleSheet,
-  Dimensions,
   View,
 } from 'react-native';
-
+import utils from '../utils/utils'
 import React, { Component } from 'react'
 
 class NoResources extends Component {
@@ -35,10 +34,12 @@ var styles = StyleSheet.create({
   },
   centerText: {
     alignItems: 'center',
+    justifyContent: 'center'
   },
   NoResourcesText: {
-    marginTop: Dimensions.get('window').height > 800 ? Dimensions.get('window').height/5 : Dimensions.get('window').height / 4,
+    // marginTop: height > 800 ? height/5 : height / 4,
     color: '#888888',
+    fontSize: utils.getFontSize(18)
   }
 });
 
