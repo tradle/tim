@@ -20,7 +20,6 @@ import {
   StyleSheet,
   Platform,
   Text,
-  Dimensions,
   TouchableHighlight,
   View
 } from 'react-native';
@@ -170,7 +169,7 @@ class ResourceRow extends Component {
       return (
         <View key={this.getNextKey()} style={{opacity: 1, justifyContent: 'center', backgroundColor: '#ffffff'}}>
           <TouchableHighlight onPress={this.state ? this.action.bind(this) : this.props.onSelect} underlayColor='transparent' key={this.getNextKey()}>
-            <View style={[styles.row, {width: Dimensions.get('window').width - 50}]} key={this.getNextKey()}>
+            <View style={[styles.row, {width: utils.dimensions(ResourceRow).width - 50}]} key={this.getNextKey()}>
               {photo}
               {orgPhoto}
               {onlineStatus}
@@ -396,7 +395,7 @@ class ResourceRow extends Component {
                   lastMessageTypeIcon = <Icon name={icon} size={14} color='#7AAAc3' style={{paddingLeft: 1, marginTop: -2}}/>
               }
             }
-            let w = Dimensions.get('window').width - 145
+            let w = utils.dimensions(ResourceRow).width - 145
             row = <View style={{flexDirection: 'row'}} key={self.getNextKey()}>
                     <View style={{flexDirection: 'column'}}>
                     <Icon name='md-done-all' size={16} color={isMyLastMessage ? '#cccccc' : '#7AAAc3'}/>

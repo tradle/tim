@@ -18,7 +18,6 @@ var ResourceMixin = require('./ResourceMixin');
 var QRCode = require('./QRCode')
 var MessageList = require('./MessageList')
 var defaultBankStyle = require('../styles/bankStyle.json')
-var buttonStyles = require('../styles/buttonStyles');
 var ENV = require('../utils/env')
 
 import ActionSheet from 'react-native-actionsheet'
@@ -180,6 +179,7 @@ class ResourceView extends Component {
       return <View/>
 
     var styles = createStyles()
+
     var resource = this.state.resource;
     var modelName = resource[constants.TYPE];
     var model = utils.getModel(modelName).value;
@@ -201,17 +201,18 @@ class ResourceView extends Component {
     }
     else
       actionPanel = <View/>
-    var qrcode, width
+    var qrcode, w
+    var {width, height} = utils.dimensions(ResourceView)
     if (this.state.pairingData) {
-      width = Math.floor((Dimensions.get('window').width / 3) * 2)
+      w = Math.floor((width / 3) * 2)
       qrcode = <View style={{alignSelf: 'center', justifyContent: 'center', backgroundColor: '#ffffff', padding:10}} onPress={()=> this.setState({isModalOpen: true})}>
-                 <QRCode inline={true} content={this.state.pairingData} dimension={width} />
+                 <QRCode inline={true} content={this.state.pairingData} dimension={w} />
                </View>
     }
     else if (isMe  &&  me.isEmployee  &&  me.organization && me.organization.url) {
-      width = Math.floor((Dimensions.get('window').width / 3) * 2)
+      w = Math.floor((width / 3) * 2)
       qrcode = <View style={{alignSelf: 'center', justifyContent: 'center', backgroundColor: '#ffffff', padding:10}} onPress={()=> this.setState({isModalOpen: true})}>
-                 <QRCode inline={true} content={TALK_TO_EMPLOYEE + ';' + me.organization.url + ';' + utils.getId(me.organization).split('_')[1] + ';' + me[constants.ROOT_HASH]} dimension={width} />
+                 <QRCode inline={true} content={TALK_TO_EMPLOYEE + ';' + me.organization.url + ';' + utils.getId(me.organization).split('_')[1] + ';' + me[constants.ROOT_HASH]} dimension={w} />
                </View>
     }
     else
@@ -266,7 +267,7 @@ class ResourceView extends Component {
         actions.push(USE_GESTURE_PASSWORD)
       }
 
-      if (this.state.useGesturePassword) {
+      if (this.state.useGesturePassword || !utils.isIOS) {
         buttons.push(translate('changeGesturePassword'))
         actions.push(CHANGE_GESTURE_PASSWORD)
       }
