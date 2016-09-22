@@ -3,7 +3,7 @@
 var PhotoList = require('./PhotoList')
 var utils = require('../utils/utils');
 var translate = utils.translate
-var UIImagePickerManager = require('NativeModules').ImagePickerManager;
+import ImagePicker from 'react-native-image-picker';
 var extend = require('extend')
 var equal = require('deep-equal')
 var Icon = require('react-native-vector-icons/Ionicons')
@@ -103,13 +103,19 @@ class GridItemsList extends Component {
       </View>
     )
   }
+      // returnIsVertical: true,
+      // chooseFromLibraryButtonTitle: __DEV__ ? 'Choose from Library' : null
+
   showChoice() {
     var self = this;
     this.setState({show: false})
-    UIImagePickerManager.showImagePicker({
-      returnIsVertical: true,
-      chooseFromLibraryButtonTitle: __DEV__ ? 'Choose from Library' : null
-    }, (response) => {
+    let options = {}
+    if (!utils.isSimulator()  ||  __DEV__)
+      options.takePhotoButtonTitle = 'Take Photo…'
+    if (utils.isSimulator() || prop._allowPicturesFromLibrary)
+      options.chooseFromLibraryButtonTitle = 'Choose from Library'
+
+    ImagePicker.showImagePicker(options, (response) => {
       if (response.didCancel)
         return;
       if (response.error) {
