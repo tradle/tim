@@ -20,7 +20,6 @@ import {
   Text,
   TouchableHighlight,
   Navigator,
-  Dimensions,
   View
 } from 'react-native'
 
@@ -106,14 +105,6 @@ class FormMessageRow extends Component {
              ? <Text style={styles.date} numberOfLines={1}>{val}</Text>
              : <View />;
 
-    var messageBody;
-    var w = Dimensions.get('window').width
-    var msgWidth = isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
-    // HACK that solves the case when the message is short and we don't want it to be displayed
-    // in a bigger than needed bubble
-    var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
-    viewStyle.width = msgWidth
-
     var sendStatus = <View />
     if (this.props.sendStatus  &&  this.props.sendStatus !== null) {
       switch (this.props.sendStatus) {
@@ -137,6 +128,15 @@ class FormMessageRow extends Component {
     let cellStyle = addStyle
                   ? [styles.textContainer, addStyle]
                   : styles.textContainer
+    // HACK that solves the case when the message is short and we don't want it to be displayed
+    // in a bigger than needed bubble
+    var messageBody;
+    var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
+    if (isMyMessage)
+      viewStyle.marginLeft = 70
+    else
+      viewStyle.marginRight = 50
+
     messageBody =
       <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
         <View style={[rowStyle, viewStyle]}>
@@ -162,27 +162,27 @@ class FormMessageRow extends Component {
     var photoStyle = {};
     // var height;
 
-    if (inRow > 0) {
-      if (inRow === 1) {
-        var ww = Math.max(240, msgWidth / 2)
-        var hh = ww * 280 / 240
-        photoStyle = [styles.bigImage, {
-          width:  ww,
-          height: hh
-        }]
-      }
-      else if (inRow === 2)
-        photoStyle = styles.mediumImage;
-      else
-        photoStyle = styles.image;
-    }
+    // if (inRow > 0) {
+    //   if (inRow === 1) {
+    //     var ww = Math.max(240, msgWidth / 2)
+    //     var hh = ww * 280 / 240
+    //     photoStyle = [styles.bigImage, {
+    //       width:  ww,
+    //       height: hh
+    //     }]
+    //   }
+    //   else if (inRow === 2)
+    //     photoStyle = styles.mediumImage;
+    //   else
+    //     photoStyle = styles.image;
+    // }
 
     return (
       <View style={{margin: 1, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}}>
         {date}
         {messageBody}
         <View style={photoListStyle}>
-          <PhotoList photos={photoUrls} resource={this.props.resource} style={[photoStyle, {marginTop: -5}]} navigator={this.props.navigator} numberInRow={inRow} />
+          <PhotoList photos={photoUrls} resource={this.props.resource} style={[{marginTop: -5}]} navigator={this.props.navigator} numberInRow={inRow} />
         </View>
         {sendStatus}
       </View>
