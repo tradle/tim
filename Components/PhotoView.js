@@ -12,8 +12,7 @@ import {
   Image,
   View,
   Text,
-  TouchableHighlight,
-  Dimensions
+  TouchableHighlight
 } from 'react-native'
 
 import React, { Component } from 'react'
@@ -70,10 +69,17 @@ class PhotoView extends Component {
       if (p === url)
         nextPhoto = i === len - 1 ? resource.photos[0] : resource.photos[i + 1];
     }
+    let {width, height} = utils.dimensions(PhotoView)
+    let image = {
+      width: width < height ? width : height,
+      height: width < height ? height / 2 : width / 2,
+      // alignSelf: 'stretch'
+    }
+
     return (
           <Animatable.View animation="fadeIn" iterationCount={1} direction="normal">
             <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, resource.photos[0])}>
-              <Image source={source} style={styles.image} />
+              <Image source={source} style={image} />
             </TouchableHighlight>
           </Animatable.View>
     )
@@ -87,11 +93,6 @@ var styles = StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'stretch'
   },
-  image: {
-    width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height / 2,
-    alignSelf: 'stretch'
-  }
 });
 
 module.exports = PhotoView;
