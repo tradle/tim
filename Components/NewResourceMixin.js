@@ -43,11 +43,11 @@ import {
   Navigator,
   Switch,
   DatePickerAndroid,
-  Dimensions
 } from 'react-native';
 
 var LINK_COLOR, DEFAULT_LINK_COLOR = '#a94442'
 // import transform from 'tcomb-json-schema'
+var component
 
 var NewResourceMixin = {
   onScroll(e) {
@@ -58,6 +58,7 @@ var NewResourceMixin = {
   },
   getFormFields(params) {
     CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol ||  this.props.currency : DEFAULT_CURRENCY_SYMBOL
+    component = params.component
 
     if (this.props.bankStyle)
       LINK_COLOR = this.props.bankStyle.LINK_COLOR || DEFAULT_LINK_COLOR
@@ -396,7 +397,7 @@ var NewResourceMixin = {
             prop:  p,
             required: !maybe,
             errors: params.errors,
-            chooser: options.fields[p].onFocus
+            chooser: options.fields[p].onFocus,
           })
 
         options.fields[p].nullOption = {value: '', label: 'Choose your ' + utils.makeLabel(p)};
@@ -438,7 +439,7 @@ var NewResourceMixin = {
           label: translate(props.video, meta),
           prop:  'video',
           errors: params.errors,
-          required: !maybe,
+          required: !maybe
         })
     }
 
@@ -543,11 +544,12 @@ var NewResourceMixin = {
     // let paddingBottom = 20
     let lStyle = styles.labelStyle
     if (params.prop.ref  &&  params.prop.ref === constants.TYPES.MONEY  &&  !params.required) {
-      let maxChars = (Dimensions.get('window').width - 60)/10
+      let maxChars = (utils.dimensions(component).width - 60)/10
       // let some space for wrapping
       if (maxChars < label.length)
         lStyle = [styles.labelStyle, {marginTop: 0}]
     }
+
     if (this.state.isRegistration)
       lStyle = [lStyle, {color: '#eeeeee'}]
     return (
@@ -624,7 +626,7 @@ var NewResourceMixin = {
         }>
           <View style={styles.booleanContainer}>
             <View style={styles.booleanContentStyle}>
-              <Text style={[style, doWrap ? {flexWrap: 'wrap', width: Dimensions.get('window').width - 100} : {}]}>{label}</Text>
+              <Text style={[style, doWrap ? {flexWrap: 'wrap', width: (utils.dimensions(component).width - 100)} : {}]}>{label}</Text>
               <Switch onValueChange={value => this.onChangeText(prop, value)} value={value} onTintColor={LINK_COLOR} />
             </View>
           </View>
@@ -668,7 +670,7 @@ var NewResourceMixin = {
     return <View style={{paddingBottom: this.hasError(params.errors, prop.name) ?  0 : 10}} key={this.getNextKey()} ref={prop.name}>
           {propLabel}
           <DatePicker
-            style={styles.datePicker}
+            style={[styles.datePicker, { width: utils.dimensions(component).width - 30}]}
             mode="date"
             placeholder={value}
             format={format}
@@ -812,7 +814,7 @@ var NewResourceMixin = {
       style = [labelStyle, color]
       propLabel = <View/>
     }
-    let maxChars = (Dimensions.get('window').width - 20)/10
+    let maxChars = (utils.dimensions(component).width - 20)/10
     if (maxChars < label.length)
       label = label.substring(0, maxChars - 3) + '...'
     if (this.state.isRegistration  &&  prop.ref  &&  prop.ref === 'tradle.Language'  &&  !resource[prop.name])
@@ -1193,11 +1195,9 @@ var NewResourceMixin = {
       err[p] = error
     return error
   },
-
 }
 
-
-var styles = StyleSheet.create({
+var styles= StyleSheet.create({
   enumProp: {
     marginTop: 15,
   },
@@ -1230,7 +1230,7 @@ var styles = StyleSheet.create({
     borderRadius: 4
   },
   datePicker: {
-    width: Dimensions.get('window').width - 30,
+    // width: dimensions.width - 30,
     paddingLeft: 10,
     justifyContent: 'flex-start',
     borderColor: '#f7f7f7',
