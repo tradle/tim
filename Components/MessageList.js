@@ -20,6 +20,7 @@ var constants = require('@tradle/constants')
 var GiftedMessenger = require('react-native-gifted-messenger')
 var NetworkInfoProvider = require('./NetworkInfoProvider')
 import ActionSheet from 'react-native-actionsheet'
+import makeResponsive from './makeResponsive'
 // var AddNewMessage = require('./AddNewMessage')
 // var SearchBar = require('react-native-search-bar')
 // var ResourceTypesScreen = require('./ResourceTypesScreen')
@@ -34,7 +35,6 @@ import React, { Component } from 'react'
 import {
   ListView,
   StyleSheet,
-  Dimensions,
   PropTypes,
   Navigator,
   Platform,
@@ -247,10 +247,11 @@ class MessageList extends Component {
       return true
     if (this.state.show !== nextState.show)
       return true
-    if (!this.state.list                                 ||
-        !nextState.list                                  ||
-         this.state.allLoaded !== nextState.allLoaded    ||
-         this.state.sendStatus !== nextState.sendStatus  ||
+    if (!this.state.list                                  ||
+        !nextState.list                                   ||
+         this.props.orientation !== nextProps.orientation ||
+         this.state.allLoaded !== nextState.allLoaded     ||
+         this.state.sendStatus !== nextState.sendStatus   ||
          this.state.list.length !== nextState.list.length)
       return true
     for (var i=0; i<this.state.list.length; i++) {
@@ -441,7 +442,7 @@ class MessageList extends Component {
 
     if (!content) {
       var isAllMessages = model.isInterface  &&  model.id === constants.TYPES.MESSAGE;
-      var maxHeight = Dimensions.get('window').height - (Platform.OS === 'android' ? 77 : 64) - (this.state.isConnected ? 0 : 30)
+      var maxHeight = utils.dimensions(MessageList).height - (Platform.OS === 'android' ? 77 : 64) - (this.state.isConnected ? 0 : 30)
       // content = <GiftedMessenger style={{paddingHorizontal: 10, marginBottom: Platform.OS === 'android' ? 0 : 20}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
       content = <GiftedMessenger style={{paddingHorizontal: 10}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
         ref={(c) => this._GiftedMessenger = c}
@@ -784,6 +785,7 @@ class MessageList extends Component {
 
 }
 reactMixin(MessageList.prototype, Reflux.ListenerMixin);
+MessageList = makeResponsive(MessageList)
 
 var styles = StyleSheet.create({
   imageOutline: {
@@ -800,7 +802,7 @@ var styles = StyleSheet.create({
     flexWrap: 'nowrap',
     justifyContent: 'flex-end',
     height: 45,
-    width: Dimensions.get('window').width,
+    // width: Dimensions.get('window').width,
     backgroundColor: '#eeeeee',
     borderColor: '#eeeeee',
     borderWidth: 1,
