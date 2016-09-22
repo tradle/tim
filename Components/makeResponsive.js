@@ -11,7 +11,8 @@ var orientation = Orientation.getInitialOrientation()
 Orientation.addOrientationListener(o => orientation = o)
 
 module.exports = function (WrappedComponent) {
-  return class Responsive extends WrappedComponent {
+  return class Responsive extends Component {
+    static displayName = WrappedComponent.displayName;
     constructor(props) {
       super(props)
       this._updateOrientation = this._updateOrientation.bind(this)
