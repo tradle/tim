@@ -388,11 +388,13 @@ var utils = {
         v = v.title ? v.title : utils.getDisplayName(v, this.getModel(props[p].ref).value.properties)
       group.push(v)
     }
+
     if (hasSetProps) {
       let s = this.template(prop.displayAs, group).trim()
-      s = s.replace(/,\s+,/g, ',').trim()
-      s = s.replace(/^,/, '').trim()
-      s = s.replace(/,$/, '').trim()
+      s = s.replace(/[,\s+,]+[,,]/g, ',')
+      if (s.charAt(0) === ',')
+        s = s.replace(/,/, '')
+
       if (s.charAt(s.length - 1) !== ',')
         return s
       let i = s.length - 2
