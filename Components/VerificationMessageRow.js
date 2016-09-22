@@ -22,14 +22,11 @@ import {
   Alert,
   Modal,
   Navigator,
-  Dimensions,
   View,
   processColor
 } from 'react-native'
 
 import React, { Component } from 'react'
-
-var DeviceWidth = Dimensions.get('window').width
 
 class VerificationMessageRow extends Component {
   constructor(props) {
@@ -54,7 +51,7 @@ class VerificationMessageRow extends Component {
              : <View />;
 
     var isMyMessage = this.isMyMessage();
-    var msgWidth = isMyMessage ? DeviceWidth - 70 : DeviceWidth - 50;
+//    var msgWidth = isMyMessage ? DeviceWidth - 70 : DeviceWidth - 50;
 
     var msgModel = utils.getModel(resource.document[constants.TYPE]).value;
     var orgName = resource.organization  ? resource.organization.title : ''
@@ -79,7 +76,11 @@ class VerificationMessageRow extends Component {
                     </View>
                   </View>
 
-    var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start', width: msgWidth, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}
+    var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start', backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}
+    if (isMyMessage)
+      viewStyle.marginLeft = 70
+    else
+      viewStyle.marginRight = 50
     let addStyle = [styles.verificationBody, {backgroundColor: this.props.bankStyle.VERIFICATION_BG, borderColor: bgColor}];
     let messageBody =
           <TouchableHighlight onPress={this.verify.bind(this, resource)} underlayColor='transparent'>
