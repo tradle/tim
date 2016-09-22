@@ -3,7 +3,7 @@
 var Carousel = require('react-native-carousel');
 var utils = require('../utils/utils');
 var constants = require('@tradle/constants');
-import makeResponsive from './makeResponsive'
+import { makeResponsive } from 'react-native-orient'
 
 import {
   StyleSheet,

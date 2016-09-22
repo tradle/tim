@@ -51,7 +51,10 @@ import Native, {
 import React, { Component, PropTypes } from 'react'
 import ActivityIndicator from './ActivityIndicator'
 import platformStyles from '../styles/platform'
-import makeResponsive from './makeResponsive'
+import { makeResponsive } from 'react-native-orient'
+
+// DeviceHeight = Dimensions.get('window').height;
+// DeviceWidth = Dimensions.get('window').width
 
 class NewResource extends Component {
   static displayName = 'NewResource';
@@ -1206,4 +1209,4 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions }) {
   })
 })
 
-module.exports = NewResource;
+module.exports = makeResponsive(NewResource);

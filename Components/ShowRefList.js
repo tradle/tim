@@ -9,7 +9,7 @@ var constants = require('@tradle/constants');
 var reactMixin = require('react-mixin');
 var RowMixin = require('./RowMixin');
 var ResourceMixin = require('./ResourceMixin');
-import makeResponsive from './makeResponsive'
+import { makeResponsive } from 'react-native-orient'
 
 import * as Animatable from 'react-native-animatable'
 

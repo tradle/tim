@@ -24,7 +24,7 @@ import ActionSheet from 'react-native-actionsheet'
 
 import platformStyles from '../styles/platform'
 import { signIn } from '../utils/localAuth'
-import makeResponsive from './makeResponsive'
+import { makeResponsive } from 'react-native-orient'
 
 const TALK_TO_EMPLOYEE = '1'
 // const SERVER_URL = 'http://192.168.0.162:44444/'
@@ -178,6 +178,7 @@ class ResourceView extends Component {
     if (this.state.isLoading)
       return <View/>
 
+    var dimensions = this.props.dimensions
     var styles = createStyles()
 
     var resource = this.state.resource;

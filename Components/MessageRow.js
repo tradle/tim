@@ -18,7 +18,7 @@ var equal = require('deep-equal')
 var formDefaults = require('@tradle/models').formDefaults;
 var TradleW = require('../img/TradleW.png')
 var Actions = require('../Actions/Actions');
-import makeResponsive from './makeResponsive'
+import { makeResponsive } from 'react-native-orient'
 
 var reactMixin = require('react-mixin');
 
