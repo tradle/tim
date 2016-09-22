@@ -57,7 +57,6 @@ import {
   BackAndroid,
   StatusBar,
   Modal,
-  Dimensions,
   Alert,
   Platform
 } from 'react-native'
