@@ -5,6 +5,7 @@ import {
   // View
 } from 'react-native'
 
+import utils from '../utils/utils'
 import Orientation from 'react-native-orientation'
 
 var orientation = Orientation.getInitialOrientation()
@@ -16,7 +17,7 @@ module.exports = function (WrappedComponent) {
     constructor(props) {
       super(props)
       this._updateOrientation = this._updateOrientation.bind(this)
-      this.state = { orientation, ...Dimensions.get('window') }
+      this.state = { orientation, ...utils.dimensions(WrappedComponent) }
     }
     componentWillMount() {
       Orientation.addOrientationListener(this._updateOrientation)
@@ -25,7 +26,7 @@ module.exports = function (WrappedComponent) {
       Orientation.removeOrientationListener(this._updateOrientation)
     }
     _updateOrientation(orientation) {
-      this.setState({ orientation, ...Dimensions.get('window') })
+      this.setState({ orientation, ...utils.dimensions(WrappedComponent) })
     }
     shouldComponentUpdate(newProps, newState) {
       for (var p in newProps) {
