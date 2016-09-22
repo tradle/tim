@@ -21,13 +21,10 @@ import {
   Alert,
   Modal,
   Navigator,
-  Dimensions,
   View,
 } from 'react-native'
 
 import React, { Component } from 'react'
-
-var DeviceWidth = Dimensions.get('window').width
 
 class MyProductMessageRow extends Component {
   constructor(props) {
@@ -67,9 +64,10 @@ class MyProductMessageRow extends Component {
 
     renderedRow.push(<Text  key={this.getNextKey()} style={[styles.formType, {color: '#289427'}]}>{title}</Text>);
     rowStyle = addStyle ? [styles.textContainer, addStyle] : styles.textContainer
+
     let messageBody =
       <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
-        <View style={styles.viewStyle}>
+        <View style={[styles.viewStyle, {marginRight: 50}]}>
           {this.getOwnerPhoto()}
           <View style={rowStyle}>
             <View style={{flex: 1}}>
@@ -229,7 +227,6 @@ var styles = StyleSheet.create({
   viewStyle: {
     flexDirection: 'row',
     alignSelf: 'flex-start',
-    width: DeviceWidth - 50
   }
 });
 reactMixin(MyProductMessageRow.prototype, RowMixin);
