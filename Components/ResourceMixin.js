@@ -1,7 +1,6 @@
 'use strict';
 
 var utils = require('../utils/utils');
-var UIImagePickerManager = require('NativeModules').ImagePickerManager;
 var extend = require('extend');
 var translate = utils.translate
 var Icon = require('react-native-vector-icons/Ionicons');
