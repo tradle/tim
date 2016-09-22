@@ -10,6 +10,7 @@ import {
 
 import React, { Component, PropTypes } from 'react'
 import ArticleView from './ArticleView'
+
 const BG_IMAGE = require('../img/bg.png')
 const TOUCH_ID_IMG = require('../img/touchid2.png')
 const LINK_COLOR = '#7AAAC3'
@@ -32,7 +33,7 @@ class TouchIDOptIn extends Component {
   }
   render() {
         // <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: Device.width, height: Device.height}} />
-    let { width, height } = Dimensions.get('window')
+    let width, height = utils.dimensions(TouchIDOptIn).width
           // <Text style={[styles.text, { paddingTop: 20, fontSize: 15 }]}>
           //   You can always enable/disable it on your profile
           // </Text>
@@ -69,7 +70,6 @@ class TouchIDOptIn extends Component {
     )
   }
 }
-
 var styles = StyleSheet.create({
   container: {
     flex: 1,
