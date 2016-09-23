@@ -37,6 +37,7 @@ var STRUCTURED_MESSAGE_COLOR
 
 const DEFAULT_CURRENCY_SYMBOL = '£'
 const DEFAULT_LINK_COLOR = '#2892C6'
+const MAX_WIDTH = 400
 
 import {
   Image,
@@ -177,6 +178,7 @@ class MessageRow extends Component {
     var messageBody;
     var w = utils.dimensions(MessageRow).width
     var msgWidth = isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
+    msgWidth = Math.min(msgWidth, MAX_WIDTH)
     var sendStatus = <View />
     // HACK that solves the case when the message is short and we don't want it to be displayed
     // in a bigger than needed bubble
@@ -207,6 +209,7 @@ class MessageRow extends Component {
       }
       if (!isSimpleMessage)
         viewStyle.width =  message ? Math.min(msgWidth, message.length * 9 + 40) : msgWidth
+
 
       if (this.props.sendStatus  &&  this.props.sendStatus !== null) {
         switch (this.props.sendStatus) {

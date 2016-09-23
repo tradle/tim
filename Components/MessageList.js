@@ -19,6 +19,8 @@ var Reflux = require('reflux')
 var constants = require('@tradle/constants')
 var GiftedMessenger = require('react-native-gifted-messenger')
 var NetworkInfoProvider = require('./NetworkInfoProvider')
+var extend = require('extend');
+
 import ActionSheet from 'react-native-actionsheet'
 import makeResponsive from './makeResponsive'
 // var AddNewMessage = require('./AddNewMessage')
@@ -351,26 +353,33 @@ class MessageList extends Component {
     currentMessageTime = resource.time;
     var props = {
       onSelect: this.selectResource.bind(this),
-      share: this.share.bind(this),
       resource: resource,
-      messageNumber: rowId,
-      sendStatus: this.state.sendStatus &&  this.state.sendResource[constants.ROOT_HASH] === resource[constants.ROOT_HASH] ? this.state.sendStatus : null,
-      isAggregation: isAggregation,
-      currency: this.props.currency,
-      navigator: this.props.navigator,
-      productToForms: this.state.productToForms,
       bankStyle: this.props.bankStyle,
-      shareableResources: this.state.shareableResources,
-      previousMessageTime: previousMessageTime,
-      isLast: rowId === this.state.list.length - 1,
-      to: isAggregation ? resource.to : this.props.resource
+      to: isAggregation ? resource.to : this.props.resource,
+      navigator: this.props.navigator,
     }
     if (model.subClassOf === 'tradle.MyProduct')
       return  <MyProductMessageRow {...props} />
+
+      // messageNumber: rowId,
+    var moreProps = {
+      share: this.share.bind(this),
+      sendStatus: this.state.sendStatus &&  this.state.sendResource[constants.ROOT_HASH] === resource[constants.ROOT_HASH] ? this.state.sendStatus : null,
+      currency: this.props.currency,
+      previousMessageTime: previousMessageTime,
+    }
+
+    props = extend(props, moreProps)
     if (model.id === constants.TYPES.VERIFICATION)
       return  <VerificationMessageRow {...props} />
     if (model.subClassOf === constants.TYPES.FORM)
       return <FormMessageRow {...props} />
+
+    props.isLast = rowId === this.state.list.length - 1,
+    props.productToForms = this.state.productToForms
+    props.shareableResources = this.state.shareableResources,
+    props.isAggregation = isAggregation
+
     return   <MessageRow {...props} />
   }
   addedMessage(text) {
@@ -621,47 +630,6 @@ class MessageList extends Component {
       // }
     });
   }
-  // showEmployeeMenu() {
-  //   // var buttons = ['Talk to representative', 'Forget me', 'Cancel']
-  //   var buttons = [translate('formChooser'), translate('cancel')] // ['Forget me', 'Cancel']
-  //   var self = this;
-
-  //   ActionSheetIOS.showActionSheetWithOptions({
-  //     options: buttons,
-  //     cancelButtonIndex: 1
-  //   }, function(buttonIndex) {
-  //     switch (buttonIndex) {
-  //     // case 0:
-  //     //   Actions.talkToRepresentative(self.props.resource)
-  //     //   break
-  //     case 0:
-  //       self.chooseFormForCustomer()
-  //       break;
-  //     default:
-  //       return
-  //     }
-  //   });
-  // }
-  // showMenu() {
-  //   // var buttons = ['Talk to representative', 'Forget me', 'Cancel']
-  //   var self = this;
-  //   ActionSheetIOS.showActionSheetWithOptions({
-  //     options: buttons,
-  //     cancelButtonIndex: 1
-  //   }, function(buttonIndex) {
-  //     switch (buttonIndex) {
-  //     // case 0:
-  //     //   Actions.talkToRepresentative(self.props.resource)
-  //     //   break
-  //     case 0:
-  //       self.forgetMe()
-  //       break;
-  //     default:
-  //       return
-  //     }
-  //   });
-  // }
-      // 'Are you sure you want \'' + utils.getDisplayName(resource, utils.getModel(resource[constants.TYPE]).value.properties) + '\' to forget you',
   forgetMe() {
     var resource = this.props.resource
     this.setState({show: false})
@@ -845,4 +813,45 @@ module.exports = MessageList;
     if (resource.url)
       Actions.addModelFromUrl(resource.url);
   }
+  // showEmployeeMenu() {
+  //   // var buttons = ['Talk to representative', 'Forget me', 'Cancel']
+  //   var buttons = [translate('formChooser'), translate('cancel')] // ['Forget me', 'Cancel']
+  //   var self = this;
+
+  //   ActionSheetIOS.showActionSheetWithOptions({
+  //     options: buttons,
+  //     cancelButtonIndex: 1
+  //   }, function(buttonIndex) {
+  //     switch (buttonIndex) {
+  //     // case 0:
+  //     //   Actions.talkToRepresentative(self.props.resource)
+  //     //   break
+  //     case 0:
+  //       self.chooseFormForCustomer()
+  //       break;
+  //     default:
+  //       return
+  //     }
+  //   });
+  // }
+  // showMenu() {
+  //   // var buttons = ['Talk to representative', 'Forget me', 'Cancel']
+  //   var self = this;
+  //   ActionSheetIOS.showActionSheetWithOptions({
+  //     options: buttons,
+  //     cancelButtonIndex: 1
+  //   }, function(buttonIndex) {
+  //     switch (buttonIndex) {
+  //     // case 0:
+  //     //   Actions.talkToRepresentative(self.props.resource)
+  //     //   break
+  //     case 0:
+  //       self.forgetMe()
+  //       break;
+  //     default:
+  //       return
+  //     }
+  //   });
+  // }
+      // 'Are you sure you want \'' + utils.getDisplayName(resource, utils.getModel(resource[constants.TYPE]).value.properties) + '\' to forget you',
 */
