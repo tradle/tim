@@ -190,11 +190,10 @@ class FormMessageRow extends Component {
   }
   isShared() {
     var resource = this.props.resource
+    if (!resource.to.organization)
+      return false
     var to = this.props.to
     if (to[constants.TYPE] === constants.TYPES.PROFILE)
-      return false
-    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
-    if (model.subClassOf !== constants.TYPES.FORM  ||  !resource.to.organization)
       return false
     return utils.getId(resource.to.organization) !== utils.getId(to)
   }
