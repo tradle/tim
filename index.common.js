@@ -59,7 +59,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
-  StatusBar,
+  // StatusBar,
   Platform,
   // Linking,
   AppState,
@@ -300,7 +300,6 @@ class TiMApp extends Component {
         navigationBar={
           <Navigator.NavigationBar
             routeMapper={NavigationBarRouteMapper}
-            style={styles.navBar}
           />
         }
         passProps={this.state.props}
@@ -438,9 +437,9 @@ class TiMApp extends Component {
 var HIT_SLOP = {top:10,right:10,bottom:10,left:10}
 var NavigationBarRouteMapper = {
   LeftButton: function(route, navigator, index, navState) {
-    if (index === 0  ||  route.noLeftButton) {
-      return null;
-    }
+    if (index === 0  ||  route.noLeftButton)
+      return <View/>
+
     var color = '#7AAAC3'
     if (route.passProps.bankStyle  &&  route.passProps.bankStyle.LINK_COLOR)
       color = route.passProps.bankStyle.LINK_COLOR
@@ -540,20 +539,22 @@ var NavigationBarRouteMapper = {
   },
 
   Title: function(route, navigator, index, navState) {
+    if (!route.title)
+      return <View/>
     var org;
-    var style = [platformStyles.navBarText, styles.navBarTitleText];
-    if (route.passProps.modelName) {
-      if (route.passProps.modelName === 'tradle.Message') {
-        if (route.passProps.resource  &&  route.passProps.resource[constants.TYPE] === constants.TYPES.PROFILE) {
+    if (route.passProps.modelName                       &&
+        route.passProps.modelName === 'tradle.Message'  &&
+        route.passProps.resource.organization           &&
+        route.passProps.resource                        &&
+        route.passProps.resource[constants.TYPE] === constants.TYPES.PROFILE)
           // if (route.passProps.resource.organization  &&  route.passProps.resource.organization.photo)
           //   org = <Image source={{uri: route.passProps.resource.organization.photo}} style={styles.orgImage} />
-          if (route.passProps.resource.organization)
-            org = <Text style={style}> - {route.passProps.resource.organization.title}</Text>
-        }
-      }
-    }
-    if (!org)
+          // if (route.passProps.resource.organization)
+        org = <Text style={style}> - {route.passProps.resource.organization.title}</Text>
+    else
       org = <View />;
+
+    var style = [platformStyles.navBarText, styles.navBarTitleText];
     if (route.titleTextColor)
       style.push({color: route.titleTextColor});
     return (
@@ -572,7 +573,6 @@ var styles = StyleSheet.create({
   icon: {
     width: 20,
     height: 20,
-    // marginTop: 15,
   },
   row: {
     flexDirection: 'row'
@@ -592,12 +592,10 @@ var styles = StyleSheet.create({
   navBarLeftButton: {
     paddingLeft: 10,
     paddingRight: 25,
-    // paddingBottom: 10
   },
   navBarRightButton: {
     paddingLeft: 25,
     paddingRight: 10,
-    // paddingBottom: 10
   },
   navBarButtonText: {
     color: '#7AAAC3',
@@ -606,21 +604,6 @@ var styles = StyleSheet.create({
 
 AppRegistry.registerComponent('Tradle', function() { return TiMApp });
 
-  // orgImage: {
-  //   width: 20,
-  //   height: 20,
-  //   marginTop: 15,
-  //   marginRight: 3,
-  //   borderRadius: 10
-  // },
-  // navBar: {
-  //   marginTop: 10,
-  //   padding: 3
-  // },
-  // navBarText: {
-  //   fontSize: 17,
-  //   // marginBottom: 7
-  // },
   // render() {
   //   var props = {db: this.state.db};
   //   return (
