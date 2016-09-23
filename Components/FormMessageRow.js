@@ -160,29 +160,30 @@ class FormMessageRow extends Component {
     var len = photoUrls.length;
     var inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
     var photoStyle = {};
-    // var height;
+    var height;
 
-    // if (inRow > 0) {
-    //   if (inRow === 1) {
-    //     var ww = Math.max(240, msgWidth / 2)
-    //     var hh = ww * 280 / 240
-    //     photoStyle = [styles.bigImage, {
-    //       width:  ww,
-    //       height: hh
-    //     }]
-    //   }
-    //   else if (inRow === 2)
-    //     photoStyle = styles.mediumImage;
-    //   else
-    //     photoStyle = styles.image;
-    // }
+    if (inRow > 0) {
+      if (inRow === 1) {
+        let msgWidth = utils.dimensions(FormMessageRow).width - (isMyMessage ? 70 : 50)
+        var ww = Math.max(240, msgWidth / 2)
+        var hh = ww * 280 / 240
+        photoStyle = [styles.bigImage, {
+          width:  ww,
+          height: hh
+        }]
+      }
+      else if (inRow === 2)
+        photoStyle = styles.mediumImage;
+      else
+        photoStyle = styles.image;
+    }
 
     return (
       <View style={{margin: 1, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}}>
         {date}
         {messageBody}
         <View style={photoListStyle}>
-          <PhotoList photos={photoUrls} resource={this.props.resource} style={[{marginTop: -5}]} navigator={this.props.navigator} numberInRow={inRow} />
+          <PhotoList photos={photoUrls} resource={this.props.resource} style={[photoStyle, {marginTop: -5}]} navigator={this.props.navigator} numberInRow={inRow} />
         </View>
         {sendStatus}
       </View>
