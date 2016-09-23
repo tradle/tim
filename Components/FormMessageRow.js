@@ -10,10 +10,12 @@ var Icon = require('react-native-vector-icons/Ionicons');
 var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin');
 var equal = require('deep-equal')
+var makeResponsive = require('./makeResponsive')
 
 var reactMixin = require('react-mixin');
 
 var STRUCTURED_MESSAGE_COLOR
+const MAX_WIDTH = 400
 
 import {
   StyleSheet,
@@ -36,6 +38,7 @@ class FormMessageRow extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     return !equal(this.props.resource, nextProps.resource) ||
            !equal(this.props.to, nextProps.to)             ||
+           this.props.orientation != nextProps.orientation ||
            this.props.sendStatus !== nextProps.sendStatus
   }
   render() {
@@ -131,11 +134,8 @@ class FormMessageRow extends Component {
     // HACK that solves the case when the message is short and we don't want it to be displayed
     // in a bigger than needed bubble
     var messageBody;
-    var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
-    if (isMyMessage)
-      viewStyle.marginLeft = 70
-    else
-      viewStyle.marginRight = 50
+    let msgWidth = utils.dimensions(FormMessageRow).width - (isMyMessage ? 70 : 50)
+    var viewStyle = {width: Math.min(msgWidth, MAX_WIDTH), flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
 
     messageBody =
       <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
@@ -164,7 +164,6 @@ class FormMessageRow extends Component {
 
     if (inRow > 0) {
       if (inRow === 1) {
-        let msgWidth = utils.dimensions(FormMessageRow).width - (isMyMessage ? 70 : 50)
         var ww = Math.max(240, msgWidth / 2)
         var hh = ww * 280 / 240
         photoStyle = [styles.bigImage, {
@@ -440,6 +439,7 @@ var styles = StyleSheet.create({
   }
 });
 reactMixin(FormMessageRow.prototype, RowMixin);
+FormMessageRow = makeResponsive(FormMessageRow)
 
 module.exports = FormMessageRow;
 

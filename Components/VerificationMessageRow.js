@@ -9,11 +9,12 @@ var Icon = require('react-native-vector-icons/Ionicons');
 var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin');
 var equal = require('deep-equal')
+var makeResponsive = require('./makeResponsive')
 
 var reactMixin = require('react-mixin');
 
 const VERIFICATION_BG = '#FBFFE5' //'#F6FFF0';
-
+const MAX_WIDTH = 400
 import {
   Image,
   StyleSheet,
@@ -38,6 +39,7 @@ class VerificationMessageRow extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     return !equal(this.props.resource, nextProps.resource) ||
            !equal(this.props.to, nextProps.to)             ||
+           this.props.orientation != nextProps.orientation ||
            this.props.sendStatus !== nextProps.sendStatus
   }
   render() {
@@ -51,7 +53,10 @@ class VerificationMessageRow extends Component {
              : <View />;
 
     var isMyMessage = this.isMyMessage();
-//    var msgWidth = isMyMessage ? DeviceWidth - 70 : DeviceWidth - 50;
+    var w = utils.dimensions(VerificationMessageRow).width
+    var msgWidth = isMyMessage ? w - 70 : w - 50;
+    msgWidth = Math.min(msgWidth, MAX_WIDTH)
+    var viewStyle = {width: msgWidth, flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
 
     var msgModel = utils.getModel(resource.document[constants.TYPE]).value;
     var orgName = resource.organization  ? resource.organization.title : ''
@@ -76,11 +81,7 @@ class VerificationMessageRow extends Component {
                     </View>
                   </View>
 
-    var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start', backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}
-    if (isMyMessage)
-      viewStyle.marginLeft = 70
-    else
-      viewStyle.marginRight = 50
+    var viewStyle = {width: msgWidth, flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start', backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}
     let addStyle = [styles.verificationBody, {backgroundColor: this.props.bankStyle.VERIFICATION_BG, borderColor: bgColor}];
     let messageBody =
           <TouchableHighlight onPress={this.verify.bind(this, resource)} underlayColor='transparent'>
@@ -190,6 +191,7 @@ var styles = StyleSheet.create({
   },
 });
 reactMixin(VerificationMessageRow.prototype, RowMixin);
+VerificationMessageRow = makeResponsive(VerificationMessageRow)
 
 module.exports = VerificationMessageRow;
 
