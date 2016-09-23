@@ -190,8 +190,13 @@ class MessageRow extends Component {
       let strName = utils.getStringName(message)
       if (strName)
         message = translate(strName)
+      if (resource.form) {
+        let formTitle = translate(resource.form)
+        if (formTitle.length > message.length)
+          message = formTitle
+      }
     }
-
+    // HACK
     let numberOfCharsInWidth = msgWidth / 10
     let longMessage = isSimpleMessage  &&  message ? numberOfCharsInWidth < message.length : false
     if (showMessageBody) {
