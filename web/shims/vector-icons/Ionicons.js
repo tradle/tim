@@ -10,8 +10,13 @@ const normalized = {
   'md-checkmark': 'md-check',
   'ios-checkmark-circle-outline': 'ios-checkmark-empty',
   'ios-call-outline': 'ios-telephone',
-  'ios-close-circle-outline': 'ios-close-circled'
+  'ios-close-circle-outline': 'ios-close-circled',
+  'ios-ribbon': 'ios-ribbon-b',
 }
+
+// find mapping here:
+// FROM: http://ionicframework.com/docs/v2/ionicons/
+// TO: http://ionicons.com/
 
 module.exports = props => {
   const Icon = getIconComponent(props.name)
