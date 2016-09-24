@@ -81,8 +81,8 @@ class MessageView extends Component {
         'Verify ' + utils.getDisplayName(resource, model.properties),
         null,
         [
-          {text: 'Ok', onPress: this.verify.bind(this)},
           {text: 'Cancel', onPress: () => console.log('Canceled!')},
+          {text: 'Ok', onPress: this.verify.bind(this)},
         ]
       )
     }
@@ -97,8 +97,8 @@ class MessageView extends Component {
         'Sending message to ' + resource.from.title,
         msg,
         [
-          {text: 'Ok', onPress: this.createError.bind(this, msg)},
           {text: 'Cancel', onPress: () => console.log('Canceled!')},
+          {text: 'Ok', onPress: this.createError.bind(this, msg)},
         ]
       )
       // AlertIOS.prompt(
