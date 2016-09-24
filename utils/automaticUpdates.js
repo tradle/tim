@@ -3,7 +3,7 @@ import { AsyncStorage, Alert } from 'react-native'
 import utils from './utils'
 import Actions from '../Actions/Actions'
 
-let CodePush = !__DEV__ && require('react-native-code-push')
+let CodePush = !__DEV__ && !utils.isSimulator() && require('react-native-code-push')
 let ON = false
 let CHECKING
 // every 10 mins
@@ -87,7 +87,10 @@ function sync () {
     syncStatus => {
       if (syncStatus === CodePush.SyncStatus.UPDATE_INSTALLED) {
         return AsyncStorage.setItem(CODE_UPDATE_KEY, '1')
-          .then(() => downloadedUpdate = true)
+          .then(() => {
+            downloadedUpdate = true
+            Actions.downloadedCodeUpdate()
+          })
       }
     },
     err => false
