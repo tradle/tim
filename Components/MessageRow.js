@@ -806,57 +806,63 @@ class MessageRow extends Component {
     let color = isMyMessage
               ? {color: '#AFBBA8'} //{color: STRUCTURED_MESSAGE_COLOR}
               : {color: '#2892C6'}
-    let link = sameFormRequestForm  &&  !resource.documentCreated
-             ? <View style={[styles.rowContainer, {paddingVertical: 10, alignSelf: 'center'}]}>
-                 <View style={styles.textContainer}>
-                 <TouchableHighlight underlayColor='transparent' style={{paddingRight: 15}} onPress={() => {
-                   this.createNewResource(form, isMyMessage)
-                 }}>
-                   <View style={styles.multiEntryButton}>
-                     <Text style={styles.multiEntryText}>   {translate('addSameForm')}   </Text>
-                   </View>
-                 </TouchableHighlight>
-                 <TouchableHighlight underlayColor='transparent' onPress={() => {
-                    Alert.alert(
-                      translate('areYouSureAboutNextForm', translate(form)),
-                      null,
-                      [
-                        {text: translate('Ok'), onPress: () => {
-                          Actions.addMessage({
-                            from: resource.to,
-                            to: resource.from,
-                            [constants.TYPE]: NEXT_FORM_REQUEST,
-                            after: form.id
-                          })
-                          var params = {
-                            value: {documentCreated: true},
-                            resource: resource,
-                            meta: utils.getModel(resource[constants.TYPE]).value
-                          }
-                          Actions.addItem(params)
-                         }},
-                        {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-                      ]
-                    )
-                 }}>
-                   <View style={styles.multiEntryButton}>
-                     <Text style={styles.multiEntryText}>   {translate('getNextForm')}   </Text>
-                   </View>
+    let link
+    if (sameFormRequestForm  &&  !resource.documentCreated) {
+       link = <View style={[styles.rowContainer, {paddingVertical: 10, alignSelf: 'center'}]}>
+               <View style={styles.textContainer}>
+               <TouchableHighlight underlayColor='transparent' style={{paddingRight: 15}} onPress={() => {
+                 this.createNewResource(form, isMyMessage)
+               }}>
+                 <View style={styles.multiEntryButton}>
+                   <Text style={styles.multiEntryText}>   {translate('addSameForm')}   </Text>
+                 </View>
+               </TouchableHighlight>
+               <TouchableHighlight underlayColor='transparent' onPress={() => {
+                  Alert.alert(
+                    translate('areYouSureAboutNextForm', translate(form)),
+                    null,
+                    [
+                      {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+                      {text: translate('Ok'), onPress: () => {
+                        Actions.addMessage({
+                          from: resource.to,
+                          to: resource.from,
+                          [constants.TYPE]: NEXT_FORM_REQUEST,
+                          after: form.id
+                        })
+                        var params = {
+                          value: {documentCreated: true},
+                          resource: resource,
+                          meta: utils.getModel(resource[constants.TYPE]).value
+                        }
+                        Actions.addItem(params)
+                       }},
+                    ]
+                  )
+               }}>
+                 <View style={styles.multiEntryButton}>
+                   <Text style={styles.multiEntryText}>   {translate('getNextForm')}   </Text>
+                 </View>
+              </TouchableHighlight>
+              </View>
+             </View>
+    }
+    else if (isMyMessage)
+      link = <Text style={[styles.resourceTitle, color]}>{translate(form)}</Text>
+    else {
+      let view = <View style={styles.rowContainer}>
+                   <Text style={[styles.resourceTitle, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(form)}</Text>
+                   <Icon style={resource.documentCreated  ? styles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}} size={20} name={'ios-arrow-forward'} />
+                 </View>
+      if (resource.documentCreated)
+        link = view
+      else
+        link =  <TouchableHighlight underlayColor='transparent' onPress={() => {
+                  this.createNewResource(form, isMyMessage)
+                }}>
+                  {view}
                 </TouchableHighlight>
-                </View>
-               </View>
-              : isMyMessage
-                 ? <Text style={[styles.resourceTitle, color]}>{translate(form)}</Text>
-                 : <TouchableHighlight underlayColor='transparent' onPress={() => {
-                       this.createNewResource(form, isMyMessage)
-                     }}>
-
-                   <View style={styles.rowContainer}>
-                     <Text style={[styles.resourceTitle, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(form)}</Text>
-                     <Icon style={resource.documentCreated  ? styles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}} size={20} name={'ios-arrow-forward'} />
-                   </View>
-                  </TouchableHighlight>
-
+    }
     let strName = sameFormRequestForm ? translate('addAnotherFormOrGetNext', translate(form)) : utils.getStringName(message)
     let str = strName ? utils.translate(strName) : message
     let msg = <View key={this.getNextKey()}>
