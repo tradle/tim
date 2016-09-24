@@ -204,8 +204,8 @@ class VerificationRow extends Component {
       translate('confirmRevoke', resource.to.organization.title),
       null,
       [
+        {text: translate('cancel'), onPress: () => console.log('Cancel')},
         {text: 'OK', onPress: () =>  AlertIOS.alert(translate('willBeAvailable'))},
-        {text: translate('cancel'), onPress: () => console.log('Cancel')}
       ]
     )
   }

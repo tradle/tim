@@ -33,8 +33,8 @@ class VerificationButton extends Component {
               'Verify ' + utils.getDisplayName(resource, model.properties),
               null,
               [
-                {text: 'Verify', onPress: this.props.verify.bind(this)},
                 {text: 'Cancel', onPress: () => console.log('Canceled!')},
+                {text: 'Verify', onPress: this.props.verify.bind(this)},
               ]
             )
           }>
