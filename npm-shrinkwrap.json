@@ -2279,9 +2279,9 @@
       }
     },
     "global": {
-      "version": "4.3.0",
+      "version": "4.3.1",
       "from": "global@>=4.3.0 <5.0.0",
-      "resolved": "https://registry.npmjs.org/global/-/global-4.3.0.tgz",
+      "resolved": "https://registry.npmjs.org/global/-/global-4.3.1.tgz",
       "dependencies": {
         "process": {
           "version": "0.5.2",
@@ -2817,9 +2817,9 @@
       "resolved": "https://registry.npmjs.org/jsonparse/-/jsonparse-1.2.0.tgz"
     },
     "JSONStream": {
-      "version": "1.1.4",
+      "version": "1.2.1",
       "from": "JSONStream@>=1.0.3 <2.0.0",
-      "resolved": "https://registry.npmjs.org/JSONStream/-/JSONStream-1.1.4.tgz"
+      "resolved": "https://registry.npmjs.org/JSONStream/-/JSONStream-1.2.1.tgz"
     },
     "jstransform": {
       "version": "11.0.3",
@@ -3336,9 +3336,9 @@
           "resolved": "https://registry.npmjs.org/deep-extend/-/deep-extend-0.4.1.tgz"
         },
         "glob": {
-          "version": "7.0.6",
+          "version": "7.1.0",
           "from": "glob@>=7.0.3 <8.0.0",
-          "resolved": "https://registry.npmjs.org/glob/-/glob-7.0.6.tgz"
+          "resolved": "https://registry.npmjs.org/glob/-/glob-7.1.0.tgz"
         },
         "vinyl": {
           "version": "1.2.0",
@@ -3398,7 +3398,7 @@
       "dependencies": {
         "isarray": {
           "version": "1.0.0",
-          "from": "isarray@>=1.0.0 <1.1.0",
+          "from": "isarray@~1.0.0",
           "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
         },
         "readable-stream": {
@@ -3463,9 +3463,9 @@
       "resolved": "https://registry.npmjs.org/mime-types/-/mime-types-2.1.11.tgz"
     },
     "min-document": {
-      "version": "2.18.1",
-      "from": "min-document@>=2.6.1 <3.0.0",
-      "resolved": "https://registry.npmjs.org/min-document/-/min-document-2.18.1.tgz"
+      "version": "2.19.0",
+      "from": "min-document@>=2.19.0 <3.0.0",
+      "resolved": "https://registry.npmjs.org/min-document/-/min-document-2.19.0.tgz"
     },
     "minimalistic-assert": {
       "version": "1.0.0",
@@ -4184,7 +4184,7 @@
     },
     "react-native": {
       "version": "0.33.0",
-      "from": "react-native@>=0.33.0 <0.34.0",
+      "from": "react-native@0.33.0",
       "resolved": "https://registry.npmjs.org/react-native/-/react-native-0.33.0.tgz",
       "dependencies": {
         "commander": {
@@ -4722,8 +4722,8 @@
     },
     "sendy": {
       "version": "2.3.0",
-      "from": "sendy@latest",
-      "resolved": "https://registry.npmjs.org/sendy/-/sendy-2.3.0.tgz"
+      "from": "mvayngrib/sendy#8165c21",
+      "resolved": "git://github.com/mvayngrib/sendy.git#8165c21f6f12b7742646c3c8d785946c3eae8282"
     },
     "sendy-axolotl": {
       "version": "1.0.1",
