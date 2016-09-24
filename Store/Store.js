@@ -139,7 +139,7 @@ const TLSClient = require('sendy-axolotl')
 //   }
 // })
 
-const SENDY_OPTS = { resendInterval: 2000, mtu: 10000 }
+const SENDY_OPTS = { resendInterval: 2000, mtu: 10000, autoConnect: true }
 // const newOTRSwitchboard = require('sendy-otr-ws').Switchboard
 const newSwitchboard = SendyWS.Switchboard
 const WebSocketClient = SendyWS.Client
@@ -535,10 +535,11 @@ var Store = Reflux.createStore({
 
       // this timeout is not for sending the entire message
       // but rather an idle connection timeout
-      messenger.setTimeout(60000)
       messenger.send(identifier, msg, cb)
+      messenger.setTimeout(20000)
     }
 
+    // meDriver = timeFunctions(meDriver)
     this.getInfo(SERVICE_PROVIDERS_BASE_URLS, true)
     .then(() => {
       if (!me  ||  !SERVICE_PROVIDERS)
@@ -5505,6 +5506,7 @@ var Store = Reflux.createStore({
       batch.push({type: 'put', key: m.id, value: m});
     });
 
+    // return Promise.resolve()
     return db.batch(batch)
           .then(function() {
             return self.loadMyResources();
@@ -5623,19 +5625,22 @@ function timeFunctions (obj) {
       }
 
       return ret
-        .catch(err => {
-          recordDuration()
-          throw err
-        })
         .then(val => {
           recordDuration()
           return val
+        }, err => {
+          recordDuration()
+          throw err
         })
 
       function recordDuration () {
         var ms = stopTimer()
         total.time += ms
         total.calls++
+        // if (k === 'send' || k === 'receive' || ms > 200) {
+        //   Alert.alert(`${k} took`, '' + ms)
+        // }
+
         timerDebug(`${k} took ${ms}ms. ${total.calls} calls totaled ${total.time}ms`)
       }
     }
