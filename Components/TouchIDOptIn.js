@@ -10,6 +10,7 @@ import {
 
 import React, { Component, PropTypes } from 'react'
 import ArticleView from './ArticleView'
+import utils from '../utils/utils'
 
 const BG_IMAGE = require('../img/bg.png')
 const TOUCH_ID_IMG = require('../img/touchid2.png')
@@ -33,7 +34,7 @@ class TouchIDOptIn extends Component {
   }
   render() {
         // <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: Device.width, height: Device.height}} />
-    let width, height = utils.dimensions(TouchIDOptIn).width
+    let { width, height } = utils.dimensions(TouchIDOptIn)
           // <Text style={[styles.text, { paddingTop: 20, fontSize: 15 }]}>
           //   You can always enable/disable it on your profile
           // </Text>
