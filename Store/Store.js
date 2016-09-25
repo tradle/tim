@@ -13,7 +13,6 @@ import ReactNative, {
 import AsyncStorage from './Storage'
 import * as LocalAuth from '../utils/localAuth'
 import Push from '../utils/push'
-// import DeviceInfo from 'react-native-device-info'
 
 var path = require('path')
 var BeSafe = require('asyncstorage-backup')
@@ -26,7 +25,6 @@ var deepEqual = require('deep-equal')
 
 var debug = Debug('Store')
 var employee = require('../people/employee.json')
-// var isConnected
 
 var timerDebug = Debug('TIMER')
 var Q = require('q');
@@ -421,21 +419,6 @@ var Store = Reflux.createStore({
       // return self.loadModels()
     })
   },
-  createFromIdentity(r) {
-    var rr = {};
-    if (r.name) {
-      for (var p in r.name)
-        rr[p] = r.name[p];
-    }
-    if (r.location) {
-      for (var p in r.location)
-        rr[p] = r.location[p];
-    }
-    for (var p in r)
-      if (p !== 'name' && p !== 'location')
-        rr[p] = r[p];
-    return rr;
-  },
   buildDriver ({ keys, identity, encryption }) {
     var self = this
     var keeper = createKeeper({
@@ -589,6 +572,7 @@ var Store = Reflux.createStore({
         chatMessages[id].sort(function(a, b) {
           return a.time - b.time;
         })
+        chatMessages[id] = this.filterChatMessages(chatMessages[id], id)
       }
     })
     .catch(function(err) {
@@ -597,6 +581,115 @@ var Store = Reflux.createStore({
 
     return Q(meDriver)
   },
+
+  // Filtered result contains only messages that get displayed
+  filterChatMessages(messages, orgId, lastId) {
+    let meId = utils.getId(me)
+    let productToForms = {}
+    // Compact all FormRequests that were fulfilled
+    for (let i=messages.length - 1; i>=0; i--) {
+      let r = list[messages[i].id].value
+      if (r[TYPE] !== FORM_REQUEST)
+        continue
+
+      if (!r.document) {// && r.documentCreated)
+      // delete list[id]
+        let forms = productToForms[r.product]
+        if (!forms)
+          productToForms[r.product] = {}
+        let formIdx = productToForms[r.product][r.form]
+        if (typeof formIdx !== 'undefined') {
+          list[messages[formIdx]]
+          messages.splice(formIdx, 1)
+        }
+        productToForms[r.product][r.form] = i
+      }
+    }
+    // Compact all SelfIntroduction
+    messages = messages.filter((rr, i) => {
+      let r = list[rr.id].value
+      return r[TYPE] === SELF_INTRODUCTION ? false : true
+        // delete list[id]
+    })
+    let newResult = messages.filter((rr, i) => {
+      let time = rr.time
+      let id = rr.id
+      let type = id.split('_')[0]
+      // Compact ProductList resources that go one after another
+      if (type === PRODUCT_LIST  &&  i !== messages.length - 1) {
+        var next = messages[i + 1]
+
+        if (next && next.id.split('_')[0] === PRODUCT_LIST) {
+          // delete list[id]
+          return false
+        }
+      }
+      // if (r[TYPE] === CUSTOMER_WAITING) {
+      //   let f = list[utils.getId(r.from)].value.organization
+      //   let t = list[utils.getId(r.to)].value.organization
+      //   if (utils.getId(f) === utils.getId(t))
+      //     return false
+      // }
+      let r = list[rr.id].value
+
+      // Check if there was request for the next form after multy-entry form
+      let fromId = utils.getId(r.from)
+
+      if (!me.isEmployee  &&  fromId !== meId  &&  list[fromId]) {
+        let rFrom = list[fromId].value
+        if (!rFrom.bot) {
+          let photos = list[fromId].value.photos
+          if (photos)
+            r.from.photo = photos[0]
+          else
+            r.from.photo = employee
+        }
+      }
+      let m = this.getModel(r[TYPE]).value
+      let isMyProduct = m.subClassOf === MY_PRODUCT
+      let isForm = !isMyProduct && m.subClassOf === FORM
+      // r.from.photos = list[utils.getId(r.from)].value.photos;
+      // var to = list[utils.getId(r.to)]
+      // if (!to) console.log(r.to)
+      // r.to.photos = to  &&  to.value.photos;
+      if (isMyProduct)
+        r.from.organization = list[utils.getId(r.from)].value.organization
+      else if (isForm) {
+        // set organization and photos for items properties for better displaying
+        let form = list[utils.getId(r.to)].value
+        if (orgId  &&  r.sharedWith  &&  r.sharedWith.length > 1) {
+          // if (utils.getId(r.to.organization) !== toOrgId) {
+          //   let filteredVerifications = this.getSharedVerificationsAboutThisForm(r, toOrgId)
+          // }
+        }
+        r.to.organization = form.organization
+        for (var p in r) {
+          if (!m.properties[p]  ||  m.properties[p].type !== 'array' ||  !m.properties[p].items.ref)
+            continue
+          let pModel = this.getModel(m.properties[p].items.ref).value
+          if (pModel.properties.photos) {
+            let items = r[p]
+            items.forEach((ir) => {
+              let itemPhotos = list[utils.getId(ir)].value.photos
+              if (itemPhotos)
+                ir.photo = itemPhotos[0].url
+            })
+          }
+        }
+      }
+      return true
+    })
+    if (lastId  &&  lastId.split('_')[0] === PRODUCT_LIST) {
+      let i=newResult.length - 1
+      for (; i>=0; i--)
+        if (newResult[i][TYPE] !== PRODUCT_LIST)
+          break
+        newResult.splice(i, 1)
+    }
+    return newResult
+    // return newResult.reverse()
+  },
+
 
   getInfo(serverUrls, retry, id) {
     let self = this
@@ -691,23 +784,6 @@ var Store = Reflux.createStore({
     //   meDriver.watchTxs(whitelist)
     //   return meDriver
     // })
-  },
-
-  onAddApp(serverUrl) {
-    let parts = serverUrl.split(';')
-    // let idx = serverUrl.lastIndexOf('/')
-    // let id = parts[parts.length - 1]
-    // let url = parts.slice(0, parts.length - 1).join('/')
-
-    return this.getInfo([parts[0]], false, parts[1])
-    .then(() => {
-      this.trigger({action: 'addApp'})
-      // let list = self.searchNotMessages({modelName: ORGANIZATION})
-      // this.trigger({
-      //   action: 'list',
-      //   list: list,
-      // })
-    })
   },
 
   onGetEmployeeInfo(code) {
@@ -1299,7 +1375,6 @@ var Store = Reflux.createStore({
       debugger
     })
   },
-
   // dhtFor (identity, port) {
   //   var dht = new DHT({
   //     nodeId: this.nodeIdFor(identity),
@@ -1486,7 +1561,7 @@ var Store = Reflux.createStore({
 
           var msg = {
             message: me.firstName + ' is waiting for the response',
-            [TYPE]: constants.TYPES.SELF_INTRODUCTION,
+            [TYPE]: SELF_INTRODUCTION,
             identity: identity[0].publishedIdentity,
             name: me.firstName,
             from: me,
@@ -1604,6 +1679,23 @@ var Store = Reflux.createStore({
       sendParams.to = { fingerprint: this.getFingerprint(list[toId].value) }
     return sendParams
   },
+  disableOtherFormRequestsLikeThis(rr) {
+    let fromRep = utils.getId(rr.from)
+    let orgId = utils.getId(list[fromRep].value.organization)
+    let messages = chatMessages[orgId]
+    messages.forEach((r) => {
+      let m = list[r.id].value
+      if (m[TYPE] === FORM_REQUEST  &&
+          m.product === rr.product  &&
+          m.form === rr.form        &&
+          !m.document               &&
+          !m.documentCreated) {
+        m.documentCreated = true
+        db.put(utils.getId(m), m)
+      }
+    })
+
+  },
   // Every chat has it's own messages array where
   // all the messages present in order they were received
   addMessagesToChat(id, r, isInit, timeShared) {
@@ -1611,8 +1703,16 @@ var Store = Reflux.createStore({
       return
     let messages = chatMessages[id]
     let rid = utils.getId(r)
-    if (messages) {
+    if (messages  &&  messages.length) {
       if (!isInit) {
+        if (r[TYPE] === SELF_INTRODUCTION)
+          return
+        if (r[TYPE] === PRODUCT_LIST) {
+          let msgId = messages[messages.length - 1].id
+          if (msgId.split('_')[0] === PRODUCT_LIST)
+            messages.splice(messages.length - 1, 1)
+        }
+  //       return false
         let idx = -1
         for (let i=0; i<messages.length  &&  !idx; i++)
           if (messages[i].id === rid)
@@ -1979,7 +2079,7 @@ var Store = Reflux.createStore({
 
           var msg = {
             message: me.firstName + ' is waiting for the response',
-            [TYPE]: constants.TYPES.SELF_INTRODUCTION,
+            [TYPE]: SELF_INTRODUCTION,
             identity: meDriver.identity,
             name: me.firstName,
             from: me,
@@ -2144,7 +2244,7 @@ var Store = Reflux.createStore({
         // hack: we don't know root hash yet, use a fake
         if (returnVal.documentCreated)  {
           var params = {action: 'addItem', resource: returnVal}
-
+          self.disableOtherFormRequestsLikeThis(returnVal)
           // don't save until the real resource is created
           list[utils.getId(returnVal)].value = returnVal
           self.trigger(params);
@@ -2854,7 +2954,6 @@ var Store = Reflux.createStore({
     }
     return result;
   },
-
   searchMessages(params) {
     var query = params.query;
     var modelName = params.modelName;
@@ -2863,7 +2962,7 @@ var Store = Reflux.createStore({
     if (typeof prop === 'string')
       prop = meta[prop];
     var backlink = prop ? (prop.items ? prop.items.backlink : prop) : null;
-    var foundResources = {};
+    var foundResources = [];
     var props = meta.properties;
 
     // var required = meta.required;
@@ -2875,7 +2974,7 @@ var Store = Reflux.createStore({
       chatTo = list[utils.getId(chatTo)].value
     var chatId = chatTo ? utils.getId(chatTo) : null;
     var isChatWithOrg = chatTo  &&  chatTo[TYPE] === ORGANIZATION;
-    var toId
+    var toOrgId
     var toOrg
     let thisChatMessages
 
@@ -2886,15 +2985,15 @@ var Store = Reflux.createStore({
       chatTo = rep
       chatId = utils.getId(chatTo)
       // isChatWithOrg = false
-      toId = utils.getId(params.to)
-      toOrg = list[toId].value
-      thisChatMessages = chatMessages[toId]
+      toOrgId = utils.getId(params.to)
+      toOrg = list[toOrgId].value
+      thisChatMessages = chatMessages[toOrgId]
     }
     else {
       if (chatTo) {
         if (chatTo.organization  &&  !meOrgId) {
-          toId = utils.getId(chatTo.organization)
-          thisChatMessages = chatMessages[toId]
+          toOrgId = utils.getId(chatTo.organization)
+          thisChatMessages = chatMessages[toOrgId]
         }
         else
           thisChatMessages = chatMessages[utils.getId(chatTo)]
@@ -2964,23 +3063,14 @@ var Store = Reflux.createStore({
     for (let i=ii; i>=0; i--) {
       var key = thisChatMessages[i].id
       var iMeta = null;
-      if (isAllMessages) {
-        if (implementors) {
-          implementors.some((impl) => {
-            if (impl.id === key.split('_')[0]) {
-              iMeta = impl;
-              return true
-            }
-          })
-          if (!iMeta)
-            continue;
-        }
-      }
+      if (isAllMessages)
+        iMeta = utils.getModel(key.split('_')[0]).value
       else if (list[key].value[TYPE] !== modelName) {
         var rModel = this.getModel(list[key].value[TYPE])
         if (!rModel)
           continue
         rModel = rModel.value;
+        // Checks for the first level of subClasses
         if (rModel.subClassOf !== modelName)
           continue;
       }
@@ -3029,10 +3119,10 @@ var Store = Reflux.createStore({
       }
 
       var isSharedWith = false, timeResourcePair = null
-      if (r.sharedWith  &&  toId) {
+      if (r.sharedWith  &&  toOrgId) {
         var sharedWith = r.sharedWith.filter(function(r) {
           let org = list[r.bankRepresentative].value.organization
-          return (org) ? utils.getId(org) === toId : false
+          return (org) ? utils.getId(org) === toOrgId : false
         })
         isSharedWith = sharedWith.length !== 0
         if (isSharedWith) {
@@ -3048,17 +3138,10 @@ var Store = Reflux.createStore({
         if (backlink  &&  r[backlink]) {
           var s = params.resource ? utils.getId(params.resource) : chatId
           if (s === utils.getId(r[backlink])) {
-            foundResources[key] = {
-              value: r,
-              time: thisChatMessages[i].time
-            }
+            foundResources.push(r)
             // for Loading earlier resources we don't need to check limit untill we get to the lastId
-            if (limit  &&  Object.keys(foundResources).length === limit) {
-              let result = this.filterResult(foundResources)
-              if (result.length === limit)
-                return this.getSearchResult(result)
-              foundResources = this.packResult(result)
-            }
+            if (limit  &&  foundResources.length === limit)
+              return foundResources.reverse()
           }
 
           continue;
@@ -3072,71 +3155,25 @@ var Store = Reflux.createStore({
         if ((!r.message  ||  r.message.trim().length === 0) && !r.photos &&  !isVerificationR  &&  !isForm  &&  !isMyProduct && !isProductApplication)
           // check if this is verification resource
           continue;
-        var fromID = utils.getId(r.from);
+        // var fromID = utils.getId(r.from);
         var toID = utils.getId(r.to);
 
         if (params.strict) {
           if (chatId !== toID)
             continue
         }
-        if (fromID !== meId  &&  toID !== meId  &&  toID != meOrgId)
-          continue;
-        if (isChatWithOrg) {
-          if (isVerificationR) {
-            let org = list[fromID].value.organization
-            if (!org)
-              org = list[toID].value.organization
-
-            let msgOrgId = utils.getId(org)
-            if (toId !== msgOrgId) {
-              // if (!isSharedWith)
-                continue
-              // let sharedWithThisOrg = r.sharedWith.filter((s) => {
-              //   let rep = list[s.bankRepresentative].value
-              //   if (utils.getId(rep.organization) === toId)
-              //     return true
-              // })
-              // if (!sharedWithThisOrg  ||  !sharedWithThisOrg.length)
-              //   continue
-            }
-          }
-          else {
-            let msgOrg
-            if (toID !== meId) {
-              msgOrg = list[toID].value.organization
-              if (!msgOrg)
-                msgOrg = list[fromID].value.organization
-            }
-            else {
-              msgOrg = list[fromID].value.organization
-              if (!msgOrg)
-                msgOrg = list[toID].value.organization
-            }
-            let msgOrgId = utils.getId(msgOrg)
-            if (toId !== msgOrgId  &&  (!isSharedWith || isVerificationR)) // do not show shared verifications
-              continue
-          }
-        }
-        else {
-          if (!isSharedWith  &&  fromID !== chatId  &&  toID != chatId  &&  toID != meOrgId)
-            continue;
-        }
       }
       if (params.strict  &&  chatId !== utils.getId(r.to))
         continue
 
-      if (r.sharedWith  &&  toId  &&  !isSharedWith)
+      if (r.sharedWith  &&  toOrgId  &&  !isSharedWith)
         continue
       if (isVerificationR  ||  r[TYPE] === ADDITIONAL_INFO) {
         var doc = {};
         var rDoc = list[utils.getId(r.document)]
         if (!rDoc) {
-          if (params.isForgetting) {
-            foundResources[key] = {
-              value: r,
-              time: thisChatMessages[i].time
-            }
-          }
+          if (params.isForgetting)
+            foundResources.push(r)
           continue
         }
 
@@ -3168,16 +3205,9 @@ var Store = Reflux.createStore({
         if (!msg)
           msg = r
         // foundResources[key] = msg;
-        foundResources[key] = {
-          value: msg,
-          time: thisChatMessages[i].time
-        }
-        if (limit  &&  Object.keys(foundResources).length === limit) {
-          let result = this.filterResult(foundResources)
-          if (result.length === limit)
-            return this.getSearchResult(result)
-          foundResources = this.packResult(result)
-        }
+        foundResources.push(msg)
+        if (limit  &&  foundResources.length === limit)
+          return foundResources.reverse()
 
         continue;
       }
@@ -3190,162 +3220,23 @@ var Store = Reflux.createStore({
       }
       if (!combinedValue  ||  (combinedValue  &&  (!query || combinedValue.toLowerCase().indexOf(query.toLowerCase()) != -1))) {
         // foundResources[key] = this.fillMessage(r);
-        foundResources[key] = {
-          value: this.fillMessage(r),
-          time: r.time
-        }
+        foundResources.push(this.fillMessage(r))
 
-        if (limit  &&  Object.keys(foundResources).length === limit) {
-          let result = this.filterResult(foundResources)
-          if (result.length === limit)
-            return this.getSearchResult(result)
-          foundResources = this.packResult(result)
-        }
+        if (limit  &&  foundResources.length === limit)
+          return foundResources.reverse()
       }
     }
-
-    let result = this.filterResult(foundResources, lastId, toOrg ? utils.getId(toOrg) : null)
-    if (!result)
+    if (!foundResources.length)
       return
-    return this.getSearchResult(result)
-
-    // if (params.isForgetting)
-    //   return result
-    // return result //.reverse();
+    return foundResources.reverse()
   },
+
   getSearchResult(result) {
     return result.map((r) => {
       return r.value
     })
   },
-  packResult(result) {
-    let foundResources = {}
-    result.forEach((fr) => {
-      foundResources[utils.getId(fr.value)] = fr
-    })
-    return foundResources
-  },
-  filterResult(result, lastId, toOrgId) {
-    if (!result)
-      return
-    if (!Array.isArray(result))
-      result = Object.values(result) //.reverse()
-    if (!result  ||  !result.length)
-      return
 
-    result.sort(function(a, b) {
-      return a.time - b.time;
-    });
-
-    let meId = utils.getId(me)
-    let newResult = result.filter((rr, i) => {
-      let time = rr.time
-      let r = rr.value
-      if (r[TYPE] === PRODUCT_LIST  &&  i !== result.length - 1) {
-        var next = result[i + 1].value
-        if (next && next[TYPE] === PRODUCT_LIST)
-          return false
-      }
-      // if (r[TYPE] === CUSTOMER_WAITING) {
-      //   let f = list[utils.getId(r.from)].value.organization
-      //   let t = list[utils.getId(r.to)].value.organization
-      //   if (utils.getId(f) === utils.getId(t))
-      //     return false
-      // }
-      if (r[TYPE] === SELF_INTRODUCTION) {
-        // var next = result[i + 1]
-        // if (next && next[TYPE] === SELF_INTRODUCTION)
-          return false
-      }
-      // Check if there was request for the next form after multy-entry form
-      if (r[TYPE] === FORM_REQUEST  &&  !r.document && r.documentCreated)
-        return false
-      // Gather info about duplicate requests for the same product
-      // if (r[TYPE] === PRODUCT_APPLICATION)  {
-      //   if (!paRequests[r.product])
-      //     paRequests[r.product] = []
-      //   paRequests[r.product].push(i)
-      // }
-      // if (r[TYPE] === SIMPLE_MESSAGE  &&  r.message) {
-      //   let parts = utils.splitMessage(r.message)
-      //   if (parts.length === 2) {
-      //     let formM = utils.getModel(parts[1])
-      //     if (formM) {
-      //       if (!formRequests[parts[1]])
-      //         formRequests[parts[1]] = []
-      //       formRequests[parts[1]].push(i)
-      //     }
-      //   }
-      // }
-      let fromId = utils.getId(r.from)
-
-      if (!me.isEmployee  &&  fromId !== meId  &&  list[fromId]) {
-        let rFrom = list[fromId].value
-        if (!rFrom.bot) {
-          let photos = list[fromId].value.photos
-          if (photos)
-            r.from.photo = photos[0]
-          else
-            r.from.photo = employee
-        }
-      }
-      let m = this.getModel(r[TYPE]).value
-      let isMyProduct = m.subClassOf === MY_PRODUCT
-      let isForm = !isMyProduct && m.subClassOf === FORM
-      // r.from.photos = list[utils.getId(r.from)].value.photos;
-      // var to = list[utils.getId(r.to)]
-      // if (!to) console.log(r.to)
-      // r.to.photos = to  &&  to.value.photos;
-      if (isMyProduct)
-        r.from.organization = list[utils.getId(r.from)].value.organization
-      else if (isForm) {
-        // set organization and photos for items properties for better displaying
-        let form = list[utils.getId(r.to)].value
-        if (toOrgId  &&  r.sharedWith  &&  r.sharedWith.length > 1) {
-          // if (utils.getId(r.to.organization) !== toOrgId) {
-          //   let filteredVerifications = this.getSharedVerificationsAboutThisForm(r, toOrgId)
-          // }
-        }
-        r.to.organization = form.organization
-        for (var p in r) {
-          if (!m.properties[p]  ||  m.properties[p].type !== 'array' ||  !m.properties[p].items.ref)
-            continue
-          let pModel = this.getModel(m.properties[p].items.ref).value
-          if (pModel.properties.photos) {
-            let items = r[p]
-            items.forEach((ir) => {
-              let itemPhotos = list[utils.getId(ir)].value.photos
-              if (itemPhotos)
-                ir.photo = itemPhotos[0].url
-            })
-          }
-        }
-      }
-      return true
-    })
-    if (lastId  &&  lastId.split('_')[0] === PRODUCT_LIST) {
-      let i=newResult.length - 1
-      for (; i>=0; i--)
-        if (newResult[i][TYPE] !== PRODUCT_LIST)
-          break
-        newResult.splice(i, 1)
-    }
-    return newResult
-    // return newResult.reverse()
-  },
-  // getSharedVerificationsAboutThisForm(form, toOrgId) {
-  //   let result = this.searchMessages({modelName: VERIFICATION, to: utils.getMe(), strict: true})
-  //   // let result = this.searchMessages({modelName: VERIFICATION, to: to, strict: true, filterProps: {from: utils.getMe(), document: utils.getId(form)}})
-  //   let formId = utils.getId(form)
-  //   return result.filter((r) => {
-  //     if (utils.getId(r.document) !== formId)
-  //       return false
-  //     let fromOrgId = utils.getId(list[utils.getId(r.from)].value.organization)
-  //     if (fromOrgId === toOrgId)
-  //       return false
-  //     return true
-  //   })
-  // },
   fillMessage(r) {
     return r
 
@@ -4452,13 +4343,19 @@ var Store = Reflux.createStore({
 
     val[ROOT_HASH] = val[ROOT_HASH]  ||  obj[ROOT_HASH]
     val[CUR_HASH] = obj[CUR_HASH]
-    if (!val.time)
-      val.time = obj.timestamp
 
     var fromId = obj.objectinfo
                ? obj.objectinfo.author
                : obj.txId ? obj.from[ROOT_HASH] : null
-    var from = list[PROFILE + '_' + fromId].value
+    fromId = PROFILE + '_' + fromId
+    var from = list[fromId].value
+    var me = utils.getMe()
+    if (utils.getId(me) === fromId)
+      val.time = val.time || obj.timestamp
+    else {
+      val.time = new Date().getTime()
+      val.sentTime = val.time || obj.timestamp
+    }
     // var from = list[PROFILE + '_' + obj.from[ROOT_HASH]].value
     var type = val[TYPE]
     if (type === FORGET_ME) {
@@ -4514,7 +4411,7 @@ var Store = Reflux.createStore({
       var toId = PROFILE + '_' + obj.to[ROOT_HASH]
       var meId = PROFILE + '_' + me[ROOT_HASH]
       var isSelfIntroduction = model.id === SELF_INTRODUCTION
-      var id = !isSelfIntroduction  &&  toId === meId ? PROFILE + '_' + fromId : toId
+      var id = !isSelfIntroduction  &&  toId === meId ? fromId : toId
       var to = list[id].value
       if (!noTrigger) {
         if (to.organization) {
@@ -4652,7 +4549,7 @@ var Store = Reflux.createStore({
     var fromR = list[fromProfile]
 
     if (!fromR) {
-      if (!val[TYPE] === SELF_INTRODUCTION)
+      if (val[TYPE] !== SELF_INTRODUCTION)
         return
       let name = val.name || (val.identity.name && val.identity.name.formatted)
       fromR = {
@@ -6606,4 +6503,797 @@ function getProviderUrl (provider) {
     return result //.reverse();
   },
 
+  // filterResult(result, lastId, toOrgId) {
+  //   if (!result)
+  //     return
+  //   if (!Array.isArray(result))
+  //     result = Object.values(result) //.reverse()
+  //   if (!result  ||  !result.length)
+  //     return
+
+  //   result.sort(function(a, b) {
+  //     return a.time - b.time;
+  //   });
+
+  //   let meId = utils.getId(me)
+  //   let newResult = result.filter((rr, i) => {
+  //     let time = rr.time
+  //     let r = rr.value
+  //     if (r[TYPE] === PRODUCT_LIST  &&  i !== result.length - 1) {
+  //       var next = result[i + 1].value
+  //       if (next && next[TYPE] === PRODUCT_LIST)
+  //         return false
+  //     }
+  //     // if (r[TYPE] === CUSTOMER_WAITING) {
+  //     //   let f = list[utils.getId(r.from)].value.organization
+  //     //   let t = list[utils.getId(r.to)].value.organization
+  //     //   if (utils.getId(f) === utils.getId(t))
+  //     //     return false
+  //     // }
+  //     if (r[TYPE] === SELF_INTRODUCTION) {
+  //       // var next = result[i + 1]
+  //       // if (next && next[TYPE] === SELF_INTRODUCTION)
+  //         return false
+  //     }
+  //     // Check if there was request for the next form after multy-entry form
+  //     if (r[TYPE] === FORM_REQUEST  &&  !r.document && r.documentCreated)
+  //       return false
+  //     // Gather info about duplicate requests for the same product
+  //     // if (r[TYPE] === PRODUCT_APPLICATION)  {
+  //     //   if (!paRequests[r.product])
+  //     //     paRequests[r.product] = []
+  //     //   paRequests[r.product].push(i)
+  //     // }
+  //     // if (r[TYPE] === SIMPLE_MESSAGE  &&  r.message) {
+  //     //   let parts = utils.splitMessage(r.message)
+  //     //   if (parts.length === 2) {
+  //     //     let formM = utils.getModel(parts[1])
+  //     //     if (formM) {
+  //     //       if (!formRequests[parts[1]])
+  //     //         formRequests[parts[1]] = []
+  //     //       formRequests[parts[1]].push(i)
+  //     //     }
+  //     //   }
+  //     // }
+  //     let fromId = utils.getId(r.from)
+
+  //     if (!me.isEmployee  &&  fromId !== meId  &&  list[fromId]) {
+  //       let rFrom = list[fromId].value
+  //       if (!rFrom.bot) {
+  //         let photos = list[fromId].value.photos
+  //         if (photos)
+  //           r.from.photo = photos[0]
+  //         else
+  //           r.from.photo = employee
+  //       }
+  //     }
+  //     let m = this.getModel(r[TYPE]).value
+  //     let isMyProduct = m.subClassOf === MY_PRODUCT
+  //     let isForm = !isMyProduct && m.subClassOf === FORM
+  //     // r.from.photos = list[utils.getId(r.from)].value.photos;
+  //     // var to = list[utils.getId(r.to)]
+  //     // if (!to) console.log(r.to)
+  //     // r.to.photos = to  &&  to.value.photos;
+  //     if (isMyProduct)
+  //       r.from.organization = list[utils.getId(r.from)].value.organization
+  //     else if (isForm) {
+  //       // set organization and photos for items properties for better displaying
+  //       let form = list[utils.getId(r.to)].value
+  //       if (toOrgId  &&  r.sharedWith  &&  r.sharedWith.length > 1) {
+  //         // if (utils.getId(r.to.organization) !== toOrgId) {
+  //         //   let filteredVerifications = this.getSharedVerificationsAboutThisForm(r, toOrgId)
+  //         // }
+  //       }
+  //       r.to.organization = form.organization
+  //       for (var p in r) {
+  //         if (!m.properties[p]  ||  m.properties[p].type !== 'array' ||  !m.properties[p].items.ref)
+  //           continue
+  //         let pModel = this.getModel(m.properties[p].items.ref).value
+  //         if (pModel.properties.photos) {
+  //           let items = r[p]
+  //           items.forEach((ir) => {
+  //             let itemPhotos = list[utils.getId(ir)].value.photos
+  //             if (itemPhotos)
+  //               ir.photo = itemPhotos[0].url
+  //           })
+  //         }
+  //       }
+  //     }
+  //     return true
+  //   })
+  //   if (lastId  &&  lastId.split('_')[0] === PRODUCT_LIST) {
+  //     let i=newResult.length - 1
+  //     for (; i>=0; i--)
+  //       if (newResult[i][TYPE] !== PRODUCT_LIST)
+  //         break
+  //       newResult.splice(i, 1)
+  //   }
+  //   return newResult
+  //   // return newResult.reverse()
+  // },
+  // getSharedVerificationsAboutThisForm(form, toOrgId) {
+  //   let result = this.searchMessages({modelName: VERIFICATION, to: utils.getMe(), strict: true})
+  //   // let result = this.searchMessages({modelName: VERIFICATION, to: to, strict: true, filterProps: {from: utils.getMe(), document: utils.getId(form)}})
+  //   let formId = utils.getId(form)
+  //   return result.filter((r) => {
+  //     if (utils.getId(r.document) !== formId)
+  //       return false
+  //     let fromOrgId = utils.getId(list[utils.getId(r.from)].value.organization)
+  //     if (fromOrgId === toOrgId)
+  //       return false
+  //     return true
+  //   })
+  // },
+  searchMessages(params) {
+    var query = params.query;
+    var modelName = params.modelName;
+    var meta = this.getModel(modelName).value;
+    var prop = params.prop;
+    if (typeof prop === 'string')
+      prop = meta[prop];
+    var backlink = prop ? (prop.items ? prop.items.backlink : prop) : null;
+    var foundResources = [];
+    var props = meta.properties;
+
+    // var required = meta.required;
+    var meId = utils.getId(me)
+    var meOrgId = me.isEmployee ? utils.getId(me.organization) : null;
+
+    var chatTo = params.to
+    if (chatTo  &&  chatTo.id)
+      chatTo = list[utils.getId(chatTo)].value
+    var chatId = chatTo ? utils.getId(chatTo) : null;
+    var isChatWithOrg = chatTo  &&  chatTo[TYPE] === ORGANIZATION;
+    var toOrgId
+    var toOrg
+    let thisChatMessages
+
+    if (isChatWithOrg) {
+      var rep = this.getRepresentative(chatId)
+      if (!rep)
+        return
+      chatTo = rep
+      chatId = utils.getId(chatTo)
+      // isChatWithOrg = false
+      toOrgId = utils.getId(params.to)
+      toOrg = list[toOrgId].value
+      thisChatMessages = chatMessages[toOrgId]
+    }
+    else {
+      if (chatTo) {
+        if (chatTo.organization  &&  !meOrgId) {
+          toOrgId = utils.getId(chatTo.organization)
+          thisChatMessages = chatMessages[toOrgId]
+        }
+        else
+          thisChatMessages = chatMessages[utils.getId(chatTo)]
+      }
+//       else if (chatId === meId) {
+// console.log('What are we doing here!!! chatId: ' + chatId)
+//         thisChatMessages = chatMessages[chatId]
+//       }
+    }
+    if (!thisChatMessages  &&  (!params.to  ||  chatId === meId)) {
+      thisChatMessages = []
+      Object.keys(list).filter((key) => {
+        let type = list[key].value[TYPE]
+        let m = this.getModel(type)
+        if (!m)
+          return false
+        if (type === modelName                      ||
+           m.value.subClassOf === modelName         ||
+           (modelName === MESSAGE  &&  m.value.interfaces)) {
+          thisChatMessages.push({id: key, time: list[key].value.time})
+          return true
+        }
+      })
+    }
+
+    if (!thisChatMessages  ||  !thisChatMessages.length)
+      return null
+    // if (isChatWithOrg  &&  !chatTo.name) {
+    //   chatTo = list[chatId].value;
+    // }
+    var testMe = chatTo ? chatTo.me : null;
+    if (testMe) {
+      if (testMe === 'me') {
+        if (!originalMe)
+          originalMe = me;
+        testMe = originalMe[ROOT_HASH];
+      }
+
+      isTest = true;
+      var meId = constants.TYPES.PROFILE + '_' + testMe;
+      me = list[meId].value;
+      this.setMe(me);
+      var myIdentities = list[MY_IDENTITIES].value;
+      if (myIdentities)
+        myIdentities.currentIdentity = meId;
+    }
+    // var lastPL
+    // var sharedWithTimePairs = []
+    var from = params.from
+    var limit = params.limit ? params.limit + 1 : null
+    var isAllMessages = meta.isInterface;
+    var implementors = isAllMessages ? utils.getImplementors(modelName) : null;
+    var isVerification = modelName === VERIFICATION  ||  meta.subClassOf === VERIFICATION;
+
+    // for (var key in list) {
+    let lastId = params.lastId
+    let ii = thisChatMessages.length - 1
+    if (lastId) {
+      for (; ii>=0; ii--) {
+        if (thisChatMessages[ii].id === lastId) {
+          ii--
+          break
+        }
+      }
+    }
+    let resourceId = params.resource ? utils.getId(params.resource) : null
+    for (let i=ii; i>=0; i--) {
+      var key = thisChatMessages[i].id
+      var iMeta = null;
+      if (isAllMessages) {
+        iMeta = utils.getModel(key.split('_')[0]).value
+        // if (implementors) {
+        //   implementors.some((impl) => {
+        //     if (impl.id === key.split('_')[0]) {
+        //       iMeta = impl;
+        //       return true
+        //     }
+        //   })
+        //   if (!iMeta)
+        //     continue;
+        // }
+      }
+      else if (list[key].value[TYPE] !== modelName) {
+        var rModel = this.getModel(list[key].value[TYPE])
+        if (!rModel)
+          continue
+        rModel = rModel.value;
+        // Checks for the first level of subClasses
+        if (rModel.subClassOf !== modelName)
+          continue;
+      }
+      if (!iMeta)
+        iMeta = meta;
+      var r = list[key].value;
+      if (r.canceled)
+        continue;
+      var isFormError = isAllMessages && r[TYPE] === FORM_ERROR
+      // Make sure that the messages that are showing in chat belong to the conversation between these participants
+      if (isVerification) {
+        if (r.document) {
+          var d = list[utils.getId(r.document)]
+          if (!d)
+            continue
+
+          if (params.resource  &&  resourceId !== meId  && utils.getId(params.resource) !== utils.getId(d.value))
+            continue
+          r.document = d.value;
+        }
+      }
+      else if (isFormError)
+        r.prefill = list[utils.getId(r.prefill)] ? list[utils.getId(r.prefill)].value : r.prefill
+
+      // HACK to not show service message in customer stream
+      else if (r.message  &&  r.message.length)  {
+        if (r[TYPE] === SELF_INTRODUCTION  &&  !params.isForgetting && (utils.getId(r.to) !== meId))
+          continue
+        if (r.message === '[already published](tradle.Identity)')
+          continue
+        var m = utils.splitMessage(r.message)
+
+        if (m.length === 2) {
+          if (m[1] === PROFILE)
+            continue;
+        }
+        if (chatTo.organization  &&  r[TYPE] === constants.TYPES.CUSTOMER_WAITING) {
+          var rid = utils.getId(chatTo.organization);
+
+          var org = list[utils.getId(r.to)].value.organization
+          var orgId = utils.getId(org)
+          if (!utils.isEmployee(list[utils.getId(chatTo.organization)].value))
+            continue;
+        }
+
+      }
+
+      var isSharedWith = false, timeResourcePair = null
+      if (r.sharedWith  &&  toOrgId) {
+        var sharedWith = r.sharedWith.filter(function(r) {
+          let org = list[r.bankRepresentative].value.organization
+          return (org) ? utils.getId(org) === toOrgId : false
+        })
+        isSharedWith = sharedWith.length !== 0
+        if (isSharedWith) {
+          timeResourcePair = {
+            time: sharedWith[0].timeShared,
+            resource: r
+          }
+        }
+      }
+
+      if (chatTo) {
+        // backlinks like myVerifications, myDocuments etc. on Profile
+        if (backlink  &&  r[backlink]) {
+          var s = params.resource ? utils.getId(params.resource) : chatId
+          if (s === utils.getId(r[backlink])) {
+            foundResources.push(r)
+            // for Loading earlier resources we don't need to check limit untill we get to the lastId
+            if (limit  &&  foundResources.length === limit)
+              return foundResources.reverse()
+          }
+
+          continue;
+        }
+
+        var m = this.getModel(r[TYPE]).value
+        var isVerificationR = r[TYPE] === VERIFICATION  ||  m.subClassOf === VERIFICATION
+        var isForm = m.subClassOf === FORM
+        var isMyProduct = m.subClassOf === MY_PRODUCT
+        let isProductApplication = m.id === PRODUCT_APPLICATION
+        if ((!r.message  ||  r.message.trim().length === 0) && !r.photos &&  !isVerificationR  &&  !isForm  &&  !isMyProduct && !isProductApplication)
+          // check if this is verification resource
+          continue;
+        var fromID = utils.getId(r.from);
+        var toID = utils.getId(r.to);
+
+        if (params.strict) {
+          if (chatId !== toID)
+            continue
+        }
+
+        // if (fromID !== meId  &&  toID !== meId  &&  toID != meOrgId)
+        //   continue;
+        // if (isChatWithOrg) {
+          // if (isVerificationR) {
+          //   let org = list[fromID].value.organization
+          //   if (!org)
+          //     org = list[toID].value.organization
+
+          //   let msgOrgId = utils.getId(org)
+          //   if (toOrgId !== msgOrgId) {
+          //     // if (!isSharedWith)
+          //       continue
+          //     // let sharedWithThisOrg = r.sharedWith.filter((s) => {
+          //     //   let rep = list[s.bankRepresentative].value
+          //     //   if (utils.getId(rep.organization) === toOrgId)
+          //     //     return true
+          //     // })
+          //     // if (!sharedWithThisOrg  ||  !sharedWithThisOrg.length)
+          //     //   continue
+          //   }
+          // }
+          // else {
+          //   let msgOrg
+          //   if (toID !== meId) {
+          //     msgOrg = list[toID].value.organization
+          //     if (!msgOrg)
+          //       msgOrg = list[fromID].value.organization
+          //   }
+          //   else {
+          //     msgOrg = list[fromID].value.organization
+          //     if (!msgOrg)
+          //       msgOrg = list[toID].value.organization
+          //   }
+          //   let msgOrgId = utils.getId(msgOrg)
+          //   if (toOrgId !== msgOrgId  &&  (!isSharedWith || isVerificationR)) // do not show shared verifications
+          //     continue
+          // }
+      //   }
+      //   else {
+      //     if (!isSharedWith  &&  fromID !== chatId  &&  toID != chatId  &&  toID != meOrgId)
+      //       continue;
+      //   }
+      }
+      if (params.strict  &&  chatId !== utils.getId(r.to))
+        continue
+
+      if (r.sharedWith  &&  toOrgId  &&  !isSharedWith)
+        continue
+      if (isVerificationR  ||  r[TYPE] === ADDITIONAL_INFO) {
+        var doc = {};
+        var rDoc = list[utils.getId(r.document)]
+        if (!rDoc) {
+          if (params.isForgetting)
+            foundResources.push(r)
+          continue
+        }
+
+        // TODO: check if we can copy by reference
+        for (var p in rDoc.value) {
+          if (p === 'verifications' || p === 'additionalInfo') continue
+
+          var val = rDoc.value[p]
+          switch (typeof val) {
+            case 'object':
+              if (val) {
+                if (Array.isArray(val))
+                  doc[p] = val.slice(0)
+                else
+                  doc[p] = extend(true, {}, val)
+              }
+              break
+            default:
+              doc[p] = val
+              break
+          }
+        }
+
+        r.document = doc;
+      }
+
+      if (!query) {
+        var msg = this.fillMessage(r);
+        if (!msg)
+          msg = r
+        // foundResources[key] = msg;
+        foundResources.push(msg)
+        if (limit  &&  foundResources.length === limit)
+          return foundResources.reverse()
+
+        continue;
+      }
+       // primitive filtering for this commit
+      var combinedValue = '';
+      for (var rr in props) {
+        if (r[rr] instanceof Array)
+         continue;
+        combinedValue += combinedValue ? ' ' + r[rr] : r[rr];
+      }
+      if (!combinedValue  ||  (combinedValue  &&  (!query || combinedValue.toLowerCase().indexOf(query.toLowerCase()) != -1))) {
+        // foundResources[key] = this.fillMessage(r);
+        foundResources.push(this.fillMessage(r))
+
+        if (limit  &&  foundResources.length === limit)
+          return foundResources.reverse()
+      }
+    }
+    if (!foundResources.length)
+      return
+    return foundResources.reverse()// this.filterResult(foundResources, lastId, toOrg ? utils.getId(toOrg) : null)
+    // result.sort(function(a, b) {
+    //   return a.time - b.time;
+    // });
+    // return this.getSearchResult(result)
+
+    // if (params.isForgetting)
+    //   return result
+    // return result //.reverse();
+  },
+  searchMessages(params) {
+    var query = params.query;
+    var modelName = params.modelName;
+    var meta = this.getModel(modelName).value;
+    var prop = params.prop;
+    if (typeof prop === 'string')
+      prop = meta[prop];
+    var backlink = prop ? (prop.items ? prop.items.backlink : prop) : null;
+    var foundResources = [];
+    var props = meta.properties;
+
+    // var required = meta.required;
+    var meId = utils.getId(me)
+    var meOrgId = me.isEmployee ? utils.getId(me.organization) : null;
+
+    var chatTo = params.to
+    if (chatTo  &&  chatTo.id)
+      chatTo = list[utils.getId(chatTo)].value
+    var chatId = chatTo ? utils.getId(chatTo) : null;
+    var isChatWithOrg = chatTo  &&  chatTo[TYPE] === ORGANIZATION;
+    var toOrgId
+    var toOrg
+    let thisChatMessages
+
+    if (isChatWithOrg) {
+      var rep = this.getRepresentative(chatId)
+      if (!rep)
+        return
+      chatTo = rep
+      chatId = utils.getId(chatTo)
+      // isChatWithOrg = false
+      toOrgId = utils.getId(params.to)
+      toOrg = list[toOrgId].value
+      thisChatMessages = chatMessages[toOrgId]
+    }
+    else {
+      if (chatTo) {
+        if (chatTo.organization  &&  !meOrgId) {
+          toOrgId = utils.getId(chatTo.organization)
+          thisChatMessages = chatMessages[toOrgId]
+        }
+        else
+          thisChatMessages = chatMessages[utils.getId(chatTo)]
+      }
+//       else if (chatId === meId) {
+// console.log('What are we doing here!!! chatId: ' + chatId)
+//         thisChatMessages = chatMessages[chatId]
+//       }
+    }
+    if (!thisChatMessages  &&  (!params.to  ||  chatId === meId)) {
+      thisChatMessages = []
+      Object.keys(list).filter((key) => {
+        let type = list[key].value[TYPE]
+        let m = this.getModel(type)
+        if (!m)
+          return false
+        if (type === modelName                      ||
+           m.value.subClassOf === modelName         ||
+           (modelName === MESSAGE  &&  m.value.interfaces)) {
+          thisChatMessages.push({id: key, time: list[key].value.time})
+          return true
+        }
+      })
+    }
+
+    if (!thisChatMessages  ||  !thisChatMessages.length)
+      return null
+    // if (isChatWithOrg  &&  !chatTo.name) {
+    //   chatTo = list[chatId].value;
+    // }
+    var testMe = chatTo ? chatTo.me : null;
+    if (testMe) {
+      if (testMe === 'me') {
+        if (!originalMe)
+          originalMe = me;
+        testMe = originalMe[ROOT_HASH];
+      }
+
+      isTest = true;
+      var meId = constants.TYPES.PROFILE + '_' + testMe;
+      me = list[meId].value;
+      this.setMe(me);
+      var myIdentities = list[MY_IDENTITIES].value;
+      if (myIdentities)
+        myIdentities.currentIdentity = meId;
+    }
+    // var lastPL
+    // var sharedWithTimePairs = []
+    var from = params.from
+    var limit = params.limit ? params.limit + 1 : null
+    var isAllMessages = meta.isInterface;
+    var implementors = isAllMessages ? utils.getImplementors(modelName) : null;
+    var isVerification = modelName === VERIFICATION  ||  meta.subClassOf === VERIFICATION;
+
+    // for (var key in list) {
+    let lastId = params.lastId
+    let ii = thisChatMessages.length - 1
+    if (lastId) {
+      for (; ii>=0; ii--) {
+        if (thisChatMessages[ii].id === lastId) {
+          ii--
+          break
+        }
+      }
+    }
+    let resourceId = params.resource ? utils.getId(params.resource) : null
+    for (let i=ii; i>=0; i--) {
+      var key = thisChatMessages[i].id
+      var iMeta = null;
+      if (isAllMessages) {
+        iMeta = utils.getModel(key.split('_')[0]).value
+        // if (implementors) {
+        //   implementors.some((impl) => {
+        //     if (impl.id === key.split('_')[0]) {
+        //       iMeta = impl;
+        //       return true
+        //     }
+        //   })
+        //   if (!iMeta)
+        //     continue;
+        // }
+      }
+      else if (list[key].value[TYPE] !== modelName) {
+        var rModel = this.getModel(list[key].value[TYPE])
+        if (!rModel)
+          continue
+        rModel = rModel.value;
+        // Checks for the first level of subClasses
+        if (rModel.subClassOf !== modelName)
+          continue;
+      }
+      if (!iMeta)
+        iMeta = meta;
+      var r = list[key].value;
+      if (r.canceled)
+        continue;
+      var isFormError = isAllMessages && r[TYPE] === FORM_ERROR
+      // Make sure that the messages that are showing in chat belong to the conversation between these participants
+      if (isVerification) {
+        if (r.document) {
+          var d = list[utils.getId(r.document)]
+          if (!d)
+            continue
+
+          if (params.resource  &&  resourceId !== meId  && utils.getId(params.resource) !== utils.getId(d.value))
+            continue
+          r.document = d.value;
+        }
+      }
+      else if (isFormError)
+        r.prefill = list[utils.getId(r.prefill)] ? list[utils.getId(r.prefill)].value : r.prefill
+
+      // HACK to not show service message in customer stream
+      else if (r.message  &&  r.message.length)  {
+        if (r[TYPE] === SELF_INTRODUCTION  &&  !params.isForgetting && (utils.getId(r.to) !== meId))
+          continue
+        if (r.message === '[already published](tradle.Identity)')
+          continue
+        var m = utils.splitMessage(r.message)
+
+        if (m.length === 2) {
+          if (m[1] === PROFILE)
+            continue;
+        }
+        if (chatTo.organization  &&  r[TYPE] === constants.TYPES.CUSTOMER_WAITING) {
+          var rid = utils.getId(chatTo.organization);
+
+          var org = list[utils.getId(r.to)].value.organization
+          var orgId = utils.getId(org)
+          if (!utils.isEmployee(list[utils.getId(chatTo.organization)].value))
+            continue;
+        }
+
+      }
+
+      var isSharedWith = false, timeResourcePair = null
+      if (r.sharedWith  &&  toOrgId) {
+        var sharedWith = r.sharedWith.filter(function(r) {
+          let org = list[r.bankRepresentative].value.organization
+          return (org) ? utils.getId(org) === toOrgId : false
+        })
+        isSharedWith = sharedWith.length !== 0
+        if (isSharedWith) {
+          timeResourcePair = {
+            time: sharedWith[0].timeShared,
+            resource: r
+          }
+        }
+      }
+
+      if (chatTo) {
+        // backlinks like myVerifications, myDocuments etc. on Profile
+        if (backlink  &&  r[backlink]) {
+          var s = params.resource ? utils.getId(params.resource) : chatId
+          if (s === utils.getId(r[backlink])) {
+            foundResources.push(r)
+            // for Loading earlier resources we don't need to check limit untill we get to the lastId
+            if (limit  &&  foundResources.length === limit)
+              return foundResources.reverse()
+          }
+
+          continue;
+        }
+
+        var m = this.getModel(r[TYPE]).value
+        var isVerificationR = r[TYPE] === VERIFICATION  ||  m.subClassOf === VERIFICATION
+        var isForm = m.subClassOf === FORM
+        var isMyProduct = m.subClassOf === MY_PRODUCT
+        let isProductApplication = m.id === PRODUCT_APPLICATION
+        if ((!r.message  ||  r.message.trim().length === 0) && !r.photos &&  !isVerificationR  &&  !isForm  &&  !isMyProduct && !isProductApplication)
+          // check if this is verification resource
+          continue;
+        var fromID = utils.getId(r.from);
+        var toID = utils.getId(r.to);
+
+        if (params.strict) {
+          if (chatId !== toID)
+            continue
+        }
+      }
+      if (params.strict  &&  chatId !== utils.getId(r.to))
+        continue
+
+      if (r.sharedWith  &&  toOrgId  &&  !isSharedWith)
+        continue
+      if (isVerificationR  ||  r[TYPE] === ADDITIONAL_INFO) {
+        var doc = {};
+        var rDoc = list[utils.getId(r.document)]
+        if (!rDoc) {
+          if (params.isForgetting)
+            foundResources.push(r)
+          continue
+        }
+
+        // TODO: check if we can copy by reference
+        for (var p in rDoc.value) {
+          if (p === 'verifications' || p === 'additionalInfo') continue
+
+          var val = rDoc.value[p]
+          switch (typeof val) {
+            case 'object':
+              if (val) {
+                if (Array.isArray(val))
+                  doc[p] = val.slice(0)
+                else
+                  doc[p] = extend(true, {}, val)
+              }
+              break
+            default:
+              doc[p] = val
+              break
+          }
+        }
+
+        r.document = doc;
+      }
+
+      if (!query) {
+        var msg = this.fillMessage(r);
+        if (!msg)
+          msg = r
+        // foundResources[key] = msg;
+        foundResources.push(msg)
+        if (limit  &&  foundResources.length === limit)
+          return foundResources.reverse()
+
+        continue;
+      }
+       // primitive filtering for this commit
+      var combinedValue = '';
+      for (var rr in props) {
+        if (r[rr] instanceof Array)
+         continue;
+        combinedValue += combinedValue ? ' ' + r[rr] : r[rr];
+      }
+      if (!combinedValue  ||  (combinedValue  &&  (!query || combinedValue.toLowerCase().indexOf(query.toLowerCase()) != -1))) {
+        // foundResources[key] = this.fillMessage(r);
+        foundResources.push(this.fillMessage(r))
+
+        if (limit  &&  foundResources.length === limit)
+          return foundResources.reverse()
+      }
+    }
+    if (!foundResources.length)
+      return
+    return foundResources.reverse()// this.filterResult(foundResources, lastId, toOrg ? utils.getId(toOrg) : null)
+    // result.sort(function(a, b) {
+    //   return a.time - b.time;
+    // });
+    // return this.getSearchResult(result)
+
+    // if (params.isForgetting)
+    //   return result
+    // return result //.reverse();
+  },
+  createFromIdentity(r) {
+    var rr = {};
+    if (r.name) {
+      for (var p in r.name)
+        rr[p] = r.name[p];
+    }
+    if (r.location) {
+      for (var p in r.location)
+        rr[p] = r.location[p];
+    }
+    for (var p in r)
+      if (p !== 'name' && p !== 'location')
+        rr[p] = r[p];
+    return rr;
+  },
+  onAddApp(serverUrl) {
+    let parts = serverUrl.split(';')
+    // let idx = serverUrl.lastIndexOf('/')
+    // let id = parts[parts.length - 1]
+    // let url = parts.slice(0, parts.length - 1).join('/')
+
+    return this.getInfo([parts[0]], false, parts[1])
+    .then(() => {
+      this.trigger({action: 'addApp'})
+      // let list = self.searchNotMessages({modelName: ORGANIZATION})
+      // this.trigger({
+      //   action: 'list',
+      //   list: list,
+      // })
+    })
+  },
+
+  packResult(result) {
+    let foundResources = {}
+    result.forEach((fr) => {
+      foundResources[utils.getId(fr.value)] = fr
+    })
+    return foundResources
+  },
 */
