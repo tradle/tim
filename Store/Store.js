@@ -69,6 +69,7 @@ const tradle = require('@tradle/engine')
 const tradleUtils = tradle.utils
 const protocol = tradle.protocol
 const constants = require('@tradle/constants') // tradle.constants
+const Cache = require('lru-cache')
 const NONCE = constants.NONCE
 const TYPE = constants.TYPE
 const SIG = constants.SIG
@@ -469,6 +470,7 @@ var Store = Reflux.createStore({
     // TODO: figure out of we need to publish identities
     meDriver.identityPublishStatus = meDriver.identitySealStatus
     meDriver._multiGetFromDB = utils.multiGet
+    meDriver.addressBook.setCache(new Cache({ max: 500 }))
 
     let noProviders
     if (!SERVICE_PROVIDERS_BASE_URLS) {
