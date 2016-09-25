@@ -4722,8 +4722,8 @@
     },
     "sendy": {
       "version": "2.3.0",
-      "from": "mvayngrib/sendy#8165c21",
-      "resolved": "git://github.com/mvayngrib/sendy.git#8165c21f6f12b7742646c3c8d785946c3eae8282"
+      "from": "tradle/sendy#ca476127",
+      "resolved": "git://github.com/tradle/sendy.git#ca476127ea300cb9d43d518cfa157eb64bc1d09e"
     },
     "sendy-axolotl": {
       "version": "1.0.1",
