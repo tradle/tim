@@ -1,9 +1,11 @@
 import ReactNative from 'react-native'
 const noop = () => {}
-const noopWithFn = () => noop
+const noopWithRemove = () => {
+  return { remove: noop }
+}
 
 ReactNative.DeviceEventEmitter = {
-  addListener: noopWithFn,
+  addListener: noopWithRemove,
   removeSubscription: noop,
   removeAllListeners: noop
 }

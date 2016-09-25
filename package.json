@@ -100,7 +100,7 @@
     "react-native-swipeout": "github:mvayngrib/react-native-swipeout#6939c109",
     "react-native-vector-icons": "^2.0.3",
     "react-native-video": "github:tradle/react-native-video#8982843",
-    "react-web": "github:mvayngrib/react-web#dist",
+    "react-web": "github:mvayngrib/react-web#f44747e",
     "readable-stream": "^1.0.33",
     "reflux": "^0.4.1",
     "regenerator": "^0.8.42",
@@ -168,6 +168,7 @@
     "react-native-vector-icons/Ionicons": "./web/shims/vector-icons/Ionicons",
     "react-native-datepicker": "./web/shims/DatePicker.web.js",
     "react-native-gesture-password": false,
-    "./Components/PasswordCheck.js": false
+    "./Components/PasswordCheck.js": false,
+    "./utils/push.js": "./web/shims/push.js"
   }
 }
