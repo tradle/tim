@@ -14,10 +14,11 @@ import DeviceInfo from 'react-native-device-info'
 import PushNotifications from 'react-native-push-notification'
 import Keychain from 'react-native-keychain'
 import ENV from './env'
-import Orientation from 'react-native-orientation'
+import { getDimensions, getOrientation } from 'react-native-orient'
+// import Orientation from 'react-native-orientation'
 
-var orientation = Orientation.getInitialOrientation()
-Orientation.addOrientationListener(o => orientation = o)
+// var orientation = Orientation.getInitialOrientation()
+// Orientation.addOrientationListener(o => orientation = o)
 
 var RCTUIManager = NativeModules.UIManager
 var crypto = require('crypto')
@@ -1049,32 +1050,25 @@ var utils = {
     return top
   },
   orientation() {
-    return orientation
+    // disallow PORTRAITUPSIDEDOWN
+    return orientation === 'PORTRAITUPSIDEDOWN' ? 'LANDSCAPE' : orientation.replace(/-LEFT|-RIGHT/, '')
   },
-  dimensions(component) {
-    return component.lockToPortrait ? utils.portrait() : Dimensions.get('window')
+  dimensions(Component) {
+    return getDimensions(Component)
   },
-  portrait() {
-    var { width, height } = Dimensions.get('window')
-    if (width > height) {
-      [width, height] = [height, width]
-    }
-
-    return { width, height }
-  },
-  styleFactory(component, create) {
-    if (!component.displayName) throw new Error('component must have "displayName"')
+  styleFactory(Component, create) {
+    if (!Component.displayName) throw new Error('component must have "displayName"')
 
     return () => {
-      var key = component.displayName
+      var key = Component.displayName
       if (!stylesCache[key]) {
         stylesCache[key] = {}
       }
 
-      var orientation = utils.orientation().replace('UPSIDEDOWN', '')
+      var orientation = getOrientation(Component)
       var subCache = stylesCache[key]
-      if (!subCache[utils.orientation()]) {
-        var dimensions = utils.dimensions(component)
+      if (!subCache[orientation]) {
+        var dimensions = getDimensions(Component)
         var { width, height } = dimensions
         var switchWidthHeight = (
           (orientation === 'PORTRAIT' && width > height) ||

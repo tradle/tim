@@ -9,7 +9,7 @@ var Icon = require('react-native-vector-icons/Ionicons');
 var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin');
 var equal = require('deep-equal')
-var makeResponsive = require('./makeResponsive')
+import { makeResponsive } from 'react-native-orient'
 
 var reactMixin = require('react-mixin');
 

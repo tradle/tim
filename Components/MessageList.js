@@ -22,7 +22,7 @@ var NetworkInfoProvider = require('./NetworkInfoProvider')
 var extend = require('extend');
 
 import ActionSheet from 'react-native-actionsheet'
-import makeResponsive from './makeResponsive'
+import { makeResponsive } from 'react-native-orient'
 // var AddNewMessage = require('./AddNewMessage')
 // var SearchBar = require('react-native-search-bar')
 // var ResourceTypesScreen = require('./ResourceTypesScreen')

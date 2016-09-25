@@ -67,7 +67,7 @@ import React, { Component } from 'react'
 
 class TimHome extends Component {
   static displayName = 'TimHome';
-  static lockToPortrait = true;
+  static orientation = 'PORTRAIT';
   props: {
     modelName: PropTypes.string.isRequired,
     navigator: PropTypes.object.isRequired

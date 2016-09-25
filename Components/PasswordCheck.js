@@ -6,7 +6,7 @@ import {
   StyleSheet
 } from 'react-native'
 
-import makeResponsive from './makeResponsive'
+import { getDimensions } from 'react-native-orient'
 var PasswordGesture = require('react-native-gesture-password')
 var utils = require('../utils/utils')
 var translate = utils.translate
@@ -169,7 +169,7 @@ var PasswordCheck = React.createClass({
   },
 
   render: function() {
-    var { width, height } = utils.dimensions(PasswordCheck)
+    var { width, height } = getDimensions(PasswordCheck)
     return (
       <View style={styles.container}>
         <Image source={BG_IMAGE} style={[styles.bg, { width, height }]} />
@@ -200,9 +200,8 @@ var PasswordCheck = React.createClass({
   }
 })
 
-PasswordCheck = makeResponsive(PasswordCheck)
 PasswordCheck.displayName = 'PasswordCheck'
-PasswordCheck.lockToPortrait = true
+PasswordCheck.orientation = 'PORTRAIT'
 module.exports = PasswordCheck
 
 var containerRawStyle = {
