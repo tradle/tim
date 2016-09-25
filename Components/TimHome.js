@@ -82,6 +82,7 @@ class TimHome extends Component {
     this._handleConnectivityChange = this._handleConnectivityChange.bind(this)
   }
   componentWillMount() {
+    this.listenTo(Store, 'handleEvent');
     this._pressHandler = debounce(this._pressHandler, 500, true)
     if (!isAndroid)
       Linking.addEventListener('url', this._handleOpenURL);
@@ -137,7 +138,6 @@ class TimHome extends Component {
           firstRoute.isConnected = isConnected
         }
       );
-      this.listenTo(Store, 'handleEvent');
     })
     .catch((e) => {
       debugger
@@ -643,7 +643,7 @@ class TimHome extends Component {
                 </View>
 
     return (
-      <View style={styles.scroll}>
+      <View style={{flex: 1}}>
         <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width, height}} />
         {regView}
         { utils.getMe()
