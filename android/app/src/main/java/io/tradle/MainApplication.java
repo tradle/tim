@@ -20,6 +20,7 @@ import com.rnfs.RNFSPackage;
 import com.learnium.RNDeviceInfo.RNDeviceInfo;
 import com.microsoft.codepush.react.CodePush;
 import com.lwansbrough.RCTCamera.RCTCameraPackage;
+import com.github.yamill.orientation.OrientationPackage;
 
 import java.util.Arrays;
 import java.util.List;
@@ -53,7 +54,8 @@ public class MainApplication extends Application implements ReactApplication {
         new ReactNativeLocalizationPackage(),
         new LinearGradientPackage(),
         new CodePush(BuildConfig.CODEPUSH_KEY, MainApplication.this, BuildConfig.DEBUG),
-        new RCTCameraPackage()
+        new RCTCameraPackage(),
+        new OrientationPackage()
       );
     }
   };

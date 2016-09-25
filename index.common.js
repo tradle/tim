@@ -65,12 +65,15 @@ import {
   StyleSheet,
   Alert,
   StatusBar,
+  // StatusBar,
+  Platform,
   // Linking,
   AppState,
   AppRegistry,
   Text
 } from 'react-native';
 
+import Orientation from 'react-native-orientation'
 import platformStyles from './styles/platform'
 
 let originalGetDefaultProps = Text.getDefaultProps;
@@ -111,7 +114,7 @@ class TiMApp extends Component {
     // if (!isIphone)
     //   isIphone = isIphone;
 
-    ;['_handleOpenURL', '_handleAppStateChange'].forEach((method) => {
+    ;['_handleOpenURL', '_handleAppStateChange', 'onNavigatorBeforeTransition', 'onNavigatorAfterTransition'].forEach((method) => {
       this[method] = this[method].bind(this)
     })
   }
@@ -158,6 +161,8 @@ class TiMApp extends Component {
 
         return
       case 'background':
+        // const nonAuthRoute = utils.getTopNonAuthRoute(this.state.navigator)
+        // this.state.navigator.popToRoute(nonAuthRoute)
         newState.unauthTimeout = setTimeout(() => {
           if (!me || !me.isRegistered) return
 
@@ -261,7 +266,7 @@ class TiMApp extends Component {
     }
   }
 
-  onNavigatorBeforeTransition() {
+  onNavigatorBeforeTransition(e) {
     if (ReactPerf) ReactPerf.start()
 
     Actions.startTransition()
@@ -278,6 +283,20 @@ class TiMApp extends Component {
     Actions.endTransition()
   }
 
+  _lockToPortrait() {
+    if (!this._lockedOrientation) {
+      this._lockedOrientation = true
+      Orientation.lockToPortrait()
+    }
+  }
+
+  _unlockOrientation() {
+    if (this._lockedOrientation) {
+      this._lockedOrientation = false
+      Orientation.unlockAllOrientations()
+    }
+  }
+
   render() {
     var nav = (
       <Navigator
@@ -287,7 +306,6 @@ class TiMApp extends Component {
         navigationBar={
           <Navigator.NavigationBar
             routeMapper={NavigationBarRouteMapper}
-            style={styles.navBar}
           />
         }
         passProps={this.state.props}
@@ -310,6 +328,12 @@ class TiMApp extends Component {
           // return {...Navigator.SceneConfigs.FloatFromRight, springFriction:26, springTension:300};
 
   renderScene(route, nav) {
+    if (route.id === 1 || route.id === 20  ||  (!utils.getMe()  ||  !utils.getMe().isRegistered  &&  route.id === 4)) {
+      this._lockToPortrait()
+    } else {
+      this._unlockOrientation()
+    }
+
     if (__DEV__) {
       let displayName = route.component.displayName
       if (!displayName) {
@@ -419,9 +443,9 @@ class TiMApp extends Component {
 var HIT_SLOP = {top:10,right:10,bottom:10,left:10}
 var NavigationBarRouteMapper = {
   LeftButton: function(route, navigator, index, navState) {
-    if (index === 0  ||  route.noLeftButton) {
-      return null;
-    }
+    if (index === 0  ||  route.noLeftButton)
+      return <View/>
+
     var color = '#7AAAC3'
     if (route.passProps.bankStyle  &&  route.passProps.bankStyle.LINK_COLOR)
       color = route.passProps.bankStyle.LINK_COLOR
@@ -438,6 +462,7 @@ var NavigationBarRouteMapper = {
       var st = {color: color}
       style.push(st);
     }
+    style.push({fontSize: utils.getFontSize(17)})
     var title = lbTitle.indexOf('|') == -1
               ? <Text style={style}>
                   {lbTitle}
@@ -466,6 +491,7 @@ var NavigationBarRouteMapper = {
       style.push({color: route.tintColor});
     else if (route.passProps.bankStyle)
       style.push({color: route.passProps.bankStyle.LINK_COLOR || '#7AAAC3'})
+    style.push({fontSize: utils.getFontSize(17)})
     var title
     if (route.rightButtonTitle.indexOf('|') == -1)
       title =  <Text style={style}>
@@ -519,20 +545,22 @@ var NavigationBarRouteMapper = {
   },
 
   Title: function(route, navigator, index, navState) {
+    if (!route.title)
+      return <View/>
     var org;
-    var style = [platformStyles.navBarText, styles.navBarTitleText];
-    if (route.passProps.modelName) {
-      if (route.passProps.modelName === 'tradle.Message') {
-        if (route.passProps.resource  &&  route.passProps.resource[constants.TYPE] === constants.TYPES.PROFILE) {
+    if (route.passProps.modelName                       &&
+        route.passProps.modelName === 'tradle.Message'  &&
+        route.passProps.resource.organization           &&
+        route.passProps.resource                        &&
+        route.passProps.resource[constants.TYPE] === constants.TYPES.PROFILE)
           // if (route.passProps.resource.organization  &&  route.passProps.resource.organization.photo)
           //   org = <Image source={{uri: route.passProps.resource.organization.photo}} style={styles.orgImage} />
-          if (route.passProps.resource.organization)
-            org = <Text style={style}> - {route.passProps.resource.organization.title}</Text>
-        }
-      }
-    }
-    if (!org)
+          // if (route.passProps.resource.organization)
+        org = <Text style={style}> - {route.passProps.resource.organization.title}</Text>
+    else
       org = <View />;
+
+    var style = [platformStyles.navBarText, styles.navBarTitleText];
     if (route.titleTextColor)
       style.push({color: route.titleTextColor});
     return (
@@ -551,7 +579,6 @@ var styles = StyleSheet.create({
   icon: {
     width: 20,
     height: 20,
-    // marginTop: 15,
   },
   row: {
     flexDirection: 'row'
@@ -566,17 +593,15 @@ var styles = StyleSheet.create({
   navBarTitleText: {
     color: '#2E3B4E',
     fontWeight: '400',
-    fontSize: 17,
+    fontSize: utils.getFontSize(17),
   },
   navBarLeftButton: {
     paddingLeft: 10,
     paddingRight: 25,
-    // paddingBottom: 10
   },
   navBarRightButton: {
     paddingLeft: 25,
     paddingRight: 10,
-    // paddingBottom: 10
   },
   navBarButtonText: {
     color: '#7AAAC3',
@@ -592,21 +617,6 @@ if (utils.isWeb()){
   })
 }
 
-  // orgImage: {
-  //   width: 20,
-  //   height: 20,
-  //   marginTop: 15,
-  //   marginRight: 3,
-  //   borderRadius: 10
-  // },
-  // navBar: {
-  //   marginTop: 10,
-  //   padding: 3
-  // },
-  // navBarText: {
-  //   fontSize: 17,
-  //   // marginBottom: 7
-  // },
   // render() {
   //   var props = {db: this.state.db};
   //   return (

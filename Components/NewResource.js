@@ -22,8 +22,6 @@ var NewResourceMixin = require('./NewResourceMixin');
 var reactMixin = require('react-mixin');
 var BG_IMAGE = require('../img/bg.png')
 var equal = require('deep-equal')
-var DeviceHeight
-var DeviceWidth
 var constants = require('@tradle/constants');
 var termsAndConditions = require('../termsAndConditions.json')
 
@@ -32,7 +30,6 @@ import FileInput from 'react-file-input'
 var ENUM = 'tradle.Enum'
 var LINK_COLOR, DEFAULT_LINK_COLOR = '#a94442'
 var FORM_ERROR = 'tradle.FormError'
-
 
 var Form = t.form.Form;
 var stylesheet = require('../styles/styles')
@@ -47,7 +44,6 @@ import Native, {
   Platform,
   // StatusBar,
   Alert,
-  Dimensions,
   Navigator,
   TouchableHighlight,
   Animated,
@@ -56,18 +52,19 @@ import Native, {
 
 var Keyboard
 if (Platform.OS !== 'web') {
-  // Keyboard = require('Keyboard')
+  Keyboard = require('Keyboard')
 }
 
 import React, { Component, PropTypes } from 'react'
 import ActivityIndicator from './ActivityIndicator'
-
 import platformStyles from '../styles/platform'
+import { makeResponsive } from 'react-native-orient'
 
-DeviceHeight = Dimensions.get('window').height;
-DeviceWidth = Dimensions.get('window').width
+// DeviceHeight = Dimensions.get('window').height;
+// DeviceWidth = Dimensions.get('window').width
 
 class NewResource extends Component {
+  static displayName = 'NewResource';
   props: {
     navigator: PropTypes.object.isRequired,
     model: PropTypes.object.isRequired,
@@ -92,11 +89,8 @@ class NewResource extends Component {
       r[constants.TYPE] = props.model.id
     var isRegistration = !utils.getMe()  && this.props.model.id === constants.TYPES.PROFILE  &&  (!this.props.resource || !this.props.resource[constants.ROOT_HASH]);
 
-    // this.updateKeyboardSpace = this.updateKeyboardSpace.bind(this);
-    // this.resetKeyboardSpace = this.resetKeyboardSpace.bind(this);
     this.state = {
       resource: r,
-      keyboardSpace: 0,
       // modalVisible: false,
       date: new Date(),
       isUploading: !isRegistration  &&  (!r[constants.ROOT_HASH] || Object.keys(r).length === 2),
@@ -104,37 +98,30 @@ class NewResource extends Component {
       isLoadingVideo: false,
       isPrefilled: this.props.isPrefilled,
       modal: {},
-      offSet: new Animated.Value(Dimensions.get('window').height),
+      // offSet: new Animated.Value(Dimensions.get('window').height),
       termsAccepted: isRegistration ? false : true
     }
     var currentRoutes = this.props.navigator.getCurrentRoutes()
     var currentRoutesLength = currentRoutes.length
     currentRoutes[currentRoutesLength - 1].onRightButtonPress = this.onSavePressed.bind(this)
 
-    this._contentOffset = { x: 0, y: 0 }
+    // this._contentOffset = { x: 0, y: 0 }
     this.scrollviewProps = {
       automaticallyAdjustContentInsets:true,
       scrollEventThrottle: 50,
       onScroll: this.onScroll.bind(this)
     };
   }
-  updateKeyboardSpace(frames) {
-    var height = frames.endCoordinates ? frames.endCoordinates.height : 0
-    this.setState({keyboardSpace: height});
-  }
-
-  resetKeyboardSpace() {
-    // LayoutAnimation.configureNext(animations.layout.spring);
-    this.setState({keyboardSpace: 0});
-  }
   shouldComponentUpdate(nextProps, nextState) {
     let isUpdate = nextState.err                             ||
+           this.props.orientation !== nextProps.orientation  ||
            nextState.missedRequiredOrErrorValue              ||
            this.state.modal !== nextState.modal              ||
            this.state.prop !== nextState.prop                ||
            this.state.isUploading !== nextState.isUploading  ||
            this.state.itemsCount !== nextState.itemsCount    ||
            this.state.isLoadingVideo !== nextState.isLoadingVideo  ||
+           this.state.keyboardSpace !== nextState.keyboardSpace    ||
            this.state.termsAccepted !== nextState.termsAccepted    ||
           !equal(this.state.resource, nextState.resource)
 
@@ -352,7 +339,7 @@ class NewResource extends Component {
     if (this.state.submitted)
       return
     if (this.state.isRegistration  &&  !this.state.termsAccepted) {
-      Alert.alert('Please accept Terms and Conditions')
+      Alert.alert(translate('viewTerms'))
       return
     }
 
@@ -668,6 +655,8 @@ class NewResource extends Component {
     var parentBG = {backgroundColor: '#7AAAC3'};
     var resource = this.state.resource;
 
+    var styles = createStyles()
+
     var meta =  props.model;
     if (this.props.setProperty)
       this.state.resource[this.props.setProperty.name] = this.props.setProperty.value;
@@ -692,6 +681,7 @@ class NewResource extends Component {
         model: model,
         items: arrays,
         onEndEditing: this.onEndEditing.bind(this),
+        component: NewResource
       };
     if (this.props.editCols)
       params.editCols = this.props.editCols;
@@ -737,138 +727,21 @@ class NewResource extends Component {
       itemsArray = null
       var count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
       if (count  &&  bl.name === 'photos')
-        arrayItems.push(this.getPhotoItem(bl))
+        arrayItems.push(this.getPhotoItem(bl, styles))
       else
-        arrayItems.push(this.getItem(bl))
-
-      // var isPhoto = false
-      // if (count) {
-      //   var items = []
-      //   isPhoto = bl.name === 'photos'
-      //   var arr = resource[bl.name]
-      //   var n = isPhoto
-      //         ? Math.min(arr.length, 7)
-      //         : 3
-
-      //   for (var i=0; i<n; i++) {
-      //     if (isPhoto)
-      //       items.push(<Image style={styles.thumb} source={{uri: arr[i].url}}  key={this.getNextKey()} onPress={() => this.openModal(arr[i])}/>)
-      //   }
-      //   if (isPhoto) {
-      //     itemsArray =
-      //       <View style={[styles.photoStrip, count ? {marginTop: -30} : {marginTop: 0}]}>
-      //         <Text style={styles.activePropTitle}>{translate(bl, blmodel)}</Text>
-      //         <View style={styles.photoStripItems}>{items}</View>
-      //       </View>
-      //     counter =
-      //       <View>
-      //         <View style={{marginTop: 25, paddingHorizontal: 5}}>
-      //           <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
-      //         </View>
-      //       </View>;
-      //   }
-      //   else {
-      //     var vCols = bl.viewCols;
-      //     var cnt = resource[bl.name].length;
-      //     let val = <View>{self.renderItems(resource[bl.name], bl, this.cancelItem.bind(this))}</View>
-
-      //     var separator = <View style={styles.separator}></View>
-      //     let cstyle = []
-      //     if (count) {
-      //       cstyle.push(styles.activePropTitle)
-      //       // cstyle.push({marginTop: 20})
-      //     }
-      //     else
-      //       cstyle.push(styles.noItemsText)
-      //     // cstyle.push({paddingLeft: 10})
-      //     itemsArray = <View>
-      //                    <Text style={cstyle}>{translate(bl, model)}</Text>
-      //                    {val}
-      //                  </View>
-
-      //     counter = <View style={[styles.itemsCounterEmpty, {paddingBottom: 10, marginTop: 15}]}>
-      //                 <Icon name={bl.icon || 'md-add'} size={bl.icon ? 25 : 15}  color={LINK_COLOR} />
-      //               </View>
-      //   }
-      // }
-      // else {
-      //   itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{translate(bl, blmodel)}</Text>
-      //   counter = <View style={[styles.itemsCounterEmpty]}>
-      //             { bl.name === 'photos'
-      //               ? <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
-      //               : <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color={LINK_COLOR} />
-      //             }
-      //             </View>
-      // }
-      // var title = translate(bl, blmodel) //.title || utils.makeLabel(p)
-      // var err = this.state.missedRequiredOrErrorValue
-      //         ? this.state.missedRequiredOrErrorValue[meta.properties[p].name]
-      //         : null
-      // var errTitle = translate('thisFieldIsRequired')
-      // var error = err
-      //           ? <View style={styles.error}>
-      //               <Text style={styles.errorText}>{errTitle}</Text>
-      //             </View>
-      //           : <View/>
-      // var actionableItem = isPhoto && count
-      //                    ?  <TouchableHighlight style={{flex: 7, paddingTop: 15}} underlayColor='transparent'
-      //                        onPress={self.showItems.bind(self, bl, meta)}>
-      //                         {itemsArray}
-      //                       </TouchableHighlight>
-      //                    :  <TouchableHighlight style={[{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]} underlayColor='transparent'
-      //                           onPress={self.onNewPressed.bind(self, bl, meta)}>
-      //                         {itemsArray}
-      //                       </TouchableHighlight>
-
-      // let istyle = []
-      // if (isPhoto) {
-      //   if (count)
-      //     istyle.push(styles.photoButton)
-      //   else {
-      //     istyle.push(styles.itemButton)
-      //     // istyle.push({paddingBottom: 10})
-      //     // istyle.push({height: 70})
-      //   }
-      // }
-      // else {
-      //   istyle.push(styles.itemButton)
-      //   if (err)
-      //     istyle.push({marginBottom: 10})
-      //   else if (!count)
-      //     istyle.push({paddingBottom: 0, height: 70})
-      //   else {
-      //     let height = resource[bl.name].photo ? 55 : 45
-      //     // else if (resource[bl.name][0].photo)
-      //     //   height = 38
-      //     istyle.push({paddingBottom: 0, height: count * height + 35})
-      //   }
-      // }
-
-      // arrayItems.push (
-      //   <View key={this.getNextKey()}>
-      //     <View style={[istyle, {marginHorizontal: 10}]} ref={bl.name}>
-      //       <View style={styles.items}>
-      //         {actionableItem}
-      //         <TouchableHighlight underlayColor='transparent' style={[{flex: 1, position: 'absolute', right: 0}, isPhoto  &&  count ? {marginTop: 15} : count ? {paddingTop: 0} : {marginTop: 15, paddingBottom: 7}]}
-      //             onPress={self.onNewPressed.bind(self, bl, meta)}>
-      //           {counter}
-      //         </TouchableHighlight>
-      //       </View>
-      //     </View>
-      //     {error}
-      //   </View>
-      // );
+        arrayItems.push(this.getItem(bl, styles))
     }
-    // var FromToView = require('./FromToView');
-    // var isRegistration = !utils.getMe()  &&  resource[constants.TYPE] === constants.TYPES.PROFILE
     if (this.state.isRegistration)
       Form.stylesheet = rStyles
     else
       Form.stylesheet = stylesheet
 
-    var style = this.state.isRegistration
-              ? DeviceHeight < 600 ? {marginTop: 90} : {marginTop: DeviceHeight / 4}
-              : platformStyles.container
+    // var style = this.state.isRegistration
+    //           ? DeviceHeight < 600 ? {marginTop: 100} : {marginTop: DeviceHeight / 4}
+    //           : platformStyles.container
+    var {width, height} = utils.dimensions(NewResource)
+    // var style = [platformStyles.container, {backgroundColor: 'transparent', height: DeviceHeight}]
+    var style = [platformStyles.container, {backgroundColor: 'transparent'}]
     if (!options)
       options = {}
     options.auto = 'placeholders';
@@ -896,33 +769,37 @@ class NewResource extends Component {
                      })
                    }}>
                      <View style={{flexDirection: 'row'}}>
-                       <Icon name={this.state.termsAccepted ? 'md-checkbox-outline' : 'md-square-outline'} color='#A6DBF5' size={20} style={{paddingRight: 3}}/>
                        <Text style={{fontSize: 16, color: '#A6DBF5'}}>{translate('acceptTermsAndConditions')}</Text>
                      </View>
                    </TouchableHighlight>
                  </View>
                : <View style={{height: 0}} />
-
+    var formStyle = this.state.isRegistration
+                  ? {justifyContent: 'center', height: height - 100}
+                  : {justifyContent: 'flex-start'}
     var content =
-      <ScrollView style={style} ref='scrollView' {...this.scrollviewProps} keyboardDismissMode={'on-drag'} keyboardShouldPersistTaps={true}>
-        <View style={styles.container}>
+      <ScrollView style={style}
+                  ref='scrollView' {...this.scrollviewProps}
+                  keyboardShouldPersistTaps={true}
+                  keyboardDismissMode={this.state.isRegistration || Platform.OS === 'ios' ? 'on-drag' : 'interactive'}>
+        <View style={[styles.container, formStyle]}>
           <View style={photoStyle}>
             <PhotoView resource={resource} navigator={this.props.navigator}/>
           </View>
-          <View style={this.state.isRegistration ? {marginHorizontal: DeviceHeight > 1000 ? 50 : 30, paddingTop: 30} : {marginHorizontal: 10}}>
+          <View style={this.state.isRegistration ? {marginHorizontal: height > 1000 ? 50 : 30} : {marginHorizontal: 10}}>
             <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange.bind(this)}/>
             {button}
             <View style={{marginTop: this.state.isRegistration ? 0 : -10}}>
               {arrayItems}
              </View>
-           {  this.state.isLoadingVideo
+            {
+             this.state.isLoadingVideo
              ? <View style={{alignItems: 'center', marginTop: 50}}>
                 <ActivityIndicator animating={true} size='large' color='#ffffff'/>
               </View>
              : <View/>
             }
           </View>
-          <View style={{height: 300}}/>
         </View>
       </ScrollView>
 
@@ -934,21 +811,22 @@ class NewResource extends Component {
       }
       return content
     }
-    var cTop = DeviceHeight / 6
-
     var thumb = {
-      width: DeviceWidth / 2.2,
-      height: DeviceWidth / 2.2,
+      width: width / 2.2,
+      height: width / 2.2,
     }
-
     return (
-      <View style={{height: DeviceHeight}}>
+      <View style={{height: height}}>
         <Image source={BG_IMAGE} style={styles.bgImage} />
-
+        <View style={{justifyContent: 'center', height: height}}>
         {content}
-        <View style={{opacity: 0.7, position: 'absolute', top: 20, right: 20, flexDirection: 'row'}}>
-          <Image style={{width: 50, height: 50}} source={require('../img/TradleW.png')}></Image>
         </View>
+        {this.state.isRegistration
+          ? <View style={styles.logo}>
+              <Image style={styles.thumb} source={require('../img/TradleW.png')}></Image>
+            </View>
+          : <View/>
+        }
       </View>
     )
   }
@@ -961,7 +839,7 @@ class NewResource extends Component {
         {text: 'Ok', onPress: () => {
           this.props.navigator.pop()
           this.setState({termsAccepted: true})
-        }}
+        }},
       ]
     )
   }
@@ -1006,7 +884,7 @@ class NewResource extends Component {
       }
     });
   }
-  getItem(bl) {
+  getItem(bl, styles) {
     let meta = this.props.model
     let resource = this.state.resource
     let blmodel = meta
@@ -1080,7 +958,7 @@ class NewResource extends Component {
       </View>
     );
   }
-  getPhotoItem(bl) {
+  getPhotoItem(bl, styles) {
     let meta = this.props.model
     let resource = this.state.resource
     let blmodel = meta
@@ -1235,134 +1113,143 @@ class NewResource extends Component {
 reactMixin(NewResource.prototype, Reflux.ListenerMixin);
 reactMixin(NewResource.prototype, NewResourceMixin);
 reactMixin(NewResource.prototype, ResourceMixin);
+NewResource = makeResponsive(NewResource)
 
-var styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  noItemsText: {
-    fontSize: 18,
-    color: '#AAAAAA',
-    // alignSelf: 'center',
-    // paddingLeft: 10
-  },
-  itemsText: {
-    fontSize: 18,
-    color: '#000000',
-    // alignSelf: 'center',
-    paddingLeft: 10
-  },
-  itemsCounterEmpty: {
-    paddingHorizontal: 5
-  },
-  itemsCounter: {
-    borderColor: '#2E3B4E',
-    borderRadius: 10,
-    borderWidth: 1,
-    alignSelf: 'center',
-    paddingHorizontal: 5,
-  },
-  itemButton: {
-    height: 60,
-    marginLeft: 10,
-    // marginLeft: 10,
-    borderColor: '#ffffff',
-    borderBottomColor: '#cccccc',
-    borderBottomWidth: 1,
-    paddingBottom: 10,
-    justifyContent: 'flex-end',
-  },
-  photoButton: {
-    marginLeft: 10,
-    borderColor: '#ffffff',
-    borderBottomColor: '#cccccc',
-    borderBottomWidth: 1,
-    // paddingBottom: 5,
-  },
+var createStyles = utils.styleFactory(NewResource, function ({ dimensions }) {
+  return StyleSheet.create({
+    container: {
+      flex: 1
+    },
+    noItemsText: {
+      fontSize: 18,
+      color: '#AAAAAA',
+      // alignSelf: 'center',
+      // paddingLeft: 10
+    },
+    itemsText: {
+      fontSize: 18,
+      color: '#000000',
+      // alignSelf: 'center',
+      paddingLeft: 10
+    },
+    itemsCounterEmpty: {
+      paddingHorizontal: 5
+    },
+    itemsCounter: {
+      borderColor: '#2E3B4E',
+      borderRadius: 10,
+      borderWidth: 1,
+      alignSelf: 'center',
+      paddingHorizontal: 5,
+    },
+    itemButton: {
+      height: 60,
+      marginLeft: 10,
+      // marginLeft: 10,
+      borderColor: '#ffffff',
+      borderBottomColor: '#cccccc',
+      borderBottomWidth: 1,
+      paddingBottom: 10,
+      justifyContent: 'flex-end',
+    },
+    photoButton: {
+      marginLeft: 10,
+      borderColor: '#ffffff',
+      borderBottomColor: '#cccccc',
+      borderBottomWidth: 1,
+      // paddingBottom: 5,
+    },
 
-  photoBG: {
-    // marginTop: -15,
-    alignItems: 'center',
-    paddingBottom: 10,
-    // backgroundColor: '#245D8C'
-  },
-  err: {
-    // paddingVertical: 10,
-    flexWrap: 'wrap',
-    paddingHorizontal: 25,
-    fontSize: 16,
-    color: 'darkred',
-  },
-  getStartedText: {
-    // color: '#f0f0f0',
-    color: '#eeeeee',
-    fontSize: 20,
-    fontWeight:'300',
-    alignSelf: 'center'
-  },
-  getStarted: {
-    backgroundColor: '#467EAE', //'#2892C6',
-    paddingVertical: 10,
-    marginLeft: 10,
-    // paddingHorizontal: 50,
-    alignSelf: 'stretch',
-  },
-  thumbButton: {
-    marginTop: 20,
-    alignSelf: 'stretch',
-    alignItems: 'center',
-    justifyContent: 'center',
-    // paddingHorizontal: 80,
-  },
-  thumb: {
-    width:  40,
-    height: 40,
-    marginRight: 2,
-    borderRadius: 5
-  },
-  error: {
-    // paddingLeft: 5,
-    // position: 'absolute',
-    // top: 70,
-    // marginBottom: -30,
-    marginTop: -10,
-    backgroundColor: 'transparent'
-  },
-  errorText: {
-    fontSize: 14,
-    marginLeft: 10,
-    color: '#a94442'
-  },
-  items: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    // paddingBottom: 5
-  },
-  activePropTitle: {
-    fontSize: 12,
-    marginTop: 20,
-    paddingBottom: 5,
-    // marginBottom: 5,
-    color: '#bbbbbb'
-  },
-  photoStrip: {
-    // marginLeft: 10,
-    // marginTop: -30,
-    paddingBottom: 5
-  },
-  photoStripItems: {
-    flexDirection: 'row'
-  },
-  bgImage: {
-    position:'absolute',
-    left: 0,
-    top: 0,
-    width: DeviceWidth,
-    height: DeviceHeight
-  }
-});
+    photoBG: {
+      // marginTop: -15,
+      alignItems: 'center',
+      paddingBottom: 10,
+      // backgroundColor: '#245D8C'
+    },
+    err: {
+      // paddingVertical: 10,
+      flexWrap: 'wrap',
+      paddingHorizontal: 25,
+      fontSize: 16,
+      color: 'darkred',
+    },
+    getStartedText: {
+      // color: '#f0f0f0',
+      color: '#eeeeee',
+      fontSize: 20,
+      fontWeight:'300',
+      alignSelf: 'center'
+    },
+    getStarted: {
+      backgroundColor: '#467EAE', //'#2892C6',
+      paddingVertical: 10,
+      marginLeft: 10,
+      // paddingHorizontal: 50,
+      alignSelf: 'stretch',
+    },
+    thumbButton: {
+      marginTop: 20,
+      alignSelf: 'stretch',
+      alignItems: 'center',
+      justifyContent: 'center',
+      // paddingHorizontal: 80,
+    },
+    thumb: {
+      width:  40,
+      height: 40,
+      marginRight: 2,
+      borderRadius: 5
+    },
+    error: {
+      // paddingLeft: 5,
+      // position: 'absolute',
+      // top: 70,
+      // marginBottom: -30,
+      marginTop: -10,
+      backgroundColor: 'transparent'
+    },
+    errorText: {
+      fontSize: 14,
+      marginLeft: 10,
+      color: '#a94442'
+    },
+    items: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      // paddingBottom: 5
+    },
+    activePropTitle: {
+      fontSize: 12,
+      marginTop: 20,
+      paddingBottom: 5,
+      // marginBottom: 5,
+      color: '#bbbbbb'
+    },
+    photoStrip: {
+      // marginLeft: 10,
+      // marginTop: -30,
+      paddingBottom: 5
+    },
+    photoStripItems: {
+      flexDirection: 'row'
+    },
+    bgImage: {
+      position:'absolute',
+      left: 0,
+      top: 0,
+      width: dimensions.width,
+      height: dimensions.height
+    },
+    logo: {
+      opacity: 0.7,
+      position: 'absolute',
+      top: 20,
+      right: 20
+    }
+  })
+})
 
-module.exports = NewResource;
+module.exports = makeResponsive(NewResource);
 
 function readFile (file, cb) {
   var reader  = new FileReader();

@@ -7,14 +7,11 @@ import {
   Text,
   TouchableHighlight,
   StyleSheet,
-  Dimensions,
   Easing,
   Animated
 } from 'react-native'
 
 import React from 'react'
-var deviceWidth = Dimensions.get('window').width;
-var deviceHeight = Dimensions.get('window').height;
 
 var Picker = React.createClass({
   componentDidMount: function() {
@@ -27,7 +24,7 @@ var Picker = React.createClass({
   closeModal() {
     Animated.timing(this.props.offSet, {
       duration: 300,
-      toValue: deviceHeight
+      toValue: utils.dimensions(Picker).width
     }).start(this.props.closeModal);
   },
   render() {

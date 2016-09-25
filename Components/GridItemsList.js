@@ -103,13 +103,19 @@ class GridItemsList extends Component {
       </View>
     )
   }
+      // returnIsVertical: true,
+      // chooseFromLibraryButtonTitle: __DEV__ ? 'Choose from Library' : null
+
   showChoice() {
     var self = this;
-    imports.setState({
-      show: false,
-      returnIsVertical: true,
-      chooseFromLibraryButtonTitle: __DEV__ ? 'Choose from Library' : null
-    }, (response) => {
+    this.setState({show: false})
+    let options = {}
+    if (!utils.isSimulator()  ||  __DEV__)
+      options.takePhotoButtonTitle = 'Take Photo…'
+    if (utils.isSimulator() || prop._allowPicturesFromLibrary)
+      options.chooseFromLibraryButtonTitle = 'Choose from Library'
+
+    ImagePicker.showImagePicker(options, (response) => {
       if (response.didCancel)
         return;
       if (response.error) {

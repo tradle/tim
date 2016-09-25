@@ -3,19 +3,23 @@
 import Carousel from 'react-native-carousel';
 var utils = require('../utils/utils');
 var constants = require('@tradle/constants');
+import { makeResponsive } from 'react-native-orient'
 
 import {
   StyleSheet,
   Image,
-  Dimensions,
   View,
 } from 'react-native'
 
 import React, { Component } from 'react'
 
 class PhotoCarousel extends Component {
+  static displayName = 'PhotoCarousel'
   constructor(props) {
     super(props);
+  }
+  shouldComponentUpdate(nextProps, nextState) {
+    return this.props.orientation !== nextProps.orientation
   }
   render() {
     var photos = [];
@@ -29,6 +33,7 @@ class PhotoCarousel extends Component {
     var isUtility = !isLicense  &&  model.id.indexOf('Utility') !== -1
     var cnt = 2000
     var r = this.props.resource
+    var styles = createStyles()
     for (var j=0; j<2; j++) {
       for (var i=0; i<n; i++) {
         var photo = this.props.photos[i];
@@ -39,10 +44,10 @@ class PhotoCarousel extends Component {
           currentPhotoIndex = i;
         var key = r[constants.ROOT_HASH] + cnt++
         if (photo.width) {
-          var w = Dimensions.get('window').width
-          var h, padding
-          if (photo.width > Dimensions.get('window').width) {
-            h = photo.height * Dimensions.get('window').width / photo.width
+          var {width, height} = utils.dimensions(PhotoCarousel)
+          var w = width, h, padding
+          if (photo.width > width) {
+            h = photo.height * width / photo.width
             // if (photo.isVertical)
             //   h = Dimensions.get('window').width * 1.2
             // else
@@ -51,11 +56,11 @@ class PhotoCarousel extends Component {
           else {
             h = photo.height
             w = photo.width
-            padding = (Dimensions.get('window').width - photo.width) / 2
+            padding = (width - photo.width) / 2
           }
 
-          if (h > 3 * Dimensions.get('window').height / 4)
-            h = 3 * Dimensions.get('window').height / 4
+          if (h > 3 * height / 4)
+            h = 3 * height / 4
 
           photos.push(
                         <View style={[styles.container, {paddingHorizontal: padding}]} key={key}>
@@ -65,19 +70,19 @@ class PhotoCarousel extends Component {
 
         }
         else
-        photos.push(
-          isVertical  ? <View style={styles.container} key={key}>
-                          <Image source={{uri: photo.url}} style={styles.imageV}/>
-                        </View>
+          photos.push(
+            isVertical  ? <View style={styles.container} key={key}>
+                            <Image source={{uri: photo.url}} style={styles.imageV}/>
+                          </View>
 
-                      : (isLicense
-                         ? <View style={styles.container} key={key}>
-                              <Image source={{uri: photo.url}} style={styles.imageH}/>
-                            </View>
-                         : <View style={styles.container} key={key}>
-                              <Image source={{uri: photo.url}} style={styles.image}/>
-                            </View>
-                      )
+                        : (isLicense
+                           ? <View style={styles.container} key={key}>
+                                <Image source={{uri: photo.url}} style={styles.imageH}/>
+                              </View>
+                           : <View style={styles.container} key={key}>
+                                <Image source={{uri: photo.url}} style={styles.image}/>
+                              </View>
+                        )
         )
         // photos.push(
         //   isLicense ? <View style={styles.container}>
@@ -97,7 +102,7 @@ class PhotoCarousel extends Component {
       n = currentPhotoIndex
     }
     return (
-      <Carousel width={Dimensions.get('window').width}
+      <Carousel width={width}
                 loop={false}
                 animate={false}
                 indicatorOffset={40}
@@ -107,26 +112,29 @@ class PhotoCarousel extends Component {
     );
   }
 }
+PhotoCarousel = makeResponsive(PhotoCarousel)
 
-var styles = StyleSheet.create({
-  image: {
-    width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height - 200,
-  },
-  imageH: {
-    width: Dimensions.get('window').width,
-    height: Dimensions.get('window').width - 100
-  },
-  imageV: {
-    width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height - 200,
-  },
-  container: {
-    width: Dimensions.get('window').width,
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'black',
-  },
-});
+var createStyles = utils.styleFactory(PhotoCarousel, function ({ dimensions }) {
+  return StyleSheet.create({
+    image: {
+      width: dimensions.width,
+      height: dimensions.height - 200,
+    },
+    imageH: {
+      width: dimensions.width,
+      height: dimensions.width - 100
+    },
+    imageV: {
+      width: dimensions.width,
+      height: dimensions.height - 200,
+    },
+    container: {
+      width: dimensions.width,
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'black',
+    },
+  })
+})
 module.exports = PhotoCarousel;

@@ -10,17 +10,18 @@ var Icon = require('react-native-vector-icons/Ionicons');
 var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin');
 var equal = require('deep-equal')
+import { makeResponsive } from 'react-native-orient'
 
 var reactMixin = require('react-mixin');
 
 var STRUCTURED_MESSAGE_COLOR
+const MAX_WIDTH = 400
 
 import {
   StyleSheet,
   Text,
   TouchableHighlight,
   Navigator,
-  Dimensions,
   View
 } from 'react-native'
 
@@ -37,6 +38,7 @@ class FormMessageRow extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     return !equal(this.props.resource, nextProps.resource) ||
            !equal(this.props.to, nextProps.to)             ||
+           this.props.orientation != nextProps.orientation ||
            this.props.sendStatus !== nextProps.sendStatus
   }
   render() {
@@ -106,14 +108,6 @@ class FormMessageRow extends Component {
              ? <Text style={styles.date} numberOfLines={1}>{val}</Text>
              : <View />;
 
-    var messageBody;
-    var w = Dimensions.get('window').width
-    var msgWidth = isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
-    // HACK that solves the case when the message is short and we don't want it to be displayed
-    // in a bigger than needed bubble
-    var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
-    viewStyle.width = msgWidth
-
     var sendStatus = <View />
     if (this.props.sendStatus  &&  this.props.sendStatus !== null) {
       switch (this.props.sendStatus) {
@@ -137,6 +131,12 @@ class FormMessageRow extends Component {
     let cellStyle = addStyle
                   ? [styles.textContainer, addStyle]
                   : styles.textContainer
+    // HACK that solves the case when the message is short and we don't want it to be displayed
+    // in a bigger than needed bubble
+    var messageBody;
+    let msgWidth = utils.dimensions(FormMessageRow).width - (isMyMessage ? 70 : 50)
+    var viewStyle = {width: Math.min(msgWidth, MAX_WIDTH), flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
+
     messageBody =
       <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
         <View style={[rowStyle, viewStyle]}>
@@ -160,7 +160,7 @@ class FormMessageRow extends Component {
     var len = photoUrls.length;
     var inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
     var photoStyle = {};
-    // var height;
+    var height;
 
     if (inRow > 0) {
       if (inRow === 1) {
@@ -190,11 +190,10 @@ class FormMessageRow extends Component {
   }
   isShared() {
     var resource = this.props.resource
+    if (!resource.to.organization)
+      return false
     var to = this.props.to
     if (to[constants.TYPE] === constants.TYPES.PROFILE)
-      return false
-    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
-    if (model.subClassOf !== constants.TYPES.FORM  ||  !resource.to.organization)
       return false
     return utils.getId(resource.to.organization) !== utils.getId(to)
   }
@@ -439,6 +438,7 @@ var styles = StyleSheet.create({
   }
 });
 reactMixin(FormMessageRow.prototype, RowMixin);
+FormMessageRow = makeResponsive(FormMessageRow)
 
 module.exports = FormMessageRow;
 

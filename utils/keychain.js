@@ -22,7 +22,7 @@ export function generateNewSet (opts = {}) {
     networkName: 'String'
   }, opts)
 
-  return Q.all(DEFAULT_KEY_SET.map(function (keyProps) {
+  return Promise.all(DEFAULT_KEY_SET.map(function (keyProps) {
     keyProps = { ...keyProps } // defensive copy
     const gen = isKeyInSecureEnclave(keyProps)
       ? createSecureEnclaveKey(keyProps)
@@ -46,7 +46,7 @@ export function saveKey (pub, priv) {
 }
 
 export function lookupKeys (keys) {
-  return Q.all(keys.map(lookupKey))
+  return Promise.all(keys.map(lookupKey))
 }
 
 function lookupKey (pubKey) {

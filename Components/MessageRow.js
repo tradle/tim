@@ -18,6 +18,7 @@ var equal = require('deep-equal')
 var formDefaults = require('@tradle/models').formDefaults;
 var TradleW = require('../img/TradleW.png')
 var Actions = require('../Actions/Actions');
+import { makeResponsive } from 'react-native-orient'
 
 var reactMixin = require('react-mixin');
 
@@ -36,6 +37,7 @@ var STRUCTURED_MESSAGE_COLOR
 
 const DEFAULT_CURRENCY_SYMBOL = '£'
 const DEFAULT_LINK_COLOR = '#2892C6'
+const MAX_WIDTH = 400
 
 import {
   Image,
@@ -45,14 +47,11 @@ import {
   Alert,
   Modal,
   Navigator,
-  Dimensions,
   View,
   processColor
 } from 'react-native'
 
 import React, { Component } from 'react'
-
-var DeviceWidth = Dimensions.get('window').width
 
 class MessageRow extends Component {
   constructor(props) {
@@ -65,8 +64,9 @@ class MessageRow extends Component {
     CURRENCY_SYMBOL = props.currency ? props.currency.symbol || props.currency : DEFAULT_CURRENCY_SYMBOL
   }
   shouldComponentUpdate(nextProps, nextState) {
-    return !equal(this.props.resource, nextProps.resource) ||
-           !equal(this.props.to, nextProps.to)             ||
+    return !equal(this.props.resource, nextProps.resource)   ||
+           !equal(this.props.to, nextProps.to)               ||
+           this.props.orientation !== nextProps.orientation  ||
            this.props.sendStatus !== nextProps.sendStatus
   }
   render() {
@@ -176,12 +176,31 @@ class MessageRow extends Component {
     else
       showMessageBody = true;
     var messageBody;
-    var w = Dimensions.get('window').width
+    var w = utils.dimensions(MessageRow).width
     var msgWidth = isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
+    msgWidth = Math.min(msgWidth, MAX_WIDTH)
     var sendStatus = <View />
     // HACK that solves the case when the message is short and we don't want it to be displayed
     // in a bigger than needed bubble
-    let longMessage = isSimpleMessage  &&  resource.message ? (msgWidth / 11) < resource.message.length : false
+    let message
+    if (resource.message) {
+      let parts = utils.splitMessage(resource.message)
+      if (parts.length == 2)
+        message = parts[0].length > parts[1].length ? parts[0] : parts[1]
+      else
+        message = parts[0]
+      let strName = utils.getStringName(message)
+      if (strName)
+        message = translate(strName)
+      if (resource.form) {
+        let formTitle = translate(resource.form)
+        if (formTitle.length > message.length)
+          message = formTitle
+      }
+    }
+    // HACK
+    let numberOfCharsInWidth = msgWidth / 10
+    let longMessage = isSimpleMessage  &&  message ? numberOfCharsInWidth < message.length : false
     if (showMessageBody) {
       var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? (isNewProduct ? 'center' : 'flex-end') : 'flex-start'};
       if (resource.message) {
@@ -189,7 +208,7 @@ class MessageRow extends Component {
           viewStyle.width = msgWidth; //isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
       }
       if (!isSimpleMessage)
-        viewStyle.width = msgWidth
+        viewStyle.width =  message ? Math.min(msgWidth, message.length * 9 + 40) : msgWidth
 
 
       if (this.props.sendStatus  &&  this.props.sendStatus !== null) {
@@ -223,7 +242,9 @@ class MessageRow extends Component {
       messageBody =
         <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
           <View style={[rowStyle, viewStyle]}>
+            <View style={{marginTop: 2}}>
             {ownerPhoto}
+            </View>
             <View style={cellStyle}>
               <View style={{flex: 1}}>
               {this.isShared()
@@ -425,7 +446,7 @@ class MessageRow extends Component {
 
 
     return (
-      <View style={[rowStyle, viewStyle, {width: DeviceWidth - 50}]} key={this.getNextKey()}>
+      <View style={[rowStyle, viewStyle, {width: utils.dimensions(MessageRow).width - 50}]} key={this.getNextKey()}>
         <View style={{width: 30}}/>
         <View style={[addStyle ? [styles.textContainer, addStyle] : styles.textContainer]}>
           <View style={{flex: 1}}>
@@ -547,7 +568,7 @@ class MessageRow extends Component {
                 <Text style={styles.resourceTitle}>{translate('hello', utils.getMe().firstName)}</Text>
                 <View style={styles.rowContainer}>
                   <Text style={[styles.resourceTitle, {color: LINK_COLOR}]}>{translate('listOfProducts')} </Text>
-                  <Icon style={[styles.linkIcon, {color: LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
+                  <Icon style={{color: LINK_COLOR}} size={20} name={'ios-arrow-forward'} />
                 </View>
               </View>
         renderedRow.push(msg);
@@ -560,7 +581,7 @@ class MessageRow extends Component {
       let msg = <View key={this.getNextKey()}>
                   <View style={styles.rowContainer}>
                     <Text style={[styles.resourceTitle, {color: isMyMessage ? '#ffffff' : '#757575'}]}>{resource.message}</Text>
-                    <Icon style={[styles.linkIcon, {color: LINK_COLOR, backgroundColor: 'transparent',  paddingLeft: 5}]} size={20} name={'ios-person'} />
+                    <Icon style={{color: LINK_COLOR, backgroundColor: 'transparent',  paddingLeft: 5}} size={20} name={'ios-person'} />
                   </View>
                 </View>
       renderedRow.push(msg);
@@ -657,7 +678,7 @@ class MessageRow extends Component {
                     <Text style={style}>{msgParts[0]}</Text>
                     <View style={styles.rowContainer}>
                       <Text style={[style, {color: isMyMessage ? STRUCTURED_MESSAGE_COLOR : isMyMessage ? self.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]}>{msgParts[1]} </Text>
-                      <Icon style={[styles.linkIcon, {color: LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
+                      <Icon style={{color: LINK_COLOR}} size={20} name={'ios-arrow-forward'} />
                     </View>
                   </View>
             vCols.push(msg);
@@ -693,7 +714,7 @@ class MessageRow extends Component {
               else
                 link = <View style={styles.rowContainer}>
                            <Text style={[style, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(msgModel)}</Text>
-                           <Icon style={resource.documentCreated  ? styles.linkIconGreyed : [self.linkIcon, {color: isMyMessage ? self.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
+                           <Icon style={resource.documentCreated  ? styles.linkIconGreyed : {color: isMyMessage ? self.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}} size={20} name={'ios-arrow-forward'} />
                        </View>
             }
             let strName = isMyProduct
@@ -785,57 +806,63 @@ class MessageRow extends Component {
     let color = isMyMessage
               ? {color: '#AFBBA8'} //{color: STRUCTURED_MESSAGE_COLOR}
               : {color: '#2892C6'}
-    let link = sameFormRequestForm  &&  !resource.documentCreated
-             ? <View style={[styles.rowContainer, {paddingVertical: 10, alignSelf: 'center'}]}>
-                 <View style={styles.textContainer}>
-                 <TouchableHighlight underlayColor='transparent' style={{paddingRight: 15}} onPress={() => {
-                   this.createNewResource(form, isMyMessage)
-                 }}>
-                   <View style={styles.multiEntryButton}>
-                     <Text style={styles.multiEntryText}>   {translate('addSameForm')}   </Text>
-                   </View>
-                 </TouchableHighlight>
-                 <TouchableHighlight underlayColor='transparent' onPress={() => {
-                    Alert.alert(
-                      translate('areYouSureAboutNextForm', translate(form)),
-                      null,
-                      [
-                        {text: translate('Ok'), onPress: () => {
-                          Actions.addMessage({
-                            from: resource.to,
-                            to: resource.from,
-                            [constants.TYPE]: NEXT_FORM_REQUEST,
-                            after: form.id
-                          })
-                          var params = {
-                            value: {documentCreated: true},
-                            resource: resource,
-                            meta: utils.getModel(resource[constants.TYPE]).value
-                          }
-                          Actions.addItem(params)
-                         }},
-                        {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-                      ]
-                    )
-                 }}>
-                   <View style={styles.multiEntryButton}>
-                     <Text style={styles.multiEntryText}>   {translate('getNextForm')}   </Text>
-                   </View>
+    let link
+    if (sameFormRequestForm  &&  !resource.documentCreated) {
+       link = <View style={[styles.rowContainer, {paddingVertical: 10, alignSelf: 'center'}]}>
+               <View style={styles.textContainer}>
+               <TouchableHighlight underlayColor='transparent' style={{paddingRight: 15}} onPress={() => {
+                 this.createNewResource(form, isMyMessage)
+               }}>
+                 <View style={styles.multiEntryButton}>
+                   <Text style={styles.multiEntryText}>   {translate('addSameForm')}   </Text>
+                 </View>
+               </TouchableHighlight>
+               <TouchableHighlight underlayColor='transparent' onPress={() => {
+                  Alert.alert(
+                    translate('areYouSureAboutNextForm', translate(form)),
+                    null,
+                    [
+                      {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+                      {text: translate('Ok'), onPress: () => {
+                        Actions.addMessage({
+                          from: resource.to,
+                          to: resource.from,
+                          [constants.TYPE]: NEXT_FORM_REQUEST,
+                          after: form.id
+                        })
+                        var params = {
+                          value: {documentCreated: true},
+                          resource: resource,
+                          meta: utils.getModel(resource[constants.TYPE]).value
+                        }
+                        Actions.addItem(params)
+                       }},
+                    ]
+                  )
+               }}>
+                 <View style={styles.multiEntryButton}>
+                   <Text style={styles.multiEntryText}>   {translate('getNextForm')}   </Text>
+                 </View>
+              </TouchableHighlight>
+              </View>
+             </View>
+    }
+    else if (isMyMessage)
+      link = <Text style={[styles.resourceTitle, color]}>{translate(form)}</Text>
+    else {
+      let view = <View style={styles.rowContainer}>
+                   <Text style={[styles.resourceTitle, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(form)}</Text>
+                   <Icon style={resource.documentCreated  ? styles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}} size={20} name={'ios-arrow-forward'} />
+                 </View>
+      if (resource.documentCreated)
+        link = view
+      else
+        link =  <TouchableHighlight underlayColor='transparent' onPress={() => {
+                  this.createNewResource(form, isMyMessage)
+                }}>
+                  {view}
                 </TouchableHighlight>
-                </View>
-               </View>
-              : isMyMessage
-                 ? <Text style={[styles.resourceTitle, color]}>{translate(form)}</Text>
-                 : <TouchableHighlight underlayColor='transparent' style={{paddingRight: 15}} onPress={() => {
-                       this.createNewResource(form, isMyMessage)
-                     }}>
-
-                   <View style={styles.rowContainer}>
-                     <Text style={[styles.resourceTitle, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(form)}</Text>
-                     <Icon style={resource.documentCreated  ? styles.linkIconGreyed : [this.linkIcon, {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
-                   </View>
-                  </TouchableHighlight>
-
+    }
     let strName = sameFormRequestForm ? translate('addAnotherFormOrGetNext', translate(form)) : utils.getStringName(message)
     let str = strName ? utils.translate(strName) : message
     let msg = <View key={this.getNextKey()}>
@@ -862,7 +889,7 @@ class MessageRow extends Component {
       id: 15,
       component: ProductChooser,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      backButtonTitle: translate('cancel'),
+      backButtonTitle: translate('back'),
       passProps: {
         resource: resource,
         returnRoute: currentRoutes[currentRoutes.length - 1],
@@ -982,14 +1009,7 @@ var styles = StyleSheet.create({
     color: '#757575'
     // color: '#b4c3cb'
   },
-  linkIcon: {
-    width: 20,
-    height: 20,
-    color: '#2892C6'
-  },
   linkIconGreyed: {
-    width: 20,
-    height: 20,
     color: '#cccccc'
   },
   description: {
@@ -1072,13 +1092,14 @@ var styles = StyleSheet.create({
   multiEntryText: {
     fontSize: 18
   },
-  viewStyle: {
-    flexDirection: 'row',
-    alignSelf: 'flex-start',
-    width: DeviceWidth - 50
-  }
+  // viewStyle: {
+  //   flexDirection: 'row',
+  //   alignSelf: 'flex-start',
+  //   width: DeviceWidth - 50
+  // }
 });
 reactMixin(MessageRow.prototype, RowMixin);
+MessageRow = makeResponsive(MessageRow)
 
 module.exports = MessageRow;
   // employeeImage: {

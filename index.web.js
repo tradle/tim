@@ -6,4 +6,6 @@ if (window.history) {
   }
 }
 
+require('./web/shims/deviceEventEmitter')
+require('./web/shims/orientation')
 require('./index.common')

@@ -9,11 +9,12 @@ var Icon = require('react-native-vector-icons/Ionicons');
 var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin');
 var equal = require('deep-equal')
+import { makeResponsive } from 'react-native-orient'
 
 var reactMixin = require('react-mixin');
 
 const VERIFICATION_BG = '#FBFFE5' //'#F6FFF0';
-
+const MAX_WIDTH = 400
 import {
   Image,
   StyleSheet,
@@ -22,14 +23,11 @@ import {
   Alert,
   Modal,
   Navigator,
-  Dimensions,
   View,
   processColor
 } from 'react-native'
 
 import React, { Component } from 'react'
-
-var DeviceWidth = Dimensions.get('window').width
 
 class VerificationMessageRow extends Component {
   constructor(props) {
@@ -41,6 +39,7 @@ class VerificationMessageRow extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     return !equal(this.props.resource, nextProps.resource) ||
            !equal(this.props.to, nextProps.to)             ||
+           this.props.orientation != nextProps.orientation ||
            this.props.sendStatus !== nextProps.sendStatus
   }
   render() {
@@ -54,7 +53,10 @@ class VerificationMessageRow extends Component {
              : <View />;
 
     var isMyMessage = this.isMyMessage();
-    var msgWidth = isMyMessage ? DeviceWidth - 70 : DeviceWidth - 50;
+    var w = utils.dimensions(VerificationMessageRow).width
+    var msgWidth = isMyMessage ? w - 70 : w - 50;
+    msgWidth = Math.min(msgWidth, MAX_WIDTH)
+    var viewStyle = {width: msgWidth, flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
 
     var msgModel = utils.getModel(resource.document[constants.TYPE]).value;
     var orgName = resource.organization  ? resource.organization.title : ''
@@ -65,12 +67,23 @@ class VerificationMessageRow extends Component {
       // Check if I am the employee of the organization I opened a chat with or the customer
       isThirdPartyVerification = !utils.isEmployee(resource.organization)
     }
-    let bgColor =  isThirdPartyVerification ? '#93BEBA' : this.props.bankStyle.VERIFIED_HEADER_COLOR
-    let verifiedBy = translate('verifiedBy', orgName)
-    if (verifiedBy.length > 25)
-      verifiedBy = verifiedBy.substring(0, 25) + '..'
+    let isShared = this.isShared()
+    let bgColor =  isThirdPartyVerification
+                ? '#93BEBA'
+                : this.props.bankStyle.VERIFIED_HEADER_COLOR
+    let verifiedBy = isShared ? translate('youShared', orgName) : translate('verifiedBy', orgName)
+    let numberOfCharacters = msgWidth / 12
+    if (verifiedBy.length > numberOfCharacters)
+      verifiedBy = verifiedBy.substring(0, numberOfCharacters) + '..'
+
+    let headerStyle = [
+      styles.verifiedHeader,
+      {backgroundColor: bgColor, opacity: isShared ? 0.5 : 1},
+      isMyMessage ? {borderTopRightRadius: 0, borderTopLeftRadius: 10} : {borderTopLeftRadius: 0, borderTopRightRadius: 10}
+    ]
+
     renderedRow = <View>
-                    <View style={[styles.verifiedHeader, {backgroundColor: bgColor}]}>
+                    <View style={headerStyle}>
                       <Icon style={styles.verificationIcon} size={20} name={'md-checkmark'} />
                       <Text style={styles.verificationHeaderText}>{verifiedBy}</Text>
                     </View>
@@ -79,8 +92,17 @@ class VerificationMessageRow extends Component {
                     </View>
                   </View>
 
-    var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start', width: msgWidth, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}
-    let addStyle = [styles.verificationBody, {backgroundColor: this.props.bankStyle.VERIFICATION_BG, borderColor: bgColor}];
+    var viewStyle = {
+      width: msgWidth,
+      flexDirection: 'row',
+      alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
+      backgroundColor: this.props.bankStyle.BACKGROUND_COLOR
+    }
+    let addStyle = [
+      styles.verificationBody,
+      {backgroundColor: this.props.bankStyle.VERIFICATION_BG, borderColor: bgColor},
+      isMyMessage ? {borderTopRightRadius: 0} : {borderTopLeftRadius: 0}
+    ];
     let messageBody =
           <TouchableHighlight onPress={this.verify.bind(this, resource)} underlayColor='transparent'>
             <View style={[styles.row, viewStyle]}>
@@ -100,6 +122,16 @@ class VerificationMessageRow extends Component {
         {messageBody}
       </View>
     );
+  }
+  isShared() {
+    let resource = this.props.resource
+    // Is resource was originally created in this chat or shared from a different chat
+    if (!resource.organization)
+      return false
+    let to = this.props.to
+    if (to[constants.TYPE] === constants.TYPES.PROFILE)
+      return false
+    return utils.getId(resource.organization) !== utils.getId(to)
   }
   verify(event) {
     var resource = this.props.resource;
@@ -189,6 +221,7 @@ var styles = StyleSheet.create({
   },
 });
 reactMixin(VerificationMessageRow.prototype, RowMixin);
+VerificationMessageRow = makeResponsive(VerificationMessageRow)
 
 module.exports = VerificationMessageRow;
 

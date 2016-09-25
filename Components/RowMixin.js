@@ -234,8 +234,8 @@ var RowMixin = {
                         'Sharing ' + docTitle + ' ' + verifiedBy,
                         'with ' + orgTitle,
                         [
-                          {text: translate('Share'), onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
                           {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+                          {text: translate('Share'), onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
                         ]
                     )}>
               {shareView}
@@ -257,8 +257,8 @@ var RowMixin = {
                       'Sharing ' + docTitle + ' ' + verifiedBy,
                       'with ' + orgTitle,
                       [
-                        {text: translate('Share'), onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
                         {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+                        {text: translate('Share'), onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
                       ]
                   )}>
             {shareView}

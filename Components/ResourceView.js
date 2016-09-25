@@ -18,12 +18,13 @@ var ResourceMixin = require('./ResourceMixin');
 var QRCode = require('./QRCode')
 var MessageList = require('./MessageList')
 var defaultBankStyle = require('../styles/bankStyle.json')
-var buttonStyles = require('../styles/buttonStyles');
 var ENV = require('../utils/env')
+
 import ActionSheet from 'react-native-actionsheet'
 
 import platformStyles from '../styles/platform'
 import { signIn } from '../utils/localAuth'
+import { makeResponsive } from 'react-native-orient'
 
 const TALK_TO_EMPLOYEE = '1'
 // const SERVER_URL = 'http://192.168.0.162:44444/'
@@ -51,6 +52,7 @@ import {
 import React, { Component } from 'react'
 
 class ResourceView extends Component {
+  static displayName = 'ResourceView';
   constructor(props) {
     super(props);
     let me = utils.getMe()
@@ -59,7 +61,7 @@ class ResourceView extends Component {
       isLoading: props.resource.id ? true : false,
       isModalOpen: false,
       useTouchId: me && me.useTouchId,
-      useGesturePassword: me && me.useGesturePassword
+      useGesturePassword: me && me.useGesturePassword,
     }
     let currentRoutes = this.props.navigator.getCurrentRoutes()
     let len = currentRoutes.length
@@ -138,7 +140,8 @@ class ResourceView extends Component {
     }
   }
   shouldComponentUpdate(nextProps, nextState) {
-    return (this.state.isModalOpen  !== nextState.isModalOpen              ||
+    return this.props.orientation !== nextProps.orientation                ||
+            (this.state.isModalOpen  !== nextState.isModalOpen             ||
             this.state.useGesturePassword !== nextState.useGesturePassword ||
             this.state.useTouchId !== nextState.useTouchId                 ||
             this.state.pairingData !== nextState.pairingData)
@@ -174,6 +177,10 @@ class ResourceView extends Component {
   render() {
     if (this.state.isLoading)
       return <View/>
+
+    var dimensions = this.props.dimensions
+    var styles = createStyles()
+
     var resource = this.state.resource;
     var modelName = resource[constants.TYPE];
     var model = utils.getModel(modelName).value;
@@ -195,17 +202,18 @@ class ResourceView extends Component {
     }
     else
       actionPanel = <View/>
-    var qrcode, width
+    var qrcode, w
+    var {width, height} = utils.dimensions(ResourceView)
     if (this.state.pairingData) {
-      width = Math.floor((Dimensions.get('window').width / 3) * 2)
+      w = Math.floor((width / 3) * 2)
       qrcode = <View style={{alignSelf: 'center', justifyContent: 'center', backgroundColor: '#ffffff', padding:10}} onPress={()=> this.setState({isModalOpen: true})}>
-                 <QRCode inline={true} content={this.state.pairingData} dimension={width} />
+                 <QRCode inline={true} content={this.state.pairingData} dimension={w} />
                </View>
     }
     else if (isMe  &&  me.isEmployee  &&  me.organization && me.organization.url) {
-      width = Math.floor((Dimensions.get('window').width / 3) * 2)
+      w = Math.floor((width / 3) * 2)
       qrcode = <View style={{alignSelf: 'center', justifyContent: 'center', backgroundColor: '#ffffff', padding:10}} onPress={()=> this.setState({isModalOpen: true})}>
-                 <QRCode inline={true} content={TALK_TO_EMPLOYEE + ';' + me.organization.url + ';' + utils.getId(me.organization).split('_')[1] + ';' + me[constants.ROOT_HASH]} dimension={width} />
+                 <QRCode inline={true} content={TALK_TO_EMPLOYEE + ';' + me.organization.url + ';' + utils.getId(me.organization).split('_')[1] + ';' + me[constants.ROOT_HASH]} dimension={w} />
                </View>
     }
     else
@@ -222,7 +230,7 @@ class ResourceView extends Component {
 //, this.state.useTouchId ? {opacity: 1} : {opacity: 0.3}
     let switchTouchId = isIdentity
                       ? <View style={styles.footer}>
-                          <Text style={styles.touchIdText}>{msg}</Text>
+                          <Text style={platformStyles.touchIdText}>{msg}</Text>
                           <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
                              <View style={[platformStyles.menuButtonRegular]}>
                                 <Icon name='md-finger-print' color={Platform.OS === 'ios' ? '#ffffff': 'red'} size={33} />
@@ -260,7 +268,7 @@ class ResourceView extends Component {
         actions.push(USE_GESTURE_PASSWORD)
       }
 
-      if (this.state.useGesturePassword) {
+      if (this.state.useGesturePassword || !utils.isIOS) {
         buttons.push(translate('changeGesturePassword'))
         actions.push(CHANGE_GESTURE_PASSWORD)
       }
@@ -376,43 +384,41 @@ class ResourceView extends Component {
     // Actions.addItem({resource: me, value: r, meta: utils.getModel(constants.TYPES.PROFILE).value})
   }
 }
+
 reactMixin(ResourceView.prototype, Reflux.ListenerMixin);
 reactMixin(ResourceView.prototype, ResourceMixin);
+ResourceView = makeResponsive(ResourceView)
 
-var styles = StyleSheet.create({
-  // container: {
-  //   marginTop: Platform.OS === 'ios' ? 64 : 44,
-  //   flex: 1,
-  // },
-  modalBackgroundStyle: {
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'center',
-    padding: 20,
-    height: Dimensions.get('window').height
-  },
-  photoBG: {
-    // backgroundColor: '#245D8C',
-    alignItems: 'center',
-  },
-  footer: {
-    flexDirection: 'row',
-    flexWrap: 'nowrap',
-    justifyContent: 'space-between',
-    height: 45,
-    width: Dimensions.get('window').width,
-    backgroundColor: '#eeeeee',
-    borderColor: '#eeeeee',
-    borderWidth: 1,
-    borderTopColor: '#cccccc',
-    paddingRight: 10
-  },
-  touchIdText: {
-    color: '#2E3B4E',
-    fontSize: 18,
-    marginVertical: 10,
-    marginLeft: 15,
-    alignSelf: 'flex-start'
-  }
-});
+var createStyles = utils.styleFactory(ResourceView, function ({ dimensions }) {
+  return StyleSheet.create({
+    // container: {
+    //   marginTop: Platform.OS === 'ios' ? 64 : 44,
+    //   flex: 1,
+    // },
+    modalBackgroundStyle: {
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+      justifyContent: 'center',
+      padding: 20,
+      height: dimensions.height
+    },
+    photoBG: {
+      // backgroundColor: '#245D8C',
+      alignItems: 'center',
+    },
+    footer: {
+      flexDirection: 'row',
+      flexWrap: 'nowrap',
+      justifyContent: 'space-between',
+      alignSelf: 'stretch',
+      height: 45,
+      width: dimensions.width,
+      backgroundColor: '#eeeeee',
+      borderColor: '#eeeeee',
+      borderWidth: 1,
+      borderTopColor: '#cccccc',
+      paddingRight: 10,
+    }
+  })
+})
 
 module.exports = ResourceView;

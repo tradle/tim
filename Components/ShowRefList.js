@@ -9,6 +9,7 @@ var constants = require('@tradle/constants');
 var reactMixin = require('react-mixin');
 var RowMixin = require('./RowMixin');
 var ResourceMixin = require('./ResourceMixin');
+import { makeResponsive } from 'react-native-orient'
 
 import * as Animatable from 'react-native-animatable'
 
@@ -18,7 +19,6 @@ import {
   TextInput,
   TouchableHighlight,
   Platform,
-  Dimensions
 } from 'react-native';
 
 import React, { Component } from 'react'
@@ -57,7 +57,7 @@ class ShowRefList extends Component {
       propsToShow.push(p)
     }
     let showQR = utils.getId(me) === utils.getId(resource)  &&  me.isEmployee
-    let width = Dimensions.get('window').width  / (propsToShow.length + (showQR ? 1 : 0))
+    let width = utils.dimensions(ShowRefList).width  / (propsToShow.length + (showQR ? 1 : 0))
     let maxLetters = 2 + (width/10)
     propsToShow.forEach((p) => {
       let propTitle = translate(props[p], model)
@@ -116,5 +116,6 @@ class ShowRefList extends Component {
 }
 reactMixin(ShowRefList.prototype, ResourceMixin);
 reactMixin(ShowRefList.prototype, RowMixin);
+ShowRefList = makeResponsive(ShowRefList)
 
 module.exports = ShowRefList;

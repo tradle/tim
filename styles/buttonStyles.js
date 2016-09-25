@@ -16,6 +16,8 @@ var FONT_SIZE = 12;
 var FONT_SIZE_1 = 17;
 var FONT_WEIGHT = '500';
 
+var utils = require('../utils/utils')
+
 var buttonStyles = Object.freeze({
   icon: {
     width: 30,
@@ -50,8 +52,8 @@ var buttonStyles = Object.freeze({
   text: {
     color: '#ffffff',
     paddingBottom: 10,
-    fontWeight: FONT_WEIGHT,
-    fontSize: FONT_SIZE,
+    // fontWeight: FONT_WEIGHT,
+    fontSize: utils.getFontSize(FONT_SIZE),
     alignSelf: 'center',
     // marginTop: -6,
     // paddingTop: 10,
@@ -98,7 +100,7 @@ var buttonStyles = Object.freeze({
     color: '#ffffff',
     fontFamily: 'Avenir Next',
     // fontWeight: '800',
-    fontSize: FONT_SIZE_1
+    fontSize: utils.getFontSize(FONT_SIZE_1)
   }
 });
 

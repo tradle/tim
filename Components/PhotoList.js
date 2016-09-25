@@ -6,6 +6,7 @@ var constants = require('@tradle/constants');
 var reactMixin = require('react-mixin');
 var PhotoCarouselMixin = require('./PhotoCarouselMixin');
 var RowMixin = require('./RowMixin')
+
 var equal = require('deep-equal')
 var cnt = 1000
 import {
@@ -14,19 +15,15 @@ import {
   View,
   ListView,
   Text,
-  Dimensions,
   TextInput,
   TouchableHighlight,
 } from 'react-native'
-var width = Dimensions.get('window').width
-var d3 = (width / 3) - 5
-var d4 = (width / 4) - 5
-var d5 = (width / 5) - 5
 
 import React, { Component } from 'react'
 
 // var Animated = require('Animated');
 class PhotoList extends Component {
+  static displayName = 'PhotoList'
   constructor(props) {
     super(props);
     var dataSource = new ListView.DataSource({
@@ -63,6 +60,11 @@ class PhotoList extends Component {
       return null;
 
     var inRow = photos.length, height;
+    var styles = createStyles()
+    var width = utils.dimensions(PhotoList).width
+    var d3 = (width / 3) - 5
+    var d4 = (width / 4) - 5
+    var d5 = (width / 5) - 5
 
     switch (photos.length) {
       case 1:
@@ -83,7 +85,7 @@ class PhotoList extends Component {
     if (photos.length % inRow)
       rows++;
     height *= rows;
-    var val = this.renderPhotoList(photos);
+    var val = this.renderPhotoList(photos, styles);
     return (
        <View style={[styles.photoContainer, this.props.style ? {} : {marginHorizontal: 5, height: height}]} key={this.getNextKey() + '_photo'}>
          {val}
@@ -91,7 +93,7 @@ class PhotoList extends Component {
      );
   }
 
-  renderPhotoList(val) {
+  renderPhotoList(val, styles) {
     var dataSource = this.state.dataSource.cloneWithRows(
       groupByEveryN(val, this.props.numberInRow || 3)
     );
@@ -101,13 +103,13 @@ class PhotoList extends Component {
             scrollEnabled = {false}
             removeClippedSubviews={false}
             enableEmptySections={true}
-            renderRow={this.renderRow.bind(this)}
+            renderRow={this.renderRow.bind(this, styles)}
             dataSource={dataSource} />
       </View>
     );
   }
 
-  renderRow(photos)  {
+  renderRow(styles, photos)  {
     var len = photos.length;
     var imageStyle = this.props.style;
     if (!imageStyle) {
@@ -170,34 +172,39 @@ class PhotoList extends Component {
 reactMixin(PhotoList.prototype, PhotoCarouselMixin);
 reactMixin(PhotoList.prototype, RowMixin);
 
-var styles = StyleSheet.create({
-  photoContainer: {
-    paddingTop: 5,
-    // alignSelf: 'center',
-  },
-  thumb3: {
-    width: d3,
-    height: d3,
-  },
-  thumb4: {
-    width: d4,
-    height: d4,
-  },
-  thumb5: {
-    width: d5,
-    height: d5,
-  },
-  thumbCommon: {
-    borderWidth: 0.5,
-    margin: 1,
-    borderColor: '#999999'
-  },
-  row: {
-    flexDirection: 'row',
-    // marginTop: 3,
-    // flex: 1,
-  },
-
-});
+var createStyles = utils.styleFactory(PhotoList, function ({ dimensions }) {
+  var width = dimensions.width
+  var d3 = (width / 3) - 5
+  var d4 = (width / 4) - 5
+  var d5 = (width / 5) - 5
+  return StyleSheet.create({
+    photoContainer: {
+      paddingTop: 5,
+      // alignSelf: 'center',
+    },
+    thumb3: {
+      width: d3,
+      height: d3,
+    },
+    thumb4: {
+      width: d4,
+      height: d4,
+    },
+    thumb5: {
+      width: d5,
+      height: d5,
+    },
+    thumbCommon: {
+      borderWidth: 0.5,
+      margin: 1,
+      borderColor: '#999999'
+    },
+    row: {
+      flexDirection: 'row',
+      // marginTop: 3,
+      // flex: 1,
+    },
+  })
+})
 
 module.exports = PhotoList;

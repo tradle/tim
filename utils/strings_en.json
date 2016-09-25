@@ -125,6 +125,7 @@
     "pairingRequestWasProcesseed": "Pairing request was processed",
     "youShared": "You shared from {1}",
     "termsAndConditions": "Terms and conditions.",
-    "acceptTermsAndConditions": "Accept terms and conditions.",
-    "acceptingTermsAndConditions": "By pressing OK button you are accepting Terms and Conditions"
+    "acceptTermsAndConditions": "View terms and conditions",
+    "acceptingTermsAndConditions": "By pressing OK, you accept the Terms and Conditions",
+    "viewTerms": "Please view the Terms and Conditions"
 }

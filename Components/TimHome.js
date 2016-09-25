@@ -55,11 +55,9 @@ import {
   Linking,
   Animated,
   Modal,
-  Dimensions,
   Alert,
   Platform
 } from 'react-native'
-
 import ActivityIndicator from './ActivityIndicator'
 import StatusBar from './StatusBar'
 
@@ -67,7 +65,8 @@ const isAndroid = utils.isAndroid()
 import React, { Component } from 'react'
 
 class TimHome extends Component {
-  static displayName = 'TimHome'
+  static displayName = 'TimHome';
+  static orientation = 'PORTRAIT';
   props: {
     modelName: PropTypes.string.isRequired,
     navigator: PropTypes.object.isRequired
@@ -78,6 +77,8 @@ class TimHome extends Component {
       isLoading: true,
       hasMe: utils.getMe()
     };
+
+    this._handleConnectivityChange = this._handleConnectivityChange.bind(this)
   }
   componentWillMount() {
     this._pressHandler = debounce(this._pressHandler, 500, true)
@@ -97,20 +98,20 @@ class TimHome extends Component {
 
     Actions.start();
   }
-
-  componentDidMount() {
-    AutomaticUpdates.on()
+  // componentDidMount() {
+    // AutomaticUpdates.on()
     // LinkingIOS.addEventListener('url', this._handleOpenURL);
     // var url = LinkingIOS.popInitialURL();
     // if (url)
     //   this._handleOpenURL({url});
-  }
+  // }
   _handleConnectivityChange(isConnected) {
     this.props.navigator.isConnected = isConnected
   }
   componentWillUnmount() {
     if (Linking && !isAndroid)
       Linking.removeEventListener('url', this._handleOpenURL);
+
     if (NetInfo) {
       NetInfo.isConnected.removeEventListener(
         'change',
@@ -119,6 +120,7 @@ class TimHome extends Component {
     }
   }
   componentDidMount() {
+    AutomaticUpdates.on()
     this.listenTo(Store, 'handleEvent');
     if (!Linking) return
 
@@ -138,12 +140,11 @@ class TimHome extends Component {
     .catch((e) => {
       debugger
     })
-
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    if (this.state.isLoading  !== nextState.isLoading  ||
-        this.state.message !== nextState.message       ||
+    if (this.state.isLoading  !== nextState.isLoading   ||
+        this.state.message !== nextState.message        ||
         this.state.hasMe !== nextState.hasMe)
       return true
     else
@@ -542,28 +543,9 @@ class TimHome extends Component {
       this.restartTiM()
       return
     }
-/*
-      <PasswordCheck mode={PasswordCheck.Modes.check} maxAttempts={3} promptCheck={translate('drawYourPassword')}
-                     promptRetryCheck={translate('gestureNotRecognized')}
-                     isCorrect={(pass) => {
-                      return Keychain.getGenericPassword(PASSWORD_ITEM_KEY)
-                        .then((stored) => {
-                          return stored === utils.hashPassword(pass)
-                        })
-                        .catch(err => {
-                          return false
-                        })
-                    }}
-                    onSuccess={() => cb()}
-                    onFail={(err) => {
-                    cb(err || new Error('For the safety of your data, ' +
-                      'this application has been temporarily locked. ' +
-                      'Please try in 5 minutes.'))
-                    // lock up the app for 10 mins? idk
-                  }} />
-*/
+
     // var url = Linking.getInitialURL();
-    var { width, height } = Dimensions.get('window')
+    var {width, height} = utils.dimensions(TimHome)
     var h = height > 800 ? height - 220 : height - 180
     // var cTop = h / 4
 
@@ -571,22 +553,6 @@ class TimHome extends Component {
               ? { width: width / 2.2, height: width / 2.2 }
               : styles.thumb
               // <Progress.CircleSnail color={'white'} size={70} thickness={5}/>
-  	// var splashscreen = (
-   //    <View>
-   //        <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: width, height: height }} />
-   //        <ScrollView
-   //          scrollEnabled={false}
-   //          style={{height:h}}>
-   //          <View style={[styles.container]}>
-   //            <Image style={thumb} source={TradleWhite}></Image>
-   //            <Text style={styles.tradle}>Tradle</Text>
-   //          </View>
-   //          <View style={{alignItems: 'center'}}>
-   //            <ActivityIndicator hidden='true' size='large' color='#ffffff'/>
-   //          </View>
-   //        </ScrollView>
-   //    </View>
-   //  )
 
     if (this.state.isLoading)
       return this.getSplashScreen(h, thumb)
@@ -605,7 +571,7 @@ class TimHome extends Component {
               </View>
 
     // var dev = <View/>
-    var dev = __DEV__  // &&  utils.getMe()
+    var dev = __DEV__
             ? <View style={styles.dev}>
                 <TouchableHighlight
                     underlayColor='transparent' onPress={this.onReloadDBPressed.bind(this)}>
@@ -630,10 +596,8 @@ class TimHome extends Component {
     // let hh = height - 300
     let left = (width - 300) / 2
     let logo = <View style={[styles.container]}>
-                <View>
                   <Image style={thumb} source={TradleWhite}></Image>
                   <Text style={styles.tradle}>Tradle</Text>
-                </View>
               </View>
 
                           // <Image style={{position: 'absolute', left: 0, opacity: 0.5, width: 100, height: 100}} source={TradleWhite}></Image>
@@ -659,7 +623,7 @@ class TimHome extends Component {
                         this.register(this.showOfficialAccounts.bind(this))
                         }} underlayColor='transparent'>
                         <View style={styles.signIn}>
-                          <Text style={{backgroundColor: 'transparent', color: 'lightblue', fontSize: 18, flexWrap: 'wrap', alignSelf: 'center'}}>{translate('This is my first Tradle device')}</Text>
+                          <Text style={styles.signInText}>{translate('This is my first Tradle device')}</Text>
                         </View>
                       </TouchableHighlight>
                     </FadeInView>
@@ -684,8 +648,8 @@ class TimHome extends Component {
             {logo}
           </TouchableHighlight>
         </ScrollView>
-        <View style={{height: 90, opacity: utils.getMe() ? 1 : 0}}></View>
-          <TouchableHighlight style={[styles.thumbButton, {opacity: utils.getMe() ? 1 : 0}]}
+        <View style={{height: 90, opacity: me ? 1 : 0}}></View>
+          <TouchableHighlight style={[styles.thumbButton, {opacity: me ? 1 : 0}]}
                 underlayColor='transparent' onPress={() => this._pressHandler()}>
             <View style={styles.getStarted}>
                <Text style={styles.getStartedText}>Get started</Text>
@@ -698,7 +662,7 @@ class TimHome extends Component {
     );
   }
   getSplashScreen(h, thumb) {
-    var { width, height } = Dimensions.get('window')
+    var {width, height} = utils.dimensions(TimHome)
     return (
       <View>
         <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: width, height: height }} />
@@ -796,84 +760,91 @@ class TimHome extends Component {
 
 reactMixin(TimHome.prototype, Reflux.ListenerMixin);
 
-var styles = StyleSheet.create({
-  container: {
-    // padding: 30,
-    marginTop: Dimensions.get('window').height / 4,
-    alignItems: 'center',
-  },
-  tradle: {
-    // color: '#7AAAC3',
-    color: '#eeeeee',
-    fontSize: Dimensions.get('window').height > 450 ? 35 : 25,
-    alignSelf: 'center',
-  },
-  text: {
-    color: '#7AAAC3',
-    paddingHorizontal: 5,
-    fontSize: 14,
-  },
-  thumbButton: {
-    // marginBottom: 10,
-    alignSelf: 'center',
-    justifyContent: 'center',
-    // padding: 40,
-  },
-  thumb: {
-    width: 170,
-    height: 170,
-  },
-  communitiesText: {
-    color: '#f8920d',
-    fontSize: 20,
-  },
-  communities: {
-    paddingBottom: 40,
-    alignSelf: 'center',
-  },
-  title: {
-    marginTop: 30,
-    alignSelf: 'center',
-    fontSize: 20,
-    color: '#7AAAC3'
-  },
-  dev: {
-    marginTop: 10,
-    flexDirection: 'row',
-    marginBottom: 500,
-    alignSelf: 'center',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  getStartedText: {
-    color: '#f0f0f0',
-    fontSize: Dimensions.get('window').width > 450 ? 35 : 20,
-    fontWeight:'400'
-  },
-  getStarted: {
-    backgroundColor: '#568FBE', //'#2892C6',
-    paddingVertical: 10,
-    paddingHorizontal: 30
-  },
-  signIn: {
-    flexDirection: 'row',
-    width: 300,
-    height: Platform.OS === 'ios' ? 80 : 50,
-    marginTop: 10,
-    justifyContent: 'center',
-    backgroundColor: '#467EAE',
-    // shadowOpacity: 0.5,
-    shadowColor: 'lightblue',
-    shadowRadius: 10,
-    shadowOffset: {width: 0.5, height: 0.5},
-    shadowOpacity: 0.7
-  },
-  version: {
-    color: '#ffffff',
-    fontSize: 10
-  }
-});
-
+var styles = (function () {
+  var dimensions = utils.dimensions(TimHome)
+  var { width, height } = dimensions
+  return StyleSheet.create({
+    container: {
+      // padding: 30,
+      marginTop: height / 4,
+      alignItems: 'center',
+    },
+    tradle: {
+      // color: '#7AAAC3',
+      color: '#eeeeee',
+      fontSize: height > 450 ? 35 : 25,
+      alignSelf: 'center',
+    },
+    text: {
+      color: '#7AAAC3',
+      paddingHorizontal: 5,
+      fontSize: 14,
+    },
+    thumbButton: {
+      // marginBottom: 10,
+      alignSelf: 'center',
+      // justifyContent: isLandscape ? 'flex-start' : 'center',
+      // padding: 40,
+    },
+    thumb: {
+      width: 170,
+      height: 170,
+    },
+    title: {
+      marginTop: 30,
+      alignSelf: 'center',
+      fontSize: 20,
+      color: '#7AAAC3'
+    },
+    dev: {
+      marginTop: 10,
+      flexDirection: 'row',
+      marginBottom: 500,
+      alignSelf: 'center',
+      alignItems: 'center',
+      justifyContent: 'center'
+    },
+    getStartedText: {
+      color: '#f0f0f0',
+      fontSize: width > 450 ? 35 : 20,
+      fontWeight:'400'
+    },
+    getStarted: {
+      backgroundColor: '#568FBE', //'#2892C6',
+      paddingVertical: 10,
+      paddingHorizontal: 30
+    },
+    signIn: {
+      flexDirection: 'row',
+      width: 300,
+      height: Platform.OS === 'ios' ? 80 : 50,
+      marginTop: 10,
+      justifyContent: 'center',
+      backgroundColor: '#467EAE',
+      // shadowOpacity: 0.5,
+      shadowColor: 'lightblue',
+      shadowRadius: 10,
+      shadowOffset: {width: 0.5, height: 0.5},
+      shadowOpacity: 0.7
+    },
+    version: {
+      color: '#ffffff',
+      fontSize: 10
+    },
+    pairDivicesText: {
+      backgroundColor: 'transparent',
+      color: '#467EAE',
+      fontSize: 18,
+      alignSelf: 'center'
+    },
+    signInText: {
+      backgroundColor: 'transparent',
+      color: 'lightblue',
+      fontSize: 18,
+      alignSelf: 'center'
+    }
+  });
+})()
 
 module.exports = TimHome;
   // signIn(cb) {

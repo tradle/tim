@@ -5,6 +5,7 @@ import {
   findNodeHandle,
   Dimensions,
   Alert,
+  PixelRatio,
   Platform
 } from 'react-native'
 
@@ -13,6 +14,11 @@ import DeviceInfo from 'react-native-device-info'
 import PushNotifications from 'react-native-push-notification'
 import Keychain from 'react-native-keychain'
 import ENV from './env'
+import { getDimensions, getOrientation } from 'react-native-orient'
+// import Orientation from 'react-native-orientation'
+
+// var orientation = Orientation.getInitialOrientation()
+// Orientation.addOrientationListener(o => orientation = o)
 
 var RCTUIManager = NativeModules.UIManager
 var crypto = require('crypto')
@@ -29,7 +35,9 @@ var fetch = global.fetch || require('whatwg-fetch')
 var levelErrors = require('levelup/lib/errors')
 const Cache = require('lru-cache')
 var strMap = {
-  'Please fill out this form and attach a snapshot of the original document': 'fillTheForm'
+  'Please fill out this form and attach a snapshot of the original document': 'fillTheFormWithAttachments',
+  'Please fill out this form': 'fillTheForm'
+
 }
 var translatedStrings = {
   en: require('./strings_en.json'),
@@ -77,6 +85,8 @@ var BACKOFF_DEFAULTS = {
 }
 
 var DEFAULT_FETCH_TIMEOUT = 5000
+var stylesCache = {}
+
 var utils = {
   isEmpty(obj) {
     for(var prop in obj) {
@@ -282,6 +292,11 @@ var utils = {
     }
     return subclasses;
   },
+  getFontSize(fontSize) {
+    return fontSize * (!PixelRatio.getFontScale() || PixelRatio.getFontScale() <= 3
+          ? (Platform.OS === 'androis' ? 1 : 1.1)
+          : (PixelRatio.getFontScale() < 3.5) ? 0.95 : 0.87)
+  },
   getId(r) {
     if (typeof r === 'string') {
       return r
@@ -375,11 +390,13 @@ var utils = {
         v = v.title ? v.title : utils.getDisplayName(v, this.getModel(props[p].ref).value.properties)
       group.push(v)
     }
+
     if (hasSetProps) {
       let s = this.template(prop.displayAs, group).trim()
-      s = s.replace(/,\s+,/g, ',').trim()
-      s = s.replace(/^,/, '').trim()
-      s = s.replace(/,$/, '').trim()
+      s = s.replace(/[,\s+,]+[,,]/g, ',')
+      if (s.charAt(0) === ',')
+        s = s.replace(/,/, '')
+
       if (s.charAt(s.length - 1) !== ',')
         return s
       let i = s.length - 2
@@ -1069,6 +1086,42 @@ var utils = {
     }
 
     return top
+  },
+  orientation() {
+    // disallow PORTRAITUPSIDEDOWN
+    return orientation === 'PORTRAITUPSIDEDOWN' ? 'LANDSCAPE' : orientation.replace(/-LEFT|-RIGHT/, '')
+  },
+  dimensions(Component) {
+    return getDimensions(Component)
+  },
+  styleFactory(Component, create) {
+    if (!Component.displayName) throw new Error('component must have "displayName"')
+
+    return () => {
+      var key = Component.displayName
+      if (!stylesCache[key]) {
+        stylesCache[key] = {}
+      }
+
+      var orientation = getOrientation(Component)
+      var subCache = stylesCache[key]
+      if (!subCache[orientation]) {
+        var dimensions = getDimensions(Component)
+        var { width, height } = dimensions
+        var switchWidthHeight = (
+          (orientation === 'PORTRAIT' && width > height) ||
+          (orientation === 'LANDSCAPE' && width < height)
+        )
+
+        if (switchWidthHeight) {
+          dimensions = { width: height, height: width }
+        }
+
+        subCache[orientation] = create({ dimensions })
+      }
+
+      return subCache[orientation]
+    }
   }
 }
 

@@ -17,7 +17,6 @@ import {
   Text,
   TextInput,
   TouchableHighlight,
-  Dimensions,
 } from 'react-native'
 
 import React, { Component } from 'react'
@@ -51,7 +50,7 @@ class ShowMessageRefList extends Component {
       if (!icon)
         icon = 'ios-checkmark';
       let style = (backlinks.length === 1)
-                ? [buttonStyles.container, {width: Dimensions.get('window').width}]
+                ? [buttonStyles.container, {width: utils.dimensions(ShowMessageRefList).width}]
                 :  buttonStyles.container
       refList.push(
         <View style={style} key={this.getNextKey()}>

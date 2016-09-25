@@ -50,6 +50,14 @@ module.exports = exports = StyleSheet.create({
     shadowColor: '#afafaf',
     backgroundColor: 'red'
   },
+  touchIdText: {
+    color: '#2E3B4E',
+    fontSize: 18,
+    marginTop: 10,
+    marginLeft: 15,
+    alignSelf: 'flex-start'
+  }
+
 })
 
 var menuIcon = {

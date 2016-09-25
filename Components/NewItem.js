@@ -10,6 +10,7 @@ var myStyles = require('../styles/styles');
 var constants = require('@tradle/constants');
 var NewResourceMixin = require('./NewResourceMixin');
 var reactMixin = require('react-mixin');
+import platformStyles from '../styles/platform'
 
 var Form = t.form.Form;
 Form.stylesheet = myStyles;
@@ -25,6 +26,7 @@ import {
 import React, { Component } from 'react'
 
 class NewItem extends Component {
+  static displayName = 'NewItem'
   props: {
     navigator: PropTypes.object.isRequired,
     metadata: PropTypes.object.isRequired,
@@ -203,7 +205,8 @@ class NewItem extends Component {
         model: model,
         // chooser: this.props.chooser.bind(this),
         // template: this.props.template.bind(this),
-        onSubmitEditing: this.onSavePressed.bind(this)
+        onSubmitEditing: this.onSavePressed.bind(this),
+        component: NewItem
     };
     if (this.state.data)
       params.data = this.state.data[0]
@@ -225,7 +228,7 @@ class NewItem extends Component {
         //   navigator={this.props.navigator}
         //   onSelect={this.onSelect.bind(this)} />
     return (
-      <View style={styles.container}>
+      <View style={platformStyles.container}>
         <View style={{marginLeft: 10, marginRight: 20, marginBottom: 15 }}>
           <Form ref='form' type={Model} options={options} />
         </View>
@@ -245,10 +248,6 @@ class NewItem extends Component {
 reactMixin(NewItem.prototype, NewResourceMixin);
 
 var styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    marginTop: 64
-  },
   imageContainer: {
     flex: 1,
   },
