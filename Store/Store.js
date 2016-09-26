@@ -39,6 +39,7 @@ var AddressBook = require('NativeModules').AddressBook;
 
 var voc = require('@tradle/models');
 var sampleData = voc.data
+// var currencies = voc.currencies
 
 // var myIdentity = __DEV__ ? require('../data/myIdentity.json') : []
 var welcome = require('../data/welcome.json');
@@ -286,9 +287,6 @@ var Store = Reflux.createStore({
     this.isConnected = isConnected
     this.trigger({action: 'connectivity', isConnected: isConnected})
     // Alert.alert('Store: ' + isConnected)
-    // this.setState({
-    //   isConnected,
-    // });
   },
 
   getMe() {
@@ -589,23 +587,27 @@ var Store = Reflux.createStore({
   filterChatMessages(messages, orgId, lastId) {
     let meId = utils.getId(me)
     let productToForms = {}
+    let productApp = {}
     // Compact all FormRequests that were fulfilled
     for (let i=messages.length - 1; i>=0; i--) {
       let r = list[messages[i].id].value
-      if (r[TYPE] !== FORM_REQUEST)
-        continue
-
-      if (!r.document) {// && r.documentCreated)
+      if (r[TYPE] === FORM_REQUEST  &&  !r.document) {// && r.documentCreated)
       // delete list[id]
         let forms = productToForms[r.product]
         if (!forms)
           productToForms[r.product] = {}
         let formIdx = productToForms[r.product][r.form]
-        if (typeof formIdx !== 'undefined') {
-          list[messages[formIdx]]
+        if (typeof formIdx !== 'undefined')
           messages.splice(formIdx, 1)
-        }
+
         productToForms[r.product][r.form] = i
+      }
+      if (r[TYPE] === PRODUCT_APPLICATION) {
+        let productIdx = productApp[r.product]
+        if (productIdx)
+          messages.splice(productIdx, 1)
+        else
+          productApp[r.product] = i
       }
     }
     // Compact all SelfIntroduction
@@ -3144,7 +3146,7 @@ var Store = Reflux.createStore({
             foundResources.push(r)
             // for Loading earlier resources we don't need to check limit untill we get to the lastId
             if (limit  &&  foundResources.length === limit)
-              return foundResources.reverse()
+              break
           }
 
           continue;
@@ -3210,7 +3212,7 @@ var Store = Reflux.createStore({
         // foundResources[key] = msg;
         foundResources.push(msg)
         if (limit  &&  foundResources.length === limit)
-          return foundResources.reverse()
+          break
 
         continue;
       }
@@ -3226,7 +3228,7 @@ var Store = Reflux.createStore({
         foundResources.push(this.fillMessage(r))
 
         if (limit  &&  foundResources.length === limit)
-          return foundResources.reverse()
+          break
       }
     }
     if (!foundResources.length)
@@ -4798,17 +4800,8 @@ var Store = Reflux.createStore({
         else
           sameContactList[p] = p
       }
-      if (!utils.isEmpty(list)) {
-        sampleData.getResources().forEach(function(r) {
-          if (!r[ROOT_HASH])
-            r[ROOT_HASH] = sha(r)
-
-          r[CUR_HASH] = r[ROOT_HASH]
-          let id = utils.getId(r)
-          if (!list[id])
-            self._setItem(id, r)
-        })
-      }
+      if (!utils.isEmpty(list))
+        this.loadStaticData()
 
       for (var s in sameContactList)
         delete orgContacts[s]
@@ -5481,20 +5474,33 @@ var Store = Reflux.createStore({
         }
       });
     }
-    sampleData.getResources().forEach(function(r) {
-      if (!r[ROOT_HASH])
-        r[ROOT_HASH] = sha(r);
-
-      r[CUR_HASH] = r[ROOT_HASH];
-      var key = utils.getId(r)
-      self._setItem(key, r)
-    });
+    this.loadStaticData()
 
     return self.loadMyResources()
           // .then(self.loadAddressBook)
           .catch(function(err) {
             err = err;
             });
+  },
+  loadStaticData() {
+    sampleData.getResources().forEach((r) => {
+      if (!r[ROOT_HASH])
+        r[ROOT_HASH] = sha(r);
+
+      r[CUR_HASH] = r[ROOT_HASH];
+      var key = utils.getId(r)
+      this._setItem(key, r)
+    });
+    // currencies.forEach((r) => {
+    //   if (!r[ROOT_HASH])
+    //     r[ROOT_HASH] = sha(r)
+
+    //   r[CUR_HASH] = r[ROOT_HASH]
+    //   let id = utils.getId(r)
+    //   if (!list[id])
+    //     this._setItem(id, r)
+    // })
+
   },
   loadModels() {
     var self = this
