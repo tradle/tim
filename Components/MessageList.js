@@ -171,7 +171,12 @@ class MessageList extends Component {
         return;
     }
     var list = params.list;
-
+    // if (this.state.sendStatus) {
+    //   list.forEach((r) => {
+    //     if (r[constants.ROOT_HASH] === this.state.sendResource[constants.ROOT_HASH])
+    //       r.status = this.state.sendStatus
+    //   })
+    // }
     if (params.loadEarlierMessages  &&  this.state.postLoad) {
       if (!list || !list.length) {
         this.state.postLoad([], true)
@@ -261,8 +266,9 @@ class MessageList extends Component {
         !nextState.list                                   ||
          this.props.orientation !== nextProps.orientation ||
          this.state.allLoaded !== nextState.allLoaded     ||
-         this.state.sendStatus !== nextState.sendStatus   ||
-         this.state.list.length !== nextState.list.length)
+         this.state.list.length !== nextState.list.length ||
+         (this.state.sendStatus !== nextState.sendStatus   &&
+         this.state.sendResource[constants.ROOT_HASH] === nextState.sendResource[constants.ROOT_HASH]))
       return true
     for (var i=0; i<this.state.list.length; i++) {
       let r = this.state.list[i]
@@ -466,6 +472,8 @@ class MessageList extends Component {
         loadEarlierMessagesButton={this.state.loadEarlierMessages}
         onLoadEarlierMessages={this.onLoadEarlierMessages.bind(this)}
         messages={this.state.list}
+        messageSent={this.state.sendResource}
+        messageSentStatus={this.state.sendStatus}
         enableEmptySections={true}
         autoFocus={false}
         textRef={'chat'}
@@ -564,7 +572,7 @@ class MessageList extends Component {
             </TouchableHighlight>
   }
   paintMenuButton() {
-    return  <View style={[platformStyles.menuButtonNarrow]}>
+    return  <View style={[platformStyles.menuButtonNarrow, {opacity: 0.3}]}>
               <Icon name={MenuIcon.name}  size={33}  color={MenuIcon.color} />
             </View>
   }

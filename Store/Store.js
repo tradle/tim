@@ -1522,6 +1522,16 @@ var Store = Reflux.createStore({
     .then(function(result) {
       toChain = result.object
       tmpKey = rr[ROOT_HASH] = result.sig
+
+      if (r[TYPE] === PRODUCT_APPLICATION) {
+        let params = {
+          action: 'addItem',
+          resource: rr,
+          sendStatus:  (self.isConnected) ? 'Sending' : 'Queued'
+        }
+        self.trigger(params)
+      }
+
       if (!isWelcome) {
         let len = batch.length
         self.addLastMessage(r, batch)
@@ -4253,7 +4263,7 @@ var Store = Reflux.createStore({
       meDriver.on('sent', function (msg) {
         const obj = utils.toOldStyleWrapper(msg)
         var model = self.getModel(obj[TYPE]).value
-        if (model.subClassOf === FORM) {
+        if (model.subClassOf === FORM  ||  model.id === PRODUCT_APPLICATION) {
           var r = list[obj[TYPE] + '_' + obj[ROOT_HASH]]
           if (r)
             self.trigger({action: 'updateItem', sendStatus: 'Sent', resource: r.value})
