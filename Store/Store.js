@@ -1480,7 +1480,7 @@ var Store = Reflux.createStore({
         }
       }
     }
-    // else if (r[TYPE] === CUSTOMER_WAITING) {
+    let isCustomerWaiting = r[TYPE] === CUSTOMER_WAITING
     //   if (!this.isConnected) {
     //     let result = this.searchMessages({modelName: PRODUCT_LIST, to: toOrg})
     //     firstTime = !result  ||  !result.length
@@ -1517,7 +1517,7 @@ var Store = Reflux.createStore({
       hash = list[utils.getId(r.to)].value[ROOT_HASH]
     var toId = IDENTITY + '_' + hash
 
-    // var isServiceMessage = rr[TYPE] === 'tradle.ServiceMessage'
+    var noCustomerWaiting
     return meDriver.sign({ object: toChain })
     .then(function(result) {
       toChain = result.object
@@ -1540,7 +1540,8 @@ var Store = Reflux.createStore({
       // welcomeMessage = {}
       if (me.txId)
         return
-
+      // Avoid sending CustomerWaiting request after SelfIntroduction or IdentityPublishRequest to
+      // prevent the not needed duplicate expensive operations for obtaining ProductList
       return self.getDriver(me)
       .then(function () {
         if (/*!self.isConnected  || */ publishRequestSent[orgId])
@@ -1554,6 +1555,8 @@ var Store = Reflux.createStore({
           return
         publishRequestSent[orgId] = true
         if (!status.watches.link  &&  !status.link) {
+          if (isCustomerWaiting)
+            noCustomerWaiting = true
           return self.publishMyIdentity(orgRep)
         }
         else {
@@ -1572,6 +1575,8 @@ var Store = Reflux.createStore({
             from: me,
             to: r.to
           }
+          if (isCustomerWaiting)
+            noCustomerWaiting = true
           return self.onAddMessage(msg)
         }
       })
@@ -1603,25 +1608,19 @@ var Store = Reflux.createStore({
         return self.getDriver(me)
     })
     .then(function() {
+      // SelfIntroduction or IdentityPublishRequest were just sent
+      if (noCustomerWaiting)
+        return
       if (list[toId].value.pubkeys) {
-        // if (publishRequestSent)
-        //    return
-        // if (r[TYPE] !== CUSTOMER_WAITING) {
         let sendParams = self.packMessage(r, toChain)
         const method = toChain[SIG] ? 'send' : 'signAndSend'
-        // return meDriver[method]({
-        //   object: toChain,
-        //   to: { fingerprint: self.getFingerprint(list[toId].value) }
-        // })
         return meDriver[method](sendParams)
         .catch(function (err) {
           debugger
         })
       }
-    // }
     })
     .then(function(result) {
-      const data = utils.toOldStyleWrapper(result.message)
       if (!requestForForm  &&  isWelcome)
         return
       if (isWelcome  &&  utils.isEmpty(welcomeMessage))
@@ -1636,6 +1635,7 @@ var Store = Reflux.createStore({
       delete list[rr[TYPE] + '_' + tmpKey]
 
       // saving the new message
+      const data = utils.toOldStyleWrapper(result.message)
       if (data)  {
         rr[ROOT_HASH] = data[ROOT_HASH]
         rr[CUR_HASH] = data[CUR_HASH]
