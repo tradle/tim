@@ -474,7 +474,7 @@ class MessageList extends Component {
         submitOnReturn={true}
         menu={this.generateMenu.bind(this)}
         keyboardShouldPersistTaps={true}
-        keyboardDismissMode='on-drag'
+        keyboardDismissMode={'on-drag'}
         maxHeight={maxHeight} // 64 for the navBar; 110 - with SearchBar
       />
         // returnKeyType={false}
@@ -549,28 +549,22 @@ class MessageList extends Component {
     );
         // {addNew}
   }
-  generateMenu() {
-    let me = utils.getMe()
-    // if (this.state.isEmployee)
-    //   return <View/>
+  generateMenu(show) {
+    if (!show)
+      return <View/>
+    // {
+    //   return <TouchableHighlight underlayColor='transparent' onPress={this.onSubmitEditing.bind(this)}>
+    //            <View style={[platformStyles.menuButton, {backgroundColor: LINK_COLOR,}]}>
+    //              <Icon name='ios-send'  size={33}  color='#ffffff' />
+    //            </View>
+    //         </TouchableHighlight>
+    // }
     return  <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
               {this.paintMenuButton()}
             </TouchableHighlight>
-
-
-    // return <TouchableHighlight underlayColor='transparent'
-    //         onPress={() => this.ActionSheet.show()}>
-    //         <View style={{marginLeft: 5, paddingRight: 0, marginTop: 5, marginRight: 10, marginBottom: 0}}>
-    //           <Icon name='md-more' size={30} color='#999999' />
-    //         </View>
-    //       </TouchableHighlight>
   }
   paintMenuButton() {
-    // let style = Platform.OS === 'ios' ? styles.menuButton : styles.menuButtonA
-    // let icon = Platform.OS === 'ios' ?  'md-more' : 'md-menu'
-    // let color = Platform.OS === 'ios' ? '#ffffff' : 'red'
-
-    return  <View style={[platformStyles.menuButtonNarrow, {opacity: 0.7, marginTop: Platform.OS === 'ios' ? -23 : -2}]}>
+    return  <View style={[platformStyles.menuButtonNarrow]}>
               <Icon name={MenuIcon.name}  size={33}  color={MenuIcon.color} />
             </View>
   }
