@@ -267,8 +267,8 @@ class MessageList extends Component {
          this.props.orientation !== nextProps.orientation ||
          this.state.allLoaded !== nextState.allLoaded     ||
          this.state.list.length !== nextState.list.length ||
-         (this.state.sendStatus !== nextState.sendStatus   &&
-         this.state.sendResource[constants.ROOT_HASH] === nextState.sendResource[constants.ROOT_HASH]))
+         this.state.sendStatus !== nextState.sendStatus)
+         // this.state.sendResource  &&  this.state.sendResource[constants.ROOT_HASH] === nextState.sendResource[constants.ROOT_HASH]))
       return true
     for (var i=0; i<this.state.list.length; i++) {
       let r = this.state.list[i]
@@ -572,7 +572,7 @@ class MessageList extends Component {
             </TouchableHighlight>
   }
   paintMenuButton() {
-    return  <View style={[platformStyles.menuButtonNarrow, {opacity: 0.3}]}>
+    return  <View style={[platformStyles.menuButtonNarrow, {opacity: 0.5}]}>
               <Icon name={MenuIcon.name}  size={33}  color={MenuIcon.color} />
             </View>
   }
