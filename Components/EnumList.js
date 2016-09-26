@@ -7,8 +7,11 @@ import {
   PropTypes,
   TouchableHighlight,
   View,
+  Platform,
   Text
 } from 'react-native'
+const SearchBar = Platform.OS === 'android' ? null : require('react-native-search-bar')
+var translate = require('../utils/utils').translate
 
 class EnumList extends Component {
   props: {
@@ -29,6 +32,7 @@ class EnumList extends Component {
     })
     this.state = {
       dataSource: dataSource.cloneWithRows(this.props.enumProp.oneOf),
+      filter: ''
     }
   }
 
@@ -49,13 +53,32 @@ class EnumList extends Component {
           pageSize={20}
           scrollRenderAhead={10}
           showsVerticalScrollIndicator={false} />;
+    var searchBar
+    if (SearchBar) {
+      searchBar = (
+        <SearchBar
+          onChangeText={this.onSearchChange.bind(this)}
+          placeholder={translate('search')}
+          showsCancelButton={false}
+          hideBackground={true}
+          />
+      )
+    }
 
     return (
       <View style={styles.container}>
+        {searchBar}
         <View style={styles.separator} />
         {content}
       </View>
     );
+  }
+  onSearchChange(filter) {
+    let vals = this.props.enumProp.oneOf
+    let list = vals.filter((s) => {
+      return Object.keys(s)[0].indexOf(filter) === -1 ? false : true
+    })
+    this.setState({filter: filter, dataSource: this.state.dataSource.cloneWithRows(list)})
   }
 
   renderRow(value) {
