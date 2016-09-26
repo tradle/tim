@@ -122,8 +122,10 @@ class MessageRow extends Component {
         else {
           if (isSimpleMessage && resource.message.length < 30)
             addStyle = [styles.verificationBody, {borderColor: isFormError ? this.props.bankStyle.REQUEST_FULFILLED : '#efefef', backgroundColor: '#ffffff', borderTopLeftRadius: 0}];
-          else
-            addStyle = [styles.verificationBody, {flex: 1, borderColor: isFormError ? this.props.bankStyle.REQUEST_FULFILLED : '#efefef', backgroundColor: '#ffffff', borderTopLeftRadius: 0}];
+          else {
+            let borderColor = isFormError ? this.props.bankStyle.REQUEST_FULFILLED : '#efefef'
+            addStyle = [styles.verificationBody, {flex: 1, borderColor: borderColor, backgroundColor: '#ffffff', borderTopLeftRadius: 0}];
+          }
 
         }
       }
@@ -199,7 +201,7 @@ class MessageRow extends Component {
       }
     }
     // HACK
-    let numberOfCharsInWidth = msgWidth / 10
+    let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
     let longMessage = isSimpleMessage  &&  message ? numberOfCharsInWidth < message.length : false
     if (showMessageBody) {
       var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? (isNewProduct ? 'center' : 'flex-end') : 'flex-start'};
@@ -208,7 +210,7 @@ class MessageRow extends Component {
           viewStyle.width = msgWidth; //isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
       }
       if (!isSimpleMessage)
-        viewStyle.width =  message ? Math.min(msgWidth, message.length * 9 + 40) : msgWidth
+        viewStyle.width =  message ? Math.min(msgWidth, message.length * utils.getFontSize(10) + 40) : msgWidth
 
 
       if (this.props.sendStatus  &&  this.props.sendStatus !== null) {
@@ -253,8 +255,12 @@ class MessageRow extends Component {
                   </View>
                 : <View />
               }
-
-                {renderedRow}
+              {renderedRow}
+              {
+                isNewProduct
+                ? <Icon name='ios-star-outline' size={25} style={[styles.productAppStar, {color: LINK_COLOR}]}/>
+                : <View/>
+              }
              </View>
              {sealedStatus}
             </View>
@@ -1092,6 +1098,21 @@ var styles = StyleSheet.create({
   multiEntryText: {
     fontSize: 18
   },
+  msgImage: {
+    height: 30,
+    marginRight: 3,
+    marginLeft: 0,
+    width: 30,
+    borderRadius: 15,
+    borderColor: '#cccccc',
+    borderWidth: 1
+  },
+  productAppStar: {
+    alignSelf: 'flex-end',
+    opacity: 0.5,
+    marginTop: -30,
+    backgroundColor: 'transparent'
+  }
   // viewStyle: {
   //   flexDirection: 'row',
   //   alignSelf: 'flex-start',
