@@ -465,7 +465,8 @@ class MessageList extends Component {
 
     if (!content) {
       var isAllMessages = model.isInterface  &&  model.id === constants.TYPES.MESSAGE;
-      var maxHeight = utils.dimensions(MessageList).height - (Platform.OS === 'android' ? 77 : 64) - (this.state.isConnected ? 0 : 30)
+      var maxHeight = utils.dimensions(MessageList).height -
+                      (Platform.OS === 'android' ? 77 : 64) - (this.state.isConnected ? 0 : 35)
       // content = <GiftedMessenger style={{paddingHorizontal: 10, marginBottom: Platform.OS === 'android' ? 0 : 20}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
       content = <GiftedMessenger style={{paddingHorizontal: 10}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
         ref={(c) => this._GiftedMessenger = c}
