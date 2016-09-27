@@ -612,7 +612,8 @@ class NewResource extends Component {
     ImagePicker.showImagePicker({
       returnIsVertical: true,
       chooseFromLibraryButtonTitle: utils.isSimulator() || prop._allowPicturesFromLibrary ? 'Choose from Library' : null,
-      takePhotoButtonTitle: utils.isSimulator() ? null : 'Take Photo…'
+      takePhotoButtonTitle: utils.isSimulator() ? null : 'Take Photo…',
+      quality: utils.imageQuality
     }, (response) => {
       if (response.didCancel)
         return;

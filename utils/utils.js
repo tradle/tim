@@ -1084,7 +1084,8 @@ var utils = {
 
       return subCache[orientation]
     }
-  }
+  },
+  imageQuality: 0.2
 }
 
 function normalizeRemoveListener (addListenerRetVal) {
