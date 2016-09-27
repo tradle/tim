@@ -141,7 +141,7 @@ const TLSClient = require('sendy-axolotl')
 //   }
 // })
 
-const SENDY_OPTS = { resendInterval: 2000, mtu: 10000, autoConnect: true }
+const SENDY_OPTS = { resendInterval: 2000, autoConnect: true }
 // const newOTRSwitchboard = require('sendy-otr-ws').Switchboard
 const newSwitchboard = SendyWS.Switchboard
 const WebSocketClient = SendyWS.Client
@@ -536,7 +536,7 @@ var Store = Reflux.createStore({
       // this timeout is not for sending the entire message
       // but rather an idle connection timeout
       messenger.send(identifier, msg, cb)
-      messenger.setTimeout(20000)
+      messenger.setTimeout(60000)
     }
 
     // meDriver = timeFunctions(meDriver)
@@ -4894,7 +4894,6 @@ var Store = Reflux.createStore({
           return
         data.value.forEach(function(r) {
           r = utils.toOldStyleWrapper(r)
-          delete r.id
           var rId = utils.getId(r)
           if (!list[rId]) {
             let arr = rId.split('_')
@@ -5095,12 +5094,24 @@ var Store = Reflux.createStore({
     .then((results) => {
       if (noTrigger)
         return
-      var result = this.searchMessages({to: resource, modelName: MESSAGE});
+      // var result = this.searchMessages({to: resource, modelName: MESSAGE});
+      msg[ROOT_HASH] = results[0].object.permalink
       msg.message = translate('inProgress')
-      msg.from = this.buildRef(resource)
+      // reverse to and from to display as from assistent
+      msg.from = this.buildRef(list[PROFILE + '_' + results[0].message.recipient].value)
       msg.to = this.buildRef(me)
-      msg.id = sha(msg)
-      result.push(msg)
+
+      let mId = utils.getId(msg)
+      list[mId] = {
+        key: mId,
+        value: msg
+      }
+      let batch = []
+
+      this.addMessagesToChat(utils.getId(rId), msg)
+
+      batch.push({type: 'put', key: mId, value: msg})
+      // result.push(msg)
       this.trigger({action: 'addMessage', to: resource, resource: msg})
 
       resource.lastMessage = translate('requestedForgetMe')
@@ -5108,7 +5119,8 @@ var Store = Reflux.createStore({
       resource.lastMessageType = FORGET_ME
       this.trigger({action: 'list', list: this.searchNotMessages({modelName: ORGANIZATION}), forceUpdate: true})
 
-      db.put(rId, resource)
+      batch.push({type: 'put', key: rId, value: resource})
+      db.batch(batch)
     })
     .catch(function (err) {
       debugger
