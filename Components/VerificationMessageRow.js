@@ -205,7 +205,8 @@ var styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '500',
     alignSelf: 'center',
-    color: '#FBFFE5'
+    color: '#FBFFE5',
+    paddingLeft: 3
   },
   verificationBody: {
     paddingVertical: 5,
