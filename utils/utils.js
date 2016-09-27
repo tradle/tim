@@ -882,7 +882,13 @@ var utils = {
       }
 
       wrapper[TYPE] = payload[TYPE]
-    } else {
+    }
+    else if (wrapper.objectinfo) {
+      wrapper[CUR_HASH] = wrapper.objectinfo.link
+      wrapper[ROOT_HASH] = wrapper.objectinfo.permalink
+      wrapper[TYPE] = wrapper.objectinfo.type
+    }
+    else {
       wrapper[CUR_HASH] = wrapper.link
       wrapper[ROOT_HASH] = wrapper.permalink
       wrapper[TYPE] = wrapper.type
