@@ -141,7 +141,7 @@ const TLSClient = require('sendy-axolotl')
 //   }
 // })
 
-const SENDY_OPTS = { resendInterval: 2000, mtu: 10000, autoConnect: true }
+const SENDY_OPTS = { resendInterval: 10000, mtu: 10000, autoConnect: true }
 // const newOTRSwitchboard = require('sendy-otr-ws').Switchboard
 const newSwitchboard = SendyWS.Switchboard
 const WebSocketClient = SendyWS.Client
@@ -536,7 +536,7 @@ var Store = Reflux.createStore({
       // this timeout is not for sending the entire message
       // but rather an idle connection timeout
       messenger.send(identifier, msg, cb)
-      messenger.setTimeout(20000)
+      messenger.setTimeout(60000)
     }
 
     // meDriver = timeFunctions(meDriver)
