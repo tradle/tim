@@ -109,7 +109,7 @@ class GridItemsList extends Component {
   showChoice() {
     var self = this;
     this.setState({show: false})
-    let options = {quality: 0.4}
+    let options = { quality: utils.imageQuality }
     if (!utils.isSimulator()  ||  __DEV__)
       options.takePhotoButtonTitle = 'Take Photo…'
     if (utils.isSimulator() || prop._allowPicturesFromLibrary)

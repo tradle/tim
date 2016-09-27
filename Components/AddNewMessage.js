@@ -165,7 +165,11 @@ class AddNewMessage extends Component {
   }
   showChoice() {
     var self = this;
-    ImagePicker.showImagePicker({returnBase64Image: true, returnIsVertical: true}, (doCancel, response) => {
+    ImagePicker.showImagePicker({
+      returnBase64Image: true,
+      returnIsVertical: true,
+      quality: utils.imageQuality
+    }, (doCancel, response) => {
       if (!doCancel) {
         var selectedAssets = self.state.selectedAssets;
         var dataUri = 'data:image/jpeg;base64,' + response.data
