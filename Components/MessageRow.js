@@ -556,7 +556,7 @@ class MessageRow extends Component {
                 </View>
               :   <View key={this.getNextKey()} style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                     <Text style={[styles.resourceTitle, {color: '#ffffff', paddingRight: 10}]}>{str}</Text>
-                    <Icon name='ios-notifications-outline' size={25} color='#ffffff'/>
+                    <Icon name='ios-folder-open-outline' size={25} color='#ffffff'/>
                   </View>
       renderedRow.push(msg);
       return ({message: str})
