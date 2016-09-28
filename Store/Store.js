@@ -39,14 +39,15 @@ var AddressBook = require('NativeModules').AddressBook;
 
 var voc = require('@tradle/models');
 var sampleData = voc.data
-// var currencies = voc.currencies
+var currencies = voc.currencies
+var nationalities = voc.nationalities
 
 // var myIdentity = __DEV__ ? require('../data/myIdentity.json') : []
 var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
-var Keychain = !utils.isWeb() && require('../utils/keychain')
+var Keychain = null //!utils.isWeb() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('q-level');
 var asyncstorageDown = require('asyncstorage-down')
@@ -4892,12 +4893,23 @@ var Store = Reflux.createStore({
         data.value.forEach(function(r) {
           r = utils.toOldStyleWrapper(r)
           var rId = utils.getId(r)
-          if (!list[rId]) {
-            let arr = rId.split('_')
-            // self.deleteMessageFromChat(orgId, {[TYPE]: arr[0], [ROOT_HASH]: arr[1]})
-            return
+          var res = list[rId] && list[rId].value
+          if (!res) {
+            let idx = r[TYPE].indexOf('Confirmation')
+            if (idx === -1)
+              return
+            let realProductType = r[TYPE].substring(0, r[TYPE].length - 'Confirmation'.length)
+            let m = utils.getModel(realProductType)
+            if (!m  ||  m.value.subClassOf !== FINANCIAL_PRODUCT)
+              return
+            // This is confirmation for getting the product
+            rId = SIMPLE_MESSAGE + '_' +  r[ROOT_HASH]
+            res = list[rId]
+            if (!res)
+              return
+            res = res.value
+            r = res
           }
-          var res = list[rId].value
           var isVerification = r[TYPE] === VERIFICATION
           var model = self.getModel(r[TYPE]).value
           var isForm = !isVerification  &&  model.subClassOf === FORM
@@ -5503,24 +5515,26 @@ var Store = Reflux.createStore({
   },
   loadStaticData() {
     sampleData.getResources().forEach((r) => {
-      if (!r[ROOT_HASH])
-        r[ROOT_HASH] = sha(r);
-
-      r[CUR_HASH] = r[ROOT_HASH];
-      var key = utils.getId(r)
-      this._setItem(key, r)
+      this.loadStaticItem(r)
     });
-    // currencies.forEach((r) => {
-    //   if (!r[ROOT_HASH])
-    //     r[ROOT_HASH] = sha(r)
-
-    //   r[CUR_HASH] = r[ROOT_HASH]
-    //   let id = utils.getId(r)
-    //   if (!list[id])
-    //     this._setItem(id, r)
-    // })
-
+    currencies.forEach((r) => {
+      this.loadStaticItem(r)
+    })
+    nationalities.forEach((r) => {
+      this.loadStaticItem(r)
+    })
   },
+
+  loadStaticItem(r) {
+    if (!r[ROOT_HASH])
+      r[ROOT_HASH] = sha(r)
+
+    r[CUR_HASH] = r[ROOT_HASH]
+    let id = utils.getId(r)
+    if (!list[id])
+      this._setItem(id, r)
+  },
+
   loadModels() {
     var self = this
     var batch = [];
