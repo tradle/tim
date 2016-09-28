@@ -611,7 +611,6 @@ class NewResource extends Component {
     var self = this;
     ImagePicker.showImagePicker({
       returnIsVertical: true,
-      quality: 0.4,
       chooseFromLibraryButtonTitle: utils.isSimulator() || prop._allowPicturesFromLibrary ? 'Choose from Library' : null,
       takePhotoButtonTitle: utils.isSimulator() ? null : 'Take Photo…',
       quality: utils.imageQuality
