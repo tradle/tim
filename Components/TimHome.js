@@ -552,7 +552,7 @@ class TimHome extends Component {
     // var cTop = h / 4
 
     var thumb = width > 400
-              ? { width: width / 2, height: width / 2 }
+              ? { width: width / 2.5, height: width / 2.5 }
               : styles.thumb
               // <Progress.CircleSnail color={'white'} size={70} thickness={5}/>
 
