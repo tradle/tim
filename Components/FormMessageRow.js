@@ -135,7 +135,7 @@ class FormMessageRow extends Component {
     var messageBody;
     var width = utils.dimensions(FormMessageRow).width
     let msgWidth = width - (isMyMessage ? 70 : 50)
-    let maxWidth = width > 800 ? 600 : 400
+    let maxWidth = width * 0.8 //  width > 800 ? 600 : 400
     var viewStyle = {width: Math.min(msgWidth, maxWidth), flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
 
     messageBody =
@@ -381,7 +381,7 @@ var styles = StyleSheet.create({
     color: '#EBFCFF',
     fontSize: 20,
     fontWeight: '600',
-    opacity: 0.5,
+    opacity: 0.7,
     alignSelf: 'flex-end',
     marginTop: 10
   },
