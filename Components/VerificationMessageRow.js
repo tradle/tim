@@ -13,7 +13,6 @@ import { makeResponsive } from 'react-native-orient'
 
 var reactMixin = require('react-mixin');
 
-const VERIFICATION_BG = '#FBFFE5' //'#F6FFF0';
 const MAX_WIDTH = 400
 import {
   Image,
@@ -87,7 +86,7 @@ class VerificationMessageRow extends Component {
                       <Icon style={styles.verificationIcon} size={20} name={'md-checkmark'} />
                       <Text style={styles.verificationHeaderText}>{verifiedBy}</Text>
                     </View>
-                    <View style={{paddingTop: 5}}>
+                    <View>
                       {this.formatDocument(msgModel, resource, this.verify.bind(this), isThirdPartyVerification)}
                     </View>
                   </View>
@@ -209,7 +208,7 @@ var styles = StyleSheet.create({
     paddingLeft: 3
   },
   verificationBody: {
-    paddingVertical: 5,
+    paddingTop: 5,
     paddingHorizontal: 7,
     borderRadius: 10,
     borderWidth: 1,
