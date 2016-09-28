@@ -1091,7 +1091,10 @@ var utils = {
       return subCache[orientation]
     }
   },
-  imageQuality: 0.2
+  imageQuality: 0.2,
+  restartApp: function () {
+    return NativeModules.CodePush.restartApp(false)
+  }
 }
 
 function normalizeRemoveListener (addListenerRetVal) {
