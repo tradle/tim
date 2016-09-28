@@ -17,7 +17,6 @@ import {
   Image
 } from 'react-native';
 
-const VERIFICATION_BG = '#FBFFE5' //'#F6FFF0';
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_ERROR = 'tradle.FormError'
 const FORM = 'tradle.Form'
@@ -68,7 +67,7 @@ var RowMixin = {
     let propTitle = translate(prop, model)
     if (isVerification) {
       if (!this.props.isAggregation)
-        style = [style, {borderWidth: 1, paddingVertical: 3, borderColor: VERIFICATION_BG, borderTopColor: '#eeeeee'}]
+        style = [style, {borderWidth: 1, paddingVertical: 3, borderColor: this.props.bankStyle.VERIFICATION_BG, borderTopColor: '#eeeeee'}]
       return (
         <View style={style} key={this.getNextKey()}>
           <View style={{flex: 1, flexDirection: 'column'}}>
@@ -171,29 +170,43 @@ var RowMixin = {
     var msg;
     if (resource.message  &&  docModel.subClassOf !== FORM)
       msg = <View><Text style={styles.description}>{resource.message}</Text></View>
-    else {
-      var rows = [];
-      this.formatDocument1(model, resource, rows);
-      msg = <View>{rows}</View>
-    }
-
+    // else if (!onPress) {
+    //   msg = <View><Text style={styles.description}>{translate('seeTheForm')}</Text></View>
+    //   // var rows = [];
+    //   // this.formatDocument1(model, resource, rows);
+    //   // msg = <View>{rows}</View>
+    // }
+    else
+      msg = <View/>
 
     var hasPhotos = resource  &&  resource.photos  &&  resource.photos.length
     var photo = hasPhotos
               ? <Image source={{uri: utils.getImageUri(resource.photos[0].url)}}  style={styles.cellImage} />
               : <View />;
     var headerStyle = {paddingTop: 5, alignSelf: 'center'}
+    // var header =  <View style={headerStyle}>
+    //                 <Text style={[styles.resourceTitle, {fontSize: 20, color: '#B6C2A7'}]}>{translate(model)}</Text>
+    //               </View>
     var header =  <View style={headerStyle}>
-                    <Text style={[styles.resourceTitle, {fontSize: 20, color: '#B6C2A7'}]}>{translate(model)}</Text>
+                    <Text style={[styles.resourceTitle, {fontSize: 20, color: this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>{translate(model)}</Text>
                   </View>
+    let addStyle
+    if (!onPress)
+      addStyle = {marginHorizontal: -7, paddingHorizontal: 7, backgroundColor: this.props.bankStyle.VERIFICATION_BG, borderWidth: 1, borderColor: this.props.bankStyle.VERIFICATION_BG, borderBottomColor: this.props.bankStyle.VERIFIED_HEADER_COLOR}
+    else
+      addStyle = {}
     header = hasPhotos
-            ?  <View style={[styles.rowContainer, styles.verification]}>
+            ?  <View style={[styles.rowContainer, styles.verification, addStyle]}>
                  {photo}
                  {header}
                </View>
-            :  <View style={[{alignSelf: 'stretch'}, styles.verification]}>
+            :  <View style={[addStyle, styles.verification]}>
                  {header}
                </View>
+   if (!isAccordion)
+      header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, resource, verification)}>
+                 {header}
+               </TouchableHighlight>
 
 
     var orgRow = <View/>
@@ -251,7 +264,7 @@ var RowMixin = {
                   </View>
       }
       else {
-        orgRow = <View style={{flexDirection: 'row', marginTop: 5, paddingBottom: 5, justifyContent:'space-between'}}>
+        orgRow = <View style={{flexDirection: 'row', marginTop: 7, paddingBottom: 5, justifyContent:'space-between'}}>
           <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
                     Alert.alert(
                       'Sharing ' + docTitle + ' ' + verifiedBy,
@@ -276,7 +289,7 @@ var RowMixin = {
                      {orgRow}
                    </View>
 
-    var verifiedBy = verification && verification.organization ? verification.organization.title : ''
+    // var verifiedBy = verification && verification.organization ? verification.organization.title : ''
     return isAccordion
         ? ( <View style ={{marginTop: 5}} key={this.getNextKey()}>
              <Accordion
@@ -287,7 +300,7 @@ var RowMixin = {
                easing='easeOutCirc' />
             </View>
           )
-        : ( <View style={{flex: 1, paddingVertical: 5}} key={this.getNextKey()}>
+        : ( <View style={{flex: 1}} key={this.getNextKey()}>
                {header}
                {content}
              </View>
@@ -461,10 +474,11 @@ var styles = StyleSheet.create({
     justifyContent: 'space-between'
   },
   verification: {
-    marginHorizontal: -7,
-    marginTop: -10,
-    padding: 7,
-    backgroundColor: '#EDF2CE'
+    // marginHorizontal: -7,
+    // marginVertical: -10,
+    paddingVertical: 7,
+    // borderRadius: 10,
+    // backgroundColor: '#EDF2CE'
   },
   orgImage: {
     width: 20,
