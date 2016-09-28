@@ -552,7 +552,7 @@ class TimHome extends Component {
     // var cTop = h / 4
 
     var thumb = width > 400
-              ? { width: width / 2.2, height: width / 2.2 }
+              ? { width: width / 2, height: width / 2 }
               : styles.thumb
               // <Progress.CircleSnail color={'white'} size={70} thickness={5}/>
 
@@ -607,7 +607,7 @@ class TimHome extends Component {
                 {version}
               </View>
 
-    let hh = (height / 2) - (Platform.OS === 'ios' ? 280 : 240)
+    let hh =  height > 1000 ? 100 : ((height / 2) - (Platform.OS === 'ios' ? 280 : 240))
     // let hh = height - 300
     let left = (width - 300) / 2
     let logo = <View style={[styles.container]}>
