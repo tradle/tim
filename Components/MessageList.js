@@ -23,6 +23,7 @@ var extend = require('extend');
 
 import ActionSheet from 'react-native-actionsheet'
 import { makeResponsive } from 'react-native-orient'
+
 // var AddNewMessage = require('./AddNewMessage')
 // var SearchBar = require('react-native-search-bar')
 // var ResourceTypesScreen = require('./ResourceTypesScreen')
@@ -31,6 +32,7 @@ var LINK_COLOR
 var LIMIT = 10
 var NEXT_HASH = '_n'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
+const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_REQUEST = 'tradle.FormRequest'
 
 import React, { Component } from 'react'
@@ -321,7 +323,7 @@ class MessageList extends Component {
       }
     }
     // Allow to edit resource that was not previously changed
-    if (!isEmployee  &&  !resource[NEXT_HASH]) {
+    if (!isEmployee  &&  !resource[NEXT_HASH]  &&  model.subClassOf !== MY_PRODUCT) {
       route.rightButtonTitle = translate('edit')
       route.onRightButtonPress = {
         title: utils.getDisplayName(resource),
