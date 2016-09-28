@@ -61,7 +61,7 @@
     "react": "^15.3.2",
     "react-addons-perf": "~15.2.1",
     "react-mixin": "~1.2.2",
-    "react-native": "^0.33.0",
+    "react-native": "^0.34.1",
     "react-native-accordion": "^1.0.1",
     "react-native-actionsheet": "^2.0.3",
     "react-native-animatable": "^0.6.1",
