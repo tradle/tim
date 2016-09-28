@@ -754,7 +754,7 @@ class NewResource extends Component {
                  </View>
                : <View style={{height: 0}} />
     var formStyle = this.state.isRegistration
-                  ? {justifyContent: 'center', height: height - 100}
+                  ? {justifyContent: 'center', height: height - (height > 1000 ? 0 : 100)}
                   : {justifyContent: 'flex-start'}
     var content =
       <ScrollView style={style}
