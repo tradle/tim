@@ -22,7 +22,6 @@ import { makeResponsive } from 'react-native-orient'
 
 var reactMixin = require('react-mixin');
 
-const VERIFICATION_BG = '#FBFFE5' //'#F6FFF0';
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_ERROR = 'tradle.FormError'
 const FORM = 'tradle.Form'
@@ -394,14 +393,13 @@ class MessageRow extends Component {
     // formModel = formModel.value;
     var vtt = [];
     var cnt = 0;
-    var self = this;
     var chatOrg = this.props.to[constants.TYPE] === constants.TYPES.ORGANIZATION  &&  utils.getId(this.props.to)
     for (var t in  this.props.shareableResources) {
       if (t === formModel.id) {
         var ver = this.props.shareableResources[t];
         var r = ver[0]
         var totalShareables = ver.length
-        ver.forEach(function(r) {
+        ver.forEach((r) => {
           if (entries  &&  (entries.indexOf(utils.getId(r.document)) !== -1  ||  entries.indexOf(r.document[constants.NONCE]) !== -1))
             return
           // if (chatOrg  &&  utils.getId(r.organization) === chatOrg) {
@@ -410,9 +408,9 @@ class MessageRow extends Component {
           // }
           // if (!cnt) {x
             var vModel = utils.getModel(r[constants.TYPE]);
-            var doc = self.formatDocument(formModel, r, null, totalShareables > 1);
+            var doc = this.formatDocument(formModel, r, null, totalShareables > 1);
             if (cnt) {
-              doc = <View key={self.getNextKey()}>
+              doc = <View key={this.getNextKey()}>
                       <View style={{height: 1, backgroundColor: '#dddddd'}} />
                       {doc}
                     </View>
@@ -782,7 +780,7 @@ class MessageRow extends Component {
     // if (s.length === 2)
     //   onPressCall = this.editForm.bind(self, msgParts[1], msgParts[0])
     let sameFormRequestForm
-    if (!resource.documentCreated  &&  resource.product) {
+    if (!resource.documentCreated  &&  resource.product  &&  form.subClassOf !== MY_PRODUCT) {
       let multiEntryForms = utils.getModel(resource.product).value.multiEntryForms
       if (multiEntryForms  &&  multiEntryForms.indexOf(form.id) !== -1) {
         let productToForms = this.props.productToForms
@@ -1023,8 +1021,8 @@ var styles = StyleSheet.create({
   assistentBox: {
     backgroundColor: '#efefef',
     paddingVertical: 5,
-    borderRadius: 5,
-    borderTopLeftRadius: 0,
+    // borderRadius: 5,
+    borderTopRightRadius: 10,
     paddingHorizontal: 7,
     marginTop: -7,
     marginHorizontal: -7
