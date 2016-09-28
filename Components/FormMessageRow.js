@@ -15,7 +15,6 @@ import { makeResponsive } from 'react-native-orient'
 var reactMixin = require('react-mixin');
 
 var STRUCTURED_MESSAGE_COLOR
-const MAX_WIDTH = 400
 
 import {
   StyleSheet,
@@ -134,8 +133,10 @@ class FormMessageRow extends Component {
     // HACK that solves the case when the message is short and we don't want it to be displayed
     // in a bigger than needed bubble
     var messageBody;
-    let msgWidth = utils.dimensions(FormMessageRow).width - (isMyMessage ? 70 : 50)
-    var viewStyle = {width: Math.min(msgWidth, MAX_WIDTH), flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
+    var width = utils.dimensions(FormMessageRow).width
+    let msgWidth = width - (isMyMessage ? 70 : 50)
+    let maxWidth = width > 800 ? 600 : 400
+    var viewStyle = {width: Math.min(msgWidth, maxWidth), flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
 
     messageBody =
       <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
