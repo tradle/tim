@@ -147,10 +147,12 @@ const TLSClient = require('sendy-axolotl')
 //   }
 // })
 
-const SENDY_OPTS = { resendInterval: 30000, mtu: 10000, autoConnect: true }
+const SENDY_OPTS = { resendInterval: 10000, mtu: 1500, autoConnect: true }
+// const SENDY_OPTS = { resendInterval: 10000, mtu: 10000, autoConnect: true }
 // const newOTRSwitchboard = require('sendy-otr-ws').Switchboard
 const newSwitchboard = SendyWS.Switchboard
-const WebSocketClient = SendyWS.Client
+// const WebSocketClient = SendyWS.Client
+const WebSocketClient = require('@tradle/ws/client')
 // const HttpClient = require('@tradle/transport-http').HttpClient
 // var getDHTKey = require('tim/lib/utils').getDHTKey
 
@@ -543,8 +545,18 @@ var Store = Reflux.createStore({
 
       // this timeout is not for sending the entire message
       // but rather an idle connection timeout
-      messenger.send(identifier, msg, cb)
-      messenger.setTimeout(60000)
+      const tid = setTimeout(function () {
+        cbWrapper(new Error('timed out'))
+      }, Math.max(10000, msg.length / 1000))
+
+      messenger.send(identifier, msg, cbWrapper)
+
+      function cbWrapper (err) {
+        clearTimeout(tid)
+        cb(err)
+      }
+
+      // messenger.setTimeout(60000)
     }
 
     // meDriver = timeFunctions(meDriver)
@@ -908,7 +920,7 @@ var Store = Reflux.createStore({
     if (wsClients[base]) return wsClients[base]
 
     let wsClient = this.getWsClient(base)
-    let transport = this.getTransport(wsClient)
+    // let transport = this.getTransport(wsClient)
     // const url = utils.joinURL(base, 'ws?from=' + identifier).replace(/^http/, 'ws')
     // const wsClient = new WebSocketClient({
     //   url: url,
@@ -919,12 +931,6 @@ var Store = Reflux.createStore({
     // })
 
     wsClient.on('disconnect', function () {
-      transport.clients().forEach(function (c) {
-        // reset OTR session, restart on connect
-        debug('aborting pending sends due to disconnect')
-        c.destroy()
-      })
-
       // pause all channels
       meDriver.sender.pause()
     })
@@ -934,8 +940,8 @@ var Store = Reflux.createStore({
       meDriver.sender.resume()
     })
 
-    wsClients[base] = transport
-    wsClients[provider.hash] = transport
+    wsClients[base] = wsClient
+    wsClients[provider.hash] = wsClient
 
     // let timeouts = {}
     // transport.on('receiving', function (msg) {
@@ -952,15 +958,16 @@ var Store = Reflux.createStore({
     //   }
     // })
 
-    transport.on('404', function (recipient) {
-      meDriver.sender.pause(recipient)
-      transport.cancelPending(recipient)
-      // try again soon. Todo: make this smarter
-      setTimeout(() => meDriver.resume(), 10000)
-    })
+    // transport.on('404', function (recipient) {
+    //   meDriver.sender.pause(recipient)
+    //   transport.cancelPending(recipient)
+    //   // try again soon. Todo: make this smarter
+    //   setTimeout(() => meDriver.resume(), 10000)
+    // })
 
     const receiveLocks = {}
-    transport.on('message', function (msg, from) {
+    wsClient.on('message', function (msg, from) {
+      msg = tradleUtils.unserializeMessage(msg)
       if (!receiveLocks[from]) receiveLocks[from] = mutexify()
 
       const lock = receiveLocks[from]
@@ -968,6 +975,7 @@ var Store = Reflux.createStore({
         const release = () => {
           clearTimeout(timeout)
           _release()
+          wsClient.ack(from, msg[tradle.constants.SEQ])
         }
 
         const timeout = setTimeout(release, 10000)
@@ -980,13 +988,12 @@ var Store = Reflux.createStore({
       })
     })
 
-    transport.on('timeout', function (identifier) {
-      transport.cancelPending(identifier)
-    })
+    // wsClient.on('timeout', function (identifier) {
+    //   wsClient.cancelPending(identifier)
+    // })
 
     function receive (msg, from) {
       try {
-        msg = tradleUtils.unserializeMessage(msg)
         const payload = msg.object
         if (payload.context) {
           let s = PRODUCT_APPLICATION + '_' + payload.context
@@ -1000,7 +1007,7 @@ var Store = Reflux.createStore({
             return self.addContact(payload, rootHash)
           })
           .then(() => {
-            const url = utils.keyByValue(wsClients, transport)
+            const url = utils.keyByValue(wsClients, wsClient)
             self.addToSettings({hash: rootHash, url: url})
           })
           break
@@ -1027,7 +1034,7 @@ var Store = Reflux.createStore({
                   return self.addContact(payload, rootHash)
                 })
                 .then(() => {
-                  const url = utils.keyByValue(wsClients, transport)
+                  const url = utils.keyByValue(wsClients, wsClient)
                   self.addToSettings({hash: rootHash, url: url})
                 })
               }},
@@ -1132,7 +1139,7 @@ var Store = Reflux.createStore({
 
   getWsClient(base) {
     const tlsKey = driverInfo.tlsKey
-    const url = utils.joinURL(base, 'ws?' + querystring.stringify({
+    const url = utils.joinURL(base, 'ws/?' + querystring.stringify({
       from: this.getIdentifier(),
       // pubKey: this.getIdentifierPubKey()
     })).replace(/^http/, 'ws')
@@ -1146,26 +1153,26 @@ var Store = Reflux.createStore({
     })
   },
 
-  getTransport(wsClient) {
-    const tlsKey = driverInfo.tlsKey
-    return newSwitchboard({
-      identifier: this.getIdentifier(),
-      unreliable: wsClient,
-      clientForRecipient: function (recipient) {
-        const sendy = new Sendy(SENDY_OPTS)
-        if (!tlsKey) return sendy
+  // getTransport(wsClient) {
+  //   const tlsKey = driverInfo.tlsKey
+  //   return newSwitchboard({
+  //     identifier: this.getIdentifier(),
+  //     unreliable: wsClient,
+  //     clientForRecipient: function (recipient) {
+  //       const sendy = new Sendy(SENDY_OPTS)
+  //       if (!tlsKey) return sendy
 
-        return new TLSClient({
-          key: {
-            secretKey: tlsKey.priv,
-            publicKey: tlsKey.pub
-          },
-          client: sendy,
-          theirPubKey: new Buffer(recipient, 'hex')
-        })
-      }
-    })
-  },
+  //       return new TLSClient({
+  //         key: {
+  //           secretKey: tlsKey.priv,
+  //           publicKey: tlsKey.pub
+  //         },
+  //         client: sendy,
+  //         theirPubKey: new Buffer(recipient, 'hex')
+  //       })
+  //     }
+  //   })
+  // },
 
   // Gets info about companies in this app, their bot representatives and their styles
   getServiceProviders(url, retry, id) {
@@ -5706,8 +5713,8 @@ var Store = Reflux.createStore({
       let transport = driverInfo.wsClients[url]
       if (!transport) {
         let wsClient = this.getWsClient(url, deviceId)
-        transport = this.getTransport(wsClient, deviceId)
-        driverInfo.wsClients[url] = transport
+        // transport = this.getTransport(wsClient, deviceId)
+        driverInfo.wsClients[url] = wsClient//transport
       }
       let self = this
       transport.on('message', (msg, from) => {
