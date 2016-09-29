@@ -156,7 +156,11 @@ var config = module.exports = {
         query: { name: '[name].[ext]' }
       },
       { test: /\.json$/, loader: 'json' },
-      { test: /\.css$/, loader: 'style-loader!css-loader' }
+      { test: /\.css$/, loader: 'style-loader!css-loader' },
+      {
+        test   : /\.(ttf|eot|svg|woff(2)?)(\?[a-z0-9=&.]+)?$/,
+        loader : 'file-loader'
+      }
     ]
   },
   node: {

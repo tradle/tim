@@ -6,6 +6,7 @@ if (window.history) {
   }
 }
 
+import './web/public/css/ionicons.css'
 require('./web/shims/deviceEventEmitter')
 require('./web/shims/orientation')
 require('./index.common')
