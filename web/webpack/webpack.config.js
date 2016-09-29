@@ -31,7 +31,7 @@ var config = module.exports = {
     path.join(__dirname, '../../index.web.js')
   ],
   output: {
-    path: path.join(__dirname, '../public'),
+    path: path.join(__dirname, '../../'),
     filename: 'bundle.js',
     publicPath: '/',
   },

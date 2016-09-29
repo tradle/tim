@@ -8,8 +8,9 @@ if (window.history && !localStorage._tradleTimeTraveled) {
 }
 
 localStorage.removeItem('_tradleTimeTraveled')
-import './web/public/css/ionicons.css'
-import './web/public/css/styles.css'
+import './css/customicons.css'
+import './css/ionicons.css'
+import './css/styles.css'
 require('./web/shims/deviceEventEmitter')
 require('./web/shims/orientation')
 require('./index.common')
