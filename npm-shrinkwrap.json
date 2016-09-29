@@ -5603,8 +5603,8 @@
     },
     "react-native-animatable": {
       "version": "0.6.1",
-      "from": "react-native-animatable@>=0.6.1 <0.7.0",
-      "resolved": "https://registry.npmjs.org/react-native-animatable/-/react-native-animatable-0.6.1.tgz"
+      "from": "oblador/react-native-animatable#d72c092",
+      "resolved": "git://github.com/oblador/react-native-animatable.git#d72c09217ee992bcae47b7e6c3f1bb701da3ac05"
     },
     "react-native-button": {
       "version": "1.7.1",

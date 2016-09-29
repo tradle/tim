@@ -71,7 +71,7 @@
     "react-native": "^0.33.1",
     "react-native-accordion": "github:mvayngrib/react-native-accordion#ad6ea87",
     "react-native-actionsheet": "^2.0.3",
-    "react-native-animatable": "^0.6.1",
+    "react-native-animatable": "github:oblador/react-native-animatable#d72c092",
     "react-native-camera": "github:lwansbrough/react-native-camera#1747ec4b",
     "react-native-carousel": "^0.8.0",
     "react-native-code-push": "^1.14.6-beta",
