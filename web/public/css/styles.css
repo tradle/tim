@@ -1,0 +1,7 @@
+fieldset {
+    border: 0;
+}
+
+textarea:focus, input:focus {
+    outline: none;
+}
