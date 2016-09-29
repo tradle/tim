@@ -548,10 +548,10 @@ class TimHome extends Component {
 
     // var url = Linking.getInitialURL();
     var {width, height} = utils.dimensions(TimHome)
-    // var h = height > 800 ? height - 220 : height - 180
+    var h = height > 800 ? height - 220 : height - 180
 
     if (this.state.isLoading)
-      return this.getSplashScreen()
+      return this.getSplashScreen(h)
 
     var err = this.state.err || '';
     var errStyle = err ? styles.err : {'padding': 0, 'height': 0};
@@ -626,8 +626,8 @@ class TimHome extends Component {
 
     return (
       <View style={{height: height}}>
-        <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width, height}} />
-        <View style={{ justifyContent: 'space-between', height: height}}>
+        <Image source={BG_IMAGE} style={styles.bgImage} />
+        <View style={styles.layout}>
           <View/>
           <TouchableHighlight style={[styles.thumbButton]}
             underlayColor='transparent' onPress={() => this._pressHandler()}>
@@ -654,18 +654,16 @@ class TimHome extends Component {
     var {width, height} = utils.dimensions(TimHome)
     return (
       <View>
-        <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: width, height: height }} />
-        <ScrollView
-          scrollEnabled={false}
-          style={{height:height}}>
-          <View style={[styles.container]}>
-            <Image style={styles.thumb} source={TradleWhite}></Image>
+        <Image source={BG_IMAGE} style={styles.bgImage} />
+        <View  style={styles.splashLayout}>
+          <View>
+            <Image style={[styles.thumb]} source={TradleWhite}></Image>
             <Text style={styles.tradle}>Tradle</Text>
+            <View style={{paddingTop: 20}}>
+              <ActivityIndicator hidden='true' size='large' color='#ffffff'/>
+            </View>
           </View>
-          <View style={{alignItems: 'center', paddingTop: 10}}>
-            <ActivityIndicator hidden='true' size='large' color='#ffffff'/>
-          </View>
-        </ScrollView>
+        </View>
       </View>
     )
 
@@ -803,6 +801,22 @@ var styles = (function () {
       color: 'lightblue',
       fontSize: 18,
       alignSelf: 'center'
+    },
+    bgImage: {
+      position:'absolute',
+      left: 0,
+      top: 0,
+      width: width,
+      height: height
+    },
+    splashLayout: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      height: height
+    },
+    layout: {
+      justifyContent: 'space-between',
+      height: height
     }
   });
 })()
