@@ -166,6 +166,7 @@
     "react-native-datepicker": "./web/shims/DatePicker.web.js",
     "react-native-gesture-password": false,
     "./Components/PasswordCheck.js": false,
+    "./Components/BackgroundImage.js": "./Components/BackgroundImage.web.js",
     "./utils/push.js": "./web/shims/push.js"
   }
 }
