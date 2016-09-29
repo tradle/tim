@@ -1,0 +1,80 @@
+{
+  "IcoMoonType": "selection",
+  "icons": [
+    {
+      "icon": {
+        "paths": [
+          "M571.122 736.268v30.927c10.014 12.761 16.003 28.82 16.003 46.257 0 41.42-33.699 75.113-75.116 75.113s-75.116-33.697-75.116-75.113c0-17.44 5.993-33.5 16.003-46.257v-30.923c-23.181 17.796-38.172 45.767-38.172 77.185 0 53.641 43.643 97.283 97.284 97.283s97.284-43.643 97.284-97.283c0-31.419-14.982-59.389-38.172-77.189z",
+          "M469.524 413.155v-1.147c-220.805-29.038-417.113-95.351-408.324-304.429-44.841 181.812-17.49 338.815 280.791 402.72-169.974-90.942-117.394-118.703 127.535-97.149z",
+          "M962.811 107.577c8.789 209.078-187.514 275.381-408.32 304.429v1.147c244.928-21.557 297.511 6.208 127.536 97.149 298.285-63.904 325.617-220.912 280.782-402.72z"
+        ],
+        "attrs": [],
+        "isMulticolor": false,
+        "isMulticolor2": false,
+        "tags": [
+          "Logo vector"
+        ],
+        "grid": 16
+      },
+      "attrs": [],
+      "properties": {
+        "order": 8,
+        "id": 0,
+        "prevSize": 32,
+        "code": 58896,
+        "name": "tradle",
+        "ligatures": ""
+      },
+      "setIdx": 0,
+      "setId": 3,
+      "iconIdx": 0
+    }
+  ],
+  "height": 1024,
+  "metadata": {
+    "name": "tradle"
+  },
+  "preferences": {
+    "fontPref": {
+      "prefix": "ui-icon-",
+      "metadata": {
+        "fontFamily": "tradle",
+        "majorVersion": 1,
+        "minorVersion": 0
+      },
+      "showGlyphs": true,
+      "metrics": {
+        "emSize": 512,
+        "baseline": 6.25,
+        "whitespace": 50
+      },
+      "resetPoint": 58880,
+      "showQuickUse": true,
+      "quickUsageToken": false,
+      "showMetrics": true,
+      "showMetadata": false,
+      "embed": false
+    },
+    "imagePref": {
+      "color": 0,
+      "height": 40,
+      "columns": 16,
+      "margin": 16,
+      "png": false,
+      "sprites": true,
+      "prefix": "icon-",
+      "bgColor": 0,
+      "overrideSize": true
+    },
+    "historySize": 100,
+    "showCodes": true,
+    "gridSize": 16,
+    "showLiga": false,
+    "showGrid": true,
+    "showGlyphs": true,
+    "showQuickUse": true,
+    "search": "",
+    "showSVGs": true,
+    "showQuickUse2": true
+  }
+}

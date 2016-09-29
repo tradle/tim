@@ -4,10 +4,10 @@ var React = require('react');
 var utils = require('../utils/utils');
 var translate = utils.translate
 var constants = require('@tradle/constants');
-var TradleW = require('../img/TradleW.png')
 var Accordion = require('react-native-accordion')
 // var Icon = require('react-native-vector-icons/Ionicons');
 import LinearGradient from 'react-native-linear-gradient'
+import CustomIcon from '../styles/customicons'
 var cnt = 0;
 import {
   Text,
@@ -219,7 +219,7 @@ var RowMixin = {
                    ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
                    : <View />
       var shareView = <View style={{flexDirection: 'row', marginLeft: 0, justifyContent: 'space-between', padding: 5, borderRadius: 10, borderWidth: BORDER_WIDTH, borderColor: '#215A89', backgroundColor: '#4982B1', opacity: this.props.resource.documentCreated ? 0.3 : 1}}>
-                        <Image source={TradleW} style={{width: 35, height: 35}}/>
+                        <CustomIcon name='tradle' style={{ color: '#ffffff' }} size={35} />
                         <Text style={{color: '#fefefe', fontSize: 20, paddingHorizontal: 3, marginTop: 6}}>{translate('Share')}</Text>
                       </View>
       var orgTitle = this.props.to[constants.TYPE] === constants.TYPES.ORGANIZATION

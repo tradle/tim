@@ -26,6 +26,7 @@ var constants = require('@tradle/constants');
 var termsAndConditions = require('../termsAndConditions.json')
 
 import ImagePicker from 'react-native-image-picker';
+import CustomIcon from '../styles/customicons'
 var ENUM = 'tradle.Enum'
 var LINK_COLOR, DEFAULT_LINK_COLOR = '#a94442'
 var FORM_ERROR = 'tradle.FormError'
@@ -800,7 +801,7 @@ class NewResource extends Component {
         </View>
         {this.state.isRegistration
           ? <View style={styles.logo}>
-              <Image style={styles.thumb} source={require('../img/TradleW.png')}></Image>
+              <CustomIcon name='tradle' size={40} style={styles.thumb} />
             </View>
           : <View/>
         }

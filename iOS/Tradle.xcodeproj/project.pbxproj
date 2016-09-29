@@ -5,6 +5,7 @@
 	};
 	objectVersion = 46;
 	objects = {
+
 /* Begin PBXBuildFile section */
 		00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302AC1ABCB8CE00DB3ED1 /* libRCTActionSheet.a */; };
 		00C302E71ABCBA2D00DB3ED1 /* libRCTGeolocation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302BA1ABCB90400DB3ED1 /* libRCTGeolocation.a */; };
@@ -60,6 +61,8 @@
 		732EA17B1CA6D61E00231B26 /* libRCTCamera.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BCE7C031CA4AF3000370B5A /* libRCTCamera.a */; };
 		7348C3B81C41C04F00B9CDF5 /* Fabric.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7348C3B61C41C04F00B9CDF5 /* Fabric.framework */; };
 		7348C3B91C41C04F00B9CDF5 /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7348C3B71C41C04F00B9CDF5 /* Crashlytics.framework */; };
+		7348E4741D9D8CDD00328628 /* tradle.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7348E4731D9D8CDD00328628 /* tradle.ttf */; };
+		7348E4911D9D8D1B00328628 /* tradle.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7348E4731D9D8CDD00328628 /* tradle.ttf */; };
 		7365BF2E1C3461F900B0A512 /* libRNKeychain.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7365BF2D1C3461E700B0A512 /* libRNKeychain.a */; };
 		73683CFC1CC443B300E178CF /* QTouchposeApplication.m in Sources */ = {isa = PBXBuildFile; fileRef = 73683CFB1CC443B300E178CF /* QTouchposeApplication.m */; };
 		7375409D1D25942300A81EC1 /* libRNDeviceInfo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 737540931D25941500A81EC1 /* libRNDeviceInfo.a */; };
@@ -333,6 +336,7 @@
 		732EA0AF1C24AB90000EFAA6 /* RNRandomBytes.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNRandomBytes.xcodeproj; path = "../node_modules/react-native-randombytes/RNRandomBytes.xcodeproj"; sourceTree = "<group>"; };
 		7348C3B61C41C04F00B9CDF5 /* Fabric.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Fabric.framework; sourceTree = "<group>"; };
 		7348C3B71C41C04F00B9CDF5 /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Crashlytics.framework; sourceTree = "<group>"; };
+		7348E4731D9D8CDD00328628 /* tradle.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = tradle.ttf; sourceTree = "<group>"; };
 		7364872A1C34703500713F09 /* RNECC.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNECC.xcodeproj; path = "../node_modules/react-native-ecc/ios/RNECC.xcodeproj"; sourceTree = "<group>"; };
 		7365BF281C3461E600B0A512 /* RNKeychain.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNKeychain.xcodeproj; path = "../node_modules/react-native-keychain/RNKeychain.xcodeproj"; sourceTree = "<group>"; };
 		73683CFA1CC443B300E178CF /* QTouchposeApplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QTouchposeApplication.h; sourceTree = "<group>"; };
@@ -785,6 +789,7 @@
 		EE2D4A8F3033431CB4B55B5B /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				7348E4731D9D8CDD00328628 /* tradle.ttf */,
 				0D298874FB194B1BB016DCEE /* Entypo.ttf */,
 				0513790E280C4C748E30A60F /* EvilIcons.ttf */,
 				7792D3B3CB564D30820C6FBC /* Foundation.ttf */,
@@ -1237,6 +1242,7 @@
 				EDA552EBDE6041E294013897 /* Entypo.ttf in Resources */,
 				1236C1178A71422DBF4F6998 /* EvilIcons.ttf in Resources */,
 				BC686B7EA43346EC98F13734 /* Foundation.ttf in Resources */,
+				7348E4741D9D8CDD00328628 /* tradle.ttf in Resources */,
 				1C603FB69CA74D178EB7521B /* MaterialIcons.ttf in Resources */,
 				D5FC2F4618F64B86BA09C1CC /* Octicons.ttf in Resources */,
 				5E66B670540246B3A0D82BAC /* Zocial.ttf in Resources */,
@@ -1247,6 +1253,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7348E4911D9D8D1B00328628 /* tradle.ttf in Resources */,
 				73261E351C4AB9FE00292FEE /* LaunchScreen.xib in Resources */,
 				73261E361C4AB9FE00292FEE /* environment.json in Resources */,
 				73261E371C4AB9FE00292FEE /* Images.xcassets in Resources */,
