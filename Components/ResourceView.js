@@ -233,7 +233,7 @@ class ResourceView extends Component {
                           <Text style={platformStyles.touchIdText}>{msg}</Text>
                           <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
                              <View style={[platformStyles.menuButtonRegular]}>
-                                <Icon name='md-finger-print' color={Platform.OS === 'ios' ? '#ffffff': 'red'} size={33} />
+                                <Icon name='md-finger-print' color={Platform.OS === 'android' ? 'red' : '#ffffff'} size={33} />
                               </View>
                             </TouchableHighlight>
                         </View>

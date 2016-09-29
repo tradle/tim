@@ -688,8 +688,8 @@ class ResourceList extends Component {
     //   </View>
     // );
     // let style = Platform.OS === 'ios' ? styles.menuButton : styles.menuButtonA
-    let icon = Platform.OS === 'ios' ?  'md-more' : 'md-menu'
-    let color = Platform.OS === 'ios' ? '#ffffff' : 'red'
+    let icon = Platform.OS === 'android' ? 'md-menu' : 'md-more'
+    let color = Platform.OS === 'android' ? 'red' : '#ffffff'
     return (
        <View style={styles.footer}>
          <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
