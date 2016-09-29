@@ -39,6 +39,7 @@ import {
 
 import AutomaticUpdates from '../utils/automaticUpdates'
 import CustomIcon from '../styles/customicons'
+import BackgroundImage from './BackgroundImage'
 
 const PASSWORD_ITEM_KEY = 'app-password'
 
@@ -626,7 +627,7 @@ class TimHome extends Component {
 
     return (
       <View style={{height: height}}>
-        <Image source={BG_IMAGE} style={styles.bgImage} />
+        <BackgroundImage source={BG_IMAGE} />
         <View style={styles.layout}>
           <View/>
           <TouchableHighlight style={[styles.thumbButton]}
@@ -654,7 +655,7 @@ class TimHome extends Component {
     var {width, height} = utils.dimensions(TimHome)
     return (
       <View>
-        <Image source={BG_IMAGE} style={styles.bgImage} />
+        <BackgroundImage source={BG_IMAGE} />
         <View  style={styles.splashLayout}>
           <View>
             <CustomIcon name="tradle" size={getIconSize()} style={styles.thumb} />
@@ -802,13 +803,6 @@ var styles = (function () {
       color: 'lightblue',
       fontSize: 18,
       alignSelf: 'center'
-    },
-    bgImage: {
-      position:'absolute',
-      left: 0,
-      top: 0,
-      width: width,
-      height: height
     },
     splashLayout: {
       alignItems: 'center',
