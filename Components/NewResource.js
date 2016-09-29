@@ -1070,7 +1070,6 @@ class NewResource extends Component {
   }
 
   onSubmitEditing(msg) {
-    debugger
     msg = msg ? msg : this.state.userInput;
     var assets = this.state.selectedAssets;
     var isNoAssets = utils.isEmpty(assets);
