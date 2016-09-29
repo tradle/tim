@@ -822,7 +822,8 @@ var styles = (function () {
 function getIconSize (dimensions) {
   dimensions = dimensions || utils.dimensions(TimHome)
   const { width } = dimensions
-  return width > 400 ? width / 2.5 : 170
+  const size = width > 400 ? width / 2.5 : 170
+  return Math.min(size, 300)
 }
 
 module.exports = TimHome;
