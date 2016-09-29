@@ -1278,10 +1278,12 @@ var styles= StyleSheet.create({
   },
   regInput: {
     borderWidth: 0,
-    color: '#eeeeee'
+    color: '#eeeeee',
+    fontFamily: '"Helvetica Neue", STHeiTi, sans-serif'
   },
   textInput: {
     borderWidth: 0,
+    fontFamily: '"Helvetica Neue", STHeiTi, sans-serif'
   },
   thumb: {
     width: 25,

@@ -70,14 +70,14 @@ class PhotoList extends Component {
       case 1:
       case 2:
       case 3:
-        height = d3 + 2;
+        height = Math.min(d3, 150) + 2;
         break;
       case 4:
-        height = d4 + 2;
+        height = Math.min(d4, 150) + 2;
         break;
       default:
       case 5:
-        height = d5 + 2;
+        height = Math.min(d5, 150) + 2;
         inRow = 5;
         break;
     }

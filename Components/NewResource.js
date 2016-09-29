@@ -743,7 +743,7 @@ class NewResource extends Component {
     //           : platformStyles.container
     var {width, height} = utils.dimensions(NewResource)
     // var style = [platformStyles.container, {backgroundColor: 'transparent', height: DeviceHeight}]
-    var style = [platformStyles.container, {backgroundColor: 'transparent'}]
+    var style = [platformStyles.container, {backgroundColor: 'transparent'}, utils.isWeb() &&  !this.state.isRegistration ?  {borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderTopColor: '#7AAAC3'} : {borderWidth: 0}]
     if (!options)
       options = {}
     options.auto = 'placeholders';
@@ -772,6 +772,8 @@ class NewResource extends Component {
     var formStyle = this.state.isRegistration
                   ? {justifyContent: 'center', height: height - (height > 1000 ? 0 : 100)}
                   : {justifyContent: 'flex-start'}
+
+
     var content =
       <ScrollView style={style}
                   ref='scrollView' {...this.scrollviewProps}
@@ -813,11 +815,11 @@ class NewResource extends Component {
       <View style={{height: height}}>
         <Image source={BG_IMAGE} style={styles.bgImage} />
         <View style={{justifyContent: 'center', height: height}}>
-        {content}
+          {content}
         </View>
         {this.state.isRegistration
           ? <View style={styles.logo}>
-              <CustomIcon name='tradle' size={40} style={styles.thumb} />
+              <CustomIcon name='tradle' color='#ffffff' size={40} style={styles.thumb} />
             </View>
           : <View/>
         }
@@ -934,7 +936,7 @@ class NewResource extends Component {
                 </View>
               : <View/>
     var actionableItem = utils.isWeb() && bl.name === 'photos'
-      ? this.renderImageFileInput(bl, meta, itemsArray, [{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}])
+      ? this.renderImageFileInput(bl, meta, itemsArray)
       : <TouchableHighlight style={[{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]} underlayColor='transparent'
             onPress={this.onNewPressed.bind(this, bl, meta)}>
           {itemsArray}
@@ -950,12 +952,15 @@ class NewResource extends Component {
       istyle.push({paddingBottom: 0, height: count * height + 35})
     }
 
+    let cstyle = [{flex: 1, position: 'absolute', right: 0},
+                   count || utils.isWeb() ? {paddingTop: 0} : {marginTop: 15, paddingBottom: 7}
+                 ]
     return (
       <View key={this.getNextKey()}>
         <View style={[istyle, {marginHorizontal: 10}]} ref={bl.name}>
           <View style={styles.items}>
             {actionableItem}
-            <TouchableHighlight underlayColor='transparent' style={[{flex: 1, position: 'absolute', right: 0}, count ? {paddingTop: 0} : {marginTop: 15, paddingBottom: 7}]}
+            <TouchableHighlight underlayColor='transparent' style={cstyle}
                 onPress={this.onNewPressed.bind(this, bl, meta)}>
               {counter}
             </TouchableHighlight>
@@ -1039,11 +1044,12 @@ class NewResource extends Component {
 
   renderImageFileInput(bl, meta, itemsArray, style) {
     const self = this
+    // style = [{flex: 7, fontSize: 18}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]
+        // style={style}
     return (
       <FileInput
         name={bl.name}
         placeholder={bl.title || bl.name}
-        style={style}
         onChange={e => {
           readImage(e.target.files[0], function (err, item) {
             if (err) return Alert.alert('Unable to process file', err.message)
@@ -1189,7 +1195,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions }) {
     getStarted: {
       backgroundColor: '#467EAE', //'#2892C6',
       paddingVertical: 10,
-      marginLeft: 10,
+      marginHorizontal: 10,
       // paddingHorizontal: 50,
       alignSelf: 'stretch',
     },

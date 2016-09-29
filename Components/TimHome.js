@@ -17,7 +17,7 @@ var constants = require('@tradle/constants');
 // var BACKUPS = require('asyncstorage-backup')
 var debug = require('debug')('Tradle-Home')
 var BG_IMAGE = require('../img/bg.png')
-var PasswordCheck = require('./PasswordCheck')
+// var PasswordCheck = require('./PasswordCheck')
 var FadeInView = require('./FadeInView')
 var TouchIDOptIn = require('./TouchIDOptIn')
 var defaultBankStyle = require('../styles/bankStyle.json')
@@ -66,7 +66,7 @@ import React, { Component } from 'react'
 
 class TimHome extends Component {
   static displayName = 'TimHome';
-  static orientation = 'PORTRAIT';
+  static orientation = Platform.OS === 'web' ? 'LANDSCAPE' : 'PORTRAIT';
   props: {
     modelName: PropTypes.string.isRequired,
     navigator: PropTypes.object.isRequired
@@ -582,7 +582,7 @@ class TimHome extends Component {
               </View>
 
     let logo = <View style={[styles.container]}>
-                  <CustomIcon name="tradle" size={getIconSize()} style={styles.thumb} />
+                  <CustomIcon color='#ffffff' name="tradle" size={getIconSize()} style={styles.thumb} />
                   <Text style={styles.tradle}>Tradle</Text>
               </View>
 
@@ -632,11 +632,11 @@ class TimHome extends Component {
         <Image source={BG_IMAGE} style={styles.bgImage} />
         <View  style={styles.splashLayout}>
           <View>
-            <CustomIcon name="tradle" size={getIconSize()} style={styles.thumb} />
+            <CustomIcon name="tradle" color='#ffffff' size={getIconSize()} style={styles.thumb} />
             <Text style={styles.tradle}>Tradle</Text>
-            <View style={{paddingTop: 20}}>
-              <ActivityIndicator hidden='true' size='large' color='#ffffff'/>
-            </View>
+          </View>
+          <View style={{paddingTop: 20, alignSelf: 'center'}}>
+            <ActivityIndicator hidden='true' size='large' color='#ffffff'/>
           </View>
         </View>
       </View>
@@ -715,8 +715,11 @@ class TimHome extends Component {
   }
 
   _pressHandler() {
-    signIn(this.props.navigator)
-      .then(() => this.showOfficialAccounts())
+    if (utils.getMe())
+      signIn(this.props.navigator)
+        .then(() => this.showOfficialAccounts())
+    else
+      this.register(this.showOfficialAccounts.bind(this))
   }
 }
 
@@ -725,6 +728,7 @@ reactMixin(TimHome.prototype, Reflux.ListenerMixin);
 var styles = (function () {
   var dimensions = utils.dimensions(TimHome)
   var { width, height } = dimensions
+  var thumb = width > 1000 ? 300 : (width > 400 ? width / 2.5 : 170)
   return StyleSheet.create({
     container: {
       // padding: 30,
@@ -749,9 +753,9 @@ var styles = (function () {
       // padding: 40,
     },
     thumb: {
-      color: '#ffffff'
-      // width:  width > 400 ? width / 2.5 : 170,
-      // height: width > 400 ? width / 2.5 : 170,
+      width:  thumb,
+      height: thumb,
+      paddingVertical: 20
     },
     dev: {
       paddingVertical: 10,

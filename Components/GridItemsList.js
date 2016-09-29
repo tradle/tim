@@ -110,9 +110,10 @@ class GridItemsList extends Component {
     var self = this;
     this.setState({show: false})
     let options = { quality: utils.imageQuality }
+    let prop = utils.getModel(this.props.resource[constants.TYPE]).value.properties[this.props.prop]
     if (!utils.isSimulator()  ||  __DEV__)
       options.takePhotoButtonTitle = 'Take Photo…'
-    if (utils.isSimulator() || prop._allowPicturesFromLibrary)
+    if (utils.isSimulator() || this.props.prop._allowPicturesFromLibrary)
       options.chooseFromLibraryButtonTitle = 'Choose from Library'
 
     ImagePicker.showImagePicker(options, (response) => {
