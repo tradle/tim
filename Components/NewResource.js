@@ -27,6 +27,7 @@ var termsAndConditions = require('../termsAndConditions.json')
 
 import ImagePicker from 'react-native-image-picker';
 import FileInput from 'react-file-input'
+import CustomIcon from '../styles/customicons'
 var ENUM = 'tradle.Enum'
 var LINK_COLOR, DEFAULT_LINK_COLOR = '#a94442'
 var FORM_ERROR = 'tradle.FormError'
@@ -627,7 +628,6 @@ class NewResource extends Component {
     var self = this;
     ImagePicker.showImagePicker({
       returnIsVertical: true,
-      quality: 0.4,
       chooseFromLibraryButtonTitle: utils.isSimulator() || prop._allowPicturesFromLibrary ? 'Choose from Library' : null,
       takePhotoButtonTitle: utils.isSimulator() ? null : 'Take Photo…',
       quality: utils.imageQuality
@@ -817,7 +817,7 @@ class NewResource extends Component {
         </View>
         {this.state.isRegistration
           ? <View style={styles.logo}>
-              <Image style={styles.thumb} source={require('../img/TradleW.png')}></Image>
+              <CustomIcon name='tradle' size={40} style={styles.thumb} />
             </View>
           : <View/>
         }

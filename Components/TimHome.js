@@ -16,7 +16,6 @@ var reactMixin = require('react-mixin');
 var constants = require('@tradle/constants');
 // var BACKUPS = require('asyncstorage-backup')
 var debug = require('debug')('Tradle-Home')
-var TradleWhite = require('../img/TradleW.png')
 var BG_IMAGE = require('../img/bg.png')
 var PasswordCheck = require('./PasswordCheck')
 var FadeInView = require('./FadeInView')
@@ -39,6 +38,7 @@ import {
 } from '../utils/localAuth'
 
 import AutomaticUpdates from '../utils/automaticUpdates'
+import CustomIcon from '../styles/customicons'
 
 const PASSWORD_ITEM_KEY = 'app-password'
 
@@ -582,7 +582,7 @@ class TimHome extends Component {
               </View>
 
     let logo = <View style={[styles.container]}>
-                  <Image style={styles.thumb} source={TradleWhite}></Image>
+                  <CustomIcon name="tradle" size={getIconSize()} style={styles.thumb} />
                   <Text style={styles.tradle}>Tradle</Text>
               </View>
 
@@ -632,7 +632,7 @@ class TimHome extends Component {
         <Image source={BG_IMAGE} style={styles.bgImage} />
         <View  style={styles.splashLayout}>
           <View>
-            <Image style={[styles.thumb]} source={TradleWhite}></Image>
+            <CustomIcon name="tradle" size={getIconSize()} style={styles.thumb} />
             <Text style={styles.tradle}>Tradle</Text>
             <View style={{paddingTop: 20}}>
               <ActivityIndicator hidden='true' size='large' color='#ffffff'/>
@@ -749,8 +749,9 @@ var styles = (function () {
       // padding: 40,
     },
     thumb: {
-      width:  width > 400 ? width / 2.5 : 170,
-      height: width > 400 ? width / 2.5 : 170,
+      color: '#ffffff'
+      // width:  width > 400 ? width / 2.5 : 170,
+      // height: width > 400 ? width / 2.5 : 170,
     },
     dev: {
       paddingVertical: 10,
@@ -817,6 +818,12 @@ var styles = (function () {
     }
   });
 })()
+
+function getIconSize (dimensions) {
+  dimensions = dimensions || utils.dimensions(TimHome)
+  const { width } = dimensions
+  return width > 400 ? width / 2.5 : 170
+}
 
 module.exports = TimHome;
   // signIn(cb) {
