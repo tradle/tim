@@ -13,7 +13,6 @@ import { makeResponsive } from 'react-native-orient'
 
 var reactMixin = require('react-mixin');
 
-const MAX_WIDTH = 400
 import {
   Image,
   StyleSheet,
@@ -53,8 +52,7 @@ class VerificationMessageRow extends Component {
 
     var isMyMessage = this.isMyMessage();
     var w = utils.dimensions(VerificationMessageRow).width
-    var msgWidth = isMyMessage ? w - 70 : w - 50;
-    msgWidth = Math.min(msgWidth, MAX_WIDTH)
+    let msgWidth = w * 0.8
     var viewStyle = {width: msgWidth, flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
 
     var msgModel = utils.getModel(resource.document[constants.TYPE]).value;
@@ -211,7 +209,7 @@ var styles = StyleSheet.create({
     paddingTop: 5,
     paddingHorizontal: 7,
     borderRadius: 10,
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
     marginVertical: 2
   },
   verificationIcon: {

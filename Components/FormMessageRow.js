@@ -134,9 +134,8 @@ class FormMessageRow extends Component {
     // in a bigger than needed bubble
     var messageBody;
     var width = utils.dimensions(FormMessageRow).width
-    let msgWidth = width - (isMyMessage ? 70 : 50)
-    let maxWidth = width > 800 ? 600 : 400
-    var viewStyle = {width: Math.min(msgWidth, maxWidth), flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
+    let msgWidth = width * 0.8
+    var viewStyle = {width: msgWidth, flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
 
     messageBody =
       <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
@@ -264,9 +263,8 @@ class FormMessageRow extends Component {
     var self = this
     var vCols = [];
     viewCols.forEach(function(v) {
-      if (properties[v].type === 'array'  ||  properties[v].type === 'date')
+      if (properties[v].type === 'array')
         return;
-
       if (properties[v].ref) {
         if (resource[v]) {
           vCols.push(self.getPropRow(properties[v], resource, resource[v].title || resource[v]))
@@ -285,7 +283,11 @@ class FormMessageRow extends Component {
         vCols.push(<Text style={style} numberOfLines={first ? 2 : 1} key={self.getNextKey()}>{resource[v]}</Text>);
       }
       else if (!model.autoCreate) {
-        var val = (properties[v].displayAs)
+        let val
+        if (properties[v].type === 'date')
+           val = utils.formatDate(resource[v])
+        else
+           val = (properties[v].displayAs)
                 ? utils.templateIt(properties[v], resource)
                 : properties[v].type === 'boolean' ? (resource[v] ? 'Yes' : 'No') : resource[v];
 
@@ -381,7 +383,7 @@ var styles = StyleSheet.create({
     color: '#EBFCFF',
     fontSize: 20,
     fontWeight: '600',
-    opacity: 0.5,
+    opacity: 0.7,
     alignSelf: 'flex-end',
     marginTop: 10
   },

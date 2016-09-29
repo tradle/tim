@@ -25,6 +25,7 @@ const ENUM = 'tradle.Enum'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 var STRUCTURED_MESSAGE_COLOR
+var BORDER_WIDTH = StyleSheet.hairlineWidth
 
 var RowMixin = {
   addDateProp(dateProp, style) {
@@ -67,7 +68,7 @@ var RowMixin = {
     let propTitle = translate(prop, model)
     if (isVerification) {
       if (!this.props.isAggregation)
-        style = [style, {borderWidth: 1, paddingVertical: 3, borderColor: this.props.bankStyle.VERIFICATION_BG, borderTopColor: '#eeeeee'}]
+        style = [style, {borderWidth: BORDER_WIDTH, paddingVertical: 3, borderColor: this.props.bankStyle.VERIFICATION_BG, borderTopColor: '#eeeeee'}]
       return (
         <View style={style} key={this.getNextKey()}>
           <View style={{flex: 1, flexDirection: 'column'}}>
@@ -84,7 +85,7 @@ var RowMixin = {
       let isForm = model.subClassOf === constants.TYPES.FORM
       let isMyMessage = this.isMyMessage()
       if (!this.props.isAggregation  &&  (isMyMessage || isForm) &&  !isMyProduct)
-        style = [style, {borderWidth: 1, paddingVertical: 3, borderColor: isMyMessage ? STRUCTURED_MESSAGE_COLOR : '#ffffff', borderBottomColor: this.props.bankStyle.STRUCTURED_MESSAGE_BORDER}]
+        style = [style, {borderWidth: BORDER_WIDTH, paddingVertical: 3, borderColor: isMyMessage ? STRUCTURED_MESSAGE_COLOR : '#ffffff', borderBottomColor: this.props.bankStyle.STRUCTURED_MESSAGE_BORDER}]
       let color = this.isMyMessage() && !isMyProduct ? {color: '#FFFFEE'} : {color: '#757575'}
       return (
         <View style={style} key={this.getNextKey()}>
@@ -160,6 +161,7 @@ var RowMixin = {
   },
   formatDocument(model, verification, onPress, isAccordion) {
     var resource = verification.document;
+    isAccordion = false
 
     var docModel = utils.getModel(resource[constants.TYPE]).value;
     var isMyProduct = docModel.subClassOf === MY_PRODUCT
@@ -187,12 +189,13 @@ var RowMixin = {
     // var header =  <View style={headerStyle}>
     //                 <Text style={[styles.resourceTitle, {fontSize: 20, color: '#B6C2A7'}]}>{translate(model)}</Text>
     //               </View>
+                    // <Icon name='md-arrow-dropright' size={30} color={this.props.bankStyle.VERIFIED_HEADER_COLOR}/>
     var header =  <View style={headerStyle}>
-                    <Text style={[styles.resourceTitle, {fontSize: 20, color: this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>{translate(model)}</Text>
+                    <Text style={[styles.resourceTitle, {fontSize: 20, marginTop: 2, paddingRight: 10, color: this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>{translate(model) + ' ...'}</Text>
                   </View>
     let addStyle
     if (!onPress)
-      addStyle = {marginHorizontal: -7, paddingHorizontal: 7, backgroundColor: this.props.bankStyle.VERIFICATION_BG, borderWidth: 1, borderColor: this.props.bankStyle.VERIFICATION_BG, borderBottomColor: this.props.bankStyle.VERIFIED_HEADER_COLOR}
+      addStyle = {marginHorizontal: -7, paddingHorizontal: 7, backgroundColor: this.props.bankStyle.VERIFICATION_BG, borderWidth: BORDER_WIDTH, borderColor: this.props.bankStyle.VERIFICATION_BG, borderBottomColor: this.props.bankStyle.VERIFIED_HEADER_COLOR}
     else
       addStyle = {}
     header = hasPhotos
@@ -214,7 +217,7 @@ var RowMixin = {
       var orgPhoto = verification.organization.photo
                    ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
                    : <View />
-      var shareView = <View style={{flexDirection: 'row', marginLeft: 0, justifyContent: 'space-between', padding: 5, borderRadius: 10, borderWidth: 1, borderColor: '#215A89', backgroundColor: '#4982B1', opacity: this.props.resource.documentCreated ? 0.3 : 1}}>
+      var shareView = <View style={{flexDirection: 'row', marginLeft: 0, justifyContent: 'space-between', padding: 5, borderRadius: 10, borderWidth: BORDER_WIDTH, borderColor: '#215A89', backgroundColor: '#4982B1', opacity: this.props.resource.documentCreated ? 0.3 : 1}}>
                         <Image source={TradleW} style={{width: 35, height: 35}}/>
                         <Text style={{color: '#fefefe', fontSize: 20, paddingHorizontal: 3, marginTop: 6}}>{translate('Share')}</Text>
                       </View>
@@ -437,7 +440,7 @@ var styles = StyleSheet.create({
     width: 30,
     borderRadius: 15,
     borderColor: '#cccccc',
-    borderWidth: 1
+    borderWidth: BORDER_WIDTH
   },
   cellText: {
     marginTop: 8,
@@ -467,7 +470,7 @@ var styles = StyleSheet.create({
     marginRight: 10,
     borderColor: 'transparent',
     borderRadius:10,
-    borderWidth: 1,
+    borderWidth: BORDER_WIDTH,
   },
   rowContainer: {
     flexDirection: 'row',

@@ -17,7 +17,7 @@
     "@tradle/constants": "^1.3.0",
     "@tradle/engine": "^3.3.0",
     "@tradle/keeper": "^3.1.0",
-    "@tradle/models": "github:tradle/models#66e829a",
+    "@tradle/models": "github:tradle/models#933786e",
     "@tradle/protocol": "^2.0.0",
     "art": "^0.10.0",
     "assert": "^1.3.0",

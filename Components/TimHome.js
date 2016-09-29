@@ -546,18 +546,9 @@ class TimHome extends Component {
     // var url = Linking.getInitialURL();
     var {width, height} = utils.dimensions(TimHome)
     var h = height > 800 ? height - 220 : height - 180
-    // var cTop = h / 4
-
-    var thumb = width > 400
-              ? { width: width / 2, height: width / 2 }
-              : styles.thumb
-              // <Progress.CircleSnail color={'white'} size={70} thickness={5}/>
 
     if (this.state.isLoading)
-      return this.getSplashScreen(h, thumb)
-
-    // if (!me.isAuthenticated)
-    //   return <PasswordCheck />
+      return this.getSplashScreen(h)
 
     var err = this.state.err || '';
     var errStyle = err ? styles.err : {'padding': 0, 'height': 0};
@@ -569,7 +560,6 @@ class TimHome extends Component {
                 <Text style={styles.version}>git: {commitHash}</Text>
               </View>
 
-    // var dev = <View/>
     var dev = __DEV__
             ? <View style={styles.dev}>
                 <TouchableHighlight
@@ -591,32 +581,13 @@ class TimHome extends Component {
                 {version}
               </View>
 
-    let hh =  height > 1000 ? 100 : ((height / 2) - (Platform.OS === 'ios' ? 280 : 240))
-    // let hh = height - 300
-    let left = (width - 300) / 2
     let logo = <View style={[styles.container]}>
-                  <Image style={thumb} source={TradleWhite}></Image>
+                  <Image style={styles.thumb} source={TradleWhite}></Image>
                   <Text style={styles.tradle}>Tradle</Text>
               </View>
 
                           // <Image style={{position: 'absolute', left: 0, opacity: 0.5, width: 100, height: 100}} source={TradleWhite}></Image>
-    let pairingButton = !utils.isWeb() && (
-      <FadeInView>
-        <TouchableHighlight  onPress={() => {
-          this.pairDevices(this.showOfficialAccounts.bind(this))
-          }} underlayColor='transparent'>
-          <View style={[styles.signIn, {shadowColor: '#245c8c', backgroundColor: 'lightblue'}]}>
-            <Text style={{backgroundColor: 'transparent', color: '#467EAE', fontSize: 20, alignSelf: 'center', fontWeight: '600'}}>{translate('I have another Tradle device')}</Text>
-          </View>
-        </TouchableHighlight>
-      </FadeInView>
-    )
-
-    let regView = utils.getMe()
-                ? <View/>
-                : <View>
-                    {logo}
-                  <View  style={{marginTop: hh, alignSelf: 'center'}}>
+    let regView = <View  style={{alignSelf: 'center'}}>
                     <FadeInView>
                       <TouchableHighlight  onPress={() => {
                         this.register(this.showOfficialAccounts.bind(this))
@@ -626,56 +597,48 @@ class TimHome extends Component {
                         </View>
                       </TouchableHighlight>
                     </FadeInView>
-                    {pairingButton}
                  </View>
-                </View>
 
     return (
-      <View style={{flex: 1}}>
-        <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width, height}} />
-        {regView}
-        { utils.getMe()
-           ? <View/>
-           :  <View>{dev}</View>
-        }
-        <ScrollView
-          scrollEnabled={false}
-          style={{height:h}}
-        >
+      <View style={{height: height}}>
+        <Image source={BG_IMAGE} style={styles.bgImage} />
+        <View style={styles.layout}>
+          <View/>
           <TouchableHighlight style={[styles.thumbButton]}
             underlayColor='transparent' onPress={() => this._pressHandler()}>
             {logo}
           </TouchableHighlight>
-        </ScrollView>
-        <View style={{height: 90, opacity: me ? 1 : 0}}></View>
-          <TouchableHighlight style={[styles.thumbButton, {opacity: me ? 1 : 0}]}
-                underlayColor='transparent' onPress={() => this._pressHandler()}>
-            <View style={styles.getStarted}>
-               <Text style={styles.getStartedText}>Get started</Text>
-            </View>
-          </TouchableHighlight>
-          <Text style={errStyle}>{err}</Text>
-          {dev}
-        <View style={{height: 200}}></View>
+          <View>
+            { utils.getMe()
+              ? <TouchableHighlight style={[styles.thumbButton, {justifyContent: 'flex-end',  opacity: me ? 1 : 0}]}
+                    underlayColor='transparent' onPress={() => this._pressHandler()}>
+                  <View style={styles.getStarted}>
+                     <Text style={styles.getStartedText}>Get started</Text>
+                  </View>
+                </TouchableHighlight>
+              : regView
+            }
+            <Text style={errStyle}>{err}</Text>
+            {dev}
+          </View>
+        </View>
       </View>
     );
   }
-  getSplashScreen(h, thumb) {
+  getSplashScreen() {
     var {width, height} = utils.dimensions(TimHome)
     return (
       <View>
-        <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: width, height: height }} />
-        <ScrollView
-          scrollEnabled={false}
-          style={{height:h}}>
-          <View style={[styles.container]}>
-            <Image style={thumb} source={TradleWhite}></Image>
+        <Image source={BG_IMAGE} style={styles.bgImage} />
+        <View  style={styles.splashLayout}>
+          <View>
+            <Image style={[styles.thumb]} source={TradleWhite}></Image>
             <Text style={styles.tradle}>Tradle</Text>
+            <View style={{paddingTop: 20}}>
+              <ActivityIndicator hidden='true' size='large' color='#ffffff'/>
+            </View>
           </View>
-          <View style={{alignItems: 'center', paddingTop: 10}}>
-            <ActivityIndicator hidden='true' size='large' color='#ffffff'/>
-          </View>
-        </ScrollView>
+        </View>
       </View>
     )
 
@@ -765,7 +728,7 @@ var styles = (function () {
   return StyleSheet.create({
     container: {
       // padding: 30,
-      marginTop: height / 4,
+      // marginTop: height / 4,
       alignItems: 'center',
     },
     tradle: {
@@ -786,19 +749,13 @@ var styles = (function () {
       // padding: 40,
     },
     thumb: {
-      width: 170,
-      height: 170,
-    },
-    title: {
-      marginTop: 30,
-      alignSelf: 'center',
-      fontSize: 20,
-      color: '#7AAAC3'
+      width:  width > 400 ? width / 2.5 : 170,
+      height: width > 400 ? width / 2.5 : 170,
     },
     dev: {
-      marginTop: 10,
+      paddingVertical: 10,
       flexDirection: 'row',
-      marginBottom: 500,
+      // marginBottom: 500,
       alignSelf: 'center',
       alignItems: 'center',
       justifyContent: 'center'
@@ -841,6 +798,22 @@ var styles = (function () {
       color: 'lightblue',
       fontSize: 18,
       alignSelf: 'center'
+    },
+    bgImage: {
+      position:'absolute',
+      left: 0,
+      top: 0,
+      width: width,
+      height: height
+    },
+    splashLayout: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      height: height
+    },
+    layout: {
+      justifyContent: 'space-between',
+      height: height
     }
   });
 })()
