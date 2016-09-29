@@ -5726,9 +5726,9 @@
       "resolved": "https://registry.npmjs.org/react-native-localization/-/react-native-localization-0.1.18.tgz"
     },
     "react-native-orient": {
-      "version": "1.1.0",
-      "from": "react-native-orient@>=1.1.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/react-native-orient/-/react-native-orient-1.1.0.tgz"
+      "version": "1.2.0",
+      "from": "react-native-orient@latest",
+      "resolved": "https://registry.npmjs.org/react-native-orient/-/react-native-orient-1.2.0.tgz"
     },
     "react-native-orientation": {
       "version": "1.17.0",

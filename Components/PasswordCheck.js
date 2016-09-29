@@ -7,6 +7,7 @@ import {
 } from 'react-native'
 
 import { getDimensions } from 'react-native-orient'
+import BackgroundImage from './BackgroundImage'
 var PasswordGesture = require('react-native-gesture-password')
 var utils = require('../utils/utils')
 var translate = utils.translate
@@ -169,10 +170,9 @@ var PasswordCheck = React.createClass({
   },
 
   render: function() {
-    var { width, height } = getDimensions(PasswordCheck)
     return (
       <View style={styles.container}>
-        <Image source={BG_IMAGE} style={[styles.bg, { width, height }]} />
+        <BackgroundImage source={BG_IMAGE} />
         <PasswordGesture
           lockToPortrait={true}
           ref='pg'
@@ -211,11 +211,6 @@ var containerRawStyle = {
 }
 
 var styles = StyleSheet.create({
-  bg: {
-    position:'absolute',
-    left: 0,
-    top: 0
-  },
   container: containerRawStyle
 })
 
