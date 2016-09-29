@@ -115,12 +115,16 @@ class MessageRow extends Component {
         if (isConfirmation)
           addStyle = [styles.verificationBody, {borderColor: '#cccccc', backgroundColor: this.props.bankStyle.CONFIRMATION_BG}, styles.myConfCell]
         else {
-          if (isSimpleMessage && message.length < 30)
-            addStyle = [styles.verificationBody, {borderColor: isFormError ? this.props.bankStyle.REQUEST_FULFILLED : '#efefef', backgroundColor: '#ffffff', borderTopLeftRadius: 0}];
-          else {
-            let borderColor = isFormError ? this.props.bankStyle.REQUEST_FULFILLED : '#efefef'
-            addStyle = [styles.verificationBody, {flex: 1, borderColor: borderColor, backgroundColor: '#ffffff', borderTopLeftRadius: 0}];
+          let borderColor = isFormError ? this.props.bankStyle.REQUEST_FULFILLED : '#efefef'
+          let mstyle = {
+            borderColor: borderColor,
+            backgroundColor: '#ffffff',
+            borderTopLeftRadius: 0
           }
+          addStyle = (isSimpleMessage && message.length < 30)
+                   ? [styles.verificationBody, mstyle]
+                   : [styles.verificationBody, {flex: 1}, mstyle]
+
 
         }
       }
@@ -174,8 +178,6 @@ class MessageRow extends Component {
       showMessageBody = true;
     var messageBody;
     var w = utils.dimensions(MessageRow).width
-    var msgWidth = isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
-    msgWidth = Math.min(msgWidth, MAX_WIDTH)
     var sendStatus = <View />
     // HACK that solves the case when the message is short and we don't want it to be displayed
     // in a bigger than needed bubble
@@ -195,7 +197,9 @@ class MessageRow extends Component {
       }
     }
     // HACK
+    let msgWidth = w * 0.8
     let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
+
     let longMessage = isSimpleMessage  &&  message ? numberOfCharsInWidth < message.length : false
     if (showMessageBody) {
       var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
@@ -244,7 +248,7 @@ class MessageRow extends Component {
             {ownerPhoto}
             </View>
             <View style={cellStyle}>
-              <View style={{flex: 1}}>
+              <View style={styles.container}>
               {this.isShared()
                 ? <View style={[styles.verifiedHeader, {backgroundColor: this.props.bankStyle.SHARED_WITH_BG}]}>
                     <Text style={{color: '#ffffff', fontSize: 18}}>{translate('youShared', resource.to.organization.title)}</Text>
@@ -440,9 +444,10 @@ class MessageRow extends Component {
               )
             : translate('shareOneOfMany', utils.getMe().firstName, docType, org)
 
-
+    let w = utils.dimensions(MessageRow).width * 0.8
+    // w = Math.min(MAX_WIDTH, w)
     return (
-      <View style={[rowStyle, viewStyle, {width: utils.dimensions(MessageRow).width - 50}]} key={this.getNextKey()}>
+      <View style={[rowStyle, viewStyle, {width: w}]} key={this.getNextKey()}>
         <View style={{width: 30}}/>
         <View style={[addStyle ? [styles.textContainer, addStyle] : styles.textContainer]}>
           <View style={{flex: 1}}>
@@ -930,6 +935,9 @@ function isMultientry(resource) {
 }
 
 var styles = StyleSheet.create({
+  container: {
+    flex: 1
+  },
   textContainer: {
     flex: 1,
     flexDirection: 'row'
