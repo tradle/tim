@@ -23,6 +23,7 @@ var extend = require('extend');
 
 import ActionSheet from 'react-native-actionsheet'
 import { makeResponsive } from 'react-native-orient'
+
 // var AddNewMessage = require('./AddNewMessage')
 // var SearchBar = require('react-native-search-bar')
 // var ResourceTypesScreen = require('./ResourceTypesScreen')
@@ -31,6 +32,7 @@ var LINK_COLOR
 var LIMIT = 10
 var NEXT_HASH = '_n'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
+const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_REQUEST = 'tradle.FormRequest'
 
 import React, { Component } from 'react'
@@ -192,7 +194,12 @@ class MessageList extends Component {
         return;
     }
     var list = params.list;
-
+    // if (this.state.sendStatus) {
+    //   list.forEach((r) => {
+    //     if (r[constants.ROOT_HASH] === this.state.sendResource[constants.ROOT_HASH])
+    //       r.status = this.state.sendStatus
+    //   })
+    // }
     if (params.loadEarlierMessages  &&  this.state.postLoad) {
       if (!list || !list.length) {
         this.state.postLoad([], true)
@@ -282,8 +289,9 @@ class MessageList extends Component {
         !nextState.list                                   ||
          this.props.orientation !== nextProps.orientation ||
          this.state.allLoaded !== nextState.allLoaded     ||
-         this.state.sendStatus !== nextState.sendStatus   ||
-         this.state.list.length !== nextState.list.length)
+         this.state.list.length !== nextState.list.length ||
+         this.state.sendStatus !== nextState.sendStatus)
+         // this.state.sendResource  &&  this.state.sendResource[constants.ROOT_HASH] === nextState.sendResource[constants.ROOT_HASH]))
       return true
     for (var i=0; i<this.state.list.length; i++) {
       let r = this.state.list[i]
@@ -336,7 +344,7 @@ class MessageList extends Component {
       }
     }
     // Allow to edit resource that was not previously changed
-    if (!isEmployee  &&  !resource[NEXT_HASH]) {
+    if (!isEmployee  &&  !resource[NEXT_HASH]  &&  model.subClassOf !== MY_PRODUCT) {
       route.rightButtonTitle = translate('edit')
       route.onRightButtonPress = {
         title: utils.getDisplayName(resource),
@@ -483,13 +491,16 @@ class MessageList extends Component {
 
     if (!content) {
       var isAllMessages = model.isInterface  &&  model.id === constants.TYPES.MESSAGE;
-      var maxHeight = utils.dimensions(MessageList).height - (Platform.OS === 'android' ? 77 : 64) - (this.state.isConnected ? 0 : 30)
+      var maxHeight = utils.dimensions(MessageList).height -
+                      (Platform.OS === 'android' ? 77 : 64) - (this.state.isConnected ? 0 : 35)
       // content = <GiftedMessenger style={{paddingHorizontal: 10, marginBottom: Platform.OS === 'android' ? 0 : 20}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
       content = <GiftedMessenger style={{paddingHorizontal: 10}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
         ref={(c) => this._GiftedMessenger = c}
         loadEarlierMessagesButton={this.state.loadEarlierMessages}
         onLoadEarlierMessages={this.onLoadEarlierMessages.bind(this)}
         messages={this.state.list}
+        messageSent={this.state.sendResource}
+        messageSentStatus={this.state.sendStatus}
         enableEmptySections={true}
         autoFocus={false}
         textRef={'chat'}
@@ -498,7 +509,7 @@ class MessageList extends Component {
         submitOnReturn={true}
         menu={this.generateMenu.bind(this)}
         keyboardShouldPersistTaps={true}
-        keyboardDismissMode='on-drag'
+        keyboardDismissMode={'on-drag'}
         maxHeight={maxHeight} // 64 for the navBar; 110 - with SearchBar
       />
         // returnKeyType={false}
@@ -573,28 +584,22 @@ class MessageList extends Component {
     );
         // {addNew}
   }
-  generateMenu() {
-    let me = utils.getMe()
-    // if (this.state.isEmployee)
-    //   return <View/>
+  generateMenu(show) {
+    if (!show)
+      return <View/>
+    // {
+    //   return <TouchableHighlight underlayColor='transparent' onPress={this.onSubmitEditing.bind(this)}>
+    //            <View style={[platformStyles.menuButton, {backgroundColor: LINK_COLOR,}]}>
+    //              <Icon name='ios-send'  size={33}  color='#ffffff' />
+    //            </View>
+    //         </TouchableHighlight>
+    // }
     return  <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
               {this.paintMenuButton()}
             </TouchableHighlight>
-
-
-    // return <TouchableHighlight underlayColor='transparent'
-    //         onPress={() => this.ActionSheet.show()}>
-    //         <View style={{marginLeft: 5, paddingRight: 0, marginTop: 5, marginRight: 10, marginBottom: 0}}>
-    //           <Icon name='md-more' size={30} color='#999999' />
-    //         </View>
-    //       </TouchableHighlight>
   }
   paintMenuButton() {
-    // let style = Platform.OS === 'ios' ? styles.menuButton : styles.menuButtonA
-    // let icon = Platform.OS === 'ios' ?  'md-more' : 'md-menu'
-    // let color = Platform.OS === 'ios' ? '#ffffff' : 'red'
-
-    return  <View style={[platformStyles.menuButtonNarrow, {opacity: 0.7, marginTop: Platform.OS === 'ios' ? -23 : -2}]}>
+    return  <View style={[platformStyles.menuButtonNarrow, {opacity: 0.5}]}>
               <Icon name={MenuIcon.name}  size={33}  color={MenuIcon.color} />
             </View>
   }

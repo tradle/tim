@@ -81,6 +81,7 @@ class TimHome extends Component {
     this._handleConnectivityChange = this._handleConnectivityChange.bind(this)
   }
   componentWillMount() {
+    this.listenTo(Store, 'handleEvent');
     this._pressHandler = debounce(this._pressHandler, 500, true)
     if (Linking && !isAndroid)
       Linking.addEventListener('url', this._handleOpenURL);
@@ -130,12 +131,10 @@ class TimHome extends Component {
         this._handleOpenURL({url});
 
       const checkConnected = NetInfo ? NetInfo.isConnected.fetch() : Q(true)
-
       checkConnected().then(isConnected => {
         let firstRoute = this.props.navigator.getCurrentRoutes()[0]
         firstRoute.isConnected = isConnected
       })
-
     })
     .catch((e) => {
       debugger
@@ -550,7 +549,7 @@ class TimHome extends Component {
     // var cTop = h / 4
 
     var thumb = width > 400
-              ? { width: width / 2.2, height: width / 2.2 }
+              ? { width: width / 2, height: width / 2 }
               : styles.thumb
               // <Progress.CircleSnail color={'white'} size={70} thickness={5}/>
 
@@ -592,7 +591,7 @@ class TimHome extends Component {
                 {version}
               </View>
 
-    let hh = (height / 2) - (Platform.OS === 'ios' ? 280 : 240)
+    let hh =  height > 1000 ? 100 : ((height / 2) - (Platform.OS === 'ios' ? 280 : 240))
     // let hh = height - 300
     let left = (width - 300) / 2
     let logo = <View style={[styles.container]}>
@@ -632,7 +631,7 @@ class TimHome extends Component {
                 </View>
 
     return (
-      <View style={styles.scroll}>
+      <View style={{flex: 1}}>
         <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width, height}} />
         {regView}
         { utils.getMe()

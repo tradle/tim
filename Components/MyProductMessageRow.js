@@ -11,8 +11,6 @@ var equal = require('deep-equal')
 
 var reactMixin = require('react-mixin');
 
-const MY_PRODUCT = 'tradle.MyProduct'
-
 import {
   Image,
   StyleSheet,

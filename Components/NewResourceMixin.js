@@ -543,12 +543,18 @@ var NewResourceMixin = {
     //        : ''
     // let paddingBottom = 20
     let lStyle = styles.labelStyle
+
     if (params.prop.ref  &&  params.prop.ref === constants.TYPES.MONEY  &&  !params.required) {
-      let maxChars = (utils.dimensions(component).width - 60)/10
+      let maxChars = (utils.dimensions(component).width - 60)/utils.getFontSize(9)
       // let some space for wrapping
       if (maxChars < label.length)
         lStyle = [styles.labelStyle, {marginTop: 0}]
     }
+    // else  if (!params.value) {
+    //   let maxChars = (utils.dimensions(component).width)/utils.getFontSize(9)
+    //   if (maxChars < label.length)
+    //     label = label.substring(0, maxChars) + '...'
+    // }
 
     if (this.state.isRegistration)
       lStyle = [lStyle, {color: '#eeeeee'}]
@@ -591,7 +597,7 @@ var NewResourceMixin = {
     return error
   },
   myBooleanTemplate(params) {
-    var labelStyle = {color: '#cccccc', fontSize: 18};
+    var labelStyle = {color: '#aaaaaa', fontSize: 18};
     var textStyle =  {marginTop: 5, color: this.state.isRegistration ? '#ffffff' : '#000000', fontSize: 18};
 
     let prop = params.prop
@@ -626,7 +632,7 @@ var NewResourceMixin = {
         }>
           <View style={styles.booleanContainer}>
             <View style={styles.booleanContentStyle}>
-              <Text style={[style, doWrap ? {flexWrap: 'wrap', width: (utils.dimensions(component).width - 100)} : {}]}>{label}</Text>
+              <Text style={[style, { width: (utils.dimensions(component).width - 100)} : {}]}>{label}</Text>
               <Switch onValueChange={value => this.onChangeText(prop, value)} value={value} onTintColor={LINK_COLOR} />
             </View>
           </View>
@@ -1323,7 +1329,7 @@ var styles= StyleSheet.create({
     paddingBottom: 5,
     marginTop: 5,
     borderWidth: 1,
-    borderColor: '#f7f7f7',
+    borderColor: 'transparent',
     borderBottomColor: '#cccccc',
     alignItems: 'flex-start',
     justifyContent: 'center'

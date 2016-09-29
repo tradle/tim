@@ -22,7 +22,6 @@ import { makeResponsive } from 'react-native-orient'
 
 var reactMixin = require('react-mixin');
 
-const VERIFICATION_BG = '#FBFFE5' //'#F6FFF0';
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_ERROR = 'tradle.FormError'
 const FORM = 'tradle.Form'
@@ -86,20 +85,16 @@ class MessageRow extends Component {
     let isConfirmation = ret ? ret.isConfirmation : null
     var isFormError = resource[constants.TYPE] === FORM_ERROR
 
-    let isNewProduct = ret ? ret.isNewProduct : null
-    if (isNewProduct) {
-      if (to  &&  to.photos) {
-        var uri = utils.getImageUri(to.photos[0].url);
-        ownerPhoto = <Image source={{uri: uri}} style={styles.msgImage} />
-        hasOwnerPhoto = true;
-        isMyMessage = false
-      }
-    }
     var photoUrls = [];
     var photoListStyle = {height: 3};
     var addStyle, inRow;
-    var noMessage = !resource.message  ||  !resource.message.length;
+
+    var isProductApplication = model.id === PRODUCT_APPLICATION
+    let message = isProductApplication ? ret.message : resource.message
+
+    var noMessage = !message  ||  !message.length;
     var isSimpleMessage = resource[constants.TYPE] === constants.TYPES.SIMPLE_MESSAGE
+
     var isForgetting = model.id === constants.TYPES.FORGET_ME || model.id === constants.TYPES.FORGOT_YOU
     if (!renderedRow.length) {
       var vCols = noMessage ? null : utils.getDisplayName(resource, model.properties);
@@ -120,10 +115,12 @@ class MessageRow extends Component {
         if (isConfirmation)
           addStyle = [styles.verificationBody, {borderColor: '#cccccc', backgroundColor: this.props.bankStyle.CONFIRMATION_BG}, styles.myConfCell]
         else {
-          if (isSimpleMessage && resource.message.length < 30)
+          if (isSimpleMessage && message.length < 30)
             addStyle = [styles.verificationBody, {borderColor: isFormError ? this.props.bankStyle.REQUEST_FULFILLED : '#efefef', backgroundColor: '#ffffff', borderTopLeftRadius: 0}];
-          else
-            addStyle = [styles.verificationBody, {flex: 1, borderColor: isFormError ? this.props.bankStyle.REQUEST_FULFILLED : '#efefef', backgroundColor: '#ffffff', borderTopLeftRadius: 0}];
+          else {
+            let borderColor = isFormError ? this.props.bankStyle.REQUEST_FULFILLED : '#efefef'
+            addStyle = [styles.verificationBody, {flex: 1, borderColor: borderColor, backgroundColor: '#ffffff', borderTopLeftRadius: 0}];
+          }
 
         }
       }
@@ -182,9 +179,8 @@ class MessageRow extends Component {
     var sendStatus = <View />
     // HACK that solves the case when the message is short and we don't want it to be displayed
     // in a bigger than needed bubble
-    let message
-    if (resource.message) {
-      let parts = utils.splitMessage(resource.message)
+    if (message  &&  !isProductApplication) {
+      let parts = utils.splitMessage(message)
       if (parts.length == 2)
         message = parts[0].length > parts[1].length ? parts[0] : parts[1]
       else
@@ -199,28 +195,30 @@ class MessageRow extends Component {
       }
     }
     // HACK
-    let numberOfCharsInWidth = msgWidth / 10
+    let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
     let longMessage = isSimpleMessage  &&  message ? numberOfCharsInWidth < message.length : false
     if (showMessageBody) {
-      var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? (isNewProduct ? 'center' : 'flex-end') : 'flex-start'};
-      if (resource.message) {
-        if (resource.message.charAt(0) === '['  ||  longMessage)
+      var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
+      if (message) {
+        if (message.charAt(0) === '['  ||  longMessage)
           viewStyle.width = msgWidth; //isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
       }
       if (!isSimpleMessage)
-        viewStyle.width =  message ? Math.min(msgWidth, message.length * 9 + 40) : msgWidth
+        viewStyle.width =  message ? Math.min(msgWidth, message.length * utils.getFontSize(10) + 40) : msgWidth
 
 
       if (this.props.sendStatus  &&  this.props.sendStatus !== null) {
         switch (this.props.sendStatus) {
         case 'Sent':
           sendStatus = <View style={styles.sendStatus}>
-                         <Text style={{fontSize: 14, color: '#009900', marginRight: 3}}>{this.props.sendStatus}</Text>
+                         <Text style={styles.sendStatusText}>{this.props.sendStatus}</Text>
                          <Icon name={'ios-checkmark-outline'} size={15} color='#009900' />
                        </View>
           break
         default:
-          sendStatus = <Text style={{alignSelf: 'flex-end', fontSize: 14, color: '#757575', marginHorizontal: 5, paddingBottom: 20}}>{this.props.sendStatus}</Text>
+          sendStatus = <View style={styles.sendStatus}>
+                        <Text style={styles.sendStatusDefaultText}>{this.props.sendStatus}</Text>
+                      </View>
           break
         }
       }
@@ -253,8 +251,7 @@ class MessageRow extends Component {
                   </View>
                 : <View />
               }
-
-                {renderedRow}
+              {renderedRow}
              </View>
              {sealedStatus}
             </View>
@@ -396,14 +393,13 @@ class MessageRow extends Component {
     // formModel = formModel.value;
     var vtt = [];
     var cnt = 0;
-    var self = this;
     var chatOrg = this.props.to[constants.TYPE] === constants.TYPES.ORGANIZATION  &&  utils.getId(this.props.to)
     for (var t in  this.props.shareableResources) {
       if (t === formModel.id) {
         var ver = this.props.shareableResources[t];
         var r = ver[0]
         var totalShareables = ver.length
-        ver.forEach(function(r) {
+        ver.forEach((r) => {
           if (entries  &&  (entries.indexOf(utils.getId(r.document)) !== -1  ||  entries.indexOf(r.document[constants.NONCE]) !== -1))
             return
           // if (chatOrg  &&  utils.getId(r.organization) === chatOrg) {
@@ -412,9 +408,9 @@ class MessageRow extends Component {
           // }
           // if (!cnt) {x
             var vModel = utils.getModel(r[constants.TYPE]);
-            var doc = self.formatDocument(formModel, r, null, totalShareables > 1);
+            var doc = this.formatDocument(formModel, r, null, totalShareables > 1);
             if (cnt) {
-              doc = <View key={self.getNextKey()}>
+              doc = <View key={this.getNextKey()}>
                       <View style={{height: 1, backgroundColor: '#dddddd'}} />
                       {doc}
                     </View>
@@ -544,21 +540,21 @@ class MessageRow extends Component {
     var resource = this.props.resource;
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
 
-    var isProductApplication = model.id === PRODUCT_APPLICATION
-    if (isProductApplication) {
+    if (model.id === PRODUCT_APPLICATION) {
       let msgModel = utils.getModel(resource.product).value
-      let color = {color: LINK_COLOR, fontWeight: '400', fontSize: 18}
-
-
+      let str = !this.props.navigator.isConnected  &&  this.props.isLast
+              ? translate('noConnectionForNewProduct', utils.getMe().firstName, translate(msgModel))
+              : translate('newProductMsg', translate(msgModel))
       let msg = !this.props.navigator.isConnected  &&  this.props.isLast
               ? <View key={this.getNextKey()}>
-                  <Text style={[styles.resourceTitle, {color: '#FF6D0D'}]}>{translate('noConnectionForNewProduct', utils.getMe().firstName, translate(msgModel))}</Text>
+                  <Text style={[styles.resourceTitle, {color: '#ffffff'}]}>{str}</Text>
                 </View>
-              : <View key={this.getNextKey()}>
-                  <Text style={[styles.resourceTitle, {color: '#757575'}]}>{translate('newProductMsg', utils.getMe().firstName, translate(msgModel))}</Text>
-                </View>
+              :   <View key={this.getNextKey()} style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                    <Text style={[styles.resourceTitle, {color: '#ffffff', paddingRight: 10}]}>{str}</Text>
+                    <Icon name='ios-notifications-outline' size={25} color='#ffffff'/>
+                  </View>
       renderedRow.push(msg);
-      return {isNewProduct: true}
+      return ({message: str})
     }
     var isProductList = model.id === constants.TYPES.PRODUCT_LIST
     if (isProductList) {
@@ -784,7 +780,7 @@ class MessageRow extends Component {
     // if (s.length === 2)
     //   onPressCall = this.editForm.bind(self, msgParts[1], msgParts[0])
     let sameFormRequestForm
-    if (!resource.documentCreated  &&  resource.product) {
+    if (!resource.documentCreated  &&  resource.product  &&  form.subClassOf !== MY_PRODUCT) {
       let multiEntryForms = utils.getModel(resource.product).value.multiEntryForms
       if (multiEntryForms  &&  multiEntryForms.indexOf(form.id) !== -1) {
         let productToForms = this.props.productToForms
@@ -941,8 +937,8 @@ var styles = StyleSheet.create({
   resourceTitle: {
     // flex: 1,
     fontSize: 18,
-    fontWeight: '400',
-    marginBottom: 2,
+    // fontWeight: '400',
+    // marginBottom: 2,
   },
   date: {
     flex: 1,
@@ -1025,8 +1021,8 @@ var styles = StyleSheet.create({
   assistentBox: {
     backgroundColor: '#efefef',
     paddingVertical: 5,
-    borderRadius: 5,
-    borderTopLeftRadius: 0,
+    // borderRadius: 5,
+    borderTopRightRadius: 10,
     paddingHorizontal: 7,
     marginTop: -7,
     marginHorizontal: -7
@@ -1050,8 +1046,18 @@ var styles = StyleSheet.create({
   sendStatus: {
     alignSelf: 'flex-end',
     flexDirection: 'row',
-    marginHorizontal: 5,
-    marginTop: -5
+    backgroundColor: 'transparent',
+    marginTop: -3
+  },
+  sendStatusText: {
+    fontSize: 14,
+    color: '#009900',
+    marginRight: 3
+  },
+  sendStatusDefaultText: {
+    fontSize: 14,
+    alignSelf: 'flex-end',
+    color: '#757575',
   },
   sealedStatus: {
     // alignSelf: 'flex-end',
@@ -1092,6 +1098,20 @@ var styles = StyleSheet.create({
   multiEntryText: {
     fontSize: 18
   },
+  msgImage: {
+    height: 30,
+    marginRight: 3,
+    marginLeft: 0,
+    width: 30,
+    borderRadius: 15,
+    borderColor: '#cccccc',
+    borderWidth: 1
+  },
+  productAppIcon: {
+    alignSelf: 'flex-end',
+    marginTop: -30,
+    backgroundColor: 'transparent'
+  }
   // viewStyle: {
   //   flexDirection: 'row',
   //   alignSelf: 'flex-start',

@@ -556,7 +556,7 @@ var NavigationBarRouteMapper = {
           // if (route.passProps.resource.organization  &&  route.passProps.resource.organization.photo)
           //   org = <Image source={{uri: route.passProps.resource.organization.photo}} style={styles.orgImage} />
           // if (route.passProps.resource.organization)
-        org = <Text style={style}> - {route.passProps.resource.organization.title}</Text>
+      org = <Text style={style}> - {route.passProps.resource.organization.title}</Text>
     else
       org = <View />;
 

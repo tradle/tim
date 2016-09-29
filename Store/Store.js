@@ -39,13 +39,15 @@ var ENV = Platform.OS !== 'ios' ? require('../environment.json') : require('reac
 
 var voc = require('@tradle/models');
 var sampleData = voc.data
+var currencies = voc.currencies
+var nationalities = voc.nationalities
 
 // var myIdentity = __DEV__ ? require('../data/myIdentity.json') : []
 var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
-var Keychain = !utils.isWeb() && require('../utils/keychain')
+var Keychain = null //!utils.isWeb() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('q-level');
 var leveldown = require('./leveldown')
@@ -127,7 +129,7 @@ const TLSClient = require('sendy-axolotl')
 //   }
 // })
 
-const SENDY_OPTS = { resendInterval: 2000, mtu: 10000, autoConnect: true }
+const SENDY_OPTS = { resendInterval: 30000, mtu: 10000, autoConnect: true }
 // const newOTRSwitchboard = require('sendy-otr-ws').Switchboard
 const newSwitchboard = SendyWS.Switchboard
 const WebSocketClient = SendyWS.Client
@@ -271,9 +273,6 @@ var Store = Reflux.createStore({
     this.isConnected = isConnected
     this.trigger({action: 'connectivity', isConnected: isConnected})
     // Alert.alert('Store: ' + isConnected)
-    // this.setState({
-    //   isConnected,
-    // });
   },
 
   getMe() {
@@ -523,7 +522,7 @@ var Store = Reflux.createStore({
       // this timeout is not for sending the entire message
       // but rather an idle connection timeout
       messenger.send(identifier, msg, cb)
-      messenger.setTimeout(20000)
+      messenger.setTimeout(60000)
     }
 
     // meDriver = timeFunctions(meDriver)
@@ -574,23 +573,27 @@ var Store = Reflux.createStore({
   filterChatMessages(messages, orgId, lastId) {
     let meId = utils.getId(me)
     let productToForms = {}
+    let productApp = {}
     // Compact all FormRequests that were fulfilled
     for (let i=messages.length - 1; i>=0; i--) {
       let r = list[messages[i].id].value
-      if (r[TYPE] !== FORM_REQUEST)
-        continue
-
-      if (!r.document) {// && r.documentCreated)
+      if (r[TYPE] === FORM_REQUEST  &&  !r.document) {// && r.documentCreated)
       // delete list[id]
         let forms = productToForms[r.product]
         if (!forms)
           productToForms[r.product] = {}
         let formIdx = productToForms[r.product][r.form]
-        if (typeof formIdx !== 'undefined') {
-          list[messages[formIdx]]
+        if (typeof formIdx !== 'undefined')
           messages.splice(formIdx, 1)
-        }
+
         productToForms[r.product][r.form] = i
+      }
+      if (r[TYPE] === PRODUCT_APPLICATION) {
+        let productIdx = productApp[r.product]
+        if (productIdx)
+          messages.splice(productIdx, 1)
+        else
+          productApp[r.product] = i
       }
     }
     // Compact all SelfIntroduction
@@ -1201,9 +1204,6 @@ var Store = Reflux.createStore({
         .filter(r => r.state === 'fulfilled')
         .map(r => r.value)
     })
-    .catch((err) => {
-      debugger
-    })
   },
   addInfo(sp, url) {
     var self = this
@@ -1463,7 +1463,7 @@ var Store = Reflux.createStore({
         }
       }
     }
-    // else if (r[TYPE] === CUSTOMER_WAITING) {
+    let isCustomerWaiting = r[TYPE] === CUSTOMER_WAITING
     //   if (!this.isConnected) {
     //     let result = this.searchMessages({modelName: PRODUCT_LIST, to: toOrg})
     //     firstTime = !result  ||  !result.length
@@ -1500,11 +1500,21 @@ var Store = Reflux.createStore({
       hash = list[utils.getId(r.to)].value[ROOT_HASH]
     var toId = IDENTITY + '_' + hash
 
-    // var isServiceMessage = rr[TYPE] === 'tradle.ServiceMessage'
+    var noCustomerWaiting
     return meDriver.sign({ object: toChain })
     .then(function(result) {
       toChain = result.object
       tmpKey = rr[ROOT_HASH] = result.sig
+
+      if (r[TYPE] === PRODUCT_APPLICATION) {
+        let params = {
+          action: 'addItem',
+          resource: rr,
+          sendStatus:  (self.isConnected) ? 'Sending' : 'Queued'
+        }
+        self.trigger(params)
+      }
+
       if (!isWelcome) {
         let len = batch.length
         self.addLastMessage(r, batch)
@@ -1523,7 +1533,8 @@ var Store = Reflux.createStore({
       // welcomeMessage = {}
       if (me.txId)
         return
-
+      // Avoid sending CustomerWaiting request after SelfIntroduction or IdentityPublishRequest to
+      // prevent the not needed duplicate expensive operations for obtaining ProductList
       return self.getDriver(me)
       .then(function () {
         if (/*!self.isConnected  || */ publishRequestSent[orgId])
@@ -1537,6 +1548,8 @@ var Store = Reflux.createStore({
           return
         publishRequestSent[orgId] = true
         if (!status.watches.link  &&  !status.link) {
+          if (isCustomerWaiting)
+            noCustomerWaiting = true
           return self.publishMyIdentity(orgRep)
         }
         else {
@@ -1555,6 +1568,8 @@ var Store = Reflux.createStore({
             from: me,
             to: r.to
           }
+          if (isCustomerWaiting)
+            noCustomerWaiting = true
           return self.onAddMessage(msg)
         }
       })
@@ -1586,25 +1601,19 @@ var Store = Reflux.createStore({
         return self.getDriver(me)
     })
     .then(function() {
+      // SelfIntroduction or IdentityPublishRequest were just sent
+      if (noCustomerWaiting)
+        return
       if (list[toId].value.pubkeys) {
-        // if (publishRequestSent)
-        //    return
-        // if (r[TYPE] !== CUSTOMER_WAITING) {
         let sendParams = self.packMessage(r, toChain)
         const method = toChain[SIG] ? 'send' : 'signAndSend'
-        // return meDriver[method]({
-        //   object: toChain,
-        //   to: { fingerprint: self.getFingerprint(list[toId].value) }
-        // })
         return meDriver[method](sendParams)
         .catch(function (err) {
           debugger
         })
       }
-    // }
     })
     .then(function(result) {
-      const data = utils.toOldStyleWrapper(result.message)
       if (!requestForForm  &&  isWelcome)
         return
       if (isWelcome  &&  utils.isEmpty(welcomeMessage))
@@ -1619,6 +1628,7 @@ var Store = Reflux.createStore({
       delete list[rr[TYPE] + '_' + tmpKey]
 
       // saving the new message
+      const data = utils.toOldStyleWrapper(result.message)
       if (data)  {
         rr[ROOT_HASH] = data[ROOT_HASH]
         rr[CUR_HASH] = data[CUR_HASH]
@@ -3129,7 +3139,7 @@ var Store = Reflux.createStore({
             foundResources.push(r)
             // for Loading earlier resources we don't need to check limit untill we get to the lastId
             if (limit  &&  foundResources.length === limit)
-              return foundResources.reverse()
+              break
           }
 
           continue;
@@ -3195,7 +3205,7 @@ var Store = Reflux.createStore({
         // foundResources[key] = msg;
         foundResources.push(msg)
         if (limit  &&  foundResources.length === limit)
-          return foundResources.reverse()
+          break
 
         continue;
       }
@@ -3211,7 +3221,7 @@ var Store = Reflux.createStore({
         foundResources.push(this.fillMessage(r))
 
         if (limit  &&  foundResources.length === limit)
-          return foundResources.reverse()
+          break
       }
     }
     if (!foundResources.length)
@@ -4236,7 +4246,7 @@ var Store = Reflux.createStore({
       meDriver.on('sent', function (msg) {
         const obj = utils.toOldStyleWrapper(msg)
         var model = self.getModel(obj[TYPE]).value
-        if (model.subClassOf === FORM) {
+        if (model.subClassOf === FORM  ||  model.id === PRODUCT_APPLICATION) {
           var r = list[obj[TYPE] + '_' + obj[ROOT_HASH]]
           if (r)
             self.trigger({action: 'updateItem', sendStatus: 'Sent', resource: r.value})
@@ -4786,17 +4796,8 @@ var Store = Reflux.createStore({
         else
           sameContactList[p] = p
       }
-      if (!utils.isEmpty(list)) {
-        sampleData.getResources().forEach(function(r) {
-          if (!r[ROOT_HASH])
-            r[ROOT_HASH] = sha(r)
-
-          r[CUR_HASH] = r[ROOT_HASH]
-          let id = utils.getId(r)
-          if (!list[id])
-            self._setItem(id, r)
-        })
-      }
+      if (!utils.isEmpty(list))
+        this.loadStaticData()
 
       for (var s in sameContactList)
         delete orgContacts[s]
@@ -4879,14 +4880,24 @@ var Store = Reflux.createStore({
           return
         data.value.forEach(function(r) {
           r = utils.toOldStyleWrapper(r)
-          delete r.id
           var rId = utils.getId(r)
-          if (!list[rId]) {
-            let arr = rId.split('_')
-            // self.deleteMessageFromChat(orgId, {[TYPE]: arr[0], [ROOT_HASH]: arr[1]})
-            return
+          var res = list[rId] && list[rId].value
+          if (!res) {
+            let idx = r[TYPE].indexOf('Confirmation')
+            if (idx === -1)
+              return
+            let realProductType = r[TYPE].substring(0, r[TYPE].length - 'Confirmation'.length)
+            let m = utils.getModel(realProductType)
+            if (!m  ||  m.value.subClassOf !== FINANCIAL_PRODUCT)
+              return
+            // This is confirmation for getting the product
+            rId = SIMPLE_MESSAGE + '_' +  r[ROOT_HASH]
+            res = list[rId]
+            if (!res)
+              return
+            res = res.value
+            r = res
           }
-          var res = list[rId].value
           var isVerification = r[TYPE] === VERIFICATION
           var model = self.getModel(r[TYPE]).value
           var isForm = !isVerification  &&  model.subClassOf === FORM
@@ -5080,12 +5091,24 @@ var Store = Reflux.createStore({
     .then((results) => {
       if (noTrigger)
         return
-      var result = this.searchMessages({to: resource, modelName: MESSAGE});
+      // var result = this.searchMessages({to: resource, modelName: MESSAGE});
+      msg[ROOT_HASH] = results[0].object.permalink
       msg.message = translate('inProgress')
-      msg.from = this.buildRef(resource)
+      // reverse to and from to display as from assistent
+      msg.from = this.buildRef(list[PROFILE + '_' + results[0].message.recipient].value)
       msg.to = this.buildRef(me)
-      msg.id = sha(msg)
-      result.push(msg)
+
+      let mId = utils.getId(msg)
+      list[mId] = {
+        key: mId,
+        value: msg
+      }
+      let batch = []
+
+      this.addMessagesToChat(utils.getId(rId), msg)
+
+      batch.push({type: 'put', key: mId, value: msg})
+      // result.push(msg)
       this.trigger({action: 'addMessage', to: resource, resource: msg})
 
       resource.lastMessage = translate('requestedForgetMe')
@@ -5093,7 +5116,8 @@ var Store = Reflux.createStore({
       resource.lastMessageType = FORGET_ME
       this.trigger({action: 'list', list: this.searchNotMessages({modelName: ORGANIZATION}), forceUpdate: true})
 
-      db.put(rId, resource)
+      batch.push({type: 'put', key: rId, value: resource})
+      db.batch(batch)
     })
     .catch(function (err) {
       debugger
@@ -5469,21 +5493,31 @@ var Store = Reflux.createStore({
         }
       });
     }
-    sampleData.getResources().forEach(function(r) {
-      if (!r[ROOT_HASH])
-        r[ROOT_HASH] = sha(r);
-
-      r[CUR_HASH] = r[ROOT_HASH];
-      var key = utils.getId(r)
-      self._setItem(key, r)
-    });
-
+    this.loadStaticData()
     return self.loadMyResources()
-          // .then(self.loadAddressBook)
-          .catch(function(err) {
-            err = err;
-          });
   },
+  loadStaticData() {
+    sampleData.getResources().forEach((r) => {
+      this.loadStaticItem(r)
+    });
+    currencies.forEach((r) => {
+      this.loadStaticItem(r)
+    })
+    nationalities.forEach((r) => {
+      this.loadStaticItem(r)
+    })
+  },
+
+  loadStaticItem(r) {
+    if (!r[ROOT_HASH])
+      r[ROOT_HASH] = sha(r)
+
+    r[CUR_HASH] = r[ROOT_HASH]
+    let id = utils.getId(r)
+    if (!list[id])
+      this._setItem(id, r)
+  },
+
   loadModels() {
     var self = this
     var batch = [];

@@ -627,8 +627,10 @@ class NewResource extends Component {
     var self = this;
     ImagePicker.showImagePicker({
       returnIsVertical: true,
+      quality: 0.4,
       chooseFromLibraryButtonTitle: utils.isSimulator() || prop._allowPicturesFromLibrary ? 'Choose from Library' : null,
-      takePhotoButtonTitle: utils.isSimulator() ? null : 'Take Photo…'
+      takePhotoButtonTitle: utils.isSimulator() ? null : 'Take Photo…',
+      quality: utils.imageQuality
     }, (response) => {
       if (response.didCancel)
         return;
@@ -750,24 +752,17 @@ class NewResource extends Component {
     var button = this.state.isRegistration
                ? <View>
                    <TouchableHighlight style={styles.thumbButton}
-                        underlayColor='transparent' onPress={this.onSavePressed.bind(this)}>
+                        underlayColor='transparent' onPress={() => {
+                          if (this.state.termsAccepted)
+                            this.onSavePressed()
+                          else
+                            this.showTermsAndConditions()
+                        }}>
                       <View style={styles.getStarted}>
                          <Text style={styles.getStartedText}>ENTER</Text>
                       </View>
                    </TouchableHighlight>
-                   <TouchableHighlight underlayColor='transparent' style={{flexDirection: 'row', alignSelf: 'center', paddingTop: 7}} onPress={() => {
-                      this.props.navigator.push({
-                        id: 3,
-                        component: ResourceView,
-                        title: translate('termsAndConditions'),
-                        backButtonTitle: translate('back'),
-                        rightButtonTitle: translate('Accept'),
-                        passProps: {
-                          resource: termsAndConditions,
-                          action: this.acceptTsAndCs.bind(this)
-                        }
-                     })
-                   }}>
+                   <TouchableHighlight underlayColor='transparent' style={{flexDirection: 'row', alignSelf: 'center', paddingTop: 7}} onPress={this.showTermsAndConditions.bind(this)}>
                      <View style={{flexDirection: 'row'}}>
                        <Text style={{fontSize: 16, color: '#A6DBF5'}}>{translate('acceptTermsAndConditions')}</Text>
                      </View>
@@ -775,7 +770,7 @@ class NewResource extends Component {
                  </View>
                : <View style={{height: 0}} />
     var formStyle = this.state.isRegistration
-                  ? {justifyContent: 'center', height: height - 100}
+                  ? {justifyContent: 'center', height: height - (height > 1000 ? 0 : 100)}
                   : {justifyContent: 'flex-start'}
     var content =
       <ScrollView style={style}
@@ -792,13 +787,12 @@ class NewResource extends Component {
             <View style={{marginTop: this.state.isRegistration ? 0 : -10}}>
               {arrayItems}
              </View>
-            {
-             this.state.isLoadingVideo
-             ? <View style={{alignItems: 'center', marginTop: 50}}>
-                <ActivityIndicator animating={true} size='large' color='#ffffff'/>
+              <View style={{alignItems: 'center', marginTop: 50}}>
+               {this.state.isLoadingVideo
+                    ? <ActivityIndicator animating={true} size='large' color='#ffffff'/>
+                    : <View/>
+                 }
               </View>
-             : <View/>
-            }
           </View>
         </View>
       </ScrollView>
@@ -830,18 +824,31 @@ class NewResource extends Component {
       </View>
     )
   }
+  showTermsAndConditions() {
+    this.props.navigator.push({
+      id: 3,
+      component: ResourceView,
+      title: translate('termsAndConditions'),
+      backButtonTitle: translate('back'),
+      rightButtonTitle: translate('Accept'),
+      passProps: {
+        resource: termsAndConditions,
+        action: this.acceptTsAndCs.bind(this)
+      }
+   })
+  }
   acceptTsAndCs() {
-    Alert.alert(
-      translate('acceptingTermsAndConditions'),
-      null,
-      [
-        {text: 'Cancel', onPress: () => console.log('Canceled!')},
-        {text: 'Ok', onPress: () => {
+    // Alert.alert(
+    //   translate('acceptingTermsAndConditions'),
+    //   null,
+    //   [
+    //     {text: 'Cancel', onPress: () => console.log('Canceled!')},
+    //     {text: 'Ok', onPress: () => {
           this.props.navigator.pop()
           this.setState({termsAccepted: true})
-        }},
-      ]
-    )
+    //     }},
+    //   ]
+    // )
   }
 
   cancelItem(pMeta, item) {

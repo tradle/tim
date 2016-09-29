@@ -113,7 +113,7 @@ class ProductChooser extends Component {
     if (model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT) {
       msg[constants.TYPE] = PRODUCT_APPLICATION
       msg.product = model.id // '[application for](' + model.id + ')',
-      utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg, true, true))
+      utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg, false, true))
     }
     else {
       msg[constants.TYPE] =  FORM_REQUEST,
