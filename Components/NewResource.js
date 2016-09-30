@@ -1010,6 +1010,7 @@ class NewResource extends Component {
                             {itemsArray}
                           </TouchableHighlight>
                        : <ImageInput
+                           prop={bl}
                            style={[{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]}
                            underlayColor='transparent'
                            onImage={item => this.onAddItem(bl.name, item)}>
@@ -1023,7 +1024,9 @@ class NewResource extends Component {
         <View style={[istyle, {marginHorizontal: 10}]} ref={bl.name}>
           <View style={styles.items}>
             {actionableItem}
-            <ImageInput underlayColor='transparent' style={[{flex: 1, position: 'absolute', right: 0}, count ? {marginTop: 15} : {marginTop: 15, paddingBottom: 7}]}
+            <ImageInput
+                prop={bl}
+                underlayColor='transparent' style={[{flex: 1, position: 'absolute', right: 0}, count ? {marginTop: 15} : {marginTop: 15, paddingBottom: 7}]}
                 onImage={item => this.onAddItem(bl.name, item)}>
               {counter}
             </ImageInput>
