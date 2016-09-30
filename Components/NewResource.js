@@ -980,6 +980,7 @@ class NewResource extends Component {
       </View>
     );
   }
+
   getPhotoItem(bl, styles) {
     let meta = this.props.model
     let resource = this.state.resource

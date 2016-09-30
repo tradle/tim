@@ -1132,6 +1132,36 @@ var utils = {
   imageQuality: 0.2,
   restartApp: function () {
     return NativeModules.CodePush.restartApp(false)
+  },
+  readFile: Platform.OS == 'web' && function readFile (file, cb) {
+    var reader  = new FileReader();
+    reader.addEventListener('load', function () {
+      cb(null, reader.result)
+    }, false)
+
+    reader.addEventListener('error', cb)
+    reader.readAsDataURL(file)
+  },
+
+  readImage: Platform.OS == 'web' && function readImage (file, cb) {
+    utils.readFile(file, function (err, dataUrl) {
+      var image = new window.Image()
+      image.addEventListener('error', function (err) {
+        if (!err) err = new Error('failed to load image')
+
+        cb(err)
+      })
+
+      image.addEventListener('load', function () {
+        cb(null, {
+          url: dataUrl,
+          width: image.width,
+          height: image.height
+        })
+      })
+
+      image.src = dataUrl
+    })
   }
 }
 
