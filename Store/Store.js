@@ -4244,8 +4244,9 @@ var Store = Reflux.createStore({
       meDriver.on('sent', function (msg) {
         const obj = utils.toOldStyleWrapper(msg)
         var model = self.getModel(obj[TYPE]).value
-        if (model.subClassOf === FORM  ||  model.id === PRODUCT_APPLICATION) {
-          var r = list[obj[TYPE] + '_' + obj[ROOT_HASH]]
+        var isForm = model.subClassOf === FORM
+        if (isForm  ||  model.id === PRODUCT_APPLICATION) {
+          var r = list[obj[TYPE] + '_' + obj[ROOT_HASH] + (isForm ? '_' +  obj[CUR_HASH] : '')]
           if (r)
             self.trigger({action: 'updateItem', sendStatus: 'Sent', resource: r.value})
           // var o = {}
@@ -4817,7 +4818,8 @@ var Store = Reflux.createStore({
       utils.setModels(models);
     })
     .then(() => {
-      this.initChats()
+      if (me && utils.isEmpty(chatMessages))
+        this.initChats()
     })
     .catch(err => {
       debugger
