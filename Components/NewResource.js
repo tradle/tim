@@ -26,7 +26,7 @@ var constants = require('@tradle/constants');
 var termsAndConditions = require('../termsAndConditions.json')
 
 import ImagePicker from 'react-native-image-picker';
-import FileInput from 'react-file-input'
+import ImageInput from './ImageInput'
 import CustomIcon from '../styles/customicons'
 var ENUM = 'tradle.Enum'
 var LINK_COLOR, DEFAULT_LINK_COLOR = '#a94442'
@@ -580,10 +580,10 @@ class NewResource extends Component {
     // }
     var resource = this.addFormValues();
     this.setState({resource: resource, err: ''});
-    if (bl.name === 'photos') {
-      this.showChoice(bl);
-      return;
-    }
+    // if (bl.name === 'photos') {
+    //   this.showChoice(bl);
+    //   return;
+    // }
     var blmodel = bl.items.ref ? utils.getModel(bl.items.ref).value : this.props.model
     if (bl.items.ref  &&  bl.allowToAdd) {
       this.props.navigator.push({
@@ -624,31 +624,31 @@ class NewResource extends Component {
       }
     });
   }
-  showChoice(prop) {
-    var self = this;
-    ImagePicker.showImagePicker({
-      returnIsVertical: true,
-      chooseFromLibraryButtonTitle: utils.isSimulator() || prop._allowPicturesFromLibrary ? 'Choose from Library' : null,
-      takePhotoButtonTitle: utils.isSimulator() ? null : 'Take Photo…',
-      quality: utils.imageQuality
-    }, (response) => {
-      if (response.didCancel)
-        return;
-      if (response.error) {
-        console.log('ImagePickerManager Error: ', response.error);
-        return
-      }
-      var item = {
-        // title: 'photo',
-        url: 'data:image/jpeg;base64,' + response.data,
-        isVertical: response.isVertical,
-        width: response.width,
-        height: response.height,
-        chooseFromLibraryButtonTitle: ''
-      };
-      self.onAddItem('photos', item);
-    });
-  }
+  // showChoice(prop) {
+  //   var self = this;
+  //   ImagePicker.showImagePicker({
+  //     returnIsVertical: true,
+  //     chooseFromLibraryButtonTitle: utils.isSimulator() || prop._allowPicturesFromLibrary ? 'Choose from Library' : null,
+  //     takePhotoButtonTitle: utils.isSimulator() ? null : 'Take Photo…',
+  //     quality: utils.imageQuality
+  //   }, (response) => {
+  //     if (response.didCancel)
+  //       return;
+  //     if (response.error) {
+  //       console.log('ImagePickerManager Error: ', response.error);
+  //       return
+  //     }
+  //     var item = {
+  //       // title: 'photo',
+  //       url: 'data:image/jpeg;base64,' + response.data,
+  //       isVertical: response.isVertical,
+  //       width: response.width,
+  //       height: response.height,
+  //       chooseFromLibraryButtonTitle: ''
+  //     };
+  //     self.onAddItem('photos', item);
+  //   });
+  // }
 
   render() {
     if (this.state.isUploading)
@@ -935,9 +935,13 @@ class NewResource extends Component {
                   <Text style={styles.errorText}>{errTitle}</Text>
                 </View>
               : <View/>
-    var actionableItem = utils.isWeb() && bl.name === 'photos'
-      ? this.renderImageFileInput(bl, meta, itemsArray)
-      : <TouchableHighlight style={[{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]} underlayColor='transparent'
+
+    var aiStyle = [{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]
+    var actionableItem = bl.name === 'photos'
+      ? <ImageInput prop={bl} style={aiStyle} onImage={item => this.onAddItem(bl.name, item)}>
+          {itemsArray}
+        </ImageInput>
+      : <TouchableHighlight style={aiStyle} underlayColor='transparent'
             onPress={this.onNewPressed.bind(this, bl, meta)}>
           {itemsArray}
         </TouchableHighlight>
@@ -952,18 +956,24 @@ class NewResource extends Component {
       istyle.push({paddingBottom: 0, height: count * height + 35})
     }
 
-    let cstyle = [{flex: 1, position: 'absolute', right: 0},
+    let acStyle = [{flex: 1, position: 'absolute', right: 0},
                    count || utils.isWeb() ? {paddingTop: 0} : {marginTop: 15, paddingBottom: 7}
                  ]
+    var actionableCounter = bl.name === 'photos'
+      ? <ImageInput prop={bl} style={acStyle} onImage={item => this.onAddItem(bl.name, item)}>
+          {counter}
+        </ImageInput>
+      : <TouchableHighlight underlayColor='transparent' style={acStyle}
+            onPress={this.onNewPressed.bind(this, bl, meta)}>
+          {counter}
+        </TouchableHighlight>
+
     return (
       <View key={this.getNextKey()}>
         <View style={[istyle, {marginHorizontal: 10}]} ref={bl.name}>
           <View style={styles.items}>
             {actionableItem}
-            <TouchableHighlight underlayColor='transparent' style={cstyle}
-                onPress={this.onNewPressed.bind(this, bl, meta)}>
-              {counter}
-            </TouchableHighlight>
+            {actionableCounter}
           </View>
         </View>
         {error}
@@ -1019,10 +1029,13 @@ class NewResource extends Component {
                            onPress={this.showItems.bind(this, bl, meta)}>
                             {itemsArray}
                           </TouchableHighlight>
-                       :  <TouchableHighlight style={[{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]} underlayColor='transparent'
-                              onPress={this.onNewPressed.bind(this, bl, meta)}>
-                            {itemsArray}
-                          </TouchableHighlight>
+                       : <ImageInput
+                           prop={bl}
+                           style={[{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]}
+                           underlayColor='transparent'
+                           onImage={item => this.onAddItem(bl.name, item)}>
+                           {itemsArray}
+                         </ImageInput>
 
     let istyle = count ? styles.photoButton : styles.itemButton
 
@@ -1031,36 +1044,15 @@ class NewResource extends Component {
         <View style={[istyle, {marginHorizontal: 10}]} ref={bl.name}>
           <View style={styles.items}>
             {actionableItem}
-            <TouchableHighlight underlayColor='transparent' style={[{flex: 1, position: 'absolute', right: 0}, count ? {marginTop: 15} : {marginTop: 15, paddingBottom: 7}]}
-                onPress={this.onNewPressed.bind(this, bl, meta)}>
+            <ImageInput underlayColor='transparent' style={[{flex: 1, position: 'absolute', right: 0}, count ? {marginTop: 15} : {marginTop: 15, paddingBottom: 7}]}
+                onImage={item => this.onAddItem(bl.name, item)}>
               {counter}
-            </TouchableHighlight>
+            </ImageInput>
           </View>
         </View>
         {error}
       </View>
     );
-  }
-
-  renderImageFileInput(bl, meta, itemsArray, style) {
-    const self = this
-    // style = [{flex: 7, fontSize: 18}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]
-        // style={style}
-    return (
-      <FileInput
-        name={bl.name}
-        placeholder={bl.title || bl.name}
-        onChange={e => {
-          readImage(e.target.files[0], function (err, item) {
-            if (err) return Alert.alert('Unable to process file', err.message)
-
-            self.onAddItem(bl.name, {
-              ...item,
-              isVertical: true
-            })
-          })
-        }} />
-    )
   }
 
   onEndEditing(prop, event) {

@@ -20,6 +20,7 @@ import {
 
 import React, { Component } from 'react'
 import platformStyles from '../styles/platform'
+import ImageInput from './ImageInput'
 
 class GridItemsList extends Component {
   props: {
@@ -43,11 +44,12 @@ class GridItemsList extends Component {
       props.navigator.popToRoute(props.returnRoute);
     }
 
+    this._onImage = this._onImage.bind(this)
   }
   shouldComponentUpdate(nextProps, nextState) {
     return nextState.err                         ||
            nextState.forceUpdate                 ||
-           nextState.show !== this.state.show    ||
+           // nextState.show !== this.state.show    ||
            this.state.list.length != nextState.list.length
   }
   cancelItem(item) {
@@ -71,10 +73,11 @@ class GridItemsList extends Component {
 
   render() {
     var m = utils.getModel(this.props.resource[constants.TYPE]).value
-    var buttons = [translate('addNew', m.properties[this.props.prop].title), translate('cancel')]
-
+    var prop = m.properties[this.props.prop]
+    var buttons = [translate('addNew', prop.title), translate('cancel')]
     let icon = Platform.OS === 'ios' ?  'md-add' : 'md-add'
-    let color = Platform.OS === 'ios' ? '#ffffff' : 'red'
+    let color = Platform.OS === 'android' ? 'red' : '#ffffff'
+    let actionSheet = this.renderActionSheet(buttons)
     return (
       <View style={styles.container}>
         <View style={{flex: 1}}>
@@ -82,66 +85,52 @@ class GridItemsList extends Component {
         </View>
 
         <View style={styles.footer}>
-          <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
+          <ImageInput
+            ref={input => this._imageInput = input}
+            prop={prop}
+            underlayColor='transparent'
+            onPress={utils.isWeb() ? null : () => this.ActionSheet.show()}
+            onImage={this._onImage}>
             <View style={platformStyles.menuButton}>
               <Icon name={icon}  size={33}  color={color} />
             </View>
-          </TouchableHighlight>
+          </ImageInput>
         </View>
-
-        <ActionSheet
-          ref={(o) => {
-            this.ActionSheet = o
-          }}
-          options={buttons}
-          cancelButtonIndex={buttons.length - 1}
-          onPress={(index) => {
-            if (index === 0)
-              this.showChoice()
-          }}
-        />
+        {actionSheet}
       </View>
     )
   }
+
+  renderActionSheet(buttons) {
+    if (utils.isWeb()) return
+
+    return (
+      <ActionSheet
+        ref={(o) => {
+          this.ActionSheet = o
+        }}
+        options={buttons}
+        cancelButtonIndex={buttons.length - 1}
+        onPress={(index) => {
+          if (index === 0) this._imageInput.showImagePicker()
+        }}
+      />
+    )
+  }
+
       // returnIsVertical: true,
       // chooseFromLibraryButtonTitle: __DEV__ ? 'Choose from Library' : null
-
-  showChoice() {
-    var self = this;
-    this.setState({show: false})
-    let options = { quality: utils.imageQuality }
-    let prop = utils.getModel(this.props.resource[constants.TYPE]).value.properties[this.props.prop]
-    if (!utils.isSimulator()  ||  __DEV__)
-      options.takePhotoButtonTitle = 'Take Photo…'
-    if (utils.isSimulator() || this.props.prop._allowPicturesFromLibrary)
-      options.chooseFromLibraryButtonTitle = 'Choose from Library'
-
-    ImagePicker.showImagePicker(options, (response) => {
-      if (response.didCancel)
-        return;
-      if (response.error) {
-        console.log('ImagePickerManager Error: ', response.error);
-        return
-      }
-      var item = {
-        // title: 'photo',
-        url: 'data:image/jpeg;base64,' + response.data,
-        isVertical: response.isVertical,
-        width: response.width,
-        height: response.height,
-        chooseFromLibraryButtonTitle: ''
-      };
-      let l = []
-      self.state.list.forEach((r) => {
-        let lr = {}
-        extend(lr, r)
-        l.push(lr)
-      })
-      l.push(item)
-      self.props.onAddItem('photos', item);
-      self.setState({list: l, forceUpdate: true})
-      // this.setState({resouce: resource})
-    });
+  _onImage(item) {
+    let l = []
+    this.state.list.forEach((r) => {
+      let lr = {}
+      extend(lr, r)
+      l.push(lr)
+    })
+    l.push(item)
+    this.props.onAddItem('photos', item);
+    this.setState({list: l, forceUpdate: true})
+    // this.setState({resouce: resource})
   }
 }
 

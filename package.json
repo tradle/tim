@@ -167,6 +167,7 @@
     "react-native-gesture-password": false,
     "./Components/PasswordCheck.js": false,
     "./Components/BackgroundImage.js": "./Components/BackgroundImage.web.js",
+    "./Components/ImageInput.js": "./Components/ImageInput.web.js",
     "./utils/push.js": "./web/shims/push.js"
   }
 }
