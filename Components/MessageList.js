@@ -8,6 +8,7 @@ var FormMessageRow = require('./FormMessageRow')
 var NoResources = require('./NoResources')
 var NewResource = require('./NewResource')
 var ProductChooser = require('./ProductChooser')
+var PageView = require('./PageView')
 var Icon = require('react-native-vector-icons/Ionicons')
 var utils = require('../utils/utils')
 var translate = utils.translate
@@ -508,8 +509,8 @@ class MessageList extends Component {
         handleSend={this.onSubmitEditing.bind(this)}
         submitOnReturn={true}
         menu={this.generateMenu.bind(this)}
-        keyboardShouldPersistTaps={true}
-        keyboardDismissMode={'on-drag'}
+        keyboardShouldPersistTaps={utils.isWeb() ? false : true}
+        keyboardDismissMode={utils.isWeb() ? 'none' : 'on-drag'}
         maxHeight={maxHeight} // 64 for the navBar; 110 - with SearchBar
       />
         // returnKeyType={false}
@@ -560,7 +561,7 @@ class MessageList extends Component {
                 ? [translate('formChooser'), translate('cancel')]
                 : [translate('forgetMe'), translate('cancel')]
     return (
-      <View style={[platformStyles.container, bgStyle]}>
+      <PageView style={[platformStyles.container, bgStyle]}>
         <NetworkInfoProvider connected={this.state.isConnected} resource={this.props.resource} />
         <View style={ sepStyle } />
         {content}
@@ -580,7 +581,7 @@ class MessageList extends Component {
           }}
         />
         {alert}
-      </View>
+      </PageView>
     );
         // {addNew}
   }
