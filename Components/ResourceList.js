@@ -6,6 +6,7 @@ var ResourceView = require('./ResourceView');
 var VerificationRow = require('./VerificationRow');
 var NewResource = require('./NewResource');
 var MessageList = require('./MessageList');
+var PageView = require('./PageView')
 var MessageView = require('./MessageView')
 import ActionSheet from 'react-native-actionsheet'
 var utils = require('../utils/utils');
@@ -832,13 +833,14 @@ class ResourceList extends Component {
           renderRow={this.renderRow.bind(this)}
           automaticallyAdjustContentInsets={false}
           removeClippedSubviews={false}
-          keyboardDismissMode='on-drag'
-          keyboardShouldPersistTaps={true}
-          initialListSize={10}
-          pageSize={20}
-          scrollRenderAhead={10}
+          keyboardDismissMode={utils.isWeb() ? 'none' : 'on-drag'}
+          keyboardShouldPersistTaps={utils.isWeb() ? false : true}
+          initialListSize={1000}
           showsVerticalScrollIndicator={false} />;
     }
+          // pageSize={20}
+          // scrollRenderAhead={10}
+          // initialListSize={10}
     var model = utils.getModel(this.props.modelName).value;
     var footer = this.renderFooter();
 
@@ -859,7 +861,7 @@ class ResourceList extends Component {
     }
 
     return (
-      <View style={platformStyles.container}>
+      <PageView style={platformStyles.container}>
         <NetworkInfoProvider connected={this.state.isConnected} />
         {searchBar}
         <View style={styles.separator} />
@@ -890,7 +892,7 @@ class ResourceList extends Component {
             }
           }}
         />
-      </View>
+      </PageView>
     );
   }
 
