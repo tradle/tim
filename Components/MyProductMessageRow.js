@@ -63,9 +63,10 @@ class MyProductMessageRow extends Component {
     renderedRow.push(<Text  key={this.getNextKey()} style={[styles.formType, {color: '#289427'}]}>{title}</Text>);
     rowStyle = addStyle ? [styles.textContainer, addStyle] : styles.textContainer
 
+    let width = utils.dimensions().width * 0.8
     let messageBody =
       <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
-        <View style={[styles.viewStyle, {marginRight: 50}]}>
+        <View style={[styles.viewStyle, {width: width}]}>
           {this.getOwnerPhoto()}
           <View style={rowStyle}>
             <View style={{flex: 1}}>
@@ -74,7 +75,6 @@ class MyProductMessageRow extends Component {
           </View>
         </View>
       </TouchableHighlight>
-
 
     var viewStyle = { margin: 1, paddingTop: 7} //, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR }
     return (
@@ -202,7 +202,7 @@ var styles = StyleSheet.create({
   formType: {
     color: '#EBFCFF',
     fontSize: 20,
-    fontWeight: '600',
+    // fontWeight: '600',
     opacity: 0.5,
     alignSelf: 'flex-end',
     marginTop: 10
