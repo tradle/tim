@@ -1044,7 +1044,9 @@ class NewResource extends Component {
         <View style={[istyle, {marginHorizontal: 10}]} ref={bl.name}>
           <View style={styles.items}>
             {actionableItem}
-            <ImageInput underlayColor='transparent' style={[{flex: 1, position: 'absolute', right: 0}, count ? {marginTop: 15} : {marginTop: 15, paddingBottom: 7}]}
+            <ImageInput
+                prop={bl}
+                underlayColor='transparent' style={[{flex: 1, position: 'absolute', right: 0}, count ? {marginTop: 15} : {marginTop: 15, paddingBottom: 7}]}
                 onImage={item => this.onAddItem(bl.name, item)}>
               {counter}
             </ImageInput>
