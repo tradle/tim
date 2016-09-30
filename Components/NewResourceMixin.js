@@ -648,7 +648,8 @@ var NewResourceMixin = {
     let hasValue = resource && resource[prop.name]
     if (resource && resource[prop.name]) {
       label = resource[prop.name].title
-      propLabel = <Text style={{fontSize: 12, marginTop: 5, marginLeft: 10, color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}}>{params.label}</Text>
+      let st = utils.isWeb() ? {paddingBottom: 10, marginLeft: 0} : {marginLeft: 10}
+      propLabel = <Text style={[st, {fontSize: 12, marginTop: 5, color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}]}>{params.label}</Text>
     }
     else {
       label = params.label
@@ -673,10 +674,11 @@ var NewResourceMixin = {
 
     if (!value)
       value = translate(params.prop)
-    return <View style={{paddingBottom: this.hasError(params.errors, prop.name) ?  0 : 10}} key={this.getNextKey()} ref={prop.name}>
+    let st = utils.isWeb() ? {marginHorizontal: 10, borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderBottomColor: '#cccccc'} : {}
+    return <View key={this.getNextKey()} ref={prop.name} style={[st, {paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10}]}>
           {propLabel}
           <DatePicker
-            style={[styles.datePicker, { width: utils.dimensions(component).width - 30}]}
+            style={[styles.datePicker, {width: utils.dimensions(component).width - 30}]}
             mode="date"
             placeholder={value}
             format={format}
@@ -1237,6 +1239,7 @@ var styles= StyleSheet.create({
   },
   datePicker: {
     // width: dimensions.width - 30,
+    marginLeft: 10,
     paddingLeft: 10,
     justifyContent: 'flex-start',
     borderColor: '#f7f7f7',
@@ -1334,11 +1337,12 @@ var styles= StyleSheet.create({
     borderColor: 'transparent',
     borderBottomColor: '#cccccc',
     alignItems: 'flex-start',
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
   dateText: {
     fontSize: 18,
     color: '#000000',
+    marginLeft: 10
   },
   placeholderText: {
     fontSize: 18,
