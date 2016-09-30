@@ -382,7 +382,7 @@ var styles = StyleSheet.create({
   formType: {
     color: '#EBFCFF',
     fontSize: 20,
-    fontWeight: '600',
+    // fontWeight: '600',
     opacity: 0.7,
     alignSelf: 'flex-end',
     marginTop: 10
