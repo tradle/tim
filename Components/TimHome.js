@@ -729,7 +729,7 @@ reactMixin(TimHome.prototype, Reflux.ListenerMixin);
 var styles = (function () {
   var dimensions = utils.dimensions(TimHome)
   var { width, height } = dimensions
-  var thumb = width > 1000 ? 300 : (width > 400 ? width / 2.5 : 170)
+  var thumb = width > 1000 ? 250 : (width > 400 ? width / 2.5 : 170)
   return StyleSheet.create({
     container: {
       // padding: 30,
@@ -756,7 +756,8 @@ var styles = (function () {
     thumb: {
       width:  thumb,
       height: thumb,
-      paddingVertical: 20
+      paddingBottom: 30,
+      marginTop: Platform.OS === 'web' ? -50 : 0
     },
     dev: {
       paddingVertical: 10,
@@ -768,7 +769,7 @@ var styles = (function () {
     },
     getStartedText: {
       color: '#f0f0f0',
-      fontSize: width > 450 ? 35 : 20,
+      fontSize: width > 450 ? 30 : 20,
       fontWeight:'400'
     },
     getStarted: {
@@ -821,7 +822,7 @@ function getIconSize (dimensions) {
   dimensions = dimensions || utils.dimensions(TimHome)
   const { width } = dimensions
   const size = width > 400 ? width / 2.5 : 170
-  return Math.min(size, 300)
+  return Math.min(size, 250)
 }
 
 module.exports = TimHome;
