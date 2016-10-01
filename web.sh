@@ -17,4 +17,5 @@ cd node_modules/node-libs-browser && \
 rm -rf node_modules/node-libs-browser/node_modules/crypto-browserify
 rm -rf node_modules/node-libs-browser/node_modules/create-ecdh
 rm -rf node_modules/node-libs-browser/node_modules/browserify-sign
+rm -rf node_modules/webpack/node_modules/uglify-js
 # node apres.js

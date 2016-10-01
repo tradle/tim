@@ -1,42 +1,37 @@
 'use strict';
 
+// https://medium.com/@okonetchnikov/long-term-caching-of-static-assets-with-webpack-1ecb139adb95#.5hgptdzc0
+
 var path = require('path');
+var fs = require('fs')
 var webpack = require('webpack');
-var HtmlPlugin = require('webpack-html-plugin');
+// var HtmlPlugin = require('webpack-html-plugin');
+var HtmlPlugin = require('html-webpack-plugin');
 var HasteResolverPlugin = require('haste-resolver-webpack-plugin');
+// var ManifestPlugin = require('webpack-manifest-plugin');
+// var ChunkManifestPlugin = require('chunk-manifest-webpack-plugin');
+// var InlineManifestWebpackPlugin = require('inline-manifest-webpack-plugin')
+// var WebpackMd5Hash = require('webpack-md5-hash')
+var validate = require('webpack-validator');
+var merge = require('webpack-merge');
+var SplitByPathPlugin = require('webpack-split-by-path')
 var emptyObjPath = path.join(__dirname, './empty.js')
 
-var IP = '0.0.0.0';
-var PORT = 3000;
 var NODE_ENV = process.env.NODE_ENV || 'development';
 // var ROOT_PATH = path.resolve(__dirname, '../');
 var PROD = 'production';
 var DEV = 'development';
-let isProd = NODE_ENV === 'production';
-
+var isProd = NODE_ENV === 'production';
+var isHot = !isProd && process.env.HOT === '1'
 // var paths = {
 //   src: path.join(ROOT_PATH, '.'),
 //   index: path.join(ROOT_PATH, 'index.web'),
 // };
 
-var config = module.exports = {
-  ip: IP,
-  port: PORT,
-  debug: true,
-  // devtool: 'cheap-module-eval-source-map',
-  devtool: 'source-map',
-  entry: [
-    'webpack-hot-middleware/client',
-    'babel-polyfill',
-    path.join(__dirname, '../../index.web.js')
-  ],
-  output: {
-    path: path.join(__dirname, '../../'),
-    filename: 'bundle.js',
-    publicPath: '/',
-  },
+var common = {
   resolve: {
     alias: {
+      'q': 'bluebird-q',
       'react-native': 'react-web/lib/react-web.js',
       'ReactART': 'react-art',
       'RCTNativeAppEventEmitter': emptyObjPath,
@@ -44,118 +39,17 @@ var config = module.exports = {
     },
     extensions: ['', '.js', '.jsx', '.web.js'],
   },
-  // entry: isProd? [
-  //   paths.index
-  // ]: [
-  //   'webpack-dev-server/client?http://' + IP + ':' + PORT,
-  //   // 'webpack/hot/only-dev-server',
-  //   paths.index,
-  // ],
-  // output: {
-  //   path: path.join(__dirname, 'output'),
-  //   filename: 'bundle.js'
-  // },
-  plugins: [
-    // new HasteResolverPlugin({
-    //   platform: 'web',
-    //   blacklist: ['lib']
-    // }),
-    new HasteResolverPlugin({
-      platform: 'web',
-      nodeModules: ['react-web']
-    }),
-    new webpack.optimize.DedupePlugin(),
-    new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify(NODE_ENV),
-      __DEV__: isProd ? false : true
-    }),
-    // isProd? new webpack.ProvidePlugin({
-    //   React: "react"
-    // }): new webpack.HotModuleReplacementPlugin(),
-    new webpack.ProvidePlugin({
-      React: "react"
-    }),
-    new webpack.NoErrorsPlugin(),
-    new HtmlPlugin(),
-  ],
-  // module: {
-  //   loaders: [{
-  //     test: /\.json$/,
-  //     loader: 'json',
-  //   },
-  //   {
-  //     test: /\.(png|gif|jpe?g|svg)$/,
-  //     loader: 'url'
-  //   },
-  //   // {
-  //   //   test: /\.jsx?$/,
-  //   //   loader: 'react-hot',
-  //   //   include: [paths.src],
-  //   //   // exclude: [/node_modules\/.*node_modules/]
-  //   //   // exclude: [/node_modules/]
-  //   // },
-  //   {
-  //     test: /\.jsx?$/,
-  //     loader: 'babel',
-  //     query: {
-  //       presets: ['es2015', 'react', 'stage-1']
-  //     },
-  //     include: [paths.src],
-  //     // exclude: [/node_modules\/.*node_modules/]
-  //     // exclude: [/node_modules/]
-  //   }]
-  // },
   module: {
     loaders: [
-      {
-        test: /\.jsx?$/,
-        loader: 'babel-loader',
-        // exclude node_modules below second level
-        // exclude: /node_modules\/[^\/]+\/node_modules\/[^\/]+\/node_modules/,
-        // exclude: /node_modules\/[^\/]+\/node_modules\/[^\/]+\/node_modules/,
-        exclude: [
-          /node_modules\/(?!react|tcomb)/,
-          // /node_modules\/(^react-)/,
-          // /node_modules\/[^\/]+\/node_modules\//,
-          /errno/,
-          // /error/,
-          /xtend/
-        ],
-        query: {
-          cacheDirectory: true,
-          presets: ['es2015', 'react', 'stage-1'],
-          plugins: [
-            'transform-object-rest-spread',
-            'transform-class-properties',
-            'transform-async-functions',
-            'transform-flow-strip-types',
-            [
-              'react-transform',
-              {
-                transforms: [
-                  {
-                    transform: 'react-transform-hmr',
-                    imports: ['react'],
-                    // this is important for Webpack HMR:
-                    locals: ['module']
-                  },
-                  {
-                    // you can have many transforms, not just one
-                    "transform": "react-transform-catch-errors",
-                    "imports": ["react", "redbox-react"]
-                  }
-                ]
-              }
-            ]
-          ]
-        },
-      },
       {
         test: /\.(gif|jpe?g|png|svg)$/,
         loader: 'url-loader',
         query: { name: '[name].[ext]' }
       },
-      { test: /\.json$/, loader: 'json' },
+      {
+        test: /\.json$/,
+        loader: 'json'
+      },
       { test: /\.css$/, loader: 'style-loader!css-loader' },
       {
         test   : /\.(ttf|eot|svg|woff(2)?)(\?[a-z0-9-=&.]+)?$/,
@@ -163,24 +57,209 @@ var config = module.exports = {
       }
     ]
   },
+  plugins: [
+    // new webpack.optimize.CommonsChunkPlugin({
+    //   name: 'vendor',
+    //   minChunks: function(module) {
+    //     return isExternal(module)
+    //   }
+    // }),
+    // new webpack.optimize.CommonsChunkPlugin({
+    //     name: "manifest"
+    // }),
+    new HasteResolverPlugin({
+      platform: 'web',
+      nodeModules: ['react-web']
+    }),
+    // new webpack.optimize.DedupePlugin(),
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify(NODE_ENV),
+      __DEV__: isProd ? false : true
+    }),
+    new webpack.ProvidePlugin({
+      React: 'react'
+    }),
+    new webpack.NoErrorsPlugin(),
+    // new WebpackMd5Hash(),
+    // new ManifestPlugin({
+    //   fileName: 'build-manifest.json'
+    // }),
+    // new ChunkManifestPlugin({
+    //   filename: 'chunk-manifest.json',
+    //   manifestVariable: 'webpackManifest'
+    // }),
+    // new InlineManifestWebpackPlugin({
+    //   name: 'webpackManifest'
+    // }),
+    // new webpack.optimize.OccurrenceOrderPlugin(true),
+    function() {
+      this.plugin('done', function(stats) {
+        fs.writeFileSync(path.join(__dirname, '../../', `webpack-stats-${NODE_ENV}.json`), JSON.stringify(stats.toJson()))
+      })
+    }
+  ],
   node: {
-    // console: 'empty',
     fs: 'empty',
     net: 'empty',
-    tls: 'empty',
-    // global: true,
-    // Buffer: true,
-    // process: true
+    tls: 'empty'
   }
-};
+}
 
-if (isProd) {
-  config.plugins.push(new webpack.optimize.UglifyJsPlugin({
-    compress: {
-      warnings: false
+if (!isHot) {
+  common.plugins.push(
+    new SplitByPathPlugin([
+      {
+        name: 'vendor',
+        path: path.join(__dirname, '../../node_modules')
+      }
+    ])
+  )
+}
+
+var config
+if (NODE_ENV === 'development') {
+  config = merge(common, {
+    // debug: true,
+    // devtool: 'cheap-module-eval-source-map',
+    devtool: 'source-map',
+    entry: getEntry(),
+    output: {
+      path: path.join(__dirname, '../build'),
+      filename: '[name].[chunkhash].js',
+      chunkFilename: '[chunkhash].js',
+      publicPath: '/',
     },
-    mangle: false
-  }))
+    plugins: [
+      // new webpack.optimize.DedupePlugin(),
+      // new webpack.ProvidePlugin({
+      //   React: "react"
+      // }),
+      new HtmlPlugin({
+        title: 'Tradle',
+        template: 'index-template.html'
+      })
+      // new HtmlPlugin()
+    ],
+    module: {
+      loaders: [
+        getBabelLoader()
+      ]
+    }
+  });
+
+  if (isHot) {
+    config.plugins.push(
+      new webpack.HotModuleReplacementPlugin()
+    )
+  }
 } else {
-  config.plugins.push(new webpack.HotModuleReplacementPlugin())
+  config = merge(common, {
+    // debug: true,
+    // devtool: 'cheap-module-eval-source-map',
+    devtool: 'source-map',
+    entry: getEntry(),
+    output: {
+      path: path.join(__dirname, '../dist'),
+      filename: '[name].[hash].js',
+      chunkFilename: '[name].[hash].js',
+      publicPath: '/',
+    },
+    module: {
+      loaders: [
+        getBabelLoader()
+      ]
+    },
+    plugins: [
+      new webpack.optimize.DedupePlugin(),
+      new webpack.optimize.UglifyJsPlugin({
+        compress: {
+          warnings: false
+        },
+        mangle: false
+      }),
+      new webpack.optimize.AggressiveMergingPlugin(),
+      new HtmlPlugin({
+        template: 'index-template.html',
+        filename: 'index.html',
+        // hash: true,
+        title: 'Tradle'
+      })
+    ]
+  })
+}
+
+module.exports = validate(config)
+
+function getEntry () {
+  var entry = [
+    'babel-polyfill',
+    path.join(__dirname, '../../index.web.js')
+  ]
+
+  if (isHot) {
+    entry.unshift(
+      'webpack/hot/dev-server',
+      'webpack-hot-middleware/client'
+    )
+  }
+
+  return entry
+}
+
+function getBabelLoader () {
+  const loader = {
+    test: /\.jsx?$/,
+    loader: 'babel-loader',
+    exclude: [
+      /node_modules\/(?!react|tcomb)/,
+      /errno/,
+      /xtend/
+    ],
+    query: {
+      cacheDirectory: true,
+      presets: ['es2015', 'react', 'stage-1'],
+      plugins: [
+        'transform-object-rest-spread',
+        'transform-class-properties',
+        'transform-async-functions',
+        'transform-flow-strip-types'
+      ]
+    }
+  }
+
+  if (!isProd) {
+    var plugins = loader.query.plugins
+    plugins.push([
+      'react-transform',
+      {
+        transforms: [
+          {
+            // you can have many transforms, not just one
+            "transform": "react-transform-catch-errors",
+            "imports": ["react", "redbox-react"]
+          }
+        ]
+      }
+    ])
+
+    if (isHot) {
+      plugins[1].unshift({
+        transform: 'react-transform-hmr',
+        imports: ['react'],
+        // this is important for Webpack HMR:
+        locals: ['module']
+      })
+    }
+  }
+
+  return loader
+}
+
+function isExternal (module) {
+  var userRequest = module.userRequest
+  if (typeof userRequest !== 'string') {
+    return false
+  }
+
+  return userRequest.indexOf('/node_modules/') !== -1
 }
