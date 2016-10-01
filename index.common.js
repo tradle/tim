@@ -75,6 +75,7 @@ import {
 
 import Orientation from 'react-native-orientation'
 import platformStyles from './styles/platform'
+import Transitions from './utils/transitions'
 
 let originalGetDefaultProps = Text.getDefaultProps;
 Text.defaultProps = function() {
@@ -313,7 +314,10 @@ class TiMApp extends Component {
           if (route.sceneConfig)
             return route.sceneConfig;
 
-          const config = {...Navigator.SceneConfigs.FloatFromRight, springFriction:26, springTension:200}
+          const config = utils.isWeb()
+            ? Transitions.NONE
+            : {...Navigator.SceneConfigs.FloatFromRight, springFriction:26, springTension:200}
+
           if (route.component === PasswordCheck) {
             config.gestures = {}
           }
