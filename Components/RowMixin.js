@@ -5,7 +5,7 @@ var utils = require('../utils/utils');
 var translate = utils.translate
 var constants = require('@tradle/constants');
 var Accordion = require('react-native-accordion')
-import LinearGradient from './LinearGradient'
+import LinearGradient from 'react-native-linear-gradient'
 // var Icon = require('react-native-vector-icons/Ionicons');
 import CustomIcon from '../styles/customicons'
 var cnt = 0;

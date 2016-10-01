@@ -23,7 +23,7 @@ import {
   Platform
 } from 'react-native';
 
-import LinearGradient from './LinearGradient'
+import LinearGradient from 'react-native-linear-gradient'
 import React, { Component } from 'react'
 import ActivityIndicator from './ActivityIndicator'
 var dateProp

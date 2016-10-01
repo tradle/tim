@@ -10,7 +10,7 @@ var PhotoList = require('./PhotoList');
 var Icon = require('react-native-vector-icons/Ionicons');
 var groupByEveryN = utils.groupByEveryN
 var constants = require('@tradle/constants');
-import LinearGradient from './LinearGradient'
+import LinearGradient from 'react-native-linear-gradient'
 var RowMixin = require('./RowMixin');
 var Accordion = require('react-native-accordion')
 var extend = require('extend')

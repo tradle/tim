@@ -159,13 +159,14 @@
   },
   "browser": {
     "asyncstorage-down": "level-js",
+    "react-native-linear-gradient": "./web/shims/LinearGradient",
     "react-native-safe-async-storage": "./web/shims/AsyncStorage",
     "react-native-camera": false,
     "react-native-video": false,
     "react-native-keychain": "./web/shims/keychain.js",
     "react-native-datepicker": "./web/shims/DatePicker.web.js",
     "react-native-gesture-password": false,
-    "./Components/PasswordCheck.js": false,
+     "./Components/PasswordCheck.js": false,
     "./Components/BackgroundImage.js": "./Components/BackgroundImage.web.js",
     "./Components/ImageInput.js": "./Components/ImageInput.web.js",
     "./utils/push.js": "./web/shims/push.js"
