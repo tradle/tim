@@ -994,7 +994,7 @@ class NewResource extends Component {
       var arr = resource[bl.name]
       var n = Math.min(arr.length, 7)
       for (var i=0; i<n; i++) {
-        items.push(<Image style={styles.thumb} source={{uri: arr[i].url}}  key={this.getNextKey()} onPress={() => {
+        items.push(<Image resizeMode='cover' style={styles.thumb} source={{uri: arr[i].url}}  key={this.getNextKey()} onPress={() => {
           this.openModal(arr[i])
         }}/>)
       }
