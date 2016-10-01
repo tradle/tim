@@ -70,14 +70,14 @@ class PhotoList extends Component {
       case 1:
       case 2:
       case 3:
-        height = Math.min(d3, 150) + 2;
+        height = Math.min(d3, 200) + 2;
         break;
       case 4:
-        height = Math.min(d4, 150) + 2;
+        height = Math.min(d4, 200) + 2;
         break;
       default:
       case 5:
-        height = Math.min(d5, 150) + 2;
+        height = Math.min(d5, 200) + 2;
         inRow = 5;
         break;
     }
@@ -87,7 +87,7 @@ class PhotoList extends Component {
     height *= rows;
     var val = this.renderPhotoList(photos, styles);
     return (
-       <View style={[styles.photoContainer, this.props.style ? {} : {marginHorizontal: 5, height: height}]} key={this.getNextKey() + '_photo'}>
+       <View style={[styles.photoContainer, this.props.style ? {} : {marginHorizontal: 15, height: height}]} key={this.getNextKey() + '_photo'}>
          {val}
        </View>
      );
@@ -103,10 +103,16 @@ class PhotoList extends Component {
             scrollEnabled = {false}
             removeClippedSubviews={false}
             enableEmptySections={true}
+            style={{overflow: 'visible'}}
             renderRow={this.renderRow.bind(this, styles)}
             dataSource={dataSource} />
       </View>
     );
+    // return (
+    //   <View style={styles.row}>
+    //     {this.renderRow(styles, val)}
+    //   </View>
+    // );
   }
 
   renderRow(styles, photos)  {
@@ -154,9 +160,9 @@ class PhotoList extends Component {
         source.isStatic = true;
 
       return (
-        <View style={[{paddingTop: 2, margin: 1, flexDirection: 'column'}, imageStyle[0]]} key={this.getNextKey() + '_photo'}>
+        <View style={[{paddingTop: 2, margin: 5, flexDirection: 'column'}, imageStyle[0]]} key={this.getNextKey() + '_photo'}>
           <TouchableHighlight underlayColor='transparent' onPress={this.props.callback ? this.props.callback.bind(this, photo) : this.showCarousel.bind(this, photo)}>
-             <Image style={[styles.thumbCommon, imageStyle]} source={source} />
+             <Image resizeMode='cover' style={[styles.thumbCommon, imageStyle]} source={source} />
           </TouchableHighlight>
         </View>
       );
@@ -174,9 +180,9 @@ reactMixin(PhotoList.prototype, RowMixin);
 
 var createStyles = utils.styleFactory(PhotoList, function ({ dimensions }) {
   var width = dimensions.width
-  var d3 = (width / 3) - 5
-  var d4 = (width / 4) - 5
-  var d5 = (width / 5) - 5
+  var d3 = Math.min((width / 3) - 5, 200)
+  var d4 = Math.min((width / 4) - 5, 200)
+  var d5 = Math.min((width / 5) - 5, 200)
   return StyleSheet.create({
     photoContainer: {
       paddingTop: 5,

@@ -46,25 +46,37 @@ class PhotoCarousel extends Component {
         if (photo.width) {
           var {width, height} = utils.dimensions(PhotoCarousel)
           var w = width, h, padding
-          if (photo.width > width) {
-            h = photo.height * width / photo.width
-            // if (photo.isVertical)
-            //   h = Dimensions.get('window').width * 1.2
-            // else
-            //   h = Dimensions.get('window').width / 1.2
+
+          if (height > width) {
+            if (photo.width > width) {
+              h = photo.height * width / photo.width
+              // if (photo.isVertical)
+              //   h = Dimensions.get('window').width * 1.2
+              // else
+              //   h = Dimensions.get('window').width / 1.2
+            }
+            else {
+              h = photo.height
+              w = photo.width
+              padding = (width - photo.width) / 2
+            }
+
+            if (h > 3 * height / 4)
+              h = 3 * height / 4
           }
           else {
-            h = photo.height
-            w = photo.width
-            padding = (width - photo.width) / 2
+            h = 0.8 * height
+            if (photo.height > h)
+              w = photo.width * h / photo.height
+            else {
+              h = photo.height
+              w = photo.width
+            }
           }
 
-          if (h > 3 * height / 4)
-            h = 3 * height / 4
-
           photos.push(
-                        <View style={[styles.container, {paddingHorizontal: padding}]} key={key}>
-                          <Image source={{uri: photo.url}} style={{width: w, height: h}}/>
+                        <View style={[styles.container]} key={key}>
+                          <Image resizeMode='cover' source={{uri: photo.url}} style={{width: w, height: h}}/>
                         </View>
                      )
 
@@ -72,15 +84,15 @@ class PhotoCarousel extends Component {
         else
           photos.push(
             isVertical  ? <View style={styles.container} key={key}>
-                            <Image source={{uri: photo.url}} style={styles.imageV}/>
+                            <Image resizeMode='cover' source={{uri: photo.url}} style={styles.imageV}/>
                           </View>
 
                         : (isLicense
                            ? <View style={styles.container} key={key}>
-                                <Image source={{uri: photo.url}} style={styles.imageH}/>
+                                <Image resizeMode='cover' source={{uri: photo.url}} style={styles.imageH}/>
                               </View>
                            : <View style={styles.container} key={key}>
-                                <Image source={{uri: photo.url}} style={styles.image}/>
+                                <Image resizeMode='cover' source={{uri: photo.url}} style={styles.image}/>
                               </View>
                         )
         )
