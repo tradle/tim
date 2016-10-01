@@ -36,7 +36,6 @@ var STRUCTURED_MESSAGE_COLOR
 
 const DEFAULT_CURRENCY_SYMBOL = '£'
 const DEFAULT_LINK_COLOR = '#2892C6'
-const MAX_WIDTH = 400
 
 import {
   Image,
@@ -445,7 +444,6 @@ class MessageRow extends Component {
             : translate('shareOneOfMany', utils.getMe().firstName, docType, org)
 
     let w = utils.dimensions(MessageRow).width * 0.8
-    // w = Math.min(MAX_WIDTH, w)
     return (
       <View style={[rowStyle, viewStyle, {width: w}]} key={this.getNextKey()}>
         <View style={{width: 30}}/>
@@ -1037,7 +1035,7 @@ var styles = StyleSheet.create({
   },
   formType: {
     color: '#EBFCFF',
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '600',
     opacity: 0.5,
     alignSelf: 'flex-end',

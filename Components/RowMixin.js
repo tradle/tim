@@ -192,7 +192,7 @@ var RowMixin = {
     //               </View>
                     // <Icon name='md-arrow-dropright' size={30} color={this.props.bankStyle.VERIFIED_HEADER_COLOR}/>
     var header =  <View style={headerStyle}>
-                    <Text style={[styles.resourceTitle, {fontSize: 20, marginTop: 2, paddingRight: 10, color: this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>{translate(model) + ' ...'}</Text>
+                    <Text style={[styles.resourceTitle, {fontSize: 18, marginTop: 2, paddingRight: 10, color: this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>{translate(model) + ' ...'}</Text>
                   </View>
     let addStyle
     if (!onPress)
