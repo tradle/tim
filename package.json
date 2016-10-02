@@ -169,7 +169,7 @@
     "react-native-keychain": "./web/shims/keychain.js",
     "react-native-datepicker": "./web/shims/DatePicker.web.js",
     "react-native-gesture-password": false,
-    "./Components/PasswordCheck.js": false,
+    "./Components/PasswordCheck.js": "./web/shims/PasswordCheck.js",
     "./Components/BackgroundImage.js": "./Components/BackgroundImage.web.js",
     "./Components/ImageInput.js": "./Components/ImageInput.web.js",
     "./utils/push.js": "./web/shims/push.js"

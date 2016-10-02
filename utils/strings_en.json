@@ -18,6 +18,7 @@
     "drawYourOldPassword": "Draw your old gesture password",
     "gestureNotRecognized": "Gesture not recognized, please try again",
     "passwordLimitations": "Password must have 5 or more points",
+    "textPasswordLimitations": "Must have 10+ characters, at least one uppercase letter, lowercase letter, number, and special character",
     "invalidPattern": "Invalid pattern, please try again",
     "patternNotMatching": "The gestures didn't match. Please start again",
     "wrongPattern": "Wrong pattern",
