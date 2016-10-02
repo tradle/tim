@@ -1,15 +1,19 @@
+'use strict'
+
 import React, { PropTypes, Component } from 'react'
 import {
   View,
   Text,
   TextInput,
   TouchableHighlight,
-  StyleSheet
+  StyleSheet,
+  Dimensions
 } from 'react-native'
 
 import t from 'tcomb-form-native'
 import Icon from 'react-native-vector-icons/Ionicons'
 import { translate } from '../../utils/utils'
+import { makeResponsive } from 'react-native-orient'
 // import FloatingLabel from 'react-native-floating-labels'
 
 const Form = t.form.Form
@@ -248,34 +252,40 @@ class PasswordEntry extends Component {
     const customStyle = this.props.style || {}
     const type = this.props.mode === 'set' ? SetType : CheckType
     const header = this.renderHeader()
+    let { width, height } = Dimensions.get('window')
+    const smaller = Math.min(width, height)
+    width = smaller / 2
+    height = smaller / 4
     return (
       <View style={[styles.container, customStyle.container]}>
         {header}
-        <Form
-          ref="form"
-          type={type}
-          options={options}
-          style={[styles.form, customStyle.form]}
-          value={this.state.value}
-          onChange={this.onChange}
-        />
-        <TouchableHighlight
-          style={[styles.button, customStyle.submit, { alignItems: 'center' }]}
-          onPress={this.onPress}
-          underlayColor='transparent'
-          disabled={disabled}>
-          <Icon
-            name='ios-lock'
-            size={this.props.iconSize || 100}
-            style={{color: this.hasError() ? ERROR_COLOR : NEUTRAL_COLOR }}
+        <View style={{ width, height }}>
+          <Form
+            ref="form"
+            type={type}
+            options={options}
+            style={[styles.form, customStyle.form]}
+            value={this.state.value}
+            onChange={this.onChange}
           />
-        </TouchableHighlight>
+          <TouchableHighlight
+            style={[styles.button, customStyle.submit, { alignItems: 'center' }]}
+            onPress={this.onPress}
+            underlayColor='transparent'
+            disabled={disabled}>
+            <Icon
+              name='ios-lock'
+              size={this.props.iconSize || 100}
+              style={{color: this.hasError() ? ERROR_COLOR : NEUTRAL_COLOR }}
+            />
+          </TouchableHighlight>
+        </View>
       </View>
     )
   }
 
   renderHeader() {
-    const style = this.isDisabled() ? styles.error : styles.prompt
+    const style = this.hasError() ? styles.error : styles.prompt
     return (
       <Text style={[styles.header, style]}>{this.state.message}</Text>
     )
@@ -289,6 +299,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#efefef',
     // backgroundColor: 'transparent',
     justifyContent: 'center',
+    alignItems: 'center',
     padding: 20
   },
   form: {
@@ -325,5 +336,5 @@ const styles = StyleSheet.create({
   // }
 })
 
-exports = module.exports = PasswordEntry
+exports = module.exports = makeResponsive(PasswordEntry)
 exports.Modes = Modes
