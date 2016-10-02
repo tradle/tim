@@ -6000,8 +6000,8 @@
     },
     "react-web": {
       "version": "0.4.0",
-      "from": "mvayngrib/react-web#ffc7627",
-      "resolved": "git://github.com/mvayngrib/react-web.git#ffc7627a57803a9b2fcbcb7e1c049ac8406cdd2f",
+      "from": "mvayngrib/react-web#d50b9c3",
+      "resolved": "git://github.com/mvayngrib/react-web.git#d50b9c363556965802e03c9bf1238537cf956375",
       "dependencies": {
         "acorn": {
           "version": "3.3.0",
