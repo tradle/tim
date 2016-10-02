@@ -269,7 +269,7 @@ class PasswordEntry extends Component {
           <Icon
             name='ios-lock'
             size={this.props.iconSize || 100}
-            style={{color: this.hasError() ? styles.ERROR_COLOR : '#888888' }}
+            style={{color: this.hasError() ? ERROR_COLOR : '#888888' }}
           />
         </TouchableHighlight>
       </View>
