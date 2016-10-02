@@ -294,6 +294,8 @@ function checkPassword (navigator, isChangePassword) {
   $                         End anchor.
  */
 function validateTextPassword (pass) {
+  if (__DEV__) return pass.length > 1
+
   return PASSWORD_REGEX.test(pass)
 }
 
