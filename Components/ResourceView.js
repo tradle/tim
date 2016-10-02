@@ -268,7 +268,7 @@ class ResourceView extends Component {
         actions.push(USE_GESTURE_PASSWORD)
       }
 
-      if (this.state.useGesturePassword || !utils.isIOS) {
+      if (this.state.useGesturePassword || !utils.isIOS()) {
         buttons.push(translate('changeGesturePassword'))
         actions.push(CHANGE_GESTURE_PASSWORD)
       }
