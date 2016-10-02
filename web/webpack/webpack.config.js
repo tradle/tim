@@ -32,7 +32,8 @@ var common = {
   resolve: {
     alias: {
       'q': 'bluebird-q',
-      'react-native': 'react-web/lib/react-web.js',
+      'react-native': 'react-web/lib/index.js',
+      // 'react-native': 'react-web/lib/react-web.js',
       'ReactART': 'react-art',
       'RCTNativeAppEventEmitter': emptyObjPath,
       'Keyboard': emptyObjPath
@@ -69,7 +70,9 @@ var common = {
     // }),
     new HasteResolverPlugin({
       platform: 'web',
-      nodeModules: ['react-web']
+      // blacklist: ['Libraries']
+      // blacklist: ['Libraries']
+      // nodeModules: ['react-web']
     }),
     // new webpack.optimize.DedupePlugin(),
     new webpack.DefinePlugin({
@@ -193,15 +196,10 @@ module.exports = validate(config)
 function getEntry () {
   var entry = [
     'babel-polyfill',
+    isHot && 'webpack/hot/dev-server',
+    isHot && 'webpack-hot-middleware/client',
     path.join(__dirname, '../../index.web.js')
-  ]
-
-  if (isHot) {
-    entry.unshift(
-      'webpack/hot/dev-server',
-      'webpack-hot-middleware/client'
-    )
-  }
+  ].filter(notNull)
 
   return entry
 }
@@ -262,4 +260,8 @@ function isExternal (module) {
   }
 
   return userRequest.indexOf('/node_modules/') !== -1
+}
+
+function notNull (a) {
+  return !!a
 }
