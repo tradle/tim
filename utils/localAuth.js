@@ -46,6 +46,9 @@ const DEFAULT_OPTS = {
   suppressEnterPassword: false
 }
 
+const PROMPTS = require('./password-prompts')
+const PASSWORD_PROMPTS = getPasswordPrompts()
+
 let pendingAuth
 let pendingEnrollRequest
 let TIMEOUT = __DEV__ ? 1000 : 10 * 60 * 1000
@@ -237,10 +240,11 @@ function setPassword (navigator, isChangePassword) {
       id: 20,
       noLeftButton: true,
       passProps: {
+        ...PASSWORD_PROMPTS,
         mode: PasswordCheck.Modes.set,
         validate: validate,
         isChange: isChangePassword,
-        promptInvalidSet: passwordSpec,
+        // promptInvalidSet: translate('passwordLimitations'),
         onSuccess: (pass) => {
           utils.setHashedPassword(PASSWORD_ITEM_KEY, pass)
           .then(() => {
@@ -265,6 +269,7 @@ function checkPassword (navigator, isChangePassword) {
     id: 20,
     noLeftButton: true,
     passProps: {
+      ...PASSWORD_PROMPTS,
       mode: PasswordCheck.Modes.check,
       maxAttempts: 3,
       isChange: isChangePassword,
@@ -301,4 +306,14 @@ function validateTextPassword (pass) {
 
 function validateGesturePassword (pass) {
   return pass.length > 4
+}
+
+function getPasswordPrompts () {
+  const prompts = PROMPTS[utils.isWeb() ? 'text' : 'gesture']
+  const translated = {}
+  for (var p in prompts) {
+    translated[p] = utils.translate(prompts[p])
+  }
+
+  return translated
 }
