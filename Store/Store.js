@@ -495,6 +495,7 @@ var Store = Reflux.createStore({
       }
     }
 
+
     // if (TLS_ENABLED) {
     //   tlsKey = keys.filter((k) => k.type === 'dsa')[0]
     //   if (tlsKey) tlsKey = DSA.parsePrivate(tlsKey.priv)
@@ -527,6 +528,10 @@ var Store = Reflux.createStore({
 
     // meDriver = timeFunctions(meDriver)
     this.getInfo(SERVICE_PROVIDERS_BASE_URLS, true)
+    .then(() => {
+      if (me && utils.isEmpty(chatMessages))
+        this.initChats()
+    })
     .catch(function(err) {
       debugger
     })
@@ -3295,6 +3300,7 @@ var Store = Reflux.createStore({
         verTypes.push(msgModel.value.id);
     }
     var shareableResources = {};
+    var shareableResourcesRootToR = {}
 
     var isOrg = to  &&  to[TYPE] === ORGANIZATION
     var org = isOrg ? to : (to.organization ? list[utils.getId(to.organization)].value : null)
@@ -3319,16 +3325,27 @@ var Store = Reflux.createStore({
           if (sw.length)
             return
         }
-        var docType = r[TYPE]
-        var v = shareableResources[docType];
-        if (!v)
-          shareableResources[docType] = [];
+        if (shareableResourcesRootToR[r[ROOT_HASH]]) {
+          let arr = shareableResources[r[TYPE]]
+          let skip
+          for (let i=0; i<arr.length  &&  !skip; i++) {
+            if (r[ROOT_HASH] === rr[ROOT_HASH]) {
+              if (r.time < rr.time)
+                skip = true
+              else
+                arr.splice(i, 1)
+            }
+          }
+          if (skip)
+            return
+        }
         let rr = {
           [TYPE]: VERIFICATION,
           document: r,
           organization: list[utils.getId(r.from)].value.organization
         }
-        shareableResources[docType].push(rr);
+
+        addAndCheckShareable(rr)
       })
     }
     if (!verTypes.length)
@@ -3337,77 +3354,94 @@ var Store = Reflux.createStore({
     let toId = utils.getId(to)
     var l = this.searchMessages({modelName: VERIFICATION})
     if (l)
-    l.forEach(function(val) {
-      var doc = val.document
-      var docType = (doc.id && doc.id.split('_')[0]) || doc[TYPE];
-      if (verTypes.indexOf(docType) === -1)
-        return;
-      var id = utils.getId(val.to.id);
-      if (id !== meId)
-        return
-      // Filter out the verification from the same company
-      var fromId = utils.getId(val.from)
-      var fromOrgId = utils.getId(list[fromId].value.organization)
-      if (fromOrgId === toId)
-        return
-      var document = doc.id ? list[utils.getId(doc.id)]  &&  list[utils.getId(doc.id)].value : doc;
-      if (!document)
-        return;
-      if (to  &&  org  &&  document.verifications) {
-        var thisCompanyVerification;
-        for (var i=0; i<document.verifications.length; i++) {
-          var v = list[utils.getId(document.verifications[i])].value;
+      l.forEach((val) => {
+        var doc = val.document
+        var docType = (doc.id && doc.id.split('_')[0]) || doc[TYPE];
+        if (verTypes.indexOf(docType) === -1)
+          return;
+        var id = utils.getId(val.to.id);
+        if (id !== meId)
+          return
+        // Filter out the verification from the same company
+        var fromId = utils.getId(val.from)
+        var fromOrgId = utils.getId(list[fromId].value.organization)
+        if (fromOrgId === toId)
+          return
+        var document = doc.id ? list[utils.getId(doc.id)]  &&  list[utils.getId(doc.id)].value : doc;
+        if (!document)
+          return;
+        if (to  &&  org  &&  document.verifications) {
+          var thisCompanyVerification;
+          for (var i=0; i<document.verifications.length; i++) {
+            var v = list[utils.getId(document.verifications[i])].value;
 
-          if (v.organization  &&  utils.getId(org) === utils.getId(v.organization)) {
-            let sharedWith = doc.sharedWith
-            if (!sharedWith)
-              thisCompanyVerification = true;
-            else {
-              let sw = sharedWith.filter((r) => {
-                if (reps.filter((rep) => {
-                        if (utils.getId(rep) === r.bankRepresentative)
-                          return true
-                      }).length)
-                  return true
-              })
-              if (sw.length)
-                thisCompanyVerification = true
+            if (v.organization  &&  utils.getId(org) === utils.getId(v.organization)) {
+              let sharedWith = doc.sharedWith
+              if (!sharedWith)
+                thisCompanyVerification = true;
+              else {
+                let sw = sharedWith.filter((r) => {
+                  if (reps.filter((rep) => {
+                          if (utils.getId(rep) === r.bankRepresentative)
+                            return true
+                        }).length)
+                    return true
+                })
+                if (sw.length)
+                  thisCompanyVerification = true
+              }
+              break;
             }
-            break;
           }
+          // if (thisCompanyVerification)
+          //   return;
         }
-        // if (thisCompanyVerification)
-        //   return;
-      }
-      var value = {};
-      extend(value, val);
-      value.document = document;
-      var v = shareableResources[docType];
-      if (!v)
-        shareableResources[docType] = [];
-      shareableResources[docType].push(value);
-    })
+        var value = {};
+        extend(value, val);
+        value.document = document;
+
+        addAndCheckShareable(value)
+      })
     // Allow sharing non-verified forms
     verTypes.forEach((verType) => {
       var l = this.searchNotMessages({modelName: verType, notVerified: true})
       if (!l)
         return
       l.forEach((r) => {
-        let docType = r[TYPE]
-        var v = shareableResources[docType];
-        if (!v)
-          shareableResources[docType] = [];
         let rr = {
           [TYPE]: VERIFICATION,
           document: r,
           organization: list[utils.getId(r.to)].value.organization
         }
-        shareableResources[docType].push(rr)
+        addAndCheckShareable(rr)
       })
     })
 
-    return shareableResources;
+    return shareableResources
+
+    function addAndCheckShareable(verification) {
+      let r = verification.document
+      let docType = r[TYPE]
+      var v = shareableResources[docType];
+      if (!v)
+        shareableResources[docType] = [];
+      else if (shareableResourcesRootToR[r[ROOT_HASH]]) {
+        let arr = shareableResources[r[TYPE]]
+        for (let i=0; i<arr.length; i++) {
+          let rr = arr[i].document
+          if (r[ROOT_HASH] === rr[ROOT_HASH]) {
+            if (r.time < rr.time)
+              return
+            else
+              arr.splice(i, 1)
+          }
+        }
+      }
+      shareableResources[docType].push(verification)
+      shareableResourcesRootToR[r[ROOT_HASH]] = r
+    }
   },
+
   getNonce() {
     return crypto.randomBytes(32).toString('hex')
   },
