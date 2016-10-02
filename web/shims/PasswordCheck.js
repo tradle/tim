@@ -9,6 +9,7 @@ import {
 
 import t from 'tcomb-form-native'
 import Icon from 'react-native-vector-icons/Ionicons'
+import { translate } from '../../utils/utils'
 // import FloatingLabel from 'react-native-floating-labels'
 
 const Form = t.form.Form
@@ -27,6 +28,7 @@ const Modes = {
 }
 
 const ERROR_COLOR = '#a94442'
+const NEUTRAL_COLOR = '#888888'
 
 class PasswordEntry extends Component {
   static propTypes = {
@@ -65,6 +67,7 @@ class PasswordEntry extends Component {
 
   _getInitialSetState() {
     return {
+      message: this.props.isChange ? this.props.promptSetChange : this.props.promptSet,
       value: {
         password: '',
         passwordAgain: ''
@@ -78,6 +81,7 @@ class PasswordEntry extends Component {
 
   _getInitialCheckState() {
     return {
+      message: this.props.isChange ? this.props.promptCheckCurrent : this.props.promptCheck,
       value: {
         password: ''
       },
@@ -114,13 +118,13 @@ class PasswordEntry extends Component {
   _onChangeSet(value, path) {
     this.setState({
       value,
-      errors: this.validate(value, path[0] === 'passwordAgain')
+      errors: this.validatePasswordChoice(value, path[0] === 'passwordAgain')
     })
   }
 
-  validate(value, both) {
+  validatePasswordChoice(value, both) {
     var passwordError = this.props.validate(value && value.password || '')
-    if (passwordError === false) passwordError = this.props.promptInvalidSet || 'Invalid password'
+    if (passwordError === false) passwordError = this.props.promptInvalidSet
     else if (passwordError === true) passwordError = null
 
     const errors = {
@@ -129,7 +133,7 @@ class PasswordEntry extends Component {
 
     if (!passwordError && both) {
       if (!value || value.password !== value.passwordAgain) {
-        errors.passwordAgain = "Passwords don't match"
+        errors.passwordAgain = this.props.promptRetrySet
       }
     }
 
@@ -147,7 +151,7 @@ class PasswordEntry extends Component {
   }
 
   _onSet() {
-    const errors = this.validate(this.refs.form.getValue(), true)
+    const errors = this.validatePasswordChoice(this.refs.form.getValue(), true)
     if (errors.password || errors.passwordAgain) {
       this.setState({ errors })
     } else {
@@ -166,7 +170,9 @@ class PasswordEntry extends Component {
       if (isCorrect) return this.props.onSuccess(password)
 
       const attempts = this.state.attempts + 1
-      this.setState({ attempts }, () => {
+      this.setState({
+        attempts
+      }, () => {
         if (attempts >= this.props.maxAttempts) {
           return this.props.onFail()
         }
@@ -241,18 +247,10 @@ class PasswordEntry extends Component {
 
     const customStyle = this.props.style || {}
     const type = this.props.mode === 'set' ? SetType : CheckType
-    var errorMsg
-    if (this.isDisabled()) {
-      errorMsg = (
-        <Text style={styles.error}>
-          Too many failed attempts! This form has been disabled.
-        </Text>
-      )
-    }
-
+    const header = this.renderHeader()
     return (
       <View style={[styles.container, customStyle.container]}>
-        {errorMsg}
+        {header}
         <Form
           ref="form"
           type={type}
@@ -269,10 +267,17 @@ class PasswordEntry extends Component {
           <Icon
             name='ios-lock'
             size={this.props.iconSize || 100}
-            style={{color: this.hasError() ? ERROR_COLOR : '#888888' }}
+            style={{color: this.hasError() ? ERROR_COLOR : NEUTRAL_COLOR }}
           />
         </TouchableHighlight>
       </View>
+    )
+  }
+
+  renderHeader() {
+    const style = this.isDisabled() ? styles.error : styles.prompt
+    return (
+      <Text style={[styles.header, style]}>{this.state.message}</Text>
     )
   }
   // <Text style={[styles.buttonText, customStyle.submitText]}>{this.props.submitText || 'Save'}</Text>
@@ -292,12 +297,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center'
   },
-  error: {
+  header: {
     fontSize: 25,
-    padding: 25,
-    textAlign: 'center',
+    padding: 50,
+    textAlign: 'center'
+  },
+  error: {
     color: ERROR_COLOR
   },
+  prompt: {
+    color: NEUTRAL_COLOR
+  }
   // buttonText: {
   //   fontSize: 18,
   //   color: '#ffffff',

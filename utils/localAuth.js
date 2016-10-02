@@ -48,11 +48,11 @@ const DEFAULT_OPTS = {
 
 const PROMPTS = require('./password-prompts')
 const PASSWORD_PROMPTS = getPasswordPrompts()
+const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z]).{10,}$/
 
 let pendingAuth
 let pendingEnrollRequest
 let TIMEOUT = __DEV__ ? 1000 : 10 * 60 * 1000
-const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z]).{10,}$/
 
 module.exports = {
   TIMEOUT,
