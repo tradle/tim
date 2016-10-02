@@ -1113,10 +1113,11 @@ var utils = {
         stylesCache[key] = {}
       }
 
-      var orientation = getOrientation(Component)
       var subCache = stylesCache[key]
-      if (!subCache[orientation]) {
-        var dimensions = getDimensions(Component)
+      var dimensions = getDimensions(Component)
+      var subKey = dimensions.width + 'x' + dimensions.height
+      if (!subCache[subKey]) {
+        var orientation = getOrientation(Component)
         var { width, height } = dimensions
         var switchWidthHeight = (
           (orientation === 'PORTRAIT' && width > height) ||
@@ -1127,11 +1128,16 @@ var utils = {
           dimensions = { width: height, height: width }
         }
 
-        subCache[orientation] = create({ dimensions })
+        subCache[subKey] = create({ dimensions })
       }
 
-      return subCache[orientation]
+      return subCache[subKey]
     }
+  },
+  resized: function (props, nextProps) {
+    return props.orientation !== nextProps.orientation ||
+          props.width !== nextProps.width              ||
+          props.height !== nextProps.height
   },
   imageQuality: 0.2,
   restartApp: function () {
