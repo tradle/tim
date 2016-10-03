@@ -802,7 +802,7 @@ class NewResource extends Component {
         </View>
         {this.state.isRegistration
           ? <View style={styles.logo}>
-              <CustomIcon name='tradle' size={40} style={styles.thumb} />
+              <CustomIcon name='tradle' size={40} color='#ffffff' style={styles.thumb} />
             </View>
           : <View/>
         }
