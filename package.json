@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "react-native start",
-    "postinstall": "npm run nodeify && npm run installhooks && ./fbdedupe.sh",
+    "postinstall": "npm run nodeify && npm run installhooks && ./fbdedupe.sh && ./hooks/update_version.sh",
     "nodeify": "./node_modules/.bin/rn-nodeify --hack",
     "installhooks": "cp hooks/* .git/hooks/",
     "rmsymlinks": "find -L . -type l -exec rm {} \\;"
