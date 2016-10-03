@@ -566,40 +566,6 @@ var Store = Reflux.createStore({
       chatMessages[id] = this.filterChatMessages(chatMessages[id], id)
     }
   },
-
-  initChats() {
-    let meId = utils.getId(me)
-    for (var p in list) {
-      let r = list[p].value
-      let m = this.getModel(r[TYPE]).value
-      if (m.interfaces  &&  m.interfaces.indexOf(MESSAGE) !== -1) {
-        if (r.sharedWith) {
-          r.sharedWith.forEach((shareInfo) => {
-            if (shareInfo.bankRepresentative === meId)
-              this.addMessagesToChat(utils.getId(r.to), r, true, shareInfo.timeShared)
-            else  {
-              let orgId = utils.getId(list[shareInfo.bankRepresentative].value.organization)
-              this.addMessagesToChat(orgId, r, true, shareInfo.timeShared)
-            }
-          })
-        }
-        else if (m.id === VERIFICATION  &&  meId === utils.getId(r.from))
-          this.addMessagesToChat(utils.getId(r.to), r, true)
-        else {
-          let fromId = utils.getId(r.from)
-          let rep = list[meId === fromId ? utils.getId(r.to) : fromId].value
-          let orgId = rep.organization ? utils.getId(rep.organization) : utils.getId(rep)
-          this.addMessagesToChat(orgId, r, true)
-        }
-      }
-    }
-    for (let id in chatMessages) {
-      chatMessages[id].sort(function(a, b) {
-        return a.time - b.time;
-      })
-      chatMessages[id] = this.filterChatMessages(chatMessages[id], id)
-    }
-  },
   // Filtered result contains only messages that get displayed
   filterChatMessages(messages, orgId, lastId) {
     let meId = utils.getId(me)
