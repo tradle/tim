@@ -134,7 +134,7 @@ class FormMessageRow extends Component {
     // in a bigger than needed bubble
     var messageBody;
     var width = utils.dimensions(FormMessageRow).width
-    let msgWidth = width * 0.8
+    let msgWidth = Math.floor(width * 0.8)
     var viewStyle = {width: msgWidth, flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
 
     messageBody =
@@ -158,31 +158,40 @@ class FormMessageRow extends Component {
       </TouchableHighlight>
 
     var len = photoUrls.length;
-    var inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
+    var inRow = utils.isWeb()
+              ? Math.floor(msgWidth / 150)
+              : len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
     var photoStyle = {};
     var height;
 
-    if (inRow > 0) {
-      if (inRow === 1) {
-        var ww = Math.max(240, msgWidth / 2)
-        var hh = ww * 280 / 240
-        photoStyle = [styles.bigImage, {
-          width:  ww,
-          height: hh
-        }]
-      }
-      else if (inRow === 2)
-        photoStyle = styles.mediumImage;
-      else
-        photoStyle = styles.image;
-    }
+    // if (!utils.isWeb()  &&  inRow > 0) {
+    //   if (inRow === 1) {
+    //     if (utils.isWeb())
+    //       photoStyle = styles.bigImage
+    //     else {
+    //       var ww = Math.max(240, msgWidth / 2)
+    //       var hh = ww * 280 / 240
+    //       photoStyle = {
+    //         width:  ww,
+    //         height: hh,
+    //         margin: 1,
+    //         borderRadius: 10
+    //       }
+    //     }
+    //   }
+    //   else if (inRow === 2)
+    //     photoStyle = styles.mediumImage;
+    //   else
+    //     photoStyle = styles.image;
+    //   photoStyle = [photoStyle, {marginTop: '-5'}]
+    // }
 
     return (
       <View style={{margin: 1, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}}>
         {date}
         {messageBody}
         <View style={photoListStyle}>
-          <PhotoList photos={photoUrls} resource={this.props.resource} style={[photoStyle, {marginTop: -5}]} navigator={this.props.navigator} numberInRow={inRow} />
+          <PhotoList photos={photoUrls} resource={this.props.resource} style={photoStyle} navigator={this.props.navigator} numberInRow={inRow} />
         </View>
         {sendStatus}
       </View>
