@@ -11,6 +11,8 @@ var ShowPropertiesView = require('./ShowPropertiesView');
 var ShowMessageRefList = require('./ShowMessageRefList');
 // var MoreLikeThis = require('./MoreLikeThis');
 var NewResource = require('./NewResource');
+var PageView = require('./PageView')
+
 // var VerificationButton = require('./VerificationButton');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
@@ -194,6 +196,7 @@ class MessageView extends Component {
             : <View/>
 
     return (
+      <PageView style={platformStyles.container}>
       <ScrollView  ref='this' style={platformStyles.container}>
         <View style={[styles.band, {borderBottomColor: this.props.bankStyle.PRODUCT_ROW_BG_COLOR, borderTopColor: '#dddddd'}]}><Text style={styles.date}>{date}</Text></View>
         <View style={styles.photoBG}>
@@ -219,6 +222,7 @@ class MessageView extends Component {
           </View>
         </View>
       </ScrollView>
+      </PageView>
     );
   }
   onPress(url) {
@@ -326,7 +330,7 @@ var styles = StyleSheet.create({
   },
   photoListStyle: {
     flexDirection: 'row',
-    alignSelf: 'center',
+    // alignSelf: 'center',
   },
   band: {
     height: 30,
