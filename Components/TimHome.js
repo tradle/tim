@@ -583,7 +583,7 @@ class TimHome extends Component {
               </View>
 
     let logo = <View style={[styles.container]}>
-                  <CustomIcon color='#ffffff' name="tradle" size={getIconSize()} style={styles.thumb} />
+                  <CustomIcon color='#ffffff' name="tradle" size={getIconSize()} />
                   <Text style={styles.tradle}>Tradle</Text>
               </View>
 
@@ -633,7 +633,7 @@ class TimHome extends Component {
         <BackgroundImage source={BG_IMAGE} />
         <View  style={styles.splashLayout}>
           <View>
-            <CustomIcon name="tradle" color='#ffffff' size={getIconSize()} style={styles.thumb} />
+            <CustomIcon name="tradle" color='#ffffff' size={getIconSize()} />
             <Text style={styles.tradle}>Tradle</Text>
           </View>
           <View style={{paddingTop: 20, alignSelf: 'center'}}>
@@ -729,7 +729,7 @@ reactMixin(TimHome.prototype, Reflux.ListenerMixin);
 var styles = (function () {
   var dimensions = utils.dimensions(TimHome)
   var { width, height } = dimensions
-  var thumb = width > 1000 ? 250 : (width > 400 ? width / 2.5 : 170)
+  var thumb = width > 1000 ? 250 : Math.floor(width > 400 ? width / 2.5 : 170)
   return StyleSheet.create({
     container: {
       // padding: 30,
@@ -821,7 +821,7 @@ var styles = (function () {
 function getIconSize (dimensions) {
   dimensions = dimensions || utils.dimensions(TimHome)
   const { width } = dimensions
-  const size = width > 400 ? width / 2.5 : 170
+  const size = width > 400 ? Math.floor(width / 2.5) : 170
   return Math.min(size, 250)
 }
 
