@@ -8,6 +8,7 @@ var PhotoList = require('./PhotoList');
 // var AddNewIdentity = require('./AddNewIdentity');
 // var SwitchIdentity = require('./SwitchIdentity');
 var ShowRefList = require('./ShowRefList');
+var PageView = require('./PageView')
 var Icon = require('react-native-vector-icons/Ionicons');
 // var IdentitiesList = require('./IdentitiesList');
 var Actions = require('../Actions/Actions');
@@ -184,7 +185,6 @@ class ResourceView extends Component {
     var resource = this.state.resource;
     var modelName = resource[constants.TYPE];
     var model = utils.getModel(modelName).value;
-    var photos = [];
     if (resource.photos  &&  resource.photos.length > 1) {
       extend(photos, resource.photos);
       photos.splice(0, 1);
@@ -277,11 +277,15 @@ class ResourceView extends Component {
     }
     buttons.push(translate('cancel'))
     return (
-      <View style={{flex:1}}>
-      <ScrollView  ref='this' style={platformStyles.container}>
-        <View style={styles.photoBG}>
-          <PhotoView resource={resource} navigator={this.props.navigator}/>
-        </View>
+      <PageView style={platformStyles.container}>
+      <ScrollView  ref='this'>
+        {
+          resource.photos.length === 1
+          ? <View style={styles.photoBG}>
+              <PhotoView resource={resource} navigator={this.props.navigator}/>
+            </View>
+          : <View/>
+        }
         {actionPanel}
         <Modal animationType={'fade'} visible={this.state.isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
           <TouchableHighlight  onPress={() => this.closeModal()} underlayColor='transparent'>
@@ -311,7 +315,7 @@ class ResourceView extends Component {
       </ScrollView>
       {switchTouchId}
 
-      </View>
+      </PageView>
     );
   }
   openModal() {
