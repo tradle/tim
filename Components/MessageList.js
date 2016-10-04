@@ -316,15 +316,15 @@ class MessageList extends Component {
     var model = utils.getModel(resource[constants.TYPE]).value;
     var title = model.title; //utils.getDisplayName(resource, model.properties);
     var newTitle = title;
-    if (title.length > 20) {
-      var t = title.split(' ');
-      newTitle = '';
-      t.forEach(function(word) {
-        if (newTitle.length + word.length > 20)
-          return;
-        newTitle += newTitle.length ? ' ' + word : word;
-      })
-    }
+    // if (title.length > 20) {
+    //   var t = title.split(' ');
+    //   newTitle = '';
+    //   t.forEach(function(word) {
+    //     if (newTitle.length + word.length > 20)
+    //       return;
+    //     newTitle += newTitle.length ? ' ' + word : word;
+    //   })
+    // }
     let me = utils.getMe()
     // Check if I am a customer or a verifier and if I already verified this resource
     let isVerifier = !verification && utils.isVerifier(resource)
