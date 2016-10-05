@@ -19,6 +19,7 @@ var Icon = require('react-native-vector-icons/Ionicons');
 var myStyles = require('../styles/styles');
 var rStyles = require('../styles/registrationStyles');
 var NewResourceMixin = require('./NewResourceMixin');
+var PageView = require('./PageView')
 var reactMixin = require('react-mixin');
 var BG_IMAGE = require('../img/bg.png')
 var equal = require('deep-equal')
@@ -744,7 +745,7 @@ class NewResource extends Component {
     var {width, height} = utils.dimensions(NewResource)
     // var style = [platformStyles.container, {backgroundColor: 'transparent', height: DeviceHeight}]
     // var style = [platformStyles.container, {backgroundColor: 'transparent'}, utils.isWeb() &&  !this.state.isRegistration ?  {borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderTopColor: '#7AAAC3'} : {borderWidth: 0}]
-    var style = [platformStyles.container, {backgroundColor: 'transparent'}]
+    var style = {backgroundColor: 'transparent'}
     if (!options)
       options = {}
     options.auto = 'placeholders';
@@ -781,9 +782,12 @@ class NewResource extends Component {
                   keyboardShouldPersistTaps={true}
                   keyboardDismissMode={this.state.isRegistration || Platform.OS === 'ios' ? 'on-drag' : 'interactive'}>
         <View style={[styles.container, formStyle]}>
-          <View style={photoStyle}>
-            <PhotoView resource={resource} navigator={this.props.navigator}/>
-          </View>
+          { utils.isWeb()
+            ? <View/>
+            : <View style={photoStyle}>
+                <PhotoView resource={resource} navigator={this.props.navigator}/>
+              </View>
+          }
           <View style={this.state.isRegistration ? {marginHorizontal: height > 1000 ? 50 : 30} : {marginHorizontal: 10}}>
             <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange.bind(this)}/>
             {button}
@@ -806,25 +810,25 @@ class NewResource extends Component {
         Alert.alert(this.state.err)
         this.state.err = null
       }
-      return content
+      return <PageView style={platformStyles.container}>{content}</PageView>
     }
     var thumb = {
       width: width / 2.2,
       height: width / 2.2,
     }
     return (
-      <View style={{height: height}}>
+      <PageView style={[platformStyles.container, {height: height}]}>
         <Image source={BG_IMAGE} style={styles.bgImage} />
         <View style={{justifyContent: 'center', height: height}}>
           {content}
         </View>
         {this.state.isRegistration
           ? <View style={styles.logo}>
-              <CustomIcon name='tradle' color='#ffffff' size={40} style={styles.thumb} />
+              <CustomIcon name='tradle' color='#ffffff' size={40} />
             </View>
           : <View/>
         }
-      </View>
+      </PageView>
     )
   }
   showTermsAndConditions() {
@@ -992,7 +996,7 @@ class NewResource extends Component {
     if (count) {
       var items = []
       var arr = resource[bl.name]
-      var n = Math.min(arr.length, 7)
+      var n = Math.min(arr.length, utils.isWeb() ? utils.dimensions().width - 100 / 40 :  7)
       for (var i=0; i<n; i++) {
         items.push(<Image resizeMode='cover' style={styles.thumb} source={{uri: arr[i].url}}  key={this.getNextKey()} onPress={() => {
           this.openModal(arr[i])
