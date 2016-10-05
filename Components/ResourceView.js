@@ -280,13 +280,9 @@ class ResourceView extends Component {
     return (
       <PageView style={platformStyles.container}>
       <ScrollView  ref='this'>
-        {
-          resource.photos.length === 1
-          ? <View style={styles.photoBG}>
-              <PhotoView resource={resource} navigator={this.props.navigator}/>
-            </View>
-          : <View/>
-        }
+        <View style={styles.photoBG}>
+          <PhotoView resource={resource} navigator={this.props.navigator}/>
+        </View>
         {actionPanel}
         <Modal animationType={'fade'} visible={this.state.isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
           <TouchableHighlight  onPress={() => this.closeModal()} underlayColor='transparent'>
