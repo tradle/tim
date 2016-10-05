@@ -9,6 +9,7 @@ var GridItemsList = require('./GridItemsList')
 var PhotoView = require('./PhotoView');
 var ResourceView = require('./ResourceView');
 var ResourceMixin = require('./ResourceMixin');
+var PageView = require('./PageView')
 var t = require('tcomb-form-native');
 var extend = require('extend');
 var Actions = require('../Actions/Actions');
@@ -728,7 +729,9 @@ class NewResource extends Component {
     //           : platformStyles.container
     var {width, height} = utils.dimensions(NewResource)
     // var style = [platformStyles.container, {backgroundColor: 'transparent', height: DeviceHeight}]
-    var style = [platformStyles.container, {backgroundColor: 'transparent'}]
+    var style = this.state.isRegistration
+              ? [platformStyles.container, {backgroundColor: 'transparent'}]
+              : {backgroundColor: 'transparent'}
     if (!options)
       options = {}
     options.auto = 'placeholders';
@@ -788,7 +791,7 @@ class NewResource extends Component {
         Alert.alert(this.state.err)
         this.state.err = null
       }
-      return content
+      return <PageView style={platformStyles.container}>{content}</PageView>
     }
     var thumb = {
       width: width / 2.2,
@@ -802,7 +805,7 @@ class NewResource extends Component {
         </View>
         {this.state.isRegistration
           ? <View style={styles.logo}>
-              <CustomIcon name='tradle' size={40} style={styles.thumb} />
+              <CustomIcon name='tradle' size={40} color='#ffffff' style={styles.thumb} />
             </View>
           : <View/>
         }
@@ -972,7 +975,7 @@ class NewResource extends Component {
       var arr = resource[bl.name]
       var n = Math.min(arr.length, 7)
       for (var i=0; i<n; i++) {
-        items.push(<Image style={styles.thumb} source={{uri: arr[i].url}}  key={this.getNextKey()} onPress={() => {
+        items.push(<Image resizeMode='cover' style={styles.thumb} source={{uri: arr[i].url}}  key={this.getNextKey()} onPress={() => {
           this.openModal(arr[i])
         }}/>)
       }
