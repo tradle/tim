@@ -12,8 +12,10 @@ import { utils as tradleUtils } from '@tradle/engine'
 import nkeySE from './nkey-se'
 import nkeyECDSA from 'nkey-ecdsa'
 
-nkeyECDSA.setImplementationForCurve('p256', nkeySE)
-nkeyECDSA.setImplementationForCurve('prime256v1', nkeySE)
+if (utils.isIOS()) {
+  nkeyECDSA.setImplementationForCurve('p256', nkeySE)
+  nkeyECDSA.setImplementationForCurve('prime256v1', nkeySE)
+}
 
 const debug = require('debug')('tradle:app:keychain')
 const ellipticCurves = {}
