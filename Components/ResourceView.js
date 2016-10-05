@@ -185,6 +185,7 @@ class ResourceView extends Component {
     var resource = this.state.resource;
     var modelName = resource[constants.TYPE];
     var model = utils.getModel(modelName).value;
+    var photos = []
     if (resource.photos  &&  resource.photos.length > 1) {
       extend(photos, resource.photos);
       photos.splice(0, 1);
