@@ -64,7 +64,7 @@ class PhotoCarousel extends Component {
 
           photos.push(
                         <View style={[styles.container, {paddingHorizontal: padding}]} key={key}>
-                          <Image source={{uri: photo.url}} style={{width: w, height: h}}/>
+                          <Image resizeMode='cover' source={{uri: photo.url}} style={{width: w, height: h}}/>
                         </View>
                      )
 
@@ -72,15 +72,15 @@ class PhotoCarousel extends Component {
         else
           photos.push(
             isVertical  ? <View style={styles.container} key={key}>
-                            <Image source={{uri: photo.url}} style={styles.imageV}/>
+                            <Image resizeMode='cover' source={{uri: photo.url}} style={styles.imageV}/>
                           </View>
 
                         : (isLicense
                            ? <View style={styles.container} key={key}>
-                                <Image source={{uri: photo.url}} style={styles.imageH}/>
+                                <Image resizeMode='cover' source={{uri: photo.url}} style={styles.imageH}/>
                               </View>
                            : <View style={styles.container} key={key}>
-                                <Image source={{uri: photo.url}} style={styles.image}/>
+                                <Image resizeMode='cover' source={{uri: photo.url}} style={styles.image}/>
                               </View>
                         )
         )
