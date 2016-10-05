@@ -79,7 +79,7 @@ class PhotoView extends Component {
     return (
           <Animatable.View animation="fadeIn" iterationCount={1} direction="normal">
             <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, resource.photos[0])}>
-              <Image source={source} style={image} />
+              <Image resizeMode='cover' source={source} style={image} />
             </TouchableHighlight>
           </Animatable.View>
     )
