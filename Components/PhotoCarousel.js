@@ -29,8 +29,6 @@ class PhotoCarousel extends Component {
 
     var model = utils.getModel(this.props.resource[constants.TYPE]).value;
     var isVertical = currentPhoto.isVertical
-    var isLicense = model.id.indexOf('License') !== -1  ||  model.id.indexOf('Passport') !== -1;
-    var isUtility = !isLicense  &&  model.id.indexOf('Utility') !== -1
     var cnt = 2000
     var r = this.props.resource
     var styles = createStyles()
@@ -48,13 +46,8 @@ class PhotoCarousel extends Component {
           var w = width, h, padding
 
           if (height > width) {
-            if (photo.width > width) {
+            if (photo.width > width)
               h = photo.height * width / photo.width
-              // if (photo.isVertical)
-              //   h = Dimensions.get('window').width * 1.2
-              // else
-              //   h = Dimensions.get('window').width / 1.2
-            }
             else {
               h = photo.height
               w = photo.width
@@ -79,7 +72,6 @@ class PhotoCarousel extends Component {
                           <Image resizeMode='cover' source={{uri: photo.url}} style={{width: w, height: h}}/>
                         </View>
                      )
-
         }
         else
           photos.push(
@@ -87,29 +79,10 @@ class PhotoCarousel extends Component {
                             <Image resizeMode='cover' source={{uri: photo.url}} style={styles.imageV}/>
                           </View>
 
-                        : (isLicense
-                           ? <View style={styles.container} key={key}>
-                                <Image resizeMode='cover' source={{uri: photo.url}} style={styles.imageH}/>
-                              </View>
-                           : <View style={styles.container} key={key}>
-                                <Image resizeMode='cover' source={{uri: photo.url}} style={styles.image}/>
-                              </View>
-                        )
+                        : <View style={styles.container} key={key}>
+                            <Image resizeMode='cover' source={{uri: photo.url}} style={styles.image}/>
+                          </View>
         )
-        // photos.push(
-        //   isLicense ? <View style={styles.container}>
-        //                <Image source={{uri: photo.url}} style={styles.imageH}/>
-        //               </View>
-        //             : (isUtility
-        //               ? <View style={styles.container}>
-        //                   <Image source={{uri: photo.url}} style={styles.imageV}/>
-        //                 </View>
-
-        //               : <View style={styles.container}>
-        //                   <Image source={{uri: photo.url}} style={styles.image}/>
-        //                 </View>
-        //               )
-        // )
       }
       n = currentPhotoIndex
     }
