@@ -8,6 +8,7 @@ var PhotoList = require('./PhotoList');
 // var AddNewIdentity = require('./AddNewIdentity');
 // var SwitchIdentity = require('./SwitchIdentity');
 var ShowRefList = require('./ShowRefList');
+var PageView = require('./PageView')
 var Icon = require('react-native-vector-icons/Ionicons');
 // var IdentitiesList = require('./IdentitiesList');
 var Actions = require('../Actions/Actions');
@@ -277,8 +278,8 @@ class ResourceView extends Component {
     }
     buttons.push(translate('cancel'))
     return (
-      <View style={{flex:1}}>
-      <ScrollView  ref='this' style={platformStyles.container}>
+      <PageView style={platformStyles.container}>
+      <ScrollView  ref='this'>
         <View style={styles.photoBG}>
           <PhotoView resource={resource} navigator={this.props.navigator}/>
         </View>
@@ -311,7 +312,7 @@ class ResourceView extends Component {
       </ScrollView>
       {switchTouchId}
 
-      </View>
+      </PageView>
     );
   }
   openModal() {

@@ -1,6 +1,7 @@
 'use strict';
 
 var PhotoList = require('./PhotoList')
+var PageView = require('./PageView')
 var utils = require('../utils/utils');
 var translate = utils.translate
 import ImagePicker from 'react-native-image-picker';
@@ -80,7 +81,7 @@ class GridItemsList extends Component {
     let color = Platform.OS === 'android' ? 'red' : '#ffffff'
     let actionSheet = this.renderActionSheet(buttons)
     return (
-      <View style={styles.container}>
+      <PageView style={platformStyles.container}>
         <ScrollView  ref='this'>
         <View style={{flex: 1}}>
           <PhotoList photos={this.state.list} forceUpdate={this.state.forceUpdate} callback={this.cancelItem.bind(this)} navigator={this.props.navigator} resource={this.props.resource}/>
@@ -100,7 +101,7 @@ class GridItemsList extends Component {
           </ImageInput>
         </View>
         {actionSheet}
-      </View>
+      </PageView>
     )
   }
 
