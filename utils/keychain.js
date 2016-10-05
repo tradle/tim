@@ -10,6 +10,12 @@ if (accessGroup) ec.setAccessGroup(accessGroup)
 import { ec as ellipticEC } from 'elliptic'
 import { utils as tradleUtils } from '@tradle/engine'
 import nkeySE from './nkey-se'
+import nkeyECDSA from 'nkey-ecdsa'
+
+if (utils.isIOS()) {
+  nkeyECDSA.setImplementationForCurve('p256', nkeySE)
+  nkeyECDSA.setImplementationForCurve('prime256v1', nkeySE)
+}
 
 const debug = require('debug')('tradle:app:keychain')
 const ellipticCurves = {}
@@ -46,7 +52,21 @@ export function saveKey (pub, priv) {
 }
 
 export function lookupKeys (keys) {
-  return Promise.all(keys.map(lookupKey))
+  return Promise.all(keys.map(key => lookupKeyUntilFound(key)))
+}
+
+function lookupKeyUntilFound (pubKey, delay) {
+  delay = delay || 1000
+  return utils.tryWithExponentialBackoff(() => {
+    return lookupKey(pubKey)
+      .catch(err => {
+        debug('key not found, will retry', err)
+        throw err
+     })
+  }, {
+    intialDelay: 1000,
+    maxDelay: 20000
+  })
 }
 
 function lookupKey (pubKey) {
@@ -130,5 +150,5 @@ function getCurve (name) {
 }
 
 function isKeyInSecureEnclave (key) {
-  return utils.isIOS() && key.curve === 'p256'
+  return utils.isIOS() && key.type === 'ec' && key.curve in ec.curves //key.curve === 'p256'
 }
