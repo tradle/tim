@@ -18,11 +18,13 @@ var SplitByPathPlugin = require('webpack-split-by-path')
 var emptyObjPath = path.join(__dirname, './empty.js')
 
 var NODE_ENV = process.env.NODE_ENV || 'development';
-// var ROOT_PATH = path.resolve(__dirname, '../');
+// var ROOT_PATH = path.resolve(__dirname, '');
 var PROD = 'production';
 var DEV = 'development';
 var isProd = NODE_ENV === 'production';
 var isHot = !isProd && process.env.HOT === '1'
+var projectRoot = path.join(__dirname, '../')
+
 // var paths = {
 //   src: path.join(ROOT_PATH, '.'),
 //   index: path.join(ROOT_PATH, 'index.web'),
@@ -97,7 +99,7 @@ var common = {
     // new webpack.optimize.OccurrenceOrderPlugin(true),
     function() {
       this.plugin('done', function(stats) {
-        fs.writeFileSync(path.join(__dirname, '../../', `webpack-stats-${NODE_ENV}.json`), JSON.stringify(stats.toJson()))
+        fs.writeFileSync(path.join(__dirname, `webpack-stats-${NODE_ENV}.json`), JSON.stringify(stats.toJson()))
       })
     }
   ],
@@ -113,7 +115,7 @@ if (!isHot) {
     new SplitByPathPlugin([
       {
         name: 'vendor',
-        path: path.join(__dirname, '../../node_modules')
+        path: path.join(projectRoot, 'node_modules')
       }
     ])
   )
@@ -127,7 +129,7 @@ if (NODE_ENV === 'development') {
     devtool: 'source-map',
     entry: getEntry(),
     output: {
-      path: path.join(__dirname, '../build'),
+      path: path.join(__dirname, 'build'),
       filename: '[name].[chunkhash].js',
       chunkFilename: '[chunkhash].js',
       publicPath: '/',
@@ -139,7 +141,7 @@ if (NODE_ENV === 'development') {
       // }),
       new HtmlPlugin({
         title: 'Tradle',
-        template: 'index-template.html'
+        template: path.join(__dirname, 'index-template.html')
       })
       // new HtmlPlugin()
     ],
@@ -157,14 +159,12 @@ if (NODE_ENV === 'development') {
   }
 } else {
   config = merge(common, {
-    // debug: true,
-    // devtool: 'cheap-module-eval-source-map',
-    devtool: 'source-map',
+    // devtool: 'source-map',
     entry: getEntry(),
     output: {
-      path: path.join(__dirname, '../dist'),
-      filename: '[name].[hash].js',
-      chunkFilename: '[name].[hash].js',
+      path: path.join(__dirname, 'dist'),
+      filename: '[name].[chunkhash].js',
+      chunkFilename: '[name].[chunkhash].js',
       publicPath: '/',
     },
     module: {
@@ -178,11 +178,14 @@ if (NODE_ENV === 'development') {
         compress: {
           warnings: false
         },
-        mangle: false
+        sourceMap: false,
+        mangle: false,
+        beautify: false,
+        comments: false
       }),
-      new webpack.optimize.AggressiveMergingPlugin(),
+      // new webpack.optimize.AggressiveMergingPlugin(),
       new HtmlPlugin({
-        template: 'index-template.html',
+        template: path.join(__dirname, 'index-template.html'),
         filename: 'index.html',
         // hash: true,
         title: 'Tradle'
@@ -198,7 +201,7 @@ function getEntry () {
     'babel-polyfill',
     isHot && 'webpack/hot/dev-server',
     isHot && 'webpack-hot-middleware/client',
-    path.join(__dirname, '../../index.web.js')
+    path.join(projectRoot, 'index.web.js')
   ].filter(notNull)
 
   return entry
@@ -208,7 +211,16 @@ function getBabelLoader () {
   const loader = {
     test: /\.jsx?$/,
     loader: 'babel-loader',
+    // test: function (modulePath) {
+    //   if (!/\.jsx?$/.test(modulePath)) return false
+    //   if (modulePath.indexOf('node_modules') === -1) return true
+    //   if (modulePath.indexOf('react') === -1 && modulePath.indexOf('tcomb') === -1) return true
+
+    //   return false
+    // },
     exclude: [
+      // exclude node_modules except tcomb and react ones
+      // /node_modules\/(?!(.*)?(react|tcomb))/,
       /node_modules\/(?!react|tcomb)/,
       /errno/,
       /xtend/

@@ -2580,7 +2580,7 @@
     },
     "express": {
       "version": "4.14.0",
-      "from": "express@>=4.13.3 <5.0.0",
+      "from": "express@latest",
       "resolved": "https://registry.npmjs.org/express/-/express-4.14.0.tgz",
       "dependencies": {
         "accepts": {
@@ -6480,7 +6480,7 @@
     },
     "rimraf": {
       "version": "2.5.4",
-      "from": "rimraf@>=2.2.8 <3.0.0",
+      "from": "rimraf@latest",
       "resolved": "https://registry.npmjs.org/rimraf/-/rimraf-2.5.4.tgz",
       "dependencies": {
         "glob": {
