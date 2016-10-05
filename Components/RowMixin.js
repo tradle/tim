@@ -192,7 +192,7 @@ var RowMixin = {
     //               </View>
                     // <Icon name='md-arrow-dropright' size={30} color={this.props.bankStyle.VERIFIED_HEADER_COLOR}/>
     var header =  <View style={headerStyle}>
-                    <Text style={[styles.resourceTitle, {fontSize: 20, marginTop: 2, paddingRight: 10, color: this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>{translate(model) + ' ...'}</Text>
+                    <Text style={[styles.resourceTitle, {fontSize: 18, marginTop: 2, paddingRight: 10, color: this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>{translate(model) + ' ...'}</Text>
                   </View>
     let addStyle
     if (!onPress)
@@ -220,7 +220,7 @@ var RowMixin = {
                    : <View />
       var shareView = <View style={{flexDirection: 'row', marginLeft: 0, justifyContent: 'space-between', padding: 5, borderRadius: 10, borderWidth: BORDER_WIDTH, borderColor: '#215A89', backgroundColor: '#4982B1', opacity: this.props.resource.documentCreated ? 0.3 : 1}}>
                         <CustomIcon name='tradle' style={{ color: '#ffffff' }} size={35} />
-                        <Text style={{color: '#fefefe', fontSize: 20, paddingHorizontal: 3, marginTop: 6}}>{translate('Share')}</Text>
+                        <Text style={{color: '#fefefe', fontSize: 18, paddingHorizontal: 3, marginTop: 6}}>{translate('Share')}</Text>
                       </View>
       var orgTitle = this.props.to[constants.TYPE] === constants.TYPES.ORGANIZATION
                    ? this.props.to.name
