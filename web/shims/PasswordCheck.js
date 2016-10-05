@@ -93,18 +93,34 @@ class PasswordEntry extends Component {
     }
   }
 
-  componentDidMount() {
-    var input = this.refs.form.getComponent('password').refs.input
+  _getInput(field) {
+    var component = this.refs.form.getComponent(field)
+    if (!component) return
+
+    var input = component.refs.input
+    if (!input) return
+
     if (!input.focus) input = input.refs.input
-    input.focus()
-    input.addEventListener('keydown', e => {
-      if (!input.value || this.isDisabled()) return
+
+    return input
+  }
+
+  componentDidMount() {
+    const self = this
+    const password = this._getInput('password')
+    const passwordAgain = this._getInput('passwordAgain')
+    password.focus()
+    password.addEventListener('keydown', onKeyDown)
+    if (passwordAgain) passwordAgain.addEventListener('keydown', onKeyDown)
+
+    function onKeyDown (e) {
+      if (!this.value || self.isDisabled()) return
 
       const code = e.keyCode ? e.keyCode : e.which
       if (code == 13) { // Enter keycode
-        this.onPress()
+        self.onPress()
       }
-    })
+    }
   }
 
   onChange(value, path) {
