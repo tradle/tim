@@ -7,6 +7,7 @@ var VerificationRow = require('./VerificationRow');
 var NewResource = require('./NewResource');
 var MessageList = require('./MessageList');
 var MessageView = require('./MessageView')
+var PageView = require('./PageView')
 import ActionSheet from 'react-native-actionsheet'
 var utils = require('../utils/utils');
 var translate = utils.translate
@@ -859,7 +860,7 @@ class ResourceList extends Component {
     }
 
     return (
-      <View style={platformStyles.container}>
+      <PageView style={platformStyles.container}>
         <NetworkInfoProvider connected={this.state.isConnected} />
         {searchBar}
         <View style={styles.separator} />
@@ -890,7 +891,7 @@ class ResourceList extends Component {
             }
           }}
         />
-      </View>
+      </PageView>
     );
   }
 
@@ -1002,7 +1003,7 @@ var styles = StyleSheet.create({
   },
   separator: {
     height: 1,
-    backgroundColor: '#cccccc',
+    backgroundColor: '#eeeeee',
   },
   icon: {
     marginLeft: -23,
