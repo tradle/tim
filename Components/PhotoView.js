@@ -6,12 +6,14 @@ var constants = require('@tradle/constants');
 var PhotoCarousel = require('./PhotoCarousel')
 var reactMixin = require('react-mixin');
 var PhotoCarouselMixin = require('./PhotoCarouselMixin');
+
 var equal = require('deep-equal')
 import {
   StyleSheet,
   Image,
   View,
   Text,
+  // Animated,
   TouchableHighlight
 } from 'react-native'
 
@@ -22,7 +24,8 @@ import * as Animatable from 'react-native-animatable'
 class PhotoView extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {}
+    // this.state = {anim: new Animated.Value(100)};
   }
   changePhoto(photo) {
     this.setState({currentPhoto: photo});
@@ -72,7 +75,7 @@ class PhotoView extends Component {
     let {width, height} = utils.dimensions(PhotoView)
     let image = {
       width: width < height ? width : height,
-      height: width < height ? height / 2 : width / 2,
+      height: Math.round(width < height ? height / 2 : width / 2),
       // alignSelf: 'stretch'
     }
 
