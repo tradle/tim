@@ -61,11 +61,11 @@ class PhotoCarousel extends Component {
               padding = (width - photo.width) / 2
             }
 
-            if (h > 3 * height / 4)
-              h = 3 * height / 4
+            if (h > 0.8 * height)
+              h = Math.floor(0.8 * height)
           }
           else {
-            h = 0.8 * height
+            h = Math.floor(0.8 * height)
             if (photo.height > h)
               w = photo.width * h / photo.height
             else {
@@ -117,7 +117,7 @@ class PhotoCarousel extends Component {
       <Carousel width={width}
                 loop={false}
                 animate={false}
-                indicatorOffset={40}
+                indicatorOffset={20}
                 indicatorColor={'#efefef'}>
         {photos}
       </Carousel>
