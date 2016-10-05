@@ -292,9 +292,9 @@ var utils = {
     return subclasses;
   },
   getFontSize(fontSize) {
-    return fontSize * (!PixelRatio.getFontScale() || PixelRatio.getFontScale() <= 3
+    return Math.floor(fontSize * (!PixelRatio.getFontScale() || PixelRatio.getFontScale() <= 3
           ? (Platform.OS === 'androis' ? 1 : 1.1)
-          : (PixelRatio.getFontScale() < 3.5) ? 0.95 : 0.87)
+          : (PixelRatio.getFontScale() < 3.5) ? 0.95 : 0.87))
   },
   getId(r) {
     if (typeof r === 'string') {
