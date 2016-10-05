@@ -134,7 +134,7 @@ class FormMessageRow extends Component {
     // in a bigger than needed bubble
     var messageBody;
     var width = utils.dimensions(FormMessageRow).width
-    let msgWidth = width * 0.8
+    let msgWidth =  Math.floor(width * 0.8)
     var viewStyle = {width: msgWidth, flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
 
     messageBody =
@@ -381,8 +381,8 @@ var styles = StyleSheet.create({
   },
   formType: {
     color: '#EBFCFF',
-    fontSize: 20,
-    fontWeight: '600',
+    fontSize: 18,
+    // fontWeight: '600',
     opacity: 0.7,
     alignSelf: 'flex-end',
     marginTop: 10
