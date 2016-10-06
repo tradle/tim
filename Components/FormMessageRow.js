@@ -159,7 +159,7 @@ class FormMessageRow extends Component {
 
     var len = photoUrls.length;
     var inRow = utils.isWeb()
-              ? Math.floor(msgWidth / 150)
+              ? Math.floor(msgWidth / 145)
               : len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
     var photoStyle = {};
     var height;
