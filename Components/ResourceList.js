@@ -826,6 +826,8 @@ class ResourceList extends Component {
     }
     else {
       var model = utils.getModel(this.props.modelName).value;
+          // style={[styles.listViewStyle, {width: Math.floor(utils.dimensions().width * 0.75)}]}
+
       content = <ListView
           dataSource={this.state.dataSource}
           renderHeader={this.renderHeader.bind(this)}
@@ -864,7 +866,6 @@ class ResourceList extends Component {
       <PageView style={platformStyles.container}>
         <NetworkInfoProvider connected={this.state.isConnected} />
         {searchBar}
-        <View style={styles.separator} />
         {content}
         {footer}
         <ActionSheet
@@ -999,6 +1000,12 @@ var styles = StyleSheet.create({
   //   backgroundColor: '#f7f7f7',
   //   // backgroundColor: 'white',
   //   marginTop: Platform.OS === 'ios' ? 64 : 44,
+  // },
+  // listViewStyle: {
+  //   alignSelf: 'flex-end',
+  //   borderWidth: 1,
+  //   borderColor: '#f7f7f7',
+  //   borderLeftColor: '#cccccc'
   // },
   centerText: {
     alignItems: 'center',
