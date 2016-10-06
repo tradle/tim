@@ -249,7 +249,9 @@ var Store = Reflux.createStore({
       return this.ready = this.wipe()
         .then(() => {
           Alert.alert('please refresh')
-          return Q.Promise(function (resolve) {})
+          return Q.Promise(function (resolve) {
+            // hang
+          })
         })
     }
 
