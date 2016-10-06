@@ -7,7 +7,7 @@ var constants = require('@tradle/constants');
 var Icon = require('react-native-vector-icons/Ionicons');
 var RowMixin = require('./RowMixin');
 var ResourceList = require('./ResourceList')
-var Swipeout = require('react-native-swipeout')
+// var Swipeout = require('react-native-swipeout')
 var reactMixin = require('react-mixin');
 var equal = require('deep-equal')
 var extend = require('extend')
@@ -109,11 +109,6 @@ class ResourceRow extends Component {
       }
     }
     var orgPhoto;
-    // if (isIdentity  &&  resource.organization) {
-    //   if (resource.organization.photo)
-    //     orgPhoto = <Image source={{uri: resource.organization.photo}} style={styles.orgIcon} />
-    // }
-    // if (!orgPhoto)
       orgPhoto = <View/>
 
     var onlineStatus = (resource.online)
@@ -138,8 +133,7 @@ class ResourceRow extends Component {
     let dateRow
     if (dateProp  &&  resource[dateProp]) {
       var val = utils.formatDate(new Date(resource[dateProp]), true)
-      // var dateBlock = self.addDateProp(resource, dateProp, true);
-      dateRow = <View style={{position: 'absolute', top: 2, backgroundColor: 'transparent', right: 10}}>
+      dateRow = <View style={styles.dateRow}>
               <Text style={styles.verySmallLetters}>{val}</Text>
             </View>
     }
@@ -150,7 +144,7 @@ class ResourceRow extends Component {
     var isOpaque = resource[constants.TYPE] === constants.TYPES.ORGANIZATION && !resource.contacts
     if (isOpaque)
       return (
-      <View key={this.getNextKey()} style={{opacity: 0.5}}>
+      <View key={this.getNextKey()} style={[{opacity: 0.5}, styles.rowWrapper]}>
         <View style={styles.row} key={this.getNextKey()}>
           {photo}
           {orgPhoto}
@@ -162,12 +156,11 @@ class ResourceRow extends Component {
           {dateRow}
           {cancelResource}
         </View>
-        <View style={styles.cellBorder}  key={this.getNextKey()} />
       </View>
         )
     else
       return (
-        <View key={this.getNextKey()} style={{opacity: 1, justifyContent: 'center', backgroundColor: '#ffffff'}}>
+        <View key={this.getNextKey()} style={[{opacity: 1}, styles.rowWrapper]}>
           <TouchableHighlight onPress={this.state ? this.action.bind(this) : this.props.onSelect} underlayColor='transparent' key={this.getNextKey()}>
             <View style={[styles.row, {width: utils.dimensions(ResourceRow).width - 50}]} key={this.getNextKey()}>
               {photo}
@@ -204,53 +197,9 @@ class ResourceRow extends Component {
             : <View />}
           {dateRow}
           {cancelResource}
-          <View style={styles.cellBorder} />
         </View>
       );
   }
-      // return (
-      // <Swipeout right={[{text: 'Hide', backgroundColor: 'red', onPress: this.hideResource.bind(this, resource)}]} autoClose={true} scroll={(event) => this._allowScroll(event)} >
-      //   <View key={this.getNextKey()} style={{opacity: 1, flex: 1, justifyContent: 'center'}}>
-      //     <TouchableHighlight onPress={this.state ? this.action.bind(this) : this.props.onSelect} underlayColor='transparent' key={this.getNextKey()}>
-      //       <View style={[styles.row]} key={this.getNextKey()}>
-      //         {photo}
-      //         {orgPhoto}
-      //         {onlineStatus}
-      //         <View style={textStyle} key={this.getNextKey()}>
-      //           {this.formatRow(resource)}
-      //         </View>
-      //         {cancelResource}
-      //       </View>
-      //     </TouchableHighlight>
-      //     {this.props.isOfficialAccounts
-      //     ? <TouchableHighlight underlayColor='transparent' style={{position: 'absolute', right: 20, top: 25, backgroundColor: 'white'}} onPress={() => {
-      //         this.props.navigator.push({
-      //           component: ResourceList,
-      //           title: translate("myDocuments"),
-      //           backButtonTitle: translate('back'),
-      //           passProps: {
-      //             modelName: constants.TYPES.FORM,
-      //             resource: this.props.resource
-      //           }
-      //         })
-      //       }}>
-      //         <View style={textStyle}>
-      //            {resource.numberOfForms
-      //               ? <View style={{flexDirection: 'row'}}>
-      //                    <Icon name='ios-paper-outline' color='#cccccc' size={35} style={{marginTop: Platform.OS === 'ios' ? -5 : 0}}/>
-      //                    <Text style={{fontWeight: '600', marginLeft: 0, marginTop: Platform.OS === 'ios' ? -10 : -6, color: '#cccccc'}}>{resource.numberOfForms}</Text>
-      //                 </View>
-      //               : <View />
-      //            }
-      //         </View>
-      //       </TouchableHighlight>
-      //       : <View />}
-      //     {dateRow}
-      //     {cancelResource}
-      //     <View style={styles.cellBorder}  key={this.getNextKey()} />
-      //   </View>
-      // </Swipeout>
-      // );
 
   action() {
     if (this.props.onCancel)
@@ -407,16 +356,6 @@ class ResourceRow extends Component {
           else
             row = <Text style={style} key={self.getNextKey()}>{val}</Text>;
         }
-        // if (first  &&  dateProp) {
-        //   var val = utils.formatDate(new Date(resource[dateProp]), true);
-        //   // var dateBlock = self.addDateProp(resource, dateProp, true);
-        //   row = <View style={{flexDirection: 'row', justifyContent: 'space-between'}} key={self.getNextKey()}>
-        //           <View>{row}</View>
-        //           <View style={{position: 'absolute', top: -3, right: 10}}>
-        //             <Text style={styles.verySmallLetters}>{val}</Text>
-        //           </View>
-        //         </View>
-        // }
         vCols.push(row);
         first = false;
       }
@@ -457,6 +396,20 @@ var styles = StyleSheet.create({
     flex: 1,
     alignSelf: 'center'
   },
+  rowWrapper: {
+    borderColor: '#f7f7f7',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#eeeeee',
+    justifyContent: 'center',
+    backgroundColor: '#ffffff'
+  },
+  dateRow: {
+    position: 'absolute',
+    top: 2,
+    backgroundColor:
+    'transparent',
+    right: 10
+  },
   // TODO: remove when you figure out v-centering
   // HACK FOR VERTICAL CENTERING
   resourceTitle: {
@@ -479,25 +432,6 @@ var styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 5,
   },
-  rowV: {
-    // backgroundColor: 'white',
-    // justifyContent: 'space-around',
-    // flexDirection: 'row',
-    padding: 5,
-  },
-  cell: {
-    marginTop: 20,
-    marginBottom: 20,
-    marginLeft: 10,
-    fontSize: 18
-  },
-  myCell: {
-    padding: 5,
-    marginLeft: 30,
-    justifyContent: 'flex-end',
-    borderRadius: 10,
-    backgroundColor: '#D7E6ED'
-  },
   cellRoundImage: {
     // flex: 1,
     justifyContent: 'center',
@@ -513,8 +447,6 @@ var styles = StyleSheet.create({
     alignSelf: 'center'
   },
   cellText: {
-    // marginTop: 12,
-    // alignSelf: 'center',
     color: '#ffffff',
     fontSize: 20,
     backgroundColor: 'transparent'
@@ -533,11 +465,6 @@ var styles = StyleSheet.create({
     marginTop: 20,
     marginLeft: 10,
   },
-  cellBorder: {
-    backgroundColor: '#eeeeee',
-    height: 1,
-    marginLeft: 4,
-  },
   cancelIcon: {
     width: 40,
     height: 40,
@@ -550,28 +477,6 @@ var styles = StyleSheet.create({
     marginTop: 7,
     color: '#7AAAc3'
   },
-  // orgIcon: {
-  //   width: 30,
-  //   height: 30,
-  //   borderWidth: 1,
-  //   borderColor: '#7AAAc3',
-  //   borderRadius: 15,
-  //   marginLeft: -30,
-  //   marginTop: 40,
-  // },
-  // orgImage: {
-  //   width: 30,
-  //   height: 30,
-  //   borderWidth: 1,
-  //   borderColor: '#7AAAc3',
-  //   borderRadius: 15,
-  //   marginRight: 10,
-
-  //   alignSelf: 'center',
-//    // position: 'absolute',
-//    // marginLeft: 10,
-//    // marginTop: 7,
-  // },
   online: {
     backgroundColor: 'green',
     borderRadius: 6,
@@ -591,3 +496,46 @@ var styles = StyleSheet.create({
 });
 
 module.exports = ResourceRow;
+      // return (
+      // <Swipeout right={[{text: 'Hide', backgroundColor: 'red', onPress: this.hideResource.bind(this, resource)}]} autoClose={true} scroll={(event) => this._allowScroll(event)} >
+      //   <View key={this.getNextKey()} style={{opacity: 1, flex: 1, justifyContent: 'center'}}>
+      //     <TouchableHighlight onPress={this.state ? this.action.bind(this) : this.props.onSelect} underlayColor='transparent' key={this.getNextKey()}>
+      //       <View style={[styles.row]} key={this.getNextKey()}>
+      //         {photo}
+      //         {orgPhoto}
+      //         {onlineStatus}
+      //         <View style={textStyle} key={this.getNextKey()}>
+      //           {this.formatRow(resource)}
+      //         </View>
+      //         {cancelResource}
+      //       </View>
+      //     </TouchableHighlight>
+      //     {this.props.isOfficialAccounts
+      //     ? <TouchableHighlight underlayColor='transparent' style={{position: 'absolute', right: 20, top: 25, backgroundColor: 'white'}} onPress={() => {
+      //         this.props.navigator.push({
+      //           component: ResourceList,
+      //           title: translate("myDocuments"),
+      //           backButtonTitle: translate('back'),
+      //           passProps: {
+      //             modelName: constants.TYPES.FORM,
+      //             resource: this.props.resource
+      //           }
+      //         })
+      //       }}>
+      //         <View style={textStyle}>
+      //            {resource.numberOfForms
+      //               ? <View style={{flexDirection: 'row'}}>
+      //                    <Icon name='ios-paper-outline' color='#cccccc' size={35} style={{marginTop: Platform.OS === 'ios' ? -5 : 0}}/>
+      //                    <Text style={{fontWeight: '600', marginLeft: 0, marginTop: Platform.OS === 'ios' ? -10 : -6, color: '#cccccc'}}>{resource.numberOfForms}</Text>
+      //                 </View>
+      //               : <View />
+      //            }
+      //         </View>
+      //       </TouchableHighlight>
+      //       : <View />}
+      //     {dateRow}
+      //     {cancelResource}
+      //     <View style={styles.cellBorder}  key={this.getNextKey()} />
+      //   </View>
+      // </Swipeout>
+      // );
