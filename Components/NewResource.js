@@ -124,7 +124,7 @@ class NewResource extends Component {
            this.state.itemsCount !== nextState.itemsCount    ||
            this.state.isLoadingVideo !== nextState.isLoadingVideo  ||
            this.state.keyboardSpace !== nextState.keyboardSpace    ||
-           this.state.termsAccepted !== nextState.termsAccepted    ||
+           // this.state.termsAccepted !== nextState.termsAccepted    ||
           !equal(this.state.resource, nextState.resource)
 
     if (!isUpdate)
@@ -340,10 +340,6 @@ class NewResource extends Component {
   onSavePressed() {
     if (this.state.submitted)
       return
-    if (this.state.isRegistration  &&  !this.state.termsAccepted) {
-      Alert.alert(translate('viewTerms'))
-      return
-    }
 
     this.state.submitted = true
     this.state.noScroll = false
@@ -812,23 +808,20 @@ class NewResource extends Component {
       }
       return <PageView style={platformStyles.container}>{content}</PageView>
     }
-    var thumb = {
-      width: width / 2.2,
-      height: width / 2.2,
-    }
     return (
-      <PageView style={[platformStyles.container, {height: height}]}>
+      <View style={{height: height}}>
         <Image source={BG_IMAGE} style={styles.bgImage} />
         <View style={{justifyContent: 'center', height: height}}>
-          {content}
-        </View>
         {this.state.isRegistration
           ? <View style={styles.logo}>
-              <CustomIcon name='tradle' color='#ffffff' size={40} />
+              <CustomIcon name='tradle' size={40} color='#ffffff' style={{padding: 10}}/>
             </View>
           : <View/>
         }
-      </PageView>
+        {content}
+        <View/>
+        </View>
+      </View>
     )
   }
   showTermsAndConditions() {
@@ -845,17 +838,11 @@ class NewResource extends Component {
    })
   }
   acceptTsAndCs() {
-    // Alert.alert(
-    //   translate('acceptingTermsAndConditions'),
-    //   null,
-    //   [
-    //     {text: 'Cancel', onPress: () => console.log('Canceled!')},
-    //     {text: 'Ok', onPress: () => {
-          this.props.navigator.pop()
-          this.setState({termsAccepted: true})
-    //     }},
-    //   ]
-    // )
+    this.setState({termsAccepted: true})
+    if (this.state.resource.firstName)
+      this.onSavePressed()
+    else
+      this.props.navigator.pop()
   }
 
   cancelItem(pMeta, item) {
@@ -1254,9 +1241,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions }) {
     },
     logo: {
       opacity: 0.7,
-      position: 'absolute',
-      top: 20,
-      right: 20
+      alignSelf: 'flex-end',
     }
   })
 })
