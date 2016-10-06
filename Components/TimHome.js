@@ -654,7 +654,7 @@ class TimHome extends Component {
   getSplashScreen() {
     var {width, height} = utils.dimensions(TimHome)
     return (
-      <View>
+      <View style={styles.container}>
         <BackgroundImage source={BG_IMAGE} />
         <View  style={styles.splashLayout}>
           <View>
@@ -719,8 +719,11 @@ class TimHome extends Component {
   }
 
   _pressHandler() {
-    signIn(this.props.navigator)
-      .then(() => this.showOfficialAccounts())
+    if (utils.getMe())
+      signIn(this.props.navigator)
+        .then(() => this.showOfficialAccounts())
+    else
+      this.register(this.showOfficialAccounts.bind(this))
   }
 }
 
