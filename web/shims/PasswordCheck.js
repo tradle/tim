@@ -271,11 +271,11 @@ class PasswordEntry extends Component {
     let { width, height } = Dimensions.get('window')
     const smaller = Math.min(width, height)
     width = smaller / 2
-    height = smaller / 4
+    // height = smaller / 4
     return (
       <View style={[styles.container, customStyle.container]}>
         {header}
-        <View style={{ width, height }}>
+        <View style={{ width }}>
           <Form
             ref="form"
             type={type}
