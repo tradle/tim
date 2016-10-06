@@ -729,9 +729,6 @@ class NewResource extends Component {
     //           : platformStyles.container
     var {width, height} = utils.dimensions(NewResource)
     // var style = [platformStyles.container, {backgroundColor: 'transparent', height: DeviceHeight}]
-    var style = this.state.isRegistration
-              ? [platformStyles.container, {backgroundColor: 'transparent'}]
-              : {backgroundColor: 'transparent'}
     if (!options)
       options = {}
     options.auto = 'placeholders';
@@ -761,7 +758,7 @@ class NewResource extends Component {
                   ? {justifyContent: 'center', height: height - (height > 1000 ? 0 : 100)}
                   : {justifyContent: 'flex-start'}
     var content =
-      <ScrollView style={style}
+      <ScrollView style={{backgroundColor: 'transparent'}}
                   ref='scrollView' {...this.scrollviewProps}
                   keyboardShouldPersistTaps={true}
                   keyboardDismissMode={this.state.isRegistration || Platform.OS === 'ios' ? 'on-drag' : 'interactive'}>
@@ -793,22 +790,33 @@ class NewResource extends Component {
       }
       return <PageView style={platformStyles.container}>{content}</PageView>
     }
-    var thumb = {
-      width: width / 2.2,
-      height: width / 2.2,
-    }
+    // return (
+    //   <View style={{height: height}}>
+    //     <Image source={BG_IMAGE} style={styles.bgImage} />
+    //     <View style={{justifyContent: 'center', height: height}}>
+    //     {content}
+    //     </View>
+    //     {this.state.isRegistration
+    //       ? <View style={styles.logo}>
+    //           <CustomIcon name='tradle' size={40} color='#ffffff' />
+    //         </View>
+    //       : <View/>
+    //     }
+    //   </View>
+    // )
     return (
       <View style={{height: height}}>
         <Image source={BG_IMAGE} style={styles.bgImage} />
         <View style={{justifyContent: 'center', height: height}}>
-        {content}
-        </View>
         {this.state.isRegistration
           ? <View style={styles.logo}>
-              <CustomIcon name='tradle' size={40} color='#ffffff' style={styles.thumb} />
+              <CustomIcon name='tradle' size={40} color='#ffffff' style={{padding: 10}}/>
             </View>
           : <View/>
         }
+        {content}
+        <View/>
+        </View>
       </View>
     )
   }
@@ -1230,9 +1238,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions }) {
     },
     logo: {
       opacity: 0.7,
-      position: 'absolute',
-      top: 20,
-      right: 20
+      alignSelf: 'flex-end',
     }
   })
 })
