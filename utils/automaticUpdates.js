@@ -3,7 +3,7 @@ import { AsyncStorage, Alert } from 'react-native'
 import utils from './utils'
 import Actions from '../Actions/Actions'
 
-let CodePush = !__DEV__ && !utils.isSimulator() && require('react-native-code-push')
+let CodePush = !__DEV__ && !utils.isSimulator() && !utils.isWeb() && require('react-native-code-push')
 let ON = false
 let CHECKING
 // every 10 mins

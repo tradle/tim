@@ -141,13 +141,11 @@ class ResourceView extends Component {
     }
   }
   shouldComponentUpdate(nextProps, nextState) {
-    return this.props.orientation !== nextProps.orientation                ||
+    return utils.resized(this.props, nextProps)                            ||
             (this.state.isModalOpen  !== nextState.isModalOpen             ||
             this.state.useGesturePassword !== nextState.useGesturePassword ||
             this.state.useTouchId !== nextState.useTouchId                 ||
             this.state.pairingData !== nextState.pairingData)
-           ? true
-           : false
   }
   onResourceUpdate(params) {
     var resource = params.resource;
@@ -269,8 +267,8 @@ class ResourceView extends Component {
         actions.push(USE_GESTURE_PASSWORD)
       }
 
-      if (this.state.useGesturePassword || !utils.isIOS) {
-        buttons.push(translate('changeGesturePassword'))
+      if (this.state.useGesturePassword || !utils.isIOS()) {
+        buttons.push(utils.isWeb() ? translate('changePassword') : translate('changeGesturePassword'))
         actions.push(CHANGE_GESTURE_PASSWORD)
       }
       buttons.push(translate('pairDevices'))

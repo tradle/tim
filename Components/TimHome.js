@@ -63,6 +63,7 @@ import ActivityIndicator from './ActivityIndicator'
 import StatusBar from './StatusBar'
 
 const isAndroid = utils.isAndroid()
+const isLinkingSupported = utils.isIOS() && Linking
 import React, { Component } from 'react'
 
 class TimHome extends Component {
@@ -84,7 +85,7 @@ class TimHome extends Component {
   componentWillMount() {
     this.listenTo(Store, 'handleEvent');
     this._pressHandler = debounce(this._pressHandler, 500, true)
-    if (Linking && !isAndroid)
+    if (isLinkingSupported)
       Linking.addEventListener('url', this._handleOpenURL);
 
     // var url = LinkingIOS.popInitialURL()
@@ -111,7 +112,7 @@ class TimHome extends Component {
     this.props.navigator.isConnected = isConnected
   }
   componentWillUnmount() {
-    if (Linking && !isAndroid)
+    if (isLinkingSupported)
       Linking.removeEventListener('url', this._handleOpenURL);
 
     if (NetInfo) {
@@ -124,7 +125,7 @@ class TimHome extends Component {
   componentDidMount() {
     AutomaticUpdates.on()
     this.listenTo(Store, 'handleEvent');
-    if (!Linking) return
+    if (!isLinkingSupported) return
 
     Linking.getInitialURL()
     .then((url) => {

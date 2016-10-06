@@ -50,3 +50,6 @@ config/
 code-push
 localIP.json
 google-services.json
+web/dist
+webpack-stats-*.json
+version.json

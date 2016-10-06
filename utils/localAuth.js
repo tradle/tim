@@ -42,9 +42,13 @@ const LOCK_TIME = __DEV__ ? 5000 : 5 * 60 * 1000
 const AUTH_FAILED_MSG = 'Authentication failed'
 const DEFAULT_OPTS = {
   reason: 'unlock Tradle to proceed',
-  fallbackToPasscode: false,
+  fallbackToPasscode: true,
   suppressEnterPassword: false
 }
+
+const PROMPTS = require('./password-prompts')
+const PASSWORD_PROMPTS = getPasswordPrompts()
+const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z]).{10,}$/
 
 let pendingAuth
 let pendingEnrollRequest
@@ -199,7 +203,14 @@ function passwordAuth (navigator, isChangePassword) {
 
 function lockUp (err) {
   // self.setState({isModalOpen: true})
-  loopAlert(err)
+  if (utils.isWeb()) {
+    try {
+      Alert.alert(err)
+    } catch (err) {}
+  } else {
+    loopAlert(err)
+  }
+
   let doneWaiting
   return utils.promiseDelay(LOCK_TIME)
     .then(() => doneWaiting = true)
@@ -215,7 +226,13 @@ function lockUp (err) {
 }
 
 function setPassword (navigator, isChangePassword) {
-  if (utils.isWeb()) return Promise.resolve()
+  const passwordSpec = utils.isWeb()
+    ? translate('textPasswordLimitations')
+    : translate('passwordLimitations')
+
+  const validate = utils.isWeb()
+    ? validateTextPassword
+    : validateGesturePassword
 
   return Q.Promise((resolve, reject) => {
     navigator.push({
@@ -223,10 +240,11 @@ function setPassword (navigator, isChangePassword) {
       id: 20,
       noLeftButton: true,
       passProps: {
+        ...PASSWORD_PROMPTS,
         mode: PasswordCheck.Modes.set,
-        validate: (pass) => { return pass.length > 4 },
+        validate: validate,
         isChange: isChangePassword,
-        promptInvalidSet: translate('passwordLimitations'),
+        // promptInvalidSet: translate('passwordLimitations'),
         onSuccess: (pass) => {
           utils.setHashedPassword(PASSWORD_ITEM_KEY, pass)
           .then(() => {
@@ -241,8 +259,6 @@ function setPassword (navigator, isChangePassword) {
 }
 
 function checkPassword (navigator, isChangePassword) {
-  if (utils.isWeb()) return Promise.resolve()
-
   // HACK
   let routes = navigator.getCurrentRoutes()
   let currentRoute = routes[routes.length - 1]
@@ -253,6 +269,7 @@ function checkPassword (navigator, isChangePassword) {
     id: 20,
     noLeftButton: true,
     passProps: {
+      ...PASSWORD_PROMPTS,
       mode: PasswordCheck.Modes.check,
       maxAttempts: 3,
       isChange: isChangePassword,
@@ -270,4 +287,33 @@ function checkPassword (navigator, isChangePassword) {
 
   navigator[push ? 'push' : 'replace'](route)
   return defer.promise
+}
+
+/*
+  ^                         Start anchor
+  (?=.*[A-Z])               Ensure string has an uppercase letter.
+  (?=.*[!@#$&*])            Ensure string has a special case letter.
+  (?=.*[0-9])               Ensure string has a digit.
+  (?=.*[a-z])               Ensure string has a lowercase letter
+  .{10,}                    Ensure string is of > length 10.
+  $                         End anchor.
+ */
+function validateTextPassword (pass) {
+  if (__DEV__) return pass.length > 1
+
+  return PASSWORD_REGEX.test(pass)
+}
+
+function validateGesturePassword (pass) {
+  return pass.length > 4
+}
+
+function getPasswordPrompts () {
+  const prompts = PROMPTS[utils.isWeb() ? 'text' : 'gesture']
+  const translated = {}
+  for (var p in prompts) {
+    translated[p] = utils.translate(prompts[p])
+  }
+
+  return translated
 }

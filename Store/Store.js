@@ -572,7 +572,6 @@ var Store = Reflux.createStore({
       chatMessages[id] = this.filterChatMessages(chatMessages[id], id)
     }
   },
-
   // Filtered result contains only messages that get displayed
   filterChatMessages(messages, orgId, lastId) {
     let meId = utils.getId(me)

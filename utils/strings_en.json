@@ -10,6 +10,7 @@
     "invalidProperty": "Invalid {1}",
     "optional": "optional",
     "thisFieldIsRequired": "This field is required",
+
     "pleaseDrawPassword": "Please draw a gesture password",
     "drawYourPassword": "Draw your gesture password",
     "drawYourPasswordAgain": "Draw your gesture password again",
@@ -23,6 +24,16 @@
     "wrongPattern": "Wrong pattern",
     "correctGesture": "Correct gesture detected",
     "authenticationFailed": "Authentication failed",
+
+    "setPassword": "Choose a secure password",
+    "enterPassword": "Enter your password",
+    "enterCurrentPassword": "Enter your current password",
+    "setNewPassword": "Choose a new password",
+    "textPasswordLimitations": "Must have 10+ characters, at least one uppercase letter, lowercase letter, number, and special character",
+    "tooManyPasswordAttempts": "Too many failed attempts! This form has been disabled.",
+    "correctPassword": "Aww, you remembered!",
+    "passwordsDontMatch": "Passwords don't match",
+
     "pleaseRestartTIM": "Please restart TiM",
     "cancel": "Cancel",
     "details": "Details",
@@ -96,6 +107,7 @@
     "useGesturePassword": "Use Gesture Password",
     "useTouchIdAndGesturePassword": "Use Touch ID and Gesture",
     "changeGesturePassword": "Change gesture password",
+    "changePassword": "Change password",
     "touchIdOn": "Touch ID is ON",
     "passwordOn": "Gesture Password is ON",
     "bothOn": "Both are ON",
