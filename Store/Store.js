@@ -258,7 +258,9 @@ var Store = Reflux.createStore({
       return this.ready = this.wipe()
         .then(() => {
           Alert.alert('please refresh')
-          return Q.Promise(function (resolve) {})
+          return Q.Promise(function (resolve) {
+            // hang
+          })
         })
     }
 
@@ -5556,7 +5558,6 @@ var Store = Reflux.createStore({
         }
       });
     }
-    this.loadStaticData()
 
     return self.loadMyResources()
           // .then(self.loadAddressBook)
