@@ -519,24 +519,24 @@ class TimHome extends Component {
     utils.setModels(null)
     Actions.reloadModels()
   }
-  // async onBackupPressed() {
-  //   let backupNumber = await BACKUPS.backup()
-  //   Alert.alert(
-  //     `Backed up to #${backupNumber}`
-  //   )
-  // }
-  // async onLoadFromBackupPressed() {
-  //   try {
-  //     let backupNumber = await BACKUPS.loadFromBackup()
-  //     Alert.alert(
-  //       `Loaded from backup #${backupNumber}. Please refresh`
-  //     )
-  //   } catch (err) {
-  //     Alert.alert(
-  //       `${err.message}`
-  //     )
-  //   }
-  // }
+  async onBackupPressed() {
+    let backupNumber = await BACKUPS.backup()
+    Alert.alert(
+      `Backed up to #${backupNumber}`
+    )
+  }
+  async onLoadFromBackupPressed() {
+    try {
+      let backupNumber = await BACKUPS.loadFromBackup()
+      Alert.alert(
+        `Loaded from backup #${backupNumber}. Please refresh`
+      )
+    } catch (err) {
+      Alert.alert(
+        `${err.message}`
+      )
+    }
+  }
   render() {
     StatusBar.setHidden(true);
     if (this.state.message) {
@@ -601,14 +601,11 @@ class TimHome extends Component {
                  </View>
 
     return (
-      <View style={{height: height}}>
+      <View style={[{height: height}]}>
         <BackgroundImage source={BG_IMAGE} />
         <View style={styles.layout}>
           <View/>
-          <TouchableHighlight style={[styles.thumbButton]}
-            underlayColor='transparent' onPress={() => this._pressHandler()}>
-            {logo}
-          </TouchableHighlight>
+          {logo}
           <View>
             { utils.getMe()
               ? <TouchableHighlight style={[styles.thumbButton, {justifyContent: 'flex-end',  opacity: me ? 1 : 0}]}
@@ -719,8 +716,6 @@ class TimHome extends Component {
     if (utils.getMe())
       signIn(this.props.navigator)
         .then(() => this.showOfficialAccounts())
-    else
-      this.register(this.showOfficialAccounts.bind(this))
   }
 }
 
