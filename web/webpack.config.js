@@ -60,6 +60,11 @@ var common = {
       }
     ]
   },
+  // externals: {
+  //   // Use external version of React
+  //   "react": "React",
+  //   "react-dom": "ReactDOM"
+  // },
   plugins: [
     // new webpack.optimize.CommonsChunkPlugin({
     //   name: 'vendor',
@@ -82,7 +87,8 @@ var common = {
       __DEV__: isProd ? false : true
     }),
     new webpack.ProvidePlugin({
-      React: 'react'
+      React: 'react',
+      ReactDOM: 'react-dom'
     }),
     new webpack.NoErrorsPlugin(),
     // new WebpackMd5Hash(),
@@ -115,7 +121,11 @@ if (!isHot) {
     new SplitByPathPlugin([
       {
         name: 'vendor',
-        path: path.join(projectRoot, 'node_modules')
+        path: path.join(projectRoot, 'node_modules'),
+        // ignore: [
+        //   path.join(projectRoot, 'node_modules/react'),
+        //   path.join(projectRoot, 'node_modules/react-dom')
+        // ]
       }
     ])
   )
@@ -179,9 +189,11 @@ if (NODE_ENV === 'development') {
           warnings: false
         },
         sourceMap: false,
-        mangle: false,
+        mangle: {
+          keep_fnames: true
+        },
         beautify: false,
-        comments: false
+        // comments: false
       }),
       // new webpack.optimize.AggressiveMergingPlugin(),
       new HtmlPlugin({
