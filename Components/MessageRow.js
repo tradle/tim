@@ -43,7 +43,6 @@ import {
   Text,
   TouchableHighlight,
   Alert,
-  Modal,
   Navigator,
   View,
   processColor
