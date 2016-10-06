@@ -6,7 +6,7 @@ var PhotoCarouselMixin = {
   showCarousel(currentPhoto) {
     this.props.navigator.push({
       id: 14,
-      title: 'Photos',
+      // title: 'Photos',
       noLeftButton: true,
       component: PhotoCarousel,
       passProps: {
