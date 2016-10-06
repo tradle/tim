@@ -12,10 +12,6 @@ module.exports = exports = StyleSheet.create({
     marginTop: 10,
     fontSize: 17
   },
-  // navBar: {
-  //   marginTop: 10,
-  //   padding: 3
-  // },
   menuButtonNarrow: {
     marginTop: -23,
     paddingVertical: 5,

@@ -8,11 +8,6 @@ module.exports = exports = StyleSheet.create({
     marginTop: 56,
     flex: 1,
   },
-  // navBarText: {
-  //   marginTop: 10,
-  //   fontSize: 17
-  // },
-
   navBarText: {
     marginTop: 19,
     fontSize: 17,
