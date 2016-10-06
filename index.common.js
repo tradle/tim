@@ -504,12 +504,12 @@ var NavigationBarRouteMapper = {
         icons.push(<Icon name={i} key={i} size={20} color='#7AAAC3' style={styles.iconSpace} />)
       })
 
-      title = <View style={styles.row}>
+      title = <View>
                {icons}
               </View>
     }
     return (
-      <View>
+      <View style={{position: 'absolute', right: 0}}>
       {route.help
         ? <TouchableOpacity
             hitSlop={HIT_SLOP}
@@ -579,9 +579,6 @@ var styles = StyleSheet.create({
   icon: {
     width: 20,
     height: 20,
-  },
-  row: {
-    flexDirection: 'row'
   },
   iconSpace:  {
     paddingLeft: 3
