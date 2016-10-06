@@ -630,10 +630,7 @@ class TimHome extends Component {
         <BackgroundImage source={BG_IMAGE} />
         <View style={styles.layout}>
           <View/>
-          <TouchableHighlight style={[styles.thumbButton]}
-            underlayColor='transparent' onPress={() => this._pressHandler()}>
-            {logo}
-          </TouchableHighlight>
+          {logo}
           <View>
             { utils.getMe()
               ? <TouchableHighlight style={[styles.thumbButton, {justifyContent: 'flex-end',  opacity: me ? 1 : 0}]}
@@ -722,8 +719,6 @@ class TimHome extends Component {
     if (utils.getMe())
       signIn(this.props.navigator)
         .then(() => this.showOfficialAccounts())
-    else
-      this.register(this.showOfficialAccounts.bind(this))
   }
 }
 
