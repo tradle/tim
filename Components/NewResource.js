@@ -118,7 +118,7 @@ class NewResource extends Component {
            this.state.itemsCount !== nextState.itemsCount    ||
            this.state.isLoadingVideo !== nextState.isLoadingVideo  ||
            this.state.keyboardSpace !== nextState.keyboardSpace    ||
-           this.state.termsAccepted !== nextState.termsAccepted    ||
+           // this.state.termsAccepted !== nextState.termsAccepted    ||
           !equal(this.state.resource, nextState.resource)
 
     if (!isUpdate)
@@ -325,10 +325,6 @@ class NewResource extends Component {
   onSavePressed() {
     if (this.state.submitted)
       return
-    if (this.state.isRegistration  &&  !this.state.termsAccepted) {
-      Alert.alert(translate('viewTerms'))
-      return
-    }
 
     this.state.submitted = true
     this.state.noScroll = false
@@ -834,17 +830,11 @@ class NewResource extends Component {
    })
   }
   acceptTsAndCs() {
-    // Alert.alert(
-    //   translate('acceptingTermsAndConditions'),
-    //   null,
-    //   [
-    //     {text: 'Cancel', onPress: () => console.log('Canceled!')},
-    //     {text: 'Ok', onPress: () => {
-          this.props.navigator.pop()
-          this.setState({termsAccepted: true})
-    //     }},
-    //   ]
-    // )
+    this.setState({termsAccepted: true})
+    if (this.state.resource.firstName)
+      this.onSavePressed()
+    else
+      this.props.navigator.pop()
   }
 
   cancelItem(pMeta, item) {
