@@ -54,7 +54,6 @@ import {
   NetInfo,
   ScrollView,
   Linking,
-  Animated,
   BackAndroid,
   StatusBar,
   Modal,
@@ -95,11 +94,7 @@ class TimHome extends Component {
       'change',
       this._handleConnectivityChange
     );
-    NetInfo.isConnected.fetch().done(
-      (isConnected) => {
-        this._handleConnectivityChange(isConnected)
-      }
-    );
+    NetInfo.isConnected.fetch().then(isConnected => this._handleConnectivityChange(isConnected))
     BackAndroid.addEventListener('hardwareBackPress', () => {
       if (this.props.navigator.getCurrentRoutes().length > 1)
         this.props.navigator.pop()
