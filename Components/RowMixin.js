@@ -184,7 +184,7 @@ var RowMixin = {
 
     var hasPhotos = resource  &&  resource.photos  &&  resource.photos.length
     var photo = hasPhotos
-              ? <Image source={{uri: utils.getImageUri(resource.photos[0].url)}}  style={styles.cellImage} />
+              ? <Image resizeMode='cover' source={{uri: utils.getImageUri(resource.photos[0].url)}}  style={styles.cellImage} />
               : <View />;
     var headerStyle = {paddingTop: 5, alignSelf: 'center'}
     // var header =  <View style={headerStyle}>
