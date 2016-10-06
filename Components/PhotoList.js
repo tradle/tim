@@ -15,6 +15,8 @@ import {
   View,
   ListView,
   Text,
+  Animated,
+  Easing,
   TextInput,
   TouchableHighlight,
 } from 'react-native'
@@ -31,9 +33,18 @@ class PhotoList extends Component {
     });
     this.state = {
       photos: this.props.photos,
+      anim: new Animated.Value(0.7),
       // bounceValue: new Animated.Value(0),
       dataSource: dataSource
     }
+  }
+
+  componentDidMount() {
+    Animated.timing(      // Uses easing functions
+      this.state.anim,    // The value to drive
+      {toValue: 1,
+      duration: 500}        // Configuration
+    ).start();
   }
   // componentDidMount() {
   //  // this.state.bounceValue.setValue(1.5);     // Start large
@@ -56,7 +67,7 @@ class PhotoList extends Component {
   render() {
     var photos = this.props.photos;
     // if (!photos || !photos.length) //  ||  (photos.length <= 1  &&  this.props.isView))
-    if (!photos ||  !photos.length || (photos.length == 1  &&  this.props.isView))
+    if (!photos ||  !photos.length) // || (photos.length === 1  &&  this.props.isView))
       return null;
 
     var inRow = photos.length, height;
@@ -87,11 +98,23 @@ class PhotoList extends Component {
     height *= rows;
     var val = this.renderPhotoList(photos, styles);
     return (
-       <View style={[styles.photoContainer, this.props.style ? {} : {marginHorizontal: 5, height: height}]} key={this.getNextKey() + '_photo'}>
+       <View style={
+        [styles.photoContainer,
+         this.props.style ? {} : {marginHorizontal: 5, height: height}
+        ]} key={this.getNextKey() + '_photo'}>
          {val}
        </View>
      );
   }
+  /*
+       <Animated.View style={
+        [styles.photoContainer,
+         {transform: [{scale: this.state.anim}]},
+         this.props.style ? {} : {marginHorizontal: 5, height: height}
+        ]} key={this.getNextKey() + '_photo'}>
+         {val}
+       </Animated.View>
+      */
   renderPhotoList(val, styles) {
     // var dataSource = this.state.dataSource.cloneWithRows(
     //   groupByEveryN(val, this.props.numberInRow || 3)
@@ -112,7 +135,7 @@ class PhotoList extends Component {
     var d3 = (width / 3) - 5
     var d4 = (width / 4) - 5
     var d5 = (width / 5) - 5
-    var w
+    var w = d3
     if (!imageStyle  ||  utils.isEmpty(imageStyle)) {
       switch (len) {
       case 1:
@@ -142,7 +165,6 @@ class PhotoList extends Component {
       rows.push(<View style={{flexDirection: 'row'}} key={this.getNextKey()}>
                   {row}
                 </View>)
-      i--
     }
     return (
       <View style={{flexDirection: 'column'}}>
@@ -165,11 +187,11 @@ class PhotoList extends Component {
       source.isStatic = true;
 
     return (
-      <View style={[{paddingTop: 2, margin: 1}, imageStyle[0]]} key={this.getNextKey() + '_photo'}>
+      <Animated.View style={[{paddingTop: 2, margin: 1}, {transform: [{scale: this.state.anim}]},imageStyle[0]]} key={this.getNextKey() + '_photo'}>
         <TouchableHighlight underlayColor='transparent' onPress={this.props.callback ? this.props.callback.bind(this, photo) : this.showCarousel.bind(this, photo)}>
            <Image resizeMode='cover' style={[styles.thumbCommon, imageStyle]} source={source} />
         </TouchableHighlight>
-      </View>
+      </Animated.View>
     )
   }
 
