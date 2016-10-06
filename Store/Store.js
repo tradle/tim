@@ -211,6 +211,7 @@ var Store = Reflux.createStore({
     // ldb.query.use(jsonqueryEngine());
     db = promisify(ldb);
 
+    this._loadedResourcesDefer = Q.defer()
     if (NetInfo) {
       NetInfo.isConnected.addEventListener(
         'change',
@@ -528,10 +529,10 @@ var Store = Reflux.createStore({
 
     // meDriver = timeFunctions(meDriver)
     this.getInfo(SERVICE_PROVIDERS_BASE_URLS, true)
-    .then(() => {
-      if (me && utils.isEmpty(chatMessages))
-        this.initChats()
-    })
+    // .then(() => {
+    //   if (me && utils.isEmpty(chatMessages))
+    //     this.initChats()
+    // })
     .catch(function(err) {
       debugger
     })
@@ -1702,6 +1703,8 @@ var Store = Reflux.createStore({
   addMessagesToChat(id, r, isInit, timeShared) {
     if (r.documentCreated  &&  !isInit)
       return
+    if (!isInit  &&  utils.isEmpty(chatMessages))
+      return
     let messages = chatMessages[id]
     let rid = utils.getId(r)
     if (messages  &&  messages.length) {
@@ -2649,13 +2652,83 @@ var Store = Reflux.createStore({
     }
   },
   getList(params) {
-    //query, modelName, resource, isAggregation, prop) {
-    // meDriver.messages().byRootHash("41677f5827973883a3a5259c1337bda9a5360d38", function(err, r) {
-    //   meDriver.lookupObject(r[0])
-    //     .then(function (obj) {
-    //       debugger
-    //     })
-    // })
+    var meta = this.getModel(params.modelName).value;
+    var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
+    if (!isMessage) {
+      params.fromView = true
+      let result = this.searchNotMessages(params);
+      if (!result) {
+        // First time. No connection no providers yet loaded
+        if (!this.isConnected  &&  params.modelName === ORGANIZATION)
+          this.trigger({action: 'list', alert: translate('noConnection')})
+
+        return
+      }
+      if (params.isAggregation)
+        result = this.getDependencies(result);
+      var shareableResources;
+      var retParams = {
+        action: 'list',
+        list: result,
+        spinner: params.spinner,
+        isAggregation: params.isAggregation
+      }
+      if (params.prop)
+        retParams.prop = params.prop;
+      this.trigger(retParams);
+      return
+    }
+
+    return this._searchMessages(params)
+    .then((result) => {
+      if (!result)
+        return
+      if (params.isAggregation)
+        result = this.getDependencies(result);
+
+      var retParams = {
+        action: !params.prop ? 'messageList' : 'list',
+        list: result,
+        spinner: params.spinner,
+        isAggregation: params.isAggregation
+      }
+      var shareableResources;
+      let hasMore = params.limit  &&  result.length > params.limit
+      if (params.loadEarlierMessages || hasMore) {
+        if (hasMore)  {
+          result.splice(0, 1)
+          retParams.allLoaded = true
+        }
+        retParams.loadEarlierMessages = true
+      }
+      if (!params.isAggregation  &&  params.to) {
+        // let to = list[utils.getId(params.to)].value
+        // if (to  &&  to[TYPE] === ORGANIZATION)
+          shareableResources = this.getShareableResources(result, params.to)
+      }
+      if (params.to) {
+        let orgId
+        if (params.to.organization)
+          orgId = utils.getId(params.to.organization)
+        else {
+          if (params.to[TYPE] === ORGANIZATION)
+            orgId = utils.getId(params.to)
+        }
+        if (orgId) {
+          let rep = this.getRepresentative(orgId)
+          if (rep  &&  !rep.bot)
+            retParams.isEmployee = true
+        }
+      }
+
+      if (shareableResources)
+        retParams.shareableResources = shareableResources;
+      if (params.prop)
+        retParams.prop = params.prop;
+      this.trigger(retParams);
+    })
+  },
+  getList1(params) {
     var result = this.searchResources(params);
     if (params.isAggregation)
       result = this.getDependencies(result);
@@ -2670,17 +2743,6 @@ var Store = Reflux.createStore({
     var model = this.getModel(params.modelName).value;
     var isMessage = model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1);
 
-    // if (!isMessage)
-    //   return
-    // HACK
-    // utils.dedupeVerifications(result)
-
-    // var resultList = [];
-    // result.forEach((r) =>  {
-    //   var rr = {};
-    //   extend(rr, r);
-    //   resultList.push(rr);
-    // })
     var resultList = result
     var shareableResources;
     var retParams = {
@@ -2741,8 +2803,8 @@ var Store = Reflux.createStore({
   searchResources(params) {
     var meta = this.getModel(params.modelName).value;
     var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
-    if (isMessage  ||  meta.id === FORM)
-      return this.searchMessages(params);
+    if (isMessage)
+      return this._searchMessages(params);
     else {
       params.fromView = true
       return this.searchNotMessages(params);
@@ -2954,6 +3016,12 @@ var Store = Reflux.createStore({
       result = retOrgs
     }
     return result;
+  },
+  _searchMessages(params) {
+    return this._loadedResourcesDefer.promise
+      .then(() => {
+        return this.searchMessages(params)
+      })
   },
   searchMessages(params) {
     var query = params.query;
@@ -4854,6 +4922,7 @@ var Store = Reflux.createStore({
     .then(() => {
       if (me && utils.isEmpty(chatMessages))
         this.initChats()
+      this._loadedResourcesDefer.resolve()
     })
     .catch(err => {
       debugger
