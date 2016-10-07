@@ -1,6 +1,6 @@
 
 import Q from 'q'
-import Debug from 'debug'
+import Debug from './debug'
 var timerDebug = Debug('TIMER')
 
 global.timeFunctions = exports.timeFunctions = function timeFunctions (obj, overwrite) {
@@ -57,7 +57,7 @@ global.timeFunctions = exports.timeFunctions = function timeFunctions (obj, over
 
 global.tradleTimer = function timer (name) {
   var now = Date.now()
-  return function (print=false) {
+  return function (print=true) {
     var time = Date.now() - now
     if (print && time > 100) {
       console.log(`TIMER ${name}: ${time}ms`)

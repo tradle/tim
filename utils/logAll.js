@@ -1,5 +1,5 @@
 // Store apply and call
-// global.logAll = true
+global.logAll = true
 ;['setTimeout', 'setInterval', 'setImmediate'].forEach(method => {
   var orig = global[method]
   global[method] = function () {
@@ -29,7 +29,7 @@ function log(str) {
 }
 
 var times = {}
-import { Alert } from 'react-native'
+// import { Alert } from 'react-native'
 // setInterval(function () {
 //   var big = {}
 //   for (var t in times) {
@@ -59,11 +59,10 @@ Function.prototype.call = function () {
 //   return origApply.apply(this, arguments);
 // }
 
-function willLog (context, args) {
-  // if (context === console || context.slice) return
+function willLog (fn, args) {
   if (!global.logAll) return
 
-  var name = getFunctionName(context)
+  var name = getFunctionName(fn)
   if (name === 'hasOwnProperty' || name === 'log' || name === 'slice' ||
     name === 'addListener' || name === 'EventSubscription' || name === 'handleClose' ||
     name === 'EventTarget' || name === 'EventEmitter' || name === 'removeSubscription' ||
