@@ -61,6 +61,7 @@ import React, { Component, PropTypes } from 'react'
 import ActivityIndicator from './ActivityIndicator'
 import platformStyles from '../styles/platform'
 import { makeResponsive } from 'react-native-orient'
+import BackgroundImage from './BackgroundImage'
 
 // DeviceHeight = Dimensions.get('window').height;
 // DeviceWidth = Dimensions.get('window').width
@@ -810,7 +811,7 @@ class NewResource extends Component {
     }
     return (
       <View style={{height: height}}>
-        <Image source={BG_IMAGE} style={styles.bgImage} />
+        <BackgroundImage source={BG_IMAGE} style={styles.bgImage} />
         <View style={{justifyContent: 'center', height: height}}>
         {this.state.isRegistration
           ? <View style={styles.logo}>
