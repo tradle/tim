@@ -1119,7 +1119,7 @@ var utils = {
       if (!subCache[subKey]) {
         var orientation = getOrientation(Component)
         var { width, height } = dimensions
-        var switchWidthHeight = (
+        var switchWidthHeight = !utils.isWeb() && (
           (orientation === 'PORTRAIT' && width > height) ||
           (orientation === 'LANDSCAPE' && width < height)
         )
