@@ -752,15 +752,15 @@ class NewResource extends Component {
     var formStyle = this.state.isRegistration
                   ? {justifyContent: 'center', height: height - (height > 1000 ? 0 : 100)}
                   : {justifyContent: 'flex-start'}
+//          <View style={photoStyle}>
+//            <PhotoView resource={resource} navigator={this.props.navigator}/>
+//          </View>
     var content =
       <ScrollView style={{backgroundColor: 'transparent'}}
                   ref='scrollView' {...this.scrollviewProps}
                   keyboardShouldPersistTaps={true}
                   keyboardDismissMode={this.state.isRegistration || Platform.OS === 'ios' ? 'on-drag' : 'interactive'}>
         <View style={[styles.container, formStyle]}>
-          <View style={photoStyle}>
-            <PhotoView resource={resource} navigator={this.props.navigator}/>
-          </View>
           <View style={this.state.isRegistration ? {marginHorizontal: height > 1000 ? 50 : 30} : {marginHorizontal: 10}}>
             <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange.bind(this)}/>
             {button}
