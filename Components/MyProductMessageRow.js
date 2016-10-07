@@ -17,7 +17,6 @@ import {
   Text,
   TouchableHighlight,
   Alert,
-  Modal,
   Navigator,
   View,
 } from 'react-native'

@@ -1,7 +1,9 @@
 'use strict';
 
 var PhotoCarousel = require('./PhotoCarousel');
-
+import {
+  Navigator
+} from 'react-native'
 var PhotoCarouselMixin = {
   showCarousel(currentPhoto) {
     this.props.navigator.push({
@@ -16,6 +18,7 @@ var PhotoCarouselMixin = {
       },
       rightButtonTitle: 'Done',
       titleTintColor: 'black',
+      sceneConfig: Navigator.SceneConfigs.FadeAndroid,
       tintColor: '#dddddd',
       onRightButtonPress: {
         stateChange: this.closeCarousel.bind(this)

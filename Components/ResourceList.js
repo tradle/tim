@@ -8,6 +8,7 @@ var NewResource = require('./NewResource');
 var MessageList = require('./MessageList');
 var PageView = require('./PageView')
 var MessageView = require('./MessageView')
+var PageView = require('./PageView')
 import ActionSheet from 'react-native-actionsheet'
 var utils = require('../utils/utils');
 var translate = utils.translate
@@ -117,7 +118,6 @@ class ResourceList extends Component {
     }
     var params = {
       modelName: this.props.modelName,
-      to: this.props.resource
     };
     if (this.props.isAggregation)
       params.isAggregation = true;
@@ -129,13 +129,15 @@ class ResourceList extends Component {
       let m = utils.getModel(this.props.resource[constants.TYPE]).value
       // case when for example clicking on 'Verifications' on Form page
       if (m.interfaces) {
-        if (utils.getModel(this.props.modelName).value.interfaces)
-          params.to = this.props.resource.to
+        // if (utils.getModel(this.props.modelName).value.interfaces)
+        //   params.to = this.props.resource.to
         params.resource = this.props.resource
       }
-
 //       params.resource = this.props.resource
     }
+    else
+      params.to = this.props.resource
+
     // this.state.isLoading = true;
     utils.onNextTransitionEnd(this.props.navigator, () => {
       Actions.list(params)
@@ -1012,7 +1014,7 @@ var styles = StyleSheet.create({
   },
   separator: {
     height: 1,
-    backgroundColor: '#cccccc',
+    backgroundColor: '#eeeeee',
   },
   icon: {
     marginLeft: -23,

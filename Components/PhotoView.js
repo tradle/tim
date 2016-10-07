@@ -6,12 +6,16 @@ var constants = require('@tradle/constants');
 var PhotoCarousel = require('./PhotoCarousel')
 var reactMixin = require('react-mixin');
 var PhotoCarouselMixin = require('./PhotoCarouselMixin');
+
 var equal = require('deep-equal')
 import {
   StyleSheet,
   Image,
   View,
   Text,
+  Modal,
+  Animated,
+  Easing,
   TouchableHighlight
 } from 'react-native'
 
@@ -22,13 +26,22 @@ import * as Animatable from 'react-native-animatable'
 class PhotoView extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {anim: new Animated.Value(1.5), isModalOpen: false};
+  }
+  componentDidMount() {
+     Animated.timing(      // Uses easing functions
+       this.state.anim,    // The value to drive
+       {toValue: 1,
+       duration: 500}        // Configuration
+     ).start();
   }
   changePhoto(photo) {
     this.setState({currentPhoto: photo});
   }
+
   shouldComponentUpdate(nextProps, nextState) {
-    if (this.props.resource[constants.ROOT_HASH] !== nextProps.resource[constants.ROOT_HASH])
+    if (this.props.resource[constants.ROOT_HASH] !== nextProps.resource[constants.ROOT_HASH] ||
+        this.state.isModalOpen !== nextState.isModalOpen)
       return true
 
     return !equal(this.props.resource.photos, nextProps.resource.photos)
@@ -83,13 +96,55 @@ class PhotoView extends Component {
                 }
 
     return (
-          <Animatable.View animation="fadeIn" iterationCount={1} direction="normal">
+          <View>
             <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, resource.photos[0])}>
               <Image resizeMode='cover' source={source} style={image} />
             </TouchableHighlight>
-          </Animatable.View>
+          </View>
     )
+    // return (
+    //       <Animated.View style={style}>
+    //         <TouchableHighlight underlayColor='transparent' onPress={this.openModal.bind(this)}>
+    //           <Image resizeMode='cover' source={source} style={image} />
+    //         </TouchableHighlight>
+    //     <Modal style={{width: width, height: height}} animationType={'fade'} visible={this.state.isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
+    //       <TouchableHighlight  onPress={() => this.closeModal()} underlayColor='transparent'>
+    //         <View style={styles.modalBackgroundStyle}>
+    //           {this.shwCarousel(resource.photos[0])}
+    //         </View>
+    //       </TouchableHighlight>
+    //     </Modal>
+    //       </Animated.View>
+    // )
   }
+  shwCarousel(currentPhoto) {
+    var photoUrls = [];
+    // var currentPhoto = this.props.currentPhoto || this.props.photos[0];
+    var currentPhotoIndex = -1;
+
+    for (var i=0; i<this.props.resource.photos.length; i++) {
+      var photo = this.props.resource.photos[i];
+
+      if (currentPhotoIndex === -1  &&  photo.url === currentPhoto.url)
+        currentPhotoIndex = i;
+      photoUrls.push(photo.url)
+    }
+    return (
+      <Gallery
+        style={{flex: 1}}
+        images={photoUrls}
+        initialPage={currentPhotoIndex}
+      />
+    );
+
+  }
+  openModal() {
+    this.setState({isModalOpen: true});
+  }
+  closeModal() {
+    this.setState({isModalOpen: false});
+  }
+
 }
 reactMixin(PhotoView.prototype, PhotoCarouselMixin);
 
@@ -99,6 +154,11 @@ var styles = StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'stretch'
   },
+    modalBackgroundStyle: {
+      backgroundColor: 'rgba(0, 0, 0, 0.4)',
+      justifyContent: 'center',
+      // padding: 20,
+    },
 });
 
 module.exports = PhotoView;

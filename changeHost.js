@@ -38,16 +38,11 @@ function fixIP () {
 
 function updateLocalIP () {
   var localIP = path.resolve('utils/localIP.json')
-  fs.readFile(localIP, { encoding: 'utf8' }, function (err, contents) {
-    // if (err) throw err
-    if (hostname === 'localhost')
-      hostname = '127.0.0.1'
+  if (hostname === 'localhost')
+    hostname = '127.0.0.1'
 
-    const json = JSON.stringify(hostname)
-    if (json !== contents) {
-      fs.writeFile(localIP, json, function (err) {
-        if (err) throw err
-      })
-    }
+  const json = JSON.stringify(hostname)
+  fs.writeFile(localIP, json, function (err) {
+    if (err) throw err
   })
 }

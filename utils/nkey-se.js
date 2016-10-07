@@ -39,22 +39,9 @@ function fromJSON (json) {
     })
   }
 
-  const lookup = thunky(cb => lookupKey(pub, cb))
-  const afterLookup = fn => {
-    return function (...args) {
-      const cb = args[args.length - 1]
-      lookup(function (err, key) {
-        if (err) return cb(err)
-
-        fn(...args)
-      })
-    }
-  }
-
   return fromJSON({
     ...json,
-    sign: afterLookup(sign),
-    verify: afterLookup(verify)
+    ...ec.keyFromPublic(pub)
   })
 
   function sign (data, algorithm, cb) {
@@ -67,7 +54,8 @@ function fromJSON (json) {
   }
 
   function verify (data, algorithm, sig, cb) {
-    if (typeof sig === 'undefined') {
+    if (typeof sig === 'function') {
+      cb = sig
       sig = algorithm
       algorithm = exports.DEFAULT_ALGORITHM
     }

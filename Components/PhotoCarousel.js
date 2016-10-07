@@ -22,7 +22,7 @@ class PhotoCarousel extends Component {
     return this.props.orientation !== nextProps.orientation
   }
   render() {
-    var photos = [];
+    var photoUrls = [];
     var currentPhoto = this.props.currentPhoto || this.props.photos[0];
     var currentPhotoIndex = -1;
     var n = this.props.photos.length;
@@ -97,29 +97,5 @@ class PhotoCarousel extends Component {
     );
   }
 }
-PhotoCarousel = makeResponsive(PhotoCarousel)
-
-var createStyles = utils.styleFactory(PhotoCarousel, function ({ dimensions }) {
-  return StyleSheet.create({
-    image: {
-      width: dimensions.width,
-      height: dimensions.height - 200,
-    },
-    imageH: {
-      width: dimensions.width,
-      height: dimensions.width - 100
-    },
-    imageV: {
-      width: dimensions.width,
-      height: dimensions.height - 200,
-    },
-    container: {
-      width: dimensions.width,
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: 'black',
-    },
-  })
-})
+// PhotoCarousel = makeResponsive(PhotoCarousel)
 module.exports = PhotoCarousel;

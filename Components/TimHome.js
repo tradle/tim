@@ -54,7 +54,6 @@ import {
   NetInfo,
   ScrollView,
   Linking,
-  Animated,
   Modal,
   Alert,
   Platform
@@ -627,7 +626,7 @@ class TimHome extends Component {
   getSplashScreen() {
     var {width, height} = utils.dimensions(TimHome)
     return (
-      <View>
+      <View style={styles.container}>
         <BackgroundImage source={BG_IMAGE} />
         <View  style={styles.splashLayout}>
           <View>

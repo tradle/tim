@@ -24,7 +24,7 @@ var styles = StyleSheet.create({
   separator: {
     borderColor: '#ffffff',
     borderTopColor: '#cccccc',
-    borderWidth: utils.isWeb() ? 1 : 0
+    borderWidth: StyleSheet.hairlineWidth
   }
 })
 

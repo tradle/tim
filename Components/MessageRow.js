@@ -43,7 +43,6 @@ import {
   Text,
   TouchableHighlight,
   Alert,
-  Modal,
   Navigator,
   View,
   processColor
@@ -553,7 +552,7 @@ class MessageRow extends Component {
                   <Text style={[styles.resourceTitle, {color: '#ffffff'}]}>{str}</Text>
                 </View>
               :   <View key={this.getNextKey()} style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                    <Text style={[styles.resourceTitle, {color: '#ffffff', paddingRight: 10}]}>{str}</Text>
+                    <Text style={[styles.resourceTitle, {color: '#ffffff', marginTop: 3, paddingRight: 10}]}>{str}</Text>
                     <Icon name='ios-folder-open-outline' size={25} color='#ffffff'/>
                   </View>
       renderedRow.push(msg);
@@ -1022,7 +1021,7 @@ var styles = StyleSheet.create({
   assistentText: {
     color: '#757575',
     fontStyle: 'italic',
-    fontSize: 18
+    fontSize: 17
   },
   assistentBox: {
     backgroundColor: '#efefef',

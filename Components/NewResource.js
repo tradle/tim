@@ -9,6 +9,7 @@ var GridItemsList = require('./GridItemsList')
 var PhotoView = require('./PhotoView');
 var ResourceView = require('./ResourceView');
 var ResourceMixin = require('./ResourceMixin');
+var PageView = require('./PageView')
 var t = require('tcomb-form-native');
 var extend = require('extend');
 var Actions = require('../Actions/Actions');
@@ -61,6 +62,7 @@ import React, { Component, PropTypes } from 'react'
 import ActivityIndicator from './ActivityIndicator'
 import platformStyles from '../styles/platform'
 import { makeResponsive } from 'react-native-orient'
+import BackgroundImage from './BackgroundImage'
 
 // DeviceHeight = Dimensions.get('window').height;
 // DeviceWidth = Dimensions.get('window').width
@@ -654,8 +656,6 @@ class NewResource extends Component {
     var parentBG = {backgroundColor: '#7AAAC3'};
     var resource = this.state.resource;
 
-    var styles = createStyles()
-
     var meta =  props.model;
     if (this.props.setProperty)
       this.state.resource[this.props.setProperty.name] = this.props.setProperty.value;
@@ -770,10 +770,8 @@ class NewResource extends Component {
     var formStyle = this.state.isRegistration
                   ? {justifyContent: 'center', height: height - (height > 1000 ? 0 : 100)}
                   : {justifyContent: 'flex-start'}
-
-
     var content =
-      <ScrollView style={style}
+      <ScrollView style={{backgroundColor: 'transparent'}}
                   ref='scrollView' {...this.scrollviewProps}
                   keyboardShouldPersistTaps={true}
                   keyboardDismissMode={this.state.isRegistration || Platform.OS === 'ios' ? 'on-drag' : 'interactive'}>
@@ -808,9 +806,23 @@ class NewResource extends Component {
       }
       return <PageView style={platformStyles.container}>{content}</PageView>
     }
+    // return (
+    //   <View style={{height: height}}>
+    //     <Image source={BG_IMAGE} style={styles.bgImage} />
+    //     <View style={{justifyContent: 'center', height: height}}>
+    //     {content}
+    //     </View>
+    //     {this.state.isRegistration
+    //       ? <View style={styles.logo}>
+    //           <CustomIcon name='tradle' size={40} color='#ffffff' />
+    //         </View>
+    //       : <View/>
+    //     }
+    //   </View>
+    // )
     return (
       <View style={{height: height}}>
-        <Image source={BG_IMAGE} style={styles.bgImage} />
+        <BackgroundImage source={BG_IMAGE} />
         <View style={{justifyContent: 'center', height: height}}>
         {this.state.isRegistration
           ? <View style={styles.logo}>
@@ -1114,136 +1126,127 @@ reactMixin(NewResource.prototype, NewResourceMixin);
 reactMixin(NewResource.prototype, ResourceMixin);
 NewResource = makeResponsive(NewResource)
 
-var createStyles = utils.styleFactory(NewResource, function ({ dimensions }) {
-  return StyleSheet.create({
-    container: {
-      flex: 1
-    },
-    noItemsText: {
-      fontSize: 18,
-      color: '#AAAAAA',
-      // alignSelf: 'center',
-      // paddingLeft: 10
-    },
-    itemsText: {
-      fontSize: 18,
-      color: '#000000',
-      // alignSelf: 'center',
-      paddingLeft: 10
-    },
-    itemsCounterEmpty: {
-      paddingHorizontal: 5
-    },
-    itemsCounter: {
-      borderColor: '#2E3B4E',
-      borderRadius: 10,
-      borderWidth: 1,
-      alignSelf: 'center',
-      paddingHorizontal: 5,
-    },
-    itemButton: {
-      height: 60,
-      marginLeft: 10,
-      // marginLeft: 10,
-      borderColor: '#ffffff',
-      borderBottomColor: '#cccccc',
-      borderBottomWidth: 1,
-      paddingBottom: 10,
-      justifyContent: 'flex-end',
-    },
-    photoButton: {
-      marginLeft: 10,
-      borderColor: '#ffffff',
-      borderBottomColor: '#cccccc',
-      borderBottomWidth: 1,
-      // paddingBottom: 5,
-    },
+var styles = StyleSheet.create({
+  container: {
+    flex: 1
+  },
+  noItemsText: {
+    fontSize: 18,
+    color: '#AAAAAA',
+    // alignSelf: 'center',
+    // paddingLeft: 10
+  },
+  itemsText: {
+    fontSize: 18,
+    color: '#000000',
+    // alignSelf: 'center',
+    paddingLeft: 10
+  },
+  itemsCounterEmpty: {
+    paddingHorizontal: 5
+  },
+  itemsCounter: {
+    borderColor: '#2E3B4E',
+    borderRadius: 10,
+    borderWidth: 1,
+    alignSelf: 'center',
+    paddingHorizontal: 5,
+  },
+  itemButton: {
+    height: 60,
+    marginLeft: 10,
+    // marginLeft: 10,
+    borderColor: '#ffffff',
+    borderBottomColor: '#cccccc',
+    borderBottomWidth: 1,
+    paddingBottom: 10,
+    justifyContent: 'flex-end',
+  },
+  photoButton: {
+    marginLeft: 10,
+    borderColor: '#ffffff',
+    borderBottomColor: '#cccccc',
+    borderBottomWidth: 1,
+    // paddingBottom: 5,
+  },
 
-    photoBG: {
-      // marginTop: -15,
-      alignItems: 'center',
-      paddingBottom: 10,
-      // backgroundColor: '#245D8C'
-    },
-    err: {
-      // paddingVertical: 10,
-      flexWrap: 'wrap',
-      paddingHorizontal: 25,
-      fontSize: 16,
-      color: 'darkred',
-    },
-    getStartedText: {
-      // color: '#f0f0f0',
-      color: '#eeeeee',
-      fontSize: 20,
-      fontWeight:'300',
-      alignSelf: 'center'
-    },
-    getStarted: {
-      backgroundColor: '#467EAE', //'#2892C6',
-      paddingVertical: 10,
-      marginHorizontal: 10,
-      // paddingHorizontal: 50,
-      alignSelf: 'stretch',
-    },
-    thumbButton: {
-      marginTop: 20,
-      alignSelf: 'stretch',
-      alignItems: 'center',
-      justifyContent: 'center',
-      // paddingHorizontal: 80,
-    },
-    thumb: {
-      width:  40,
-      height: 40,
-      marginRight: 2,
-      borderRadius: 5
-    },
-    error: {
-      // paddingLeft: 5,
-      // position: 'absolute',
-      // top: 70,
-      // marginBottom: -30,
-      marginTop: -10,
-      backgroundColor: 'transparent'
-    },
-    errorText: {
-      fontSize: 14,
-      marginLeft: 10,
-      color: '#a94442'
-    },
-    items: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      // paddingBottom: 5
-    },
-    activePropTitle: {
-      fontSize: 12,
-      marginTop: 20,
-      paddingBottom: 5,
-      // marginBottom: 5,
-      color: '#bbbbbb'
-    },
-    photoStrip: {
-      // marginLeft: 10,
-      // marginTop: -30,
-      paddingBottom: 5
-    },
-    photoStripItems: {
-      flexDirection: 'row'
-    },
-    bgImage: {
-      position:'absolute',
-      left: 0,
-      top: 0,
-      width: dimensions.width,
-      height: dimensions.height
-    },
-    logo: {
-      opacity: 0.7,
-      alignSelf: 'flex-end',
-    }
-  })
+  photoBG: {
+    // marginTop: -15,
+    alignItems: 'center',
+    paddingBottom: 10,
+    // backgroundColor: '#245D8C'
+  },
+  err: {
+    // paddingVertical: 10,
+    flexWrap: 'wrap',
+    paddingHorizontal: 25,
+    fontSize: 16,
+    color: 'darkred',
+  },
+  getStartedText: {
+    // color: '#f0f0f0',
+    color: '#eeeeee',
+    fontSize: 20,
+    fontWeight:'300',
+    alignSelf: 'center'
+  },
+  getStarted: {
+    backgroundColor: '#467EAE', //'#2892C6',
+    paddingVertical: 10,
+    marginHorizontal: 10,
+    // paddingHorizontal: 50,
+    alignSelf: 'stretch',
+  },
+  thumbButton: {
+    marginTop: 20,
+    alignSelf: 'stretch',
+    alignItems: 'center',
+    justifyContent: 'center',
+    // paddingHorizontal: 80,
+  },
+  thumb: {
+    width:  40,
+    height: 40,
+    marginRight: 2,
+    borderRadius: 5
+  },
+  error: {
+    // paddingLeft: 5,
+    // position: 'absolute',
+    // top: 70,
+    // marginBottom: -30,
+    marginTop: -10,
+    backgroundColor: 'transparent'
+  },
+  errorText: {
+    fontSize: 14,
+    marginLeft: 10,
+    color: '#a94442'
+  },
+  items: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    // paddingBottom: 5
+  },
+  activePropTitle: {
+    fontSize: 12,
+    marginTop: 20,
+    paddingBottom: 5,
+    // marginBottom: 5,
+    color: '#bbbbbb'
+  },
+  photoStrip: {
+    // marginLeft: 10,
+    // marginTop: -30,
+    paddingBottom: 5
+  },
+  photoStripItems: {
+    flexDirection: 'row'
+  },
+  logo: {
+    opacity: 0.7,
+    alignSelf: 'flex-end',
+  }
 })
 
 module.exports = makeResponsive(NewResource);

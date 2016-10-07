@@ -47,7 +47,7 @@ var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
-var Keychain = null //!utils.isWeb() && require('../utils/keychain')
+var Keychain = !utils.isWeb() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('q-level');
 var leveldown = require('./leveldown')
@@ -1702,8 +1702,8 @@ var Store = Reflux.createStore({
   addMessagesToChat(id, r, isInit, timeShared) {
     if (r.documentCreated  &&  !isInit)
       return
-    if (!isInit  &&  utils.isEmpty(chatMessages))
-      return
+    // if (!isInit  &&  utils.isEmpty(chatMessages))
+    //   return
     let messages = chatMessages[id]
     let rid = utils.getId(r)
     if (messages  &&  messages.length) {
@@ -3485,7 +3485,7 @@ var Store = Reflux.createStore({
     })
 
     return shareableResources
-
+    // Allow sharing only the last version of the resource
     function addAndCheckShareable(verification) {
       let r = verification.document
       let docType = r[TYPE]
@@ -4919,7 +4919,7 @@ var Store = Reflux.createStore({
       utils.setModels(models);
     })
     .then(() => {
-      if (me && utils.isEmpty(chatMessages))
+      if (me  &&  utils.isEmpty(chatMessages))
         this.initChats()
       this._loadedResourcesDefer.resolve()
     })
