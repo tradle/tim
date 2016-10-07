@@ -9,7 +9,7 @@ var extend = require('extend')
 var equal = require('deep-equal')
 var Icon = require('react-native-vector-icons/Ionicons')
 var constants = require('@tradle/constants');
-import ActionSheet from 'react-native-actionsheet'
+// import ActionSheet from 'react-native-actionsheet'
 
 import {
   StyleSheet,
@@ -76,10 +76,10 @@ class GridItemsList extends Component {
   render() {
     var m = utils.getModel(this.props.resource[constants.TYPE]).value
     var prop = m.properties[this.props.prop]
-    var buttons = [translate('addNew', prop.title), translate('cancel')]
+    // var buttons = [translate('addNew', prop.title), translate('cancel')]
     let icon = Platform.OS === 'ios' ?  'md-add' : 'md-add'
     let color = Platform.OS === 'android' ? 'red' : '#ffffff'
-    let actionSheet = this.renderActionSheet(buttons)
+    // let actionSheet = this.renderActionSheet(buttons)
     return (
       <PageView style={platformStyles.container}>
         <ScrollView  ref='this'>
@@ -93,34 +93,33 @@ class GridItemsList extends Component {
             ref={input => this._imageInput = input}
             prop={prop}
             underlayColor='transparent'
-            onPress={utils.isWeb() ? null : () => this.ActionSheet.show()}
+            onPress={utils.isWeb() ? null : () => this._imageInput.showImagePicker()}
             onImage={this._onImage}>
             <View style={platformStyles.menuButton}>
               <Icon name={icon}  size={33}  color={color} />
             </View>
           </ImageInput>
         </View>
-        {actionSheet}
       </PageView>
     )
   }
 
-  renderActionSheet(buttons) {
-    if (utils.isWeb()) return
+  // renderActionSheet(buttons) {
+  //   if (utils.isWeb()) return
 
-    return (
-      <ActionSheet
-        ref={(o) => {
-          this.ActionSheet = o
-        }}
-        options={buttons}
-        cancelButtonIndex={buttons.length - 1}
-        onPress={(index) => {
-          if (index === 0) this._imageInput.showImagePicker()
-        }}
-      />
-    )
-  }
+  //   return (
+  //     <ActionSheet
+  //       ref={(o) => {
+  //         this.ActionSheet = o
+  //       }}
+  //       options={buttons}
+  //       cancelButtonIndex={buttons.length - 1}
+  //       onPress={(index) => {
+  //         if (index === 0) this._imageInput.showImagePicker()
+  //       }}
+  //     />
+  //   )
+  // }
 
       // returnIsVertical: true,
       // chooseFromLibraryButtonTitle: __DEV__ ? 'Choose from Library' : null
