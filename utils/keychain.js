@@ -104,17 +104,18 @@ function lookupKeychainKey (pubKey) {
 
 async function lookupSecureEnclaveKey (pubKey) {
   const keyPair = getCurve(pubKey.curve).keyFromPublic(new Buffer(pubKey.pub, 'hex'))
-  const compressed = keyPair.getPublic(true, true)
+  // const compressed = keyPair.getPublic(true, true)
   const uncompressed = keyPair.getPublic(false, true)
-  const tryCompressed = Q.ninvoke(ec, 'lookupKey', new Buffer(compressed))
-  const tryUncompressed = Q.ninvoke(ec, 'lookupKey', new Buffer(uncompressed))
-  let key
-  try {
-    key = await tryCompressed
-  } catch (err) {
-    key = await tryUncompressed
-  }
+  // const tryCompressed = Q.ninvoke(ec, 'lookupKey', new Buffer(compressed))
+  // const tryUncompressed = Q.ninvoke(ec, 'lookupKey', new Buffer(uncompressed))
+  // let key
+  // try {
+  //   key = await tryCompressed
+  // } catch (err) {
+  //   key = await tryUncompressed
+  // }
 
+  const key = await Q.ninvoke(ec, 'lookupKey', new Buffer(uncompressed))
   return nkeySE.fromJSON({ ...pubKey, ...key })
 }
 
