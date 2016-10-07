@@ -1,5 +1,8 @@
 'use strict'
 
+// import './utils/logAll'
+// import './utils/perf'
+
 // see issue: https://github.com/facebook/react-native/issues/6227
 try {
   var NativeAppEventEmitter = require('RCTNativeAppEventEmitter')
@@ -10,6 +13,7 @@ require('babel-polyfill')
 // require('react-native-level')
 import Debug from './utils/debug'
 var debug = Debug('tradle:app')
+var perfDebug = Debug('perf')
 
 // require('regenerator/runtime') // support es7.asyncFunctions
 import './utils/shim'
@@ -277,7 +281,7 @@ class TiMApp extends Component {
     if (ReactPerf) {
       setTimeout(function () {
         ReactPerf.stop()
-        // console.log(ReactPerf.printWasted())
+        perfDebug(ReactPerf.printWasted())
       }, 500)
     }
 
