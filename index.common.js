@@ -311,7 +311,7 @@ class TiMApp extends Component {
         }
         passProps={this.state.props}
         configureScene={(route) => {
-          if (route.sceneConfig)
+          if (!utils.isWeb() && route.sceneConfig)
             return route.sceneConfig;
 
           const config = utils.isWeb()
