@@ -197,7 +197,7 @@ class MessageView extends Component {
 
     return (
       <PageView style={platformStyles.container}>
-      <ScrollView  ref='this' style={platformStyles.container}>
+      <ScrollView  ref='this'>
         <View style={[styles.band, {borderBottomColor: this.props.bankStyle.PRODUCT_ROW_BG_COLOR, borderTopColor: '#dddddd'}]}><Text style={styles.date}>{date}</Text></View>
         <View style={styles.photoBG}>
           <PhotoView resource={resource} navigator={this.props.navigator}/>
