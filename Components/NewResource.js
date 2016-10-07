@@ -822,7 +822,7 @@ class NewResource extends Component {
     // )
     return (
       <View style={{height: height}}>
-        <BackgroundImage source={BG_IMAGE} />
+        <BackgroundImage source={BG_IMAGE} style={styles.bgImage} />
         <View style={{justifyContent: 'center', height: height}}>
         {this.state.isRegistration
           ? <View style={styles.logo}>

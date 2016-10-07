@@ -170,8 +170,17 @@ class PasswordEntry extends Component {
     }
   }
 
+  getValue() {
+    const password = this._getInput('password')
+    const passwordAgain = this._getInput('passwordAgain')
+    return {
+      password: password.value,
+      passwordAgain: passwordAgain && passwordAgain.value
+    }
+  }
+
   _onSet() {
-    const errors = this.validatePasswordChoice(this.refs.form.getValue(), true)
+    const errors = this.validatePasswordChoice(this.getValue(), true)
     if (errors.password || errors.passwordAgain) {
       this.setState({ errors })
     } else {
@@ -180,7 +189,7 @@ class PasswordEntry extends Component {
   }
 
   _onCheck() {
-    const fields = this.refs.form.getValue()
+    const fields = this.getValue()
     if (!fields) return
 
     const password = fields.password

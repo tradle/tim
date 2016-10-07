@@ -123,7 +123,6 @@ class TimHome extends Component {
   }
   componentDidMount() {
     AutomaticUpdates.on()
-    this.listenTo(Store, 'handleEvent');
     if (!isLinkingSupported) return
 
     Linking.getInitialURL()
