@@ -47,7 +47,7 @@ var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
-var Keychain = null //!utils.isWeb() && require('../utils/keychain')
+var Keychain = !utils.isWeb() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('q-level');
 var asyncstorageDown = require('asyncstorage-down')
@@ -2755,7 +2755,7 @@ var Store = Reflux.createStore({
   searchResources(params) {
     var meta = this.getModel(params.modelName).value;
     var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
-    if (isMessage  ||  meta.id === FORM)
+    if (isMessage) //  ||  meta.id === FORM)
       return this.searchMessages(params);
     else {
       params.fromView = true
