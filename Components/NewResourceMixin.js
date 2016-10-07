@@ -648,8 +648,9 @@ var NewResourceMixin = {
     let hasValue = resource && resource[prop.name]
     if (resource && resource[prop.name]) {
       label = resource[prop.name].title
-      let st = utils.isWeb() ? {paddingBottom: 10, marginLeft: 0} : {marginLeft: 10}
-      propLabel = <Text style={[st, {fontSize: 12, marginTop: 5, color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}]}>{params.label}</Text>
+      let st = utils.isWeb() ? {paddingBottom: 10, marginLeft: 0, backgroundColor: 'transparent'} : {marginLeft: 10}
+      let color = this.state.isRegistration ? '#eeeeee' : '#B1B1B1'
+      propLabel = <Text style={[st, {fontSize: 12, marginTop: 5, color: color}]}>{params.label}</Text>
     }
     else {
       label = params.label
@@ -693,7 +694,7 @@ var NewResourceMixin = {
               dateText: styles.dateText,
               placeholderText: [styles.placeholderText, {
                 color: params.value ? '#000000' : '#aaaaaa',
-                  paddingLeft: params.value ? 10 : 0
+                paddingLeft: params.value ? 10 : 0
               }],
               dateIconColor: {color: LINK_COLOR},
               dateIcon: styles.dateIcon
@@ -1342,6 +1343,7 @@ var styles= StyleSheet.create({
   dateText: {
     fontSize: 18,
     color: '#000000',
+    backgroundColor: 'transparent',
     marginLeft: 10
   },
   placeholderText: {
