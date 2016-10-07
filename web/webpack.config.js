@@ -139,7 +139,7 @@ if (NODE_ENV === 'development') {
     devtool: 'source-map',
     entry: getEntry(),
     output: {
-      path: path.join(__dirname, 'build'),
+      path: path.join(__dirname, 'dist'),
       filename: '[name].[chunkhash].js',
       chunkFilename: '[chunkhash].js',
       publicPath: '/',
@@ -168,8 +168,9 @@ if (NODE_ENV === 'development') {
     )
   }
 } else {
+  const genSourceMap = true
   config = merge(common, {
-    // devtool: 'source-map',
+    devtool: genSourceMap && 'source-map',
     entry: getEntry(),
     output: {
       path: path.join(__dirname, 'dist'),
@@ -188,9 +189,10 @@ if (NODE_ENV === 'development') {
         compress: {
           warnings: false
         },
-        sourceMap: false,
+        sourceMap: genSourceMap,
         mangle: {
-          keep_fnames: true
+          keep_fnames: true,
+          screw_ie8: true
         },
         beautify: false,
         // comments: false
@@ -231,9 +233,6 @@ function getBabelLoader () {
     //   return false
     // },
     exclude: [
-      // exclude node_modules except tcomb and react ones
-      // /node_modules\/(?!(.*)?(react|tcomb))/,
-      /node_modules\/(?!react|tcomb)/,
       /errno/,
       /xtend/
     ],
@@ -250,6 +249,14 @@ function getBabelLoader () {
   }
 
   if (!isProd) {
+    // exclude node_modules, include react & tcomb
+    // /node_modules\/(?!(.*)?(react|tcomb))/,
+    //
+    // but when uglifying, make sure to compile all es6 to es5
+    loader.exclude.push(
+      /node_modules\/(?!react|tcomb)/
+    )
+
     var plugins = loader.query.plugins
     plugins.push([
       'react-transform',
