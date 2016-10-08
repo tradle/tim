@@ -831,7 +831,9 @@ var NewResourceMixin = {
     let isVideo = prop.name === 'video'
     let isPhoto = prop.name === 'photos'
       // <View key={this.getNextKey()} style={this.hasError(params) ? {paddingBottom: 0} : {paddingBottom: 10}} ref={prop.name}>
-    let color = {color: resource && resource[params.prop] ? '#000000' : this.state.isRegistration ? '#eeeeee' : '#AAAAAA'}
+    let color = this.state.isRegistration
+              ? {color: '#eeeeee'}
+              : {color: resource && resource[params.prop] ? '#000000' : '#AAAAAA'}
     let iconColor = this.state.isRegistration ? '#eeeeee' : LINK_COLOR
     return (
       <View key={this.getNextKey()} style={{paddingBottom: this.hasError(params.errors, prop.name) ? 0 : 10, margin: 0}} ref={prop.name}>
