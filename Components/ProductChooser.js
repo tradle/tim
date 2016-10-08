@@ -9,6 +9,7 @@ var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var constants = require('@tradle/constants');
+var PageView = require('./PageView')
 var MessageList = require('./MessageList')
 // var SearchBar = require('react-native-search-bar');
 
@@ -220,10 +221,10 @@ class ProductChooser extends Component {
             : <View />;
     var bgStyle = this.props.bankStyle  &&  this.props.bankStyle.BACKGROUND_COLOR ? {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR} : {backgroundColor: '#ffffff'}
     return (
-      <View style={[styles.container, bgStyle]}>
+      <PageView style={[styles.container, bgStyle]}>
         {err}
         {content}
-      </View>
+      </PageView>
     );
   }
 }
