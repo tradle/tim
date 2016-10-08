@@ -63,10 +63,10 @@ class MessageTypeRow extends Component {
       var url = utils.getImageUri(ownerImg);
       verPhoto = <Image source={{uri: ownerImg}} style={styles.ownerImage} />
     }
-    var viewStyle = { marginVertical :1, backgroundColor: PRODUCT_ROW_BG_COLOR }
+    var viewStyle = { marginTop: 1, backgroundColor: PRODUCT_ROW_BG_COLOR }
     return (
       <TouchableHighlight style={viewStyle} onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
-          {renderedRow}
+        {renderedRow}
       </TouchableHighlight>
     );
   }
