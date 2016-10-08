@@ -5807,8 +5807,8 @@
     },
     "react-native-floating-labels": {
       "version": "1.0.1",
-      "from": "mvayngrib/react-native-floating-labels#409b583",
-      "resolved": "git://github.com/mvayngrib/react-native-floating-labels.git#409b583524c6c5ac0d735779fef95548f42dcb38",
+      "from": "mvayngrib/react-native-floating-labels#9d4d135",
+      "resolved": "git://github.com/mvayngrib/react-native-floating-labels.git#9d4d1356a3bcbc418eb91f33ffa1ee18cdc49f18",
       "dependencies": {
         "lodash": {
           "version": "3.10.1",

@@ -76,7 +76,7 @@
     "react-native-device-info": "^0.9.3",
     "react-native-ecc": "github:tradle/react-native-ecc#63a1a75",
     "react-native-env": "github:tradle/react-native-env",
-    "react-native-floating-labels": "github:mvayngrib/react-native-floating-labels#409b583",
+    "react-native-floating-labels": "github:mvayngrib/react-native-floating-labels#9d4d135",
     "react-native-fs": "^1.5.1",
     "react-native-gesture-password": "github:mvayngrib/react-native-gesture-password#6ccf2955",
     "react-native-gifted-messenger": "github:pgmemk/react-native-gifted-messenger#9ef9a96d6",
