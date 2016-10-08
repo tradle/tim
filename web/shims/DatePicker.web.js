@@ -12,10 +12,6 @@ require('react-datepicker/dist/react-datepicker.css')
 import moment from 'moment'
 
 export default class DatePickerAdapter extends Component {
-  constructor(props) {
-    super(props)
-  }
-
   render() {
     return <DatePicker
       dateFormat={this.props.format}
