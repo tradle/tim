@@ -325,7 +325,7 @@ var styles = StyleSheet.create({
     marginHorizontal: 15
   },
   photoBG: {
-    backgroundColor: '#CEE7F5',
+    // backgroundColor: '#CEE7F5',
     alignItems: 'center',
   },
   photoListStyle: {
