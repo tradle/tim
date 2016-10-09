@@ -1,5 +1,5 @@
 
-const debug = require('debug')('tim:local-auth')
+const debug = require('debug')('tradle:app:local-auth')
 import { Alert, Platform } from 'react-native'
 import LocalAuth from 'react-native-local-auth'
 import Errors from 'react-native-local-auth/data/errors'
@@ -189,6 +189,7 @@ function touchIDAndPasswordAuth(navigator, isChangePassword) {
 
 function passwordAuth (navigator, isChangePassword) {
   // check if we have a password stored already
+  debug('passwordAuth')
   return utils.getHashedPassword(PASSWORD_ITEM_KEY)
     .then(
       () => checkPassword(navigator, isChangePassword),
@@ -200,6 +201,7 @@ function passwordAuth (navigator, isChangePassword) {
 
 function lockUp (err) {
   // self.setState({isModalOpen: true})
+  debug('lockUp')
   loopAlert(err)
   let doneWaiting
   return utils.promiseDelay(LOCK_TIME)
@@ -216,6 +218,7 @@ function lockUp (err) {
 }
 
 function setPassword (navigator, isChangePassword) {
+  debug('setPassword')
   return Q.Promise((resolve, reject) => {
     navigator.push({
       component: PasswordCheck,
@@ -241,6 +244,7 @@ function setPassword (navigator, isChangePassword) {
 }
 
 function checkPassword (navigator, isChangePassword) {
+  debug('checkPassword')
   // HACK
   let routes = navigator.getCurrentRoutes()
   let currentRoute = routes[routes.length - 1]

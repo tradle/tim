@@ -26,7 +26,6 @@ var deepEqual = require('deep-equal')
 var debug = Debug('Store')
 var employee = require('../people/employee.json')
 
-var timerDebug = Debug('TIMER')
 var Q = require('q');
 Q.longStackSupport = true
 Q.onerror = function (err) {
@@ -258,7 +257,9 @@ var Store = Reflux.createStore({
       return this.ready = this.wipe()
         .then(() => {
           Alert.alert('please refresh')
-          return Q.Promise(function (resolve) {})
+          return Q.Promise(function (resolve) {
+            // hang
+          })
         })
     }
 
@@ -5567,7 +5568,6 @@ var Store = Reflux.createStore({
         }
       });
     }
-    // this.loadStaticData()
 
     return self.loadMyResources()
           // .then(self.loadAddressBook)
@@ -5690,67 +5690,6 @@ var Store = Reflux.createStore({
 
 module.exports = Store;
 
-function timeSomething (name) {
-  var start = Date.now()
-  return (print) => {
-    var ms = Date.now() - start
-    if (print) {
-      console.log(`TIMER: ${name} took ${ms}ms`)
-    }
-
-    return ms
-  }
-}
-
-function timeFunctions (obj) {
-  if (!__DEV__) return obj
-
-  var timed = {}
-  var totals = {}
-  Object.keys(obj).forEach((k) => {
-    var orig = obj[k]
-    if (typeof orig !== 'function') {
-      timed[k] = orig
-      return
-    }
-
-    const total = totals[k] = {
-      calls: 0,
-      time: 0
-    }
-
-    timed[k] = function () {
-      var stopTimer = timeSomething(k)
-      var ret = orig.apply(this, arguments)
-      if (!Q.isPromiseAlike(ret)) {
-        recordDuration()
-        return ret
-      }
-
-      return ret
-        .then(val => {
-          recordDuration()
-          return val
-        }, err => {
-          recordDuration()
-          throw err
-        })
-
-      function recordDuration () {
-        var ms = stopTimer()
-        total.time += ms
-        total.calls++
-        // if (k === 'send' || k === 'receive' || ms > 200) {
-        //   Alert.alert(`${k} took`, '' + ms)
-        // }
-
-        timerDebug(`${k} took ${ms}ms. ${total.calls} calls totaled ${total.time}ms`)
-      }
-    }
-  })
-
-  return timed
-}
 function getProviderUrl (provider) {
   return provider.id ? utils.joinURL(provider.url, provider.id) : provider.url
 }

@@ -50,6 +50,7 @@ var encryptionOpts = {
 
 const tradle = require('@tradle/engine')
 const protocol = tradle.protocol
+const tradleUtils = tradle.utils
 var constants = require('@tradle/constants');
 var TYPE = constants.TYPE
 var TYPES = constants.TYPES
@@ -1094,7 +1095,8 @@ var utils = {
   imageQuality: 0.2,
   restartApp: function () {
     return NativeModules.CodePush.restartApp(false)
-  }
+  },
+  printStack: tradleUtils.printStack.bind(tradleUtils)
 }
 
 function normalizeRemoveListener (addListenerRetVal) {
