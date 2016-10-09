@@ -30,7 +30,7 @@ import { makeResponsive } from 'react-native-orient'
 // var ResourceTypesScreen = require('./ResourceTypesScreen')
 
 var LINK_COLOR
-var LIMIT = 10
+var LIMIT = 300
 var NEXT_HASH = '_n'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const MY_PRODUCT = 'tradle.MyProduct'
