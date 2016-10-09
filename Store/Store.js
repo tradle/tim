@@ -47,7 +47,7 @@ var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
-var Keychain = !utils.isWeb() && require('../utils/keychain')
+var Keychain = null // !utils.isWeb() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('q-level');
 var asyncstorageDown = require('asyncstorage-down')
@@ -2438,6 +2438,17 @@ var Store = Reflux.createStore({
       })
       if (o  &&  o.length)
         return true
+    }
+    else if (org) {
+      let result = this.searchMessages({to: me, modelName: MY_EMPLOYEE_PASS})
+      if (!result)
+        return true
+      let meOrgId = utils.getId(me.organization)
+      let repId = utils.getId(this.getRepresentative(meOrgId))
+      let fresult = result.some((r) => {
+        return repId === utils.getId(r.to)
+      })
+      return fresult.length
     }
   },
   onGetMe() {
