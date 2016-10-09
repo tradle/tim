@@ -23,6 +23,7 @@ import {
   Platform
 } from 'react-native';
 
+import { makeResponsive } from 'react-native-orient'
 import LinearGradient from 'react-native-linear-gradient'
 import React, { Component } from 'react'
 import ActivityIndicator from './ActivityIndicator'
@@ -495,6 +496,7 @@ var styles = StyleSheet.create({
   },
 });
 
+ResourceRow = makeResponsive(ResourceRow)
 module.exports = ResourceRow;
       // return (
       // <Swipeout right={[{text: 'Hide', backgroundColor: 'red', onPress: this.hideResource.bind(this, resource)}]} autoClose={true} scroll={(event) => this._allowScroll(event)} >
