@@ -156,6 +156,12 @@ if (NODE_ENV === 'development') {
       // new HtmlPlugin()
     ],
     module: {
+      preLoaders: [
+        {
+          test: /\.js$/,
+          loader: 'source-map-loader'
+        }
+      ],
       loaders: [
         getBabelLoader()
       ]
