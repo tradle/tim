@@ -58,14 +58,14 @@ class PhotoView extends Component {
     var hasPhoto = resource.photos && resource.photos.length;
     var currentPhoto = this.state.currentPhoto || (hasPhoto  &&  resource.photos[0]);
     if (!currentPhoto) {
-      if (model.id === constants.TYPES.PROFILE) {
-        return (
-          <View style={styles.photoBG}>
-            <Icon name='ios-person' size={200}  color='#f6f6f4' />
-          </View>
-        )
-      }
-      else
+      // if (model.id === constants.TYPES.PROFILE) {
+      //   return (
+      //     <View style={styles.photoBG}>
+      //       <Icon name='ios-person' size={200}  color='#f6f6f4' />
+      //     </View>
+      //   )
+      // }
+      // else
         return <View />
     }
 
