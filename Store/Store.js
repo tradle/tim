@@ -4866,7 +4866,7 @@ var Store = Reflux.createStore({
         else
           sameContactList[p] = p
       }
-      if (!utils.isEmpty(list))
+      if (utils.isEmpty(list))
         this.loadStaticData()
 
       for (var s in sameContactList)
@@ -5567,7 +5567,7 @@ var Store = Reflux.createStore({
         }
       });
     }
-    this.loadStaticData()
+    // this.loadStaticData()
 
     return self.loadMyResources()
           // .then(self.loadAddressBook)
