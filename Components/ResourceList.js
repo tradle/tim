@@ -8,7 +8,6 @@ var NewResource = require('./NewResource');
 var MessageList = require('./MessageList');
 var PageView = require('./PageView')
 var MessageView = require('./MessageView')
-var PageView = require('./PageView')
 import ActionSheet from 'react-native-actionsheet'
 var utils = require('../utils/utils');
 var translate = utils.translate
@@ -39,7 +38,7 @@ import {
   Alert,
   // AlertIOS,
   // ActionSheetIOS,
-  TouchableHighlight,
+  TouchableOpacity,
   Image,
   View,
   Text,
@@ -118,6 +117,7 @@ class ResourceList extends Component {
     }
     var params = {
       modelName: this.props.modelName,
+      // to: this.props.resource
     };
     if (this.props.isAggregation)
       params.isAggregation = true;
@@ -133,6 +133,7 @@ class ResourceList extends Component {
         //   params.to = this.props.resource.to
         params.resource = this.props.resource
       }
+
 //       params.resource = this.props.resource
     }
     else
@@ -695,11 +696,11 @@ class ResourceList extends Component {
     let color = Platform.OS === 'android' ? 'red' : '#ffffff'
     return (
        <View style={styles.footer}>
-         <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
+         <TouchableOpacity onPress={() => this.ActionSheet.show()}>
            <View style={platformStyles.menuButtonNarrow}>
              <Icon name={icon}  size={33}  color={color} />
            </View>
-         </TouchableHighlight>
+         </TouchableOpacity>
        </View>
     )
   }
@@ -904,7 +905,7 @@ class ResourceList extends Component {
 
     return (
       <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
-        <TouchableHighlight underlayColor='transparent' onPress={this.showBanks.bind(this)}>
+        <TouchableOpacity onPress={this.showBanks.bind(this)}>
           <View style={styles.row}>
             <View>
               <Image source={require('../img/banking.png')} style={styles.cellImage} />
@@ -913,7 +914,7 @@ class ResourceList extends Component {
               <Text style={styles.resourceTitle}>Official Accounts</Text>
             </View>
           </View>
-        </TouchableHighlight>
+        </TouchableOpacity>
       </View>
     )
   }
@@ -1014,7 +1015,7 @@ var styles = StyleSheet.create({
   },
   separator: {
     height: 1,
-    backgroundColor: '#eeeeee',
+    backgroundColor: '#cccccc',
   },
   icon: {
     marginLeft: -23,
@@ -1038,7 +1039,7 @@ var styles = StyleSheet.create({
     backgroundColor: 'transparent',
     // backgroundColor: '#eeeeee',
     borderColor: '#eeeeee',
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
     borderTopColor: '#cccccc',
   },
   row: {
