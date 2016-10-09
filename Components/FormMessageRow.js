@@ -418,10 +418,6 @@ var styles = StyleSheet.create({
     bottom: 1,
     left: 10,
   },
-  rowContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between'
-  },
   verificationBody: {
     paddingVertical: 5,
     paddingHorizontal: 7,
