@@ -5967,9 +5967,9 @@
       "resolved": "https://registry.npmjs.org/react-tween-state/-/react-tween-state-0.0.5.tgz"
     },
     "react-web": {
-      "version": "0.4.0",
-      "from": "mvayngrib/react-web#1a47c79",
-      "resolved": "git://github.com/mvayngrib/react-web.git#1a47c794308a59e0a3a8a2a7ba068a0529e92850",
+      "version": "0.4.1",
+      "from": "mvayngrib/react-web#15e9486",
+      "resolved": "git://github.com/mvayngrib/react-web.git#15e94861bcb97c0aa2f7da8152ab11738a29127d",
       "dependencies": {
         "chalk": {
           "version": "1.1.1",
