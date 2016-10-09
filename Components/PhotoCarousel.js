@@ -32,6 +32,7 @@ class PhotoCarousel extends Component {
     var cnt = 2000
     var r = this.props.resource
     var styles = createStyles()
+    var photos = []
     for (var j=0; j<2; j++) {
       for (var i=0; i<n; i++) {
         var photo = this.props.photos[i];
@@ -97,5 +98,30 @@ class PhotoCarousel extends Component {
     );
   }
 }
-// PhotoCarousel = makeResponsive(PhotoCarousel)
+PhotoCarousel = makeResponsive(PhotoCarousel)
+
+var createStyles = utils.styleFactory(PhotoCarousel, function ({ dimensions }) {
+  return StyleSheet.create({
+    image: {
+      width: dimensions.width,
+      height: dimensions.height - 200,
+    },
+    imageH: {
+      width: dimensions.width,
+      height: dimensions.width - 100
+    },
+    imageV: {
+      width: dimensions.width,
+      height: dimensions.height - 200,
+    },
+    container: {
+      width: dimensions.width,
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'black',
+    },
+  })
+})
+PhotoCarousel = makeResponsive(PhotoCarousel)
 module.exports = PhotoCarousel;
