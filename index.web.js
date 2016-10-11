@@ -11,6 +11,7 @@
 import './css/customicons.css'
 import './css/ionicons.min.css'
 import './css/styles.css'
+import 'whatwg-fetch'
 require('./web/shims/deviceEventEmitter')
 require('./web/shims/orientation')
 require('./index.common')

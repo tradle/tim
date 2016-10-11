@@ -52,9 +52,9 @@
       "resolved": "git://github.com/tradle/models.git#9e64ddb89ee5833d0d954a6fdd4995e4af777406"
     },
     "@tradle/protocol": {
-      "version": "2.2.0",
-      "from": "@tradle/protocol@>=2.0.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/@tradle/protocol/-/protocol-2.2.0.tgz"
+      "version": "2.2.1",
+      "from": "@tradle/protocol@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/protocol/-/protocol-2.2.1.tgz"
     },
     "@tradle/wire": {
       "version": "1.2.0",
@@ -213,6 +213,11 @@
       "version": "1.0.7",
       "from": "argparse@>=1.0.7 <2.0.0",
       "resolved": "https://registry.npmjs.org/argparse/-/argparse-1.0.7.tgz"
+    },
+    "argsarray": {
+      "version": "0.0.1",
+      "from": "argsarray@0.0.1",
+      "resolved": "https://registry.npmjs.org/argsarray/-/argsarray-0.0.1.tgz"
     },
     "arr-diff": {
       "version": "2.0.0",
@@ -1786,6 +1791,11 @@
       "from": "d@>=0.1.1 <0.2.0",
       "resolved": "https://registry.npmjs.org/d/-/d-0.1.1.tgz"
     },
+    "d64": {
+      "version": "1.0.0",
+      "from": "d64@>=1.0.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/d64/-/d64-1.0.0.tgz"
+    },
     "dargs": {
       "version": "4.1.0",
       "from": "dargs@>=4.0.0 <5.0.0",
@@ -3280,6 +3290,11 @@
       "from": "has-gulplog@>=0.1.0 <0.2.0",
       "resolved": "https://registry.npmjs.org/has-gulplog/-/has-gulplog-0.1.0.tgz"
     },
+    "has-localstorage": {
+      "version": "1.0.1",
+      "from": "has-localstorage@>=1.0.1 <2.0.0",
+      "resolved": "https://registry.npmjs.org/has-localstorage/-/has-localstorage-1.0.1.tgz"
+    },
     "has-unicode": {
       "version": "2.0.1",
       "from": "has-unicode@>=2.0.0 <3.0.0",
@@ -3410,6 +3425,11 @@
       "version": "0.0.1",
       "from": "https-browserify@0.0.1",
       "resolved": "https://registry.npmjs.org/https-browserify/-/https-browserify-0.0.1.tgz"
+    },
+    "humble-localstorage": {
+      "version": "1.4.2",
+      "from": "humble-localstorage@>=1.4.2 <2.0.0",
+      "resolved": "https://registry.npmjs.org/humble-localstorage/-/humble-localstorage-1.4.2.tgz"
     },
     "hydration": {
       "version": "1.0.0",
@@ -4156,6 +4176,28 @@
           "resolved": "https://registry.npmjs.org/json5/-/json5-0.5.0.tgz"
         }
       }
+    },
+    "localstorage-down": {
+      "version": "0.6.6",
+      "from": "localstorage-down@>=0.6.6 <0.7.0",
+      "resolved": "https://registry.npmjs.org/localstorage-down/-/localstorage-down-0.6.6.tgz",
+      "dependencies": {
+        "abstract-leveldown": {
+          "version": "0.12.3",
+          "from": "abstract-leveldown@0.12.3",
+          "resolved": "https://registry.npmjs.org/abstract-leveldown/-/abstract-leveldown-0.12.3.tgz"
+        },
+        "xtend": {
+          "version": "3.0.0",
+          "from": "xtend@>=3.0.0 <3.1.0",
+          "resolved": "https://registry.npmjs.org/xtend/-/xtend-3.0.0.tgz"
+        }
+      }
+    },
+    "localstorage-memory": {
+      "version": "1.0.2",
+      "from": "localstorage-memory@>=1.0.1 <2.0.0",
+      "resolved": "https://registry.npmjs.org/localstorage-memory/-/localstorage-memory-1.0.2.tgz"
     },
     "lodash": {
       "version": "4.16.2",
@@ -7224,6 +7266,11 @@
       "from": "timers-browserify@>=1.0.1 <2.0.0",
       "resolved": "https://registry.npmjs.org/timers-browserify/-/timers-browserify-1.4.2.tgz"
     },
+    "tiny-queue": {
+      "version": "0.2.0",
+      "from": "tiny-queue@0.2.0",
+      "resolved": "https://registry.npmjs.org/tiny-queue/-/tiny-queue-0.2.0.tgz"
+    },
     "tinycolor": {
       "version": "0.0.1",
       "from": "tinycolor@0.0.1",
@@ -7697,7 +7744,7 @@
     },
     "whatwg-fetch": {
       "version": "1.0.0",
-      "from": "whatwg-fetch@>=0.10.0",
+      "from": "whatwg-fetch@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/whatwg-fetch/-/whatwg-fetch-1.0.0.tgz"
     },
     "whet.extend": {
