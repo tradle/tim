@@ -2567,6 +2567,18 @@ var Store = Reflux.createStore({
   onReloadModels() {
     this.loadModels()
   },
+  onRequestWipe() {
+    Alert.alert(translate('areYouSureAboutWipe'), '', [
+      {
+        text: 'Cancel',
+        onPress: () => {}
+      },
+      {
+        text: 'OK',
+        onPress: () => Actions.reloadDB()
+      }
+    ])
+  },
   wipe() {
     if (utils.isWeb()) {
       return this.wipeWeb()

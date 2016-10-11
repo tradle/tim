@@ -356,17 +356,7 @@ class ResourceView extends Component {
       Actions.genPairingData()
       return
     case WIPE_DEVICE:
-      Alert.alert(translate('areYouSureAboutWipe'), '', [
-        {
-          text: 'Cancel',
-          onPress: () => {}
-        },
-        {
-          text: 'OK',
-          onPress: () => Actions.reloadDB()
-        }
-      ])
-
+      Actions.requestWipe()
       return
     }
     if (!r.useGesturePassword  &&  !r.useTouchId)
