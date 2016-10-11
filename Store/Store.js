@@ -22,6 +22,9 @@ var extend = require('extend');
 var Debug = require('debug')
 var deepEqual = require('deep-equal')
 
+const SENT = 'Sent'
+const SENDING = 'Sending'
+const QUEUED = 'Queued'
 
 var debug = Debug('Store')
 var employee = require('../people/employee.json')
@@ -550,8 +553,14 @@ var Store = Reflux.createStore({
             if (shareInfo.bankRepresentative === meId)
               this.addMessagesToChat(utils.getId(r.to), r, true, shareInfo.timeShared)
             else  {
+              let rep = list[shareInfo.bankRepresentative].value
               let orgId = utils.getId(list[shareInfo.bankRepresentative].value.organization)
               this.addMessagesToChat(orgId, r, true, shareInfo.timeShared)
+              if (utils.getId(r.to) === meId) {
+                let contact = list[utils.getId(r.from)].value
+                if (!contact.organization  ||  !contact.bot)
+                  this.addMessagesToChat(utils.getId(r.from), r, true, shareInfo.timeShared)
+              }
             }
           })
         }
@@ -1503,6 +1512,7 @@ var Store = Reflux.createStore({
       hash = list[utils.getId(r.to)].value[ROOT_HASH]
     var toId = IDENTITY + '_' + hash
 
+    var sendStatus = (self.isConnected) ? SENDING : QUEUED
     var noCustomerWaiting
     return meDriver.sign({ object: toChain })
     .then(function(result) {
@@ -1583,7 +1593,7 @@ var Store = Reflux.createStore({
 
       // Temporary untill the real hash is known
       var key = utils.getId(rr)
-      self._setItem(key, rr)
+      self._setItem(key, rr, sendStatus)
 
       if (!toOrg) {
         let to = list[utils.getId(r.to)].value
@@ -1655,8 +1665,11 @@ var Store = Reflux.createStore({
       hash = r.from[ROOT_HASH]
     if (!hash)
       hash = list[utils.getId(r.to)].value[ROOT_HASH]
-    var toId = IDENTITY + '_' + hash
-    let isEmployee = me.isEmployee && (!r.to.organization || utils.getId(r.to.organization) === utils.getId(me.organization))
+    let isEmployee
+    if (me.isEmployee) {
+      let to = list[utils.getId(r.to)].value
+      isEmployee = (!to.organization ||  utils.getId(to.organization) === utils.getId(me.organization))
+    }
     if (isEmployee) {
       let arr = SERVICE_PROVIDERS.filter((sp) => {
         let reps = this.getRepresentatives(sp.org)
@@ -1676,6 +1689,7 @@ var Store = Reflux.createStore({
         sendParams.to = { fingerprint: this.getFingerprint(list[IDENTITY + '_' + rep[ROOT_HASH]].value) }
       }
     }
+    var toId = IDENTITY + '_' + hash
     if (!sendParams.to)
       sendParams.to = { fingerprint: this.getFingerprint(list[toId].value) }
     return sendParams
@@ -2276,7 +2290,10 @@ var Store = Reflux.createStore({
         }
 
         var returnValKey = utils.getId(returnVal)
-        self._setItem(returnValKey, returnVal)
+
+        var sendStatus = (self.isConnected) ? SENDING : QUEUED
+        self._setItem(returnValKey, returnVal, sendStatus)
+
         let org = list[utils.getId(returnVal.to)].value.organization
         let orgId = utils.getId(org)
         self.addMessagesToChat(orgId, returnVal)
@@ -3504,8 +3521,11 @@ var Store = Reflux.createStore({
           }
         }
       }
-      shareableResources[docType].push(verification)
-      shareableResourcesRootToR[r[ROOT_HASH]] = r
+      // Check that this is not the resource that was send to me as to an employee
+      if (utils.getId(r.to) !== meId) {
+        shareableResources[docType].push(verification)
+        shareableResourcesRootToR[r[ROOT_HASH]] = r
+      }
     }
   },
 
@@ -4348,8 +4368,11 @@ var Store = Reflux.createStore({
         var isForm = model.subClassOf === FORM
         if (isForm  ||  model.id === PRODUCT_APPLICATION) {
           var r = list[obj[TYPE] + '_' + obj[ROOT_HASH] + (isForm ? '_' +  obj[CUR_HASH] : '')]
-          if (r)
+          if (r) {
+            r._sendStatus = SENT
             self.trigger({action: 'updateItem', sendStatus: 'Sent', resource: r.value})
+            db.put(key, r)
+          }
           // var o = {}
           // extend(o, obj)
           // var from = o.from
@@ -4896,7 +4919,7 @@ var Store = Reflux.createStore({
         else
           sameContactList[p] = p
       }
-      if (!utils.isEmpty(list))
+      if (utils.isEmpty(list))
         this.loadStaticData()
 
       for (var s in sameContactList)
@@ -5598,7 +5621,7 @@ var Store = Reflux.createStore({
         }
       });
     }
-    this.loadStaticData()
+    // this.loadStaticData()
     return self.loadMyResources()
   },
   loadStaticData() {
@@ -5704,7 +5727,12 @@ var Store = Reflux.createStore({
       ref.time = resource.time
     return ref
   },
-  _setItem(key, value) {
+  _setItem(key, value, sendStatus) {
+    if (sendStatus) {
+      value._sendStatus = sendStatus
+      db.put(key, value)
+    }
+
     list[key] = { key, value }
   },
   _mergeItem(key, value) {
