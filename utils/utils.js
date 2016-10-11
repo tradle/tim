@@ -1141,7 +1141,11 @@ var utils = {
   },
   imageQuality: 0.2,
   restartApp: function () {
-    return NativeModules.CodePush.restartApp(false)
+    if (utils.isWeb()) {
+      window.location.reload()
+    } else {
+      NativeModules.CodePush.restartApp(false)
+    }
   },
   readFile: Platform.OS == 'web' && function readFile (file, cb) {
     var reader  = new FileReader();

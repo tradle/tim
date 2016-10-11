@@ -2568,6 +2568,21 @@ var Store = Reflux.createStore({
     this.loadModels()
   },
   wipe() {
+    if (utils.isWeb()) {
+      return this.wipeWeb()
+    } else {
+      return this.wipeMobile()
+    }
+  },
+
+  wipeWeb() {
+    if (localStorage) localStorage.clear()
+    if (sessionStorage) sessionStorage.clear()
+
+    return leveldown.destroyAll()
+  },
+
+  wipeMobile() {
     return Q.all([
       AsyncStorage.clear(),
       utils.resetPasswords()
