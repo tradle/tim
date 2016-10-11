@@ -5,7 +5,7 @@ var utils = require('../utils/utils');
 var translate = utils.translate
 var constants = require('@tradle/constants');
 var Accordion = require('react-native-accordion')
-import LinearGradient from 'react-native-linear-gradient'
+// import LinearGradient from 'react-native-linear-gradient'
 // var Icon = require('react-native-vector-icons/Ionicons');
 import CustomIcon from '../styles/customicons'
 var cnt = 0;
@@ -121,9 +121,9 @@ var RowMixin = {
       }).join('');
 
       return <View style={{paddingRight: 3}}>
-               <LinearGradient colors={['#2B6493', '#417AA9', '#568FBE']} style={styles.cellRoundImage}>
+               <View style={[{color: '#ffffff', backgroundColor: this.props.bankStyle.LINK_COLOR}, styles.cellRoundImage]}>
                  <Text style={styles.cellText}>{title}</Text>
-               </LinearGradient>
+               </View>
              </View>
     }
   },
