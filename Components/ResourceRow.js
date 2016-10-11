@@ -18,7 +18,7 @@ import {
   PixelRatio,
   StyleSheet,
   Text,
-  TouchableHighlight,
+  TouchableOpacity,
   View,
   Platform
 } from 'react-native';
@@ -117,11 +117,11 @@ class ResourceRow extends Component {
 
     var rId = utils.getId(this.props.resource)
     // var cancelResource = (this.props.onCancel ||  this.state)
-    //                    ? <TouchableHighlight onPress={this.action.bind(this)} underlayColor='transparent' style={{position: 'absolute', right: 0, top: 20}}>
+    //                    ? <TouchableOpacity onPress={this.action.bind(this)} style={{position: 'absolute', right: 0, top: 20}}>
     //                        <View>
     //                          <Icon name={this.state.sharedWith[rId] ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color={this.state.sharedWith[rId] ? '#B1010E' : '#dddddd'}  style={styles.cancelIcon} />
     //                        </View>
-    //                      </TouchableHighlight>
+    //                      </TouchableOpacity>
     //                    : <View />;
     var cancelResource = (this.props.onCancel ||  this.state)
                        ?  <View style={{position: 'absolute', right: 0, top: 20, backgroundColor: 'transparent'}}>
@@ -161,7 +161,7 @@ class ResourceRow extends Component {
     else
       return (
         <View key={this.getNextKey()} style={[{opacity: 1}, styles.rowWrapper]}>
-          <TouchableHighlight onPress={this.state ? this.action.bind(this) : this.props.onSelect} underlayColor='transparent' key={this.getNextKey()}>
+          <TouchableOpacity onPress={this.state ? this.action.bind(this) : this.props.onSelect} key={this.getNextKey()}>
             <View style={[styles.row, {width: utils.dimensions(ResourceRow).width - 50}]} key={this.getNextKey()}>
               {photo}
               {orgPhoto}
@@ -171,9 +171,9 @@ class ResourceRow extends Component {
               </View>
               {cancelResource}
             </View>
-          </TouchableHighlight>
+          </TouchableOpacity>
           {this.props.isOfficialAccounts
-          ? <TouchableHighlight underlayColor='transparent' style={{position: 'absolute', right: 10, top: 25, backgroundColor: 'white'}} onPress={() => {
+          ? <TouchableOpacity style={{position: 'absolute', right: 10, top: 25, backgroundColor: 'white'}} onPress={() => {
               this.props.navigator.push({
                 component: ResourceList,
                 title: translate("myDocuments"),
@@ -193,7 +193,7 @@ class ResourceRow extends Component {
                     : <View />
                  }
               </View>
-            </TouchableHighlight>
+            </TouchableOpacity>
             : <View />}
           {dateRow}
           {cancelResource}
@@ -371,11 +371,11 @@ class ResourceRow extends Component {
     if (!backlink)
       return renderedViewCols
     return [
-      <TouchableHighlight key={this.getNextKey()} onPress={this.props.showRefResources.bind(this, resource, backlink)} underlayColor='transparent'>
+      <TouchableOpacity key={this.getNextKey()} onPress={this.props.showRefResources.bind(this, resource, backlink)}>
         <View key={this.getNextKey()}>
           {renderedViewCols}
         </View>
-      </TouchableHighlight>
+      </TouchableOpacity>
     ];
   }
   onPress(event) {
@@ -458,7 +458,7 @@ var styles = StyleSheet.create({
     width: 60,
     borderColor: '#7AAAc3',
     borderRadius: 30,
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
   },
   cellNoImage: {
     backgroundColor: '#dddddd',
@@ -485,7 +485,7 @@ var styles = StyleSheet.create({
     position: 'absolute',
     top: 83,
     left: 8,
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
     borderColor: '#ffffff'
   },
   verySmallLetters: {
@@ -499,7 +499,7 @@ module.exports = ResourceRow;
       // return (
       // <Swipeout right={[{text: 'Hide', backgroundColor: 'red', onPress: this.hideResource.bind(this, resource)}]} autoClose={true} scroll={(event) => this._allowScroll(event)} >
       //   <View key={this.getNextKey()} style={{opacity: 1, flex: 1, justifyContent: 'center'}}>
-      //     <TouchableHighlight onPress={this.state ? this.action.bind(this) : this.props.onSelect} underlayColor='transparent' key={this.getNextKey()}>
+      //     <TouchableOpacity onPress={this.state ? this.action.bind(this) : this.props.onSelect} key={this.getNextKey()}>
       //       <View style={[styles.row]} key={this.getNextKey()}>
       //         {photo}
       //         {orgPhoto}
@@ -509,9 +509,9 @@ module.exports = ResourceRow;
       //         </View>
       //         {cancelResource}
       //       </View>
-      //     </TouchableHighlight>
+      //     </TouchableOpacity>
       //     {this.props.isOfficialAccounts
-      //     ? <TouchableHighlight underlayColor='transparent' style={{position: 'absolute', right: 20, top: 25, backgroundColor: 'white'}} onPress={() => {
+      //     ? <TouchableOpacity style={{position: 'absolute', right: 20, top: 25, backgroundColor: 'white'}} onPress={() => {
       //         this.props.navigator.push({
       //           component: ResourceList,
       //           title: translate("myDocuments"),
@@ -531,7 +531,7 @@ module.exports = ResourceRow;
       //               : <View />
       //            }
       //         </View>
-      //       </TouchableHighlight>
+      //       </TouchableOpacity>
       //       : <View />}
       //     {dateRow}
       //     {cancelResource}
