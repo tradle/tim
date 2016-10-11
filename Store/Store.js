@@ -2597,22 +2597,22 @@ var Store = Reflux.createStore({
     return destroyTim
       .then(() => this.wipe())
       .then(() => {
-        Alert.alert('please refresh')
-        return Q.Promise(function (resolve) {})
+        // Alert.alert('please refresh')
+        return utils.restartApp()// Q.Promise(function (resolve) {})
       })
-      .then(function() {
-        list = {};
-        models = {};
-        me = null;
-        return
-        // return self.loadModels()
-      })
-      .then(function() {
-        self.trigger({action: 'reloadDB', models: models});
-      })
-      .catch(function(err) {
-        err = err;
-      });
+      // .then(function() {
+      //   list = {};
+      //   models = {};
+      //   me = null;
+      //   return
+      //   // return self.loadModels()
+      // })
+      // .then(function() {
+      //   self.trigger({action: 'reloadDB', models: models});
+      // })
+      // .catch(function(err) {
+      //   err = err;
+      // });
     // var togo = 1;
     // // this.loadModels()
     // // var name = me.firstName.toLowerCase();
