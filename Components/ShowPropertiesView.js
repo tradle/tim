@@ -256,7 +256,7 @@ class ShowPropertiesView extends Component {
       if (isPromptVisible)
         console.log(this.state.promptVisible)
       let canReject = this.props.checkProperties
-                    ? <View style={{flex: 1, justifyContent: 'flex-end', alignSelf: 'center'}}>
+                    ? <View style={styles.iconView}>
                         <Icon key={p} name={this.props.errorProps && this.props.errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={25} color={this.props.errorProps && this.props.errorProps[p] ? 'red' : this.props.bankStyle.LINK_COLOR} style={{marginTop: 10}}
                         onPress={() => {
                           this.setState({promptVisible: pMeta})
@@ -280,7 +280,7 @@ class ShowPropertiesView extends Component {
       if (isDirectionRow) {
         style.push({flexDirection: 'row'})
         if (canReject)
-          style.push({justifyContent: 'space-between', flex: 10})
+          style.push({justifyContent: 'space-between'})
       }
       else
         style.push({flexDirection: 'column'})
@@ -356,6 +356,10 @@ var styles = StyleSheet.create({
     width: 40,
     height: 40
   },
+  iconView: {
+    alignSelf: 'center',
+    marginRight: 20
+  }
 });
 
 module.exports = ShowPropertiesView;
