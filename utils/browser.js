@@ -7,6 +7,9 @@ module.exports = {
 
     var ua = global.navigator.userAgent
     var msie = ua.indexOf("MSIE ")
-    return msie > 0
+    if (msie > 0) return true
+
+    // IE11
+    return !(global.ActiveXObject) && "ActiveXObject" in global
   })()
 }
