@@ -736,7 +736,7 @@ class MessageRow extends Component {
           vCols.push(
             <View key={self.getNextKey()}>
               <Text style={[style]}>{resource[v]}</Text>
-              <Icon style={[{color: self.props.bankStyle.CONFIRMATION_COLOR, alignSelf: 'flex-end', width: 50, height: 50, marginTop: -45, opacity: 0.2}]} size={50} name={'ios-flower'} />
+              <Icon style={[{color: self.props.bankStyle.CONFIRMATION_COLOR, alignSelf: 'flex-end', width: 50, height: 50, marginTop: -30, opacity: 0.2}]} size={50} name={'ios-flower'} />
               <Icon style={{color: self.props.bankStyle.CONFIRMATION_COLOR, alignSelf: 'flex-end', marginTop: -10}} size={30} name={'ios-done-all'} />
             </View>
           );
@@ -750,8 +750,8 @@ class MessageRow extends Component {
     });
     if (!isSimpleMessage  &&  !isFormError  &&  !isMyProduct)  {
       let title = translate(model)
-      if (title.length > 30)
-        title = title.substring(0, 27) + '...'
+      // if (title.length > 30)
+      //   title = title.substring(0, 27) + '...'
 
       vCols.push(<Text style={[styles.resourceTitle, styles.formType, {color: isMyMessage ? '#EBFCFF' : this.props.bankStyle.STRUCTURED_MESSAGE_BORDER}]} key={this.getNextKey()}>{title}</Text>);
     }
