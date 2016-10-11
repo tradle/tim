@@ -3,6 +3,7 @@
 var Q = require('q')
 var Keychain = require('react-native-keychain')
 var debounce = require('debounce')
+var DashboardView = require('./DashboardView')
 var ResourceList = require('./ResourceList');
 var VideoPlayer = require('./VideoPlayer')
 var NewResource = require('./NewResource');
@@ -48,8 +49,7 @@ import {
   Text,
   Navigator,
   View,
-  TouchableHighlight,
-  TouchableWithoutFeedback,
+  TouchableOpacity,
   Image,
   NetInfo,
   ScrollView,
@@ -329,6 +329,45 @@ class TimHome extends Component {
       this.showContacts()
       return
     }
+    // let route = {
+    //   id: 23,
+    //   component: DashboardView,
+    //   title: translate('profile'),
+    //   backButtonTitle: translate('back'),
+    //   rightButtonTitle: translate('edit'),
+    //   onRightButtonPress: {
+    //     title: translate('profile'),
+    //     id: 23,
+    //     component: DashboardView,
+    //     menu: ResourceList,
+    //     menuProps: {
+    //       modelName: constants.TYPES.ORGANIZATION,
+    //       bankStyle: this.props.bankStyle || defaultBankStyle
+    //     },
+    //     mainComponent: NewResource,
+    //     titleTextColor: '#7AAAC3',
+    //     backButtonTitle: translate('back'),
+    //     rightButtonTitle: translate('done'),
+    //     mainComponentProps: {
+    //       model: utils.getModel(constants.TYPES.PROFILE).value,
+    //       resource: me,
+    //       bankStyle: this.props.bankStyle || defaultBankStyle
+    //     }
+    //   },
+    //   passProps: {
+    //     bankStyle: defaultBankStyle,
+    //     menu: ResourceList,
+    //     menuProps: {
+    //       modelName: constants.TYPES.ORGANIZATION,
+    //       bankStyle: this.props.bankStyle || defaultBankStyle
+    //     },
+    //     mainComponent: ResourceView,
+    //     mainComponentProps: {
+    //       bankStyle: this.props.bankStyle || defaultBankStyle,
+    //       resource: me
+    //     }
+    //   }
+    // }
     let title = me.firstName;
     let route = {
       title: translate('officialAccounts'),
@@ -366,9 +405,9 @@ class TimHome extends Component {
         }
       }
     }
-    // if (doReplace)
-    //   nav.replace(route)
-    // else
+    if (doReplace)
+      nav.replace(route)
+    else
       nav.push(route)
 
   }
@@ -562,18 +601,18 @@ class TimHome extends Component {
 
     var dev = __DEV__
             ? <View style={styles.dev}>
-                <TouchableHighlight
+                <TouchableOpacity
                     underlayColor='transparent' onPress={this.onReloadDBPressed.bind(this)}>
                   <Text style={styles.text}>
                     Reload DB
                   </Text>
-                </TouchableHighlight>
-                <TouchableHighlight
+                </TouchableOpacity>
+                <TouchableOpacity
                     underlayColor='transparent' onPress={this.onReloadModels.bind(this)}>
                   <Text style={styles.text}>
                     Reload Models
                   </Text>
-                </TouchableHighlight>
+                </TouchableOpacity>
                 {settings}
               </View>
             : <View style={[styles.dev, { flexDirection: 'column' }]}>
@@ -581,21 +620,23 @@ class TimHome extends Component {
                 {version}
               </View>
 
-    let logo = <View style={[styles.container]}>
+    let logo = <TouchableOpacity onPress={() => this._pressHandler()}>
+                <View style={[styles.container]}>
                   <CustomIcon color='#ffffff' name="tradle" size={getIconSize()} />
                   <Text style={styles.tradle}>Tradle</Text>
-              </View>
+                </View>
+               </TouchableOpacity>
 
                           // <Image style={{position: 'absolute', left: 0, opacity: 0.5, width: 100, height: 100}} source={TradleWhite}></Image>
     let regView = <View  style={{alignSelf: 'center'}}>
                     <FadeInView>
-                      <TouchableHighlight  onPress={() => {
+                      <TouchableOpacity  onPress={() => {
                         this.register(this.showOfficialAccounts.bind(this))
                         }} underlayColor='transparent'>
                         <View style={styles.signIn}>
                           <Text style={styles.signInText}>{translate('This is my first Tradle device')}</Text>
                         </View>
-                      </TouchableHighlight>
+                      </TouchableOpacity>
                     </FadeInView>
                  </View>
 
@@ -607,12 +648,12 @@ class TimHome extends Component {
           {logo}
           <View>
             { utils.getMe()
-              ? <TouchableHighlight style={[styles.thumbButton, {justifyContent: 'flex-end',  opacity: me ? 1 : 0}]}
+              ? <TouchableOpacity style={[styles.thumbButton, {justifyContent: 'flex-end',  opacity: me ? 1 : 0}]}
                     underlayColor='transparent' onPress={() => this._pressHandler()}>
                   <View style={styles.getStarted}>
                      <Text style={styles.getStartedText}>Get started</Text>
                   </View>
-                </TouchableHighlight>
+                </TouchableOpacity>
               : regView
             }
             <Text style={errStyle}>{err}</Text>
