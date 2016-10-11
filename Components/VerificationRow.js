@@ -182,21 +182,26 @@ class VerificationRow extends Component {
            {header}
           </TouchableHighlight>
          </View>
-       :  !isMyProduct  &&  !isVerification  &&  !this.props.prop
-          ? <Swipeout right={[{text: 'Revoke', backgroundColor: 'red', onPress: this.revokeDocument.bind(this)}]} autoClose={true} scroll={(event) => this._allowScroll(event)}>
-              <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>
-               {header}
-              </TouchableHighlight>
-            </Swipeout>
-          : <View>
-             <Accordion
-               header={header}
-               style={{alignSelf: 'stretch'}}
-               content={content}
-               underlayColor='transparent'
-               easing='easeOutQuad' />
-            </View>
+       :  <Swipeout right={[{text: 'Revoke', backgroundColor: 'red', onPress: this.revokeDocument.bind(this)}]} autoClose={true} scroll={(event) => this._allowScroll(event)}>
+            <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>
+             {header}
+            </TouchableHighlight>
+          </Swipeout>
     );
+       // :  !isMyProduct  &&  !isVerification  &&  !this.props.prop
+       //    ? <Swipeout right={[{text: 'Revoke', backgroundColor: 'red', onPress: this.revokeDocument.bind(this)}]} autoClose={true} scroll={(event) => this._allowScroll(event)}>
+       //        <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>
+       //         {header}
+       //        </TouchableHighlight>
+       //      </Swipeout>
+       //    : <View>
+       //       <Accordion
+       //         header={header}
+       //         style={{alignSelf: 'stretch'}}
+       //         content={content}
+       //         underlayColor='transparent'
+       //         easing='easeOutQuad' />
+       //      </View>
   }
   revokeDocument() {
     var resource = this.props.resource
