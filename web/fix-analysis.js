@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 
 const split = require('split')
 var started = false
