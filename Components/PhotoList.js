@@ -164,8 +164,8 @@ reactMixin(PhotoList.prototype, RowMixin);
 
 var createStyles = utils.styleFactory(PhotoList, function ({ dimensions }) {
   var width = dimensions.width
-  var d3 = Math.min((width / 3) - 5, 140)
-  var d4 = Math.min((width / 4) - 5, 140)
+  var d3 = Math.min((width / 3) - 5, 240)
+  var d4 = Math.min((width / 4) - 5, 190)
   var d5 = Math.min((width / 5) - 5, 140)
   return StyleSheet.create({
     photoContainer: {
