@@ -79,16 +79,17 @@ class FormMessageRow extends Component {
       // }
     }
     var properties = model.properties;
+    var photoStyle = {}
     if (properties.photos  &&  resource.photos) {
       var len = resource.photos.length;
       inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
       var style;
       if (inRow === 1)
-        style = styles.bigImage;
+        photoStyle = styles.bigImage;
       else if (inRow === 2)
-        style = styles.mediumImage;
+        photoStyle = styles.mediumImage;
       else
-        style = styles.image;
+        photoStyle = styles.image;
       resource.photos.forEach((p) => {
         photoUrls.push({url: utils.getImageUri(p.url)});
       })
@@ -161,8 +162,8 @@ class FormMessageRow extends Component {
     var inRow = utils.isWeb()
               ? Math.floor(msgWidth / 145)
               : len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
-    var photoStyle = {};
-    var height;
+    // var photoStyle = {};
+    // var height;
 
     // if (!utils.isWeb()  &&  inRow > 0) {
     //   if (inRow === 1) {
