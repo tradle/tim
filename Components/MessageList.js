@@ -132,8 +132,12 @@ class MessageList extends Component {
         limit: this.state.list ? this.state.list.length + 1 : LIMIT
       }
 
-      if (params.sendStatus) {
-        this.state.sendStatus = params.sendStatus
+      // if (params.sendStatus) {
+      //   this.state.sendStatus = params.sendStatus
+      //   this.state.sendResource = params.resource
+      // }
+      if (params.resource._sendStatus) {
+        this.state.sendStatus = params.resource._sendStatus
         this.state.sendResource = params.resource
       }
       Actions.messageList(actionParams);
@@ -326,7 +330,7 @@ class MessageList extends Component {
     if (!isEmployee  &&  !resource[NEXT_HASH]  &&  model.subClassOf !== MY_PRODUCT) {
       route.rightButtonTitle = translate('edit')
       route.onRightButtonPress = {
-        title: utils.getDisplayName(resource),
+        title: newTitle, //utils.getDisplayName(resource),
         id: 4,
         component: NewResource,
         // titleTextColor: '#7AAAC3',
@@ -378,9 +382,11 @@ class MessageList extends Component {
       return  <MyProductMessageRow {...props} />
 
       // messageNumber: rowId,
+    let sendStatus = this.state.sendStatus &&  this.state.sendResource[constants.ROOT_HASH] === resource[constants.ROOT_HASH]
+                   ? this.state.sendStatus : (resource._sendStatus === 'Sent' ? null : resource._sendStatus)
     var moreProps = {
       share: this.share.bind(this),
-      sendStatus: this.state.sendStatus &&  this.state.sendResource[constants.ROOT_HASH] === resource[constants.ROOT_HASH] ? this.state.sendStatus : null,
+      sendStatus: sendStatus,
       currency: this.props.currency,
       previousMessageTime: previousMessageTime,
     }
