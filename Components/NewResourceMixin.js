@@ -878,7 +878,7 @@ var NewResourceMixin = {
     var m = utils.getModel(propRef).value;
     var currentRoutes = this.props.navigator.getCurrentRoutes();
     this.props.navigator.push({
-      title: m.id === translate(m), //m.title,
+      title: translate(prop), //m.title,
       titleTextColor: '#7AAAC3',
       id: 10,
       component: ResourceList,
