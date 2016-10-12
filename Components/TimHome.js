@@ -428,6 +428,7 @@ class TimHome extends Component {
           component: TouchIDOptIn,
           id: 21,
           rightButtonTitle: 'Skip',
+          noLeftButton: true,
           passProps: {
             optIn: () => {
               Actions.updateMe({ useTouchId: true })
