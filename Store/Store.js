@@ -4366,11 +4366,13 @@ var Store = Reflux.createStore({
         const obj = utils.toOldStyleWrapper(msg)
         var model = self.getModel(obj[TYPE]).value
         var isForm = model.subClassOf === FORM
-        if (isForm  ||  model.id === PRODUCT_APPLICATION) {
-          var r = list[obj[TYPE] + '_' + obj[ROOT_HASH] + (isForm ? '_' +  obj[CUR_HASH] : '')]
+        // if (isForm  ||  model.id === PRODUCT_APPLICATION) {
+          let key = obj[TYPE] + '_' + obj[ROOT_HASH] + (isForm ? '_' +  obj[CUR_HASH] : '')
+          var r = list[key]
           if (r) {
+            r = r.value
             r._sendStatus = SENT
-            self.trigger({action: 'updateItem', sendStatus: 'Sent', resource: r.value})
+            self.trigger({action: 'updateItem', sendStatus: SENT, resource: r})
             db.put(key, r)
           }
           // var o = {}
@@ -4382,7 +4384,7 @@ var Store = Reflux.createStore({
           // setTimeout(() => {
           //   self.putInDb(o)
           // }, 5000);
-        }
+        // }
 
         self.maybeWatchSeal(msg)
       })
@@ -4919,7 +4921,7 @@ var Store = Reflux.createStore({
         else
           sameContactList[p] = p
       }
-      if (utils.isEmpty(list))
+      // if (!utils.isEmpty(list))
         this.loadStaticData()
 
       for (var s in sameContactList)
