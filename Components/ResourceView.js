@@ -36,6 +36,7 @@ const USE_TOUCH_ID = 0
 const USE_GESTURE_PASSWORD = 1
 const CHANGE_GESTURE_PASSWORD = 2
 const PAIR_DEVICES = 3
+const WIPE_DEVICE = 4
 import {
   StyleSheet,
   ScrollView,
@@ -274,6 +275,12 @@ class ResourceView extends Component {
       buttons.push(translate('pairDevices'))
       actions.push(PAIR_DEVICES)
     }
+
+    if (utils.isWeb()) {
+      buttons.push(translate('wipeDevice'))
+      actions.push(WIPE_DEVICE)
+    }
+
     buttons.push(translate('cancel'))
     return (
       <PageView style={platformStyles.container}>
@@ -347,6 +354,9 @@ class ResourceView extends Component {
       break
     case PAIR_DEVICES:
       Actions.genPairingData()
+      return
+    case WIPE_DEVICE:
+      Actions.requestWipe()
       return
     }
     if (!r.useGesturePassword  &&  !r.useTouchId)

@@ -2585,7 +2585,34 @@ var Store = Reflux.createStore({
   onReloadModels() {
     this.loadModels()
   },
+  onRequestWipe() {
+    Alert.alert(translate('areYouSureAboutWipe'), '', [
+      {
+        text: 'Cancel',
+        onPress: () => {}
+      },
+      {
+        text: 'OK',
+        onPress: () => Actions.reloadDB()
+      }
+    ])
+  },
   wipe() {
+    if (utils.isWeb()) {
+      return this.wipeWeb()
+    } else {
+      return this.wipeMobile()
+    }
+  },
+
+  wipeWeb() {
+    if (localStorage) localStorage.clear()
+    if (sessionStorage) sessionStorage.clear()
+
+    return leveldown.destroyAll()
+  },
+
+  wipeMobile() {
     return Q.all([
       AsyncStorage.clear(),
       utils.resetPasswords()
@@ -2600,22 +2627,22 @@ var Store = Reflux.createStore({
     return destroyTim
       .then(() => this.wipe())
       .then(() => {
-        Alert.alert('please refresh')
-        return Q.Promise(function (resolve) {})
+        // Alert.alert('please refresh')
+        return utils.restartApp()// Q.Promise(function (resolve) {})
       })
-      .then(function() {
-        list = {};
-        models = {};
-        me = null;
-        return
-        // return self.loadModels()
-      })
-      .then(function() {
-        self.trigger({action: 'reloadDB', models: models});
-      })
-      .catch(function(err) {
-        err = err;
-      });
+      // .then(function() {
+      //   list = {};
+      //   models = {};
+      //   me = null;
+      //   return
+      //   // return self.loadModels()
+      // })
+      // .then(function() {
+      //   self.trigger({action: 'reloadDB', models: models});
+      // })
+      // .catch(function(err) {
+      //   err = err;
+      // });
     // var togo = 1;
     // // this.loadModels()
     // // var name = me.firstName.toLowerCase();

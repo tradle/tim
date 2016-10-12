@@ -946,10 +946,10 @@ var utils = {
 
   hashPassword: function (opts) {
     if (typeof opts === 'string') opts = { password: opts }
-    if (utils.isWeb()) {
-      const result = utils.kdf(opts)
-      return { hash: result.key, salt: result.salt }
-    }
+    // if (utils.isWeb()) {
+    //   const result = utils.kdf(opts)
+    //   return { hash: result.key, salt: result.salt }
+    // }
 
     const salt = opts.salt || utils.generateSalt()
     const saltStr = salt.toString(PASSWORD_ENC)
@@ -1141,7 +1141,11 @@ var utils = {
   },
   imageQuality: 0.2,
   restartApp: function () {
-    return NativeModules.CodePush.restartApp(false)
+    if (utils.isWeb()) {
+      window.location.reload()
+    } else {
+      NativeModules.CodePush.restartApp(false)
+    }
   },
   readFile: Platform.OS == 'web' && function readFile (file, cb) {
     var reader  = new FileReader();

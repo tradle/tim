@@ -6,6 +6,7 @@ import {
   Text,
   TextInput,
   TouchableHighlight,
+  TouchableOpacity,
   StyleSheet,
   Dimensions
 } from 'react-native'
@@ -14,6 +15,7 @@ import t from 'tcomb-form-native'
 import Icon from 'react-native-vector-icons/Ionicons'
 import { translate } from '../../utils/utils'
 import { makeResponsive } from 'react-native-orient'
+import Actions from '../../Actions/Actions'
 // import FloatingLabel from 'react-native-floating-labels'
 
 const Form = t.form.Form
@@ -293,18 +295,18 @@ class PasswordEntry extends Component {
             value={this.state.value}
             onChange={this.onChange}
           />
-          <TouchableHighlight
+          <TouchableOpacity
             style={[styles.button, customStyle.submit, { alignItems: 'center' }]}
             onPress={this.onPress}
-            underlayColor='transparent'
             disabled={disabled}>
             <Icon
               name='ios-lock'
               size={this.props.iconSize || 100}
               style={{color: this.hasError() ? ERROR_COLOR : NEUTRAL_COLOR }}
             />
-          </TouchableHighlight>
+          </TouchableOpacity>
         </View>
+        {this.renderFooter()}
       </View>
     )
   }
@@ -313,6 +315,16 @@ class PasswordEntry extends Component {
     const style = this.hasError() ? styles.error : styles.prompt
     return (
       <Text style={[styles.header, style]}>{this.state.message}</Text>
+    )
+  }
+
+  renderFooter() {
+    if (this.props.mode === 'set') return
+
+    return (
+      <TouchableOpacity style={styles.footer} onPress={() => Actions.requestWipe()}>
+        <Text style={styles.danger}>Wipe device</Text>
+      </TouchableOpacity>
     )
   }
   // <Text style={[styles.buttonText, customStyle.submitText]}>{this.props.submitText || 'Save'}</Text>
@@ -343,6 +355,17 @@ const styles = StyleSheet.create({
   },
   prompt: {
     color: NEUTRAL_COLOR
+  },
+  footer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingRight: 5,
+    textAlign: 'right'
+  },
+  danger: {
+    color: '#ff8888'
   }
   // buttonText: {
   //   fontSize: 18,

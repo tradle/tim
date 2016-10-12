@@ -2,23 +2,6 @@
   "name": "Tradle",
   "version": "0.0.1",
   "dependencies": {
-    "@ldn0x7dc/react-native-view-pager": {
-      "version": "0.0.9",
-      "from": "@ldn0x7dc/react-native-view-pager@0.0.9",
-      "resolved": "https://registry.npmjs.org/@ldn0x7dc/react-native-view-pager/-/react-native-view-pager-0.0.9.tgz",
-      "dependencies": {
-        "react-mixin": {
-          "version": "3.0.5",
-          "from": "react-mixin@>=3.0.5 <4.0.0",
-          "resolved": "https://registry.npmjs.org/react-mixin/-/react-mixin-3.0.5.tgz"
-        },
-        "smart-mixin": {
-          "version": "2.0.0",
-          "from": "smart-mixin@>=2.0.0 <3.0.0",
-          "resolved": "https://registry.npmjs.org/smart-mixin/-/smart-mixin-2.0.0.tgz"
-        }
-      }
-    },
     "@tradle/bitcoinjs-lib": {
       "version": "1.6.0",
       "from": "@tradle/bitcoinjs-lib@>=1.5.7 <2.0.0",
@@ -69,9 +52,9 @@
       "resolved": "git://github.com/tradle/models.git#8ee099313329657d6fc043d4dad2aebeb0df54f4"
     },
     "@tradle/protocol": {
-      "version": "2.2.0",
-      "from": "@tradle/protocol@>=2.0.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/@tradle/protocol/-/protocol-2.2.0.tgz"
+      "version": "2.2.1",
+      "from": "@tradle/protocol@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/protocol/-/protocol-2.2.1.tgz"
     },
     "@tradle/wire": {
       "version": "1.2.0",
@@ -230,6 +213,11 @@
       "version": "1.0.7",
       "from": "argparse@>=1.0.7 <2.0.0",
       "resolved": "https://registry.npmjs.org/argparse/-/argparse-1.0.7.tgz"
+    },
+    "argsarray": {
+      "version": "0.0.1",
+      "from": "argsarray@0.0.1",
+      "resolved": "https://registry.npmjs.org/argsarray/-/argsarray-0.0.1.tgz"
     },
     "arr-diff": {
       "version": "2.0.0",
@@ -1803,6 +1791,11 @@
       "from": "d@>=0.1.1 <0.2.0",
       "resolved": "https://registry.npmjs.org/d/-/d-0.1.1.tgz"
     },
+    "d64": {
+      "version": "1.0.0",
+      "from": "d64@>=1.0.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/d64/-/d64-1.0.0.tgz"
+    },
     "dargs": {
       "version": "4.1.0",
       "from": "dargs@>=4.0.0 <5.0.0",
@@ -2942,8 +2935,8 @@
     },
     "forward-secrecy": {
       "version": "1.0.2",
-      "from": "tradle/forward-secrecy#dev",
-      "resolved": "git://github.com/tradle/forward-secrecy.git#5ad4c2ee429db4b10599efbd41c650b9debbf7fe",
+      "from": "git+https://github.com/tradle/forward-secrecy.git#dev",
+      "resolved": "git+https://github.com/tradle/forward-secrecy.git#5ad4c2ee429db4b10599efbd41c650b9debbf7fe",
       "dependencies": {
         "tweetnacl": {
           "version": "0.13.3",
@@ -3297,6 +3290,11 @@
       "from": "has-gulplog@>=0.1.0 <0.2.0",
       "resolved": "https://registry.npmjs.org/has-gulplog/-/has-gulplog-0.1.0.tgz"
     },
+    "has-localstorage": {
+      "version": "1.0.1",
+      "from": "has-localstorage@>=1.0.1 <2.0.0",
+      "resolved": "https://registry.npmjs.org/has-localstorage/-/has-localstorage-1.0.1.tgz"
+    },
     "has-unicode": {
       "version": "2.0.1",
       "from": "has-unicode@>=2.0.0 <3.0.0",
@@ -3427,6 +3425,11 @@
       "version": "0.0.1",
       "from": "https-browserify@0.0.1",
       "resolved": "https://registry.npmjs.org/https-browserify/-/https-browserify-0.0.1.tgz"
+    },
+    "humble-localstorage": {
+      "version": "1.4.2",
+      "from": "humble-localstorage@>=1.4.2 <2.0.0",
+      "resolved": "https://registry.npmjs.org/humble-localstorage/-/humble-localstorage-1.4.2.tgz"
     },
     "hydration": {
       "version": "1.0.0",
@@ -4174,6 +4177,28 @@
         }
       }
     },
+    "localstorage-down": {
+      "version": "0.6.6",
+      "from": "localstorage-down@>=0.6.6 <0.7.0",
+      "resolved": "https://registry.npmjs.org/localstorage-down/-/localstorage-down-0.6.6.tgz",
+      "dependencies": {
+        "abstract-leveldown": {
+          "version": "0.12.3",
+          "from": "abstract-leveldown@0.12.3",
+          "resolved": "https://registry.npmjs.org/abstract-leveldown/-/abstract-leveldown-0.12.3.tgz"
+        },
+        "xtend": {
+          "version": "3.0.0",
+          "from": "xtend@>=3.0.0 <3.1.0",
+          "resolved": "https://registry.npmjs.org/xtend/-/xtend-3.0.0.tgz"
+        }
+      }
+    },
+    "localstorage-memory": {
+      "version": "1.0.2",
+      "from": "localstorage-memory@>=1.0.1 <2.0.0",
+      "resolved": "https://registry.npmjs.org/localstorage-memory/-/localstorage-memory-1.0.2.tgz"
+    },
     "lodash": {
       "version": "4.16.2",
       "from": "lodash@>=4.8.0 <5.0.0",
@@ -4586,8 +4611,8 @@
     },
     "merkle-tree-stream": {
       "version": "3.0.3",
-      "from": "mvayngrib/merkle-tree-stream#finalize",
-      "resolved": "git://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
+      "from": "git+https://github.com/mvayngrib/merkle-tree-stream.git#finalize",
+      "resolved": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
       "dependencies": {
         "isarray": {
           "version": "1.0.0",
@@ -5839,20 +5864,10 @@
       "from": "react-native-fs@>=1.5.1 <2.0.0",
       "resolved": "https://registry.npmjs.org/react-native-fs/-/react-native-fs-1.5.1.tgz"
     },
-    "react-native-gallery": {
-      "version": "0.0.17",
-      "from": "react-native-gallery@0.0.17",
-      "resolved": "https://registry.npmjs.org/react-native-gallery/-/react-native-gallery-0.0.17.tgz"
-    },
     "react-native-gesture-password": {
       "version": "0.1.4",
       "from": "mvayngrib/react-native-gesture-password#6ccf2955",
       "resolved": "git://github.com/mvayngrib/react-native-gesture-password.git#6ccf29558bdb75e78db18208a4f2c5eff512fe62"
-    },
-    "react-native-gesture-responder": {
-      "version": "0.1.1",
-      "from": "react-native-gesture-responder@0.1.1",
-      "resolved": "https://registry.npmjs.org/react-native-gesture-responder/-/react-native-gesture-responder-0.1.1.tgz"
     },
     "react-native-gifted-messenger": {
       "version": "0.0.16",
@@ -5923,11 +5938,6 @@
       "version": "1.0.0",
       "from": "mvayngrib/react-native-safe-async-storage#7afa8c65",
       "resolved": "git://github.com/mvayngrib/react-native-safe-async-storage.git#7afa8c65d0b858689122c7a49e0f403752726490"
-    },
-    "react-native-scroller": {
-      "version": "0.0.6",
-      "from": "react-native-scroller@0.0.6",
-      "resolved": "https://registry.npmjs.org/react-native-scroller/-/react-native-scroller-0.0.6.tgz"
     },
     "react-native-search-bar": {
       "version": "2.16.0",
@@ -6009,9 +6019,9 @@
       "resolved": "https://registry.npmjs.org/react-tween-state/-/react-tween-state-0.0.5.tgz"
     },
     "react-web": {
-      "version": "0.4.0",
-      "from": "mvayngrib/react-web#d50b9c3",
-      "resolved": "git://github.com/mvayngrib/react-web.git#d50b9c363556965802e03c9bf1238537cf956375",
+      "version": "0.4.1",
+      "from": "mvayngrib/react-web#8034d16",
+      "resolved": "git://github.com/mvayngrib/react-web.git#8034d16545d4f4cce560bcaeaa991e74bda8dde4",
       "dependencies": {
         "chalk": {
           "version": "1.1.1",
@@ -7266,6 +7276,11 @@
       "from": "timers-browserify@>=1.0.1 <2.0.0",
       "resolved": "https://registry.npmjs.org/timers-browserify/-/timers-browserify-1.4.2.tgz"
     },
+    "tiny-queue": {
+      "version": "0.2.0",
+      "from": "tiny-queue@0.2.0",
+      "resolved": "https://registry.npmjs.org/tiny-queue/-/tiny-queue-0.2.0.tgz"
+    },
     "tinycolor": {
       "version": "0.0.1",
       "from": "tinycolor@0.0.1",
@@ -7739,7 +7754,7 @@
     },
     "whatwg-fetch": {
       "version": "1.0.0",
-      "from": "whatwg-fetch@>=0.10.0",
+      "from": "whatwg-fetch@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/whatwg-fetch/-/whatwg-fetch-1.0.0.tgz"
     },
     "whet.extend": {

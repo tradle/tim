@@ -139,5 +139,7 @@
     "termsAndConditions": "Terms and conditions.",
     "acceptTermsAndConditions": "View terms and conditions",
     "acceptingTermsAndConditions": "By pressing OK, you accept the Terms and Conditions",
-    "viewTerms": "Please view the Terms and Conditions"
+    "viewTerms": "Please view the Terms and Conditions",
+    "wipeDevice": "Wipe device",
+    "areYouSureAboutWipe": "This action is irreversible. You will lose all your data and private keys. Are you sure you want to proceed?"
 }

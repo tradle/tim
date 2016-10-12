@@ -24,6 +24,7 @@ var DEV = 'development';
 var isProd = NODE_ENV === 'production';
 var isHot = !isProd && process.env.HOT === '1'
 var projectRoot = path.join(__dirname, '../')
+var screwIE = !process.env.IE
 
 // var paths = {
 //   src: path.join(ROOT_PATH, '.'),
@@ -120,12 +121,29 @@ if (!isHot) {
   common.plugins.push(
     new SplitByPathPlugin([
       {
+        name: 'tradle',
+        path: /node_modules\/\@tradle/
+      },
+      {
+        name: 'react',
+        path: /node_modules\/(react|react-dom)\// //|react-native-[a-zA-Z-_]+)\//
+      },
+      {
+        name: 'react-web',
+        path: /node_modules\/(react-web|immutable|animated)\//,
+      },
+      {
+        name: 'crypto',
+        path: /node_modules\/.*?(bitcoin|crypto|bn\.js|elliptic|nkey|secp256k1|forward-secrecy)\//
+      },
+      {
+        name: 'utils',
+        path: /node_modules\/(async|levelup|localstorage-down|level-js|bluebird|q|readable-stream|moment|babel-polyfill|lodash)\//
+      },
+      // the rest
+      {
         name: 'vendor',
-        path: path.join(projectRoot, 'node_modules'),
-        // ignore: [
-        //   path.join(projectRoot, 'node_modules/react'),
-        //   path.join(projectRoot, 'node_modules/react-dom')
-        // ]
+        path: /node_modules/ //\/(?!react|react-dom|react-web|react\-native|\@tradle)\//
       }
     ])
   )
@@ -156,6 +174,12 @@ if (NODE_ENV === 'development') {
       // new HtmlPlugin()
     ],
     module: {
+      preLoaders: [
+        {
+          test: /\.js$/,
+          loader: 'source-map-loader'
+        }
+      ],
       loaders: [
         getBabelLoader()
       ]
@@ -248,15 +272,17 @@ function getBabelLoader () {
     }
   }
 
-  if (!isProd) {
+  if (!isProd && screwIE) {
+    // when uglifying (production), or for IE compat, we need to compile all es6 to es5
+    //
     // exclude node_modules, include react & tcomb
     // /node_modules\/(?!(.*)?(react|tcomb))/,
-    //
-    // but when uglifying, make sure to compile all es6 to es5
     loader.exclude.push(
       /node_modules\/(?!react|tcomb)/
     )
+  }
 
+  if (!isProd) {
     var plugins = loader.query.plugins
     plugins.push([
       'react-transform',
