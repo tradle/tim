@@ -4879,8 +4879,7 @@ var Store = Reflux.createStore({
         else
           sameContactList[p] = p
       }
-      // if (!utils.isEmpty(list))
-        this.loadStaticData()
+      this.loadStaticData()
 
       for (var s in sameContactList)
         delete orgContacts[s]
@@ -5581,28 +5580,31 @@ var Store = Reflux.createStore({
       });
     }
 
-    return self.loadMyResources()
-          // .then(self.loadAddressBook)
-          .catch(function(err) {
-            err = err;
-            });
+    return this.loadStaticDbData(true)
+    .then(() => {
+      return this.loadMyResources()
+    })
+    // .then(self.loadAddressBook)
+    .catch(function(err) {
+      err = err;
+      });
   },
   loadStaticData() {
     sampleData.getResources().forEach((r) => {
       this.loadStaticItem(r)
     });
-    currencies.forEach((r) => {
-      this.loadStaticItem(r)
-    })
-    nationalities.forEach((r) => {
-      this.loadStaticItem(r)
-    })
-    countries.forEach((r) => {
-      this.loadStaticItem(r)
-    })
   },
-
-  loadStaticItem(r) {
+  loadStaticDbData(saveInDB) {
+    let batch = []
+    let sData = [currencies, nationalities, countries]
+    sData.forEach((arr) => {
+      arr.forEach((r) => {
+        this.loadStaticItem(r, saveInDB, batch)
+      })
+    })
+    return batch.length ? db.batch(batch) : Q()
+  },
+  loadStaticItem(r, saveInDB, batch) {
     if (!r[ROOT_HASH])
       r[ROOT_HASH] = sha(r)
 
@@ -5610,6 +5612,8 @@ var Store = Reflux.createStore({
     let id = utils.getId(r)
     if (!list[id])
       this._setItem(id, r)
+    if (saveInDB)
+      batch.push({type: 'put', key: id, value: r})
   },
 
   loadModels() {
