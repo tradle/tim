@@ -345,7 +345,7 @@ var utils = {
       if (p.charAt(0) === '_')
         continue
       if (!meta[p].displayName) {
-        if (m  &&  resource[p]  &&  m.value.subClassOf === 'tradle.Enum')
+        if (!displayName  &&  m  &&  resource[p]  &&  m.value.subClassOf === 'tradle.Enum')
           return resource[p];
         continue
       }
