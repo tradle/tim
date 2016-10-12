@@ -44,6 +44,7 @@ var voc = require('@tradle/models');
 var sampleData = voc.data
 var currencies = voc.currencies
 var nationalities = voc.nationalities
+var countries = voc.countries
 
 // var myIdentity = __DEV__ ? require('../data/myIdentity.json') : []
 var welcome = require('../data/welcome.json');
@@ -5634,6 +5635,9 @@ var Store = Reflux.createStore({
       this.loadStaticItem(r)
     })
     nationalities.forEach((r) => {
+      this.loadStaticItem(r)
+    })
+    countries.forEach((r) => {
       this.loadStaticItem(r)
     })
   },
