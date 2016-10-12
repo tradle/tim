@@ -24,7 +24,7 @@ import 'stream'
 //   console.error(e)
 //   if (__DEV__) throw e
 // })
-
+// var DashboardView = require('./Components/DashboardView')
 var ResourceList = require('./Components/ResourceList');
 var VideoPlayer = require('./Components/VideoPlayer')
 var EnumList = require('./Components/EnumList')
@@ -299,6 +299,7 @@ class TiMApp extends Component {
   }
 
   render() {
+            // style={{ position: 'absolute', left: 300}}
     var nav = (
       <Navigator
         style={styles.container}
@@ -437,6 +438,8 @@ class TiMApp extends Component {
       return <TouchIDOptIn navigator={nav} { ...props } />
     case 22:
       return <EnumList navigator={nav} { ...props } />
+    // case 23:
+    //   return <DashboardView navigator={nav} { ...props } />
     case 10:
     default: // 10
       return <ResourceList navigator={nav} {...props} />
@@ -513,12 +516,12 @@ var NavigationBarRouteMapper = {
               </View>
     }
     return (
-      <View style={{position: 'absolute', right: 0}}>
+      <View style={{position: 'absolute', right: 0, flexDirection: 'row'}}>
       {route.help
         ? <TouchableOpacity
             hitSlop={HIT_SLOP}
             onPress={() =>  Alert.alert(translate(route.help))}>
-            <Icon name={'ios-information-circle'} key={'ios-help'} size={20} color='#29ABE2' style={[styles.iconSpace, {marginTop: 10}]}/>
+            <Icon name={'ios-information-circle'} key={'ios-help'} size={20} color='#29ABE2' style={[styles.iconSpace, {marginTop: 5}]}/>
           </TouchableOpacity>
         : <View />
       }
@@ -588,9 +591,8 @@ var styles = StyleSheet.create({
     paddingLeft: 3
   },
   container: {
-    flex: 1
+    flex: 1,
   },
-
   navBarTitleText: {
     color: '#2E3B4E',
     fontWeight: '400',
