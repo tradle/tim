@@ -3,7 +3,7 @@
 var Q = require('q')
 var Keychain = require('react-native-keychain')
 var debounce = require('debounce')
-var DashboardView = require('./DashboardView')
+// var DashboardView = require('./DashboardView')
 var ResourceList = require('./ResourceList');
 var VideoPlayer = require('./VideoPlayer')
 var NewResource = require('./NewResource');
