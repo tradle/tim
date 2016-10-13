@@ -499,7 +499,7 @@ var Store = Reflux.createStore({
         }
         SERVICE_PROVIDERS_BASE_URLS = urls
         if (updateSettings)
-          db.put(settingsId, settings)
+          db.put(settingsId, settings.value)
       }
       else {
         SERVICE_PROVIDERS_BASE_URLS = SERVICE_PROVIDERS_BASE_URL_DEFAULTS.slice()
@@ -1678,7 +1678,12 @@ var Store = Reflux.createStore({
     if (!hash)
       hash = list[utils.getId(r.to)].value[ROOT_HASH]
     var toId = IDENTITY + '_' + hash
-    let isEmployee = me.isEmployee && (!r.to.organization || utils.getId(r.to.organization) === utils.getId(me.organization))
+    var isEmployee
+    if (me.isEmployee) {
+      let to = list[utils.getId(r.to)].value
+      isEmployee = (!to.organization ||  utils.getId(to.organization) === utils.getId(me.organization))
+    }
+    // let isEmployee = me.isEmployee && (!r.to.organization || utils.getId(r.to.organization) === utils.getId(me.organization))
     if (isEmployee) {
       let arr = SERVICE_PROVIDERS.filter((sp) => {
         let reps = this.getRepresentatives(sp.org)
@@ -2297,8 +2302,6 @@ var Store = Reflux.createStore({
 
         var returnValKey = utils.getId(returnVal)
 
-        var sendStatus = (self.isConnected) ? SENDING : QUEUED
-        returnVal._sendStatus = sendStatus
         self._setItem(returnValKey, returnVal)
 
         let org = list[utils.getId(returnVal.to)].value.organization
@@ -2361,7 +2364,7 @@ var Store = Reflux.createStore({
             toChain[PREV_HASH] = returnVal[PREV_HASH]
           }
 
-          let exclude = ['to', 'from', 'verifications', CUR_HASH, 'sharedWith']
+          let exclude = ['to', 'from', 'verifications', CUR_HASH, 'sharedWith', '_sendStatus']
           if (isNew)
             exclude.push(ROOT_HASH)
           extend(toChain, returnVal)
@@ -2393,6 +2396,8 @@ var Store = Reflux.createStore({
 
           returnVal[CUR_HASH] = result.object.link
           returnVal[ROOT_HASH] = result.object.permalink
+          var sendStatus = (self.isConnected) ? SENDING : QUEUED
+          returnVal._sendStatus = sendStatus
 
 //           let org = list[utils.getId(returnVal.to)].value.organization
 //           self.addMessagesToChat(utils.getId(org), returnVal)
@@ -2414,7 +2419,7 @@ var Store = Reflux.createStore({
           if (!isNew  ||  self.getModel(returnVal[TYPE]).value.subClassOf !== FORM)
             return
           let allFormRequests = self.searchMessages({modelName: FORM_REQUEST, to: to})
-          let formRequests = allFormRequests.filter((r) => {
+          let formRequests = allFormRequests  &&  allFormRequests.filter((r) => {
             if (r.document === returnVal[NONCE])
               return true
           })
@@ -3457,6 +3462,9 @@ var Store = Reflux.createStore({
     // Allow sharing only the last version of the resource
     function addAndCheckShareable(verification) {
       let r = verification.document
+      // Allow sharing only of resources that were filled out by me
+      // if (utils.getId(r.from) !== utils.getId(me))
+      //   return
       let docType = r[TYPE]
       var v = shareableResources[docType];
       if (!v)
