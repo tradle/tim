@@ -1,5 +1,4 @@
 import {
-  WebView,
   View,
   Text,
   ScrollView,
@@ -8,6 +7,8 @@ import {
 
 import React, { Component } from 'react'
 import ActivityIndicator from './ActivityIndicator'
+import WebView from './WebView'
+import utils from '../utils/utils'
 
 class ArticleView extends Component {
   constructor(props) {
@@ -31,7 +32,7 @@ class ArticleView extends Component {
   render() {
     return (
       <WebView style={styles.webView}
-        url={this.props.url}
+        source={{ uri: this.props.url }}
         startInLoadingState={true}
         renderError={this.renderError.bind(this)}
         automaticallyAdjustContentInsets={false}
@@ -56,7 +57,7 @@ var styles = StyleSheet.create({
   webView: {
     backgroundColor: '#ffffff',
     marginTop: 60,
-    height: 350,
+    height: utils.isWeb() ? '100%' : 350
   },
 
 })
