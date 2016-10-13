@@ -9,7 +9,6 @@ var NativeAppEventEmitter = require('RCTNativeAppEventEmitter')
 // require('react-native-level')
 import Debug from './utils/debug'
 var debug = Debug('tradle:app')
-var perfDebug = Debug('perf')
 
 // require('regenerator/runtime') // support es7.asyncFunctions
 import './utils/shim'
@@ -274,7 +273,7 @@ class TiMApp extends Component {
     if (ReactPerf) {
       setTimeout(function () {
         ReactPerf.stop()
-        perfDebug(ReactPerf.printWasted())
+        ReactPerf.printWasted()
       }, 500)
     }
 
