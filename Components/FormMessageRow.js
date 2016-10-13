@@ -295,7 +295,7 @@ class FormMessageRow extends Component {
       else if (!model.autoCreate) {
         let val
         if (properties[v].type === 'date')
-           val = utils.formatDate(resource[v])
+           val = resource[v] ? utils.formatDate(resource[v]) : null
         else
            val = (properties[v].displayAs)
                 ? utils.templateIt(properties[v], resource)

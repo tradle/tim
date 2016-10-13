@@ -552,9 +552,9 @@ class MessageRow extends Component {
               ? <View key={this.getNextKey()}>
                   <Text style={[styles.resourceTitle, {color: color}]}>{str}</Text>
                 </View>
-              :   <View key={this.getNextKey()} style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                    <Text style={[styles.resourceTitle, {color: color, marginTop: 3, paddingRight: 10}]}>{str}</Text>
-                    <Icon name='ios-folder-open-outline' size={25} color={color}/>
+              :   <View key={this.getNextKey()} style={{flexDirection: 'row'}}>
+                    <Text style={[styles.resourceTitle, {color: '#ffffff', marginTop: 3, paddingRight: 10}]}>{str}</Text>
+                    <Icon name='ios-folder-open-outline' size={25} color='#ffffff' style={{position: 'absolute', right: 0}}/>
                   </View>
       renderedRow.push(msg);
       return ({message: str})

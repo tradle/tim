@@ -352,7 +352,7 @@ class MessageList extends Component {
     if (!isEmployee  &&  !resource[NEXT_HASH]  &&  model.subClassOf !== MY_PRODUCT) {
       route.rightButtonTitle = translate('edit')
       route.onRightButtonPress = {
-        title: utils.getDisplayName(resource),
+        title: newTitle, //utils.getDisplayName(resource),
         id: 4,
         component: NewResource,
         // titleTextColor: '#7AAAC3',

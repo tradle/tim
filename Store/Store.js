@@ -50,7 +50,7 @@ var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
-var Keychain = null // !utils.isWeb() && require('../utils/keychain')
+var Keychain = !utils.isWeb() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('q-level');
 var leveldown = require('./leveldown')
@@ -486,7 +486,7 @@ var Store = Reflux.createStore({
         }
         SERVICE_PROVIDERS_BASE_URLS = urls
         if (updateSettings)
-          db.put(settingsId, settings)
+          db.put(settingsId, settings.value)
       }
       else {
         SERVICE_PROVIDERS_BASE_URLS = SERVICE_PROVIDERS_BASE_URL_DEFAULTS.slice()
@@ -557,7 +557,7 @@ var Store = Reflux.createStore({
               this.addMessagesToChat(utils.getId(r.to), r, true, shareInfo.timeShared)
             else  {
               let rep = list[shareInfo.bankRepresentative].value
-              let orgId = utils.getId(list[shareInfo.bankRepresentative].value.organization)
+              let orgId = utils.getId(rep.organization)
               this.addMessagesToChat(orgId, r, true, shareInfo.timeShared)
               if (utils.getId(r.to) === meId) {
                 let contact = list[utils.getId(r.from)].value
@@ -1514,7 +1514,6 @@ var Store = Reflux.createStore({
     if (!hash)
       hash = list[utils.getId(r.to)].value[ROOT_HASH]
     var toId = IDENTITY + '_' + hash
-
     var sendStatus = (self.isConnected) ? SENDING : QUEUED
     var noCustomerWaiting
     return meDriver.sign({ object: toChain })
@@ -1526,7 +1525,7 @@ var Store = Reflux.createStore({
         let params = {
           action: 'addItem',
           resource: rr,
-          sendStatus:  (self.isConnected) ? 'Sending' : 'Queued'
+          // sendStatus: sendStatus
         }
         self.trigger(params)
       }
@@ -1652,6 +1651,8 @@ var Store = Reflux.createStore({
       }
       var key = utils.getId(rr)
       batch.push({type: 'put', key: key, value: rr})
+      rr._sendStatus = self.isConnected ? SENDING : QUEUED
+
       self._setItem(key, rr)
       self.addMessagesToChat(orgId, rr)
       return db.batch(batch)
@@ -1669,11 +1670,13 @@ var Store = Reflux.createStore({
       hash = r.from[ROOT_HASH]
     if (!hash)
       hash = list[utils.getId(r.to)].value[ROOT_HASH]
-    let isEmployee
+    var toId = IDENTITY + '_' + hash
+    var isEmployee
     if (me.isEmployee) {
       let to = list[utils.getId(r.to)].value
       isEmployee = (!to.organization ||  utils.getId(to.organization) === utils.getId(me.organization))
     }
+    // let isEmployee = me.isEmployee && (!r.to.organization || utils.getId(r.to.organization) === utils.getId(me.organization))
     if (isEmployee) {
       let arr = SERVICE_PROVIDERS.filter((sp) => {
         let reps = this.getRepresentatives(sp.org)
@@ -2295,7 +2298,6 @@ var Store = Reflux.createStore({
 
         var returnValKey = utils.getId(returnVal)
 
-        returnVal._sendStatus = (self.isConnected) ? SENDING : QUEUED
         self._setItem(returnValKey, returnVal)
 
         let org = list[utils.getId(returnVal.to)].value.organization
@@ -2314,12 +2316,10 @@ var Store = Reflux.createStore({
           }
         }
         var m = self.getModel(returnVal[TYPE]).value
-        if (m.subClassOf === FORM) {
-          if (self.isConnected)
-            params.sendStatus = 'Sending'
-          else
-            params.sendStatus = 'Queued'
-        }
+
+        // if (m.subClassOf === FORM)
+        //   params.sendStatus = sendStatus
+
 
 //         var to = returnVal.to
 //         Object.defineProperty(returnVal, 'to', {
@@ -2360,7 +2360,7 @@ var Store = Reflux.createStore({
             toChain[PREV_HASH] = returnVal[PREV_HASH]
           }
 
-          let exclude = ['to', 'from', 'verifications', CUR_HASH, 'sharedWith']
+          let exclude = ['to', 'from', 'verifications', CUR_HASH, 'sharedWith', '_sendStatus']
           if (isNew)
             exclude.push(ROOT_HASH)
           extend(toChain, returnVal)
@@ -2387,10 +2387,13 @@ var Store = Reflux.createStore({
           if (isNew  ||  isForm) {
             delete list[returnValKey]
             self.deleteMessageFromChat(orgId, returnVal)
+
           }
 
           returnVal[CUR_HASH] = result.object.link
           returnVal[ROOT_HASH] = result.object.permalink
+          var sendStatus = (self.isConnected) ? SENDING : QUEUED
+          returnVal._sendStatus = sendStatus
 
 //           let org = list[utils.getId(returnVal.to)].value.organization
 //           self.addMessagesToChat(utils.getId(org), returnVal)
@@ -2412,7 +2415,7 @@ var Store = Reflux.createStore({
           if (!isNew  ||  self.getModel(returnVal[TYPE]).value.subClassOf !== FORM)
             return
           let allFormRequests = self.searchMessages({modelName: FORM_REQUEST, to: to})
-          let formRequests = allFormRequests.filter((r) => {
+          let formRequests = allFormRequests  &&  allFormRequests.filter((r) => {
             if (r.document === returnVal[NONCE])
               return true
           })
@@ -3547,6 +3550,9 @@ var Store = Reflux.createStore({
     // Allow sharing only the last version of the resource
     function addAndCheckShareable(verification) {
       let r = verification.document
+      // Allow sharing only of resources that were filled out by me
+      // if (utils.getId(r.from) !== utils.getId(me))
+      //   return
       let docType = r[TYPE]
       var v = shareableResources[docType];
       if (!v)
@@ -4413,8 +4419,8 @@ var Store = Reflux.createStore({
           var r = list[key]
           if (r) {
             r = r.value
-            r._sendStatus = SENT
             self.trigger({action: 'updateItem', sendStatus: SENT, resource: r})
+            r._sendStatus = SENT
             db.put(key, r)
           }
           // var o = {}
@@ -4729,13 +4735,16 @@ var Store = Reflux.createStore({
         }
       }
     }
+    let key = utils.getId(val)
     var from = fromR.value
+
     // if (me  &&  from[ROOT_HASH] === me[ROOT_HASH])
     //   return
 
     var to = list[PROFILE + '_' + obj.to[ROOT_HASH]].value
     var fOrg = (me  &&  from[ROOT_HASH] === me[ROOT_HASH]) ? to.organization : from.organization
     var org = fOrg ? list[utils.getId(fOrg)].value : null
+
     if (onMessage) {
       let profileModel = this.getModel(PROFILE).value
       val.from = {
@@ -4786,7 +4795,6 @@ var Store = Reflux.createStore({
       batch.push({type: 'put', key: utils.getId(org), value: org})
       noTrigger = this.hasNoTrigger(orgId)
     }
-    let key = utils.getId(val)
     if (!val.time)
       val.time = obj.timestamp
 
@@ -4964,9 +4972,6 @@ var Store = Reflux.createStore({
           sameContactList[p] = p
       }
       this.loadStaticData()
-      let sd = this.searchNotMessages({modelName: COUNTRY})
-      if (!sd || utils.isEmpty(countries))
-        this.loadStaticDbData()
 
       for (var s in sameContactList)
         delete orgContacts[s]
@@ -5666,10 +5671,15 @@ var Store = Reflux.createStore({
         }
       });
     }
+
     return this.loadStaticDbData(true)
     .then(() => {
       return this.loadMyResources()
     })
+    // .then(self.loadAddressBook)
+    .catch(function(err) {
+      err = err;
+      });
   },
   loadStaticData() {
     sampleData.getResources().forEach((r) => {
@@ -5686,7 +5696,6 @@ var Store = Reflux.createStore({
     })
     return batch.length ? db.batch(batch) : Q()
   },
-
   loadStaticItem(r, saveInDB, batch) {
     if (!r[ROOT_HASH])
       r[ROOT_HASH] = sha(r)

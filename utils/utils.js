@@ -651,7 +651,7 @@ var utils = {
     return AsyncStorage.multiGet(keys.map((key) => prefix + key))
       .then((pairs) => {
         return pairs
-          .filter((pair) => typeof pair[1] !== 'undefined')
+          .filter((pair) => pair[1] != null)
           .map((pair) => {
             pair[1] = pair[1].slice(2)
             try {
