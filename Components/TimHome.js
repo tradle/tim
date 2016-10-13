@@ -48,8 +48,7 @@ import {
   Text,
   Navigator,
   View,
-  TouchableHighlight,
-  TouchableWithoutFeedback,
+  TouchableOpacity,
   Image,
   NetInfo,
   ScrollView,
@@ -563,30 +562,30 @@ class TimHome extends Component {
 
     var dev = __DEV__
             ? <View style={styles.dev}>
-                <TouchableHighlight
+                <TouchableOpacity
                     underlayColor='transparent' onPress={this.onReloadDBPressed.bind(this)}>
                   <Text style={styles.text}>
                     Reload DB
                   </Text>
-                </TouchableHighlight>
-                <TouchableHighlight
+                </TouchableOpacity>
+                <TouchableOpacity
                     underlayColor='transparent' onPress={this.onReloadModels.bind(this)}>
                   <Text style={styles.text}>
                     Reload Models
                   </Text>
-                </TouchableHighlight>
-                <TouchableHighlight
+                </TouchableOpacity>
+                <TouchableOpacity
                     underlayColor='transparent' onPress={this.onBackupPressed.bind(this)}>
                   <Text style={styles.text}>
                     Backup
                   </Text>
-                </TouchableHighlight>
-                <TouchableHighlight
+                </TouchableOpacity>
+                <TouchableOpacity
                     underlayColor='transparent' onPress={this.onLoadFromBackupPressed.bind(this)}>
                   <Text style={styles.text}>
                     Load
                   </Text>
-                </TouchableHighlight>
+                </TouchableOpacity>
                 {settings}
               </View>
             : <View style={[styles.dev, { flexDirection: 'column' }]}>
@@ -594,30 +593,32 @@ class TimHome extends Component {
                 {version}
               </View>
 
-    let logo = <View style={[styles.container]}>
+    let logo = <TouchableOpacity onPress={() => this._pressHandler()}>
+                <View style={[styles.container]}>
                   <CustomIcon name="tradle" size={getIconSize()} style={styles.thumb} />
                   <Text style={styles.tradle}>Tradle</Text>
-              </View>
+                </View>
+              </TouchableOpacity>
 
                           // <Image style={{position: 'absolute', left: 0, opacity: 0.5, width: 100, height: 100}} source={TradleWhite}></Image>
     let regView = <View  style={{alignSelf: 'center'}}>
                     <FadeInView>
-                      <TouchableHighlight  onPress={() => {
+                      <TouchableOpacity  onPress={() => {
                         this.register(this.showOfficialAccounts.bind(this))
                         }} underlayColor='transparent'>
                         <View style={styles.signIn}>
                           <Text style={styles.signInText}>{translate('This is my first Tradle device')}</Text>
                         </View>
-                      </TouchableHighlight>
+                      </TouchableOpacity>
                     </FadeInView>
                     <FadeInView>
-                      <TouchableHighlight  onPress={() => {
+                      <TouchableOpacity  onPress={() => {
                         this.pairDevices(this.showOfficialAccounts.bind(this))
                         }} underlayColor='transparent'>
                         <View style={[styles.signIn, {shadowColor: '#245c8c', backgroundColor: 'lightblue'}]}>
                           <Text style={styles.pairDivicesText}>{translate('I have another Tradle device')}</Text>
                         </View>
-                      </TouchableHighlight>
+                      </TouchableOpacity>
                     </FadeInView>
                  </View>
 
@@ -629,12 +630,12 @@ class TimHome extends Component {
           {logo}
           <View>
             { utils.getMe()
-              ? <TouchableHighlight style={[styles.thumbButton, {justifyContent: 'flex-end',  opacity: me ? 1 : 0}]}
+              ? <TouchableOpacity style={[styles.thumbButton, {justifyContent: 'flex-end',  opacity: me ? 1 : 0}]}
                     underlayColor='transparent' onPress={() => this._pressHandler()}>
                   <View style={styles.getStarted}>
                      <Text style={styles.getStartedText}>Get started</Text>
                   </View>
-                </TouchableHighlight>
+                </TouchableOpacity>
               : regView
             }
             <Text style={errStyle}>{err}</Text>
