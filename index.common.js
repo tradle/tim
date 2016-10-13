@@ -507,12 +507,12 @@ var NavigationBarRouteMapper = {
               </View>
     }
     return (
-      <View>
+      <View style={{flexDirection: 'row'}}>
       {route.help
         ? <TouchableOpacity
             hitSlop={HIT_SLOP}
             onPress={() =>  Alert.alert(translate(route.help))}>
-            <Icon name={'ios-information-circle'} key={'ios-help'} size={20} color='#29ABE2' style={[styles.iconSpace, {marginTop: 10}]}/>
+            <Icon name={'ios-information-circle'} key={'ios-help'} size={18} color='#29ABE2' style={[styles.iconSpace, {marginTop: 13}]}/>
           </TouchableOpacity>
         : <View />
       }
@@ -534,7 +534,7 @@ var NavigationBarRouteMapper = {
                     navigator.push(route.onRightButtonPress)
                }
         }>
-        <View style={[styles.navBarRightButton, route.help ? {paddingLeft: 5} : {paddingLeft: 25}]}>
+        <View style={[styles.navBarRightButton, route.help ? {paddingLeft: 3} : {paddingLeft: 25}]}>
           {title}
         </View>
       </TouchableOpacity>
