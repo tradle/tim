@@ -103,6 +103,7 @@ const FORM_REQUEST        = 'tradle.FormRequest'
 const PAIRING_REQUEST     = 'tradle.PairingRequest'
 const PAIRING_RESPONSE    = 'tradle.PairingResponse'
 const PAIRING_DATA        = 'tradle.PairingData'
+const COUNTRY           = 'tradle.Country'
 const MY_IDENTITIES     = MY_IDENTITIES_TYPE + '_1'
 const SETTINGS          = constants.TYPES.SETTINGS
 
@@ -1594,7 +1595,8 @@ var Store = Reflux.createStore({
 
       // Temporary untill the real hash is known
       var key = utils.getId(rr)
-      self._setItem(key, rr, sendStatus)
+      rr._sendStatus = sendStatus
+      self._setItem(key, rr)
 
       if (!toOrg) {
         let to = list[utils.getId(r.to)].value
@@ -2292,8 +2294,8 @@ var Store = Reflux.createStore({
 
         var returnValKey = utils.getId(returnVal)
 
-        var sendStatus = (self.isConnected) ? SENDING : QUEUED
-        self._setItem(returnValKey, returnVal, sendStatus)
+        returnVal._sendStatus = (self.isConnected) ? SENDING : QUEUED
+        self._setItem(returnValKey, returnVal)
 
         let org = list[utils.getId(returnVal.to)].value.organization
         let orgId = utils.getId(org)
@@ -4716,12 +4718,12 @@ var Store = Reflux.createStore({
       }
     }
     var from = fromR.value
-    if (me  &&  from[ROOT_HASH] === me[ROOT_HASH])
-      return
+    // if (me  &&  from[ROOT_HASH] === me[ROOT_HASH])
+    //   return
 
-    var fOrg = from.organization
-    var org = fOrg ? list[utils.getId(fOrg)].value : null
     var to = list[PROFILE + '_' + obj.to[ROOT_HASH]].value
+    var fOrg = (me  &&  from[ROOT_HASH] === me[ROOT_HASH]) ? to.organization : from.organization
+    var org = fOrg ? list[utils.getId(fOrg)].value : null
     if (onMessage) {
       let profileModel = this.getModel(PROFILE).value
       val.from = {
@@ -4949,8 +4951,10 @@ var Store = Reflux.createStore({
         else
           sameContactList[p] = p
       }
-      // if (!utils.isEmpty(list))
-        this.loadStaticData()
+      this.loadStaticData()
+      let sd = this.searchNotMessages({modelName: COUNTRY})
+      if (!sd || utils.isEmpty(countries))
+        this.loadStaticDbData()
 
       for (var s in sameContactList)
         delete orgContacts[s]
@@ -5639,7 +5643,6 @@ var Store = Reflux.createStore({
     return models[modelName];
   },
   loadDB() {
-    const self = this
     if (utils.isEmpty(models)) {
       voc.forEach(function(m) {
         if (!m[ROOT_HASH])
@@ -5651,25 +5654,28 @@ var Store = Reflux.createStore({
         }
       });
     }
-    // this.loadStaticData()
-    return self.loadMyResources()
+    return this.loadStaticDbData(true)
+    .then(() => {
+      return this.loadMyResources()
+    })
   },
   loadStaticData() {
     sampleData.getResources().forEach((r) => {
       this.loadStaticItem(r)
     });
-    currencies.forEach((r) => {
-      this.loadStaticItem(r)
+  },
+  loadStaticDbData(saveInDB) {
+    let batch = []
+    let sData = [currencies, nationalities, countries]
+    sData.forEach((arr) => {
+      arr.forEach((r) => {
+        this.loadStaticItem(r, saveInDB, batch)
+      })
     })
-    nationalities.forEach((r) => {
-      this.loadStaticItem(r)
-    })
-    countries.forEach((r) => {
-      this.loadStaticItem(r)
-    })
+    return batch.length ? db.batch(batch) : Q()
   },
 
-  loadStaticItem(r) {
+  loadStaticItem(r, saveInDB, batch) {
     if (!r[ROOT_HASH])
       r[ROOT_HASH] = sha(r)
 
@@ -5677,6 +5683,8 @@ var Store = Reflux.createStore({
     let id = utils.getId(r)
     if (!list[id])
       this._setItem(id, r)
+    if (saveInDB)
+      batch.push({type: 'put', key: id, value: r})
   },
 
   loadModels() {
@@ -5760,12 +5768,7 @@ var Store = Reflux.createStore({
       ref.time = resource.time
     return ref
   },
-  _setItem(key, value, sendStatus) {
-    if (sendStatus) {
-      value._sendStatus = sendStatus
-      db.put(key, value)
-    }
-
+  _setItem(key, value) {
     list[key] = { key, value }
   },
   _mergeItem(key, value) {
