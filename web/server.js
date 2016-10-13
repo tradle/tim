@@ -11,6 +11,11 @@ const isHot = isDeveloping && process.env.HOT === '1'
 const port = Number(process.env.PORT) || (isDeveloping ? 3001 : 3000)
 const app = express()
 
+app.get('*', function (req, res, next) {
+  res.setHeader('X-UA-Compatible', 'IE=Edge')
+  next()
+})
+
 if (isDeveloping) {
   const compiler = webpack(config)
   const middleware = webpackMiddleware(compiler, {
