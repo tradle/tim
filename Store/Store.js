@@ -1603,7 +1603,7 @@ var Store = Reflux.createStore({
 
       // Temporary untill the real hash is known
       var key = utils.getId(rr)
-      self._setItem(key, rr, sendStatus)
+      self._setItem(key, rr)
 
       if (!toOrg) {
         let to = list[utils.getId(r.to)].value
@@ -1658,6 +1658,8 @@ var Store = Reflux.createStore({
       }
       var key = utils.getId(rr)
       batch.push({type: 'put', key: key, value: rr})
+      rr._sendStatus = self.isConnected ? SENDING : QUEUED
+
       self._setItem(key, rr)
       self.addMessagesToChat(orgId, rr)
       return db.batch(batch)
@@ -2296,7 +2298,8 @@ var Store = Reflux.createStore({
         var returnValKey = utils.getId(returnVal)
 
         var sendStatus = (self.isConnected) ? SENDING : QUEUED
-        self._setItem(returnValKey, returnVal, sendStatus)
+        returnVal._sendStatus = sendStatus
+        self._setItem(returnValKey, returnVal)
 
         let org = list[utils.getId(returnVal.to)].value.organization
         let orgId = utils.getId(org)
@@ -2385,6 +2388,7 @@ var Store = Reflux.createStore({
           if (isNew  ||  isForm) {
             delete list[returnValKey]
             self.deleteMessageFromChat(orgId, returnVal)
+
           }
 
           returnVal[CUR_HASH] = result.object.link
@@ -4326,7 +4330,7 @@ var Store = Reflux.createStore({
         const obj = utils.toOldStyleWrapper(msg)
         var model = self.getModel(obj[TYPE]).value
         var isForm = model.subClassOf === FORM
-        if (isForm  ||  model.id === PRODUCT_APPLICATION) {
+        // if (isForm  ||  model.id === PRODUCT_APPLICATION) {
           let key = obj[TYPE] + '_' + obj[ROOT_HASH] + (isForm ? '_' +  obj[CUR_HASH] : '')
           var r = list[key]
           if (r) {
@@ -4344,7 +4348,7 @@ var Store = Reflux.createStore({
           // setTimeout(() => {
           //   self.putInDb(o)
           // }, 5000);
-        }
+        // }
 
         self.maybeWatchSeal(msg)
       })
@@ -4650,9 +4654,10 @@ var Store = Reflux.createStore({
     // if (me  &&  from[ROOT_HASH] === me[ROOT_HASH])
     //   return
 
-    var fOrg = from.organization
-    var org = fOrg ? list[utils.getId(fOrg)].value : null
     var to = list[PROFILE + '_' + obj.to[ROOT_HASH]].value
+    var fOrg = (me  &&  from[ROOT_HASH] === me[ROOT_HASH]) ? to.organization : from.organization
+    var org = fOrg ? list[utils.getId(fOrg)].value : null
+
     if (onMessage) {
       let profileModel = this.getModel(PROFILE).value
       val.from = {
@@ -5697,12 +5702,7 @@ var Store = Reflux.createStore({
       ref.time = resource.time
     return ref
   },
-  _setItem(key, value, sendStatus) {
-    if (sendStatus) {
-      value._sendStatus = sendStatus
-      db.put(key, value)
-    }
-
+  _setItem(key, value) {
     list[key] = { key, value }
   },
   _mergeItem(key, value) {
