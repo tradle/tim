@@ -281,7 +281,7 @@ class TiMApp extends Component {
     if (ReactPerf) {
       setTimeout(function () {
         ReactPerf.stop()
-        perfDebug(ReactPerf.printWasted())
+        ReactPerf.printWasted()
       }, 500)
     }
 
@@ -616,13 +616,6 @@ var styles = StyleSheet.create({
 });
 
 AppRegistry.registerComponent('Tradle', () => TiMApp)
-if (utils.isWeb()){
-  var app = document.createElement('div')
-  document.body.appendChild(app)
-  AppRegistry.runApplication('Tradle', {
-    rootTag: app
-  })
-}
 
   // render() {
   //   var props = {db: this.state.db};

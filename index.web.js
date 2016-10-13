@@ -12,6 +12,17 @@ import './css/customicons.css'
 import './css/ionicons.min.css'
 import './css/styles.css'
 import 'whatwg-fetch'
+
+if (!console.table) console.table = console.log
+
 require('./web/shims/deviceEventEmitter')
 require('./web/shims/orientation')
 require('./index.common')
+
+const AppRegistry = require('react-native').AppRegistry
+
+const app = document.createElement('div')
+document.body.appendChild(app)
+AppRegistry.runApplication('Tradle', {
+  rootTag: app
+})
