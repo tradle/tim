@@ -215,9 +215,11 @@ class ProductChooser extends Component {
           />
       )
     }
-
+    var style = [styles.listview]
+    if (searchBar)
+      style.push({marginTop: 20})
     var content =
-      <ListView ref='listview' style={styles.listview}
+      <ListView ref='listview' style={style}
         dataSource={this.state.dataSource}
         removeClippedSubviews={true}
         initialListSize={100}
@@ -250,7 +252,10 @@ var styles = StyleSheet.create({
     // backgroundColor: 'white',
   },
   listview: {
-    marginTop: Platform.OS === 'ios' ? 10 : 64,
+    marginTop: 64,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#ffffff',
+    borderTopColor: '#cccccc'
   },
   centerText: {
     alignItems: 'center',
