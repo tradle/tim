@@ -10,7 +10,8 @@ var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var constants = require('@tradle/constants');
 var MessageList = require('./MessageList')
-// var SearchBar = require('react-native-search-bar');
+var PageView = require('./PageView')
+import platformStyles from '../styles/platform'
 
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const FORM_REQUEST = 'tradle.FormRequest'
@@ -19,8 +20,10 @@ import {
   Text,
   StyleSheet,
   View,
+  Platform
 } from 'react-native'
 
+const SearchBar = Platform.OS === 'android' ? null : require('react-native-search-bar')
 import React, { Component } from 'react'
 
 class ProductChooser extends Component {
@@ -91,6 +94,13 @@ class ProductChooser extends Component {
       products: products,
       dataSource: this.state.dataSource.cloneWithRows(products),
     });
+  }
+  onSearchChange(filter) {
+    let vals = this.state.products
+    let list = vals.filter((s) => {
+      return s.title.indexOf(filter) === -1 ? false : true
+    })
+    this.setState({filter: filter, dataSource: this.state.dataSource.cloneWithRows(list)})
   }
 
   selectResource(model) {
@@ -194,36 +204,41 @@ class ProductChooser extends Component {
   }
 
   render() {
-    // var sb = this.props.type === constants.TYPES.FORM
-    //        ?  <SearchBar
-    //             onChangeText={this.onSearchChange.bind(this)}
-    //             placeholder={translate('search')}
-    //             showsCancelButton={false}
-    //             hideBackground={true}
-    //           />
-    //       : <View />
+    var searchBar
+    if (SearchBar  &&  this.props.type === constants.TYPES.FORM) {
+      searchBar = (
+        <SearchBar
+          onChangeText={this.onSearchChange.bind(this)}
+          placeholder={translate('search')}
+          showsCancelButton={false}
+          hideBackground={true}
+          />
+      )
+    }
 
     var content =
-    <ListView ref='listview' style={styles.listview}
-      dataSource={this.state.dataSource}
-      removeClippedSubviews={true}
-      initialListSize={100}
-      renderRow={this.renderRow.bind(this)}
-      enableEmptySections={true}
-      automaticallyAdjustContentInsets={false}
-      keyboardDismissMode='on-drag'
-      keyboardShouldPersistTaps={true}
-      showsVerticalScrollIndicator={false} />;
+      <ListView ref='listview' style={styles.listview}
+        dataSource={this.state.dataSource}
+        removeClippedSubviews={true}
+        initialListSize={100}
+        renderRow={this.renderRow.bind(this)}
+        enableEmptySections={true}
+        automaticallyAdjustContentInsets={false}
+        keyboardDismissMode='on-drag'
+        keyboardShouldPersistTaps={true}
+        showsVerticalScrollIndicator={false} />;
 
-    var err = this.state.err
+  var err = this.state.err
             ? <View style={styles.errContainer}><Text style={styles.err}>{this.state.err}</Text></View>
             : <View />;
     var bgStyle = this.props.bankStyle  &&  this.props.bankStyle.BACKGROUND_COLOR ? {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR} : {backgroundColor: '#ffffff'}
+      // <View style={[styles.container, bgStyle]}>
     return (
-      <View style={[styles.container, bgStyle]}>
+      <PageView style={platformStyles.container, bgStyle}>
         {err}
+        {searchBar}
         {content}
-      </View>
+      </PageView>
     );
   }
 }
@@ -232,10 +247,10 @@ reactMixin(ProductChooser.prototype, Reflux.ListenerMixin);
 var styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    // backgroundColor: 'white',
   },
   listview: {
-    marginTop: 64,
+    marginTop: Platform.OS === 'ios' ? 10 : 64,
   },
   centerText: {
     alignItems: 'center',
