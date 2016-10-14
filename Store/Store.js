@@ -2625,8 +2625,7 @@ var Store = Reflux.createStore({
   wipeWeb() {
     if (localStorage) localStorage.clear()
     if (sessionStorage) sessionStorage.clear()
-
-    return leveldown.destroyAll()
+    if (leveldown.destroyAll) return leveldown.destroyAll()
   },
 
   wipeMobile() {
