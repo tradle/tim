@@ -302,7 +302,9 @@ class ShowPropertiesView extends Component {
                      <View style={styles.separator}></View>
                      <View style={[styles.textContainer, {padding: 10}]}>
                        <Text style={styles.title}>{'Transaction uri'}</Text>
-                       <Text onPress={this.onPress.bind(this, 'http://tbtc.blockr.io/tx/info/' + resource.txId)} style={[styles.description, {color: '#7AAAC3'}]}>{resource.txId}</Text>
+                       <TouchableOpacity onPress={this.onPress.bind(this, 'http://tbtc.blockr.io/tx/info/' + resource.txId)}>
+                         <Text style={[styles.description, {color: '#7AAAC3'}]}>{resource.txId}</Text>
+                       </TouchableOpacity>
                       </View>
                     </View>)
     }
