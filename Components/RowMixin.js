@@ -218,7 +218,7 @@ var RowMixin = {
       var orgPhoto = verification.organization.photo
                    ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
                    : <View />
-      var shareView = <View style={{flexDirection: 'row', marginLeft: 0, justifyContent: 'space-between', padding: 5, borderRadius: 10, borderWidth: BORDER_WIDTH, borderColor: '#215A89', backgroundColor: '#4982B1', opacity: this.props.resource.documentCreated ? 0.3 : 1}}>
+      var shareView = <View style={[styles.shareButton, {opacity: this.props.resource.documentCreated ? 0.3 : 1}]}>
                         <CustomIcon name='tradle' style={{ color: '#ffffff' }} size={35} />
                         <Text style={{color: '#fefefe', fontSize: 18, paddingHorizontal: 3, marginTop: 6}}>{translate('Share')}</Text>
                       </View>
@@ -237,26 +237,27 @@ var RowMixin = {
 
       // if (verifiedBy.length > 25)
       //   verifiedBy = verifiedBy.substring(0, 25) + '..'
-      var orgView =   <View style={{flexDirection: 'row', justifyContent: 'flex-end', marginTop: 15}}>
-                        <Text style={[styles.verySmallLetters, {fontSize: 14}]}>
-                          {verifiedBy.length > 25 ? verifiedBy.substring(0, 25) + '..' : verifiedBy}
+      var maxWidth = 0.8 * utils.dimensions().width - 150
+      var orgView =   <View style={{marginTop: 5, maxWidth: maxWidth, paddingLeft: 3}}>
+                        <Text style={[styles.verySmallLetters, { fontSize: 14}]}>
+                          {verifiedBy}
                         </Text>
                       </View>
 
                          // <Text style={[styles.verySmallLetters, {color: '#2E3B4E'}]}>{verification.organization.title.length < 30 ? verification.organization.title : verification.organization.title.substring(0, 27) + '..'}</Text>
       if (onPress) {
-        if (!this.props.resource.documentCreated)
-            <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
-                      Alert.alert(
-                        'Sharing ' + docTitle + ' ' + verifiedBy,
-                        'with ' + orgTitle,
-                        [
-                          {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-                          {text: translate('Share'), onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
-                        ]
-                    )}>
-              {shareView}
-            </TouchableHighlight>
+        // if (!this.props.resource.documentCreated)
+        //      <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
+        //                     Alert.alert(
+        //                       'Sharing ' + docTitle + ' ' + verifiedBy,
+        //                       'with ' + orgTitle,
+        //                       [
+        //                         {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+        //                         {text: translate('Share'), onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
+        //                       ]
+        //                   )}>
+        //             {shareView}
+        //           </TouchableHighlight>
 
       }
       else if (this.props.resource.documentCreated) {
@@ -269,21 +270,21 @@ var RowMixin = {
       }
       else {
         orgRow = <View style={{flexDirection: 'row', marginTop: 7, paddingBottom: 5, justifyContent:'space-between'}}>
-          <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
-                    Alert.alert(
-                      'Sharing ' + docTitle + ' ' + verifiedBy,
-                      'with ' + orgTitle,
-                      [
-                        {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-                        {text: translate('Share'), onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
-                      ]
-                  )}>
-            {shareView}
-          </TouchableHighlight>
-          <TouchableHighlight onPress={this.props.onSelect.bind(this, resource, verification)} underlayColor='transparent'>
-            {orgView}
-          </TouchableHighlight>
-        </View>
+                   <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
+                            Alert.alert(
+                              'Sharing ' + docTitle + ' ' + verifiedBy,
+                              'with ' + orgTitle,
+                              [
+                                {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+                                {text: translate('Share'), onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
+                              ]
+                          )}>
+                    {shareView}
+                   </TouchableHighlight>
+                   <TouchableHighlight onPress={this.props.onSelect.bind(this, resource, verification)} underlayColor='transparent'>
+                     {orgView}
+                   </TouchableHighlight>
+                </View>
       }
     }
     let content = <View style={{flex:1}}>
@@ -432,6 +433,16 @@ var styles = StyleSheet.create({
     // flexWrap: 'wrap',
     // color: '#757575',
     fontSize: 18,
+  },
+  shareButton: {
+    flexDirection: 'row',
+    marginLeft: 0,
+    justifyContent: 'space-between',
+    padding: 5,
+    borderRadius: 10,
+    borderWidth: BORDER_WIDTH,
+    borderColor: '#215A89',
+    backgroundColor: '#4982B1'
   },
   msgImage: {
     // backgroundColor: '#dddddd',
