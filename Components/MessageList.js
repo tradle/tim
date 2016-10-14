@@ -538,7 +538,7 @@ class MessageList extends Component {
       //   }
       // ]}
     let me = utils.getMe()
-    let buttons = this.state.isEmployee
+    let buttons = this.state.isEmployee  &&  this.props.resource[constants.TYPE] !== constants.TYPES.ORGANIZATION
                 ? [translate('formChooser'), translate('cancel')]
                 : [translate('forgetMe'), translate('cancel')]
     return (
