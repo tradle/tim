@@ -37,14 +37,6 @@ class ProductChooser extends Component {
         products.push(utils.getModel(m).value)
       })
     }
-    // else {
-    //   var productList = utils.getAllSubclasses(constants.TYPES.FINANCIAL_PRODUCT);
-    //   productList.slice(0, 2)
-    //   productList.forEach(function(m) {
-    //     if (m.forms)
-    //       products.push(m)
-    //   })
-    // }
 
     var dataSource =  new ListView.DataSource({
       rowHasChanged: (row1, row2) => row1 !== row2,
