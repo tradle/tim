@@ -37,15 +37,6 @@ class ProductChooser extends Component {
       orgProducts.forEach(function(m) {
         products.push(utils.getModel(m).value)
       })
-
-    }
-    else {
-      var productList = utils.getAllSubclasses(constants.TYPES.FINANCIAL_PRODUCT);
-      productList.slice(0, 2)
-      productList.forEach(function(m) {
-        if (m.forms)
-          products.push(m)
-      })
     }
 
     var dataSource =  new ListView.DataSource({
@@ -69,6 +60,7 @@ class ProductChooser extends Component {
       if (params.resource.products) {
         if (equal(params.resource.products, this.props.resource.products))
           return
+
         products = []
         params.resource.products.forEach(function(m) {
           products.push(utils.getModel(m).value)

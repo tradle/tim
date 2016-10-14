@@ -15,12 +15,13 @@ import PushNotifications from 'react-native-push-notification'
 import Keychain from 'react-native-keychain'
 import ENV from './env'
 import { getDimensions, getOrientation } from 'react-native-orient'
+import platformUtils from './platformUtils'
+
 // import Orientation from 'react-native-orientation'
 
 // var orientation = Orientation.getInitialOrientation()
 // Orientation.addOrientationListener(o => orientation = o)
 
-var RCTUIManager = NativeModules.UIManager
 var crypto = require('crypto')
 var debug = require('debug')('tradle:app:utils')
 var Q = require('q')
@@ -698,77 +699,62 @@ var utils = {
   //   RCTUIManager.measure(handle, cb)
   // },
 
-  scrollComponentIntoView(container, component) {
-    if (utils.isWeb()) {
-      return console.log('TODO: implement scrollComponentIntoView for Web')
-    }
-
-    const handle = typeof component === 'number'
-      ? component
-      : findNodeHandle(component)
-
-    const currentScrollOffset = container.getScrollOffset && container.getScrollOffset().y
+  scrollComponentIntoView (container, component) {
+    const handle = platformUtils.getNode(component)
+    let currentScrollOffset = container.getScrollOffset && container.getScrollOffset().y
     const scrollView = container.refs && container.refs.scrollView || container
     const scrollResponder = scrollView.getScrollResponder()
     const additionalOffset = 120
-    const doScroll = typeof currentScrollOffset === 'undefined'
-      ? autoScroll
-      : manualScroll
-
-    setTimeout(doScroll, 50)
-
-    // const measureLayout = typeof component === 'object' && component.measureLayout
-    //   ? component.measureLayout.bind(component)
-    //   : RCTUIManager.measureLayout.bind(RCTUIManager)
-
-    // measureLayout(
-
-    function manualScroll () {
-      RCTUIManager.measureLayout(
-        handle,
-        findNodeHandle(scrollView.getInnerViewNode()),
-        function (err) {
-          debugger
-        },
-        function (left: number, top: number, width: number, height: number) {
-          // left,top,width,right describe the offset
-          // and size of the component we want to scroll into view
-          //
-          // currentScrollOffset is how far down we've scrolled already
-
-          let keyboardScreenY = Dimensions.get('window').height;
-          if (scrollResponder.keyboardWillOpenTo) {
-            keyboardScreenY = scrollResponder.keyboardWillOpenTo.endCoordinates.screenY;
-          }
-
-          // how much space we have from the component's bottom to the keyboard's top
-          // top + height
-          let componentBottomY = top + height
-          let keyboardTopY = currentScrollOffset + keyboardScreenY
-          let bottomExpansionNeeded = componentBottomY - keyboardTopY + additionalOffset
-
-          let topExpansionNeeded = currentScrollOffset - top
-          let scrollOffsetY
-          if (bottomExpansionNeeded > 0) {
-            scrollOffsetY = currentScrollOffset + bottomExpansionNeeded
-          } else if (topExpansionNeeded > 0) {
-            scrollOffsetY = currentScrollOffset - topExpansionNeeded
-          } else {
-            return
-          }
-
-          scrollResponder.scrollResponderScrollTo({x: 0, y: scrollOffsetY, animated: true});
-        }
-      );
+    let autoScroll
+    if (typeof currentScrollOffset === 'undefined') {
+      if (utils.isWeb()) currentScrollOffset = 0
+      else autoScroll = true
     }
 
-    function autoScroll () {
-      // debugger
-      scrollResponder.scrollResponderScrollNativeHandleToKeyboard(
-        findNodeHandle(handle),
-        additionalOffset,
-        true
-      )
+    setTimeout(function () {
+      if (autoScroll) {
+        platformUtils.autoScroll(scrollView, handle, additionalOffset)
+      } else {
+        manualScroll(scrollView, handle)
+      }
+    }, 50)
+
+    function manualScroll (scrollView, handle) {
+      platformUtils.measure(scrollView, handle, function (err, rect) {
+        if (err) {
+          debugger
+          return
+        }
+
+        // left,top,width,right describe the offset
+        // and size of the component we want to scroll into view
+        //
+        // currentScrollOffset is how far down we've scrolled already
+
+        const { left, top, width, height } = rect
+        let keyboardScreenY = Dimensions.get('window').height;
+        if (scrollResponder.keyboardWillOpenTo) {
+          keyboardScreenY = scrollResponder.keyboardWillOpenTo.endCoordinates.screenY;
+        }
+
+        // how much space we have from the component's bottom to the keyboard's top
+        // top + height
+        let componentBottomY = top + height
+        let keyboardTopY = currentScrollOffset + keyboardScreenY
+        let bottomExpansionNeeded = componentBottomY - keyboardTopY + additionalOffset
+
+        let topExpansionNeeded = currentScrollOffset - top
+        let scrollOffsetY
+        if (bottomExpansionNeeded > 0) {
+          scrollOffsetY = currentScrollOffset + bottomExpansionNeeded
+        } else if (topExpansionNeeded > 0) {
+          scrollOffsetY = currentScrollOffset - topExpansionNeeded
+        } else {
+          return
+        }
+
+        platformUtils.scrollTo(scrollView, 0, scrollOffsetY)
+      });
     }
   },
 

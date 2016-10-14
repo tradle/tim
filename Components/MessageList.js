@@ -563,7 +563,7 @@ class MessageList extends Component {
       //   }
       // ]}
     let me = utils.getMe()
-    let buttons = this.state.isEmployee
+    let buttons = this.state.isEmployee  &&  this.props.resource[constants.TYPE] !== constants.TYPES.ORGANIZATION
                 ? [translate('formChooser'), translate('cancel')]
                 : [translate('forgetMe'), translate('cancel')]
     return (
@@ -651,7 +651,7 @@ class MessageList extends Component {
       id: 15,
       component: ProductChooser,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      backButtonTitle: translate('back'),
+      backButtonTitle: translate('cancel'),
       passProps: {
         resource: resource,
         returnRoute: currentRoutes[currentRoutes.length - 1],
@@ -714,7 +714,7 @@ class MessageList extends Component {
       id: 15,
       component: ProductChooser,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      backButtonTitle: translate('back'),
+      backButtonTitle: translate('cancel'),
       passProps: {
         resource: resource,
         returnRoute: currentRoutes[currentRoutes.length - 1],
