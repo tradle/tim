@@ -237,7 +237,7 @@ class ProductChooser extends Component {
     var bgStyle = this.props.bankStyle  &&  this.props.bankStyle.BACKGROUND_COLOR ? {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR} : {backgroundColor: '#ffffff'}
       // <View style={[styles.container, bgStyle]}>
     return (
-      <PageView style={platformStyles.container, bgStyle}>
+      <PageView style={[styles.container, bgStyle]}>
         {err}
         {searchBar}
         {content}

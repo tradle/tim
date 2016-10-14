@@ -55,6 +55,7 @@ var translate = utils.translate
 var promisify = require('q-level');
 var leveldown = require('./leveldown')
 var level = require('./level')
+var mutexify = require('mutexify')
 
 const collect = require('stream-collector')
 const tradle = require('@tradle/engine')
@@ -940,10 +941,22 @@ var Store = Reflux.createStore({
 
     const receiveLocks = {}
     transport.on('message', function (msg, from) {
-      if (!receiveLocks[from]) receiveLocks[from] = Promise.resolve()
+      if (!receiveLocks[from]) receiveLocks[from] = mutexify()
 
-      return receiveLocks[from].finally(() => {
-        return receiveLocks[from] = receive(msg, from)
+      const lock = receiveLocks[from]
+      lock(_release => {
+        const timeout = setTimeout(release, 10000)
+        const release = () => {
+          clearTimeout(timeout)
+          _release()
+        }
+
+        const promise = receive(msg, from)
+        if (!Q.isPromiseAlike(promise)) {
+          return release()
+        }
+
+        promise.finally(release)
       })
     })
 
@@ -2518,10 +2531,10 @@ var Store = Reflux.createStore({
       seal: true
     }
 
-    var promise = resource[CUR_HASH] ? meDriver.send({...opts, link: resource[CUR_HASH]}) : Q()
+    var promise = meDriver.send({...opts, link: resource.document[CUR_HASH]})
     return promise
     .then(function () {
-      return meDriver.send({...opts, link: resource.document[CUR_HASH]})
+      return resource[CUR_HASH] ? meDriver.send({...opts, link: resource[CUR_HASH]}) : Q()
       // return meDriver.send({...opts, link: resource.document[ROOT_HASH]})
     })
     .then(function() {
