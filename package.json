@@ -97,7 +97,7 @@
     "react-native-swipeout": "github:mvayngrib/react-native-swipeout#6939c109",
     "react-native-vector-icons": "^2.0.3",
     "react-native-video": "github:tradle/react-native-video#8982843",
-    "react-web": "github:mvayngrib/react-web#9cb8809",
+    "react-web": "github:mvayngrib/react-web#distdev",
     "readable-stream": "^1.0.33",
     "reflux": "^0.4.1",
     "regenerator": "^0.8.42",

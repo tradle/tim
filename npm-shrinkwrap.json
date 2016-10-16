@@ -4844,16 +4844,6 @@
       "from": "node-libs-browser@>=0.4.0 <=0.6.0",
       "resolved": "https://registry.npmjs.org/node-libs-browser/-/node-libs-browser-0.6.0.tgz",
       "dependencies": {
-        "base64-js": {
-          "version": "0.0.8",
-          "from": "base64-js@0.0.8",
-          "resolved": "https://registry.npmjs.org/base64-js/-/base64-js-0.0.8.tgz"
-        },
-        "buffer": {
-          "version": "3.6.0",
-          "from": "buffer@>=3.6.0 <3.7.0",
-          "resolved": "https://registry.npmjs.org/buffer/-/buffer-3.6.0.tgz"
-        },
         "crypto-browserify": {
           "version": "3.2.8",
           "from": "crypto-browserify@>=3.2.6 <3.3.0",
@@ -4863,16 +4853,6 @@
           "version": "0.0.0",
           "from": "https-browserify@0.0.0",
           "resolved": "https://registry.npmjs.org/https-browserify/-/https-browserify-0.0.0.tgz"
-        },
-        "ieee754": {
-          "version": "1.1.8",
-          "from": "ieee754@>=1.1.4 <2.0.0",
-          "resolved": "https://registry.npmjs.org/ieee754/-/ieee754-1.1.8.tgz"
-        },
-        "isarray": {
-          "version": "1.0.0",
-          "from": "isarray@>=1.0.0 <2.0.0",
-          "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
         },
         "pbkdf2-compat": {
           "version": "2.0.1",
@@ -6018,8 +5998,8 @@
     },
     "react-web": {
       "version": "0.4.1",
-      "from": "mvayngrib/react-web#9cb8809",
-      "resolved": "git://github.com/mvayngrib/react-web.git#9cb8809900676af68e09d3b3de62bad3c8ddf784",
+      "from": "mvayngrib/react-web#distdev",
+      "resolved": "git://github.com/mvayngrib/react-web.git#72ec8b18244f7a12dcf7a5b641a7f47a810b061c",
       "dependencies": {
         "chalk": {
           "version": "1.1.1",

@@ -36,7 +36,8 @@ const Modes = {
 const ERROR_COLOR = '#a94442'
 const NEUTRAL_COLOR = '#888888'
 
-class PasswordEntry extends Component {
+class PasswordCheck extends Component {
+  static displayName = 'PasswordCheck';
   static propTypes = {
     validate: PropTypes.func,
     onSuccess: PropTypes.func,
@@ -384,5 +385,5 @@ const styles = StyleSheet.create({
   // }
 })
 
-exports = module.exports = makeResponsive(PasswordEntry)
+exports = module.exports = makeResponsive(PasswordCheck)
 exports.Modes = Modes

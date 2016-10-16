@@ -91,6 +91,7 @@ Text.defaultProps = function() {
 
 import React, { Component } from 'react'
 import Push from './utils/push'
+import Navs from './utils/navs'
 
 var ReactPerf = __DEV__ && require('react-addons-perf')
 var UNAUTHENTICATE_AFTER_BG_MILLIS = require('./utils/localAuth').TIMEOUT
@@ -364,6 +365,7 @@ class TiMApp extends Component {
       ]
 
       this.state.navigator = nav;
+      Navs.watch(nav)
     }
 
     switch (route.id) {

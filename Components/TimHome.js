@@ -64,6 +64,7 @@ import StatusBar from './StatusBar'
 const isAndroid = utils.isAndroid()
 const isLinkingSupported = utils.isIOS() && Linking
 import React, { Component } from 'react'
+import Navs from '../utils/navs'
 
 class TimHome extends Component {
   static displayName = 'TimHome';
@@ -323,7 +324,10 @@ class TimHome extends Component {
   }
   showOfficialAccounts(doReplace) {
     var nav = this.props.navigator
-    nav.immediatelyResetRouteStack(nav.getCurrentRoutes().slice(0,1));
+    if (!utils.isWeb()) {
+      nav.immediatelyResetRouteStack(nav.getCurrentRoutes().slice(0,1));
+    }
+
     let me = utils.getMe()
     if (me.isEmployee) {
       this.showContacts()
@@ -405,6 +409,13 @@ class TimHome extends Component {
         }
       }
     }
+
+    if (utils.isWeb() && !doReplace) {
+      if (Navs.getCurrentRoute(nav).component.displayName !== 'TimHome') {
+        doReplace = true
+      }
+    }
+
     if (doReplace)
       nav.replace(route)
     else
