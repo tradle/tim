@@ -11,15 +11,21 @@
 //
 // will not be necessary when we switch to redux and save all state including history
 // and get our bearings from the url
-const historyIndex = parseInt(location.hash.replace('#/scene_', ''))
-if (historyIndex) {
-  history.go(-historyIndex)
+
+if (global.history && global.history.length) {
+  const historyIndex = parseInt(location.hash.replace('#/scene_', ''))
+  if (historyIndex) {
+    history.go(-historyIndex)
+  }
 }
 
-import './css/customicons.css'
-import './css/ionicons.min.css'
-import './css/styles.css'
-import 'whatwg-fetch'
+require('./css/customicons.css')
+require('./css/ionicons.min.css')
+require('./css/styles.css')
+require('whatwg-fetch')
+// if (!global.EventSource) {
+//   require('event-source-polyfill/eventsource.min.js')
+// }
 
 if (!console.table) console.table = console.log
 
