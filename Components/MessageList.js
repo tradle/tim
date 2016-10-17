@@ -626,7 +626,7 @@ class MessageList extends Component {
       id: 15,
       component: ProductChooser,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      backButtonTitle: translate('back'),
+      backButtonTitle: translate('cancel'),
       passProps: {
         resource: resource,
         returnRoute: currentRoutes[currentRoutes.length - 1],
@@ -689,7 +689,7 @@ class MessageList extends Component {
       id: 15,
       component: ProductChooser,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      backButtonTitle: translate('back'),
+      backButtonTitle: translate('cancel'),
       passProps: {
         resource: resource,
         returnRoute: currentRoutes[currentRoutes.length - 1],

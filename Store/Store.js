@@ -1348,21 +1348,29 @@ var Store = Reflux.createStore({
     if (newContact) {
       if (data.name === '')
         data.name = data.identity.name && data.identity.name.formatted
-      if (isDevicePairing)
+      if (isDevicePairing) {
         profile = {
           [TYPE]: PROFILE,
           [ROOT_HASH]: hash,
           firstName:  me.firstName,
           formatted: me.formatted
         }
-
-      else
+      }
+      else {
         profile = {
           [TYPE]: PROFILE,
           [ROOT_HASH]: hash,
-          firstName:  data.name || data.message.split(' ')[0],
-          formatted: data.name || data.message.split(' ')[0]
+          ...data.profile
         }
+
+        if (!profile.firstName) {
+          profile.firstName = data.name || data.message.split(' ')[0]
+        }
+
+        if (!profile.formatted) {
+          profile.formatted = profile.firstName
+        }
+      }
 
       profile.formatted = profile.firstName + (data && data.lastName ? ' ' + data.lastName : '')
       var identity = data.identity
@@ -1601,7 +1609,9 @@ var Store = Reflux.createStore({
             message: me.firstName + ' is waiting for the response',
             [TYPE]: SELF_INTRODUCTION,
             identity: identity[0].publishedIdentity,
-            name: me.firstName,
+            profile: {
+              firstName: me.firstName
+            },
             from: me,
             to: r.to
           }
@@ -4118,7 +4128,9 @@ var Store = Reflux.createStore({
       [TYPE]: IDENTITY_PUBLISHING_REQUEST,
       [NONCE]: self.getNonce(),
       identity: meDriver.identity,
-      name: me.firstName
+      profile: {
+        firstName: me.firstName
+      }
     }
     var key = IDENTITY + '_' + orgRep[ROOT_HASH]
 
