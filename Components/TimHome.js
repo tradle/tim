@@ -623,7 +623,7 @@ class TimHome extends Component {
                  </View>
 
     return (
-      <View style={{height: height}}>
+      <View>
         <BackgroundImage source={BG_IMAGE} />
         <View style={styles.layout}>
           <View/>
