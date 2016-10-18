@@ -34,9 +34,13 @@ require('./web/shims/orientation')
 require('./index.common')
 
 const AppRegistry = require('react-native').AppRegistry
-
 const app = document.createElement('div')
 document.body.appendChild(app)
 AppRegistry.runApplication('Tradle', {
   rootTag: app
 })
+
+setTimeout(function () {
+  const splash = document.getElementById('splashscreen')
+  splash.parentNode.removeChild(splash)
+}, 500)

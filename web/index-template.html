@@ -5,10 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" type="text/css" href="/css/spinner.css">
     <title>Tradle</title>
     <!--script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/react/15.3.2/react.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/react/15.3.2/react-dom.min.js"></script-->
+    <!--script type="text/javascript" src="environment.js"></script-->
   </head>
-  <body>
+  <body style="margin:0">
+    <style>
+      #splashscreen {
+        z-index: -1000;
+        background: url(img/bg.jpg) center center / cover no-repeat fixed;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    </style>
+    <div id="splashscreen">
+      <img src="img/logo.gif" width=250 height=250 />
+      <!--img src="/img/spinner.gif" /-->
+    </div>
   </body>
 </html>
