@@ -1,6 +1,5 @@
-if ('Notification' in global) {
-  requestPermissions()
-}
+const notificationsSupported = 'Notification' in global
+if (notificationsSupported) requestPermissions()
 
 let tabIsFocused = true
 let me
@@ -18,6 +17,8 @@ window.addEventListener('focus', function () {
 })
 
 exports.init = function (opts) {
+  if (!notificationsSupported) return Promise.resolve()
+
   me = opts.me
   const node = opts.node
   node.on('message', function () {
