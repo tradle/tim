@@ -22,8 +22,9 @@ self.addEventListener('push', function (event) {
 
     var title = 'You have a message waiting!';
     var body = 'Click to open your Tradle tab';
-    var icon = '/img/logo.png';
+    var icon = '/img/logo-blue.png';
     var tag = 'tradle-app-notification-tag';
+    // TODO: check existing notifications
     return self.registration.showNotification(title, {
       body: body,
       icon: icon,
@@ -31,6 +32,35 @@ self.addEventListener('push', function (event) {
     });
   }));
 });
+
+// var notificationFilter = {
+//           tag: notificationTag
+//         };
+// return self.registration.getNotifications(notificationFilter)
+//         .then(function(notifications) {
+//           if (notifications && notifications.length &gt; 0) {
+//             // Start with one to account for the new notification
+//             // we are adding
+//             var notificationCount = 1;
+//             for (var i = 0; i &lt; notifications.length; i++) {
+//               var existingNotification = notifications[i];
+//               if (existingNotification.data &&
+//                 existingNotification.data.notificationCount) {
+//                 notificationCount +=
+// existingNotification.data.notificationCount;
+//               } else {
+//                 notificationCount++;
+//               }
+//               existingNotification.close();
+//             }
+//             message = 'You have ' + notificationCount +
+//               ' weather updates.';
+//             notificationData.notificationCount = notificationCount;
+//           }
+
+//           return showNotification(title, message, icon, notificationData);
+//         });
+
 
 // The user has clicked on the notification ...
 self.addEventListener('notificationclick', function (event) {
