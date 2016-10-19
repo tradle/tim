@@ -51,7 +51,7 @@ class MyProductMessageRow extends Component {
 
     var hdrStyle = {backgroundColor: '#289427'} //this.props.bankStyle.PRODUCT_BG_COLOR ? {backgroundColor: this.props.bankStyle.PRODUCT_BG_COLOR} : {backgroundColor: '#289427'}
     var orgName = resource.from.organization  ? resource.from.organization.title : ''
-    renderedRow.splice(0, 0, <View  key={this.getNextKey()} style={[styles.verifiedHeader, hdrStyle, {marginHorizontal: -8, marginTop: -7, marginBottom: 7, paddingBottom: 5}]}>
+    renderedRow.splice(0, 0, <View  key={this.getNextKey()} style={[styles.verifiedHeader, hdrStyle, {marginHorizontal: -8, marginTop: -7, marginBottom: 7, paddingBottom: 5, borderTopRightRadius: 10}]}>
                        <Text style={{fontSize: 17, alignSelf: 'center', color: '#fff'}}>{translate('issuedBy', orgName)}</Text>
                     </View>
                     );
@@ -62,7 +62,8 @@ class MyProductMessageRow extends Component {
     renderedRow.push(<Text  key={this.getNextKey()} style={[styles.formType, {color: '#289427'}]}>{title}</Text>);
     rowStyle = addStyle ? [styles.textContainer, addStyle] : styles.textContainer
 
-    let width = utils.dimensions().width * 0.8
+    // let width = utils.dimensions().width * 0.8
+    let width = Math.floor((utils.dimensions().width - 300) * 0.8)
     let messageBody =
       <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
         <View style={[styles.viewStyle, {width: width}]}>
