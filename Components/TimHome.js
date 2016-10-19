@@ -291,7 +291,7 @@ class TimHome extends Component {
       id: 10,
       title: translate('Accounts'),
       // titleTextColor: '#7AAAC3',
-      backButtonTitle: translate('back'),
+      backButtonTitle: 'Back',
       component: ResourceList,
       rightButtonTitle: translate('profile'),
       passProps: passProps,
@@ -299,7 +299,7 @@ class TimHome extends Component {
         title: utils.getDisplayName(me, utils.getModel(me[constants.TYPE]).value.properties),
         id: 3,
         component: ResourceView,
-        backButtonTitle: translate('back'),
+        backButtonTitle: 'Back',
         // titleTextColor: '#7AAAC3',
         rightButtonTitle: translate('edit'),
         onRightButtonPress: {
@@ -307,8 +307,8 @@ class TimHome extends Component {
           id: 4,
           component: NewResource,
           // titleTextColor: '#7AAAC3',
-          backButtonTitle: translate('back'),
-          rightButtonTitle: translate('done'),
+          backButtonTitle: 'Back',
+          rightButtonTitle: 'Done',
           passProps: {
             model: utils.getModel(me[constants.TYPE]).value,
             resource: me,
@@ -337,7 +337,7 @@ class TimHome extends Component {
     //   id: 23,
     //   component: DashboardView,
     //   title: translate('profile'),
-    //   backButtonTitle: translate('back'),
+    //   backButtonTitle: 'Back',
     //   rightButtonTitle: translate('edit'),
     //   onRightButtonPress: {
     //     title: translate('profile'),
@@ -350,8 +350,8 @@ class TimHome extends Component {
     //     },
     //     mainComponent: NewResource,
     //     titleTextColor: '#7AAAC3',
-    //     backButtonTitle: translate('back'),
-    //     rightButtonTitle: translate('done'),
+    //     backButtonTitle: 'Back',
+    //     rightButtonTitle: 'Done',
     //     mainComponentProps: {
     //       model: utils.getModel(constants.TYPES.PROFILE).value,
     //       resource: me,
@@ -377,7 +377,7 @@ class TimHome extends Component {
       title: translate('officialAccounts'),
       id: 10,
       component: ResourceList,
-      backButtonTitle: translate('back'),
+      backButtonTitle: 'Back',
       passProps: {
         modelName: constants.TYPES.ORGANIZATION,
         isConnected: this.state.isConnected,
@@ -389,14 +389,14 @@ class TimHome extends Component {
         title: title,
         id: 3,
         component: ResourceView,
-        backButtonTitle: translate('back'),
+        backButtonTitle: 'Back',
         rightButtonTitle: translate('edit'),
         onRightButtonPress: {
           title: title,
           id: 4,
           component: NewResource,
-          backButtonTitle: translate('back'),
-          rightButtonTitle: translate('done'),
+          backButtonTitle: 'Back',
+          rightButtonTitle: 'Done',
           passProps: {
             model: utils.getModel(me[constants.TYPE]).value,
             resource: me,
@@ -742,8 +742,8 @@ class TimHome extends Component {
     var route = {
       component: NewResource,
       title: translate('settings'),
-      backButtonTitle: translate('back'),
-      rightButtonTitle: translate('done'),
+      backButtonTitle: 'Back',
+      rightButtonTitle: 'Done',
       id: 4,
       titleTextColor: '#7AAAC3',
       passProps: {

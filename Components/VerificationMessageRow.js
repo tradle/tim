@@ -149,7 +149,7 @@ class VerificationMessageRow extends Component {
     var route = {
       id: 5,
       component: MessageView,
-      backButtonTitle: translate('back'),
+      backButtonTitle: 'Back',
       passProps: passProps,
       title: translate(model)
     }
