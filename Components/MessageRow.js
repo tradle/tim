@@ -239,26 +239,30 @@ class MessageRow extends Component {
       }
       else
         cellStyle = styles.textContainer
-      messageBody =
-        <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
-          <View style={[rowStyle, viewStyle]}>
-            <View style={{marginTop: 2}}>
-            {ownerPhoto}
-            </View>
-            <View style={cellStyle}>
-              <View style={styles.container}>
-              {this.isShared()
-                ? <View style={[styles.verifiedHeader, {backgroundColor: this.props.bankStyle.SHARED_WITH_BG}]}>
-                    <Text style={{color: '#ffffff', fontSize: 18}}>{translate('youShared', resource.to.organization.title)}</Text>
-                  </View>
-                : <View />
-              }
-              {renderedRow}
-             </View>
-             {sealedStatus}
-            </View>
-          </View>
-        </TouchableHighlight>
+
+      let msgContent =  <View style={[rowStyle, viewStyle]}>
+                          <View style={{marginTop: 2}}>
+                          {ownerPhoto}
+                          </View>
+                          <View style={cellStyle}>
+                            <View style={styles.container}>
+                            {this.isShared()
+                              ? <View style={[styles.verifiedHeader, {backgroundColor: this.props.bankStyle.SHARED_WITH_BG}]}>
+                                  <Text style={{color: '#ffffff', fontSize: 18}}>{translate('youShared', resource.to.organization.title)}</Text>
+                                </View>
+                              : <View />
+                            }
+                            {renderedRow}
+                           </View>
+                           {sealedStatus}
+                          </View>
+                        </View>
+
+      messageBody = isSimpleMessage || isProductApplication
+                  ? msgContent
+                  : <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
+                      {msgContent}
+                    </TouchableHighlight>
     }
     else
       messageBody = <View style={{height: 5}}/>
@@ -293,7 +297,7 @@ class MessageRow extends Component {
       // <View style={viewStyle} ref={resource[constants.ROOT_HASH]}>
 
     return (
-      <View style={[viewStyle, {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}]}>
+      <View style={[viewStyle, {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR, paddingRight: isMyMessage ? 10 : 0}]}>
         {date}
         {messageBody}
         <View style={photoListStyle}>
@@ -322,8 +326,8 @@ class MessageRow extends Component {
       id: 4,
       component: NewResource,
       // titleTextColor: '#999999',
-      backButtonTitle: translate('back'),
-      rightButtonTitle: translate('done'),
+      backButtonTitle: 'Back',
+      rightButtonTitle: 'Done',
       passProps: {
         model: rmodel,
         resource: resource,
@@ -358,8 +362,8 @@ class MessageRow extends Component {
     this.props.navigator.push({
       id: 4,
       title: translate(model),
-      rightButtonTitle: translate('done'),
-      backButtonTitle: translate('back'),
+      rightButtonTitle: 'Done',
+      backButtonTitle: 'Back',
       component: NewResource,
       // titleTextColor: '#7AAAC3',
       passProps:  {
@@ -474,15 +478,15 @@ class MessageRow extends Component {
     resource[constants.TYPE] = model.id;
 
     // Prefill for testing and demoing
-    var isPrefilled = __DEV__ && model.id in formDefaults
+    var isPrefilled = /*__DEV__ &&*/ model.id in formDefaults
     if (isPrefilled)
       extend(true, resource, formDefaults[model.id])
 
     this.props.navigator.push({
       id: 4,
       title: translate(model),
-      rightButtonTitle: isMyMessage ? null : translate('done'),
-      backButtonTitle: translate('back'),
+      rightButtonTitle: isMyMessage ? null : 'Done',
+      backButtonTitle: 'Back',
       component: NewResource,
       // titleTextColor: '#7AAAC3',
       passProps:  {
@@ -515,7 +519,7 @@ class MessageRow extends Component {
     var route = {
       id: 5,
       component: MessageView,
-      backButtonTitle: translate('back'),
+      backButtonTitle: 'Back',
       passProps: passProps,
       title: translate(model)
     }
@@ -552,9 +556,9 @@ class MessageRow extends Component {
               ? <View key={this.getNextKey()}>
                   <Text style={[styles.resourceTitle, {color: color}]}>{str}</Text>
                 </View>
-              :   <View key={this.getNextKey()} style={{flexDirection: 'row'}}>
-                    <Text style={[styles.resourceTitle, {color: '#ffffff', marginTop: 3, paddingRight: 10}]}>{str}</Text>
-                    <Icon name='ios-folder-open-outline' size={25} color='#ffffff' style={{position: 'absolute', right: 0}}/>
+              :   <View key={this.getNextKey()} style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                    <Text style={[styles.resourceTitle, {color: color, marginTop: 3, paddingRight: 10}]}>{str}</Text>
+                    <Icon name='ios-folder-open-outline' size={25} color={color}/>
                   </View>
       renderedRow.push(msg);
       return ({message: str})
@@ -888,7 +892,7 @@ class MessageRow extends Component {
       id: 15,
       component: ProductChooser,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      backButtonTitle: translate('cancel'),
+      backButtonTitle: 'Back',
       passProps: {
         resource: resource,
         returnRoute: currentRoutes[currentRoutes.length - 1],
@@ -912,8 +916,8 @@ class MessageRow extends Component {
       id: 4,
       component: NewResource,
       // titleTextColor: '#999999',
-      backButtonTitle: translate('back'),
-      rightButtonTitle: translate('done'),
+      backButtonTitle: 'Back',
+      rightButtonTitle: 'Done',
       passProps: {
         model: rmodel,
         resource: resource,
@@ -1564,8 +1568,8 @@ module.exports = MessageRow;
       id: 4,
       component: NewResource,
       // titleTextColor: '#999999',
-      backButtonTitle: translate('back'),
-      rightButtonTitle: translate('done'),
+      backButtonTitle: 'Back',
+      rightButtonTitle: 'Done',
       passProps: {
         model: rmodel,
         resource: resource,
