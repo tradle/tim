@@ -744,7 +744,7 @@ var utils = {
         let keyboardTopY = currentScrollOffset + keyboardScreenY
         let bottomExpansionNeeded = componentBottomY - keyboardTopY + additionalOffset
 
-        let topExpansionNeeded = currentScrollOffset - top + platformUtils.navBarHeight
+        let topExpansionNeeded = currentScrollOffset - top + platformUtils.navBarHeight * 2
         let scrollOffsetY
         if (bottomExpansionNeeded > 0) {
           scrollOffsetY = currentScrollOffset + bottomExpansionNeeded
