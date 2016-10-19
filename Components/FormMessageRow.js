@@ -100,6 +100,7 @@ class FormMessageRow extends Component {
         marginLeft: isMyMessage ? 30 : 45, //(hasOwnerPhoto ? 45 : 10),
         borderRadius: 10,
         marginBottom: 3,
+        paddingRight: isMyMessage ? 10 : 0
       }
     }
     var rowStyle = [styles.row, {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}];
@@ -136,7 +137,7 @@ class FormMessageRow extends Component {
     var messageBody;
     var width = utils.dimensions(FormMessageRow).width
     let msgWidth = Math.floor(width * 0.8)
-    var viewStyle = {width: msgWidth, flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
+    var viewStyle = {width: msgWidth, flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start', paddingRight: isMyMessage ? 10 : 0};
 
     messageBody =
       <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
@@ -234,14 +235,14 @@ class FormMessageRow extends Component {
     var route = {
       id: 5,
       component: MessageView,
-      backButtonTitle: translate('back'),
+      backButtonTitle: 'Back',
       passProps: passProps,
       title: translate(model)
     }
     if (this.isMyMessage()) {
-      route.rightButtonTitle = translate('edit');
+      route.rightButtonTitle = 'Edit'
       route.onRightButtonPress = {
-        title: translate('edit'),
+        title: 'Edit',
         component: NewResource,
         // titleTextColor: '#7AAAC3',
         id: 4,
