@@ -1619,7 +1619,6 @@ var Store = Reflux.createStore({
 
       // Temporary untill the real hash is known
       var key = utils.getId(rr)
-      rr._sendStatus = sendStatus
       self._setItem(key, rr)
 
       if (!toOrg) {
