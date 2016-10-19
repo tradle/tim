@@ -9,6 +9,7 @@ var extend = require('extend');
 var myStyles = require('../styles/styles');
 var constants = require('@tradle/constants');
 var NewResourceMixin = require('./NewResourceMixin');
+var PageView = require('./PageView')
 var reactMixin = require('react-mixin');
 import platformStyles from '../styles/platform'
 
@@ -228,12 +229,12 @@ class NewItem extends Component {
         //   navigator={this.props.navigator}
         //   onSelect={this.onSelect.bind(this)} />
     return (
-      <View style={platformStyles.container}>
+      <PageView style={platformStyles.container}>
         <View style={{marginLeft: 10, marginRight: 20, marginBottom: 15 }}>
           <Form ref='form' type={Model} options={options} />
         </View>
         {error}
-      </View>
+      </PageView>
     );
   }
   onSelect(asset) {
