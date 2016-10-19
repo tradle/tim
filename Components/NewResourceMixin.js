@@ -1,6 +1,7 @@
 'use strict';
 
 var React = require('react');
+var ReactDOM = require('react-dom')
 var dateformat = require('dateformat')
 var ResourceList = require('./ResourceList')
 var EnumList = require('./EnumList')
@@ -51,7 +52,14 @@ var component
 
 var NewResourceMixin = {
   onScroll(e) {
-    this._contentOffset = { ...e.nativeEvent.contentOffset }
+    // from ListView._onScroll
+    const target = ReactDOM.findDOMNode(this.refs.scrollView)
+    this._contentOffset = {
+      x: target.scrollLeft,
+      y: target.scrollTop
+    }
+
+    // this._contentOffset = { ...e.nativeEvent.contentOffset }
   },
   getScrollOffset() {
     return { ...this._contentOffset }
