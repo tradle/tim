@@ -14,6 +14,7 @@ import {
   View,
   Alert,
   StyleSheet,
+  Platform,
   TouchableHighlight,
   Image
 } from 'react-native';
@@ -72,10 +73,10 @@ var RowMixin = {
         style = [style, {borderWidth: BORDER_WIDTH, paddingVertical: 3, borderColor: this.props.bankStyle.VERIFICATION_BG, borderTopColor: '#eeeeee'}]
       return (
         <View style={style} key={this.getNextKey()}>
-          <View style={{flex: 1, flexDirection: 'column'}}>
+          <View style={styles.column}>
             <Text style={[styles.verySmallLetters, {color: '#333333'}]}>{propTitle}</Text>
           </View>
-          <View style={{flex: 1, flexDirection: 'column'}}>
+          <View style={styles.column}>
             <Text style={styles.verySmallLetters}>{val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')}</Text>
           </View>
         </View>
@@ -90,10 +91,10 @@ var RowMixin = {
       let color = this.isMyMessage() && !isMyProduct ? {color: '#FFFFEE'} : {color: '#757575'}
       return (
         <View style={style} key={this.getNextKey()}>
-          <View style={{flex: 1, flexDirection: 'column'}}>
+          <View style={styles.column}>
             <Text style={[styles.descriptionB, color]}>{propTitle}</Text>
           </View>
-          <View style={{flex: 1, flexDirection: 'column'}}>
+          <View style={styles.column}>
             <Text style={[styles.descriptionB, color]}>{val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')}</Text>
           </View>
        </View>
@@ -196,7 +197,7 @@ var RowMixin = {
                   </View>
     let addStyle
     if (!onPress)
-      addStyle = {marginHorizontal: -7, paddingHorizontal: 7, backgroundColor: this.props.bankStyle.VERIFICATION_BG, borderWidth: BORDER_WIDTH, borderColor: this.props.bankStyle.VERIFICATION_BG, borderBottomColor: this.props.bankStyle.VERIFIED_HEADER_COLOR}
+      addStyle = {backgroundColor: this.props.bankStyle.VERIFICATION_BG, borderWidth: BORDER_WIDTH, borderColor: this.props.bankStyle.VERIFICATION_BG, borderBottomColor: this.props.bankStyle.VERIFIED_HEADER_COLOR}
     else
       addStyle = {}
     header = hasPhotos
@@ -218,9 +219,9 @@ var RowMixin = {
       var orgPhoto = verification.organization.photo
                    ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
                    : <View />
-      var shareView = <View style={[styles.shareButton, {opacity: this.props.resource.documentCreated ? 0.3 : 1}]}>
-                        <CustomIcon name='tradle' style={{ color: '#ffffff' }} size={35} />
-                        <Text style={{color: '#fefefe', fontSize: 18, paddingHorizontal: 3, marginTop: 6}}>{translate('Share')}</Text>
+      var shareView = <View style={[styles.shareButton, {marginLeft: 10, marginRight: 10, opacity: this.props.resource.documentCreated ? 0.3 : 1}]}>
+                        <CustomIcon name='tradle' style={{color: '#4982B1' }} size={32} />
+                        <Text style={styles.shareText}>{translate('Share')}</Text>
                       </View>
       var orgTitle = this.props.to[constants.TYPE] === constants.TYPES.ORGANIZATION
                    ? this.props.to.name
@@ -238,7 +239,7 @@ var RowMixin = {
       // if (verifiedBy.length > 25)
       //   verifiedBy = verifiedBy.substring(0, 25) + '..'
       var maxWidth = 0.8 * utils.dimensions().width - 150
-      var orgView =   <View style={{marginTop: 5, maxWidth: maxWidth, paddingLeft: 3}}>
+      var orgView =   <View style={{marginTop: Platform.OS === 'android' ? 0 : 5, maxWidth: maxWidth, paddingLeft: 3}}>
                         <Text style={[styles.verySmallLetters, { fontSize: 14}]}>
                           {verifiedBy}
                         </Text>
@@ -261,15 +262,15 @@ var RowMixin = {
 
       }
       else if (this.props.resource.documentCreated) {
-          orgRow = <View style={{flexDirection: 'row', marginTop: 5, paddingBottom: 5, justifyContent:'space-between'}}>
-                     {shareView}
-                    <TouchableHighlight onPress={this.props.onSelect.bind(this, resource, verification)} underlayColor='transparent'>
-                      {orgView}
-                    </TouchableHighlight>
-                  </View>
+        orgRow = <View style={styles.shareView}>
+                   {shareView}
+                  <TouchableHighlight onPress={this.props.onSelect.bind(this, resource, verification)} underlayColor='transparent'>
+                    {orgView}
+                  </TouchableHighlight>
+                </View>
       }
       else {
-        orgRow = <View style={{flexDirection: 'row', marginTop: 7, paddingBottom: 5, justifyContent:'space-between'}}>
+        orgRow = <View style={styles.shareView}>
                    <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
                             Alert.alert(
                               'Sharing ' + docTitle + ' ' + verifiedBy,
@@ -440,9 +441,23 @@ var styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 5,
     borderRadius: 10,
-    borderWidth: BORDER_WIDTH,
-    borderColor: '#215A89',
-    backgroundColor: '#4982B1'
+    borderWidth: 1,
+    // borderColor: '#215A89',
+    borderColor: '#4982B1',
+    // backgroundColor: '#ffffff'
+    // backgroundColor: '#4982B1'
+  },
+  shareText: {
+    color: '#4982B1',
+    fontSize: 18,
+    paddingHorizontal: 3,
+    marginTop: Platform.OS === 'android' ? 0 : 4
+  },
+  shareView: {
+    flexDirection: 'row',
+    marginTop: 5,
+    paddingBottom: 5,
+    justifyContent:'space-between'
   },
   msgImage: {
     // backgroundColor: '#dddddd',
@@ -505,6 +520,10 @@ var styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '400',
     marginBottom: 2,
+  },
+  column: {
+    flex: 1,
+    flexDirection: 'column'
   },
 });
 

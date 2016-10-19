@@ -469,8 +469,9 @@ var Store = Reflux.createStore({
       let settingsId = SETTINGS + '_1'
       var settings = list[settingsId]
       let updateSettings
-      if (__DEV__  &&  settings  &&  settings.value.urls) {
-        let urls = settings.value.urls
+      if (__DEV__  &&  settings  &&  this._getItem(settings).urls) {
+        settings = this._getItem(settings)
+        let urls = settings.urls
         // HACK for non-static ip
         if (SERVICE_PROVIDERS_BASE_URL_DEFAULTS) {
           SERVICE_PROVIDERS_BASE_URL_DEFAULTS.forEach((url) => {
@@ -487,7 +488,7 @@ var Store = Reflux.createStore({
         }
         SERVICE_PROVIDERS_BASE_URLS = urls
         if (updateSettings)
-          db.put(settingsId, settings.value)
+          db.put(settingsId, settings)
       }
       else {
         SERVICE_PROVIDERS_BASE_URLS = SERVICE_PROVIDERS_BASE_URL_DEFAULTS.slice()
@@ -517,7 +518,7 @@ var Store = Reflux.createStore({
       const recipientHash = recipientInfo.permalink
       let messenger = wsClients[recipientHash]
       if (!messenger) {
-        let url = list[SETTINGS + '_1'].value.hashToUrl[recipientHash]
+        let url = self._getItem(list[SETTINGS + '_1']).hashToUrl[recipientHash]
         messenger = wsClients[url]
       }
       if (!messenger) {
@@ -549,15 +550,15 @@ var Store = Reflux.createStore({
   initChats() {
     let meId = utils.getId(me)
     for (var p in list) {
-      let r = list[p].value
-      let m = this.getModel(r[TYPE]).value
+      let r = this._getItem(list[p])
+      let m = this._getItem(this.getModel(r[TYPE]))
       if (m.interfaces  &&  m.interfaces.indexOf(MESSAGE) !== -1) {
         if (r.sharedWith) {
           r.sharedWith.forEach((shareInfo) => {
             if (shareInfo.bankRepresentative === meId)
               this.addMessagesToChat(utils.getId(r.to), r, true, shareInfo.timeShared)
             else  {
-              let rep = list[shareInfo.bankRepresentative].value
+              let rep = this._getItem(list[shareInfo.bankRepresentative])
               let orgId = utils.getId(rep.organization)
               this.addMessagesToChat(orgId, r, true, shareInfo.timeShared)
               if (utils.getId(r.to) === meId) {
@@ -572,7 +573,7 @@ var Store = Reflux.createStore({
           this.addMessagesToChat(utils.getId(r.to), r, true)
         else {
           let fromId = utils.getId(r.from)
-          let rep = list[meId === fromId ? utils.getId(r.to) : fromId].value
+          let rep = this._getItem(list[meId === fromId ? utils.getId(r.to) : fromId])
           let orgId = rep.organization ? utils.getId(rep.organization) : utils.getId(rep)
           this.addMessagesToChat(orgId, r, true)
         }
@@ -592,7 +593,7 @@ var Store = Reflux.createStore({
     let productApp = {}
     // Compact all FormRequests that were fulfilled
     for (let i=messages.length - 1; i>=0; i--) {
-      let r = list[messages[i].id].value
+      let r = this._getItem(list[messages[i].id])
       if (r[TYPE] === FORM_REQUEST  &&  !r.document) {// && r.documentCreated)
       // delete list[id]
         let forms = productToForms[r.product]
@@ -614,7 +615,7 @@ var Store = Reflux.createStore({
     }
     // Compact all SelfIntroduction
     messages = messages.filter((rr, i) => {
-      let r = list[rr.id].value
+      let r = this._getItem(list[rr.id])
       return r[TYPE] === SELF_INTRODUCTION ? false : true
         // delete list[id]
     })
@@ -637,15 +638,15 @@ var Store = Reflux.createStore({
       //   if (utils.getId(f) === utils.getId(t))
       //     return false
       // }
-      let r = list[rr.id].value
+      let r = this._getItem(list[rr.id])
 
       // Check if there was request for the next form after multy-entry form
       let fromId = utils.getId(r.from)
 
       if (!me.isEmployee  &&  fromId !== meId  &&  list[fromId]) {
-        let rFrom = list[fromId].value
+        let rFrom = this._getItem(list[fromId])
         if (!rFrom.bot) {
-          let photos = list[fromId].value.photos
+          let photos = rFrom.photos
           if (photos)
             r.from.photo = photos[0]
           else
@@ -1455,7 +1456,6 @@ var Store = Reflux.createStore({
     var self = this
     let m = this.getModel(r[TYPE]).value
     var props = m.properties;
-    var rr = {};
     if (!r.time)
       r.time = new Date().getTime();
     var toOrg
@@ -1476,6 +1476,7 @@ var Store = Reflux.createStore({
 
     let isSelfIntroduction = r[TYPE] === SELF_INTRODUCTION
 
+    var rr = {};
     for (var p in r) {
       if (!props[p])
         continue
@@ -1535,7 +1536,7 @@ var Store = Reflux.createStore({
     if (!hash)
       hash = list[utils.getId(r.to)].value[ROOT_HASH]
     var toId = IDENTITY + '_' + hash
-    var sendStatus = (self.isConnected) ? SENDING : QUEUED
+    rr._sendStatus = self.isConnected ? SENDING : QUEUED
     var noCustomerWaiting
     return meDriver.sign({ object: toChain })
     .then(function(result) {
@@ -1618,7 +1619,6 @@ var Store = Reflux.createStore({
 
       // Temporary untill the real hash is known
       var key = utils.getId(rr)
-      rr._sendStatus = sendStatus
       self._setItem(key, rr)
 
       if (!toOrg) {
@@ -1674,7 +1674,7 @@ var Store = Reflux.createStore({
       }
       var key = utils.getId(rr)
       batch.push({type: 'put', key: key, value: rr})
-      rr._sendStatus = self.isConnected ? SENDING : QUEUED
+      // rr._sendStatus = self.isConnected ? SENDING : QUEUED
 
       self._setItem(key, rr)
       self.addMessagesToChat(orgId, rr)
@@ -3573,8 +3573,8 @@ var Store = Reflux.createStore({
     function addAndCheckShareable(verification) {
       let r = verification.document
       // Allow sharing only of resources that were filled out by me
-      // if (utils.getId(r.from) !== utils.getId(me))
-      //   return
+      if (utils.getId(r.from) !== utils.getId(me))
+        return
       let docType = r[TYPE]
       var v = shareableResources[docType];
       if (!v)
@@ -5816,6 +5816,9 @@ var Store = Reflux.createStore({
   },
   _setItem(key, value) {
     list[key] = { key, value }
+  },
+  _getItem(r) {
+    return r.value
   },
   _mergeItem(key, value) {
     const current = list[key] || {}

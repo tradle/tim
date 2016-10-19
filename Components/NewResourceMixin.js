@@ -1,6 +1,7 @@
 'use strict';
 
 var React = require('react');
+var ReactDOM = require('react-dom')
 var dateformat = require('dateformat')
 var ResourceList = require('./ResourceList')
 var EnumList = require('./EnumList')
@@ -51,7 +52,14 @@ var component
 
 var NewResourceMixin = {
   onScroll(e) {
-    this._contentOffset = { ...e.nativeEvent.contentOffset }
+    // from ListView._onScroll
+    const target = ReactDOM.findDOMNode(this.refs.scrollView)
+    this._contentOffset = {
+      x: target.scrollLeft,
+      y: target.scrollTop
+    }
+
+    // this._contentOffset = { ...e.nativeEvent.contentOffset }
   },
   getScrollOffset() {
     return { ...this._contentOffset }
@@ -523,8 +531,8 @@ var NewResourceMixin = {
     var label = translate(params.prop, params.model)
 
     return (
-      <View style={[styles.divider, {backgroundColor: LINK_COLOR}]}>
-        <Text style={styles.dividerText}>{label}</Text>
+      <View style={[styles.divider, {borderBottomColor: LINK_COLOR}]}>
+        <Text style={[styles.dividerText, {color: LINK_COLOR}]}>{label}</Text>
       </View>
     );
   },
@@ -548,7 +556,7 @@ var NewResourceMixin = {
       let maxChars = (utils.dimensions(component).width - 60)/utils.getFontSize(9)
       // let some space for wrapping
       if (maxChars < label.length)
-        lStyle = [styles.labelStyle, {marginTop: 0}]
+        lStyle = [lStyle, {marginTop: 0}]
     }
     // else  if (!params.value) {
     //   let maxChars = (utils.dimensions(component).width)/utils.getFontSize(9)
@@ -563,6 +571,7 @@ var NewResourceMixin = {
         <FloatLabel
           labelStyle={lStyle}
           autoCorrect={false}
+          multiline={Platform.OS === 'android' ? true : false}
           autoCapitalize={this.state.isRegistration  ||  (params.prop.name !== 'url' &&  (!params.prop.keyboard || params.prop.keyboard !== 'email-address')) ? 'sentences' : 'none'}
           onFocus={this.inputFocused.bind(this, params.prop.name)}
           inputStyle={this.state.isRegistration ? styles.regInput : styles.textInput}
@@ -571,6 +580,7 @@ var NewResourceMixin = {
           keyboardShouldPersistTaps={true}
           keyboardType={params.keyboard || 'default'}
           onChangeText={this.onChangeText.bind(this, params.prop)}
+          underlineColorAndroid='transparent'
         >{label}</FloatLabel>
           {this.getErrorView(params)}
       </View>
@@ -596,6 +606,7 @@ var NewResourceMixin = {
     }
     return error
   },
+
   myBooleanTemplate(params) {
     var labelStyle = {color: '#aaaaaa', fontSize: 18};
     var textStyle =  {marginTop: 5, color: this.state.isRegistration ? '#ffffff' : '#000000', fontSize: 18};
@@ -831,9 +842,8 @@ var NewResourceMixin = {
     let isVideo = prop.name === 'video'
     let isPhoto = prop.name === 'photos'
       // <View key={this.getNextKey()} style={this.hasError(params) ? {paddingBottom: 0} : {paddingBottom: 10}} ref={prop.name}>
-    let color = this.state.isRegistration
-              ? {color: '#eeeeee'}
-              : {color: resource && resource[params.prop] ? '#000000' : '#AAAAAA'}
+    let color = {color: resource && resource[params.prop] ? '#000000' : this.state.isRegistration ? '#eeeeee' : '#AAAAAA'}
+    let fontSize = {fontSize: this.state.isRegistration ? 20 : 18}
     let iconColor = this.state.isRegistration ? '#eeeeee' : LINK_COLOR
     return (
       <View key={this.getNextKey()} style={{paddingBottom: this.hasError(params.errors, prop.name) ? 0 : 10, margin: 0}} ref={prop.name}>
@@ -847,7 +857,7 @@ var NewResourceMixin = {
                  <Image source={{uri: this.state[prop.name + '_photo'].url}} style={styles.thumb} />
                  <Text style={[styles.input, color]}>{label}</Text>
                </View>
-             : <Text style={[styles.input, color]}>{label}</Text>
+             : <Text style={[styles.input, fontSize, color]}>{label}</Text>
             }
               {isVideo
                 ? <Icon name='ios-play-outline'  size={25}  color={LINK_COLOR} />
@@ -879,7 +889,7 @@ var NewResourceMixin = {
     var currentRoutes = this.props.navigator.getCurrentRoutes();
     this.props.navigator.push({
       title: translate(prop), //m.title,
-      titleTextColor: '#7AAAC3',
+      // titleTextColor: '#7AAAC3',
       id: 10,
       component: ResourceList,
       backButtonTitle: 'Back',
@@ -1218,6 +1228,9 @@ var styles= StyleSheet.create({
     color: '#757575',
     fontSize: 18
   },
+  labelStyle: {
+    paddingLeft: 0
+  },
   icon1: {
     width: 15,
     height: 15,
@@ -1279,17 +1292,21 @@ var styles= StyleSheet.create({
   },
   formInput: {
     borderBottomWidth: 1,
+    borderBottomColor: '#cccccc',
     marginHorizontal: 10,
+    paddingLeft: 0,
+    // fontSize: 18
     borderColor: '#cccccc',
   },
   regInput: {
     borderWidth: 0,
-    color: '#eeeeee',
-    fontFamily: '"Helvetica Neue", STHeiTi, sans-serif'
+    paddingLeft: 0,
+    color: '#eeeeee'
   },
   textInput: {
     borderWidth: 0,
-    fontFamily: '"Helvetica Neue", STHeiTi, sans-serif'
+    paddingLeft: 0,
+    fontSize: 18,
   },
   thumb: {
     width: 25,
@@ -1357,14 +1374,18 @@ var styles= StyleSheet.create({
     top: 5
   },
   divider: {
-    justifyContent: 'center',
+    // justifyContent: 'center',
+    borderColor: 'transparent',
+    borderWidth: 1.5,
+    marginTop: 20,
     marginHorizontal: 10,
     marginBottom: 5
   },
   dividerText: {
-    marginVertical: 10,
-    fontSize: 18,
-    alignSelf: 'center',
+    // marginTop: 15,
+    marginBottom: 10,
+    fontSize: 20,
+    // alignSelf: 'center',
     color: '#ffffff'
   },
 })

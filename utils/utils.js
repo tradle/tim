@@ -704,7 +704,7 @@ var utils = {
     let currentScrollOffset = container.getScrollOffset && container.getScrollOffset().y
     const scrollView = container.refs && container.refs.scrollView || container
     const scrollResponder = scrollView.getScrollResponder()
-    const additionalOffset = 120
+    const additionalOffset = utils.isWeb() ? 0 : 120
     let autoScroll
     if (typeof currentScrollOffset === 'undefined') {
       if (utils.isWeb()) currentScrollOffset = 0
@@ -732,6 +732,7 @@ var utils = {
         // currentScrollOffset is how far down we've scrolled already
 
         const { left, top, width, height } = rect
+
         let keyboardScreenY = Dimensions.get('window').height;
         if (scrollResponder.keyboardWillOpenTo) {
           keyboardScreenY = scrollResponder.keyboardWillOpenTo.endCoordinates.screenY;
@@ -743,7 +744,7 @@ var utils = {
         let keyboardTopY = currentScrollOffset + keyboardScreenY
         let bottomExpansionNeeded = componentBottomY - keyboardTopY + additionalOffset
 
-        let topExpansionNeeded = currentScrollOffset - top
+        let topExpansionNeeded = currentScrollOffset - top + platformUtils.navBarHeight * 2
         let scrollOffsetY
         if (bottomExpansionNeeded > 0) {
           scrollOffsetY = currentScrollOffset + bottomExpansionNeeded

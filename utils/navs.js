@@ -7,7 +7,9 @@ module.exports = {
 
     let _currentRoute
     navs.set(nav, {
-      get currentRoute() { return _currentRoute }
+      get currentRoute() {
+        return _currentRoute || nav.state.routeStack[nav.state.presentedIndex]
+      }
     })
 
     nav.navigationContext.addListener('willfocus', function (e) {
