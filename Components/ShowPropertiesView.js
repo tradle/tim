@@ -1,6 +1,5 @@
 'use strict';
 
-var PhotoList = require('./PhotoList');
 var ArticleView = require('./ArticleView');
 var utils = require('../utils/utils');
 var constants = require('@tradle/constants');
