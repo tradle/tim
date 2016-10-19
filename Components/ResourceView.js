@@ -4,7 +4,8 @@ var utils = require('../utils/utils');
 var translate = utils.translate
 var ShowPropertiesView = require('./ShowPropertiesView');
 var PhotoView = require('./PhotoView');
-var PhotoList = require('./PhotoList');
+import PhotoList from './PhotoList';
+// import {MIN_WIDTH} from './PhotoList';
 // var AddNewIdentity = require('./AddNewIdentity');
 // var SwitchIdentity = require('./SwitchIdentity');
 var ShowRefList = require('./ShowRefList');
@@ -185,9 +186,9 @@ class ResourceView extends Component {
     var modelName = resource[constants.TYPE];
     var model = utils.getModel(modelName).value;
     var photos = []
-    if (resource.photos  &&  resource.photos.length > 1) {
+    if (resource.photos) { //  &&  resource.photos.length > 1) {
       extend(photos, resource.photos);
-      photos.splice(0, 1);
+      // photos.splice(0, 1);
     }
 
     var isIdentity = model.id === constants.TYPES.PROFILE;
@@ -282,12 +283,18 @@ class ResourceView extends Component {
     }
 
     buttons.push(translate('cancel'))
+
+    // let numberInRow = Math.min(width / MIN_WIDTH, photos.length)
+        // <PhotoList photos={photos} resource={this.props.resource} navigator={this.props.navigator} isView={true} numberInRow={numberInRow} />
     return (
       <PageView style={platformStyles.container}>
       <ScrollView  ref='this'>
-        <View style={styles.photoBG}>
-          <PhotoView resource={resource} navigator={this.props.navigator}/>
-        </View>
+        {photos.length === 1
+          ? <View style={styles.photoBG}>
+              <PhotoView resource={resource} navigator={this.props.navigator}/>
+            </View>
+          : <View/>
+        }
         {actionPanel}
         <Modal animationType={'fade'} visible={this.state.isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
           <TouchableHighlight  onPress={() => this.closeModal()} underlayColor='transparent'>
@@ -296,7 +303,7 @@ class ResourceView extends Component {
             </View>
           </TouchableHighlight>
         </Modal>
-        <PhotoList photos={photos} resource={this.props.resource} navigator={this.props.navigator} isView={true} numberInRow={photos.length > 4 ? 5 : photos.length} />
+        <PhotoList photos={photos} resource={this.props.resource} navigator={this.props.navigator} isView={true} />
         <ShowPropertiesView resource={resource}
                             showItems={this.showResources.bind(this)}
                             showRefResource={this.getRefResource.bind(this)}
