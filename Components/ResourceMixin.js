@@ -36,7 +36,7 @@ var ResourceMixin = {
       component: require('./ResourceView'),
       titleTextColor: '#7AAAC3',
       // rightButtonTitle: 'Edit',
-      backButtonTitle: translate('back'),
+      backButtonTitle: 'Back',
       passProps: {
         resource: resource,
         prop: prop,
@@ -49,7 +49,7 @@ var ResourceMixin = {
       id: 10,
       title: translate(prop, utils.getModel(resource[constants.TYPE]).value),
       titleTextColor: '#7AAAC3',
-      backButtonTitle: translate('back'),
+      backButtonTitle: 'Back',
       component: require('./ResourceList'),
       passProps: {
         modelName: prop.items.ref,
@@ -155,7 +155,7 @@ var ResourceMixin = {
                  title: v.title,
                  id: 3,
                  component: require('./ResourceView'),
-                 backButtonTitle: translate('back'),
+                 backButtonTitle: 'Back',
                  passProps: {resource: v}
                 })
               }}>
