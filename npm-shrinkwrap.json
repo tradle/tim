@@ -1120,8 +1120,8 @@
     },
     "changes-feed": {
       "version": "1.1.0",
-      "from": "mvayngrib/changes-feed",
-      "resolved": "git://github.com/mvayngrib/changes-feed.git#bd106bd1a8b03660e7c6820e279a34bcaac0fd5e",
+      "from": "git+https://github.com/mvayngrib/changes-feed.git",
+      "resolved": "git+https://github.com/mvayngrib/changes-feed.git#bd106bd1a8b03660e7c6820e279a34bcaac0fd5e",
       "dependencies": {
         "readable-stream": {
           "version": "1.0.34",
@@ -2343,8 +2343,8 @@
     },
     "forward-secrecy": {
       "version": "1.0.2",
-      "from": "tradle/forward-secrecy#dev",
-      "resolved": "git://github.com/tradle/forward-secrecy.git#5ad4c2ee429db4b10599efbd41c650b9debbf7fe",
+      "from": "git+https://github.com/tradle/forward-secrecy.git#dev",
+      "resolved": "git+https://github.com/tradle/forward-secrecy.git#5ad4c2ee429db4b10599efbd41c650b9debbf7fe",
       "dependencies": {
         "tweetnacl": {
           "version": "0.13.3",
@@ -3216,8 +3216,8 @@
     },
     "level-change-processor": {
       "version": "1.0.0",
-      "from": "mvayngrib/level-change-processor#7100404",
-      "resolved": "git://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b"
+      "from": "git+https://github.com/mvayngrib/level-change-processor.git#7100404",
+      "resolved": "git+https://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b"
     },
     "level-codec": {
       "version": "6.1.0",
@@ -3671,8 +3671,8 @@
     },
     "merkle-tree-stream": {
       "version": "3.0.3",
-      "from": "mvayngrib/merkle-tree-stream#finalize",
-      "resolved": "git://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
+      "from": "git+https://github.com/mvayngrib/merkle-tree-stream.git#finalize",
+      "resolved": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
       "dependencies": {
         "isarray": {
           "version": "1.0.0",
@@ -5050,8 +5050,8 @@
     },
     "sendy": {
       "version": "2.3.0",
-      "from": "tradle/sendy#ca476127",
-      "resolved": "git://github.com/tradle/sendy.git#ca476127ea300cb9d43d518cfa157eb64bc1d09e"
+      "from": "tradle/sendy#cf5b0e77",
+      "resolved": "git://github.com/tradle/sendy.git#cf5b0e7788a6ecbe48a371047275c5fe87b885db"
     },
     "sendy-axolotl": {
       "version": "1.0.1",

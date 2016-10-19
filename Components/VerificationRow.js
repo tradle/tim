@@ -101,7 +101,7 @@ class VerificationRow extends Component {
       rows.push(
           <View style={{flexDirection: 'row'}} key={this.getNextKey()}>
             <Text style={styles.resourceTitleL}>{translate('verificationTransactionID')}</Text>
-            <Text style={[styles.description, {color: '#7AAAc3'}]} onPress={this.onPress.bind(this, 'http://tbtc.blockr.io/tx/info/' + resource.txId)}>{resource.txId}</Text>
+            <Text style={[styles.description, {color: '#7AAAc3'}]} onPress={this.onPress.bind(this, 'https://tbtc.blockr.io/tx/info/' + resource.txId)}>{resource.txId}</Text>
           </View>
         )
 

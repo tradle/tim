@@ -100,7 +100,7 @@
     "readable-stream": "^1.0.33",
     "reflux": "^0.4.1",
     "regenerator": "^0.8.42",
-    "sendy": "github:tradle/sendy#ca476127",
+    "sendy": "github:tradle/sendy#cf5b0e77",
     "sendy-axolotl": "^1.0.1",
     "sendy-ws": "^1.4.0",
     "stable-sha1": "~1.0.1",

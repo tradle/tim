@@ -171,7 +171,7 @@ class MessageView extends Component {
       verificationTxID =
           <View style={{padding :10, flex: 1}}>
             <Text style={styles.title}>Verification Transaction Id</Text>
-            <Text style={styles.verification} onPress={this.onPress.bind(this, 'http://tbtc.blockr.io/tx/info/' + this.props.verification.txId)}>{this.props.verification.txId}</Text>
+            <Text style={styles.verification} onPress={this.onPress.bind(this, 'https://tbtc.blockr.io/tx/info/' + this.props.verification.txId)}>{this.props.verification.txId}</Text>
           </View>
       separator = <View style={styles.separator}></View>
     }
