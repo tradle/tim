@@ -17,11 +17,13 @@ const Alert = {
   prompt
 }
 
-module.exports = Alert
-
 function alert (title, message, buttons) {
   if (typeof message !== 'string') {
     buttons = message
+    message = null
+  }
+
+  if (!message) {
     message = title
     title = null
   }
@@ -34,6 +36,7 @@ function alert (title, message, buttons) {
     callback = noop
   }
 
+  const styles = exports.styles
   buttons = buttons.map(function (b, i) {
     const style = buttons.length === 2 && i === 0 ? styles.cancel : styles.ok
     return (
@@ -99,7 +102,7 @@ function prompt (title, message, buttons) {
 //          <TouchableOpacity onPress=
 //            <Icon name="ios-close" size={20} style={styles.close} />
 
-const styles = StyleSheet.create({
+const defaultStyles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
@@ -108,9 +111,10 @@ const styles = StyleSheet.create({
   },
   box: {
     padding: 20,
-    maxWidth: 500,
+    maxWidth: 600,
     minWidth: 300,
-    backgroundColor: '#ffffff'
+    backgroundColor: '#ffffff',
+    boxShadow: '2px 2px 10px rgba(0, 0, 0, 0.2)'
   },
   head: {
     flex: 1,
@@ -166,3 +170,7 @@ const styles = StyleSheet.create({
     color: '#ffffff'
   }
 })
+
+module.exports = exports = Alert
+// allow override
+exports.styles = defaultStyles
