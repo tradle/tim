@@ -24,7 +24,7 @@ import {
   Platform
 } from 'react-native'
 
-const SearchBar = Platform.OS === 'android' ? null : require('react-native-search-bar')
+const SearchBar = Platform.OS === 'ios' ? require('react-native-search-bar') : null
 import React, { Component } from 'react'
 
 class ProductChooser extends Component {
@@ -38,6 +38,12 @@ class ProductChooser extends Component {
         products.push(utils.getModel(m).value)
       })
     }
+    // else if (this.props.products) {
+    //   this.props.products.forEach((p) => {
+    //     if (p.subClassOf === constants.TYPES.FINANCIAL_PRODUCT)
+    //       products.push(p)
+    //   })
+    // }
 
     var dataSource =  new ListView.DataSource({
       rowHasChanged: (row1, row2) => row1 !== row2,
@@ -49,15 +55,30 @@ class ProductChooser extends Component {
     };
   }
   componentWillMount() {
-    Actions.getItem(utils.getId(this.props.resource))
+    let r = this.props.resource
+    let id = r[constants.TYPE] === constants.TYPES.PROFILE ? utils.getId(utils.getMe().organization) : utils.getId(r)
+    Actions.getItem(id)
   }
   componentDidMount() {
     this.listenTo(Store, 'onNewProductAdded');
   }
   onNewProductAdded(params) {
-    if (params.action === 'getItem'  &&  this.props.resource[constants.ROOT_HASH] === params.resource[constants.ROOT_HASH]) {
+    if (params.action === 'getItem'  &&
+        (this.props.resource[constants.ROOT_HASH] === params.resource[constants.ROOT_HASH] ||
+        this.props.resource[constants.TYPE] === constants.TYPES.PROFILE)) {
       let products
-      if (params.resource.products) {
+      if (this.props.resource[constants.TYPE] === constants.TYPES.PROFILE) {
+        if (params.resource.products) {
+          params.resource.products.forEach((r) => {
+            r.forms.forEach((f) => {
+              products.push(utils.getModel(f).value)
+            })
+          })
+        }
+        else
+          products = utils.getAllSubclasses(constants.TYPES.FORM)
+      }
+      else if (params.resource.products) {
         if (equal(params.resource.products, this.props.resource.products))
           return
 
@@ -66,13 +87,14 @@ class ProductChooser extends Component {
           products.push(utils.getModel(m).value)
         })
       }
-      else
-        products = utils.getAllSubclasses(constants.TYPES.FORM)
+      // else
+      //   products = utils.getAllSubclasses(constants.TYPES.FORM)
 
       this.setState({
         products: products,
         dataSource: this.state.dataSource.cloneWithRows(products),
       })
+      // }
       return
     }
     if (params.action !== 'productList' || params.resource[constants.ROOT_HASH] !== this.props.resource[constants.ROOT_HASH])
@@ -99,7 +121,7 @@ class ProductChooser extends Component {
   selectResource(model) {
     var route = {
       component: MessageList,
-      backButtonTitle: translate('cancel'),
+      backButtonTitle: 'Back',
       id: 11,
       title: this.props.resource.name,
       passProps: {
@@ -174,8 +196,8 @@ class ProductChooser extends Component {
     this.props.navigator.replace({
       id: 4,
       title: resource.title,
-      rightButtonTitle: translate('done'),
-      backButtonTitle: translate('back'),
+      rightButtonTitle: 'Done',
+      backButtonTitle: 'Back',
       component: NewResource,
       titleTextColor: '#7AAAC3',
       resource: resource,
