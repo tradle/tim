@@ -336,7 +336,7 @@ class MessageList extends Component {
     var route = {
       title: newTitle,
       id: 5,
-      backButtonTitle: translate('back'),
+      backButtonTitle: 'Back',
       component: MessageView,
       parentMeta: model,
       passProps: {
@@ -356,8 +356,8 @@ class MessageList extends Component {
         id: 4,
         component: NewResource,
         // titleTextColor: '#7AAAC3',
-        backButtonTitle: translate('back'),
-        rightButtonTitle: translate('done'),
+        backButtonTitle: 'Back',
+        rightButtonTitle: 'Done',
         passProps: {
           model: model,
           resource: resource,
@@ -651,7 +651,7 @@ class MessageList extends Component {
       id: 15,
       component: ProductChooser,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      backButtonTitle: translate('cancel'),
+      backButtonTitle: 'Back',
       passProps: {
         resource: resource,
         returnRoute: currentRoutes[currentRoutes.length - 1],
@@ -714,7 +714,7 @@ class MessageList extends Component {
       id: 15,
       component: ProductChooser,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      backButtonTitle: translate('cancel'),
+      backButtonTitle: 'Back',
       passProps: {
         resource: resource,
         returnRoute: currentRoutes[currentRoutes.length - 1],
@@ -726,9 +726,9 @@ class MessageList extends Component {
         id: 4,
         title: translate('newProduct'),
         component: NewResource,
-        backButtonTitle: translate('back'),
+        backButtonTitle: 'Back',
         // titleTextColor: '#999999',
-        rightButtonTitle: translate('done'),
+        rightButtonTitle: 'Done',
         passProps: {
           model: utils.getModel('tradle.NewMessageModel').value,
           currency: resource.currency,
