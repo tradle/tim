@@ -2467,8 +2467,9 @@ var Store = Reflux.createStore({
     })
   },
   isSwitchingToEmployeeMode(resource) {
-    if (resource[TYPE] !== PROFILE  ||  !resource.organization)
+    if (resource[TYPE] !== PROFILE  ||  !resource.organization || !SERVICE_PROVIDERS)
       return
+
     let org = list[utils.getId(resource)].value.organization
     let newOrgId = utils.getId(resource.organization)
     let settingOrg = !org || utils.getId(org) !== newOrgId
@@ -3647,7 +3648,8 @@ var Store = Reflux.createStore({
           }
         }
 
-        extend(true, me, value)
+        Object.assign(me, value)
+        // extend(true, me, value)
         self.setMe(me)
         if (newLanguage) {
           let lang = list[utils.getId(me.language)].value
