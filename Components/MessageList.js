@@ -501,7 +501,11 @@ class MessageList extends Component {
       var maxHeight = utils.dimensions(MessageList).height -
                       (Platform.OS === 'android' ? 77 : 64) - (this.state.isConnected ? 0 : 35)
       // content = <GiftedMessenger style={{paddingHorizontal: 10, marginBottom: Platform.OS === 'android' ? 0 : 20}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
-      content = <GiftedMessenger style={{paddingHorizontal: 10}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
+
+      var paddingLeft = 10
+      // way ScrollView is implemented with position:absolute disrespects the confines of the screen width
+      var paddingRight = utils.isWeb() ? 20 : 10
+      content = <GiftedMessenger style={{ paddingLeft, paddingRight }} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
         ref={(c) => this._GiftedMessenger = c}
         loadEarlierMessagesButton={this.state.loadEarlierMessages}
         onLoadEarlierMessages={this.onLoadEarlierMessages.bind(this)}
