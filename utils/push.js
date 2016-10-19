@@ -14,7 +14,7 @@ import ENV from './env'
 const constants = require('@tradle/engine').constants
 const TYPE = constants.TYPE
 const Actions = require('../Actions/Actions')
-const pushServerURL = __DEV__ ? `http://${ENV.LOCAL_IP}:48284` : 'http://push1.tradle.io'
+const pushServerURL = __DEV__ ? `http://${ENV.LOCAL_IP}:48284` : 'https://push1.tradle.io'
 
 let initialized
 let preinitialized

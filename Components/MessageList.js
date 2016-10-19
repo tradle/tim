@@ -349,7 +349,7 @@ class MessageList extends Component {
       }
     }
     // Allow to edit resource that was not previously changed
-    if (!isEmployee  &&  !resource[NEXT_HASH]  &&  model.subClassOf !== MY_PRODUCT) {
+    if (!verification  &&  !isEmployee  &&  !resource[NEXT_HASH]  &&  model.subClassOf !== MY_PRODUCT) {
       route.rightButtonTitle = translate('edit')
       route.onRightButtonPress = {
         title: newTitle, //utils.getDisplayName(resource),

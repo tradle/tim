@@ -3,6 +3,7 @@
 var PhotoList = require('./PhotoList');
 var ArticleView = require('./ArticleView');
 var utils = require('../utils/utils');
+var translate = utils.translate
 var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin')
 var ResourceMixin = require('./ResourceMixin')
@@ -301,9 +302,12 @@ class ShowPropertiesView extends Component {
       viewCols.push(<View key={this.getNextKey()}>
                      <View style={styles.separator}></View>
                      <View style={[styles.textContainer, {padding: 10}]}>
-                       <Text style={styles.title}>{'Transaction uri'}</Text>
-                       <TouchableOpacity onPress={this.onPress.bind(this, 'http://tbtc.blockr.io/tx/info/' + resource.txId)}>
-                         <Text style={[styles.description, {color: '#7AAAC3'}]}>{resource.txId}</Text>
+                       <Text style={styles.title}>{'irrefutableProofs'}</Text>
+                       <TouchableOpacity onPress={this.onPress.bind(this, 'https://tbtc.blockr.io/tx/info/' + resource.txId)}>
+                         <Text style={[styles.description, {color: '#7AAAC3'}]}>{translate('independentBlockchainViewer') + ' 1'}</Text>
+                       </TouchableOpacity>
+                       <TouchableOpacity onPress={this.onPress.bind(this, 'https://test-insight.bitpay.com/tx/' + resource.txId)}>
+                         <Text style={[styles.description, {color: '#7AAAC3'}]}>{translate('independentBlockchainViewer') + ' 2'}</Text>
                        </TouchableOpacity>
                       </View>
                     </View>)

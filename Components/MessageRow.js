@@ -451,7 +451,9 @@ class MessageRow extends Component {
             <View style={styles.assistentBox}>
               <Text style={styles.assistentText}>{msg}</Text>
             </View>
+            <View style={{marginHorizontal: -7}}>
             {vtt}
+            </View>
          </View>
         </View>
       </View>
@@ -548,14 +550,17 @@ class MessageRow extends Component {
               ? translate('noConnectionForNewProduct', utils.getMe().firstName, translate(msgModel))
               : translate('newProductMsg', translate(msgModel))
       let color = isMyMessage ? '#ffffff' : '#757575'
+      let maxWidth = 0.8 * utils.dimensions().width - (isMyMessage ? 40 : 90) // message width - icon size and all the paddings
       let msg = !this.props.navigator.isConnected  &&  this.props.isLast
               ? <View key={this.getNextKey()}>
                   <Text style={[styles.resourceTitle, {color: color}]}>{str}</Text>
                 </View>
-              :   <View key={this.getNextKey()} style={{flexDirection: 'row'}}>
-                    <Text style={[styles.resourceTitle, {color: '#ffffff', marginTop: 3, paddingRight: 10}]}>{str}</Text>
-                    <Icon name='ios-folder-open-outline' size={25} color='#ffffff' style={{position: 'absolute', right: 0}}/>
+              : <View key={this.getNextKey()} style={{flexDirection: 'row'}}>
+                  <View style={{flexDirection: 'column', maxWidth: maxWidth}}>
+                    <Text style={[styles.resourceTitle, {color: color, marginTop: 3}]}>{str}</Text>
                   </View>
+                  <Icon name='ios-folder-open-outline' size={25} color={color} style={{position: 'absolute', right: 0}}/>
+                </View>
       renderedRow.push(msg);
       return ({message: str})
     }
@@ -567,7 +572,7 @@ class MessageRow extends Component {
                 <Text style={styles.resourceTitle}>{translate('hello', utils.getMe().firstName)}</Text>
                 <View style={styles.rowContainer}>
                   <Text style={[styles.resourceTitle, {color: LINK_COLOR}]}>{translate('listOfProducts')} </Text>
-                  <Icon style={{color: LINK_COLOR}} size={20} name={'ios-arrow-forward'} />
+                  <Icon style={{color: LINK_COLOR, marginTop: 2}} size={20} name={'ios-arrow-forward'} />
                 </View>
               </View>
         renderedRow.push(msg);
@@ -677,7 +682,7 @@ class MessageRow extends Component {
                     <Text style={style}>{msgParts[0]}</Text>
                     <View style={styles.rowContainer}>
                       <Text style={[style, {color: isMyMessage ? STRUCTURED_MESSAGE_COLOR : isMyMessage ? self.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]}>{msgParts[1]} </Text>
-                      <Icon style={{color: LINK_COLOR}} size={20} name={'ios-arrow-forward'} />
+                      <Icon style={{color: LINK_COLOR, marginTop: 2}} size={20} name={'ios-arrow-forward'} />
                     </View>
                   </View>
             vCols.push(msg);
@@ -713,7 +718,7 @@ class MessageRow extends Component {
               else
                 link = <View style={styles.rowContainer}>
                            <Text style={[style, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(msgModel)}</Text>
-                           <Icon style={resource.documentCreated  ? styles.linkIconGreyed : {color: isMyMessage ? self.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}} size={20} name={'ios-arrow-forward'} />
+                           <Icon style={[{marginTop: 2}, resource.documentCreated  ? styles.linkIconGreyed : {color: isMyMessage ? self.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
                        </View>
             }
             let strName = isMyProduct
@@ -851,7 +856,7 @@ class MessageRow extends Component {
     else {
       let view = <View style={styles.rowContainer}>
                    <Text style={[styles.resourceTitle, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(form)}</Text>
-                   <Icon style={resource.documentCreated  ? styles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}} size={20} name={'ios-arrow-forward'} />
+                   <Icon style={[{marginTop: 2}, resource.documentCreated  ? styles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
                  </View>
       if (resource.documentCreated)
         link = view
