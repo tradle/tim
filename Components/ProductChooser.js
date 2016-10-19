@@ -37,6 +37,12 @@ class ProductChooser extends Component {
         products.push(utils.getModel(m).value)
       })
     }
+    else if (this.props.products) {
+      this.props.products.forEach((p) => {
+        if (p.subClassOf === constants.TYPES.FINANCIAL_PRODUCT)
+          products.push(p)
+      })
+    }
 
     var dataSource =  new ListView.DataSource({
       rowHasChanged: (row1, row2) => row1 !== row2,
@@ -64,14 +70,15 @@ class ProductChooser extends Component {
         params.resource.products.forEach(function(m) {
           products.push(utils.getModel(m).value)
         })
-      }
-      else
-        products = utils.getAllSubclasses(constants.TYPES.FORM)
+      // }
+      // else
+      //   products = utils.getAllSubclasses(constants.TYPES.FORM)
 
-      this.setState({
-        products: products,
-        dataSource: this.state.dataSource.cloneWithRows(products),
-      })
+        this.setState({
+          products: products,
+          dataSource: this.state.dataSource.cloneWithRows(products),
+        })
+      }
       return
     }
     if (params.action !== 'productList' || params.resource[constants.ROOT_HASH] !== this.props.resource[constants.ROOT_HASH])
@@ -245,9 +252,11 @@ var styles = StyleSheet.create({
   },
   listview: {
     marginTop: 64,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 0,
+    marginHorizontal: -1,
+    borderBottomWidth: StyleSheet.hairlineWidth,
     borderColor: '#ffffff',
-    borderTopColor: '#cccccc'
+    // borderTopColor: '#cccccc'
   },
   centerText: {
     alignItems: 'center',
