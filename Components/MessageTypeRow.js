@@ -4,7 +4,6 @@ var utils = require('../utils/utils');
 var constants = require('@tradle/constants');
 var translate = utils.translate
 var bankStyles = require('../styles/bankStyles')
-var STRUCTURED_MESSAGE_COLOR = '#F6FFF0';
 var DEFAULT_PRODUCT_ROW_BG_COLOR = '#f7f7f7'
 var DEFAULT_PRODUCT_ROW_TEXT_COLOR = '#757575'
 var PRODUCT_ROW_BG_COLOR, PRODUCT_ROW_TEXT_COLOR
@@ -22,14 +21,8 @@ import React, { Component } from 'react'
 class MessageTypeRow extends Component {
   constructor(props) {
     super(props);
-    if (this.props.bankStyle) {
-      PRODUCT_ROW_BG_COLOR = this.props.bankStyle.PRODUCT_ROW_BG_COLOR || DEFAULT_PRODUCT_ROW_BG_COLOR
-      PRODUCT_ROW_TEXT_COLOR = this.props.bankStyle.PRODUCT_ROW_TEXT_COLOR || DEFAULT_PRODUCT_ROW_TEXT_COLOR
-    }
-    else {
-      PRODUCT_ROW_BG_COLOR = DEFAULT_PRODUCT_ROW_BG_COLOR
-      PRODUCT_ROW_TEXT_COLOR = DEFAULT_PRODUCT_ROW_TEXT_COLOR
-    }
+    PRODUCT_ROW_BG_COLOR = this.props.bankStyle.PRODUCT_ROW_BG_COLOR || DEFAULT_PRODUCT_ROW_BG_COLOR
+    PRODUCT_ROW_TEXT_COLOR = this.props.bankStyle.PRODUCT_ROW_TEXT_COLOR || DEFAULT_PRODUCT_ROW_TEXT_COLOR
   }
   render() {
     var resource = this.props.resource;
@@ -63,20 +56,16 @@ class MessageTypeRow extends Component {
       var url = utils.getImageUri(ownerImg);
       verPhoto = <Image source={{uri: ownerImg}} style={styles.ownerImage} />
     }
-    var viewStyle = { marginVertical :1, backgroundColor: PRODUCT_ROW_BG_COLOR }
+    var viewStyle = { marginVertical: StyleSheet.hairlineWidth, backgroundColor: PRODUCT_ROW_BG_COLOR }
     return (
       <TouchableHighlight style={viewStyle} onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
-          {renderedRow}
+        {renderedRow}
       </TouchableHighlight>
     );
   }
 }
 
 var styles = StyleSheet.create({
-  textContainer: {
-    flex: 1,
-    flexDirection: 'row'
-  },
   modelTitle: {
     flex: 1,
     flexWrap: 'wrap',
@@ -84,11 +73,6 @@ var styles = StyleSheet.create({
     fontWeight: '400',
     marginVertical: 15,
     marginLeft: 15
-  },
-  row: {
-    alignItems: 'center',
-    backgroundColor: '#f7f7f7',
-    flexDirection: 'row',
   },
   cell: {
     paddingLeft: 20
