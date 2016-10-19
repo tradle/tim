@@ -3721,7 +3721,8 @@ var Store = Reflux.createStore({
           }
         }
 
-        extend(true, me, value)
+        Object.assign(me, value)
+
         self.setMe(me)
         if (newLanguage) {
           let lang = list[utils.getId(me.language)].value
