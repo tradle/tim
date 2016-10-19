@@ -22,6 +22,8 @@ import {
 } from 'react-native'
 
 import React, { Component } from 'react'
+// const MIN_WIDTH = 140
+export const MIN_WIDTH = 140
 
 // var Animated = require('Animated');
 class PhotoList extends Component {
@@ -72,7 +74,7 @@ class PhotoList extends Component {
     var styles = createStyles()
     var val = this.renderPhotoList(photos, styles);
     return (
-       <View style={[styles.photoContainer, this.props.style ? {} : {marginHorizontal: 15}]} key={this.getNextKey()}>
+       <View style={[styles.photoContainer, this.props.style ? {} : {marginHorizontal: 5}]} key={this.getNextKey()}>
          {val}
        </View>
      );
@@ -123,7 +125,7 @@ class PhotoList extends Component {
       i--
     }
     return (
-      <View style={{flexDirection: 'column'}}>
+      <View style={{flexDirection: 'column', alignSelf: 'center'}}>
         {rows}
       </View>
     );
@@ -166,7 +168,7 @@ var createStyles = utils.styleFactory(PhotoList, function ({ dimensions }) {
   var width = dimensions.width
   var d3 = Math.min((width / 3) - 5, 240)
   var d4 = Math.min((width / 4) - 5, 190)
-  var d5 = Math.min((width / 5) - 5, 140)
+  var d5 = Math.min((width / 5) - 5, MIN_WIDTH)
   return StyleSheet.create({
     photoContainer: {
       paddingTop: 5,
