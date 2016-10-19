@@ -19,6 +19,8 @@ if (global.history && global.history.length) {
   }
 }
 
+require('react-native').Alert = require('./web/shims/Alert')
+
 require('./css/customicons.css')
 require('./css/ionicons.min.css')
 require('./css/styles.css')
@@ -44,3 +46,9 @@ setTimeout(function () {
   const splash = document.getElementById('splashscreen')
   splash.parentNode.removeChild(splash)
 }, 500)
+
+// import Alert from './web/shims/Alert'
+// Alert.alert('Title', 'this is a much longer message than the shorter message', [
+//   { text: 'Cancel', onPress: () => alert('canceled!') },
+//   { text: 'OK', onPress: () => alert('ok!') },
+// ])
