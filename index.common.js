@@ -497,10 +497,11 @@ var NavigationBarRouteMapper = {
 
     var rbTitle = route.rightButtonTitle
     var iconIdx = rbTitle.indexOf('|')
-    var icon = rbTitle === 'Done' ? 'md-checkmark' : rbTitle === 'Edit' ? 'ios-create-outline' : null
+    var icon = rbTitle === 'Done' ? 'md-checkmark-circle-outline' : rbTitle === 'Edit' ? 'ios-create-outline' : null
 
-    if (icon) {
-      title = <Icon name={icon} size={25} color='#7AAAC3' style={styles.icon} />
+    if (icon)  {
+      let color = rbTitle === 'Done' ? '#62C457' : '#7AAAC3'
+      title = <Icon name={icon} size={25} color={color} style={styles.icon} />
     }
     else if (rbTitle.indexOf('|') === -1)
       title =  <Text style={style}>
