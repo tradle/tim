@@ -239,26 +239,29 @@ class MessageRow extends Component {
       }
       else
         cellStyle = styles.textContainer
-      messageBody =
-        <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
-          <View style={[rowStyle, viewStyle]}>
-            <View style={{marginTop: 2}}>
-            {ownerPhoto}
-            </View>
-            <View style={cellStyle}>
-              <View style={styles.container}>
-              {this.isShared()
-                ? <View style={[styles.verifiedHeader, {backgroundColor: this.props.bankStyle.SHARED_WITH_BG}]}>
-                    <Text style={{color: '#ffffff', fontSize: 18}}>{translate('youShared', resource.to.organization.title)}</Text>
-                  </View>
-                : <View />
-              }
-              {renderedRow}
-             </View>
-             {sealedStatus}
-            </View>
-          </View>
-        </TouchableHighlight>
+      let msgContent =  <View style={[rowStyle, viewStyle]}>
+                          <View style={{marginTop: 2}}>
+                          {ownerPhoto}
+                          </View>
+                          <View style={cellStyle}>
+                            <View style={styles.container}>
+                            {this.isShared()
+                              ? <View style={[styles.verifiedHeader, {backgroundColor: this.props.bankStyle.SHARED_WITH_BG}]}>
+                                  <Text style={{color: '#ffffff', fontSize: 18}}>{translate('youShared', resource.to.organization.title)}</Text>
+                                </View>
+                              : <View />
+                            }
+                            {renderedRow}
+                           </View>
+                           {sealedStatus}
+                          </View>
+                        </View>
+
+      messageBody = isSimpleMessage || isProductApplication
+                  ? msgContent
+                  : <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
+                      {msgContent}
+                    </TouchableHighlight>
     }
     else
       messageBody = <View style={{height: 5}}/>
