@@ -882,7 +882,7 @@ var NewResourceMixin = {
       titleTextColor: '#7AAAC3',
       id: 10,
       component: ResourceList,
-      backButtonTitle: translate('cancel'),
+      backButtonTitle: 'Back',
       sceneConfig: isFinancialProduct ? Navigator.SceneConfigs.FloatFromBottom : Navigator.SceneConfigs.FloatFromRight,
       passProps: {
         filter:         filter,

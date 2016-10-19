@@ -229,7 +229,7 @@ class MessageView extends Component {
     this.props.navigator.push({
       id: 7,
       component: ArticleView,
-      backButtonTitle: translate('back'),
+      backButtonTitle: 'Back',
       passProps: {url: url}
     });
   }
