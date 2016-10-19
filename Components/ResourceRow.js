@@ -178,7 +178,7 @@ class ResourceRow extends Component {
               this.props.navigator.push({
                 component: ResourceList,
                 title: translate("myDocuments"),
-                backButtonTitle: translate('back'),
+                backButtonTitle: 'Back',
                 passProps: {
                   modelName: constants.TYPES.FORM,
                   resource: this.props.resource
@@ -517,7 +517,7 @@ module.exports = ResourceRow;
       //         this.props.navigator.push({
       //           component: ResourceList,
       //           title: translate("myDocuments"),
-      //           backButtonTitle: translate('back'),
+      //           backButtonTitle: 'Back',
       //           passProps: {
       //             modelName: constants.TYPES.FORM,
       //             resource: this.props.resource
