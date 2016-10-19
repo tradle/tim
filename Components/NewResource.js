@@ -286,13 +286,13 @@ class NewResource extends Component {
       component: ResourceView,
       titleTextColor: '#7AAAC3',
       rightButtonTitle: translate('edit'),
-      backButtonTitle: translate('back'),
+      backButtonTitle: 'Back',
       onRightButtonPress: {
         title: title,
         id: 4,
         component: NewResource,
-        rightButtonTitle: translate('done'),
-        backButtonTitle: translate('back'),
+        rightButtonTitle: 'Done',
+        backButtonTitle: 'Back',
         titleTextColor: '#7AAAC3',
         passProps: {
           model: self.props.model,
@@ -319,9 +319,9 @@ class NewResource extends Component {
     this.props.navigator.replace({
       id: 10,
       title: translate('shareChangesWith'),
-      backButtonTitle: translate('back'),
+      backButtonTitle: 'Back',
       component: ResourceList,
-      rightButtonTitle: translate('Done'),
+      rightButtonTitle: 'Done',
       passProps: {
         message: translate('chooseCompaniesToShareChangesWith'),
         modelName: constants.TYPES.ORGANIZATION,
@@ -588,7 +588,7 @@ class NewResource extends Component {
       this.props.navigator.push({
         id: 10,
         title: translate(bl, blmodel), // Add new ' + bl.title,
-        backButtonTitle: translate('back'),
+        backButtonTitle: 'Back',
         component: ResourceList,
         passProps: {
           modelName: bl.items.ref,
@@ -607,9 +607,9 @@ class NewResource extends Component {
     this.props.navigator.push({
       id: 6,
       title: translate('addNew', translate(bl, blmodel)), // Add new ' + bl.title,
-      backButtonTitle: translate('back'),
+      backButtonTitle: 'Back',
       component: NewItem,
-      rightButtonTitle: translate('done'),
+      rightButtonTitle: 'Done',
       // onRightButtonPress: {
       //   stateChange: this.onAddItem.bind(this, bl, ),
       //   before: this.done.bind(this)
@@ -841,7 +841,7 @@ class NewResource extends Component {
       id: 3,
       component: ResourceView,
       title: translate('termsAndConditions'),
-      backButtonTitle: translate('back'),
+      backButtonTitle: 'Back',
       rightButtonTitle: translate('Accept'),
       passProps: {
         resource: termsAndConditions,
@@ -886,7 +886,7 @@ class NewResource extends Component {
       id: 19,
       component: GridItemsList,
       noLeftButton: true,
-      rightButtonTitle: translate('done'),
+      rightButtonTitle: 'Done',
       passProps: {
         prop:        prop.name,
         resource:    resource,
@@ -904,6 +904,7 @@ class NewResource extends Component {
     var counter, count = 0
     let itemsArray = null
     var count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
+    let isPhoto = bl.name === 'photos'
 
     if (count) {
       let val = <View>{this.renderItems(resource[bl.name], bl, this.cancelItem.bind(this))}</View>
@@ -921,12 +922,11 @@ class NewResource extends Component {
     }
     else {
       itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{translate(bl, blmodel)}</Text>
-      counter = <View style={[styles.itemsCounterEmpty]}>{
-                  bl.name === 'photos'
+      counter = <View style={[styles.itemsCounterEmpty]}>
+                  {isPhoto
                     ? <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
                     : <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color={LINK_COLOR} />
                   }
-
                 </View>
     }
     var title = translate(bl, blmodel) //.title || utils.makeLabel(p)
@@ -940,15 +940,6 @@ class NewResource extends Component {
                 </View>
               : <View/>
 
-    var aiStyle = [{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]
-    var actionableItem = bl.name === 'photos'
-      ? <ImageInput prop={bl} style={aiStyle} onImage={item => this.onAddItem(bl.name, item)}>
-          {itemsArray}
-        </ImageInput>
-      : <TouchableHighlight style={aiStyle} underlayColor='transparent'
-            onPress={this.onNewPressed.bind(this, bl, meta)}>
-          {itemsArray}
-        </TouchableHighlight>
 
     let istyle = [styles.itemButton]
     if (err)
@@ -959,11 +950,45 @@ class NewResource extends Component {
       let height = resource[bl.name].photo ? 55 : 45
       istyle.push({paddingBottom: 0, height: count * height + 35})
     }
+    if (!count  ||  !isPhoto) {
+      var aiStyle = [{paddingTop: 15, paddingBottom: 7, marginTop: isPhoto ? 0 : 15}]
+      return (
+        <View key={this.getNextKey()}>
+          <View style={[istyle, {marginHorizontal: 10}]} ref={bl.name}>
+           {isPhoto
+            ? <ImageInput prop={bl} style={aiStyle} onImage={item => this.onAddItem(bl.name, item)}>
+                <View style={styles.items}>
+                  {itemsArray}
+                  {counter}
+                </View>
+              </ImageInput>
+            : <TouchableHighlight style={[aiStyle, {marginTop: 5}]} underlayColor='transparent'
+                  onPress={this.onNewPressed.bind(this, bl, meta)}>
+                <View style={styles.items}>
+                  {itemsArray}
+                  {counter}
+                </View>
+              </TouchableHighlight>
+          }
+          </View>
+        </View>
+      )
+    }
+    var aiStyle = [{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]
+    var actionableItem = isPhoto
+      ? <ImageInput prop={bl} style={aiStyle} onImage={item => this.onAddItem(bl.name, item)}>
+          {itemsArray}
+        </ImageInput>
+      : <TouchableHighlight style={aiStyle} underlayColor='transparent'
+            onPress={this.onNewPressed.bind(this, bl, meta)}>
+          {itemsArray}
+        </TouchableHighlight>
+
 
     let acStyle = [{flex: 1, position: 'absolute', right: 0},
                    count || utils.isWeb() ? {paddingTop: 0} : {marginTop: 15, paddingBottom: 7}
                  ]
-    var actionableCounter = bl.name === 'photos'
+    var actionableCounter = isPhoto
       ? <ImageInput prop={bl} style={acStyle} onImage={item => this.onAddItem(bl.name, item)}>
           {counter}
         </ImageInput>
