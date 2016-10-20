@@ -2133,7 +2133,9 @@ var Store = Reflux.createStore({
             message: me.firstName + ' is waiting for the response',
             [TYPE]: SELF_INTRODUCTION,
             identity: meDriver.identity,
-            name: me.firstName,
+            profile: {
+              firstName: me.firstName,
+            },
             from: me,
             to: orgRep
           }
@@ -2646,22 +2648,24 @@ var Store = Reflux.createStore({
     return destroyTim
       .then(() => this.wipe())
       .then(() => {
-        Alert.alert('please refresh')
-        return Q.Promise(function (resolve) {})
+        return utils.restartApp()
+        // Alert.alert('please refresh')
+        // return Q.Promise(function (resolve) {})
       })
-      .then(function() {
-        list = {};
-        models = {};
-        me = null;
-        return
-        // return self.loadModels()
-      })
-      .then(function() {
-        self.trigger({action: 'reloadDB', models: models});
-      })
-      .catch(function(err) {
-        err = err;
-      });
+      // .then(function() {
+      //   list = {};
+      //   models = {};
+      //   me = null;
+      //   return
+      //   // return self.loadModels()
+      // })
+      // .then(function() {
+      //   self.trigger({action: 'reloadDB', models: models});
+      // })
+      // .catch(function(err) {
+      //   err = err;
+      // });
+
     // var togo = 1;
     // // this.loadModels()
     // // var name = me.firstName.toLowerCase();
