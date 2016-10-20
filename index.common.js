@@ -605,12 +605,12 @@ var styles = StyleSheet.create({
     fontSize: utils.getFontSize(17),
   },
   navBarLeftButton: {
-    paddingLeft: 10,
+    paddingLeft: 20,
     paddingRight: 25,
   },
   navBarRightButton: {
     paddingLeft: 25,
-    paddingRight: 10,
+    paddingRight: 20,
   },
   navBarButtonText: {
     color: '#7AAAC3',
