@@ -10,12 +10,14 @@ cp node_modules/react-native-carousel/CarouselPager.android.js node_modules/reac
 sed -i '' "s/ReactLocalization;/ReactLocalization \|\| \{ language: 'en_US' \};/g" node_modules/react-native-localization/LocalizedStrings.js
 sed -i '' "s/RNDeviceInfo;/RNDeviceInfo \|\| \{};/g" node_modules/react-native-device-info/deviceinfo.js
 sed -i '' "s/e\.nativeEvent\.contentOffset\.y/this.refs.listView.scrollProperties.offset/g" node_modules/react-native-gifted-messenger/GiftedMessenger.js
-cd node_modules/node-libs-browser && \
-  npm i --save buffer@3.6 && \
-  cd $OLDPWD
+# cd node_modules/node-libs-browser && \
+#   npm i --save buffer@3.6 && \
+#   cd $OLDPWD
 
-rm -rf node_modules/node-libs-browser/node_modules/crypto-browserify
+# rm -rf node_modules/webpack/node_modules/node-libs-browser
+# rm -rf node_modules/node-libs-browser/node_modules/crypto-browserify
 rm -rf node_modules/node-libs-browser/node_modules/create-ecdh
-rm -rf node_modules/node-libs-browser/node_modules/browserify-sign
+rm -rf node_modules/react-native-ecc/node_modules/buffer
+# rm -rf node_modules/node-libs-browser/node_modules/browserify-sign
 # rm -rf node_modules/webpack/node_modules/uglify-js
 # rm -rf node_modules/html-minifier/node_modules/uglify-js

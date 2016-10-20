@@ -3,10 +3,9 @@ if [ -f npm-shrinkwrap.json ]
     rm npm-shrinkwrap.json
 fi
 
+cd node_modules/webpack && npm i --save node-libs-browser@latest && cd $OLDPWD
+
 npm dedupe
 npm prune
-
-cd node_modules/node-libs-browser && npm i crypto-browserify && cd ../../
-
 npm shrinkwrap
 ./web.sh
