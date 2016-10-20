@@ -475,12 +475,16 @@ var NavigationBarRouteMapper = {
       var st = {color: color}
       style.push(st);
     }
+    var iconIdx = lbTitle.indexOf('|')
+    var icon = iconIdx !== -1 ? lbTitle.substring(idx + 1) : lbTitle === 'Back' ? 'ios-arrow-back' : null
+
+
     style.push({fontSize: utils.getFontSize(17)})
-    var title = lbTitle.indexOf('|') == -1
-              ? <Text style={style}>
+    var title = icon
+              ? <Icon name={icon} size={25} color='#7AAAC3' style={styles.icon}/>
+              : <Text style={style}>
                   {lbTitle}
                 </Text>
-              : <Icon name={lbTitle.substring(4)} size={20} color='#7AAAC3' style={styles.icon}/>;
     if (route.component === ResourceList  &&  index === 1 &&  navigator.getCurrentRoutes().length === 2)
       Actions.cleanup()
 
@@ -506,12 +510,21 @@ var NavigationBarRouteMapper = {
       style.push({color: route.passProps.bankStyle.LINK_COLOR || '#7AAAC3'})
     style.push({fontSize: utils.getFontSize(17)})
     var title
-    if (route.rightButtonTitle.indexOf('|') == -1)
+
+    var rbTitle = route.rightButtonTitle
+    var iconIdx = rbTitle.indexOf('|')
+    var icon = rbTitle === 'Done' ? 'md-checkmark-circle-outline' : rbTitle === 'Edit' ? 'ios-create-outline' : null
+
+    if (icon)  {
+      let color = rbTitle === 'Done' ? '#62C457' : '#7AAAC3'
+      title = <Icon name={icon} size={25} color={color} style={styles.icon} />
+    }
+    else if (rbTitle.indexOf('|') === -1)
       title =  <Text style={style}>
-                  {route.rightButtonTitle}
+                  {rbTitle}
                </Text>
     else {
-      let iconsList = route.rightButtonTitle.split('|')
+      let iconsList = rbTitle.split('|')
       let icons = []
       iconsList.forEach((i) => {
         icons.push(<Icon name={i} key={i} size={20} color='#7AAAC3' style={styles.iconSpace} />)
@@ -590,8 +603,9 @@ var NavigationBarRouteMapper = {
 
 var styles = StyleSheet.create({
   icon: {
-    width: 20,
-    height: 20,
+    width: 25,
+    height: 25,
+    marginTop: 10
   },
   iconSpace:  {
     paddingLeft: 3

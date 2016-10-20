@@ -506,7 +506,7 @@ var NewResourceMixin = {
     var self = this;
     this.props.navigator.push({
       title: 'Take a pic',
-      backButtonTitle: 'Cancel',
+      backButtonTitle: 'Back',
       id: 12,
       component: CameraView,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,

@@ -92,7 +92,7 @@ class ShowPropertiesView extends Component {
     if (this.props.checkProperties) {
       let props = model.properties
       for (let p in props) {
-        if (p.charAt(0) === '_'  ||  props[p].hidden  ||  props[p].readOnly)
+        if (p.charAt(0) === '_'  ||  props[p].hidden  ||  props[p].readOnly) //  ||  p.indexOf('_group') === p.length - 6)
           continue
         vCols.push(p)
       }

@@ -2128,7 +2128,9 @@ var Store = Reflux.createStore({
             message: me.firstName + ' is waiting for the response',
             [TYPE]: SELF_INTRODUCTION,
             identity: meDriver.identity,
-            name: me.firstName,
+            profile: {
+              firstName: me.firstName,
+            },
             from: me,
             to: orgRep
           }
@@ -2462,8 +2464,9 @@ var Store = Reflux.createStore({
     })
   },
   isSwitchingToEmployeeMode(resource) {
-    if (resource[TYPE] !== PROFILE  ||  !resource.organization)
+    if (resource[TYPE] !== PROFILE  ||  !resource.organization || !SERVICE_PROVIDERS)
       return
+
     let org = list[utils.getId(resource)].value.organization
     let newOrgId = utils.getId(resource.organization)
     let settingOrg = !org || utils.getId(org) !== newOrgId
@@ -2666,8 +2669,9 @@ var Store = Reflux.createStore({
     return destroyTim
       .then(() => this.wipe())
       .then(() => {
+        return utils.restartApp()
         // Alert.alert('please refresh')
-        return utils.restartApp()// Q.Promise(function (resolve) {})
+        // return Q.Promise(function (resolve) {})
       })
       // .then(function() {
       //   list = {};
@@ -2682,6 +2686,7 @@ var Store = Reflux.createStore({
       // .catch(function(err) {
       //   err = err;
       // });
+
     // var togo = 1;
     // // this.loadModels()
     // // var name = me.firstName.toLowerCase();
@@ -3727,7 +3732,7 @@ var Store = Reflux.createStore({
         }
 
         Object.assign(me, value)
-
+        // extend(true, me, value)
         self.setMe(me)
         if (newLanguage) {
           let lang = list[utils.getId(me.language)].value

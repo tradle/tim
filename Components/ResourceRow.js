@@ -189,7 +189,7 @@ class ResourceRow extends Component {
                  {resource.numberOfForms
                     ? <View style={{flexDirection: 'row'}}>
                          <Icon name='ios-paper-outline' color={'#7AAAc3'} size={30} style={{marginTop: Platform.OS === 'ios' ? 0 : 0}}/>
-                         <Text style={{fontWeight: '600', marginLeft: 0, marginTop: Platform.OS === 'ios' ? -5 : -5, color: '#7AAAc3'}}>{resource.numberOfForms}</Text>
+                         <Text style={{fontWeight: '600', marginLeft: 2, marginTop: Platform.OS === 'ios' ? -5 : -5, color: '#7AAAc3'}}>{resource.numberOfForms}</Text>
                       </View>
                     : <View />
                  }
@@ -415,7 +415,7 @@ var styles = StyleSheet.create({
   // HACK FOR VERTICAL CENTERING
   resourceTitle: {
     // flex: 1,
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '400',
     // paddingTop: 18,
     // marginBottom: 2,

@@ -239,7 +239,6 @@ class MessageRow extends Component {
       }
       else
         cellStyle = styles.textContainer
-
       let msgContent =  <View style={[rowStyle, viewStyle]}>
                           <View style={{marginTop: 2}}>
                           {ownerPhoto}
