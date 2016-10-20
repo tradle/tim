@@ -4844,16 +4844,6 @@
       "from": "node-libs-browser@>=0.4.0 <=0.6.0",
       "resolved": "https://registry.npmjs.org/node-libs-browser/-/node-libs-browser-0.6.0.tgz",
       "dependencies": {
-        "base64-js": {
-          "version": "0.0.8",
-          "from": "base64-js@0.0.8",
-          "resolved": "https://registry.npmjs.org/base64-js/-/base64-js-0.0.8.tgz"
-        },
-        "buffer": {
-          "version": "3.6.0",
-          "from": "buffer@>=3.6.0 <3.7.0",
-          "resolved": "https://registry.npmjs.org/buffer/-/buffer-3.6.0.tgz"
-        },
         "crypto-browserify": {
           "version": "3.2.8",
           "from": "crypto-browserify@>=3.2.6 <3.3.0",
@@ -4863,16 +4853,6 @@
           "version": "0.0.0",
           "from": "https-browserify@0.0.0",
           "resolved": "https://registry.npmjs.org/https-browserify/-/https-browserify-0.0.0.tgz"
-        },
-        "ieee754": {
-          "version": "1.1.8",
-          "from": "ieee754@>=1.1.4 <2.0.0",
-          "resolved": "https://registry.npmjs.org/ieee754/-/ieee754-1.1.8.tgz"
-        },
-        "isarray": {
-          "version": "1.0.0",
-          "from": "isarray@>=1.0.0 <2.0.0",
-          "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
         },
         "pbkdf2-compat": {
           "version": "2.0.1",
@@ -5856,9 +5836,9 @@
       "resolved": "git://github.com/tradle/react-native-env.git#19361827c84ad4a3a9d761fdadd8d65f0e814856"
     },
     "react-native-floating-labels": {
-      "version": "1.0.1",
-      "from": "mvayngrib/react-native-floating-labels#9d4d135",
-      "resolved": "git://github.com/mvayngrib/react-native-floating-labels.git#9d4d1356a3bcbc418eb91f33ffa1ee18cdc49f18",
+      "version": "1.1.0",
+      "from": "mvayngrib/react-native-floating-labels#pointerFix",
+      "resolved": "git://github.com/mvayngrib/react-native-floating-labels.git#23c4d10a3b5487f0ac1204e7a7a8b96d56f34790",
       "dependencies": {
         "lodash": {
           "version": "3.10.1",
