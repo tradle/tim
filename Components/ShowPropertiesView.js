@@ -93,7 +93,7 @@ class ShowPropertiesView extends Component {
     if (this.props.checkProperties) {
       let props = model.properties
       for (let p in props) {
-        if (p.charAt(0) === '_'  ||  props[p].hidden  ||  props[p].readOnly)
+        if (p.charAt(0) === '_'  ||  props[p].hidden  ||  props[p].readOnly) //  ||  p.indexOf('_group') === p.length - 6)
           continue
         vCols.push(p)
       }
@@ -145,8 +145,21 @@ class ShowPropertiesView extends Component {
       if (!val) {
         if (pMeta.displayAs)
           val = utils.templateIt(pMeta, resource);
-        else if (this.props.checkProperties)
-          val = NOT_SPECIFIED
+        else if (this.props.checkProperties) {
+          if (p.charAt(0) === '_'  ||  props[p].hidden  ||  props[p].readOnly)
+            return
+          if (p.indexOf('_group') === p.length - 6) {
+
+            return (<View style={{padding: 15}} key={this.getNextKey()}>
+                    <View key={this.getNextKey()}  style={{borderBottomColor: this.props.bankStyle.LINK_COLOR, borderBottomWidth: 1, paddingBottom: 5}}>
+                      <Text style={{fontSize: 20, color: this.props.bankStyle.LINK_COLOR}}>{translate(pMeta)}</Text>
+                    </View>
+                    </View>
+             );
+          }
+          else
+            val = NOT_SPECIFIED
+        }
         else
           return;
       }
