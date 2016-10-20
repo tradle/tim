@@ -144,8 +144,19 @@ class ShowPropertiesView extends Component {
       if (!val) {
         if (pMeta.displayAs)
           val = utils.templateIt(pMeta, resource);
-        else if (this.props.checkProperties)
-          val = NOT_SPECIFIED
+        else if (this.props.checkProperties) {
+          if (p.indexOf('_group') === p.length - 6) {
+
+            return (<View style={{padding: 15}} key={this.getNextKey()}>
+                    <View key={this.getNextKey()}  style={{borderBottomColor: this.props.bankStyle.LINK_COLOR, borderBottomWidth: 1, paddingBottom: 5}}>
+                      <Text style={{fontSize: 20, color: this.props.bankStyle.LINK_COLOR}}>{translate(pMeta)}</Text>
+                    </View>
+                    </View>
+             );
+          }
+          else
+            val = NOT_SPECIFIED
+        }
         else
           return;
       }
