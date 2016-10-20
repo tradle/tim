@@ -146,8 +146,6 @@ class ShowPropertiesView extends Component {
         if (pMeta.displayAs)
           val = utils.templateIt(pMeta, resource);
         else if (this.props.checkProperties) {
-          if (p.charAt(0) === '_'  ||  props[p].hidden  ||  props[p].readOnly)
-            return
           if (p.indexOf('_group') === p.length - 6) {
 
             return (<View style={{padding: 15}} key={this.getNextKey()}>
