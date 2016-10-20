@@ -521,6 +521,7 @@ class MessageList extends Component {
         menu={this.generateMenu.bind(this)}
         keyboardShouldPersistTaps={utils.isWeb() ? false : true}
         keyboardDismissMode={utils.isWeb() ? 'none' : 'on-drag'}
+        initialListSize={20}
         maxHeight={maxHeight} // 64 for the navBar; 110 - with SearchBar
       />
         // returnKeyType={false}
