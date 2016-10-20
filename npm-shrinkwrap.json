@@ -1318,8 +1318,8 @@
     },
     "changes-feed": {
       "version": "1.1.0",
-      "from": "git+https://github.com/mvayngrib/changes-feed.git",
-      "resolved": "git+https://github.com/mvayngrib/changes-feed.git#bd106bd1a8b03660e7c6820e279a34bcaac0fd5e",
+      "from": "mvayngrib/changes-feed",
+      "resolved": "git://github.com/mvayngrib/changes-feed.git#bd106bd1a8b03660e7c6820e279a34bcaac0fd5e",
       "dependencies": {
         "readable-stream": {
           "version": "1.0.34",
@@ -2930,8 +2930,8 @@
     },
     "forward-secrecy": {
       "version": "1.0.2",
-      "from": "git+https://github.com/tradle/forward-secrecy.git#dev",
-      "resolved": "git+https://github.com/tradle/forward-secrecy.git#5ad4c2ee429db4b10599efbd41c650b9debbf7fe",
+      "from": "tradle/forward-secrecy#dev",
+      "resolved": "git://github.com/tradle/forward-secrecy.git#5ad4c2ee429db4b10599efbd41c650b9debbf7fe",
       "dependencies": {
         "tweetnacl": {
           "version": "0.13.3",
@@ -4000,8 +4000,8 @@
     },
     "level-change-processor": {
       "version": "1.0.0",
-      "from": "git+https://github.com/mvayngrib/level-change-processor.git#7100404",
-      "resolved": "git+https://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b"
+      "from": "mvayngrib/level-change-processor#7100404",
+      "resolved": "git://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b"
     },
     "level-codec": {
       "version": "6.1.0",
@@ -4599,8 +4599,8 @@
     },
     "merkle-tree-stream": {
       "version": "3.0.3",
-      "from": "git+https://github.com/mvayngrib/merkle-tree-stream.git#finalize",
-      "resolved": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
+      "from": "mvayngrib/merkle-tree-stream#finalize",
+      "resolved": "git://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
       "dependencies": {
         "isarray": {
           "version": "1.0.0",
@@ -4844,16 +4844,6 @@
       "from": "node-libs-browser@>=0.4.0 <=0.6.0",
       "resolved": "https://registry.npmjs.org/node-libs-browser/-/node-libs-browser-0.6.0.tgz",
       "dependencies": {
-        "base64-js": {
-          "version": "0.0.8",
-          "from": "base64-js@0.0.8",
-          "resolved": "https://registry.npmjs.org/base64-js/-/base64-js-0.0.8.tgz"
-        },
-        "buffer": {
-          "version": "3.6.0",
-          "from": "buffer@>=3.6.0 <3.7.0",
-          "resolved": "https://registry.npmjs.org/buffer/-/buffer-3.6.0.tgz"
-        },
         "crypto-browserify": {
           "version": "3.2.8",
           "from": "crypto-browserify@>=3.2.6 <3.3.0",
@@ -4863,16 +4853,6 @@
           "version": "0.0.0",
           "from": "https-browserify@0.0.0",
           "resolved": "https://registry.npmjs.org/https-browserify/-/https-browserify-0.0.0.tgz"
-        },
-        "ieee754": {
-          "version": "1.1.8",
-          "from": "ieee754@>=1.1.4 <2.0.0",
-          "resolved": "https://registry.npmjs.org/ieee754/-/ieee754-1.1.8.tgz"
-        },
-        "isarray": {
-          "version": "1.0.0",
-          "from": "isarray@>=1.0.0 <2.0.0",
-          "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
         },
         "pbkdf2-compat": {
           "version": "2.0.1",
@@ -5879,8 +5859,8 @@
     },
     "react-native-gifted-messenger": {
       "version": "0.0.16",
-      "from": "pgmemk/react-native-gifted-messenger#9ef9a96d6",
-      "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#9ef9a96d62f0fad0ebe420b06bcac0a0b642f9b2"
+      "from": "pgmemk/react-native-gifted-messenger#d8af64f",
+      "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#d8af64fbd256bc39b3524b3b6c1e62d620e619e3"
     },
     "react-native-gifted-spinner": {
       "version": "0.0.4",
