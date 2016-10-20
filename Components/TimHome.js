@@ -278,7 +278,7 @@ class TimHome extends Component {
     }
   }
 
-  showContacts() {
+  showContacts(doReplace) {
     let passProps = {
         filter: '',
         modelName: this.props.modelName,
@@ -286,7 +286,7 @@ class TimHome extends Component {
         bankStyle: defaultBankStyle
       };
     let me = utils.getMe();
-    this.props.navigator.push({
+    this.props.navigator[doReplace ? 'replace' : 'push']({
       // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       id: 10,
       title: translate('Accounts'),
@@ -328,9 +328,15 @@ class TimHome extends Component {
       nav.immediatelyResetRouteStack(nav.getCurrentRoutes().slice(0,1));
     }
 
+    if (utils.isWeb() && !doReplace) {
+      if (Navs.getCurrentRoute(nav).component.displayName !== 'TimHome') {
+        doReplace = true
+      }
+    }
+
     let me = utils.getMe()
     if (me.isEmployee) {
-      this.showContacts()
+      this.showContacts(doReplace)
       return
     }
     // let route = {
@@ -407,12 +413,6 @@ class TimHome extends Component {
           resource: me,
           bankStyle: defaultBankStyle
         }
-      }
-    }
-
-    if (utils.isWeb() && !doReplace) {
-      if (Navs.getCurrentRoute(nav).component.displayName !== 'TimHome') {
-        doReplace = true
       }
     }
 
