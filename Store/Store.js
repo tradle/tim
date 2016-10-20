@@ -2133,7 +2133,9 @@ var Store = Reflux.createStore({
             message: me.firstName + ' is waiting for the response',
             [TYPE]: SELF_INTRODUCTION,
             identity: meDriver.identity,
-            name: me.firstName,
+            profile: {
+              firstName: me.firstName,
+            },
             from: me,
             to: orgRep
           }
