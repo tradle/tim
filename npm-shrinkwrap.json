@@ -3921,7 +3921,31 @@
     "key-encoder": {
       "version": "1.1.6",
       "from": "mvayngrib/key-encoder-js",
-      "resolved": "git://github.com/mvayngrib/key-encoder-js.git#9811b1d85ded6f6d8eb6b48389d80ed17df550ff"
+      "resolved": "git://github.com/mvayngrib/key-encoder-js.git#9811b1d85ded6f6d8eb6b48389d80ed17df550ff",
+      "dependencies": {
+        "asn1.js": {
+          "version": "2.2.1",
+          "from": "asn1.js@>=2.2.0 <3.0.0",
+          "resolved": "https://registry.npmjs.org/asn1.js/-/asn1.js-2.2.1.tgz",
+          "dependencies": {
+            "bn.js": {
+              "version": "2.2.0",
+              "from": "bn.js@>=2.0.0 <3.0.0",
+              "resolved": "https://registry.npmjs.org/bn.js/-/bn.js-2.2.0.tgz"
+            }
+          }
+        },
+        "bn.js": {
+          "version": "3.3.0",
+          "from": "bn.js@>=3.1.2 <4.0.0",
+          "resolved": "https://registry.npmjs.org/bn.js/-/bn.js-3.3.0.tgz"
+        },
+        "elliptic": {
+          "version": "5.2.1",
+          "from": "elliptic@>=5.1.0 <6.0.0",
+          "resolved": "https://registry.npmjs.org/elliptic/-/elliptic-5.2.1.tgz"
+        }
+      }
     },
     "keymirror": {
       "version": "0.1.1",
@@ -5984,8 +6008,8 @@
     },
     "react-web": {
       "version": "0.4.1",
-      "from": "mvayngrib/react-web#7c4ae8c",
-      "resolved": "git://github.com/mvayngrib/react-web.git#7c4ae8cc253f38d477e157ffdebc26087b585f44",
+      "from": "mvayngrib/react-web#aada136",
+      "resolved": "git://github.com/mvayngrib/react-web.git#aada1366abac1ac521836e61f9de1f8d6c74ee06",
       "dependencies": {
         "chalk": {
           "version": "1.1.1",
