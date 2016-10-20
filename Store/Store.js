@@ -77,6 +77,7 @@ const tradleUtils = tradle.utils
 const protocol = tradle.protocol
 const constants = require('@tradle/constants') // tradle.constants
 const Cache = require('lru-cache')
+const once = require('once')
 const NONCE = constants.NONCE
 const TYPE = constants.TYPE
 const SIG = constants.SIG
@@ -549,7 +550,14 @@ var Store = Reflux.createStore({
         cbWrapper(new Error('timed out'))
       }, Math.max(10000, msg.length / 1000))
 
-      messenger.send(identifier, msg, cbWrapper)
+      // TODO: avoid unserializer
+      // either engine/lib/channel.js doesn't need to serialize
+      //   or it can provide both serialized and unserialized (or serialized + metadata)
+      messenger.send({
+        to: identifier,
+        message: msg,
+        seq: tradleUtils.unserializeMessage(msg)[tradle.constants.SEQ]
+      }, cbWrapper)
 
       function cbWrapper (err) {
         clearTimeout(tid)
@@ -972,19 +980,24 @@ var Store = Reflux.createStore({
 
       const lock = receiveLocks[from]
       lock(_release => {
-        const release = () => {
+        const release = once(ack => {
           clearTimeout(timeout)
           _release()
-          wsClient.ack(from, msg[tradle.constants.SEQ])
-        }
+          if (ack) {
+            wsClient.ack({
+              to: from,
+              seq: msg[tradle.constants.SEQ]
+            })
+          }
+        })
 
         const timeout = setTimeout(release, 10000)
         const promise = receive(msg, from)
         if (!Q.isPromiseAlike(promise)) {
-          return release()
+          return release(true)
         }
 
-        promise.finally(release)
+        promise.finally(() => release(true))
       })
     })
 

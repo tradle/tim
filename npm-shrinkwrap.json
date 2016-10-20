@@ -100,6 +100,38 @@
         }
       }
     },
+    "@tradle/ws": {
+      "version": "1.0.0",
+      "from": "mvayngrib/ws#5f62e03",
+      "resolved": "git://github.com/mvayngrib/ws.git#5f62e034de8b9141dbd11ffab16bb1b15dcc80e5",
+      "dependencies": {
+        "@tradle/wire": {
+          "version": "1.2.0",
+          "from": "tradle/wire",
+          "resolved": "git://github.com/tradle/wire.git#e1c7ba5c1250e83f76e7e3f447acce322e7a93f9"
+        },
+        "isarray": {
+          "version": "1.0.0",
+          "from": "isarray@>=1.0.0 <1.1.0",
+          "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
+        },
+        "readable-stream": {
+          "version": "2.1.5",
+          "from": "readable-stream@>=2.1.4 <3.0.0",
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.1.5.tgz"
+        },
+        "sendy-protobufs": {
+          "version": "1.0.0",
+          "from": "tradle/sendy-protobufs",
+          "resolved": "git://github.com/tradle/sendy-protobufs.git#e03ab2198b77226dcdb6a7ae68c6fd85db7d459b"
+        },
+        "typeforce": {
+          "version": "1.8.7",
+          "from": "typeforce@>=1.8.7 <2.0.0",
+          "resolved": "https://registry.npmjs.org/typeforce/-/typeforce-1.8.7.tgz"
+        }
+      }
+    },
     "abbrev": {
       "version": "1.0.9",
       "from": "abbrev@>=1.0.0 <2.0.0",
@@ -1825,7 +1857,14 @@
         "end-of-stream": {
           "version": "1.0.0",
           "from": "end-of-stream@1.0.0",
-          "resolved": "https://registry.npmjs.org/end-of-stream/-/end-of-stream-1.0.0.tgz"
+          "resolved": "https://registry.npmjs.org/end-of-stream/-/end-of-stream-1.0.0.tgz",
+          "dependencies": {
+            "once": {
+              "version": "1.3.3",
+              "from": "once@>=1.3.0 <1.4.0",
+              "resolved": "https://registry.npmjs.org/once/-/once-1.3.3.tgz"
+            }
+          }
         },
         "isarray": {
           "version": "1.0.0",
@@ -1872,7 +1911,14 @@
     "end-of-stream": {
       "version": "1.1.0",
       "from": "end-of-stream@>=1.1.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/end-of-stream/-/end-of-stream-1.1.0.tgz"
+      "resolved": "https://registry.npmjs.org/end-of-stream/-/end-of-stream-1.1.0.tgz",
+      "dependencies": {
+        "once": {
+          "version": "1.3.3",
+          "from": "once@>=1.3.0 <1.4.0",
+          "resolved": "https://registry.npmjs.org/once/-/once-1.3.3.tgz"
+        }
+      }
     },
     "engine.io-client": {
       "version": "1.6.11",
@@ -4012,9 +4058,9 @@
       "resolved": "https://registry.npmjs.org/on-headers/-/on-headers-1.0.1.tgz"
     },
     "once": {
-      "version": "1.3.3",
-      "from": "once@1.3.3",
-      "resolved": "https://registry.npmjs.org/once/-/once-1.3.3.tgz"
+      "version": "1.4.0",
+      "from": "once@latest",
+      "resolved": "https://registry.npmjs.org/once/-/once-1.4.0.tgz"
     },
     "onetime": {
       "version": "1.1.0",
@@ -4889,6 +4935,16 @@
           "resolved": "https://registry.npmjs.org/esprima-fb/-/esprima-fb-15001.1001.0-dev-harmony-fb.tgz"
         }
       }
+    },
+    "reconnect-core": {
+      "version": "1.3.0",
+      "from": "reconnect-core@>=1.0.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/reconnect-core/-/reconnect-core-1.3.0.tgz"
+    },
+    "reconnect-ws": {
+      "version": "0.1.0",
+      "from": "mvayngrib/reconnect-ws",
+      "resolved": "git://github.com/mvayngrib/reconnect-ws.git#48cc164ba3e75d80531296f62acecbfb8c7263be"
     },
     "redent": {
       "version": "1.0.0",
@@ -6024,6 +6080,11 @@
       "version": "0.10.0",
       "from": "watch@>=0.10.0 <0.11.0",
       "resolved": "https://registry.npmjs.org/watch/-/watch-0.10.0.tgz"
+    },
+    "websocket-stream": {
+      "version": "3.3.0",
+      "from": "websocket-stream@>=3.3.0 <4.0.0",
+      "resolved": "https://registry.npmjs.org/websocket-stream/-/websocket-stream-3.3.0.tgz"
     },
     "whatwg-fetch": {
       "version": "1.0.0",
