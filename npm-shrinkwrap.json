@@ -5837,23 +5837,6 @@
       "from": "react-native-device-info@>=0.9.3 <0.10.0",
       "resolved": "https://registry.npmjs.org/react-native-device-info/-/react-native-device-info-0.9.5.tgz"
     },
-    "react-native-ecc": {
-      "version": "1.2.2",
-      "from": "tradle/react-native-ecc#63a1a75",
-      "resolved": "git://github.com/tradle/react-native-ecc.git#63a1a75008dcf410e4dad6cd9973ce7958978f10",
-      "dependencies": {
-        "buffer": {
-          "version": "3.6.0",
-          "from": "buffer@>=3.6.0 <4.0.0",
-          "resolved": "https://registry.npmjs.org/buffer/-/buffer-3.6.0.tgz"
-        },
-        "isarray": {
-          "version": "1.0.0",
-          "from": "isarray@^1.0.0",
-          "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
-        }
-      }
-    },
     "react-native-env": {
       "version": "0.0.5",
       "from": "tradle/react-native-env",
