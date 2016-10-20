@@ -9,9 +9,13 @@ input[type=text], input[type=file] {
 }
 
 textarea:focus, input:focus {
-    outline: none;
+  outline: none;
 }
 
 .react-datepicker__input-container input {
   background: transparent;
+}
+
+* {
+  font-family: Helvetica Neue, STHeiTi, sans-serif;
 }
