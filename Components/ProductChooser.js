@@ -63,10 +63,10 @@ class ProductChooser extends Component {
     this.listenTo(Store, 'onNewProductAdded');
   }
   onNewProductAdded(params) {
+    let products = []
     if (params.action === 'getItem'  &&
         (this.props.resource[constants.ROOT_HASH] === params.resource[constants.ROOT_HASH] ||
         this.props.resource[constants.TYPE] === constants.TYPES.PROFILE)) {
-      let products
       if (this.props.resource[constants.TYPE] === constants.TYPES.PROFILE) {
         if (params.resource.products) {
           params.resource.products.forEach((r) => {
@@ -82,7 +82,6 @@ class ProductChooser extends Component {
         if (equal(params.resource.products, this.props.resource.products))
           return
 
-        products = []
         params.resource.products.forEach(function(m) {
           products.push(utils.getModel(m).value)
         })
@@ -103,7 +102,7 @@ class ProductChooser extends Component {
       this.setState({err: params.err});
       return
     }
-    var products = params.productList;
+    products = params.productList;
 
     this.setState({
       products: products,
@@ -268,9 +267,10 @@ var styles = StyleSheet.create({
   },
   listview: {
     marginTop: 64,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 0,
+    marginHorizontal: -1,
+    borderBottomWidth: StyleSheet.hairlineWidth,
     borderColor: '#ffffff',
-    borderTopColor: '#cccccc'
   },
   centerText: {
     alignItems: 'center',
