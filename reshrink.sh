@@ -3,7 +3,7 @@ if [ -f npm-shrinkwrap.json ]
     rm npm-shrinkwrap.json
 fi
 
-cd node_modules/webpack && npm i --save node-libs-browser@latest && cd $OLDPWD
+sed -i '' 's/\"node-libs-browser\": \"\^0.6.0\"/"node-libs-browser": "^1.0.0"/' node_modules/webpack/package.json
 
 npm dedupe
 npm prune

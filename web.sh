@@ -17,7 +17,7 @@ sed -i '' "s/RNDeviceInfo;/RNDeviceInfo \|\| \{};/g" node_modules/react-native-d
 # rm -rf node_modules/webpack/node_modules/node-libs-browser
 # rm -rf node_modules/node-libs-browser/node_modules/crypto-browserify
 rm -rf node_modules/node-libs-browser/node_modules/create-ecdh
-rm -rf node_modules/react-native-ecc/node_modules/buffer
+# rm -rf node_modules/react-native-ecc/node_modules/buffer
 # rm -rf node_modules/node-libs-browser/node_modules/browserify-sign
 # rm -rf node_modules/webpack/node_modules/uglify-js
 # rm -rf node_modules/html-minifier/node_modules/uglify-js
