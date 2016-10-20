@@ -72,7 +72,7 @@
     "react-native-device-info": "^0.9.3",
     "react-native-ecc": "github:tradle/react-native-ecc#63a1a75",
     "react-native-env": "github:tradle/react-native-env",
-    "react-native-floating-labels": "github:mvayngrib/react-native-floating-labels#d185fea",
+    "react-native-floating-labels": "github:mvayngrib/react-native-floating-labels#pointerFix",
     "react-native-fs": "^1.5.1",
     "react-native-gallery": "0.0.17",
     "react-native-gesture-password": "github:mvayngrib/react-native-gesture-password#6ccf2955",
