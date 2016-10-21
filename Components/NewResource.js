@@ -951,7 +951,7 @@ class NewResource extends Component {
       istyle.push({paddingBottom: 0, height: count * height + 35})
     }
     if (!count  ||  !isPhoto) {
-      var aiStyle = [{paddingTop: Platform.OS === 'web' ? 0 : 15, paddingBottom: 7, marginTop: isPhoto ? 0 : 15}]
+      var aiStyle = [{paddingTop: 30, paddingBottom: 7}]
       return (
         <View key={this.getNextKey()}>
           <View style={[istyle, {marginHorizontal: 10}]} ref={bl.name}>
@@ -962,7 +962,7 @@ class NewResource extends Component {
                   {counter}
                 </View>
               </ImageInput>
-            : <TouchableHighlight style={[aiStyle, {marginTop: 5}]} underlayColor='transparent'
+            : <TouchableHighlight style={aiStyle} underlayColor='transparent'
                   onPress={this.onNewPressed.bind(this, bl, meta)}>
                 <View style={styles.items}>
                   {itemsArray}
@@ -971,6 +971,7 @@ class NewResource extends Component {
               </TouchableHighlight>
           }
           </View>
+          {error}
         </View>
       )
     }
