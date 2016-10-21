@@ -1,9 +1,14 @@
 
 import {
   findNodeHandle,
-  NativeModules
+  NativeModules,
+  Platform
 } from 'react-native'
 
+import NavigationBarStylesIOS from 'NavigatorNavigationBarStylesIOS'
+import NavigationBarStylesAndroid from 'NavigatorNavigationBarStylesAndroid'
+
+const NavBarStyles = Platform.OS === 'ios' ? NavigationBarStylesIOS : NavigationBarStylesAndroid
 const RCTUIManager = NativeModules.UIManager
 
 module.exports = {
@@ -27,5 +32,6 @@ module.exports = {
   scrollTo: function (scrollView, x, y) {
     const scrollResponder = scrollView.getScrollResponder()
     scrollResponder.scrollResponderScrollTo({ x, y, animated: true});
-  }
+  },
+  navBarHeight: NavBarStyles.General.NavBarHeight
 }
