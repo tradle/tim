@@ -195,7 +195,7 @@ class ResourceRow extends Component {
                  }
               </View>
             </TouchableOpacity>
-            : <View />}
+          : <View />}
           {dateRow}
           {cancelResource}
         </View>
