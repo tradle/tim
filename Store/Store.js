@@ -1753,6 +1753,8 @@ var Store = Reflux.createStore({
   addMessagesToChat(id, r, isInit, timeShared) {
     if (r.documentCreated  &&  !isInit)
       return
+    if (!r.time  &&  !timeShared)
+      return
     let messages = chatMessages[id]
     let rid = utils.getId(r)
     if (messages  &&  messages.length) {
@@ -3510,8 +3512,11 @@ var Store = Reflux.createStore({
           }
         }
       }
-      shareableResources[docType].push(verification)
-      shareableResourcesRootToR[r[ROOT_HASH]] = r
+      // Check that this is not the resource that was send to me as to an employee
+      if (utils.getId(r.to) !== meId) {
+        shareableResources[docType].push(verification)
+        shareableResourcesRootToR[r[ROOT_HASH]] = r
+      }
     }
   },
   // Checks if the  version of the resource is the latest
