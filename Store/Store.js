@@ -561,6 +561,7 @@ var Store = Reflux.createStore({
               let rep = this._getItem(list[shareInfo.bankRepresentative])
               let orgId = utils.getId(rep.organization)
               this.addMessagesToChat(orgId, r, true, shareInfo.timeShared)
+              // Add to my employee chat
               if (utils.getId(r.to) === meId) {
                 let contact = list[utils.getId(r.from)].value
                 if (!contact.organization  ||  !contact.bot)
@@ -1745,6 +1746,8 @@ var Store = Reflux.createStore({
   // all the messages present in order they were received
   addMessagesToChat(id, r, isInit, timeShared) {
     if (r.documentCreated  &&  !isInit)
+      return
+    if (!r.time  &&  !timeShared)
       return
     // if (!isInit  &&  utils.isEmpty(chatMessages))
     //   return
