@@ -726,9 +726,9 @@ class NewResource extends Component {
       itemsArray = null
       var count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
       if (count  &&  bl.name === 'photos')
-        arrayItems.push(this.getPhotoItem(bl, styles))
+        arrayItems.push(this.getPhotoItem(bl))
       else
-        arrayItems.push(this.getItem(bl, styles))
+        arrayItems.push(this.getItem(bl))
     }
     if (this.state.isRegistration)
       Form.stylesheet = rStyles
@@ -897,7 +897,7 @@ class NewResource extends Component {
       }
     });
   }
-  getItem(bl, styles) {
+  getItem(bl) {
     let meta = this.props.model
     let resource = this.state.resource
     let blmodel = meta
@@ -951,7 +951,7 @@ class NewResource extends Component {
       istyle.push({paddingBottom: 0, height: count * height + 35})
     }
     if (!count  ||  !isPhoto) {
-      var aiStyle = [{paddingTop: 15, paddingBottom: 7, marginTop: isPhoto ? 0 : 15}]
+      var aiStyle = [{paddingTop: Platform.OS === 'web' ? 0 : 15, paddingBottom: 7, marginTop: isPhoto ? 0 : 15}]
       return (
         <View key={this.getNextKey()}>
           <View style={[istyle, {marginHorizontal: 10}]} ref={bl.name}>
@@ -1010,7 +1010,7 @@ class NewResource extends Component {
     );
   }
 
-  getPhotoItem(bl, styles) {
+  getPhotoItem(bl) {
     let meta = this.props.model
     let resource = this.state.resource
     let blmodel = meta
