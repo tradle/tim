@@ -479,7 +479,7 @@ var NavigationBarRouteMapper = {
     var icon = iconIdx !== -1 ? lbTitle.substring(idx + 1) : lbTitle === 'Back' ? 'ios-arrow-back' : null
 
 
-    style.push({fontSize: utils.getFontSize(17)})
+    style.push({fontSize: utils.getFontSize(20)})
     var title = icon
               ? <Icon name={icon} size={25} color='#7AAAC3' style={styles.icon}/>
               : <Text style={style}>
@@ -508,7 +508,7 @@ var NavigationBarRouteMapper = {
       style.push({color: route.tintColor});
     else if (route.passProps.bankStyle)
       style.push({color: route.passProps.bankStyle.LINK_COLOR || '#7AAAC3'})
-    style.push({fontSize: utils.getFontSize(17)})
+    style.push({fontSize: utils.getFontSize(20)})
     var title
 
     var rbTitle = route.rightButtonTitle
@@ -605,7 +605,7 @@ var styles = StyleSheet.create({
   icon: {
     width: 25,
     height: 25,
-    marginTop: 10
+    marginTop: Platform.OS === 'web' ? 0 : 10
   },
   iconSpace:  {
     paddingLeft: 3
@@ -616,7 +616,7 @@ var styles = StyleSheet.create({
   navBarTitleText: {
     color: '#2E3B4E',
     fontWeight: '400',
-    fontSize: utils.getFontSize(17),
+    fontSize: utils.getFontSize(20),
   },
   navBarLeftButton: {
     paddingLeft: 20,
