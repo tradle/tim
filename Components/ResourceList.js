@@ -910,7 +910,7 @@ class ResourceList extends Component {
             <View>
               <Image source={require('../img/banking.png')} style={styles.cellImage} />
             </View>
-            <View style={styles.textContainer}>
+            <View style={[styles.textContainer, {alignSelf: 'center'}]}>
               <Text style={styles.resourceTitle}>Official Accounts</Text>
             </View>
           </View>
