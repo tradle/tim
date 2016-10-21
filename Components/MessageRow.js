@@ -957,7 +957,7 @@ var styles = StyleSheet.create({
   date: {
     flex: 1,
     color: '#999999',
-    fontSize: 12,
+    fontSize:  14,
     alignSelf: 'center',
     paddingTop: 10
   },
