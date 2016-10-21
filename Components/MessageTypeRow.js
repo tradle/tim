@@ -21,8 +21,8 @@ import React, { Component } from 'react'
 class MessageTypeRow extends Component {
   constructor(props) {
     super(props);
-    PRODUCT_ROW_BG_COLOR = this.props.bankStyle.PRODUCT_ROW_BG_COLOR || DEFAULT_PRODUCT_ROW_BG_COLOR
-    PRODUCT_ROW_TEXT_COLOR = this.props.bankStyle.PRODUCT_ROW_TEXT_COLOR || DEFAULT_PRODUCT_ROW_TEXT_COLOR
+    PRODUCT_ROW_BG_COLOR = (this.props.bankStyle  &&  this.props.bankStyle.PRODUCT_ROW_BG_COLOR) || DEFAULT_PRODUCT_ROW_BG_COLOR
+    PRODUCT_ROW_TEXT_COLOR = (this.props.bankStyle  &&  this.props.bankStyle.PRODUCT_ROW_TEXT_COLOR) || DEFAULT_PRODUCT_ROW_TEXT_COLOR
   }
   render() {
     var resource = this.props.resource;
