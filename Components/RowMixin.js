@@ -87,7 +87,7 @@ var RowMixin = {
       let isForm = model.subClassOf === constants.TYPES.FORM
       let isMyMessage = this.isMyMessage()
       if (!this.props.isAggregation  &&  (isMyMessage || isForm) &&  !isMyProduct)
-        style = [style, {borderWidth: BORDER_WIDTH, paddingVertical: 3, borderColor: isMyMessage ? STRUCTURED_MESSAGE_COLOR : '#ffffff', borderBottomColor: this.props.bankStyle.STRUCTURED_MESSAGE_BORDER}]
+        style = [style, {borderWidth: BORDER_WIDTH, paddingVertical: 3, borderColor: isMyMessage ? STRUCTURED_MESSAGE_COLOR : '#ffffff', borderBottomColor: isMyMessage ? this.props.bankStyle.STRUCTURED_MESSAGE_BORDER : '#eeeeee'}]
       let color = this.isMyMessage() && !isMyProduct ? {color: '#FFFFEE'} : {color: '#757575'}
       return (
         <View style={style} key={this.getNextKey()}>
