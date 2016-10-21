@@ -239,7 +239,7 @@ var RowMixin = {
       // if (verifiedBy.length > 25)
       //   verifiedBy = verifiedBy.substring(0, 25) + '..'
       var maxWidth = 0.8 * utils.dimensions().width - 150
-      var orgView =   <View style={{marginTop: Platform.OS === 'android' ? 0 : 5, maxWidth: maxWidth, paddingLeft: 3}}>
+      var orgView =   <View style={{marginTop: Platform.OS === 'android' ? 0 : 5, maxWidth: maxWidth, paddingLeft: 3, marginRight: 10}}>
                         <Text style={[styles.verySmallLetters, { fontSize: 14}]}>
                           {verifiedBy}
                         </Text>
@@ -451,7 +451,8 @@ var styles = StyleSheet.create({
     color: '#4982B1',
     fontSize: 18,
     paddingHorizontal: 3,
-    marginTop: Platform.OS === 'android' ? 0 : 4
+    alignSelf: 'center',
+    // marginTop: Platform.OS === 'android' ? 0 : 4
   },
   shareView: {
     flexDirection: 'row',
