@@ -13,6 +13,7 @@ var constants = require('@tradle/constants');
 import {
   Text,
   View,
+  Platform,
   TouchableHighlight,
   StyleSheet,
   Image,
@@ -124,7 +125,7 @@ var ResourceMixin = {
               ? <View style={styles.row}>
                   {item}
                   <TouchableHighlight underlayColor='transparent' onPress={cancelItem.bind(self, prop, v)}>
-                    <Icon name='ios-close-circle-outline' size={25} color={LINK_COLOR} />
+                    <Icon name='ios-close-circle-outline' size={25} color={LINK_COLOR} style={{marginTop: Platform.OS === 'web' ? -5 : 0, paddingLeft: 10}}/>
                   </TouchableHighlight>
                 </View>
               : item
