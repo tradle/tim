@@ -171,8 +171,8 @@ var PasswordCheck = React.createClass({
             }
           }
           baseColor={'#ffffff'}
-          rightColor={'#55ff55'}
-          wrongColor={'#ff5555'}
+          rightColor={'#FAF7AC'}
+          wrongColor={'#F794AB'}
           radius={{ inner: 18, outer: 25 }}
           status={this.state.status}
           message={this.state.message}
