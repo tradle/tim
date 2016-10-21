@@ -50,9 +50,6 @@ class ShowRefList extends Component {
       }
       if (p.charAt(0) === '_'  ||  !props[p].items  ||  !props[p].items.backlink)
         continue;
-      var icon = props[p].icon  ||  utils.getModel(props[p].items.ref).value.icon;
-      if (!icon)
-        icon = 'ios-checkmark';
         // icon = 'ios-checkmark-outline';
       propsToShow.push(p)
     }
@@ -63,6 +60,9 @@ class ShowRefList extends Component {
       let propTitle = translate(props[p], model)
       if (propTitle.length > maxLetters)
         propTitle = propTitle.substring(0, maxLetters)
+      var icon = props[p].icon  ||  utils.getModel(props[p].items.ref).value.icon;
+      if (!icon)
+        icon = 'ios-checkmark';
       refList.push(
         <View style={[buttonStyles.container, {width: width}]} key={this.getNextKey()}>
            <TouchableHighlight onPress={this.showResources.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
