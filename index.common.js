@@ -631,7 +631,7 @@ var styles = StyleSheet.create({
   },
   navBarRightButton: {
     paddingLeft: 25,
-    paddingRight: 20,
+    paddingRight: 10,
   },
   navBarButtonText: {
     color: '#7AAAC3',
