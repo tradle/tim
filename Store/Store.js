@@ -2740,6 +2740,84 @@ var Store = Reflux.createStore({
     }
   },
   getList(params) {
+    var meta = this.getModel(params.modelName).value;
+    var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
+    if (!isMessage) {
+      params.fromView = true
+      let result = this.searchNotMessages(params);
+      if (!result) {
+        // First time. No connection no providers yet loaded
+        if (!this.isConnected  &&  params.modelName === ORGANIZATION)
+          this.trigger({action: 'list', alert: translate('noConnection')})
+
+        return
+      }
+      if (params.isAggregation)
+        result = this.getDependencies(result);
+      var shareableResources;
+      var retParams = {
+        action: 'list',
+        list: result,
+        spinner: params.spinner,
+        isAggregation: params.isAggregation
+      }
+      if (params.prop)
+        retParams.prop = params.prop;
+      this.trigger(retParams);
+      return
+    }
+
+    return this._searchMessages(params)
+    .then((result) => {
+      if (!result)
+        return
+      if (params.isAggregation)
+        result = this.getDependencies(result);
+
+      var retParams = {
+        action: !params.prop ? 'messageList' : 'list',
+        list: result,
+        spinner: params.spinner,
+        isAggregation: params.isAggregation
+      }
+      var shareableResources;
+      let hasMore = params.limit  &&  result.length > params.limit
+      if (params.loadEarlierMessages || hasMore) {
+        if (hasMore)  {
+          result.splice(0, 1)
+          retParams.allLoaded = true
+        }
+        retParams.loadEarlierMessages = true
+      }
+      if (!params.isAggregation  &&  params.to) {
+        // let to = list[utils.getId(params.to)].value
+        // if (to  &&  to[TYPE] === ORGANIZATION)
+          shareableResources = this.getShareableResources(result, params.to)
+      }
+      if (params.to) {
+        let orgId
+        if (params.to.organization)
+          orgId = utils.getId(params.to.organization)
+        else {
+          if (params.to[TYPE] === ORGANIZATION)
+            orgId = utils.getId(params.to)
+        }
+        if (orgId) {
+          let rep = this.getRepresentative(orgId)
+          if (rep  &&  !rep.bot)
+            retParams.isEmployee = true
+        }
+      }
+
+      if (shareableResources)
+        retParams.shareableResources = shareableResources;
+      if (params.prop)
+        retParams.prop = params.prop;
+      this.trigger(retParams);
+    })
+  },
+
+  getList1(params) {
     var result = this.searchResources(params);
     if (params.isAggregation)
       result = this.getDependencies(result);
