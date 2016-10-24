@@ -19,6 +19,9 @@ import {
   Image
 } from 'react-native';
 
+var CURRENCY_SYMBOL
+const DEFAULT_CURRENCY_SYMBOL = '£'
+
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_ERROR = 'tradle.FormError'
 const FORM = 'tradle.Form'
@@ -48,6 +51,8 @@ var RowMixin = {
   },
   getPropRow(prop, resource, val, isVerification) {
     STRUCTURED_MESSAGE_COLOR = this.props.bankStyle.STRUCTURED_MESSAGE_COLOR
+    CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol || this.props.currency : DEFAULT_CURRENCY_SYMBOL
+
     if (prop.ref) {
       if (prop.ref === constants.TYPES.MONEY) {
         let c = utils.normalizeCurrencySymbol(val.currency)

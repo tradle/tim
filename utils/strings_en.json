@@ -76,6 +76,7 @@
     "newProductMsg": "I need a {1}.",
     "shareOne": "{1}, this is your personal privacy assistant. I see you've already had your {2} verified. You can tap below to share it with {3}.",
     "shareOneOfMany": "{1}, this is your personal privacy assistant. I see you've already had your {2} verified. You can tap on any items in the list below to share them with {3}.",
+    "shareWith": "Share {1}",
     "verificationTransactionID": "Verification Transaction Id",
     "scanQRcode": "Scan QR code",
     "setDateValue": "Set",
@@ -140,5 +141,6 @@
     "acceptingTermsAndConditions": "By pressing OK, you accept the Terms and Conditions",
     "viewTerms": "Please view the Terms and Conditions",
     "irrefutableProofs": "Irrefutable proofs",
-    "independentBlockchainViewer": "Independent blockchain viewer"
+    "independentBlockchainViewer": "Independent blockchain viewer",
+    "contextsFor": "Contexts for"
 }

@@ -80,6 +80,8 @@ class ResourceList extends Component {
       isConnected: this.props.navigator.isConnected,
       userInput: '',
     };
+    if (props.multiChooser)
+      this.state.chosen = {}
     var isRegistration = this.props.isRegistration ||  (this.props.resource  &&  this.props.resource[constants.TYPE] === constants.TYPES.PROFILE  &&  !this.props.resource[constants.ROOT_HASH]);
     if (isRegistration)
       this.state.isRegistration = isRegistration;
@@ -87,6 +89,11 @@ class ResourceList extends Component {
       this.state.sharedWith = {}
       var routes = this.props.navigator.getCurrentRoutes()
       routes[routes.length - 1].onRightButtonPress = this.done.bind(this)
+    }
+    else if (this.props.onDone) {
+      this.state.sharedWith = {}
+      var routes = this.props.navigator.getCurrentRoutes()
+      routes[routes.length - 1].onRightButtonPress = this.props.onDone.bind(this, this.state.chosen)
     }
   }
   done() {
@@ -635,8 +642,10 @@ class ResourceList extends Component {
         changeSharedWithList={this.props.chat ? this.changeSharedWithList.bind(this) : null}
         currency={this.props.currency}
         isOfficialAccounts={this.props.officialAccounts}
+        multiChooser={this.props.multiChooser}
         showRefResources={this.showRefResources.bind(this)}
-        resource={resource} />
+        resource={resource}
+        chosen={this.state.chosen} />
     );
   }
   changeSharedWithList(id, value) {

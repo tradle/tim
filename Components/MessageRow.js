@@ -834,6 +834,7 @@ class MessageRow extends Component {
                         Actions.addMessage({
                           from: resource.to,
                           to: resource.from,
+                          _context: this.props.context,
                           [constants.TYPE]: NEXT_FORM_REQUEST,
                           after: form.id
                         })

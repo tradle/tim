@@ -33,6 +33,8 @@ class ResourceRow extends Component {
     super(props)
     if (this.props.changeSharedWithList)
       this.state = {sharedWith: true}
+    if (this.props.multiChooser)
+      this.state = {isChosen: false}
   }
   shouldComponentUpdate(nextProps, nextState) {
     if (Object.keys(this.props).length  !== Object.keys(nextProps).length)
@@ -128,25 +130,44 @@ class ResourceRow extends Component {
     //                        </View>
     //                      </TouchableHighlight>
     //                    : <View />;
-    var cancelResource = (this.props.onCancel ||  this.state)
-                       ?  <View style={{position: 'absolute', right: 0, top: 20, backgroundColor: 'transparent'}}>
-                             <Icon name={this.state.sharedWith ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color={this.state.sharedWith ? '#B1010E' : '#dddddd'}  style={styles.cancelIcon} />
+    var cancelResource = (this.props.onCancel  ||  (this.state && this.state.sharedWith))
+                       ?  <View style={{position: 'absolute', right: 10, top: 25, backgroundColor: 'transparent'}}>
+                             <Icon name={this.state.sharedWith ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color={this.state.sharedWith ? '#B1010E' : '#dddddd'} />
                            </View>
-                       : <View />;
-    var textStyle = noImage ? [styles.textContainer, {marginVertical: 7}] : styles.textContainer;
+                       : <View />
+    //
+    var multiChooser = this.props.multiChooser
+                     ?  <View style={{position: 'absolute', right: 10, top: 25, backgroundColor: 'transparent'}}>
+                          <TouchableHighlight underlayColor='transparent' onPress={() => {
+                            let id = utils.getId(resource)
+                            if (this.props.chosen[id]) {
+                              this.setState({isChosen: false})
+                              delete this.props.chosen[id]
+                            }
+                            else {
+                              this.setState({isChosen: true})
+                              this.props.chosen[id] = ''
+                            }
+                          }}>
+                           <Icon name={this.state.isChosen ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color='#7AAAc3' />
+                          </TouchableHighlight>
+                        </View>
+                      : <View />
+    var textStyle = /*noImage ? [styles.textContainer, {marginVertical: 7}] :*/ styles.textContainer;
 
     let dateRow
     if (dateProp  &&  resource[dateProp]) {
       var val = utils.formatDate(new Date(resource[dateProp]), true)
       // var dateBlock = self.addDateProp(resource, dateProp, true);
       dateRow = <View style={{position: 'absolute', top: 2, backgroundColor: 'transparent', right: 10}}>
-              <Text style={styles.verySmallLetters}>{val}</Text>
-            </View>
+                  <Text style={styles.verySmallLetters}>{val}</Text>
+                </View>
     }
     else
       dateRow = <View/>
 
     // Grey out if not loaded provider info yet
+            // <ActivityIndicator hidden='true' color='#629BCA'/>
     var isOpaque = resource[constants.TYPE] === constants.TYPES.ORGANIZATION && !resource.contacts
     if (isOpaque)
       return (
@@ -155,11 +176,11 @@ class ResourceRow extends Component {
           {photo}
           {orgPhoto}
           {onlineStatus}
-          <View style={[textStyle, {flexDirection: 'row', justifyContent: 'space-between'}]} key={this.getNextKey()}>
+          <View style={[textStyle, {flexDirection: 'row', justifyContent: 'space-between'}]}>
             {this.formatRow(resource)}
-            <ActivityIndicator hidden='true' color='#629BCA'/>
           </View>
           {dateRow}
+          {multiChooser}
           {cancelResource}
         </View>
         <View style={styles.cellBorder}  key={this.getNextKey()} />
@@ -176,7 +197,6 @@ class ResourceRow extends Component {
               <View style={textStyle} key={this.getNextKey()}>
                 {this.formatRow(resource)}
               </View>
-              {cancelResource}
             </View>
           </TouchableHighlight>
           {this.props.isOfficialAccounts
@@ -203,6 +223,7 @@ class ResourceRow extends Component {
             </TouchableHighlight>
             : <View />}
           {dateRow}
+          {multiChooser}
           {cancelResource}
           <View style={styles.cellBorder} />
         </View>
@@ -255,7 +276,7 @@ class ResourceRow extends Component {
   action() {
     if (this.props.onCancel)
       this.props.onCancel()
-    else if (typeof this.props.changeSharedWithList) {
+    else if (typeof this.props.changeSharedWithList != 'undefined') {
       let id = utils.getId(this.props.resource)
       this.setState({sharedWith: this.state.sharedWith ? false : true})
       this.props.changeSharedWithList(id, this.state.sharedWith ? false : true)
@@ -530,17 +551,13 @@ var styles = StyleSheet.create({
   },
   cellNoImage: {
     backgroundColor: '#dddddd',
-    marginTop: 20,
+    height: 40,
     marginLeft: 10,
   },
   cellBorder: {
     backgroundColor: '#eeeeee',
     height: 1,
     marginLeft: 4,
-  },
-  cancelIcon: {
-    width: 40,
-    height: 40,
   },
   icon: {
     width: 40,

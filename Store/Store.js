@@ -480,10 +480,9 @@ var Store = Reflux.createStore({
     let noProviders
     if (!SERVICE_PROVIDERS_BASE_URLS) {
       let settingsId = SETTINGS + '_1'
-      var settings = list[settingsId]
+      var settings = this._getItem(settingsId)
       let updateSettings
-      if (__DEV__  &&  settings  &&  this._getItem(settings).urls) {
-        settings = this._getItem(settings)
+      if (__DEV__  &&  settings  &&  settings.urls) {
         let urls = settings.urls
         // HACK for non-static ip
         if (SERVICE_PROVIDERS_BASE_URL_DEFAULTS) {
@@ -530,7 +529,7 @@ var Store = Reflux.createStore({
       const recipientHash = recipientInfo.permalink
       let messenger = wsClients[recipientHash]
       if (!messenger) {
-        let url = self._getItem(list[SETTINGS + '_1']).hashToUrl[recipientHash]
+        let url = self._getItem(SETTINGS + '_1').hashToUrl[recipientHash]
         messenger = wsClients[url]
       }
       if (!messenger) {
@@ -563,15 +562,15 @@ var Store = Reflux.createStore({
   initChats() {
     let meId = utils.getId(me)
     for (var p in list) {
-      let r = this._getItem(list[p])
+      let r = this._getItem(p)
       let m = this._getItem(this.getModel(r[TYPE]))
       if (m.interfaces  &&  m.interfaces.indexOf(MESSAGE) !== -1) {
-        if (r.sharedWith) {
-          r.sharedWith.forEach((shareInfo) => {
+        if (r._sharedWith) {
+          r._sharedWith.forEach((shareInfo) => {
             if (shareInfo.bankRepresentative === meId)
               this.addMessagesToChat(utils.getId(r.to), r, true, shareInfo.timeShared)
             else  {
-              let rep = this._getItem(list[shareInfo.bankRepresentative])
+              let rep = this._getItem(shareInfo.bankRepresentative)
               let orgId = utils.getId(rep.organization)
               this.addMessagesToChat(orgId, r, true, shareInfo.timeShared)
             }
@@ -581,17 +580,16 @@ var Store = Reflux.createStore({
           this.addMessagesToChat(utils.getId(r.to), r, true)
         else {
           let fromId = utils.getId(r.from)
-          let rep = this._getItem(list[meId === fromId ? utils.getId(r.to) : fromId])
+          let rep = this._getItem(meId === fromId ? utils.getId(r.to) : fromId)
           let orgId = rep.organization ? utils.getId(rep.organization) : utils.getId(rep)
           this.addMessagesToChat(orgId, r, true)
         }
       }
     }
     for (let id in chatMessages) {
-      chatMessages[id].sort(function(a, b) {
-        return a.time - b.time;
-      })
-      chatMessages[id] = this.filterChatMessages(chatMessages[id], id)
+      var arr = chatMessages[id]
+      arr.sort((a, b) => a.time - b.time)
+      chatMessages[id] = this.filterChatMessages(arr, id)
     }
   },
   // Filtered result contains only messages that get displayed
@@ -601,7 +599,7 @@ var Store = Reflux.createStore({
     let productApp = {}
     // Compact all FormRequests that were fulfilled
     for (let i=messages.length - 1; i>=0; i--) {
-      let r = this._getItem(list[messages[i].id])
+      let r = this._getItem(messages[i].id)
       if (r[TYPE] === FORM_REQUEST  &&  !r.document) {// && r.documentCreated)
       // delete list[id]
         let forms = productToForms[r.product]
@@ -623,7 +621,7 @@ var Store = Reflux.createStore({
     }
     // Compact all SelfIntroduction
     messages = messages.filter((rr, i) => {
-      let r = this._getItem(list[rr.id])
+      let r = this._getItem(rr.id)
       return r[TYPE] === SELF_INTRODUCTION ? false : true
         // delete list[id]
     })
@@ -646,13 +644,13 @@ var Store = Reflux.createStore({
       //   if (utils.getId(f) === utils.getId(t))
       //     return false
       // }
-      let r = this._getItem(list[rr.id])
+      let r = this._getItem(rr.id)
 
       // Check if there was request for the next form after multy-entry form
       let fromId = utils.getId(r.from)
 
       if (!me.isEmployee  &&  fromId !== meId  &&  list[fromId]) {
-        let rFrom = this._getItem(list[fromId])
+        let rFrom = this._getItem(fromId)
         if (!rFrom.bot) {
           let photos = rFrom.photos
           if (photos)
@@ -669,11 +667,11 @@ var Store = Reflux.createStore({
       // if (!to) console.log(r.to)
       // r.to.photos = to  &&  to.value.photos;
       if (isMyProduct)
-        r.from.organization = list[utils.getId(r.from)].value.organization
+        r.from.organization = this._getItem(utils.getId(r.from)).organization
       else if (isForm) {
         // set organization and photos for items properties for better displaying
-        let form = list[utils.getId(r.to)].value
-        if (orgId  &&  r.sharedWith  &&  r.sharedWith.length > 1) {
+        let form = this._getItem(utils.getId(r.to))
+        if (orgId  &&  r._sharedWith  &&  r._sharedWith.length > 1) {
           // if (utils.getId(r.to.organization) !== toOrgId) {
           //   let filteredVerifications = this.getSharedVerificationsAboutThisForm(r, toOrgId)
           // }
@@ -686,7 +684,7 @@ var Store = Reflux.createStore({
           if (pModel.properties.photos) {
             let items = r[p]
             items.forEach((ir) => {
-              let itemPhotos = list[utils.getId(ir)].value.photos
+              let itemPhotos = this._getItem(utils.getId(ir)).photos
               if (itemPhotos)
                 ir.photo = itemPhotos[0].url
             })
@@ -812,7 +810,7 @@ var Store = Reflux.createStore({
     serviceProvider = (serviceProvider  &&  serviceProvider.length) ? serviceProvider[0] : null
       // let serviceProvider =  SERVICE_PROVIDERS.filter((json) => json.url === serverUrl)
 
-    var org = list[orgId].value
+    var org = this._getItem(orgId)
     let promise = serviceProvider ? Q() : this.getInfo([parts[0]])
 
     return promise
@@ -834,10 +832,11 @@ var Store = Reflux.createStore({
       return response.clone().json()
     })
     .then(function(data) {
+      let r = this._getItem(orgId)
       let info = {
         bot: data,
-        org: list[orgId].value,
-        style: list[orgId].value.style,
+        org: r,
+        style: r.style,
         isEmployee: true
       }
       return self.addInfo(info)
@@ -848,9 +847,9 @@ var Store = Reflux.createStore({
 
       meDriver.addContactIdentity(provider.identity)
 
-      let employee = list[PROFILE + '_' + provider.hash].value
+      let employee = this._getItem(PROFILE + '_' + provider.hash)
       currentEmployees[utils.getId(org)] = employee
-      let myIdentities = list[MY_IDENTITIES].value
+      let myIdentities = this._getItem(MY_IDENTITIES)
       let currentIdentity = myIdentities.currentIdentity
       let identity = myIdentities.allIdentities.filter(function(i) {
         if (i.id === currentIdentity)
@@ -864,16 +863,14 @@ var Store = Reflux.createStore({
     })
   },
   addToSettings(provider) {
-    let hashToUrl = list[SETTINGS + '_1'].value.hashToUrl
-    if (!hashToUrl) {
-      list[SETTINGS + '_1'].value.hashToUrl = {}
-      hashToUrl = list[SETTINGS + '_1'].value.hashToUrl
-    }
+    let r = this._getItem(SETTINGS + '_1')
+    if (!r.hashToUrl)
+      r.hashToUrl = {}
+
     // save provider's employee
     // if (!hashToUrl[provider.hash]) {
-      hashToUrl[provider.hash] = getProviderUrl(provider)
-
-      db.put(SETTINGS + '_1', list[SETTINGS + '_1'].value)
+    r.hashToUrl[provider.hash] = getProviderUrl(provider)
+    db.put(SETTINGS + '_1', r)
     // }
   },
   addProvider(provider) {
@@ -1089,7 +1086,7 @@ var Store = Reflux.createStore({
     }
   },
   onPairingRequestAccepted(payload) {
-    return this.onProcessPairingRequest(list[PAIRING_DATA + '_1'].value, payload)
+    return this.onProcessPairingRequest(this._getItem(PAIRING_DATA + '_1'), payload)
     .then(() => {
       this.trigger({action: 'pairingRequestAccepted'})
     })
@@ -1173,7 +1170,7 @@ var Store = Reflux.createStore({
     if (me) {
       language = me.language
       if (language && list[utils.getId(language)]) {
-        language = list[utils.getId(language)].value
+        language = this._getItem(utils.getId(language))
         languageCode = language.code
       }
     }
@@ -1243,7 +1240,6 @@ var Store = Reflux.createStore({
     })
   },
   addInfo(sp, url) {
-    var self = this
     var okey = sp.org ? utils.getId(sp.org) : null
     var hash = protocol.linkString(sp.bot.pub)
     var ikey = IDENTITY + '_' + hash
@@ -1253,13 +1249,13 @@ var Store = Reflux.createStore({
       this._setItem(okey, sp.org)
     }
     if (sp.style)
-      list[okey].value.style = sp.style
+      this._getItem(okey).style = sp.style
     if (!list[ikey]) {
       var profile = {
         [TYPE]: PROFILE,
         [ROOT_HASH]: hash,
         firstName: sp.bot.profile.name.firstName || sp.id + 'Bot',
-        organization: self.buildRef(sp.org)
+        organization: this.buildRef(sp.org)
         // organization: {
         //   id: okey,
         //   title: sp.org.name
@@ -1293,23 +1289,23 @@ var Store = Reflux.createStore({
 
       batch.push({type: 'put', key: ikey, value: identity })
       batch.push({type: 'put', key: pkey, value: profile })
-      self._setItem(ikey, identity)
-      self._setItem(pkey, profile)
+      this._setItem(ikey, identity)
+      this._setItem(pkey, profile)
     }
-    if (!list[okey].value.contacts) {
-      self._mergeItem(okey, { contacts: [] })
+    if (!this._getItem(okey).contacts) {
+      this._mergeItem(okey, { contacts: [] })
       // list[okey].value.contacts = []
     }
 
     var pkey = PROFILE + '_' + hash
 
-    var curOkeyVal = list[okey].value
+    var curOkeyVal = this._getItem(okey)
     var newContact = {
       id:     pkey,
       // title: list[pkey].value.formatted
     }
 
-    self._mergeItem(okey, { contacts: [...curOkeyVal.contacts, newContact] })
+    this._mergeItem(okey, { contacts: [...curOkeyVal.contacts, newContact] })
     // list[okey].value.contacts.push({
     //   id:     pkey,
     //   titile: list[pkey].formatted
@@ -1340,8 +1336,8 @@ var Store = Reflux.createStore({
     var ikey = IDENTITY + '_' + hash
     var pkey = PROFILE + '_' + hash
 
-    var profile = list[pkey] && list[pkey].value
-    var identity = list[ikey]  &&  list[ikey].value
+    var profile = list[pkey] && this._getItem(pkey)
+    var identity = list[ikey]  &&  this._getItem(ikey)
 
     var newContact = !profile  ||  !identity
     var isDevicePairing = data[TYPE]  &&  data[TYPE] === PAIRING_REQUEST
@@ -1397,7 +1393,7 @@ var Store = Reflux.createStore({
           [TYPE]: SIMPLE_MESSAGE,
           message: translate('howCanIHelpYou', profile.formatted, utils.getMe().firstName),
           from: this.buildRef(utils.getMe()),
-          to: list[pkey].value
+          to: this._getItem(pkey)
         })
       .then(() => {
         if (newContact)
@@ -1485,6 +1481,8 @@ var Store = Reflux.createStore({
     let isSelfIntroduction = r[TYPE] === SELF_INTRODUCTION
 
     var rr = {};
+    if (r._context)
+      rr._context = r._context
     for (var p in r) {
       if (!props[p])
         continue
@@ -1542,7 +1540,7 @@ var Store = Reflux.createStore({
     // var promise = Q(protocol.linkString(toChain))
     let hash = r.to[ROOT_HASH]
     if (!hash)
-      hash = list[utils.getId(r.to)].value[ROOT_HASH]
+      hash = this._getItem(utils.getId(r.to))[ROOT_HASH]
     var toId = IDENTITY + '_' + hash
     rr._sendStatus = self.isConnected ? SENDING : QUEUED
     var noCustomerWaiting
@@ -1599,7 +1597,7 @@ var Store = Reflux.createStore({
         }
         else {
           // self.updateMe()
-          var allMyIdentities = list[MY_IDENTITIES].value
+          var allMyIdentities = self._getItem(MY_IDENTITIES)
           var all = allMyIdentities.allIdentities
           var curId = allMyIdentities.currentIdentity
 
@@ -1630,7 +1628,7 @@ var Store = Reflux.createStore({
       self._setItem(key, rr)
 
       if (!toOrg) {
-        let to = list[utils.getId(r.to)].value
+        let to = self._getItem(utils.getId(r.to))
         toOrg = to.organization ? to.organization : to
       }
 
@@ -1644,14 +1642,14 @@ var Store = Reflux.createStore({
         params.error = error
 
       self.trigger(params);
-      if (batch.length  &&  !error  &&  list[toId].value.pubkeys)
+      if (batch.length  &&  !error  &&  self._getItem(toId).pubkeys)
         return self.getDriver(me)
     })
     .then(function() {
       // SelfIntroduction or IdentityPublishRequest were just sent
       if (noCustomerWaiting)
         return
-      if (list[toId].value.pubkeys) {
+      if (self._getItem(toId).pubkeys) {
         let sendParams = self.packMessage(r, toChain)
         const method = toChain[SIG] ? 'send' : 'signAndSend'
         return meDriver[method](sendParams)
@@ -1667,7 +1665,7 @@ var Store = Reflux.createStore({
         return
       // cleanup temporary resources from the chat message references and from the in-memory storage - 'list'
       if (!toOrg) {
-        let to = list[utils.getId(r.to)].value
+        let to = self._getItem(utils.getId(r.to))
         toOrg = to.organization ? to.organization : to
       }
       let orgId = utils.getId(toOrg)
@@ -1700,11 +1698,11 @@ var Store = Reflux.createStore({
     if (hash === me[ROOT_HASH])
       hash = r.from[ROOT_HASH]
     if (!hash)
-      hash = list[utils.getId(r.to)].value[ROOT_HASH]
+      hash = this._getItem(utils.getId(r.to))[ROOT_HASH]
     var toId = IDENTITY + '_' + hash
     var isEmployee
     if (me.isEmployee) {
-      let to = list[utils.getId(r.to)].value
+      let to = this._getItem(utils.getId(r.to))
       isEmployee = (!to.organization ||  utils.getId(to.organization) === utils.getId(me.organization))
     }
     // let isEmployee = me.isEmployee && (!r.to.organization || utils.getId(r.to.organization) === utils.getId(me.organization))
@@ -1724,19 +1722,29 @@ var Store = Reflux.createStore({
         }
         let rep = this.getRepresentative(utils.getId(me.organization))
 
-        sendParams.to = { fingerprint: this.getFingerprint(list[IDENTITY + '_' + rep[ROOT_HASH]].value) }
+        sendParams.to = { fingerprint: this.getFingerprint(this._getItem(IDENTITY + '_' + rep[ROOT_HASH])) }
       }
     }
+    if (r._context) {
+      if (!sendParams.other)
+        sendParams.other = {}
+      let cId = utils.getId(r._context)
+      sendParams.other.context = cId.split('_')[1]
+      let c = this._getItem(cId)
+      c.lastMessageTime = new Date().getTime()
+      c.formsCount = c.formsCount ? ++c.formsCount : 1
+      db.put(cId, c)
+    }
     if (!sendParams.to)
-      sendParams.to = { fingerprint: this.getFingerprint(list[toId].value) }
+      sendParams.to = { fingerprint: this.getFingerprint(this._getItem(toId)) }
     return sendParams
   },
   disableOtherFormRequestsLikeThis(rr) {
     let fromRep = utils.getId(rr.from)
-    let orgId = utils.getId(list[fromRep].value.organization)
+    let orgId = utils.getId(this._getItem(fromRep).organization)
     let messages = chatMessages[orgId]
     messages.forEach((r) => {
-      let m = list[r.id].value
+      let m = this._getItem(r.id)
       if (m[TYPE] === FORM_REQUEST  &&
           m.product === rr.product  &&
           m.form === rr.form        &&
@@ -1768,7 +1776,7 @@ var Store = Reflux.createStore({
         }
   //       return false
         let idx = -1
-        for (let i=0; i<messages.length  &&  !idx; i++)
+        for (let i=0; i<messages.length  &&  idx === -1; i++)
           if (messages[i].id === rid)
             idx = i
 
@@ -1828,12 +1836,15 @@ var Store = Reflux.createStore({
     var batch = [];
     var key;
     var fromId = utils.getId(r.from);
-    var from = list[fromId].value;
+    var from = this._getItem(fromId)
     var toId = utils.getId(r.to);
-    var to = list[toId].value;
+    var to = this._getItem(toId)
 
     r[NONCE] = r[NONCE]  ||  this.getNonce()
     r.time = r.time || new Date().getTime();
+    let document = this._getItem(utils.getId(r.document))
+    if (document._context)
+      r._context = document._context
 
     var toChain = {}
     var sendParams
@@ -1860,7 +1871,7 @@ var Store = Reflux.createStore({
                     // })
     var newVerification
     return promise
-    .then(function(data) {
+    .then((data) => {
       if (data) {
         r[CUR_HASH] = data.object.link
         r[ROOT_HASH] = data.object.permalink
@@ -1871,9 +1882,9 @@ var Store = Reflux.createStore({
       key = utils.getId(r)
       if (from.organization)
         r.organization = from.organization;
-      if (!r.sharedWith) {
-        r.sharedWith = []
-        r.sharedWith.push(self.createSharedWith(utils.getId(r.from), r.time))
+      if (!r._sharedWith) {
+        r._sharedWith = []
+        r._sharedWith.push(self.createSharedWith(utils.getId(r.from), r.time))
       }
       batch.push({type: 'put', key: key, value: r});
       newVerification = self.buildRef(r)
@@ -1881,7 +1892,7 @@ var Store = Reflux.createStore({
       self.addLastMessage(r, batch)
       return db.batch(batch)
     })
-    .then(function() {
+    .then(() => {
       var rr = {};
       // extend(rr, from);
       // rr.verifiedByMe = r;
@@ -1897,7 +1908,7 @@ var Store = Reflux.createStore({
         self.trigger({action: 'addVerification', resource: r});
 
       var verificationRequestId = utils.getId(r.document);
-      var verificationRequest = list[verificationRequestId].value;
+      var verificationRequest = self._getItem(verificationRequestId)
       if (!verificationRequest.verifications)
         verificationRequest.verifications = [];
       if (!r.txId) {
@@ -1909,15 +1920,15 @@ var Store = Reflux.createStore({
             verificationRequest.verifications = self.buildRef(newVerification)
         }
       }
-      // if (!verificationRequest.sharedWith)
-      //   verificationRequest.sharedWith = []
-      // verificationRequest.sharedWith.push(fromId)
+      // if (!verificationRequest._sharedWith)
+      //   verificationRequest._sharedWith = []
+      // verificationRequest._sharedWith.push(fromId)
       return db.put(verificationRequestId, verificationRequest);
     })
-    .then(function(data) {
+    .then((data) => {
       var d = data
     })
-    .catch(function(err) {
+    .catch((err) => {
       debugger
       err = err
     })
@@ -1931,7 +1942,7 @@ var Store = Reflux.createStore({
   onGetItem(key, action) {
     var resource = {};
 
-    extend(resource, list[utils.getId(key)].value);
+    extend(resource, this._getItem(utils.getId(key)))
     var props = this.getModel(resource[TYPE]).value.properties;
     for (var p in props) {
       if (p.charAt(0) === '_')
@@ -1995,7 +2006,7 @@ var Store = Reflux.createStore({
 
           refProps[rValue] = p;
           if (list[rValue]) {
-            var elm = {value: list[rValue].value, state: 'fulfilled'};
+            var elm = {value: this._getItem(rValue), state: 'fulfilled'};
             foundRefs.push(elm);
           }
         }
@@ -2125,7 +2136,7 @@ var Store = Reflux.createStore({
           if (isSwitchingToEmployeeMode)
             self.publishMyIdentity(self.getRepresentative(utils.getId(resource.organization)))
           else
-            self.publishMyIdentity(list[utils.getId(resource.to)].value)
+            self.publishMyIdentity(self._getItem(utils.getId(resource.to)))
         }
         else if (isSwitchingToEmployeeMode) {
           let orgId = utils.getId(resource.organization)
@@ -2161,7 +2172,7 @@ var Store = Reflux.createStore({
             var rValue = utils.getId(resource[p])
             refProps[rValue] = p;
             if (list[rValue]) {
-              var elm = {value: list[rValue].value, state: 'fulfilled'};
+              var elm = {value: this._getItem(rValue), state: 'fulfilled'};
               foundRefs.push(elm);
             }
             else
@@ -2266,10 +2277,10 @@ var Store = Reflux.createStore({
             [NONCE]: self.getNonce(),
             time: new Date().getTime()
           }
-          self.trigger({action: 'employeeOnboarding', to: list[orgId].value})
+          self.trigger({action: 'employeeOnboarding', to: this._getItem(orgId)})
           meDriver.signAndSend({
             object: msg,
-            to: { fingerprint: self.getFingerprint(list[utils.getId(IDENTITY + '_' + orgRep[ROOT_HASH])].value) }
+            to: { fingerprint: self.getFingerprint(this._getItem(utils.getId(IDENTITY + '_' + orgRep[ROOT_HASH]))) }
           })
           .catch(function (err) {
             debugger
@@ -2319,7 +2330,7 @@ var Store = Reflux.createStore({
         if (isNew)
           returnVal[ROOT_HASH] = returnVal[NONCE]
         else if (isForm) {
-          let prevRes = list[returnVal[TYPE] + '_' + returnVal[ROOT_HASH] + '_' + returnVal[CUR_HASH]].value
+          let prevRes = self._getItem(returnVal[TYPE] + '_' + returnVal[ROOT_HASH] + '_' + returnVal[CUR_HASH])
           if (utils.compare(returnVal, prevRes)) {
             self.trigger({action: 'noChanges'})
             return
@@ -2332,13 +2343,13 @@ var Store = Reflux.createStore({
 
         self._setItem(returnValKey, returnVal)
 
-        let org = list[utils.getId(returnVal.to)].value.organization
+        let org = self._getItem(utils.getId(returnVal.to)).organization
         let orgId = utils.getId(org)
         self.addMessagesToChat(orgId, returnVal)
 
         var params;
         if (returnVal[TYPE] === GUEST_SESSION_PROOF) {
-          org = list[utils.getId(org)].value
+          org = self._getItem(utils.getId(org))
           params = {action: 'getForms', to: org}
         }
         else {
@@ -2384,7 +2395,7 @@ var Store = Reflux.createStore({
         return self.waitForTransitionToEnd()
         .then(function () {
           let rId = utils.getId(returnVal.to)
-          let to = list[rId].value
+          let to = self._getItem(rId)
 
           var toChain = {}
           if (!isNew) {
@@ -2392,7 +2403,7 @@ var Store = Reflux.createStore({
             toChain[PREV_HASH] = returnVal[PREV_HASH]
           }
 
-          let exclude = ['to', 'from', 'verifications', CUR_HASH, 'sharedWith', '_sendStatus']
+          let exclude = ['to', 'from', 'verifications', CUR_HASH, 'sharedWith', '_sendStatus', '_context']
           if (isNew)
             exclude.push(ROOT_HASH)
           extend(toChain, returnVal)
@@ -2429,7 +2440,7 @@ var Store = Reflux.createStore({
 
 //           let org = list[utils.getId(returnVal.to)].value.organization
 //           self.addMessagesToChat(utils.getId(org), returnVal)
-          delete returnVal.sharedWith
+          delete returnVal._sharedWith
           delete returnVal.verifications
           // if (shareWith) {
           //   let oldValue = list[returnValKey]
@@ -2442,7 +2453,7 @@ var Store = Reflux.createStore({
         })
         .then(() => {
           let rId = utils.getId(returnVal.to)
-          let to = list[rId].value
+          let to = self._getItem(rId)
 
           if (!isNew  ||  self.getModel(returnVal[TYPE]).value.subClassOf !== FORM)
             return
@@ -2474,7 +2485,7 @@ var Store = Reflux.createStore({
     if (resource[TYPE] !== PROFILE  ||  !resource.organization || !SERVICE_PROVIDERS)
       return
 
-    let org = list[utils.getId(resource)].value.organization
+    let org = this._getItem(utils.getId(resource)).organization
     let newOrgId = utils.getId(resource.organization)
     let settingOrg = !org || utils.getId(org) !== newOrgId
     if (settingOrg) {
@@ -2524,7 +2535,7 @@ var Store = Reflux.createStore({
       return this.onShareOne(resource, shareWithList, formResource)
     let promisses = []
     shareWithList.forEach((r) => {
-      promisses.push(this.onShareOne(resource, list[r].value))
+      promisses.push(this.onShareOne(resource, this._getItem(r)))
     })
     Q.all(promisses)
     .then((results) => {
@@ -2546,10 +2557,12 @@ var Store = Reflux.createStore({
 
     var ikey = IDENTITY + '_' + to[ROOT_HASH]
     var opts = {
-      to: {fingerprint: this.getFingerprint(list[ikey].value)},
+      to: {fingerprint: this.getFingerprint(this._getItem(ikey))},
       // share seal if it exists
       seal: true
     }
+    if (formResource  &&  formResource._context)
+      opts.other = {context: utils.getId(formResource).split('_')[1]}
 
     var promise = meDriver.send({...opts, link: resource.document[CUR_HASH]})
     return promise
@@ -2559,7 +2572,7 @@ var Store = Reflux.createStore({
     })
     .then(function() {
       var key = utils.getId(formResource)
-      var r = list[key].value
+      var r = self._getItem(key)
       r.documentCreated = true
       if (r[TYPE] === FORM_REQUEST)
         r.document = resource[TYPE] === VERIFICATION
@@ -2581,22 +2594,22 @@ var Store = Reflux.createStore({
       // batch.push({type: 'put', key: utils.getId(sh), value: sh})
       if (resource[ROOT_HASH]) {
         key = utils.getId(resource)
-        var ver = list[key].value
-        if (!ver.sharedWith)
-          ver.sharedWith = []
+        var ver = self._getItem(key)
+        if (!ver._sharedWith)
+          ver._sharedWith = []
 
-        ver.sharedWith.push(self.createSharedWith(toId, time))
+        ver._sharedWith.push(self.createSharedWith(toId, time))
         utils.optimizeResource(ver)
         batch.push({type: 'put', key: key, value: ver})
       }
       var formId = utils.getId(resource.document)
-      var form = list[formId].value
-      if (!form.sharedWith) {
-        form.sharedWith = []
-        form.sharedWith.push(self.createSharedWith(utils.getId(form.to), form.time))
+      var form = self._getItem(formId)
+      if (!form._sharedWith) {
+        form._sharedWith = []
+        form._sharedWith.push(self.createSharedWith(utils.getId(form.to), form.time))
       }
 
-      form.sharedWith.push(self.createSharedWith(toId, time))
+      form._sharedWith.push(self.createSharedWith(toId, time))
       self.addMessagesToChat(toOrgId, form, false, time)
       if (ver)
         self.addMessagesToChat(toOrgId, ver, false, time)
@@ -2789,6 +2802,34 @@ var Store = Reflux.createStore({
             retParams.isEmployee = true
         }
       }
+      if (params.context)
+        retParams.context = params.context
+      else {
+        let c = this.searchMessages({modelName: PRODUCT_APPLICATION, to: params.to})
+        if (c) {
+          if (c.length === 1)
+            retParams.context = c[0]
+          else {
+            let contexts = c.filter((r) => r.formsCount)
+            if (contexts) {
+              if (contexts.length === 1)
+                retParams.context = contexts[0]
+              else {
+                contexts.sort((a, b) => {
+                  return b.lastMessageTime - a.lastMessageTime
+                })
+                retParams.context = contexts[0]
+              }
+            }
+            // for (let i=c.length - 1; i>=0  &&  !retParams.context; i--) {
+            //   if (c[i].formsCount)
+            //     retParams.context = c[i]
+            // }
+            // if (!retParams.context)
+            //   retParams.context = c[c.length - 1]
+          }
+        }
+      }
     }
     // if (isMessage) {
     //   let orgId = utils.getId(params.to)
@@ -2821,15 +2862,15 @@ var Store = Reflux.createStore({
     }
   },
   onListSharedWith(resource, chat) {
-    let sharedWith = resource.sharedWith
+    let sharedWith = resource._sharedWith
     if (!sharedWith)
       return null
     let chatId = utils.getId(chat)
     let shareWithMapping = {}
     let result = []
     sharedWith.forEach((r) => {
-      let bot = list[r.bankRepresentative].value
-      let org = list[utils.getId(bot.organization)].value
+      let bot = this._getItem(r.bankRepresentative)
+      let org = this._getItem(utils.getId(bot.organization))
       if (utils.getId(org) === chatId)
         return
       result.push(org)
@@ -2871,18 +2912,18 @@ var Store = Reflux.createStore({
     })
     let orgToForm = {}
     for (var key in list) {
-      var r = list[key].value;
+      var r = this._getItem(key);
       if (key.indexOf(modelName + '_') == -1) {
         var s = key.split('_')[0]
         if (isOrg) {
           if (this.getModel(s).value.subClassOf !== FORM)
             continue
-          let toId = utils.getId(list[key].value.to)
+          let toId = utils.getId(this._getItem(key).to)
           // The resource was never shared or it has a shared with party in it
-          if (r.sharedWith) {
+          if (r._sharedWith) {
             let wasShared
-            r.sharedWith.forEach((o) => {
-              let org = list[o.bankRepresentative].value.organization
+            r._sharedWith.forEach((o) => {
+              let org = this._getItem(o.bankRepresentative).organization
               let orgId = utils.getId(org)
               if (orgToForm[orgId])
                 orgToForm[orgId] = ++orgToForm[orgId]
@@ -2891,9 +2932,9 @@ var Store = Reflux.createStore({
             })
           }
           else {
-            let org = list[toId].value.organization
+            let org = this._getItem(toId).organization
             if (!org) {
-              let fromId = utils.getId(list[key].value.from)
+              let fromId = utils.getId(this._getItem(key).from)
               org = list[fromId].value.organization
             }
             let orgId = utils.getId(org)
@@ -2944,7 +2985,7 @@ var Store = Reflux.createStore({
       if (sampleData.getMyId())
         delete foundResources[utils.getId(me)];
       else if (!isTest) {
-        var myIdentities = list[MY_IDENTITIES].value.allIdentities;
+        var myIdentities = this._getItem(MY_IDENTITIES).allIdentities;
         myIdentities.forEach((meId) =>  {
           if (foundResources[meId.id])
              delete foundResources[meId.id];
@@ -3032,6 +3073,8 @@ var Store = Reflux.createStore({
     var modelName = params.modelName;
     var meta = this.getModel(modelName).value;
     var prop = params.prop;
+    var context = params.context
+
     if (typeof prop === 'string')
       prop = meta[prop];
     var backlink = prop ? (prop.items ? prop.items.backlink : prop) : null;
@@ -3044,7 +3087,7 @@ var Store = Reflux.createStore({
 
     var chatTo = params.to
     if (chatTo  &&  chatTo.id)
-      chatTo = list[utils.getId(chatTo)].value
+      chatTo = this._getItem(utils.getId(chatTo))
     var chatId = chatTo ? utils.getId(chatTo) : null;
     var isChatWithOrg = chatTo  &&  chatTo[TYPE] === ORGANIZATION;
     var toOrgId
@@ -3059,7 +3102,7 @@ var Store = Reflux.createStore({
       chatId = utils.getId(chatTo)
       // isChatWithOrg = false
       toOrgId = utils.getId(params.to)
-      toOrg = list[toOrgId].value
+      toOrg = this._getItem(toOrgId)
       thisChatMessages = chatMessages[toOrgId]
     }
     else {
@@ -3078,15 +3121,17 @@ var Store = Reflux.createStore({
     }
     if (!thisChatMessages  &&  (!params.to  ||  chatId === meId)) {
       thisChatMessages = []
+      let self = this
       Object.keys(list).filter((key) => {
-        let type = list[key].value[TYPE]
+        let r = self._getItem(key)
+        let type = r[TYPE]
         let m = this.getModel(type)
         if (!m)
           return false
         if (type === modelName                      ||
            m.value.subClassOf === modelName         ||
            (modelName === MESSAGE  &&  m.value.interfaces)) {
-          thisChatMessages.push({id: key, time: list[key].value.time})
+          thisChatMessages.push({id: key, time: r.time})
           return true
         }
       })
@@ -3107,9 +3152,9 @@ var Store = Reflux.createStore({
 
       isTest = true;
       var meId = constants.TYPES.PROFILE + '_' + testMe;
-      me = list[meId].value;
+      me = this._getItem(meId);
       this.setMe(me);
-      var myIdentities = list[MY_IDENTITIES].value;
+      var myIdentities = this._getItem(MY_IDENTITIES);
       if (myIdentities)
         myIdentities.currentIdentity = meId;
     }
@@ -3135,11 +3180,12 @@ var Store = Reflux.createStore({
     let resourceId = params.resource ? utils.getId(params.resource) : null
     for (let i=ii; i>=0; i--) {
       var key = thisChatMessages[i].id
+      var r = this._getItem(key)
       var iMeta = null;
       if (isAllMessages)
         iMeta = utils.getModel(key.split('_')[0]).value
-      else if (list[key].value[TYPE] !== modelName) {
-        var rModel = this.getModel(list[key].value[TYPE])
+      else if (r[TYPE] !== modelName) {
+        var rModel = this.getModel(r[TYPE])
         if (!rModel)
           continue
         rModel = rModel.value;
@@ -3149,24 +3195,29 @@ var Store = Reflux.createStore({
       }
       if (!iMeta)
         iMeta = meta;
-      var r = list[key].value;
       if (r.canceled)
         continue;
+      if (context) {
+        if (!this.inContext(r, context))
+          continue
+      }
       var isFormError = isAllMessages && r[TYPE] === FORM_ERROR
       // Make sure that the messages that are showing in chat belong to the conversation between these participants
       if (isVerification) {
         if (r.document) {
-          var d = list[utils.getId(r.document)]
+          var d = this._getItem(utils.getId(r.document))
           if (!d)
             continue
 
-          if (params.resource  &&  resourceId !== meId  && utils.getId(params.resource) !== utils.getId(d.value))
+          if (params.resource  &&  resourceId !== meId  && utils.getId(params.resource) !== utils.getId(d))
             continue
-          r.document = d.value;
+          r.document = d;
         }
       }
-      else if (isFormError)
-        r.prefill = list[utils.getId(r.prefill)] ? list[utils.getId(r.prefill)].value : r.prefill
+      else if (isFormError) {
+        let prefill = this._getItem(utils.getId(r.prefill))
+        r.prefill =  prefill ? prefill : r.prefill
+      }
 
       // HACK to not show service message in customer stream
       else if (r.message  &&  r.message.length)  {
@@ -3183,18 +3234,18 @@ var Store = Reflux.createStore({
         if (chatTo.organization  &&  r[TYPE] === constants.TYPES.CUSTOMER_WAITING) {
           var rid = utils.getId(chatTo.organization);
 
-          var org = list[utils.getId(r.to)].value.organization
-          var orgId = utils.getId(org)
-          if (!utils.isEmployee(list[utils.getId(chatTo.organization)].value))
+          // var org = this._getItem(utils.getId(r.to)).organization
+          // var orgId = utils.getId(org)
+          if (!utils.isEmployee(this._getItem(rid)))
             continue;
         }
 
       }
 
       var isSharedWith = false, timeResourcePair = null
-      if (r.sharedWith  &&  toOrgId) {
-        var sharedWith = r.sharedWith.filter(function(r) {
-          let org = list[r.bankRepresentative].value.organization
+      if (r._sharedWith  &&  toOrgId) {
+        var sharedWith = r._sharedWith.filter((r) => {
+          let org = this._getItem(r.bankRepresentative).organization
           return (org) ? utils.getId(org) === toOrgId : false
         })
         isSharedWith = sharedWith.length !== 0
@@ -3239,7 +3290,7 @@ var Store = Reflux.createStore({
       if (params.strict  &&  chatId !== utils.getId(r.to))
         continue
 
-      if (r.sharedWith  &&  toOrgId  &&  !isSharedWith)
+      if (r._sharedWith  &&  toOrgId  &&  !isSharedWith)
         continue
       if (isVerificationR  ||  r[TYPE] === ADDITIONAL_INFO) {
         var doc = {};
@@ -3303,7 +3354,14 @@ var Store = Reflux.createStore({
       return
     return foundResources.reverse()
   },
-
+  onGetAllContexts(params) {
+    let list = this.searchMessages(params)
+    let l = list.filter((r) => r.formsCount)
+    this.trigger({action: 'allContexts', list: l, to: params.to})
+  },
+  inContext(r, context) {
+    return r._context && utils.getId(r._context) === utils.getId(context)
+  },
   getSearchResult(result) {
     return result.map((r) => {
       return r.value
@@ -3321,10 +3379,10 @@ var Store = Reflux.createStore({
       var v = resource.verifications[i];
       var vId = utils.getId(v)
       var ver = {};
-      extend(ver, list[vId].value);
+      extend(ver, this._getItem(vId));
       resource.verifications[i] = ver;
       if (ver.organization  &&  !ver.organization.photos) {
-        var orgPhotos = list[utils.getId(ver.organization.id)].value.photos;
+        var orgPhotos = this._getItem(utils.getId(ver.organization.id)).photos;
         if (orgPhotos)
           ver.organization.photo = orgPhotos[0].url;
       }
@@ -3363,7 +3421,7 @@ var Store = Reflux.createStore({
       let rr = simpleLinkMessages[r.form]
       if (rr) {
         rr.documentCreated = true
-        list[utils.getId(rr)].value.documentCreated = true
+        this._getItem(utils.getId(rr)).documentCreated = true
         continue
       }
       simpleLinkMessages[r.form] = r
@@ -3375,7 +3433,7 @@ var Store = Reflux.createStore({
     var shareableResourcesRootToR = {}
 
     var isOrg = to  &&  to[TYPE] === ORGANIZATION
-    var org = isOrg ? to : (to.organization ? list[utils.getId(to.organization)].value : null)
+    var org = isOrg ? to : (to.organization ? this._getItem(utils.getId(to.organization)) : null)
     var reps
     if (isOrg)
       reps = this.getRepresentatives(utils.getId(org))
@@ -3386,8 +3444,8 @@ var Store = Reflux.createStore({
     if (productsToShare  &&  productsToShare.length) {
       productsToShare.forEach((r) => {
         let fromId = utils.getId(r.from)
-        if (r.sharedWith) {
-          let sw = r.sharedWith.filter((r) => {
+        if (r._sharedWith) {
+          let sw = r._sharedWith.filter((r) => {
             if (reps.filter((rep) => {
                     if (utils.getId(rep) === r.bankRepresentative)
                       return true
@@ -3414,7 +3472,7 @@ var Store = Reflux.createStore({
         let rr = {
           [TYPE]: VERIFICATION,
           document: r,
-          organization: list[utils.getId(r.from)].value.organization
+          organization: this._getItem(utils.getId(r.from)).organization
         }
 
         addAndCheckShareable(rr)
@@ -3436,19 +3494,19 @@ var Store = Reflux.createStore({
           return
         // Filter out the verification from the same company
         var fromId = utils.getId(val.from)
-        var fromOrgId = utils.getId(list[fromId].value.organization)
+        var fromOrgId = utils.getId(this._getItem(fromId).organization)
         if (fromOrgId === toId)
           return
-        var document = doc.id ? list[utils.getId(doc.id)]  &&  list[utils.getId(doc.id)].value : doc;
+        var document = doc.id ? this._getItem(utils.getId(doc.id)) : doc;
         if (!document)
           return;
         if (to  &&  org  &&  document.verifications) {
           var thisCompanyVerification;
           for (var i=0; i<document.verifications.length; i++) {
-            var v = list[utils.getId(document.verifications[i])].value;
+            var v = this._getItem(utils.getId(document.verifications[i]));
 
             if (v.organization  &&  utils.getId(org) === utils.getId(v.organization)) {
-              let sharedWith = doc.sharedWith
+              let sharedWith = doc._sharedWith
               if (!sharedWith)
                 thisCompanyVerification = true;
               else {
@@ -3483,7 +3541,7 @@ var Store = Reflux.createStore({
         let rr = {
           [TYPE]: VERIFICATION,
           document: r,
-          organization: list[utils.getId(r.to)].value.organization
+          organization: this._getItem(utils.getId(r.to)).organization
         }
         addAndCheckShareable(rr)
       })
@@ -3589,7 +3647,7 @@ var Store = Reflux.createStore({
         var verificationRequest = value.document;
 
         var vrId = utils.getId(verificationRequest);
-        var vr = list[vrId].value;
+        var vr = this._getItem(vrId);
         if (!vr.additionalInfo  ||  !vr.additionalInfo.length)
           vr.additionalInfo = [];
         vr.additionalInfo.push(this.buildRef(value))
@@ -3601,9 +3659,9 @@ var Store = Reflux.createStore({
     if (isMessage) {
       let isForm = model.subClassOf === FORM
       if (/*isNew  &&*/  isForm) {
-        if (!value.sharedWith)
-          value.sharedWith = []
-        value.sharedWith.push(this.createSharedWith(utils.getId(value.to), new Date().getTime()))
+        if (!value._sharedWith)
+          value._sharedWith = []
+        value._sharedWith.push(this.createSharedWith(utils.getId(value.to), new Date().getTime()))
       }
       if (!isNew  &&  isForm) {
         let prevRes = list[value[TYPE] + '_' + value[ROOT_HASH] + '_' + value[PREV_HASH]]
@@ -3644,7 +3702,7 @@ var Store = Reflux.createStore({
         if (toId === meId)
           toId = utils.getId(value.from)
 
-        let org = list[toId].value.organization
+        let org = self._getItem(toId).organization
         self.addMessagesToChat(utils.getId(org), value)
       }
       if (mid)
@@ -3653,7 +3711,7 @@ var Store = Reflux.createStore({
         if (me.language || value.language) {
           if (value.language) {
             if (!me.language  ||  (utils.getId(me.language) !== utils.getId(value.language)))
-              newLanguage = list[utils.getId(value.language)].value
+              newLanguage = self._getItem(utils.getId(value.language))
           }
         }
 
@@ -3661,7 +3719,7 @@ var Store = Reflux.createStore({
         // extend(true, me, value)
         self.setMe(me)
         if (newLanguage) {
-          let lang = list[utils.getId(me.language)].value
+          let lang = this._getItem(utils.getId(me.language))
           value.languageCode = lang.code
           db.put(iKey, value)
 
@@ -3705,15 +3763,15 @@ var Store = Reflux.createStore({
     if (model.id === SIMPLE_MESSAGE  &&  value.message  && value.message === '[already published](tradle.Identity)')
       return
 
-    let to = list[utils.getId(value.to)].value;
+    let to = this._getItem(utils.getId(value.to));
     let toId = utils.getId(to)
     if (toId !== meId  &&  to.bot)
-      to = list[utils.getId(to.organization)].value
+      to = this._getItem(utils.getId(to.organization))
 
     let dn
     let messageType = model.id
     if (sharedWith) {
-      let sharedWithOrg = list[utils.getId(sharedWith.organization)].value
+      let sharedWithOrg = this._getItem(utils.getId(sharedWith.organization))
       let orgName = utils.getDisplayName(to, this.getModel(ORGANIZATION).value.properties)
       if (model.subClassOf !== MY_PRODUCT && model.subClassOf !== FORM)
         return
@@ -3726,13 +3784,13 @@ var Store = Reflux.createStore({
       return
     }
 
-    let from = list[utils.getId(value.from)].value;
+    let from = this._getItem(utils.getId(value.from));
     let fromId = utils.getId(from)
     let meId = utils.getId(me)
-    let isNew = !value[ROOT_HASH] || !list[utils.getId(value)]
+    let isNew = !value[ROOT_HASH] || !this._getItem(utils.getId(value))
 
     if (fromId !== meId  &&  from.bot)
-      from = list[utils.getId(from.organization)].value
+      from = this._getItem(utils.getId(from.organization))
 
     if (model.id === FORM_REQUEST  &&  value.product) {
       let m = this.getModel(value.product).value
@@ -3801,7 +3859,7 @@ var Store = Reflux.createStore({
     extend(true, identity, publishedIdentity)
     var iKey = IDENTITY + '_' + identity[ROOT_HASH]
     if (me.language) {
-      me.language = list[utils.getId(me.language)].value
+      me.language = this._getItem(utils.getId(me.language))
       me.languageCode = me.language.code
     }
     batch.push({type: 'put', key: iKey, value: identity});
@@ -3834,7 +3892,7 @@ var Store = Reflux.createStore({
     .then(function(json) {
       var settings = list[key]
       if (settings) {
-        const curVal = list[key].value
+        const curVal = self._getItem(key)
         self._mergeItem(key, { urls: [...curVal.urls, v] })
       }
       else {
@@ -3846,7 +3904,7 @@ var Store = Reflux.createStore({
       // if (me)
       //   self.monitorTim()
       self.trigger({action: 'addItem', resource: value})
-      db.put(key, list[key].value)
+      db.put(key, self._getItem(key))
     })
     .catch((err) => {
       self.trigger({action: 'addItem', error: err.message, resource: value})
@@ -3923,13 +3981,13 @@ var Store = Reflux.createStore({
 
   // TODO: simplify getDriver to use this
   loadIdentityAndKeys(me) {
-    var mePub = me[ROOT_HASH] ? list[IDENTITY + '_' + me[ROOT_HASH]].value.pubkeys : me.pubkeys
+    var mePub = me[ROOT_HASH] ? this._getItem(IDENTITY + '_' + me[ROOT_HASH]).pubkeys : me.pubkeys
     var mePriv
     var identity
-    var allMyIdentities = list[MY_IDENTITIES]
+    var allMyIdentities = this._getItem(MY_IDENTITIES)
     if (allMyIdentities) {
-      var all = allMyIdentities.value.allIdentities
-      var curId = allMyIdentities.value.currentIdentity
+      var all = allMyIdentities.allIdentities
+      var curId = allMyIdentities.currentIdentity
       all.some(id => {
         if (id.id === curId) {
           // currentIdentity = id
@@ -4046,7 +4104,7 @@ var Store = Reflux.createStore({
     //   loadIdentityAndKeys = utils.getPassword(ENCRYPTION_KEY)
 
     if (me.language)
-      language = list[utils.getId(me.language)] && list[utils.getId(me.language)].value
+      language = list[utils.getId(me.language)] && this._getItem(utils.getId(me.language))
 
     return driverPromise = this.loadIdentityAndKeys(me)
     .then(result => {
@@ -4054,11 +4112,8 @@ var Store = Reflux.createStore({
         let privkeys = result.keys.map(k => {
           return k.toJSON ? k.toJSON(true) : k
         })
-        let myIdentities = list[MY_IDENTITIES]
+        let myIdentities = this._getItem(MY_IDENTITIES)
         if (myIdentities) {
-          myIdentities = myIdentities.value
-
-
           let currentIdentity = myIdentities.currentIdentity
           myIdentities.allIdentities.forEach((r) => {
              if (r.id === currentIdentity)
@@ -4147,7 +4202,7 @@ var Store = Reflux.createStore({
 
     return meDriver.signAndSend({
       object: msg,
-      to: { fingerprint: self.getFingerprint(list[key].value) }
+      to: { fingerprint: self.getFingerprint(this._getItem(key)) }
     })
     .catch(function(err) {
       debugger
@@ -4189,9 +4244,9 @@ var Store = Reflux.createStore({
           contactInfo: contactInfo
         };
         newIdentity[TYPE] = PROFILE;
-        var myIdentities = list[MY_IDENTITIES];
+        var myIdentities = self._getItem(MY_IDENTITIES)
         if (myIdentities)  {
-          var currentIdentity = myIdentities.value.currentIdentity;
+          var currentIdentity = myIdentities.currentIdentity;
           newIdentity[constants.OWNER] = {
             id: currentIdentity,
             title: utils.getDisplayName(currentIdentity, props)
@@ -4480,7 +4535,7 @@ var Store = Reflux.createStore({
                ? obj.objectinfo.author
                : obj.txId ? obj.from[ROOT_HASH] : null
     fromId = PROFILE + '_' + fromId
-    var from = list[fromId].value
+    var from = this._getItem(fromId)
     var me = utils.getMe()
     if (utils.getId(me) === fromId)
       val.time = val.time || obj.timestamp
@@ -4531,7 +4586,7 @@ var Store = Reflux.createStore({
       }
     }
     if (model.subClassOf === MY_PRODUCT)
-      val.sharedWith = [this.createSharedWith(utils.getId(val.from.id), new Date().getTime())]
+      val._sharedWith = [this.createSharedWith(utils.getId(val.from.id), new Date().getTime())]
 
     self._mergeItem(key, val)
     var retParams = {
@@ -4544,10 +4599,10 @@ var Store = Reflux.createStore({
       var meId = PROFILE + '_' + me[ROOT_HASH]
       var isSelfIntroduction = model.id === SELF_INTRODUCTION
       var id = !isSelfIntroduction  &&  toId === meId ? fromId : toId
-      var to = list[id].value
+      var to = this._getItem(id)
       if (!noTrigger) {
         if (to.organization) {
-          var org =  list[utils.getId(to.organization)].value
+          var org =  this._getItem(utils.getId(to.organization))
           resultList = this.searchMessages({to: org, modelName: MESSAGE})
         }
         else
@@ -4578,12 +4633,12 @@ var Store = Reflux.createStore({
       if (model.id === PRODUCT_LIST) {
         // var orgList = this.searchNotMessages({modelName: ORGANIZATION})
         // this.trigger({action: 'list', list: orgList, forceUpdate: true})
-        this.trigger({action: 'getItem', resource: list[utils.getId(from.organization)].value})
+        this.trigger({action: 'getItem', resource: this._getItem(utils.getId(from.organization))})
       }
 
       if (isConfirmation) {
         var fOrg = from.organization
-        var org = fOrg ? list[utils.getId(fOrg)].value : null
+        var org = fOrg ? this._getItem(utils.getId(fOrg)) : null
         var msg = {
           message: me.firstName + ' is waiting for the response',
           [TYPE]: constants.TYPES.CUSTOMER_WAITING,
@@ -4623,7 +4678,7 @@ var Store = Reflux.createStore({
     delete profile.v
     let key = utils.getId(val)
     var profileKey = utils.getId(profile)
-    let v = list[key] ? list[profileKey].value : null
+    let v = list[key] ? this._getItem(profileKey) : null
     if (!v  &&  me  &&  val[ROOT_HASH] === me[ROOT_HASH])
       v = me
     if (v)  {
@@ -4636,7 +4691,7 @@ var Store = Reflux.createStore({
     if (val.organization) {
       // if (val.organization.title === 'Rabobank'  &&  val.securityCode)
       //   return
-      org = list[utils.getId(val.organization)]  &&  list[utils.getId(val.organization)].value
+      org = list[utils.getId(val.organization)]  &&  this._getItem(utils.getId(val.organization))
       if (org) {
         profile.organization = val.organization
         delete val.organization
@@ -4678,31 +4733,27 @@ var Store = Reflux.createStore({
   },
   putMessageInDB(val, obj, batch, onMessage) {
     var fromProfile = PROFILE + '_' + (obj.objectinfo ? obj.objectinfo.author : obj.from[ROOT_HASH])
-    var fromR = list[fromProfile]
+    var from = this._getItem(fromProfile)
 
-    if (!fromR) {
+    if (!from) {
       if (val[TYPE] !== SELF_INTRODUCTION)
         return
       let name = val.name || (val.identity.name && val.identity.name.formatted)
-      fromR = {
-        key: fromProfile,
-        value: {
-          [TYPE]: PROFILE,
-          [ROOT_HASH]: obj.objectinfo.author,
-          firstName: name ?  name.charAt(0).toUpperCase() + name.slice(1) : 'NewCustomer' + Object.keys(list).length
-        }
+      from = {
+        [TYPE]: PROFILE,
+        [ROOT_HASH]: obj.objectinfo.author,
+        firstName: name ?  name.charAt(0).toUpperCase() + name.slice(1) : 'NewCustomer' + Object.keys(list).length
       }
     }
     let key = utils.getId(val)
-    var from = fromR.value
 
     // if (me  &&  from[ROOT_HASH] === me[ROOT_HASH])
     //   return
 
-    var to = list[PROFILE + '_' + obj.to[ROOT_HASH]].value
+    var to = this._getItem(PROFILE + '_' + obj.to[ROOT_HASH])
     var fOrg = (me  &&  from[ROOT_HASH] === me[ROOT_HASH]) ? to.organization : from.organization
-    var org = fOrg ? list[utils.getId(fOrg)].value : null
-
+    var org = fOrg ? this._getItem(utils.getId(fOrg)) : null
+    var inDB
     if (onMessage) {
       let profileModel = this.getModel(PROFILE).value
       val.from = {
@@ -4717,11 +4768,43 @@ var Store = Reflux.createStore({
       // self.fillFromAndTo(obj, val)
     }
     else {
-      let inDB = list[key].value
+      let inDB = this._getItem(key)
       val.from = inDB.from
       val.to = inDB.to
+      val._context = inDB._context
+      val._sharedWith = inDB._sharedWith
+      val.verifications = inDB.verifications
     }
+    if (obj.object.context) {
+      // if (!val._contexts)
+      //   val._contexts = []
+      let contextId = PRODUCT_APPLICATION + '_' + obj.object.context
+      let context = this._getItem(contextId)
+      // Avoid doubling the number of forms
+      if (!inDB)
+        context.formsCount = context.formsCount ? ++context.formsCount : 1
+      context.lastMessageTime = new Date().getTime()
+      batch.push({type: 'put', key: contextId, value: context})
 
+      val._context = this.buildRef(context)
+      // val._contexts.push(this.buildRef(context))
+    }
+    else if (val[TYPE] === FORM_REQUEST  && val[ROOT_HASH] === val[CUR_HASH]) {
+      let product = val.product
+      let contexts = this.searchMessages({modelName: PRODUCT_APPLICATION, to: org})
+      if (contexts) {
+        let i = contexts.length - 1
+        for (; i>=0; i--)
+          if (contexts[i].product === product) {
+          // if (!val._contexts)
+          //   val._contexts = []
+          // val._contexts.push(this.buildRef(contexts[i]))
+            val._context = this.buildRef(contexts[i])
+            break
+          }
+
+      }
+    }
     // if (onMessage  &&  val[TYPE] === FORGOT_YOU) {
     //   this.forgotYou(from)
     //   return
@@ -4815,8 +4898,8 @@ var Store = Reflux.createStore({
   },
   fillFromAndTo(obj, val) {
     var whoAmI = obj.parsed.data._i.split(':')[0]
-    var from = list[PROFILE + '_' + obj.objectinfo.author].value
-    var to = list[PROFILE + '_' + obj.to[ROOT_HASH]].value
+    var from = this._getItem(PROFILE + '_' + obj.objectinfo.author)
+    var to = this._getItem(PROFILE + '_' + obj.to[ROOT_HASH])
 
     if (whoAmI !== from[ROOT_HASH]) {
       // swap from and to
@@ -4888,7 +4971,7 @@ var Store = Reflux.createStore({
         if (!myId  &&  data.key === MY_IDENTITIES) {
           myId = data.value.currentIdentity;
           if (list[myId])
-            me = list[myId].value;
+            me = this._getItem(myId)
         }
         if (!me  &&  myId  && data.key == myId)
           me = data.value;
@@ -4908,7 +4991,7 @@ var Store = Reflux.createStore({
       for (var p in orgContacts) {
         if (!list[p])
           continue
-        var org = list[p].value
+        var org = this._getItem(p)
         if (!org.contacts  ||  org.contacts.length !== orgContacts[p].length) {
           org.contacts = orgContacts[p]
           continue
@@ -4961,7 +5044,6 @@ var Store = Reflux.createStore({
   },
   // Received by employee/bot request from customer. And all the customer resources on FI side gets deleted
   forgetMe(resource) {
-    let self = this
     let result = this.searchMessages({modelName: MESSAGE, to: resource, isForgetting: true})
     let batch = []
     let ids = []
@@ -4976,10 +5058,10 @@ var Store = Reflux.createStore({
     return db.batch(batch)
     .then(() => {
       ids.forEach((id) => {
-        self.deleteMessageFromChat(utils.getId(resource), list[id].value)
+        this.deleteMessageFromChat(utils.getId(resource), this._getItem(id))
         delete list[id]
       })
-      self.trigger({action: 'messageList', modelName: MESSAGE, forgetMeFromCustomer: true})
+      this.trigger({action: 'messageList', modelName: MESSAGE, forgetMeFromCustomer: true})
       return meDriver.signAndSend({
         object: { [TYPE]: FORGOT_YOU },
         to: { permalink: resource[ROOT_HASH] }
@@ -4992,7 +5074,7 @@ var Store = Reflux.createStore({
   // Cleanup and notify customer that FI successfully forgotten him
   forgotYou(resource) {
     var self = this
-    var org = list[utils.getId(resource.organization)].value
+    var org = this._getItem(utils.getId(resource.organization))
     var orgId = utils.getId(org)
     var msg = {
       [TYPE]: FORGOT_YOU,
@@ -5010,14 +5092,14 @@ var Store = Reflux.createStore({
     )
     var batch = []
     return Q.allSettled(promises)
-    .then(function(result) {
-      result.forEach(function(data) {
+    .then((result) => {
+      result.forEach((data) => {
         if (data.state !== 'fulfilled')
           return
-        data.value.forEach(function(r) {
+        data.value.forEach((r) => {
           r = utils.toOldStyleWrapper(r)
           var rId = utils.getId(r)
-          var res = list[rId] && list[rId].value
+          var res = list[rId] && this._getItem(rId)
           if (!res) {
             let idx = r[TYPE].indexOf('Confirmation')
             if (idx === -1)
@@ -5035,13 +5117,13 @@ var Store = Reflux.createStore({
             r = res
           }
           var isVerification = r[TYPE] === VERIFICATION
-          var model = self.getModel(r[TYPE]).value
+          var model = this.getModel(r[TYPE]).value
           var isForm = !isVerification  &&  model.subClassOf === FORM
-          var deleted = !(res.sharedWith && res.sharedWith.length > 1)
+          var deleted = !(res._sharedWith && res._sharedWith.length > 1)
           if (!deleted) {
             var fromId = utils.getId(res.from)
             var toId = utils.getId(res.to)
-            var sharedWith = res.sharedWith || []
+            var sharedWith = res._sharedWith || []
             var sharedWithKeys = sharedWith.map(function(r) {
               return r.bankRepresentative
             })
@@ -5070,7 +5152,7 @@ var Store = Reflux.createStore({
             if (deleted) {
               var docPair = list[utils.getId(res.document)]
               if (docPair) {
-                var doc = list[utils.getId(res.document)].value
+                var doc = this._getItem(utils.getId(res.document))
                 if (doc.verifications) {
                   var verifications = doc.verifications.filter(function(r) {
                     return (utils.getId(r) === rId) ? false : true
@@ -5088,19 +5170,19 @@ var Store = Reflux.createStore({
             }
           }
           if (deleted) {
-            if (res.sharedWith) {
-              res.sharedWith.forEach((r) => {
-                let org = list[r.bankRepresentative].value.organization
-                // self.deleteMessageFromChat(utils.getId(org), res)
+            if (res._sharedWith) {
+              res._sharedWith.forEach((r) => {
+                let org = this._getItem(r.bankRepresentative).organization
+                // this.deleteMessageFromChat(utils.getId(org), res)
               })
             }
             delete list[rId]
-            // self.deleteMessageFromChat(orgId, r)
+            // this.deleteMessageFromChat(orgId, r)
             batch.push({type: 'del', key: rId})
           }
         })
       })
-      self.trigger({action: 'messageList', list: [msg], resource: org})
+      this.trigger({action: 'messageList', list: [msg], resource: org})
       chatMessages[orgId] = []
 
       return db.batch(batch)
@@ -5141,7 +5223,6 @@ var Store = Reflux.createStore({
   },
 
   cleanup(result) {
-    var self = this
     if (!result.length)
       return Q()
 
@@ -5151,14 +5232,14 @@ var Store = Reflux.createStore({
       batch.push({type: 'del', key: utils.getId(r), value: r})
     })
     return db.batch(batch)
-    .then(function() {
-      result.forEach(function(r) {
+    .then(() => {
+      result.forEach((r) => {
         if (this.getModel(r[TYPE]).value.interfaces) {
           let id = (utils.getId(r.from) === meId) ? utils.getId(r.from) : utils.getId(r.to)
-          let rep = list[id].value
+          let rep = this._getItem(id)
           let orgId = rep.organization ? utils.getId(rep.organization) : utils.getId(rep)
 
-          self.deleteMessageFromChat(orgId, r)
+          this.deleteMessageFromChat(orgId, r)
         }
         delete list[utils.getId(r)]
       })
@@ -5168,7 +5249,6 @@ var Store = Reflux.createStore({
     })
   },
   onTalkToRepresentative(resource, org) {
-    var self = this
     var orgRep = resource[TYPE] === ORGANIZATION
                ? this.getRepresentative(utils.getId(resource))
                : resource
@@ -5182,10 +5262,10 @@ var Store = Reflux.createStore({
       msgFrom.to = this.buildRef(me)
       msg.id = sha(msg)
       result.push(msg)
-      self.trigger({action: 'messageList', list: result, resource: resource})
+      this.trigger({action: 'messageList', list: result, resource: resource})
       return
     }
-    var result = self.searchMessages({to: resource, modelName: MESSAGE});
+    var result = this.searchMessages({to: resource, modelName: MESSAGE});
     var msg = {
       [TYPE]: SIMPLE_MESSAGE,
       [NONCE]: this.getNonce(),
@@ -5195,12 +5275,12 @@ var Store = Reflux.createStore({
     msgFrom.to = this.buildRef(me)
     msg.id = sha(msg)
     result.push(msg)
-    self.trigger({action: 'messageList', list: result, resource: resource})
+    this.trigger({action: 'messageList', list: result, resource: resource})
     var key = IDENTITY + '_' + orgRep[ROOT_HASH]
 
     return meDriver.signAndSend({
       object: msg,
-      to: { fingerprint: self.getFingerprint(list[key].value) }
+      to: { fingerprint: this.getFingerprint(this._getItem(key)) }
     })
   },
   onForgetMe(resource, noTrigger) {
@@ -5219,7 +5299,7 @@ var Store = Reflux.createStore({
     for (let rep of orgReps) {
       promises.push(meDriver.signAndSend({
         object: msg,
-        to: { fingerprint: this.getFingerprint(list[IDENTITY + '_' + rep[ROOT_HASH]].value) }
+        to: { fingerprint: this.getFingerprint(this._getItem(IDENTITY + '_' + rep[ROOT_HASH])) }
       })
     )}
 
@@ -5285,11 +5365,10 @@ var Store = Reflux.createStore({
     let publishedIdentity
     let deviceId
 
-    let myIdentities = list[MY_IDENTITIES]
+    let myIdentities = this._getItem(MY_IDENTITIES)
     if (myIdentities) {
-      myIdentities = myIdentities.value
       publishedIdentity = myIdentities.allIdentities[0].publishedIdentity
-      deviceId = list[IDENTITY + '_' + pairingData.identity].value.deviceId
+      deviceId = this._getItem(IDENTITY + '_' + pairingData.identity).deviceId
     }
 
     let promise = myIdentities
@@ -5367,18 +5446,18 @@ var Store = Reflux.createStore({
         driverInfo.wsClients[url] = transport
       }
       let self = this
-      transport.on('message', function (msg, from) {
+      transport.on('message', (msg, from) => {
         try {
           const payload = JSON.parse(msg)
           if (payload[TYPE] === PAIRING_RESPONSE) {
             transport.destroy()
             delete driverInfo.wsClients[url]
 
-            return self.onProcessPairingResponse(list[PAIRING_DATA + '_1'].value, payload)
+            return self.onProcessPairingResponse(this._getItem(PAIRING_DATA + '_1'), payload)
             .then(() => {
               debugger
               Alert.alert('Pairing was successful')
-              self.trigger({action: 'pairingSuccessful'})
+              this.trigger({action: 'pairingSuccessful'})
             })
             .catch((err) => {
               debugger
@@ -5504,7 +5583,7 @@ var Store = Reflux.createStore({
     }
   },
   updatePubkeys(batch, identity) {
-    let myIdentities = list[MY_IDENTITIES].value
+    let myIdentities = this._getItem(MY_IDENTITIES)
     let currentIdentity = myIdentities.currentIdentity
 
     let id = currentIdentity.replace(PROFILE, IDENTITY)
@@ -5512,11 +5591,11 @@ var Store = Reflux.createStore({
 
     myIdentities.allIdentities.forEach((r) => {
       if (r.id === currentIdentity)
-        r.publishedIdentity = list[id].value
+        r.publishedIdentity = this._getItem(id)
     })
 
     batch.push({type: 'put', key: MY_IDENTITIES, value: myIdentities})
-    batch.push({type: 'put', key: id, value: list[id].value})
+    batch.push({type: 'put', key: id, value: this._getItem(id)})
 
     // If pairing request was not verified what do we want to do
     db.batch(batch)
@@ -5527,7 +5606,7 @@ var Store = Reflux.createStore({
     if (tradleUtils.hexLink(pairingRes.prev) !== pairingData.identity)
       return Promise.reject(new Error('prev identity does not match expected'))
 
-    let pubkeys = list[IDENTITY + '_' + pairingData.identity].value.pubkeys
+    let pubkeys = this._getItem(IDENTITY + '_' + pairingData.identity).pubkeys
     const hasMyKeys = pubkeys.every(myKey => {
       return pairingRes.identity.pubkeys.some(theirKey => {
         return deepEqual(theirKey, myKey)
@@ -5561,7 +5640,7 @@ var Store = Reflux.createStore({
     // batch.push({type: 'put', key: id, value: list[id].value})
     // db.batch(batch)
 
-    let me = list[PROFILE + '_' + pairingData.identity].value
+    let me = this._getItem(PROFILE + '_' + pairingData.identity)
     return this.getDriver(me)
     .then(() =>  meDriver.addContact(pairingRes.prev))
     .then(() => {
@@ -5751,7 +5830,10 @@ var Store = Reflux.createStore({
     list[key] = { key, value }
   },
   _getItem(r) {
-    return r.value
+    if (typeof r === 'string')
+      return list[r] ? list[r].value : null
+    else
+      return r.value
   },
   _mergeItem(key, value) {
     const current = list[key] || {}
@@ -5843,8 +5925,8 @@ function getProviderUrl (provider) {
   //       }
   //     }
   //     var isSharedWith = false, timeResourcePair = null
-  //     if (r.sharedWith  &&  fromId) {
-  //       var sharedWith = r.sharedWith.filter(function(r) {
+  //     if (r._sharedWith  &&  fromId) {
+  //       var sharedWith = r._sharedWith.filter(function(r) {
   //         let org = list[r.bankRepresentative].value.organization
   //         return (org) ? utils.getId(org) === fromId : false
   //       })
@@ -5877,7 +5959,7 @@ function getProviderUrl (provider) {
   //           continue;
   //       }
   //     }
-  //     if (r.sharedWith  &&  fromId  &&  !isSharedWith)
+  //     if (r._sharedWith  &&  fromId  &&  !isSharedWith)
   //       continue
 
   //     var msg = this.fillMessage(r);
@@ -6346,8 +6428,8 @@ function getProviderUrl (provider) {
         // }
       }
       var isSharedWith = false, timeResourcePair = null
-      if (r.sharedWith  &&  toId) {
-        var sharedWith = r.sharedWith.filter(function(r) {
+      if (r._sharedWith  &&  toId) {
+        var sharedWith = r._sharedWith.filter(function(r) {
           let org = list[r.bankRepresentative].value.organization
           return (org) ? utils.getId(org) === toId : false
         })
@@ -6414,7 +6496,7 @@ function getProviderUrl (provider) {
             if (toId !== msgOrgId) {
               // if (!isSharedWith)
                 continue
-              // let sharedWithThisOrg = r.sharedWith.filter((s) => {
+              // let sharedWithThisOrg = r._sharedWith.filter((s) => {
               //   let rep = list[s.bankRepresentative].value
               //   if (utils.getId(rep.organization) === toId)
               //     return true
@@ -6461,10 +6543,10 @@ function getProviderUrl (provider) {
       if (params.strict  &&  chatId !== utils.getId(r.to))
         continue
 
-      if (r.sharedWith  &&  toId  &&  !isSharedWith)
+      if (r._sharedWith  &&  toId  &&  !isSharedWith)
         continue
-      // if (r.sharedWith  &&  toId) {
-      //   var arr = r.sharedWith.filter(function(r) {
+      // if (r._sharedWith  &&  toId) {
+      //   var arr = r._sharedWith.filter(function(r) {
       //     return utils.getId(list[r.bankRepresentative].value.organization) === toId
       //   })
       //   if (!arr.length)
@@ -6698,7 +6780,7 @@ function getProviderUrl (provider) {
   //     else if (isForm) {
   //       // set organization and photos for items properties for better displaying
   //       let form = list[utils.getId(r.to)].value
-  //       if (toOrgId  &&  r.sharedWith  &&  r.sharedWith.length > 1) {
+  //       if (toOrgId  &&  r._sharedWith  &&  r._sharedWith.length > 1) {
   //         // if (utils.getId(r.to.organization) !== toOrgId) {
   //         //   let filteredVerifications = this.getSharedVerificationsAboutThisForm(r, toOrgId)
   //         // }
@@ -6919,8 +7001,8 @@ function getProviderUrl (provider) {
       }
 
       var isSharedWith = false, timeResourcePair = null
-      if (r.sharedWith  &&  toOrgId) {
-        var sharedWith = r.sharedWith.filter(function(r) {
+      if (r._sharedWith  &&  toOrgId) {
+        var sharedWith = r._sharedWith.filter(function(r) {
           let org = list[r.bankRepresentative].value.organization
           return (org) ? utils.getId(org) === toOrgId : false
         })
@@ -6975,7 +7057,7 @@ function getProviderUrl (provider) {
           //   if (toOrgId !== msgOrgId) {
           //     // if (!isSharedWith)
           //       continue
-          //     // let sharedWithThisOrg = r.sharedWith.filter((s) => {
+          //     // let sharedWithThisOrg = r._sharedWith.filter((s) => {
           //     //   let rep = list[s.bankRepresentative].value
           //     //   if (utils.getId(rep.organization) === toOrgId)
           //     //     return true
@@ -7009,7 +7091,7 @@ function getProviderUrl (provider) {
       if (params.strict  &&  chatId !== utils.getId(r.to))
         continue
 
-      if (r.sharedWith  &&  toOrgId  &&  !isSharedWith)
+      if (r._sharedWith  &&  toOrgId  &&  !isSharedWith)
         continue
       if (isVerificationR  ||  r[TYPE] === ADDITIONAL_INFO) {
         var doc = {};
@@ -7257,8 +7339,8 @@ function getProviderUrl (provider) {
       }
 
       var isSharedWith = false, timeResourcePair = null
-      if (r.sharedWith  &&  toOrgId) {
-        var sharedWith = r.sharedWith.filter(function(r) {
+      if (r._sharedWith  &&  toOrgId) {
+        var sharedWith = r._sharedWith.filter(function(r) {
           let org = list[r.bankRepresentative].value.organization
           return (org) ? utils.getId(org) === toOrgId : false
         })
@@ -7304,7 +7386,7 @@ function getProviderUrl (provider) {
       if (params.strict  &&  chatId !== utils.getId(r.to))
         continue
 
-      if (r.sharedWith  &&  toOrgId  &&  !isSharedWith)
+      if (r._sharedWith  &&  toOrgId  &&  !isSharedWith)
         continue
       if (isVerificationR  ||  r[TYPE] === ADDITIONAL_INFO) {
         var doc = {};
