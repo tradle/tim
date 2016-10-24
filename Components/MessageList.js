@@ -631,7 +631,7 @@ class MessageList extends Component {
   }
   shareContext(orgs) {
     delete orgs[utils.getId(this.props.resource)]
-    Actions.share(nthis.state.context, Object.keys(orgs), this.props.resource)
+    Actions.share(this.state.context, Object.keys(orgs), this.props.resource)
   }
   generateMenu(show) {
     if (!show)
