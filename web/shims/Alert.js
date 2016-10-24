@@ -18,14 +18,13 @@ const Alert = {
 }
 
 function alert (title, message, buttons) {
-  if (typeof message !== 'string') {
-    buttons = message
-    message = null
-  }
-
   if (!message) {
     message = title
     title = null
+  }
+  if (typeof message !== 'string') {
+    buttons = message
+    // message = null
   }
 
   let callback
