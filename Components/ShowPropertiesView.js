@@ -312,7 +312,7 @@ class ShowPropertiesView extends Component {
       viewCols.push(<View key={this.getNextKey()}>
                      <View style={styles.separator}></View>
                      <View style={[styles.textContainer, {padding: 10}]}>
-                       <Text style={styles.title}>{'irrefutableProofs'}</Text>
+                       <Text style={styles.title}>{translate('irrefutableProofs')}</Text>
                        <TouchableOpacity onPress={this.onPress.bind(this, 'https://tbtc.blockr.io/tx/info/' + resource.txId)}>
                          <Text style={[styles.description, {color: '#7AAAC3'}]}>{translate('independentBlockchainViewer') + ' 1'}</Text>
                        </TouchableOpacity>
