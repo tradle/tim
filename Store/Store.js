@@ -1515,6 +1515,8 @@ var Store = Reflux.createStore({
       toChain.message = rr.message
     if (rr.photos)
       toChain.photos = rr.photos
+    if (isSelfIntroduction)
+      toChain.profile = { firstName: me.firstName }
     if (r.list)
       rr.list = r.list
     let required = m.required
