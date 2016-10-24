@@ -48,6 +48,7 @@ var ArticleView = require('./Components/ArticleView');
 var IdentitiesList = require('./Components/IdentitiesList');
 // var SelectPhotoList = require('./Components/SelectPhotoList');
 var ProductChooser = require('./Components/ProductChooser')
+var ContextChooser = require('./Components/ContextChooser')
 var CameraView = require('./Components/CameraView');
 var PhotoCarousel = require('./Components/PhotoCarousel');
 var QRCode = require('./Components/QRCode')
@@ -444,8 +445,8 @@ class TiMApp extends Component {
       return <TouchIDOptIn navigator={nav} { ...props } />
     case 22:
       return <EnumList navigator={nav} { ...props } />
-    // case 23:
-    //   return <DashboardView navigator={nav} { ...props } />
+    case 23:
+      return <ContextChooser navigator={nav} {...props} />
     case 10:
     default: // 10
       return <ResourceList navigator={nav} {...props} />
@@ -513,7 +514,13 @@ var NavigationBarRouteMapper = {
 
     var rbTitle = route.rightButtonTitle
     var iconIdx = rbTitle.indexOf('|')
-    var icon = rbTitle === 'Done' ? 'md-checkmark-circle-outline' : rbTitle === 'Edit' ? 'ios-create-outline' : null
+    var icon = rbTitle === 'Done'
+                         ? 'md-checkmark-circle-outline'
+                         : rbTitle === 'Edit'
+                                     ? 'ios-create-outline'
+                                     : rbTitle === 'Share'
+                                                 ? 'md-share'
+                                                 : null
 
     if (icon)  {
       let color = rbTitle === 'Done' ? '#62C457' : '#7AAAC3'

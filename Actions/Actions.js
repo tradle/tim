@@ -41,6 +41,7 @@ var asyncActions = [
   'processPairingResponse',
   'pairingRequestAccepted',
   'addApp',
+  'getAllContexts',
 ]
 
 var syncActions = [

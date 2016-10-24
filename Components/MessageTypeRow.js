@@ -7,6 +7,7 @@ var bankStyles = require('../styles/bankStyles')
 var DEFAULT_PRODUCT_ROW_BG_COLOR = '#f7f7f7'
 var DEFAULT_PRODUCT_ROW_TEXT_COLOR = '#757575'
 var PRODUCT_ROW_BG_COLOR, PRODUCT_ROW_TEXT_COLOR
+const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 import {
   Image,
   StyleSheet,
@@ -21,8 +22,8 @@ import React, { Component } from 'react'
 class MessageTypeRow extends Component {
   constructor(props) {
     super(props);
-    PRODUCT_ROW_BG_COLOR = this.props.bankStyle.PRODUCT_ROW_BG_COLOR || DEFAULT_PRODUCT_ROW_BG_COLOR
-    PRODUCT_ROW_TEXT_COLOR = this.props.bankStyle.PRODUCT_ROW_TEXT_COLOR || DEFAULT_PRODUCT_ROW_TEXT_COLOR
+    PRODUCT_ROW_BG_COLOR = (this.props.bankStyle  &&  this.props.bankStyle.PRODUCT_ROW_BG_COLOR) || DEFAULT_PRODUCT_ROW_BG_COLOR
+    PRODUCT_ROW_TEXT_COLOR = (this.props.bankStyle  &&  this.props.bankStyle.PRODUCT_ROW_TEXT_COLOR) || DEFAULT_PRODUCT_ROW_TEXT_COLOR
   }
   render() {
     var resource = this.props.resource;
@@ -41,15 +42,17 @@ class MessageTypeRow extends Component {
     }
     else
       ownerPhoto = <View style={[styles.cell, {marginVertical: 20}]} />
-    var renderedRow = [];
     var onPressCall = this.props.onSelect;
 
-    var addStyle, inRow;
-    if (!renderedRow.length) {
-      var vCols = translate(resource);
-      if (vCols)
-        renderedRow = <Text style={[styles.modelTitle, {color: PRODUCT_ROW_TEXT_COLOR}]} numberOfLines={2}>{vCols}</Text>;
-    }
+    var title
+    if (resource.id)
+      title = translate(resource)
+    else if (resource[constants.TYPE] === PRODUCT_APPLICATION)
+      title = utils.getModel(resource.product) ? utils.getModel(resource.product).value.title : resource.product
+    else
+      title = utils.getDisplayName(resource, utils.getModel(resource[constants.TYPE]).value.properties)
+    let renderedRow = <Text style={[styles.modelTitle, {color: PRODUCT_ROW_TEXT_COLOR}]} numberOfLines={2}>{title}</Text>;
+
     var verPhoto;
     if (resource.owner  &&  resource.owner.photos) {
       var ownerImg = resource.owner.photos[0].url;
