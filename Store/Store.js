@@ -2277,9 +2277,15 @@ var Store = Reflux.createStore({
             time: new Date().getTime()
           }
           self.trigger({action: 'employeeOnboarding', to: this._getItem(orgId)})
-          meDriver.signAndSend({
+          let sendParams = {
             object: msg,
             to: { fingerprint: self.getFingerprint(this._getItem(utils.getId(IDENTITY + '_' + orgRep[ROOT_HASH]))) }
+          }
+          meDriver.signAndSend(sendParams)
+          .then((data) => {
+            msg[CUR_HASH] = data.object.link
+            msg[ROOT_HASH] = data.object.permalink
+            self._setItem(utils.getId(msg), msg)
           })
           .catch(function (err) {
             debugger
@@ -2531,10 +2537,14 @@ var Store = Reflux.createStore({
   },
   onShare(resource, shareWithList, originatingResource) {
     if (resource[TYPE] === PRODUCT_APPLICATION) {
-      let list = shareWithList.map((id) => id.split('_')[1])
+      let list = shareWithList.map((id) => {
+        let rep = this.getRepresentative(id)
+        return this.buildRef(rep)
+      })
+
       let msg = {
         [TYPE]: 'tradle.ShareContext',
-        context: resource[ROOT_HASH],
+        context: this.buildRef(resource),
         with: list
       }
       let rep = this.getRepresentative(utils.getId(originatingResource))
