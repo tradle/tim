@@ -910,22 +910,20 @@ class ResourceList extends Component {
   }
 
   renderHeader() {
-    if (this.props.modelName !== constants.TYPES.PROFILE) return <View />
-
-    return (
-      <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
-        <TouchableOpacity onPress={this.showBanks.bind(this)}>
-          <View style={styles.row}>
-            <View>
-              <Image source={require('../img/banking.png')} style={styles.cellImage} />
+    return (this.props.modelName === constants.TYPES.PROFILE)
+          ? <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
+              <TouchableOpacity onPress={this.showBanks.bind(this)}>
+                <View style={styles.row}>
+                  <View>
+                    <Image source={require('../img/banking.png')} style={styles.cellImage} />
+                  </View>
+                  <View style={styles.textContainer}>
+                    <Text style={styles.resourceTitle}>{translate('officialAccounts')}</Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
             </View>
-            <View style={[styles.textContainer, {alignSelf: 'center'}]}>
-              <Text style={styles.resourceTitle}>Official Accounts</Text>
-            </View>
-          </View>
-        </TouchableOpacity>
-      </View>
-    )
+          : <View />
   }
 
   // showQRCode1(purpose, content) {
