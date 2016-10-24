@@ -205,8 +205,11 @@ class MessageRow extends Component {
         if (message.charAt(0) === '['  ||  longMessage)
           viewStyle.width = msgWidth; //isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
       }
-      if (!isSimpleMessage)
-        viewStyle.width =  message ? Math.min(msgWidth, message.length * utils.getFontSize(10) + 40) : msgWidth
+      if (!isSimpleMessage) {
+        let msgW = message.length * utils.getFontSize(10) + 100
+        // if (msgW > msgWidth)
+          viewStyle.width =  message ? Math.min(msgWidth, msgW) : msgWidth
+      }
 
 
       if (this.props.sendStatus  &&  this.props.sendStatus !== null) {
