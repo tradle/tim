@@ -950,7 +950,7 @@ class NewResource extends Component {
       istyle.push({paddingBottom: 0, height: count * height + 35})
     }
     if (!count  ||  !isPhoto) {
-      var aiStyle = [{paddingTop: 30, paddingBottom: 7}]
+      var aiStyle = [{paddingBottom: 7}]
       return (
         <View key={this.getNextKey()}>
           <View style={[istyle, {marginHorizontal: 10}]} ref={bl.name}>
