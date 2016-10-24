@@ -263,7 +263,7 @@ class ResourceList extends Component {
       var me = utils.getMe()
 
       var msg = {
-        message: me.firstName + ' is waiting for the response',
+        message: translate('customerWaiting', me.firstName),
         _t: constants.TYPES.SELF_INTRODUCTION,
         identity: params.myIdentity,
         from: me,
@@ -484,7 +484,7 @@ class ResourceList extends Component {
       if (this.props.officialAccounts) {
         if (!utils.isEmployee(resource)) {
           var msg = {
-            message: me.firstName + ' is waiting for the response',
+            message: translate('customerWaiting', me.firstName),
             _t: constants.TYPES.CUSTOMER_WAITING,
             from: me,
             to: resource,

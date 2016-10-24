@@ -142,5 +142,6 @@
     "viewTerms": "Please view the Terms and Conditions",
     "irrefutableProofs": "Irrefutable proofs",
     "independentBlockchainViewer": "Independent blockchain viewer",
-    "contextsFor": "Contexts for"
+    "contextsFor": "Contexts for",
+    "customerWaiting": "{1} has entered the chat",
 }
