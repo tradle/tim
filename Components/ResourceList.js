@@ -914,7 +914,7 @@ class ResourceList extends Component {
                     <Image source={require('../img/banking.png')} style={styles.cellImage} />
                   </View>
                   <View style={styles.textContainer}>
-                    <Text style={styles.resourceTitle}>Official Accounts</Text>
+                    <Text style={styles.resourceTitle}>{translate('officialAccounts')}</Text>
                   </View>
                 </View>
               </TouchableHighlight>
