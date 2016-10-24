@@ -2285,6 +2285,8 @@ var Store = Reflux.createStore({
           .then((data) => {
             msg[CUR_HASH] = data.object.link
             msg[ROOT_HASH] = data.object.permalink
+            msg.to = self.buildRef(orgRep)
+            msg.from = self.buildRef(me)
             self._setItem(utils.getId(msg), msg)
           })
           .catch(function (err) {
