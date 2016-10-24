@@ -1536,7 +1536,6 @@ var Store = Reflux.createStore({
     var batch = []
     var error
     var welcomeMessage
-    var tmpKey
     // var promise = Q(protocol.linkString(toChain))
     let hash = r.to[ROOT_HASH]
     if (!hash)
@@ -1547,9 +1546,12 @@ var Store = Reflux.createStore({
     return meDriver.sign({ object: toChain })
     .then(function(result) {
       toChain = result.object
-      tmpKey = rr[ROOT_HASH] = result.sig
+      let hash = protocol.linkString(result.object)
+
+      rr[ROOT_HASH] = r[ROOT_HASH] = rr[CUR_HASH] = r[CUR_HASH] = hash
 
       if (r[TYPE] === PRODUCT_APPLICATION) {
+        rr._context = r._context = {id: utils.getId(r), title: r.product}
         let params = {
           action: 'addItem',
           resource: rr,
@@ -1669,8 +1671,8 @@ var Store = Reflux.createStore({
         toOrg = to.organization ? to.organization : to
       }
       let orgId = utils.getId(toOrg)
-      self.deleteMessageFromChat(orgId, rr)
-      delete list[rr[TYPE] + '_' + tmpKey]
+      // self.deleteMessageFromChat(orgId, rr)
+      // delete list[rr[TYPE] + '_' + tmpKey]
 
       // saving the new message
       const data = utils.toOldStyleWrapper(result.message)
@@ -1683,7 +1685,7 @@ var Store = Reflux.createStore({
       // rr._sendStatus = self.isConnected ? SENDING : QUEUED
 
       self._setItem(key, rr)
-      self.addMessagesToChat(orgId, rr)
+      // self.addMessagesToChat(orgId, rr)
       return db.batch(batch)
     })
     .catch(function(err) {
@@ -1731,9 +1733,12 @@ var Store = Reflux.createStore({
       let cId = utils.getId(r._context)
       sendParams.other.context = cId.split('_')[1]
       let c = this._getItem(cId)
-      c.lastMessageTime = new Date().getTime()
-      c.formsCount = c.formsCount ? ++c.formsCount : 1
-      db.put(cId, c)
+      // will be null for PRODUCT_APPLICATION itself
+      if (c) {
+        c.lastMessageTime = new Date().getTime()
+        c.formsCount = c.formsCount ? ++c.formsCount : 1
+        db.put(cId, c)
+      }
     }
     if (!sendParams.to)
       sendParams.to = { fingerprint: this.getFingerprint(this._getItem(toId)) }
@@ -2530,9 +2535,24 @@ var Store = Reflux.createStore({
     })
 
   },
-  onShare(resource, shareWithList, formResource) {
+  onShare(resource, shareWithList, originatingResource) {
+    if (resource[TYPE] === PRODUCT_APPLICATION) {
+      let msg = {
+        [TYPE]: 'tradle.ShareContext',
+        context: resource[ROOT_HASH],
+        with: shareWithList
+      }
+      let repId = this.getRepresentative(utils.getId(originatingResource))
+
+      let sendParams = {
+        object: msg,
+        to: {fingerprint: this.getFingerprint(this._getItem(repId))},
+      }
+
+      return meDriver.send(sendParams)
+    }
     if (!Array.isArray(shareWithList))
-      return this.onShareOne(resource, shareWithList, formResource)
+      return this.onShareOne(resource, shareWithList, originatingResource)
     let promisses = []
     shareWithList.forEach((r) => {
       promisses.push(this.onShareOne(resource, this._getItem(r)))
@@ -2681,41 +2701,6 @@ var Store = Reflux.createStore({
       //   err = err;
       // });
 
-    // var togo = 1;
-    // // this.loadModels()
-    // // var name = me.firstName.toLowerCase();
-    // var self = this
-    // meDriver.destroy()
-    // .then(function() {
-    //   meDriver = null
-    //   driverPromise = null
-
-    //   rimraf('./', function () {
-    //     console.log('rimraf done')
-    //     finish()
-    //   })
-    //   ;[
-    //     'addressBook.db',
-    //     'msg-log.db',
-    //     'messages.db',
-    //     'txs.db'
-    //   ].forEach(function (dbName) {
-    //     ;[name].forEach(function (name) {
-    //       togo++
-    //       leveldown.destroy(TIM_PATH_PREFIX + '-' + dbName, finish)
-    //     })
-    //   })
-
-    //   function finish () {
-    //     if (--togo === 0)  {
-    //       isLoaded = false;
-    //       self.onReloadDB1()
-    //     }
-    //   }
-    // })
-    // .catch(function(err) {
-    //   err = err
-    // })
   },
   onMessageList(params) {
     this.onList(params);
@@ -2734,13 +2719,6 @@ var Store = Reflux.createStore({
     }
   },
   getList(params) {
-    //query, modelName, resource, isAggregation, prop) {
-    // meDriver.messages().byRootHash("41677f5827973883a3a5259c1337bda9a5360d38", function(err, r) {
-    //   meDriver.lookupObject(r[0])
-    //     .then(function (obj) {
-    //       debugger
-    //     })
-    // })
     var result = this.searchResources(params);
     if (params.isAggregation)
       result = this.getDependencies(result);
@@ -2755,17 +2733,6 @@ var Store = Reflux.createStore({
     var model = this.getModel(params.modelName).value;
     var isMessage = model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1);
 
-    // if (!isMessage)
-    //   return
-    // HACK
-    // utils.dedupeVerifications(result)
-
-    // var resultList = [];
-    // result.forEach((r) =>  {
-    //   var rr = {};
-    //   extend(rr, r);
-    //   resultList.push(rr);
-    // })
     var resultList = result
     var shareableResources;
     var retParams = {
@@ -2958,11 +2925,6 @@ var Store = Reflux.createStore({
         continue
       if (r.canceled)
         continue;
-      // if (r[constants.OWNER]) {
-      //   var id = utils.getId(r[constants.OWNER]);
-      //   if (id != me[TYPE] + '_' + me[ROOT_HASH])
-      //     continue;
-      // }
       if (containerProp  &&  (!r[containerProp]  ||  utils.getId(r[containerProp]) !== resourceId))
         continue;
       if (!query) {
@@ -3577,22 +3539,6 @@ var Store = Reflux.createStore({
       }
     }
   },
-  // Checks if the  version of the resource is the latest
-//   isNewerVersion(r, shareableResources) {
-//     let arr = shareableResources[r[TYPE]]
-//     for (let i=0; i<arr.length; i++) {
-//       let rr = arr[i].document
-//       if (r[ROOT_HASH] === rr[ROOT_HASH]) {
-// // Alert.alert('rtime = ' + r.time + '; rrtime = ' + rr.time)
-//         if (r.time < rr.time)
-//           return false
-//         else
-//           arr.splice(i, 1)
-//       }
-//     }
-//     return true
-//   },
-
   getNonce() {
     return crypto.randomBytes(32).toString('hex')
   },
@@ -3947,27 +3893,10 @@ var Store = Reflux.createStore({
     if (!pubkeys) {
       // Choose any employee from the company to send the notification about the customer
       if (r[TYPE] === ORGANIZATION) {
-        // var secCodes = this.searchNotMessages({modelName: 'tradle.SecurityCode', to: r})
         var employees = this.searchNotMessages({modelName: PROFILE, prop: 'organization', to: r})
 
-        if (employees) {
-          // RABOBANK case
-          // if (secCodes) {
-          //   var codes = [];
-          //   secCodes.forEach(function(sc) {
-          //     codes.push(sc.code)
-          //   })
-
-          //   for (var i=0; i<employees.length  &&  !pubkeys; i++) {
-          //     if (employees[i].securityCode  && codes.indexOf(employees[i].securityCode) != -1) {
-          //       pubkeys = list[IDENTITY + '_' + employees[i][ROOT_HASH]].pubkeys
-          //     }
-          //   }
-          // }
-          // // LLOYDS case
-          // else
-            pubkeys = list[IDENTITY + '_' + employees[0][ROOT_HASH]].pubkeys
-        }
+        if (employees)
+          pubkeys = list[IDENTITY + '_' + employees[0][ROOT_HASH]].pubkeys
       }
     }
     if (pubkeys) {
@@ -4171,22 +4100,6 @@ var Store = Reflux.createStore({
       genIdentity
     ])
   },
-
-  // makePublishingIdentity(me, pubkeys) {
-  //   var meIdentity = new Identity()
-  //                       .name({
-  //                         firstName: me.firstName,
-  //                         formatted: me.firstName + (me.lastName ? ' ' + me.lastName : '')
-  //                       })
-  //                       .set([NONCE], me[NONCE] || this.getNonce())
-  //   if (me.isEmployee) {
-  //     var org = this.buildRef(me.organization)
-  //     meIdentity.set('organization', org)
-  //   }
-
-  //   pubkeys.forEach(meIdentity.addKey, meIdentity)
-  //   return meIdentity.toJSON()
-  // },
 
   publishMyIdentity(orgRep) {
     var self = this
@@ -4775,7 +4688,7 @@ var Store = Reflux.createStore({
       val._sharedWith = inDB._sharedWith
       val.verifications = inDB.verifications
     }
-    if (obj.object.context) {
+    if (obj.object.context  &&  val[TYPE] !== PRODUCT_APPLICATION) {
       // if (!val._contexts)
       //   val._contexts = []
       let contextId = PRODUCT_APPLICATION + '_' + obj.object.context
@@ -7497,4 +7410,36 @@ function getProviderUrl (provider) {
     })
     return foundResources
   },
+  // Checks if the  version of the resource is the latest
+//   isNewerVersion(r, shareableResources) {
+//     let arr = shareableResources[r[TYPE]]
+//     for (let i=0; i<arr.length; i++) {
+//       let rr = arr[i].document
+//       if (r[ROOT_HASH] === rr[ROOT_HASH]) {
+// // Alert.alert('rtime = ' + r.time + '; rrtime = ' + rr.time)
+//         if (r.time < rr.time)
+//           return false
+//         else
+//           arr.splice(i, 1)
+//       }
+//     }
+//     return true
+//   },
+
+  // makePublishingIdentity(me, pubkeys) {
+  //   var meIdentity = new Identity()
+  //                       .name({
+  //                         firstName: me.firstName,
+  //                         formatted: me.firstName + (me.lastName ? ' ' + me.lastName : '')
+  //                       })
+  //                       .set([NONCE], me[NONCE] || this.getNonce())
+  //   if (me.isEmployee) {
+  //     var org = this.buildRef(me.organization)
+  //     meIdentity.set('organization', org)
+  //   }
+
+  //   pubkeys.forEach(meIdentity.addKey, meIdentity)
+  //   return meIdentity.toJSON()
+  // },
+
 */
