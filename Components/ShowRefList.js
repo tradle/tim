@@ -48,6 +48,7 @@ class ShowRefList extends Component {
       }
       if (p.charAt(0) === '_'  ||  !props[p].items  ||  !props[p].items.backlink)
         continue;
+        // icon = 'ios-checkmark-outline';
       propsToShow.push(p)
     }
     let showQR = utils.getId(me) === utils.getId(resource)  &&  me.isEmployee

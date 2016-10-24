@@ -231,7 +231,7 @@ class ProductChooser extends Component {
     }
     var style = [styles.listview]
     if (searchBar)
-      style.push({marginTop: 20})
+      style.push({marginTop: 0, borderTopColor: '#cccccc', borderTopWidth: StyleSheet.hairlineWidth})
     var content =
       <ListView ref='listview' style={style}
         dataSource={this.state.dataSource}
@@ -250,7 +250,7 @@ class ProductChooser extends Component {
     var bgStyle = this.props.bankStyle  &&  this.props.bankStyle.BACKGROUND_COLOR ? {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR} : {backgroundColor: '#ffffff'}
       // <View style={[styles.container, bgStyle]}>
     return (
-      <PageView style={[styles.container, bgStyle]}>
+      <PageView style={[styles.container, bgStyle, searchBar ? {marginTop: 64} : {marginTop: 0}]}>
         {err}
         {searchBar}
         {content}

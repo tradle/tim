@@ -1328,8 +1328,8 @@
     },
     "changes-feed": {
       "version": "1.1.0",
-      "from": "mvayngrib/changes-feed",
-      "resolved": "git://github.com/mvayngrib/changes-feed.git#bd106bd1a8b03660e7c6820e279a34bcaac0fd5e",
+      "from": "git+https://github.com/mvayngrib/changes-feed.git",
+      "resolved": "git+https://github.com/mvayngrib/changes-feed.git#bd106bd1a8b03660e7c6820e279a34bcaac0fd5e",
       "dependencies": {
         "readable-stream": {
           "version": "1.0.34",
@@ -2938,8 +2938,8 @@
     },
     "forward-secrecy": {
       "version": "1.0.2",
-      "from": "tradle/forward-secrecy#dev",
-      "resolved": "git://github.com/tradle/forward-secrecy.git#5ad4c2ee429db4b10599efbd41c650b9debbf7fe",
+      "from": "git+https://github.com/tradle/forward-secrecy.git#dev",
+      "resolved": "git+https://github.com/tradle/forward-secrecy.git#5ad4c2ee429db4b10599efbd41c650b9debbf7fe",
       "dependencies": {
         "tweetnacl": {
           "version": "0.13.3",
@@ -3366,9 +3366,31 @@
       "resolved": "https://registry.npmjs.org/html-entities/-/html-entities-1.2.0.tgz"
     },
     "html-minifier": {
-      "version": "2.1.7",
-      "from": "html-minifier@>=2.1.6 <3.0.0",
-      "resolved": "https://registry.npmjs.org/html-minifier/-/html-minifier-2.1.7.tgz"
+      "version": "3.1.0",
+      "from": "html-minifier@>=3.1.0 <4.0.0",
+      "resolved": "https://registry.npmjs.org/html-minifier/-/html-minifier-3.1.0.tgz",
+      "dependencies": {
+        "async": {
+          "version": "0.2.10",
+          "from": "async@>=0.2.6 <0.3.0",
+          "resolved": "https://registry.npmjs.org/async/-/async-0.2.10.tgz"
+        },
+        "camelcase": {
+          "version": "1.2.1",
+          "from": "camelcase@>=1.0.2 <2.0.0",
+          "resolved": "https://registry.npmjs.org/camelcase/-/camelcase-1.2.1.tgz"
+        },
+        "uglify-js": {
+          "version": "2.7.4",
+          "from": "uglify-js@>=2.7.0 <2.8.0",
+          "resolved": "https://registry.npmjs.org/uglify-js/-/uglify-js-2.7.4.tgz"
+        },
+        "yargs": {
+          "version": "3.10.0",
+          "from": "yargs@>=3.10.0 <3.11.0",
+          "resolved": "https://registry.npmjs.org/yargs/-/yargs-3.10.0.tgz"
+        }
+      }
     },
     "html-wiring": {
       "version": "1.2.0",
@@ -4008,8 +4030,8 @@
     },
     "level-change-processor": {
       "version": "1.0.0",
-      "from": "mvayngrib/level-change-processor#7100404",
-      "resolved": "git://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b"
+      "from": "git+https://github.com/mvayngrib/level-change-processor.git#7100404",
+      "resolved": "git+https://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b"
     },
     "level-codec": {
       "version": "6.1.0",
@@ -4607,8 +4629,8 @@
     },
     "merkle-tree-stream": {
       "version": "3.0.3",
-      "from": "mvayngrib/merkle-tree-stream#finalize",
-      "resolved": "git://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
+      "from": "git+https://github.com/mvayngrib/merkle-tree-stream.git#finalize",
+      "resolved": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
       "dependencies": {
         "isarray": {
           "version": "1.0.0",
@@ -5474,9 +5496,9 @@
       "resolved": "https://registry.npmjs.org/pretty-bytes/-/pretty-bytes-2.0.1.tgz"
     },
     "pretty-error": {
-      "version": "2.0.1",
-      "from": "pretty-error@>=2.0.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/pretty-error/-/pretty-error-2.0.1.tgz"
+      "version": "2.0.2",
+      "from": "pretty-error@>=2.0.2 <3.0.0",
+      "resolved": "https://registry.npmjs.org/pretty-error/-/pretty-error-2.0.2.tgz"
     },
     "private": {
       "version": "0.1.6",
@@ -5869,8 +5891,8 @@
     },
     "react-native-gifted-messenger": {
       "version": "0.0.16",
-      "from": "pgmemk/react-native-gifted-messenger#0285613",
-      "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#0285613da52ceaf119a5cbef4047da262ae373a5"
+      "from": "pgmemk/react-native-gifted-messenger#e48f5fe",
+      "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#e48f5fea85d3d263e221e901038e413567010364"
     },
     "react-native-gifted-spinner": {
       "version": "0.0.4",
@@ -6602,6 +6624,11 @@
       "version": "0.0.1",
       "from": "shallow-copy@>=0.0.1 <0.1.0",
       "resolved": "https://registry.npmjs.org/shallow-copy/-/shallow-copy-0.0.1.tgz"
+    },
+    "shallowequal": {
+      "version": "0.2.2",
+      "from": "shallowequal@>=0.2.2 <0.3.0",
+      "resolved": "https://registry.npmjs.org/shallowequal/-/shallowequal-0.2.2.tgz"
     },
     "shebang-regex": {
       "version": "1.0.0",

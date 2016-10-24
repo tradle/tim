@@ -241,7 +241,7 @@ class NewResource extends Component {
       this.state.submitted = false
       return;
     }
-    if (params.action === 'addItem'  &&  resource.sharedWith  &&  resource.sharedWith.length > 1) {
+    if (params.action === 'addItem'  &&  resource._sharedWith  &&  resource._sharedWith.length > 1) {
       this.showSharedWithList(params.resource)
       return
     }
@@ -313,7 +313,7 @@ class NewResource extends Component {
 //     this.state.submitted = false
   }
   showSharedWithList(newResource) {
-    if (!this.props.resource  ||  !this.props.resource.sharedWith)
+    if (!this.props.resource  ||  !this.props.resource._sharedWith)
       // this.onSavePressed1()
       return
     this.props.navigator.replace({
@@ -481,7 +481,7 @@ class NewResource extends Component {
     //     foundRep = foundRep[0]
     //   else {
     //     // find the right representative from the sharedWith property of the resource
-    //     let sharedWith = resource.sharedWith
+    //     let sharedWith = resource._sharedWith
     //     sharedWith.forEach(rep => {
     //       let r = chatReps.filter(r => {
     //         return r.id === rep.bankRepresentative
@@ -495,6 +495,7 @@ class NewResource extends Component {
 
     var r = {}
     extend(true, r, resource)
+    json._context = r._context ||  (this.props.originatingMessage  &&  this.props.originatingMessage._context)
     delete r.url
     var params = {
       value: json,
@@ -502,8 +503,6 @@ class NewResource extends Component {
       meta: this.props.model,
       isRegistration: this.state.isRegistration
     };
-    if (this.props.additionalInfo)
-      params.additionalInfo = additionalInfo
     if (this.props.chat)
       params.chat = this.props.chat
     // if (list)
@@ -1131,6 +1130,8 @@ class NewResource extends Component {
       time: new Date().getTime()
     }
     value[constants.TYPE] = modelName;
+    if (this.props.context)
+      value._context = this.props.context
 
     if (!isNoAssets) {
       var photos = [];

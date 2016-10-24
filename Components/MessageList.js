@@ -9,6 +9,9 @@ var NoResources = require('./NoResources')
 var NewResource = require('./NewResource')
 var ProductChooser = require('./ProductChooser')
 var PageView = require('./PageView')
+var ResourceList = require('./ResourceList')
+var ChatContext = require('./ChatContext')
+var ContextChooser = require('./ContextChooser')
 var Icon = require('react-native-vector-icons/Ionicons')
 var utils = require('../utils/utils')
 var translate = utils.translate
@@ -72,7 +75,15 @@ class MessageList extends Component {
       isLoading: true,
       selectedAssets: {},
       isConnected: this.props.navigator.isConnected,
-      show: false,
+      allContexts: true,  // true - for the full chat; false - filtered chat for specific context.
+      isEmployee: utils.isEmployee(props.resource),
+      filter: this.props.filter,
+      userInput: '',
+      allLoaded: false
+      // show: false,
+      // progress: 0,
+      // indeterminate: true,
+    };
       // dataSource: new ListView.DataSource({
       //   rowHasChanged: (row1, row2) => {
       //     if (row1 !== row2) {
@@ -80,13 +91,6 @@ class MessageList extends Component {
       //     }
       //   }
       // }),
-      isEmployee: utils.isEmployee(props.resource),
-      filter: this.props.filter,
-      userInput: '',
-      progress: 0,
-      indeterminate: true,
-      allLoaded: false
-    };
   }
   componentWillMount() {
     var params = {
@@ -151,6 +155,7 @@ class MessageList extends Component {
         query: this.state.filter,
         modelName: this.props.modelName,
         to: this.props.resource,
+        context: this.state.allContexts ? null : this.state.context,
         limit: this.state.list ? this.state.list.length + 1 : LIMIT
       }
 
@@ -174,7 +179,12 @@ class MessageList extends Component {
       return
     }
     if (params.action === 'addMessage') {
-      Actions.messageList({modelName: this.props.modelName, to: this.props.resource, limit: this.state.list ? this.state.list.length + 1 : LIMIT});
+      Actions.messageList({
+        modelName: this.props.modelName,
+        to: this.props.resource,
+        limit: this.state.list ? this.state.list.length + 1 : LIMIT,
+        context: this.state.allContexts ? null : this.state.context
+      });
       return
     }
     if ( params.action !== 'messageList'                   ||
@@ -255,6 +265,7 @@ class MessageList extends Component {
         list: list,
         shareableResources: params.shareableResources,
         allLoaded: false,
+        context: params.context,
         isEmployee: isEmployee,
         loadEarlierMessages: params.loadEarlierMessages,
         productToForms: productToForms
@@ -288,8 +299,10 @@ class MessageList extends Component {
       return false
     if (nextState.isConnected !== this.state.isConnected)
       return true
-    if (this.state.show !== nextState.show)
+    if (this.state.context !== nextState.context || this.state.allContexts !== nextState.allContexts)
       return true
+    // if (this.state.show !== nextState.show)
+    //   return true
     if (!this.state.list                                  ||
         !nextState.list                                   ||
          this.props.orientation !== nextProps.orientation ||
@@ -308,9 +321,9 @@ class MessageList extends Component {
     }
     return false
   }
-  share(resource, to, formResource) {
+  share(resource, to, formRequest) {
     console.log('Share')
-    Actions.share(resource, to, formResource)
+    Actions.share(resource, to, formRequest) // forRequest - originating message
   }
 
   selectResource(resource, verification) {
@@ -379,6 +392,7 @@ class MessageList extends Component {
       query: text,
       modelName: this.props.modelName,
       to: this.props.resource,
+      context: this.state.allContexts ? null : this.state.context,
       limit: this.state.list ? this.state.list.length + 1 : LIMIT
     }
     this.state.emptySearch = true
@@ -397,6 +411,7 @@ class MessageList extends Component {
       onSelect: this.selectResource.bind(this),
       resource: resource,
       bankStyle: this.props.bankStyle,
+      context: resource._context || this.state.context,
       to: isAggregation ? resource.to : this.props.resource,
       navigator: this.props.navigator,
     }
@@ -427,7 +442,12 @@ class MessageList extends Component {
     return   <MessageRow {...props} />
   }
   addedMessage(text) {
-    Actions.messageList({modelName: this.props.modelName, to: this.props.resource,  limit: this.state.list ? this.state.list.length + 1 : LIMIT});
+    Actions.messageList({
+      modelName: this.props.modelName,
+      to: this.props.resource,
+      context: this.state.allContexts ? null : this.state.context,
+      limit: this.state.list ? this.state.list.length + 1 : LIMIT
+    });
   }
 
   componentDidUpdate() {
@@ -499,7 +519,7 @@ class MessageList extends Component {
     if (!content) {
       var isAllMessages = model.isInterface  &&  model.id === constants.TYPES.MESSAGE;
       var maxHeight = utils.dimensions(MessageList).height -
-                      (Platform.OS === 'android' ? 77 : 64) - (this.state.isConnected ? 0 : 35)
+                      (Platform.OS === 'android' ? 77 : 64) - (this.state.isConnected ? 0 : 35) - (this.state.context ? 35 : 0)
       // content = <GiftedMessenger style={{paddingHorizontal: 10, marginBottom: Platform.OS === 'android' ? 0 : 20}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
 
       var paddingLeft = 10
@@ -574,6 +594,7 @@ class MessageList extends Component {
     return (
       <PageView style={[platformStyles.container, bgStyle]}>
         <NetworkInfoProvider connected={this.state.isConnected} resource={this.props.resource} />
+        <ChatContext context={this.state.context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={this.props.bankStyle} allContexts={this.state.allContexts} />
         <View style={ sepStyle } />
         {content}
         <ActionSheet
@@ -595,6 +616,52 @@ class MessageList extends Component {
       </PageView>
     );
         // {addNew}
+  }
+  // Context chooser shows all the context of the particular chat.
+  // When choosing the context chat will show only the messages in linked to this context.
+  contextChooser(context) {
+    this.props.navigator.push({
+      title: translate('contextsFor') + ' ' + this.props.resource.name,
+      id: 23,
+      component: ContextChooser,
+      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      backButtonTitle: 'Back',
+      passProps: {
+        resource: this.props.resource,
+        // bankStyle: this.props.bankStyle,
+        selectContext: this.selectContext.bind(this)
+      },
+    })
+  }
+  // Select context to filter messages for the particular context
+  selectContext(context) {
+    this.props.navigator.pop()
+    Actions.messageList({
+      modelName: this.props.modelName,
+      to: this.props.resource,
+      context: context,
+      limit: context ? 300 : LIMIT
+    })
+    this.setState({context: context, allContexts: context == null})
+  }
+  // Show chooser of the organizations to share context with
+  shareWith() {
+    this.props.navigator.push({
+      title: translate(utils.getModel(this.state.context.product).value),
+      id: 10,
+      component: ResourceList,
+      backButtonTitle: 'Back',
+      rightButtonTitle: 'Share',
+      passProps: {
+        modelName: constants.TYPES.ORGANIZATION,
+        multiChooser: true,
+        onDone: this.shareContext.bind(this)
+      }
+    });
+  }
+  shareContext(orgs) {
+    delete orgs[utils.getId(this.props.resource)]
+    Actions.share(this.state.context, Object.keys(orgs), this.props.resource)
   }
   generateMenu(show) {
     if (!show)
@@ -629,6 +696,7 @@ class MessageList extends Component {
       lastId: id,
       limit: LIMIT,
       loadEarlierMessages: true,
+      context: this.state.allContexts ? null : this.state.context,
       modelName: this.props.modelName,
       to: this.props.resource,
     })
@@ -762,19 +830,12 @@ class MessageList extends Component {
       time: new Date().getTime(),
       photos: [{
         url: data
-      }]
+      }],
+      _context: this.state.context
     }
     msg[constants.TYPE] = constants.TYPES.SIMPLE_MESSAGE;
     this.props.navigator.pop();
     Actions.addMessage(msg);
-  }
-  getNextFrom(resource) {
-    Actions.addMessage({
-      from: resource.from,
-      to: resource.to,
-      [constants.TYPE]: NEW_FORM_REQUEST,
-      after: resource.form
-    })
   }
   onSubmitEditing(msg) {
     var me = utils.getMe();
@@ -791,7 +852,7 @@ class MessageList extends Component {
               : '',
       from: me,
       to: resource.to,
-      time: new Date().getTime()
+      _context: this.state.context
     }
     value[constants.TYPE] = modelName;
     this.setState({userInput: '', selectedAssets: {}});

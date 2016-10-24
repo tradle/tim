@@ -19,6 +19,9 @@ import {
   Image
 } from 'react-native';
 
+var CURRENCY_SYMBOL
+const DEFAULT_CURRENCY_SYMBOL = '£'
+
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_ERROR = 'tradle.FormError'
 const FORM = 'tradle.Form'
@@ -48,6 +51,8 @@ var RowMixin = {
   },
   getPropRow(prop, resource, val, isVerification) {
     STRUCTURED_MESSAGE_COLOR = this.props.bankStyle.STRUCTURED_MESSAGE_COLOR
+    CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol || this.props.currency : DEFAULT_CURRENCY_SYMBOL
+
     if (prop.ref) {
       if (prop.ref === constants.TYPES.MONEY) {
         let c = utils.normalizeCurrencySymbol(val.currency)
@@ -236,10 +241,11 @@ var RowMixin = {
       else
         verifiedBy = translate('sentTo', verification.organization.title)
 
-      // if (verifiedBy.length > 25)
-      //   verifiedBy = verifiedBy.substring(0, 25) + '..'
-      var maxWidth = 0.8 * utils.dimensions().width - 150
-      var orgView =   <View style={{marginTop: Platform.OS === 'android' ? 0 : 5, maxWidth: maxWidth, paddingLeft: 3, marginRight: 10}}>
+//      // if (verifiedBy.length > 25)
+//      //   verifiedBy = verifiedBy.substring(0, 25) + '..'
+//      var maxWidth = 0.8 * utils.dimensions().width - 150
+//      var orgView =   <View style={{marginTop: Platform.OS === 'android' ? 0 : 5, maxWidth: maxWidth, paddingLeft: 3, marginRight: 10}}>
+      var orgView =   <View style={styles.orgView}>
                         <Text style={[styles.verySmallLetters, { fontSize: 14}]}>
                           {verifiedBy}
                         </Text>
@@ -451,8 +457,7 @@ var styles = StyleSheet.create({
     color: '#4982B1',
     fontSize: 18,
     paddingHorizontal: 3,
-    alignSelf: 'center',
-    // marginTop: Platform.OS === 'android' ? 0 : 4
+    alignSelf: 'center'
   },
   shareView: {
     flexDirection: 'row',
@@ -525,6 +530,13 @@ var styles = StyleSheet.create({
   column: {
     flex: 1,
     flexDirection: 'column'
+  },
+  orgView: {
+    maxWidth: 0.8 * utils.dimensions().width - 150,
+    paddingLeft: 3,
+    marginRight: 10,
+    flex: 1,
+    justifyContent: 'center'
   },
 });
 

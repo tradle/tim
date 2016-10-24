@@ -14,18 +14,18 @@ class PageView extends Component {
   }
   render() {
     return (
-      <View style={[this.props.style, styles.separator]}>
-        {this.props.children}
-      </View>
+        <View style={[this.props.style, styles.separator, {flex: 1}]}>
+          {this.props.children}
+        </View>
     )
   }
 }
 var styles = StyleSheet.create({
   separator: {
-    borderColor: '#ffffff',
+    borderColor: 'transparent',
     borderTopColor: '#cccccc',
     borderWidth: StyleSheet.hairlineWidth
-  }
+  },
 })
 
 module.exports = PageView

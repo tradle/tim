@@ -83,7 +83,7 @@
     "react-native-floating-labels": "github:mvayngrib/react-native-floating-labels#pointerFix",
     "react-native-fs": "^1.5.1",
     "react-native-gesture-password": "github:mvayngrib/react-native-gesture-password#6ccf2955",
-    "react-native-gifted-messenger": "github:pgmemk/react-native-gifted-messenger#0285613",
+    "react-native-gifted-messenger": "github:pgmemk/react-native-gifted-messenger#e48f5fe",
     "react-native-http": "github:tradle/react-native-http#834492d",
     "react-native-image-picker": "^0.19.3",
     "react-native-keychain": "github:mvayngrib/react-native-keychain#6afb4e7",
