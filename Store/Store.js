@@ -2537,19 +2537,20 @@ var Store = Reflux.createStore({
   },
   onShare(resource, shareWithList, originatingResource) {
     if (resource[TYPE] === PRODUCT_APPLICATION) {
+      let list = shareWithList.map((id) => id.split('_')[1])
       let msg = {
         [TYPE]: 'tradle.ShareContext',
         context: resource[ROOT_HASH],
-        with: shareWithList
+        with: list
       }
-      let repId = this.getRepresentative(utils.getId(originatingResource))
+      let rep = this.getRepresentative(utils.getId(originatingResource))
 
       let sendParams = {
         object: msg,
-        to: {fingerprint: this.getFingerprint(this._getItem(repId))},
+        to: {fingerprint: this.getFingerprint(this._getItem(IDENTITY + '_' + rep[ROOT_HASH]))},
       }
 
-      return meDriver.send(sendParams)
+      return meDriver.signAndSend(sendParams)
     }
     if (!Array.isArray(shareWithList))
       return this.onShareOne(resource, shareWithList, originatingResource)
@@ -4694,12 +4695,13 @@ var Store = Reflux.createStore({
       let contextId = PRODUCT_APPLICATION + '_' + obj.object.context
       let context = this._getItem(contextId)
       // Avoid doubling the number of forms
-      if (!inDB)
-        context.formsCount = context.formsCount ? ++context.formsCount : 1
-      context.lastMessageTime = new Date().getTime()
-      batch.push({type: 'put', key: contextId, value: context})
-
-      val._context = this.buildRef(context)
+      if (context) {
+        if (!inDB)
+          context.formsCount = context.formsCount ? ++context.formsCount : 1
+        context.lastMessageTime = new Date().getTime()
+        batch.push({type: 'put', key: contextId, value: context})
+        val._context = this.buildRef(context)
+      }
       // val._contexts.push(this.buildRef(context))
     }
     else if (val[TYPE] === FORM_REQUEST  && val[ROOT_HASH] === val[CUR_HASH]) {
