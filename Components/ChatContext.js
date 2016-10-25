@@ -31,7 +31,7 @@ class ChatContext extends Component {
                         <Icon size={22} name='md-share' color='#7D6EC4' style={{marginRight: 10, paddingLeft: 20}} />
                     </TouchableOpacity>
     return (
-            <View style={[bar, styles.bar, {flexDirection: 'row'}]}>
+            <View style={[bar, styles.bar, {flexDirection: 'row', justifyContent: 'space-between'}]}>
               {chooser}
               {share}
             </View>
@@ -64,11 +64,13 @@ var styles = StyleSheet.create({
     backgroundColor: '#f1ffe7',
   },
   bar: {
-    borderTopColor: '#dddddd',
-    borderTopWidth: StyleSheet.hairlineWidth,
+    // borderTopColor: '#dddddd',
+    // borderTopWidth: StyleSheet.hairlineWidth,
     padding: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#eeeeee',
     // flexDirection: 'row',
-    justifyContent: 'space-between',
+    // justifyContent: 'space-between',
   },
   textAll: {
     fontSize: 18,
