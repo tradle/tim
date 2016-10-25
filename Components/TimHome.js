@@ -286,7 +286,7 @@ class TimHome extends Component {
     this.props.navigator.push({
       // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       id: 10,
-      title: translate('Accounts'),
+      title: translate('officialAccounts'),
       // titleTextColor: '#7AAAC3',
       backButtonTitle: translate('back'),
       component: ResourceList,
