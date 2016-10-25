@@ -21,17 +21,23 @@ class ChatContext extends Component {
     if (!this.props.context)
       return <View/>
 
+    let bar = this.props.allContexts ? styles.barAll : styles.barOne
+    let chooser =  <TouchableOpacity onPress={this.props.contextChooser} style={{flex: 1}}>
+                        <Text style={[this.props.allContexts ? styles.textAll : styles.textOne, styles.text]}>{translate(utils.getModel(this.props.context.product).value)}</Text>
+                    </TouchableOpacity>
+    let share = this.props.allContexts
+                  ? <View/>
+                  : <TouchableOpacity onPress={this.props.shareWith} style={{position: 'absolute', right: 10}}>
+                        <Icon size={22} name='md-share' color='#7D6EC4' style={{marginRight: 10, paddingLeft: 20}} />
+                    </TouchableOpacity>
     return (
-            <TouchableOpacity onPress={this.props.allContexts ? this.props.contextChooser : this.props.shareWith}>
-              <View style={[this.props.allContexts ? styles.barAll : styles.barOne, styles.bar]}>
-                <Text style={[this.props.allContexts ? styles.textAll : styles.textOne, styles.text]}>{translate(utils.getModel(this.props.context.product).value)}</Text>
-              {this.props.allContexts
-                ? <View/>
-                : <Icon size={22} name='md-share' color='#7D6EC4' style={{marginRight: 10, paddingLeft: 20}} />
-              }
-              </View>
-            </TouchableOpacity>
+            <View style={[bar, styles.bar, {flexDirection: 'row'}]}>
+              {chooser}
+              {share}
+            </View>
             )
+
+
     // return this.props.context
     //       ? <View style={this.props.allContexts ? styles.barAll : styles.bar}>
     //           <TouchableOpacity onPress={this.props.contextChooser}>
@@ -61,10 +67,8 @@ var styles = StyleSheet.create({
     borderTopColor: '#dddddd',
     borderTopWidth: StyleSheet.hairlineWidth,
     padding: 10,
-    flexDirection: 'row',
+    // flexDirection: 'row',
     justifyContent: 'space-between',
-    borderBottomColor: '#eeeeee',
-    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   textAll: {
     fontSize: 18,
@@ -74,7 +78,7 @@ var styles = StyleSheet.create({
   },
   text: {
     fontSize: 18,
-    alignSelf: 'center',
+    // alignSelf: 'center',
     marginHorizontal: 10
   }
 });
