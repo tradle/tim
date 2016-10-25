@@ -23,7 +23,7 @@ class PageView extends Component {
 var styles = StyleSheet.create({
   separator: {
     borderColor: 'transparent',
-    borderTopColor: '#cccccc',
+    borderTopColor: '#eeeeee',
     borderWidth: StyleSheet.hairlineWidth
   },
 })
