@@ -4407,7 +4407,10 @@ var Store = Reflux.createStore({
           let obj = msg.object
           obj.from = {[ROOT_HASH]: msg.objectinfo.author}
           obj.objectinfo = msg.objectinfo
-          msg.object.object.recipientPubKey.pub = new Buffer(msg.object.object.recipientPubKey.pub.data)
+          if (!Buffer.isBuffer(msg.object.object.recipientPubKey.pub)) {
+            msg.object.object.recipientPubKey.pub = new Buffer(msg.object.object.recipientPubKey.pub.data)
+          }
+
           Q.ninvoke(meDriver.addressBook, 'byPubKey', msg.object.object.recipientPubKey)
           .then((r) => {
             obj.to = {[ROOT_HASH]: r.permalink}
