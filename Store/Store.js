@@ -1515,6 +1515,8 @@ var Store = Reflux.createStore({
       toChain.message = rr.message
     if (rr.photos)
       toChain.photos = rr.photos
+    if (isSelfIntroduction)
+      toChain.profile = { firstName: me.firstName }
     if (r.list)
       rr.list = r.list
     let required = m.required
@@ -2589,7 +2591,7 @@ var Store = Reflux.createStore({
       seal: true
     }
     if (formResource  &&  formResource._context)
-      opts.other = {context: utils.getId(formResource).split('_')[1]}
+      opts.other = {context: utils.getId(formResource._context).split('_')[1]}
 
     var promise = meDriver.send({...opts, link: resource.document[CUR_HASH]})
     return promise
