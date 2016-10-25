@@ -74,7 +74,7 @@ var styles = StyleSheet.create({
     fontSize: 18,
   },
   textOne: {
-    color: '#289427',
+    color: '#7D6EC4',
   },
   text: {
     fontSize: 18,
