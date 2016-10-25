@@ -134,19 +134,9 @@ class ResourceRow extends Component {
     //
     var multiChooser = this.props.multiChooser
                      ?  <View style={{position: 'absolute', right: 10, top: 25, backgroundColor: 'transparent'}}>
-                          <TouchableHighlight underlayColor='transparent' onPress={() => {
-                            let id = utils.getId(resource)
-                            if (this.props.chosen[id]) {
-                              this.setState({isChosen: false})
-                              delete this.props.chosen[id]
-                            }
-                            else {
-                              this.setState({isChosen: true})
-                              this.props.chosen[id] = ''
-                            }
-                          }}>
+                          <TouchableOpacity underlayColor='transparent' onPress={this.chooseToShare.bind(this)}>
                            <Icon name={this.state.isChosen ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color='#7AAAc3' />
-                          </TouchableHighlight>
+                          </TouchableOpacity>
                         </View>
                       : <View />
     var textStyle = /*noImage ? [styles.textContainer, {marginVertical: 7}] :*/ styles.textContainer;
@@ -181,10 +171,13 @@ class ResourceRow extends Component {
         </View>
       </View>
         )
-    else
+    else {
+      let onPress = this.state
+                  ? this.action.bind(this)
+                  : this.props.onSelect
       return (
         <View key={this.getNextKey()} style={[{opacity: 1}, styles.rowWrapper]}>
-          <TouchableOpacity onPress={this.state ? this.action.bind(this) : this.props.onSelect} key={this.getNextKey()}>
+          <TouchableOpacity onPress={onPress} key={this.getNextKey()}>
             <View style={[styles.row, {width: utils.dimensions(ResourceRow).width - 50}]} key={this.getNextKey()}>
               {photo}
               {orgPhoto}
@@ -222,10 +215,24 @@ class ResourceRow extends Component {
           {cancelResource}
         </View>
       );
+    }
   }
-
+  chooseToShare() {
+    let resource = this.props.resource
+    let id = utils.getId(resource)
+    if (this.state.isChosen) {
+      this.setState({isChosen: false})
+      delete this.props.chosen[id]
+    }
+    else {
+      this.setState({isChosen: true})
+      this.props.chosen[id] = ''
+    }
+  }
   action() {
-    if (this.props.onCancel)
+    if (this.props.multiChooser)
+      this.chooseToShare()
+    else if (this.props.onCancel)
       this.props.onCancel()
     else if (typeof this.props.changeSharedWithList != 'undefined') {
       let id = utils.getId(this.props.resource)
