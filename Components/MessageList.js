@@ -632,7 +632,16 @@ class MessageList extends Component {
   }
   shareContext(orgs) {
     delete orgs[utils.getId(this.props.resource)]
-    Actions.share(this.state.context, Object.keys(orgs), this.props.resource)
+    Alert.alert(
+      translate('shareAllPastAndFutureMessages'), null,
+      [
+        {text: translate('cancel'), onPress: () => console.log('Cancel')},
+        {text: 'OK', onPress: () => {
+          Actions.share(this.state.context, Object.keys(orgs), this.props.resource)
+          this.props.navigator.pop()
+        }}
+      ]
+    )
   }
   generateMenu(show) {
     if (!show)
