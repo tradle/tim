@@ -146,5 +146,7 @@
     "irrefutableProofs": "Irrefutable proofs",
     "independentBlockchainViewer": "Independent blockchain viewer",
     "contextsFor": "Contexts for",
-    "customerWaiting": "{1} has entered the chat"
+    "customerWaiting": "{1} has entered the chat",
+    "sharedContext": "Shared Context",
+    "shareAllPastAndFutureMessages": "Share all past and future messages in this context with selected parties"
 }
