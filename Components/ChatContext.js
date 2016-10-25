@@ -18,7 +18,7 @@ class ChatContext extends Component {
   }
 
   render() {
-    if (!this.props.context)
+    if (!this.props.context  ||  this.props.context._readOnly)
       return <View/>
 
     let bar = this.props.allContexts ? styles.barAll : styles.barOne
@@ -74,7 +74,7 @@ var styles = StyleSheet.create({
     fontSize: 18,
   },
   textOne: {
-    color: '#7D6EC4',
+    color: '#289427',
   },
   text: {
     fontSize: 18,
