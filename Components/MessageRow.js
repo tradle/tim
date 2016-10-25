@@ -628,6 +628,7 @@ class MessageRow extends Component {
     var self = this
 
     var vCols = [];
+    let isReadOnly = this.props.context  &&  this.props.context._readOnly
     viewCols.forEach(function(v) {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date')
         return;
@@ -721,7 +722,7 @@ class MessageRow extends Component {
               else
                 link = <View style={styles.rowContainer}>
                            <Text style={[style, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(msgModel)}</Text>
-                           <Icon style={[{marginTop: 2}, resource.documentCreated  ? styles.linkIconGreyed : {color: isMyMessage ? self.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
+                           <Icon style={[{marginTop: 2}, resource.documentCreated || isReadOnly ? styles.linkIconGreyed : {color: isMyMessage ? self.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
                        </View>
             }
             let strName = isMyProduct
@@ -768,6 +769,8 @@ class MessageRow extends Component {
         renderedRow.push(v);
       })
     }
+    if (isReadOnly)
+      return null
     if (onPressCall)
       return {onPressCall: onPressCall}
     if (isFormError) {
@@ -814,7 +817,10 @@ class MessageRow extends Component {
               ? {color: '#AFBBA8'} //{color: STRUCTURED_MESSAGE_COLOR}
               : {color: '#2892C6'}
     let link
+    let isReadOnly = this.props.context  &&  this.props.context._readOnly
     if (sameFormRequestForm  &&  !resource.documentCreated) {
+       let isReadOnly = this.props.context  &&  this.props.context._readOnly
+
        link = <View style={[styles.rowContainer, {paddingVertical: 10, alignSelf: 'center'}]}>
                <View style={styles.textContainer}>
                <TouchableHighlight underlayColor='transparent' style={{paddingRight: 15}} onPress={() => {
@@ -862,7 +868,7 @@ class MessageRow extends Component {
                    <Text style={[styles.resourceTitle, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(form)}</Text>
                    <Icon style={[{marginTop: 2}, resource.documentCreated  ? styles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
                  </View>
-      if (resource.documentCreated)
+      if (resource.documentCreated  ||  isReadOnly)
         link = view
       else
         link =  <TouchableHighlight underlayColor='transparent' onPress={() => {
@@ -878,7 +884,7 @@ class MessageRow extends Component {
                {link}
              </View>
     vCols.push(msg);
-    return onPressCall
+    return isReadOnly ? null : onPressCall
   }
 
   onChooseProduct(sendForm) {
