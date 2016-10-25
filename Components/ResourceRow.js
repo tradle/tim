@@ -186,10 +186,13 @@ class ResourceRow extends Component {
         <View style={styles.cellBorder}  key={this.getNextKey()} />
       </View>
         )
-    else
+    else {
+      let onPress = this.state
+                  ? this.action.bind(this)
+                  : this.props.onSelect
       return (
         <View key={this.getNextKey()} style={{opacity: 1, justifyContent: 'center', backgroundColor: '#ffffff'}}>
-          <TouchableHighlight onPress={this.state ? this.action.bind(this) : this.props.onSelect} underlayColor='transparent' key={this.getNextKey()}>
+          <TouchableHighlight onPress={onPress} underlayColor='transparent' key={this.getNextKey()}>
             <View style={[styles.row, {width: utils.dimensions(ResourceRow).width - 50}]} key={this.getNextKey()}>
               {photo}
               {orgPhoto}
@@ -228,6 +231,7 @@ class ResourceRow extends Component {
           <View style={styles.cellBorder} />
         </View>
       );
+    }
   }
       // return (
       // <Swipeout right={[{text: 'Hide', backgroundColor: 'red', onPress: this.hideResource.bind(this, resource)}]} autoClose={true} scroll={(event) => this._allowScroll(event)} >
@@ -273,8 +277,22 @@ class ResourceRow extends Component {
       // </Swipeout>
       // );
 
+  chooseToShare() {
+    let resource = this.props.resource
+    let id = utils.getId(resource)
+    if (this.state.isChosen) {
+      this.setState({isChosen: false})
+      delete this.props.chosen[id]
+    }
+    else {
+      this.setState({isChosen: true})
+      this.props.chosen[id] = ''
+    }
+  }
   action() {
-    if (this.props.onCancel)
+    if (this.props.multiChooser)
+      this.chooseToShare()
+    else if (this.props.onCancel)
       this.props.onCancel()
     else if (typeof this.props.changeSharedWithList != 'undefined') {
       let id = utils.getId(this.props.resource)
