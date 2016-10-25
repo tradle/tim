@@ -2822,6 +2822,34 @@ var Store = Reflux.createStore({
             retParams.isEmployee = true
         }
       }
+      if (params.context)
+        retParams.context = params.context
+      else {
+        let c = this.searchMessages({modelName: PRODUCT_APPLICATION, to: params.to})
+        if (c) {
+          if (c.length === 1)
+            retParams.context = c[0]
+          else {
+            let contexts = c.filter((r) => r.formsCount)
+            if (contexts) {
+              if (contexts.length === 1)
+                retParams.context = contexts[0]
+              else {
+                contexts.sort((a, b) => {
+                  return b.lastMessageTime - a.lastMessageTime
+                })
+                retParams.context = contexts[0]
+              }
+            }
+            // for (let i=c.length - 1; i>=0  &&  !retParams.context; i--) {
+            //   if (c[i].formsCount)
+            //     retParams.context = c[i]
+            // }
+            // if (!retParams.context)
+            //   retParams.context = c[c.length - 1]
+          }
+        }
+      }
 
       if (shareableResources)
         retParams.shareableResources = shareableResources;
