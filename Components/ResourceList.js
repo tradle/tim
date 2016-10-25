@@ -1048,6 +1048,7 @@ var styles = StyleSheet.create({
   },
   textContainer: {
     flex: 1,
+    alignSelf: 'center'
   },
   resourceTitle: {
     flex: 1,
