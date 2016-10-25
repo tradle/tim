@@ -26,6 +26,7 @@ import {
 
 import React, { Component } from 'react'
 import ActivityIndicator from './ActivityIndicator'
+const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 var dateProp
 
 class ResourceRow extends Component {
@@ -337,6 +338,10 @@ class ResourceRow extends Component {
       else
         return <Text style={styles.resourceTitle} numberOfLines={2}>{model.title + ' ' + utils.getFormattedDate(resource.time)}</Text>;
     }
+    // HACK
+    else if (model.id === PRODUCT_APPLICATION)
+      return <Text style={styles.resourceTitle}>{translate(utils.getModel(resource.product).value)}</Text>;
+
     var vCols = [];
     var properties = model.properties;
     var first = true
