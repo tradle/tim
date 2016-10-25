@@ -1887,6 +1887,7 @@ var Store = Reflux.createStore({
                     //   object: toChain,
                     //   to: { fingerprint: this.getFingerprint(list[key].value) }
                     // })
+    let isReadOnly = r._context  &&  this._getItem(utils.getId(r._context))._readOnly
     var newVerification
     return promise
     .then((data) => {
@@ -1907,7 +1908,8 @@ var Store = Reflux.createStore({
       batch.push({type: 'put', key: key, value: r});
       newVerification = self.buildRef(r)
       let len = batch.length
-      self.addLastMessage(r, batch)
+      if (!isReadOnly)
+        self.addLastMessage(r, batch)
       return db.batch(batch)
     })
     .then(() => {
@@ -1915,6 +1917,8 @@ var Store = Reflux.createStore({
       // extend(rr, from);
       // rr.verifiedByMe = r;
       self._setItem(key, r)
+      if (isReadOnly)
+        self.addMessagesToChat(utils.getId(r._context), r)
       if (utils.getId(from) === utils.getId(me))
         self.addMessagesToChat(utils.getId(r.to), r)
       else
@@ -3123,6 +3127,9 @@ var Store = Reflux.createStore({
           thisChatMessages.push({id: key, time: r.time})
           return true
         }
+      })
+      thisChatMessages.sort((a, b) => {
+        return a.time - b.time
       })
     }
 
