@@ -598,7 +598,7 @@ var styles = StyleSheet.create({
   icon: {
     width: 25,
     height: 25,
-    marginTop: 10
+    marginTop: Platform.OS === 'android' ? 20 : 10
   },
   row: {
     flexDirection: 'row'
