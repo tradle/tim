@@ -19,7 +19,7 @@
     },
     "@tradle/engine": {
       "version": "3.4.3",
-      "from": "@tradle/engine@latest",
+      "from": "@tradle/engine@>=3.4.0 <3.5.0",
       "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-3.4.3.tgz",
       "dependencies": {
         "async": {
@@ -649,25 +649,10 @@
       "from": "babel-plugin-transform-es2015-literals@>=6.8.0 <7.0.0",
       "resolved": "https://registry.npmjs.org/babel-plugin-transform-es2015-literals/-/babel-plugin-transform-es2015-literals-6.8.0.tgz"
     },
-    "babel-plugin-transform-es2015-modules-amd": {
-      "version": "6.8.0",
-      "from": "babel-plugin-transform-es2015-modules-amd@>=6.8.0 <7.0.0",
-      "resolved": "https://registry.npmjs.org/babel-plugin-transform-es2015-modules-amd/-/babel-plugin-transform-es2015-modules-amd-6.8.0.tgz"
-    },
     "babel-plugin-transform-es2015-modules-commonjs": {
       "version": "6.16.0",
       "from": "babel-plugin-transform-es2015-modules-commonjs@>=6.0.0 <7.0.0",
       "resolved": "https://registry.npmjs.org/babel-plugin-transform-es2015-modules-commonjs/-/babel-plugin-transform-es2015-modules-commonjs-6.16.0.tgz"
-    },
-    "babel-plugin-transform-es2015-modules-systemjs": {
-      "version": "6.14.0",
-      "from": "babel-plugin-transform-es2015-modules-systemjs@>=6.14.0 <7.0.0",
-      "resolved": "https://registry.npmjs.org/babel-plugin-transform-es2015-modules-systemjs/-/babel-plugin-transform-es2015-modules-systemjs-6.14.0.tgz"
-    },
-    "babel-plugin-transform-es2015-modules-umd": {
-      "version": "6.12.0",
-      "from": "babel-plugin-transform-es2015-modules-umd@>=6.12.0 <7.0.0",
-      "resolved": "https://registry.npmjs.org/babel-plugin-transform-es2015-modules-umd/-/babel-plugin-transform-es2015-modules-umd-6.12.0.tgz"
     },
     "babel-plugin-transform-es2015-object-super": {
       "version": "6.8.0",
@@ -698,11 +683,6 @@
       "version": "6.8.0",
       "from": "babel-plugin-transform-es2015-template-literals@>=6.8.0 <7.0.0",
       "resolved": "https://registry.npmjs.org/babel-plugin-transform-es2015-template-literals/-/babel-plugin-transform-es2015-template-literals-6.8.0.tgz"
-    },
-    "babel-plugin-transform-es2015-typeof-symbol": {
-      "version": "6.8.0",
-      "from": "babel-plugin-transform-es2015-typeof-symbol@>=6.6.0 <7.0.0",
-      "resolved": "https://registry.npmjs.org/babel-plugin-transform-es2015-typeof-symbol/-/babel-plugin-transform-es2015-typeof-symbol-6.8.0.tgz"
     },
     "babel-plugin-transform-es2015-unicode-regex": {
       "version": "6.11.0",
@@ -2772,9 +2752,9 @@
       "resolved": "https://registry.npmjs.org/fd-slicer/-/fd-slicer-1.0.1.tgz"
     },
     "feed-indexer": {
-      "version": "1.1.1",
-      "from": "feed-indexer@>=1.1.1 <2.0.0",
-      "resolved": "https://registry.npmjs.org/feed-indexer/-/feed-indexer-1.1.1.tgz",
+      "version": "1.2.1",
+      "from": "feed-indexer@>=1.2.1 <2.0.0",
+      "resolved": "https://registry.npmjs.org/feed-indexer/-/feed-indexer-1.2.1.tgz",
       "dependencies": {
         "isarray": {
           "version": "1.0.0",
@@ -6030,8 +6010,8 @@
     },
     "react-web": {
       "version": "0.4.1",
-      "from": "mvayngrib/react-web#aada136",
-      "resolved": "git://github.com/mvayngrib/react-web.git#aada1366abac1ac521836e61f9de1f8d6c74ee06",
+      "from": "mvayngrib/react-web#distdev",
+      "resolved": "git://github.com/mvayngrib/react-web.git#f80ec9843b1ac0f6520b6dfaaa14eb3688470b34",
       "dependencies": {
         "chalk": {
           "version": "1.1.1",
