@@ -2348,6 +2348,8 @@ var Store = Reflux.createStore({
           returnVal[CUR_HASH] = returnVal[NONCE]
         }
 
+        if (returnVal.txId)
+          delete returnVal.txId
         var returnValKey = utils.getId(returnVal)
 
         self._setItem(returnValKey, returnVal)
