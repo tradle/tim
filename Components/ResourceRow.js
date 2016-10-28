@@ -339,8 +339,15 @@ class ResourceRow extends Component {
         return <Text style={styles.resourceTitle} numberOfLines={2}>{model.title + ' ' + utils.getFormattedDate(resource.time)}</Text>;
     }
     // HACK
-    else if (model.id === PRODUCT_APPLICATION)
+    else if (model.id === PRODUCT_APPLICATION) {
+      if (resource._readOnly  &&  resource.to.organization) {
+        return <View>
+          <Text style={styles.resourceTitle}>{translate(utils.getModel(resource.product).value)}</Text>
+          <Text style={styles.contextOwners}>{resource.from.organization || resource.from.title} -> {resource.to.organization.title}</Text>
+        </View>
+      }
       return <Text style={styles.resourceTitle}>{translate(utils.getModel(resource.product).value)}</Text>;
+    }
 
     var vCols = [];
     var properties = model.properties;
@@ -622,6 +629,10 @@ var styles = StyleSheet.create({
     left: 8,
     borderWidth: 1,
     borderColor: '#ffffff'
+  },
+  contextOwners: {
+    fontSize: 14,
+    color: '#b4c3cb'
   },
   verySmallLetters: {
     fontSize: 12,
