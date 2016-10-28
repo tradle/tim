@@ -230,8 +230,9 @@ class NewResource extends Component {
       return
     }
     if (this.props.callback) {
-      this.state.submitted = false
-      console.log('callback: submitted = false')
+      utils.onNextTransitionEnd(this.props.navigator, () => this.state.submitted = false)
+      // this.state.submitted = false
+      // console.log('callback: submitted = false')
       this.props.callback(resource);
       return;
     }
@@ -741,13 +742,28 @@ class NewResource extends Component {
                          <Text style={styles.getStartedText}>ENTER</Text>
                       </View>
                    </TouchableHighlight>
-                   <TouchableHighlight underlayColor='transparent' style={{flexDirection: 'row', alignSelf: 'center', paddingTop: 7}} onPress={this.showTermsAndConditions.bind(this)}>
-                     <View style={{flexDirection: 'row'}}>
-                       <Text style={{fontSize: 16, color: '#A6DBF5'}}>{translate('acceptTermsAndConditions')}</Text>
-                     </View>
-                   </TouchableHighlight>
                  </View>
                : <View style={{height: 0}} />
+    // var button = this.state.isRegistration
+    //            ? <View>
+    //                <TouchableHighlight style={styles.thumbButton}
+    //                     underlayColor='transparent' onPress={() => {
+    //                       if (this.state.termsAccepted)
+    //                         this.onSavePressed()
+    //                       else
+    //                         this.showTermsAndConditions()
+    //                     }}>
+    //                   <View style={styles.getStarted}>
+    //                      <Text style={styles.getStartedText}>ENTER</Text>
+    //                   </View>
+    //                </TouchableHighlight>
+    //                <TouchableHighlight underlayColor='transparent' style={{flexDirection: 'row', alignSelf: 'center', paddingTop: 7}} onPress={this.showTermsAndConditions.bind(this)}>
+    //                  <View style={{flexDirection: 'row'}}>
+    //                    <Text style={{fontSize: 16, color: '#A6DBF5'}}>{translate('acceptTermsAndConditions')}</Text>
+    //                  </View>
+    //                </TouchableHighlight>
+    //              </View>
+    //            : <View style={{height: 0}} />
     var formStyle = this.state.isRegistration
                   ? {justifyContent: 'center', height: height - (height > 1000 ? 0 : 100)}
                   : {justifyContent: 'flex-start'}
