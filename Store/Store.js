@@ -1742,12 +1742,14 @@ var Store = Reflux.createStore({
         sendParams.other = {}
       let cId = utils.getId(r._context)
       sendParams.other.context = cId.split('_')[1]
-      let c = this._getItem(cId)
-      // will be null for PRODUCT_APPLICATION itself
-      if (c) {
-        c.lastMessageTime = new Date().getTime()
-        c.formsCount = c.formsCount ? ++c.formsCount : 1
-        db.put(cId, c)
+      if (r[TYPE] !== PRODUCT_APPLICATION) {
+        let c = this._getItem(cId)
+        // will be null for PRODUCT_APPLICATION itself
+        if (c) {
+          c.lastMessageTime = new Date().getTime()
+          c.formsCount = c.formsCount ? ++c.formsCount : 1
+          db.put(cId, c)
+        }
       }
     }
     if (!sendParams.to)
