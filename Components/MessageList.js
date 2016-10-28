@@ -524,6 +524,7 @@ class MessageList extends Component {
 
       var paddingLeft = 10
       // way ScrollView is implemented with position:absolute disrespects the confines of the screen width
+      let hideTextInput = this.props.resource[constants.TYPE] === PRODUCT_APPLICATION  && this.props.resource._readOnly
       var paddingRight = utils.isWeb() ? 20 : 10
       content = <GiftedMessenger style={{ paddingLeft, paddingRight }} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
         ref={(c) => this._GiftedMessenger = c}
@@ -542,6 +543,7 @@ class MessageList extends Component {
         keyboardShouldPersistTaps={utils.isWeb() ? false : true}
         keyboardDismissMode={utils.isWeb() ? 'none' : 'on-drag'}
         initialListSize={20}
+        hideTextInput={hideTextInput}
         maxHeight={maxHeight} // 64 for the navBar; 110 - with SearchBar
       />
         // returnKeyType={false}
