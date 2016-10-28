@@ -307,14 +307,6 @@ class MessageRow extends Component {
       </View>
     )
   }
-  isShared() {
-    var resource = this.props.resource
-    var to = this.props.to
-    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
-    if (model.subClassOf !== constants.TYPES.FORM  ||  !resource.to.organization)
-      return false
-    return utils.getId(resource.to.organization) !== utils.getId(to)
-  }
 
   editVerificationRequest() {
     var resource = this.props.resource.document;
