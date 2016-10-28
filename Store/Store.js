@@ -563,16 +563,17 @@ var Store = Reflux.createStore({
     let meId = utils.getId(me)
     for (var p in list) {
       let r = this._getItem(p)
-      let m = this._getItem(this.getModel(r[TYPE]))
-      if (!m.interfaces  ||  m.interfaces.indexOf(MESSAGE) === -1)
-        continue
       if (r._context) {
-        let contextId = utils.getId(r._context)
-        if (this._getItem(contextId)._readOnly) {
-          this.addMessagesToChat(contextId, r, true)
+        let c = this._getItem(r._context)
+        if (c._readOnly) {
+          this.addMessagesToChat(utils.getId(r._context), r, true)
           continue
         }
       }
+
+      let m = this._getItem(this.getModel(r[TYPE]))
+      if (!m.interfaces  ||  m.interfaces.indexOf(MESSAGE) === -1)
+        continue
       if (r._sharedWith) {
         r._sharedWith.forEach((shareInfo) => {
           if (shareInfo.bankRepresentative === meId)
@@ -667,15 +668,11 @@ var Store = Reflux.createStore({
         }
       }
       let m = this.getModel(r[TYPE]).value
-      let isMyProduct = m.subClassOf === MY_PRODUCT
-      let isForm = !isMyProduct && m.subClassOf === FORM
       // r.from.photos = list[utils.getId(r.from)].value.photos;
       // var to = list[utils.getId(r.to)]
       // if (!to) console.log(r.to)
       // r.to.photos = to  &&  to.value.photos;
-      if (isMyProduct)
-        r.from.organization = this._getItem(utils.getId(r.from)).organization
-      else if (isForm) {
+      if (m.subClassOf === FORM) {
         // set organization and photos for items properties for better displaying
         let form = this._getItem(utils.getId(r.to))
         if (orgId  &&  r._sharedWith  &&  r._sharedWith.length > 1) {
@@ -1781,6 +1778,12 @@ var Store = Reflux.createStore({
       return
     if (!r.time  &&  !timeShared)
       return
+    // Check if this is a shared context
+    if (r._context) {
+      let c = this._getItem(r._context)
+      if (c._readOnly)
+        id = utils.getId(r._context)
+    }
     let messages = chatMessages[id]
     let rid = utils.getId(r)
     if (messages  &&  messages.length) {
@@ -2359,14 +2362,18 @@ var Store = Reflux.createStore({
         let isForm = self.getModel(returnVal[TYPE]).value.subClassOf === FORM
         if (isNew)
           returnVal[ROOT_HASH] = returnVal[NONCE]
-        else if (isForm) {
-          let prevRes = self._getItem(returnVal[TYPE] + '_' + returnVal[ROOT_HASH] + '_' + returnVal[CUR_HASH])
-          if (utils.compare(returnVal, prevRes)) {
-            self.trigger({action: 'noChanges'})
-            return
+        else {
+          if (isForm) {
+            let prevRes = self._getItem(returnVal[TYPE] + '_' + returnVal[ROOT_HASH] + '_' + returnVal[CUR_HASH])
+            if (utils.compare(returnVal, prevRes)) {
+              self.trigger({action: 'noChanges'})
+              return
+            }
+            returnVal[PREV_HASH] = returnVal[CUR_HASH]
+            returnVal[CUR_HASH] = returnVal[NONCE]
           }
-          returnVal[PREV_HASH] = returnVal[CUR_HASH]
-          returnVal[CUR_HASH] = returnVal[NONCE]
+          if (returnVal.txId)
+            delete returnVal.txId
         }
 
         var returnValKey = utils.getId(returnVal)
@@ -3197,6 +3204,8 @@ var Store = Reflux.createStore({
         if (!this.inContext(r, context))
           continue
       }
+      // if (r._context  &&  this._getItem(r._context)._readOnly)
+      //   continue
       var isFormError = isAllMessages && r[TYPE] === FORM_ERROR
       // Make sure that the messages that are showing in chat belong to the conversation between these participants
       if (isVerification) {
@@ -4758,11 +4767,19 @@ var Store = Reflux.createStore({
       val._context = inDB._context
       val._sharedWith = inDB._sharedWith
       val.verifications = inDB.verifications
+      if (val.txId  &&  !inDB.txId) {
+        val.time = inDB.time
+        val.sealedTime = val.time || obj.timestamp
+      }
     }
     let meId = utils.getId(me)
     let isReadOnly = utils.getId(to) !== meId  &&  utils.getId(from) !== meId
-    if (val[TYPE] === PRODUCT_APPLICATION  &&  isReadOnly)
+    if (val[TYPE] === PRODUCT_APPLICATION  &&  isReadOnly) {
+      // props that are convenient for displaying in shared context
+      val.from.organization = this._getItem(utils.getId(val.from)).organization
+      val.to.organization = this._getItem(utils.getId(val.to)).organization
       val._readOnly = true
+    }
     if (obj.object.context  &&  val[TYPE] !== PRODUCT_APPLICATION) {
       // if (!val._contexts)
       //   val._contexts = []
@@ -4844,6 +4861,8 @@ var Store = Reflux.createStore({
       // }
       return
     }
+    if (model.subClassOf === MY_PRODUCT)
+      val.from.organization = this._getItem(utils.getId(val.from)).organization
     if (!isProductList  &&  !isReadOnly) {
     //   if (!from.lastMessageTime || (new Date() - from.lastMessageTime) > WELCOME_INTERVAL)
     //     batch.push({type: 'put', key: key, value: val})
@@ -5831,8 +5850,12 @@ var Store = Reflux.createStore({
   _getItem(r) {
     if (typeof r === 'string')
       return list[r] ? list[r].value : null
-    else
+    else if (r.value)
       return r.value
+    else {
+      let rr = list[utils.getId(r)]
+      return rr ? rr.value : null
+    }
   },
   _mergeItem(key, value) {
     const current = list[key] || {}
