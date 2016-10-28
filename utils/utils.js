@@ -465,12 +465,12 @@ var utils = {
     switch (dayDiff) {
     case 0:
       noTime = false
-      val = dateformat(date, 'h:mm TT')
+      val = dateformat(date, 'h:MM TT')
       // val = moment(date).format('h:mA') //moment(date).fromNow();
       break;
     case 1:
       noTime = false
-      val = 'yesterday, ' + (noTime ? '' : dateformat(date, 'h:mm TT'))
+      val = 'yesterday, ' + (noTime ? '' : dateformat(date, 'h:MM TT'))
       // val = moment(date).format('[yesterday], h:mA');
       break;
     default:
