@@ -188,15 +188,6 @@ class FormMessageRow extends Component {
       </View>
     )
   }
-  isShared() {
-    var resource = this.props.resource
-    if (!resource.to.organization)
-      return false
-    var to = this.props.to
-    if (to[constants.TYPE] === constants.TYPES.PROFILE)
-      return false
-    return utils.getId(resource.to.organization) !== utils.getId(to)
-  }
 
   onPress(event) {
     this.props.navigator.push({

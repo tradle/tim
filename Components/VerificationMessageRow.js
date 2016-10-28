@@ -120,16 +120,6 @@ class VerificationMessageRow extends Component {
       </View>
     );
   }
-  isShared() {
-    let resource = this.props.resource
-    // Is resource was originally created in this chat or shared from a different chat
-    if (!resource.organization)
-      return false
-    let to = this.props.to
-    if (to[constants.TYPE] === constants.TYPES.PROFILE)
-      return false
-    return utils.getId(resource.organization) !== utils.getId(to)
-  }
   verify(event) {
     var resource = this.props.resource;
     var isVerification = resource[constants.TYPE] === constants.TYPES.VERIFICATION;

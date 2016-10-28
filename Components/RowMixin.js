@@ -394,6 +394,16 @@ var RowMixin = {
         renderedRow.push(v);
       });
     }
+  },
+  isShared() {
+    let resource = this.props.resource
+    // Is resource was originally created in this chat or shared from a different chat
+    if (!resource.organization  ||  (this.props.context  &&  this.props.context._readOnly))
+      return false
+    let to = this.props.to
+    if (to[constants.TYPE] === constants.TYPES.PROFILE)
+      return false
+    return utils.getId(resource.organization) !== utils.getId(to)
   }
 
   // anyOtherRow(prop, backlink, styles) {
