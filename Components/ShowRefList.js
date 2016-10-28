@@ -54,17 +54,13 @@ class ShowRefList extends Component {
       propsToShow.push(p)
     }
     let showQR = utils.getId(me) === utils.getId(resource)  &&  me.isEmployee
-    let width = utils.dimensions(ShowRefList).width  / (propsToShow.length + (showQR ? 1 : 0))
-    let maxLetters = 2 + (width/10)
     propsToShow.forEach((p) => {
       let propTitle = translate(props[p], model)
-      if (propTitle.length > maxLetters)
-        propTitle = propTitle.substring(0, maxLetters)
       var icon = props[p].icon  ||  utils.getModel(props[p].items.ref).value.icon;
       if (!icon)
         icon = 'ios-checkmark';
       refList.push(
-        <View style={[buttonStyles.container, {width: width}]} key={this.getNextKey()}>
+        <View style={[buttonStyles.container, {flex: 1, alignSelf: 'stretch'}]} key={this.getNextKey()}>
            <TouchableHighlight onPress={this.showResources.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
              <View style={{alignItems: 'center'}}>
                <Icon name={icon}  size={30}  color='#ffffff' />
@@ -74,27 +70,10 @@ class ShowRefList extends Component {
          </View>
         );
     })
-    /*
-      refList.push(
-        <View style={[buttonStyles.container, {width: width}]} key={this.getNextKey()}>
-           <TouchableHighlight onPress={() => this.setState({currentProp: p})} underlayColor='transparent'>
-             <View style={{alignItems: 'center'}}>
-               {self.state.currentProp === p
-                ? <Animatable.View animation="bounceOut" iterationCount={1} direction="alternate" onAnimationEnd={this.showResources.bind(this, this.props.resource, props[p])}>
-                     <Icon name={icon}  size={30}  color='#ffffff' />
-                  </Animatable.View>
-                : <Icon name={icon}  size={30}  color='#ffffff' />
-               }
-               <Text style={[buttonStyles.text, Platform.OS === 'android' ? {marginTop: 3} : {marginTop: 0}]}>{propTitle}</Text>
-             </View>
-           </TouchableHighlight>
-         </View>
-        );
-    */
 
     if (utils.getId(me) === utils.getId(resource)  &&  me.isEmployee) {
       refList.push(
-        <View style={buttonStyles.container} key={this.getNextKey()}>
+        <View style={[buttonStyles.container, {flex:1, alignSelf: 'stretch'}]} key={this.getNextKey()}>
            <TouchableHighlight onPress={this.props.showQR.bind(this)} underlayColor='transparent'>
              <View style={{alignItems: 'center'}}>
                <Icon name={'ios-qr-scanner'}  size={30}  color='#ffffff' />
@@ -107,9 +86,7 @@ class ShowRefList extends Component {
      }
      return refList.length
              ?  <View style={buttonStyles.buttons} key={'ShowRefList'}>
-                  <View  style={{flexDirection: 'row'}}>
-                    {refList}
-                  </View>
+                  {refList}
                 </View>
              : <View/>;
   }
