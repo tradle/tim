@@ -5898,8 +5898,12 @@ var Store = Reflux.createStore({
   _getItem(r) {
     if (typeof r === 'string')
       return list[r] ? list[r].value : null
-    else
+    else if (r.value)
       return r.value
+    else {
+      let rr = list[utils.getId(r)]
+      return rr ? rr.value : null
+    }
   },
   _mergeItem(key, value) {
     const current = list[key] || {}
