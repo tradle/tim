@@ -49,9 +49,7 @@ class ShowMessageRefList extends Component {
       var icon = props[p].icon  ||  utils.getModel(props[p].items.ref).value.icon;
       if (!icon)
         icon = 'ios-checkmark';
-      let style = (backlinks.length === 1)
-                ? [buttonStyles.container, {width: utils.dimensions(ShowMessageRefList).width}]
-                :  buttonStyles.container
+      let style = [buttonStyles.container, {flex: 1, alignSelf: 'stretch'}]
       refList.push(
         <View style={style} key={this.getNextKey()}>
            <TouchableHighlight onPress={this.showResources.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
