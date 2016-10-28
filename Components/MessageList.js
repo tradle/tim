@@ -497,6 +497,7 @@ class MessageList extends Component {
       var maxHeight = utils.dimensions(MessageList).height -
                       (Platform.OS === 'android' ? 77 : 64) - (this.state.isConnected ? 0 : 35) - (this.state.context ? 35 : 0)
       // content = <GiftedMessenger style={{paddingHorizontal: 10, marginBottom: Platform.OS === 'android' ? 0 : 20}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
+      let hideTextInput = this.props.resource[constants.TYPE] === PRODUCT_APPLICATION  && this.props.resource._readOnly
       content = <GiftedMessenger style={{paddingHorizontal: 10}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
         ref={(c) => this._GiftedMessenger = c}
         loadEarlierMessagesButton={this.state.loadEarlierMessages}
@@ -514,6 +515,7 @@ class MessageList extends Component {
         keyboardShouldPersistTaps={utils.isWeb() ? false : true}
         keyboardDismissMode={utils.isWeb() ? 'none' : 'on-drag'}
         maxHeight={maxHeight} // 64 for the navBar; 110 - with SearchBar
+        hideTextInput={hideTextInput}
       />
         // returnKeyType={false}
         // keyboardShouldPersistTaps={false}
