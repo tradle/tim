@@ -21,6 +21,7 @@ import com.learnium.RNDeviceInfo.RNDeviceInfo;
 import com.microsoft.codepush.react.CodePush;
 import com.lwansbrough.RCTCamera.RCTCameraPackage;
 import com.github.yamill.orientation.OrientationPackage;
+import com.rn.ecc.ECCPackage;
 
 import java.util.Arrays;
 import java.util.List;
@@ -55,7 +56,8 @@ public class MainApplication extends Application implements ReactApplication {
         new LinearGradientPackage(),
         new CodePush(BuildConfig.CODEPUSH_KEY, MainApplication.this, BuildConfig.DEBUG),
         new RCTCameraPackage(),
-        new OrientationPackage()
+        new OrientationPackage(),
+        new ECCPackage()
       );
     }
   };
