@@ -955,12 +955,12 @@ var Store = Reflux.createStore({
 
       const lock = receiveLocks[from]
       lock(_release => {
-        const timeout = setTimeout(release, 10000)
         const release = () => {
           clearTimeout(timeout)
           _release()
         }
 
+        const timeout = setTimeout(release, 10000)
         const promise = receive(msg, from)
         if (!Q.isPromiseAlike(promise)) {
           return release()
