@@ -18,7 +18,7 @@ class ChatContext extends Component {
   }
 
   render() {
-    if (!this.props.context)
+    if (!this.props.context  ||  this.props.context._readOnly)
       return <View/>
 
     let bar = this.props.allContexts ? styles.barAll : styles.barOne
@@ -31,7 +31,7 @@ class ChatContext extends Component {
                         <Icon size={22} name='md-share' color='#7D6EC4' style={{marginRight: 10, paddingLeft: 20}} />
                     </TouchableOpacity>
     return (
-            <View style={[bar, styles.bar, {flexDirection: 'row', justifyContent: 'space-between'}]}>
+            <View style={[bar, styles.bar, {flexDirection: 'row'}]}>
               {chooser}
               {share}
             </View>

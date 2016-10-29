@@ -27,6 +27,7 @@ import { makeResponsive } from 'react-native-orient'
 import LinearGradient from 'react-native-linear-gradient'
 import React, { Component } from 'react'
 import ActivityIndicator from './ActivityIndicator'
+const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 var dateProp
 
 class ResourceRow extends Component {
@@ -176,7 +177,7 @@ class ResourceRow extends Component {
                   ? this.action.bind(this)
                   : this.props.onSelect
       return (
-        <View key={this.getNextKey()} style={[{opacity: 1}, styles.rowWrapper]}>
+        <View key={this.getNextKey()} style={{opacity: 1, justifyContent: 'center', backgroundColor: '#ffffff'}}>
           <TouchableOpacity onPress={onPress} key={this.getNextKey()}>
             <View style={[styles.row, {width: utils.dimensions(ResourceRow).width - 50}]} key={this.getNextKey()}>
               {photo}
@@ -217,6 +218,7 @@ class ResourceRow extends Component {
       );
     }
   }
+
   chooseToShare() {
     let resource = this.props.resource
     let id = utils.getId(resource)
@@ -277,6 +279,17 @@ class ResourceRow extends Component {
       else
         return <Text style={styles.resourceTitle} numberOfLines={2}>{model.title + ' ' + utils.getFormattedDate(resource.time)}</Text>;
     }
+    // HACK
+    else if (model.id === PRODUCT_APPLICATION) {
+      if (resource._readOnly  &&  resource.to.organization) {
+        return <View>
+          <Text style={styles.resourceTitle}>{translate(utils.getModel(resource.product).value)}</Text>
+          <Text style={styles.contextOwners}>{resource.from.organization || resource.from.title} -> {resource.to.organization.title}</Text>
+        </View>
+      }
+      return <Text style={styles.resourceTitle}>{translate(utils.getModel(resource.product).value)}</Text>;
+    }
+
     var vCols = [];
     var properties = model.properties;
     var first = true
@@ -518,6 +531,10 @@ var styles = StyleSheet.create({
     left: 8,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: '#ffffff'
+  },
+  contextOwners: {
+    fontSize: 14,
+    color: '#b4c3cb'
   },
   verySmallLetters: {
     fontSize: 12,
