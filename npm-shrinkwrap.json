@@ -2138,9 +2138,9 @@
       "resolved": "https://registry.npmjs.org/extend-shallow/-/extend-shallow-2.0.1.tgz"
     },
     "external-editor": {
-      "version": "1.0.3",
+      "version": "1.1.1",
       "from": "external-editor@>=1.0.1 <2.0.0",
-      "resolved": "https://registry.npmjs.org/external-editor/-/external-editor-1.0.3.tgz",
+      "resolved": "https://registry.npmjs.org/external-editor/-/external-editor-1.1.1.tgz",
       "dependencies": {
         "extend": {
           "version": "3.0.0",
@@ -4533,9 +4533,9 @@
       "resolved": "git://github.com/lwansbrough/react-native-camera.git#1747ec4b0a52472cf2e8ad95f2c3603595e28e13"
     },
     "react-native-code-push": {
-      "version": "1.14.6-beta",
-      "from": "react-native-code-push@>=1.14.6-beta <2.0.0",
-      "resolved": "https://registry.npmjs.org/react-native-code-push/-/react-native-code-push-1.14.6-beta.tgz",
+      "version": "1.15.0-beta",
+      "from": "react-native-code-push@>=1.15.0-beta <2.0.0",
+      "resolved": "https://registry.npmjs.org/react-native-code-push/-/react-native-code-push-1.15.0-beta.tgz",
       "dependencies": {
         "inquirer": {
           "version": "1.1.2",
@@ -5650,6 +5650,11 @@
       "version": "0.2.0",
       "from": "tiny-queue@0.2.0",
       "resolved": "https://registry.npmjs.org/tiny-queue/-/tiny-queue-0.2.0.tgz"
+    },
+    "tmp": {
+      "version": "0.0.29",
+      "from": "tmp@>=0.0.29 <0.0.30",
+      "resolved": "https://registry.npmjs.org/tmp/-/tmp-0.0.29.tgz"
     },
     "tmpl": {
       "version": "1.0.4",
