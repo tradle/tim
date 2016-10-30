@@ -9,6 +9,7 @@ import {
 import { getDimensions } from 'react-native-orient'
 import BackgroundImage from './BackgroundImage'
 var PasswordGesture = require('react-native-gesture-password')
+var utils = require('../utils/utils')
 var MIN_LENGTH = 5
 var Password1 = ''
 var BG_IMAGE = require('../img/bg.png')
@@ -166,7 +167,7 @@ var PasswordCheck = React.createClass({
           styles={
             {
               frame: containerRawStyle,
-              msgText: { fontSize: 18 },
+              msgText: { fontSize: utils.getFontSize(26) },
               line: { height: 2, backgroundColor: '#ffffff' }
             }
           }
@@ -176,7 +177,7 @@ var PasswordCheck = React.createClass({
           radius={{ inner: 18, outer: 25 }}
           status={this.state.status}
           message={this.state.message}
-          msgStyle={{fontSize:20}}
+          msgStyle={{fontSize:24}}
           onStart={() => this._onStart()}
           onEnd={(password) => this._onEntered(password)}
         />
