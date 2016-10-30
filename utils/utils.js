@@ -294,9 +294,11 @@ var utils = {
     return subclasses;
   },
   getFontSize(fontSize) {
-    return Math.floor(fontSize * (!PixelRatio.getFontScale() || PixelRatio.getFontScale() <= 3
-          ? (Platform.OS === 'androis' ? 1 : 1.1)
-          : (PixelRatio.getFontScale() < 3.5) ? 0.95 : 0.87))
+    // return fontSize
+    let fontScale = PixelRatio.getFontScale()
+    if (fontScale <= 3)
+      return fontSize
+    return Math.floor(fontSize * (fontScale < 3.5 ? 0.95 : 0.9))
   },
   getId(r) {
     if (typeof r === 'string') {
