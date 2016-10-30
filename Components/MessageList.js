@@ -38,11 +38,12 @@ var NEXT_HASH = '_n'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_REQUEST = 'tradle.FormRequest'
+var StyleSheet = require('../StyleSheet')
 
 import React, { Component } from 'react'
 import {
   ListView,
-  StyleSheet,
+  // StyleSheet,
   PropTypes,
   Navigator,
   Platform,
@@ -329,7 +330,7 @@ class MessageList extends Component {
     var route = {
       title: newTitle,
       id: 5,
-      backButtonTitle: translate('back'),
+      backButtonTitle: 'Back',
       component: MessageView,
       parentMeta: model,
       passProps: {
@@ -343,14 +344,14 @@ class MessageList extends Component {
     }
     // Allow to edit resource that was not previously changed
     if (!verification  &&  !isEmployee  &&  !resource[NEXT_HASH]  &&  model.subClassOf !== MY_PRODUCT) {
-      route.rightButtonTitle = translate('edit')
+      route.rightButtonTitle = 'Edit'
       route.onRightButtonPress = {
         title: newTitle, //utils.getDisplayName(resource),
         id: 4,
         component: NewResource,
         // titleTextColor: '#7AAAC3',
-        backButtonTitle: translate('back'),
-        rightButtonTitle: translate('done'),
+        backButtonTitle: 'Back',
+        rightButtonTitle: 'Done',
         passProps: {
           model: model,
           resource: resource,
@@ -496,7 +497,7 @@ class MessageList extends Component {
     if (!content) {
       var isAllMessages = model.isInterface  &&  model.id === constants.TYPES.MESSAGE;
       var maxHeight = utils.dimensions(MessageList).height -
-                      (Platform.OS === 'android' ? 77 : 64) - (this.state.isConnected ? 0 : 35) - (this.state.context ? 35 : 0)
+                      (Platform.OS === 'android' ? 77 : 64) - (this.state.isConnected ? 0 : 35) - (this.state.context ? 45 : 0)
       // content = <GiftedMessenger style={{paddingHorizontal: 10, marginBottom: Platform.OS === 'android' ? 0 : 20}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
       // Hide TextInput for shared context since it is read-only
       let hideTextInput = this.props.resource[constants.TYPE] === PRODUCT_APPLICATION  && this.props.resource._readOnly
@@ -709,7 +710,7 @@ class MessageList extends Component {
       id: 15,
       component: ProductChooser,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      backButtonTitle: translate('cancel'),
+      backButtonTitle: 'Back',
       passProps: {
         resource: resource,
         returnRoute: currentRoutes[currentRoutes.length - 1],
@@ -772,7 +773,7 @@ class MessageList extends Component {
       id: 15,
       component: ProductChooser,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      backButtonTitle: translate('cancel'),
+      backButtonTitle: 'Back',
       passProps: {
         resource: resource,
         returnRoute: currentRoutes[currentRoutes.length - 1],
@@ -784,9 +785,9 @@ class MessageList extends Component {
         id: 4,
         title: translate('newProduct'),
         component: NewResource,
-        backButtonTitle: translate('back'),
+        backButtonTitle: 'Back',
         // titleTextColor: '#999999',
-        rightButtonTitle: translate('done'),
+        rightButtonTitle: 'Done',
         passProps: {
           model: utils.getModel('tradle.NewMessageModel').value,
           currency: resource.currency,
@@ -799,7 +800,7 @@ class MessageList extends Component {
     var self = this;
     this.props.navigator.push({
       title: 'Take a pic',
-      backButtonTitle: 'Cancel',
+      backButtonTitle: 'Back',
       id: 12,
       component: CameraView,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
