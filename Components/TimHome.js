@@ -40,6 +40,7 @@ import {
 import AutomaticUpdates from '../utils/automaticUpdates'
 import CustomIcon from '../styles/customicons'
 import BackgroundImage from './BackgroundImage'
+import Navs from '../utils/navs'
 
 const PASSWORD_ITEM_KEY = 'app-password'
 
@@ -53,7 +54,6 @@ import {
   NetInfo,
   ScrollView,
   Linking,
-  BackAndroid,
   StatusBar,
   Modal,
   Alert,
@@ -94,12 +94,6 @@ class TimHome extends Component {
       this._handleConnectivityChange
     );
     NetInfo.isConnected.fetch().then(isConnected => this._handleConnectivityChange(isConnected))
-    BackAndroid.addEventListener('hardwareBackPress', () => {
-      if (this.props.navigator.getCurrentRoutes().length > 1)
-        this.props.navigator.pop()
-      return true
-    })
-
     Actions.start();
   }
   // componentDidMount() {
