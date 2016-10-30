@@ -8,12 +8,13 @@ var Accordion = require('react-native-accordion')
 // var Icon = require('react-native-vector-icons/Ionicons');
 import LinearGradient from 'react-native-linear-gradient'
 import CustomIcon from '../styles/customicons'
+var StyleSheet = require('../StyleSheet')
 var cnt = 0;
 import {
   Text,
   View,
   Alert,
-  StyleSheet,
+  // StyleSheet,
   Platform,
   TouchableHighlight,
   Image
@@ -79,10 +80,10 @@ var RowMixin = {
       return (
         <View style={style} key={this.getNextKey()}>
           <View style={styles.column}>
-            <Text style={[styles.verySmallLetters, {color: '#333333'}]}>{propTitle}</Text>
+            <Text style={[styles.title, {color: '#333333'}]}>{propTitle}</Text>
           </View>
           <View style={styles.column}>
-            <Text style={styles.verySmallLetters}>{val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')}</Text>
+            <Text style={styles.title}>{val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')}</Text>
           </View>
         </View>
       )
@@ -193,12 +194,8 @@ var RowMixin = {
               ? <Image source={{uri: utils.getImageUri(resource.photos[0].url)}}  style={styles.cellImage} />
               : <View />;
     var headerStyle = {paddingTop: 5, alignSelf: 'center'}
-    // var header =  <View style={headerStyle}>
-    //                 <Text style={[styles.resourceTitle, {fontSize: 20, color: '#B6C2A7'}]}>{translate(model)}</Text>
-    //               </View>
-                    // <Icon name='md-arrow-dropright' size={30} color={this.props.bankStyle.VERIFIED_HEADER_COLOR}/>
     var header =  <View style={headerStyle}>
-                    <Text style={[styles.resourceTitle, {fontSize: 18, marginTop: 2, paddingRight: 10, color: this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>{translate(model) + ' ...'}</Text>
+                    <Text style={[styles.resourceTitle, styles.header, {color: this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>{translate(model) + ' ...'}</Text>
                   </View>
     let addStyle
     if (!onPress)
@@ -242,12 +239,12 @@ var RowMixin = {
         verifiedBy = translate('sentTo', verification.organization.title)
 
       var orgView =   <View style={styles.orgView}>
-                        <Text style={[styles.verySmallLetters, { fontSize: 14}]}>
+                        <Text style={styles.description}>
                           {verifiedBy}
                         </Text>
                       </View>
 
-                         // <Text style={[styles.verySmallLetters, {color: '#2E3B4E'}]}>{verification.organization.title.length < 30 ? verification.organization.title : verification.organization.title.substring(0, 27) + '..'}</Text>
+                         // <Text style={[styles.title, {color: '#2E3B4E'}]}>{verification.organization.title.length < 30 ? verification.organization.title : verification.organization.title.substring(0, 27) + '..'}</Text>
       if (onPress) {
         // if (!this.props.resource.documentCreated)
         //      <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
@@ -329,7 +326,7 @@ var RowMixin = {
     viewCols.forEach(function(v) {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date')
         return;
-      var style = styles.verySmallLetters;
+      var style = styles.title;
       if (properties[v].ref) {
       // if (properties[v].ref) {
         if (resource[v]) {
@@ -431,20 +428,15 @@ var RowMixin = {
 }
 
 var styles = StyleSheet.create({
-  verySmallLetters: {
+  title: {
     fontSize: 18,
-    // alignSelf: 'flex-end',
     color: '#757575'
-    // color: '#b4c3cb'
   },
   description: {
-    // flexWrap: 'wrap',
     color: '#757575',
     fontSize: 14,
   },
   descriptionB: {
-    // flexWrap: 'wrap',
-    // color: '#757575',
     fontSize: 18,
   },
   shareButton: {
@@ -530,7 +522,6 @@ var styles = StyleSheet.create({
   resourceTitle: {
     // flex: 1,
     fontSize: 18,
-    fontWeight: '400',
     marginBottom: 2,
   },
   column: {
@@ -544,6 +535,11 @@ var styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center'
   },
+  header: {
+    fontSize: 18,
+    marginTop: 2,
+    paddingRight: 10
+  }
 });
 
 module.exports = RowMixin;
