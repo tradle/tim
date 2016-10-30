@@ -13,11 +13,12 @@ var reactMixin = require('react-mixin');
 var equal = require('deep-equal')
 var extend = require('extend')
 var Actions = require('../Actions/Actions');
+var StyleSheet = require('../StyleSheet')
 
 import {
   Image,
   PixelRatio,
-  StyleSheet,
+  // StyleSheet,
   Platform,
   Text,
   TouchableHighlight,
@@ -512,7 +513,7 @@ var styles = StyleSheet.create({
   // HACK FOR VERTICAL CENTERING
   resourceTitle: {
     // flex: 1,
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: '400',
     // paddingTop: 18,
     // marginBottom: 2,
