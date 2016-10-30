@@ -22,6 +22,7 @@ var Reflux = require('reflux')
 var constants = require('@tradle/constants')
 var GiftedMessenger = require('react-native-gifted-messenger')
 var NetworkInfoProvider = require('./NetworkInfoProvider')
+var PageView = require('./PageView')
 var extend = require('extend');
 
 import ActionSheet from 'react-native-actionsheet'
@@ -497,6 +498,7 @@ class MessageList extends Component {
       var maxHeight = utils.dimensions(MessageList).height -
                       (Platform.OS === 'android' ? 77 : 64) - (this.state.isConnected ? 0 : 35) - (this.state.context ? 35 : 0)
       // content = <GiftedMessenger style={{paddingHorizontal: 10, marginBottom: Platform.OS === 'android' ? 0 : 20}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
+      // Hide TextInput for shared context since it is read-only
       let hideTextInput = this.props.resource[constants.TYPE] === PRODUCT_APPLICATION  && this.props.resource._readOnly
       content = <GiftedMessenger style={{paddingHorizontal: 10}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
         ref={(c) => this._GiftedMessenger = c}
@@ -511,6 +513,7 @@ class MessageList extends Component {
         renderCustomMessage={this.renderRow.bind(this)}
         handleSend={this.onSubmitEditing.bind(this)}
         submitOnReturn={true}
+        underlineColorAndroid='transparent'
         menu={this.generateMenu.bind(this)}
         keyboardShouldPersistTaps={utils.isWeb() ? false : true}
         keyboardDismissMode={utils.isWeb() ? 'none' : 'on-drag'}
@@ -565,7 +568,7 @@ class MessageList extends Component {
                 ? [translate('formChooser'), translate('cancel')]
                 : [translate('forgetMe'), translate('cancel')]
     return (
-      <View style={[platformStyles.container, bgStyle]}>
+      <PageView style={[platformStyles.container, bgStyle]}>
         <NetworkInfoProvider connected={this.state.isConnected} resource={this.props.resource} />
         <ChatContext context={this.state.context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={this.props.bankStyle} allContexts={this.state.allContexts} />
         <View style={ sepStyle } />
@@ -586,7 +589,7 @@ class MessageList extends Component {
           }}
         />
         {alert}
-      </View>
+      </PageView>
     );
         // {addNew}
   }
