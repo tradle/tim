@@ -10,6 +10,7 @@ var utils = require('../utils/utils');
 var CameraView = require('./CameraView')
 var translate = utils.translate
 var moment = require('moment')
+var StyleSheet = require('../StyleSheet')
 
 import DatePicker from 'react-native-datepicker'
 
@@ -39,7 +40,7 @@ import {
   TouchableHighlight,
   Platform,
   Image,
-  StyleSheet,
+  // StyleSheet,
   Navigator,
   Switch,
   DatePickerAndroid,
@@ -538,10 +539,6 @@ var NewResourceMixin = {
     }
     else
       label += params.required ? '' : ' (' + translate('optional') + ')'
-    // label += (params.prop.ref  &&  params.prop.ref === constants.TYPES.MONEY)
-    //        ?  ' (' + CURRENCY_SYMBOL + ')'
-    //        : ''
-    // let paddingBottom = 20
     let lStyle = styles.labelStyle
 
     if (params.prop.ref  &&  params.prop.ref === constants.TYPES.MONEY  &&  !params.required) {
@@ -550,14 +547,9 @@ var NewResourceMixin = {
       if (maxChars < label.length)
         lStyle = [lStyle, {marginTop: 0}]
     }
-    // else  if (!params.value) {
-    //   let maxChars = (utils.dimensions(component).width)/utils.getFontSize(9)
-    //   if (maxChars < label.length)
-    //     label = label.substring(0, maxChars) + '...'
-    // }
-
     if (this.state.isRegistration)
       lStyle = [lStyle, {color: '#eeeeee'}]
+
     return (
       <View style={{flex: 5, paddingBottom: this.hasError(params.errors, params.prop.name) ? 10 : Platform.OS === 'ios' ? 10 : 7}}>
         <FloatLabel
@@ -592,7 +584,7 @@ var NewResourceMixin = {
 
       error = err
                 ? <View style={[styles.err, typeof params.paddingLeft !== 'undefined' ? {paddingLeft: params.paddingLeft} : {paddingLeft: 10}]} key={this.getNextKey()}>
-                    <Text style={{fontSize: 14, color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>{err}</Text>
+                    <Text style={styles.font14, {color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>{err}</Text>
                   </View>
                 : <View key={this.getNextKey()} />
     }
@@ -600,8 +592,8 @@ var NewResourceMixin = {
   },
 
   myBooleanTemplate(params) {
-    var labelStyle = {color: '#aaaaaa', fontSize: 18};
-    var textStyle =  {marginTop: 5, color: this.state.isRegistration ? '#ffffff' : '#000000', fontSize: 18};
+    var labelStyle = styles.booleanLabel
+    var textStyle =  [styles.booleanText, {color: this.state.isRegistration ? '#ffffff' : '#000000'}]
 
     let prop = params.prop
     let resource = this.state.resource
@@ -651,7 +643,7 @@ var NewResourceMixin = {
     let hasValue = resource && resource[prop.name]
     if (resource && resource[prop.name]) {
       label = resource[prop.name].title
-      propLabel = <Text style={{fontSize: 12, marginTop: 5, marginLeft: 10, color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}}>{params.label}</Text>
+      propLabel = <Text style={[styles.dateLabel, {color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}]}>{params.label}</Text>
     }
     else {
       label = params.label
@@ -692,7 +684,7 @@ var NewResourceMixin = {
             customStyles={{
               dateInput: styles.dateInput,
               dateText: styles.dateText,
-              placeholderText: [styles.placeholderText, {
+              placeholderText: [styles.font18, {
                 color: params.value ? '#000000' : '#aaaaaa',
                   paddingLeft: params.value ? 10 : 0
               }],
@@ -832,7 +824,7 @@ var NewResourceMixin = {
     let isPhoto = prop.name === 'photos'
       // <View key={this.getNextKey()} style={this.hasError(params) ? {paddingBottom: 0} : {paddingBottom: 10}} ref={prop.name}>
     let color = {color: resource && resource[params.prop] ? '#000000' : this.state.isRegistration ? '#eeeeee' : '#AAAAAA'}
-    let fontSize = {fontSize: this.state.isRegistration ? 20 : 18}
+    let fontSize = this.state.isRegistration ? styles.font20 : styles.font18
     let iconColor = this.state.isRegistration ? '#eeeeee' : LINK_COLOR
     return (
       <View key={this.getNextKey()} style={{paddingBottom: this.hasError(params.errors, prop.name) ? 0 : 10, margin: 0}} ref={prop.name}>
@@ -1218,7 +1210,7 @@ var styles= StyleSheet.create({
     fontSize: 18
   },
   labelStyle: {
-    paddingLeft: 0
+    paddingLeft: 0,
   },
   icon1: {
     width: 15,
@@ -1283,17 +1275,19 @@ var styles= StyleSheet.create({
     borderBottomColor: '#cccccc',
     marginHorizontal: 10,
     paddingLeft: 0,
-    // fontSize: 18
     borderColor: '#cccccc',
   },
   regInput: {
     borderWidth: 0,
     paddingLeft: 0,
+    height: 50,
+    fontSize: 20,
     color: '#eeeeee'
   },
   textInput: {
     borderWidth: 0,
     paddingLeft: 0,
+    height: 45,
     fontSize: 18,
   },
   thumb: {
@@ -1351,8 +1345,11 @@ var styles= StyleSheet.create({
     fontSize: 18,
     color: '#000000',
   },
-  placeholderText: {
+  font18: {
     fontSize: 18,
+  },
+  font20: {
+    fontSize: 20,
   },
   dateIcon: {
     position: 'absolute',
@@ -1369,10 +1366,26 @@ var styles= StyleSheet.create({
   },
   dividerText: {
     // marginTop: 15,
-    marginBottom: 10,
-    fontSize: 20,
+    marginBottom: 5,
+    fontSize: 26,
     // alignSelf: 'center',
     color: '#ffffff'
+  },
+  font14: {
+    fontSize: 14
+  },
+  booleanLabel: {
+    color: '#aaaaaa',
+    fontSize: 18
+  },
+  booleanText: {
+    marginTop: 5,
+    fontSize: 18
+  },
+  dateLabel: {
+    fontSize: 12,
+    marginTop: 5,
+    marginLeft: 10
   },
 })
 module.exports = NewResourceMixin;
