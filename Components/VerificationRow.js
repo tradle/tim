@@ -8,14 +8,14 @@ var reactMixin = require('react-mixin');
 var RowMixin = require('./RowMixin');
 var Accordion = require('react-native-accordion')
 var Swipeout = require('react-native-swipeout')
+var StyleSheet = require('../StyleSheet')
 
 var DEFAULT_CURRENCY_SYMBOL = '£'
 var CURRENCY_SYMBOL
 
 import {
   Image,
-  PixelRatio,
-  StyleSheet,
+  // StyleSheet,
   Text,
   TouchableHighlight,
   ArticleView,

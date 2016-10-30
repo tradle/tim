@@ -4,13 +4,15 @@ var utils = require('../utils/utils');
 var constants = require('@tradle/constants');
 var translate = utils.translate
 var bankStyles = require('../styles/bankStyles')
+var StyleSheet = require('../StyleSheet')
+
 var DEFAULT_PRODUCT_ROW_BG_COLOR = '#f7f7f7'
 var DEFAULT_PRODUCT_ROW_TEXT_COLOR = '#757575'
 var PRODUCT_ROW_BG_COLOR, PRODUCT_ROW_TEXT_COLOR
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 import {
   Image,
-  StyleSheet,
+  // StyleSheet,
   Text,
   TouchableHighlight,
   Platform,

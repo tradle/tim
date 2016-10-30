@@ -10,12 +10,13 @@ var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin');
 var equal = require('deep-equal')
 import { makeResponsive } from 'react-native-orient'
+var StyleSheet = require('../StyleSheet')
 
 var reactMixin = require('react-mixin');
 
 import {
   Image,
-  StyleSheet,
+  // StyleSheet,
   Text,
   TouchableHighlight,
   Alert,
