@@ -2215,7 +2215,7 @@
       "dependencies": {
         "isarray": {
           "version": "1.0.0",
-          "from": "isarray@>=1.0.0 <1.1.0",
+          "from": "isarray@~1.0.0",
           "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
         },
         "readable-stream": {
@@ -3676,8 +3676,8 @@
     },
     "merkle-tree-stream": {
       "version": "3.0.3",
-      "from": "mvayngrib/merkle-tree-stream#finalize",
-      "resolved": "git://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
+      "from": "git+https://github.com/mvayngrib/merkle-tree-stream.git#finalize",
+      "resolved": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
       "dependencies": {
         "isarray": {
           "version": "1.0.0",
@@ -4570,9 +4570,9 @@
       "resolved": "https://registry.npmjs.org/react-native-device-info/-/react-native-device-info-0.9.5.tgz"
     },
     "react-native-ecc": {
-      "version": "1.2.2",
-      "from": "tradle/react-native-ecc#63a1a75",
-      "resolved": "git://github.com/tradle/react-native-ecc.git#63a1a75008dcf410e4dad6cd9973ce7958978f10"
+      "version": "1.3.0",
+      "from": "react-native-ecc@latest",
+      "resolved": "https://registry.npmjs.org/react-native-ecc/-/react-native-ecc-1.3.0.tgz"
     },
     "react-native-env": {
       "version": "0.0.5",

@@ -12,9 +12,11 @@ import { utils as tradleUtils } from '@tradle/engine'
 import nkeySE from './nkey-se'
 import nkeyECDSA from 'nkey-ecdsa'
 
-if (utils.isIOS()) {
-  nkeyECDSA.setImplementationForCurve('p256', nkeySE)
-  nkeyECDSA.setImplementationForCurve('prime256v1', nkeySE)
+if (!utils.isWeb()) {
+  // 3 aliases for the same curve
+  ;['p256', 'prime256v1', 'secp256r1'].forEach(alias => {
+    nkeyECDSA.setImplementationForCurve(alias, nkeySE)
+  })
 }
 
 const debug = require('debug')('tradle:app:keychain')
@@ -30,9 +32,9 @@ export function generateNewSet (opts = {}) {
 
   return Promise.all(DEFAULT_KEY_SET.map(function (keyProps) {
     keyProps = { ...keyProps } // defensive copy
-    const gen = isKeyInSecureEnclave(keyProps)
-      ? createSecureEnclaveKey(keyProps)
-      : createKeychainKey(keyProps, opts.networkName)
+    const gen = isKeychainNative(keyProps)
+      ? createKeychainNativeKey(keyProps)
+      : createKeychainResidentKey(keyProps, opts.networkName)
 
     return gen.then(key => {
       key.set('purpose', keyProps.purpose)
@@ -74,11 +76,11 @@ function lookupKey (pubKey) {
     pub: 'String'
   }, pubKey)
 
-  if (!isKeyInSecureEnclave(pubKey)) {
+  if (!isKeychainNative(pubKey)) {
     return fromKeychain()
   }
 
-  return lookupSecureEnclaveKey(pubKey)
+  return lookupKeychainNativeKey(pubKey)
     .catch(function (err) {
       if (err.message !== 'NotFound') throw err
 
@@ -86,7 +88,7 @@ function lookupKey (pubKey) {
     })
 
   function fromKeychain () {
-    return lookupKeychainKey(pubKey)
+    return lookupKeychainResidentKey(pubKey)
       .then(function (priv) {
         var priv = { ...pubKey, priv }
         return tradleUtils.importKey(priv)
@@ -98,11 +100,11 @@ function lookupKey (pubKey) {
   }
 }
 
-function lookupKeychainKey (pubKey) {
+function lookupKeychainResidentKey (pubKey) {
   return utils.getPassword(pubKey.pub)
 }
 
-async function lookupSecureEnclaveKey (pubKey) {
+async function lookupKeychainNativeKey (pubKey) {
   const keyPair = getCurve(pubKey.curve).keyFromPublic(new Buffer(pubKey.pub, 'hex'))
   // const compressed = keyPair.getPublic(true, true)
   const uncompressed = keyPair.getPublic(false, true)
@@ -119,7 +121,7 @@ async function lookupSecureEnclaveKey (pubKey) {
   return nkeySE.fromJSON({ ...pubKey, ...key })
 }
 
-function createKeychainKey (keyProps, networkName) {
+function createKeychainResidentKey (keyProps, networkName) {
   keyProps = { ...keyProps }
   if (keyProps.type === 'bitcoin') {
     keyProps.networkName = networkName
@@ -130,14 +132,8 @@ function createKeychainKey (keyProps, networkName) {
     .then(() => key)
 }
 
-function createSecureEnclaveKey (keyProps) {
-  // { sign, verify, pub }
+function createKeychainNativeKey (keyProps) {
   return Q.ninvoke(nkeySE, 'gen', keyProps)
-  // return Q.ninvoke(ec, 'keyPair', keyProps.curve)
-  //   .then((key) => {
-  //     console.log('made', key.pub.toString('hex'))
-  //     return extendKey(key, keyProps)
-  //   })
 }
 
 function rejectNotFound () {
@@ -150,6 +146,7 @@ function getCurve (name) {
   return ellipticCurves[name]
 }
 
-function isKeyInSecureEnclave (key) {
-  return utils.isIOS() && key.type === 'ec' && key.curve in ec.curves //key.curve === 'p256'
+function isKeychainNative (key) {
+  return !utils.isWeb() && key.type === 'ec' && key.curve in ec.curves
+  // return utils.isIOS() && key.type === 'ec' && key.curve in ec.curves //key.curve === 'p256'
 }

@@ -29,6 +29,7 @@ var EnumList = require('./Components/EnumList')
 // var GridList = require('./Components/GridList');
 var TimHome = require('./Components/TimHome');
 var PasswordCheck = require('./Components/PasswordCheck');
+var LockScreen = require('./Components/LockScreen')
 var TouchIDOptIn = require('./Components/TouchIDOptIn');
 var ResourceTypesScreen = require('./Components/ResourceTypesScreen');
 var NewResource = require('./Components/NewResource');
@@ -434,6 +435,8 @@ class TiMApp extends Component {
       return <EnumList navigator={nav} { ...props } />
     case 23:
       return <ContextChooser navigator={nav} {...props} />
+    case 24:
+      return <LockScreen navigator={nav} {...props} />
     case 10:
     default: // 10
       return <ResourceList navigator={nav} {...props} />

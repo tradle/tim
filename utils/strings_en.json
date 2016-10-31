@@ -14,8 +14,8 @@
     "pleaseDrawPassword": "Draw your pattern",
     "drawYourPassword": "Draw your pattern",
     "drawYourPasswordAgain": "Draw your pattern again",
-    "drawYourNewPassword": "Choose you pattern",
-    "drawYourNewPasswordAgain": "Draw your pattern again",
+    "drawYourNewPassword": "Draw a new pattern",
+    "drawYourNewPasswordAgain": "Draw the new pattern again",
     "drawYourOldPassword": "Draw your old pattern",
     "gestureNotRecognized": "Wrong pattern",
     "passwordLimitations": "Pattern must have 5+ points",
@@ -33,6 +33,7 @@
     "tooManyPasswordAttempts": "Too many failed attempts! This form has been disabled.",
     "correctPassword": "Aww, you remembered!",
     "passwordsDontMatch": "Passwords don't match",
+    "temporarilyLocked": "For your protection, this application has been temporarily locked for {1}",
 
     "pleaseRestartTIM": "Please restart TiM",
     "cancel": "Cancel",

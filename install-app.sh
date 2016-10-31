@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # Copyright (c) 2015-present, Facebook, Inc.
 # All rights reserved.
 #
@@ -9,58 +8,35 @@
 
 # Bundle React Native app's code and image assets.
 # This script is supposed to be invoked as part of Xcode build process
-# and relies on envoronment variables (including PWD) set by Xcode
-
-function evil_git_dirty {
-  [[ $(git diff --shortstat 2> /dev/null | tail -n1) != "" ]] && echo "*"
-}
-
-DEV=false
-plistName="Info"
-if [ "$PRODUCT_NAME" == "Tradle-dev" ]; then
-  plistName="Dev"
-fi
-
-# Xcode project file for React Native apps is located in ios/ subfolder
-
-buildPlist="Tradle/$plistName.plist"
-bundleVersion=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" $buildPlist)
-gitHash=$(git rev-parse HEAD)
-RELEASES_DIR="$(pwd)/../release" # up from iOS
-THIS_RELEASE_DIR="$RELEASES_DIR/$bundleVersion/${gitHash:0:10}"
+# and relies on environment variables (including PWD) set by Xcode
 
 case "$CONFIGURATION" in
   Debug)
-  exit 0 # avoid building bundle in Debug mode
-    # DEV=true
-    ;;
-  Release)
-    # if [ "$(evil_git_dirty)" == "*" ]; then
-    #   echo "TRADLE DEVELOPER, YOU HAVE UNSTAGED CHANGES, PLEASE COMMIT BEFORE BUILDING A RELEASE"
-    #   exit 1
-    # fi
+    # Speed up build times by skipping the creation of the offline package for debug
+    # builds on the simulator since the packager is supposed to be running anyways.
+    echo "Skipping bundling in Dev mode"
+    exit 0;
     ;;
   "")
-    DEST=$THIS_RELEASE_DIR # build bundle to local dir
+    echo "$0 must be invoked by Xcode"
+    exit 1
     ;;
   *)
-    echo "Unsupported value of \$CONFIGURATION=$CONFIGURATION"
-    exit 1
+    DEV=false
     ;;
 esac
 
-source ~/.bash_profile
-source ~/.bashrc
+# Path to react-native folder inside node_modules
+REACT_NATIVE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/node_modules/react-native" && pwd)"
 
+# Xcode project file for React Native apps is located in ios/ subfolder
 cd ..
-
-REACT_NATIVE_DIR="$(pwd)/node_modules/react-native"
-if [ -z "$DEST" ]; then
-  DEST=$CONFIGURATION_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH
-fi
 
 # Define NVM_DIR and source the nvm.sh setup script
 [ -z "$NVM_DIR" ] && export NVM_DIR="$HOME/.nvm"
+
+# Define entry file
+ENTRY_FILE=${1:-index.ios.js}
 
 if [[ -s "$HOME/.nvm/nvm.sh" ]]; then
   . "$HOME/.nvm/nvm.sh"
@@ -68,33 +44,51 @@ elif [[ -x "$(command -v brew)" && -s "$(brew --prefix nvm)/nvm.sh" ]]; then
   . "$(brew --prefix nvm)/nvm.sh"
 fi
 
-copy_bundle() {
-  if [ "$DEV" == false ]; then
-    echo "copying bundle and assets to $THIS_RELEASE_DIR"
-    mkdir -p "$THIS_RELEASE_DIR"
-    cp "$DEST/main.jsbundle" "$THIS_RELEASE_DIR/"
-    cp "$DEST/main.jsbundle.map" "$THIS_RELEASE_DIR/"
-    cp -r "$DEST/assets" "$THIS_RELEASE_DIR/"
-    rm -rf "$RELEASES_DIR/latest"
-    cp -r "$THIS_RELEASE_DIR" "$RELEASES_DIR/latest"
-  fi
+# Set up the nodenv node version manager if present
+if [[ -x "$HOME/.nodenv/bin/nodenv" ]]; then
+  eval "$("$HOME/.nodenv/bin/nodenv" init -)"
+fi
+
+[ -z "$NODE_BINARY" ] && export NODE_BINARY="node"
+
+nodejs_not_found()
+{
+  echo "error: Can't find '$NODE_BINARY' binary to build React Native bundle" >&2
+  echo "If you have non-standard nodejs installation, select your project in Xcode," >&2
+  echo "find 'Build Phases' - 'Bundle React Native code and images'" >&2
+  echo "and change NODE_BINARY to absolute path to your node executable" >&2
+  echo "(you can find it by invoking 'which node' in the terminal)" >&2
+  exit 2
 }
 
-# if [ -f "$THIS_RELEASE_DIR/main.jsbundle" ]; then
-#   echo "build exists in $THIS_RELEASE_DIR, copying"
-#   mkdir -p "$DEST"
-#   cp "$THIS_RELEASE_DIR/main.jsbundle" "$DEST/"
-#   cp -r "$THIS_RELEASE_DIR/assets" "$DEST/"
-# else
-  echo "writing bundle and assets to $DEST"
-  # rm -rf $TMPDIR/react-*
-  set -x
-  node "$REACT_NATIVE_DIR/local-cli/cli.js" bundle \
-    --entry-file index.ios.js \
-    --platform ios \
-    --dev $DEV \
-    --reset-cache true \
-    --sourcemap-output "$DEST/main.jsbundle.map" \
-    --bundle-output "$DEST/main.jsbundle" \
-    --assets-dest "$DEST" && copy_bundle
-# fi
+type $NODE_BINARY >/dev/null 2>&1 || nodejs_not_found
+
+# Print commands before executing them (useful for troubleshooting)
+set -x
+DEST=$CONFIGURATION_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH
+
+if [[ "$CONFIGURATION" = "Debug" && "$PLATFORM_NAME" != "iphonesimulator" ]]; then
+  PLISTBUDDY='/usr/libexec/PlistBuddy'
+  PLIST=$TARGET_BUILD_DIR/$INFOPLIST_PATH
+  IP=$(ipconfig getifaddr en0)
+  $PLISTBUDDY -c "Add NSAppTransportSecurity:NSExceptionDomains:localhost:NSTemporaryExceptionAllowsInsecureHTTPLoads bool true" "$PLIST"
+  $PLISTBUDDY -c "Add NSAppTransportSecurity:NSExceptionDomains:$IP.xip.io:NSTemporaryExceptionAllowsInsecureHTTPLoads bool true" "$PLIST"
+  echo "$IP.xip.io" > "$DEST/ip.txt"
+fi
+
+BUNDLE_FILE="$DEST/main.jsbundle"
+
+$NODE_BINARY "$REACT_NATIVE_DIR/local-cli/cli.js" bundle \
+  --entry-file "$ENTRY_FILE" \
+  --platform ios \
+  --dev $DEV \
+  --reset-cache \
+  --bundle-output "$BUNDLE_FILE" \
+  --sourcemap-output "$BUNDLE_FILE.map" \
+  --assets-dest "$DEST"
+
+if [[ ! $DEV && ! -f "$BUNDLE_FILE" ]]; then
+  echo "error: File $BUNDLE_FILE does not exist. This must be a bug with" >&2
+  echo "React Native, please report it here: https://github.com/facebook/react-native/issues"
+  exit 2
+fi
