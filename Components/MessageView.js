@@ -307,7 +307,7 @@ var styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontFamily: 'Avenir Next',
+    // fontFamily: 'Avenir Next',
     marginHorizontal: 7,
     color: '#9b9b9b'
   },
