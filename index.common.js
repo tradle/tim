@@ -54,6 +54,7 @@ var Icon = require('react-native-vector-icons/Ionicons');
 var Actions = require('./Actions/Actions');
 import * as AutomaticUpdates from './utils/automaticUpdates';
 import { signIn } from './utils/localAuth'
+var StyleSheet = require('./StyleSheet')
 
 var reactMixin = require('react-mixin');
 import {
@@ -61,7 +62,7 @@ import {
   Image,
   View,
   TouchableOpacity,
-  StyleSheet,
+  // StyleSheet,
   Alert,
   // StatusBar,
   Platform,
@@ -466,9 +467,8 @@ var NavigationBarRouteMapper = {
     var icon = iconIdx !== -1 ? lbTitle.substring(idx + 1) : lbTitle === 'Back' ? 'ios-arrow-back' : null
 
 
-    style.push({fontSize: utils.getFontSize(17)})
     var title = icon
-              ? <Icon name={icon} size={25} color='#7AAAC3' style={styles.icon}/>
+              ? <Icon name={icon} size={utils.getFontSize(25)} color='#7AAAC3' style={styles.icon}/>
               : <Text style={style}>
                   {lbTitle}
                 </Text>
@@ -495,22 +495,23 @@ var NavigationBarRouteMapper = {
       style.push({color: route.tintColor});
     else if (route.passProps.bankStyle)
       style.push({color: route.passProps.bankStyle.LINK_COLOR || '#7AAAC3'})
-    style.push({fontSize: utils.getFontSize(17)})
     var title
 
     var rbTitle = route.rightButtonTitle
     var iconIdx = rbTitle.indexOf('|')
-    var icon = rbTitle === 'Done'
-                         ? 'md-checkmark-circle-outline'
-                         : rbTitle === 'Edit'
-                                     ? 'ios-create-outline'
-                                     : rbTitle === 'Share'
-                                                 ? 'md-share'
-                                                 : null
+    var icon = (rbTitle === 'Done' || rbTitle === 'Accept')
+             ? 'md-checkmark'
+             : rbTitle === 'Profile'
+                ? 'md-person'
+                : rbTitle === 'Edit'
+                            ? 'md-create'
+                            : rbTitle === 'Share'
+                                        ? 'md-share'
+                                        : null
 
     if (icon)  {
       let color = rbTitle === 'Done' ? '#62C457' : '#7AAAC3'
-      title = <Icon name={icon} size={25} color={color} style={styles.icon} />
+      title = <Icon name={icon} size={utils.getFontSize(25)} color={color} style={styles.icon} />
     }
     else if (rbTitle.indexOf('|') === -1)
       title =  <Text style={style}>
@@ -598,7 +599,7 @@ var styles = StyleSheet.create({
   icon: {
     width: 25,
     height: 25,
-    marginTop: Platform.OS === 'android' ? 20 : 10
+    marginTop: Platform.OS === 'android' ? 19 : 10
   },
   row: {
     flexDirection: 'row'
@@ -613,7 +614,7 @@ var styles = StyleSheet.create({
   navBarTitleText: {
     color: '#2E3B4E',
     fontWeight: '400',
-    fontSize: utils.getFontSize(17),
+    fontSize: 18,
   },
   navBarLeftButton: {
     paddingLeft: 10,
@@ -625,7 +626,8 @@ var styles = StyleSheet.create({
   },
   navBarButtonText: {
     color: '#7AAAC3',
-  },
+    fontSize: 18
+  }
 });
 
 AppRegistry.registerComponent('Tradle', function() { return TiMApp });
