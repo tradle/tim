@@ -444,7 +444,7 @@ var styles = StyleSheet.create({
   // HACK FOR VERTICAL CENTERING
   resourceTitle: {
     // flex: 1,
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: '400',
     // paddingTop: 18,
     // marginBottom: 2,
