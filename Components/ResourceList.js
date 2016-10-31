@@ -1090,7 +1090,7 @@ var styles = StyleSheet.create({
     alignSelf: 'center',
   },
   resourceTitle: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: '400',
     marginBottom: 2,
     paddingLeft: 5
