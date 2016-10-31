@@ -202,12 +202,12 @@ class MessageRow extends Component {
     if (showMessageBody) {
       var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
       if (message) {
-        if (message.charAt(0) === '['  ||  longMessage)
+        if (/*message.charAt(0) === '['  || */ longMessage)
           viewStyle.width = msgWidth; //isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
       }
       if (!isSimpleMessage) {
         let msgW = message.length * utils.getFontSize(10) + 100
-        // if (msgW > msgWidth)
+        if (msgW > msgWidth)
           viewStyle.width =  message ? Math.min(msgWidth, msgW) : msgWidth
       }
 
@@ -577,8 +577,8 @@ class MessageRow extends Component {
         let msg = <View key={this.getNextKey()}>
                 <Text style={styles.resourceTitle}>{translate('hello', utils.getMe().firstName)}</Text>
                 <View style={styles.rowContainer}>
-                  <Text style={[styles.resourceTitle, {color: LINK_COLOR}]}>{translate('listOfProducts')} </Text>
-                  <Icon style={{color: LINK_COLOR, marginTop: 2}} size={20} name={'ios-arrow-forward'} />
+                  <Text style={[styles.resourceTitle, {color: LINK_COLOR, paddingRight: 20}]}>{translate('listOfProducts')} </Text>
+                  <Icon style={{color: LINK_COLOR}} size={20} name={'ios-arrow-forward'} />
                 </View>
               </View>
         renderedRow.push(msg);
