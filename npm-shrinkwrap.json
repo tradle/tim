@@ -36,7 +36,7 @@
     },
     "@tradle/engine": {
       "version": "3.5.0",
-      "from": "@tradle/engine@latest",
+      "from": "@tradle/engine@3.5.0",
       "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-3.5.0.tgz",
       "dependencies": {
         "async": {
@@ -2213,17 +2213,15 @@
       "from": "feed-indexer@>=1.2.1 <2.0.0",
       "resolved": "https://registry.npmjs.org/feed-indexer/-/feed-indexer-1.2.1.tgz",
       "dependencies": {
+        "isarray": {
+          "version": "1.0.0",
+          "from": "isarray@>=1.0.0 <1.1.0",
+          "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
+        },
         "readable-stream": {
           "version": "2.1.5",
           "from": "readable-stream@>=2.1.4 <3.0.0",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.1.5.tgz",
-          "dependencies": {
-            "isarray": {
-              "version": "1.0.0",
-              "from": "isarray@>=1.0.0 <1.1.0",
-              "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
-            }
-          }
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.1.5.tgz"
         }
       }
     },
@@ -2350,8 +2348,8 @@
     },
     "forward-secrecy": {
       "version": "1.0.2",
-      "from": "git+https://github.com/tradle/forward-secrecy.git#dev",
-      "resolved": "git+https://github.com/tradle/forward-secrecy.git#5ad4c2ee429db4b10599efbd41c650b9debbf7fe",
+      "from": "tradle/forward-secrecy#dev",
+      "resolved": "git://github.com/tradle/forward-secrecy.git#5ad4c2ee429db4b10599efbd41c650b9debbf7fe",
       "dependencies": {
         "tweetnacl": {
           "version": "0.13.3",
@@ -3131,7 +3129,31 @@
     "key-encoder": {
       "version": "1.1.6",
       "from": "mvayngrib/key-encoder-js",
-      "resolved": "git://github.com/mvayngrib/key-encoder-js.git#9811b1d85ded6f6d8eb6b48389d80ed17df550ff"
+      "resolved": "git://github.com/mvayngrib/key-encoder-js.git#9811b1d85ded6f6d8eb6b48389d80ed17df550ff",
+      "dependencies": {
+        "asn1.js": {
+          "version": "2.2.1",
+          "from": "asn1.js@>=2.2.0 <3.0.0",
+          "resolved": "https://registry.npmjs.org/asn1.js/-/asn1.js-2.2.1.tgz",
+          "dependencies": {
+            "bn.js": {
+              "version": "2.2.0",
+              "from": "bn.js@>=2.0.0 <3.0.0",
+              "resolved": "https://registry.npmjs.org/bn.js/-/bn.js-2.2.0.tgz"
+            }
+          }
+        },
+        "bn.js": {
+          "version": "3.3.0",
+          "from": "bn.js@>=3.1.2 <4.0.0",
+          "resolved": "https://registry.npmjs.org/bn.js/-/bn.js-3.3.0.tgz"
+        },
+        "elliptic": {
+          "version": "5.2.1",
+          "from": "elliptic@>=5.1.0 <6.0.0",
+          "resolved": "https://registry.npmjs.org/elliptic/-/elliptic-5.2.1.tgz"
+        }
+      }
     },
     "keymirror": {
       "version": "0.1.1",
@@ -3654,8 +3676,20 @@
     },
     "merkle-tree-stream": {
       "version": "3.0.3",
-      "from": "git+https://github.com/mvayngrib/merkle-tree-stream.git#finalize",
-      "resolved": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290"
+      "from": "mvayngrib/merkle-tree-stream#finalize",
+      "resolved": "git://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
+      "dependencies": {
+        "isarray": {
+          "version": "1.0.0",
+          "from": "isarray@>=1.0.0 <1.1.0",
+          "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
+        },
+        "readable-stream": {
+          "version": "2.1.5",
+          "from": "readable-stream@>=2.0.5 <3.0.0",
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.1.5.tgz"
+        }
+      }
     },
     "method-override": {
       "version": "2.3.6",
@@ -4289,9 +4323,9 @@
       "resolved": "https://registry.npmjs.org/pull-level/-/pull-level-1.5.2.tgz",
       "dependencies": {
         "pull-stream": {
-          "version": "3.4.5",
+          "version": "3.5.0",
           "from": "pull-stream@>=3.4.0 <4.0.0",
-          "resolved": "https://registry.npmjs.org/pull-stream/-/pull-stream-3.4.5.tgz"
+          "resolved": "https://registry.npmjs.org/pull-stream/-/pull-stream-3.5.0.tgz"
         }
       }
     },
@@ -4547,8 +4581,8 @@
     },
     "react-native-floating-labels": {
       "version": "1.1.0",
-      "from": "mvayngrib/react-native-floating-labels#pointerFix",
-      "resolved": "git://github.com/mvayngrib/react-native-floating-labels.git#23c4d10a3b5487f0ac1204e7a7a8b96d56f34790",
+      "from": "mvayngrib/react-native-floating-labels#pointerEvents",
+      "resolved": "git://github.com/mvayngrib/react-native-floating-labels.git#ce9e4a7746c7b1b4d83aa1e99102e831073c0973",
       "dependencies": {
         "lodash": {
           "version": "3.10.1",
@@ -4579,8 +4613,8 @@
     },
     "react-native-gifted-messenger": {
       "version": "0.0.16",
-      "from": "pgmemk/react-native-gifted-messenger#e48f5fe",
-      "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#e48f5fea85d3d263e221e901038e413567010364"
+      "from": "pgmemk/react-native-gifted-messenger#a32cdf4",
+      "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#a32cdf4c591706f02214496100a10964b93fc06d"
     },
     "react-native-gifted-spinner": {
       "version": "0.0.4",
@@ -5376,9 +5410,9 @@
           "resolved": "https://registry.npmjs.org/looper/-/looper-3.0.0.tgz"
         },
         "pull-stream": {
-          "version": "3.4.5",
+          "version": "3.5.0",
           "from": "pull-stream@>=3.2.3 <4.0.0",
-          "resolved": "https://registry.npmjs.org/pull-stream/-/pull-stream-3.4.5.tgz"
+          "resolved": "https://registry.npmjs.org/pull-stream/-/pull-stream-3.5.0.tgz"
         }
       }
     },
