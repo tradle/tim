@@ -19,9 +19,9 @@ const ENUM = 'tradle.Enum'
 import ActionSheet from 'react-native-actionsheet'
 import Prompt from 'react-native-prompt'
 // import Communications from 'react-native-communications'
-
+import StyleSheet from '../StyleSheet'
 import {
-  StyleSheet,
+  // StyleSheet,
   Image,
   View,
   Text,

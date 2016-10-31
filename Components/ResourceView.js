@@ -2,6 +2,7 @@
 
 var utils = require('../utils/utils');
 var translate = utils.translate
+var fontSize = utils.getFontSize
 var ShowPropertiesView = require('./ShowPropertiesView');
 var PhotoView = require('./PhotoView');
 var PhotoList = require('./PhotoList');
@@ -20,6 +21,7 @@ var QRCode = require('./QRCode')
 var MessageList = require('./MessageList')
 var defaultBankStyle = require('../styles/bankStyle.json')
 var ENV = require('../utils/env')
+var StyleSheet = require('../StyleSheet')
 
 import ActionSheet from 'react-native-actionsheet'
 
@@ -37,7 +39,7 @@ const USE_GESTURE_PASSWORD = 1
 const CHANGE_GESTURE_PASSWORD = 2
 const PAIR_DEVICES = 3
 import {
-  StyleSheet,
+  // StyleSheet,
   ScrollView,
   Image,
   View,
@@ -234,7 +236,7 @@ class ResourceView extends Component {
                           <Text style={platformStyles.touchIdText}>{msg}</Text>
                           <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
                              <View style={[platformStyles.menuButtonRegular]}>
-                                <Icon name='md-finger-print' color={Platform.OS === 'ios' ? '#ffffff': 'red'} size={33} />
+                                <Icon name='md-finger-print' color={Platform.OS === 'ios' ? '#ffffff': 'red'} size={fontSize(33)} />
                               </View>
                             </TouchableHighlight>
                         </View>
