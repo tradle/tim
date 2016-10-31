@@ -349,7 +349,7 @@ var styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    fontFamily: 'Avenir Next',
+    // fontFamily: 'Avenir Next',
     marginTop: 3,
     marginBottom: 0,
     marginHorizontal: 7,
