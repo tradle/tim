@@ -1,6 +1,6 @@
 'use strict';
 
-import {StyleSheet} from 'react-native';
+import StyleSheet from '../StyleSheet'
 
 export default StyleSheet.create({
   container: {
