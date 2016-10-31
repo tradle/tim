@@ -76,7 +76,7 @@ class MessageList extends Component {
       selectedAssets: {},
       isConnected: this.props.navigator.isConnected,
       allContexts: true,  // true - for the full chat; false - filtered chat for specific context.
-      isEmployee: utils.isEmployee(props.resource),
+      isEmployee:  utils.isEmployee(props.resource),
       filter: this.props.filter,
       userInput: '',
       allLoaded: false
@@ -97,6 +97,7 @@ class MessageList extends Component {
       modelName: this.props.modelName,
       to: this.props.resource,
       prop: this.props.prop,
+      context: this.props.context,
       limit: LIMIT
     }
     if (this.props.isAggregation)
@@ -243,7 +244,7 @@ class MessageList extends Component {
       }
       return
     }
-    LINK_COLOR = this.props.bankStyle.LINK_COLOR
+    LINK_COLOR = this.props.bankStyle  &&  this.props.bankStyle.LINK_COLOR
     let isEmployee = utils.isEmployee(this.props.resource)
     if (list.length || (this.state.filter  &&  this.state.filter.length)) {
       let productToForms = this.gatherForms(list)
@@ -411,7 +412,7 @@ class MessageList extends Component {
       onSelect: this.selectResource.bind(this),
       resource: resource,
       bankStyle: this.props.bankStyle,
-      context: resource._context || this.state.context,
+      context: this.props.resource[constants.TYPE] === PRODUCT_APPLICATION ? this.props.resource : resource._context || this.state.context,
       to: isAggregation ? resource.to : this.props.resource,
       navigator: this.props.navigator,
     }
@@ -545,6 +546,7 @@ class MessageList extends Component {
         initialListSize={20}
         hideTextInput={hideTextInput}
         maxHeight={maxHeight} // 64 for the navBar; 110 - with SearchBar
+        hideTextInput={hideTextInput}
       />
         // returnKeyType={false}
         // keyboardShouldPersistTaps={false}

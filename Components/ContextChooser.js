@@ -46,9 +46,11 @@ class ContextChooser extends Component {
     this.listenTo(Store, 'onContexts');
   }
   onContexts(params) {
-    if (params.action !== 'allContexts'  ||  params.to[constants.ROOT_HASH] !== this.props.resource[constants.ROOT_HASH])
+    if (params.action !== 'allContexts'  ||
+        !params.list                     ||
+        !params.list.length              ||
+        params.to[constants.ROOT_HASH] !== this.props.resource[constants.ROOT_HASH])
       return
-
     this.setState({
       dataSource: this.state.dataSource.cloneWithRows(params.list),
       isLoading: false

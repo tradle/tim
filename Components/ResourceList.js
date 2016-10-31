@@ -27,6 +27,7 @@ var defaultBankStyle = require('../styles/bankStyle.json')
 const WEB_TO_MOBILE = '0'
 const TALK_TO_EMPLOYEEE = '1'
 const APP_QR_CODE = '5'
+const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 // var bankStyles = require('../styles/bankStyles')
 const ENUM = 'tradle.Enum'
 
@@ -126,6 +127,9 @@ class ResourceList extends Component {
       modelName: this.props.modelName,
       // to: this.props.resource
     };
+    if (this.props._readOnly)
+      params._readOnly = true
+
     if (this.props.isAggregation)
       params.isAggregation = true;
     if (this.props.sortProperty)
@@ -625,6 +629,7 @@ class ResourceList extends Component {
     var isVerification = model.id === constants.TYPES.VERIFICATION  ||  model.subClassOf === constants.TYPES.VERIFICATION
     var isForm = model.id === constants.TYPES.FORM || model.subClassOf === constants.TYPES.FORM
     var isMyProduct = model.id === 'tradle.MyProduct'  ||  model.subClassOf === 'tradle.MyProduct'
+    var isSharedContext = model.id === PRODUCT_APPLICATION && resource._readOnly
 
     // let hasBacklink = this.props.prop && this.props.prop.items  &&  this.props.prop.backlink
     return /*hasBacklink  &&*/  (isVerification  || isForm || isMyProduct)
@@ -638,7 +643,7 @@ class ResourceList extends Component {
         resource={resource} />
       )
     : (<ResourceRow
-        onSelect={() => this.selectResource(resource)}
+        onSelect={() => isSharedContext ? this.openSharedContextChat(resource) : this.selectResource(resource)}
         key={resource[constants.ROOT_HASH]}
         navigator={this.props.navigator}
         changeSharedWithList={this.props.chat ? this.changeSharedWithList.bind(this) : null}
@@ -649,6 +654,22 @@ class ResourceList extends Component {
         resource={resource}
         chosen={this.state.chosen} />
     );
+  }
+  openSharedContextChat(resource) {
+    this.props.navigator.push({
+      title: translate(utils.getModel(resource.product).value),
+      component: MessageList,
+      id: 11,
+      backButtonTitle: 'Back',
+      passProps: {
+        resource: resource,
+        context: resource,
+        filter: '',
+        modelName: constants.TYPES.MESSAGE,
+        // currency: params.to.currency,
+        bankStyle: this.props.bankStyle || defaultBankStyle
+      }
+    })
   }
   changeSharedWithList(id, value) {
     this.state.sharedWith[id] = value
@@ -750,6 +771,22 @@ class ResourceList extends Component {
       }
     });
   }
+  showContexts() {
+    this.props.navigator.push({
+      title: translate('sharedContext'),
+      id: 10,
+      component: ResourceList,
+      backButtonTitle: translate('back'),
+      titleTextColor: '#7AAAC3',
+      passProps: {
+        // officialAccounts: true,
+        bankStyle: this.props.style,
+        modelName: PRODUCT_APPLICATION,
+        _readOnly: true
+      }
+    });
+  }
+
   addNew() {
     var model = utils.getModel(this.props.modelName).value;
     var r;
@@ -911,17 +948,27 @@ class ResourceList extends Component {
 
   renderHeader() {
     return (this.props.modelName === constants.TYPES.PROFILE)
-          ? <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
-              <TouchableOpacity onPress={this.showBanks.bind(this)}>
+          ? <View>
+            <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
+              <TouchableHighlight underlayColor='transparent' onPress={this.showBanks.bind(this)}>
                 <View style={styles.row}>
-                  <View>
-                    <Image source={require('../img/banking.png')} style={styles.cellImage} />
-                  </View>
+                  <Image source={require('../img/banking.png')} style={styles.cellImage} />
                   <View style={styles.textContainer}>
                     <Text style={styles.resourceTitle}>{translate('officialAccounts')}</Text>
                   </View>
                 </View>
-              </TouchableOpacity>
+              </TouchableHighlight>
+            </View>
+            <View style={{padding: 5, backgroundColor: '#f1ffe7'}}>
+              <TouchableHighlight underlayColor='transparent' onPress={this.showContexts.bind(this)}>
+                <View style={styles.row}>
+                  <Icon name='md-share' size={50} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+                  <View style={styles.textContainer}>
+                    <Text style={styles.resourceTitle}>{translate('sharedContext')}</Text>
+                  </View>
+                </View>
+              </TouchableHighlight>
+            </View>
             </View>
           : <View />
   }
@@ -1027,60 +1074,47 @@ var styles = StyleSheet.create({
   icon: {
     marginLeft: -23,
     marginTop: -25,
-    // color: '#629BCA',
     color: 'red'
   },
   image: {
     width: 25,
     height: 25,
     marginRight: 5,
-    // color: '#cccccc'
   },
   footer: {
     flexDirection: 'row',
     flexWrap: 'nowrap',
     justifyContent: 'flex-end',
     height: 45,
-    // paddingTop: 5,
     paddingHorizontal: 10,
     backgroundColor: 'transparent',
-    // backgroundColor: '#eeeeee',
     borderColor: '#eeeeee',
     borderWidth: StyleSheet.hairlineWidth,
     borderTopColor: '#cccccc',
   },
   row: {
-    // backgroundColor: 'white',
-    // justifyContent: 'space-around',
     flexDirection: 'row',
     padding: 5,
   },
   textContainer: {
-    flex: 1,
-    alignSelf: 'center'
+    alignSelf: 'center',
   },
   resourceTitle: {
-    flex: 1,
     fontSize: 18,
     fontWeight: '400',
     marginBottom: 2,
     paddingLeft: 5
   },
   cellImage: {
-    // backgroundColor: '#dddddd',
     height: 50,
     marginRight: 10,
     width: 50,
-    // borderColor: '#7AAAc3',
-    // borderRadius: 30,
-    // borderWidth: 1,
   },
   menuButton: {
     marginTop: -23,
     paddingVertical: 5,
     paddingHorizontal: 21,
     borderRadius: 24,
-    // shadowOffset:{width: 5, height: 5},
     shadowOpacity: 1,
     shadowRadius: 5,
     shadowColor: '#afafaf',
