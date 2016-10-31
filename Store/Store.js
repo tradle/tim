@@ -2829,10 +2829,12 @@ var Store = Reflux.createStore({
       else {
         let c = this.searchMessages({modelName: PRODUCT_APPLICATION, to: params.to})
         if (c) {
-          if (c.length === 1)
-            retParams.context = c[0]
+          if (c.length === 1) {
+            if (!c[0]._readOnly)
+              retParams.context = c[0]
+          }
           else {
-            let contexts = c.filter((r) => r.formsCount)
+            let contexts = c.filter((r) => !r._readOnly && r.formsCount)
             if (contexts) {
               if (contexts.length === 1)
                 retParams.context = contexts[0]
@@ -4839,6 +4841,10 @@ var Store = Reflux.createStore({
       val._context = inDB._context
       val._sharedWith = inDB._sharedWith
       val.verifications = inDB.verifications
+      if (val.txId  &&  !inDB.txId) {
+        val.time = inDB.time
+        val.sealedTime = val.time || obj.timestamp
+      }
     }
     if (obj.object.context  &&  val[TYPE] !== PRODUCT_APPLICATION) {
       // if (!val._contexts)
