@@ -95,7 +95,7 @@ class ContextChooser extends Component {
     if (this.state.isLoading)
       return <PageView >
                 <View style={[platformStyles.container, bgStyle]}>
-                  <Text style={{fontSize: 17, alignSelf: 'center', marginTop: 80, color: '#629BCA'}}>{'Loading...'}</Text>
+                  <Text style={styles.loading}>{'Loading...'}</Text>
                   <ActivityIndicator size='large' style={{alignSelf: 'center', marginTop: 20}} />
                 </View>
               </PageView>
@@ -136,6 +136,12 @@ var styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderColor: '#ffffff',
   },
+  loading: {
+    fontSize: 17,
+    alignSelf: 'center',
+    marginTop: 80,
+    color: '#629BCA'
+  }
 });
 
 module.exports = ContextChooser
