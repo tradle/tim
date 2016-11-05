@@ -687,7 +687,7 @@ class ResourceList extends Component {
 
     // var qrInfo = (model.id === constants.TYPES.PROFILE)
     //            ? <View style={styles.row}>
-    //                <TouchableHighlight underlayColor='transparent'
+    //                <TouchableOpacity underlayColor='transparent'
     //                   onPress={this.showQRCode.bind(this, 'Contact Info', me[constants.ROOT_HASH])}>
     //                 <View style={{alignSelf: 'center'}}>
     //                   <View style={{marginTop: -12}}>
