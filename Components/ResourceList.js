@@ -687,7 +687,7 @@ class ResourceList extends Component {
 
     // var qrInfo = (model.id === constants.TYPES.PROFILE)
     //            ? <View style={styles.row}>
-    //                <TouchableHighlight underlayColor='transparent'
+    //                <TouchableOpacity underlayColor='transparent'
     //                   onPress={this.showQRCode.bind(this, 'Contact Info', me[constants.ROOT_HASH])}>
     //                 <View style={{alignSelf: 'center'}}>
     //                   <View style={{marginTop: -12}}>
@@ -697,8 +697,8 @@ class ResourceList extends Component {
     //                     <Text style={[buttonStyles.text, {color:'#999999'}]}>My QR Code</Text>
     //                   </View>
     //                 </View>
-    //               </TouchableHighlight>
-    //               <TouchableHighlight underlayColor='transparent' onPress={this.scanQRCode.bind(this)}>
+    //               </TouchableOpacity>
+    //               <TouchableOpacity underlayColor='transparent' onPress={this.scanQRCode.bind(this)}>
     //                 <View style={styles.row}>
     //                   <View style={{marginTop: -5}}>
     //                     <Text style={styles.resourceTitle}>Scan new contact</Text>
@@ -707,17 +707,17 @@ class ResourceList extends Component {
     //                     <Icon name='qr-scanner'  size={30}  color='#999999' style={styles.icon} />
     //                   </View>
     //                 </View>
-    //               </TouchableHighlight>
+    //               </TouchableOpacity>
     //             </View>
     //           : <View />
 
     // return (
     //   <View style={styles.footer}>
-    //     <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
+    //     <TouchableOpacity underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
     //       <View style={styles.menuButton1}>
     //         <Icon name='md-menu'  size={30}  color='#ffffff' />
     //       </View>
-    //     </TouchableHighlight>
+    //     </TouchableOpacity>
     //   </View>
     // );
     // let style = Platform.OS === 'ios' ? styles.menuButton : styles.menuButtonA
@@ -949,24 +949,24 @@ class ResourceList extends Component {
     return (this.props.modelName === constants.TYPES.PROFILE)
           ? <View>
             <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
-              <TouchableHighlight underlayColor='transparent' onPress={this.showBanks.bind(this)}>
+              <TouchableOpacity underlayColor='transparent' onPress={this.showBanks.bind(this)}>
                 <View style={styles.row}>
                   <Image source={require('../img/banking.png')} style={styles.cellImage} />
                   <View style={styles.textContainer}>
                     <Text style={styles.resourceTitle}>{translate('officialAccounts')}</Text>
                   </View>
                 </View>
-              </TouchableHighlight>
+              </TouchableOpacity>
             </View>
             <View style={{padding: 5, backgroundColor: '#f1ffe7'}}>
-              <TouchableHighlight underlayColor='transparent' onPress={this.showContexts.bind(this)}>
+              <TouchableOpacity underlayColor='transparent' onPress={this.showContexts.bind(this)}>
                 <View style={styles.row}>
                   <Icon name='md-share' size={50} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
                   <View style={styles.textContainer}>
                     <Text style={styles.resourceTitle}>{translate('sharedContext')}</Text>
                   </View>
                 </View>
-              </TouchableHighlight>
+              </TouchableOpacity>
             </View>
             </View>
           : <View />
