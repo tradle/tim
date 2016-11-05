@@ -171,6 +171,7 @@ class ResourceRow extends Component {
           {multiChooser}
           {cancelResource}
         </View>
+        <View style={styles.cellBorder}  key={this.getNextKey()} />
       </View>
         )
     else {
@@ -215,6 +216,7 @@ class ResourceRow extends Component {
           {dateRow}
           {multiChooser}
           {cancelResource}
+          <View style={styles.cellBorder} />
         </View>
       );
     }
