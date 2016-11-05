@@ -7,43 +7,43 @@ import Errors from 'react-native-local-auth/data/errors'
 import Q from 'q'
 import Keychain from 'react-native-keychain'
 import PasswordCheck from '../Components/PasswordCheck'
-
-const ENV = require('../utils/env')
+import LockScreen from '../Components/LockScreen'
+import ENV from '../utils/env'
 
 // hack!
-hasTouchID().then(ENV.setHasTouchID)
+// hasTouchID().then(ENV.setHasTouchID)
 
 var utils = require('../utils/utils')
 var translate = utils.translate
-var TouchIDOptIn = require('../Components/TouchIDOptIn')
+// var TouchIDOptIn = require('../Components/TouchIDOptIn')
 var Actions = require('../Actions/Actions');
 
 const PASSWORD_ITEM_KEY = 'app-password'
 
-const isAndroid = Platform.OS === 'android'
+const isWeb = Platform.OS === 'web'
 const ForgivableTouchIDErrors = [
   'LAErrorTouchIDNotAvailable',
   'LAErrorTouchIDNotSupported',
   'RCTTouchIDNotSupported'
 ]
 
-const FallbackToPasswordErrors = [
-  'LAErrorUserCancel',
-  'LAErrorSystemCancel'
-]
-
-const LOCK_UP_MESSAGE = 'For the safety of your data, ' +
-                        'this application has been temporarily locked. ' +
-                        'Please try in 5 minutes.'
+// const FallbackToPasswordErrors = [
+//   'LAErrorUserCancel',
+//   'LAErrorSystemCancel'
+// ]
 
 const LOCK_TIME = __DEV__ ? 5000 : 5 * 60 * 1000
+const LOCK_TIME_STR = __DEV__ ? '5 seconds' : '5 minutes'
+
+const LOCK_UP_MESSAGE = translate('temporarilyLocked', LOCK_TIME_STR)
+const LOCK_SCREEN_BG = require('../img/bg.png')
 
 // const SETUP_MSG = 'Please set up Touch ID first, so the app can better protect your data.'
 const AUTH_FAILED_MSG = 'Authentication failed'
 const DEFAULT_OPTS = {
   reason: 'unlock Tradle to proceed',
-  fallbackToPasscode: true,
-  suppressEnterPassword: false
+  fallbackToPasscode: ENV.autoOptInTouchId,
+  suppressEnterPassword: ENV.autoOptInTouchId
 }
 
 const PROMPTS = require('./password-prompts')
@@ -52,7 +52,7 @@ const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z]).{10,}$/
 
 let pendingAuth
 let pendingEnrollRequest
-let TIMEOUT = __DEV__ ? 1000 : 10 * 60 * 1000
+let TIMEOUT = __DEV__ ? 5000 : 10 * 60 * 1000
 
 module.exports = {
   TIMEOUT,
@@ -151,7 +151,7 @@ function signIn(navigator, newMe, isChangePassword) {
  * @return {[type]}           [description]
  */
 function touchIDAndPasswordAuth(navigator, isChangePassword) {
-  if (isAndroid) return passwordAuth(navigator, isChangePassword)
+  if (isWeb) return passwordAuth(navigator, isChangePassword)
 
   return authenticateUser()
     .then(
@@ -202,7 +202,7 @@ function passwordAuth (navigator, isChangePassword) {
     )
 }
 
-function lockUp (err) {
+function lockUp (nav, err) {
   // self.setState({isModalOpen: true})
   if (utils.isWeb()) {
     try {
@@ -213,18 +213,20 @@ function lockUp (err) {
   }
 
   debug('lockUp')
-  let doneWaiting
-  return utils.promiseDelay(LOCK_TIME)
-    .then(() => doneWaiting = true)
-
-  function loopAlert (err) {
-    Alert.alert(err, null, [
-      {
-        text: 'OK',
-        onPress: () => !doneWaiting && loopAlert(err)
+  return new Promise(resolve => {
+    nav.replace({
+      component: LockScreen,
+      id: 24,
+      noLeftButton: true,
+      passProps: {
+        bg: LOCK_SCREEN_BG,
+        // convert to seconds
+        timer: LOCK_TIME / 1000,
+        message: err,
+        callback: resolve
       }
-    ])
-  }
+    })
+  })
 }
 
 function setPassword (navigator, isChangePassword) {
@@ -266,7 +268,8 @@ function checkPassword (navigator, isChangePassword) {
   // HACK
   let routes = navigator.getCurrentRoutes()
   let currentRoute = routes[routes.length - 1]
-  let push = currentRoute.component.displayName !== PasswordCheck.displayName
+  const name = currentRoute.component.displayName
+  let push = name !== PasswordCheck.displayName && name !== LockScreen.displayName
   let defer = Q.defer()
   let route = {
     component: PasswordCheck,
@@ -282,7 +285,7 @@ function checkPassword (navigator, isChangePassword) {
       },
       onSuccess: () => defer.resolve(),
       onFail: (err) => {
-        lockUp(LOCK_UP_MESSAGE)
+        lockUp(navigator, LOCK_UP_MESSAGE)
           .then(() => checkPassword(navigator))
           .then(() => defer.resolve())
       }

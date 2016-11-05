@@ -23,6 +23,7 @@ var Reflux = require('reflux')
 var constants = require('@tradle/constants')
 var GiftedMessenger = require('react-native-gifted-messenger')
 var NetworkInfoProvider = require('./NetworkInfoProvider')
+var PageView = require('./PageView')
 var extend = require('extend');
 
 import ActionSheet from 'react-native-actionsheet'
@@ -38,11 +39,12 @@ var NEXT_HASH = '_n'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_REQUEST = 'tradle.FormRequest'
+var StyleSheet = require('../StyleSheet')
 
 import React, { Component } from 'react'
 import {
   ListView,
-  StyleSheet,
+  // StyleSheet,
   PropTypes,
   Navigator,
   Platform,
@@ -364,7 +366,7 @@ class MessageList extends Component {
     }
     // Allow to edit resource that was not previously changed
     if (!verification  &&  !isEmployee  &&  !resource[NEXT_HASH]  &&  model.subClassOf !== MY_PRODUCT) {
-      route.rightButtonTitle = translate('edit')
+      route.rightButtonTitle = 'Edit'
       route.onRightButtonPress = {
         title: newTitle, //utils.getDisplayName(resource),
         id: 4,
@@ -520,7 +522,7 @@ class MessageList extends Component {
     if (!content) {
       var isAllMessages = model.isInterface  &&  model.id === constants.TYPES.MESSAGE;
       var maxHeight = utils.dimensions(MessageList).height -
-                      (Platform.OS === 'android' ? 77 : 64) - (this.state.isConnected ? 0 : 35) - (this.state.context ? 35 : 0)
+                      (Platform.OS === 'android' ? 77 : 64) - (this.state.isConnected ? 0 : 35) - (this.state.context ? 45 : 0)
       // content = <GiftedMessenger style={{paddingHorizontal: 10, marginBottom: Platform.OS === 'android' ? 0 : 20}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
 
       var paddingLeft = 10
@@ -540,6 +542,7 @@ class MessageList extends Component {
         renderCustomMessage={this.renderRow.bind(this)}
         handleSend={this.onSubmitEditing.bind(this)}
         submitOnReturn={true}
+        underlineColorAndroid='transparent'
         menu={this.generateMenu.bind(this)}
         keyboardShouldPersistTaps={utils.isWeb() ? false : true}
         keyboardDismissMode={utils.isWeb() ? 'none' : 'on-drag'}
@@ -827,7 +830,7 @@ class MessageList extends Component {
     var self = this;
     this.props.navigator.push({
       title: 'Take a pic',
-      backButtonTitle: 'Cancel',
+      backButtonTitle: 'Back',
       id: 12,
       component: CameraView,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,

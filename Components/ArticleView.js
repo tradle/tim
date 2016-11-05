@@ -2,13 +2,14 @@ import {
   View,
   Text,
   ScrollView,
-  StyleSheet,
+  // StyleSheet,
 } from 'react-native'
 
 import React, { Component } from 'react'
 import ActivityIndicator from './ActivityIndicator'
 import WebView from './WebView'
 import utils from '../utils/utils'
+import StyleSheet from '../StyleSheet'
 
 class ArticleView extends Component {
   constructor(props) {

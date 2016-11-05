@@ -23,6 +23,7 @@ var QRCode = require('./QRCode')
 var buttonStyles = require('../styles/buttonStyles');
 var NetworkInfoProvider = require('./NetworkInfoProvider')
 var defaultBankStyle = require('../styles/bankStyle.json')
+var StyleSheet = require('../StyleSheet')
 
 const WEB_TO_MOBILE = '0'
 const TALK_TO_EMPLOYEEE = '1'
@@ -34,7 +35,7 @@ const ENUM = 'tradle.Enum'
 import React, { Component, PropTypes } from 'react'
 import {
   ListView,
-  StyleSheet,
+  // StyleSheet,
   Navigator,
   Alert,
   // AlertIOS,
@@ -299,17 +300,17 @@ class ResourceList extends Component {
       return
     var list = params.list;
 
+    let state = {
+      dataSource: this.state.dataSource.cloneWithRows(list),
+      list: list,
+      isLoading: false,
+    }
+
     if (!list.length) {
-     if (!this.state.filter  ||  !this.state.filter.length)
-       this.setState({
-         isLoading: false
-       })
+      if (!this.state.filter  ||  !this.state.filter.length)
+        this.setState({isLoading: false})
       else
-       this.setState({
-         isLoading: false,
-         dataSource: this.state.dataSource.cloneWithRows(list),
-         list: list
-       })
+        this.setState(state)
       return;
     }
     var type = list[0][constants.TYPE];
@@ -318,13 +319,11 @@ class ResourceList extends Component {
       if (!m.subClassOf  ||  m.subClassOf != this.props.modelName)
         return;
     }
-    let state = {
-      dataSource: this.state.dataSource.cloneWithRows(list),
-      list: list,
+    extend(state, {
       forceUpdate: params.forceUpdate,
       dictionary: params.dictionary,
-      isLoading: false,
-    }
+    })
+
     if (params.sharedWith) {
       state.sharedWithMapping = params.sharedWith
       let sharedWith = {}
@@ -1100,7 +1099,7 @@ var styles = StyleSheet.create({
     alignSelf: 'center',
   },
   resourceTitle: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: '400',
     marginBottom: 2,
     paddingLeft: 5

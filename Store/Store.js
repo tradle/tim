@@ -2937,10 +2937,12 @@ var Store = Reflux.createStore({
       else {
         let c = this.searchMessages({modelName: PRODUCT_APPLICATION, to: params.to})
         if (c) {
-          if (c.length === 1)
-            retParams.context = c[0]
+          if (c.length === 1) {
+            if (!c[0]._readOnly)
+              retParams.context = c[0]
+          }
           else {
-            let contexts = c.filter((r) => r.formsCount)
+            let contexts = c.filter((r) => !r._readOnly && r.formsCount)
             if (contexts) {
               if (contexts.length === 1)
                 retParams.context = contexts[0]

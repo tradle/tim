@@ -1,6 +1,6 @@
 'use strict';
 
-import {StyleSheet} from 'react-native';
+import StyleSheet from '../StyleSheet'
 
 module.exports = exports = StyleSheet.create({
   container: {

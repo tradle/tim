@@ -39,7 +39,7 @@ var styles = StyleSheet.create({
   NoResourcesText: {
     // marginTop: height > 800 ? height/5 : height / 4,
     color: '#888888',
-    fontSize: utils.getFontSize(18)
+    fontSize: 18
   }
 });
 

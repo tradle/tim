@@ -295,8 +295,8 @@ var utils = {
     return subclasses;
   },
   getFontSize(fontSize) {
+    // return fontSize
     let fontScale = PixelRatio.getFontScale()
-    // console.log('fontScale: ' + fontScale)
     if (fontScale <= 3)
       return fontSize
     return Math.floor(fontSize * (fontScale < 3.5 ? 0.95 : 0.9))

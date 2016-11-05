@@ -12,7 +12,7 @@ var HELP_COLOR = '#999999';
 var BORDER_COLOR = '#cccccc';
 var DISABLED_COLOR = '#777777';
 var DISABLED_BACKGROUND_COLOR = '#eeeeee';
-var FONT_SIZE = 12;
+var FONT_SIZE = 14;
 var FONT_SIZE_1 = 17;
 var FONT_WEIGHT = '500';
 

@@ -1,7 +1,7 @@
 
 const navs = new Map()
 
-module.exports = {
+const navUtils = {
   watch: nav => {
     if (navs.has(nav)) return
 
@@ -21,5 +21,17 @@ module.exports = {
     if (!watcher) throw new Error('nav not found! Run navs.watch(nav) first')
 
     return watcher.currentRoute
+  },
+
+  getCurrentRouteInfo: nav => {
+    const route = navUtils.getCurrentRoute(nav)
+    const routes = nav.getCurrentRoutes()
+    return {
+      routes,
+      route,
+      index: routes.indexOf(route)
+    }
   }
 }
+
+module.exports = navUtils

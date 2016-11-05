@@ -5,6 +5,7 @@ var extend = require('extend');
 var translate = utils.translate
 var Icon = require('react-native-vector-icons/Ionicons');
 var equal = require('deep-equal')
+var StyleSheet = require('../StyleSheet')
 // var ResourceView = require('./ResourceView');
 // var ResourceList = require('./ResourceList');
 var PhotoList = require('./PhotoList')
@@ -15,7 +16,7 @@ import {
   View,
   Platform,
   TouchableHighlight,
-  StyleSheet,
+  // StyleSheet,
   Image,
   Navigator
 } from 'react-native'
@@ -186,7 +187,7 @@ var styles = StyleSheet.create({
   },
   itemText: {
     fontSize: 18,
-    fontFamily: 'Avenir Next',
+    // fontFamily: 'Avenir Next',
     marginBottom: 0,
     // marginHorizontal: 7,
     color: '#000000',

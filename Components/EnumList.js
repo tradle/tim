@@ -3,7 +3,7 @@
 import React, { Component } from 'react'
 import {
   ListView,
-  StyleSheet,
+  // StyleSheet,
   PropTypes,
   TouchableHighlight,
   View,
@@ -13,6 +13,7 @@ import {
 // const SearchBar = Platform.OS === 'android' ? null : require('react-native-search-bar')
 const SearchBar = Platform.OS !== 'ios' ? null : require('react-native-search-bar')
 var translate = require('../utils/utils').translate
+var StyleSheet = require('../StyleSheet')
 
 class EnumList extends Component {
   props: {

@@ -26,6 +26,7 @@ var BG_IMAGE = require('../img/bg.png')
 var equal = require('deep-equal')
 var constants = require('@tradle/constants');
 var termsAndConditions = require('../termsAndConditions.json')
+var StyleSheet = require('../StyleSheet')
 
 import ImagePicker from 'react-native-image-picker';
 import ImageInput from './ImageInput'
@@ -38,7 +39,7 @@ var Form = t.form.Form;
 var stylesheet = require('../styles/styles')
 
 import Native, {
-  StyleSheet,
+  // StyleSheet,
   View,
   Text,
   TextInput,

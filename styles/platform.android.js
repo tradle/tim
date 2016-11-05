@@ -1,6 +1,7 @@
 'use strict';
 
-import {StyleSheet, Platform} from 'react-native';
+import StyleSheet from '../StyleSheet'
+import {Platform} from 'react-native';
 import {getFontSize} from '../utils/utils'
 module.exports = exports = StyleSheet.create({
   container: {

@@ -61,7 +61,7 @@ class ShowRefList extends Component {
         <View style={[buttonStyles.container, {flex: 1, alignSelf: 'stretch'}]} key={this.getNextKey()}>
            <TouchableHighlight onPress={this.showResources.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
              <View style={{alignItems: 'center'}}>
-               <Icon name={icon}  size={30}  color='#ffffff' />
+               <Icon name={icon}  size={utils.getFontSize(30)}  color='#ffffff' />
                <Text style={[buttonStyles.text, Platform.OS === 'android' ? {marginTop: 3} : {marginTop: 0}]}>{propTitle}</Text>
              </View>
            </TouchableHighlight>
@@ -74,7 +74,7 @@ class ShowRefList extends Component {
         <View style={[buttonStyles.container, {flex:1, alignSelf: 'stretch'}]} key={this.getNextKey()}>
            <TouchableHighlight onPress={this.props.showQR.bind(this)} underlayColor='transparent'>
              <View style={{alignItems: 'center'}}>
-               <Icon name={'ios-qr-scanner'}  size={30}  color='#ffffff' />
+               <Icon name={'ios-qr-scanner'}  size={utils.getFontSize(30)}  color='#ffffff' />
                <Text style={[buttonStyles.text, Platform.OS === 'android' ? {marginTop: 3} : {marginTop: 0}]}>{translate('showQR')}</Text>
              </View>
            </TouchableHighlight>

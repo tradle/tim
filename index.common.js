@@ -35,6 +35,7 @@ var EnumList = require('./Components/EnumList')
 // var GridList = require('./Components/GridList');
 var TimHome = require('./Components/TimHome');
 var PasswordCheck = require('./Components/PasswordCheck');
+var LockScreen = require('./Components/LockScreen')
 var TouchIDOptIn = require('./Components/TouchIDOptIn');
 var ResourceTypesScreen = require('./Components/ResourceTypesScreen');
 var NewResource = require('./Components/NewResource');
@@ -60,6 +61,7 @@ var Icon = require('react-native-vector-icons/Ionicons');
 var Actions = require('./Actions/Actions');
 import * as AutomaticUpdates from './utils/automaticUpdates';
 import { signIn } from './utils/localAuth'
+var StyleSheet = require('./StyleSheet')
 
 var reactMixin = require('react-mixin');
 import {
@@ -67,7 +69,7 @@ import {
   Image,
   View,
   TouchableOpacity,
-  StyleSheet,
+  // StyleSheet,
   Alert,
   StatusBar,
   // StatusBar,
@@ -75,7 +77,8 @@ import {
   // Linking,
   AppState,
   AppRegistry,
-  Text
+  Text,
+  BackAndroid
 } from 'react-native';
 
 import Orientation from 'react-native-orientation'
@@ -367,6 +370,9 @@ class TiMApp extends Component {
 
       this.state.navigator = nav;
       Navs.watch(nav)
+      if (BackAndroid) {
+        BackAndroid.addEventListener('hardwareBackPress', () => goBack(this.state.navigator))
+      }
     }
 
     switch (route.id) {
@@ -447,11 +453,21 @@ class TiMApp extends Component {
       return <EnumList navigator={nav} { ...props } />
     case 23:
       return <ContextChooser navigator={nav} {...props} />
+    case 24:
+      return <LockScreen navigator={nav} {...props} />
     case 10:
     default: // 10
       return <ResourceList navigator={nav} {...props} />
     }
   }
+}
+
+function goBack (nav) {
+  const { routes, route, index } = Navs.getCurrentRouteInfo(nav)
+  if (index === 0 || route.component.backButtonDisabled) return false
+
+  nav.pop()
+  return true
 }
 
 var HIT_SLOP = {top:10,right:10,bottom:10,left:10}
@@ -479,10 +495,9 @@ var NavigationBarRouteMapper = {
     var iconIdx = lbTitle.indexOf('|')
     var icon = iconIdx !== -1 ? lbTitle.substring(idx + 1) : lbTitle === 'Back' ? 'ios-arrow-back' : null
 
-
     style.push({fontSize: utils.getFontSize(20)})
     var title = icon
-              ? <Icon name={icon} size={25} color='#7AAAC3' style={styles.icon}/>
+              ? <Icon name={icon} size={utils.getFontSize(25)} color='#7AAAC3' style={styles.icon}/>
               : <Text style={style}>
                   {lbTitle}
                 </Text>
@@ -493,7 +508,7 @@ var NavigationBarRouteMapper = {
     return (
       <TouchableOpacity
         hitSlop={HIT_SLOP}
-        onPress={() => navigator.pop()}>
+        onPress={goBack.bind(null, navigator)}>
         <View style={styles.navBarLeftButton}>
           {status}
           {title}
@@ -509,22 +524,25 @@ var NavigationBarRouteMapper = {
       style.push({color: route.tintColor});
     else if (route.passProps.bankStyle)
       style.push({color: route.passProps.bankStyle.LINK_COLOR || '#7AAAC3'})
+
     style.push({fontSize: utils.getFontSize(20)})
     var title
 
     var rbTitle = route.rightButtonTitle
     var iconIdx = rbTitle.indexOf('|')
-    var icon = rbTitle === 'Done'
-                         ? 'md-checkmark-circle-outline'
-                         : rbTitle === 'Edit'
-                                     ? 'ios-create-outline'
-                                     : rbTitle === 'Share'
-                                                 ? 'md-share'
-                                                 : null
+    var icon = (rbTitle === 'Done' || rbTitle === 'Accept')
+             ? 'md-checkmark'
+             : rbTitle === 'Profile'
+                ? 'md-person'
+                : rbTitle === 'Edit'
+                            ? 'md-create'
+                            : rbTitle === 'Share'
+                                        ? 'md-share'
+                                        : null
 
     if (icon)  {
       let color = rbTitle === 'Done' ? '#62C457' : '#7AAAC3'
-      title = <Icon name={icon} size={25} color={color} style={styles.icon} />
+      title = <Icon name={icon} size={utils.getFontSize(25)} color={color} style={styles.icon} />
     }
     else if (rbTitle.indexOf('|') === -1)
       title =  <Text style={style}>
@@ -612,7 +630,7 @@ var styles = StyleSheet.create({
   icon: {
     width: 25,
     height: 25,
-    marginTop: Platform.OS === 'web' ? 0 : Platform.OS === 'android' ? 20 : 10
+    marginTop: Platform.OS === 'web' ? 0 : Platform.OS === 'android' ? 19 : 10
   },
   row: {
     flexDirection: 'row'
@@ -638,7 +656,8 @@ var styles = StyleSheet.create({
   },
   navBarButtonText: {
     color: '#7AAAC3',
-  },
+    fontSize: 18
+  }
 });
 
 AppRegistry.registerComponent('Tradle', () => TiMApp)

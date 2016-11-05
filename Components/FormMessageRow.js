@@ -11,13 +11,14 @@ var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin');
 var equal = require('deep-equal')
 import { makeResponsive } from 'react-native-orient'
+var StyleSheet = require('../StyleSheet')
 
 var reactMixin = require('react-mixin');
 
 var STRUCTURED_MESSAGE_COLOR
 
 import {
-  StyleSheet,
+  // StyleSheet,
   Text,
   TouchableHighlight,
   Navigator,

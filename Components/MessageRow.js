@@ -19,7 +19,7 @@ var formDefaults = require('@tradle/models').formDefaults;
 var TradleW = require('../img/TradleW.png')
 var Actions = require('../Actions/Actions');
 import { makeResponsive } from 'react-native-orient'
-
+var StyleSheet = require('../StyleSheet')
 var reactMixin = require('react-mixin');
 
 const MY_PRODUCT = 'tradle.MyProduct'
@@ -39,7 +39,7 @@ const DEFAULT_LINK_COLOR = '#2892C6'
 
 import {
   Image,
-  StyleSheet,
+  // StyleSheet,
   Text,
   TouchableHighlight,
   Alert,
@@ -250,7 +250,7 @@ class MessageRow extends Component {
                             <View style={styles.container}>
                             {this.isShared()
                               ? <View style={[styles.verifiedHeader, {backgroundColor: this.props.bankStyle.SHARED_WITH_BG}]}>
-                                  <Text style={{color: '#ffffff', fontSize: 18}}>{translate('youShared', resource.to.organization.title)}</Text>
+                                  <Text style={styles.white18}>{translate('youShared', resource.to.organization.title)}</Text>
                                 </View>
                               : <View />
                             }
@@ -520,9 +520,9 @@ class MessageRow extends Component {
       title: translate(model)
     }
     if (this.isMyMessage()) {
-      route.rightButtonTitle = translate('edit');
+      route.rightButtonTitle = 'Edit';
       route.onRightButtonPress = {
-        title: translate('edit'),
+        title: 'Edit',
         component: NewResource,
         // titleTextColor: '#7AAAC3',
         id: 4,
@@ -593,7 +593,7 @@ class MessageRow extends Component {
     var isForgetting = model.id === constants.TYPES.FORGET_ME || model.id === constants.TYPES.FORGOT_YOU
     if (isForgetting) {
       let msg = <View key={this.getNextKey()}>
-                  <Text style={[styles.resourceTitle, {fontSize: 18, color: '#ffffff'}]} key={this.getNextKey()}>{resource.message}</Text>
+                  <Text style={[styles.resourceTitle, styles.white18]} key={this.getNextKey()}>{resource.message}</Text>
                 </View>
       renderedRow.push(msg)
       return null
@@ -736,7 +736,7 @@ class MessageRow extends Component {
           isConfirmation = resource[v].indexOf('Congratulations!') !== -1
 
         if (isConfirmation) {
-          style = [style, {color: self.props.bankStyle.CONFIRMATION_COLOR, fontSize: 18}]
+          style = [style, {color: self.props.bankStyle.CONFIRMATION_COLOR}, styles.resourceTitle]
           vCols.push(
             <View key={self.getNextKey()}>
               <Text style={[style]}>{resource[v]}</Text>
@@ -1127,7 +1127,11 @@ var styles = StyleSheet.create({
     alignSelf: 'flex-end',
     marginTop: -30,
     backgroundColor: 'transparent'
-  }
+  },
+  white18: {
+    color: '#ffffff',
+    fontSize: 18
+  },
   // viewStyle: {
   //   flexDirection: 'row',
   //   alignSelf: 'flex-start',

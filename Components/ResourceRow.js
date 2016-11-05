@@ -12,15 +12,16 @@ var reactMixin = require('react-mixin');
 var equal = require('deep-equal')
 var extend = require('extend')
 var Actions = require('../Actions/Actions');
+var StyleSheet = require('../StyleSheet')
 
 import {
   Image,
   PixelRatio,
-  StyleSheet,
+  // StyleSheet,
+  Platform,
   Text,
   TouchableOpacity,
-  View,
-  Platform
+  View
 } from 'react-native';
 
 import { makeResponsive } from 'react-native-orient'

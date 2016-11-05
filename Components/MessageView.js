@@ -26,7 +26,7 @@ var NetworkInfoProvider = require('./NetworkInfoProvider')
 // import Prompt from 'react-native-prompt'
 
 import {
-  StyleSheet,
+  // StyleSheet,
   ScrollView,
   View,
   Text,
@@ -37,6 +37,7 @@ import {
 
 import React, { Component } from 'react'
 import platformStyles from '../styles/platform'
+import StyleSheet from '../StyleSheet'
 
 class MessageView extends Component {
   props: {
@@ -310,7 +311,7 @@ var styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontFamily: 'Avenir Next',
+    // fontFamily: 'Avenir Next',
     marginHorizontal: 7,
     color: '#9b9b9b'
   },

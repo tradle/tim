@@ -11,6 +11,7 @@ var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var MessageTypeRow = require('./MessageTypeRow');
+var StyleSheet = require('../StyleSheet')
 
 import ActivityIndicator from './ActivityIndicator'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
@@ -18,7 +19,7 @@ const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 import {
   ListView,
   Text,
-  StyleSheet,
+  // StyleSheet,
   View,
   Platform
 } from 'react-native'
