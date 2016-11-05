@@ -8,15 +8,14 @@ import Q from 'q'
 import Keychain from 'react-native-keychain'
 import PasswordCheck from '../Components/PasswordCheck'
 import LockScreen from '../Components/LockScreen'
-
-const ENV = require('../utils/env')
+import ENV from '../utils/env'
 
 // hack!
-hasTouchID().then(ENV.setHasTouchID)
+// hasTouchID().then(ENV.setHasTouchID)
 
 var utils = require('../utils/utils')
 var translate = utils.translate
-var TouchIDOptIn = require('../Components/TouchIDOptIn')
+// var TouchIDOptIn = require('../Components/TouchIDOptIn')
 var Actions = require('../Actions/Actions');
 
 const PASSWORD_ITEM_KEY = 'app-password'
@@ -28,10 +27,10 @@ const ForgivableTouchIDErrors = [
   'RCTTouchIDNotSupported'
 ]
 
-const FallbackToPasswordErrors = [
-  'LAErrorUserCancel',
-  'LAErrorSystemCancel'
-]
+// const FallbackToPasswordErrors = [
+//   'LAErrorUserCancel',
+//   'LAErrorSystemCancel'
+// ]
 
 const LOCK_TIME = __DEV__ ? 5000 : 5 * 60 * 1000
 const LOCK_TIME_STR = __DEV__ ? '5 seconds' : '5 minutes'
@@ -43,8 +42,8 @@ const LOCK_SCREEN_BG = require('../img/bg.png')
 const AUTH_FAILED_MSG = 'Authentication failed'
 const DEFAULT_OPTS = {
   reason: 'unlock Tradle to proceed',
-  fallbackToPasscode: false,
-  suppressEnterPassword: false
+  fallbackToPasscode: ENV.autoOptInTouchId,
+  suppressEnterPassword: ENV.autoOptInTouchId
 }
 
 const PROMPTS = require('./password-prompts')
@@ -52,7 +51,7 @@ const PASSWORD_PROMPTS = getPasswordPrompts()
 
 let pendingAuth
 let pendingEnrollRequest
-let TIMEOUT = __DEV__ ? 1000 : 10 * 60 * 1000
+let TIMEOUT = __DEV__ ? 5000 : 10 * 60 * 1000
 
 module.exports = {
   TIMEOUT,
@@ -149,7 +148,7 @@ function signIn(navigator, newMe, isChangePassword) {
  * @return {[type]}           [description]
  */
 function touchIDAndPasswordAuth(navigator, isChangePassword) {
-  if (isAndroid) return passwordAuth(navigator, isChangePassword)
+  // if (isAndroid) return passwordAuth(navigator, isChangePassword)
 
   return authenticateUser()
     .then(
