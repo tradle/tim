@@ -1,0 +1,21 @@
+fieldset {
+    border: 0;
+}
+
+input[type=text], input[type=file] {
+  border: none;
+  font-size: 18px;
+  padding-bottom: 10px;
+}
+
+textarea:focus, input:focus {
+  outline: none;
+}
+
+.react-datepicker__input-container input {
+  background: transparent;
+}
+
+* {
+  font-family: Helvetica Neue, STHeiTi, sans-serif;
+}
