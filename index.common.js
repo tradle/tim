@@ -358,7 +358,9 @@ class TiMApp extends Component {
 
       this.state.navigator = nav;
       Navs.watch(nav)
-      BackAndroid.addEventListener('hardwareBackPress', () => goBack(this.state.navigator))
+      if (BackAndroid) {
+        BackAndroid.addEventListener('hardwareBackPress', () => goBack(this.state.navigator))
+      }
     }
 
     switch (route.id) {
