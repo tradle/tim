@@ -645,7 +645,8 @@ class MessageList extends Component {
   shareContext(orgs) {
     delete orgs[utils.getId(this.props.resource)]
     Alert.alert(
-      translate('shareAllPastAndFutureMessages'), null,
+      translate('shareContext', utils.getModel(this.state.context.product).value.title),
+      translate('shareAllPastAndFutureMessages'),
       [
         {text: translate('cancel'), onPress: () => console.log('Cancel')},
         {text: 'OK', onPress: () => {
