@@ -771,7 +771,7 @@ var NewResourceMixin = {
   // },
 
   inputFocused(refName) {
-    if (!this.state.isRegistration   &&
+    if (/*!this.state.isRegistration   &&*/
          this.refs                   &&
          this.refs.scrollView        &&
          this.props.model            &&
@@ -797,6 +797,7 @@ var NewResourceMixin = {
              : this.props.metadata.items.properties[params.prop]
 
     let isRequired = this.props.model && this.props.model.required  &&  this.props.model.required.indexOf(params.prop) !== -1
+    let color = {color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}
     if (resource && resource[params.prop]) {
       let rModel
       var m = utils.getId(resource[params.prop]).split('_')[0]
@@ -807,10 +808,9 @@ var NewResourceMixin = {
       if (rModel.subClassOf  &&  rModel.subClassOf === ENUM)
         label = utils.createAndTranslate(label, true)
       style = textStyle
-      propLabel = <Text style={[styles.labelDirty, {color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}]}>{params.label}</Text>
+      propLabel = <Text style={[styles.labelDirty, color]}>{params.label}</Text>
     }
     else {
-      let color = {color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}
       label = params.label
       style = [labelStyle, color]
       propLabel = <View/>
@@ -823,8 +823,9 @@ var NewResourceMixin = {
     let isVideo = prop.name === 'video'
     let isPhoto = prop.name === 'photos'
       // <View key={this.getNextKey()} style={this.hasError(params) ? {paddingBottom: 0} : {paddingBottom: 10}} ref={prop.name}>
-    let color = {color: resource && resource[params.prop] ? '#000000' : this.state.isRegistration ? '#eeeeee' : '#AAAAAA'}
-    let fontSize = this.state.isRegistration ? styles.font20 : styles.font18
+    color = {color: this.state.isRegistration ? '#eeeeee' : resource && resource[params.prop] ? '#000000' :  '#AAAAAA'}
+    let fontSize = styles.font20 //this.state.isRegistration ? styles.font20 : styles.font18
+    // let fontSize = styles.font18 //this.state.isRegistration ? styles.font20 : styles.font18
     let iconColor = this.state.isRegistration ? '#eeeeee' : LINK_COLOR
     return (
       <View key={this.getNextKey()} style={{paddingBottom: this.hasError(params.errors, prop.name) ? 0 : 10, margin: 0}} ref={prop.name}>
@@ -1288,7 +1289,7 @@ var styles= StyleSheet.create({
     borderWidth: 0,
     paddingLeft: 0,
     height: 45,
-    fontSize: 18,
+    fontSize: 20,
   },
   thumb: {
     width: 25,
@@ -1314,7 +1315,7 @@ var styles= StyleSheet.create({
     marginTop: 21,
     color: '#AAA',
     position: 'absolute',
-    fontSize: 18,
+    fontSize: 20,
     top: 7
   },
   labelDirty: {
