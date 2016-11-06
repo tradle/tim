@@ -258,7 +258,7 @@ class ShowPropertiesView extends Component {
       }
       var title = pMeta.skipLabel  ||  isItems
                 ? <View />
-                : <Text style={styles.title}>{pMeta.title || utils.makeLabel(p)}</Text>
+                : <Text style={modelName === TERMS_AND_CONDITIONS ? styles.bigTitle : styles.title}>{pMeta.title || utils.makeLabel(p)}</Text>
       var separator = first
                     ? <View />
                     : <View style={styles.separator}></View>;
@@ -354,6 +354,14 @@ var styles = StyleSheet.create({
     marginBottom: 0,
     marginHorizontal: 7,
     color: '#9b9b9b'
+  },
+  bigTitle: {
+    fontSize: 20,
+    // fontFamily: 'Avenir Next',
+    marginTop: 3,
+    marginBottom: 0,
+    marginHorizontal: 7,
+    color: '#7AAAC3'
   },
   linkTitle: {
     color: '#2892C6'
