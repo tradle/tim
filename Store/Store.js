@@ -50,7 +50,7 @@ var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
-var Keychain = !utils.isWeb() && require('../utils/keychain')
+var Keychain = null // !utils.isWeb() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('q-level');
 var asyncstorageDown = require('asyncstorage-down')
@@ -1395,18 +1395,34 @@ var Store = Reflux.createStore({
     if (!isDevicePairing)
       this.trigger({action: 'newContact', to: profile, newContact: true})
 
+    let promise
+    if (isDevicePairing)
+      promise = Q()
+    else {
+      let r = this._getItem(utils.getId(profile))
+      if (r  &&  r.bot)
+        promise = Q()
+      else
+        promise = this.onAddMessage({
+                    [TYPE]: SIMPLE_MESSAGE,
+                    message: translate('howCanIHelpYou', profile.formatted, utils.getMe().firstName),
+                    from: this.buildRef(utils.getMe()),
+                    to: this._getItem(pkey)
+                  })
+    }
     // return newContact ? db.batch(batch) : Q()
     // .then(() => {
-      return isDevicePairing ? Q() : this.onAddMessage({
-          [TYPE]: SIMPLE_MESSAGE,
-          message: translate('howCanIHelpYou', profile.formatted, utils.getMe().firstName),
-          from: this.buildRef(utils.getMe()),
-          to: this._getItem(pkey)
-        })
-      .then(() => {
-        if (newContact)
-          return db.batch(batch)
-      })
+    // return isDevicePairing ? Q() : this.onAddMessage({
+    //     [TYPE]: SIMPLE_MESSAGE,
+    //     message: translate('howCanIHelpYou', profile.formatted, utils.getMe().firstName),
+    //     from: this.buildRef(utils.getMe()),
+    //     to: this._getItem(pkey)
+    //   })
+    return promise
+    .then(() => {
+      if (newContact)
+        return db.batch(batch)
+    })
     // })
     .catch((err) => {
       debugger
@@ -2898,7 +2914,7 @@ var Store = Reflux.createStore({
     let isOrg = params.modelName == ORGANIZATION
     let sortProp = params.sortProperty
                  ? params.sortProperty
-                 : isOrg  &&  !params.sortProperty ? LAST_MESSAGE_TIME : null
+                 : isOrg  &&  !params.sortProperty ? LAST_MESSAGE_TIME : meta.sort
 
     var isIdentity = modelName === PROFILE;
     // to variable if present is a container resource as for example subreddit for posts or post for comments
@@ -3046,9 +3062,15 @@ var Store = Reflux.createStore({
         });
       }
       else if (props[sortProp].type == 'string')  {
-        result.sort();
+        let sortPropToR = {}
+        let arr = result.map((r) => {
+          sortPropToR[r[sortProp]] = r
+          return r[sortProp]
+        })
+        arr.sort();
         if (asc)
-          result = result.reverse();
+          arr = arr.reverse();
+        result = arr.map((s) => sortPropToR[s])
       }
       else if (props[sortProp].type == 'number') {
         result.sort(function(a, b) {
