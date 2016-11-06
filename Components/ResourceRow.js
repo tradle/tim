@@ -103,7 +103,7 @@ class ResourceRow extends Component {
         var model = utils.getModel(resource[constants.TYPE]).value;
         var icon = model.icon;
         if (icon)
-          photo = <View style={styles.cellImage}><Icon name={icon} size={35} style={styles.icon} /></View>
+          photo = <View style={styles.cellImage}><Icon name={icon} size={35} color='#7AAAc3' style={styles.icon} /></View>
         else if (model.properties.photos)
           photo = <View style={styles.cellImage} />
         else {
@@ -342,7 +342,7 @@ class ResourceRow extends Component {
     // HACK
     else if (model.id === PRODUCT_APPLICATION) {
       if (resource._readOnly  &&  resource.to.organization) {
-        return <View>
+        return <View style={{padding: 5}}>
           <Text style={styles.resourceTitle}>{translate(utils.getModel(resource.product).value)}</Text>
           <Text style={styles.contextOwners}>{resource.from.organization || resource.from.title} -> {resource.to.organization.title}</Text>
         </View>
@@ -513,8 +513,9 @@ var styles = StyleSheet.create({
   // HACK FOR VERTICAL CENTERING
   resourceTitle: {
     // flex: 1,
-    fontSize: 22,
-    fontWeight: '400',
+    fontSize: 20,
+    // fontWeight: '400',
+    color: '#555555'
     // paddingTop: 18,
     // marginBottom: 2,
   },
@@ -522,7 +523,7 @@ var styles = StyleSheet.create({
     // flex: 1,
     flexWrap: 'wrap',
     color: '#999999',
-    fontSize: 16,
+    fontSize: 14,
   },
   row: {
     backgroundColor: 'white',
@@ -536,19 +537,6 @@ var styles = StyleSheet.create({
     // justifyContent: 'space-around',
     // flexDirection: 'row',
     padding: 5,
-  },
-  cell: {
-    marginTop: 20,
-    marginBottom: 20,
-    marginLeft: 10,
-    fontSize: 18
-  },
-  myCell: {
-    padding: 5,
-    marginLeft: 30,
-    justifyContent: 'flex-end',
-    borderRadius: 10,
-    backgroundColor: '#D7E6ED'
   },
   cellRoundImage: {
     // flex: 1,
@@ -591,12 +579,12 @@ var styles = StyleSheet.create({
     marginLeft: 4,
   },
   icon: {
-    width: 40,
-    height: 40,
+    // width: 40,
+    // height: 40,
     alignSelf: 'center',
     marginLeft: 10,
     marginTop: 7,
-    color: '#7AAAc3'
+    // color: '#7AAAc3'
   },
   // orgIcon: {
   //   width: 30,
