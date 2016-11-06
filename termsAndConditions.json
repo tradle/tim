@@ -1,18 +1,11 @@
 {
   "_t": "tradle.TermsAndConditions",
-  "introduction": "Morbi consectetur sagittis scelerisque. Maecenas vel urna mauris. Quisque laoreet nunc ut rhoncus sagittis. Quisque mattis sapien sit amet enim ultrices, at sodales est vestibulum. Fusce scelerisque odio quis ornare dignissim. Donec at tincidunt arcu. Nulla euismod accumsan ex eu hendrerit. Nam massa nunc, vulputate efficitur urna in, dignissim sodales massa. Nulla non sem consequat, fringilla mauris quis, convallis felis.",
-  "intellectualPropertyRights": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer et mollis risus. Nunc posuere leo quis risus rutrum luctus. Maecenas sodales varius mauris, sed ullamcorper enim venenatis sed. ",
-  "restrictions": [
-    {"text": "You are specifically restricted from all of the following:"},
-    {"text": "1. Curabitur et dictum ligula.;"},
-    {"text": "2. In eget dapibus nisi, eget viverra tortor;"},
-    {"text": "3. Integer non magna et massa posuere pretium at vitae est. "},
-    {"text": "4. Consectetur adipiscing elit.;"},
-    {"text": "5. Quisque mattis sapien sit amet enim ultrices;"},
-    {"text": "6. Nunc vestibulum ultricies libero quis ultrices;"},
-    {"text": "7. Fusce ac massa vehicula sem varius tempor et nec erat.;"},
-    {"text": "8. In eget dapibus nisi, eget viverra tortor."},
-    {"text": "Integer non magna et massa posuere pretium at vitae est. Nunc vestibulum ultricies libero quis ultrices. Fusce ac massa vehicula sem varius tempor et nec erat. In eget dapibus nisi, eget viverra tortor. Morbi a risus pellentesque, hendrerit ipsum ut, semper lacus. Curabitur et dictum ligula."}
-  ],
-  "limitationOfLiability": "Donec at felis eros. Morbi lectus dui, molestie quis varius eget, feugiat in purus. Duis lacinia vel turpis ac viverra. Donec nisl augue, egestas ac luctus eget, bibendum quis mi. Nam tincidunt lorem in neque faucibus, a venenatis urna vestibulum."
+  "introduction": "By accessing or using the App you agree to be bound by these Terms.",
+  "identity": "This web and mobile app allows users to establish a continuity of their actions (identity) with service providers and vice versa. This establishes a digital trust layer that is needed in finance and other sectors of commerce and for government services. You as a customer control your identity attributes and can share a subset of them with the services providers.",
+  "sharing": "Providers may request data, e.g. identity attributes, forms filled, products purchased. When providers request data you have already submitted to another service provider, you can choose to share or submit anew. Choosing to share lets you update multiple service providers when you make changes to the shared data, saving you time, and accumulating reputation across providers.",
+  "notifications": "When either party makes changes to exchanged data, the other is notified of the fact that data has changed on your side, but does not receive the changes themselves, e.g. the fact that an insurance policy changed, but none of the details of the updated policy.",
+  "digitalSignatures": "This app uses digital signatures to authenticate all messages exchanged between parties. Digital signatures are verified on both ends, i.e. making sure you are talking to the right service provider and for them to ensure that they are talking to the right user of their service. For any message you send, this app adds a digital signature on your behalf, which in combination with a cryptographic seal placed on a blockchain, protects the data from tampering and provides non-repudiation of the signer’s statements. It also serves as an audit trail of the consent parties give each other to keep and safeguard exchanged data. Either party can revoke that consent at any time.",
+  "changes": "We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material we will try to provide at least 10 days' notice prior to any new terms taking effect. What constitutes a material change will be determined at our sole discretion.",
+  "contactUs": "If you have any questions about these Terms, please contact us at info@tradle.io",
+  "damages": "You further acknowledge and agree that Tradle shall not be responsible or liable, directly or indirectly, for any damage or loss caused or alleged to be caused by or in connection with use of or reliance on content exchanged using this App."
 }
