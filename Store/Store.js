@@ -3820,6 +3820,8 @@ var Store = Reflux.createStore({
       let docType = utils.getId(value.document).split('_')[0]
       dn = translate('receivedVerification', translate(this.getModel(docType).value))
     }
+    else if (model.id === PRODUCT_APPLICATION)
+      dn = utils.getModel(value.product).value.title
     else if (model.subClassOf === MY_PRODUCT)
       dn = translate('receivedProduct', translate(model))
     else if (model.subClassOf === FORM) {
