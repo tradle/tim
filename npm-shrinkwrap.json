@@ -1125,8 +1125,8 @@
     },
     "changes-feed": {
       "version": "1.1.0",
-      "from": "git+https://github.com/mvayngrib/changes-feed.git",
-      "resolved": "git+https://github.com/mvayngrib/changes-feed.git#bd106bd1a8b03660e7c6820e279a34bcaac0fd5e",
+      "from": "mvayngrib/changes-feed",
+      "resolved": "git://github.com/mvayngrib/changes-feed.git#bd106bd1a8b03660e7c6820e279a34bcaac0fd5e",
       "dependencies": {
         "readable-stream": {
           "version": "1.0.34",
@@ -3129,31 +3129,7 @@
     "key-encoder": {
       "version": "1.1.6",
       "from": "mvayngrib/key-encoder-js",
-      "resolved": "git://github.com/mvayngrib/key-encoder-js.git#9811b1d85ded6f6d8eb6b48389d80ed17df550ff",
-      "dependencies": {
-        "asn1.js": {
-          "version": "2.2.1",
-          "from": "asn1.js@>=2.2.0 <3.0.0",
-          "resolved": "https://registry.npmjs.org/asn1.js/-/asn1.js-2.2.1.tgz",
-          "dependencies": {
-            "bn.js": {
-              "version": "2.2.0",
-              "from": "bn.js@>=2.0.0 <3.0.0",
-              "resolved": "https://registry.npmjs.org/bn.js/-/bn.js-2.2.0.tgz"
-            }
-          }
-        },
-        "bn.js": {
-          "version": "3.3.0",
-          "from": "bn.js@>=3.1.2 <4.0.0",
-          "resolved": "https://registry.npmjs.org/bn.js/-/bn.js-3.3.0.tgz"
-        },
-        "elliptic": {
-          "version": "5.2.1",
-          "from": "elliptic@>=5.1.0 <6.0.0",
-          "resolved": "https://registry.npmjs.org/elliptic/-/elliptic-5.2.1.tgz"
-        }
-      }
+      "resolved": "git://github.com/mvayngrib/key-encoder-js.git#9811b1d85ded6f6d8eb6b48389d80ed17df550ff"
     },
     "keymirror": {
       "version": "0.1.1",
@@ -3221,8 +3197,8 @@
     },
     "level-change-processor": {
       "version": "1.0.0",
-      "from": "git+https://github.com/mvayngrib/level-change-processor.git#7100404",
-      "resolved": "git+https://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b"
+      "from": "mvayngrib/level-change-processor#7100404",
+      "resolved": "git://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b"
     },
     "level-codec": {
       "version": "6.1.0",
@@ -3676,20 +3652,8 @@
     },
     "merkle-tree-stream": {
       "version": "3.0.3",
-      "from": "git+https://github.com/mvayngrib/merkle-tree-stream.git#finalize",
-      "resolved": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
-      "dependencies": {
-        "isarray": {
-          "version": "1.0.0",
-          "from": "isarray@>=1.0.0 <1.1.0",
-          "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
-        },
-        "readable-stream": {
-          "version": "2.1.5",
-          "from": "readable-stream@>=2.0.5 <3.0.0",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.1.5.tgz"
-        }
-      }
+      "from": "mvayngrib/merkle-tree-stream#finalize",
+      "resolved": "git://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290"
     },
     "method-override": {
       "version": "2.3.6",
@@ -4580,9 +4544,9 @@
       "resolved": "git://github.com/tradle/react-native-env.git#19361827c84ad4a3a9d761fdadd8d65f0e814856"
     },
     "react-native-floating-labels": {
-      "version": "1.1.0",
+      "version": "1.1.1",
       "from": "mvayngrib/react-native-floating-labels#pointerEvents",
-      "resolved": "git://github.com/mvayngrib/react-native-floating-labels.git#ce9e4a7746c7b1b4d83aa1e99102e831073c0973",
+      "resolved": "git://github.com/mvayngrib/react-native-floating-labels.git#081466653f80d4b3e2760f5cfc20720acc80bf2f",
       "dependencies": {
         "lodash": {
           "version": "3.10.1",
@@ -4613,8 +4577,8 @@
     },
     "react-native-gifted-messenger": {
       "version": "0.0.16",
-      "from": "pgmemk/react-native-gifted-messenger#a32cdf4",
-      "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#a32cdf4c591706f02214496100a10964b93fc06d"
+      "from": "pgmemk/react-native-gifted-messenger#e3ad6c2",
+      "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#e3ad6c2fe96a72c96cf9e7d041596f7aa40e5d80"
     },
     "react-native-gifted-spinner": {
       "version": "0.0.4",
