@@ -19,4 +19,5 @@ module.exports = {
   isWeb: function () {
     return Platform.OS === 'web'
   },
+  autoOptInTouchId: true
 }

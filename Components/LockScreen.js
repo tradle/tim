@@ -6,8 +6,9 @@ import {
 } from 'react-native'
 
 import BackgroundImage from './BackgroundImage'
+import NoBacksies from './NoBacksies'
 
-class LockScreen extends Component {
+class LockScreen extends NoBacksies {
   static displayName = 'LockScreen';
   static propTypes = {
     bg: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),

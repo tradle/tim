@@ -114,7 +114,7 @@ android {
         minSdkVersion 16
         targetSdkVersion 22
         versionCode 2
-        versionName "1.0.2"
+        versionName "1.0.3"
         ndk {
             abiFilters "armeabi-v7a", "x86"
         }
@@ -163,6 +163,7 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-local-auth')
     compile project(':react-native-ecc')
     compile project(':react-native-orientation')
     compile project(':react-native-video')

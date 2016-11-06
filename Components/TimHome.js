@@ -19,7 +19,7 @@ var debug = require('debug')('Tradle-Home')
 var BG_IMAGE = require('../img/bg.png')
 var PasswordCheck = require('./PasswordCheck')
 var FadeInView = require('./FadeInView')
-var TouchIDOptIn = require('./TouchIDOptIn')
+// var TouchIDOptIn = require('./TouchIDOptIn')
 var defaultBankStyle = require('../styles/bankStyle.json')
 var QRCodeScanner = require('./QRCodeScanner')
 
@@ -40,6 +40,8 @@ import {
 import AutomaticUpdates from '../utils/automaticUpdates'
 import CustomIcon from '../styles/customicons'
 import BackgroundImage from './BackgroundImage'
+import Navs from '../utils/navs'
+import ENV from '../utils/env'
 
 const PASSWORD_ITEM_KEY = 'app-password'
 
@@ -53,7 +55,6 @@ import {
   NetInfo,
   ScrollView,
   Linking,
-  BackAndroid,
   StatusBar,
   Modal,
   Alert,
@@ -94,12 +95,6 @@ class TimHome extends Component {
       this._handleConnectivityChange
     );
     NetInfo.isConnected.fetch().then(isConnected => this._handleConnectivityChange(isConnected))
-    BackAndroid.addEventListener('hardwareBackPress', () => {
-      if (this.props.navigator.getCurrentRoutes().length > 1)
-        this.props.navigator.pop()
-      return true
-    })
-
     Actions.start();
   }
   // componentDidMount() {
@@ -397,7 +392,7 @@ class TimHome extends Component {
     route.passProps.callback = () => {
       setPassword(this.props.navigator)
       .then(() => this.optInTouchID())
-      .then (() => {
+      .then(() => {
         this.setState({hasMe: true})
         Actions.setAuthenticated(true)
         this.showOfficialAccounts(true)
@@ -419,6 +414,11 @@ class TimHome extends Component {
   }
 
   optInTouchID() {
+    if (ENV.autoOptInTouchId) {
+      Actions.updateMe({ useTouchId: true })
+      return
+    }
+
     return hasTouchID().then(has => {
       if (!has) return
 

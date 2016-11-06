@@ -70,7 +70,8 @@ import {
   // Linking,
   AppState,
   AppRegistry,
-  Text
+  Text,
+  BackAndroid
 } from 'react-native';
 
 import Orientation from 'react-native-orientation'
@@ -86,6 +87,7 @@ Text.defaultProps = function() {
 
 import React, { Component } from 'react'
 import Push from './utils/push'
+import Navs from './utils/navs'
 
 var ReactPerf = __DEV__ && require('react-addons-perf')
 var UNAUTHENTICATE_AFTER_BG_MILLIS = require('./utils/localAuth').TIMEOUT
@@ -355,6 +357,10 @@ class TiMApp extends Component {
       ]
 
       this.state.navigator = nav;
+      Navs.watch(nav)
+      if (BackAndroid) {
+        BackAndroid.addEventListener('hardwareBackPress', () => goBack(this.state.navigator))
+      }
     }
 
     switch (route.id) {
@@ -444,6 +450,14 @@ class TiMApp extends Component {
   }
 }
 
+function goBack (nav) {
+  const { routes, route, index } = Navs.getCurrentRouteInfo(nav)
+  if (index === 0 || route.component.backButtonDisabled) return false
+
+  nav.pop()
+  return true
+}
+
 var HIT_SLOP = {top:10,right:10,bottom:10,left:10}
 var NavigationBarRouteMapper = {
   LeftButton: function(route, navigator, index, navState) {
@@ -482,7 +496,7 @@ var NavigationBarRouteMapper = {
     return (
       <TouchableOpacity
         hitSlop={HIT_SLOP}
-        onPress={() => navigator.pop()}>
+        onPress={goBack.bind(null, navigator)}>
         <View style={styles.navBarLeftButton}>
           {status}
           {title}
