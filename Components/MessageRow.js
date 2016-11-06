@@ -199,6 +199,7 @@ class MessageRow extends Component {
     let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
 
     let longMessage = isSimpleMessage  &&  message ? numberOfCharsInWidth < message.length : false
+    if (message.length > 10)
     if (showMessageBody) {
       var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
       if (message) {
@@ -206,7 +207,7 @@ class MessageRow extends Component {
           viewStyle.width = msgWidth; //isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
       }
       if (!isSimpleMessage)
-        viewStyle.width =  message ? Math.min(msgWidth, message.length * utils.getFontSize(10) + 40) : msgWidth
+        viewStyle.width =  message ? Math.min(msgWidth, message.length * utils.getFontSize(18) + 40) : msgWidth
 
 
       if (this.props.sendStatus  &&  this.props.sendStatus !== null) {
@@ -879,7 +880,7 @@ class MessageRow extends Component {
     return isReadOnly ? null : onPressCall
   }
 
-  onChooseProduct(sendForm) {
+  onChooseProduct() {
     if (this.props.isAggregation)
       return
     var modelName = constants.TYPES.MESSAGE
