@@ -297,6 +297,11 @@ class ResourceList extends Component {
     if (action === 'listSharedWith'  &&  !this.props.chat)
       return
     var list = params.list;
+    if (this.props.multiChooser  &&  list.length) {
+      list = list.filter(r => {
+        return r[constants.ROOT_HASH] !== this.props.sharingChat[constants.ROOT_HASH]
+      })
+    }
 
     let state = {
       dataSource: this.state.dataSource.cloneWithRows(list),
