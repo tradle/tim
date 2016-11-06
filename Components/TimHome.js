@@ -772,8 +772,8 @@ var styles = (function () {
     },
     signIn: {
       flexDirection: 'row',
-      width: 300,
-      height: Platform.OS === 'ios' ? 80 : 50,
+      width: 320,
+      height: Platform.OS === 'ios' ? 80 : 60,
       marginTop: 10,
       justifyContent: 'center',
       backgroundColor: '#467EAE',
