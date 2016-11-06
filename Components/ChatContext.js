@@ -25,7 +25,8 @@ class ChatContext extends Component {
     let chooser =  <TouchableOpacity onPress={this.props.contextChooser} style={{flex: 1}}>
                       <Text style={[this.props.allContexts ? styles.textAll : styles.textOne, styles.text]}>{translate(utils.getModel(this.props.context.product).value)}</Text>
                     </TouchableOpacity>
-    let share = this.props.allContexts  ||  utils.isEmployee(utils.getMe())
+    // HACK: if me is employee no sharing for now
+    let share = this.props.allContexts  ||  utils.getMe().isEmployee
                   ? <View/>
                   : <TouchableOpacity onPress={this.props.shareWith} style={{position: 'absolute', right: 10}}>
                       <Icon size={22} name='md-share' color='#7D6EC4' style={{marginRight: 10, paddingLeft: 20}} />
