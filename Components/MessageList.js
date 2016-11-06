@@ -496,11 +496,13 @@ class MessageList extends Component {
 
     if (!content) {
       var isAllMessages = model.isInterface  &&  model.id === constants.TYPES.MESSAGE;
-      var maxHeight = utils.dimensions(MessageList).height -
+
+      let hideTextInput = this.props.resource[constants.TYPE] === PRODUCT_APPLICATION  && this.props.resource._readOnly
+      let h = utils.dimensions(MessageList).height
+      var maxHeight = h -
                       (Platform.OS === 'android' ? 77 : 64) - (this.state.isConnected ? 0 : 35) - (this.state.context ? 45 : 0)
       // content = <GiftedMessenger style={{paddingHorizontal: 10, marginBottom: Platform.OS === 'android' ? 0 : 20}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
       // Hide TextInput for shared context since it is read-only
-      let hideTextInput = this.props.resource[constants.TYPE] === PRODUCT_APPLICATION  && this.props.resource._readOnly
       content = <GiftedMessenger style={{paddingHorizontal: 10}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
         ref={(c) => this._GiftedMessenger = c}
         loadEarlierMessagesButton={this.state.loadEarlierMessages}
@@ -565,9 +567,12 @@ class MessageList extends Component {
       //   }
       // ]}
     let me = utils.getMe()
-    let buttons = this.state.isEmployee  &&  this.props.resource[constants.TYPE] !== constants.TYPES.ORGANIZATION
-                ? [translate('formChooser'), translate('cancel')]
-                : [translate('forgetMe'), translate('cancel')]
+    let buttons = []
+    if (this.state.isEmployee  &&  this.props.resource[constants.TYPE] !== constants.TYPES.ORGANIZATION)
+      buttons.push(translate('formChooser'))
+    else
+      buttons.push(translate('forgetMe'))
+    buttons.push(translate('cancel'))
     return (
       <PageView style={[platformStyles.container, bgStyle]}>
         <NetworkInfoProvider connected={this.state.isConnected} resource={this.props.resource} />
