@@ -23,12 +23,12 @@ class ChatContext extends Component {
 
     let bar = this.props.allContexts ? styles.barAll : styles.barOne
     let chooser =  <TouchableOpacity onPress={this.props.contextChooser} style={{flex: 1}}>
-                        <Text style={[this.props.allContexts ? styles.textAll : styles.textOne, styles.text]}>{translate(utils.getModel(this.props.context.product).value)}</Text>
+                      <Text style={[this.props.allContexts ? styles.textAll : styles.textOne, styles.text]}>{translate(utils.getModel(this.props.context.product).value)}</Text>
                     </TouchableOpacity>
-    let share = this.props.allContexts
+    let share = this.props.allContexts  ||  utils.isEmployee(utils.getMe())
                   ? <View/>
                   : <TouchableOpacity onPress={this.props.shareWith} style={{position: 'absolute', right: 10}}>
-                        <Icon size={22} name='md-share' color='#7D6EC4' style={{marginRight: 10, paddingLeft: 20}} />
+                      <Icon size={22} name='md-share' color='#7D6EC4' style={{marginRight: 10, paddingLeft: 20}} />
                     </TouchableOpacity>
     return (
             <View style={[bar, styles.bar, {flexDirection: 'row'}]}>
