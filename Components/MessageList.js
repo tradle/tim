@@ -637,6 +637,7 @@ class MessageList extends Component {
       passProps: {
         modelName: constants.TYPES.ORGANIZATION,
         multiChooser: true,
+        sharingChat: this.props.resource,
         onDone: this.shareContext.bind(this)
       }
     });
