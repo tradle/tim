@@ -531,16 +531,16 @@ var NavigationBarRouteMapper = {
                {icons}
               </View>
     }
+      // {route.help
+      //   ? <TouchableOpacity
+      //       hitSlop={HIT_SLOP}
+      //       onPress={() =>  Alert.alert(translate(route.help))}>
+      //       <Icon name={'ios-information-circle'} key={'ios-help'} size={18} color='#29ABE2' style={[styles.iconSpace, {marginTop: 13}]}/>
+      //     </TouchableOpacity>
+      //   : <View />
+      // }
     return (
       <View style={{flexDirection: 'row'}}>
-      {route.help
-        ? <TouchableOpacity
-            hitSlop={HIT_SLOP}
-            onPress={() =>  Alert.alert(translate(route.help))}>
-            <Icon name={'ios-information-circle'} key={'ios-help'} size={18} color='#29ABE2' style={[styles.iconSpace, {marginTop: 13}]}/>
-          </TouchableOpacity>
-        : <View />
-      }
       <TouchableOpacity
         hitSlop={HIT_SLOP}
         onPress={() => {
