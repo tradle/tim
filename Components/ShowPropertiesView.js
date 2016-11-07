@@ -268,7 +268,7 @@ class ShowPropertiesView extends Component {
         console.log(this.state.promptVisible)
       let canReject = this.props.checkProperties
                     ? <View style={styles.iconView}>
-                        <Icon key={p} name={this.props.errorProps && this.props.errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={25} color={this.props.errorProps && this.props.errorProps[p] ? 'red' : this.props.bankStyle.LINK_COLOR} style={{marginTop: 10}}
+                        <Icon key={p} name={this.props.errorProps && this.props.errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={25} color={this.props.errorProps && this.props.errorProps[p] ? 'red' : this.props.bankStyle.LINK_COLOR} style={{marginTop: 10, marginRight: 20}}
                         onPress={() => {
                           this.setState({promptVisible: pMeta})
                         }}/>
