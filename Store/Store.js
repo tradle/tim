@@ -1379,8 +1379,10 @@ var Store = Reflux.createStore({
       profile.firstName = identity.name.firstName
       profile.formatted = identity.name.formatted || profile.firstName
     }
-    if (!isDevicePairing)
-      this.trigger({action: 'newContact', to: profile, newContact: true})
+    if (!isDevicePairing) {
+      if (!this._getItem(utils.getId(profile)).bot)
+        this.trigger({action: 'newContact', to: profile, newContact: true})
+    }
 
     let promise
     if (isDevicePairing)
