@@ -200,6 +200,7 @@ class MessageRow extends Component {
     let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
 
     let longMessage = isSimpleMessage  &&  message ? numberOfCharsInWidth < message.length : false
+    if (message.length > 10)
     if (showMessageBody) {
       var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
       if (message) {
@@ -475,7 +476,7 @@ class MessageRow extends Component {
     resource[constants.TYPE] = model.id;
 
     // Prefill for testing and demoing
-    var isPrefilled = /*__DEV__ &&*/ model.id in formDefaults
+    var isPrefilled = __DEV__ && model.id in formDefaults
     if (isPrefilled)
       extend(true, resource, formDefaults[model.id])
 
@@ -883,7 +884,7 @@ class MessageRow extends Component {
     return isReadOnly ? null : onPressCall
   }
 
-  onChooseProduct(sendForm) {
+  onChooseProduct() {
     if (this.props.isAggregation)
       return
     var modelName = constants.TYPES.MESSAGE

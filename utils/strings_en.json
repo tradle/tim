@@ -149,5 +149,7 @@
     "contextsFor": "Contexts for",
     "customerWaiting": "{1} has entered the chat",
     "sharedContext": "Shared Context",
-    "shareAllPastAndFutureMessages": "Share all past and future messages in this context with selected parties"
+    "shareContext": "Share {1}",
+    "shareAllPastAndFutureMessages": "Share all past and future messages in this context with selected parties",
+    "listOfProducts": "List of products"
 }

@@ -299,6 +299,11 @@ class ResourceList extends Component {
     if (action === 'listSharedWith'  &&  !this.props.chat)
       return
     var list = params.list;
+    if (this.props.multiChooser  &&  list.length) {
+      list = list.filter(r => {
+        return r[constants.ROOT_HASH] !== this.props.sharingChat[constants.ROOT_HASH]
+      })
+    }
 
     let state = {
       dataSource: this.state.dataSource.cloneWithRows(list),
@@ -961,7 +966,7 @@ class ResourceList extends Component {
             <View style={{paddingVertical: 5, backgroundColor: '#f1ffe7'}}>
               <TouchableOpacity underlayColor='transparent' onPress={this.showContexts.bind(this)}>
                 <View style={styles.row}>
-                  <Icon name='md-share' size={50} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+                  <Icon name='md-share' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
                   <View style={styles.textContainer}>
                     <Text style={styles.resourceTitle}>{translate('sharedContext')}</Text>
                   </View>
@@ -1099,8 +1104,9 @@ var styles = StyleSheet.create({
     alignSelf: 'center',
   },
   resourceTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '400',
+    color: '#757575',
     marginBottom: 2,
     paddingLeft: 5
   },

@@ -1367,8 +1367,8 @@
     },
     "changes-feed": {
       "version": "1.1.0",
-      "from": "git+https://github.com/mvayngrib/changes-feed.git",
-      "resolved": "git+https://github.com/mvayngrib/changes-feed.git#bd106bd1a8b03660e7c6820e279a34bcaac0fd5e",
+      "from": "mvayngrib/changes-feed",
+      "resolved": "git://github.com/mvayngrib/changes-feed.git#bd106bd1a8b03660e7c6820e279a34bcaac0fd5e",
       "dependencies": {
         "readable-stream": {
           "version": "1.0.34",
@@ -4028,8 +4028,8 @@
     },
     "level-change-processor": {
       "version": "1.0.0",
-      "from": "git+https://github.com/mvayngrib/level-change-processor.git#7100404",
-      "resolved": "git+https://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b"
+      "from": "mvayngrib/level-change-processor#7100404",
+      "resolved": "git://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b"
     },
     "level-codec": {
       "version": "6.1.0",
