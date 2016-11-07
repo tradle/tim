@@ -3741,13 +3741,16 @@ var Store = Reflux.createStore({
         shareableResources[docType] = [];
       else if (shareableResourcesRootToR[r[ROOT_HASH]]) {
         let arr = shareableResources[r[TYPE]]
+        let vFromId = utils.getId(verification.from)
         for (let i=0; i<arr.length; i++) {
           let rr = arr[i].document
           if (r[ROOT_HASH] === rr[ROOT_HASH]) {
-            if (r.time < rr.time)
-              return
-            else
-              arr.splice(i, 1)
+            if (utils.getId(arr[i].from) === vFromId) {
+              if (r.time < rr.time)
+                return
+              else
+                arr.splice(i, 1)
+            }
           }
         }
       }
