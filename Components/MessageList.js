@@ -114,7 +114,7 @@ class MessageList extends Component {
 
   _watchSubmit() {
     const self = this
-    if (!utils.isWeb() || !this._GiftedMessenger) return
+    if (!utils.isWeb() || !this._GiftedMessenger || !this._GiftedMessenger.refs.textInput) return
 
     const input = this._GiftedMessenger.refs.textInput.refs.input
     if (this._watchedInput === input) return
