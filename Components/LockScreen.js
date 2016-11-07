@@ -52,8 +52,10 @@ class LockScreen extends NoBacksies {
     return (
       <View style={DEFAULT_STYLE.container}>
         {bg && <BackgroundImage source={bg} />}
-        {message && <Text style={[DEFAULT_STYLE.message, style.message]}>{message}</Text>}
-        <Text style={[DEFAULT_STYLE.timer, style.timer]}>{`${minutes}:${seconds}`}</Text>
+        <View style={DEFAULT_STYLE.textContainer}>
+          {message && <Text style={[DEFAULT_STYLE.message, style.message]}>{message}</Text>}
+          <Text style={[DEFAULT_STYLE.timer, style.timer]}>{`${minutes}:${seconds}`}</Text>
+        </View>
       </View>
     )
   }
@@ -67,6 +69,9 @@ const DEFAULT_STYLE = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     // alignSelf: 'stretch'
+  },
+  textContainer: {
+    zIndex: 1
   },
   message: {
     textAlign: 'center',
