@@ -19,5 +19,12 @@ module.exports = {
   isWeb: function () {
     return Platform.OS === 'web'
   },
-  autoOptInTouchId: false
+  autoOptInTouchId: false,
+  get prefillWithTestData() {
+    if (typeof global.PREFILL_FORMS === 'boolean') {
+      return global.PREFILL_FORMS
+    }
+
+    return __DEV__
+  }
 }

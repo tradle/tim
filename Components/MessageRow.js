@@ -1,6 +1,7 @@
 'use strict';
 
 var utils = require('../utils/utils');
+var ENV = require('../utils/env')
 var translate = utils.translate
 var ArticleView = require('./ArticleView');
 var MessageView = require('./MessageView');
@@ -475,7 +476,7 @@ class MessageRow extends Component {
     resource[constants.TYPE] = model.id;
 
     // Prefill for testing and demoing
-    var isPrefilled = __DEV__ && model.id in formDefaults
+    var isPrefilled = ENV.prefillWithTestData && model.id in formDefaults
     if (isPrefilled)
       extend(true, resource, formDefaults[model.id])
 
