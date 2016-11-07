@@ -43,7 +43,7 @@ var StyleSheet = require('../StyleSheet')
 
 import React, { Component } from 'react'
 import {
-  ListView,
+  // ListView,
   // StyleSheet,
   PropTypes,
   Navigator,
@@ -524,7 +524,6 @@ class MessageList extends Component {
       var maxHeight = utils.dimensions(MessageList).height -
                       (Platform.OS === 'android' ? 77 : 64) - (this.state.isConnected ? 0 : 35) - (this.state.context ? 45 : 0)
       // content = <GiftedMessenger style={{paddingHorizontal: 10, marginBottom: Platform.OS === 'android' ? 0 : 20}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
-
       var paddingLeft = 10
       // way ScrollView is implemented with position:absolute disrespects the confines of the screen width
       let hideTextInput = this.props.resource[constants.TYPE] === PRODUCT_APPLICATION  && this.props.resource._readOnly
