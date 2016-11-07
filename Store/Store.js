@@ -2528,6 +2528,22 @@ var Store = Reflux.createStore({
       }
     })
   },
+  onAddApp(serverUrl) {
+    let parts = serverUrl.split(';')
+    // let idx = serverUrl.lastIndexOf('/')
+    // let id = parts[parts.length - 1]
+    // let url = parts.slice(0, parts.length - 1).join('/')
+
+    return this.getInfo([parts[0]], false, parts[1])
+    .then(() => {
+      this.trigger({action: 'addApp'})
+      // let list = self.searchNotMessages({modelName: ORGANIZATION})
+      // this.trigger({
+      //   action: 'list',
+      //   list: list,
+      // })
+    })
+  },
   isSwitchingToEmployeeMode(resource) {
     if (resource[TYPE] !== PROFILE  ||  !resource.organization || !SERVICE_PROVIDERS)
       return
@@ -7657,22 +7673,6 @@ function getProviderUrl (provider) {
       if (p !== 'name' && p !== 'location')
         rr[p] = r[p];
     return rr;
-  },
-  onAddApp(serverUrl) {
-    let parts = serverUrl.split(';')
-    // let idx = serverUrl.lastIndexOf('/')
-    // let id = parts[parts.length - 1]
-    // let url = parts.slice(0, parts.length - 1).join('/')
-
-    return this.getInfo([parts[0]], false, parts[1])
-    .then(() => {
-      this.trigger({action: 'addApp'})
-      // let list = self.searchNotMessages({modelName: ORGANIZATION})
-      // this.trigger({
-      //   action: 'list',
-      //   list: list,
-      // })
-    })
   },
 
   packResult(result) {
