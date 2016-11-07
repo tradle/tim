@@ -240,7 +240,8 @@ function setPassword (navigator, isChangePassword) {
 
   debug('setPassword')
   return Q.Promise((resolve, reject) => {
-    navigator.push({
+    let routes = navigator.getCurrentRoutes().length
+    navigator[routes === 1 ? 'push' : 'replace']({
       component: PasswordCheck,
       id: 20,
       noLeftButton: true,
