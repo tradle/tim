@@ -866,11 +866,10 @@ class NewResource extends Component {
    })
   }
   acceptTsAndCs() {
+    this.props.navigator.pop()
     this.setState({termsAccepted: true})
     if (this.state.resource.firstName)
       this.onSavePressed()
-    else
-      this.props.navigator.pop()
   }
 
   cancelItem(pMeta, item) {
