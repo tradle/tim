@@ -29,6 +29,7 @@ const FORM_REQUEST = 'tradle.FormRequest'
 const ENUM = 'tradle.Enum'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
+const PRODUCT_LIST = 'tradle.ProductList'
 
 var CURRENCY_SYMBOL
 var LINK_COLOR
@@ -205,10 +206,10 @@ class MessageRow extends Component {
         if (/*message.charAt(0) === '['  || */ longMessage)
           viewStyle.width = msgWidth; //isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
       }
-      if (!isSimpleMessage) {
-        let msgW = message.length * utils.getFontSize(10) + 100
-        if (msgW > msgWidth)
-          viewStyle.width =  message ? Math.min(msgWidth, msgW) : msgWidth
+      if (!isSimpleMessage  &&  model.id !== FORM_REQUEST  &&  model.id !== PRODUCT_LIST) {
+        let msgW = message.length * utils.getFontSize(12) + 40
+        // if (msgW > msgWidth)
+          viewStyle.width =  msgW > msgWidth ? msgWidth : msgW
       }
 
 
@@ -861,7 +862,7 @@ class MessageRow extends Component {
     else {
       let view = <View style={styles.rowContainer}>
                    <Text style={[styles.resourceTitle, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(form)}</Text>
-                   <Icon style={[{marginTop: 2}, resource.documentCreated  ? styles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
+                   <Icon style={[{marginTop: 2, paddingLeft: 100}, resource.documentCreated  ? styles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
                  </View>
       if (resource.documentCreated  ||  isReadOnly)
         link = view
