@@ -67,9 +67,20 @@ class PasswordCheck extends Component {
 
   constructor(props) {
     super(props)
-    this.state = this.props.mode === 'set' ? this._getInitialSetState() : this._getInitialCheckState()
+    this._resetState()
     this.onPress = this.onPress.bind(this)
     this.onChange = this.onChange.bind(this)
+  }
+
+  _resetState(props) {
+    props = props || this.props
+    this.state = props.mode === 'set' ? this._getInitialSetState() : this._getInitialCheckState()
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (this.props.mode !== nextProps.mode) {
+      this._resetState(nextProps)
+    }
   }
 
   _getInitialSetState() {
