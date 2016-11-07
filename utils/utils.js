@@ -207,7 +207,7 @@ var utils = {
         }
       }
       else if (typeof r1[p] === 'object') {
-        if (!r2[p])
+        if (!r2[p]  ||  !properties[p]) // internal props like _context
           return false
         if (properties[p].ref === TYPES.MONEY) {
           if (r1[p].currency !== r2[p].currency)
