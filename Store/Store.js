@@ -2809,7 +2809,7 @@ var Store = Reflux.createStore({
         result = this.getDependencies(result);
 
       var retParams = {
-        action: !params.prop ? 'messageList' : 'list',
+        action: isMessage  &&  !params.prop && !params._readOnly ? 'messageList' : 'list',
         list: result,
         spinner: params.spinner,
         isAggregation: params.isAggregation
@@ -2844,7 +2844,7 @@ var Store = Reflux.createStore({
       }
       if (params.context)
         retParams.context = params.context
-      else {
+      else if (params.modelName !== PRODUCT_APPLICATION) {
         let c = this.searchMessages({modelName: PRODUCT_APPLICATION, to: params.to})
         if (c) {
           if (c.length === 1) {
