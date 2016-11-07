@@ -27,7 +27,6 @@ var equal = require('deep-equal')
 var constants = require('@tradle/constants');
 var termsAndConditions = require('../termsAndConditions.json')
 var StyleSheet = require('../StyleSheet')
-
 import ImagePicker from 'react-native-image-picker';
 import ImageInput from './ImageInput'
 import CustomIcon from '../styles/customicons'
@@ -685,7 +684,8 @@ class NewResource extends Component {
       };
     if (this.props.editCols)
       params.editCols = this.props.editCols;
-    if (this.state.isRegistration)
+    let isRegistration = this.state.isRegistration
+    if (isRegistration)
       params.isRegistration = true
     if (this.props.originatingMessage  &&  this.props.originatingMessage[constants.TYPE] === FORM_ERROR) {
       params.errors = {}
@@ -731,12 +731,12 @@ class NewResource extends Component {
       else
         arrayItems.push(this.getItem(bl))
     }
-    if (this.state.isRegistration)
+    if (isRegistration)
       Form.stylesheet = rStyles
     else
       Form.stylesheet = stylesheet
 
-    // var style = this.state.isRegistration
+    // var style = isRegistration
     //           ? DeviceHeight < 600 ? {marginTop: 100} : {marginTop: DeviceHeight / 4}
     //           : platformStyles.container
     var {width, height} = utils.dimensions(NewResource)
@@ -748,7 +748,7 @@ class NewResource extends Component {
     options.auto = 'placeholders';
     options.tintColor = 'red'
     var photoStyle = /*isMessage && !isFinancialProduct ? {marginTop: -35} :*/ styles.photoBG;
-    var button = this.state.isRegistration
+    var button = isRegistration
                ? <View>
                    <TouchableHighlight style={styles.thumbButton}
                         underlayColor='transparent' onPress={() => {
@@ -763,7 +763,7 @@ class NewResource extends Component {
                    </TouchableHighlight>
                  </View>
                : <View style={{height: 0}} />
-    // var button = this.state.isRegistration
+    // var button = isRegistration
     //            ? <View>
     //                <TouchableHighlight style={styles.thumbButton}
     //                     underlayColor='transparent' onPress={() => {
@@ -783,9 +783,13 @@ class NewResource extends Component {
     //                </TouchableHighlight>
     //              </View>
     //            : <View style={{height: 0}} />
-    var formStyle = this.state.isRegistration
-                  ? {justifyContent: 'center', height: height - (height > 1000 ? 0 : 100)}
+    var formStyle = isRegistration
+                  ? {justifyContent: 'center', height: height - (height > 1000 ? 0 : isRegistration ? 50 : 100)}
                   : {justifyContent: 'flex-start'}
+//          <View style={photoStyle}>
+//            <PhotoView resource={resource} navigator={this.props.navigator}/>
+//          </View>
+                  // keyboardDismissMode='on-drag'>
     var content =
       <ScrollView style={{backgroundColor: 'transparent'}}
                   ref='scrollView' {...this.scrollviewProps}
@@ -801,7 +805,7 @@ class NewResource extends Component {
           <View style={this.state.isRegistration ? {marginHorizontal: height > 1000 ? 50 : 30} : {marginHorizontal: 10}}>
             <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange.bind(this)}/>
             {button}
-            <View style={{marginTop: this.state.isRegistration ? 0 : -10}}>
+            <View style={{marginTop: isRegistration ? 0 : -10}}>
               {arrayItems}
              </View>
               <View style={{alignItems: 'center', marginTop: 50}}>
@@ -815,7 +819,7 @@ class NewResource extends Component {
       </ScrollView>
 
     // StatusBar.setHidden(true);
-    if (!this.state.isRegistration) {
+    if (!isRegistration) {
       if (this.state.err) {
         Alert.alert(this.state.err)
         this.state.err = null
@@ -828,7 +832,7 @@ class NewResource extends Component {
     //     <View style={{justifyContent: 'center', height: height}}>
     //     {content}
     //     </View>
-    //     {this.state.isRegistration
+    //     {isRegistration
     //       ? <View style={styles.logo}>
     //           <CustomIcon name='tradle' size={40} color='#ffffff' />
     //         </View>
@@ -840,7 +844,7 @@ class NewResource extends Component {
       <View style={{height: height}}>
         <BackgroundImage source={BG_IMAGE} style={styles.bgImage} />
         <View style={{justifyContent: 'center', height: height}}>
-        {this.state.isRegistration
+        {isRegistration
           ? <View style={styles.logo}>
               <CustomIcon name='tradle' size={40} color='#ffffff' style={{padding: 10}}/>
             </View>
@@ -1175,13 +1179,13 @@ var styles = StyleSheet.create({
     flex: 1
   },
   noItemsText: {
-    fontSize: 18,
+    fontSize: 20,
     color: '#AAAAAA',
     // alignSelf: 'center',
     // paddingLeft: 10
   },
   itemsText: {
-    fontSize: 18,
+    fontSize: 20,
     color: '#000000',
     // alignSelf: 'center',
     paddingLeft: 10

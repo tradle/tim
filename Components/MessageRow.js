@@ -200,6 +200,7 @@ class MessageRow extends Component {
     let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
 
     let longMessage = isSimpleMessage  &&  message ? numberOfCharsInWidth < message.length : false
+    if (message.length > 10)
     if (showMessageBody) {
       var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
       if (message) {
@@ -883,7 +884,7 @@ class MessageRow extends Component {
     return isReadOnly ? null : onPressCall
   }
 
-  onChooseProduct(sendForm) {
+  onChooseProduct() {
     if (this.props.isAggregation)
       return
     var modelName = constants.TYPES.MESSAGE

@@ -521,12 +521,14 @@ class MessageList extends Component {
 
     if (!content) {
       var isAllMessages = model.isInterface  &&  model.id === constants.TYPES.MESSAGE;
-      var maxHeight = utils.dimensions(MessageList).height -
+
+      let hideTextInput = this.props.resource[constants.TYPE] === PRODUCT_APPLICATION  && this.props.resource._readOnly
+      let h = utils.dimensions(MessageList).height
+      var maxHeight = h -
                       (Platform.OS === 'android' ? 77 : 64) - (this.state.isConnected ? 0 : 35) - (this.state.context ? 45 : 0)
       // content = <GiftedMessenger style={{paddingHorizontal: 10, marginBottom: Platform.OS === 'android' ? 0 : 20}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
       var paddingLeft = 10
       // way ScrollView is implemented with position:absolute disrespects the confines of the screen width
-      let hideTextInput = this.props.resource[constants.TYPE] === PRODUCT_APPLICATION  && this.props.resource._readOnly
       var paddingRight = utils.isWeb() ? 20 : 10
       content = <GiftedMessenger style={{ paddingLeft, paddingRight }} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
         ref={(c) => this._GiftedMessenger = c}
@@ -594,9 +596,12 @@ class MessageList extends Component {
       //   }
       // ]}
     let me = utils.getMe()
-    let buttons = this.state.isEmployee  &&  this.props.resource[constants.TYPE] !== constants.TYPES.ORGANIZATION
-                ? [translate('formChooser'), translate('cancel')]
-                : [translate('forgetMe'), translate('cancel')]
+    let buttons = []
+    if (this.state.isEmployee  &&  this.props.resource[constants.TYPE] !== constants.TYPES.ORGANIZATION)
+      buttons.push(translate('formChooser'))
+    else
+      buttons.push(translate('forgetMe'))
+    buttons.push(translate('cancel'))
     return (
       <PageView style={[platformStyles.container, bgStyle]}>
         <NetworkInfoProvider connected={this.state.isConnected} resource={this.props.resource} />
@@ -661,6 +666,7 @@ class MessageList extends Component {
       passProps: {
         modelName: constants.TYPES.ORGANIZATION,
         multiChooser: true,
+        sharingChat: this.props.resource,
         onDone: this.shareContext.bind(this)
       }
     });
@@ -668,7 +674,8 @@ class MessageList extends Component {
   shareContext(orgs) {
     delete orgs[utils.getId(this.props.resource)]
     Alert.alert(
-      translate('shareAllPastAndFutureMessages'), null,
+      translate('shareContext', utils.getModel(this.state.context.product).value.title),
+      translate('shareAllPastAndFutureMessages'),
       [
         {text: translate('cancel'), onPress: () => console.log('Cancel')},
         {text: 'OK', onPress: () => {

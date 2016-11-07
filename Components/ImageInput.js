@@ -42,29 +42,36 @@ class ImageInput extends Component {
   }
   showImagePicker() {
     const { prop, onImage } = this.props
-    ImagePicker.showImagePicker({
-      returnIsVertical: true,
-      chooseFromLibraryButtonTitle: utils.isSimulator() || prop._allowPicturesFromLibrary ? 'Choose from Library' : null,
-      takePhotoButtonTitle: utils.isSimulator() ? null : 'Take Photo…',
-      quality: utils.imageQuality
-    }, (response) => {
-      if (response.didCancel) {
-        return// onImage(new Error('canceled'))
-      }
-
-      if (response.error) {
-        console.log('ImagePickerManager Error: ', response.error);
-        return// onImage(new Error(response.error))
-      }
-
-      onImage({
-        // title: 'photo',
-        url: 'data:image/jpeg;base64,' + response.data,
-        isVertical: response.isVertical,
-        width: response.width,
-        height: response.height,
-        chooseFromLibraryButtonTitle: ''
+    let options = {returnIsVertical: true, quality: utils.imageQuality}
+    if (utils.isSimulator())
+      ImagePicker.launchImageLibrary(options, (response) => this.respond(response))
+    else if (!prop._allowPicturesFromLibrary)
+      ImagePicker.launchCamera(options, (response) => this.respond(response))
+    else {
+      extend(options, {
+        chooseFromLibraryButtonTitle: hasChoiceFromLibrary ? 'Choose from Library' : null,
+        takePhotoButtonTitle: utils.isSimulator() ? null : 'Take Photo…',
       })
+      ImagePicker.showImagePicker(options, (response) => this.respond(response))
+    }
+  }
+  respond(response) {
+    if (response.didCancel) {
+      return// onImage(new Error('canceled'))
+    }
+
+    if (response.error) {
+      console.log('ImagePickerManager Error: ', response.error);
+      return// onImage(new Error(response.error))
+    }
+
+    onImage({
+      // title: 'photo',
+      url: 'data:image/jpeg;base64,' + response.data,
+      isVertical: response.isVertical,
+      width: response.width,
+      height: response.height,
+      chooseFromLibraryButtonTitle: ''
     })
   }
 }

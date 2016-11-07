@@ -221,7 +221,7 @@ var RowMixin = {
       var orgPhoto = verification.organization.photo
                    ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
                    : <View />
-      var shareView = <View style={[styles.shareButton, {marginLeft: 10, marginRight: 10, opacity: this.props.resource.documentCreated ? 0.3 : 1}]}>
+      var shareView = <View style={[styles.shareButton, {opacity: this.props.resource.documentCreated ? 0.3 : 1}]}>
                         <CustomIcon name='tradle' style={{color: '#4982B1' }} size={32} />
                         <Text style={styles.shareText}>{translate('Share')}</Text>
                       </View>
@@ -445,7 +445,8 @@ var styles = StyleSheet.create({
   },
   shareButton: {
     flexDirection: 'row',
-    marginLeft: 0,
+    // marginLeft: 0,
+    marginHorizontal: 10,
     justifyContent: 'space-between',
     padding: 5,
     borderRadius: 10,
