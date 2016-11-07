@@ -958,7 +958,7 @@ class ResourceList extends Component {
                 </View>
               </TouchableOpacity>
             </View>
-            <View style={{padding: 5, backgroundColor: '#f1ffe7'}}>
+            <View style={{paddingVertical: 5, backgroundColor: '#f1ffe7'}}>
               <TouchableOpacity underlayColor='transparent' onPress={this.showContexts.bind(this)}>
                 <View style={styles.row}>
                   <Icon name='md-share' size={50} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
