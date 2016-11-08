@@ -51,7 +51,7 @@ const PASSWORD_PROMPTS = getPasswordPrompts()
 
 let pendingAuth
 let pendingEnrollRequest
-let TIMEOUT = __DEV__ ? 5000 : 10 * 60 * 1000
+let TIMEOUT = __DEV__ ? 5000 : 1 * 60 * 1000
 
 module.exports = {
   TIMEOUT,
