@@ -11,6 +11,7 @@ import {
 
 import ImagePicker from 'react-native-image-picker'
 import utils from '../utils/utils'
+import extend from 'extend'
 
 const imageInputPropTypes = {
   ...TouchableHighlight.propTypes,
