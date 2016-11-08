@@ -50,8 +50,8 @@ class ImageInput extends Component {
       ImagePicker.launchCamera(options, (response) => this.respond(response))
     else {
       extend(options, {
-        chooseFromLibraryButtonTitle: hasChoiceFromLibrary ? 'Choose from Library' : null,
-        takePhotoButtonTitle: utils.isSimulator() ? null : 'Take Photo…',
+        chooseFromLibraryButtonTitle: 'Choose from Library',
+        takePhotoButtonTitle: 'Take Photo…',
       })
       ImagePicker.showImagePicker(options, (response) => this.respond(response))
     }
