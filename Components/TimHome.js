@@ -198,7 +198,10 @@ class TimHome extends Component {
       self.setState({isLoading: false});
       if (!utils.getMe()) {
         self.setState({isModalOpen: true})
-        // this.register(() => this.showOfficialAccounts())
+        // if (utils.isWeb()) {
+        //   this.register(() => this.showOfficialAccounts())
+        // }
+
         return
       }
 
@@ -652,7 +655,7 @@ class TimHome extends Component {
                         this.register(this.showOfficialAccounts.bind(this))
                         }} underlayColor='transparent'>
                         <View style={styles.signIn}>
-                          <Text style={styles.signInText}>{translate('This is my first Tradle device')}</Text>
+                          <Text style={styles.signInText}>{translate('getStarted')}</Text>
                         </View>
                       </TouchableOpacity>
                     </FadeInView>
@@ -669,7 +672,7 @@ class TimHome extends Component {
               ? <TouchableOpacity style={[styles.thumbButton, {justifyContent: 'flex-end',  opacity: me ? 1 : 0}]}
                     underlayColor='transparent' onPress={() => this._pressHandler()}>
                   <View style={styles.getStarted}>
-                     <Text style={styles.getStartedText}>Get started</Text>
+                     <Text style={styles.getStartedText}>{translate('getStarted')}</Text>
                   </View>
                 </TouchableOpacity>
               : regView
