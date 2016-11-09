@@ -126,6 +126,7 @@ class NewResource extends Component {
            this.state.itemsCount !== nextState.itemsCount    ||
            this.state.isLoadingVideo !== nextState.isLoadingVideo  ||
            this.state.keyboardSpace !== nextState.keyboardSpace    ||
+           this.state.inFocus !== nextState.inFocus                ||
            // this.state.termsAccepted !== nextState.termsAccepted    ||
           !equal(this.state.resource, nextState.resource)
 
@@ -382,7 +383,7 @@ class NewResource extends Component {
           if (ref) {
             let rModel = utils.getModel(ref).value
             if (ref === constants.TYPES.MONEY) {
-              if (!v.value || !v.value.length) {
+              if (!v.value || (typeof v.value === 'string'  &&  !v.value.length)) {
                 missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
                 return
               }

@@ -66,6 +66,7 @@ class VerificationMessageRow extends Component {
       isThirdPartyVerification = !utils.isEmployee(resource.organization)
     }
     let isShared = this.isShared()
+    isMyMessage = isShared
     let bgColor =  isThirdPartyVerification
                 ? '#93BEBA'
                 : this.props.bankStyle.VERIFIED_HEADER_COLOR

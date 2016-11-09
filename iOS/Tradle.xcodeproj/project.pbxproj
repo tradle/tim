@@ -1304,7 +1304,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = ../config/dev/fabric.sh;
+			shellScript = "if [ \"$CONFIGURATION\" == \"Release\" ]; then\n  ../config/prod/fabric.sh\nfi";
 		};
 		7348C39E1C41C02400B9CDF5 /* Fiber / Crashlytics */ = {
 			isa = PBXShellScriptBuildPhase;
