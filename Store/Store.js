@@ -565,7 +565,8 @@ var Store = Reflux.createStore({
       let r = this._getItem(p)
       if (r._context) {
         let c = this._getItem(r._context)
-        if (c._readOnly) {
+        // context could be empty if ForgetMe was requested for the provider where form was originally created
+        if (c  &&  c._readOnly) {
           this.addMessagesToChat(utils.getId(r._context), r, true)
           continue
         }
@@ -688,7 +689,9 @@ var Store = Reflux.createStore({
           if (pModel.properties.photos) {
             let items = r[p]
             items.forEach((ir) => {
-              let itemPhotos = this._getItem(utils.getId(ir)).photos
+              let irRes = this._getItem(utils.getId(ir))
+              // HACK - bad forgetMe
+              let itemPhotos = irRes  && irRes.photos
               if (itemPhotos)
                 ir.photo = itemPhotos[0].url
             })
@@ -1801,7 +1804,8 @@ var Store = Reflux.createStore({
     // Check if this is a shared context
     if (r._context) {
       let c = this._getItem(r._context)
-      if (c._readOnly)
+      // context could be empty if ForgetMe was requested for the provider where form was originally created
+      if (c  &&  c._readOnly)
         id = utils.getId(r._context)
     }
     let messages = chatMessages[id]
@@ -1821,8 +1825,11 @@ var Store = Reflux.createStore({
           if (messages[i].id === rid)
             idx = i
 
-        if (idx !== -1)
+        if (idx !== -1) {
+          if (r.time === list[rId].value.time)
+            return
           messages.splice(idx, 1)
+        }
       }
     }
     else {
@@ -2384,7 +2391,8 @@ var Store = Reflux.createStore({
           returnVal[ROOT_HASH] = returnVal[NONCE]
         else {
           if (isForm) {
-            let prevRes = self._getItem(returnVal[TYPE] + '_' + returnVal[ROOT_HASH] + '_' + returnVal[CUR_HASH])
+            let formId = utils.getId(returnVal)
+            let prevRes = self._getItem(formId)
             if (utils.compare(returnVal, prevRes)) {
               self.trigger({action: 'noChanges'})
               return
@@ -3102,6 +3110,15 @@ var Store = Reflux.createStore({
     if (isOrg) {
       // cloning orgs to re-render the org list with the correct number of forms
       let retOrgs = []
+      result = result.filter((r) => {
+        let orgId = utils.getId(r)
+        if (!SERVICE_PROVIDERS)
+          return false
+        let set =  SERVICE_PROVIDERS.filter((rr) => {
+          return rr.org === orgId
+        })
+        return set.length ? true : false
+      })
       result.forEach((r) => {
         let oId = utils.getId(r)
         let rr = {}
@@ -3604,14 +3621,15 @@ var Store = Reflux.createStore({
     // Allow sharing only the last version of the resource
     function addAndCheckShareable(verification) {
       let r = verification.document
-      // Allow sharing only of resources that were filled out by me
-      if (utils.getId(r.from) !== utils.getId(me))
-        return
       let docType = r[TYPE]
+      let isMyProduct = utils.getModel(docType).value.subClassOf === MY_PRODUCT
+      // Allow sharing only of resources that were filled out by me
+      if (!isMyProduct  &&  utils.getId(r.from) !== utils.getId(me))
+        return
       var v = shareableResources[docType];
       if (!v)
         shareableResources[docType] = [];
-      else if (shareableResourcesRootToR[r[ROOT_HASH]]) {
+      else if (verification.from  &&   shareableResourcesRootToR[r[ROOT_HASH]]) {
         let arr = shareableResources[r[TYPE]]
         let vFromId = utils.getId(verification.from)
         for (let i=0; i<arr.length; i++) {
@@ -3627,7 +3645,7 @@ var Store = Reflux.createStore({
         }
       }
       // Check that this is not the resource that was send to me as to an employee
-      if (utils.getId(r.to) !== meId) {
+      if (utils.getId(r.to) !== meId  ||  isMyProduct) {
         shareableResources[docType].push(verification)
         shareableResourcesRootToR[r[ROOT_HASH]] = r
       }
@@ -4389,7 +4407,7 @@ var Store = Reflux.createStore({
               return self.putInDb(wrapper)
             })
             .catch(function (err) {
-              console.error('unable to get message for object', wrapper)
+              console.error('unable to get message for object', wrapper)
               debugger
             })
         }
@@ -4410,9 +4428,9 @@ var Store = Reflux.createStore({
             const match = messages.filter(m => m.author === authorInfo.permalink)[0]
             // if (!match) throw new Error('unable to get message for object')
             if (!match) {
-              console.error('unable to get message for object', wrapper)
-              throw new Error('unable to get message for object')
-            }
+              console.error('unable to get message for object', wrapper)
+              throw new Error('unable to get message for object')
+            }
             return match
           })
         }
@@ -4438,9 +4456,9 @@ var Store = Reflux.createStore({
       meDriver.on('sent', function (msg) {
         const obj = utils.toOldStyleWrapper(msg)
         var model = self.getModel(obj[TYPE]).value
-        var isForm = model.subClassOf === FORM
+        var addCurHash = model.subClassOf === FORM || model.subClassOf === MY_PRODUCT
         // if (isForm  ||  model.id === PRODUCT_APPLICATION) {
-          let key = obj[TYPE] + '_' + obj[ROOT_HASH] + (isForm ? '_' +  obj[CUR_HASH] : '')
+          let key = obj[TYPE] + '_' + obj[ROOT_HASH] + (addCurHash ? '_' +  obj[CUR_HASH] : '')
           var r = list[key]
           if (r) {
             r = r.value
