@@ -50,7 +50,7 @@ var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
-var Keychain = !utils.isWeb() && require('../utils/keychain')
+var Keychain = null //!utils.isWeb() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('q-level');
 var asyncstorageDown = require('asyncstorage-down')
@@ -3655,7 +3655,6 @@ var Store = Reflux.createStore({
     return crypto.randomBytes(32).toString('hex')
   },
   _putResourceInDB(params) {
-    var self = this;
     var modelName = params.type
     var value = params.resource
     var dhtKey = params.roothash
@@ -3732,7 +3731,7 @@ var Store = Reflux.createStore({
       }
 
       if (props['to']  &&  props['from'])
-        self.addLastMessage(value, batch)
+        this.addLastMessage(value, batch)
     }
     var iKey = utils.getId(value) //modelName + '_' + value[ROOT_HASH];
     batch.push({type: 'put', key: iKey, value: value});
@@ -3750,32 +3749,32 @@ var Store = Reflux.createStore({
     let meId = utils.getId(me)
 
     db.batch(batch)
-    .then(function() {
+    .then(() => {
       return db.get(iKey)
     })
-    .then(function(value) {
-      self._setItem(iKey, value)
+    .then((value) => {
+      this._setItem(iKey, value)
       if (isMessage) {
         let toId = utils.getId(value.to)
         if (toId === meId)
           toId = utils.getId(value.from)
 
-        let org = self._getItem(toId).organization
-        self.addMessagesToChat(utils.getId(org), value)
+        let org = this._getItem(toId).organization
+        this.addMessagesToChat(utils.getId(org), value)
       }
       if (mid)
-        self._setItem(MY_IDENTITIES, mid)
+        this._setItem(MY_IDENTITIES, mid)
       else if (!isNew  &&  iKey === meId) {
         if (me.language || value.language) {
           if (value.language) {
             if (!me.language  ||  (utils.getId(me.language) !== utils.getId(value.language)))
-              newLanguage = self._getItem(utils.getId(value.language))
+              newLanguage = this._getItem(utils.getId(value.language))
           }
         }
 
         Object.assign(me, value)
         // extend(true, me, value)
-        self.setMe(me)
+        this.setMe(me)
         if (newLanguage) {
           let lang = this._getItem(utils.getId(me.language))
           value.languageCode = lang.code
@@ -3783,33 +3782,33 @@ var Store = Reflux.createStore({
 
           me.language = lang
           me.languageCode = lang.code
-          self.setMe(me)
+          this.setMe(me)
           var urls = []
           if (SERVICE_PROVIDERS) {
             SERVICE_PROVIDERS.forEach((sp) => {
               if (urls.indexOf(sp.url) === -1)
                 urls.push(sp.url)
             })
-            return self.getInfo(urls)
+            return this.getInfo(urls)
           }
         }
       }
     })
-    .then(function() {
+    .then(() => {
       var  params = {action: newLanguage ? 'languageChange' : 'addItem', resource: value};
       // registration or profile editing
       if (!noTrigger) {
-        self.trigger(params);
+        this.trigger(params);
       }
       if (model.subClassOf === FORM) {
-        let mlist = self.searchMessages({modelName: FORM})
-        let olist = self.searchNotMessages({modelName: ORGANIZATION})
-        self.trigger({action: 'list', modelName: ORGANIZATION, list: olist, forceUpdate: true})
+        let mlist = this.searchMessages({modelName: FORM})
+        let olist = this.searchNotMessages({modelName: ORGANIZATION})
+        this.trigger({action: 'list', modelName: ORGANIZATION, list: olist, forceUpdate: true})
       }
     })
-    .catch(function(err) {
+    .catch((err) => {
       if (!noTrigger) {
-        self.trigger({action: 'addItem', error: err.message, resource: value})
+        this.trigger({action: 'addItem', error: err.message, resource: value})
       }
       err = err;
     });
