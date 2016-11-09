@@ -26,6 +26,7 @@ const YEAR = 3600 * 1000 * 24 * 365
 const DAY  = 3600 * 1000 * 24
 const HOUR = 3600 * 1000
 const MINUTE = 60 * 1000
+const FOCUSED_LABEL_COLOR = '#139459'
 
 var cnt = 0;
 var propTypesMap = {
@@ -547,19 +548,19 @@ var NewResourceMixin = {
       if (maxChars < label.length)
         lStyle = [lStyle, {marginTop: 0}]
     }
+    let lcolor = this.getLabelAndBorderColor(params.prop.name)
     if (this.state.isRegistration)
-      lStyle = [lStyle, {color: '#eeeeee'}]
-
+      lStyle = [lStyle, {color: lcolor}]
     return (
       <View style={{flex: 5, paddingBottom: this.hasError(params.errors, params.prop.name) ? 10 : Platform.OS === 'ios' ? 10 : 7}}>
         <FloatLabel
-          labelStyle={lStyle}
+          labelStyle={[lStyle, {color: lcolor}]}
           autoCorrect={false}
           multiline={Platform.OS === 'android' ? true : false}
           autoCapitalize={this.state.isRegistration  ||  (params.prop.name !== 'url' &&  (!params.prop.keyboard || params.prop.keyboard !== 'email-address')) ? 'sentences' : 'none'}
           onFocus={this.inputFocused.bind(this, params.prop.name)}
           inputStyle={this.state.isRegistration ? styles.regInput : styles.textInput}
-          style={styles.formInput}
+          style={[styles.formInput, {borderBottomColor: lcolor}]}
           value={params.value}
           keyboardShouldPersistTaps={true}
           keyboardType={params.keyboard || 'default'}
@@ -641,9 +642,11 @@ var NewResourceMixin = {
     let resource = this.state.resource
     let label, style, propLabel
     let hasValue = resource && resource[prop.name]
+
+    let lcolor = this.getLabelAndBorderColor(prop.name)
     if (resource && resource[prop.name]) {
       label = resource[prop.name].title
-      propLabel = <Text style={[styles.dateLabel, {color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}]}>{params.label}</Text>
+      propLabel = <Text style={[styles.dateLabel, {color: lcolor}]}>{params.label}</Text>
     }
     else {
       label = params.label
@@ -695,6 +698,9 @@ var NewResourceMixin = {
           />
           {this.getErrorView(params)}
          </View>
+  },
+  getLabelAndBorderColor(prop) {
+    return this.state.isRegistration ? '#eeeeee' : this.state.inFocus === prop ? FOCUSED_LABEL_COLOR : '#b1b1b1'
   },
   getDateRange(dateStr) {
     if (!dateStr)
@@ -762,6 +768,7 @@ var NewResourceMixin = {
     this.floatingProps[prop.name] = date
     this.setState({
       resource: r,
+      inFocus: prop.name
     });
 
    },
@@ -777,7 +784,10 @@ var NewResourceMixin = {
          this.props.model            &&
          Object.keys(this.props.model.properties).length > 5) {
       utils.scrollComponentIntoView(this, this.refs.form.getComponent(refName))
+      this.setState({inFocus: refName})
     }
+    else if (this.state.inFocus !== refName)
+      this.setState({inFocus: refName})
   },
   // scrollDown (){
   //   if (this.refs  &&  this.refs.scrollView) {
@@ -790,14 +800,17 @@ var NewResourceMixin = {
     var textStyle = styles.labelDirty
     var resource = /*this.props.resource ||*/ this.state.resource
     var label, style
-    var propLabel, propName
+    var propLabel
     var isItem = this.props.metadata != null
     var prop = this.props.model
              ? this.props.model.properties[params.prop]
              : this.props.metadata.items.properties[params.prop]
 
     let isRequired = this.props.model && this.props.model.required  &&  this.props.model.required.indexOf(params.prop) !== -1
-    let color = {color: this.state.isRegistration ? '#eeeeee' : '#B1B1B1'}
+
+    let lcolor = this.getLabelAndBorderColor(params.prop)
+
+    let color = {color: lcolor}
     if (resource && resource[params.prop]) {
       let rModel
       var m = utils.getId(resource[params.prop]).split('_')[0]
@@ -833,7 +846,7 @@ var NewResourceMixin = {
         <TouchableHighlight underlayColor='transparent' onPress={
           isVideo ? this.showCamera.bind(this, params) : this.chooser.bind(this, prop, params.prop)
         }>
-          <View  style={[styles.chooserContainer, {flexDirection: 'row'}]}>
+          <View  style={[styles.chooserContainer, {flexDirection: 'row', borderBottomColor: lcolor}]}>
             {this.state[prop.name + '_photo']
              ? <View style={{flexDirection: 'row'}}>
                  <Image source={{uri: this.state[prop.name + '_photo'].url}} style={styles.thumb} />
@@ -957,6 +970,7 @@ var NewResourceMixin = {
 
     if (value.photos)
       state[propName + '_photo'] = value.photos[0]
+    state.inFocus = propName
     this.setState(state);
 
     var r = {}
