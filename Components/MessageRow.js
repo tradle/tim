@@ -472,8 +472,10 @@ class MessageRow extends Component {
 
     // Prefill for testing and demoing
     var isPrefilled = __DEV__ && model.id in formDefaults
-    if (isPrefilled)
+    if (isPrefilled) {
       extend(true, resource, formDefaults[model.id])
+      console.log(JSON.stringify(resource, 0, 2))
+    }
 
     this.props.navigator.push({
       id: 4,
@@ -856,11 +858,12 @@ class MessageRow extends Component {
     else if (isMyMessage)
       link = <Text style={[styles.resourceTitle, color]}>{translate(form)}</Text>
     else {
+      let notLink = resource.documentCreated  ||  isReadOnly  ||  form.subClassOf === MY_PRODUCT
       let view = <View style={styles.rowContainer}>
-                   <Text style={[styles.resourceTitle, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(form)}</Text>
+                   <Text style={[styles.resourceTitle, {color: resource.documentCreated  ||  notLink ?  '#757575' : LINK_COLOR}]}>{translate(form)}</Text>
                    <Icon style={[{marginTop: 2}, resource.documentCreated  ? styles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
                  </View>
-      if (resource.documentCreated  ||  isReadOnly)
+      if (notLink)
         link = view
       else
         link =  <TouchableHighlight underlayColor='transparent' onPress={() => {
