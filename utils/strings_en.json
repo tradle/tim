@@ -11,6 +11,7 @@
     "optional": "optional",
     "thisFieldIsRequired": "This field is required",
 
+    "unlockDevice": "unlock your device to proceed",
     "pleaseDrawPassword": "Draw your pattern",
     "drawYourPassword": "Draw your pattern",
     "drawYourPasswordAgain": "Draw your pattern again",
