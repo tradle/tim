@@ -1826,7 +1826,7 @@ var Store = Reflux.createStore({
             idx = i
 
         if (idx !== -1) {
-          if (r.time === list[rId].value.time)
+          if (r.time === list[rid].value.time)
             return
           messages.splice(idx, 1)
         }
