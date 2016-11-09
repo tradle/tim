@@ -123,6 +123,7 @@ class NewResource extends Component {
            this.state.itemsCount !== nextState.itemsCount    ||
            this.state.isLoadingVideo !== nextState.isLoadingVideo  ||
            this.state.keyboardSpace !== nextState.keyboardSpace    ||
+           this.state.inFocus !== nextState.inFocus                ||
            // this.state.termsAccepted !== nextState.termsAccepted    ||
           !equal(this.state.resource, nextState.resource)
 
