@@ -314,11 +314,11 @@ var Store = Reflux.createStore({
     .then(function(value) {
       me = value
       if (me.isAuthenticated) {
-        if (Date.now() - me.dateAuthenticated > AUTHENTICATION_TIMEOUT) {
-          delete me.isAuthenticated
-          delete me.dateAuthenticated
-          db.put(utils.getId(me), me)
-        }
+        // if (Date.now() - me.dateAuthenticated > AUTHENTICATION_TIMEOUT) {
+        delete me.isAuthenticated
+        delete me.dateAuthenticated
+        db.put(utils.getId(me), me)
+        // }
       }
       // HACK for the case if employee removed
       if (me.isEmployee  &&  !me.organization) {
@@ -3501,6 +3501,7 @@ var Store = Reflux.createStore({
     }
     var shareableResources = {};
     var shareableResourcesRootToR = {}
+    var shareableResourcesRootToOrgs = {}
 
     var isOrg = to  &&  to[TYPE] === ORGANIZATION
     var org = isOrg ? to : (to.organization ? this._getItem(utils.getId(to.organization)) : null)
@@ -3617,7 +3618,7 @@ var Store = Reflux.createStore({
       })
     })
 
-    return shareableResources
+    return {verifications: shareableResources, providers: shareableResourcesRootToOrgs}
     // Allow sharing only the last version of the resource
     function addAndCheckShareable(verification) {
       let r = verification.document
@@ -3635,12 +3636,14 @@ var Store = Reflux.createStore({
         for (let i=0; i<arr.length; i++) {
           let rr = arr[i].document
           if (r[ROOT_HASH] === rr[ROOT_HASH]) {
-            if (utils.getId(arr[i].from) === vFromId) {
-              if (r.time < rr.time)
+            // if (utils.getId(arr[i].from) === vFromId) {
+              if (r.time < rr.time) {
+                addSharedWithProvider(verification)
                 return
+              }
               else
                 arr.splice(i, 1)
-            }
+            // }
           }
         }
       }
@@ -3648,7 +3651,17 @@ var Store = Reflux.createStore({
       if (utils.getId(r.to) !== meId  ||  isMyProduct) {
         shareableResources[docType].push(verification)
         shareableResourcesRootToR[r[ROOT_HASH]] = r
+        addSharedWithProvider(verification)
       }
+    }
+    function addSharedWithProvider(verification) {
+      let hash = verification.document[ROOT_HASH]
+      let o = shareableResourcesRootToOrgs[hash]
+      if (!o) {
+        o = []
+        shareableResourcesRootToOrgs[hash] = o
+      }
+      o.push(verification.organization)
     }
   },
   getNonce() {
