@@ -167,31 +167,38 @@ var RowMixin = {
         return true
     }
   },
-  formatDocument(model, verification, onPress, isAccordion) {
-    var resource = verification.document;
+  formatDocument(params) {
+    let model = params.model
+    let verification = params.verification
+    let onPress = params.onPress
+    let isAccordion = params.isAccordion
+    let providers = params.providers  // providers the document was shared with
+
+    var document = verification.document
+
     isAccordion = false
 
-    var docModel = utils.getModel(resource[constants.TYPE]).value;
+    var docModel = utils.getModel(document[constants.TYPE]).value;
     var isMyProduct = docModel.subClassOf === MY_PRODUCT
     var docModelTitle = docModel.title;
     var idx = docModelTitle.indexOf('Verification');
     var docTitle = idx === -1 ? docModelTitle : docModelTitle.substring(0, idx);
 
     var msg;
-    if (resource.message  &&  docModel.subClassOf !== FORM)
-      msg = <View><Text style={styles.description}>{resource.message}</Text></View>
+    if (document.message  &&  docModel.subClassOf !== FORM)
+      msg = <View><Text style={styles.description}>{document.message}</Text></View>
     // else if (!onPress) {
     //   msg = <View><Text style={styles.description}>{translate('seeTheForm')}</Text></View>
     //   // var rows = [];
-    //   // this.formatDocument1(model, resource, rows);
+    //   // this.formatDocument1(model, document, rows);
     //   // msg = <View>{rows}</View>
     // }
     else
       msg = <View/>
 
-    var hasPhotos = resource  &&  resource.photos  &&  resource.photos.length
+    var hasPhotos = document  &&  document.photos  &&  document.photos.length
     var photo = hasPhotos
-              ? <Image source={{uri: utils.getImageUri(resource.photos[0].url)}}  style={styles.cellImage} />
+              ? <Image source={{uri: utils.getImageUri(document.photos[0].url)}}  style={styles.cellImage} />
               : <View />;
     var headerStyle = {paddingTop: 5, alignSelf: 'center'}
     var header =  <View style={headerStyle}>
@@ -211,7 +218,7 @@ var RowMixin = {
                  {header}
                </View>
    if (!isAccordion)
-      header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, resource, verification)}>
+      header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, document, verification)}>
                  {header}
                </TouchableHighlight>
 
@@ -233,8 +240,20 @@ var RowMixin = {
       if (isMyProduct)
         verifiedBy = translate('issuedBy', verification.organization.title)
       // Not verified Form - still shareable
-      else if (verification[constants.ROOT_HASH])
-        verifiedBy = translate('verifiedBy', verification.organization.title)
+      else if (verification[constants.ROOT_HASH]) {
+        let orgs
+        if (providers) {
+          providers.forEach((p) => {
+            if (!orgs)
+              orgs = p.title
+            else
+              orgs += ', ' + p.title
+          })
+        }
+        else
+          orgs = verification.organization.title
+        verifiedBy = translate('verifiedBy', orgs)
+      }
       else
         verifiedBy = translate('sentTo', verification.organization.title)
 
@@ -263,7 +282,7 @@ var RowMixin = {
       else if (this.props.resource.documentCreated) {
         orgRow = <View style={styles.shareView}>
                    {shareView}
-                  <TouchableHighlight onPress={this.props.onSelect.bind(this, resource, verification)} underlayColor='transparent'>
+                  <TouchableHighlight onPress={this.props.onSelect.bind(this, document, verification)} underlayColor='transparent'>
                     {orgView}
                   </TouchableHighlight>
                 </View>
@@ -281,14 +300,14 @@ var RowMixin = {
                           )}>
                     {shareView}
                    </TouchableHighlight>
-                   <TouchableHighlight onPress={this.props.onSelect.bind(this, resource, verification)} underlayColor='transparent'>
+                   <TouchableHighlight onPress={this.props.onSelect.bind(this, document, verification)} underlayColor='transparent'>
                      {orgView}
                    </TouchableHighlight>
                 </View>
       }
     }
     let content = <View style={{flex:1}}>
-                     <TouchableHighlight onPress={this.props.onSelect.bind(this, resource, verification)} underlayColor='transparent'>
+                     <TouchableHighlight onPress={this.props.onSelect.bind(this, document, verification)} underlayColor='transparent'>
                        {msg}
                      </TouchableHighlight>
                      {orgRow}
