@@ -72,6 +72,7 @@ class MessageList extends Component {
   };
   constructor(props) {
     super(props);
+    currentMessageTime = null;
     this.state = {
       isLoading: true,
       selectedAssets: {},
@@ -140,10 +141,6 @@ class MessageList extends Component {
         limit: this.state.list ? this.state.list.length + 1 : LIMIT
       }
 
-      // if (params.sendStatus) {
-      //   this.state.sendStatus = params.sendStatus
-      //   this.state.sendResource = params.resource
-      // }
       if (params.resource._sendStatus) {
         this.state.sendStatus = params.resource._sendStatus
         this.state.sendResource = params.resource
@@ -160,6 +157,8 @@ class MessageList extends Component {
       return
     }
     if (params.action === 'addMessage') {
+      this.state.sendStatus = params.resource._sendStatus
+      this.state.sendResource = params.resource
       Actions.messageList({
         modelName: this.props.modelName,
         to: this.props.resource,
@@ -443,7 +442,7 @@ class MessageList extends Component {
   }
 
   render() {
-    currentMessageTime = null;
+    // currentMessageTime = null;
     var content;
 
     var model = utils.getModel(this.props.modelName).value;
