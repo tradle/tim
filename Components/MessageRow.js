@@ -396,13 +396,16 @@ class MessageRow extends Component {
     var vtt = [];
     var cnt = 0;
     var chatOrg = this.props.to[constants.TYPE] === constants.TYPES.ORGANIZATION  &&  utils.getId(this.props.to)
-    for (var t in  this.props.shareableResources) {
+    let shareableResources = this.props.shareableResources.verifications
+    let providers = this.props.shareableResources.providers
+    for (var t in  shareableResources) {
       if (t === formModel.id) {
-        var ver = this.props.shareableResources[t];
+        var ver = shareableResources[t];
         var r = ver[0]
         var totalShareables = ver.length
         ver.forEach((r) => {
-          if (entries  &&  (entries.indexOf(utils.getId(r.document)) !== -1  ||  entries.indexOf(r.document[constants.NONCE]) !== -1))
+          let document = r.document
+          if (entries  &&  (entries.indexOf(utils.getId(document)) !== -1  ||  entries.indexOf(r.document[constants.NONCE]) !== -1))
             return
           // if (chatOrg  &&  utils.getId(r.organization) === chatOrg) {
           //   totalShareables--
@@ -410,7 +413,12 @@ class MessageRow extends Component {
           // }
           // if (!cnt) {x
             var vModel = utils.getModel(r[constants.TYPE]);
-            var doc = this.formatDocument(formModel, r, null, totalShareables > 1);
+            var doc = this.formatDocument({
+              model: formModel,
+              verification: r,
+              isAccordion: totalShareables > 1,
+              providers: providers  &&  providers[document[constants.ROOT_HASH]]
+            })
             if (cnt) {
               doc = <View key={this.getNextKey()}>
                       <View style={{height: 1, backgroundColor: '#dddddd'}} />
@@ -479,6 +487,7 @@ class MessageRow extends Component {
     var isPrefilled = ENV.prefillWithTestData && model.id in formDefaults
     if (isPrefilled) {
       extend(true, resource, formDefaults[model.id])
+      // console.log(JSON.stringify(resource, 0, 2))
     }
 
     this.props.navigator.push({

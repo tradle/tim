@@ -87,7 +87,12 @@ class VerificationMessageRow extends Component {
                       <Text style={styles.verificationHeaderText}>{verifiedBy}</Text>
                     </View>
                     <View>
-                      {this.formatDocument(msgModel, resource, this.verify.bind(this), isThirdPartyVerification)}
+                      {this.formatDocument({
+                        model: msgModel,
+                        verification: resource,
+                        onPress: this.verify.bind(this),
+                        isAccordion: isThirdPartyVerification
+                      })}
                     </View>
                   </View>
 

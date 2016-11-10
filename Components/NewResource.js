@@ -554,7 +554,8 @@ class NewResource extends Component {
     this.setState({
       resource: resource,
       itemsCount: itemsCount,
-      prop: propName
+      prop: propName,
+      inFocus: propName
     });
   }
   onNewPressed(bl) {
@@ -578,8 +579,9 @@ class NewResource extends Component {
     //   });
     //   return;
     // }
+
     var resource = this.addFormValues();
-    this.setState({resource: resource, err: ''});
+    this.setState({resource: resource, err: '', inFocus: bl.name});
     // if (bl.name === 'photos') {
     //   this.showChoice(bl);
     //   return;
@@ -925,6 +927,7 @@ class NewResource extends Component {
     let itemsArray = null
     var count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
     let isPhoto = bl.name === 'photos'
+    let lcolor = this.getLabelAndBorderColor(bl.name)
 
     if (count) {
       let val = <View>{this.renderItems(resource[bl.name], bl, this.cancelItem.bind(this))}</View>
@@ -932,7 +935,7 @@ class NewResource extends Component {
       var separator = <View style={styles.separator}></View>
       let cstyle = count ? styles.activePropTitle : styles.noItemsText
       itemsArray = <View>
-                     <Text style={cstyle}>{translate(bl, blmodel)}</Text>
+                     <Text style={[cstyle, {color: lcolor}]}>{translate(bl, blmodel)}</Text>
                      {val}
                    </View>
 
@@ -949,7 +952,6 @@ class NewResource extends Component {
                   }
                 </View>
     }
-    var title = translate(bl, blmodel) //.title || utils.makeLabel(p)
     var err = this.state.missedRequiredOrErrorValue
             ? this.state.missedRequiredOrErrorValue[bl.name]
             : null
@@ -1020,7 +1022,7 @@ class NewResource extends Component {
 
     return (
       <View key={this.getNextKey()}>
-        <View style={[istyle, {marginHorizontal: 10}]} ref={bl.name}>
+        <View style={[istyle, {marginHorizontal: 10, borderBottomColor: lcolor}]} ref={bl.name}>
           <View style={styles.items}>
             {actionableItem}
             {actionableCounter}
@@ -1037,6 +1039,7 @@ class NewResource extends Component {
     let blmodel = meta
     var counter, count = 0
     let itemsArray = null
+    let lcolor = this.getLabelAndBorderColor(bl.name)
     var count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
     if (count) {
       var items = []
@@ -1049,7 +1052,7 @@ class NewResource extends Component {
       }
       itemsArray =
         <View style={[styles.photoStrip, count ? {marginTop: -25} : {marginTop: 0}]}>
-          <Text style={styles.activePropTitle}>{translate(bl, blmodel)}</Text>
+          <Text style={[styles.activePropTitle, {color: lcolor}]}>{translate(bl, blmodel)}</Text>
           <View style={styles.photoStripItems}>{items}</View>
         </View>
       counter =
@@ -1088,11 +1091,11 @@ class NewResource extends Component {
                            {itemsArray}
                          </ImageInput>
 
-    let istyle = count ? styles.photoButton : styles.itemButton
+    let istyle = [count ? styles.photoButton : styles.itemButton, {marginHorizontal: 10, borderBottomColor: lcolor}]
 
     return (
       <View key={this.getNextKey()}>
-        <View style={[istyle, {marginHorizontal: 10}]} ref={bl.name}>
+        <View style={istyle} ref={bl.name}>
           <View style={styles.items}>
             {actionableItem}
             <ImageInput
@@ -1205,7 +1208,7 @@ var styles = StyleSheet.create({
     marginLeft: 10,
     // marginLeft: 10,
     borderColor: '#ffffff',
-    borderBottomColor: '#cccccc',
+    borderBottomColor: '#b1b1b1',
     borderBottomWidth: 1,
     paddingBottom: 10,
     justifyContent: 'flex-end',
@@ -1213,7 +1216,7 @@ var styles = StyleSheet.create({
   photoButton: {
     marginLeft: 10,
     borderColor: '#ffffff',
-    borderBottomColor: '#cccccc',
+    borderBottomColor: '#b1b1b1',
     borderBottomWidth: 1,
     // paddingBottom: 5,
   },

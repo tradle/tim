@@ -50,7 +50,7 @@ var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
-var Keychain = !utils.isWeb() && require('../utils/keychain')
+var Keychain = null //!utils.isWeb() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('q-level');
 var leveldown = require('./leveldown')
@@ -301,11 +301,11 @@ var Store = Reflux.createStore({
     .then(function(value) {
       me = value
       if (me.isAuthenticated) {
-        if (Date.now() - me.dateAuthenticated > AUTHENTICATION_TIMEOUT) {
-          delete me.isAuthenticated
-          delete me.dateAuthenticated
-          db.put(utils.getId(me), me)
-        }
+        // if (Date.now() - me.dateAuthenticated > AUTHENTICATION_TIMEOUT) {
+        delete me.isAuthenticated
+        delete me.dateAuthenticated
+        db.put(utils.getId(me), me)
+        // }
       }
       // HACK for the case if employee removed
       if (me.isEmployee  &&  !me.organization) {
@@ -548,6 +548,8 @@ var Store = Reflux.createStore({
   },
   initChats() {
     let meId = utils.getId(me)
+    let meOrgId = me.organization ? utils.getId(me.organization) : null
+
     for (var p in list) {
       let r = this._getItem(p)
       if (r._context) {
@@ -562,24 +564,30 @@ var Store = Reflux.createStore({
       let m = this._getItem(this.getModel(r[TYPE]))
       if (!m.interfaces  ||  m.interfaces.indexOf(MESSAGE) === -1)
         continue
+
+      let addedToProviders = []
       if (r._sharedWith) {
         r._sharedWith.forEach((shareInfo) => {
-          if (shareInfo.bankRepresentative === meId)
-            this.addMessagesToChat(utils.getId(r.to), r, true, shareInfo.timeShared)
-          else  {
+          // if (shareInfo.bankRepresentative === meId)
+          //   this.addMessagesToChat(utils.getId(r.to), r, true, shareInfo.timeShared)
+          // else  {
             let rep = this._getItem(shareInfo.bankRepresentative)
             let orgId = utils.getId(rep.organization)
-            this.addMessagesToChat(orgId, r, true, shareInfo.timeShared)
-          }
+            if (meOrgId !== orgId) {
+              this.addMessagesToChat(orgId, r, true, shareInfo.timeShared)
+              addedToProviders.push(orgId)
+            }
+          // }
         })
       }
-      else if (m.id === VERIFICATION  &&  meId === utils.getId(r.from))
+      if (m.id === VERIFICATION  &&  meId === utils.getId(r.from))
         this.addMessagesToChat(utils.getId(r.to), r, true)
       else {
         let fromId = utils.getId(r.from)
         let rep = this._getItem(meId === fromId ? utils.getId(r.to) : fromId)
         let orgId = rep.organization ? utils.getId(rep.organization) : utils.getId(rep)
-        this.addMessagesToChat(orgId, r, true)
+        if (addedToProviders.indexOf(orgId) === -1)
+          this.addMessagesToChat(orgId, r, true)
       }
     }
     for (let id in chatMessages) {
@@ -1905,7 +1913,11 @@ var Store = Reflux.createStore({
                     //   object: toChain,
                     //   to: { fingerprint: this.getFingerprint(list[key].value) }
                     // })
-    let isReadOnly = r._context  &&  this._getItem(utils.getId(r._context))._readOnly
+    let isReadOnly
+    if (r._context) {
+      let c = this._getItem(utils.getId(r._context));
+      isReadOnly = c  &&  c._readOnly
+    }
     var newVerification
     return promise
     .then((data) => {
@@ -3631,6 +3643,7 @@ var Store = Reflux.createStore({
     }
     var shareableResources = {};
     var shareableResourcesRootToR = {}
+    var shareableResourcesRootToOrgs = {}
 
     var isOrg = to  &&  to[TYPE] === ORGANIZATION
     var org = isOrg ? to : (to.organization ? this._getItem(utils.getId(to.organization)) : null)
@@ -3747,7 +3760,7 @@ var Store = Reflux.createStore({
       })
     })
 
-    return shareableResources
+    return {verifications: shareableResources, providers: shareableResourcesRootToOrgs}
     // Allow sharing only the last version of the resource
     function addAndCheckShareable(verification) {
       let r = verification.document
@@ -3765,12 +3778,14 @@ var Store = Reflux.createStore({
         for (let i=0; i<arr.length; i++) {
           let rr = arr[i].document
           if (r[ROOT_HASH] === rr[ROOT_HASH]) {
-            if (utils.getId(arr[i].from) === vFromId) {
-              if (r.time < rr.time)
+            // if (utils.getId(arr[i].from) === vFromId) {
+              if (r.time < rr.time) {
+                addSharedWithProvider(verification)
                 return
+              }
               else
                 arr.splice(i, 1)
-            }
+            // }
           }
         }
       }
@@ -3778,14 +3793,23 @@ var Store = Reflux.createStore({
       if (utils.getId(r.to) !== meId  ||  isMyProduct) {
         shareableResources[docType].push(verification)
         shareableResourcesRootToR[r[ROOT_HASH]] = r
+        addSharedWithProvider(verification)
       }
+    }
+    function addSharedWithProvider(verification) {
+      let hash = verification.document[ROOT_HASH]
+      let o = shareableResourcesRootToOrgs[hash]
+      if (!o) {
+        o = []
+        shareableResourcesRootToOrgs[hash] = o
+      }
+      o.push(verification.organization)
     }
   },
   getNonce() {
     return crypto.randomBytes(32).toString('hex')
   },
   _putResourceInDB(params) {
-    var self = this;
     var modelName = params.type
     var value = params.resource
     var dhtKey = params.roothash
@@ -3862,7 +3886,7 @@ var Store = Reflux.createStore({
       }
 
       if (props['to']  &&  props['from'])
-        self.addLastMessage(value, batch)
+        this.addLastMessage(value, batch)
     }
     var iKey = utils.getId(value) //modelName + '_' + value[ROOT_HASH];
     batch.push({type: 'put', key: iKey, value: value});
@@ -3880,32 +3904,32 @@ var Store = Reflux.createStore({
     let meId = utils.getId(me)
 
     db.batch(batch)
-    .then(function() {
+    .then(() => {
       return db.get(iKey)
     })
-    .then(function(value) {
-      self._setItem(iKey, value)
+    .then((value) => {
+      this._setItem(iKey, value)
       if (isMessage) {
         let toId = utils.getId(value.to)
         if (toId === meId)
           toId = utils.getId(value.from)
 
-        let org = self._getItem(toId).organization
-        self.addMessagesToChat(utils.getId(org), value)
+        let org = this._getItem(toId).organization
+        this.addMessagesToChat(utils.getId(org), value)
       }
       if (mid)
-        self._setItem(MY_IDENTITIES, mid)
+        this._setItem(MY_IDENTITIES, mid)
       else if (!isNew  &&  iKey === meId) {
         if (me.language || value.language) {
           if (value.language) {
             if (!me.language  ||  (utils.getId(me.language) !== utils.getId(value.language)))
-              newLanguage = self._getItem(utils.getId(value.language))
+              newLanguage = this._getItem(utils.getId(value.language))
           }
         }
 
         Object.assign(me, value)
         // extend(true, me, value)
-        self.setMe(me)
+        this.setMe(me)
         if (newLanguage) {
           let lang = this._getItem(utils.getId(me.language))
           value.languageCode = lang.code
@@ -3913,33 +3937,33 @@ var Store = Reflux.createStore({
 
           me.language = lang
           me.languageCode = lang.code
-          self.setMe(me)
+          this.setMe(me)
           var urls = []
           if (SERVICE_PROVIDERS) {
             SERVICE_PROVIDERS.forEach((sp) => {
               if (urls.indexOf(sp.url) === -1)
                 urls.push(sp.url)
             })
-            return self.getInfo(urls)
+            return this.getInfo(urls)
           }
         }
       }
     })
-    .then(function() {
+    .then(() => {
       var  params = {action: newLanguage ? 'languageChange' : 'addItem', resource: value};
       // registration or profile editing
       if (!noTrigger) {
-        self.trigger(params);
+        this.trigger(params);
       }
       if (model.subClassOf === FORM) {
-        let mlist = self.searchMessages({modelName: FORM})
-        let olist = self.searchNotMessages({modelName: ORGANIZATION})
-        self.trigger({action: 'list', modelName: ORGANIZATION, list: olist, forceUpdate: true})
+        let mlist = this.searchMessages({modelName: FORM})
+        let olist = this.searchNotMessages({modelName: ORGANIZATION})
+        this.trigger({action: 'list', modelName: ORGANIZATION, list: olist, forceUpdate: true})
       }
     })
-    .catch(function(err) {
+    .catch((err) => {
       if (!noTrigger) {
-        self.trigger({action: 'addItem', error: err.message, resource: value})
+        this.trigger({action: 'addItem', error: err.message, resource: value})
       }
       err = err;
     });
