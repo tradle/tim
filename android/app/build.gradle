@@ -163,6 +163,7 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-os')
     compile project(':react-native-local-auth')
     compile project(':react-native-ecc')
     compile project(':react-native-orientation')

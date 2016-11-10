@@ -58,13 +58,13 @@
     },
     "@tradle/keeper": {
       "version": "3.1.0",
-      "from": "@tradle/keeper@>=3.1.0 <4.0.0",
+      "from": "@tradle/keeper@latest",
       "resolved": "https://registry.npmjs.org/@tradle/keeper/-/keeper-3.1.0.tgz",
       "dependencies": {
         "levelup": {
-          "version": "1.3.2",
+          "version": "1.3.3",
           "from": "levelup@>=1.3.2 <2.0.0",
-          "resolved": "https://registry.npmjs.org/levelup/-/levelup-1.3.2.tgz"
+          "resolved": "https://registry.npmjs.org/levelup/-/levelup-1.3.3.tgz"
         }
       }
     },
@@ -981,10 +981,15 @@
       "resolved": "https://registry.npmjs.org/btoa/-/btoa-1.1.2.tgz"
     },
     "buffer": {
-      "version": "3.6.0",
-      "from": "buffer@>=3.6.0 <3.7.0",
-      "resolved": "https://registry.npmjs.org/buffer/-/buffer-3.6.0.tgz",
+      "version": "4.9.1",
+      "from": "buffer@>=4.0.0 <5.0.0",
+      "resolved": "https://registry.npmjs.org/buffer/-/buffer-4.9.1.tgz",
       "dependencies": {
+        "base64-js": {
+          "version": "1.2.0",
+          "from": "base64-js@>=1.0.2 <2.0.0",
+          "resolved": "https://registry.npmjs.org/base64-js/-/base64-js-1.2.0.tgz"
+        },
         "isarray": {
           "version": "1.0.0",
           "from": "isarray@>=1.0.0 <2.0.0",
@@ -2721,9 +2726,9 @@
       "resolved": "https://registry.npmjs.org/iconv-lite/-/iconv-lite-0.4.13.tgz"
     },
     "ieee754": {
-      "version": "1.1.6",
+      "version": "1.1.8",
       "from": "ieee754@>=1.1.4 <2.0.0",
-      "resolved": "https://registry.npmjs.org/ieee754/-/ieee754-1.1.6.tgz"
+      "resolved": "https://registry.npmjs.org/ieee754/-/ieee754-1.1.8.tgz"
     },
     "ignore": {
       "version": "3.1.5",
@@ -3230,9 +3235,9 @@
       "resolved": "https://registry.npmjs.org/level-codec/-/level-codec-6.1.0.tgz"
     },
     "level-encrypt": {
-      "version": "3.0.0",
+      "version": "3.1.0",
       "from": "level-encrypt@>=3.0.0 <4.0.0",
-      "resolved": "https://registry.npmjs.org/level-encrypt/-/level-encrypt-3.0.0.tgz"
+      "resolved": "https://registry.npmjs.org/level-encrypt/-/level-encrypt-3.1.0.tgz"
     },
     "level-errors": {
       "version": "1.0.4",
@@ -3676,8 +3681,8 @@
     },
     "merkle-tree-stream": {
       "version": "3.0.3",
-      "from": "mvayngrib/merkle-tree-stream#finalize",
-      "resolved": "git://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
+      "from": "git+https://github.com/mvayngrib/merkle-tree-stream.git#finalize",
+      "resolved": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
       "dependencies": {
         "isarray": {
           "version": "1.0.0",
@@ -4064,11 +4069,6 @@
           "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.1.5.tgz"
         }
       }
-    },
-    "os-browserify": {
-      "version": "0.1.2",
-      "from": "os-browserify@>=0.1.2 <0.2.0",
-      "resolved": "https://registry.npmjs.org/os-browserify/-/os-browserify-0.1.2.tgz"
     },
     "os-homedir": {
       "version": "1.0.1",
@@ -4529,8 +4529,8 @@
     },
     "react-native-camera": {
       "version": "0.3.8",
-      "from": "lwansbrough/react-native-camera#1747ec4b",
-      "resolved": "git://github.com/lwansbrough/react-native-camera.git#1747ec4b0a52472cf2e8ad95f2c3603595e28e13"
+      "from": "lwansbrough/react-native-camera#fb3b12b",
+      "resolved": "git://github.com/lwansbrough/react-native-camera.git#fb3b12b4f1a2ed8d1b20cc21a9b52117878b2c35"
     },
     "react-native-code-push": {
       "version": "1.15.0-beta",
@@ -4556,7 +4556,7 @@
     },
     "react-native-crypto": {
       "version": "2.0.1",
-      "from": "react-native-crypto@>=2.0.1 <3.0.0",
+      "from": "react-native-crypto@latest",
       "resolved": "https://registry.npmjs.org/react-native-crypto/-/react-native-crypto-2.0.1.tgz"
     },
     "react-native-datepicker": {
@@ -4570,9 +4570,9 @@
       "resolved": "https://registry.npmjs.org/react-native-device-info/-/react-native-device-info-0.9.5.tgz"
     },
     "react-native-ecc": {
-      "version": "1.3.0",
+      "version": "1.4.0",
       "from": "react-native-ecc@latest",
-      "resolved": "https://registry.npmjs.org/react-native-ecc/-/react-native-ecc-1.3.0.tgz"
+      "resolved": "https://registry.npmjs.org/react-native-ecc/-/react-native-ecc-1.4.0.tgz"
     },
     "react-native-env": {
       "version": "0.0.5",
@@ -4670,6 +4670,11 @@
       "version": "1.17.0",
       "from": "yamill/react-native-orientation#2782917",
       "resolved": "git://github.com/yamill/react-native-orientation.git#278291739e2b7c8ab208fdf404e4b139e24b4a3f"
+    },
+    "react-native-os": {
+      "version": "1.0.2",
+      "from": "react-native-os@latest",
+      "resolved": "https://registry.npmjs.org/react-native-os/-/react-native-os-1.0.2.tgz"
     },
     "react-native-prompt": {
       "version": "0.18.4",
