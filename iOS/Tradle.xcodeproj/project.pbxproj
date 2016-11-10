@@ -897,6 +897,7 @@
 					};
 					73261E121C4AB9FE00292FEE = {
 						DevelopmentTeam = 94V7783F74;
+						ProvisioningStyle = Manual;
 						SystemCapabilities = {
 							com.apple.Keychain = {
 								enabled = 1;
@@ -1599,8 +1600,10 @@
 					"\"$(SRCROOT)/Tradle\"",
 				);
 				OTHER_LDFLAGS = "-ObjC";
-				PRODUCT_BUNDLE_IDENTIFIER = io.tradle.dev;
+				PRODUCT_BUNDLE_IDENTIFIER = io.tradle.dev.tim;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "becd37ae-5ff5-4748-8b22-99a7f73e54b4";
+				PROVISIONING_PROFILE_SPECIFIER = "Tradle prov profile1";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -1643,6 +1646,8 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = io.tradle.dev.tim;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "becd37ae-5ff5-4748-8b22-99a7f73e54b4";
+				PROVISIONING_PROFILE_SPECIFIER = "Tradle prov profile1";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
