@@ -561,6 +561,8 @@ var Store = Reflux.createStore({
 
   initChats() {
     let meId = utils.getId(me)
+    let meOrgId = me.organization ? utils.getId(me.organization) : null
+
     for (var p in list) {
       let r = this._getItem(p)
       if (r._context) {
@@ -575,24 +577,30 @@ var Store = Reflux.createStore({
       let m = this._getItem(this.getModel(r[TYPE]))
       if (!m.interfaces  ||  m.interfaces.indexOf(MESSAGE) === -1)
         continue
+
+      let addedToProviders = []
       if (r._sharedWith) {
         r._sharedWith.forEach((shareInfo) => {
-          if (shareInfo.bankRepresentative === meId)
-            this.addMessagesToChat(utils.getId(r.to), r, true, shareInfo.timeShared)
-          else  {
+          // if (shareInfo.bankRepresentative === meId)
+          //   this.addMessagesToChat(utils.getId(r.to), r, true, shareInfo.timeShared)
+          // else  {
             let rep = this._getItem(shareInfo.bankRepresentative)
             let orgId = utils.getId(rep.organization)
-            this.addMessagesToChat(orgId, r, true, shareInfo.timeShared)
-          }
+            if (meOrgId !== orgId) {
+              this.addMessagesToChat(orgId, r, true, shareInfo.timeShared)
+              addedToProviders.push(orgId)
+            }
+          // }
         })
       }
-      else if (m.id === VERIFICATION  &&  meId === utils.getId(r.from))
+      if (m.id === VERIFICATION  &&  meId === utils.getId(r.from))
         this.addMessagesToChat(utils.getId(r.to), r, true)
       else {
         let fromId = utils.getId(r.from)
         let rep = this._getItem(meId === fromId ? utils.getId(r.to) : fromId)
         let orgId = rep.organization ? utils.getId(rep.organization) : utils.getId(rep)
-        this.addMessagesToChat(orgId, r, true)
+        if (addedToProviders.indexOf(orgId) === -1)
+          this.addMessagesToChat(orgId, r, true)
       }
     }
     for (let id in chatMessages) {
@@ -1917,7 +1925,11 @@ var Store = Reflux.createStore({
                     //   object: toChain,
                     //   to: { fingerprint: this.getFingerprint(list[key].value) }
                     // })
-    let isReadOnly = r._context  &&  this._getItem(utils.getId(r._context))._readOnly
+    let isReadOnly
+    if (r._context) {
+      let c = this._getItem(utils.getId(r._context));
+      isReadOnly = c  &&  c._readOnly
+    }
     var newVerification
     return promise
     .then((data) => {
