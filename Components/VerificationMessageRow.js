@@ -113,7 +113,7 @@ class VerificationMessageRow extends Component {
             </View>
           </TouchableHighlight>
 
-    var viewStyle = { margin: 1, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR }
+    var viewStyle = { margin: 1, paddingRight: 10, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR }
     return (
       <View style={viewStyle} key={this.getNextKey()}>
         {date}
