@@ -89,17 +89,19 @@ class ShowPropertiesView extends Component {
     var resource = this.props.resource;
     var modelName = resource[constants.TYPE];
     var model = utils.getModel(modelName).value;
-    var vCols = []
-    if (this.props.checkProperties) {
+    var vCols = vCols = model.viewCols
+    if (vCols  &&  this.props.checkProperties) {
       let props = model.properties
-      for (let p in props) {
+      let v = []
+      vCols.forEach((p) => {
         if (p.charAt(0) === '_'  ||  props[p].hidden  ||  props[p].readOnly) //  ||  p.indexOf('_group') === p.length - 6)
-          continue
-        vCols.push(p)
-      }
+          return
+        v.push(p)
+        if (p.indexOf('_group') === p.length - 6)
+          props[p].list.forEach((p) => v.push(p))
+      })
+      vCols = v
     }
-    else
-      vCols = model.viewCols
 
     var excludedProperties = this.props.excludedProperties;
     var props = model.properties;
@@ -147,11 +149,10 @@ class ShowPropertiesView extends Component {
           val = utils.templateIt(pMeta, resource);
         else if (this.props.checkProperties) {
           if (p.indexOf('_group') === p.length - 6) {
-
             return (<View style={{padding: 15}} key={this.getNextKey()}>
-                    <View key={this.getNextKey()}  style={{borderBottomColor: this.props.bankStyle.LINK_COLOR, borderBottomWidth: 1, paddingBottom: 5}}>
-                      <Text style={{fontSize: 20, color: this.props.bankStyle.LINK_COLOR}}>{translate(pMeta)}</Text>
-                    </View>
+                      <View key={this.getNextKey()}  style={{borderBottomColor: this.props.bankStyle.LINK_COLOR, borderBottomWidth: 1, paddingBottom: 5}}>
+                        <Text style={{fontSize: 22, color: this.props.bankStyle.LINK_COLOR}}>{translate(pMeta)}</Text>
+                      </View>
                     </View>
              );
           }
