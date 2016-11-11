@@ -5984,7 +5984,7 @@
     "react-web": {
       "version": "0.4.1",
       "from": "mvayngrib/react-web#distdev",
-      "resolved": "git://github.com/mvayngrib/react-web.git#41dafc723f7c06df178b1572179cfe7b3c6827c5",
+      "resolved": "git://github.com/mvayngrib/react-web.git#678a442a8546f2e1d0123a63d3ff138ba06490e6",
       "dependencies": {
         "chalk": {
           "version": "1.1.1",
