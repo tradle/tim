@@ -8,7 +8,6 @@ import {
   Text
 } from 'react-native'
 import ReactDOM from 'react-dom'
-import Icon from 'react-native-vector-icons/Ionicons'
 
 const CENTER = false
 const noop = () => {}
@@ -22,9 +21,10 @@ function alert (title, message, buttons) {
     message = title
     title = null
   }
-  if (typeof message !== 'string') {
+
+  if (Array.isArray(message)) {
     buttons = message
-    // message = null
+    message = null
   }
 
   let callback
@@ -35,13 +35,17 @@ function alert (title, message, buttons) {
     callback = noop
   }
 
+  if (!(buttons && buttons.length)) {
+    buttons = [{ text: 'OK', onPress: noop }]
+  }
+
   const styles = exports.styles
   buttons = buttons.map(function (b, i) {
     const style = buttons.length === 2 && i === 0 ? styles.cancel : styles.ok
     return (
       <TouchableOpacity onPress={() => {
         remove()
-        b.onPress()
+        if (b.onPress) b.onPress()
       }} style={[styles.button, style]}>
         <Text>{b.text}</Text>
       </TouchableOpacity>
@@ -91,15 +95,6 @@ function appendModal (modal) {
 function prompt (title, message, buttons) {
   throw new Error('not supported yet')
 }
-
-      // isOpen={bool}
-      // onAfterOpen={afterOpenFn}
-      // onRequestClose={requestCloseFn}
-      // closeTimeoutMS={n}
-      // style={customStyle}
-
-//          <TouchableOpacity onPress=
-//            <Icon name="ios-close" size={20} style={styles.close} />
 
 const defaultStyles = StyleSheet.create({
   container: {
