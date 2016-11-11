@@ -1820,7 +1820,6 @@ var Store = Reflux.createStore({
         for (let i=0; i<messages.length  &&  idx === -1; i++)
           if (messages[i].id === rid)
             idx = i
-
         if (idx !== -1) {
           if (r.time === list[rid].value.time)
             return
