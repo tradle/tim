@@ -2341,6 +2341,7 @@ var Store = Reflux.createStore({
             msg.to = self.buildRef(orgRep)
             msg.from = self.buildRef(me)
             self._setItem(utils.getId(msg), msg)
+            self.addMessagesToChat(orgId, msg)
           })
           .catch(function (err) {
             debugger

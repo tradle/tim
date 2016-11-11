@@ -17,6 +17,7 @@ module.exports = exports = StyleSheet.create({
     paddingVertical: 5,
     paddingHorizontal: 21,
     height: 45,
+    justifyContent: 'center',
     borderRadius: 24,
     // shadowOffset:{width: 5, height: 5},
     shadowOpacity: 1,
