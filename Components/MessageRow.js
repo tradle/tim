@@ -581,8 +581,8 @@ class MessageRow extends Component {
         let msg = <View key={this.getNextKey()}>
                 <Text style={styles.resourceTitle}>{translate('hello', utils.getMe().firstName)}</Text>
                 <View style={styles.rowContainer}>
-                  <Text style={[styles.resourceTitle, {color: LINK_COLOR, paddingRight: 20}]}>{translate('listOfProducts')} </Text>
-                  <Icon style={{color: LINK_COLOR}} size={20} name={'ios-arrow-forward'} />
+                  <Text style={[styles.resourceTitle, {color: LINK_COLOR}]}>{translate('listOfProducts')} </Text>
+                  <Icon style={{color: LINK_COLOR, paddingLeft: 100}} size={20} name={'ios-arrow-forward'} />
                 </View>
               </View>
         renderedRow.push(msg);
