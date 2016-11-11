@@ -3803,6 +3803,12 @@ var Store = Reflux.createStore({
         o = []
         shareableResourcesRootToOrgs[hash] = o
       }
+      else {
+        let oId = utils.getId(verification.organization)
+        let oo = o.filter((r) => utils.getId(r) === oId)
+        if (oo.length)
+          return
+      }
       o.push(verification.organization)
     }
   },
