@@ -375,6 +375,10 @@ class TiMApp extends Component {
       }
     }
 
+    // can simplify the below switch statement to:
+    // const RouteComponent = route.component
+    // return <RouteComponent navigator={nav} {...props} />
+
     switch (route.id) {
     case 1:
       return <TimHome navigator={nav} {...props}/>;

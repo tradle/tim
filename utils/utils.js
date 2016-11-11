@@ -54,16 +54,19 @@ const tradle = require('@tradle/engine')
 const protocol = tradle.protocol
 const tradleUtils = tradle.utils
 var constants = require('@tradle/constants');
-var TYPE = constants.TYPE
-var TYPES = constants.TYPES
 
-var VERIFICATION = constants.TYPES.VERIFICATION
+const TYPE = constants.TYPE
+const TYPES = constants.TYPES
+
+const VERIFICATION = TYPES.VERIFICATION
+const MY_PRODUCT = 'tradle.MyProduct'
+
 const CUR_HASH = constants.CUR_HASH
 const NONCE = constants.NONCE
 const ROOT_HASH = constants.ROOT_HASH
 const PREV_HASH = constants.PREV_HASH
 const SIG = constants.SIG
-const FORM = constants.TYPES.FORM
+const FORM = TYPES.FORM
 const PASSWORD_ENC = 'hex'
 
 var LocalizedStrings = require('react-native-localization')
@@ -188,7 +191,7 @@ var utils = {
     let properties = utils.getModel(r1[TYPE]).value.properties
     let exclude = ['time', ROOT_HASH, CUR_HASH, PREV_HASH, NONCE, 'verifications', 'sharedWith']
     for (var p in r1) {
-      if (exclude.indexOf(p) !== -1)
+      if (!properties[p]  ||  exclude.indexOf(p) !== -1)
         continue
       if (r1[p] === r2[p])
         continue
@@ -315,10 +318,10 @@ var utils = {
     }
     else {
       let m = utils.getModel(r[TYPE])
-      if (m  &&  (m.value.subClassOf === FORM  ||  m.value.id === VERIFICATION))
-        return r[TYPE] + '_' + r[ROOT_HASH] + '_' + (r[CUR_HASH] || r[ROOT_HASH])
-      else
-        return r[TYPE] + '_' + r[ROOT_HASH];
+      let id = r[TYPE] + '_' + r[ROOT_HASH]
+      return  m  &&  (m.value.subClassOf === FORM  ||  m.value.id === VERIFICATION  ||  m.value.id === MY_PRODUCT)
+            ? id + '_' + (r[CUR_HASH] || r[ROOT_HASH])
+            : id
     }
   },
   getItemsMeta(metadata) {
@@ -561,7 +564,7 @@ var utils = {
     var me = utils.getMe()
     if (fromHash == this.getId(me))
       return true;
-    if (utils.getModel(r[TYPE]).value.subClassOf == 'tradle.MyProduct') {
+    if (utils.getModel(r[TYPE]).value.subClassOf == MY_PRODUCT) {
       let org = r.from.organization
       if (org  &&  utils.getId(r.from.organization) !== utils.getId(this.props.to))
         return true

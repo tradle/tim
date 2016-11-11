@@ -66,6 +66,7 @@ class VerificationMessageRow extends Component {
       isThirdPartyVerification = !utils.isEmployee(resource.organization)
     }
     let isShared = this.isShared()
+    isMyMessage = isShared
     let bgColor =  isThirdPartyVerification
                 ? '#93BEBA'
                 : this.props.bankStyle.VERIFIED_HEADER_COLOR
@@ -86,7 +87,12 @@ class VerificationMessageRow extends Component {
                       <Text style={styles.verificationHeaderText}>{verifiedBy}</Text>
                     </View>
                     <View>
-                      {this.formatDocument(msgModel, resource, this.verify.bind(this), isThirdPartyVerification)}
+                      {this.formatDocument({
+                        model: msgModel,
+                        verification: resource,
+                        onPress: this.verify.bind(this),
+                        isAccordion: isThirdPartyVerification
+                      })}
                     </View>
                   </View>
 
