@@ -2646,16 +2646,16 @@ var Store = Reflux.createStore({
 
       return meDriver.signAndSend(sendParams)
     }
-    if (!Array.isArray(shareWithList))
-      return this.onShareOne(resource, shareWithList, originatingResource)
-    let promisses = []
-    shareWithList.forEach((r) => {
-      promisses.push(this.onShareOne(resource, this._getItem(r)))
-    })
-    Q.all(promisses)
-    .then((results) => {
-      debugger
-    })
+    // if (!Array.isArray(shareWithList))
+    return this.onShareOne(resource, shareWithList, originatingResource)
+    // let promisses = []
+    // shareWithList.forEach((r) => {
+    //   promisses.push(this.onShareOne(resource, this._getItem(r)))
+    // })
+    // Q.all(promisses)
+    // .then((results) => {
+    //   debugger
+    // })
   },
 
   onShareOne(resource, to, formResource) {
@@ -3672,6 +3672,12 @@ var Store = Reflux.createStore({
       if (!o) {
         o = []
         shareableResourcesRootToOrgs[hash] = o
+      }
+      else {
+        let oId = utils.getId(verification.organization)
+        let oo = o.filter((r) => utils.getId(r) === oId)
+        if (oo.length)
+          return
       }
       o.push(verification.organization)
     }
