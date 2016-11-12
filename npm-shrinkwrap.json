@@ -1130,8 +1130,8 @@
     },
     "changes-feed": {
       "version": "1.1.0",
-      "from": "mvayngrib/changes-feed",
-      "resolved": "git://github.com/mvayngrib/changes-feed.git#bd106bd1a8b03660e7c6820e279a34bcaac0fd5e",
+      "from": "git+https://github.com/mvayngrib/changes-feed.git",
+      "resolved": "git+https://github.com/mvayngrib/changes-feed.git#bd106bd1a8b03660e7c6820e279a34bcaac0fd5e",
       "dependencies": {
         "readable-stream": {
           "version": "1.0.34",
@@ -2353,8 +2353,8 @@
     },
     "forward-secrecy": {
       "version": "1.0.2",
-      "from": "tradle/forward-secrecy#dev",
-      "resolved": "git://github.com/tradle/forward-secrecy.git#5ad4c2ee429db4b10599efbd41c650b9debbf7fe",
+      "from": "git+https://github.com/tradle/forward-secrecy.git#dev",
+      "resolved": "git+https://github.com/tradle/forward-secrecy.git#5ad4c2ee429db4b10599efbd41c650b9debbf7fe",
       "dependencies": {
         "tweetnacl": {
           "version": "0.13.3",
@@ -3226,8 +3226,8 @@
     },
     "level-change-processor": {
       "version": "1.0.0",
-      "from": "mvayngrib/level-change-processor#7100404",
-      "resolved": "git://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b"
+      "from": "git+https://github.com/mvayngrib/level-change-processor.git#7100404",
+      "resolved": "git+https://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b"
     },
     "level-codec": {
       "version": "6.1.0",
@@ -3690,9 +3690,9 @@
           "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
         },
         "readable-stream": {
-          "version": "2.1.5",
+          "version": "2.2.1",
           "from": "readable-stream@>=2.0.5 <3.0.0",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.1.5.tgz"
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.1.tgz"
         }
       }
     },
@@ -4582,7 +4582,7 @@
     "react-native-floating-labels": {
       "version": "1.1.1",
       "from": "mvayngrib/react-native-floating-labels#pointerEvents",
-      "resolved": "git://github.com/mvayngrib/react-native-floating-labels.git#081466653f80d4b3e2760f5cfc20720acc80bf2f",
+      "resolved": "git://github.com/mvayngrib/react-native-floating-labels.git#c61704d64317805f0f7379142a2b45836dd04ec3",
       "dependencies": {
         "lodash": {
           "version": "3.10.1",
@@ -4694,7 +4694,19 @@
     "react-native-randombytes": {
       "version": "2.1.0",
       "from": "react-native-randombytes@>=2.1.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/react-native-randombytes/-/react-native-randombytes-2.1.0.tgz"
+      "resolved": "https://registry.npmjs.org/react-native-randombytes/-/react-native-randombytes-2.1.0.tgz",
+      "dependencies": {
+        "buffer": {
+          "version": "3.6.0",
+          "from": "buffer@>=3.5.2 <4.0.0",
+          "resolved": "https://registry.npmjs.org/buffer/-/buffer-3.6.0.tgz"
+        },
+        "isarray": {
+          "version": "1.0.0",
+          "from": "isarray@^1.0.0",
+          "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
+        }
+      }
     },
     "react-native-safe-async-storage": {
       "version": "1.0.0",
@@ -4720,6 +4732,40 @@
           "version": "0.1.5",
           "from": "react-tween-state@>=0.1.3 <0.2.0",
           "resolved": "https://registry.npmjs.org/react-tween-state/-/react-tween-state-0.1.5.tgz"
+        }
+      }
+    },
+    "react-native-tcp": {
+      "version": "3.0.0",
+      "from": "react-native-tcp@latest",
+      "resolved": "https://registry.npmjs.org/react-native-tcp/-/react-native-tcp-3.0.0.tgz",
+      "dependencies": {
+        "buffer": {
+          "version": "5.0.1",
+          "from": "buffer@>=5.0.0 <6.0.0",
+          "resolved": "https://registry.npmjs.org/buffer/-/buffer-5.0.1.tgz",
+          "dependencies": {
+            "base64-js": {
+              "version": "1.2.0",
+              "from": "base64-js@>=1.0.2 <2.0.0",
+              "resolved": "https://registry.npmjs.org/base64-js/-/base64-js-1.2.0.tgz"
+            }
+          }
+        },
+        "isarray": {
+          "version": "1.0.0",
+          "from": "isarray@>=1.0.0 <1.1.0",
+          "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
+        },
+        "readable-stream": {
+          "version": "2.2.1",
+          "from": "readable-stream@>=2.0.2 <3.0.0",
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.1.tgz"
+        },
+        "stream-browserify": {
+          "version": "2.0.1",
+          "from": "stream-browserify@>=2.0.1 <3.0.0",
+          "resolved": "https://registry.npmjs.org/stream-browserify/-/stream-browserify-2.0.1.tgz"
         }
       }
     },

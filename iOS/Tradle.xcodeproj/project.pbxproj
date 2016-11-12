@@ -90,6 +90,7 @@
 		B9960E5EDF0C47B789285122 /* libReactNativeLocalization.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0BD5B3365E2D454AB5703454 /* libReactNativeLocalization.a */; };
 		BA4A894818DA4F889E58F732 /* libRCTVideo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ABE7159BBFD14FFDB6BBF084 /* libRCTVideo.a */; };
 		BC686B7EA43346EC98F13734 /* Foundation.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7792D3B3CB564D30820C6FBC /* Foundation.ttf */; };
+		CC1AB989D89F4D92A4A9CA06 /* libTcpSockets.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CB49356B78554325A3737E7D /* libTcpSockets.a */; };
 		D5FC2F4618F64B86BA09C1CC /* Octicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E42475336EA34BAA9B260B8E /* Octicons.ttf */; };
 		E31F23F231334399B2377206 /* libRNOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 17FFD8A9DD434C5AB09BCBE9 /* libRNOS.a */; };
 		EDA552EBDE6041E294013897 /* Entypo.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0D298874FB194B1BB016DCEE /* Entypo.ttf */; };
@@ -216,6 +217,13 @@
 			remoteGlobalIDString = 134814201AA4EA6300B7C361;
 			remoteInfo = RCTPushNotification;
 		};
+		73AE89E31DD7711600FCD7FD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6ECAAF13C7384B738734FB25 /* TcpSockets.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 134814201AA4EA6300B7C361;
+			remoteInfo = TcpSockets;
+		};
 		73B656711C42F4880068687F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 3D510339A825413A9733521D /* RCTVideo.xcodeproj */;
@@ -337,6 +345,7 @@
 		29F90A6163024FE8B7A7022D /* libRNLocalAuth.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNLocalAuth.a; sourceTree = "<group>"; };
 		36B5640D4902498D93210121 /* RCTOrientation.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTOrientation.xcodeproj; path = "../node_modules/react-native-orientation/iOS/RCTOrientation.xcodeproj"; sourceTree = "<group>"; };
 		3D510339A825413A9733521D /* RCTVideo.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTVideo.xcodeproj; path = "../node_modules/react-native-video/RCTVideo.xcodeproj"; sourceTree = "<group>"; };
+		6ECAAF13C7384B738734FB25 /* TcpSockets.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = TcpSockets.xcodeproj; path = "../node_modules/react-native-tcp/ios/TcpSockets.xcodeproj"; sourceTree = "<group>"; };
 		73030AF11D14DC4B0096A864 /* RNFS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNFS.xcodeproj; path = "../node_modules/react-native-fs/RNFS.xcodeproj"; sourceTree = "<group>"; };
 		731045901D7CE25D0087E82D /* Tradle-dev.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Tradle-dev.entitlements"; sourceTree = "<group>"; };
 		731F233D1C31BB6600C3B09D /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
@@ -372,6 +381,7 @@
 		ABE7159BBFD14FFDB6BBF084 /* libRCTVideo.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRCTVideo.a; sourceTree = "<group>"; };
 		AF8DF7DF1C49484ABF808B20 /* RCTCamera.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTCamera.xcodeproj; path = "../node_modules/react-native-camera/ios/RCTCamera.xcodeproj"; sourceTree = "<group>"; };
 		C1932A8E8BA74132B608AF40 /* RNOS.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNOS.xcodeproj; path = "../node_modules/react-native-os/ios/RNOS.xcodeproj"; sourceTree = "<group>"; };
+		CB49356B78554325A3737E7D /* libTcpSockets.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libTcpSockets.a; sourceTree = "<group>"; };
 		D491E41C0C9C47B68AC487CA /* Zocial.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = unknown; name = Zocial.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Zocial.ttf"; sourceTree = "<group>"; };
 		E42475336EA34BAA9B260B8E /* Octicons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = unknown; name = Octicons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Octicons.ttf"; sourceTree = "<group>"; };
 		E8DC5312A84F470C87F82CE6 /* MaterialIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/MaterialIcons.ttf"; sourceTree = "<group>"; };
@@ -421,6 +431,7 @@
 				9B47481D1D18C1E6008703E3 /* libCodePush.a in Frameworks */,
 				595E255E879245FDA7D8F9EE /* libRCTOrientation.a in Frameworks */,
 				E31F23F231334399B2377206 /* libRNOS.a in Frameworks */,
+				CC1AB989D89F4D92A4A9CA06 /* libTcpSockets.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -635,6 +646,14 @@
 			path = "../node_modules/react-native-env/RNEnvironmentManagerIOS";
 			sourceTree = "<group>";
 		};
+		73AE89C41DD7711600FCD7FD /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				73AE89E41DD7711600FCD7FD /* libTcpSockets.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		73B6565F1C42F4880068687F /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -723,6 +742,7 @@
 				083F8D1194934922894AAA06 /* RNVectorIcons.xcodeproj */,
 				36B5640D4902498D93210121 /* RCTOrientation.xcodeproj */,
 				C1932A8E8BA74132B608AF40 /* RNOS.xcodeproj */,
+				6ECAAF13C7384B738734FB25 /* TcpSockets.xcodeproj */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -1034,6 +1054,10 @@
 					ProjectRef = 083F8D1194934922894AAA06 /* RNVectorIcons.xcodeproj */;
 				},
 				{
+					ProductGroup = 73AE89C41DD7711600FCD7FD /* Products */;
+					ProjectRef = 6ECAAF13C7384B738734FB25 /* TcpSockets.xcodeproj */;
+				},
+				{
 					ProductGroup = 73FE358F1BFA123100EFB313 /* Products */;
 					ProjectRef = 73FE358E1BFA123100EFB313 /* UdpSockets.xcodeproj */;
 				},
@@ -1158,6 +1182,13 @@
 			fileType = archive.ar;
 			path = libRCTPushNotification.a;
 			remoteRef = 73947DA71D3DAEA500C5CC8F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		73AE89E41DD7711600FCD7FD /* libTcpSockets.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libTcpSockets.a;
+			remoteRef = 73AE89E31DD7711600FCD7FD /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		73B656721C42F4880068687F /* libRCTVideo.a */ = {
@@ -1433,6 +1464,7 @@
 					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
+					"\"$(SRCROOT)/Tradle\"",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = Tradle;
@@ -1456,6 +1488,7 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/TiM\"",
 					"\"$(SRCROOT)/TiM\"",
+					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
@@ -1494,6 +1527,7 @@
 					"$(SRCROOT)/../node_modules/react-native-vector-icons/RNVectorIconsManager",
 					"$(SRCROOT)/../node_modules/react-native-orientation/iOS/RCTOrientation/**",
 					"$(SRCROOT)/../node_modules/react-native-os/ios",
+					"$(SRCROOT)/../node_modules/react-native-tcp/ios/**",
 				);
 				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -1502,6 +1536,7 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/TiM\"",
 					"\"$(SRCROOT)/TiM\"",
+					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
@@ -1540,6 +1575,7 @@
 					"$(SRCROOT)/../node_modules/react-native-vector-icons/RNVectorIconsManager",
 					"$(SRCROOT)/../node_modules/react-native-orientation/iOS/RCTOrientation/**",
 					"$(SRCROOT)/../node_modules/react-native-os/ios",
+					"$(SRCROOT)/../node_modules/react-native-tcp/ios/**",
 				);
 				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -1548,6 +1584,7 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/TiM\"",
 					"\"$(SRCROOT)/TiM\"",
+					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
@@ -1591,6 +1628,7 @@
 					"$(SRCROOT)/../node_modules/react-native-vector-icons/RNVectorIconsManager",
 					"$(SRCROOT)/../node_modules/react-native-orientation/iOS/RCTOrientation/**",
 					"$(SRCROOT)/../node_modules/react-native-os/ios",
+					"$(SRCROOT)/../node_modules/react-native-tcp/ios/**",
 				);
 				INFOPLIST_FILE = Tradle/Dev.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -1635,6 +1673,7 @@
 					"$(SRCROOT)/../node_modules/react-native-vector-icons/RNVectorIconsManager",
 					"$(SRCROOT)/../node_modules/react-native-orientation/iOS/RCTOrientation/**",
 					"$(SRCROOT)/../node_modules/react-native-os/ios",
+					"$(SRCROOT)/../node_modules/react-native-tcp/ios/**",
 				);
 				INFOPLIST_FILE = Tradle/Dev.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -1703,6 +1742,7 @@
 					"$(SRCROOT)/../node_modules/react-native-vector-icons/RNVectorIconsManager",
 					"$(SRCROOT)/../node_modules/react-native-orientation/iOS/RCTOrientation/**",
 					"$(SRCROOT)/../node_modules/react-native-os/ios",
+					"$(SRCROOT)/../node_modules/react-native-tcp/ios/**",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
@@ -1755,6 +1795,7 @@
 					"$(SRCROOT)/../node_modules/react-native-vector-icons/RNVectorIconsManager",
 					"$(SRCROOT)/../node_modules/react-native-orientation/iOS/RCTOrientation/**",
 					"$(SRCROOT)/../node_modules/react-native-os/ios",
+					"$(SRCROOT)/../node_modules/react-native-tcp/ios/**",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
