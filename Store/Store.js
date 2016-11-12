@@ -720,7 +720,7 @@ var Store = Reflux.createStore({
   },
 
 
-  getInfo(serverUrls, retry, id) {
+  getInfo(serverUrls, retry, id, errHandler) {
     let self = this
 
     let defer = Q.defer()
@@ -758,6 +758,8 @@ var Store = Reflux.createStore({
       })
       .catch((err) => {
         debugger
+        if (errHandler)
+          errHandler(err)
       })
     })
 
@@ -2561,21 +2563,19 @@ var Store = Reflux.createStore({
   },
   onAddApp(serverUrl) {
     let parts = serverUrl.split(';')
+    let id = parts[1]
     // let idx = serverUrl.lastIndexOf('/')
     // let id = parts[parts.length - 1]
     // let url = parts.slice(0, parts.length - 1).join('/')
-
-    return this.getInfo([parts[0]], false, parts[1])
+    return this.getInfo([parts[0]], false, id, (err) => this.trigger({action: 'addApp', error: 'Oops! No one is there.'}).bind(this))
     .then(() => {
-      this.trigger({action: 'addApp'})
+      let newProvider = SERVICE_PROVIDERS.filter((r) => r.id === id)
+      this.trigger({action: 'addApp', error: newProvider.length ? null : 'Oops! No one is there.'})
       // let list = self.searchNotMessages({modelName: ORGANIZATION})
       // this.trigger({
       //   action: 'list',
       //   list: list,
       // })
-    })
-    .catch((err) => {
-      this.trigger({action: 'addApp', error: 'Oops! No one is there.'})
     })
   },
 

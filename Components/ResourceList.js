@@ -161,10 +161,17 @@ class ResourceList extends Component {
   }
 
   onListUpdate(params) {
+    var action = params.action;
+    if (action === 'addApp') {
+      this.props.navigator.pop()
+      if (params.error)
+        Alert.alert(params.error)
+      // Actions.list(constants.TYPES.ORGANIZATION)
+      return
+    }
     if (params.error)
       return;
 
-    var action = params.action;
     if (action === 'newContact') {
       let routes = this.props.navigator.getCurrentRoutes()
       let curRoute = routes[routes.length - 1]
@@ -187,13 +194,6 @@ class ResourceList extends Component {
         }
       })
 
-      return
-    }
-    if (action === 'addApp') {
-      this.props.navigator.pop()
-      if (params.error)
-        Alert.alert(params.error)
-      // Actions.list(constants.TYPES.ORGANIZATION)
       return
     }
     if (action === 'connectivity') {
