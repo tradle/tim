@@ -720,7 +720,7 @@ var Store = Reflux.createStore({
   },
 
 
-  getInfo(serverUrls, retry, id, errHandler) {
+  getInfo(serverUrls, retry, id) {
     let self = this
 
     let defer = Q.defer()
@@ -756,11 +756,9 @@ var Store = Reflux.createStore({
           return meDriver
         }
       })
-      .catch((err) => {
-        debugger
-        if (errHandler)
-          errHandler(err)
-      })
+      // .catch((err) => {
+      //   debugger
+      // })
     })
 
     return defer.promise
@@ -2567,15 +2565,20 @@ var Store = Reflux.createStore({
     // let idx = serverUrl.lastIndexOf('/')
     // let id = parts[parts.length - 1]
     // let url = parts.slice(0, parts.length - 1).join('/')
-    return this.getInfo([parts[0]], false, id, (err) => this.trigger({action: 'addApp', error: 'Oops! No one is there.'}).bind(this))
+    return this.getInfo([parts[0]], false, id)
     .then(() => {
       let newProvider = SERVICE_PROVIDERS.filter((r) => r.id === id)
+      if (newProvider.length)
+        this.addToSettings(newProvider[0])
       this.trigger({action: 'addApp', error: newProvider.length ? null : 'Oops! No one is there.'})
       // let list = self.searchNotMessages({modelName: ORGANIZATION})
       // this.trigger({
       //   action: 'list',
       //   list: list,
       // })
+    })
+    .catch((err) => {
+       this.trigger({action: 'addApp', error: 'Oops! No one is there.'})
     })
   },
 
@@ -7619,23 +7622,6 @@ function getProviderUrl (provider) {
         rr[p] = r[p];
     return rr;
   },
-  onAddApp(serverUrl) {
-    let parts = serverUrl.split(';')
-    // let idx = serverUrl.lastIndexOf('/')
-    // let id = parts[parts.length - 1]
-    // let url = parts.slice(0, parts.length - 1).join('/')
-
-    return this.getInfo([parts[0]], false, parts[1])
-    .then(() => {
-      this.trigger({action: 'addApp'})
-      // let list = self.searchNotMessages({modelName: ORGANIZATION})
-      // this.trigger({
-      //   action: 'list',
-      //   list: list,
-      // })
-    })
-  },
-
   packResult(result) {
     let foundResources = {}
     result.forEach((fr) => {
