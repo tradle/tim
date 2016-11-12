@@ -178,7 +178,7 @@ class ResourceList extends Component {
         id: 11,
         backButtonTitle: 'Back',
         passProps: {
-          resource: params.to,
+          resource: params.newContact,
           filter: '',
           modelName: constants.TYPES.MESSAGE,
           // currency: params.organization.currency,
