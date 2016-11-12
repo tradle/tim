@@ -6,17 +6,22 @@ import {
 
 import React, { Component, PropTypes } from 'react'
 import Camera from 'react-native-camera'
+import debounce from 'debounce'
 
 var ICON_BORDER_COLOR = '#D7E6ED'
 var Icon = require('react-native-vector-icons/Ionicons')
 var Dir = Camera.constants.Type
 
+
 class QRCodeScanner extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      cameraType: Camera.constants.Type.back
+      cameraType: Camera.constants.Type.back,
+      scanned: false
     }
+
+    this._onBarCodeRead = debounce(this._onBarCodeRead.bind(this), 500, true)
   }
   propTypes: {
     onread: PropTypes.func.isRequired
@@ -34,7 +39,8 @@ class QRCodeScanner extends Component {
     return (
       <Camera
         style={styles.container}
-        onBarCodeRead={this._onBarCodeRead.bind(this)}
+        captureAudio={false}
+        onBarCodeRead={this._onBarCodeRead}
         ref={(cam) => {
             this.camera = cam;
           }}
@@ -46,10 +52,13 @@ class QRCodeScanner extends Component {
     )
   }
   _onBarCodeRead(e) {
-    if (this._finished) return
+    if (this.state.scanned) return
 
-    this.props.onread(e)
-    this._finished = true
+    this.setState({
+      scanned: true
+    }, () => {
+      this.props.onread(e)
+    })
   }
   _switchCamera() {
     var cameraType = this.state.cameraType === Dir.back ? Dir.front : Dir.back
