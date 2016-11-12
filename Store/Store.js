@@ -2426,16 +2426,20 @@ var Store = Reflux.createStore({
         self.addMessagesToChat(orgId, returnVal)
 
         var params;
+
+        var sendStatus = (self.isConnected) ? SENDING : QUEUED
         if (returnVal[TYPE] === GUEST_SESSION_PROOF) {
           org = self._getItem(utils.getId(org))
           params = {action: 'getForms', to: org}
         }
         else {
+          returnVal._sendStatus = sendStatus
           params = {
             action: 'addItem',
             resource: utils.clone(returnVal)
           }
         }
+
         var m = self.getModel(returnVal[TYPE]).value
 
         // if (m.subClassOf === FORM)
@@ -2463,6 +2467,7 @@ var Store = Reflux.createStore({
 //             console.log('yay!')
 //           }
 //         })
+
 
         try {
           self.trigger(params);
@@ -2513,8 +2518,8 @@ var Store = Reflux.createStore({
 
           returnVal[CUR_HASH] = result.object.link
           returnVal[ROOT_HASH] = result.object.permalink
-          var sendStatus = (self.isConnected) ? SENDING : QUEUED
-          returnVal._sendStatus = sendStatus
+          // var sendStatus = (self.isConnected) ? SENDING : QUEUED
+          // returnVal._sendStatus = sendStatus
 
 //           let org = list[utils.getId(returnVal.to)].value.organization
 //           self.addMessagesToChat(utils.getId(org), returnVal)
