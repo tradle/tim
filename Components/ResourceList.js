@@ -170,6 +170,7 @@ class ResourceList extends Component {
       let curRoute = routes[routes.length - 1]
       if (curRoute.id === 11  &&  curRoute.passProps.resource[constants.ROOT_HASH] === params.to[constants.ROOT_HASH])
         return
+      // this.setState({newContact: params.newContact})
       let style = this.mergeStyle(params.to.style)
       this.props.navigator[curRoute.id === 3 ? 'replace' : 'push']({
         title: params.to.firstName,
@@ -190,6 +191,8 @@ class ResourceList extends Component {
     }
     if (action === 'addApp') {
       this.props.navigator.pop()
+      if (params.error)
+        Alert.alert(params.error)
       // Actions.list(constants.TYPES.ORGANIZATION)
       return
     }
@@ -307,6 +310,7 @@ class ResourceList extends Component {
       dataSource: this.state.dataSource.cloneWithRows(list),
       list: list,
       isLoading: false,
+      // unread: params.unread
     }
 
     if (!list.length) {
@@ -348,10 +352,14 @@ class ResourceList extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     if (nextState.forceUpdate)
       return true
+    // if (this.state.unread !== nextState.unread)
+    //   return true
     if (this.state.show !== nextState.show)
       return true
     if (nextState.isConnected !== this.state.isConnected)
       return true
+    // if (nextState.newContact  &&  (!this.state.newContact ||  this.state.newContact !== this.state.newContact))
+    //   return true
     // if (this.state.isConnected !== nextState.isConnected)
     //   if (!this.state.list && !nextState.list)
     //     return true
@@ -634,6 +642,8 @@ class ResourceList extends Component {
     var isSharedContext = model.id === PRODUCT_APPLICATION && resource._readOnly
 
     // let hasBacklink = this.props.prop && this.props.prop.items  &&  this.props.prop.backlink
+        // unread={resource._unread}
+        // newContact={this.state.newContact}
     return /*hasBacklink  &&*/  (isVerification  || isForm || isMyProduct)
     ? (<VerificationRow
         onSelect={() => this.selectResource(isVerification ? resource.document : resource)}
