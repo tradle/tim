@@ -5,6 +5,7 @@ var translate = utils.translate
 var ArticleView = require('./ArticleView');
 var MessageView = require('./MessageView');
 var NewResource = require('./NewResource');
+var dateformat = require('dateformat')
 var PhotoList = require('./PhotoList');
 var Icon = require('react-native-vector-icons/Ionicons');
 var constants = require('@tradle/constants');
@@ -277,7 +278,9 @@ class FormMessageRow extends Component {
       else if (!model.autoCreate) {
         let val
         if (properties[v].type === 'date')
-           val = resource[v] ? utils.formatDate(resource[v]) : null
+          val = dateformat(new Date(resource[v]), 'mmm d, yyyy');
+
+           // val = resource[v] ? utils.formatDate(resource[v]) : null
         else
            val = (properties[v].displayAs)
                 ? utils.templateIt(properties[v], resource)
