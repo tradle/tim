@@ -17,6 +17,7 @@ import {
   Text,
   Animated,
   Easing,
+  Platform,
   TextInput,
   TouchableHighlight,
 } from 'react-native'
@@ -68,7 +69,8 @@ class PhotoList extends Component {
     var photos = this.props.photos;
     if (!photos ||  !photos.length) // || (photos.length === 1  &&  this.props.isView))
       return null;
-
+    if (this.props.isView  &&  photos.length === 1  &&  Platform.OS !== 'web')
+      return null
     var val = this.renderPhotoList(photos);
     return (
        <View style={
