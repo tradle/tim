@@ -46,7 +46,6 @@ export function generateNewSet (opts = {}) {
 export function saveKey (pub, priv) {
   typeforce('String', pub)
   typeforce('String', priv)
-  console.log('saving', pub)
   return utils.setPassword(
     pub,
     priv

@@ -41,7 +41,7 @@ const LOCK_SCREEN_BG = require('../img/bg.png')
 // const SETUP_MSG = 'Please set up Touch ID first, so the app can better protect your data.'
 const AUTH_FAILED_MSG = 'Authentication failed'
 const DEFAULT_OPTS = {
-  reason: 'unlock Tradle to proceed',
+  reason: translate('unlockDevice'),
   fallbackToPasscode: ENV.autoOptInTouchId,
   suppressEnterPassword: ENV.autoOptInTouchId
 }
