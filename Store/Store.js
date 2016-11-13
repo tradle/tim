@@ -131,9 +131,6 @@ const WELCOME_INTERVAL = 600000
 // Zlorp.LOOKUP_INTERVAL = 10000
 // Zlorp.KEEP_ALIVE_INTERVAL = 10000
 
-const Sendy = require('sendy')
-const SendyWS = require('sendy-ws')
-const TLSClient = require('sendy-axolotl')
 // const DSA = require('@tradle/otr').DSA
 // const BigInt = require('@tradle/otr/vendor/bigint')
 // const BigIntTimes = {}
@@ -151,7 +148,7 @@ const TLSClient = require('sendy-axolotl')
 const SENDY_OPTS = { resendInterval: 10000, mtu: 1500, autoConnect: true }
 // const SENDY_OPTS = { resendInterval: 10000, mtu: 10000, autoConnect: true }
 // const newOTRSwitchboard = require('sendy-otr-ws').Switchboard
-const newSwitchboard = SendyWS.Switchboard
+// const newSwitchboard = SendyWS.Switchboard
 // const WebSocketClient = SendyWS.Client
 const WebSocketClient = require('@tradle/ws/client')
 // const HttpClient = require('@tradle/transport-http').HttpClient
@@ -531,12 +528,12 @@ var Store = Reflux.createStore({
     // var fromPubKey = meDriver.identity.pubkeys.filter(k => k.type === 'ec' && k.purpose === 'sign')[0]
     meDriver._send = function (msg, recipientInfo, cb) {
       const recipientHash = recipientInfo.permalink
-      let messenger = wsClients[recipientHash]
-      if (!messenger) {
+      let wsClient = wsClients[recipientHash]
+      if (!wsClient) {
         let url = self._getItem(SETTINGS + '_1').hashToUrl[recipientHash]
-        messenger = wsClients[url]
+        wsClient = wsClients[url]
       }
-      if (!messenger) {
+      if (!wsClient) {
         // Alert.alert('meDriver._send recipient not found ' + recipientHash)
         return cb(new Error('recipient not found'))
       }
@@ -553,7 +550,7 @@ var Store = Reflux.createStore({
       // TODO: avoid unserializer
       // either engine/lib/channel.js doesn't need to serialize
       //   or it can provide both serialized and unserialized (or serialized + metadata)
-      messenger.send({
+      wsClient.send({
         to: identifier,
         message: msg,
         seq: tradleUtils.unserializeMessage(msg)[tradle.constants.SEQ]
@@ -564,7 +561,7 @@ var Store = Reflux.createStore({
         cb(err)
       }
 
-      // messenger.setTimeout(60000)
+      // wsClient.setTimeout(60000)
     }
 
     // meDriver = timeFunctions(meDriver)
@@ -928,15 +925,6 @@ var Store = Reflux.createStore({
     if (wsClients[base]) return wsClients[base]
 
     let wsClient = this.getWsClient(base)
-    // let transport = this.getTransport(wsClient)
-    // const url = utils.joinURL(base, 'ws?from=' + identifier).replace(/^http/, 'ws')
-    // const wsClient = new WebSocketClient({
-    //   url: url,
-    //   autoConnect: true,
-    //   // for now, till we figure out why binary
-    //   // doesn't work (socket.io parser errors on decode)
-    //   forceBase64: true
-    // })
 
     wsClient.on('disconnect', function () {
       // pause all channels
@@ -951,28 +939,6 @@ var Store = Reflux.createStore({
     wsClients[base] = wsClient
     wsClients[provider.hash] = wsClient
 
-    // let timeouts = {}
-    // transport.on('receiving', function (msg) {
-    //   clearTimeout(timeouts[msg.from])
-    //   delete timeouts[msg.from]
-    // })
-
-    // transport.on('404', function (recipient) {
-    //   if (!timeouts[recipient]) {
-    //     timeout = setTimeout(function () {
-    //       delete timeouts[recipient]
-    //       transport.cancelPending(recipient)
-    //     }, 10000)
-    //   }
-    // })
-
-    // transport.on('404', function (recipient) {
-    //   meDriver.sender.pause(recipient)
-    //   transport.cancelPending(recipient)
-    //   // try again soon. Todo: make this smarter
-    //   setTimeout(() => meDriver.resume(), 10000)
-    // })
-
     const receiveLocks = {}
     wsClient.on('message', function (msg, from) {
       msg = tradleUtils.unserializeMessage(msg)
@@ -980,24 +946,22 @@ var Store = Reflux.createStore({
 
       const lock = receiveLocks[from]
       lock(_release => {
-        const release = once(ack => {
-          clearTimeout(timeout)
-          _release()
-          if (ack) {
-            wsClient.ack({
-              to: from,
-              seq: msg[tradle.constants.SEQ]
-            })
-          }
-        })
-
+        const release = once(_release)
         const timeout = setTimeout(release, 10000)
         const promise = receive(msg, from)
         if (!Q.isPromiseAlike(promise)) {
-          return release(true)
+          return releaseAndAck()
         }
 
-        promise.finally(() => release(true))
+        promise.finally(releaseAndAck)
+
+        function releaseAndAck () {
+          release()
+          wsClient.ack({
+            to: from,
+            seq: msg[tradle.constants.SEQ]
+          })
+        }
       })
     })
 
@@ -1151,41 +1115,12 @@ var Store = Reflux.createStore({
   },
 
   getWsClient(base) {
-    const tlsKey = driverInfo.tlsKey
     const url = utils.joinURL(base, 'ws/?' + querystring.stringify({
-      from: this.getIdentifier(),
-      // pubKey: this.getIdentifierPubKey()
+      from: this.getIdentifier()
     })).replace(/^http/, 'ws')
 
-    return new WebSocketClient({
-      url: url,
-      autoConnect: true,
-      // for now, till we figure out why binary
-      // doesn't work (socket.io parser errors on decode)
-      forceBase64: true
-    })
+    return new WebSocketClient({ url })
   },
-
-  // getTransport(wsClient) {
-  //   const tlsKey = driverInfo.tlsKey
-  //   return newSwitchboard({
-  //     identifier: this.getIdentifier(),
-  //     unreliable: wsClient,
-  //     clientForRecipient: function (recipient) {
-  //       const sendy = new Sendy(SENDY_OPTS)
-  //       if (!tlsKey) return sendy
-
-  //       return new TLSClient({
-  //         key: {
-  //           secretKey: tlsKey.priv,
-  //           publicKey: tlsKey.pub
-  //         },
-  //         client: sendy,
-  //         theirPubKey: new Buffer(recipient, 'hex')
-  //       })
-  //     }
-  //   })
-  // },
 
   // Gets info about companies in this app, their bot representatives and their styles
   getServiceProviders(url, retry, id) {
