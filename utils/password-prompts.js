@@ -10,6 +10,8 @@ const TEXT_PASSWORD_PROMPTS = {
   promptRetrySet: 'passwordsDontMatch',
   promptCheck: 'enterPassword',
   promptCheckCurrent: 'enterCurrentPassword',
+  promptInvalid: 'textPasswordLimitations',
+  // duplicate, for backwords compat
   promptInvalidSet: 'textPasswordLimitations',
   successMsg: 'correctPassword',
   failMsg: 'tooManyPasswordAttempts'
@@ -24,6 +26,8 @@ const GESTURE_PASSWORD_PROMPTS = {
   promptReenter: 'drawYourPasswordAgain',
   promptReenterChange: 'drawYourNewPasswordAgain',
   promptRetryCheck: 'gestureNotRecognized',
+  promptInvalid: 'passwordLimitations',
+  // duplicate, for backwords compat
   promptInvalidSet: 'passwordLimitations',
   successMsg: 'correctGesture',
   failMsg: 'authenticationFailed'
