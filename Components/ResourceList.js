@@ -310,7 +310,6 @@ class ResourceList extends Component {
       dataSource: this.state.dataSource.cloneWithRows(list),
       list: list,
       isLoading: false,
-      // unread: params.unread
     }
 
     if (!list.length) {
@@ -352,8 +351,6 @@ class ResourceList extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     if (nextState.forceUpdate)
       return true
-    // if (this.state.unread !== nextState.unread)
-    //   return true
     if (this.state.show !== nextState.show)
       return true
     if (nextState.isConnected !== this.state.isConnected)
@@ -642,8 +639,6 @@ class ResourceList extends Component {
     var isSharedContext = model.id === PRODUCT_APPLICATION && resource._readOnly
 
     // let hasBacklink = this.props.prop && this.props.prop.items  &&  this.props.prop.backlink
-        // unread={resource._unread}
-        // newContact={this.state.newContact}
     return /*hasBacklink  &&*/  (isVerification  || isForm || isMyProduct)
     ? (<VerificationRow
         onSelect={() => this.selectResource(isVerification ? resource.document : resource)}
@@ -659,6 +654,7 @@ class ResourceList extends Component {
         key={resource[constants.ROOT_HASH]}
         navigator={this.props.navigator}
         changeSharedWithList={this.props.chat ? this.changeSharedWithList.bind(this) : null}
+        newContact={this.state.newContact}
         currency={this.props.currency}
         isOfficialAccounts={this.props.officialAccounts}
         multiChooser={this.props.multiChooser}

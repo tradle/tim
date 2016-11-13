@@ -9,10 +9,14 @@ var Icon = require('react-native-vector-icons/Ionicons');
 var RowMixin = require('./RowMixin');
 var ResourceList = require('./ResourceList')
 var Swipeout = require('react-native-swipeout')
-var reactMixin = require('react-mixin');
+
 var equal = require('deep-equal')
 var extend = require('extend')
+var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
+var Reflux = require('reflux');
+var reactMixin = require('react-mixin');
+
 var StyleSheet = require('../StyleSheet')
 
 import {
@@ -28,15 +32,29 @@ import {
 import React, { Component } from 'react'
 import ActivityIndicator from './ActivityIndicator'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
+const UNREAD_COLOR = '#139459'
+
+
 var dateProp
 
 class ResourceRow extends Component {
   constructor(props) {
     super(props)
-    if (this.props.changeSharedWithList)
+    if (props.changeSharedWithList)
       this.state = {sharedWith: true}
-    if (this.props.multiChooser)
+    if (props.multiChooser)
       this.state = {isChosen: false}
+    if (props.resource[constants.TYPE] === constants.TYPES.PROFILE)
+      this.state = {resource: props.resource, unread: props.resource._unread}
+  }
+  componentDidMount() {
+    this.listenTo(Store, 'onRowUpdate');
+  }
+  onRowUpdate(params) {
+    if (params.action !== 'updateRow')
+      return
+    if (params.resource[constants.ROOT_HASH] === this.props.resource[constants.ROOT_HASH])
+      this.setState({unread: params.resource._unread})
   }
   shouldComponentUpdate(nextProps, nextState) {
     if (Object.keys(this.props).length  !== Object.keys(nextProps).length)
@@ -44,6 +62,8 @@ class ResourceRow extends Component {
     if (this.props.resource.lastMessage !== nextProps.resource.lastMessage)
       return true
     if (this.state || nextState) {
+      if (this.state.unread !== nextState.unread)
+        return true
       if (nextState.sharedWith  &&  nextState.sharedWith === this.state.sharedWith)
         return true
       if (this.state  &&  nextState) {
@@ -133,13 +153,13 @@ class ResourceRow extends Component {
     //                      </TouchableHighlight>
     //                    : <View />;
     var cancelResource = (this.props.onCancel  ||  (this.state && this.state.sharedWith))
-                       ?  <View style={{position: 'absolute', right: 10, top: 25, backgroundColor: 'transparent'}}>
+                       ?  <View style={styles.multiChooser}>
                              <Icon name={this.state.sharedWith ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color={this.state.sharedWith ? '#B1010E' : '#dddddd'} />
                            </View>
                        : <View />
-    //
+
     var multiChooser = this.props.multiChooser
-                     ?  <View style={{position: 'absolute', right: 10, top: 25, backgroundColor: 'transparent'}}>
+                     ?  <View style={styles.multiChooser}>
                           <TouchableHighlight underlayColor='transparent' onPress={() => {
                             let id = utils.getId(resource)
                             if (this.props.chosen[id]) {
@@ -168,6 +188,16 @@ class ResourceRow extends Component {
     else
       dateRow = <View/>
 
+    let isNewContact = this.props.newContact  &&  this.props.newContact[constants.ROOT_HASH] === resource[constants.ROOT_HASH]
+    let count
+    if (isIdentity)
+      count = resource._unread
+
+    count = count ? <View style={styles.countView}>
+                      <Text style={styles.countText}>{count}</Text>
+                    </View>
+                  : <View/>
+
     // Grey out if not loaded provider info yet
             // <ActivityIndicator hidden='true' color='#629BCA'/>
     var isOpaque = resource[constants.TYPE] === constants.TYPES.ORGANIZATION && !resource.contacts
@@ -189,7 +219,7 @@ class ResourceRow extends Component {
       </View>
         )
     else {
-      let onPress = this.state
+      let onPress = this.state  &&  !this.state.resource
                   ? this.action.bind(this)
                   : this.props.onSelect
       return (
@@ -227,10 +257,11 @@ class ResourceRow extends Component {
               </View>
             </TouchableHighlight>
             : <View />}
+          {count}
           {dateRow}
           {multiChooser}
           {cancelResource}
-          <View style={styles.cellBorder} />
+          <View style={isNewContact ? styles.highlightedCellBorder : styles.cellBorder}  key={this.getNextKey()} />
         </View>
       );
     }
@@ -380,7 +411,7 @@ class ResourceRow extends Component {
 
     var isOfficialAccounts = this.props.isOfficialAccounts
     var isIdentity = resource[constants.TYPE] === constants.TYPES.PROFILE;
-    viewCols.forEach(function(v) {
+    viewCols.forEach((v) => {
       if (v === dateProp)
         return;
       if (properties[v].type === 'array')
@@ -456,8 +487,11 @@ class ResourceRow extends Component {
                     <Text style={[style, {width: w, paddingLeft: 2}]}>{val}</Text>
                   </View>
           }
-          else
+          else {
+            if (resource._unread  &&  v === 'lastMessage')
+              style = [style, {color: UNREAD_COLOR}]
             row = <Text style={style} key={self.getNextKey()}>{val}</Text>;
+          }
         }
         // if (first  &&  dateProp) {
         //   var val = utils.formatDate(new Date(resource[dateProp]), true);
@@ -502,6 +536,7 @@ class ResourceRow extends Component {
     });
   }
 }
+reactMixin(ResourceRow.prototype, Reflux.ListenerMixin);
 reactMixin(ResourceRow.prototype, RowMixin);
 
 var styles = StyleSheet.create({
@@ -578,6 +613,11 @@ var styles = StyleSheet.create({
     height: 1,
     marginLeft: 4,
   },
+  highlightedCellBorder: {
+    backgroundColor: '#139459',
+    height: 1,
+    marginLeft: 4,
+  },
   icon: {
     // width: 40,
     // height: 40,
@@ -586,28 +626,6 @@ var styles = StyleSheet.create({
     marginTop: 7,
     // color: '#7AAAc3'
   },
-  // orgIcon: {
-  //   width: 30,
-  //   height: 30,
-  //   borderWidth: 1,
-  //   borderColor: '#7AAAc3',
-  //   borderRadius: 15,
-  //   marginLeft: -30,
-  //   marginTop: 40,
-  // },
-  // orgImage: {
-  //   width: 30,
-  //   height: 30,
-  //   borderWidth: 1,
-  //   borderColor: '#7AAAc3',
-  //   borderRadius: 15,
-  //   marginRight: 10,
-
-  //   alignSelf: 'center',
-//    // position: 'absolute',
-//    // marginLeft: 10,
-//    // marginTop: 7,
-  // },
   online: {
     backgroundColor: 'green',
     borderRadius: 6,
@@ -627,6 +645,28 @@ var styles = StyleSheet.create({
     fontSize: 12,
     alignSelf: 'flex-end',
     color: '#b4c3cb'
+  },
+  countView: {
+    top: 25,
+    position: 'absolute',
+    right: 10,
+    justifyContent: 'center',
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    backgroundColor: UNREAD_COLOR
+  },
+  countText: {
+    fontSize: 14,
+    alignSelf: 'center',
+    // fontWeight: '600',
+    color: '#ffffff'
+  },
+  multiChooser: {
+    position: 'absolute',
+    right: 10,
+    top: 25,
+    backgroundColor: 'transparent'
   },
 });
 
