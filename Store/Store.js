@@ -1385,7 +1385,7 @@ var Store = Reflux.createStore({
         if (!profile.formatted) {
           profile.formatted = profile.firstName
         }
-        // profile._unread = 1
+        profile._unread = 1
       }
 
       profile.formatted = profile.firstName + (data && data.lastName ? ' ' + data.lastName : '')
@@ -2840,11 +2840,10 @@ var Store = Reflux.createStore({
     var model = this.getModel(params.modelName).value;
     var isMessage = model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1);
 
-    var resultList = result
     var shareableResources;
     var retParams = {
       action: isMessage  &&  !params.prop && !params._readOnly ? 'messageList' : 'list',
-      list: resultList,
+      list: result,
       spinner: params.spinner,
       isAggregation: params.isAggregation
     }
@@ -2857,21 +2856,23 @@ var Store = Reflux.createStore({
         }
         retParams.loadEarlierMessages = true
       }
+      let meId = utils.getId(me)
       if (!params.isAggregation  &&  params.to) {
         // let to = list[utils.getId(params.to)].value
         // if (to  &&  to[TYPE] === ORGANIZATION)
+        // entering the chat should clear customer's unread indicator
         shareableResources = this.getShareableResources(result, params.to)
-        // if (me.isEmployee  && params.to[TYPE] === PROFILE) {
-        //   let toId = utils.getId(params.to)
-        //   let to = this._getItem(toId)
-        //   if (!to.bot) {
-        //     to._unread = 0
-        //     db.put(toId, to)
-        //     .then(() => {
-        //       this.trigger({action: 'list', unread: to._unread, list: this.searchNotMessages({modelName: PROFILE})})
-        //     })
-        //   }
-        // }
+        if (me.isEmployee  && params.to[TYPE] === PROFILE) {
+          let toId = utils.getId(params.to)
+          let to = this._getItem(toId)
+          if (!to.bot) {
+            to._unread = 0
+            db.put(toId, to)
+            .then(() => {
+              this.trigger({action: 'updateRow', resource: to})
+            })
+          }
+        }
       }
       if (params.to) {
         let orgId
@@ -2917,6 +2918,28 @@ var Store = Reflux.createStore({
           }
         }
       }
+      // Filter out forms that were shared, leave only verifications
+      if (params.to  &&  params.to[TYPE] === ORGANIZATION  &&  !utils.isEmployee(params.to)) {//  &&  utils.getId(params.to) !== meId) {
+        let toId = utils.getId(this.getRepresentative(utils.getId(params.to)))
+        let filterOutForms = []
+        result.forEach((r) => {
+          if (r[TYPE] !== VERIFICATION  ||  !r._sharedWith ||  r._sharedWith.length === 0)
+            return
+          let shV = r._sharedWith.forEach((rr) => {
+            if (rr.bankRepresentative === toId) {
+              let d = this._getItem(r.document)
+              if (utils.getId(d.to) !== toId)
+                filterOutForms.push(utils.getId(r.document))
+            }
+          })
+        })
+        if (filterOutForms.length)
+          result = result.filter((rr) => {
+            return filterOutForms.indexOf(utils.getId(rr)) === -1
+          })
+        retParams.list = result
+      }
+
     }
     // if (isMessage) {
     //   let orgId = utils.getId(params.to)
@@ -4763,8 +4786,20 @@ var Store = Reflux.createStore({
         }
         this.onAddMessage(msg, true)
       }
-      else if (isMessage  &&  !noTrigger)
+      else if (isMessage  &&  !noTrigger) {
+        if (onMessage) {
+          let meId = utils.getId(me)
+          if (me.isEmployee) {
+            let notMeId = toId === meId ? fromId  : toId
+            let notMe = this._getItem(notMeId)
+            if (notMe  &&  !notMe.bot) {
+              ++notMe._unread
+              this.trigger({action: 'updateRow', resource: notMe})
+            }
+          }
+        }
         this.trigger({action: 'addItem', resource: val})
+      }
       else if (representativeAddedTo  &&  !triggeredOrgs) {
         var orgList = this.searchNotMessages({modelName: ORGANIZATION})
         this.trigger({action: 'list', list: orgList, forceUpdate: true})
@@ -4878,7 +4913,7 @@ var Store = Reflux.createStore({
       //   let notMe = this._getItem(notMeId)
       //   if (!notMe.bot) {
       //     ++notMe._unread
-      //     this.trigger({action: 'list', list: this.searchNotMessages({modelName: PROFILE}), unread: notMe._unread})
+      //     // this.trigger({action: 'updateRow', resource: notMe})
       //   }
       // }
       let profileModel = this.getModel(PROFILE).value
