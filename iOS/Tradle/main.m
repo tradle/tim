@@ -16,12 +16,12 @@ int main(int argc, char *argv[])
 {
   @autoreleasepool
   {
-#ifdef DEBUG
+//#ifdef DEBUG
     return UIApplicationMain(argc, argv,
                              NSStringFromClass([QTouchposeApplication class]),
                              NSStringFromClass([AppDelegate class]));
-#else
-    return UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));
-#endif
+//#else
+//    return UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));
+//#endif
   }
 }
