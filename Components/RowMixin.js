@@ -229,7 +229,7 @@ var RowMixin = {
                    ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
                    : <View />
       var shareView = <View style={[styles.shareButton, {opacity: this.props.resource.documentCreated ? 0.3 : 1}]}>
-                        <CustomIcon name='tradle' style={{color: '#4982B1' }} size={32} />
+                        <CustomIcon name='tradle' style={{color: '#ffffff' }} size={32} />
                         <Text style={styles.shareText}>{translate('Share')}</Text>
                       </View>
       var orgTitle = this.props.to[constants.TYPE] === constants.TYPES.ORGANIZATION
@@ -465,15 +465,17 @@ var styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 5,
     borderRadius: 10,
-    borderWidth: 1,
+    // borderWidth: 1,
     // borderColor: '#215A89',
-    borderColor: '#4982B1',
+    // borderColor: '#4982B1',
     // backgroundColor: '#ffffff'
-    // backgroundColor: '#4982B1'
+    backgroundColor: '#4982B1'
   },
   shareText: {
-    color: '#4982B1',
-    fontSize: 18,
+    // color: '#4982B1',
+    color: '#ffffff',
+    fontSize: 20,
+    // fontWeight: '600',
     paddingHorizontal: 3,
     alignSelf: 'center'
   },
