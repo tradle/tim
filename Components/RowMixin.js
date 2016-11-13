@@ -201,8 +201,14 @@ var RowMixin = {
               ? <Image source={{uri: utils.getImageUri(document.photos[0].url)}}  style={styles.cellImage} />
               : <View />;
     var headerStyle = {paddingTop: 5, alignSelf: 'center'}
+    var isShared = this.isShared(verification)
+
     var header =  <View style={headerStyle}>
-                    <Text style={[styles.resourceTitle, styles.header, {color: this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>{translate(model) + ' ...'}</Text>
+                    <Text style={[styles.resourceTitle, styles.header, {color: isShared ? '#757575' : this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>
+                      {isShared
+                        ? translate('asVerifiedBy', verification.organization.title)
+                        : translate(model) + ' ...'}
+                    </Text>
                   </View>
     let addStyle
     if (!onPress)
