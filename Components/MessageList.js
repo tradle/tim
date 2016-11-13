@@ -486,11 +486,11 @@ class MessageList extends Component {
         }
       }
       else {
-        if (!this.state.isLoading  &&  !this.props.navigator.isConnected) {
-          alert = (this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION)
-                ? Alert.alert(translate('noConnectionForPL', this.props.resource.name))
-                : Alert.alert(translate('noConnection'))
-        }
+        // if (!this.state.isLoading  &&  !this.props.navigator.isConnected) {
+        //   alert = (this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION)
+        //         ? Alert.alert(translate('noConnectionForPL', this.props.resource.name))
+        //         : Alert.alert(translate('noConnection'))
+        // }
         // content =  <NoResources
         //             filter={this.state.filter}
         //             model={model}
