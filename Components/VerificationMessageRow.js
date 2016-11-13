@@ -67,9 +67,13 @@ class VerificationMessageRow extends Component {
     }
     let isShared = this.isShared()
     isMyMessage = isShared
-    let bgColor =  isThirdPartyVerification
-                ? '#93BEBA'
-                : this.props.bankStyle.VERIFIED_HEADER_COLOR
+    let bgColor
+    if (isThirdPartyVerification)
+      bgColor = '#93BEBA'
+    else if (isShared)
+      bgColor = this.props.bankStyle.SHARED_WITH_BG
+    else
+      bgColor = this.props.bankStyle.VERIFIED_HEADER_COLOR
     let verifiedBy = isShared ? translate('youShared', orgName) : translate('verifiedBy', orgName)
     let numberOfCharacters = msgWidth / 12
     if (verifiedBy.length > numberOfCharacters)
@@ -77,22 +81,27 @@ class VerificationMessageRow extends Component {
 
     let headerStyle = [
       styles.verifiedHeader,
-      {backgroundColor: bgColor, opacity: isShared ? 0.5 : 1},
+      {backgroundColor: bgColor}, // opacity: isShared ? 0.5 : 1},
       isMyMessage ? {borderTopRightRadius: 0, borderTopLeftRadius: 10} : {borderTopLeftRadius: 0, borderTopRightRadius: 10}
     ]
 
     renderedRow = <View>
                     <View style={headerStyle}>
-                      <Icon style={styles.verificationIcon} size={20} name={'md-checkmark'} />
-                      <Text style={styles.verificationHeaderText}>{verifiedBy}</Text>
+                      {isShared
+                       ? <View/>
+                       : <Icon style={styles.verificationIcon} size={20} name={'md-checkmark'} />
+                      }
+                      <Text style={styles.verificationHeaderText}>{isShared ? translate(msgModel) : verifiedBy}</Text>
                     </View>
                     <View>
-                      {this.formatDocument({
-                        model: msgModel,
-                        verification: resource,
-                        onPress: this.verify.bind(this),
-                        isAccordion: isThirdPartyVerification
-                      })}
+                      {
+                        this.formatDocument({
+                          model: msgModel,
+                          verification: resource,
+                          onPress: this.verify.bind(this),
+                          isAccordion: isThirdPartyVerification
+                        })
+                      }
                     </View>
                   </View>
 
@@ -104,7 +113,7 @@ class VerificationMessageRow extends Component {
     }
     let addStyle = [
       styles.verificationBody,
-      {backgroundColor: this.props.bankStyle.VERIFICATION_BG, borderColor: bgColor},
+      {backgroundColor: isShared ? '#ffffff' : this.props.bankStyle.VERIFICATION_BG, borderColor: bgColor},
       isMyMessage ? {borderTopRightRadius: 0} : {borderTopLeftRadius: 0}
     ];
     let messageBody =
