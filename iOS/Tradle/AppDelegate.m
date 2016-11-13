@@ -14,7 +14,7 @@
 #import "CodePush.h"
 #import <Fabric/Fabric.h>
 #import <Crashlytics/Crashlytics.h>
-// #import "QTouchposeApplication.h"
+#import "QTouchposeApplication.h"
 #import "RCTPushNotificationManager.h"
 #import "Orientation.h"
 #import <asl.h>
@@ -41,9 +41,9 @@
    */
 
 #ifdef DEBUG
-    jsCodeLocation = [NSURL URLWithString:@"http://192.168.1.4:8081/index.ios.bundle?platform=ios&dev=true"];
-//    QTouchposeApplication *touchposeApplication = (QTouchposeApplication *)application;
-//    touchposeApplication.alwaysShowTouches = YES;
+  jsCodeLocation = [NSURL URLWithString:@"http://192.168.1.4:8081/index.ios.bundle?platform=ios&dev=true"];
+  QTouchposeApplication *touchposeApplication = (QTouchposeApplication *)application;
+  touchposeApplication.alwaysShowTouches = YES;
 #else
   jsCodeLocation = [CodePush bundleURL];
     // jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
