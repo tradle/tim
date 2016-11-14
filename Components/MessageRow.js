@@ -15,7 +15,7 @@ var RowMixin = require('./RowMixin');
 var Accordion = require('react-native-accordion')
 var extend = require('extend')
 var equal = require('deep-equal')
-var formDefaults = require('@tradle/models').formDefaults;
+var formDefaults = require('../data/formDefaults.json')
 var TradleW = require('../img/TradleW.png')
 var Actions = require('../Actions/Actions');
 import { makeResponsive } from 'react-native-orient'
