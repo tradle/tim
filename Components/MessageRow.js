@@ -63,6 +63,7 @@ class MessageRow extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     return !equal(this.props.resource, nextProps.resource)   ||
            !equal(this.props.to, nextProps.to)               ||
+           this.props.addedItem !== nextProps.addedItem      ||
            this.props.orientation !== nextProps.orientation  ||
            this.props.sendStatus !== nextProps.sendStatus
   }
