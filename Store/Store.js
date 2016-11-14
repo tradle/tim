@@ -5008,15 +5008,16 @@ var Store = Reflux.createStore({
     }
     if (val[TYPE] === FORM_REQUEST) {
       let formRequests = this.searchMessages({modelName: FORM_REQUEST, to: org})
-      formRequests.forEach((r) => {
-        if (!r.documentCreated) {
-          r.documentCreated = true
-          let rId = utils.getId(r)
-          let rr = this._getItem(rId)
-          rr.documentCreated = true
-          batch.push({type: 'put', key: rId, value: r})
-        }
-      })
+      if (formRequests)
+        formRequests.forEach((r) => {
+          if (!r.documentCreated) {
+            r.documentCreated = true
+            let rId = utils.getId(r)
+            let rr = this._getItem(rId)
+            rr.documentCreated = true
+            batch.push({type: 'put', key: rId, value: r})
+          }
+        })
     }
     // if (onMessage  &&  val[TYPE] === FORGOT_YOU) {
     //   this.forgotYou(from)
