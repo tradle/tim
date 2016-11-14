@@ -135,7 +135,7 @@ class PhotoList extends Component {
 
     return (
       <Animated.View style={[{paddingTop: 2, margin: 1}, {transform: [{scale: this.state.anim}]},imageStyle[0]]} key={this.getNextKey() + '_photo'}>
-        <TouchableHighlight underlayColor='transparent' onPress={this.props.callback ? this.props.callback.bind(this, photo) : this.showCarousel.bind(this, photo)}>
+        <TouchableHighlight underlayColor='transparent' onPress={this.props.callback ? this.props.callback.bind(this, photo) : this.showCarousel.bind(this, photo, this.props.isView)}>
            <Image resizeMode='cover' style={[styles.thumbCommon, imageStyle]} source={source} />
         </TouchableHighlight>
       </Animated.View>

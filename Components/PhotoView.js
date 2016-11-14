@@ -102,7 +102,7 @@ class PhotoView extends Component {
  //          }}
     return (
           <Animated.View style={style}>
-            <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, resource.photos[0])}>
+            <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, resource.photos[0], true)}>
               <Image resizeMode='cover' source={source} style={image} />
             </TouchableHighlight>
           </Animated.View>
@@ -122,6 +122,7 @@ class PhotoView extends Component {
     //       </Animated.View>
     // )
   }
+  /*
   shwCarousel(currentPhoto) {
     var photoUrls = [];
     // var currentPhoto = this.props.currentPhoto || this.props.photos[0];
@@ -143,6 +144,7 @@ class PhotoView extends Component {
     );
 
   }
+  */
   openModal() {
     this.setState({isModalOpen: true});
   }

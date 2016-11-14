@@ -184,7 +184,7 @@ class FormMessageRow extends Component {
         {date}
         {messageBody}
         <View style={photoListStyle}>
-          <PhotoList photos={photoUrls} resource={this.props.resource} style={[photoStyle, {marginTop: -5}]} navigator={this.props.navigator} numberInRow={inRow} />
+          <PhotoList photos={photoUrls} resource={this.props.resource} style={[photoStyle, {marginTop: -5}]} navigator={this.props.navigator} numberInRow={inRow} chat={this.props.to} />
         </View>
         {sendStatus}
       </View>
