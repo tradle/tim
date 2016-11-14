@@ -228,7 +228,7 @@ function setPassword (navigator, isChangePassword) {
       passProps: {
         ...PASSWORD_PROMPTS,
         mode: PasswordCheck.Modes.set,
-        validate: (pass) => { return pass.length > 4 },
+        validate: validateGesturePassword,
         isChange: isChangePassword,
         // promptInvalidSet: translate('passwordLimitations'),
         onSuccess: (pass) => {
@@ -261,6 +261,7 @@ function checkPassword (navigator, isChangePassword) {
       mode: PasswordCheck.Modes.check,
       maxAttempts: 3,
       isChange: isChangePassword,
+      validate: validateGesturePassword,
       isCorrect: (pass) => {
         return utils.checkHashedPassword(PASSWORD_ITEM_KEY, pass)
       },
@@ -285,4 +286,8 @@ function getPasswordPrompts () {
   }
 
   return translated
+}
+
+function validateGesturePassword (pass) {
+  return pass.length > 4
 }

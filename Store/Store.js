@@ -727,49 +727,38 @@ var Store = Reflux.createStore({
     // return newResult.reverse()
   },
 
-
   getInfo(serverUrls, retry, id) {
-    let self = this
+    return Q.all(serverUrls.map(url => {
+      return this.getServiceProviders(url, retry, id)
+        .then(results => {
+          // var httpClient = driverInfo.httpClient
+          var wsClients = driverInfo.wsClients
+          // var whitelist = driverInfo.whitelist
+          var tlsKey = driverInfo.tlsKey
+          // if (!httpClient) {
+          //   httpClient = new HttpClient()
+          //   driverInfo.httpClient = httpClient
+          //   meDriver.ready().then(function () {
+          //     var myHash = meDriver.myRootHash()
+          //     httpClient.setRootHash(myHash)
+          //   })
 
-    let defer = Q.defer()
-    let togo = serverUrls.length
-    serverUrls.forEach((url) => {
-      self.getServiceProviders(url, retry, id)
-      .then((results) => {
-        // var httpClient = driverInfo.httpClient
-        var wsClients = driverInfo.wsClients
-        // var whitelist = driverInfo.whitelist
-        var tlsKey = driverInfo.tlsKey
-        // if (!httpClient) {
-        //   httpClient = new HttpClient()
-        //   driverInfo.httpClient = httpClient
-        //   meDriver.ready().then(function () {
-        //     var myHash = meDriver.myRootHash()
-        //     httpClient.setRootHash(myHash)
-        //   })
-
-        //   httpClient.on('message', function () {
-        //     meDriver.receiveMsg.apply(meDriver, arguments)
-        //   })
-        // }
-        results.forEach(function(provider) {
-          self.addProvider(provider)
-          Push.subscribe(provider.hash)
-            .catch(err => console.log('failed to register for push notifications'))
+          //   httpClient.on('message', function () {
+          //     meDriver.receiveMsg.apply(meDriver, arguments)
+          //   })
+          // }
+          results.forEach(provider => {
+            this.addProvider(provider)
+            Push.subscribe(provider.hash)
+              .catch(err => console.log('failed to register for push notifications'))
+          })
         })
-
-        if (--togo === 0) {
-          defer.resolve()
-          // meDriver.watchTxs(whitelist)
-          return meDriver
-        }
-      })
-      // .catch((err) => {
-      //   debugger
-      // })
-    })
-
-    return defer.promise
+        .catch(err => {
+          // forgive individual errors for batch getInfo
+          if (id) throw err
+        })
+        .then(() => meDriver)
+    }))
 
     // return Q.all(serverUrls.map(url => self.getServiceProviders(url, retry)))
     // .then(function(results) {
@@ -2580,25 +2569,37 @@ var Store = Reflux.createStore({
     })
   },
   onAddApp(serverUrl) {
-    let parts = serverUrl.split(';')
-    let id = parts[1]
+    const parts = serverUrl.split(';')
+    const [url, id] = parts
     // let idx = serverUrl.lastIndexOf('/')
     // let id = parts[parts.length - 1]
     // let url = parts.slice(0, parts.length - 1).join('/')
-    return this.getInfo([parts[0]], false, id)
+    const fullUrl = utils.joinURL(url, id)
+    return this.getInfo([url], false, id)
     .then(() => {
-      let newProvider = SERVICE_PROVIDERS.filter((r) => r.id === id)
-      if (newProvider.length)
-        this.addToSettings(newProvider[0])
-      this.trigger({action: 'addApp', error: newProvider.length ? null : 'Oops! No one is there.'})
+      const newProvider = tradleUtils.find(SERVICE_PROVIDERS, r => r.id === id)
+      if (!newProvider) {
+        return this.trigger({
+          action: 'addApp',
+          error: `no provider found at url: ${fullUrl}`
+        })
+      }
+
+      this.addToSettings(newProvider)
+      this.trigger({ action: 'addApp' })
+
       // let list = self.searchNotMessages({modelName: ORGANIZATION})
       // this.trigger({
       //   action: 'list',
       //   list: list,
       // })
     })
-    .catch((err) => {
-       this.trigger({action: 'addApp', error: 'Oops! No one is there.'})
+    .catch(err => {
+       // this.trigger({action: 'addApp', error: 'Oops! No one is there.'})
+      this.trigger({
+        action: 'addApp',
+        error: `Server at ${fullUrl} is unavailable: ` + err.message
+      })
     })
   },
 
@@ -3260,19 +3261,19 @@ var Store = Reflux.createStore({
     if (!thisChatMessages  &&  (!params.to  ||  chatId === meId)) {
       thisChatMessages = []
       let self = this
-      Object.keys(list).filter((key) => {
+      Object.keys(list).forEach(key => {
         let r = self._getItem(key)
         let type = r[TYPE]
         let m = this.getModel(type)
-        if (!m)
-          return false
+        if (!m) return
+
         if (type === modelName                      ||
            m.value.subClassOf === modelName         ||
            (modelName === MESSAGE  &&  m.value.interfaces)) {
           thisChatMessages.push({id: key, time: r.time})
-          return true
         }
       })
+
       thisChatMessages.sort((a, b) => {
         return a.time - b.time
       })

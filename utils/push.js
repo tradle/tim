@@ -36,7 +36,7 @@ exports.resetBadgeNumber = function () {
 }
 
 function createPusher (opts) {
-  if (utils.isSimulator() || !(utils.isIOS() || utils.isAndroid())) return Promise.resolve({})
+  if (__DEV__ || utils.isSimulator() || !(utils.isIOS() || utils.isAndroid())) return Promise.resolve({})
 
   const me = opts.me
   const node = opts.node
