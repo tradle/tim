@@ -478,11 +478,10 @@ var NavigationBarRouteMapper = {
       return null;
     var style = [platformStyles.navBarText];
     if (route.tintColor)
-      style.push(route.tintColor);
+      style.push({color: route.tintColor});
     else {
       style.push(styles.navBarButtonText);
-      var st = {color: color}
-      style.push(st);
+      style.push({color: color});
     }
     var iconIdx = lbTitle.indexOf('|')
     var icon = iconIdx !== -1 ? lbTitle.substring(idx + 1) : lbTitle === 'Back' ? 'ios-arrow-back' : null
