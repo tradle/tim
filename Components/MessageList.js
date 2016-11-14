@@ -33,7 +33,7 @@ import { makeResponsive } from 'react-native-orient'
 // var ResourceTypesScreen = require('./ResourceTypesScreen')
 
 var LINK_COLOR
-var LIMIT = 10
+var LIMIT = 20
 var NEXT_HASH = '_n'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const MY_PRODUCT = 'tradle.MyProduct'
@@ -105,7 +105,7 @@ class MessageList extends Component {
     if (this.props.isAggregation)
       params.isAggregation = true;
 
-    utils.onNextTransitionEnd(this.props.navigator, () => Actions.messageList(params));
+    utils.onNextTransitionEnd(this.props.navigator, () => Actions.list(params));
   }
   componentDidMount() {
     this.listenTo(Store, 'onAction');
@@ -138,14 +138,18 @@ class MessageList extends Component {
         modelName: this.props.modelName,
         to: this.props.resource,
         context: this.state.allContexts ? null : this.state.context,
-        limit: this.state.list ? this.state.list.length + 1 : LIMIT
+        limit: this.state.list ? Math.max(this.state.list.length + 1, LIMIT) : LIMIT
       }
 
       if (params.resource._sendStatus) {
         this.state.sendStatus = params.resource._sendStatus
         this.state.sendResource = params.resource
       }
-      Actions.messageList(actionParams);
+      else if (params.resource[constants.TYPE] === FORM_REQUEST)
+        this.state.addedItem = params.resource
+      else
+        this.state.addedItem = null
+      Actions.list(actionParams);
       return;
     }
     this.state.newItem = false
@@ -159,7 +163,7 @@ class MessageList extends Component {
     if (params.action === 'addMessage') {
       this.state.sendStatus = params.resource._sendStatus
       this.state.sendResource = params.resource
-      Actions.messageList({
+      Actions.list({
         modelName: this.props.modelName,
         to: this.props.resource,
         limit: this.state.list ? this.state.list.length + 1 : LIMIT,
@@ -376,7 +380,7 @@ class MessageList extends Component {
       limit: this.state.list ? this.state.list.length + 1 : LIMIT
     }
     this.state.emptySearch = true
-    Actions.messageList(actionParams);
+    Actions.list(actionParams);
   }
 
   renderRow(resource, sectionId, rowId)  {
@@ -418,11 +422,12 @@ class MessageList extends Component {
     props.productToForms = this.state.productToForms
     props.shareableResources = this.state.shareableResources,
     props.isAggregation = isAggregation
+    props.addedItem = this.state.addedItem
 
     return   <MessageRow {...props} />
   }
   addedMessage(text) {
-    Actions.messageList({
+    Actions.list({
       modelName: this.props.modelName,
       to: this.props.resource,
       context: this.state.allContexts ? null : this.state.context,
@@ -509,6 +514,7 @@ class MessageList extends Component {
         messages={this.state.list}
         messageSent={this.state.sendResource}
         messageSentStatus={this.state.sendStatus}
+        addedItem={this.state.addedItem}
         enableEmptySections={true}
         autoFocus={false}
         textRef={'chat'}
@@ -617,7 +623,7 @@ class MessageList extends Component {
   // Select context to filter messages for the particular context
   selectContext(context) {
     this.props.navigator.pop()
-    Actions.messageList({
+    Actions.list({
       modelName: this.props.modelName,
       to: this.props.resource,
       context: context,
@@ -684,7 +690,7 @@ class MessageList extends Component {
     // newest messages have to be at the begining of the array
     var list = this.state.list;
     var id = utils.getId(list[0])
-    Actions.messageList({
+    Actions.list({
       lastId: id,
       limit: LIMIT,
       loadEarlierMessages: true,
