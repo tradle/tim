@@ -65,7 +65,7 @@ class MessageView extends Component {
       var len = currentRoutes.length;
       if (currentRoutes[len - 1].id === 5)
         this.props.navigator.pop();
-      Actions.messageList({
+      Actions.list({
         modelName: constants.TYPES.MESSAGE,
         to: params.resource
       });
