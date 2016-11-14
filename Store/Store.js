@@ -3261,19 +3261,19 @@ var Store = Reflux.createStore({
     if (!thisChatMessages  &&  (!params.to  ||  chatId === meId)) {
       thisChatMessages = []
       let self = this
-      Object.keys(list).filter((key) => {
+      Object.keys(list).forEach(key => {
         let r = self._getItem(key)
         let type = r[TYPE]
         let m = this.getModel(type)
-        if (!m)
-          return false
+        if (!m) return
+
         if (type === modelName                      ||
            m.value.subClassOf === modelName         ||
            (modelName === MESSAGE  &&  m.value.interfaces)) {
           thisChatMessages.push({id: key, time: r.time})
-          return true
         }
       })
+
       thisChatMessages.sort((a, b) => {
         return a.time - b.time
       })
