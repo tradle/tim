@@ -69,7 +69,7 @@ class ProductChooser extends Component {
       if (this.props.resource[constants.TYPE] === constants.TYPES.PROFILE) {
         if (params.resource.products  &&  params.resource.products.length) {
           params.resource.products.forEach((r) => {
-            r.forms.forEach((f) => {
+            utils.getModel(r).value.forms.forEach((f) => {
               products.push(utils.getModel(f).value)
             })
           })
