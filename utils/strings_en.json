@@ -153,4 +153,6 @@
     "listOfProducts": "List of products",
     "backTo": "Back to {1}",
     "backToResults": "Back to results",
+    "formListError": "Unavailable",
+    "formListErrorDescription": "Forms can be requested once the customer begins an application",
 }
