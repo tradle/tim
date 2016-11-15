@@ -151,4 +151,6 @@
     "shareContext": "Share {1}",
     "shareAllPastAndFutureMessages": "Share all past and future messages in this context with selected parties",
     "listOfProducts": "List of products",
+    "backTo": "Back to {1}",
+    "backToResults": "Back to results",
 }
