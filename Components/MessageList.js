@@ -609,8 +609,9 @@ class MessageList extends Component {
   // Context chooser shows all the context of the particular chat.
   // When choosing the context chat will show only the messages in linked to this context.
   contextChooser(context) {
+    let name = this.props.resource[constants.TYPE] === constants.TYPES.PROFILE ? this.props.resource.formatted : this.props.resource.name
     this.props.navigator.push({
-      title: translate('contextsFor') + ' ' + this.props.resource.name,
+      title: translate('contextsFor') + ' ' + name,
       id: 23,
       component: ContextChooser,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
@@ -716,6 +717,10 @@ class MessageList extends Component {
   }
 
   chooseFormForCustomer() {
+    if (!this.state.context) {
+      Alert.alert(translate('formListError'), translate('formListErrorDescription'))
+      return
+    }
     var currentRoutes = this.props.navigator.getCurrentRoutes();
     var resource = this.props.resource
     this.setState({show: false})
