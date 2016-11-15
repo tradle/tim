@@ -249,6 +249,7 @@ class MessageList extends Component {
         list: list,
         shareableResources: params.shareableResources,
         allLoaded: false,
+        addedItem: this.state.addedItem,
         context: params.context,
         isEmployee: isEmployee,
         loadEarlierMessages: params.loadEarlierMessages,
@@ -415,6 +416,7 @@ class MessageList extends Component {
     props = extend(props, moreProps)
     if (model.id === constants.TYPES.VERIFICATION)
       return  <VerificationMessageRow {...props} />
+
     if (model.subClassOf === constants.TYPES.FORM)
       return <FormMessageRow {...props} />
 
