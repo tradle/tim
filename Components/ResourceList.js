@@ -177,10 +177,10 @@ class ResourceList extends Component {
       let curRoute = routes[routes.length - 1]
       if (curRoute.id === 11  &&  curRoute.passProps.resource[constants.ROOT_HASH] === params.to[constants.ROOT_HASH])
         return
-      // this.setState({newContact: params.newContact})
-      let style = this.mergeStyle(params.to.style)
+      this.setState({newContact: params.newContact})
+      let style = this.mergeStyle(params.newContact.style)
       this.props.navigator[curRoute.id === 3 ? 'replace' : 'push']({
-        title: params.to.firstName,
+        title: params.newContact.firstName,
         component: MessageList,
         id: 11,
         backButtonTitle: 'Back',
@@ -344,9 +344,7 @@ class ResourceList extends Component {
   mergeStyle(newStyle) {
     let style = {}
     extend(style, defaultBankStyle)
-    if (newStyle)
-      style = extend(style, newStyle)
-    return style
+    return newStyle ? extend(style, newStyle) : style
   }
   shouldComponentUpdate(nextProps, nextState) {
     if (nextState.forceUpdate)
@@ -355,8 +353,8 @@ class ResourceList extends Component {
       return true
     if (nextState.isConnected !== this.state.isConnected)
       return true
-    // if (nextState.newContact  &&  (!this.state.newContact ||  this.state.newContact !== this.state.newContact))
-    //   return true
+    if (nextState.newContact  &&  (!this.state.newContact ||  this.state.newContact !== this.state.newContact))
+      return true
     // if (this.state.isConnected !== nextState.isConnected)
     //   if (!this.state.list && !nextState.list)
     //     return true
