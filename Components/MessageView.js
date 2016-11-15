@@ -125,7 +125,7 @@ class MessageView extends Component {
       prefill: resource,
       from: resource.to,
       to: resource.from,
-      _context: this.props.context,
+      _context: resource._context,
       message: text || translate('pleaseCorrectTheErrors')
     }
     Actions.addMessage(formError)
