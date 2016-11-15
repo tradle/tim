@@ -5,7 +5,7 @@ var utils = require('../utils/utils');
 var translate = utils.translate
 var constants = require('@tradle/constants');
 var Accordion = require('react-native-accordion')
-// var Icon = require('react-native-vector-icons/Ionicons');
+var Icon = require('react-native-vector-icons/Ionicons');
 import LinearGradient from 'react-native-linear-gradient'
 import CustomIcon from '../styles/customicons'
 var StyleSheet = require('../StyleSheet')
@@ -426,6 +426,20 @@ var RowMixin = {
     if (to[constants.TYPE] === constants.TYPES.PROFILE)
       return false
     return utils.getId(resource.organization) !== utils.getId(to)
+  },
+  getSendStatus() {
+    if (!this.props.sendStatus)
+      return <View />
+    if (this.props.sendStatus === 'Sent')
+      return <View style={styles.sendStatus}>
+               <Text style={styles.sentStatus}>{this.props.sendStatus}</Text>
+               <Icon name={'ios-checkmark-outline'} size={15} color='#009900' />
+             </View>
+    else
+      return <View style={styles.sendStatus}>
+               <Text style={styles.otherStatus}>{this.props.sendStatus}</Text>
+             </View>
+               // <Text style={styles.sendStatusDefaultText}>{this.props.sendStatus}</Text>
   }
 
   // anyOtherRow(prop, backlink, styles) {
@@ -567,7 +581,25 @@ var styles = StyleSheet.create({
     fontSize: 18,
     marginTop: 2,
     paddingRight: 10
-  }
+  },
+  sentStatus: {
+    fontSize: 14,
+    color: '#009900',
+    marginRight: 3
+  },
+  sendStatus: {
+    alignSelf: 'flex-end',
+    flexDirection: 'row',
+    marginHorizontal: 5,
+    marginTop: -3
+  },
+  otherStatus: {
+    alignSelf: 'flex-end',
+    fontSize: 14,
+    color: '#757575',
+    marginHorizontal: 5,
+    // paddingBottom: 20
+  },
 });
 
 module.exports = RowMixin;

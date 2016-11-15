@@ -110,19 +110,8 @@ class FormMessageRow extends Component {
              : <View />;
 
     var sendStatus = <View />
-    if (this.props.sendStatus  &&  this.props.sendStatus !== null) {
-      switch (this.props.sendStatus) {
-      case 'Sent':
-        sendStatus = <View style={styles.sendStatus}>
-                       <Text style={styles.sentStatus}>{this.props.sendStatus}</Text>
-                       <Icon name={'ios-checkmark-outline'} size={15} color='#009900' />
-                     </View>
-        break
-      default:
-        sendStatus = <Text style={styles.otherStatus}>{this.props.sendStatus}</Text>
-        break
-      }
-    }
+    if (this.props.sendStatus  &&  this.props.sendStatus !== null)
+      sendStatus = this.getSendStatus()
     var sealedStatus = (resource.txId)
                      ? <View style={styles.sealedStatus}>
                          <Icon name={'ios-ribbon'} size={30} color='#316A99' style={{opacity: 0.5}} />
@@ -413,18 +402,6 @@ var styles = StyleSheet.create({
   myMsg: {
     justifyContent: 'flex-end',
     color: '#ffffff'
-  },
-  sentStatus: {
-    fontSize: 14,
-    color: '#009900',
-    marginRight: 3
-  },
-  otherStatus: {
-    alignSelf: 'flex-end',
-    fontSize: 14,
-    color: '#757575',
-    marginHorizontal: 5,
-    paddingBottom: 20
   },
   youSharedText: {
     color: '#ffffff',

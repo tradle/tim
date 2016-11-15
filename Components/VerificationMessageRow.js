@@ -118,13 +118,16 @@ class VerificationMessageRow extends Component {
     ];
     let messageBody =
           <TouchableHighlight onPress={this.verify.bind(this, resource)} underlayColor='transparent'>
+          <View style={{flexDirection: 'column', flex: 1}}>
             <View style={[styles.row, viewStyle]}>
               {this.getOwnerPhoto(isMyMessage)}
               <View style={[styles.textContainer, addStyle]}>
                 <View style={{flex: 1}}>
                   {renderedRow}
                </View>
-              </View>
+            </View>
+          </View>
+              {this.getSendStatus()}
             </View>
           </TouchableHighlight>
 
