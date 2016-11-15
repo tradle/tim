@@ -558,7 +558,6 @@ var Store = Reflux.createStore({
 
     return Q(meDriver)
   },
-
   initChats() {
     let meId = utils.getId(me)
     let meOrgId = me.organization ? utils.getId(me.organization) : null
@@ -726,7 +725,6 @@ var Store = Reflux.createStore({
     return newResult
     // return newResult.reverse()
   },
-
   getInfo(serverUrls, retry, id) {
     return Q.all(serverUrls.map(url => {
       return this.getServiceProviders(url, retry, id)
@@ -1812,6 +1810,15 @@ var Store = Reflux.createStore({
       return
     if (!r.time  &&  !timeShared)
       return
+    // if (r.sharedWith) {
+    //   if (r[TYPE] !== VERIFICATION) {
+    //     if (id.split('_')[0] === ORGANIZATION) {
+    //       let o = this._getItem(utils.getId(r.to)).organization
+    //       if (utils.getId(o) !== id)
+    //         return
+    //     }
+    //   }
+    // }
     // Check if this is a shared context
     if (r._context) {
       let c = this._getItem(r._context)
@@ -2707,15 +2714,40 @@ var Store = Reflux.createStore({
     if (formResource  &&  formResource._context)
       opts.other = {context: utils.getId(formResource._context).split('_')[1]}
 
+    var documentCreated = formResource.documentCreated
+    var key = utils.getId(formResource)
+    var r = this._getItem(key)
+    r.documentCreated = true
+    // disable FormRequest from being used again
+    this.trigger({action: 'addItem', context: resource.context, resource: r})
+    if (documentCreated)
+      return
+
+    var time = new Date().getTime()
+    var toId = utils.getId(to)
+    var ver
+    if (resource[ROOT_HASH]) {
+      // Show sending status to not to keep customer in suspense
+      if (!resource.sharedWith)
+        resource.sharedWith = []
+      let key = utils.getId(resource)
+      ver = self._getItem(key)
+      ver._sharedWith.push(this.createSharedWith(toId, time))
+      ver._sendStatus = this.isConnected ? SENDING : QUEUED
+      utils.optimizeResource(ver)
+      this.addMessagesToChat(toOrgId, ver, false, time)
+      this.trigger({action: 'addItem', context: resource.context, resource: ver})
+    }
+
     var promise = meDriver.send({...opts, link: resource.document[CUR_HASH]})
     return promise
     .then(function () {
       return resource[CUR_HASH] ? meDriver.send({...opts, link: resource[CUR_HASH]}) : Q()
       // return meDriver.send({...opts, link: resource.document[ROOT_HASH]})
     })
-    .then(function() {
+    .then(() => {
       var key = utils.getId(formResource)
-      var r = self._getItem(key)
+      var r = this._getItem(key)
       r.documentCreated = true
       if (r[TYPE] === FORM_REQUEST)
         r.document = resource[TYPE] === VERIFICATION
@@ -2724,48 +2756,42 @@ var Store = Reflux.createStore({
 
       var batch = []
       batch.push({type: 'put', key: key, value: r})
-      var toId = utils.getId(to)
-      var time = new Date().getTime()
-      // let sh = {
-      //   [TYPE]: SHARED_RESOURCE,
-      //   [ROOT_HASH]: self.getNonce(),
-      //   resource: self.buildRef(resource),
-      //   from: resource.from,
-      //   to: resource.to,
-      //   time: time
-      // }
-      // batch.push({type: 'put', key: utils.getId(sh), value: sh})
-      if (resource[ROOT_HASH]) {
-        key = utils.getId(resource)
-        var ver = self._getItem(key)
-        if (!ver._sharedWith)
-          ver._sharedWith = []
-
-        ver._sharedWith.push(self.createSharedWith(toId, time))
-        utils.optimizeResource(ver)
+      if (ver) {
+        key = utils.getId(ver)
+        // var ver = this._getItem(key)
+        // if (!ver._sharedWith)
+        //   ver._sharedWith = []
+        this.trigger({action: 'updateItem', sendStatus: SENT, resource: ver})
+        ver._sendStatus = SENT
+        // ver._sharedWith.push(this.createSharedWith(toId, time))
+        // utils.optimizeResource(ver)
         batch.push({type: 'put', key: key, value: ver})
       }
       var formId = utils.getId(resource.document)
-      var form = self._getItem(formId)
+      var form = this._getItem(formId)
       if (!form._sharedWith) {
         form._sharedWith = []
-        form._sharedWith.push(self.createSharedWith(utils.getId(form.to), form.time))
+        form._sharedWith.push(this.createSharedWith(utils.getId(form.to), form.time))
       }
 
-      form._sharedWith.push(self.createSharedWith(toId, time))
-      self.addMessagesToChat(toOrgId, form, false, time)
-      if (ver)
-        self.addMessagesToChat(toOrgId, ver, false, time)
+      form._sharedWith.push(this.createSharedWith(toId, time))
+      this.addMessagesToChat(toOrgId, form, false, time)
+      // if (ver)
+      //   this.addMessagesToChat(toOrgId, ver, false, time)
 
       utils.optimizeResource(form)
-      self.addLastMessage(form, batch, to)
+      this.addLastMessage(form, batch, to)
       batch.push({type: 'put', key: formId, value: form})
       return db.batch(batch)
     })
 //     .then(() => {
-//       self.trigger({action: 'list', list: self.searchNotMessages({modelName: ORGANIZATION, to: resource})})
+//       this.trigger({action: 'list', list: this.searchNotMessages({modelName: ORGANIZATION, to: resource})})
 //     })
     .catch(function(err) {
+      if (ver) {
+        var idx = ver.indexOf(key)
+        ver.splice(idx, 1)
+      }
       debugger
     })
   },
@@ -7744,4 +7770,174 @@ function getProviderUrl (provider) {
   //   return meIdentity.toJSON()
   // },
 
+*/
+/*
+  initChats() {
+    let meId = utils.getId(me)
+    let meOrgId = me.organization ? utils.getId(me.organization) : null
+
+    for (var p in list) {
+      let r = this._getItem(p)
+      if (r._context) {
+        let c = this._getItem(r._context)
+        // context could be empty if ForgetMe was requested for the provider where form was originally created
+        if (c  &&  c._readOnly) {
+          this.addMessagesToChat(utils.getId(r._context), r, true)
+          continue
+        }
+      }
+
+      let m = this._getItem(this.getModel(r[TYPE]))
+      if (!m.interfaces  ||  m.interfaces.indexOf(MESSAGE) === -1)
+        continue
+
+      let addedToProviders = []
+      if (r._sharedWith) {
+        if (m.id === VERIFICATION)
+          r._sharedWith.forEach((shareInfo) => {
+            // if (shareInfo.bankRepresentative === meId)
+            //   this.addMessagesToChat(utils.getId(r.to), r, true, shareInfo.timeShared)
+            // else  {
+            let rep = this._getItem(shareInfo.bankRepresentative)
+            let orgId = utils.getId(rep.organization)
+            if (meOrgId !== orgId) {
+              this.addMessagesToChat(orgId, r, true, shareInfo.timeShared)
+              addedToProviders.push(orgId)
+            }
+            // }
+          })
+      }
+      if (m.id === VERIFICATION  &&  meId === utils.getId(r.from))
+        this.addMessagesToChat(utils.getId(r.to), r, true)
+      else {
+        let fromId = utils.getId(r.from)
+        let rep = this._getItem(meId === fromId ? utils.getId(r.to) : fromId)
+        let orgId = rep.organization ? utils.getId(rep.organization) : utils.getId(rep)
+        if (addedToProviders.indexOf(orgId) === -1)
+          this.addMessagesToChat(orgId, r, true)
+      }
+    }
+    for (let id in chatMessages) {
+      var arr = chatMessages[id]
+      arr.sort((a, b) => a.time - b.time)
+      chatMessages[id] = this.filterChatMessages(arr, id)
+    }
+  },
+  // Filtered result contains only messages that get displayed
+  filterChatMessages(messages, orgId, lastId) {
+    let meId = utils.getId(me)
+    let productToForms = {}
+    let productApp = {}
+    let removeMsg = []
+    // Compact all FormRequests that were fulfilled
+    for (let i=messages.length - 1; i>=0; i--) {
+      let r = this._getItem(messages[i].id)
+      if (r[TYPE] === FORM_REQUEST  &&  !r.document) {// && r.documentCreated)
+      // delete list[id]
+        let forms = productToForms[r.product]
+        if (!forms)
+          productToForms[r.product] = {}
+        let formIdx = productToForms[r.product][r.form]
+        if (typeof formIdx !== 'undefined')
+          removeMsg.push(formIdx)
+          // messages.splice(formIdx, 1)
+
+        productToForms[r.product][r.form] = i
+      }
+      if (r[TYPE] === PRODUCT_APPLICATION) {
+        let productIdx = productApp[r.product]
+        if (productIdx)
+          removeMsg.push(productIdx)
+          // messages.splice(productIdx, 1)
+        // else
+          productApp[r.product] = i
+      }
+    }
+    if (removeMsg.length) {
+      removeMsg.sort((i1, i2) => {return i2 - i1})
+      for (let i=0; i<removeMsg.length; i++)
+        messages.splice(removeMsg[i], 1)
+    }
+    // Compact all SelfIntroduction
+    messages = messages.filter((rr, i) => {
+      let r = this._getItem(rr.id)
+      return r[TYPE] === SELF_INTRODUCTION ? false : true
+        // delete list[id]
+    })
+    let newResult = messages.filter((rr, i) => {
+      let time = rr.time
+      let id = rr.id
+      let type = id.split('_')[0]
+      // Compact ProductList resources that go one after another
+      if (type === PRODUCT_LIST  &&  i !== messages.length - 1) {
+        var next = messages[i + 1]
+
+        if (next && next.id.split('_')[0] === PRODUCT_LIST) {
+          // delete list[id]
+          return false
+        }
+      }
+      // if (r[TYPE] === CUSTOMER_WAITING) {
+      //   let f = list[utils.getId(r.from)].value.organization
+      //   let t = list[utils.getId(r.to)].value.organization
+      //   if (utils.getId(f) === utils.getId(t))
+      //     return false
+      // }
+      let r = this._getItem(rr.id)
+
+      // Check if there was request for the next form after multy-entry form
+      let fromId = utils.getId(r.from)
+
+      if (!me.isEmployee  &&  fromId !== meId  &&  list[fromId]) {
+        let rFrom = this._getItem(fromId)
+        if (!rFrom.bot) {
+          let photos = rFrom.photos
+          if (photos)
+            r.from.photo = photos[0]
+          else
+            r.from.photo = employee
+        }
+      }
+      let m = this.getModel(r[TYPE]).value
+      // r.from.photos = list[utils.getId(r.from)].value.photos;
+      // var to = list[utils.getId(r.to)]
+      // if (!to) console.log(r.to)
+      // r.to.photos = to  &&  to.value.photos;
+      if (m.subClassOf === FORM) {
+        // set organization and photos for items properties for better displaying
+        let form = this._getItem(utils.getId(r.to))
+        if (orgId  &&  r._sharedWith  &&  r._sharedWith.length > 1) {
+          // if (utils.getId(r.to.organization) !== toOrgId) {
+          //   let filteredVerifications = this.getSharedVerificationsAboutThisForm(r, toOrgId)
+          // }
+        }
+        r.to.organization = form.organization
+        for (var p in r) {
+          if (!m.properties[p]  ||  m.properties[p].type !== 'array' ||  !m.properties[p].items.ref)
+            continue
+          let pModel = this.getModel(m.properties[p].items.ref).value
+          if (pModel.properties.photos) {
+            let items = r[p]
+            items.forEach((ir) => {
+              let irRes = this._getItem(utils.getId(ir))
+              // HACK - bad forgetMe
+              let itemPhotos = irRes  && irRes.photos
+              if (itemPhotos)
+                ir.photo = itemPhotos[0].url
+            })
+          }
+        }
+      }
+      return true
+    })
+    if (lastId  &&  lastId.split('_')[0] === PRODUCT_LIST) {
+      let i=newResult.length - 1
+      for (; i>=0; i--)
+        if (newResult[i][TYPE] !== PRODUCT_LIST)
+          break
+        newResult.splice(i, 1)
+    }
+    return newResult
+    // return newResult.reverse()
+  },
 */
