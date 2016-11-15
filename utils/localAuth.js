@@ -312,7 +312,7 @@ function checkPassword (navigator, isChangePassword) {
 function validateTextPassword (pass) {
   if (__DEV__) return pass.length > 1
 
-  return BS_PASSWORD_REGEX.test(pass)
+  return PASSWORD_REGEX.test(pass)
 }
 
 function validateGesturePassword (pass) {
