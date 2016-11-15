@@ -26,5 +26,6 @@ module.exports = {
     }
 
     return __DEV__
-  }
+  },
+  lenientPassword: true
 }

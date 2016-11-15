@@ -48,8 +48,9 @@ const DEFAULT_OPTS = {
 
 const PROMPTS = require('./password-prompts')
 const PASSWORD_PROMPTS = getPasswordPrompts()
-const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z]).{10,}$/
-const BS_PASSWORD_REGEX = /.{2,}$/
+const PASSWORD_REGEX = ENV.lenientPassword
+  ? /.{1,}/
+  : /^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z]).{10,}$/
 
 let pendingAuth
 let pendingEnrollRequest
