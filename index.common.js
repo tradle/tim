@@ -147,6 +147,10 @@ class TiMApp extends Component {
     // Actions.appState(currentAppState)
     // and check if authentication expired in store
 
+    // uncomment after figuring out what to do when the user
+    // uses the browser back button here to leave the auth screen
+    if (utils.isWeb()) return
+
     let dateAppStateChanged = Date.now()
     let lastDateAppStateChanged = this.state.dateAppStateChanged
     let newState = { currentAppState, dateAppStateChanged }
