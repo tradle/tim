@@ -49,6 +49,7 @@ const DEFAULT_OPTS = {
 const PROMPTS = require('./password-prompts')
 const PASSWORD_PROMPTS = getPasswordPrompts()
 const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z]).{10,}$/
+const BS_PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z]).{2,}$/
 
 let pendingAuth
 let pendingEnrollRequest
@@ -310,7 +311,7 @@ function checkPassword (navigator, isChangePassword) {
 function validateTextPassword (pass) {
   if (__DEV__) return pass.length > 1
 
-  return PASSWORD_REGEX.test(pass)
+  return BS_PASSWORD_REGEX.test(pass)
 }
 
 function validateGesturePassword (pass) {
