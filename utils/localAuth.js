@@ -48,8 +48,9 @@ const DEFAULT_OPTS = {
 
 const PROMPTS = require('./password-prompts')
 const PASSWORD_PROMPTS = getPasswordPrompts()
-const PASSWORD_REGEX = ENV.lenientPassword
-  ? /.{1,}/
+const DEV_PASSWORD_REGEX = /.{1,}/
+const PASSWORD_REGEX = __DEV__ || ENV.lenientPassword
+  ? DEV_PASSWORD_REGEX
   : /^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z]).{10,}$/
 
 let pendingAuth
@@ -310,8 +311,6 @@ function checkPassword (navigator, isChangePassword) {
   $                         End anchor.
  */
 function validateTextPassword (pass) {
-  if (__DEV__) return pass.length > 1
-
   return PASSWORD_REGEX.test(pass)
 }
 

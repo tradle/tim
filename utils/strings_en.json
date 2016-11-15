@@ -31,7 +31,7 @@
     "enterCurrentPassword": "Enter your current password",
     "setNewPassword": "Choose a new password",
     "textPasswordLimitations": "Must have 10+ characters, at least one uppercase letter, lowercase letter, number, and special character",
-    "lenientTextPasswordLimitations": "Must have 2+ characters",
+    "lenientTextPasswordLimitations": "Must have 1+ characters",
     "tooManyPasswordAttempts": "Too many failed attempts! This form has been disabled.",
     "correctPassword": "Aww, you remembered!",
     "passwordsDontMatch": "Passwords don't match",
