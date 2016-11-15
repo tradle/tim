@@ -2682,7 +2682,7 @@ var Store = Reflux.createStore({
       return meDriver.signAndSend(sendParams)
     }
     // if (!Array.isArray(shareWithList))
-    return this.onShareOne(resource, shareWithList, originatingResource)
+    this.shareAll(resource.document, shareWithList, originatingResource)
     // let promisses = []
     // shareWithList.forEach((r) => {
     //   promisses.push(this.onShareOne(resource, this._getItem(r)))
@@ -2692,8 +2692,19 @@ var Store = Reflux.createStore({
     //   debugger
     // })
   },
-
-  onShareOne(resource, to, formResource) {
+  shareAll(document, shareWith, formResource) {
+    var documentCreated = formResource.documentCreated
+    var key = utils.getId(formResource)
+    var r = this._getItem(key)
+    // disable FormRequest from being used again
+    r.documentCreated = true
+    this.trigger({action: 'addItem', context: formResource.context, resource: r})
+    if (documentCreated)
+      return
+    let verifications = this._getItem(document).verifications
+    verifications.forEach((v) => this.shareOne(this._getItem(v), shareWith, formResource))
+  },
+  shareOne(resource, to, formResource) {
     var self = this
     var toOrgId
     if (to[TYPE] === ORGANIZATION) {
@@ -2714,14 +2725,14 @@ var Store = Reflux.createStore({
     if (formResource  &&  formResource._context)
       opts.other = {context: utils.getId(formResource._context).split('_')[1]}
 
-    var documentCreated = formResource.documentCreated
-    var key = utils.getId(formResource)
-    var r = this._getItem(key)
-    r.documentCreated = true
-    // disable FormRequest from being used again
-    this.trigger({action: 'addItem', context: resource.context, resource: r})
-    if (documentCreated)
-      return
+    // var documentCreated = formResource.documentCreated
+    // var key = utils.getId(formResource)
+    // var r = this._getItem(key)
+    // // disable FormRequest from being used again
+    // r.documentCreated = true
+    // this.trigger({action: 'addItem', context: resource.context, resource: r})
+    // if (documentCreated)
+    //   return
 
     var time = new Date().getTime()
     var toId = utils.getId(to)
@@ -2730,8 +2741,7 @@ var Store = Reflux.createStore({
       // Show sending status to not to keep customer in suspense
       if (!resource.sharedWith)
         resource.sharedWith = []
-      let key = utils.getId(resource)
-      ver = self._getItem(key)
+      ver = self._getItem(utils.getId(resource))
       ver._sharedWith.push(this.createSharedWith(toId, time))
       ver._sendStatus = this.isConnected ? SENDING : QUEUED
       utils.optimizeResource(ver)
@@ -2739,7 +2749,7 @@ var Store = Reflux.createStore({
       this.trigger({action: 'addItem', context: resource.context, resource: ver})
     }
 
-    var promise = meDriver.send({...opts, link: resource.document[CUR_HASH]})
+    var promise = meDriver.send({...opts, link: this._getItem(resource.document)[CUR_HASH]})
     return promise
     .then(function () {
       return resource[CUR_HASH] ? meDriver.send({...opts, link: resource[CUR_HASH]}) : Q()
@@ -2748,7 +2758,7 @@ var Store = Reflux.createStore({
     .then(() => {
       var key = utils.getId(formResource)
       var r = this._getItem(key)
-      r.documentCreated = true
+
       if (r[TYPE] === FORM_REQUEST)
         r.document = resource[TYPE] === VERIFICATION
                    ? utils.getId(resource.document)
@@ -2758,13 +2768,8 @@ var Store = Reflux.createStore({
       batch.push({type: 'put', key: key, value: r})
       if (ver) {
         key = utils.getId(ver)
-        // var ver = this._getItem(key)
-        // if (!ver._sharedWith)
-        //   ver._sharedWith = []
         this.trigger({action: 'updateItem', sendStatus: SENT, resource: ver})
         ver._sendStatus = SENT
-        // ver._sharedWith.push(this.createSharedWith(toId, time))
-        // utils.optimizeResource(ver)
         batch.push({type: 'put', key: key, value: ver})
       }
       var formId = utils.getId(resource.document)
@@ -2784,14 +2789,7 @@ var Store = Reflux.createStore({
       batch.push({type: 'put', key: formId, value: form})
       return db.batch(batch)
     })
-//     .then(() => {
-//       this.trigger({action: 'list', list: this.searchNotMessages({modelName: ORGANIZATION, to: resource})})
-//     })
     .catch(function(err) {
-      if (ver) {
-        var idx = ver.indexOf(key)
-        ver.splice(idx, 1)
-      }
       debugger
     })
   },
@@ -3248,7 +3246,7 @@ var Store = Reflux.createStore({
     var meId = utils.getId(me)
     var meOrgId = me.isEmployee ? utils.getId(me.organization) : null;
 
-    let filterOutForms = !params.isForgetting  &&  params.to  &&  params.to[TYPE] === ORGANIZATION  &&  !utils.isEmployee(params.to)
+    let filterOutForms = !params.isForgetting  &&  params.to  &&  params.to[TYPE] === ORGANIZATION  //&&  !utils.isEmployee(params.to)
 
     var chatTo = params.to
     if (chatTo  &&  chatTo.id)
@@ -5489,7 +5487,7 @@ var Store = Reflux.createStore({
     .then(() => {
       result.forEach((r) => {
         if (this.getModel(r[TYPE]).value.interfaces) {
-          let id = (utils.getId(r.from) === meId) ? utils.getId(r.from) : utils.getId(r.to)
+          let id = (utils.getId(r.from) === utils.getId(me)) ? utils.getId(r.from) : utils.getId(r.to)
           let rep = this._getItem(id)
           let orgId = rep.organization ? utils.getId(rep.organization) : utils.getId(rep)
 
