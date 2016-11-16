@@ -1,3 +1,4 @@
+
 'use strict';
 
 var path = require('path')
@@ -1496,6 +1497,9 @@ var Store = Reflux.createStore({
     if (!r.time)
       r.time = new Date().getTime();
     var toOrg
+    // r.to could be a reference to a resource
+    if (!r.to[TYPE])
+      r.to = this._getItem(r.to)
     if (r.to[TYPE] === ORGANIZATION) {
       var orgId = utils.getId(r.to)
       var orgRep = this.getRepresentative(orgId)
@@ -2932,7 +2936,7 @@ var Store = Reflux.createStore({
         retParams.context = params.context
       else {
         let c = this.searchMessages({modelName: PRODUCT_APPLICATION, to: params.to})
-        if (c) {
+        if (c  &&  c.length) {
           if (c.length === 1) {
             if (!c[0]._readOnly)
               retParams.context = c[0]
@@ -2940,7 +2944,9 @@ var Store = Reflux.createStore({
           else {
             let contexts = c.filter((r) => !r._readOnly && r.formsCount)
             if (contexts) {
-              if (contexts.length === 1)
+              if (!contexts.length)
+                retParams.context = c[c.length - 1]
+              else if (contexts.length === 1)
                 retParams.context = contexts[0]
               else {
                 contexts.sort((a, b) => {
