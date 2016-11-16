@@ -175,7 +175,7 @@ class ResourceList extends Component {
     if (action === 'newContact') {
       let routes = this.props.navigator.getCurrentRoutes()
       let curRoute = routes[routes.length - 1]
-      if (curRoute.id === 11  &&  curRoute.passProps.resource[constants.ROOT_HASH] === params.to[constants.ROOT_HASH])
+      if (curRoute.id === 11  &&  curRoute.passProps.resource[constants.ROOT_HASH] === params.newContact[constants.ROOT_HASH])
         return
       this.setState({newContact: params.newContact})
       let style = this.mergeStyle(params.newContact.style)
