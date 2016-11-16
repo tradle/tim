@@ -309,6 +309,7 @@ class TimHome extends Component {
         },
         passProps: {
           bankStyle: defaultBankStyle,
+          officialAccounts: true,
           resource: me
         }
       }
