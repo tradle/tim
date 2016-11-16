@@ -2918,8 +2918,8 @@ var Store = Reflux.createStore({
           }
         }
       }
+      let orgId
       if (params.to) {
-        let orgId
         if (params.to.organization)
           orgId = utils.getId(params.to.organization)
         else {
@@ -2937,7 +2937,10 @@ var Store = Reflux.createStore({
       else {
         let c = this.searchMessages({modelName: PRODUCT_APPLICATION, to: params.to})
         if (c  &&  c.length) {
-          if (c.length === 1) {
+          let talkingToCustomer = !orgId  &&  me.isEmployee  &&  params.to  &&  params.to[TYPE] === PROFILE  &&  utils.getId(params.to) !== meId
+          if (talkingToCustomer)
+            retParams.context = c[c.length - 1]
+          else if (c.length === 1) {
             if (!c[0]._readOnly)
               retParams.context = c[0]
           }
