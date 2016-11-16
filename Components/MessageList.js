@@ -734,7 +734,8 @@ class MessageList extends Component {
         resource: resource,
         returnRoute: currentRoutes[currentRoutes.length - 1],
         callback: this.props.callback,
-        type: constants.TYPES.FORM
+        // type: constants.TYPES.FORM,
+        context: this.state.context
       },
       // rightButtonTitle: 'ion|plus',
       // onRightButtonPress: {
