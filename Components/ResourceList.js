@@ -139,11 +139,13 @@ class ResourceList extends Component {
     if (params.prop) {
       let m = utils.getModel(this.props.resource[constants.TYPE]).value
       // case when for example clicking on 'Verifications' on Form page
-      if (m.interfaces) {
+      if (m.interfaces)
         // if (utils.getModel(this.props.modelName).value.interfaces)
         //   params.to = this.props.resource.to
         params.resource = this.props.resource
-      }
+      else if (params.prop.items  &&  params.prop.items.backlink)
+        params.to = this.props.resource
+
 //       params.resource = this.props.resource
     }
     else
@@ -178,21 +180,21 @@ class ResourceList extends Component {
       if (curRoute.id === 11  &&  curRoute.passProps.resource[constants.ROOT_HASH] === params.newContact[constants.ROOT_HASH])
         return
       this.setState({newContact: params.newContact})
-      let style = this.mergeStyle(params.newContact.style)
-      this.props.navigator[curRoute.id === 3 ? 'replace' : 'push']({
-        title: params.newContact.firstName,
-        component: MessageList,
-        id: 11,
-        backButtonTitle: 'Back',
-        passProps: {
-          resource: params.newContact,
-          filter: '',
-          modelName: constants.TYPES.MESSAGE,
-          // currency: params.organization.currency,
-          bankStyle: style,
-          // dictionary: params.dictionary,
-        }
-      })
+      // let style = this.mergeStyle(params.newContact.style)
+      // this.props.navigator[curRoute.id === 3 ? 'replace' : 'push']({
+      //   title: params.newContact.firstName,
+      //   component: MessageList,
+      //   id: 11,
+      //   backButtonTitle: 'Back',
+      //   passProps: {
+      //     resource: params.newContact,
+      //     filter: '',
+      //     modelName: constants.TYPES.MESSAGE,
+      //     // currency: params.organization.currency,
+      //     bankStyle: style,
+      //     // dictionary: params.dictionary,
+      //   }
+      // })
 
       return
     }
