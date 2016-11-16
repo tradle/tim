@@ -32,7 +32,7 @@ import {
 import React, { Component } from 'react'
 import ActivityIndicator from './ActivityIndicator'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
-const UNREAD_COLOR = '#139459'
+const UNREAD_COLOR = '#FF6D0D'
 
 
 var dateProp
