@@ -595,6 +595,9 @@ var Store = Reflux.createStore({
       }
       if (m.id === VERIFICATION  &&  meId === utils.getId(r.from))
         this.addMessagesToChat(utils.getId(r.to), r, true)
+      // Shared context
+      else if (m.id === PRODUCT_APPLICATION  &&  r._readOnly)
+        this.addMessagesToChat(utils.getId(r.from), r, true)
       else {
         let fromId = utils.getId(r.from)
         let rep = this._getItem(meId === fromId ? utils.getId(r.to) : fromId)
