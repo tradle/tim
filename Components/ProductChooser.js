@@ -135,6 +135,8 @@ class ProductChooser extends Component {
       to:   this.props.resource,
       time: new Date().getTime()
     }
+    if (this.props.context)
+      msg._context = this.props.context
     if (model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT) {
       msg[constants.TYPE] = PRODUCT_APPLICATION
       msg.product = model.id // '[application for](' + model.id + ')',
