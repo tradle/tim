@@ -2903,7 +2903,6 @@ var Store = Reflux.createStore({
         }
         retParams.loadEarlierMessages = true
       }
-      let meId = utils.getId(me)
       if (!params.isAggregation  &&  params.to) {
         // let to = list[utils.getId(params.to)].value
         // if (to  &&  to[TYPE] === ORGANIZATION)
@@ -2940,6 +2939,7 @@ var Store = Reflux.createStore({
       else {
         let c = this.searchMessages({modelName: PRODUCT_APPLICATION, to: params.to})
         if (c  &&  c.length) {
+          let meId = utils.getId(me)
           let talkingToCustomer = !orgId  &&  me.isEmployee  &&  params.to  &&  params.to[TYPE] === PROFILE  &&  utils.getId(params.to) !== meId
           if (talkingToCustomer)
             retParams.context = c[c.length - 1]
@@ -5487,27 +5487,25 @@ var Store = Reflux.createStore({
   },
 
   cleanup(result) {
+    // return Q()
     if (!result.length)
       return Q()
 
     var batch = []
     var docs = []
-    result.forEach(function(r){
+    var meId = utils.getId(me)
+    result.forEach((r) => {
       batch.push({type: 'del', key: utils.getId(r), value: r})
-    })
-    return db.batch(batch)
-    .then(() => {
-      result.forEach((r) => {
-        if (this.getModel(r[TYPE]).value.interfaces) {
-          let id = (utils.getId(r.from) === utils.getId(me)) ? utils.getId(r.from) : utils.getId(r.to)
-          let rep = this._getItem(id)
-          let orgId = rep.organization ? utils.getId(rep.organization) : utils.getId(rep)
+      if (this.getModel(r[TYPE]).value.interfaces) {
+        let id = (utils.getId(r.from) === meId) ? utils.getId(r.from) : utils.getId(r.to)
+        let rep = this._getItem(id)
+        let orgId = rep.organization ? utils.getId(rep.organization) : utils.getId(rep)
 
-          this.deleteMessageFromChat(orgId, r)
-        }
-        delete list[utils.getId(r)]
-      })
+        this.deleteMessageFromChat(orgId, r)
+      }
+      delete list[utils.getId(r)]
     })
+    db.batch(batch)
     .catch(function(err) {
       err = err
     })
