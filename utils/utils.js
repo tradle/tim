@@ -28,6 +28,7 @@ var Q = require('q')
 var collect = require('stream-collector')
 var typeforce = require('typeforce')
 var t = require('tcomb-form-native');
+var equal = require('deep-equal')
 // var moment = require('moment');
 var dateformat = require('dateformat')
 var Backoff = require('backoff')
@@ -199,14 +200,8 @@ var utils = {
           return false
         if (r1[p].length !== r2[p].length)
           return false
-        for (var i=0; i<r1.length; i++) {
-          let r = r1[i]
-          let found = r2.some((rr2) => {
-            equal(r, rr2)
-          })
-          if (!found)
-            return false
-        }
+        if (!r1[p].some((r) => r2[p].some((rr2) => equal(r, rr2))))
+          return false
       }
       else if (typeof r1[p] === 'object') {
         if (!r2[p])
