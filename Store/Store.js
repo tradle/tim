@@ -5505,7 +5505,7 @@ var Store = Reflux.createStore({
       }
       delete list[utils.getId(r)]
     })
-    db.batch(batch)
+    return db.batch(batch)
     .catch(function(err) {
       err = err
     })
