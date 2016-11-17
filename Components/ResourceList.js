@@ -460,19 +460,19 @@ class ResourceList extends Component {
     }
     if (isIdentity) { //  ||  isOrganization) {
       route.title = resource.firstName
-      route.rightButtonTitle = translate('profile')
+      // route.rightButtonTitle = translate('profile')
 
-      route.onRightButtonPress = {
-        title: title,
-        id: 3,
-        component: ResourceView,
-        titleTextColor: '#7AAAC3',
-        backButtonTitle: 'Back',
-        passProps: {
-          bankStyle: style,
-          resource: resource
-        }
-      }
+      // route.onRightButtonPress = {
+      //   title: title,
+      //   id: 3,
+      //   component: ResourceView,
+      //   titleTextColor: '#7AAAC3',
+      //   backButtonTitle: 'Back',
+      //   passProps: {
+      //     bankStyle: style,
+      //     resource: resource
+      //   }
+      // }
       var isMe = isIdentity ? resource[constants.ROOT_HASH] === me[constants.ROOT_HASH] : true;
       if (isMe) {
         route.onRightButtonPress.rightButtonTitle = 'Edit'
