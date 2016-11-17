@@ -272,10 +272,11 @@ class ShowPropertiesView extends Component {
         console.log(this.state.promptVisible)
       let canReject = this.props.checkProperties
                     ? <View style={styles.checkProperties}>
-                        <Icon key={p} name={this.props.errorProps && this.props.errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={25} color={this.props.errorProps && this.props.errorProps[p] ? 'red' : this.props.bankStyle.LINK_COLOR} style={{marginTop: 10}}
-                        onPress={() => {
+                        <TouchableOpacity underlayColor='transparent' onPress={() => {
                           this.setState({promptVisible: pMeta})
-                        }}/>
+                        }}>
+                          <Icon key={p} name={this.props.errorProps && this.props.errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={25} color={this.props.errorProps && this.props.errorProps[p] ? 'red' : this.props.bankStyle.LINK_COLOR} style={{marginTop: 10, marginRight: 20}}/>
+                        </TouchableOpacity>
                         <Prompt
                           title='Please write a message to the customer'
                           placeholder="Start typing"
