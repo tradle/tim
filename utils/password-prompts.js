@@ -3,6 +3,8 @@ import {
   Platform
 } from 'react-native'
 
+import ENV from './env'
+
 // maps to strings_en.json
 const TEXT_PASSWORD_PROMPTS = {
   promptSet: 'setPassword',
@@ -10,7 +12,7 @@ const TEXT_PASSWORD_PROMPTS = {
   promptRetrySet: 'passwordsDontMatch',
   promptCheck: 'enterPassword',
   promptCheckCurrent: 'enterCurrentPassword',
-  promptInvalidSet: 'textPasswordLimitations',
+  promptInvalidSet: ENV.lenientPassword ? 'lenientTextPasswordLimitations' : 'textPasswordLimitations',
   successMsg: 'correctPassword',
   failMsg: 'tooManyPasswordAttempts'
 }

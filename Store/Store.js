@@ -5521,6 +5521,7 @@ var Store = Reflux.createStore({
     if (!result.length)
       return Q()
 
+    var meId = utils.getId(me)
     var batch = []
     var docs = []
     var meId = utils.getId(me)
