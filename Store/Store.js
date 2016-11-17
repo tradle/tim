@@ -1487,8 +1487,6 @@ var Store = Reflux.createStore({
     if (!r.time)
       r.time = new Date().getTime();
     var toOrg
-    if (!r.to[TYPE])
-      r.to = this._getItem(r.to)
     if (r.to[TYPE] === ORGANIZATION) {
       var orgId = utils.getId(r.to)
       var orgRep = this.getRepresentative(orgId)
@@ -2836,28 +2834,27 @@ var Store = Reflux.createStore({
     var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
     if (!isMessage) {
       params.fromView = true
-      return this._searchNotMessages(params)
-      .then((result) => {
-        if (!result) {
-          // First time. No connection no providers yet loaded
-          if (!this.isConnected  &&  params.modelName === ORGANIZATION)
-            this.trigger({action: 'list', alert: translate('noConnection')})
+      let result = this.searchNotMessages(params);
+      if (!result) {
+        // First time. No connection no providers yet loaded
+        if (!this.isConnected  &&  params.modelName === ORGANIZATION)
+          this.trigger({action: 'list', alert: translate('noConnection')})
 
-          return
-        }
-        if (params.isAggregation)
-          result = this.getDependencies(result);
-        var shareableResources;
-        var retParams = {
-          action: 'list',
-          list: result,
-          spinner: params.spinner,
-          isAggregation: params.isAggregation
-        }
-        if (params.prop)
-          retParams.prop = params.prop;
-        this.trigger(retParams);
-      })
+        return
+      }
+      if (params.isAggregation)
+        result = this.getDependencies(result);
+      var shareableResources;
+      var retParams = {
+        action: 'list',
+        list: result,
+        spinner: params.spinner,
+        isAggregation: params.isAggregation
+      }
+      if (params.prop)
+        retParams.prop = params.prop;
+      this.trigger(retParams);
+      return
     }
 
     return this._searchMessages(params)
@@ -2908,8 +2905,12 @@ var Store = Reflux.createStore({
         if (c  &&  c.length) {
           let meId = utils.getId(me)
           let talkingToCustomer = !orgId  &&  me.isEmployee  &&  params.to  &&  params.to[TYPE] === PROFILE  &&  utils.getId(params.to) !== meId
-          if (talkingToCustomer)
-            retParams.context = c[c.length - 1]
+          if (talkingToCustomer) {
+            let contexts = c.filter((r) => !r._readOnly && r.formsCount)
+            let currentProduct = c[c.length - 1].product
+            contexts = c.filter((r) => !r._readOnly && r.product === currentProduct)
+            retParams.context = contexts.length ? contexts[0] : c[c.length - 1]
+          }
           else if (c.length === 1) {
             if (!c[0]._readOnly)
               retParams.context = c[0]
@@ -2967,125 +2968,125 @@ var Store = Reflux.createStore({
       // }
 
       if (shareableResources)
-        retParams.shareableResources = shareableResources
+        retParams.shareableResources = shareableResources;
       if (params.prop)
-        retParams.prop = params.prop
-      this.trigger(retParams)
+        retParams.prop = params.prop;
+      this.trigger(retParams);
     })
   },
 
-  // getList1(params) {
-  //   var result = this.searchResources(params);
-  //   if (params.isAggregation)
-  //     result = this.getDependencies(result);
-  //   if (!result) {
-  //     // First time. No connection no providers yet loaded
-  //     if (!this.isConnected  &&  params.modelName === ORGANIZATION)
-  //       this.trigger({action: 'list', alert: translate('noConnection')})
+  getList1(params) {
+    var result = this.searchResources(params);
+    if (params.isAggregation)
+      result = this.getDependencies(result);
+    if (!result) {
+      // First time. No connection no providers yet loaded
+      if (!this.isConnected  &&  params.modelName === ORGANIZATION)
+        this.trigger({action: 'list', alert: translate('noConnection')})
 
-  //     return
-  //   }
+      return
+    }
 
-  //   var model = this.getModel(params.modelName).value;
-  //   var isMessage = model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1);
+    var model = this.getModel(params.modelName).value;
+    var isMessage = model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1);
 
-  //   var resultList = result
-  //   var shareableResources;
-  //   var retParams = {
-  //     action: isMessage  &&  !params.prop && !params._readOnly ? 'messageList' : 'list',
-  //     list: resultList,
-  //     spinner: params.spinner,
-  //     isAggregation: params.isAggregation
-  //   }
-  //   if (isMessage) {
-  //     let hasMore = params.limit  &&  result.length > params.limit
-  //     if (params.loadEarlierMessages || hasMore) {
-  //       if (hasMore)  {
-  //         result.splice(0, 1)
-  //         retParams.allLoaded = true
-  //       }
-  //       retParams.loadEarlierMessages = true
-  //     }
-  //     if (!params.isAggregation  &&  params.to) {
-  //       // let to = list[utils.getId(params.to)].value
-  //       // if (to  &&  to[TYPE] === ORGANIZATION)
-  //         shareableResources = this.getShareableResources(result, params.to)
-  //     }
-  //     if (params.to) {
-  //       let orgId
-  //       if (params.to.organization)
-  //         orgId = utils.getId(params.to.organization)
-  //       else {
-  //         if (params.to[TYPE] === ORGANIZATION)
-  //           orgId = utils.getId(params.to)
-  //       }
-  //       if (orgId) {
-  //         let rep = this.getRepresentative(orgId)
-  //         if (rep  &&  !rep.bot)
-  //           retParams.isEmployee = true
-  //       }
-  //     }
-  //     if (params.context)
-  //       retParams.context = params.context
-  //     else {
-  //       let c = this.searchMessages({modelName: PRODUCT_APPLICATION, to: params.to})
-  //       if (c) {
-  //         if (c.length === 1) {
-  //           if (!c[0]._readOnly)
-  //             retParams.context = c[0]
-  //         }
-  //         else {
-  //           let contexts = c.filter((r) => !r._readOnly && r.formsCount)
-  //           if (contexts) {
-  //             if (contexts.length === 1)
-  //               retParams.context = contexts[0]
-  //             else {
-  //               contexts.sort((a, b) => {
-  //                 return b.lastMessageTime - a.lastMessageTime
-  //               })
-  //               retParams.context = contexts[0]
-  //             }
-  //           }
-  //           // for (let i=c.length - 1; i>=0  &&  !retParams.context; i--) {
-  //           //   if (c[i].formsCount)
-  //           //     retParams.context = c[i]
-  //           // }
-  //           // if (!retParams.context)
-  //           //   retParams.context = c[c.length - 1]
-  //         }
-  //       }
-  //     }
-  //   }
-  //   // if (isMessage) {
-  //   //   let orgId = utils.getId(params.to)
-  //   //   let styles
-  //   //   if (SERVICE_PROVIDERS)
-  //   //      styles = SERVICE_PROVIDERS.filter((sp) => {
-  //   //         if (sp.org === orgId)
-  //   //           return true
-  //   //       })
-  //   //   if (styles  &&  styles.length)
-  //   //     retParams.style = styles[0].style
-  //   // }
+    var resultList = result
+    var shareableResources;
+    var retParams = {
+      action: isMessage  &&  !params.prop && !params._readOnly ? 'messageList' : 'list',
+      list: resultList,
+      spinner: params.spinner,
+      isAggregation: params.isAggregation
+    }
+    if (isMessage) {
+      let hasMore = params.limit  &&  result.length > params.limit
+      if (params.loadEarlierMessages || hasMore) {
+        if (hasMore)  {
+          result.splice(0, 1)
+          retParams.allLoaded = true
+        }
+        retParams.loadEarlierMessages = true
+      }
+      if (!params.isAggregation  &&  params.to) {
+        // let to = list[utils.getId(params.to)].value
+        // if (to  &&  to[TYPE] === ORGANIZATION)
+          shareableResources = this.getShareableResources(result, params.to)
+      }
+      if (params.to) {
+        let orgId
+        if (params.to.organization)
+          orgId = utils.getId(params.to.organization)
+        else {
+          if (params.to[TYPE] === ORGANIZATION)
+            orgId = utils.getId(params.to)
+        }
+        if (orgId) {
+          let rep = this.getRepresentative(orgId)
+          if (rep  &&  !rep.bot)
+            retParams.isEmployee = true
+        }
+      }
+      if (params.context)
+        retParams.context = params.context
+      else {
+        let c = this.searchMessages({modelName: PRODUCT_APPLICATION, to: params.to})
+        if (c) {
+          if (c.length === 1) {
+            if (!c[0]._readOnly)
+              retParams.context = c[0]
+          }
+          else {
+            let contexts = c.filter((r) => !r._readOnly && r.formsCount)
+            if (contexts) {
+              if (contexts.length === 1)
+                retParams.context = contexts[0]
+              else {
+                contexts.sort((a, b) => {
+                  return b.lastMessageTime - a.lastMessageTime
+                })
+                retParams.context = contexts[0]
+              }
+            }
+            // for (let i=c.length - 1; i>=0  &&  !retParams.context; i--) {
+            //   if (c[i].formsCount)
+            //     retParams.context = c[i]
+            // }
+            // if (!retParams.context)
+            //   retParams.context = c[c.length - 1]
+          }
+        }
+      }
+    }
+    // if (isMessage) {
+    //   let orgId = utils.getId(params.to)
+    //   let styles
+    //   if (SERVICE_PROVIDERS)
+    //      styles = SERVICE_PROVIDERS.filter((sp) => {
+    //         if (sp.org === orgId)
+    //           return true
+    //       })
+    //   if (styles  &&  styles.length)
+    //     retParams.style = styles[0].style
+    // }
 
-  //   if (shareableResources)
-  //     retParams.shareableResources = shareableResources;
-  //   if (params.prop)
-  //     retParams.prop = params.prop;
+    if (shareableResources)
+      retParams.shareableResources = shareableResources;
+    if (params.prop)
+      retParams.prop = params.prop;
 
-  //   this.trigger(retParams);
-  // },
+    this.trigger(retParams);
+  },
 
-  // searchResources(params) {
-  //   var meta = this.getModel(params.modelName).value;
-  //   var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
-  //   if (isMessage)
-  //     return this._searchMessages(params);
-  //   else {
-  //     params.fromView = true
-  //     return this.searchNotMessages(params);
-  //   }
-  // },
+  searchResources(params) {
+    var meta = this.getModel(params.modelName).value;
+    var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
+    if (isMessage)
+      return this._searchMessages(params);
+    else {
+      params.fromView = true
+      return this.searchNotMessages(params);
+    }
+  },
   onListSharedWith(resource, chat) {
     let sharedWith = resource._sharedWith
     if (!sharedWith)
@@ -3102,13 +3103,6 @@ var Store = Reflux.createStore({
       shareWithMapping[r.bankRepresentative] = org
     })
     this.trigger({action: 'listSharedWith', list: result, sharedWith: shareWithMapping})
-  },
-
-  _searchNotMessages(params) {
-    return this._loadedResourcesDefer.promise
-    .then(() => {
-      return this.searchNotMessages(params)
-    })
   },
   searchNotMessages(params) {
     var foundResources = {};
@@ -3308,7 +3302,7 @@ var Store = Reflux.createStore({
       })
       result = retOrgs
     }
-    return result
+    return result;
   },
   _searchMessages(params) {
     return this._loadedResourcesDefer.promise
@@ -5518,14 +5512,13 @@ var Store = Reflux.createStore({
   },
 
   cleanup(result) {
+    // return Q()
     if (!result.length)
       return Q()
 
-    var meId = utils.getId(me)
     var batch = []
     var docs = []
-    var meId = utils.getId(me)
-    result.forEach((r) => {
+    result.forEach(function(r){
       batch.push({type: 'del', key: utils.getId(r), value: r})
       if (this.getModel(r[TYPE]).value.interfaces) {
         let id = (utils.getId(r.from) === meId) ? utils.getId(r.from) : utils.getId(r.to)
@@ -5537,18 +5530,18 @@ var Store = Reflux.createStore({
       delete list[utils.getId(r)]
     })
     return db.batch(batch)
-    // .then(() => {
-    //   result.forEach((r) => {
-    //     if (this.getModel(r[TYPE]).value.interfaces) {
-    //       let id = (utils.getId(r.from) === meId) ? utils.getId(r.from) : utils.getId(r.to)
-    //       let rep = this._getItem(id)
-    //       let orgId = rep.organization ? utils.getId(rep.organization) : utils.getId(rep)
+    .then(() => {
+      result.forEach((r) => {
+        if (this.getModel(r[TYPE]).value.interfaces) {
+          let id = (utils.getId(r.from) === meId) ? utils.getId(r.from) : utils.getId(r.to)
+          let rep = this._getItem(id)
+          let orgId = rep.organization ? utils.getId(rep.organization) : utils.getId(rep)
 
-    //       this.deleteMessageFromChat(orgId, r)
-    //     }
-    //     delete list[utils.getId(r)]
-    //   })
-    // })
+          this.deleteMessageFromChat(orgId, r)
+        }
+        delete list[utils.getId(r)]
+      })
+    })
     .catch(function(err) {
       err = err
     })
