@@ -28,6 +28,7 @@ var Q = require('q')
 var collect = require('stream-collector')
 var typeforce = require('typeforce')
 var t = require('tcomb-form-native');
+var equal = require('deep-equal')
 // var moment = require('moment');
 var dateformat = require('dateformat')
 var Backoff = require('backoff')
@@ -200,14 +201,21 @@ var utils = {
           return false
         if (r1[p].length !== r2[p].length)
           return false
-        for (var i=0; i<r1.length; i++) {
-          let r = r1[i]
-          let found = r2.some((rr2) => {
-            equal(r, rr2)
+        let filtered = r1[p].filter((r) => {
+          return r2[p].some((rr2) => {
+            return equal(r, rr2)
           })
-          if (!found)
-            return false
-        }
+        })
+        if (!filtered.length)
+          return false
+        // for (var i=0; i<r1.length; i++) {
+        //   let r = r1[i]
+        //   let found = r2.some((rr2) => {
+        //     equal(r, rr2)
+        //   })
+        //   if (!found)
+        //     return false
+        // }
       }
       else if (typeof r1[p] === 'object') {
         if (!r2[p]  ||  !properties[p]) // internal props like _context
@@ -609,6 +617,8 @@ var utils = {
       }
       else if (properties[p].type === 'array'  &&  properties[p].items.ref) {
         var arr = []
+        if (!res[p]  ||   !res[p].length)
+          continue
         res[p].forEach(function(r) {
           if (r.id) {
             if (r.photo)
