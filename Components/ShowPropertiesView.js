@@ -96,7 +96,8 @@ class ShowPropertiesView extends Component {
         if (p.charAt(0) === '_'  ||  props[p].hidden  ||  props[p].readOnly) //  ||  p.indexOf('_group') === p.length - 6)
           return
         v.push(p)
-        if (p.indexOf('_group') === p.length - 6)
+        let idx = p.indexOf('_group')
+        if (idx !== -1  &&  idx === p.length - 6)
           props[p].list.forEach((p) => v.push(p))
       })
       vCols = v
