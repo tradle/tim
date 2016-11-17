@@ -106,7 +106,7 @@ class MessageList extends Component {
     if (this.props.isAggregation)
       params.isAggregation = true;
 
-    utils.onNextTransitionEnd(this.props.navigator, () => Actions.messageList(params));
+    utils.onNextTransitionEnd(this.props.navigator, () => Actions.list(params));
   }
   componentDidMount() {
     this.listenTo(Store, 'onAction');
@@ -167,7 +167,7 @@ class MessageList extends Component {
         this.state.sendStatus = params.resource._sendStatus
         this.state.sendResource = params.resource
       }
-      Actions.messageList(actionParams);
+      Actions.list(actionParams);
       return;
     }
     this.state.newItem = false
@@ -181,7 +181,7 @@ class MessageList extends Component {
     if (params.action === 'addMessage') {
       this.state.sendStatus = params.resource._sendStatus
       this.state.sendResource = params.resource
-      Actions.messageList({
+      Actions.list({
         modelName: this.props.modelName,
         to: this.props.resource,
         limit: this.state.list ? this.state.list.length + 1 : LIMIT,
@@ -398,7 +398,7 @@ class MessageList extends Component {
       limit: this.state.list ? this.state.list.length + 1 : LIMIT
     }
     this.state.emptySearch = true
-    Actions.messageList(actionParams);
+    Actions.list(actionParams);
   }
 
   renderRow(resource, sectionId, rowId)  {
@@ -444,7 +444,7 @@ class MessageList extends Component {
     return   <MessageRow {...props} />
   }
   addedMessage(text) {
-    Actions.messageList({
+    Actions.list({
       modelName: this.props.modelName,
       to: this.props.resource,
       context: this.state.allContexts ? null : this.state.context,
@@ -646,7 +646,7 @@ class MessageList extends Component {
   // Select context to filter messages for the particular context
   selectContext(context) {
     this.props.navigator.pop()
-    Actions.messageList({
+    Actions.list({
       modelName: this.props.modelName,
       to: this.props.resource,
       context: context,
@@ -713,7 +713,7 @@ class MessageList extends Component {
     // newest messages have to be at the begining of the array
     var list = this.state.list;
     var id = utils.getId(list[0])
-    Actions.messageList({
+    Actions.list({
       lastId: id,
       limit: LIMIT,
       loadEarlierMessages: true,
@@ -750,7 +750,8 @@ class MessageList extends Component {
         resource: resource,
         returnRoute: currentRoutes[currentRoutes.length - 1],
         callback: this.props.callback,
-        type: constants.TYPES.FORM
+        type: constants.TYPES.FORM,
+        context: this.state.context
       },
       // rightButtonTitle: 'ion|plus',
       // onRightButtonPress: {

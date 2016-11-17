@@ -9,7 +9,6 @@ var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var constants = require('@tradle/constants');
-var PageView = require('./PageView')
 var MessageList = require('./MessageList')
 var PageView = require('./PageView')
 import platformStyles from '../styles/platform'
@@ -69,14 +68,17 @@ class ProductChooser extends Component {
         this.props.resource[constants.TYPE] === constants.TYPES.PROFILE)) {
       if (this.props.resource[constants.TYPE] === constants.TYPES.PROFILE) {
         if (params.resource.products  &&  params.resource.products.length) {
-          params.resource.products.forEach((r) => {
-            r.forms.forEach((f) => {
+          let context = this.props.context
+          let productIds = context ? [context.product] : [params.resource.products]
+          productIds.forEach((r) => {
+            utils.getModel(r).value.forms.forEach((f) => {
               products.push(utils.getModel(f).value)
             })
           })
         }
         else
           products = utils.getAllSubclasses(constants.TYPES.FORM)
+
       }
       else if (params.resource.products) {
         if (equal(params.resource.products, this.props.resource.products))
@@ -134,6 +136,8 @@ class ProductChooser extends Component {
       to:   this.props.resource,
       time: new Date().getTime()
     }
+    if (this.props.context)
+      msg._context = this.props.context
     if (model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT) {
       msg[constants.TYPE] = PRODUCT_APPLICATION
       msg.product = model.id // '[application for](' + model.id + ')',

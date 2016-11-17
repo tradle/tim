@@ -287,6 +287,7 @@ class TimHome extends Component {
         filter: '',
         modelName: this.props.modelName,
         sortProperty: 'lastMessageTime',
+        officialAccounts: true,
         bankStyle: defaultBankStyle
       };
     let me = utils.getMe();

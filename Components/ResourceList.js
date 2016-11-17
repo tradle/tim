@@ -489,21 +489,18 @@ class ResourceList extends Component {
         }
       }
     }
-    if (isOrganization) {
-      route.title = resource.name
-      if (this.props.officialAccounts) {
-        if (!utils.isEmployee(resource)) {
-          var msg = {
-            message: translate('customerWaiting', me.firstName),
-            _t: constants.TYPES.CUSTOMER_WAITING,
-            from: me,
-            to: resource,
-            time: new Date().getTime()
-          }
-
-          utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg, true))
-        }
+    if (this.props.officialAccounts) {
+      if (isOrganization)
+        route.title = resource.name
+      var msg = {
+        message: translate('customerWaiting', me.firstName),
+        _t: constants.TYPES.CUSTOMER_WAITING,
+        from: me,
+        to: utils.isEmployee(resource) ? me.organization : resource,
+        time: new Date().getTime()
       }
+
+      utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg, true))
     }
 
     this.props.navigator.push(route);
