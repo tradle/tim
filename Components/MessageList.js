@@ -737,6 +737,10 @@ class MessageList extends Component {
   }
 
   chooseFormForCustomer() {
+    if (!this.state.context) {
+      Alert.alert(translate('formListError'), translate('formListErrorDescription'))
+      return
+    }
     var currentRoutes = this.props.navigator.getCurrentRoutes();
     var resource = this.props.resource
     this.setState({show: false})
