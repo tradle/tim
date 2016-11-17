@@ -1738,9 +1738,9 @@ var Store = Reflux.createStore({
     var sendParams = {
       object: toChain
     }
-    let hash = r.to[ROOT_HASH]
+    let hash = this._getItem(r.to)[ROOT_HASH]
     if (hash === me[ROOT_HASH])
-      hash = r.from[ROOT_HASH]
+      hash = this._getItem(r.from)[ROOT_HASH]
     if (!hash)
       hash = this._getItem(utils.getId(r.to))[ROOT_HASH]
     var toId = IDENTITY + '_' + hash
@@ -2941,8 +2941,13 @@ var Store = Reflux.createStore({
         if (c  &&  c.length) {
           let meId = utils.getId(me)
           let talkingToCustomer = !orgId  &&  me.isEmployee  &&  params.to  &&  params.to[TYPE] === PROFILE  &&  utils.getId(params.to) !== meId
-          if (talkingToCustomer)
-            retParams.context = c[c.length - 1]
+          if (talkingToCustomer) {
+            // Use the context that was already started if such exists
+            let contexts = c.filter((r) => !r._readOnly && r.formsCount)
+            let currentProduct = c[c.length - 1].product
+            contexts = c.filter((r) => !r._readOnly && r.product === currentProduct)
+            retParams.context = contexts.length ? contexts[0] : c[c.length - 1]
+          }
           else if (c.length === 1) {
             if (!c[0]._readOnly)
               retParams.context = c[0]
@@ -5487,12 +5492,11 @@ var Store = Reflux.createStore({
   },
 
   cleanup(result) {
-    // return Q()
+    return Q()
     if (!result.length)
       return Q()
 
     var batch = []
-    var docs = []
     var meId = utils.getId(me)
     result.forEach((r) => {
       batch.push({type: 'del', key: utils.getId(r), value: r})
