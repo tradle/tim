@@ -201,21 +201,11 @@ var utils = {
           return false
         if (r1[p].length !== r2[p].length)
           return false
-        let filtered = r1[p].filter((r) => {
-          return r2[p].some((rr2) => {
-            return equal(r, rr2)
-          })
+        if (!r1[p].some((r) => r2[p].some((rr2) => equal(r, rr2))))
+          return false
         })
         if (!filtered.length)
           return false
-        // for (var i=0; i<r1.length; i++) {
-        //   let r = r1[i]
-        //   let found = r2.some((rr2) => {
-        //     equal(r, rr2)
-        //   })
-        //   if (!found)
-        //     return false
-        // }
       }
       else if (typeof r1[p] === 'object') {
         if (!r2[p]  ||  !properties[p]) // internal props like _context
