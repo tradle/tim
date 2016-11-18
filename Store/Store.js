@@ -2498,7 +2498,7 @@ var Store = Reflux.createStore({
             toChain[PREV_HASH] = returnVal[PREV_HASH]
           }
 
-          let exclude = ['to', 'from', 'verifications', CUR_HASH, '_sharedWith', '_sendStatus', '_context']
+          let exclude = ['to', 'from', 'verifications', CUR_HASH, '_sharedWith', '_sendStatus', '_context', 'idOld']
           if (isNew)
             exclude.push(ROOT_HASH)
           extend(toChain, returnVal)
