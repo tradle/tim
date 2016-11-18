@@ -1222,7 +1222,7 @@ var styles= StyleSheet.create({
     marginTop: 10,
     marginLeft: 20,
     color: '#757575',
-    fontSize: 18
+    fontSize: 20
   },
   labelStyle: {
     paddingLeft: 0,
@@ -1322,7 +1322,7 @@ var styles= StyleSheet.create({
   input: {
     backgroundColor: 'transparent',
     color: '#aaaaaa',
-    fontSize: 18,
+    fontSize: 20,
     marginTop: 10,
   },
   labelClean: {
@@ -1357,7 +1357,7 @@ var styles= StyleSheet.create({
     justifyContent: 'center'
   },
   dateText: {
-    fontSize: 18,
+    fontSize: 20,
     color: '#000000',
   },
   font18: {
@@ -1395,7 +1395,7 @@ var styles= StyleSheet.create({
   },
   booleanText: {
     marginTop: 5,
-    fontSize: 18
+    fontSize: 20
   },
   dateLabel: {
     fontSize: 12,
@@ -1403,7 +1403,7 @@ var styles= StyleSheet.create({
     marginLeft: 10
   },
 })
-module.exports = NewResourceMixin;
+module.exports = NewResourceMixin
   // icon: {
   //   width: 20,
   //   height: 20,
