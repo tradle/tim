@@ -55,7 +55,7 @@ class ShowMessageRefList extends Component {
            <TouchableHighlight onPress={this.showResources.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
              <View style={{alignItems: 'center'}}>
                <Icon name={icon}  size={35}  color='#ffffff' />
-               <Text style={buttonStyles.text}>{translate(props[p], model)}</Text>
+               <Text style={buttonStyles.msgText}>{translate(props[p], model)}</Text>
              </View>
            </TouchableHighlight>
          </View>
