@@ -114,7 +114,7 @@ var ResourceMixin = {
 
         if (!value)
           return
-        let item = <View style={styles.itemColContainer}>
+        let item = <View>
                      <Text style={itemMeta.skipLabel ? {height: 0} : styles.itemText}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
                      <Text style={styles.itemText}>{value}</Text>
                    </View>
@@ -134,7 +134,7 @@ var ResourceMixin = {
         );
       })
       if (!ret.length  && v.title) {
-        let item = <View style={[styles.itemColContainer, {flexDirection: 'row'}]}>
+        let item = <View style={{flexDirection: 'row'}}>
                     {v.photo
                       ? <Image source={{uri: v.photo}} style={styles.thumb} />
                       : <View />
@@ -185,7 +185,7 @@ var styles = StyleSheet.create({
     borderRadius: 5
   },
   itemText: {
-    fontSize: 18,
+    fontSize: 20,
     // fontFamily: 'Avenir Next',
     marginBottom: 0,
     // marginHorizontal: 7,
@@ -195,9 +195,6 @@ var styles = StyleSheet.create({
     height: 1,
     backgroundColor: '#eeeeee',
     // marginHorizontal: 15
-  },
-  itemColContainer: {
-    // flexDirection: 'row',
   },
   item: {
     paddingVertical: 7,
