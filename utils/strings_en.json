@@ -126,7 +126,7 @@
     "nothingChanged": "Nothing changed",
     "en": "English",
     "nl": "Dutch",
-    "submittingForm": "Submittted new {1}",
+    "submittingForm": "Submittted {1}",
     "submittingModifiedForm": "Modifying {1}",
     "receivedProduct": "Received {1}",
     "receivedVerification": "Received verification for {1}",
@@ -155,4 +155,5 @@
     "backToResults": "Back to results",
     "formListError": "Unavailable",
     "formListErrorDescription": "Forms can be requested once the customer begins an application",
+    "providerIsOffline": "{1} is offline",
 }
