@@ -1441,28 +1441,6 @@ var Store = Reflux.createStore({
       debugger
     })
   },
-  // dhtFor (identity, port) {
-  //   var dht = new DHT({
-  //     nodeId: this.nodeIdFor(identity),
-  //     bootstrap: ['tradle.io:25778']
-  //   })
-
-  //   dht.on('error', function (err) {
-  //     debugger
-  //     throw err
-  //   })
-
-  //   dht.listen(port)
-  //   // dht.socket.filterMessages(tutils.isDHTMessage)
-  //   return dht
-  // },
-  //
-  // nodeIdFor (identity) {
-  //   return crypto.createHash('sha256')
-  //     .update(this.findKey(identity.pubkeys, { type: 'dsa' }).fingerprint)
-  //     .digest()
-  //     .slice(0, 20)
-  // },
   findKey (keys, where) {
     var match
     keys.some(function (k) {
@@ -1501,9 +1479,10 @@ var Store = Reflux.createStore({
       r.time = new Date().getTime();
     var toOrg
     // r.to could be a reference to a resource
-    if (!r.to[TYPE])
-      r.to = this._getItem(r.to)
-    if (r.to[TYPE] === ORGANIZATION) {
+    var to = this._getItem(r.to)
+    // if (!r.to[TYPE])
+    //   r.to = this._getItem(r.to)
+    if (to[TYPE] === ORGANIZATION) {
       var orgId = utils.getId(r.to)
       var orgRep = this.getRepresentative(orgId)
       if (!orgRep) {
@@ -1671,10 +1650,8 @@ var Store = Reflux.createStore({
       var key = utils.getId(rr)
       self._setItem(key, rr)
 
-      if (!toOrg) {
-        let to = self._getItem(utils.getId(r.to))
+      if (!toOrg)
         toOrg = to.organization ? to.organization : to
-      }
 
       self.addMessagesToChat(utils.getId(toOrg), rr)
 
@@ -1708,10 +1685,9 @@ var Store = Reflux.createStore({
       if (isWelcome  &&  utils.isEmpty(welcomeMessage))
         return
       // cleanup temporary resources from the chat message references and from the in-memory storage - 'list'
-      if (!toOrg) {
-        let to = self._getItem(utils.getId(r.to))
+      if (!toOrg)
         toOrg = to.organization ? to.organization : to
-      }
+
       let orgId = utils.getId(toOrg)
       // self.deleteMessageFromChat(orgId, rr)
       // delete list[rr[TYPE] + '_' + tmpKey]
@@ -1734,31 +1710,44 @@ var Store = Reflux.createStore({
       debugger
     });
   },
+
   packMessage(r, toChain) {
     var sendParams = {
       object: toChain
     }
-    let hash = this._getItem(r.to)[ROOT_HASH]
-    if (hash === me[ROOT_HASH])
-      hash = this._getItem(r.from)[ROOT_HASH]
-    if (!hash)
-      hash = this._getItem(utils.getId(r.to))[ROOT_HASH]
-    var toId = IDENTITY + '_' + hash
-    var isEmployee
-    if (me.isEmployee) {
-      let to = this._getItem(utils.getId(r.to))
-      isEmployee = (!to.organization ||  utils.getId(to.organization) === utils.getId(me.organization))
+    let to = this._getItem(utils.getId(r.to))
+    let provider, hash
+    if (to[ROOT_HASH] === me[ROOT_HASH]) {
+      provider = this._getItem(r.from)
+      hash = provider[ROOT_HASH]
     }
+    else
+      provider = to
+    hash = provider[ROOT_HASH]
+
+    // if (!hash)
+    //   hash = provider[ROOT_HASH]
+
+    var isEmployee
+    if (me.isEmployee)
+      isEmployee = (!to.organization ||  utils.getId(to.organization) === utils.getId(me.organization))
+
     // let isEmployee = me.isEmployee && (!r.to.organization || utils.getId(r.to.organization) === utils.getId(me.organization))
     if (isEmployee) {
-      let arr = SERVICE_PROVIDERS.filter((sp) => {
-        let reps = this.getRepresentatives(sp.org)
-        let talkingToBot = reps.forEach((r) => {
-          return r[ROOT_HASH] === hash ? true : false
+      let arr
+      if (SERVICE_PROVIDERS)
+        arr = SERVICE_PROVIDERS.filter((sp) => {
+          let reps = this.getRepresentatives(sp.org)
+          let talkingToBot = reps.forEach((r) => {
+            return r[ROOT_HASH] === hash ? true : false
+          })
+          return talkingToBot  &&  talkingToBot.length ? true : false
         })
-        return talkingToBot  &&  talkingToBot.length ? true : false
-      })
-      if (!arr.length) {
+      else  {
+        if (!to.bot)
+          arr = [to]
+      }
+      if (!arr  ||  !arr.length) {
         var toRootHash = hash
 
         sendParams.other = {
@@ -1784,8 +1773,10 @@ var Store = Reflux.createStore({
         }
       }
     }
-    if (!sendParams.to)
+    if (!sendParams.to) {
+      var toId = IDENTITY + '_' + hash
       sendParams.to = { fingerprint: this.getFingerprint(this._getItem(toId)) }
+    }
     return sendParams
   },
 
@@ -2037,9 +2028,12 @@ var Store = Reflux.createStore({
         modelName: items.ref,
         to: resource,
         meta: itemsModel,
+        prop: props[p],
         props: itemsModel.properties
       }
-      var result = this.searchNotMessages(params);
+      var meta = utils.getModel(items.ref).value
+      var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
+      var result = isMessage ? this.searchMessages(params) : this.searchNotMessages(params)
       if (result  &&  result.length)
         resource[p] = result;
     }
@@ -2688,8 +2682,13 @@ var Store = Reflux.createStore({
 
       return meDriver.signAndSend(sendParams)
     }
-    // if (!Array.isArray(shareWithList))
+    // if (resource[TYPE] === VERIFICATION) {
+    //   if (!Array.isArray(shareWithList))
+    //     sharedWithList = [sharedWithList]
     this.shareAll(resource.document, shareWithList, originatingResource)
+    //   return
+    // }
+
     // let promisses = []
     // shareWithList.forEach((r) => {
     //   promisses.push(this.onShareOne(resource, this._getItem(r)))
@@ -2889,7 +2888,7 @@ var Store = Reflux.createStore({
 
     var shareableResources;
     var retParams = {
-      action: isMessage  &&  !params.prop && !params._readOnly ? 'messageList' : 'list',
+      action: !params.listView  &&  isMessage  &&  !params.prop && !params._readOnly ? 'messageList' : 'list',
       list: result,
       spinner: params.spinner,
       isAggregation: params.isAggregation
@@ -2903,7 +2902,7 @@ var Store = Reflux.createStore({
         }
         retParams.loadEarlierMessages = true
       }
-      if (!params.isAggregation  &&  params.to) {
+      if (!params.isAggregation  &&  params.to  &&  !params.prop) {
         // let to = list[utils.getId(params.to)].value
         // if (to  &&  to[TYPE] === ORGANIZATION)
         // entering the chat should clear customer's unread indicator
@@ -3225,21 +3224,20 @@ var Store = Reflux.createStore({
     if (isOrg) {
       // cloning orgs to re-render the org list with the correct number of forms
       let retOrgs = []
-      result = result.filter((r) => {
+      result.forEach((r) => {
         let orgId = utils.getId(r)
         if (!SERVICE_PROVIDERS)
-          return false
-        let set =  SERVICE_PROVIDERS.filter((rr) => {
-          return rr.org === orgId
-        })
-        return set.length ? true : false
-      })
-      result.forEach((r) => {
-        let oId = utils.getId(r)
+          r.offline = true
+        else {
+          let set =  SERVICE_PROVIDERS.filter((rr) => {
+            return rr.org === orgId
+          })
+          r.offline = set.length ? false : true
+        }
         let rr = {}
         extend(true, rr, r)
+        rr.numberOfForms = orgToForm[orgId]
         retOrgs.push(rr)
-        rr.numberOfForms = orgToForm[oId]
       })
       result = retOrgs
     }
@@ -3291,8 +3289,10 @@ var Store = Reflux.createStore({
           toOrgId = utils.getId(chatTo.organization)
           thisChatMessages = chatMessages[toOrgId]
         }
-        else
-          thisChatMessages = chatMessages[utils.getId(chatTo)]
+        else {
+          if (meId !== chatId)
+            thisChatMessages = chatMessages[chatId]
+        }
       }
 //       else if (chatId === meId) {
 // console.log('What are we doing here!!! chatId: ' + chatId)
@@ -7953,3 +7953,25 @@ function getProviderUrl (provider) {
     // return newResult.reverse()
   },
 */
+  // dhtFor (identity, port) {
+  //   var dht = new DHT({
+  //     nodeId: this.nodeIdFor(identity),
+  //     bootstrap: ['tradle.io:25778']
+  //   })
+
+  //   dht.on('error', function (err) {
+  //     debugger
+  //     throw err
+  //   })
+
+  //   dht.listen(port)
+  //   // dht.socket.filterMessages(tutils.isDHTMessage)
+  //   return dht
+  // },
+  //
+  // nodeIdFor (identity) {
+  //   return crypto.createHash('sha256')
+  //     .update(this.findKey(identity.pubkeys, { type: 'dsa' }).fingerprint)
+  //     .digest()
+  //     .slice(0, 20)
+  // },
