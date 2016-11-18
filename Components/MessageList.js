@@ -505,8 +505,11 @@ class MessageList extends Component {
 
       let hideTextInput = this.props.resource[constants.TYPE] === PRODUCT_APPLICATION  && this.props.resource._readOnly
       let h = utils.dimensions(MessageList).height
-      var maxHeight = h -
-                      (Platform.OS === 'android' ? 77 : 64) - (this.state.isConnected ? 0 : 35) - (this.state.context ? 45 : 0)
+      var maxHeight = h - (Platform.OS === 'android' ? 77 : 64)
+      if (!this.state.isConnected || this.props.resource.offline)
+        maxHeight -=  35
+      if (this.state.context)
+        maxHeight -= 45
       // content = <GiftedMessenger style={{paddingHorizontal: 10, marginBottom: Platform.OS === 'android' ? 0 : 20}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
       // Hide TextInput for shared context since it is read-only
       content = <GiftedMessenger style={{paddingHorizontal: 10}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
@@ -734,7 +737,7 @@ class MessageList extends Component {
         resource: resource,
         returnRoute: currentRoutes[currentRoutes.length - 1],
         callback: this.props.callback,
-        // type: constants.TYPES.FORM,
+        type: constants.TYPES.FORM,
         context: this.state.context
       },
       // rightButtonTitle: 'ion|plus',
