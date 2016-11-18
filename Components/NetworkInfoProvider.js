@@ -21,7 +21,14 @@ class NetworkInfoProvider extends Component {
            ? translate('learnMoreDescriptionTo', utils.getDisplayName(this.props.resource))
            : translate('learnMoreDescription')
     return this.props.connected
-          ? <View/>
+          ? this.props.resource  &&  this.props.resource.offline
+            ? <View style={styles.bar}>
+                <Text style={styles.text}>{translate('providerIsOffline', utils.getDisplayName(this.props.resource))}</Text>
+                <TouchableOpacity onPress={() => Alert.alert(translate('offlineMode'), dn, null)}>
+                  <Text style={styles.text}>{translate('learnMore')}</Text>
+                </TouchableOpacity>
+              </View>
+            : <View/>
           : <View style={styles.bar}>
               <Text style={styles.text}>{translate('noNetwork')}</Text>
               <TouchableOpacity onPress={() => Alert.alert(translate('offlineMode'), dn, null)}>
