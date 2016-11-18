@@ -70,8 +70,8 @@
     },
     "@tradle/models": {
       "version": "4.10.9",
-      "from": "tradle/models#36cfa52",
-      "resolved": "git://github.com/tradle/models.git#36cfa527176bcca3366bda5b4efe906540ad0778"
+      "from": "tradle/models#42d0057",
+      "resolved": "git://github.com/tradle/models.git#42d0057329e7048344c656d0b54ae5646c04576a"
     },
     "@tradle/otr": {
       "version": "0.2.17",
@@ -4678,8 +4678,8 @@
     },
     "react-native-prompt": {
       "version": "0.18.4",
-      "from": "pgmemk/react-native-prompt",
-      "resolved": "git://github.com/pgmemk/react-native-prompt.git#9c477f493f28a6314833c2228d3148ce06031e7d"
+      "from": "pgmemk/react-native-prompt#789e25c",
+      "resolved": "git://github.com/pgmemk/react-native-prompt.git#789e25c45541180553f78567649a79a6a6aa98db"
     },
     "react-native-push-notification": {
       "version": "2.1.1",
