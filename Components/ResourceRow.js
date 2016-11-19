@@ -98,7 +98,8 @@ class ResourceRow extends Component {
   render() {
     var resource = this.props.resource;
     var photo;
-    var isIdentity = resource[constants.TYPE] === constants.TYPES.PROFILE;
+    let rType = resource[constants.TYPE]
+    var isIdentity = rType === constants.TYPES.PROFILE;
     var noImage;
     if (resource.photos &&  resource.photos.length) {
       var uri = utils.getImageUri(resource.photos[0].url);
@@ -132,17 +133,15 @@ class ResourceRow extends Component {
         }
       }
     }
-    var orgPhoto;
-    // if (isIdentity  &&  resource.organization) {
-    //   if (resource.organization.photo)
-    //     orgPhoto = <Image source={{uri: resource.organization.photo}} style={styles.orgIcon} />
-    // }
-    // if (!orgPhoto)
-      orgPhoto = <View/>
-
-    var onlineStatus = (resource.online)
-                     ? <View style={styles.online}></View>
-                     : <View style={[styles.online, {backgroundColor: 'transparent'}]}></View>
+    if (photo  &&  (isIdentity || rType === constants.TYPES.ORGANIZATION)) {
+      var onlineStatus = (resource.online)
+                       ? <Icon name='ios-checkmark-circle' size={16} color='#62C457' style={styles.online} />
+                       : <Icon name='md-close-circle' size={16} color='#FAD70C' style={styles.online} />
+      photo = <View style={{flexDirection: 'row'}}>
+                {photo}
+                {onlineStatus}
+              </View>
+    }
 
     var rId = utils.getId(this.props.resource)
     // var cancelResource = (this.props.onCancel ||  this.state)
@@ -206,8 +205,6 @@ class ResourceRow extends Component {
       <View key={this.getNextKey()} style={{opacity: 0.5}}>
         <View style={styles.row} key={this.getNextKey()}>
           {photo}
-          {orgPhoto}
-          {onlineStatus}
           <View style={[textStyle, {flexDirection: 'row', justifyContent: 'space-between'}]}>
             {this.formatRow(resource)}
           </View>
@@ -219,16 +216,15 @@ class ResourceRow extends Component {
       </View>
         )
     else {
-      let onPress = this.state  &&  !this.state.resource
-                  ? this.action.bind(this)
-                  : this.props.onSelect
+      let onPress = this.action.bind(this)
+      // let onPress = this.state  &&  !this.state.resource
+      //             ? this.action.bind(this)
+      //             : this.props.onSelect
       return (
         <View key={this.getNextKey()} style={{opacity: 1, justifyContent: 'center', backgroundColor: '#ffffff'}}>
           <TouchableHighlight onPress={onPress} underlayColor='transparent' key={this.getNextKey()}>
             <View style={[styles.row, {width: utils.dimensions(ResourceRow).width - 50}]} key={this.getNextKey()}>
               {photo}
-              {orgPhoto}
-              {onlineStatus}
               <View style={textStyle} key={this.getNextKey()}>
                 {this.formatRow(resource)}
               </View>
@@ -327,11 +323,13 @@ class ResourceRow extends Component {
       this.chooseToShare()
     else if (this.props.onCancel)
       this.props.onCancel()
-    else if (typeof this.props.changeSharedWithList != 'undefined') {
+    else if (this.props.changeSharedWithList  &&  (typeof this.props.changeSharedWithList != 'undefined')) {
       let id = utils.getId(this.props.resource)
       this.setState({sharedWith: this.state.sharedWith ? false : true})
       this.props.changeSharedWithList(id, this.state.sharedWith ? false : true)
     }
+    else
+      this.props.onSelect(this.props.resource)
   }
   hideResource(resource) {
     let r = {}
@@ -341,18 +339,6 @@ class ResourceRow extends Component {
   }
   _allowScroll(scrollEnabled) {
     this.setState({scrollEnabled: scrollEnabled})
-  }
-  rowContent() {
-    return
-    <View style={styles.row} key={this.getNextKey()}>
-      {photo}
-      {orgPhoto}
-      {onlineStatus}
-      <View style={textStyle} key={this.getNextKey()}>
-        {this.formatRow(resource)}
-      </View>
-      {cancelResource}
-    </View>
   }
   formatRow(resource) {
     var self = this;
@@ -627,15 +613,18 @@ var styles = StyleSheet.create({
     // color: '#7AAAc3'
   },
   online: {
-    backgroundColor: 'green',
-    borderRadius: 6,
-    width: 12,
-    height: 12,
-    position: 'absolute',
-    top: 83,
-    left: 8,
-    borderWidth: 1,
-    borderColor: '#ffffff'
+    // backgroundColor: 'transparent',
+    borderRadius: 8,
+    alignSelf: 'flex-end',
+    marginLeft: -25,
+    marginRight: 25,
+    // width: 16,
+    // height: 16,
+    // position: 'absolute',
+    // top: 45,
+    // left: 45,
+    // borderWidth: 2,
+    // borderColor: '#ffffff'
   },
   contextOwners: {
     fontSize: 14,

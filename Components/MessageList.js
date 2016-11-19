@@ -77,6 +77,7 @@ class MessageList extends Component {
       isLoading: true,
       selectedAssets: {},
       isConnected: this.props.navigator.isConnected,
+      onlineStatus: this.props.resource.online,
       allContexts: true,  // true - for the full chat; false - filtered chat for specific context.
       isEmployee:  utils.isEmployee(props.resource),
       filter: this.props.filter,
@@ -129,6 +130,24 @@ class MessageList extends Component {
       // }
       // else
       this.setState({isConnected: params.isConnected})
+
+      return
+    }
+    if (params.action === 'onlineStatus') {
+      // if (params.isConnected  &&  !this.state.isForgetting) {
+      //   this.state.isConnected = params.isConnected
+      //   let me = utils.getMe()
+      //   let msg = {
+      //     message: me.firstName + ' is waiting for the response',
+      //     _t: constants.TYPES.CUSTOMER_WAITING,
+      //     from: me,
+      //     to: this.props.resource,
+      //     time: new Date().getTime()
+      //   }
+      //   Actions.addMessage(msg, true)
+      // }
+      // else
+      this.setState({onlineStatus: params.online})
 
       return
     }
@@ -282,7 +301,7 @@ class MessageList extends Component {
     // Eliminating repeated alerts when connection returns after ForgetMe action
     if (!this.state.isConnected && !this.state.list  && !nextState.list && this.state.isLoading === nextState.isLoading)
       return false
-    if (nextState.isConnected !== this.state.isConnected)
+    if (nextState.isConnected !== this.state.isConnected || nextState.onlineStatus !== this.state.onlineStatus)
       return true
     if (this.state.context !== nextState.context || this.state.allContexts !== nextState.allContexts)
       return true
@@ -506,7 +525,7 @@ class MessageList extends Component {
       let hideTextInput = this.props.resource[constants.TYPE] === PRODUCT_APPLICATION  && this.props.resource._readOnly
       let h = utils.dimensions(MessageList).height
       var maxHeight = h - (Platform.OS === 'android' ? 77 : 64)
-      if (!this.state.isConnected || this.props.resource.offline)
+      if (!this.state.isConnected || !this.props.resource.online)
         maxHeight -=  35
       if (this.state.context)
         maxHeight -= 45
@@ -585,7 +604,7 @@ class MessageList extends Component {
     buttons.push(translate('cancel'))
     return (
       <PageView style={[platformStyles.container, bgStyle]}>
-        <NetworkInfoProvider connected={this.state.isConnected} resource={this.props.resource} />
+        <NetworkInfoProvider connected={this.state.isConnected} resource={this.props.resource} online={this.state.onlineStatus} />
         <ChatContext context={this.state.context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={this.props.bankStyle} allContexts={this.state.allContexts} />
         <View style={ sepStyle } />
         {content}
@@ -867,7 +886,7 @@ class MessageList extends Component {
     this.setState({userInput: '', selectedAssets: {}});
     if (this.state.clearCallback)
       this.state.clearCallback();
-    Actions.addMessage(value); //, this.state.resource, utils.getModel(modelName).value);
+    Actions.addMessage(value);
   }
 
 }

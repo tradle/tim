@@ -73,7 +73,7 @@ class ResourceList extends Component {
       isLoading: true,
       dataSource: new ListView.DataSource({
         rowHasChanged: function(row1, row2) {
-          return row1 !== row2
+          return row1 !== row2  &&  row1.online !== row2.online
         }
       }),
       allowToAdd: this.props.prop  &&  this.props.prop.allowToAdd,
@@ -150,7 +150,7 @@ class ResourceList extends Component {
     }
     else
       params.to = this.props.resource
-
+    params.listView = this.props.listView
     // this.state.isLoading = true;
     utils.onNextTransitionEnd(this.props.navigator, () => {
       Actions.list(params)
@@ -367,6 +367,8 @@ class ResourceList extends Component {
       if (this.state.list[i].numberOfForms !== nextState.list[i].numberOfForms)
         return true
       if (this.state.list[i][constants.ROOT_HASH] !== nextState.list[i][constants.ROOT_HASH])
+        return true
+      if (this.state.list[i].online !== nextState.list[i].online)
         return true
     }
     return false

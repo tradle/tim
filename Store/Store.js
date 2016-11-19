@@ -919,18 +919,49 @@ var Store = Reflux.createStore({
     // })
 
     wsClient.on('disconnect', function () {
+      let trigger, org
       transport.clients().forEach(function (c) {
         // reset OTR session, restart on connect
+        if (SERVICE_PROVIDERS) {
+          SERVICE_PROVIDERS.forEach((sp) => {
+            if (sp.id === provider.id) {
+              org = self._getItem(sp.org)
+              org.online = false
+              trigger = true
+            }
+          })
+        }
         debug('aborting pending sends due to disconnect')
         c.destroy()
       })
 
+      if (trigger) {
+        self.trigger({action: 'offlineStatus', online: false})
+        let l = self.searchNotMessages({modelName: ORGANIZATION})
+        self.trigger({action: 'list', list: l})
+      }
       // pause all channels
       meDriver.sender.pause()
     })
 
     wsClient.on('connect', function (recipient) {
       // resume all paused channels
+      let trigger, org
+      if (SERVICE_PROVIDERS) {
+        SERVICE_PROVIDERS.forEach((sp) => {
+          if (sp.id === provider.id) {
+            org = self._getItem(sp.org)
+            org.online = true
+            trigger = true
+          }
+        })
+      }
+      if (trigger) {
+        self.trigger({action: 'onlineStatus', online: true})
+        let l = self.searchNotMessages({modelName: ORGANIZATION})
+        self.trigger({action: 'list', list: l})
+      }
+
       meDriver.sender.resume()
     })
 
@@ -1266,6 +1297,7 @@ var Store = Reflux.createStore({
       batch.push({type: 'put', key: okey, value: sp.org})
       this._setItem(okey, sp.org)
     }
+    list[okey].online = true
     if (sp.style)
       this._getItem(okey).style = sp.style
     if (!list[ikey]) {
@@ -3226,14 +3258,6 @@ var Store = Reflux.createStore({
       let retOrgs = []
       result.forEach((r) => {
         let orgId = utils.getId(r)
-        if (!SERVICE_PROVIDERS)
-          r.offline = true
-        else {
-          let set =  SERVICE_PROVIDERS.filter((rr) => {
-            return rr.org === orgId
-          })
-          r.offline = set.length ? false : true
-        }
         let rr = {}
         extend(true, rr, r)
         rr.numberOfForms = orgToForm[orgId]
