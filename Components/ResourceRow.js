@@ -133,10 +133,14 @@ class ResourceRow extends Component {
         }
       }
     }
-    if (photo  &&  (isIdentity || rType === constants.TYPES.ORGANIZATION)) {
-      var onlineStatus = (resource.online)
-                       ? <Icon name='ios-checkmark-circle' size={16} color='#62C457' style={styles.online} />
-                       : <Icon name='md-close-circle' size={16} color='#FAD70C' style={styles.online} />
+    if (photo  &&  rType === constants.TYPES.ORGANIZATION) {
+      var onlineStatus = <View style={styles.online}>
+                        {
+                          (resource.online)
+                           ? <Icon name='md-checkmark-circle' size={18} color='#62C457' />
+                           : <Icon name='md-close-circle' size={18} color='#FAD70C' />
+                         }
+                         </View>
       photo = <View style={{flexDirection: 'row'}}>
                 {photo}
                 {onlineStatus}
@@ -562,18 +566,21 @@ var styles = StyleSheet.create({
     // color: '#7AAAc3'
   },
   online: {
-    // backgroundColor: 'transparent',
-    borderRadius: 8,
-    alignSelf: 'flex-end',
-    marginLeft: -25,
-    marginRight: 25,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    alignItems: 'center',
+    // alignSelf: 'flex-end',
+    // marginLeft: -25,
+    // marginRight: 25,
     // width: 16,
     // height: 16,
-    // position: 'absolute',
-    // top: 45,
-    // left: 45,
-    // borderWidth: 2,
-    // borderColor: '#ffffff'
+    position: 'absolute',
+    top: 40,
+    left: 43,
+    borderWidth: 1,
+    borderColor: '#ffffff'
   },
   contextOwners: {
     fontSize: 14,

@@ -1285,7 +1285,7 @@ var Store = Reflux.createStore({
       batch.push({type: 'put', key: okey, value: sp.org})
       this._setItem(okey, sp.org)
     }
-    list[okey].online = true
+    list[okey].value.online = true
     if (sp.style)
       this._getItem(okey).style = sp.style
     if (!list[ikey]) {
