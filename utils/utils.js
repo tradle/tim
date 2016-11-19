@@ -203,7 +203,6 @@ var utils = {
           return false
         if (!r1[p].some((r) => r2[p].some((rr2) => equal(r, rr2))))
           return false
-        })
         if (!filtered.length)
           return false
       }
