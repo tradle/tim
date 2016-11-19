@@ -596,38 +596,53 @@ class MessageList extends Component {
       //   }
       // ]}
     let me = utils.getMe()
-    let buttons = []
-    if (this.state.isEmployee  &&  this.props.resource[constants.TYPE] !== constants.TYPES.ORGANIZATION)
-      buttons.push(translate('formChooser'))
-    else
-      buttons.push(translate('forgetMe'))
-    buttons.push(translate('cancel'))
+    let actionSheet = this.renderActionSheet()
     return (
       <PageView style={[platformStyles.container, bgStyle]}>
         <NetworkInfoProvider connected={this.state.isConnected} resource={this.props.resource} online={this.state.onlineStatus} />
         <ChatContext context={this.state.context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={this.props.bankStyle} allContexts={this.state.allContexts} />
         <View style={ sepStyle } />
         {content}
-        <ActionSheet
-          ref={(o) => {
-            this.ActionSheet = o
-          }}
-          options={buttons}
-          cancelButtonIndex={1}
-          onPress={(index) => {
-            if (index === 0) {
-              if (this.state.isEmployee)
-                this.chooseFormForCustomer()
-              else
-                this.forgetMe()
-            }
-          }}
-        />
+        {actionSheet}
         {alert}
       </PageView>
     );
         // {addNew}
   }
+
+  renderActionSheet() {
+    let buttons = []
+    if (this.state.isEmployee  &&  this.props.resource[constants.TYPE] !== constants.TYPES.ORGANIZATION) {
+      buttons.push(translate('formChooser'))
+    }
+    else {
+      if (__DEV__) {
+        buttons.push(translate('forgetMe'))
+      }
+    }
+
+    if (!buttons.length) return
+
+    buttons.push(translate('cancel'))
+    return (
+      <ActionSheet
+        ref={(o) => {
+          this.ActionSheet = o
+        }}
+        options={buttons}
+        cancelButtonIndex={1}
+        onPress={(index) => {
+          if (index === 0) {
+            if (this.state.isEmployee)
+              this.chooseFormForCustomer()
+            else
+              this.forgetMe()
+          }
+        }}
+      />
+    )
+  }
+
   // Context chooser shows all the context of the particular chat.
   // When choosing the context chat will show only the messages in linked to this context.
   contextChooser(context) {
@@ -687,7 +702,7 @@ class MessageList extends Component {
     )
   }
   generateMenu(show) {
-    if (!show)
+    if (!show || !this.ActionSheet)
       return <View/>
     // {
     //   return <TouchableHighlight underlayColor='transparent' onPress={this.onSubmitEditing.bind(this)}>

@@ -899,9 +899,15 @@ class ResourceList extends Component {
     var model = utils.getModel(this.props.modelName).value;
     var footer = this.renderFooter();
 
-    let buttons = this.state.allowToAdd
-                ? [translate('addNew', this.props.prop.title), translate('cancel')]
-                : [translate('addServerUrl'), translate('scanQRcode')/*, 'Talk to employee'*/, translate('cancel')]
+    let buttons;
+    if (this.state.allowToAdd) {
+      buttons = [translate('addNew', this.props.prop.title), translate('cancel')]
+    } else {
+      buttons = [translate('cancel')]
+      if (__DEV__) {
+        buttons.unshift(translate('addServerUrl'), translate('scanQRcode'))
+      }
+    }
 
     var searchBar
     if (SearchBar) {
