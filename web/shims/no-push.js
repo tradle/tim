@@ -1,3 +1,6 @@
+import { EventEmitter } from 'events'
+import Actions from '../../Actions/Actions'
+
 const notificationsSupported = 'Notification' in global
 if (notificationsSupported) requestPermissions()
 
@@ -16,12 +19,14 @@ window.addEventListener('focus', function () {
   tabIsFocused = true
 })
 
-exports.init = function (opts) {
+const emitter = module.exports = exports = new EventEmitter()
+
+emitter.init = function (opts) {
   if (!notificationsSupported) return Promise.resolve()
 
   me = opts.me
   const node = opts.node
-  node.on('message', function () {
+  node.on('message', msg => {
     if (tabIsFocused || Notification.permission !== 'granted') return
 
     // TODO: show logo of msg sender
@@ -33,6 +38,7 @@ exports.init = function (opts) {
     n.onclick = function () {
       try {
         window.focus()
+        Actions.viewChat(msg)
       } catch (e) {}
 
       clearTimeout(closeTimeout)
@@ -43,11 +49,11 @@ exports.init = function (opts) {
   })
 }
 
-exports.subscribe = function () {
+emitter.subscribe = function (publisher) {
   return Promise.resolve()
 }
 
-exports.resetBadgeNumber = function () {
+emitter.resetBadgeNumber = function () {
   return Promise.resolve()
 }
 

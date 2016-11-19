@@ -6175,6 +6175,9 @@ var Store = Reflux.createStore({
     const current = list[key] || {}
     list[key] = { key, value: { ...current.value, ...value } }
   },
+  onViewChat(msg) {
+    debugger
+  }
 })
 // );
 
