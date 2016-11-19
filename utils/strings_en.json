@@ -156,4 +156,6 @@
     "formListError": "Unavailable",
     "formListErrorDescription": "Forms can be requested once the customer begins an application",
     "providerIsOffline": "{1} is offline",
+    "sendEditRequestPrompt": "Send edit request to {1}?",
+    "pleaseCorrectFields": "Please correct the following fields: {1}"
 }

@@ -92,11 +92,12 @@ class MessageView extends Component {
       let msg = ''
       for (var p in this.state.errorProps)
         msg += msg ? ', ' + properties[p].title : properties[p].title
-      msg = 'Please correct or fill out the following fields: ' + msg
+      msg = translate('pleaseCorrectFields', msg)
 
       Alert.alert(
-        'Sending message to ' + resource.from.title,
-        msg,
+        translate('sendEditRequestPrompt', resource.from.title),
+        null,
+        // msg,
         [
           {text: 'Cancel', onPress: () => console.log('Canceled!')},
           {text: 'Ok', onPress: this.createError.bind(this, msg)},
