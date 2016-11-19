@@ -108,7 +108,7 @@ ShowRefList = makeResponsive(ShowRefList)
 var styles = StyleSheet.create({
   count: {
     alignSelf: 'flex-start',
-    width: 18,
+    minWidth: 18,
     marginLeft: -7,
     marginTop: -2,
     borderRadius: 8,
