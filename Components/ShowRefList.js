@@ -14,6 +14,7 @@ import { makeResponsive } from 'react-native-orient'
 import {
   View,
   Text,
+  StyleSheet,
   TextInput,
   TouchableHighlight,
   Platform,
@@ -57,11 +58,20 @@ class ShowRefList extends Component {
       var icon = props[p].icon  ||  utils.getModel(props[p].items.ref).value.icon;
       if (!icon)
         icon = 'ios-checkmark';
+      let count = resource[p]  &&  resource[p].length
       refList.push(
         <View style={[buttonStyles.container, {flex: 1, alignSelf: 'stretch'}]} key={this.getNextKey()}>
            <TouchableHighlight onPress={this.showResources.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
-             <View style={{alignItems: 'center'}}>
-               <Icon name={icon}  size={utils.getFontSize(30)}  color='#ffffff' />
+             <View style={styles.item}>
+               <View style={{flexDirection: 'row'}}>
+               <Icon name={icon}  size={utils.getFontSize(30)}  color='#757575' />
+              {count
+                  ? <View style={styles.count}>
+                      <Text style={styles.countText}>{count}</Text>
+                    </View>
+                  : <View/>
+               }
+               </View>
                <Text style={[buttonStyles.text, Platform.OS === 'android' ? {marginTop: 3} : {marginTop: 0}]}>{propTitle}</Text>
              </View>
            </TouchableHighlight>
@@ -73,8 +83,8 @@ class ShowRefList extends Component {
       refList.push(
         <View style={[buttonStyles.container, {flex:1, alignSelf: 'stretch'}]} key={this.getNextKey()}>
            <TouchableHighlight onPress={this.props.showQR.bind(this)} underlayColor='transparent'>
-             <View style={{alignItems: 'center'}}>
-               <Icon name={'ios-qr-scanner'}  size={utils.getFontSize(30)}  color='#ffffff' />
+             <View style={styles.item}>
+               <Icon name={'ios-qr-scanner'}  size={utils.getFontSize(30)}  color='#757575' />
                <Text style={[buttonStyles.text, Platform.OS === 'android' ? {marginTop: 3} : {marginTop: 0}]}>{translate('showQR')}</Text>
              </View>
            </TouchableHighlight>
@@ -92,5 +102,27 @@ class ShowRefList extends Component {
 reactMixin(ShowRefList.prototype, ResourceMixin);
 reactMixin(ShowRefList.prototype, RowMixin);
 ShowRefList = makeResponsive(ShowRefList)
+
+var styles = StyleSheet.create({
+  count: {
+    alignSelf: 'flex-start',
+    minWidth: 18,
+    marginLeft: -7,
+    marginTop: -2,
+    borderRadius: 8,
+    backgroundColor: '#7AAAC3',
+    paddingHorizontal: 3,
+    paddingVertical: 1
+  },
+  countText: {
+    fontSize: 12,
+    fontWeight: '600',
+    alignSelf: 'center',
+    color: '#ffffff'
+  },
+  item: {
+    alignItems: 'center'
+  },
+})
 
 module.exports = ShowRefList;

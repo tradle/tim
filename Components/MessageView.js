@@ -67,7 +67,7 @@ class MessageView extends Component {
       var len = currentRoutes.length;
       if (currentRoutes[len - 1].id === 5)
         this.props.navigator.pop();
-      Actions.messageList({
+      Actions.list({
         modelName: constants.TYPES.MESSAGE,
         to: params.resource
       });
@@ -94,11 +94,12 @@ class MessageView extends Component {
       let msg = ''
       for (var p in this.state.errorProps)
         msg += msg ? ', ' + properties[p].title : properties[p].title
-      msg = 'Please correct or fill out the following fields: ' + msg
+      msg = translate('pleaseCorrectFields', msg)
 
       Alert.alert(
-        'Sending message to ' + resource.from.title,
-        msg,
+        translate('sendEditRequestPrompt', resource.from.title),
+        null,
+        // msg,
         [
           {text: 'Cancel', onPress: () => console.log('Canceled!')},
           {text: 'Ok', onPress: this.createError.bind(this, msg)},
@@ -127,7 +128,7 @@ class MessageView extends Component {
       prefill: resource,
       from: resource.to,
       to: resource.from,
-      _context: this.props.context,
+      _context: resource._context,
       message: text || translate('pleaseCorrectTheErrors')
     }
     Actions.addMessage(formError)

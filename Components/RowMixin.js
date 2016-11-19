@@ -5,8 +5,7 @@ var utils = require('../utils/utils');
 var translate = utils.translate
 var constants = require('@tradle/constants');
 var Accordion = require('react-native-accordion')
-// import LinearGradient from 'react-native-linear-gradient'
-// var Icon = require('react-native-vector-icons/Ionicons');
+var Icon = require('react-native-vector-icons/Ionicons');
 import CustomIcon from '../styles/customicons'
 var StyleSheet = require('../StyleSheet')
 var cnt = 0;
@@ -200,9 +199,15 @@ var RowMixin = {
     var photo = hasPhotos
               ? <Image resizeMode='cover' source={{uri: utils.getImageUri(document.photos[0].url)}}  style={styles.cellImage} />
               : <View />;
-    var headerStyle = {paddingTop: 5, alignSelf: 'center'}
+    var headerStyle = {paddingTop: 5, alignSelf: 'center', flex: 1}
+    var isShared = this.isShared(verification)
+
     var header =  <View style={headerStyle}>
-                    <Text style={[styles.resourceTitle, styles.header, {color: this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>{translate(model) + ' ...'}</Text>
+                    <Text style={[isShared ? styles.description : styles.resourceTitle, styles.header, isShared ? {maxWidth: 0.8 * utils.dimensions().width - 50, fontSize: 16, alignSelf: 'flex-end', marginTop: -5, color: '#757575'} : {color: this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>
+                      {isShared
+                        ? translate('asVerifiedBy', verification.organization.title)
+                        : translate(model) + ' ...'}
+                    </Text>
                   </View>
     let addStyle
     if (!onPress)
@@ -229,7 +234,7 @@ var RowMixin = {
                    ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
                    : <View />
       var shareView = <View style={[styles.shareButton, {opacity: this.props.resource.documentCreated ? 0.3 : 1}]}>
-                        <CustomIcon name='tradle' style={{color: '#4982B1' }} size={32} />
+                        <CustomIcon name='tradle' style={{color: '#ffffff' }} size={32} />
                         <Text style={styles.shareText}>{translate('Share')}</Text>
                       </View>
       var orgTitle = this.props.to[constants.TYPE] === constants.TYPES.ORGANIZATION
@@ -424,6 +429,20 @@ var RowMixin = {
     if (to[constants.TYPE] === constants.TYPES.PROFILE)
       return false
     return utils.getId(resource.organization) !== utils.getId(to)
+  },
+  getSendStatus() {
+    if (!this.props.sendStatus)
+      return <View />
+    if (this.props.sendStatus === 'Sent')
+      return <View style={styles.sendStatus}>
+               <Text style={styles.sentStatus}>{this.props.sendStatus}</Text>
+               <Icon name={'ios-checkmark-outline'} size={15} color='#009900' />
+             </View>
+    else
+      return <View style={styles.sendStatus}>
+               <Text style={styles.otherStatus}>{this.props.sendStatus}</Text>
+             </View>
+               // <Text style={styles.sendStatusDefaultText}>{this.props.sendStatus}</Text>
   }
 
   // anyOtherRow(prop, backlink, styles) {
@@ -469,15 +488,17 @@ var styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 5,
     borderRadius: 10,
-    borderWidth: 1,
+    // borderWidth: 1,
     // borderColor: '#215A89',
-    borderColor: '#4982B1',
+    // borderColor: '#4982B1',
     // backgroundColor: '#ffffff'
-    // backgroundColor: '#4982B1'
+    backgroundColor: '#4982B1'
   },
   shareText: {
-    color: '#4982B1',
-    fontSize: 18,
+    // color: '#4982B1',
+    color: '#ffffff',
+    fontSize: 20,
+    // fontWeight: '600',
     paddingHorizontal: 3,
     alignSelf: 'center'
   },
@@ -563,7 +584,25 @@ var styles = StyleSheet.create({
     fontSize: 18,
     marginTop: 2,
     paddingRight: 10
-  }
+  },
+  sentStatus: {
+    fontSize: 14,
+    color: '#009900',
+    marginRight: 3
+  },
+  sendStatus: {
+    alignSelf: 'flex-end',
+    flexDirection: 'row',
+    marginHorizontal: 5,
+    marginTop: -3
+  },
+  otherStatus: {
+    alignSelf: 'flex-end',
+    fontSize: 14,
+    color: '#757575',
+    marginHorizontal: 5,
+    // paddingBottom: 20
+  },
 });
 
 module.exports = RowMixin;

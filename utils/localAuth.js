@@ -41,7 +41,7 @@ const LOCK_SCREEN_BG = require('../img/bg.png')
 // const SETUP_MSG = 'Please set up Touch ID first, so the app can better protect your data.'
 const AUTH_FAILED_MSG = 'Authentication failed'
 const DEFAULT_OPTS = {
-  reason: 'unlock Tradle to proceed',
+  reason: translate('unlockDevice'),
   fallbackToPasscode: ENV.autoOptInTouchId,
   suppressEnterPassword: ENV.autoOptInTouchId
 }
@@ -52,6 +52,10 @@ const DEV_PASSWORD_REGEX = /.{1,}/
 const PASSWORD_REGEX = __DEV__ || ENV.lenientPassword
   ? DEV_PASSWORD_REGEX
   : /^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z]).{10,}$/
+
+const validate = utils.isWeb()
+  ? validateTextPassword
+  : validateGesturePassword
 
 let pendingAuth
 let pendingEnrollRequest
@@ -237,10 +241,6 @@ function setPassword (navigator, isChangePassword) {
     ? translate('textPasswordLimitations')
     : translate('passwordLimitations')
 
-  const validate = utils.isWeb()
-    ? validateTextPassword
-    : validateGesturePassword
-
   debug('setPassword')
   return Q.Promise((resolve, reject) => {
     let routes = navigator.getCurrentRoutes().length
@@ -285,6 +285,7 @@ function checkPassword (navigator, isChangePassword) {
       mode: PasswordCheck.Modes.check,
       maxAttempts: 3,
       isChange: isChangePassword,
+      validate: validate,
       isCorrect: (pass) => {
         return utils.checkHashedPassword(PASSWORD_ITEM_KEY, pass)
       },

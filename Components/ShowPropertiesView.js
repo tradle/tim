@@ -7,6 +7,7 @@ var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin')
 var ResourceMixin = require('./ResourceMixin')
 var reactMixin = require('react-mixin')
+var dateformat = require('dateformat')
 var Accordion = require('react-native-accordion')
 var Icon = require('react-native-vector-icons/Ionicons')
 var NOT_SPECIFIED = '[not specified]'
@@ -182,7 +183,8 @@ class ShowPropertiesView extends Component {
         }
       }
       else if (pMeta.type === 'date')
-        val = utils.formatDate(val);
+        val = dateformat(new Date(val), 'fullDate')
+        // val = utils.formatDate(val);
       // else if (pMeta[constants.SUB_TYPE] === 'email') {
       //   isEmail = true
       //   val = <TouchableOpacity onPress={() => Communications.email([val], null, null, 'My Subject','My body text')}>

@@ -132,13 +132,13 @@ class VerificationRow extends Component {
                   ? resource.to.organization
                   : resource.organization
 
-      let by
-      if (isMyProduct)
-        by = translate('issuedBy', org.title)
-      else if (isForm)
-        by = translate('sentTo', org.title)
-      else
-        by = translate('verifiedBy', org.title)
+
+      let title = org ? org.title : resource.to.title
+      let by = (isMyProduct)
+             ? translate('issuedBy', title)
+             : (isForm)
+                ? translate('sentTo', title)
+                : translate('verifiedBy', title)
 
       verifiedBy = <View style={contentRows.length == 1 ? {flex: 1} : {flexDirection: 'row'}} key={this.getNextKey()}>
                     <Text style={styles.description}>{by}</Text>

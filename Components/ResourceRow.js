@@ -7,11 +7,14 @@ var constants = require('@tradle/constants');
 var Icon = require('react-native-vector-icons/Ionicons');
 var RowMixin = require('./RowMixin');
 var ResourceList = require('./ResourceList')
-// var Swipeout = require('react-native-swipeout')
-var reactMixin = require('react-mixin');
+
 var equal = require('deep-equal')
 var extend = require('extend')
+var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
+var Reflux = require('reflux');
+var reactMixin = require('react-mixin');
+
 var StyleSheet = require('../StyleSheet')
 
 import {
@@ -29,15 +32,29 @@ import LinearGradient from 'react-native-linear-gradient'
 import React, { Component } from 'react'
 import ActivityIndicator from './ActivityIndicator'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
+const UNREAD_COLOR = '#FF6D0D'
+
+
 var dateProp
 
 class ResourceRow extends Component {
   constructor(props) {
     super(props)
-    if (this.props.changeSharedWithList)
+    if (props.changeSharedWithList)
       this.state = {sharedWith: true}
-    if (this.props.multiChooser)
+    if (props.multiChooser)
       this.state = {isChosen: false}
+    if (props.resource[constants.TYPE] === constants.TYPES.PROFILE)
+      this.state = {resource: props.resource, unread: props.resource._unread}
+  }
+  componentDidMount() {
+    this.listenTo(Store, 'onRowUpdate');
+  }
+  onRowUpdate(params) {
+    if (params.action !== 'updateRow')
+      return
+    if (params.resource[constants.ROOT_HASH] === this.props.resource[constants.ROOT_HASH])
+      this.setState({unread: params.resource._unread})
   }
   shouldComponentUpdate(nextProps, nextState) {
     if (Object.keys(this.props).length  !== Object.keys(nextProps).length)
@@ -45,6 +62,8 @@ class ResourceRow extends Component {
     if (this.props.resource.lastMessage !== nextProps.resource.lastMessage)
       return true
     if (this.state || nextState) {
+      if (this.state.unread !== nextState.unread)
+        return true
       if (nextState.sharedWith  &&  nextState.sharedWith === this.state.sharedWith)
         return true
       if (this.state  &&  nextState) {
@@ -79,7 +98,8 @@ class ResourceRow extends Component {
   render() {
     var resource = this.props.resource;
     var photo;
-    var isIdentity = resource[constants.TYPE] === constants.TYPES.PROFILE;
+    let rType = resource[constants.TYPE]
+    var isIdentity = rType === constants.TYPES.PROFILE;
     var noImage;
     if (resource.photos &&  resource.photos.length) {
       var uri = utils.getImageUri(resource.photos[0].url);
@@ -113,12 +133,15 @@ class ResourceRow extends Component {
         }
       }
     }
-    var orgPhoto;
-      orgPhoto = <View/>
-
-    var onlineStatus = (resource.online)
-                     ? <View style={styles.online}></View>
-                     : <View style={[styles.online, {backgroundColor: 'transparent'}]}></View>
+    if (photo  &&  (isIdentity || rType === constants.TYPES.ORGANIZATION)) {
+      var onlineStatus = (resource.online)
+                       ? <Icon name='ios-checkmark-circle' size={16} color='#62C457' style={styles.online} />
+                       : <Icon name='md-close-circle' size={16} color='#FAD70C' style={styles.online} />
+      photo = <View style={{flexDirection: 'row'}}>
+                {photo}
+                {onlineStatus}
+              </View>
+    }
 
     var rId = utils.getId(this.props.resource)
     // var cancelResource = (this.props.onCancel ||  this.state)
@@ -129,13 +152,13 @@ class ResourceRow extends Component {
     //                      </TouchableOpacity>
     //                    : <View />;
     var cancelResource = (this.props.onCancel  ||  (this.state && this.state.sharedWith))
-                       ?  <View style={{position: 'absolute', right: 10, top: 25, backgroundColor: 'transparent'}}>
+                       ?  <View style={styles.multiChooser}>
                              <Icon name={this.state.sharedWith ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color={this.state.sharedWith ? '#B1010E' : '#dddddd'} />
                            </View>
                        : <View />
-    //
+
     var multiChooser = this.props.multiChooser
-                     ?  <View style={{position: 'absolute', right: 10, top: 25, backgroundColor: 'transparent'}}>
+                     ?  <View style={styles.multiChooser}>
                           <TouchableOpacity underlayColor='transparent' onPress={this.chooseToShare.bind(this)}>
                            <Icon name={this.state.isChosen ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color='#7AAAc3' />
                           </TouchableOpacity>
@@ -154,6 +177,16 @@ class ResourceRow extends Component {
     else
       dateRow = <View/>
 
+    let isNewContact = this.props.newContact  &&  this.props.newContact[constants.ROOT_HASH] === resource[constants.ROOT_HASH]
+    let count
+    if (isIdentity)
+      count = resource._unread
+
+    count = count ? <View style={styles.countView}>
+                      <Text style={styles.countText}>{count}</Text>
+                    </View>
+                  : <View/>
+
     // Grey out if not loaded provider info yet
             // <ActivityIndicator hidden='true' color='#629BCA'/>
     var isOpaque = resource[constants.TYPE] === constants.TYPES.ORGANIZATION && !resource.contacts
@@ -162,8 +195,6 @@ class ResourceRow extends Component {
       <View key={this.getNextKey()} style={[{opacity: 0.5}, styles.rowWrapper]}>
         <View style={styles.row} key={this.getNextKey()}>
           {photo}
-          {orgPhoto}
-          {onlineStatus}
           <View style={[textStyle, {flexDirection: 'row', justifyContent: 'space-between'}]}>
             {this.formatRow(resource)}
           </View>
@@ -175,16 +206,15 @@ class ResourceRow extends Component {
       </View>
         )
     else {
-      let onPress = this.state
-                  ? this.action.bind(this)
-                  : this.props.onSelect
+      let onPress = this.action.bind(this)
+      // let onPress = this.state  &&  !this.state.resource
+      //             ? this.action.bind(this)
+      //             : this.props.onSelect
       return (
         <View key={this.getNextKey()} style={{opacity: 1, justifyContent: 'center', backgroundColor: '#ffffff'}}>
           <TouchableOpacity onPress={onPress} key={this.getNextKey()}>
             <View style={[styles.row, {width: utils.dimensions(ResourceRow).width - 50}]} key={this.getNextKey()}>
               {photo}
-              {orgPhoto}
-              {onlineStatus}
               <View style={textStyle} key={this.getNextKey()}>
                 {this.formatRow(resource)}
               </View>
@@ -213,10 +243,11 @@ class ResourceRow extends Component {
               </View>
             </TouchableOpacity>
           : <View />}
+          {count}
           {dateRow}
           {multiChooser}
           {cancelResource}
-          <View style={styles.cellBorder} />
+          <View style={isNewContact ? styles.highlightedCellBorder : styles.cellBorder}  key={this.getNextKey()} />
         </View>
       );
     }
@@ -239,11 +270,13 @@ class ResourceRow extends Component {
       this.chooseToShare()
     else if (this.props.onCancel)
       this.props.onCancel()
-    else if (typeof this.props.changeSharedWithList != 'undefined') {
+    else if (this.props.changeSharedWithList  &&  (typeof this.props.changeSharedWithList != 'undefined')) {
       let id = utils.getId(this.props.resource)
       this.setState({sharedWith: this.state.sharedWith ? false : true})
       this.props.changeSharedWithList(id, this.state.sharedWith ? false : true)
     }
+    else
+      this.props.onSelect(this.props.resource)
   }
   hideResource(resource) {
     let r = {}
@@ -253,18 +286,6 @@ class ResourceRow extends Component {
   }
   _allowScroll(scrollEnabled) {
     this.setState({scrollEnabled: scrollEnabled})
-  }
-  rowContent() {
-    return
-    <View style={styles.row} key={this.getNextKey()}>
-      {photo}
-      {orgPhoto}
-      {onlineStatus}
-      <View style={textStyle} key={this.getNextKey()}>
-        {this.formatRow(resource)}
-      </View>
-      {cancelResource}
-    </View>
   }
   formatRow(resource) {
     var self = this;
@@ -323,7 +344,7 @@ class ResourceRow extends Component {
 
     var isOfficialAccounts = this.props.isOfficialAccounts
     var isIdentity = resource[constants.TYPE] === constants.TYPES.PROFILE;
-    viewCols.forEach(function(v) {
+    viewCols.forEach((v) => {
       if (v === dateProp)
         return;
       if (properties[v].type === 'array')
@@ -399,8 +420,11 @@ class ResourceRow extends Component {
                     <Text style={[style, {width: w, paddingLeft: 2}]}>{val}</Text>
                   </View>
           }
-          else
+          else {
+            if (resource._unread  &&  v === 'lastMessage')
+              style = [style, {color: UNREAD_COLOR}]
             row = <Text style={style} key={self.getNextKey()}>{val}</Text>;
+          }
         }
         vCols.push(row);
         first = false;
@@ -435,6 +459,7 @@ class ResourceRow extends Component {
     });
   }
 }
+reactMixin(ResourceRow.prototype, Reflux.ListenerMixin);
 reactMixin(ResourceRow.prototype, RowMixin);
 
 var styles = StyleSheet.create({
@@ -523,6 +548,11 @@ var styles = StyleSheet.create({
     height: 1,
     marginLeft: 4,
   },
+  highlightedCellBorder: {
+    backgroundColor: '#139459',
+    height: 1,
+    marginLeft: 4,
+  },
   icon: {
     // width: 40,
     // height: 40,
@@ -532,15 +562,18 @@ var styles = StyleSheet.create({
     // color: '#7AAAc3'
   },
   online: {
-    backgroundColor: 'green',
-    borderRadius: 6,
-    width: 12,
-    height: 12,
-    position: 'absolute',
-    top: 83,
-    left: 8,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#ffffff'
+    // backgroundColor: 'transparent',
+    borderRadius: 8,
+    alignSelf: 'flex-end',
+    marginLeft: -25,
+    marginRight: 25,
+    // width: 16,
+    // height: 16,
+    // position: 'absolute',
+    // top: 45,
+    // left: 45,
+    // borderWidth: 2,
+    // borderColor: '#ffffff'
   },
   contextOwners: {
     fontSize: 14,
@@ -550,6 +583,28 @@ var styles = StyleSheet.create({
     fontSize: 12,
     alignSelf: 'flex-end',
     color: '#b4c3cb'
+  },
+  countView: {
+    top: 25,
+    position: 'absolute',
+    right: 10,
+    justifyContent: 'center',
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    backgroundColor: UNREAD_COLOR
+  },
+  countText: {
+    fontSize: 14,
+    alignSelf: 'center',
+    // fontWeight: '600',
+    color: '#ffffff'
+  },
+  multiChooser: {
+    position: 'absolute',
+    right: 10,
+    top: 25,
+    backgroundColor: 'transparent'
   },
 });
 

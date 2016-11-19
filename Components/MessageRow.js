@@ -16,7 +16,7 @@ var RowMixin = require('./RowMixin');
 var Accordion = require('react-native-accordion')
 var extend = require('extend')
 var equal = require('deep-equal')
-var formDefaults = require('@tradle/models').formDefaults;
+var formDefaults = require('../data/formDefaults.json')
 var TradleW = require('../img/TradleW.png')
 var Actions = require('../Actions/Actions');
 import { makeResponsive } from 'react-native-orient'
@@ -65,6 +65,7 @@ class MessageRow extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     return !equal(this.props.resource, nextProps.resource)   ||
            !equal(this.props.to, nextProps.to)               ||
+           this.props.addedItem !== nextProps.addedItem      ||
            this.props.orientation !== nextProps.orientation  ||
            this.props.sendStatus !== nextProps.sendStatus
   }
@@ -214,21 +215,8 @@ class MessageRow extends Component {
       }
 
 
-      if (this.props.sendStatus  &&  this.props.sendStatus !== null) {
-        switch (this.props.sendStatus) {
-        case 'Sent':
-          sendStatus = <View style={styles.sendStatus}>
-                         <Text style={styles.sendStatusText}>{this.props.sendStatus}</Text>
-                         <Icon name={'ios-checkmark-outline'} size={15} color='#009900' />
-                       </View>
-          break
-        default:
-          sendStatus = <View style={styles.sendStatus}>
-                        <Text style={styles.sendStatusDefaultText}>{this.props.sendStatus}</Text>
-                      </View>
-          break
-        }
-      }
+      if (this.props.sendStatus  &&  this.props.sendStatus !== null)
+        sendStatus = this.getSendStatus()
       var sealedStatus = (resource.txId)
                        ? <View style={styles.sealedStatus}>
                            <Icon name={'ios-ribbon'} size={30} color='#316A99' style={{opacity: 0.5}} />
@@ -1071,22 +1059,6 @@ var styles = StyleSheet.create({
     marginHorizontal: -8,
     marginTop: -6,
     justifyContent: 'center'
-  },
-  sendStatus: {
-    alignSelf: 'flex-end',
-    flexDirection: 'row',
-    backgroundColor: 'transparent',
-    marginTop: -3
-  },
-  sendStatusText: {
-    fontSize: 14,
-    color: '#009900',
-    marginRight: 3
-  },
-  sendStatusDefaultText: {
-    fontSize: 14,
-    alignSelf: 'flex-end',
-    color: '#757575',
   },
   sealedStatus: {
     // alignSelf: 'flex-end',

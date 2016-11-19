@@ -1,3 +1,4 @@
+
 'use strict';
 
 var path = require('path')
@@ -50,7 +51,7 @@ var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
-var Keychain = null //!utils.isWeb() && require('../utils/keychain')
+var Keychain = !utils.isWeb() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('q-level');
 var leveldown = require('./leveldown')
@@ -582,6 +583,9 @@ var Store = Reflux.createStore({
       }
       if (m.id === VERIFICATION  &&  meId === utils.getId(r.from))
         this.addMessagesToChat(utils.getId(r.to), r, true)
+      // Shared context
+      else if (m.id === PRODUCT_APPLICATION  &&  r._readOnly)
+        this.addMessagesToChat(utils.getId(r.from), r, true)
       else {
         let fromId = utils.getId(r.from)
         let rep = this._getItem(meId === fromId ? utils.getId(r.to) : fromId)
@@ -601,6 +605,7 @@ var Store = Reflux.createStore({
     let meId = utils.getId(me)
     let productToForms = {}
     let productApp = {}
+    let removeMsg = []
     // Compact all FormRequests that were fulfilled
     for (let i=messages.length - 1; i>=0; i--) {
       let r = this._getItem(messages[i].id)
@@ -611,17 +616,24 @@ var Store = Reflux.createStore({
           productToForms[r.product] = {}
         let formIdx = productToForms[r.product][r.form]
         if (typeof formIdx !== 'undefined')
-          messages.splice(formIdx, 1)
+          removeMsg.push(formIdx)
+          // messages.splice(formIdx, 1)
 
         productToForms[r.product][r.form] = i
       }
       if (r[TYPE] === PRODUCT_APPLICATION) {
         let productIdx = productApp[r.product]
         if (productIdx)
-          messages.splice(productIdx, 1)
-        else
+          removeMsg.push(productIdx)
+          // messages.splice(productIdx, 1)
+        // else
           productApp[r.product] = i
       }
+    }
+    if (removeMsg.length) {
+      removeMsg.sort((i1, i2) => {return i2 - i1})
+      for (let i=0; i<removeMsg.length; i++)
+        messages.splice(removeMsg[i], 1)
     }
     // Compact all SelfIntroduction
     messages = messages.filter((rr, i) => {
@@ -705,50 +717,38 @@ var Store = Reflux.createStore({
     return newResult
     // return newResult.reverse()
   },
-
-
   getInfo(serverUrls, retry, id) {
-    let self = this
+    return Q.all(serverUrls.map(url => {
+      return this.getServiceProviders(url, retry, id)
+        .then(results => {
+          // var httpClient = driverInfo.httpClient
+          var wsClients = driverInfo.wsClients
+          // var whitelist = driverInfo.whitelist
+          var tlsKey = driverInfo.tlsKey
+          // if (!httpClient) {
+          //   httpClient = new HttpClient()
+          //   driverInfo.httpClient = httpClient
+          //   meDriver.ready().then(function () {
+          //     var myHash = meDriver.myRootHash()
+          //     httpClient.setRootHash(myHash)
+          //   })
 
-    let defer = Q.defer()
-    let togo = serverUrls.length
-    serverUrls.forEach((url) => {
-      self.getServiceProviders(url, retry, id)
-      .then((results) => {
-        // var httpClient = driverInfo.httpClient
-        var wsClients = driverInfo.wsClients
-        // var whitelist = driverInfo.whitelist
-        var tlsKey = driverInfo.tlsKey
-        // if (!httpClient) {
-        //   httpClient = new HttpClient()
-        //   driverInfo.httpClient = httpClient
-        //   meDriver.ready().then(function () {
-        //     var myHash = meDriver.myRootHash()
-        //     httpClient.setRootHash(myHash)
-        //   })
-
-        //   httpClient.on('message', function () {
-        //     meDriver.receiveMsg.apply(meDriver, arguments)
-        //   })
-        // }
-        results.forEach(function(provider) {
-          self.addProvider(provider)
-          Push.subscribe(provider.hash)
-            .catch(err => console.log('failed to register for push notifications'))
+          //   httpClient.on('message', function () {
+          //     meDriver.receiveMsg.apply(meDriver, arguments)
+          //   })
+          // }
+          results.forEach(provider => {
+            this.addProvider(provider)
+            Push.subscribe(provider.hash)
+              .catch(err => console.log('failed to register for push notifications'))
+          })
         })
-
-        if (--togo === 0) {
-          defer.resolve()
-          // meDriver.watchTxs(whitelist)
-          return meDriver
-        }
-      })
-      .catch((err) => {
-        debugger
-      })
-    })
-
-    return defer.promise
+        .catch(err => {
+          // forgive individual errors for batch getInfo
+          if (id) throw err
+        })
+        .then(() => meDriver)
+    }))
 
     // return Q.all(serverUrls.map(url => self.getServiceProviders(url, retry)))
     // .then(function(results) {
@@ -907,18 +907,49 @@ var Store = Reflux.createStore({
     // })
 
     wsClient.on('disconnect', function () {
+      let trigger, org
       transport.clients().forEach(function (c) {
         // reset OTR session, restart on connect
+        if (SERVICE_PROVIDERS) {
+          SERVICE_PROVIDERS.forEach((sp) => {
+            if (sp.id === provider.id) {
+              org = self._getItem(sp.org)
+              org.online = false
+              trigger = true
+            }
+          })
+        }
         debug('aborting pending sends due to disconnect')
         c.destroy()
       })
 
+      if (trigger) {
+        self.trigger({action: 'offlineStatus', online: false})
+        let l = self.searchNotMessages({modelName: ORGANIZATION})
+        self.trigger({action: 'list', list: l})
+      }
       // pause all channels
       meDriver.sender.pause()
     })
 
     wsClient.on('connect', function (recipient) {
       // resume all paused channels
+      let trigger, org
+      if (SERVICE_PROVIDERS) {
+        SERVICE_PROVIDERS.forEach((sp) => {
+          if (sp.id === provider.id) {
+            org = self._getItem(sp.org)
+            org.online = true
+            trigger = true
+          }
+        })
+      }
+      if (trigger) {
+        self.trigger({action: 'onlineStatus', online: true})
+        let l = self.searchNotMessages({modelName: ORGANIZATION})
+        self.trigger({action: 'list', list: l})
+      }
+
       meDriver.sender.resume()
     })
 
@@ -1254,6 +1285,7 @@ var Store = Reflux.createStore({
       batch.push({type: 'put', key: okey, value: sp.org})
       this._setItem(okey, sp.org)
     }
+    list[okey].online = true
     if (sp.style)
       this._getItem(okey).style = sp.style
     if (!list[ikey]) {
@@ -1372,6 +1404,7 @@ var Store = Reflux.createStore({
         if (!profile.formatted) {
           profile.formatted = profile.firstName
         }
+        profile._unread = 1
       }
 
       profile.formatted = profile.firstName + (data && data.lastName ? ' ' + data.lastName : '')
@@ -1392,7 +1425,7 @@ var Store = Reflux.createStore({
     }
     if (!isDevicePairing) {
       if (!this._getItem(utils.getId(profile)).bot)
-        this.trigger({action: 'newContact', to: profile, newContact: true})
+        this.trigger({action: 'newContact', newContact: profile})
     }
 
     let promise
@@ -1428,28 +1461,6 @@ var Store = Reflux.createStore({
       debugger
     })
   },
-  // dhtFor (identity, port) {
-  //   var dht = new DHT({
-  //     nodeId: this.nodeIdFor(identity),
-  //     bootstrap: ['tradle.io:25778']
-  //   })
-
-  //   dht.on('error', function (err) {
-  //     debugger
-  //     throw err
-  //   })
-
-  //   dht.listen(port)
-  //   // dht.socket.filterMessages(tutils.isDHTMessage)
-  //   return dht
-  // },
-  //
-  // nodeIdFor (identity) {
-  //   return crypto.createHash('sha256')
-  //     .update(this.findKey(identity.pubkeys, { type: 'dsa' }).fingerprint)
-  //     .digest()
-  //     .slice(0, 20)
-  // },
   findKey (keys, where) {
     var match
     keys.some(function (k) {
@@ -1487,9 +1498,11 @@ var Store = Reflux.createStore({
     if (!r.time)
       r.time = new Date().getTime();
     var toOrg
-    if (!r.to[TYPE])
-      r.to = this._getItem(r.to)
-    if (r.to[TYPE] === ORGANIZATION) {
+    // r.to could be a reference to a resource
+    var to = this._getItem(r.to)
+    // if (!r.to[TYPE])
+    //   r.to = this._getItem(r.to)
+    if (to[TYPE] === ORGANIZATION) {
       var orgId = utils.getId(r.to)
       var orgRep = this.getRepresentative(orgId)
       if (!orgRep) {
@@ -1657,10 +1670,8 @@ var Store = Reflux.createStore({
       var key = utils.getId(rr)
       self._setItem(key, rr)
 
-      if (!toOrg) {
-        let to = self._getItem(utils.getId(r.to))
+      if (!toOrg)
         toOrg = to.organization ? to.organization : to
-      }
 
       self.addMessagesToChat(utils.getId(toOrg), rr)
 
@@ -1694,10 +1705,9 @@ var Store = Reflux.createStore({
       if (isWelcome  &&  utils.isEmpty(welcomeMessage))
         return
       // cleanup temporary resources from the chat message references and from the in-memory storage - 'list'
-      if (!toOrg) {
-        let to = self._getItem(utils.getId(r.to))
+      if (!toOrg)
         toOrg = to.organization ? to.organization : to
-      }
+
       let orgId = utils.getId(toOrg)
       // self.deleteMessageFromChat(orgId, rr)
       // delete list[rr[TYPE] + '_' + tmpKey]
@@ -1720,31 +1730,44 @@ var Store = Reflux.createStore({
       debugger
     });
   },
+
   packMessage(r, toChain) {
     var sendParams = {
       object: toChain
     }
-    let hash = r.to[ROOT_HASH]
-    if (hash === me[ROOT_HASH])
-      hash = r.from[ROOT_HASH]
-    if (!hash)
-      hash = this._getItem(utils.getId(r.to))[ROOT_HASH]
-    var toId = IDENTITY + '_' + hash
-    var isEmployee
-    if (me.isEmployee) {
-      let to = this._getItem(utils.getId(r.to))
-      isEmployee = (!to.organization ||  utils.getId(to.organization) === utils.getId(me.organization))
+    let to = this._getItem(utils.getId(r.to))
+    let provider, hash
+    if (to[ROOT_HASH] === me[ROOT_HASH]) {
+      provider = this._getItem(r.from)
+      hash = provider[ROOT_HASH]
     }
+    else
+      provider = to
+    hash = provider[ROOT_HASH]
+
+    // if (!hash)
+    //   hash = provider[ROOT_HASH]
+
+    var isEmployee
+    if (me.isEmployee)
+      isEmployee = (!to.organization ||  utils.getId(to.organization) === utils.getId(me.organization))
+
     // let isEmployee = me.isEmployee && (!r.to.organization || utils.getId(r.to.organization) === utils.getId(me.organization))
     if (isEmployee) {
-      let arr = SERVICE_PROVIDERS.filter((sp) => {
-        let reps = this.getRepresentatives(sp.org)
-        let talkingToBot = reps.forEach((r) => {
-          return r[ROOT_HASH] === hash ? true : false
+      let arr
+      if (SERVICE_PROVIDERS)
+        arr = SERVICE_PROVIDERS.filter((sp) => {
+          let reps = this.getRepresentatives(sp.org)
+          let talkingToBot = reps.forEach((r) => {
+            return r[ROOT_HASH] === hash ? true : false
+          })
+          return talkingToBot  &&  talkingToBot.length ? true : false
         })
-        return talkingToBot  &&  talkingToBot.length ? true : false
-      })
-      if (!arr.length) {
+      else  {
+        if (!to.bot)
+          arr = [to]
+      }
+      if (!arr  ||  !arr.length) {
         var toRootHash = hash
 
         sendParams.other = {
@@ -1770,28 +1793,34 @@ var Store = Reflux.createStore({
         }
       }
     }
-    var toId = IDENTITY + '_' + hash
-    if (!sendParams.to)
+    if (!sendParams.to) {
+      var toId = IDENTITY + '_' + hash
       sendParams.to = { fingerprint: this.getFingerprint(this._getItem(toId)) }
+    }
     return sendParams
   },
-  disableOtherFormRequestsLikeThis(rr) {
-    let fromRep = utils.getId(rr.from)
-    let orgId = utils.getId(this._getItem(fromRep).organization)
-    let messages = chatMessages[orgId]
-    messages.forEach((r) => {
-      let m = this._getItem(r.id)
-      if (m[TYPE] === FORM_REQUEST  &&
-          m.product === rr.product  &&
-          m.form === rr.form        &&
-          !m.document               &&
-          !m.documentCreated) {
-        m.documentCreated = true
-        db.put(utils.getId(m), m)
-      }
-    })
 
-  },
+  // disableOtherFormRequestsLikeThis(rr) {
+  //   let fromRep = utils.getId(rr.from)
+  //   let orgId = utils.getId(this._getItem(fromRep).organization)
+  //   let messages = chatMessages[orgId]
+  //   let batch = []
+  //   messages.forEach((r) => {
+  //     let m = this._getItem(r.id)
+  //     if (m[TYPE] === FORM_REQUEST  &&
+  //         m[ROOT_HASH] !== rr[ROOT_HASH] &&
+  //         m.product === rr.product  &&
+  //         m.form === rr.form        &&
+  //         !m.document               &&
+  //         !m.documentCreated) {
+  //       m.documentCreated = true
+  //       batch.push({type: 'put', key: utils.getId(m), value: m})
+  //     }
+  //   })
+  //   if (batch.length)
+  //     return db.batch(batch)
+  // },
+
   // Every chat has it's own messages array where
   // all the messages present in order they were received
   addMessagesToChat(id, r, isInit, timeShared) {
@@ -1799,6 +1828,15 @@ var Store = Reflux.createStore({
       return
     if (!r.time  &&  !timeShared)
       return
+    // if (r.sharedWith) {
+    //   if (r[TYPE] !== VERIFICATION) {
+    //     if (id.split('_')[0] === ORGANIZATION) {
+    //       let o = this._getItem(utils.getId(r.to)).organization
+    //       if (utils.getId(o) !== id)
+    //         return
+    //     }
+    //   }
+    // }
     // Check if this is a shared context
     if (r._context) {
       let c = this._getItem(r._context)
@@ -2009,9 +2047,12 @@ var Store = Reflux.createStore({
         modelName: items.ref,
         to: resource,
         meta: itemsModel,
+        prop: props[p],
         props: itemsModel.properties
       }
-      var result = this.searchNotMessages(params);
+      var meta = utils.getModel(items.ref).value
+      var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
+      var result = isMessage ? this.searchMessages(params) : this.searchNotMessages(params)
       if (result  &&  result.length)
         resource[p] = result;
     }
@@ -2373,8 +2414,9 @@ var Store = Reflux.createStore({
         // hack: we don't know root hash yet, use a fake
         if (returnVal.documentCreated)  {
           var params = {action: 'addItem', resource: returnVal}
-          self.disableOtherFormRequestsLikeThis(returnVal)
-          // don't save until the real resource is created
+          // return self.disableOtherFormRequestsLikeThis(returnVal)
+          // .then(() => {
+            // don't save until the real resource is created
           list[utils.getId(returnVal)].value = returnVal
           self.trigger(params);
           return self.waitForTransitionToEnd()
@@ -2384,6 +2426,7 @@ var Store = Reflux.createStore({
           .catch(function(err) {
             debugger
           })
+          // })
         }
         // Trigger painting before send. for that set ROOT_HASH to some temporary value like NONCE
         // and reset it after the real root hash will be known
@@ -2417,16 +2460,20 @@ var Store = Reflux.createStore({
         self.addMessagesToChat(orgId, returnVal)
 
         var params;
+
+        var sendStatus = (self.isConnected) ? SENDING : QUEUED
         if (returnVal[TYPE] === GUEST_SESSION_PROOF) {
           org = self._getItem(utils.getId(org))
           params = {action: 'getForms', to: org}
         }
         else {
+          returnVal._sendStatus = sendStatus
           params = {
             action: 'addItem',
             resource: utils.clone(returnVal)
           }
         }
+
         var m = self.getModel(returnVal[TYPE]).value
 
         // if (m.subClassOf === FORM)
@@ -2455,6 +2502,7 @@ var Store = Reflux.createStore({
 //           }
 //         })
 
+
         try {
           self.trigger(params);
         } catch (err) {
@@ -2472,7 +2520,7 @@ var Store = Reflux.createStore({
             toChain[PREV_HASH] = returnVal[PREV_HASH]
           }
 
-          let exclude = ['to', 'from', 'verifications', CUR_HASH, 'sharedWith', '_sendStatus', '_context']
+          let exclude = ['to', 'from', 'verifications', CUR_HASH, '_sharedWith', '_sendStatus', '_context', 'idOld']
           if (isNew)
             exclude.push(ROOT_HASH)
           extend(toChain, returnVal)
@@ -2504,8 +2552,8 @@ var Store = Reflux.createStore({
 
           returnVal[CUR_HASH] = result.object.link
           returnVal[ROOT_HASH] = result.object.permalink
-          var sendStatus = (self.isConnected) ? SENDING : QUEUED
-          returnVal._sendStatus = sendStatus
+          // var sendStatus = (self.isConnected) ? SENDING : QUEUED
+          // returnVal._sendStatus = sendStatus
 
 //           let org = list[utils.getId(returnVal.to)].value.organization
 //           self.addMessagesToChat(utils.getId(org), returnVal)
@@ -2551,19 +2599,37 @@ var Store = Reflux.createStore({
     })
   },
   onAddApp(serverUrl) {
-    let parts = serverUrl.split(';')
+    const parts = serverUrl.split(';')
+    const [url, id] = parts
     // let idx = serverUrl.lastIndexOf('/')
     // let id = parts[parts.length - 1]
     // let url = parts.slice(0, parts.length - 1).join('/')
-
-    return this.getInfo([parts[0]], false, parts[1])
+    const fullUrl = utils.joinURL(url, id)
+    return this.getInfo([url], false, id)
     .then(() => {
-      this.trigger({action: 'addApp'})
+      const newProvider = tradleUtils.find(SERVICE_PROVIDERS, r => r.id === id)
+      if (!newProvider) {
+        return this.trigger({
+          action: 'addApp',
+          error: `no provider found at url: ${fullUrl}`
+        })
+      }
+
+      this.addToSettings(newProvider)
+      this.trigger({ action: 'addApp' })
+
       // let list = self.searchNotMessages({modelName: ORGANIZATION})
       // this.trigger({
       //   action: 'list',
       //   list: list,
       // })
+    })
+    .catch(err => {
+       // this.trigger({action: 'addApp', error: 'Oops! No one is there.'})
+      this.trigger({
+        action: 'addApp',
+        error: `Server at ${fullUrl} is unavailable: ` + err.message
+      })
     })
   },
 
@@ -2638,19 +2704,35 @@ var Store = Reflux.createStore({
 
       return meDriver.signAndSend(sendParams)
     }
-    if (!Array.isArray(shareWithList))
-      return this.onShareOne(resource, shareWithList, originatingResource)
-    let promisses = []
-    shareWithList.forEach((r) => {
-      promisses.push(this.onShareOne(resource, this._getItem(r)))
-    })
-    Q.all(promisses)
-    .then((results) => {
-      debugger
-    })
-  },
+    // if (resource[TYPE] === VERIFICATION) {
+    //   if (!Array.isArray(shareWithList))
+    //     sharedWithList = [sharedWithList]
+    this.shareAll(resource.document, shareWithList, originatingResource)
+    //   return
+    // }
 
-  onShareOne(resource, to, formResource) {
+    // let promisses = []
+    // shareWithList.forEach((r) => {
+    //   promisses.push(this.onShareOne(resource, this._getItem(r)))
+    // })
+    // Q.all(promisses)
+    // .then((results) => {
+    //   debugger
+    // })
+  },
+  shareAll(document, shareWith, formResource) {
+    var documentCreated = formResource.documentCreated
+    var key = utils.getId(formResource)
+    var r = this._getItem(key)
+    // disable FormRequest from being used again
+    r.documentCreated = true
+    this.trigger({action: 'addItem', context: formResource.context, resource: r})
+    if (documentCreated)
+      return
+    let verifications = this._getItem(document).verifications
+    verifications.forEach((v) => this.shareOne(this._getItem(v), shareWith, formResource))
+  },
+  shareOne(resource, to, formResource) {
     var self = this
     var toOrgId
     if (to[TYPE] === ORGANIZATION) {
@@ -2671,16 +2753,40 @@ var Store = Reflux.createStore({
     if (formResource  &&  formResource._context)
       opts.other = {context: utils.getId(formResource._context).split('_')[1]}
 
-    var promise = meDriver.send({...opts, link: resource.document[CUR_HASH]})
+    // var documentCreated = formResource.documentCreated
+    // var key = utils.getId(formResource)
+    // var r = this._getItem(key)
+    // // disable FormRequest from being used again
+    // r.documentCreated = true
+    // this.trigger({action: 'addItem', context: resource.context, resource: r})
+    // if (documentCreated)
+    //   return
+
+    var time = new Date().getTime()
+    var toId = utils.getId(to)
+    var ver
+    if (resource[ROOT_HASH]) {
+      // Show sending status to not to keep customer in suspense
+      if (!resource.sharedWith)
+        resource.sharedWith = []
+      ver = self._getItem(utils.getId(resource))
+      ver._sharedWith.push(this.createSharedWith(toId, time))
+      ver._sendStatus = this.isConnected ? SENDING : QUEUED
+      utils.optimizeResource(ver)
+      this.addMessagesToChat(toOrgId, ver, false, time)
+      this.trigger({action: 'addItem', context: resource.context, resource: ver})
+    }
+
+    var promise = meDriver.send({...opts, link: this._getItem(resource.document)[CUR_HASH]})
     return promise
     .then(function () {
       return resource[CUR_HASH] ? meDriver.send({...opts, link: resource[CUR_HASH]}) : Q()
       // return meDriver.send({...opts, link: resource.document[ROOT_HASH]})
     })
-    .then(function() {
+    .then(() => {
       var key = utils.getId(formResource)
-      var r = self._getItem(key)
-      r.documentCreated = true
+      var r = this._getItem(key)
+
       if (r[TYPE] === FORM_REQUEST)
         r.document = resource[TYPE] === VERIFICATION
                    ? utils.getId(resource.document)
@@ -2688,47 +2794,29 @@ var Store = Reflux.createStore({
 
       var batch = []
       batch.push({type: 'put', key: key, value: r})
-      var toId = utils.getId(to)
-      var time = new Date().getTime()
-      // let sh = {
-      //   [TYPE]: SHARED_RESOURCE,
-      //   [ROOT_HASH]: self.getNonce(),
-      //   resource: self.buildRef(resource),
-      //   from: resource.from,
-      //   to: resource.to,
-      //   time: time
-      // }
-      // batch.push({type: 'put', key: utils.getId(sh), value: sh})
-      if (resource[ROOT_HASH]) {
-        key = utils.getId(resource)
-        var ver = self._getItem(key)
-        if (!ver._sharedWith)
-          ver._sharedWith = []
-
-        ver._sharedWith.push(self.createSharedWith(toId, time))
-        utils.optimizeResource(ver)
+      if (ver) {
+        key = utils.getId(ver)
+        this.trigger({action: 'updateItem', sendStatus: SENT, resource: ver})
+        ver._sendStatus = SENT
         batch.push({type: 'put', key: key, value: ver})
       }
       var formId = utils.getId(resource.document)
-      var form = self._getItem(formId)
+      var form = this._getItem(formId)
       if (!form._sharedWith) {
         form._sharedWith = []
-        form._sharedWith.push(self.createSharedWith(utils.getId(form.to), form.time))
+        form._sharedWith.push(this.createSharedWith(utils.getId(form.to), form.time))
       }
 
-      form._sharedWith.push(self.createSharedWith(toId, time))
-      self.addMessagesToChat(toOrgId, form, false, time)
-      if (ver)
-        self.addMessagesToChat(toOrgId, ver, false, time)
+      form._sharedWith.push(this.createSharedWith(toId, time))
+      this.addMessagesToChat(toOrgId, form, false, time)
+      // if (ver)
+      //   this.addMessagesToChat(toOrgId, ver, false, time)
 
       utils.optimizeResource(form)
-      self.addLastMessage(form, batch, to)
+      this.addLastMessage(form, batch, to)
       batch.push({type: 'put', key: formId, value: form})
       return db.batch(batch)
     })
-//     .then(() => {
-//       self.trigger({action: 'list', list: self.searchNotMessages({modelName: ORGANIZATION, to: resource})})
-//     })
     .catch(function(err) {
       debugger
     })
@@ -2867,104 +2955,128 @@ var Store = Reflux.createStore({
       if (params.isAggregation)
         result = this.getDependencies(result);
 
+      var shareableResources;
       var retParams = {
-        action: isMessage  &&  !params.prop && !params._readOnly ? 'messageList' : 'list',
+        action: !params.listView  &&  isMessage  &&  !params.prop && !params._readOnly ? 'messageList' : 'list',
         list: result,
         spinner: params.spinner,
         isAggregation: params.isAggregation
       }
-      var shareableResources;
-      let hasMore = params.limit  &&  result.length > params.limit
-      if (params.loadEarlierMessages || hasMore) {
-        if (hasMore)  {
-          result.splice(0, 1)
-          retParams.allLoaded = true
+      if (isMessage) {
+        let hasMore = params.limit  &&  result.length > params.limit
+        if (params.loadEarlierMessages || hasMore) {
+          if (hasMore)  {
+            result.splice(0, 1)
+            retParams.allLoaded = true
+          }
+          retParams.loadEarlierMessages = true
         }
-        retParams.loadEarlierMessages = true
-      }
-      if (!params.isAggregation  &&  params.to) {
-        // let to = list[utils.getId(params.to)].value
-        // if (to  &&  to[TYPE] === ORGANIZATION)
+        if (!params.isAggregation  &&  params.to  &&  !params.prop) {
+          // let to = list[utils.getId(params.to)].value
+          // if (to  &&  to[TYPE] === ORGANIZATION)
+          // entering the chat should clear customer's unread indicator
           shareableResources = this.getShareableResources(result, params.to)
-      }
-      let orgId
-      if (params.to) {
-        if (params.to.organization)
-          orgId = utils.getId(params.to.organization)
-        else {
-          if (params.to[TYPE] === ORGANIZATION)
-            orgId = utils.getId(params.to)
-        }
-        if (orgId) {
-          let rep = this.getRepresentative(orgId)
-          if (rep  &&  !rep.bot)
-            retParams.isEmployee = true
-        }
-      }
-      if (params.context)
-        retParams.context = params.context
-      else {
-        let c = this.searchMessages({modelName: PRODUCT_APPLICATION, to: params.to})
-        if (c  &&  c.length) {
-          let meId = utils.getId(me)
-          let talkingToCustomer = !orgId  &&  me.isEmployee  &&  params.to  &&  params.to[TYPE] === PROFILE  &&  utils.getId(params.to) !== meId
-          if (talkingToCustomer)
-            retParams.context = c[c.length - 1]
-          else if (c.length === 1) {
-            if (!c[0]._readOnly)
-              retParams.context = c[0]
-          }
-          else {
-            let contexts = c.filter((r) => !r._readOnly && r.formsCount)
-            if (contexts) {
-              if (!contexts.length)
-                retParams.context = c[c.length - 1]
-              else if (contexts.length === 1)
-                retParams.context = contexts[0]
-              else {
-                contexts.sort((a, b) => {
-                  return b.lastMessageTime - a.lastMessageTime
-                })
-                retParams.context = contexts[0]
-              }
+          if (me.isEmployee  && params.to[TYPE] === PROFILE) {
+            let toId = utils.getId(params.to)
+            let to = this._getItem(toId)
+            if (!to.bot) {
+              to._unread = 0
+              db.put(toId, to)
+              .then(() => {
+                this.trigger({action: 'updateRow', resource: to})
+              })
             }
-            // for (let i=c.length - 1; i>=0  &&  !retParams.context; i--) {
-            //   if (c[i].formsCount)
-            //     retParams.context = c[i]
-            // }
-            // if (!retParams.context)
-            //   retParams.context = c[c.length - 1]
           }
         }
+        let orgId
+        if (params.to) {
+          if (params.to.organization)
+            orgId = utils.getId(params.to.organization)
+          else {
+            if (params.to[TYPE] === ORGANIZATION)
+              orgId = utils.getId(params.to)
+          }
+          if (orgId) {
+            let rep = this.getRepresentative(orgId)
+            if (rep  &&  !rep.bot)
+              retParams.isEmployee = true
+          }
+        }
+        if (params.context)
+          retParams.context = params.context
+        else {
+          let c = this.searchMessages({modelName: PRODUCT_APPLICATION, to: params.to})
+          if (c  &&  c.length) {
+            let meId = utils.getId(me)
+            let talkingToCustomer = !orgId  &&  me.isEmployee  &&  params.to  &&  params.to[TYPE] === PROFILE  &&  utils.getId(params.to) !== meId
+            if (talkingToCustomer) {
+              // Use the context that was already started if such exists
+              let contexts = c.filter((r) => !r._readOnly && r.formsCount)
+              let currentProduct = c[c.length - 1].product
+              contexts = c.filter((r) => !r._readOnly && r.product === currentProduct)
+              retParams.context = contexts.length ? contexts[0] : c[c.length - 1]
+            }
+            else if (c.length === 1) {
+              if (!c[0]._readOnly)
+                retParams.context = c[0]
+            }
+            else {
+              let contexts = c.filter((r) => !r._readOnly && r.formsCount)
+              if (contexts) {
+                if (!contexts.length)
+                  retParams.context = c[c.length - 1]
+                else if (contexts.length === 1)
+                  retParams.context = contexts[0]
+                else {
+                  contexts.sort((a, b) => {
+                    return b.lastMessageTime - a.lastMessageTime
+                  })
+                  retParams.context = contexts[0]
+                }
+              }
+              // for (let i=c.length - 1; i>=0  &&  !retParams.context; i--) {
+              //   if (c[i].formsCount)
+              //     retParams.context = c[i]
+              // }
+              // if (!retParams.context)
+              //   retParams.context = c[c.length - 1]
+            }
+          }
+        }
+  /*
+        // Filter out forms that were shared, leave only verifications
+        if (params.to  &&  params.to[TYPE] === ORGANIZATION  &&  !utils.isEmployee(params.to)) {//  &&  utils.getId(params.to) !== meId) {
+          let toId = utils.getId(this.getRepresentative(utils.getId(params.to)))
+          result = result.filter((r) => {
+            // if (r[TYPE] !== VERIFICATION  ||  !r._sharedWith ||  r._sharedWith.length === 0)
+            //   return
+            if (utils.getModel(r[TYPE]).value.subClassOf !== FORM)
+              return true
+            let rId = utils.getId(r.to)
+            return (utils.getId(r.from) === meId  &&  rId !== toId) ? false : true
+            // let shV = r._sharedWith.forEach((rr) => {
+            //   if (rr.bankRepresentative === toId) {
+            //     let d = this._getItem(r.document)
+            //     if (utils.getId(d.to) !== toId)
+            //       filterOutForms.push(utils.getId(r.document))
+            //   }
+            // })
+          })
+          retParams.list = result
+        }
+  */
       }
-      // else if (params.modelName !== PRODUCT_APPLICATION) {
-      //   let c = this.searchMessages({modelName: PRODUCT_APPLICATION, to: params.to})
-      //   if (c) {
-      //     if (c.length === 1) {
-      //       if (!c[0]._readOnly)
-      //         retParams.context = c[0]
-      //     }
-      //     else {
-      //       let contexts = c.filter((r) => !r._readOnly && r.formsCount)
-      //       if (contexts) {
-      //         if (contexts.length === 1)
-      //           retParams.context = contexts[0]
-      //         else {
-      //           contexts.sort((a, b) => {
-      //             return b.lastMessageTime - a.lastMessageTime
-      //           })
-      //           retParams.context = contexts[0]
-      //         }
-      //       }
-      //       // for (let i=c.length - 1; i>=0  &&  !retParams.context; i--) {
-      //       //   if (c[i].formsCount)
-      //       //     retParams.context = c[i]
-      //       // }
-      //       // if (!retParams.context)
-      //       //   retParams.context = c[c.length - 1]
-      //     }
-      //   }
-      // }
+    // if (isMessage) {
+    //   let orgId = utils.getId(params.to)
+    //   let styles
+    //   if (SERVICE_PROVIDERS)
+    //      styles = SERVICE_PROVIDERS.filter((sp) => {
+    //         if (sp.org === orgId)
+    //           return true
+    //       })
+    //   if (styles  &&  styles.length)
+    //     retParams.style = styles[0].style
+    // }
 
       if (shareableResources)
         retParams.shareableResources = shareableResources
@@ -3178,21 +3290,12 @@ var Store = Reflux.createStore({
     if (isOrg) {
       // cloning orgs to re-render the org list with the correct number of forms
       let retOrgs = []
-      result = result.filter((r) => {
-        let orgId = utils.getId(r)
-        if (!SERVICE_PROVIDERS)
-          return false
-        let set =  SERVICE_PROVIDERS.filter((rr) => {
-          return rr.org === orgId
-        })
-        return set.length ? true : false
-      })
       result.forEach((r) => {
-        let oId = utils.getId(r)
+        let orgId = utils.getId(r)
         let rr = {}
         extend(true, rr, r)
+        rr.numberOfForms = orgToForm[orgId]
         retOrgs.push(rr)
-        rr.numberOfForms = orgToForm[oId]
       })
       result = retOrgs
     }
@@ -3222,6 +3325,8 @@ var Store = Reflux.createStore({
     var meId = utils.getId(me)
     var meOrgId = me.isEmployee ? utils.getId(me.organization) : null;
 
+    let filterOutForms = !params.isForgetting  &&  params.to  &&  params.to[TYPE] === ORGANIZATION  //&&  !utils.isEmployee(params.to)
+
     var chatTo = params.to
     if (chatTo  &&  chatTo.id)
       chatTo = this._getItem(utils.getId(chatTo))
@@ -3248,8 +3353,10 @@ var Store = Reflux.createStore({
           toOrgId = utils.getId(chatTo.organization)
           thisChatMessages = chatMessages[toOrgId]
         }
-        else
-          thisChatMessages = chatMessages[utils.getId(chatTo)]
+        else {
+          if (meId !== chatId)
+            thisChatMessages = chatMessages[chatId]
+        }
       }
 //       else if (chatId === meId) {
 // console.log('What are we doing here!!! chatId: ' + chatId)
@@ -3259,19 +3366,19 @@ var Store = Reflux.createStore({
     if (!thisChatMessages  &&  (!params.to  ||  chatId === meId)) {
       thisChatMessages = []
       let self = this
-      Object.keys(list).filter((key) => {
+      Object.keys(list).forEach(key => {
         let r = self._getItem(key)
         let type = r[TYPE]
         let m = this.getModel(type)
-        if (!m)
-          return false
+        if (!m) return
+
         if (type === modelName                      ||
            m.value.subClassOf === modelName         ||
            (modelName === MESSAGE  &&  m.value.interfaces)) {
           thisChatMessages.push({id: key, time: r.time})
-          return true
         }
       })
+
       thisChatMessages.sort((a, b) => {
         return a.time - b.time
       })
@@ -3404,7 +3511,8 @@ var Store = Reflux.createStore({
         if (backlink  &&  r[backlink]) {
           var s = params.resource ? utils.getId(params.resource) : chatId
           if (s === utils.getId(r[backlink])) {
-            foundResources.push(r)
+            if (!filterOutForms  ||  !this.doFilterOut(r, chatId))
+              foundResources.push(r)
             // for Loading earlier resources we don't need to check limit untill we get to the lastId
             if (limit  &&  foundResources.length === limit)
               break
@@ -3438,8 +3546,10 @@ var Store = Reflux.createStore({
         var doc = {};
         var rDoc = list[utils.getId(r.document)]
         if (!rDoc) {
-          if (params.isForgetting)
-            foundResources.push(r)
+          if (params.isForgetting) {
+            if (!filterOutForms  ||  !this.doFilterOut(r, chatId))
+              foundResources.push(r)
+          }
           continue
         }
 
@@ -3471,7 +3581,8 @@ var Store = Reflux.createStore({
         if (!msg)
           msg = r
         // foundResources[key] = msg;
-        foundResources.push(msg)
+        if (!filterOutForms  ||  !this.doFilterOut(msg, chatId))
+          foundResources.push(msg)
         if (limit  &&  foundResources.length === limit)
           break
 
@@ -3486,7 +3597,8 @@ var Store = Reflux.createStore({
       }
       if (!combinedValue  ||  (combinedValue  &&  (!query || combinedValue.toLowerCase().indexOf(query.toLowerCase()) != -1))) {
         // foundResources[key] = this.fillMessage(r);
-        foundResources.push(this.fillMessage(r))
+        if (!filterOutForms  ||  !this.doFilterOut(r, chatId))
+          foundResources.push(this.fillMessage(r))
 
         if (limit  &&  foundResources.length === limit)
           break
@@ -3497,6 +3609,13 @@ var Store = Reflux.createStore({
     if (params._readOnly)
       foundResources = foundResources.filter((r) => r._readOnly)
     return foundResources.reverse()
+  },
+  doFilterOut(r, toId) {
+    if (utils.getModel(r[TYPE]).value.subClassOf !== FORM)
+      return false
+    let meId = utils.getId(me)
+    let rId = utils.getId(r.to)
+    return utils.getId(r.from) === meId  &&  rId !== toId
   },
   onGetAllContexts(params) {
     let list = this.searchMessages(params)
@@ -4755,20 +4874,20 @@ var Store = Reflux.createStore({
       var id
       if (isMyMessage) {
         id = !isSelfIntroduction  &&  toId === meId ? fromId : toId
-      if (!noTrigger  &&  id) {
-        var to = this._getItem(id)
-        if (to.organization) {
-          var org =  this._getItem(utils.getId(to.organization))
-          resultList = this.searchMessages({to: org, modelName: MESSAGE})
+        if (!noTrigger  &&  id) {
+          var to = this._getItem(id)
+          if (to.organization) {
+            var org =  this._getItem(utils.getId(to.organization))
+            resultList = this.searchMessages({to: org, modelName: MESSAGE})
+          }
+          else
+            resultList = this.searchMessages({to: to, modelName: MESSAGE})
+          retParams.list = resultList
+          var shareableResources = this.getShareableResources(resultList, to);
+          if (shareableResources)
+            retParams.shareableResources = shareableResources
+          retParams.resource = to
         }
-        else
-          resultList = this.searchMessages({to: to, modelName: MESSAGE})
-        retParams.list = resultList
-        var shareableResources = this.getShareableResources(resultList, to);
-        if (shareableResources)
-          retParams.shareableResources = shareableResources
-        retParams.resource = to
-      }
       }
       // if (to.organization) {
       //    if (!to.bot)
@@ -4805,8 +4924,20 @@ var Store = Reflux.createStore({
         }
         this.onAddMessage(msg, true)
       }
-      else if (isMessage  &&  !noTrigger)
+      else if (isMessage  &&  !noTrigger) {
+        if (onMessage) {
+          let meId = utils.getId(me)
+          if (me.isEmployee) {
+            let notMeId = toId === meId ? fromId  : toId
+            let notMe = this._getItem(notMeId)
+            if (notMe  &&  !notMe.bot) {
+              ++notMe._unread
+              this.trigger({action: 'updateRow', resource: notMe})
+            }
+          }
+        }
         this.trigger({action: 'addItem', resource: val})
+      }
       else if (representativeAddedTo  &&  !triggeredOrgs) {
         var orgList = this.searchNotMessages({modelName: ORGANIZATION})
         this.trigger({action: 'list', list: orgList, forceUpdate: true})
@@ -4912,16 +5043,26 @@ var Store = Reflux.createStore({
     var org = fOrg ? this._getItem(utils.getId(fOrg)) : null
     var inDB
     if (onMessage) {
+      let fromId = utils.getId(from)
+      let toId = utils.getId(to)
+      // let meId = utils.getId(me)
+      // if (me.isEmployee) {
+      //   let notMeId = toId === meId ? fromId  : toId
+      //   let notMe = this._getItem(notMeId)
+      //   if (!notMe.bot) {
+      //     ++notMe._unread
+      //     // this.trigger({action: 'updateRow', resource: notMe})
+      //   }
+      // }
       let profileModel = this.getModel(PROFILE).value
       val.from = {
-        id: utils.getId(from),
+        id: fromId,
         title: from.formatted || from.firstName
       }
       val.to = {
-        id: utils.getId(to),
+        id: toId,
         title: to.formatted || to.firstName
       }
-
       // self.fillFromAndTo(obj, val)
     }
     else {
@@ -4959,7 +5100,7 @@ var Store = Reflux.createStore({
       }
       // val._contexts.push(this.buildRef(context))
     }
-    else if (val[TYPE] === FORM_REQUEST  && val[ROOT_HASH] === val[CUR_HASH]) {
+    else if (val[TYPE] === FORM_REQUEST  &&  val[ROOT_HASH] === val[CUR_HASH]) {
       let product = val.product
       let contexts = this.searchMessages({modelName: PRODUCT_APPLICATION, to: org})
       if (contexts) {
@@ -4972,8 +5113,20 @@ var Store = Reflux.createStore({
             val._context = this.buildRef(contexts[i])
             break
           }
-
       }
+    }
+    if (val[TYPE] === FORM_REQUEST) {
+      let formRequests = this.searchMessages({modelName: FORM_REQUEST, to: org})
+      if (formRequests)
+        formRequests.forEach((r) => {
+          if (!r.documentCreated) {
+            r.documentCreated = true
+            let rId = utils.getId(r)
+            let rr = this._getItem(rId)
+            rr.documentCreated = true
+            batch.push({type: 'put', key: rId, value: r})
+          }
+        })
     }
     // if (onMessage  &&  val[TYPE] === FORGOT_YOU) {
     //   this.forgotYou(from)
@@ -5057,6 +5210,7 @@ var Store = Reflux.createStore({
     }
     else
       this.addMessagesToChat(utils.getId(org ? org : from), val)
+
     batch.push({type: 'put', key: key, value: val})
     return noTrigger
   },
@@ -5406,12 +5560,10 @@ var Store = Reflux.createStore({
   },
 
   cleanup(result) {
-    // return Q()
     if (!result.length)
       return Q()
 
     var batch = []
-    var docs = []
     var meId = utils.getId(me)
     result.forEach((r) => {
       batch.push({type: 'del', key: utils.getId(r), value: r})
@@ -5425,18 +5577,6 @@ var Store = Reflux.createStore({
       delete list[utils.getId(r)]
     })
     return db.batch(batch)
-    // .then(() => {
-    //   result.forEach((r) => {
-    //     if (this.getModel(r[TYPE]).value.interfaces) {
-    //       let id = (utils.getId(r.from) === meId) ? utils.getId(r.from) : utils.getId(r.to)
-    //       let rep = this._getItem(id)
-    //       let orgId = rep.organization ? utils.getId(rep.organization) : utils.getId(rep)
-
-    //       this.deleteMessageFromChat(orgId, r)
-    //     }
-    //     delete list[utils.getId(r)]
-    //   })
-    // })
     .catch(function(err) {
       err = err
     })
@@ -7669,7 +7809,6 @@ function getProviderUrl (provider) {
         rr[p] = r[p];
     return rr;
   },
-
   packResult(result) {
     let foundResources = {}
     result.forEach((fr) => {
@@ -7710,115 +7849,195 @@ function getProviderUrl (provider) {
   // },
 
 */
-  // getList1(params) {
-  //   var result = this.searchResources(params);
-  //   if (params.isAggregation)
-  //     result = this.getDependencies(result);
-  //   if (!result) {
-  //     // First time. No connection no providers yet loaded
-  //     if (!this.isConnected  &&  params.modelName === ORGANIZATION)
-  //       this.trigger({action: 'list', alert: translate('noConnection')})
+/*
+  initChats() {
+    let meId = utils.getId(me)
+    let meOrgId = me.organization ? utils.getId(me.organization) : null
 
-  //     return
-  //   }
+    for (var p in list) {
+      let r = this._getItem(p)
+      if (r._context) {
+        let c = this._getItem(r._context)
+        // context could be empty if ForgetMe was requested for the provider where form was originally created
+        if (c  &&  c._readOnly) {
+          this.addMessagesToChat(utils.getId(r._context), r, true)
+          continue
+        }
+      }
 
-  //   var model = this.getModel(params.modelName).value;
-  //   var isMessage = model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1);
+      let m = this._getItem(this.getModel(r[TYPE]))
+      if (!m.interfaces  ||  m.interfaces.indexOf(MESSAGE) === -1)
+        continue
 
-  //   var resultList = result
-  //   var shareableResources;
-  //   var retParams = {
-  //     action: isMessage  &&  !params.prop && !params._readOnly ? 'messageList' : 'list',
-  //     list: resultList,
-  //     spinner: params.spinner,
-  //     isAggregation: params.isAggregation
-  //   }
-  //   if (isMessage) {
-  //     let hasMore = params.limit  &&  result.length > params.limit
-  //     if (params.loadEarlierMessages || hasMore) {
-  //       if (hasMore)  {
-  //         result.splice(0, 1)
-  //         retParams.allLoaded = true
-  //       }
-  //       retParams.loadEarlierMessages = true
-  //     }
-  //     if (!params.isAggregation  &&  params.to) {
-  //       // let to = list[utils.getId(params.to)].value
-  //       // if (to  &&  to[TYPE] === ORGANIZATION)
-  //         shareableResources = this.getShareableResources(result, params.to)
-  //     }
-  //     if (params.to) {
-  //       let orgId
-  //       if (params.to.organization)
-  //         orgId = utils.getId(params.to.organization)
-  //       else {
-  //         if (params.to[TYPE] === ORGANIZATION)
-  //           orgId = utils.getId(params.to)
-  //       }
-  //       if (orgId) {
-  //         let rep = this.getRepresentative(orgId)
-  //         if (rep  &&  !rep.bot)
-  //           retParams.isEmployee = true
-  //       }
-  //     }
-  //     if (params.context)
-  //       retParams.context = params.context
-  //     else {
-  //       let c = this.searchMessages({modelName: PRODUCT_APPLICATION, to: params.to})
-  //       if (c) {
-  //         if (c.length === 1) {
-  //           if (!c[0]._readOnly)
-  //             retParams.context = c[0]
-  //         }
-  //         else {
-  //           let contexts = c.filter((r) => !r._readOnly && r.formsCount)
-  //           if (contexts) {
-  //             if (contexts.length === 1)
-  //               retParams.context = contexts[0]
-  //             else {
-  //               contexts.sort((a, b) => {
-  //                 return b.lastMessageTime - a.lastMessageTime
-  //               })
-  //               retParams.context = contexts[0]
-  //             }
-  //           }
-  //           // for (let i=c.length - 1; i>=0  &&  !retParams.context; i--) {
-  //           //   if (c[i].formsCount)
-  //           //     retParams.context = c[i]
-  //           // }
-  //           // if (!retParams.context)
-  //           //   retParams.context = c[c.length - 1]
-  //         }
-  //       }
-  //     }
-  //   }
-  //   // if (isMessage) {
-  //   //   let orgId = utils.getId(params.to)
-  //   //   let styles
-  //   //   if (SERVICE_PROVIDERS)
-  //   //      styles = SERVICE_PROVIDERS.filter((sp) => {
-  //   //         if (sp.org === orgId)
-  //   //           return true
-  //   //       })
-  //   //   if (styles  &&  styles.length)
-  //   //     retParams.style = styles[0].style
-  //   // }
+      let addedToProviders = []
+      if (r._sharedWith) {
+        if (m.id === VERIFICATION)
+          r._sharedWith.forEach((shareInfo) => {
+            // if (shareInfo.bankRepresentative === meId)
+            //   this.addMessagesToChat(utils.getId(r.to), r, true, shareInfo.timeShared)
+            // else  {
+            let rep = this._getItem(shareInfo.bankRepresentative)
+            let orgId = utils.getId(rep.organization)
+            if (meOrgId !== orgId) {
+              this.addMessagesToChat(orgId, r, true, shareInfo.timeShared)
+              addedToProviders.push(orgId)
+            }
+            // }
+          })
+      }
+      if (m.id === VERIFICATION  &&  meId === utils.getId(r.from))
+        this.addMessagesToChat(utils.getId(r.to), r, true)
+      else {
+        let fromId = utils.getId(r.from)
+        let rep = this._getItem(meId === fromId ? utils.getId(r.to) : fromId)
+        let orgId = rep.organization ? utils.getId(rep.organization) : utils.getId(rep)
+        if (addedToProviders.indexOf(orgId) === -1)
+          this.addMessagesToChat(orgId, r, true)
+      }
+    }
+    for (let id in chatMessages) {
+      var arr = chatMessages[id]
+      arr.sort((a, b) => a.time - b.time)
+      chatMessages[id] = this.filterChatMessages(arr, id)
+    }
+  },
+  // Filtered result contains only messages that get displayed
+  filterChatMessages(messages, orgId, lastId) {
+    let meId = utils.getId(me)
+    let productToForms = {}
+    let productApp = {}
+    let removeMsg = []
+    // Compact all FormRequests that were fulfilled
+    for (let i=messages.length - 1; i>=0; i--) {
+      let r = this._getItem(messages[i].id)
+      if (r[TYPE] === FORM_REQUEST  &&  !r.document) {// && r.documentCreated)
+      // delete list[id]
+        let forms = productToForms[r.product]
+        if (!forms)
+          productToForms[r.product] = {}
+        let formIdx = productToForms[r.product][r.form]
+        if (typeof formIdx !== 'undefined')
+          removeMsg.push(formIdx)
+          // messages.splice(formIdx, 1)
 
-  //   if (shareableResources)
-  //     retParams.shareableResources = shareableResources;
-  //   if (params.prop)
-  //     retParams.prop = params.prop;
+        productToForms[r.product][r.form] = i
+      }
+      if (r[TYPE] === PRODUCT_APPLICATION) {
+        let productIdx = productApp[r.product]
+        if (productIdx)
+          removeMsg.push(productIdx)
+          // messages.splice(productIdx, 1)
+        // else
+          productApp[r.product] = i
+      }
+    }
+    if (removeMsg.length) {
+      removeMsg.sort((i1, i2) => {return i2 - i1})
+      for (let i=0; i<removeMsg.length; i++)
+        messages.splice(removeMsg[i], 1)
+    }
+    // Compact all SelfIntroduction
+    messages = messages.filter((rr, i) => {
+      let r = this._getItem(rr.id)
+      return r[TYPE] === SELF_INTRODUCTION ? false : true
+        // delete list[id]
+    })
+    let newResult = messages.filter((rr, i) => {
+      let time = rr.time
+      let id = rr.id
+      let type = id.split('_')[0]
+      // Compact ProductList resources that go one after another
+      if (type === PRODUCT_LIST  &&  i !== messages.length - 1) {
+        var next = messages[i + 1]
 
-  //   this.trigger(retParams);
+        if (next && next.id.split('_')[0] === PRODUCT_LIST) {
+          // delete list[id]
+          return false
+        }
+      }
+      // if (r[TYPE] === CUSTOMER_WAITING) {
+      //   let f = list[utils.getId(r.from)].value.organization
+      //   let t = list[utils.getId(r.to)].value.organization
+      //   if (utils.getId(f) === utils.getId(t))
+      //     return false
+      // }
+      let r = this._getItem(rr.id)
+
+      // Check if there was request for the next form after multy-entry form
+      let fromId = utils.getId(r.from)
+
+      if (!me.isEmployee  &&  fromId !== meId  &&  list[fromId]) {
+        let rFrom = this._getItem(fromId)
+        if (!rFrom.bot) {
+          let photos = rFrom.photos
+          if (photos)
+            r.from.photo = photos[0]
+          else
+            r.from.photo = employee
+        }
+      }
+      let m = this.getModel(r[TYPE]).value
+      // r.from.photos = list[utils.getId(r.from)].value.photos;
+      // var to = list[utils.getId(r.to)]
+      // if (!to) console.log(r.to)
+      // r.to.photos = to  &&  to.value.photos;
+      if (m.subClassOf === FORM) {
+        // set organization and photos for items properties for better displaying
+        let form = this._getItem(utils.getId(r.to))
+        if (orgId  &&  r._sharedWith  &&  r._sharedWith.length > 1) {
+          // if (utils.getId(r.to.organization) !== toOrgId) {
+          //   let filteredVerifications = this.getSharedVerificationsAboutThisForm(r, toOrgId)
+          // }
+        }
+        r.to.organization = form.organization
+        for (var p in r) {
+          if (!m.properties[p]  ||  m.properties[p].type !== 'array' ||  !m.properties[p].items.ref)
+            continue
+          let pModel = this.getModel(m.properties[p].items.ref).value
+          if (pModel.properties.photos) {
+            let items = r[p]
+            items.forEach((ir) => {
+              let irRes = this._getItem(utils.getId(ir))
+              // HACK - bad forgetMe
+              let itemPhotos = irRes  && irRes.photos
+              if (itemPhotos)
+                ir.photo = itemPhotos[0].url
+            })
+          }
+        }
+      }
+      return true
+    })
+    if (lastId  &&  lastId.split('_')[0] === PRODUCT_LIST) {
+      let i=newResult.length - 1
+      for (; i>=0; i--)
+        if (newResult[i][TYPE] !== PRODUCT_LIST)
+          break
+        newResult.splice(i, 1)
+    }
+    return newResult
+    // return newResult.reverse()
+  },
+*/
+  // dhtFor (identity, port) {
+  //   var dht = new DHT({
+  //     nodeId: this.nodeIdFor(identity),
+  //     bootstrap: ['tradle.io:25778']
+  //   })
+
+  //   dht.on('error', function (err) {
+  //     debugger
+  //     throw err
+  //   })
+
+  //   dht.listen(port)
+  //   // dht.socket.filterMessages(tutils.isDHTMessage)
+  //   return dht
   // },
-
-  // searchResources(params) {
-  //   var meta = this.getModel(params.modelName).value;
-  //   var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
-  //   if (isMessage)
-  //     return this._searchMessages(params);
-  //   else {
-  //     params.fromView = true
-  //     return this.searchNotMessages(params);
-  //   }
+  //
+  // nodeIdFor (identity) {
+  //   return crypto.createHash('sha256')
+  //     .update(this.findKey(identity.pubkeys, { type: 'dsa' }).fingerprint)
+  //     .digest()
+  //     .slice(0, 20)
   // },

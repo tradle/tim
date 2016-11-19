@@ -33,10 +33,18 @@ var buttonStyles = Object.freeze({
   },
   buttons: {
     flexDirection: 'row',
-    backgroundColor: '#a0a0a0',
+    backgroundColor: '#F5FFED',
+    borderBottomColor: '#a0a0a0',
+    borderBottomWidth: 1,
     alignSelf: 'stretch'
   },
   text: {
+    color: '#757575',
+    paddingBottom: 10,
+    fontSize: utils.getFontSize(FONT_SIZE),
+    alignSelf: 'center',
+  },
+  msgText: {
     color: '#ffffff',
     paddingBottom: 10,
     fontSize: utils.getFontSize(FONT_SIZE),

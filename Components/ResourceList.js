@@ -73,7 +73,7 @@ class ResourceList extends Component {
       isLoading: true,
       dataSource: new ListView.DataSource({
         rowHasChanged: function(row1, row2) {
-          return row1 !== row2
+          return row1 !== row2  &&  row1.online !== row2.online
         }
       }),
       allowToAdd: this.props.prop  &&  this.props.prop.allowToAdd,
@@ -140,17 +140,18 @@ class ResourceList extends Component {
     if (params.prop) {
       let m = utils.getModel(this.props.resource[constants.TYPE]).value
       // case when for example clicking on 'Verifications' on Form page
-      if (m.interfaces) {
+      if (m.interfaces)
         // if (utils.getModel(this.props.modelName).value.interfaces)
         //   params.to = this.props.resource.to
         params.resource = this.props.resource
-      }
+      else if (params.prop.items  &&  params.prop.items.backlink)
+        params.to = this.props.resource
 
 //       params.resource = this.props.resource
     }
     else
       params.to = this.props.resource
-
+    params.listView = this.props.listView
     // this.state.isLoading = true;
     utils.onNextTransitionEnd(this.props.navigator, () => {
       Actions.list(params)
@@ -163,36 +164,39 @@ class ResourceList extends Component {
   }
 
   onListUpdate(params) {
+    var action = params.action;
+    if (action === 'addApp') {
+      this.props.navigator.pop()
+      if (params.error)
+        Alert.alert(params.error)
+      // Actions.list(constants.TYPES.ORGANIZATION)
+      return
+    }
     if (params.error)
       return;
 
-    var action = params.action;
     if (action === 'newContact') {
       let routes = this.props.navigator.getCurrentRoutes()
       let curRoute = routes[routes.length - 1]
-      if (curRoute.id === 11  &&  curRoute.passProps.resource[constants.ROOT_HASH] === params.to[constants.ROOT_HASH])
+      if (curRoute.id === 11  &&  curRoute.passProps.resource[constants.ROOT_HASH] === params.newContact[constants.ROOT_HASH])
         return
-      let style = this.mergeStyle(params.to.style)
-      this.props.navigator[curRoute.id === 3 ? 'replace' : 'push']({
-        title: params.to.firstName,
-        component: MessageList,
-        id: 11,
-        backButtonTitle: 'Back',
-        passProps: {
-          resource: params.to,
-          filter: '',
-          modelName: constants.TYPES.MESSAGE,
-          // currency: params.organization.currency,
-          bankStyle: style,
-          // dictionary: params.dictionary,
-        }
-      })
+      this.setState({newContact: params.newContact})
+      // let style = this.mergeStyle(params.newContact.style)
+      // this.props.navigator[curRoute.id === 3 ? 'replace' : 'push']({
+      //   title: params.newContact.firstName,
+      //   component: MessageList,
+      //   id: 11,
+      //   backButtonTitle: 'Back',
+      //   passProps: {
+      //     resource: params.newContact,
+      //     filter: '',
+      //     modelName: constants.TYPES.MESSAGE,
+      //     // currency: params.organization.currency,
+      //     bankStyle: style,
+      //     // dictionary: params.dictionary,
+      //   }
+      // })
 
-      return
-    }
-    if (action === 'addApp') {
-      this.props.navigator.pop()
-      // Actions.list(constants.TYPES.ORGANIZATION)
       return
     }
     if (action === 'connectivity') {
@@ -343,9 +347,7 @@ class ResourceList extends Component {
   mergeStyle(newStyle) {
     let style = {}
     extend(style, defaultBankStyle)
-    if (newStyle)
-      style = extend(style, newStyle)
-    return style
+    return newStyle ? extend(style, newStyle) : style
   }
   shouldComponentUpdate(nextProps, nextState) {
     if (nextState.forceUpdate)
@@ -353,6 +355,8 @@ class ResourceList extends Component {
     if (this.state.show !== nextState.show)
       return true
     if (nextState.isConnected !== this.state.isConnected)
+      return true
+    if (nextState.newContact  &&  (!this.state.newContact ||  this.state.newContact !== this.state.newContact))
       return true
     // if (this.state.isConnected !== nextState.isConnected)
     //   if (!this.state.list && !nextState.list)
@@ -364,6 +368,8 @@ class ResourceList extends Component {
       if (this.state.list[i].numberOfForms !== nextState.list[i].numberOfForms)
         return true
       if (this.state.list[i][constants.ROOT_HASH] !== nextState.list[i][constants.ROOT_HASH])
+        return true
+      if (this.state.list[i].online !== nextState.list[i].online)
         return true
     }
     return false
@@ -457,22 +463,22 @@ class ResourceList extends Component {
     }
     if (isIdentity) { //  ||  isOrganization) {
       route.title = resource.firstName
-      route.rightButtonTitle = translate('profile')
+      // route.rightButtonTitle = translate('profile')
 
-      route.onRightButtonPress = {
-        title: title,
-        id: 3,
-        component: ResourceView,
-        titleTextColor: '#7AAAC3',
-        backButtonTitle: 'Back',
-        passProps: {
-          bankStyle: style,
-          resource: resource
-        }
-      }
+      // route.onRightButtonPress = {
+      //   title: title,
+      //   id: 3,
+      //   component: ResourceView,
+      //   titleTextColor: '#7AAAC3',
+      //   backButtonTitle: 'Back',
+      //   passProps: {
+      //     bankStyle: style,
+      //     resource: resource
+      //   }
+      // }
       var isMe = isIdentity ? resource[constants.ROOT_HASH] === me[constants.ROOT_HASH] : true;
       if (isMe) {
-        route.onRightButtonPress.rightButtonTitle = translate('edit')
+        route.onRightButtonPress.rightButtonTitle = 'Edit'
         route.onRightButtonPress.onRightButtonPress = {
           title: title,
           id: 4,
@@ -546,9 +552,9 @@ class ResourceList extends Component {
        !model.value.isInterface  &&
        (resource[constants.ROOT_HASH] === me[constants.ROOT_HASH]  ||  resource[constants.TYPE] !== constants.TYPES.PROFILE)) {
       var self = this ;
-      route.rightButtonTitle = translate('edit')
+      route.rightButtonTitle = 'Edit'
       route.onRightButtonPress = /*() =>*/ {
-        title: translate('edit'),
+        title: 'Edit',
         id: 4,
         component: NewResource,
         rightButtonTitle: 'Done',
@@ -648,6 +654,7 @@ class ResourceList extends Component {
         key={resource[constants.ROOT_HASH]}
         navigator={this.props.navigator}
         changeSharedWithList={this.props.chat ? this.changeSharedWithList.bind(this) : null}
+        newContact={this.state.newContact}
         currency={this.props.currency}
         isOfficialAccounts={this.props.officialAccounts}
         multiChooser={this.props.multiChooser}
@@ -777,7 +784,7 @@ class ResourceList extends Component {
       title: translate('sharedContext'),
       id: 10,
       component: ResourceList,
-      backButtonTitle: translate('back'),
+      backButtonTitle: 'Back',
       titleTextColor: '#7AAAC3',
       passProps: {
         // officialAccounts: true,
@@ -896,9 +903,15 @@ class ResourceList extends Component {
     var model = utils.getModel(this.props.modelName).value;
     var footer = this.renderFooter();
 
-    let buttons = this.state.allowToAdd
-                ? [translate('addNew', this.props.prop.title), translate('cancel')]
-                : [translate('addServerUrl'), translate('scanQRcode')/*, 'Talk to employee'*/, translate('cancel')]
+    let buttons;
+    if (this.state.allowToAdd) {
+      buttons = [translate('addNew', this.props.prop.title), translate('cancel')]
+    } else {
+      buttons = [translate('cancel')]
+      if (__DEV__) {
+        buttons.unshift(translate('addServerUrl'), translate('scanQRcode'))
+      }
+    }
 
     var searchBar
     if (SearchBar) {

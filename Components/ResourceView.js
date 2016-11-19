@@ -24,6 +24,8 @@ var defaultBankStyle = require('../styles/bankStyle.json')
 var ENV = require('../utils/env')
 var StyleSheet = require('../StyleSheet')
 
+// var ResourceList = require('./ResourceList')
+
 import ActionSheet from 'react-native-actionsheet'
 
 import platformStyles from '../styles/platform'
@@ -74,7 +76,7 @@ class ResourceView extends Component {
       currentRoutes[len - 1].onRightButtonPress = this.props.action.bind(this)
   }
   componentWillMount() {
-    if (this.props.resource.id)
+    if (this.props.resource.id  ||  this.props.resource[constants.TYPE] === constants.TYPES.PROFILE)
       Actions.getItem(this.props.resource)
   }
   componentDidMount() {
@@ -146,10 +148,10 @@ class ResourceView extends Component {
   }
   shouldComponentUpdate(nextProps, nextState) {
     return utils.resized(this.props, nextProps)                            ||
-            (this.state.isModalOpen  !== nextState.isModalOpen             ||
+            this.state.isModalOpen  !== nextState.isModalOpen             ||
             this.state.useGesturePassword !== nextState.useGesturePassword ||
             this.state.useTouchId !== nextState.useTouchId                 ||
-            this.state.pairingData !== nextState.pairingData)
+            this.state.pairingData !== nextState.pairingData
   }
   onResourceUpdate(params) {
     var resource = params.resource;
@@ -197,8 +199,8 @@ class ResourceView extends Component {
     var isOrg = model.id === constants.TYPES.ORGANIZATION;
     var me = utils.getMe()
     var actionPanel
+    var isMe = isIdentity ? resource[constants.ROOT_HASH] === me[constants.ROOT_HASH] : false
     if (me) {
-      var isMe = isIdentity ? resource[constants.ROOT_HASH] === me[constants.ROOT_HASH] : true;
       actionPanel = ((isIdentity  &&  !isMe) || (isOrg  &&  (!me.organization  ||  utils.getId(me.organization) !== utils.getId(resource))))
                   ? <View/>
                   : <ShowRefList showQR={this.openModal.bind(this)} resource={resource} currency={this.props.currency} navigator={this.props.navigator} />
@@ -222,23 +224,28 @@ class ResourceView extends Component {
     else
       qrcode = <View />
 
-
-    let msg
-    if (this.state.useTouchId  &&  this.state.useGesturePassword)
-      msg = translate('bothOn')
-    else if (this.state.useTouchId)
-      msg = translate('touchIdOn')
-    else
-      msg = translate('passwordOn')
-//, this.state.useTouchId ? {opacity: 1} : {opacity: 0.3}
+    // let recentActivity = <View/>
+    // if (isMe) {
+    //   let type = 'tradle.ProductApplication'
+    //   let listView = true
+    //   recentActivity = <ResourceList modelName={type} listView={listView} resource={me} navigator={this.props.navigator} />
+    // }
+    let msg = ''
+    // if (this.state.useTouchId  &&  this.state.useGesturePassword)
+    //   msg = translate('bothOn')
+    // else if (this.state.useTouchId)
+    //   msg = translate('touchIdOn')
+    // else
+    //   msg = translate('passwordOn')
+////, this.state.useTouchId ? {opacity: 1} : {opacity: 0.3}
     let switchTouchId = isIdentity
                       ? <View style={styles.footer}>
                           <Text style={platformStyles.touchIdText}>{msg}</Text>
                           <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
                              <View style={[platformStyles.menuButtonRegular]}>
                                 <Icon name='md-finger-print' color={Platform.OS === 'android' ? 'red' : '#ffffff'} size={fontSize(33)} />
-                              </View>
-                            </TouchableHighlight>
+                             </View>
+                          </TouchableHighlight>
                         </View>
                       : <View/>
     // let showSwitch = isIdentity && Platform.OS === 'ios'  && !utils.isSimulator()

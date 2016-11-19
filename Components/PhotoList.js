@@ -17,6 +17,7 @@ import {
   Text,
   Animated,
   Easing,
+  Platform,
   TextInput,
   TouchableHighlight,
 } from 'react-native'

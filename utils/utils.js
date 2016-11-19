@@ -203,8 +203,6 @@ var utils = {
           return false
         if (!r1[p].some((r) => r2[p].some((rr2) => equal(r, rr2))))
           return false
-        if (!filtered.length)
-          return false
       }
       else if (typeof r1[p] === 'object') {
         if (!r2[p]  ||  !properties[p]) // internal props like _context

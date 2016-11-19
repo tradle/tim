@@ -6,7 +6,6 @@ import {
   StyleSheet
 } from 'react-native'
 
-import { getDimensions } from 'react-native-orient'
 import BackgroundImage from './BackgroundImage'
 var PasswordGesture = require('react-native-gesture-password')
 var utils = require('../utils/utils')
@@ -20,11 +19,12 @@ var MODES = {
 
 var PasswordCheck = React.createClass({
   propTypes: {
+    validate: PropTypes.func.isRequired,
+    promptInvalid: PropTypes.string.isRequired,
     // whether the user already has a password
     // and is choosing a new one
     isChange: PropTypes.bool,
     isCorrect: PropTypes.func,
-    validate: PropTypes.func,
     onSuccess: PropTypes.func,
     onFail: PropTypes.func,
     maxAttempts: PropTypes.number,
@@ -34,7 +34,6 @@ var PasswordCheck = React.createClass({
     promptReenterChange: PropTypes.string,
     promptRetrySet: PropTypes.string,
     promptRetryCheck: PropTypes.string,
-    promptInvalidSet: PropTypes.string,
     successMsg: PropTypes.string,
     failMsg: PropTypes.string,
     mode: function (props, propName) {
@@ -91,7 +90,7 @@ var PasswordCheck = React.createClass({
     if (this.state.attempts === 0) {
       if (!this.props.validate(password)) {
         return this.setState({
-          message: this.props.promptInvalidSet,
+          message: this.props.promptInvalid,
           status: 'wrong'
         })
       }
@@ -125,6 +124,13 @@ var PasswordCheck = React.createClass({
   },
 
   _checkPassword: function (password) {
+    if (!this.props.validate(password)) {
+      return this.setState({
+        status: 'wrong',
+        message: this.props.promptInvalid
+      })
+    }
+
     this.props.isCorrect(password)
       .then((isCorrect) => {
         if (isCorrect) {

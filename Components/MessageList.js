@@ -34,7 +34,7 @@ import { makeResponsive } from 'react-native-orient'
 // var ResourceTypesScreen = require('./ResourceTypesScreen')
 
 var LINK_COLOR
-var LIMIT = 300
+var LIMIT = 20
 var NEXT_HASH = '_n'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const MY_PRODUCT = 'tradle.MyProduct'
@@ -78,6 +78,7 @@ class MessageList extends Component {
       isLoading: true,
       selectedAssets: {},
       isConnected: this.props.navigator.isConnected,
+      onlineStatus: this.props.resource.online,
       allContexts: true,  // true - for the full chat; false - filtered chat for specific context.
       isEmployee:  utils.isEmployee(props.resource),
       filter: this.props.filter,
@@ -154,19 +155,41 @@ class MessageList extends Component {
 
       return
     }
+    if (params.action === 'onlineStatus') {
+      // if (params.isConnected  &&  !this.state.isForgetting) {
+      //   this.state.isConnected = params.isConnected
+      //   let me = utils.getMe()
+      //   let msg = {
+      //     message: me.firstName + ' is waiting for the response',
+      //     _t: constants.TYPES.CUSTOMER_WAITING,
+      //     from: me,
+      //     to: this.props.resource,
+      //     time: new Date().getTime()
+      //   }
+      //   Actions.addMessage(msg, true)
+      // }
+      // else
+      this.setState({onlineStatus: params.online})
+
+      return
+    }
     if (params.action === 'addItem'  ||  params.action === 'addVerification') {
       var actionParams = {
         query: this.state.filter,
         modelName: this.props.modelName,
         to: this.props.resource,
         context: this.state.allContexts ? null : this.state.context,
-        limit: this.state.list ? this.state.list.length + 1 : LIMIT
+        limit: this.state.list ? Math.max(this.state.list.length + 1, LIMIT) : LIMIT
       }
 
       if (params.resource._sendStatus) {
         this.state.sendStatus = params.resource._sendStatus
         this.state.sendResource = params.resource
       }
+      else if (params.resource[constants.TYPE] === FORM_REQUEST)
+        this.state.addedItem = params.resource
+      else
+        this.state.addedItem = null
       Actions.list(actionParams);
       return;
     }
@@ -267,6 +290,7 @@ class MessageList extends Component {
         list: list,
         shareableResources: params.shareableResources,
         allLoaded: false,
+        addedItem: this.state.addedItem,
         context: params.context,
         isEmployee: isEmployee,
         loadEarlierMessages: params.loadEarlierMessages,
@@ -299,7 +323,7 @@ class MessageList extends Component {
     // Eliminating repeated alerts when connection returns after ForgetMe action
     if (!this.state.isConnected && !this.state.list  && !nextState.list && this.state.isLoading === nextState.isLoading)
       return false
-    if (nextState.isConnected !== this.state.isConnected)
+    if (nextState.isConnected !== this.state.isConnected || nextState.onlineStatus !== this.state.onlineStatus)
       return true
     if (this.state.context !== nextState.context || this.state.allContexts !== nextState.allContexts)
       return true
@@ -433,6 +457,7 @@ class MessageList extends Component {
     props = extend(props, moreProps)
     if (model.id === constants.TYPES.VERIFICATION)
       return  <VerificationMessageRow {...props} />
+
     if (model.subClassOf === constants.TYPES.FORM)
       return <FormMessageRow {...props} />
 
@@ -440,6 +465,7 @@ class MessageList extends Component {
     props.productToForms = this.state.productToForms
     props.shareableResources = this.state.shareableResources,
     props.isAggregation = isAggregation
+    props.addedItem = this.state.addedItem
 
     return   <MessageRow {...props} />
   }
@@ -506,11 +532,11 @@ class MessageList extends Component {
         }
       }
       else {
-        if (!this.state.isLoading  &&  !this.props.navigator.isConnected) {
-          alert = (this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION)
-                ? Alert.alert(translate('noConnectionForPL', this.props.resource.name))
-                : Alert.alert(translate('noConnection'))
-        }
+        // if (!this.state.isLoading  &&  !this.props.navigator.isConnected) {
+        //   alert = (this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION)
+        //         ? Alert.alert(translate('noConnectionForPL', this.props.resource.name))
+        //         : Alert.alert(translate('noConnection'))
+        // }
         // content =  <NoResources
         //             filter={this.state.filter}
         //             model={model}
@@ -523,8 +549,11 @@ class MessageList extends Component {
 
       let hideTextInput = this.props.resource[constants.TYPE] === PRODUCT_APPLICATION  && this.props.resource._readOnly
       let h = utils.dimensions(MessageList).height
-      var maxHeight = h -
-                      (Platform.OS === 'android' ? 77 : 64) - (this.state.isConnected ? 0 : 35) - (this.state.context ? 45 : 0)
+      var maxHeight = h - (Platform.OS === 'android' ? 77 : 64)
+      if (!this.state.isConnected || !this.props.resource.online)
+        maxHeight -=  35
+      if (this.state.context)
+        maxHeight -= 45
       // content = <GiftedMessenger style={{paddingHorizontal: 10, marginBottom: Platform.OS === 'android' ? 0 : 20}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
       var paddingLeft = 10
       // way ScrollView is implemented with position:absolute disrespects the confines of the screen width
@@ -536,6 +565,7 @@ class MessageList extends Component {
         messages={this.state.list}
         messageSent={this.state.sendResource}
         messageSentStatus={this.state.sendStatus}
+        addedItem={this.state.addedItem}
         enableEmptySections={true}
         autoFocus={false}
         textRef={'chat'}
@@ -595,43 +625,59 @@ class MessageList extends Component {
       //   }
       // ]}
     let me = utils.getMe()
-    let buttons = []
-    if (this.state.isEmployee  &&  this.props.resource[constants.TYPE] !== constants.TYPES.ORGANIZATION)
-      buttons.push(translate('formChooser'))
-    else
-      buttons.push(translate('forgetMe'))
-    buttons.push(translate('cancel'))
+    let actionSheet = this.renderActionSheet()
     return (
       <PageView style={[platformStyles.container, bgStyle]}>
-        <NetworkInfoProvider connected={this.state.isConnected} resource={this.props.resource} />
+        <NetworkInfoProvider connected={this.state.isConnected} resource={this.props.resource} online={this.state.onlineStatus} />
         <ChatContext context={this.state.context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={this.props.bankStyle} allContexts={this.state.allContexts} />
         <View style={ sepStyle } />
         {content}
-        <ActionSheet
-          ref={(o) => {
-            this.ActionSheet = o
-          }}
-          options={buttons}
-          cancelButtonIndex={1}
-          onPress={(index) => {
-            if (index === 0) {
-              if (this.state.isEmployee)
-                this.chooseFormForCustomer()
-              else
-                this.forgetMe()
-            }
-          }}
-        />
+        {actionSheet}
         {alert}
       </PageView>
     );
         // {addNew}
   }
+
+  renderActionSheet() {
+    let buttons = []
+    if (this.state.isEmployee  &&  this.props.resource[constants.TYPE] !== constants.TYPES.ORGANIZATION) {
+      buttons.push(translate('formChooser'))
+    }
+    else {
+      if (__DEV__) {
+        buttons.push(translate('forgetMe'))
+      }
+    }
+
+    if (!buttons.length) return
+
+    buttons.push(translate('cancel'))
+    return (
+      <ActionSheet
+        ref={(o) => {
+          this.ActionSheet = o
+        }}
+        options={buttons}
+        cancelButtonIndex={1}
+        onPress={(index) => {
+          if (index === 0) {
+            if (this.state.isEmployee)
+              this.chooseFormForCustomer()
+            else
+              this.forgetMe()
+          }
+        }}
+      />
+    )
+  }
+
   // Context chooser shows all the context of the particular chat.
   // When choosing the context chat will show only the messages in linked to this context.
   contextChooser(context) {
+    let name = this.props.resource[constants.TYPE] === constants.TYPES.PROFILE ? this.props.resource.formatted : this.props.resource.name
     this.props.navigator.push({
-      title: translate('contextsFor') + ' ' + this.props.resource.name,
+      title: translate('contextsFor') + ' ' + name,
       id: 23,
       component: ContextChooser,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
@@ -685,7 +731,7 @@ class MessageList extends Component {
     )
   }
   generateMenu(show) {
-    if (!show)
+    if (!show || !this.ActionSheet)
       return <View/>
     // {
     //   return <TouchableHighlight underlayColor='transparent' onPress={this.onSubmitEditing.bind(this)}>
@@ -884,7 +930,7 @@ class MessageList extends Component {
     this.setState({userInput: '', selectedAssets: {}});
     if (this.state.clearCallback)
       this.state.clearCallback();
-    Actions.addMessage(value); //, this.state.resource, utils.getModel(modelName).value);
+    Actions.addMessage(value);
   }
 
 }

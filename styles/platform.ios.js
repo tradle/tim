@@ -38,8 +38,8 @@ module.exports = exports = StyleSheet.create({
   menuButtonRegular: {
     marginTop: -20,
     paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 24,
+    paddingHorizontal: 11,
+    borderRadius: 26,
     // shadowOffset:{width: 5, height: 5},
     shadowOpacity: 1,
     shadowRadius: 5,

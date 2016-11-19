@@ -51,7 +51,7 @@ class PasswordCheck extends Component {
     promptReenter: PropTypes.string,
     promptRetrySet: PropTypes.string,
     promptRetryCheck: PropTypes.string,
-    promptInvalidSet: PropTypes.string,
+    promptInvalid: PropTypes.string,
     successMsg: PropTypes.string,
     failMsg: PropTypes.string,
     style: PropTypes.shape({
@@ -158,7 +158,7 @@ class PasswordCheck extends Component {
 
   validatePasswordChoice(value, both) {
     var passwordError = this.props.validate(value && value.password || '')
-    if (passwordError === false) passwordError = this.props.promptInvalidSet
+    if (passwordError === false) passwordError = this.props.promptInvalid
     else if (passwordError === true) passwordError = null
 
     const errors = {
@@ -206,6 +206,12 @@ class PasswordCheck extends Component {
     const fields = this.getValue()
     if (!fields) return
 
+    // const errors = this.validatePasswordChoice(fields)
+    // if (errors.password) {
+    //   this.setState({ errors, message: this.props.promptInvalid })
+    //   return
+    // }
+
     const password = fields.password
     const result = this.props.isCorrect(password)
     const promise = typeof result === 'boolean' ? Promise.resolve(result) : result
@@ -214,7 +220,8 @@ class PasswordCheck extends Component {
 
       const attempts = this.state.attempts + 1
       this.setState({
-        attempts
+        attempts,
+        message: this.props.promptRetryCheck
       }, () => {
         if (attempts >= this.props.maxAttempts) {
           return this.props.onFail()

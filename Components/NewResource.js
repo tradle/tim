@@ -242,9 +242,13 @@ class NewResource extends Component {
       this.state.submitted = false
       return;
     }
-    if (params.action === 'addItem'  &&  resource._sharedWith  &&  resource._sharedWith.length > 1) {
-      this.showSharedWithList(params.resource)
-      return
+    if (params.action === 'addItem') {
+      // If the resource was being modified, show the list of parties with whom the resource has been
+      // previously shared and allow customer to choose who he wants to sharae the modifications with
+      // if (resource._sharedWith  &&  resource._sharedWith.length > 1) {
+      //   this.showSharedWithList(params.resource)
+      //   return
+      // }
     }
     if (this.props.callback) {
       utils.onNextTransitionEnd(this.props.navigator, () => this.state.submitted = false)
@@ -314,6 +318,8 @@ class NewResource extends Component {
 //     console.log('itemAdded: submitted = false')
 //     this.state.submitted = false
   }
+  // Show providers this resource was shared with and allow customer to choose
+  // which providers to share the changes with
   showSharedWithList(newResource) {
     if (!this.props.resource  ||  !this.props.resource._sharedWith)
       // this.onSavePressed1()
@@ -336,6 +342,8 @@ class NewResource extends Component {
       }
     });
   }
+  // The form/verification was shared with other providers and now it is edited.
+  // Offer to share the form with the same providers it was originally share
   shareWith(newResource, list) {
     if (list.length)
       Actions.share(newResource, list)

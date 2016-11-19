@@ -32,9 +32,10 @@
     "enterCurrentPassword": "Enter your current password",
     "setNewPassword": "Choose a new password",
     "textPasswordLimitations": "Must have 10+ characters, at least one uppercase letter, lowercase letter, number, and special character",
-    "lenientTextPasswordLimitations": "Must have 2+ characters",
+    "lenientTextPasswordLimitations": "Must have 1+ characters",
+    "wrongPassword": "Wrong password, please try again",
     "tooManyPasswordAttempts": "Too many failed attempts! This form has been disabled.",
-    "correctPassword": "Aww, you remembered!",
+    "correctPassword": "Yes!",
     "passwordsDontMatch": "Passwords don't match",
     "temporarilyLocked": "For your protection, this application has been temporarily locked for {1}",
 
@@ -129,7 +130,7 @@
     "nothingChanged": "Nothing changed",
     "en": "English",
     "nl": "Dutch",
-    "submittingForm": "Submittted new {1}",
+    "submittingForm": "Submittted {1}",
     "submittingModifiedForm": "Modifying {1}",
     "receivedProduct": "Received {1}",
     "receivedVerification": "Received verification for {1}",
@@ -159,5 +160,8 @@
     "backTo": "Back to {1}",
     "backToResults": "Back to results",
     "formListError": "Unavailable",
-    "formListErrorDescription": "Forms can be requested once the customer begins an application"
+    "formListErrorDescription": "Forms can be requested once the customer begins an application",
+    "providerIsOffline": "{1} is offline",
+    "sendEditRequestPrompt": "Send edit request to {1}?",
+    "pleaseCorrectFields": "Please correct the following fields: {1}"
 }
