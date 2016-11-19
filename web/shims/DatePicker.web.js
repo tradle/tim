@@ -15,6 +15,7 @@ export default class DatePickerAdapter extends Component {
   render() {
     return (
       <DatePicker
+        readOnly={true}
         showYearDropdown
         selected={this.props.date && moment(this.props.date)}
         placeholderText={this.props.placeholder}
