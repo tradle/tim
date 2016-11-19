@@ -580,8 +580,12 @@ class MessageList extends Component {
     let buttons = []
     if (this.state.isEmployee  &&  this.props.resource[constants.TYPE] !== constants.TYPES.ORGANIZATION)
       buttons.push(translate('formChooser'))
-    else
-      buttons.push(translate('forgetMe'))
+    else {
+      if (__DEV__) {
+        buttons.push(translate('forgetMe'))
+      }
+    }
+
     buttons.push(translate('cancel'))
     return (
       <PageView style={[platformStyles.container, bgStyle]}>
