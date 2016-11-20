@@ -134,7 +134,7 @@ class ResourceRow extends Component {
       }
     }
     if (photo  &&  rType === constants.TYPES.ORGANIZATION) {
-      var onlineStatus = <View style={styles._online}>
+      var onlineStatus = <View style={styles.online}>
                         {
                           (resource._online)
                            ? <Icon name='md-checkmark-circle' size={18} color='#62C457' />
@@ -622,20 +622,6 @@ var styles = StyleSheet.create({
     left: 43,
     borderWidth: 1,
     borderColor: '#ffffff'
-  },
-  online1: {
-    // backgroundColor: 'transparent',
-    borderRadius: 8,
-    alignSelf: 'flex-end',
-    marginLeft: -25,
-    marginRight: 25,
-    // width: 16,
-    // height: 16,
-    // position: 'absolute',
-    // top: 45,
-    // left: 45,
-    // borderWidth: 2,
-    // borderColor: '#ffffff'
   },
   contextOwners: {
     fontSize: 14,
