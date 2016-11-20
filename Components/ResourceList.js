@@ -49,6 +49,7 @@ import {
 } from 'react-native';
 
 import platformStyles from '../styles/platform'
+import ENV from '../utils/env'
 
 const SearchBar = Platform.OS === 'android' ? null : require('react-native-search-bar')
 
@@ -897,18 +898,8 @@ class ResourceList extends Component {
           showsVerticalScrollIndicator={false} />;
     }
     var model = utils.getModel(this.props.modelName).value;
-    var footer = this.renderFooter();
-
-    let buttons;
-    if (this.state.allowToAdd) {
-      buttons = [translate('addNew', this.props.prop.title), translate('cancel')]
-    } else {
-      buttons = [translate('cancel')]
-      if (__DEV__) {
-        buttons.unshift(translate('addServerUrl'), translate('scanQRcode'))
-      }
-    }
-
+    var actionSheet = this.renderActionSheet()
+    var footer = actionSheet && this.renderFooter()
     var searchBar
     if (SearchBar) {
       searchBar = (
@@ -928,33 +919,52 @@ class ResourceList extends Component {
         <View style={styles.separator} />
         {content}
         {footer}
-        <ActionSheet
-          ref={(o) => {
-            this.ActionSheet = o
-          }}
-          options={buttons}
-          cancelButtonIndex={buttons.length - 1}
-          onPress={(index) => {
-            switch (index) {
-            case 0:
-              if (this.state.allowToAdd)
-                this.addNew()
-              else
-                this.onSettingsPressed()
-              break
-            case 1:
-              this.scanFormsQRCode()
-              break;
-            // case 2:
-            //   this.talkToEmployee()
-            //   break
-            default:
-              return
-            }
-          }}
-        />
+        {actionSheet}
       </PageView>
     );
+  }
+
+  renderActionSheet() {
+    let buttons
+    if (this.state.allowToAdd) {
+      buttons = [translate('addNew', this.props.prop.title), translate('cancel')]
+    } else {
+      if (!ENV.allowAddServer) return
+
+      buttons = [
+        translate('addServerUrl'),
+        translate('scanQRcode'),
+        translate('cancel')
+      ]
+    }
+
+    return (
+      <ActionSheet
+        ref={(o) => {
+          this.ActionSheet = o
+        }}
+        options={buttons}
+        cancelButtonIndex={buttons.length - 1}
+        onPress={(index) => {
+          switch (index) {
+          case 0:
+            if (this.state.allowToAdd)
+              this.addNew()
+            else
+              this.onSettingsPressed()
+            break
+          case 1:
+            this.scanFormsQRCode()
+            break;
+          // case 2:
+          //   this.talkToEmployee()
+          //   break
+          default:
+            return
+          }
+        }}
+      />
+    )
   }
 
   renderHeader() {
