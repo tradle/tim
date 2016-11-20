@@ -925,7 +925,7 @@ var Store = Reflux.createStore({
       })
 
       if (trigger) {
-        self.trigger({action: 'offlineStatus', online: false})
+        self.trigger({action: 'onlineStatus', online: false})
         let l = self.searchNotMessages({modelName: ORGANIZATION})
         self.trigger({action: 'list', list: l})
       }
