@@ -73,7 +73,7 @@ class ResourceList extends Component {
       isLoading: true,
       dataSource: new ListView.DataSource({
         rowHasChanged: function(row1, row2) {
-          return row1 !== row2  &&  row1.online !== row2.online
+          return row1 !== row2
         }
       }),
       allowToAdd: this.props.prop  &&  this.props.prop.allowToAdd,
@@ -355,7 +355,7 @@ class ResourceList extends Component {
       return true
     if (nextState.isConnected !== this.state.isConnected)
       return true
-    if (nextState.newContact  &&  (!this.state.newContact ||  this.state.newContact !== this.state.newContact))
+    if (nextState.newContact  &&  (!this.state.newContact ||  this.state.newContact !== nextState.newContact))
       return true
     // if (this.state.isConnected !== nextState.isConnected)
     //   if (!this.state.list && !nextState.list)
