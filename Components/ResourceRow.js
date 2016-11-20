@@ -137,7 +137,7 @@ class ResourceRow extends Component {
     if (photo  &&  rType === constants.TYPES.ORGANIZATION) {
       var onlineStatus = (
         <Geometry.Circle size={20} style={styles.online}>
-          <Geometry.Circle size={17} style={{ backgroundColor: resource.online ? '#62C457' : '#FAD70C' }} />
+          <Geometry.Circle size={17} style={{ backgroundColor: resource._online ? '#62C457' : '#FAD70C' }} />
         </Geometry.Circle>
       )
 
