@@ -919,49 +919,19 @@ var Store = Reflux.createStore({
     // })
 
     wsClient.on('disconnect', function () {
-      let trigger, org
       transport.clients().forEach(function (c) {
         // reset OTR session, restart on connect
-        if (SERVICE_PROVIDERS) {
-          SERVICE_PROVIDERS.forEach((sp) => {
-            if (sp.id === provider.id) {
-              org = self._getItem(sp.org)
-              org._online = false
-              trigger = true
-            }
-          })
-        }
         debug('aborting pending sends due to disconnect')
         c.destroy()
       })
-
-      if (trigger) {
-        self.trigger({action: 'onlineStatus', online: false})
-        let l = self.searchNotMessages({modelName: ORGANIZATION})
-        self.trigger({action: 'list', list: l})
-      }
+      setProviderOnlineStatus(false)
       // pause all channels
       meDriver.sender.pause()
     })
 
     wsClient.on('connect', function (recipient) {
       // resume all paused channels
-      let trigger, org
-      if (SERVICE_PROVIDERS) {
-        SERVICE_PROVIDERS.forEach((sp) => {
-          if (sp.id === provider.id) {
-            org = self._getItem(sp.org)
-            org._online = true
-            trigger = true
-          }
-        })
-      }
-      if (trigger) {
-        self.trigger({action: 'onlineStatus', online: true})
-        let l = self.searchNotMessages({modelName: ORGANIZATION})
-        self.trigger({action: 'list', list: l})
-      }
-
+      setProviderOnlineStatus(true)
       meDriver.sender.resume()
     })
 
@@ -1014,7 +984,23 @@ var Store = Reflux.createStore({
     transport.on('timeout', function (identifier) {
       transport.cancelPending(identifier)
     })
-
+    function setProviderOnlineStatus(online) {
+      let trigger, org
+      if (SERVICE_PROVIDERS) {
+        SERVICE_PROVIDERS.forEach((sp) => {
+          if (sp.url === provider.url  &&  sp.id === provider.id) {
+            org = self._getItem(sp.org)
+            org._online = online
+            trigger = true
+          }
+        })
+      }
+      if (trigger) {
+        self.trigger({action: 'onlineStatus', online: online})
+        let l = self.searchNotMessages({modelName: ORGANIZATION})
+        self.trigger({action: 'list', list: l})
+      }
+    }
     function receive (msg, from) {
       try {
         msg = tradleUtils.unserializeMessage(msg)
