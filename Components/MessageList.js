@@ -497,6 +497,7 @@ class MessageList extends Component {
     var content;
 
     var model = utils.getModel(this.props.modelName).value;
+    var resource = this.props.resource
                     // <Text style={{fontSize: 17, alignSelf: 'center', color: '#ffffff'}}>{'Sending...'}</Text>
     // var isVisible = this.state.sendStatus  &&  this.state.sendStatus !== null
     // var spinner = isVisible
@@ -518,7 +519,7 @@ class MessageList extends Component {
     var bgStyle = this.props.bankStyle.BACKGROUND_COLOR ? {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR} : {backgroundColor: '#f7f7f7'}
     var alert = <View />
     if (!this.state.list || !this.state.list.length) {
-      if (this.props.navigator.isConnected  &&  this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION) {
+      if (this.props.navigator.isConnected  &&  resource[constants.TYPE] === constants.TYPES.ORGANIZATION) {
         if (this.state.isLoading) {
           content = <View style={{flex: 1}}>
                       <View style={[platformStyles.container, bgStyle]}>
@@ -533,8 +534,8 @@ class MessageList extends Component {
       }
       else {
         // if (!this.state.isLoading  &&  !this.props.navigator.isConnected) {
-        //   alert = (this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION)
-        //         ? Alert.alert(translate('noConnectionForPL', this.props.resource.name))
+        //   alert = (resource[constants.TYPE] === constants.TYPES.ORGANIZATION)
+        //         ? Alert.alert(translate('noConnectionForPL', resource.name))
         //         : Alert.alert(translate('noConnection'))
         // }
         // content =  <NoResources
@@ -547,10 +548,10 @@ class MessageList extends Component {
     if (!content) {
       var isAllMessages = model.isInterface  &&  model.id === constants.TYPES.MESSAGE;
 
-      let hideTextInput = this.props.resource[constants.TYPE] === PRODUCT_APPLICATION  && this.props.resource._readOnly
+      let hideTextInput = resource[constants.TYPE] === PRODUCT_APPLICATION  && resource._readOnly
       let h = utils.dimensions(MessageList).height
       var maxHeight = h - (Platform.OS === 'android' ? 77 : 64)
-      if (!this.state.isConnected || !this.props.resource._online)
+      if (!this.state.isConnected || (resource[constants.TYPE] === constants.TYPES.ORGANIZATION  &&  !resource._online))
         maxHeight -=  35
       if (this.state.context)
         maxHeight -= 45
@@ -588,7 +589,7 @@ class MessageList extends Component {
 
     // var addNew = (model.isInterface)
     //        ? <AddNewMessage navigator={this.props.navigator}
-    //                         resource={this.props.resource}
+    //                         resource={resource}
     //                         modelName={this.props.modelName}
     //                         onAddNewPressed={this.onAddNewPressed.bind(this)}
     //                         onMenu={this.showMenu.bind(this)}
@@ -596,7 +597,7 @@ class MessageList extends Component {
     //                         callback={this.addedMessage.bind(this)} />
     //        : <View/>;
                             // onTakePicPressed={this.onTakePicPressed.bind(this)}
-    var isOrg = !this.props.isAggregation  &&  this.props.resource  &&  this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION
+    var isOrg = !this.props.isAggregation  &&  resource  &&  resource[constants.TYPE] === constants.TYPES.ORGANIZATION
     var chooser
     if (isOrg)
       chooser =  <View style={{flex:1, marginTop: 8}}>
@@ -628,7 +629,7 @@ class MessageList extends Component {
     let actionSheet = this.renderActionSheet()
     return (
       <PageView style={[platformStyles.container, bgStyle]}>
-        <NetworkInfoProvider connected={this.state.isConnected} resource={this.props.resource} online={this.state.onlineStatus} />
+        <NetworkInfoProvider connected={this.state.isConnected} resource={resource} online={this.state.onlineStatus} />
         <ChatContext context={this.state.context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={this.props.bankStyle} allContexts={this.state.allContexts} />
         <View style={ sepStyle } />
         {content}
@@ -675,7 +676,9 @@ class MessageList extends Component {
   // Context chooser shows all the context of the particular chat.
   // When choosing the context chat will show only the messages in linked to this context.
   contextChooser(context) {
-    let name = this.props.resource[constants.TYPE] === constants.TYPES.PROFILE ? this.props.resource.formatted : this.props.resource.name
+    let name = this.props.resource[constants.TYPE] === constants.TYPES.PROFILE
+             ? this.props.resource.formatted
+             : this.props.resource.name
     this.props.navigator.push({
       title: translate('contextsFor') + ' ' + name,
       id: 23,
