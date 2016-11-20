@@ -2663,6 +2663,8 @@ var Store = Reflux.createStore({
     // var me  = utils.getMe()
     if (!me)
       return
+    // Delete all resources but the last one. Every time custome enters the chat RM will receive
+    // CustomerWaiting and the customer will receive ProductList message. So there is no point to keep them
     var result = this.searchMessages({to: me, modelName: CUSTOMER_WAITING, isForgetting: true});
     if (!result)
       return
@@ -5512,7 +5514,7 @@ var Store = Reflux.createStore({
       if (this.getModel(r[TYPE]).value.interfaces) {
         let id = (utils.getId(r.from) === meId) ? utils.getId(r.from) : utils.getId(r.to)
         let rep = this._getItem(id)
-        let orgId = rep.organization ? utils.getId(rep.organization) : utils.getId(rep)
+        let orgId = rep.bot  &&  rep.organization ? utils.getId(rep.organization) : utils.getId(rep)
 
         this.deleteMessageFromChat(orgId, r)
       }
