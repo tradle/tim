@@ -198,7 +198,7 @@ class MessageRow extends Component {
       }
     }
     // HACK
-    let msgWidth = w * 0.8
+    let msgWidth = Math.floor(w * 0.8)
     let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
 
     let longMessage = isSimpleMessage  &&  message ? numberOfCharsInWidth < message.length : false
@@ -206,12 +206,12 @@ class MessageRow extends Component {
       var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
       if (message) {
         if (/*message.charAt(0) === '['  || */ longMessage)
-          viewStyle.width = msgWidth; //isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
+          viewStyle.maxWidth = msgWidth; //isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
       }
       if (!isSimpleMessage  &&  model.id !== FORM_REQUEST  &&  model.id !== PRODUCT_LIST) {
         let msgW = message.length * utils.getFontSize(12) + 40
         // if (msgW > msgWidth)
-          viewStyle.width =  msgW > msgWidth ? msgWidth : msgW
+          viewStyle.maxWidth =  msgW > msgWidth ? msgWidth : msgW
       }
 
 
@@ -1033,6 +1033,7 @@ var styles = StyleSheet.create({
   assistentText: {
     color: '#757575',
     fontStyle: 'italic',
+    flexWrap: 'wrap',
     fontSize: 17
   },
   assistentBox: {

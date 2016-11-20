@@ -303,6 +303,16 @@ class ResourceList extends Component {
     if (action === 'listSharedWith'  &&  !this.props.chat)
       return
     var list = params.list;
+
+    if (list.length) {
+      var type = list[0][constants.TYPE];
+      if (type  !== this.props.modelName) {
+        var m = utils.getModel(type).value;
+        if (!m.subClassOf  ||  m.subClassOf != this.props.modelName)
+          return;
+      }
+    }
+
     if (this.props.multiChooser  &&  list.length) {
       list = list.filter(r => {
         return r[constants.ROOT_HASH] !== this.props.sharingChat[constants.ROOT_HASH]
@@ -321,12 +331,6 @@ class ResourceList extends Component {
       else
         this.setState(state)
       return;
-    }
-    var type = list[0][constants.TYPE];
-    if (type  !== this.props.modelName) {
-      var m = utils.getModel(type).value;
-      if (!m.subClassOf  ||  m.subClassOf != this.props.modelName)
-        return;
     }
     extend(state, {
       forceUpdate: params.forceUpdate,
@@ -356,7 +360,7 @@ class ResourceList extends Component {
       return true
     if (nextState.isConnected !== this.state.isConnected)
       return true
-    if (nextState.newContact  &&  (!this.state.newContact ||  this.state.newContact !== this.state.newContact))
+    if (nextState.newContact  &&  (!this.state.newContact ||  this.state.newContact !== nextState.newContact))
       return true
     // if (this.state.isConnected !== nextState.isConnected)
     //   if (!this.state.list && !nextState.list)
@@ -654,7 +658,6 @@ class ResourceList extends Component {
         key={resource[constants.ROOT_HASH]}
         navigator={this.props.navigator}
         changeSharedWithList={this.props.chat ? this.changeSharedWithList.bind(this) : null}
-        newContact={this.state.newContact}
         currency={this.props.currency}
         isOfficialAccounts={this.props.officialAccounts}
         multiChooser={this.props.multiChooser}
@@ -662,6 +665,7 @@ class ResourceList extends Component {
         resource={resource}
         chosen={this.state.chosen} />
     );
+        // newContact={this.state.newContact}
   }
   openSharedContextChat(resource) {
     this.props.navigator.push({
