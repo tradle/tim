@@ -8,20 +8,27 @@ import {
   TouchableOpacity
 } from 'react-native'
 
+import React, { Component } from 'react'
 import utils from '../utils/utils'
 var translate = utils.translate
-import React, { Component } from 'react'
+var constants = require('@tradle/constants');
+const TYPE = constants.TYPE
+const ORGANIZATION = constants.TYPES.ORGANIZATION
 
 class NetworkInfoProvider extends Component {
   constructor(props) {
     super(props)
   }
   render() {
+    let isOrg = this.props.resource  &&  this.props.resource[TYPE] === ORGANIZATION
+    let offline = this.props.resource  &&  isOrg  &&  !this.props.online
     let dn = this.props.resource
-           ? translate('learnMoreDescriptionTo', utils.getDisplayName(this.props.resource))
+           ? this.props.isConnected
+               ? translate('learnMoreDescriptionTo', utils.getDisplayName(this.props.resource))
+               : translate('learnMoreServerIsDown', utils.getDisplayName(this.props.resource))
            : translate('learnMoreDescription')
     return this.props.connected
-          ? this.props.resource  &&  !this.props.online
+          ? offline
             ? <View style={styles.bar}>
                 <Text style={styles.text}>{translate('providerIsOffline', utils.getDisplayName(this.props.resource))}</Text>
                 <TouchableOpacity onPress={() => Alert.alert(translate('offlineMode'), dn, null)}>

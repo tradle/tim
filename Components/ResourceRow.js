@@ -133,10 +133,14 @@ class ResourceRow extends Component {
         }
       }
     }
-    if (photo  &&  (isIdentity || rType === constants.TYPES.ORGANIZATION)) {
-      var onlineStatus = (resource.online)
-                       ? <Icon name='ios-checkmark-circle' size={16} color='#62C457' style={styles.online} />
-                       : <Icon name='md-close-circle' size={16} color='#FAD70C' style={styles.online} />
+    if (photo  &&  rType === constants.TYPES.ORGANIZATION) {
+      var onlineStatus = <View style={styles.online}>
+                        {
+                          (resource.online)
+                           ? <Icon name='md-checkmark-circle' size={18} color='#62C457' />
+                           : <Icon name='md-close-circle' size={18} color='#FAD70C' />
+                         }
+                         </View>
       photo = <View style={{flexDirection: 'row'}}>
                 {photo}
                 {onlineStatus}
@@ -159,17 +163,7 @@ class ResourceRow extends Component {
 
     var multiChooser = this.props.multiChooser
                      ?  <View style={styles.multiChooser}>
-                          <TouchableHighlight underlayColor='transparent' onPress={() => {
-                            let id = utils.getId(resource)
-                            if (this.props.chosen[id]) {
-                              this.setState({isChosen: false})
-                              delete this.props.chosen[id]
-                            }
-                            else {
-                              this.setState({isChosen: true})
-                              this.props.chosen[id] = ''
-                            }
-                          }}>
+                          <TouchableHighlight underlayColor='transparent' onPress={this.chooseToShare.bind(this)}>
                            <Icon name={this.state.isChosen ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color='#7AAAc3' />
                           </TouchableHighlight>
                         </View>
@@ -613,6 +607,23 @@ var styles = StyleSheet.create({
     // color: '#7AAAc3'
   },
   online: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    alignItems: 'center',
+    // alignSelf: 'flex-end',
+    // marginLeft: -25,
+    // marginRight: 25,
+    // width: 16,
+    // height: 16,
+    position: 'absolute',
+    top: 40,
+    left: 43,
+    borderWidth: 1,
+    borderColor: '#ffffff'
+  },
+  online1: {
     // backgroundColor: 'transparent',
     borderRadius: 8,
     alignSelf: 'flex-end',
