@@ -31,6 +31,7 @@ import { makeResponsive } from 'react-native-orient'
 import LinearGradient from 'react-native-linear-gradient'
 import React, { Component } from 'react'
 import ActivityIndicator from './ActivityIndicator'
+import Geometry from './Geometry'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const UNREAD_COLOR = '#FF6D0D'
 
@@ -134,13 +135,12 @@ class ResourceRow extends Component {
       }
     }
     if (photo  &&  rType === constants.TYPES.ORGANIZATION) {
-      var onlineStatus = <View style={styles.online}>
-                        {
-                          (resource._online)
-                           ? <Icon name='md-checkmark-circle' size={18} color='#62C457' />
-                           : <Icon name='md-close-circle' size={18} color='#FAD70C' />
-                         }
-                         </View>
+      var onlineStatus = (
+        <Geometry.Circle size={20} style={styles.online}>
+          <Geometry.Circle size={17} style={{ backgroundColor: resource._online ? '#62C457' : '#FAD70C' }} />
+        </Geometry.Circle>
+      )
+
       photo = <View style={{flexDirection: 'row'}}>
                 {photo}
                 {onlineStatus}
@@ -568,8 +568,6 @@ var styles = StyleSheet.create({
   online: {
     backgroundColor: 'white',
     borderRadius: 10,
-    width: 20,
-    height: 20,
     alignItems: 'center',
     // alignSelf: 'flex-end',
     // marginLeft: -25,
@@ -579,8 +577,8 @@ var styles = StyleSheet.create({
     position: 'absolute',
     top: 40,
     left: 43,
-    borderWidth: 1,
-    borderColor: '#ffffff'
+    // borderWidth: 1,
+    // borderColor: '#ffffff'
   },
   contextOwners: {
     fontSize: 14,
@@ -612,7 +610,7 @@ var styles = StyleSheet.create({
     right: 10,
     top: 25,
     backgroundColor: 'transparent'
-  },
+  }
 });
 
 ResourceRow = makeResponsive(ResourceRow)
