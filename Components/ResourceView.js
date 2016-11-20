@@ -151,8 +151,6 @@ class ResourceView extends Component {
            this.state.useGesturePassword !== nextState.useGesturePassword ||
            this.state.useTouchId !== nextState.useTouchId                 ||
            this.state.pairingData !== nextState.pairingData
-           ? true
-           : false
   }
   onResourceUpdate(params) {
     var resource = params.resource;
