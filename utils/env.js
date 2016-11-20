@@ -24,7 +24,6 @@ module.exports = {
   isWeb: function () {
     return Platform.OS === 'web'
   },
-  autoOptInTouchId: false,
   get prefillWithTestData() {
     if (typeof global.PREFILL_FORMS === 'boolean') {
       return global.PREFILL_FORMS
@@ -32,5 +31,8 @@ module.exports = {
 
     return __DEV__
   },
-  lenientPassword: true
+  autoOptInTouchId: false,
+  lenientPassword: true,
+  allowAddServer: true,
+  allowForgetMe: true
 }
