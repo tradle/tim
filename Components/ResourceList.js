@@ -73,7 +73,7 @@ class ResourceList extends Component {
       isLoading: true,
       dataSource: new ListView.DataSource({
         rowHasChanged: function(row1, row2) {
-          return row1 !== row2 // &&  row1.online !== row2.online
+          return row1 !== row2  ||  row1._online !== row2._online
         }
       }),
       allowToAdd: this.props.prop  &&  this.props.prop.allowToAdd,
@@ -373,7 +373,7 @@ class ResourceList extends Component {
         return true
       if (this.state.list[i][constants.ROOT_HASH] !== nextState.list[i][constants.ROOT_HASH])
         return true
-      if (this.state.list[i].online !== nextState.list[i].online)
+      if (this.state.list[i]._online !== nextState.list[i]._online)
         return true
     }
     return false

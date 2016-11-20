@@ -136,7 +136,7 @@ class ResourceRow extends Component {
     if (photo  &&  rType === constants.TYPES.ORGANIZATION) {
       var onlineStatus = <View style={styles.online}>
                         {
-                          (resource.online)
+                          (resource._online)
                            ? <Icon name='md-checkmark-circle' size={18} color='#62C457' />
                            : <Icon name='md-close-circle' size={18} color='#FAD70C' />
                          }

@@ -78,7 +78,7 @@ class MessageList extends Component {
       isLoading: true,
       selectedAssets: {},
       isConnected: this.props.navigator.isConnected,
-      onlineStatus: this.props.resource.online,
+      onlineStatus: this.props.resource._online,
       allContexts: true,  // true - for the full chat; false - filtered chat for specific context.
       isEmployee:  utils.isEmployee(props.resource),
       filter: this.props.filter,
@@ -550,7 +550,7 @@ class MessageList extends Component {
       let hideTextInput = this.props.resource[constants.TYPE] === PRODUCT_APPLICATION  && this.props.resource._readOnly
       let h = utils.dimensions(MessageList).height
       var maxHeight = h - (Platform.OS === 'android' ? 77 : 64)
-      if (!this.state.isConnected || !this.props.resource.online)
+      if (!this.state.isConnected || !this.props.resource._online)
         maxHeight -=  35
       if (this.state.context)
         maxHeight -= 45

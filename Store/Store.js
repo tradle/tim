@@ -915,7 +915,7 @@ var Store = Reflux.createStore({
           SERVICE_PROVIDERS.forEach((sp) => {
             if (sp.url === provider.url) {
               org = self._getItem(sp.org)
-              org.online = false
+              org._online = false
               trigger = true
             }
           })
@@ -940,7 +940,7 @@ var Store = Reflux.createStore({
         SERVICE_PROVIDERS.forEach((sp) => {
           if (sp.url === provider.url) {
             org = self._getItem(sp.org)
-            org.online = true
+            org._online = true
             trigger = true
           }
         })
@@ -1286,7 +1286,7 @@ var Store = Reflux.createStore({
       batch.push({type: 'put', key: okey, value: sp.org})
       this._setItem(okey, sp.org)
     }
-    list[okey].value.online = true
+    list[okey].value._online = true
     if (sp.style)
       this._getItem(okey).style = sp.style
     if (!list[ikey]) {
@@ -2521,7 +2521,7 @@ var Store = Reflux.createStore({
             toChain[PREV_HASH] = returnVal[PREV_HASH]
           }
 
-          let exclude = ['to', 'from', 'verifications', CUR_HASH, '_sharedWith', '_sendStatus', '_context', 'idOld']
+          let exclude = ['to', 'from', 'verifications', CUR_HASH, '_sharedWith', '_sendStatus', '_context', '_online', idOld']
           if (isNew)
             exclude.push(ROOT_HASH)
           extend(toChain, returnVal)
