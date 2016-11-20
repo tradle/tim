@@ -908,11 +908,12 @@ var Store = Reflux.createStore({
 
     wsClient.on('disconnect', function () {
       let trigger, org
+
       transport.clients().forEach(function (c) {
         // reset OTR session, restart on connect
         if (SERVICE_PROVIDERS) {
           SERVICE_PROVIDERS.forEach((sp) => {
-            if (sp.id === provider.id) {
+            if (sp.url === provider.url) {
               org = self._getItem(sp.org)
               org.online = false
               trigger = true
@@ -937,7 +938,7 @@ var Store = Reflux.createStore({
       let trigger, org
       if (SERVICE_PROVIDERS) {
         SERVICE_PROVIDERS.forEach((sp) => {
-          if (sp.id === provider.id) {
+          if (sp.url === provider.url) {
             org = self._getItem(sp.org)
             org.online = true
             trigger = true
