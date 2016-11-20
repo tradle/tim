@@ -5516,7 +5516,6 @@ var Store = Reflux.createStore({
   },
 
   cleanup(result) {
-    return Q()
     if (!result.length)
       return Q()
 
