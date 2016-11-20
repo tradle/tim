@@ -17,6 +17,7 @@ import {
   Text,
   TextInput,
   TouchableHighlight,
+  StyleSheet
 } from 'react-native'
 
 import React, { Component } from 'react'
@@ -42,20 +43,30 @@ class ShowMessageRefList extends Component {
       backlinks.push(props[p])
     }
     backlinks.forEach((prop) => {
-      // if (isIdentity  &&  !isMe  &&  props[p].allowRoles  &&  props[p].allowRoles === 'me')
+      // if (isIdentity  &&  !isMe  &&  prop.allowRoles  &&  prop.allowRoles === 'me')
       //   continue;
-      // if (p.charAt(0) === '_'  ||  !props[p].items  ||  !props[p].items.backlink)
+      // if (prop.name.charAt(0) === '_'  ||  !prop.items  ||  !prop.items.backlink)
       //   continue;
-      var icon = props[p].icon  ||  utils.getModel(props[p].items.ref).value.icon;
+      var icon = prop.icon  ||  utils.getModel(prop.items.ref).value.icon;
       if (!icon)
         icon = 'ios-checkmark';
       let style = [buttonStyles.container, {flex: 1, alignSelf: 'stretch'}]
+      let count = resource[prop.name]  &&  resource[prop.name].length
+
       refList.push(
         <View style={style} key={this.getNextKey()}>
-           <TouchableHighlight onPress={this.showResources.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
-             <View style={{alignItems: 'center'}}>
-               <Icon name={icon}  size={35}  color='#ffffff' />
-               <Text style={buttonStyles.msgText}>{translate(props[p], model)}</Text>
+           <TouchableHighlight onPress={this.showResources.bind(this, this.props.resource, prop)} underlayColor='transparent'>
+             <View style={styles.item}>
+             <View style={{flexDirection: 'row'}}>
+               <Icon name={icon}  size={utils.getFontSize(35)}  color='#ffffff' />
+                {count
+                    ? <View style={styles.count}>
+                        <Text style={styles.countText}>{count}</Text>
+                      </View>
+                    : <View/>
+                 }
+               </View>
+               <Text style={buttonStyles.msgText}>{translate(prop, model)}</Text>
              </View>
            </TouchableHighlight>
          </View>
@@ -91,6 +102,27 @@ class ShowMessageRefList extends Component {
 }
 reactMixin(ShowMessageRefList.prototype, ResourceMixin);
 reactMixin(ShowMessageRefList.prototype, RowMixin);
+var styles = StyleSheet.create({
+  count: {
+    alignSelf: 'flex-start',
+    minWidth: 18,
+    marginLeft: -7,
+    marginTop: -2,
+    borderRadius: 8,
+    backgroundColor: '#F5FFED',
+    paddingHorizontal: 3,
+    paddingVertical: 1
+  },
+  countText: {
+    fontSize: 12,
+    fontWeight: '600',
+    alignSelf: 'center',
+    color: '#466399'
+  },
+  item: {
+    alignItems: 'center'
+  },
+})
 
 module.exports = ShowMessageRefList;
 
