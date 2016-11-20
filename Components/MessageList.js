@@ -56,8 +56,8 @@ import {
 } from 'react-native'
 
 import ActivityIndicator from './ActivityIndicator'
-
 import platformStyles, {MenuIcon} from '../styles/platform'
+import ENV from '../utils/env'
 
 var currentMessageTime
 
@@ -521,14 +521,18 @@ class MessageList extends Component {
     if (!this.state.list || !this.state.list.length) {
       if (this.props.navigator.isConnected  &&  resource[constants.TYPE] === constants.TYPES.ORGANIZATION) {
         if (this.state.isLoading) {
+          var menuBtn = this.hasMenuButton() && (
+            <View style={styles.footer}>
+              {this.paintMenuButton()}
+            </View>
+          )
+
           content = <View style={{flex: 1}}>
                       <View style={[platformStyles.container, bgStyle]}>
                         <Text style={{fontSize: 17, alignSelf: 'center', marginTop: 80, color: '#629BCA'}}>{'Loading...'}</Text>
                         <ActivityIndicator size='large' style={{alignSelf: 'center', marginTop: 20}} />
                       </View>
-                      <View style={styles.footer}>
-                        {this.paintMenuButton()}
-                      </View>
+                      {menuBtn}
                     </View>
         }
       }
@@ -640,20 +644,29 @@ class MessageList extends Component {
         // {addNew}
   }
 
-  renderActionSheet() {
-    let buttons = []
+  hasMenuButton() {
+    return !!this.getActionSheetItems()
+  }
+
+  getActionSheetItems() {
+    let buttons
     if (this.state.isEmployee  &&  this.props.resource[constants.TYPE] !== constants.TYPES.ORGANIZATION) {
-      buttons.push(translate('formChooser'))
+      buttons = [translate('formChooser')]
     }
     else {
-      if (__DEV__) {
-        buttons.push(translate('forgetMe'))
-      }
+      if (!ENV.allowForgetMe) return
+
+      buttons = [translate('forgetMe')]
     }
 
-    if (!buttons.length) return
-
     buttons.push(translate('cancel'))
+    return buttons
+  }
+
+  renderActionSheet() {
+    const buttons = this.getActionSheetItems()
+    if (!buttons) return
+
     return (
       <ActionSheet
         ref={(o) => {
@@ -747,12 +760,12 @@ class MessageList extends Component {
               {this.paintMenuButton()}
             </TouchableHighlight>
   }
+
   paintMenuButton() {
     return  <View style={[platformStyles.menuButtonNarrow, {opacity: 0.5}]}>
               <Icon name={MenuIcon.name}  size={33}  color={MenuIcon.color} />
             </View>
   }
-
 
   onLoadEarlierMessages(oldestMessage = {}, callback = () => {}) {
     this.state.loadEarlierMessages = true

@@ -5548,7 +5548,7 @@ var Store = Reflux.createStore({
   },
 
   cleanup(result) {
-    if (!result.length)
+    // if (!result.length)
       return Q()
 
     var batch = []

@@ -1,22 +1,24 @@
 import { EventEmitter } from 'events'
+import { AppState } from 'react-native'
+import { constants } from '@tradle/engine'
 import Actions from '../../Actions/Actions'
+
+const { TYPE } = constants
+const IGNORE_TYPES = [
+  'tradle.CustomerWaiting'
+]
 
 const notificationsSupported = 'Notification' in global
 if (notificationsSupported) requestPermissions()
 
-let tabIsFocused = true
+let tabIsFocused = AppState.currentState === 'active'
 let me
 
-window.addEventListener('blur', function () {
-  tabIsFocused = false
-})
-
-window.addEventListener('focus', function () {
-  if (me && me.unreadPushNotifications) {
+AppState.addEventListener('change', function () {
+  tabIsFocused = AppState.currentState === 'active'
+  if (tabIsFocused && me && me.unreadPushNotifications) {
     Actions.updateMe({ unreadPushNotifications: 0 })
   }
-
-  tabIsFocused = true
 })
 
 const emitter = module.exports = exports = new EventEmitter()
@@ -28,6 +30,11 @@ emitter.init = function (opts) {
   const node = opts.node
   node.on('message', msg => {
     if (tabIsFocused || Notification.permission !== 'granted') return
+
+    // embedded messages are an extra layer deep
+    const obj = msg.object.object || msg.object
+    const type = obj[TYPE]
+    if (IGNORE_TYPES.indexOf(type) !== -1) return
 
     // TODO: show logo of msg sender
     const n = new Notification('You have a message waiting!', {
