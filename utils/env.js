@@ -3,7 +3,12 @@ import {
   Platform
 } from 'react-native'
 
-const LOCAL_IP = require('./localIP.json')
+let LOCAL_IP
+try {
+  LOCAL_IP = require('./localIP.json')
+} catch (err) {
+  LOCAL_IP = 'localhost'
+}
 
 module.exports = {
   GCM_SENDER_ID: '633104277721',
