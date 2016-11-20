@@ -548,16 +548,13 @@ class MessageRow extends Component {
               ? translate('noConnectionForNewProduct', utils.getMe().firstName, translate(msgModel))
               : translate('newProductMsg', translate(msgModel))
       let color = isMyMessage ? '#ffffff' : '#757575'
-      let maxWidth = 0.8 * utils.dimensions().width - (isMyMessage ? 40 : 90) // message width - icon size and all the paddings
       let msg = !this.props.navigator.isConnected  &&  this.props.isLast
               ? <View key={this.getNextKey()}>
                   <Text style={[styles.resourceTitle, {color: color}]}>{str}</Text>
                 </View>
-              : <View key={this.getNextKey()} style={{flexDirection: 'row'}}>
-                  <View style={{flexDirection: 'column', maxWidth: maxWidth}}>
-                    <Text style={[styles.resourceTitle, {color: color, marginTop: 3}]}>{str}</Text>
-                  </View>
-                  <Icon name='ios-folder-open-outline' size={25} color={color} style={{position: 'absolute', right: 0}}/>
+              : <View key={this.getNextKey()} style={{flexDirection: 'row', justifyContent: 'center'}}>
+                  <Text style={[styles.resourceTitle, {color: color, marginTop: 3, paddingRight: 20}]}>{str}</Text>
+                  <Icon name='ios-folder-open-outline' size={25} color={color}/>
                 </View>
       renderedRow.push(msg);
       return ({message: str})
@@ -582,7 +579,7 @@ class MessageRow extends Component {
     if (isSelfIntroduction || isCustomerWaiting) {
       let msg = <View key={this.getNextKey()}>
                   <View style={styles.rowContainer}>
-                    <Text style={[styles.resourceTitle, {color: isMyMessage ? '#ffffff' : '#757575'}]}>{resource.message}</Text>
+                    <Text style={[styles.resourceTitle, {paddingRight: 20, color: isMyMessage ? '#ffffff' : '#757575'}]}>{resource.message}</Text>
                     <Icon style={{color: LINK_COLOR, backgroundColor: 'transparent',  paddingLeft: 5}} size={20} name={'ios-person'} />
                   </View>
                 </View>
@@ -822,7 +819,7 @@ class MessageRow extends Component {
                  this.createNewResource(form, isMyMessage)
                }}>
                  <View style={styles.multiEntryButton}>
-                   <Text style={styles.multiEntryText}>   {translate('addSameForm')}   </Text>
+                   <Text style={styles.resourceTitle}>   {translate('addSameForm')}   </Text>
                  </View>
                </TouchableHighlight>
                <TouchableHighlight underlayColor='transparent' onPress={() => {
@@ -850,7 +847,7 @@ class MessageRow extends Component {
                   )
                }}>
                  <View style={styles.multiEntryButton}>
-                   <Text style={styles.multiEntryText}>   {translate('getNextForm')}   </Text>
+                   <Text style={styles.resourceTitle}>   {translate('getNextForm')}   </Text>
                  </View>
               </TouchableHighlight>
               </View>
@@ -952,10 +949,7 @@ var styles = StyleSheet.create({
     flexDirection: 'row'
   },
   resourceTitle: {
-    // flex: 1,
     fontSize: 18,
-    // fontWeight: '400',
-    // marginBottom: 2,
   },
   date: {
     flex: 1,
@@ -1096,9 +1090,6 @@ var styles = StyleSheet.create({
     borderColor: '#77ADFC',
     borderWidth: 1,
     padding: 10
-  },
-  multiEntryText: {
-    fontSize: 18
   },
   msgImage: {
     height: 30,
