@@ -5002,8 +5002,8 @@ var Store = Reflux.createStore({
 
     // if (me  &&  from[ROOT_HASH] === me[ROOT_HASH])
     //   return
-
-    var to = this._getItem(PROFILE + '_' + obj.to[ROOT_HASH])
+    var toId = PROFILE + '_' + obj.to[ROOT_HASH]
+    var to = this._getItem(toId)
 
     // HACK for showing verification in employee's chat
     if (val[TYPE] === VERIFICATION  && me.isEmployee  &&  utils.getId(me) === toId) {
@@ -5017,7 +5017,6 @@ var Store = Reflux.createStore({
     var inDB
     if (onMessage) {
       let fromId = utils.getId(from)
-      let toId = utils.getId(to)
       // let meId = utils.getId(me)
       // if (me.isEmployee) {
       //   let notMeId = toId === meId ? fromId  : toId
