@@ -730,6 +730,8 @@ var Store = Reflux.createStore({
     // return newResult.reverse()
   },
   getInfo(serverUrls, retry, id) {
+    let self = this
+    initOnlineStatus()
     return Q.all(serverUrls.map(url => {
       return this.getServiceProviders(url, retry, id)
         .then(results => {
@@ -761,57 +763,13 @@ var Store = Reflux.createStore({
         })
         .then(() => meDriver)
     }))
-
-    // return Q.all(serverUrls.map(url => self.getServiceProviders(url, retry)))
-    // .then(function(results) {
-    //   var httpClient = driverInfo.httpClient
-    //   var wsClients = driverInfo.wsClients
-    //   var whitelist = driverInfo.whitelist
-    //   var tlsKey = driverInfo.tlsKey
-    //   results.forEach(function(providers) {
-    //     if (!httpClient) {
-    //       httpClient = new HttpClient()
-    //       driverInfo.httpClient = httpClient
-    //       meDriver.ready().then(function () {
-    //         var myHash = meDriver.myRootHash()
-    //         httpClient.setRootHash(myHash)
-    //       })
-
-    //       httpClient.on('message', function () {
-    //         meDriver.receiveMsg.apply(meDriver, arguments)
-    //       })
-    //     }
-
-    //     providers.forEach(function(provider) {
-    //       self.addProvider(provider)
-    //       // httpClient.addRecipient(
-    //       //   provider.hash,
-    //       //   utils.joinURL(provider.url, provider.id, 'send')
-    //       // )
-
-    //       // if (provider.txId) {
-    //       //   whitelist.push(provider.txId)
-    //       // }
-
-    //       // if (!tlsKey) return
-
-    //       // // self.addWebSocketClient()
-    //       // var wsClient = new WebSocketClient({
-    //       //   url: utils.joinURL(provider.url, provider.id, 'ws'),
-    //       //   tlsKey: tlsKey,
-    //       //   autoconnect: false,
-    //       //   // rootHash: meDriver.myRootHash()
-    //       // })
-    //       // // will need to do this on demand too
-    //       // // e.g. when scanning an employee QR Code at the bank
-    //       // wsClient.on('message', meDriver.receiveMsg)
-    //       // wsClients[provider.hash] = wsClient
-    //     })
-    //   })
-
-    //   meDriver.watchTxs(whitelist)
-    //   return meDriver
-    // })
+    // Not the best way to
+    function initOnlineStatus() {
+      let orgs = self.searchNotMessages({modelName: ORGANIZATION})
+      orgs.forEach((org) => {
+        self._getItem(utils.getId(org))._online = false
+      })
+    }
   },
 
   onGetEmployeeInfo(code) {
