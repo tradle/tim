@@ -64,13 +64,13 @@ class ShowRefList extends Component {
            <TouchableHighlight onPress={this.showResources.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
              <View style={styles.item}>
                <View style={{flexDirection: 'row'}}>
-               <Icon name={icon}  size={utils.getFontSize(30)}  color='#757575' />
-              {count
-                  ? <View style={styles.count}>
-                      <Text style={styles.countText}>{count}</Text>
-                    </View>
-                  : <View/>
-               }
+                 <Icon name={icon}  size={utils.getFontSize(30)}  color='#757575' />
+                {count
+                    ? <View style={styles.count}>
+                        <Text style={styles.countText}>{count}</Text>
+                      </View>
+                    : <View/>
+                 }
                </View>
                <Text style={[buttonStyles.text, Platform.OS === 'android' ? {marginTop: 3} : {marginTop: 0}]}>{propTitle}</Text>
              </View>
