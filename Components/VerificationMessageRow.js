@@ -57,13 +57,15 @@ class VerificationMessageRow extends Component {
     var viewStyle = {width: msgWidth, flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
 
     var msgModel = utils.getModel(resource.document[constants.TYPE]).value;
-    var orgName = resource.organization  ? resource.organization.title : ''
+    var orgName = resource._verifiedBy
+                ? resource._verifiedBy.title
+                : resource.organization  ? resource.organization.title : ''
 
     let me = utils.getMe()
     let isThirdPartyVerification
     if (me.isEmployee  &&  !this.props.to.organization && !this.props.context._readOnly)
       // Check if I am the employee of the organization I opened a chat with or the customer
-      isThirdPartyVerification = !utils.isEmployee(resource.organization)
+      isThirdPartyVerification = resource._verifiedBy || (resource.organization  &&  !utils.isEmployee(resource.organization))
 
     let isShared = this.isShared()
     isMyMessage = isShared
