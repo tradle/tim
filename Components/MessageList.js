@@ -115,6 +115,7 @@ class MessageList extends Component {
   onAction(params) {
     if (params.error)
       return
+    let resource = this.props.resource
     if (params.action === 'connectivity') {
       // if (params.isConnected  &&  !this.state.isForgetting) {
       //   this.state.isConnected = params.isConnected
@@ -123,7 +124,7 @@ class MessageList extends Component {
       //     message: me.firstName + ' is waiting for the response',
       //     _t: constants.TYPES.CUSTOMER_WAITING,
       //     from: me,
-      //     to: this.props.resource,
+      //     to: resource,
       //     time: new Date().getTime()
       //   }
       //   Actions.addMessage(msg, true)
@@ -141,7 +142,7 @@ class MessageList extends Component {
       //     message: me.firstName + ' is waiting for the response',
       //     _t: constants.TYPES.CUSTOMER_WAITING,
       //     from: me,
-      //     to: this.props.resource,
+      //     to: resource,
       //     time: new Date().getTime()
       //   }
       //   Actions.addMessage(msg, true)
@@ -155,7 +156,7 @@ class MessageList extends Component {
       var actionParams = {
         query: this.state.filter,
         modelName: this.props.modelName,
-        to: this.props.resource,
+        to: resource,
         context: this.state.allContexts ? null : this.state.context,
         limit: this.state.list ? Math.max(this.state.list.length + 1, LIMIT) : LIMIT
       }
@@ -184,7 +185,7 @@ class MessageList extends Component {
       this.state.sendResource = params.resource
       Actions.list({
         modelName: this.props.modelName,
-        to: this.props.resource,
+        to: resource,
         limit: this.state.list ? this.state.list.length + 1 : LIMIT,
         context: this.state.allContexts ? null : this.state.context
       });
@@ -202,10 +203,10 @@ class MessageList extends Component {
       // ComponentUtils.showContacts(this.props.navigator, constants.TYPES.PROFILE)
       return
     }
-    if (params.resource  &&  params.resource[constants.ROOT_HASH] != this.props.resource[constants.ROOT_HASH]) {
+    if (params.resource  &&  params.resource[constants.ROOT_HASH] != resource[constants.ROOT_HASH]) {
       var doUpdate
-      if (this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION  &&  params.resource.organization) {
-        if (this.props.resource[constants.TYPE] + '_' + this.props.resource[constants.ROOT_HASH] === utils.getId(params.resource.organization))
+      if (resource[constants.TYPE] === constants.TYPES.ORGANIZATION  &&  params.resource.organization) {
+        if (resource[constants.TYPE] + '_' + resource[constants.ROOT_HASH] === utils.getId(params.resource.organization))
           doUpdate = true
       }
       if (!doUpdate)
@@ -247,7 +248,7 @@ class MessageList extends Component {
       return
     }
     LINK_COLOR = this.props.bankStyle  &&  this.props.bankStyle.LINK_COLOR
-    let isEmployee = utils.isEmployee(this.props.resource)
+    let isEmployee = utils.isEmployee(resource)
     if (list.length || (this.state.filter  &&  this.state.filter.length)) {
       let productToForms = this.gatherForms(list)
 
