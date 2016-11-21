@@ -573,7 +573,7 @@ var Store = Reflux.createStore({
           //   this.addMessagesToChat(utils.getId(r.to), r, true, shareInfo.timeShared)
           // else  {
             let rep = this._getItem(shareInfo.bankRepresentative)
-            let orgId = utils.getId(rep.organization)
+            let orgId = rep.organization ?  utils.getId(rep.organization) : utils.getId(rep)
             if (meOrgId !== orgId) {
               this.addMessagesToChat(orgId, r, true, shareInfo.timeShared)
               addedToProviders.push(orgId)
@@ -4794,6 +4794,7 @@ var Store = Reflux.createStore({
                ? obj.objectinfo.author
                : obj.txId ? obj.from[ROOT_HASH] : null
     fromId = PROFILE + '_' + fromId
+
     var from = this._getItem(fromId)
     var me = utils.getMe()
     if (utils.getId(me) === fromId)
@@ -4853,13 +4854,13 @@ var Store = Reflux.createStore({
     }
 
     var resultList
-    let isMyMessage = isMessage ? (toId !== meId  &&  fromId !== meId) : false
-
+    let isMyMessage
     if (isMessage) {
       var toId = PROFILE + '_' + obj.to[ROOT_HASH]
       var meId = PROFILE + '_' + me[ROOT_HASH]
       var isSelfIntroduction = model.id === SELF_INTRODUCTION
       var id
+      isMyMessage = isMessage ? (toId !== meId  &&  fromId !== meId) : false
       if (isMyMessage) {
         id = !isSelfIntroduction  &&  toId === meId ? fromId : toId
         if (!noTrigger  &&  id) {
@@ -5025,14 +5026,21 @@ var Store = Reflux.createStore({
 
     // if (me  &&  from[ROOT_HASH] === me[ROOT_HASH])
     //   return
+    let toId = PROFILE + '_' + obj.to[ROOT_HASH]
+    var to = this._getItem(toId)
 
-    var to = this._getItem(PROFILE + '_' + obj.to[ROOT_HASH])
+    // HACK for showing verification in employee's chat
+    if (val[TYPE] === VERIFICATION  && me.isEmployee  &&  utils.getId(me) === toId) {
+      val._verifiedBy = from.organization
+      fromProfile = this._getItem(utils.getId(val.document)).from
+      from = this._getItem(fromProfile)
+    }
+
     var fOrg = (me  &&  from[ROOT_HASH] === me[ROOT_HASH]) ? to.organization : from.organization
     var org = fOrg ? this._getItem(utils.getId(fOrg)) : null
     var inDB
     if (onMessage) {
       let fromId = utils.getId(from)
-      let toId = utils.getId(to)
       // let meId = utils.getId(me)
       // if (me.isEmployee) {
       //   let notMeId = toId === meId ? fromId  : toId
