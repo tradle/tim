@@ -635,7 +635,7 @@ class MessageList extends Component {
     return (
       <PageView style={[platformStyles.container, bgStyle]}>
         <NetworkInfoProvider connected={this.state.isConnected} resource={resource} online={this.state.onlineStatus} />
-        <ChatContext chat={this.props.resource} context={this.state.context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={this.props.bankStyle} allContexts={this.state.allContexts} />
+        <ChatContext chat={resource} context={this.state.context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={this.props.bankStyle} allContexts={this.state.allContexts} />
         <View style={ sepStyle } />
         {content}
         {actionSheet}
