@@ -2708,7 +2708,7 @@ var Store = Reflux.createStore({
     //   debugger
     // })
   },
-  shareAll(document, shareWith, formResource) {
+  shareAll(document, to, formResource) {
     var documentCreated = formResource.documentCreated
     var key = utils.getId(formResource)
     var r = this._getItem(key)
@@ -2717,11 +2717,8 @@ var Store = Reflux.createStore({
     this.trigger({action: 'addItem', context: formResource.context, resource: r})
     if (documentCreated)
       return
-    let verifications = this._getItem(document).verifications
-    verifications.forEach((v) => this.shareOne(this._getItem(v), shareWith, formResource))
-  },
-  shareOne(resource, to, formResource) {
-    var self = this
+
+    // Get representative
     var toOrgId
     if (to[TYPE] === ORGANIZATION) {
       toOrgId = utils.getId(to)
@@ -2741,15 +2738,65 @@ var Store = Reflux.createStore({
     if (formResource  &&  formResource._context)
       opts.other = {context: utils.getId(formResource._context).split('_')[1]}
 
-    // var documentCreated = formResource.documentCreated
-    // var key = utils.getId(formResource)
-    // var r = this._getItem(key)
-    // // disable FormRequest from being used again
-    // r.documentCreated = true
-    // this.trigger({action: 'addItem', context: resource.context, resource: r})
-    // if (documentCreated)
-    //   return
+    let batch = []
+    // Get the whole resource
+    document = this._getItem(utils.getId(document))
+    let verifications = document.verifications
+    return this.shareForm(document, to, opts, formResource)
+    .then(() => {
+      var documentId = utils.getId(document)
+      if (r[TYPE] === FORM_REQUEST)
+        r.document = documentId
+      batch.push({type: 'put', key: key, value: r})
 
+      utils.optimizeResource(document)
+      this.addLastMessage(document, batch, to)
+      batch.push({type: 'put', key: documentId, value: document})
+
+      if (!verifications)
+        return
+
+      let all = verifications.length
+      let defer = Q.defer()
+      verifications.forEach((v) => {
+        let ver = this._getItem(v)
+        return this.shareVerification(ver, to, opts)
+        .then(() => {
+          let vId = utils.getId(ver)
+          let v = this._getItem(vId)
+          utils.optimizeResource(v)
+          batch.push({type: 'put', key: vId, value: v})
+
+          if (--all === 0) {
+            defer.resolve()
+            return
+          }
+        })
+      })
+      return defer.promise
+    })
+    .then(() => {
+      db.batch(batch)
+    })
+  },
+  shareForm(document, to, opts) {
+    var time = new Date().getTime()
+    return meDriver.send({...opts, link: this._getItem(document)[CUR_HASH]})
+    .then(() => {
+      if (!document._sharedWith) {
+        document._sharedWith = []
+        document._sharedWith.push(this.createSharedWith(utils.getId(document.to), document.time))
+      }
+
+      document._sharedWith.push(this.createSharedWith(utils.getId(to), time))
+      this.addMessagesToChat(utils.getId(to.organization), document, false, time)
+    })
+    .catch(function(err) {
+      debugger
+    })
+  },
+
+  shareVerification(resource, to, opts) {
     var time = new Date().getTime()
     var toId = utils.getId(to)
     var ver
@@ -2757,53 +2804,21 @@ var Store = Reflux.createStore({
       // Show sending status to not to keep customer in suspense
       if (!resource.sharedWith)
         resource.sharedWith = []
-      ver = self._getItem(utils.getId(resource))
+      ver = this._getItem(utils.getId(resource))
       ver._sharedWith.push(this.createSharedWith(toId, time))
       ver._sendStatus = this.isConnected ? SENDING : QUEUED
       utils.optimizeResource(ver)
-      this.addMessagesToChat(toOrgId, ver, false, time)
+
+      this.addMessagesToChat(utils.getId(to.organization), ver, false, time)
       this.trigger({action: 'addItem', context: resource.context, resource: ver})
     }
-
-    var promise = meDriver.send({...opts, link: this._getItem(resource.document)[CUR_HASH]})
+    let promise = resource[CUR_HASH] ? meDriver.send({...opts, link: resource[CUR_HASH]}) : Q()
     return promise
-    .then(function () {
-      return resource[CUR_HASH] ? meDriver.send({...opts, link: resource[CUR_HASH]}) : Q()
-      // return meDriver.send({...opts, link: resource.document[ROOT_HASH]})
-    })
     .then(() => {
-      var key = utils.getId(formResource)
-      var r = this._getItem(key)
-
-      if (r[TYPE] === FORM_REQUEST)
-        r.document = resource[TYPE] === VERIFICATION
-                   ? utils.getId(resource.document)
-                   : utils.getId(resource)
-
-      var batch = []
-      batch.push({type: 'put', key: key, value: r})
       if (ver) {
-        key = utils.getId(ver)
         this.trigger({action: 'updateItem', sendStatus: SENT, resource: ver})
         ver._sendStatus = SENT
-        batch.push({type: 'put', key: key, value: ver})
       }
-      var formId = utils.getId(resource.document)
-      var form = this._getItem(formId)
-      if (!form._sharedWith) {
-        form._sharedWith = []
-        form._sharedWith.push(this.createSharedWith(utils.getId(form.to), form.time))
-      }
-
-      form._sharedWith.push(this.createSharedWith(toId, time))
-      this.addMessagesToChat(toOrgId, form, false, time)
-      // if (ver)
-      //   this.addMessagesToChat(toOrgId, ver, false, time)
-
-      utils.optimizeResource(form)
-      this.addLastMessage(form, batch, to)
-      batch.push({type: 'put', key: formId, value: form})
-      return db.batch(batch)
     })
     .catch(function(err) {
       debugger
@@ -4854,9 +4869,12 @@ var Store = Reflux.createStore({
     }
 
     var resultList
+
     let isMyMessage
     if (isMessage) {
       var toId = PROFILE + '_' + obj.to[ROOT_HASH]
+      let to = this._getItem(toId)
+
       var meId = PROFILE + '_' + me[ROOT_HASH]
       var isSelfIntroduction = model.id === SELF_INTRODUCTION
       var id
@@ -5022,12 +5040,22 @@ var Store = Reflux.createStore({
         firstName: name ?  name.charAt(0).toUpperCase() + name.slice(1) : 'NewCustomer' + Object.keys(list).length
       }
     }
+
     let key = utils.getId(val)
 
     // if (me  &&  from[ROOT_HASH] === me[ROOT_HASH])
     //   return
     let toId = PROFILE + '_' + obj.to[ROOT_HASH]
     var to = this._getItem(toId)
+
+    // HACK for showing verification in employee's chat
+    if (val[TYPE] === VERIFICATION  && me.isEmployee  &&  utils.getId(me) === toId) {
+      val._verifiedBy = from.organization
+      fromProfile = this._getItem(utils.getId(val.document)).from
+      from = this._getItem(fromProfile)
+    }
+
+    var to = this._getItem(PROFILE + '_' + obj.to[ROOT_HASH])
 
     // HACK for showing verification in employee's chat
     if (val[TYPE] === VERIFICATION  && me.isEmployee  &&  utils.getId(me) === toId) {
