@@ -718,8 +718,6 @@ var Store = Reflux.createStore({
     // return newResult.reverse()
   },
   getInfo(serverUrls, retry, id) {
-    let self = this
-    initOnlineStatus()
     return Q.all(serverUrls.map(url => {
       return this.getServiceProviders(url, retry, id)
         .then(results => {
@@ -752,12 +750,6 @@ var Store = Reflux.createStore({
         .then(() => meDriver)
     }))
     // Not the best way to
-    function initOnlineStatus() {
-      let orgs = self.searchNotMessages({modelName: ORGANIZATION})
-      orgs.forEach((org) => {
-        self._getItem(utils.getId(org))._online = false
-      })
-    }
   },
 
   onGetEmployeeInfo(code) {
@@ -5345,6 +5337,11 @@ var Store = Reflux.createStore({
     .then(() => {
       if (me  &&  utils.isEmpty(chatMessages))
         this.initChats()
+      let orgs = this.searchNotMessages({modelName: ORGANIZATION})
+      if (orgs)
+        orgs.forEach((org) => {
+          this._getItem(utils.getId(org))._online = false
+        })
       this._loadedResourcesDefer.resolve()
     })
     .catch(err => {
