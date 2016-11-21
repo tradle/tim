@@ -42,7 +42,6 @@
     "enterYourName": "Enter your name",
     "addServerUrl": "Add server url",
     "search": "Search",
-    "listOfProducts": "Click for a list of products",
     "hello": "Hello {1}!",
     "testForgetMe": "This is a test mechanism to reset all communications with this provider",
     "confirmForgetMe": "Are you sure you want '{1}' to forget you",
