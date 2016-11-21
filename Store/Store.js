@@ -5295,9 +5295,10 @@ var Store = Reflux.createStore({
       if (me  &&  utils.isEmpty(chatMessages))
         this.initChats()
       let orgs = self.searchNotMessages({modelName: ORGANIZATION})
-      orgs.forEach((org) => {
-        self._getItem(utils.getId(org))._online = false
-      })
+      if (orgs)
+        orgs.forEach((org) => {
+          self._getItem(utils.getId(org))._online = false
+        })
     })
     .catch(err => {
       debugger
