@@ -13,6 +13,14 @@ import Icon from 'react-native-vector-icons/Ionicons'
 var constants = require('@tradle/constants');
 
 class ChatContext extends Component {
+  props: {
+    chat: PropTypes.object.isRequired,
+    context: PropTypes.object.isRequired,
+    contextChooser: PropTypes.func.isRequired,
+    shareWith: PropTypes.func.isRequired,
+    bankStyle: PropTypes.object.isRequired,
+    allContexts: PropTypes.bool.isRequired
+  };
   constructor(props) {
     super(props)
   }
@@ -26,11 +34,17 @@ class ChatContext extends Component {
                       <Text style={[this.props.allContexts ? styles.textAll : styles.textOne, styles.text]}>{translate(utils.getModel(this.props.context.product).value)}</Text>
                     </TouchableOpacity>
     // HACK: if me is employee no sharing for now
-    let share = this.props.allContexts  ||  utils.getMe().isEmployee
-                  ? <View/>
-                  : <TouchableOpacity onPress={this.props.shareWith} style={{position: 'absolute', right: 10}}>
-                      <Icon size={22} name='md-share' color='#7D6EC4' style={{marginRight: 10, paddingLeft: 20}} />
-                    </TouchableOpacity>
+
+
+    let share
+    if (this.props.allContexts)
+      share = <View/>
+    else if (utils.getMe().isEmployee  &&  this.props.chat[constants.TYPE] === constants.TYPES.PROFILE)
+      share = <View/>
+    else
+      share = <TouchableOpacity onPress={this.props.shareWith} style={{position: 'absolute', right: 10}}>
+                <Icon size={22} name='md-share' color='#7D6EC4' style={{marginRight: 10, paddingLeft: 20}} />
+              </TouchableOpacity>
     return (
             <View style={[bar, styles.bar, {flexDirection: 'row'}]}>
               {chooser}
@@ -65,11 +79,13 @@ var styles = StyleSheet.create({
     backgroundColor: '#f1ffe7',
   },
   bar: {
-    borderTopColor: '#dddddd',
-    borderTopWidth: StyleSheet.hairlineWidth,
+    // borderTopColor: '#dddddd',
+    // borderTopWidth: StyleSheet.hairlineWidth,
     padding: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#eeeeee',
     // flexDirection: 'row',
-    justifyContent: 'space-between',
+    // justifyContent: 'space-between',
   },
   textAll: {
     fontSize: 18,
