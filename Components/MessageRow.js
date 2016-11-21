@@ -29,6 +29,7 @@ const FORM_REQUEST = 'tradle.FormRequest'
 const ENUM = 'tradle.Enum'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
+const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
 
 var CURRENCY_SYMBOL
 var LINK_COLOR
@@ -576,7 +577,7 @@ class MessageRow extends Component {
     let isCustomerWaiting = model.id === constants.TYPES.CUSTOMER_WAITING
     if (isSelfIntroduction || isCustomerWaiting) {
       let msg = <View key={this.getNextKey()}>
-                  <View style={styles.rowContainer}>
+                  <View style={styles.rowContainer}>>
                     <Text style={[styles.resourceTitle, {color: isMyMessage ? '#ffffff' : '#757575'}]}>{resource.message}</Text>
                     <Icon style={{color: LINK_COLOR, backgroundColor: 'transparent',  paddingLeft: 5}} size={20} name={'ios-person'} />
                   </View>
@@ -584,6 +585,13 @@ class MessageRow extends Component {
       renderedRow.push(msg);
       return null
       // return {onPressCall: this.addContact.bind(this)}
+    }
+    if (model.id === APPLICATION_SUBMITTED) {
+      let msg = <View key={this.getNextKey()}>
+                  <Text style={[styles.resourceTitle, {color: this.props.bankStyle.CONFIRMATION_COLOR}]}>{resource.message}</Text>
+                </View>
+      renderedRow.push(msg);
+      return null
     }
     var isForgetting = model.id === constants.TYPES.FORGET_ME || model.id === constants.TYPES.FORGOT_YOU
     if (isForgetting) {
