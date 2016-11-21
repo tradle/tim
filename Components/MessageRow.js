@@ -31,6 +31,7 @@ const ENUM = 'tradle.Enum'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const PRODUCT_LIST = 'tradle.ProductList'
+const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
 
 var CURRENCY_SYMBOL
 var LINK_COLOR
@@ -586,6 +587,13 @@ class MessageRow extends Component {
       renderedRow.push(msg);
       return null
       // return {onPressCall: this.addContact.bind(this)}
+    }
+    if (model.id === APPLICATION_SUBMITTED) {
+      let msg = <View key={this.getNextKey()}>
+                  <Text style={[styles.resourceTitle, {color: this.props.bankStyle.CONFIRMATION_COLOR}]}>{resource.message}</Text>
+                </View>
+      renderedRow.push(msg);
+      return null
     }
     var isForgetting = model.id === constants.TYPES.FORGET_ME || model.id === constants.TYPES.FORGOT_YOU
     if (isForgetting) {
