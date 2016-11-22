@@ -650,38 +650,57 @@ class MessageList extends Component {
   }
 
   getActionSheetItems() {
-    let buttons
-    if (this.state.isEmployee  &&  this.props.resource[constants.TYPE] !== constants.TYPES.ORGANIZATION) {
-      buttons = [translate('formChooser')]
+    let buttons = []
+    let isOrg = this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION
+    let cancelIndex = 1
+    if (this.state.isEmployee  &&  !isOrg) {
+      cancelIndex++
+      buttons.push({
+        index: 0,
+        title: translate('formChooser'),
+        callback: () => this.chooseFormForCustomer()
+      })
     }
     else {
-      if (!ENV.allowForgetMe) return
-
-      buttons = [translate('forgetMe')]
+      if (!this.state.isEmployee) {
+        cancelIndex++
+        buttons.push({
+          index: 0,
+          title: translate('applyForProduct'),
+          callback: () => this.onChooseProduct()
+        })
+      }
+      if (ENV.allowForgetMe) {
+        cancelIndex++
+        buttons.push({
+          index: 1,
+          title: translate('forgetMe'),
+          callback: () => this.forgetMe()
+        })
+      }
     }
 
-    buttons.push(translate('cancel'))
+    buttons.push({
+      index: cancelIndex,
+      title: translate('cancel'),
+      callback: () => {}
+    })
     return buttons
   }
 
   renderActionSheet() {
     const buttons = this.getActionSheetItems()
     if (!buttons) return
-
+    let titles = buttons.map((b) => b.title)
     return (
       <ActionSheet
         ref={(o) => {
           this.ActionSheet = o
         }}
-        options={buttons}
-        cancelButtonIndex={1}
+        options={titles}
+        cancelButtonIndex={buttons.length - 1}
         onPress={(index) => {
-          if (index === 0) {
-            if (this.state.isEmployee)
-              this.chooseFormForCustomer()
-            else
-              this.forgetMe()
-          }
+          buttons[index].callback()
         }}
       />
     )
@@ -836,6 +855,33 @@ class MessageList extends Component {
       // }
     });
   }
+  onChooseProduct() {
+    if (this.props.isAggregation)
+      return
+    var modelName = constants.TYPES.MESSAGE
+    var model = utils.getModel(modelName).value;
+    var isInterface = model.isInterface;
+    if (!isInterface)
+      return;
+
+    var resource = this.props.resource
+    var currentRoutes = this.props.navigator.getCurrentRoutes();
+    this.props.navigator.push({
+      title: translate('iNeed'), //I need...',
+      id: 15,
+      component: ProductChooser,
+      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      backButtonTitle: 'Back',
+      passProps: {
+        resource: resource,
+        returnRoute: currentRoutes[currentRoutes.length - 1],
+        products: this.props.resource.list,
+        callback: this.props.callback,
+        bankStyle: this.props.bankStyle
+      },
+    });
+  }
+
   forgetMe() {
     var resource = this.props.resource
     this.setState({show: false})

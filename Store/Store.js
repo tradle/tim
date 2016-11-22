@@ -5122,7 +5122,7 @@ var Store = Reflux.createStore({
       let orgId = utils.getId(org)
       list[orgId].value = org
       batch.push({type: 'put', key: utils.getId(org), value: org})
-      noTrigger = this.hasNoTrigger(orgId)
+      noTrigger = hasNoTrigger(orgId)
     }
     if (!val.time)
       val.time = obj.timestamp
@@ -5164,23 +5164,39 @@ var Store = Reflux.createStore({
       extend(true, v, val)
       this._setItem(key, v)
     }
-    if (isReadOnly) {
-      if (val[TYPE] === PRODUCT_APPLICATION)
-        this.addMessagesToChat(utils.getId(val), val)
-      else if (val._context) {
-        let context = this._getItem(utils.getId(val._context))
-        if (val._context  &&  context._readOnly)
-          this.addMessagesToChat(utils.getId(context), val)
+    if (!noTrigger) {
+      if (isReadOnly) {
+        if (val[TYPE] === PRODUCT_APPLICATION)
+          this.addMessagesToChat(utils.getId(val), val)
+        else if (val._context) {
+          let context = this._getItem(utils.getId(val._context))
+          if (val._context  &&  context._readOnly)
+            this.addMessagesToChat(utils.getId(context), val)
+        }
       }
-    }
-    else
-      this.addMessagesToChat(utils.getId(org ? org : from), val)
+      else
+        this.addMessagesToChat(utils.getId(org ? org : from), val)
 
-    batch.push({type: 'put', key: key, value: val})
+      batch.push({type: 'put', key: key, value: val})
+    }
     return noTrigger
+    function hasNoTrigger(orgId) {
+      let messages = chatMessages[orgId]
+      if (!messages)
+        return false
+      let type
+      // Skip all SELF_INTRODUCTION messages since they are not showing anyways on customer screen
+      for (let i=0; i<messages.length; i++) {
+        type = messages[i].id.split('_')[0]
+        if (type  === PRODUCT_LIST)
+          return true
+      }
+      // Don't trigger re-rendering the list if the current and previous messages were of PRODUCT_LIST type
+      return false
+    }
   },
   // if the last message showing was PRODUCT_LIST. No need to re-render
-  hasNoTrigger(orgId) {
+  hasNoTrigger1(orgId) {
     let messages = chatMessages[orgId]
     if (!messages)
       return false
@@ -5342,6 +5358,7 @@ var Store = Reflux.createStore({
         orgs.forEach((org) => {
           this._getItem(utils.getId(org))._online = false
         })
+
       this._loadedResourcesDefer.resolve()
     })
     .catch(err => {
