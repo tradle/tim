@@ -865,18 +865,11 @@ class MessageRow extends Component {
       link = <Text style={[styles.resourceTitle, color]}>{translate(form)}</Text>
     else {
       let notLink = resource.documentCreated  ||  isReadOnly  ||  form.subClassOf === MY_PRODUCT
-      let view = <View style={styles.rowContainer}>
-                   <Text style={[styles.resourceTitle, {color: resource.documentCreated  ||  notLink ?  '#757575' : LINK_COLOR}]}>{translate(form)}</Text>
-                   <Icon style={[{marginTop: 2, paddingLeft: 100}, resource.documentCreated  ? styles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
-                 </View>
-      if (notLink)
-        link = view
-      else
-        link =  <TouchableHighlight underlayColor='transparent' onPress={() => {
-                  this.createNewResource(form, isMyMessage)
-                }}>
-                  {view}
-                </TouchableHighlight>
+      link = <View style={styles.rowContainer}>
+               <Text style={[styles.resourceTitle, {color: resource.documentCreated  ||  notLink ?  '#757575' : LINK_COLOR}]}>{translate(form)}</Text>
+               <Icon style={[{marginTop: 2, paddingLeft: 100}, resource.documentCreated  ? styles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
+             </View>
+      onPressCall = notLink ? null : this.createNewResource.bind(this, form, isMyMessage)
     }
     let strName = sameFormRequestForm ? translate('addAnotherFormOrGetNext', translate(form)) : utils.getStringName(message)
     let str = strName ? utils.translate(strName) : message
