@@ -2633,7 +2633,10 @@ var Store = Reflux.createStore({
         context: this.buildRef(resource),
         with: list
       }
-      let rep = this.getRepresentative(utils.getId(originatingResource))
+
+      let rep =  originatingResource[TYPE] === ORGANIZATION
+              ?  this.getRepresentative(utils.getId(originatingResource))
+              :  originatingResource
 
       let sendParams = {
         object: msg,
@@ -5353,12 +5356,16 @@ var Store = Reflux.createStore({
     .then(() => {
       if (me  &&  utils.isEmpty(chatMessages))
         this.initChats()
-      let orgs = this.searchNotMessages({modelName: ORGANIZATION})
-      if (orgs)
-        orgs.forEach((org) => {
-          this._getItem(utils.getId(org))._online = false
-        })
+      if (SERVICE_PROVIDERS)
+        SERVICE_PROVIDERS.forEach((p) => this._getItem(p.org)._online = true)
 
+      else {
+        let orgs = this.searchNotMessages({modelName: ORGANIZATION})
+        if (orgs)
+          orgs.forEach((org) => {
+            this._getItem(utils.getId(org))._online = false
+          })
+      }
       this._loadedResourcesDefer.resolve()
     })
     .catch(err => {
