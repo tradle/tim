@@ -625,6 +625,7 @@ class MessageList extends Component {
     let isOrg = this.props.resource[constants.TYPE] === constants.TYPES.ORGANIZATION
     let cancelIndex = 1
     if (this.state.isEmployee  &&  !isOrg) {
+      cancelIndex++
       buttons.push({
         index: 0,
         title: translate('formChooser'),
@@ -633,14 +634,15 @@ class MessageList extends Component {
     }
     else {
       if (!this.state.isEmployee) {
+        cancelIndex++
         buttons.push({
           index: 0,
           title: translate('applyForProduct'),
           callback: () => this.onChooseProduct()
         })
-        cancelIndex = 2
       }
       if (ENV.allowForgetMe) {
+        cancelIndex++
         buttons.push({
           index: 1,
           title: translate('forgetMe'),
@@ -667,7 +669,7 @@ class MessageList extends Component {
           this.ActionSheet = o
         }}
         options={titles}
-        cancelButtonIndex={1}
+        cancelButtonIndex={buttons.length - 1}
         onPress={(index) => {
           buttons[index].callback()
         }}
