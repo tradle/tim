@@ -461,13 +461,16 @@ var NewResourceMixin = {
   onChangeText(prop, value) {
     var r = {}
     extend(true, r, this.state.resource)
-    if(prop.type === 'number') {
-      let val = Number(value)
-      if (value.charAt(value.length - 1) === '.')
-        value = val + .00
-      else
-        value = val
-    }
+    // delay coercing string->number until submit
+    // otherwise text field acts funny (inserting/preventing 0, mishandling decimal points)
+    //
+    // if (prop.type === 'number') {
+    //   let val = Number(value)
+    //   if (value.charAt(value.length - 1) === '.')
+    //     value = val + .00
+    //   else
+    //     value = val
+    // }
     if (!this.floatingProps)
       this.floatingProps = {}
     if (prop.ref == constants.TYPES.MONEY) {
@@ -559,6 +562,10 @@ var NewResourceMixin = {
     let lcolor = this.getLabelAndBorderColor(params.prop.name)
     if (this.state.isRegistration)
       lStyle = [lStyle, {color: lcolor}]
+
+    // avoid <input type="number"> on web
+    // it good-naturedly interferes with validation
+    const keyboard = utils.isWeb() || !params.keyboard ? 'default': params.keyboard
     return (
       <View style={{flex: 5, paddingBottom: this.hasError(params.errors, params.prop.name) ? 10 : Platform.OS === 'ios' ? 10 : 7}}>
         <FloatLabel
@@ -571,7 +578,7 @@ var NewResourceMixin = {
           style={[styles.formInput, {borderBottomColor: lcolor}]}
           value={params.value}
           keyboardShouldPersistTaps={true}
-          keyboardType={params.keyboard || 'default'}
+          keyboardType={keyboard}
           onChangeText={this.onChangeText.bind(this, params.prop)}
           underlineColorAndroid='transparent'
         >{label}</FloatLabel>
@@ -1144,19 +1151,22 @@ var NewResourceMixin = {
         deleteProps.push(p)
         continue
       }
-      if (prop.type === 'number')
-        this.checkNumber(value[p], prop, err)
+      if (prop.type === 'number') {
+        coerceNumber(value, p)
+        checkNumber(value[p], prop, err)
+      }
       else if (prop.ref === constants.TYPES.MONEY) {
-        let error = this.checkNumber(value[p], prop, err)
+        coerceNumber(value[p], 'value')
+        let error = checkNumber(value[p].value, prop, err)
         if (error  &&  m.required.indexOf(p) === -1)
           deleteProps.push(p)
         else if (!value[p].currency)
           value[p].currency = this.props.currency
       }
       else if (prop.units && prop.units === '[min - max]') {
-        let v = value[p].split('-').forEach((n) => trim(n))
+        let v = value[p].split('-').map(coerceNumber)
         if (v.length === 1)
-          checkNumber(v, prop, err)
+          checkNumber(v[0], prop, err)
         else if (v.length === 2) {
           checkNumber(v[0], prop, err)
           if (err[p])
@@ -1204,23 +1214,29 @@ var NewResourceMixin = {
       })
     return err
   },
-  checkNumber(v, prop, err) {
-    var p = prop.name
-    var error
-    if (prop.ref === constants.TYPES.MONEY)
-      v = v.value
-    if (isNaN(v))
-      error = 'Please enter a valid number'
-    else {
-      if (prop.max && v > prop.max)
-        error = 'The maximum value for is ' + prop.max
-      else if (prop.min && v < prop.min)
-        error = 'The minimum value for is ' + prop.min
-    }
-    if (error)
-      err[p] = error
-    return error
-  },
+}
+
+function checkNumber (v, prop, err) {
+  var p = prop.name
+  var error
+  if (isNaN(v))
+    error = 'Please enter a valid number'
+  else {
+    if (prop.max && v > prop.max)
+      error = 'The maximum value for is ' + prop.max
+    else if (prop.min && v < prop.min)
+      error = 'The minimum value for is ' + prop.min
+  }
+  if (error)
+    err[p] = error
+  return error
+}
+
+function coerceNumber (obj, p) {
+  const val = obj[p]
+  if (typeof val === 'string') {
+    obj[p] = Number(val.trim())
+  }
 }
 
 var styles= StyleSheet.create({
