@@ -577,7 +577,7 @@ class MessageRow extends Component {
     let isCustomerWaiting = model.id === constants.TYPES.CUSTOMER_WAITING
     if (isSelfIntroduction || isCustomerWaiting) {
       let msg = <View key={this.getNextKey()}>
-                  <View style={styles.rowContainer}>>
+                  <View style={styles.rowContainer}>
                     <Text style={[styles.resourceTitle, {color: isMyMessage ? '#ffffff' : '#757575'}]}>{resource.message}</Text>
                     <Icon style={{color: LINK_COLOR, backgroundColor: 'transparent',  paddingLeft: 5}} size={20} name={'ios-person'} />
                   </View>
@@ -626,7 +626,8 @@ class MessageRow extends Component {
     var self = this
 
     var vCols = [];
-    let isReadOnly = this.props.context  &&  this.props.context._readOnly
+
+    let isReadOnly = utils.isReadOnlyChat(this.props.resource) //this.props.context  &&  this.props.context._readOnly
     viewCols.forEach(function(v) {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date')
         return;
@@ -815,9 +816,9 @@ class MessageRow extends Component {
               ? {color: '#AFBBA8'} //{color: STRUCTURED_MESSAGE_COLOR}
               : {color: '#2892C6'}
     let link
-    let isReadOnly = this.props.context  &&  this.props.context._readOnly
+    let isReadOnly = utils.isReadOnlyChat(this.props.resource) //this.props.context  &&  this.props.context._readOnly
     if (sameFormRequestForm  &&  !resource.documentCreated) {
-       let isReadOnly = this.props.context  &&  this.props.context._readOnly
+       let isReadOnly = utils.isReadOnlyChat(this.props.resource) // this.props.context  &&  this.props.context._readOnly
 
        link = <View style={[styles.rowContainer, {paddingVertical: 10, alignSelf: 'center'}]}>
                <View style={styles.textContainer}>
@@ -863,18 +864,11 @@ class MessageRow extends Component {
       link = <Text style={[styles.resourceTitle, color]}>{translate(form)}</Text>
     else {
       let notLink = resource.documentCreated  ||  isReadOnly  ||  form.subClassOf === MY_PRODUCT
-      let view = <View style={styles.rowContainer}>
+      link = <View style={styles.rowContainer}>
                    <Text style={[styles.resourceTitle, {color: resource.documentCreated  ||  notLink ?  '#757575' : LINK_COLOR}]}>{translate(form)}</Text>
                    <Icon style={[{marginTop: 2}, resource.documentCreated  ? styles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
                  </View>
-      if (notLink)
-        link = view
-      else
-        link =  <TouchableHighlight underlayColor='transparent' onPress={() => {
-                  this.createNewResource(form, isMyMessage)
-                }}>
-                  {view}
-                </TouchableHighlight>
+      onPressCall = notLink ? null : this.createNewResource.bind(this, form, isMyMessage)
     }
     let strName = sameFormRequestForm ? translate('addAnotherFormOrGetNext', translate(form)) : utils.getStringName(message)
     let str = strName ? utils.translate(strName) : message
