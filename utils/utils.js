@@ -337,8 +337,9 @@ var utils = {
     if (!meta) {
       if (resource.title)
         return resource.title
-      else
-        meta = this.getModel(resource[TYPE]).value.properties
+      if (resource.id)
+        return ""
+      meta = this.getModel(resource[TYPE]).value.properties
     }
     let m = this.getModel(resource[TYPE])
     var displayName = '';
@@ -352,7 +353,7 @@ var utils = {
       }
       if (resource[p]) {
         if (meta[p].type == 'object') {
-          var title = resource[p].title || this.getDisplayName(resource[p], utils.getModel(resource[p][TYPE]).value.properties);
+          var title = resource[p].title || this.getDisplayName(resource[p]);
           displayName += displayName.length ? ' ' + title : title;
         }
         else
@@ -586,6 +587,15 @@ var utils = {
     */
     return verifiedByMe
   },
+  isReadOnlyChat(resource) {
+    let me = this.getMe()
+    if (!me)
+      return false
+    if (!resource.to || !resource.from)
+      return false
+    let meId = this.getId(me)
+    return this.getId(resource.to) !== meId  &&  this.getId(resource.from) !== meId
+  },
   optimizeResource(res) {
     var properties = this.getModel(res[TYPE]).value.properties
     for (var p in res) {
@@ -687,10 +697,11 @@ var utils = {
     let model = this.getModel(resource[TYPE]).value
     if (!me.organization)
       return false
-    if (model.subClassOf === TYPES.FORM)
-      return  utils.getId(me) === utils.getId(resource.to) &&
+    if (model.subClassOf === TYPES.FORM) {
+      return  (utils.getId(me) === utils.getId(resource.to)  ||  this.isReadOnlyChat(resource)) &&
              !utils.isVerifiedByMe(resource)               // !verification  &&  utils.getId(resource.to) === utils.getId(me)  &&
-    else if (model.id === TYPES.VERIFICATION)
+    }
+    if (model.id === TYPES.VERIFICATION)
       return  utils.getId(me) === utils.getId(resource.from)
   },
   // measure(component, cb) {
