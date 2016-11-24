@@ -420,7 +420,8 @@ var RowMixin = {
   isShared() {
     let resource = this.props.resource
     // Is resource was originally created in this chat or shared from a different chat
-    if (!resource.organization  ||  (this.props.context  &&  this.props.context._readOnly))
+    // if (!resource.organization  ||  (this.props.context  &&  this.props.context._readOnly))
+    if (!resource.organization  ||  utils.isReadOnlyChat(this.props.resource))
       return false
     let to = this.props.to
     if (to[constants.TYPE] === constants.TYPES.PROFILE)
