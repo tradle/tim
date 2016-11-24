@@ -636,7 +636,7 @@ class ResourceList extends Component {
     var isVerification = model.id === constants.TYPES.VERIFICATION  ||  model.subClassOf === constants.TYPES.VERIFICATION
     var isForm = model.id === constants.TYPES.FORM || model.subClassOf === constants.TYPES.FORM
     var isMyProduct = model.id === 'tradle.MyProduct'  ||  model.subClassOf === 'tradle.MyProduct'
-    var isSharedContext = model.id === PRODUCT_APPLICATION && resource._readOnly
+    var isSharedContext = model.id === PRODUCT_APPLICATION && utils.isReadOnlyChat(resource)
 
     // let hasBacklink = this.props.prop && this.props.prop.items  &&  this.props.prop.backlink
     return /*hasBacklink  &&*/  (isVerification  || isForm || isMyProduct)
