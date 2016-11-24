@@ -63,7 +63,7 @@ class VerificationMessageRow extends Component {
 
     let me = utils.getMe()
     let isThirdPartyVerification
-    if (me.isEmployee  &&  !this.props.to.organization && !this.props.context._readOnly)
+    if (me.isEmployee  &&  !this.props.to.organization && !utils.isReadOnlyChat(this.props.resource)) //this.props.context._readOnly)
       // Check if I am the employee of the organization I opened a chat with or the customer
       isThirdPartyVerification = resource._verifiedBy || (resource.organization  &&  !utils.isEmployee(resource.organization))
 
