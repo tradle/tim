@@ -26,11 +26,13 @@ class ChatContext extends Component {
   }
 
   render() {
-    if (!this.props.context  ||  this.props.context._readOnly)
+    if (!this.props.context)
       return <View/>
+    // if (!this.props.context  ||  this.props.context._readOnly)
+    //   return <View/>
 
     let bar = this.props.allContexts ? styles.barAll : styles.barOne
-    let chooser =  <TouchableOpacity onPress={this.props.contextChooser} style={{flex: 1}}>
+    let chooser =  <TouchableOpacity onPress={this.props.contextChooser} style={{flex: 1, padding: 10}}>
                       <Text style={[this.props.allContexts ? styles.textAll : styles.textOne, styles.text]}>{translate(utils.getModel(this.props.context.product).value)}</Text>
                     </TouchableOpacity>
     // HACK: if me is employee no sharing for now
@@ -39,10 +41,10 @@ class ChatContext extends Component {
     let share
     if (this.props.allContexts)
       share = <View/>
-    else if (utils.getMe().isEmployee  &&  this.props.chat[constants.TYPE] === constants.TYPES.PROFILE)
-      share = <View/>
+    // else if (utils.getMe().isEmployee  &&  this.props.chat[constants.TYPE] === constants.TYPES.PROFILE)
+    //   share = <View/>
     else
-      share = <TouchableOpacity onPress={this.props.shareWith} style={{position: 'absolute', right: 10}}>
+      share = <TouchableOpacity onPress={this.props.shareWith} style={{position: 'absolute', right: 10, padding: 10}}>
                 <Icon size={22} name='md-share' color='#7D6EC4' style={{marginRight: 10, paddingLeft: 20}} />
               </TouchableOpacity>
     return (
@@ -81,7 +83,7 @@ var styles = StyleSheet.create({
   bar: {
     // borderTopColor: '#dddddd',
     // borderTopWidth: StyleSheet.hairlineWidth,
-    padding: 10,
+    // padding: 10,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#eeeeee',
     // flexDirection: 'row',
