@@ -2634,16 +2634,29 @@ var Store = Reflux.createStore({
         with: list
       }
 
-      let rep =  originatingResource[TYPE] === ORGANIZATION
-              ?  this.getRepresentative(utils.getId(originatingResource))
-              :  originatingResource
+      let permalink
+      if (me.isEmployee) {
+        let orgId = utils.getId(this._getItem(me.organization))
+        permalink = this.getRepresentative(orgId)[ROOT_HASH]
+      }
+      else
+        permalink = originatingResource[TYPE] === ORGANIZATION
+                  ?  this.getRepresentative(utils.getId(originatingResource))[ROOT_HASH]
+                  :  originatingResource[ROOT_HASH]
 
       let sendParams = {
         object: msg,
-        to: {fingerprint: this.getFingerprint(this._getItem(IDENTITY + '_' + rep[ROOT_HASH]))},
+        to: {permalink: permalink}
       }
+      // let sendParams = {
+      //   object: msg,
+      //   to: {fingerprint: this.getFingerprint(this._getItem(IDENTITY + '_' + rep[ROOT_HASH]))},
+      // }
 
       return meDriver.signAndSend(sendParams)
+      .catch((err) => {
+        debugger
+      })
     }
     // if (resource[TYPE] === VERIFICATION) {
     //   if (!Array.isArray(shareWithList))
@@ -4746,7 +4759,8 @@ var Store = Reflux.createStore({
   // },
 
   putInDb(obj, onMessage) {
-    return this._putInDb(obj, onMessage) || Q()
+    return this._loadedResourcesDefer.promise
+    .then(() => this._putInDb(obj, onMessage) || Q())
   },
   _putInDb(obj, onMessage) {
     // defensive copy
@@ -5001,12 +5015,30 @@ var Store = Reflux.createStore({
     var toId = PROFILE + '_' + obj.to[ROOT_HASH]
     var to = this._getItem(toId)
 
+    var meId = utils.getId(me)
     // HACK for showing verification in employee's chat
-    if (val[TYPE] === VERIFICATION  && me.isEmployee  &&  utils.getId(me) === toId) {
-      val._verifiedBy = from.organization
-      fromProfile = this._getItem(utils.getId(val.document)).from
-      from = this._getItem(fromProfile)
+    if (val[TYPE] === VERIFICATION) {
+      let document = this._getItem(val.document)
+      if (!document) {
+        debugger
+        return
+      }
+      let originalTo = this._getItem(document.to).organization
+      let verificationFrom = from.organization
+
+      if (verificationFrom  !==  originalTo) {
+        val._verifiedBy = from.organization
+        to = this._getItem(document.from)
+        toId = utils.getId(to)
+        from = this._getItem(document.to)
+      }
     }
+    // // HACK for showing verification in employee's chat
+    // if (val[TYPE] === VERIFICATION  && me.isEmployee  &&  utils.getId(me) === toId) {
+    //   val._verifiedBy = from.organization
+    //   fromProfile = this._getItem(utils.getId(val.document)).from
+    //   from = this._getItem(fromProfile)
+    // }
 
     var fOrg = (me  &&  from[ROOT_HASH] === me[ROOT_HASH]) ? to.organization : from.organization
     var org = fOrg ? this._getItem(utils.getId(fOrg)) : null
@@ -5045,7 +5077,6 @@ var Store = Reflux.createStore({
         val.sealedTime = val.time || obj.timestamp
       }
     }
-    let meId = utils.getId(me)
     let isReadOnly = utils.getId(to) !== meId  &&  utils.getId(from) !== meId
     if (val[TYPE] === PRODUCT_APPLICATION  &&  isReadOnly) {
       // props that are convenient for displaying in shared context
@@ -6140,13 +6171,14 @@ var Store = Reflux.createStore({
   buildRef(resource) {
     if (!resource[TYPE] && resource.id)
       return resource
-    let isForm = this.getModel(resource[TYPE]).value.subClassOf === FORM
+    let m = this.getModel(resource[TYPE]).value
+    let isForm = m.subClassOf === FORM
     // let id = utils.getId(resource)
     // if (isForm)
     //   id += '_' + resource[CUR_HASH]
     let ref = {
       id: utils.getId(resource),
-      title: resource.id ? resource.title : utils.getDisplayName(resource, this.getModel(resource[TYPE]).value.properties)
+      title: resource.id ? resource.title : utils.getDisplayName(resource)
     }
     if (resource.time)
       ref.time = resource.time
@@ -6170,7 +6202,9 @@ var Store = Reflux.createStore({
     list[key] = { key, value: { ...current.value, ...value } }
   },
   onViewChat(msg) {
-    debugger
+    let to = this._getItem(PROFILE + '_' + msg.to[ROOT_HASH])
+    let chat = to.organization ? this._getItem(to.organization) : to
+    this.trigger({action: 'showChat', to: to})
   }
 })
 // );
