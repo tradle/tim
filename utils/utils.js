@@ -338,6 +338,8 @@ var utils = {
     if (!meta) {
       if (resource.title)
         return resource.title
+      else if (resource.id)
+        return ""
       else
         meta = this.getModel(resource[TYPE]).value.properties
     }
@@ -353,7 +355,7 @@ var utils = {
       }
       if (resource[p]) {
         if (meta[p].type == 'object') {
-          var title = resource[p].title || this.getDisplayName(resource[p], utils.getModel(resource[p][TYPE]).value.properties);
+          var title = resource[p].title || this.getDisplayName(resource[p]);
           displayName += displayName.length ? ' ' + title : title;
         }
         else
