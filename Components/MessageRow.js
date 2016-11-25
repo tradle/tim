@@ -628,7 +628,8 @@ class MessageRow extends Component {
     var self = this
 
     var vCols = [];
-    let isReadOnly = this.props.context  &&  this.props.context._readOnly
+
+    let isReadOnly = utils.isReadOnlyChat(this.props.resource) //this.props.context  &&  this.props.context._readOnly
     viewCols.forEach(function(v) {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date')
         return;
@@ -817,9 +818,9 @@ class MessageRow extends Component {
               ? {color: '#AFBBA8'} //{color: STRUCTURED_MESSAGE_COLOR}
               : {color: '#2892C6'}
     let link
-    let isReadOnly = this.props.context  &&  this.props.context._readOnly
+    let isReadOnly = utils.isReadOnlyChat(this.props.resource) //this.props.context  &&  this.props.context._readOnly
     if (sameFormRequestForm  &&  !resource.documentCreated) {
-       let isReadOnly = this.props.context  &&  this.props.context._readOnly
+       let isReadOnly = utils.isReadOnlyChat(this.props.resource) // this.props.context  &&  this.props.context._readOnly
 
        link = <View style={[styles.rowContainer, {paddingVertical: 10, alignSelf: 'center'}]}>
                <View style={styles.textContainer}>

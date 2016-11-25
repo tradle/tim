@@ -553,13 +553,15 @@ class MessageList extends Component {
     if (!content) {
       var isAllMessages = model.isInterface  &&  model.id === constants.TYPES.MESSAGE;
 
-      let hideTextInput = resource[constants.TYPE] === PRODUCT_APPLICATION  && resource._readOnly
+      let hideTextInput = resource[constants.TYPE] === PRODUCT_APPLICATION  && utils.isReadOnlyChat(resource)
       let h = utils.dimensions(MessageList).height
       var maxHeight = h - (Platform.OS === 'android' ? 77 : 64)
       if (!this.state.isConnected || (resource[constants.TYPE] === constants.TYPES.ORGANIZATION  &&  !resource._online))
         maxHeight -=  35
       if (this.state.context)
         maxHeight -= 45
+      if (hideTextInput)
+        maxHeight -= 10
       // content = <GiftedMessenger style={{paddingHorizontal: 10, marginBottom: Platform.OS === 'android' ? 0 : 20}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
       var paddingLeft = 10
       // way ScrollView is implemented with position:absolute disrespects the confines of the screen width

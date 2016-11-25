@@ -556,10 +556,14 @@ var Store = Reflux.createStore({
       if (r._context) {
         let c = this._getItem(r._context)
         // context could be empty if ForgetMe was requested for the provider where form was originally created
-        if (c  &&  c._readOnly) {
-          this.addMessagesToChat(utils.getId(r._context), r, true)
+        // if (c  &&  c._readOnly) {
+        let cId = utils.getId(c)
+        if (utils.isReadOnlyChat(r)) {
+          this.addMessagesToChat(cId, r, true)
           continue
         }
+        if (chatMessages[cId])
+          this.addMessagesToChat(cId, r, true)
       }
 
       let m = this._getItem(this.getModel(r[TYPE]))
@@ -581,12 +585,12 @@ var Store = Reflux.createStore({
           // }
         })
       }
-      if (m.id === VERIFICATION  &&  meId === utils.getId(r.from))
+      if (m.id === VERIFICATION  &&  meId === utils.getId(r.from)  && r.to)
         this.addMessagesToChat(utils.getId(r.to), r, true)
       // Shared context
-      else if (m.id === PRODUCT_APPLICATION  &&  r._readOnly)
+      else if (m.id === PRODUCT_APPLICATION  &&  utils.isReadOnlyChat(r))   //  &&  r._readOnly)
         this.addMessagesToChat(utils.getId(r.from), r, true)
-      else {
+      else  if (r.to) { // remove
         let fromId = utils.getId(r.from)
         let rep = this._getItem(meId === fromId ? utils.getId(r.to) : fromId)
         let orgId = rep.organization ? utils.getId(rep.organization) : utils.getId(rep)
@@ -1627,7 +1631,8 @@ var Store = Reflux.createStore({
       if (noCustomerWaiting)
         return
       if (self._getItem(toId).pubkeys) {
-        let sendParams = self.packMessage(r, toChain)
+        // let sendParams = self.packMessage(r, toChain)
+        let sendParams = self.packMessage(toChain, r.from, r.to, r._context)
         const method = toChain[SIG] ? 'send' : 'signAndSend'
         return meDriver[method](sendParams)
         .catch(function (err) {
@@ -1667,14 +1672,14 @@ var Store = Reflux.createStore({
     });
   },
 
-  packMessage(r, toChain) {
+  packMessage(toChain, from, to, context) {
     var sendParams = {
       object: toChain
     }
-    let to = this._getItem(utils.getId(r.to))
+    to = this._getItem(utils.getId(to))
     let provider, hash
     if (to[ROOT_HASH] === me[ROOT_HASH]) {
-      provider = this._getItem(r.from)
+      provider = this._getItem(from)
       hash = provider[ROOT_HASH]
     }
     else
@@ -1685,8 +1690,14 @@ var Store = Reflux.createStore({
     //   hash = provider[ROOT_HASH]
 
     var isEmployee
-    if (me.isEmployee)
-      isEmployee = (!to.organization ||  utils.getId(to.organization) === utils.getId(me.organization))
+    if (me.organization) {
+      isEmployee = utils.isEmployee(to)
+      // See if the sender is in a process of verifying some form in shared context chat
+      if (!isEmployee  &&  context)
+        isEmployee = utils.isReadOnlyChat(this._getItem(context))
+    }
+    // if (me.isEmployee)
+    //   isEmployee = (!to.organization ||  utils.getId(to.organization) === utils.getId(me.organization))
 
     // let isEmployee = me.isEmployee && (!r.to.organization || utils.getId(r.to.organization) === utils.getId(me.organization))
     if (isEmployee) {
@@ -1711,15 +1722,15 @@ var Store = Reflux.createStore({
         }
         let rep = this.getRepresentative(utils.getId(me.organization))
 
-        sendParams.to = { fingerprint: this.getFingerprint(this._getItem(IDENTITY + '_' + rep[ROOT_HASH])) }
+        sendParams.to = { permalink: rep[ROOT_HASH] }
       }
     }
-    if (r._context) {
+    if (context) {
       if (!sendParams.other)
         sendParams.other = {}
-      let cId = utils.getId(r._context)
+      let cId = utils.getId(context)
       sendParams.other.context = cId.split('_')[1]
-      if (r[TYPE] !== PRODUCT_APPLICATION) {
+      if (toChain[TYPE] !== PRODUCT_APPLICATION) {
         let c = this._getItem(cId)
         // will be null for PRODUCT_APPLICATION itself
         if (c) {
@@ -1731,11 +1742,10 @@ var Store = Reflux.createStore({
     }
     if (!sendParams.to) {
       var toId = IDENTITY + '_' + hash
-      sendParams.to = { fingerprint: this.getFingerprint(this._getItem(toId)) }
+      sendParams.to = { permalink: hash }
     }
     return sendParams
   },
-
   // disableOtherFormRequestsLikeThis(rr) {
   //   let fromRep = utils.getId(rr.from)
   //   let orgId = utils.getId(this._getItem(fromRep).organization)
@@ -1777,7 +1787,8 @@ var Store = Reflux.createStore({
     if (r._context) {
       let c = this._getItem(r._context)
       // context could be empty if ForgetMe was requested for the provider where form was originally created
-      if (c  &&  c._readOnly)
+      // if (c  &&  c._readOnly)
+      if (utils.isReadOnlyChat(r))
         id = utils.getId(r._context)
     }
     let messages = chatMessages[id]
@@ -1850,101 +1861,106 @@ var Store = Reflux.createStore({
 
     return orgRep
   },
-  onAddVerification(r, notOneClickVerification, dontSend) {
-    var self = this;
-    var batch = [];
-    var key;
-    var fromId = utils.getId(r.from);
-    var from = this._getItem(fromId)
-    var toId = utils.getId(r.to);
-    var to = this._getItem(toId)
 
-    r[NONCE] = r[NONCE]  ||  this.getNonce()
-    r.time = r.time || new Date().getTime();
-    let document = this._getItem(utils.getId(r.document))
-    if (document._context)
-      r._context = document._context
+  onAddVerification(params) {
+    let r = params.r
+    let notOneClickVerification = params.notOneClickVerification
+    let to = params.to || [r.to]
+    let document = params.document || r.document
+    let dontSend = params.dontSend
+    let time = r && r.time || new Date().getTime()
+    let self = this
+    let fromId = utils.getId(r  &&  r.from || me)
+    let from = this._getItem(fromId)
+    let newVerification
+    let isReadOnly
+    let key
 
-    var toChain = {}
-    var sendParams
-    var toRootHash = toId.split('_')[1]
-    if (!dontSend) {
-      extend(toChain, r);
-      if (r[ROOT_HASH]) {
-        toChain[CUR_HASH] = r[ROOT_HASH]
-        r[CUR_HASH] = r[ROOT_HASH]
-      }
-      delete toChain.from
-      delete toChain.to
-      toChain.time = r.time
-      sendParams = this.packMessage(r, toChain)
-    }
-    var key = IDENTITY + '_' + toRootHash
+    let promise = (dontSend)
+                ? Q()
+                : meDriver.createObject({object: {
+                    [TYPE]: VERIFICATION,
+                    document: document,
+                    time: time
+                  }})
 
-    var promise = dontSend
-                 ? Q()
-                 :  meDriver.signAndSend(sendParams)
+    return promise
+    .then((result) => {
+       if (result) {
+         r = utils.clone(result.object)
+         r[ROOT_HASH] = result.permalink
+         r[CUR_HASH] = result.link
+         r.from = this.buildRef(me)
+         r.to = this.buildRef(this._getItem(to[0]))
+       }
+       newVerification = this.buildRef(r)
+
+      document = this._getItem(utils.getId(document))
+      let context = document._context
+      if (context)
+        r._context = context
+
+      var promise = dontSend
+                   ? Q()
+                   : sendMyVerificationTo(result.object, to, context)
+                 // meDriver.signAndSend(sendParams)
                     // meDriver.signAndSend({
                     //   object: toChain,
                     //   to: { fingerprint: this.getFingerprint(list[key].value) }
                     // })
-    let isReadOnly
-    if (r._context) {
-      let c = this._getItem(utils.getId(r._context));
-      isReadOnly = c  &&  c._readOnly
-    }
-    var newVerification
-    return promise
-    .then((data) => {
-      if (data) {
-        r[CUR_HASH] = data.object.link
-        r[ROOT_HASH] = data.object.permalink
-        // var roothash = data[0]._props[ROOT_HASH]
-        // r[ROOT_HASH] = roothash
-        // r[CUR_HASH] = data[0]._props[CUR_HASH]
-      }
+      return promise
+    })
+    .then(() => {
       key = utils.getId(r)
       if (from.organization)
         r.organization = from.organization;
       if (!r._sharedWith) {
         r._sharedWith = []
-        r._sharedWith.push(self.createSharedWith(utils.getId(r.from), r.time))
+        r._sharedWith.push(this.createSharedWith(utils.getId(r.from), r.time))
       }
+      var batch = [];
       batch.push({type: 'put', key: key, value: r});
-      newVerification = self.buildRef(r)
       let len = batch.length
+
+      if (r._context) {
+        let c = this._getItem(utils.getId(r._context));
+        isReadOnly = utils.isReadOnlyChat(c) //c  &&  c._readOnly
+      }
       if (!isReadOnly)
-        self.addLastMessage(r, batch)
+        this.addLastMessage(r, batch)
       return db.batch(batch)
     })
     .then(() => {
       var rr = {};
       // extend(rr, from);
       // rr.verifiedByMe = r;
-      self._setItem(key, r)
+      this._setItem(key, r)
       if (isReadOnly)
-        self.addMessagesToChat(utils.getId(r._context), r)
-      if (utils.getId(from) === utils.getId(me))
-        self.addMessagesToChat(utils.getId(r.to), r)
+        this.addMessagesToChat(utils.getId(r._context), r)
+      if (utils.getId(from) === utils.getId(me)) {
+        to.forEach((recipient) => {
+          this.addMessagesToChat(utils.getId(recipient), r)
+        })
+      }
       else
-        self.addMessagesToChat(from.organization ? utils.getId(from.organization) : fromId, r)
+        this.addMessagesToChat(from.organization ? utils.getId(from.organization) : fromId, r)
 
       if (notOneClickVerification)
-        self.trigger({action: 'addItem', resource: r});
+        this.trigger({action: 'addItem', resource: r});
       else
-        self.trigger({action: 'addVerification', resource: r});
+        this.trigger({action: 'addVerification', resource: r});
 
       var verificationRequestId = utils.getId(r.document);
-      var verificationRequest = self._getItem(verificationRequestId)
+      var verificationRequest = this._getItem(verificationRequestId)
       if (!verificationRequest.verifications)
         verificationRequest.verifications = [];
       if (!r.txId) {
-        verificationRequest.verifications.push(self.buildRef(newVerification));
+        verificationRequest.verifications.push(this.buildRef(newVerification));
       }
       else {
         for (var i=0; i<verificationRequest.verifications.length; i++) {
           if (utils.getId(verificationRequest.verifications).split('_')[1] === r[ROOT_HASH])
-            verificationRequest.verifications = self.buildRef(newVerification)
+            verificationRequest.verifications = this.buildRef(newVerification)
         }
       }
       // if (!verificationRequest._sharedWith)
@@ -1952,13 +1968,23 @@ var Store = Reflux.createStore({
       // verificationRequest._sharedWith.push(fromId)
       return db.put(verificationRequestId, verificationRequest);
     })
-    .then((data) => {
-      var d = data
-    })
     .catch((err) => {
       debugger
       err = err
     })
+    function sendMyVerificationTo(v, recipients, context) {
+      let defer = Q.defer()
+      let togo = to.length
+      recipients.forEach((to) => {
+        let sendParams = self.packMessage(v, me, to, context)
+        return meDriver.send(sendParams)
+        .then(() => {
+          if (--togo === 0)
+            defer.resolve()
+        })
+      })
+      return defer.promise
+    }
   },
   onGetTo(key) {
     this.onGetItem(key, 'getTo');
@@ -2147,14 +2173,14 @@ var Store = Reflux.createStore({
     var props = meta.properties;
 
     if (meta.id == VERIFICATION  ||  meta.subClassOf === VERIFICATION)
-      return this.onAddVerification(resource, true);
+      return this.onAddVerification({r: resource, notOneClickVerification: true});
 
     let isSelfIntroduction = meta[TYPE] === SELF_INTRODUCTION
     var isNew = !resource[ROOT_HASH];
 
     var checkPublish
     var isSwitchingToEmployeeMode = isNew ? false : self.isSwitchingToEmployeeMode(resource)
-    // Data were obtained by scanning QR code of the forms that were entered on Web
+    // Data were obtaipackmy scanning QR code of the forms that were entered on Web
     if (meta.id === GUEST_SESSION_PROOF || isSwitchingToEmployeeMode) {
       checkPublish = this.getDriver(me)
       .then(function () {
@@ -2467,7 +2493,8 @@ var Store = Reflux.createStore({
 
           var key = IDENTITY + '_' + to[ROOT_HASH]
 
-          let sendParams = self.packMessage(returnVal, toChain)
+          // let sendParams = self.packMessage(returnVal, toChain)
+          let sendParams = self.packMessage(toChain, returnVal.from, returnVal.to, returnVal._context)
 
           return meDriver.signAndSend(sendParams)
           // return meDriver.signAndSend({
@@ -3072,7 +3099,6 @@ var Store = Reflux.createStore({
     })
     this.trigger({action: 'listSharedWith', list: result, sharedWith: shareWithMapping})
   },
-
   _searchNotMessages(params) {
     return this._loadedResourcesDefer.promise
     .then(() => {
@@ -3276,13 +3302,19 @@ var Store = Reflux.createStore({
         return this.searchMessages(params)
       })
   },
+  _searchMessages(params) {
+    return this._loadedResourcesDefer.promise
+      .then(() => {
+        return this.searchMessages(params)
+      })
+  },
   searchMessages(params) {
     var query = params.query;
     var modelName = params.modelName;
     var meta = this.getModel(modelName).value;
     var prop = params.prop;
     var context = params.context
-    var _readOnly = params._readOnly  ||  (context  &&  context._readOnly)
+    var _readOnly = params._readOnly  || (context  && utils.isReadOnlyChat(context)) //(context  &&  context._readOnly)
 
     if (typeof prop === 'string')
       prop = meta[prop];
@@ -3576,7 +3608,7 @@ var Store = Reflux.createStore({
     if (!foundResources.length)
       return
     if (params._readOnly)
-      foundResources = foundResources.filter((r) => r._readOnly)
+      foundResources = foundResources.filter((r) => utils.isReadOnlyChat(r)) //r._readOnly)
     return foundResources.reverse()
   },
   doFilterOut(r, toId) {
@@ -5014,6 +5046,8 @@ var Store = Reflux.createStore({
     //   return
     var toId = PROFILE + '_' + obj.to[ROOT_HASH]
     var to = this._getItem(toId)
+    var meId = utils.getId(me)
+    // HACK for showing verification in employee's chat
 
     var meId = utils.getId(me)
     // HACK for showing verification in employee's chat
@@ -5038,6 +5072,15 @@ var Store = Reflux.createStore({
     //   val._verifiedBy = from.organization
     //   fromProfile = this._getItem(utils.getId(val.document)).from
     //   from = this._getItem(fromProfile)
+    // }
+
+    // if (val[TYPE] === VERIFICATION  && me.isEmployee  &&  meId === toId) {
+    //   let document = this._getItem(val.document)
+    //   if (utils.getId(document.from) === meId) {
+    //     val._verifiedBy = from.organization
+    //     fromProfile = document.from
+    //     from = this._getItem(fromProfile)
+    //   }
     // }
 
     var fOrg = (me  &&  from[ROOT_HASH] === me[ROOT_HASH]) ? to.organization : from.organization
@@ -5082,7 +5125,7 @@ var Store = Reflux.createStore({
       // props that are convenient for displaying in shared context
       val.from.organization = this._getItem(utils.getId(val.from)).organization
       val.to.organization = this._getItem(utils.getId(val.to)).organization
-      val._readOnly = true
+      // val._readOnly = true
     }
     if (obj.object.context  &&  val[TYPE] !== PRODUCT_APPLICATION) {
       // if (!val._contexts)
@@ -5165,7 +5208,7 @@ var Store = Reflux.createStore({
     var model = this.getModel(type)  &&  this.getModel(type).value
     let isVerification = type === VERIFICATION  || (model  && model.subClassOf === VERIFICATION)
     if (isVerification) {
-      this.onAddVerification(val, false, true)
+      this.onAddVerification({r: val, notOneClickVerification: false, dontSend: true})
       // if (!val.txId) {
       //   var o = {}
       //   extend(o, obj)
@@ -5204,7 +5247,7 @@ var Store = Reflux.createStore({
           this.addMessagesToChat(utils.getId(val), val)
         else if (val._context) {
           let context = this._getItem(utils.getId(val._context))
-          if (val._context  &&  context._readOnly)
+          if (val._context  &&  utils.isReadOnlyChat(val)) // context._readOnly)
             this.addMessagesToChat(utils.getId(context), val)
         }
       }
@@ -5385,16 +5428,17 @@ var Store = Reflux.createStore({
       utils.setModels(models);
     })
     .then(() => {
-      if (me  &&  utils.isEmpty(chatMessages))
+      if (me  &&  utils.isEmpty(chatMessages)) {
+        utils.setMe(me)
         this.initChats()
+      }
       if (SERVICE_PROVIDERS)
         SERVICE_PROVIDERS.forEach((p) => this._getItem(p.org)._online = true)
-
       else {
-        let orgs = this.searchNotMessages({modelName: ORGANIZATION})
+        let orgs = self.searchNotMessages({modelName: ORGANIZATION})
         if (orgs)
           orgs.forEach((org) => {
-            this._getItem(utils.getId(org))._online = false
+            self._getItem(utils.getId(org))._online = false
           })
       }
       this._loadedResourcesDefer.resolve()
@@ -8072,3 +8116,190 @@ function getProviderUrl (provider) {
   //     .digest()
   //     .slice(0, 20)
   // },
+/*
+  onAddVerification(r, notOneClickVerification, dontSend) {
+    var self = this;
+    var batch = [];
+    var key;
+    var fromId = utils.getId(r.from);
+    var from = this._getItem(fromId)
+    var toId = utils.getId(r.to);
+    var to = this._getItem(toId)
+
+    r[NONCE] = r[NONCE]  ||  this.getNonce()
+    r.time = r.time || new Date().getTime();
+    let document = this._getItem(utils.getId(r.document))
+    if (document._context)
+      r._context = document._context
+
+    var toChain = {}
+    var sendParams
+    var toRootHash = toId.split('_')[1]
+    if (!dontSend) {
+      extend(toChain, r);
+      if (r[ROOT_HASH]) {
+        toChain[CUR_HASH] = r[ROOT_HASH]
+        r[CUR_HASH] = r[ROOT_HASH]
+      }
+      delete toChain.from
+      delete toChain.to
+      toChain.time = r.time
+      sendParams = this.packMessage(r, toChain)
+    }
+    var key = IDENTITY + '_' + toRootHash
+
+    var promise = dontSend
+                 ? Q()
+                 :  meDriver.signAndSend(sendParams)
+                    // meDriver.signAndSend({
+                    //   object: toChain,
+                    //   to: { fingerprint: this.getFingerprint(list[key].value) }
+                    // })
+    let isReadOnly
+    if (r._context) {
+      let c = this._getItem(utils.getId(r._context));
+      isReadOnly = c  &&  c._readOnly
+    }
+    var newVerification
+    return promise
+    .then((data) => {
+      if (data) {
+        r[CUR_HASH] = data.object.link
+        r[ROOT_HASH] = data.object.permalink
+        // var roothash = data[0]._props[ROOT_HASH]
+        // r[ROOT_HASH] = roothash
+        // r[CUR_HASH] = data[0]._props[CUR_HASH]
+      }
+      key = utils.getId(r)
+      if (from.organization)
+        r.organization = from.organization;
+      if (!r._sharedWith) {
+        r._sharedWith = []
+        r._sharedWith.push(self.createSharedWith(utils.getId(r.from), r.time))
+      }
+      batch.push({type: 'put', key: key, value: r});
+      newVerification = self.buildRef(r)
+      let len = batch.length
+      if (!isReadOnly)
+        self.addLastMessage(r, batch)
+      return db.batch(batch)
+    })
+    .then(() => {
+      var rr = {};
+      // extend(rr, from);
+      // rr.verifiedByMe = r;
+      self._setItem(key, r)
+      if (isReadOnly)
+        self.addMessagesToChat(utils.getId(r._context), r)
+      if (utils.getId(from) === utils.getId(me))
+        self.addMessagesToChat(utils.getId(r.to), r)
+      else
+        self.addMessagesToChat(from.organization ? utils.getId(from.organization) : fromId, r)
+
+      if (notOneClickVerification)
+        self.trigger({action: 'addItem', resource: r});
+      else
+        self.trigger({action: 'addVerification', resource: r});
+
+      var verificationRequestId = utils.getId(r.document);
+      var verificationRequest = self._getItem(verificationRequestId)
+      if (!verificationRequest.verifications)
+        verificationRequest.verifications = [];
+      if (!r.txId) {
+        verificationRequest.verifications.push(self.buildRef(newVerification));
+      }
+      else {
+        for (var i=0; i<verificationRequest.verifications.length; i++) {
+          if (utils.getId(verificationRequest.verifications).split('_')[1] === r[ROOT_HASH])
+            verificationRequest.verifications = self.buildRef(newVerification)
+        }
+      }
+      // if (!verificationRequest._sharedWith)
+      //   verificationRequest._sharedWith = []
+      // verificationRequest._sharedWith.push(fromId)
+      return db.put(verificationRequestId, verificationRequest);
+    })
+    .then((data) => {
+      var d = data
+    })
+    .catch((err) => {
+      debugger
+      err = err
+    })
+  },
+  // packMessage(r, toChain) {
+    // var sendParams = {
+    //   object: toChain
+    // }
+    // let to = this._getItem(utils.getId(r.to))
+    // let provider, hash
+    // if (to[ROOT_HASH] === me[ROOT_HASH]) {
+    //   provider = this._getItem(r.from)
+    //   hash = provider[ROOT_HASH]
+    // }
+    // else
+    //   provider = to
+    // hash = provider[ROOT_HASH]
+
+    // // if (!hash)
+    // //   hash = provider[ROOT_HASH]
+
+    // var isEmployee
+    // if (me.organization) {
+    //   isEmployee = utils.isEmployee(to)
+    //   // See if the sender is in a process of verifying some form in shared context chat
+    //   if (!isEmployee  &&  r._context)
+    //     isEmployee = utils.isReadOnlyChat(this._getItem(r._context))
+    // }
+    // // if (me.isEmployee)
+    // //   isEmployee = (!to.organization ||  utils.getId(to.organization) === utils.getId(me.organization))
+
+    // // let isEmployee = me.isEmployee && (!r.to.organization || utils.getId(r.to.organization) === utils.getId(me.organization))
+    // if (isEmployee) {
+    //   let arr
+    //   if (SERVICE_PROVIDERS)
+    //     arr = SERVICE_PROVIDERS.filter((sp) => {
+    //       let reps = this.getRepresentatives(sp.org)
+    //       let talkingToBot = reps.forEach((r) => {
+    //         return r[ROOT_HASH] === hash ? true : false
+    //       })
+    //       return talkingToBot  &&  talkingToBot.length ? true : false
+    //     })
+    //   else  {
+    //     if (!to.bot)
+    //       arr = [to]
+    //   }
+    //   if (!arr  ||  !arr.length) {
+    //     var toRootHash = hash
+
+    //     sendParams.other = {
+    //       forward: toRootHash
+    //     }
+    //     let rep = this.getRepresentative(utils.getId(me.organization))
+
+    //     sendParams.to = { permalink: rep[ROOT_HASH] }
+    //   }
+    // }
+    // if (r._context) {
+    //   if (!sendParams.other)
+    //     sendParams.other = {}
+    //   let cId = utils.getId(r._context)
+    //   sendParams.other.context = cId.split('_')[1]
+    //   if (r[TYPE] !== PRODUCT_APPLICATION) {
+    //     let c = this._getItem(cId)
+    //     // will be null for PRODUCT_APPLICATION itself
+    //     if (c) {
+    //       c.lastMessageTime = new Date().getTime()
+    //       c.formsCount = c.formsCount ? ++c.formsCount : 1
+    //       db.put(cId, c)
+    //     }
+    //   }
+    // }
+    // if (!sendParams.to) {
+    //   var toId = IDENTITY + '_' + hash
+    //   sendParams.to = { permalink: hash }
+    // }
+    // return sendParams
+  // },
+
+*/

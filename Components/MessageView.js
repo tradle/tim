@@ -62,7 +62,7 @@ class MessageView extends Component {
     this.listenTo(Store, 'onAction');
   }
   onAction(params) {
-    if (params.action === 'addVerification' ||  params.action === 'addAdditionalInfo') {
+    if (params.action === 'addVerification') {
       var currentRoutes = this.props.navigator.getCurrentRoutes();
       var len = currentRoutes.length;
       if (currentRoutes[len - 1].id === 5)
@@ -166,7 +166,6 @@ class MessageView extends Component {
     var actionPanel =
           <ShowMessageRefList resource={resource}
                               navigator={this.props.navigator}
-                              additionalInfo={this.additionalInfo.bind(this)}
                               currency={this.props.currency}
                               bankStyle={this.props.bankStyle} />
         // <FromToView resource={resource} navigator={this.props.navigator} />
@@ -217,7 +216,7 @@ class MessageView extends Component {
                                 bankStyle={this.props.bankStyle}
                                 errorProps={this.state.errorProps}
                                 currency={this.props.currency}
-                                checkProperties={this.props.isVerifier ? this.onCheck.bind(this) : null}
+                                checkProperties={this.props.isVerifier  && !utils.isReadOnlyChat(resource) ? this.onCheck.bind(this) : null}
                                 excludedProperties={['tradle.Message.message', 'time', 'photos']}
                                 showRefResource={this.getRefResource.bind(this)}/>
             {separator}
@@ -237,67 +236,55 @@ class MessageView extends Component {
     });
   }
 
-  additionalInfo(resource, prop, msg) {
-    var rmodel = utils.getModel(resource[constants.TYPE]).value;
-    msg = msg.length ? msg : 'Please submit more info';
-    var r = {
-      _t: prop.items.ref,
-      from: utils.getMe(),
-      to: resource.from,
-      time: new Date().getTime(),
-      message: msg
-    };
-    r[prop.items.backlink] = {
-      id: utils.getId(resource),
-      title: utils.getDisplayName(resource, rmodel.properties)
-    }
-    Actions.addVerification(r);
-  }
-
   verify() {
     var resource = this.props.resource;
     var model = utils.getModel(resource[constants.TYPE]).value;
     // this.props.navigator.pop();
     var me = utils.getMe();
     var from = this.props.resource.from;
-    var verificationModel = constants.TYPES.VERIFICATION // model.properties.verifications.items.ref;
-    var verification = {
-      document: {
-        id: utils.getId(resource),
-        title: resource.message ? resource.message : model.title
-      },
-      to: {
-        id: from.id,
-        title: from.title
-      },
-      from: {
-        id: utils.getId(me),
-        title: utils.getDisplayName(me, utils.getModel(me[constants.TYPE]).value.properties)
-      },
-      time: new Date().getTime()
+    // var verificationModel = model.properties.verifications.items.ref;
+    let document = {
+      id: utils.getId(resource),
+      title: resource.message ? resource.message : model.title
     }
-    verification[constants.TYPE] = verificationModel;
-
-    if (verificationModel === constants.TYPES.VERIFICATION)
-      Actions.addVerification(verification);
-    else {
-      this.props.navigator.replace({
-        title: resource.message,
-        id: 4,
-        component: NewResource,
-        backButtonTitle: resource.firstName,
-        rightButtonTitle: 'Done',
-        titleTextColor: '#7AAAC3',
-        passProps: {
-          model: utils.getModel(verificationModel).value,
-          resource: verification,
-          // callback: this.createVerification.bind(self)
-        }
-      });
+    // var verification = {
+    //   [constants.TYPE]: constants.TYPES.VERIFICATION,
+    //   document: document
+    //   time: new Date().getTime()
+    // }
+    var to = [utils.getId(from)]
+    if (utils.isReadOnlyChat(resource)) {
+      // var to = this.props.resource.to
+      // verification = {
+      //   [constants.TYPE]: constants.TYPES.VERIFICATION,
+      //   document: {
+      //     id: utils.getId(resource),
+      //     title: resource.message ? resource.message : model.title
+      //   }
+      // }
+      to.push(utils.getId(this.props.resource.to))
     }
-  }
-  createVerification(resource) {
-    Actions.addVerification(resource, true);
+    let params = {to: to, document: document}
+    if (this.props.resource._context)
+      params.context = this.props.resource._context
+    Actions.addVerification(params)
+    // verification[constants.TYPE] = verificationModel;
+    // if (verificationModel === constants.TYPES.VERIFICATION)
+    // else {
+    //   this.props.navigator.replace({
+    //     title: resource.message,
+    //     id: 4,
+    //     component: NewResource,
+    //     backButtonTitle: resource.firstName,
+    //     rightButtonTitle: 'Done',
+    //     titleTextColor: '#7AAAC3',
+    //     passProps: {
+    //       model: utils.getModel(verificationModel).value,
+    //       resource: verification,
+    //       // callback: this.createVerification.bind(self)
+    //     }
+    //   });
+    // }
   }
 }
 reactMixin(MessageView.prototype, Reflux.ListenerMixin);
@@ -385,4 +372,24 @@ module.exports = MessageView;
   //       // },
   //     }
   //   })
+  // }
+  // additionalInfo(resource, prop, msg) {
+  //   var rmodel = utils.getModel(resource[constants.TYPE]).value;
+  //   msg = msg.length ? msg : 'Please submit more info';
+  //   var r = {
+  //     _t: prop.items.ref,
+  //     from: utils.getMe(),
+  //     // to: resource.from,
+  //     // time: new Date().getTime(),
+  //     message: msg
+  //   };
+  //   r[prop.items.backlink] = {
+  //     id: utils.getId(resource),
+  //     title: utils.getDisplayName(resource, rmodel.properties)
+  //   }
+  //   Actions.addVerification({r: r, to: [utils.getId(resource.from)]});
+  // }
+
+  // createVerification(resource) {
+  //   Actions.addVerification(resource, true);
   // }
