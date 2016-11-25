@@ -213,7 +213,7 @@ class MessageView extends Component {
                                 bankStyle={this.props.bankStyle}
                                 errorProps={this.state.errorProps}
                                 currency={this.props.currency}
-                                checkProperties={this.props.isVerifier  && !utils.isReadOnlyChat(resource) ? this.onCheck.bind(this) : null}
+                                checkProperties={this.props.isVerifier ? this.onCheck.bind(this) : null}
                                 excludedProperties={['tradle.Message.message', 'time', 'photos']}
                                 showRefResource={this.getRefResource.bind(this)}/>
             {separator}
