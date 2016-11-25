@@ -79,7 +79,7 @@ class MessageView extends Component {
     let model = utils.getModel(resource[constants.TYPE]).value
     if (utils.isEmpty(this.state.errorProps)) {
       Alert.alert(
-        'Verify ' + utils.getDisplayName(resource, model.properties),
+        translate('verifyPrompt'), // + utils.getDisplayName(resource),
         null,
         [
           {text: 'Cancel', onPress: () => console.log('Canceled!')},
