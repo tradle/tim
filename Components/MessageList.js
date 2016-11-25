@@ -240,6 +240,7 @@ class MessageList extends Component {
           list: list,
           noScroll: true,
           allLoaded: allLoaded,
+          context: params.context,
           productToForms: productToForms,
           loadEarlierMessages: !allLoaded
         })
@@ -533,7 +534,7 @@ class MessageList extends Component {
       var maxHeight = h - (Platform.OS === 'android' ? 77 : 64)
       if (!this.state.isConnected || (resource[constants.TYPE] === constants.TYPES.ORGANIZATION  &&  !resource._online))
         maxHeight -=  35
-      if (this.state.context)
+      if (this.state.context ||  this.props.resource[constants.TYPE] === PRODUCT_APPLICATION)
         maxHeight -= 45
       if (hideTextInput)
         maxHeight -= 10
@@ -605,10 +606,13 @@ class MessageList extends Component {
       // ]}
     let me = utils.getMe()
     let actionSheet = this.renderActionSheet()
+    let context = this.state.context
+    if (!context  &&  this.props.resource[constants.TYPE] === PRODUCT_APPLICATION)
+      context = this.props.resource
     return (
       <PageView style={[platformStyles.container, bgStyle]}>
         <NetworkInfoProvider connected={this.state.isConnected} resource={resource} online={this.state.onlineStatus} />
-        <ChatContext chat={resource} context={this.state.context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={this.props.bankStyle} allContexts={this.state.allContexts} />
+        <ChatContext chat={resource} context={context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={this.props.bankStyle} allContexts={this.state.allContexts} />
         <View style={ sepStyle } />
         {content}
         {actionSheet}
