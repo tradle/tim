@@ -2713,43 +2713,6 @@ var Store = Reflux.createStore({
     //   debugger
     // })
   },
-  onShare1(resource, shareWithList, originatingResource) {
-    if (resource[TYPE] === PRODUCT_APPLICATION) {
-      let list = shareWithList.map((id) => {
-        let rep = this.getRepresentative(id)
-        return this.buildRef(rep)
-      })
-
-      let msg = {
-        [TYPE]: 'tradle.ShareContext',
-        context: this.buildRef(resource),
-        with: list
-      }
-      let rep = this.getRepresentative(utils.getId(originatingResource))
-
-      let sendParams = {
-        object: msg,
-        to: {fingerprint: this.getFingerprint(this._getItem(IDENTITY + '_' + rep[ROOT_HASH]))},
-      }
-
-      return meDriver.signAndSend(sendParams)
-    }
-    // if (resource[TYPE] === VERIFICATION) {
-    //   if (!Array.isArray(shareWithList))
-    //     sharedWithList = [sharedWithList]
-    this.shareAll(resource.document, shareWithList, originatingResource)
-    //   return
-    // }
-
-    // let promisses = []
-    // shareWithList.forEach((r) => {
-    //   promisses.push(this.onShareOne(resource, this._getItem(r)))
-    // })
-    // Q.all(promisses)
-    // .then((results) => {
-    //   debugger
-    // })
-  },
   shareAll(document, to, formResource) {
     var documentCreated = formResource.documentCreated
     var key = utils.getId(formResource)
