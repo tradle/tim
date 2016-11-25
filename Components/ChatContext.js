@@ -33,8 +33,8 @@ class ChatContext extends Component {
 
     let bar = this.props.allContexts ? styles.barAll : styles.barOne
     let chooser =  <TouchableOpacity onPress={this.props.contextChooser} style={{flex: 1, padding: 10}}>
-                      <Text style={[this.props.allContexts ? styles.textAll : styles.textOne, styles.text]}>{translate(utils.getModel(this.props.context.product).value)}</Text>
-                    </TouchableOpacity>
+                     <Text style={[this.props.allContexts ? styles.textAll : styles.textOne, styles.text]}>{translate(utils.getModel(this.props.context.product).value)}</Text>
+                   </TouchableOpacity>
     // HACK: if me is employee no sharing for now
 
 
