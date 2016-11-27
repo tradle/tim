@@ -96,7 +96,7 @@ class MessageRow extends Component {
 
     var noMessage = !message  ||  !message.length;
     var isSimpleMessage = resource[constants.TYPE] === constants.TYPES.SIMPLE_MESSAGE
-
+    var isFormRequest = model.id === FORM_REQUEST
     var isForgetting = model.id === constants.TYPES.FORGET_ME || model.id === constants.TYPES.FORGOT_YOU
     if (!renderedRow.length) {
       var vCols = noMessage ? null : utils.getDisplayName(resource, model.properties);
@@ -106,7 +106,7 @@ class MessageRow extends Component {
     else {
       var fromHash = resource.from.id;
       if (isMyMessage) {
-        if (model.id === FORM_REQUEST)
+        if (isFormRequest)
           addStyle = [styles.myCell, {backgroundColor: '#F1FFE7', borderColor: '#D7DACA', borderWidth: 1}]
         else if (!noMessage)
           addStyle = styles.myCell
@@ -202,7 +202,7 @@ class MessageRow extends Component {
     let msgWidth = Math.floor(w * 0.8)
     let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
 
-    let longMessage = isSimpleMessage  &&  message ? numberOfCharsInWidth < message.length : false
+    let longMessage = (isSimpleMessage || isFormRequest)  &&  message ? numberOfCharsInWidth < message.length : false
     if (showMessageBody) {
       var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
       if (message) {

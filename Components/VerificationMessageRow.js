@@ -53,7 +53,7 @@ class VerificationMessageRow extends Component {
 
     var isMyMessage = this.isMyMessage();
     var w = utils.dimensions(VerificationMessageRow).width
-    let msgWidth = Math.floor((w - 300) * 0.8)
+    let msgWidth = Math.floor(w * 0.7)
     var viewStyle = {width: msgWidth, flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
 
     var msgModel = utils.getModel(resource.document[constants.TYPE]).value;
