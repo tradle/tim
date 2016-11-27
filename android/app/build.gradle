@@ -107,12 +107,12 @@ def enableProguardInReleaseBuilds = false
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.3"
+    buildToolsVersion "23.0.1"
 
     defaultConfig {
         applicationId "io.tradle.dev"
         minSdkVersion 16
-        targetSdkVersion 24
+        targetSdkVersion 22
         versionCode 2
         versionName "1.0.3"
         ndk {
@@ -160,13 +160,6 @@ android {
             }
         }
     }
-
-    lintOptions {
-        // okio-1.6.0 will cause an error like
-        // "Invalid package reference in library; not included in Android: java.nio.file. Referenced from okio.Okio."
-        // (See also: https://github.com/square/okio/issues/58 )
-        ignore 'InvalidPackage'
-    }
 }
 
 dependencies {
@@ -180,7 +173,7 @@ dependencies {
     compile project(':react-native-udp')
     compile project(':react-native-randombytes')
     compile project(':react-native-push-notification')
-    compile ('com.google.android.gms:play-services-gcm:9.8.0') {
+    compile ('com.google.android.gms:play-services-gcm:9.2.1') {
         force = true;
     }
     compile project(':react-native-localization')
@@ -192,7 +185,7 @@ dependencies {
     compile project(':react-native-code-push')
     compile project(':react-native-camera')
     compile fileTree(dir: "libs", include: ["*.jar"])
-    compile "com.android.support:appcompat-v7:25.0.1"
+    compile "com.android.support:appcompat-v7:23.0.1"
     compile "com.facebook.react:react-native:+"  // From node_modules
 }
 
