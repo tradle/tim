@@ -35,7 +35,7 @@ function alert (title, message, buttons) {
     callback = noop
   }
 
-  if (!(buttons && buttons.length)) {
+  if (!buttons) {
     buttons = [{ text: 'OK', onPress: noop }]
   }
 
