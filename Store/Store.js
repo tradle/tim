@@ -2673,7 +2673,10 @@ var Store = Reflux.createStore({
 
       let sendParams = {
         object: msg,
-        to: {permalink: permalink}
+        to: {permalink: permalink},
+        other: {
+          context: resource[ROOT_HASH]
+        }
       }
       // let sendParams = {
       //   object: msg,
