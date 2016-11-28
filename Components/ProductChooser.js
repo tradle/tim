@@ -23,7 +23,7 @@ import {
   Platform
 } from 'react-native'
 
-const SearchBar = Platform.OS === 'android' ? null : require('react-native-search-bar')
+const SearchBar = Platform.OS !== 'ios' ? null : require('react-native-search-bar')
 import React, { Component } from 'react'
 
 class ProductChooser extends Component {

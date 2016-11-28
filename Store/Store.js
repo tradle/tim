@@ -1450,7 +1450,6 @@ var Store = Reflux.createStore({
       });
     })
   },
-
   onAddMessage(r, isWelcome, requestForForm) {
     var self = this
     let m = this.getModel(r[TYPE]).value
@@ -1460,9 +1459,9 @@ var Store = Reflux.createStore({
     var toOrg
     // r.to could be a reference to a resource
     var to = this._getItem(r.to)
-    var isReadOnlyContext
     // if (!r.to[TYPE])
     //   r.to = this._getItem(r.to)
+    let isReadOnlyContext
     if (to[TYPE] === ORGANIZATION) {
       var orgId = utils.getId(r.to)
       var orgRep = this.getRepresentative(orgId)
@@ -1479,6 +1478,7 @@ var Store = Reflux.createStore({
     }
     else
       isReadOnlyContext = to[TYPE]  === PRODUCT_APPLICATION  &&  utils.isReadOnlyChat(to)
+
     let isSelfIntroduction = r[TYPE] === SELF_INTRODUCTION
 
     var rr = {};
@@ -1643,8 +1643,8 @@ var Store = Reflux.createStore({
       }
       if (error)
         params.error = error
-
-      self.trigger(params);
+      if (!isReadOnlyContext)
+        self.trigger(params)
       if (batch.length  &&  !error  &&  (isReadOnlyContext || self._getItem(toId).pubkeys))
         return self.getDriver(me)
     })
@@ -1653,8 +1653,7 @@ var Store = Reflux.createStore({
       if (noCustomerWaiting)
         return
       if (isReadOnlyContext)
-        return self.sendMessageToContextOwners(toChain, [r.from, r.to], r._context)
-
+        return self.sendMessageToContextOwners(toChain, [r._context.from, r._context.to], r._context)
       if (self._getItem(toId).pubkeys) {
         // let sendParams = self.packMessage(r, toChain)
         let sendParams = self.packMessage(toChain, r.from, r.to, r._context)
@@ -1669,6 +1668,8 @@ var Store = Reflux.createStore({
       if (!requestForForm  &&  isWelcome)
         return
       if (isWelcome  &&  utils.isEmpty(welcomeMessage))
+        return
+      if (isReadOnlyContext)
         return
       // cleanup temporary resources from the chat message references and from the in-memory storage - 'list'
       if (!toOrg)
@@ -1998,6 +1999,7 @@ var Store = Reflux.createStore({
       err = err
     })
   },
+
   sendMessageToContextOwners(v, recipients, context) {
     let defer = Q.defer()
     let togo = recipients.length
@@ -2711,9 +2713,8 @@ var Store = Reflux.createStore({
         to: {permalink: permalink},
         other: {
           context: resource[ROOT_HASH]
-        }
+        }      // let sendParams = {
       }
-      // let sendParams = {
       //   object: msg,
       //   to: {fingerprint: this.getFingerprint(this._getItem(IDENTITY + '_' + rep[ROOT_HASH]))},
       // }
@@ -3024,21 +3025,36 @@ var Store = Reflux.createStore({
         }
         let orgId
         if (params.to) {
-          if (params.to.organization)
-            orgId = utils.getId(params.to.organization)
-          else {
-            if (params.to[TYPE] === ORGANIZATION)
-              orgId = utils.getId(params.to)
+          if (params.to[TYPE] === PRODUCT_APPLICATION  &&  utils.isReadOnlyChat(params.to)) {
+            if (!params.context)
+              params.context = params.to
+            result.forEach((r) => {
+              let from = this._getItem(r.from)
+              if (from.organization) {
+                let o = this._getItem(from.organization)
+                if (o.photos)
+                  r.from.photo = o.photos[0]
+              }
+            })
           }
-          if (orgId) {
-            let rep = this.getRepresentative(orgId)
-            if (rep  &&  !rep.bot)
-              retParams.isEmployee = true
+          else {
+            if (params.to.organization)
+              orgId = utils.getId(params.to.organization)
+            else {
+              if (params.to[TYPE] === ORGANIZATION)
+                orgId = utils.getId(params.to)
+            }
+            if (orgId) {
+              let rep = this.getRepresentative(orgId)
+              if (rep  &&  !rep.bot)
+                retParams.isEmployee = true
+            }
           }
         }
+
         if (params.context)
           retParams.context = params.context
-        else {
+        else if (params.modelName !== PRODUCT_APPLICATION) {
           let c = this.searchMessages({modelName: PRODUCT_APPLICATION, to: params.to})
           if (c  &&  c.length) {
             let meId = utils.getId(me)
@@ -3076,6 +3092,16 @@ var Store = Reflux.createStore({
               //   retParams.context = c[c.length - 1]
             }
           }
+        }
+        else if (params._readOnly) {
+          result.forEach((r) => {
+            let to = this._getItem(r.to)
+            if (to.organization) {
+              let o = this._getItem(to.organization)
+              if (o.photos)
+                r.to.photo = o.photos[0]
+            }
+          })
         }
   /*
         // Filter out forms that were shared, leave only verifications

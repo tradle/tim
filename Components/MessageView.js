@@ -132,6 +132,20 @@ class MessageView extends Component {
       message: text || translate('pleaseCorrectTheErrors')
     }
     Actions.addMessage(formError)
+    if (utils.isReadOnlyChat(resource)) {
+      // var to = this.props.resource.to
+      // verification = {
+      //   [constants.TYPE]: constants.TYPES.VERIFICATION,
+      //   document: {
+      //     id: utils.getId(resource),
+      //     title: resource.message ? resource.message : model.title
+      //   }
+      // }
+      let formError1 = utils.clone(formError)
+      formError1.to = this.props.resource.to
+      Actions.addMessage(formError1)
+    }
+
     this.props.navigator.pop()
   }
   onCheck(prop, message) {
@@ -215,7 +229,7 @@ class MessageView extends Component {
                                 bankStyle={this.props.bankStyle}
                                 errorProps={this.state.errorProps}
                                 currency={this.props.currency}
-                                checkProperties={this.props.isVerifier  && !utils.isReadOnlyChat(resource) ? this.onCheck.bind(this) : null}
+                                checkProperties={this.props.isVerifier /* && !utils.isReadOnlyChat(resource)*/ ? this.onCheck.bind(this) : null}
                                 excludedProperties={['tradle.Message.message', 'time', 'photos']}
                                 showRefResource={this.getRefResource.bind(this)}/>
             {separator}

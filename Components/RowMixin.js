@@ -93,7 +93,7 @@ var RowMixin = {
       let isMyMessage = this.isMyMessage()
       if (!this.props.isAggregation  &&  (isMyMessage || isForm) &&  !isMyProduct)
         style = [style, {borderWidth: BORDER_WIDTH, paddingVertical: 3, borderColor: isMyMessage ? STRUCTURED_MESSAGE_COLOR : '#ffffff', borderBottomColor: isMyMessage ? this.props.bankStyle.STRUCTURED_MESSAGE_BORDER : '#eeeeee'}]
-      let color = this.isMyMessage() && !isMyProduct ? {color: '#FFFFEE'} : {color: '#757575'}
+      let color = isMyMessage && !isMyProduct ? {color: '#FFFFEE'} : {color: '#757575'}
       return (
         <View style={style} key={this.getNextKey()}>
           <View style={styles.column}>
@@ -109,13 +109,19 @@ var RowMixin = {
   },
   getOwnerPhoto(isMyMessage) {
     var to = this.props.to;
-
-    if (isMyMessage  || !to /* ||  !to.photos*/)
+    let isProductApplication = to[constants.TYPE]  === PRODUCT_APPLICATION
+    if (!isProductApplication && (isMyMessage  || !to /* ||  !to.photos*/))
       return <View style={{marginVertical: 0}}/>
 
-    if (!isMyMessage   &&  this.props.resource.from.photo) {
+    if (!isMyMessage  &&  this.props.resource.from.photo) {
       let uri = utils.getImageUri(this.props.resource.from.photo.url)
-      return <Image source={{uri: uri}} style={styles.employeeImage} />
+      let photo = <Image source={{uri: uri}} style={styles.employeeImage} />
+      return photo
+      // return isProductApplication
+      //      ? <TouchableHighlight underlayColor='transparent' onPress={this.props.switchChat.bind(this)}>
+      //          {photo}
+      //        </TouchableHighlight>
+      //      : photo
     }
     if (to.photos) {
       var uri = utils.getImageUri(to.photos[0].url);
