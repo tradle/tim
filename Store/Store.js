@@ -576,6 +576,26 @@ var Store = Reflux.createStore({
           this.addMessagesToChat(cId, r, true)
           continue
         }
+        else {
+          // Check if the message was sent by the party that is not one of the 2 original parties of the context
+          let meId = utils.getId(me)
+          let fromId = utils.getId(r.from)
+          let toId = utils.getId(r.to)
+
+          let chkId = (toId === meId) ? fromId : toId
+
+          let cTo = utils.getId(c.to)
+          let cFrom = utils.getId(c.from)
+          if (chkId !== cTo  &&  chkId !== cFrom) {
+            let chatId = utils.getId(cTo === meId ? cFrom : cTo)
+            let chat = this._getItem(chatId)
+            if (chat.organization  &&  cFrom === meId)
+              this.addMessagesToChat(utils.getId(chat.organization), r, true)
+            else
+              this.addMessagesToChat(chatId, r, true)
+            continue
+          }
+        }
         if (chatMessages[cId])
           this.addMessagesToChat(cId, r, true)
       }
@@ -1444,7 +1464,6 @@ var Store = Reflux.createStore({
       });
     })
   },
-
   onAddMessage(r, isWelcome, requestForForm) {
     var self = this
     let m = this.getModel(r[TYPE]).value
@@ -1456,6 +1475,7 @@ var Store = Reflux.createStore({
     var to = this._getItem(r.to)
     // if (!r.to[TYPE])
     //   r.to = this._getItem(r.to)
+    let isReadOnlyContext
     if (to[TYPE] === ORGANIZATION) {
       var orgId = utils.getId(r.to)
       var orgRep = this.getRepresentative(orgId)
@@ -1470,6 +1490,8 @@ var Store = Reflux.createStore({
       toOrg = r.to
       r.to = orgRep
     }
+    else
+      isReadOnlyContext = to[TYPE]  === PRODUCT_APPLICATION  &&  utils.isReadOnlyChat(to)
 
     let isSelfIntroduction = r[TYPE] === SELF_INTRODUCTION
 
@@ -1635,15 +1657,17 @@ var Store = Reflux.createStore({
       }
       if (error)
         params.error = error
-
-      self.trigger(params);
-      if (batch.length  &&  !error  &&  self._getItem(toId).pubkeys)
+      if (!isReadOnlyContext)
+        self.trigger(params)
+      if (batch.length  &&  !error  &&  (isReadOnlyContext || self._getItem(toId).pubkeys))
         return self.getDriver(me)
     })
     .then(function() {
       // SelfIntroduction or IdentityPublishRequest were just sent
       if (noCustomerWaiting)
         return
+      if (isReadOnlyContext)
+        return self.sendMessageToContextOwners(toChain, [r._context.from, r._context.to], r._context)
       if (self._getItem(toId).pubkeys) {
         // let sendParams = self.packMessage(r, toChain)
         let sendParams = self.packMessage(toChain, r.from, r.to, r._context)
@@ -1658,6 +1682,8 @@ var Store = Reflux.createStore({
       if (!requestForForm  &&  isWelcome)
         return
       if (isWelcome  &&  utils.isEmpty(welcomeMessage))
+        return
+      if (isReadOnlyContext)
         return
       // cleanup temporary resources from the chat message references and from the in-memory storage - 'list'
       if (!toOrg)
@@ -1917,7 +1943,7 @@ var Store = Reflux.createStore({
 
       var promise = dontSend
                    ? Q()
-                   : sendMyVerificationTo(result.object, to, context)
+                   : this.sendMessageToContextOwners(result.object, to, context)
                  // meDriver.signAndSend(sendParams)
                     // meDriver.signAndSend({
                     //   object: toChain,
@@ -1987,19 +2013,20 @@ var Store = Reflux.createStore({
       debugger
       err = err
     })
-    function sendMyVerificationTo(v, recipients, context) {
-      let defer = Q.defer()
-      let togo = to.length
-      recipients.forEach((to) => {
-        let sendParams = self.packMessage(v, me, to, context)
-        return meDriver.send(sendParams)
-        .then(() => {
-          if (--togo === 0)
-            defer.resolve()
-        })
+  },
+
+  sendMessageToContextOwners(v, recipients, context) {
+    let defer = Q.defer()
+    let togo = recipients.length
+    recipients.forEach((to) => {
+      let sendParams = this.packMessage(v, me, to, context)
+      return meDriver.send(sendParams)
+      .then(() => {
+        if (--togo === 0)
+          defer.resolve()
       })
-      return defer.promise
-    }
+    })
+    return defer.promise
   },
   onGetTo(key) {
     this.onGetItem(key, 'getTo');
@@ -2190,6 +2217,15 @@ var Store = Reflux.createStore({
     if (meta.id == VERIFICATION  ||  meta.subClassOf === VERIFICATION)
       return this.onAddVerification({r: resource, notOneClickVerification: true});
 
+    // Check if the recipient is not one if the creators of this context.
+    // If NOT send the message to the counterparty of the context
+    let context = resource._context || value._context
+    if (context) {
+      context = this._getItem(context)
+      let toId = utils.getId(resource.to)
+      if (toId !== utils.getId(context.to)  &&  toId !== utils.getId(context.from))
+        resource.to = utils.clone(utils.getId(context.to) === utils.getId(me) ? context.from : context.to)
+    }
     let isSelfIntroduction = meta[TYPE] === SELF_INTRODUCTION
     var isNew = !resource[ROOT_HASH];
 
@@ -2685,9 +2721,11 @@ var Store = Reflux.createStore({
 
       let sendParams = {
         object: msg,
-        to: {permalink: permalink}
+        to: {permalink: permalink},
+        other: {
+          context: resource[ROOT_HASH]
+        }      // let sendParams = {
       }
-      // let sendParams = {
       //   object: msg,
       //   to: {fingerprint: this.getFingerprint(this._getItem(IDENTITY + '_' + rep[ROOT_HASH]))},
       // }
@@ -2972,21 +3010,36 @@ var Store = Reflux.createStore({
         }
         let orgId
         if (params.to) {
-          if (params.to.organization)
-            orgId = utils.getId(params.to.organization)
-          else {
-            if (params.to[TYPE] === ORGANIZATION)
-              orgId = utils.getId(params.to)
+          if (params.to[TYPE] === PRODUCT_APPLICATION  &&  utils.isReadOnlyChat(params.to)) {
+            if (!params.context)
+              params.context = params.to
+            result.forEach((r) => {
+              let from = this._getItem(r.from)
+              if (from.organization) {
+                let o = this._getItem(from.organization)
+                if (o.photos)
+                  r.from.photo = o.photos[0]
+              }
+            })
           }
-          if (orgId) {
-            let rep = this.getRepresentative(orgId)
-            if (rep  &&  !rep.bot)
-              retParams.isEmployee = true
+          else {
+            if (params.to.organization)
+              orgId = utils.getId(params.to.organization)
+            else {
+              if (params.to[TYPE] === ORGANIZATION)
+                orgId = utils.getId(params.to)
+            }
+            if (orgId) {
+              let rep = this.getRepresentative(orgId)
+              if (rep  &&  !rep.bot)
+                retParams.isEmployee = true
+            }
           }
         }
+
         if (params.context)
           retParams.context = params.context
-        else {
+        else if (params.modelName !== PRODUCT_APPLICATION) {
           let c = this.searchMessages({modelName: PRODUCT_APPLICATION, to: params.to})
           if (c  &&  c.length) {
             let meId = utils.getId(me)
@@ -3024,6 +3077,16 @@ var Store = Reflux.createStore({
               //   retParams.context = c[c.length - 1]
             }
           }
+        }
+        else if (params._readOnly) {
+          result.forEach((r) => {
+            let to = this._getItem(r.to)
+            if (to.organization) {
+              let o = this._getItem(to.organization)
+              if (o.photos)
+                r.to.photo = o.photos[0]
+            }
+          })
         }
   /*
         // Filter out forms that were shared, leave only verifications
@@ -5247,6 +5310,7 @@ var Store = Reflux.createStore({
       }
     }
     let isReadOnly = utils.getId(to) !== meId  &&  utils.getId(from) !== meId
+    let isThirdPartySentRequest
     if (val[TYPE] === PRODUCT_APPLICATION  &&  isReadOnly) {
       // props that are convenient for displaying in shared context
       val.from.organization = this._getItem(utils.getId(val.from)).organization
@@ -5258,6 +5322,8 @@ var Store = Reflux.createStore({
       //   val._contexts = []
       let contextId = PRODUCT_APPLICATION + '_' + obj.object.context
       let context = this._getItem(contextId)
+
+      isThirdPartySentRequest = utils.getId(from) !== utils.getId(context.from)  &&  utils.getId(from) !== utils.getId(context.to)
       // Avoid doubling the number of forms
       if (context) {
         if (!inDB)
