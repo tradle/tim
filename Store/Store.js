@@ -6323,9 +6323,9 @@ var Store = Reflux.createStore({
     list[key] = { key, value: { ...current.value, ...value } }
   },
   onViewChat(msg) {
-    let to = this._getItem(PROFILE + '_' + msg.to[ROOT_HASH])
-    let chat = to.organization ? this._getItem(to.organization) : to
-    this.trigger({action: 'showChat', to: to})
+    // let to = this._getItem(PROFILE + '_' + msg.to[ROOT_HASH])
+    // let chat = to.organization ? this._getItem(to.organization) : to
+    // this.trigger({action: 'showChat', to: to})
   }
 })
 // );
