@@ -106,7 +106,7 @@ const defaultStyles = StyleSheet.create({
   box: {
     padding: 20,
     maxWidth: 600,
-    minWidth: 300,
+    minWidth: '40%',
     backgroundColor: '#ffffff',
     boxShadow: '2px 2px 10px rgba(0, 0, 0, 0.2)'
   },
