@@ -1649,8 +1649,7 @@ var Store = Reflux.createStore({
       }
       if (error)
         params.error = error
-      if (!isReadOnlyContext)
-        self.trigger(params)
+      self.trigger(params)
       if (batch.length  &&  !error  &&  (isReadOnlyContext || self._getItem(toId).pubkeys))
         return self.getDriver(me)
     })
