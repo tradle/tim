@@ -64,7 +64,8 @@ class MessageRow extends Component {
     CURRENCY_SYMBOL = props.currency ? props.currency.symbol || props.currency : DEFAULT_CURRENCY_SYMBOL
   }
   shouldComponentUpdate(nextProps, nextState) {
-    return !equal(this.props.resource, nextProps.resource)   ||
+    return utils.resized(this.props, nextProps)              ||
+           !equal(this.props.resource, nextProps.resource)   ||
            !equal(this.props.to, nextProps.to)               ||
            this.props.addedItem !== nextProps.addedItem      ||
            this.props.orientation !== nextProps.orientation  ||
