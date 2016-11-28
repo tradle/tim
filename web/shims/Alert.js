@@ -9,19 +9,6 @@ import {
 } from 'react-native'
 import ReactDOM from 'react-dom'
 
-// lazy, as currently importing react-native-orient this early causes an error
-// this is one of the first modules imported
-const getResponsiveModal = (function () {
-  let ResponsiveModal
-
-  return () => {
-    if (ResponsiveModal) return ResponsiveModal
-
-    const makeResponsive = require('react-native-orient').makeResponsive
-    return ResponsiveModal = makeResponsive(Modal)
-  }
-})()
-
 const CENTER = false
 const noop = () => {}
 const Alert = {
@@ -71,9 +58,8 @@ function alert (title, message, buttons) {
     </View>
   )
 
-  const ResponsiveModal = getResponsiveModal()
   const modal = (
-    <ResponsiveModal
+    <Modal
       animated="true"
       transparent="true"
     >
@@ -88,7 +74,7 @@ function alert (title, message, buttons) {
           </View>
         </View>
       </View>
-    </ResponsiveModal>
+    </Modal>
   )
 
   const remove = appendModal(modal)
@@ -120,7 +106,7 @@ const defaultStyles = StyleSheet.create({
   box: {
     padding: 20,
     maxWidth: 600,
-    minWidth: '40%',
+    minWidth: 300,
     backgroundColor: '#ffffff',
     boxShadow: '2px 2px 10px rgba(0, 0, 0, 0.2)'
   },
