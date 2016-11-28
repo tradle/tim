@@ -1648,7 +1648,9 @@ var Store = Reflux.createStore({
 
       // Temporary untill the real hash is known
       var key = utils.getId(rr)
-      rr.to = isReadOnlyContext ? rr.to : rr
+
+      rr.to = self.buildRef(isReadOnlyContext ? context.to : r.to)
+
       self._setItem(key, rr)
 
       if (!toOrg)
