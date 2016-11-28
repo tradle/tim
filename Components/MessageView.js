@@ -121,19 +121,18 @@ class MessageView extends Component {
       errors.push({name: p, error: this.state.errorProps[p] || 'Please correct this property'})
     }
     let resource = this.props.resource
-
+    let isReadOnlyChat = utils.isReadOnlyChat(resource)
     let formError = {
       _t: 'tradle.FormError',
       errors: errors,
       prefill: resource,
-      from: resource.to,
-      to: resource.from,
+      from: utils.getMe(),// resource.to,
+      to: isReadOnlyChat ? resource._context : resource.from,
       _context: resource._context,
       message: text || translate('pleaseCorrectTheErrors')
     }
     Actions.addMessage(formError)
     this.props.navigator.pop()
-
   }
   onCheck(prop, message) {
     let errorProps = {}
