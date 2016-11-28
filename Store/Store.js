@@ -1649,8 +1649,7 @@ var Store = Reflux.createStore({
       }
       if (error)
         params.error = error
-      if (!isReadOnlyContext)
-        self.trigger(params)
+      self.trigger(params)
       if (batch.length  &&  !error  &&  (isReadOnlyContext || self._getItem(toId).pubkeys))
         return self.getDriver(me)
     })
@@ -3020,16 +3019,16 @@ var Store = Reflux.createStore({
             // if (to  &&  to[TYPE] === ORGANIZATION)
             // entering the chat should clear customer's unread indicator
             shareableResources = this.getShareableResources(result, params.to)
-            if (me.isEmployee  && params.to[TYPE] === PROFILE) {
-              let toId = utils.getId(params.to)
-              let to = this._getItem(toId)
-              if (!to.bot) {
-                to._unread = 0
-                db.put(toId, to)
-                .then(() => {
-                  this.trigger({action: 'updateRow', resource: to})
-                })
-              }
+          }
+          if (me.isEmployee  && params.to[TYPE] === PROFILE) {
+            let toId = utils.getId(params.to)
+            let to = this._getItem(toId)
+            if (!to.bot) {
+              to._unread = 0
+              db.put(toId, to)
+              .then(() => {
+                this.trigger({action: 'updateRow', resource: to})
+              })
             }
           }
         }
@@ -5010,11 +5009,13 @@ var Store = Reflux.createStore({
         if (onMessage) {
           let meId = utils.getId(me)
           if (me.isEmployee) {
-            let notMeId = toId === meId ? fromId  : toId
-            let notMe = this._getItem(notMeId)
-            if (notMe  &&  !notMe.bot) {
-              ++notMe._unread
-              this.trigger({action: 'updateRow', resource: notMe})
+            if (!val._context  ||  utils.isReadOnlyChat(val._context)) {
+              let notMeId = toId === meId ? fromId  : toId
+              let notMe = this._getItem(notMeId)
+              if (notMe  &&  !notMe.bot) {
+                ++notMe._unread
+                this.trigger({action: 'updateRow', resource: notMe})
+              }
             }
           }
         }
