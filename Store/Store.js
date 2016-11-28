@@ -1666,8 +1666,10 @@ var Store = Reflux.createStore({
       // SelfIntroduction or IdentityPublishRequest were just sent
       if (noCustomerWaiting)
         return
-      if (isReadOnlyContext)
-        return self.sendMessageToContextOwners(toChain, [r._context.from, r._context.to], r._context)
+      if (isReadOnlyContext) {
+        let context = self._getItem(r._context)
+        return self.sendMessageToContextOwners(toChain, [context.from, context.to], context)
+      }
       if (self._getItem(toId).pubkeys) {
         // let sendParams = self.packMessage(r, toChain)
         let sendParams = self.packMessage(toChain, r.from, r.to, r._context)
