@@ -562,6 +562,26 @@ var Store = Reflux.createStore({
           this.addMessagesToChat(cId, r, true)
           continue
         }
+        else {
+          // Check if the message was sent by the party that is not one of the 2 original parties of the context
+          let meId = utils.getId(me)
+          let fromId = utils.getId(r.from)
+          let toId = utils.getId(r.to)
+
+          let chkId = (toId === meId) ? fromId : toId
+
+          let cTo = utils.getId(c.to)
+          let cFrom = utils.getId(c.from)
+          if (chkId !== cTo  &&  chkId !== cFrom) {
+            let chatId = utils.getId(cTo === meId ? cFrom : cTo)
+            let chat = this._getItem(chatId)
+            if (chat.organization  &&  cFrom === meId)
+              this.addMessagesToChat(utils.getId(chat.organization), r, true)
+            else
+              this.addMessagesToChat(chatId, r, true)
+            continue
+          }
+        }
         if (chatMessages[cId])
           this.addMessagesToChat(cId, r, true)
       }
@@ -1440,6 +1460,7 @@ var Store = Reflux.createStore({
     var toOrg
     // r.to could be a reference to a resource
     var to = this._getItem(r.to)
+    var isReadOnlyContext
     // if (!r.to[TYPE])
     //   r.to = this._getItem(r.to)
     if (to[TYPE] === ORGANIZATION) {
@@ -1456,7 +1477,8 @@ var Store = Reflux.createStore({
       toOrg = r.to
       r.to = orgRep
     }
-
+    else
+      isReadOnlyContext = to[TYPE]  === PRODUCT_APPLICATION  &&  utils.isReadOnlyChat(to)
     let isSelfIntroduction = r[TYPE] === SELF_INTRODUCTION
 
     var rr = {};
@@ -1623,13 +1645,16 @@ var Store = Reflux.createStore({
         params.error = error
 
       self.trigger(params);
-      if (batch.length  &&  !error  &&  self._getItem(toId).pubkeys)
+      if (batch.length  &&  !error  &&  (isReadOnlyContext || self._getItem(toId).pubkeys))
         return self.getDriver(me)
     })
     .then(function() {
       // SelfIntroduction or IdentityPublishRequest were just sent
       if (noCustomerWaiting)
         return
+      if (isReadOnlyContext)
+        return self.sendMessageToContextOwners(toChain, [r.from, r.to], r._context)
+
       if (self._getItem(toId).pubkeys) {
         // let sendParams = self.packMessage(r, toChain)
         let sendParams = self.packMessage(toChain, r.from, r.to, r._context)
@@ -1902,7 +1927,7 @@ var Store = Reflux.createStore({
 
       var promise = dontSend
                    ? Q()
-                   : sendMyVerificationTo(result.object, to, context)
+                   : this.sendMessageToContextOwners(result.object, to, context)
                  // meDriver.signAndSend(sendParams)
                     // meDriver.signAndSend({
                     //   object: toChain,
@@ -1972,20 +1997,21 @@ var Store = Reflux.createStore({
       debugger
       err = err
     })
-    function sendMyVerificationTo(v, recipients, context) {
-      let defer = Q.defer()
-      let togo = to.length
-      recipients.forEach((to) => {
-        let sendParams = self.packMessage(v, me, to, context)
-        return meDriver.send(sendParams)
-        .then(() => {
-          if (--togo === 0)
-            defer.resolve()
-        })
-      })
-      return defer.promise
-    }
   },
+  sendMessageToContextOwners(v, recipients, context) {
+    let defer = Q.defer()
+    let togo = recipients.length
+    recipients.forEach((to) => {
+      let sendParams = this.packMessage(v, me, to, context)
+      return meDriver.send(sendParams)
+      .then(() => {
+        if (--togo === 0)
+          defer.resolve()
+      })
+    })
+    return defer.promise
+  },
+
   onGetTo(key) {
     this.onGetItem(key, 'getTo');
   },
@@ -2175,6 +2201,15 @@ var Store = Reflux.createStore({
     if (meta.id == VERIFICATION  ||  meta.subClassOf === VERIFICATION)
       return this.onAddVerification({r: resource, notOneClickVerification: true});
 
+    // Check if the recipient is not one if the creators of this context.
+    // If NOT send the message to the counterparty of the context
+    let context = resource._context || value._context
+    if (context) {
+      context = this._getItem(context)
+      let toId = utils.getId(resource.to)
+      if (toId !== utils.getId(context.to)  &&  toId !== utils.getId(context.from))
+        resource.to = utils.clone(utils.getId(context.to) === utils.getId(me) ? context.from : context.to)
+    }
     let isSelfIntroduction = meta[TYPE] === SELF_INTRODUCTION
     var isNew = !resource[ROOT_HASH];
 
@@ -5124,6 +5159,7 @@ var Store = Reflux.createStore({
       }
     }
     let isReadOnly = utils.getId(to) !== meId  &&  utils.getId(from) !== meId
+    let isThirdPartySentRequest
     if (val[TYPE] === PRODUCT_APPLICATION  &&  isReadOnly) {
       // props that are convenient for displaying in shared context
       val.from.organization = this._getItem(utils.getId(val.from)).organization
@@ -5135,6 +5171,8 @@ var Store = Reflux.createStore({
       //   val._contexts = []
       let contextId = PRODUCT_APPLICATION + '_' + obj.object.context
       let context = this._getItem(contextId)
+
+      isThirdPartySentRequest = utils.getId(from) !== utils.getId(context.from)  &&  utils.getId(from) !== utils.getId(context.to)
       // Avoid doubling the number of forms
       if (context) {
         if (!inDB)
@@ -5245,14 +5283,22 @@ var Store = Reflux.createStore({
       this._setItem(key, v)
     }
     if (!noTrigger) {
+      let context = val._context ? this._getItem(utils.getId(val._context)) : null
       if (isReadOnly) {
         if (val[TYPE] === PRODUCT_APPLICATION)
           this.addMessagesToChat(utils.getId(val), val)
         else if (val._context) {
-          let context = this._getItem(utils.getId(val._context))
           if (val._context  &&  utils.isReadOnlyChat(val)) // context._readOnly)
             this.addMessagesToChat(utils.getId(context), val)
         }
+      }
+      // Check that the message was send to the party that is not anyone who created the context it was send from
+      // That is possible if the message was sent from shared context
+      else if (isThirdPartySentRequest) {
+        let chat = utils.getId(context.to) === meId ? context.from : context.to
+        chat = this._getItem(chat)
+        let id  = chat.organization ? utils.getId(chat.organization) : utils.getId(chat)
+        this.addMessagesToChat(id, val)
       }
       else
         this.addMessagesToChat(utils.getId(org ? org : from), val)
