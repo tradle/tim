@@ -3018,14 +3018,6 @@ var Store = Reflux.createStore({
           if (params.to[TYPE] === PRODUCT_APPLICATION  &&  utils.isReadOnlyChat(params.to)) {
             if (!params.context)
               params.context = params.to
-            result.forEach((r) => {
-              let from = this._getItem(r.from)
-              if (from.organization) {
-                let o = this._getItem(from.organization)
-                if (o.photos)
-                  r.from.photo = o.photos[0]
-              }
-            })
           }
           else {
             if (params.to.organization)
@@ -3040,6 +3032,15 @@ var Store = Reflux.createStore({
                 retParams.isEmployee = true
             }
           }
+          // Need to know that this context was shared and only then run this loop
+          result.forEach((r) => {
+            let from = this._getItem(r.from)
+            if (from.organization) {
+              let o = this._getItem(from.organization)
+              if (o.photos)
+                r.from.photo = o.photos[0]
+            }
+          })
         }
 
         if (params.context)
