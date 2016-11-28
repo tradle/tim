@@ -1479,7 +1479,6 @@ var Store = Reflux.createStore({
     else
       isReadOnlyContext = to[TYPE]  === PRODUCT_APPLICATION  &&  utils.isReadOnlyChat(to)
 
-
     let isSelfIntroduction = r[TYPE] === SELF_INTRODUCTION
 
     var rr = {};
@@ -1650,7 +1649,8 @@ var Store = Reflux.createStore({
       }
       if (error)
         params.error = error
-      self.trigger(params)
+      if (!isReadOnlyContext)
+        self.trigger(params)
       if (batch.length  &&  !error  &&  (isReadOnlyContext || self._getItem(toId).pubkeys))
         return self.getDriver(me)
     })
@@ -1658,9 +1658,10 @@ var Store = Reflux.createStore({
       // SelfIntroduction or IdentityPublishRequest were just sent
       if (noCustomerWaiting)
         return
-      if (isReadOnlyContext)
+      if (isReadOnlyContext) {
+        let context = self._getItem(r._context)
         return self.sendMessageToContextOwners(toChain, [context.from, context.to], context)
-
+      }
       if (self._getItem(toId).pubkeys) {
         // let sendParams = self.packMessage(r, toChain)
         let sendParams = self.packMessage(toChain, r.from, r.to, r._context)
@@ -3014,19 +3015,21 @@ var Store = Reflux.createStore({
           retParams.loadEarlierMessages = true
         }
         if (!params.isAggregation  &&  params.to  &&  !params.prop) {
-          // let to = list[utils.getId(params.to)].value
-          // if (to  &&  to[TYPE] === ORGANIZATION)
-          // entering the chat should clear customer's unread indicator
-          shareableResources = this.getShareableResources(result, params.to)
-          if (me.isEmployee  && params.to[TYPE] === PROFILE) {
-            let toId = utils.getId(params.to)
-            let to = this._getItem(toId)
-            if (!to.bot) {
-              to._unread = 0
-              db.put(toId, to)
-              .then(() => {
-                this.trigger({action: 'updateRow', resource: to})
-              })
+          if (params.to[TYPE] !== PROFILE  ||  !me.isEmployee) {
+            // let to = list[utils.getId(params.to)].value
+            // if (to  &&  to[TYPE] === ORGANIZATION)
+            // entering the chat should clear customer's unread indicator
+            shareableResources = this.getShareableResources(result, params.to)
+            if (me.isEmployee  && params.to[TYPE] === PROFILE) {
+              let toId = utils.getId(params.to)
+              let to = this._getItem(toId)
+              if (!to.bot) {
+                to._unread = 0
+                db.put(toId, to)
+                .then(() => {
+                  this.trigger({action: 'updateRow', resource: to})
+                })
+              }
             }
           }
         }
@@ -4104,7 +4107,8 @@ var Store = Reflux.createStore({
       return
     if (model.id === SIMPLE_MESSAGE  &&  value.message  && value.message === '[already published](tradle.Identity)')
       return
-
+    if (value._context  &&  utils.isReadOnlyChat(value._context))
+      return
     let to = this._getItem(utils.getId(value.to));
     let toId = utils.getId(to)
     if (toId !== meId  &&  to.bot)
@@ -4742,16 +4746,14 @@ var Store = Reflux.createStore({
         var model = self.getModel(obj[TYPE]).value
         var addCurHash = model.subClassOf === FORM || model.subClassOf === MY_PRODUCT
         // if (isForm  ||  model.id === PRODUCT_APPLICATION) {
-        let key = obj[TYPE] + '_' + obj[ROOT_HASH] + (addCurHash ? '_' +  obj[CUR_HASH] : '')
-        var r = list[key]
-        if (r) {
-          r = r.value
-          if (r._sendStatus !== SENT) {
+          let key = obj[TYPE] + '_' + obj[ROOT_HASH] + (addCurHash ? '_' +  obj[CUR_HASH] : '')
+          var r = list[key]
+          if (r) {
+            r = r.value
             self.trigger({action: 'updateItem', sendStatus: SENT, resource: r})
             r._sendStatus = SENT
             db.put(key, r)
           }
-        }
           // var o = {}
           // extend(o, obj)
           // var from = o.from
