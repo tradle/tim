@@ -1493,11 +1493,15 @@ var Store = Reflux.createStore({
     else
       isReadOnlyContext = to[TYPE]  === PRODUCT_APPLICATION  &&  utils.isReadOnlyChat(to)
 
+
     let isSelfIntroduction = r[TYPE] === SELF_INTRODUCTION
 
     var rr = {};
-    if (r._context)
+    var context
+    if (r._context) {
       rr._context = r._context
+      context = this._getItem(r._context)
+    }
     for (var p in r) {
       if (!props[p])
         continue
@@ -1644,6 +1648,7 @@ var Store = Reflux.createStore({
 
       // Temporary untill the real hash is known
       var key = utils.getId(rr)
+      rr.to = isReadOnlyContext ? rr.to : rr
       self._setItem(key, rr)
 
       if (!toOrg)
@@ -1657,8 +1662,7 @@ var Store = Reflux.createStore({
       }
       if (error)
         params.error = error
-      if (!isReadOnlyContext)
-        self.trigger(params)
+      self.trigger(params)
       if (batch.length  &&  !error  &&  (isReadOnlyContext || self._getItem(toId).pubkeys))
         return self.getDriver(me)
     })
@@ -1666,10 +1670,9 @@ var Store = Reflux.createStore({
       // SelfIntroduction or IdentityPublishRequest were just sent
       if (noCustomerWaiting)
         return
-      if (isReadOnlyContext) {
-        let context = self._getItem(r._context)
+      if (isReadOnlyContext)
         return self.sendMessageToContextOwners(toChain, [context.from, context.to], context)
-      }
+
       if (self._getItem(toId).pubkeys) {
         // let sendParams = self.packMessage(r, toChain)
         let sendParams = self.packMessage(toChain, r.from, r.to, r._context)
@@ -4874,14 +4877,16 @@ var Store = Reflux.createStore({
         var model = self.getModel(obj[TYPE]).value
         var addCurHash = model.subClassOf === FORM || model.subClassOf === MY_PRODUCT
         // if (isForm  ||  model.id === PRODUCT_APPLICATION) {
-          let key = obj[TYPE] + '_' + obj[ROOT_HASH] + (addCurHash ? '_' +  obj[CUR_HASH] : '')
-          var r = list[key]
-          if (r) {
-            r = r.value
+        let key = obj[TYPE] + '_' + obj[ROOT_HASH] + (addCurHash ? '_' +  obj[CUR_HASH] : '')
+        var r = list[key]
+        if (r) {
+          r = r.value
+          if (r._sendStatus !== SENT) {
             self.trigger({action: 'updateItem', sendStatus: SENT, resource: r})
             r._sendStatus = SENT
             db.put(key, r)
           }
+        }
           // var o = {}
           // extend(o, obj)
           // var from = o.from
