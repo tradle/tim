@@ -55,7 +55,9 @@ class ProductChooser extends Component {
   }
   componentWillMount() {
     let r = this.props.resource
-    let id = r[constants.TYPE] === constants.TYPES.PROFILE ? utils.getId(utils.getMe().organization) : utils.getId(r)
+    let id = r[constants.TYPE] === constants.TYPES.PROFILE  ||  r[constants.TYPE] === PRODUCT_APPLICATION
+           ? utils.getId(utils.getMe().organization)
+           : utils.getId(r)
     Actions.getItem(id)
   }
   componentDidMount() {
@@ -65,8 +67,10 @@ class ProductChooser extends Component {
     let products = []
     if (params.action === 'getItem'  &&
         (this.props.resource[constants.ROOT_HASH] === params.resource[constants.ROOT_HASH] ||
-        this.props.resource[constants.TYPE] === constants.TYPES.PROFILE)) {
-      if (this.props.resource[constants.TYPE] === constants.TYPES.PROFILE) {
+        this.props.resource[constants.TYPE] === constants.TYPES.PROFILE)                   ||
+        this.props.resource[constants.TYPE] === PRODUCT_APPLICATION) {
+      if (this.props.resource[constants.TYPE] === constants.TYPES.PROFILE ||
+          this.props.resource[constants.TYPE] === PRODUCT_APPLICATION) {
         if (params.resource.products  &&  params.resource.products.length) {
           let context = this.props.context
           let productIds = context ? [context.product] : [params.resource.products]
