@@ -2999,19 +2999,21 @@ var Store = Reflux.createStore({
           retParams.loadEarlierMessages = true
         }
         if (!params.isAggregation  &&  params.to  &&  !params.prop) {
-          // let to = list[utils.getId(params.to)].value
-          // if (to  &&  to[TYPE] === ORGANIZATION)
-          // entering the chat should clear customer's unread indicator
-          shareableResources = this.getShareableResources(result, params.to)
-          if (me.isEmployee  && params.to[TYPE] === PROFILE) {
-            let toId = utils.getId(params.to)
-            let to = this._getItem(toId)
-            if (!to.bot) {
-              to._unread = 0
-              db.put(toId, to)
-              .then(() => {
-                this.trigger({action: 'updateRow', resource: to})
-              })
+          if (params.to[TYPE] !== PROFILE  ||  !me.isEmployee) {
+            // let to = list[utils.getId(params.to)].value
+            // if (to  &&  to[TYPE] === ORGANIZATION)
+            // entering the chat should clear customer's unread indicator
+            shareableResources = this.getShareableResources(result, params.to)
+            if (me.isEmployee  && params.to[TYPE] === PROFILE) {
+              let toId = utils.getId(params.to)
+              let to = this._getItem(toId)
+              if (!to.bot) {
+                to._unread = 0
+                db.put(toId, to)
+                .then(() => {
+                  this.trigger({action: 'updateRow', resource: to})
+                })
+              }
             }
           }
         }
@@ -4241,6 +4243,8 @@ var Store = Reflux.createStore({
     if (model.id === CUSTOMER_WAITING || model.id === SELF_INTRODUCTION)
       return
     if (model.id === SIMPLE_MESSAGE  &&  value.message  && value.message === '[already published](tradle.Identity)')
+      return
+    if (value._context  &&  utils.isReadOnlyChat(value._context))
       return
 
     let to = this._getItem(utils.getId(value.to));
