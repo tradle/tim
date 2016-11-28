@@ -34,7 +34,7 @@ import { makeResponsive } from 'react-native-orient'
 // var ResourceTypesScreen = require('./ResourceTypesScreen')
 
 var LINK_COLOR
-var LIMIT = 20
+var LIMIT = 500
 var NEXT_HASH = '_n'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const MY_PRODUCT = 'tradle.MyProduct'
@@ -585,7 +585,7 @@ class MessageList extends Component {
         menu={this.generateMenu.bind(this)}
         keyboardShouldPersistTaps={utils.isWeb() ? false : true}
         keyboardDismissMode={utils.isWeb() ? 'none' : 'on-drag'}
-        initialListSize={20}
+        initialListSize={LIMIT}
         hideTextInput={hideTextInput}
         maxHeight={maxHeight} // 64 for the navBar; 110 - with SearchBar
         hideTextInput={hideTextInput}
