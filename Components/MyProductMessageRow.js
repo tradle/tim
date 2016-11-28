@@ -63,7 +63,7 @@ class MyProductMessageRow extends Component {
     rowStyle = addStyle ? [styles.textContainer, addStyle] : styles.textContainer
 
     // let width = utils.dimensions().width * 0.8
-    let width = Math.floor((utils.dimensions().width - 300) * 0.8)
+    let width = Math.floor(utils.dimensions().width * 0.8)
     let messageBody =
       <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
         <View style={[styles.viewStyle, {width: width}]}>
