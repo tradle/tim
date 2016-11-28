@@ -94,7 +94,7 @@ var RowMixin = {
       let isMyMessage = this.isMyMessage()
       if (!this.props.isAggregation  &&  (isMyMessage || isForm) &&  !isMyProduct)
         style = [style, {borderWidth: BORDER_WIDTH, paddingVertical: 3, borderColor: isMyMessage ? STRUCTURED_MESSAGE_COLOR : '#ffffff', borderBottomColor: this.props.bankStyle.STRUCTURED_MESSAGE_BORDER}]
-      let color = this.isMyMessage() && !isMyProduct ? {color: '#FFFFEE'} : {color: '#757575'}
+      let color = isMyMessage && !isMyProduct ? {color: '#FFFFEE'} : {color: '#757575'}
       return (
         <View style={style} key={this.getNextKey()}>
           <View style={styles.column}>
@@ -110,13 +110,19 @@ var RowMixin = {
   },
   getOwnerPhoto(isMyMessage) {
     var to = this.props.to;
-
-    if (isMyMessage  || !to /* ||  !to.photos*/)
+    let isProductApplication = to[constants.TYPE]  === PRODUCT_APPLICATION
+    if (!isProductApplication && (isMyMessage  || !to /* ||  !to.photos*/))
       return <View style={{marginVertical: 0}}/>
 
-    if (!isMyMessage   &&  this.props.resource.from.photo) {
+    if (!isMyMessage  &&  this.props.resource.from.photo) {
       let uri = utils.getImageUri(this.props.resource.from.photo.url)
-      return <Image source={{uri: uri}} style={styles.employeeImage} />
+      let photo = <Image source={{uri: uri}} style={styles.employeeImage} />
+      return photo
+      // return isProductApplication
+      //      ? <TouchableHighlight underlayColor='transparent' onPress={this.props.switchChat.bind(this)}>
+      //          {photo}
+      //        </TouchableHighlight>
+      //      : photo
     }
     if (to.photos) {
       var uri = utils.getImageUri(to.photos[0].url);
@@ -127,11 +133,17 @@ var RowMixin = {
         return s.charAt(0);
       }).join('');
 
-      return <View style={{paddingRight: 3}}>
-               <LinearGradient colors={['#2B6493', '#417AA9', '#568FBE']} style={styles.cellRoundImage}>
-                 <Text style={styles.cellText}>{title}</Text>
-               </LinearGradient>
-             </View>
+      let photo = <View style={{paddingRight: 3}}>
+                    <LinearGradient colors={['#2B6493', '#417AA9', '#568FBE']} style={styles.cellRoundImage}>
+                      <Text style={styles.cellText}>{title}</Text>
+                    </LinearGradient>
+                  </View>
+      return photo
+      // return isProductApplication
+      //      ? <TouchableHighlight underlayColor='transparent' onPress={this.props.switchChat.bind(this)}>
+      //          {photo}
+      //        </TouchableHighlight>
+      //      : photo
     }
   },
   getTime(resource) {

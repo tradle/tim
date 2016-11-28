@@ -412,14 +412,16 @@ class MessageList extends Component {
     var me = utils.getMe();
     // var MessageRow = require('./MessageRow');
     var previousMessageTime = currentMessageTime;
+    var isProductApplication = this.props.resource[constants.TYPE] === PRODUCT_APPLICATION
     currentMessageTime = resource.time;
     var props = {
       onSelect: this.selectResource.bind(this),
       resource: resource,
       bankStyle: this.props.bankStyle,
-      context: this.props.resource[constants.TYPE] === PRODUCT_APPLICATION ? this.props.resource : resource._context || this.state.context,
+      context: isProductApplication ? this.props.resource : resource._context || this.state.context,
       to: isAggregation ? resource.to : this.props.resource,
       navigator: this.props.navigator,
+      switchChat: isProductApplication ? this.switchChat.bind(this, resource) : null
     }
     if (model.subClassOf === 'tradle.MyProduct')
       return  <MyProductMessageRow {...props} />
@@ -529,7 +531,7 @@ class MessageList extends Component {
     if (!content) {
       var isAllMessages = model.isInterface  &&  model.id === constants.TYPES.MESSAGE;
 
-      let hideTextInput = resource[constants.TYPE] === PRODUCT_APPLICATION  && utils.isReadOnlyChat(resource)
+      let hideTextInput = false // resource[constants.TYPE] === PRODUCT_APPLICATION  && utils.isReadOnlyChat(resource)
       let h = utils.dimensions(MessageList).height
       var maxHeight = h - (Platform.OS === 'android' ? 77 : 64)
       if (!this.state.isConnected || (resource[constants.TYPE] === constants.TYPES.ORGANIZATION  &&  !resource._online))
@@ -970,7 +972,21 @@ class MessageList extends Component {
       this.state.clearCallback();
     Actions.addMessage(value);
   }
-
+  switchChat(resource) {
+    let to = resource.from.organization  ||  resource.from
+    this.props.navigator.push({
+      title: to.title,
+      component: MessageList,
+      id: 11,
+      backButtonTitle: 'Back',
+      passProps: {
+        resource: to,
+        modelName: constants.TYPES.MESSAGE,
+        currency: this.props.currency,
+        bankStyle:  this.props.bankStyle
+      }
+    })
+  }
 }
 reactMixin(MessageList.prototype, Reflux.ListenerMixin);
 MessageList = makeResponsive(MessageList)
