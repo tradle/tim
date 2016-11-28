@@ -113,39 +113,24 @@ class MessageView extends Component {
       // )
    }
   }
-  createError(text) {
+ createError(text) {
     let errors = []
     for (let p in this.state.errorProps) {
       errors.push({name: p, error: this.state.errorProps[p] || 'Please correct this property'})
     }
     let resource = this.props.resource
-
+    let isReadOnlyChat = utils.isReadOnlyChat(resource)
     let formError = {
       _t: 'tradle.FormError',
       errors: errors,
       prefill: resource,
       from: utils.getMe(),// resource.to,
-      to: resource.from,
+      to: isReadOnlyChat ? resource._context : resource.from,
       _context: resource._context,
       message: text || translate('pleaseCorrectTheErrors')
     }
     Actions.addMessage(formError)
-    if (utils.isReadOnlyChat(resource)) {
-      // var to = this.props.resource.to
-      // verification = {
-      //   [constants.TYPE]: constants.TYPES.VERIFICATION,
-      //   document: {
-      //     id: utils.getId(resource),
-      //     title: resource.message ? resource.message : model.title
-      //   }
-      // }
-      let formError1 = utils.clone(formError)
-      formError1.to = this.props.resource.to
-      Actions.addMessage(formError1)
-    }
-
     this.props.navigator.pop()
-
   }
   onCheck(prop, message) {
     let errorProps = {}
