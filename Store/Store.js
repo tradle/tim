@@ -4108,6 +4108,7 @@ var Store = Reflux.createStore({
       return
     if (value._context  &&  utils.isReadOnlyChat(value._context))
       return
+
     let to = this._getItem(utils.getId(value.to));
     let toId = utils.getId(to)
     if (toId !== meId  &&  to.bot)
