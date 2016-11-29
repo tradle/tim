@@ -2276,7 +2276,7 @@ var Store = Reflux.createStore({
     return checkPublish
     .then(() => {
       for (var p in resource) {
-        if (props[p] &&  props[p].type !== 'object')
+        if (!props[p] ||  props[p].type !== 'object')
           continue
         var ref = props[p].ref;
         if (!ref  ||  !resource[p])
