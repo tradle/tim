@@ -716,8 +716,8 @@ var NewResourceMixin = {
             {...dateProps}
           />
         </View>
-          {this.getErrorView(params)}
-         </View>
+        {this.getErrorView(params)}
+       </View>
       )
   },
   getLabelAndBorderColor(prop) {
