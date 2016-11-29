@@ -454,6 +454,39 @@ var RowMixin = {
              </View>
                // <Text style={styles.sendStatusDefaultText}>{this.props.sendStatus}</Text>
   }
+  formStub(resource) {
+    let sentTo = translate('asSentTo', resource.to.organization.title)
+
+    var viewStyle = {
+      width: Math.floor(utils.dimensions().width * 0.7),
+      alignSelf: 'flex-end',
+      backgroundColor: this.props.bankStyle.BACKGROUND_COLOR
+    }
+
+    let headerStyle = [
+      styles.verifiedHeader,
+      {backgroundColor: this.props.bankStyle.SHARED_WITH_BG}, // opacity: isShared ? 0.5 : 1},
+      {borderTopRightRadius: 0, borderTopLeftRadius: 10}
+    ]
+
+    var st = {
+      margin: 1,
+      paddingRight: 10,
+      backgroundColor: this.props.bankStyle.BACKGROUND_COLOR
+    }
+    return (
+      <View style={st, viewStyle} key={this.getNextKey()}>
+        <View style={[styles.textContainer, styles.verificationBody]}>
+          <View style={headerStyle}>
+            <Text style={styles.verificationHeaderText}>{translate(utils.getModel(resource[constants.TYPE]).value)}</Text>
+          </View>
+          <View style={{padding: 5}}>
+            <Text style={{color: '#7AAAC3', fontSize: 16, alignSelf: 'flex-end'}}>{sentTo}</Text>
+          </View>
+        </View>
+      </View>
+    );
+  }
 
   // anyOtherRow(prop, backlink, styles) {
   //   var row;
@@ -568,6 +601,36 @@ var styles = StyleSheet.create({
     paddingVertical: 7,
     // borderRadius: 10,
     // backgroundColor: '#EDF2CE'
+  },
+  verifiedHeader: {
+    flexDirection: 'row',
+    paddingVertical: 5,
+    paddingHorizontal: 7,
+    marginHorizontal: -8,
+    marginTop: -6,
+    justifyContent: 'center'
+  },
+  verificationHeaderText: {
+    fontSize: 18,
+    fontWeight: '500',
+    alignSelf: 'center',
+    color: '#f7f7f7',
+    paddingLeft: 3
+  },
+  verificationBody: {
+    paddingTop: 5,
+    paddingHorizontal: 7,
+    borderRadius: 10,
+    borderColor: '#7AAAC3',
+    borderWidth: StyleSheet.hairlineWidth,
+    marginVertical: 2,
+    backgroundColor: '#ffffff',
+    borderTopRightRadius: 0
+  },
+  row: {
+    // alignItems: 'center',
+    backgroundColor: '#f7f7f7',
+    flexDirection: 'row',
   },
   orgImage: {
     width: 20,
