@@ -118,7 +118,7 @@ class NewResource extends Component {
   }
   shouldComponentUpdate(nextProps, nextState) {
     let isUpdate = nextState.err                             ||
-           this.props.orientation !== nextProps.orientation  ||
+           utils.resized(this.props, nextProps)              ||
            nextState.missedRequiredOrErrorValue              ||
            this.state.modal !== nextState.modal              ||
            this.state.prop !== nextState.prop                ||
