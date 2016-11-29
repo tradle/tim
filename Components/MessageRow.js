@@ -776,6 +776,8 @@ class MessageRow extends Component {
     if (onPressCall)
       return {onPressCall: onPressCall}
     if (isFormError) {
+      if (resource.documentCreated)
+        return null
       if (utils.getId(resource.from) === utils.getId(utils.getMe()))
         return null
       else
