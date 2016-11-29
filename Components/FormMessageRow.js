@@ -43,14 +43,21 @@ class FormMessageRow extends Component {
            this.props.sendStatus !== nextProps.sendStatus
   }
   render() {
-    var resource = this.props.resource;
+    var resource = this.props.resource
+    var isMyMessage = this.isMyMessage()
+    var to = this.props.to;
+
+    if (isMyMessage  &&  resource.to.organization  &&  utils.getId(resource.to.organization) !== utils.getId(to)) {
+      return  <View style={{margin: 1, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}}>
+                <TouchableHighlight onPress={this.props.onSelect.bind(this, resource, null)} underlayColor='transparent'>
+                  {this.formStub(resource)}
+                </TouchableHighlight>
+               </View>
+    }
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
 
     var me = utils.getMe();
-
-    var isMyMessage = this.isMyMessage();
     // var isVerifier = utils.isVerifier(resource)
-    var to = this.props.to;
     var ownerPhoto = this.getOwnerPhoto(isMyMessage)
     let hasOwnerPhoto = !isMyMessage &&  to  &&  to.photos;
 
