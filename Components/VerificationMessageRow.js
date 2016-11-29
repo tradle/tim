@@ -53,8 +53,6 @@ class VerificationMessageRow extends Component {
 
     var isMyMessage = this.isMyMessage();
     var w = utils.dimensions(VerificationMessageRow).width
-    let msgWidth = w * 0.8
-    var viewStyle = {width: msgWidth, flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
 
     var msgModel = utils.getModel(resource.document[constants.TYPE]).value;
     var orgName = resource._verifiedBy
@@ -77,6 +75,7 @@ class VerificationMessageRow extends Component {
     else
       bgColor = this.props.bankStyle.VERIFIED_HEADER_COLOR
     let verifiedBy = isShared ? translate('youShared', orgName) : translate('verifiedBy', orgName)
+    let msgWidth = w * 0.8
     let numberOfCharacters = msgWidth / 12
     if (verifiedBy.length > numberOfCharacters)
       verifiedBy = verifiedBy.substring(0, numberOfCharacters) + '..'
