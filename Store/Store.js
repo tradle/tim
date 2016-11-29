@@ -2023,17 +2023,10 @@ var Store = Reflux.createStore({
   },
 
   sendMessageToContextOwners(v, recipients, context) {
-    let defer = Q.defer()
-    let togo = recipients.length
-    recipients.forEach((to) => {
+    return Q.all(recipients.map((to) => {
       let sendParams = this.packMessage(v, me, to, context)
       return meDriver.send(sendParams)
-      .then(() => {
-        if (--togo === 0)
-          defer.resolve()
-      })
-    })
-    return defer.promise
+    }))
   },
   onGetTo(key) {
     this.onGetItem(key, 'getTo');
