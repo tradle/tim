@@ -453,7 +453,7 @@ var RowMixin = {
                <Text style={styles.otherStatus}>{this.props.sendStatus}</Text>
              </View>
                // <Text style={styles.sendStatusDefaultText}>{this.props.sendStatus}</Text>
-  }
+  },
   formStub(resource) {
     let sentTo = translate('asSentTo', resource.to.organization.title)
 
