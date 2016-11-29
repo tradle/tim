@@ -433,7 +433,7 @@ var RowMixin = {
     if (!resource.organization  ||  utils.isReadOnlyChat(this.props.resource))
       return false
     let to = this.props.to
-    if (to[constants.TYPE] === constants.TYPES.PROFILE)
+    if (to[constants.TYPE] === constants.TYPES.PROFILE || to[constants.TYPE] === PRODUCT_APPLICATION)
       return false
     return utils.getId(resource.organization) !== utils.getId(to)
   },
