@@ -517,10 +517,10 @@ var styles = StyleSheet.create({
   },
   msgImage: {
     // backgroundColor: '#dddddd',
-    height: 30,
+    height: 40,
     marginRight: 3,
     marginLeft: 0,
-    width: 30,
+    width: 40,
     borderRadius: 15,
     borderColor: '#cccccc',
     borderWidth: BORDER_WIDTH
@@ -534,10 +534,10 @@ var styles = StyleSheet.create({
   },
   employeeImage: {
     // backgroundColor: '#dddddd',
-    height: 30,
+    height: 40,
     marginRight: 3,
     marginLeft: 0,
-    width: 30,
+    width: 40,
   },
   cellRoundImage: {
     paddingVertical: 1,
