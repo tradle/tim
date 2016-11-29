@@ -235,6 +235,7 @@ var NewResourceMixin = {
                     label: label,
                     prop:  props[p],
                     model: meta,
+                    errors: params.errors,
                     value: data[p] ? new Date(data[p]) : data[p]
                   })
           // if (!this.state.modal || typeof this.state.modal[p] === 'undefined')
@@ -687,7 +688,9 @@ var NewResourceMixin = {
     if (!value)
       value = translate(params.prop)
     let st = utils.isWeb() ? {marginHorizontal: 10, borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderBottomColor: '#cccccc'} : {}
-    return <View key={this.getNextKey()} ref={prop.name} style={[st, {paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10}]}>
+    return (
+      <View>
+        <View key={this.getNextKey()} ref={prop.name} style={[st, {paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10}]}>
           {propLabel}
           <DatePicker
             style={[styles.datePicker, {width: utils.dimensions(component).width - 30}]}
@@ -712,8 +715,10 @@ var NewResourceMixin = {
             }}
             {...dateProps}
           />
+        </View>
           {this.getErrorView(params)}
          </View>
+      )
   },
   getLabelAndBorderColor(prop) {
     return this.state.isRegistration ? '#eeeeee' : this.state.inFocus === prop ? FOCUSED_LABEL_COLOR : '#b1b1b1'
@@ -1427,8 +1432,9 @@ var styles= StyleSheet.create({
   },
   dateLabel: {
     fontSize: 12,
-    marginTop: 5,
-    marginLeft: 10
+    marginVertical: 5,
+    paddingBottom: 5
+    // marginLeft: 10
   },
 })
 module.exports = NewResourceMixin
