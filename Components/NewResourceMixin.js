@@ -227,6 +227,7 @@ var NewResourceMixin = {
                     label: label,
                     prop:  props[p],
                     model: meta,
+                    errors: params.errors,
                     value: data[p] ? new Date(data[p]) : data[p]
                   })
           // if (!this.state.modal || typeof this.state.modal[p] === 'undefined')
@@ -671,10 +672,13 @@ var NewResourceMixin = {
 
     if (!value)
       value = translate(params.prop)
-    return <View style={{paddingBottom: this.hasError(params.errors, prop.name) ?  0 : 10}} key={this.getNextKey()} ref={prop.name}>
+    let st = utils.isWeb() ? {marginHorizontal: 10, borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderBottomColor: '#cccccc'} : {}
+    return (
+      <View>
+        <View key={this.getNextKey()} ref={prop.name} style={[st, {paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10}]}>
           {propLabel}
           <DatePicker
-            style={[styles.datePicker, { width: utils.dimensions(component).width - 30}]}
+            style={[styles.datePicker, {width: utils.dimensions(component).width - 30}]}
             mode="date"
             placeholder={value}
             format={format}
@@ -689,15 +693,17 @@ var NewResourceMixin = {
               dateText: styles.dateText,
               placeholderText: [styles.font18, {
                 color: params.value ? '#000000' : '#aaaaaa',
-                  paddingLeft: params.value ? 10 : 0
+                paddingLeft: params.value ? 10 : 0
               }],
               dateIconColor: {color: LINK_COLOR},
               dateIcon: styles.dateIcon
             }}
             {...dateProps}
           />
-          {this.getErrorView(params)}
-         </View>
+        </View>
+        {this.getErrorView(params)}
+       </View>
+      )
   },
   getLabelAndBorderColor(prop) {
     return this.state.isRegistration ? '#eeeeee' : this.state.inFocus === prop ? FOCUSED_LABEL_COLOR : '#b1b1b1'
@@ -1399,8 +1405,8 @@ var styles= StyleSheet.create({
   },
   dateLabel: {
     fontSize: 12,
-    marginTop: 5,
-    marginLeft: 10
+    marginVertical: 5,
+    paddingBottom: 5
   },
 })
 module.exports = NewResourceMixin
