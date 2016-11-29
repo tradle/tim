@@ -3001,148 +3001,146 @@ var Store = Reflux.createStore({
 
       var shareableResources;
       var retParams = {
-        action: !params.listView  &&  isMessage  &&  !params.prop && !params._readOnly ? 'messageList' : 'list',
+        action: !params.listView  &&  !params.prop && !params._readOnly ? 'messageList' : 'list',
         list: result,
         spinner: params.spinner,
         isAggregation: params.isAggregation
       }
-      if (isMessage) {
-        let hasMore = params.limit  &&  result.length > params.limit
-        if (params.loadEarlierMessages || hasMore) {
-          if (hasMore)  {
-            result.splice(0, 1)
-            retParams.allLoaded = true
-          }
-          retParams.loadEarlierMessages = true
+      let hasMore = params.limit  &&  result.length > params.limit
+      if (params.loadEarlierMessages || hasMore) {
+        if (hasMore)  {
+          result.splice(0, 1)
+          retParams.allLoaded = true
         }
-        if (!params.isAggregation  &&  params.to  &&  !params.prop) {
-          if (params.to[TYPE] !== PROFILE  ||  !me.isEmployee) {
-            // let to = list[utils.getId(params.to)].value
-            // if (to  &&  to[TYPE] === ORGANIZATION)
-            // entering the chat should clear customer's unread indicator
-            shareableResources = this.getShareableResources(result, params.to)
-          }
-          if (me.isEmployee  && params.to[TYPE] === PROFILE) {
-            let toId = utils.getId(params.to)
-            let to = this._getItem(toId)
-            if (!to.bot) {
-              to._unread = 0
-              db.put(toId, to)
-              .then(() => {
-                this.trigger({action: 'updateRow', resource: to})
-              })
-            }
+        retParams.loadEarlierMessages = true
+      }
+      if (!params.isAggregation  &&  params.to  &&  !params.prop) {
+        if (params.to[TYPE] !== PROFILE  ||  !me.isEmployee) {
+          // let to = list[utils.getId(params.to)].value
+          // if (to  &&  to[TYPE] === ORGANIZATION)
+          // entering the chat should clear customer's unread indicator
+          shareableResources = this.getShareableResources(result, params.to)
+        }
+        if (me.isEmployee  && params.to[TYPE] === PROFILE) {
+          let toId = utils.getId(params.to)
+          let to = this._getItem(toId)
+          if (!to.bot) {
+            to._unread = 0
+            db.put(toId, to)
+            .then(() => {
+              this.trigger({action: 'updateRow', resource: to})
+            })
           }
         }
-        let orgId
-        if (params.to) {
-          if (params.to[TYPE] === PRODUCT_APPLICATION  &&  utils.isReadOnlyChat(params.to)) {
-            if (!params.context)
-              params.context = params.to
+      }
+      let orgId
+      if (params.to) {
+        if (params.to[TYPE] === PRODUCT_APPLICATION  &&  utils.isReadOnlyChat(params.to)) {
+          if (!params.context)
+            params.context = params.to
+        }
+        else {
+          if (params.to.organization)
+            orgId = utils.getId(params.to.organization)
+          else {
+            if (params.to[TYPE] === ORGANIZATION)
+              orgId = utils.getId(params.to)
+          }
+          if (orgId) {
+            let rep = this.getRepresentative(orgId)
+            if (rep  &&  !rep.bot)
+              retParams.isEmployee = true
+          }
+        }
+        // Need to know that this context was shared and only then run this loop
+        result.forEach((r) => {
+          let from = this._getItem(r.from)
+          if (from.organization) {
+            let o = this._getItem(from.organization)
+            if (o.photos)
+              r.from.photo = o.photos[0]
+          }
+          if (this.getModel(r[TYPE]).value.subClassOf === FORM) {
+            let to = this._getItem(r.to)
+            if (to.organization)
+              r.to.organization = to.organization
+          }
+        })
+      }
+
+      if (params.context)
+        retParams.context = params.context
+      else if (params.modelName !== PRODUCT_APPLICATION) {
+        let c = this.searchMessages({modelName: PRODUCT_APPLICATION, to: params.to})
+        if (c  &&  c.length) {
+          let meId = utils.getId(me)
+          let talkingToCustomer = !orgId  &&  me.isEmployee  &&  params.to  &&  params.to[TYPE] === PROFILE  &&  utils.getId(params.to) !== meId
+          if (talkingToCustomer) {
+            // Use the context that was already started if such exists
+            let contexts = c.filter((r) => !r._readOnly && r.formsCount)
+            let currentProduct = c[c.length - 1].product
+            contexts = c.filter((r) => !r._readOnly && r.product === currentProduct)
+            retParams.context = contexts.length ? contexts[0] : c[c.length - 1]
+          }
+          else if (c.length === 1) {
+            if (!c[0]._readOnly)
+              retParams.context = c[0]
           }
           else {
-            if (params.to.organization)
-              orgId = utils.getId(params.to.organization)
-            else {
-              if (params.to[TYPE] === ORGANIZATION)
-                orgId = utils.getId(params.to)
-            }
-            if (orgId) {
-              let rep = this.getRepresentative(orgId)
-              if (rep  &&  !rep.bot)
-                retParams.isEmployee = true
-            }
-          }
-          // Need to know that this context was shared and only then run this loop
-          result.forEach((r) => {
-            let from = this._getItem(r.from)
-            if (from.organization) {
-              let o = this._getItem(from.organization)
-              if (o.photos)
-                r.from.photo = o.photos[0]
-            }
-            if (this.getModel(r[TYPE]).value.subClassOf === FORM) {
-              let to = this._getItem(r.to)
-              if (to.organization)
-                r.to.organization = to.organization
-            }
-          })
-        }
-
-        if (params.context)
-          retParams.context = params.context
-        else if (params.modelName !== PRODUCT_APPLICATION) {
-          let c = this.searchMessages({modelName: PRODUCT_APPLICATION, to: params.to})
-          if (c  &&  c.length) {
-            let meId = utils.getId(me)
-            let talkingToCustomer = !orgId  &&  me.isEmployee  &&  params.to  &&  params.to[TYPE] === PROFILE  &&  utils.getId(params.to) !== meId
-            if (talkingToCustomer) {
-              // Use the context that was already started if such exists
-              let contexts = c.filter((r) => !r._readOnly && r.formsCount)
-              let currentProduct = c[c.length - 1].product
-              contexts = c.filter((r) => !r._readOnly && r.product === currentProduct)
-              retParams.context = contexts.length ? contexts[0] : c[c.length - 1]
-            }
-            else if (c.length === 1) {
-              if (!c[0]._readOnly)
-                retParams.context = c[0]
-            }
-            else {
-              let contexts = c.filter((r) => !r._readOnly && r.formsCount)
-              if (contexts) {
-                if (!contexts.length)
-                  retParams.context = c[c.length - 1]
-                else if (contexts.length === 1)
-                  retParams.context = contexts[0]
-                else {
-                  contexts.sort((a, b) => {
-                    return b.lastMessageTime - a.lastMessageTime
-                  })
-                  retParams.context = contexts[0]
-                }
+            let contexts = c.filter((r) => !r._readOnly && r.formsCount)
+            if (contexts) {
+              if (!contexts.length)
+                retParams.context = c[c.length - 1]
+              else if (contexts.length === 1)
+                retParams.context = contexts[0]
+              else {
+                contexts.sort((a, b) => {
+                  return b.lastMessageTime - a.lastMessageTime
+                })
+                retParams.context = contexts[0]
               }
-              // for (let i=c.length - 1; i>=0  &&  !retParams.context; i--) {
-              //   if (c[i].formsCount)
-              //     retParams.context = c[i]
-              // }
-              // if (!retParams.context)
-              //   retParams.context = c[c.length - 1]
             }
+            // for (let i=c.length - 1; i>=0  &&  !retParams.context; i--) {
+            //   if (c[i].formsCount)
+            //     retParams.context = c[i]
+            // }
+            // if (!retParams.context)
+            //   retParams.context = c[c.length - 1]
           }
         }
-        else if (params._readOnly) {
-          result.forEach((r) => {
-            let to = this._getItem(r.to)
-            if (to.organization) {
-              let o = this._getItem(to.organization)
-              if (o.photos)
-                r.to.photo = o.photos[0]
-            }
-          })
-        }
-  /*
-        // Filter out forms that were shared, leave only verifications
-        if (params.to  &&  params.to[TYPE] === ORGANIZATION  &&  !utils.isEmployee(params.to)) {//  &&  utils.getId(params.to) !== meId) {
-          let toId = utils.getId(this.getRepresentative(utils.getId(params.to)))
-          result = result.filter((r) => {
-            // if (r[TYPE] !== VERIFICATION  ||  !r._sharedWith ||  r._sharedWith.length === 0)
-            //   return
-            if (utils.getModel(r[TYPE]).value.subClassOf !== FORM)
-              return true
-            let rId = utils.getId(r.to)
-            return (utils.getId(r.from) === meId  &&  rId !== toId) ? false : true
-            // let shV = r._sharedWith.forEach((rr) => {
-            //   if (rr.bankRepresentative === toId) {
-            //     let d = this._getItem(r.document)
-            //     if (utils.getId(d.to) !== toId)
-            //       filterOutForms.push(utils.getId(r.document))
-            //   }
-            // })
-          })
-          retParams.list = result
-        }
-  */
       }
+      else if (params._readOnly) {
+        result.forEach((r) => {
+          let to = this._getItem(r.to)
+          if (to.organization) {
+            let o = this._getItem(to.organization)
+            if (o.photos)
+              r.to.photo = o.photos[0]
+          }
+        })
+      }
+/*
+      // Filter out forms that were shared, leave only verifications
+      if (params.to  &&  params.to[TYPE] === ORGANIZATION  &&  !utils.isEmployee(params.to)) {//  &&  utils.getId(params.to) !== meId) {
+        let toId = utils.getId(this.getRepresentative(utils.getId(params.to)))
+        result = result.filter((r) => {
+          // if (r[TYPE] !== VERIFICATION  ||  !r._sharedWith ||  r._sharedWith.length === 0)
+          //   return
+          if (utils.getModel(r[TYPE]).value.subClassOf !== FORM)
+            return true
+          let rId = utils.getId(r.to)
+          return (utils.getId(r.from) === meId  &&  rId !== toId) ? false : true
+          // let shV = r._sharedWith.forEach((rr) => {
+          //   if (rr.bankRepresentative === toId) {
+          //     let d = this._getItem(r.document)
+          //     if (utils.getId(d.to) !== toId)
+          //       filterOutForms.push(utils.getId(r.document))
+          //   }
+          // })
+        })
+        retParams.list = result
+      }
+*/
     // if (isMessage) {
     //   let orgId = utils.getId(params.to)
     //   let styles
@@ -5171,7 +5169,7 @@ var Store = Reflux.createStore({
       let originalTo = this._getItem(document.to).organization
       let verificationFrom = from.organization
 
-      if (verificationFrom  !==  originalTo  &&  val._context  &&  utils.isReadOnlyChat(val._context)) {
+      if (verificationFrom  !==  originalTo) { //}  &&  val._context  &&  utils.isReadOnlyChat(val._context)) {
         val._verifiedBy = from.organization
         to = this._getItem(document.from)
         toId = utils.getId(to)
@@ -5245,9 +5243,9 @@ var Store = Reflux.createStore({
       let contextId = PRODUCT_APPLICATION + '_' + obj.object.context
       let context = this._getItem(contextId)
 
-      isThirdPartySentRequest = utils.getId(from) !== utils.getId(context.from)  &&  utils.getId(from) !== utils.getId(context.to)
       // Avoid doubling the number of forms
       if (context) {
+        isThirdPartySentRequest = utils.getId(from) !== utils.getId(context.from)  &&  utils.getId(from) !== utils.getId(context.to)
         if (!inDB)
           context.formsCount = context.formsCount ? ++context.formsCount : 1
         context.lastMessageTime = new Date().getTime()
