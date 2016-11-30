@@ -211,7 +211,7 @@ var RowMixin = {
     var header =  <View style={headerStyle}>
                     <Text style={[isShared ? styles.description : styles.resourceTitle, styles.header, isShared ? {maxWidth: 0.8 * utils.dimensions().width - 50, fontSize: 16, alignSelf: 'flex-end', marginTop: -5, color: '#757575'} : {color: this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>
                       {isShared
-                        ? translate('asVerifiedBy', verification.organization.title)
+                        ? translate('asVerifiedBy', verification._verifiedBy ? verification._verifiedBy.title : verification.organization.title)
                         : translate(model) + ' ...'}
                     </Text>
                   </View>
