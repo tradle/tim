@@ -201,7 +201,7 @@ const ENCRYPTION_KEY = 'accountkey'
 const DEVICE_ID = 'deviceid'
 // const ENCRYPTION_SALT = 'accountsalt'
 const TLS_ENABLED = false
-const PAUSE_ON_TRANSITION = false //true
+const PAUSE_ON_TRANSITION = false
 
 // var Store = Reflux.createStore(timeFunctions({
 var Store = Reflux.createStore({
@@ -6320,7 +6320,7 @@ var Store = Reflux.createStore({
 
   onStartTransition() {
     if (PAUSE_ON_TRANSITION) {
-      if (meDriver) meDriver.pause(2000)
+      if (meDriver) meDriver.pause({ timeout: 2000 })
     }
   },
   onEndTransition() {
