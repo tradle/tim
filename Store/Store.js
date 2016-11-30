@@ -201,7 +201,7 @@ const ENCRYPTION_KEY = 'accountkey'
 const DEVICE_ID = 'deviceid'
 // const ENCRYPTION_SALT = 'accountsalt'
 const TLS_ENABLED = false
-const PAUSE_ON_TRANSITION = true
+const PAUSE_ON_TRANSITION = false //true
 
 // var Store = Reflux.createStore(timeFunctions({
 var Store = Reflux.createStore({
@@ -1968,12 +1968,18 @@ var Store = Reflux.createStore({
       // extend(rr, from);
       // rr.verifiedByMe = r;
       this._setItem(key, r)
+
+      let context = r._context ? this._getItem(r._context) : null
       if (isReadOnly)
         this.addMessagesToChat(utils.getId(r._context), r)
-      if (utils.getId(from) === utils.getId(me)) {
+      if (fromId === utils.getId(me)) {
         to.forEach((recipient) => {
           this.addMessagesToChat(utils.getId(recipient), r)
         })
+      }
+      else if (context && params.isThirdPartySentRequest) {
+        let cOrg = this._getItem(context.to).organization
+        this.addMessagesToChat(utils.getId(cOrg), r)
       }
       else
         this.addMessagesToChat(from.organization ? utils.getId(from.organization) : fromId, r)
@@ -3622,7 +3628,8 @@ var Store = Reflux.createStore({
         continue
 
       if (r._sharedWith  &&  toOrgId  &&  !isSharedWith)
-        continue
+          continue
+
       if (isVerificationR  ||  r[TYPE] === ADDITIONAL_INFO) {
         var doc = {};
         var rDoc = list[utils.getId(r.document)]
@@ -5159,6 +5166,7 @@ var Store = Reflux.createStore({
     // HACK for showing verification in employee's chat
 
     var meId = utils.getId(me)
+    let isThirdPartySentRequest
     // HACK for showing verification in employee's chat
     if (val[TYPE] === VERIFICATION) {
       let document = this._getItem(val.document)
@@ -5166,14 +5174,19 @@ var Store = Reflux.createStore({
         debugger
         return
       }
-      let originalTo = this._getItem(document.to).organization
-      let verificationFrom = from.organization
+      var context = val._context || document._context
+      context = context ? this._getItem(context) : null
+      if (context) {
+        let originalTo = context.to.organization // this._getItem(document.to).organization
+        let verificationFrom = from.organization
 
-      if (verificationFrom  !==  originalTo) { //}  &&  val._context  &&  utils.isReadOnlyChat(val._context)) {
-        val._verifiedBy = from.organization
-        to = this._getItem(document.from)
-        toId = utils.getId(to)
-        from = this._getItem(document.to)
+        if (verificationFrom  !==  originalTo) { //}  &&  val._context  &&  utils.isReadOnlyChat(val._context)) {
+          val._verifiedBy = from.organization
+          to = this._getItem(document.from)
+          toId = utils.getId(to)
+          from = this._getItem(utils.clone(context.to))
+          isThirdPartySentRequest = true
+        }
       }
     }
     // // HACK for showing verification in employee's chat
@@ -5230,7 +5243,6 @@ var Store = Reflux.createStore({
       }
     }
     let isReadOnly = utils.getId(to) !== meId  &&  utils.getId(from) !== meId
-    let isThirdPartySentRequest
     if (val[TYPE] === PRODUCT_APPLICATION  &&  isReadOnly) {
       // props that are convenient for displaying in shared context
       val.from.organization = this._getItem(utils.getId(val.from)).organization
@@ -5320,7 +5332,7 @@ var Store = Reflux.createStore({
     var model = this.getModel(type)  &&  this.getModel(type).value
     let isVerification = type === VERIFICATION  || (model  && model.subClassOf === VERIFICATION)
     if (isVerification) {
-      this.onAddVerification({r: val, notOneClickVerification: false, dontSend: true})
+      this.onAddVerification({r: val, notOneClickVerification: false, dontSend: true, isThirdPartySentRequest: isThirdPartySentRequest})
       // if (!val.txId) {
       //   var o = {}
       //   extend(o, obj)
