@@ -130,7 +130,7 @@ class VerificationRow extends Component {
               ? resource.from.organization
               : isForm
                   ? resource.to.organization
-                  : resource.organization
+                  : resource._verifiedBy || resource.organization
 
 
       let title = org ? org.title : resource.to.title
