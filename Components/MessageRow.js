@@ -627,7 +627,7 @@ class MessageRow extends Component {
 
     var vCols = [];
 
-    let isReadOnly = utils.isReadOnlyChat(this.props.resource) //this.props.context  &&  this.props.context._readOnly
+    let isReadOnly = utils.isReadOnlyChat(resource, this.props.context) //this.props.context  &&  this.props.context._readOnly
     viewCols.forEach(function(v) {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date')
         return;
@@ -656,8 +656,8 @@ class MessageRow extends Component {
         vCols.push(
           <View key={self.getNextKey()}>
             <Text style={[style, {color: '#757575'}]}>{isMyMessage ? translate('errorNotification') : resource[v]} </Text>
-            <Text style={[style, {color: resource.documentCreated ?  '#757575' : self.props.bankStyle.FORM_ERROR_COLOR}]}>{translate(utils.getModel(rtype).value)}</Text>
-            <Icon name={iconName} size={iconSize} color={resource.documentCreated ? self.props.bankStyle.REQUEST_FULFILLED : self.props.bankStyle.FORM_ERROR_COLOR} style={styles.errorBadge} />
+            <Text style={[style, {color: resource.documentCreated || isReadOnly ?  '#757575' : self.props.bankStyle.FORM_ERROR_COLOR}]}>{translate(utils.getModel(rtype).value)}</Text>
+            <Icon name={iconName} size={iconSize} color={resource.documentCreated || isReadOnly ? self.props.bankStyle.REQUEST_FULFILLED : self.props.bankStyle.FORM_ERROR_COLOR} style={styles.errorBadge} />
           </View>
         )
       }
@@ -820,7 +820,7 @@ class MessageRow extends Component {
     let link
     let isReadOnly = utils.isReadOnlyChat(this.props.resource) //this.props.context  &&  this.props.context._readOnly
     if (sameFormRequestForm  &&  !resource.documentCreated) {
-       let isReadOnly = utils.isReadOnlyChat(this.props.resource) // this.props.context  &&  this.props.context._readOnly
+       let isReadOnly = utils.isReadOnlyChat(this.props.resource, this.props.context) // this.props.context  &&  this.props.context._readOnly
 
        link = <View style={[styles.rowContainer, {paddingVertical: 10, alignSelf: 'center'}]}>
                <View style={styles.textContainer}>
