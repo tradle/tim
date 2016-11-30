@@ -621,11 +621,18 @@ var NavigationBarRouteMapper = {
     var style = [platformStyles.navBarText, styles.navBarTitleText];
     if (route.titleTextColor)
       style.push({color: route.titleTextColor});
+
+    let t = route.title.split(' -- ')
+    let tArr = t.length > 1 ? [] : <View />
+
+    for (let i=1; i<t.length; i++)
+      tArr.push(<Text style={{marginTop: -3, color: '#2892C6', fontSize: 12, alignSelf: 'center'}} key={'index.common.js_' + i}>{t[i]}</Text>)
     return (
-      <View>
+      <View key={'index.common.js'}>
         <Text style={style}>
-          {route.title}
+          {t[0]}
         </Text>
+        {tArr}
         {org}
       </View>
     );
