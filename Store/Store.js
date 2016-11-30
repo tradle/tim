@@ -22,6 +22,7 @@ var Actions = require('../Actions/Actions');
 var extend = require('extend');
 var Debug = require('debug')
 var deepEqual = require('deep-equal')
+var once = require('once')
 
 const SENT = 'Sent'
 const SENDING = 'Sending'
@@ -942,15 +943,15 @@ var Store = Reflux.createStore({
 
       const lock = receiveLocks[from]
       lock(_release => {
-        const release = () => {
+        const release = once(() => {
           clearTimeout(timeout)
           _release()
-        }
+        })
 
         const timeout = setTimeout(release, 10000)
         const promise = receive(msg, from)
         if (!Q.isPromiseAlike(promise)) {
-          return release()
+          return process.nextTick(release)
         }
 
         promise.finally(release)
