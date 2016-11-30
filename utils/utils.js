@@ -67,6 +67,8 @@ const ROOT_HASH = constants.ROOT_HASH
 const PREV_HASH = constants.PREV_HASH
 const SIG = constants.SIG
 const FORM = TYPES.FORM
+const FORM_ERROR = 'tradle.FormError'
+const FORM_REQUEST = 'tradle.FormRequest'
 const PASSWORD_ENC = 'hex'
 
 var LocalizedStrings = require('react-native-localization')
@@ -587,14 +589,22 @@ var utils = {
     */
     return verifiedByMe
   },
-  isReadOnlyChat(resource) {
+  isReadOnlyChat(resource, context) {
     let me = this.getMe()
     if (!me)
       return false
     if (!resource.to || !resource.from)
       return false
     let meId = this.getId(me)
-    return this.getId(resource.to) !== meId  &&  this.getId(resource.from) !== meId
+    let fromId = this.getId(resource.from)
+    let toId = this.getId(resource.to)
+    let isReadOnly = toId !== meId  &&  fromId !== meId
+    if (isReadOnly || !context  || (resource[constants.TYPE] !== FORM_ERROR  &&   resource[constants.TYPE] !== FORM_REQUEST))
+      return isReadOnly
+    // Form error can be used only by context originating contact
+    return !isReadOnly  &&  context
+           ? meId  !== this.getId(context.from)
+           : isReadOnly
   },
   optimizeResource(res) {
     var properties = this.getModel(res[TYPE]).value.properties
