@@ -3523,6 +3523,7 @@ var Store = Reflux.createStore({
       })
   },
   searchMessages(params) {
+    var self = this
     var query = params.query;
     var modelName = params.modelName;
     var meta = this.getModel(modelName).value;
@@ -3580,7 +3581,6 @@ var Store = Reflux.createStore({
     }
     if (!thisChatMessages  &&  (!params.to  ||  chatId === meId)) {
       thisChatMessages = []
-      let self = this
       Object.keys(list).forEach(key => {
         let r = self._getItem(key)
         let type = r[TYPE]
