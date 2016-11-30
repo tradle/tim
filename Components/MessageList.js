@@ -418,7 +418,7 @@ class MessageList extends Component {
       onSelect: this.selectResource.bind(this),
       resource: resource,
       bankStyle: this.props.bankStyle,
-      context: isProductApplication ? this.props.resource : resource._context || this.state.context,
+      context: this.state.context ||  (isProductApplication ? this.props.resource : resource._context || this.state.context),
       to: isAggregation ? resource.to : this.props.resource,
       navigator: this.props.navigator,
       switchChat: isProductApplication ? this.switchChat.bind(this, resource) : null
