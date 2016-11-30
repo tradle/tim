@@ -3076,45 +3076,8 @@ var Store = Reflux.createStore({
 
       if (params.context)
         retParams.context = params.context
-      else if (params.modelName !== PRODUCT_APPLICATION) {
-        let c = this.searchMessages({modelName: PRODUCT_APPLICATION, to: params.to})
-        if (c  &&  c.length) {
-          let meId = utils.getId(me)
-          let talkingToCustomer = !orgId  &&  me.isEmployee  &&  params.to  &&  params.to[TYPE] === PROFILE  &&  utils.getId(params.to) !== meId
-          if (talkingToCustomer) {
-            // Use the context that was already started if such exists
-            let contexts = c.filter((r) => !r._readOnly && r.formsCount)
-            let currentProduct = c[c.length - 1].product
-            contexts = c.filter((r) => !r._readOnly && r.product === currentProduct)
-            retParams.context = contexts.length ? contexts[0] : c[c.length - 1]
-          }
-          else if (c.length === 1) {
-            if (!c[0]._readOnly)
-              retParams.context = c[0]
-          }
-          else {
-            let contexts = c.filter((r) => !r._readOnly && r.formsCount)
-            if (contexts) {
-              if (!contexts.length)
-                retParams.context = c[c.length - 1]
-              else if (contexts.length === 1)
-                retParams.context = contexts[0]
-              else {
-                contexts.sort((a, b) => {
-                  return b.lastMessageTime - a.lastMessageTime
-                })
-                retParams.context = contexts[0]
-              }
-            }
-            // for (let i=c.length - 1; i>=0  &&  !retParams.context; i--) {
-            //   if (c[i].formsCount)
-            //     retParams.context = c[i]
-            // }
-            // if (!retParams.context)
-            //   retParams.context = c[c.length - 1]
-          }
-        }
-      }
+      else if (params.modelName !== PRODUCT_APPLICATION)
+        retParams.context = this.getCurrentContext(params.to, orgId)
       else if (params._readOnly) {
         result.forEach((r) => {
           let to = this._getItem(r.to)
@@ -3165,6 +3128,36 @@ var Store = Reflux.createStore({
         retParams.prop = params.prop
       this.trigger(retParams)
     })
+  },
+
+  getCurrentContext(to, orgId) {
+    let c = this.searchMessages({modelName: PRODUCT_APPLICATION, to: to})
+    if (!c  ||  !c.length)
+      return
+
+    let meId = utils.getId(me)
+    let talkingToCustomer = !orgId  &&  me.isEmployee  &&  to  &&  to[TYPE] === PROFILE  &&  utils.getId(to) !== meId
+    if (talkingToCustomer) {
+      // Use the context that was already started if such exists
+      let contexts = c.filter((r) => !r._readOnly && r.formsCount)
+      let currentProduct = c[c.length - 1].product
+      contexts = c.filter((r) => !r._readOnly && r.product === currentProduct)
+      return contexts.length ? contexts[0] : c[c.length - 1]
+    }
+    if (c.length === 1)
+      return utils.isReadOnlyChat(c[0]) ? null : c[0]
+
+    let contexts = c.filter((r) => !utils.isReadOnlyChat(r) && r.formsCount)
+    if (!contexts)
+      return
+    if (!contexts.length)
+      return c[c.length - 1]
+    if (contexts.length === 1)
+      return contexts[0]
+    contexts.sort((a, b) => {
+      return b.lastMessageTime - a.lastMessageTime
+    })
+    return contexts[0]
   },
 
   onListSharedWith(resource, chat) {
@@ -3694,9 +3687,10 @@ var Store = Reflux.createStore({
     }
     if (!foundResources.length)
       return
-    if (params._readOnly)
-      foundResources = foundResources.filter((r) => utils.isReadOnlyChat(r)) //r._readOnly)
-    return foundResources.reverse()
+    // Minor hack before we intro sort property here
+    return   params._readOnly  &&  modelName === PRODUCT_APPLICATION
+           ? foundResources.filter((r) => utils.isReadOnlyChat(r)) //r._readOnly)
+           : foundResources.reverse()
 
     function doFilterOut(r, toId, idx) {
       if (utils.getModel(r[TYPE]).value.subClassOf !== FORM)
@@ -3910,17 +3904,20 @@ var Store = Reflux.createStore({
         addAndCheckShareable(value)
       })
     // Allow sharing non-verified forms
+    let context = this.getCurrentContext(to)
     verTypes.forEach((verType) => {
       var l = this.searchNotMessages({modelName: verType, notVerified: true})
       if (!l)
         return
       l.forEach((r) => {
-        let rr = {
-          [TYPE]: VERIFICATION,
-          document: r,
-          organization: this._getItem(utils.getId(r.to)).organization
+        if (!context  ||  (r._context  &&  utils.getId(context) !== utils.getId(r._context))) {
+          let rr = {
+            [TYPE]: VERIFICATION,
+            document: r,
+            organization: this._getItem(utils.getId(r.to)).organization
+          }
+          addAndCheckShareable(rr)
         }
-        addAndCheckShareable(rr)
       })
     })
 
@@ -5174,7 +5171,8 @@ var Store = Reflux.createStore({
         debugger
         return
       }
-      var context = val._context || document._context
+
+      let context = this._getItem(obj.object.context ? this._getItem(PRODUCT_APPLICATION + '_' + obj.object.context) : document._context)
       context = context ? this._getItem(context) : null
       if (context) {
         let originalTo = context.to.organization // this._getItem(document.to).organization
