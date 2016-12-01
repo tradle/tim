@@ -2229,9 +2229,16 @@ var Store = Reflux.createStore({
     var isNew = !resource[ROOT_HASH];
 
     var checkPublish
-    var isSwitchingToEmployeeMode = isNew ? false : self.isSwitchingToEmployeeMode(resource)
+    var isBecomingEmployee = isNew ? false : becomingEmployee(resource)
+    if (isBecomingEmployee) {
+      if (isBecomingEmployee.error) {
+        this.trigger({action: 'addItem', error: isBecomingEmployee.error})
+        return
+      }
+      isBecomingEmployee = isBecomingEmployee.isBecomingEmployee
+    }
     // Data were obtaipackmy scanning QR code of the forms that were entered on Web
-    if (meta.id === GUEST_SESSION_PROOF || isSwitchingToEmployeeMode) {
+    if (meta.id === GUEST_SESSION_PROOF || isBecomingEmployee) {
       checkPublish = this.getDriver(me)
       .then(function () {
         // if (publishRequestSent)
@@ -2239,12 +2246,12 @@ var Store = Reflux.createStore({
       })
       .then(function(status) {
         if (!status.watches.link  &&  !status.link) {
-          if (isSwitchingToEmployeeMode)
+          if (isBecomingEmployee)
             self.publishMyIdentity(self.getRepresentative(utils.getId(resource.organization)))
           else
             self.publishMyIdentity(self._getItem(utils.getId(resource.to)))
         }
-        else if (isSwitchingToEmployeeMode) {
+        else if (isBecomingEmployee) {
           let orgId = utils.getId(resource.organization)
           let orgRep = self.getRepresentative(orgId)
 
@@ -2370,10 +2377,10 @@ var Store = Reflux.createStore({
         else if (isMessage)
           return handleMessage()
         else
-          return save(isSwitchingToEmployeeMode)
+          return save(isBecomingEmployee)
       })
       .then(() => {
-        if (isSwitchingToEmployeeMode) {
+        if (isBecomingEmployee) {
           let orgId = utils.getId(resource.organization)
           let orgRep = self.getRepresentative(orgId)
 
@@ -2610,6 +2617,36 @@ var Store = Reflux.createStore({
         })
       }
     })
+    function becomingEmployee(resource) {
+      if (resource[TYPE] !== PROFILE)
+        return
+
+      if (!resource.organization  &&  !me.organization)
+        return
+
+      let meOrgId = me.organization ? utils.getId(me.organization) : null
+      let newOrgId = utils.getId(resource.organization)
+
+      if (meOrgId  &&  meOrgId !== newOrgId)
+        return {error: 'Can\'t change employment'}
+
+      if (!meOrgId) {
+        if (!SERVICE_PROVIDERS)
+          return {error: 'Can\'t verify if provider is active at this time. Try again later'}
+        let o = SERVICE_PROVIDERS.filter((r) => {
+          return r.org == newOrgId ? true : false
+        })
+        if (o  &&  o.length)
+          return {isBecomingEmployee: true}
+      }
+      else if (meOrgId) {
+        let result = self.searchMessages({to: me, modelName: MY_EMPLOYEE_PASS})
+        if (!result)
+          return true
+        let meId = utils.getId(me)
+        return {isBecomingEmployee: result.some((r) => meId === utils.getId(r.to))}
+      }
+    }
   },
   onAddApp(serverUrl) {
     const parts = serverUrl.split(';')
@@ -2644,33 +2681,6 @@ var Store = Reflux.createStore({
         error: `Server at ${fullUrl} is unavailable: ` + err.message
       })
     })
-  },
-
-  isSwitchingToEmployeeMode(resource) {
-    if (resource[TYPE] !== PROFILE  ||  !resource.organization || !SERVICE_PROVIDERS)
-      return
-
-    let org = this._getItem(utils.getId(resource)).organization
-    let newOrgId = utils.getId(resource.organization)
-    let settingOrg = !org || utils.getId(org) !== newOrgId
-    if (settingOrg) {
-      let o = SERVICE_PROVIDERS.filter((r) => {
-        return r.org == newOrgId ? true : false
-      })
-      if (o  &&  o.length)
-        return true
-    }
-    else if (org) {
-      let result = this.searchMessages({to: me, modelName: MY_EMPLOYEE_PASS})
-      if (!result)
-        return true
-      let meOrgId = utils.getId(me.organization)
-      let repId = utils.getId(this.getRepresentative(meOrgId))
-      let fresult = result.some((r) => {
-        return repId === utils.getId(r.to)
-      })
-      return fresult.length
-    }
   },
 
   onGetMe() {
