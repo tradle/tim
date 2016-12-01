@@ -671,7 +671,7 @@ class ResourceList extends Component {
   openSharedContextChat(resource) {
     this.props.navigator.push({
       // title: translate(utils.getModel(resource.product).value) + ' -- ' + (resource.from.organization || resource.from.title) + ' ->  ' + resource.to.organization.title,
-      title: (resource.from.organization || resource.from.title) + '  ->  ' + resource.to.organization.title,
+      title: (resource.from.organization || resource.from.title) + '  →  ' + resource.to.organization.title,
       component: MessageList,
       id: 11,
       backButtonTitle: 'Back',
