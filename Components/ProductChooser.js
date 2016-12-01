@@ -65,40 +65,30 @@ class ProductChooser extends Component {
   }
   onNewProductAdded(params) {
     let products = []
-    if (params.action === 'getItem'  &&
-        (this.props.resource[constants.ROOT_HASH] === params.resource[constants.ROOT_HASH] ||
-        this.props.resource[constants.TYPE] === constants.TYPES.PROFILE)                   ||
-        this.props.resource[constants.TYPE] === PRODUCT_APPLICATION) {
-      if (this.props.resource[constants.TYPE] === constants.TYPES.PROFILE ||
-          this.props.resource[constants.TYPE] === PRODUCT_APPLICATION) {
-        if (params.resource.products  &&  params.resource.products.length) {
-          let context = this.props.context
-          let productIds = context ? [context.product] : [params.resource.products]
-          productIds.forEach((r) => {
-            utils.getModel(r).value.forms.forEach((f) => {
-              products.push(utils.getModel(f).value)
-            })
+    if (params.action === 'getItem') {
+      if (this.props.resource[constants.ROOT_HASH] === params.resource[constants.ROOT_HASH]) {
+        if (params.resource.products) {
+          if (equal(params.resource.products, this.props.resource.products))
+            return
+          params.resource.products.forEach((m) => products.push(utils.getModel(m).value))
+        }
+      }
+      else if (this.props.resource[constants.TYPE] === constants.TYPES.PROFILE   ||
+               this.props.resource[constants.TYPE] === PRODUCT_APPLICATION) {
+        if (this.props.context)
+          utils.getModel(this.props.context.product).value.forms.forEach((f) => products.push(utils.getModel(f).value))
+        else if (params.resource.products  &&  params.resource.products.length) {
+          params.resource.products.forEach((r) => {
+            utils.getModel(r).value.forms.forEach((f) => products.push(utils.getModel(f).value))
           })
         }
         else
           products = utils.getAllSubclasses(constants.TYPES.FORM)
       }
-      else if (params.resource.products) {
-        if (equal(params.resource.products, this.props.resource.products))
-          return
-
-        params.resource.products.forEach(function(m) {
-          products.push(utils.getModel(m).value)
-        })
-      }
-      // else
-      //   products = utils.getAllSubclasses(constants.TYPES.FORM)
-
       this.setState({
         products: products,
         dataSource: this.state.dataSource.cloneWithRows(products),
       })
-      // }
       return
     }
     if (params.action !== 'productList' || params.resource[constants.ROOT_HASH] !== this.props.resource[constants.ROOT_HASH])
