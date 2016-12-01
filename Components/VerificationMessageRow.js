@@ -59,11 +59,19 @@ class VerificationMessageRow extends Component {
                 ? resource._verifiedBy.title
                 : resource.organization  ? resource.organization.title : ''
 
-    let me = utils.getMe()
     let isThirdPartyVerification
-    if (me.isEmployee  &&  !this.props.to.organization && !utils.isReadOnlyChat(this.props.resource)) //this.props.context._readOnly)
-      // Check if I am the employee of the organization I opened a chat with or the customer
-      isThirdPartyVerification = resource._verifiedBy || (resource.organization  &&  !utils.isEmployee(resource.organization))
+
+    if (this.props.context) {
+      let me = utils.getMe()
+      if (me.isEmployee) {
+        if  (utils.isReadOnlyChat(this.props.to))
+          isThirdPartyVerification = utils.getId(resource.organization) !== utils.getId(this.props.context.to.organization)
+        else if (this.props.to[constants.TYPE] === constants.TYPES.PROFILE)
+          isThirdPartyVerification = utils.getId(me) !== utils.getId(this.props.context.to) || (resource._verifiedBy  &&  utils.getId(me.organization) !== utils.getId(resource._verifiedBy))
+      }
+      else
+        isThirdPartyVerification = resource._verifiedBy !== null && utils.getId(resource._verifiedBy)  !== utils.getId(resource.organization)// &&  utils.getId(this.props.context.to.organization) !== utils.getId(resource._verifiedBy)
+    }
 
     let isShared = this.isShared()
     isMyMessage = isShared
