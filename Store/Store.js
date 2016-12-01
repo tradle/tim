@@ -5266,11 +5266,10 @@ var Store = Reflux.createStore({
       let formRequests = this.searchMessages({modelName: FORM_REQUEST, to: org})
       if (formRequests)
         formRequests.forEach((r) => {
-          if (!r.documentCreated) {
+          if (!r.documentCreated  &&  r.form === val.form) {
             r.documentCreated = true
             let rId = utils.getId(r)
-            let rr = this._getItem(rId)
-            rr.documentCreated = true
+            this._getItem(rId).documentCreated = true
             batch.push({type: 'put', key: rId, value: r})
           }
         })
