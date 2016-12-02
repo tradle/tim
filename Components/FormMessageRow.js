@@ -13,7 +13,7 @@ var RowMixin = require('./RowMixin');
 var equal = require('deep-equal')
 import { makeResponsive } from 'react-native-orient'
 var StyleSheet = require('../StyleSheet')
-
+var chatStyles = require('../styles/chatStyles')
 var reactMixin = require('react-mixin');
 
 var STRUCTURED_MESSAGE_COLOR
@@ -73,20 +73,17 @@ class FormMessageRow extends Component {
     if (!renderedRow.length) {
       var vCols = noMessage ? null : utils.getDisplayName(resource, model.properties);
       if (vCols)
-        renderedRow = <Text style={styles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
+        renderedRow = <Text style={chatStyles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
     }
     else {
-      var fromHash = resource.from.id;
+      var fromHash = resource.from.id
       if (isMyMessage) {
         if (!noMessage)
-          addStyle = styles.myCell
+          addStyle = chatStyles.myCell
+        addStyle = [addStyle, chatStyles.verificationBody, {backgroundColor: STRUCTURED_MESSAGE_COLOR, borderColor: '#C1E3E8', borderTopRightRadius: 0}]; //model.style];
       }
       else
-        addStyle = [styles.verificationBody, {flex: 1, borderColor: '#efefef', backgroundColor: '#ffffff', borderTopLeftRadius: 0}];
-
-      if (isMyMessage)
-        addStyle = [addStyle, styles.verificationBody, {backgroundColor: STRUCTURED_MESSAGE_COLOR, borderColor: '#C1E3E8', borderTopRightRadius: 0}]; //model.style];
-      // }
+        addStyle = [chatStyles.verificationBody, {flex: 1, borderColor: '#efefef', backgroundColor: '#ffffff', borderTopLeftRadius: 0}];
     }
     var properties = model.properties;
     if (properties.photos  &&  resource.photos) {
@@ -111,24 +108,24 @@ class FormMessageRow extends Component {
         marginBottom: 3,
       }
     }
-    var rowStyle = [styles.row, {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}];
+    var rowStyle = [chatStyles.row, {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}];
     var val = this.getTime(resource);
     var date = val
-             ? <Text style={styles.date} numberOfLines={1}>{val}</Text>
+             ? <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
              : <View />;
 
     var sendStatus = <View />
     if (this.props.sendStatus  &&  this.props.sendStatus !== null)
       sendStatus = this.getSendStatus()
     var sealedStatus = (resource.txId)
-                     ? <View style={styles.sealedStatus}>
+                     ? <View style={chatStyles.sealedStatus}>
                          <Icon name={'ios-ribbon'} size={30} color='#316A99' style={{opacity: 0.5}} />
                        </View>
                      : <View />
 
     let cellStyle = addStyle
-                  ? [styles.textContainer, addStyle]
-                  : styles.textContainer
+                  ? [chatStyles.textContainer, addStyle]
+                  : chatStyles.textContainer
     // HACK that solves the case when the message is short and we don't want it to be displayed
     // in a bigger than needed bubble
     var messageBody;
@@ -143,7 +140,7 @@ class FormMessageRow extends Component {
           <View style={cellStyle}>
             <View style={{flex: 1}}>
             {this.isShared()
-              ? <View style={[styles.verifiedHeader, {backgroundColor: this.props.bankStyle.SHARED_WITH_BG}]}>
+              ? <View style={[chatStyles.verifiedHeader, {backgroundColor: this.props.bankStyle.SHARED_WITH_BG}]}>
                   <Text style={styles.youSharedText}>{translate('youShared', resource.to.organization.title)}</Text>
                 </View>
               : <View />
@@ -262,7 +259,7 @@ class FormMessageRow extends Component {
         }
         return;
       }
-      var style = styles.resourceTitle
+      var style = chatStyles.resourceTitle
       if (isMyMessage)
         style = [style, styles.myMsg];
 
@@ -304,7 +301,7 @@ class FormMessageRow extends Component {
     if (title.length > 30)
       title = title.substring(0, 27) + '...'
 
-    vCols.push(<Text style={[styles.resourceTitle, styles.formType, {color: isMyMessage ? '#EBFCFF' : this.props.bankStyle.STRUCTURED_MESSAGE_BORDER}]} key={this.getNextKey()}>{title}</Text>);
+    vCols.push(<Text style={[chatStyles.resourceTitle, chatStyles.formType, {color: isMyMessage ? '#EBFCFF' : this.props.bankStyle.STRUCTURED_MESSAGE_BORDER}]} key={this.getNextKey()}>{title}</Text>);
 
     if (vCols  &&  vCols.length) {
       vCols.forEach(function(v) {
@@ -318,96 +315,6 @@ class FormMessageRow extends Component {
 }
 
 var styles = StyleSheet.create({
-  textContainer: {
-    flex: 1,
-    flexDirection: 'row'
-  },
-  resourceTitle: {
-    // flex: 1,
-    fontSize: 18,
-    fontWeight: '400',
-    marginBottom: 2,
-  },
-  date: {
-    flex: 1,
-    color: '#999999',
-    fontSize: 12,
-    alignSelf: 'center',
-    paddingTop: 10
-  },
-  row: {
-    // alignItems: 'center',
-    backgroundColor: '#f7f7f7',
-    flexDirection: 'row',
-  },
-  myCell: {
-    paddingVertical: 5,
-    // borderTopRightRadius: 0,
-    paddingHorizontal: 7,
-    justifyContent: 'flex-end',
-    borderRadius: 10,
-    backgroundColor: '#77ADFC' //#569bff',
-  },
-  bigImage: {
-    width: 240,
-    height: 280,
-    margin: 1,
-    borderRadius: 10
-  },
-  bigImageH: {
-    width: 270,
-    height: 200,
-    margin: 1,
-    borderRadius: 10
-  },
-  mediumImage: {
-    width: 120,
-    height: 120,
-    margin: 1,
-    borderRadius: 10
-  },
-  image: {
-    width: 88,
-    height: 88,
-    margin: 1,
-    borderRadius: 10
-  },
-  formType: {
-    color: '#EBFCFF',
-    fontSize: 18,
-    // fontWeight: '600',
-    opacity: 0.7,
-    alignSelf: 'flex-end',
-    marginTop: 10
-  },
-  verifiedHeader: {
-    flexDirection: 'row',
-    paddingVertical: 5,
-    paddingHorizontal: 7,
-    marginHorizontal: -8,
-    marginTop: -6,
-    justifyContent: 'center'
-  },
-  sendStatus: {
-    alignSelf: 'flex-end',
-    flexDirection: 'row',
-    marginHorizontal: 5,
-    marginTop: -5
-  },
-  sealedStatus: {
-    // alignSelf: 'flex-end',
-    // flexDirection: 'row',
-    position: 'absolute',
-    bottom: 1,
-    left: 10,
-  },
-  verificationBody: {
-    paddingVertical: 5,
-    paddingHorizontal: 7,
-    borderRadius: 10,
-    borderWidth: 1,
-    marginVertical: 2
-  },
   myMsg: {
     justifyContent: 'flex-end',
     color: '#ffffff'
