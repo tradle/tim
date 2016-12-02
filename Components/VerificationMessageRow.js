@@ -11,7 +11,7 @@ var RowMixin = require('./RowMixin');
 var equal = require('deep-equal')
 import { makeResponsive } from 'react-native-orient'
 var StyleSheet = require('../StyleSheet')
-
+var chatStyles = require('../styles/chatStyles')
 var reactMixin = require('react-mixin');
 
 import {
@@ -48,7 +48,7 @@ class VerificationMessageRow extends Component {
 
     var time = this.getTime(resource);
     var date = time
-             ? <Text style={styles.date} numberOfLines={1}>{time}</Text>
+             ? <Text style={chatStyles.date} numberOfLines={1}>{time}</Text>
              : <View />;
 
     var isMyMessage = this.isMyMessage();
@@ -88,7 +88,7 @@ class VerificationMessageRow extends Component {
       verifiedBy = verifiedBy.substring(0, numberOfCharacters) + '..'
 
     let headerStyle = [
-      styles.verifiedHeader,
+      chatStyles.verifiedHeader,
       {backgroundColor: bgColor}, // opacity: isShared ? 0.5 : 1},
       isMyMessage ? {borderTopRightRadius: 0, borderTopLeftRadius: 10} : {borderTopLeftRadius: 0, borderTopRightRadius: 10}
     ]
@@ -97,9 +97,9 @@ class VerificationMessageRow extends Component {
                     <View style={headerStyle}>
                       {isShared
                        ? <View/>
-                       : <Icon style={styles.verificationIcon} size={20} name={'md-checkmark'} />
+                       : <Icon style={chatStyles.verificationIcon} size={20} name={'md-checkmark'} />
                       }
-                      <Text style={styles.verificationHeaderText}>{isShared ? translate(msgModel) : verifiedBy}</Text>
+                      <Text style={chatStyles.verificationHeaderText}>{isShared ? translate(msgModel) : verifiedBy}</Text>
                     </View>
                     <View>
                       {
@@ -120,16 +120,16 @@ class VerificationMessageRow extends Component {
       backgroundColor: this.props.bankStyle.BACKGROUND_COLOR
     }
     let addStyle = [
-      styles.verificationBody,
+      chatStyles.verificationBody,
       {backgroundColor: isShared ? '#ffffff' : this.props.bankStyle.VERIFICATION_BG, borderColor: bgColor},
       isMyMessage ? {borderTopRightRadius: 0} : {borderTopLeftRadius: 0}
     ];
     let messageBody =
           <TouchableHighlight onPress={this.verify.bind(this, resource)} underlayColor='transparent'>
           <View style={{flexDirection: 'column', flex: 1}}>
-            <View style={[styles.row, viewStyle]}>
+            <View style={[chatStyles.row, viewStyle]}>
               {this.getOwnerPhoto(isMyMessage)}
-              <View style={[styles.textContainer, addStyle]}>
+              <View style={[chatStyles.textContainer, addStyle]}>
                 <View style={{flex: 1}}>
                   {renderedRow}
                </View>
@@ -190,51 +190,6 @@ class VerificationMessageRow extends Component {
   }
 }
 
-var styles = StyleSheet.create({
-  textContainer: {
-    flex: 1,
-    flexDirection: 'row'
-  },
-  date: {
-    flex: 1,
-    color: '#999999',
-    fontSize: 12,
-    alignSelf: 'center',
-    paddingTop: 10
-  },
-  row: {
-    // alignItems: 'center',
-    backgroundColor: '#f7f7f7',
-    flexDirection: 'row',
-  },
-  verifiedHeader: {
-    flexDirection: 'row',
-    paddingVertical: 5,
-    paddingHorizontal: 7,
-    marginHorizontal: -8,
-    marginTop: -6,
-    justifyContent: 'center'
-  },
-  verificationHeaderText: {
-    fontSize: 18,
-    fontWeight: '500',
-    alignSelf: 'center',
-    color: '#FBFFE5',
-    paddingLeft: 3
-  },
-  verificationBody: {
-    paddingTop: 5,
-    paddingHorizontal: 7,
-    borderRadius: 10,
-    borderWidth: StyleSheet.hairlineWidth,
-    marginVertical: 2
-  },
-  verificationIcon: {
-    width: 20,
-    height: 20,
-    color: '#ffffff',
-  },
-});
 reactMixin(VerificationMessageRow.prototype, RowMixin);
 VerificationMessageRow = makeResponsive(VerificationMessageRow)
 
