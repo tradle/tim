@@ -9,6 +9,7 @@ var Icon = require('react-native-vector-icons/Ionicons');
 import LinearGradient from 'react-native-linear-gradient'
 import CustomIcon from '../styles/customicons'
 var StyleSheet = require('../StyleSheet')
+var chatStyles = require('../styles/chatStyles')
 var cnt = 0;
 import {
   Text,
@@ -97,7 +98,7 @@ var RowMixin = {
       return (
         <View style={style} key={this.getNextKey()}>
           <View style={styles.column}>
-            <Text style={[styles.descriptionB, color]}>{propTitle}</Text>
+            <Text style={[chatStyles.descriptionB, color]}>{propTitle}</Text>
           </View>
           <View style={styles.column}>
             <Text style={[styles.descriptionB, color]}>{val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')}</Text>
@@ -141,7 +142,7 @@ var RowMixin = {
       }).join('');
 
       return <View style={{paddingRight: 3}}>
-               <View style={[{color: '#ffffff', backgroundColor: this.props.bankStyle.LINK_COLOR}, styles.cellRoundImage]}>
+               <View style={[{backgroundColor: this.props.bankStyle.LINK_COLOR}, styles.cellRoundImage]}>
                  <Text style={styles.cellText}>{title}</Text>
                </View>
              </View>
@@ -200,7 +201,7 @@ var RowMixin = {
 
     var msg;
     if (document.message  &&  docModel.subClassOf !== FORM)
-      msg = <View><Text style={styles.description}>{document.message}</Text></View>
+      msg = <View><Text style={chatStyles.description}>{document.message}</Text></View>
     // else if (!onPress) {
     //   msg = <View><Text style={styles.description}>{translate('seeTheForm')}</Text></View>
     //   // var rows = [];
@@ -218,7 +219,7 @@ var RowMixin = {
     var isShared = this.isShared(verification)
 
     var header =  <View style={headerStyle}>
-                    <Text style={[isShared ? styles.description : styles.resourceTitle, styles.header, isShared ? {maxWidth: 0.8 * utils.dimensions().width - 50, fontSize: 16, alignSelf: 'flex-end', marginTop: -5, color: '#757575'} : {color: this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>
+                    <Text style={[isShared ? chatStyles.description : chatStyles.resourceTitle, styles.header, isShared ? {maxWidth: 0.8 * utils.dimensions().width - 50, fontSize: 16, alignSelf: 'flex-end', marginTop: -5, color: '#757575'} : {color: this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>
                       {isShared
                         ? translate('asVerifiedBy', verification._verifiedBy ? verification._verifiedBy.title : verification.organization.title)
                         : translate(model) + ' ...'}
@@ -230,7 +231,7 @@ var RowMixin = {
     else
       addStyle = {}
     header = hasPhotos
-            ?  <View style={[styles.rowContainer, styles.verification, addStyle]}>
+            ?  <View style={[chatStyles.rowContainer, styles.verification, addStyle]}>
                  {photo}
                  {header}
                </View>
@@ -278,7 +279,7 @@ var RowMixin = {
         verifiedBy = translate('sentTo', verification.organization.title)
 
       var orgView =   <View style={styles.orgView}>
-                        <Text style={styles.description}>
+                        <Text style={chatStyles.description}>
                           {verifiedBy}
                         </Text>
                       </View>
@@ -470,7 +471,7 @@ var RowMixin = {
     }
 
     let headerStyle = [
-      styles.verifiedHeader,
+      chatStyles.verifiedHeader,
       {backgroundColor: this.props.bankStyle.SHARED_WITH_BG}, // opacity: isShared ? 0.5 : 1},
       {borderTopRightRadius: 0, borderTopLeftRadius: 10}
     ]
@@ -482,9 +483,9 @@ var RowMixin = {
     }
     return (
       <View style={st, viewStyle} key={this.getNextKey()}>
-        <View style={[styles.textContainer, styles.verificationBody]}>
+        <View style={[chatStyles.textContainer, verificatinStyles.verificationBody]}>
           <View style={headerStyle}>
-            <Text style={styles.verificationHeaderText}>{translate(utils.getModel(resource[constants.TYPE]).value)}</Text>
+            <Text style={chatStyles.verificationHeaderText}>{translate(utils.getModel(resource[constants.TYPE]).value)}</Text>
           </View>
           <View style={{padding: 5}}>
             <Text style={{color: '#7AAAC3', fontSize: 16, alignSelf: 'flex-end'}}>{sentTo}</Text>
@@ -522,10 +523,6 @@ var styles = StyleSheet.create({
   title: {
     fontSize: 18,
     color: '#757575'
-  },
-  description: {
-    color: '#757575',
-    fontSize: 14,
   },
   descriptionB: {
     fontSize: 18,
@@ -597,10 +594,6 @@ var styles = StyleSheet.create({
     borderRadius:10,
     borderWidth: BORDER_WIDTH,
   },
-  rowContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between'
-  },
   verification: {
     // marginHorizontal: -7,
     // marginVertical: -10,
@@ -608,45 +601,10 @@ var styles = StyleSheet.create({
     // borderRadius: 10,
     // backgroundColor: '#EDF2CE'
   },
-  verifiedHeader: {
-    flexDirection: 'row',
-    paddingVertical: 5,
-    paddingHorizontal: 7,
-    marginHorizontal: -8,
-    marginTop: -6,
-    justifyContent: 'center'
-  },
-  verificationHeaderText: {
-    fontSize: 18,
-    fontWeight: '500',
-    alignSelf: 'center',
-    color: '#f7f7f7',
-    paddingLeft: 3
-  },
-  verificationBody: {
-    paddingTop: 5,
-    paddingHorizontal: 7,
-    borderRadius: 10,
-    borderColor: '#7AAAC3',
-    borderWidth: StyleSheet.hairlineWidth,
-    marginVertical: 2,
-    backgroundColor: '#ffffff',
-    borderTopRightRadius: 0
-  },
-  row: {
-    // alignItems: 'center',
-    backgroundColor: '#f7f7f7',
-    flexDirection: 'row',
-  },
   orgImage: {
     width: 20,
     height: 20,
     borderRadius: 10
-  },
-  resourceTitle: {
-    // flex: 1,
-    fontSize: 18,
-    marginBottom: 2,
   },
   column: {
     flex: 1,
