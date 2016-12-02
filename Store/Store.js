@@ -633,25 +633,26 @@ var Store = Reflux.createStore({
     // Compact all FormRequests that were fulfilled
     for (let i=messages.length - 1; i>=0; i--) {
       let r = this._getItem(messages[i].id)
+      let product = r.product || (r._context && this._getItem(r._context).product)
       if (r[TYPE] === FORM_REQUEST  &&  !r.document) {// && r.documentCreated)
       // delete list[id]
-        let forms = productToForms[r.product]
+        let forms = productToForms[product]
         if (!forms)
-          productToForms[r.product] = {}
-        let formIdx = productToForms[r.product][r.form]
-        if (typeof formIdx !== 'undefined')
+          productToForms[product] = {}
+        let formIdx = productToForms[product][r.form]
+        if (typeof formIdx !== 'undefined'  &&  !r.documentCreated)
           removeMsg.push(formIdx)
           // messages.splice(formIdx, 1)
 
-        productToForms[r.product][r.form] = i
+        productToForms[product][r.form] = i
       }
       if (r[TYPE] === PRODUCT_APPLICATION) {
-        let productIdx = productApp[r.product]
+        let productIdx = productApp[product]
         if (productIdx)
           removeMsg.push(productIdx)
           // messages.splice(productIdx, 1)
         // else
-          productApp[r.product] = i
+          productApp[product] = i
       }
     }
     if (removeMsg.length) {
