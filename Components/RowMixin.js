@@ -113,10 +113,18 @@ var RowMixin = {
     if (!isProductApplication && (isMyMessage  || !to /* ||  !to.photos*/))
       return <View style={{marginVertical: 0}}/>
 
-    if (!isMyMessage  &&  this.props.resource.from.photo) {
-      let uri = utils.getImageUri(this.props.resource.from.photo.url)
-      let photo = <Image source={{uri: uri}} style={styles.employeeImage} />
-      return photo
+    let resource = this.props.resource
+    let isVerification  = resource[constants.TYPE] === constants.TYPES.VERIFICATION
+    if (!isMyMessage) {
+
+      let photo = isVerification && resource._verifiedBy  &&  resource._verifiedBy.photo
+                ? resource._verifiedBy.photo
+                : resource.from.photo
+      if  (photo) {
+        let uri = utils.getImageUri(photo.url)
+        photo = <Image source={{uri: uri}} style={styles.employeeImage} />
+        return photo
+      }
       // return isProductApplication
       //      ? <TouchableHighlight underlayColor='transparent' onPress={this.props.switchChat.bind(this)}>
       //          {photo}
@@ -128,21 +136,15 @@ var RowMixin = {
       return <Image source={{uri: uri}} style={styles.msgImage} />
     }
     if (!isMyMessage) {
-      var title = this.props.resource.from.title.split(' ').map(function(s) {
+      var title = resource.from.title.split(' ').map(function(s) {
         return s.charAt(0);
       }).join('');
 
-      let photo = <View style={{paddingRight: 3}}>
-                    <LinearGradient colors={['#2B6493', '#417AA9', '#568FBE']} style={styles.cellRoundImage}>
-                      <Text style={styles.cellText}>{title}</Text>
-                    </LinearGradient>
-                  </View>
-      return photo
-      // return isProductApplication
-      //      ? <TouchableHighlight underlayColor='transparent' onPress={this.props.switchChat.bind(this)}>
-      //          {photo}
-      //        </TouchableHighlight>
-      //      : photo
+      return <View style={{paddingRight: 3}}>
+               <View style={[{color: '#ffffff', backgroundColor: this.props.bankStyle.LINK_COLOR}, styles.cellRoundImage]}>
+                 <Text style={styles.cellText}>{title}</Text>
+               </View>
+             </View>
     }
   },
   getTime(resource) {
