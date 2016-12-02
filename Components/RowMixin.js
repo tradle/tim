@@ -113,10 +113,18 @@ var RowMixin = {
     if (!isProductApplication && (isMyMessage  || !to /* ||  !to.photos*/))
       return <View style={{marginVertical: 0}}/>
 
-    if (!isMyMessage  &&  this.props.resource.from.photo) {
-      let uri = utils.getImageUri(this.props.resource.from.photo.url)
-      let photo = <Image source={{uri: uri}} style={styles.employeeImage} />
-      return photo
+    let resource = this.props.resource
+    let isVerification  = resource[constants.TYPE] === constants.TYPES.VERIFICATION
+    if (!isMyMessage) {
+
+      let photo = isVerification && resource._verifiedBy  &&  resource._verifiedBy.photo
+                ? resource._verifiedBy.photo
+                : resource.from.photo
+      if  (photo) {
+        let uri = utils.getImageUri(photo.url)
+        photo = <Image source={{uri: uri}} style={styles.employeeImage} />
+        return photo
+      }
       // return isProductApplication
       //      ? <TouchableHighlight underlayColor='transparent' onPress={this.props.switchChat.bind(this)}>
       //          {photo}
@@ -128,7 +136,7 @@ var RowMixin = {
       return <Image source={{uri: uri}} style={styles.msgImage} />
     }
     if (!isMyMessage) {
-      var title = this.props.resource.from.title.split(' ').map(function(s) {
+      var title = resource.from.title.split(' ').map(function(s) {
         return s.charAt(0);
       }).join('');
 
