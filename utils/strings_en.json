@@ -162,5 +162,7 @@
     "sendEditRequestPrompt": "Send edit request to {1}?",
     "pleaseCorrectFields": "Please correct the following fields: {1}",
     "applyForProduct": "Apply for a product",
-    "verifyPrompt": "Verify?"
+    "verifyPrompt": "Verify?",
+    "fieldErrorMessagePrompt": "What's wrong with this field?",
+    "thisValueIsInvalidPlaceholder": "this value is invalid because..."
 }
