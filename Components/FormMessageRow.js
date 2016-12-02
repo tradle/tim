@@ -80,7 +80,7 @@ class FormMessageRow extends Component {
       if (isMyMessage) {
         if (!noMessage)
           addStyle = chatStyles.myCell
-        addStyle = [addStyle, chatStyles.verificationBody, {backgroundColor: STRUCTURED_MESSAGE_COLOR, borderColor: '#C1E3E8', borderTopRightRadius: 0}]; //model.style];
+        addStyle = [addStyle, chatStyles.verificationBody, {backgroundColor: STRUCTURED_MESSAGE_COLOR, borderColor: '#C1E3E8', borderTopRightRadius: 0, paddingBottom: 5}]; //model.style];
       }
       else
         addStyle = [chatStyles.verificationBody, {flex: 1, borderColor: '#efefef', backgroundColor: '#ffffff', borderTopLeftRadius: 0}];
