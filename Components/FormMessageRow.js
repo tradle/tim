@@ -91,11 +91,11 @@ class FormMessageRow extends Component {
       inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
       var style;
       if (inRow === 1)
-        style = styles.bigImage;
+        style = chatStyles.bigImage;
       else if (inRow === 2)
-        style = styles.mediumImage;
+        style = chatStyles.mediumImage;
       else
-        style = styles.image;
+        style = chatStyles.image;
       resource.photos.forEach((p) => {
         photoUrls.push({url: utils.getImageUri(p.url)});
       })
@@ -162,15 +162,15 @@ class FormMessageRow extends Component {
       if (inRow === 1) {
         var ww = Math.max(240, msgWidth / 2)
         var hh = ww * 280 / 240
-        photoStyle = [styles.bigImage, {
+        photoStyle = [chatStyles.bigImage, {
           width:  ww,
           height: hh
         }]
       }
       else if (inRow === 2)
-        photoStyle = styles.mediumImage;
+        photoStyle = chatStyles.mediumImage;
       else
-        photoStyle = styles.image;
+        photoStyle = chatStyles.image;
     }
 
     return (

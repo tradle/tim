@@ -98,7 +98,7 @@ var RowMixin = {
       return (
         <View style={style} key={this.getNextKey()}>
           <View style={styles.column}>
-            <Text style={[chatStyles.descriptionB, color]}>{propTitle}</Text>
+            <Text style={[styles.descriptionB, color]}>{propTitle}</Text>
           </View>
           <View style={styles.column}>
             <Text style={[styles.descriptionB, color]}>{val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')}</Text>
@@ -483,7 +483,7 @@ var RowMixin = {
     }
     return (
       <View style={st, viewStyle} key={this.getNextKey()}>
-        <View style={[chatStyles.textContainer, verificatinStyles.verificationBody]}>
+        <View style={[chatStyles.textContainer, chatStyles.verificationBody]}>
           <View style={headerStyle}>
             <Text style={chatStyles.verificationHeaderText}>{translate(utils.getModel(resource[constants.TYPE]).value)}</Text>
           </View>
