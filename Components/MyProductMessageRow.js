@@ -8,6 +8,7 @@ var Icon = require('react-native-vector-icons/Ionicons');
 var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin');
 var equal = require('deep-equal')
+var chatStyles = require('../styles/chatStyles')
 
 var reactMixin = require('react-mixin');
 
@@ -40,27 +41,27 @@ class MyProductMessageRow extends Component {
     var ret = this.formatRow(false, renderedRow);
     let onPressCall = ret ? ret.onPressCall : null
 
-    let addStyle = [addStyle, styles.verificationBody, {backgroundColor: this.props.bankStyle.PRODUCT_BG_COLOR , borderColor: this.props.bankStyle.CONFIRMATION_COLOR}];
-    let rowStyle = [styles.row,  {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}];
+    let addStyle = [addStyle, chatStyles.verificationBody, {backgroundColor: this.props.bankStyle.PRODUCT_BG_COLOR , borderColor: this.props.bankStyle.CONFIRMATION_COLOR}];
+    let rowStyle = [chatStyles.row,  {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}];
     var val = this.getTime(resource);
     var date = val
-             ? <Text style={styles.date} numberOfLines={1}>{val}</Text>
+             ? <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
              : <View />;
 
     // var viewStyle = {flexDirection: 'row', alignSelf: 'flex-start', width: DeviceWidth - 50};
 
     var hdrStyle = {backgroundColor: '#289427'} //this.props.bankStyle.PRODUCT_BG_COLOR ? {backgroundColor: this.props.bankStyle.PRODUCT_BG_COLOR} : {backgroundColor: '#289427'}
     var orgName = resource.from.organization  ? resource.from.organization.title : ''
-    renderedRow.splice(0, 0, <View  key={this.getNextKey()} style={[styles.verifiedHeader, hdrStyle, {marginHorizontal: -8, marginTop: -7, marginBottom: 7, paddingBottom: 5}]}>
-                       <Text style={{fontSize: 17, alignSelf: 'center', color: '#fff'}}>{translate('issuedBy', orgName)}</Text>
+    renderedRow.splice(0, 0, <View  key={this.getNextKey()} style={[chatStyles.verifiedHeader, hdrStyle, {marginHorizontal: -8, marginTop: -7, marginBottom: 7, paddingBottom: 5}]}>
+                       <Text style={styles.issuedBy}>{translate('issuedBy', orgName)}</Text>
                     </View>
                     );
     let title = translate(model)
     if (title.length > 30)
       title = title.substring(0, 27) + '...'
 
-    renderedRow.push(<Text  key={this.getNextKey()} style={[styles.formType, {color: '#289427'}]}>{title}</Text>);
-    rowStyle = addStyle ? [styles.textContainer, addStyle] : styles.textContainer
+    renderedRow.push(<Text  key={this.getNextKey()} style={[chatStyles.formType, {color: '#289427'}]}>{title}</Text>);
+    rowStyle = addStyle ? [chatStyles.textContainer, addStyle] : chatStyles.textContainer
 
     let messageBody =
       <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
@@ -121,7 +122,7 @@ class MyProductMessageRow extends Component {
         }
         return;
       }
-      var style = styles.description; //resourceTitle; //(first) ? styles.resourceTitle : styles.description;
+      var style = chatStyles.description; //resourceTitle; //(first) ? styles.resourceTitle : styles.description;
       if (isMyMessage)
         style = [style, {justifyContent: 'flex-end', color: '#2892C6'}];
 
@@ -154,8 +155,8 @@ class MyProductMessageRow extends Component {
           vCols.push(
             <View key={self.getNextKey()}>
               <Text style={[style]}>{resource[v]}</Text>
-              <Icon style={[{color: self.props.bankStyle.CONFIRMATION_COLOR, alignSelf: 'flex-end', width: 50, height: 50, marginTop: -45, opacity: 0.2}]} size={50} name={'ios-flower'} />
-              <Icon style={{color: self.props.bankStyle.CONFIRMATION_COLOR, alignSelf: 'flex-end', marginTop: -10}} size={30} name={'ios-done-all'} />
+              <Icon style={[{color: self.props.bankStyle.CONFIRMATION_COLOR}, styles.flower]} size={50} name={'ios-flower'} />
+              <Icon style={{color: self.props.bankStyle.CONFIRMATION_COLOR}, styles.done} size={30} name={'ios-done-all'} />
             </View>
           );
 
@@ -178,52 +179,25 @@ class MyProductMessageRow extends Component {
 }
 
 var styles = StyleSheet.create({
-  textContainer: {
-    flex: 1,
-    flexDirection: 'row'
-  },
-  date: {
-    flex: 1,
-    color: '#999999',
-    fontSize: 12,
-    alignSelf: 'center',
-    paddingTop: 10
-  },
-  row: {
-    backgroundColor: '#f7f7f7',
-    flexDirection: 'row',
-  },
-  description: {
-    // flexWrap: 'wrap',
-    color: '#757575',
-    fontSize: 14,
-  },
-  formType: {
-    color: '#EBFCFF',
-    fontSize: 20,
-    // fontWeight: '600',
-    opacity: 0.5,
-    alignSelf: 'flex-end',
-    marginTop: 10
-  },
-  verifiedHeader: {
-    flexDirection: 'row',
-    paddingVertical: 5,
-    paddingHorizontal: 7,
-    marginHorizontal: -8,
-    marginTop: -6,
-    justifyContent: 'center'
-  },
-  verificationBody: {
-    paddingVertical: 5,
-    paddingHorizontal: 7,
-    borderRadius: 10,
-    borderWidth: 1,
-    marginVertical: 2
-  },
   viewStyle: {
     flexDirection: 'row',
     alignSelf: 'flex-start',
+  },
+  issuedBy: {
+    fontSize: 17,
+    alignSelf: 'center',
+    color: '#fff'
+  },
+  flower: {
+    alignSelf: 'flex-end',
+    width: 50,
+    height: 50,
+    marginTop: -45,
+    opacity: 0.2
+  },
+  done: {
+    alignSelf: 'flex-end',
+    marginTop: -10
   }
 });
 reactMixin(MyProductMessageRow.prototype, RowMixin);
