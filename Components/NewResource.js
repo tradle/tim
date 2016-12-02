@@ -17,7 +17,6 @@ var Store = require('../Store/Store');
 var Reflux = require('reflux');
 var reactMixin = require('react-mixin');
 var Icon = require('react-native-vector-icons/Ionicons');
-var myStyles = require('../styles/styles');
 var rStyles = require('../styles/registrationStyles');
 var NewResourceMixin = require('./NewResourceMixin');
 var reactMixin = require('react-mixin');
