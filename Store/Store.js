@@ -1945,14 +1945,13 @@ var Store = Reflux.createStore({
       return promise
     })
     .then(() => {
-      key = utils.getId(r)
-      if (from.organization)
-        r.organization = from.organization;
+      this.addVisualProps(r)
       if (!r._sharedWith) {
         r._sharedWith = []
         r._sharedWith.push(this.createSharedWith(utils.getId(r.from), r.time))
       }
       var batch = [];
+      key = utils.getId(r)
       batch.push({type: 'put', key: key, value: r});
       let len = batch.length
 
@@ -2012,6 +2011,31 @@ var Store = Reflux.createStore({
       debugger
       err = err
     })
+  },
+  addVisualProps(r) {
+    let from = this._getItem(r.from || me)
+    if (from.organization) {
+      r.from.organization = from.organization
+      let fOrg = this._getItem(from.organization)
+      if (fOrg.photos)
+        r.from.photo = fOrg.photos[0]
+      if (r[TYPE] === VERIFICATION)
+        r.organization = from.organization
+    }
+    let to = this._getItem(r.to)
+    if (to.organization) {
+      r.to.organization = to.organization
+      let toOrg = this._getItem(to.organization)
+      if (toOrg.photos)
+        r.to.photo = toOrg.photos[0]
+    }
+    if (r && r._verifiedBy) {
+      let verifiedBy = this._getItem(r._verifiedBy)
+      if (verifiedBy.organization)
+        r._verifiedBy.organization = verifiedBy.organization
+      if (verifiedBy.photos)
+        r._verifiedBy.photo = verifiedBy.photos[0]
+    }
   },
 
   sendMessageToContextOwners(v, recipients, context) {
@@ -2643,7 +2667,7 @@ var Store = Reflux.createStore({
       else if (meOrgId) {
         let result = self.searchMessages({to: me, modelName: MY_EMPLOYEE_PASS})
         if (!result)
-          return true
+          return {isBecomingEmployee: true}
         let meId = utils.getId(me)
         return {isBecomingEmployee: result.some((r) => meId === utils.getId(r.to))}
       }
@@ -3077,7 +3101,12 @@ var Store = Reflux.createStore({
             if (o.photos)
               r.from.photo = o.photos[0]
           }
-          if (this.getModel(r[TYPE]).value.subClassOf === FORM) {
+          if (r[TYPE] === VERIFICATION  &&  r._verifiedBy) {
+            let o = this._getItem(r._verifiedBy)
+            if (o.photos)
+              r._verifiedBy.photo = o.photos[0]
+          }
+          else if (this.getModel(r[TYPE]).value.subClassOf === FORM) {
             let to = this._getItem(r.to)
             if (to.organization)
               r.to.organization = to.organization
@@ -4053,7 +4082,9 @@ var Store = Reflux.createStore({
           value._sharedWith = []
         value._sharedWith.push(this.createSharedWith(utils.getId(value.to), new Date().getTime()))
       }
-      if (!isNew  &&  isForm) {
+      if (isNew)
+        this.addVisualProps(value)
+      else if (isForm) {
         let prevRes = list[value[TYPE] + '_' + value[ROOT_HASH] + '_' + value[PREV_HASH]]
         if (prevRes) {
           prevRes = prevRes.value
@@ -4062,7 +4093,6 @@ var Store = Reflux.createStore({
           batch.push({type: 'put', key: utils.getId(prevRes), value: prevRes})
         }
       }
-
       if (props['to']  &&  props['from'])
         this.addLastMessage(value, batch)
     }
