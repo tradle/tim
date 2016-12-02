@@ -55,10 +55,8 @@ class VerificationRow extends Component {
     var isForm = model.subClassOf === 'tradle.Form'
     var isVerification = resource.document
     var r = isVerification ? resource.document : resource
-    if (r  &&  isMyProduct) {
-      let photos = resource.from.organization.photos
-      photo = photos  &&  photos.length ? photos[0] : null
-    }
+    if (r  &&  isMyProduct)
+      photo = resource.from.photo
     else if (r  &&  r.photos)
       photo = r.photos[0]
     let hasPhoto = photo !== null
