@@ -21,26 +21,30 @@ if (global.history && global.history.length) {
   }
 }
 
-require('react-native').Alert = require('./web/shims/Alert')
+const Alert = require('./web/shims/Alert')
+require('react-native').Alert = Alert
 require('./css/customicons.css')
 require('./css/ionicons.min.css')
 require('./css/styles.css')
 
 const err = isUnsupportedEnv()
 if (err) {
-  const rootEl = document.createElement('div')
-  rootEl.className = 'react-root'
-  document.body.appendChild(rootEl)
-  const Alert = require('react-native').Alert
-  Alert.alert('Oh no!', err, [])
+  alertError(err)
 } else {
-  require('whatwg-fetch')
-  // if (!global.EventSource) {
-  //   require('event-source-polyfill/eventsource.min.js')
-  // }
+  const isOnlyTab = require('onetab')
+  isOnlyTab(function (err, yes) {
+    if (err || !yes) {
+      return alertError('This application is open in another tab. Please close one of the two tabs and refresh the page.')
+    }
 
+    init()
+  })
+}
+
+function init () {
   if (!console.table) console.table = console.log
 
+  require('whatwg-fetch')
   require('./web/shims/deviceEventEmitter')
   require('./web/shims/orientation')
   require('./index.common')
@@ -56,12 +60,6 @@ if (err) {
     const splash = document.getElementById('splashscreen')
     splash.parentNode.removeChild(splash)
   }, 500)
-
-  // import Alert from './web/shims/Alert'
-  // Alert.alert('Title', 'this is a much longer message than the shorter message', [
-  //   { text: 'Cancel', onPress: () => alert('canceled!') },
-  //   { text: 'OK', onPress: () => alert('ok!') },
-  // ])
 }
 
 function isUnsupportedEnv () {
@@ -72,4 +70,11 @@ function isUnsupportedEnv () {
   if (!window.indexedDB) {
     return 'This application is not supported in this browser. Please use Chrome, Safari, Firefox or IE11+'
   }
+}
+
+function alertError (err) {
+  const rootEl = document.createElement('div')
+  rootEl.className = 'react-root'
+  document.body.appendChild(rootEl)
+  Alert.alert('Oh no!', err, [])
 }

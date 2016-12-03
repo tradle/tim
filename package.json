@@ -66,6 +66,7 @@
     "node-haste": "github:mvayngrib/node-haste#766d7e6",
     "node-libs-browser": "^1.0.0",
     "once": "^1.4.0",
+    "onetab": "~1.0.0",
     "os-browserify": "^0.1.2",
     "path-browserify": "0.0.0",
     "process": "^0.11.2",
