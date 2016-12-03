@@ -18,6 +18,7 @@ const ENUM = 'tradle.Enum'
 
 import ActionSheet from 'react-native-actionsheet'
 import Prompt from 'react-native-prompt'
+import { makeResponsive } from 'react-native-orient'
 // import Communications from 'react-native-communications'
 import StyleSheet from '../StyleSheet'
 import {
@@ -79,6 +80,8 @@ class ShowPropertiesView extends Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     // Prompt for employee to write a correction message
+    if (utils.resized(this.props, nextProps))
+      return true
     if (this.state.promptVisible !== nextState.promptVisible)
       return true
     if (!this.props.errorProps  ||  !nextProps.errorProps)
@@ -278,6 +281,7 @@ class ShowPropertiesView extends Component {
                           <Icon key={p} name={this.props.errorProps && this.props.errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={25} color={this.props.errorProps && this.props.errorProps[p] ? 'red' : this.props.bankStyle.LINK_COLOR} style={{marginTop: 10}}/>
                         </TouchableOpacity>
                         <Prompt
+                          promptStyle={{ width: this.props.width / 1.5 }}
                           title='Please write a message to the customer'
                           placeholder="Start typing"
                           visible={isPromptVisible}
@@ -342,6 +346,8 @@ class ShowPropertiesView extends Component {
 }
 reactMixin(ShowPropertiesView.prototype, RowMixin);
 reactMixin(ShowPropertiesView.prototype, ResourceMixin);
+ShowPropertiesView = makeResponsive(ShowPropertiesView)
+
 var styles = StyleSheet.create({
   textContainer: {
     flex: 1,
