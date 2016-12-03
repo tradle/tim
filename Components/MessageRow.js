@@ -823,7 +823,7 @@ class MessageRow extends Component {
     let link
     let isReadOnly = utils.isReadOnlyChat(this.props.resource, this.props.context) //this.props.context  &&  this.props.context._readOnly
     if (sameFormRequestForm  &&  !resource.documentCreated) {
-       let isReadOnly = utils.isReadOnlyChat(this.props.resource) // this.props.context  &&  this.props.context._readOnly
+       // let isReadOnly = utils.isReadOnlyChat(this.props.resource) // this.props.context  &&  this.props.context._readOnly
 
        link = <View style={[styles.rowContainer, {paddingVertical: 10, alignSelf: 'center'}]}>
                <View style={styles.textContainer}>
