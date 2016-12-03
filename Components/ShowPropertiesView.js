@@ -278,8 +278,8 @@ class ShowPropertiesView extends Component {
                           <Icon key={p} name={this.props.errorProps && this.props.errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={25} color={this.props.errorProps && this.props.errorProps[p] ? 'red' : this.props.bankStyle.LINK_COLOR} style={{marginTop: 10}}/>
                         </TouchableOpacity>
                         <Prompt
-                          title='Please write a message to the customer'
-                          placeholder="Start typing"
+                          title={translate('fieldErrorMessagePrompt')}
+                          placeholder={translate('thisValueIsInvalidPlaceholder')}
                           visible={isPromptVisible}
                           onCancel={() => this.setState({ promptVisible: null })}
                           onSubmit={(value) => {
