@@ -272,10 +272,6 @@ class ResourceList extends Component {
           dictionary: params.dictionary
         },
       }
-      if (action === 'allSharedContexts'  &&  this.props.officialAccounts  &&  this.props.modelName === constants.TYPES.PROFILE) {
-        this.setState({sharedContextCount: params.count})
-        return
-      }
       var me = utils.getMe()
 
       var msg = {
@@ -292,6 +288,10 @@ class ResourceList extends Component {
         this.props.navigator.replace(route)
       else
         this.props.navigator.push(route)
+      return
+    }
+    if (action === 'allSharedContexts'  &&  this.props.officialAccounts  &&  this.props.modelName === constants.TYPES.PROFILE) {
+      this.setState({sharedContextCount: params.count})
       return
     }
     if (action === 'list') {
@@ -1118,7 +1118,7 @@ var styles = StyleSheet.create({
   },
   sharedContext: {
     position: 'absolute',
-    right: 10,
+    right: 5,
     top: 20,
     width: 20,
     height:20,
