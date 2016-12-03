@@ -42,6 +42,8 @@ var asyncActions = [
   'pairingRequestAccepted',
   'addApp',
   'getAllContexts',
+  'getAllSharedContexts',
+  'viewChat'
 ]
 
 var syncActions = [

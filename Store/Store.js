@@ -3725,6 +3725,15 @@ var Store = Reflux.createStore({
     let l = list  &&  list.filter((r) => r.formsCount)
     this.trigger({action: 'allContexts', list: l, to: params.to})
   },
+  onGetAllSharedContexts() {
+    let list = this.searchMessages({modelName: PRODUCT_APPLICATION})
+    if (!list  ||  !list.length)
+      return
+    let l = list.filter((r) => {
+      return utils.isReadOnlyChat(r)
+    })
+    this.trigger({action: 'allSharedContexts', count: l.length})
+  },
   inContext(r, context) {
     return r._context && utils.getId(r._context) === utils.getId(context)
   },
@@ -6365,6 +6374,11 @@ var Store = Reflux.createStore({
     const current = list[key] || {}
     list[key] = { key, value: { ...current.value, ...value } }
   },
+  onViewChat(msg) {
+    // let to = this._getItem(PROFILE + '_' + msg.to[ROOT_HASH])
+    // let chat = to.organization ? this._getItem(to.organization) : to
+    // this.trigger({action: 'showChat', to: to})
+  }
 })
 // );
 
