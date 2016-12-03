@@ -291,6 +291,7 @@ class TimHome extends Component {
         bankStyle: defaultBankStyle
       };
     let me = utils.getMe();
+    Actions.getAllSharedContexts()
     this.props.navigator[doReplace ? 'replace' : 'push']({
       // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       id: 10,

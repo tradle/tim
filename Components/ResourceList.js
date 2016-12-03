@@ -82,6 +82,7 @@ class ResourceList extends Component {
       show: false,
       isConnected: this.props.navigator.isConnected,
       userInput: '',
+      sharedContextCount: 0,
     };
     if (props.multiChooser)
       this.state.chosen = {}
@@ -254,6 +255,10 @@ class ResourceList extends Component {
       this.props.navigator.replace(route)
       return
     }
+    if (action === 'allSharedContexts'  &&  this.props.officialAccounts  &&  this.props.modelName === constants.TYPES.PROFILE) {
+      this.setState({sharedContextCount: params.count})
+      return
+    }
     if (action === 'talkToEmployee') {
       if (!params.to)
         return
@@ -358,6 +363,8 @@ class ResourceList extends Component {
     if (nextState.forceUpdate)
       return true
     if (this.state.show !== nextState.show)
+      return true
+    if (this.state.sharedContextCount !== nextState.sharedContextCount)
       return true
     if (nextState.isConnected !== this.state.isConnected)
       return true
@@ -700,42 +707,6 @@ class ResourceList extends Component {
     if (this.props.prop  &&  !this.props.prop.allowToAdd)
       return <View />
 
-    // var qrInfo = (model.id === constants.TYPES.PROFILE)
-    //            ? <View style={styles.row}>
-    //                <TouchableOpacity underlayColor='transparent'
-    //                   onPress={this.showQRCode.bind(this, 'Contact Info', me[constants.ROOT_HASH])}>
-    //                 <View style={{alignSelf: 'center'}}>
-    //                   <View style={{marginTop: -12}}>
-    //                     <Icon name='ios-barcode'  size={30}  color='#999999' style={styles.icon} />
-    //                   </View>
-    //                   <View style={{marginTop: -5}}>
-    //                     <Text style={[buttonStyles.text, {color:'#999999'}]}>My QR Code</Text>
-    //                   </View>
-    //                 </View>
-    //               </TouchableOpacity>
-    //               <TouchableOpacity underlayColor='transparent' onPress={this.scanQRCode.bind(this)}>
-    //                 <View style={styles.row}>
-    //                   <View style={{marginTop: -5}}>
-    //                     <Text style={styles.resourceTitle}>Scan new contact</Text>
-    //                   </View>
-    //                   <View style={{marginTop: -12}}>
-    //                     <Icon name='qr-scanner'  size={30}  color='#999999' style={styles.icon} />
-    //                   </View>
-    //                 </View>
-    //               </TouchableOpacity>
-    //             </View>
-    //           : <View />
-
-    // return (
-    //   <View style={styles.footer}>
-    //     <TouchableOpacity underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
-    //       <View style={styles.menuButton1}>
-    //         <Icon name='md-menu'  size={30}  color='#ffffff' />
-    //       </View>
-    //     </TouchableOpacity>
-    //   </View>
-    // );
-    // let style = Platform.OS === 'ios' ? styles.menuButton : styles.menuButtonA
     let icon = Platform.OS === 'android' ? 'md-menu' : 'md-more'
     let color = Platform.OS === 'android' ? 'red' : '#ffffff'
     return (
@@ -979,7 +950,7 @@ class ResourceList extends Component {
     return (this.props.modelName === constants.TYPES.PROFILE)
           ? <View>
             <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
-              <TouchableOpacity underlayColor='transparent' onPress={this.showBanks.bind(this)}>
+              <TouchableOpacity onPress={this.showBanks.bind(this)}>
                 <View style={styles.row}>
                   <Image source={require('../img/banking.png')} style={styles.cellImage} />
                   <View style={styles.textContainer}>
@@ -989,12 +960,19 @@ class ResourceList extends Component {
               </TouchableOpacity>
             </View>
             <View style={{paddingVertical: 5, backgroundColor: '#f1ffe7'}}>
-              <TouchableOpacity underlayColor='transparent' onPress={this.showContexts.bind(this)}>
+              <TouchableOpacity onPress={this.showContexts.bind(this)}>
                 <View style={styles.row}>
                   <Icon name='md-share' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
                   <View style={styles.textContainer}>
                     <Text style={styles.resourceTitle}>{translate('sharedContext')}</Text>
                   </View>
+                  {
+                    this.state.sharedContextCount
+                    ? <View style={styles.sharedContext}>
+                        <Text style={styles.sharedContextText}>{this.state.sharedContextCount}</Text>
+                      </View>
+                    : <View />
+                  }
                 </View>
               </TouchableOpacity>
             </View>
@@ -1150,75 +1128,22 @@ var styles = StyleSheet.create({
     shadowColor: '#afafaf',
     backgroundColor: 'red'
   },
-  menuButtonA: {
-    paddingVertical: 5,
-    paddingHorizontal: 5
+  sharedContext: {
+    position: 'absolute',
+    right: 10,
+    top: 20,
+    width: 20,
+    height:20,
+    justifyContent: 'center',
+    borderRadius: 10,
+    backgroundColor: '#246624'
   },
-
-  menuButton1: {
-    marginTop: -30,
-    paddingVertical: 7,
-    paddingHorizontal: 13,
-    borderRadius: 25,
-    backgroundColor: 'red',
-    shadowOpacity: 1,
-    shadowRadius: 5,
-    shadowColor: '#afafaf',
-  }
+  sharedContextText: {
+    fontSize: 14,
+    alignSelf: 'center',
+    color: '#ffffff'
+  },
 
 });
 
 module.exports = ResourceList;
-
-  // showDeals(modelName) {
-  //   var model = utils.getModel(modelName).value;
-  //   // var model = utils.getModel(this.props.modelName).value;
-  //   this.props.navigator.push({
-  //     title: model.title,
-  //     id: 10,
-  //     component: ResourceList,
-  //     titleTextColor: '#7AAAC3',
-  //     backButtonTitle: 'Back',
-  //     passProps: {
-  //       filter: '',
-  //       modelName: DEAL_MODEL,
-  //     },
-  //   })
-  // }
-  // onSearchChange1(event) {
-  //   var filter = event.nativeEvent.text.toLowerCase();
-  //   Actions.list({
-  //     query: filter,
-  //     modelName: this.props.modelName,
-  //     to: this.props.resource
-  //   });
-  // }
-  // showMenu() {
-  //   var buttons = [translate('addServerUrl'), translate('scanQRcode'), 'Talk to employee', translate('cancel')]
-  //   let allowToAdd = this.props.prop  &&  this.props.prop.allowToAdd
-  //   var buttons = allowToAdd
-  //               ? [translate('addNew', this.props.prop.title), translate('cancel')]
-  //               : buttons
-  //   var self = this;
-  //   ActionSheetIOS.showActionSheetWithOptions({
-  //     options: buttons,
-  //     cancelButtonIndex: allowToAdd ? 2 : 3
-  //   }, function(buttonIndex) {
-  //     switch (buttonIndex) {
-  //     case 0:
-  //       if (allowToAdd)
-  //         self.addNew()
-  //       else
-  //         self.onSettingsPressed()
-  //       break
-  //     case 1:
-  //       self.scanFormsQRCode()
-  //       break;
-  //     case 2:
-  //       self.talkToEmployee()
-  //       break
-  //     default:
-  //       return
-  //     }
-  //   });
-  // }
