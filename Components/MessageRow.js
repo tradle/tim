@@ -819,10 +819,8 @@ class MessageRow extends Component {
               ? {color: '#AFBBA8'} //{color: STRUCTURED_MESSAGE_COLOR}
               : {color: '#2892C6'}
     let link
-    let isReadOnly = utils.isReadOnlyChat(this.props.resource) //this.props.context  &&  this.props.context._readOnly
+    let isReadOnly = utils.isReadOnlyChat(this.props.resource, this.props.context) //this.props.context  &&  this.props.context._readOnly
     if (sameFormRequestForm  &&  !resource.documentCreated) {
-       let isReadOnly = utils.isReadOnlyChat(this.props.resource, this.props.context) // this.props.context  &&  this.props.context._readOnly
-
        link = <View style={[chatStyles.rowContainer, {paddingVertical: 10, alignSelf: 'center'}]}>
                <View style={chatStyles.textContainer}>
                <TouchableHighlight underlayColor='transparent' style={{paddingRight: 15}} onPress={() => {
