@@ -5229,12 +5229,12 @@ var Store = Reflux.createStore({
       }
     }
     let isReadOnly = utils.getId(to) !== meId  &&  utils.getId(from) !== meId
-    if (val[TYPE] === PRODUCT_APPLICATION  &&  isReadOnly) {
-      // props that are convenient for displaying in shared context
-      val.from.organization = this._getItem(utils.getId(val.from)).organization
-      val.to.organization = this._getItem(utils.getId(val.to)).organization
-      // val._readOnly = true
-    }
+    // if (val[TYPE] === PRODUCT_APPLICATION  &&  isReadOnly) {
+    //   // props that are convenient for displaying in shared context
+    //   val.from.organization = this._getItem(utils.getId(val.from)).organization
+    //   val.to.organization = this._getItem(utils.getId(val.to)).organization
+    //   // val._readOnly = true
+    // }
     if (obj.object.context  &&  val[TYPE] !== PRODUCT_APPLICATION) {
       // if (!val._contexts)
       //   val._contexts = []
@@ -5329,8 +5329,8 @@ var Store = Reflux.createStore({
       // }
       return
     }
-    if (model.subClassOf === MY_PRODUCT)
-      val.from.organization = this._getItem(utils.getId(val.from)).organization
+    // if (model.subClassOf === MY_PRODUCT)
+    //   val.from.organization = this._getItem(utils.getId(val.from)).organization
     if (!isProductList  &&  !isReadOnly) {
     //   if (!from.lastMessageTime || (new Date() - from.lastMessageTime) > WELCOME_INTERVAL)
     //     batch.push({type: 'put', key: key, value: val})
@@ -5351,6 +5351,7 @@ var Store = Reflux.createStore({
       this._setItem(key, v)
     }
     if (!noTrigger) {
+      let context = val._context ? this._getItem(utils.getId(val._context)) : null
       if (isReadOnly) {
         if (val[TYPE] === PRODUCT_APPLICATION)
           this.addMessagesToChat(utils.getId(val), val)
@@ -5360,9 +5361,18 @@ var Store = Reflux.createStore({
             this.addMessagesToChat(utils.getId(context), val)
         }
       }
+      // Check that the message was send to the party that is not anyone who created the context it was send from
+      // That is possible if the message was sent from shared context
+      else if (isThirdPartySentRequest) {
+        let chat = utils.getId(context.to) === meId ? context.from : context.to
+        chat = this._getItem(chat)
+        let id  = chat.organization ? utils.getId(chat.organization) : utils.getId(chat)
+        this.addMessagesToChat(id, val)
+      }
       else
         this.addMessagesToChat(utils.getId(org ? org : from), val)
 
+      this.addVisualProps(val)
       batch.push({type: 'put', key: key, value: val})
     }
     return noTrigger
