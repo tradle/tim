@@ -3093,41 +3093,12 @@ var Store = Reflux.createStore({
               retParams.isEmployee = true
           }
         }
-        // Need to know that this context was shared and only then run this loop
-        result.forEach((r) => {
-          let from = this._getItem(r.from)
-          if (from.organization) {
-            let o = this._getItem(from.organization)
-            if (o.photos)
-              r.from.photo = o.photos[0]
-          }
-          if (r[TYPE] === VERIFICATION  &&  r._verifiedBy) {
-            let o = this._getItem(r._verifiedBy)
-            if (o.photos)
-              r._verifiedBy.photo = o.photos[0]
-          }
-          else if (this.getModel(r[TYPE]).value.subClassOf === FORM) {
-            let to = this._getItem(r.to)
-            if (to.organization)
-              r.to.organization = to.organization
-          }
-        })
       }
 
       if (params.context)
         retParams.context = params.context
       else if (params.modelName !== PRODUCT_APPLICATION)
         retParams.context = this.getCurrentContext(params.to, orgId)
-      else if (params._readOnly) {
-        result.forEach((r) => {
-          let to = this._getItem(r.to)
-          if (to.organization) {
-            let o = this._getItem(to.organization)
-            if (o.photos)
-              r.to.photo = o.photos[0]
-          }
-        })
-      }
 /*
       // Filter out forms that were shared, leave only verifications
       if (params.to  &&  params.to[TYPE] === ORGANIZATION  &&  !utils.isEmployee(params.to)) {//  &&  utils.getId(params.to) !== meId) {
@@ -3768,6 +3739,15 @@ var Store = Reflux.createStore({
     let list = this.searchMessages(params)
     let l = list  &&  list.filter((r) => r.formsCount)
     this.trigger({action: 'allContexts', list: l, to: params.to})
+  },
+  onGetAllSharedContexts() {
+    let list = this.searchMessages({modelName: PRODUCT_APPLICATION})
+    if (!list  ||  !list.length)
+      return
+    let l = list.filter((r) => {
+      return utils.isReadOnlyChat(r)
+    })
+    this.trigger({action: 'allSharedContexts', count: l.length})
   },
   inContext(r, context) {
     return r._context && utils.getId(r._context) === utils.getId(context)
@@ -5228,13 +5208,6 @@ var Store = Reflux.createStore({
         }
       }
     }
-    // // HACK for showing verification in employee's chat
-    // if (val[TYPE] === VERIFICATION  && me.isEmployee  &&  utils.getId(me) === toId) {
-    //   val._verifiedBy = from.organization
-    //   fromProfile = this._getItem(utils.getId(val.document)).from
-    //   from = this._getItem(fromProfile)
-    // }
-
     // if (val[TYPE] === VERIFICATION  && me.isEmployee  &&  meId === toId) {
     //   let document = this._getItem(val.document)
     //   if (utils.getId(document.from) === meId) {
@@ -5424,6 +5397,7 @@ var Store = Reflux.createStore({
       else
         this.addMessagesToChat(utils.getId(org ? org : from), val)
 
+      this.addVisualProps(val)
       batch.push({type: 'put', key: key, value: val})
     }
     return noTrigger
