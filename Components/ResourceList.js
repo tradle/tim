@@ -309,8 +309,9 @@ class ResourceList extends Component {
       return
     var list = params.list;
     if (this.props.multiChooser  &&  list.length) {
+      let sharingChatId = utils.getId(this.props.sharingChat)
       list = list.filter(r => {
-        return r[constants.ROOT_HASH] !== this.props.sharingChat[constants.ROOT_HASH]
+        return utils.getId(r) !== sharingChatId
       })
     }
 
