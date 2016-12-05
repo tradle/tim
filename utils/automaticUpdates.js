@@ -11,6 +11,7 @@ let DEFAULT_INTERVAL = 10 * 60 * 1000
 let downloadedUpdate = false
 let currentSync
 const CODE_UPDATE_KEY = '~hascodeupdate'
+const noop = () => {}
 
 // remove on app start
 // in case the user restarted the app manually
