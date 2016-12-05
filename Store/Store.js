@@ -38,7 +38,7 @@ Q.onerror = function (err) {
   throw err
 }
 
-var ENV = Platform.OS === 'android' ? require('../environment') : require('react-native-env')
+var ENV = require('../environment')
 var AddressBook = require('NativeModules').AddressBook;
 
 var voc = require('@tradle/models');
