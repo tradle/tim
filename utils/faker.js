@@ -18,14 +18,16 @@ const apis = {
     [TYPE]: "tradle.API",
     name: "au10tix",
     provider: {
-      id: 'tradle.Organization_abcdefghijklmnopqrstuvwxyz012345abcdefghijklmnopqrstuvwxyz012345_abcdefghijklmnopqrstuvwxyz012345abcdefghijklmnopqrstuvwxyz012345'
+      id: 'tradle.Organization_9ac10efb26e08e637baed8e855515f88ada0eed2b3af29f3b683bbfb94118157',
+      title: 'MA'
     }
   },
   idscan: {
     [TYPE]: 'tradle.API',
     name: 'idscan',
     provider: {
-      id: 'tradle.Organization_abcdefghijklmnopqrstuvwxyz012345abcdefghijklmnopqrstuvwxyz012345_abcdefghijklmnopqrstuvwxyz012345abcdefghijklmnopqrstuvwxyz012345'
+      id: 'tradle.Organization_e51f0d14ad262b2675aa7ca7169237a8d1a9b025b4f619ade0e0781472133be5',
+      title: 'B'
     }
   }
 }
@@ -46,15 +48,15 @@ function newAPIBasedVerification (doc, api) {
 
   return newVerificationWithMethod(doc, {
     [TYPE]: 'tradle.APIBasedVerificationMethod',
-    aspect: {
+    aspect: [{
       type: 'authenticity',
       authentic: true
-    },
+    }],
     api: api,
     confidence: Number((1 - (Math.random() * 0.2)).toFixed(2)), // 0.8 - 1.0 range to 2 sig figs
-    reference: {
+    reference: [{
       queryId: randomHex(32)
-    }
+    }]
   })
 }
 
@@ -62,10 +64,10 @@ function newVisualVerification (doc) {
   const ownerPresence = randomVal(ownerPresences)
   return newVerificationWithMethod(doc, {
     [TYPE]: 'tradle.VisualVerificationMethod',
-    aspect: {
+    aspect: [{
       type: 'ownership',
       authentic: true
-    },
+    }],
     documentPresence: ownerPresence === 'physical' ? ownerPresence : randomVal(documentPresences),
     ownerPresence: ownerPresence
   })

@@ -715,6 +715,14 @@ class MessageList extends Component {
   }
   // Show chooser of the organizations to share context with
   shareWith() {
+    let sharingChat
+    let me = utils.getMe()
+    if (me.organization) {
+      if (utils.isEmployee(me))
+        sharingChat = me.organization
+    }
+    else
+      sharingChat = this.props.resource
     this.props.navigator.push({
       title: translate(utils.getModel(this.state.context.product).value),
       id: 10,
@@ -724,7 +732,7 @@ class MessageList extends Component {
       passProps: {
         modelName: constants.TYPES.ORGANIZATION,
         multiChooser: true,
-        sharingChat: this.props.resource,
+        sharingChat: sharingChat,
         onDone: this.shareContext.bind(this)
       }
     });
