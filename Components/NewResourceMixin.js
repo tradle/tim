@@ -923,7 +923,8 @@ var NewResourceMixin = {
       resource[propName] = value
     }
     else if (this.props.model.properties[propName].type === 'array') {
-      if (this.props.model.properties[propName].items  &&  this.props.model.properties[propName].items.ref) {
+      let prop = this.props.model.properties[propName]
+      if (!prop.inlined  &&  prop.items  &&  props.items.ref) {
         let v = {
           id: utils.getId(value),
           title: utils.getDisplayName(value, utils.getModel(value[constants.TYPE]).properties)
@@ -1404,6 +1405,7 @@ var styles= StyleSheet.create({
     fontSize: 20
   },
   dateLabel: {
+    marginLeft: Platform.OS === 'ios' ? 10 : 0,
     fontSize: 12,
     marginVertical: 5,
     paddingBottom: 5

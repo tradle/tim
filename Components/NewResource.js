@@ -537,6 +537,8 @@ class NewResource extends Component {
     if (!item)
       return;
     var resource = this.addFormValues();
+    if (this.props.model.properties[propName].items.ref)
+      item[constants.TYPE] = this.props.model.properties[propName].items.ref
     var items = resource[propName];
     if (!items) {
       items = [];
