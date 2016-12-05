@@ -2884,7 +2884,7 @@ var Store = Reflux.createStore({
     })
   },
 
-  shareVerification(resource, to, opts) {
+  shareVerification(resource, to, opts, shareBatchId) {
     var time = new Date().getTime()
     var toId = utils.getId(to)
     var ver
