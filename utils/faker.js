@@ -82,6 +82,8 @@ function newVerificationWithMethod (doc, method, props={}) {
 
 function newVerificationTree (vOrDoc, depth) {
   const document = vOrDoc.document || vOrDoc
+  if (depth < 2) throw new Error('min depth is 2')
+
   depth = depth || 2
 
   if (depth === 2) {
