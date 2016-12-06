@@ -483,7 +483,7 @@ var RowMixin = {
     }
     return (
       <View style={st, viewStyle} key={this.getNextKey()}>
-        <View style={[chatStyles.textContainer, chatStyles.verificationBody]}>
+        <View style={[{flex:1}, chatStyles.verificationBody]}>
           <View style={headerStyle}>
             <Text style={chatStyles.verificationHeaderText}>{translate(utils.getModel(resource[constants.TYPE]).value)}</Text>
           </View>
