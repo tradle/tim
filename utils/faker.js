@@ -11,6 +11,8 @@ module.exports = {
   newVerificationTree,
   randomDoc
 }
+const titles = ['HSBC', 'Aviva', 'UBS', 'Alianz', 'Barclays', 'LBG', 'Admiral', 'Citi', 'JP Morgan', 'Lloyds of London Market']
+let titleIdx = 0
 
 const VERIFICATION = 'tradle.Verification'
 const apis = {
@@ -19,7 +21,7 @@ const apis = {
     name: "au10tix",
     provider: {
       id: 'tradle.Organization_9ac10efb26e08e637baed8e855515f88ada0eed2b3af29f3b683bbfb94118157',
-      title: 'MA'
+      title: 'Au10tix'
     }
   },
   idscan: {
@@ -27,7 +29,7 @@ const apis = {
     name: 'idscan',
     provider: {
       id: 'tradle.Organization_e51f0d14ad262b2675aa7ca7169237a8d1a9b025b4f619ade0e0781472133be5',
-      title: 'B'
+      title: 'IDScan'
     }
   }
 }
@@ -55,7 +57,7 @@ function newAPIBasedVerification (doc, api) {
     api: api,
     confidence: Number((1 - (Math.random() * 0.2)).toFixed(2)), // 0.8 - 1.0 range to 2 sig figs
     reference: [{
-      queryId: randomHex(32)
+      queryId: randomHex(16)
     }]
   })
 }
@@ -77,29 +79,44 @@ function newVerificationWithMethod (doc, method, props={}) {
   return extend({
     [TYPE]: VERIFICATION,
     document: doc,
+    from: {
+      id: 'tradle.Organization_' + randomHex(16),
+      title: titles[titleIdx++]
+    },
     dateVerified: Date.now(), // 10 mins ago
     method
   }, props)
 }
 
 function newVerificationTree (vOrDoc, depth) {
+  if (titleIdx === titles.length)
+    titleIdx = 0
   const document = vOrDoc.document || vOrDoc
   if (depth < 2) throw new Error('min depth is 2')
 
   depth = depth || 2
 
   if (depth === 2) {
-    return {
+    let r = {
       document,
+      from: {
+        id: 'tradle.Organization_' + randomHex(16),
+        title: titles[titleIdx++]
+      },
       sources: [
         newAPIBasedVerification(document),
         newVisualVerification(document)
       ]
     }
+    return r
   }
 
   return {
     document,
+    from: {
+      id: 'tradle.Organization_' + randomHex(16),
+      title: titles[titleIdx++]
+    },
     sources: [0, 0].map(a => newVerificationTree(vOrDoc, depth - 1))
   }
 }
@@ -116,7 +133,7 @@ function randomVal (obj) {
 
 function randomDoc (type) {
   type = type || 'tradle.PersonalInfo'
-  const link = randomHex(32)
+  const link = randomHex(16)
   return {
     id: `tradle.PersonalInfo_${link}_${link}`,
     title: type.split('.').pop()
