@@ -74,16 +74,20 @@ function checkPeriodically (millis) {
   }
 }
 
-function sync () {
+function sync (opts={}) {
   if (!(CodePush && ON)) return Promise.resolve(false)
   if (downloadedUpdate) return Promise.resolve(true)
   if (currentSync) return currentSync
 
-  return currentSync = CodePush.sync({
-    // use our own dialog below when the download completes
-    updateDialog: false,
-    installMode: CodePush.InstallMode.ON_NEXT_RESTART
-  })
+  return currentSync = CodePush.sync(
+    {
+      // use our own dialog below when the download completes
+      updateDialog: false,
+      installMode: CodePush.InstallMode.ON_NEXT_RESTART
+    },
+    opts.onSyncStatusChanged,
+    opts.onDownloadProgress
+  )
   .then(
     syncStatus => {
       if (syncStatus === CodePush.SyncStatus.UPDATE_INSTALLED) {

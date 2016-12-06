@@ -37,6 +37,8 @@ import {
   setPassword
 } from '../utils/localAuth'
 
+import throttle from 'throttleit'
+import { SyncStatus } from 'react-native-code-push'
 import AutomaticUpdates from '../utils/automaticUpdates'
 import CustomIcon from '../styles/customicons'
 import BackgroundImage from './BackgroundImage'
@@ -135,12 +137,10 @@ class TimHome extends Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    if (this.state.isLoading  !== nextState.isLoading   ||
+    return this.state.downloadUpdateProgress !== nextState.downloadUpdateProgress ||
+        this.state.isLoading  !== nextState.isLoading   ||
         this.state.message !== nextState.message        ||
-        this.state.hasMe !== nextState.hasMe)
-      return true
-    else
-      return false
+        this.state.hasMe !== nextState.hasMe
   }
 
   _handleOpenURL(event) {
@@ -171,10 +171,42 @@ class TimHome extends Component {
       utils.setModels(params.models);
       break
     case 'start':
+      // await new Promise(resolve => {
+      //   let percent = 0
+      //   const interval = setInterval(() => {
+      //     if (percent >= 100) {
+      //       this.setState({ downloadUpdateProgress: null })
+      //       clearInterval(interval)
+      //       resolve()
+      //     } else {
+      //       this.setState({ downloadUpdateProgress: Math.min(percent += Math.random() * 10 | 0, 100) })
+      //     }
+      //   }, 1000)
+      // })
+
       // prior to registration
       // force install updates before first interaction
       if (!utils.getMe()) {
-        await AutomaticUpdates.sync()
+        //   UP_TO_DATE: 0, // The running app is up-to-date
+        //   UPDATE_INSTALLED: 1, // The app had an optional/mandatory update that was successfully downloaded and is about to be installed.
+        //   UPDATE_IGNORED: 2, // The app had an optional update and the end-user chose to ignore it
+        //   UNKNOWN_ERROR: 3,
+        //   SYNC_IN_PROGRESS: 4, // There is an ongoing "sync" operation in progress.
+        //   CHECKING_FOR_UPDATE: 5,
+        //   AWAITING_USER_ACTION: 6,
+        //   DOWNLOADING_PACKAGE: 7,
+        //   INSTALLING_UPDATE: 8
+        await AutomaticUpdates.sync({
+          onDownloadProgress: throttle(({ totalBytes, receivedBytes }) => {
+            const percent = (receivedBytes * 100 / totalBytes)
+            if (percent === 100) {
+              this.setState({ downloadUpdateProgress: null })
+            } else {
+              this.setState({ downloadUpdateProgress: percent })
+            }
+          }, 1000)
+        })
+
         const hasUpdate = await AutomaticUpdates.hasUpdate()
         if (hasUpdate) return AutomaticUpdates.install()
       }
@@ -649,6 +681,13 @@ class TimHome extends Component {
   }
   getSplashScreen() {
     var {width, height} = utils.dimensions(TimHome)
+    var progress = this.state.downloadUpdateProgress
+    var progressIndicator = progress && (
+      <View>
+        <Text style={styles.progressIndicator}>{translate('downloadingUpdate')}: {progress}%</Text>
+      </View>
+    )
+
     return (
       <View style={styles.container}>
         <BackgroundImage source={BG_IMAGE} />
@@ -658,6 +697,7 @@ class TimHome extends Component {
             <Text style={styles.tradle}>Tradle</Text>
             <View style={{paddingTop: 20}}>
               <ActivityIndicator hidden='true' size='large' color='#ffffff'/>
+              {progressIndicator}
             </View>
           </View>
         </View>
@@ -737,6 +777,10 @@ var styles = (function () {
       color: '#eeeeee',
       fontSize: height > 450 ? 35 : 25,
       alignSelf: 'center',
+    },
+    progressIndicator: {
+      color: '#ffffff',
+      paddingTop: 10
     },
     text: {
       color: '#7AAAC3',
