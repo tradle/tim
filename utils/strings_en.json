@@ -164,5 +164,6 @@
     "applyForProduct": "Apply for a product",
     "verifyPrompt": "Verify?",
     "fieldErrorMessagePrompt": "What's wrong with this field?",
-    "thisValueIsInvalidPlaceholder": "this value is invalid because..."
+    "thisValueIsInvalidPlaceholder": "this value is invalid because...",
+    "sourcesBy": "Sources by {1}"
 }
