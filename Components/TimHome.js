@@ -37,7 +37,6 @@ import {
   setPassword
 } from '../utils/localAuth'
 
-import throttle from 'throttleit'
 import { SyncStatus } from 'react-native-code-push'
 import AutomaticUpdates from '../utils/automaticUpdates'
 import CustomIcon from '../styles/customicons'
@@ -118,7 +117,6 @@ class TimHome extends Component {
     );
   }
   componentDidMount() {
-    AutomaticUpdates.on()
     Linking.getInitialURL()
     .then((url) => {
       if (url)
@@ -171,6 +169,8 @@ class TimHome extends Component {
       utils.setModels(params.models);
       break
     case 'start':
+      // uncomment to test download progress indicator
+      //
       // await new Promise(resolve => {
       //   let percent = 0
       //   const interval = setInterval(() => {
@@ -196,21 +196,30 @@ class TimHome extends Component {
         //   AWAITING_USER_ACTION: 6,
         //   DOWNLOADING_PACKAGE: 7,
         //   INSTALLING_UPDATE: 8
-        await AutomaticUpdates.sync({
-          onDownloadProgress: throttle(({ totalBytes, receivedBytes }) => {
-            const percent = (receivedBytes * 100 / totalBytes)
-            if (percent === 100) {
-              this.setState({ downloadUpdateProgress: null })
-            } else {
-              this.setState({ downloadUpdateProgress: percent })
-            }
-          }, 1000)
-        })
+        try {
+          await AutomaticUpdates.sync({
+            onSyncStatusChanged: status => {
+              if (status === SyncStatus.DOWNLOADING_PACKAGE) {
+                this.setState({ downloadingUpdate: true, downloadUpdateProgress: 0 })
+              }
+            },
+            onDownloadProgress: debounce(({ totalBytes, receivedBytes }) => {
+              const downloadUpdateProgress = (receivedBytes * 100 / totalBytes) | 0
+              // avoid going from 1 percent to 0
+              this.setState({ downloadUpdateProgress })
+            }, 300, true)
+          })
+        } catch (err) {
+          debug('failed to sync with code push', err)
+        } finally {
+          this.setState({ downloadingUpdate: false, downloadUpdateProgress: null })
+        }
 
         const hasUpdate = await AutomaticUpdates.hasUpdate()
         if (hasUpdate) return AutomaticUpdates.install()
       }
 
+      AutomaticUpdates.on()
       if (self.state.message) {
         self.restartTiM()
         return
@@ -679,15 +688,26 @@ class TimHome extends Component {
       </View>
     );
   }
-  getSplashScreen() {
-    var {width, height} = utils.dimensions(TimHome)
-    var progress = this.state.downloadUpdateProgress
-    var progressIndicator = progress && (
+
+  getUpdateIndicator() {
+    if (!this.state.downloadingUpdate) return
+
+    var percentIndicator
+    if (this.state.downloadUpdateProgress) {
+      percentIndicator = <Text style={styles.updateIndicator}>{progress}%</Text>
+    }
+
+    return (
       <View>
-        <Text style={styles.progressIndicator}>{translate('downloadingUpdate')}: {progress}%</Text>
+        <Text style={styles.updateIndicator}>{translate('downloadingUpdate')}</Text>
+        {percentIndicator}
       </View>
     )
+  }
 
+  getSplashScreen() {
+    var {width, height} = utils.dimensions(TimHome)
+    var updateIndicator = this.getUpdateIndicator()
     return (
       <View style={styles.container}>
         <BackgroundImage source={BG_IMAGE} />
@@ -697,7 +717,7 @@ class TimHome extends Component {
             <Text style={styles.tradle}>Tradle</Text>
             <View style={{paddingTop: 20}}>
               <ActivityIndicator hidden='true' size='large' color='#ffffff'/>
-              {progressIndicator}
+              {updateIndicator}
             </View>
           </View>
         </View>
@@ -778,9 +798,10 @@ var styles = (function () {
       fontSize: height > 450 ? 35 : 25,
       alignSelf: 'center',
     },
-    progressIndicator: {
+    updateIndicator: {
       color: '#ffffff',
-      paddingTop: 10
+      paddingTop: 10,
+      alignSelf: 'center'
     },
     text: {
       color: '#7AAAC3',

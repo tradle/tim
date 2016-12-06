@@ -122,7 +122,6 @@ class TiMApp extends Component {
   }
 
   componentDidMount() {
-    AutomaticUpdates.on()
     AppState.addEventListener('change', this._handleAppStateChange);
     // Linking.addEventListener('url', this._handleOpenURL);
     // var url = Linking.popInitialURL();

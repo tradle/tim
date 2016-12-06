@@ -4,7 +4,7 @@ import utils from './utils'
 import Actions from '../Actions/Actions'
 
 let CodePush = !__DEV__ && !utils.isSimulator() && require('react-native-code-push')
-let ON = false
+let ON = !!CodePush
 let CHECKING
 // every 10 mins
 let DEFAULT_INTERVAL = 10 * 60 * 1000
@@ -63,15 +63,14 @@ function checkPeriodically (millis) {
   if (CHECKING) return CHECKING
 
   millis = millis || DEFAULT_INTERVAL
-  return CHECKING = sync()
+  return CHECKING = utils.promiseDelay(millis)
+    .then(sync)
     .then(() => {
-      if (!downloadedUpdate) return loop()
+      if (!downloadedUpdate) {
+        // loop
+        return ON && checkPeriodically(millis)
+      }
     })
-
-  function loop () {
-    return utils.promiseDelay(millis)
-      .then(() => ON && checkPeriodically(millis))
-  }
 }
 
 function sync (opts={}) {
@@ -107,7 +106,7 @@ function sync (opts={}) {
 }
 
 function on (period) {
-  if (CodePush && !ON) {
+  if (CodePush) {
     ON = true
     checkPeriodically(period)
   }
