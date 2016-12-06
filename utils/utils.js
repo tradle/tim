@@ -622,24 +622,27 @@ var utils = {
             title: this.getDisplayName(res[p], properties)
           }
         }
+        continue
       }
-      else if (properties[p].type === 'array'  &&  properties[p].items.ref) {
-        var arr = []
-        res[p].forEach(function(r) {
-          if (r.id) {
-            if (r.photo)
-              delete r.photo
-            arr.push(r)
-            return
-          }
-          var rr = {}
-          rr.id = utils.getId(r)
-          var m = utils.getModel(r[TYPE])
-          rr.title = utils.getDisplayName(r, m.properties)
-          arr.push(rr)
-        })
-        res[p] = arr
-      }
+      if (properties[p].type !== 'array'  ||
+         !properties[p].items.ref         ||
+          properties[p].inlined)
+        continue
+      var arr = []
+      res[p].forEach(function(r) {
+        if (r.id) {
+          if (r.photo)
+            delete r.photo
+          arr.push(r)
+          return
+        }
+        var rr = {}
+        rr.id = utils.getId(r)
+        var m = utils.getModel(r[TYPE])
+        rr.title = utils.getDisplayName(r, m.properties)
+        arr.push(rr)
+      })
+      res[p] = arr
     }
   },
 
