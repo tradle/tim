@@ -1124,7 +1124,22 @@ var utils = {
   restartApp: function () {
     return NativeModules.CodePush.restartApp(false)
   },
-  printStack: tradleUtils.printStack.bind(tradleUtils)
+  printStack: tradleUtils.printStack.bind(tradleUtils),
+  addCatchLogger: function (name, fn) {
+    return function () {
+      return fn.apply(this, arguments)
+        .catch(err => {
+          console.warn(`${name} failed:`, err.stack || err.message || err)
+          throw err
+        })
+    }
+  }
+}
+
+if (__DEV__) {
+  ;['setPassword', 'getPassword'].forEach(method => {
+    utils[method] = utils.addCatchLogger(method, utils[method])
+  })
 }
 
 function normalizeRemoveListener (addListenerRetVal) {

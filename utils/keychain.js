@@ -23,6 +23,12 @@ const debug = require('debug')('tradle:app:keychain')
 const ellipticCurves = {}
 const DEFAULT_KEY_SET = tradleUtils.defaultKeySet()
 
+if (__DEV__) {
+  createKeychainNativeKey = utils.addCatchLogger('createKeychainNativeKey', createKeychainNativeKey)
+  createKeychainResidentKey = utils.addCatchLogger('createKeychainResidentKey', createKeychainResidentKey)
+  lookupKey = utils.addCatchLogger('lookupKey', lookupKey)
+}
+
 export const PASSWORD_ITEM_KEY = 'app-password'
 
 export function generateNewSet (opts = {}) {

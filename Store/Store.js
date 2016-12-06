@@ -4560,6 +4560,29 @@ var Store = Reflux.createStore({
       utils.setPassword(ENCRYPTION_KEY, encryptionKey).then(() => encryptionKey),
       genIdentity
     ])
+    .catch(err => {
+      if (!/authentication failed/.test(err.message)) {
+        // Alert.alert(
+        //   'Something went wrong...',
+        //   'Please restart the app and try again'
+        // )
+
+        throw err
+      }
+
+      // user doesn't have passcode enabled
+      return new Promise(resolve => {
+        Alert.alert(
+          translate('youShallNotPass'),
+          translate('enablePasscodeFirst'),
+          [
+            { text: 'OK', onPress: resolve }
+          ]
+        )
+      })
+      // retry
+      .then(() => this.createNewIdentity())
+    })
   },
 
   publishMyIdentity(orgRep) {
