@@ -191,7 +191,7 @@ var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
 var COMMON_ENV = require('../utils/env')
-var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://' + COMMON_ENV.LOCAL_IP + ':44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
+var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = [] //__DEV__ ? ['http://' + COMMON_ENV.LOCAL_IP + ':44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
@@ -215,6 +215,16 @@ const DEVICE_ID = 'deviceid'
 // const ENCRYPTION_SALT = 'accountsalt'
 const TLS_ENABLED = false
 const PAUSE_ON_TRANSITION = false //true
+
+const {
+  newAPIBasedVerification,
+  newIdscanVerification,
+  newAu10tixVerification,
+  newVisualVerification,
+  newVerificationTree,
+  randomDoc
+} = require('../utils/faker')
+
 
 // var Store = Reflux.createStore(timeFunctions({
 var Store = Reflux.createStore({
@@ -507,7 +517,7 @@ var Store = Reflux.createStore({
           db.put(settingsId, settings)
       }
       else {
-        SERVICE_PROVIDERS_BASE_URLS = SERVICE_PROVIDERS_BASE_URL_DEFAULTS.slice()
+        SERVICE_PROVIDERS_BASE_URLS = SERVICE_PROVIDERS_BASE_URL_DEFAULTS ? SERVICE_PROVIDERS_BASE_URL_DEFAULTS.slice() : []
         var settings = {
           [TYPE]: SETTINGS,
           [ROOT_HASH]: '1',
@@ -1915,9 +1925,16 @@ var Store = Reflux.createStore({
 
   onAddVerification(params) {
     let r = params.r
+
     let notOneClickVerification = params.notOneClickVerification
     let to = params.to || [r.to]
     let document = params.document || r.document
+
+    // if (__DEV__) {
+    // let newV = newVerificationTree(document, 4)
+    // delete newV.from
+    // extend(r, newV, true)
+    // }
     let dontSend = params.dontSend
     let time = r && r.time || new Date().getTime()
     let self = this
@@ -2676,7 +2693,7 @@ var Store = Reflux.createStore({
         if (!result)
           return {isBecomingEmployee: true}
         let meId = utils.getId(me)
-        return {isBecomingEmployee: result.some((r) => meId === utils.getId(r.to))}
+        return {isBecomingEmployee: !(result.some((r) => meId === utils.getId(r.to)))}
       }
     }
   },
