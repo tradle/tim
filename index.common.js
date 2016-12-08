@@ -24,6 +24,8 @@ import 'stream'
 // })
 
 var ResourceList = require('./Components/ResourceList');
+var VerifierChooser = require('./Components/VerifierChooser')
+
 var VideoPlayer = require('./Components/VideoPlayer')
 var EnumList = require('./Components/EnumList')
 // var GridList = require('./Components/GridList');
@@ -446,6 +448,8 @@ class TiMApp extends Component {
       return <ContextChooser navigator={nav} {...props} />
     case 24:
       return <LockScreen navigator={nav} {...props} />
+    case 25:
+      return <VerifierChooser navigator={nav} {...props} />
     case 10:
     default: // 10
       return <ResourceList navigator={nav} {...props} />
