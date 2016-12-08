@@ -1,4 +1,3 @@
-
 'use strict';
 
 var path = require('path')
@@ -14,6 +13,8 @@ import ReactNative, {
 import AsyncStorage from './Storage'
 import * as LocalAuth from '../utils/localAuth'
 import Push from '../utils/push'
+
+var noop = () => {}
 
 var path = require('path')
 var BeSafe = require('asyncstorage-backup')
@@ -191,7 +192,7 @@ var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
 var COMMON_ENV = require('../utils/env')
-var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = [] //__DEV__ ? ['http://' + COMMON_ENV.LOCAL_IP + ':44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
+var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://' + COMMON_ENV.LOCAL_IP + ':44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
@@ -222,7 +223,8 @@ const {
   newAu10tixVerification,
   newVisualVerification,
   newVerificationTree,
-  randomDoc
+  randomDoc,
+  newFormRequestVerifiers
 } = require('../utils/faker')
 
 
@@ -1477,7 +1479,7 @@ var Store = Reflux.createStore({
       });
     })
   },
-  onAddMessage(r, isWelcome, requestForForm) {
+  onAddMessage(r, isWelcome, requestForForm, cb) {
     var self = this
     let m = this.getModel(r[TYPE]).value
     var props = m.properties;
@@ -1663,6 +1665,8 @@ var Store = Reflux.createStore({
       var key = utils.getId(rr)
 
       rr.to = self.buildRef(isReadOnlyContext ? context.to : r.to)
+      if (r[TYPE] === PRODUCT_APPLICATION)
+        rr.to.organization = self.buildRef(to)
 
       self._setItem(key, rr)
 
@@ -1729,7 +1733,8 @@ var Store = Reflux.createStore({
     })
     .catch(function(err) {
       debugger
-    });
+    })
+    .finally(() => cb ? cb(rr) : noop())
   },
 
   packMessage(toChain, from, to, context) {
@@ -1965,12 +1970,13 @@ var Store = Reflux.createStore({
          r.to = this.buildRef(this._getItem(to[0]))
        }
        newVerification = this.buildRef(r)
-
-      document = this._getItem(utils.getId(document))
-      let context = document._context
-      if (context)
-        r._context = context
-
+      let context = r._context
+      if (!context) {
+        document = this._getItem(utils.getId(document))
+        context = document._context
+        if (context)
+          r._context = context
+      }
       var promise = dontSend
                    ? Q()
                    : this.sendMessageToContextOwners(result.object, to, context)
@@ -2257,6 +2263,8 @@ var Store = Reflux.createStore({
     var resource = params.resource;
     delete temporaryResources[resource[TYPE]]
     var meta = params.meta;
+    if (!meta)
+      meta = utils.getModel(resource[TYPE]).value
     var shareWith = params.shareWith
 
     var isRegistration = params.isRegistration;
@@ -3022,14 +3030,16 @@ var Store = Reflux.createStore({
         if (params.isAggregation)
           result = this.getDependencies(result);
         var shareableResources;
-        var retParams = {
-          action: 'list',
-          list: result,
-          spinner: params.spinner,
-          isAggregation: params.isAggregation
-        }
-        if (params.prop)
-          retParams.prop = params.prop;
+        var retParams = params.list
+                      ? { action: 'filteredList', list: result}
+                      : { action: 'list',
+                          list: result,
+                          spinner: params.spinner,
+                          isAggregation: params.isAggregation
+                        }
+          if (params.prop)
+            retParams.prop = params.prop;
+
         this.trigger(retParams);
       })
     }
@@ -3043,9 +3053,10 @@ var Store = Reflux.createStore({
 
       var shareableResources;
       var retParams = {
-        action: !params.listView  &&  isMessage  &&  !params.prop && !params._readOnly ? 'messageList' : 'list',
+        action: !params.listView  &&  !params.prop && !params._readOnly ? 'messageList' : 'list',
         list: result,
         spinner: params.spinner,
+        to: params.to,
         isAggregation: params.isAggregation
       }
       if (isMessage) {
@@ -3207,6 +3218,9 @@ var Store = Reflux.createStore({
     })
   },
   searchNotMessages(params) {
+    if (params.list)
+      return params.list.map((r) => this._getItem(r))
+
     var foundResources = {};
     var modelName = params.modelName;
     var to = params.to;
@@ -3795,6 +3809,8 @@ var Store = Reflux.createStore({
     var meId = utils.getId(me)
     var simpleLinkMessages = {}
     var meId = utils.getId(utils.getMe())
+
+    var hasVerifiers = []
     for (var i=0; i<foundResources.length; i++) {
       var r = foundResources[i]
       if (me  &&  utils.getId(r.to) !== meId  &&  utils.getId(r.from) !== meId)
@@ -3821,8 +3837,11 @@ var Store = Reflux.createStore({
       }
       simpleLinkMessages[r.form] = r
       var msgModel = this.getModel(r.form);
-      if (msgModel  &&  msgModel.value.subClassOf !== MY_PRODUCT)
+      if (msgModel  &&  msgModel.value.subClassOf !== MY_PRODUCT) {
         verTypes.push(msgModel.value.id);
+        if (r.verifiers)
+          hasVerifiers[msgModel.value.id] = r.verifiers
+      }
     }
     var shareableResources = {};
     var shareableResourcesRootToR = {}
@@ -3830,11 +3849,7 @@ var Store = Reflux.createStore({
 
     var isOrg = to  &&  to[TYPE] === ORGANIZATION
     var org = isOrg ? to : (to.organization ? this._getItem(utils.getId(to.organization)) : null)
-    var reps
-    if (isOrg)
-      reps = this.getRepresentatives(utils.getId(org))
-    else
-      reps = [utils.getId(to)]
+    var reps = isOrg ? this.getRepresentatives(utils.getId(org)) : [utils.getId(to)]
 
     var productsToShare = this.searchMessages({modelName: MY_PRODUCT, to: utils.getMe(), strict: true})
     if (productsToShare  &&  productsToShare.length) {
@@ -3896,6 +3911,30 @@ var Store = Reflux.createStore({
         var document = doc.id ? this._getItem(utils.getId(doc.id)) : doc;
         if (!document)
           return;
+
+        // Check if there is at least one verification by the listed in FormRequest verifiers
+        if (hasVerifiers  &&  hasVerifiers[docType]) {
+          let verifiers = hasVerifiers[docType]
+          let foundVerifiedForm
+          verifiers.forEach((sp) => {
+            let spReps = this.getRepresentatives(utils.getId(sp.provider))
+            let sw = val._sharedWith.filter((r) => {
+              return spReps.some((rep) => utils.getId(rep) === r.bankRepresentative)
+            })
+            if (sw.length)
+              foundVerifiedForm = true
+          })
+          if (!foundVerifiedForm)
+            return
+          // let sw = sharedWith.filter((r) => {
+          //   if (reps.some((rep) => utils.getId(rep) === r.bankRepresentative))
+          //     return true
+          // })
+          // if (sw.length)
+          //   thisCompanyVerification = true
+        }
+
+        /*
         if (to  &&  org  &&  document.verifications) {
           var thisCompanyVerification;
           for (var i=0; i<document.verifications.length; i++) {
@@ -3907,10 +3946,7 @@ var Store = Reflux.createStore({
                 thisCompanyVerification = true;
               else {
                 let sw = sharedWith.filter((r) => {
-                  if (reps.filter((rep) => {
-                          if (utils.getId(rep) === r.bankRepresentative)
-                            return true
-                        }).length)
+                  if (reps.some((rep) => utils.getId(rep) === r.bankRepresentative)))
                     return true
                 })
                 if (sw.length)
@@ -3922,6 +3958,7 @@ var Store = Reflux.createStore({
           // if (thisCompanyVerification)
           //   return;
         }
+        */
         var value = {};
         extend(value, val);
         value.document = document;
@@ -3931,6 +3968,8 @@ var Store = Reflux.createStore({
     // Allow sharing non-verified forms
     let context = this.getCurrentContext(to)
     verTypes.forEach((verType) => {
+      if (hasVerifiers  &&  hasVerifiers[verType])
+        return
       var l = this.searchNotMessages({modelName: verType, notVerified: true})
       if (!l)
         return
@@ -5023,47 +5062,41 @@ var Store = Reflux.createStore({
       val._sharedWith = [this.createSharedWith(utils.getId(val.from.id), new Date().getTime())]
 
     self._mergeItem(key, val)
-    var retParams = {
-      action: isMessage ? 'messageList' : 'list'
-    }
+    // var retParams = {
+    //   action: isMessage ? 'messageList' : 'list'
+    // }
 
     var resultList
 
     let isMyMessage
     if (isMessage) {
       var toId = PROFILE + '_' + obj.to[ROOT_HASH]
-      let to = this._getItem(toId)
-
       var meId = PROFILE + '_' + me[ROOT_HASH]
-      var isSelfIntroduction = model.id === SELF_INTRODUCTION
-      var id
       isMyMessage = isMessage ? (toId !== meId  &&  fromId !== meId) : false
-      if (isMyMessage) {
-        id = !isSelfIntroduction  &&  toId === meId ? fromId : toId
-        if (!noTrigger  &&  id) {
-          var to = this._getItem(id)
-          if (to.organization) {
-            var org =  this._getItem(utils.getId(to.organization))
-            resultList = this.searchMessages({to: org, modelName: MESSAGE})
-          }
-          else
-            resultList = this.searchMessages({to: to, modelName: MESSAGE})
-          retParams.list = resultList
-          var shareableResources = this.getShareableResources(resultList, to);
-          if (shareableResources)
-            retParams.shareableResources = shareableResources
-          retParams.resource = to
-        }
-      }
-      // if (to.organization) {
-      //    if (!to.bot)
-      //     retParams.isEmployee = true
+      // let to = this._getItem(toId)
+      // var isSelfIntroduction = model.id === SELF_INTRODUCTION
+      // if (isMyMessage) {
+      //   var id = !isSelfIntroduction  &&  toId === meId ? fromId : toId
+      //   if (!noTrigger  &&  id) {
+      //     var to = this._getItem(id)
+      //     if (to.organization) {
+      //       var org =  this._getItem(utils.getId(to.organization))
+      //       resultList = this.searchMessages({to: org, modelName: MESSAGE})
+      //     }
+      //     else
+      //       resultList = this.searchMessages({to: to, modelName: MESSAGE})
+      //     retParams.list = resultList
+      //     var shareableResources = this.getShareableResources(resultList, to);
+      //     if (shareableResources)
+      //       retParams.shareableResources = shareableResources
+      //     retParams.resource = to
+      //   }
       // }
     }
-    else if (!onMessage  &&  val[TYPE] != PROFILE) {
-      resultList = this.searchNotMessages({modelName: val[TYPE]})
-      retParams.list = resultList
-    }
+    // else if (!onMessage  &&  val[TYPE] != PROFILE) {
+    //   resultList = this.searchNotMessages({modelName: val[TYPE]})
+    //   retParams.list = resultList
+    // }
 
     return db.batch(batch)
     .then(() => {
@@ -5287,6 +5320,7 @@ var Store = Reflux.createStore({
     //   val.to.organization = this._getItem(utils.getId(val.to)).organization
     //   // val._readOnly = true
     // }
+    let isNew = val[ROOT_HASH] === val[CUR_HASH]
     if (obj.object.context  &&  val[TYPE] !== PRODUCT_APPLICATION) {
       // if (!val._contexts)
       //   val._contexts = []
@@ -5304,7 +5338,7 @@ var Store = Reflux.createStore({
       }
       // val._contexts.push(this.buildRef(context))
     }
-    else if (val[TYPE] === FORM_REQUEST  &&  val[ROOT_HASH] === val[CUR_HASH]) {
+    else if (val[TYPE] === FORM_REQUEST  &&  isNew) {
       let product = val.product
       let contexts = this.searchMessages({modelName: PRODUCT_APPLICATION, to: org})
       if (contexts) {
@@ -5320,6 +5354,22 @@ var Store = Reflux.createStore({
       }
     }
     if (val[TYPE] === FORM_REQUEST) {
+      ///=============== TEST VERIFIERS
+      if (isNew) {
+        // Prefill for testing and demoing
+        newFormRequestVerifiers(from, SERVICE_PROVIDERS, val)
+        //============
+        if (val.verifiers) {
+          val.message = 'Please have this form verified by one of our trusted associates'
+          val.verifiers.forEach((v) => {
+            let serviceProvider =  SERVICE_PROVIDERS  ? SERVICE_PROVIDERS.filter((sp) => sp.org === v.provider.id) : null
+            serviceProvider = (serviceProvider  &&  serviceProvider.length) ? serviceProvider[0] : null
+            if (!serviceProvider)
+              this.getInfo([v.url], true) //, id)
+          })
+        }
+      }
+
       let formRequests = this.searchMessages({modelName: FORM_REQUEST, to: org})
       if (formRequests)
         formRequests.forEach((r) => {
@@ -5638,7 +5688,7 @@ var Store = Reflux.createStore({
         this.deleteMessageFromChat(utils.getId(resource), this._getItem(id))
         delete list[id]
       })
-      this.trigger({action: 'messageList', modelName: MESSAGE, forgetMeFromCustomer: true})
+      this.trigger({action: 'messageList', modelName: MESSAGE, to: resource, forgetMeFromCustomer: true})
       return meDriver.signAndSend({
         object: { [TYPE]: FORGOT_YOU },
         to: { permalink: resource[ROOT_HASH] }
@@ -5759,7 +5809,7 @@ var Store = Reflux.createStore({
           }
         })
       })
-      this.trigger({action: 'messageList', list: [msg], resource: org})
+      this.trigger({action: 'messageList', list: [msg], resource: org, to: resource})
       chatMessages[orgId] = []
 
       return db.batch(batch)

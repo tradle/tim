@@ -107,6 +107,33 @@ var verificationStyles = Object.freeze({
     borderTopRightRadius: 0,
     backgroundColor: '#77ADFC' //#569bff',
   },
+  shareButton: {
+    flexDirection: 'row',
+    // marginLeft: 0,
+    marginHorizontal: 10,
+    justifyContent: 'space-between',
+    padding: 5,
+    borderRadius: 10,
+    // borderWidth: 1,
+    // borderColor: '#215A89',
+    // borderColor: '#4982B1',
+    // backgroundColor: '#ffffff'
+    backgroundColor: '#4982B1'
+  },
+  shareText: {
+    // color: '#4982B1',
+    color: '#ffffff',
+    fontSize: 20,
+    // fontWeight: '600',
+    paddingHorizontal: 3,
+    alignSelf: 'center'
+  },
+  shareView: {
+    flexDirection: 'row',
+    marginTop: 5,
+    paddingBottom: 5,
+    justifyContent:'space-between'
+  },
 });
 
 module.exports = verificationStyles;

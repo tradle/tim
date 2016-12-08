@@ -3,13 +3,16 @@ const extend = require('xtend')
 const { constants } = require('@tradle/engine')
 const { TYPE } = constants
 
+var formDefaults = require('../data/formDefaults.json')
+
 module.exports = {
   newAPIBasedVerification,
   newIdscanVerification,
   newAu10tixVerification,
   newVisualVerification,
   newVerificationTree,
-  randomDoc
+  randomDoc,
+  newFormRequestVerifiers
 }
 
 const nextTitle = (function () {
@@ -45,6 +48,38 @@ const apis = {
 const ownerPresences = ['physical', 'selfie', 'video']
 const documentPresences = ['physical', 'snapshot', 'video']
 
+function newFormRequestVerifiers(from, SERVICE_PROVIDERS, val) {
+  if (!from || !SERVICE_PROVIDERS || !SERVICE_PROVIDERS.length)
+    return
+  if (from.organization.title !== 'Easy Bank')
+    return
+
+  if (val.form in formDefaults) {
+    let formRes = {[TYPE]: val.form}
+    val.formResource = extend(formRes, formDefaults[val.form])
+    // console.log(JSON.stringify(resource, 0, 2))
+  }
+  else
+    return
+  let verifiers = []
+  let fOrgId = from.organization && from.organization.id
+
+  for (let i=0; i<SERVICE_PROVIDERS.length  &&  verifiers.length < 2; i++) {
+    let sp = SERVICE_PROVIDERS[i]
+    if (fOrgId  &&  fOrgId === sp.org)
+      continue
+    verifiers.push({
+      url: sp.url,
+      product: 'tradle.CurrentAccount',
+      provider: {
+        id: sp.org,
+        title: sp.title
+      }
+    })
+  }
+  val.verifiers = verifiers
+
+}
 function newIdscanVerification (doc) {
   return newAPIBasedVerification(doc, apis.idscan)
 }
