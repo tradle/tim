@@ -35,7 +35,6 @@ import Geometry from './Geometry'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const UNREAD_COLOR = '#FF6D0D'
 
-
 var dateProp
 
 class ResourceRow extends Component {
@@ -256,49 +255,6 @@ class ResourceRow extends Component {
       );
     }
   }
-      // return (
-      // <Swipeout right={[{text: 'Hide', backgroundColor: 'red', onPress: this.hideResource.bind(this, resource)}]} autoClose={true} scroll={(event) => this._allowScroll(event)} >
-      //   <View key={this.getNextKey()} style={{opacity: 1, flex: 1, justifyContent: 'center'}}>
-      //     <TouchableHighlight onPress={this.state ? this.action.bind(this) : this.props.onSelect} underlayColor='transparent' key={this.getNextKey()}>
-      //       <View style={[styles.row]} key={this.getNextKey()}>
-      //         {photo}
-      //         {orgPhoto}
-      //         {onlineStatus}
-      //         <View style={textStyle} key={this.getNextKey()}>
-      //           {this.formatRow(resource)}
-      //         </View>
-      //         {cancelResource}
-      //       </View>
-      //     </TouchableHighlight>
-      //     {this.props.isOfficialAccounts
-      //     ? <TouchableHighlight underlayColor='transparent' style={{position: 'absolute', right: 20, top: 25, backgroundColor: 'white'}} onPress={() => {
-      //         this.props.navigator.push({
-      //           component: ResourceList,
-      //           title: translate("myDocuments"),
-      //           backButtonTitle: translate('back'),
-      //           passProps: {
-      //             modelName: constants.TYPES.FORM,
-      //             resource: this.props.resource
-      //           }
-      //         })
-      //       }}>
-      //         <View style={textStyle}>
-      //            {resource.numberOfForms
-      //               ? <View style={{flexDirection: 'row'}}>
-      //                    <Icon name='ios-paper-outline' color='#cccccc' size={35} style={{marginTop: Platform.OS === 'ios' ? -5 : 0}}/>
-      //                    <Text style={{fontWeight: '600', marginLeft: 0, marginTop: Platform.OS === 'ios' ? -10 : -6, color: '#cccccc'}}>{resource.numberOfForms}</Text>
-      //                 </View>
-      //               : <View />
-      //            }
-      //         </View>
-      //       </TouchableHighlight>
-      //       : <View />}
-      //     {dateRow}
-      //     {cancelResource}
-      //     <View style={styles.cellBorder}  key={this.getNextKey()} />
-      //   </View>
-      // </Swipeout>
-      // );
 
   chooseToShare() {
     let resource = this.props.resource
@@ -655,3 +611,46 @@ var styles = StyleSheet.create({
 });
 
 module.exports = ResourceRow;
+      // return (
+      // <Swipeout right={[{text: 'Hide', backgroundColor: 'red', onPress: this.hideResource.bind(this, resource)}]} autoClose={true} scroll={(event) => this._allowScroll(event)} >
+      //   <View key={this.getNextKey()} style={{opacity: 1, flex: 1, justifyContent: 'center'}}>
+      //     <TouchableHighlight onPress={this.state ? this.action.bind(this) : this.props.onSelect} underlayColor='transparent' key={this.getNextKey()}>
+      //       <View style={[styles.row]} key={this.getNextKey()}>
+      //         {photo}
+      //         {orgPhoto}
+      //         {onlineStatus}
+      //         <View style={textStyle} key={this.getNextKey()}>
+      //           {this.formatRow(resource)}
+      //         </View>
+      //         {cancelResource}
+      //       </View>
+      //     </TouchableHighlight>
+      //     {this.props.isOfficialAccounts
+      //     ? <TouchableHighlight underlayColor='transparent' style={{position: 'absolute', right: 20, top: 25, backgroundColor: 'white'}} onPress={() => {
+      //         this.props.navigator.push({
+      //           component: ResourceList,
+      //           title: translate("myDocuments"),
+      //           backButtonTitle: translate('back'),
+      //           passProps: {
+      //             modelName: constants.TYPES.FORM,
+      //             resource: this.props.resource
+      //           }
+      //         })
+      //       }}>
+      //         <View style={textStyle}>
+      //            {resource.numberOfForms
+      //               ? <View style={{flexDirection: 'row'}}>
+      //                    <Icon name='ios-paper-outline' color='#cccccc' size={35} style={{marginTop: Platform.OS === 'ios' ? -5 : 0}}/>
+      //                    <Text style={{fontWeight: '600', marginLeft: 0, marginTop: Platform.OS === 'ios' ? -10 : -6, color: '#cccccc'}}>{resource.numberOfForms}</Text>
+      //                 </View>
+      //               : <View />
+      //            }
+      //         </View>
+      //       </TouchableHighlight>
+      //       : <View />}
+      //     {dateRow}
+      //     {cancelResource}
+      //     <View style={styles.cellBorder}  key={this.getNextKey()} />
+      //   </View>
+      // </Swipeout>
+      // );
