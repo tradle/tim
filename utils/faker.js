@@ -11,8 +11,16 @@ module.exports = {
   newVerificationTree,
   randomDoc
 }
-const titles = ['HSBC', 'Aviva', 'UBS', 'Alianz', 'Barclays', 'LBG', 'Admiral', 'Citi', 'JP Morgan', 'Lloyds of London Market']
-let titleIdx = 0
+
+const nextTitle = (function () {
+  const titles = ['HSBC', 'Aviva', 'UBS', 'Alianz', 'Barclays', 'Lloyds Banking Group', 'Bank of America', 'Citi', 'JP Morgan', 'Morgan Stanley', 'Credit Suisse']
+  let titleIdx = -1
+  return function () {
+    titleIdx++
+    titleIdx = titleIdx % titles.length
+    return titles[titleIdx]
+  }
+})()
 
 const VERIFICATION = 'tradle.Verification'
 const apis = {
@@ -81,17 +89,20 @@ function newVerificationWithMethod (doc, method, props={}) {
     document: doc,
     from: {
       id: 'tradle.Organization_' + randomHex(16),
-      title: titles[titleIdx++]
+      title: nextTitle()
     },
     dateVerified: Date.now(), // 10 mins ago
     method
   }, props)
 }
 
-function newVerificationTree (vOrDoc, depth) {
-  if (titleIdx === titles.length)
-    titleIdx = 0
-  const document = vOrDoc.document || vOrDoc
+function newVerificationTree (verification, depth) {
+  if (depth < 2) return verification
+
+  const document = verification.document
+  const from = verification.from.title
+  if (from !== 'easyBot') return
+
   if (depth < 2) throw new Error('min depth is 2')
 
   depth = depth || 2
@@ -101,7 +112,7 @@ function newVerificationTree (vOrDoc, depth) {
       document,
       from: {
         id: 'tradle.Organization_' + randomHex(16),
-        title: titles[titleIdx++]
+        title: nextTitle()
       },
       sources: [
         newAPIBasedVerification(document),
@@ -115,9 +126,9 @@ function newVerificationTree (vOrDoc, depth) {
     document,
     from: {
       id: 'tradle.Organization_' + randomHex(16),
-      title: titles[titleIdx++]
+      title: nextTitle()
     },
-    sources: [0, 0].map(a => newVerificationTree(vOrDoc, depth - 1))
+    sources: [0, 0].map(a => newVerificationTree(verification, depth - 1))
   }
 }
 
