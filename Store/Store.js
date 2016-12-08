@@ -2500,7 +2500,7 @@ var Store = Reflux.createStore({
             // don't save until the real resource is created
           list[utils.getId(returnVal)].value = returnVal
           self.trigger(params);
-          return self.waitForTransitionToEnd()
+          return self.onIdle()
           .then(() => {
             save()
           })
@@ -2588,7 +2588,7 @@ var Store = Reflux.createStore({
           debugger
         }
 
-        return self.waitForTransitionToEnd()
+        return self.onIdle()
         .then(function () {
           let rId = utils.getId(returnVal.to)
           let to = self._getItem(rId)
@@ -6409,11 +6409,13 @@ var Store = Reflux.createStore({
   },
 
   onStartTransition() {
+    this._transitioning = true
     if (PAUSE_ON_TRANSITION) {
       if (meDriver) meDriver.pause(2000)
     }
   },
   onEndTransition() {
+    this._transitioning = false
     if (PAUSE_ON_TRANSITION) {
       if (meDriver) meDriver.resume()
     }
@@ -6425,7 +6427,11 @@ var Store = Reflux.createStore({
       cbs.forEach((fn) => fn())
     }
   },
-  waitForTransitionToEnd(fn) {
+  onIdle(fn) {
+    if (utils.isWeb() || !this._transitioning) {
+      return Q.resolve()
+    }
+
     if (!this._transitionCallbacks) {
       this._transitionCallbacks = []
     }
