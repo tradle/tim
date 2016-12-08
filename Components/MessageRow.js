@@ -438,7 +438,7 @@ class MessageRow extends Component {
     let w = utils.dimensions(MessageRow).width * 0.8
     return (
       <View style={[rowStyle, viewStyle, {width: w}]} key={this.getNextKey()}>
-        <View style={{width: 30}}/>
+        <View style={{width: 40}}/>
         <View style={[addStyle ? [chatStyles.textContainer, addStyle] : chatStyles.textContainer]}>
           <View style={{flex: 1}}>
             <View style={styles.assistentBox}>
@@ -869,7 +869,11 @@ class MessageRow extends Component {
                    <Text style={[chatStyles.resourceTitle, {color: resource.documentCreated  ||  notLink ?  '#757575' : LINK_COLOR}]}>{translate(form)}</Text>
                    <Icon style={[{marginTop: 2}, resource.documentCreated  ? styles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
                  </View>
-      onPressCall = notLink ? null : this.createNewResource.bind(this, form, isMyMessage)
+      onPressCall = notLink
+                  ? null
+                  : resource.verifiers
+                     ? this.props.chooseTrustedProvider.bind(this, this.props.resource, form, isMyMessage)
+                     : this.createNewResource.bind(this, form, isMyMessage)
     }
     let strName = sameFormRequestForm ? translate('addAnotherFormOrGetNext', translate(form)) : utils.getStringName(message)
     let str = strName ? utils.translate(strName) : message
@@ -1004,15 +1008,15 @@ var styles = StyleSheet.create({
   multiEntryText: {
     fontSize: 18
   },
-  msgImage: {
-    height: 30,
-    marginRight: 3,
-    marginLeft: 0,
-    width: 30,
-    borderRadius: 15,
-    borderColor: '#cccccc',
-    borderWidth: 1
-  },
+  // msgImage: {
+  //   height: 30,
+  //   marginRight: 3,
+  //   marginLeft: 0,
+  //   width: 30,
+  //   borderRadius: 15,
+  //   borderColor: '#cccccc',
+  //   borderWidth: 1
+  // },
   productAppIcon: {
     alignSelf: 'flex-end',
     marginTop: -30,
