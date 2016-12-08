@@ -1931,10 +1931,13 @@ var Store = Reflux.createStore({
     let document = params.document || r.document
 
     // if (__DEV__) {
-    // let newV = newVerificationTree(document, 4)
-    // delete newV.from
-    // extend(r, newV, true)
+    //   let newV = newVerificationTree(r, 4)
+    //   if (newV) {
+    //     delete newV.from
+    //     extend(r, newV, true)
+    //   }
     // }
+
     let dontSend = params.dontSend
     let time = r && r.time || new Date().getTime()
     let self = this
