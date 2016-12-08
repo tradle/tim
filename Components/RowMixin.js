@@ -123,7 +123,9 @@ var RowMixin = {
                 : resource.from.photo
       if  (photo) {
         let uri = utils.getImageUri(photo.url)
-        photo = <Image source={{uri: uri}} style={styles.employeeImage} />
+        photo = <View style={{paddingRight: 3}}>
+                  <Image source={{uri: uri}} style={styles.cellRoundImage} />
+                </View>
         return photo
       }
       // return isProductApplication
@@ -571,13 +573,13 @@ var styles = StyleSheet.create({
     fontSize: 18,
     backgroundColor: 'transparent'
   },
-  employeeImage: {
-    // backgroundColor: '#dddddd',
-    height: 40,
-    marginRight: 3,
-    marginLeft: 0,
-    width: 40,
-  },
+  // employeeImage: {
+  //   // backgroundColor: '#dddddd',
+  //   height: 40,
+  //   marginRight: 3,
+  //   marginLeft: 0,
+  //   width: 40,
+  // },
   cellRoundImage: {
     paddingVertical: 1,
     borderRadius: 20,
