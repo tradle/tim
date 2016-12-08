@@ -837,9 +837,6 @@ class ResourceList extends Component {
     })
   }
   render() {
-    // AlertIOS.alert('Rendering list ' + this.state.isLoading)
-    // if (this.state.isLoading)
-    //   return <View/>
     var content;
     var model = utils.getModel(this.props.modelName).value;
     if (this.state.dataSource.getRowCount() === 0   &&
@@ -847,8 +844,6 @@ class ResourceList extends Component {
         !utils.getMe().organization                 &&
         model.subClassOf !== ENUM                   &&
         !this.props.isChooser                       &&
-        // this.props.modelName !== constants.TYPES.PROFILE       &&
-        // this.props.modelName !== constants.TYPES.VERIFICATION  &&
         this.props.modelName !== constants.TYPES.ORGANIZATION  &&
         (!model.subClassOf  ||  model.subClassOf !== ENUM)) {
       content = <NoResources
@@ -857,7 +852,6 @@ class ResourceList extends Component {
                   isLoading={this.state.isLoading}/>
     }
     else {
-      var model = utils.getModel(this.props.modelName).value;
       content = <ListView
           dataSource={this.state.dataSource}
           renderHeader={this.renderHeader.bind(this)}
@@ -872,7 +866,6 @@ class ResourceList extends Component {
           scrollRenderAhead={10}
           showsVerticalScrollIndicator={false} />;
     }
-    var model = utils.getModel(this.props.modelName).value;
     var actionSheet = this.renderActionSheet()
     var footer = actionSheet && this.renderFooter()
     var searchBar
@@ -977,30 +970,6 @@ class ResourceList extends Component {
 
   }
 
-  // showQRCode1(purpose, content) {
-  //   this.props.navigator.push({
-  //     title: 'QR Code: ' + purpose,
-  //     id: 17,
-  //     component: QRCode,
-  //     titleTextColor: '#eeeeee',
-  //     backButtonTitle: translate('back'),
-  //     passProps: {
-  //       fullScreen: true,
-  //       content: content
-  //     }
-  //   })
-  // }
-
-  // talkToEmployee(qrcode) {
-  //   this.setState({show: false})
-  //   if (!qrcode)
-  //     // qrcode = 'http://127.0.0.1:444444;71e4b7cd6c11ab7221537275988f113a879029eu;6aefc09f4da125095409770592eb96ac142fb579'
-  //     // qrcode = 'http://192.168.0.104:44444/;71e4b7cd6c11ab7221537275988f113a879029eu;3497c6ce074f1bc66c05e204fd3a7fbcd5e0fb08'
-  //     qrcode = 'http://192.168.0.136:44444/;71e4b7cd6c11ab7221537275988f113a879029eu;c3adf2d26304133265c3e28b5c9037614880aec5'
-
-  //   Actions.getEmployeeInfo(qrcode)
-  //   return
-  // }
   scanFormsQRCode() {
     this.setState({show: false})
     this.props.navigator.push({
@@ -1138,3 +1107,27 @@ var styles = StyleSheet.create({
 
 module.exports = ResourceList;
 
+  // showQRCode1(purpose, content) {
+  //   this.props.navigator.push({
+  //     title: 'QR Code: ' + purpose,
+  //     id: 17,
+  //     component: QRCode,
+  //     titleTextColor: '#eeeeee',
+  //     backButtonTitle: translate('back'),
+  //     passProps: {
+  //       fullScreen: true,
+  //       content: content
+  //     }
+  //   })
+  // }
+
+  // talkToEmployee(qrcode) {
+  //   this.setState({show: false})
+  //   if (!qrcode)
+  //     // qrcode = 'http://127.0.0.1:444444;71e4b7cd6c11ab7221537275988f113a879029eu;6aefc09f4da125095409770592eb96ac142fb579'
+  //     // qrcode = 'http://192.168.0.104:44444/;71e4b7cd6c11ab7221537275988f113a879029eu;3497c6ce074f1bc66c05e204fd3a7fbcd5e0fb08'
+  //     qrcode = 'http://192.168.0.136:44444/;71e4b7cd6c11ab7221537275988f113a879029eu;c3adf2d26304133265c3e28b5c9037614880aec5'
+
+  //   Actions.getEmployeeInfo(qrcode)
+  //   return
+  // }
