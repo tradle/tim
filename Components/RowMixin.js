@@ -227,11 +227,8 @@ var RowMixin = {
                         : translate(model) + ' ...'}
                     </Text>
                   </View>
-    let addStyle
-    if (!onPress)
-      addStyle = {backgroundColor: this.props.bankStyle.VERIFICATION_BG, borderWidth: BORDER_WIDTH, borderColor: this.props.bankStyle.VERIFICATION_BG, borderBottomColor: this.props.bankStyle.VERIFIED_HEADER_COLOR}
-    else
-      addStyle = {}
+    let addStyle = onPress ? {} : {backgroundColor: this.props.bankStyle.VERIFICATION_BG, borderWidth: BORDER_WIDTH, borderColor: this.props.bankStyle.VERIFICATION_BG, borderBottomColor: this.props.bankStyle.VERIFIED_HEADER_COLOR}
+
     header = hasPhotos
             ?  <View style={[chatStyles.rowContainer, styles.verification, addStyle]}>
                  {photo}
@@ -251,9 +248,9 @@ var RowMixin = {
       var orgPhoto = verification.organization.photo
                    ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
                    : <View />
-      var shareView = <View style={[styles.shareButton, {opacity: this.props.resource.documentCreated ? 0.3 : 1}]}>
+      var shareView = <View style={[chatStyles.shareButton, {opacity: this.props.resource.documentCreated ? 0.3 : 1}]}>
                         <CustomIcon name='tradle' style={{color: '#ffffff' }} size={32} />
-                        <Text style={styles.shareText}>{translate('Share')}</Text>
+                        <Text style={chatStyles.shareText}>{translate('Share')}</Text>
                       </View>
       var orgTitle = this.props.to[constants.TYPE] === constants.TYPES.ORGANIZATION
                    ? this.props.to.name
@@ -303,7 +300,7 @@ var RowMixin = {
 
       }
       else if (this.props.resource.documentCreated) {
-        orgRow = <View style={styles.shareView}>
+        orgRow = <View style={chatStyles.shareView}>
                    {shareView}
                   <TouchableHighlight onPress={this.props.onSelect.bind(this, document, verification)} underlayColor='transparent'>
                     {orgView}
@@ -311,7 +308,7 @@ var RowMixin = {
                 </View>
       }
       else {
-        orgRow = <View style={styles.shareView}>
+        orgRow = <View style={chatStyles.shareView}>
                    <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
                             Alert.alert(
                               'Sharing ' + docTitle + ' ' + verifiedBy,
@@ -529,33 +526,6 @@ var styles = StyleSheet.create({
   descriptionB: {
     fontSize: 18,
   },
-  shareButton: {
-    flexDirection: 'row',
-    // marginLeft: 0,
-    marginHorizontal: 10,
-    justifyContent: 'space-between',
-    padding: 5,
-    borderRadius: 10,
-    // borderWidth: 1,
-    // borderColor: '#215A89',
-    // borderColor: '#4982B1',
-    // backgroundColor: '#ffffff'
-    backgroundColor: '#4982B1'
-  },
-  shareText: {
-    // color: '#4982B1',
-    color: '#ffffff',
-    fontSize: 20,
-    // fontWeight: '600',
-    paddingHorizontal: 3,
-    alignSelf: 'center'
-  },
-  shareView: {
-    flexDirection: 'row',
-    marginTop: 5,
-    paddingBottom: 5,
-    justifyContent:'space-between'
-  },
   msgImage: {
     // backgroundColor: '#dddddd',
     height: 40,
@@ -589,6 +559,7 @@ var styles = StyleSheet.create({
   },
   cellImage: {
     // backgroundColor: '#dddddd',
+    marginLeft: 10,
     height: 40,
     width: 40,
     marginRight: 10,

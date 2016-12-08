@@ -5,6 +5,7 @@ var translate = utils.translate
 var ArticleView = require('./ArticleView');
 var MessageView = require('./MessageView');
 var NewResource = require('./NewResource');
+import CustomIcon from '../styles/customicons'
 var Icon = require('react-native-vector-icons/Ionicons');
 var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin');
@@ -124,6 +125,17 @@ class VerificationMessageRow extends Component {
       {backgroundColor: isShared ? '#ffffff' : this.props.bankStyle.VERIFICATION_BG, borderColor: bgColor},
       isMyMessage ? {borderTopRightRadius: 0} : {borderTopLeftRadius: 0}
     ];
+    let shareWith = this.props.shareWithRequestedParty
+                  ? <View style={styles.shareView}>
+                      <TouchableHighlight underlayColor='transparent' onPress={this.shareWithRequestedParty.bind(this)}>
+                         <View style={[styles.shareButton, {opacity: this.props.resource.documentCreated ? 0.3 : 1}]}>
+                          <CustomIcon name='tradle' style={{color: '#ffffff' }} size={32} />
+                          <Text style={styles.shareText}>{translate('Share')}</Text>
+                        </View>
+                      </TouchableHighlight>
+                      <Text style={{paddingLeft: 5, fontSize: 16}}>{'with ' + this.props.shareWithRequestedParty.title}</Text>
+                    </View>
+                  : <View/>
     let messageBody =
           <TouchableHighlight onPress={this.verify.bind(this, resource)} underlayColor='transparent'>
           <View style={{flexDirection: 'column', flex: 1}}>
@@ -133,6 +145,7 @@ class VerificationMessageRow extends Component {
                 <View style={{flex: 1}}>
                   {renderedRow}
                </View>
+               {shareWith}
             </View>
           </View>
               {this.getSendStatus()}
@@ -140,12 +153,16 @@ class VerificationMessageRow extends Component {
           </TouchableHighlight>
 
     var viewStyle = { margin: 1, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR }
+
     return (
       <View style={viewStyle} key={this.getNextKey()}>
         {date}
         {messageBody}
       </View>
     );
+  }
+  shareWithRequestedParty() {
+
   }
   verify(event) {
     var resource = this.props.resource;
