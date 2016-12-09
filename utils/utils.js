@@ -38,7 +38,6 @@ const Cache = require('lru-cache')
 var strMap = {
   'Please fill out this form and attach a snapshot of the original document': 'fillTheFormWithAttachments',
   'Please fill out this form': 'fillTheForm'
-
 }
 var translatedStrings = {
   en: require('./strings_en.json'),

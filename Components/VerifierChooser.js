@@ -49,14 +49,26 @@ class VerifierChooser extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      isLoading: true,
-      isConnected: this.props.navigator.isConnected,
-      dataSource: new ListView.DataSource({
+    let v = props.originatingMessage.verifiers.map((rr) => {
+      let p = rr.provider.id.split('_')
+      return {
+        [constants.TYPE]: p[0],
+        [constants.ROOT_HASH]: p[1],
+        name: rr.provider.title,
+        photos: rr.provider.photo ? [rr.provider.photo] : null
+      }
+    })
+
+    let dataSource = new ListView.DataSource({
         rowHasChanged: function(row1, row2) {
           return row1 !== row2 || row1._online !== row2._online
         }
       })
+
+    this.state = {
+      isLoading: true,
+      dataSource: dataSource.cloneWithRows(v),
+      isConnected: this.props.navigator.isConnected,
     };
   }
   componentWillUnmount() {
@@ -64,12 +76,12 @@ class VerifierChooser extends Component {
       StatusBar.setHidden(true)
   }
   componentWillMount() {
-    let v = this.props.originatingMessage.verifiers.map((rr) => rr.provider.id)
+    // let v = this.props.originatingMessage.verifiers.map((rr) => rr.provider.id)
 
-    utils.onNextTransitionEnd(this.props.navigator, () => {
-      Actions.list({modelName: this.props.modelName, list: v})
-      StatusBar.setHidden(false);
-    });
+    // utils.onNextTransitionEnd(this.props.navigator, () => {
+    //   Actions.list({modelName: this.props.modelName, list: v})
+    //   StatusBar.setHidden(false);
+    // });
   }
 
   componentDidMount() {
@@ -98,6 +110,7 @@ class VerifierChooser extends Component {
   renderRow(resource)  {
     return <ResourceRow
               onSelect={() => this.showVerifier(resource)}
+              isChooser={true}
               navigator={this.props.navigator}
               resource={resource} />
   }
@@ -154,7 +167,7 @@ class VerifierChooser extends Component {
       })
     })
     this.props.navigator.replace({
-      title: resource.title,
+      title: resource.name,
       component: MessageList,
       id: 11,
       backButtonTitle: 'Back',

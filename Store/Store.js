@@ -15,7 +15,9 @@ import * as LocalAuth from '../utils/localAuth'
 import Push from '../utils/push'
 
 var noop = () => {}
-
+AsyncStorage.getAllKeys().then(keys => {
+  console.log('AsyncStorage', keys)
+})
 var path = require('path')
 var BeSafe = require('asyncstorage-backup')
 var Reflux = require('reflux');
@@ -2834,6 +2836,7 @@ var Store = Reflux.createStore({
       return
 
     // Get representative
+    to = this._getItem(to)
     var toOrgId
     if (to[TYPE] === ORGANIZATION) {
       toOrgId = utils.getId(to)
@@ -5357,7 +5360,11 @@ var Store = Reflux.createStore({
       ///=============== TEST VERIFIERS
       if (isNew) {
         // Prefill for testing and demoing
-        newFormRequestVerifiers(from, SERVICE_PROVIDERS, val)
+
+        let orgs = {}
+        this.searchNotMessages({modelName: ORGANIZATION}).forEach((r) => orgs[utils.getId(r)] = r)
+
+        newFormRequestVerifiers(from, SERVICE_PROVIDERS, val, orgs)
         //============
         if (val.verifiers) {
           val.message = 'Please have this form verified by one of our trusted associates'

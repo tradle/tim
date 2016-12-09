@@ -48,7 +48,7 @@ const apis = {
 const ownerPresences = ['physical', 'selfie', 'video']
 const documentPresences = ['physical', 'snapshot', 'video']
 
-function newFormRequestVerifiers(from, SERVICE_PROVIDERS, val) {
+function newFormRequestVerifiers(from, SERVICE_PROVIDERS, val, orgs) {
   if (!from || !SERVICE_PROVIDERS || !SERVICE_PROVIDERS.length)
     return
   if (from.organization.title !== 'Easy Bank')
@@ -68,12 +68,14 @@ function newFormRequestVerifiers(from, SERVICE_PROVIDERS, val) {
     let sp = SERVICE_PROVIDERS[i]
     if (fOrgId  &&  fOrgId === sp.org)
       continue
+    let org = orgs[sp.org]
     verifiers.push({
       url: sp.url,
       product: 'tradle.CurrentAccount',
       provider: {
         id: sp.org,
-        title: sp.title
+        title: org.name,
+        photo: org.photos &&  org.photos[0]
       }
     })
   }
