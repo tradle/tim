@@ -410,8 +410,10 @@ class MessageList extends Component {
 
     props = extend(props, moreProps)
     if (model.id === TYPES.VERIFICATION) {
-      if (this.state.verifiedByTrustedProvider  &&  this.state.verifiedByTrustedProvider[ROOT_HASH] === resource[ROOT_HASH])
+      if (this.state.verifiedByTrustedProvider  &&  this.state.verifiedByTrustedProvider[ROOT_HASH] === resource[ROOT_HASH]) {
         props.shareWithRequestedParty = this.props.originatingMessage.from
+        props.originatingMessage = this.props.originatingMessage
+      }
       return  <VerificationMessageRow {...props} />
     }
 
@@ -588,7 +590,10 @@ class MessageList extends Component {
       context = this.props.resource
     return (
       <PageView style={[platformStyles.container, bgStyle]}>
-        <NetworkInfoProvider connected={this.state.isConnected} resource={resource} online={this.state.onlineStatus} />
+        {this.props.originatingMessage
+          ? <View/>
+          : <NetworkInfoProvider connected={this.state.isConnected} resource={resource} online={this.state.onlineStatus} />
+        }
         <ChatContext chat={resource} context={context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={this.props.bankStyle} allContexts={this.state.allContexts} />
         <View style={ sepStyle } />
         {content}
