@@ -310,7 +310,6 @@ class MessageList extends Component {
     return false
   }
   share(resource, to, formRequest) {
-    console.log('Share')
     Actions.share(resource, to, formRequest) // forRequest - originating message
   }
 
@@ -737,6 +736,7 @@ class MessageList extends Component {
       titleTextColor: this.props.bankStyle.VERIFIED_HEADER_COLOR,
       backButtonTitle: 'Back',
       component: VerifierChooser,
+      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       // titleTextColor: '#7AAAC3',
       passProps:  {
         modelName: TYPES.ORGANIZATION,
