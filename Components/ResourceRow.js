@@ -42,7 +42,8 @@ class ResourceRow extends Component {
     super(props)
     if (props.changeSharedWithList)
       this.state = {sharedWith: true}
-    if (props.multiChooser)
+    // Multichooser for sharing context; isChooser for choosing delegated trusted party for requested verification
+    if (props.multiChooser || this.props.isChooser)
       this.state = {isChosen: false}
     if (props.resource[constants.TYPE] === constants.TYPES.PROFILE)
       this.state = {resource: props.resource, unread: props.resource._unread}
@@ -133,7 +134,7 @@ class ResourceRow extends Component {
         }
       }
     }
-    if (photo  &&  rType === constants.TYPES.ORGANIZATION) {
+    if (!this.props.isChooser  &&  photo  &&  rType === constants.TYPES.ORGANIZATION) {
       var onlineStatus = (
         <Geometry.Circle size={20} style={styles.online}>
           <Geometry.Circle size={18} style={{ backgroundColor: resource._online ? '#62C457' : '#FAD70C' }} />
@@ -160,9 +161,9 @@ class ResourceRow extends Component {
                            </View>
                        : <View />
 
-    var multiChooser = this.props.multiChooser
+    var multiChooser = this.props.multiChooser  ||  this.props.isChooser
                      ?  <View style={styles.multiChooser}>
-                          <TouchableHighlight underlayColor='transparent' onPress={this.chooseToShare.bind(this)}>
+                          <TouchableHighlight underlayColor='transparent' onPress={this.props.multiChooser ? this.chooseToShare.bind(this) : () => {this.setState({isChosen: true}); setTimeout(this.props.onSelect.bind(this, this.props.resource), 500)}}>
                            <Icon name={this.state.isChosen ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color='#7AAAc3' />
                           </TouchableHighlight>
                         </View>
@@ -170,7 +171,7 @@ class ResourceRow extends Component {
     var textStyle = /*noImage ? [styles.textContainer, {marginVertical: 7}] :*/ styles.textContainer;
 
     let dateRow
-    if (dateProp  &&  resource[dateProp]) {
+    if (!this.props.isChooser  &&  dateProp  &&  resource[dateProp]) {
       var val = utils.formatDate(new Date(resource[dateProp]), true)
       // var dateBlock = self.addDateProp(resource, dateProp, true);
       dateRow = <View style={{position: 'absolute', top: 2, backgroundColor: 'transparent', right: 10}}>
@@ -192,7 +193,7 @@ class ResourceRow extends Component {
 
     // Grey out if not loaded provider info yet
             // <ActivityIndicator hidden='true' color='#629BCA'/>
-    var isOpaque = resource[constants.TYPE] === constants.TYPES.ORGANIZATION && !resource.contacts
+    var isOpaque = resource[constants.TYPE] === constants.TYPES.ORGANIZATION && !resource.contacts  &&  !this.props.isChooser
     if (isOpaque)
       return (
       <View key={this.getNextKey()} style={{opacity: 0.5}}>
@@ -316,7 +317,9 @@ class ResourceRow extends Component {
       }
       return <Text style={styles.resourceTitle}>{translate(utils.getModel(resource.product).value)}</Text>;
     }
-
+    else if (this.props.isChooser) {
+      return <Text style={styles.resourceTitle}>{utils.getDisplayName(resource)}</Text>
+    }
     var vCols = [];
     var properties = model.properties;
     var first = true
@@ -324,7 +327,7 @@ class ResourceRow extends Component {
     var datePropsCounter = 0;
     var backlink;
     var cnt = 10;
-    for (var i=0; i<viewCols.length; i++) {
+    for (var i=0; !this.props.isChooser  &&  i<viewCols.length; i++) {
       var v = viewCols[i];
       if (properties[v].type === 'array') {
         if (properties[v].items.backlink)
