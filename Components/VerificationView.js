@@ -252,11 +252,6 @@ var styles = StyleSheet.create({
     marginHorizontal: 7,
     color: '#2E3B4E',
   },
-  separator: {
-    height: 1,
-    backgroundColor: '#eeeeee',
-    marginHorizontal: 15
-  },
   title: {
     fontSize: 16,
     // fontFamily: 'Avenir Next',
