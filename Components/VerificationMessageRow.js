@@ -11,6 +11,7 @@ var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin');
 var equal = require('deep-equal')
 import { makeResponsive } from 'react-native-orient'
+var Actions = require('../Actions/Actions')
 var StyleSheet = require('../StyleSheet')
 var chatStyles = require('../styles/chatStyles')
 var reactMixin = require('react-mixin');
@@ -125,30 +126,37 @@ class VerificationMessageRow extends Component {
       {backgroundColor: isShared ? '#ffffff' : this.props.bankStyle.VERIFICATION_BG, borderColor: bgColor},
       isMyMessage ? {borderTopRightRadius: 0} : {borderTopLeftRadius: 0}
     ];
-    let shareWith = this.props.shareWithRequestedParty
-                  ? <View style={styles.shareView}>
-                      <TouchableHighlight underlayColor='transparent' onPress={this.shareWithRequestedParty.bind(this)}>
-                         <View style={[styles.shareButton, {opacity: this.props.resource.documentCreated ? 0.3 : 1}]}>
-                          <CustomIcon name='tradle' style={{color: '#ffffff' }} size={32} />
-                          <Text style={styles.shareText}>{translate('Share')}</Text>
-                        </View>
-                      </TouchableHighlight>
-                      <Text style={{paddingLeft: 5, fontSize: 16}}>{'with ' + this.props.shareWithRequestedParty.title}</Text>
+
+    let shareWith
+    if (this.props.shareWithRequestedParty) {
+      let title = this.props.shareWithRequestedParty.organization && this.props.shareWithRequestedParty.organization.title
+      shareWith = <View style={[chatStyles.shareView, {justifyContent: 'flex-start', backgroundColor: '#ffffff', paddingTop: 10, marginHorizontal: -7, borderBottomLeftRadius: 10, borderBottomRightRadius: 10, borderTopColor: '#4982B1', borderTopWidth: 0.5}]}>
+                    <TouchableHighlight underlayColor='transparent' onPress={this.shareWithRequestedParty.bind(this)}>
+                       <View style={[chatStyles.shareButton, {marginLeft: 15, justifyContent: 'flex-start'}]}>
+                        <CustomIcon name='tradle' style={{color: '#ffffff' }} size={32} />
+                        <Text style={chatStyles.shareText}>{translate('Share')}</Text>
+                      </View>
+                    </TouchableHighlight>
+                    <View style={{justifyContent: 'center'}}>
+                      <Text style={{fontSize: 16, color: '#757575'}}>{'with ' + title}</Text>
                     </View>
-                  : <View/>
+                  </View>
+    }
+    else
+      shareWith = <View/>
     let messageBody =
           <TouchableHighlight onPress={this.verify.bind(this, resource)} underlayColor='transparent'>
-          <View style={{flexDirection: 'column', flex: 1}}>
-            <View style={[chatStyles.row, viewStyle]}>
-              {this.getOwnerPhoto(isMyMessage)}
-              <View style={[chatStyles.textContainer, addStyle]}>
-                <View style={{flex: 1}}>
-                  {renderedRow}
-               </View>
-               {shareWith}
+            <View style={{flexDirection: 'column', flex: 1}}>
+              <View style={[chatStyles.row, viewStyle]}>
+                {this.getOwnerPhoto(isMyMessage)}
+                <View style={[chatStyles.textContainer, addStyle]}>
+                  <View style={{flex: 1}}>
+                    {renderedRow}
+                    {shareWith}
+                 </View>
+              </View>
             </View>
-          </View>
-              {this.getSendStatus()}
+            {this.getSendStatus()}
             </View>
           </TouchableHighlight>
 
@@ -162,7 +170,8 @@ class VerificationMessageRow extends Component {
     );
   }
   shareWithRequestedParty() {
-
+    this.props.navigator.pop()
+    Actions.share(this.props.resource, this.props.shareWithRequestedParty.organization, this.props.originatingMessage) // forRequest - originating message
   }
   verify(event) {
     var resource = this.props.resource;
@@ -212,3 +221,20 @@ VerificationMessageRow = makeResponsive(VerificationMessageRow)
 
 module.exports = VerificationMessageRow;
 
+/*
+    let shareWith = this.props.shareWithRequestedParty
+                  ? <View style={[chatStyles.shareView, {justifyContent: 'flex-start', paddingLeft: 5}]}>
+                      <View style={{flexDirection: 'column'}}>
+                      <TouchableHighlight underlayColor='transparent' onPress={this.shareWithRequestedParty.bind(this)}>
+                         <View style={[chatStyles.shareButton, {flexDirection: 'column', marginHorizontal: 3}]}>
+                          <CustomIcon name='tradle' style={{color: '#ffffff'}} size={32} />
+                        </View>
+                      </TouchableHighlight>
+                      <Text style={[chatStyles.shareText, {color: '#4982B1', fontSize: 12}]}>{translate('Share')}</Text>
+                      </View>
+                      <View style={{justifyContent: 'center', paddingLeft: 5}}>
+                        <Text style={{fontSize: 14, color: '#4982B1'}}>{'with ' + this.props.shareWithRequestedParty.title}</Text>
+                      </View>
+                    </View>
+                  : <View/>
+*/
