@@ -92,9 +92,18 @@ class ShowPropertiesView extends Component {
     var resource = this.props.resource;
     var modelName = resource[constants.TYPE];
     var model = utils.getModel(modelName).value;
-    var vCols = vCols = model.viewCols
-    if (vCols  &&  this.props.checkProperties) {
-      let props = model.properties
+    var vCols = model.viewCols
+    var props = model.properties;
+    if (this.props.checkProperties) {
+      if (!vCols) {
+        vCols = []
+        for (var p in resource) {
+          if (p.charAt(0) === '_'  ||  !props[p])
+            continue
+          vCols.push(p)
+        }
+      }
+
       let v = []
       vCols.forEach((p) => {
         if (p.charAt(0) === '_'  ||  props[p].hidden  ||  props[p].readOnly) //  ||  p.indexOf('_group') === p.length - 6)
@@ -108,7 +117,6 @@ class ShowPropertiesView extends Component {
     }
 
     var excludedProperties = this.props.excludedProperties;
-    var props = model.properties;
     if (excludedProperties) {
       var mapped = [];
       excludedProperties.forEach((p) =>  {
