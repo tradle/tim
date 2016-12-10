@@ -81,6 +81,9 @@ class ResourceView extends Component {
     this.listenTo(Store, 'handleEvent');
   }
   handleEvent(params) {
+    if (params.resource  &&  params.resource[constants.ROOT_HASH] !== this.props.resource[constants.ROOT_HASH])
+      return
+
     switch (params.action) {
     case 'showIdentityList':
       this.onShowIdentityList(params)
