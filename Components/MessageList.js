@@ -511,7 +511,9 @@ class MessageList extends Component {
       let hideTextInput = false // resource[TYPE] === PRODUCT_APPLICATION  && utils.isReadOnlyChat(resource)
       let h = utils.dimensions(MessageList).height
       var maxHeight = h - (Platform.OS === 'android' ? 77 : 64)
-      if (!this.state.isConnected || (resource[TYPE] === TYPES.ORGANIZATION  &&  !resource._online))
+      // Chooser for trusted party verifier
+      let isChooser = this.props.originatingMessage && this.originatingMessage.verifiers
+      if (!isChooser  &&  (!this.state.isConnected || (resource[TYPE] === TYPES.ORGANIZATION  &&  !resource._online)))
         maxHeight -=  35
       if (this.state.context ||  this.props.resource[TYPE] === PRODUCT_APPLICATION)
         maxHeight -= 45
