@@ -69,9 +69,18 @@ class ShowPropertiesView extends Component {
       resource = this.props.resource
     var modelName = resource[constants.TYPE];
     var model = utils.getModel(modelName).value;
-    var vCols = vCols = model.viewCols
+    var vCols = model.viewCols
     var props = model.properties;
-    if (vCols  &&  this.props.checkProperties) {
+    if (this.props.checkProperties) {
+      if (!vCols) {
+        vCols = []
+        for (var p in resource) {
+          if (p.charAt(0) === '_'  ||  !props[p])
+            continue
+          vCols.push(p)
+        }
+      }
+
       let v = []
       vCols.forEach((p) => {
         if (p.charAt(0) === '_'  ||  props[p].hidden  ||  props[p].readOnly) //  ||  p.indexOf('_group') === p.length - 6)
