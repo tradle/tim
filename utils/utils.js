@@ -212,7 +212,7 @@ var utils = {
         if (properties[p].ref === TYPES.MONEY) {
           if (r1[p].currency !== r2[p].currency)
             return false
-          if (r1[p].value !== r1[p].value)
+          if (r1[p].value !== r2[p].value)
             return false
         }
         else if (utils.getId(r1[p]) !== utils.getId(r2[p]))
