@@ -20,7 +20,7 @@ import {
   Image,
   // StyleSheet,
   Text,
-  TouchableHighlight,
+  TouchableOpacity,
   Alert,
   Modal,
   Navigator,
@@ -130,13 +130,13 @@ class VerificationMessageRow extends Component {
     let shareWith
     if (this.props.shareWithRequestedParty) {
       let title = this.props.shareWithRequestedParty.organization && this.props.shareWithRequestedParty.organization.title
-      shareWith = <View style={[chatStyles.shareView, {justifyContent: 'flex-start', backgroundColor: '#ffffff', paddingTop: 10, marginHorizontal: -7, borderBottomLeftRadius: 10, borderBottomRightRadius: 10, borderTopColor: '#4982B1', borderTopWidth: 0.5}]}>
-                    <TouchableHighlight underlayColor='transparent' onPress={this.shareWithRequestedParty.bind(this)}>
+      shareWith = <View style={styles.shareWithInquirer}>
+                    <TouchableOpacity onPress={this.shareWithRequestedParty.bind(this)}>
                        <View style={[chatStyles.shareButton, {marginLeft: 15, justifyContent: 'flex-start'}]}>
                         <CustomIcon name='tradle' style={{color: '#ffffff' }} size={32} />
                         <Text style={chatStyles.shareText}>{translate('Share')}</Text>
                       </View>
-                    </TouchableHighlight>
+                    </TouchableOpacity>
                     <View style={{justifyContent: 'center'}}>
                       <Text style={{fontSize: 16, color: '#757575'}}>{'with ' + title}</Text>
                     </View>
@@ -144,8 +144,9 @@ class VerificationMessageRow extends Component {
     }
     else
       shareWith = <View/>
+
     let messageBody =
-          <TouchableHighlight onPress={this.verify.bind(this, resource)} underlayColor='transparent'>
+          <TouchableOpacity onPress={this.verify.bind(this, resource)}>
             <View style={{flexDirection: 'column', flex: 1}}>
               <View style={[chatStyles.row, viewStyle]}>
                 {this.getOwnerPhoto(isMyMessage)}
@@ -158,7 +159,7 @@ class VerificationMessageRow extends Component {
             </View>
             {this.getSendStatus()}
             </View>
-          </TouchableHighlight>
+          </TouchableOpacity>
 
     var viewStyle = { margin: 1, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR }
 
@@ -215,7 +216,19 @@ class VerificationMessageRow extends Component {
     this.props.navigator.push(route);
   }
 }
-
+var styles = StyleSheet.create({
+  shareWithInquirer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    backgroundColor: '#ffffff',
+    paddingVertical: 10,
+    marginHorizontal: -7,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
+    borderTopColor: '#4982B1',
+    borderTopWidth: 0.5
+  }
+})
 reactMixin(VerificationMessageRow.prototype, RowMixin);
 VerificationMessageRow = makeResponsive(VerificationMessageRow)
 
@@ -225,11 +238,11 @@ module.exports = VerificationMessageRow;
     let shareWith = this.props.shareWithRequestedParty
                   ? <View style={[chatStyles.shareView, {justifyContent: 'flex-start', paddingLeft: 5}]}>
                       <View style={{flexDirection: 'column'}}>
-                      <TouchableHighlight underlayColor='transparent' onPress={this.shareWithRequestedParty.bind(this)}>
+                      <TouchableOpacity onPress={this.shareWithRequestedParty.bind(this)}>
                          <View style={[chatStyles.shareButton, {flexDirection: 'column', marginHorizontal: 3}]}>
                           <CustomIcon name='tradle' style={{color: '#ffffff'}} size={32} />
                         </View>
-                      </TouchableHighlight>
+                      </TouchableOpacity>
                       <Text style={[chatStyles.shareText, {color: '#4982B1', fontSize: 12}]}>{translate('Share')}</Text>
                       </View>
                       <View style={{justifyContent: 'center', paddingLeft: 5}}>
