@@ -1587,8 +1587,8 @@ var Store = Reflux.createStore({
       let hash = protocol.linkString(result.object)
 
       rr[ROOT_HASH] = r[ROOT_HASH] = rr[CUR_HASH] = r[CUR_HASH] = hash
-
-      if (r[TYPE] === PRODUCT_APPLICATION) {
+      let isProductApplication = r[TYPE] === PRODUCT_APPLICATION
+      if (isProductApplication) {
         rr._context = r._context = {id: utils.getId(r), title: r.product}
         let params = {
           action: 'addItem',
@@ -1596,12 +1596,11 @@ var Store = Reflux.createStore({
           // sendStatus: sendStatus
         }
         self.trigger(params)
-      }
-
-      if (!isWelcome) {
-        let len = batch.length
         self.addLastMessage(r, batch)
       }
+      else if (!isWelcome)
+        self.addLastMessage(r, batch)
+
       if (!isWelcome  ||  utils.isEmployee(r.to))
         return
       if (!orgRep)
@@ -1616,6 +1615,10 @@ var Store = Reflux.createStore({
       // welcomeMessage = {}
       if (me.txId)
         return
+
+      // ProductApplication was requested as a part of verification process from different provider
+      if (isProductApplication)
+        isWelcome = false
       // Avoid sending CustomerWaiting request after SelfIntroduction or IdentityPublishRequest to
       // prevent the not needed duplicate expensive operations for obtaining ProductList
       return self.getDriver(me)
@@ -1736,7 +1739,9 @@ var Store = Reflux.createStore({
     .catch(function(err) {
       debugger
     })
-    .finally(() => cb ? cb(rr) : noop())
+    .finally(() => {
+      cb ? cb(rr) : noop()
+    })
   },
 
   packMessage(toChain, from, to, context) {
@@ -4017,7 +4022,6 @@ var Store = Reflux.createStore({
         }
       })
     })
-
     return {verifications: shareableResources, providers: shareableResourcesRootToOrgs}
     // Allow sharing only the last version of the resource
     function addAndCheckShareable(verification) {
@@ -4049,6 +4053,23 @@ var Store = Reflux.createStore({
       }
       // Check that this is not the resource that was send to me as to an employee
       if (utils.getId(r.to) !== meId  ||  isMyProduct) {
+        // Don't add this verification if it's for a previous copy of the document
+        // If the this is the newer copy remove the older and push this one
+        if (shareableResources[docType].length) {
+          let sr = shareableResources[docType]
+          for (let i=0; i<sr.length; i++) {
+            let d = sr[i].document
+            if (d[ROOT_HASH] !== r[ROOT_HASH])
+              continue
+            // Don't add the verification for teh previous copy of the document
+            if (!r[PREV_HASH] || d[PREV_HASH] === r[CUR_HASH])
+              return
+            if (r[PREV_HASH] === d[CUR_HASH]) {
+              sr.splice(i, 1)
+              break
+            }
+          }
+        }
         shareableResources[docType].push(verification)
         shareableResourcesRootToR[r[ROOT_HASH]] = r
         addSharedWithProvider(verification)
