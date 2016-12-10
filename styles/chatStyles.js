@@ -109,15 +109,10 @@ var verificationStyles = Object.freeze({
   },
   shareButton: {
     flexDirection: 'row',
-    // marginLeft: 0,
     marginHorizontal: 10,
     justifyContent: 'space-between',
     padding: 5,
     borderRadius: 10,
-    // borderWidth: 1,
-    // borderColor: '#215A89',
-    // borderColor: '#4982B1',
-    // backgroundColor: '#ffffff'
     backgroundColor: '#4982B1'
   },
   shareText: {
