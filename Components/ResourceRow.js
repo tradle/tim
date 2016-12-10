@@ -43,7 +43,7 @@ class ResourceRow extends Component {
     if (props.changeSharedWithList)
       this.state = {sharedWith: true}
     // Multichooser for sharing context; isChooser for choosing delegated trusted party for requested verification
-    if (props.multiChooser || this.props.isChooser)
+    if (props.multiChooser)
       this.state = {isChosen: false}
     if (props.resource[constants.TYPE] === constants.TYPES.PROFILE)
       this.state = {resource: props.resource, unread: props.resource._unread}
@@ -161,9 +161,9 @@ class ResourceRow extends Component {
                            </View>
                        : <View />
 
-    var multiChooser = this.props.multiChooser  ||  this.props.isChooser
+    var multiChooser = this.props.multiChooser
                      ?  <View style={styles.multiChooser}>
-                          <TouchableHighlight underlayColor='transparent' onPress={this.props.multiChooser ? this.chooseToShare.bind(this) : () => {this.setState({isChosen: true}); setTimeout(this.props.onSelect.bind(this, this.props.resource), 500)}}>
+                          <TouchableHighlight underlayColor='transparent' onPress={this.chooseToShare.bind(this)}>
                            <Icon name={this.state.isChosen ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color='#7AAAc3' />
                           </TouchableHighlight>
                         </View>
@@ -317,9 +317,9 @@ class ResourceRow extends Component {
       }
       return <Text style={styles.resourceTitle}>{translate(utils.getModel(resource.product).value)}</Text>;
     }
-    else if (this.props.isChooser) {
+    else if (this.props.isChooser)
       return <Text style={styles.resourceTitle}>{utils.getDisplayName(resource)}</Text>
-    }
+
     var vCols = [];
     var properties = model.properties;
     var first = true
@@ -327,7 +327,7 @@ class ResourceRow extends Component {
     var datePropsCounter = 0;
     var backlink;
     var cnt = 10;
-    for (var i=0; !this.props.isChooser  &&  i<viewCols.length; i++) {
+    for (var i=0; i<viewCols.length; i++) {
       var v = viewCols[i];
       if (properties[v].type === 'array') {
         if (properties[v].items.backlink)
