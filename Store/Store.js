@@ -3062,51 +3062,81 @@ var Store = Reflux.createStore({
         to: params.to,
         isAggregation: params.isAggregation
       }
-      if (isMessage) {
-        let hasMore = params.limit  &&  result.length > params.limit
-        if (params.loadEarlierMessages || hasMore) {
-          if (hasMore)  {
-            result.splice(0, 1)
-            retParams.allLoaded = true
-          }
-          retParams.loadEarlierMessages = true
+      let hasMore = params.limit  &&  result.length > params.limit
+      if (params.loadEarlierMessages || hasMore) {
+        if (hasMore)  {
+          result.splice(0, 1)
+          retParams.allLoaded = true
         }
-        if (!params.isAggregation  &&  params.to  &&  !params.prop) {
-          if (params.to[TYPE] !== PROFILE  ||  !me.isEmployee) {
-            // let to = list[utils.getId(params.to)].value
-            // if (to  &&  to[TYPE] === ORGANIZATION)
-            // entering the chat should clear customer's unread indicator
-            shareableResources = this.getShareableResources(result, params.to)
-          }
-          if (me.isEmployee  && params.to[TYPE] === PROFILE) {
-            let toId = utils.getId(params.to)
-            let to = this._getItem(toId)
-            if (!to.bot) {
-              to._unread = 0
-              db.put(toId, to)
-              .then(() => {
-                this.trigger({action: 'updateRow', resource: to})
-              })
-            }
+        retParams.loadEarlierMessages = true
+      }
+      if (!params.isAggregation  &&  params.to  &&  !params.prop) {
+        if (params.to[TYPE] !== PROFILE  ||  !me.isEmployee) {
+          // let to = list[utils.getId(params.to)].value
+          // if (to  &&  to[TYPE] === ORGANIZATION)
+          // entering the chat should clear customer's unread indicator
+          shareableResources = this.getShareableResources(result, params.to)
+        }
+        if (me.isEmployee  && params.to[TYPE] === PROFILE) {
+          let toId = utils.getId(params.to)
+          let to = this._getItem(toId)
+          if (!to.bot) {
+            to._unread = 0
+            db.put(toId, to)
+            .then(() => {
+              this.trigger({action: 'updateRow', resource: to})
+            })
           }
         }
         let orgId
-        if (params.to) {
-          if (params.to[TYPE] === PRODUCT_APPLICATION  &&  utils.isReadOnlyChat(params.to)) {
-            if (!params.context)
-              params.context = params.to
-          }
-          else {
-            if (params.to.organization)
-              orgId = utils.getId(params.to.organization)
-            else {
-              if (params.to[TYPE] === ORGANIZATION)
-                orgId = utils.getId(params.to)
-            }
-            if (orgId) {
-              let rep = this.getRepresentative(orgId)
-              if (rep  &&  !rep.bot)
-                retParams.isEmployee = true
+
+        if (params.to[TYPE] === PRODUCT_APPLICATION  &&  utils.isReadOnlyChat(params.to)) {
+          if (!params.context)
+            params.context = params.to
+        }
+        else {
+          if (params.to.organization)
+            orgId = utils.getId(params.to.organization)
+          else if (params.to[TYPE] === ORGANIZATION)
+              orgId = utils.getId(params.to)
+
+          if (orgId) {
+            let rep = this.getRepresentative(orgId)
+            if (rep  &&  !rep.bot)
+              retParams.isEmployee = true
+
+            // Filter forms verified by a different provider and leave only verifications
+            if (params.modelName === MESSAGE) {
+              let sharedVerifiedForms = []
+              for (let i=0; i<result.length; i++) {
+                let r = result[i]
+                if (utils.getModel(r[TYPE]).value.subClassOf !== FORM)
+                  continue
+                // Case when event to dosplay ML is before the new resource was sent
+                let formCreatorId = r.to.organization
+                                  ? utils.getId(r.to.organization)
+                                  : utils.getId(this._getItem(utils.getId(r.to)).organization)
+                if (formCreatorId === orgId)
+                  continue
+                let fId = utils.getId(r)
+                for (let ii = i+1; ii<result.length; ii++) {
+                  let v = result[ii]
+                  if (v[TYPE] !== VERIFICATION)
+                    continue
+                  if (utils.getId(v.document) === fId) {
+                    let vFromId = utils.getId(v.from.organization)
+                    // If this is this provider's verification then the form was shared
+                    //  without verification and the stub needs to be shown
+                    if (vFromId === orgId)
+                      break
+                    sharedVerifiedForms.push(i)
+                  }
+                }
+              }
+              if (sharedVerifiedForms.length) {
+                for (let i = sharedVerifiedForms.length - 1; i>=0; i--)
+                  result.splice(sharedVerifiedForms[i], 1)
+              }
             }
           }
         }
