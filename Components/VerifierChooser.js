@@ -158,7 +158,7 @@ class VerifierChooser extends Component {
     form.to = resource
 
     utils.onNextTransitionEnd(this.props.navigator, () => {
-      Actions.addMessage(msg, false, true, (r) => {
+      Actions.addMessage(msg, true, true, (r) => {
         form._context = r
         setTimeout(() => Actions.addItem({
           resource: form,
