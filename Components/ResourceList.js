@@ -948,23 +948,26 @@ class ResourceList extends Component {
                 </View>
               </TouchableOpacity>
             </View>
-            <View style={{padding: 5, backgroundColor: '#f1ffe7'}}>
-              <TouchableOpacity onPress={this.showContexts.bind(this)}>
-                <View style={styles.row}>
-                  <Icon name='md-share' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
-                  <View style={styles.textContainer}>
-                    <Text style={styles.resourceTitle}>{translate('sharedContext')}</Text>
-                  </View>
-                  {
-                    this.state.sharedContextCount
-                    ? <View style={styles.sharedContext}>
-                        <Text style={styles.sharedContextText}>{this.state.sharedContextCount}</Text>
+            {this.state.sharedContextCount
+              ? <View style={{padding: 5, backgroundColor: '#f1ffe7'}}>
+                  <TouchableOpacity onPress={this.showContexts.bind(this)}>
+                    <View style={styles.row}>
+                      <Icon name='md-share' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+                      <View style={styles.textContainer}>
+                        <Text style={styles.resourceTitle}>{translate('sharedContext')}</Text>
                       </View>
-                    : <View />
-                  }
+                      {
+                        this.state.sharedContextCount
+                        ? <View style={styles.sharedContext}>
+                            <Text style={styles.sharedContextText}>{this.state.sharedContextCount}</Text>
+                          </View>
+                        : <View />
+                      }
+                    </View>
+                  </TouchableOpacity>
                 </View>
-              </TouchableOpacity>
-            </View>
+              : <View/>
+            }
             </View>
           : <View />
 
