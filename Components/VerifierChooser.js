@@ -4,7 +4,6 @@ var ResourceRow = require('./ResourceRow');
 var MessageList = require('./MessageList');
 var PageView = require('./PageView')
 var utils = require('../utils/utils');
-var translate = utils.translate
 var reactMixin = require('react-mixin');
 var extend = require('extend')
 var Store = require('../Store/Store');
@@ -34,9 +33,8 @@ import {
 } from 'react-native';
 
 import platformStyles from '../styles/platform'
-import ENV from '../utils/env'
 
-const SearchBar = Platform.OS === 'android' ? null : require('react-native-search-bar')
+const SETTINGS = 'tradle.Settings'
 
 class VerifierChooser extends Component {
   props: {
@@ -50,12 +48,13 @@ class VerifierChooser extends Component {
     super(props);
 
     let v = props.originatingMessage.verifiers.map((rr) => {
-      let p = rr.provider.id.split('_')
+      let p = rr.provider ? rr.provider.split('_') : [constants.TYPES.ORGANIZATION]
       return {
         [constants.TYPE]: p[0],
-        [constants.ROOT_HASH]: p[1],
-        name: rr.provider.title,
-        photos: rr.provider.photo ? [rr.provider.photo] : null
+        // [constants.ROOT_HASH]: p[1],
+        name: rr.name,
+        url: rr.url,
+        photos: [{url: rr.photo}]
       }
     })
 
@@ -138,21 +137,32 @@ class VerifierChooser extends Component {
     );
   }
   showVerifier(resource) {
-    let provider = this.props.provider
-    let rId = utils.getId(resource)
     let formRequest = this.props.originatingMessage
-    let product
+    let verifier
     formRequest.verifiers.forEach((r) => {
-      if (utils.getId(r.provider) === rId)
-        product = r.product
+      if (r.name  === resource.name  &&  r.url === resource.url)
+        verifier = r
     })
+
+    Actions.addItem({
+      meta: utils.getModel(SETTINGS).value,
+      resource: {
+        [constants.TYPE]: SETTINGS,
+        url: resource.url,
+        id: verifier.id
+      },
+      cb: (r) => this.verifyByTrustedProvider(r, verifier.product)
+    })
+  }
+  verifyByTrustedProvider(resource, product) {
+    let provider = this.props.provider
     let msg = {
       [constants.TYPE]: PRODUCT_APPLICATION,
       product: product,
       from: utils.getMe(),
       to:   resource
     }
-    let form = formRequest.formResource
+    let form = this.props.originatingMessage.formResource
 
     form.from = utils.getMe()
     form.to = resource
@@ -177,7 +187,7 @@ class VerifierChooser extends Component {
         currency: this.props.currency,
         bankStyle:  this.props.bankStyle,
         // returnChat: provider,
-        originatingMessage: formRequest
+        originatingMessage: this.props.originatingMessage
       }
     })
   }
