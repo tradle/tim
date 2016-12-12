@@ -82,12 +82,12 @@ class VerificationView extends Component {
       resource.sources.forEach((r) => {
         if (r.method)
           this.renderVerification(r, model, vTree, currentLayer)
-        else {
+        else if (r.from) {
           vTree.push(<View key={this.getNextKey()}>
                        <View style={styles.separator}></View>
                          <View style={[styles.textContainer, {padding: 10, flexDirection: 'row'}]}>
                            <Icon name='ios-play-outline' size={20} color='#757575' style={{justifyContent: 'center', marginTop: 5, paddingLeft: (currentLayer + 1) * 10}} />
-                           <Text style={[styles.description, {color: this.props.bankStyle.VERIFIED_SOURCES_COLOR}]}>{translate('sourcesBy', r.from.title)}</Text>
+                           <Text style={[styles.description, {color: this.props.bankStyle.VERIFIED_SOURCES_COLOR}]}>{translate('sourcesBy', r.from.organization ? r.from.organization.title : r.from.title)}</Text>
                          </View>
                       </View>)
           this.renderVerification(r, model, vTree, currentLayer + 1)
