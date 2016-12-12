@@ -4430,7 +4430,8 @@ var Store = Reflux.createStore({
       var settings = list[key]
       if (settings) {
         const curVal = self._getItem(key)
-        self._mergeItem(key, { urls: [...curVal.urls, v] })
+        if (curVal.urls.indexOf(v) === -1)
+          self._mergeItem(key, { urls: [...curVal.urls, v] })
         // Save the knowledge that only some providers are needed from this server
         if (value.id) {
           var urlToId = curVal.urlToId
