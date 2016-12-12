@@ -5025,8 +5025,19 @@ var Store = Reflux.createStore({
 
           return
         } else if (payload[TYPE] === VERIFICATION && payload.sources) {
+// const pubKeys = []
+// forEachSource(payload.sources, function (source) {
+//   pubKeys.push(tradleUtils.claimedSigPubKey(source).pub.toString('hex'))
+// })
+
+// console.log(pubKeys)
           const sourceToAuthor = await lookupSourceAuthors(meDriver, payload.sources)
-          debugger
+          for (var [verification, author] of sourceToAuthor) {
+            let a = self._getItem(PROFILE + '_' + author.permalink)
+            verification.from = self.buildRef(a)
+            verification.from.organization = utils.clone(a.organization)
+          }
+          // debugger
         }
 
         const old = utils.toOldStyleWrapper(msg)
@@ -6617,7 +6628,9 @@ async function lookupSourceAuthors (meDriver, sources) {
       verify: true
     })
     .then(author => sourceToAuthor.set(source, author))
-
+    // .catch(err => {
+    //   debugger
+    // })
     promises.push(promise)
   })
 
