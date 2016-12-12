@@ -15,9 +15,12 @@ import * as LocalAuth from '../utils/localAuth'
 import Push from '../utils/push'
 
 var noop = () => {}
-AsyncStorage.getAllKeys().then(keys => {
-  console.log('AsyncStorage', keys)
-})
+if (__DEV__) {
+  AsyncStorage.getAllKeys().then(keys => {
+    console.log('AsyncStorage', keys)
+  })
+}
+
 var path = require('path')
 var BeSafe = require('asyncstorage-backup')
 var Reflux = require('reflux');
@@ -4995,52 +4998,45 @@ var Store = Reflux.createStore({
         self.maybeWatchSeal(msg)
       })
 
-      meDriver.on('message', function (msg) {
-        if (msg.object.object[TYPE] === MESSAGE) {
+      meDriver.on('message', async function (msg) {
+        self.maybeWatchSeal(msg)
+        const payload = msg.object.object
+        if (payload[TYPE] === MESSAGE) {
           let obj = msg.object
           obj.from = {[ROOT_HASH]: msg.objectinfo.author}
           obj.objectinfo = msg.objectinfo
-          if (!Buffer.isBuffer(msg.object.object.recipientPubKey.pub)) {
-            msg.object.object.recipientPubKey.pub = new Buffer(msg.object.object.recipientPubKey.pub.data)
-          }
+          try {
+            const author = await Q.ninvoke(tradleUtils, 'lookupAuthor', meDriver, {
+              object: payload,
+              verify: true
+            })
 
-          Q.ninvoke(meDriver.addressBook, 'byPubKey', msg.object.object.recipientPubKey)
-          .then((r) => {
-            obj.to = {[ROOT_HASH]: r.permalink}
-
-            obj.parsed = {data: msg.object.object.object}
+            obj.to = {[ROOT_HASH]: author.permalink}
+            obj.parsed = {data: payload.object}
             obj[ROOT_HASH] = protocol.linkString(obj.parsed.data)
             if (!obj.parsed.data[CUR_HASH])
               obj[CUR_HASH] = obj[ROOT_HASH]
 
-            self.putInDb(obj, true)
-              .then(() => {
-                self.trigger({ action: 'receivedMessage', msg: msg })
-              }, err => {
-                console.error(err)
-                debugger
-              })
-
-            self.maybeWatchSeal(msg)
-          })
-          .catch((err) => {
-            debugger
-          })
+            await self.putInDb(obj, true)
+            self.trigger({ action: 'receivedMessage', msg: msg })
+          } catch (err) {
+            console.error('1. failed to process received message', err)
+          }
 
           return
+        } else if (payload[TYPE] === VERIFICATION && payload.sources) {
+          const sourceToAuthor = await lookupSourceAuthors(meDriver, payload.sources)
+          debugger
         }
 
         const old = utils.toOldStyleWrapper(msg)
         old.to = { [ROOT_HASH]: meDriver.permalink }
-        self.putInDb(old, true)
-          .then(() => {
-            self.trigger({ action: 'receivedMessage', msg: msg })
-          }, err => {
-            console.error(err)
-            debugger
-          })
-
-        self.maybeWatchSeal(msg)
+        try {
+          await self.putInDb(old, true)
+          self.trigger({ action: 'receivedMessage', msg: msg })
+        } catch (err) {
+          console.error('2. failed to process received message', err)
+        }
       })
     // })
     // return meDriver.ready()
@@ -6521,8 +6517,16 @@ var Store = Reflux.createStore({
     if (PAUSE_ON_TRANSITION) {
       if (meDriver) meDriver.pause(2000)
     }
+
+    // clearTimeout(this._transitionTimeout)
+    // this._transitionTimeout = setTimeout(() => {
+    //   this.onEndTransition()
+    // }, 2000)
   },
   onEndTransition() {
+    // clearTimeout(this._transitionTimeout)
+    // if (!this._transitioning) return
+
     this._transitioning = false
     if (PAUSE_ON_TRANSITION) {
       if (meDriver) meDriver.resume()
@@ -6594,6 +6598,33 @@ module.exports = Store;
 function getProviderUrl (provider) {
   return provider.id ? utils.joinURL(provider.url, provider.id) : provider.url
 }
+
+function forEachSource (sources, fn) {
+  sources.forEach(source => {
+    fn(source)
+    if (source.sources) {
+      forEachSource(source.sources, fn)
+    }
+  })
+}
+
+async function lookupSourceAuthors (meDriver, sources) {
+  const promises = []
+  const sourceToAuthor = new Map()
+  forEachSource(sources, source => {
+    const promise = Q.ninvoke(tradleUtils, 'lookupAuthor', meDriver, {
+      object: source,
+      verify: true
+    })
+    .then(author => sourceToAuthor.set(source, author))
+
+    promises.push(promise)
+  })
+
+  await Q.allSettled(promises)
+  return sourceToAuthor
+}
+
   // searchFormsToShare(params) {
   //   var modelName = params.modelName;
   //   var meta = this.getModel(modelName).value;
