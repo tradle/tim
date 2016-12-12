@@ -512,7 +512,7 @@ class MessageList extends Component {
       let h = utils.dimensions(MessageList).height
       var maxHeight = h - (Platform.OS === 'android' ? 77 : 64)
       // Chooser for trusted party verifier
-      let isChooser = this.props.originatingMessage && this.originatingMessage.verifiers
+      let isChooser = this.props.originatingMessage && this.props.originatingMessage.verifiers
       if (!isChooser  &&  (!this.state.isConnected || (resource[TYPE] === TYPES.ORGANIZATION  &&  !resource._online)))
         maxHeight -=  35
       if (this.state.context ||  this.props.resource[TYPE] === PRODUCT_APPLICATION)
