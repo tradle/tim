@@ -4436,7 +4436,7 @@ var Store = Reflux.createStore({
           var urlToId = curVal.urlToId
           if (!urlToId[v])
             urlToId[v] = [value.id]
-          else if (urlToId.indexOf(value.id) !== -1)
+          else if (urlToId[v].indexOf(value.id) !== -1)
             return
           else
             urlToId[v].push(value.id)
