@@ -527,7 +527,8 @@ var Store = Reflux.createStore({
           [ROOT_HASH]: '1',
           [CUR_HASH]: '1',
           urls: SERVICE_PROVIDERS_BASE_URLS,
-          hashToUrl: {}
+          hashToUrl: {},
+          urlToId: {}
         }
         this._setItem(settingsId, settings)
         db.put(settingsId, settings)
@@ -1188,6 +1189,15 @@ var Store = Reflux.createStore({
     //     }, 5000)
     //   })
     // ])
+
+    // Make sure not to get all providers from this server
+    // but the ones customer requested before
+    var providerIds
+    if (!id) {
+      let settings = this._getItem(SETTINGS + '_1')
+      if (settings  &&  settings.urlToId  &&  settings.urlToId[url])
+        providerIds = settings.urlToId[url]
+    }
     const doFetch = retry
                   ? utils.fetchWithBackoff
                   : utils.fetchWithTimeout
@@ -1233,6 +1243,8 @@ var Store = Reflux.createStore({
           if (sp.id !== id)
             return
         }
+        else if (providerIds  &&  providerIds.indexOf(sp.id) === -1)
+          return
         // else if (sp.id !== 'eres'  &&  !list[PROFILE + '_' + sp.bot[ROOT_HASH]])
         //   return
         if (!sp.org[ROOT_HASH]) {
@@ -2265,9 +2277,12 @@ var Store = Reflux.createStore({
     this.trigger({action: 'getTemporary', resource: r})
   },
   onAddItem(params) {
-    var self = this;
-    var value = params.value;
-    var resource = params.resource;
+    var self = this
+    var resource = params.resource
+    var value = params.value
+    if (!value)
+      value = resource
+
     delete temporaryResources[resource[TYPE]]
     var meta = params.meta;
     if (!meta)
@@ -2477,6 +2492,17 @@ var Store = Reflux.createStore({
             debugger
           })
         }
+        else if (params.cb) {
+          if (returnVal[TYPE] !== SETTINGS)
+            params.cb(returnVal)
+          else {
+            // return newly created provider
+            SERVICE_PROVIDERS.forEach((r) => {
+              if (r.id === returnVal.id  &&  r.url === returnVal.url)
+                params.cb(self._getItem(utils.getId(r.org)))
+            })
+          }
+        }
       })
 
       function handleRegistration () {
@@ -2684,6 +2710,7 @@ var Store = Reflux.createStore({
         })
       }
     })
+
     function becomingEmployee(resource) {
       if (resource[TYPE] !== PROFILE)
         return
@@ -3954,8 +3981,9 @@ var Store = Reflux.createStore({
         if (hasVerifiers  &&  hasVerifiers[docType]) {
           let verifiers = hasVerifiers[docType]
           let foundVerifiedForm
-          verifiers.forEach((sp) => {
-            let spReps = this.getRepresentatives(utils.getId(sp.provider))
+          verifiers.forEach((v) => {
+            let provider = SERVICE_PROVIDERS.filter((sp) => sp.id === v.id  &&  sp.url === v.url)
+            let spReps = this.getRepresentatives(utils.getId(provider[0].org))
             let sw = val._sharedWith.filter((r) => {
               return spReps.some((rep) => utils.getId(rep) === r.bankRepresentative)
             })
@@ -4391,12 +4419,28 @@ var Store = Reflux.createStore({
       v = v.substring(0, v.length - 1)
     var key = SETTINGS + '_1'
     var togo
-    return this.getInfo([v])
+    if (SERVICE_PROVIDERS  &&  value.id) {
+      if (SERVICE_PROVIDERS.some((r) => r.id === value.id  &&  r.url === value.url))
+        return
+    }
+    return this.getInfo([v], true, value.id ? value.id : null)
     .then(function(json) {
       var settings = list[key]
       if (settings) {
         const curVal = self._getItem(key)
         self._mergeItem(key, { urls: [...curVal.urls, v] })
+        // Save the knowledge that only some providers are needed from this server
+        if (value.id) {
+          var urlToId = curVal.urlToId
+          if (!urlToId[v])
+            urlToId[v] = [value.id]
+          else if (urlToId.indexOf(valueId) !== -1)
+            return
+          else
+            urlToId[v].push(value.id)
+
+          self._mergeItem(key, { urlToId: urlToId })
+        }
       }
       else {
         value.urls = SERVICE_PROVIDERS_BASE_URL_DEFAULTS.concat(v)
@@ -5420,10 +5464,13 @@ var Store = Reflux.createStore({
         if (val.verifiers) {
           val.message = 'Please have this form verified by one of our trusted associates'
           val.verifiers.forEach((v) => {
-            let serviceProvider =  SERVICE_PROVIDERS  ? SERVICE_PROVIDERS.filter((sp) => sp.org === v.provider.id) : null
-            serviceProvider = (serviceProvider  &&  serviceProvider.length) ? serviceProvider[0] : null
-            if (!serviceProvider)
-              this.getInfo([v.url], true) //, id)
+            let serviceProvider =  SERVICE_PROVIDERS
+                                ? SERVICE_PROVIDERS.filter((sp) => sp.id === v.id  &&  sp.url === v.url)
+                                : null
+            if (serviceProvider  &&  serviceProvider.length)
+              v.provider = serviceProvider[0].org
+            // else
+            //   this.getInfo([v.url], true) //, id)
           })
         }
       }
