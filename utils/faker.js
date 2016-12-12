@@ -51,7 +51,7 @@ const documentPresences = ['physical', 'snapshot', 'video']
 function newFormRequestVerifiers(from, SERVICE_PROVIDERS, val, orgs) {
   if (!from || !SERVICE_PROVIDERS || !SERVICE_PROVIDERS.length)
     return
-  if (from.organization.title !== 'Easy Bank' && val.form !== 'tradle.LoanPart')
+  if (from.organization.title !== 'Easy Bank' || val.form !== 'tradle.LoanPart')
     return
 
   if (val.form in formDefaults) {
