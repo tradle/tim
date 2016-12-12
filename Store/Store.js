@@ -3983,6 +3983,8 @@ var Store = Reflux.createStore({
           let foundVerifiedForm
           verifiers.forEach((v) => {
             let provider = SERVICE_PROVIDERS.filter((sp) => sp.id === v.id  &&  sp.url === v.url)
+            if (!provider.length)
+              return
             let spReps = this.getRepresentatives(utils.getId(provider[0].org))
             let sw = val._sharedWith.filter((r) => {
               return spReps.some((rep) => utils.getId(rep) === r.bankRepresentative)
@@ -4434,7 +4436,7 @@ var Store = Reflux.createStore({
           var urlToId = curVal.urlToId
           if (!urlToId[v])
             urlToId[v] = [value.id]
-          else if (urlToId.indexOf(valueId) !== -1)
+          else if (urlToId.indexOf(value.id) !== -1)
             return
           else
             urlToId[v].push(value.id)
