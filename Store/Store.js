@@ -5038,6 +5038,9 @@ var Store = Reflux.createStore({
             verification.from.organization = utils.clone(a.organization)
           }
           // debugger
+        } else if (payload[TYPE] === 'tradle.Partial') {
+          const provedProps = tradle.partial.interpretLeaves(payload.leaves)
+          debugger
         }
 
         const old = utils.toOldStyleWrapper(msg)
