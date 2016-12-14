@@ -107,13 +107,15 @@ const FORM = constants.TYPES.FORM;
 const MODEL = constants.TYPES.MODEL;
 const CUSTOMER_WAITING  = constants.TYPES.CUSTOMER_WAITING
 const SELF_INTRODUCTION = constants.TYPES.SELF_INTRODUCTION
-const INTRODUCTION      = 'tradle.Introduction'
 const FORGET_ME         = constants.TYPES.FORGET_ME
 const FORGOT_YOU        = constants.TYPES.FORGOT_YOU
+const SETTINGS          = constants.TYPES.SETTINGS
 
 // const SHARED_RESOURCE     = 'tradle.SharedResource'
 const MY_IDENTITIES_TYPE  = 'tradle.MyIdentities'
+const INTRODUCTION        = 'tradle.Introduction'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
+const PARTIAL             = 'tradle.Partial'
 const MY_PRODUCT          = 'tradle.MyProduct'
 const ENUM                = 'tradle.Enum'
 const GUEST_SESSION_PROOF = 'tradle.GuestSessionProof'
@@ -125,7 +127,6 @@ const PAIRING_REQUEST     = 'tradle.PairingRequest'
 const PAIRING_RESPONSE    = 'tradle.PairingResponse'
 const PAIRING_DATA        = 'tradle.PairingData'
 const MY_IDENTITIES     = MY_IDENTITIES_TYPE + '_1'
-const SETTINGS          = constants.TYPES.SETTINGS
 
 const WELCOME_INTERVAL = 600000
 
@@ -2302,7 +2303,7 @@ var Store = Reflux.createStore({
 
     if (meta.id == VERIFICATION  ||  meta.subClassOf === VERIFICATION)
       return this.onAddVerification({r: resource, notOneClickVerification: true});
-
+    let isGuestSessionProof = meta.id === GUEST_SESSION_PROOF
     // Check if the recipient is not one if the creators of this context.
     // If NOT send the message to the counterparty of the context
     let context = resource._context || value._context
@@ -2325,7 +2326,10 @@ var Store = Reflux.createStore({
       isBecomingEmployee = isBecomingEmployee.isBecomingEmployee
     }
     // Data were obtaipackmy scanning QR code of the forms that were entered on Web
-    if (meta.id === GUEST_SESSION_PROOF || isBecomingEmployee) {
+    if (isGuestSessionProof || isBecomingEmployee) {
+      resource[TYPE] = PRODUCT_APPLICATION
+      resource.product = 'tradle.Remediation'
+
       checkPublish = this.getDriver(me)
       .then(function () {
         // if (publishRequestSent)
@@ -2577,7 +2581,7 @@ var Store = Reflux.createStore({
         var params;
 
         var sendStatus = (self.isConnected) ? SENDING : QUEUED
-        if (returnVal[TYPE] === GUEST_SESSION_PROOF) {
+        if (isGuestSessionProof) {
           org = self._getItem(utils.getId(org))
           params = {action: 'getForms', to: org}
         }
@@ -3827,6 +3831,13 @@ var Store = Reflux.createStore({
     let l = list  &&  list.filter((r) => r.formsCount)
     this.trigger({action: 'allContexts', list: l, to: params.to})
   },
+  onGetAllPartials() {
+    let list = this.searchNotMessages({modelName: PARTIAL})
+    if (!list  ||  !list.length)
+      return
+
+    this.trigger({action: 'allPartials', list: list, count: list.length})
+  },
   onGetAllSharedContexts() {
     let list = this.searchMessages({modelName: PRODUCT_APPLICATION})
     if (!list  ||  !list.length)
@@ -5039,7 +5050,14 @@ var Store = Reflux.createStore({
           }
           // debugger
         } else if (payload[TYPE] === 'tradle.Partial') {
-          const provedProps = tradle.partial.interpretLeaves(payload.leaves)
+          msg.object[ROOT_HASH] = msg.objectinfo.permalink
+
+          payload.leaves = tradle.partial.interpretLeaves(payload.leaves)
+          let from = PROFILE + '_' + msg.partialinfo.author
+          let fromR = self._getItem(from)
+          payload.from = fromR ? self.buildRef(fromR) : {id: from}
+          payload.provider = utils.clone(self._getItem(PROFILE + '_' + msg.author).organization)
+
           debugger
         }
 
