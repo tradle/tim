@@ -172,7 +172,8 @@ class VerifierChooser extends Component {
         form._context = r
         setTimeout(() => Actions.addItem({
           resource: form,
-          value: form
+          value: form,
+          disableFormRequest: true
         }), 500)
       })
     })
