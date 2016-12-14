@@ -137,10 +137,9 @@ class VerificationRow extends Component {
              : (isForm)
                 ? translate('sentTo', title)
                 : translate('verifiedBy', title)
+      // verifiedBy = <View style={contentRows.length == 1 ? {flex: 1} : {flexDirection: 'row'}} key={this.getNextKey()}>
 
-      verifiedBy = <View style={contentRows.length == 1 ? {flex: 1} : {flexDirection: 'row'}} key={this.getNextKey()}>
-                    <Text style={styles.description}>{by}</Text>
-                  </View>
+      verifiedBy = <Text style={styles.description}>{by}</Text>
     }
     else
       verifiedBy = <View/>
