@@ -58,7 +58,7 @@ var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
-var Keychain = !utils.isWeb() && require('../utils/keychain')
+var Keychain = null //!utils.isWeb() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('q-level');
 var asyncstorageDown = require('asyncstorage-down')
@@ -126,7 +126,8 @@ const FORM_REQUEST        = 'tradle.FormRequest'
 const PAIRING_REQUEST     = 'tradle.PairingRequest'
 const PAIRING_RESPONSE    = 'tradle.PairingResponse'
 const PAIRING_DATA        = 'tradle.PairingData'
-const MY_IDENTITIES     = MY_IDENTITIES_TYPE + '_1'
+const MY_IDENTITIES       = MY_IDENTITIES_TYPE + '_1'
+const REMEDIATION         = 'tradle.Remediation'
 
 const WELCOME_INTERVAL = 600000
 
@@ -2326,10 +2327,11 @@ var Store = Reflux.createStore({
       isBecomingEmployee = isBecomingEmployee.isBecomingEmployee
     }
     // Data were obtaipackmy scanning QR code of the forms that were entered on Web
-    if (isGuestSessionProof || isBecomingEmployee) {
+    if (isGuestSessionProof) {
       resource[TYPE] = PRODUCT_APPLICATION
-      resource.product = 'tradle.Remediation'
-
+      resource.product = REMEDIATION
+    }
+    if (isGuestSessionProof || isBecomingEmployee) {
       checkPublish = this.getDriver(me)
       .then(function () {
         // if (publishRequestSent)
@@ -2342,9 +2344,14 @@ var Store = Reflux.createStore({
           else
             self.publishMyIdentity(self._getItem(utils.getId(resource.to)))
         }
-        else if (isBecomingEmployee) {
-          let orgId = utils.getId(resource.organization)
-          let orgRep = self.getRepresentative(orgId)
+        else {
+          let orgRep
+          if (isBecomingEmployee) {
+            let orgId = utils.getId(resource.organization)
+            orgRep = self.getRepresentative(orgId)
+          }
+          else
+            orgRep = self._getItem(utils.getId(resource.to))
 
           var msg = {
             message: me.firstName + ' is waiting for the response',
@@ -2356,7 +2363,7 @@ var Store = Reflux.createStore({
             from: me,
             to: orgRep
           }
-          checkPublish = self.onAddMessage(msg)
+          return self.onAddMessage(msg)
         }
       })
     } else {
@@ -3146,10 +3153,17 @@ var Store = Reflux.createStore({
 
             // Filter forms verified by a different provider and leave only verifications
             if (params.modelName === MESSAGE) {
+              let rmIdx = []
               let sharedVerifiedForms = []
               for (let i=0; i<result.length; i++) {
                 let r = result[i]
-                if (utils.getModel(r[TYPE]).value.subClassOf !== FORM)
+                let m = utils.getModel(r[TYPE]).value
+                // So not show remediation PA in chat
+                if (m.id === PRODUCT_APPLICATION  &&  r.product === REMEDIATION) {
+                  rmIdx.push(i)
+                  continue
+                }
+                if (m.subClassOf !== FORM)
                   continue
                 // Case when event to dosplay ML is before the new resource was sent
                 let formCreatorId = r.to.organization
@@ -3171,6 +3185,10 @@ var Store = Reflux.createStore({
                     sharedVerifiedForms.push(i)
                   }
                 }
+              }
+              if (rmIdx) {
+                for (let i=rmIdx.length - 1; i>=0; i--)
+                  result.splice(rmIdx[i], 1)
               }
               if (sharedVerifiedForms.length) {
                 for (let i = sharedVerifiedForms.length - 1; i>=0; i--)
