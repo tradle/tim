@@ -474,7 +474,7 @@ var utils = {
       // val = moment(date).format('[yesterday], h:mA');
       break;
     default:
-      val = dateformat(date, 'mmmm d, yyyy' + (noTime ? '' : ', h:MM TT'));
+      val = dateformat(date, 'mmm d, yyyy' + (noTime ? '' : ', h:MM TT'));
       // val = moment(date).format('LL');
     }
     return val;
