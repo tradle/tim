@@ -43,6 +43,7 @@ var asyncActions = [
   'addApp',
   'getAllContexts',
   'getAllSharedContexts',
+  'getAllPartials',
   'viewChat'
 ]
 
