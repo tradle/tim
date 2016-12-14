@@ -146,7 +146,7 @@ class VerificationRow extends Component {
       verifiedBy = <View/>
 
     var date = r
-             ? this.addDateProp('time', [styles.verySmallLetters, {position: 'absolute', right: 10}])
+             ? this.addDateProp(resource.dateVerified ? 'dateVerified' : 'time', [styles.verySmallLetters, {position: 'absolute', right: 10}])
              : <View />
     var header =  <View style={{borderColor: '#ffffff', backgroundColor: '#ffffff', borderBottomColor: '#cccccc', borderBottomWidth: StyleSheet.hairlineWidth}} key={this.getNextKey()}>
                     <View style={{flexDirection: 'row', marginHorizontal: 10,  marginVertical: 3, paddingBottom: 4}}>
