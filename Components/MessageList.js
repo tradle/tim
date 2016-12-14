@@ -39,6 +39,7 @@ var NEXT_HASH = '_n'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_REQUEST = 'tradle.FormRequest'
+const REMEDIATION = 'tradle.Remediation'
 const ROOT_HASH = constants.ROOT_HASH
 const CUR_HASH = constants.ROOT_CUR
 const TYPE = constants.TYPE
@@ -515,7 +516,7 @@ class MessageList extends Component {
       let isChooser = this.props.originatingMessage && this.props.originatingMessage.verifiers
       if (!isChooser  &&  (!this.state.isConnected || (resource[TYPE] === TYPES.ORGANIZATION  &&  !resource._online)))
         maxHeight -=  35
-      if (this.state.context ||  this.props.resource[TYPE] === PRODUCT_APPLICATION)
+      if ((this.state.context  &&  this.state.context.product !== REMEDIATION)  ||  (resource[TYPE] === PRODUCT_APPLICATION && resource.product !== REMEDIATION))
         maxHeight -= 45
       if (hideTextInput)
         maxHeight -= 10
