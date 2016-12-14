@@ -217,7 +217,7 @@ var RowMixin = {
     var photo = hasPhotos
               ? <Image source={{uri: utils.getImageUri(document.photos[0].url)}}  style={styles.cellImage} />
               : <View />;
-    var headerStyle = {paddingTop: 5, alignSelf: 'center', flex: 1}
+    var headerStyle = {paddingTop: verification.dateVerified ? 0 : 5, alignSelf: 'center', flex: 1}
     var isShared = this.isShared(verification)
 
     var header =  <View style={headerStyle}>
@@ -226,6 +226,13 @@ var RowMixin = {
                         ? translate('asVerifiedBy', verification._verifiedBy ? verification._verifiedBy.title : verification.organization.title)
                         : translate(model) + ' ...'}
                     </Text>
+                    {verification.dateVerified
+                      ? <View style={{flexDirection: 'row'}}>
+                          <Text style={{fontSize: 12, color: 'darkblue', fontStyle: 'italic'}}>{'Date: '}</Text>
+                          <Text style={{fontSize: 12, color: this.props.bankStyle.VERIFIED_HEADER_COLOR, fontStyle: 'italic'}}>{utils.formatDate(verification.dateVerified)}</Text>
+                        </View>
+                      : <View/>
+                    }
                   </View>
     let addStyle = onPress ? {} : {backgroundColor: this.props.bankStyle.VERIFICATION_BG, borderWidth: BORDER_WIDTH, borderColor: this.props.bankStyle.VERIFICATION_BG, borderBottomColor: this.props.bankStyle.VERIFIED_HEADER_COLOR}
 
@@ -604,7 +611,7 @@ var styles = StyleSheet.create({
     alignSelf: 'flex-end',
     flexDirection: 'row',
     marginHorizontal: 5,
-    marginTop: -3
+    marginTop: -2
   },
   otherStatus: {
     alignSelf: 'flex-end',
