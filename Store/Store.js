@@ -5973,7 +5973,8 @@ var Store = Reflux.createStore({
           }
         })
       })
-      this.trigger({action: 'messageList', list: [msg], resource: org, to: resource})
+      // this.trigger({action: 'messageList', list: [msg], resource: org, to: resource})
+      this.trigger({action: 'messageList', list: [msg], to: org})
       chatMessages[orgId] = []
 
       return db.batch(batch)
