@@ -2480,6 +2480,15 @@ var Store = Reflux.createStore({
           return save(isBecomingEmployee)
       })
       .then(() => {
+        if (params.disableFormRequest) {
+          let result = self.searchMessages({modelName: FORM_REQUEST, to: resource.to, context: resource._context})
+          if (result &&  result.length) {
+            result[0].documentCreated = true
+            let key = utils.getId(result[0])
+            self._setItem(key, result[0])
+            db.put(key, result[0])
+          }
+        }
         if (isBecomingEmployee) {
           let orgId = utils.getId(resource.organization)
           let orgRep = self.getRepresentative(orgId)
