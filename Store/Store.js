@@ -58,7 +58,7 @@ var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
-var Keychain = null //!utils.isWeb() && require('../utils/keychain')
+var Keychain = !utils.isWeb() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('q-level');
 var asyncstorageDown = require('asyncstorage-down')
@@ -2340,9 +2340,9 @@ var Store = Reflux.createStore({
       .then(function(status) {
         if (!status.watches.link  &&  !status.link) {
           if (isBecomingEmployee)
-            self.publishMyIdentity(self.getRepresentative(utils.getId(resource.organization)))
+            return self.publishMyIdentity(self.getRepresentative(utils.getId(resource.organization)))
           else
-            self.publishMyIdentity(self._getItem(utils.getId(resource.to)))
+            return self.publishMyIdentity(self._getItem(utils.getId(resource.to)))
         }
         else {
           let orgRep
@@ -2363,6 +2363,7 @@ var Store = Reflux.createStore({
             from: me,
             to: orgRep
           }
+
           return self.onAddMessage(msg)
         }
       })
