@@ -10,6 +10,7 @@ module.exports = {
   serviceID: 'tradle',
   accessGroup: '94V7783F74.io.tradle.dev',
   LOCAL_IP: LOCAL_IP,
+  pushServerURL: __DEV__ ? `http://${LOCAL_IP}:48284` : 'https://push1.tradle.io',
   isAndroid: function () {
     return Platform.OS === 'android'
   },
