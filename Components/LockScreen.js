@@ -23,15 +23,18 @@ class LockScreen extends NoBacksies {
 
   constructor(props) {
     super(props)
+    const timer = Math.ceil(props.timer)
     this.state = {
-      ttl: Math.ceil(props.timer)
+      start: Date.now(),
+      timer: timer,
+      ttl: timer
     }
   }
 
   componentDidMount() {
     this._countdown = setInterval(() => {
-      const ttl = this.state.ttl - 1
-      if (!ttl) {
+      const ttl = this.state.timer - ((Date.now() - this.state.start) / 1000 | 0)
+      if (ttl <= 0) {
         clearInterval(this._countdown)
         return this.props.callback()
       }
