@@ -103,9 +103,15 @@ class StatisticsView extends Component {
   }
 
   renderRow(resource)  {
-    let app = resource.applications ? resource.applications[0] : null
-    let completionDate = app  &&  resource.completedApps[app.resource.title]
-    completionDate = completionDate ? utils.formatDate(new Date(completionDate)) : ''
+    let completionDate, app
+
+    if (resource.applications.length) {
+      app = resource.applications[0]
+      let appType = app.leaves.find(l => l.key === 'product' && l.value).value
+      completionDate = resource.completedApps[appType]
+      if (completionDate)
+        completionDate = utils.formatDate(new Date(completionDate))
+    }
 
     return  <Row size={8} style={{borderBottomColor: '#aaaaaa', borderBottomWidth: 1}}>
               <Col sm={1} md={4} lg={3} style={styles.col}>
