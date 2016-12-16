@@ -4033,7 +4033,7 @@ var Store = Reflux.createStore({
     //   let r = providers[p].provider
     //   stats.push[{provider: r, open: r.open, completed: r.completed}]
     // }
-    this.trigger({action: 'allPartials', stats: Object.values(providers), owners: owners})
+    this.trigger({action: 'allPartials', list: list, stats: Object.values(providers), owners: owners})
   },
   onGetAllSharedContexts() {
     let list = this.searchMessages({modelName: PRODUCT_APPLICATION})
