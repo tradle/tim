@@ -321,6 +321,7 @@ class TimHome extends Component {
       };
     let me = utils.getMe();
     Actions.getAllSharedContexts()
+    Actions.hasPartials()
     this.props.navigator.push({
       // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       id: 10,
@@ -365,6 +366,7 @@ class TimHome extends Component {
       this.showContacts()
       return
     }
+    Actions.hasPartials()
     let title = me.firstName;
     let route = {
       title: translate('officialAccounts'),
