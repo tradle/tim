@@ -72,7 +72,7 @@ class SupervisoryView extends Component {
 
   onStats(params) {
     var action = params.action;
-    if (action !== 'allPartials')
+    if (action !== 'allPartials' || !params.stats.length)
       return
     let list = params.stats
 
