@@ -3978,6 +3978,16 @@ var Store = Reflux.createStore({
       })
     }
 
+    for (let p in owners) {
+      let o = owners[p]
+      let pruned = {}
+      for (let r in o) {
+        if (o[r].applications.length)
+          pruned[r] = o[r]
+      }
+      owners[p] = pruned
+    }
+
     for (let p in providers) {
       let stats = providers[p]
       let pId = stats.provider.id
@@ -5259,7 +5269,7 @@ var Store = Reflux.createStore({
             [CUR_HASH]: msg.partialinfo.link
           }
           payload.resource = {id: utils.getId(r)}
-          payload.provider = utils.clone(self._getItem(PROFILE + '_' + msg.author).organization)
+          payload.provider = utils.clone(self._getItem(PROFILE + '_' + msg.objectinfo.author).organization)
           // debugger
         }
 
