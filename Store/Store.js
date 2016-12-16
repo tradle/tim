@@ -58,7 +58,7 @@ var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
-var Keychain = !utils.isWeb() && require('../utils/keychain')
+var Keychain = null // !utils.isWeb() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('q-level');
 var asyncstorageDown = require('asyncstorage-down')
@@ -3859,12 +3859,170 @@ var Store = Reflux.createStore({
     let l = list  &&  list.filter((r) => r.formsCount)
     this.trigger({action: 'allContexts', list: l, to: params.to})
   },
+  onHasPartials() {
+    let list = this.searchNotMessages({modelName: PARTIAL})
+    if (!list  ||  !list.length)
+      return
+    this.trigger({action: 'hasPartials', count: list.length})
+  },
   onGetAllPartials() {
     let list = this.searchNotMessages({modelName: PARTIAL})
     if (!list  ||  !list.length)
       return
 
-    this.trigger({action: 'allPartials', list: list, count: list.length})
+    let providers = {}
+    let owners = {}
+    let allResources = {}
+    list.forEach((r) => {
+      let pId = utils.getId(r.provider)
+      let stats = providers[pId]
+      if (!stats) {
+        stats = {
+          openApps: {},
+          completedApps: {},
+          applications: [],
+          formRequests: [],
+          forms: [],
+          formCorrections: [],
+          verifications: [],
+          formErrors: [],
+          myProducts: [],
+          provider: r.provider
+        }
+        providers[pId] = stats
+      }
+      let ownerId = r.from.id
+      if (!owners[pId])
+        owners[pId] = {}
+      let applicantStats = owners[pId][ownerId]
+      if (!applicantStats) {
+        applicantStats = {
+          owner: r.from,
+          openApps: {},
+          completedApps: {},
+          applications: [],
+          formRequests: [],
+          forms: [],
+          formCorrections: [],
+          verifications: [],
+          formErrors: [],
+          myProducts: [],
+          provider: r.provider
+        }
+        owners[pId][ownerId] = applicantStats
+      }
+
+      let l = r.leaves
+      let t = r.leaves.filter((prop) => prop.key === TYPE)[0].value
+
+      allResources[r.resource.id] = r
+
+      // if (!owners[pId])
+      //   owners[pId] = {}
+      // if (!owners[pId][ownerId])
+      //   owners[pId][ownerId] = {}
+      // owners[pId][ownerId][r.resource.id] = r
+
+      // if (ch[r.from.id])
+      //   ch[r.from.id] = {}
+
+      // ch[r.from.id][r.resource.id] = r
+
+      switch (t) {
+      case FORM_REQUEST:
+        stats.formRequests.push(r)
+        applicantStats.formRequests.push(r)
+        break
+      case FORM_ERROR:
+        stats.formErrors.push(r)
+        applicantStats.formErrors.push(r)
+        break
+      case VERIFICATION:
+        stats.verifications.push(r)
+        // applicantStats.verifications.push(r)
+        break
+      case PRODUCT_APPLICATION:
+        let product = l.filter((prop) => prop.key === 'product')[0].value
+        if (product === 'tradle.CoverholderApproval') {
+          stats.applications.push(r)
+          applicantStats.applications.push(r)
+        }
+        break
+      default:
+        if (utils.getModel(t).value.subClassOf === MY_PRODUCT) {
+          stats.myProducts.push(r)
+          applicantStats.myProducts.push(r)
+        }
+        else {
+          let id = r.resource.id.split('_')
+          if (id.length === 2  ||  id[1] === id[2]) {
+            stats.forms.push(r)
+            applicantStats.forms.push(r)
+          }
+          else {
+            stats.formCorrections.push(r)
+            applicantStats.formCorrections.push(r)
+          }
+        }
+      }
+    })
+
+    for (let p in providers) {
+      providers[p].verifications.forEach((v) => {
+        let docId = v.leaves.filter((prop) => prop.key === 'document')[0].value.id
+        // HACK till modified forms paritals fixed
+        if (allResources[docId]) {
+          let docOwner = allResources[docId].from.id
+          owners[p][docOwner].verifications.push(v)
+        }
+      })
+    }
+
+    for (let p in providers) {
+      let stats = providers[p]
+      let pId = stats.provider.id
+      let apps = stats.applications
+      apps.forEach((a) => {
+        let product = a.leaves.filter((prop) => prop.key === 'product')[0].value
+        let forms = this.getModel(product).value.forms
+        let ownerId = a.from.id
+        let uniqueVerifications = {}
+        let verifications = owners[pId][ownerId].verifications
+        verifications.forEach((v) => {
+          let doc = v.leaves.filter((prop) => prop.key === 'document')[0].value.id
+          // if (!owners[pId][ownerId].forms)
+          //   return
+          // if (!allResources[doc]  ||  allResources[doc].from.id !== ownerId)
+          //   return
+          if (forms.indexOf(doc)) {
+            if (!uniqueVerifications[doc])
+              uniqueVerifications[doc] = v
+          }
+        })
+        if (Object.keys(uniqueVerifications).length === forms.length) {
+          verifications.sort((a, b) => a.time - b.time)
+
+          owners[pId][ownerId].completedApps[product] = verifications[verifications.length - 1].time
+          if (!stats.completedApps[product])
+            stats.completedApps[product] = 1
+          else
+            stats.completedApps[product]++
+        }
+        else {
+          if (!stats.openApps[product])
+            stats.openApps[product] = 1
+          else
+            stats.openApps[product]++
+        }
+      })
+    }
+
+    // let stats = []
+    // for (let p in providers) {
+    //   let r = providers[p].provider
+    //   stats.push[{provider: r, open: r.open, completed: r.completed}]
+    // }
+    this.trigger({action: 'allPartials', stats: Object.values(providers), owners: owners})
   },
   onGetAllSharedContexts() {
     let list = this.searchMessages({modelName: PRODUCT_APPLICATION})
@@ -5077,22 +5235,39 @@ var Store = Reflux.createStore({
             verification.from.organization = utils.clone(a.organization)
           }
           // debugger
-        } else if (payload[TYPE] === 'tradle.Partial') {
+        }
+        else if (payload[TYPE] === PARTIAL) {
           msg.object[ROOT_HASH] = msg.objectinfo.permalink
 
           payload.leaves = tradle.partial.interpretLeaves(payload.leaves)
+
+          let partialPermalink = payload.leaves.find(l => l.key === ROOT_HASH && l.value)
+          if (partialPermalink)
+            msg.partialinfo.permalink = partialPermalink.value
+          else
+            msg.partialinfo.permalink = msg.partialinfo.link
+
           let from = PROFILE + '_' + msg.partialinfo.author
           let fromR = self._getItem(from)
           payload.from = fromR ? self.buildRef(fromR) : {id: from}
-          payload.provider = utils.clone(self._getItem(PROFILE + '_' + msg.author).organization)
 
-          debugger
+          let type = payload.leaves.find(l => l.key === TYPE && l.value).value
+          var r = {
+            [TYPE]: type,
+            [ROOT_HASH]: msg.partialinfo.permalink,
+            [CUR_HASH]: msg.partialinfo.link
+          }
+          payload.resource = {id: utils.getId(r)}
+          payload.provider = utils.clone(self._getItem(PROFILE + '_' + msg.author).organization)
+          // debugger
         }
 
         const old = utils.toOldStyleWrapper(msg)
         old.to = { [ROOT_HASH]: meDriver.permalink }
         try {
           await self.putInDb(old, true)
+          if (payload[TYPE] === PARTIAL)
+            self.onGetAllPartials()
           self.trigger({ action: 'receivedMessage', msg: msg })
         } catch (err) {
           console.error('2. failed to process received message', err)
@@ -5214,6 +5389,8 @@ var Store = Reflux.createStore({
         if (type === VERIFICATION)
           return
       }
+      else
+        batch.push({type: 'put', key: key, value: val})
     }
     if (model.subClassOf === MY_PRODUCT)
       val._sharedWith = [this.createSharedWith(utils.getId(val.from.id), new Date().getTime())]
@@ -8732,4 +8909,99 @@ async function lookupSourceAuthors (meDriver, sources) {
     // return sendParams
   // },
 
+  onGetAllPartials1() {
+    let list = this.searchNotMessages({modelName: PARTIAL})
+    if (!list  ||  !list.length)
+      return
+
+    let providers = {}
+    let ch = {}
+    // let allResources = {}
+    list.forEach((r) => {
+      let pId = utils.getId(r.provider)
+      let stats = providers[pId]
+      if (!stats) {
+        stats = {
+          openApps: {},
+          completedApps: {},
+          applications: [],
+          formRequests: [],
+          forms: [],
+          verifications: [],
+          formErrors: [],
+          myProducts: [],
+          provider: r.provider
+        }
+        providers[pId] = stats
+      }
+
+      let l = r.leaves
+      let t = r.leaves.filter((prop) => prop.key === TYPE)[0].value
+
+      // allResources[r.resource.id] = r
+      // if (ch[r.from.id])
+      //   ch[r.from.id] = {}
+
+      owners[r.from.id][r.resource.id] = r
+
+      switch (t) {
+      case FORM_REQUEST:
+        stats.formRequests.push(r)
+        break
+      case FORM_ERROR:
+        stats.formErrors.push(r)
+        break
+      case VERIFICATION:
+        stats.verifications.push(r)
+        break
+      case PRODUCT_APPLICATION:
+        let product = l.filter((prop) => prop.key === 'product')[0].value
+        if (product === 'tradle.CoverholderApproval')
+        stats.applications.push(r)
+        break
+      default:
+        if (utils.getModel(t).value.subClassOf === MY_PRODUCT)
+          stats.myProducts.push(r)
+        else
+          stats.forms.push(r)
+      }
+    })
+    for (let p in providers) {
+      let stats = providers[p]
+      let apps = stats.applications
+      apps.forEach((a) => {
+        let product = a.leaves.filter((prop) => prop.key === 'product')[0].value
+        let forms = this.getModel(product).value.forms
+        let ch = a.from.id
+        let uniqueVerifications = {}
+        stats.verifications.forEach((v) => {
+          let doc = v.leaves.filter((prop) => prop.key === 'document')[0].value.id
+          // if (allResources[doc].from.id !== ch)
+          //   return
+          if (forms.indexOf(doc)) {
+            if (!uniqueVerifications[doc])
+              uniqueVerifications[doc] = v
+          }
+        })
+        if (Object.keys(uniqueVerifications).length === forms.length) {
+          if (!stats.completedApps[product])
+            stats.completedApps[product] = 0
+          stats.completedApps[product]++
+        }
+        else {
+          if (!stats.openApps[product])
+            stats.openApps[product] = 1
+          else
+            stats.openApps[product]++
+        }
+      })
+    }
+
+    // let stats = []
+    // for (let p in providers) {
+    //   let r = providers[p].provider
+    //   stats.push[{provider: r, open: r.open, completed: r.completed}]
+    // }
+    this.trigger({action: 'allPartials', stats: Object.values(providers)})
+  },
 */
