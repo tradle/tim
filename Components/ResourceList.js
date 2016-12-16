@@ -8,6 +8,7 @@ var NewResource = require('./NewResource');
 var MessageList = require('./MessageList');
 var PageView = require('./PageView')
 var MessageView = require('./MessageView')
+var SupervisoryView = require('./SupervisoryView')
 import ActionSheet from 'react-native-actionsheet'
 var utils = require('../utils/utils');
 var translate = utils.translate
@@ -83,6 +84,7 @@ class ResourceList extends Component {
       isConnected: this.props.navigator.isConnected,
       userInput: '',
       sharedContextCount: 0,
+      hasPartials: false
     };
     if (props.multiChooser)
       this.state.chosen = {}
@@ -295,6 +297,14 @@ class ResourceList extends Component {
         this.props.navigator.push(route)
       return
     }
+    if (action === 'allSharedContexts'  &&  this.props.officialAccounts  &&  this.props.modelName === constants.TYPES.PROFILE) {
+      this.setState({sharedContextCount: params.count})
+      return
+    }
+    if (action === 'hasPartials') { //  &&  this.props.officialAccounts  &&  (this.props.modelName === constants.TYPES.PROFILE || this.props.modelName === constants.TYPES.ORGANIZATION)) {
+      this.setState({hasPartials: true})
+      return
+    }
     if (action === 'list') {
       // First time connecting to server. No connection no providers yet loaded
       if (!params.list  &&  params.alert) {
@@ -320,8 +330,9 @@ class ResourceList extends Component {
     }
 
     if (this.props.multiChooser  &&  list.length) {
+      let sharingChatId = utils.getId(this.props.sharingChat)
       list = list.filter(r => {
-        return r[constants.ROOT_HASH] !== this.props.sharingChat[constants.ROOT_HASH]
+        return utils.getId(r) !== sharingChatId
       })
     }
 
@@ -365,6 +376,8 @@ class ResourceList extends Component {
     if (this.state.show !== nextState.show)
       return true
     if (this.state.sharedContextCount !== nextState.sharedContextCount)
+      return true
+    if (this.state.hasPartials !== nextState.hasPartials)
       return true
     if (nextState.isConnected !== this.state.isConnected)
       return true
@@ -653,7 +666,9 @@ class ResourceList extends Component {
     // let hasBacklink = this.props.prop && this.props.prop.items  &&  this.props.prop.backlink
     return /*hasBacklink  &&*/  (isVerification  || isForm || isMyProduct)
     ? (<VerificationRow
-        onSelect={() => this.selectResource(isVerification ? resource.document : resource)}
+        onSelect={() => this.selectResource(isVerification
+                              ? resource.sources ? resource : resource.document
+                              : resource)}
         key={resource[constants.ROOT_HASH]}
         navigator={this.props.navigator}
         prop={this.props.prop}
@@ -839,9 +854,6 @@ class ResourceList extends Component {
     })
   }
   render() {
-    // AlertIOS.alert('Rendering list ' + this.state.isLoading)
-    // if (this.state.isLoading)
-    //   return <View/>
     var content;
     var model = utils.getModel(this.props.modelName).value;
     if (this.state.dataSource.getRowCount() === 0   &&
@@ -849,8 +861,6 @@ class ResourceList extends Component {
         !utils.getMe().organization                 &&
         model.subClassOf !== ENUM                   &&
         !this.props.isChooser                       &&
-        // this.props.modelName !== constants.TYPES.PROFILE       &&
-        // this.props.modelName !== constants.TYPES.VERIFICATION  &&
         this.props.modelName !== constants.TYPES.ORGANIZATION  &&
         (!model.subClassOf  ||  model.subClassOf !== ENUM)) {
       content = <NoResources
@@ -859,9 +869,6 @@ class ResourceList extends Component {
                   isLoading={this.state.isLoading}/>
     }
     else {
-      var model = utils.getModel(this.props.modelName).value;
-          // style={[styles.listViewStyle, {width: Math.floor(utils.dimensions().width * 0.75)}]}
-
       content = <ListView
           dataSource={this.state.dataSource}
           renderHeader={this.renderHeader.bind(this)}
@@ -874,10 +881,6 @@ class ResourceList extends Component {
           initialListSize={1000}
           showsVerticalScrollIndicator={false} />;
     }
-          // pageSize={20}
-          // scrollRenderAhead={10}
-          // initialListSize={10}
-    var model = utils.getModel(this.props.modelName).value;
     var actionSheet = this.renderActionSheet()
     var footer = actionSheet && this.renderFooter()
     var searchBar
@@ -947,63 +950,63 @@ class ResourceList extends Component {
   }
 
   renderHeader() {
+    let partial = this.state.hasPartials
+                ? <View style={{padding: 5, backgroundColor: '#f1ffe7'}}>
+                    <TouchableOpacity onPress={this.showPartials.bind(this)}>
+                      <View style={styles.row}>
+                        <Icon name='ios-stats-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+                        <View style={styles.textContainer}>
+                          <Text style={styles.resourceTitle}>{translate('Statistics')}</Text>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+                : <View/>
+
     return (this.props.modelName === constants.TYPES.PROFILE)
           ? <View>
-            <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
-              <TouchableOpacity onPress={this.showBanks.bind(this)}>
-                <View style={styles.row}>
-                  <Image source={require('../img/banking.png')} style={styles.cellImage} />
-                  <View style={styles.textContainer}>
-                    <Text style={styles.resourceTitle}>{translate('officialAccounts')}</Text>
+              <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
+                <TouchableOpacity onPress={this.showBanks.bind(this)}>
+                  <View style={styles.row}>
+                    <Image source={require('../img/banking.png')} style={styles.cellImage} />
+                    <View style={styles.textContainer}>
+                      <Text style={styles.resourceTitle}>{translate('officialAccounts')}</Text>
+                    </View>
                   </View>
-                </View>
-              </TouchableOpacity>
-            </View>
-            <View style={{paddingVertical: 5, backgroundColor: '#f1ffe7'}}>
-              <TouchableOpacity onPress={this.showContexts.bind(this)}>
-                <View style={styles.row}>
-                  <Icon name='md-share' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
-                  <View style={styles.textContainer}>
-                    <Text style={styles.resourceTitle}>{translate('sharedContext')}</Text>
-                  </View>
-                  {
-                    this.state.sharedContextCount
-                    ? <View style={styles.sharedContext}>
-                        <Text style={styles.sharedContextText}>{this.state.sharedContextCount}</Text>
+                </TouchableOpacity>
+              </View>
+              {this.state.sharedContextCount
+                ? <View style={{padding: 5, backgroundColor: '#f1ffe7'}}>
+                    <TouchableOpacity onPress={this.showContexts.bind(this)}>
+                      <View style={styles.row}>
+                        <Icon name='md-share' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+                        <View style={styles.textContainer}>
+                          <Text style={styles.resourceTitle}>{translate('sharedContext')}</Text>
+                        </View>
+                        <View style={styles.sharedContext}>
+                          <Text style={styles.sharedContextText}>{this.state.sharedContextCount}</Text>
+                        </View>
                       </View>
-                    : <View />
-                  }
-                </View>
-              </TouchableOpacity>
+                    </TouchableOpacity>
+                  </View>
+                : <View/>
+              }
+              {partial}
             </View>
+          : <View>
+              {partial}
             </View>
-          : <View />
   }
-
-  // showQRCode1(purpose, content) {
-  //   this.props.navigator.push({
-  //     title: 'QR Code: ' + purpose,
-  //     id: 17,
-  //     component: QRCode,
-  //     titleTextColor: '#eeeeee',
-  //     backButtonTitle: 'Back',
-  //     passProps: {
-  //       fullScreen: true,
-  //       content: content
-  //     }
-  //   })
-  // }
-
-  // talkToEmployee(qrcode) {
-  //   this.setState({show: false})
-  //   if (!qrcode)
-  //     // qrcode = 'http://127.0.0.1:444444;71e4b7cd6c11ab7221537275988f113a879029eu;6aefc09f4da125095409770592eb96ac142fb579'
-  //     // qrcode = 'http://192.168.0.104:44444/;71e4b7cd6c11ab7221537275988f113a879029eu;3497c6ce074f1bc66c05e204fd3a7fbcd5e0fb08'
-  //     qrcode = 'http://192.168.0.136:44444/;71e4b7cd6c11ab7221537275988f113a879029eu;c3adf2d26304133265c3e28b5c9037614880aec5'
-
-  //   Actions.getEmployeeInfo(qrcode)
-  //   return
-  // }
+  showPartials() {
+    Actions.getAllPartials()
+    this.props.navigator.push({
+      id: 27,
+      component: SupervisoryView,
+      backButtonTitle: 'Back',
+      title: translate('overviewOfApplications'),
+      passProps: {}
+    })
+  }
   scanFormsQRCode() {
     this.setState({show: false})
     this.props.navigator.push({
@@ -1143,7 +1146,31 @@ var styles = StyleSheet.create({
     alignSelf: 'center',
     color: '#ffffff'
   },
-
 });
 
 module.exports = ResourceList;
+
+  // showQRCode1(purpose, content) {
+  //   this.props.navigator.push({
+  //     title: 'QR Code: ' + purpose,
+  //     id: 17,
+  //     component: QRCode,
+  //     titleTextColor: '#eeeeee',
+  //     backButtonTitle: translate('back'),
+  //     passProps: {
+  //       fullScreen: true,
+  //       content: content
+  //     }
+  //   })
+  // }
+
+  // talkToEmployee(qrcode) {
+  //   this.setState({show: false})
+  //   if (!qrcode)
+  //     // qrcode = 'http://127.0.0.1:444444;71e4b7cd6c11ab7221537275988f113a879029eu;6aefc09f4da125095409770592eb96ac142fb579'
+  //     // qrcode = 'http://192.168.0.104:44444/;71e4b7cd6c11ab7221537275988f113a879029eu;3497c6ce074f1bc66c05e204fd3a7fbcd5e0fb08'
+  //     qrcode = 'http://192.168.0.136:44444/;71e4b7cd6c11ab7221537275988f113a879029eu;c3adf2d26304133265c3e28b5c9037614880aec5'
+
+  //   Actions.getEmployeeInfo(qrcode)
+  //   return
+  // }

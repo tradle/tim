@@ -37,12 +37,12 @@ class ProductChooser extends Component {
         products.push(utils.getModel(m).value)
       })
     }
-    // else if (this.props.products) {
-    //   this.props.products.forEach((p) => {
-    //     if (p.subClassOf === constants.TYPES.FINANCIAL_PRODUCT)
-    //       products.push(p)
-    //   })
-    // }
+    else if (this.props.products) {
+      this.props.products.forEach((p) => {
+        if (p.subClassOf === constants.TYPES.FINANCIAL_PRODUCT)
+          products.push(p)
+      })
+    }
 
     var dataSource =  new ListView.DataSource({
       rowHasChanged: (row1, row2) => row1 !== row2,

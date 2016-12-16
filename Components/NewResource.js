@@ -17,7 +17,6 @@ var Store = require('../Store/Store');
 var Reflux = require('reflux');
 var reactMixin = require('react-mixin');
 var Icon = require('react-native-vector-icons/Ionicons');
-var myStyles = require('../styles/styles');
 var rStyles = require('../styles/registrationStyles');
 var NewResourceMixin = require('./NewResourceMixin');
 var PageView = require('./PageView')
@@ -550,6 +549,8 @@ class NewResource extends Component {
     if (!item)
       return;
     var resource = this.addFormValues();
+    if (this.props.model.properties[propName].items.ref)
+      item[constants.TYPE] = this.props.model.properties[propName].items.ref
     var items = resource[propName];
     if (!items) {
       items = [];

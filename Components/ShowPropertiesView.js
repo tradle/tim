@@ -38,7 +38,6 @@ class ShowPropertiesView extends Component {
     checkProperties: PropTypes.func,
     currency: PropTypes.string,
     showRefResources: PropTypes.func,
-    showItems: PropTypes.func,
     bankStyle: PropTypes.object,
     errorProps: PropTypes.object,
     excludedProperties: PropTypes.array
@@ -57,26 +56,6 @@ class ShowPropertiesView extends Component {
       </View>
     );
   }
-  // let buttons = {[translate('sendEmail'), translate('sendSMS'), translate('cancel')]}
-        // <ActionSheet
-        //   ref={(o) => {
-        //     this.ActionSheet = o
-        //   }}
-        //   options={buttons}
-        //   cancelButtonIndex={buttons.length - 1}
-        //   onPress={(index) => {
-        //     switch (index) {
-        //     case 0:
-        //       Communications.email([val], null, null, 'My Subject','My body text')
-        //       break
-        //     case 1:
-        //       Communications.text(val)
-        //       break;
-        //     default:
-        //       return
-        //     }
-        //   }}
-        // />
 
   shouldComponentUpdate(nextProps, nextState) {
     // Prompt for employee to write a correction message
@@ -89,7 +68,8 @@ class ShowPropertiesView extends Component {
     return (this.props.errorProps != nextProps.errorProps) ? true : false
   }
   getViewCols(resource, model) {
-    var resource = this.props.resource;
+    if (!resource)
+      resource = this.props.resource
     var modelName = resource[constants.TYPE];
     var model = utils.getModel(modelName).value;
     var vCols = model.viewCols
@@ -151,7 +131,7 @@ class ShowPropertiesView extends Component {
         return;
 
       var val = resource[p];
-      var pMeta = model.properties[p];
+      var pMeta = props[p];
       var isRef;
       var isItems
       var isDirectionRow;
@@ -179,6 +159,8 @@ class ShowPropertiesView extends Component {
           let c = utils.normalizeCurrencySymbol(val.currency)
           val = (c || CURRENCY_SYMBOL) + val.value
         }
+        else if (pMeta.inlined)
+          return this.viewCols(val, utils.getModel(val[constants.TYPE]).value)
         // Could be enum like props
         else if (utils.getModel(pMeta.ref).value.subClassOf === ENUM)
           val = val.title
@@ -195,7 +177,6 @@ class ShowPropertiesView extends Component {
       }
       else if (pMeta.type === 'date')
         val = dateformat(new Date(val), 'fullDate')
-        // val = utils.formatDate(val);
       // else if (pMeta[constants.SUB_TYPE] === 'email') {
       //   isEmail = true
       //   val = <TouchableOpacity onPress={() => Communications.email([val], null, null, 'My Subject','My body text')}>
@@ -207,68 +188,8 @@ class ShowPropertiesView extends Component {
       if (!val)
         return <View key={this.getNextKey()}></View>;
       if (!isRef) {
-        if (val instanceof Array) {
-          if (pMeta.items.backlink)
-            return <View  key={this.getNextKey()} />
-          var vCols = pMeta.viewCols;
-          var cnt = val.length;
-          val = <View style={{marginHorizontal: 7}}>{this.renderItems(val, pMeta)}</View>
-
-          isItems = true
-          first = false;
-          title = <View style={{flexDirection: 'row'}}>
-                    <Text style={styles.title}>{pMeta.title || utils.makeLabel(p)}</Text>
-                    {cnt > 3  &&  modelName !== TERMS_AND_CONDITIONS
-                      ? <Icon name={'ios-arrow-down'} size={15} color='#7AAAC3' style={{position: 'absolute', right: 10, top: 10}}/>
-                      : <View />
-                    }
-                  </View>
-
-          if (cnt > 3  &&  modelName !== TERMS_AND_CONDITIONS)
-            val = <View key={this.getNextKey()}>
-                    {separator}
-                    <Accordion
-                      header={title}
-                      content={val}
-                      underlayColor='transparent'
-                      easing='easeInCirc' />
-                 </View>
-          else {
-            val = <View key={this.getNextKey()}>
-                   {title}
-                   {val}
-                 </View>
-          }
-        }
-        else  {
-          if (props[p].units  &&  props[p].units.charAt(0) != '[')
-            val += ' ' + props[p].units
-
-          if (val === NOT_SPECIFIED)
-            val = <Text style={[styles.description, {color: this.props.bankStyle.LINK}]}>{val}</Text>
-          else if (typeof val === 'number'  ||  typeof val === 'boolean')
-            val = <Text style={styles.description}>{val ? 'Yes' : 'No'}</Text>;
-          else if (pMeta.type === 'boolean')
-            val = <Text style={styles.description}>{val.title}</Text>;
-          else if (pMeta.type !== 'object'  &&  (typeof val === 'string')  &&  (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0))
-            val = <Text onPress={this.onPress.bind(this, val)} style={[styles.description, {color: '#7AAAC3'}]}>{val}</Text>;
-          // else if (pMeta.range) {
-          //   if (pMeta.range === 'email')
-          //     val = <TouchableOpacity onPress={this.sendEmail.bind(this, val)}>
-          //             <Text  style={[styles.title, styles.linkTitle]}>{val}</Text>
-          //           </TouchableOpacity>
-          //   else if (pMeta.range === 'phone') {
-          //     val = <TouchableOpacity onPress={this.sendSMS.bind(this, val)}>
-          //             <Text  style={[styles.title, styles.linkTitle]}>{val}</Text>
-          //           </TouchableOpacity>
-          //   }
-          // }
-          else if (modelName === TERMS_AND_CONDITIONS)
-            val = <Text style={[styles.description, {flexWrap: 'wrap'}]}>{val}</Text>;
-          else
-            val = <Text style={[styles.description]} numberOfLines={2}>{val}</Text>;
-
-        }
+        isItems = Array.isArray(val)
+        val = this.renderSimpleProp(val, pMeta, modelName)
       }
       var title = pMeta.skipLabel  ||  isItems
                 ? <View />
@@ -286,12 +207,12 @@ class ShowPropertiesView extends Component {
                         <TouchableOpacity underlayColor='transparent' onPress={() => {
                           this.setState({promptVisible: pMeta})
                         }}>
-                          <Icon key={p} name={this.props.errorProps && this.props.errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={25} color={this.props.errorProps && this.props.errorProps[p] ? 'red' : this.props.bankStyle.LINK_COLOR} style={{marginTop: 10}}/>
+                          <Icon key={p} name={this.props.errorProps && this.props.errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={30} color={this.props.errorProps && this.props.errorProps[p] ? 'red' : this.props.bankStyle.LINK_COLOR} style={{marginTop: 10}}/>
                         </TouchableOpacity>
                         <Prompt
                           promptStyle={{ width: this.props.width / 1.5 }}
-                          title='Please write a message to the customer'
-                          placeholder="Start typing"
+                          title={translate('fieldErrorMessagePrompt')}
+                          placeholder={translate('thisValueIsInvalidPlaceholder')}
                           visible={isPromptVisible}
                           onCancel={() => this.setState({ promptVisible: null })}
                           onSubmit={(value) => {
@@ -341,6 +262,7 @@ class ShowPropertiesView extends Component {
     }
     return viewCols;
   }
+
   onPress(url, event) {
     var model = utils.getModel(this.props.resource[constants.TYPE]).value;
     this.props.navigator.push({
@@ -406,6 +328,26 @@ var styles = StyleSheet.create({
 });
 
 module.exports = ShowPropertiesView;
+  // let buttons = {[translate('sendEmail'), translate('sendSMS'), translate('cancel')]}
+  // <ActionSheet
+  //   ref={(o) => {
+  //     this.ActionSheet = o
+  //   }}
+  //   options={buttons}
+  //   cancelButtonIndex={buttons.length - 1}
+  //   onPress={(index) => {
+  //     switch (index) {
+  //     case 0:
+  //       Communications.email([val], null, null, 'My Subject','My body text')
+  //       break
+  //     case 1:
+  //       Communications.text(val)
+  //       break;
+  //     default:
+  //       return
+  //     }
+  //   }}
+  // />
   // npm i react-native-message-composer
   // sendEmail(val) {
   //   Communications.email([val], null, null, 'My Subject','My body text')

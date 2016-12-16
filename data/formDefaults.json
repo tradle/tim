@@ -552,5 +552,25 @@
     "startDate": "9/28/1996",
     "shareholding": 100,
     "dateOfBirth": "9/28/1971"
+  },
+  "tradle.Residence": {
+    "_t": "tradle.Residence",
+    "residenceType": {
+      "title": "Primary Residence",
+      "id": "tradle.ResidenceType_123"
+    },
+    "streetAddress": "30 Lincoln Center Plaza",
+    "city": "New York",
+    "region": "New York",
+    "postalCode": "10023",
+    "country": {
+      "id": "tradle.Country_123",
+      "title": "US"
+    },
+    "region": "NY"
+  },
+  "tradle.TaxesFiledConfirmationForm": {
+    "startDate": "01/01/2015",
+    "endDate": "01/01/2016"
   }
 }

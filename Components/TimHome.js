@@ -38,6 +38,7 @@ import {
   setPassword
 } from '../utils/localAuth'
 
+import { SyncStatus } from 'react-native-code-push'
 import AutomaticUpdates from '../utils/automaticUpdates'
 import CustomIcon from '../styles/customicons'
 import BackgroundImage from './BackgroundImage'
@@ -124,7 +125,6 @@ class TimHome extends Component {
     }
   }
   componentDidMount() {
-    AutomaticUpdates.on()
     if (!isLinkingSupported) return
 
     Linking.getInitialURL()
@@ -144,12 +144,10 @@ class TimHome extends Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    if (this.state.isLoading  !== nextState.isLoading   ||
+    return this.state.downloadUpdateProgress !== nextState.downloadUpdateProgress ||
+        this.state.isLoading  !== nextState.isLoading   ||
         this.state.message !== nextState.message        ||
-        this.state.hasMe !== nextState.hasMe)
-      return true
-    else
-      return false
+        this.state.hasMe !== nextState.hasMe
   }
 
   _handleOpenURL(event) {
@@ -180,14 +178,57 @@ class TimHome extends Component {
       utils.setModels(params.models);
       break
     case 'start':
+      // uncomment to test download progress indicator
+      //
+      // await new Promise(resolve => {
+      //   let percent = 0
+      //   const interval = setInterval(() => {
+      //     if (percent >= 100) {
+      //       this.setState({ downloadUpdateProgress: null })
+      //       clearInterval(interval)
+      //       resolve()
+      //     } else {
+      //       this.setState({ downloadUpdateProgress: Math.min(percent += Math.random() * 10 | 0, 100) })
+      //     }
+      //   }, 1000)
+      // })
+
       // prior to registration
       // force install updates before first interaction
       if (!utils.getMe()) {
-        await AutomaticUpdates.sync()
+        //   UP_TO_DATE: 0, // The running app is up-to-date
+        //   UPDATE_INSTALLED: 1, // The app had an optional/mandatory update that was successfully downloaded and is about to be installed.
+        //   UPDATE_IGNORED: 2, // The app had an optional update and the end-user chose to ignore it
+        //   UNKNOWN_ERROR: 3,
+        //   SYNC_IN_PROGRESS: 4, // There is an ongoing "sync" operation in progress.
+        //   CHECKING_FOR_UPDATE: 5,
+        //   AWAITING_USER_ACTION: 6,
+        //   DOWNLOADING_PACKAGE: 7,
+        //   INSTALLING_UPDATE: 8
+        try {
+          await AutomaticUpdates.sync({
+            onSyncStatusChanged: status => {
+              if (status === SyncStatus.DOWNLOADING_PACKAGE) {
+                this.setState({ downloadingUpdate: true, downloadUpdateProgress: 0 })
+              }
+            },
+            onDownloadProgress: debounce(({ totalBytes, receivedBytes }) => {
+              const downloadUpdateProgress = (receivedBytes * 100 / totalBytes) | 0
+              // avoid going from 1 percent to 0
+              this.setState({ downloadUpdateProgress })
+            }, 300, true)
+          })
+        } catch (err) {
+          debug('failed to sync with code push', err)
+        } finally {
+          this.setState({ downloadingUpdate: false, downloadUpdateProgress: null })
+        }
+
         const hasUpdate = await AutomaticUpdates.hasUpdate()
         if (hasUpdate) return AutomaticUpdates.install()
       }
 
+      AutomaticUpdates.on()
       if (self.state.message) {
         self.restartTiM()
         return
@@ -292,6 +333,7 @@ class TimHome extends Component {
       };
     let me = utils.getMe();
     Actions.getAllSharedContexts()
+    Actions.hasPartials()
     this.props.navigator[doReplace ? 'replace' : 'push']({
       // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       id: 10,
@@ -345,45 +387,8 @@ class TimHome extends Component {
       this.showContacts(doReplace)
       return
     }
-    // let route = {
-    //   id: 23,
-    //   component: DashboardView,
-    //   title: translate('profile'),
-    //   backButtonTitle: 'Back',
-    //   rightButtonTitle: translate('edit'),
-    //   onRightButtonPress: {
-    //     title: translate('profile'),
-    //     id: 23,
-    //     component: DashboardView,
-    //     menu: ResourceList,
-    //     menuProps: {
-    //       modelName: constants.TYPES.ORGANIZATION,
-    //       bankStyle: this.props.bankStyle || defaultBankStyle
-    //     },
-    //     mainComponent: NewResource,
-    //     titleTextColor: '#7AAAC3',
-    //     backButtonTitle: 'Back',
-    //     rightButtonTitle: 'Done',
-    //     mainComponentProps: {
-    //       model: utils.getModel(constants.TYPES.PROFILE).value,
-    //       resource: me,
-    //       bankStyle: this.props.bankStyle || defaultBankStyle
-    //     }
-    //   },
-    //   passProps: {
-    //     bankStyle: defaultBankStyle,
-    //     menu: ResourceList,
-    //     menuProps: {
-    //       modelName: constants.TYPES.ORGANIZATION,
-    //       bankStyle: this.props.bankStyle || defaultBankStyle
-    //     },
-    //     mainComponent: ResourceView,
-    //     mainComponentProps: {
-    //       bankStyle: this.props.bankStyle || defaultBankStyle,
-    //       resource: me
-    //     }
-    //   }
-    // }
+
+    Actions.hasPartials()
     let title = me.firstName;
     let route = {
       title: translate('officialAccounts'),
@@ -686,8 +691,26 @@ class TimHome extends Component {
       </View>
     );
   }
+
+  getUpdateIndicator() {
+    if (!this.state.downloadingUpdate) return
+
+    var percentIndicator
+    if (this.state.downloadUpdateProgress) {
+      percentIndicator = <Text style={styles.updateIndicator}>{progress}%</Text>
+    }
+
+    return (
+      <View>
+        <Text style={styles.updateIndicator}>{translate('downloadingUpdate')}</Text>
+        {percentIndicator}
+      </View>
+    )
+  }
+
   getSplashScreen() {
     var {width, height} = utils.dimensions(TimHome)
+    var updateIndicator = this.getUpdateIndicator()
     return (
       <View style={styles.container}>
         <BackgroundImage source={BG_IMAGE} />
@@ -799,6 +822,11 @@ var styles = (function () {
       color: '#eeeeee',
       fontSize: height > 450 ? 35 : 25,
       alignSelf: 'center',
+    },
+    updateIndicator: {
+      color: '#ffffff',
+      paddingTop: 10,
+      alignSelf: 'center'
     },
     text: {
       color: '#7AAAC3',

@@ -22,6 +22,7 @@ var Actions = require('../Actions/Actions');
 import { makeResponsive } from 'react-native-orient'
 var StyleSheet = require('../StyleSheet')
 var reactMixin = require('react-mixin');
+var chatStyles = require('../styles/chatStyles')
 
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_ERROR = 'tradle.FormError'
@@ -102,21 +103,21 @@ class MessageRow extends Component {
     if (!renderedRow.length) {
       var vCols = noMessage ? null : utils.getDisplayName(resource, model.properties);
       if (vCols)
-        renderedRow = <Text style={styles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
+        renderedRow = <Text style={chatStyles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
     }
     else {
       var fromHash = resource.from.id;
       if (isMyMessage) {
-        if (isFormRequest)
-          addStyle = [styles.myCell, {backgroundColor: '#F1FFE7', borderColor: '#D7DACA', borderWidth: 1}]
+        if (model.id === FORM_REQUEST)
+          addStyle = [chatStyles.myCell, {backgroundColor: '#F1FFE7', borderColor: '#D7DACA', borderWidth: 1}]
         else if (!noMessage)
-          addStyle = styles.myCell
+          addStyle = chatStyles.myCell
       }
       else if (isForgetting)
         addStyle = styles.forgetCell
       else {
         if (isConfirmation)
-          addStyle = [styles.verificationBody, {borderColor: '#cccccc', backgroundColor: this.props.bankStyle.CONFIRMATION_BG}, styles.myConfCell]
+          addStyle = [chatStyles.verificationBody, {borderColor: '#cccccc', backgroundColor: this.props.bankStyle.CONFIRMATION_BG}, styles.myConfCell]
         else {
           let borderColor = isFormError ? this.props.bankStyle.REQUEST_FULFILLED : '#efefef'
           let mstyle = {
@@ -125,16 +126,16 @@ class MessageRow extends Component {
             borderTopLeftRadius: 0
           }
           addStyle = (isSimpleMessage && message.length < 30)
-                   ? [styles.verificationBody, mstyle]
-                   : [styles.verificationBody, {flex: 1}, mstyle]
+                   ? [chatStyles.verificationBody, mstyle]
+                   : [chatStyles.verificationBody, {flex: 1}, mstyle]
 
 
         }
       }
       if (isFormError)
-        addStyle = [addStyle, styles.verificationBody, {backgroundColor: this.props.bankStyle.FORM_ERROR_BG, borderColor: resource.documentCreated ? this.props.bankStyle.REQUEST_FULFILLED : this.props.bankStyle.FORM_ERROR_BORDER}]; //model.style];
+        addStyle = [addStyle, chatStyles.verificationBody, {backgroundColor: this.props.bankStyle.FORM_ERROR_BG, borderColor: resource.documentCreated ? this.props.bankStyle.REQUEST_FULFILLED : this.props.bankStyle.FORM_ERROR_BORDER}]; //model.style];
       if (isMyMessage  &&  !isSimpleMessage && !isFormError && !model.id === FORM_REQUEST)
-        addStyle = [addStyle, styles.verificationBody, {backgroundColor: STRUCTURED_MESSAGE_COLOR, borderColor: '#C1E3E8'}]; //model.style];
+        addStyle = [addStyle, chatStyles.verificationBody, {backgroundColor: STRUCTURED_MESSAGE_COLOR, borderColor: '#C1E3E8'}]; //model.style];
     }
     var properties = model.properties;
     var verPhoto;
@@ -144,11 +145,11 @@ class MessageRow extends Component {
         inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
         var style;
         if (inRow === 1)
-          style = styles.bigImage;
+          style = chatStyles.bigImage;
         else if (inRow === 2)
-          style = styles.mediumImage;
+          style = chatStyles.mediumImage;
         else
-          style = styles.image;
+          style = chatStyles.image;
         resource.photos.forEach((p) => {
           photoUrls.push({url: utils.getImageUri(p.url)});
         })
@@ -164,10 +165,10 @@ class MessageRow extends Component {
       else
         verPhoto = <View style={{height: 0, width:0}} />
     }
-    var rowStyle = [styles.row, {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}];
+    var rowStyle = [chatStyles.row, {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}];
     var val = this.getTime(resource);
     var date = val
-             ? <Text style={styles.date} numberOfLines={1}>{val}</Text>
+             ? <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
              : <View />;
 
     var showMessageBody;
@@ -200,7 +201,7 @@ class MessageRow extends Component {
       }
     }
     // HACK
-    let msgWidth = Math.floor(w * 0.7)
+    let msgWidth = Math.floor(w * 0.8)
     let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
 
     let longMessage = (isSimpleMessage || isFormRequest)  &&  message ? numberOfCharsInWidth < message.length : false
@@ -220,7 +221,7 @@ class MessageRow extends Component {
       if (this.props.sendStatus  &&  this.props.sendStatus !== null)
         sendStatus = this.getSendStatus()
       var sealedStatus = (resource.txId)
-                       ? <View style={styles.sealedStatus}>
+                       ? <View style={chatStyles.sealedStatus}>
                            <Icon name={'ios-ribbon'} size={30} color='#316A99' style={{opacity: 0.5}} />
                          </View>
                        : <View />
@@ -228,12 +229,12 @@ class MessageRow extends Component {
       let cellStyle
       if (addStyle) {
         if (/*hasOwnerPhoto  ||  */!isSimpleMessage  ||  longMessage)
-          cellStyle = [styles.textContainer, addStyle]
+          cellStyle = [chatStyles.textContainer, addStyle]
         else
           cellStyle = addStyle
       }
       else
-        cellStyle = styles.textContainer
+        cellStyle = chatStyles.textContainer
       let msgContent =  <View style={[rowStyle, viewStyle]}>
                           <View style={{marginTop: 2}}>
                           {ownerPhoto}
@@ -241,7 +242,7 @@ class MessageRow extends Component {
                           <View style={cellStyle}>
                             <View style={styles.container}>
                             {this.isShared()
-                              ? <View style={[styles.verifiedHeader, {backgroundColor: this.props.bankStyle.SHARED_WITH_BG}]}>
+                              ? <View style={[chatStyles.verifiedHeader, {backgroundColor: this.props.bankStyle.SHARED_WITH_BG}]}>
                                   <Text style={styles.white18}>{translate('youShared', resource.to.organization.title)}</Text>
                                 </View>
                               : <View />
@@ -278,7 +279,7 @@ class MessageRow extends Component {
       else if (inRow === 2)
         photoStyle = styles.mediumImage;
       else
-        photoStyle = styles.image;
+        photoStyle = chatStyles.image;
     }
 
     var viewStyle = { margin:1, backgroundColor: '#f7f7f7' }
@@ -443,8 +444,8 @@ class MessageRow extends Component {
     let w = utils.dimensions(MessageRow).width * 0.8
     return (
       <View style={[rowStyle, viewStyle, {width: w}]} key={this.getNextKey()}>
-        <View style={{width: 30}}/>
-        <View style={[addStyle ? [styles.textContainer, addStyle] : styles.textContainer]}>
+        <View style={{width: 40}}/>
+        <View style={[addStyle ? [chatStyles.textContainer, addStyle] : chatStyles.textContainer]}>
           <View style={{flex: 1}}>
             <View style={styles.assistentBox}>
               <Text style={styles.assistentText}>{msg}</Text>
@@ -552,7 +553,7 @@ class MessageRow extends Component {
       let color = isMyMessage ? '#ffffff' : '#757575'
       let msg = !this.props.navigator.isConnected  &&  this.props.isLast
               ? <View key={this.getNextKey()}>
-                  <Text style={[styles.resourceTitle, {color: color}]}>{str}</Text>
+                  <Text style={[chatStyles.resourceTitle, {color: color}]}>{str}</Text>
                 </View>
               : <View key={this.getNextKey()} style={{flexDirection: 'row', justifyContent: 'center'}}>
                   <Text style={[styles.resourceTitle, {color: color, marginTop: 3, paddingRight: 20}]}>{str}</Text>
@@ -581,7 +582,7 @@ class MessageRow extends Component {
     if (isSelfIntroduction || isCustomerWaiting) {
       let msg = <View key={this.getNextKey()}>
                   <View style={styles.rowContainer}>
-                    <Text style={[styles.resourceTitle, {paddingRight: 20, color: isMyMessage ? '#ffffff' : '#757575'}]}>{resource.message}</Text>
+                    <Text style={[styles.resourceTitle, {paddingRight: 20, color: isMyMessage ? '#ffffff' : '#757575', fontStyle: isCustomerWaiting ? 'italic' : 'normal'}]}>{resource.message}</Text>
                     <Icon style={{color: LINK_COLOR, backgroundColor: 'transparent',  paddingLeft: 5}} size={20} name={'ios-person'} />
                   </View>
                 </View>
@@ -591,7 +592,7 @@ class MessageRow extends Component {
     }
     if (model.id === APPLICATION_SUBMITTED) {
       let msg = <View key={this.getNextKey()}>
-                  <Text style={[styles.resourceTitle, {color: this.props.bankStyle.CONFIRMATION_COLOR}]}>{resource.message}</Text>
+                  <Text style={[chatStyles.resourceTitle, {color: this.props.bankStyle.CONFIRMATION_COLOR}]}>{resource.message}</Text>
                 </View>
       renderedRow.push(msg);
       return null
@@ -599,7 +600,7 @@ class MessageRow extends Component {
     var isForgetting = model.id === constants.TYPES.FORGET_ME || model.id === constants.TYPES.FORGOT_YOU
     if (isForgetting) {
       let msg = <View key={this.getNextKey()}>
-                  <Text style={[styles.resourceTitle, styles.white18]} key={this.getNextKey()}>{resource.message}</Text>
+                  <Text style={[chatStyles.resourceTitle, styles.white18]} key={this.getNextKey()}>{resource.message}</Text>
                 </View>
       renderedRow.push(msg)
       return null
@@ -642,7 +643,7 @@ class MessageRow extends Component {
         }
         return;
       }
-      var style = isSimpleMessage || isFormError ? styles.resourceTitle : styles.description; //resourceTitle; //(first) ? styles.resourceTitle : styles.description;
+      var style = isSimpleMessage || isFormError ? chatStyles.resourceTitle : chatStyles.description; //resourceTitle; //(first) ? chatStyles.resourceTitle : styles.description;
       if (isMyMessage)
         style = [style, {justifyContent: 'flex-end', color: isMyProduct ? '#2892C6' : '#ffffff'}];
 
@@ -686,7 +687,7 @@ class MessageRow extends Component {
           if (resource.welcome) {
             msg = <View key={self.getNextKey()}>
                     <Text style={style}>{msgParts[0]}</Text>
-                    <View style={styles.rowContainer}>
+                    <View style={chatStyles.rowContainer}>
                       <Text style={[style, {color: isMyMessage ? STRUCTURED_MESSAGE_COLOR : isMyMessage ? self.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]}>{msgParts[1]} </Text>
                       <Icon style={{color: LINK_COLOR, marginTop: 2}} size={20} name={'ios-arrow-forward'} />
                     </View>
@@ -700,7 +701,7 @@ class MessageRow extends Component {
           let color, link
           if (msgModel) {
             if (self.props.shareableResources  &&  !isSimpleMessage)
-              style = /*isSimpleMessage ? styles.resourceTitle : */styles.description;
+              style = /*isSimpleMessage ? chatStyles.resourceTitle : */chatStyles.description;
             msgModel = msgModel.value;
             let shareMyProduct = msgModel.subClassOf === MY_PRODUCT
             if (shareMyProduct) {
@@ -722,7 +723,7 @@ class MessageRow extends Component {
               if (isMyMessage)
                 link = <Text style={[style, color]}>{translate(msgModel)}</Text>
               else
-                link = <View style={styles.rowContainer}>
+                link = <View style={chatStyles.rowContainer}>
                            <Text style={[style, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(msgModel)}</Text>
                            <Icon style={[{marginTop: 2}, resource.documentCreated || isReadOnly ? styles.linkIconGreyed : {color: isMyMessage ? self.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
                        </View>
@@ -743,7 +744,7 @@ class MessageRow extends Component {
           isConfirmation = resource[v].indexOf('Congratulations!') !== -1
 
         if (isConfirmation) {
-          style = [style, {color: self.props.bankStyle.CONFIRMATION_COLOR}, styles.resourceTitle]
+          style = [style, {color: self.props.bankStyle.CONFIRMATION_COLOR}, chatStyles.resourceTitle]
           vCols.push(
             <View key={self.getNextKey()}>
               <Text style={[style]}>{resource[v]}</Text>
@@ -764,7 +765,7 @@ class MessageRow extends Component {
       // if (title.length > 30)
       //   title = title.substring(0, 27) + '...'
 
-      vCols.push(<Text style={[styles.resourceTitle, styles.formType, {color: isMyMessage ? '#EBFCFF' : this.props.bankStyle.STRUCTURED_MESSAGE_BORDER}]} key={this.getNextKey()}>{title}</Text>);
+      vCols.push(<Text style={[chatStyles.resourceTitle, chatStyles.formType, {color: isMyMessage ? '#EBFCFF' : this.props.bankStyle.STRUCTURED_MESSAGE_BORDER}]} key={this.getNextKey()}>{title}</Text>);
     }
     if (vCols  &&  vCols.length) {
       vCols.forEach(function(v) {
@@ -866,19 +867,23 @@ class MessageRow extends Component {
              </View>
     }
     else if (isMyMessage)
-      link = <Text style={[styles.resourceTitle, color]}>{translate(form)}</Text>
+      link = <Text style={[chatStyles.resourceTitle, color]}>{translate(form)}</Text>
     else {
       let notLink = resource.documentCreated  ||  isReadOnly  ||  form.subClassOf === MY_PRODUCT
       link = <View style={styles.rowContainer}>
                <Text style={[styles.resourceTitle, {color: resource.documentCreated  ||  notLink ?  '#757575' : LINK_COLOR}]}>{translate(form)}</Text>
                <Icon style={[{marginTop: 2, paddingLeft: 100}, resource.documentCreated  ? styles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
              </View>
-      onPressCall = notLink ? null : this.createNewResource.bind(this, form, isMyMessage)
+      onPressCall = notLink
+                  ? null
+                  : resource.verifiers
+                     ? this.props.chooseTrustedProvider.bind(this, this.props.resource, form, isMyMessage)
+                     : this.createNewResource.bind(this, form, isMyMessage)
     }
     let strName = sameFormRequestForm ? translate('addAnotherFormOrGetNext', translate(form)) : utils.getStringName(message)
     let str = strName ? utils.translate(strName) : message
     let msg = <View key={this.getNextKey()}>
-               <Text style={styles.resourceTitle}>{str}</Text>
+               <Text style={chatStyles.resourceTitle}>{str}</Text>
                {link}
              </View>
     vCols.push(msg);
@@ -976,6 +981,12 @@ var styles = StyleSheet.create({
     borderTopRightRadius: 0,
     backgroundColor: '#77ADFC' //#569bff',
   },
+  // resourceTitle: {
+  //   // flex: 1,
+  //   fontSize: 18,
+  //   // fontWeight: '400',
+  //   // marginBottom: 2,
+  // },
   forgetCell: {
     paddingVertical: 5,
     paddingHorizontal: 7,
@@ -991,43 +1002,14 @@ var styles = StyleSheet.create({
     borderTopLeftRadius: 0,
     borderRadius: 10,
   },
-  bigImage: {
-    width: 240,
-    height: 280,
-    margin: 1,
-    borderRadius: 10
-  },
   bigImageH: {
     width: 270,
     height: 200,
     margin: 1,
     borderRadius: 10
   },
-  mediumImage: {
-    width: 120,
-    height: 120,
-    margin: 1,
-    borderRadius: 10
-  },
-  image: {
-    width: 88,
-    height: 88,
-    margin: 1,
-    borderRadius: 10
-  },
-  verySmallLetters: {
-    fontSize: 18,
-    // alignSelf: 'flex-end',
-    color: '#757575'
-    // color: '#b4c3cb'
-  },
   linkIconGreyed: {
     color: '#cccccc'
-  },
-  description: {
-    // flexWrap: 'wrap',
-    color: '#757575',
-    fontSize: 14,
   },
   assistentText: {
     color: '#757575',
@@ -1044,51 +1026,11 @@ var styles = StyleSheet.create({
     marginTop: -7,
     marginHorizontal: -7
   },
-  formType: {
-    color: '#EBFCFF',
-    fontSize: 18,
-    fontWeight: '600',
-    opacity: 0.5,
-    alignSelf: 'flex-end',
-    marginTop: 10
-  },
-  verifiedHeader: {
-    flexDirection: 'row',
-    paddingVertical: 5,
-    paddingHorizontal: 7,
-    marginHorizontal: -8,
-    marginTop: -6,
-    justifyContent: 'center'
-  },
-  sealedStatus: {
-    // alignSelf: 'flex-end',
-    // flexDirection: 'row',
-    position: 'absolute',
-    bottom: 1,
-    left: 10,
-  },
   errorBadge: {
     position: 'absolute',
     opacity: 0.5,
     bottom: -5,
     right: 0
-  },
-  rowContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between'
-  },
-  verificationHeaderText: {
-    fontSize: 18,
-    fontWeight: '500',
-    alignSelf: 'center',
-    color: '#FBFFE5'
-  },
-  verificationBody: {
-    paddingVertical: 5,
-    paddingHorizontal: 7,
-    borderRadius: 10,
-    borderWidth: 1,
-    marginVertical: 2
   },
   multiEntryButton:  {
     borderRadius: 10,
@@ -1105,6 +1047,18 @@ var styles = StyleSheet.create({
     borderColor: '#cccccc',
     borderWidth: 1
   },
+  multiEntryText: {
+    fontSize: 18
+  },
+  // msgImage: {
+  //   height: 30,
+  //   marginRight: 3,
+  //   marginLeft: 0,
+  //   width: 30,
+  //   borderRadius: 15,
+  //   borderColor: '#cccccc',
+  //   borderWidth: 1
+  // },
   productAppIcon: {
     alignSelf: 'flex-end',
     marginTop: -30,
@@ -1114,459 +1068,8 @@ var styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 18
   },
-  // viewStyle: {
-  //   flexDirection: 'row',
-  //   alignSelf: 'flex-start',
-  //   width: DeviceWidth - 50
-  // }
 });
 reactMixin(MessageRow.prototype, RowMixin);
 MessageRow = makeResponsive(MessageRow)
 
 module.exports = MessageRow;
-  // employeeImage: {
-  //   // backgroundColor: '#dddddd',
-  //   height: 30,
-  //   marginRight: 3,
-  //   marginLeft: 0,
-  //   width: 30,
-  // },
-
-  // msgImage: {
-  //   // backgroundColor: '#dddddd',
-  //   height: 30,
-  //   marginRight: 3,
-  //   marginLeft: 0,
-  //   width: 30,
-  //   borderRadius: 15,
-  //   borderColor: '#cccccc',
-  //   borderWidth: 1
-  // },
-  // cellRoundImage: {
-  //   paddingVertical: 1,
-  //   borderRadius: 20,
-  //   height: 40,
-  //   width: 40,
-  //   alignSelf: 'center'
-  // },
-  // cellText: {
-  //   marginTop: 8,
-  //   alignSelf: 'center',
-  //   color: '#ffffff',
-  //   fontSize: 18,
-  //   backgroundColor: 'transparent'
-  // },
-
-/*
-  renderVerification() {
-    var resource = this.props.resource;
-    var model = utils.getModel(resource[constants.TYPE]).value;
-    var renderedRow = [];
-
-    var time = this.getTime(resource);
-    var date = time
-             ? <Text style={styles.date} numberOfLines={1}>{time}</Text>
-             : <View />;
-
-    var isMyMessage = this.isMyMessage();
-    var msgWidth = isMyMessage ? DeviceWidth - 70 : DeviceWidth - 50;
-
-    var msgModel = utils.getModel(resource.document[constants.TYPE]).value;
-    var orgName = resource.organization  ? resource.organization.title : ''
-
-    let me = utils.getMe()
-    let isThirdPartyVerification
-    if (me.isEmployee  &&  !this.props.to.organization) {
-      // Check if I am the employee of the organization I opened a chat with or the customer
-      isThirdPartyVerification = !utils.isEmployee(resource.organization)
-      // let orgId = utils.getId(resource.organization)
-      // if (orgId !== utils.getId(me.organization))
-      //   isThirdPartyVerification = true
-    }
-    let bgColor =  isThirdPartyVerification ? '#93BEBA' : this.props.bankStyle.VERIFIED_HEADER_COLOR
-    renderedRow = <View>
-                    <View style={[styles.verifiedHeader, {backgroundColor: bgColor}]}>
-                      <Icon style={styles.verificationIcon} size={20} name={'ios-checkmark'} />
-                      <Text style={styles.verificationHeaderText}>{translate('verifiedBy', orgName)}</Text>
-                    </View>
-                    <View style={{paddingTop: 5}}>
-                      {this.formatDocument(msgModel, resource, this.verify.bind(this), isThirdPartyVerification)}
-                    </View>
-                  </View>
-
-    var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start', width: msgWidth, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}
-    let addStyle = [styles.verificationBody, {backgroundColor: this.props.bankStyle.VERIFICATION_BG, borderColor: bgColor}];
-    let messageBody =
-          <TouchableHighlight onPress={this.verify.bind(this, resource)} underlayColor='transparent'>
-            <View style={[styles.row, viewStyle]}>
-              {this.getOwnerPhoto(isMyMessage)}
-              <View style={[styles.textContainer, addStyle]}>
-                <View style={{flex: 1}}>
-                  {renderedRow}
-               </View>
-              </View>
-            </View>
-          </TouchableHighlight>
-
-    var viewStyle = { margin: 1, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR }
-    return (
-      <View style={viewStyle} key={this.getNextKey()}>
-        {date}
-        {messageBody}
-      </View>
-    );
-  }
-
-  renderMyProduct() {
-    var resource = this.props.resource;
-    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
-    var renderedRow = [];
-
-    var ret = this.formatRow(false, renderedRow);
-    let onPressCall = ret ? ret.onPressCall : null
-
-    let addStyle = [addStyle, styles.verificationBody, {backgroundColor: this.props.bankStyle.PRODUCT_BG_COLOR , borderColor: this.props.bankStyle.CONFIRMATION_COLOR}];
-    let rowStyle = [styles.row,  {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}];
-    var val = this.getTime(resource);
-    var date = val
-             ? <Text style={styles.date} numberOfLines={1}>{val}</Text>
-             : <View />;
-
-    // var viewStyle = {flexDirection: 'row', alignSelf: 'flex-start', width: DeviceWidth - 50};
-
-    var hdrStyle = {backgroundColor: '#289427'} //this.props.bankStyle.PRODUCT_BG_COLOR ? {backgroundColor: this.props.bankStyle.PRODUCT_BG_COLOR} : {backgroundColor: '#289427'}
-    var orgName = resource.from.organization  ? resource.from.organization.title : ''
-    renderedRow.splice(0, 0, <View  key={this.getNextKey()} style={[styles.verifiedHeader, hdrStyle, {marginHorizontal: -8, marginTop: -7, marginBottom: 7, paddingBottom: 5}]}>
-                       <Text style={{fontSize: 18, alignSelf: 'center', color: '#fff'}}>{translate('issuedBy', orgName)}</Text>
-                    </View>
-                    );
-    let title = translate(model)
-    if (title.length > 30)
-      title = title.substring(0, 27) + '...'
-
-    renderedRow.push(<Text  key={this.getNextKey()} style={[styles.formType, {color: '#289427'}]}>{title}</Text>);
-    rowStyle = addStyle ? [styles.textContainer, addStyle] : styles.textContainer
-    let messageBody =
-      <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
-        <View style={styles.viewStyle}>
-          {this.getOwnerPhoto()}
-          <View style={rowStyle}>
-            <View style={{flex: 1}}>
-              {renderedRow}
-           </View>
-          </View>
-        </View>
-      </TouchableHighlight>
-
-
-    var viewStyle = { margin: 1, paddingTop: 7} //, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR }
-    return (
-      <View style={viewStyle} key={this.getNextKey()}>
-        {date}
-        {messageBody}
-      </View>
-    );
-  }
-
-  getPropRow(prop, resource, val, isVerification) {
-    var style = {flexDirection: 'row'}
-    if (prop.ref) {
-      if (prop.ref === constants.TYPES.MONEY) {
-        let c = utils.normalizeCurrencySymbol(val.currency)
-        val = (c || CURRENCY_SYMBOL) + val.value
-        // val = (val.currency || CURRENCY_SYMBOL) + val.value
-      }
-      else {
-        let m = utils.getModel(prop.ref).value
-        if (m.subClassOf === ENUM) {
-          if (typeof val === 'string')
-            val = utils.createAndTranslate(val)
-          else
-            val = utils.createAndTranslate(val.title)
-        }
-      }
-    }
-    let model = utils.getModel(resource[constants.TYPE]).value
-
-    let propTitle = translate(prop, model)
-    if (isVerification) {
-      if (!this.props.isAggregation)
-        style = [style, {borderWidth: 1, paddingVertical: 3, borderColor: VERIFICATION_BG, borderTopColor: '#eeeeee'}]
-      return (
-        <View style={style} key={this.getNextKey()}>
-          <View style={{flex: 1, flexDirection: 'column'}}>
-            <Text style={[styles.verySmallLetters, {color: '#333333'}]}>{propTitle}</Text>
-          </View>
-          <View style={{flex: 1, flexDirection: 'column'}}>
-            <Text style={styles.verySmallLetters}>{val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')}</Text>
-          </View>
-        </View>
-      )
-    }
-    else {
-      let isMyProduct = model.subClassOf === MY_PRODUCT
-      let isForm = model.subClassOf === constants.TYPES.FORM
-      let isMyMessage = this.isMyMessage()
-      if (!this.props.isAggregation  &&  (isMyMessage || isForm) &&  !isMyProduct)
-        style = [style, {borderWidth: 1, paddingVertical: 3, borderColor: isMyMessage ? STRUCTURED_MESSAGE_COLOR : '#ffffff', borderBottomColor: this.props.bankStyle.STRUCTURED_MESSAGE_BORDER}]
-      let color = this.isMyMessage() && !isMyProduct ? {color: '#FFFFEE'} : {color: '#757575'}
-      return (
-        <View style={style} key={this.getNextKey()}>
-          <View style={{flex: 1, flexDirection: 'column'}}>
-            <Text style={[styles.descriptionB, color]}>{propTitle}</Text>
-          </View>
-          <View style={{flex: 1, flexDirection: 'column'}}>
-            <Text style={[styles.descriptionB, color]}>{val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')}</Text>
-          </View>
-       </View>
-      )
-    }
-
-  }
-  formatDocument(model, verification, onPress, isAccordion) {
-    var resource = verification.document;
-
-    var docModel = utils.getModel(resource[constants.TYPE]).value;
-    var isMyProduct = docModel.subClassOf === MY_PRODUCT
-    var docModelTitle = docModel.title;
-    var idx = docModelTitle.indexOf('Verification');
-    var docTitle = idx === -1 ? docModelTitle : docModelTitle.substring(0, idx);
-
-    var msg;
-    if (resource.message  &&  docModel.subClassOf !== FORM)
-      msg = <View><Text style={styles.description}>{resource.message}</Text></View>
-    else {
-      var rows = [];
-      this.formatDocument1(model, resource, rows);
-      msg = <View>{rows}</View>
-    }
-
-
-    var hasPhotos = resource  &&  resource.photos  &&  resource.photos.length
-    var photo = hasPhotos
-              ? <Image source={{uri: utils.getImageUri(resource.photos[0].url)}}  style={styles.cellImage} />
-              : <View />;
-    var headerStyle = {paddingTop: 5, alignSelf: 'center'}
-    var header =  <View style={headerStyle}>
-                    <Text style={[styles.resourceTitle, {fontSize: 20, color: '#B6C2A7'}]}>{translate(model)}</Text>
-                  </View>
-    header = hasPhotos
-            ?  <View style={[styles.rowContainer, styles.verification]}>
-                 {photo}
-                 {header}
-               </View>
-            :  <View style={[{alignSelf: 'stretch'}, styles.verification]}>
-                 {header}
-               </View>
-
-
-    var orgRow = <View/>
-    if (verification  && verification.organization) {
-      var orgPhoto = verification.organization.photo
-                   ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
-                   : <View />
-      var shareView = <View style={{flexDirection: 'row', marginLeft: 0, justifyContent: 'space-between', padding: 5, borderRadius: 10, borderWidth: 1, borderColor: '#215A89', backgroundColor: '#4982B1', opacity: this.props.resource.documentCreated ? 0.3 : 1}}>
-                        <Image source={TradleW} style={{width: 35, height: 35}}/>
-                        <Text style={{color: '#fefefe', fontSize: 20, paddingHorizontal: 3, marginTop: 6}}>{translate('Share')}</Text>
-                      </View>
-      var orgTitle = this.props.to[constants.TYPE] === constants.TYPES.ORGANIZATION
-                   ? this.props.to.name
-                   : (this.props.to.organization ? this.props.to.organization.title : null);
-      // let o = verification.organization.title.length < 25 ? verification.organization.title : verification.organization.title.substring(0, 27) + '..'
-      let verifiedBy
-      if (isMyProduct)
-        verifiedBy = translate('issuedBy', verification.organization.title)
-      // Not verified Form - still shareable
-      else if (verification[constants.ROOT_HASH])
-        verifiedBy = translate('verifiedBy', verification.organization.title)
-      else
-        verifiedBy = translate('sentTo', verification.organization.title)
-
-      if (verifiedBy.length > 25)
-        verifiedBy = verifiedBy.substring(0, 25) + '..'
-      var orgView =   <View style={{flexDirection: 'row', justifyContent: 'flex-end', marginTop: 15}}>
-                         <Text style={[styles.verySmallLetters, {fontSize: 14}]}>{verifiedBy}</Text>
-                      </View>
-
-                         // <Text style={[styles.verySmallLetters, {color: '#2E3B4E'}]}>{verification.organization.title.length < 30 ? verification.organization.title : verification.organization.title.substring(0, 27) + '..'}</Text>
-      if (onPress) {
-        if (!this.props.resource.documentCreated)
-            <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
-                      Alert.alert(
-                        'Sharing ' + docTitle + ' ' + verifiedBy,
-                        'with ' + orgTitle,
-                        [
-                          {text: translate('Share'), onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
-                          {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-                        ]
-                    )}>
-              {shareView}
-            </TouchableHighlight>
-
-      }
-      else if (this.props.resource.documentCreated) {
-          orgRow = <View style={{flexDirection: 'row', marginTop: 5, paddingBottom: 5, justifyContent:'space-between'}}>
-                     {shareView}
-                    <TouchableHighlight onPress={this.props.onSelect.bind(this, resource, verification)} underlayColor='transparent'>
-                      {orgView}
-                    </TouchableHighlight>
-                  </View>
-      }
-      else {
-        orgRow = <View style={{flexDirection: 'row', marginTop: 5, paddingBottom: 5, justifyContent:'space-between'}}>
-          <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
-                    Alert.alert(
-                      'Sharing ' + docTitle + ' ' + verifiedBy,
-                      'with ' + orgTitle,
-                      [
-                        {text: translate('Share'), onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
-                        {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-                      ]
-                  )}>
-            {shareView}
-          </TouchableHighlight>
-          <TouchableHighlight onPress={this.props.onSelect.bind(this, resource, verification)} underlayColor='transparent'>
-            {orgView}
-          </TouchableHighlight>
-        </View>
-      }
-    }
-    let content = <View style={{flex:1}}>
-                     <TouchableHighlight onPress={this.props.onSelect.bind(this, resource, verification)} underlayColor='transparent'>
-                       {msg}
-                     </TouchableHighlight>
-                     {orgRow}
-                   </View>
-
-    var verifiedBy = verification && verification.organization ? verification.organization.title : ''
-    return isAccordion
-        ? ( <View style ={{marginTop: 5}} key={this.getNextKey()}>
-             <Accordion
-               header={header}
-               style={{padding: 5}}
-               content={content}
-               underlayColor='transparent'
-               easing='easeOutCirc' />
-            </View>
-          )
-        : ( <View style={{flex: 1, paddingVertical: 5}} key={this.getNextKey()}>
-               {header}
-               {content}
-             </View>
-           );
-  }
-
-  formatDocument1(model, resource, renderedRow) {
-    var viewCols = model.gridCols || model.viewCols;
-    if (!viewCols)
-      return
-    var vCols = [];
-    var self = this;
-
-    if (resource[constants.TYPE] != model.id)
-      return;
-
-    var properties = model.properties;
-    viewCols.forEach(function(v) {
-      if (properties[v].type === 'array'  ||  properties[v].type === 'date')
-        return;
-      var style = styles.verySmallLetters;
-      if (properties[v].ref) {
-      // if (properties[v].ref) {
-        if (resource[v]) {
-          var val
-          if (properties[v].type === 'object') {
-            if (properties[v].ref) {
-              if (properties[v].ref === constants.TYPES.MONEY) {
-                val = resource[v] //(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value
-                if (typeof val === 'string')
-                  val = {value: val, currency: CURRENCY_SYMBOL}
-                else {
-                  let c = utils.normalizeCurrencySymbol(val.currency)
-                  val.currency = c
-                }
-              }
-              else {
-                var m = utils.getModel(properties[v].ref).value
-                if (m.subClassOf  &&  m.subClassOf == ENUM)
-                  val = resource[v].title
-              }
-            }
-          }
-          if (!val)
-            val = resource[v].title  ||  resource[v]
-          vCols.push(self.getPropRow(properties[v], resource, val, true))
-        }
-        return;
-      }
-      var row
-      if (resource[v]  &&  properties[v].type === 'string'  &&  (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0))
-        row = <Text style={style} key={self.getNextKey()}>{resource[v]}</Text>;
-      else if (!model.autoCreate) {
-        var val = (properties[v].displayAs)
-                ? utils.templateIt(properties[v], resource)
-                : properties[v].type === 'boolean' ? (resource[v] ? 'Yes' : 'No') : resource[v];
-        if (!val)
-          return
-        row = self.getPropRow(properties[v], resource, val || resource[v], true)
-      }
-      else {
-        if (!resource[v]  ||  !resource[v].length)
-          return;
-        var msgParts = utils.splitMessage(resource[v]);
-        // Case when the needed form was sent along with the message
-        if (msgParts.length === 2) {
-          var msgModel = utils.getModel(msgParts[1]);
-          if (msgModel) {
-            vCols.push(<View key={self.getNextKey()}>
-                         <Text style={style}>{msgParts[0]}</Text>
-                         <Text style={[style, {color: isMyMessage ? STRUCTURED_MESSAGE_COLOR : LINK_COLOR}]}>{msgModel.value.title}</Text>
-                       </View>);
-            return;
-          }
-        }
-        row = self.getPropRow(properties[v], resource, resource[v], true)
-      }
-      vCols.push(row);
-    });
-
-    if (vCols  &&  vCols.length) {
-      vCols.forEach(function(v) {
-        renderedRow.push(v);
-      });
-    }
-  }
-  addContact() {
-    Alert.alert(
-      translate('addContact', utils.getDisplayName(this.props.resource.from)),
-      null,
-      [
-        {text: translate('Ok'), onPress: () => console.log('Ok!') },
-        {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-      ]
-    )
-  }
-  editForm(rUri, message) {
-    let s = rUri.split('_')
-    let resource = {
-      [constants.TYPE]: s[0],
-      [constants.ROOT_HASH]: s[1]
-    }
-
-    let rmodel = utils.getModel(s[0]).value;
-    let title = translate(rmodel);
-    this.props.navigator.push({
-      title: title,
-      id: 4,
-      component: NewResource,
-      // titleTextColor: '#999999',
-      backButtonTitle: 'Back',
-      rightButtonTitle: 'Done',
-      passProps: {
-        model: rmodel,
-        resource: resource,
-        message: message
-      }
-    })
-  }
-*/
