@@ -109,6 +109,7 @@ var RowMixin = {
 
   },
   getOwnerPhoto(isMyMessage) {
+    return <View/>
     var to = this.props.to;
     let isProductApplication = to[constants.TYPE]  === PRODUCT_APPLICATION
     if (!isProductApplication && (isMyMessage  || !to /* ||  !to.photos*/))
