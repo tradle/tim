@@ -3990,13 +3990,14 @@ var Store = Reflux.createStore({
         let verifications = owners[pId][ownerId].verifications
         verifications.forEach((v) => {
           let doc = v.leaves.filter((prop) => prop.key === 'document')[0].value.id
+          let docType = doc.split('_')[0]
           // if (!owners[pId][ownerId].forms)
           //   return
           // if (!allResources[doc]  ||  allResources[doc].from.id !== ownerId)
           //   return
-          if (forms.indexOf(doc)) {
-            if (!uniqueVerifications[doc])
-              uniqueVerifications[doc] = v
+          if (forms.indexOf(docType) !== -1) {
+            if (!uniqueVerifications[docType])
+              uniqueVerifications[docType] = v
           }
         })
         if (Object.keys(uniqueVerifications).length === forms.length) {
