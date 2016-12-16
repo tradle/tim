@@ -289,8 +289,8 @@ var styles = StyleSheet.create({
     fontSize:  16,
     fontWeight: '600',
     alignSelf: 'center',
-    borderRightColor: '#aaaaaa',
-    borderRightWidth: 1,
+    // borderRightColor: '#aaaaaa',
+    // borderRightWidth: 1,
   },
   col: {
     borderRightColor: '#aaaaaa',
