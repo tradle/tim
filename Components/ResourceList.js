@@ -8,6 +8,7 @@ var NewResource = require('./NewResource');
 var MessageList = require('./MessageList');
 var MessageView = require('./MessageView')
 var PageView = require('./PageView')
+var SupervisoryView = require('./SupervisoryView')
 import ActionSheet from 'react-native-actionsheet'
 var utils = require('../utils/utils');
 var translate = utils.translate
@@ -83,6 +84,7 @@ class ResourceList extends Component {
       isConnected: this.props.navigator.isConnected,
       userInput: '',
       sharedContextCount: 0,
+      hasPartials: false
     };
     if (props.multiChooser)
       this.state.chosen = {}
@@ -294,6 +296,10 @@ class ResourceList extends Component {
       this.setState({sharedContextCount: params.count})
       return
     }
+    if (action === 'hasPartials') { //  &&  this.props.officialAccounts  &&  (this.props.modelName === constants.TYPES.PROFILE || this.props.modelName === constants.TYPES.ORGANIZATION)) {
+      this.setState({hasPartials: true})
+      return
+    }
     if (action === 'list') {
       // First time connecting to server. No connection no providers yet loaded
       if (!params.list  &&  params.alert) {
@@ -361,6 +367,8 @@ class ResourceList extends Component {
     if (this.state.show !== nextState.show)
       return true
     if (this.state.sharedContextCount !== nextState.sharedContextCount)
+      return true
+    if (this.state.hasPartials !== nextState.hasPartials)
       return true
     if (nextState.isConnected !== this.state.isConnected)
       return true
@@ -936,43 +944,63 @@ class ResourceList extends Component {
   }
 
   renderHeader() {
+    let partial = this.state.hasPartials
+                ? <View style={{padding: 5, backgroundColor: '#f1ffe7'}}>
+                    <TouchableOpacity onPress={this.showPartials.bind(this)}>
+                      <View style={styles.row}>
+                        <Icon name='ios-stats-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+                        <View style={styles.textContainer}>
+                          <Text style={styles.resourceTitle}>{translate('Statistics')}</Text>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+                : <View/>
+
     return (this.props.modelName === constants.TYPES.PROFILE)
           ? <View>
-            <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
-              <TouchableOpacity onPress={this.showBanks.bind(this)}>
-                <View style={styles.row}>
-                  <Image source={require('../img/banking.png')} style={styles.cellImage} />
-                  <View style={styles.textContainer}>
-                    <Text style={styles.resourceTitle}>{translate('officialAccounts')}</Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            </View>
-            {this.state.sharedContextCount
-              ? <View style={{padding: 5, backgroundColor: '#f1ffe7'}}>
-                  <TouchableOpacity onPress={this.showContexts.bind(this)}>
-                    <View style={styles.row}>
-                      <Icon name='md-share' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
-                      <View style={styles.textContainer}>
-                        <Text style={styles.resourceTitle}>{translate('sharedContext')}</Text>
-                      </View>
-                      {
-                        this.state.sharedContextCount
-                        ? <View style={styles.sharedContext}>
-                            <Text style={styles.sharedContextText}>{this.state.sharedContextCount}</Text>
-                          </View>
-                        : <View />
-                      }
+              <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
+                <TouchableOpacity onPress={this.showBanks.bind(this)}>
+                  <View style={styles.row}>
+                    <Image source={require('../img/banking.png')} style={styles.cellImage} />
+                    <View style={styles.textContainer}>
+                      <Text style={styles.resourceTitle}>{translate('officialAccounts')}</Text>
                     </View>
-                  </TouchableOpacity>
-                </View>
-              : <View/>
-            }
+                  </View>
+                </TouchableOpacity>
+              </View>
+              {this.state.sharedContextCount
+                ? <View style={{padding: 5, backgroundColor: '#f1ffe7'}}>
+                    <TouchableOpacity onPress={this.showContexts.bind(this)}>
+                      <View style={styles.row}>
+                        <Icon name='md-share' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+                        <View style={styles.textContainer}>
+                          <Text style={styles.resourceTitle}>{translate('sharedContext')}</Text>
+                        </View>
+                        <View style={styles.sharedContext}>
+                          <Text style={styles.sharedContextText}>{this.state.sharedContextCount}</Text>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+                : <View/>
+              }
+              {partial}
             </View>
-          : <View />
-
+          : <View>
+              {partial}
+            </View>
   }
-
+  showPartials() {
+    Actions.getAllPartials()
+    this.props.navigator.push({
+      id: 27,
+      component: SupervisoryView,
+      backButtonTitle: 'Back',
+      title: translate('overviewOfApplications'),
+      passProps: {}
+    })
+  }
   scanFormsQRCode() {
     this.setState({show: false})
     this.props.navigator.push({
