@@ -43,6 +43,8 @@ var MessageView = require('./Components/MessageView');
 var MessageList = require('./Components/MessageList');
 var ArticleView = require('./Components/ArticleView');
 var IdentitiesList = require('./Components/IdentitiesList');
+var StatisticsView = require('./Components/StatisticsView')
+var SupervisoryView = require('./Components/SupervisoryView')
 // var SelectPhotoList = require('./Components/SelectPhotoList');
 var ProductChooser = require('./Components/ProductChooser')
 var ContextChooser = require('./Components/ContextChooser')
@@ -450,6 +452,10 @@ class TiMApp extends Component {
       return <LockScreen navigator={nav} {...props} />
     case 25:
       return <VerifierChooser navigator={nav} {...props} />
+    case 26:
+      return <StatisticsView navigator={nav} {...props} />
+    case 27:
+      return <SupervisoryView navigator={nav} {...props} />
     case 10:
     default: // 10
       return <ResourceList navigator={nav} {...props} />
@@ -602,7 +608,11 @@ var NavigationBarRouteMapper = {
       org = <Text style={style}> - {route.passProps.resource.organization.title}</Text>
     else
       org = <View />;
-
+    let photo
+    if (route.id === 11  &&  route.passProps.resource.photos) {
+      var uri = utils.getImageUri(route.passProps.resource.photos[0].url);
+      photo = <Image source={{uri: uri}} style={styles.msgImage} />
+    }
     var style = [platformStyles.navBarText, styles.navBarTitleText]
     if (route.titleTextColor)
       style.push({color: route.titleTextColor});
@@ -614,18 +624,42 @@ var NavigationBarRouteMapper = {
       tArr.push(<Text style={{marginTop: -3, color: '#2892C6', fontSize: 12, alignSelf: 'center'}} key={'index.common.js_' + i}>{t[i]}</Text>)
     return (
       <View key={'index.common.js'}>
+        <View style={{flexDirection: 'row'}}>
+        {photo}
         <Text style={style}>
           {t[0]}
         </Text>
+        </View>
         {tArr}
         {org}
       </View>
     );
+    // return (
+    //   <View key={'index.common.js'}>
+    //     <Text style={style}>
+    //       {t[0]}
+    //     </Text>
+    //     {tArr}
+    //     {org}
+    //   </View>
+    // );
+
   },
 
 };
 
 var styles = StyleSheet.create({
+  msgImage: {
+    // backgroundColor: '#dddddd',
+    height: 27,
+    marginRight: 3,
+    marginTop: 7,
+    marginLeft: 0,
+    width: 27,
+    borderRadius: 15,
+    borderColor: '#cccccc',
+    borderWidth: StyleSheet.hairlineWidth
+  },
   icon: {
     width: 25,
     height: 25,
