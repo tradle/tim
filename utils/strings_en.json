@@ -169,5 +169,6 @@
     "youShallNotPass": "You shall not pass!",
     "enablePasscodeFirst": "Looks like you don't have a device passcode enabled. Without it, this app cannot protect your data! Please enable it before pressing OK",
     "downloadingUpdate": "Downloading an update...",
-    "trustedProviders": "Trusted providers"
+    "trustedProviders": "Trusted providers",
+    "overviewOfApplications": "Overview of Applications"
 }
