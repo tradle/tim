@@ -297,6 +297,14 @@ class ResourceRow extends Component {
     var viewCols = model.gridCols || model.viewCols;
     var renderedViewCols;
     if (!viewCols) {
+      if (model.id === 'tradle.Partial') {
+        let p = resource.leaves.find((l) => l.key === constants.TYPE && l.value).value
+        let productTitle = utils.getModel(p).value.title
+        return <View style={{flexDirection: 'row'}}>
+                <Text style={[styles.resourceTitle, {fontSize: 18}]} numberOfLines={2}>{resource.provider.title}</Text>
+                <Text style={[styles.resourceTitle, {fontSize: 18, color: '#FF6D0D'}]}>{' ' + productTitle}</Text>
+              </View>
+      }
       var vCols = utils.getDisplayName(resource, model.properties);
       if (vCols && vCols.length) {
         if (model.subClassOf  &&  model.subClassOf === 'tradle.Enum')
