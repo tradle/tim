@@ -581,7 +581,7 @@ class MessageRow extends Component {
     if (isSelfIntroduction || isCustomerWaiting) {
       let msg = <View key={this.getNextKey()}>
                   <View style={styles.rowContainer}>
-                    <Text style={[styles.resourceTitle, {paddingRight: 20, color: isMyMessage ? '#ffffff' : '#757575'}]}>{resource.message}</Text>
+                    <Text style={[styles.resourceTitle, {color: isMyMessage ? '#ffffff' : '#757575', fontStyle: isCustomerWaiting ? 'italic' : 'normal'}]}>{resource.message}</Text>
                     <Icon style={{color: LINK_COLOR, backgroundColor: 'transparent',  paddingLeft: 5}} size={20} name={'ios-person'} />
                   </View>
                 </View>
