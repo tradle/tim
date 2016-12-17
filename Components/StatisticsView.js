@@ -185,7 +185,7 @@ class StatisticsView extends Component {
     );
   }
   renderHeader() {
-    return <View style={{backgroundColor: '#f1ffe7'}}>
+    return <View style={{backgroundColor: '#FBFFE5'}}>
             <Row size={8} style={styles.topRow}>
               <Col sm={1} md={1} lg={1}>
                 <Text>
@@ -260,19 +260,6 @@ class StatisticsView extends Component {
               </Col>
             </Row>
           </View>
-
-
-    // let partial = <View style={{padding: 5, backgroundColor: '#f1ffe7'}}>
-    //                 <View style={styles.row}>
-    //                   <Icon name='ios-stats-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
-    //                   <View style={styles.textContainer}>
-    //                     <Text style={styles.resourceTitle}>{translate('Statistics')}</Text>
-    //                   </View>
-    //                   <View style={styles.sharedContext}>
-    //                     <Text style={styles.sharedContextText}>{this.state.partialsCount}</Text>
-    //                   </View>
-    //                 </View>
-    //               </View>
 
     return partial
   }
