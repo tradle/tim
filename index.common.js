@@ -643,7 +643,6 @@ var NavigationBarRouteMapper = {
     return (
       <View key={'index.common.js'}>
         <View style={{flexDirection: 'row'}}>
-        {photo}
         <Text style={style}>
           {t[0]}
         </Text>

@@ -3,12 +3,18 @@ import {
   Platform
 } from 'react-native'
 
-let LOCAL_IP
-try {
-  LOCAL_IP = require('./localIP.json')
-} catch (err) {
-  LOCAL_IP = 'localhost'
-}
+import DeviceInfo from 'react-native-device-info'
+
+const MACHINE_LOCAL_IP = require('./localIP.json')
+const LOCAL_IP = (function () {
+  if (Platform.OS === 'android') return '10.0.2.2'
+
+  if (Platform.OS === 'web' || DeviceInfo.getModel() === 'Simulator') {
+    return 'localhost'
+  }
+
+  return MACHINE_LOCAL_IP
+})()
 
 module.exports = {
   GCM_SENDER_ID: '633104277721',

@@ -697,7 +697,7 @@ class TimHome extends Component {
 
     var percentIndicator
     if (this.state.downloadUpdateProgress) {
-      percentIndicator = <Text style={styles.updateIndicator}>{progress}%</Text>
+      percentIndicator = <Text style={styles.updateIndicator}>{this.state.downloadUpdateProgress}%</Text>
     }
 
     return (

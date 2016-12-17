@@ -58,7 +58,7 @@ var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
-var Keychain = null // !utils.isWeb() && require('../utils/keychain')
+var Keychain = !utils.isWeb() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('q-level');
 var leveldown = require('./leveldown')
@@ -194,10 +194,32 @@ var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 var SERVICE_PROVIDERS
 var publishRequestSent = []
 
-var driverInfo = {
-  wsClients: {},
+var driverInfo = (function () {
+  const clientToPermalinks = new Map()
+  const byUrl = {}
+  const byPermalink = {}
+  const wsClients = {
+    add({ client, url, permalink }) {
+      const current = clientToPermalinks.get(client) || []
+      clientToPermalinks.set(client, current.concat(permalink))
+
+      if (url) byUrl[url] = client
+      if (permalink) byPermalink[permalink] = client
+
+      return client
+    },
+    providers({ client, url }) {
+      if (!client) client = byUrl[url]
+
+      return client && clientToPermalinks.get(client)
+    },
+    byUrl,
+    byPermalink
+  }
+
+  return { wsClients }
   // whitelist: [],
-}
+})()
 
 // const KEY_SET = [
 //   { type: 'bitcoin', purpose: 'payment' },
@@ -237,10 +259,22 @@ var Store = Reflux.createStore({
     db = promisify(ldb);
 
     this._loadedResourcesDefer = Q.defer()
-    if (NetInfo) {
-      NetInfo.isConnected.addEventListener(
-        'change',
-        this._handleConnectivityChange.bind(this)
+    this.lockReceive = utils.locker({ timeout: 10000 })
+
+    NetInfo.isConnected.addEventListener(
+      'change',
+      this._handleConnectivityChange.bind(this)
+    );
+
+    if (utils.isSimulator()) {
+      // isConnected always returns false on simulator
+      // https://github.com/facebook/react-native/issues/873
+      this.isConnected = true
+    } else {
+      NetInfo.isConnected.fetch().then(
+        (isConnected) => {
+          this.isConnected = isConnected
+        }
       );
 
       if (utils.isSimulator()) {
@@ -300,6 +334,13 @@ var Store = Reflux.createStore({
   _handleConnectivityChange(isConnected) {
     this.isConnected = isConnected
     this.trigger({action: 'connectivity', isConnected: isConnected})
+    if (!meDriver) return
+
+    if (isConnected) {
+      meDriver.resume()
+    } else {
+      meDriver.pause()
+    }
     // Alert.alert('Store: ' + isConnected)
   },
 
@@ -488,6 +529,8 @@ var Store = Reflux.createStore({
     if (!SERVICE_PROVIDERS_BASE_URLS) {
       let settingsId = SETTINGS + '_1'
       var settings = this._getItem(settingsId)
+      fixOldSettings(settings)
+
       let updateSettings
       if (__DEV__  &&  settings  &&  settings.urls) {
         let urls = settings.urls
@@ -536,10 +579,10 @@ var Store = Reflux.createStore({
     // var fromPubKey = meDriver.identity.pubkeys.filter(k => k.type === 'ec' && k.purpose === 'sign')[0]
     meDriver._send = function (msg, recipientInfo, cb) {
       const recipientHash = recipientInfo.permalink
-      let messenger = wsClients[recipientHash]
+      let messenger = wsClients.byPermalink[recipientHash]
       if (!messenger) {
         let url = self._getItem(SETTINGS + '_1').hashToUrl[recipientHash]
-        messenger = wsClients[url]
+        messenger = wsClients.byUrl[url]
       }
       if (!messenger) {
         // Alert.alert('meDriver._send recipient not found ' + recipientHash)
@@ -889,10 +932,19 @@ var Store = Reflux.createStore({
     // const identifier = tradle.utils.serializePubKey(identifierPubKey).toString('hex')
     const base = getProviderUrl(provider)
 
-    if (wsClients[base]) return wsClients[base]
+    let transport = wsClients.byUrl[base]
+    if (transport) {
+      wsClients.add({
+        client: transport,
+        url: base,
+        permalink: provider.hash
+      })
+
+      return transport
+    }
 
     let wsClient = this.getWsClient(base)
-    let transport = this.getTransport(wsClient)
+    transport = this.getTransport(wsClient)
     // const url = utils.joinURL(base, 'ws?from=' + identifier).replace(/^http/, 'ws')
     // const wsClient = new WebSocketClient({
     //   url: url,
@@ -908,19 +960,28 @@ var Store = Reflux.createStore({
         debug('aborting pending sends due to disconnect')
         c.destroy()
       })
-      setProviderOnlineStatus(false)
-      // pause all channels
-      meDriver.sender.pause()
+
+      const disconnectedPermalinks = wsClients.providers({ client: transport })
+      disconnectedPermalinks.forEach(permalink => {
+        self.setProviderOnlineStatus(permalink, false)
+        meDriver.sender.pause(permalink)
+      })
     })
 
     wsClient.on('connect', function (recipient) {
       // resume all paused channels
-      setProviderOnlineStatus(true)
-      meDriver.sender.resume()
+      const connectedPermalinks = wsClients.providers({ client: transport })
+      connectedPermalinks.forEach(permalink => {
+        self.setProviderOnlineStatus(permalink, true)
+        meDriver.sender.resume(permalink)
+      })
     })
 
-    wsClients[base] = transport
-    wsClients[provider.hash] = transport
+    wsClients.add({
+      client: transport,
+      url: base,
+      permalink: provider.hash
+    })
 
     // let timeouts = {}
     // transport.on('receiving', function (msg) {
@@ -944,47 +1005,24 @@ var Store = Reflux.createStore({
       setTimeout(() => meDriver.resume(), 10000)
     })
 
-    const receiveLocks = {}
-    transport.on('message', function (msg, from) {
-      if (!receiveLocks[from]) receiveLocks[from] = mutexify()
+    transport.on('message', async function (msg, from) {
+      const unlock = await self.lockReceive(from)
+      const maybePromise = receive(msg, from)
+      if (!Q.isPromiseAlike(maybePromise)) {
+        return process.nextTick(unlock)
+      }
 
-      const lock = receiveLocks[from]
-      lock(_release => {
-        const release = once(() => {
-          clearTimeout(timeout)
-          _release()
-        })
-
-        const timeout = setTimeout(release, 10000)
-        const promise = receive(msg, from)
-        if (!Q.isPromiseAlike(promise)) {
-          return process.nextTick(release)
-        }
-
-        promise.finally(release)
-      })
+      try {
+        await maybePromise
+      } finally {
+        unlock()
+      }
     })
 
     transport.on('timeout', function (identifier) {
       transport.cancelPending(identifier)
     })
-    function setProviderOnlineStatus(online) {
-      let trigger, org
-      if (SERVICE_PROVIDERS) {
-        SERVICE_PROVIDERS.forEach((sp) => {
-          if (sp.url === provider.url  &&  sp.id === provider.id) {
-            org = self._getItem(sp.org)
-            org._online = online
-            trigger = true
-          }
-        })
-      }
-      if (trigger) {
-        self.trigger({action: 'onlineStatus', online: online})
-        let l = self.searchNotMessages({modelName: ORGANIZATION})
-        self.trigger({action: 'list', list: l})
-      }
-    }
+
     function receive (msg, from) {
       try {
         msg = tradleUtils.unserializeMessage(msg)
@@ -1103,6 +1141,22 @@ var Store = Reflux.createStore({
           debugger
         })
     }
+  },
+  setProviderOnlineStatus(permalink, online) {
+    if (!SERVICE_PROVIDERS) return
+
+    const provider = SERVICE_PROVIDERS.find(provider => {
+      return provider.permalink === permalink
+    })
+
+    if (!provider) return
+
+    const org = this._getItem(provider.org)
+    org._online = online
+
+    this.trigger({action: 'onlineStatus', online: online})
+    let l = this.searchNotMessages({modelName: ORGANIZATION})
+    this.trigger({action: 'list', list: l})
   },
   onPairingRequestAccepted(payload) {
     return this.onProcessPairingRequest(this._getItem(PAIRING_DATA + '_1'), payload)
@@ -1250,7 +1304,16 @@ var Store = Reflux.createStore({
 
         if (isDuplicate)
           return
-        SERVICE_PROVIDERS.push({id: sp.id, org: utils.getId(sp.org), url: originalUrl, style: sp.style})
+
+        sp.bot.permalink = sp.bot.pub[ROOT_HASH] || protocol.linkString(sp.bot.pub)
+        SERVICE_PROVIDERS.push({
+          id: sp.id,
+          org: utils.getId(sp.org),
+          url: originalUrl,
+          style: sp.style,
+          permalink: sp.bot.permalink
+        })
+
         promises.push(self.addInfo(sp, originalUrl))
       })
       if (utils.getMe())
@@ -3908,7 +3971,7 @@ var Store = Reflux.createStore({
       return
     this.trigger({action: 'hasPartials', count: list.length})
   },
-  onGetAllPartials() {
+  onGetAllPartials(listOnly) {
     let list = this.searchNotMessages({modelName: PARTIAL})
     if (!list  ||  !list.length)
       return
@@ -4076,7 +4139,7 @@ var Store = Reflux.createStore({
     //   let r = providers[p].provider
     //   stats.push[{provider: r, open: r.open, completed: r.completed}]
     // }
-    this.trigger({action: 'allPartials', stats: Object.values(providers), owners: owners})
+    this.trigger({action: 'allPartials', list: list, stats: Object.values(providers), owners: owners})
   },
   onGetAllSharedContexts() {
     let list = this.searchMessages({modelName: PRODUCT_APPLICATION})
@@ -5254,12 +5317,8 @@ var Store = Reflux.createStore({
           obj.from = {[ROOT_HASH]: msg.objectinfo.author}
           obj.objectinfo = msg.objectinfo
           try {
-            const author = await Q.ninvoke(tradleUtils, 'lookupAuthor', meDriver, {
-              object: payload,
-              verify: true
-            })
-
-            obj.to = {[ROOT_HASH]: author.permalink}
+            const originalRecipient = await meDriver.addressBook.byPubKey(msg.object.object.recipientPubKey)
+            obj.to = {[ROOT_HASH]: originalRecipient.permalink}
             obj.parsed = {data: payload.object}
             obj[ROOT_HASH] = protocol.linkString(obj.parsed.data)
             if (!obj.parsed.data[CUR_HASH])
@@ -6457,11 +6516,11 @@ var Store = Reflux.createStore({
       pairingReq.auth = hmac.digest('base64')
 
       const url = pairingData.rendezvous.url
-      let transport = driverInfo.wsClients[url]
+      let transport = driverInfo.wsClients.byUrl[url]
       if (!transport) {
         let wsClient = this.getWsClient(url, deviceId)
         transport = this.getTransport(wsClient, deviceId)
-        driverInfo.wsClients[url] = transport
+        driverInfo.wsClients.byUrl[url] = transport
       }
       let self = this
       transport.on('message', (msg, from) => {
@@ -6469,7 +6528,7 @@ var Store = Reflux.createStore({
           const payload = JSON.parse(msg)
           if (payload[TYPE] === PAIRING_RESPONSE) {
             transport.destroy()
-            delete driverInfo.wsClients[url]
+            delete driverInfo.wsClients.byUrl[url]
 
             return self.onProcessPairingResponse(this._getItem(PAIRING_DATA + '_1'), payload)
             .then(() => {
@@ -6490,7 +6549,7 @@ var Store = Reflux.createStore({
       // if (!transport) {
       //   let wsClient = this.getWsClient(url, meDriver.permalink)
       //   transport = this.getTransport(wsClient, meDriver.permalink)
-      //   driverInfo.wsClients[url] = transport
+      //   driverInfo.wsClients.byUrl[url] = transport
       // }
       const pairingReqStr = tradleUtils.stringify(pairingReq)
 
@@ -6583,7 +6642,7 @@ var Store = Reflux.createStore({
         }
 
         const url = pairingData.rendezvous.url
-        let transport = driverInfo.wsClients[url]
+        let transport = driverInfo.wsClients.byUrl[url]
         const pairingResStr = tradleUtils.stringify(pairingRes)
         return utils.tryWithExponentialBackoff(send)
 
@@ -6886,7 +6945,8 @@ var Store = Reflux.createStore({
 module.exports = Store;
 
 function getProviderUrl (provider) {
-  return provider.id ? utils.joinURL(provider.url, provider.id) : provider.url
+  return provider.url
+  // return provider.id ? utils.joinURL(provider.url, provider.id) : provider.url
 }
 
 function forEachSource (sources, fn) {
@@ -6915,6 +6975,22 @@ async function lookupSourceAuthors (meDriver, sources) {
 
   await Q.allSettled(promises)
   return sourceToAuthor
+}
+
+function fixOldSettings (settings) {
+  if (!(settings && settings.hashToUrl)) return
+
+  // previously there was 1 websocket connection per provider
+  // now it's 1 per url, so endpoint urls no longer contain provider ids
+
+  const { hashToUrl } = settings
+  for (var hash in hashToUrl) {
+    let url = hashToUrl[hash]
+    let lastSlashIdx = url.lastIndexOf('/')
+    if (lastSlashIdx > 8) {
+      hashToUrl[hash] = url.slice(0, lastSlashIdx)
+    }
+  }
 }
 
   // searchFormsToShare(params) {

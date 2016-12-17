@@ -153,7 +153,7 @@ class SupervisoryView extends Component {
       return <View/>
     // HACK for now
     let app = utils.getModel(this.product).value
-    return <View style={{backgroundColor: '#f1ffe7'}}>
+    return <View style={{backgroundColor: '#FBFFE5'}}>
             <Row size={3} style={styles.topRow}>
               <Col sm={3} md={3} lg={3}>
                 <Text style={{fontWeight: '600', alignSelf: 'center', paddingVertical: 5, fontSize: 16 }}>

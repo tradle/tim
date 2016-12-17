@@ -30,6 +30,7 @@ const WEB_TO_MOBILE = '0'
 const TALK_TO_EMPLOYEEE = '1'
 const APP_QR_CODE = '5'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
+const PARTIAL = 'tradle.Partial'
 // var bankStyles = require('../styles/bankStyles')
 const ENUM = 'tradle.Enum'
 
@@ -951,7 +952,8 @@ class ResourceList extends Component {
 
   renderHeader() {
     let partial = this.state.hasPartials
-                ? <View style={{padding: 5, backgroundColor: '#f1ffe7'}}>
+                ? <View>
+                   <View style={{padding: 5, backgroundColor: '#f1ffe7'}}>
                     <TouchableOpacity onPress={this.showPartials.bind(this)}>
                       <View style={styles.row}>
                         <Icon name='ios-stats-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
@@ -960,6 +962,17 @@ class ResourceList extends Component {
                         </View>
                       </View>
                     </TouchableOpacity>
+                  </View>
+                  <View style={{padding: 5, backgroundColor: '#FBFFE5'}}>
+                    <TouchableOpacity onPress={this.showAllPartials.bind(this)}>
+                      <View style={styles.row}>
+                        <Icon name='ios-apps-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+                        <View style={styles.textContainer}>
+                          <Text style={styles.resourceTitle}>{translate('Partials')}</Text>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
                   </View>
                 : <View/>
 
@@ -1005,6 +1018,19 @@ class ResourceList extends Component {
       backButtonTitle: 'Back',
       title: translate('overviewOfApplications'),
       passProps: {}
+    })
+  }
+  showAllPartials() {
+    Actions.list({modelName: PARTIAL})
+    this.props.navigator.push({
+      title: 'Partials',
+      id: 10,
+      component: ResourceList,
+      backButtonTitle: 'Back',
+      titleTextColor: '#7AAAC3',
+      passProps: {
+        modelName: PARTIAL
+      },
     })
   }
   scanFormsQRCode() {

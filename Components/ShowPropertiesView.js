@@ -126,6 +126,7 @@ class ShowPropertiesView extends Component {
     }
     var first = true;
     let self = this
+    let isPartial = model.id === 'tradle.Partial'
     var viewCols = vCols.map((p) => {
       if (excludedProperties  &&  excludedProperties.indexOf(p) !== -1)
         return;
@@ -159,8 +160,11 @@ class ShowPropertiesView extends Component {
           let c = utils.normalizeCurrencySymbol(val.currency)
           val = (c || CURRENCY_SYMBOL) + val.value
         }
-        else if (pMeta.inlined)
-          return this.viewCols(val, utils.getModel(val[constants.TYPE]).value)
+        else if (pMeta.inlined) {
+          if (!val[constants.TYPE])
+            val[constants.TYPE] = pMeta.ref
+          return this.getViewCols(val, utils.getModel(val[constants.TYPE]).value)
+        }
         // Could be enum like props
         else if (utils.getModel(pMeta.ref).value.subClassOf === ENUM)
           val = val.title
@@ -189,6 +193,40 @@ class ShowPropertiesView extends Component {
         return <View key={this.getNextKey()}></View>;
       if (!isRef) {
         isItems = Array.isArray(val)
+        if (isPartial  &&  p === 'leaves') {
+          let labels = []
+          let type = val.find((l) => l.key === constants.TYPE  &&  l.value).value
+          let lprops = utils.getModel(type).value.properties
+          val.forEach((v) => {
+            let key
+            if (v.key.charAt(0) === '_') {
+              if (v.key === constants.TYPE) {
+                key = 'type'
+                value = utils.getModel(v.value).value.title
+              }
+              else
+                return
+            }
+            else {
+              key = lprops[v.key]  &&  lprops[v.key].title
+              if (v.value  &&  v.key  && (v.key === 'product'  ||  v.key === 'form'))
+                value = utils.getModel(v.value).value.title
+              else
+                value = v.value || '[not shared]'
+            }
+
+            if (!key)
+              return
+            labels.push(<View style={{justifyContent: 'space-between', flexDirection: 'row'}} key={this.getNextKey()}>
+                           <Text style={[styles.title]}>{key}</Text>
+                           <Text style={[styles.title, {color: '#2e3b4e'}]}>{value}</Text>
+                        </View>)
+          })
+          return <View style={{paddingLeft: 10}} key={this.getNextKey()}>
+                    <Text  style={[styles.title, {paddingVertical: 3}]}>{'Properties Shared'}</Text>
+                    {labels}
+                  </View>
+        }
         val = this.renderSimpleProp(val, pMeta, modelName)
       }
       var title = pMeta.skipLabel  ||  isItems
