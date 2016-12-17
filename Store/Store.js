@@ -6926,6 +6926,8 @@ async function lookupSourceAuthors (meDriver, sources) {
 }
 
 function fixOldSettings (settings) {
+  if (!(settings && settings.hashToUrl)) return
+
   // previously there was 1 websocket connection per provider
   // now it's 1 per url, so endpoint urls no longer contain provider ids
 
