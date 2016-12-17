@@ -917,7 +917,7 @@
 					};
 					73261E121C4AB9FE00292FEE = {
 						DevelopmentTeam = 94V7783F74;
-						ProvisioningStyle = Manual;
+						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.Keychain = {
 								enabled = 1;
@@ -1605,9 +1605,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "Tradle-dev.entitlements";
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEAD_CODE_STRIPPING = NO;
+				DEPLOYMENT_POSTPROCESSING = NO;
 				DEVELOPMENT_TEAM = 94V7783F74;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1640,8 +1641,8 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = io.tradle.dev.tim;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "becd37ae-5ff5-4748-8b22-99a7f73e54b4";
-				PROVISIONING_PROFILE_SPECIFIER = "Tradle prov profile1";
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -1651,8 +1652,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "Tradle-dev.entitlements";
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEPLOYMENT_POSTPROCESSING = NO;
 				DEVELOPMENT_TEAM = 94V7783F74;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1685,8 +1687,8 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = io.tradle.dev.tim;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "becd37ae-5ff5-4748-8b22-99a7f73e54b4";
-				PROVISIONING_PROFILE_SPECIFIER = "Tradle prov profile1";
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;

@@ -168,5 +168,13 @@
     "sendEditRequestPrompt": "Send edit request to {1}?",
     "pleaseCorrectFields": "Please correct the following fields: {1}",
     "applyForProduct": "Apply for a product",
-    "verifyPrompt": "Verify?"
+    "verifyPrompt": "Verify?",
+    "fieldErrorMessagePrompt": "What's wrong with this field?",
+    "thisValueIsInvalidPlaceholder": "this value is invalid because...",
+    "sourcesBy": "Sources by {1}",
+    "youShallNotPass": "You shall not pass!",
+    "enablePasscodeFirst": "Looks like you don't have a device passcode enabled. Without it, this app cannot protect your data! Please enable it before pressing OK",
+    "downloadingUpdate": "Downloading an update...",
+    "trustedProviders": "Trusted providers",
+    "overviewOfApplications": "Overview of Applications"
 }

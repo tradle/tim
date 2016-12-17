@@ -39,7 +39,6 @@ const Cache = require('lru-cache')
 var strMap = {
   'Please fill out this form and attach a snapshot of the original document': 'fillTheFormWithAttachments',
   'Please fill out this form': 'fillTheForm'
-
 }
 var translatedStrings = {
   en: require('./strings_en.json'),
@@ -210,9 +209,7 @@ var utils = {
         if (!r2[p]  ||  !properties[p]) // internal props like _context
           return false
         if (properties[p].ref === TYPES.MONEY) {
-          if (r1[p].currency !== r2[p].currency)
-            return false
-          if (r1[p].value !== r2[p].value)
+          if (r1[p].currency !== r2[p].currency  ||  r1[p].value !== r2[p].value)
             return false
         }
         else if (utils.getId(r1[p]) !== utils.getId(r2[p]))
@@ -478,7 +475,7 @@ var utils = {
       // val = moment(date).format('[yesterday], h:mA');
       break;
     default:
-      val = dateformat(date, 'mmmm d, yyyy' + (noTime ? '' : ', h:MM TT'));
+      val = dateformat(date, 'mmm d, yyyy' + (noTime ? '' : ', h:MM TT'));
       // val = moment(date).format('LL');
     }
     return val;
@@ -623,26 +620,27 @@ var utils = {
             title: this.getDisplayName(res[p], properties)
           }
         }
+        continue
       }
-      else if (properties[p].type === 'array'  &&  properties[p].items.ref) {
-        var arr = []
-        if (!res[p]  ||   !res[p].length)
-          continue
-        res[p].forEach(function(r) {
-          if (r.id) {
-            if (r.photo)
-              delete r.photo
-            arr.push(r)
-            return
-          }
-          var rr = {}
-          rr.id = utils.getId(r)
-          var m = utils.getModel(r[TYPE])
-          rr.title = utils.getDisplayName(r, m.properties)
-          arr.push(rr)
-        })
-        res[p] = arr
-      }
+      if (properties[p].type !== 'array'  ||
+         !properties[p].items.ref         ||
+          properties[p].inlined)
+        continue
+      var arr = []
+      res[p].forEach(function(r) {
+        if (r.id) {
+          if (r.photo)
+            delete r.photo
+          arr.push(r)
+          return
+        }
+        var rr = {}
+        rr.id = utils.getId(r)
+        var m = utils.getModel(r[TYPE])
+        rr.title = utils.getDisplayName(r, m.properties)
+        arr.push(rr)
+      })
+      res[p] = arr
     }
   },
 
@@ -1190,7 +1188,22 @@ var utils = {
       image.src = dataUrl
     })
   },
-  printStack: tradleUtils.printStack.bind(tradleUtils)
+  printStack: tradleUtils.printStack.bind(tradleUtils),
+  addCatchLogger: function (name, fn) {
+    return function () {
+      return fn.apply(this, arguments)
+        .catch(err => {
+          console.warn(`${name} failed:`, err.stack || err.message || err)
+          throw err
+        })
+    }
+  }
+}
+
+if (__DEV__) {
+  ;['setPassword', 'getPassword'].forEach(method => {
+    utils[method] = utils.addCatchLogger(method, utils[method])
+  })
 }
 
 function normalizeRemoveListener (addListenerRetVal) {

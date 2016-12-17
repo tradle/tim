@@ -9,6 +9,7 @@ var PhotoList = require('./PhotoList');
 var PhotoView = require('./PhotoView');
 var ShowPropertiesView = require('./ShowPropertiesView');
 var ShowMessageRefList = require('./ShowMessageRefList');
+var VerificationView = require('./VerificationView')
 // var MoreLikeThis = require('./MoreLikeThis');
 var NewResource = require('./NewResource');
 var PageView = require('./PageView')
@@ -24,6 +25,7 @@ var buttonStyles = require('../styles/buttonStyles');
 var HELP_COLOR = 'blue'
 var NetworkInfoProvider = require('./NetworkInfoProvider')
 // import Prompt from 'react-native-prompt'
+const VERIFICATION = constants.TYPES.VERIFICATION
 
 import {
   // StyleSheet,
@@ -150,15 +152,43 @@ class MessageView extends Component {
     var model = utils.getModel(this.props.resource[constants.TYPE]).value;
 
     this.state.prop = prop;
-    this.state.propValue = utils.getId(resource.id);
+    // this.state.propValue = utils.getId(resource.id);
     this.showRefResource(resource, prop)
     // Actions.getItem(resource.id);
   }
+
+  showVerification(resource, document) {
+    // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
+    var model = utils.getModel(document[constants.TYPE]).value;
+    var title = model.title; //utils.getDisplayName(resource, model.properties);
+    var newTitle = title;
+    let me = utils.getMe()
+    // Check if I am a customer or a verifier and if I already verified this resource
+    let isVerifier = !resource && utils.isVerifier(document)
+    let isEmployee = utils.isEmployee(this.props.resource)
+    var route = {
+      title: newTitle,
+      id: 5,
+      backButtonTitle: 'Back',
+      component: MessageView,
+      parentMeta: model,
+      passProps: {
+        bankStyle: this.props.bankStyle,
+        resource: resource,
+        currency: this.props.currency,
+        document: document,
+        // createFormError: isVerifier && !utils.isMyMessage(resource),
+        isVerifier: isVerifier
+      }
+    }
+    this.props.navigator.push(route);
+  }
+
   render() {
     var resource = this.state.resource;
     var modelName = resource[constants.TYPE];
     var model = utils.getModel(modelName).value;
-    var date = utils.formatDate(new Date(resource.time))
+    var date = resource.time ? utils.formatDate(new Date(resource.time)) : utils.formatDate(new Date())
     var inRow = resource.photos ? resource.photos.length : 0
     if (inRow  &&  inRow > 4)
       inRow = 5;
@@ -210,14 +240,21 @@ class MessageView extends Component {
           </View>
           <View style={styles.rowContainer}>
             {msg}
-            <ShowPropertiesView navigator={this.props.navigator}
-                                resource={resource}
-                                bankStyle={this.props.bankStyle}
-                                errorProps={this.state.errorProps}
-                                currency={this.props.currency}
-                                checkProperties={this.props.isVerifier /* && !utils.isReadOnlyChat(resource)*/ ? this.onCheck.bind(this) : null}
-                                excludedProperties={['tradle.Message.message', 'time', 'photos']}
-                                showRefResource={this.getRefResource.bind(this)}/>
+            {this.props.resource[constants.TYPE] === constants.TYPES.VERIFICATION
+              ? <VerificationView navigator={this.props.navigator}
+                                  resource={resource}
+                                  bankStyle={this.props.bankStyle}
+                                  currency={this.props.currency}
+                                  showVerification={this.showVerification.bind(this)}/>
+              : <ShowPropertiesView navigator={this.props.navigator}
+                                  resource={resource}
+                                  bankStyle={this.props.bankStyle}
+                                  errorProps={this.state.errorProps}
+                                  currency={this.props.currency}
+                                  checkProperties={this.props.isVerifier /* && !utils.isReadOnlyChat(resource)*/ ? this.onCheck.bind(this) : null}
+                                  excludedProperties={['tradle.Message.message', 'time', 'photos']}
+                                  showRefResource={this.getRefResource.bind(this)}/>
+            }
             {separator}
             {verificationTxID}
           </View>

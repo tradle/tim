@@ -10,7 +10,7 @@ import React, { Component } from 'react'
 import utils from '../utils/utils'
 var translate = utils.translate
 import Icon from 'react-native-vector-icons/Ionicons'
-var constants = require('@tradle/constants');
+const REMEDIATION = 'tradle.Remediation'
 
 class ChatContext extends Component {
   props: {
@@ -27,7 +27,7 @@ class ChatContext extends Component {
 
   render() {
     let context = this.props.context
-    if (!context)
+    if (!context  ||  context.product === REMEDIATION)
       return <View/>
     // if (!this.props.context  ||  this.props.context._readOnly)
     //   return <View/>

@@ -35,7 +35,6 @@ import Geometry from './Geometry'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const UNREAD_COLOR = '#FF6D0D'
 
-
 var dateProp
 
 class ResourceRow extends Component {
@@ -43,6 +42,7 @@ class ResourceRow extends Component {
     super(props)
     if (props.changeSharedWithList)
       this.state = {sharedWith: true}
+    // Multichooser for sharing context; isChooser for choosing delegated trusted party for requested verification
     if (props.multiChooser)
       this.state = {isChosen: false}
     if (props.resource[constants.TYPE] === constants.TYPES.PROFILE)
@@ -134,7 +134,7 @@ class ResourceRow extends Component {
         }
       }
     }
-    if (photo  &&  rType === constants.TYPES.ORGANIZATION) {
+    if (!this.props.isChooser  &&  photo  &&  rType === constants.TYPES.ORGANIZATION) {
       var onlineStatus = (
         <Geometry.Circle size={20} style={styles.online}>
           <Geometry.Circle size={18} style={{ backgroundColor: resource._online ? '#62C457' : '#FAD70C' }} />
@@ -171,7 +171,7 @@ class ResourceRow extends Component {
     var textStyle = /*noImage ? [styles.textContainer, {marginVertical: 7}] :*/ styles.textContainer;
 
     let dateRow
-    if (dateProp  &&  resource[dateProp]) {
+    if (!this.props.isChooser  &&  dateProp  &&  resource[dateProp]) {
       var val = utils.formatDate(new Date(resource[dateProp]), true)
       // var dateBlock = self.addDateProp(resource, dateProp, true);
       dateRow = <View style={styles.dateRow}>
@@ -193,7 +193,7 @@ class ResourceRow extends Component {
 
     // Grey out if not loaded provider info yet
             // <ActivityIndicator hidden='true' color='#629BCA'/>
-    var isOpaque = resource[constants.TYPE] === constants.TYPES.ORGANIZATION && !resource.contacts
+    var isOpaque = resource[constants.TYPE] === constants.TYPES.ORGANIZATION && !resource.contacts  &&  !this.props.isChooser
     if (isOpaque)
       return (
       <View key={this.getNextKey()} style={[{opacity: 0.5}, styles.rowWrapper]}>
@@ -317,6 +317,8 @@ class ResourceRow extends Component {
       }
       return <Text style={styles.resourceTitle}>{translate(utils.getModel(resource.product).value)}</Text>;
     }
+    else if (this.props.isChooser)
+      return <Text style={styles.resourceTitle}>{utils.getDisplayName(resource)}</Text>
 
     var vCols = [];
     var properties = model.properties;
@@ -618,7 +620,7 @@ module.exports = ResourceRow;
       // return (
       // <Swipeout right={[{text: 'Hide', backgroundColor: 'red', onPress: this.hideResource.bind(this, resource)}]} autoClose={true} scroll={(event) => this._allowScroll(event)} >
       //   <View key={this.getNextKey()} style={{opacity: 1, flex: 1, justifyContent: 'center'}}>
-      //     <TouchableOpacity onPress={this.state ? this.action.bind(this) : this.props.onSelect} key={this.getNextKey()}>
+      //     <TouchableHighlight onPress={this.state ? this.action.bind(this) : this.props.onSelect} underlayColor='transparent' key={this.getNextKey()}>
       //       <View style={[styles.row]} key={this.getNextKey()}>
       //         {photo}
       //         {orgPhoto}
@@ -628,13 +630,13 @@ module.exports = ResourceRow;
       //         </View>
       //         {cancelResource}
       //       </View>
-      //     </TouchableOpacity>
+      //     </TouchableHighlight>
       //     {this.props.isOfficialAccounts
-      //     ? <TouchableOpacity style={{position: 'absolute', right: 20, top: 25, backgroundColor: 'white'}} onPress={() => {
+      //     ? <TouchableHighlight underlayColor='transparent' style={{position: 'absolute', right: 20, top: 25, backgroundColor: 'white'}} onPress={() => {
       //         this.props.navigator.push({
       //           component: ResourceList,
       //           title: translate("myDocuments"),
-      //           backButtonTitle: 'Back',
+      //           backButtonTitle: translate('back'),
       //           passProps: {
       //             modelName: constants.TYPES.FORM,
       //             resource: this.props.resource
@@ -650,7 +652,7 @@ module.exports = ResourceRow;
       //               : <View />
       //            }
       //         </View>
-      //       </TouchableOpacity>
+      //       </TouchableHighlight>
       //       : <View />}
       //     {dateRow}
       //     {cancelResource}

@@ -11,9 +11,9 @@ DEST="$2"
 if [ -z "$2" ]; then
   COMMIT_HASH=$(git rev-parse HEAD)
   DEST="release/$PLATFORM/${COMMIT_HASH:0:7}"
-  mkdir -p "$DEST"
 fi
 
+mkdir -p "$DEST"
 DEV=false
 if [ "$3" == true ]; then
   DEV=true
