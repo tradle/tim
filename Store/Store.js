@@ -316,6 +316,13 @@ var Store = Reflux.createStore({
   _handleConnectivityChange(isConnected) {
     this.isConnected = isConnected
     this.trigger({action: 'connectivity', isConnected: isConnected})
+    if (!meDriver) return
+
+    if (isConnected) {
+      meDriver.resume()
+    } else {
+      meDriver.pause()
+    }
     // Alert.alert('Store: ' + isConnected)
   },
 
