@@ -9,7 +9,7 @@ module.exports = {
   GCM_SENDER_ID: '633104277721',
   serviceID: 'tradle',
   accessGroup: '94V7783F74.io.tradle.dev',
-  LOCAL_IP: LOCAL_IP,
+  LOCAL_IP: Platform.OS === 'android' ? '10.0.2.2' : LOCAL_IP,
   LOCAL_SERVER: `http://${LOCAL_IP}:44444`,
   pushServerURL: __DEV__ ? `http://${LOCAL_IP}:48284` : 'https://push1.tradle.io',
   isAndroid: function () {
