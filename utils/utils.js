@@ -35,6 +35,7 @@ var Backoff = require('backoff')
 var extend = require('xtend')
 var levelErrors = require('levelup/lib/errors')
 const Cache = require('lru-cache')
+const mutexify = require('mutexify')
 var strMap = {
   'Please fill out this form and attach a snapshot of the original document': 'fillTheFormWithAttachments',
   'Please fill out this form': 'fillTheForm'
@@ -1129,6 +1130,30 @@ var utils = {
           console.warn(`${name} failed:`, err.stack || err.message || err)
           throw err
         })
+    }
+  },
+
+  locker: function (opts={}) {
+    const { timeout } = opts
+    const locks = new Map()
+    return function lockID (something) {
+      let lock = locks.get(something)
+      if (!lock) {
+        lock = mutexify()
+        locks.set(something, lock)
+      }
+
+      return new Promise(function (resolve, reject) {
+        lock(function (unlock) {
+          resolve(unlock)
+          if (!timeout) return
+
+          setTimeout(() => {
+            reject(new Error('timed out'))
+            unlock()
+          }, timeout)
+        })
+      })
     }
   }
 }
