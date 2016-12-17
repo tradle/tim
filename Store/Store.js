@@ -3865,7 +3865,7 @@ var Store = Reflux.createStore({
       return
     this.trigger({action: 'hasPartials', count: list.length})
   },
-  onGetAllPartials() {
+  onGetAllPartials(listOnly) {
     let list = this.searchNotMessages({modelName: PARTIAL})
     if (!list  ||  !list.length)
       return
@@ -5214,12 +5214,8 @@ var Store = Reflux.createStore({
           obj.from = {[ROOT_HASH]: msg.objectinfo.author}
           obj.objectinfo = msg.objectinfo
           try {
-            const author = await Q.ninvoke(tradleUtils, 'lookupAuthor', meDriver, {
-              object: payload,
-              verify: true
-            })
-
-            obj.to = {[ROOT_HASH]: author.permalink}
+            const originalRecipient = await meDriver.addressBook.byPubKey(msg.object.object.recipientPubKey)
+            obj.to = {[ROOT_HASH]: originalRecipient.permalink}
             obj.parsed = {data: payload.object}
             obj[ROOT_HASH] = protocol.linkString(obj.parsed.data)
             if (!obj.parsed.data[CUR_HASH])
