@@ -4149,29 +4149,33 @@ var Store = Reflux.createStore({
               verifications: appProps.verifications.length,
               forms: appProps.forms.length
             }
-
-            if (!resource  ||  resource.from.id !== p)
+            if (!resource)
               return
+
             let m = utils.getModel(appProps.product).value
             let t = resource.leaves.filter((prop) => prop.key === TYPE)[0].value
-            if (m.forms.indexOf(t) === -1)
+
+            if (m.forms.indexOf(t) === -1  &&  t !== VERIFICATION)
               return
             switch (t) {
             case FORM_REQUEST:
-              appStats.changed('formRequests')
+              appStats.changed = 'formRequests'
               break
             case FORM_ERROR:
-              appStats.changed('formErrors')
+              appStats.changed = 'formErrors'
               break
             case VERIFICATION:
-              appStats.changed('verifications')
+              let docId = resource.leaves.filter((prop) => prop.key === 'document')[0].value.id
+              let docType = docId.split('_')[0]
+              if (m.forms.indexOf(docType)  !== -1)
+                appStats.changed = 'verifications'
               break
             case PRODUCT_APPLICATION:
-              appStats.changed('productApplications')
+              appStats.changed = 'productApplications'
               break
             default:
               if (utils.getModel(t).value.subClassOf === MY_PRODUCT)
-                appStats.changed('myProducts')
+                appStats.changed = 'myProducts'
               else
                 appStats.changed = 'forms'
             }
