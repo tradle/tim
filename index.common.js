@@ -43,7 +43,7 @@ var MessageView = require('./Components/MessageView');
 var MessageList = require('./Components/MessageList');
 var ArticleView = require('./Components/ArticleView');
 var IdentitiesList = require('./Components/IdentitiesList');
-var StatisticsView = require('./Components/StatisticsView')
+var SupervisoryViewPerProvider = require('./Components/SupervisoryViewPerProvider')
 var SupervisoryView = require('./Components/SupervisoryView')
 // var SelectPhotoList = require('./Components/SelectPhotoList');
 var ProductChooser = require('./Components/ProductChooser')
@@ -453,7 +453,7 @@ class TiMApp extends Component {
     case 25:
       return <VerifierChooser navigator={nav} {...props} />
     case 26:
-      return <StatisticsView navigator={nav} {...props} />
+      return <SupervisoryViewPerProvider navigator={nav} {...props} />
     case 27:
       return <SupervisoryView navigator={nav} {...props} />
     case 10:
