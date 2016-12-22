@@ -301,7 +301,7 @@ class ResourceRow extends Component {
         let p = resource.leaves.find((l) => l.key === constants.TYPE && l.value).value
         let productTitle = utils.getModel(p).value.title
         return <View style={{flexDirection: 'row'}}>
-                <Text style={[styles.resourceTitle, {fontSize: 18}]} numberOfLines={2}>{resource.provider.title}</Text>
+                <Text style={[styles.resourceTitle, {fontSize: 18}]} numberOfLines={2}>{resource.providerInfo.title}</Text>
                 <Text style={[styles.resourceTitle, {fontSize: 18, color: '#FF6D0D'}]}>{' ' + productTitle}</Text>
               </View>
       }

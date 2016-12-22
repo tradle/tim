@@ -98,7 +98,7 @@ class SupervisoryView extends Component {
               <Col sm={1} md={1} lg={1} style={styles.col}>
                 <TouchableOpacity onPress={() => this.showProviderDetails(resource)}>
                   <Text style={[styles.cell, {fontWeight: '600'}]}>
-                    {resource.provider.title}
+                    {resource.providerInfo.title}
                   </Text>
                 </TouchableOpacity>
               </Col>
@@ -121,10 +121,10 @@ class SupervisoryView extends Component {
       id: 26,
       component: SupervisoryViewPerProvider,
       backButtonTitle: 'Back',
-      title: resource.provider.title,
+      title: resource.providerInfo.title,
       passProps: {
         provider: resource,
-        applicants: this.state.owners[resource.provider.id]
+        applicants: this.state.owners[resource.providerInfo.id]
       }
     })
   }

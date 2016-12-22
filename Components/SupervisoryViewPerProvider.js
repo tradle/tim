@@ -36,6 +36,7 @@ import platformStyles from '../styles/platform'
 import ENV from '../utils/env'
 
 const SearchBar = Platform.OS === 'android' ? null : require('react-native-search-bar')
+const MILLIS_IN_DAY = 86400000
 
 class SupervisoryViewPerProvider extends Component {
   props: {
@@ -62,7 +63,7 @@ class SupervisoryViewPerProvider extends Component {
     if (action !== 'allPartials')
       return
     this.setState({
-      applicants: params.owners[this.props.provider.provider.id]
+      applicants: params.owners[this.props.provider.providerInfo.id]
     })
   }
 
@@ -83,7 +84,7 @@ class SupervisoryViewPerProvider extends Component {
     //   })
     // }
     let completed = completionDate ? utils.formatDate(new Date(completionDate)) : ''
-    let days = startDate && completionDate ? (completionDate - startDate) / MIILIS_IN_DAY : ''
+    let days = startDate && completionDate ? Math.ceil((completionDate - startDate) / MILLIS_IN_DAY) : ''
     let changedCol = {}
     if (stats.changed)
       changedCol = {[stats.changed]: styles.changedCol}

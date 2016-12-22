@@ -3941,7 +3941,7 @@ var Store = Reflux.createStore({
     let owners = {}
     let allResources = {}
     plist.forEach((r) => {
-      let pId = utils.getId(r.provider)
+      let pId = utils.getId(r.providerInfo)
       let stats = providers[pId]
       if (!stats) {
         stats = {
@@ -3954,7 +3954,7 @@ var Store = Reflux.createStore({
           verifications: [],
           formErrors: [],
           myProducts: [],
-          provider: r.provider
+          providerInfo: r.providerInfo
         }
         providers[pId] = stats
       }
@@ -3974,7 +3974,7 @@ var Store = Reflux.createStore({
           verifications: [],
           formErrors: [],
           myProducts: [],
-          provider: r.provider
+          providerInfo: r.providerInfo
         }
         owners[pId][ownerId] = providerCustomerStats
       }
@@ -4091,7 +4091,7 @@ var Store = Reflux.createStore({
 
     for (let p in providers) {
       let stats = providers[p]
-      let pId = stats.provider.id
+      let pId = stats.providerInfo.id
       let apps = stats.applications
       apps.forEach((a) => {
         let product = a.productType
@@ -4132,7 +4132,6 @@ var Store = Reflux.createStore({
 
     function getProviderPerCustomerPerProductStats(provider, providerCustomers, resource) {
       provider.applications.forEach((a) => {
-        let ownerStats
         for (let p in providerCustomers) {
           let app = providerCustomers[p]
           app.allPerApp.forEach((appProps) => {
@@ -4144,7 +4143,7 @@ var Store = Reflux.createStore({
               verifications: appProps.verifications.length,
               forms: appProps.forms.length
             }
-            if (!resource || resource.provider.id !== provider.provider.id)
+            if (!resource || resource.providerInfo.id !== provider.providerInfo.id)
               return
 
             let m = utils.getModel(appProps.product).value
@@ -5397,7 +5396,7 @@ var Store = Reflux.createStore({
             [CUR_HASH]: msg.partialinfo.link
           }
           payload.resource = {id: utils.getId(r)}
-          payload.provider = utils.clone(self._getItem(PROFILE + '_' + msg.objectinfo.author).organization)
+          payload.providerInfo = utils.clone(self._getItem(PROFILE + '_' + msg.objectinfo.author).organization)
           // debugger
         }
 
