@@ -4131,30 +4131,26 @@ var Store = Reflux.createStore({
     this.trigger({action: 'allPartials', list: plist, stats: Object.values(providers), owners: owners })
 
     function getProviderPerCustomerPerProductStats(provider, providerCustomers, resource) {
-      let products = []
-
       provider.applications.forEach((a) => {
-        if (products.indexOf(a.productType) !== -1)
-          return
         let ownerStats
-        products.push(a.productType)
         for (let p in providerCustomers) {
           let app = providerCustomers[p]
-          app.stats = {}
           app.allPerApp.forEach((appProps) => {
-            let appStats = app.stats[appProps.product] = {
+            appProps.stats = {}
+            let appStats = appProps.stats[appProps.product] = {
               product: appProps.product,
               formErrors: appProps.formErrors.length,
               formCorrections: appProps.formCorrections.length,
               verifications: appProps.verifications.length,
               forms: appProps.forms.length
             }
-            if (!resource)
+            if (!resource || resource.provider.id !== provider.provider.id)
               return
 
             let m = utils.getModel(appProps.product).value
             let t = resource.leaves.filter((prop) => prop.key === TYPE)[0].value
-
+            if (t !== VERIFICATION  &&  resource.from.id !== p)
+              return
             if (m.forms.indexOf(t) === -1  &&  t !== VERIFICATION)
               return
             switch (t) {
@@ -4167,8 +4163,14 @@ var Store = Reflux.createStore({
             case VERIFICATION:
               let docId = resource.leaves.filter((prop) => prop.key === 'document')[0].value.id
               let docType = docId.split('_')[0]
-              if (m.forms.indexOf(docType)  !== -1)
-                appStats.changed = 'verifications'
+              if (m.forms.indexOf(docType)  !== -1) {
+                app.allPerApp.forEach((a) => {
+                  a.forms.forEach((f) => {
+                    if (f.resource.id === docId)
+                      appStats.changed = 'verifications'
+                  })
+                })
+              }
               break
             case PRODUCT_APPLICATION:
               appStats.changed = 'productApplications'

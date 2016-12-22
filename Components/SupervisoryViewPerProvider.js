@@ -70,7 +70,7 @@ class SupervisoryViewPerProvider extends Component {
     let appType = resource.product
     let app = resource.app.product
     let owner = applicant.owner
-    let stats = applicant.stats ? applicant.stats[appType] : null
+    let stats = resource.stats[appType] // applicant.stats ? applicant.stats[appType] : null
 
     let startDate = app && app.time
     let start = startDate ? utils.formatDate(startDate) : ''
