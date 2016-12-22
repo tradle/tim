@@ -52,7 +52,7 @@ const documentPresences = ['physical', 'snapshot', 'video']
 function newFormRequestVerifiers(from, SERVICE_PROVIDERS, val, orgs) {
   if (!from || !SERVICE_PROVIDERS || !SERVICE_PROVIDERS.length)
     return
-  if (from.organization.title !== 'Easy Bank' || val.form !== 'tradle.TaxesFiledConfirmationForm')
+  if (from.organization.title !== 'UBS' || val.form !== 'tradle.TaxesFiledConfirmationForm')
     return
 
   if (val.form in formDefaults) {
@@ -66,7 +66,7 @@ function newFormRequestVerifiers(from, SERVICE_PROVIDERS, val, orgs) {
   let fOrgId = from.organization && from.organization.id
 
   verifiers.push({
-    url: __DEV__ ? ENV.LOCAL_SERVER : 'https://azure1.tradle.io',
+    url: __DEV__ ? ENV.LOCAL_SERVER : 'https://ubs.tradle.io',
     product: 'tradle.TaxesFiledConfirmation',
     id: 'taxtime',
     name: 'Tax Time!',
