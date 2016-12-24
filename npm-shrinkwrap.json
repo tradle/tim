@@ -1141,9 +1141,9 @@
       }
     },
     "charenc": {
-      "version": "0.0.1",
+      "version": "0.0.2",
       "from": "charenc@>=0.0.1 <0.1.0",
-      "resolved": "https://registry.npmjs.org/charenc/-/charenc-0.0.1.tgz"
+      "resolved": "https://registry.npmjs.org/charenc/-/charenc-0.0.2.tgz"
     },
     "cheerio": {
       "version": "0.19.0",
@@ -1384,9 +1384,9 @@
       "resolved": "https://registry.npmjs.org/cross-spawn-async/-/cross-spawn-async-2.2.4.tgz"
     },
     "crypt": {
-      "version": "0.0.1",
+      "version": "0.0.2",
       "from": "crypt@>=0.0.1 <0.1.0",
-      "resolved": "https://registry.npmjs.org/crypt/-/crypt-0.0.1.tgz"
+      "resolved": "https://registry.npmjs.org/crypt/-/crypt-0.0.2.tgz"
     },
     "csrf": {
       "version": "3.0.3",
@@ -3146,31 +3146,7 @@
     "key-encoder": {
       "version": "1.1.6",
       "from": "git://github.com/mvayngrib/key-encoder-js.git#9811b1d85ded6f6d8eb6b48389d80ed17df550ff",
-      "resolved": "git://github.com/mvayngrib/key-encoder-js.git#9811b1d85ded6f6d8eb6b48389d80ed17df550ff",
-      "dependencies": {
-        "asn1.js": {
-          "version": "2.2.1",
-          "from": "asn1.js@>=2.2.0 <3.0.0",
-          "resolved": "https://registry.npmjs.org/asn1.js/-/asn1.js-2.2.1.tgz",
-          "dependencies": {
-            "bn.js": {
-              "version": "2.2.0",
-              "from": "bn.js@>=2.0.0 <3.0.0",
-              "resolved": "https://registry.npmjs.org/bn.js/-/bn.js-2.2.0.tgz"
-            }
-          }
-        },
-        "bn.js": {
-          "version": "3.3.0",
-          "from": "bn.js@>=3.1.2 <4.0.0",
-          "resolved": "https://registry.npmjs.org/bn.js/-/bn.js-3.3.0.tgz"
-        },
-        "elliptic": {
-          "version": "5.2.1",
-          "from": "elliptic@>=5.1.0 <6.0.0",
-          "resolved": "https://registry.npmjs.org/elliptic/-/elliptic-5.2.1.tgz"
-        }
-      }
+      "resolved": "git://github.com/mvayngrib/key-encoder-js.git#9811b1d85ded6f6d8eb6b48389d80ed17df550ff"
     },
     "keymirror": {
       "version": "0.1.1",
@@ -3694,19 +3670,7 @@
     "merkle-tree-stream": {
       "version": "3.0.3",
       "from": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
-      "resolved": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
-      "dependencies": {
-        "isarray": {
-          "version": "1.0.0",
-          "from": "isarray@>=1.0.0 <1.1.0",
-          "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
-        },
-        "readable-stream": {
-          "version": "2.2.2",
-          "from": "readable-stream@>=2.0.5 <3.0.0",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.2.tgz"
-        }
-      }
+      "resolved": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290"
     },
     "method-override": {
       "version": "2.3.6",
@@ -5122,14 +5086,21 @@
       }
     },
     "sendy": {
-      "version": "2.3.0",
-      "from": "git://github.com/mvayngrib/sendy.git#d10e9147fcbc82b93b793bf91d77d6cb9afee051",
-      "resolved": "git://github.com/mvayngrib/sendy.git#d10e9147fcbc82b93b793bf91d77d6cb9afee051"
+      "version": "3.0.0",
+      "from": "sendy@latest",
+      "resolved": "https://registry.npmjs.org/sendy/-/sendy-3.0.0.tgz"
     },
     "sendy-axolotl": {
       "version": "1.0.1",
       "from": "sendy-axolotl@>=1.0.1 <2.0.0",
-      "resolved": "https://registry.npmjs.org/sendy-axolotl/-/sendy-axolotl-1.0.1.tgz"
+      "resolved": "https://registry.npmjs.org/sendy-axolotl/-/sendy-axolotl-1.0.1.tgz",
+      "dependencies": {
+        "sendy": {
+          "version": "2.4.0",
+          "from": "sendy@>=2.1.1 <3.0.0",
+          "resolved": "https://registry.npmjs.org/sendy/-/sendy-2.4.0.tgz"
+        }
+      }
     },
     "sendy-protobufs": {
       "version": "1.0.0",

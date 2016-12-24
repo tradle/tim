@@ -965,6 +965,8 @@ var Store = Reflux.createStore({
     //   forceBase64: true
     // })
 
+    transport.on('presence', updatePresence)
+
     wsClient.on('disconnect', function () {
       transport.clients().forEach(function (c) {
         // reset OTR session, restart on connect
@@ -972,21 +974,19 @@ var Store = Reflux.createStore({
         c.destroy()
       })
 
-      const disconnectedPermalinks = wsClients.providers({ client: transport })
-      disconnectedPermalinks.forEach(permalink => {
-        self.setProviderOnlineStatus(permalink, false)
-        meDriver.sender.pause(permalink)
-      })
+      wsClients
+        .providers({ client: transport })
+        .forEach(permalink => updatePresence(permalink, false))
     })
 
-    wsClient.on('connect', function (recipient) {
-      // resume all paused channels
-      const connectedPermalinks = wsClients.providers({ client: transport })
-      connectedPermalinks.forEach(permalink => {
-        self.setProviderOnlineStatus(permalink, true)
-        meDriver.sender.resume(permalink)
-      })
-    })
+    // wsClient.on('connect', function () {
+    //   // resume all paused channels
+    //   const connectedPermalinks = wsClients.providers({ client: transport })
+    //   connectedPermalinks.forEach(permalink => {
+    //     self.setProviderOnlineStatus(permalink, true)
+    //     meDriver.sender.resume(permalink)
+    //   })
+    // })
 
     wsClients.add({
       client: transport,
@@ -1008,13 +1008,6 @@ var Store = Reflux.createStore({
     //     }, 10000)
     //   }
     // })
-
-    transport.on('404', function (recipient) {
-      meDriver.sender.pause(recipient)
-      transport.cancelPending(recipient)
-      // try again soon. Todo: make this smarter
-      setTimeout(() => meDriver.resume(), 10000)
-    })
 
     transport.on('message', async function (msg, from) {
       if (!wsClients.byIdentifier[from]) {
@@ -1041,6 +1034,19 @@ var Store = Reflux.createStore({
     transport.on('timeout', function (identifier) {
       transport.cancelPending(identifier)
     })
+
+    function updatePresence (recipient, present) {
+      if (present) {
+        meDriver.sender.resume(recipient)
+      } else {
+        meDriver.sender.pause(recipient)
+        transport.cancelPending(recipient)
+        // try again soon. Todo: make this smarter
+        setTimeout(() => meDriver.sender.resume(recipient), 10000)
+      }
+
+      self.setProviderOnlineStatus(recipient, present)
+    }
 
     function receive (msg, from) {
       try {
