@@ -804,9 +804,7 @@ class NewResource extends Component {
                   // keyboardDismissMode='on-drag'>
     var content =
       <ScrollView style={{backgroundColor: 'transparent'}}
-                  ref='scrollView' {...this.scrollviewProps}
-                  keyboardShouldPersistTaps={true}
-                  keyboardDismissMode={this.state.isRegistration || Platform.OS === 'ios' ? 'on-drag' : 'interactive'}>
+                  ref='scrollView' {...this.scrollviewProps}>
         <View style={[styles.container, formStyle]}>
           { utils.isWeb()
             ? <View/>
