@@ -27,6 +27,11 @@ var Reflux = require('reflux');
 var Actions = require('../Actions/Actions');
 var extend = require('extend');
 var Debug = require('debug')
+Debug.enable([
+  'sendy*',
+  'tradle:node'
+].join(','))
+
 var deepEqual = require('deep-equal')
 var once = require('once')
 
@@ -195,26 +200,28 @@ var SERVICE_PROVIDERS
 var publishRequestSent = []
 
 var driverInfo = (function () {
-  const clientToPermalinks = new Map()
+  const clientToIdentifiers = new Map()
   const byUrl = {}
-  const byPermalink = {}
+  const byIdentifier = {}
   const wsClients = {
-    add({ client, url, permalink }) {
-      const current = clientToPermalinks.get(client) || []
-      clientToPermalinks.set(client, current.concat(permalink))
+    add({ client, url, identifier }) {
+      const identifiers = clientToIdentifiers.get(client) || []
+      if (identifiers.indexOf(identifier) === -1) identifiers.push(identifier)
+
+      clientToIdentifiers.set(client, identifiers)
 
       if (url) byUrl[url] = client
-      if (permalink) byPermalink[permalink] = client
+      if (identifier) byIdentifier[identifier] = client
 
       return client
     },
     providers({ client, url }) {
       if (!client) client = byUrl[url]
 
-      return client && clientToPermalinks.get(client)
+      return client && clientToIdentifiers.get(client)
     },
     byUrl,
-    byPermalink
+    byIdentifier
   }
 
   return { wsClients }
@@ -579,7 +586,7 @@ var Store = Reflux.createStore({
     // var fromPubKey = meDriver.identity.pubkeys.filter(k => k.type === 'ec' && k.purpose === 'sign')[0]
     meDriver._send = function (msg, recipientInfo, cb) {
       const recipientHash = recipientInfo.permalink
-      let messenger = wsClients.byPermalink[recipientHash]
+      let messenger = wsClients.byIdentifier[recipientHash]
       if (!messenger) {
         let url = self._getItem(SETTINGS + '_1').hashToUrl[recipientHash]
         messenger = wsClients.byUrl[url]
@@ -937,7 +944,7 @@ var Store = Reflux.createStore({
       wsClients.add({
         client: transport,
         url: base,
-        permalink: provider.hash
+        identifier: provider.hash
       })
 
       return transport
@@ -980,7 +987,7 @@ var Store = Reflux.createStore({
     wsClients.add({
       client: transport,
       url: base,
-      permalink: provider.hash
+      identifier: provider.hash
     })
 
     // let timeouts = {}
@@ -1006,6 +1013,14 @@ var Store = Reflux.createStore({
     })
 
     transport.on('message', async function (msg, from) {
+      if (!wsClients.byIdentifier[from]) {
+        wsClients.add({
+          client: transport,
+          url: base,
+          identifier: from
+        })
+      }
+
       const unlock = await self.lockReceive(from)
       const maybePromise = receive(msg, from)
       if (!Q.isPromiseAlike(maybePromise)) {
@@ -1207,7 +1222,7 @@ var Store = Reflux.createStore({
       identifier: this.getIdentifier(),
       unreliable: wsClient,
       clientForRecipient: function (recipient) {
-        const sendy = new Sendy(SENDY_OPTS)
+        const sendy = new Sendy({ ...SENDY_OPTS, name: recipient })
         if (!tlsKey) return sendy
 
         return new TLSClient({

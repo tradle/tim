@@ -25,6 +25,7 @@ var isProd = NODE_ENV === 'production';
 var isHot = !isProd && process.env.HOT === '1'
 var projectRoot = path.join(__dirname, '../')
 var screwIE = !process.env.IE
+var envFile = path.join(__dirname, '../env', (process.env.PROVIDERS || 'dev') + '.json')
 
 // var paths = {
 //   src: path.join(ROOT_PATH, '.'),
@@ -92,6 +93,10 @@ var common = {
       ReactDOM: 'react-dom'
     }),
     new webpack.NoErrorsPlugin(),
+    new webpack.NormalModuleReplacementPlugin(
+      /environment.json$/,
+      require.resolve(envFile)
+    ),
     // new WebpackMd5Hash(),
     // new ManifestPlugin({
     //   fileName: 'build-manifest.json'
