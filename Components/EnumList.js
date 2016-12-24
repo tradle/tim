@@ -43,6 +43,7 @@ class EnumList extends Component {
     this.props.navigator.popToRoute(this.props.returnRoute);
     return;
   }
+          // scrollRenderAhead={10}
   render() {
     var content = <ListView
           dataSource={this.state.dataSource}
@@ -51,9 +52,8 @@ class EnumList extends Component {
           removeClippedSubviews={false}
           keyboardDismissMode='on-drag'
           keyboardShouldPersistTaps={true}
-          initialListSize={10}
-          pageSize={20}
-          scrollRenderAhead={10}
+          initialListSize={200}
+          pageSize={200}
           showsVerticalScrollIndicator={false} />;
     var searchBar
     if (SearchBar) {
