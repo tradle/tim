@@ -1383,9 +1383,9 @@
       }
     },
     "charenc": {
-      "version": "0.0.1",
+      "version": "0.0.2",
       "from": "charenc@>=0.0.1 <0.1.0",
-      "resolved": "https://registry.npmjs.org/charenc/-/charenc-0.0.1.tgz"
+      "resolved": "https://registry.npmjs.org/charenc/-/charenc-0.0.2.tgz"
     },
     "cheerio": {
       "version": "0.19.0",
@@ -1752,9 +1752,9 @@
       "resolved": "https://registry.npmjs.org/cross-spawn-async/-/cross-spawn-async-2.2.4.tgz"
     },
     "crypt": {
-      "version": "0.0.1",
+      "version": "0.0.2",
       "from": "crypt@>=0.0.1 <0.1.0",
-      "resolved": "https://registry.npmjs.org/crypt/-/crypt-0.0.1.tgz"
+      "resolved": "https://registry.npmjs.org/crypt/-/crypt-0.0.2.tgz"
     },
     "cryptiles": {
       "version": "2.0.5",
@@ -6576,14 +6576,21 @@
       }
     },
     "sendy": {
-      "version": "2.3.0",
-      "from": "git://github.com/mvayngrib/sendy.git#d10e9147fcbc82b93b793bf91d77d6cb9afee051",
-      "resolved": "git://github.com/mvayngrib/sendy.git#d10e9147fcbc82b93b793bf91d77d6cb9afee051"
+      "version": "3.0.0",
+      "from": "sendy@latest",
+      "resolved": "https://registry.npmjs.org/sendy/-/sendy-3.0.0.tgz"
     },
     "sendy-axolotl": {
       "version": "1.0.1",
       "from": "sendy-axolotl@>=1.0.1 <2.0.0",
-      "resolved": "https://registry.npmjs.org/sendy-axolotl/-/sendy-axolotl-1.0.1.tgz"
+      "resolved": "https://registry.npmjs.org/sendy-axolotl/-/sendy-axolotl-1.0.1.tgz",
+      "dependencies": {
+        "sendy": {
+          "version": "2.4.0",
+          "from": "sendy@>=2.1.1 <3.0.0",
+          "resolved": "https://registry.npmjs.org/sendy/-/sendy-2.4.0.tgz"
+        }
+      }
     },
     "sendy-protobufs": {
       "version": "1.0.0",

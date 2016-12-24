@@ -953,7 +953,7 @@ class ResourceList extends Component {
   renderHeader() {
     let partial = this.state.hasPartials
                 ? <View>
-                   <View style={{padding: 5, backgroundColor: '#f1ffe7'}}>
+                   <View style={{padding: 5, backgroundColor: '#BADFCD'}}>
                     <TouchableOpacity onPress={this.showPartials.bind(this)}>
                       <View style={styles.row}>
                         <Icon name='ios-stats-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />

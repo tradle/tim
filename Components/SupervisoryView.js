@@ -13,7 +13,7 @@ var constants = require('@tradle/constants');
 var Icon = require('react-native-vector-icons/Ionicons');
 var buttonStyles = require('../styles/buttonStyles');
 var NetworkInfoProvider = require('./NetworkInfoProvider')
-var StatisticsView = require('./StatisticsView')
+var SupervisoryViewPerProvider = require('./SupervisoryViewPerProvider')
 var defaultBankStyle = require('../styles/bankStyle.json')
 var StyleSheet = require('../StyleSheet')
 
@@ -76,7 +76,7 @@ class SupervisoryView extends Component {
       return
     let list = params.stats
 
-    this.product = list[0].applications[0].leaves.filter((prop) => prop.key === 'product')[0].value
+    this.product = list[0].applications[0].productType
 
     this.setState({
       dataSource: this.state.dataSource.cloneWithRows(list),
@@ -87,13 +87,18 @@ class SupervisoryView extends Component {
   }
 
   renderRow(resource)  {
-    let completed = resource.completedApps[this.product]
-    let open = resource.openApps[this.product]
+    let completed = 0
+    let open = 0
+    for (let p in resource.openApps)
+      open += resource.openApps[p]
+    for (let p in resource.completedApps)
+      completed += resource.completedApps[p]
+
     return  <Row size={3} style={{borderBottomColor: '#aaaaaa', borderBottomWidth: 1}}>
               <Col sm={1} md={1} lg={1} style={styles.col}>
                 <TouchableOpacity onPress={() => this.showProviderDetails(resource)}>
-                  <Text style={styles.topRowCell}>
-                    {resource.provider.title}
+                  <Text style={[styles.cell, {fontWeight: '600'}]}>
+                    {resource.providerInfo.title}
                   </Text>
                 </TouchableOpacity>
               </Col>
@@ -102,7 +107,7 @@ class SupervisoryView extends Component {
                   {completed || 0}
                 </Text>
               </Col>
-              <Col sm={1} md={1} lg={1} style={styles.col}>
+              <Col sm={1} md={1} lg={1} style={[styles.col, {borderRightWidth: 0}]}>
                 <Text style={styles.cell}>
                   {open || 0}
                 </Text>
@@ -114,12 +119,12 @@ class SupervisoryView extends Component {
     // Actions.getAllPartials()
     this.props.navigator.push({
       id: 26,
-      component: StatisticsView,
+      component: SupervisoryViewPerProvider,
       backButtonTitle: 'Back',
-      title: resource.provider.title,
+      title: resource.providerInfo.title,
       passProps: {
         provider: resource,
-        applicants: this.state.owners[resource.provider.id]
+        applicants: this.state.owners[resource.providerInfo.id]
       }
     })
   }
@@ -152,15 +157,15 @@ class SupervisoryView extends Component {
     if (this.state.isLoading)
       return <View/>
     // HACK for now
-    let app = utils.getModel(this.product).value
+    // let app = utils.getModel(this.product).value
+    //         <Row size={3} style={styles.topRow}>
+    //           <Col sm={3} md={3} lg={3}>
+    //             <Text style={{fontWeight: '600', alignSelf: 'center', paddingVertical: 5, fontSize: 16 }}>
+    //               {app.title}
+    //             </Text>
+    //           </Col>
+    //         </Row>
     return <View style={{backgroundColor: '#FBFFE5'}}>
-            <Row size={3} style={styles.topRow}>
-              <Col sm={3} md={3} lg={3}>
-                <Text style={{fontWeight: '600', alignSelf: 'center', paddingVertical: 5, fontSize: 16 }}>
-                  {app.title}
-                </Text>
-              </Col>
-            </Row>
             <Row size={3} style={{borderBottomColor: '#aaaaaa', borderBottomWidth: 1}}>
               <Col sm={1} md={1} lg={1} style={styles.col}>
                 <Text style={{fontWeight: '600', alignSelf: 'center', paddingVertical: 5 }}>
@@ -172,7 +177,7 @@ class SupervisoryView extends Component {
                   Completed
                 </Text>
               </Col>
-              <Col sm={1} md={4} lg={3} style={styles.col}>
+              <Col sm={1} md={4} lg={3} style={[styles.col, {borderRightWidth: 0}]}>
                 <Text style={styles.cell}>
                   Open
                 </Text>

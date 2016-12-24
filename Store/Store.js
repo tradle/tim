@@ -266,7 +266,7 @@ var Store = Reflux.createStore({
     db = promisify(ldb);
 
     this._loadedResourcesDefer = Q.defer()
-    this.lockReceive = utils.locker({ timeout: 10000 })
+    this.lockReceive = utils.locker({ timeout: 600000 })
 
     NetInfo.isConnected.addEventListener(
       'change',
@@ -961,6 +961,8 @@ var Store = Reflux.createStore({
     //   forceBase64: true
     // })
 
+    transport.on('presence', updatePresence)
+
     wsClient.on('disconnect', function () {
       transport.clients().forEach(function (c) {
         // reset OTR session, restart on connect
@@ -968,21 +970,19 @@ var Store = Reflux.createStore({
         c.destroy()
       })
 
-      const disconnectedPermalinks = wsClients.providers({ client: transport })
-      disconnectedPermalinks.forEach(permalink => {
-        self.setProviderOnlineStatus(permalink, false)
-        meDriver.sender.pause(permalink)
-      })
+      wsClients
+        .providers({ client: transport })
+        .forEach(permalink => updatePresence(permalink, false))
     })
 
-    wsClient.on('connect', function (recipient) {
-      // resume all paused channels
-      const connectedPermalinks = wsClients.providers({ client: transport })
-      connectedPermalinks.forEach(permalink => {
-        self.setProviderOnlineStatus(permalink, true)
-        meDriver.sender.resume(permalink)
-      })
-    })
+    // wsClient.on('connect', function () {
+    //   // resume all paused channels
+    //   const connectedPermalinks = wsClients.providers({ client: transport })
+    //   connectedPermalinks.forEach(permalink => {
+    //     self.setProviderOnlineStatus(permalink, true)
+    //     meDriver.sender.resume(permalink)
+    //   })
+    // })
 
     wsClients.add({
       client: transport,
@@ -1004,13 +1004,6 @@ var Store = Reflux.createStore({
     //     }, 10000)
     //   }
     // })
-
-    transport.on('404', function (recipient) {
-      meDriver.sender.pause(recipient)
-      transport.cancelPending(recipient)
-      // try again soon. Todo: make this smarter
-      setTimeout(() => meDriver.resume(), 10000)
-    })
 
     transport.on('message', async function (msg, from) {
       if (!wsClients.byIdentifier[from]) {
@@ -1037,6 +1030,19 @@ var Store = Reflux.createStore({
     transport.on('timeout', function (identifier) {
       transport.cancelPending(identifier)
     })
+
+    function updatePresence (recipient, present) {
+      if (present) {
+        meDriver.sender.resume(recipient)
+      } else {
+        meDriver.sender.pause(recipient)
+        transport.cancelPending(recipient)
+        // try again soon. Todo: make this smarter
+        setTimeout(() => meDriver.sender.resume(recipient), 10000)
+      }
+
+      self.setProviderOnlineStatus(recipient, present)
+    }
 
     function receive (msg, from) {
       try {
@@ -3871,9 +3877,8 @@ var Store = Reflux.createStore({
         continue
 
       if (r._sharedWith  &&  toOrgId  &&  !isSharedWith)
-          continue
-
-      if (isVerificationR  ||  r[TYPE] === ADDITIONAL_INFO) {
+        continue
+      if (isVerificationR) {
         var doc = {};
         var rDoc = list[utils.getId(r.document)]
         if (!rDoc) {
@@ -3886,7 +3891,7 @@ var Store = Reflux.createStore({
 
         // TODO: check if we can copy by reference
         for (var p in rDoc.value) {
-          if (p === 'verifications' || p === 'additionalInfo') continue
+          if (p === 'verifications') continue
 
           var val = rDoc.value[p]
           switch (typeof val) {
@@ -3982,20 +3987,20 @@ var Store = Reflux.createStore({
   },
   onHasPartials() {
     let list = this.searchNotMessages({modelName: PARTIAL})
-    if (!list  ||  !list.length)
-      return
-    this.trigger({action: 'hasPartials', count: list.length})
+    if (list  &&  list.length)
+      this.trigger({action: 'hasPartials', count: list.length})
   },
-  onGetAllPartials(listOnly) {
-    let list = this.searchNotMessages({modelName: PARTIAL})
-    if (!list  ||  !list.length)
+
+  onGetAllPartials(resource) {
+    let plist = this.searchNotMessages({modelName: PARTIAL})
+    if (!plist  ||  !plist.length)
       return
 
     let providers = {}
     let owners = {}
     let allResources = {}
-    list.forEach((r) => {
-      let pId = utils.getId(r.provider)
+    plist.forEach((r) => {
+      let pId = utils.getId(r.providerInfo)
       let stats = providers[pId]
       if (!stats) {
         stats = {
@@ -4008,16 +4013,16 @@ var Store = Reflux.createStore({
           verifications: [],
           formErrors: [],
           myProducts: [],
-          provider: r.provider
+          providerInfo: r.providerInfo
         }
         providers[pId] = stats
       }
       let ownerId = r.from.id
       if (!owners[pId])
         owners[pId] = {}
-      let applicantStats = owners[pId][ownerId]
-      if (!applicantStats) {
-        applicantStats = {
+      let providerCustomerStats = owners[pId][ownerId]
+      if (!providerCustomerStats) {
+        providerCustomerStats = {
           owner: r.from,
           openApps: {},
           completedApps: {},
@@ -4028,9 +4033,9 @@ var Store = Reflux.createStore({
           verifications: [],
           formErrors: [],
           myProducts: [],
-          provider: r.provider
+          providerInfo: r.providerInfo
         }
-        owners[pId][ownerId] = applicantStats
+        owners[pId][ownerId] = providerCustomerStats
       }
 
       let l = r.leaves
@@ -4038,56 +4043,44 @@ var Store = Reflux.createStore({
 
       allResources[r.resource.id] = r
 
-      // if (!owners[pId])
-      //   owners[pId] = {}
-      // if (!owners[pId][ownerId])
-      //   owners[pId][ownerId] = {}
-      // owners[pId][ownerId][r.resource.id] = r
-
-      // if (ch[r.from.id])
-      //   ch[r.from.id] = {}
-
-      // ch[r.from.id][r.resource.id] = r
-
       switch (t) {
       case FORM_REQUEST:
         stats.formRequests.push(r)
-        applicantStats.formRequests.push(r)
+        providerCustomerStats.formRequests.push(r)
         break
       case FORM_ERROR:
         stats.formErrors.push(r)
-        applicantStats.formErrors.push(r)
+        providerCustomerStats.formErrors.push(r)
         break
       case VERIFICATION:
         stats.verifications.push(r)
-        // applicantStats.verifications.push(r)
+        providerCustomerStats.verifications.push(r)
         break
       case PRODUCT_APPLICATION:
         let product = l.filter((prop) => prop.key === 'product')[0].value
-        if (product === 'tradle.CoverholderApproval') {
-          stats.applications.push(r)
-          applicantStats.applications.push(r)
+        if (utils.getModel(product)) {
+          stats.applications.push({productType: product, product: r})
+          providerCustomerStats.applications.push({productType: product, product: r})
         }
         break
       default:
         if (utils.getModel(t).value.subClassOf === MY_PRODUCT) {
-          stats.myProducts.push(r)
-          applicantStats.myProducts.push(r)
+          stats.myProducts.push({[t] : r})
+          providerCustomerStats.myProducts.push(r)
         }
         else {
           let id = r.resource.id.split('_')
           if (id.length === 2  ||  id[1] === id[2]) {
             stats.forms.push(r)
-            applicantStats.forms.push(r)
+            providerCustomerStats.forms.push(r)
           }
           else {
             stats.formCorrections.push(r)
-            applicantStats.formCorrections.push(r)
+            providerCustomerStats.formCorrections.push(r)
           }
         }
       }
     })
-
     for (let p in providers) {
       providers[p].verifications.forEach((v) => {
         let docId = v.leaves.filter((prop) => prop.key === 'document')[0].value.id
@@ -4109,14 +4102,60 @@ var Store = Reflux.createStore({
       owners[p] = pruned
     }
 
+    // provider customers per product stats
+    for (let pc in owners) {
+      let providerCustomers = owners[pc]
+      for (let p in providerCustomers) {
+        let customer = providerCustomers[p]
+        let allPerApp = []
+        customer.allPerApp = allPerApp
+        customer.applications.forEach((a) => {
+          let allStats = {
+            app: a,
+            product: a.productType,
+            forms: [],
+            formErrors: [],
+            verifications: [],
+            formCorrections: [],
+            formRequests: []
+          }
+          allPerApp.push(allStats)
+          let formModels = utils.getModel(a.productType).value.forms
+          customer.forms.forEach((f) => {
+            let formType = f.leaves.find(l => l.key === TYPE && l.value).value
+            if (formModels.indexOf(formType) !== -1)
+              allStats.forms.push(f)
+          })
+          customer.formCorrections.forEach((f) => {
+            let formType = f.leaves.find(l => l.key === TYPE && l.value).value
+            if (formModels.indexOf(formType) !== -1)
+              allStats.formCorrections.push(f)
+          })
+          customer.verifications.forEach((v) => {
+            let doc = v.leaves.find(l => l.key === 'document' && l.value).value
+            if (formModels.indexOf(doc.id.split('_')[0]) !== -1)
+              allStats.verifications.push(v)
+          })
+          customer.formRequests.forEach((f) => {
+            let forRequestType = f.leaves.find(l => l.key === 'product' && l.value).value
+            if (forRequestType === a.productType)
+              allStats.formRequest.push(f)
+          })
+          customer.formErrors.forEach((f) => {
+          })
+        })
+      }
+      getProviderPerCustomerPerProductStats(providers[pc], providerCustomers, resource)
+    }
+
     for (let p in providers) {
       let stats = providers[p]
-      let pId = stats.provider.id
+      let pId = stats.providerInfo.id
       let apps = stats.applications
       apps.forEach((a) => {
-        let product = a.leaves.filter((prop) => prop.key === 'product')[0].value
+        let product = a.productType
         let forms = this.getModel(product).value.forms
-        let ownerId = a.from.id
+        let ownerId = a.product.from.id
         let uniqueVerifications = {}
         let verifications = owners[pId][ownerId].verifications
         verifications.forEach((v) => {
@@ -4148,13 +4187,62 @@ var Store = Reflux.createStore({
         }
       })
     }
+    this.trigger({action: 'allPartials', list: plist, stats: Object.values(providers), owners: owners })
 
-    // let stats = []
-    // for (let p in providers) {
-    //   let r = providers[p].provider
-    //   stats.push[{provider: r, open: r.open, completed: r.completed}]
-    // }
-    this.trigger({action: 'allPartials', list: list, stats: Object.values(providers), owners: owners})
+    function getProviderPerCustomerPerProductStats(provider, providerCustomers, resource) {
+      provider.applications.forEach((a) => {
+        for (let p in providerCustomers) {
+          let app = providerCustomers[p]
+          app.allPerApp.forEach((appProps) => {
+            appProps.stats = {}
+            let appStats = appProps.stats[appProps.product] = {
+              product: appProps.product,
+              formErrors: appProps.formErrors.length,
+              formCorrections: appProps.formCorrections.length,
+              verifications: appProps.verifications.length,
+              forms: appProps.forms.length
+            }
+            if (!resource || resource.providerInfo.id !== provider.providerInfo.id)
+              return
+
+            let m = utils.getModel(appProps.product).value
+            let t = resource.leaves.filter((prop) => prop.key === TYPE)[0].value
+            if (t !== VERIFICATION  &&  resource.from.id !== p)
+              return
+            if (m.forms.indexOf(t) === -1  &&  t !== VERIFICATION)
+              return
+            switch (t) {
+            case FORM_REQUEST:
+              appStats.changed = 'formRequests'
+              break
+            case FORM_ERROR:
+              appStats.changed = 'formErrors'
+              break
+            case VERIFICATION:
+              let docId = resource.leaves.filter((prop) => prop.key === 'document')[0].value.id
+              let docType = docId.split('_')[0]
+              if (m.forms.indexOf(docType)  !== -1) {
+                app.allPerApp.forEach((a) => {
+                  a.forms.forEach((f) => {
+                    if (f.resource.id === docId)
+                      appStats.changed = 'verifications'
+                  })
+                })
+              }
+              break
+            case PRODUCT_APPLICATION:
+              appStats.changed = 'productApplications'
+              break
+            default:
+              if (utils.getModel(t).value.subClassOf === MY_PRODUCT)
+                appStats.changed = 'myProducts'
+              else
+                appStats.changed = 'forms'
+            }
+          })
+        }
+      })
+    }
   },
   onGetAllSharedContexts() {
     let list = this.searchMessages({modelName: PRODUCT_APPLICATION})
@@ -4495,25 +4583,6 @@ var Store = Reflux.createStore({
       value[CUR_HASH] = dhtKey //isNew ? dhtKey : value[ROOT_HASH]
 
     var batch = [];
-    // if (isNew) {
-    //   var creator =  me
-    //               ?  me
-    //               :  isRegistration ? value : null;
-    //   // if (creator)
-    //   //   value[constants.OWNER] = this.buildRef(creator)
-
-    //   if (value[TYPE] === ADDITIONAL_INFO) {
-    //     var verificationRequest = value.document;
-
-    //     var vrId = utils.getId(verificationRequest);
-    //     var vr = this._getItem(vrId);
-    //     if (!vr.additionalInfo  ||  !vr.additionalInfo.length)
-    //       vr.additionalInfo = [];
-    //     vr.additionalInfo.push(this.buildRef(value))
-    //     batch.push({type: 'put', key: vrId, value: vr});
-    //   }
-    // }
-
     value.time = value.time || new Date().getTime();
     if (isMessage) {
       let isForm = model.subClassOf === FORM
@@ -5383,7 +5452,7 @@ var Store = Reflux.createStore({
             [CUR_HASH]: msg.partialinfo.link
           }
           payload.resource = {id: utils.getId(r)}
-          payload.provider = utils.clone(self._getItem(PROFILE + '_' + msg.objectinfo.author).organization)
+          payload.providerInfo = utils.clone(self._getItem(PROFILE + '_' + msg.objectinfo.author).organization)
           // debugger
         }
 
@@ -5392,7 +5461,7 @@ var Store = Reflux.createStore({
         try {
           await self.putInDb(old, true)
           if (payload[TYPE] === PARTIAL)
-            self.onGetAllPartials()
+            self.onGetAllPartials(payload)
           self.trigger({ action: 'receivedMessage', msg: msg })
         } catch (err) {
           console.error('2. failed to process received message', err)
@@ -7390,589 +7459,6 @@ function fixOldSettings (settings) {
   //   })
   // },
 /*
-  searchMessages1(params) {
-    // if (params.loadingEarlierMessages)
-    //   return this.getMessagesBefore(params)
-
-    var query = params.query;
-    var modelName = params.modelName;
-    var meta = this.getModel(modelName).value;
-    var prop = params.prop;
-    if (typeof prop === 'string')
-      prop = meta[prop];
-    var backlink = prop ? (prop.items ? prop.items.backlink : prop) : null;
-    var foundResources = {};
-    var props = meta.properties;
-
-    // var required = meta.required;
-    var meId = utils.getId(me)
-    var meOrgId = me.isEmployee ? utils.getId(me.organization) : null;
-
-    var chatTo = params.to
-    if (chatTo  &&  chatTo.id)
-      chatTo = list[utils.getId(chatTo)].value
-    var chatId = chatTo ? utils.getId(chatTo) : null;
-    var isChatWithOrg = chatTo  &&  chatTo[TYPE] === ORGANIZATION;
-    var toId
-    var toOrg
-    let thisChatMessages
-    if (isChatWithOrg) {
-      var rep = this.getRepresentative(chatId)
-      if (!rep)
-        return
-      chatTo = rep
-      chatId = utils.getId(chatTo)
-      // isChatWithOrg = false
-      toId = utils.getId(params.to)
-      toOrg = list[toId].value
-      thisChatMessages = chatMessages[toId]
-    }
-    else {
-      if (chatTo  &&  chatTo.organization  &&  !meOrgId) {
-        toId = utils.getId(chatTo.organization)
-        thisChatMessages = chatMessages[toId]
-      }
-      else
-        thisChatMessages = chatMessages[chatId]
-    }
-    if (!thisChatMessages  &&  !params.to) {
-      thisChatMessages = []
-      Object.keys(list).filter((key) => {
-        if (list[key].value[TYPE] === modelName                           ||
-           utils.getModel(list[key].value[TYPE]).subClassOf === modelName ||
-           modelName === MESSAGE  &&  utils.getModel(list[key].value[TYPE]).interfaces) {
-          thisChatMessages.push({id: key, time: list[key].value.time})
-          return true
-        }
-      })
-    }
-    if (!thisChatMessages)
-      return null
-    // if (isChatWithOrg  &&  !chatTo.name) {
-    //   chatTo = list[chatId].value;
-    // }
-    var testMe = chatTo ? chatTo.me : null;
-    if (testMe) {
-      if (testMe === 'me') {
-        if (!originalMe)
-          originalMe = me;
-        testMe = originalMe[ROOT_HASH];
-      }
-
-      isTest = true;
-      var meId = constants.TYPES.PROFILE + '_' + testMe;
-      me = list[meId].value;
-      this.setMe(me);
-      var myIdentities = list[MY_IDENTITIES].value;
-      if (myIdentities)
-        myIdentities.currentIdentity = meId;
-    }
-    // var lastPL
-    // var sharedWithTimePairs = []
-    var from = params.from
-    var limit = params.limit ? params.limit + 1 : null
-    var isAllMessages = meta.isInterface;
-    var implementors = isAllMessages ? utils.getImplementors(modelName) : null;
-    var isVerification = modelName === VERIFICATION  ||  meta.subClassOf === VERIFICATION;
-
-    // for (var key in list) {
-    let lastId = params.lastId
-    let lastIdIdx = -1
-    for (let i=thisChatMessages.length - 1; i>=0; i--) {
-      var key = thisChatMessages[i].id
-      if (lastId && lastIdIdx === -1  &&  key === lastId) {
-        let result = this.filterResult(foundResources)
-        lastIdIdx = result.length
-        limit = result.length + limit
-        params.limit = limit - 1
-        foundResources = this.packResult(result)
-//         foundResources = {}
-//         result.forEach((fr) => {
-//           foundResources[utils.getId(fr)] = fr
-//         })
-      }
-      var iMeta = null;
-      if (isAllMessages) {
-        if (implementors) {
-          implementors.some((impl) => {
-            if (impl.id === key.split('_')[0]) {
-              iMeta = impl;
-              return true
-            }
-          })
-          if (!iMeta)
-            continue;
-        }
-      }
-      else if (list[key].value[TYPE] !== modelName) {
-        var rModel = this.getModel(list[key].value[TYPE])
-        if (!rModel)
-          continue
-        rModel = rModel.value;
-        if (rModel.subClassOf !== modelName)
-          continue;
-      }
-      if (!iMeta)
-        iMeta = meta;
-      var r = list[key].value;
-      if (r.canceled)
-        continue;
-      var isFormError = isAllMessages && r[TYPE] === FORM_ERROR
-      // Make sure that the messages that are showing in chat belong to the conversation between these participants
-      if (isVerification) {
-        // if (r.organization) {
-        //   if (!r.organization.photos) {
-        //     var orgPhotos = list[utils.getId(r.organization.id)].value.photos;
-        //     if (orgPhotos)
-        //       r.organization.photos = [orgPhotos[0]];
-        //   }
-        // }
-        if (r.document) {
-          var d = list[utils.getId(r.document)]
-          if (!d)
-            continue
-          if (params.resource  &&  utils.getId(params.resource) !== utils.getId(d.value))
-            continue
-          r.document = d.value;
-        }
-      }
-      else if (isFormError) {
-        r.prefill = list[utils.getId(r.prefill)] ? list[utils.getId(r.prefill)].value : r.prefill
-      }
-      // HACK to not show service message in customer stream
-      else if (r.message  &&  r.message.length)  {
-        if (r[TYPE] === SELF_INTRODUCTION  &&  !params.isForgetting && (utils.getId(r.to) !== meId))
-          continue
-        if (r.message === '[already published](tradle.Identity)')
-          continue
-        var m = utils.splitMessage(r.message)
-
-        if (m.length === 2) {
-          if (m[1] === PROFILE)
-            continue;
-        }
-        if (chatTo.organization  &&  r[TYPE] === constants.TYPES.CUSTOMER_WAITING) {
-          var rid = utils.getId(chatTo.organization);
-
-          // if (rid.indexOf(ORGANIZATION) === 0) {
-          var org = list[utils.getId(r.to)].value.organization
-          var orgId = utils.getId(org)
-          // if (params.isForgetting  &&  orgId === rid) {
-          //   // foundResources[key] = r
-          //   sharedWithTimePairs.push({
-          //      time: r.time,
-          //      resource: r
-          //   })
-          // }
-          if (!utils.isEmployee(list[utils.getId(chatTo.organization)].value))
-          // if (!me.isEmployee  ||  rid !== utils.getId(me.organization))
-            continue;
-         // }
-        }
-
-        // Show only the last 'Choose the product' message
-        // else if (r[TYPE] === PRODUCT_LIST) {
-          // if (!lastPL  ||  lastPL.time < r.time) {
-          //   var id = utils.getId(r.from)
-          //   if (utils.getId(list[id].value.organization) === toId)
-          //     lastPL = r
-          // }
-          // continue;
-        // }
-        // else if (m.length === 2  &&  m[0] === '[application for') {
-          // continue
-          // var id = utils.getId(r.to)
-          // if (id === toId) {
-          //   var fr = foundResources[foundResources.length - 1]
-          //   if ()
-          // }
-        // }
-      }
-      var isSharedWith = false, timeResourcePair = null
-      if (r._sharedWith  &&  toId) {
-        var sharedWith = r._sharedWith.filter(function(r) {
-          let org = list[r.bankRepresentative].value.organization
-          return (org) ? utils.getId(org) === toId : false
-        })
-        isSharedWith = sharedWith.length !== 0
-        if (isSharedWith) {
-          timeResourcePair = {
-            time: sharedWith[0].timeShared,
-            resource: r
-          }
-        }
-      }
-
-      if (chatTo) {
-        if (backlink  &&  r[backlink]) {
-          var s = params.resource ? utils.getId(params.resource) : chatId
-          if (s === utils.getId(r[backlink])) {
-            foundResources[key] = r;
-            // if (timeResourcePair)
-            //   sharedWithTimePairs.push(timeResourcePair)
-            // else
-            //   sharedWithTimePairs.push({
-            //     time: r.time,
-            //     resource: r
-            //   })
-            // for Loading earlier resources we don't need to check limit untill we get to the lastId
-            if (lastId && lastIdIdx === -1)
-              continue
-            if (limit  &&  Object.keys(foundResources).length === limit) {
-              let result = this.filterResult(foundResources)
-              if (result.length === limit)
-                return result
-              else
-                foundResources = this.packResult(result)
-            }
-          }
-
-          continue;
-        }
-
-        var m = this.getModel(r[TYPE]).value
-        var isVerificationR = r[TYPE] === VERIFICATION  ||  m.subClassOf === VERIFICATION
-        var isForm = m.subClassOf === FORM
-        var isMyProduct = m.subClassOf === MY_PRODUCT
-        let isProductApplication = m.id === PRODUCT_APPLICATION
-        if ((!r.message  ||  r.message.trim().length === 0) && !r.photos &&  !isVerificationR  &&  !isForm  &&  !isMyProduct && !isProductApplication)
-          // check if this is verification resource
-          continue;
-        var fromID = utils.getId(r.from);
-        var toID = utils.getId(r.to);
-
-        if (params.strict) {
-          if (chatId !== toID)
-            continue
-        }
-        if (fromID !== meId  &&  toID !== meId  &&  toID != meOrgId)
-          continue;
-        if (isChatWithOrg) {
-          if (isVerificationR) {
-            let org = list[fromID].value.organization
-            if (!org)
-              org = list[toID].value.organization
-
-            let msgOrgId = utils.getId(org)
-            if (toId !== msgOrgId) {
-              // if (!isSharedWith)
-                continue
-              // let sharedWithThisOrg = r._sharedWith.filter((s) => {
-              //   let rep = list[s.bankRepresentative].value
-              //   if (utils.getId(rep.organization) === toId)
-              //     return true
-              // })
-              // if (!sharedWithThisOrg  ||  !sharedWithThisOrg.length)
-              //   continue
-            }
-          }
-          else {
-            let msgOrg
-            if (toID !== meId) {
-              msgOrg = list[toID].value.organization
-              if (!msgOrg)
-                msgOrg = list[fromID].value.organization
-            }
-            else {
-              msgOrg = list[fromID].value.organization
-              if (!msgOrg)
-                msgOrg = list[toID].value.organization
-            }
-            let msgOrgId = utils.getId(msgOrg)
-            if (toId !== msgOrgId  &&  (!isSharedWith || isVerificationR)) // do not show shared verifications
-              continue
-           //   let msgOrgTo = list[toID].value.organization
-          //   let msgOrgFrom = list[fromID].value.organization
-          // // if (toID === meId)
-          // //   continue
-          //   let msgOrg
-          //   if (!msgOrgTo  ||  (msgOrgFrom  &&  toID !== meId))
-          //     msgOrg = msgOrgFrom
-          //   else
-          //     msgOrg = msgOrgTo
-
-          //   let msgOrgId = utils.getId(msgOrg)
-          //   if (toId !== msgOrgId  &&  !isSharedWith)
-          //     continue
-          }
-        }
-        else {
-          if (!isSharedWith  &&  fromID !== chatId  &&  toID != chatId  &&  toID != meOrgId)
-            continue;
-        }
-      }
-      if (params.strict  &&  chatId !== utils.getId(r.to))
-        continue
-
-      if (r._sharedWith  &&  toId  &&  !isSharedWith)
-        continue
-      // if (r._sharedWith  &&  toId) {
-      //   var arr = r._sharedWith.filter(function(r) {
-      //     return utils.getId(list[r.bankRepresentative].value.organization) === toId
-      //   })
-      //   if (!arr.length)
-      //     continue
-      //  }
-       if (isVerificationR  ||  r[TYPE] === ADDITIONAL_INFO) {
-        // if (!isSharedWith)
-        //   continue
-        var doc = {};
-        var rDoc = list[utils.getId(r.document)]
-        if (!rDoc) {
-          if (params.isForgetting) {
-            foundResources[key] = r
-            // if (timeResourcePair)
-            //   sharedWithTimePairs.push(timeResourcePair)
-            // else
-            //   sharedWithTimePairs.push({
-            //     time: r.time,
-            //     resource: r
-            //   })
-          }
-          continue
-        }
-
-        // extend(true, doc, rDoc.value);
-        // TODO: check if we can copy by reference
-        for (var p in rDoc.value) {
-          if (p === 'verifications' || p === 'additionalInfo') continue
-
-          var val = rDoc.value[p]
-          switch (typeof val) {
-            case 'object':
-              if (val) {
-                if (Array.isArray(val))
-                  doc[p] = val.slice(0)
-                else
-                  doc[p] = extend(true, {}, val)
-              }
-              break
-            default:
-              doc[p] = val
-              break
-          }
-        }
-
-        r.document = doc;
-      }
-
-      if (!query) {
-        var msg = this.fillMessage(r);
-        if (!msg)
-          msg = r
-        foundResources[key] = msg;
-        // if (!timeResourcePair)
-        //   sharedWithTimePairs.push({
-        //     time: r.time,
-        //     resource: msg
-        //   })
-        // else {
-        //   timeResourcePair.resource = msg
-        //   sharedWithTimePairs.push(timeResourcePair)
-        // }
-        if (lastId  &&  lastIdIdx === -1)
-          continue
-        if (limit  &&  Object.keys(foundResources).length === limit) {
-          let result = this.filterResult(foundResources)
-          if (result.length === limit)
-            return result
-          foundResources = this.packResult(result)
-        }
-
-        continue;
-      }
-       // primitive filtering for this commit
-      var combinedValue = '';
-      for (var rr in props) {
-        if (r[rr] instanceof Array)
-         continue;
-        combinedValue += combinedValue ? ' ' + r[rr] : r[rr];
-      }
-      if (!combinedValue  ||  (combinedValue  &&  (!query || combinedValue.toLowerCase().indexOf(query.toLowerCase()) != -1))) {
-        foundResources[key] = this.fillMessage(r);
-        // if (timeResourcePair)
-        //   sharedWithTimePairs.push(timeResourcePair)
-        // else
-        //   sharedWithTimePairs.push({
-        //     time: r.time,
-        //     resource: r
-        //   })
-
-        if (limit  &&  Object.keys(foundResources).length === limit) {
-          let result = this.filterResult(foundResources)
-          if (result.length === limit)
-            return result
-          foundResources = this.packResult(result)
-        }
-      }
-    }
-
-//     sharedWithTimePairs.sort(function(a, b) {
-//       return a.time - b.time;
-//     });
-
-      let result = this.filterResult(foundResources)
-//           if (result.length === limit)
-//             break;
-//           else {
-//             foundResources = {}
-//             result.forEach((fr) => {
-//               foundResources[utils.getId(fr)] = fr
-//             })
-//           }
-
-//        var result = Object.values(foundResources)
-//     var result = []
-//     sharedWithTimePairs.forEach((r) => {
-//       result.push(r.resource)
-//     })
-
-    // var result = utils.objectToArray(foundResources);
-    // if (lastPL)
-    //   result.push(lastPL)
-
-    if (params.isForgetting)
-      return result
-    // let paRequests = {}
-    // let formRequests = {}
-//     this.filterResult(result)
-    // There was a case when FormRequest was following ProductList over and over with the same form
-    // let curFormRequest
-    // let removeNext
-    // result = result.filter((r, i) => {
-    //   if (r[TYPE] === PRODUCT_LIST) {
-    //     var next = result[i + 1]
-    //     if (next) {
-    //        if (next[TYPE] === PRODUCT_LIST)
-    //         return false
-    //       else if (next[TYPE] === FORM_REQUEST  &&  !next.documentCreated) {
-    //         if (!curFormRequest)
-    //           return true
-    //         if (curFormRequest === next.product)
-    //           return false
-    //       }
-    //     }
-    //   }
-    //   else if (r[TYPE] === FORM_REQUEST) {
-    //     if (r.documentCreated)
-    //       return true
-    //     if (r.product === curFormRequest)
-    //      return false
-    //     curFormRequest = r.product
-    //   }
-    //   return true
-    // })
-    return result //.reverse();
-  },
-
-  // filterResult(result, lastId, toOrgId) {
-  //   if (!result)
-  //     return
-  //   if (!Array.isArray(result))
-  //     result = Object.values(result) //.reverse()
-  //   if (!result  ||  !result.length)
-  //     return
-
-  //   result.sort(function(a, b) {
-  //     return a.time - b.time;
-  //   });
-
-  //   let meId = utils.getId(me)
-  //   let newResult = result.filter((rr, i) => {
-  //     let time = rr.time
-  //     let r = rr.value
-  //     if (r[TYPE] === PRODUCT_LIST  &&  i !== result.length - 1) {
-  //       var next = result[i + 1].value
-  //       if (next && next[TYPE] === PRODUCT_LIST)
-  //         return false
-  //     }
-  //     // if (r[TYPE] === CUSTOMER_WAITING) {
-  //     //   let f = list[utils.getId(r.from)].value.organization
-  //     //   let t = list[utils.getId(r.to)].value.organization
-  //     //   if (utils.getId(f) === utils.getId(t))
-  //     //     return false
-  //     // }
-  //     if (r[TYPE] === SELF_INTRODUCTION) {
-  //       // var next = result[i + 1]
-  //       // if (next && next[TYPE] === SELF_INTRODUCTION)
-  //         return false
-  //     }
-  //     // Check if there was request for the next form after multy-entry form
-  //     if (r[TYPE] === FORM_REQUEST  &&  !r.document && r.documentCreated)
-  //       return false
-  //     // Gather info about duplicate requests for the same product
-  //     // if (r[TYPE] === PRODUCT_APPLICATION)  {
-  //     //   if (!paRequests[r.product])
-  //     //     paRequests[r.product] = []
-  //     //   paRequests[r.product].push(i)
-  //     // }
-  //     // if (r[TYPE] === SIMPLE_MESSAGE  &&  r.message) {
-  //     //   let parts = utils.splitMessage(r.message)
-  //     //   if (parts.length === 2) {
-  //     //     let formM = utils.getModel(parts[1])
-  //     //     if (formM) {
-  //     //       if (!formRequests[parts[1]])
-  //     //         formRequests[parts[1]] = []
-  //     //       formRequests[parts[1]].push(i)
-  //     //     }
-  //     //   }
-  //     // }
-  //     let fromId = utils.getId(r.from)
-
-  //     if (!me.isEmployee  &&  fromId !== meId  &&  list[fromId]) {
-  //       let rFrom = list[fromId].value
-  //       if (!rFrom.bot) {
-  //         let photos = list[fromId].value.photos
-  //         if (photos)
-  //           r.from.photo = photos[0]
-  //         else
-  //           r.from.photo = employee
-  //       }
-  //     }
-  //     let m = this.getModel(r[TYPE]).value
-  //     let isMyProduct = m.subClassOf === MY_PRODUCT
-  //     let isForm = !isMyProduct && m.subClassOf === FORM
-  //     // r.from.photos = list[utils.getId(r.from)].value.photos;
-  //     // var to = list[utils.getId(r.to)]
-  //     // if (!to) console.log(r.to)
-  //     // r.to.photos = to  &&  to.value.photos;
-  //     if (isMyProduct)
-  //       r.from.organization = list[utils.getId(r.from)].value.organization
-  //     else if (isForm) {
-  //       // set organization and photos for items properties for better displaying
-  //       let form = list[utils.getId(r.to)].value
-  //       if (toOrgId  &&  r._sharedWith  &&  r._sharedWith.length > 1) {
-  //         // if (utils.getId(r.to.organization) !== toOrgId) {
-  //         //   let filteredVerifications = this.getSharedVerificationsAboutThisForm(r, toOrgId)
-  //         // }
-  //       }
-  //       r.to.organization = form.organization
-  //       for (var p in r) {
-  //         if (!m.properties[p]  ||  m.properties[p].type !== 'array' ||  !m.properties[p].items.ref)
-  //           continue
-  //         let pModel = this.getModel(m.properties[p].items.ref).value
-  //         if (pModel.properties.photos) {
-  //           let items = r[p]
-  //           items.forEach((ir) => {
-  //             let itemPhotos = list[utils.getId(ir)].value.photos
-  //             if (itemPhotos)
-  //               ir.photo = itemPhotos[0].url
-  //           })
-  //         }
-  //       }
-  //     }
-  //     return true
-  //   })
-  //   if (lastId  &&  lastId.split('_')[0] === PRODUCT_LIST) {
-  //     let i=newResult.length - 1
-  //     for (; i>=0; i--)
-  //       if (newResult[i][TYPE] !== PRODUCT_LIST)
-  //         break
-  //       newResult.splice(i, 1)
-  //   }
-  //   return newResult
-  //   // return newResult.reverse()
-  // },
   // getSharedVerificationsAboutThisForm(form, toOrgId) {
   //   let result = this.searchMessages({modelName: VERIFICATION, to: utils.getMe(), strict: true})
   //   // let result = this.searchMessages({modelName: VERIFICATION, to: to, strict: true, filterProps: {from: utils.getMe(), document: utils.getId(form)}})
@@ -9146,5 +8632,178 @@ function fixOldSettings (settings) {
     //   stats.push[{provider: r, open: r.open, completed: r.completed}]
     // }
     this.trigger({action: 'allPartials', stats: Object.values(providers)})
+  },
+  onGetAllPartials1(listOnly) {
+    let list = this.searchNotMessages({modelName: PARTIAL})
+    if (!list  ||  !list.length)
+      return
+
+    let providers = {}
+    let owners = {}
+    let allResources = {}
+    list.forEach((r) => {
+      let pId = utils.getId(r.provider)
+      let stats = providers[pId]
+      if (!stats) {
+        stats = {
+          openApps: {},
+          completedApps: {},
+          applications: [],
+          formRequests: [],
+          forms: [],
+          formCorrections: [],
+          verifications: [],
+          formErrors: [],
+          myProducts: [],
+          provider: r.provider
+        }
+        providers[pId] = stats
+      }
+      let ownerId = r.from.id
+      if (!owners[pId])
+        owners[pId] = {}
+      let applicantStats = owners[pId][ownerId]
+      if (!applicantStats) {
+        applicantStats = {
+          owner: r.from,
+          openApps: {},
+          completedApps: {},
+          applications: [],
+          formRequests: [],
+          forms: [],
+          formCorrections: [],
+          verifications: [],
+          formErrors: [],
+          myProducts: [],
+          provider: r.provider
+        }
+        owners[pId][ownerId] = applicantStats
+      }
+
+      let l = r.leaves
+      let t = r.leaves.filter((prop) => prop.key === TYPE)[0].value
+
+      allResources[r.resource.id] = r
+
+      // if (!owners[pId])
+      //   owners[pId] = {}
+      // if (!owners[pId][ownerId])
+      //   owners[pId][ownerId] = {}
+      // owners[pId][ownerId][r.resource.id] = r
+
+      // if (ch[r.from.id])
+      //   ch[r.from.id] = {}
+
+      // ch[r.from.id][r.resource.id] = r
+
+      switch (t) {
+      case FORM_REQUEST:
+        stats.formRequests.push(r)
+        applicantStats.formRequests.push(r)
+        break
+      case FORM_ERROR:
+        stats.formErrors.push(r)
+        applicantStats.formErrors.push(r)
+        break
+      case VERIFICATION:
+        stats.verifications.push(r)
+        // applicantStats.verifications.push(r)
+        break
+      case PRODUCT_APPLICATION:
+        let product = l.filter((prop) => prop.key === 'product')[0].value
+        if (product === 'tradle.CoverholderApproval') {
+          stats.applications.push({productType: product, product: r})
+          applicantStats.applications.push({productType: product, product: r})
+          // stats.applications.push(r)
+          // applicantStats.applications.push(r)
+        }
+        break
+      default:
+        if (utils.getModel(t).value.subClassOf === MY_PRODUCT) {
+          stats.myProducts.push(r)
+          applicantStats.myProducts.push(r)
+        }
+        else {
+          let id = r.resource.id.split('_')
+          if (id.length === 2  ||  id[1] === id[2]) {
+            stats.forms.push(r)
+            applicantStats.forms.push(r)
+          }
+          else {
+            stats.formCorrections.push(r)
+            applicantStats.formCorrections.push(r)
+          }
+        }
+      }
+    })
+
+    for (let p in providers) {
+      providers[p].verifications.forEach((v) => {
+        let docId = v.leaves.filter((prop) => prop.key === 'document')[0].value.id
+        // HACK till modified forms paritals fixed
+        if (allResources[docId]) {
+          let docOwner = allResources[docId].from.id
+          owners[p][docOwner].verifications.push(v)
+        }
+      })
+    }
+
+    for (let p in owners) {
+      let o = owners[p]
+      let pruned = {}
+      for (let r in o) {
+        if (o[r].applications.length)
+          pruned[r] = o[r]
+      }
+      owners[p] = pruned
+    }
+
+    for (let p in providers) {
+      let stats = providers[p]
+      let pId = stats.provider.id
+      let apps = stats.applications
+      apps.forEach((a) => {
+        // let product = a.product.leaves.filter((prop) => prop.key === 'product')[0].value
+        let product = a.productType
+        let forms = this.getModel(product).value.forms
+        let ownerId = a.product.from.id
+        let uniqueVerifications = {}
+        let verifications = owners[pId][ownerId].verifications
+        verifications.forEach((v) => {
+          let doc = v.leaves.filter((prop) => prop.key === 'document')[0].value.id
+          let docType = doc.split('_')[0]
+          // if (!owners[pId][ownerId].forms)
+          //   return
+          // if (!allResources[doc]  ||  allResources[doc].from.id !== ownerId)
+          //   return
+          if (forms.indexOf(docType) !== -1) {
+            if (!uniqueVerifications[docType])
+              uniqueVerifications[docType] = v
+          }
+        })
+        if (Object.keys(uniqueVerifications).length === forms.length) {
+          verifications.sort((a, b) => a.time - b.time)
+
+          owners[pId][ownerId].completedApps[product] = verifications[verifications.length - 1].time
+          if (!stats.completedApps[product])
+            stats.completedApps[product] = 1
+          else
+            stats.completedApps[product]++
+        }
+        else {
+          if (!stats.openApps[product])
+            stats.openApps[product] = 1
+          else
+            stats.openApps[product]++
+        }
+      })
+    }
+
+    // let stats = []
+    // for (let p in providers) {
+    //   let r = providers[p].provider
+    //   stats.push[{provider: r, open: r.open, completed: r.completed}]
+    // }
+    this.trigger({action: 'allPartials', list: list, stats: Object.values(providers), owners: owners})
   },
 */
