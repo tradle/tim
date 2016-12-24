@@ -578,8 +578,6 @@ var NewResourceMixin = {
           inputStyle={this.state.isRegistration ? styles.regInput : styles.textInput}
           style={[styles.formInput, {borderBottomColor: lcolor}]}
           value={params.value}
-          keyboardShouldPersistTaps={true}
-          keyboardType={keyboard}
           onChangeText={this.onChangeText.bind(this, params.prop)}
           underlineColorAndroid='transparent'
         >{label}</FloatLabel>
