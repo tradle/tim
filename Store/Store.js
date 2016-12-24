@@ -66,6 +66,7 @@ var utils = require('../utils/utils');
 var Keychain = !utils.isWeb() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('q-level');
+var debounce = require('debounce')
 var asyncstorageDown = require('asyncstorage-down')
 var levelup = require('levelup')
 var mutexify = require('mutexify')
@@ -278,6 +279,7 @@ var Store = Reflux.createStore({
     // ldb.query.use(jsonqueryEngine());
     db = promisify(ldb);
 
+    this.announcePresence = debounce(this.announcePresence.bind(this), 100)
     this._loadedResourcesDefer = Q.defer()
     this.lockReceive = utils.locker({ timeout: 600000 })
 
@@ -1180,9 +1182,14 @@ var Store = Reflux.createStore({
     org._online = online
 
     this.trigger({action: 'onlineStatus', online: online})
-    let l = this.searchNotMessages({modelName: ORGANIZATION})
-    this.trigger({action: 'list', list: l})
+    this.announcePresence()
   },
+
+  announcePresence() {
+    let l = this.searchNotMessages({modelName: ORGANIZATION})
+    this.trigger({ action: 'list', list: l })
+  },
+
   onPairingRequestAccepted(payload) {
     return this.onProcessPairingRequest(this._getItem(PAIRING_DATA + '_1'), payload)
     .then(() => {
