@@ -301,6 +301,7 @@ var NewResourceMixin = {
                     model: meta,
                     value: data  &&  data[p] ? data[p] + '' : null,
                     required: !maybe,
+                    onSubmitEditing: onSubmitEditing.bind(this),
                     errors: params.errors,
                     keyboard: props[p].keyboard ||  (type === 'number' ? 'numeric' : 'default'),
                   })
@@ -318,25 +319,20 @@ var NewResourceMixin = {
           }
         }
       }
-      else if (props[p].oneOf) {
-        model[p] = t.enums(props[p].oneOf);
-        options.fields[p].auto = 'labels';
-      }
-      else if (type == 'enum') {
-        var facet = props[p].facet;
-        var values = models.filter(mod => {
-           return mod.type === facet ? mod.values : null;
-        });
-        if (values && values.length) {
-          var enumValues = {};
-          values[0].values.forEach(function(val) {
-            enumValues[val.label] = val.displayName;
-          });
-          // options.fields[p].factory = t.form.radio;
-          model[p] = t.enums(enumValues);
-        }
-        options.fields[p].auto = 'labels';
-      }
+      // else if (type === 'enum') {
+      //   model[p] = t.Str;
+      //   this.myEnumTemplate({
+      //         prop:     props[p],
+      //         enumProp: props[p],
+      //         required: params.required,
+      //         value:    data[p],
+      //         errors:   params.errors,
+      //         // noError:  params.errors && params.errors[params.prop],
+      //         noError: true
+      //       })
+      //   options.fields[p].onSubmitEditing = onSubmitEditing.bind(this)
+      //   options.fields[p].onEndEditing = onEndEditing.bind(this, p);
+      // }
       else {
         var ref = props[p].ref;
         if (!ref) {
@@ -578,12 +574,17 @@ var NewResourceMixin = {
           inputStyle={this.state.isRegistration ? styles.regInput : styles.textInput}
           style={[styles.formInput, {borderBottomColor: lcolor}]}
           value={params.value}
+          onKeyPress={this.onKeyPress.bind(this, params.onSubmitEditing)}
           onChangeText={this.onChangeText.bind(this, params.prop)}
           underlineColorAndroid='transparent'
         >{label}</FloatLabel>
           {this.getErrorView(params)}
       </View>
     );
+  },
+  onKeyPress(onSubmit, key) {
+    if (key.nativeEvent.code === 'Enter')
+      onSubmit()
   },
 
   getErrorView(params) {
@@ -1052,7 +1053,7 @@ var NewResourceMixin = {
     }
     else
       error = <View/>
-    var value = prop ? params.value : resource[enumProp.name]
+    var value = prop ? params.value : this.state.resource[enumProp.name]
     return (
       <View style={[styles.chooserContainer, styles.enumElement]} key={this.getNextKey()} ref={enumProp.name}>
         <TouchableHighlight underlayColor='transparent' onPress={this.enumChooser.bind(this, prop, enumProp)}>
