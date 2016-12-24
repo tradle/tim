@@ -977,14 +977,14 @@ var Store = Reflux.createStore({
         .forEach(permalink => updatePresence(permalink, false))
     })
 
-    // wsClient.on('connect', function () {
-    //   // resume all paused channels
-    //   const connectedPermalinks = wsClients.providers({ client: transport })
-    //   connectedPermalinks.forEach(permalink => {
-    //     self.setProviderOnlineStatus(permalink, true)
-    //     meDriver.sender.resume(permalink)
-    //   })
-    // })
+    wsClient.on('connect', function () {
+      // resume all paused channels
+      const connectedPermalinks = wsClients.providers({ client: transport })
+      connectedPermalinks.forEach(permalink => {
+        self.setProviderOnlineStatus(permalink, true)
+        meDriver.sender.resume(permalink)
+      })
+    })
 
     wsClients.add({
       client: transport,
