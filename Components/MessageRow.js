@@ -556,7 +556,7 @@ class MessageRow extends Component {
                   <Text style={[chatStyles.resourceTitle, {color: color}]}>{str}</Text>
                 </View>
               : <View key={this.getNextKey()} style={{flexDirection: 'row', justifyContent: 'center'}}>
-                  <Text style={[styles.resourceTitle, {color: color, marginTop: 3, paddingRight: 20}]}>{str}</Text>
+                  <Text style={[chatStyles.resourceTitle, {color: color, marginTop: 3, paddingRight: 20}]}>{str}</Text>
                   <Icon name='ios-folder-open-outline' size={25} color={color}/>
                 </View>
       renderedRow.push(msg);
@@ -567,9 +567,9 @@ class MessageRow extends Component {
       // Case when the needed form was sent along with the message
       if (resource.welcome) {
         let msg = <View key={this.getNextKey()}>
-                <Text style={styles.resourceTitle}>{translate('hello', utils.getMe().firstName)}</Text>
-                <View style={styles.rowContainer}>
-                  <Text style={[styles.resourceTitle, {color: LINK_COLOR}]}>{translate('listOfProducts')} </Text>
+                <Text style={chatStyles.resourceTitle}>{translate('hello', utils.getMe().firstName)}</Text>
+                <View style={chatStyles.rowContainer}>
+                  <Text style={[chatStyles.resourceTitle, {color: LINK_COLOR}]}>{translate('listOfProducts')} </Text>
                   <Icon style={{color: LINK_COLOR, paddingLeft: 100}} size={20} name={'ios-arrow-forward'} />
                 </View>
               </View>
@@ -581,8 +581,8 @@ class MessageRow extends Component {
     let isCustomerWaiting = model.id === constants.TYPES.CUSTOMER_WAITING
     if (isSelfIntroduction || isCustomerWaiting) {
       let msg = <View key={this.getNextKey()}>
-                  <View style={styles.rowContainer}>
-                    <Text style={[styles.resourceTitle, {paddingRight: 20, color: isMyMessage ? '#ffffff' : '#757575', fontStyle: isCustomerWaiting ? 'italic' : 'normal'}]}>{resource.message}</Text>
+                  <View style={chatStyles.rowContainer}>
+                    <Text style={[chatStyles.resourceTitle, {paddingRight: 20, color: isMyMessage ? '#ffffff' : '#757575', fontStyle: isCustomerWaiting ? 'italic' : 'normal'}]}>{resource.message}</Text>
                     <Icon style={{color: LINK_COLOR, backgroundColor: 'transparent',  paddingLeft: 5}} size={20} name={'ios-person'} />
                   </View>
                 </View>
@@ -826,13 +826,13 @@ class MessageRow extends Component {
     if (sameFormRequestForm  &&  !resource.documentCreated) {
        // let isReadOnly = utils.isReadOnlyChat(this.props.resource) // this.props.context  &&  this.props.context._readOnly
 
-       link = <View style={[styles.rowContainer, {paddingVertical: 10, alignSelf: 'center'}]}>
-               <View style={styles.textContainer}>
+       link = <View style={[chatStyles.rowContainer, {paddingVertical: 10, alignSelf: 'center'}]}>
+               <View style={chatStyles.textContainer}>
                <TouchableHighlight underlayColor='transparent' style={{paddingRight: 15}} onPress={() => {
                  this.createNewResource(form, isMyMessage)
                }}>
                  <View style={styles.multiEntryButton}>
-                   <Text style={styles.resourceTitle}>   {translate('addSameForm')}   </Text>
+                   <Text style={chatStyles.resourceTitle}>   {translate('addSameForm')}   </Text>
                  </View>
                </TouchableHighlight>
                <TouchableHighlight underlayColor='transparent' onPress={() => {
@@ -860,7 +860,7 @@ class MessageRow extends Component {
                   )
                }}>
                  <View style={styles.multiEntryButton}>
-                   <Text style={styles.resourceTitle}>   {translate('getNextForm')}   </Text>
+                   <Text style={chatStyles.resourceTitle}>   {translate('getNextForm')}   </Text>
                  </View>
               </TouchableHighlight>
               </View>
@@ -870,8 +870,8 @@ class MessageRow extends Component {
       link = <Text style={[chatStyles.resourceTitle, color]}>{translate(form)}</Text>
     else {
       let notLink = resource.documentCreated  ||  isReadOnly  ||  form.subClassOf === MY_PRODUCT
-      link = <View style={styles.rowContainer}>
-               <Text style={[styles.resourceTitle, {color: resource.documentCreated  ||  notLink ?  '#757575' : LINK_COLOR}]}>{translate(form)}</Text>
+      link = <View style={chatStyles.rowContainer}>
+               <Text style={[chatStyles.resourceTitle, {color: resource.documentCreated  ||  notLink ?  '#757575' : LINK_COLOR}]}>{translate(form)}</Text>
                <Icon style={[{marginTop: 2, paddingLeft: 100}, resource.documentCreated  ? styles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
              </View>
       onPressCall = notLink
@@ -954,39 +954,6 @@ var styles = StyleSheet.create({
   container: {
     flex: 1
   },
-  textContainer: {
-    flex: 1,
-    flexDirection: 'row'
-  },
-  resourceTitle: {
-    fontSize: 18,
-  },
-  date: {
-    flex: 1,
-    color: '#999999',
-    fontSize:  14,
-    alignSelf: 'center',
-    paddingTop: 10
-  },
-  row: {
-    // alignItems: 'center',
-    backgroundColor: '#f7f7f7',
-    flexDirection: 'row',
-  },
-  myCell: {
-    paddingVertical: 5,
-    paddingHorizontal: 7,
-    justifyContent: 'flex-end',
-    borderRadius: 10,
-    borderTopRightRadius: 0,
-    backgroundColor: '#77ADFC' //#569bff',
-  },
-  // resourceTitle: {
-  //   // flex: 1,
-  //   fontSize: 18,
-  //   // fontWeight: '400',
-  //   // marginBottom: 2,
-  // },
   forgetCell: {
     paddingVertical: 5,
     paddingHorizontal: 7,
