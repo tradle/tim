@@ -28,6 +28,8 @@ const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_ERROR = 'tradle.FormError'
 const FORM = 'tradle.Form'
 const FORM_REQUEST = 'tradle.FormRequest'
+const SHARE_CONTEXT = 'tradle.ShareContext'
+
 const ENUM = 'tradle.Enum'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
@@ -181,7 +183,6 @@ class MessageRow extends Component {
     else
       showMessageBody = true;
     var messageBody;
-    var w = utils.dimensions(MessageRow).width
     var sendStatus = <View />
     // HACK that solves the case when the message is short and we don't want it to be displayed
     // in a bigger than needed bubble
@@ -201,6 +202,7 @@ class MessageRow extends Component {
       }
     }
     // HACK
+    var w = utils.dimensions(MessageRow).width
     let msgWidth = Math.floor(w * 0.8)
     let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
 
@@ -590,6 +592,17 @@ class MessageRow extends Component {
       return null
       // return {onPressCall: this.addContact.bind(this)}
     }
+    if (model.id === SHARE_CONTEXT) {
+      let msg = <View key={this.getNextKey()}>
+                  <View style={{flexDirection: 'row'}}>
+                    <Text style={[chatStyles.resourceTitle, {color: '#ffffff'}]}>{resource.message}</Text>
+                    <Icon style={{color: '#ffffff', backgroundColor: 'transparent',  paddingLeft: 5}} size={20} name={'md-share'} />
+                  </View>
+                </View>
+      renderedRow.push(msg);
+      return null
+    }
+
     if (model.id === APPLICATION_SUBMITTED) {
       let msg = <View key={this.getNextKey()}>
                   <Text style={[chatStyles.resourceTitle, {color: this.props.bankStyle.CONFIRMATION_COLOR}]}>{resource.message}</Text>
@@ -882,6 +895,7 @@ class MessageRow extends Component {
     }
     let strName = sameFormRequestForm ? translate('addAnotherFormOrGetNext', translate(form)) : utils.getStringName(message)
     let str = strName ? utils.translate(strName) : message
+
     let msg = <View key={this.getNextKey()}>
                <Text style={chatStyles.resourceTitle}>{str}</Text>
                {link}
