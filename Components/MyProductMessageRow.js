@@ -151,7 +151,7 @@ class MyProductMessageRow extends Component {
         isConfirmation = resource[v].indexOf('Congratulations!') !== -1
 
         if (isConfirmation) {
-          style = [style, {color: self.props.bankStyle.CONFIRMATION_COLOR, fontSize: 17}]
+          style = [style, {color: self.props.bankStyle.CONFIRMATION_COLOR, fontSize: 18}]
           vCols.push(
             <View key={self.getNextKey()}>
               <Text style={[style]}>{resource[v]}</Text>
@@ -184,7 +184,7 @@ var styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   issuedBy: {
-    fontSize: 17,
+    fontSize: 18,
     alignSelf: 'center',
     color: '#fff'
   },
