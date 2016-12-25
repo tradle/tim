@@ -310,25 +310,20 @@ var NewResourceMixin = {
           }
         }
       }
-      else if (props[p].oneOf) {
-        model[p] = t.enums(props[p].oneOf);
-        options.fields[p].auto = 'labels';
-      }
-      else if (type == 'enum') {
-        var facet = props[p].facet;
-        var values = models.filter(mod => {
-           return mod.type === facet ? mod.values : null;
-        });
-        if (values && values.length) {
-          var enumValues = {};
-          values[0].values.forEach(function(val) {
-            enumValues[val.label] = val.displayName;
-          });
-          // options.fields[p].factory = t.form.radio;
-          model[p] = t.enums(enumValues);
-        }
-        options.fields[p].auto = 'labels';
-      }
+      // else if (type === 'enum') {
+      //   model[p] = t.Str;
+      //   this.myEnumTemplate({
+      //         prop:     props[p],
+      //         enumProp: props[p],
+      //         required: params.required,
+      //         value:    data[p],
+      //         errors:   params.errors,
+      //         // noError:  params.errors && params.errors[params.prop],
+      //         noError: true
+      //       })
+      //   options.fields[p].onSubmitEditing = onSubmitEditing.bind(this)
+      //   options.fields[p].onEndEditing = onEndEditing.bind(this, p);
+      // }
       else {
         var ref = props[p].ref;
         if (!ref) {
