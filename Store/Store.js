@@ -972,18 +972,23 @@ var Store = Reflux.createStore({
         c.destroy()
       })
 
-      wsClients
-        .providers({ client: transport })
-        .forEach(permalink => updatePresence(permalink, false))
+      const connectedPermalinks = wsClients.providers({ client: transport })
+      if (connectedPermalinks.length === SERVICE_PROVIDERS.length)
+        self.trigger({action: 'onlineStatus', online: false})
+
+      connectedPermalinks.forEach(permalink => updatePresence(permalink, false))
     })
 
     wsClient.on('connect', function () {
       // resume all paused channels
       const connectedPermalinks = wsClients.providers({ client: transport })
-      connectedPermalinks.forEach(permalink => {
-        self.setProviderOnlineStatus(permalink, true)
-        meDriver.sender.resume(permalink)
-      })
+      if (connectedPermalinks.length === SERVICE_PROVIDERS.length)
+        self.trigger({action: 'onlineStatus', online: true})
+      connectedPermalinks.forEach(permalink => updatePresence(permalink, true))
+      // connectedPermalinks.forEach(permalink => {
+      //   self.setProviderOnlineStatus(permalink, true)
+      //   meDriver.sender.resume(permalink)
+      // })
     })
 
     wsClients.add({
@@ -1042,7 +1047,7 @@ var Store = Reflux.createStore({
         // try again soon. Todo: make this smarter
         setTimeout(() => meDriver.sender.resume(recipient), 10000)
       }
-
+      // self.trigger({action: 'onlineStatus', online: present})
       self.setProviderOnlineStatus(recipient, present)
     }
 
@@ -1176,8 +1181,6 @@ var Store = Reflux.createStore({
 
     const org = this._getItem(provider.org)
     org._online = online
-
-    this.trigger({action: 'onlineStatus', online: online})
     this.announcePresence()
   },
 
@@ -2908,11 +2911,13 @@ var Store = Reflux.createStore({
   },
   onShare(resource, shareWithList, originatingResource) {
     if (resource[TYPE] === PRODUCT_APPLICATION) {
+      let listOfProviders = []
       let list = shareWithList.map((id) => {
         let rep = this.getRepresentative(id)
+        listOfProviders.push(rep.organization.title)
         return this.buildRef(rep)
       })
-
+      listOfProviders = listOfProviders.join(', ')
       let msg = {
         [TYPE]: 'tradle.ShareContext',
         context: this.buildRef(resource),
@@ -2929,18 +2934,31 @@ var Store = Reflux.createStore({
                   ?  this.getRepresentative(utils.getId(originatingResource))[ROOT_HASH]
                   :  originatingResource[ROOT_HASH]
 
-      let sendParams = {
-        object: msg,
-        to: {permalink: permalink},
-        other: {
-          context: resource[ROOT_HASH]
-        }      // let sendParams = {
-      }
-      //   object: msg,
-      //   to: {fingerprint: this.getFingerprint(this._getItem(IDENTITY + '_' + rep[ROOT_HASH]))},
-      // }
-
-      return meDriver.signAndSend(sendParams)
+      return meDriver.createObject({ object: msg })
+      .then((data) => {
+        let shareContext = utils.clone(msg)
+        shareContext.from = this.buildRef(me)
+        let time = new Date().getTime()
+        shareContext.time = time
+        shareContext._context = shareContext.context
+        shareContext.to = utils.clone(resource.from)
+        shareContext.message = translate('sharedWith', translate(utils.getModel(resource.product).value), listOfProviders)
+        let hash = data.link
+        shareContext[ROOT_HASH] = shareContext[CUR_HASH] = hash
+        let key = utils.getId(shareContext)
+        db.put(key, shareContext)
+        this._setItem(key, shareContext)
+        this.addMessagesToChat(shareContext.to.id, shareContext, false, time)
+        this.trigger({action: 'addMessage', resource: shareContext})
+        let sendParams = {
+          to: {permalink: permalink},
+          link: hash,
+          other: {
+            context: resource[ROOT_HASH]
+          }      // let sendParams = {
+        }
+        return meDriver.send(sendParams)
+      })
       .catch((err) => {
         debugger
       })
@@ -3185,13 +3203,16 @@ var Store = Reflux.createStore({
       params.fromView = true
       return this._searchNotMessages(params)
       .then((result) => {
+        let isOrg = params.modelName === ORGANIZATION
         if (!result) {
           // First time. No connection no providers yet loaded
-          if (!this.isConnected  &&  params.modelName === ORGANIZATION)
+          if (!this.isConnected  &&  isOrg)
             this.trigger({action: 'list', alert: translate('noConnection')})
 
           return
         }
+        if (!SERVICE_PROVIDERS)
+          this.trigger({action: 'onlineStatus', onlineStatus: false})
         if (params.isAggregation)
           result = this.getDependencies(result);
         var shareableResources;
