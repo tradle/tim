@@ -3,7 +3,6 @@
 var utils = require('../utils/utils');
 var Icon = require('react-native-vector-icons/Ionicons');
 var constants = require('@tradle/constants');
-var PhotoCarousel = require('./PhotoCarousel')
 var reactMixin = require('react-mixin');
 var PhotoCarouselMixin = require('./PhotoCarouselMixin');
 
