@@ -67,7 +67,8 @@ var verificationStyles = Object.freeze({
     // fontWeight: '600',
     opacity: 0.5,
     alignSelf: 'flex-end',
-    marginTop: 10
+    marginTop: 10,
+    marginBottom: 5
   },
   row: {
     // alignItems: 'center',
