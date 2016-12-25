@@ -176,5 +176,7 @@
     "enablePasscodeFirst": "Looks like you don't have a device passcode enabled. Without it, this app cannot protect your data! Please enable it before pressing OK",
     "downloadingUpdate": "Downloading an update...",
     "trustedProviders": "Trusted providers",
-    "overviewOfApplications": "Overview of Applications"
+    "overviewOfApplications": "Overview of Applications",
+    "serverIsUnreachable": "Server is unreachable",
+    "sharedWith": "Shared {1} context with {2}"
 }
