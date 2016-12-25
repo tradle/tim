@@ -34,6 +34,13 @@ import ActivityIndicator from './ActivityIndicator'
 import Geometry from './Geometry'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const UNREAD_COLOR = '#FF6D0D'
+const ROOT_HASH = constants.ROOT_HASH
+const TYPE = constants.TYPE
+const FORM = constants.TYPES.FORM
+const PROFILE = constants.TYPES.PROFILE
+const ORGANIZATION = constants.TYPES.ORGANIZATION
+const FINANCIAL_PRODUCT = constants.TYPES.FINANCIAL_PRODUCT
+const MONEY = constants.TYPES.MONEY
 
 var dateProp
 
@@ -45,16 +52,18 @@ class ResourceRow extends Component {
     // Multichooser for sharing context; isChooser for choosing delegated trusted party for requested verification
     if (props.multiChooser)
       this.state = {isChosen: false}
-    if (props.resource[constants.TYPE] === constants.TYPES.PROFILE)
+    if (props.resource[TYPE] === PROFILE)
       this.state = {resource: props.resource, unread: props.resource._unread}
   }
   componentDidMount() {
     this.listenTo(Store, 'onRowUpdate');
   }
   onRowUpdate(params) {
-    if (params.action !== 'updateRow')
-      return
-    if (params.resource[constants.ROOT_HASH] === this.props.resource[constants.ROOT_HASH])
+    if (params.action === 'connectivity') {
+      this.setState({isConnected: params.isConnected})
+    }
+    else if (params.action === 'updateRow'  &&
+             params.resource[ROOT_HASH] === this.props.resource[ROOT_HASH])
       this.setState({unread: params.resource._unread})
   }
   shouldComponentUpdate(nextProps, nextState) {
@@ -99,8 +108,8 @@ class ResourceRow extends Component {
   render() {
     var resource = this.props.resource;
     var photo;
-    let rType = resource[constants.TYPE]
-    var isIdentity = rType === constants.TYPES.PROFILE;
+    let rType = resource[TYPE]
+    var isIdentity = rType === PROFILE;
     var noImage;
     if (resource.photos &&  resource.photos.length) {
       var uri = utils.getImageUri(resource.photos[0].url);
@@ -122,7 +131,7 @@ class ResourceRow extends Component {
         </LinearGradient>
       }
       else  {
-        var model = utils.getModel(resource[constants.TYPE]).value;
+        var model = utils.getModel(resource[TYPE]).value;
         var icon = model.icon;
         if (icon)
           photo = <View style={styles.cellImage}><Icon name={icon} size={35} color='#7AAAc3' style={styles.icon} /></View>
@@ -134,10 +143,10 @@ class ResourceRow extends Component {
         }
       }
     }
-    if (!this.props.isChooser  &&  photo  &&  rType === constants.TYPES.ORGANIZATION) {
+    if (!this.props.isChooser  &&  photo  &&  rType === ORGANIZATION) {
       var onlineStatus = (
         <Geometry.Circle size={20} style={styles.online}>
-          <Geometry.Circle size={18} style={{ backgroundColor: resource._online ? '#62C457' : '#FAD70C' }} />
+          <Geometry.Circle size={18} style={{ backgroundColor: !resource._online || !this.props.navigator.isConnected ? '#FAD70C' : '#62C457'}} />
         </Geometry.Circle>
       )
 
@@ -181,7 +190,7 @@ class ResourceRow extends Component {
     else
       dateRow = <View/>
 
-    let isNewContact = this.props.newContact  &&  this.props.newContact[constants.ROOT_HASH] === resource[constants.ROOT_HASH]
+    let isNewContact = this.props.newContact  &&  this.props.newContact[ROOT_HASH] === resource[ROOT_HASH]
     let count
     if (isIdentity)
       count = resource._unread
@@ -193,7 +202,7 @@ class ResourceRow extends Component {
 
     // Grey out if not loaded provider info yet
             // <ActivityIndicator hidden='true' color='#629BCA'/>
-    var isOpaque = resource[constants.TYPE] === constants.TYPES.ORGANIZATION && !resource.contacts  &&  !this.props.isChooser
+    var isOpaque = resource[TYPE] === ORGANIZATION && !resource.contacts  &&  !this.props.isChooser
     if (isOpaque)
       return (
       <View key={this.getNextKey()} style={{opacity: 0.5}}>
@@ -231,7 +240,7 @@ class ResourceRow extends Component {
                 title: translate("myDocuments"),
                 backButtonTitle: translate('back'),
                 passProps: {
-                  modelName: constants.TYPES.FORM,
+                  modelName: FORM,
                   resource: this.props.resource
                 }
               })
@@ -286,19 +295,19 @@ class ResourceRow extends Component {
     let r = {}
     extend(true, r, resource)
     r.hide = true
-    Actions.addItem({resource: resource, value: r, meta: utils.getModel(resource[constants.TYPE]).value})
+    Actions.addItem({resource: resource, value: r, meta: utils.getModel(resource[TYPE]).value})
   }
   _allowScroll(scrollEnabled) {
     this.setState({scrollEnabled: scrollEnabled})
   }
   formatRow(resource) {
     var self = this;
-    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
+    var model = utils.getModel(resource[TYPE] || resource.id).value;
     var viewCols = model.gridCols || model.viewCols;
     var renderedViewCols;
     if (!viewCols) {
       if (model.id === 'tradle.Partial') {
-        let p = resource.leaves.find((l) => l.key === constants.TYPE && l.value).value
+        let p = resource.leaves.find((l) => l.key === TYPE && l.value).value
         let productTitle = utils.getModel(p).value.title
         return <View style={{flexDirection: 'row'}}>
                 <Text style={[styles.resourceTitle, {fontSize: 18}]} numberOfLines={2}>{resource.providerInfo.title}</Text>
@@ -357,7 +366,7 @@ class ResourceRow extends Component {
       dateProp = null;
 
     var isOfficialAccounts = this.props.isOfficialAccounts
-    var isIdentity = resource[constants.TYPE] === constants.TYPES.PROFILE;
+    var isIdentity = resource[TYPE] === PROFILE;
     viewCols.forEach((v) => {
       if (v === dateProp)
         return;
@@ -375,7 +384,7 @@ class ResourceRow extends Component {
       if (ref) {
         if (resource[v]) {
           var row;
-          if (ref == constants.TYPES.MONEY)
+          if (ref == MONEY)
             row = <Text style={style} numberOfLines={first ? 2 : 1} key={self.getNextKey()}>{(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value}</Text>
           else
             row = <Text style={style} numberOfLines={first ? 2 : 1} key={self.getNextKey()}>{resource[v].title}</Text>
@@ -415,11 +424,11 @@ class ResourceRow extends Component {
               if (lastMessageType) {
                 let msgModel = utils.getModel(lastMessageType).value
                 let icon
-                if (msgModel.subClassOf === constants.TYPES.FINANCIAL_PRODUCT)
+                if (msgModel.subClassOf === FINANCIAL_PRODUCT)
                   icon = 'ios-usd'
-                else if (msgModel.subClassOf === constants.TYPES.FORM)
+                else if (msgModel.subClassOf === FORM)
                   icon = 'ios-paper-outline'
-                // else if (model.id === constants.TYPES.VERIFICATION)
+                // else if (model.id === VERIFICATION)
                 //   icon =
                 if (icon)
                   lastMessageTypeIcon = <Icon name={icon} size={14} color='#7AAAc3' style={{paddingLeft: 1, marginTop: -2}}/>
@@ -473,7 +482,7 @@ class ResourceRow extends Component {
     ];
   }
   onPress(event) {
-    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
+    var model = utils.getModel(resource[TYPE] || resource.id).value;
     var title = utils.makeTitle(utils.getDisplayName(this.props.resource, model.properties));
     this.props.navigator.push({
       id: 7,
@@ -643,7 +652,7 @@ module.exports = ResourceRow;
       //           title: translate("myDocuments"),
       //           backButtonTitle: translate('back'),
       //           passProps: {
-      //             modelName: constants.TYPES.FORM,
+      //             modelName: FORM,
       //             resource: this.props.resource
       //           }
       //         })
