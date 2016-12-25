@@ -50,8 +50,8 @@ class EnumList extends Component {
           removeClippedSubviews={false}
           keyboardDismissMode='on-drag'
           keyboardShouldPersistTaps={true}
-          initialListSize={10}
-          pageSize={20}
+          initialListSize={100}
+          pageSize={200}
           scrollRenderAhead={10}
           showsVerticalScrollIndicator={false} />;
     var searchBar
