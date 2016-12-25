@@ -50,10 +50,10 @@ class MyProductMessageRow extends Component {
 
     // var viewStyle = {flexDirection: 'row', alignSelf: 'flex-start', width: DeviceWidth - 50};
 
-    var hdrStyle = {backgroundColor: '#289427'} //this.props.bankStyle.PRODUCT_BG_COLOR ? {backgroundColor: this.props.bankStyle.PRODUCT_BG_COLOR} : {backgroundColor: '#289427'}
+    var hdrStyle = {backgroundColor: '#289427', paddingVertical: 5} //this.props.bankStyle.PRODUCT_BG_COLOR ? {backgroundColor: this.props.bankStyle.PRODUCT_BG_COLOR} : {backgroundColor: '#289427'}
     var orgName = resource.from.organization  ? resource.from.organization.title : ''
     renderedRow.splice(0, 0, <View  key={this.getNextKey()} style={[styles.verifiedHeader, hdrStyle, {marginHorizontal: -8, marginTop: -7, marginBottom: 7, paddingBottom: 5, borderTopRightRadius: 10}]}>
-                       <Text style={{fontSize: 17, alignSelf: 'center', color: '#fff'}}>{translate('issuedBy', orgName)}</Text>
+                       <Text style={{fontSize: 18, alignSelf: 'center', color: '#fff'}}>{translate('issuedBy', orgName)}</Text>
                     </View>
                     );
     let title = translate(model)
@@ -152,7 +152,7 @@ class MyProductMessageRow extends Component {
         isConfirmation = resource[v].indexOf('Congratulations!') !== -1
 
         if (isConfirmation) {
-          style = [style, {color: self.props.bankStyle.CONFIRMATION_COLOR, fontSize: 17}]
+          style = [style, {color: self.props.bankStyle.CONFIRMATION_COLOR, fontSize: 18}]
           vCols.push(
             <View key={self.getNextKey()}>
               <Text style={[style]}>{resource[v]}</Text>
@@ -185,7 +185,7 @@ var styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   issuedBy: {
-    fontSize: 17,
+    fontSize: 18,
     alignSelf: 'center',
     color: '#fff'
   },
