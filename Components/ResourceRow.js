@@ -47,21 +47,23 @@ var dateProp
 class ResourceRow extends Component {
   constructor(props) {
     super(props)
+    this.state = {isConnected: this.props.navigator.isConnected}
     if (props.changeSharedWithList)
-      this.state = {sharedWith: true}
+      this.state.sharedWith = true
     // Multichooser for sharing context; isChooser for choosing delegated trusted party for requested verification
     if (props.multiChooser)
-      this.state = {isChosen: false}
-    if (props.resource[TYPE] === PROFILE)
-      this.state = {resource: props.resource, unread: props.resource._unread}
+      this.state.isChosen = false
+    if (props.resource[TYPE] === PROFILE) {
+      this.state.resource = props.resource
+      this.state.unread = props.resource._unread
+    }
   }
   componentDidMount() {
     this.listenTo(Store, 'onRowUpdate');
   }
   onRowUpdate(params) {
-    if (params.action === 'connectivity') {
+    if (params.action === 'connectivity')
       this.setState({isConnected: params.isConnected})
-    }
     else if (params.action === 'updateRow'  &&
              params.resource[ROOT_HASH] === this.props.resource[ROOT_HASH])
       this.setState({unread: params.resource._unread})
@@ -71,18 +73,13 @@ class ResourceRow extends Component {
       return true
     if (this.props.resource.lastMessage !== nextProps.resource.lastMessage)
       return true
-    if (this.state || nextState) {
-      if (this.state.unread !== nextState.unread)
-        return true
-      if (nextState.sharedWith  &&  nextState.sharedWith === this.state.sharedWith)
-        return true
-      if (this.state  &&  nextState) {
-        if (Object.keys(this.state).length  !== Object.keys(nextState).length)
-          return true
-      }
-      else
-        return true
-    }
+    if (this.state.unread !== nextState.unread)
+      return true
+    if (nextState.sharedWith  &&  nextState.sharedWith === this.state.sharedWith)
+      return true
+    if (Object.keys(this.state).length  !== Object.keys(nextState).length)
+      return true
+
     var opts = {strict: true}
     for (var p in this.props) {
       if (typeof this.props[p] === 'function') {
@@ -94,8 +91,6 @@ class ResourceRow extends Component {
           return true
       }
     }
-    if (!this.state  &&  !nextState)
-      return false
     for (var p in this.state) {
       if (this.state[p] !== nextState[p]) {
         if (!equal(this.state[p], nextState[p], opts))
