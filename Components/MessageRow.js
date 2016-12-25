@@ -595,8 +595,12 @@ class MessageRow extends Component {
     if (model.id === SHARE_CONTEXT) {
       let msg = <View key={this.getNextKey()}>
                   <View style={{flexDirection: 'row'}}>
-                    <Text style={[chatStyles.resourceTitle, {color: '#ffffff'}]}>{resource.message}</Text>
-                    <Icon style={{color: '#ffffff', backgroundColor: 'transparent',  paddingLeft: 5}} size={20} name={'md-share'} />
+                    <View style={{flexDirection: 'column'}}>
+                      <Text style={[chatStyles.resourceTitle, {color: '#ffffff'}]}>{resource.message}</Text>
+                    </View>
+                    <View style={{justifyContent: 'center'}}>
+                      <Icon style={{color: '#ffffff', backgroundColor: 'transparent',  paddingLeft: 5}} size={20} name={'md-share'} />
+                    </View>
                   </View>
                 </View>
       renderedRow.push(msg);
