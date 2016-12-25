@@ -27,6 +27,7 @@ const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_ERROR = 'tradle.FormError'
 const FORM = 'tradle.Form'
 const FORM_REQUEST = 'tradle.FormRequest'
+const SHARE_CONTEXT = 'tradle.ShareContext'
 const ENUM = 'tradle.Enum'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
@@ -125,8 +126,6 @@ class MessageRow extends Component {
           addStyle = (isSimpleMessage && message.length < 30)
                    ? [chatStyles.verificationBody, mstyle]
                    : [chatStyles.verificationBody, {flex: 1}, mstyle]
-
-
         }
       }
       if (isFormError)
@@ -178,7 +177,6 @@ class MessageRow extends Component {
     else
       showMessageBody = true;
     var messageBody;
-    var w = utils.dimensions(MessageRow).width
     var sendStatus = <View />
     // HACK that solves the case when the message is short and we don't want it to be displayed
     // in a bigger than needed bubble
@@ -198,6 +196,7 @@ class MessageRow extends Component {
       }
     }
     // HACK
+    var w = utils.dimensions(MessageRow).width
     let msgWidth = w * 0.8
     let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
 
@@ -545,7 +544,7 @@ class MessageRow extends Component {
               ? translate('noConnectionForNewProduct', utils.getMe().firstName, translate(msgModel))
               : translate('newProductMsg', translate(msgModel))
       let color = isMyMessage ? '#ffffff' : '#757575'
-      let maxWidth = 0.8 * utils.dimensions().width - (isMyMessage ? 40 : 90) // message width - icon size and all the paddings
+      let maxWidth = Math.floor(0.8 * utils.dimensions().width) - (isMyMessage ? 40 : 90) // message width - icon size and all the paddings
       let msg = !this.props.navigator.isConnected  &&  this.props.isLast
               ? <View key={this.getNextKey()}>
                   <Text style={[chatStyles.resourceTitle, {color: color}]}>{str}</Text>
@@ -586,6 +585,21 @@ class MessageRow extends Component {
       renderedRow.push(msg);
       return null
       // return {onPressCall: this.addContact.bind(this)}
+    }
+    if (model.id === SHARE_CONTEXT) {
+      let w = Math.floor(0.8 * utils.dimensions().width) - 40 // message width - icon size and all the paddings
+      let msg = <View key={this.getNextKey()}>
+                  <View style={{flexDirection: 'row'}}>
+                    <View style={{flexDirection: 'column', width: w}}>
+                      <Text style={[chatStyles.resourceTitle, {color: '#ffffff'}]}>{resource.message}</Text>
+                    </View>
+                    <View style={{justifyContent: 'center'}}>
+                      <Icon style={{color: '#ffffff', backgroundColor: 'transparent',  paddingLeft: 5}} size={20} name={'md-share'} />
+                    </View>
+                  </View>
+                </View>
+      renderedRow.push(msg);
+      return null
     }
     if (model.id === APPLICATION_SUBMITTED) {
       let msg = <View key={this.getNextKey()}>
