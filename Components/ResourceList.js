@@ -82,6 +82,7 @@ class ResourceList extends Component {
       allowToAdd: this.props.prop  &&  this.props.prop.allowToAdd,
       filter: this.props.filter,
       show: false,
+      serverOffline: this.props.serverOffline,
       isConnected: this.props.navigator.isConnected,
       userInput: '',
       sharedContextCount: 0,
@@ -179,7 +180,10 @@ class ResourceList extends Component {
     }
     if (params.error)
       return;
-
+    if (params.action === 'onlineStatus') {
+      this.setState({serverOffline: !params.online})
+      return
+    }
     if (action === 'newContact') {
       let routes = this.props.navigator.getCurrentRoutes()
       let curRoute = routes[routes.length - 1]
@@ -375,6 +379,8 @@ class ResourceList extends Component {
     if (nextState.forceUpdate)
       return true
     if (this.state.show !== nextState.show)
+      return true
+    if (this.state.serverOffline !== nextState.serverOffline)
       return true
     if (this.state.sharedContextCount !== nextState.sharedContextCount)
       return true
@@ -767,6 +773,7 @@ class ResourceList extends Component {
       titleTextColor: '#7AAAC3',
       passProps: {
         officialAccounts: true,
+        serverOffline: this.state.serverOffline,
         bankStyle: this.props.style,
         modelName: constants.TYPES.ORGANIZATION
       }
@@ -895,10 +902,13 @@ class ResourceList extends Component {
           />
       )
     }
+    let network = this.props.isChooser || !this.props.officialAccounts || this.props.modelName !== constants.TYPES.ORGANIZATION
+                ? <View/>
+                : <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
 
     return (
       <PageView style={platformStyles.container}>
-        <NetworkInfoProvider connected={this.state.isConnected} />
+        {network}
         {searchBar}
         {content}
         {footer}
