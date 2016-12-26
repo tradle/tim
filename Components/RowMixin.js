@@ -229,7 +229,7 @@ var RowMixin = {
                     </Text>
                     {verification.dateVerified
                       ? <View style={{flexDirection: 'row'}}>
-                          <Text style={{fontSize: 12, color: 'darkblue', fontStyle: 'italic'}}>{'Date: '}</Text>
+                          <Text style={{fontSize: 12, color: 'darkblue', fontStyle: 'italic'}}>{'Date '}</Text>
                           <Text style={{fontSize: 12, color: this.props.bankStyle.VERIFIED_HEADER_COLOR, fontStyle: 'italic'}}>{utils.formatDate(verification.dateVerified)}</Text>
                         </View>
                       : <View/>
