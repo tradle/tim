@@ -53,8 +53,8 @@
     },
     "@tradle/models": {
       "version": "4.10.9",
-      "from": "git://github.com/tradle/models.git#be00e48f8208aab113c531502b4f1199125f177f",
-      "resolved": "git://github.com/tradle/models.git#be00e48f8208aab113c531502b4f1199125f177f"
+      "from": "git://github.com/tradle/models.git#937fc3505497b6be5e06a4afd239e8d9fbccbfa5",
+      "resolved": "git://github.com/tradle/models.git#937fc3505497b6be5e06a4afd239e8d9fbccbfa5"
     },
     "@tradle/protocol": {
       "version": "2.3.0",
@@ -1255,11 +1255,6 @@
       "version": "1.1.1",
       "from": "builtin-modules@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/builtin-modules/-/builtin-modules-1.1.1.tgz"
-    },
-    "builtin-status-codes": {
-      "version": "2.0.0",
-      "from": "builtin-status-codes@>=2.0.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/builtin-status-codes/-/builtin-status-codes-2.0.0.tgz"
     },
     "bytes": {
       "version": "2.1.0",
@@ -5035,6 +5030,18 @@
       "from": "once@1.4.0",
       "resolved": "https://registry.npmjs.org/once/-/once-1.4.0.tgz"
     },
+    "onetab": {
+      "version": "1.0.0",
+      "from": "onetab@>=1.0.0 < 1.1.0",
+      "resolved": "https://registry.npmjs.org/onetab/-/onetab-1.0.0.tgz",
+      "dependencies": {
+        "thunky": {
+          "version": "1.0.1",
+          "from": "thunky@>=1.0.1 <2.0.0",
+          "resolved": "https://registry.npmjs.org/thunky/-/thunky-1.0.1.tgz"
+        }
+      }
+    },
     "onetime": {
       "version": "1.1.0",
       "from": "onetime@>=1.0.0 <2.0.0",
@@ -6990,11 +6997,6 @@
       "from": "stream-counter@>=0.2.0 <0.3.0",
       "resolved": "https://registry.npmjs.org/stream-counter/-/stream-counter-0.2.0.tgz"
     },
-    "stream-http": {
-      "version": "2.5.0",
-      "from": "stream-http@>=2.3.1 <3.0.0",
-      "resolved": "https://registry.npmjs.org/stream-http/-/stream-http-2.5.0.tgz"
-    },
     "stream-shift": {
       "version": "1.0.0",
       "from": "stream-shift@>=1.0.0 <2.0.0",
@@ -7362,11 +7364,6 @@
       "version": "0.1.4",
       "from": "to-array@0.1.4",
       "resolved": "https://registry.npmjs.org/to-array/-/to-array-0.1.4.tgz"
-    },
-    "to-arraybuffer": {
-      "version": "1.0.1",
-      "from": "to-arraybuffer@>=1.0.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/to-arraybuffer/-/to-arraybuffer-1.0.1.tgz"
     },
     "to-fast-properties": {
       "version": "1.0.2",
@@ -7780,52 +7777,10 @@
           "from": "async@^1.3.0",
           "resolved": "https://registry.npmjs.org/async/-/async-1.5.2.tgz"
         },
-        "inherits": {
-          "version": "2.0.1",
-          "from": "inherits@2.0.1",
-          "resolved": "https://registry.npmjs.org/inherits/-/inherits-2.0.1.tgz"
-        },
-        "isarray": {
-          "version": "1.0.0",
-          "from": "isarray@>=1.0.0 <2.0.0",
-          "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
-        },
-        "node-libs-browser": {
-          "version": "1.1.1",
-          "from": "node-libs-browser@1.1.1",
-          "resolved": "https://registry.npmjs.org/node-libs-browser/-/node-libs-browser-1.1.1.tgz"
-        },
-        "os-browserify": {
-          "version": "0.2.1",
-          "from": "os-browserify@>=0.2.0 <0.3.0",
-          "resolved": "https://registry.npmjs.org/os-browserify/-/os-browserify-0.2.1.tgz"
-        },
-        "readable-stream": {
-          "version": "2.2.2",
-          "from": "readable-stream@>=2.0.5 <3.0.0",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.2.tgz"
-        },
-        "stream-browserify": {
-          "version": "2.0.1",
-          "from": "stream-browserify@>=2.0.1 <3.0.0",
-          "resolved": "https://registry.npmjs.org/stream-browserify/-/stream-browserify-2.0.1.tgz"
-        },
         "supports-color": {
           "version": "3.1.2",
           "from": "supports-color@>=3.1.0 <4.0.0",
           "resolved": "https://registry.npmjs.org/supports-color/-/supports-color-3.1.2.tgz"
-        },
-        "url": {
-          "version": "0.11.0",
-          "from": "url@>=0.11.0 <0.12.0",
-          "resolved": "https://registry.npmjs.org/url/-/url-0.11.0.tgz",
-          "dependencies": {
-            "punycode": {
-              "version": "1.3.2",
-              "from": "punycode@1.3.2",
-              "resolved": "https://registry.npmjs.org/punycode/-/punycode-1.3.2.tgz"
-            }
-          }
         }
       }
     },
