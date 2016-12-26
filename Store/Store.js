@@ -1741,6 +1741,8 @@ var Store = Reflux.createStore({
 
           let identity = all.filter((id) => id.id === curId)
 
+          console.log('Store.onAddMessage: type = ' + r[TYPE] + '; to = ' + r.to.title)
+
           var msg = {
             message: me.firstName + ' is waiting for the response',
             [TYPE]: SELF_INTRODUCTION,
@@ -2433,6 +2435,7 @@ var Store = Reflux.createStore({
           else
             orgRep = self._getItem(utils.getId(resource.to))
 
+          console.log('Store.onAddItem: type = ' + resource[TYPE] + '; to = ' + resource.to.title)
           var msg = {
             message: me.firstName + ' is waiting for the response',
             [TYPE]: SELF_INTRODUCTION,
