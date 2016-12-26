@@ -5,6 +5,7 @@ import {
   Navigator
 } from 'react-native'
 import utils from '../utils/utils'
+var TYPE = require('@tradle/constants').TYPE
 
 var PhotoCarouselMixin = {
   showCarousel(currentPhoto, isView) {
