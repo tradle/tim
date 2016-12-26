@@ -609,10 +609,12 @@ var NavigationBarRouteMapper = {
     else
       org = <View />;
     let photo
-    if (route.id === 11  &&  route.passProps.resource.photos) {
+    if (Platform.OS !== 'android' &&  route.id === 11  &&  route.passProps.resource.photos) {
       var uri = utils.getImageUri(route.passProps.resource.photos[0].url);
       photo = <Image source={{uri: uri}} style={styles.msgImage} />
     }
+    else
+      photo = <View/>
     var style = [platformStyles.navBarText, styles.navBarTitleText]
     if (route.titleTextColor)
       style.push({color: route.titleTextColor});
@@ -625,6 +627,7 @@ var NavigationBarRouteMapper = {
     return (
       <View key={'index.common.js'}>
         <View style={{flexDirection: 'row'}}>
+        {photo}
         <Text style={style}>
           {t[0]}
         </Text>
@@ -655,7 +658,7 @@ var styles = StyleSheet.create({
     marginTop: 7,
     marginLeft: 0,
     width: 27,
-    borderRadius: 15,
+    borderRadius: 13,
     borderColor: '#cccccc',
     borderWidth: StyleSheet.hairlineWidth
   },

@@ -109,7 +109,8 @@ var RowMixin = {
 
   },
   getOwnerPhoto(isMyMessage) {
-    // return <View/>
+    if (Platform.OS !== 'android'  &&  !utils.isReadOnlyChat(this.props.resource))
+      return <View/>
     var to = this.props.to;
     let isProductApplication = to[constants.TYPE]  === PRODUCT_APPLICATION
     if (!isProductApplication && (isMyMessage  || !to /* ||  !to.photos*/))
