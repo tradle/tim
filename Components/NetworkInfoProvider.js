@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Text,
   Alert,
+  Animated,
   TouchableOpacity
 } from 'react-native'
 
@@ -18,30 +19,40 @@ const ORGANIZATION = constants.TYPES.ORGANIZATION
 class NetworkInfoProvider extends Component {
   constructor(props) {
     super(props)
+    this.state = {
+      fadeAnim: new Animated.Value(0), // init opacity 0
+    }
   }
+
+  componentDidMount() {
+     Animated.timing(          // Uses easing functions
+       this.state.fadeAnim,    // The value to drive
+       {toValue: 1, duration: 3000}            // Configuration
+     ).start();                // Don't forget start!
+  }
+
   render() {
     let isOrg = this.props.resource  &&  this.props.resource[TYPE] === ORGANIZATION
-    let offline = this.props.resource  &&  isOrg  &&  !this.props.online
+    let providerOffline = this.props.resource  &&  isOrg  &&  !this.props.online
     let dn = this.props.resource
            ? this.props.isConnected
                ? translate('learnMoreDescriptionTo', utils.getDisplayName(this.props.resource))
                : translate('learnMoreServerIsDown', utils.getDisplayName(this.props.resource))
            : translate('learnMoreDescription')
-    return this.props.connected
-          ? offline
-            ? <View style={styles.bar}>
-                <Text style={styles.text}>{translate('providerIsOffline', utils.getDisplayName(this.props.resource))}</Text>
+    if (this.props.connected  &&  !providerOffline && !this.props.serverOffline)
+      return <View/>
+
+    let msg = this.props.connected
+            ? (providerOffline ? translate('providerIsOffline', utils.getDisplayName(this.props.resource)) : translate('serverIsUnreachable'))
+            : translate('noNetwork')
+    return  <Animated.View style={{opacity: this.state.fadeAnim}}>
+              <View style={styles.bar}>
+                <Text style={styles.text}>{msg}</Text>
                 <TouchableOpacity onPress={() => Alert.alert(translate('offlineMode'), dn, null)}>
                   <Text style={styles.text}>{translate('learnMore')}</Text>
                 </TouchableOpacity>
               </View>
-            : <View/>
-          : <View style={styles.bar}>
-              <Text style={styles.text}>{translate('noNetwork')}</Text>
-              <TouchableOpacity onPress={() => Alert.alert(translate('offlineMode'), dn, null)}>
-                <Text style={styles.text}>{translate('learnMore')}</Text>
-              </TouchableOpacity>
-            </View>
+            </Animated.View>
   }
 }
 
