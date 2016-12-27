@@ -17,7 +17,7 @@ var chatStyles = require('../styles/chatStyles')
 var reactMixin = require('react-mixin');
 
 var STRUCTURED_MESSAGE_COLOR
-
+const MAX_PROPS_IN_FORM = 1
 import {
   // StyleSheet,
   Text,
@@ -119,7 +119,7 @@ class FormMessageRow extends Component {
       sendStatus = this.getSendStatus()
     var sealedStatus = (resource.txId)
                      ? <View style={chatStyles.sealedStatus}>
-                         <Icon name={'ios-ribbon'} size={30} color='#316A99' style={{opacity: 0.5}} />
+                         <Icon name={'ios-done-all'} size={30} color='#EBFCFF' style={{opacity: 0.7}} />
                        </View>
                      : <View />
 
@@ -249,7 +249,10 @@ class FormMessageRow extends Component {
 
     var self = this
     var vCols = [];
+
     viewCols.forEach(function(v) {
+      if (vCols.length > MAX_PROPS_IN_FORM)
+        return
       if (properties[v].type === 'array')
         return;
       if (properties[v].ref) {
@@ -301,7 +304,15 @@ class FormMessageRow extends Component {
     if (title.length > 30)
       title = title.substring(0, 27) + '...'
 
-    vCols.push(<Text style={[chatStyles.resourceTitle, chatStyles.formType, {color: isMyMessage ? '#EBFCFF' : this.props.bankStyle.STRUCTURED_MESSAGE_BORDER}]} key={this.getNextKey()}>{title}</Text>);
+    if (vCols.length > MAX_PROPS_IN_FORM) {
+      vCols.splice(MAX_PROPS_IN_FORM, 1)
+      vCols.push(<View style={{flexDirection: 'row', justifyContent: 'flex-end'}} key={this.getNextKey()}>
+                   <Text style={[chatStyles.resourceTitle, chatStyles.formType, {paddingRight: 5, color: isMyMessage ? '#EBFCFF' : this.props.bankStyle.STRUCTURED_MESSAGE_BORDER}]}>{title}</Text>
+                   <Icon style={{color: '#ffffff', marginTop: 15}} size={20} name={'ios-arrow-forward'} />
+                 </View>);
+    }
+    else
+      vCols.push(<Text style={[chatStyles.resourceTitle, chatStyles.formType, {color: isMyMessage ? '#EBFCFF' : this.props.bankStyle.STRUCTURED_MESSAGE_BORDER}]} key={this.getNextKey()}>{title}</Text>);
 
     if (vCols  &&  vCols.length) {
       vCols.forEach(function(v) {
