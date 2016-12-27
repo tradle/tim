@@ -231,7 +231,7 @@ var driverInfo = (function () {
     providers({ client, url }) {
       if (!client) client = byUrl[url]
 
-      return client && clientToIdentifiers.get(client)
+      return client && clientToIdentifiers.get(client) || []
     },
     byUrl,
     byIdentifier
@@ -282,6 +282,7 @@ var Store = Reflux.createStore({
     this.announcePresence = debounce(this.announcePresence.bind(this), 100)
     this._loadedResourcesDefer = Q.defer()
     this.lockReceive = utils.locker({ timeout: 600000 })
+    this._connectedServers = {}
 
     NetInfo.isConnected.addEventListener(
       'change',
@@ -943,20 +944,20 @@ var Store = Reflux.createStore({
     // const identifier = tlsKey ? tlsKey.pubKeyString : meDriver.permalink
 
     // const identifier = tradle.utils.serializePubKey(identifierPubKey).toString('hex')
-    const base = getProviderUrl(provider)
+    const url = getProviderUrl(provider)
 
-    let transport = wsClients.byUrl[base]
+    let transport = wsClients.byUrl[url]
     if (transport) {
       wsClients.add({
         client: transport,
-        url: base,
+        url: url,
         identifier: provider.hash
       })
 
       return transport
     }
 
-    let wsClient = this.getWsClient(base)
+    const wsClient = this.getWsClient(url)
     transport = this.getTransport(wsClient)
     // const url = utils.joinURL(base, 'ws?from=' + identifier).replace(/^http/, 'ws')
     // const wsClient = new WebSocketClient({
@@ -970,34 +971,55 @@ var Store = Reflux.createStore({
     transport.on('presence', updatePresence)
 
     wsClient.on('disconnect', function () {
-      transport.clients().forEach(function (c) {
-        // reset OTR session, restart on connect
-        debug('aborting pending sends due to disconnect')
-        c.destroy()
-      })
-
-      const connectedPermalinks = wsClients.providers({ client: transport })
-      if (connectedPermalinks.length === SERVICE_PROVIDERS.length)
-        self.trigger({action: 'onlineStatus', online: false})
-
-      connectedPermalinks.forEach(permalink => updatePresence(permalink, false))
+      onTransportConnectivityChanged(false)
     })
 
     wsClient.on('connect', function () {
-      // resume all paused channels
-      const connectedPermalinks = wsClients.providers({ client: transport })
-      if (connectedPermalinks.length === SERVICE_PROVIDERS.length)
-        self.trigger({action: 'onlineStatus', online: true})
-      connectedPermalinks.forEach(permalink => updatePresence(permalink, true))
-      // connectedPermalinks.forEach(permalink => {
-      //   self.setProviderOnlineStatus(permalink, true)
-      //   meDriver.sender.resume(permalink)
-      // })
+      onTransportConnectivityChanged(true)
+      // request presence information
+      wsClient.sendCustomEvent('presence')
     })
+
+    wsClient.on('presence', function (present) {
+      debug('presence updated', present)
+      // the below only handles the known parties
+      // TODO: handle the new arrivals in `present`
+
+      wsClients
+        .providers({ client: transport })
+        .forEach(permalink => {
+          const isPresent = present.indexOf(permalink) !== -1
+          updatePresence(permalink, isPresent)
+        })
+    })
+
+    function onTransportConnectivityChanged (connected) {
+      if (connected) {
+        self._connectedServers[url] = true
+      } else {
+        delete self._connectedServers[url]
+        transport.clients().forEach(function (c) {
+          // reset OTR session, restart on connect
+          debug('aborting pending sends due to disconnect')
+          c.destroy()
+        })
+      }
+
+      const numConnected = Object.keys(self._connectedServers).length
+      if (numConnected === 0) {
+        self.trigger({ action: 'onlineStatus', online: false })
+      } else if (numConnected === 1) {
+        self.trigger({ action: 'onlineStatus', online: true })
+      }
+
+      wsClients
+        .providers({ client: transport })
+        .forEach(permalink => updatePresence(permalink, connected))
+    }
 
     wsClients.add({
       client: transport,
-      url: base,
+      url: url,
       identifier: provider.hash
     })
 
@@ -1020,7 +1042,7 @@ var Store = Reflux.createStore({
       if (!wsClients.byIdentifier[from]) {
         wsClients.add({
           client: transport,
-          url: base,
+          url: url,
           identifier: from
         })
       }
@@ -1222,9 +1244,9 @@ var Store = Reflux.createStore({
     return key.pubKeyString || key.pub
   },
 
-  getWsClient(base) {
+  getWsClient(baseUrl) {
     const tlsKey = driverInfo.tlsKey
-    const url = utils.joinURL(base, 'ws?' + querystring.stringify({
+    const url = utils.joinURL(baseUrl, 'ws?' + querystring.stringify({
       from: this.getIdentifier(),
       // pubKey: this.getIdentifierPubKey()
     })).replace(/^http/, 'ws')
