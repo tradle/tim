@@ -37,11 +37,14 @@ var verificationStyles = Object.freeze({
     color: '#ffffff',
   },
   sealedStatus: {
+    justifyContent: 'center',
+    // paddingHorizontal: 5,
+    marginTop: 2
     // alignSelf: 'flex-end',
     // flexDirection: 'row',
-    position: 'absolute',
-    bottom: 1,
-    left: 10,
+    // position: 'absolute',
+    // bottom: 1,
+    // left: 10,
   },
   bigImage: {
     width: 240,
