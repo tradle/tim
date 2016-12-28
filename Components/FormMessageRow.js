@@ -80,10 +80,10 @@ class FormMessageRow extends Component {
       if (isMyMessage) {
         if (!noMessage)
           addStyle = chatStyles.myCell
-        addStyle = [addStyle, chatStyles.verificationBody, {backgroundColor: STRUCTURED_MESSAGE_COLOR, borderColor: '#C1E3E8', borderTopRightRadius: 0, paddingBottom: 5}]; //model.style];
+        addStyle = [addStyle, chatStyles.verificationBody, {backgroundColor: STRUCTURED_MESSAGE_COLOR, borderColor: '#C1E3E8', paddingBottom: 5, borderTopLeftRadius: 0, borderTopRightRadius: 0 }];
       }
       else
-        addStyle = [chatStyles.verificationBody, {flex: 1, borderColor: '#efefef', backgroundColor: '#ffffff', borderTopLeftRadius: 0}];
+        addStyle = [chatStyles.verificationBody, {flex: 1, borderColor: '#efefef', backgroundColor: '#ffffff', borderTopLeftRadius: 0, borderTopRightRadius: 0 }];
     }
     var properties = model.properties;
     if (properties.photos  &&  resource.photos) {
@@ -117,11 +117,6 @@ class FormMessageRow extends Component {
     var sendStatus = <View />
     if (this.props.sendStatus  &&  this.props.sendStatus !== null)
       sendStatus = this.getSendStatus()
-    var sealedStatus = (resource.txId)
-                     ? <View style={chatStyles.sealedStatus}>
-                         <Icon name={'ios-done-all'} size={30} color='#EBFCFF' style={{opacity: 0.7}} />
-                       </View>
-                     : <View />
 
     let cellStyle = addStyle
                   ? [chatStyles.textContainer, addStyle]
@@ -131,7 +126,7 @@ class FormMessageRow extends Component {
     var messageBody;
     var width = utils.dimensions(FormMessageRow).width
     let msgWidth =  Math.floor(width * 0.8)
-    var viewStyle = {width: msgWidth, flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
+    var viewStyle = { width: msgWidth, flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
 
     messageBody =
       <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
@@ -145,10 +140,8 @@ class FormMessageRow extends Component {
                 </View>
               : <View />
             }
-
               {renderedRow}
            </View>
-           {sealedStatus}
           </View>
         </View>
       </TouchableHighlight>
@@ -172,10 +165,36 @@ class FormMessageRow extends Component {
       else
         photoStyle = chatStyles.image;
     }
+                         // <Icon name={'md-done-all'} size={20} color={this.props.bankStyle.REQUEST_FULFILLED} style={{opacity: 0.7}} />
+
+    return  <View style={{margin: 1, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}}>
+              <TouchableHighlight onPress={this.props.onSelect.bind(this, resource, null)} underlayColor='transparent'>
+                {this.formStub(resource, to)}
+              </TouchableHighlight>
+              <View style={photoListStyle}>
+                <PhotoList photos={photoUrls} resource={this.props.resource} style={[photoStyle, {marginTop: -5}]} navigator={this.props.navigator} numberInRow={inRow} chat={this.props.to} />
+              </View>
+            </View>
+    // var sealedStatus = (resource.txId)
+    //                  ? <View style={chatStyles.sealedStatus}>
+    //                      <Text style={{fontSize: 20, marginTop: -5}}>{'💋'}</Text>
+    //                    </View>
+    //                  : <View />
+
+    // let title = translate(model)
+    // if (title.length > 30)
+    //   title = title.substring(0, 27) + '...'
+
+    // let header = <View style={[viewStyle, {backgroundColor: '#fff', borderTopLeftRadius: 10, flexDirection: 'row', paddingVertical: 5, justifyContent: 'center', borderWidth: 1, borderColor: this.props.bankStyle.STRUCTURED_MESSAGE_COLOR}]} key={this.getNextKey()}>
+    //                {sealedStatus}
+    //                <Text style={[chatStyles.resourceTitle, {paddingRight: 5, color: this.props.bankStyle.STRUCTURED_MESSAGE_COLOR}]}>{title}</Text>
+    //                <Icon color={this.props.bankStyle.STRUCTURED_MESSAGE_COLOR} size={20} name={'ios-arrow-forward'} style={{marginTop: 2, position: 'absolute', right: 10}}/>
+    //              </View>
 
     return (
       <View style={{margin: 1, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}}>
         {date}
+        {header}
         {messageBody}
         <View style={photoListStyle}>
           <PhotoList photos={photoUrls} resource={this.props.resource} style={[photoStyle, {marginTop: -5}]} navigator={this.props.navigator} numberInRow={inRow} chat={this.props.to} />
@@ -232,6 +251,61 @@ class FormMessageRow extends Component {
       };
     }
     this.props.navigator.push(route);
+  }
+  formStub(resource, to) {
+    let sentTo = !to || utils.getId(to) !== utils.getId(resource.to.organization)
+               ? <View style={{padding: 5}}>
+                   <Text style={{color: '#7AAAC3', fontSize: 14, alignSelf: 'flex-end'}}>{translate('asSentTo', resource.to.organization.title)}</Text>
+                 </View>
+               : <View/>
+
+    let isMyMessage = this.isMyMessage()
+    let isSharedContext = utils.isReadOnlyChat(resource)
+    var viewStyle = {
+      width: Math.floor(utils.dimensions().width * 0.8) - (isMyMessage || isSharedContext ? 0 : 45),
+      alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
+      marginLeft: isMyMessage ? 30 : (isSharedContext ? 0 : 45), //(hasOwnerPhoto ? 45 : 10),
+      backgroundColor: this.props.bankStyle.BACKGROUND_COLOR,
+      flexDirection: 'row',
+    }
+
+    let headerStyle = [
+      chatStyles.verifiedHeader,
+      {backgroundColor: this.props.bankStyle.SHARED_WITH_BG}, // opacity: isShared ? 0.5 : 1},
+      isMyMessage ? {borderTopRightRadius: 0, borderTopLeftRadius: 10 } : {borderTopRightRadius: 10, borderTopLeftRadius: 0 }
+    ]
+
+    var st = {
+      margin: 1,
+      paddingRight: 10,
+      // flexDirection: 'row',
+      backgroundColor: this.props.bankStyle.BACKGROUND_COLOR
+    }
+    var sealedStatus = (resource.txId)
+                     ? <View style={chatStyles.sealedStatus}>
+                         <Icon style={{marginTop: 2}} name='md-done-all' size={20} color='#EBFCFF'/>
+                       </View>
+                     : <View />
+
+    let renderedRow = []
+    let ret = this.formatRow(true, renderedRow)
+    var ownerPhoto = this.getOwnerPhoto(isMyMessage)
+    return (
+      <View style={st, viewStyle} key={this.getNextKey()}>
+        {ownerPhoto}
+        <View style={[{flex:1}, chatStyles.verificationBody]}>
+          <View style={headerStyle}>
+            {sealedStatus}
+            <Text style={chatStyles.verificationHeaderText}>{translate(utils.getModel(resource[constants.TYPE]).value)}</Text>
+            <Icon color='#EBFCFF' size={20} name={'ios-arrow-forward'} style={{marginTop: 2, position: 'absolute', right: 10}}/>
+          </View>
+          <View style={{height: 5}}/>
+          {renderedRow}
+          {sentTo}
+          <View style={{height: 5}}/>
+        </View>
+      </View>
+    );
   }
 
   formatRow(isMyMessage, renderedRow) {
@@ -300,22 +374,15 @@ class FormMessageRow extends Component {
       first = false;
 
     });
-    let title = translate(model)
-    if (title.length > 30)
-      title = title.substring(0, 27) + '...'
 
-    if (vCols.length > MAX_PROPS_IN_FORM) {
+    if (vCols.length > MAX_PROPS_IN_FORM)
       vCols.splice(MAX_PROPS_IN_FORM, 1)
-      vCols.push(<View style={{flexDirection: 'row', justifyContent: 'flex-end'}} key={this.getNextKey()}>
-                   <Text style={[chatStyles.resourceTitle, chatStyles.formType, {paddingRight: 5, color: isMyMessage ? '#EBFCFF' : this.props.bankStyle.STRUCTURED_MESSAGE_BORDER}]}>{title}</Text>
-                   <Icon style={{color: '#ffffff', marginTop: 15}} size={20} name={'ios-arrow-forward'} />
-                 </View>);
-    }
-    else
-      vCols.push(<Text style={[chatStyles.resourceTitle, chatStyles.formType, {color: isMyMessage ? '#EBFCFF' : this.props.bankStyle.STRUCTURED_MESSAGE_BORDER}]} key={this.getNextKey()}>{title}</Text>);
+
+    // else
+    //   vCols.push(<Text style={[chatStyles.resourceTitle, chatStyles.formType, {color: isMyMessage ? '#EBFCFF' : this.props.bankStyle.STRUCTURED_MESSAGE_BORDER}]} key={this.getNextKey()}>{title}</Text>);
 
     if (vCols  &&  vCols.length) {
-      vCols.forEach(function(v) {
+      vCols.forEach((v) => {
         renderedRow.push(v);
       })
     }
@@ -328,7 +395,7 @@ class FormMessageRow extends Component {
 var styles = StyleSheet.create({
   myMsg: {
     justifyContent: 'flex-end',
-    color: '#ffffff'
+    // color: '#ffffff'
   },
   youSharedText: {
     color: '#ffffff',
