@@ -65,7 +65,7 @@ var verificationStyles = Object.freeze({
     color: '#EBFCFF',
     fontSize: 18,
     // fontWeight: '600',
-    opacity: 0.5,
+    opacity: 0.7,
     alignSelf: 'flex-end',
     marginTop: 10,
     marginBottom: 5

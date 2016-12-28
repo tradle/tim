@@ -96,10 +96,10 @@ var RowMixin = {
       let color = isMyMessage && !isMyProduct ? {color: '#FFFFEE'} : {color: '#757575'}
       return (
         <View style={style} key={this.getNextKey()}>
-          <View style={styles.column}>
+          <View style={[styles.column, {flex: 1}]}>
             <Text style={[styles.descriptionB, color]}>{propTitle}</Text>
           </View>
-          <View style={styles.column}>
+          <View style={[styles.column, {flex: 2}]}>
             <Text style={[styles.descriptionB, color]}>{val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')}</Text>
           </View>
        </View>
@@ -108,7 +108,8 @@ var RowMixin = {
 
   },
   getOwnerPhoto(isMyMessage) {
-    // return <View/>
+    if (Platform.OS !== 'android'  &&  !utils.isReadOnlyChat(this.props.resource))
+      return <View/>
     var to = this.props.to;
     let isProductApplication = to[constants.TYPE]  === PRODUCT_APPLICATION
     if (!isProductApplication && (isMyMessage  || !to /* ||  !to.photos*/))

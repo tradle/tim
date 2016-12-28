@@ -79,6 +79,7 @@ class ResourceRow extends Component {
       return true
     if (Object.keys(this.state).length  !== Object.keys(nextState).length)
       return true
+
     var opts = {strict: true}
     for (var p in this.props) {
       if (typeof this.props[p] === 'function') {
@@ -422,7 +423,7 @@ class ResourceRow extends Component {
                   icon = 'ios-usd'
                 else if (msgModel.subClassOf === FORM)
                   icon = 'ios-paper-outline'
-                // else if (model.id === constants.TYPES.VERIFICATION)
+                // else if (model.id === VERIFICATION)
                 //   icon =
                 if (icon)
                   lastMessageTypeIcon = <Icon name={icon} size={14} color='#7AAAc3' style={{paddingLeft: 1, marginTop: -2}}/>

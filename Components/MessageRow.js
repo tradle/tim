@@ -29,7 +29,6 @@ const FORM_ERROR = 'tradle.FormError'
 const FORM = 'tradle.Form'
 const FORM_REQUEST = 'tradle.FormRequest'
 const SHARE_CONTEXT = 'tradle.ShareContext'
-
 const ENUM = 'tradle.Enum'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
@@ -130,8 +129,6 @@ class MessageRow extends Component {
           addStyle = (isSimpleMessage && message.length < 30)
                    ? [chatStyles.verificationBody, mstyle]
                    : [chatStyles.verificationBody, {flex: 1}, mstyle]
-
-
         }
       }
       if (isFormError)
@@ -606,7 +603,6 @@ class MessageRow extends Component {
       renderedRow.push(msg);
       return null
     }
-
     if (model.id === APPLICATION_SUBMITTED) {
       let msg = <View key={this.getNextKey()}>
                   <Text style={[chatStyles.resourceTitle, {color: this.props.bankStyle.CONFIRMATION_COLOR}]}>{resource.message}</Text>

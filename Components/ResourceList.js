@@ -787,7 +787,6 @@ class ResourceList extends Component {
       backButtonTitle: 'Back',
       titleTextColor: '#7AAAC3',
       passProps: {
-        // officialAccounts: true,
         bankStyle: this.props.style,
         modelName: PRODUCT_APPLICATION,
         _readOnly: true
@@ -905,7 +904,6 @@ class ResourceList extends Component {
     let network = this.props.isChooser || !this.props.officialAccounts || this.props.modelName !== constants.TYPES.ORGANIZATION
                 ? <View/>
                 : <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
-
     return (
       <PageView style={platformStyles.container}>
         {network}
