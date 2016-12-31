@@ -10,8 +10,11 @@ import {
 } from 'react-native'
 
 import ImagePicker from 'react-native-image-picker'
+import BlinkID from './BlinkID'
 import utils from '../utils/utils'
 import extend from 'extend'
+
+BlinkID.setLicenseKey('...')
 
 const imageInputPropTypes = {
   ...TouchableHighlight.propTypes,
@@ -24,6 +27,7 @@ class ImageInput extends Component {
   constructor(props) {
     super(props)
     this.showImagePicker = this.showImagePicker.bind(this)
+    this.showIDScanner = this.showIDScanner.bind(this)
   }
   render() {
     const touchableProps = { ...this.props }
@@ -40,6 +44,18 @@ class ImageInput extends Component {
         {this.props.children}
       </TouchableHighlight>
     )
+  }
+  async showIDScanner() {
+    const result = await BlinkID.scan({
+      quality: 0.2,
+      base64: true,
+      // machine readable travel documents (passport)
+      mrtd: {},
+      // US driver license
+      usdl: {}
+    })
+
+    console.log(result)
   }
   showImagePicker() {
     const { prop, onImage } = this.props
