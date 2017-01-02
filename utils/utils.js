@@ -69,6 +69,7 @@ const SIG = constants.SIG
 const FORM = TYPES.FORM
 const FORM_ERROR = 'tradle.FormError'
 const FORM_REQUEST = 'tradle.FormRequest'
+const PHOTO = 'tradle.Photo'
 const PASSWORD_ENC = 'hex'
 
 var LocalizedStrings = require('react-native-localization')
@@ -147,10 +148,9 @@ var utils = {
     return (translations) ? translations[model.id] || translations.Default : property.title || utils.makeLabel(property.name)
   },
   translateModel(model) {
-    if (!dictionary)
-      return model.title
-    return dictionary.models[model.id] || model.title
-
+    if (dictionary  &&  dictionary.models[model.id])
+      return dictionary.models[model.id]
+    return model.title ? model.title : this.makeLabel(model.id.split('.')[1])
   },
   translateString(...args) {
     if (!strings)
@@ -1132,6 +1132,15 @@ var utils = {
         })
     }
   },
+  getPhotoProperty(resource) {
+    let props = this.getModel(resource[constants.TYPE]).value.properties
+    let photoProp
+    for (let p in resource) {
+      if (props[p].ref === PHOTO  &&  props[p].mainPhoto)
+        return props[p]
+    }
+    return properties.photos
+  },
 
   locker: function (opts={}) {
     const { timeout } = opts
@@ -1155,6 +1164,51 @@ var utils = {
         })
       })
     }
+  },
+  getMainPhotoProperty(model) {
+    let mainPhoto
+    let props = model.properties
+    for (let p in props) {
+      if (props[p].mainPhoto)
+        mainPhoto = p
+    }
+    return mainPhoto
+  },
+  getResourcePhotos(model, resource) {
+    var mainPhoto, photos
+    let props = model.properties
+    for (let p in resource) {
+      if (!props[p] ||  (props[p].ref !== PHOTO && (!props[p].items || props[p].items.ref !== PHOTO)))
+        continue
+      if (props[p].mainPhoto) {
+        mainPhoto = resource[p]
+        continue
+      }
+      if (!photos)
+        photos = []
+      if (props[p].items)
+        resource[p].forEach((r) => photos.push(r))
+      else
+        photos.push(resource[p])
+    }
+    if (!photos) {
+      if (mainPhoto)
+        return [mainPhoto]
+    }
+    else {
+      if (!mainPhoto)
+        return photos
+      photos.splice(0, 0, mainPhoto)
+      return photos
+    }
+  },
+  getPropertiesWithRange(range, model) {
+    let props = model.properties
+    let rProps = []
+    for (let p in props)
+      if (props[p].range === range)
+        rProps.push(props[p])
+    return rProps
   },
   fromMicroBlink: function (result) {
     const { mrtd, usdl, eudl, image } = result
