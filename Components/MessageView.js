@@ -22,6 +22,8 @@ var ResourceMixin = require('./ResourceMixin');
 var buttonStyles = require('../styles/buttonStyles');
 var HELP_COLOR = 'blue'
 var NetworkInfoProvider = require('./NetworkInfoProvider')
+const PHOTO = 'tradle.Photo'
+const TYPE = constants.TYPE
 // import Prompt from 'react-native-prompt'
 const VERIFICATION = constants.TYPES.VERIFICATION
 
@@ -78,7 +80,7 @@ class MessageView extends Component {
   }
   verifyOrCreateError() {
     let resource = this.props.resource
-    let model = utils.getModel(resource[constants.TYPE]).value
+    let model = utils.getModel(resource[TYPE]).value
     if (utils.isEmpty(this.state.errorProps)) {
       Alert.alert(
         translate('verifyPrompt'), // + utils.getDisplayName(resource),
@@ -90,7 +92,7 @@ class MessageView extends Component {
       )
     }
     else {
-      let properties = utils.getModel(this.state.resource[constants.TYPE]).value.properties
+      let properties = utils.getModel(this.state.resource[TYPE]).value.properties
       let msg = ''
       for (var p in this.state.errorProps)
         msg += msg ? ', ' + properties[p].title : properties[p].title
@@ -147,7 +149,7 @@ class MessageView extends Component {
   }
 
   getRefResource(resource, prop) {
-    var model = utils.getModel(this.props.resource[constants.TYPE]).value;
+    var model = utils.getModel(this.props.resource[TYPE]).value;
 
     this.state.prop = prop;
     // this.state.propValue = utils.getId(resource.id);
@@ -157,7 +159,7 @@ class MessageView extends Component {
 
   showVerification(resource, document) {
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
-    var model = utils.getModel(document[constants.TYPE]).value;
+    var model = utils.getModel(document[TYPE]).value;
     var title = model.title; //utils.getDisplayName(resource, model.properties);
     var newTitle = title;
     let me = utils.getMe()
@@ -184,10 +186,36 @@ class MessageView extends Component {
 
   render() {
     var resource = this.state.resource;
-    var modelName = resource[constants.TYPE];
+    var modelName = resource[TYPE];
     var model = utils.getModel(modelName).value;
     var date = resource.time ? utils.formatDate(new Date(resource.time)) : utils.formatDate(new Date())
-    var inRow = resource.photos ? resource.photos.length : 0
+    var photos = resource.photos
+    var mainPhoto
+    if (!photos) {
+      photos = utils.getResourcePhotos(model, resource)
+      let mainPhotoProp = utils.getMainPhotoProperty(model)
+      mainPhoto = mainPhotoProp ? resource[mainPhotoProp.name] : photos && photos[0]
+
+      // let props = model.properties
+      // for (let p in resource) {
+      //   if (!props[p] ||  (props[p].ref !== PHOTO && (!props[p].items || props[p].items.ref !== PHOTO)))
+      //     continue
+      //   if (props[p].mainPhoto)
+      //     mainPhoto = resource[p]
+      //   if (!photos)
+      //     photos = []
+      //   if (props[p].items)
+      //     resource[p].forEach((r) => photos.push(r))
+      //   else
+      //     photos.push(resource[p])
+      // }
+      // if (photos  &&  !mainPhoto) {
+      //   mainPhoto = photos[0]
+      //   if (photos.length === 1)
+      //     photos = null
+      // }
+    }
+    var inRow = photos ? photos.length : 0
     if (inRow  &&  inRow > 4)
       inRow = 5;
     var actionPanel =
@@ -228,16 +256,16 @@ class MessageView extends Component {
       <ScrollView  ref='this' style={platformStyles.container}>
         <View style={[styles.band, {borderBottomColor: this.props.bankStyle.PRODUCT_ROW_BG_COLOR, borderTopColor: '#dddddd'}]}><Text style={styles.date}>{date}</Text></View>
         <View style={styles.photoBG}>
-          <PhotoView resource={resource} navigator={this.props.navigator}/>
+          <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={this.props.navigator}/>
         </View>
         {actionPanel}
         <View style={{marginTop: -3}}>
           <View style={styles.photoListStyle}>
-            <PhotoList photos={resource.photos} resource={resource} isView={true} navigator={this.props.navigator} numberInRow={inRow} />
+            <PhotoList photos={photos} resource={resource} isView={true} navigator={this.props.navigator} numberInRow={inRow} />
           </View>
           <View style={styles.rowContainer}>
             {msg}
-            {this.props.resource[constants.TYPE] === constants.TYPES.VERIFICATION
+            {this.props.resource[TYPE] === constants.TYPES.VERIFICATION
               ? <VerificationView navigator={this.props.navigator}
                                   resource={resource}
                                   bankStyle={this.props.bankStyle}
@@ -270,7 +298,7 @@ class MessageView extends Component {
 
   verify() {
     var resource = this.props.resource;
-    var model = utils.getModel(resource[constants.TYPE]).value;
+    var model = utils.getModel(resource[TYPE]).value;
     // this.props.navigator.pop();
     var me = utils.getMe();
     var from = this.props.resource.from;

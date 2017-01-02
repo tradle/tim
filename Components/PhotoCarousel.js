@@ -15,11 +15,11 @@ class PhotoCarousel extends Component {
   }
   render() {
     var photoUrls = [];
-    var currentPhoto = this.props.currentPhoto || this.props.photos[0];
+    var currentPhoto = this.props.currentPhoto || (this.props.photos && this.props.photos[0])
     var currentPhotoIndex = -1;
-
-    for (var i=0; i<this.props.photos.length; i++) {
-      var photo = this.props.photos[i];
+    let photos = (!this.props.photos  &&  currentPhoto) ? [currentPhoto] : this.props.photos
+    for (var i=0; i<photos.length; i++) {
+      var photo = photos[i];
 
       if (currentPhotoIndex === -1  &&  photo.url === currentPhoto.url)
         currentPhotoIndex = i;

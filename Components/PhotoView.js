@@ -57,7 +57,7 @@ class PhotoView extends Component {
       return <View />
 
     var hasPhoto = resource.photos && resource.photos.length;
-    var currentPhoto = this.state.currentPhoto || (hasPhoto  &&  resource.photos[0]);
+    var currentPhoto = this.state.currentPhoto || this.props.mainPhoto || (hasPhoto  &&  resource.photos[0]);
     if (!currentPhoto) {
       if (model.id === constants.TYPES.PROFILE) {
         return (
@@ -71,13 +71,13 @@ class PhotoView extends Component {
     }
 
     var url = currentPhoto.url;
-    var nextPhoto = resource.photos.length == 1
+    // var nextPhoto = resource.photos && resource.photos.length == 1
     var uri = utils.getImageUri(url);
     var source = uri.charAt(0) == '/' || uri.indexOf('data') === 0
                ? {uri: uri, isStatic: true}
                : {uri: uri}
     var nextPhoto;
-    var len = resource.photos.length;
+    var len = resource.photos  &&  resource.photos.length;
     for (var i=0; i<len  &&  !nextPhoto; i++) {
       var p = resource.photos[i].url;
       if (p === url)
@@ -101,7 +101,7 @@ class PhotoView extends Component {
  //          }}
     return (
           <Animated.View style={style}>
-            <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, resource.photos[0], true)}>
+            <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, this.props.mainPhoto || resource.photos[0], true)}>
               <Image resizeMode='cover' source={source} style={image} />
             </TouchableHighlight>
           </Animated.View>
