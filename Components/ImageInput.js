@@ -14,7 +14,8 @@ import BlinkID from './BlinkID'
 import utils from '../utils/utils'
 import extend from 'extend'
 
-BlinkID.setLicenseKey('...')
+// BlinkID.setLicenseKey('...')
+BlinkID.setLicenseKey('TAB5DE5I-QA75WEDQ-ITNBNEMA-HX2QL6QH-DEGVO7UK-C7TSIPEU-RFE2T37A-D4XRD3S2')
 
 const imageInputPropTypes = {
   ...TouchableHighlight.propTypes,
@@ -34,7 +35,8 @@ class ImageInput extends Component {
     delete touchableProps.prop
     delete touchableProps.onImage
 
-    const onPress = this.props.onPress || this.showMicroBlinkScanner
+    // const onPress = this.props.onPress || this.showMicroBlinkScanner
+    const onPress = this.props.onPress || this.showImagePicker
     // allow override onPress
     return (
       <TouchableHighlight
@@ -57,9 +59,10 @@ class ImageInput extends Component {
 
     const tradleObj = utils.fromMicroBlink(result)
   }
+
   showImagePicker() {
     const { prop, onImage } = this.props
-    let options = {returnIsVertical: true, quality: utils.imageQuality}
+    let options = {returnIsVertical: true, quality: utils.imageQuality, cameraType: this.props.prop.cameraType || 'back'}
     let action
     if (utils.isSimulator())
       action = 'launchImageLibrary'
