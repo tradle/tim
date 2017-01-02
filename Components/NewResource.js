@@ -32,9 +32,11 @@ import ImageInput from './ImageInput'
 var TextInputState = require('TextInputState')
 
 import CustomIcon from '../styles/customicons'
-var ENUM = 'tradle.Enum'
-var LINK_COLOR, DEFAULT_LINK_COLOR = '#a94442'
-var FORM_ERROR = 'tradle.FormError'
+const ENUM = 'tradle.Enum'
+var LINK_COLOR
+const DEFAULT_LINK_COLOR = '#a94442'
+const FORM_ERROR = 'tradle.FormError'
+const PHOTO = 'tradle.Photo'
 
 var Form = t.form.Form;
 var stylesheet = require('../styles/styles')
@@ -383,6 +385,8 @@ class NewResource extends Component {
                 return
               }
             }
+            else if (ref === 'tradle.Photo')
+              return
             else if (!rModel.subClassOf  ||  rModel.subClassOf !== ENUM) {
               var units = this.props.model.properties[p].units
               if (units)
@@ -726,7 +730,7 @@ class NewResource extends Component {
       var counter, count = 0
       itemsArray = null
       var count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
-      if (count  &&  bl.name === 'photos')
+      if (count  &&  (bl.name === 'photos' || bl.items.ref === PHOTO))
         arrayItems.push(this.getPhotoItem(bl, styles))
       else
         arrayItems.push(this.getItem(bl, styles))
@@ -788,6 +792,17 @@ class NewResource extends Component {
 //            <PhotoView resource={resource} navigator={this.props.navigator}/>
 //          </View>
                   // keyboardDismissMode='on-drag'>
+    let jsonProps = utils.getPropertiesWithRange('json', meta)
+    let jsons = []
+    if (jsonProps  &&  jsonProps.length) {
+      jsonProps.forEach((prop) => {
+        let val = this.state.resource[prop.name]
+        if (val)
+          jsons.push(this.showJson(prop, val))
+      })
+    }
+    if (!jsons.length)
+      jsons = <View/>
     var content =
       <ScrollView style={{backgroundColor: 'transparent'}}
                   ref='scrollView' {...this.scrollviewProps}
@@ -807,13 +822,14 @@ class NewResource extends Component {
             {button}
             <View style={{marginTop: isRegistration ? 0 : -10}}>
               {arrayItems}
-             </View>
-              <View style={{alignItems: 'center', marginTop: 50}}>
-               {this.state.isLoadingVideo
-                    ? <ActivityIndicator animating={true} size='large' color='#ffffff'/>
-                    : <View/>
-                 }
-              </View>
+            </View>
+            {jsons}
+            <View style={{alignItems: 'center', marginTop: 50}}>
+             {this.state.isLoadingVideo
+                  ? <ActivityIndicator animating={true} size='large' color='#ffffff'/>
+                  : <View/>
+               }
+            </View>
           </View>
         </View>
       </ScrollView>
@@ -925,7 +941,7 @@ class NewResource extends Component {
     let itemsArray = null
     var count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
     let lcolor = this.getLabelAndBorderColor(bl.name)
-
+    let isPhoto = bl.name === 'photos' || bl.items.ref === PHOTO
     if (count) {
       let val = <View>{this.renderItems(resource[bl.name], bl, this.cancelItem.bind(this))}</View>
 
@@ -943,7 +959,7 @@ class NewResource extends Component {
     else {
       itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{translate(bl, blmodel)}</Text>
       counter = <View style={[styles.itemsCounterEmpty]}>{
-                  bl.name === 'photos'
+                  isPhoto
                     ? <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
                     : <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color={LINK_COLOR} />
                   }
@@ -961,7 +977,7 @@ class NewResource extends Component {
               : <View/>
 
     var aiStyle = [{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]
-    var actionableItem = bl.name === 'photos'
+    var actionableItem = isPhoto
       ? <ImageInput prop={bl} style={aiStyle} onImage={item => this.onAddItem(bl.name, item)}>
           {itemsArray}
         </ImageInput>
@@ -981,7 +997,7 @@ class NewResource extends Component {
     }
 
     var acStyle = [{flex: 1, position: 'absolute', right: 0}, count ? {paddingTop: 0} : {marginTop: 15, paddingBottom: 7}]
-    var actionableCounter = bl.name === 'photos'
+    var actionableCounter = isPhoto
       ? <ImageInput prop={bl} style={acStyle} onImage={item => this.onAddItem(bl.name, item)}>
           {counter}
         </ImageInput>
