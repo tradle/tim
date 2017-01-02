@@ -235,6 +235,22 @@ var ResourceMixin = {
         val = <Text style={[styles.description]} numberOfLines={2}>{val}</Text>;
     }
     return val
+  },
+  showJson(prop, jsonStr, isView) {
+    let json = JSON.parse(jsonStr)
+    let jsonRows = []
+    for (let p in json) {
+      jsonRows.push(<View style={{justifyContent: 'space-between', flexDirection: 'row'}} key={this.getNextKey()}>
+                     <Text style={[styles.title]}>{utils.makeLabel(p)}</Text>
+                     <Text style={[styles.title, {color: '#2e3b4e'}]}>{json[p]}</Text>
+                  </View>)
+    }
+    return <View key={this.getNextKey()} style={{marginHorizontal: isView ? 10 : 0}}>
+              <Text  style={[styles.bigTitle, {color: this.props.bankStyle.LINK_COLOR, paddingVertical: 10}]}>{translate(prop)}</Text>
+              <View style={{height: 1, marginBottom: 10, marginHorizontal: -10, alignSelf: 'stretch', backgroundColor: this.props.bankStyle.LINK_COLOR}} />
+              {jsonRows}
+            </View>
+
   }
 }
 
@@ -277,6 +293,15 @@ var styles = StyleSheet.create({
     marginHorizontal: 7,
     color: '#2E3B4E',
   },
+  bigTitle: {
+    fontSize: 20,
+    // fontFamily: 'Avenir Next',
+    marginTop: 3,
+    marginBottom: 0,
+    marginHorizontal: 7,
+    color: '#7AAAC3'
+  },
+
 })
 
 module.exports = ResourceMixin;
