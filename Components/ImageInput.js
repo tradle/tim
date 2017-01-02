@@ -14,7 +14,7 @@ import BlinkID from './BlinkID'
 import utils from '../utils/utils'
 import extend from 'extend'
 
-// BlinkID.setLicenseKey('...')
+BlinkID.setLicenseKey('...')
 
 const imageInputPropTypes = {
   ...TouchableHighlight.propTypes,
