@@ -19,6 +19,16 @@ const ORGANIZATION = constants.TYPES.ORGANIZATION
 class NetworkInfoProvider extends Component {
   constructor(props) {
     super(props)
+    this.state = {
+      fadeAnim: new Animated.Value(0), // init opacity 0
+    }
+  }
+
+  componentDidMount() {
+     Animated.timing(          // Uses easing functions
+       this.state.fadeAnim,    // The value to drive
+       {toValue: 1, duration: 5000}            // Configuration
+     ).start();                // Don't forget start!
   }
 
   render() {
@@ -36,12 +46,20 @@ class NetworkInfoProvider extends Component {
             ? (providerOffline ? translate('providerIsOffline', utils.getDisplayName(this.props.resource)) : translate('serverIsUnreachable'))
             : translate('noNetwork')
 
-    return <View style={styles.bar}>
-             <Text style={styles.text}>{msg}</Text>
-             <TouchableOpacity onPress={() => Alert.alert(translate('offlineMode'), dn, null)}>
-               <Text style={styles.text}>{translate('learnMore')}</Text>
-             </TouchableOpacity>
-           </View>
+    return  <Animated.View style={{opacity: this.state.fadeAnim}}>
+              <View style={styles.bar}>
+                <Text style={styles.text}>{msg}</Text>
+                <TouchableOpacity onPress={() => Alert.alert(translate('offlineMode'), dn, null)}>
+                  <Text style={styles.text}>{translate('learnMore')}</Text>
+                </TouchableOpacity>
+              </View>
+            </Animated.View>
+      // return <View style={styles.bar}>
+      //          <Text style={styles.text}>{msg}</Text>
+      //          <TouchableOpacity onPress={() => Alert.alert(translate('offlineMode'), dn, null)}>
+      //            <Text style={styles.text}>{translate('learnMore')}</Text>
+      //          </TouchableOpacity>
+      //        </View>
   }
 }
 
