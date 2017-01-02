@@ -86,8 +86,9 @@ class FormMessageRow extends Component {
         addStyle = [chatStyles.verificationBody, {flex: 1, borderColor: '#efefef', backgroundColor: '#ffffff', borderTopLeftRadius: 0, borderTopRightRadius: 0 }];
     }
     var properties = model.properties;
-    if (properties.photos  &&  resource.photos) {
-      var len = resource.photos.length;
+    let photos = utils.getResourcePhotos(model, resource)
+    if (photos) {
+      var len = photos.length;
       inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
       var style;
       if (inRow === 1)
@@ -96,7 +97,7 @@ class FormMessageRow extends Component {
         style = chatStyles.mediumImage;
       else
         style = chatStyles.image;
-      resource.photos.forEach((p) => {
+      photos.forEach((p) => {
         photoUrls.push({url: utils.getImageUri(p.url)});
       })
 
@@ -191,17 +192,17 @@ class FormMessageRow extends Component {
     //                <Icon color={this.props.bankStyle.STRUCTURED_MESSAGE_COLOR} size={20} name={'ios-arrow-forward'} style={{marginTop: 2, position: 'absolute', right: 10}}/>
     //              </View>
 
-    return (
-      <View style={{margin: 1, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}}>
-        {date}
-        {header}
-        {messageBody}
-        <View style={photoListStyle}>
-          <PhotoList photos={photoUrls} resource={this.props.resource} style={[photoStyle, {marginTop: -5}]} navigator={this.props.navigator} numberInRow={inRow} chat={this.props.to} />
-        </View>
-        {sendStatus}
-      </View>
-    )
+    // return (
+    //   <View style={{margin: 1, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}}>
+    //     {date}
+    //     {header}
+    //     {messageBody}
+    //     <View style={photoListStyle}>
+    //       <PhotoList photos={photoUrls} resource={this.props.resource} style={[photoStyle, {marginTop: -5}]} navigator={this.props.navigator} numberInRow={inRow} chat={this.props.to} />
+    //     </View>
+    //     {sendStatus}
+    //   </View>
+    // )
   }
 
   onPress(event) {
@@ -253,11 +254,16 @@ class FormMessageRow extends Component {
     this.props.navigator.push(route);
   }
   formStub(resource, to) {
-    let sentTo = !to || utils.getId(to) !== utils.getId(resource.to.organization)
+    let hasSentTo = !to || utils.getId(to) !== utils.getId(resource.to.organization)
+    let sentTo = hasSentTo
                ? <View style={{padding: 5}}>
                    <Text style={{color: '#7AAAC3', fontSize: 14, alignSelf: 'flex-end'}}>{translate('asSentTo', resource.to.organization.title)}</Text>
                  </View>
                : <View/>
+
+    let renderedRow = []
+    let ret = this.formatRow(true, renderedRow)
+    let noContent = !hasSentTo &&  !renderedRow.length
 
     let isMyMessage = this.isMyMessage()
     let isSharedContext = utils.isReadOnlyChat(resource)
@@ -271,6 +277,7 @@ class FormMessageRow extends Component {
 
     let headerStyle = [
       chatStyles.verifiedHeader,
+      noContent ? {borderBottomLeftRadius: 10, borderBottomRightRadius: 10} : {},
       {backgroundColor: this.props.bankStyle.SHARED_WITH_BG}, // opacity: isShared ? 0.5 : 1},
       isMyMessage ? {borderTopRightRadius: 0, borderTopLeftRadius: 10 } : {borderTopRightRadius: 10, borderTopLeftRadius: 0 }
     ]
@@ -287,8 +294,15 @@ class FormMessageRow extends Component {
                        </View>
                      : <View />
 
-    let renderedRow = []
-    let ret = this.formatRow(true, renderedRow)
+    let row
+    if (noContent)
+      row = <View/>
+    else
+      row = <View style={{paddingVertical: 5}}>
+              {renderedRow}
+              {sentTo}
+            </View>
+
     var ownerPhoto = this.getOwnerPhoto(isMyMessage)
     return (
       <View style={st, viewStyle} key={this.getNextKey()}>
@@ -299,10 +313,7 @@ class FormMessageRow extends Component {
             <Text style={chatStyles.verificationHeaderText}>{translate(utils.getModel(resource[constants.TYPE]).value)}</Text>
             <Icon color='#EBFCFF' size={20} name={'ios-arrow-forward'} style={{marginTop: 2, position: 'absolute', right: 10}}/>
           </View>
-          <View style={{height: 5}}/>
-          {renderedRow}
-          {sentTo}
-          <View style={{height: 5}}/>
+          {row}
         </View>
       </View>
     );
