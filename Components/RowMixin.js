@@ -199,7 +199,7 @@ var RowMixin = {
 
     var docModel = utils.getModel(document[constants.TYPE]).value;
     var isMyProduct = docModel.subClassOf === MY_PRODUCT
-    var docModelTitle = docModel.title;
+    var docModelTitle = docModel.title || utils.makeLabel(docModel.id)
     var idx = docModelTitle.indexOf('Verification');
     var docTitle = idx === -1 ? docModelTitle : docModelTitle.substring(0, idx);
 
@@ -222,6 +222,12 @@ var RowMixin = {
     var headerStyle = {paddingTop: verification.dateVerified ? 0 : 5, alignSelf: 'center', flex: 1}
     var isShared = this.isShared(verification)
 
+                    // {verification.dateVerified
+                    //   ? <View style={{flexDirection: 'row'}}>
+                    //       <Text style={{fontSize: 12, color: this.props.bankStyle.VERIFIED_HEADER_COLOR, fontStyle: 'italic'}}>{utils.formatDate(verification.dateVerified)}</Text>
+                    //     </View>
+                    //   : <View/>
+                    // }
                           // <Text style={{fontSize: 12, color: 'darkblue', fontStyle: 'italic'}}>{'Date '}</Text>
     var header =  <View style={headerStyle}>
                     <Text style={[isShared ? chatStyles.description : chatStyles.resourceTitle, styles.header, isShared ? {maxWidth: 0.8 * utils.dimensions().width - 50, fontSize: 16, alignSelf: 'flex-end', marginTop: -5, color: '#757575'} : {color: this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>
@@ -229,12 +235,6 @@ var RowMixin = {
                         ? translate('asVerifiedBy', verification._verifiedBy ? verification._verifiedBy.title : verification.organization.title)
                         : translate(model) + ' ...'}
                     </Text>
-                    {verification.dateVerified
-                      ? <View style={{flexDirection: 'row'}}>
-                          <Text style={{fontSize: 12, color: this.props.bankStyle.VERIFIED_HEADER_COLOR, fontStyle: 'italic'}}>{utils.formatDate(verification.dateVerified)}</Text>
-                        </View>
-                      : <View/>
-                    }
                   </View>
     let addStyle = onPress ? {} : {backgroundColor: this.props.bankStyle.VERIFICATION_BG, borderWidth: BORDER_WIDTH, borderColor: this.props.bankStyle.VERIFICATION_BG, borderBottomColor: this.props.bankStyle.VERIFIED_HEADER_COLOR}
 
@@ -290,6 +290,12 @@ var RowMixin = {
                         <Text style={chatStyles.description}>
                           {verifiedBy}
                         </Text>
+                    {verification.dateVerified
+                      ? <View style={{flexDirection: 'row'}}>
+                          <Text style={{fontSize: 12, color: '#757575', fontStyle: 'italic'}}>{utils.formatDate(verification.dateVerified)}</Text>
+                        </View>
+                      : <View/>
+                    }
                       </View>
 
                          // <Text style={[styles.title, {color: '#2E3B4E'}]}>{verification.organization.title.length < 30 ? verification.organization.title : verification.organization.title.substring(0, 27) + '..'}</Text>
