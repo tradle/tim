@@ -10,8 +10,11 @@ import {
 } from 'react-native'
 
 import ImagePicker from 'react-native-image-picker'
+import BlinkID from './BlinkID'
 import utils from '../utils/utils'
 import extend from 'extend'
+
+BlinkID.setLicenseKey('...')
 
 const imageInputPropTypes = {
   ...TouchableHighlight.propTypes,
@@ -24,13 +27,14 @@ class ImageInput extends Component {
   constructor(props) {
     super(props)
     this.showImagePicker = this.showImagePicker.bind(this)
+    this.showMicroBlinkScanner = this.showMicroBlinkScanner.bind(this)
   }
   render() {
     const touchableProps = { ...this.props }
     delete touchableProps.prop
     delete touchableProps.onImage
 
-    const onPress = this.props.onPress || this.showImagePicker
+    const onPress = this.props.onPress || this.showMicroBlinkScanner
     // allow override onPress
     return (
       <TouchableHighlight
@@ -40,6 +44,18 @@ class ImageInput extends Component {
         {this.props.children}
       </TouchableHighlight>
     )
+  }
+  async showMicroBlinkScanner() {
+    const result = await BlinkID.scan({
+      quality: 0.2,
+      base64: true,
+      // machine readable travel documents (passport)
+      mrtd: {},
+      // US driver license
+      usdl: {}
+    })
+
+    const tradleObj = utils.fromMicroBlink(result)
   }
   showImagePicker() {
     const { prop, onImage } = this.props
