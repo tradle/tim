@@ -1155,6 +1155,39 @@ var utils = {
         })
       })
     }
+  },
+  fromMicroBlink: function (result) {
+    const { mrtd, usdl, eudl, image } = result
+    if (mrtd) {
+      return {
+        [TYPE]: 'tradle.Passport',
+        givenName: mrtd.secondaryId,
+        surname: mrtd.primaryId,
+        nationality: {
+          id: 'tradle.Country_abc',
+          title: mrtd.nationality.slice(0, 2)
+        },
+        issuingCountry: {
+          id: 'tradle.Country_abc',
+          title: mrtd.issuer.slice(0, 2)
+        },
+        passportNumber: mrtd.documentNumber,
+        sex: {
+          id: 'tradle.Sex_abc',
+          title: mrtd.sex === 'M' ? 'Male' : 'Female'
+        },
+        dateOfExpiry: mrtd.dateOfExpiry,
+        dateOfBirth: mrtd.dateOfBirth,
+        photos: [
+          {
+            url: image.base64,
+            width: image.width,
+            height: image.height,
+            isVertical: image.width < image.height
+          }
+        ]
+      }
+    }
   }
 }
 

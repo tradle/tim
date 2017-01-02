@@ -51,8 +51,6 @@ module.exports = {
 
     const result = await scan(opts)
     return normalizeResults(result)
-    // const normalized = await normalizeResults(result)
-    // return normalized
   },
   dismiss: RNMicroBlinkManager.dismiss
 }

@@ -355,8 +355,8 @@ RCT_EXPORT_METHOD(dismiss)
            @"issuer": [mrtdResult issuer],
            @"documentNumber": [mrtdResult documentNumber],
            @"documentCode": [mrtdResult documentCode],
-           @"dateOfExpiry": [mrtdResult dateOfExpiry],
-           @"dateOfBirth": [mrtdResult dateOfBirth],
+           @"dateOfExpiry": [self dateToMillis:[mrtdResult dateOfExpiry]],
+           @"dateOfBirth": [self dateToMillis:[mrtdResult dateOfBirth]],
            @"nationality": [mrtdResult nationality],
            @"sex": [mrtdResult sex],
            @"opt1": [mrtdResult opt1],
@@ -394,6 +394,10 @@ RCT_EXPORT_METHOD(dismiss)
                @"customerIdNumber": [usdlResult getField:kPPCustomerIdNumber]
            },
          };
+}
+
+- (NSNumber*) dateToMillis:(NSDate*) date {
+  return @((long long)([date timeIntervalSince1970] * 1000.0));
 }
 
 // dismiss the scanning view controller when user presses OK.

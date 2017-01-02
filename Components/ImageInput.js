@@ -27,14 +27,14 @@ class ImageInput extends Component {
   constructor(props) {
     super(props)
     this.showImagePicker = this.showImagePicker.bind(this)
-    this.showIDScanner = this.showIDScanner.bind(this)
+    this.showMicroBlinkScanner = this.showMicroBlinkScanner.bind(this)
   }
   render() {
     const touchableProps = { ...this.props }
     delete touchableProps.prop
     delete touchableProps.onImage
 
-    const onPress = this.props.onPress || this.showImagePicker
+    const onPress = this.props.onPress || this.showMicroBlinkScanner
     // allow override onPress
     return (
       <TouchableHighlight
@@ -45,7 +45,7 @@ class ImageInput extends Component {
       </TouchableHighlight>
     )
   }
-  async showIDScanner() {
+  async showMicroBlinkScanner() {
     const result = await BlinkID.scan({
       quality: 0.2,
       base64: true,
@@ -55,7 +55,7 @@ class ImageInput extends Component {
       usdl: {}
     })
 
-    console.log(result)
+    const tradleObj = utils.fromMicroBlink(result)
   }
   showImagePicker() {
     const { prop, onImage } = this.props
