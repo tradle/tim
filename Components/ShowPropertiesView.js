@@ -15,6 +15,7 @@ var DEFAULT_CURRENCY_SYMBOL = '£'
 var CURRENCY_SYMBOL
 var TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
 const ENUM = 'tradle.Enum'
+const PHOTO = 'tradle.Photo'
 
 import ActionSheet from 'react-native-actionsheet'
 import Prompt from 'react-native-prompt'
@@ -127,9 +128,10 @@ class ShowPropertiesView extends Component {
     var viewCols = vCols.map((p) => {
       if (excludedProperties  &&  excludedProperties.indexOf(p) !== -1)
         return;
-
       var val = resource[p];
       var pMeta = props[p];
+      if (pMeta.range === 'json')
+        return this.showJson(pMeta, val)
       var isRef;
       var isItems
       var isDirectionRow;
@@ -162,6 +164,8 @@ class ShowPropertiesView extends Component {
             val[constants.TYPE] = pMeta.ref
           return this.getViewCols(val, utils.getModel(val[constants.TYPE]).value)
         }
+        else if (pMeta.mainPhoto)
+          return
         // Could be enum like props
         else if (utils.getModel(pMeta.ref).value.subClassOf === ENUM)
           val = val.title
@@ -224,6 +228,8 @@ class ShowPropertiesView extends Component {
                     {labels}
                   </View>
         }
+        else if (isItems  &&  pMeta.items.ref === PHOTO)
+          return
         val = this.renderSimpleProp(val, pMeta, modelName)
       }
       var title = pMeta.skipLabel  ||  isItems
@@ -296,7 +302,6 @@ class ShowPropertiesView extends Component {
     }
     return viewCols;
   }
-
   onPress(url, event) {
     var model = utils.getModel(this.props.resource[constants.TYPE]).value;
     this.props.navigator.push({
