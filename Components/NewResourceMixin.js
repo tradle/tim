@@ -564,6 +564,7 @@ var NewResourceMixin = {
       r[prop + 'Json'] = JSON.stringify(dl)
     }
 
+    if (!this.floatingProps) this.floatingProps = {}
     this.floatingProps[prop] = r[prop]
     this.floatingProps[prop + 'Json'] = r[prop + 'Json']
     this.setState({resource: r})
