@@ -537,8 +537,8 @@ var NewResourceMixin = {
     }
 
     if (result.mrtd) {
-      result.mrtd.dateOfBirth = dateformat(new Date(result.mrtd.dateOfBirth), 'mmm dS, yyyy')
-      result.mrtd.dateOfExpiry = dateformat(new Date(result.mrtd.dateOfExpiry), 'mmm dS, yyyy')
+      result.mrtd.personal.dateOfBirth = dateformat(new Date(result.mrtd.personal.dateOfBirth), 'mmm dS, yyyy')
+      result.mrtd.document.dateOfExpiry = dateformat(new Date(result.mrtd.document.dateOfExpiry), 'mmm dS, yyyy')
       r[prop + 'Json'] = JSON.stringify(result.mrtd)
     }
     else if (result.usdl || result.eudl) {
