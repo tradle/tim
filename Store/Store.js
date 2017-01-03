@@ -63,7 +63,7 @@ var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
-var Keychain = !utils.isWeb() && require('../utils/keychain')
+var Keychain = null //!utils.isWeb() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('q-level');
 var debounce = require('debounce')
@@ -1620,6 +1620,8 @@ var Store = Reflux.createStore({
     if (to[TYPE] === ORGANIZATION) {
       var orgId = utils.getId(r.to)
       var orgRep = this.getRepresentative(orgId)
+      if (me.organization  &&  utils.getId(me.organization) === orgId)
+        return
       if (!orgRep) {
         var params = {
           action: 'addMessage',
@@ -2460,7 +2462,7 @@ var Store = Reflux.createStore({
           else
             orgRep = self._getItem(utils.getId(resource.to))
 
-          console.log('Store.onAddItem: type = ' + resource[TYPE] + '; to = ' + resource.to.title)
+          console.log('Store.onAddItem: type = ' + resource[TYPE] + (resource.to ? '; to = ' + resource.to.title : ''))
 
           var msg = {
             message: me.firstName + ' is waiting for the response',
@@ -2713,6 +2715,8 @@ var Store = Reflux.createStore({
         }
         else {
           returnVal._sendStatus = sendStatus
+          if (isNew)
+            self.addVisualProps(returnVal)
           params = {
             action: 'addItem',
             resource: utils.clone(returnVal)
@@ -7027,7 +7031,18 @@ var Store = Reflux.createStore({
     // let to = this._getItem(PROFILE + '_' + msg.to[ROOT_HASH])
     // let chat = to.organization ? this._getItem(to.organization) : to
     // this.trigger({action: 'showChat', to: to})
-  }
+  },
+  // onGetDocumentsFor(requestedDocumentType) {
+  //   if (requestedDocumentType !== 'tradle.PersonalInfo')
+  //     return
+  //   let m = this.getModel(requestedDocumentType)
+  //   let evidentiaryDocTypes = m.evidentiaryDocuments
+  //   let docTypeToDocs = {}
+  //   evidentiaryDocTypes.forEach((d) => {
+  //     docTypeToDocs[d] = this.searchMessages(d)
+  //   })
+  //   this.trigger({action: 'documentsFor', documentType: requestedDocumentType, documents: docTypeToDocs})
+  // }
 })
 // );
 
