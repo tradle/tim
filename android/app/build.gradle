@@ -182,6 +182,7 @@ android {
 
 dependencies {
     compile project(':react-native-async-storage-snappy')
+    compile project(':anyline-ocr-react-native-module')
     compile project(':react-native-tcp')
     compile project(':react-native-os')
     compile project(':react-native-local-auth')

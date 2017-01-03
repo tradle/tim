@@ -8,6 +8,9 @@ import com.bitgo.randombytes.RandomBytesPackage;
 import com.brentvatne.react.ReactVideoPackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.facebook.react.ReactApplication;
+import com.anyline.reactnative.AnylinePackage;
+import com.peel.react.TcpSocketsModule;
+import com.peel.react.rnos.RNOSModule;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
@@ -49,6 +52,7 @@ public class MainApplication extends Application implements ReactApplication {
         new MainReactPackage(),
         new RNAsyncSnappyStoragePackage(),
         // new TcpSocketsModule(),
+        new AnylinePackage(),
         new RNOSModule(),
         new ReactNativePushNotificationPackage(),
         new RNDeviceInfo(),

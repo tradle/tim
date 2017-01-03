@@ -1,0 +1,51 @@
+PODS:
+  - Anyline (3.8.0)
+  - AnylineReact (0.0.1):
+    - Anyline
+    - React
+  - React (0.34.1):
+    - React/Core (= 0.34.1)
+  - React/Core (0.34.1)
+  - React/RCTActionSheet (0.34.1):
+    - React/Core
+  - React/RCTGeolocation (0.34.1):
+    - React/Core
+  - React/RCTImage (0.34.1):
+    - React/Core
+    - React/RCTNetwork
+  - React/RCTNetwork (0.34.1):
+    - React/Core
+  - React/RCTSettings (0.34.1):
+    - React/Core
+  - React/RCTText (0.34.1):
+    - React/Core
+  - React/RCTVibration (0.34.1):
+    - React/Core
+  - React/RCTWebSocket (0.34.1):
+    - React/Core
+
+DEPENDENCIES:
+  - AnylineReact (from `../node_modules/anyline-ocr-react-native-module/ios`)
+  - React/RCTActionSheet (from `../node_modules/react-native`)
+  - React/RCTGeolocation (from `../node_modules/react-native`)
+  - React/RCTImage (from `../node_modules/react-native`)
+  - React/RCTNetwork (from `../node_modules/react-native`)
+  - React/RCTSettings (from `../node_modules/react-native`)
+  - React/RCTText (from `../node_modules/react-native`)
+  - React/RCTVibration (from `../node_modules/react-native`)
+  - React/RCTWebSocket (from `../node_modules/react-native`)
+
+EXTERNAL SOURCES:
+  AnylineReact:
+    :path: "../node_modules/anyline-ocr-react-native-module/ios"
+  React:
+    :path: "../node_modules/react-native"
+
+SPEC CHECKSUMS:
+  Anyline: e5ede3f2244009f5f542a521e1c92138f8755e9e
+  AnylineReact: bf67e09f85c0dbcad608c93a03054d1172203bd7
+  React: fc15d22bec0ec10fe15c12749fbefdac37ddc541
+
+PODFILE CHECKSUM: 7dde4e6b68d36364252a00a2261bacd57a061157
+
+COCOAPODS: 1.1.1

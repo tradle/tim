@@ -22,6 +22,8 @@ if (microblink && BlinkID) {
   BlinkID.setLicenseKey(microblink.licenseKey)
 }
 
+import Anyline from './Anyline'
+
 var constants = require('@tradle/constants');
 var t = require('tcomb-form-native');
 var Actions = require('../Actions/Actions');
@@ -508,7 +510,35 @@ var NewResourceMixin = {
     Actions.saveTemporary(r)
   },
 
-  async showIDScanner(prop) {
+  async showAnylineScanner(prop) {
+    const { documentType, country } = this.state.resource
+    let type
+    switch (documentType.title) {
+      case 'Passport':
+        type = 'MRZ'
+        break;
+      case 'Driver licence':
+      case 'Driver license':
+        if (country.title === 'United Kingdom') {
+          type = 'ANYLINE_OCR'
+        } else {
+          type = 'BARCODE'
+        }
+
+        break
+      default:
+        throw new Error('unsupported document type: ' + documentType.title)
+    }
+
+    try {
+      const result = await Anyline.setupScanViewWithConfigJson({ type })
+      Alert.alert('ANYLINE', JSON.stringify(result))
+    } catch (err) {
+      Alert.alert('ANYLINE ERROR', err.message)
+    }
+  },
+
+  async showBlinkIDScanner(prop) {
     const { documentType, country } = this.state.resource
     const blinkIDOpts = {
       quality: 0.2,
@@ -582,7 +612,7 @@ var NewResourceMixin = {
     // }
     if (params.prop === 'scan')  {
       if (this.state.resource.documentType  &&  this.state.resource.country)
-        this.showIDScanner(params.prop)
+        this.showAnylineScanner(params.prop)
         // this.scanFormsQRCode(params.prop)
       else
         Alert.alert('Please choose country and document type first')
