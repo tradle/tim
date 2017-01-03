@@ -525,9 +525,23 @@ var NewResourceMixin = {
       width: result.image.width,
       height: result.image.height
     }
-    result.mrtd.dateOfBirth = dateformat(new Date(result.mrtd.dateOfBirth), 'mmm dS, yyyy')
-    result.mrtd.dateOfExpiry = dateformat(new Date(result.mrtd.dateOfExpiry), 'mmm dS, yyyy')
-    r[prop + 'Json'] = JSON.stringify(result.mrtd)
+    if (result.mrtd) {
+      result.mrtd.dateOfBirth = dateformat(new Date(result.mrtd.dateOfBirth), 'mmm dS, yyyy')
+      result.mrtd.dateOfExpiry = dateformat(new Date(result.mrtd.dateOfExpiry), 'mmm dS, yyyy')
+      r[prop + 'Json'] = JSON.stringify(result.mrtd)
+    }
+    else if (result.usdl) {
+      for (let c in result.usdl) {
+        let category = result.usdl[c]
+        for (let p in category) {
+          if (p.indexOf('date') === 0) {
+            let d = category[p]
+            category[p] = d.substring(0, 2) + '/' + d.substring(2, 4) + '/' + d.substring(4)
+          }
+        }
+      }
+      r[prop + 'Json'] = JSON.stringify(result.usdl)
+    }
     this.floatingProps[prop] = r[prop]
     this.floatingProps[prop + 'Json'] = r[prop + 'Json']
     this.setState({resource: r})
