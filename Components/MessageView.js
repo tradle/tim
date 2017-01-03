@@ -194,7 +194,7 @@ class MessageView extends Component {
     if (!photos) {
       photos = utils.getResourcePhotos(model, resource)
       let mainPhotoProp = utils.getMainPhotoProperty(model)
-      mainPhoto = mainPhotoProp ? resource[mainPhotoProp.name] : photos && photos[0]
+      mainPhoto = mainPhotoProp ? resource[mainPhotoProp] : photos && photos[0]
 
       // let props = model.properties
       // for (let p in resource) {
