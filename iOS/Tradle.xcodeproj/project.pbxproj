@@ -65,12 +65,16 @@
 		7348E4741D9D8CDD00328628 /* tradle.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7348E4731D9D8CDD00328628 /* tradle.ttf */; };
 		7348E4911D9D8D1B00328628 /* tradle.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7348E4731D9D8CDD00328628 /* tradle.ttf */; };
 		734EF80E1E2E95D900E3A9C4 /* libRCTAsyncRocksDBStorage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 734EF80C1E2E947200E3A9C4 /* libRCTAsyncRocksDBStorage.a */; };
+		735F27AE1E2EDEA30042F408 /* libAnylineReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 735F27AD1E2EDEA30042F408 /* libAnylineReact.a */; };
 		7365BF2E1C3461F900B0A512 /* libRNKeychain.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7365BF2D1C3461E700B0A512 /* libRNKeychain.a */; };
 		73683CFC1CC443B300E178CF /* QTouchposeApplication.m in Sources */ = {isa = PBXBuildFile; fileRef = 73683CFB1CC443B300E178CF /* QTouchposeApplication.m */; };
 		7375409D1D25942300A81EC1 /* libRNDeviceInfo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 737540931D25941500A81EC1 /* libRNDeviceInfo.a */; };
 		7375AA881C34766300F36CF3 /* libRNECC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7364872F1C34703500713F09 /* libRNECC.a */; };
+		7376086B1E1B2385002D0B45 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7376086A1E1B2385002D0B45 /* AssetsLibrary.framework */; };
+		7376086D1E1B374A002D0B45 /* Anyline.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 737608661E1B2355002D0B45 /* Anyline.framework */; };
 		73855D2E1CB42638000B6A0B /* libRNImagePicker.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B2E51601CAD7DBC000439E6 /* libRNImagePicker.a */; };
 		7385C6BB1C4C24A700B92CDA /* Dev.plist in Resources */ = {isa = PBXBuildFile; fileRef = 7385C6BA1C4C24A700B92CDA /* Dev.plist */; };
+		7390333B1E1D449D00E2FB31 /* libPods-Tradle-dev.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 677D170CD70E3212DDC0DAC0 /* libPods-Tradle-dev.a */; };
 		73947DA91D3DAEAA00C5CC8F /* libRCTPushNotification.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73947DA81D3DAEA500C5CC8F /* libRCTPushNotification.a */; };
 		739917CE1E17CF3E00061291 /* MicroBlink.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 739917CA1E17CF3E00061291 /* MicroBlink.bundle */; };
 		739917CF1E17CF3E00061291 /* MicroBlink.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 739917CB1E17CF3E00061291 /* MicroBlink.framework */; };
@@ -94,6 +98,7 @@
 		73FE35D11BFA14F600EFB313 /* Ionicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 73FE35D01BFA14F600EFB313 /* Ionicons.ttf */; };
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 		8DF0B09C8F2B4028AA380CF0 /* libRCTCamera.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9AEE7B81E1394BF19CA3BEBB /* libRCTCamera.a */; };
+		93418AA4BF318F1B3CE895A4 /* libPods-Tradle-dev.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 677D170CD70E3212DDC0DAC0 /* libPods-Tradle-dev.a */; };
 		9B10B2EC1C1A05F400A20159 /* libART.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B10B2EB1C1A05EE00A20159 /* libART.a */; };
 		9B2E51661CAD7DD7000439E6 /* libRNImagePicker.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B2E51601CAD7DBC000439E6 /* libRNImagePicker.a */; };
 		9B41626D1C6F9BBD00A93B7C /* FontAwesome.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9B41626C1C6F9BBD00A93B7C /* FontAwesome.ttf */; };
@@ -366,6 +371,8 @@
 		29F90A6163024FE8B7A7022D /* libRNLocalAuth.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNLocalAuth.a; sourceTree = "<group>"; };
 		36B5640D4902498D93210121 /* RCTOrientation.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTOrientation.xcodeproj; path = "../node_modules/react-native-orientation/iOS/RCTOrientation.xcodeproj"; sourceTree = "<group>"; };
 		3D510339A825413A9733521D /* RCTVideo.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTVideo.xcodeproj; path = "../node_modules/react-native-video/RCTVideo.xcodeproj"; sourceTree = "<group>"; };
+		66D82D13AFA17C3F90361EB1 /* Pods-Tradle-dev.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Tradle-dev.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Tradle-dev/Pods-Tradle-dev.debug.xcconfig"; sourceTree = "<group>"; };
+		677D170CD70E3212DDC0DAC0 /* libPods-Tradle-dev.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Tradle-dev.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6ECAAF13C7384B738734FB25 /* TcpSockets.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = TcpSockets.xcodeproj; path = "../node_modules/react-native-tcp/ios/TcpSockets.xcodeproj"; sourceTree = "<group>"; };
 		73030AF11D14DC4B0096A864 /* RNFS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNFS.xcodeproj; path = "../node_modules/react-native-fs/RNFS.xcodeproj"; sourceTree = "<group>"; };
 		731045901D7CE25D0087E82D /* Tradle-dev.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Tradle-dev.entitlements"; sourceTree = "<group>"; };
@@ -376,12 +383,18 @@
 		7348C3B61C41C04F00B9CDF5 /* Fabric.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Fabric.framework; sourceTree = "<group>"; };
 		7348C3B71C41C04F00B9CDF5 /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Crashlytics.framework; sourceTree = "<group>"; };
 		7348E4731D9D8CDD00328628 /* tradle.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = tradle.ttf; sourceTree = "<group>"; };
+		735F27AD1E2EDEA30042F408 /* libAnylineReact.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libAnylineReact.a; path = "../../../Library/Developer/Xcode/DerivedData/Tradle-ggebxcvwncukinfhemslyyyvcgkh/Build/Products/Debug-iphoneos/AnylineReact/libAnylineReact.a"; sourceTree = "<group>"; };
 		7364872A1C34703500713F09 /* RNECC.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNECC.xcodeproj; path = "../node_modules/react-native-ecc/ios/RNECC.xcodeproj"; sourceTree = "<group>"; };
 		7365BF281C3461E600B0A512 /* RNKeychain.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNKeychain.xcodeproj; path = "../node_modules/react-native-keychain/RNKeychain.xcodeproj"; sourceTree = "<group>"; };
 		73683CFA1CC443B300E178CF /* QTouchposeApplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QTouchposeApplication.h; sourceTree = "<group>"; };
 		73683CFB1CC443B300E178CF /* QTouchposeApplication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QTouchposeApplication.m; sourceTree = "<group>"; };
 		7375407E1D25941500A81EC1 /* RNDeviceInfo.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNDeviceInfo.xcodeproj; path = "../node_modules/react-native-device-info/RNDeviceInfo.xcodeproj"; sourceTree = "<group>"; };
+		737608661E1B2355002D0B45 /* Anyline.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Anyline.framework; path = Anyline/Anyline.framework; sourceTree = "<group>"; };
+		7376086A1E1B2385002D0B45 /* AssetsLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AssetsLibrary.framework; path = System/Library/Frameworks/AssetsLibrary.framework; sourceTree = SDKROOT; };
 		7385C6BA1C4C24A700B92CDA /* Dev.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Dev.plist; path = Tradle/Dev.plist; sourceTree = "<group>"; };
+		739033351E1D443F00E2FB31 /* libAnylineReact.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libAnylineReact.a; path = "../../../Library/Developer/Xcode/DerivedData/Tradle-ggebxcvwncukinfhemslyyyvcgkh/Build/Products/Debug-iphonesimulator/AnylineReact/libAnylineReact.a"; sourceTree = "<group>"; };
+		739033371E1D444100E2FB31 /* libPods-Tradle-dev.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libPods-Tradle-dev.a"; path = "../../../Library/Developer/Xcode/DerivedData/Tradle-ggebxcvwncukinfhemslyyyvcgkh/Build/Products/Debug-iphonesimulator/libPods-Tradle-dev.a"; sourceTree = "<group>"; };
+		739033391E1D444300E2FB31 /* libReact.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libReact.a; path = "../../../Library/Developer/Xcode/DerivedData/Tradle-ggebxcvwncukinfhemslyyyvcgkh/Build/Products/Debug-iphonesimulator/React/libReact.a"; sourceTree = "<group>"; };
 		73947DA31D3DAEA500C5CC8F /* RCTPushNotification.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTPushNotification.xcodeproj; path = "../node_modules/react-native/Libraries/PushNotificationIOS/RCTPushNotification.xcodeproj"; sourceTree = "<group>"; };
 		739917CA1E17CF3E00061291 /* MicroBlink.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = MicroBlink.bundle; sourceTree = "<group>"; };
 		739917CB1E17CF3E00061291 /* MicroBlink.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MicroBlink.framework; path = MicroBlink/MicroBlink.framework; sourceTree = "<group>"; };
@@ -405,6 +418,7 @@
 		7792D3B3CB564D30820C6FBC /* Foundation.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = unknown; name = Foundation.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Foundation.ttf"; sourceTree = "<group>"; };
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "../node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
+		8E71248804774FEE2052F151 /* Pods-Tradle-dev.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Tradle-dev.release.xcconfig"; path = "Pods/Target Support Files/Pods-Tradle-dev/Pods-Tradle-dev.release.xcconfig"; sourceTree = "<group>"; };
 		9AEE7B81E1394BF19CA3BEBB /* libRCTCamera.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRCTCamera.a; sourceTree = "<group>"; };
 		9B10B2E61C1A05EE00A20159 /* ART.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ART.xcodeproj; path = "../node_modules/react-native/Libraries/ART/ART.xcodeproj"; sourceTree = "<group>"; };
 		9B2E51471CAD7DBC000439E6 /* RNImagePicker.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNImagePicker.xcodeproj; path = "../node_modules/react-native-image-picker/ios/RNImagePicker.xcodeproj"; sourceTree = "<group>"; };
@@ -468,6 +482,7 @@
 				E31F23F231334399B2377206 /* libRNOS.a in Frameworks */,
 				CC1AB989D89F4D92A4A9CA06 /* libTcpSockets.a in Frameworks */,
 				3D032E2C194C437EBC054F71 /* libRCTAsyncRocksDBStorage.a in Frameworks */,
+				7390333B1E1D449D00E2FB31 /* libPods-Tradle-dev.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -475,14 +490,15 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7376086B1E1B2385002D0B45 /* AssetsLibrary.framework in Frameworks */,
+				73261E1A1C4AB9FE00292FEE /* libz.tbd in Frameworks */,
+				739917FA1E17CF8400061291 /* libc++.tbd in Frameworks */,
 				739917FE1E17CF9C00061291 /* CoreMedia.framework in Frameworks */,
 				739917FC1E17CF8B00061291 /* libiconv.tbd in Frameworks */,
-				739917FA1E17CF8400061291 /* libc++.tbd in Frameworks */,
 				739917F81E17CF7400061291 /* AudioToolbox.framework in Frameworks */,
 				739917F61E17CF7100061291 /* AVFoundation.framework in Frameworks */,
 				739917F41E17CF6D00061291 /* Accelerate.framework in Frameworks */,
 				9BE3302D1D90762600A8292D /* libRCTOrientation.a in Frameworks */,
-				73261E1A1C4AB9FE00292FEE /* libz.tbd in Frameworks */,
 				73261E1B1C4AB9FE00292FEE /* libReact.a in Frameworks */,
 				73261E1C1C4AB9FE00292FEE /* libRCTGeolocation.a in Frameworks */,
 				73261E1D1C4AB9FE00292FEE /* libRCTImage.a in Frameworks */,
@@ -492,6 +508,7 @@
 				73261E211C4AB9FE00292FEE /* libRCTText.a in Frameworks */,
 				73261E221C4AB9FE00292FEE /* libRCTVibration.a in Frameworks */,
 				739917EF1E17CF4700061291 /* MicroBlink.framework in Frameworks */,
+				7376086D1E1B374A002D0B45 /* Anyline.framework in Frameworks */,
 				73261E231C4AB9FE00292FEE /* libRCTWebSocket.a in Frameworks */,
 				73261E241C4AB9FE00292FEE /* libUdpSockets.a in Frameworks */,
 				73261E251C4AB9FE00292FEE /* Fabric.framework in Frameworks */,
@@ -513,6 +530,8 @@
 				7375409D1D25942300A81EC1 /* libRNDeviceInfo.a in Frameworks */,
 				73947DA91D3DAEAA00C5CC8F /* libRCTPushNotification.a in Frameworks */,
 				734EF80E1E2E95D900E3A9C4 /* libRCTAsyncRocksDBStorage.a in Frameworks */,
+				735F27AE1E2EDEA30042F408 /* libAnylineReact.a in Frameworks */,
+				93418AA4BF318F1B3CE895A4 /* libPods-Tradle-dev.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -617,6 +636,15 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		3A562FDDC8EC492EDAA26FC7 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				66D82D13AFA17C3F90361EB1 /* Pods-Tradle-dev.debug.xcconfig */,
+				8E71248804774FEE2052F151 /* Pods-Tradle-dev.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 		73030AF21D14DC4B0096A864 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -702,7 +730,12 @@
 		739917F21E17CF6D00061291 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				731F233D1C31BB6600C3B09D /* libz.tbd */,
+				735F27AD1E2EDEA30042F408 /* libAnylineReact.a */,
+				739033391E1D444300E2FB31 /* libReact.a */,
+				739033371E1D444100E2FB31 /* libPods-Tradle-dev.a */,
+				739033351E1D443F00E2FB31 /* libAnylineReact.a */,
+				7376086A1E1B2385002D0B45 /* AssetsLibrary.framework */,
+				737608661E1B2355002D0B45 /* Anyline.framework */,
 				7348C3B61C41C04F00B9CDF5 /* Fabric.framework */,
 				7348C3B71C41C04F00B9CDF5 /* Crashlytics.framework */,
 				739917FD1E17CF9C00061291 /* CoreMedia.framework */,
@@ -712,6 +745,7 @@
 				739917F71E17CF7400061291 /* AudioToolbox.framework */,
 				739917F51E17CF7100061291 /* AVFoundation.framework */,
 				739917F31E17CF6D00061291 /* Accelerate.framework */,
+				677D170CD70E3212DDC0DAC0 /* libPods-Tradle-dev.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -851,6 +885,7 @@
 				83CBBA001A601CBA00E9B192 /* Products */,
 				EE2D4A8F3033431CB4B55B5B /* Resources */,
 				739917F21E17CF6D00061291 /* Frameworks */,
+				3A562FDDC8EC492EDAA26FC7 /* Pods */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -949,6 +984,8 @@
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
+				739033151E1D417200E2FB31 /* [CP] Embed Pods Framework */,
+				739033341E1D41A400E2FB31 /* [CP] Copy Pods Resources */,
 				7348C39E1C41C02400B9CDF5 /* Fiber / Crashlytics */,
 			);
 			buildRules = (
@@ -964,11 +1001,14 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 73261E3C1C4AB9FE00292FEE /* Build configuration list for PBXNativeTarget "Tradle-dev" */;
 			buildPhases = (
+				875A058DA079FEAF89FEC767 /* [CP] Check Pods Manifest.lock */,
 				73261E131C4AB9FE00292FEE /* Sources */,
 				73261E191C4AB9FE00292FEE /* Frameworks */,
 				73261E341C4AB9FE00292FEE /* Resources */,
 				73261E3A1C4AB9FE00292FEE /* Bundle React Native code and images */,
 				73261E3B1C4AB9FE00292FEE /* Fiber / Crashlytics */,
+				93BC82FB224405D6F38FE586 /* [CP] Embed Pods Frameworks */,
+				8E898D1AA01D4ED84184B711 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -1481,6 +1521,81 @@
 			shellPath = /bin/sh;
 			shellScript = ../config/prod/fabric.sh;
 		};
+		739033151E1D417200E2FB31 /* [CP] Embed Pods Framework */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Framework";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Tradle-dev/Pods-Tradle-dev-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		739033341E1D41A400E2FB31 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Tradle-dev/Pods-Tradle-dev-resources.sh\"";
+			showEnvVarsInLog = 0;
+		};
+		875A058DA079FEAF89FEC767 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		8E898D1AA01D4ED84184B711 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Tradle-dev/Pods-Tradle-dev-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		93BC82FB224405D6F38FE586 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Tradle-dev/Pods-Tradle-dev-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -1594,10 +1709,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEAD_CODE_STRIPPING = NO;
+				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 					"$(PROJECT_DIR)/MicroBlink",
+					"$(PROJECT_DIR)/Anyline",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1637,10 +1754,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 					"$(PROJECT_DIR)/MicroBlink",
+					"$(PROJECT_DIR)/Anyline",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1678,6 +1797,7 @@
 		};
 		73261E3D1C4AB9FE00292FEE /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 66D82D13AFA17C3F90361EB1 /* Pods-Tradle-dev.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "Tradle-dev.entitlements";
@@ -1691,6 +1811,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 					"$(PROJECT_DIR)/MicroBlink",
+					"$(PROJECT_DIR)/Anyline",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1717,7 +1838,7 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/Tradle\"",
 				);
-				OTHER_LDFLAGS = "-ObjC";
+				OTHER_LDFLAGS = "-all_load";
 				PRODUCT_BUNDLE_IDENTIFIER = io.tradle.dev.tim;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -1728,6 +1849,7 @@
 		};
 		73261E3E1C4AB9FE00292FEE /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8E71248804774FEE2052F151 /* Pods-Tradle-dev.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "Tradle-dev.entitlements";
@@ -1740,6 +1862,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 					"$(PROJECT_DIR)/MicroBlink",
+					"$(PROJECT_DIR)/Anyline",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1766,7 +1889,7 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/Tradle\"",
 				);
-				OTHER_LDFLAGS = "-ObjC";
+				OTHER_LDFLAGS = "-all_load";
 				PRODUCT_BUNDLE_IDENTIFIER = io.tradle.dev.tim;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";

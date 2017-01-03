@@ -50,3 +50,6 @@ config/
 code-push
 localIP.json
 google-services.json
+MicroBlink.framework
+MicroBlink.bundle
+iOS/Frameworks
