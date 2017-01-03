@@ -218,7 +218,7 @@ RCT_EXPORT_METHOD(dismiss)
     else if ([result isKindOfClass:[PPEudlRecognizerResult class]]) {
       /** EU drivers license was detected */
       key = @"eudl";
-//      resultData = [self getEudlResultProps:(PPEudlRecognizerResult*)result];
+      resultData = [self getEudlResultProps:(PPEudlRecognizerResult*)result];
     }
 //    else if ([result isKindOfClass:[PPMyKadRecognizerResult class]]) {
 //      /** MyKad was detected */
@@ -350,19 +350,23 @@ RCT_EXPORT_METHOD(dismiss)
 
 - (NSDictionary*) getMrtdResultProps:(PPMrtdRecognizerResult*) mrtdResult {
   return @{
-           @"primaryId": [mrtdResult primaryId],
-           @"secondaryId": [mrtdResult secondaryId],
-           @"issuer": [mrtdResult issuer],
-           @"documentNumber": [mrtdResult documentNumber],
-           @"documentCode": [mrtdResult documentCode],
-           @"dateOfExpiry": [self dateToMillis:[mrtdResult dateOfExpiry]],
-           @"dateOfBirth": [self dateToMillis:[mrtdResult dateOfBirth]],
-           @"nationality": [mrtdResult nationality],
-           @"sex": [mrtdResult sex],
-           @"opt1": [mrtdResult opt1],
-           @"opt2": [mrtdResult opt2],
-           @"mrzText": [mrtdResult mrzText]
-           };
+           @"personal": @{
+             @"lastName": [mrtdResult primaryId],
+             @"firstName": [mrtdResult secondaryId],
+             @"nationality": [mrtdResult nationality],
+             @"sex": [mrtdResult sex]
+           },
+           @"document": @{
+             @"issuer": [mrtdResult issuer],
+             @"documentNumber": [mrtdResult documentNumber],
+             @"documentCode": [mrtdResult documentCode],
+             @"dateOfExpiry": [self dateToMillis:[mrtdResult dateOfExpiry]],
+             @"dateOfBirth": [self dateToMillis:[mrtdResult dateOfBirth]],
+             @"opt1": [mrtdResult opt1],
+             @"opt2": [mrtdResult opt2],
+             @"mrzText": [mrtdResult mrzText]
+           }
+        };
 }
 
 - (NSDictionary*) getUsdlResultProps:(PPUsdlRecognizerResult*) usdlResult {
@@ -383,7 +387,7 @@ RCT_EXPORT_METHOD(dismiss)
                @"state": [usdlResult getField:kPPAddressJurisdictionCode],
                @"postalCode": [usdlResult getField:kPPAddressJurisdictionCode],
            },
-           @"license": @{
+           @"document": @{
                @"dateOfIssue": [usdlResult getField:kPPDocumentIssueDate],
                @"dateOfExpiry": [usdlResult getField:kPPDocumentExpirationDate],
                @"issueIdentificationNumber": [usdlResult getField:kPPIssuerIdentificationNumber],
@@ -391,9 +395,50 @@ RCT_EXPORT_METHOD(dismiss)
                @"jurisdictionVehicleClass": [usdlResult getField:kPPJurisdictionVehicleClass],
                @"jurisdictionRestrictionCodes": [usdlResult getField:kPPJurisdictionRestrictionCodes],
                @"jurisdictionEndorsementCodes": [usdlResult getField:kPPJurisdictionEndorsementCodes],
+               @"documentNumber": [usdlResult getField:kPPCustomerIdNumber],
+               // deprecated
                @"customerIdNumber": [usdlResult getField:kPPCustomerIdNumber]
            },
          };
+}
+
+- (NSDictionary*) getEudlResultProps:(PPEudlRecognizerResult*) eudlResult {
+  PPEudlCountry euCountry = [eudlResult country];
+  NSString* country;
+  switch (euCountry) {
+    case PPEudlCountryUnitedKingdom:
+      country = @"GBR";
+      break;
+    case PPEudlCountryGermany:
+      country = @"DEU";
+      break;
+    case PPEudlCountryAustria:
+      country = @"AUT";
+      break;
+    case PPEudlCountryAny:
+      country = @"";
+      break;
+  }
+
+//  NSDictionary* names = [self parseName:[eudlResult ownerFirstName]];
+  return @{
+    @"personal": @{
+      @"firstName": [eudlResult ownerFirstName],
+      @"lastName": [eudlResult ownerLastName],
+      @"birthData": [eudlResult ownerBirthData]
+    },
+    @"address": @{
+      @"full": [eudlResult ownerAddress]
+    },
+    @"document": @{
+      @"dateOfIssue": [eudlResult documentIssueDate],
+      @"dateOfExpiry": [eudlResult documentExpiryDate],
+      @"documentNumber": [eudlResult driverNumber] ?: [NSNull null],
+      @"personalNumber": [eudlResult personalNumber] ?: [NSNull null],
+      @"issuer": [eudlResult documentIssuingAuthority],
+      @"country": country
+    }
+  };
 }
 
 - (NSNumber*) dateToMillis:(NSDate*) date {
@@ -409,5 +454,10 @@ RCT_EXPORT_METHOD(dismiss)
   [self resetScanState];
   [[self getRoot] dismissViewControllerAnimated:YES completion:nil];
 }
+
+//- (NSDictionary*) parseName: (NSString*)name {
+//  NSMutableDictionary names = [NSMutableDictionary dictionary];
+//  [name split
+//}
 
 @end

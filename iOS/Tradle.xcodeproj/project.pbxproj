@@ -681,6 +681,7 @@
 		739917F21E17CF6D00061291 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				731F233D1C31BB6600C3B09D /* libz.tbd */,
 				7348C3B61C41C04F00B9CDF5 /* Fabric.framework */,
 				7348C3B71C41C04F00B9CDF5 /* Crashlytics.framework */,
 				739917FD1E17CF9C00061291 /* CoreMedia.framework */,
@@ -821,7 +822,6 @@
 				9B41626C1C6F9BBD00A93B7C /* FontAwesome.ttf */,
 				739F73081C3F74AE00D9F2FB /* environment.json */,
 				739F72ED1C3F742B00D9F2FB /* RNEnvironmentManagerIOS */,
-				731F233D1C31BB6600C3B09D /* libz.tbd */,
 				73FE35D01BFA14F600EFB313 /* Ionicons.ttf */,
 				13B07FAE1A68108700A75B9A /* Tradle */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,

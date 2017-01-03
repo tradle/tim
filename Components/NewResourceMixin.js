@@ -17,7 +17,8 @@ var driverLicenseParser = require('../utils/driverLicenseParser')
 import DatePicker from 'react-native-datepicker'
 
 import BlinkID from './BlinkID'
-BlinkID.setLicenseKey('TAB5DE5I-QA75WEDQ-ITNBNEMA-HX2QL6QH-DEGVO7UK-C7TSIPEU-RFE2T37A-D4XRD3S2')
+const { microblink } = require('../environment.json')
+BlinkID.setLicenseKey(microblink.licenseKey)
 
 var constants = require('@tradle/constants');
 var t = require('tcomb-form-native');
@@ -505,16 +506,25 @@ var NewResourceMixin = {
     Actions.saveTemporary(r)
   },
 
-
   async showIDScanner(prop) {
-    const result = await BlinkID.scan({
+    const { documentType, country } = this.state.resource
+    const blinkIDOpts = {
       quality: 0.2,
-      base64: true,
+      base64: true
+    }
+
+    if (documentType.title === 'Passport') {
       // machine readable travel documents (passport)
-      mrtd: {},
-      // US driver license
-      usdl: {}
-    })
+      blinkIDOpts.mrtd = {}
+    } else if (documentType.title === 'Driver licence' || documentType.title === 'Driver license') {
+      if (country.title === 'United States') {
+        blinkIDOpts.usdl = {}
+      } else {
+        blinkIDOpts.eudl = {}
+      }
+    }
+
+    const result = await BlinkID.scan(blinkIDOpts)
 
     // const tradleObj = utils.fromMicroBlink(result)
     var r = {}
@@ -525,23 +535,35 @@ var NewResourceMixin = {
       width: result.image.width,
       height: result.image.height
     }
+
     if (result.mrtd) {
       result.mrtd.dateOfBirth = dateformat(new Date(result.mrtd.dateOfBirth), 'mmm dS, yyyy')
       result.mrtd.dateOfExpiry = dateformat(new Date(result.mrtd.dateOfExpiry), 'mmm dS, yyyy')
       r[prop + 'Json'] = JSON.stringify(result.mrtd)
     }
-    else if (result.usdl) {
-      for (let c in result.usdl) {
-        let category = result.usdl[c]
+    else if (result.usdl || result.eudl) {
+      const dl = result.usdl || result.eudl
+      for (let c in dl) {
+        let category = dl[c]
         for (let p in category) {
+          let d = category[p]
           if (p.indexOf('date') === 0) {
-            let d = category[p]
-            category[p] = d.substring(0, 2) + '/' + d.substring(2, 4) + '/' + d.substring(4)
+            if (result.usdl) {
+              category[p] = d.slice(0, 2) + '/' + d.slice(2, 4) + '/' + d.slice(4)
+            } else {
+              category[p] = parseEUDate(d)
+            }
+          } else if (p === 'birthData') {
+            if (/^\d+\.\d+\.\d+/.test(d)) {
+              let parts = d.split(' ')
+              category[p] = [parseEUDate(parts[0]), ...parts.slice(1)].join(' ')
+            }
           }
         }
       }
-      r[prop + 'Json'] = JSON.stringify(result.usdl)
+      r[prop + 'Json'] = JSON.stringify(dl)
     }
+
     this.floatingProps[prop] = r[prop]
     this.floatingProps[prop + 'Json'] = r[prop + 'Json']
     this.setState({resource: r})
@@ -1529,6 +1551,12 @@ var styles= StyleSheet.create({
     paddingBottom: 5
   },
 })
+
+function parseEUDate (date) {
+  const [day, month, year] = date.split('.')
+  return [month, day, year].join('/')
+}
+
 module.exports = NewResourceMixin
   // icon: {
   //   width: 20,

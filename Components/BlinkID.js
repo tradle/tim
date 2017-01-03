@@ -65,7 +65,6 @@ function validateUSDLOptions (options) {
 
 function validateEUDLOptions (options) {
   // TODO:
-  throw new Error('not supported yet')
 }
 
 function validateDetectorOptions (options) {
