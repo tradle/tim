@@ -240,13 +240,25 @@ var ResourceMixin = {
     let json = JSON.parse(jsonStr)
     let jsonRows = []
     for (let p in json) {
-      jsonRows.push(<View style={{justifyContent: 'space-between', flexDirection: 'row'}} key={this.getNextKey()}>
-                     <Text style={[styles.title]}>{utils.makeLabel(p)}</Text>
-                     <Text style={[styles.title, {color: '#2e3b4e'}]}>{json[p]}</Text>
+      if (typeof json[p] === 'object') {
+        jsonRows.push(<View style={{paddingVertical: 10, paddingHorizontal: isView ? 10 : 0}} key={this.getNextKey()}><Text style={styles.bigTitle}>{utils.makeLabel(p)}</Text></View>)
+        jsonRows.push(this.showJson(null, JSON.stringify(json[p]), isView))
+        continue
+      }
+
+      jsonRows.push(<View style={{flexDirection: 'row', paddingHorizontal: isView ? 10 : 0}} key={this.getNextKey()}>
+                     <Text style={[styles.title, {flex: 1}]}>{utils.makeLabel(p)}</Text>
+                     <Text style={[styles.title, {flex: 1, color: '#2e3b4e'}]}>{json[p]}</Text>
                   </View>)
     }
-    return <View key={this.getNextKey()} style={{marginHorizontal: isView ? 10 : 0}}>
-              <Text  style={[styles.bigTitle, {color: this.props.bankStyle.LINK_COLOR, paddingVertical: 10}]}>{translate(prop)}</Text>
+    var backlinksBg = {backgroundColor: '#96B9FA', paddingHorizontal: isView ? 10 : 0, marginHorizontal: isView ? 0 : -10} // this.props.bankStyle && this.props.bankStyle.PRODUCT_ROW_BG_COLOR ? {backgroundColor: this.props.bankStyle.PRODUCT_ROW_BG_COLOR} : {backgroundColor: '#a0a0a0'}
+    let title = prop
+              ? <View style={backlinksBg}>
+                   <Text  style={[styles.bigTitle, {color: '#ffffff', paddingVertical: 10}]}>{translate(prop)}</Text>
+                 </View>
+              : <View/>
+    return <View key={this.getNextKey()} style={{marginTop: isView ? 0 : -2}}>
+              {title}
               <View style={{height: 1, marginBottom: 10, marginHorizontal: -10, alignSelf: 'stretch', backgroundColor: this.props.bankStyle.LINK_COLOR}} />
               {jsonRows}
             </View>
