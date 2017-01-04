@@ -57,9 +57,17 @@ class VerificationRow extends Component {
     var r = isVerification ? resource.document : resource
     if (r  &&  isMyProduct)
       photo = resource.from.photo
-    else if (r  &&  r.photos)
-      photo = r.photos[0]
-    let hasPhoto = photo !== null
+    else {
+      let docModel = utils.getModel(r[constants.TYPE]).value
+      let mainPhotoProp = utils.getMainPhotoProperty(docModel)
+      if (mainPhotoProp)
+        photo = r[mainPhotoProp]
+      if (!photo) {
+        let photos = utils.getResourcePhotos(docModel, r)
+        photo = photos  &&  photos.length ? photos[0] : null
+      }
+    }
+    let hasPhoto = photo != null
     if (photo)
       photo = <Image source={{uri: utils.getImageUri(photo.url), position: 'absolute', left: 10}}  style={styles.cellImage} />
     else if (isForm || isVerification)
@@ -152,7 +160,7 @@ class VerificationRow extends Component {
                       {photo}
                       {date}
                       <View style={{flexDirection: 'column', paddingTop: 10}}>
-                        <Text style={styles.rTitle}>{this.props.isChooser ? utils.getDisplayName(resource, model.properties) : verificationRequest.title}</Text>
+                        <Text style={styles.rTitle}>{this.props.isChooser ? utils.getDisplayName(resource, model.properties) : verificationRequest.title || utils.makeModelTitle(verificationRequest)}</Text>
                          {verifiedBy}
                       </View>
                     </View>
