@@ -35,6 +35,8 @@ class MyProductMessageRow extends Component {
 
   render() {
     var resource = this.props.resource;
+    if (resource[constants.TYPE] === 'tradle.MyTaxesFiledConfirmation')
+      return <View/>
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
     var renderedRow = [];
 
