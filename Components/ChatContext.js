@@ -11,6 +11,8 @@ import utils from '../utils/utils'
 var translate = utils.translate
 import Icon from 'react-native-vector-icons/Ionicons'
 const REMEDIATION = 'tradle.Remediation'
+var constants = require('@tradle/constants');
+const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 
 class ChatContext extends Component {
   props: {
@@ -31,15 +33,19 @@ class ChatContext extends Component {
       return <View/>
     // if (!this.props.context  ||  this.props.context._readOnly)
     //   return <View/>
+    let r = this.props.chat
+    let isReadOnlyChat = utils.isReadOnlyChat(context)
+    let isShareContext = r[constants.TYPE] === PRODUCT_APPLICATION && isReadOnlyChat
+
     let content = <Text style={[this.props.allContexts ? styles.textAll : styles.textOne, styles.text]}>{translate(utils.getModel(context.product).value)}</Text>
-    let chooser = context && utils.isReadOnlyChat(context)
+    let chooser = context  &&  isShareContext
                 ? <View style={styles.contextBar}>{content}</View>
                 : <TouchableOpacity onPress={this.props.contextChooser} style={styles.contextBar}>
                     {content}
                   </TouchableOpacity>
     // HACK: if me is employee no sharing for now
     let share
-    if (this.props.allContexts)
+    if (this.props.allContexts || isReadOnlyChat)
       share = <View/>
     // else if (utils.getMe().isEmployee  &&  this.props.chat[constants.TYPE] === constants.TYPES.PROFILE)
     //   share = <View/>
