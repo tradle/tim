@@ -101,7 +101,7 @@ class FormMessageRow extends Component {
       photos.forEach((p) => {
         photoUrls.push({url: utils.getImageUri(p.url)});
       })
-      let isSharedContext = resource[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.context)
+      let isSharedContext = to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.context)
 
       photoListStyle = {
         flexDirection: 'row',
