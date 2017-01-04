@@ -18,6 +18,7 @@ var reactMixin = require('react-mixin');
 
 var STRUCTURED_MESSAGE_COLOR
 const MAX_PROPS_IN_FORM = 1
+const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 import {
   // StyleSheet,
   Text,
@@ -100,11 +101,12 @@ class FormMessageRow extends Component {
       photos.forEach((p) => {
         photoUrls.push({url: utils.getImageUri(p.url)});
       })
+      let isSharedContext = resource[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.context)
 
       photoListStyle = {
         flexDirection: 'row',
         alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
-        marginLeft: isMyMessage ? 30 : 45, //(hasOwnerPhoto ? 45 : 10),
+        marginLeft: isMyMessage ? 30 : isSharedContext ? 45 : 0, //(hasOwnerPhoto ? 45 : 10),
         borderRadius: 10,
         marginBottom: 3,
       }
@@ -119,33 +121,39 @@ class FormMessageRow extends Component {
     if (this.props.sendStatus  &&  this.props.sendStatus !== null)
       sendStatus = this.getSendStatus()
 
-    let cellStyle = addStyle
-                  ? [chatStyles.textContainer, addStyle]
-                  : chatStyles.textContainer
+    let cellStyle = [chatStyles.textContainer]
+    if (addStyle) {
+      if (Array.isArray(addStyle))
+        addStyle.forEach((a) => cellStyle.push(a))
+      else
+        cellStyle.push(addStyle)
+    }
+
     // HACK that solves the case when the message is short and we don't want it to be displayed
     // in a bigger than needed bubble
-    var messageBody;
     var width = utils.dimensions(FormMessageRow).width
     let msgWidth =  Math.floor(width * 0.8)
-    var viewStyle = { width: msgWidth, flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
 
-    messageBody =
-      <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
-        <View style={[rowStyle, viewStyle]}>
-          {ownerPhoto}
-          <View style={cellStyle}>
-            <View style={{flex: 1}}>
-            {this.isShared()
-              ? <View style={[chatStyles.verifiedHeader, {backgroundColor: this.props.bankStyle.SHARED_WITH_BG}]}>
-                  <Text style={styles.youSharedText}>{translate('youShared', resource.to.organization.title)}</Text>
-                </View>
-              : <View />
-            }
-              {renderedRow}
-           </View>
-          </View>
-        </View>
-      </TouchableHighlight>
+    // var viewStyle = { width: msgWidth, flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
+
+    // var messageBody;
+    // messageBody =
+    //   <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
+    //     <View style={[rowStyle, viewStyle]}>
+    //       {ownerPhoto}
+    //       <View style={cellStyle}>
+    //         <View style={{flex: 1}}>
+    //         {this.isShared()
+    //           ? <View style={[chatStyles.verifiedHeader, {backgroundColor: this.props.bankStyle.SHARED_WITH_BG}]}>
+    //               <Text style={styles.youSharedText}>{translate('youShared', resource.to.organization.title)}</Text>
+    //             </View>
+    //           : <View />
+    //         }
+    //           {renderedRow}
+    //        </View>
+    //       </View>
+    //     </View>
+    //   </TouchableHighlight>
 
     var len = photoUrls.length;
     var inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
@@ -266,11 +274,11 @@ class FormMessageRow extends Component {
     let noContent = !hasSentTo &&  !renderedRow.length
 
     let isMyMessage = this.isMyMessage()
-    let isSharedContext = utils.isReadOnlyChat(resource)
+
     var viewStyle = {
-      width: Math.floor(utils.dimensions().width * 0.8) - (isMyMessage || isSharedContext ? 0 : 45),
+      width: Math.floor(utils.dimensions().width * 0.8) - (isMyMessage  ? 45 : 0),
       alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
-      marginLeft: isMyMessage ? 30 : (isSharedContext ? 0 : 45), //(hasOwnerPhoto ? 45 : 10),
+      marginLeft: isMyMessage ? 30 : 0, //(hasOwnerPhoto ? 45 : 10),
       backgroundColor: this.props.bankStyle.BACKGROUND_COLOR,
       flexDirection: 'row',
     }
