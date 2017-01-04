@@ -668,7 +668,7 @@ var NewResourceMixin = {
     if (params.prop.ref  &&  params.prop.ref === constants.TYPES.MONEY  &&  !params.required) {
       let maxChars = (utils.dimensions(component).width - 60)/utils.getFontSize(9)
       // let some space for wrapping
-      if (maxChars < label.length)
+      if (maxChars < label.length  &&  (!this.state.resource[params.prop.name] || !this.state.resource[params.prop.name].length))
         lStyle = [lStyle, {marginTop: 0}]
     }
     let lcolor = this.getLabelAndBorderColor(params.prop.name)
@@ -717,7 +717,7 @@ var NewResourceMixin = {
 
   myBooleanTemplate(params) {
     var labelStyle = styles.booleanLabel
-    var textStyle =  [styles.booleanText, {color: this.state.isRegistration ? '#ffffff' : '#000000'}]
+    var textStyle =  [styles.booleanText, {color: this.state.isRegistration ? '#ffffff' : '#757575'}]
 
     let prop = params.prop
     let resource = this.state.resource
@@ -751,8 +751,8 @@ var NewResourceMixin = {
         }>
           <View style={styles.booleanContainer}>
             <View style={styles.booleanContentStyle}>
-              <Text style={[style, { width: (utils.dimensions(component).width - 100)} : {}]}>{label}</Text>
-              <Switch onValueChange={value => this.onChangeText(prop, value)} value={value} onTintColor={LINK_COLOR} />
+              <Text style={[style, { width: (utils.dimensions(component).width - 100)}]}>{label}</Text>
+              <Switch onValueChange={value => this.onChangeText(prop, value)} value={value} onTintColor={LINK_COLOR} style={{position: 'absolute', right: 0, top: 5}}/>
             </View>
           </View>
         </TouchableHighlight>
@@ -1385,7 +1385,7 @@ var styles= StyleSheet.create({
     flex: 1
   },
   booleanContentStyle: {
-    justifyContent: 'space-between',
+    // justifyContent: 'space-between',
     flexDirection: 'row',
     // paddingVertical: 5,
     // marginRight: 10,
@@ -1542,7 +1542,7 @@ var styles= StyleSheet.create({
   },
   booleanText: {
     marginTop: 5,
-    fontSize: 20
+    fontSize: 18
   },
   dateLabel: {
     marginLeft: Platform.OS === 'ios' ? 10 : 0,
