@@ -9,7 +9,10 @@ import CustomIcon from '../styles/customicons'
 var Icon = require('react-native-vector-icons/Ionicons');
 var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin');
+var BackgroundImage = require('./BackgroundImage')
 var equal = require('deep-equal')
+var BG_IMAGE = require('../img/verificationBg.jpg')
+
 import { makeResponsive } from 'react-native-orient'
 var Actions = require('../Actions/Actions')
 var StyleSheet = require('../StyleSheet')
@@ -63,10 +66,12 @@ class VerificationMessageRow extends Component {
 
     let me = utils.getMe()
     let isThirdPartyVerification
+    let isReadOnlyChat
     if (this.props.context) {
       let me = utils.getMe()
       if (me.isEmployee) {
-        if  (utils.isReadOnlyChat(this.props.to))
+        isReadOnlyChat = utils.isReadOnlyChat(this.props.to)
+        if  (isReadOnlyChat)
           isThirdPartyVerification = utils.getId(resource.organization) !== utils.getId(this.props.context.to.organization)
         else if (this.props.to[constants.TYPE] === constants.TYPES.PROFILE)
           isThirdPartyVerification = utils.getId(me) !== utils.getId(this.props.context.to) || (resource._verifiedBy  &&  utils.getId(me.organization) !== utils.getId(resource._verifiedBy))
@@ -91,7 +96,9 @@ class VerificationMessageRow extends Component {
 
     let headerStyle = [
       chatStyles.verifiedHeader,
-      {backgroundColor: bgColor}, // opacity: isShared ? 0.5 : 1},
+      {marginTop: 10, paddingBottom: 10},
+      // {backgroundColor: bgColor}, // opacity: isShared ? 0.5 : 1},
+      {backgroundColor: 'transparent'}, //, borderBottomWidth: 1, borderBottomColor: bgColor}, // opacity: isShared ? 0.5 : 1},
       isMyMessage ? {borderTopRightRadius: 0, borderTopLeftRadius: 10} : {borderTopLeftRadius: 0, borderTopRightRadius: 10}
     ]
 
@@ -99,9 +106,9 @@ class VerificationMessageRow extends Component {
                     <View style={headerStyle}>
                       {isShared
                        ? <View/>
-                       : <Icon style={chatStyles.verificationIcon} size={20} name={'md-checkmark'} />
+                       : <Icon style={[chatStyles.verificationIcon, {color: bgColor}]} size={20} name={'md-checkmark'} />
                       }
-                      <Text style={chatStyles.verificationHeaderText}>{isShared ? translate(msgModel) : verifiedBy}</Text>
+                      <Text style={[chatStyles.verificationHeaderText, {color: '#555555', fontFamily: 'Bradley Hand'}]}>{isShared ? translate(msgModel) : verifiedBy}</Text>
                     </View>
                     <View>
                       {
@@ -118,12 +125,15 @@ class VerificationMessageRow extends Component {
     var viewStyle = {
       width: msgWidth,
       flexDirection: 'row',
+      // borderWidth: 1,
       alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
-      backgroundColor: this.props.bankStyle.BACKGROUND_COLOR
+      backgroundColor: 'transparent',
+      height: 100
+      // backgroundColor: this.props.bankStyle.BACKGROUND_COLOR
     }
     let addStyle = [
-      chatStyles.verificationBody,
-      {backgroundColor: isShared ? '#ffffff' : this.props.bankStyle.VERIFICATION_BG, borderColor: bgColor},
+      // chatStyles.verificationBody,
+      {borderWidth: 0, backgroundColor: 'transparent' /*, backgroundColor: isShared ? '#ffffff' : this.props.bankStyle.VERIFICATION_BG,*/ },
       isMyMessage ? {borderTopRightRadius: 0} : {borderTopLeftRadius: 0}
     ];
 
@@ -151,7 +161,8 @@ class VerificationMessageRow extends Component {
               <View style={[chatStyles.row, viewStyle]}>
                 {this.getOwnerPhoto(isMyMessage)}
                 <View style={[chatStyles.textContainer, addStyle]}>
-                  <View style={{flex: 1}}>
+                  <View style={{flex: 1, backgroundColor: 'transparent'}}>
+                    <Image source={BG_IMAGE} style={[{position: 'absolute', top: 0, borderRadius: 10, left: -7, width: (isReadOnlyChat ? msgWidth - 40 : msgWidth + 7), height: 100, resizeMode: 'stretch', opacity: 0.5}, addStyle]}/>
                     {renderedRow}
                     {shareWith}
                  </View>
@@ -161,7 +172,7 @@ class VerificationMessageRow extends Component {
             </View>
           </TouchableOpacity>
 
-    var viewStyle = { margin: 1, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR }
+    var viewStyle = { margin: 1 }
 
     return (
       <View style={viewStyle} key={this.getNextKey()}>

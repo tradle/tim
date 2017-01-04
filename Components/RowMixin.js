@@ -97,11 +97,11 @@ var RowMixin = {
       // let color =  isMyMessage && !isMyProduct ? {color: '#FFFFEE'} : {color: '#757575'}
       return (
         <View style={style} key={this.getNextKey()}>
-          <View style={[styles.column, {flex:1}]}>
+          <View style={[styles.column, {flex: 1}]}>
             <Text style={[styles.descriptionB]}>{propTitle}</Text>
           </View>
-          <View style={[styles.column, {flex:1}]}>
-            <Text style={[styles.descriptionB, {alignSelf: 'flex-end'}]}>{val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')}</Text>
+          <View style={[styles.column, {flex: 3}]}>
+            <Text style={styles.descriptionB}>{val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')}</Text>
           </View>
        </View>
       )
@@ -215,11 +215,11 @@ var RowMixin = {
     else
       msg = <View/>
 
-    var hasPhotos = document  &&  document.photos  &&  document.photos.length
-    var photo = hasPhotos
-              ? <Image source={{uri: utils.getImageUri(document.photos[0].url)}}  style={styles.cellImage} />
-              : <View />;
-    var headerStyle = {paddingTop: verification.dateVerified ? 0 : 5, alignSelf: 'center', flex: 1}
+    // var hasPhotos = document  &&  document.photos  &&  document.photos.length
+    // var photo = hasPhotos
+    //           ? <Image source={{uri: utils.getImageUri(document.photos[0].url)}}  style={styles.cellImage} />
+    //           : <View />;
+    var headerStyle = {paddingTop: verification.dateVerified ? 0 : 5, marginLeft: 15}
     var isShared = this.isShared(verification)
 
                     // {verification.dateVerified
@@ -229,23 +229,21 @@ var RowMixin = {
                     //   : <View/>
                     // }
                           // <Text style={{fontSize: 12, color: 'darkblue', fontStyle: 'italic'}}>{'Date '}</Text>
-    var header =  <View style={headerStyle}>
-                    <Text style={[isShared ? chatStyles.description : chatStyles.resourceTitle, styles.header, isShared ? {maxWidth: 0.8 * utils.dimensions().width - 50, fontSize: 16, alignSelf: 'flex-end', marginTop: -5, color: '#757575'} : {color: this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>
-                      {isShared
-                        ? translate('asVerifiedBy', verification._verifiedBy ? verification._verifiedBy.title : verification.organization.title)
-                        : translate(model) + ' ...'}
-                    </Text>
-                  </View>
     let addStyle = onPress ? {} : {backgroundColor: this.props.bankStyle.VERIFICATION_BG, borderWidth: BORDER_WIDTH, borderColor: this.props.bankStyle.VERIFICATION_BG, borderBottomColor: this.props.bankStyle.VERIFIED_HEADER_COLOR}
 
-    header = hasPhotos
-            ?  <View style={[chatStyles.rowContainer, styles.verification, addStyle]}>
-                 {photo}
-                 {header}
-               </View>
-            :  <View style={[addStyle, styles.verification]}>
-                 {header}
-               </View>
+    let arrow = <Icon color={this.props.bankStyle.VERIFIED_HEADER_COLOR} size={20} name={'ios-arrow-forward'} style={{top: 12, position: 'absolute', right: 20}}/>
+    var header =  <View style={headerStyle}>
+                    <Text style={[isShared ? chatStyles.description : chatStyles.resourceTitle, styles.header, isShared ? {maxWidth: 0.8 * utils.dimensions().width - 50, fontSize: 16, marginTop: -5, color: '#757575'} : {color: '#757575'}]}>
+                      {isShared
+                        ? translate('asVerifiedBy', verification._verifiedBy ? verification._verifiedBy.title : verification.organization.title)
+                        : translate(model)}
+                    </Text>
+                  </View>
+
+    header = <View style={[addStyle, styles.verification]}>
+               {arrow}
+               {header}
+             </View>
    if (!isAccordion)
       header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, document, verification)}>
                  {header}
