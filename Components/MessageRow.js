@@ -144,10 +144,11 @@ class MessageRow extends Component {
           photoUrls.push({url: utils.getImageUri(p.url)});
         })
 
+        let isReadOnlyChat = to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.context) //this.props.context  &&  this.props.context._readOnly
         photoListStyle = {
           flexDirection: 'row',
           alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
-          marginLeft: isMyMessage ? 30 : 45, //(hasOwnerPhoto ? 45 : 10),
+          marginLeft: isReadOnlyChat ? 45 : 30, //(hasOwnerPhoto ? 45 : 10),
           borderRadius: 10,
           marginBottom: 3,
         }
@@ -444,13 +445,15 @@ class MessageRow extends Component {
     var resource = this.props.resource;
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
 
+    let isReadOnlyChat = this.props.to[constants.TYPE]  &&  utils.isReadOnlyChat(this.props.context) //this.props.context  &&  this.props.context._readOnly
+
     if (model.id === PRODUCT_APPLICATION) {
       let msgModel = utils.getModel(resource.product).value
       let str = !this.props.navigator.isConnected  &&  this.props.isLast
               ? translate('noConnectionForNewProduct', utils.getMe().firstName, translate(msgModel))
               : translate('newProductMsg', translate(msgModel))
       let color = isMyMessage ? '#ffffff' : '#757575'
-      let maxWidth = Math.floor(0.8 * utils.dimensions().width) - (isMyMessage ? 40 : 90) // message width - icon size and all the paddings
+      let maxWidth = Math.floor(0.8 * utils.dimensions().width) - (isReadOnlyChat ? 90 : 40) // message width - icon size and all the paddings
       let msg = !this.props.navigator.isConnected  &&  this.props.isLast
               ? <View key={this.getNextKey()}>
                   <Text style={[chatStyles.resourceTitle, {color: color}]}>{str}</Text>
@@ -542,7 +545,6 @@ class MessageRow extends Component {
 
     var vCols = [];
 
-    let isReadOnly = utils.isReadOnlyChat(resource, this.props.context) //this.props.context  &&  this.props.context._readOnly
     viewCols.forEach(function(v) {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date')
         return;
@@ -569,10 +571,10 @@ class MessageRow extends Component {
         let iconName = resource.documentCreated ? 'ios-done-all' : 'ios-alert-outline'
         let iconSize = resource.documentCreated ? 30 : 25
         vCols.push(
-          <View key={self.getNextKey()}>
+          <View key={self.getNextKey()} style={{paddingBottom: 3}}>
             <Text style={[style, {color: '#555555'}]}>{isMyMessage ? translate('errorNotification') : translate('pleaseCorrect')} </Text>
-            <Text style={[style, {color: resource.documentCreated || isReadOnly ?  '#aaaaaa' : self.props.bankStyle.FORM_ERROR_COLOR}]}>{translate(utils.getModel(rtype).value)}</Text>
-            <Icon name={iconName} size={iconSize} color={resource.documentCreated || isReadOnly ? self.props.bankStyle.REQUEST_FULFILLED : self.props.bankStyle.FORM_ERROR_COLOR} style={styles.errorBadge} />
+            <Text style={[style, {color: resource.documentCreated || isReadOnlyChat ?  '#aaaaaa' : self.props.bankStyle.FORM_ERROR_COLOR}]}>{translate(utils.getModel(rtype).value)}</Text>
+            <Icon name={iconName} size={iconSize} color={resource.documentCreated || isReadOnlyChat ? self.props.bankStyle.REQUEST_FULFILLED : self.props.bankStyle.FORM_ERROR_COLOR} style={styles.errorBadge} />
           </View>
         )
       }
@@ -636,7 +638,7 @@ class MessageRow extends Component {
               else
                 link = <View style={chatStyles.rowContainer}>
                            <Text style={[style, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(msgModel)}</Text>
-                           <Icon style={[{marginTop: 2}, resource.documentCreated || isReadOnly ? chatStyles.linkIconGreyed : {color: isMyMessage ? self.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
+                           <Icon style={[{marginTop: 2}, resource.documentCreated || isReadOnlyChat ? chatStyles.linkIconGreyed : {color: isMyMessage ? self.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
                        </View>
             }
             let strName = isMyProduct
@@ -683,7 +685,7 @@ class MessageRow extends Component {
         renderedRow.push(v);
       })
     }
-    if (isReadOnly)
+    if (isReadOnlyChat)
       return null
     if (onPressCall)
       return {onPressCall: onPressCall}
