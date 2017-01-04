@@ -2,17 +2,10 @@
 
 var utils = require('../utils/utils');
 var translate = utils.translate
-var ArticleView = require('./ArticleView');
-var MessageView = require('./MessageView');
 var NewResource = require('./NewResource');
-var ProductChooser = require('./ProductChooser');
-var PhotoList = require('./PhotoList');
 var Icon = require('react-native-vector-icons/Ionicons');
-var groupByEveryN = require('groupByEveryN');
 var constants = require('@tradle/constants');
-import LinearGradient from 'react-native-linear-gradient'
 var RowMixin = require('./RowMixin');
-var Accordion = require('react-native-accordion')
 var extend = require('extend')
 var equal = require('deep-equal')
 var formDefaults = require('../data/formDefaults.json')
@@ -24,20 +17,13 @@ var reactMixin = require('react-mixin');
 var chatStyles = require('../styles/chatStyles')
 
 const MY_PRODUCT = 'tradle.MyProduct'
-const FORM_ERROR = 'tradle.FormError'
 const FORM = 'tradle.Form'
 const FORM_REQUEST = 'tradle.FormRequest'
-const SHARE_CONTEXT = 'tradle.ShareContext'
-const ENUM = 'tradle.Enum'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
-const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
 
-var CURRENCY_SYMBOL
 var LINK_COLOR
-var STRUCTURED_MESSAGE_COLOR
 
-const DEFAULT_CURRENCY_SYMBOL = '£'
 const DEFAULT_LINK_COLOR = '#2892C6'
 
 import {
@@ -61,8 +47,6 @@ class FormRequestRow extends Component {
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
     var me = utils.getMe();
     LINK_COLOR = this.props.bankStyle.LINK_COLOR
-    STRUCTURED_MESSAGE_COLOR = this.props.bankStyle.STRUCTURED_MESSAGE_COLOR
-    CURRENCY_SYMBOL = props.currency ? props.currency.symbol || props.currency : DEFAULT_CURRENCY_SYMBOL
   }
   shouldComponentUpdate(nextProps, nextState) {
     return !equal(this.props.resource, nextProps.resource)   ||
@@ -260,21 +244,14 @@ class FormRequestRow extends Component {
       </View>
      );
   }
-  onPress(event) {
-    this.props.navigator.push({
-      id: 7,
-      component: ArticleView,
-      passProps: {url: this.props.resource.message}
-    });
-  }
   createNewResource(model, isMyMessage) {
     var resource = {
       'from': this.props.resource.to,
       'to': this.props.resource.from,
       _context: this.props.context
     }
-    if (this.props.resource[constants.TYPE] !== FORM_REQUEST)
-      resource.message = this.props.resource.message;
+    // if (this.props.resource[constants.TYPE] !== FORM_REQUEST)
+    //   resource.message = this.props.resource.message;
     resource[constants.TYPE] = model.id;
 
     // Prefill for testing and demoing
@@ -300,48 +277,6 @@ class FormRequestRow extends Component {
         originatingMessage: this.props.resource
       }
     });
-  }
-
-  verify(event) {
-    var resource = this.props.resource;
-    var isVerification = resource[constants.TYPE] === constants.TYPES.VERIFICATION;
-    var r = isVerification ? resource.document : resource
-
-    var passProps = {
-      resource: r,
-      bankStyle: this.props.bankStyle,
-      currency: this.props.currency
-    }
-    if (!isVerification)
-      passProps.verify = true
-    else
-      passProps.verification = resource
-
-    var model = utils.getModel(r[constants.TYPE]).value;
-    var route = {
-      id: 5,
-      component: MessageView,
-      backButtonTitle: 'Back',
-      passProps: passProps,
-      title: translate(model)
-    }
-    if (this.isMyMessage()) {
-      route.rightButtonTitle = 'Edit';
-      route.onRightButtonPress = {
-        title: 'Edit',
-        component: NewResource,
-        // titleTextColor: '#7AAAC3',
-        id: 4,
-        passProps: {
-          resource: r,
-          metadata: model,
-          bankStyle: this.props.bankStyle,
-          currency: this.props.currency,
-          callback: this.props.onSelect.bind(this, r)
-        }
-      };
-    }
-    this.props.navigator.push(route);
   }
 
   formRequest(resource, vCols) {
@@ -373,7 +308,7 @@ class FormRequestRow extends Component {
     var isMyMessage = this.isMyMessage();
 
     let color = isMyMessage
-              ? {color: '#AFBBA8'} //{color: STRUCTURED_MESSAGE_COLOR}
+              ? {color: '#AFBBA8'}
               : {color: '#2892C6'}
     let link
     let isReadOnly = utils.isReadOnlyChat(this.props.resource, this.props.context) //this.props.context  &&  this.props.context._readOnly
