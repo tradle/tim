@@ -237,6 +237,8 @@ var utils = {
     return t !== stringName ? t : s
   },
   makeModelTitle(model) {
+    if (model.title)
+      return model.title
     let label = model.id.split('.')[1]
     return label
           // insert a space before all caps
