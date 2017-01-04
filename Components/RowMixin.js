@@ -6,7 +6,6 @@ var translate = utils.translate
 var constants = require('@tradle/constants');
 var Accordion = require('react-native-accordion')
 var Icon = require('react-native-vector-icons/Ionicons');
-import LinearGradient from 'react-native-linear-gradient'
 import CustomIcon from '../styles/customicons'
 var StyleSheet = require('../StyleSheet')
 var chatStyles = require('../styles/chatStyles')
@@ -109,8 +108,10 @@ var RowMixin = {
 
   },
   getOwnerPhoto(isMyMessage) {
-    if (Platform.OS !== 'android'  &&  !utils.isReadOnlyChat(this.props.resource))
+    let isSharedContext = this.props.to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.context)
+    if (Platform.OS !== 'android'  &&  !isSharedContext)
       return <View/>
+
     var to = this.props.to;
     let isProductApplication = to[constants.TYPE]  === PRODUCT_APPLICATION
     if (!isProductApplication && (isMyMessage  || !to /* ||  !to.photos*/))
