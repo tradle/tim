@@ -236,6 +236,14 @@ var utils = {
     // return t !== stringName ? t : (isEnumValue ? s : utils.makeLabel(s))
     return t !== stringName ? t : s
   },
+  makeModelTitle(model) {
+    let label = model.id.split('.')[1]
+    return label
+          // insert a space before all caps
+          .replace(/([A-Z])/g, ' $1')
+          // uppercase the first character
+          .replace(/^./, function(str){ return str.toUpperCase(); })
+  },
   makeLabel(label) {
     return label
           // insert a space before all caps
