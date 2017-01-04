@@ -272,7 +272,7 @@ class MessageRow extends Component {
     var viewStyle = { margin:1, backgroundColor: '#f7f7f7' }
     var model = utils.getModel(this.props.resource[constants.TYPE]).value;
     var isLicense = model.id.indexOf('License') !== -1  ||  model.id.indexOf('Passport') !== -1;
-    var photoStyle = (isLicense  &&  len === 1) ? styles.bigImageH : photoStyle;
+    var photoStyle = (isLicense  &&  len === 1) ? chatStyles.bigImage : photoStyle;
 
     return (
       <View style={[viewStyle, {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}]}>
@@ -566,12 +566,12 @@ class MessageRow extends Component {
       }
       else if (isFormError) {
         let rtype = (resource.prefill[constants.TYPE]) ? resource.prefill[constants.TYPE] : utils.getId(resource.prefill).split('_')[0]
-        let iconName = resource.documentCreated ? 'ios-done-all' : 'ios-information-circle-outline'
-        let iconSize = 30
+        let iconName = resource.documentCreated ? 'ios-done-all' : 'ios-alert-outline'
+        let iconSize = resource.documentCreated ? 30 : 25
         vCols.push(
           <View key={self.getNextKey()}>
-            <Text style={[style, {color: '#757575'}]}>{isMyMessage ? translate('errorNotification') : resource[v]} </Text>
-            <Text style={[style, {color: resource.documentCreated || isReadOnly ?  '#757575' : self.props.bankStyle.FORM_ERROR_COLOR}]}>{translate(utils.getModel(rtype).value)}</Text>
+            <Text style={[style, {color: '#555555'}]}>{isMyMessage ? translate('errorNotification') : translate('pleaseCorrect')} </Text>
+            <Text style={[style, {color: resource.documentCreated || isReadOnly ?  '#aaaaaa' : self.props.bankStyle.FORM_ERROR_COLOR}]}>{translate(utils.getModel(rtype).value)}</Text>
             <Icon name={iconName} size={iconSize} color={resource.documentCreated || isReadOnly ? self.props.bankStyle.REQUEST_FULFILLED : self.props.bankStyle.FORM_ERROR_COLOR} style={styles.errorBadge} />
           </View>
         )
@@ -636,7 +636,7 @@ class MessageRow extends Component {
               else
                 link = <View style={chatStyles.rowContainer}>
                            <Text style={[style, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(msgModel)}</Text>
-                           <Icon style={[{marginTop: 2}, resource.documentCreated || isReadOnly ? styles.linkIconGreyed : {color: isMyMessage ? self.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
+                           <Icon style={[{marginTop: 2}, resource.documentCreated || isReadOnly ? chatStyles.linkIconGreyed : {color: isMyMessage ? self.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
                        </View>
             }
             let strName = isMyProduct
@@ -770,19 +770,10 @@ var styles = StyleSheet.create({
     borderTopLeftRadius: 0,
     borderRadius: 10,
   },
-  bigImageH: {
-    width: 270,
-    height: 200,
-    margin: 1,
-    borderRadius: 10
-  },
-  linkIconGreyed: {
-    color: '#cccccc'
-  },
   errorBadge: {
     position: 'absolute',
     opacity: 0.5,
-    bottom: -5,
+    bottom: 0,
     right: 0
   },
   white18: {
