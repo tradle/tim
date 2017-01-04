@@ -412,8 +412,17 @@ class ResourceList extends Component {
       var m = utils.getModel(resource[constants.TYPE]).value;
 
       if (isVerification || isForm) {
+        let title
+        if (isForm)
+          title = utils.getModelTitle(m)
+        else {
+          let type = resource.document[constants.TYPE]
+          if (!type)
+            type = resource.document.is.split('_')[0]
+          title = utils.makeModelTitle(utils.getModel(type).value)
+        }
         this.props.navigator.push({
-          title: m.title,
+          title: title,
           id: 5,
           component: MessageView,
           backButtonTitle: 'Back',
