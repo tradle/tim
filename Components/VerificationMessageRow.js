@@ -162,7 +162,7 @@ class VerificationMessageRow extends Component {
                 {this.getOwnerPhoto(isMyMessage)}
                 <View style={[chatStyles.textContainer, addStyle]}>
                   <View style={{flex: 1, backgroundColor: 'transparent'}}>
-                    <Image source={BG_IMAGE} style={[{position: 'absolute', top: 0, borderRadius: 10, left: -7, width: (isReadOnlyChat ? msgWidth - 40 : msgWidth + 7), height: 100, resizeMode: 'stretch', opacity: 0.5}, addStyle]}/>
+                    <Image source={BG_IMAGE} style={[{position: 'absolute', top: 0, borderRadius: 10, left: 0, width: (isReadOnlyChat ? msgWidth - 40 : msgWidth), height: 100, resizeMode: 'stretch', opacity: 0.5}, addStyle]}/>
                     {renderedRow}
                     {shareWith}
                  </View>
