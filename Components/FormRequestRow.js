@@ -412,7 +412,7 @@ class FormRequestRow extends Component {
       let notLink = resource.documentCreated  ||  isReadOnly  ||  form.subClassOf === MY_PRODUCT
       link = <View style={chatStyles.rowContainer}>
                    <Text style={[chatStyles.resourceTitle, {color: resource.documentCreated  ||  notLink ?  '#757575' : resource.verifiers ? 'green' : LINK_COLOR}]}>{translate(form)}</Text>
-                   <Icon style={[{marginTop: 2}, resource.documentCreated  ? styles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
+                   <Icon style={[{marginTop: 2}, resource.documentCreated  ? chatStyles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
                  </View>
       onPressCall = notLink
                   ? null
@@ -458,9 +458,6 @@ function isMultientry(resource) {
 var styles = StyleSheet.create({
   container: {
     flex: 1
-  },
-  linkIconGreyed: {
-    color: '#cccccc'
   },
   assistentText: {
     color: '#757575',

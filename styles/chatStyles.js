@@ -17,7 +17,7 @@ var verificationStyles = Object.freeze({
   },
   verificationHeaderText: {
     fontSize: 18,
-    // fontWeight: '500',
+    fontWeight: '500',
     alignSelf: 'center',
     color: '#f7f7f7',
     paddingLeft: 3
@@ -132,6 +132,9 @@ var verificationStyles = Object.freeze({
     marginTop: 5,
     paddingBottom: 5,
     justifyContent:'space-between'
+  },
+  linkIconGreyed: {
+    color: '#cccccc'
   },
 });
 
