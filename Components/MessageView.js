@@ -259,7 +259,7 @@ class MessageView extends Component {
           <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={this.props.navigator}/>
         </View>
         {actionPanel}
-        <View style={{marginTop: -3}}>
+        <View>
           <View style={styles.photoListStyle}>
             <PhotoList photos={photos} resource={resource} isView={true} navigator={this.props.navigator} numberInRow={inRow} />
           </View>
