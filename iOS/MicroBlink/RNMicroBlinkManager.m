@@ -61,7 +61,7 @@ RCT_EXPORT_METHOD(scan:(NSDictionary*) options callback:(RCTResponseSenderBlock)
 
   NSDictionary* usdl = [options objectForKey:@"usdl"];
   if (usdl) {
-    PPUsdlRecognizerSettings *usdlRecognizerSettings = [[PPUsdlRecognizerSettings alloc] init];
+    PPUsdlRecognizerSettings *usdlRecognizerSettings = [[PPUsdlRecognizerSettings alloc] init];    
     // TODO: copy over settings from usdl -> usdlRecognizerSettings
     [settings.scanSettings addRecognizerSettings:usdlRecognizerSettings];
   }
@@ -69,6 +69,9 @@ RCT_EXPORT_METHOD(scan:(NSDictionary*) options callback:(RCTResponseSenderBlock)
   NSDictionary* eudl = [options objectForKey:@"eudl"];
   if (eudl) {
     PPEudlRecognizerSettings *eudlRecognizerSettings = [[PPEudlRecognizerSettings alloc] init];
+    if (needImage) {
+      eudlRecognizerSettings.showFullDocument = YES;
+    }
     // TODO: copy over settings from eudl -> eudlRecognizerSettings
     [settings.scanSettings addRecognizerSettings:eudlRecognizerSettings];
   }
@@ -198,7 +201,7 @@ RCT_EXPORT_METHOD(dismiss)
    * Each member of results array will represent one result for a single processed image
    * Usually there will be only one result. Multiple results are possible when there are 2 or more detected objects on a single image (i.e. pdf417 and QR code side by side)
    */
-
+  
   NSMutableDictionary* json = [NSMutableDictionary dictionary];
 
   // Collect data from the result
@@ -354,6 +357,7 @@ RCT_EXPORT_METHOD(dismiss)
              @"lastName": [mrtdResult primaryId],
              @"firstName": [mrtdResult secondaryId],
              @"nationality": [mrtdResult nationality],
+             @"dateOfBirth": [self dateToMillis:[mrtdResult dateOfBirth]],
              @"sex": [mrtdResult sex]
            },
            @"document": @{
@@ -361,7 +365,6 @@ RCT_EXPORT_METHOD(dismiss)
              @"documentNumber": [mrtdResult documentNumber],
              @"documentCode": [mrtdResult documentCode],
              @"dateOfExpiry": [self dateToMillis:[mrtdResult dateOfExpiry]],
-             @"dateOfBirth": [self dateToMillis:[mrtdResult dateOfBirth]],
              @"opt1": [mrtdResult opt1],
              @"opt2": [mrtdResult opt2],
              @"mrzText": [mrtdResult mrzText]
