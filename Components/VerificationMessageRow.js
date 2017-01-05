@@ -112,7 +112,7 @@ class VerificationMessageRow extends Component {
                     </View>
                     <View style={{flexDirection: 'row', alignSelf: 'center', marginTop: -5}}>
                       <View style={{height: 1, backgroundColor: '#cccccc', width: msgWidth * 0.2, alignSelf: 'center'}} />
-                      <Icon name='ios-star' size={15} style={{color: bgColor, marginHorizontal: 7, alignSelf: 'center'}} />
+                      <Text style={{color: bgColor, marginHorizontal: 7, alignSelf: 'center'}}>🔸</Text>
                       <View style={{height: 1, backgroundColor: '#cccccc', width: msgWidth * 0.2, alignSelf: 'center'}} />
                     </View>
                     <View>
@@ -133,7 +133,7 @@ class VerificationMessageRow extends Component {
       // borderWidth: 1,
       alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
       backgroundColor: 'transparent',
-      height: 100
+      height: 110
       // backgroundColor: this.props.bankStyle.BACKGROUND_COLOR
     }
     let addStyle = [
@@ -167,7 +167,7 @@ class VerificationMessageRow extends Component {
                 {this.getOwnerPhoto(isMyMessage)}
                 <View style={[chatStyles.textContainer, addStyle]}>
                   <View style={{flex: 1, backgroundColor: 'transparent'}}>
-                    <Image source={BG_IMAGE} style={[{position: 'absolute', top: 0, borderRadius: 10, left: 0, width: (isReadOnlyChat ? msgWidth - 40 : msgWidth), height: 100, resizeMode: 'stretch', opacity: 0.4}, addStyle]}/>
+                    <Image source={BG_IMAGE} style={[{position: 'absolute', top: 0, borderRadius: 10, left: 0, width: (isReadOnlyChat ? msgWidth - 40 : msgWidth), height: 110, resizeMode: 'stretch', opacity: 0.4}, addStyle]}/>
                     {renderedRow}
                     {shareWith}
                  </View>

@@ -124,7 +124,6 @@ var RowMixin = {
     let resource = this.props.resource
     let isVerification  = resource[constants.TYPE] === constants.TYPES.VERIFICATION
     if (!isMyMessage) {
-
       let photo = isVerification && resource._verifiedBy  &&  resource._verifiedBy.photo
                 ? resource._verifiedBy.photo
                 : resource.from.photo
@@ -224,7 +223,7 @@ var RowMixin = {
     // var photo = hasPhotos
     //           ? <Image source={{uri: utils.getImageUri(document.photos[0].url)}}  style={styles.cellImage} />
     //           : <View />;
-    var headerStyle = {paddingTop: verification.dateVerified ? 0 : 5, marginLeft: 25}
+    var headerStyle = {paddingTop: verification.dateVerified ? 0 : 5, marginLeft: 30}
     var isShared = this.isShared(verification)
 
                     // {verification.dateVerified
@@ -236,7 +235,7 @@ var RowMixin = {
                           // <Text style={{fontSize: 12, color: 'darkblue', fontStyle: 'italic'}}>{'Date '}</Text>
     let addStyle = onPress ? {} : {backgroundColor: this.props.bankStyle.VERIFICATION_BG, borderWidth: BORDER_WIDTH, borderColor: this.props.bankStyle.VERIFICATION_BG, borderBottomColor: this.props.bankStyle.VERIFIED_HEADER_COLOR}
 
-    let arrow = <Icon color={this.props.bankStyle.VERIFIED_HEADER_COLOR} size={20} name={'ios-arrow-forward'} style={{top: 12, position: 'absolute', right: 30}}/>
+    let arrow = <Icon color={this.props.bankStyle.VERIFIED_HEADER_COLOR} size={20} name={'ios-arrow-forward'} style={{top: 10, position: 'absolute', right: 30}}/>
     var header =  <View style={headerStyle}>
                     <Text style={[isShared ? chatStyles.description : chatStyles.resourceTitle, styles.header, isShared ? {maxWidth: 0.8 * utils.dimensions().width - 50, fontSize: 16, marginTop: -5} : {}]}>
                       {isShared
