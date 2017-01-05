@@ -35,9 +35,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/constants/-/constants-1.3.0.tgz"
     },
     "@tradle/engine": {
-      "version": "3.9.3",
+      "version": "3.9.4",
       "from": "tradle/engine",
-      "resolved": "git://github.com/tradle/engine.git#fe8b0e38338f4a162a77bdb6035c3abd8660e14d",
+      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-3.9.4.tgz",
       "dependencies": {
         "async": {
           "version": "2.1.4",
