@@ -96,7 +96,7 @@ class VerificationMessageRow extends Component {
 
     let headerStyle = [
       chatStyles.verifiedHeader,
-      {marginTop: 10, paddingBottom: 10},
+      {marginTop: 10},
       // {backgroundColor: bgColor}, // opacity: isShared ? 0.5 : 1},
       {backgroundColor: 'transparent'}, //, borderBottomWidth: 1, borderBottomColor: bgColor}, // opacity: isShared ? 0.5 : 1},
       isMyMessage ? {borderTopRightRadius: 0, borderTopLeftRadius: 10} : {borderTopLeftRadius: 0, borderTopRightRadius: 10}
@@ -108,7 +108,12 @@ class VerificationMessageRow extends Component {
                        ? <View/>
                        : <Icon style={[chatStyles.verificationIcon, {color: bgColor}]} size={20} name={'md-checkmark'} />
                       }
-                      <Text style={[chatStyles.verificationHeaderText, {color: '#555555', fontFamily: 'Bradley Hand'}]}>{isShared ? translate(msgModel) : verifiedBy}</Text>
+                      <Text style={[chatStyles.verificationHeaderText, {color: '#555555', fontStyle: 'italic'}]}>{isShared ? translate(msgModel) : verifiedBy}</Text>
+                    </View>
+                    <View style={{flexDirection: 'row', alignSelf: 'center', marginTop: -5}}>
+                      <View style={{height: 1, backgroundColor: '#cccccc', width: msgWidth * 0.2, alignSelf: 'center'}} />
+                      <Icon name='ios-star' size={15} style={{color: bgColor, marginHorizontal: 7, alignSelf: 'center'}} />
+                      <View style={{height: 1, backgroundColor: '#cccccc', width: msgWidth * 0.2, alignSelf: 'center'}} />
                     </View>
                     <View>
                       {
@@ -162,7 +167,7 @@ class VerificationMessageRow extends Component {
                 {this.getOwnerPhoto(isMyMessage)}
                 <View style={[chatStyles.textContainer, addStyle]}>
                   <View style={{flex: 1, backgroundColor: 'transparent'}}>
-                    <Image source={BG_IMAGE} style={[{position: 'absolute', top: 0, borderRadius: 10, left: 0, width: (isReadOnlyChat ? msgWidth - 40 : msgWidth), height: 100, resizeMode: 'stretch', opacity: 0.5}, addStyle]}/>
+                    <Image source={BG_IMAGE} style={[{position: 'absolute', top: 0, borderRadius: 10, left: 0, width: (isReadOnlyChat ? msgWidth - 40 : msgWidth), height: 100, resizeMode: 'stretch', opacity: 0.4}, addStyle]}/>
                     {renderedRow}
                     {shareWith}
                  </View>
