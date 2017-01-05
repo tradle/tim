@@ -943,8 +943,12 @@ var NewResourceMixin = {
     let isVideo = prop.name === 'video'
     let isPhoto = prop.name === 'photos'  ||  prop.ref === 'tradle.Photo'
     if (resource && resource[params.prop]) {
-      if (isPhoto)
+      if (isPhoto) {
         label = prop.title
+        if (!this.floatingProps)
+          this.floatingProps = {}
+        this.floatingProps[prop.name] = resource[params.prop]
+      }
       else {
         let rModel
         // var m = utils.getId(resource[params.prop]).split('_')[0]
@@ -966,9 +970,7 @@ var NewResourceMixin = {
     let photoR = isPhoto && (this.state[prop.name + '_photo'] || this.state.resource[prop.name])
     color = {color: this.state.isRegistration ? '#eeeeee' : resource && resource[params.prop] ? '#000000' :  '#AAAAAA'}
     let propView = photoR
-                 ? <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                     <Image source={{uri: photoR.url}} style={styles.thumb} />
-                   </View>
+                 ? <Image source={{uri: photoR.url}} style={styles.thumb} />
                  : <Text style={[styles.input, fontSize, color]}>{label}</Text>
 
     let maxChars = (utils.dimensions(component).width - 20)/10
