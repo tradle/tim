@@ -236,13 +236,13 @@ var ResourceMixin = {
     }
     return val
   },
-  showJson(prop, jsonStr, isView) {
-    let json = JSON.parse(jsonStr)
+  showJson(prop, json, isView) {
+    // let json = JSON.parse(jsonStr)
     let jsonRows = []
     for (let p in json) {
       if (typeof json[p] === 'object') {
         jsonRows.push(<View style={{paddingVertical: 10, paddingHorizontal: isView ? 10 : 0}} key={this.getNextKey()}><Text style={styles.bigTitle}>{utils.makeLabel(p)}</Text></View>)
-        jsonRows.push(this.showJson(null, JSON.stringify(json[p]), isView))
+        jsonRows.push(this.showJson(null, json[p], isView))
         continue
       }
 

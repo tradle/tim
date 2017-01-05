@@ -539,7 +539,7 @@ var NewResourceMixin = {
     if (result.mrtd) {
       result.mrtd.personal.dateOfBirth = dateformat(new Date(result.mrtd.personal.dateOfBirth), 'mmm dS, yyyy')
       result.mrtd.document.dateOfExpiry = dateformat(new Date(result.mrtd.document.dateOfExpiry), 'mmm dS, yyyy')
-      r[prop + 'Json'] = JSON.stringify(result.mrtd)
+      r[prop + 'Json'] = result.mrtd //JSON.stringify(result.mrtd)
     }
     else if (result.usdl || result.eudl) {
       const dl = result.usdl || result.eudl
@@ -561,7 +561,7 @@ var NewResourceMixin = {
           }
         }
       }
-      r[prop + 'Json'] = JSON.stringify(dl)
+      r[prop + 'Json'] = dl
     }
 
     if (!this.floatingProps) this.floatingProps = {}
