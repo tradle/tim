@@ -257,7 +257,7 @@ var ResourceMixin = {
                    <Text  style={[styles.bigTitle, {color: '#ffffff', paddingVertical: 10}]}>{translate(prop)}</Text>
                  </View>
               : <View/>
-    return <View key={this.getNextKey()} style={{marginTop: isView ? 0 : -2}}>
+    return <View key={this.getNextKey()} style={{paddingTop: 20}}>
               {title}
               <View style={{height: 1, marginBottom: 10, marginHorizontal: -10, alignSelf: 'stretch', backgroundColor: this.props.bankStyle.LINK_COLOR}} />
               {jsonRows}
