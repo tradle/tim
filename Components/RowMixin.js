@@ -235,9 +235,10 @@ var RowMixin = {
                           // <Text style={{fontSize: 12, color: 'darkblue', fontStyle: 'italic'}}>{'Date '}</Text>
     let addStyle = onPress ? {} : {backgroundColor: this.props.bankStyle.VERIFICATION_BG, borderWidth: BORDER_WIDTH, borderColor: this.props.bankStyle.VERIFICATION_BG, borderBottomColor: this.props.bankStyle.VERIFIED_HEADER_COLOR}
 
+    let hs = /*isShared ? chatStyles.description :*/ [chatStyles.resourceTitle, styles.header]
     let arrow = <Icon color={this.props.bankStyle.VERIFIED_HEADER_COLOR} size={20} name={'ios-arrow-forward'} style={{top: 10, position: 'absolute', right: 30}}/>
     var header =  <View style={headerStyle}>
-                    <Text style={[isShared ? chatStyles.description : chatStyles.resourceTitle, styles.header, isShared ? {maxWidth: 0.8 * utils.dimensions().width - 50, fontSize: 16, marginTop: -5} : {}]}>
+                    <Text style={hs}>
                       {isShared
                         ? translate('asVerifiedBy', verification._verifiedBy ? verification._verifiedBy.title : verification.organization.title)
                         : translate(model)}
