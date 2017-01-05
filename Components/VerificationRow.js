@@ -355,6 +355,7 @@ var styles = StyleSheet.create({
     flexWrap: 'wrap',
     color: '#999999',
     fontSize: 14,
+    paddingLeft: 5
   },
   row: {
     // backgroundColor: '#FBFFE5',
