@@ -233,11 +233,12 @@ var styles = StyleSheet.create({
     justifyContent: 'flex-start',
     backgroundColor: '#ffffff',
     paddingVertical: 10,
-    marginHorizontal: -7,
+    borderColor: '#dddddd',
+    // marginHorizontal: -7,
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
-    borderTopColor: '#4982B1',
-    borderTopWidth: 0.5
+    borderTopColor: '#dddddd',
+    borderWidth: 0.5
   }
 })
 reactMixin(VerificationMessageRow.prototype, RowMixin);
