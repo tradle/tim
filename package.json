@@ -13,7 +13,7 @@
   "dependencies": {
     "@tradle/cb-blockr": "^3.2.0",
     "@tradle/constants": "^1.3.0",
-    "@tradle/engine": "^3.9.3",
+    "@tradle/engine": "3.9.4",
     "@tradle/keeper": "^3.1.0",
     "@tradle/models": "github:tradle/models#f28a20b",
     "@tradle/protocol": "2.3.0",
