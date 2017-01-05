@@ -183,6 +183,7 @@ class FormMessageRow extends Component {
               <View style={photoListStyle}>
                 <PhotoList photos={photoUrls} resource={this.props.resource} style={[photoStyle, {marginTop: -5}]} navigator={this.props.navigator} numberInRow={inRow} chat={this.props.to} />
               </View>
+              {sendStatus}
             </View>
     // var sealedStatus = (resource.txId)
     //                  ? <View style={chatStyles.sealedStatus}>
@@ -274,7 +275,7 @@ class FormMessageRow extends Component {
     let noContent = !hasSentTo &&  !renderedRow.length
 
     let isMyMessage = this.isMyMessage()
-    let isSharedContext = to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.context)
+    let isSharedContext = to  &&  to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.context)
 
     var viewStyle = {
       width: Math.floor(utils.dimensions().width * 0.8) - (isSharedContext  ? 45 : 0),
