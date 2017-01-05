@@ -10,14 +10,14 @@ var verificationStyles = Object.freeze({
   verifiedHeader: {
     flexDirection: 'row',
     paddingVertical: 5,
-    paddingHorizontal: 7,
+    // paddingHorizontal: 7,
     marginHorizontal: -8,
     marginTop: -6,
     justifyContent: 'center'
   },
   verificationHeaderText: {
     fontSize: 18,
-    fontWeight: '500',
+    // fontWeight: '500',
     alignSelf: 'center',
     color: '#f7f7f7',
     paddingLeft: 3
