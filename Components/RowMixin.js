@@ -93,14 +93,18 @@ var RowMixin = {
       let isMyMessage = this.isMyMessage()
       if (!this.props.isAggregation  &&  (isMyMessage || isForm) &&  !isMyProduct)
         style = [style, { paddingVertical: 3}] //, borderWidth: BORDER_WIDTH, borderColor: isMyMessage ? STRUCTURED_MESSAGE_COLOR : '#ffffff', borderTopColor: this.props.bankStyle.STRUCTURED_MESSAGE_BORDER}]
+      let value = val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')
+      let ratio = value.length / propTitle.length
+      let flexVal = (propTitle.length > value.length || ratio < 1.2) ? 1 : ratio < 1.5 ? 2 : 3
+
       // let color =  isMyMessage && !isMyProduct ? {color: '#FFFFEE'} : {color: '#757575'}
       return (
         <View style={style} key={this.getNextKey()}>
           <View style={[styles.column, {flex: 1}]}>
             <Text style={[styles.descriptionB]}>{propTitle}</Text>
           </View>
-          <View style={[styles.column, {flex: 3}]}>
-            <Text style={styles.descriptionB}>{val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')}</Text>
+          <View style={[styles.column, {flex: flexVal}]}>
+            <Text style={styles.descriptionB}>{value}</Text>
           </View>
        </View>
       )
