@@ -145,12 +145,16 @@ var utils = {
     if (!dictionary)
       return property.title || utils.makeLabel(property.name)
     let translations = dictionary.properties[property.name]
-    return (translations) ? translations[model.id] || translations.Default : property.title || utils.makeLabel(property.name)
+    let val
+    if (translations)
+      val = translations[model.id] || translations.Default
+
+    return val || property.title || utils.makeLabel(property.name)
   },
   translateModel(model) {
     if (dictionary  &&  dictionary.models[model.id])
       return dictionary.models[model.id]
-    return model.title ? model.title : this.makeLabel(model.id.split('.')[1])
+    return model.title ? model.title : this.makeModelTitle(model)
   },
   translateString(...args) {
     if (!strings)
