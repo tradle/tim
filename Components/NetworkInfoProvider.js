@@ -33,7 +33,8 @@ class NetworkInfoProvider extends Component {
 
   render() {
     let isOrg = this.props.resource  &&  this.props.resource[TYPE] === ORGANIZATION
-    let providerOffline = this.props.resource  &&  isOrg  &&  !this.props.online
+    let isOnline = this.props.online || (typeof this.props.online === 'undefined')
+    let providerOffline = this.props.resource  &&  isOrg  &&  !isOnline
     let dn = this.props.resource
            ? this.props.isConnected
                ? translate('learnMoreDescriptionTo', utils.getDisplayName(this.props.resource))
