@@ -87,8 +87,8 @@
     },
     "@tradle/models": {
       "version": "4.10.9",
-      "from": "git://github.com/tradle/models.git#6ab812cf18bd4c6fe1d2180a720f40642ee16576",
-      "resolved": "git://github.com/tradle/models.git#6ab812cf18bd4c6fe1d2180a720f40642ee16576"
+      "from": "git://github.com/tradle/models.git#76fcd8a",
+      "resolved": "git://github.com/tradle/models.git#76fcd8a"
     },
     "@tradle/otr": {
       "version": "0.2.17",
