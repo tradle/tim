@@ -129,7 +129,7 @@ class NewResource extends Component {
           !equal(this.state.resource, nextState.resource)
 
     if (!isUpdate)
-      utils.compare(this.props.resource, nextProps.resource)
+      isUpdate = !utils.compare(this.props.resource, nextProps.resource)
     return isUpdate
            // nextState.isModalOpen !== this.state.isModalOpen  ||
            // this.state.modalVisible != nextState.modalVisible ||
