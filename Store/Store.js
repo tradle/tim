@@ -5901,12 +5901,14 @@ var Store = Reflux.createStore({
 
         newFormRequestVerifiers(from, SERVICE_PROVIDERS, val, orgs)
         //============
-        if (val.verifiers) {
+        if (SERVICE_PROVIDERS && val.verifiers) {
           val.message = 'Please have this form verified by one of our trusted associates'
           val.verifiers.forEach((v) => {
-            let serviceProvider =  SERVICE_PROVIDERS
-                                ? SERVICE_PROVIDERS.filter((sp) => sp.id === v.id  &&  sp.url === v.url)
-                                : null
+            let serviceProvider = SERVICE_PROVIDERS.filter((sp) => {
+              return sp.url === v.url &&
+                (v.id ? v.id === sp.id : v.permalink === sp.permalink)
+            })
+
             if (serviceProvider  &&  serviceProvider.length)
               v.provider = serviceProvider[0].org
             // else
