@@ -41,9 +41,10 @@ class VerificationMessageRow extends Component {
     var me = utils.getMe();
   }
   shouldComponentUpdate(nextProps, nextState) {
+    if (this.props.orientation !== nextProps.orientation  &&  this.props.orientation !== 'UNKNOWN'  &&  nextProps.orientation !== 'UNKNOWN')
+      return true
     return !equal(this.props.resource, nextProps.resource) ||
            !equal(this.props.to, nextProps.to)             ||
-           this.props.orientation != nextProps.orientation ||
            this.props.sendStatus !== nextProps.sendStatus
   }
   render() {
@@ -86,7 +87,7 @@ class VerificationMessageRow extends Component {
     if (isThirdPartyVerification)
       bgColor = '#93BEBA'
     else if (isShared)
-      bgColor = this.props.bankStyle.SHARED_WITH_BG
+      bgColor = this.props.bankStyle.SHARED_WITH_VERIFICATION_BG
     else
       bgColor = this.props.bankStyle.VERIFIED_HEADER_COLOR
     let verifiedBy = isShared ? translate('youShared', orgName) : translate('verifiedBy', orgName)
@@ -105,11 +106,8 @@ class VerificationMessageRow extends Component {
 
     renderedRow = <View>
                     <View style={headerStyle}>
-                      {isShared
-                       ? <View/>
-                       : <Icon style={[chatStyles.verificationIcon, {color: bgColor}]} size={20} name={'md-checkmark'} />
-                      }
-                      <Text style={[chatStyles.verificationHeaderText, {color: '#555555', fontStyle: 'italic'}]}>{isShared ? translate(msgModel) : verifiedBy}</Text>
+                      <Icon style={[chatStyles.verificationIcon, {color: bgColor}]} size={20} name={'md-checkmark'} />
+                      <Text style={[chatStyles.verificationHeaderText, {color: '#555555', fontStyle: 'italic'}]}>{verifiedBy}</Text>
                     </View>
                     <View style={{flexDirection: 'row', alignSelf: 'center', marginTop: -5}}>
                       <View style={{height: 1, backgroundColor: '#cccccc', width: msgWidth * 0.2, alignSelf: 'center'}} />
