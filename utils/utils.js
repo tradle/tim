@@ -631,7 +631,9 @@ var utils = {
       if (properties[p].type === 'object') {
         if (res[p]  &&  res[p].id  &&  res[p].title)
           continue
-        if (properties[p].ref  &&  properties[p].ref !== MONEY  &&  properties[p].ref !== PHOTO) {
+        if (properties[p].ref  &&  !utils.getModel(properties[p].ref).value.inlined) {
+
+          // if (properties[p].ref !== MONEY  &&  properties[p].ref !== PHOTO) {
           res[p] = {
             id: this.getId(res[p]),
             title: this.getDisplayName(res[p], properties)

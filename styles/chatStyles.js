@@ -96,6 +96,10 @@ var verificationStyles = Object.freeze({
     flex: 1,
     flexDirection: 'row'
   },
+  dateInForm: {
+    color: '#999999',
+    fontSize: 12,
+  },
   date: {
     flex: 1,
     color: '#999999',

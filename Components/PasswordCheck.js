@@ -74,7 +74,7 @@ var PasswordCheck = React.createClass({
   },
 
   _onStart: function () {
-    this.setState({ status: 'normal' })
+    this.doSetState({ status: 'normal' })
   },
 
   _onEntered: function (password) {
@@ -89,7 +89,7 @@ var PasswordCheck = React.createClass({
   _setPassword: function (password) {
     if (this.state.attempts === 0) {
       if (!this.props.validate(password)) {
-        return this.setState({
+        return this.doSetState({
           message: this.props.promptInvalid,
           status: 'wrong'
         })
@@ -99,7 +99,7 @@ var PasswordCheck = React.createClass({
         ? this.props.promptReenterChange
         : this.props.promptReenter
 
-      return this.setState({
+      return this.doSetState({
         message: message,
         attempts: 1,
         password: password,
@@ -108,7 +108,7 @@ var PasswordCheck = React.createClass({
     }
 
     if (this.state.password === password) {
-      this.setState({
+      this.doSetState({
         status: 'right',
         message: ''
       })
@@ -116,16 +116,32 @@ var PasswordCheck = React.createClass({
       return this.props.onSuccess(password)
     }
 
-    return this.setState({
+    this.doSetState({
       attempts: 0,
       status: 'wrong',
       message: this.props.promptRetrySet
     })
   },
 
+  doSetState: function (state) {
+    this.setState(state)
+    clearTimeout(this._resetToNormalTimeout)
+    if (state.status === 'wrong') {
+      this._resetToNormalTimeout = setTimeout(() => {
+        if (this.state.status !== 'normal') {
+          this.doSetState({ status: 'normal' })
+        }
+      }, 1500)
+    }
+  },
+
+  componentWillUnmount() {
+    clearTimeout(this._resetToNormalTimeout)
+  },
+
   _checkPassword: function (password) {
     if (!this.props.validate(password)) {
-      return this.setState({
+      return this.doSetState({
         status: 'wrong',
         message: this.props.promptInvalid
       })
@@ -134,7 +150,7 @@ var PasswordCheck = React.createClass({
     this.props.isCorrect(password)
       .then((isCorrect) => {
         if (isCorrect) {
-          this.setState({
+          this.doSetState({
             status: 'right',
             message: this.props.successMsg
           })
@@ -143,7 +159,7 @@ var PasswordCheck = React.createClass({
         }
 
         if (++this.state.attempts >= this.props.maxAttempts) {
-          this.setState({
+          this.doSetState({
             status: 'wrong',
             attempts: this.state.attempts,
             message: this.props.failMsg
@@ -152,7 +168,7 @@ var PasswordCheck = React.createClass({
           return this.props.onFail()
         }
 
-        this.setState({
+        this.doSetState({
           status: 'wrong',
           attempts: this.state.attempts,
           message: this.props.promptRetryCheck
