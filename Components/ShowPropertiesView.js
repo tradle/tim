@@ -159,7 +159,7 @@ class ShowPropertiesView extends Component {
           let c = utils.normalizeCurrencySymbol(val.currency)
           val = (c || CURRENCY_SYMBOL) + val.value
         }
-        else if (pMeta.inlined) {
+        else if (pMeta.inlined  ||  utils.getModel(pMeta.ref).value.inlined) {
           if (!val[constants.TYPE])
             val[constants.TYPE] = pMeta.ref
           return this.getViewCols(val, utils.getModel(val[constants.TYPE]).value)
