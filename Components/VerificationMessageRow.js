@@ -60,8 +60,7 @@ class VerificationMessageRow extends Component {
     var isMyMessage = this.isMyMessage();
     var w = utils.dimensions(VerificationMessageRow).width
 
-    var type = resource.document[constants.TYPE] || utils.getId(resource.document).split('_')[0]
-    var msgModel = utils.getModel(type).value;
+    var msgModel = utils.getModel(resource.document[constants.TYPE]).value;
     var orgName = resource._verifiedBy
                 ? resource._verifiedBy.title
                 : resource.organization  ? resource.organization.title : ''
