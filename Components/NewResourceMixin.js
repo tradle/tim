@@ -1060,7 +1060,7 @@ var NewResourceMixin = {
     }
     else if (this.props.model.properties[propName].type === 'array') {
       let prop = this.props.model.properties[propName]
-      if (!prop.inlined  &&  prop.items  &&  prop.items.ref) {
+      if (!prop.inlined  &&  prop.items  &&  prop.items.ref  &&  !utils.getModel(pMeta.ref).value.inlined) {
         let v = {
           id: utils.getId(value),
           title: utils.getDisplayName(value, utils.getModel(value[constants.TYPE]).properties)
