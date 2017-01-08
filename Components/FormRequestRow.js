@@ -373,6 +373,7 @@ class FormRequestRow extends Component {
       })
       var params = {
         value: {documentCreated: true},
+        doneWithMultiEntry: true,
         resource: resource,
         meta: utils.getModel(resource[constants.TYPE]).value
       }
