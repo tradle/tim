@@ -5148,9 +5148,9 @@
       "resolved": "https://registry.npmjs.org/sendy-protobufs/-/sendy-protobufs-1.0.0.tgz"
     },
     "sendy-ws": {
-      "version": "1.5.0",
-      "from": "tradle/sendy-ws",
-      "resolved": "git://github.com/tradle/sendy-ws.git#0c94b11be18964db72d7a47b4d0faf7c8f971aa7"
+      "version": "1.5.1",
+      "from": "git://github.com/tradle/sendy-ws.git#6aad46cf66a7cd57cc3c911699ffc938af470727",
+      "resolved": "git://github.com/tradle/sendy-ws.git#6aad46cf66a7cd57cc3c911699ffc938af470727"
     },
     "serve-favicon": {
       "version": "2.3.0",
