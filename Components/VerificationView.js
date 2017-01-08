@@ -165,7 +165,7 @@ class VerificationView extends Component {
           let c = utils.normalizeCurrencySymbol(val.currency)
           val = (c || CURRENCY_SYMBOL) + val.value
         }
-        else if (pMeta.inlined)
+        else if (pMeta.inlined ||  utils.getModel(pMeta.ref).value.inlined)
           return this.renderResource(val, utils.getModel(val[constants.TYPE]).value)
 
         // Could be enum like props
