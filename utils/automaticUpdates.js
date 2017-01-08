@@ -4,6 +4,8 @@ import utils from './utils'
 import Actions from '../Actions/Actions'
 
 let CodePush = !__DEV__ && !utils.isSimulator() && require('react-native-code-push')
+if (CodePush) CodePush.notifyAppReady()
+
 let ON = !!CodePush
 let CHECKING
 // every 10 mins
