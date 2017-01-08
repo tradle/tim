@@ -87,8 +87,8 @@
     },
     "@tradle/models": {
       "version": "4.10.9",
-      "from": "git://github.com/tradle/models.git#549c7e470b214fd3354319fa15dfddc58fc26078",
-      "resolved": "git://github.com/tradle/models.git#549c7e470b214fd3354319fa15dfddc58fc26078"
+      "from": "git://github.com/tradle/models.git#37f6d20e59b5ff50ccf018fe7251346fb3c8ae41",
+      "resolved": "git://github.com/tradle/models.git#37f6d20e59b5ff50ccf018fe7251346fb3c8ae41"
     },
     "@tradle/otr": {
       "version": "0.2.17",
@@ -6124,9 +6124,9 @@
       "resolved": "https://registry.npmjs.org/write/-/write-0.2.1.tgz"
     },
     "write-file-atomic": {
-      "version": "1.3.0",
+      "version": "1.3.1",
       "from": "write-file-atomic@>=1.1.4 <2.0.0",
-      "resolved": "https://registry.npmjs.org/write-file-atomic/-/write-file-atomic-1.3.0.tgz",
+      "resolved": "https://registry.npmjs.org/write-file-atomic/-/write-file-atomic-1.3.1.tgz",
       "dependencies": {
         "graceful-fs": {
           "version": "4.1.11",
