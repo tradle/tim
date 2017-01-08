@@ -63,7 +63,7 @@ var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
-var Keychain = !utils.isWeb() && require('../utils/keychain')
+var Keychain = null //!utils.isWeb() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('q-level');
 var debounce = require('debounce')
@@ -2527,6 +2527,7 @@ var Store = Reflux.createStore({
         });
         return;
       }
+
       // if (error) {
       //   this.listenables[0].addItem.failed(error);
       //   return;
@@ -2538,6 +2539,7 @@ var Store = Reflux.createStore({
         utils.optimizeResource(resource)
 
       var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
+      var readOnlyBacklinks = []
       Q.allSettled(promises)
       .then(function(results) {
         let allFoundRefs = foundRefs.concat(results);
@@ -2570,6 +2572,21 @@ var Store = Reflux.createStore({
               continue
             else if (!props[p].readOnly  &&  !props[p].immutable)
               returnVal[p] = json[p];
+        }
+        for (let p in props) {
+          if (!returnVal[p]  &&  props[p].backlink  &&  props[p].ref  &&  props[p].readOnly)
+            readOnlyBacklinks.push(props[p])
+        }
+        if (readOnlyBacklinks.length) {
+          readOnlyBacklinks.forEach((prop) => {
+            let pm = utils.getModel(prop.ref).value
+            let isMessage = pm.isInterface || (pm.interfaces  &&  pm.interfaces.indexOf(MESSAGE) != -1)
+            if (isMessage) {
+              let result = self.searchMessages({modelName: prop.ref, context: context})
+              if (result  &&  result.length)
+                returnVal[prop.name] = self.buildRef(result[0])
+            }
+          })
         }
 
         // utils.optimizeResource(returnVal)
@@ -2798,6 +2815,16 @@ var Store = Reflux.createStore({
             delete list[returnValKey]
             self.deleteMessageFromChat(orgId, returnVal)
 
+          }
+          if (readOnlyBacklinks) {
+            readOnlyBacklinks.forEach((prop) => {
+              let topR = returnVal[prop.name]
+              if (topR) {
+                if (!topR[prop.backlink])
+                  topR[prop.backlink] = []
+                topR[prop.backlink].push(self.buildRef(returnVal))
+              }
+            })
           }
 
           returnVal[CUR_HASH] = result.object.link
@@ -4329,7 +4356,8 @@ var Store = Reflux.createStore({
       }
       simpleLinkMessages[r.form] = r
       var msgModel = this.getModel(r.form);
-      if (msgModel  &&  msgModel.value.subClassOf !== MY_PRODUCT) {
+
+      if (msgModel  &&  msgModel.value.subClassOf !== MY_PRODUCT  &&  !msgModel.value.notShareable) {
         verTypes.push(msgModel.value.id);
         if (r.verifiers)
           hasVerifiers[msgModel.value.id] = r.verifiers
@@ -5785,7 +5813,7 @@ var Store = Reflux.createStore({
     let isThirdPartySentRequest
     // HACK for showing verification in employee's chat
     if (val[TYPE] === VERIFICATION) {
-      let document = this._getItem(val.document)
+      let document = this._getItem(utils.getId(val.document))
       if (!document) {
         debugger
         return
@@ -5892,6 +5920,7 @@ var Store = Reflux.createStore({
       }
     }
     if (val[TYPE] === FORM_REQUEST) {
+      let self = this
       ///=============== TEST VERIFIERS
       if (isNew) {
         // Prefill for testing and demoing
@@ -5909,8 +5938,13 @@ var Store = Reflux.createStore({
                 (v.id ? v.id === sp.id : v.permalink === sp.permalink)
             })
 
-            if (serviceProvider  &&  serviceProvider.length)
+            if (serviceProvider  &&  serviceProvider.length) {
               v.provider = serviceProvider[0].org
+              let org = self._getItem(v.provider)
+              v.name = org.name
+              v.id = serviceProvider[0].id
+              v.photo = org.photos && org.photos[0].url
+            }
             // else
             //   this.getInfo([v.url], true) //, id)
           })
