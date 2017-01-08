@@ -38,7 +38,8 @@ const Cache = require('lru-cache')
 const mutexify = require('mutexify')
 var strMap = {
   'Please fill out this form and attach a snapshot of the original document': 'fillTheFormWithAttachments',
-  'Please fill out this form': 'fillTheForm'
+  'Please fill out this form': 'fillTheForm',
+  'Please take a': 'takeAPicture'
 }
 var translatedStrings = {
   en: require('./strings_en.json'),
@@ -59,14 +60,16 @@ const TYPE = constants.TYPE
 const TYPES = constants.TYPES
 
 const VERIFICATION = TYPES.VERIFICATION
-const MY_PRODUCT = 'tradle.MyProduct'
+const MONEY = TYPES.MONEY
+const FORM = TYPES.FORM
+const ORGANIZATION = TYPES.ORGANIZATION
 
+const MY_PRODUCT = 'tradle.MyProduct'
 const CUR_HASH = constants.CUR_HASH
 const NONCE = constants.NONCE
 const ROOT_HASH = constants.ROOT_HASH
 const PREV_HASH = constants.PREV_HASH
 const SIG = constants.SIG
-const FORM = TYPES.FORM
 const FORM_ERROR = 'tradle.FormError'
 const FORM_REQUEST = 'tradle.FormRequest'
 const PHOTO = 'tradle.Photo'
@@ -212,7 +215,7 @@ var utils = {
       else if (typeof r1[p] === 'object') {
         if (!r2[p])
           return false
-        if (properties[p].ref === TYPES.MONEY) {
+        if (properties[p].ref === MONEY) {
           if (r1[p].currency !== r2[p].currency  ||  r1[p].value !== r2[p].value)
             return false
         }
@@ -628,7 +631,7 @@ var utils = {
       if (properties[p].type === 'object') {
         if (res[p]  &&  res[p].id  &&  res[p].title)
           continue
-        if (properties[p].ref !== TYPES.MONEY) {
+        if (properties[p].ref  &&  properties[p].ref !== MONEY  &&  properties[p].ref !== PHOTO) {
           res[p] = {
             id: this.getId(res[p]),
             title: this.getDisplayName(res[p], properties)
@@ -710,7 +713,7 @@ var utils = {
     if (!me.isEmployee)
       return false
     let myId = this.getId(me.organization)
-    if (resource[TYPE] === TYPES.ORGANIZATION)
+    if (resource[TYPE] === ORGANIZATION)
       return this.getId(resource) === myId ? true : false
     if (!resource.organization)
       return true
@@ -724,7 +727,7 @@ var utils = {
     let model = this.getModel(resource[TYPE]).value
     if (!me.organization)
       return false
-    if (model.subClassOf === TYPES.FORM) {
+    if (model.subClassOf === FORM) {
       return  (utils.getId(me) === utils.getId(resource.to)  ||  this.isReadOnlyChat(resource)) &&
              !utils.isVerifiedByMe(resource)               // !verification  &&  utils.getId(resource.to) === utils.getId(me)  &&
     }
