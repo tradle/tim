@@ -815,7 +815,7 @@ var NewResourceMixin = {
               dateInput: styles.dateInput,
               dateText: styles.dateText,
               placeholderText: [styles.font18, {
-                color: params.value ? '#000000' : '#aaaaaa',
+                color: params.value ? '#555555' : '#aaaaaa',
                 paddingLeft: params.value ? 10 : 0
               }],
               dateIconColor: {color: LINK_COLOR},
@@ -968,7 +968,7 @@ var NewResourceMixin = {
       propLabel = <View/>
     }
     let photoR = isPhoto && (this.state[prop.name + '_photo'] || this.state.resource[prop.name])
-    color = {color: this.state.isRegistration ? '#eeeeee' : resource && resource[params.prop] ? '#000000' :  '#AAAAAA'}
+    color = {color: this.state.isRegistration ? '#eeeeee' : resource && resource[params.prop] ? '#555555' :  '#AAAAAA'}
     let propView = photoR
                  ? <Image source={{uri: photoR.url}} style={styles.thumb} />
                  : <Text style={[styles.input, fontSize, color]}>{label}</Text>
@@ -1447,6 +1447,7 @@ var styles= StyleSheet.create({
   textInput: {
     borderWidth: 0,
     paddingLeft: 0,
+    color: '#555555',
     height: 45,
     fontSize: 20,
   },
@@ -1508,7 +1509,7 @@ var styles= StyleSheet.create({
   },
   dateText: {
     fontSize: 20,
-    color: '#000000',
+    color: '#555555',
   },
   font18: {
     fontSize: 18,

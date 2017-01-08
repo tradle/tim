@@ -798,7 +798,7 @@ class NewResource extends Component {
       jsonProps.forEach((prop) => {
         let val = this.state.resource[prop.name]
         if (val)
-          jsons.push(this.showJson(prop, val))
+          jsons.push(this.showJson(prop, val, false, []))
       })
     }
     if (!jsons.length)
@@ -820,7 +820,7 @@ class NewResource extends Component {
           <View style={isRegistration ? {marginHorizontal: height > 1000 ? 50 : 30} : {marginHorizontal: 10}}>
             <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange.bind(this)}/>
             {button}
-            <View style={{marginTop: isRegistration ? 0 : -10}}>
+            <View style={{marginTop: isRegistration ? 0 : -10, paddingBottom: 20}}>
               {arrayItems}
             </View>
             {jsons}
