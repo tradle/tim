@@ -317,7 +317,7 @@ class ResourceRow extends Component {
         return <Text style={styles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
       }
       else
-        return <Text style={styles.resourceTitle} numberOfLines={2}>{model.title + ' ' + utils.getFormattedDate(resource.time)}</Text>;
+        return <Text style={styles.resourceTitle} numberOfLines={2}>{model.title}</Text>;
     }
     // HACK
     else if (model.id === PRODUCT_APPLICATION) {

@@ -25,7 +25,7 @@ var PhotoCarouselMixin = {
         resource: this.props.resource
       },
       // rightButtonTitle: 'Done',
-      // titleTintColor: 'black',
+      titleTextColor: '#D2EBF7',
       sceneConfig: Navigator.SceneConfigs.FadeAndroid,
       tintColor: '#dddddd',
       onRightButtonPress: {
