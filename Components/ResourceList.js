@@ -340,7 +340,7 @@ class ResourceList extends Component {
       return;
     }
     var type = list[0][constants.TYPE];
-    if (type  !== this.props.modelName) {
+    if (type  !== this.props.modelName  &&  this.props.modelName !== params.requestedModelName) {
       var m = utils.getModel(type).value;
       if (!m.subClassOf  ||  m.subClassOf != this.props.modelName)
         return;
@@ -414,7 +414,7 @@ class ResourceList extends Component {
       if (isVerification || isForm) {
         let title
         if (isForm)
-          title = utils.getModelTitle(m)
+          title = utils.makeModelTitle(m)
         else {
           let type = resource.document[constants.TYPE]
           if (!type)

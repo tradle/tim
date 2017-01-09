@@ -53,7 +53,7 @@ class VerificationRow extends Component {
     var model = utils.getModel(resource[constants.TYPE]).value;
     var isMyProduct = model.subClassOf === 'tradle.MyProduct'
     var isForm = model.subClassOf === 'tradle.Form'
-    var isVerification = resource.document
+    var isVerification = resource.document != null
     var r = isVerification ? resource.document : resource
     if (r  &&  isMyProduct)
       photo = resource.from.photo
@@ -99,17 +99,18 @@ class VerificationRow extends Component {
 
     // var val = utils.formatDate(new Date(resource.time));
     // rows.push(<View><Text style={styles.resourceTitle}>{val}</Text></View>);
-
-    if (r)
+    let notAccordion = !isMyProduct  &&  !isVerification && !this.props.prop === null || resource.sources || isForm
+    if (r  &&  !notAccordion) {
       this.formatDoc(verificationRequest, r, rows);
-    var backlink = this.props.prop &&  this.props.prop.items  &&  this.props.prop.items.backlink;
-    if (resource.txId)
-      rows.push(
-          <View style={{flexDirection: 'row'}} key={this.getNextKey()}>
-            <Text style={styles.resourceTitleL}>{translate('verificationTransactionID')}</Text>
-            <Text style={[styles.description, {color: '#7AAAc3'}]} onPress={this.onPress.bind(this, 'https://tbtc.blockr.io/tx/info/' + resource.txId)}>{resource.txId}</Text>
-          </View>
-        )
+      var backlink = this.props.prop &&  this.props.prop.items  &&  this.props.prop.items.backlink;
+      if (resource.txId)
+        rows.push(
+            <View style={{flexDirection: 'row'}} key={this.getNextKey()}>
+              <Text style={styles.resourceTitleL}>{translate('verificationTransactionID')}</Text>
+              <Text style={[styles.description, {color: '#7AAAc3'}]} onPress={this.onPress.bind(this, 'https://tbtc.blockr.io/tx/info/' + resource.txId)}>{resource.txId}</Text>
+            </View>
+          )
+    }
 
     // if (!isForm  &&  resource.to  &&  backlink !== 'to') {
     //   var row = <View style={{flexDirection: 'row'}} key={this.getNextKey()}>
@@ -155,11 +156,11 @@ class VerificationRow extends Component {
     var date = r
              ? this.addDateProp(resource.dateVerified ? 'dateVerified' : 'time', [styles.verySmallLetters, {position: 'absolute', right: 10}])
              : <View />
-    var header =  <View style={{borderColor: '#ffffff', backgroundColor: '#ffffff', borderBottomColor: '#cccccc', borderBottomWidth: StyleSheet.hairlineWidth}} key={this.getNextKey()}>
+    var header =  <View style={{backgroundColor: '#ffffff', borderBottomColor: '#f0f0f0', borderBottomWidth: 1}} key={this.getNextKey()}>
                     <View style={{flexDirection: 'row', marginHorizontal: 10,  marginVertical: 3, paddingBottom: 4}}>
                       {photo}
                       {date}
-                      <View style={{flexDirection: 'column', paddingTop: 10}}>
+                      <View style={styles.noImageBlock}>
                         <Text style={styles.rTitle}>{this.props.isChooser ? utils.getDisplayName(resource, model.properties) : verificationRequest.title || utils.makeModelTitle(verificationRequest)}</Text>
                          {verifiedBy}
                       </View>
@@ -170,30 +171,31 @@ class VerificationRow extends Component {
    //              {header}
    //            </Swipeout>
 
-    var content = <View>
-                    <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>
+    var content = <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>
                       <View style={styles.row}>
-                        <View style={[styles.textContainer, {margin: -5, paddingLeft: 3, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: 'transparent'}]}>
+                        <View style={styles.textContainer}>
                           {rows}
                         </View>
                       </View>
                     </TouchableHighlight>
-                  </View>
 
-    return (
-      this.props.isChooser
-       ? <View>
-          <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>
-           {header}
-          </TouchableHighlight>
-         </View>
-       :  !isMyProduct  &&  !isVerification  &&  !this.props.prop || resource.sources
-          ? <Swipeout right={[{text: 'Revoke', backgroundColor: 'red', onPress: this.revokeDocument.bind(this)}]} autoClose={true} scroll={(event) => this._allowScroll(event)}>
+    var row
+    if (this.props.isChooser)
+      row = <View>
               <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>
                {header}
               </TouchableHighlight>
-            </Swipeout>
-          : <View>
+            </View>
+    else if (notAccordion)
+      row = <View style={{backgroundColor: '#fff'}}>
+              <Swipeout right={[{text: 'Revoke', backgroundColor: 'red', onPress: this.revokeDocument.bind(this)}]} autoClose={true} scroll={(event) => this._allowScroll(event)}>
+              <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>
+               {header}
+              </TouchableHighlight>
+              </Swipeout>
+            </View>
+    else
+      row = <View>
              <Accordion
                header={header}
                style={{alignSelf: 'stretch'}}
@@ -201,7 +203,29 @@ class VerificationRow extends Component {
                underlayColor='transparent'
                easing='easeOutQuad' />
             </View>
-    );
+    return row
+    // return (
+    //   this.props.isChooser
+    //    ? <View>
+    //       <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>
+    //        {header}
+    //       </TouchableHighlight>
+    //      </View>
+    //      : notAccordion
+    //         ? <Swipeout right={[{text: 'Revoke', backgroundColor: 'red', onPress: this.revokeDocument.bind(this)}]} autoClose={true} scroll={(event) => this._allowScroll(event)}>
+    //             <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>
+    //              {header}
+    //             </TouchableHighlight>
+    //           </Swipeout>
+    //         : <View>
+    //            <Accordion
+    //              header={header}
+    //              style={{alignSelf: 'stretch'}}
+    //              content={content}
+    //              underlayColor='transparent'
+    //              easing='easeOutQuad' />
+    //           </View>
+    // );
   }
   revokeDocument() {
     var resource = this.props.resource
@@ -251,7 +275,7 @@ class VerificationRow extends Component {
                   ? utils.normalizeCurrencySymbol(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value
                   : (resource[v].title || resource[v])
           vCols.push(
-            <View style={{flexDirection: 'row', justifyContent: 'space-between', borderColor: '#F2FAED', borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#f0f0f0', paddingVertical: 3}} key={self.getNextKey()}>
+            <View style={styles.refPropertyRow} key={self.getNextKey()}>
               <Text style={labelStyle}>{properties[v].title + units}</Text>
               <Text style={style}>{val}</Text>
             </View>
@@ -278,7 +302,7 @@ class VerificationRow extends Component {
         if (msgParts.length === 2) {
           var msgModel = utils.getModel(msgParts[1]);
           if (msgModel) {
-            vCols.push(<View key={self.getNextKey()} style={{borderColor: '#F2FAED', borderBottomWidth: StyleSheet.hairlineWidth, paddingVertical: 5, borderBottomColor: '#f0f0f0'}}>
+            vCols.push(<View key={self.getNextKey()} style={styles.msgParts}>
                          <Text style={style}>{msgParts[0]}</Text>
                          <Text style={[style, {color: isMyMessage ? '#efffe5' : '#7AAAC3'}]}>{msgModel.value.title}</Text>
                        </View>);
@@ -296,7 +320,7 @@ class VerificationRow extends Component {
       // }
 
       vCols.push(
-        <View style={{flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 5, borderColor: '#F2FAED', borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#f0f0f0'}} key={self.getNextKey()}>
+        <View style={styles.refPropertyRow} key={self.getNextKey()}>
           <Text style={labelStyle}>{properties[v].title + units}</Text>
           {row}
         </View>
@@ -335,6 +359,10 @@ var styles = StyleSheet.create({
     color: '#757575',
     // fontWeight: '600',
     // marginBottom: 2,
+  },
+  noImageBlock: {
+    flexDirection: 'column',
+    paddingVertical: 7
   },
   resourceTitle: {
     flex: 1,
@@ -387,6 +415,20 @@ var styles = StyleSheet.create({
     alignSelf: 'flex-end',
     color: '#b4c3cb'
   },
+  refPropertRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    borderColor: '#F2FAED',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#f0f0f0',
+    paddingVertical: 3
+  },
+  msgParts: {
+    borderColor: '#F2FAED',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    paddingVertical: 5,
+    borderBottomColor: '#f0f0f0'
+  }
   // verySmallLettersCenter: {
   //   fontSize: 12,
   //   color: '#2E3B4E'
