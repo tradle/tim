@@ -66,3 +66,17 @@ global.tradleTimer = function timer (name) {
     return time
   }
 }
+
+global.timeAsyncFunction = function (fn) {
+  return function (...args) {
+    const start = Date.now()
+    const cb = args.pop()
+    args.push(function () {
+      const time = Date.now() - start
+      console.log(`TIMER: ${fn.name} took ${time}ms`)
+      cb.apply(this, arguments)
+    })
+
+    return fn.apply(this, args)
+  }
+}
