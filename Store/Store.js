@@ -2394,6 +2394,7 @@ var Store = Reflux.createStore({
     var self = this
     var resource = params.resource
     var value = params.value
+    var doneWithMultiEntry = params.doneWithMultiEntry
     if (!value)
       value = resource
 
@@ -2679,6 +2680,23 @@ var Store = Reflux.createStore({
         // TODO: fix hack
         // hack: we don't know root hash yet, use a fake
         if (returnVal.documentCreated)  {
+          // when all the multientry forms are filled out and next form is requested
+          // do not show the last form request for the multientry form it is confusing for the user
+          if (doneWithMultiEntry) {
+            let ptype = returnVal[TYPE] === FORM_REQUEST && returnVal.product
+            if (ptype) {
+              let multiEntryForms = utils.getModel(ptype).value.multiEntryForms
+              if (multiEntryForms  &&  multiEntryForms.indexOf(returnVal.form) !== -1) {
+                self.deleteMessageFromChat(returnVal.from.organization.id, returnVal)
+                let id = utils.getId(returnVal)
+                delete list[id]
+                db.del(id)
+                var params = {action: 'addItem', resource: returnVal}
+                self.trigger(params);
+                return
+              }
+            }
+          }
           var params = {action: 'addItem', resource: returnVal}
           // return self.disableOtherFormRequestsLikeThis(returnVal)
           // .then(() => {

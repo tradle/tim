@@ -101,13 +101,14 @@ var styles = StyleSheet.create({
     // justifyContent: 'space-between',
   },
   textAll: {
-    fontSize: 18,
+    fontSize: 20,
+    color: '#555555',
   },
   textOne: {
     color: '#7D6EC4',
   },
   text: {
-    fontSize: 18,
+    fontSize: 20,
     // alignSelf: 'center',
     marginHorizontal: 10
   }

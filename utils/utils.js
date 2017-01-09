@@ -255,6 +255,7 @@ var utils = {
   },
   makeLabel(label) {
     return label
+          .replace(/_/g, ' ')
           // insert a space before all caps
           .replace(/([A-Z])/g, ' $1')
           // uppercase the first character
@@ -350,7 +351,15 @@ var utils = {
   makeTitle(resourceTitle, prop) {
     return (resourceTitle.length > 28) ? resourceTitle.substring(0, 28) + '...' : resourceTitle;
   },
-  getDisplayName(resource, meta) {
+  getPropertiesWithAnnotation(meta, annotation) {
+    let props = {}
+    for (let p in meta)
+      if (meta[p][annotation])
+        props[p] = meta[p]
+
+    return props
+  },
+  getDisplayName1(resource, meta) {
     if (!meta) {
       if (resource.title)
         return resource.title
@@ -383,6 +392,62 @@ var utils = {
       }
     }
     return displayName;
+  },
+
+  getDisplayName(resource, meta) {
+    if (!meta) {
+      if (resource.title)
+        return resource.title
+      if (resource.id)
+        return ""
+      meta = this.getModel(resource[TYPE]).value.properties
+    }
+    let dProps = this.getPropertiesWithAnnotation(meta, 'displayName')
+
+    let m = this.getModel(resource[TYPE])
+    let vCols = m  &&  m.value.viewCols
+    var displayName = '';
+    if (vCols) {
+      vCols.forEach((p) => {
+        if (dProps[p]) {
+          let dn = this.getPropStringValue(meta[p], resource)
+          displayName += displayName.length ? ' ' + dn : dn;
+        }
+      })
+      // if (displayName.length)
+      //   return displayName
+    }
+    // if models does not have viewCols or not all displayName props are listed in viewCols
+    for (var p in meta) {
+      if (p.charAt(0) === '_')
+        continue
+      if (vCols  &&  vCols.indexOf(p) !== -1)
+        continue
+      if (dProps)  {
+        if (!dProps[p]) {
+          if (!displayName  &&  m  &&  resource[p]  &&  m.value.subClassOf === 'tradle.Enum')
+            return resource[p];
+          continue
+        }
+        else if (resource[p]) {
+          let dn = this.getPropStringValue(meta[p], resource)
+          displayName += displayName.length ? ' ' + dn : dn;
+        }
+      }
+      // let dn = this.getPropStringValue(meta[p], resource)
+      // displayName += displayName.length ? ' ' + dn : dn;
+    }
+    return displayName;
+  },
+
+  getPropStringValue(prop, resource) {
+    let p = prop.name
+    if (!resource[p]  &&  prop.displayAs)
+      return this.templateIt(prop, resource);
+    if (prop.type == 'object')
+      return resource[p].title || this.getDisplayName(resource[p]);
+    else
+      return resource[p] + '';
   },
 
   template (t, o) {

@@ -101,7 +101,7 @@ var RowMixin = {
       return (
         <View style={style} key={this.getNextKey()}>
           <View style={[styles.column, {flex: 1}]}>
-            <Text style={[styles.descriptionB]}>{propTitle}</Text>
+            <Text style={[styles.descriptionG]}>{propTitle}</Text>
           </View>
           <View style={[styles.column, {flex: flexVal}]}>
             <Text style={styles.descriptionB}>{value}</Text>
@@ -505,6 +505,12 @@ var styles = StyleSheet.create({
   title: {
     fontSize: 18,
     color: '#757575'
+  },
+  descriptionG: {
+    fontSize: 17,
+    justifyContent: 'center',
+    color: '#aaaaaa',
+    marginTop: 1
   },
   descriptionB: {
     fontSize: 18,
