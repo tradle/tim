@@ -154,7 +154,10 @@ RCT_EXPORT_METHOD(scan:(NSDictionary*) options callback:(RCTResponseSenderBlock)
     // allow rotation if VC is displayed as a modal view controller
     scanningViewController.autorotate = YES;
     scanningViewController.supportedOrientations = UIInterfaceOrientationMaskAll;
-
+    if (scanningViewController.isScanningPaused) {
+      [scanningViewController resumeScanningAndResetState:true];
+    }
+    
     /** You can use other presentation methods as well */
     [root presentViewController:scanningViewController animated:YES completion:nil];
   });
