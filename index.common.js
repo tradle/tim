@@ -680,7 +680,7 @@ var styles = StyleSheet.create({
   navBarTitleText: {
     color: '#2E3B4E',
     fontWeight: '400',
-    fontSize: 22,
+    fontSize: 20,
   },
   navBarLeftButton: {
     paddingLeft: 10,
