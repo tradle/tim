@@ -62,10 +62,9 @@ class VerificationView extends Component {
       let dnProps = utils.getPropertiesWithAnnotation(m.properties, 'displayName')
       let displayName = utils.getDisplayName(resource.method, m.properties)
       let val = <View>{this.renderResource(resource.method, m)}</View>
-      let title = <View style={{backgroundColor: this.props.bankStyle.VERIFICATION_BG, padding: 10, flexDirection: 'row'}}>
-                    <Icon name='md-add-circle' size={15} color={this.props.bankStyle.VERIFIED_HEADER_COLOR} style={{ marginTop: 2, justifyContent:'center', paddingRight: 3, paddingLeft: 10 * (currentLayer + 1)}} />
-                    <View style={{flexDirection: 'column'}}>
-                      <Text style={{color: this.props.bankStyle.VERIFIED_HEADER_COLOR, fontSize: 18}}>{translate(m)}</Text>
+      let title = <View style={{backgroundColor: this.props.bankStyle.VERIFICATION_BG, paddingVertical: 10, flexDirection: 'row'}}>
+                    <Icon name='md-add-circle' size={15} color='#aaa' style={{ marginTop: 2, justifyContent:'center', paddingRight: 3, paddingLeft: 10 * (currentLayer + 1)}} />
+                    <View style={{flexDirection: 'column', width: utils.dimensions(VerificationView).width}}>
                       <Text style={{color: '#757575', fontSize: 18}}>{displayName}</Text>
                     </View>
                   </View>
@@ -163,7 +162,7 @@ class VerificationView extends Component {
           else
             val = NOT_SPECIFIED
         }
-        else
+        else if (typeof val === 'undefined')
           return;
       }
       else if (pMeta.ref) {
@@ -189,7 +188,7 @@ class VerificationView extends Component {
         // let jsonRows = []
         val = this.showJson(pMeta, val, false, [])
       }
-      if (!val)
+      if (typeof val === 'undefined')
         return <View key={this.getNextKey()}></View>;
       if (!isRef) {
         // isItems = Array.isArray(val)
