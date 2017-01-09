@@ -429,7 +429,7 @@ var utils = {
             return resource[p];
           continue
         }
-        else if (resource[p]) {
+        else {
           let dn = this.getPropStringValue(meta[p], resource)
           displayName += displayName.length ? ' ' + dn : dn;
         }
@@ -464,6 +464,7 @@ var utils = {
     let pgroup = prop.group
     let group = []
     let hasSetProps
+    let props = this.getModel(resource[TYPE]).value.properties
     let m = this.getModel(resource[TYPE])
     for (let i=0; i<=pgroup.length; i++) {
       let p = pgroup[i]
