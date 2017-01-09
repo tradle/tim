@@ -445,7 +445,7 @@ var utils = {
     if (!resource[p]  &&  prop.displayAs)
       return this.templateIt(prop, resource);
     if (prop.type == 'object')
-      return resource[p].title || this.getDisplayName(resource[p]);
+      return resource[p].title || this.getDisplayName(resource[p], utils.getModel(resource[p][TYPE]).value.properties);
     else
       return resource[p] + '';
   },
