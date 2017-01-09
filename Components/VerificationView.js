@@ -63,7 +63,7 @@ class VerificationView extends Component {
       let displayName = utils.getDisplayName(resource.method, m.properties)
       let val = <View>{this.renderResource(resource.method, m)}</View>
       let title = <View style={{backgroundColor: this.props.bankStyle.VERIFICATION_BG, paddingVertical: 10, flexDirection: 'row'}}>
-                    <Icon name='md-add-circle' size={15} color='#aaa' style={{ marginTop: 2, justifyContent:'center', paddingRight: 3, paddingLeft: 10 * (currentLayer + 1)}} />
+                    <Icon name='md-add-circle' size={25} color='#aaa' style={{ marginTop: 2, justifyContent:'center', paddingRight: 3, paddingLeft: 10 * (currentLayer + 1)}} />
                     <View style={{flexDirection: 'column', width: utils.dimensions(VerificationView).width}}>
                       <Text style={{color: '#757575', fontSize: 18}}>{displayName}</Text>
                     </View>
