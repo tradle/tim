@@ -359,7 +359,7 @@ var utils = {
 
     return props
   },
-  getDisplayName1(resource, meta) {
+  getDisplayName(resource, meta) {
     if (!meta) {
       if (resource.title)
         return resource.title
@@ -394,7 +394,7 @@ var utils = {
     return displayName;
   },
 
-  getDisplayName(resource, meta) {
+  getDisplayName1(resource, meta) {
     if (!meta) {
       if (resource.title)
         return resource.title
