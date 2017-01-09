@@ -46,7 +46,7 @@ class VerificationView extends Component {
     let vTree = []
     return (
        <View>
-        <View style={[styles.textContainer, {padding: 10, alignSelf: 'stretch', alignItems: 'center', backgroundColor: this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>
+        <View style={[styles.textContainer, {padding: 5, alignSelf: 'stretch', alignItems: 'center', backgroundColor: this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>
           <Text style={[styles.description, {color: this.props.bankStyle.VERIFICATION_BG, fontSize:20}]}>{translate('verifiedBy', resource._verifiedBy ? resource._verifiedBy.title : resource.from.title)}</Text>
         </View>
         {this.renderVerification(resource, utils.getModel(constants.TYPES.VERIFICATION).value, vTree, 0, 0)}
