@@ -138,7 +138,7 @@ class ProductChooser extends Component {
     }
     else {
       msg[constants.TYPE] =  FORM_REQUEST,
-      msg.message = translate(model.formRequestMessage || 'fillTheForm', translate(utils.getModelTitle(model)))
+      msg.message = translate(model.formRequestMessage || 'fillTheForm', translate(utils.makeModelTitle(model)))
           // translate(model.properties.photos ? 'fillTheFormWithAttachments' : 'fillTheForm', translate(model.title)),
       // product: productModel.id,
       msg.form = model.id
