@@ -5111,7 +5111,7 @@
     },
     "sendy-ws": {
       "version": "1.5.1",
-      "from": "tradle/sendy-ws",
+      "from": "git://github.com/tradle/sendy-ws.git#6aad46cf66a7cd57cc3c911699ffc938af470727",
       "resolved": "git://github.com/tradle/sendy-ws.git#6aad46cf66a7cd57cc3c911699ffc938af470727"
     },
     "serve-favicon": {
