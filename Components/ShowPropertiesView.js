@@ -216,6 +216,8 @@ class ShowPropertiesView extends Component {
                 value = utils.getModel(v.value).value.title
               else
                 value = v.value || '[not shared]'
+              if (typeof value === 'object')
+                value = value.title
             }
 
             if (!key)
