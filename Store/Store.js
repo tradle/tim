@@ -3304,6 +3304,8 @@ var Store = Reflux.createStore({
         }
         retParams.loadEarlierMessages = true
       }
+      if (params.modelName === FORM)
+        retParams.requestedModelName = FORM
       if (!params.isAggregation  &&  params.to  &&  !params.prop) {
         if (params.to[TYPE] !== PROFILE  ||  !me.isEmployee) {
           // let to = list[utils.getId(params.to)].value
