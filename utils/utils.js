@@ -429,7 +429,7 @@ var utils = {
             return resource[p];
           continue
         }
-        else if (resource[p]) {
+        else {
           let dn = this.getPropStringValue(meta[p], resource)
           displayName += displayName.length ? ' ' + dn : dn;
         }
@@ -445,7 +445,7 @@ var utils = {
     if (!resource[p]  &&  prop.displayAs)
       return this.templateIt(prop, resource);
     if (prop.type == 'object')
-      return resource[p].title || this.getDisplayName(resource[p]);
+      return resource[p].title || this.getDisplayName(resource[p], utils.getModel(resource[p][TYPE]).value.properties);
     else
       return resource[p] + '';
   },
@@ -464,6 +464,7 @@ var utils = {
     let pgroup = prop.group
     let group = []
     let hasSetProps
+    let props = this.getModel(resource[TYPE]).value.properties
     let m = this.getModel(resource[TYPE])
     for (let i=0; i<=pgroup.length; i++) {
       let p = pgroup[i]
