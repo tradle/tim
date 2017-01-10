@@ -40,6 +40,8 @@ import {
 
 import React, { Component } from 'react'
 
+import ENV from '../utils/env'
+
 class FormRequestRow extends Component {
   constructor(props) {
     super(props);
@@ -255,7 +257,7 @@ class FormRequestRow extends Component {
     resource[constants.TYPE] = model.id;
 
     // Prefill for testing and demoing
-    var isPrefilled = __DEV__ && model.id in formDefaults
+    var isPrefilled = ENV.prefillForms && model.id in formDefaults
     if (isPrefilled) {
       extend(true, resource, formDefaults[model.id])
       // console.log(JSON.stringify(resource, 0, 2))

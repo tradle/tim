@@ -34,5 +34,6 @@ module.exports = {
   },
   autoOptInTouchId: true,
   allowAddServer: true,
-  allowForgetMe: true
+  allowForgetMe: true,
+  prefillForms: __DEV__
 }
