@@ -547,10 +547,10 @@ class MessageList extends Component {
       if (hideTextInput)
         maxHeight -= 10
       // content = <GiftedMessenger style={{paddingHorizontal: 10, marginBottom: Platform.OS === 'android' ? 0 : 20}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
-      var paddingLeft = 10
+      var marginLeft = 10
       // way ScrollView is implemented with position:absolute disrespects the confines of the screen width
-      var paddingRight = utils.isWeb() ? 20 : 10
-      content = <GiftedMessenger style={{ paddingLeft, paddingRight }} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
+      var marginRight = 10
+      content = <GiftedMessenger style={{ marginLeft, marginRight }} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
         ref={(c) => this._GiftedMessenger = c}
         loadEarlierMessagesButton={this.state.loadEarlierMessages}
         onLoadEarlierMessages={this.onLoadEarlierMessages.bind(this)}

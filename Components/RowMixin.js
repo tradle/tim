@@ -92,15 +92,16 @@ var RowMixin = {
       let isForm = model.subClassOf === constants.TYPES.FORM
       let isMyMessage = this.isMyMessage()
       if (!this.props.isAggregation  &&  (isMyMessage || isForm) &&  !isMyProduct)
-        style = [style, {borderWidth: BORDER_WIDTH, paddingVertical: 3, borderColor: isMyMessage ? STRUCTURED_MESSAGE_COLOR : '#ffffff', borderBottomColor: isMyMessage ? this.props.bankStyle.STRUCTURED_MESSAGE_BORDER : '#eeeeee'}]
-      let color = isMyMessage && !isMyProduct ? {color: '#FFFFEE'} : {color: '#757575'}
+        style = [style, {borderWidth: 0, paddingVertical: 3, borderColor: isMyMessage ? STRUCTURED_MESSAGE_COLOR : '#ffffff', borderBottomColor: isMyMessage ? this.props.bankStyle.STRUCTURED_MESSAGE_BORDER : '#eeeeee'}]
       let value = val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')
+      let ratio = value.length / propTitle.length
+      let flexVal = (propTitle.length > value.length || ratio < 1.2) ? 1 : ratio < 1.5 ? 2 : 3
       return (
         <View style={style} key={this.getNextKey()}>
           <View style={[styles.column, {flex: 1}]}>
             <Text style={[styles.descriptionG]}>{propTitle}</Text>
           </View>
-          <View style={[styles.column, {flex: 1}]}>
+          <View style={[styles.column, {flex: flexVal}]}>
             <Text style={styles.descriptionB}>{value}</Text>
           </View>
        </View>
@@ -216,11 +217,12 @@ var RowMixin = {
     else
       msg = <View/>
 
-    var hasPhotos = document  &&  document.photos  &&  document.photos.length
-    var photo = hasPhotos
-              ? <Image resizeMode='cover' source={{uri: utils.getImageUri(document.photos[0].url)}}  style={styles.cellImage} />
-              : <View />;
-    var headerStyle = {paddingTop: verification.dateVerified ? 0 : 5, alignSelf: 'center', flex: 1}
+    // var hasPhotos = document  &&  document.photos  &&  document.photos.length
+    // var photo = hasPhotos
+    //           ? <Image resizeMode='cover' source={{uri: utils.getImageUri(document.photos[0].url)}}  style={styles.cellImage} />
+    //           : <View />;
+    var headerStyle = {paddingTop: verification.dateVerified ? 0 : 5, marginLeft: 30}
+    // var headerStyle = {paddingTop: verification.dateVerified ? 0 : 5, alignSelf: 'center', flex: 1}
     var isShared = this.isShared(verification)
 
                     // {verification.dateVerified
@@ -235,24 +237,10 @@ var RowMixin = {
     let hs = /*isShared ? chatStyles.description :*/ [chatStyles.resourceTitle, styles.header]
     let arrow = <Icon color={this.props.bankStyle.VERIFIED_HEADER_COLOR} size={20} name={'ios-arrow-forward'} style={{top: 10, position: 'absolute', right: 30}}/>
     var header =  <View style={headerStyle}>
-                    <Text style={[isShared ? chatStyles.description : chatStyles.resourceTitle, styles.header, isShared ? {maxWidth: 0.8 * utils.dimensions().width - 50, fontSize: 16, alignSelf: params.isMyMessage ? 'flex-start' : 'flex-end', marginTop: -5, color: '#757575'} : {color: this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>
-                      {isShared
-                        ? translate('asVerifiedBy', verification._verifiedBy ? verification._verifiedBy.title : verification.organization.title)
-                        : translate(model) + ' ...'}
+                    <Text style={hs}>
+                     {translate(model)}
                     </Text>
-                    {verification.dateVerified
-                      ? <View style={{flexDirection: 'row'}}>
-                          <Text style={{fontSize: 12, color: 'darkblue', fontStyle: 'italic', paddingRight: 5}}>{'Date'}</Text>
-                          <Text style={{fontSize: 12, color: this.props.bankStyle.VERIFIED_HEADER_COLOR, fontStyle: 'italic'}}>{utils.formatDate(verification.dateVerified)}</Text>
-                        </View>
-                      : <View/>
-                    }
                   </View>
-
-    // var header =    <Text style={hs}>
-    //                  {translate(model)}
-    //                 </Text>
-
 
     header = <View style={[addStyle, styles.verification]}>
                {arrow}

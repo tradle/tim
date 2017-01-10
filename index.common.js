@@ -673,7 +673,7 @@ var styles = StyleSheet.create({
     // backgroundColor: '#dddddd',
     height: 27,
     marginRight: 3,
-    marginTop: 7,
+    marginTop: 2,
     marginLeft: 0,
     width: 27,
     borderRadius: 13,
