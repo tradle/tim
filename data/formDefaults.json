@@ -571,7 +571,7 @@
   },
   "tradle.TaxesFiledConfirmationForm": {
     "relevantTaxYear": 2016,
-    "confirmationText": "I/we have no indication that with respect to the assets transferred into the above account/custody account opened during the current tax assessment period1 and/or any capital gains and/or other income derived from them in the past, if relevant, the aforementioned person did not fulfill his/her tax payment and/or disclosure obligations in his/her country of residence in accordance with the applicable local regulations",
+    "confirmationText": "I/we have no indication that with respect to the assets transferred into the above account/custody account opened during the current tax assessment period and/or any capital gains and/or other income derived from them in the past, if relevant, the aforementioned person did not fulfill his/her tax payment and/or disclosure obligations in his/her country of residence in accordance with the applicable local regulations",
     "confirmationCheck": true
   },
   "tradle.PhotoID": {
