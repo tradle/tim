@@ -1834,7 +1834,7 @@ var Store = Reflux.createStore({
         if (disableAutoResponse) {
           if (!sendParams.other)
             sendParams.other = {}
-          sendParams.disableAutoResponse = true
+          sendParams.other.disableAutoResponse = true
         }
         const method = toChain[SIG] ? 'send' : 'signAndSend'
         return meDriver[method](sendParams)
