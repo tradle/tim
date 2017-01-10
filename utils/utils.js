@@ -466,13 +466,15 @@ var utils = {
     let hasSetProps
     let props = this.getModel(resource[TYPE]).value.properties
     let m = this.getModel(resource[TYPE])
-    for (let i=0; i<=pgroup.length; i++) {
+    for (let i=0; i<pgroup.length; i++) {
       let p = pgroup[i]
       let v =  resource[p] ? resource[p] : ''
       if (v)
         hasSetProps = true
       if (typeof v === 'object')
         v = v.title ? v.title : utils.getDisplayName(v, this.getModel(props[p].ref).value.properties)
+      else if (props[p].range  &&  props[p].range  === 'check')
+        v = ''
       group.push(v)
     }
 
