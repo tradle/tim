@@ -1085,7 +1085,7 @@ class ResourceList extends Component {
           id: constants.TYPES.PROFILE + '_' + h[2]
         }
       }
-      Actions.addItem({resource: r, value: r, meta: utils.getModel('tradle.GuestSessionProof').value})
+      Actions.addItem({resource: r, value: r, meta: utils.getModel('tradle.GuestSessionProof').value, disableAutoResponse: true})
       break
     case TALK_TO_EMPLOYEEE:
       Actions.getEmployeeInfo(result.data.substring(h[0].length + 1))

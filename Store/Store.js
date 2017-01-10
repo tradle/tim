@@ -52,7 +52,7 @@ var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
-var Keychain = !utils.isWeb() && require('../utils/keychain')
+var Keychain = null //!utils.isWeb() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('q-level');
 var debounce = require('debounce')
@@ -242,15 +242,15 @@ const DEVICE_ID = 'deviceid'
 const TLS_ENABLED = false
 const PAUSE_ON_TRANSITION = false //true
 
-const {
-  newAPIBasedVerification,
-  newIdscanVerification,
-  newAu10tixVerification,
-  newVisualVerification,
-  newVerificationTree,
-  randomDoc,
-  newFormRequestVerifiers
-} = require('../utils/faker')
+// const {
+//   newAPIBasedVerification,
+//   newIdscanVerification,
+//   newAu10tixVerification,
+//   newVisualVerification,
+//   newVerificationTree,
+//   randomDoc,
+//   newFormRequestVerifiers
+// } = require('../utils/faker')
 
 
 // var Store = Reflux.createStore(timeFunctions({
@@ -2475,7 +2475,7 @@ var Store = Reflux.createStore({
             to: orgRep
           }
 
-          return self.onAddMessage({msg: msg})
+          return self.onAddMessage({msg: msg, disableAutoResponse: params.disableAutoResponse})
         }
       })
     } else {
