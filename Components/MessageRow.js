@@ -1,7 +1,6 @@
 'use strict';
 
 var utils = require('../utils/utils');
-var ENV = require('../utils/env')
 var translate = utils.translate
 var ArticleView = require('./ArticleView');
 var MessageView = require('./MessageView');
@@ -11,9 +10,7 @@ var PhotoList = require('./PhotoList');
 var Icon = require('react-native-vector-icons/Ionicons');
 var groupByEveryN = utils.groupByEveryN
 var constants = require('@tradle/constants');
-import LinearGradient from 'react-native-linear-gradient'
 var RowMixin = require('./RowMixin');
-var Accordion = require('react-native-accordion')
 var extend = require('extend')
 var equal = require('deep-equal')
 var formDefaults = require('../data/formDefaults.json')
@@ -27,10 +24,8 @@ var chatStyles = require('../styles/chatStyles')
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_ERROR = 'tradle.FormError'
 const FORM = 'tradle.Form'
-const FORM_REQUEST = 'tradle.FormRequest'
 const SHARE_CONTEXT = 'tradle.ShareContext'
 const ENUM = 'tradle.Enum'
-const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const PRODUCT_LIST = 'tradle.ProductList'
 const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
@@ -50,10 +45,12 @@ import {
   Alert,
   Navigator,
   View,
+  Platform,
   processColor
 } from 'react-native'
 
 import React, { Component } from 'react'
+import ENV from '../utils/env'
 
 class MessageRow extends Component {
   constructor(props) {
@@ -99,7 +96,6 @@ class MessageRow extends Component {
 
     var noMessage = !message  ||  !message.length;
     var isSimpleMessage = resource[constants.TYPE] === constants.TYPES.SIMPLE_MESSAGE
-    var isFormRequest = model.id === FORM_REQUEST
     var isForgetting = model.id === constants.TYPES.FORGET_ME || model.id === constants.TYPES.FORGOT_YOU
     if (!renderedRow.length) {
       var vCols = noMessage ? null : utils.getDisplayName(resource, model.properties);
@@ -109,9 +105,7 @@ class MessageRow extends Component {
     else {
       var fromHash = resource.from.id;
       if (isMyMessage) {
-        if (model.id === FORM_REQUEST)
-          addStyle = [chatStyles.myCell, {backgroundColor: '#F1FFE7', borderColor: '#D7DACA', borderWidth: 1}]
-        else if (!noMessage)
+        if (!noMessage)
           addStyle = chatStyles.myCell
       }
       else if (isForgetting)
@@ -133,7 +127,7 @@ class MessageRow extends Component {
       }
       if (isFormError)
         addStyle = [addStyle, chatStyles.verificationBody, {backgroundColor: this.props.bankStyle.FORM_ERROR_BG, borderColor: resource.documentCreated ? this.props.bankStyle.REQUEST_FULFILLED : this.props.bankStyle.FORM_ERROR_BORDER}]; //model.style];
-      if (isMyMessage  &&  !isSimpleMessage && !isFormError && !model.id === FORM_REQUEST)
+      if (isMyMessage  &&  !isSimpleMessage && !isFormError)
         addStyle = [addStyle, chatStyles.verificationBody, {backgroundColor: STRUCTURED_MESSAGE_COLOR, borderColor: '#C1E3E8'}]; //model.style];
     }
     var properties = model.properties;
@@ -153,10 +147,11 @@ class MessageRow extends Component {
           photoUrls.push({url: utils.getImageUri(p.url)});
         })
 
+        let isReadOnlyChat = to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.context) //this.props.context  &&  this.props.context._readOnly
         photoListStyle = {
           flexDirection: 'row',
           alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
-          marginLeft: isMyMessage ? 30 : 45, //(hasOwnerPhoto ? 45 : 10),
+          marginLeft: isReadOnlyChat ? 45 : 30, //(hasOwnerPhoto ? 45 : 10),
           borderRadius: 10,
           marginBottom: 3,
         }
@@ -203,14 +198,14 @@ class MessageRow extends Component {
     let msgWidth = Math.floor(w * 0.8)
     let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
 
-    let longMessage = (isSimpleMessage || isFormRequest)  &&  message ? numberOfCharsInWidth < message.length : false
+    let longMessage = isSimpleMessage  &&  message ? numberOfCharsInWidth < message.length : false
     if (showMessageBody) {
       var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
       if (message) {
         if (/*message.charAt(0) === '['  || */ longMessage)
           viewStyle.maxWidth = msgWidth; //isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
       }
-      if (!isSimpleMessage  &&  model.id !== FORM_REQUEST  &&  model.id !== PRODUCT_LIST) {
+      if (!isSimpleMessage  &&  model.id !== PRODUCT_LIST) {
         let msgW = message.length * utils.getFontSize(12) + 40
         // if (msgW > msgWidth)
           viewStyle.maxWidth =  msgW > msgWidth ? msgWidth : msgW
@@ -284,11 +279,7 @@ class MessageRow extends Component {
     var viewStyle = { margin:1, backgroundColor: '#f7f7f7' }
     var model = utils.getModel(this.props.resource[constants.TYPE]).value;
     var isLicense = model.id.indexOf('License') !== -1  ||  model.id.indexOf('Passport') !== -1;
-    var photoStyle = (isLicense  &&  len === 1) ? styles.bigImageH : photoStyle;
-    var shareables = resource.documentCreated || model.id !== FORM_REQUEST
-                   ? <View />
-                   : this.showShareableResources(rowStyle, viewStyle, addStyle);
-      // <View style={viewStyle} ref={resource[constants.ROOT_HASH]}>
+    var photoStyle = (isLicense  &&  len === 1) ? chatStyles.bigImage : photoStyle;
 
     return (
       <View style={[viewStyle, {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR, paddingRight: isMyMessage ? 10 : 0}]}>
@@ -298,9 +289,19 @@ class MessageRow extends Component {
           <PhotoList photos={photoUrls} resource={this.props.resource} style={[photoStyle, {marginTop: -5}]} navigator={this.props.navigator} numberInRow={inRow} />
         </View>
         {sendStatus}
-        {shareables}
       </View>
     )
+    // return (
+    //   <View style={[viewStyle, {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}]}>
+    //     {date}
+    //     {messageBody}
+    //     <View style={photoListStyle}>
+    //       <PhotoList photos={photoUrls} resource={this.props.resource} style={[photoStyle, {marginTop: -5}]} navigator={this.props.navigator} numberInRow={inRow} />
+    //     </View>
+    //     {sendStatus}
+    //     {shareables}
+    //   </View>
+    // )
   }
 
   editVerificationRequest() {
@@ -364,99 +365,6 @@ class MessageRow extends Component {
     });
 
   }
-  showShareableResources(rowStyle, viewStyle, addStyle) {
-    if (!this.props.shareableResources) // || !this.props.resource.message)
-      return <View/>;
-
-    var resource = this.props.resource;
-    // var msgParts = utils.splitMessage(resource.message);
-    // // Case when the needed form was sent along with the message
-    // if (msgParts.length != 2)
-    //   return <View/>
-
-    // var msgModel = utils.getModel(msgParts[1]);
-    let formModel = utils.getModel(resource.form).value
-    let isMultientryForm = isMultientry(resource)
-    let entries = (isMultientryForm && this.props.productToForms[resource.product])
-                ? this.props.productToForms[resource.product][resource.form]
-                : null
-    // if (!formModel)
-    //   return <View/>;
-    // formModel = formModel.value;
-    var vtt = [];
-    var cnt = 0;
-    var chatOrg = this.props.to[constants.TYPE] === constants.TYPES.ORGANIZATION  &&  utils.getId(this.props.to)
-    let shareableResources = this.props.shareableResources.verifications
-    let providers = this.props.shareableResources.providers
-    for (var t in  shareableResources) {
-      if (t === formModel.id) {
-        var ver = shareableResources[t];
-        var r = ver[0]
-        var totalShareables = ver.length
-        ver.forEach((r) => {
-          let document = r.document
-          if (entries  &&  (entries.indexOf(utils.getId(document)) !== -1  ||  entries.indexOf(r.document[constants.NONCE]) !== -1))
-            return
-          // if (chatOrg  &&  utils.getId(r.organization) === chatOrg) {
-          //   totalShareables--
-          //   return
-          // }
-          // if (!cnt) {x
-            var vModel = utils.getModel(r[constants.TYPE]);
-            var doc = this.formatDocument({
-              model: formModel,
-              verification: r,
-              isAccordion: totalShareables > 1,
-              providers: providers  &&  providers[document[constants.ROOT_HASH]]
-            })
-            if (cnt) {
-              doc = <View key={this.getNextKey()}>
-                      <View style={{height: 1, backgroundColor: '#dddddd'}} />
-                      {doc}
-                    </View>
-            }
-          // }
-          vtt.push(doc);
-          cnt++;
-        })
-      }
-    }
-    if (!vtt.length)
-      return <View />;
-
-    var modelTitle = translate(formModel)
-    var idx = modelTitle.indexOf('Verification');
-    var docType;
-    if (idx === -1)
-      docType = modelTitle;
-    else
-      docType = modelTitle.substring(0, idx) + (modelTitle.length === idx + 12 ? '' : modelTitle.substring(idx + 12))
-
-    let org = this.props.to.organization ? (this.props.to.organization.title + '.') : this.props.to.name;
-    let msg = (vtt.length === 1)
-            ? (formModel.subClassOf === MY_PRODUCT
-                ? translate('shareMyProduct', translate(formModel), org)
-                : translate('shareOne', utils.getMe().firstName, docType, org)
-              )
-            : translate('shareOneOfMany', utils.getMe().firstName, docType, org)
-
-    let w = utils.dimensions(MessageRow).width * 0.8
-    return (
-      <View style={[rowStyle, viewStyle, {width: w}]} key={this.getNextKey()}>
-        <View style={{width: 40}}/>
-        <View style={[addStyle ? [chatStyles.textContainer, addStyle] : chatStyles.textContainer]}>
-          <View style={{flex: 1}}>
-            <View style={styles.assistentBox}>
-              <Text style={styles.assistentText}>{msg}</Text>
-            </View>
-            <View style={{marginHorizontal: -7}}>
-            {vtt}
-            </View>
-         </View>
-        </View>
-      </View>
-     );
-  }
   onPress(event) {
     this.props.navigator.push({
       id: 7,
@@ -469,12 +377,11 @@ class MessageRow extends Component {
       'from': this.props.resource.to,
       'to': this.props.resource.from,
     }
-    if (this.props.resource[constants.TYPE] !== FORM_REQUEST)
-      resource.message = this.props.resource.message;
+    resource.message = this.props.resource.message;
     resource[constants.TYPE] = model.id;
 
     // Prefill for testing and demoing
-    var isPrefilled = ENV.prefillWithTestData && model.id in formDefaults
+    var isPrefilled = ENV.prefillForms && model.id in formDefaults
     if (isPrefilled) {
       extend(true, resource, formDefaults[model.id])
       // console.log(JSON.stringify(resource, 0, 2))
@@ -543,6 +450,8 @@ class MessageRow extends Component {
   formatRow(isMyMessage, renderedRow) {
     var resource = this.props.resource;
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
+
+    let isReadOnlyChat = this.props.to[constants.TYPE]  &&  utils.isReadOnlyChat(this.props.context) //this.props.context  &&  this.props.context._readOnly
 
     if (model.id === PRODUCT_APPLICATION) {
       let msgModel = utils.getModel(resource.product).value
@@ -618,12 +527,6 @@ class MessageRow extends Component {
       renderedRow.push(msg)
       return null
     }
-    if (model.id === FORM_REQUEST) {
-      if (!resource.product  || utils.getModel(resource.product).value.subClassOf !== MY_PRODUCT)
-        return {onPressCall: this.formRequest(resource, renderedRow)}
-      else
-        return
-    }
 
     var viewCols = model.gridCols || model.viewCols;
     if (!viewCols)
@@ -644,7 +547,6 @@ class MessageRow extends Component {
 
     var vCols = [];
 
-    let isReadOnly = utils.isReadOnlyChat(resource, this.props.context) //this.props.context  &&  this.props.context._readOnly
     viewCols.forEach(function(v) {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date')
         return;
@@ -668,13 +570,23 @@ class MessageRow extends Component {
       }
       else if (isFormError) {
         let rtype = (resource.prefill[constants.TYPE]) ? resource.prefill[constants.TYPE] : utils.getId(resource.prefill).split('_')[0]
-        let iconName = resource.documentCreated ? 'ios-done-all' : 'ios-information-circle-outline'
-        let iconSize = 30
+        let iconName = resource.documentCreated ? 'ios-done-all' : 'ios-alert-outline'
+        let iconSize = resource.documentCreated ? 30 : 25
+        let instruction
+        if (isMyMessage) {
+          instruction = translate('errorNotification')
+        } else if (resource.message.indexOf('Importing') === 0) {
+          // hack for tradle.Remediation
+          instruction = resource.message
+        } else {
+          instruction = translate('pleaseCorrect')
+        }
+
         vCols.push(
-          <View key={self.getNextKey()}>
-            <Text style={[style, {color: '#757575'}]}>{isMyMessage ? translate('errorNotification') : resource[v]} </Text>
-            <Text style={[style, {color: resource.documentCreated || isReadOnly ?  '#757575' : self.props.bankStyle.FORM_ERROR_COLOR}]}>{translate(utils.getModel(rtype).value)}</Text>
-            <Icon name={iconName} size={iconSize} color={resource.documentCreated || isReadOnly ? self.props.bankStyle.REQUEST_FULFILLED : self.props.bankStyle.FORM_ERROR_COLOR} style={styles.errorBadge} />
+          <View key={self.getNextKey()} style={{paddingBottom: 3}}>
+            <Text style={[style, {color: '#555555'}]}>{instruction} </Text>
+            <Text style={[style, {color: resource.documentCreated || isReadOnlyChat ?  '#aaaaaa' : self.props.bankStyle.FORM_ERROR_COLOR}]}>{translate(utils.getModel(rtype).value)}</Text>
+            <Icon name={iconName} size={iconSize} color={resource.documentCreated || isReadOnlyChat ? self.props.bankStyle.REQUEST_FULFILLED : self.props.bankStyle.FORM_ERROR_COLOR} style={styles.errorBadge} />
           </View>
         )
       }
@@ -713,8 +625,8 @@ class MessageRow extends Component {
           var msgModel = utils.getModel(s[0]);
           let color, link
           if (msgModel) {
-            if (self.props.shareableResources  &&  !isSimpleMessage)
-              style = /*isSimpleMessage ? chatStyles.resourceTitle : */chatStyles.description;
+            // if (self.props.shareableResources  &&  !isSimpleMessage)
+            //   style = /*isSimpleMessage ? chatStyles.resourceTitle : */chatStyles.description;
             msgModel = msgModel.value;
             let shareMyProduct = msgModel.subClassOf === MY_PRODUCT
             if (shareMyProduct) {
@@ -738,7 +650,7 @@ class MessageRow extends Component {
               else
                 link = <View style={chatStyles.rowContainer}>
                            <Text style={[style, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(msgModel)}</Text>
-                           <Icon style={[{marginTop: 2}, resource.documentCreated || isReadOnly ? styles.linkIconGreyed : {color: isMyMessage ? self.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
+                           <Icon style={[{marginTop: 2}, resource.documentCreated || isReadOnlyChat ? chatStyles.linkIconGreyed : {color: isMyMessage ? self.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
                        </View>
             }
             let strName = isMyProduct
@@ -785,7 +697,7 @@ class MessageRow extends Component {
         renderedRow.push(v);
       })
     }
-    if (isReadOnly)
+    if (isReadOnlyChat)
       return null
     if (onPressCall)
       return {onPressCall: onPressCall}
@@ -800,108 +712,6 @@ class MessageRow extends Component {
     if (isSimpleMessage)
       return isConfirmation ? {isConfirmation: true} : null
     return {onPressCall: this.props.onSelect.bind(this, resource, null)}
-  }
-
-  formRequest(resource, vCols) {
-    let form = utils.getModel(resource.form).value
-
-    // if (this.props.shareableResources)
-    //   style = styles.description;
-    let message = resource.message
-    let onPressCall
-    // if (s.length === 2)
-    //   onPressCall = this.editForm.bind(self, msgParts[1], msgParts[0])
-    let sameFormRequestForm
-    if (!resource.documentCreated  &&  resource.product  &&  form.subClassOf !== MY_PRODUCT) {
-      let multiEntryForms = utils.getModel(resource.product).value.multiEntryForms
-      if (multiEntryForms  &&  multiEntryForms.indexOf(form.id) !== -1) {
-        let productToForms = this.props.productToForms
-        if (productToForms) {
-          let product = productToForms[resource.product]
-          if (product) {
-            let formsArray = product[resource.form]
-            if (formsArray)
-              sameFormRequestForm = true
-          }
-          // onPressCall = this.getNextFormAlert.bind(this)
-        }
-      }
-      if (!sameFormRequestForm)
-        onPressCall = this.createNewResource.bind(this, form, isMyMessage);
-    }
-    var isMyMessage = this.isMyMessage();
-
-    let color = isMyMessage
-              ? {color: '#AFBBA8'} //{color: STRUCTURED_MESSAGE_COLOR}
-              : {color: '#2892C6'}
-    let link
-    let isReadOnly = utils.isReadOnlyChat(this.props.resource, this.props.context) //this.props.context  &&  this.props.context._readOnly
-    if (sameFormRequestForm  &&  !resource.documentCreated) {
-       // let isReadOnly = utils.isReadOnlyChat(this.props.resource) // this.props.context  &&  this.props.context._readOnly
-
-       link = <View style={[chatStyles.rowContainer, {paddingVertical: 10, alignSelf: 'center'}]}>
-               <View style={chatStyles.textContainer}>
-               <TouchableHighlight underlayColor='transparent' style={{paddingRight: 15}} onPress={() => {
-                 this.createNewResource(form, isMyMessage)
-               }}>
-                 <View style={styles.multiEntryButton}>
-                   <Text style={chatStyles.resourceTitle}>   {translate('addSameForm')}   </Text>
-                 </View>
-               </TouchableHighlight>
-               <TouchableHighlight underlayColor='transparent' onPress={() => {
-                  Alert.alert(
-                    translate('areYouSureAboutNextForm', translate(form)),
-                    null,
-                    [
-                      {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-                      {text: translate('Ok'), onPress: () => {
-                        Actions.addMessage({
-                          from: resource.to,
-                          to: resource.from,
-                          _context: this.props.context,
-                          [constants.TYPE]: NEXT_FORM_REQUEST,
-                          after: form.id
-                        })
-                        var params = {
-                          value: {documentCreated: true},
-                          resource: resource,
-                          meta: utils.getModel(resource[constants.TYPE]).value
-                        }
-                        Actions.addItem(params)
-                       }},
-                    ]
-                  )
-               }}>
-                 <View style={styles.multiEntryButton}>
-                   <Text style={chatStyles.resourceTitle}>   {translate('getNextForm')}   </Text>
-                 </View>
-              </TouchableHighlight>
-              </View>
-             </View>
-    }
-    else if (isMyMessage)
-      link = <Text style={[chatStyles.resourceTitle, color]}>{translate(form)}</Text>
-    else {
-      let notLink = resource.documentCreated  ||  isReadOnly  ||  form.subClassOf === MY_PRODUCT
-      link = <View style={chatStyles.rowContainer}>
-               <Text style={[chatStyles.resourceTitle, {color: resource.documentCreated  ||  notLink ?  '#757575' : LINK_COLOR}]}>{translate(form)}</Text>
-               <Icon style={[{marginTop: 2, paddingLeft: 100}, resource.documentCreated  ? styles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
-             </View>
-      onPressCall = notLink
-                  ? null
-                  : resource.verifiers
-                     ? this.props.chooseTrustedProvider.bind(this, this.props.resource, form, isMyMessage)
-                     : this.createNewResource.bind(this, form, isMyMessage)
-    }
-    let strName = sameFormRequestForm ? translate('addAnotherFormOrGetNext', translate(form)) : utils.getStringName(message)
-    let str = strName ? utils.translate(strName) : message
-
-    let msg = <View key={this.getNextKey()}>
-               <Text style={chatStyles.resourceTitle}>{str}</Text>
-               {link}
-             </View>
-    vCols.push(msg);
-    return isReadOnly ? null : onPressCall
   }
 
   onChooseProduct() {
@@ -955,15 +765,6 @@ class MessageRow extends Component {
   }
 }
 
-function isMultientry(resource) {
-  if (!resource.product)
-    return false
-  let form = utils.getModel(resource.form).value
-  let product = utils.getModel(resource.product).value
-  let multiEntryForms = product.multiEntryForms
-  return  multiEntryForms && multiEntryForms.indexOf(form.id) !== -1 ? true : false
-}
-
 var styles = StyleSheet.create({
   container: {
     flex: 1
@@ -983,67 +784,11 @@ var styles = StyleSheet.create({
     borderTopLeftRadius: 0,
     borderRadius: 10,
   },
-  bigImageH: {
-    width: 270,
-    height: 200,
-    margin: 1,
-    borderRadius: 10
-  },
-  linkIconGreyed: {
-    color: '#cccccc'
-  },
-  assistentText: {
-    color: '#757575',
-    fontStyle: 'italic',
-    flexWrap: 'wrap',
-    fontSize: 17
-  },
-  assistentBox: {
-    backgroundColor: '#efefef',
-    paddingVertical: 5,
-    // borderRadius: 5,
-    borderTopRightRadius: 10,
-    paddingHorizontal: 7,
-    marginTop: -7,
-    marginHorizontal: -7
-  },
   errorBadge: {
     position: 'absolute',
     opacity: 0.5,
-    bottom: -5,
+    bottom: 0,
     right: 0
-  },
-  multiEntryButton:  {
-    borderRadius: 10,
-    borderColor: '#77ADFC',
-    borderWidth: 1,
-    padding: 10
-  },
-  msgImage: {
-    height: 30,
-    marginRight: 3,
-    marginLeft: 0,
-    width: 30,
-    borderRadius: 15,
-    borderColor: '#cccccc',
-    borderWidth: 1
-  },
-  multiEntryText: {
-    fontSize: 18
-  },
-  // msgImage: {
-  //   height: 30,
-  //   marginRight: 3,
-  //   marginLeft: 0,
-  //   width: 30,
-  //   borderRadius: 15,
-  //   borderColor: '#cccccc',
-  //   borderWidth: 1
-  // },
-  productAppIcon: {
-    alignSelf: 'flex-end',
-    marginTop: -30,
-    backgroundColor: 'transparent'
   },
   white18: {
     color: '#ffffff',

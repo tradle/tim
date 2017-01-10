@@ -15,6 +15,7 @@ var NOT_SPECIFIED = '[not specified]'
 var DEFAULT_CURRENCY_SYMBOL = '£'
 var CURRENCY_SYMBOL
 const ENUM = 'tradle.Enum'
+const TYPE = constants.TYPE
 
 import StyleSheet from '../StyleSheet'
 import {
@@ -45,7 +46,7 @@ class VerificationView extends Component {
     let vTree = []
     return (
        <View>
-        <View style={[styles.textContainer, {padding: 10, alignSelf: 'stretch', alignItems: 'center', backgroundColor: this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>
+        <View style={[styles.textContainer, {padding: 5, alignSelf: 'stretch', alignItems: 'center', backgroundColor: this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>
           <Text style={[styles.description, {color: this.props.bankStyle.VERIFICATION_BG, fontSize:20}]}>{translate('verifiedBy', resource._verifiedBy ? resource._verifiedBy.title : resource.from.title)}</Text>
         </View>
         {this.renderVerification(resource, utils.getModel(constants.TYPES.VERIFICATION).value, vTree, 0, 0)}
@@ -57,11 +58,15 @@ class VerificationView extends Component {
     var resource = resource ? resource : this.props.resource;
     var vModel = utils.getModel(constants.TYPES.VERIFICATION).value
     if (resource.method) {
-      var m = utils.getModel(resource.method[constants.TYPE]).value
+      var m = utils.getModel(resource.method[TYPE]).value
+      let dnProps = utils.getPropertiesWithAnnotation(m.properties, 'displayName')
+      let displayName = utils.getDisplayName(resource.method, m.properties)
       let val = <View>{this.renderResource(resource.method, m)}</View>
-      let title = <View style={{backgroundColor: this.props.bankStyle.VERIFICATION_BG, padding: 10, flexDirection: 'row'}}>
-                    <Icon name='md-add-circle' size={15} color={this.props.bankStyle.VERIFIED_HEADER_COLOR} style={{ marginTop: 2, justifyContent:'center', paddingRight: 3, paddingLeft: 10 * (currentLayer + 1)}} />
-                    <Text style={{color: this.props.bankStyle.VERIFIED_HEADER_COLOR, fontSize: 18}}>{m.title}</Text>
+      let title = <View style={{backgroundColor: this.props.bankStyle.VERIFICATION_BG, paddingVertical: 10, flexDirection: 'row', justifyContent: 'center'}}>
+                    <Icon name='ios-add-circle-outline' size={25} color='#aaa' style={{ marginTop: 2, justifyContent:'center', paddingRight: 3, paddingLeft: 10 * (currentLayer + 1)}} />
+                    <View style={{flexDirection: 'column', paddingLeft: 5, width: utils.dimensions(VerificationView).width - 50}}>
+                      <Text style={{color: '#757575', fontSize: 18}}>{displayName}</Text>
+                    </View>
                   </View>
 
       vTree.push(
@@ -98,7 +103,7 @@ class VerificationView extends Component {
   }
 
   onPress(url, event) {
-    var model = utils.getModel(this.props.resource[constants.TYPE]).value;
+    var model = utils.getModel(this.props.resource[TYPE]).value;
     this.props.navigator.push({
       id: 7,
       backButtonTitle: 'Back',
@@ -109,17 +114,17 @@ class VerificationView extends Component {
   }
   renderResource(resource, model) {
     var resource = resource ? resource : this.props.resource;
-    var modelName = resource[constants.TYPE];
+    var modelName = resource[TYPE];
     if (!model)
       model = utils.getModel(modelName)
     // var model = utils.getModel(modelName).value;
-    var vCols = vCols = model.viewCols
+    var vCols = model.viewCols ? utils.clone(model.viewCols) : null
     let props = model.properties
 
     if (!vCols) {
       vCols = [];
       for (var p in props) {
-        if (p != constants.TYPE)
+        if (p != TYPE)
           vCols.push(p)
       }
     }
@@ -157,7 +162,7 @@ class VerificationView extends Component {
           else
             val = NOT_SPECIFIED
         }
-        else
+        else if (typeof val === 'undefined')
           return;
       }
       else if (pMeta.ref) {
@@ -165,25 +170,30 @@ class VerificationView extends Component {
           let c = utils.normalizeCurrencySymbol(val.currency)
           val = (c || CURRENCY_SYMBOL) + val.value
         }
-        else if (pMeta.inlined)
-          return this.renderResource(val, utils.getModel(val[constants.TYPE]).value)
+        else if (pMeta.inlined ||  utils.getModel(pMeta.ref).value.inlined)
+          return this.renderResource(val, utils.getModel(val[TYPE]).value)
 
         // Could be enum like props
         else if (utils.getModel(pMeta.ref).value.subClassOf === ENUM)
           val = val.title
         else if (this.props.showVerification) {
-          var value = val[constants.TYPE] ? utils.getDisplayName(val, utils.getModel(val[constants.TYPE]).value.properties) : val.title
+          var value = val[TYPE] ? utils.getDisplayName(val, utils.getModel(val[TYPE]).value.properties) : val.title
           val = <Text style={[styles.title, styles.linkTitle]}>{value}</Text>
           isRef = true;
         }
       }
       else if (pMeta.type === 'date')
         val = dateformat(new Date(val), 'fullDate')
-      if (!val)
+      else if (pMeta.range === 'json') {
+        // let jsonRows = []
+        val = this.showJson(pMeta, val, false, [])
+      }
+      if (typeof val === 'undefined')
         return <View key={this.getNextKey()}></View>;
       if (!isRef) {
-        isItems = Array.isArray(val)
-        val = this.renderSimpleProp(val, pMeta, modelName)
+        // isItems = Array.isArray(val)
+        if (pMeta.range !== 'json')
+          val = this.renderSimpleProp(val, pMeta, modelName)
       }
       var title = pMeta.skipLabel  ||  isItems
                 ? <View />
@@ -271,7 +281,7 @@ module.exports = VerificationView
 /*
   renderResource(resource, model) {
     var resource = resource ? resource : this.props.resource;
-    var modelName = resource[constants.TYPE];
+    var modelName = resource[TYPE];
     var model = utils.getModel(modelName).value;
     var vCols = vCols = model.viewCols
     let props = model.properties
@@ -326,14 +336,14 @@ module.exports = VerificationView
           val = (c || CURRENCY_SYMBOL) + val.value
         }
         else if (pMeta.inlined)
-          return this.renderResource(val, utils.getModel(val[constants.TYPE]).value)
+          return this.renderResource(val, utils.getModel(val[TYPE]).value)
 
         // Could be enum like props
         else if (utils.getModel(pMeta.ref).value.subClassOf === ENUM)
           val = val.title
         else if (this.props.showVerification) {
           // ex. property that is referencing to the Organization for the contact
-          var value = val[constants.TYPE] ? utils.getDisplayName(val, utils.getModel(val[constants.TYPE]).value.properties) : val.title;
+          var value = val[TYPE] ? utils.getDisplayName(val, utils.getModel(val[TYPE]).value.properties) : val.title;
 
           // val = <TouchableOpacity onPress={this.props.showVerification.bind(this, val, pMeta)}>
              val=  <Text style={[styles.title, styles.linkTitle]}>{value}</Text>

@@ -70,6 +70,18 @@
 		73855D2E1CB42638000B6A0B /* libRNImagePicker.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B2E51601CAD7DBC000439E6 /* libRNImagePicker.a */; };
 		7385C6BB1C4C24A700B92CDA /* Dev.plist in Resources */ = {isa = PBXBuildFile; fileRef = 7385C6BA1C4C24A700B92CDA /* Dev.plist */; };
 		73947DA91D3DAEAA00C5CC8F /* libRCTPushNotification.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73947DA81D3DAEA500C5CC8F /* libRCTPushNotification.a */; };
+		739917CE1E17CF3E00061291 /* MicroBlink.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 739917CA1E17CF3E00061291 /* MicroBlink.bundle */; };
+		739917CF1E17CF3E00061291 /* MicroBlink.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 739917CB1E17CF3E00061291 /* MicroBlink.framework */; };
+		739917D01E17CF3E00061291 /* RNMicroBlinkManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 739917CD1E17CF3E00061291 /* RNMicroBlinkManager.m */; };
+		739917EF1E17CF4700061291 /* MicroBlink.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 739917CB1E17CF3E00061291 /* MicroBlink.framework */; };
+		739917F01E17CF4C00061291 /* MicroBlink.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 739917CA1E17CF3E00061291 /* MicroBlink.bundle */; };
+		739917F11E17CF6500061291 /* RNMicroBlinkManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 739917CD1E17CF3E00061291 /* RNMicroBlinkManager.m */; };
+		739917F41E17CF6D00061291 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 739917F31E17CF6D00061291 /* Accelerate.framework */; };
+		739917F61E17CF7100061291 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 739917F51E17CF7100061291 /* AVFoundation.framework */; };
+		739917F81E17CF7400061291 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 739917F71E17CF7400061291 /* AudioToolbox.framework */; };
+		739917FA1E17CF8400061291 /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 739917F91E17CF8400061291 /* libc++.tbd */; };
+		739917FC1E17CF8B00061291 /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 739917FB1E17CF8B00061291 /* libiconv.tbd */; };
+		739917FE1E17CF9C00061291 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 739917FD1E17CF9C00061291 /* CoreMedia.framework */; };
 		739F72C01C3F739700D9F2FB /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB11A68108700A75B9A /* LaunchScreen.xib */; };
 		739F72F01C3F742B00D9F2FB /* RNEnvironmentManagerIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = 739F72EF1C3F742B00D9F2FB /* RNEnvironmentManagerIOS.m */; };
 		739F73091C3F74AE00D9F2FB /* environment.json in Resources */ = {isa = PBXBuildFile; fileRef = 739F73081C3F74AE00D9F2FB /* environment.json */; };
@@ -362,6 +374,16 @@
 		7375407E1D25941500A81EC1 /* RNDeviceInfo.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNDeviceInfo.xcodeproj; path = "../node_modules/react-native-device-info/RNDeviceInfo.xcodeproj"; sourceTree = "<group>"; };
 		7385C6BA1C4C24A700B92CDA /* Dev.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Dev.plist; path = Tradle/Dev.plist; sourceTree = "<group>"; };
 		73947DA31D3DAEA500C5CC8F /* RCTPushNotification.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTPushNotification.xcodeproj; path = "../node_modules/react-native/Libraries/PushNotificationIOS/RCTPushNotification.xcodeproj"; sourceTree = "<group>"; };
+		739917CA1E17CF3E00061291 /* MicroBlink.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = MicroBlink.bundle; sourceTree = "<group>"; };
+		739917CB1E17CF3E00061291 /* MicroBlink.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MicroBlink.framework; path = MicroBlink/MicroBlink.framework; sourceTree = "<group>"; };
+		739917CC1E17CF3E00061291 /* RNMicroBlinkManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNMicroBlinkManager.h; sourceTree = "<group>"; };
+		739917CD1E17CF3E00061291 /* RNMicroBlinkManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNMicroBlinkManager.m; sourceTree = "<group>"; };
+		739917F31E17CF6D00061291 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
+		739917F51E17CF7100061291 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		739917F71E17CF7400061291 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		739917F91E17CF8400061291 /* libc++.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++.tbd"; path = "usr/lib/libc++.tbd"; sourceTree = SDKROOT; };
+		739917FB1E17CF8B00061291 /* libiconv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libiconv.tbd; path = usr/lib/libiconv.tbd; sourceTree = SDKROOT; };
+		739917FD1E17CF9C00061291 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		739F72EE1C3F742B00D9F2FB /* RNEnvironmentManagerIOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNEnvironmentManagerIOS.h; sourceTree = "<group>"; };
 		739F72EF1C3F742B00D9F2FB /* RNEnvironmentManagerIOS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNEnvironmentManagerIOS.m; sourceTree = "<group>"; };
 		739F73081C3F74AE00D9F2FB /* environment.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = environment.json; path = Tradle/environment.json; sourceTree = "<group>"; };
@@ -425,6 +447,7 @@
 				BA4A894818DA4F889E58F732 /* libRCTVideo.a in Frameworks */,
 				F3E3EC882358400CBD24AAF9 /* libRNLocalAuth.a in Frameworks */,
 				B9960E5EDF0C47B789285122 /* libReactNativeLocalization.a in Frameworks */,
+				739917CF1E17CF3E00061291 /* MicroBlink.framework in Frameworks */,
 				9B2E51661CAD7DD7000439E6 /* libRNImagePicker.a in Frameworks */,
 				8DF0B09C8F2B4028AA380CF0 /* libRCTCamera.a in Frameworks */,
 				27C0899D8D7943A3B5913F26 /* libRNVectorIcons.a in Frameworks */,
@@ -440,6 +463,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				739917FE1E17CF9C00061291 /* CoreMedia.framework in Frameworks */,
+				739917FC1E17CF8B00061291 /* libiconv.tbd in Frameworks */,
+				739917FA1E17CF8400061291 /* libc++.tbd in Frameworks */,
+				739917F81E17CF7400061291 /* AudioToolbox.framework in Frameworks */,
+				739917F61E17CF7100061291 /* AVFoundation.framework in Frameworks */,
+				739917F41E17CF6D00061291 /* Accelerate.framework in Frameworks */,
 				9BE3302D1D90762600A8292D /* libRCTOrientation.a in Frameworks */,
 				73261E1A1C4AB9FE00292FEE /* libz.tbd in Frameworks */,
 				73261E1B1C4AB9FE00292FEE /* libReact.a in Frameworks */,
@@ -450,6 +479,7 @@
 				73261E201C4AB9FE00292FEE /* libRCTSettings.a in Frameworks */,
 				73261E211C4AB9FE00292FEE /* libRCTText.a in Frameworks */,
 				73261E221C4AB9FE00292FEE /* libRCTVibration.a in Frameworks */,
+				739917EF1E17CF4700061291 /* MicroBlink.framework in Frameworks */,
 				73261E231C4AB9FE00292FEE /* libRCTWebSocket.a in Frameworks */,
 				73261E241C4AB9FE00292FEE /* libUdpSockets.a in Frameworks */,
 				73261E251C4AB9FE00292FEE /* Fabric.framework in Frameworks */,
@@ -638,6 +668,33 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		739917C91E17CF3E00061291 /* MicroBlink */ = {
+			isa = PBXGroup;
+			children = (
+				739917CA1E17CF3E00061291 /* MicroBlink.bundle */,
+				739917CC1E17CF3E00061291 /* RNMicroBlinkManager.h */,
+				739917CD1E17CF3E00061291 /* RNMicroBlinkManager.m */,
+			);
+			path = MicroBlink;
+			sourceTree = "<group>";
+		};
+		739917F21E17CF6D00061291 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				731F233D1C31BB6600C3B09D /* libz.tbd */,
+				7348C3B61C41C04F00B9CDF5 /* Fabric.framework */,
+				7348C3B71C41C04F00B9CDF5 /* Crashlytics.framework */,
+				739917FD1E17CF9C00061291 /* CoreMedia.framework */,
+				739917FB1E17CF8B00061291 /* libiconv.tbd */,
+				739917F91E17CF8400061291 /* libc++.tbd */,
+				739917CB1E17CF3E00061291 /* MicroBlink.framework */,
+				739917F71E17CF7400061291 /* AudioToolbox.framework */,
+				739917F51E17CF7100061291 /* AVFoundation.framework */,
+				739917F31E17CF6D00061291 /* Accelerate.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		739F72ED1C3F742B00D9F2FB /* RNEnvironmentManagerIOS */ = {
 			isa = PBXGroup;
 			children = (
@@ -760,19 +817,18 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				739917C91E17CF3E00061291 /* MicroBlink */,
 				731045901D7CE25D0087E82D /* Tradle-dev.entitlements */,
 				9B41626C1C6F9BBD00A93B7C /* FontAwesome.ttf */,
 				739F73081C3F74AE00D9F2FB /* environment.json */,
-				7348C3B61C41C04F00B9CDF5 /* Fabric.framework */,
-				7348C3B71C41C04F00B9CDF5 /* Crashlytics.framework */,
 				739F72ED1C3F742B00D9F2FB /* RNEnvironmentManagerIOS */,
-				731F233D1C31BB6600C3B09D /* libz.tbd */,
 				73FE35D01BFA14F600EFB313 /* Ionicons.ttf */,
 				13B07FAE1A68108700A75B9A /* Tradle */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* IdentityTests */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				EE2D4A8F3033431CB4B55B5B /* Resources */,
+				739917F21E17CF6D00061291 /* Frameworks */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -1314,6 +1370,7 @@
 				BC686B7EA43346EC98F13734 /* Foundation.ttf in Resources */,
 				7348E4741D9D8CDD00328628 /* tradle.ttf in Resources */,
 				1C603FB69CA74D178EB7521B /* MaterialIcons.ttf in Resources */,
+				739917CE1E17CF3E00061291 /* MicroBlink.bundle in Resources */,
 				D5FC2F4618F64B86BA09C1CC /* Octicons.ttf in Resources */,
 				5E66B670540246B3A0D82BAC /* Zocial.ttf in Resources */,
 			);
@@ -1326,6 +1383,7 @@
 				7348E4911D9D8D1B00328628 /* tradle.ttf in Resources */,
 				73261E351C4AB9FE00292FEE /* LaunchScreen.xib in Resources */,
 				73261E361C4AB9FE00292FEE /* environment.json in Resources */,
+				739917F01E17CF4C00061291 /* MicroBlink.bundle in Resources */,
 				73261E371C4AB9FE00292FEE /* Images.xcassets in Resources */,
 				73261E381C4AB9FE00292FEE /* Ionicons.ttf in Resources */,
 			);
@@ -1406,6 +1464,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
+				739917D01E17CF3E00061291 /* RNMicroBlinkManager.m in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 				739F72F01C3F742B00D9F2FB /* RNEnvironmentManagerIOS.m in Sources */,
 			);
@@ -1419,6 +1478,7 @@
 				73261E161C4AB9FE00292FEE /* main.m in Sources */,
 				73261E171C4AB9FE00292FEE /* RNEnvironmentManagerIOS.m in Sources */,
 				73683CFC1CC443B300E178CF /* QTouchposeApplication.m in Sources */,
+				739917F11E17CF6500061291 /* RNMicroBlinkManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1518,6 +1578,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/MicroBlink",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1566,6 +1627,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/MicroBlink",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1620,6 +1682,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/MicroBlink",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1666,6 +1729,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/MicroBlink",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",

@@ -633,7 +633,7 @@ var NavigationBarRouteMapper = {
     }
     else
       photo = <View/>
-    var style = [platformStyles.navBarText, styles.navBarTitleText]
+    var style = [platformStyles.navBarText, styles.navBarTitleText, {color: '#555555'}]
     if (route.titleTextColor)
       style.push({color: route.titleTextColor});
 

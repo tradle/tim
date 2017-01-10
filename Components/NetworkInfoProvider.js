@@ -27,13 +27,14 @@ class NetworkInfoProvider extends Component {
   componentDidMount() {
      Animated.timing(          // Uses easing functions
        this.state.fadeAnim,    // The value to drive
-       {toValue: 1, duration: 3000}            // Configuration
+       {toValue: 1, duration: 5000}            // Configuration
      ).start();                // Don't forget start!
   }
 
   render() {
     let isOrg = this.props.resource  &&  this.props.resource[TYPE] === ORGANIZATION
-    let providerOffline = this.props.resource  &&  isOrg  &&  !this.props.online
+    let isOnline = this.props.online || (typeof this.props.online === 'undefined')
+    let providerOffline = this.props.resource  &&  isOrg  &&  !isOnline
     let dn = this.props.resource
            ? this.props.isConnected
                ? translate('learnMoreDescriptionTo', utils.getDisplayName(this.props.resource))
@@ -45,6 +46,7 @@ class NetworkInfoProvider extends Component {
     let msg = this.props.connected
             ? (providerOffline ? translate('providerIsOffline', utils.getDisplayName(this.props.resource)) : translate('serverIsUnreachable'))
             : translate('noNetwork')
+
     return  <Animated.View style={{opacity: this.state.fadeAnim}}>
               <View style={styles.bar}>
                 <Text style={styles.text}>{msg}</Text>
@@ -53,6 +55,12 @@ class NetworkInfoProvider extends Component {
                 </TouchableOpacity>
               </View>
             </Animated.View>
+      // return <View style={styles.bar}>
+      //          <Text style={styles.text}>{msg}</Text>
+      //          <TouchableOpacity onPress={() => Alert.alert(translate('offlineMode'), dn, null)}>
+      //            <Text style={styles.text}>{translate('learnMore')}</Text>
+      //          </TouchableOpacity>
+      //        </View>
   }
 }
 

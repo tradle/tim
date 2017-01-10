@@ -32,7 +32,7 @@ module.exports = {
   isWeb: function () {
     return Platform.OS === 'web'
   },
-  get prefillWithTestData() {
+  get prefillForms() {
     if (typeof global.PREFILL_FORMS === 'boolean') {
       return global.PREFILL_FORMS
     }

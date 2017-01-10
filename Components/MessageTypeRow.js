@@ -74,7 +74,7 @@ var styles = StyleSheet.create({
   modelTitle: {
     flex: 1,
     flexWrap: 'wrap',
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '400',
     marginVertical: 15,
     marginLeft: 15

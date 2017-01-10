@@ -23,7 +23,7 @@ class PhotoCarousel extends Component {
   }
   render() {
     var photoUrls = [];
-    var currentPhoto = this.props.currentPhoto || this.props.photos[0];
+    var currentPhoto = this.props.currentPhoto || (this.props.photos && this.props.photos[0])
     var currentPhotoIndex = -1;
     var n = this.props.photos.length;
 

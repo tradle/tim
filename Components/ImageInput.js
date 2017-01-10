@@ -24,12 +24,14 @@ class ImageInput extends Component {
   constructor(props) {
     super(props)
     this.showImagePicker = this.showImagePicker.bind(this)
+    this.showMicroBlinkScanner = this.showMicroBlinkScanner.bind(this)
   }
   render() {
     const touchableProps = { ...this.props }
     delete touchableProps.prop
     delete touchableProps.onImage
 
+    // const onPress = this.props.onPress || this.showMicroBlinkScanner
     const onPress = this.props.onPress || this.showImagePicker
     // allow override onPress
     return (
@@ -41,9 +43,10 @@ class ImageInput extends Component {
       </TouchableHighlight>
     )
   }
+
   showImagePicker() {
     const { prop, onImage } = this.props
-    let options = {returnIsVertical: true, quality: utils.imageQuality}
+    let options = {returnIsVertical: true, quality: utils.imageQuality, cameraType: this.props.prop.cameraType || 'back'}
     let action
     if (utils.isSimulator())
       action = 'launchImageLibrary'
