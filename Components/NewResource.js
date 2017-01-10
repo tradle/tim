@@ -1152,7 +1152,7 @@ class NewResource extends Component {
     //   this.setState({textValue: this.state.userInput, selectedAssets: {}});
     //   this.refs.chat.focus();
     // }.bind(this), 0);
-    Actions.addMessage(value); //, this.state.resource, utils.getModel(modelName).value);
+    Actions.addMessage({msg: value}); //, this.state.resource, utils.getModel(modelName).value);
   }
 }
 reactMixin(NewResource.prototype, Reflux.ListenerMixin);

@@ -134,7 +134,7 @@ class ProductChooser extends Component {
     if (model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT) {
       msg[constants.TYPE] = PRODUCT_APPLICATION
       msg.product = model.id // '[application for](' + model.id + ')',
-      utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg, false, true))
+      utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage({msg: msg, requestForForm: true}))
     }
     else {
       msg[constants.TYPE] =  FORM_REQUEST,
@@ -142,11 +142,9 @@ class ProductChooser extends Component {
           // translate(model.properties.photos ? 'fillTheFormWithAttachments' : 'fillTheForm', translate(model.title)),
       // product: productModel.id,
       msg.form = model.id
-
-
       // msg._t = constants.TYPES.SIMPLE_MESSAGE
       // msg.message = '[' + (model.properties.photos ? translate('fillTheFormWithAttachments') : translate('fillTheForm')) + '](' + model.id + ')'
-      utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg))
+      utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage({msg: msg}))
     }
 
     // var msg = {

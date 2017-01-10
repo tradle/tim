@@ -133,7 +133,7 @@ class MessageView extends Component {
       _context: resource._context,
       message: text || translate('pleaseCorrectTheErrors')
     }
-    Actions.addMessage(formError)
+    Actions.addMessage({msg: formError})
     this.props.navigator.pop()
   }
   onCheck(prop, message) {

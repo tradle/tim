@@ -364,13 +364,13 @@ class FormRequestRow extends Component {
     vCols.push(msg);
     return isReadOnly ? null : onPressCall
     function onOK() {
-      Actions.addMessage({
+      Actions.addMessage({msg: {
         from: resource.to,
         to: resource.from,
         _context: self.props.context,
         [constants.TYPE]: NEXT_FORM_REQUEST,
         after: form.id
-      })
+      }})
       var params = {
         value: {documentCreated: true},
         doneWithMultiEntry: true,

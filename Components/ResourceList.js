@@ -290,7 +290,7 @@ class ResourceList extends Component {
       }
       // var sendNotification = (resource.name === 'Rabobank'  &&  (!me.organization  ||  me.organization.name !== 'Rabobank'))
       // Actions.addMessage(msg, true, sendNotification)
-      utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg)) //, true))
+      utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage({msg: msg})) //, true))
       if (this.props.navigator.getCurrentRoutes().length === 3)
         this.props.navigator.replace(route)
       else
@@ -538,7 +538,7 @@ class ResourceList extends Component {
         time: new Date().getTime()
       }
 
-      utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg, true))
+      utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage({msg: msg, isWelcome: true}))
     }
 
     this.props.navigator.push(route);
