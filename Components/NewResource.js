@@ -621,7 +621,7 @@ class NewResource extends Component {
       passProps: {
         metadata: bl,
         resource: this.state.resource,
-        parentMeta: this.props.parentMeta,
+        parentMeta: this.props.model,
         onAddItem: this.onAddItem.bind(this),
         currency: this.props.currency
       }
