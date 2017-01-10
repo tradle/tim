@@ -35,5 +35,6 @@ module.exports = {
   autoOptInTouchId: true,
   allowAddServer: true,
   allowForgetMe: true,
-  prefillForms: __DEV__
+  prefillForms: __DEV__,
+  serverToSendLog: __DEV__ ? 'http://localhost:44444/userlog' : 'https://azure1.tradle.io/userlog'
 }

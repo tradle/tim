@@ -1,5 +1,6 @@
 'use strict';
 
+import querystring from 'querystring'
 var utils = require('../utils/utils');
 var translate = utils.translate
 var fontSize = utils.getFontSize
@@ -30,6 +31,8 @@ import ActionSheet from 'react-native-actionsheet'
 import platformStyles from '../styles/platform'
 import { signIn } from '../utils/localAuth'
 import { makeResponsive } from 'react-native-orient'
+import Log from './Log'
+import debug from '../utils/debug'
 
 const TALK_TO_EMPLOYEE = '1'
 // const SERVER_URL = 'http://192.168.0.162:44444/'
@@ -40,6 +43,7 @@ const USE_TOUCH_ID = 0
 const USE_GESTURE_PASSWORD = 1
 const CHANGE_GESTURE_PASSWORD = 2
 const PAIR_DEVICES = 3
+const VIEW_DEBUG_LOG = 4
 import {
   // StyleSheet,
   ScrollView,
@@ -286,6 +290,9 @@ class ResourceView extends Component {
       }
       buttons.push(translate('pairDevices'))
       actions.push(PAIR_DEVICES)
+
+      buttons.push(translate('viewDebugLog'))
+      actions.push(VIEW_DEBUG_LOG)
     }
     buttons.push(translate('cancel'))
     return (
@@ -340,6 +347,7 @@ class ResourceView extends Component {
     Actions.getItem(resource.id);
   }
   changePreferences(id, action) {
+    const self = this
     let me = utils.getMe()
     let r = {
       _r: me[constants.ROOT_HASH],
@@ -361,6 +369,33 @@ class ResourceView extends Component {
     case PAIR_DEVICES:
       Actions.genPairingData()
       return
+    case VIEW_DEBUG_LOG:
+      this.props.navigator.push({
+        id: 28,
+        component: Log,
+        passProps: {},
+        backButtonTitle: 'Back',
+        rightButtonTitle: 'Send',
+        onRightButtonPress: async function () {
+          try {
+            var res = await debug.post(ENV.serverToSendLog + '?' + querystring.stringify({
+              firstName: me.firstName,
+              lastName: me.lastName
+            }))
+
+            if (res.status > 300) {
+              var why = await res.text()
+              throw new Error(why)
+            } else {
+              Alert.alert('Success!', 'The log was sent to the Tradle developer team!')
+            }
+          } catch (err) {
+            return Alert.alert('Failed to send log', err.message)
+          }
+        }
+      })
+
+      return
     }
     if (!r.useGesturePassword  &&  !r.useTouchId)
       r.useGesturePassword = true
@@ -368,7 +403,7 @@ class ResourceView extends Component {
         me.useTouchId === r.useTouchId    &&
         me.useGesturePassword === r.useGesturePassword)
       return
-    let self = this
+
     signIn(self.props.navigator, r, isChangeGesturePassword)
       .then(() => {
         Actions.addItem({resource: me, value: r, meta: utils.getModel(constants.TYPES.PROFILE).value})

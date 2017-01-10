@@ -16,13 +16,6 @@ import './utils/crypto'
 import 'stream'
 // require('./timmy')
 
-// require('ErrorUtils').setGlobalHandler(function (e, isFatal) {
-//   Alert.alert(e.stack)
-//   console.error('Failed to handle error:')
-//   console.error(e)
-//   if (__DEV__) throw e
-// })
-
 var ResourceList = require('./Components/ResourceList');
 var VerifierChooser = require('./Components/VerifierChooser')
 
@@ -52,6 +45,7 @@ var CameraView = require('./Components/CameraView');
 var PhotoCarousel = require('./Components/PhotoCarousel');
 var QRCode = require('./Components/QRCode')
 var QRCodeScanner = require('./Components/QRCodeScanner')
+import Log from './Components/Log'
 var utils = require('./utils/utils');
 var translate = utils.translate
 var constants = require('@tradle/constants');
@@ -456,6 +450,8 @@ class TiMApp extends Component {
       return <SupervisoryViewPerProvider navigator={nav} {...props} />
     case 27:
       return <SupervisoryView navigator={nav} {...props} />
+    case 28:
+      return <Log navigator={nav} {...props} />
     case 10:
     default: // 10
       return <ResourceList navigator={nav} {...props} />
