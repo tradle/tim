@@ -211,7 +211,6 @@ var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
 var SERVICE_PROVIDERS
 var publishRequestSent = []
-
 var driverInfo = (function () {
   const clientToIdentifiers = new Map()
   const byUrl = {}
