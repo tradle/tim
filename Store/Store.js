@@ -1551,12 +1551,12 @@ var Store = Reflux.createStore({
       if (r  &&  r.bot)
         promise = Q()
       else
-        promise = this.onAddMessage({
+        promise = this.onAddMessage({msg: {
                     [TYPE]: SIMPLE_MESSAGE,
                     message: translate('howCanIHelpYou', profile.formatted, utils.getMe().firstName),
                     from: this.buildRef(utils.getMe()),
                     to: this._getItem(pkey)
-                  })
+                  }})
     }
     // return newContact ? db.batch(batch) : Q()
     // .then(() => {
@@ -1605,7 +1605,13 @@ var Store = Reflux.createStore({
       });
     })
   },
-  onAddMessage(r, isWelcome, requestForForm, cb) {
+  onAddMessage(params) {
+    let r = params.msg
+    let isWelcome = params.isWelcome
+    let requestForForm = params.requestForForm
+    let cb = params.cb
+    var disableAutoResponse = params.disableAutoResponse
+
     var self = this
     let m = this.getModel(r[TYPE]).value
     var props = m.properties;
@@ -1784,7 +1790,7 @@ var Store = Reflux.createStore({
           }
           if (isCustomerWaiting)
             noCustomerWaiting = true
-          return self.onAddMessage(msg)
+          return self.onAddMessage({msg: msg, disableAutoResponse: disableAutoResponse})
         }
       })
     })
@@ -1826,6 +1832,11 @@ var Store = Reflux.createStore({
       if (self._getItem(toId).pubkeys) {
         // let sendParams = self.packMessage(r, toChain)
         let sendParams = self.packMessage(toChain, r.from, r.to, r._context)
+        if (disableAutoResponse) {
+          if (!sendParams.other)
+            sendParams.other = {}
+          sendParams.disableAutoResponse = true
+        }
         const method = toChain[SIG] ? 'send' : 'signAndSend'
         return meDriver[method](sendParams)
         .catch(function (err) {
@@ -2476,7 +2487,7 @@ var Store = Reflux.createStore({
             to: orgRep
           }
 
-          return self.onAddMessage(msg)
+          return self.onAddMessage({msg: msg})
         }
       })
     } else {
@@ -5707,7 +5718,7 @@ var Store = Reflux.createStore({
           to: org,
           time: new Date().getTime()
         }
-        this.onAddMessage(msg, true)
+        this.onAddMessage({msg: msg, isWelcome: true})
       }
       else if (isMessage  &&  !noTrigger) {
         if (onMessage) {
