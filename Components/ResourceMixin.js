@@ -14,6 +14,7 @@ var Accordion = require('react-native-accordion')
 var NOT_SPECIFIED = '[not specified]'
 var TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
 const ENUM = 'tradle.Enum'
+var tada = []
 
 import {
   Text,
@@ -194,12 +195,12 @@ var ResourceMixin = {
       val = <View style={{marginHorizontal: 7}}>{this.renderItems(val, pMeta)}</View>
 
       let title = <View style={{flexDirection: 'row'}}>
-                <Text style={styles.title}>{pMeta.title || utils.makeLabel(p)}</Text>
-                {cnt > 3  &&  modelName !== TERMS_AND_CONDITIONS
-                  ? <Icon name={'ios-arrow-down'} size={15} color='#7AAAC3' style={{position: 'absolute', right: 10, top: 10}}/>
-                  : <View />
-                }
-              </View>
+                    <Text style={styles.title}>{pMeta.title || utils.makeLabel(p)}</Text>
+                    {cnt > 3  &&  modelName !== TERMS_AND_CONDITIONS
+                      ? <Icon name={'ios-arrow-down'} size={15} color='#7AAAC3' style={{position: 'absolute', right: 10, top: 10}}/>
+                      : <View />
+                    }
+                  </View>
 
       var separator = <View style={styles.separator}></View>;
       if (cnt > 3)
@@ -233,9 +234,59 @@ var ResourceMixin = {
       else if (modelName === TERMS_AND_CONDITIONS)
         val = <Text style={[styles.description, {flexWrap: 'wrap'}]}>{val}</Text>;
       else
-        val = <Text style={[styles.description]} numberOfLines={2}>{val}</Text>;
+        val = <Text style={[styles.description]}>{val}</Text>;
     }
     return val
+  },
+  showJson(prop, json, isView, jsonRows) {
+    // let json = JSON.parse(jsonStr)
+    // let jsonRows = []
+    if (prop) {
+      var backlinksBg = {backgroundColor: '#96B9FA', paddingHorizontal: 10, marginHorizontal: isView ? 0 : -10}
+      jsonRows.push(<View style={backlinksBg} key={this.getNextKey()}>
+                      <Text  style={[styles.bigTitle, {color: '#ffffff', paddingVertical: 10}]}>{translate(prop)}</Text>
+                    </View>)
+    }
+    for (let p in json) {
+      let pp = p
+      // if (p === 'document_numbers' || p === 'breakdown' || p === 'properties')
+      //   continue
+      if (typeof json[p] === 'object') {
+        if (utils.isEmpty(json[p]))
+          continue
+        if (Array.isArray(json[p])) {
+          json[p].forEach((js) => this.showJson(null, js, isView, jsonRows))
+          continue
+        }
+        jsonRows.push(<View style={{paddingVertical: 10, paddingHorizontal: isView ? 10 : 0}} key={this.getNextKey()}>
+                        <Text style={styles.bigTitle}>{utils.makeLabel(p)}</Text>
+                        <View style={{height: 1, marginTop: 5, marginBottom: 10, marginHorizontal: -10, alignSelf: 'stretch', backgroundColor: this.props.bankStyle.LINK_COLOR}} />
+                      </View>)
+// tada.push("<View style={{paddingVertical: 10, paddingHorizontal: isView ? 10 : 0}} key={this.getNextKey()}><Text style={styles.bigTitle}>{" + utils.makeLabel(p) + "}</Text></View>")
+        this.showJson(null, json[p], isView, jsonRows)
+        continue
+      }
+
+      jsonRows.push(<View style={{flexDirection: 'row', paddingHorizontal: isView ? 10 : 0}} key={this.getNextKey()}>
+                     <Text style={[styles.title, {flex: 1}]}>{utils.makeLabel(p)}</Text>
+                     <Text style={[styles.title, {flex: 1, color: '#2e3b4e'}]}>{json[p]}</Text>
+                  </View>)
+// tada.push("<View style={{flexDirection: 'row', paddingHorizontal: isView ? 10 : 0}} key={this.getNextKey()}><Text style={[styles.title, {flex: 1}]}>{" + utils.makeLabel(p) + "}</Text><Text style={[styles.title, {flex: 1, color: '#2e3b4e'}]}>{" + json[p] + "}</Text></View>")
+    }
+    if (!prop)
+      return
+    return jsonRows
+    // if (!jsonRows.length)
+    //   return <View/>
+    // var backlinksBg = {backgroundColor: '#96B9FA'}
+    // let title = <View style={backlinksBg} key={this.getNextKey()}>
+    //               <Text  style={[styles.bigTitle, {color: '#ffffff', paddingVertical: 10}]}>{translate(prop)}</Text>
+    //             </View>
+    // return <View key={this.getNextKey()} >
+    //           {title}
+    //           <View style={{height: 1, marginBottom: 10, alignSelf: 'stretch', backgroundColor: this.props.bankStyle.LINK_COLOR}} />
+    //           {jsonRows}
+    //         </View>
   }
 }
 
@@ -278,6 +329,15 @@ var styles = StyleSheet.create({
     marginHorizontal: 7,
     color: '#2E3B4E',
   },
+  bigTitle: {
+    fontSize: 20,
+    // fontFamily: 'Avenir Next',
+    marginTop: 3,
+    marginBottom: 0,
+    marginHorizontal: 7,
+    color: '#7AAAC3'
+  },
+
 })
 
 module.exports = ResourceMixin;

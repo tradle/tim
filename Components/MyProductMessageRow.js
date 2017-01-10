@@ -35,14 +35,16 @@ class MyProductMessageRow extends Component {
 
   render() {
     var resource = this.props.resource;
+    if (resource[constants.TYPE] === 'tradle.MyTaxesFiledConfirmation')
+      return <View/>
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
     var renderedRow = [];
 
     var ret = this.formatRow(false, renderedRow);
     let onPressCall = ret ? ret.onPressCall : null
 
-    let addStyle = [addStyle, chatStyles.verificationBody, {backgroundColor: this.props.bankStyle.PRODUCT_BG_COLOR , borderColor: this.props.bankStyle.CONFIRMATION_COLOR}];
-    let rowStyle = [chatStyles.row,  {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}];
+    let addStyle = [chatStyles.verificationBody, {backgroundColor: this.props.bankStyle.PRODUCT_BG_COLOR , borderColor: this.props.bankStyle.CONFIRMATION_COLOR}];
+    // let rowStyle = [chatStyles.row,  {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}];
     var val = this.getTime(resource);
     var date = val
              ? <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
@@ -52,16 +54,16 @@ class MyProductMessageRow extends Component {
 
     var hdrStyle = {backgroundColor: '#289427', paddingVertical: 5} //this.props.bankStyle.PRODUCT_BG_COLOR ? {backgroundColor: this.props.bankStyle.PRODUCT_BG_COLOR} : {backgroundColor: '#289427'}
     var orgName = resource.from.organization  ? resource.from.organization.title : ''
-    renderedRow.splice(0, 0, <View  key={this.getNextKey()} style={[styles.verifiedHeader, hdrStyle, {marginHorizontal: -8, marginTop: -7, marginBottom: 7, paddingBottom: 5, borderTopRightRadius: 10}]}>
-                       <Text style={{fontSize: 18, alignSelf: 'center', color: '#fff'}}>{translate('issuedBy', orgName)}</Text>
-                    </View>
-                    );
+    renderedRow.splice(0, 0, <View  key={this.getNextKey()} style={[chatStyles.verifiedHeader, hdrStyle, {marginHorizontal: -8, marginTop: -7, marginBottom: 7, paddingBottom: 5}]}>
+                               <Text style={styles.issuedBy}>{translate('issuedBy', orgName)}</Text>
+                            </View>
+                            );
     let title = translate(model)
     if (title.length > 30)
       title = title.substring(0, 27) + '...'
 
     renderedRow.push(<Text  key={this.getNextKey()} style={[chatStyles.formType, {color: '#289427'}]}>{title}</Text>);
-    rowStyle = addStyle ? [chatStyles.textContainer, addStyle] : chatStyles.textContainer
+    let rowStyle = addStyle ? [chatStyles.textContainer, addStyle] : chatStyles.textContainer
 
     // let width = utils.dimensions().width * 0.8
     let width = Math.floor(utils.dimensions().width * 0.7)

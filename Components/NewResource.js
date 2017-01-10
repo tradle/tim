@@ -29,9 +29,11 @@ var StyleSheet = require('../StyleSheet')
 import ImagePicker from 'react-native-image-picker';
 import ImageInput from './ImageInput'
 import CustomIcon from '../styles/customicons'
-var ENUM = 'tradle.Enum'
-var LINK_COLOR, DEFAULT_LINK_COLOR = '#a94442'
-var FORM_ERROR = 'tradle.FormError'
+const ENUM = 'tradle.Enum'
+var LINK_COLOR
+const DEFAULT_LINK_COLOR = '#a94442'
+const FORM_ERROR = 'tradle.FormError'
+const PHOTO = 'tradle.Photo'
 
 var Form = t.form.Form;
 var stylesheet = require('../styles/styles')
@@ -130,7 +132,7 @@ class NewResource extends Component {
           !equal(this.state.resource, nextState.resource)
 
     if (!isUpdate)
-      utils.compare(this.props.resource, nextProps.resource)
+      isUpdate = !utils.compare(this.props.resource, nextProps.resource)
     return isUpdate
            // nextState.isModalOpen !== this.state.isModalOpen  ||
            // this.state.modalVisible != nextState.modalVisible ||
@@ -395,6 +397,8 @@ class NewResource extends Component {
                 return
               }
             }
+            else if (ref === 'tradle.Photo')
+              return
             else if (!rModel.subClassOf  ||  rModel.subClassOf !== ENUM) {
               var units = this.props.model.properties[p].units
               if (units)
@@ -738,8 +742,8 @@ class NewResource extends Component {
       var counter, count = 0
       itemsArray = null
       var count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
-      if (count  &&  bl.name === 'photos')
-        arrayItems.push(this.getPhotoItem(bl))
+      if (count  &&  (bl.name === 'photos' || bl.items.ref === PHOTO))
+        arrayItems.push(this.getPhotoItem(bl, styles))
       else
         arrayItems.push(this.getItem(bl))
     }
@@ -802,6 +806,17 @@ class NewResource extends Component {
 //            <PhotoView resource={resource} navigator={this.props.navigator}/>
 //          </View>
                   // keyboardDismissMode='on-drag'>
+    let jsonProps = utils.getPropertiesWithRange('json', meta)
+    let jsons = []
+    if (jsonProps  &&  jsonProps.length) {
+      jsonProps.forEach((prop) => {
+        let val = this.state.resource[prop.name]
+        if (val)
+          jsons.push(this.showJson(prop, val, false, []))
+      })
+    }
+    if (!jsons.length)
+      jsons = <View/>
     var content =
       <ScrollView style={{backgroundColor: 'transparent'}}
                   ref='scrollView' {...this.scrollviewProps}>
@@ -815,15 +830,16 @@ class NewResource extends Component {
           <View style={this.state.isRegistration ? {marginHorizontal: height > 1000 ? 50 : 30} : {marginHorizontal: 10}}>
             <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange.bind(this)}/>
             {button}
-            <View style={{marginTop: isRegistration ? 0 : -10}}>
+            <View style={{marginTop: isRegistration ? 0 : -10, paddingBottom: 20}}>
               {arrayItems}
-             </View>
-              <View style={{alignItems: 'center', marginTop: 50}}>
-               {this.state.isLoadingVideo
-                    ? <ActivityIndicator animating={true} size='large' color='#ffffff'/>
-                    : <View/>
-                 }
-              </View>
+            </View>
+            {jsons}
+            <View style={{alignItems: 'center', marginTop: 50}}>
+             {this.state.isLoadingVideo
+                  ? <ActivityIndicator animating={true} size='large' color='#ffffff'/>
+                  : <View/>
+               }
+            </View>
           </View>
         </View>
       </ScrollView>
@@ -933,9 +949,8 @@ class NewResource extends Component {
     var counter, count = 0
     let itemsArray = null
     var count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
-    let isPhoto = bl.name === 'photos'
     let lcolor = this.getLabelAndBorderColor(bl.name)
-
+    let isPhoto = bl.name === 'photos' || bl.items.ref === PHOTO
     if (count) {
       let val = <View>{this.renderItems(resource[bl.name], bl, this.cancelItem.bind(this))}</View>
 
@@ -952,8 +967,8 @@ class NewResource extends Component {
     }
     else {
       itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{translate(bl, blmodel)}</Text>
-      counter = <View style={[styles.itemsCounterEmpty]}>
-                  {isPhoto
+      counter = <View style={[styles.itemsCounterEmpty]}>{
+                  isPhoto
                     ? <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
                     : <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color={LINK_COLOR} />
                   }
@@ -969,6 +984,15 @@ class NewResource extends Component {
                 </View>
               : <View/>
 
+    var aiStyle = [{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]
+    var actionableItem = isPhoto
+      ? <ImageInput prop={bl} style={aiStyle} onImage={item => this.onAddItem(bl.name, item)}>
+          {itemsArray}
+        </ImageInput>
+      : <TouchableHighlight style={aiStyle} underlayColor='transparent'
+            onPress={this.onNewPressed.bind(this, bl, meta)}>
+          {itemsArray}
+        </TouchableHighlight>
 
     let istyle = [styles.itemButton]
     if (err)
@@ -1176,7 +1200,7 @@ class NewResource extends Component {
     //   this.setState({textValue: this.state.userInput, selectedAssets: {}});
     //   this.refs.chat.focus();
     // }.bind(this), 0);
-    Actions.addMessage(value); //, this.state.resource, utils.getModel(modelName).value);
+    Actions.addMessage({msg: value}); //, this.state.resource, utils.getModel(modelName).value);
   }
 }
 reactMixin(NewResource.prototype, Reflux.ListenerMixin);

@@ -112,7 +112,7 @@ class ResourceTypesScreen extends Component {
       time: new Date().getTime()
     }
     value[constants.TYPE] = modelName;
-    Actions.addMessage(value);
+    Actions.addMessage({msg: value});
     this.props.navigator.pop();
   }
 

@@ -5,6 +5,7 @@ var MessageRow = require('./MessageRow')
 var MyProductMessageRow = require('./MyProductMessageRow')
 var VerificationMessageRow = require('./VerificationMessageRow')
 var FormMessageRow = require('./FormMessageRow')
+var FormRequestRow = require('./FormRequestRow')
 var NoResources = require('./NoResources')
 var NewResource = require('./NewResource')
 var ProductChooser = require('./ProductChooser')
@@ -448,7 +449,8 @@ class MessageList extends Component {
     props.isAggregation = isAggregation
     props.addedItem = this.state.addedItem
     props.chooseTrustedProvider = this.chooseTrustedProvider
-    return   <MessageRow {...props} />
+
+    return  model.id === FORM_REQUEST ? <FormRequestRow {...props} /> : <MessageRow {...props} />
   }
   addedMessage(text) {
     Actions.list({
@@ -1010,7 +1012,7 @@ class MessageList extends Component {
     this.setState({userInput: ''}) //, selectedAssets: {}});
     if (this.state.clearCallback)
       this.state.clearCallback();
-    Actions.addMessage(value);
+    Actions.addMessage({msg: value});
   }
   switchChat(resource) {
     let to = resource.from.organization  ||  resource.from

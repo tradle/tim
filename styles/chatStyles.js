@@ -10,7 +10,7 @@ var verificationStyles = Object.freeze({
   verifiedHeader: {
     flexDirection: 'row',
     paddingVertical: 5,
-    paddingHorizontal: 7,
+    // paddingHorizontal: 7,
     marginHorizontal: -8,
     marginTop: -6,
     justifyContent: 'center'
@@ -37,11 +37,14 @@ var verificationStyles = Object.freeze({
     color: '#ffffff',
   },
   sealedStatus: {
+    justifyContent: 'center',
+    // paddingHorizontal: 5,
+    marginTop: 2
     // alignSelf: 'flex-end',
     // flexDirection: 'row',
-    position: 'absolute',
-    bottom: 1,
-    left: 10,
+    // position: 'absolute',
+    // bottom: 1,
+    // left: 10,
   },
   bigImage: {
     width: 240,
@@ -65,7 +68,7 @@ var verificationStyles = Object.freeze({
     color: '#EBFCFF',
     fontSize: 18,
     // fontWeight: '600',
-    opacity: 0.5,
+    opacity: 0.7,
     alignSelf: 'flex-end',
     marginTop: 10,
     marginBottom: 5
@@ -92,6 +95,10 @@ var verificationStyles = Object.freeze({
   textContainer: {
     flex: 1,
     flexDirection: 'row'
+  },
+  dateInForm: {
+    color: '#999999',
+    fontSize: 12,
   },
   date: {
     flex: 1,
@@ -129,6 +136,9 @@ var verificationStyles = Object.freeze({
     marginTop: 5,
     paddingBottom: 5,
     justifyContent:'space-between'
+  },
+  linkIconGreyed: {
+    color: '#cccccc'
   },
 });
 

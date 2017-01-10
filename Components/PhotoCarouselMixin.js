@@ -21,7 +21,7 @@ var PhotoCarouselMixin = {
       component: PhotoCarousel,
       passProps: {
         currentPhoto: currentPhoto,
-        photos: this.props.resource.photos,
+        photos: this.props.mainPhoto ? [this.props.mainPhoto] : this.props.resource.photos,
         resource: this.props.resource
       },
       // rightButtonTitle: 'Done',

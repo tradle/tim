@@ -295,7 +295,7 @@ class ResourceList extends Component {
       }
       // var sendNotification = (resource.name === 'Rabobank'  &&  (!me.organization  ||  me.organization.name !== 'Rabobank'))
       // Actions.addMessage(msg, true, sendNotification)
-      utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg)) //, true))
+      utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage({msg: msg})) //, true))
       if (this.props.navigator.getCurrentRoutes().length === 3)
         this.props.navigator.replace(route)
       else
@@ -353,6 +353,12 @@ class ResourceList extends Component {
       else
         this.setState(state)
       return;
+    }
+    var type = list[0][constants.TYPE];
+    if (type  !== this.props.modelName  &&  this.props.modelName !== params.requestedModelName) {
+      var m = utils.getModel(type).value;
+      if (!m.subClassOf  ||  m.subClassOf != this.props.modelName)
+        return;
     }
     extend(state, {
       forceUpdate: params.forceUpdate,
@@ -421,8 +427,17 @@ class ResourceList extends Component {
       var m = utils.getModel(resource[constants.TYPE]).value;
 
       if (isVerification || isForm) {
+        let title
+        if (isForm)
+          title = utils.makeModelTitle(m)
+        else {
+          let type = resource.document[constants.TYPE]
+          if (!type)
+            type = resource.document.is.split('_')[0]
+          title = utils.makeModelTitle(utils.getModel(type).value)
+        }
         this.props.navigator.push({
-          title: m.title,
+          title: title,
           id: 5,
           component: MessageView,
           backButtonTitle: 'Back',
@@ -538,7 +553,7 @@ class ResourceList extends Component {
         time: new Date().getTime()
       }
 
-      utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage(msg, true))
+      utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage({msg: msg, isWelcome: true}))
     }
 
     this.props.navigator.push(route);
@@ -787,7 +802,6 @@ class ResourceList extends Component {
       backButtonTitle: 'Back',
       titleTextColor: '#7AAAC3',
       passProps: {
-        // officialAccounts: true,
         bankStyle: this.props.style,
         modelName: PRODUCT_APPLICATION,
         _readOnly: true
@@ -905,7 +919,6 @@ class ResourceList extends Component {
     let network = this.props.isChooser || !this.props.officialAccounts || this.props.modelName !== constants.TYPES.ORGANIZATION
                 ? <View/>
                 : <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
-
     return (
       <PageView style={platformStyles.container}>
         {network}

@@ -71,7 +71,7 @@ var RowMixin = {
     }
     let model = utils.getModel(resource[constants.TYPE]).value
 
-    var style = {flexDirection: 'row'}
+    var style = {flexDirection: 'row', justifyContent: 'center'}
     let propTitle = translate(prop, model)
     if (isVerification) {
       if (!this.props.isAggregation)
@@ -94,13 +94,14 @@ var RowMixin = {
       if (!this.props.isAggregation  &&  (isMyMessage || isForm) &&  !isMyProduct)
         style = [style, {borderWidth: BORDER_WIDTH, paddingVertical: 3, borderColor: isMyMessage ? STRUCTURED_MESSAGE_COLOR : '#ffffff', borderBottomColor: isMyMessage ? this.props.bankStyle.STRUCTURED_MESSAGE_BORDER : '#eeeeee'}]
       let color = isMyMessage && !isMyProduct ? {color: '#FFFFEE'} : {color: '#757575'}
+      let value = val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')
       return (
         <View style={style} key={this.getNextKey()}>
-          <View style={styles.column}>
-            <Text style={[styles.descriptionB, color]}>{propTitle}</Text>
+          <View style={[styles.column, {flex: 1}]}>
+            <Text style={[styles.descriptionG]}>{propTitle}</Text>
           </View>
-          <View style={styles.column}>
-            <Text style={[styles.descriptionB, color]}>{val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')}</Text>
+          <View style={[styles.column, {flex: 1}]}>
+            <Text style={styles.descriptionB}>{value}</Text>
           </View>
        </View>
       )
@@ -108,7 +109,10 @@ var RowMixin = {
 
   },
   getOwnerPhoto(isMyMessage) {
-    // return <View/>
+    let isSharedContext = this.props.to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.context)
+    if (Platform.OS !== 'android'  &&  !isSharedContext)
+      return <View/>
+
     var to = this.props.to;
     let isProductApplication = to[constants.TYPE]  === PRODUCT_APPLICATION
     if (!isProductApplication && (isMyMessage  || !to /* ||  !to.photos*/))
@@ -117,7 +121,6 @@ var RowMixin = {
     let resource = this.props.resource
     let isVerification  = resource[constants.TYPE] === constants.TYPES.VERIFICATION
     if (!isMyMessage) {
-
       let photo = isVerification && resource._verifiedBy  &&  resource._verifiedBy.photo
                 ? resource._verifiedBy.photo
                 : resource.from.photo
@@ -197,7 +200,7 @@ var RowMixin = {
 
     var docModel = utils.getModel(document[constants.TYPE]).value;
     var isMyProduct = docModel.subClassOf === MY_PRODUCT
-    var docModelTitle = docModel.title;
+    var docModelTitle = docModel.title || utils.makeLabel(docModel.id)
     var idx = docModelTitle.indexOf('Verification');
     var docTitle = idx === -1 ? docModelTitle : docModelTitle.substring(0, idx);
 
@@ -220,6 +223,17 @@ var RowMixin = {
     var headerStyle = {paddingTop: verification.dateVerified ? 0 : 5, alignSelf: 'center', flex: 1}
     var isShared = this.isShared(verification)
 
+                    // {verification.dateVerified
+                    //   ? <View style={{flexDirection: 'row'}}>
+                    //       <Text style={{fontSize: 12, color: this.props.bankStyle.VERIFIED_HEADER_COLOR, fontStyle: 'italic'}}>{utils.formatDate(verification.dateVerified)}</Text>
+                    //     </View>
+                    //   : <View/>
+                    // }
+                          // <Text style={{fontSize: 12, color: 'darkblue', fontStyle: 'italic'}}>{'Date '}</Text>
+    let addStyle = onPress ? {} : {backgroundColor: this.props.bankStyle.VERIFICATION_BG, borderWidth: BORDER_WIDTH, borderColor: this.props.bankStyle.VERIFICATION_BG, borderBottomColor: this.props.bankStyle.VERIFIED_HEADER_COLOR}
+
+    let hs = /*isShared ? chatStyles.description :*/ [chatStyles.resourceTitle, styles.header]
+    let arrow = <Icon color={this.props.bankStyle.VERIFIED_HEADER_COLOR} size={20} name={'ios-arrow-forward'} style={{top: 10, position: 'absolute', right: 30}}/>
     var header =  <View style={headerStyle}>
                     <Text style={[isShared ? chatStyles.description : chatStyles.resourceTitle, styles.header, isShared ? {maxWidth: 0.8 * utils.dimensions().width - 50, fontSize: 16, alignSelf: params.isMyMessage ? 'flex-start' : 'flex-end', marginTop: -5, color: '#757575'} : {color: this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>
                       {isShared
@@ -234,16 +248,16 @@ var RowMixin = {
                       : <View/>
                     }
                   </View>
-    let addStyle = onPress ? {} : {backgroundColor: this.props.bankStyle.VERIFICATION_BG, borderWidth: BORDER_WIDTH, borderColor: this.props.bankStyle.VERIFICATION_BG, borderBottomColor: this.props.bankStyle.VERIFIED_HEADER_COLOR}
 
-    header = hasPhotos
-            ?  <View style={[chatStyles.rowContainer, styles.verification, addStyle]}>
-                 {photo}
-                 {header}
-               </View>
-            :  <View style={[addStyle, styles.verification]}>
-                 {header}
-               </View>
+    // var header =    <Text style={hs}>
+    //                  {translate(model)}
+    //                 </Text>
+
+
+    header = <View style={[addStyle, styles.verification]}>
+               {arrow}
+               {header}
+             </View>
    if (!isAccordion)
       header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, document, verification)}>
                  {header}
@@ -284,14 +298,16 @@ var RowMixin = {
       else
         verifiedBy = translate('sentTo', verification.organization.title)
 
-//      // if (verifiedBy.length > 25)
-//      //   verifiedBy = verifiedBy.substring(0, 25) + '..'
-//      var maxWidth = 0.8 * utils.dimensions().width - 150
-//      var orgView =   <View style={{marginTop: Platform.OS === 'android' ? 0 : 5, maxWidth: maxWidth, paddingLeft: 3, marginRight: 10}}>
-      var orgView =   <View style={styles.orgView}>
-                        <Text style={chatStyles.description}>
-                          {verifiedBy}
-                        </Text>
+      var orgView = <View style={styles.orgView}>
+                      <Text style={chatStyles.description}>
+                        {verifiedBy}
+                      </Text>
+                        {verification.dateVerified
+                          ? <View style={{flexDirection: 'row'}}>
+                              <Text style={{fontSize: 12, color: '#757575', fontStyle: 'italic'}}>{utils.formatDate(verification.dateVerified)}</Text>
+                            </View>
+                          : <View/>
+                        }
                       </View>
 
                          // <Text style={[styles.title, {color: '#2E3B4E'}]}>{verification.organization.title.length < 30 ? verification.organization.title : verification.organization.title.substring(0, 27) + '..'}</Text>
@@ -471,39 +487,6 @@ var RowMixin = {
              </View>
                // <Text style={styles.sendStatusDefaultText}>{this.props.sendStatus}</Text>
   },
-  formStub(resource) {
-    let sentTo = translate('asSentTo', resource.to.organization.title)
-
-    var viewStyle = {
-      width: Math.floor(utils.dimensions().width * 0.7),
-      alignSelf: 'flex-end',
-      backgroundColor: this.props.bankStyle.BACKGROUND_COLOR
-    }
-
-    let headerStyle = [
-      styles.verifiedHeader,
-      {backgroundColor: this.props.bankStyle.SHARED_WITH_BG}, // opacity: isShared ? 0.5 : 1},
-      {borderTopRightRadius: 0, borderTopLeftRadius: 10}
-    ]
-
-    var st = {
-      margin: 1,
-      paddingRight: 10,
-      backgroundColor: this.props.bankStyle.BACKGROUND_COLOR
-    }
-    return (
-      <View style={st, viewStyle} key={this.getNextKey()}>
-        <View style={[styles.textContainer, styles.verificationBody]}>
-          <View style={headerStyle}>
-            <Text style={styles.verificationHeaderText}>{translate(utils.getModel(resource[constants.TYPE]).value)}</Text>
-          </View>
-          <View style={{padding: 5}}>
-            <Text style={{color: '#7AAAC3', fontSize: 16, alignSelf: 'flex-end'}}>{sentTo}</Text>
-          </View>
-        </View>
-      </View>
-    );
-  }
 
   // anyOtherRow(prop, backlink, styles) {
   //   var row;
@@ -534,8 +517,15 @@ var styles = StyleSheet.create({
     fontSize: 18,
     color: '#757575'
   },
+  descriptionG: {
+    fontSize: 17,
+    justifyContent: 'center',
+    color: '#aaaaaa',
+    marginTop: 1
+  },
   descriptionB: {
     fontSize: 18,
+    color: '#757575'
   },
   msgImage: {
     // backgroundColor: '#dddddd',
@@ -635,7 +625,8 @@ var styles = StyleSheet.create({
   header: {
     fontSize: 18,
     marginTop: 2,
-    paddingRight: 10
+    color: '#757575'
+    // paddingRight: 10
   },
   sentStatus: {
     fontSize: 14,

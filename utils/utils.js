@@ -39,7 +39,8 @@ const Cache = require('lru-cache')
 const mutexify = require('mutexify')
 var strMap = {
   'Please fill out this form and attach a snapshot of the original document': 'fillTheFormWithAttachments',
-  'Please fill out this form': 'fillTheForm'
+  'Please fill out this form': 'fillTheForm',
+  'Please take a': 'takeAPicture'
 }
 var translatedStrings = {
   en: require('./strings_en.json'),
@@ -60,16 +61,19 @@ const TYPE = constants.TYPE
 const TYPES = constants.TYPES
 
 const VERIFICATION = TYPES.VERIFICATION
-const MY_PRODUCT = 'tradle.MyProduct'
+const MONEY = TYPES.MONEY
+const FORM = TYPES.FORM
+const ORGANIZATION = TYPES.ORGANIZATION
 
+const MY_PRODUCT = 'tradle.MyProduct'
 const CUR_HASH = constants.CUR_HASH
 const NONCE = constants.NONCE
 const ROOT_HASH = constants.ROOT_HASH
 const PREV_HASH = constants.PREV_HASH
 const SIG = constants.SIG
-const FORM = TYPES.FORM
 const FORM_ERROR = 'tradle.FormError'
 const FORM_REQUEST = 'tradle.FormRequest'
+const PHOTO = 'tradle.Photo'
 const PASSWORD_ENC = 'hex'
 
 var LocalizedStrings = require('react-native-localization')
@@ -145,13 +149,16 @@ var utils = {
     if (!dictionary)
       return property.title || utils.makeLabel(property.name)
     let translations = dictionary.properties[property.name]
-    return (translations) ? translations[model.id] || translations.Default : property.title || utils.makeLabel(property.name)
+    let val
+    if (translations)
+      val = translations[model.id] || translations.Default
+
+    return val || property.title || utils.makeLabel(property.name)
   },
   translateModel(model) {
-    if (!dictionary)
-      return model.title
-    return dictionary.models[model.id] || model.title
-
+    if (dictionary  &&  dictionary.models[model.id])
+      return dictionary.models[model.id]
+    return model.title ? model.title : this.makeModelTitle(model)
   },
   translateString(...args) {
     if (!strings)
@@ -209,7 +216,7 @@ var utils = {
       else if (typeof r1[p] === 'object') {
         if (!r2[p]  ||  !properties[p]) // internal props like _context
           return false
-        if (properties[p].ref === TYPES.MONEY) {
+        if (properties[p].ref === MONEY) {
           if (r1[p].currency !== r2[p].currency  ||  r1[p].value !== r2[p].value)
             return false
         }
@@ -237,8 +244,19 @@ var utils = {
     // return t !== stringName ? t : (isEnumValue ? s : utils.makeLabel(s))
     return t !== stringName ? t : s
   },
+  makeModelTitle(model) {
+    if (model.title)
+      return model.title
+    let label = model.id.split('.')[1]
+    return label
+          // insert a space before all caps
+          .replace(/([A-Z])/g, ' $1')
+          // uppercase the first character
+          .replace(/^./, function(str){ return str.toUpperCase(); })
+  },
   makeLabel(label) {
     return label
+          .replace(/_/g, ' ')
           // insert a space before all caps
           .replace(/([A-Z])/g, ' $1')
           // uppercase the first character
@@ -334,6 +352,14 @@ var utils = {
   makeTitle(resourceTitle, prop) {
     return (resourceTitle.length > 28) ? resourceTitle.substring(0, 28) + '...' : resourceTitle;
   },
+  getPropertiesWithAnnotation(meta, annotation) {
+    let props = {}
+    for (let p in meta)
+      if (meta[p][annotation])
+        props[p] = meta[p]
+
+    return props
+  },
   getDisplayName(resource, meta) {
     if (!meta) {
       if (resource.title)
@@ -369,6 +395,62 @@ var utils = {
     return displayName;
   },
 
+  getDisplayName1(resource, meta) {
+    if (!meta) {
+      if (resource.title)
+        return resource.title
+      if (resource.id)
+        return ""
+      meta = this.getModel(resource[TYPE]).value.properties
+    }
+    let dProps = this.getPropertiesWithAnnotation(meta, 'displayName')
+
+    let m = this.getModel(resource[TYPE])
+    let vCols = m  &&  m.value.viewCols
+    var displayName = '';
+    if (vCols) {
+      vCols.forEach((p) => {
+        if (dProps[p]) {
+          let dn = this.getPropStringValue(meta[p], resource)
+          displayName += displayName.length ? ' ' + dn : dn;
+        }
+      })
+      // if (displayName.length)
+      //   return displayName
+    }
+    // if models does not have viewCols or not all displayName props are listed in viewCols
+    for (var p in meta) {
+      if (p.charAt(0) === '_')
+        continue
+      if (vCols  &&  vCols.indexOf(p) !== -1)
+        continue
+      if (dProps)  {
+        if (!dProps[p]) {
+          if (!displayName  &&  m  &&  resource[p]  &&  m.value.subClassOf === 'tradle.Enum')
+            return resource[p];
+          continue
+        }
+        else {
+          let dn = this.getPropStringValue(meta[p], resource)
+          displayName += displayName.length ? ' ' + dn : dn;
+        }
+      }
+      // let dn = this.getPropStringValue(meta[p], resource)
+      // displayName += displayName.length ? ' ' + dn : dn;
+    }
+    return displayName;
+  },
+
+  getPropStringValue(prop, resource) {
+    let p = prop.name
+    if (!resource[p]  &&  prop.displayAs)
+      return this.templateIt(prop, resource);
+    if (prop.type == 'object')
+      return resource[p].title || this.getDisplayName(resource[p], utils.getModel(resource[p][TYPE]).value.properties);
+    else
+      return resource[p] + '';
+  },
+
   template (t, o) {
     return t.replace(/{([^{}]*)}/g,
         function (a, b) {
@@ -383,14 +465,17 @@ var utils = {
     let pgroup = prop.group
     let group = []
     let hasSetProps
+    let props = this.getModel(resource[TYPE]).value.properties
     let m = this.getModel(resource[TYPE])
-    for (let i=0; i<=pgroup.length; i++) {
+    for (let i=0; i<pgroup.length; i++) {
       let p = pgroup[i]
       let v =  resource[p] ? resource[p] : ''
       if (v)
         hasSetProps = true
       if (typeof v === 'object')
         v = v.title ? v.title : utils.getDisplayName(v, this.getModel(props[p].ref).value.properties)
+      else if (props[p].range  &&  props[p].range  === 'check')
+        v = ''
       group.push(v)
     }
 
@@ -615,7 +700,9 @@ var utils = {
       if (properties[p].type === 'object') {
         if (res[p]  &&  res[p].id  &&  res[p].title)
           continue
-        if (properties[p].ref !== TYPES.MONEY) {
+        if (properties[p].ref  &&  !utils.getModel(properties[p].ref).value.inlined) {
+
+          // if (properties[p].ref !== MONEY  &&  properties[p].ref !== PHOTO) {
           res[p] = {
             id: this.getId(res[p]),
             title: this.getDisplayName(res[p], properties)
@@ -694,7 +781,7 @@ var utils = {
     if (!me.isEmployee)
       return false
     let myId = this.getId(me.organization)
-    if (resource[TYPE] === TYPES.ORGANIZATION)
+    if (resource[TYPE] === ORGANIZATION)
       return this.getId(resource) === myId ? true : false
     if (!resource.organization)
       return true
@@ -708,7 +795,7 @@ var utils = {
     let model = this.getModel(resource[TYPE]).value
     if (!me.organization)
       return false
-    if (model.subClassOf === TYPES.FORM) {
+    if (model.subClassOf === FORM) {
       return  (utils.getId(me) === utils.getId(resource.to)  ||  this.isReadOnlyChat(resource)) &&
              !utils.isVerifiedByMe(resource)               // !verification  &&  utils.getId(resource.to) === utils.getId(me)  &&
     }
@@ -1199,6 +1286,15 @@ var utils = {
         })
     }
   },
+  getPhotoProperty(resource) {
+    let props = this.getModel(resource[constants.TYPE]).value.properties
+    let photoProp
+    for (let p in resource) {
+      if (props[p].ref === PHOTO  &&  props[p].mainPhoto)
+        return props[p]
+    }
+    return properties.photos
+  },
 
   locker: function (opts={}) {
     const { timeout } = opts
@@ -1221,6 +1317,84 @@ var utils = {
           }, timeout)
         })
       })
+    }
+  },
+  getMainPhotoProperty(model) {
+    let mainPhoto
+    let props = model.properties
+    for (let p in props) {
+      if (props[p].mainPhoto)
+        mainPhoto = p
+    }
+    return mainPhoto
+  },
+  getResourcePhotos(model, resource) {
+    var mainPhoto, photos
+    let props = model.properties
+    for (let p in resource) {
+      if (!props[p] ||  (props[p].ref !== PHOTO && (!props[p].items || props[p].items.ref !== PHOTO)))
+        continue
+      if (props[p].mainPhoto) {
+        mainPhoto = resource[p]
+        continue
+      }
+      if (!photos)
+        photos = []
+      if (props[p].items)
+        resource[p].forEach((r) => photos.push(r))
+      else
+        photos.push(resource[p])
+    }
+    if (!photos) {
+      if (mainPhoto)
+        return [mainPhoto]
+    }
+    else {
+      if (!mainPhoto)
+        return photos
+      photos.splice(0, 0, mainPhoto)
+      return photos
+    }
+  },
+  getPropertiesWithRange(range, model) {
+    let props = model.properties
+    let rProps = []
+    for (let p in props)
+      if (props[p].range === range)
+        rProps.push(props[p])
+    return rProps
+  },
+  fromMicroBlink: function (result) {
+    const { mrtd, usdl, eudl, image } = result
+    if (mrtd) {
+      return {
+        [TYPE]: 'tradle.Passport',
+        givenName: mrtd.secondaryId,
+        surname: mrtd.primaryId,
+        nationality: {
+          id: 'tradle.Country_abc',
+          title: mrtd.nationality.slice(0, 2)
+        },
+        issuingCountry: {
+          id: 'tradle.Country_abc',
+          title: mrtd.issuer.slice(0, 2)
+        },
+        passportNumber: mrtd.documentNumber,
+        sex: {
+          id: 'tradle.Sex_abc',
+          title: mrtd.sex === 'M' ? 'Male' : 'Female'
+        },
+        dateOfExpiry: mrtd.dateOfExpiry,
+        dateOfBirth: mrtd.dateOfBirth,
+        photos: [
+          {
+            url: image.base64,
+            width: image.width,
+            height: image.height,
+            isVertical: image.width < image.height
+          }
+        ]
+      }
     }
   }
 }
