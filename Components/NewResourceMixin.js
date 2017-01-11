@@ -18,7 +18,9 @@ import DatePicker from 'react-native-datepicker'
 
 import BlinkID from './BlinkID'
 const { microblink } = require('../environment.json')
-BlinkID.setLicenseKey(microblink.licenseKey)
+if (microblink && BlinkID) {
+  BlinkID.setLicenseKey(microblink.licenseKey)
+}
 
 var constants = require('@tradle/constants');
 var t = require('tcomb-form-native');
