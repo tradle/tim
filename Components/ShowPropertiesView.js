@@ -128,6 +128,7 @@ class ShowPropertiesView extends Component {
     var viewCols = vCols.map((p) => {
       if (excludedProperties  &&  excludedProperties.indexOf(p) !== -1)
         return;
+
       var val = resource[p];
       var pMeta = props[p];
       if (pMeta.range === 'json') {
@@ -157,6 +158,8 @@ class ShowPropertiesView extends Component {
           return;
       }
       else if (pMeta.ref) {
+        if (pMeta.ref === PHOTO)
+          return
         if (pMeta.ref == constants.TYPES.MONEY) {
           let c = utils.normalizeCurrencySymbol(val.currency)
           val = (c || CURRENCY_SYMBOL) + val.value
