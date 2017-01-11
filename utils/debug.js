@@ -35,7 +35,7 @@ for (var p in EventEmitter.prototype) {
   }
 }
 
-const lines = []
+let lines = []
 debug.log = function (...args) {
   args.unshift(getNow())
   if (__DEV__) {
