@@ -521,6 +521,8 @@ var NewResourceMixin = {
   },
 
   async showIDScanner(prop) {
+    if (utils.isWeb()) return Alert.alert('Oops!', 'Scanning in the browser is not supported yet')
+
     const { documentType, country } = this.state.resource
     const blinkIDOpts = {
       quality: 0.2,
