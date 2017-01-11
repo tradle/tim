@@ -125,8 +125,6 @@ class VerificationMessageRow extends Component {
                     </View>
                   </View>
 
-    let isAndroid = utils.isAndroid()
-    // isAndroid = true
     var viewStyle = {
       width: msgWidth,
       flexDirection: 'row',
@@ -136,23 +134,21 @@ class VerificationMessageRow extends Component {
       marginBottom: 3,
       // backgroundColor: this.props.bankStyle.BACKGROUND_COLOR
     }
-    if (!isAndroid)
-      viewStyle.height = 110
 
     let addStyle = [
       // chatStyles.verificationBody,
       {borderWidth: 0, backgroundColor: 'transparent' /*, backgroundColor: isShared ? '#ffffff' : this.props.bankStyle.VERIFICATION_BG,*/ },
       isMyMessage ? {borderTopRightRadius: 0} : {borderTopLeftRadius: 0}
     ];
-    if (isAndroid) {
-      addStyle.push({
-        backgroundColor: this.props.bankStyle.VERIFICATION_BG,
-        borderColor: this.props.bankStyle.VERIFIED_BORDER_COLOR,
-        borderWidth: 1,
-        borderRadius: 10
-      })
-      addStyle.push(isMyMessage ? {borderTopRightRadius: 0} : {borderTopLeftRadius: 0})
-    }
+    // if (isAndroid) {
+    //   addStyle.push({
+    //     backgroundColor: this.props.bankStyle.VERIFICATION_BG,
+    //     borderColor: this.props.bankStyle.VERIFIED_BORDER_COLOR,
+    //     borderWidth: 1,
+    //     borderRadius: 10
+    //   })
+    //   addStyle.push(isMyMessage ? {borderTopRightRadius: 0} : {borderTopLeftRadius: 0})
+    // }
 
     let shareWith
     if (this.props.shareWithRequestedParty) {
@@ -169,9 +165,11 @@ class VerificationMessageRow extends Component {
                     </View>
                   </View>
     }
-    else
+    else {
       shareWith = <View/>
-    let bgImage = isAndroid ? <View/> : <Image source={BG_IMAGE} style={[{position: 'absolute', top: 0, borderRadius: 10, left: 0, width: (isReadOnlyChat ? msgWidth - 40 : msgWidth), height: 110, resizeMode: 'stretch', opacity: 0.4}, addStyle]}/>
+      viewStyle.height = 110
+    }
+    // let bgImage = <Image source={BG_IMAGE} style={[{position: 'absolute', top: 0, borderRadius: 10, left: 0, width: (isReadOnlyChat ? msgWidth - 40 : msgWidth), height: 110, resizeMode: 'stretch', opacity: 0.4}, addStyle]}/>
 
     let messageBody =
           <TouchableOpacity onPress={this.verify.bind(this, resource)}>
@@ -180,8 +178,7 @@ class VerificationMessageRow extends Component {
                 {this.getOwnerPhoto(isMyMessage)}
                 <View style={[chatStyles.textContainer, addStyle]}>
                   <View style={{flex: 1, backgroundColor: 'transparent'}}>
-                    {bgImage}
-                    {renderedRow}
+                    <Image source={BG_IMAGE} style={[{position: 'absolute', top: 0, borderRadius: 10, left: 0, width: (isReadOnlyChat ? msgWidth - 40 : msgWidth), height: 110, resizeMode: 'stretch', opacity: 0.4}, addStyle]}/>                    {renderedRow}
                     {shareWith}
                  </View>
               </View>
