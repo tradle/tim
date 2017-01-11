@@ -259,7 +259,7 @@ var RowMixin = {
       var orgPhoto = verification.organization.photo
                    ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
                    : <View />
-      var shareView = <View style={[chatStyles.shareButton, {opacity: this.props.resource.documentCreated ? 0.3 : 1}]}>
+      var shareView = <View style={[chatStyles.shareButton, {backgroundColor: this.props.bankStyle.SHARE_BUTTON_BACKGROUND_COLOR, opacity: this.props.resource.documentCreated ? 0.3 : 1}]}>
                         <CustomIcon name='tradle' style={{color: '#ffffff' }} size={32} />
                         <Text style={chatStyles.shareText}>{translate('Share')}</Text>
                       </View>

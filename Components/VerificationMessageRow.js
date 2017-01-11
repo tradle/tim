@@ -125,27 +125,41 @@ class VerificationMessageRow extends Component {
                     </View>
                   </View>
 
+    let isAndroid = utils.isAndroid()
+    // isAndroid = true
     var viewStyle = {
       width: msgWidth,
       flexDirection: 'row',
       // borderWidth: 1,
       alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
       backgroundColor: 'transparent',
-      height: 110
+      marginBottom: 3,
       // backgroundColor: this.props.bankStyle.BACKGROUND_COLOR
     }
+    if (!isAndroid)
+      viewStyle.height = 110
+
     let addStyle = [
       // chatStyles.verificationBody,
       {borderWidth: 0, backgroundColor: 'transparent' /*, backgroundColor: isShared ? '#ffffff' : this.props.bankStyle.VERIFICATION_BG,*/ },
       isMyMessage ? {borderTopRightRadius: 0} : {borderTopLeftRadius: 0}
     ];
+    if (isAndroid) {
+      addStyle.push({
+        backgroundColor: this.props.bankStyle.VERIFICATION_BG,
+        borderColor: this.props.bankStyle.VERIFIED_BORDER_COLOR,
+        borderWidth: 1,
+        borderRadius: 10
+      })
+      addStyle.push(isMyMessage ? {borderTopRightRadius: 0} : {borderTopLeftRadius: 0})
+    }
 
     let shareWith
     if (this.props.shareWithRequestedParty) {
       let title = this.props.shareWithRequestedParty.organization && this.props.shareWithRequestedParty.organization.title
       shareWith = <View style={styles.shareWithInquirer}>
                     <TouchableOpacity onPress={this.shareWithRequestedParty.bind(this)}>
-                       <View style={[chatStyles.shareButton, {marginLeft: 15, justifyContent: 'flex-start'}]}>
+                       <View style={[chatStyles.shareButton, {marginLeft: 15, justifyContent: 'flex-start', backgroundColor: this.props.bankStyle.SHARE_BUTTON_BACKGROUND_COLOR}]}>
                         <CustomIcon name='tradle' style={{color: '#ffffff' }} size={32} />
                         <Text style={chatStyles.shareText}>{translate('Share')}</Text>
                       </View>
@@ -157,6 +171,7 @@ class VerificationMessageRow extends Component {
     }
     else
       shareWith = <View/>
+    let bgImage = isAndroid ? <View/> : <Image source={BG_IMAGE} style={[{position: 'absolute', top: 0, borderRadius: 10, left: 0, width: (isReadOnlyChat ? msgWidth - 40 : msgWidth), height: 110, resizeMode: 'stretch', opacity: 0.4}, addStyle]}/>
 
     let messageBody =
           <TouchableOpacity onPress={this.verify.bind(this, resource)}>
@@ -165,7 +180,7 @@ class VerificationMessageRow extends Component {
                 {this.getOwnerPhoto(isMyMessage)}
                 <View style={[chatStyles.textContainer, addStyle]}>
                   <View style={{flex: 1, backgroundColor: 'transparent'}}>
-                    <Image source={BG_IMAGE} style={[{position: 'absolute', top: 0, borderRadius: 10, left: 0, width: (isReadOnlyChat ? msgWidth - 40 : msgWidth), height: 110, resizeMode: 'stretch', opacity: 0.4}, addStyle]}/>
+                    {bgImage}
                     {renderedRow}
                     {shareWith}
                  </View>
@@ -265,4 +280,28 @@ module.exports = VerificationMessageRow;
                       </View>
                     </View>
                   : <View/>
+    let isAndroid = utils.isAndroid()
+    let bg = isAndroid
+           ? <View/>
+           : <Image source={BG_IMAGE} style={[{position: 'absolute', top: 0, borderRadius: 10, left: 0, width: (isReadOnlyChat ? msgWidth - 40 : msgWidth), height: 110, opacity: 0.4}, addStyle]}/>
+
+    let androidStyle = {backgroundColor: this.props.bankStyle.VERIFICATION_BG, borderRadius: 10, borderWidth: StyleSheet.hairlineWidth, borderColor: this.props.bankStyle.SHARE_BUTTON_BACKGROUND_COLOR}
+    let messageBody =
+          <TouchableOpacity onPress={this.verify.bind(this, resource)}>
+            <View style={{flexDirection: 'column', flex: 1}}>
+              <View style={[chatStyles.row, viewStyle]}>
+                {this.getOwnerPhoto(isMyMessage)}
+                <View style={[chatStyles.textContainer, addStyle]}>
+                  <View style={[{flex: 1} , isAndroid ? androidStyle : {backgroundColor: 'transparent'}]}>
+                    {bg}
+                    {renderedRow}
+                    {shareWith}
+                 </View>
+              </View>
+            </View>
+            {this.getSendStatus()}
+            </View>
+          </TouchableOpacity>
+
+    var viewStyle = { margin: 1 }
 */
