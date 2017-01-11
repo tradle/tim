@@ -242,15 +242,15 @@ const DEVICE_ID = 'deviceid'
 const TLS_ENABLED = false
 const PAUSE_ON_TRANSITION = false //true
 
-// const {
-//   newAPIBasedVerification,
-//   newIdscanVerification,
-//   newAu10tixVerification,
-//   newVisualVerification,
-//   newVerificationTree,
-//   randomDoc,
-//   newFormRequestVerifiers
-// } = require('../utils/faker')
+const {
+  newAPIBasedVerification,
+  newIdscanVerification,
+  newAu10tixVerification,
+  newVisualVerification,
+  newVerificationTree,
+  randomDoc,
+  newFormRequestVerifiers
+} = require('../utils/faker')
 
 
 // var Store = Reflux.createStore(timeFunctions({
