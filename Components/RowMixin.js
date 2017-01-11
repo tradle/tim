@@ -20,6 +20,7 @@ import {
   Image
 } from 'react-native';
 
+const SHOW_TIME_INTERVAL = 60000
 var CURRENCY_SYMBOL
 const DEFAULT_CURRENCY_SYMBOL = '£'
 
@@ -165,9 +166,9 @@ var RowMixin = {
     if (!showTime)  {
       var prevDate = new Date(previousMessageTime);
       var curDate = new Date(resource.time);
-      showTime = resource.time - previousMessageTime > 3600000 ||
-                 prevDate.getDate()  !== curDate.getDate()  ||
-                 prevDate.getMonth() !== curDate.getMonth() ||
+      showTime = resource.time - previousMessageTime > SHOW_TIME_INTERVAL ||
+                 prevDate.getDate()  !== curDate.getDate()    ||
+                 prevDate.getMonth() !== curDate.getMonth()   ||
                  prevDate.getYear()  !== curDate.getYear()
     }
 

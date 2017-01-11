@@ -123,10 +123,15 @@ class MessageRow extends Component {
                    : [chatStyles.verificationBody, {flex: 1}, mstyle]
         }
       }
+
       if (isFormError)
         addStyle = [addStyle, chatStyles.verificationBody, {backgroundColor: this.props.bankStyle.FORM_ERROR_BG, borderColor: resource.documentCreated ? this.props.bankStyle.REQUEST_FULFILLED : this.props.bankStyle.FORM_ERROR_BORDER}]; //model.style];
-      if (isMyMessage  &&  !isSimpleMessage && !isFormError)
-        addStyle = [addStyle, chatStyles.verificationBody, {backgroundColor: STRUCTURED_MESSAGE_COLOR, borderColor: '#C1E3E8'}]; //model.style];
+      if (isMyMessage  &&  !isSimpleMessage && !isFormError) {
+        let st = isProductApplication
+               ? {backgroundColor: this.props.bankStyle.CONTEXT_BACKGROUND_COLOR}
+               : {backgroundColor: this.props.bankStyle.STRUCTURED_MESSAGE_COLOR}
+        addStyle = [addStyle, chatStyles.verificationBody, st]; //model.style];
+      }
     }
     var properties = model.properties;
     var verPhoto;
@@ -453,7 +458,7 @@ class MessageRow extends Component {
       let str = !this.props.navigator.isConnected  &&  this.props.isLast
               ? translate('noConnectionForNewProduct', utils.getMe().firstName, translate(msgModel))
               : translate('newProductMsg', translate(msgModel))
-      let color = isMyMessage ? '#ffffff' : '#757575'
+      let color = isMyMessage ? this.props.bankStyle.CONTEXT_TEXT_COLOR : '#757575'
       let maxWidth = Math.floor(0.8 * utils.dimensions().width) - (isReadOnlyChat ? 90 : 40) // message width - icon size and all the paddings
       let msg = !this.props.navigator.isConnected  &&  this.props.isLast
               ? <View key={this.getNextKey()}>
