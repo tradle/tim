@@ -132,9 +132,10 @@ class VerificationMessageRow extends Component {
       // borderWidth: 1,
       alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
       backgroundColor: 'transparent',
-      height: 110
       // backgroundColor: this.props.bankStyle.BACKGROUND_COLOR
     }
+    if (!this.props.shareWithRequestedParty)
+     viewStyle.height = 110
     let addStyle = [
       // chatStyles.verificationBody,
       {borderWidth: 0, backgroundColor: 'transparent' /*, backgroundColor: isShared ? '#ffffff' : this.props.bankStyle.VERIFICATION_BG,*/ },
@@ -166,7 +167,7 @@ class VerificationMessageRow extends Component {
                 {this.getOwnerPhoto(isMyMessage)}
                 <View style={[chatStyles.textContainer, addStyle]}>
                   <View style={{flex: 1, backgroundColor: 'transparent'}}>
-                    <Image source={BG_IMAGE} style={[{position: 'absolute', top: 0, borderRadius: 10, left: 0, width: (isReadOnlyChat ? msgWidth - 40 : msgWidth), height: 110, resizeMode: 'stretch', opacity: 0.4}, addStyle]}/>
+                    <Image source={BG_IMAGE} style={[{position: 'absolute', top: 0, borderRadius: 10, left: 0, width: (isReadOnlyChat ? msgWidth - 40 : msgWidth), height: 110, opacity: 0.4}, addStyle]}/>
                     {renderedRow}
                     {shareWith}
                  </View>
