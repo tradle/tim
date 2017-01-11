@@ -42,5 +42,6 @@ module.exports = {
   autoOptInTouchId: false,
   lenientPassword: true,
   allowAddServer: true,
-  allowForgetMe: true
+  allowForgetMe: true,
+  serverToSendLog: __DEV__ ? 'http://localhost:44444/userlog' : 'https://azure1.tradle.io/userlog'
 }

@@ -180,5 +180,6 @@
     "trustedProviders": "Trusted providers",
     "overviewOfApplications": "Overview of Applications",
     "serverIsUnreachable": "Server is unreachable",
-    "sharedWith": "Shared {1} context with {2}"
+    "sharedWith": "Shared {1} context with {2}",
+    "viewDebugLog": "View debug log"
 }

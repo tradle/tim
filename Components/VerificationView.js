@@ -5,6 +5,7 @@ var utils = require('../utils/utils');
 var translate = utils.translate
 var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin')
+var MessageView = require('./MessageView')
 var ResourceMixin = require('./ResourceMixin')
 var reactMixin = require('react-mixin')
 var dateformat = require('dateformat')
@@ -15,6 +16,7 @@ var NOT_SPECIFIED = '[not specified]'
 var DEFAULT_CURRENCY_SYMBOL = '£'
 var CURRENCY_SYMBOL
 const ENUM = 'tradle.Enum'
+const VERIFICATION = 'tradle.Verification'
 const TYPE = constants.TYPE
 
 import StyleSheet from '../StyleSheet'
@@ -38,6 +40,7 @@ class VerificationView extends Component {
     super(props);
     this.state = {
       promptVisible: null,
+      documentType: props.resource.document[TYPE]
     }
     CURRENCY_SYMBOL = props.currency ? props.currency.symbol || props.currency : DEFAULT_CURRENCY_SYMBOL
   }
@@ -61,7 +64,7 @@ class VerificationView extends Component {
       var m = utils.getModel(resource.method[TYPE]).value
       let dnProps = utils.getPropertiesWithAnnotation(m.properties, 'displayName')
       let displayName = utils.getDisplayName(resource.method, m.properties)
-      let val = <View>{this.renderResource(resource.method, m)}</View>
+      let val = <View>{this.renderResource(resource, m)}</View>
       let title = <View style={{backgroundColor: this.props.bankStyle.VERIFICATION_BG, paddingVertical: 10, flexDirection: 'row', justifyContent: 'center'}}>
                     <Icon name='ios-add-circle-outline' size={25} color='#aaa' style={{ marginTop: 2, justifyContent:'center', paddingRight: 3, paddingLeft: 10 * (currentLayer + 1)}} />
                     <View style={{flexDirection: 'column', paddingLeft: 5, width: utils.dimensions(VerificationView).width - 50}}>
@@ -112,8 +115,11 @@ class VerificationView extends Component {
       passProps: {url: url ? url : this.props.resource.url}
     });
   }
-  renderResource(resource, model) {
-    var resource = resource ? resource : this.props.resource;
+  renderResource(r, model) {
+    var resource = !r ? this.props.resource : r
+    var isVerification = resource[TYPE] === VERIFICATION
+    if (isVerification)
+      resource = r.method
     var modelName = resource[TYPE];
     if (!model)
       model = utils.getModel(modelName)
@@ -140,6 +146,8 @@ class VerificationView extends Component {
     }
     var first = true;
     let self = this
+    let style = [styles.textContainer, {padding: 10}]
+
     var viewCols = vCols.map((p) => {
       var val = resource[p];
       var pMeta = model.properties[p];
@@ -203,7 +211,6 @@ class VerificationView extends Component {
                     : <View style={styles.separator}></View>;
 
       first = false;
-      let style = [styles.textContainer, {padding: 10}]
       style.push(isDirectionRow ? {flexDirection: 'row'} : {flexDirection: 'column'})
 
       return (<View key={this.getNextKey()}>
@@ -228,6 +235,25 @@ class VerificationView extends Component {
           retCols.push(v)
       }
     })
+    if (isVerification) {
+      // If document type of the original verification is not the same as in source
+      // Then show link for document to be able to review it
+      let dType = utils.getId(r.document).split('_')[0]
+      if (this.state.documentType !== dType) {
+        let mv = utils.getModel(VERIFICATION).value
+        retCols.push(
+          <View key={this.getNextKey()}>
+             <View style={styles.separator}></View>
+             <View  style={style}>
+               <TouchableOpacity onPress={this.showResource.bind(this, r.document, dType)} >
+                 <Text style={styles.title}>{translate(mv.properties.document)}</Text>
+                 <Text style={[styles.description, {color: '#7AAAC3'}]}>{translate(utils.getModel(dType).value)}</Text>
+               </TouchableOpacity>
+             </View>
+          </View>
+        )
+      }
+    }
     if (resource.txId) {
       retCols.push(<View key={this.getNextKey()}>
                      <View style={styles.separator}></View>
@@ -243,6 +269,23 @@ class VerificationView extends Component {
                     </View>)
     }
     return retCols;
+  }
+  showResource(r, type) {
+    // if (!r[TYPE])
+    //   r = {[TYPE]: type, [constants.ROOT_HASH]: utils.getId(r).split('_')[1]}
+
+    var route = {
+      title: translate(utils.getModel(type).value),
+      id: 5,
+      backButtonTitle: 'Back',
+      component: MessageView,
+      passProps: {
+        bankStyle: this.props.bankStyle,
+        resource: r,
+        currency: this.props.currency
+      }
+    }
+    this.props.navigator.push(route)
   }
 }
 reactMixin(VerificationView.prototype, RowMixin);

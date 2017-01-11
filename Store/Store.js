@@ -15,23 +15,12 @@ import * as LocalAuth from '../utils/localAuth'
 import Push from '../utils/push'
 
 var noop = () => {}
-if (__DEV__) {
-  AsyncStorage.getAllKeys().then(keys => {
-    console.log('AsyncStorage', keys)
-  })
-}
-
 var path = require('path')
 // var BeSafe = require('asyncstorage-backup')
 var Reflux = require('reflux');
 var Actions = require('../Actions/Actions');
 var extend = require('extend');
 var Debug = require('debug')
-Debug.enable([
-  'sendy*',
-  'tradle:node'
-].join(','))
-
 var deepEqual = require('deep-equal')
 var once = require('once')
 
@@ -2481,7 +2470,7 @@ var Store = Reflux.createStore({
             to: orgRep
           }
 
-          return self.onAddMessage({msg: msg})
+          return self.onAddMessage({msg: msg, disableAutoResponse: params.disableAutoResponse})
         }
       })
     } else {

@@ -952,9 +952,13 @@ var NewResourceMixin = {
     var label, style
     var propLabel
     var isItem = this.props.metadata != null
-    var prop = this.props.model
-             ? this.props.model.properties[params.prop]
-             : this.props.metadata.items.properties[params.prop]
+    var prop
+    if (this.props.model)
+      prop = this.props.model.properties[params.prop]
+    else if (this.props.metadata.items.properties)
+      prop = this.props.metadata.items.properties[params.prop]
+    else
+      prop = utils.getModel(this.props.metadata.items.ref).value.properties[params.prop]
 
     // let isRequired = this.props.model && this.props.model.required  &&  this.props.model.required.indexOf(params.prop) !== -1
 

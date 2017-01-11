@@ -55,13 +55,19 @@ class MessageView extends Component {
     this.state = {
       resource: props.resource,
       isConnected: this.props.navigator.isConnected,
-      promptVisible: false
+      promptVisible: false,
+      isLoading: !props.resource[TYPE]
     };
     var currentRoutes = this.props.navigator.getCurrentRoutes();
     var len = currentRoutes.length;
     if (!currentRoutes[len - 1].onRightButtonPress  &&  currentRoutes[len - 1].rightButtonTitle)
       currentRoutes[len - 1].onRightButtonPress = this.verifyOrCreateError.bind(this)
   }
+  componentWillMount() {
+    if (this.props.resource.id)
+      Actions.getItem(this.props.resource)
+  }
+
   componentDidMount() {
     this.listenTo(Store, 'onAction');
   }
@@ -75,6 +81,13 @@ class MessageView extends Component {
         modelName: constants.TYPES.MESSAGE,
         to: params.resource
       });
+    }
+    else if (params.action === 'getItem') {
+      if (utils.getId(params.resource) === utils.getId(this.props.resource))
+        this.setState({
+          resource: params.resource,
+          isLoading: false
+        })
     }
     else if (params.action == 'connectivity') {
       this.setState({isConnected: params.isConnected})
@@ -187,8 +200,10 @@ class MessageView extends Component {
   }
 
   render() {
+    if (this.state.isLoading)
+      return <View/>
     var resource = this.state.resource;
-    var modelName = resource[TYPE];
+    var modelName = resource[TYPE] || resource.id.split('_')[0];
     var model = utils.getModel(modelName).value;
     var date = resource.time ? utils.formatDate(new Date(resource.time)) : utils.formatDate(new Date())
     var photos = resource.photos
