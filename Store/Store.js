@@ -582,6 +582,7 @@ var Store = Reflux.createStore({
         let url = self._getItem(SETTINGS + '_1').hashToUrl[recipientHash]
         messenger = wsClients.byUrl[url]
       }
+
       if (!messenger) {
         // Alert.alert('meDriver._send recipient not found ' + recipientHash)
         return cb(new Error('recipient not found'))
@@ -590,10 +591,17 @@ var Store = Reflux.createStore({
       const args = arguments
       const identifier = self.getIdentifier(recipientInfo)
 
+      debug(`pushing msg to ${identifier} into network stack`)
       // this timeout is not for sending the entire message
       // but rather an idle connection timeout
-      messenger.send(identifier, msg, cb)
-      messenger.setTimeout(60000)
+      messenger.send(identifier, msg, function (err) {
+        if (err) debug(`failed to deliver message to ${identifier}: ${err.message}`)
+        else debug(`delivered message to ${identifier}`)
+
+        cb(err)
+      })
+
+      // messenger.setTimeout(60000)
     }
 
     // meDriver = timeFunctions(meDriver)
@@ -943,6 +951,7 @@ var Store = Reflux.createStore({
 
     const wsClient = this.getWsClient(url)
     transport = this.getTransport(wsClient)
+
     // const url = utils.joinURL(base, 'ws?from=' + identifier).replace(/^http/, 'ws')
     // const wsClient = new WebSocketClient({
     //   url: url,
@@ -1023,6 +1032,7 @@ var Store = Reflux.createStore({
     // })
 
     transport.on('message', async function (msg, from) {
+      debug('queuing receipt of msg from', from)
       if (!wsClients.byIdentifier[from]) {
         wsClients.add({
           client: transport,
@@ -1039,12 +1049,15 @@ var Store = Reflux.createStore({
 
       try {
         await maybePromise
+        debug('received msg from', from)
       } finally {
         unlock()
       }
     })
 
+    transport.setTimeout(40000)
     transport.on('timeout', function (identifier) {
+      debug(`connection timed out with ${identifier}, canceling pending to trigger resend`)
       transport.cancelPending(identifier)
     })
 
