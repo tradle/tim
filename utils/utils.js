@@ -244,6 +244,8 @@ var utils = {
     return t !== stringName ? t : s
   },
   makeModelTitle(model) {
+    if (typeof model === 'string')
+      return this.makeModelTitle(this.getModel(model).value)
     if (model.title)
       return model.title
     let label = model.id.split('.')[1]
