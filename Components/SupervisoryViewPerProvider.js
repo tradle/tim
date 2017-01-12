@@ -90,42 +90,42 @@ class SupervisoryViewPerProvider extends Component {
       changedCol = {[stats.changed]: styles.changedCol}
 
     return  <Row size={8} style={{borderBottomColor: '#aaaaaa', borderBottomWidth: 1}} key={'app_' + cnt}>
-              <Col sm={1} md={4} lg={3}>
+              <Col sm={1} md={1} lg={1}>
                 <Text style={{alignSelf: 'center', padding: 3}}>
                   {owner.title || ''}
                 </Text>
               </Col>
-              <Col sm={1} md={4} lg={3} style={changedCol.forms || styles.col}>
+              <Col sm={1} md={1} lg={1} style={changedCol.forms || styles.col}>
                 <Text style={styles.cell}>
                   {resource.forms.length}
                 </Text>
               </Col>
-              <Col sm={1} md={4} lg={3} style={changedCol.formErrors || styles.col}>
+              <Col sm={1} md={1} lg={1} style={changedCol.formErrors || styles.col}>
                 <Text style={styles.cell}>
                   {resource.formErrors.length}
                 </Text>
               </Col>
-              <Col sm={1} md={4} lg={3} style={changedCol.formCorrections || styles.col}>
+              <Col sm={1} md={1} lg={1} style={changedCol.formCorrections || styles.col}>
                 <Text style={styles.cell}>
                   {resource.formCorrections.length}
                 </Text>
               </Col>
-              <Col sm={1} md={4} lg={3} style={changedCol.verifications || styles.col}>
+              <Col sm={1} md={1} lg={1} style={changedCol.verifications || styles.col}>
                 <Text style={styles.cell}>
                   {resource.verifications.length}
                 </Text>
               </Col>
-              <Col sm={1} md={4} lg={3} style={styles.col}>
+              <Col sm={1} md={1} lg={1} style={styles.col}>
                 <Text style={styles.cell}>
                   {start}
                 </Text>
               </Col>
-              <Col sm={1} md={4} lg={3} style={styles.col}>
+              <Col sm={1} md={1} lg={1} style={styles.col}>
                 <Text style={styles.cell}>
                   {completed}
                 </Text>
               </Col>
-              <Col sm={1} md={4} lg={3} style={styles.col}>
+              <Col sm={1} md={1} lg={1} style={styles.col}>
                 <Text style={styles.cell}>
                   {days}
                 </Text>
@@ -214,7 +214,7 @@ class SupervisoryViewPerProvider extends Component {
       let cols = []
       let cnt = 1
       titles.forEach((t) =>
-        cols.push(<Col sm={1} md={4} lg={3} style={styles.col} key={t + '_' + cnt++}>
+        cols.push(<Col sm={1} md={1} lg={1} style={styles.col} key={t + '_' + cnt++}>
                     <Text style={styles.cell}>{t}</Text>
                   </Col>)
       )
