@@ -337,6 +337,9 @@ var utils = {
             : id
     }
   },
+  getType(r) {
+    return r[TYPE] || this.getId(r).split('_')[0]
+  },
   getItemsMeta(metadata) {
     var props = metadata.properties;
     var required = utils.arrayToObject(metadata.required);
@@ -463,6 +466,8 @@ var utils = {
   },
   templateIt1(prop, resource) {
     let pgroup = prop.group
+    if (!pgroup.length)
+      return prop.displayAs
     let group = []
     let hasSetProps
     let props = this.getModel(resource[TYPE]).value.properties

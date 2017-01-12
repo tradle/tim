@@ -1,7 +1,11 @@
 
 import { NativeModules } from 'react-native'
 const { RNMicroBlinkManager } = NativeModules
-const scan = promisify(RNMicroBlinkManager.scan)
+let scan
+if (RNMicroBlinkManager) {
+ scan = promisify(RNMicroBlinkManager.scan)
+}
+
 const resultProps = ['mrtd', 'usdl', 'eudl']
 const validators = {
   mrtd: validateMRTDOptions,
@@ -12,7 +16,7 @@ const validators = {
 
 let LICENSE_KEY
 
-module.exports = {
+module.exports = RNMicroBlinkManager && {
   setLicenseKey: key => {
     LICENSE_KEY = key
     RNMicroBlinkManager.setKey(key)

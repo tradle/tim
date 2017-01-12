@@ -349,7 +349,7 @@ class MessageRow extends Component {
     // var isPrefilled = model.id in formDefaults
     // if (isPrefilled)
     //   extend(true, resource, formDefaults[model.id])
-    let type = r[constants.TYPE] || utils.getId(r).split('_')[0]
+    let type = utils.getType(r)
     let model = utils.getModel(type).value
     this.props.navigator.push({
       id: 4,

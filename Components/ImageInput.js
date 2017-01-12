@@ -24,7 +24,6 @@ class ImageInput extends Component {
   constructor(props) {
     super(props)
     this.showImagePicker = this.showImagePicker.bind(this)
-    this.showMicroBlinkScanner = this.showMicroBlinkScanner.bind(this)
   }
   render() {
     const touchableProps = { ...this.props }
@@ -43,7 +42,6 @@ class ImageInput extends Component {
       </TouchableHighlight>
     )
   }
-
   showImagePicker() {
     const { prop, onImage } = this.props
     let options = {returnIsVertical: true, quality: utils.imageQuality, cameraType: this.props.prop.cameraType || 'back'}

@@ -76,7 +76,7 @@ class SupervisoryView extends Component {
       return
     let list = params.stats
 
-    this.product = list[0].applications[0].productType
+    // this.product = list[0].applications[0].productType
 
     this.setState({
       dataSource: this.state.dataSource.cloneWithRows(list),

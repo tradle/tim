@@ -2900,9 +2900,10 @@ var Store = Reflux.createStore({
       let meOrgId = me.organization ? utils.getId(me.organization) : null
       let newOrgId = utils.getId(resource.organization)
 
-      if (meOrgId  &&  meOrgId !== newOrgId)
-        return {error: 'Can\'t change employment'}
-
+      if (meOrgId  &&  meOrgId !== newOrgId) {
+        if (this.checkIfEmployeeAlready())
+          return {error: 'Can\'t change employment'}
+      }
       if (!meOrgId) {
         if (!SERVICE_PROVIDERS)
           return {error: 'Can\'t verify if provider is active at this time. Try again later'}
@@ -2912,14 +2913,16 @@ var Store = Reflux.createStore({
         if (o  &&  o.length)
           return {isBecomingEmployee: true}
       }
-      else if (meOrgId) {
-        let result = self.searchMessages({to: me, modelName: MY_EMPLOYEE_PASS})
-        if (!result)
-          return {isBecomingEmployee: true}
-        let meId = utils.getId(me)
-        return {isBecomingEmployee: !(result.some((r) => meId === utils.getId(r.to)))}
-      }
+      else if (meOrgId)
+        return this.checkIfEmployeeAlready()
     }
+  },
+  checkIfEmployeeAlready() {
+    let result = self.searchMessages({to: me, modelName: MY_EMPLOYEE_PASS})
+    if (!result)
+      return {isBecomingEmployee: true}
+    let meId = utils.getId(me)
+    return {isBecomingEmployee: !(result.some((r) => meId === utils.getId(r.to)))}
   },
   onAddApp(serverUrl) {
     const parts = serverUrl.split(';')
