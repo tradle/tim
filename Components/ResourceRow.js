@@ -303,10 +303,10 @@ class ResourceRow extends Component {
     if (!viewCols) {
       if (model.id === 'tradle.Partial') {
         let p = resource.leaves.find((l) => l.key === TYPE && l.value).value
-        let productTitle = utils.getModel(p).value.title
+        let productTitle = utils.makeModelTitle(p)
         return <View style={{flexDirection: 'row'}}>
                 <Text style={[styles.resourceTitle, {fontSize: 18}]} numberOfLines={2}>{resource.providerInfo.title}</Text>
-                <Text style={[styles.resourceTitle, {fontSize: 18, color: '#FF6D0D'}]}>{' ' + productTitle}</Text>
+                <Text style={[styles.resourceTitle, {fontSize: 18, paddingLeft: 7, color: '#FF6D0D'}]}>{' ' + productTitle}</Text>
               </View>
       }
       var vCols = utils.getDisplayName(resource, model.properties);
