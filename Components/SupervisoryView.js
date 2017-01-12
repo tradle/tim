@@ -18,6 +18,7 @@ var defaultBankStyle = require('../styles/bankStyle.json')
 var StyleSheet = require('../StyleSheet')
 
 import {Column as Col, Row} from 'react-native-flexbox-grid'
+import { makeResponsive } from 'react-native-orient'
 
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 // var bankStyles = require('../styles/bankStyles')
@@ -113,7 +114,6 @@ class SupervisoryView extends Component {
                 </Text>
               </Col>
             </Row>
-
   }
   showProviderDetails(resource) {
     // Actions.getAllPartials()
@@ -172,12 +172,12 @@ class SupervisoryView extends Component {
                   Provider
                 </Text>
               </Col>
-              <Col sm={1} md={4} lg={3} style={styles.col}>
+              <Col sm={1} md={1} lg={1} style={styles.col}>
                 <Text style={styles.cell}>
                   Completed
                 </Text>
               </Col>
-              <Col sm={1} md={4} lg={3} style={[styles.col, {borderRightWidth: 0}]}>
+              <Col sm={1} md={1} lg={1} style={[styles.col, {borderRightWidth: 0}]}>
                 <Text style={styles.cell}>
                   Open
                 </Text>
@@ -187,6 +187,7 @@ class SupervisoryView extends Component {
   }
 }
 reactMixin(SupervisoryView.prototype, Reflux.ListenerMixin);
+SupervisoryView = makeResponsive(SupervisoryView)
 
 var styles = StyleSheet.create({
   // container: {
