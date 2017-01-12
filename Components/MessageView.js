@@ -203,7 +203,8 @@ class MessageView extends Component {
     var resource = this.state.resource;
     var modelName = resource[TYPE] || resource.id.split('_')[0];
     var model = utils.getModel(modelName).value;
-    var date = resource.time ? utils.formatDate(new Date(resource.time)) : utils.formatDate(new Date())
+    let t = resource.dateVerified ? resource.dateVerified : resource.time
+    var date = t ? utils.formatDate(new Date(t)) : utils.formatDate(new Date())
     var photos = resource.photos
     var mainPhoto
     if (!photos) {
