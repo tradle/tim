@@ -3,7 +3,7 @@ import { EventEmitter } from 'events'
 import debug from 'debug'
 
 const localDebug = debug('tradle:logger')
-const MAX_LENGTH = 10000
+const MAX_LENGTH = 5000
 
 // require('ErrorUtils').setGlobalHandler(function (e, isFatal) {
 //   Alert.alert(e.stack)
