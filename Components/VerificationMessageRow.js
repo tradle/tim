@@ -60,7 +60,8 @@ class VerificationMessageRow extends Component {
     var isMyMessage = this.isMyMessage();
     var w = utils.dimensions(VerificationMessageRow).width
 
-    var msgModel = utils.getModel(resource.document[constants.TYPE]).value;
+    var dType = utils.getType(resource.document)
+    var msgModel = utils.getModel(dType).value
     var orgName = resource._verifiedBy
                 ? resource._verifiedBy.title
                 : resource.organization  ? resource.organization.title : ''
@@ -178,7 +179,8 @@ class VerificationMessageRow extends Component {
                 {this.getOwnerPhoto(isMyMessage)}
                 <View style={[chatStyles.textContainer, addStyle]}>
                   <View style={{flex: 1, backgroundColor: 'transparent'}}>
-                    <Image source={BG_IMAGE} style={[{position: 'absolute', top: 0, borderRadius: 10, left: 0, width: (isReadOnlyChat ? msgWidth - 40 : msgWidth), height: 110, resizeMode: 'stretch', opacity: 0.4}, addStyle]}/>                    {renderedRow}
+                    <Image source={BG_IMAGE} style={[{position: 'absolute', top: 0, borderRadius: 10, left: 0, width: (isReadOnlyChat ? msgWidth - 40 : msgWidth), height: 110, resizeMode: 'stretch', opacity: 0.4}, addStyle]}/>
+                    {renderedRow}
                     {shareWith}
                  </View>
               </View>
