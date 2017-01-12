@@ -172,10 +172,8 @@ class VerificationRow extends Component {
    //            </Swipeout>
 
     var content = <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>
-                      <View style={styles.row}>
-                        <View style={styles.textContainer}>
-                          {rows}
-                        </View>
+                      <View style={styles.textContainer}>
+                        {rows}
                       </View>
                     </TouchableHighlight>
 
@@ -247,7 +245,6 @@ class VerificationRow extends Component {
       return
     var verPhoto;
     var vCols = [];
-    var first = true;
     var self = this;
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
 
@@ -263,7 +260,6 @@ class VerificationRow extends Component {
         return;
       if (!resource[v]  &&  !properties[v].displayAs)
         return
-       //(first) ? styles.resourceTitle : styles.description;
 
       var units = properties[v].units && properties[v].units.charAt(0) !== '['
                 ? ' (' + properties[v].units + ')'
@@ -274,13 +270,13 @@ class VerificationRow extends Component {
           let val = (properties[v].ref === constants.TYPES.MONEY)
                   ? utils.normalizeCurrencySymbol(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value
                   : (resource[v].title || resource[v])
+
           vCols.push(
             <View style={styles.refPropertyRow} key={self.getNextKey()}>
               <Text style={labelStyle}>{properties[v].title + units}</Text>
               <Text style={style}>{val}</Text>
             </View>
           );
-          first = false;
         }
 
         return;
@@ -292,7 +288,14 @@ class VerificationRow extends Component {
         var val = (properties[v].displayAs)
                 ? utils.templateIt(properties[v], resource)
                 : resource[v];
-        row = <Text style={style} key={self.getNextKey()}>{val}</Text>
+        let row = <Text style={style} key={self.getNextKey()}>{val}</Text>
+        vCols.push(
+          <View style={styles.refPropertyRow} key={self.getNextKey()}>
+            <Text style={labelStyle}>{properties[v].title + units}</Text>
+            {row}
+          </View>
+        )
+        return
       }
       else {
         if (!resource[v]  ||  !resource[v].length)
@@ -311,21 +314,12 @@ class VerificationRow extends Component {
         }
         row = <Text style={style} key={self.getNextKey()}>{resource[v]}</Text>;
       }
-      // if (first) {
-      //   row = <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-      //           <View>{row}</View>
-      //           <View><Text style={styles.verySmallLetters}>{renderedRow[0]}</Text></View>
-      //         </View>
-      //   renderedRow.splice(0, 1);
-      // }
-
       vCols.push(
         <View style={styles.refPropertyRow} key={self.getNextKey()}>
           <Text style={labelStyle}>{properties[v].title + units}</Text>
           {row}
         </View>
       );
-      first = false;
     });
     // if (model.style)
     //   vCols.push(<Text style={styles.verySmallLetters}>{model.title}</Text>);
@@ -350,8 +344,16 @@ reactMixin(VerificationRow.prototype, RowMixin);
 var styles = StyleSheet.create({
   textContainer: {
     flex: 1,
-    borderColor: 'green'
+    // borderColor: 'green'
+    marginHorizontal: 10,
+    padding: 5,
   },
+  // row: {
+  //   // backgroundColor: '#FBFFE5',
+  //   flexDirection: 'row',
+  //   marginHorizontal: 10,
+  //   padding: 5,
+  // },
   rTitle: {
     flex: 1,
     fontSize: 18,
@@ -371,7 +373,7 @@ var styles = StyleSheet.create({
     // marginBottom: 2,
   },
   resourceTitleL: {
-    flex: 1,
+    flex: 0.7,
     fontSize: 16,
     fontWeight: '400',
     paddingRight: 5,
@@ -384,12 +386,6 @@ var styles = StyleSheet.create({
     color: '#999999',
     fontSize: 14,
     paddingLeft: 5
-  },
-  row: {
-    // backgroundColor: '#FBFFE5',
-    flexDirection: 'row',
-    marginHorizontal: 10,
-    padding: 5,
   },
   cellImage: {
     backgroundColor: '#dddddd',
@@ -415,9 +411,9 @@ var styles = StyleSheet.create({
     alignSelf: 'flex-end',
     color: '#b4c3cb'
   },
-  refPropertRow: {
+  refPropertyRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    // justifyContent: 'space-between',
     borderColor: '#F2FAED',
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#f0f0f0',
