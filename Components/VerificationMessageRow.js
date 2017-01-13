@@ -91,7 +91,7 @@ class VerificationMessageRow extends Component {
     let verifiedBy = isShared ? translate('youShared', orgName) : translate('verifiedBy', orgName)
 
     var w = utils.dimensions(VerificationMessageRow).width
-    let msgWidth = Math.floor(w * 0.7)
+    let msgWidth = Math.min(Math.floor(w * 0.7), 600)
     let numberOfCharacters = msgWidth / 12
     if (verifiedBy.length > numberOfCharacters)
       verifiedBy = verifiedBy.substring(0, numberOfCharacters) + '..'
@@ -137,23 +137,11 @@ class VerificationMessageRow extends Component {
       // backgroundColor: this.props.bankStyle.BACKGROUND_COLOR
     }
 
-    if (!this.props.shareWithRequestedParty)
-      viewStyle.height = 110
-
     let addStyle = [
       // chatStyles.verificationBody,
       {borderWidth: 0, backgroundColor: 'transparent' /*, backgroundColor: isShared ? '#ffffff' : this.props.bankStyle.VERIFICATION_BG,*/ },
       isMyMessage ? {borderTopRightRadius: 0} : {borderTopLeftRadius: 0}
     ];
-    // if (isAndroid) {
-    //   addStyle.push({
-    //     backgroundColor: this.props.bankStyle.VERIFICATION_BG,
-    //     borderColor: this.props.bankStyle.VERIFIED_BORDER_COLOR,
-    //     borderWidth: 1,
-    //     borderRadius: 10
-    //   })
-    //   addStyle.push(isMyMessage ? {borderTopRightRadius: 0} : {borderTopLeftRadius: 0})
-    // }
 
     let shareWith
     if (this.props.shareWithRequestedParty) {
@@ -170,10 +158,8 @@ class VerificationMessageRow extends Component {
                     </View>
                   </View>
     }
-    else {
+    else
       shareWith = <View/>
-      viewStyle.height = 110
-    }
     // let bgImage = <Image source={BG_IMAGE} style={[{position: 'absolute', top: 0, borderRadius: 10, left: 0, width: (isReadOnlyChat ? msgWidth - 40 : msgWidth), height: 110, resizeMode: 'stretch', opacity: 0.4}, addStyle]}/>
 
     let messageBody =
@@ -182,10 +168,11 @@ class VerificationMessageRow extends Component {
               <View style={[chatStyles.row, viewStyle]}>
                 {this.getOwnerPhoto(isMyMessage)}
                 <View style={[chatStyles.textContainer, addStyle]}>
-                  <View style={{flex: 1, backgroundColor: 'transparent'}}>
-                    <Image source={BG_IMAGE} style={[{position: 'absolute', top: 0, borderRadius: 10, left: 0, width: (isReadOnlyChat ? msgWidth - 40 : msgWidth), height: 110, opacity: 0.4}, addStyle]}/>
-                    {renderedRow}
-                    {shareWith}
+                  <View style={[{flex: 1, backgroundColor: 'transparent', borderRadius: 10, borderWidth: 1, borderColor: '#D4D4B8'}, isMyMessage ? {borderTopRightRadius: 0} : {borderTopLeftRadius: 0}]}>
+                    <Image source={BG_IMAGE} style={[{borderRadius: 10, resizeMode: 'cover', overflow: 'hidden'}, addStyle]} >
+                      {renderedRow}
+                      {shareWith}
+                    </Image>
                  </View>
               </View>
             </View>
