@@ -130,7 +130,7 @@ class VerificationRow extends Component {
     //   rows.push(row);
     // }
     var verifiedBy
-    if (!this.props.isChooser  &&  (isVerification || isMyProduct  ||  isForm) &&  resource.from) {
+    if (!this.props.isChooser  &&  (isVerification || isMyProduct /* ||  isForm*/) &&  resource.from) {
       var contentRows = [];
       // contentRows.push(<Text style={}>verified by {resource.to.title}></Text>);
       let org = isMyProduct
@@ -161,7 +161,7 @@ class VerificationRow extends Component {
                       {photo}
                       {date}
                       <View style={styles.noImageBlock}>
-                        <Text style={styles.rTitle}>{this.props.isChooser ? utils.getDisplayName(resource, model.properties) : verificationRequest.title || utils.makeModelTitle(verificationRequest)}</Text>
+                        <Text style={styles.rTitle}>{this.props.isChooser || isForm ? utils.getDisplayName(resource, model.properties) : verificationRequest.title || utils.makeModelTitle(verificationRequest)}</Text>
                          {verifiedBy}
                       </View>
                     </View>
