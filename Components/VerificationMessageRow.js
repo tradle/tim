@@ -171,8 +171,8 @@ class VerificationMessageRow extends Component {
                   <View style={[{flex: 1, backgroundColor: 'transparent', borderRadius: 10, borderWidth: 1, borderColor: '#D4D4B8'}, isMyMessage ? {borderTopRightRadius: 0} : {borderTopLeftRadius: 0}]}>
                     <Image source={BG_IMAGE} style={[{borderRadius: 10, resizeMode: 'cover', overflow: 'hidden'}, addStyle]} >
                       {renderedRow}
-                      {shareWith}
                     </Image>
+                    {shareWith}
                  </View>
               </View>
             </View>
