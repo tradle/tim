@@ -52,7 +52,7 @@ var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
-var Keychain = !utils.isWeb() && require('../utils/keychain')
+var Keychain = null //!utils.isWeb() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('q-level');
 var debounce = require('debounce')
@@ -3399,6 +3399,19 @@ var Store = Reflux.createStore({
                 for (let i = sharedVerifiedForms.length - 1; i>=0; i--)
                   result.splice(sharedVerifiedForms[i], 1)
               }
+              // Pin last unfulfilled Form Request from current context
+              let rContext = result[result.length - 1]._context
+              if (rContext)
+                for (let i=result.length - 1; i>=0; i--) {
+                  var r = result[i]
+                  if (r[TYPE] === FORM_REQUEST) {
+                    if (!r.documentCreated  &&  utils.getId(r._context) === utils.getId(rContext)) {
+                      result.splice(i, 1)
+                      result.push(r)
+                    }
+                    break
+                  }
+                }
             }
           }
         }
