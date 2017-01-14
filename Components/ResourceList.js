@@ -824,6 +824,7 @@ class ResourceList extends Component {
       r[constants.TYPE] = this.props.prop.ref || this.props.prop.items.ref;
       r.from = this.props.resource.from
       r.to = this.props.resource.to
+      r._context = this.props.resource._context
     }
     let self = this
     this.props.navigator.push({
@@ -836,7 +837,7 @@ class ResourceList extends Component {
       passProps: {
         model: model,
         bankStyle: this.props.style,
-        resource: r,
+      resource: r,
         callback: (resource) => {
           self.props.navigator.pop()
           let l = []
