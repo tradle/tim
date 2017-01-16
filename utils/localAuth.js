@@ -20,7 +20,7 @@ var Actions = require('../Actions/Actions');
 
 const PASSWORD_ITEM_KEY = 'app-password'
 
-const isAndroid = Platform.OS === 'android'
+const isAndroid = utils.isAndroid()
 const ForgivableTouchIDErrors = [
   'LAErrorTouchIDNotAvailable',
   'LAErrorTouchIDNotSupported',
@@ -76,6 +76,10 @@ function authenticateUser (opts) {
   // prevent two authentication requests from
   // going in concurrently and causing problems
   if (pendingAuth) return pendingAuth
+
+  if (isAndroid && __DEV__) {
+    return Q.resolve()
+  }
 
   opts = typeof opts === 'string' ? { reason: opts} : opts || {}
   opts = { ...DEFAULT_OPTS, ...opts }
