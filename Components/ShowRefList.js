@@ -110,7 +110,7 @@ var styles = StyleSheet.create({
     alignSelf: 'flex-start',
     minWidth: 18,
     marginLeft: -7,
-    marginTop: -2,
+    marginTop: 0,
     borderRadius: 8,
     backgroundColor: '#7AAAC3',
     paddingHorizontal: 3,
