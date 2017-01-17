@@ -114,7 +114,7 @@ var RowMixin = {
   },
   getOwnerPhoto(isMyMessage) {
     let isSharedContext = this.props.to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.context)
-    if (Platform.OS !== 'android'  &&  !isSharedContext)
+    if (/*Platform.OS !== 'android'  &&*/  !isSharedContext)
       return <View/>
 
     var to = this.props.to;
@@ -561,7 +561,7 @@ var styles = StyleSheet.create({
   verification: {
     // marginHorizontal: -7,
     // marginVertical: -10,
-    paddingVertical: 7,
+    // paddingBottom: 7,
     // borderRadius: 10,
     // backgroundColor: '#EDF2CE'
   },

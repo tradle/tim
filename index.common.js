@@ -605,9 +605,9 @@ var NavigationBarRouteMapper = {
     else
       org = <View />;
     let photo
-    if (Platform.OS !== 'android' &&  route.id === 11  &&  route.passProps.resource.photos) {
+    if (/*Platform.OS !== 'android' && */ route.id === 11  &&  route.passProps.resource.photos) {
       var uri = utils.getImageUri(route.passProps.resource.photos[0].url);
-      photo = <Image source={{uri: uri}} style={styles.msgImage} />
+      photo = <Image source={{uri: uri}} style={[styles.msgImage, utils.isAndroid() ? {marginTop: 23} : {}]} />
     }
     else
       photo = <View/>
