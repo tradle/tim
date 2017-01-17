@@ -524,6 +524,10 @@ var NewResourceMixin = {
       } else {
         blinkIDOpts.eudl = {}
       }
+    } else {
+      blinkIDOpts.usdl = {}
+      blinkIDOpts.eudl = {}
+      blinkIDOpts.mrtd = {}
     }
 
     const result = await BlinkID.scan(blinkIDOpts)

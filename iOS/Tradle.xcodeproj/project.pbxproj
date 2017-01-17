@@ -23,6 +23,7 @@
 		146834051AC3E58100842450 /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 146834041AC3E56700842450 /* libReact.a */; };
 		1C603FB69CA74D178EB7521B /* MaterialIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E8DC5312A84F470C87F82CE6 /* MaterialIcons.ttf */; };
 		27C0899D8D7943A3B5913F26 /* libRNVectorIcons.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 743D3E6C35A24FD383DC592D /* libRNVectorIcons.a */; };
+		3D032E2C194C437EBC054F71 /* libRCTAsyncRocksDBStorage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2060B090E534D60987D7048 /* libRCTAsyncRocksDBStorage.a */; };
 		595E255E879245FDA7D8F9EE /* libRCTOrientation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 049471C98AF542809F110296 /* libRCTOrientation.a */; };
 		5E66B670540246B3A0D82BAC /* Zocial.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D491E41C0C9C47B68AC487CA /* Zocial.ttf */; };
 		73030AF71D14DC5F0096A864 /* libRNFS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73030AF61D14DC4B0096A864 /* libRNFS.a */; };
@@ -63,6 +64,7 @@
 		7348C3B91C41C04F00B9CDF5 /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7348C3B71C41C04F00B9CDF5 /* Crashlytics.framework */; };
 		7348E4741D9D8CDD00328628 /* tradle.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7348E4731D9D8CDD00328628 /* tradle.ttf */; };
 		7348E4911D9D8D1B00328628 /* tradle.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7348E4731D9D8CDD00328628 /* tradle.ttf */; };
+		734EF80E1E2E95D900E3A9C4 /* libRCTAsyncRocksDBStorage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 734EF80C1E2E947200E3A9C4 /* libRCTAsyncRocksDBStorage.a */; };
 		7365BF2E1C3461F900B0A512 /* libRNKeychain.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7365BF2D1C3461E700B0A512 /* libRNKeychain.a */; };
 		73683CFC1CC443B300E178CF /* QTouchposeApplication.m in Sources */ = {isa = PBXBuildFile; fileRef = 73683CFB1CC443B300E178CF /* QTouchposeApplication.m */; };
 		7375409D1D25942300A81EC1 /* libRNDeviceInfo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 737540931D25941500A81EC1 /* libRNDeviceInfo.a */; };
@@ -200,6 +202,13 @@
 			proxyType = 2;
 			remoteGlobalIDString = 73EEC9391BFE4B1D00D468EB;
 			remoteInfo = RNRandomBytes;
+		};
+		734EF80B1E2E947200E3A9C4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DB2A667C83D94D838507B5CF /* RCTAsyncRocksDBStorage.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 73A4DFFE1E2E7C6900D0A660;
+			remoteInfo = RCTAsyncRocksDBStorage;
 		};
 		7364872E1C34703500713F09 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -405,7 +414,9 @@
 		AF8DF7DF1C49484ABF808B20 /* RCTCamera.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTCamera.xcodeproj; path = "../node_modules/react-native-camera/ios/RCTCamera.xcodeproj"; sourceTree = "<group>"; };
 		C1932A8E8BA74132B608AF40 /* RNOS.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNOS.xcodeproj; path = "../node_modules/react-native-os/ios/RNOS.xcodeproj"; sourceTree = "<group>"; };
 		CB49356B78554325A3737E7D /* libTcpSockets.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libTcpSockets.a; sourceTree = "<group>"; };
+		D2060B090E534D60987D7048 /* libRCTAsyncRocksDBStorage.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRCTAsyncRocksDBStorage.a; sourceTree = "<group>"; };
 		D491E41C0C9C47B68AC487CA /* Zocial.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = unknown; name = Zocial.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Zocial.ttf"; sourceTree = "<group>"; };
+		DB2A667C83D94D838507B5CF /* RCTAsyncRocksDBStorage.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTAsyncRocksDBStorage.xcodeproj; path = "../node_modules/react-native-async-storage-rocks/ios/RCTAsyncRocksDBStorage.xcodeproj"; sourceTree = "<group>"; };
 		E42475336EA34BAA9B260B8E /* Octicons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = unknown; name = Octicons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Octicons.ttf"; sourceTree = "<group>"; };
 		E8DC5312A84F470C87F82CE6 /* MaterialIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/MaterialIcons.ttf"; sourceTree = "<group>"; };
 		FA9D303938764971849716EE /* RNLocalAuth.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNLocalAuth.xcodeproj; path = "../node_modules/react-native-local-auth/RNLocalAuth.xcodeproj"; sourceTree = "<group>"; };
@@ -456,6 +467,7 @@
 				595E255E879245FDA7D8F9EE /* libRCTOrientation.a in Frameworks */,
 				E31F23F231334399B2377206 /* libRNOS.a in Frameworks */,
 				CC1AB989D89F4D92A4A9CA06 /* libTcpSockets.a in Frameworks */,
+				3D032E2C194C437EBC054F71 /* libRCTAsyncRocksDBStorage.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -500,6 +512,7 @@
 				732AB4B31D18B46800F2DE1C /* libCodePush.a in Frameworks */,
 				7375409D1D25942300A81EC1 /* libRNDeviceInfo.a in Frameworks */,
 				73947DA91D3DAEAA00C5CC8F /* libRCTPushNotification.a in Frameworks */,
+				734EF80E1E2E95D900E3A9C4 /* libRCTAsyncRocksDBStorage.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -632,6 +645,14 @@
 			isa = PBXGroup;
 			children = (
 				732EA0C41C24AB90000EFAA6 /* libRNRandomBytes.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		734EF8081E2E947200E3A9C4 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				734EF80C1E2E947200E3A9C4 /* libRCTAsyncRocksDBStorage.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -802,6 +823,7 @@
 				36B5640D4902498D93210121 /* RCTOrientation.xcodeproj */,
 				C1932A8E8BA74132B608AF40 /* RNOS.xcodeproj */,
 				6ECAAF13C7384B738734FB25 /* TcpSockets.xcodeproj */,
+				DB2A667C83D94D838507B5CF /* RCTAsyncRocksDBStorage.xcodeproj */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -1021,6 +1043,10 @@
 					ProjectRef = 00C302A71ABCB8CE00DB3ED1 /* RCTActionSheet.xcodeproj */;
 				},
 				{
+					ProductGroup = 734EF8081E2E947200E3A9C4 /* Products */;
+					ProjectRef = DB2A667C83D94D838507B5CF /* RCTAsyncRocksDBStorage.xcodeproj */;
+				},
+				{
 					ProductGroup = 9BCE7BF81CA4AF3000370B5A /* Products */;
 					ProjectRef = AF8DF7DF1C49484ABF808B20 /* RCTCamera.xcodeproj */;
 				},
@@ -1217,6 +1243,13 @@
 			fileType = archive.ar;
 			path = libRNRandomBytes.a;
 			remoteRef = 732EA0C31C24AB90000EFAA6 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		734EF80C1E2E947200E3A9C4 /* libRCTAsyncRocksDBStorage.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRCTAsyncRocksDBStorage.a;
+			remoteRef = 734EF80B1E2E947200E3A9C4 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		7364872F1C34703500713F09 /* libRNECC.a */ = {
@@ -1532,6 +1565,8 @@
 					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
+					"\"$(SRCROOT)/Tradle\"",
+					"\"$(SRCROOT)/Tradle\"",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = Tradle;
@@ -1555,6 +1590,8 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/TiM\"",
 					"\"$(SRCROOT)/TiM\"",
+					"\"$(SRCROOT)/Tradle\"",
+					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
@@ -1596,6 +1633,7 @@
 					"$(SRCROOT)/../node_modules/react-native-orientation/iOS/RCTOrientation/**",
 					"$(SRCROOT)/../node_modules/react-native-os/ios",
 					"$(SRCROOT)/../node_modules/react-native-tcp/ios/**",
+					"$(SRCROOT)/../node_modules/react-native-async-storage-rocks/**",
 				);
 				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -1604,6 +1642,8 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/TiM\"",
 					"\"$(SRCROOT)/TiM\"",
+					"\"$(SRCROOT)/Tradle\"",
+					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
@@ -1645,6 +1685,7 @@
 					"$(SRCROOT)/../node_modules/react-native-orientation/iOS/RCTOrientation/**",
 					"$(SRCROOT)/../node_modules/react-native-os/ios",
 					"$(SRCROOT)/../node_modules/react-native-tcp/ios/**",
+					"$(SRCROOT)/../node_modules/react-native-async-storage-rocks/**",
 				);
 				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -1653,6 +1694,8 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/TiM\"",
 					"\"$(SRCROOT)/TiM\"",
+					"\"$(SRCROOT)/Tradle\"",
+					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
@@ -1679,6 +1722,7 @@
 				DEAD_CODE_STRIPPING = NO;
 				DEPLOYMENT_POSTPROCESSING = NO;
 				DEVELOPMENT_TEAM = 94V7783F74;
+				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -1700,6 +1744,7 @@
 					"$(SRCROOT)/../node_modules/react-native-orientation/iOS/RCTOrientation/**",
 					"$(SRCROOT)/../node_modules/react-native-os/ios",
 					"$(SRCROOT)/../node_modules/react-native-tcp/ios/**",
+					"$(SRCROOT)/../node_modules/react-native-async-storage-rocks/**",
 				);
 				INFOPLIST_FILE = Tradle/Dev.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -1726,6 +1771,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEPLOYMENT_POSTPROCESSING = NO;
 				DEVELOPMENT_TEAM = 94V7783F74;
+				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -1747,6 +1793,7 @@
 					"$(SRCROOT)/../node_modules/react-native-orientation/iOS/RCTOrientation/**",
 					"$(SRCROOT)/../node_modules/react-native-os/ios",
 					"$(SRCROOT)/../node_modules/react-native-tcp/ios/**",
+					"$(SRCROOT)/../node_modules/react-native-async-storage-rocks/**",
 				);
 				INFOPLIST_FILE = Tradle/Dev.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -1816,6 +1863,7 @@
 					"$(SRCROOT)/../node_modules/react-native-orientation/iOS/RCTOrientation/**",
 					"$(SRCROOT)/../node_modules/react-native-os/ios",
 					"$(SRCROOT)/../node_modules/react-native-tcp/ios/**",
+					"$(SRCROOT)/../node_modules/react-native-async-storage-rocks/**",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
@@ -1869,6 +1917,7 @@
 					"$(SRCROOT)/../node_modules/react-native-orientation/iOS/RCTOrientation/**",
 					"$(SRCROOT)/../node_modules/react-native-os/ios",
 					"$(SRCROOT)/../node_modules/react-native-tcp/ios/**",
+					"$(SRCROOT)/../node_modules/react-native-async-storage-rocks/**",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
