@@ -901,7 +901,8 @@ var NewResourceMixin = {
       resource: r,
       inFocus: prop.name
     });
-
+    if (this.state.missedRequiredOrErrorValue)
+      delete this.state.missedRequiredOrErrorValue[prop.name]
    },
 
   // myDateTemplate (prop) {
@@ -1555,7 +1556,7 @@ var styles= StyleSheet.create({
     fontSize: 18
   },
   dateLabel: {
-    marginLeft: Platform.OS === 'ios' ? 10 : 0,
+    marginLeft: 10,
     fontSize: 12,
     marginVertical: 5,
     paddingBottom: 5
