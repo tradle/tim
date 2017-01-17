@@ -53,7 +53,7 @@ import {
 import platformStyles from '../styles/platform'
 import ENV from '../utils/env'
 
-const SearchBar = Platform.OS === 'android' ? null : require('react-native-search-bar')
+const SearchBar = Platform.OS === 'android' ? require('./SearchBar') : require('react-native-search-bar')
 
 class ResourceList extends Component {
   props: {
@@ -652,9 +652,9 @@ class ResourceList extends Component {
   }
 
   onSearchChange(filter) {
-    this.state.filter = filter
+    this.state.filter = typeof filter === 'string' ? filter : filter.nativeEvent.text
     Actions.list({
-      query: filter,
+      query: this.state.filter,
       modelName: this.props.modelName,
       to: this.props.resource
     });
