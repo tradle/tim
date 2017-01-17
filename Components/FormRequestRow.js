@@ -6,6 +6,7 @@ var NewResource = require('./NewResource');
 var Icon = require('react-native-vector-icons/Ionicons');
 var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin');
+import CustomIcon from '../styles/customicons'
 var extend = require('extend')
 var equal = require('deep-equal')
 var formDefaults = require('../data/formDefaults.json')
@@ -73,9 +74,8 @@ class FormRequestRow extends Component {
 
 
     var fromHash = resource.from.id;
-    let borderColor = '#efefef'
     let mstyle = {
-      borderColor: borderColor,
+      borderColor: 'transparent',
       backgroundColor: '#ffffff',
       borderTopLeftRadius: 0
     }
@@ -106,7 +106,7 @@ class FormRequestRow extends Component {
     let msgWidth = w * 0.8
     let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
 
-    var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
+    var viewStyle = {flexDirection: 'row', borderTopRightRadius: 10, alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
     if (message) {
       if (message.charAt(0) === '[')
         viewStyle.width = msgWidth; //isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
@@ -122,19 +122,25 @@ class FormRequestRow extends Component {
                        </View>
                      : <View />
 
+
     let addStyle = message.length < 30
                  ? [chatStyles.verificationBody, mstyle]
                  : [chatStyles.verificationBody, {flex: 1}, mstyle]
+    var mainStyle = { margin:1, backgroundColor: '#ffffff' }
+    var shareables = resource.documentCreated
+                   ? null
+                   : this.showShareableResources(rowStyle, mainStyle);
+
     let cellStyle
     if (addStyle)
       cellStyle = [chatStyles.textContainer, addStyle]
     else
       cellStyle = chatStyles.textContainer
-    let msgContent =  <View style={[rowStyle, viewStyle]}>
+    let msgContent =  <View style={[rowStyle, viewStyle, shareables ? {backgroundColor: '#ffffff'} : {}]}>
                         <View style={{marginTop: 2}}>
                         {ownerPhoto}
                         </View>
-                        <View style={cellStyle}>
+                        <View style={[cellStyle, shareables ? styles.shareables : {}]}>
                           <View style={styles.container}>
                           {this.isShared()
                             ? <View style={[chatStyles.verifiedHeader, {backgroundColor: this.props.bankStyle.SHARED_WITH_BG}]}>
@@ -151,25 +157,20 @@ class FormRequestRow extends Component {
     let messageBody = <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
                         {msgContent}
                       </TouchableHighlight>
-
-    var viewStyle = { margin:1, backgroundColor: '#f7f7f7' }
-    var model = utils.getModel(this.props.resource[constants.TYPE]).value;
-    var shareables = resource.documentCreated
-                   ? <View />
-                   : this.showShareableResources(rowStyle, viewStyle, addStyle);
-
     return (
-      <View style={[viewStyle, {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}]}>
+      <View style={[mainStyle, {margin:2, paddingVertical: 3, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}]}>
         {date}
-        {messageBody}
-        {sendStatus}
-        {shareables}
+        <View style={shareables ? {borderWidth: 1, width: msgWidth + 2, borderColor: this.props.bankStyle.VERIFIED_HEADER_COLOR, borderRadius: 10, borderTopLeftRadius: 0} : {}}>
+          {messageBody}
+          {sendStatus}
+          {shareables}
+        </View>
       </View>
     )
   }
-  showShareableResources(rowStyle, viewStyle, addStyle) {
+  showShareableResources(rowStyle, viewStyle) {
     if (!this.props.shareableResources) // || !this.props.resource.message)
-      return <View/>;
+      return null
 
     var resource = this.props.resource;
     let formModel = utils.getModel(resource.form).value
@@ -193,7 +194,7 @@ class FormRequestRow extends Component {
         if (entries  &&  (entries.indexOf(utils.getId(document)) !== -1  ||  entries.indexOf(r.document[constants.NONCE]) !== -1))
           return
         var vModel = utils.getModel(r[constants.TYPE]);
-        var doc = this.formatDocument({
+        var doc = this.formatShareables({
           model: formModel,
           verification: r,
           isAccordion: totalShareables > 1,
@@ -210,7 +211,7 @@ class FormRequestRow extends Component {
       })
     }
     if (!vtt.length)
-      return <View />;
+      return null
 
     var modelTitle = translate(formModel)
     var idx = modelTitle.indexOf('Verification');
@@ -228,24 +229,158 @@ class FormRequestRow extends Component {
               )
             : translate('shareOneOfMany', utils.getMe().firstName, docType, org)
 
-    let w = utils.dimensions(FormRequestRow).width * 0.8
-    let space = Platform.OS === 'android' ? {width: 40} : {width: 0}
+    let w = utils.dimensions(FormRequestRow).width * 0.8 - 2
+    let color = this.props.bankStyle.VERIFIED_HEADER_COLOR
     return (
-      <View style={[rowStyle, viewStyle, {width: w}]} key={this.getNextKey()}>
-        <View style={space}/>
-        <View style={[addStyle ? [chatStyles.textContainer, addStyle] : chatStyles.textContainer]}>
-          <View style={{flex: 1}}>
-            <View style={styles.assistentBox}>
-              <Text style={styles.assistentText}>{msg}</Text>
-            </View>
-            <View style={{marginHorizontal: -7}}>
+      <View style={[rowStyle, viewStyle, {marginTop: -10, width: w, backgroundColor: this.props.bankStyle.VERIFIED_BG, borderBottomLeftRadius: 10, borderBottomRightRadius: 10}]} key={this.getNextKey()}>
+        <View style={{flex:1}}>
+          <View style={[styles.assistentBox, {backgroundColor: color}]}>
+            <Text style={styles.orText}>{'OR'}</Text>
+          </View>
+          <View style={styles.shareablesList}>
             {vtt}
-            </View>
-         </View>
+          </View>
         </View>
       </View>
      );
   }
+  formatShareables(params) {
+    let model = params.model
+    let verification = params.verification
+    let onPress = params.onPress
+    let isAccordion = false //params.isAccordion
+    let providers = params.providers  // providers the document was shared with
+
+    var document = verification.document
+
+    var docModel = utils.getModel(document[constants.TYPE]).value;
+    var isMyProduct = docModel.subClassOf === MY_PRODUCT
+    var docModelTitle = docModel.title || utils.makeLabel(docModel.id)
+    var idx = docModelTitle.indexOf('Verification');
+    var docTitle = idx === -1 ? docModelTitle : docModelTitle.substring(0, idx);
+
+    var msg;
+    if (document.message  &&  docModel.subClassOf !== FORM)
+      msg = <View><Text style={chatStyles.description}>{document.message}</Text></View>
+    else
+      msg = <View/>
+    var headerStyle = {paddingTop: 5, paddingLeft: 10}
+    var isShared = this.isShared(verification)
+    let addStyle = {}//onPress ? {} : {borderBottomColor: '#efefef', borderBottomWidth: 1}
+
+    let hs = /*isShared ? chatStyles.description :*/ [styles.header, {fontSize: 16}]
+    let arrow = <Icon color={this.props.bankStyle.VERIFIED_HEADER_COLOR} size={20} name={'ios-arrow-forward'} style={{marginRight: 10, marginTop: 5}}/>
+    var headerContent =  <View style={headerStyle}>
+                          <Text style={[hs, {color: '#555555'}]}>{utils.getDisplayName(document)}</Text>
+                        </View>
+
+    let header = <View style={[addStyle, styles.header]}>
+                   {headerContent}
+                   {arrow}
+                 </View>
+   if (!isAccordion)
+      header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, document, verification)}>
+                 {header}
+               </TouchableHighlight>
+
+
+    var orgRow = <View/>
+    if (verification  && verification.organization) {
+      var orgPhoto = verification.organization.photo
+                   ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
+                   : <View />
+      var shareView = <View style={[chatStyles.shareButton, {marginHorizontal: 0, backgroundColor: this.props.bankStyle.SHARE_BUTTON_BACKGROUND_COLOR, opacity: this.props.resource.documentCreated ? 0.3 : 1}]}>
+                        <CustomIcon name='tradle' style={{color: '#ffffff' }} size={32} />
+                        <Text style={chatStyles.shareText}>{translate('Share')}</Text>
+                      </View>
+      var orgTitle = this.props.to[constants.TYPE] === constants.TYPES.ORGANIZATION
+                   ? this.props.to.name
+                   : (this.props.to.organization ? this.props.to.organization.title : null);
+      // let o = verification.organization.title.length < 25 ? verification.organization.title : verification.organization.title.substring(0, 27) + '..'
+      let verifiedBy
+      // Not verified Form - still shareable
+      if (verification[constants.ROOT_HASH]) {
+        let orgs
+        if (providers) {
+          providers.forEach((p) => {
+            if (!orgs)
+              orgs = p.title
+            else
+              orgs += ', ' + p.title
+          })
+        }
+        else
+          orgs = verification.organization.title
+        verifiedBy = translate('verifiedBy', orgs)
+      }
+      else
+        verifiedBy = translate('sentTo', verification.organization.title)
+
+      var orgView = <View style={styles.orgView}>
+                      <Text style={[chatStyles.description, {paddingRight: 5}]}>
+                        {verifiedBy}
+                      </Text>
+                        {verification.dateVerified
+                          ? <View style={{flexDirection: 'row'}}>
+                              <Text style={{fontSize: 12, color: '#757575', fontStyle: 'italic'}}>{utils.formatDate(verification.dateVerified)}</Text>
+                            </View>
+                          : <View/>
+                        }
+                      </View>
+      if (onPress) {
+      }
+      else if (this.props.resource.documentCreated) {
+        orgRow =  <View style={chatStyles.shareView}>
+                    {shareView}
+                    <TouchableHighlight onPress={this.props.onSelect.bind(this, document, verification)} underlayColor='transparent'>
+                      {orgView}
+                    </TouchableHighlight>
+                  </View>
+      }
+      else {
+        orgRow = <View style={[chatStyles.shareView]}>
+                   <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
+                            Alert.alert(
+                              'Sharing ' + docTitle + ' ' + verifiedBy,
+                              'with ' + orgTitle,
+                              [
+                                {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+                                {text: translate('Share'), onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
+                              ]
+                          )}>
+                    {shareView}
+                   </TouchableHighlight>
+                   <TouchableHighlight onPress={this.props.onSelect.bind(this, document, verification)} underlayColor='transparent'>
+                     {orgView}
+                   </TouchableHighlight>
+                </View>
+      }
+    }
+    let content = <View style={{flex:1, paddingVertical: 3}}>
+                     <TouchableHighlight onPress={this.props.onSelect.bind(this, document, verification)} underlayColor='transparent'>
+                       {msg}
+                     </TouchableHighlight>
+                     {orgRow}
+                   </View>
+
+    // var verifiedBy = verification && verification.organization ? verification.organization.title : ''
+    return isAccordion
+        ? ( <View style={{marginTop: 5}} key={this.getNextKey()}>
+             <Accordion
+               header={header}
+               style={{padding: 5}}
+               content={content}
+               underlayColor='transparent'
+               easing='easeOutCirc' />
+            </View>
+          )
+        : ( <View style={{flex: 1}} key={this.getNextKey()}>
+               {header}
+               {content}
+             </View>
+           );
+  }
+
   createNewResource(model, isMyMessage) {
     var resource = {
       'from': this.props.resource.to,
@@ -349,7 +484,7 @@ class FormRequestRow extends Component {
       let notLink = resource.documentCreated  ||  isReadOnly  ||  form.subClassOf === MY_PRODUCT
       link = <View style={chatStyles.rowContainer}>
                    <Text style={[chatStyles.resourceTitle, {color: resource.documentCreated  ||  notLink ?  '#757575' : resource.verifiers ? 'green' : LINK_COLOR}]}>{translate(form)}</Text>
-                   <Icon style={[{marginTop: 2}, resource.documentCreated  ? chatStyles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
+                   <Icon style={[{marginTop: 2, marginRight: 2}, resource.documentCreated  ? chatStyles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
                  </View>
       onPressCall = notLink
                   ? null
@@ -403,13 +538,14 @@ var styles = StyleSheet.create({
     fontSize: 17
   },
   assistentBox: {
-    backgroundColor: '#f7f7f7',
-    paddingVertical: 5,
-    // borderRadius: 5,
-    borderTopRightRadius: 10,
-    paddingHorizontal: 7,
-    marginTop: -7,
-    marginHorizontal: -7
+    backgroundColor: 'transparent',
+    // marginTop: -8,
+    justifyContent: 'center',
+    width: 36,
+    height: 36,
+    marginTop: 0,
+    alignSelf: 'center',
+    borderRadius: 18
   },
   multiEntryButton:  {
     borderRadius: 10,
@@ -424,6 +560,34 @@ var styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 18
   },
+  header: {
+    marginRight: -4,
+    marginLeft: -1,
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+  },
+  shareables: {
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    backgroundColor: '#ffffff'
+  },
+  shareablesList: {
+    marginHorizontal: 0,
+    paddingRight: 3
+  },
+  orgView: {
+    maxWidth: 0.8 * utils.dimensions().width - 150,
+    paddingLeft: 3,
+    marginRight: 10,
+    flex: 1,
+    justifyContent: 'center'
+  },
+  orText: {
+    fontStyle: 'italic',
+    alignSelf: 'center',
+    color: '#ffffff',
+    fontSize: 18,
+  }
 });
 reactMixin(FormRequestRow.prototype, RowMixin);
 FormRequestRow = makeResponsive(FormRequestRow)
