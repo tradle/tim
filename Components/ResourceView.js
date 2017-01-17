@@ -455,6 +455,7 @@ var createStyles = utils.styleFactory(ResourceView, function ({ dimensions }) {
     footer: {
       flexDirection: 'row',
       flexWrap: 'nowrap',
+      alignItems: Platform.OS === 'android' ? 'center' : 'flex-start',
       justifyContent: 'space-between',
       alignSelf: 'stretch',
       height: 45,
