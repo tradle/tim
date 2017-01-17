@@ -11,7 +11,7 @@ var verificationStyles = Object.freeze({
     flexDirection: 'row',
     paddingVertical: 5,
     // paddingHorizontal: 7,
-    marginHorizontal: -8,
+    marginHorizontal: -7,
     marginTop: -6,
     justifyContent: 'center'
   },
@@ -28,7 +28,7 @@ var verificationStyles = Object.freeze({
     borderRadius: 10,
     borderColor: '#7AAAC3',
     borderWidth: StyleSheet.hairlineWidth,
-    marginVertical: 2,
+    marginVertical: 4,
     backgroundColor: '#ffffff',
   },
   verificationIcon: {
@@ -126,7 +126,7 @@ var verificationStyles = Object.freeze({
   shareText: {
     // color: '#4982B1',
     color: '#ffffff',
-    fontSize: 20,
+    fontSize: 14,
     // fontWeight: '600',
     paddingHorizontal: 3,
     alignSelf: 'center'
@@ -135,7 +135,8 @@ var verificationStyles = Object.freeze({
     flexDirection: 'row',
     marginTop: 5,
     paddingBottom: 5,
-    justifyContent:'space-between'
+    paddingLeft: 10,
+    justifyContent:'space-around'
   },
   linkIconGreyed: {
     color: '#cccccc'
