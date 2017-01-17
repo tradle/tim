@@ -19,7 +19,6 @@ export default StyleSheet.create({
   menuButtonNarrow: {
     marginTop: -23,
     paddingVertical: 5,
-    paddingHorizontal: 21,
     height: 45,
     borderRadius: 24,
     // shadowOffset:{width: 5, height: 5},
