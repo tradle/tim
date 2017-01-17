@@ -727,17 +727,24 @@ class ResourceList extends Component {
     if (this.props.prop  &&  !this.props.prop.allowToAdd)
       return <View />
 
-    let icon = Platform.OS === 'ios' ?  'md-more' : 'md-menu'
-    let color = Platform.OS === 'ios' ? '#ffffff' : 'red'
-    return (
-       <View style={styles.footer}>
-         <TouchableOpacity onPress={() => this.ActionSheet.show()}>
-           <View style={platformStyles.menuButtonNarrow}>
-             <Icon name={icon}  size={33}  color={color} />
-           </View>
-         </TouchableOpacity>
-       </View>
-    )
+    if (Platform.OS === 'ios')
+      return (
+        <View style={[platformStyles.menuButtonNarrow, {width: 47, position: 'absolute', right: 10, bottom:20, borderRadius: 24, justifyContent: 'center', alignItems: 'center'}]}>
+           <TouchableOpacity onPress={() => this.ActionSheet.show()}>
+              <Icon name='md-more'  size={33}  color='#ffffff'/>
+           </TouchableOpacity>
+        </View>
+      )
+    else
+      return (
+         <View style={styles.footer}>
+           <TouchableOpacity onPress={() => this.ActionSheet.show()}>
+             <View style={platformStyles.menuButtonNarrow}>
+               <Icon name='md-menu'  size={33}  color='red' />
+             </View>
+           </TouchableOpacity>
+         </View>
+      )
   }
   onSettingsPressed() {
     var model = utils.getModel(constants.TYPES.SETTINGS).value
@@ -1129,7 +1136,7 @@ var styles = StyleSheet.create({
     paddingHorizontal: 10,
     backgroundColor: 'transparent',
     borderColor: '#eeeeee',
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
     borderTopColor: '#cccccc',
   },
   row: {
