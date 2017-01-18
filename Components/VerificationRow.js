@@ -158,7 +158,7 @@ class VerificationRow extends Component {
              : <View />
 
     let title
-    if (this.props.isChooser || isForm)
+    if (this.props.isChooser)
       title = utils.getDisplayName(resource, model.properties)
     if (!title || !title.length)
       title = verificationRequest.title || utils.makeModelTitle(verificationRequest)
