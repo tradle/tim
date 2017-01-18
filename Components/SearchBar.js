@@ -20,6 +20,7 @@ class SearchBar extends Component {
           onChange={this.props.onChangeText.bind(this)}
           placeholder='Search'
           placeholderTextColor='#bbbbbb'
+          underlineColorAndroid='transparent'
           value={this.props.filter}
         />
       </View>
@@ -29,7 +30,7 @@ class SearchBar extends Component {
 
 var styles = StyleSheet.create({
   searchBarInput: {
-    height: Platform.OS === 'android' ? 40 : 32,
+    height: Platform.OS === 'android' ? 32 : 32,
     alignSelf: 'stretch',
     justifyContent: 'center',
     paddingVertical: 5,
