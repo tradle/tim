@@ -156,12 +156,19 @@ class VerificationRow extends Component {
     var date = r
              ? this.addDateProp(resource.dateVerified ? 'dateVerified' : 'time', [styles.verySmallLetters, {position: 'absolute', right: 10}])
              : <View />
+
+    let title
+    if (this.props.isChooser || isForm)
+      title = utils.getDisplayName(resource, model.properties)
+    if (!title || !title.length)
+      title = verificationRequest.title || utils.makeModelTitle(verificationRequest)
+
     var header =  <View style={{backgroundColor: '#ffffff', borderBottomColor: '#f0f0f0', borderBottomWidth: 1}} key={this.getNextKey()}>
                     <View style={{flexDirection: 'row', marginHorizontal: 10,  marginVertical: 3, paddingBottom: 4}}>
                       {photo}
                       {date}
                       <View style={styles.noImageBlock}>
-                        <Text style={styles.rTitle}>{this.props.isChooser || isForm ? utils.getDisplayName(resource, model.properties) : verificationRequest.title || utils.makeModelTitle(verificationRequest)}</Text>
+                        <Text style={styles.rTitle}>{title}</Text>
                          {verifiedBy}
                       </View>
                     </View>
