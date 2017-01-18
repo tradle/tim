@@ -773,7 +773,7 @@ class MessageList extends Component {
   }
 
   paintMenuButton() {
-    return  <View style={[platformStyles.menuButtonNarrow, {marginTop: 3, width: 47, borderRadius: 24, alignItems: 'center', opacity: 0.5}]}>
+    return  <View style={[platformStyles.menuButtonNarrow, {width: 47, borderRadius: 24, alignItems: 'center', opacity: 0.5}]}>
               <Icon name={MenuIcon.name}  size={33}  color={MenuIcon.color} />
             </View>
   }
