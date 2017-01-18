@@ -1555,17 +1555,6 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/TiM\"",
-					"\"$(SRCROOT)/TiM\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
@@ -1588,17 +1577,6 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/TiM\"",
-					"\"$(SRCROOT)/TiM\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
@@ -1640,17 +1618,6 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/TiM\"",
-					"\"$(SRCROOT)/TiM\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 				);
 				OTHER_LDFLAGS = "-ObjC";
@@ -1692,17 +1659,6 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/TiM\"",
-					"\"$(SRCROOT)/TiM\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 				);
 				OTHER_LDFLAGS = "-ObjC";
@@ -1830,6 +1786,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
+				ENABLE_BITCODE = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -1891,6 +1848,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
+				ENABLE_BITCODE = NO;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
