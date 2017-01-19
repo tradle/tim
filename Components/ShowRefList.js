@@ -2,7 +2,6 @@
 
 var utils = require('../utils/utils');
 var translate = utils.translate
-var ResourceList = require('./ResourceList');
 var Icon = require('react-native-vector-icons/Ionicons');
 var buttonStyles = require('../styles/buttonStyles');
 var constants = require('@tradle/constants');
