@@ -246,7 +246,7 @@ class ResourceView extends Component {
 ////, this.state.useTouchId ? {opacity: 1} : {opacity: 0.3}
     let switchTouchId
     if (isIdentity) {
-      if (Platform.OS === 'android')
+      // if (Platform.OS === 'android')
         switchTouchId = <View style={styles.footer}>
                           <Text style={platformStyles.touchIdText}>{msg}</Text>
                           <TouchableOpacity underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
@@ -255,12 +255,12 @@ class ResourceView extends Component {
                               </View>
                             </TouchableOpacity>
                         </View>
-      else
-        switchTouchId = <View style={[platformStyles.menuButtonNarrow, { width: 47, position: 'absolute', right: 10, bottom:20, borderRadius: 24, justifyContent: 'center', alignItems: 'center'}]}>
-                           <TouchableOpacity onPress={() => this.ActionSheet.show()}>
-                              <Icon name='md-finger-print'  size={33}  color='#ffffff'/>
-                           </TouchableOpacity>
-                        </View>
+      // else
+      //   switchTouchId = <View style={[platformStyles.menuButtonNarrow, { width: 47, position: 'absolute', right: 10, bottom:20, borderRadius: 24, justifyContent: 'center', alignItems: 'center'}]}>
+      //                      <TouchableOpacity onPress={() => this.ActionSheet.show()}>
+      //                         <Icon name='md-finger-print'  size={33}  color='#ffffff'/>
+      //                      </TouchableOpacity>
+      //                   </View>
     }
     // let showSwitch = isIdentity && Platform.OS === 'ios'  && !utils.isSimulator()
     // let switchTouchId = showSwitch
