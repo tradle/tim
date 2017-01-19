@@ -337,8 +337,8 @@ class TimHome extends Component {
     //   }
     // })
 
-    // Actions.getAllSharedContexts()
-    // Actions.hasPartials()
+    Actions.getAllSharedContexts()
+    Actions.hasPartials()
     // return
     this.props.navigator.push({
       // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
