@@ -13,6 +13,10 @@ var StyleSheet = require('../StyleSheet')
 var DEFAULT_CURRENCY_SYMBOL = '£'
 var CURRENCY_SYMBOL
 
+const ITEM = 'tradle.Item'
+const MY_PRODUCT = 'tradle.MyProduct'
+const FORM = 'tradle.Form'
+
 import {
   Image,
   // StyleSheet,
@@ -51,8 +55,8 @@ class VerificationRow extends Component {
     // if (resource.from  &&  resource.from.photos)
     //   photo = <Image source={{uri: utils.getImageUri(resource.from.photos[0].url)}} style={styles.cellImage} />
     var model = utils.getModel(resource[constants.TYPE]).value;
-    var isMyProduct = model.subClassOf === 'tradle.MyProduct'
-    var isForm = model.subClassOf === 'tradle.Form'
+    var isMyProduct = model.subClassOf === MY_PRODUCT
+    var isForm = model.subClassOf === FORM
     var isVerification = resource.document != null
     var r = isVerification ? resource.document : resource
     if (r  &&  isMyProduct)
@@ -158,7 +162,7 @@ class VerificationRow extends Component {
              : <View />
 
     let title
-    if (this.props.isChooser)
+    if (this.props.isChooser  ||  model.interfaces.indexOf(ITEM) !== -1)
       title = utils.getDisplayName(resource, model.properties)
     if (!title || !title.length)
       title = verificationRequest.title || utils.makeModelTitle(verificationRequest)
