@@ -2,7 +2,7 @@
 import { EventEmitter } from 'events'
 import debug from 'debug'
 
-const localDebug = debug('tradle:logger')
+// const localDebug = debug('tradle:logger')
 const MAX_LENGTH = 5000
 
 // require('ErrorUtils').setGlobalHandler(function (e, isFatal) {
@@ -13,20 +13,35 @@ const MAX_LENGTH = 5000
 //   // if (__DEV__) throw e
 // })
 
+const CONSOLE_NAMESPACE_COLOR = 'color: #aaa'
+const consoleMethods = Object.keys(console).filter(k => {
+  return k !== 'table' && typeof console[k] === 'function'
+})
+
+const enabled = [
+  'console',
+  'tradle:*',
+  'sendy:ws:client'
+].concat(consoleMethods.map(method => 'console.' + method))
+
 if (__DEV__) {
   console.ignoredYellowBox = ['jsSchedulingOverhead']
-  debug.enable([
-    'tradle:*',
-    'sendy:symmetric',
-    'sendy:ws:client'
-  ].join(','))
-} else {
-  // debug.disable()
-  debug.enable([
-    'tradle:*',
-    'sendy:ws:client'
-  ].join(','))
+  enabled.push('sendy:symmetric')
 }
+
+debug.enable(enabled.join(','))
+
+const rawConsole = {}
+const debugConsole = {}
+
+consoleMethods.forEach(method => {
+  const orig = console[method]
+  if (!orig) return
+
+  const namespace = 'console.' + method
+  rawConsole[method] = orig.bind(console)
+  console[method] = debug(namespace)
+})
 
 EventEmitter.call(debug)
 for (var p in EventEmitter.prototype) {
@@ -37,9 +52,14 @@ for (var p in EventEmitter.prototype) {
 
 let lines = []
 debug.log = function (...args) {
-  args.unshift(getNow())
-  if (__DEV__) {
-    console.log.apply(console, arguments)
+  // preserve colors
+  if (args[0].slice(0, 2) === '%c') {
+    args = [
+      '%c' + getNow() + ' ' + args[0],
+      CONSOLE_NAMESPACE_COLOR
+    ].concat(args.slice(1))
+  } else {
+    args.unshift(getNow())
   }
 
   lines.push(args)
@@ -47,6 +67,12 @@ debug.log = function (...args) {
 
   if (lines.length > MAX_LENGTH + 100) {
     lines = lines.slice(lines.length - MAX_LENGTH)
+  }
+
+  if (__DEV__) {
+    const method = this.namespace.indexOf('console.') === 0 && this.namespace.split('.')[1]
+    const logFn = rawConsole[method] || rawConsole.log
+    logFn(...args)
   }
 }
 
