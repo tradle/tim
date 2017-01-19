@@ -7,6 +7,7 @@ var ResourceList = require('./ResourceList');
 var VideoPlayer = require('./VideoPlayer')
 var NewResource = require('./NewResource');
 var ResourceView = require('./ResourceView');
+// var Tabs = require('./Tabs')
 var utils = require('../utils/utils');
 var translate = utils.translate
 var Reflux = require('reflux');
@@ -320,8 +321,25 @@ class TimHome extends Component {
         bankStyle: defaultBankStyle
       };
     let me = utils.getMe();
-    Actions.getAllSharedContexts()
-    Actions.hasPartials()
+    // this.props.navigator.push({
+    //   id: 30,
+    //   component: Tabs,
+    //   title: 'Hey',
+    //   backButtonTitle: translate('back'),
+    //   passProps: {
+    //     bankStyle: defaultBankStyle,
+    //     rlProps: passProps,
+    //     profileProps: {
+    //       model: utils.getModel(me[constants.TYPE]).value,
+    //       resource: me,
+    //       bankStyle: defaultBankStyle
+    //     }
+    //   }
+    // })
+
+    // Actions.getAllSharedContexts()
+    // Actions.hasPartials()
+    // return
     this.props.navigator.push({
       // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       id: 10,
@@ -366,7 +384,30 @@ class TimHome extends Component {
       this.showContacts()
       return
     }
+    let passProps = {
+      filter: '',
+      modelName: constants.TYPES.ORGANIZATION,
+      sortProperty: 'lastMessageTime',
+      officialAccounts: true,
+      bankStyle: defaultBankStyle
+    };
     Actions.hasPartials()
+    // this.props.navigator.push({
+    //   id: 30,
+    //   component: Tabs,
+    //   // title: 'Hey/Ho/Ha',
+    //   backButtonTitle: __DEV__ ? translate('back') : null,
+    //   passProps: {
+    //     bankStyle: defaultBankStyle,
+    //     rlProps: passProps,
+    //     profileProps: {
+    //       model: utils.getModel(me[constants.TYPE]).value,
+    //       resource: me,
+    //       bankStyle: defaultBankStyle
+    //     }
+    //   }
+    // })
+    // return
     let title = me.firstName;
     let route = {
       title: translate('officialAccounts'),
@@ -453,7 +494,7 @@ class TimHome extends Component {
     //   })
     // }
 
-    route.passProps.editCols = ['firstName', 'lastName', 'language']
+    route.passProps.editCols = ['firstName', 'lastName'] //, 'language']
     route.titleTintColor = '#ffffff'
     this.props.navigator.push(route);
   }
@@ -526,7 +567,7 @@ class TimHome extends Component {
     //   })
     // }
 
-    route.passProps.editCols = ['firstName', 'lastName', 'language']
+    route.passProps.editCols = ['firstName', 'lastName'] //, 'language']
     route.titleTintColor = '#ffffff'
     this.props.navigator.push(route);
   }
