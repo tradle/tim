@@ -62,7 +62,7 @@ class MessageView extends Component {
       currentRoutes[len - 1].onRightButtonPress = this.verifyOrCreateError.bind(this)
   }
   componentWillMount() {
-    if (this.props.resource.id)
+    // if (this.props.resource.id)
       Actions.getItem(this.props.resource)
   }
 
