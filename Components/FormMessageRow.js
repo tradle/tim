@@ -165,7 +165,7 @@ class FormMessageRow extends Component {
     let isSharedContext = to  &&  to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.context)
 
     var viewStyle = {
-      width: Math.floor(utils.dimensions().width * 0.8) - (isSharedContext  ? 45 : 0),
+      width: Math.floor(utils.dimensions().width * 0.8), // - (isSharedContext  ? 45 : 0),
       alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
       marginLeft: isMyMessage ? 30 : 0, //(hasOwnerPhoto ? 45 : 10),
       backgroundColor: this.props.bankStyle.BACKGROUND_COLOR,
