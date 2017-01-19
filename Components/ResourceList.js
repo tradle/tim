@@ -31,17 +31,19 @@ const TALK_TO_EMPLOYEEE = '1'
 const APP_QR_CODE = '5'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const PARTIAL = 'tradle.Partial'
+const TYPE = constants.TYPE
+const ROOT_HASH = constants.ROOT_HASH
+const PROFILE = constants.TYPES.PROFILE
+const ORGANIZATION = constants.TYPES.ORGANIZATION
+
 // var bankStyles = require('../styles/bankStyles')
 const ENUM = 'tradle.Enum'
 
 import React, { Component, PropTypes } from 'react'
 import {
   ListView,
-  // StyleSheet,
   Navigator,
   Alert,
-  // AlertIOS,
-  // ActionSheetIOS,
   TouchableOpacity,
   Image,
   StatusBar,
@@ -59,7 +61,7 @@ class ResourceList extends Component {
   props: {
     navigator: PropTypes.object.isRequired,
     modelName: PropTypes.string.isRequired,
-    resource: PropTypes.object.isRequired,
+    resource: PropTypes.object,
     returnRoute: PropTypes.object,
     callback: PropTypes.func,
     filter: PropTypes.string,
@@ -90,7 +92,7 @@ class ResourceList extends Component {
     };
     if (props.multiChooser)
       this.state.chosen = {}
-    var isRegistration = this.props.isRegistration ||  (this.props.resource  &&  this.props.resource[constants.TYPE] === constants.TYPES.PROFILE  &&  !this.props.resource[constants.ROOT_HASH]);
+    var isRegistration = this.props.isRegistration ||  (this.props.resource  &&  this.props.resource[TYPE] === PROFILE  &&  !this.props.resource[ROOT_HASH]);
     if (isRegistration)
       this.state.isRegistration = isRegistration;
     if (this.props.chat) {
@@ -141,9 +143,9 @@ class ResourceList extends Component {
     if (this.props.sortProperty)
       params.sortProperty = this.props.sortProperty;
     if (this.props.prop)
-      params.prop = utils.getModel(this.props.resource[constants.TYPE]).value.properties[this.props.prop.name];
+      params.prop = utils.getModel(this.props.resource[TYPE]).value.properties[this.props.prop.name];
     if (params.prop) {
-      let m = utils.getModel(this.props.resource[constants.TYPE]).value
+      let m = utils.getModel(this.props.resource[TYPE]).value
       // case when for example clicking on 'Verifications' on Form page
       if (m.interfaces)
         // if (utils.getModel(this.props.modelName).value.interfaces)
@@ -158,6 +160,12 @@ class ResourceList extends Component {
       params.to = this.props.resource
     params.listView = this.props.listView
     // this.state.isLoading = true;
+
+    // if (this.props.tabLabel) {
+    //   Actions.list(params)
+    //   StatusBar.setHidden(false);
+    // }
+    // else
     utils.onNextTransitionEnd(this.props.navigator, () => {
       Actions.list(params)
       StatusBar.setHidden(false);
@@ -174,7 +182,7 @@ class ResourceList extends Component {
       this.props.navigator.pop()
       if (params.error)
         Alert.alert(params.error)
-      // Actions.list(constants.TYPES.ORGANIZATION)
+      // Actions.list(ORGANIZATION)
       return
     }
     if (params.error)
@@ -186,7 +194,7 @@ class ResourceList extends Component {
     if (action === 'newContact') {
       let routes = this.props.navigator.getCurrentRoutes()
       let curRoute = routes[routes.length - 1]
-      if (curRoute.id === 11  &&  curRoute.passProps.resource[constants.ROOT_HASH] === params.newContact[constants.ROOT_HASH])
+      if (curRoute.id === 11  &&  curRoute.passProps.resource[ROOT_HASH] === params.newContact[ROOT_HASH])
         return
       this.setState({newContact: params.newContact})
       // let style = this.mergeStyle(params.newContact.style)
@@ -215,10 +223,10 @@ class ResourceList extends Component {
     if (action === 'addItem'  ||  action === 'addMessage') {
       var model = action === 'addMessage'
                 ? utils.getModel(this.props.modelName).value
-                : utils.getModel(params.resource[constants.TYPE]).value;
+                : utils.getModel(params.resource[TYPE]).value;
       if (action === 'addItem'  &&  model.id !== this.props.modelName)
         return
-      if (action === 'addMessage'  &&  this.props.modelName !== constants.TYPES.PROFILE)
+      if (action === 'addMessage'  &&  this.props.modelName !== PROFILE)
         return
       // this.state.isLoading = true;
       Actions.list({
@@ -297,11 +305,11 @@ class ResourceList extends Component {
         this.props.navigator.push(route)
       return
     }
-    if (action === 'allSharedContexts'  &&  this.props.officialAccounts  &&  this.props.modelName === constants.TYPES.PROFILE) {
+    if (action === 'allSharedContexts'  &&  this.props.officialAccounts  &&  this.props.modelName === PROFILE) {
       this.setState({sharedContextCount: params.count})
       return
     }
-    if (action === 'hasPartials') { //  &&  this.props.officialAccounts  &&  (this.props.modelName === constants.TYPES.PROFILE || this.props.modelName === constants.TYPES.ORGANIZATION)) {
+    if (action === 'hasPartials') { //  &&  this.props.officialAccounts  &&  (this.props.modelName === PROFILE || this.props.modelName === ORGANIZATION)) {
       this.setState({hasPartials: true})
       return
     }
@@ -339,7 +347,7 @@ class ResourceList extends Component {
         this.setState(state)
       return;
     }
-    var type = list[0][constants.TYPE];
+    var type = list[0][TYPE];
     if (type  !== this.props.modelName  &&  this.props.modelName !== params.requestedModelName) {
       var m = utils.getModel(type).value;
       if (!m.subClassOf  ||  m.subClassOf != this.props.modelName)
@@ -386,11 +394,11 @@ class ResourceList extends Component {
     //     return true
     if (!this.state.list  ||  !nextState.list  ||  this.state.list.length !== nextState.list.length)
       return true
-    let isOrg = this.props.modelName === constants.TYPES.ORGANIZATION
+    let isOrg = this.props.modelName === ORGANIZATION
     for (var i=0; i<this.state.list.length; i++) {
       if (this.state.list[i].numberOfForms !== nextState.list[i].numberOfForms)
         return true
-      if (this.state.list[i][constants.ROOT_HASH] !== nextState.list[i][constants.ROOT_HASH])
+      if (this.state.list[i][ROOT_HASH] !== nextState.list[i][ROOT_HASH])
         return true
       if (this.state.list[i]._online !== nextState.list[i]._online)
         return true
@@ -402,14 +410,14 @@ class ResourceList extends Component {
     var me = utils.getMe();
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     var model = utils.getModel(this.props.modelName);
-    var isIdentity = this.props.modelName === constants.TYPES.PROFILE;
+    var isIdentity = this.props.modelName === PROFILE;
     var isVerification = model.value.id === constants.TYPES.VERIFICATION
     var isForm = model.value.id === constants.TYPES.FORM
-    var isOrganization = this.props.modelName === constants.TYPES.ORGANIZATION;
+    var isOrganization = this.props.modelName === ORGANIZATION;
     if (!isIdentity         &&
         !isOrganization     &&
         !this.props.callback) {
-      var m = utils.getModel(resource[constants.TYPE]).value;
+      var m = utils.getModel(resource[TYPE]).value;
 
       if (isVerification || isForm) {
         let title
@@ -459,7 +467,7 @@ class ResourceList extends Component {
       return;
     }
     if (this.props.prop) {
-      if (me  &&  this.props.modelName != constants.TYPES.PROFILE) {
+      if (me  &&  this.props.modelName != PROFILE) {
         this._selectResource(resource);
         return;
       }
@@ -469,8 +477,8 @@ class ResourceList extends Component {
           return;
         }
       }
-      else if (me[constants.ROOT_HASH] === resource[constants.ROOT_HASH]  ||
-         (this.props.resource  &&  me[constants.ROOT_HASH] === this.props.resource[constants.ROOT_HASH]  && this.props.prop)) {
+      else if (me[ROOT_HASH] === resource[ROOT_HASH]  ||
+         (this.props.resource  &&  me[ROOT_HASH] === this.props.resource[ROOT_HASH]  && this.props.prop)) {
         this._selectResource(resource);
         return;
       }
@@ -506,7 +514,7 @@ class ResourceList extends Component {
       //     resource: resource
       //   }
       // }
-      var isMe = isIdentity ? resource[constants.ROOT_HASH] === me[constants.ROOT_HASH] : true;
+      var isMe = isIdentity ? resource[ROOT_HASH] === me[ROOT_HASH] : true;
       if (isMe) {
         route.onRightButtonPress.rightButtonTitle = 'Edit'
         route.onRightButtonPress.onRightButtonPress = {
@@ -518,7 +526,7 @@ class ResourceList extends Component {
           rightButtonTitle: 'Done',
           passProps: {
             bankStyle: style,
-            model: utils.getModel(resource[constants.TYPE]).value,
+            model: utils.getModel(resource[TYPE]).value,
             resource: resource,
             currency: this.props.currency,
           }
@@ -580,7 +588,7 @@ class ResourceList extends Component {
     }
     if (me                       &&
        !model.value.isInterface  &&
-       (resource[constants.ROOT_HASH] === me[constants.ROOT_HASH]  ||  resource[constants.TYPE] !== constants.TYPES.PROFILE)) {
+       (resource[ROOT_HASH] === me[ROOT_HASH]  ||  resource[TYPE] !== PROFILE)) {
       var self = this ;
       route.rightButtonTitle = 'Edit'
       route.onRightButtonPress = /*() =>*/ {
@@ -590,7 +598,7 @@ class ResourceList extends Component {
         rightButtonTitle: 'Done',
         titleTextColor: '#7AAAC3',
         passProps: {
-          model: utils.getModel(resource[constants.TYPE]).value,
+          model: utils.getModel(resource[TYPE]).value,
           bankStyle: this.props.style,
           resource: me
         }
@@ -599,7 +607,7 @@ class ResourceList extends Component {
     this.props.navigator.push(route);
   }
   showRefResources(resource, prop) {
-    var props = utils.getModel(resource[constants.TYPE]).value.properties;
+    var props = utils.getModel(resource[TYPE]).value.properties;
     var propJson = props[prop];
     var resourceTitle = utils.getDisplayName(resource, props);
     resourceTitle = utils.makeTitle(resourceTitle);
@@ -636,7 +644,7 @@ class ResourceList extends Component {
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
           passProps: {
-            model: utils.getModel(resource[constants.TYPE]).value,
+            model: utils.getModel(resource[TYPE]).value,
             bankStyle: this.props.style,
             resource: resource
           }
@@ -662,6 +670,8 @@ class ResourceList extends Component {
 
   renderRow(resource)  {
     var model = utils.getModel(this.props.modelName).value;
+    if (model.isInterface)
+      model = utils.getModel(resource[TYPE]).value
  // || (model.id === constants.TYPES.FORM)
     var isVerification = model.id === constants.TYPES.VERIFICATION  ||  model.subClassOf === constants.TYPES.VERIFICATION
     var isForm = model.id === constants.TYPES.FORM || model.subClassOf === constants.TYPES.FORM
@@ -674,7 +684,7 @@ class ResourceList extends Component {
         onSelect={() => this.selectResource(isVerification
                               ? resource.sources ? resource : resource.document
                               : resource)}
-        key={resource[constants.ROOT_HASH]}
+        key={resource[ROOT_HASH]}
         navigator={this.props.navigator}
         prop={this.props.prop}
         currency={this.props.currency}
@@ -683,7 +693,7 @@ class ResourceList extends Component {
       )
     : (<ResourceRow
         onSelect={() => isSharedContext ? this.openSharedContextChat(resource) : this.selectResource(resource)}
-        key={resource[constants.ROOT_HASH]}
+        key={resource[ROOT_HASH]}
         navigator={this.props.navigator}
         changeSharedWithList={this.props.chat ? this.changeSharedWithList.bind(this) : null}
         newContact={this.state.newContact}
@@ -720,31 +730,41 @@ class ResourceList extends Component {
     // if (!me  ||  (this.props.prop  &&  (this.props.prop.readOnly || (this.props.prop.items  &&  this.props.prop.items.readOnly))))
     //   return <View />;
     var model = utils.getModel(this.props.modelName).value;
-    if (!this.props.prop  &&  model.id !== constants.TYPES.ORGANIZATION)
+    if (!this.props.prop  &&  model.id !== ORGANIZATION)
       return <View />
     // if (model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT ||  model.subClassOf === ENUM)
     //   return <View />
     if (this.props.prop  &&  !this.props.prop.allowToAdd)
       return <View />
-
-    if (Platform.OS === 'ios')
-      return (
-        <View style={[platformStyles.menuButtonNarrow, {width: 47, position: 'absolute', right: 10, bottom:20, borderRadius: 24, justifyContent: 'center', alignItems: 'center'}]}>
-           <TouchableOpacity onPress={() => this.ActionSheet.show()}>
-              <Icon name='md-more'  size={33}  color='#ffffff'/>
-           </TouchableOpacity>
+    let icon = Platform.OS === 'ios' ?  'md-more' : 'md-menu'
+    let color = Platform.OS === 'ios' ? '#ffffff' : 'red'
+    return (
+        <View style={styles.footer}>
+          <TouchableOpacity onPress={() => this.ActionSheet.show()}>
+            <View style={platformStyles.menuButtonNarrow}>
+              <Icon name={icon}  size={33}  color={color} />
+            </View>
+          </TouchableOpacity>
         </View>
-      )
-    else
-      return (
-         <View style={styles.footer}>
-           <TouchableOpacity onPress={() => this.ActionSheet.show()}>
-             <View style={platformStyles.menuButtonNarrow}>
-               <Icon name='md-menu'  size={33}  color='red' />
-             </View>
-           </TouchableOpacity>
-         </View>
-      )
+     )
+    // if (Platform.OS === 'ios')
+    //   return (
+    //     <View style={[platformStyles.menuButtonNarrow, {width: 47, position: 'absolute', right: 10, bottom: 20, borderRadius: 24, justifyContent: 'center', alignItems: 'center'}]}>
+    //        <TouchableOpacity onPress={() => this.ActionSheet.show()}>
+    //           <Icon name='md-more'  size={33}  color='#ffffff'/>
+    //        </TouchableOpacity>
+    //     </View>
+    //   )
+    // else
+    //   return (
+    //      <View style={styles.footer}>
+    //        <TouchableOpacity onPress={() => this.ActionSheet.show()}>
+    //          <View style={platformStyles.menuButtonNarrow}>
+    //            <Icon name='md-menu'  size={33}  color='red' />
+    //          </View>
+    //        </TouchableOpacity>
+    //      </View>
+    //   )
   }
   onSettingsPressed() {
     var model = utils.getModel(constants.TYPES.SETTINGS).value
@@ -780,7 +800,7 @@ class ResourceList extends Component {
         officialAccounts: true,
         serverOffline: this.state.serverOffline,
         bankStyle: this.props.style,
-        modelName: constants.TYPES.ORGANIZATION
+        modelName: ORGANIZATION
       }
     });
   }
@@ -808,15 +828,15 @@ class ResourceList extends Component {
     if (this.props.resource) {
       var props = model.properties;
       for (var p in props) {
-        var isBacklink = props[p].ref  &&  props[p].ref === this.props.resource[constants.TYPE];
+        var isBacklink = props[p].ref  &&  props[p].ref === this.props.resource[TYPE];
         if (props[p].ref  &&  !isBacklink) {
           if (utils.getModel(props[p].ref).value.isInterface  &&  model.interfaces  &&  model.interfaces.indexOf(props[p].ref) !== -1)
             isBacklink = true;
         }
         if (isBacklink) {
           r = {};
-          r[constants.TYPE] = this.props.modelName;
-          r[p] = { id: this.props.resource[constants.TYPE] + '_' + this.props.resource[constants.ROOT_HASH] };
+          r[TYPE] = this.props.modelName;
+          r[p] = { id: utils.getId(this.props.resource) };
 
           if (this.props.resource.relatedTo  &&  props.relatedTo) // HACK for now for main container
             r.relatedTo = this.props.resource.relatedTo;
@@ -828,7 +848,7 @@ class ResourceList extends Component {
     if (this.props.prop  &&  model.subClassOf === constants.TYPES.FORM) {
       if (!r)
         r = {}
-      r[constants.TYPE] = this.props.prop.ref || this.props.prop.items.ref;
+      r[TYPE] = this.props.prop.ref || this.props.prop.items.ref;
       r.from = this.props.resource.from
       r.to = this.props.resource.to
       r._context = this.props.resource._context
@@ -874,7 +894,7 @@ class ResourceList extends Component {
         !utils.getMe().organization                 &&
         model.subClassOf !== ENUM                   &&
         !this.props.isChooser                       &&
-        this.props.modelName !== constants.TYPES.ORGANIZATION  &&
+        this.props.modelName !== ORGANIZATION  &&
         (!model.subClassOf  ||  model.subClassOf !== ENUM)) {
       content = <NoResources
                   filter={this.state.filter}
@@ -909,9 +929,18 @@ class ResourceList extends Component {
           />
       )
     }
-    let network = this.props.isChooser || !this.props.officialAccounts || this.props.modelName !== constants.TYPES.ORGANIZATION
+    let network = this.props.isChooser || !this.props.officialAccounts || this.props.modelName !== ORGANIZATION
                 ? <View/>
                 : <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
+
+    // let title = this.props.tabLabel
+    //           ? <View style={{height: 45, backgroundColor: '#ffffff', alignSelf: 'stretch', justifyContent: 'center'}}>
+    //               <Text style={{alignSelf: 'center', fontSize: 20}}>{translate('officialAccounts')}</Text>
+    //             </View>
+    //           : null
+      // <PageView style={[platformStyles.container, this.props.tabLabel ? {marginTop: utils.isAndroid() ? 10 : 18} : {}]}>
+      //   {title}
+
     return (
       <PageView style={platformStyles.container}>
         {network}
@@ -993,7 +1022,7 @@ class ResourceList extends Component {
                   </View>
                 : <View/>
 
-    return (this.props.modelName === constants.TYPES.PROFILE)
+    return (this.props.modelName === PROFILE)
           ? <View>
               <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
                 <TouchableOpacity onPress={this.showBanks.bind(this)}>
@@ -1088,7 +1117,7 @@ class ResourceList extends Component {
           title: utils.getDisplayName(me)
         },
         to: {
-          id: constants.TYPES.PROFILE + '_' + h[2]
+          id: PROFILE + '_' + h[2]
         }
       }
       Actions.addItem({resource: r, value: r, meta: utils.getModel('tradle.GuestSessionProof').value, disableAutoResponse: true})
@@ -1135,9 +1164,9 @@ var styles = StyleSheet.create({
     height: 45,
     paddingHorizontal: 10,
     backgroundColor: 'transparent',
-    borderColor: '#eeeeee',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#cccccc',
+    // borderColor: '#eeeeee',
+    // borderWidth: StyleSheet.hairlineWidth,
+    // borderTopColor: '#cccccc',
   },
   row: {
     flexDirection: 'row',
