@@ -3279,12 +3279,15 @@ var Store = Reflux.createStore({
         if (!SERVICE_PROVIDERS)
           this.trigger({action: 'onlineStatus', onlineStatus: false})
 
+        // if (isOrg  &&  params.sponsorsList) {
+        //   result = result.slice(0,1)
+        // }
         if (params.isAggregation)
           result = this.getDependencies(result);
         var shareableResources;
         var retParams = params.list
                       ? { action: 'filteredList', list: result}
-                      : { action: 'list',
+                      : { action: params.sponsorsList ? 'sponsorsList' : 'list',
                           list: result,
                           spinner: params.spinner,
                           isAggregation: params.isAggregation
@@ -3319,8 +3322,9 @@ var Store = Reflux.createStore({
         }
         retParams.loadEarlierMessages = true
       }
-      if (params.modelName === FORM)
-        retParams.requestedModelName = FORM
+      // if (params.modelName === FORM)
+      //   retParams.requestedModelName = FORM
+      retParams.requestedModelName = params.modelName
       if (!params.isAggregation  &&  params.to  &&  !params.prop) {
         if (params.to[TYPE] !== PROFILE  ||  !me.isEmployee) {
           // let to = list[utils.getId(params.to)].value
@@ -3782,19 +3786,33 @@ var Store = Reflux.createStore({
 //         thisChatMessages = chatMessages[chatId]
 //       }
     }
+
     if (!thisChatMessages  &&  (!params.to  ||  chatId === meId)) {
       thisChatMessages = []
+      let isInterface = meta.isInterface
+      let isForm = meta.id === FORM
+      let isMessage = meta.id === MESSAGE
       Object.keys(list).forEach(key => {
         let r = self._getItem(key)
         let type = r[TYPE]
         let m = this.getModel(type)
         if (!m) return
-
-        if (type === modelName                      ||
-           m.value.subClassOf === modelName         ||
-           (modelName === MESSAGE  &&  m.value.interfaces)) {
-          thisChatMessages.push({id: key, time: r.time})
+        m = m.value
+        let addMessage = type === modelName  ||  (!isForm  &&  m.subClassOf === meta.id)
+        // This is the case when backlinks are requested on Profile page
+        if (!addMessage) {
+          if (isForm) {
+            if (m.subClassOf === FORM) {
+              if (m.interfaces.length === 1)
+                addMessage = true
+            }
+          }
+          else if (isInterface  &&  m.interfaces  &&  m.interfaces.indexOf(meta.id) !== -1) //  && (!isMessage  ||  m.value.interfaces.length === 1))) {
+            addMessage = true
         }
+        if (addMessage)
+          thisChatMessages.push({id: key, time: r.time})
+
       })
 
       thisChatMessages.sort((a, b) => {
