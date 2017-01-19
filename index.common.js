@@ -42,6 +42,7 @@ var SupervisoryView = require('./Components/SupervisoryView')
 var ProductChooser = require('./Components/ProductChooser')
 var ContextChooser = require('./Components/ContextChooser')
 var CameraView = require('./Components/CameraView');
+// var Tabs = require('./Components/Tabs')
 var PhotoCarousel = require('./Components/PhotoCarousel');
 var QRCode = require('./Components/QRCode')
 var QRCodeScanner = require('./Components/QRCodeScanner')
@@ -452,6 +453,8 @@ class TiMApp extends Component {
       return <SupervisoryView navigator={nav} {...props} />
     case 28:
       return <Log navigator={nav} {...props} />
+    // case 30:
+    //   return <Tabs navigator={nav} {...props} />
     case 10:
     default: // 10
       return <ResourceList navigator={nav} {...props} />
@@ -525,7 +528,7 @@ var NavigationBarRouteMapper = {
     var rbTitle = route.rightButtonTitle
     var iconIdx = rbTitle.indexOf('|')
     var icon = (rbTitle === 'Done' || rbTitle === 'Accept')
-             ? 'md-checkmark'
+             ? 'md-send'
              : rbTitle === 'Profile'
                 ? 'md-person'
                 : rbTitle === 'Edit'
