@@ -52,7 +52,7 @@ var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
-var Keychain = !utils.isWeb() && require('../utils/keychain')
+var Keychain = null //!utils.isWeb() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('q-level');
 var debounce = require('debounce')
@@ -2461,10 +2461,10 @@ var Store = Reflux.createStore({
       })
       .then(function(status) {
         if (!status.watches.link  &&  !status.link) {
-          if (isBecomingEmployee)
-            return self.publishMyIdentity(self.getRepresentative(utils.getId(resource.organization)))
-          else
-            return self.publishMyIdentity(self._getItem(utils.getId(resource.to)))
+          let rep = isBecomingEmployee
+                  ? self.getRepresentative(utils.getId(resource.organization))
+                  : self._getItem(utils.getId(resource.to))
+          return self.publishMyIdentity(rep, params.disableAutoResponse)
         }
         else {
           let orgRep
@@ -2846,7 +2846,7 @@ var Store = Reflux.createStore({
             self.deleteMessageFromChat(orgId, returnVal)
 
           }
-          if (readOnlyBacklinks) {
+          if (readOnlyBacklinks.length) {
             readOnlyBacklinks.forEach((prop) => {
               let topR = returnVal[prop.name]
               if (topR) {
@@ -3372,6 +3372,13 @@ var Store = Reflux.createStore({
                   rmIdx.push(i)
                   continue
                 }
+                // Product created in Remediation show only from profile view
+                if (m.subClassOf === MY_PRODUCT  &&  r._context) {
+                  if (this._getItem(utils.getId(r._context)).product === REMEDIATION) {
+                    rmIdx.push(i)
+                    continue
+                  }
+                }
                 if (m.subClassOf !== FORM)
                   continue
                 // Case when event to dosplay ML is before the new resource was sent
@@ -3404,7 +3411,7 @@ var Store = Reflux.createStore({
                   result.splice(sharedVerifiedForms[i], 1)
               }
               // Pin last unfulfilled Form Request from current context
-              let rContext = result[result.length - 1]._context
+              let rContext = result.length  &&  result[result.length - 1]._context
               if (rContext)
                 for (let i=result.length - 1; i>=0; i--) {
                   var r = result[i]
@@ -3787,7 +3794,7 @@ var Store = Reflux.createStore({
 //       }
     }
 
-    if (!thisChatMessages  &&  (!params.to  ||  chatId === meId)) {
+    if (!thisChatMessages  &&  (!params.to || chatId === meId  || (params.prop.items  &&  params.prop.items.backlink))) {
       thisChatMessages = []
       let isInterface = meta.isInterface
       let isForm = meta.id === FORM
@@ -5230,7 +5237,7 @@ var Store = Reflux.createStore({
     })
   },
 
-  publishMyIdentity(orgRep) {
+  publishMyIdentity(orgRep, disableAutoResponse) {
     var self = this
     var msg = {
       [TYPE]: IDENTITY_PUBLISHING_REQUEST,
@@ -5240,12 +5247,14 @@ var Store = Reflux.createStore({
         firstName: me.firstName
       }
     }
-    var key = IDENTITY + '_' + orgRep[ROOT_HASH]
-
-    return meDriver.signAndSend({
+    var opts = {
       object: msg,
-      to: { fingerprint: self.getFingerprint(this._getItem(key)) }
-    })
+      to: { permalink: orgRep[ROOT_HASH] }
+    }
+    if (disableAutoResponse)
+      opts.other = { disableAutoResponse: true }
+
+    return meDriver.signAndSend(opts)
     .catch(function(err) {
       debugger
     })
