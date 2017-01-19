@@ -522,8 +522,8 @@ var NewResourceMixin = {
       case 'Driver licence':
       case 'Driver license':
         if (country.title === 'United Kingdom') {
-          return Alert.alert('Oops!', 'UK driver licence scanning is not supported at this time')
-          // type = 'ANYLINE_OCR'
+          // return Alert.alert('Oops!', 'UK driver licence scanning is not supported at this time')
+          type = 'ANYLINE_OCR'
         } else {
           type = 'BARCODE'
         }
@@ -537,7 +537,10 @@ var NewResourceMixin = {
     try {
       result = await Anyline.setupScanViewWithConfigJson({ type })
     } catch (err) {
-      if (err.message.toLowerCase() === 'canceled') return
+      if (err.type === 'canceled') return
+      if (err.type === 'invalid') {
+        return Alert.alert('Error', err.message || 'invalid document')
+      }
 
       return Alert.alert('Something went wrong', err.message)
     }

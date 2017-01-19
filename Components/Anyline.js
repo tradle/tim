@@ -4,13 +4,18 @@ import { anyline } from '../environment.json'
 import Anyline from 'anyline-ocr-react-native-module'
 import deepExtend from 'deep-extend'
 
+const Errors = {
+  invalid: newError.bind(null, 'invalid'),
+  canceled: newError.bind(null, 'canceled'),
+}
+
 // import { parse as parseMRZ } from 'mrz'
 
 // from example
 
 function createConfig (options={}) {
   let config = {
-    license: anyline.licenseKey,
+    license: anyline.licenseKey[Platform.OS],
     options: deepExtend({
       captureResolution: '480',
       cutout: {
@@ -80,7 +85,7 @@ if (Anyline) {
 
         if (type === 'MRZ') {
           if (!result.allCheckDigitsValid) {
-            throw new Error('invalid MRZ')
+            return reject(Errors.invalid('the machine readable zone on your document is invalid'))
           }
         }
 
@@ -97,6 +102,8 @@ if (Anyline) {
         result.height = Math.ceil(result.width * ratio.height / ratio.width)
         resolve(result)
       }, msg => {
+        if (msg.toLowerCase() === 'canceled') return reject(Errors.canceled())
+
         reject(new Error(msg))
       })
     })
@@ -138,4 +145,10 @@ if (Anyline) {
   exports.config.BARCODE = exports.config.barcode
 
   // console.log('ANYLINE', Anyline)
+}
+
+function newError (type, message) {
+  const err = new Error(message || type)
+  err.type = type
+  return err
 }
