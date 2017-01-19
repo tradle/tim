@@ -46,6 +46,11 @@ import Navs from '../utils/navs'
 import ENV from '../utils/env'
 
 const PASSWORD_ITEM_KEY = 'app-password'
+const SUBMIT_LOG_TEXT = {
+  submit: translate('submitLog'),
+  submitting: translate('submitting') + '...',
+  submitted: translate('restartApp')
+}
 
 import {
   StyleSheet,
@@ -84,6 +89,12 @@ class TimHome extends Component {
     this._handleConnectivityChange = this._handleConnectivityChange.bind(this)
   }
   componentWillMount() {
+    this.uhOhTimeout = setTimeout(() => {
+      if (!this.state.isLoading && !this.state.downloadingUpdate) return
+
+      this.setState({ submitLogButtonText: SUBMIT_LOG_TEXT.submit })
+    }, 120000)
+
     this.listenTo(Store, 'handleEvent');
     this._pressHandler = debounce(this._pressHandler, 500, true)
     if (!isAndroid)
@@ -136,7 +147,8 @@ class TimHome extends Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    return this.state.downloadUpdateProgress !== nextState.downloadUpdateProgress ||
+    return this.state.submitLogButtonText !== nextState.submitLogButtonText    ||
+        this.state.downloadUpdateProgress !== nextState.downloadUpdateProgress ||
         this.state.isLoading  !== nextState.isLoading   ||
         this.state.message !== nextState.message        ||
         this.state.hasMe !== nextState.hasMe
@@ -229,6 +241,7 @@ class TimHome extends Component {
       // utils.setMe(params.me);
       // utils.setModels(params.models);
       self.setState({isLoading: false});
+      clearTimeout(this.uhOhTimeout)
       if (!utils.getMe()) {
         self.setState({isModalOpen: true})
         // this.register(() => this.showOfficialAccounts())
@@ -748,9 +761,46 @@ class TimHome extends Component {
     )
   }
 
+  getSubmitLogButton() {
+    if (!this.state.isLoading) return
+
+    let instructions
+    if (this.state.submitLogButtonText === SUBMIT_LOG_TEXT.submit) {
+      instructions = (
+        <Text style={styles.submitLogInstructions}>
+          {translate('somethingWrongSubmitLog')}
+        </Text>
+      )
+    }
+
+    return this.state.submitLogButtonText && (
+      <View style={[styles.container, { maxWidth: getIconSize() }]}>
+        <TouchableOpacity
+          style={styles.submitLog}
+          onPress={() => this.onPressSubmitLog()}>
+          <Text style={styles.submitLogText}>{this.state.submitLogButtonText}</Text>
+        </TouchableOpacity>
+        {instructions}
+      </View>
+    )
+  }
+
+  async onPressSubmitLog () {
+    if (this.state.submitLogButtonText === SUBMIT_LOG_TEXT.submitted) {
+      return utils.restartApp()
+    }
+
+    let submitLogButtonText = SUBMIT_LOG_TEXT.submitting
+    this.setState({ submitLogButtonText })
+    const submitted = await utils.submitLog()
+    submitLogButtonText = submitted ? SUBMIT_LOG_TEXT.submitted : SUBMIT_LOG_TEXT.submit
+    this.setState({ submitLogButtonText })
+  }
+
   getSplashScreen() {
     var {width, height} = utils.dimensions(TimHome)
     var updateIndicator = this.getUpdateIndicator()
+    var submitLogButton = this.getSubmitLogButton()
     return (
       <View style={styles.container}>
         <BackgroundImage source={BG_IMAGE} />
@@ -761,6 +811,7 @@ class TimHome extends Component {
             <View style={{paddingTop: 20}}>
               <ActivityIndicator hidden='true' size='large' color='#ffffff'/>
               {updateIndicator}
+              {submitLogButton}
             </View>
           </View>
         </View>
@@ -877,6 +928,23 @@ var styles = (function () {
     },
     getStarted: {
       backgroundColor: '#568FBE', //'#2892C6',
+      paddingVertical: 10,
+      paddingHorizontal: 30
+    },
+    submitLogInstructions: {
+      maxWidth: 200,
+      color: '#ffffff',
+      fontSize: 12
+    },
+    submitLogText: {
+      color: '#f0f0f0',
+      fontSize: width > 450 ? 35 : 20,
+      fontWeight:'400'
+    },
+    submitLog: {
+      marginTop: 50,
+      marginBottom: 20,
+      backgroundColor: '#aaaacc', //'#2892C6',
       paddingVertical: 10,
       paddingHorizontal: 30
     },

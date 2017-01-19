@@ -175,5 +175,9 @@
     "overviewOfApplications": "Overview of Applications",
     "serverIsUnreachable": "Server is unreachable",
     "sharedWith": "Shared {1} context with {2}",
-    "viewDebugLog": "View debug log"
+    "viewDebugLog": "View debug log",
+    "somethingWrongSubmitLog": "Something seems to have gone wrong. Please submit the debug log to the Tradle developer team",
+    "submitLog": "Submit Log",
+    "submitting": "Submitting",
+    "restartApp": "Restart App"
 }

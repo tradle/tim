@@ -9,6 +9,7 @@ import {
   Platform
 } from 'react-native'
 
+import querystring from 'querystring'
 import AsyncStorage from '../Store/Storage'
 import DeviceInfo from 'react-native-device-info'
 import PushNotifications from 'react-native-push-notification'
@@ -16,6 +17,7 @@ import Keychain from 'react-native-keychain'
 import ENV from './env'
 import { getDimensions, getOrientation } from 'react-native-orient'
 import platformUtils from './platformUtils'
+import { post as submitLog } from './debug'
 
 // import Orientation from 'react-native-orientation'
 
@@ -1459,6 +1461,27 @@ var utils = {
           }
         ]
       }
+    }
+  },
+  submitLog: async function () {
+    const me = utils.getMe()
+    try {
+      const res = await submitLog(ENV.serverToSendLog + '?' + querystring.stringify({
+        firstName: me.firstName,
+        lastName: me.lastName
+      }))
+
+      if (res.status > 300) {
+        const why = await res.text()
+        throw new Error(why)
+      } else {
+        Alert.alert('Success!', 'The log was sent to the Tradle developer team!')
+      }
+
+      return true
+    } catch (err) {
+      Alert.alert('Failed to send log', err.message)
+      return false
     }
   }
 }

@@ -1,6 +1,5 @@
 'use strict';
 
-import querystring from 'querystring'
 var utils = require('../utils/utils');
 var translate = utils.translate
 var fontSize = utils.getFontSize
@@ -391,23 +390,7 @@ class ResourceView extends Component {
         passProps: {},
         backButtonTitle: 'Back',
         rightButtonTitle: 'Send',
-        onRightButtonPress: async function () {
-          try {
-            var res = await debug.post(ENV.serverToSendLog + '?' + querystring.stringify({
-              firstName: me.firstName,
-              lastName: me.lastName
-            }))
-
-            if (res.status > 300) {
-              var why = await res.text()
-              throw new Error(why)
-            } else {
-              Alert.alert('Success!', 'The log was sent to the Tradle developer team!')
-            }
-          } catch (err) {
-            return Alert.alert('Failed to send log', err.message)
-          }
-        }
+        onRightButtonPress: utils.submitLog
       })
 
       return
