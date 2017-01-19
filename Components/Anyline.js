@@ -20,12 +20,6 @@ function createConfig (options={}) {
           x: 0,
           y: 120,
         },
-        width: 426,
-        ratioFromSize: {
-          // B7 format (passport dimensions)
-          width: 426,
-          height: 300
-        },
         strokeWidth: 2,
         cornerRadius: 4,
         strokeColor: 'F21C0A',
@@ -69,70 +63,79 @@ function createConfig (options={}) {
     }
   }
 
-  return JSON.stringify(config)
+  return config
 }
 
 module.exports = exports = Anyline
-const setupScanViewWithConfigJson = Anyline.setupScanViewWithConfigJson.bind(Anyline)
-exports.setupScanViewWithConfigJson = function ({ config, type='MRZ' }) {
-  type = type.toUpperCase()
-  if (!config) config = exports.config[type]
-  if (!config) throw new Error('expected "config"')
+if (Anyline) {
+  const setupScanViewWithConfigJson = Anyline.setupScanViewWithConfigJson.bind(Anyline)
+  exports.setupScanViewWithConfigJson = function ({ config, type='MRZ' }) {
+    type = type.toUpperCase()
+    if (!config) config = exports.config[type]
+    if (!config) throw new Error('expected "config"')
 
-  return new Promise((resolve, reject) => {
-    if (typeof config === 'object') config = JSON.stringify(config)
+    return new Promise((resolve, reject) => {
+      setupScanViewWithConfigJson(JSON.stringify(config), type, function (result) {
+        if (typeof result === 'string') result = JSON.parse(result)
 
-    setupScanViewWithConfigJson(config, type, function (result) {
-      if (typeof result === 'string') result = JSON.parse(result)
-
-      if (type === 'MRZ') {
-        if (!result.allCheckDigitsValid) {
-          throw new Error('invalid MRZ')
+        if (type === 'MRZ') {
+          if (!result.allCheckDigitsValid) {
+            throw new Error('invalid MRZ')
+          }
         }
 
-        // resolve({
+        if (result.cutoutBase64) {
+          result.cutoutBase64 = 'data:image/png;base64,' + result.cutoutBase64
+        }
 
-        // })
+        if (result.fullImageBase64) {
+          result.fullImageBase64 = 'data:image/png;base64,' + result.cutoutBase64
+        }
+
+        result.width = config.options.cutout.width
+        const ratio = config.options.cutout.ratioFromSize
+        result.height = Math.ceil(result.width * ratio.height / ratio.width)
+        resolve(result)
+      }, msg => {
+        reject(new Error(msg))
+      })
+    })
+  }
+
+  exports.config = {
+    ocr: createConfig({
+      cutout: {
+        width: 400,
+        ratioFromSize: {
+          width: 1.3,
+          height: 1
+        }
       }
+    }),
+    mrz: createConfig({
+      cutout: {
+        width: 400,
+        ratioFromSize: {
+          width: 1.42,
+          height: 1
+        }
+      }
+    }),
+    barcode: createConfig({
+      cutout: {
+        width: 400,
+        ratioFromSize: {
+          width: 1.3,
+          height: 1
+        }
+      }
+    })
+  }
 
-      resolve(result)
-    }, reject)
-  })
+  // alias by built-in types
+  exports.config.ANYLINE_OCR = exports.config.ocr
+  exports.config.MRZ = exports.config.mrz
+  exports.config.BARCODE = exports.config.barcode
+
+  // console.log('ANYLINE', Anyline)
 }
-
-exports.config = {
-  ocr: createConfig({
-    options: {
-      width: 400,
-      ratioFromSize: {
-        width: 1.3,
-        height: 1
-      }
-    }
-  }),
-  mrz: createConfig({
-    options: {
-      width: 400,
-      ratioFromSize: {
-        width: 1.42,
-        height: 1
-      }
-    }
-  }),
-  barcode: createConfig({
-    options: {
-      width: 400,
-      ratioFromSize: {
-        width: 1.3,
-        height: 1
-      }
-    }
-  })
-}
-
-// alias by built-in types
-exports.config.ANYLINE_OCR = exports.config.ocr
-exports.config.MRZ = exports.config.mrz
-exports.config.BARCODE = exports.config.barcode
-
-// console.log('ANYLINE', Anyline)

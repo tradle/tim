@@ -14,6 +14,8 @@ var StyleSheet = require('../StyleSheet')
 var QRCodeScanner = require('./QRCodeScanner')
 var driverLicenseParser = require('../utils/driverLicenseParser')
 
+import omit from 'object.omit'
+import formDefaults from '../data/formDefaults'
 import DatePicker from 'react-native-datepicker'
 
 import BlinkID from 'react-native-blinkid'
@@ -520,7 +522,7 @@ var NewResourceMixin = {
       case 'Driver licence':
       case 'Driver license':
         if (country.title === 'United Kingdom') {
-          throw new Error('not supported')
+          return Alert.alert('Oops!', 'UK driver licence scanning is not supported at this time')
           // type = 'ANYLINE_OCR'
         } else {
           type = 'BARCODE'
@@ -531,12 +533,26 @@ var NewResourceMixin = {
         throw new Error('unsupported document type: ' + documentType.title)
     }
 
+    let result
     try {
-      const result = await Anyline.setupScanViewWithConfigJson({ type })
-      Alert.alert('ANYLINE', JSON.stringify(result))
+      result = await Anyline.setupScanViewWithConfigJson({ type })
     } catch (err) {
-      Alert.alert('ANYLINE ERROR', err.message)
+      if (err.message.toLowerCase() === 'canceled') return
+
+      return Alert.alert('Something went wrong', err.message)
     }
+
+    const r = {}
+    extend(true, r, this.state.resource)
+
+    r[prop] = {
+      url: result.cutoutBase64,
+      width: result.width,
+      height: result.height
+    }
+
+    r[prop + 'Json'] = omit(result, 'cutoutBase64', 'width', 'height', 'imagePath', 'fullImagePath')
+    this.afterScan(r, prop)
   },
 
   async showBlinkIDScanner(prop) {
@@ -601,10 +617,14 @@ var NewResourceMixin = {
       r[prop + 'Json'] = dl
     }
 
+    this.afterScan(r, prop)
+  },
+
+  afterScan(resource, prop) {
     if (!this.floatingProps) this.floatingProps = {}
-    this.floatingProps[prop] = r[prop]
-    this.floatingProps[prop + 'Json'] = r[prop + 'Json']
-    this.setState({resource: r})
+    this.floatingProps[prop] = resource[prop]
+    this.floatingProps[prop + 'Json'] = resource[prop + 'Json']
+    this.setState({ resource })
   },
 
   showCamera(params) {
