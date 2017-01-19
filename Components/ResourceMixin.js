@@ -11,6 +11,8 @@ var StyleSheet = require('../StyleSheet')
 var PhotoList = require('./PhotoList')
 var constants = require('@tradle/constants');
 var Accordion = require('react-native-accordion')
+var defaultBankStyle = require('../styles/bankStyle.json')
+
 var NOT_SPECIFIED = '[not specified]'
 var TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
 const ENUM = 'tradle.Enum'
@@ -246,6 +248,7 @@ var ResourceMixin = {
                       <Text  style={[styles.bigTitle, {color: '#ffffff', paddingVertical: 10}]}>{translate(prop)}</Text>
                     </View>)
     }
+    let LINK_COLOR = (this.props.bankStyle  &&  this.props.bankStyle.LINK_COLOR) || defaultBankStyle.LINK_COLOR
     for (let p in json) {
       let pp = p
       // if (p === 'document_numbers' || p === 'breakdown' || p === 'properties')
@@ -259,7 +262,7 @@ var ResourceMixin = {
         }
         jsonRows.push(<View style={{paddingVertical: 10, paddingHorizontal: isView ? 10 : 0}} key={this.getNextKey()}>
                         <Text style={styles.bigTitle}>{utils.makeLabel(p)}</Text>
-                        <View style={{height: 1, marginTop: 5, marginBottom: 10, marginHorizontal: -10, alignSelf: 'stretch', backgroundColor: this.props.bankStyle.LINK_COLOR}} />
+                        <View style={{height: 1, marginTop: 5, marginBottom: 10, marginHorizontal: -10, alignSelf: 'stretch', backgroundColor: LINK_COLOR}} />
                       </View>)
 // tada.push("<View style={{paddingVertical: 10, paddingHorizontal: isView ? 10 : 0}} key={this.getNextKey()}><Text style={styles.bigTitle}>{" + utils.makeLabel(p) + "}</Text></View>")
         this.showJson(null, json[p], isView, jsonRows)
