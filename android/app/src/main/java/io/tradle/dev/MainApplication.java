@@ -8,8 +8,6 @@ import com.bitgo.randombytes.RandomBytesPackage;
 import com.brentvatne.react.ReactVideoPackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.facebook.react.ReactApplication;
-import com.peel.react.TcpSocketsModule;
-import com.peel.react.rnos.RNOSModule;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
@@ -20,6 +18,8 @@ import com.lwansbrough.RCTCamera.RCTCameraPackage;
 import com.microsoft.codepush.react.CodePush;
 import com.oblador.keychain.KeychainPackage;
 import com.oblador.vectoricons.VectorIconsPackage;
+// import com.peel.react.TcpSocketsModule;
+import com.peel.react.rnos.RNOSModule;
 import com.rn.ecc.ECCPackage;
 import com.rnfs.RNFSPackage;
 import com.tradle.react.UdpSocketsModule;
@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import io.tradle.react.LocalAuthPackage;
+import io.tradle.snappystorage.RNAsyncSnappyStoragePackage;
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -46,7 +47,8 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
         new MainReactPackage(),
-            new TcpSocketsModule(),
+        new RNAsyncSnappyStoragePackage(),
+        // new TcpSocketsModule(),
         new RNOSModule(),
         new ReactNativePushNotificationPackage(),
         new RNDeviceInfo(),
