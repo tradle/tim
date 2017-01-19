@@ -12,7 +12,6 @@
 		00C302E81ABCBA2D00DB3ED1 /* libRCTImage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302C01ABCB91800DB3ED1 /* libRCTImage.a */; };
 		00C302E91ABCBA2D00DB3ED1 /* libRCTNetwork.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302DC1ABCB9D200DB3ED1 /* libRCTNetwork.a */; };
 		00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302E41ABCB9EE00DB3ED1 /* libRCTVibration.a */; };
-		00E356F31AD99517003FC87E /* IdentityTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* IdentityTests.m */; };
 		1236C1178A71422DBF4F6998 /* EvilIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0513790E280C4C748E30A60F /* EvilIcons.ttf */; };
 		133E29F31AD74F7200F7D852 /* libRCTLinking.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 78C398B91ACF4ADC00677621 /* libRCTLinking.a */; };
 		139105C61AF99C1200B5F7CC /* libRCTSettings.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 139105C11AF99BAD00B5F7CC /* libRCTSettings.a */; };
@@ -24,6 +23,7 @@
 		1C603FB69CA74D178EB7521B /* MaterialIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E8DC5312A84F470C87F82CE6 /* MaterialIcons.ttf */; };
 		27C0899D8D7943A3B5913F26 /* libRNVectorIcons.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 743D3E6C35A24FD383DC592D /* libRNVectorIcons.a */; };
 		3D032E2C194C437EBC054F71 /* libRCTAsyncRocksDBStorage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2060B090E534D60987D7048 /* libRCTAsyncRocksDBStorage.a */; };
+		5162421A1909465CA7AC44B2 /* libRNBlinkID.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4E2C19FDDDD4447B9C80F765 /* libRNBlinkID.a */; };
 		595E255E879245FDA7D8F9EE /* libRCTOrientation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 049471C98AF542809F110296 /* libRCTOrientation.a */; };
 		5E66B670540246B3A0D82BAC /* Zocial.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D491E41C0C9C47B68AC487CA /* Zocial.ttf */; };
 		73030AF71D14DC5F0096A864 /* libRNFS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73030AF61D14DC4B0096A864 /* libRNFS.a */; };
@@ -60,34 +60,22 @@
 		732AB4B31D18B46800F2DE1C /* libCodePush.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732AB4B21D18B45600F2DE1C /* libCodePush.a */; };
 		732EA0C81C24AB99000EFAA6 /* libRNRandomBytes.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732EA0C41C24AB90000EFAA6 /* libRNRandomBytes.a */; };
 		732EA17B1CA6D61E00231B26 /* libRCTCamera.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BCE7C031CA4AF3000370B5A /* libRCTCamera.a */; };
+		73303A9C1E30429400AAE98C /* libPods-Tradle-dev.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 677D170CD70E3212DDC0DAC0 /* libPods-Tradle-dev.a */; };
+		73303A9D1E30429900AAE98C /* libAnylineReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 735F27AD1E2EDEA30042F408 /* libAnylineReact.a */; };
+		73303A9E1E3045CE00AAE98C /* libRNBlinkID.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73303A4F1E30416E00AAE98C /* libRNBlinkID.a */; };
 		7348C3B81C41C04F00B9CDF5 /* Fabric.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7348C3B61C41C04F00B9CDF5 /* Fabric.framework */; };
 		7348C3B91C41C04F00B9CDF5 /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7348C3B71C41C04F00B9CDF5 /* Crashlytics.framework */; };
 		7348E4741D9D8CDD00328628 /* tradle.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7348E4731D9D8CDD00328628 /* tradle.ttf */; };
 		7348E4911D9D8D1B00328628 /* tradle.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7348E4731D9D8CDD00328628 /* tradle.ttf */; };
 		734EF80E1E2E95D900E3A9C4 /* libRCTAsyncRocksDBStorage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 734EF80C1E2E947200E3A9C4 /* libRCTAsyncRocksDBStorage.a */; };
-		735F27AE1E2EDEA30042F408 /* libAnylineReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 735F27AD1E2EDEA30042F408 /* libAnylineReact.a */; };
 		7365BF2E1C3461F900B0A512 /* libRNKeychain.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7365BF2D1C3461E700B0A512 /* libRNKeychain.a */; };
 		73683CFC1CC443B300E178CF /* QTouchposeApplication.m in Sources */ = {isa = PBXBuildFile; fileRef = 73683CFB1CC443B300E178CF /* QTouchposeApplication.m */; };
 		7375409D1D25942300A81EC1 /* libRNDeviceInfo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 737540931D25941500A81EC1 /* libRNDeviceInfo.a */; };
 		7375AA881C34766300F36CF3 /* libRNECC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7364872F1C34703500713F09 /* libRNECC.a */; };
 		7376086B1E1B2385002D0B45 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7376086A1E1B2385002D0B45 /* AssetsLibrary.framework */; };
-		7376086D1E1B374A002D0B45 /* Anyline.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 737608661E1B2355002D0B45 /* Anyline.framework */; };
 		73855D2E1CB42638000B6A0B /* libRNImagePicker.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B2E51601CAD7DBC000439E6 /* libRNImagePicker.a */; };
 		7385C6BB1C4C24A700B92CDA /* Dev.plist in Resources */ = {isa = PBXBuildFile; fileRef = 7385C6BA1C4C24A700B92CDA /* Dev.plist */; };
-		7390333B1E1D449D00E2FB31 /* libPods-Tradle-dev.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 677D170CD70E3212DDC0DAC0 /* libPods-Tradle-dev.a */; };
 		73947DA91D3DAEAA00C5CC8F /* libRCTPushNotification.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73947DA81D3DAEA500C5CC8F /* libRCTPushNotification.a */; };
-		739917CE1E17CF3E00061291 /* MicroBlink.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 739917CA1E17CF3E00061291 /* MicroBlink.bundle */; };
-		739917CF1E17CF3E00061291 /* MicroBlink.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 739917CB1E17CF3E00061291 /* MicroBlink.framework */; };
-		739917D01E17CF3E00061291 /* RNMicroBlinkManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 739917CD1E17CF3E00061291 /* RNMicroBlinkManager.m */; };
-		739917EF1E17CF4700061291 /* MicroBlink.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 739917CB1E17CF3E00061291 /* MicroBlink.framework */; };
-		739917F01E17CF4C00061291 /* MicroBlink.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 739917CA1E17CF3E00061291 /* MicroBlink.bundle */; };
-		739917F11E17CF6500061291 /* RNMicroBlinkManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 739917CD1E17CF3E00061291 /* RNMicroBlinkManager.m */; };
-		739917F41E17CF6D00061291 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 739917F31E17CF6D00061291 /* Accelerate.framework */; };
-		739917F61E17CF7100061291 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 739917F51E17CF7100061291 /* AVFoundation.framework */; };
-		739917F81E17CF7400061291 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 739917F71E17CF7400061291 /* AudioToolbox.framework */; };
-		739917FA1E17CF8400061291 /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 739917F91E17CF8400061291 /* libc++.tbd */; };
-		739917FC1E17CF8B00061291 /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 739917FB1E17CF8B00061291 /* libiconv.tbd */; };
-		739917FE1E17CF9C00061291 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 739917FD1E17CF9C00061291 /* CoreMedia.framework */; };
 		739F72C01C3F739700D9F2FB /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB11A68108700A75B9A /* LaunchScreen.xib */; };
 		739F72F01C3F742B00D9F2FB /* RNEnvironmentManagerIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = 739F72EF1C3F742B00D9F2FB /* RNEnvironmentManagerIOS.m */; };
 		739F73091C3F74AE00D9F2FB /* environment.json in Resources */ = {isa = PBXBuildFile; fileRef = 739F73081C3F74AE00D9F2FB /* environment.json */; };
@@ -98,7 +86,6 @@
 		73FE35D11BFA14F600EFB313 /* Ionicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 73FE35D01BFA14F600EFB313 /* Ionicons.ttf */; };
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 		8DF0B09C8F2B4028AA380CF0 /* libRCTCamera.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9AEE7B81E1394BF19CA3BEBB /* libRCTCamera.a */; };
-		93418AA4BF318F1B3CE895A4 /* libPods-Tradle-dev.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 677D170CD70E3212DDC0DAC0 /* libPods-Tradle-dev.a */; };
 		9B10B2EC1C1A05F400A20159 /* libART.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B10B2EB1C1A05EE00A20159 /* libART.a */; };
 		9B2E51661CAD7DD7000439E6 /* libRNImagePicker.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B2E51601CAD7DBC000439E6 /* libRNImagePicker.a */; };
 		9B41626D1C6F9BBD00A93B7C /* FontAwesome.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9B41626C1C6F9BBD00A93B7C /* FontAwesome.ttf */; };
@@ -152,13 +139,6 @@
 			remoteGlobalIDString = 832C81801AAF6DEF007FA2F7;
 			remoteInfo = RCTVibration;
 		};
-		00E356F41AD99517003FC87E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 13B07F861A680F5B00A75B9A;
-			remoteInfo = Tradle;
-		};
 		139105C01AF99BAD00B5F7CC /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 139105B61AF99BAD00B5F7CC /* RCTSettings.xcodeproj */;
@@ -207,6 +187,13 @@
 			proxyType = 2;
 			remoteGlobalIDString = 73EEC9391BFE4B1D00D468EB;
 			remoteInfo = RNRandomBytes;
+		};
+		73303A4E1E30416E00AAE98C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AC1BDF1F181A47D6B9CD87BE /* RNBlinkID.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 73997FB21E302EBD008B8D47;
+			remoteInfo = RNBlinkID;
 		};
 		734EF80B1E2E947200E3A9C4 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -349,7 +336,6 @@
 		00C302BB1ABCB91800DB3ED1 /* RCTImage.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTImage.xcodeproj; path = "../node_modules/react-native/Libraries/Image/RCTImage.xcodeproj"; sourceTree = "<group>"; };
 		00C302D31ABCB9D200DB3ED1 /* RCTNetwork.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTNetwork.xcodeproj; path = "../node_modules/react-native/Libraries/Network/RCTNetwork.xcodeproj"; sourceTree = "<group>"; };
 		00C302DF1ABCB9EE00DB3ED1 /* RCTVibration.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTVibration.xcodeproj; path = "../node_modules/react-native/Libraries/Vibration/RCTVibration.xcodeproj"; sourceTree = "<group>"; };
-		00E356EE1AD99517003FC87E /* Tradle.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Tradle.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* IdentityTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = IdentityTests.m; sourceTree = "<group>"; };
 		049471C98AF542809F110296 /* libRCTOrientation.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRCTOrientation.a; sourceTree = "<group>"; };
@@ -371,6 +357,7 @@
 		29F90A6163024FE8B7A7022D /* libRNLocalAuth.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNLocalAuth.a; sourceTree = "<group>"; };
 		36B5640D4902498D93210121 /* RCTOrientation.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTOrientation.xcodeproj; path = "../node_modules/react-native-orientation/iOS/RCTOrientation.xcodeproj"; sourceTree = "<group>"; };
 		3D510339A825413A9733521D /* RCTVideo.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTVideo.xcodeproj; path = "../node_modules/react-native-video/RCTVideo.xcodeproj"; sourceTree = "<group>"; };
+		4E2C19FDDDD4447B9C80F765 /* libRNBlinkID.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNBlinkID.a; sourceTree = "<group>"; };
 		66D82D13AFA17C3F90361EB1 /* Pods-Tradle-dev.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Tradle-dev.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Tradle-dev/Pods-Tradle-dev.debug.xcconfig"; sourceTree = "<group>"; };
 		677D170CD70E3212DDC0DAC0 /* libPods-Tradle-dev.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Tradle-dev.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6ECAAF13C7384B738734FB25 /* TcpSockets.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = TcpSockets.xcodeproj; path = "../node_modules/react-native-tcp/ios/TcpSockets.xcodeproj"; sourceTree = "<group>"; };
@@ -389,23 +376,12 @@
 		73683CFA1CC443B300E178CF /* QTouchposeApplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QTouchposeApplication.h; sourceTree = "<group>"; };
 		73683CFB1CC443B300E178CF /* QTouchposeApplication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QTouchposeApplication.m; sourceTree = "<group>"; };
 		7375407E1D25941500A81EC1 /* RNDeviceInfo.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNDeviceInfo.xcodeproj; path = "../node_modules/react-native-device-info/RNDeviceInfo.xcodeproj"; sourceTree = "<group>"; };
-		737608661E1B2355002D0B45 /* Anyline.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Anyline.framework; path = Anyline/Anyline.framework; sourceTree = "<group>"; };
 		7376086A1E1B2385002D0B45 /* AssetsLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AssetsLibrary.framework; path = System/Library/Frameworks/AssetsLibrary.framework; sourceTree = SDKROOT; };
 		7385C6BA1C4C24A700B92CDA /* Dev.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Dev.plist; path = Tradle/Dev.plist; sourceTree = "<group>"; };
 		739033351E1D443F00E2FB31 /* libAnylineReact.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libAnylineReact.a; path = "../../../Library/Developer/Xcode/DerivedData/Tradle-ggebxcvwncukinfhemslyyyvcgkh/Build/Products/Debug-iphonesimulator/AnylineReact/libAnylineReact.a"; sourceTree = "<group>"; };
 		739033371E1D444100E2FB31 /* libPods-Tradle-dev.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libPods-Tradle-dev.a"; path = "../../../Library/Developer/Xcode/DerivedData/Tradle-ggebxcvwncukinfhemslyyyvcgkh/Build/Products/Debug-iphonesimulator/libPods-Tradle-dev.a"; sourceTree = "<group>"; };
 		739033391E1D444300E2FB31 /* libReact.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libReact.a; path = "../../../Library/Developer/Xcode/DerivedData/Tradle-ggebxcvwncukinfhemslyyyvcgkh/Build/Products/Debug-iphonesimulator/React/libReact.a"; sourceTree = "<group>"; };
 		73947DA31D3DAEA500C5CC8F /* RCTPushNotification.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTPushNotification.xcodeproj; path = "../node_modules/react-native/Libraries/PushNotificationIOS/RCTPushNotification.xcodeproj"; sourceTree = "<group>"; };
-		739917CA1E17CF3E00061291 /* MicroBlink.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = MicroBlink.bundle; sourceTree = "<group>"; };
-		739917CB1E17CF3E00061291 /* MicroBlink.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MicroBlink.framework; path = MicroBlink/MicroBlink.framework; sourceTree = "<group>"; };
-		739917CC1E17CF3E00061291 /* RNMicroBlinkManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNMicroBlinkManager.h; sourceTree = "<group>"; };
-		739917CD1E17CF3E00061291 /* RNMicroBlinkManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNMicroBlinkManager.m; sourceTree = "<group>"; };
-		739917F31E17CF6D00061291 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
-		739917F51E17CF7100061291 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
-		739917F71E17CF7400061291 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
-		739917F91E17CF8400061291 /* libc++.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++.tbd"; path = "usr/lib/libc++.tbd"; sourceTree = SDKROOT; };
-		739917FB1E17CF8B00061291 /* libiconv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libiconv.tbd; path = usr/lib/libiconv.tbd; sourceTree = SDKROOT; };
-		739917FD1E17CF9C00061291 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		739F72EE1C3F742B00D9F2FB /* RNEnvironmentManagerIOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNEnvironmentManagerIOS.h; sourceTree = "<group>"; };
 		739F72EF1C3F742B00D9F2FB /* RNEnvironmentManagerIOS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNEnvironmentManagerIOS.m; sourceTree = "<group>"; };
 		739F73081C3F74AE00D9F2FB /* environment.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = environment.json; path = Tradle/environment.json; sourceTree = "<group>"; };
@@ -425,6 +401,7 @@
 		9B41626C1C6F9BBD00A93B7C /* FontAwesome.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = FontAwesome.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome.ttf"; sourceTree = "<group>"; };
 		9BFC36381DD7C3E100E739AF /* Tradle.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = Tradle.entitlements; path = Tradle/Tradle.entitlements; sourceTree = "<group>"; };
 		ABE7159BBFD14FFDB6BBF084 /* libRCTVideo.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRCTVideo.a; sourceTree = "<group>"; };
+		AC1BDF1F181A47D6B9CD87BE /* RNBlinkID.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNBlinkID.xcodeproj; path = "../node_modules/react-native-blinkid/ios/RNBlinkID.xcodeproj"; sourceTree = "<group>"; };
 		AF8DF7DF1C49484ABF808B20 /* RCTCamera.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTCamera.xcodeproj; path = "../node_modules/react-native-camera/ios/RCTCamera.xcodeproj"; sourceTree = "<group>"; };
 		C1932A8E8BA74132B608AF40 /* RNOS.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNOS.xcodeproj; path = "../node_modules/react-native-os/ios/RNOS.xcodeproj"; sourceTree = "<group>"; };
 		CB49356B78554325A3737E7D /* libTcpSockets.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libTcpSockets.a; sourceTree = "<group>"; };
@@ -437,13 +414,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		00E356EB1AD99517003FC87E /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		13B07F8C1A680F5B00A75B9A /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -472,7 +442,6 @@
 				BA4A894818DA4F889E58F732 /* libRCTVideo.a in Frameworks */,
 				F3E3EC882358400CBD24AAF9 /* libRNLocalAuth.a in Frameworks */,
 				B9960E5EDF0C47B789285122 /* libReactNativeLocalization.a in Frameworks */,
-				739917CF1E17CF3E00061291 /* MicroBlink.framework in Frameworks */,
 				9B2E51661CAD7DD7000439E6 /* libRNImagePicker.a in Frameworks */,
 				8DF0B09C8F2B4028AA380CF0 /* libRCTCamera.a in Frameworks */,
 				27C0899D8D7943A3B5913F26 /* libRNVectorIcons.a in Frameworks */,
@@ -482,7 +451,7 @@
 				E31F23F231334399B2377206 /* libRNOS.a in Frameworks */,
 				CC1AB989D89F4D92A4A9CA06 /* libTcpSockets.a in Frameworks */,
 				3D032E2C194C437EBC054F71 /* libRCTAsyncRocksDBStorage.a in Frameworks */,
-				7390333B1E1D449D00E2FB31 /* libPods-Tradle-dev.a in Frameworks */,
+				5162421A1909465CA7AC44B2 /* libRNBlinkID.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -492,12 +461,6 @@
 			files = (
 				7376086B1E1B2385002D0B45 /* AssetsLibrary.framework in Frameworks */,
 				73261E1A1C4AB9FE00292FEE /* libz.tbd in Frameworks */,
-				739917FA1E17CF8400061291 /* libc++.tbd in Frameworks */,
-				739917FE1E17CF9C00061291 /* CoreMedia.framework in Frameworks */,
-				739917FC1E17CF8B00061291 /* libiconv.tbd in Frameworks */,
-				739917F81E17CF7400061291 /* AudioToolbox.framework in Frameworks */,
-				739917F61E17CF7100061291 /* AVFoundation.framework in Frameworks */,
-				739917F41E17CF6D00061291 /* Accelerate.framework in Frameworks */,
 				9BE3302D1D90762600A8292D /* libRCTOrientation.a in Frameworks */,
 				73261E1B1C4AB9FE00292FEE /* libReact.a in Frameworks */,
 				73261E1C1C4AB9FE00292FEE /* libRCTGeolocation.a in Frameworks */,
@@ -507,8 +470,6 @@
 				73261E201C4AB9FE00292FEE /* libRCTSettings.a in Frameworks */,
 				73261E211C4AB9FE00292FEE /* libRCTText.a in Frameworks */,
 				73261E221C4AB9FE00292FEE /* libRCTVibration.a in Frameworks */,
-				739917EF1E17CF4700061291 /* MicroBlink.framework in Frameworks */,
-				7376086D1E1B374A002D0B45 /* Anyline.framework in Frameworks */,
 				73261E231C4AB9FE00292FEE /* libRCTWebSocket.a in Frameworks */,
 				73261E241C4AB9FE00292FEE /* libUdpSockets.a in Frameworks */,
 				73261E251C4AB9FE00292FEE /* Fabric.framework in Frameworks */,
@@ -530,8 +491,9 @@
 				7375409D1D25942300A81EC1 /* libRNDeviceInfo.a in Frameworks */,
 				73947DA91D3DAEAA00C5CC8F /* libRCTPushNotification.a in Frameworks */,
 				734EF80E1E2E95D900E3A9C4 /* libRCTAsyncRocksDBStorage.a in Frameworks */,
-				735F27AE1E2EDEA30042F408 /* libAnylineReact.a in Frameworks */,
-				93418AA4BF318F1B3CE895A4 /* libPods-Tradle-dev.a in Frameworks */,
+				73303A9E1E3045CE00AAE98C /* libRNBlinkID.a in Frameworks */,
+				73303A9D1E30429900AAE98C /* libAnylineReact.a in Frameworks */,
+				73303A9C1E30429400AAE98C /* libPods-Tradle-dev.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -677,6 +639,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		73303A381E30416E00AAE98C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				73303A4F1E30416E00AAE98C /* libRNBlinkID.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		734EF8081E2E947200E3A9C4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -717,16 +687,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		739917C91E17CF3E00061291 /* MicroBlink */ = {
-			isa = PBXGroup;
-			children = (
-				739917CA1E17CF3E00061291 /* MicroBlink.bundle */,
-				739917CC1E17CF3E00061291 /* RNMicroBlinkManager.h */,
-				739917CD1E17CF3E00061291 /* RNMicroBlinkManager.m */,
-			);
-			path = MicroBlink;
-			sourceTree = "<group>";
-		};
 		739917F21E17CF6D00061291 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -735,16 +695,8 @@
 				739033371E1D444100E2FB31 /* libPods-Tradle-dev.a */,
 				739033351E1D443F00E2FB31 /* libAnylineReact.a */,
 				7376086A1E1B2385002D0B45 /* AssetsLibrary.framework */,
-				737608661E1B2355002D0B45 /* Anyline.framework */,
 				7348C3B61C41C04F00B9CDF5 /* Fabric.framework */,
 				7348C3B71C41C04F00B9CDF5 /* Crashlytics.framework */,
-				739917FD1E17CF9C00061291 /* CoreMedia.framework */,
-				739917FB1E17CF8B00061291 /* libiconv.tbd */,
-				739917F91E17CF8400061291 /* libc++.tbd */,
-				739917CB1E17CF3E00061291 /* MicroBlink.framework */,
-				739917F71E17CF7400061291 /* AudioToolbox.framework */,
-				739917F51E17CF7100061291 /* AVFoundation.framework */,
-				739917F31E17CF6D00061291 /* Accelerate.framework */,
 				677D170CD70E3212DDC0DAC0 /* libPods-Tradle-dev.a */,
 			);
 			name = Frameworks;
@@ -858,6 +810,7 @@
 				C1932A8E8BA74132B608AF40 /* RNOS.xcodeproj */,
 				6ECAAF13C7384B738734FB25 /* TcpSockets.xcodeproj */,
 				DB2A667C83D94D838507B5CF /* RCTAsyncRocksDBStorage.xcodeproj */,
+				AC1BDF1F181A47D6B9CD87BE /* RNBlinkID.xcodeproj */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -873,7 +826,6 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				739917C91E17CF3E00061291 /* MicroBlink */,
 				731045901D7CE25D0087E82D /* Tradle-dev.entitlements */,
 				9B41626C1C6F9BBD00A93B7C /* FontAwesome.ttf */,
 				739F73081C3F74AE00D9F2FB /* environment.json */,
@@ -895,7 +847,6 @@
 			isa = PBXGroup;
 			children = (
 				13B07F961A680F5B00A75B9A /* Tradle.app */,
-				00E356EE1AD99517003FC87E /* Tradle.xctest */,
 				73261E3F1C4AB9FE00292FEE /* Tradle-dev.app */,
 			);
 			name = Products;
@@ -958,24 +909,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		00E356ED1AD99517003FC87E /* TradleTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "TradleTests" */;
-			buildPhases = (
-				00E356EA1AD99517003FC87E /* Sources */,
-				00E356EB1AD99517003FC87E /* Frameworks */,
-				00E356EC1AD99517003FC87E /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				00E356F51AD99517003FC87E /* PBXTargetDependency */,
-			);
-			name = TradleTests;
-			productName = IdentityTests;
-			productReference = 00E356EE1AD99517003FC87E /* Tradle.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 		13B07F861A680F5B00A75B9A /* Tradle */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Tradle" */;
@@ -985,7 +918,6 @@
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				739033151E1D417200E2FB31 /* [CP] Embed Pods Framework */,
-				739033341E1D41A400E2FB31 /* [CP] Copy Pods Resources */,
 				7348C39E1C41C02400B9CDF5 /* Fiber / Crashlytics */,
 			);
 			buildRules = (
@@ -1144,6 +1076,10 @@
 					ProjectRef = 73CEDF521C8CCDC6006401AA /* ReactNativeLocalization.xcodeproj */;
 				},
 				{
+					ProductGroup = 73303A381E30416E00AAE98C /* Products */;
+					ProjectRef = AC1BDF1F181A47D6B9CD87BE /* RNBlinkID.xcodeproj */;
+				},
+				{
 					ProductGroup = 7375407F1D25941500A81EC1 /* Products */;
 					ProjectRef = 7375407E1D25941500A81EC1 /* RNDeviceInfo.xcodeproj */;
 				},
@@ -1196,7 +1132,6 @@
 			targets = (
 				13B07F861A680F5B00A75B9A /* Tradle */,
 				73261E121C4AB9FE00292FEE /* Tradle-dev */,
-				00E356ED1AD99517003FC87E /* TradleTests */,
 			);
 		};
 /* End PBXProject section */
@@ -1284,6 +1219,13 @@
 			fileType = archive.ar;
 			path = libRNRandomBytes.a;
 			remoteRef = 732EA0C31C24AB90000EFAA6 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		73303A4F1E30416E00AAE98C /* libRNBlinkID.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNBlinkID.a;
+			remoteRef = 73303A4E1E30416E00AAE98C /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		734EF80C1E2E947200E3A9C4 /* libRCTAsyncRocksDBStorage.a */ = {
@@ -1422,13 +1364,6 @@
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
-		00E356EC1AD99517003FC87E /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		13B07F8E1A680F5B00A75B9A /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1444,7 +1379,6 @@
 				BC686B7EA43346EC98F13734 /* Foundation.ttf in Resources */,
 				7348E4741D9D8CDD00328628 /* tradle.ttf in Resources */,
 				1C603FB69CA74D178EB7521B /* MaterialIcons.ttf in Resources */,
-				739917CE1E17CF3E00061291 /* MicroBlink.bundle in Resources */,
 				D5FC2F4618F64B86BA09C1CC /* Octicons.ttf in Resources */,
 				5E66B670540246B3A0D82BAC /* Zocial.ttf in Resources */,
 			);
@@ -1457,7 +1391,6 @@
 				7348E4911D9D8D1B00328628 /* tradle.ttf in Resources */,
 				73261E351C4AB9FE00292FEE /* LaunchScreen.xib in Resources */,
 				73261E361C4AB9FE00292FEE /* environment.json in Resources */,
-				739917F01E17CF4C00061291 /* MicroBlink.bundle in Resources */,
 				73261E371C4AB9FE00292FEE /* Images.xcassets in Resources */,
 				73261E381C4AB9FE00292FEE /* Ionicons.ttf in Resources */,
 			);
@@ -1537,21 +1470,6 @@
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Tradle-dev/Pods-Tradle-dev-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		739033341E1D41A400E2FB31 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Tradle-dev/Pods-Tradle-dev-resources.sh\"";
-			showEnvVarsInLog = 0;
-		};
 		875A058DA079FEAF89FEC767 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -1600,20 +1518,11 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		00E356EA1AD99517003FC87E /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				00E356F31AD99517003FC87E /* IdentityTests.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		13B07F871A680F5B00A75B9A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
-				739917D01E17CF3E00061291 /* RNMicroBlinkManager.m in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 				739F72F01C3F742B00D9F2FB /* RNEnvironmentManagerIOS.m in Sources */,
 			);
@@ -1627,19 +1536,10 @@
 				73261E161C4AB9FE00292FEE /* main.m in Sources */,
 				73261E171C4AB9FE00292FEE /* RNEnvironmentManagerIOS.m in Sources */,
 				73683CFC1CC443B300E178CF /* QTouchposeApplication.m in Sources */,
-				739917F11E17CF6500061291 /* RNMicroBlinkManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		00E356F51AD99517003FC87E /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 13B07F861A680F5B00A75B9A /* Tradle */;
-			targetProxy = 00E356F41AD99517003FC87E /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		13B07FB11A68108700A75B9A /* LaunchScreen.xib */ = {
@@ -1737,12 +1637,14 @@
 					"$(SRCROOT)/../node_modules/react-native-os/ios",
 					"$(SRCROOT)/../node_modules/react-native-tcp/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-async-storage-rocks/**",
+					"$(SRCROOT)/../node_modules/react-native-blinkid/ios",
 				);
 				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
@@ -1783,12 +1685,14 @@
 					"$(SRCROOT)/../node_modules/react-native-os/ios",
 					"$(SRCROOT)/../node_modules/react-native-tcp/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-async-storage-rocks/**",
+					"$(SRCROOT)/../node_modules/react-native-blinkid/ios",
 				);
 				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
@@ -1815,8 +1719,6 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
-					"$(PROJECT_DIR)/MicroBlink",
-					"$(PROJECT_DIR)/Anyline",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1835,6 +1737,7 @@
 					"$(SRCROOT)/../node_modules/react-native-os/ios",
 					"$(SRCROOT)/../node_modules/react-native-tcp/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-async-storage-rocks/**",
+					"$(SRCROOT)/../node_modules/react-native-blinkid/ios/**",
 				);
 				INFOPLIST_FILE = Tradle/Dev.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -1843,7 +1746,10 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/Tradle\"",
 				);
-				OTHER_LDFLAGS = "-all_load";
+				OTHER_LDFLAGS = (
+					"-all_load",
+					"$(inherited)",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.tradle.dev.tim;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -1866,8 +1772,6 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
-					"$(PROJECT_DIR)/MicroBlink",
-					"$(PROJECT_DIR)/Anyline",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1886,6 +1790,7 @@
 					"$(SRCROOT)/../node_modules/react-native-os/ios",
 					"$(SRCROOT)/../node_modules/react-native-tcp/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-async-storage-rocks/**",
+					"$(SRCROOT)/../node_modules/react-native-blinkid/ios/**",
 				);
 				INFOPLIST_FILE = Tradle/Dev.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -1894,7 +1799,10 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/Tradle\"",
 				);
-				OTHER_LDFLAGS = "-all_load";
+				OTHER_LDFLAGS = (
+					"-all_load",
+					"$(inherited)",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.tradle.dev.tim;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -1958,6 +1866,7 @@
 					"$(SRCROOT)/../node_modules/react-native-os/ios",
 					"$(SRCROOT)/../node_modules/react-native-tcp/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-async-storage-rocks/**",
+					"$(SRCROOT)/../node_modules/react-native-blinkid/ios",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
@@ -2014,6 +1923,7 @@
 					"$(SRCROOT)/../node_modules/react-native-os/ios",
 					"$(SRCROOT)/../node_modules/react-native-tcp/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-async-storage-rocks/**",
+					"$(SRCROOT)/../node_modules/react-native-blinkid/ios",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -2025,15 +1935,6 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "TradleTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				00E356F61AD99517003FC87E /* Debug */,
-				00E356F71AD99517003FC87E /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Tradle" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

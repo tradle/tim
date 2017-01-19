@@ -3,6 +3,7 @@ PODS:
   - AnylineReact (0.0.1):
     - Anyline
     - React
+  - PPBlinkID (2.5.1)
   - React (0.34.1):
     - React/Core (= 0.34.1)
   - React/Core (0.34.1)
@@ -26,6 +27,7 @@ PODS:
 
 DEPENDENCIES:
   - AnylineReact (from `../node_modules/anyline-ocr-react-native-module/ios`)
+  - PPBlinkID (~> 2.5.1)
   - React/RCTActionSheet (from `../node_modules/react-native`)
   - React/RCTGeolocation (from `../node_modules/react-native`)
   - React/RCTImage (from `../node_modules/react-native`)
@@ -44,8 +46,9 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   Anyline: e5ede3f2244009f5f542a521e1c92138f8755e9e
   AnylineReact: bf67e09f85c0dbcad608c93a03054d1172203bd7
+  PPBlinkID: e3593e85c802d669fc1991f1fc7bb358665165a9
   React: fc15d22bec0ec10fe15c12749fbefdac37ddc541
 
-PODFILE CHECKSUM: 7dde4e6b68d36364252a00a2261bacd57a061157
+PODFILE CHECKSUM: cbac5e31bfe4172cc0e5fd7b97c164aa834734e0
 
 COCOAPODS: 1.1.1

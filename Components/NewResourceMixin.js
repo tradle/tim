@@ -16,7 +16,7 @@ var driverLicenseParser = require('../utils/driverLicenseParser')
 
 import DatePicker from 'react-native-datepicker'
 
-import BlinkID from './BlinkID'
+import BlinkID from 'react-native-blinkid'
 const { microblink } = require('../environment.json')
 if (microblink && BlinkID) {
   BlinkID.setLicenseKey(microblink.licenseKey)
@@ -520,7 +520,8 @@ var NewResourceMixin = {
       case 'Driver licence':
       case 'Driver license':
         if (country.title === 'United Kingdom') {
-          type = 'ANYLINE_OCR'
+          throw new Error('not supported')
+          // type = 'ANYLINE_OCR'
         } else {
           type = 'BARCODE'
         }
@@ -612,7 +613,12 @@ var NewResourceMixin = {
     // }
     if (params.prop === 'scan')  {
       if (this.state.resource.documentType  &&  this.state.resource.country)
-        this.showAnylineScanner(params.prop)
+        if (utils.isAndroid()) {
+          this.showAnylineScanner(params.prop)
+        } else {
+          this.showBlinkIDScanner(params.prop)
+        }
+
         // this.scanFormsQRCode(params.prop)
       else
         Alert.alert('Please choose country and document type first')
