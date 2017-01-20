@@ -372,7 +372,7 @@ var utils = {
         return ""
       meta = this.getModel(resource[TYPE]).value.properties
     }
-    let m = this.getModel(resource[TYPE])
+    let m = resource[TYPE] ? this.getModel(resource[TYPE]) : null
     var displayName = '';
     for (var p in meta) {
       if (p.charAt(0) === '_')
@@ -382,67 +382,46 @@ var utils = {
           return resource[p];
         continue
       }
-      if (resource[p]) {
-        if (meta[p].type == 'object') {
-          var title = resource[p].title || this.getDisplayName(resource[p]);
-          displayName += displayName.length ? ' ' + title : title;
-        }
-        else
-          displayName += displayName.length ? ' ' + resource[p] : resource[p];
-      }
-      else if (meta[p].displayAs) {
-        var dn = this.templateIt(meta[p], resource);
-        if (dn)
-          displayName += displayName.length ? ' ' + dn : dn;
+      let dn = this.getStringValueForProperty(resource, p, meta)
+      if (dn)
+        displayName += displayName.length ? ' ' + dn : dn;
+    }
+    if (!displayName.length  &&  m) {
+      let vCols = m.value.viewCols
+      if (!vCols)
+        return displayName
+      for (let i=0; i<vCols.length  &&  !displayName.length; i++) {
+        if (!resource[vCols[i]])
+          continue
+        displayName = this.getStringValueForProperty(resource, vCols[i], meta)
       }
     }
     return displayName;
   },
-
-  getDisplayName1(resource, meta) {
-    if (!meta) {
-      if (resource.title)
-        return resource.title
-      if (resource.id)
-        return ""
-      meta = this.getModel(resource[TYPE]).value.properties
-    }
-    let dProps = this.getPropertiesWithAnnotation(meta, 'displayName')
-
-    let m = this.getModel(resource[TYPE])
-    let vCols = m  &&  m.value.viewCols
-    var displayName = '';
-    if (vCols) {
-      vCols.forEach((p) => {
-        if (dProps[p]) {
-          let dn = this.getPropStringValue(meta[p], resource)
-          displayName += displayName.length ? ' ' + dn : dn;
-        }
-      })
-      // if (displayName.length)
-      //   return displayName
-    }
-    // if models does not have viewCols or not all displayName props are listed in viewCols
-    for (var p in meta) {
-      if (p.charAt(0) === '_')
-        continue
-      if (vCols  &&  vCols.indexOf(p) !== -1)
-        continue
-      if (dProps)  {
-        if (!dProps[p]) {
-          if (!displayName  &&  m  &&  resource[p]  &&  m.value.subClassOf === 'tradle.Enum')
-            return resource[p];
-          continue
-        }
-        else {
-          let dn = this.getPropStringValue(meta[p], resource)
-          displayName += displayName.length ? ' ' + dn : dn;
+  getStringValueForProperty(resource, p, meta) {
+    let displayName = ''
+    if (resource[p]) {
+      if (meta[p].type == 'object') {
+        if (resource[p].title)
+          return resource[p].title;
+        if (meta[p].ref) {
+          if (meta[p].ref == constants.TYPES.MONEY)  {
+            let c = this.normalizeCurrencySymbol(resource[p].currency)
+            return (c || '') + resource[p].value
+          }
+          else
+            return this.getDisplayName(resource[p], this.getModel(meta[p].ref).value.properties);
         }
       }
-      // let dn = this.getPropStringValue(meta[p], resource)
-      // displayName += displayName.length ? ' ' + dn : dn;
+      else
+        return resource[p];
     }
-    return displayName;
+    else if (meta[p].displayAs) {
+      var dn = this.templateIt(meta[p], resource);
+      if (dn)
+        return dn
+    }
+    return displayName
   },
 
   getPropStringValue(prop, resource) {
@@ -1414,3 +1393,50 @@ function unserialize (buf) {
 }
 
 module.exports = utils;
+/*
+  getDisplayName1(resource, meta) {
+    if (!meta) {
+      if (resource.title)
+        return resource.title
+      if (resource.id)
+        return ""
+      meta = this.getModel(resource[TYPE]).value.properties
+    }
+    let dProps = this.getPropertiesWithAnnotation(meta, 'displayName')
+
+    let m = this.getModel(resource[TYPE])
+    let vCols = m  &&  m.value.viewCols
+    var displayName = '';
+    if (vCols) {
+      vCols.forEach((p) => {
+        if (dProps[p]) {
+          let dn = this.getPropStringValue(meta[p], resource)
+          displayName += displayName.length ? ' ' + dn : dn;
+        }
+      })
+      // if (displayName.length)
+      //   return displayName
+    }
+    // if models does not have viewCols or not all displayName props are listed in viewCols
+    for (var p in meta) {
+      if (p.charAt(0) === '_')
+        continue
+      if (vCols  &&  vCols.indexOf(p) !== -1)
+        continue
+      if (dProps)  {
+        if (!dProps[p]) {
+          if (!displayName  &&  m  &&  resource[p]  &&  m.value.subClassOf === 'tradle.Enum')
+            return resource[p];
+          continue
+        }
+        else {
+          let dn = this.getPropStringValue(meta[p], resource)
+          displayName += displayName.length ? ' ' + dn : dn;
+        }
+      }
+      // let dn = this.getPropStringValue(meta[p], resource)
+      // displayName += displayName.length ? ' ' + dn : dn;
+    }
+    return displayName;
+  },
+*/
