@@ -4612,8 +4612,8 @@
     },
     "react-native-blinkid": {
       "version": "1.0.0",
-      "from": "git://github.com/tradle/react-native-blinkid.git#35ce36b0f06bc77ef7c2ad60e16c8d31eca1a866",
-      "resolved": "git://github.com/tradle/react-native-blinkid.git#35ce36b0f06bc77ef7c2ad60e16c8d31eca1a866"
+      "from": "git://github.com/tradle/react-native-blinkid.git#c674c8e3adddaa0373dda7795832c8b8d6c5ef8a",
+      "resolved": "git://github.com/tradle/react-native-blinkid.git#c674c8e3adddaa0373dda7795832c8b8d6c5ef8a"
     },
     "react-native-button": {
       "version": "1.8.2",

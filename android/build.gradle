@@ -24,6 +24,9 @@ allprojects {
         // maven {
         //     url 'https://anylinesdk.blob.core.windows.net/maven/'
         // }
+        maven {
+            url 'https://maven.microblink.com'
+        }
         flatDir {
             dirs 'libs'
         }
