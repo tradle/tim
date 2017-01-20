@@ -90,10 +90,25 @@ function authenticateUser (opts) {
     .catch((err) => {
       pendingAuth = undefined
 
-      if (__DEV__ && !(err.name in Errors)) {
-        let message = `error: ${err.message}, stack: ${err.stack}`
-        debug(JSON.stringify(err))
-        Alert.alert(message)
+      if (__DEV__) {
+        if (!(err.name in Errors)) {
+          let message = `error: ${err.message}, stack: ${err.stack}`
+          debug(JSON.stringify(err))
+          Alert.alert(message)
+        }
+      } else {
+        if (isAndroid && err.code === 'E_FAILED_TO_SHOW_AUTH') {
+          return new Promise(resolve => {
+            Alert.alert(
+              translate('youShallNotPass'),
+              translate('enablePasscodeFirst'),
+              [
+                { text: 'OK', onPress: resolve }
+              ]
+            )
+          })
+          .then(() => authenticateUser(opts))
+        }
       }
 
       throw err
