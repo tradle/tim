@@ -123,6 +123,11 @@ android {
         ndk {
             abiFilters "armeabi-v7a", "x86"
         }
+
+        multiDexEnabled true
+    }
+    dexOptions {
+        javaMaxHeapSize "4g"
     }
     signingConfigs {
         release {
@@ -206,6 +211,7 @@ dependencies {
     }
     compile project(':react-native-async-storage-snappy')
     // compile project(':anyline-ocr-react-native-module')
+    compile project(':react-native-blinkid')
     compile project(':react-native-tcp')
     compile project(':react-native-os')
     compile project(':react-native-local-auth')

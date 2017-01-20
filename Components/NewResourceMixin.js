@@ -13,6 +13,7 @@ var moment = require('moment')
 var StyleSheet = require('../StyleSheet')
 var QRCodeScanner = require('./QRCodeScanner')
 var driverLicenseParser = require('../utils/driverLicenseParser')
+const debug = require('debug')('tradle:app:blinkid')
 
 import omit from 'object.omit'
 import pick from 'object.pick'
@@ -21,6 +22,8 @@ import DatePicker from 'react-native-datepicker'
 import ImageInput from './ImageInput'
 
 import BlinkID from './BlinkID'
+// import INSTRUCTIONS_IMAGE from '../img/scan-passport.jpg'
+// import { parse as parseUSDL } from 'parse-usdl'
 
 // import Anyline from './Anyline'
 
@@ -62,6 +65,11 @@ import {
 var LINK_COLOR, DEFAULT_LINK_COLOR = '#a94442'
 // import transform from 'tcomb-json-schema'
 var component
+var DEFAULT_BLINK_ID_OPTS = {
+  mrtd: { showFullDocument: true },
+  eudl: { showFullDocument: true },
+  usdl: {}
+}
 
 var NewResourceMixin = {
   onScroll(e) {
@@ -644,27 +652,37 @@ var NewResourceMixin = {
 
   async showBlinkIDScanner(prop) {
     const { documentType, country } = this.state.resource
-    const blinkIDOpts = {
+    let blinkIDOpts = {
       quality: 0.2,
       base64: true
     }
 
     if (documentType.title === 'Passport') {
       // machine readable travel documents (passport)
-      blinkIDOpts.mrtd = {}
+      blinkIDOpts.mrtd = DEFAULT_BLINK_ID_OPTS.mrtd
     } else if (documentType.title === 'Driver licence' || documentType.title === 'Driver license') {
       if (country.title === 'United States') {
-        blinkIDOpts.usdl = {}
+        blinkIDOpts.usdl = DEFAULT_BLINK_ID_OPTS.usdl
       } else {
-        blinkIDOpts.eudl = {}
+        blinkIDOpts.eudl = DEFAULT_BLINK_ID_OPTS.eudl
       }
     } else {
-      blinkIDOpts.usdl = {}
-      blinkIDOpts.eudl = {}
-      blinkIDOpts.mrtd = {}
+      blinkIDOpts = {
+        ...DEFAULT_BLINK_ID_OPTS,
+        ...blinkIDOpts
+      }
     }
 
-    const result = await BlinkID.scan(blinkIDOpts)
+    let result
+    try {
+      result = await BlinkID.scan(blinkIDOpts)
+    } catch (err) {
+      debug('BlinkID scan failed', err.stack)
+      return Alert.alert(
+        translate('oops') + '!',
+        translate('scanningFailedTryAgain')
+      )
+    }
 
     // const tradleObj = utils.fromMicroBlink(result)
     var r = {}
@@ -700,6 +718,84 @@ var NewResourceMixin = {
     this.afterScan(r, prop)
   },
 
+  // async maybeReadNFC({ country, ...nfcProps }) {
+  //   if (!PassportReader.isSupported) return
+
+  //   const instructions = country === 'US'
+  //     ? translate('holdPhoneToPassportBackCover')
+  //     : translate('holdPhoneToPassport')
+
+  //   await PassportReader.cancel()
+  //   const { width, height } = Dimensions.get('window')
+
+  //   Actions.showModal({
+  //     onRequestClose: function () {},
+  //     contents: (
+  //       <Modal
+  //         onRequestClose={() => {}}
+  //         animationType="none">
+  //         <View style={styles.nfcModal}>
+  //           <Image source={INSTRUCTIONS_IMAGE} style={{
+  //             resizeMode: 'center',
+  //             width,
+  //             height
+  //           }} />
+  //           <View style={styles.nfcInstructions}>
+  //             <Text style={styles.nfcInstructionsText}>
+  //               {instructions}
+  //             </Text>
+  //           </View>
+  //         </View>
+  //       </Modal>
+  //     )
+  //   })
+
+  //   let nfc
+  //   try {
+  //     nfc = await PassportReader.scan(nfcProps)
+  //   } catch (err) {
+  //     debug('failed to read nfc', err)
+  //     return
+  //   }
+
+  //   const { photo, ...nfcData } = nfc
+  //   const dataRows = Object.keys(nfcData).map(key => {
+  //     return (
+  //       <Text>{key}: {nfcData[key]}</Text>
+  //     )
+  //   })
+
+  //   let ok
+  //   const waitForOK = new Promise(resolve => ok = resolve)
+  //   Actions.showModal({
+  //     onRequestClose: function () {},
+  //     contents: (
+  //       <Modal
+  //         onRequestClose={() => {}}
+  //         animationType="none">
+  //         <View style={styles.nfcModal}>
+  //           <Image source={{uri:photo.base64}} style={{
+  //             resizeMode: 'center',
+  //             width: photo.width,
+  //             height: photo.height
+  //           }} />
+  //           <View style={styles.nfcInstructions}>
+  //             {dataRows}
+  //           </View>
+  //           <TouchableHighlight
+  //             onPress={ok}
+  //             style={{ width: 100, height: 30 }}>
+  //             OK
+  //           </TouchableHighlight>
+  //         </View>
+  //       </Modal>
+  //     )
+  //   })
+
+  //   await waitForOK
+  //   return nfc
+  // },
+
   afterScan(resource, prop) {
     if (!this.floatingProps) this.floatingProps = {}
     this.floatingProps[prop] = resource[prop]
@@ -708,19 +804,22 @@ var NewResourceMixin = {
   },
 
   showCamera(params) {
-    if (utils.isAndroid()) {
-      return Alert.alert(
-        translate('oops') + '!',
-        translate('noScanningOnAndroid')
-      )
-    }
+    // if (utils.isAndroid()) {
+    //   return Alert.alert(
+    //     translate('oops') + '!',
+    //     translate('noScanningOnAndroid')
+    //   )
+    // }
 
     if (params.prop === 'scan')  {
       if (this.state.resource.documentType  &&  this.state.resource.country) {
-        // if (utils.isAndroid())
+        // if (utils.isAndroid()) {
         //   this.showAnylineScanner(params.prop)
-        // else
+        // } else {
           this.showBlinkIDScanner(params.prop)
+        // }
+
+        // this.scanFormsQRCode(params.prop)
       }
       else
         Alert.alert('Please choose country and document type first')
@@ -1153,7 +1252,7 @@ var NewResourceMixin = {
     let actionItem
     if (isVideo ||  isPhoto) {
       // HACK
-      if (isPhoto  &&  (params.prop !== 'scan'  ||  utils.isAndroid()  ||  utils.isWeb())) {
+      if (isPhoto  &&  (params.prop !== 'scan'  ||  utils.isWeb())) {
         var aiStyle = {flex: 7, paddingTop: 15, paddingBottom: 7}
         let m = utils.getModel(prop.ref).value
         actionItem = <ImageInput prop={prop} style={aiStyle} onImage={item => this.onSetMediaProperty(prop.name, item)}>
@@ -1753,6 +1852,21 @@ var styles= StyleSheet.create({
     // alignSelf: 'center',
     // paddingLeft: 10
   },
+  nfcModal: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  nfcInstructions: {
+    position: 'absolute',
+    bottom: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 50
+  },
+  nfcInstructionsText: {
+    fontSize: 20
+  }
 })
 
 function formatDate (date) {
