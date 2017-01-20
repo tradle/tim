@@ -34,7 +34,7 @@ const YEAR = 3600 * 1000 * 24 * 365
 const DAY  = 3600 * 1000 * 24
 const HOUR = 3600 * 1000
 const MINUTE = 60 * 1000
-const FOCUSED_LABEL_COLOR = '#139459'
+const FOCUSED_LABEL_COLOR = '#7AAAC3'// #139459'
 
 var cnt = 0;
 var propTypesMap = {
@@ -681,12 +681,13 @@ var NewResourceMixin = {
     let lcolor = this.getLabelAndBorderColor(params.prop.name)
     if (this.state.isRegistration)
       lStyle = [lStyle, {color: lcolor}]
+    let multiline = params.prop.maxLength > 100
     return (
       <View style={{flex: 5, paddingBottom: this.hasError(params.errors, params.prop.name) ? 10 : Platform.OS === 'ios' ? 10 : 7}}>
         <FloatLabel
           labelStyle={[lStyle, {color: lcolor}]}
           autoCorrect={false}
-          multiline={Platform.OS === 'android' ? true : false}
+          multiline={multiline}
           autoCapitalize={this.state.isRegistration  ||  (params.prop.name !== 'url' &&  (!params.prop.keyboard || params.prop.keyboard !== 'email-address')) ? 'sentences' : 'none'}
           onFocus={this.inputFocused.bind(this, params.prop.name)}
           inputStyle={this.state.isRegistration ? styles.regInput : styles.textInput}
