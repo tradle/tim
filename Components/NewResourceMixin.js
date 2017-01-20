@@ -522,15 +522,21 @@ var NewResourceMixin = {
       case 'Driver licence':
       case 'Driver license':
         if (country.title === 'United Kingdom') {
-          // return Alert.alert('Oops!', 'UK driver licence scanning is not supported at this time')
-          type = 'ANYLINE_OCR'
+          return Alert.alert(
+            translate('oops') + '!',
+            translate('ukLicenseUnsupported')
+          )
+          // type = 'ANYLINE_OCR'
         } else {
           type = 'BARCODE'
         }
 
         break
       default:
-        throw new Error('unsupported document type: ' + documentType.title)
+        return Alert.alert(
+          translate('Error'),
+          translate('unsupported document type: ' + documentType.title)
+        )
     }
 
     let result
@@ -539,10 +545,16 @@ var NewResourceMixin = {
     } catch (err) {
       if (err.type === 'canceled') return
       if (err.type === 'invalid') {
-        return Alert.alert('Error', err.message || 'invalid document')
+        return Alert.alert(
+          translate('error'),
+          err.message || translate('invalidDocument')
+        )
       }
 
-      return Alert.alert('Something went wrong', err.message)
+      return Alert.alert(
+        translate('somethingWentWrong'),
+        err.message
+      )
     }
 
     const r = {}
@@ -554,7 +566,74 @@ var NewResourceMixin = {
       height: result.height
     }
 
-    r[prop + 'Json'] = omit(result, 'cutoutBase64', 'width', 'height', 'imagePath', 'fullImagePath')
+    let normalized
+    switch (documentType.title) {
+      case 'Passport':
+        // {
+        //   "nationalityCountryCode":"USA",
+        //   "documentNumber":"...",
+        //   "givenNames":"...",
+        //   "documentType":"P",
+        //   "issuingCountryCode":"USA",
+        //   "dayOfBirth":"yymmdd",
+        //   "sex":"M",
+        //   "surNames":"...",
+        //   "expirationDate":"yymmdd",
+        //   "personalNumber":""
+        // }
+        normalized = {
+          personal: {
+            // e.g. ANNA<MARIA  to  ANNA MARIA
+            sex: result.sex,
+            firstName: result.givenNames.replace(/\</g, ' '),
+            lastName: result.surNames.replace(/\</g, ' '),
+            dateOfBirth: parseAnylineDate(result.dayOfBirth),
+            nationality: result.nationalityCountryCode
+          },
+          document: {
+            documentNumber: result.documentNumber,
+            personalNumber: result.personalNumber,
+            dateOfExpiry: parseAnylineDate(result.expirationDate),
+            issuer: result.issuingCountryCode
+          }
+        }
+
+        break
+      case 'Driver licence':
+      case 'Driver license':
+        normalized = omit(result, 'cutoutBase64', 'width', 'height', 'imagePath', 'fullImagePath')
+        // maybe can parse with: https://github.com/asdgoooo/wxwa_android/blob/1bdac358f7b4f4acb65310c1aeff43f20a66c87d/js/barcode/barcode.js
+        // value:
+        //   @
+        //   
+        //   ANSI 636001070002DL00410392ZN04330047DLDCANONE
+        //   DCBNONE
+        //   DCDNONE
+        //   DBA08312013
+        //   DCSMichael
+        //   DACM
+        //   DADMotorist
+        //   DBD08312013
+        //   DBB08312013
+        //   DBC1
+        //   DAYBRO
+        //   DAU064 in
+        //   DAG2345 ANYWHERE STREET
+        //   DAIYOUR CITY
+        //   DAJNY
+        //   DAK123450000
+        //   DAQNONE
+        //   DCFNONE
+        //   DCGUSA
+        //   DDEN
+        //   DDFN
+        //   DDGN
+        //   ZNZNAMDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5
+        break
+    }
+
+    r[prop + 'Json'] = normalized
+    console.log('SCAN JSON', normalized)
     this.afterScan(r, prop)
   },
 
@@ -593,8 +672,8 @@ var NewResourceMixin = {
     }
 
     if (result.mrtd) {
-      result.mrtd.personal.dateOfBirth = dateformat(new Date(result.mrtd.personal.dateOfBirth), 'mmm dS, yyyy')
-      result.mrtd.document.dateOfExpiry = dateformat(new Date(result.mrtd.document.dateOfExpiry), 'mmm dS, yyyy')
+      result.mrtd.personal.dateOfBirth = formatDate(new Date(result.mrtd.personal.dateOfBirth))
+      result.mrtd.document.dateOfExpiry = formatDate(new Date(result.mrtd.document.dateOfExpiry))
       r[prop + 'Json'] = result.mrtd //JSON.stringify(result.mrtd)
     }
     else if (result.usdl || result.eudl) {
@@ -1627,8 +1706,18 @@ var styles= StyleSheet.create({
   },
 })
 
+function formatDate (date) {
+  return dateformat(date, 'mmm dS, yyyy')
+}
+
 function parseEUDate (date) {
   const [day, month, year] = date.split('.')
+  return [month, day, year].join('/')
+}
+
+function parseAnylineDate (date) {
+  // yymmdd
+  const [year, month, day] = [date.slice(0, 2), date.slice(2, 4), date.slice(4, 6)]
   return [month, day, year].join('/')
 }
 

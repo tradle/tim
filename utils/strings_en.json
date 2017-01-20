@@ -179,5 +179,10 @@
     "somethingWrongSubmitLog": "Something seems to have gone wrong. Please submit the debug log to the Tradle developer team",
     "submitLog": "Submit Log",
     "submitting": "Submitting",
-    "restartApp": "Restart App"
+    "restartApp": "Restart App",
+    "error": "Error",
+    "invalidDocument": "invalid document",
+    "somethingWrong": "Something went wrong",
+    "oops": "Oops",
+    "ukLicenseUnsupported": "UK driver licence scanning is not supported at this time"
 }

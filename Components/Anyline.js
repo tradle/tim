@@ -18,18 +18,20 @@ function createConfig (options={}) {
     license: anyline.licenseKey[Platform.OS],
     options: deepExtend({
       captureResolution: '480',
+      maxWidthPercent: '95%',
+      maxHeightPercent: '95%',
       cutout: {
         style: 'rect',
-        alignment: 'top',
+        alignment: 'center',
         offset: {
           x: 0,
-          y: 120,
+          y: 0,
         },
         strokeWidth: 2,
         cornerRadius: 4,
-        strokeColor: 'F21C0A',
+        strokeColor: '4286f4',
         outerColor: '000000',
-        outerAlpha: 0.3,
+        outerAlpha: 0.5,
       },
       flash: {
         mode: 'manual',
@@ -41,9 +43,9 @@ function createConfig (options={}) {
       cancelOnResult: true,
       reportingEnabled: true,
       visualFeedback: {
-        style: 'rect',
-        strokeColor: 'F21C0A',
-        fillColor: 'F21C0A',
+        style: 'contour_underline',
+        strokeColor: '00ff00',
+        // fillColor: 'F21C0A',
         cornerRadius: 2,
       }
     }, options)
@@ -94,7 +96,7 @@ if (Anyline) {
         }
 
         if (result.fullImageBase64) {
-          result.fullImageBase64 = 'data:image/png;base64,' + result.cutoutBase64
+          result.fullImageBase64 = 'data:image/png;base64,' + result.fullImageBase64
         }
 
         result.width = config.options.cutout.width
