@@ -390,8 +390,11 @@ var utils = {
       let vCols = m.value.viewCols
       if (!vCols)
         return displayName
+      let excludeProps = []
+      if (m.value.interfaces && m.value.interfaces.indexOf(MESSAGE))
+        excludeProps = ['from', 'to']
       for (let i=0; i<vCols.length  &&  !displayName.length; i++) {
-        if (!resource[vCols[i]])
+        if (!resource[vCols[i]]  ||  excludeProps.indexOf[vCols[i]])
           continue
         displayName = this.getStringValueForProperty(resource, vCols[i], meta)
       }
