@@ -65,6 +65,7 @@ const FORM = TYPES.FORM
 const ORGANIZATION = TYPES.ORGANIZATION
 
 const MY_PRODUCT = 'tradle.MyProduct'
+const MESSAGE = 'tradle.Message'
 const CUR_HASH = constants.CUR_HASH
 const NONCE = constants.NONCE
 const ROOT_HASH = constants.ROOT_HASH
