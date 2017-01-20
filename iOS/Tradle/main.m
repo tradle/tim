@@ -10,7 +10,7 @@
 #import <UIKit/UIKit.h>
 
 #import "AppDelegate.h"
-#import "QTouchposeApplication.h"
+//#import "QTouchposeApplication.h"
 
 int main(int argc, char *argv[])
 {
