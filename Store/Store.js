@@ -3794,7 +3794,7 @@ var Store = Reflux.createStore({
 //       }
     }
 
-    if (!thisChatMessages  &&  (!params.to || chatId === meId  || (params.prop.items  &&  params.prop.items.backlink))) {
+    if (!thisChatMessages  &&  (!params.to || chatId === meId  || (params.prop  &&  params.prop.items  &&  params.prop.items.backlink))) {
       thisChatMessages = []
       let isInterface = meta.isInterface
       let isForm = meta.id === FORM
