@@ -61,7 +61,6 @@
 		732EA0C81C24AB99000EFAA6 /* libRNRandomBytes.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732EA0C41C24AB90000EFAA6 /* libRNRandomBytes.a */; };
 		732EA17B1CA6D61E00231B26 /* libRCTCamera.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BCE7C031CA4AF3000370B5A /* libRCTCamera.a */; };
 		73303A9C1E30429400AAE98C /* libPods-Tradle-dev.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 677D170CD70E3212DDC0DAC0 /* libPods-Tradle-dev.a */; };
-		73303A9D1E30429900AAE98C /* libAnylineReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 735F27AD1E2EDEA30042F408 /* libAnylineReact.a */; };
 		73303A9E1E3045CE00AAE98C /* libRNBlinkID.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73303A4F1E30416E00AAE98C /* libRNBlinkID.a */; };
 		7348C3B81C41C04F00B9CDF5 /* Fabric.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7348C3B61C41C04F00B9CDF5 /* Fabric.framework */; };
 		7348C3B91C41C04F00B9CDF5 /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7348C3B71C41C04F00B9CDF5 /* Crashlytics.framework */; };
@@ -492,7 +491,6 @@
 				73947DA91D3DAEAA00C5CC8F /* libRCTPushNotification.a in Frameworks */,
 				734EF80E1E2E95D900E3A9C4 /* libRCTAsyncRocksDBStorage.a in Frameworks */,
 				73303A9E1E3045CE00AAE98C /* libRNBlinkID.a in Frameworks */,
-				73303A9D1E30429900AAE98C /* libAnylineReact.a in Frameworks */,
 				73303A9C1E30429400AAE98C /* libPods-Tradle-dev.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

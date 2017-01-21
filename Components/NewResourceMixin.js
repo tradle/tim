@@ -723,11 +723,11 @@ var NewResourceMixin = {
     // }
     if (params.prop === 'scan')  {
       if (this.state.resource.documentType  &&  this.state.resource.country)
-        // if (utils.isAndroid()) {
+        if (utils.isAndroid()) {
           this.showAnylineScanner(params.prop)
-        // } else {
-        //   this.showBlinkIDScanner(params.prop)
-        // }
+        } else {
+          this.showBlinkIDScanner(params.prop)
+        }
 
         // this.scanFormsQRCode(params.prop)
       else
