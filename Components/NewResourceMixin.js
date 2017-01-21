@@ -15,10 +15,12 @@ var QRCodeScanner = require('./QRCodeScanner')
 var driverLicenseParser = require('../utils/driverLicenseParser')
 
 import omit from 'object.omit'
+import pick from 'object.pick'
 import formDefaults from '../data/formDefaults'
 import DatePicker from 'react-native-datepicker'
 
 import BlinkID from 'react-native-blinkid'
+import { parse as parseUSDL } from 'parse-usdl'
 const { microblink } = require('../environment.json')
 if (microblink && BlinkID) {
   BlinkID.setLicenseKey(microblink.licenseKey)
@@ -517,7 +519,7 @@ var NewResourceMixin = {
     let type
     switch (documentType.title) {
       case 'Passport':
-        type = 'MRZ'
+        type = 'mrz'
         break;
       case 'Driver licence':
       case 'Driver license':
@@ -526,9 +528,9 @@ var NewResourceMixin = {
             translate('oops') + '!',
             translate('ukLicenseUnsupported')
           )
-          // type = 'ANYLINE_OCR'
+          // type = 'ocr'
         } else {
-          type = 'BARCODE'
+          type = 'barcode'
         }
 
         break
@@ -566,6 +568,7 @@ var NewResourceMixin = {
       height: result.height
     }
 
+    let docProps = omit(result, 'cutoutBase64', 'width', 'height', 'imagePath', 'fullImagePath')
     let normalized
     switch (documentType.title) {
       case 'Passport':
@@ -601,39 +604,44 @@ var NewResourceMixin = {
         break
       case 'Driver licence':
       case 'Driver license':
-        normalized = omit(result, 'cutoutBase64', 'width', 'height', 'imagePath', 'fullImagePath')
-        // maybe can parse with: https://github.com/asdgoooo/wxwa_android/blob/1bdac358f7b4f4acb65310c1aeff43f20a66c87d/js/barcode/barcode.js
-        // value:
-        //   @
-        //   
-        //   ANSI 636001070002DL00410392ZN04330047DLDCANONE
-        //   DCBNONE
-        //   DCDNONE
-        //   DBA08312013
-        //   DCSMichael
-        //   DACM
-        //   DADMotorist
-        //   DBD08312013
-        //   DBB08312013
-        //   DBC1
-        //   DAYBRO
-        //   DAU064 in
-        //   DAG2345 ANYWHERE STREET
-        //   DAIYOUR CITY
-        //   DAJNY
-        //   DAK123450000
-        //   DAQNONE
-        //   DCFNONE
-        //   DCGUSA
-        //   DDEN
-        //   DDFN
-        //   DDGN
-        //   ZNZNAMDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5
+        if (country.title === 'United States' && result.barcodeFormat === 'PDF_417') {
+          let usdl = parseUSDL(result.value)
+          let personal = pick(usdl, [
+            'sex',
+            'firstName',
+            'middleName',
+            'lastName',
+            'dateOfBirth',
+            'eyeColor',
+            'height',
+            'addressStreet',
+            'addressCity',
+            'addressState',
+            'addressPostalCode'
+          ])
+
+          let document = pick(usdl, [
+            'documentNumber',
+            'issuer',
+            'documentDiscriminator',
+            'jurisdictionVehicleClass',
+            'jurisdictionRestrictionCodes',
+            'jurisdictionEndorsementCodes',
+            'dateOfExpiry',
+            'dateOfIssue',
+            'inventoryControlNumber'
+          ])
+
+          let misc = omit(usdl, Object.keys(personal).concat(Object.keys(document)))
+          normalized = { personal, document, misc }
+        } else {
+          normalized = docProps
+        }
+
         break
     }
 
     r[prop + 'Json'] = normalized
-    console.log('SCAN JSON', normalized)
     this.afterScan(r, prop)
   },
 
@@ -715,11 +723,11 @@ var NewResourceMixin = {
     // }
     if (params.prop === 'scan')  {
       if (this.state.resource.documentType  &&  this.state.resource.country)
-        if (utils.isAndroid()) {
+        // if (utils.isAndroid()) {
           this.showAnylineScanner(params.prop)
-        } else {
-          this.showBlinkIDScanner(params.prop)
-        }
+        // } else {
+        //   this.showBlinkIDScanner(params.prop)
+        // }
 
         // this.scanFormsQRCode(params.prop)
       else

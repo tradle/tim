@@ -1,8 +1,9 @@
 
 import { NativeModules, Platform } from 'react-native'
 import { anyline } from '../environment.json'
-import Anyline from 'anyline-ocr-react-native-module'
+import Anyline, { BarcodeFormat } from 'anyline-ocr-react-native-module'
 import deepExtend from 'deep-extend'
+import shallowExtend from 'xtend/mutable'
 
 const Errors = {
   invalid: newError.bind(null, 'invalid'),
@@ -76,8 +77,8 @@ function createConfig (options={}) {
 module.exports = exports = Anyline
 if (Anyline) {
   const setupScanViewWithConfigJson = Anyline.setupScanViewWithConfigJson.bind(Anyline)
-  exports.setupScanViewWithConfigJson = function ({ config, type='MRZ' }) {
-    type = type.toUpperCase()
+  exports.setupScanViewWithConfigJson = function ({ config, type='mrz' }) {
+    type = type.toLowerCase()
     if (!config) config = exports.config[type]
     if (!config) throw new Error('expected "config"')
 
@@ -85,10 +86,16 @@ if (Anyline) {
       setupScanViewWithConfigJson(JSON.stringify(config), type, function (result) {
         if (typeof result === 'string') result = JSON.parse(result)
 
-        if (type === 'MRZ') {
+        switch (type) {
+        case 'mrz':
           if (!result.allCheckDigitsValid) {
             return reject(Errors.invalid('the machine readable zone on your document is invalid'))
           }
+
+          break
+        case 'barcode':
+          result.barcodeFormat = BarcodeFormat[result.barcodeFormat]
+          if (result.barcodeFormat === 'UNKNOWN') throw new Error('unknown barcode format')
         }
 
         if (result.cutoutBase64) {
@@ -142,11 +149,9 @@ if (Anyline) {
   }
 
   // alias by built-in types
-  exports.config.ANYLINE_OCR = exports.config.ocr
-  exports.config.MRZ = exports.config.mrz
-  exports.config.BARCODE = exports.config.barcode
-
-  // console.log('ANYLINE', Anyline)
+  // exports.config.ANYLINE_OCR = exports.config.ocr
+  // exports.config.MRZ = exports.config.mrz
+  // exports.config.BARCODE = exports.config.barcode
 }
 
 function newError (type, message) {

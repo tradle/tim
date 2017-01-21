@@ -70,7 +70,7 @@
     },
     "@tradle/models": {
       "version": "4.10.9",
-      "from": "tradle/models#d3247cac22886ffe79e686a8afa6609620620b17",
+      "from": "git://github.com/tradle/models.git#d3247cac22886ffe79e686a8afa6609620620b17",
       "resolved": "git://github.com/tradle/models.git#d3247cac22886ffe79e686a8afa6609620620b17"
     },
     "@tradle/otr": {
@@ -203,8 +203,8 @@
     },
     "anyline-ocr-react-native-module": {
       "version": "0.0.1",
-      "from": "git://github.com/anyline/anyline-ocr-react-native-module.git#0172d79eb41048584c294d8c3432cca53cc42fdd",
-      "resolved": "git://github.com/anyline/anyline-ocr-react-native-module.git#0172d79eb41048584c294d8c3432cca53cc42fdd"
+      "from": "git://github.com/mvayngrib/anyline-ocr-react-native-module.git#45801ba6c185d7311fdef07af2dfb64124a6071e",
+      "resolved": "git://github.com/mvayngrib/anyline-ocr-react-native-module.git#45801ba6c185d7311fdef07af2dfb64124a6071e"
     },
     "archive-type": {
       "version": "3.2.0",
@@ -4012,7 +4012,7 @@
     },
     "object.pick": {
       "version": "1.2.0",
-      "from": "object.pick@>=1.1.1 <2.0.0",
+      "from": "object.pick@latest",
       "resolved": "https://registry.npmjs.org/object.pick/-/object.pick-1.2.0.tgz"
     },
     "octal": {
@@ -4145,6 +4145,11 @@
       "version": "2.2.0",
       "from": "parse-json@>=2.2.0 <3.0.0",
       "resolved": "https://registry.npmjs.org/parse-json/-/parse-json-2.2.0.tgz"
+    },
+    "parse-usdl": {
+      "version": "1.0.0",
+      "from": "parse-usdl@latest",
+      "resolved": "https://registry.npmjs.org/parse-usdl/-/parse-usdl-1.0.0.tgz"
     },
     "parsejson": {
       "version": "0.0.3",
@@ -4752,6 +4757,11 @@
       "from": "git://github.com/mvayngrib/react-native-safe-async-storage.git#7afa8c65d0b858689122c7a49e0f403752726490",
       "resolved": "git://github.com/mvayngrib/react-native-safe-async-storage.git#7afa8c65d0b858689122c7a49e0f403752726490"
     },
+    "react-native-scrollable-tab-view": {
+      "version": "0.7.1",
+      "from": "react-native-scrollable-tab-view@>=0.7.0 <0.8.0",
+      "resolved": "https://registry.npmjs.org/react-native-scrollable-tab-view/-/react-native-scrollable-tab-view-0.7.1.tgz"
+    },
     "react-native-scroller": {
       "version": "0.0.6",
       "from": "react-native-scroller@0.0.6",
@@ -5166,9 +5176,9 @@
       "resolved": "https://registry.npmjs.org/sendy-protobufs/-/sendy-protobufs-1.0.0.tgz"
     },
     "sendy-ws": {
-      "version": "1.5.1",
-      "from": "git://github.com/tradle/sendy-ws.git#6aad46cf66a7cd57cc3c911699ffc938af470727",
-      "resolved": "git://github.com/tradle/sendy-ws.git#6aad46cf66a7cd57cc3c911699ffc938af470727"
+      "version": "1.5.2",
+      "from": "sendy-ws@latest",
+      "resolved": "https://registry.npmjs.org/sendy-ws/-/sendy-ws-1.5.2.tgz"
     },
     "serve-favicon": {
       "version": "2.3.0",
