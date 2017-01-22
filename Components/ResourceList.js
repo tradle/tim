@@ -414,11 +414,10 @@ class ResourceList extends Component {
     var isVerification = model.value.id === constants.TYPES.VERIFICATION
     var isForm = model.value.id === constants.TYPES.FORM
     var isOrganization = this.props.modelName === ORGANIZATION;
+    var m = utils.getModel(resource[TYPE]).value;
     if (!isIdentity         &&
         !isOrganization     &&
         !this.props.callback) {
-      var m = utils.getModel(resource[TYPE]).value;
-
       if (isVerification || isForm) {
         let title
         if (isForm)
@@ -498,6 +497,30 @@ class ResourceList extends Component {
         currency: resource.currency,
         bankStyle: style,
       },
+      // rightButtonTitle: 'View',
+      // onRightButtonPress: {
+      //   title: utils.getDisplayName(resource),
+      //   id: 3,
+      //   component: ResourceView,
+      //   passProps: {
+      //     resource: resource
+      //   },
+      //   rightButtonTitle: 'Edit',
+      //   onRightButtonPress: {
+      //     title: title,
+      //     id: 4,
+      //     component: NewResource,
+      //     titleTextColor: '#7AAAC3',
+      //     backButtonTitle: 'Back',
+      //     rightButtonTitle: 'Done',
+      //     passProps: {
+      //       model: m,
+      //       resource: resource,
+      //       bankStyle: this.props.bankStyle || defaultBankStyle
+      //     }
+      //   },
+
+      // }
     }
     if (isIdentity) { //  ||  isOrganization) {
       route.title = resource.firstName
@@ -921,7 +944,7 @@ class ResourceList extends Component {
     var actionSheet = this.renderActionSheet()
     var footer = actionSheet && this.renderFooter()
     var searchBar
-    if (SearchBar  &&  (!this.state.list || this.state.list.length > 10)) {
+    if (SearchBar  &&  ((this.state.list && this.state.list.length > 10) || (this.state.filter  &&  this.state.filter.length))) {
       searchBar = (
         <SearchBar
           onChangeText={this.onSearchChange.bind(this)}
@@ -1189,8 +1212,8 @@ var styles = StyleSheet.create({
     paddingHorizontal: 10,
     backgroundColor: 'transparent',
     // borderColor: '#eeeeee',
-    // borderWidth: StyleSheet.hairlineWidth,
-    // borderTopColor: '#cccccc',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#cccccc',
   },
   row: {
     flexDirection: 'row',
