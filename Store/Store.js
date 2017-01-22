@@ -52,7 +52,7 @@ var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
-var Keychain = ENV.useKeychain !== false && !utils.isWeb() && require('../utils/keychain')
+var Keychain = null //ENV.useKeychain !== false && !utils.isWeb() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('q-level');
 var debounce = require('debounce')
@@ -816,9 +816,9 @@ var Store = Reflux.createStore({
     return newResult
     // return newResult.reverse()
   },
-  getInfo(serverUrls, retry, id) {
+  getInfo(serverUrls, retry, id, newServer) {
     return Q.all(serverUrls.map(url => {
-      return this.getServiceProviders(url, retry, id)
+      return this.getServiceProviders(url, retry, id, newServer)
         .then(results => {
           // var httpClient = driverInfo.httpClient
           var wsClients = driverInfo.wsClients
@@ -942,7 +942,7 @@ var Store = Reflux.createStore({
     // const identifier = tradle.utils.serializePubKey(identifierPubKey).toString('hex')
     const url = getProviderUrl(provider)
 
-    let transport = wsClients.byUrl[url]
+    let transport = wsClients.byUrl[url] || wsClients.byIdentifier[provider.hash]
     if (transport) {
       wsClients.add({
         client: transport,
@@ -1283,7 +1283,7 @@ var Store = Reflux.createStore({
   },
 
   // Gets info about companies in this app, their bot representatives and their styles
-  getServiceProviders(url, retry, id) {
+  getServiceProviders(url, retry, id, newServer) {
     var self = this
     // return Q.race([
     //   fetch(utils.joinURL(url, 'info'), { headers: { cache: 'no-cache' } }),
@@ -1374,7 +1374,7 @@ var Store = Reflux.createStore({
           permalink: sp.bot.permalink
         })
 
-        promises.push(self.addInfo(sp, originalUrl))
+        promises.push(self.addInfo(sp, originalUrl, newServer))
       })
       if (utils.getMe())
         self.setMe(utils.getMe())
@@ -1392,19 +1392,29 @@ var Store = Reflux.createStore({
         .map(r => r.value)
     })
   },
-  addInfo(sp, url) {
+  addInfo(sp, url, newServer) {
     var okey = sp.org ? utils.getId(sp.org) : null
     var hash = protocol.linkString(sp.bot.pub)
     var ikey = IDENTITY + '_' + hash
     var batch = []
-    if (!list[okey]) {
+    var org = this._getItem(okey)
+    if (org) {
+      // allow to unhide the previously hidden provider
+      if (newServer  &&  org.inactive) {
+        org.inactive = false
+        this._mergeItem(okey, sp.org)
+        batch.push({type: 'put', key: okey, value: org})
+      }
+    }
+    else {
       batch.push({type: 'put', key: okey, value: sp.org})
       this._setItem(okey, sp.org)
     }
+
     list[okey].value._online = true
     if (sp.style)
       this._getItem(okey).style = sp.style
-    if (!list[ikey]) {
+    if (list[ikey]) {
       var profile = {
         [TYPE]: PROFILE,
         [ROOT_HASH]: hash,
@@ -3574,7 +3584,7 @@ var Store = Reflux.createStore({
     let orgToForm = {}
     for (var key in list) {
       var r = this._getItem(key);
-      if (key.indexOf(modelName + '_') == -1) {
+      if (key.indexOf(modelName + '_') === -1) {
         var s = key.split('_')[0]
         if (isOrg) {
           if (this.getModel(s).value.subClassOf !== FORM)
@@ -3619,6 +3629,8 @@ var Store = Reflux.createStore({
         continue
       if (r.canceled)
         continue;
+      if (isOrg  &&  r.inactive)
+        continue
       if (containerProp  &&  (!r[containerProp]  ||  utils.getId(r[containerProp]) !== resourceId))
         continue;
       if (!query) {
@@ -4682,10 +4694,10 @@ var Store = Reflux.createStore({
           value[CUR_HASH] = 1
         }
       }
-      if (!isNew  &&  (!value.urls  ||  (value.urls  &&  value.urls.indexOf(value.url) !== -1))) {
-        this.trigger({action: 'addItem', resource: value, error: 'The "' + props.url.title + '" was already added'})
-        return
-      }
+      // if (!isNew  &&  (!value.urls  ||  (value.urls  &&  value.urls.indexOf(value.url) !== -1))) {
+      //   this.trigger({action: 'addItem', resource: value, error: 'The "' + props.url.title + '" was already added'})
+      //   return
+      // }
     }
     else if (isNew)
       value[CUR_HASH] = dhtKey //isNew ? dhtKey : value[ROOT_HASH]
@@ -4934,7 +4946,7 @@ var Store = Reflux.createStore({
       if (SERVICE_PROVIDERS.some((r) => r.id === value.id  &&  r.url === value.url))
         return
     }
-    return this.getInfo([v], true, value.id ? value.id : null)
+    return this.getInfo([v], true, value.id ? value.id : null, true)
     .then(function(json) {
       var settings = list[key]
       if (settings) {
