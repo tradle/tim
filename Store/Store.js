@@ -52,7 +52,7 @@ var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
-var Keychain = null //ENV.useKeychain !== false && !utils.isWeb() && require('../utils/keychain')
+var Keychain = ENV.useKeychain !== false && !utils.isWeb() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('q-level');
 var debounce = require('debounce')
@@ -1414,7 +1414,7 @@ var Store = Reflux.createStore({
     list[okey].value._online = true
     if (sp.style)
       this._getItem(okey).style = sp.style
-    if (list[ikey]) {
+    if (!list[ikey]) {
       var profile = {
         [TYPE]: PROFILE,
         [ROOT_HASH]: hash,
@@ -3289,9 +3289,23 @@ var Store = Reflux.createStore({
         if (!SERVICE_PROVIDERS)
           this.trigger({action: 'onlineStatus', onlineStatus: false})
 
-        // if (isOrg  &&  params.sponsorsList) {
-        //   result = result.slice(0,1)
-        // }
+        if (isOrg) {
+          let r1 = result.filter((r) => r.priority)
+          if (r1) {
+            let r2 = result.filter((r) => !r.priority)
+            result = r1.concat(r2)
+          }
+          // if (r1) {
+          //   r1.forEach((r) => {
+          //     SERVICE_PROVIDERS.forEach((sp) => {
+          //       if (utils.getId(r) === sp.org)
+          //         r._styles = sp.style
+          //     })
+          //   })
+          //   let r2 = result.filter((r) => !r.priority)
+          //   result = r1.concat(r2)
+          // }
+        }
         if (params.isAggregation)
           result = this.getDependencies(result);
         var shareableResources;
@@ -3302,8 +3316,8 @@ var Store = Reflux.createStore({
                           spinner: params.spinner,
                           isAggregation: params.isAggregation
                         }
-          if (params.prop)
-            retParams.prop = params.prop;
+        if (params.prop)
+          retParams.prop = params.prop;
 
         this.trigger(retParams);
       })
