@@ -921,7 +921,7 @@ class ResourceList extends Component {
     var actionSheet = this.renderActionSheet()
     var footer = actionSheet && this.renderFooter()
     var searchBar
-    if (SearchBar) {
+    if (SearchBar  &&  (!this.state.list || this.state.list.length > 10)) {
       searchBar = (
         <SearchBar
           onChangeText={this.onSearchChange.bind(this)}
