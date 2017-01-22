@@ -22,7 +22,7 @@ import DatePicker from 'react-native-datepicker'
 import BlinkID from 'react-native-blinkid'
 import { parse as parseUSDL } from 'parse-usdl'
 const { microblink } = require('../environment.json')
-if (microblink && BlinkID) {
+if (microblink && BlinkID && utils.isIOS()) {
   BlinkID.setLicenseKey(microblink.licenseKey)
 }
 
