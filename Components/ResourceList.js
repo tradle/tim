@@ -83,7 +83,7 @@ class ResourceList extends Component {
       }),
       allowToAdd: this.props.prop  &&  this.props.prop.allowToAdd,
       filter: this.props.filter,
-      show: false,
+      hideMode: false,  // hide provider
       serverOffline: this.props.serverOffline,
       isConnected: this.props.navigator.isConnected,
       userInput: '',
@@ -377,7 +377,7 @@ class ResourceList extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     if (nextState.forceUpdate)
       return true
-    if (this.state.show !== nextState.show)
+    if (this.state.hideMode !== nextState.hideMode)
       return true
     if (this.state.serverOffline !== nextState.serverOffline)
       return true
@@ -389,7 +389,7 @@ class ResourceList extends Component {
       return true
     if (nextState.newContact  &&  (!this.state.newContact ||  this.state.newContact !== nextState.newContact))
       return true
-    // if (this.state.isConnected !== nextState.isConnected)
+        // if (this.state.isConnected !== nextState.isConnected)
     //   if (!this.state.list && !nextState.list)
     //     return true
     if (!this.state.list  ||  !nextState.list  ||  this.state.list.length !== nextState.list.length)
@@ -694,6 +694,8 @@ class ResourceList extends Component {
     : (<ResourceRow
         onSelect={() => isSharedContext ? this.openSharedContextChat(resource) : this.selectResource(resource)}
         key={resource[ROOT_HASH]}
+        hideResource={this.hideResource.bind(this)}
+        hideMode={this.state.hideMode}
         navigator={this.props.navigator}
         changeSharedWithList={this.props.chat ? this.changeSharedWithList.bind(this) : null}
         newContact={this.state.newContact}
@@ -768,7 +770,7 @@ class ResourceList extends Component {
   }
   onSettingsPressed() {
     var model = utils.getModel(constants.TYPES.SETTINGS).value
-    this.setState({show: false})
+    this.setState({hideMode: false})
     var route = {
       component: NewResource,
       title: 'Settings',
@@ -822,7 +824,7 @@ class ResourceList extends Component {
   addNew() {
     var model = utils.getModel(this.props.modelName).value;
     var r;
-    this.setState({show: false})
+    this.setState({hideMode: false})
     // resource if present is a container resource as for example subreddit for posts or post for comments
     // if to is passed then resources only of this container need to be returned
     if (this.props.resource) {
@@ -962,6 +964,7 @@ class ResourceList extends Component {
 
       buttons = [
         translate('addServerUrl'),
+        translate('hideResource', translate(utils.getModel(this.props.modelName).value)),
         translate('scanQRcode'),
         translate('cancel')
       ]
@@ -983,6 +986,9 @@ class ResourceList extends Component {
               this.onSettingsPressed()
             break
           case 1:
+            this.setState({hideMode: true})
+            break
+          case 2:
             this.scanFormsQRCode()
             break;
           // case 2:
@@ -993,6 +999,24 @@ class ResourceList extends Component {
           }
         }}
       />
+    )
+  }
+  hideResource(resource) {
+    Alert.alert(
+      translate('areYouSureYouWantToDelete', translate(resource.name)),
+      null,
+      [
+        {text: translate('cancel'), onPress: () => {
+          this.setState({hideMode: false})
+          console.log('Canceled!')
+        }},
+        {text: translate('Ok'), onPress: () => {
+          let r = utils.clone(resource)
+          r.inactive = true
+          Actions.addItem({resource: resource, value: r, meta: utils.getModel(resource[TYPE]).value})
+          this.setState({hideMode: false})
+        }},
+      ]
     )
   }
 
@@ -1080,7 +1104,7 @@ class ResourceList extends Component {
     })
   }
   scanFormsQRCode() {
-    this.setState({show: false})
+    this.setState({hideMode: false})
     this.props.navigator.push({
       title: 'Scan QR Code',
       id: 16,

@@ -8,7 +8,7 @@ var constants = require('@tradle/constants');
 var Icon = require('react-native-vector-icons/Ionicons');
 var RowMixin = require('./RowMixin');
 var ResourceList = require('./ResourceList')
-var Swipeout = require('react-native-swipeout')
+// var Swipeout = require('react-native-swipeout')
 
 var equal = require('deep-equal')
 var extend = require('extend')
@@ -41,6 +41,7 @@ const PROFILE = constants.TYPES.PROFILE
 const ORGANIZATION = constants.TYPES.ORGANIZATION
 const FINANCIAL_PRODUCT = constants.TYPES.FINANCIAL_PRODUCT
 const MONEY = constants.TYPES.MONEY
+// const CHAR_WIDTH = 7
 
 var dateProp
 
@@ -74,6 +75,8 @@ class ResourceRow extends Component {
     if (this.props.resource.lastMessage !== nextProps.resource.lastMessage)
       return true
     if (this.state.unread !== nextState.unread)
+      return true
+    if (this.props.hideMode !== nextProps.hideMode)
       return true
     if (nextState.sharedWith  &&  nextState.sharedWith === this.state.sharedWith)
       return true
@@ -164,6 +167,13 @@ class ResourceRow extends Component {
                              <Icon name={this.state.sharedWith ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color={this.state.sharedWith ? '#B1010E' : '#dddddd'} />
                            </View>
                        : <View />
+    var hideMode =  this.props.hideMode
+             ?  <View style={styles.multiChooser}>
+                  <TouchableHighlight underlayColor='transparent' onPress={() => this.props.hideResource(resource)}>
+                    <Icon name='ios-remove-circle'  size={25}  color='#F63D37' />
+                  </TouchableHighlight>
+                 </View>
+             : <View />
 
     var multiChooser = this.props.multiChooser
                      ?  <View style={styles.multiChooser}>
@@ -200,65 +210,74 @@ class ResourceRow extends Component {
     var isOpaque = resource[TYPE] === ORGANIZATION && !resource.contacts  &&  !this.props.isChooser
     if (isOpaque)
       return (
-      <View key={this.getNextKey()} style={{opacity: 0.5}}>
-        <View style={styles.row} key={this.getNextKey()}>
-          {photo}
-          <View style={[textStyle, {flexDirection: 'row', justifyContent: 'space-between'}]}>
-            {this.formatRow(resource)}
-          </View>
-          {dateRow}
-          {multiChooser}
-          {cancelResource}
-        </View>
-        <View style={styles.cellBorder}  key={this.getNextKey()} />
-      </View>
-        )
-    else {
-      let onPress = this.action.bind(this)
-      // let onPress = this.state  &&  !this.state.resource
-      //             ? this.action.bind(this)
-      //             : this.props.onSelect
-      return (
-        <View key={this.getNextKey()} style={{opacity: 1, justifyContent: 'center', backgroundColor: '#ffffff'}}>
-          <TouchableHighlight onPress={onPress} underlayColor='transparent' key={this.getNextKey()}>
-            <View style={[styles.row, {width: utils.dimensions(ResourceRow).width - 50}]} key={this.getNextKey()}>
-              {photo}
-              <View style={textStyle} key={this.getNextKey()}>
-                {this.formatRow(resource)}
-              </View>
+        <View key={this.getNextKey()} style={{opacity: 0.5}}>
+          <View style={styles.row} key={this.getNextKey()}>
+            {photo}
+            <View style={[textStyle, {flexDirection: 'row', justifyContent: 'space-between'}]}>
+              {this.formatRow(resource)}
             </View>
-          </TouchableHighlight>
-          {this.props.isOfficialAccounts
-          ? <TouchableHighlight underlayColor='transparent' style={{position: 'absolute', right: 10, top: 25, backgroundColor: 'white'}} onPress={() => {
-              this.props.navigator.push({
-                component: ResourceList,
-                title: translate("myDocuments"),
-                backButtonTitle: translate('back'),
-                passProps: {
-                  modelName: FORM,
-                  resource: this.props.resource
-                }
-              })
-            }}>
-              <View style={textStyle}>
-                 {resource.numberOfForms
-                    ? <View style={{flexDirection: 'row'}}>
-                         <Icon name='ios-paper-outline' color={'#7AAAc3'} size={30} style={{marginTop: Platform.OS === 'ios' ? 0 : 0}}/>
-                         <Text style={{fontWeight: '600', marginLeft: 2, marginTop: Platform.OS === 'ios' ? -5 : -5, color: '#7AAAc3'}}>{resource.numberOfForms}</Text>
-                      </View>
-                    : <View />
-                 }
-              </View>
-            </TouchableHighlight>
-            : <View />}
-          {count}
-          {dateRow}
-          {multiChooser}
-          {cancelResource}
-          <View style={isNewContact ? styles.highlightedCellBorder : styles.cellBorder}  key={this.getNextKey()} />
+            {dateRow}
+            {multiChooser}
+            {cancelResource}
+            {hideMode}
+          </View>
+          <View style={styles.cellBorder}  key={this.getNextKey()} />
         </View>
-      );
-    }
+        )
+
+    let onPress = this.action.bind(this)
+    // let onPress = this.state  &&  !this.state.resource
+    //             ? this.action.bind(this)
+    //             : this.props.onSelect
+    let action
+    if (this.props.isOfficialAccounts  &&  !this.props.hideMode)
+      action = <TouchableHighlight underlayColor='transparent' style={{position: 'absolute', right: 10, top: 25, backgroundColor: 'white'}} onPress={() => {
+                  this.props.navigator.push({
+                    component: ResourceList,
+                    title: translate("myDocuments"),
+                    backButtonTitle: translate('back'),
+                    passProps: {
+                      modelName: FORM,
+                      resource: this.props.resource
+                    }
+                  })
+                }}>
+                <View style={textStyle}>
+                   {resource.numberOfForms
+                      ? <View style={{flexDirection: 'row'}}>
+                           <Icon name='ios-paper-outline' color={'#7AAAc3'} size={30} style={{marginTop: Platform.OS === 'ios' ? 0 : 0}}/>
+                           <Text style={{fontWeight: '600', marginLeft: 2, marginTop: Platform.OS === 'ios' ? -5 : -5, color: '#7AAAc3'}}>{resource.numberOfForms}</Text>
+                        </View>
+                      : <View />
+                   }
+                </View>
+              </TouchableHighlight>
+
+    let content =  <View style={styles.content} key={this.getNextKey()}>
+                    <TouchableHighlight onPress={onPress} underlayColor='transparent'>
+                      <View style={[styles.row, {width: utils.dimensions(ResourceRow).width - 50}]}>
+                        {photo}
+                        <View style={textStyle}>
+                          {this.formatRow(resource)}
+                        </View>
+                      </View>
+                    </TouchableHighlight>
+                    {action}
+                    {count}
+                    {dateRow}
+                    {multiChooser}
+                    {hideMode}
+                    {cancelResource}
+                    <View style={isNewContact ? styles.highlightedCellBorder : styles.cellBorder}  key={this.getNextKey()} />
+                  </View>
+    return content
+    // return (this.props.isOfficialAccounts)
+    //        ?  <Swipeout right={[{text: 'Hide', backgroundColor: 'red', onPress: this.props.hideResource.bind(this, resource)}]}
+    //                     autoClose={true}
+    //                     >
+    //             {content}
+    //           </Swipeout>
+    //         : content
   }
 
   chooseToShare() {
@@ -285,15 +304,6 @@ class ResourceRow extends Component {
     }
     else
       this.props.onSelect(this.props.resource)
-  }
-  hideResource(resource) {
-    let r = {}
-    extend(true, r, resource)
-    r.hide = true
-    Actions.addItem({resource: resource, value: r, meta: utils.getModel(resource[TYPE]).value})
-  }
-  _allowScroll(scrollEnabled) {
-    this.setState({scrollEnabled: scrollEnabled})
   }
   formatRow(resource) {
     var self = this;
@@ -432,8 +442,8 @@ class ResourceRow extends Component {
             let w = utils.dimensions(ResourceRow).width - 145
             row = <View style={{flexDirection: 'row'}} key={self.getNextKey()}>
                     <View style={{flexDirection: 'column'}}>
-                    <Icon name='md-done-all' size={16} color={isMyLastMessage ? '#cccccc' : '#7AAAc3'}/>
-                    {lastMessageTypeIcon}
+                      <Icon name='md-done-all' size={16} color={isMyLastMessage ? '#cccccc' : '#7AAAc3'}/>
+                      {lastMessageTypeIcon}
                     </View>
                     <Text style={[style, {width: w, paddingLeft: 2}]}>{val}</Text>
                   </View>
@@ -507,7 +517,7 @@ var styles = StyleSheet.create({
   },
   description: {
     // flex: 1,
-    flexWrap: 'wrap',
+    flexWrap: 'nowrap',
     color: '#999999',
     fontSize: 14,
   },
@@ -523,6 +533,11 @@ var styles = StyleSheet.create({
     // justifyContent: 'space-around',
     // flexDirection: 'row',
     padding: 5,
+  },
+  content: {
+    opacity: 1,
+    justifyContent: 'center',
+    backgroundColor: '#ffffff'
   },
   cellRoundImage: {
     // flex: 1,
