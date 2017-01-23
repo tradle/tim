@@ -61,6 +61,12 @@ import {
 
 import React, { Component } from 'react'
 
+const FINGERPRINT_COLOR = {
+  ios: '#ffffff',
+  web: '#ffffff',
+  android: '#ff0000'
+}
+
 class ResourceView extends Component {
   static displayName = 'ResourceView';
   constructor(props) {
@@ -251,9 +257,9 @@ class ResourceView extends Component {
                           <Text style={platformStyles.touchIdText}>{msg}</Text>
                           <TouchableOpacity underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
                              <View style={[platformStyles.menuButtonRegular]}>
-                                <Icon name='md-finger-print' color={Platform.OS === 'android' ? 'red' : '#ffffff'} size={fontSize(33)} />
-                             </View>
-                          </TouchableOpacity>
+                                <Icon name='md-finger-print' color={Platform.select(FINGERPRINT_COLOR)} size={fontSize(33)} />
+                              </View>
+                            </TouchableOpacity>
                         </View>
       // else
       //   switchTouchId = <View style={[platformStyles.menuButtonNarrow, { width: 47, position: 'absolute', right: 10, bottom:20, borderRadius: 24, justifyContent: 'center', alignItems: 'center'}]}>
