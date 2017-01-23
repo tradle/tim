@@ -1175,6 +1175,14 @@ class ResourceList extends Component {
     case APP_QR_CODE:
       Actions.addApp(result.data.substring(h[0].length + 1))
       break
+    default:
+      // keep scanning
+      Alert.alert(
+        translate('error'),
+        translate('unknownQRCodeFormat')
+      )
+
+      break
     }
   }
 }
