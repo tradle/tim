@@ -4757,11 +4757,6 @@
       "from": "git://github.com/mvayngrib/react-native-safe-async-storage.git#7afa8c65d0b858689122c7a49e0f403752726490",
       "resolved": "git://github.com/mvayngrib/react-native-safe-async-storage.git#7afa8c65d0b858689122c7a49e0f403752726490"
     },
-    "react-native-scrollable-tab-view": {
-      "version": "0.7.1",
-      "from": "react-native-scrollable-tab-view@>=0.7.0 <0.8.0",
-      "resolved": "https://registry.npmjs.org/react-native-scrollable-tab-view/-/react-native-scrollable-tab-view-0.7.1.tgz"
-    },
     "react-native-scroller": {
       "version": "0.0.6",
       "from": "react-native-scroller@0.0.6",
