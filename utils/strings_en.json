@@ -186,5 +186,8 @@
     "oops": "Oops",
     "ukLicenseUnsupported": "UK driver licence scanning is not supported at this time",
     "areYouSureYouWantToDelete": "Are you sure you want to hide {1}?",
-    "hideResource": "Hide {1}"
+    "hideResource": "Hide {1}",
+    "areYouSureYouWantToConfirmAllTheForms": "Are you sure you want to confirm all the forms?",
+    "youReviewed": "You reviewed {1} out of {2}",
+    "submittingApprovedForms": "Submitting approved forms..."
 }

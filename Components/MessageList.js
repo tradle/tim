@@ -40,6 +40,7 @@ var NEXT_HASH = '_n'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_REQUEST = 'tradle.FormRequest'
+const CONFIRM_PACKAGE_REQUEST = "tradle.ConfirmPackageRequest"
 const REMEDIATION = 'tradle.Remediation'
 const ROOT_HASH = constants.ROOT_HASH
 const CUR_HASH = constants.ROOT_CUR
@@ -138,7 +139,7 @@ class MessageList extends Component {
         this.state.sendStatus = params.resource._sendStatus
         this.state.sendResource = params.resource
       }
-      else if (params.resource[TYPE] === FORM_REQUEST)
+      else if (params.resource[TYPE] === FORM_REQUEST  ||  params.resource[TYPE] === CONFIRM_PACKAGE_REQUEST)
         this.state.addedItem = params.resource
       else
         this.state.addedItem = null
@@ -429,7 +430,9 @@ class MessageList extends Component {
     props.addedItem = this.state.addedItem
     props.chooseTrustedProvider = this.chooseTrustedProvider
 
-    return  model.id === FORM_REQUEST ? <FormRequestRow {...props} /> : <MessageRow {...props} />
+    return model.id === FORM_REQUEST || model.id === CONFIRM_PACKAGE_REQUEST
+           ? <FormRequestRow {...props} />
+           : <MessageRow {...props} />
   }
   addedMessage(text) {
     Actions.list({

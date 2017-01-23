@@ -3,6 +3,7 @@
 var utils = require('../utils/utils');
 var translate = utils.translate
 var NewResource = require('./NewResource');
+var RemediationItemsList = require('./RemediationItemsList')
 var Icon = require('react-native-vector-icons/Ionicons');
 var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin');
@@ -20,6 +21,7 @@ var chatStyles = require('../styles/chatStyles')
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM = 'tradle.Form'
 const FORM_REQUEST = 'tradle.FormRequest'
+const CONFIRM_PACKAGE_REQUEST = 'tradle.ConfirmPackageRequest'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 
@@ -69,17 +71,31 @@ class FormRequestRow extends Component {
     var ownerPhoto = this.getOwnerPhoto(isMyMessage)
     let hasOwnerPhoto = !isMyMessage &&  to  &&  to.photos;
 
+    let message = resource.message
     var renderedRow = [];
-    let onPressCall = this.formRequest(resource, renderedRow)
+    let onPressCall
+    let isFormRequest = resource[constants.TYPE] === FORM_REQUEST
+    if (isFormRequest)
+      onPressCall = this.formRequest(resource, renderedRow)
+    else {
+      onPressCall = this.reviewFormsInContext.bind(this)
+      let idx = message.indexOf('...') + 3
+      let msg = <View key={this.getNextKey()}>
+                  <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: '#aaaaaa'} : {color: '#555555'}]}>{message.substring(0, idx)}</Text>
+                  <View style={chatStyles.rowContainer}>
+                    <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: '#757575'} : {color: LINK_COLOR}]}>{message.substring(idx).trim()}</Text>
+                    <Icon style={[{marginTop: 2, marginRight: 2}, resource.documentCreated  ? chatStyles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
+                  </View>
+                </View>
 
-
+      renderedRow.push(msg)
+    }
     var fromHash = resource.from.id;
     let mstyle = {
       borderColor: 'transparent',
       backgroundColor: '#ffffff',
       borderTopLeftRadius: 0
     }
-    let message = resource.message
 
     var rowStyle = [chatStyles.row, {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}];
     var val = this.getTime(resource);
@@ -98,7 +114,7 @@ class FormRequestRow extends Component {
     let strName = utils.getStringName(message)
     if (strName)
       message = translate(strName)
-    let formTitle = translate(resource.form)
+    let formTitle = isFormRequest ? translate(resource.form) : 'Forms'
     if (formTitle.length > message.length)
       message = formTitle
     // HACK
@@ -127,7 +143,7 @@ class FormRequestRow extends Component {
                  ? [chatStyles.verificationBody, mstyle]
                  : [chatStyles.verificationBody, {flex: 1}, mstyle]
     var mainStyle = { margin:1, backgroundColor: '#ffffff' }
-    var shareables = resource.documentCreated
+    var shareables = !isFormRequest  || resource.documentCreated
                    ? null
                    : this.showShareableResources(rowStyle, mainStyle);
 
@@ -516,6 +532,24 @@ class FormRequestRow extends Component {
       }
       Actions.addItem(params)
     }
+  }
+  reviewFormsInContext(resource) {
+    this.props.navigator.push({
+      id: 29,
+      title: translate("Remediation"),
+      backButtonTitle: 'Back',
+      component: RemediationItemsList,
+      rightButtonTitle: 'Done',
+      passProps: {
+        modelName: CONFIRM_PACKAGE_REQUEST,
+        resource: this.props.resource,
+        bankStyle: this.props.bankStyle,
+        reviewed: {},
+        to: this.props.to,
+        list: this.props.resource.items,
+        currency: this.props.currency
+      }
+    })
   }
 }
 

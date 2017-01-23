@@ -123,6 +123,7 @@ const PAIRING_RESPONSE    = 'tradle.PairingResponse'
 const PAIRING_DATA        = 'tradle.PairingData'
 const MY_IDENTITIES       = MY_IDENTITIES_TYPE + '_1'
 const REMEDIATION         = 'tradle.Remediation'
+const CONFIRM_PACKAGE_REQUEST = "tradle.ConfirmPackageRequest"
 
 const WELCOME_INTERVAL = 600000
 
@@ -2412,6 +2413,33 @@ var Store = Reflux.createStore({
     // }
     this.trigger({action: 'getTemporary', resource: r})
   },
+  onAddAll(resource, to, message) {
+    var msg = {
+      [TYPE]: SIMPLE_MESSAGE,
+      [NONCE]: this.getNonce(),
+      message: message,
+    }
+    msg[ROOT_HASH] = sha(msg)
+    msg.to = this.buildRef(me)
+    msg.from = this.buildRef(to)
+    let rId = utils.getId(resource)
+    let r = this._getItem(rId)
+    r.documentCreated = true
+    this.trigger({action: 'addItem', resource: utils.clone(r)});
+    let result = this.searchMessages({modelName: MESSAGE, to: to})
+    result.push(msg)
+    this.trigger({action: 'messageList', modelName: MESSAGE, list: result, to: to})
+    return db.put(rId, r)
+    .then(() => {
+      let context = resource._context
+      resource.items.forEach((r) => {
+        r._context = context
+        r.to = to
+        r.from = me
+        this.onAddItem({ resource: r, noTrigger: true })
+      })
+    })
+  },
   onAddItem(params) {
     var self = this
     var resource = params.resource
@@ -2626,7 +2654,7 @@ var Store = Reflux.createStore({
         if (isRegistration)
           return handleRegistration()
         else if (isMessage)
-          return handleMessage()
+          return handleMessage(params.noTrigger)
         else
           return save(isBecomingEmployee)
       })
@@ -2698,7 +2726,7 @@ var Store = Reflux.createStore({
           })
       }
 
-      function handleMessage () {
+      function handleMessage (noTrigger) {
         // TODO: fix hack
         // hack: we don't know root hash yet, use a fake
         if (returnVal.documentCreated)  {
@@ -2810,7 +2838,8 @@ var Store = Reflux.createStore({
 
 
         try {
-          self.trigger(params);
+          if (!noTrigger)
+            self.trigger(params);
         } catch (err) {
           debugger
         }
@@ -4081,8 +4110,24 @@ var Store = Reflux.createStore({
            : foundResources.reverse()
 
     function doFilterOut(r, toId, idx) {
+      let m = utils.getModel(r[TYPE]).value
+
+      if (m.id === PRODUCT_APPLICATION  &&  r.product === REMEDIATION)
+        return true
+      if (r._context       &&
+          !params.prop     &&
+          (m.subClassOf === FORM || m.id === VERIFICATION) &&
+          self._getItem(utils.getId(r._context)).product === REMEDIATION) {
+        return true
+      }
+      if (m.subClassOf === MY_PRODUCT  &&
+          r._context                   &&
+          self._getItem(utils.getId(r._context)).product === REMEDIATION)
+        return true
+
+
       return false
-      if (utils.getModel(r[TYPE]).value.subClassOf !== FORM)
+      if (m.subClassOf !== FORM)
         return false
       // for employee
       let meId = utils.getId(me)
@@ -5594,6 +5639,8 @@ var Store = Reflux.createStore({
           payload.providerInfo = utils.clone(self._getItem(PROFILE + '_' + msg.objectinfo.author).organization)
           // debugger
         }
+        // else if (payload[TYPE] === CONFIRM_PACKAGE_REQUEST)
+        //   debugger
 
         const old = utils.toOldStyleWrapper(msg)
         old.to = { [ROOT_HASH]: meDriver.permalink }

@@ -30,6 +30,7 @@ var ResourceTypesScreen = require('./Components/ResourceTypesScreen');
 var NewResource = require('./Components/NewResource');
 var NewItem = require('./Components/NewItem');
 var ItemsList = require('./Components/ItemsList')
+var RemediationItemsList = require('./Components/RemediationItemsList')
 var GridItemsList = require('./Components/GridItemsList')
 var ResourceView = require('./Components/ResourceView');
 var MessageView = require('./Components/MessageView');
@@ -453,6 +454,8 @@ class TiMApp extends Component {
       return <SupervisoryView navigator={nav} {...props} />
     case 28:
       return <Log navigator={nav} {...props} />
+    case 29:
+      return <RemediationItemsList navigator={nav} {...props} />
     // case 30:
     //   return <Tabs navigator={nav} {...props} />
     case 10:
@@ -527,19 +530,31 @@ var NavigationBarRouteMapper = {
 
     var rbTitle = route.rightButtonTitle
     var iconIdx = rbTitle.indexOf('|')
-    var icon = (rbTitle === 'Done' || rbTitle === 'Accept')
-             ? 'md-send'
-             : rbTitle === 'Profile'
-                ? 'md-person'
-                : rbTitle === 'Edit'
-                            ? 'md-create'
-                            : rbTitle === 'Share'
-                                        ? 'md-share'
-                                        : null
-
+    var icon
+    var iconSize = 25
+    var style = {}
+    switch (rbTitle) {
+    case 'Done':
+    case 'Accept':
+      icon = 'ios-send'
+      iconSize = 32
+      style = {transform: [
+          {rotate: '45deg'}
+        ]}
+      break
+    case 'Profile':
+      icon = 'md-person'
+      break
+    case 'Edit':
+      icon = 'md-create'
+      break
+    case 'Share':
+      icon = 'md-share'
+      break
+    }
     if (icon)  {
-      let color = rbTitle === 'Done' ? '#62C457' : '#7AAAC3'
-      title = <Icon name={icon} size={utils.getFontSize(25)} color={color} style={styles.icon} />
+      let color = /*rbTitle === 'Done' ? '#7AAAC3' : */ '#7AAAC3'
+      title = <Icon name={icon} size={utils.getFontSize(iconSize)} color={color} style={[styles.icon, style]} />
     }
     else if (rbTitle.indexOf('|') === -1)
       title =  <Text style={style}>
