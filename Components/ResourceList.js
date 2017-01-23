@@ -1182,6 +1182,7 @@ class ResourceList extends Component {
         translate('unknownQRCodeFormat')
       )
 
+      this.props.navigator.pop()
       break
     }
   }
