@@ -102,7 +102,7 @@ var RowMixin = {
           <View style={[styles.column, {flex: 1}]}>
             <Text style={[styles.descriptionG]}>{propTitle}</Text>
           </View>
-          <View style={[styles.column, {flex: flexVal}]}>
+          <View style={[styles.column, {paddingLeft: 3, flex: flexVal}]}>
             <Text style={styles.descriptionB}>{value}</Text>
           </View>
        </View>
@@ -112,7 +112,7 @@ var RowMixin = {
   },
   getOwnerPhoto(isMyMessage) {
     let isSharedContext = this.props.to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.context)
-    if (Platform.OS !== 'android'  &&  !isSharedContext)
+    if (/*Platform.OS !== 'android'  &&*/  !isSharedContext)
       return <View/>
 
     var to = this.props.to;
@@ -235,17 +235,17 @@ var RowMixin = {
                           // <Text style={{fontSize: 12, color: 'darkblue', fontStyle: 'italic'}}>{'Date '}</Text>
     let addStyle = onPress ? {} : {backgroundColor: this.props.bankStyle.VERIFICATION_BG, borderWidth: BORDER_WIDTH, borderColor: this.props.bankStyle.VERIFICATION_BG, borderBottomColor: this.props.bankStyle.VERIFIED_HEADER_COLOR}
 
-    let hs = /*isShared ? chatStyles.description :*/ [chatStyles.resourceTitle, styles.header]
-    let arrow = <Icon color={this.props.bankStyle.VERIFIED_HEADER_COLOR} size={20} name={'ios-arrow-forward'} style={{top: 10, position: 'absolute', right: 30}}/>
-    var header =  <View style={headerStyle}>
-                    <Text style={hs}>
-                     {translate(model)}
-                    </Text>
+    let hs = /*isShared ? chatStyles.description :*/ [styles.header, {fontSize: 16}]
+    // let arrow = <Icon color={this.props.bankStyle.VERIFIED_HEADER_COLOR} size={20} name={'ios-arrow-forward'} style={{top: 10, position: 'absolute', right: 30}}/>
+    let arrow = <Icon color={this.props.bankStyle.VERIFIED_HEADER_COLOR} size={20} name={'ios-arrow-forward'} style={{marginRight: 10, marginTop: 3}}/>
+    var header =  <View style={[headerStyle]}>
+                    <Text style={[hs, {fontSize: 12}]}>{translate(model)}</Text>
+                    <Text style={[hs, {color: '#555555'}]}>{utils.getDisplayName(document)}</Text>
                   </View>
 
-    header = <View style={[addStyle, styles.verification]}>
-               {arrow}
+    header = <View style={[addStyle, styles.verification, {flexDirection: 'row', justifyContent: 'space-between'}]}>
                {header}
+               {arrow}
              </View>
    if (!isAccordion)
       header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, document, verification)}>
@@ -560,7 +560,7 @@ var styles = StyleSheet.create({
   verification: {
     // marginHorizontal: -7,
     // marginVertical: -10,
-    paddingVertical: 7,
+    // paddingBottom: 7,
     // borderRadius: 10,
     // backgroundColor: '#EDF2CE'
   },

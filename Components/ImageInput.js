@@ -30,7 +30,6 @@ class ImageInput extends Component {
     delete touchableProps.prop
     delete touchableProps.onImage
 
-    // const onPress = this.props.onPress || this.showMicroBlinkScanner
     const onPress = this.props.onPress || this.showImagePicker
     // allow override onPress
     return (

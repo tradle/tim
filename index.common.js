@@ -36,6 +36,7 @@ var ResourceTypesScreen = require('./Components/ResourceTypesScreen');
 var NewResource = require('./Components/NewResource');
 var NewItem = require('./Components/NewItem');
 var ItemsList = require('./Components/ItemsList')
+var RemediationItemsList = require('./Components/RemediationItemsList')
 var GridItemsList = require('./Components/GridItemsList')
 var ResourceView = require('./Components/ResourceView');
 var MessageView = require('./Components/MessageView');
@@ -48,6 +49,7 @@ var SupervisoryView = require('./Components/SupervisoryView')
 var ProductChooser = require('./Components/ProductChooser')
 var ContextChooser = require('./Components/ContextChooser')
 var CameraView = require('./Components/CameraView');
+// var Tabs = require('./Components/Tabs')
 var PhotoCarousel = require('./Components/PhotoCarousel');
 var QRCode = require('./Components/QRCode')
 var QRCodeScanner = require('./Components/QRCodeScanner')
@@ -468,6 +470,10 @@ class TiMApp extends Component {
       return <SupervisoryView navigator={nav} {...props} />
     case 28:
       return <Log navigator={nav} {...props} />
+    case 29:
+      return <RemediationItemsList navigator={nav} {...props} />
+    // case 30:
+    //   return <Tabs navigator={nav} {...props} />
     case 10:
     default: // 10
       return <ResourceList navigator={nav} {...props} />
@@ -542,19 +548,31 @@ var NavigationBarRouteMapper = {
 
     var rbTitle = route.rightButtonTitle
     var iconIdx = rbTitle.indexOf('|')
-    var icon = (rbTitle === 'Done' || rbTitle === 'Accept')
-             ? 'md-checkmark'
-             : rbTitle === 'Profile'
-                ? 'md-person'
-                : rbTitle === 'Edit'
-                            ? 'md-create'
-                            : rbTitle === 'Share'
-                                        ? 'md-share'
-                                        : null
-
+    var icon
+    var iconSize = 25
+    var style = {}
+    switch (rbTitle) {
+    case 'Done':
+    case 'Accept':
+      icon = 'ios-send'
+      iconSize = 30
+      style = {transform: [
+          {rotate: '45deg'}
+        ]}
+      break
+    case 'Profile':
+      icon = 'md-person'
+      break
+    case 'Edit':
+      icon = 'md-create'
+      break
+    case 'Share':
+      icon = 'md-share'
+      break
+    }
     if (icon)  {
-      let color = rbTitle === 'Done' ? '#62C457' : '#7AAAC3'
-      title = <Icon name={icon} size={utils.getFontSize(25)} color={color} style={styles.icon} />
+      let color = /*rbTitle === 'Done' ? '#7AAAC3' : */ '#7AAAC3'
+      title = <Icon name={icon} size={utils.getFontSize(iconSize)} color={color} style={[styles.icon, style]} />
     }
     else if (rbTitle.indexOf('|') === -1)
       title =  <Text style={style}>
@@ -623,9 +641,9 @@ var NavigationBarRouteMapper = {
     else
       org = <View />;
     let photo
-    if (Platform.OS !== 'android' &&  route.id === 11  &&  route.passProps.resource.photos) {
+    if (/*Platform.OS !== 'android' && */ route.id === 11  &&  route.passProps.resource.photos) {
       var uri = utils.getImageUri(route.passProps.resource.photos[0].url);
-      photo = <Image source={{uri: uri}} style={styles.msgImage} />
+      photo = <Image source={{uri: uri}} style={[styles.msgImage, utils.isAndroid() ? {marginTop: 23} : {}]} />
     }
     else
       photo = <View/>

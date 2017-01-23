@@ -1,6 +1,5 @@
 'use strict';
 
-import querystring from 'querystring'
 var utils = require('../utils/utils');
 var translate = utils.translate
 var fontSize = utils.getFontSize
@@ -57,7 +56,7 @@ import {
   Dimensions,
   Modal,
   Alert,
-  TouchableHighlight,
+  TouchableOpacity,
 } from 'react-native'
 
 import React, { Component } from 'react'
@@ -245,25 +244,33 @@ class ResourceView extends Component {
     // else
     //   msg = translate('passwordOn')
 ////, this.state.useTouchId ? {opacity: 1} : {opacity: 0.3}
-    let switchTouchId = isIdentity
-                      ? <View style={styles.footer}>
+    let switchTouchId
+    if (isIdentity) {
+      // if (Platform.OS === 'android')
+        switchTouchId = <View style={styles.footer}>
                           <Text style={platformStyles.touchIdText}>{msg}</Text>
-                          <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
+                          <TouchableOpacity underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
                              <View style={[platformStyles.menuButtonRegular]}>
                                 <Icon name='md-finger-print' color={Platform.OS === 'android' ? 'red' : '#ffffff'} size={fontSize(33)} />
                              </View>
-                          </TouchableHighlight>
+                          </TouchableOpacity>
                         </View>
-                      : <View/>
+      // else
+      //   switchTouchId = <View style={[platformStyles.menuButtonNarrow, { width: 47, position: 'absolute', right: 10, bottom:20, borderRadius: 24, justifyContent: 'center', alignItems: 'center'}]}>
+      //                      <TouchableOpacity onPress={() => this.ActionSheet.show()}>
+      //                         <Icon name='md-finger-print'  size={33}  color='#ffffff'/>
+      //                      </TouchableOpacity>
+      //                   </View>
+    }
     // let showSwitch = isIdentity && Platform.OS === 'ios'  && !utils.isSimulator()
     // let switchTouchId = showSwitch
     //                   ? <View style={styles.footer}>
     //                       <Text style={styles.touchIdText}>{msg}</Text>
-    //                       <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
+    //                       <TouchableOpacity underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
     //                          <View style={[platformStyles.menuButtonRegular, this.state.useTouchId ? {opacity: 1} : {opacity: 0.3}]}>
     //                             <Icon name='md-finger-print' color={Platform.OS === 'ios' ? '#ffffff': 'red'} size={33} />
     //                           </View>
-    //                         </TouchableHighlight>
+    //                         </TouchableOpacity>
     //                     </View>
     //                  : <View />
     // var switchTouchId = <View />
@@ -302,9 +309,13 @@ class ResourceView extends Component {
     }
 
     buttons.push(translate('cancel'))
-
-    // let numberInRow = Math.min(width / MIN_WIDTH, photos.length)
-        // <PhotoList photos={photos} resource={this.props.resource} navigator={this.props.navigator} isView={true} numberInRow={numberInRow} />
+    // let title = this.props.tabLabel
+    //           ? <View style={{height: 45, backgroundColor: '#ffffff', alignSelf: 'stretch', justifyContent: 'center'}}>
+    //               <Text style={{alignSelf: 'center', fontSize: 20}}>{translate('Profile')}</Text>
+    //             </View>
+    //           : null
+      // <PageView style={[platformStyles.container, this.props.tabLabel ? {marginTop: utils.isAndroid() ? 10 : 18} : {}]}>
+      // {title}
     return (
       <PageView style={platformStyles.container}>
       <ScrollView  ref='this'>
@@ -316,11 +327,11 @@ class ResourceView extends Component {
         }
         {actionPanel}
         <Modal animationType={'fade'} visible={this.state.isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
-          <TouchableHighlight  onPress={() => this.closeModal()} underlayColor='transparent'>
+          <TouchableOpacity  onPress={() => this.closeModal()} underlayColor='transparent'>
             <View style={styles.modalBackgroundStyle}>
               {qrcode}
             </View>
-          </TouchableHighlight>
+          </TouchableOpacity>
         </Modal>
         <PhotoList photos={photos} resource={this.props.resource} navigator={this.props.navigator} isView={true} />
         <ShowPropertiesView resource={resource}
@@ -389,23 +400,7 @@ class ResourceView extends Component {
         passProps: {},
         backButtonTitle: 'Back',
         rightButtonTitle: 'Send',
-        onRightButtonPress: async function () {
-          try {
-            var res = await debug.post(ENV.serverToSendLog + '?' + querystring.stringify({
-              firstName: me.firstName,
-              lastName: me.lastName
-            }))
-
-            if (res.status > 300) {
-              var why = await res.text()
-              throw new Error(why)
-            } else {
-              Alert.alert('Success!', 'The log was sent to the Tradle developer team!')
-            }
-          } catch (err) {
-            return Alert.alert('Failed to send log', err.message)
-          }
-        }
+        onRightButtonPress: utils.submitLog
       })
 
       return
@@ -471,6 +466,7 @@ var createStyles = utils.styleFactory(ResourceView, function ({ dimensions }) {
     footer: {
       flexDirection: 'row',
       flexWrap: 'nowrap',
+      alignItems: Platform.OS === 'android' ? 'center' : 'flex-start',
       justifyContent: 'space-between',
       alignSelf: 'stretch',
       height: 45,

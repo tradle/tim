@@ -181,5 +181,19 @@
     "overviewOfApplications": "Overview of Applications",
     "serverIsUnreachable": "Server is unreachable",
     "sharedWith": "Shared {1} context with {2}",
-    "viewDebugLog": "View debug log"
+    "viewDebugLog": "View debug log",
+    "somethingWrongSubmitLog": "Something seems to have gone wrong. Please submit the debug log to the Tradle developer team",
+    "submitLog": "Submit Log",
+    "submitting": "Submitting",
+    "restartApp": "Restart App",
+    "error": "Error",
+    "invalidDocument": "invalid document",
+    "somethingWrong": "Something went wrong",
+    "oops": "Oops",
+    "ukLicenseUnsupported": "UK driver licence scanning is not supported at this time",
+    "areYouSureYouWantToDelete": "Are you sure you want to hide {1}?",
+    "hideResource": "Hide {1}",
+    "areYouSureYouWantToConfirmAllTheForms": "Are you sure you want to confirm all the forms?",
+    "youReviewed": "You reviewed {1} out of {2}",
+    "submittingApprovedForms": "Submitting approved forms..."
 }

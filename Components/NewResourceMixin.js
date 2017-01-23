@@ -15,13 +15,19 @@ var StyleSheet = require('../StyleSheet')
 var QRCodeScanner = require('./QRCodeScanner')
 var driverLicenseParser = require('../utils/driverLicenseParser')
 
+import omit from 'object.omit'
+import pick from 'object.pick'
+import formDefaults from '../data/formDefaults.json'
 import DatePicker from 'react-native-datepicker'
 
-import BlinkID from './BlinkID'
+import BlinkID from 'react-native-blinkid'
+import { parse as parseUSDL } from 'parse-usdl'
 const { microblink } = require('../environment.json')
-if (microblink && BlinkID) {
+if (microblink && BlinkID && utils.isIOS()) {
   BlinkID.setLicenseKey(microblink.licenseKey)
 }
+
+import Anyline from './Anyline'
 
 var constants = require('@tradle/constants');
 var t = require('tcomb-form-native');
@@ -35,7 +41,7 @@ const YEAR = 3600 * 1000 * 24 * 365
 const DAY  = 3600 * 1000 * 24
 const HOUR = 3600 * 1000
 const MINUTE = 60 * 1000
-const FOCUSED_LABEL_COLOR = '#139459'
+const FOCUSED_LABEL_COLOR = '#7AAAC3'// #139459'
 
 var cnt = 0;
 var propTypesMap = {
@@ -520,9 +526,138 @@ var NewResourceMixin = {
     Actions.saveTemporary(r)
   },
 
-  async showIDScanner(prop) {
-    if (utils.isWeb()) return Alert.alert('Oops!', 'Scanning in the browser is not supported yet')
+  async showAnylineScanner(prop) {
+    const { documentType, country } = this.state.resource
+    let type
+    switch (documentType.title) {
+      case 'Passport':
+        type = 'mrz'
+        break;
+      case 'Driver licence':
+      case 'Driver license':
+        if (country.title === 'United Kingdom') {
+          return Alert.alert(
+            translate('oops') + '!',
+            translate('ukLicenseUnsupported')
+          )
+          // type = 'ocr'
+        } else {
+          type = 'barcode'
+        }
 
+        break
+      default:
+        return Alert.alert(
+          translate('Error'),
+          translate('unsupported document type: ' + documentType.title)
+        )
+    }
+
+    let result
+    try {
+      result = await Anyline.setupScanViewWithConfigJson({ type })
+    } catch (err) {
+      if (err.type === 'canceled') return
+      if (err.type === 'invalid') {
+        return Alert.alert(
+          translate('error'),
+          err.message || translate('invalidDocument')
+        )
+      }
+
+      return Alert.alert(
+        translate('somethingWentWrong'),
+        err.message
+      )
+    }
+
+    const r = {}
+    extend(true, r, this.state.resource)
+
+    r[prop] = {
+      url: result.cutoutBase64,
+      width: result.width,
+      height: result.height
+    }
+
+    let docProps = omit(result, 'cutoutBase64', 'width', 'height', 'imagePath', 'fullImagePath')
+    let normalized
+    switch (documentType.title) {
+      case 'Passport':
+        // {
+        //   "nationalityCountryCode":"USA",
+        //   "documentNumber":"...",
+        //   "givenNames":"...",
+        //   "documentType":"P",
+        //   "issuingCountryCode":"USA",
+        //   "dayOfBirth":"yymmdd",
+        //   "sex":"M",
+        //   "surNames":"...",
+        //   "expirationDate":"yymmdd",
+        //   "personalNumber":""
+        // }
+        normalized = {
+          personal: {
+            // e.g. ANNA<MARIA  to  ANNA MARIA
+            sex: result.sex,
+            firstName: result.givenNames.replace(/\</g, ' '),
+            lastName: result.surNames.replace(/\</g, ' '),
+            dateOfBirth: parseAnylineDate(result.dayOfBirth),
+            nationality: result.nationalityCountryCode
+          },
+          document: {
+            documentNumber: result.documentNumber,
+            personalNumber: result.personalNumber,
+            dateOfExpiry: parseAnylineDate(result.expirationDate),
+            issuer: result.issuingCountryCode
+          }
+        }
+
+        break
+      case 'Driver licence':
+      case 'Driver license':
+        if (country.title === 'United States' && result.barcodeFormat === 'PDF_417') {
+          let usdl = parseUSDL(result.value)
+          let personal = pick(usdl, [
+            'sex',
+            'firstName',
+            'middleName',
+            'lastName',
+            'dateOfBirth',
+            'eyeColor',
+            'height',
+            'addressStreet',
+            'addressCity',
+            'addressState',
+            'addressPostalCode'
+          ])
+
+          let document = pick(usdl, [
+            'documentNumber',
+            'issuer',
+            'documentDiscriminator',
+            'jurisdictionVehicleClass',
+            'jurisdictionRestrictionCodes',
+            'jurisdictionEndorsementCodes',
+            'dateOfExpiry',
+            'dateOfIssue',
+            'inventoryControlNumber'
+          ])
+
+          let misc = omit(usdl, Object.keys(personal).concat(Object.keys(document)))
+          normalized = { personal, document, misc }
+        } else {
+          normalized = docProps
+        }
+
+        break
+    }
+
+    r[prop + 'Json'] = normalized
+    this.afterScan(r, prop)
+  },
+
+  async showBlinkIDScanner(prop) {
     const { documentType, country } = this.state.resource
     const blinkIDOpts = {
       quality: 0.2,
@@ -538,6 +673,10 @@ var NewResourceMixin = {
       } else {
         blinkIDOpts.eudl = {}
       }
+    } else {
+      blinkIDOpts.usdl = {}
+      blinkIDOpts.eudl = {}
+      blinkIDOpts.mrtd = {}
     }
 
     const result = await BlinkID.scan(blinkIDOpts)
@@ -553,8 +692,8 @@ var NewResourceMixin = {
     }
 
     if (result.mrtd) {
-      result.mrtd.personal.dateOfBirth = dateformat(new Date(result.mrtd.personal.dateOfBirth), 'mmm dS, yyyy')
-      result.mrtd.document.dateOfExpiry = dateformat(new Date(result.mrtd.document.dateOfExpiry), 'mmm dS, yyyy')
+      result.mrtd.personal.dateOfBirth = formatDate(new Date(result.mrtd.personal.dateOfBirth))
+      result.mrtd.document.dateOfExpiry = formatDate(new Date(result.mrtd.document.dateOfExpiry))
       r[prop + 'Json'] = result.mrtd //JSON.stringify(result.mrtd)
     }
     else if (result.usdl || result.eudl) {
@@ -580,10 +719,14 @@ var NewResourceMixin = {
       r[prop + 'Json'] = dl
     }
 
+    this.afterScan(r, prop)
+  },
+
+  afterScan(resource, prop) {
     if (!this.floatingProps) this.floatingProps = {}
-    this.floatingProps[prop] = r[prop]
-    this.floatingProps[prop + 'Json'] = r[prop + 'Json']
-    this.setState({resource: r})
+    this.floatingProps[prop] = resource[prop]
+    this.floatingProps[prop + 'Json'] = resource[prop + 'Json']
+    this.setState({ resource })
   },
 
   showCamera(params) {
@@ -591,8 +734,15 @@ var NewResourceMixin = {
 
     // }
     if (params.prop === 'scan')  {
+      if (utils.isWeb()) return Alert.alert('Oops!', 'Scanning in the browser is not supported yet')
+
       if (this.state.resource.documentType  &&  this.state.resource.country)
-        this.showIDScanner(params.prop)
+        if (utils.isAndroid()) {
+          this.showAnylineScanner(params.prop)
+        } else {
+          this.showBlinkIDScanner(params.prop)
+        }
+
         // this.scanFormsQRCode(params.prop)
       else
         Alert.alert('Please choose country and document type first')
@@ -695,12 +845,13 @@ var NewResourceMixin = {
     // avoid <input type="number"> on web
     // it good-naturedly interferes with validation
     const keyboard = utils.isWeb() || !params.keyboard ? 'default': params.keyboard
+    let multiline = params.prop.maxLength > 100
     return (
       <View style={{flex: 5, paddingBottom: this.hasError(params.errors, params.prop.name) ? 10 : Platform.OS === 'ios' ? 10 : 7}}>
         <FloatLabel
           labelStyle={[lStyle, {color: lcolor}]}
           autoCorrect={false}
-          multiline={Platform.OS === 'android' ? true : false}
+          multiline={multiline}
           autoCapitalize={this.state.isRegistration  ||  (params.prop.name !== 'url' &&  (!params.prop.keyboard || params.prop.keyboard !== 'email-address')) ? 'sentences' : 'none'}
           onFocus={this.inputFocused.bind(this, params.prop.name)}
           inputStyle={this.state.isRegistration ? styles.regInput : styles.textInput}
@@ -776,7 +927,7 @@ var NewResourceMixin = {
           <View style={styles.booleanContainer}>
             <View style={styles.booleanContentStyle}>
               <Text style={[style, { width: (utils.dimensions(component).width - 100)}]}>{label}</Text>
-              <Switch onValueChange={value => this.onChangeText(prop, value)} value={value} onTintColor={LINK_COLOR} style={{position: 'absolute', right: 0, top: 5}}/>
+              <Switch onValueChange={value => this.onChangeText(prop, value)} value={value} onTintColor={LINK_COLOR} />
             </View>
           </View>
         </TouchableHighlight>
@@ -922,7 +1073,8 @@ var NewResourceMixin = {
       resource: r,
       inFocus: prop.name
     });
-
+    if (this.state.missedRequiredOrErrorValue)
+      delete this.state.missedRequiredOrErrorValue[prop.name]
    },
 
   // myDateTemplate (prop) {
@@ -1424,7 +1576,7 @@ var styles= StyleSheet.create({
     flex: 1
   },
   booleanContentStyle: {
-    // justifyContent: 'space-between',
+    justifyContent: 'space-between',
     flexDirection: 'row',
     // paddingVertical: 5,
     // marginRight: 10,
@@ -1581,14 +1733,14 @@ var styles= StyleSheet.create({
   },
   booleanLabel: {
     color: '#aaaaaa',
-    fontSize: 18
+    fontSize: 20
   },
   booleanText: {
     marginTop: 5,
-    fontSize: 18
+    fontSize: 20
   },
   dateLabel: {
-    marginLeft: Platform.OS === 'ios' ? 10 : 0,
+    marginLeft: 10,
     fontSize: 12,
     marginVertical: 5,
     paddingBottom: 5
@@ -1596,8 +1748,18 @@ var styles= StyleSheet.create({
   },
 })
 
+function formatDate (date) {
+  return dateformat(date, 'mmm dS, yyyy')
+}
+
 function parseEUDate (date) {
   const [day, month, year] = date.split('.')
+  return [month, day, year].join('/')
+}
+
+function parseAnylineDate (date) {
+  // yymmdd
+  const [year, month, day] = [date.slice(0, 2), date.slice(2, 4), date.slice(4, 6)]
   return [month, day, year].join('/')
 }
 

@@ -32,16 +32,14 @@ module.exports = {
   isWeb: function () {
     return Platform.OS === 'web'
   },
-  get prefillForms() {
-    if (typeof global.PREFILL_FORMS === 'boolean') {
-      return global.PREFILL_FORMS
-    }
-
-    return __DEV__
-  },
   autoOptInTouchId: false,
   lenientPassword: true,
   allowAddServer: true,
   allowForgetMe: true,
-  serverToSendLog: __DEV__ ? 'http://localhost:44444/userlog' : 'https://azure1.tradle.io/userlog'
+  get prefillForms() {
+    if (typeof PREFILL_FORMS === 'boolean') return PREFILL_FORMS
+
+    return __DEV__
+  },
+  serverToSendLog: __DEV__ ? `http://${LOCAL_IP}:44444/userlog` : 'https://azure1.tradle.io/userlog'
 }

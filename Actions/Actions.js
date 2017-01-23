@@ -5,46 +5,53 @@ var debug = require('debug')('Actions')
 
 var actionProps = {}
 var asyncActions = [
+  'addApp',
   'addItem',
   'addMessage',
+  'addModelFromUrl',
+  'addNewIdentity',
+  'addVerification',
+  'addAll',
+
   'getItem',
   'getMe',
   'getTo',
   'getFrom',
   'getEmployeeInfo',
-  'addNewIdentity',
+  'getTemporary',
+
   'removeIdentity',
   'showIdentityList',
   'changeIdentity',
+
   'reloadDB',
   'reloadModels',
   'list',
   'listSharedWith',
   'messageList',
   'productList',
-  'addModelFromUrl',
   'start',
   'share',
-  'addVerification',
   'startTransition',
   'endTransition',
   'talkToRepresentative',
   'saveTemporary',
-  'getTemporary',
   'cleanup',
   'forgetMe',
   'updateMe',
   'scheduleUpdate',
+
   'genPairingData',
   'sendPairingRequest',
   'processPairingRequest',
   'processPairingResponse',
   'pairingRequestAccepted',
-  'addApp',
+
   'getAllContexts',
   'getAllSharedContexts',
-  'hasPartials',
+
   'getAllPartials',
+  'hasPartials',
   'viewChat'
 ]
 

@@ -60,11 +60,16 @@ class MessageView extends Component {
     };
     var currentRoutes = this.props.navigator.getCurrentRoutes();
     var len = currentRoutes.length;
-    if (!currentRoutes[len - 1].onRightButtonPress  &&  currentRoutes[len - 1].rightButtonTitle)
-      currentRoutes[len - 1].onRightButtonPress = this.verifyOrCreateError.bind(this)
+    if (!currentRoutes[len - 1].onRightButtonPress  &&  currentRoutes[len - 1].rightButtonTitle) {
+      if (this.props.isReview)
+        currentRoutes[len - 1].onRightButtonPress = this.props.action
+      else
+        currentRoutes[len - 1].onRightButtonPress = this.verifyOrCreateError.bind(this)
+    }
   }
   componentWillMount() {
-    if (this.props.resource.id)
+    // if (this.props.resource.id)
+    if (!this.props.isReview)
       Actions.getItem(this.props.resource)
   }
 
@@ -205,7 +210,8 @@ class MessageView extends Component {
     var resource = this.state.resource;
     var modelName = resource[TYPE] || resource.id.split('_')[0];
     var model = utils.getModel(modelName).value;
-    var date = resource.time ? utils.formatDate(new Date(resource.time)) : utils.formatDate(new Date())
+    let t = resource.dateVerified ? resource.dateVerified : resource.time
+    var date = t ? utils.formatDate(new Date(t)) : utils.formatDate(new Date())
     var photos = resource.photos
     var mainPhoto
     if (!photos) {

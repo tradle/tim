@@ -40,6 +40,7 @@ var NEXT_HASH = '_n'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_REQUEST = 'tradle.FormRequest'
+const CONFIRM_PACKAGE_REQUEST = "tradle.ConfirmPackageRequest"
 const REMEDIATION = 'tradle.Remediation'
 const ROOT_HASH = constants.ROOT_HASH
 const CUR_HASH = constants.ROOT_CUR
@@ -159,7 +160,7 @@ class MessageList extends Component {
         this.state.sendStatus = params.resource._sendStatus
         this.state.sendResource = params.resource
       }
-      else if (params.resource[TYPE] === FORM_REQUEST)
+      else if (params.resource[TYPE] === FORM_REQUEST  ||  params.resource[TYPE] === CONFIRM_PACKAGE_REQUEST)
         this.state.addedItem = params.resource
       else
         this.state.addedItem = null
@@ -450,7 +451,9 @@ class MessageList extends Component {
     props.addedItem = this.state.addedItem
     props.chooseTrustedProvider = this.chooseTrustedProvider
 
-    return  model.id === FORM_REQUEST ? <FormRequestRow {...props} /> : <MessageRow {...props} />
+    return model.id === FORM_REQUEST || model.id === CONFIRM_PACKAGE_REQUEST
+           ? <FormRequestRow {...props} />
+           : <MessageRow {...props} />
   }
   addedMessage(text) {
     Actions.list({
@@ -537,7 +540,7 @@ class MessageList extends Component {
 
       let hideTextInput = false // resource[TYPE] === PRODUCT_APPLICATION  && utils.isReadOnlyChat(resource)
       let h = utils.dimensions(MessageList).height
-      var maxHeight = h - (Platform.OS === 'android' ? 77 : 64)
+      var maxHeight = h - (Platform.OS === 'android' ? 85 : 64)
       // Chooser for trusted party verifier
       let isChooser = this.props.originatingMessage && this.props.originatingMessage.verifiers
       if (!isChooser  &&  (!this.state.isConnected || (resource[TYPE] === TYPES.ORGANIZATION  &&  !resource._online)))
@@ -801,7 +804,7 @@ class MessageList extends Component {
   }
 
   paintMenuButton() {
-    return  <View style={[platformStyles.menuButtonNarrow, {opacity: 0.5}]}>
+    return  <View style={[platformStyles.menuButtonNarrow, {width: 47, borderRadius: 24, alignItems: 'center', opacity: 0.5}]}>
               <Icon name={MenuIcon.name}  size={33}  color={MenuIcon.color} />
             </View>
   }
@@ -1040,7 +1043,7 @@ var styles = StyleSheet.create({
     borderRadius: 13,
     borderColor: '#aaaaaa',
     paddingLeft: 6,
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
     color: '#79AAF2'
   },
   footer: {
@@ -1051,7 +1054,7 @@ var styles = StyleSheet.create({
     // width: Dimensions.get('window').width,
     backgroundColor: '#eeeeee',
     borderColor: '#eeeeee',
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
     borderTopColor: '#cccccc',
     paddingRight: 10
   },

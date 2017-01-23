@@ -2,7 +2,6 @@
 
 var utils = require('../utils/utils');
 var translate = utils.translate
-var ResourceList = require('./ResourceList');
 var Icon = require('react-native-vector-icons/Ionicons');
 var buttonStyles = require('../styles/buttonStyles');
 var constants = require('@tradle/constants');
@@ -108,7 +107,7 @@ var styles = StyleSheet.create({
     alignSelf: 'flex-start',
     minWidth: 18,
     marginLeft: -7,
-    marginTop: -2,
+    marginTop: 0,
     borderRadius: 8,
     backgroundColor: '#7AAAC3',
     paddingHorizontal: 3,

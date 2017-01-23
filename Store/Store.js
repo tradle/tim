@@ -52,7 +52,7 @@ var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
 var utils = require('../utils/utils');
-var Keychain = !utils.isWeb() && require('../utils/keychain')
+var Keychain = ENV.useKeychain !== false && !utils.isWeb() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('q-level');
 var leveldown = require('./leveldown')
@@ -111,6 +111,7 @@ const PAIRING_DATA        = 'tradle.PairingData'
 const COUNTRY           = 'tradle.Country'
 const MY_IDENTITIES       = MY_IDENTITIES_TYPE + '_1'
 const REMEDIATION         = 'tradle.Remediation'
+const CONFIRM_PACKAGE_REQUEST = "tradle.ConfirmPackageRequest"
 
 const WELCOME_INTERVAL = 600000
 
@@ -330,6 +331,7 @@ var Store = Reflux.createStore({
   },
 
   _handleConnectivityChange(isConnected) {
+    debug('network connectivity changed, connected: ' + isConnected)
     this.isConnected = isConnected
     this.trigger({action: 'connectivity', isConnected: isConnected})
     if (!meDriver) return
@@ -812,9 +814,9 @@ var Store = Reflux.createStore({
     return newResult
     // return newResult.reverse()
   },
-  getInfo(serverUrls, retry, id) {
+  getInfo(serverUrls, retry, id, newServer) {
     return Q.all(serverUrls.map(url => {
-      return this.getServiceProviders(url, retry, id)
+      return this.getServiceProviders(url, retry, id, newServer)
         .then(results => {
           // var httpClient = driverInfo.httpClient
           var wsClients = driverInfo.wsClients
@@ -938,7 +940,7 @@ var Store = Reflux.createStore({
     // const identifier = tradle.utils.serializePubKey(identifierPubKey).toString('hex')
     const url = getProviderUrl(provider)
 
-    let transport = wsClients.byUrl[url]
+    let transport = wsClients.byUrl[url] || wsClients.byIdentifier[provider.hash]
     if (transport) {
       wsClients.add({
         client: transport,
@@ -1277,7 +1279,7 @@ var Store = Reflux.createStore({
   },
 
   // Gets info about companies in this app, their bot representatives and their styles
-  getServiceProviders(url, retry, id) {
+  getServiceProviders(url, retry, id, newServer) {
     var self = this
     // return Q.race([
     //   fetch(utils.joinURL(url, 'info'), { headers: { cache: 'no-cache' } }),
@@ -1368,7 +1370,7 @@ var Store = Reflux.createStore({
           permalink: sp.bot.permalink
         })
 
-        promises.push(self.addInfo(sp, originalUrl))
+        promises.push(self.addInfo(sp, originalUrl, newServer))
       })
       if (utils.getMe())
         self.setMe(utils.getMe())
@@ -1386,15 +1388,25 @@ var Store = Reflux.createStore({
         .map(r => r.value)
     })
   },
-  addInfo(sp, url) {
+  addInfo(sp, url, newServer) {
     var okey = sp.org ? utils.getId(sp.org) : null
     var hash = protocol.linkString(sp.bot.pub)
     var ikey = IDENTITY + '_' + hash
     var batch = []
-    if (!list[okey]) {
+    var org = this._getItem(okey)
+    if (org) {
+      // allow to unhide the previously hidden provider
+      if (newServer  &&  org.inactive) {
+        org.inactive = false
+        this._mergeItem(okey, sp.org)
+        batch.push({type: 'put', key: okey, value: org})
+      }
+    }
+    else {
       batch.push({type: 'put', key: okey, value: sp.org})
       this._setItem(okey, sp.org)
     }
+
     list[okey].value._online = true
     if (sp.style)
       this._getItem(okey).style = sp.style
@@ -2397,6 +2409,33 @@ var Store = Reflux.createStore({
     // }
     this.trigger({action: 'getTemporary', resource: r})
   },
+  onAddAll(resource, to, message) {
+    var msg = {
+      [TYPE]: SIMPLE_MESSAGE,
+      [NONCE]: this.getNonce(),
+      message: message,
+    }
+    msg[ROOT_HASH] = sha(msg)
+    msg.to = this.buildRef(me)
+    msg.from = this.buildRef(to)
+    let rId = utils.getId(resource)
+    let r = this._getItem(rId)
+    r.documentCreated = true
+    this.trigger({action: 'addItem', resource: utils.clone(r)});
+    let result = this.searchMessages({modelName: MESSAGE, to: to})
+    result.push(msg)
+    this.trigger({action: 'messageList', modelName: MESSAGE, list: result, to: to})
+    return db.put(rId, r)
+    .then(() => {
+      let context = resource._context
+      resource.items.forEach((r) => {
+        r._context = context
+        r.to = to
+        r.from = me
+        this.onAddItem({ resource: r, noTrigger: true })
+      })
+    })
+  },
   onAddItem(params) {
     var self = this
     var resource = params.resource
@@ -2456,10 +2495,10 @@ var Store = Reflux.createStore({
       })
       .then(function(status) {
         if (!status.watches.link  &&  !status.link) {
-          if (isBecomingEmployee)
-            return self.publishMyIdentity(self.getRepresentative(utils.getId(resource.organization)))
-          else
-            return self.publishMyIdentity(self._getItem(utils.getId(resource.to)))
+          let rep = isBecomingEmployee
+                  ? self.getRepresentative(utils.getId(resource.organization))
+                  : self._getItem(utils.getId(resource.to))
+          return self.publishMyIdentity(rep, params.disableAutoResponse)
         }
         else {
           let orgRep
@@ -2611,7 +2650,7 @@ var Store = Reflux.createStore({
         if (isRegistration)
           return handleRegistration()
         else if (isMessage)
-          return handleMessage()
+          return handleMessage(params.noTrigger)
         else
           return save(isBecomingEmployee)
       })
@@ -2684,7 +2723,7 @@ var Store = Reflux.createStore({
           })
       }
 
-      function handleMessage () {
+      function handleMessage (noTrigger) {
         // TODO: fix hack
         // hack: we don't know root hash yet, use a fake
         if (returnVal.documentCreated)  {
@@ -2798,7 +2837,8 @@ var Store = Reflux.createStore({
 
 
         try {
-          self.trigger(params);
+          if (!noTrigger)
+            self.trigger(params);
         } catch (err) {
           debugger
         }
@@ -2844,7 +2884,7 @@ var Store = Reflux.createStore({
             self.deleteMessageFromChat(orgId, returnVal)
 
           }
-          if (readOnlyBacklinks) {
+          if (readOnlyBacklinks.length) {
             readOnlyBacklinks.forEach((prop) => {
               let topR = returnVal[prop.name]
               if (topR) {
@@ -3303,18 +3343,35 @@ var Store = Reflux.createStore({
         if (!SERVICE_PROVIDERS)
           this.trigger({action: 'onlineStatus', onlineStatus: false})
 
+        if (isOrg) {
+          let r1 = result.filter((r) => r.priority)
+          if (r1) {
+            let r2 = result.filter((r) => !r.priority)
+            result = r1.concat(r2)
+          }
+          // if (r1) {
+          //   r1.forEach((r) => {
+          //     SERVICE_PROVIDERS.forEach((sp) => {
+          //       if (utils.getId(r) === sp.org)
+          //         r._styles = sp.style
+          //     })
+          //   })
+          //   let r2 = result.filter((r) => !r.priority)
+          //   result = r1.concat(r2)
+          // }
+        }
         if (params.isAggregation)
           result = this.getDependencies(result);
         var shareableResources;
         var retParams = params.list
                       ? { action: 'filteredList', list: result}
-                      : { action: 'list',
+                      : { action: params.sponsorsList ? 'sponsorsList' : 'list',
                           list: result,
                           spinner: params.spinner,
                           isAggregation: params.isAggregation
                         }
-          if (params.prop)
-            retParams.prop = params.prop;
+        if (params.prop)
+          retParams.prop = params.prop;
 
         this.trigger(retParams);
       })
@@ -3343,8 +3400,9 @@ var Store = Reflux.createStore({
         }
         retParams.loadEarlierMessages = true
       }
-      if (params.modelName === FORM)
-        retParams.requestedModelName = FORM
+      // if (params.modelName === FORM)
+      //   retParams.requestedModelName = FORM
+      retParams.requestedModelName = params.modelName
       if (!params.isAggregation  &&  params.to  &&  !params.prop) {
         if (params.to[TYPE] !== PROFILE  ||  !me.isEmployee) {
           // let to = list[utils.getId(params.to)].value
@@ -3392,6 +3450,13 @@ var Store = Reflux.createStore({
                   rmIdx.push(i)
                   continue
                 }
+                // Product created in Remediation show only from profile view
+                if (m.subClassOf === MY_PRODUCT  &&  r._context) {
+                  if (this._getItem(utils.getId(r._context)).product === REMEDIATION) {
+                    rmIdx.push(i)
+                    continue
+                  }
+                }
                 if (m.subClassOf !== FORM)
                   continue
                 // Case when event to dosplay ML is before the new resource was sent
@@ -3423,6 +3488,19 @@ var Store = Reflux.createStore({
                 for (let i = sharedVerifiedForms.length - 1; i>=0; i--)
                   result.splice(sharedVerifiedForms[i], 1)
               }
+              // Pin last unfulfilled Form Request from current context
+              let rContext = result.length  &&  result[result.length - 1]._context
+              if (rContext)
+                for (let i=result.length - 1; i>=0; i--) {
+                  var r = result[i]
+                  if (r[TYPE] === FORM_REQUEST) {
+                    if (!r.documentCreated  &&  utils.getId(r._context) === utils.getId(rContext)) {
+                      result.splice(i, 1)
+                      result.push(r)
+                    }
+                    break
+                  }
+                }
             }
           }
         }
@@ -3594,7 +3672,7 @@ var Store = Reflux.createStore({
     let orgToForm = {}
     for (var key in list) {
       var r = this._getItem(key);
-      if (key.indexOf(modelName + '_') == -1) {
+      if (key.indexOf(modelName + '_') === -1) {
         var s = key.split('_')[0]
         if (isOrg) {
           if (this.getModel(s).value.subClassOf !== FORM)
@@ -3639,6 +3717,8 @@ var Store = Reflux.createStore({
         continue
       if (r.canceled)
         continue;
+      if (isOrg  &&  r.inactive)
+        continue
       if (containerProp  &&  (!r[containerProp]  ||  utils.getId(r[containerProp]) !== resourceId))
         continue;
       if (!query) {
@@ -3819,19 +3899,33 @@ var Store = Reflux.createStore({
 //         thisChatMessages = chatMessages[chatId]
 //       }
     }
-    if (!thisChatMessages  &&  (!params.to  ||  chatId === meId)) {
+
+    if (!thisChatMessages  &&  (!params.to || chatId === meId  || (params.prop  &&  params.prop.items  &&  params.prop.items.backlink))) {
       thisChatMessages = []
+      let isInterface = meta.isInterface
+      let isForm = meta.id === FORM
+      let isMessage = meta.id === MESSAGE
       Object.keys(list).forEach(key => {
         let r = self._getItem(key)
         let type = r[TYPE]
         let m = this.getModel(type)
         if (!m) return
-
-        if (type === modelName                      ||
-           m.value.subClassOf === modelName         ||
-           (modelName === MESSAGE  &&  m.value.interfaces)) {
-          thisChatMessages.push({id: key, time: r.time})
+        m = m.value
+        let addMessage = type === modelName  ||  (!isForm  &&  m.subClassOf === meta.id)
+        // This is the case when backlinks are requested on Profile page
+        if (!addMessage) {
+          if (isForm) {
+            if (m.subClassOf === FORM) {
+              if (m.interfaces.length === 1)
+                addMessage = true
+            }
+          }
+          else if (isInterface  &&  m.interfaces  &&  m.interfaces.indexOf(meta.id) !== -1) //  && (!isMessage  ||  m.value.interfaces.length === 1))) {
+            addMessage = true
         }
+        if (addMessage)
+          thisChatMessages.push({id: key, time: r.time})
+
       })
 
       thisChatMessages.sort((a, b) => {
@@ -4068,8 +4162,24 @@ var Store = Reflux.createStore({
            : foundResources.reverse()
 
     function doFilterOut(r, toId, idx) {
+      let m = utils.getModel(r[TYPE]).value
+
+      if (m.id === PRODUCT_APPLICATION  &&  r.product === REMEDIATION)
+        return true
+      if (r._context       &&
+          !params.prop     &&
+          (m.subClassOf === FORM || m.id === VERIFICATION) &&
+          self._getItem(utils.getId(r._context)).product === REMEDIATION) {
+        return true
+      }
+      if (m.subClassOf === MY_PRODUCT  &&
+          r._context                   &&
+          self._getItem(utils.getId(r._context)).product === REMEDIATION)
+        return true
+
+
       return false
-      if (utils.getModel(r[TYPE]).value.subClassOf !== FORM)
+      if (m.subClassOf !== FORM)
         return false
       // for employee
       let meId = utils.getId(me)
@@ -4695,10 +4805,10 @@ var Store = Reflux.createStore({
           value[CUR_HASH] = 1
         }
       }
-      if (!isNew  &&  (!value.urls  ||  (value.urls  &&  value.urls.indexOf(value.url) !== -1))) {
-        this.trigger({action: 'addItem', resource: value, error: 'The "' + props.url.title + '" was already added'})
-        return
-      }
+      // if (!isNew  &&  (!value.urls  ||  (value.urls  &&  value.urls.indexOf(value.url) !== -1))) {
+      //   this.trigger({action: 'addItem', resource: value, error: 'The "' + props.url.title + '" was already added'})
+      //   return
+      // }
     }
     else if (isNew)
       value[CUR_HASH] = dhtKey //isNew ? dhtKey : value[ROOT_HASH]
@@ -4946,7 +5056,7 @@ var Store = Reflux.createStore({
       if (SERVICE_PROVIDERS.some((r) => r.id === value.id  &&  r.url === value.url))
         return
     }
-    return this.getInfo([v], true, value.id ? value.id : null)
+    return this.getInfo([v], true, value.id ? value.id : null, true)
     .then(function(json) {
       var settings = list[key]
       if (settings) {
@@ -5249,7 +5359,7 @@ var Store = Reflux.createStore({
     })
   },
 
-  publishMyIdentity(orgRep) {
+  publishMyIdentity(orgRep, disableAutoResponse) {
     var self = this
     var msg = {
       [TYPE]: IDENTITY_PUBLISHING_REQUEST,
@@ -5259,12 +5369,14 @@ var Store = Reflux.createStore({
         firstName: me.firstName
       }
     }
-    var key = IDENTITY + '_' + orgRep[ROOT_HASH]
-
-    return meDriver.signAndSend({
+    var opts = {
       object: msg,
-      to: { fingerprint: self.getFingerprint(this._getItem(key)) }
-    })
+      to: { permalink: orgRep[ROOT_HASH] }
+    }
+    if (disableAutoResponse)
+      opts.other = { disableAutoResponse: true }
+
+    return meDriver.signAndSend(opts)
     .catch(function(err) {
       debugger
     })
@@ -5576,6 +5688,8 @@ var Store = Reflux.createStore({
           payload.providerInfo = utils.clone(self._getItem(PROFILE + '_' + msg.objectinfo.author).organization)
           // debugger
         }
+        // else if (payload[TYPE] === CONFIRM_PACKAGE_REQUEST)
+        //   debugger
 
         const old = utils.toOldStyleWrapper(msg)
         old.to = { [ROOT_HASH]: meDriver.permalink }

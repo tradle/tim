@@ -13,6 +13,10 @@ var StyleSheet = require('../StyleSheet')
 var DEFAULT_CURRENCY_SYMBOL = '£'
 var CURRENCY_SYMBOL
 
+const ITEM = 'tradle.Item'
+const MY_PRODUCT = 'tradle.MyProduct'
+const FORM = 'tradle.Form'
+
 import {
   Image,
   // StyleSheet,
@@ -51,8 +55,8 @@ class VerificationRow extends Component {
     // if (resource.from  &&  resource.from.photos)
     //   photo = <Image source={{uri: utils.getImageUri(resource.from.photos[0].url)}} style={styles.cellImage} />
     var model = utils.getModel(resource[constants.TYPE]).value;
-    var isMyProduct = model.subClassOf === 'tradle.MyProduct'
-    var isForm = model.subClassOf === 'tradle.Form'
+    var isMyProduct = model.subClassOf === MY_PRODUCT
+    var isForm = model.subClassOf === FORM
     var isVerification = resource.document != null
     var r = isVerification ? resource.document : resource
     if (r  &&  isMyProduct)
@@ -130,7 +134,7 @@ class VerificationRow extends Component {
     //   rows.push(row);
     // }
     var verifiedBy
-    if (!this.props.isChooser  &&  (isVerification || isMyProduct  ||  isForm) &&  resource.from) {
+    if (!this.props.isChooser  &&  (isVerification || isMyProduct /* ||  isForm*/) &&  resource.from) {
       var contentRows = [];
       // contentRows.push(<Text style={}>verified by {resource.to.title}></Text>);
       let org = isMyProduct
@@ -156,12 +160,19 @@ class VerificationRow extends Component {
     var date = r
              ? this.addDateProp(resource.dateVerified ? 'dateVerified' : 'time', [styles.verySmallLetters, {position: 'absolute', right: 10}])
              : <View />
+
+    let title
+    if (this.props.isChooser  ||  model.interfaces.indexOf(ITEM) !== -1)
+      title = utils.getDisplayName(resource, model.properties)
+    if (!title || !title.length)
+      title = verificationRequest.title || utils.makeModelTitle(verificationRequest)
+
     var header =  <View style={{backgroundColor: '#ffffff', borderBottomColor: '#f0f0f0', borderBottomWidth: 1}} key={this.getNextKey()}>
                     <View style={{flexDirection: 'row', marginHorizontal: 10,  marginVertical: 3, paddingBottom: 4}}>
                       {photo}
                       {date}
-                      <View style={styles.noImageBlock}>
-                        <Text style={styles.rTitle}>{this.props.isChooser ? utils.getDisplayName(resource, model.properties) : verificationRequest.title || utils.makeModelTitle(verificationRequest)}</Text>
+                      <View style={[styles.noImageBlock, {flex: 1}]}>
+                        <Text style={styles.rTitle}>{title}</Text>
                          {verifiedBy}
                       </View>
                     </View>

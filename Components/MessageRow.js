@@ -590,8 +590,10 @@ class MessageRow extends Component {
         vCols.push(
           <View key={self.getNextKey()} style={{paddingBottom: 3}}>
             <Text style={[style, {color: '#555555'}]}>{instruction} </Text>
-            <Text style={[style, {color: resource.documentCreated || isReadOnlyChat ?  '#aaaaaa' : self.props.bankStyle.FORM_ERROR_COLOR}]}>{translate(utils.getModel(rtype).value)}</Text>
-            <Icon name={iconName} size={iconSize} color={resource.documentCreated || isReadOnlyChat ? self.props.bankStyle.REQUEST_FULFILLED : self.props.bankStyle.FORM_ERROR_COLOR} style={styles.errorBadge} />
+            <View style={chatStyles.rowContainer}>
+              <Text style={[style, {color: resource.documentCreated || isReadOnlyChat ?  '#aaaaaa' : self.props.bankStyle.FORM_ERROR_COLOR}]}>{translate(utils.getModel(rtype).value)}</Text>
+              <Icon name={iconName} size={iconSize} color={resource.documentCreated || isReadOnlyChat ? self.props.bankStyle.REQUEST_FULFILLED : self.props.bankStyle.FORM_ERROR_COLOR} />
+            </View>
           </View>
         )
       }
@@ -788,12 +790,6 @@ var styles = StyleSheet.create({
     justifyContent: 'flex-end',
     borderTopLeftRadius: 0,
     borderRadius: 10,
-  },
-  errorBadge: {
-    position: 'absolute',
-    opacity: 0.5,
-    bottom: 0,
-    right: 0
   },
   white18: {
     color: '#ffffff',

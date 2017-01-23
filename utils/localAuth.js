@@ -21,6 +21,7 @@ var Actions = require('../Actions/Actions');
 const PASSWORD_ITEM_KEY = 'app-password'
 
 const isWeb = Platform.OS === 'web'
+const isAndroid = utils.isAndroid()
 const ForgivableTouchIDErrors = [
   'LAErrorTouchIDNotAvailable',
   'LAErrorTouchIDNotSupported',
@@ -87,6 +88,10 @@ function authenticateUser (opts) {
   // going in concurrently and causing problems
   if (pendingAuth) return pendingAuth
 
+  if (isAndroid && __DEV__) {
+    return Q.resolve()
+  }
+
   opts = typeof opts === 'string' ? { reason: opts} : opts || {}
   opts = { ...DEFAULT_OPTS, ...opts }
   return pendingAuth = LocalAuth.authenticate(opts)
@@ -96,10 +101,25 @@ function authenticateUser (opts) {
     .catch((err) => {
       pendingAuth = undefined
 
-      if (__DEV__ && !(err.name in Errors)) {
-        let message = `error: ${err.message}, stack: ${err.stack}`
-        debug(JSON.stringify(err))
-        Alert.alert(message)
+      if (__DEV__) {
+        if (!(err.name in Errors)) {
+          let message = `error: ${err.message}, stack: ${err.stack}`
+          debug(JSON.stringify(err))
+          Alert.alert(message)
+        }
+      } else {
+        if (isAndroid && err.code === 'E_FAILED_TO_SHOW_AUTH') {
+          return new Promise(resolve => {
+            Alert.alert(
+              translate('youShallNotPass'),
+              translate('enablePasscodeFirst'),
+              [
+                { text: 'OK', onPress: resolve }
+              ]
+            )
+          })
+          .then(() => authenticateUser(opts))
+        }
       }
 
       throw err

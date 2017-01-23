@@ -31,17 +31,19 @@ const TALK_TO_EMPLOYEEE = '1'
 const APP_QR_CODE = '5'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const PARTIAL = 'tradle.Partial'
+const TYPE = constants.TYPE
+const ROOT_HASH = constants.ROOT_HASH
+const PROFILE = constants.TYPES.PROFILE
+const ORGANIZATION = constants.TYPES.ORGANIZATION
+
 // var bankStyles = require('../styles/bankStyles')
 const ENUM = 'tradle.Enum'
 
 import React, { Component, PropTypes } from 'react'
 import {
   ListView,
-  // StyleSheet,
   Navigator,
   Alert,
-  // AlertIOS,
-  // ActionSheetIOS,
   TouchableOpacity,
   Image,
   View,
@@ -53,13 +55,20 @@ import platformStyles from '../styles/platform'
 import StatusBar from './StatusBar'
 import ENV from '../utils/env'
 
-const SearchBar = Platform.OS !== 'ios' ? null : require('react-native-search-bar')
+let SearchBar = (function () {
+  switch (Platform.OS) {
+    case 'android':
+      return require('./SearchBar')
+    case 'ios':
+      return require('react-native-search-bar')
+  }
+})()
 
 class ResourceList extends Component {
   props: {
     navigator: PropTypes.object.isRequired,
     modelName: PropTypes.string.isRequired,
-    resource: PropTypes.object.isRequired,
+    resource: PropTypes.object,
     returnRoute: PropTypes.object,
     callback: PropTypes.func,
     filter: PropTypes.string,
@@ -81,7 +90,7 @@ class ResourceList extends Component {
       }),
       allowToAdd: this.props.prop  &&  this.props.prop.allowToAdd,
       filter: this.props.filter,
-      show: false,
+      hideMode: false,  // hide provider
       serverOffline: this.props.serverOffline,
       isConnected: this.props.navigator.isConnected,
       userInput: '',
@@ -90,7 +99,7 @@ class ResourceList extends Component {
     };
     if (props.multiChooser)
       this.state.chosen = {}
-    var isRegistration = this.props.isRegistration ||  (this.props.resource  &&  this.props.resource[constants.TYPE] === constants.TYPES.PROFILE  &&  !this.props.resource[constants.ROOT_HASH]);
+    var isRegistration = this.props.isRegistration ||  (this.props.resource  &&  this.props.resource[TYPE] === PROFILE  &&  !this.props.resource[ROOT_HASH]);
     if (isRegistration)
       this.state.isRegistration = isRegistration;
     if (this.props.chat) {
@@ -142,9 +151,9 @@ class ResourceList extends Component {
     if (this.props.sortProperty)
       params.sortProperty = this.props.sortProperty;
     if (this.props.prop)
-      params.prop = utils.getModel(this.props.resource[constants.TYPE]).value.properties[this.props.prop.name];
+      params.prop = utils.getModel(this.props.resource[TYPE]).value.properties[this.props.prop.name];
     if (params.prop) {
-      let m = utils.getModel(this.props.resource[constants.TYPE]).value
+      let m = utils.getModel(this.props.resource[TYPE]).value
       // case when for example clicking on 'Verifications' on Form page
       if (m.interfaces)
         // if (utils.getModel(this.props.modelName).value.interfaces)
@@ -159,6 +168,12 @@ class ResourceList extends Component {
       params.to = this.props.resource
     params.listView = this.props.listView
     // this.state.isLoading = true;
+
+    // if (this.props.tabLabel) {
+    //   Actions.list(params)
+    //   StatusBar.setHidden(false);
+    // }
+    // else
     utils.onNextTransitionEnd(this.props.navigator, () => {
       Actions.list(params)
       StatusBar.setHidden(false);
@@ -175,7 +190,7 @@ class ResourceList extends Component {
       this.props.navigator.pop()
       if (params.error)
         Alert.alert(params.error)
-      // Actions.list(constants.TYPES.ORGANIZATION)
+      // Actions.list(ORGANIZATION)
       return
     }
     if (params.error)
@@ -187,7 +202,7 @@ class ResourceList extends Component {
     if (action === 'newContact') {
       let routes = this.props.navigator.getCurrentRoutes()
       let curRoute = routes[routes.length - 1]
-      if (curRoute.id === 11  &&  curRoute.passProps.resource[constants.ROOT_HASH] === params.newContact[constants.ROOT_HASH])
+      if (curRoute.id === 11  &&  curRoute.passProps.resource[ROOT_HASH] === params.newContact[ROOT_HASH])
         return
       this.setState({newContact: params.newContact})
       // let style = this.mergeStyle(params.newContact.style)
@@ -216,10 +231,10 @@ class ResourceList extends Component {
     if (action === 'addItem'  ||  action === 'addMessage') {
       var model = action === 'addMessage'
                 ? utils.getModel(this.props.modelName).value
-                : utils.getModel(params.resource[constants.TYPE]).value;
+                : utils.getModel(params.resource[TYPE]).value;
       if (action === 'addItem'  &&  model.id !== this.props.modelName)
         return
-      if (action === 'addMessage'  &&  this.props.modelName !== constants.TYPES.PROFILE)
+      if (action === 'addMessage'  &&  this.props.modelName !== PROFILE)
         return
       // this.state.isLoading = true;
       Actions.list({
@@ -302,11 +317,11 @@ class ResourceList extends Component {
         this.props.navigator.push(route)
       return
     }
-    if (action === 'allSharedContexts'  &&  this.props.officialAccounts  &&  this.props.modelName === constants.TYPES.PROFILE) {
+    if (action === 'allSharedContexts'  &&  this.props.officialAccounts  &&  this.props.modelName === PROFILE) {
       this.setState({sharedContextCount: params.count})
       return
     }
-    if (action === 'hasPartials') { //  &&  this.props.officialAccounts  &&  (this.props.modelName === constants.TYPES.PROFILE || this.props.modelName === constants.TYPES.ORGANIZATION)) {
+    if (action === 'hasPartials') { //  &&  this.props.officialAccounts  &&  (this.props.modelName === PROFILE || this.props.modelName === ORGANIZATION)) {
       this.setState({hasPartials: true})
       return
     }
@@ -354,7 +369,7 @@ class ResourceList extends Component {
         this.setState(state)
       return;
     }
-    var type = list[0][constants.TYPE];
+    var type = list[0][TYPE];
     if (type  !== this.props.modelName  &&  this.props.modelName !== params.requestedModelName) {
       var m = utils.getModel(type).value;
       if (!m.subClassOf  ||  m.subClassOf != this.props.modelName)
@@ -384,7 +399,7 @@ class ResourceList extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     if (nextState.forceUpdate)
       return true
-    if (this.state.show !== nextState.show)
+    if (this.state.hideMode !== nextState.hideMode)
       return true
     if (this.state.serverOffline !== nextState.serverOffline)
       return true
@@ -396,16 +411,16 @@ class ResourceList extends Component {
       return true
     if (nextState.newContact  &&  (!this.state.newContact ||  this.state.newContact !== nextState.newContact))
       return true
-    // if (this.state.isConnected !== nextState.isConnected)
+        // if (this.state.isConnected !== nextState.isConnected)
     //   if (!this.state.list && !nextState.list)
     //     return true
     if (!this.state.list  ||  !nextState.list  ||  this.state.list.length !== nextState.list.length)
       return true
-    let isOrg = this.props.modelName === constants.TYPES.ORGANIZATION
+    let isOrg = this.props.modelName === ORGANIZATION
     for (var i=0; i<this.state.list.length; i++) {
       if (this.state.list[i].numberOfForms !== nextState.list[i].numberOfForms)
         return true
-      if (this.state.list[i][constants.ROOT_HASH] !== nextState.list[i][constants.ROOT_HASH])
+      if (this.state.list[i][ROOT_HASH] !== nextState.list[i][ROOT_HASH])
         return true
       if (this.state.list[i]._online !== nextState.list[i]._online)
         return true
@@ -417,15 +432,14 @@ class ResourceList extends Component {
     var me = utils.getMe();
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     var model = utils.getModel(this.props.modelName);
-    var isIdentity = this.props.modelName === constants.TYPES.PROFILE;
+    var isIdentity = this.props.modelName === PROFILE;
     var isVerification = model.value.id === constants.TYPES.VERIFICATION
     var isForm = model.value.id === constants.TYPES.FORM
-    var isOrganization = this.props.modelName === constants.TYPES.ORGANIZATION;
+    var isOrganization = this.props.modelName === ORGANIZATION;
+    var m = utils.getModel(resource[TYPE]).value;
     if (!isIdentity         &&
         !isOrganization     &&
         !this.props.callback) {
-      var m = utils.getModel(resource[constants.TYPE]).value;
-
       if (isVerification || isForm) {
         let title
         if (isForm)
@@ -474,7 +488,7 @@ class ResourceList extends Component {
       return;
     }
     if (this.props.prop) {
-      if (me  &&  this.props.modelName != constants.TYPES.PROFILE) {
+      if (me  &&  this.props.modelName != PROFILE) {
         this._selectResource(resource);
         return;
       }
@@ -484,8 +498,8 @@ class ResourceList extends Component {
           return;
         }
       }
-      else if (me[constants.ROOT_HASH] === resource[constants.ROOT_HASH]  ||
-         (this.props.resource  &&  me[constants.ROOT_HASH] === this.props.resource[constants.ROOT_HASH]  && this.props.prop)) {
+      else if (me[ROOT_HASH] === resource[ROOT_HASH]  ||
+         (this.props.resource  &&  me[ROOT_HASH] === this.props.resource[ROOT_HASH]  && this.props.prop)) {
         this._selectResource(resource);
         return;
       }
@@ -505,6 +519,30 @@ class ResourceList extends Component {
         currency: resource.currency,
         bankStyle: style,
       },
+      // rightButtonTitle: 'View',
+      // onRightButtonPress: {
+      //   title: utils.getDisplayName(resource),
+      //   id: 3,
+      //   component: ResourceView,
+      //   passProps: {
+      //     resource: resource
+      //   },
+      //   rightButtonTitle: 'Edit',
+      //   onRightButtonPress: {
+      //     title: title,
+      //     id: 4,
+      //     component: NewResource,
+      //     titleTextColor: '#7AAAC3',
+      //     backButtonTitle: 'Back',
+      //     rightButtonTitle: 'Done',
+      //     passProps: {
+      //       model: m,
+      //       resource: resource,
+      //       bankStyle: this.props.bankStyle || defaultBankStyle
+      //     }
+      //   },
+
+      // }
     }
     if (isIdentity) { //  ||  isOrganization) {
       route.title = resource.firstName
@@ -521,7 +559,7 @@ class ResourceList extends Component {
       //     resource: resource
       //   }
       // }
-      var isMe = isIdentity ? resource[constants.ROOT_HASH] === me[constants.ROOT_HASH] : true;
+      var isMe = isIdentity ? resource[ROOT_HASH] === me[ROOT_HASH] : true;
       if (isMe) {
         route.onRightButtonPress.rightButtonTitle = 'Edit'
         route.onRightButtonPress.onRightButtonPress = {
@@ -533,7 +571,7 @@ class ResourceList extends Component {
           rightButtonTitle: 'Done',
           passProps: {
             bankStyle: style,
-            model: utils.getModel(resource[constants.TYPE]).value,
+            model: utils.getModel(resource[TYPE]).value,
             resource: resource,
             currency: this.props.currency,
           }
@@ -595,7 +633,7 @@ class ResourceList extends Component {
     }
     if (me                       &&
        !model.value.isInterface  &&
-       (resource[constants.ROOT_HASH] === me[constants.ROOT_HASH]  ||  resource[constants.TYPE] !== constants.TYPES.PROFILE)) {
+       (resource[ROOT_HASH] === me[ROOT_HASH]  ||  resource[TYPE] !== PROFILE)) {
       var self = this ;
       route.rightButtonTitle = 'Edit'
       route.onRightButtonPress = /*() =>*/ {
@@ -605,7 +643,7 @@ class ResourceList extends Component {
         rightButtonTitle: 'Done',
         titleTextColor: '#7AAAC3',
         passProps: {
-          model: utils.getModel(resource[constants.TYPE]).value,
+          model: utils.getModel(resource[TYPE]).value,
           bankStyle: this.props.style,
           resource: me
         }
@@ -614,7 +652,7 @@ class ResourceList extends Component {
     this.props.navigator.push(route);
   }
   showRefResources(resource, prop) {
-    var props = utils.getModel(resource[constants.TYPE]).value.properties;
+    var props = utils.getModel(resource[TYPE]).value.properties;
     var propJson = props[prop];
     var resourceTitle = utils.getDisplayName(resource, props);
     resourceTitle = utils.makeTitle(resourceTitle);
@@ -651,7 +689,7 @@ class ResourceList extends Component {
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
           passProps: {
-            model: utils.getModel(resource[constants.TYPE]).value,
+            model: utils.getModel(resource[TYPE]).value,
             bankStyle: this.props.style,
             resource: resource
           }
@@ -667,9 +705,9 @@ class ResourceList extends Component {
   }
 
   onSearchChange(filter) {
-    this.state.filter = filter
+    this.state.filter = typeof filter === 'string' ? filter : filter.nativeEvent.text
     Actions.list({
-      query: filter,
+      query: this.state.filter,
       modelName: this.props.modelName,
       to: this.props.resource
     });
@@ -677,6 +715,8 @@ class ResourceList extends Component {
 
   renderRow(resource)  {
     var model = utils.getModel(this.props.modelName).value;
+    if (model.isInterface)
+      model = utils.getModel(resource[TYPE]).value
  // || (model.id === constants.TYPES.FORM)
     var isVerification = model.id === constants.TYPES.VERIFICATION  ||  model.subClassOf === constants.TYPES.VERIFICATION
     var isForm = model.id === constants.TYPES.FORM || model.subClassOf === constants.TYPES.FORM
@@ -689,7 +729,7 @@ class ResourceList extends Component {
         onSelect={() => this.selectResource(isVerification
                               ? resource.sources ? resource : resource.document
                               : resource)}
-        key={resource[constants.ROOT_HASH]}
+        key={resource[ROOT_HASH]}
         navigator={this.props.navigator}
         prop={this.props.prop}
         currency={this.props.currency}
@@ -698,7 +738,9 @@ class ResourceList extends Component {
       )
     : (<ResourceRow
         onSelect={() => isSharedContext ? this.openSharedContextChat(resource) : this.selectResource(resource)}
-        key={resource[constants.ROOT_HASH]}
+        key={resource[ROOT_HASH]}
+        hideResource={this.hideResource.bind(this)}
+        hideMode={this.state.hideMode}
         navigator={this.props.navigator}
         changeSharedWithList={this.props.chat ? this.changeSharedWithList.bind(this) : null}
         currency={this.props.currency}
@@ -735,7 +777,7 @@ class ResourceList extends Component {
     // if (!me  ||  (this.props.prop  &&  (this.props.prop.readOnly || (this.props.prop.items  &&  this.props.prop.items.readOnly))))
     //   return <View />;
     var model = utils.getModel(this.props.modelName).value;
-    if (!this.props.prop  &&  model.id !== constants.TYPES.ORGANIZATION)
+    if (!this.props.prop  &&  model.id !== ORGANIZATION)
       return <View />
     // if (model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT ||  model.subClassOf === ENUM)
     //   return <View />
@@ -745,18 +787,36 @@ class ResourceList extends Component {
     let icon = Platform.OS === 'android' ? 'md-menu' : 'md-more'
     let color = Platform.OS === 'android' ? 'red' : '#ffffff'
     return (
-       <View style={styles.footer}>
-         <TouchableOpacity onPress={() => this.ActionSheet.show()}>
-           <View style={platformStyles.menuButtonNarrow}>
-             <Icon name={icon}  size={33}  color={color} />
-           </View>
-         </TouchableOpacity>
-       </View>
-    )
+        <View style={styles.footer}>
+          <TouchableOpacity onPress={() => this.ActionSheet.show()}>
+            <View style={platformStyles.menuButtonNarrow}>
+              <Icon name={icon}  size={33}  color={color} />
+            </View>
+          </TouchableOpacity>
+        </View>
+     )
+    // if (Platform.OS === 'ios')
+    //   return (
+    //     <View style={[platformStyles.menuButtonNarrow, {width: 47, position: 'absolute', right: 10, bottom: 20, borderRadius: 24, justifyContent: 'center', alignItems: 'center'}]}>
+    //        <TouchableOpacity onPress={() => this.ActionSheet.show()}>
+    //           <Icon name='md-more'  size={33}  color='#ffffff'/>
+    //        </TouchableOpacity>
+    //     </View>
+    //   )
+    // else
+    //   return (
+    //      <View style={styles.footer}>
+    //        <TouchableOpacity onPress={() => this.ActionSheet.show()}>
+    //          <View style={platformStyles.menuButtonNarrow}>
+    //            <Icon name='md-menu'  size={33}  color='red' />
+    //          </View>
+    //        </TouchableOpacity>
+    //      </View>
+    //   )
   }
   onSettingsPressed() {
     var model = utils.getModel(constants.TYPES.SETTINGS).value
-    this.setState({show: false})
+    this.setState({hideMode: false})
     var route = {
       component: NewResource,
       title: 'Settings',
@@ -788,7 +848,7 @@ class ResourceList extends Component {
         officialAccounts: true,
         serverOffline: this.state.serverOffline,
         bankStyle: this.props.style,
-        modelName: constants.TYPES.ORGANIZATION
+        modelName: ORGANIZATION
       }
     });
   }
@@ -810,21 +870,21 @@ class ResourceList extends Component {
   addNew() {
     var model = utils.getModel(this.props.modelName).value;
     var r;
-    this.setState({show: false})
+    this.setState({hideMode: false})
     // resource if present is a container resource as for example subreddit for posts or post for comments
     // if to is passed then resources only of this container need to be returned
     if (this.props.resource) {
       var props = model.properties;
       for (var p in props) {
-        var isBacklink = props[p].ref  &&  props[p].ref === this.props.resource[constants.TYPE];
+        var isBacklink = props[p].ref  &&  props[p].ref === this.props.resource[TYPE];
         if (props[p].ref  &&  !isBacklink) {
           if (utils.getModel(props[p].ref).value.isInterface  &&  model.interfaces  &&  model.interfaces.indexOf(props[p].ref) !== -1)
             isBacklink = true;
         }
         if (isBacklink) {
           r = {};
-          r[constants.TYPE] = this.props.modelName;
-          r[p] = { id: this.props.resource[constants.TYPE] + '_' + this.props.resource[constants.ROOT_HASH] };
+          r[TYPE] = this.props.modelName;
+          r[p] = { id: utils.getId(this.props.resource) };
 
           if (this.props.resource.relatedTo  &&  props.relatedTo) // HACK for now for main container
             r.relatedTo = this.props.resource.relatedTo;
@@ -836,9 +896,10 @@ class ResourceList extends Component {
     if (this.props.prop  &&  model.subClassOf === constants.TYPES.FORM) {
       if (!r)
         r = {}
-      r[constants.TYPE] = this.props.prop.ref || this.props.prop.items.ref;
+      r[TYPE] = this.props.prop.ref || this.props.prop.items.ref;
       r.from = this.props.resource.from
       r.to = this.props.resource.to
+      r._context = this.props.resource._context
     }
     let self = this
     this.props.navigator.push({
@@ -851,7 +912,7 @@ class ResourceList extends Component {
       passProps: {
         model: model,
         bankStyle: this.props.style,
-        resource: r,
+      resource: r,
         callback: (resource) => {
           self.props.navigator.pop()
           let l = []
@@ -881,7 +942,7 @@ class ResourceList extends Component {
         !utils.getMe().organization                 &&
         model.subClassOf !== ENUM                   &&
         !this.props.isChooser                       &&
-        this.props.modelName !== constants.TYPES.ORGANIZATION  &&
+        this.props.modelName !== ORGANIZATION  &&
         (!model.subClassOf  ||  model.subClassOf !== ENUM)) {
       content = <NoResources
                   filter={this.state.filter}
@@ -904,7 +965,7 @@ class ResourceList extends Component {
     var actionSheet = this.renderActionSheet()
     var footer = actionSheet && this.renderFooter()
     var searchBar
-    if (SearchBar) {
+    if (SearchBar  &&  ((this.state.list && this.state.list.length > 10) || (this.state.filter  &&  this.state.filter.length))) {
       searchBar = (
         <SearchBar
           onChangeText={this.onSearchChange.bind(this)}
@@ -914,9 +975,18 @@ class ResourceList extends Component {
           />
       )
     }
-    let network = this.props.isChooser || !this.props.officialAccounts || this.props.modelName !== constants.TYPES.ORGANIZATION
+    let network = this.props.isChooser || !this.props.officialAccounts || this.props.modelName !== ORGANIZATION
                 ? <View/>
                 : <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
+
+    // let title = this.props.tabLabel
+    //           ? <View style={{height: 45, backgroundColor: '#ffffff', alignSelf: 'stretch', justifyContent: 'center'}}>
+    //               <Text style={{alignSelf: 'center', fontSize: 20}}>{translate('officialAccounts')}</Text>
+    //             </View>
+    //           : null
+      // <PageView style={[platformStyles.container, this.props.tabLabel ? {marginTop: utils.isAndroid() ? 10 : 18} : {}]}>
+      //   {title}
+
     return (
       <PageView style={platformStyles.container}>
         {network}
@@ -937,6 +1007,7 @@ class ResourceList extends Component {
 
       buttons = [
         translate('addServerUrl'),
+        translate('hideResource', translate(utils.getModel(this.props.modelName).value)),
         translate('scanQRcode'),
         translate('cancel')
       ]
@@ -958,6 +1029,9 @@ class ResourceList extends Component {
               this.onSettingsPressed()
             break
           case 1:
+            this.setState({hideMode: true})
+            break
+          case 2:
             this.scanFormsQRCode()
             break;
           // case 2:
@@ -968,6 +1042,24 @@ class ResourceList extends Component {
           }
         }}
       />
+    )
+  }
+  hideResource(resource) {
+    Alert.alert(
+      translate('areYouSureYouWantToDelete', translate(resource.name)),
+      null,
+      [
+        {text: translate('cancel'), onPress: () => {
+          this.setState({hideMode: false})
+          console.log('Canceled!')
+        }},
+        {text: translate('Ok'), onPress: () => {
+          let r = utils.clone(resource)
+          r.inactive = true
+          Actions.addItem({resource: resource, value: r, meta: utils.getModel(resource[TYPE]).value})
+          this.setState({hideMode: false})
+        }},
+      ]
     )
   }
 
@@ -997,7 +1089,7 @@ class ResourceList extends Component {
                   </View>
                 : <View/>
 
-    return (this.props.modelName === constants.TYPES.PROFILE)
+    return (this.props.modelName === PROFILE)
           ? <View>
               <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
                 <TouchableOpacity onPress={this.showBanks.bind(this)}>
@@ -1055,7 +1147,7 @@ class ResourceList extends Component {
     })
   }
   scanFormsQRCode() {
-    this.setState({show: false})
+    this.setState({hideMode: false})
     this.props.navigator.push({
       title: 'Scan QR Code',
       id: 16,
@@ -1092,7 +1184,7 @@ class ResourceList extends Component {
           title: utils.getDisplayName(me)
         },
         to: {
-          id: constants.TYPES.PROFILE + '_' + h[2]
+          id: PROFILE + '_' + h[2]
         }
       }
       Actions.addItem({resource: r, value: r, meta: utils.getModel('tradle.GuestSessionProof').value, disableAutoResponse: true})

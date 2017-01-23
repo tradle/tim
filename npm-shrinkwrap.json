@@ -53,8 +53,8 @@
     },
     "@tradle/models": {
       "version": "4.10.9",
-      "from": "tradle/models#f331c7d",
-      "resolved": "git://github.com/tradle/models.git#f331c7d0d826c659224105fd4836110d3a12fb33"
+      "from": "git://github.com/tradle/models.git#719f5932d9fff5e9707fd56170ab35fca7dca6a1",
+      "resolved": "git://github.com/tradle/models.git#719f5932d9fff5e9707fd56170ab35fca7dca6a1"
     },
     "@tradle/protocol": {
       "version": "2.3.0",
@@ -1268,7 +1268,7 @@
     },
     "cachedown": {
       "version": "1.0.0",
-      "from": "mvayngrib/cachedown#bb59815",
+      "from": "git://github.com/mvayngrib/cachedown.git#bb59815b7a18a047ad7fc12b6644043d8d6aacf9",
       "resolved": "git://github.com/mvayngrib/cachedown.git#bb59815b7a18a047ad7fc12b6644043d8d6aacf9",
       "dependencies": {
         "abstract-leveldown": {
@@ -1362,8 +1362,8 @@
     },
     "changes-feed": {
       "version": "1.1.0",
-      "from": "mvayngrib/changes-feed",
-      "resolved": "git://github.com/mvayngrib/changes-feed.git#bd106bd1a8b03660e7c6820e279a34bcaac0fd5e",
+      "from": "git+https://github.com/mvayngrib/changes-feed.git#bd106bd1a8b03660e7c6820e279a34bcaac0fd5e",
+      "resolved": "git+https://github.com/mvayngrib/changes-feed.git#bd106bd1a8b03660e7c6820e279a34bcaac0fd5e",
       "dependencies": {
         "readable-stream": {
           "version": "1.0.34",
@@ -1713,7 +1713,7 @@
     },
     "create-ecdh": {
       "version": "4.0.0",
-      "from": "mvayngrib/createECDH#b5e05e40",
+      "from": "git://github.com/mvayngrib/createECDH.git#b5e05e40c0a377bace5a985dc19e97499b1c3956",
       "resolved": "git://github.com/mvayngrib/createECDH.git#b5e05e40c0a377bace5a985dc19e97499b1c3956"
     },
     "create-error-class": {
@@ -2969,8 +2969,8 @@
     },
     "forward-secrecy": {
       "version": "1.0.2",
-      "from": "tradle/forward-secrecy#dev",
-      "resolved": "git://github.com/tradle/forward-secrecy.git#5ad4c2ee429db4b10599efbd41c650b9debbf7fe",
+      "from": "git+https://github.com/tradle/forward-secrecy.git#5ad4c2ee429db4b10599efbd41c650b9debbf7fe",
+      "resolved": "git+https://github.com/tradle/forward-secrecy.git#5ad4c2ee429db4b10599efbd41c650b9debbf7fe",
       "dependencies": {
         "tweetnacl": {
           "version": "0.13.3",
@@ -3978,7 +3978,7 @@
     },
     "key-encoder": {
       "version": "1.1.6",
-      "from": "mvayngrib/key-encoder-js",
+      "from": "git://github.com/mvayngrib/key-encoder-js.git#9811b1d85ded6f6d8eb6b48389d80ed17df550ff",
       "resolved": "git://github.com/mvayngrib/key-encoder-js.git#9811b1d85ded6f6d8eb6b48389d80ed17df550ff",
       "dependencies": {
         "asn1.js": {
@@ -4066,8 +4066,8 @@
     },
     "level-change-processor": {
       "version": "1.0.0",
-      "from": "mvayngrib/level-change-processor#7100404",
-      "resolved": "git://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b"
+      "from": "git+https://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b",
+      "resolved": "git+https://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b"
     },
     "level-codec": {
       "version": "6.1.0",
@@ -4665,8 +4665,8 @@
     },
     "merkle-tree-stream": {
       "version": "3.0.3",
-      "from": "mvayngrib/merkle-tree-stream#finalize",
-      "resolved": "git://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
+      "from": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
+      "resolved": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
       "dependencies": {
         "isarray": {
           "version": "1.0.0",
@@ -4897,7 +4897,7 @@
     },
     "node-haste": {
       "version": "2.12.0",
-      "from": "mvayngrib/node-haste#766d7e6",
+      "from": "git://github.com/mvayngrib/node-haste.git#766d7e6fd8822addd4a097f0fc00df6923da88c2",
       "resolved": "git://github.com/mvayngrib/node-haste.git#766d7e6fd8822addd4a097f0fc00df6923da88c2"
     },
     "node-int64": {
@@ -5047,9 +5047,19 @@
       "resolved": "https://registry.npmjs.org/object-keys/-/object-keys-1.0.11.tgz"
     },
     "object.omit": {
-      "version": "2.0.0",
-      "from": "object.omit@>=2.0.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/object.omit/-/object.omit-2.0.0.tgz"
+      "version": "2.0.1",
+      "from": "object.omit@latest",
+      "resolved": "https://registry.npmjs.org/object.omit/-/object.omit-2.0.1.tgz"
+    },
+    "object.pick": {
+      "version": "1.2.0",
+      "from": "object.pick@latest",
+      "resolved": "https://registry.npmjs.org/object.pick/-/object.pick-1.2.0.tgz"
+    },
+    "octal": {
+      "version": "1.0.0",
+      "from": "octal@>=1.0.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/octal/-/octal-1.0.0.tgz"
     },
     "on-finished": {
       "version": "2.3.0",
@@ -5220,6 +5230,11 @@
       "version": "2.2.0",
       "from": "parse-json@>=2.2.0 <3.0.0",
       "resolved": "https://registry.npmjs.org/parse-json/-/parse-json-2.2.0.tgz"
+    },
+    "parse-usdl": {
+      "version": "1.0.0",
+      "from": "parse-usdl@latest",
+      "resolved": "https://registry.npmjs.org/parse-usdl/-/parse-usdl-1.0.0.tgz"
     },
     "parsejson": {
       "version": "0.0.3",
@@ -5868,6 +5883,21 @@
       "from": "git://github.com/oblador/react-native-animatable.git#d72c09217ee992bcae47b7e6c3f1bb701da3ac05",
       "resolved": "git://github.com/oblador/react-native-animatable.git#d72c09217ee992bcae47b7e6c3f1bb701da3ac05"
     },
+    "react-native-async-storage-rocks": {
+      "version": "1.0.0",
+      "from": "react-native-async-storage-rocks@>=1.0.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/react-native-async-storage-rocks/-/react-native-async-storage-rocks-1.0.0.tgz"
+    },
+    "react-native-async-storage-snappy": {
+      "version": "1.0.0",
+      "from": "react-native-async-storage-snappy@1.0.0",
+      "resolved": "https://registry.npmjs.org/react-native-async-storage-snappy/-/react-native-async-storage-snappy-1.0.0.tgz"
+    },
+    "react-native-blinkid": {
+      "version": "1.0.0",
+      "from": "react-native-blinkid@1.0.0",
+      "resolved": "https://registry.npmjs.org/react-native-blinkid/-/react-native-blinkid-1.0.0.tgz"
+    },
     "react-native-button": {
       "version": "1.7.1",
       "from": "react-native-button@>=1.3.1 <2.0.0",
@@ -5902,7 +5932,7 @@
     },
     "react-native-datepicker": {
       "version": "1.3.2",
-      "from": "pgmemk/react-native-datepicker#ce456393",
+      "from": "git://github.com/pgmemk/react-native-datepicker.git#ce456393807d8a537fd30d6cb4cf60d77dba7840",
       "resolved": "git://github.com/pgmemk/react-native-datepicker.git#ce456393807d8a537fd30d6cb4cf60d77dba7840"
     },
     "react-native-device-info": {
@@ -5912,7 +5942,7 @@
     },
     "react-native-env": {
       "version": "0.0.5",
-      "from": "tradle/react-native-env",
+      "from": "git://github.com/tradle/react-native-env.git#19361827c84ad4a3a9d761fdadd8d65f0e814856",
       "resolved": "git://github.com/tradle/react-native-env.git#19361827c84ad4a3a9d761fdadd8d65f0e814856"
     },
     "react-native-flexbox-grid": {
@@ -5939,12 +5969,12 @@
     },
     "react-native-gesture-password": {
       "version": "0.1.4",
-      "from": "mvayngrib/react-native-gesture-password#6ccf2955",
+      "from": "git://github.com/mvayngrib/react-native-gesture-password.git#6ccf29558bdb75e78db18208a4f2c5eff512fe62",
       "resolved": "git://github.com/mvayngrib/react-native-gesture-password.git#6ccf29558bdb75e78db18208a4f2c5eff512fe62"
     },
     "react-native-gifted-messenger": {
       "version": "0.0.16",
-      "from": "pgmemk/react-native-gifted-messenger#72cd032",
+      "from": "git://github.com/pgmemk/react-native-gifted-messenger.git#72cd03246809d30ac0a2bcccee572e42201e3436",
       "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#72cd03246809d30ac0a2bcccee572e42201e3436"
     },
     "react-native-gifted-spinner": {
@@ -5954,7 +5984,7 @@
     },
     "react-native-http": {
       "version": "1.0.0",
-      "from": "tradle/react-native-http#834492d",
+      "from": "git://github.com/tradle/react-native-http.git#834492dbc792b1dec8ec8f0a1c9671f640339f01",
       "resolved": "git://github.com/tradle/react-native-http.git#834492dbc792b1dec8ec8f0a1c9671f640339f01"
     },
     "react-native-image-picker": {
@@ -5964,7 +5994,7 @@
     },
     "react-native-keychain": {
       "version": "0.3.1",
-      "from": "mvayngrib/react-native-keychain#6afb4e7",
+      "from": "git://github.com/mvayngrib/react-native-keychain.git#6afb4e71f2cdca10dbb648421f2a9ab98ff8b30c",
       "resolved": "git://github.com/mvayngrib/react-native-keychain.git#6afb4e71f2cdca10dbb648421f2a9ab98ff8b30c"
     },
     "react-native-linear-gradient": {
@@ -5989,12 +6019,12 @@
     },
     "react-native-orientation": {
       "version": "1.17.0",
-      "from": "yamill/react-native-orientation#2782917",
+      "from": "git://github.com/yamill/react-native-orientation.git#278291739e2b7c8ab208fdf404e4b139e24b4a3f",
       "resolved": "git://github.com/yamill/react-native-orientation.git#278291739e2b7c8ab208fdf404e4b139e24b4a3f"
     },
     "react-native-prompt": {
       "version": "0.18.4",
-      "from": "pgmemk/react-native-prompt#789e25c",
+      "from": "git://github.com/pgmemk/react-native-prompt.git#789e25c45541180553f78567649a79a6a6aa98db",
       "resolved": "git://github.com/pgmemk/react-native-prompt.git#789e25c45541180553f78567649a79a6a6aa98db"
     },
     "react-native-push-notification": {
@@ -6009,8 +6039,13 @@
     },
     "react-native-safe-async-storage": {
       "version": "1.0.0",
-      "from": "mvayngrib/react-native-safe-async-storage#7afa8c65",
+      "from": "git://github.com/mvayngrib/react-native-safe-async-storage.git#7afa8c65d0b858689122c7a49e0f403752726490",
       "resolved": "git://github.com/mvayngrib/react-native-safe-async-storage.git#7afa8c65d0b858689122c7a49e0f403752726490"
+    },
+    "react-native-scroller": {
+      "version": "0.0.6",
+      "from": "react-native-scroller@0.0.6",
+      "resolved": "https://registry.npmjs.org/react-native-scroller/-/react-native-scroller-0.0.6.tgz"
     },
     "react-native-search-bar": {
       "version": "2.16.0",
@@ -6019,7 +6054,7 @@
     },
     "react-native-swipeout": {
       "version": "2.0.12",
-      "from": "mvayngrib/react-native-swipeout#6939c109",
+      "from": "git://github.com/mvayngrib/react-native-swipeout.git#6939c1091773baafd4128bd772fe75e04db623e3",
       "resolved": "git://github.com/mvayngrib/react-native-swipeout.git#6939c1091773baafd4128bd772fe75e04db623e3",
       "dependencies": {
         "react-tween-state": {
@@ -6053,7 +6088,7 @@
     },
     "react-native-video": {
       "version": "0.9.0",
-      "from": "tradle/react-native-video#8982843",
+      "from": "git://github.com/tradle/react-native-video.git#89828433118d1cfbf1b85bb2985f8aec675018c7",
       "resolved": "git://github.com/tradle/react-native-video.git#89828433118d1cfbf1b85bb2985f8aec675018c7"
     },
     "react-onclickoutside": {
@@ -6636,9 +6671,9 @@
       "resolved": "https://registry.npmjs.org/sendy-protobufs/-/sendy-protobufs-1.0.0.tgz"
     },
     "sendy-ws": {
-      "version": "1.5.1",
-      "from": "tradle/sendy-ws",
-      "resolved": "git://github.com/tradle/sendy-ws.git#6aad46cf66a7cd57cc3c911699ffc938af470727"
+      "version": "1.5.2",
+      "from": "sendy-ws@latest",
+      "resolved": "https://registry.npmjs.org/sendy-ws/-/sendy-ws-1.5.2.tgz"
     },
     "sentence-case": {
       "version": "2.1.0",

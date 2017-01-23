@@ -9,6 +9,7 @@ import {
   Platform
 } from 'react-native'
 
+import querystring from 'querystring'
 import AsyncStorage from '../Store/Storage'
 import DeviceInfo from 'react-native-device-info'
 import PushNotifications from 'react-native-push-notification'
@@ -16,6 +17,7 @@ import Keychain from 'react-native-keychain'
 import ENV from './env'
 import { getDimensions, getOrientation } from 'react-native-orient'
 import platformUtils from './platformUtils'
+import { post as submitLog } from './debug'
 
 // import Orientation from 'react-native-orientation'
 
@@ -66,6 +68,7 @@ const FORM = TYPES.FORM
 const ORGANIZATION = TYPES.ORGANIZATION
 
 const MY_PRODUCT = 'tradle.MyProduct'
+const MESSAGE = 'tradle.Message'
 const CUR_HASH = constants.CUR_HASH
 const NONCE = constants.NONCE
 const ROOT_HASH = constants.ROOT_HASH
@@ -373,7 +376,7 @@ var utils = {
         return ""
       meta = this.getModel(resource[TYPE]).value.properties
     }
-    let m = this.getModel(resource[TYPE])
+    let m = resource[TYPE] ? this.getModel(resource[TYPE]) : null
     var displayName = '';
     for (var p in meta) {
       if (p.charAt(0) === '_')
@@ -383,67 +386,49 @@ var utils = {
           return resource[p];
         continue
       }
-      if (resource[p]) {
-        if (meta[p].type == 'object') {
-          var title = resource[p].title || this.getDisplayName(resource[p]);
-          displayName += displayName.length ? ' ' + title : title;
-        }
-        else
-          displayName += displayName.length ? ' ' + resource[p] : resource[p];
-      }
-      else if (meta[p].displayAs) {
-        var dn = this.templateIt(meta[p], resource);
-        if (dn)
-          displayName += displayName.length ? ' ' + dn : dn;
+      let dn = this.getStringValueForProperty(resource, p, meta)
+      if (dn)
+        displayName += displayName.length ? ' ' + dn : dn;
+    }
+    if (!displayName.length  &&  m) {
+      let vCols = m.value.viewCols
+      if (!vCols)
+        return displayName
+      let excludeProps = []
+      if (m.value.interfaces && m.value.interfaces.indexOf(MESSAGE))
+        excludeProps = ['from', 'to']
+      for (let i=0; i<vCols.length  &&  !displayName.length; i++) {
+        if (!resource[vCols[i]]  ||  excludeProps.indexOf[vCols[i]])
+          continue
+        displayName = this.getStringValueForProperty(resource, vCols[i], m.value.properties)
       }
     }
     return displayName;
   },
-
-  getDisplayName1(resource, meta) {
-    if (!meta) {
-      if (resource.title)
-        return resource.title
-      if (resource.id)
-        return ""
-      meta = this.getModel(resource[TYPE]).value.properties
-    }
-    let dProps = this.getPropertiesWithAnnotation(meta, 'displayName')
-
-    let m = this.getModel(resource[TYPE])
-    let vCols = m  &&  m.value.viewCols
-    var displayName = '';
-    if (vCols) {
-      vCols.forEach((p) => {
-        if (dProps[p]) {
-          let dn = this.getPropStringValue(meta[p], resource)
-          displayName += displayName.length ? ' ' + dn : dn;
-        }
-      })
-      // if (displayName.length)
-      //   return displayName
-    }
-    // if models does not have viewCols or not all displayName props are listed in viewCols
-    for (var p in meta) {
-      if (p.charAt(0) === '_')
-        continue
-      if (vCols  &&  vCols.indexOf(p) !== -1)
-        continue
-      if (dProps)  {
-        if (!dProps[p]) {
-          if (!displayName  &&  m  &&  resource[p]  &&  m.value.subClassOf === 'tradle.Enum')
-            return resource[p];
-          continue
-        }
-        else {
-          let dn = this.getPropStringValue(meta[p], resource)
-          displayName += displayName.length ? ' ' + dn : dn;
+  getStringValueForProperty(resource, p, meta) {
+    let displayName = ''
+    if (resource[p]) {
+      if (meta[p].type == 'object') {
+        if (resource[p].title)
+          return resource[p].title;
+        if (meta[p].ref) {
+          if (meta[p].ref == constants.TYPES.MONEY)  {
+            let c = this.normalizeCurrencySymbol(resource[p].currency)
+            return (c || '') + resource[p].value
+          }
+          else
+            return this.getDisplayName(resource[p], this.getModel(meta[p].ref).value.properties);
         }
       }
-      // let dn = this.getPropStringValue(meta[p], resource)
-      // displayName += displayName.length ? ' ' + dn : dn;
+      else
+        return resource[p];
     }
-    return displayName;
+    else if (meta[p].displayAs) {
+      var dn = this.templateIt(meta[p], resource);
+      if (dn)
+        return dn
+    }
+    return displayName
   },
 
   getPropStringValue(prop, resource) {
@@ -1396,12 +1381,174 @@ var utils = {
         photos: [
           {
             url: image.base64,
-            width: image.width,
-            height: image.height,
-            isVertical: image.width < image.height
+            // width: image.width,
+            // height: image.height,
+            // isVertical: image.width < image.height
           }
         ]
       }
+    }
+  },
+  fromAnyline: function (result) {
+    const { scanMode, cutoutBase64, barcode, reading, data } = result
+    // as produced by newtondev-mrz-parser
+    // {
+    //       documentCode: documentCode,
+    //       documentType: 'PASSPORT',
+    //       documentTypeCode: documentType,
+    //       issuer: issuerOrg,
+    //       names: names,
+    //       documentNumber: documentNumber,
+    //       nationality: nationality,
+    //       dob: dob,
+    //       sex: sex,
+    //       checkDigit: {
+    //         documentNumber: {value: checkDigit1, valid: checkDigitVerify1},
+    //         dob: {value: checkDigit2, valid: checkDigitVerify2},
+    //         expiry: {value: checkDigit3, valid: checkDigitVerify3},
+    //         personalNumber: {value: checkDigit4, valid: checkDigitVerify4},
+    //         finalCheck: {value: checkDigit5, valid: checkDigitVerify5},
+    //         valid: (checkDigitVerify1 && checkDigitVerify2 && checkDigitVerify3 && checkDigitVerify4 && checkDigitVerify5)
+    //       },
+    //       expiry: expiry,
+    //       personalNumber: personalNumber
+    //     }
+
+    // if (scanMode === 'MRZ') {
+    //   const { names, nationality, issuer, dob, expiry, sex, documentNumber, personalNumber } = data
+    //   return {
+    //     [TYPE]: 'tradle.Passport',
+    //     givenName: names[0],
+    //     surname: names.lastName,
+    //     passportNumber: documentNumber || personalNumber,
+    //     nationality: {
+    //       id: 'tradle.Country_abc',
+    //       title: nationality.abbr.slice(0, 2)
+    //     },
+    //     issuingCountry: {
+    //       id: 'tradle.Country_abc',
+    //       title: issuer.abbr.slice(0, 2)
+    //     },
+    //     sex: {
+    //       id: 'tradle.Sex_abc',
+    //       title: sex.full
+    //     },
+    //     // todo: set offset by country
+    //     dateOfExpiry: dateFromParts(expiry),
+    //     dateOfBirth: dateFromParts(dob),
+    //     photos: [
+    //       {
+    //         url: cutoutBase64
+    //       }
+    //     ]
+    //   }
+    // }
+
+    if (scanMode === 'MRZ') {
+      // as returned by the `mrz` package
+      // {
+      //   "isValid": true,
+      //   "format": "TD3",
+      //   "documentType": {
+      //     "code": "P",
+      //     "label": "Passport",
+      //     "type": "",
+      //     "isValid": true
+      //   },
+      //   "issuingCountry": {
+      //     "code": "UTO",
+      //     "isValid": false,
+      //     "error": "The country code \"UTO\" is unknown"
+      //   },
+      //   "lastname": "ERIKSSON",
+      //   "firstname": "ANNA MARIA",
+      //   "nationality": {
+      //     "code": "UTO",
+      //     "isValid": false,
+      //     "error": "The country code \"UTO\" is unknown"
+      //   },
+      //   "birthDate": {
+      //     "year": "69",
+      //     "month": "08",
+      //     "day": "06",
+      //     "isValid": true
+      //   },
+      //   "sex": {
+      //     "code": "F",
+      //     "label": "Féminin",
+      //     "isValid": true
+      //   },
+      //   "expirationDate": {
+      //     "year": "94",
+      //     "month": "06",
+      //     "day": "23",
+      //     "isValid": true
+      //   },
+      //   "personalNumber": {
+      //     "value": "ZE184226B",
+      //     "isValid": true
+      //   }
+      // }
+
+      const {
+        issuingCountry,
+        nationality,
+        lastname,
+        firstname,
+        birthDate,
+        sex,
+        expirationDate,
+        documentNumber,
+        personalNumber
+      } = data
+
+      return {
+        [TYPE]: 'tradle.Passport',
+        givenName: firstname.split(' ')[0],
+        surname: lastname,
+        passportNumber: documentNumber || personalNumber,
+        nationality: {
+          id: 'tradle.Country_abc',
+          title: nationality.code.slice(0, 2)
+        },
+        issuingCountry: {
+          id: 'tradle.Country_abc',
+          title: issuingCountry.code.slice(0, 2)
+        },
+        sex: {
+          id: 'tradle.Sex_abc',
+          title: sex.code === 'M' ? 'Male' : 'Female'
+        },
+        // todo: set offset by country
+        dateOfExpiry: dateFromParts(expirationDate),
+        dateOfBirth: dateFromParts(birthDate),
+        photos: [
+          {
+            url: cutoutBase64
+          }
+        ]
+      }
+    }
+  },
+  submitLog: async function () {
+    const me = utils.getMe()
+    try {
+      const res = await submitLog(ENV.serverToSendLog + '?' + querystring.stringify({
+        firstName: me.firstName,
+        lastName: me.lastName
+      }))
+
+      if (res.status > 300) {
+        const why = await res.text()
+        throw new Error(why)
+      } else {
+        Alert.alert('Success!', 'The log was sent to the Tradle developer team!')
+      }
+
+      return true
+    } catch (err) {
+      Alert.alert('Failed to send log', err.message)
+      return false
     }
   }
 }
@@ -1480,4 +1627,63 @@ function unserialize (buf) {
   return parts
 }
 
+function dateFromParts (parts) {
+  const date = new Date()
+  date.setUTCHours(0)
+  date.setUTCMinutes(0)
+  date.setUTCSeconds(0)
+  date.setUTCMilliseconds(0)
+  date.setUTCFullYear(Number(parts.year))
+  date.setUTCMonth(Number(parts.month) - 1)
+  date.setUTCDate(Number(parts.day))
+  return date
+}
+
 module.exports = utils;
+/*
+  getDisplayName1(resource, meta) {
+    if (!meta) {
+      if (resource.title)
+        return resource.title
+      if (resource.id)
+        return ""
+      meta = this.getModel(resource[TYPE]).value.properties
+    }
+    let dProps = this.getPropertiesWithAnnotation(meta, 'displayName')
+
+    let m = this.getModel(resource[TYPE])
+    let vCols = m  &&  m.value.viewCols
+    var displayName = '';
+    if (vCols) {
+      vCols.forEach((p) => {
+        if (dProps[p]) {
+          let dn = this.getPropStringValue(meta[p], resource)
+          displayName += displayName.length ? ' ' + dn : dn;
+        }
+      })
+      // if (displayName.length)
+      //   return displayName
+    }
+    // if models does not have viewCols or not all displayName props are listed in viewCols
+    for (var p in meta) {
+      if (p.charAt(0) === '_')
+        continue
+      if (vCols  &&  vCols.indexOf(p) !== -1)
+        continue
+      if (dProps)  {
+        if (!dProps[p]) {
+          if (!displayName  &&  m  &&  resource[p]  &&  m.value.subClassOf === 'tradle.Enum')
+            return resource[p];
+          continue
+        }
+        else {
+          let dn = this.getPropStringValue(meta[p], resource)
+          displayName += displayName.length ? ' ' + dn : dn;
+        }
+      }
+      // let dn = this.getPropStringValue(meta[p], resource)
+      // displayName += displayName.length ? ' ' + dn : dn;
+    }
+    return displayName;
+  },
+*/

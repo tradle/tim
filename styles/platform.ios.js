@@ -15,9 +15,9 @@ module.exports = exports = StyleSheet.create({
   menuButtonNarrow: {
     marginTop: -23,
     paddingVertical: 5,
-    paddingHorizontal: 21,
     height: 45,
     borderRadius: 24,
+    paddingHorizontal: 21,
     // shadowOffset:{width: 5, height: 5},
     shadowOpacity: 1,
     shadowRadius: 5,
