@@ -16,7 +16,7 @@ var driverLicenseParser = require('../utils/driverLicenseParser')
 
 import omit from 'object.omit'
 import pick from 'object.pick'
-import formDefaults from '../data/formDefaults'
+import formDefaults from '../data/formDefaults.json'
 import DatePicker from 'react-native-datepicker'
 
 import BlinkID from 'react-native-blinkid'
