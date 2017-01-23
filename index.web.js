@@ -31,14 +31,19 @@ const err = isUnsupportedEnv()
 if (err) {
   alertError(err)
 } else {
-  const isOnlyTab = require('onetab')
-  isOnlyTab(function (err, yes) {
-    if (err || !yes) {
-      return alertError('This application is open in another tab. Please close one of the two tabs and refresh the page.')
-    }
-
+  const isSafari = navigator.userAgent.indexOf('Safari') !==-1 && navigator.userAgent.indexOf('Chrome') === -1
+  if (isSafari) {
     init()
-  })
+  } else {
+    const isOnlyTab = require('onetab')
+    isOnlyTab(function (err, yes) {
+      if (err || !yes) {
+        return alertError('This application is open in another tab. Please close one of the two tabs and refresh the page.')
+      }
+
+      init()
+    })
+  }
 }
 
 function init () {
