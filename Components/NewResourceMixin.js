@@ -906,7 +906,7 @@ var NewResourceMixin = {
           <View style={styles.booleanContainer}>
             <View style={styles.booleanContentStyle}>
               <Text style={[style, { width: (utils.dimensions(component).width - 100)}]}>{label}</Text>
-              <Switch onValueChange={value => this.onChangeText(prop, value)} value={value} onTintColor={LINK_COLOR} style={{position: 'absolute', right: 0, top: 5}}/>
+              <Switch onValueChange={value => this.onChangeText(prop, value)} value={value} onTintColor={LINK_COLOR} />
             </View>
           </View>
         </TouchableHighlight>
@@ -1546,7 +1546,7 @@ var styles= StyleSheet.create({
     flex: 1
   },
   booleanContentStyle: {
-    // justifyContent: 'space-between',
+    justifyContent: 'space-between',
     flexDirection: 'row',
     // paddingVertical: 5,
     // marginRight: 10,
@@ -1700,11 +1700,11 @@ var styles= StyleSheet.create({
   },
   booleanLabel: {
     color: '#aaaaaa',
-    fontSize: 18
+    fontSize: 20
   },
   booleanText: {
     marginTop: 5,
-    fontSize: 18
+    fontSize: 20
   },
   dateLabel: {
     marginLeft: 10,
