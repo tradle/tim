@@ -171,7 +171,7 @@ class VerificationRow extends Component {
                     <View style={{flexDirection: 'row', marginHorizontal: 10,  marginVertical: 3, paddingBottom: 4}}>
                       {photo}
                       {date}
-                      <View style={styles.noImageBlock}>
+                      <View style={[styles.noImageBlock, {flex: 1}]}>
                         <Text style={styles.rTitle}>{title}</Text>
                          {verifiedBy}
                       </View>
