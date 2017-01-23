@@ -2914,7 +2914,7 @@ var Store = Reflux.createStore({
       let newOrgId = utils.getId(resource.organization)
 
       if (meOrgId  &&  meOrgId !== newOrgId) {
-        if (this.checkIfEmployeeAlready())
+        if (self.checkIfEmployeeAlready())
           return {error: 'Can\'t change employment'}
       }
       if (!meOrgId) {
@@ -2927,12 +2927,12 @@ var Store = Reflux.createStore({
           return {isBecomingEmployee: true}
       }
       else if (meOrgId)
-        return this.checkIfEmployeeAlready()
+        return self.checkIfEmployeeAlready()
     }
   },
   checkIfEmployeeAlready() {
-    let result = self.searchMessages({to: me, modelName: MY_EMPLOYEE_PASS})
-    if (!result)
+    let result = this.searchMessages({to: me, modelName: MY_EMPLOYEE_PASS})
+    if (!result || result.every(r => r.revoked))
       return {isBecomingEmployee: true}
     let meId = utils.getId(me)
     return {isBecomingEmployee: !(result.some((r) => meId === utils.getId(r.to)))}
