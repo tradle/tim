@@ -537,7 +537,7 @@ var NavigationBarRouteMapper = {
     case 'Done':
     case 'Accept':
       icon = 'ios-send'
-      iconSize = 32
+      iconSize = 30
       style = {transform: [
           {rotate: '45deg'}
         ]}
