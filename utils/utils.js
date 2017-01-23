@@ -399,7 +399,7 @@ var utils = {
       for (let i=0; i<vCols.length  &&  !displayName.length; i++) {
         if (!resource[vCols[i]]  ||  excludeProps.indexOf[vCols[i]])
           continue
-        displayName = this.getStringValueForProperty(resource, vCols[i], meta)
+        displayName = this.getStringValueForProperty(resource, vCols[i], m.value.properties)
       }
     }
     return displayName;
