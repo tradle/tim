@@ -48,16 +48,20 @@ class RemediationItemsList extends Component {
     var currentRoutesLength = currentRoutes.length;
 
     currentRoutes[currentRoutesLength - 1].onRightButtonPress = () => {
-      if (Object.keys(this.props.reviewed).length === this.state.list.length) {
+      const numReviewed = Object.keys(this.props.reviewed).length
+      const numItems = this.state.list.length
+      if (numReviewed === numItems) {
         this.props.navigator.pop()
         return
       }
+
       Alert.alert(
-        translate('youReviewed', Object.keys(this.props.reviewed).length, this.state.list.length),
-        translate('areYouSureYouWantToConfirmAllTheForms', translate(utils.getModel(this.props.resource[constants.TYPE]).value)),
+        translate('youReviewed', numReviewed, numItems),
+        translate('areYouSureYouWantToConfirmAllItems', numItems),
+        // translate('areYouSureYouWantToConfirmAllTheForms', translate(utils.getModel(this.props.resource[constants.TYPE]).value)),
         [
-          {text: translate('cancel'), onPress: () =>  console.log('Canceled!')},
-          {text: translate('Ok'), onPress: () => {
+          {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+          {text: translate('OK'), onPress: () => {
             this.submitAllForms()
           }}
         ]

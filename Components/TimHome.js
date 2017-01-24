@@ -507,7 +507,7 @@ class TimHome extends Component {
     //   })
     // }
 
-    route.passProps.editCols = ['firstName', 'lastName'] //, 'language']
+    route.passProps.editCols = ['firstName']//, 'lastName', 'language']
     route.titleTintColor = '#ffffff'
     this.props.navigator.push(route);
   }
