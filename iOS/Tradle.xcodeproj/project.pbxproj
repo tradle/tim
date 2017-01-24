@@ -60,7 +60,6 @@
 		732AB4B31D18B46800F2DE1C /* libCodePush.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732AB4B21D18B45600F2DE1C /* libCodePush.a */; };
 		732EA0C81C24AB99000EFAA6 /* libRNRandomBytes.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732EA0C41C24AB90000EFAA6 /* libRNRandomBytes.a */; };
 		732EA17B1CA6D61E00231B26 /* libRCTCamera.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BCE7C031CA4AF3000370B5A /* libRCTCamera.a */; };
-		73303A9C1E30429400AAE98C /* libPods-Tradle-dev.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 677D170CD70E3212DDC0DAC0 /* libPods-Tradle-dev.a */; };
 		73303A9E1E3045CE00AAE98C /* libRNBlinkID.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73303A4F1E30416E00AAE98C /* libRNBlinkID.a */; };
 		7348C3B81C41C04F00B9CDF5 /* Fabric.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7348C3B61C41C04F00B9CDF5 /* Fabric.framework */; };
 		7348C3B91C41C04F00B9CDF5 /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7348C3B71C41C04F00B9CDF5 /* Crashlytics.framework */; };
@@ -358,7 +357,6 @@
 		3D510339A825413A9733521D /* RCTVideo.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTVideo.xcodeproj; path = "../node_modules/react-native-video/RCTVideo.xcodeproj"; sourceTree = "<group>"; };
 		4E2C19FDDDD4447B9C80F765 /* libRNBlinkID.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNBlinkID.a; sourceTree = "<group>"; };
 		66D82D13AFA17C3F90361EB1 /* Pods-Tradle-dev.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Tradle-dev.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Tradle-dev/Pods-Tradle-dev.debug.xcconfig"; sourceTree = "<group>"; };
-		677D170CD70E3212DDC0DAC0 /* libPods-Tradle-dev.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Tradle-dev.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6ECAAF13C7384B738734FB25 /* TcpSockets.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = TcpSockets.xcodeproj; path = "../node_modules/react-native-tcp/ios/TcpSockets.xcodeproj"; sourceTree = "<group>"; };
 		73030AF11D14DC4B0096A864 /* RNFS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNFS.xcodeproj; path = "../node_modules/react-native-fs/RNFS.xcodeproj"; sourceTree = "<group>"; };
 		731045901D7CE25D0087E82D /* Tradle-dev.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Tradle-dev.entitlements"; sourceTree = "<group>"; };
@@ -369,7 +367,6 @@
 		7348C3B61C41C04F00B9CDF5 /* Fabric.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Fabric.framework; sourceTree = "<group>"; };
 		7348C3B71C41C04F00B9CDF5 /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Crashlytics.framework; sourceTree = "<group>"; };
 		7348E4731D9D8CDD00328628 /* tradle.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = tradle.ttf; sourceTree = "<group>"; };
-		735F27AD1E2EDEA30042F408 /* libAnylineReact.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libAnylineReact.a; path = "../../../Library/Developer/Xcode/DerivedData/Tradle-ggebxcvwncukinfhemslyyyvcgkh/Build/Products/Debug-iphoneos/AnylineReact/libAnylineReact.a"; sourceTree = "<group>"; };
 		7364872A1C34703500713F09 /* RNECC.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNECC.xcodeproj; path = "../node_modules/react-native-ecc/ios/RNECC.xcodeproj"; sourceTree = "<group>"; };
 		7365BF281C3461E600B0A512 /* RNKeychain.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNKeychain.xcodeproj; path = "../node_modules/react-native-keychain/RNKeychain.xcodeproj"; sourceTree = "<group>"; };
 		73683CFA1CC443B300E178CF /* QTouchposeApplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QTouchposeApplication.h; sourceTree = "<group>"; };
@@ -377,9 +374,7 @@
 		7375407E1D25941500A81EC1 /* RNDeviceInfo.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNDeviceInfo.xcodeproj; path = "../node_modules/react-native-device-info/RNDeviceInfo.xcodeproj"; sourceTree = "<group>"; };
 		7376086A1E1B2385002D0B45 /* AssetsLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AssetsLibrary.framework; path = System/Library/Frameworks/AssetsLibrary.framework; sourceTree = SDKROOT; };
 		7385C6BA1C4C24A700B92CDA /* Dev.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Dev.plist; path = Tradle/Dev.plist; sourceTree = "<group>"; };
-		739033351E1D443F00E2FB31 /* libAnylineReact.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libAnylineReact.a; path = "../../../Library/Developer/Xcode/DerivedData/Tradle-ggebxcvwncukinfhemslyyyvcgkh/Build/Products/Debug-iphonesimulator/AnylineReact/libAnylineReact.a"; sourceTree = "<group>"; };
 		739033371E1D444100E2FB31 /* libPods-Tradle-dev.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libPods-Tradle-dev.a"; path = "../../../Library/Developer/Xcode/DerivedData/Tradle-ggebxcvwncukinfhemslyyyvcgkh/Build/Products/Debug-iphonesimulator/libPods-Tradle-dev.a"; sourceTree = "<group>"; };
-		739033391E1D444300E2FB31 /* libReact.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libReact.a; path = "../../../Library/Developer/Xcode/DerivedData/Tradle-ggebxcvwncukinfhemslyyyvcgkh/Build/Products/Debug-iphonesimulator/React/libReact.a"; sourceTree = "<group>"; };
 		73947DA31D3DAEA500C5CC8F /* RCTPushNotification.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTPushNotification.xcodeproj; path = "../node_modules/react-native/Libraries/PushNotificationIOS/RCTPushNotification.xcodeproj"; sourceTree = "<group>"; };
 		739F72EE1C3F742B00D9F2FB /* RNEnvironmentManagerIOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNEnvironmentManagerIOS.h; sourceTree = "<group>"; };
 		739F72EF1C3F742B00D9F2FB /* RNEnvironmentManagerIOS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNEnvironmentManagerIOS.m; sourceTree = "<group>"; };
@@ -491,7 +486,6 @@
 				73947DA91D3DAEAA00C5CC8F /* libRCTPushNotification.a in Frameworks */,
 				734EF80E1E2E95D900E3A9C4 /* libRCTAsyncRocksDBStorage.a in Frameworks */,
 				73303A9E1E3045CE00AAE98C /* libRNBlinkID.a in Frameworks */,
-				73303A9C1E30429400AAE98C /* libPods-Tradle-dev.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -688,14 +682,10 @@
 		739917F21E17CF6D00061291 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				735F27AD1E2EDEA30042F408 /* libAnylineReact.a */,
-				739033391E1D444300E2FB31 /* libReact.a */,
 				739033371E1D444100E2FB31 /* libPods-Tradle-dev.a */,
-				739033351E1D443F00E2FB31 /* libAnylineReact.a */,
 				7376086A1E1B2385002D0B45 /* AssetsLibrary.framework */,
 				7348C3B61C41C04F00B9CDF5 /* Fabric.framework */,
 				7348C3B71C41C04F00B9CDF5 /* Crashlytics.framework */,
-				677D170CD70E3212DDC0DAC0 /* libPods-Tradle-dev.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -958,11 +948,6 @@
 				LastUpgradeCheck = 710;
 				ORGANIZATIONNAME = Tradle;
 				TargetAttributes = {
-					00E356ED1AD99517003FC87E = {
-						CreatedOnToolsVersion = 6.2;
-						DevelopmentTeam = 94V7783F74;
-						TestTargetID = 13B07F861A680F5B00A75B9A;
-					};
 					13B07F861A680F5B00A75B9A = {
 						DevelopmentTeam = 94V7783F74;
 						SystemCapabilities = {
@@ -1552,59 +1537,6 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		00E356F61AD99517003FC87E /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				DEVELOPMENT_TEAM = 94V7783F74;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = IdentityTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.2;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
-				PRODUCT_NAME = Tradle;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Tradle.app/Tradle";
-			};
-			name = Debug;
-		};
-		00E356F71AD99517003FC87E /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				COPY_PHASE_STRIP = NO;
-				DEVELOPMENT_TEAM = 94V7783F74;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = IdentityTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.2;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
-				PRODUCT_NAME = Tradle;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Tradle.app/Tradle";
-			};
-			name = Release;
-		};
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
