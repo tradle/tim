@@ -4421,13 +4421,15 @@ var Store = Reflux.createStore({
           }
         })
         if (Object.keys(uniqueVerifications).length === forms.length) {
-          verifications.sort((a, b) => a.time - b.time)
+          if (verifications.length) {
+            verifications.sort((a, b) => a.time - b.time)
 
-          owners[pId][ownerId].completedApps[product] = verifications[verifications.length - 1].time
-          if (!stats.completedApps[product])
-            stats.completedApps[product] = 1
-          else
-            stats.completedApps[product]++
+            owners[pId][ownerId].completedApps[product] = verifications[verifications.length - 1].time
+            if (!stats.completedApps[product])
+              stats.completedApps[product] = 1
+            else
+              stats.completedApps[product]++
+          }
         }
         else {
           if (!stats.openApps[product])
