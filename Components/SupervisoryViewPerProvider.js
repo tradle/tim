@@ -90,42 +90,42 @@ class SupervisoryViewPerProvider extends Component {
       changedCol = {[stats.changed]: styles.changedCol}
 
     return  <Row size={8} style={{borderBottomColor: '#aaaaaa', borderBottomWidth: 1}} key={'app_' + cnt}>
-              <Col sm={1} md={4} lg={3}>
+              <Col sm={1} md={1} lg={1}>
                 <Text style={{alignSelf: 'center', padding: 3}}>
                   {owner.title || ''}
                 </Text>
               </Col>
-              <Col sm={1} md={4} lg={3} style={changedCol.forms || styles.col}>
+              <Col sm={1} md={1} lg={1} style={changedCol.forms || styles.col}>
                 <Text style={styles.cell}>
                   {resource.forms.length}
                 </Text>
               </Col>
-              <Col sm={1} md={4} lg={3} style={changedCol.formErrors || styles.col}>
+              <Col sm={1} md={1} lg={1} style={changedCol.formErrors || styles.col}>
                 <Text style={styles.cell}>
                   {resource.formErrors.length}
                 </Text>
               </Col>
-              <Col sm={1} md={4} lg={3} style={changedCol.formCorrections || styles.col}>
+              <Col sm={1} md={1} lg={1} style={changedCol.formCorrections || styles.col}>
                 <Text style={styles.cell}>
                   {resource.formCorrections.length}
                 </Text>
               </Col>
-              <Col sm={1} md={4} lg={3} style={changedCol.verifications || styles.col}>
+              <Col sm={1} md={1} lg={1} style={changedCol.verifications || styles.col}>
                 <Text style={styles.cell}>
                   {resource.verifications.length}
                 </Text>
               </Col>
-              <Col sm={1} md={4} lg={3} style={styles.col}>
+              <Col sm={1} md={1} lg={1} style={styles.col}>
                 <Text style={styles.cell}>
                   {start}
                 </Text>
               </Col>
-              <Col sm={1} md={4} lg={3} style={styles.col}>
+              <Col sm={1} md={1} lg={1} style={styles.col}>
                 <Text style={styles.cell}>
                   {completed}
                 </Text>
               </Col>
-              <Col sm={1} md={4} lg={3} style={styles.col}>
+              <Col sm={1} md={1} lg={1} style={styles.col}>
                 <Text style={styles.cell}>
                   {days}
                 </Text>
@@ -180,42 +180,6 @@ class SupervisoryViewPerProvider extends Component {
     )
   }
 
-  render1() {
-    let rows = []
-    let applicants = this.state.applicants
-    let products = []
-    let cnt = 0
-    this.props.provider.applications.forEach((a) => {
-      if (products.indexOf(a.productType) !== -1)
-        return
-      products.push(a.productType)
-      rows.push(<Row size={8} style={styles.topRow} key={'app_' + cnt++}>
-                  <Col sm={8} md={8} lg={8}>
-                    <Text style={styles.topRowCell}>
-                      {utils.getModel(a.productType).value.title}
-                    </Text>
-                  </Col>
-                </Row>)
-      for (let p in applicants) {
-        let app = applicants[p]
-        app.allPerApp.forEach((appProps) => {
-          if (appProps.app.productType === a.productType)
-            rows.push(this.renderRow(appProps, app, cnt++))
-        })
-      }
-    })
-    return (
-      <PageView style={platformStyles.container}>
-        <ScrollView>
-          <NetworkInfoProvider connected={this.state.isConnected} />
-          {this.renderHeader()}
-          <View style={styles.separator} />
-          {rows}
-          {rows.length > 7 ? this.renderHeader(true) : <View/>}
-        </ScrollView>
-      </PageView>
-    )
-  }
   renderHeader(isFooter) {
     let top = <Row size={8} style={styles.topRow}>
                 <Col sm={1} md={1} lg={1}>
@@ -305,3 +269,41 @@ var styles = StyleSheet.create({
 });
 
 module.exports = SupervisoryViewPerProvider
+/*
+  render1() {
+    let rows = []
+    let applicants = this.state.applicants
+    let products = []
+    let cnt = 0
+    this.props.provider.applications.forEach((a) => {
+      if (products.indexOf(a.productType) !== -1)
+        return
+      products.push(a.productType)
+      rows.push(<Row size={8} style={styles.topRow} key={'app_' + cnt++}>
+                  <Col sm={8} md={8} lg={8}>
+                    <Text style={styles.topRowCell}>
+                      {utils.getModel(a.productType).value.title}
+                    </Text>
+                  </Col>
+                </Row>)
+      for (let p in applicants) {
+        let app = applicants[p]
+        app.allPerApp.forEach((appProps) => {
+          if (appProps.app.productType === a.productType)
+            rows.push(this.renderRow(appProps, app, cnt++))
+        })
+      }
+    })
+    return (
+      <PageView style={platformStyles.container}>
+        <ScrollView>
+          <NetworkInfoProvider connected={this.state.isConnected} />
+          {this.renderHeader()}
+          <View style={styles.separator} />
+          {rows}
+          {rows.length > 7 ? this.renderHeader(true) : <View/>}
+        </ScrollView>
+      </PageView>
+    )
+  }
+*/
