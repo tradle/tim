@@ -142,7 +142,6 @@ class SupervisoryView extends Component {
           keyboardShouldPersistTaps={true}
           initialListSize={10}
           pageSize={20}
-          scrollRenderAhead={10}
           showsVerticalScrollIndicator={false} />
 
     return (

@@ -619,7 +619,7 @@ var styles = StyleSheet.create({
     paddingRight: 3
   },
   orgView: {
-    maxWidth: 0.8 * utils.dimensions().width - 150,
+    maxWidth: 0.7 * utils.dimensions().width - 150,
     paddingLeft: 3,
     marginRight: 10,
     flex: 1,
