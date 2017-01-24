@@ -298,7 +298,9 @@ class VerificationRow extends Component {
       else if (!model.autoCreate) {
         var val = (properties[v].displayAs)
                 ? utils.templateIt(properties[v], resource)
-                : resource[v];
+                : properties[v].type === 'object' ? null : resource[v];
+        if (!val)
+          return
         let row = <Text style={style} key={self.getNextKey()}>{val}</Text>
         vCols.push(
           <View style={styles.refPropertyRow} key={self.getNextKey()}>
