@@ -1108,7 +1108,7 @@ var Store = Reflux.createStore({
           let rootHash = payload.identity[ROOT_HASH] || protocol.linkString(payload.identity)
           return meDriver.addContactIdentity(payload.identity)
           .then(() => {
-            return self.addContact(payload, rootHash)
+            return self.addContact(payload, rootHash, msg.forPartials || msg.forContext)
           })
           .then(() => {
             const url = utils.keyByValue(wsClients, transport)
@@ -1188,7 +1188,7 @@ var Store = Reflux.createStore({
           //   .catch((err) => {
           //     debugger
           //     Alert.alert(err)
-          //   })
+        //   })
           // }
           return
         } catch (err) {
@@ -1518,13 +1518,14 @@ var Store = Reflux.createStore({
     })
   },
 
-  addContact(data, hash) {
+  addContact(data, hash, noMessage) {
     var ikey = IDENTITY + '_' + hash
     var pkey = PROFILE + '_' + hash
 
     var profile = list[pkey] && this._getItem(pkey)
     var identity = list[ikey]  &&  this._getItem(ikey)
 
+    var batch = []
     var newContact = !profile  ||  !identity
     var isDevicePairing = data[TYPE]  &&  data[TYPE] === PAIRING_REQUEST
     if (newContact) {
@@ -1553,6 +1554,8 @@ var Store = Reflux.createStore({
           profile.formatted = profile.firstName
         }
         profile._unread = 1
+        if (noMessage)
+          profile.inactive = true
       }
 
       profile.formatted = profile.firstName + (data && data.lastName ? ' ' + data.lastName : '')
@@ -1560,7 +1563,6 @@ var Store = Reflux.createStore({
       identity[ROOT_HASH] = hash
       identity[CUR_HASH] = hash
 
-      var batch = []
       batch.push({type: 'put', key: ikey, value: identity })
       batch.push({type: 'put', key: pkey, value: profile })
       this._setItem(ikey, identity)
@@ -1581,15 +1583,19 @@ var Store = Reflux.createStore({
       promise = Q()
     else {
       let r = this._getItem(utils.getId(profile))
-      if (r  &&  r.bot)
+      if ((r  &&  r.bot) || noMessage)
         promise = Q()
-      else
+      else {
+        if (profile.inactive)
+          batch.push({type: 'put', key: pkey, value: profile })
+
         promise = this.onAddMessage({msg: {
                     [TYPE]: SIMPLE_MESSAGE,
                     message: translate('howCanIHelpYou', profile.formatted, utils.getMe().firstName),
                     from: this.buildRef(utils.getMe()),
                     to: this._getItem(pkey)
                   }})
+      }
     }
     // return newContact ? db.batch(batch) : Q()
     // .then(() => {
@@ -1601,7 +1607,7 @@ var Store = Reflux.createStore({
     //   })
     return promise
     .then(() => {
-      if (newContact)
+      if (batch.length)
         return db.batch(batch)
     })
     // })
@@ -3352,6 +3358,10 @@ var Store = Reflux.createStore({
           //   result = r1.concat(r2)
           // }
         }
+        else if (params.modelName === PROFILE) {
+          result = result.filter((r) => !r.inactive)
+        }
+
         if (params.isAggregation)
           result = this.getDependencies(result);
         var shareableResources;
@@ -4190,7 +4200,10 @@ var Store = Reflux.createStore({
     let plist = this.searchNotMessages({modelName: PARTIAL})
     if (!plist  ||  !plist.length)
       return
-    plist = plist.reverse()
+
+    let allContextsArr = plist.filter((r) => r.type === PRODUCT_APPLICATION)
+    let allContexts ={}
+    allContextsArr.forEach((a) => allContexts[a.resource.id] = a)
 
     let providers = {}
     let owners = {}
@@ -4220,7 +4233,7 @@ var Store = Reflux.createStore({
       if (t !== FORM_REQUEST  &&  t !== FORM_ERROR)
         ownerId = r.from.id
       else {
-        let pa = allResources[PRODUCT_APPLICATION + '_' + r.context]
+        let pa = allContexts[PRODUCT_APPLICATION + '_' + r.context]
         ownerId = pa ? pa.from.id : r.from.id
       }
       if (!owners[pId])
@@ -4389,13 +4402,15 @@ var Store = Reflux.createStore({
           }
         })
         if (Object.keys(uniqueVerifications).length === forms.length) {
-          verifications.sort((a, b) => a.time - b.time)
+          if (verifications.length) {
+            verifications.sort((a, b) => a.time - b.time)
 
-          owners[pId][ownerId].completedApps[product] = verifications[verifications.length - 1].time
-          if (!stats.completedApps[product])
-            stats.completedApps[product] = 1
-          else
-            stats.completedApps[product]++
+            owners[pId][ownerId].completedApps[product] = verifications[verifications.length - 1].time
+            if (!stats.completedApps[product])
+              stats.completedApps[product] = 1
+            else
+              stats.completedApps[product]++
+          }
         }
         else {
           if (!stats.openApps[product])
@@ -5658,7 +5673,7 @@ var Store = Reflux.createStore({
         else if (payload[TYPE] === PARTIAL) {
           msg.object[ROOT_HASH] = msg.objectinfo.permalink
 
-          payload.context = msg.object.context
+          payload.context = msg.object.forContext || msg.object.context
           payload.leaves = tradle.partial.interpretLeaves(payload.leaves)
 
           let partialPermalink = payload.leaves.find(l => l.key === ROOT_HASH && l.value)
