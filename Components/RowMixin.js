@@ -224,7 +224,7 @@ var RowMixin = {
     // var photo = hasPhotos
     //           ? <Image source={{uri: utils.getImageUri(document.photos[0].url)}}  style={styles.cellImage} />
     //           : <View />;
-    var headerStyle = {paddingTop: verification.dateVerified ? 0 : 5, marginLeft: 10}
+    var headerStyle = {flexDirection: 'column', paddingTop: verification.dateVerified ? 0 : 5, marginLeft: 10}
     var isShared = this.isShared(verification)
 
                     // {verification.dateVerified
@@ -239,7 +239,7 @@ var RowMixin = {
     let hs = /*isShared ? chatStyles.description :*/ [styles.header, {fontSize: 16}]
     // let arrow = <Icon color={this.props.bankStyle.VERIFIED_HEADER_COLOR} size={20} name={'ios-arrow-forward'} style={{top: 10, position: 'absolute', right: 30}}/>
     let arrow = <Icon color={this.props.bankStyle.VERIFIED_HEADER_COLOR} size={20} name={'ios-arrow-forward'} style={{marginRight: 10, marginTop: 3}}/>
-    var header =  <View style={[headerStyle]}>
+    var header =  <View style={headerStyle}>
                     <Text style={[hs, {fontSize: 12}]}>{translate(model)}</Text>
                     <Text style={[hs, {color: '#555555'}]}>{utils.getDisplayName(document)}</Text>
                   </View>

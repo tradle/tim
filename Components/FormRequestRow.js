@@ -78,10 +78,10 @@ class FormRequestRow extends Component {
     if (isFormRequest)
       onPressCall = this.formRequest(resource, renderedRow)
     else {
-      onPressCall = this.reviewFormsInContext.bind(this)
+      onPressCall = resource.documentCreated ? null : this.reviewFormsInContext.bind(this)
       let idx = message.indexOf('...') + 3
       let msg = <View key={this.getNextKey()}>
-                  <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: '#aaaaaa'} : {color: '#555555'}]}>{message.substring(0, idx)}</Text>
+                  <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: '#aaaaaa'} : {}]}>{message.substring(0, idx)}</Text>
                   <View style={chatStyles.rowContainer}>
                     <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: '#757575'} : {color: LINK_COLOR}]}>{message.substring(idx).trim()}</Text>
                     <Icon style={[{marginTop: 2, marginRight: 2}, resource.documentCreated  ? chatStyles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
@@ -500,7 +500,7 @@ class FormRequestRow extends Component {
       let notLink = resource.documentCreated  ||  isReadOnly  ||  form.subClassOf === MY_PRODUCT
       link = <View style={chatStyles.rowContainer}>
                    <Text style={[chatStyles.resourceTitle, {color: resource.documentCreated  ||  notLink ?  '#757575' : resource.verifiers ? 'green' : LINK_COLOR}]}>{translate(form)}</Text>
-                   <Icon style={[{marginTop: 2, marginRight: 2}, resource.documentCreated  ? chatStyles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
+                   <Icon  name={'ios-arrow-forward'} style={[{marginTop: 2, marginRight: 2}, resource.documentCreated  ? chatStyles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} />
                  </View>
       onPressCall = notLink
                   ? null
@@ -533,10 +533,10 @@ class FormRequestRow extends Component {
       Actions.addItem(params)
     }
   }
-  reviewFormsInContext(resource) {
+  reviewFormsInContext() {
     this.props.navigator.push({
       id: 29,
-      title: translate("Remediation"),
+      title: translate("importData"),
       backButtonTitle: 'Back',
       component: RemediationItemsList,
       rightButtonTitle: 'Done',
