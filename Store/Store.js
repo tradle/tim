@@ -4144,12 +4144,12 @@ var Store = Reflux.createStore({
       if (r._context       &&
           !params.prop     &&
           (m.subClassOf === FORM || m.id === VERIFICATION) &&
-          self._getItem(utils.getId(r._context)).product === REMEDIATION) {
+          this._getItem(utils.getId(r._context)).product === REMEDIATION) {
         return true
       }
       if (m.subClassOf === MY_PRODUCT  &&
           r._context                   &&
-          self._getItem(utils.getId(r._context)).product === REMEDIATION)
+          this._getItem(utils.getId(r._context)).product === REMEDIATION)
         return true
 
 
