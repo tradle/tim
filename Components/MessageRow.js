@@ -591,7 +591,7 @@ class MessageRow extends Component {
             <Text style={[style, {color: '#555555'}]}>{instruction} </Text>
             <View style={chatStyles.rowContainer}>
               <Text style={[style, {color: resource.documentCreated || isReadOnlyChat ?  '#aaaaaa' : self.props.bankStyle.FORM_ERROR_COLOR}]}>{translate(utils.getModel(rtype).value)}</Text>
-              <Icon name={iconName} size={iconSize} color={resource.documentCreated || isReadOnlyChat ? self.props.bankStyle.REQUEST_FULFILLED : self.props.bankStyle.FORM_ERROR_COLOR} />
+              <Icon name={iconName} size={iconSize} color={resource.documentCreated || isReadOnlyChat ? self.props.bankStyle.REQUEST_FULFILLED : self.props.bankStyle.FORM_ERROR_COLOR} style={Platform.OS === 'web' ? {marginTop: -3} : {}}/>
             </View>
           </View>
         )
