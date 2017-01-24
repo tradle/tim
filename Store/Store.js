@@ -986,6 +986,21 @@ var Store = Reflux.createStore({
           const isPresent = present.indexOf(permalink) !== -1
           updatePresence(permalink, isPresent)
         })
+
+      // const permalinks = wsClients.providers({ client: transport })
+      // permalinks.forEach(permalink => {
+      //   const isPresent = present.indexOf(permalink) !== -1
+      //   updatePresence(permalink, isPresent)
+      // })
+
+      // const newArrivals = present.filter(permalink => {
+      //   if (permalinks.indexOf(permalink) === -1) {
+      //     const { hashToUrl={} } = self._getItem(SETTINGS + '_1')
+      //     return !hashToUrl[permalink]
+      //   }
+      // })
+
+      // if (newArrivals.length) self.getInfo([url])
     })
 
     function onTransportConnectivityChanged (connected) {
@@ -1264,6 +1279,11 @@ var Store = Reflux.createStore({
       unreliable: wsClient,
       clientForRecipient: function (recipient) {
         const sendy = new Sendy({ ...SENDY_OPTS, name: recipient })
+        sendy.on('progress', ({ total, progress }) => {
+          const percent = 100 * progress / total | 0
+          console.log(`${percent}% of message downloaded from ${recipient}`)
+        })
+
         if (!tlsKey) return sendy
 
         return new TLSClient({

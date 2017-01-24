@@ -63,6 +63,12 @@ import * as AutomaticUpdates from './utils/automaticUpdates';
 import { signIn } from './utils/localAuth'
 var StyleSheet = require('./StyleSheet')
 
+const TIM_HOME = 1
+const NEW_RESOURCE = 4
+const MESSAGE_LIST = 11
+const PASSWORD_CHECK = 20
+const REMEDIATION = 29
+
 var reactMixin = require('react-mixin');
 import {
   Navigator,
@@ -345,7 +351,7 @@ class TiMApp extends Component {
           // return {...Navigator.SceneConfigs.FloatFromRight, springFriction:26, springTension:300};
 
   renderScene(route, nav) {
-    if (route.id === 1 || route.id === 20  ||  (!utils.getMe()  ||  !utils.getMe().isRegistered  &&  route.id === 4)) {
+    if (route.id === TIM_HOME || route.id === PASSWORD_CHECK  ||  (!utils.getMe()  ||  !utils.getMe().isRegistered  &&  route.id === NEW_RESOURCE)) {
       this._lockToPortrait()
     } else {
       this._unlockOrientation()
@@ -383,7 +389,7 @@ class TiMApp extends Component {
     // return <RouteComponent navigator={nav} {...props} />
 
     switch (route.id) {
-    case 1:
+    case TIM_HOME: //1
       return <TimHome navigator={nav} {...props}/>;
     case 2:
       return <ResourceTypesScreen navigator={nav}
@@ -394,7 +400,7 @@ class TiMApp extends Component {
                   callback={props.callback} />;
     case 3:
       return <ResourceView navigator={nav} {...props } />
-    case 4:
+    case NEW_RESOURCE: // 4
       return <NewResource navigator={nav} {...props } />
     case 5:
       return <MessageView navigator={nav} {...props} />
@@ -410,7 +416,7 @@ class TiMApp extends Component {
                   modelName={props.modelName} />;
     case 9:
       return <ItemsList navigator={nav} {...props} />
-    case 11:
+    case MESSAGE_LIST: //11
       return <MessageList navigator={nav} {...props} />
     case 12:
       return <CameraView navigator={nav} {...props}/>
@@ -452,7 +458,7 @@ class TiMApp extends Component {
       // return <VideoPlayer {...props} />
     case 19:
       return <GridItemsList navigator={nav} {...props} />
-    case 20:
+    case PASSWORD_CHECK:
       return <PasswordCheck navigator={nav} {...props} />
     case 21:
       return <TouchIDOptIn navigator={nav} { ...props } />
@@ -470,7 +476,7 @@ class TiMApp extends Component {
       return <SupervisoryView navigator={nav} {...props} />
     case 28:
       return <Log navigator={nav} {...props} />
-    case 29:
+    case REMEDIATION:
       return <RemediationItemsList navigator={nav} {...props} />
     // case 30:
     //   return <Tabs navigator={nav} {...props} />
@@ -640,11 +646,14 @@ var NavigationBarRouteMapper = {
       org = <Text style={style}> - {route.passProps.resource.organization.title}</Text>
     else
       org = <View />;
-    let photo
-    if (/*Platform.OS !== 'android' && */ route.id === 11  &&  route.passProps.resource.photos) {
-      var uri = utils.getImageUri(route.passProps.resource.photos[0].url);
+    let photo, uri
+    if (route.id === MESSAGE_LIST  &&  route.passProps.resource.photos)
+      uri = utils.getImageUri(route.passProps.resource.photos[0].url);
+    if (route.id === REMEDIATION)
+      uri = route.passProps.to.photos && utils.getImageUri(route.passProps.to.photos[0].url)
+
+    if (uri)
       photo = <Image source={{uri: uri}} style={[styles.msgImage, utils.isAndroid() ? {marginTop: 23} : {}]} />
-    }
     else
       photo = <View/>
     var style = [platformStyles.navBarText, styles.navBarTitleText, {color: '#555555'}]

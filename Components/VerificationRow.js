@@ -278,9 +278,13 @@ class VerificationRow extends Component {
 
       if (properties[v].ref) {
         if (resource[v]) {
-          let val = (properties[v].ref === constants.TYPES.MONEY)
-                  ? utils.normalizeCurrencySymbol(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value
-                  : (resource[v].title || resource[v])
+          let val
+          if (properties[v].ref === constants.TYPES.MONEY)
+            val = utils.normalizeCurrencySymbol(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value
+          else if (resource[v].title)
+            val = resource[v].title
+          else
+            return
 
           vCols.push(
             <View style={styles.refPropertyRow} key={self.getNextKey()}>
@@ -298,7 +302,9 @@ class VerificationRow extends Component {
       else if (!model.autoCreate) {
         var val = (properties[v].displayAs)
                 ? utils.templateIt(properties[v], resource)
-                : resource[v];
+                : properties[v].type === 'object' ? null : resource[v];
+        if (!val)
+          return
         let row = <Text style={style} key={self.getNextKey()}>{val}</Text>
         vCols.push(
           <View style={styles.refPropertyRow} key={self.getNextKey()}>

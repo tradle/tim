@@ -179,54 +179,6 @@ class SupervisoryViewPerProvider extends Component {
       </PageView>
     )
   }
-
-  render1() {
-    let rows = []
-    let applicants = this.state.applicants
-    let products = []
-    let cnt = 0
-
-    let pTypes = {}
-    if (applicants) {
-      for (let app in applicants) {
-        let a = applicants[app]
-        if (a.applications  &&  a.applications.length)
-          a.applications.forEach((app) => pTypes[app.productType] = app.productType)
-      }
-    }
-    // this.props.provider.applications.forEach((a) => {
-    pTypes = Object.keys(pTypes)
-    pTypes.forEach((productType) => {
-      if (products.indexOf(productType) !== -1)
-        return
-      products.push(productType)
-      rows.push(<Row size={8} style={styles.topRow} key={'app_' + cnt++}>
-                  <Col sm={8} md={8} lg={8}>
-                    <Text style={styles.topRowCell}>
-                      {utils.getModel(productType).value.title}
-                    </Text>
-                  </Col>
-                </Row>)
-      for (let p in applicants) {
-        let app = applicants[p]
-        app.allPerApp.forEach((appProps) => {
-          if (appProps.app.productType === productType)
-            rows.push(this.renderRow(appProps, app, cnt++))
-        })
-      }
-    })
-    return (
-      <PageView style={platformStyles.container}>
-        <ScrollView>
-          <NetworkInfoProvider connected={this.state.isConnected} />
-          {this.renderHeader()}
-          <View style={styles.separator} />
-          {rows}
-          {rows.length > 7 ? this.renderHeader(true) : <View/>}
-        </ScrollView>
-      </PageView>
-    )
-  }
   renderHeader(isFooter) {
     let top = <Row size={8} style={styles.topRow}>
                 <Col sm={1} md={1} lg={1}>
@@ -316,3 +268,41 @@ var styles = StyleSheet.create({
 });
 
 module.exports = SupervisoryViewPerProvider
+/*
+  render1() {
+    let rows = []
+    let applicants = this.state.applicants
+    let products = []
+    let cnt = 0
+    this.props.provider.applications.forEach((a) => {
+      if (products.indexOf(a.productType) !== -1)
+        return
+      products.push(a.productType)
+      rows.push(<Row size={8} style={styles.topRow} key={'app_' + cnt++}>
+                  <Col sm={8} md={8} lg={8}>
+                    <Text style={styles.topRowCell}>
+                      {utils.getModel(a.productType).value.title}
+                    </Text>
+                  </Col>
+                </Row>)
+      for (let p in applicants) {
+        let app = applicants[p]
+        app.allPerApp.forEach((appProps) => {
+          if (appProps.app.productType === a.productType)
+            rows.push(this.renderRow(appProps, app, cnt++))
+        })
+      }
+    })
+    return (
+      <PageView style={platformStyles.container}>
+        <ScrollView>
+          <NetworkInfoProvider connected={this.state.isConnected} />
+          {this.renderHeader()}
+          <View style={styles.separator} />
+          {rows}
+          {rows.length > 7 ? this.renderHeader(true) : <View/>}
+        </ScrollView>
+      </PageView>
+    )
+  }
+*/

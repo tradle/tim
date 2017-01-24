@@ -57,8 +57,11 @@ class QRCodeScanner extends Component {
 
     this.setState({
       scanned: true
-    }, () => {
-      this.props.onread(e)
+    }, async () => {
+      const done = await this.props.onread(e)
+      if (done === false) {
+        this.setState({ scanned: false })
+      }
     })
   }
   _switchCamera() {
