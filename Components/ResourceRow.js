@@ -364,7 +364,7 @@ class ResourceRow extends Component {
         let p = resource.leaves.find((l) => l.key === TYPE && l.value).value
         let productTitle = utils.makeModelTitle(p)
         return <View style={{flexDirection: 'row'}}>
-                <Text style={[styles.resourceTitle, {fontSize: 18}]} numberOfLines={2}>{resource.providerInfo.title}</Text>
+                <Text style={[styles.resourceTitle, {fontSize: 18}]}>{resource.providerInfo.title}</Text>
                 <Text style={[styles.resourceTitle, {fontSize: 18, paddingLeft: 7, color: '#FF6D0D'}]}>{' ' + productTitle}</Text>
               </View>
       }
@@ -373,10 +373,10 @@ class ResourceRow extends Component {
         if (model.subClassOf  &&  model.subClassOf === 'tradle.Enum')
           vCols = utils.createAndTranslate(vCols, true)
 
-        return <Text style={styles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
+        return <Text style={styles.resourceTitle}>{vCols}</Text>;
       }
       else
-        return <Text style={styles.resourceTitle} numberOfLines={2}>{model.title}</Text>;
+        return <Text style={styles.resourceTitle}>{model.title}</Text>;
     }
     // HACK
     else if (model.id === PRODUCT_APPLICATION) {
@@ -512,7 +512,7 @@ class ResourceRow extends Component {
       renderedViewCols = vCols;
     else {
       var vCols = utils.getDisplayName(resource, model.properties);
-      return <Text style={styles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
+      return <Text style={styles.resourceTitle}>{vCols}</Text>;
 
     }
     if (!backlink)
