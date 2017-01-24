@@ -239,11 +239,12 @@ class MessageView extends Component {
     var inRow = photos ? photos.length : 0
     if (inRow  &&  inRow > 4)
       inRow = 5;
-    var actionPanel =
-          <ShowMessageRefList resource={resource}
-                              navigator={this.props.navigator}
-                              currency={this.props.currency}
-                              bankStyle={this.props.bankStyle} />
+    var actionPanel = this.props.isReview
+                    ? null
+                    : <ShowMessageRefList resource={resource}
+                                          navigator={this.props.navigator}
+                                          currency={this.props.currency}
+                                          bankStyle={this.props.bankStyle} />
         // <FromToView resource={resource} navigator={this.props.navigator} />
         // <MoreLikeThis resource={resource} navigator={this.props.navigator}/>
     var verificationTxID, separator
