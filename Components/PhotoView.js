@@ -94,9 +94,10 @@ class PhotoView extends Component {
                   height: Math.floor(width < height ? height / 2 : width / 2),
                 }
 
+            // <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, currentPhoto, true)}>
     return (
           <View>
-            <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, resource.photos[0], true)}>
+            <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, this.props.mainPhoto || resource.photos[0], true)}>
               <Image resizeMode='cover' source={source} style={image} />
             </TouchableHighlight>
           </View>

@@ -25,7 +25,7 @@ class PhotoCarousel extends Component {
     var photoUrls = [];
     var currentPhoto = this.props.currentPhoto || (this.props.photos && this.props.photos[0])
     var currentPhotoIndex = -1;
-    var n = this.props.photos.length;
+    var n = this.props.photos && this.props.photos.length || 1;
 
     var model = utils.getModel(this.props.resource[constants.TYPE]).value;
     var isVertical = currentPhoto.isVertical
