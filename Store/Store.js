@@ -2435,30 +2435,26 @@ var Store = Reflux.createStore({
     this.trigger({action: 'getTemporary', resource: r})
   },
   onAddAll(resource, to, message) {
-    var msg = {
-      [TYPE]: SIMPLE_MESSAGE,
-      [NONCE]: this.getNonce(),
-      message: message,
-    }
-    msg[ROOT_HASH] = sha(msg)
-    msg.to = this.buildRef(me)
-    msg.from = this.buildRef(to)
     let rId = utils.getId(resource)
     let r = this._getItem(rId)
     r.documentCreated = true
-    this.trigger({action: 'addItem', resource: utils.clone(r)});
-    let result = this.searchMessages({modelName: MESSAGE, to: to})
-    result.push(msg)
-    this.trigger({action: 'messageList', modelName: MESSAGE, list: result, to: to})
-    return db.put(rId, r)
-    .then(() => {
-      let context = resource._context
-      resource.items.forEach((r) => {
-        r._context = context
-        r.to = to
-        r.from = me
-        this.onAddItem({ resource: r, noTrigger: true })
-      })
+    this.trigger({action: 'addItem', resource: r})
+    db.put(rId, r)
+    this.onAddMessage({msg: {
+      [TYPE]: SIMPLE_MESSAGE,
+      [NONCE]: this.getNonce(),
+      message: message,
+      time: new Date().getTime(),
+      _context: resource._context,
+      from: this.buildRef(me),
+      to: this.buildRef(r.from)
+    }})
+    let context = resource._context
+    resource.items.forEach((r) => {
+      r._context = context
+      r.to = to
+      r.from = me
+      this.onAddItem({ resource: r, noTrigger: true })
     })
   },
   onAddItem(params) {
@@ -4194,6 +4190,7 @@ var Store = Reflux.createStore({
     let plist = this.searchNotMessages({modelName: PARTIAL})
     if (!plist  ||  !plist.length)
       return
+    plist = plist.reverse()
 
     let providers = {}
     let owners = {}
@@ -4216,7 +4213,16 @@ var Store = Reflux.createStore({
         }
         providers[pId] = stats
       }
-      let ownerId = r.from.id
+      let t = r.type || r.leaves.filter((prop) => prop.key === TYPE)[0].value
+      let ownerId
+      // in case of form request or form error the partial will have a bot as a sender
+      // in this case we need to check the context to see who those requests were sent to
+      if (t !== FORM_REQUEST  &&  t !== FORM_ERROR)
+        ownerId = r.from.id
+      else {
+        let pa = allResources[PRODUCT_APPLICATION + '_' + r.context]
+        ownerId = pa ? pa.from.id : r.from.id
+      }
       if (!owners[pId])
         owners[pId] = {}
       let providerCustomerStats = owners[pId][ownerId]
@@ -4238,7 +4244,6 @@ var Store = Reflux.createStore({
       }
 
       let l = r.leaves
-      let t = r.leaves.filter((prop) => prop.key === TYPE)[0].value
 
       allResources[r.resource.id] = r
 
@@ -4320,27 +4325,41 @@ var Store = Reflux.createStore({
           }
           allPerApp.push(allStats)
           let formModels = utils.getModel(a.productType).value.forms
+          let productContext = a.product.context
           customer.forms.forEach((f) => {
-            let formType = f.leaves.find(l => l.key === TYPE && l.value).value
-            if (formModels.indexOf(formType) !== -1)
+            if (productContext === f.context)
               allStats.forms.push(f)
+            // let formType = f.leaves.find(l => l.key === TYPE && l.value).value
+            // if (formModels.indexOf(formType) !== -1)
+            //   allStats.forms.push(f)
           })
           customer.formCorrections.forEach((f) => {
-            let formType = f.leaves.find(l => l.key === TYPE && l.value).value
-            if (formModels.indexOf(formType) !== -1)
+            if (productContext === f.context)
               allStats.formCorrections.push(f)
+            // let formType = f.leaves.find(l => l.key === TYPE && l.value).value
+            // if (formModels.indexOf(formType) !== -1)
+            //   allStats.formCorrections.push(f)
           })
-          customer.verifications.forEach((v) => {
-            let doc = v.leaves.find(l => l.key === 'document' && l.value).value
-            if (formModels.indexOf(doc.id.split('_')[0]) !== -1)
-              allStats.verifications.push(v)
+          customer.verifications.forEach((f) => {
+            if (productContext === f.context)
+              allStats.verifications.push(f)
+            // let doc = v.leaves.find(l => l.key === 'document' && l.value).value
+            // if (formModels.indexOf(doc.id.split('_')[0]) !== -1)
+            //   allStats.verifications.push(v)
           })
           customer.formRequests.forEach((f) => {
-            let forRequestType = f.leaves.find(l => l.key === 'product' && l.value).value
-            if (forRequestType === a.productType)
-              allStats.formRequest.push(f)
+            if (productContext === f.context)
+              allStats.formRequests.push(f)
+            // let forRequestType = f.leaves.find(l => l.key === 'product' && l.value).value
+            // if (forRequestType === a.productType)
+            //   allStats.formRequests.push(f)
           })
           customer.formErrors.forEach((f) => {
+            if (productContext === f.context)
+              allStats.formErrors.push(f)
+            // let forRequestType = f.leaves.find(l => l.key === 'product' && l.value).value
+            // if (forRequestType === a.productType)
+            //   allStats.formErrors.push(f)
           })
         })
       }
@@ -5620,7 +5639,8 @@ var Store = Reflux.createStore({
           }
 
           return
-        } else if (payload[TYPE] === VERIFICATION && payload.sources) {
+        }
+        else if (payload[TYPE] === VERIFICATION && payload.sources) {
 // const pubKeys = []
 // forEachSource(payload.sources, function (source) {
 //   pubKeys.push(tradleUtils.claimedSigPubKey(source).pub.toString('hex'))
@@ -5638,6 +5658,7 @@ var Store = Reflux.createStore({
         else if (payload[TYPE] === PARTIAL) {
           msg.object[ROOT_HASH] = msg.objectinfo.permalink
 
+          payload.context = msg.object.context
           payload.leaves = tradle.partial.interpretLeaves(payload.leaves)
 
           let partialPermalink = payload.leaves.find(l => l.key === ROOT_HASH && l.value)
@@ -5651,6 +5672,7 @@ var Store = Reflux.createStore({
           payload.from = fromR ? self.buildRef(fromR) : {id: from}
 
           let type = payload.leaves.find(l => l.key === TYPE && l.value).value
+          payload.type = type
           var r = {
             [TYPE]: type,
             [ROOT_HASH]: msg.partialinfo.permalink,
@@ -6460,7 +6482,7 @@ var Store = Reflux.createStore({
       from: this.buildRef(org),
       to: this.buildRef(me)
     }
-    msg.id = sha(msg)
+    msg[ROOT_HASH] = sha(msg)
 
     var reps = this.getRepresentatives(utils.getId(org))
     var promises = []
