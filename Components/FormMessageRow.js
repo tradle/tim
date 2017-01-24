@@ -116,7 +116,7 @@ class FormMessageRow extends Component {
     var inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
     var photoStyle = {};
     var width = utils.dimensions(FormMessageRow).width
-    let msgWidth =  Math.floor(width * 0.8)
+    let msgWidth =  Math.floor(width * 0.7)
     if (inRow > 0) {
       if (inRow === 1) {
         var ww = Math.max(240, msgWidth / 2)
@@ -404,7 +404,7 @@ module.exports = FormMessageRow;
     // HACK that solves the case when the message is short and we don't want it to be displayed
     // in a bigger than needed bubble
     // var width = utils.dimensions(FormMessageRow).width
-    // let msgWidth =  Math.floor(width * 0.8)
+    // let msgWidth =  Math.floor(width * 0.7)
 
     // var viewStyle = { width: msgWidth, flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
 
