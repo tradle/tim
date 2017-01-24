@@ -119,7 +119,7 @@ class FormRequestRow extends Component {
       message = formTitle
     // HACK
     var w = utils.dimensions(FormRequestRow).width
-    let msgWidth = w * 0.8
+    let msgWidth = Math.floor(w * 0.7)
     let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
 
     var viewStyle = {flexDirection: 'row', borderTopRightRadius: 10, alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
@@ -145,7 +145,7 @@ class FormRequestRow extends Component {
     var mainStyle = { margin:1, backgroundColor: '#ffffff' }
     var shareables = !isFormRequest  || resource.documentCreated
                    ? null
-                   : this.showShareableResources(rowStyle, mainStyle);
+                   : this.showShareableResources(rowStyle, mainStyle, viewStyle.width);
 
     let cellStyle
     if (addStyle)
@@ -176,15 +176,25 @@ class FormRequestRow extends Component {
     return (
       <View style={[mainStyle, {margin:2, paddingVertical: 3, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}]}>
         {date}
-        <View style={shareables ? {borderWidth: 1, width: msgWidth + 2, borderColor: this.props.bankStyle.VERIFIED_HEADER_COLOR, borderRadius: 10, borderTopLeftRadius: 0} : {}}>
+        <View style={shareables ? {borderWidth: 1, width: viewStyle.width + 2, borderColor: this.props.bankStyle.VERIFIED_HEADER_COLOR, borderRadius: 10, borderTopLeftRadius: 0} : {}}>
           {messageBody}
           {sendStatus}
           {shareables}
         </View>
       </View>
     )
+    // return (
+    //   <View style={[mainStyle, {margin:2, paddingVertical: 3, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}]}>
+    //     {date}
+    //     <View style={shareables ? {borderWidth: 1, width: msgWidth + 2, borderColor: this.props.bankStyle.VERIFIED_HEADER_COLOR, borderRadius: 10, borderTopLeftRadius: 0} : {}}>
+    //       {messageBody}
+    //       {sendStatus}
+    //       {shareables}
+    //     </View>
+    //   </View>
+    // )
   }
-  showShareableResources(rowStyle, viewStyle) {
+  showShareableResources(rowStyle, viewStyle, width) {
     if (!this.props.shareableResources) // || !this.props.resource.message)
       return null
 
@@ -245,10 +255,9 @@ class FormRequestRow extends Component {
               )
             : translate('shareOneOfMany', utils.getMe().firstName, docType, org)
 
-    let w = utils.dimensions(FormRequestRow).width * 0.8 - 2
     let color = this.props.bankStyle.VERIFIED_HEADER_COLOR
     return (
-      <View style={[rowStyle, viewStyle, {marginTop: -10, width: w, backgroundColor: this.props.bankStyle.VERIFIED_BG, borderBottomLeftRadius: 10, borderBottomRightRadius: 10}]} key={this.getNextKey()}>
+      <View style={[rowStyle, viewStyle, {marginTop: -10, width: width, backgroundColor: this.props.bankStyle.VERIFIED_BG, borderBottomLeftRadius: 10, borderBottomRightRadius: 10}]} key={this.getNextKey()}>
         <View style={{flex:1}}>
           <View style={[styles.assistentBox, {backgroundColor: color}]}>
             <Text style={styles.orText}>{'OR'}</Text>
@@ -500,7 +509,7 @@ class FormRequestRow extends Component {
       let notLink = resource.documentCreated  ||  isReadOnly  ||  form.subClassOf === MY_PRODUCT
       link = <View style={chatStyles.rowContainer}>
                    <Text style={[chatStyles.resourceTitle, {color: resource.documentCreated  ||  notLink ?  '#757575' : resource.verifiers ? 'green' : LINK_COLOR}]}>{translate(form)}</Text>
-                   <Icon style={[{marginTop: 2, marginRight: 2}, resource.documentCreated  ? chatStyles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
+                   <Icon name={'ios-arrow-forward'} style={[{marginTop: 2, marginRight: 2}, resource.documentCreated  ? chatStyles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} />
                  </View>
       onPressCall = notLink
                   ? null

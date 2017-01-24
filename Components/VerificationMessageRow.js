@@ -276,7 +276,7 @@ var styles = StyleSheet.create({
   },
   image: {
     borderRadius: 10,
-    // height: 120,
+    height: 120,
     resizeMode: 'cover',
     overflow: 'hidden'
   },
