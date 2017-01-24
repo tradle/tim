@@ -278,7 +278,7 @@ class VerificationRow extends Component {
 
       if (properties[v].ref) {
         if (resource[v]) {
-          let val =
+          let val
           if (properties[v].ref === constants.TYPES.MONEY)
             val = utils.normalizeCurrencySymbol(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value
           else if (resource[v].title)
