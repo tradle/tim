@@ -53,14 +53,14 @@ for (var p in EventEmitter.prototype) {
 let lines = []
 debug.log = function (...args) {
   // preserve colors
-  if (args[0].slice(0, 2) === '%c') {
-    args = [
-      '%c' + getNow() + ' ' + args[0],
-      CONSOLE_NAMESPACE_COLOR
-    ].concat(args.slice(1))
-  } else {
+  // if (args[0].slice(0, 2) === '%c') {
+  //   args = [
+  //     '%c' + getNow() + ' ' + args[0],
+  //     CONSOLE_NAMESPACE_COLOR
+  //   ].concat(args.slice(1))
+  // } else {
     args.unshift(getNow())
-  }
+  // }
 
   lines.push(args)
   debug.emit('change', args)
@@ -85,12 +85,18 @@ debug.clear = function () {
 }
 
 debug.post = function (url) {
+  const body = debug
+    .get()
+    .map(debug.stripColors)
+    .map(line => Array.isArray(line) ? line.join(' ') : line)
+    .join('\n')
+
   return fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'text'
     },
-    body: debug.get().map(debug.stripColors).join('\n')
+    body
   })
 }
 
