@@ -199,8 +199,8 @@ class MessageRow extends Component {
       }
     }
     // HACK
-    var w = utils.dimensions(MessageRow).width
-    let msgWidth = Math.floor(w * 0.8)
+    var w = utils.dimensions().width
+    let msgWidth = Math.floor(w * 0.7)
     let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
 
     let longMessage = isSimpleMessage  &&  message ? numberOfCharsInWidth < message.length : false
@@ -211,7 +211,7 @@ class MessageRow extends Component {
           viewStyle.maxWidth = msgWidth; //isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
       }
       if (!isSimpleMessage  &&  model.id !== PRODUCT_LIST) {
-        let msgW = message.length * utils.getFontSize(12) + 40
+        let msgW = message.length * utils.getFontSize(18) + 40
         // if (msgW > msgWidth)
           viewStyle.maxWidth =  msgW > msgWidth ? msgWidth : msgW
       }
@@ -234,6 +234,11 @@ class MessageRow extends Component {
       }
       else
         cellStyle = chatStyles.textContainer
+      if (isFormError) {
+        viewStyle.maxWidth = Math.min(600, msgWidth)
+        viewStyle.width =  Math.min(600, message.length * utils.getFontSize(10) + 40)
+      }
+
       let msgContent =  <View style={[rowStyle, viewStyle]}>
                           <View style={{marginTop: 2}}>
                           {ownerPhoto}
@@ -577,22 +582,22 @@ class MessageRow extends Component {
         let rtype = (resource.prefill[constants.TYPE]) ? resource.prefill[constants.TYPE] : utils.getId(resource.prefill).split('_')[0]
         let iconName = resource.documentCreated ? 'ios-done-all' : 'ios-alert-outline'
         let iconSize = resource.documentCreated ? 30 : 25
-        let instruction
-        if (isMyMessage) {
-          instruction = translate('errorNotification')
-        } else if (resource.message.indexOf('Importing') === 0) {
-          // hack for tradle.Remediation
-          instruction = resource.message
-        } else {
-          instruction = translate('pleaseCorrect')
-        }
+        let instruction = resource.message
+        // if (isMyMessage) {
+        //   instruction = translate('errorNotification')
+        // } else if (resource.message.indexOf('Importing') === 0) {
+        //   // hack for tradle.Remediation
+        //   instruction = resource.message
+        // } else {
+        //   instruction = translate('pleaseCorrect')
+        // }
 
         vCols.push(
           <View key={self.getNextKey()} style={{paddingBottom: 3}}>
             <Text style={[style, {color: '#555555'}]}>{instruction} </Text>
             <View style={chatStyles.rowContainer}>
               <Text style={[style, {color: resource.documentCreated || isReadOnlyChat ?  '#aaaaaa' : self.props.bankStyle.FORM_ERROR_COLOR}]}>{translate(utils.getModel(rtype).value)}</Text>
-              <Icon name={iconName} size={iconSize} color={resource.documentCreated || isReadOnlyChat ? self.props.bankStyle.REQUEST_FULFILLED : self.props.bankStyle.FORM_ERROR_COLOR} style={Platform.OS === 'web' ? {marginTop: -3, paddingLeft: 50} : {}}/>
+              <Icon name={iconName} size={iconSize} color={resource.documentCreated || isReadOnlyChat ? self.props.bankStyle.REQUEST_FULFILLED : self.props.bankStyle.FORM_ERROR_COLOR} style={Platform.OS === 'web' ? {marginTop: -3} : {}}/>
             </View>
           </View>
         )
