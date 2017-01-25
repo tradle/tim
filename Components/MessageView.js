@@ -12,7 +12,6 @@ var ShowMessageRefList = require('./ShowMessageRefList');
 var VerificationView = require('./VerificationView')
 // var MoreLikeThis = require('./MoreLikeThis');
 var NewResource = require('./NewResource');
-var PageView = require('./PageView')
 
 // var VerificationButton = require('./VerificationButton');
 var Actions = require('../Actions/Actions');
@@ -269,7 +268,6 @@ class MessageView extends Component {
             : <View/>
 
     return (
-      <PageView style={platformStyles.container}>
       <ScrollView  ref='this' style={platformStyles.container} keyboardShouldPersistTaps={true}>
         <View style={[styles.band, {borderBottomColor: this.props.bankStyle.PRODUCT_ROW_BG_COLOR, borderTopColor: '#dddddd'}]}><Text style={styles.date}>{date}</Text></View>
         <View style={styles.photoBG}>
@@ -302,7 +300,6 @@ class MessageView extends Component {
           </View>
         </View>
       </ScrollView>
-      </PageView>
     );
   }
   onPress(url) {
