@@ -1586,8 +1586,10 @@ var Store = Reflux.createStore({
       if ((r  &&  r.bot) || noMessage)
         promise = Q()
       else {
-        if (profile.inactive)
+        if (profile.inactive) {
+          profile.inactive = false
           batch.push({type: 'put', key: pkey, value: profile })
+        }
 
         promise = this.onAddMessage({msg: {
                     [TYPE]: SIMPLE_MESSAGE,
