@@ -2823,8 +2823,8 @@ var Store = Reflux.createStore({
         }
         else {
           returnVal._sendStatus = sendStatus
-          if (isNew)
-            self.addVisualProps(returnVal)
+          // if (isNew)
+          self.addVisualProps(returnVal)
           params = {
             action: 'addItem',
             resource: utils.clone(returnVal)
