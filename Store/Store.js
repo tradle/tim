@@ -3851,7 +3851,7 @@ var Store = Reflux.createStore({
     var meId = utils.getId(me)
     var meOrgId = me.isEmployee ? utils.getId(me.organization) : null;
 
-    let filterOutForms = !params.isForgetting  &&  params.to  &&  params.to[TYPE] === ORGANIZATION  //&&  !utils.isEmployee(params.to)
+    let filterOutForms = !params.listView  &&  !params.isForgetting  &&  params.to  &&  params.to[TYPE] === ORGANIZATION  //&&  !utils.isEmployee(params.to)
 
     var chatTo = params.to
     if (chatTo  &&  chatTo.id)
