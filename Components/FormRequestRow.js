@@ -80,11 +80,12 @@ class FormRequestRow extends Component {
     else {
       onPressCall = resource.documentCreated ? null : this.reviewFormsInContext.bind(this)
       let idx = message.indexOf('...') + 3
+      let icon = <Icon style={{marginTop: 2, marginRight: 2, color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}} size={20} name={'ios-arrow-forward'} />
       let msg = <View key={this.getNextKey()}>
                   <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: '#aaaaaa'} : {}]}>{message.substring(0, idx)}</Text>
                   <View style={chatStyles.rowContainer}>
                     <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: '#757575'} : {color: LINK_COLOR}]}>{message.substring(idx).trim()}</Text>
-                    <Icon style={[{marginTop: 2, marginRight: 2}, resource.documentCreated  ? chatStyles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
+                    {resource.documentCreated  ? null : icon}
                   </View>
                 </View>
 
@@ -100,7 +101,7 @@ class FormRequestRow extends Component {
     var rowStyle = [chatStyles.row, {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}];
     var val = this.getTime(resource);
     var date = val
-             ? <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
+             ? <Text style={chatStyles.date}>{val}</Text>
              : <View />;
 
     var sendStatus = <View />
@@ -498,9 +499,10 @@ class FormRequestRow extends Component {
       link = <Text style={[chatStyles.resourceTitle, color]}>{translate(form)}</Text>
     else {
       let notLink = resource.documentCreated  ||  isReadOnly  ||  form.subClassOf === MY_PRODUCT
+      let icon = <Icon  name={'ios-arrow-forward'} style={{marginTop: 2, marginRight: 2, color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}} size={20} />
       link = <View style={chatStyles.rowContainer}>
                    <Text style={[chatStyles.resourceTitle, {color: resource.documentCreated  ||  notLink ?  '#757575' : resource.verifiers ? 'green' : LINK_COLOR}]}>{translate(form)}</Text>
-                   <Icon  name={'ios-arrow-forward'} style={[{marginTop: 2, marginRight: 2}, resource.documentCreated  ? chatStyles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} />
+                   {resource.documentCreated ? null : icon}
                  </View>
       onPressCall = notLink
                   ? null
