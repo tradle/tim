@@ -16,6 +16,7 @@ var NetworkInfoProvider = require('./NetworkInfoProvider')
 var SupervisoryViewPerProvider = require('./SupervisoryViewPerProvider')
 var defaultBankStyle = require('../styles/bankStyle.json')
 var StyleSheet = require('../StyleSheet')
+import { makeResponsive } from 'react-native-orient'
 
 import {Column as Col, Row} from 'react-native-flexbox-grid'
 
@@ -187,6 +188,7 @@ class SupervisoryView extends Component {
   }
 }
 reactMixin(SupervisoryView.prototype, Reflux.ListenerMixin);
+SupervisoryView = makeResponsive(SupervisoryView)
 
 var styles = StyleSheet.create({
   // container: {

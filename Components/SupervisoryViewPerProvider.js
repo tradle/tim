@@ -15,6 +15,7 @@ var buttonStyles = require('../styles/buttonStyles');
 var NetworkInfoProvider = require('./NetworkInfoProvider')
 var defaultBankStyle = require('../styles/bankStyle.json')
 var StyleSheet = require('../StyleSheet')
+import { makeResponsive } from 'react-native-orient'
 
 import {Column as Col, Row} from 'react-native-flexbox-grid'
 
@@ -235,6 +236,7 @@ class SupervisoryViewPerProvider extends Component {
   }
 }
 reactMixin(SupervisoryViewPerProvider.prototype, Reflux.ListenerMixin);
+SupervisoryViewPerProvider = makeResponsive(SupervisoryViewPerProvider)
 
 var styles = StyleSheet.create({
   topRow: {
