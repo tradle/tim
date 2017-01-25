@@ -69,7 +69,7 @@ export default class Log extends Component {
     line = debug.stripColors(line)
 
     return line.length && (
-      <Text style={{color, fontSize:10, flex: 1}}>
+      <Text style={{color, fontSize:10}}>
         {line.join(' ')}
       </Text>
     )

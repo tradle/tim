@@ -53,15 +53,8 @@ for (var p in EventEmitter.prototype) {
 let lines = []
 debug.log = function (...args) {
   // preserve colors
-  // if (args[0].slice(0, 2) === '%c') {
-  //   args = [
-  //     '%c' + getNow() + ' ' + args[0],
-  //     CONSOLE_NAMESPACE_COLOR
-  //   ].concat(args.slice(1))
-  // } else {
-    args.unshift(getNow())
-  // }
-
+  let toConsole = __DEV__ && args.slice()
+  args.unshift(getNow())
   lines.push(args)
   debug.emit('change', args)
 
@@ -70,9 +63,16 @@ debug.log = function (...args) {
   }
 
   if (__DEV__) {
+    if (toConsole[0].slice(0, 2) === '%c') {
+      toConsole = [
+        '%c' + getNow() + ' ' + toConsole[0],
+        CONSOLE_NAMESPACE_COLOR
+      ].concat(toConsole.slice(1))
+    }
+
     const method = this.namespace.indexOf('console.') === 0 && this.namespace.split('.')[1]
     const logFn = rawConsole[method] || rawConsole.log
-    logFn(...args)
+    logFn(...toConsole)
   }
 }
 
