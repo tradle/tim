@@ -3907,6 +3907,7 @@ var Store = Reflux.createStore({
         if (!addMessage) {
           if (isForm) {
             if (m.subClassOf === FORM) {
+              // Make sure to not return Items and Documents in this list
               if (m.interfaces.length === 1  ||  m.interfaces.indexOf(VERIFIABLE) !== -1)
                 addMessage = true
             }
