@@ -13,6 +13,8 @@ if [ -z "$2" ]; then
   DEST="release/$PLATFORM/${COMMIT_HASH:0:7}"
 fi
 
+./hooks/update_version.sh # update version.json
+
 mkdir -p "$DEST"
 DEV=false
 if [ "$3" == true ]; then
