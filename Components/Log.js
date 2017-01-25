@@ -19,20 +19,39 @@ export default class Log extends Component {
     }
    }
   componentWillMount() {
+    this._unmounting = false
     debug.on('change', this.onChange)
   }
+  componentDidMount() {
+    if (this._updateOnMount) {
+      this._updateOnMount = false
+      this.setState(this.state)
+    }
+  }
   componentWillUnmount() {
+    this._unmounting = true
     debug.removeListener('change', this.onChange)
   }
+  componentWillUpdate() {
+    this._unmounting = false
+  }
   onChange(line) {
+    const self = this
+
     // debounce a bit
     clearTimeout(this._updateTimeout)
-    this._updateTimeout = setTimeout(() => {
+    this._updateTimeout = setTimeout(function () {
       const lines = debug.get()
-      this.setState({
+      self.state = {
         lines,
-        log: this.state.log.cloneWithRows(lines)
-      })
+        log: self.state.log.cloneWithRows(lines)
+      }
+
+      if (self._unmounting) {
+        self._updateOnMount = true
+      } else {
+        self.setState(self.state)
+      }
     }, 50)
   }
   render() {
@@ -50,7 +69,7 @@ export default class Log extends Component {
     line = debug.stripColors(line)
 
     return line.length && (
-      <Text style={{color, fontSize:10, flex: 1}}>
+      <Text style={{color, fontSize:10}}>
         {line.join(' ')}
       </Text>
     )

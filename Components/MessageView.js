@@ -127,14 +127,6 @@ class MessageView extends Component {
           {text: 'Ok', onPress: this.createError.bind(this, msg)},
         ]
       )
-      // AlertIOS.prompt(
-      //   'Please write a message to the customer',
-      //   null,
-      //   [
-      //     {text: 'Submit', onPress: this.createError.bind(this)},
-      //     {text: 'Cancel', null},
-      //   ]
-      // )
    }
   }
  createError(text) {
@@ -241,11 +233,12 @@ class MessageView extends Component {
     var inRow = photos ? photos.length : 0
     if (inRow  &&  inRow > 4)
       inRow = 5;
-    var actionPanel =
-          <ShowMessageRefList resource={resource}
-                              navigator={this.props.navigator}
-                              currency={this.props.currency}
-                              bankStyle={this.props.bankStyle} />
+    var actionPanel = this.props.isReview
+                    ? null
+                    : <ShowMessageRefList resource={resource}
+                                          navigator={this.props.navigator}
+                                          currency={this.props.currency}
+                                          bankStyle={this.props.bankStyle} />
         // <FromToView resource={resource} navigator={this.props.navigator} />
         // <MoreLikeThis resource={resource} navigator={this.props.navigator}/>
     var verificationTxID, separator
@@ -277,7 +270,7 @@ class MessageView extends Component {
 
     return (
       <PageView style={platformStyles.container}>
-      <ScrollView  ref='this'>
+      <ScrollView  ref='this' style={platformStyles.container} keyboardShouldPersistTaps={true}>
         <View style={[styles.band, {borderBottomColor: this.props.bankStyle.PRODUCT_ROW_BG_COLOR, borderTopColor: '#dddddd'}]}><Text style={styles.date}>{date}</Text></View>
         <View style={styles.photoBG}>
           <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={this.props.navigator}/>

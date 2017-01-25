@@ -408,20 +408,18 @@ var utils = {
   getStringValueForProperty(resource, p, meta) {
     let displayName = ''
     if (resource[p]) {
-      if (meta[p].type == 'object') {
-        if (resource[p].title)
-          return resource[p].title;
-        if (meta[p].ref) {
-          if (meta[p].ref == constants.TYPES.MONEY)  {
-            let c = this.normalizeCurrencySymbol(resource[p].currency)
-            return (c || '') + resource[p].value
-          }
-          else
-            return this.getDisplayName(resource[p], this.getModel(meta[p].ref).value.properties);
-        }
-      }
-      else
+      if (meta[p].type !== 'object')
         return resource[p];
+      if (resource[p].title)
+        return resource[p].title;
+      if (meta[p].ref) {
+        if (meta[p].ref == constants.TYPES.MONEY)  {
+          let c = this.normalizeCurrencySymbol(resource[p].currency)
+          return (c || '') + resource[p].value
+        }
+        else
+          return this.getDisplayName(resource[p], this.getModel(meta[p].ref).value.properties);
+      }
     }
     else if (meta[p].displayAs) {
       var dn = this.templateIt(meta[p], resource);

@@ -18,9 +18,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/constants/-/constants-1.3.0.tgz"
     },
     "@tradle/engine": {
-      "version": "3.9.4",
-      "from": "tradle/engine",
-      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-3.9.4.tgz",
+      "version": "3.10.1",
+      "from": "@tradle/engine@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-3.10.1.tgz",
       "dependencies": {
         "async": {
           "version": "2.1.4",
@@ -53,8 +53,8 @@
     },
     "@tradle/models": {
       "version": "4.10.9",
-      "from": "git://github.com/tradle/models.git#719f5932d9fff5e9707fd56170ab35fca7dca6a1",
-      "resolved": "git://github.com/tradle/models.git#719f5932d9fff5e9707fd56170ab35fca7dca6a1"
+      "from": "git://github.com/tradle/models.git#58938510fcdbe37a42fe5046327f61dfa0a36c4d",
+      "resolved": "git://github.com/tradle/models.git#58938510fcdbe37a42fe5046327f61dfa0a36c4d"
     },
     "@tradle/protocol": {
       "version": "2.3.0",
@@ -2813,33 +2813,19 @@
       "resolved": "https://registry.npmjs.org/fd-slicer/-/fd-slicer-1.0.1.tgz"
     },
     "feed-indexer": {
-      "version": "1.2.1",
+      "version": "1.2.2",
       "from": "feed-indexer@>=1.2.1 <2.0.0",
-      "resolved": "https://registry.npmjs.org/feed-indexer/-/feed-indexer-1.2.1.tgz",
+      "resolved": "https://registry.npmjs.org/feed-indexer/-/feed-indexer-1.2.2.tgz",
       "dependencies": {
-        "level-change-processor": {
+        "isarray": {
           "version": "1.0.0",
-          "from": "git+https://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b",
-          "resolved": "git+https://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b",
-          "dependencies": {
-            "readable-stream": {
-              "version": "1.1.14",
-              "from": "readable-stream@>=1.0.33 <2.0.0",
-              "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-1.1.14.tgz"
-            }
-          }
+          "from": "isarray@>=1.0.0 <1.1.0",
+          "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
         },
         "readable-stream": {
           "version": "2.2.2",
           "from": "readable-stream@>=2.1.4 <3.0.0",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.2.tgz",
-          "dependencies": {
-            "isarray": {
-              "version": "1.0.0",
-              "from": "isarray@>=1.0.0 <1.1.0",
-              "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
-            }
-          }
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.2.tgz"
         }
       }
     },
@@ -4063,6 +4049,11 @@
           "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.1.5.tgz"
         }
       }
+    },
+    "level-change-processor": {
+      "version": "1.0.0",
+      "from": "git+https://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b",
+      "resolved": "git+https://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b"
     },
     "level-change-processor": {
       "version": "1.0.0",

@@ -1246,8 +1246,8 @@ var styles = StyleSheet.create({
     height: 45,
     paddingHorizontal: 10,
     backgroundColor: 'transparent',
-    borderColor: '#eeeeee',
-    borderWidth: StyleSheet.hairlineWidth,
+    // borderColor: '#eeeeee',
+    borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: '#cccccc',
   },
   row: {

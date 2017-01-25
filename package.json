@@ -26,9 +26,9 @@
   "dependencies": {
     "@tradle/cb-blockr": "^3.2.0",
     "@tradle/constants": "^1.3.0",
-    "@tradle/engine": "3.9.4",
+    "@tradle/engine": "3.10.1",
     "@tradle/keeper": "^3.1.0",
-    "@tradle/models": "github:tradle/models#719f593",
+    "@tradle/models": "github:tradle/models#5893851",
     "@tradle/protocol": "2.3.0",
     "art": "^0.10.0",
     "assert": "^1.3.0",
