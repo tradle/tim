@@ -26,7 +26,9 @@
 		5162421A1909465CA7AC44B2 /* libRNBlinkID.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4E2C19FDDDD4447B9C80F765 /* libRNBlinkID.a */; };
 		595E255E879245FDA7D8F9EE /* libRCTOrientation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 049471C98AF542809F110296 /* libRCTOrientation.a */; };
 		5E66B670540246B3A0D82BAC /* Zocial.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D491E41C0C9C47B68AC487CA /* Zocial.ttf */; };
+		615E98BE652C4C9397FA6486 /* libRNPasscodeStatus.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 71A5BF1464684D2A8B24B80F /* libRNPasscodeStatus.a */; };
 		73030AF71D14DC5F0096A864 /* libRNFS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73030AF61D14DC4B0096A864 /* libRNFS.a */; };
+		73037B151E391BA500A5910C /* libRNPasscodeStatus.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73037B0F1E391B9000A5910C /* libRNPasscodeStatus.a */; };
 		731F233E1C31BB6600C3B09D /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 731F233D1C31BB6600C3B09D /* libz.tbd */; };
 		73261E141C4AB9FE00292FEE /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		73261E161C4AB9FE00292FEE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
@@ -164,6 +166,13 @@
 			proxyType = 2;
 			remoteGlobalIDString = F12AFB9B1ADAF8F800E0535D;
 			remoteInfo = RNFS;
+		};
+		73037B0E1E391B9000A5910C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EDBE902ECF4E436096A40578 /* RNPasscodeStatus.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 732D5BB41C30EA5700CA0A32;
+			remoteInfo = RNPasscodeStatus;
 		};
 		732872061C4342C600057D1B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -358,6 +367,7 @@
 		4E2C19FDDDD4447B9C80F765 /* libRNBlinkID.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNBlinkID.a; sourceTree = "<group>"; };
 		66D82D13AFA17C3F90361EB1 /* Pods-Tradle-dev.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Tradle-dev.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Tradle-dev/Pods-Tradle-dev.debug.xcconfig"; sourceTree = "<group>"; };
 		6ECAAF13C7384B738734FB25 /* TcpSockets.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = TcpSockets.xcodeproj; path = "../node_modules/react-native-tcp/ios/TcpSockets.xcodeproj"; sourceTree = "<group>"; };
+		71A5BF1464684D2A8B24B80F /* libRNPasscodeStatus.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNPasscodeStatus.a; sourceTree = "<group>"; };
 		73030AF11D14DC4B0096A864 /* RNFS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNFS.xcodeproj; path = "../node_modules/react-native-fs/RNFS.xcodeproj"; sourceTree = "<group>"; };
 		731045901D7CE25D0087E82D /* Tradle-dev.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Tradle-dev.entitlements"; sourceTree = "<group>"; };
 		731F233D1C31BB6600C3B09D /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
@@ -404,6 +414,7 @@
 		DB2A667C83D94D838507B5CF /* RCTAsyncRocksDBStorage.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTAsyncRocksDBStorage.xcodeproj; path = "../node_modules/react-native-async-storage-rocks/ios/RCTAsyncRocksDBStorage.xcodeproj"; sourceTree = "<group>"; };
 		E42475336EA34BAA9B260B8E /* Octicons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = unknown; name = Octicons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Octicons.ttf"; sourceTree = "<group>"; };
 		E8DC5312A84F470C87F82CE6 /* MaterialIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/MaterialIcons.ttf"; sourceTree = "<group>"; };
+		EDBE902ECF4E436096A40578 /* RNPasscodeStatus.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNPasscodeStatus.xcodeproj; path = "../node_modules/react-native-passcode-status/ios/RNPasscodeStatus.xcodeproj"; sourceTree = "<group>"; };
 		FA9D303938764971849716EE /* RNLocalAuth.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNLocalAuth.xcodeproj; path = "../node_modules/react-native-local-auth/RNLocalAuth.xcodeproj"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -446,6 +457,7 @@
 				CC1AB989D89F4D92A4A9CA06 /* libTcpSockets.a in Frameworks */,
 				3D032E2C194C437EBC054F71 /* libRCTAsyncRocksDBStorage.a in Frameworks */,
 				5162421A1909465CA7AC44B2 /* libRNBlinkID.a in Frameworks */,
+				615E98BE652C4C9397FA6486 /* libRNPasscodeStatus.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -486,6 +498,7 @@
 				73947DA91D3DAEAA00C5CC8F /* libRCTPushNotification.a in Frameworks */,
 				734EF80E1E2E95D900E3A9C4 /* libRCTAsyncRocksDBStorage.a in Frameworks */,
 				73303A9E1E3045CE00AAE98C /* libRNBlinkID.a in Frameworks */,
+				73037B151E391BA500A5910C /* libRNPasscodeStatus.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -603,6 +616,14 @@
 			isa = PBXGroup;
 			children = (
 				73030AF61D14DC4B0096A864 /* libRNFS.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		73037AF01E391B9000A5910C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				73037B0F1E391B9000A5910C /* libRNPasscodeStatus.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -799,6 +820,7 @@
 				6ECAAF13C7384B738734FB25 /* TcpSockets.xcodeproj */,
 				DB2A667C83D94D838507B5CF /* RCTAsyncRocksDBStorage.xcodeproj */,
 				AC1BDF1F181A47D6B9CD87BE /* RNBlinkID.xcodeproj */,
+				EDBE902ECF4E436096A40578 /* RNPasscodeStatus.xcodeproj */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -1091,6 +1113,10 @@
 					ProjectRef = C1932A8E8BA74132B608AF40 /* RNOS.xcodeproj */;
 				},
 				{
+					ProductGroup = 73037AF01E391B9000A5910C /* Products */;
+					ProjectRef = EDBE902ECF4E436096A40578 /* RNPasscodeStatus.xcodeproj */;
+				},
+				{
 					ProductGroup = 732EA0B01C24AB90000EFAA6 /* Products */;
 					ProjectRef = 732EA0AF1C24AB90000EFAA6 /* RNRandomBytes.xcodeproj */;
 				},
@@ -1181,6 +1207,13 @@
 			fileType = archive.ar;
 			path = libRNFS.a;
 			remoteRef = 73030AF51D14DC4B0096A864 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		73037B0F1E391B9000A5910C /* libRNPasscodeStatus.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNPasscodeStatus.a;
+			remoteRef = 73037B0E1E391B9000A5910C /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		732872071C4342C600057D1B /* libRNLocalAuth.a */ = {
@@ -1568,12 +1601,14 @@
 					"$(SRCROOT)/../node_modules/react-native-tcp/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-async-storage-rocks/**",
 					"$(SRCROOT)/../node_modules/react-native-blinkid/ios",
+					"$(SRCROOT)/../node_modules/react-native-passcode-status/ios",
 				);
 				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
@@ -1616,12 +1651,14 @@
 					"$(SRCROOT)/../node_modules/react-native-tcp/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-async-storage-rocks/**",
 					"$(SRCROOT)/../node_modules/react-native-blinkid/ios",
+					"$(SRCROOT)/../node_modules/react-native-passcode-status/ios",
 				);
 				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
@@ -1668,6 +1705,7 @@
 					"$(SRCROOT)/../node_modules/react-native-tcp/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-async-storage-rocks/**",
 					"$(SRCROOT)/../node_modules/react-native-blinkid/ios/**",
+					"$(SRCROOT)/../node_modules/react-native-passcode-status/**",
 				);
 				INFOPLIST_FILE = Tradle/Dev.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -1721,6 +1759,7 @@
 					"$(SRCROOT)/../node_modules/react-native-tcp/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-async-storage-rocks/**",
 					"$(SRCROOT)/../node_modules/react-native-blinkid/ios/**",
+					"$(SRCROOT)/../node_modules/react-native-passcode-status/**",
 				);
 				INFOPLIST_FILE = Tradle/Dev.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -1797,6 +1836,7 @@
 					"$(SRCROOT)/../node_modules/react-native-tcp/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-async-storage-rocks/**",
 					"$(SRCROOT)/../node_modules/react-native-blinkid/ios",
+					"$(SRCROOT)/../node_modules/react-native-passcode-status/ios",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
@@ -1854,6 +1894,7 @@
 					"$(SRCROOT)/../node_modules/react-native-tcp/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-async-storage-rocks/**",
 					"$(SRCROOT)/../node_modules/react-native-blinkid/ios",
+					"$(SRCROOT)/../node_modules/react-native-passcode-status/ios",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				MTL_ENABLE_DEBUG_INFO = NO;

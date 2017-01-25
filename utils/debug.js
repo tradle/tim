@@ -22,7 +22,8 @@ const enabled = [
   'console',
   'tradle:*',
   'sendy:ws:client',
-  'tradle:channel'
+  'tradle:channel',
+  'tradle:app*'
 ].concat(consoleMethods.map(method => 'console.' + method))
 
 if (__DEV__) {

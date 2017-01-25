@@ -41,5 +41,6 @@ module.exports = {
     return __DEV__
   },
   serverToSendLog: __DEV__ ? `http://${LOCAL_IP}:44444/userlog` : 'https://azure1.tradle.io/userlog',
-  showMyQRCode: false
+  showMyQRCode: false,
+  requireDeviceLocalAuth: false
 }
