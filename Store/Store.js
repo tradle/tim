@@ -5901,7 +5901,12 @@ var Store = Reflux.createStore({
         if (onMessage) {
           let meId = utils.getId(me)
           if (me.isEmployee) {
-            if (!val._context  ||  utils.isReadOnlyChat(val._context)) {
+            let isReadOnlyChat
+            if (val._context)
+              isReadOnlyChat = utils.isReadOnlyChat(this._getItem(val._context))
+            else
+              isReadOnlyChat = utils.isReadOnlyChat(val)
+            if (!val._context  ||  isReadOnlyChat) {
               let notMeId = toId === meId ? fromId  : toId
               let notMe = this._getItem(notMeId)
               if (notMe  &&  !notMe.bot) {
@@ -5909,6 +5914,8 @@ var Store = Reflux.createStore({
                 this.trigger({action: 'updateRow', resource: notMe})
               }
             }
+            if (isReadOnlyChat  &&  val[TYPE] === PRODUCT_APPLICATION)
+              this.onGetAllSharedContexts()
           }
         }
         this.trigger({action: 'addItem', resource: val})
