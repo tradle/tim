@@ -1025,8 +1025,8 @@ var styles = StyleSheet.create({
     height: 45,
     // width: Dimensions.get('window').width,
     backgroundColor: '#eeeeee',
-    borderColor: '#eeeeee',
-    borderWidth: StyleSheet.hairlineWidth,
+    // borderColor: '#eeeeee',
+    borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: '#cccccc',
     paddingRight: 10
   },
