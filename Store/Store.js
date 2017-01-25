@@ -582,6 +582,18 @@ var Store = Reflux.createStore({
     var tlsKey = driverInfo.tlsKey = TLS_ENABLED && meDriver.keys.filter(k => k.get('purpose') === 'tls')[0]
     // var fromPubKey = meDriver.identity.pubkeys.filter(k => k.type === 'ec' && k.purpose === 'sign')[0]
     meDriver._send = function (msg, recipientInfo, cb) {
+      const start = Date.now()
+      const monitor = setInterval(function () {
+        debug(`still sending to ${recipientInfo.permalink} after ${(Date.now() - start)/1000|0} seconds`, msg.unserialized.object[TYPE])
+      }, 5000)
+
+      trySend(msg, recipientInfo, function (err, result) {
+        clearInterval(monitor)
+        cb(err, result)
+      })
+    }
+
+    function trySend (msg, recipientInfo, cb) {
       const recipientHash = recipientInfo.permalink
       let messenger = wsClients.byIdentifier[recipientHash]
       if (!messenger) {
