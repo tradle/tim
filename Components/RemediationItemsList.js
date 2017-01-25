@@ -86,15 +86,10 @@ class RemediationItemsList extends Component {
     )
   }
   submitAllForms() {
-    this.props.navigator.pop()
-
     utils.onNextTransitionEnd(this.props.navigator, () => {
-      Actions.addAll(this.props.resource, this.props.to, translate('submittingApprovedForms'))
+      Actions.addAll(this.props.resource, this.props.to, translate('confirmedMyData'))
     });
-
-    // this.props.resource.items.forEach((item) => {
-    //   Actions.addItem(item)
-    // })
+    this.props.navigator.pop()
   }
   selectResource(resource, rowId) {
     var title = translate(utils.getModel(resource[constants.TYPE]).value)

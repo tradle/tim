@@ -222,7 +222,7 @@ var RowMixin = {
     // var photo = hasPhotos
     //           ? <Image resizeMode='cover' source={{uri: utils.getImageUri(document.photos[0].url)}}  style={styles.cellImage} />
     //           : <View />;
-    var headerStyle = {paddingTop: verification.dateVerified ? 0 : 5, marginLeft: 30}
+    var headerStyle = {flexDirection: 'column', paddingTop: verification.dateVerified ? 0 : 5, marginLeft: 30}
     // var headerStyle = {paddingTop: verification.dateVerified ? 0 : 5, alignSelf: 'center', flex: 1}
     var isShared = this.isShared(verification)
 
