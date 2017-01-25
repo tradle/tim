@@ -16,6 +16,8 @@ var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var reactMixin = require('react-mixin');
+// const PRIORITY_HEIGHT = 100
+var defaultBankStyle = require('../styles/bankStyle.json')
 
 var StyleSheet = require('../StyleSheet')
 
@@ -109,6 +111,7 @@ class ResourceRow extends Component {
     let rType = resource[TYPE]
     var isIdentity = rType === PROFILE;
     var noImage;
+    let isOfficialAccounts = this.props.isOfficialAccounts
     if (resource.photos &&  resource.photos.length) {
       var uri = utils.getImageUri(resource.photos[0].url);
       var params = {
@@ -148,10 +151,18 @@ class ResourceRow extends Component {
         </Geometry.Circle>
       )
 
-      photo = <View style={{flexDirection: 'row'}}>
-                {photo}
-                {onlineStatus}
+      photo = <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <View>
+                  {photo}
+                  {onlineStatus}
+                </View>
               </View>
+      // photo = <View style={[{flexDirection: 'row', alignItems: 'center'}, isOfficialAccounts && resource.priority ? {height: PRIORITY_HEIGHT - 10} : {}]}>
+      //           <View>
+      //             {photo}
+      //             {onlineStatus}
+      //           </View>
+      //         </View>
     }
 
     var rId = utils.getId(this.props.resource)
@@ -162,9 +173,18 @@ class ResourceRow extends Component {
     //                        </View>
     //                      </TouchableHighlight>
     //                    : <View />;
+    let style
+    if (isOfficialAccounts  &&  resource.style) {
+      style = {}
+      extend(style, defaultBankStyle)
+      style = extend(style, resource.style)
+    }
+    let bg = style ? {backgroundColor: style.LIST_BG} : {}
+    let color = style ? {color: style.LIST_COLOR} : {}
+
     var cancelResource = (this.props.onCancel  ||  (this.state && this.state.sharedWith))
                        ?  <View style={styles.multiChooser}>
-                             <Icon name={this.state.sharedWith ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color={this.state.sharedWith ? '#B1010E' : '#dddddd'} />
+                             <Icon name={this.state.sharedWith ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color={this.state.sharedWith ? '#B1010E' : style ? color.color : '#dddddd'} />
                            </View>
                        : <View />
     var hideMode =  this.props.hideMode
@@ -214,7 +234,7 @@ class ResourceRow extends Component {
           <View style={styles.row} key={this.getNextKey()}>
             {photo}
             <View style={[textStyle, {flexDirection: 'row', justifyContent: 'space-between'}]}>
-              {this.formatRow(resource)}
+              {this.formatRow(resource, style)}
             </View>
             {dateRow}
             {multiChooser}
@@ -229,8 +249,9 @@ class ResourceRow extends Component {
     // let onPress = this.state  &&  !this.state.resource
     //             ? this.action.bind(this)
     //             : this.props.onSelect
+
     let action
-    if (this.props.isOfficialAccounts  &&  !this.props.hideMode)
+    if (isOfficialAccounts  &&  !this.props.hideMode)
       action = <TouchableHighlight underlayColor='transparent' style={{position: 'absolute', right: 10, top: 25, backgroundColor: 'white'}} onPress={() => {
                   this.props.navigator.push({
                     component: ResourceList,
@@ -238,6 +259,7 @@ class ResourceRow extends Component {
                     backButtonTitle: translate('back'),
                     passProps: {
                       modelName: FORM,
+                      listView: true,
                       resource: this.props.resource
                     }
                   })
@@ -253,12 +275,13 @@ class ResourceRow extends Component {
                 </View>
               </TouchableHighlight>
 
-    let content =  <View style={styles.content} key={this.getNextKey()}>
+                      // <View style={[styles.row, bg, { width: utils.dimensions(ResourceRow).width - 50}, isOfficialAccounts && resource.priority ? {height: PRIORITY_HEIGHT} : {}]}>
+    let content =  <View style={[styles.content, bg]} key={this.getNextKey()}>
                     <TouchableHighlight onPress={onPress} underlayColor='transparent'>
-                      <View style={[styles.row, {width: utils.dimensions(ResourceRow).width - 50}]}>
+                      <View style={[styles.row, bg, { width: utils.dimensions(ResourceRow).width - 50}]}>
                         {photo}
                         <View style={textStyle}>
-                          {this.formatRow(resource)}
+                          {this.formatRow(resource, style)}
                         </View>
                       </View>
                     </TouchableHighlight>
@@ -271,13 +294,6 @@ class ResourceRow extends Component {
                     <View style={isNewContact ? styles.highlightedCellBorder : styles.cellBorder}  key={this.getNextKey()} />
                   </View>
     return content
-    // return (this.props.isOfficialAccounts)
-    //        ?  <Swipeout right={[{text: 'Hide', backgroundColor: 'red', onPress: this.props.hideResource.bind(this, resource)}]}
-    //                     autoClose={true}
-    //                     >
-    //             {content}
-    //           </Swipeout>
-    //         : content
   }
 
   chooseToShare() {
@@ -305,7 +321,7 @@ class ResourceRow extends Component {
     else
       this.props.onSelect(this.props.resource)
   }
-  formatRow(resource) {
+  formatRow(resource, style) {
     var self = this;
     var model = utils.getModel(resource[TYPE] || resource.id).value;
     var viewCols = model.gridCols || model.viewCols;
@@ -371,6 +387,7 @@ class ResourceRow extends Component {
       dateProp = null;
 
     var isOfficialAccounts = this.props.isOfficialAccounts
+    var color = isOfficialAccounts && style ? {color: style.LIST_COLOR} : {}
     var isIdentity = resource[TYPE] === PROFILE;
     viewCols.forEach((v) => {
       if (v === dateProp)
@@ -380,11 +397,13 @@ class ResourceRow extends Component {
 
       if (!resource[v]  &&  !properties[v].displayAs)
         return;
-      var style = first ? styles.resourceTitle : styles.description;
-      if (isIdentity  &&  v === 'organization')
-        style = [style, {alignSelf: 'flex-end', marginTop: 20}, styles.verySmallLetters];
+      var style = first ? [styles.resourceTitle, color] : [styles.description, color]
+      if (isIdentity  &&  v === 'organization') {
+        style.push({alignSelf: 'flex-end', marginTop: 20})
+        style.push(styles.verySmallLetters);
+      }
       if (properties[v].style)
-        style = [style, properties[v].style];
+        style.push(properties[v].style);
       var ref = properties[v].ref;
       if (ref) {
         if (resource[v]) {
@@ -420,7 +439,7 @@ class ResourceRow extends Component {
             for (let i=0; i<msgParts.length - 1; i++)
               val += msgParts[i];
           }
-          if (self.props.isOfficialAccounts  &&  v === 'lastMessage') {
+          if (isOfficialAccounts  &&  v === 'lastMessage') {
             let isMyLastMessage = val.indexOf('You: ') !== -1
             let lastMessageTypeIcon = <View/>
             if (isMyLastMessage) {
@@ -436,15 +455,13 @@ class ResourceRow extends Component {
                 // else if (model.id === VERIFICATION)
                 //   icon =
                 if (icon)
-                  lastMessageTypeIcon = <Icon name={icon} size={14} color='#7AAAc3' style={{paddingLeft: 1, marginTop: -2}}/>
+                  lastMessageTypeIcon = <Icon name={icon} size={14} color='#7AAAc3' style={{paddingLeft: 1, marginTop: 1}}/>
               }
             }
             let w = utils.dimensions(ResourceRow).width - 145
             row = <View style={{flexDirection: 'row'}} key={self.getNextKey()}>
-                    <View style={{flexDirection: 'column'}}>
-                      <Icon name='md-done-all' size={16} color={isMyLastMessage ? '#cccccc' : '#7AAAc3'}/>
-                      {lastMessageTypeIcon}
-                    </View>
+                    <Icon name='md-done-all' size={16} color={isMyLastMessage ? '#cccccc' : '#7AAAc3'} />
+                    {lastMessageTypeIcon}
                     <Text style={[style, {width: w, paddingLeft: 2}]}>{val}</Text>
                   </View>
           }
