@@ -124,6 +124,7 @@ const PAIRING_DATA        = 'tradle.PairingData'
 const MY_IDENTITIES       = MY_IDENTITIES_TYPE + '_1'
 const REMEDIATION         = 'tradle.Remediation'
 const CONFIRM_PACKAGE_REQUEST = "tradle.ConfirmPackageRequest"
+const VERIFIABLE          = 'tradle.Verifiable'
 
 const WELCOME_INTERVAL = 600000
 
@@ -3906,7 +3907,7 @@ var Store = Reflux.createStore({
         if (!addMessage) {
           if (isForm) {
             if (m.subClassOf === FORM) {
-              if (m.interfaces.length === 1)
+              if (m.interfaces.length === 1  ||  m.interfaces.indexOf(VERIFIABLE) !== -1)
                 addMessage = true
             }
           }
