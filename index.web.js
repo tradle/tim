@@ -12,7 +12,12 @@
 // will not be necessary when we switch to redux and save all state including history
 // and get our bearings from the url
 
-import browser from './utils/browser'
+import {
+  isFF,
+  isSafari,
+  isIE,
+  isFFPrivateBrowsing
+} from './utils/browser'
 
 if (global.history && global.history.length) {
   const historyIndex = parseInt(location.hash.replace('#/scene_', ''))
@@ -27,26 +32,22 @@ require('./css/customicons.css')
 require('./css/ionicons.min.css')
 require('./css/styles.css')
 
-const err = isUnsupportedEnv()
-if (err) {
-  alertError(err)
-} else {
-  const isSafari = navigator.userAgent.indexOf('Safari') !==-1 && navigator.userAgent.indexOf('Chrome') === -1
-  if (isSafari) {
-    init()
-  } else {
-    const isOnlyTab = require('onetab')
-    isOnlyTab(function (err, yes) {
-      if (err || !yes) {
-        return alertError('This application is open in another tab. Please close one of the two tabs and refresh the page.')
-      }
+testEnvironment().then(init, alertError)
 
-      init()
-    })
-  }
+function ensureOneTab () {
+  const isOnlyTab = require('onetab')
+  isOnlyTab.timeout = 5000
+  isOnlyTab(function (err, yes) {
+    if (err || !yes) {
+      return alertError('This application is open in another tab. Please close one of the two tabs and refresh the page.')
+    }
+
+    resolve()
+  })
 }
 
 function init () {
+  ensureOneTab()
   if (!console.table) console.table = console.log
 
   require('whatwg-fetch')
@@ -67,17 +68,34 @@ function init () {
   }, 500)
 }
 
-function isUnsupportedEnv () {
-  if (browser.isIE && !window.indexedDB) {
-    return 'This application cannot be used in InPrivate Browsing mode, due to storage and security limitations'
+async function testEnvironment () {
+  if (isSafari) return
+
+  if (isIE && !window.indexedDB) {
+    throw new Error('This application cannot be used in InPrivate Browsing mode, due to storage and security limitations')
   }
 
   if (!window.indexedDB) {
-    return 'This application is not supported in this browser. Please use Chrome, Safari, Firefox or IE11+'
+    throw new Error('This application is not supported in this browser. Please use Chrome, Safari, Firefox or IE11+')
+  }
+
+  if (isFF) {
+    let isPrivateBrowsing
+    try {
+      isPrivateBrowsing = await isFFPrivateBrowsing()
+    } catch (err) {
+      throw new Error('Something has gone wrong. Please refresh.')
+    }
+
+    if (isPrivateBrowsing) {
+      throw new Error('This application cannot be used in Private Browsing mode, due to storage and security limitations')
+    }
   }
 }
 
 function alertError (err) {
+  if (err.message) err = err.message
+
   const rootEl = document.createElement('div')
   rootEl.className = 'react-root'
   document.body.appendChild(rootEl)
