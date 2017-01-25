@@ -125,14 +125,6 @@ class MessageView extends Component {
           {text: 'Ok', onPress: this.createError.bind(this, msg)},
         ]
       )
-      // AlertIOS.prompt(
-      //   'Please write a message to the customer',
-      //   null,
-      //   [
-      //     {text: 'Submit', onPress: this.createError.bind(this)},
-      //     {text: 'Cancel', null},
-      //   ]
-      // )
    }
   }
  createError(text) {
@@ -275,7 +267,7 @@ class MessageView extends Component {
             : <View/>
 
     return (
-      <ScrollView  ref='this' style={platformStyles.container}>
+      <ScrollView  ref='this' style={platformStyles.container} keyboardShouldPersistTaps={true}>
         <View style={[styles.band, {borderBottomColor: this.props.bankStyle.PRODUCT_ROW_BG_COLOR, borderTopColor: '#dddddd'}]}><Text style={styles.date}>{date}</Text></View>
         <View style={styles.photoBG}>
           <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={this.props.navigator}/>
