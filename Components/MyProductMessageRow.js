@@ -47,7 +47,7 @@ class MyProductMessageRow extends Component {
     // let rowStyle = [chatStyles.row,  {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}];
     var val = this.getTime(resource);
     var date = val
-             ? <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
+             ? <Text style={chatStyles.date}>{val}</Text>
              : <View />;
 
     // var viewStyle = {flexDirection: 'row', alignSelf: 'flex-start', width: DeviceWidth - 50};
@@ -133,7 +133,7 @@ class MyProductMessageRow extends Component {
           properties[v].type === 'string'  &&
           (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0)) {
         onPressCall = self.onPress.bind(self);
-        vCols.push(<Text style={style} numberOfLines={first ? 2 : 1} key={self.getNextKey()}>{resource[v]}</Text>);
+        vCols.push(<Text style={style} key={self.getNextKey()}>{resource[v]}</Text>);
       }
       else if (!model.autoCreate) {
         var val = (properties[v].displayAs)

@@ -136,7 +136,7 @@ class FormMessageRow extends Component {
       sendStatus = this.getSendStatus()
     // var val = this.getTime(resource);
     // var date = val
-    //          ? <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
+    //          ? <Text style={chatStyles.date}>{val}</Text>
     //          : <View />;
 
     return  <View style={{margin: 1, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}}>
@@ -163,9 +163,9 @@ class FormMessageRow extends Component {
 
     let isMyMessage = this.isMyMessage()
     let isSharedContext = to  &&  to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.context)
-
+    let width = Math.floor(utils.dimensions().width * 0.7) - (isSharedContext  ? 45 : 0)
     var viewStyle = {
-      width: Math.floor(utils.dimensions().width * 0.7) - (isSharedContext  ? 45 : 0),
+      width: Math.min(width, 600),
       alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
       // marginLeft: isMyMessage ? 30 : 0, //(hasOwnerPhoto ? 45 : 10),
       backgroundColor: this.props.bankStyle.BACKGROUND_COLOR,
@@ -252,7 +252,7 @@ class FormMessageRow extends Component {
           properties[v].type === 'string'  &&
           (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0)) {
         onPressCall = self.onPress.bind(self);
-        vCols.push(<Text style={style} numberOfLines={first ? 2 : 1} key={self.getNextKey()}>{resource[v]}</Text>);
+        vCols.push(<Text style={style} key={self.getNextKey()}>{resource[v]}</Text>);
       }
       else if (!model.autoCreate) {
         let val
@@ -346,7 +346,7 @@ module.exports = FormMessageRow;
     // if (!renderedRow.length) {
     //   var vCols = noMessage ? null : utils.getDisplayName(resource, model.properties);
     //   if (vCols)
-    //     renderedRow = <Text style={chatStyles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
+    //     renderedRow = <Text style={chatStyles.resourceTitle}>{vCols}</Text>;
     // }
     // else {
     //   var fromHash = resource.from.id
@@ -386,7 +386,7 @@ module.exports = FormMessageRow;
     // var rowStyle = [chatStyles.row, {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}];
     // var val = this.getTime(resource);
     // var date = val
-    //          ? <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
+    //          ? <Text style={chatStyles.date}>{val}</Text>
     //          : <View />;
 
     // var sendStatus = <View />

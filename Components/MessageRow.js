@@ -100,7 +100,7 @@ class MessageRow extends Component {
     if (!renderedRow.length) {
       var vCols = noMessage ? null : utils.getDisplayName(resource, model.properties);
       if (vCols)
-        renderedRow = <Text style={chatStyles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
+        renderedRow = <Text style={chatStyles.resourceTitle}>{vCols}</Text>;
     }
     else {
       var fromHash = resource.from.id;
@@ -167,7 +167,7 @@ class MessageRow extends Component {
     var rowStyle = [chatStyles.row, {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}];
     var val = this.getTime(resource);
     var date = val
-             ? <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
+             ? <Text style={chatStyles.date}>{val}</Text>
              : <View />;
 
     var showMessageBody;
@@ -576,7 +576,7 @@ class MessageRow extends Component {
           properties[v].type === 'string'  &&
           (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0)) {
         onPressCall = self.onPress.bind(self);
-        vCols.push(<Text style={style} numberOfLines={first ? 2 : 1} key={self.getNextKey()}>{resource[v]}</Text>);
+        vCols.push(<Text style={style} key={self.getNextKey()}>{resource[v]}</Text>);
       }
       else if (isFormError) {
         let rtype = (resource.prefill[constants.TYPE]) ? resource.prefill[constants.TYPE] : utils.getId(resource.prefill).split('_')[0]

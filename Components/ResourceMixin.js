@@ -490,7 +490,7 @@ module.exports = ResourceMixin;
           else if (modelName === TERMS_AND_CONDITIONS)
             val = <Text style={[styles.description, {flexWrap: 'wrap'}]}>{val}</Text>;
           else
-            val = <Text style={[styles.description]} numberOfLines={2}>{val}</Text>;
+            val = <Text style={[styles.description]}>{val}</Text>;
 
         }
       }

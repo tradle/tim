@@ -45,7 +45,7 @@ var RowMixin = {
         ? <Text style={style} key={this.getNextKey()}>{val}</Text>
         : <View style={{flexDirection: 'row'}} key={this.getNextKey()}><Text style={style}>{properties[dateProp].title}</Text><Text style={style}>{val}</Text></View>
 
-    return <Text style={[style]} numberOfLines={1} key={this.getNextKey()}>{val}</Text>;
+    return <Text style={[style]} key={this.getNextKey()}>{val}</Text>;
   },
   getNextKey() {
     return this.props.resource[constants.ROOT_HASH] + '_' + cnt++
@@ -482,9 +482,9 @@ var RowMixin = {
   //   var resource = this.props.resource;
   //   var propValue = resource[prop.name];
   //   if (propValue  &&  (typeof propValue != 'string'))
-  //     row = <Text style={style} numberOfLines={1}>{propValue}</Text>;
+  //     row = <Text style={style}>{propValue}</Text>;
   //   else if (!backlink  &&  propValue  && (propValue.indexOf('http://') == 0  ||  propValue.indexOf('https://') == 0))
-  //     row = <Text style={style} onPress={this.onPress.bind(this)} numberOfLines={1}>{propValue}</Text>;
+  //     row = <Text style={style} onPress={this.onPress.bind(this)}>{propValue}</Text>;
   //   else {
   //     var val = prop.displayAs ? utils.templateIt(prop, resource) : propValue;
   //     let msgParts = utils.splitMessage(val);

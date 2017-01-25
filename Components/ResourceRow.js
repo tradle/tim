@@ -439,9 +439,9 @@ class ResourceRow extends Component {
         if (resource[v]) {
           var row;
           if (ref == MONEY)
-            row = <Text style={style} numberOfLines={first ? 2 : 1} key={self.getNextKey()}>{(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value}</Text>
+            row = <Text style={style} key={self.getNextKey()}>{(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value}</Text>
           else
-            row = <Text style={style} numberOfLines={first ? 2 : 1} key={self.getNextKey()}>{resource[v].title}</Text>
+            row = <Text style={style} key={self.getNextKey()}>{resource[v].title}</Text>
 
           vCols.push(row);
         }
@@ -456,9 +456,9 @@ class ResourceRow extends Component {
       else  {
         var row;
         if (resource[v]  &&  (typeof resource[v] != 'string'))
-          row = <Text style={style} numberOfLines={1} key={self.getNextKey()}>{resource[v]}</Text>;
+          row = <Text style={style} key={self.getNextKey()}>{resource[v]}</Text>;
         else if (!backlink  &&  resource[v]  && (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0))
-          row = <Text style={style} onPress={self.onPress.bind(self)} numberOfLines={1} key={self.getNextKey()}>{resource[v]}</Text>;
+          row = <Text style={style} onPress={self.onPress.bind(self)} key={self.getNextKey()}>{resource[v]}</Text>;
         else {
           var val = properties[v].displayAs ? utils.templateIt(properties[v], resource) : resource[v];
           let msgParts = utils.splitMessage(val);

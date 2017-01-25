@@ -100,7 +100,7 @@ class FormRequestRow extends Component {
     var rowStyle = [chatStyles.row, {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}];
     var val = this.getTime(resource);
     var date = val
-             ? <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
+             ? <Text style={chatStyles.date}>{val}</Text>
              : <View />;
 
     var sendStatus = <View />

@@ -53,7 +53,7 @@ class MessageTypeRow extends Component {
       title = utils.getModel(resource.product) ? utils.getModel(resource.product).value.title : resource.product
     else
       title = utils.getDisplayName(resource, utils.getModel(resource[constants.TYPE]).value.properties)
-    let renderedRow = <Text style={[styles.modelTitle, {color: PRODUCT_ROW_TEXT_COLOR}]} numberOfLines={2}>{title}</Text>;
+    let renderedRow = <Text style={[styles.modelTitle, {color: PRODUCT_ROW_TEXT_COLOR}]}>{title}</Text>;
 
     var verPhoto;
     if (resource.owner  &&  resource.owner.photos) {

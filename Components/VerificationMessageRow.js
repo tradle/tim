@@ -52,7 +52,7 @@ class VerificationMessageRow extends Component {
 
     var time = this.getTime(resource);
     var date = time
-             ? <Text style={chatStyles.date} numberOfLines={1}>{time}</Text>
+             ? <Text style={chatStyles.date}>{time}</Text>
              : <View />;
 
     var isMyMessage = this.isMyMessage();
@@ -349,7 +349,7 @@ module.exports = VerificationMessageRow;
 
   //   var time = this.getTime(resource);
   //   var date = time
-  //            ? <Text style={chatStyles.date} numberOfLines={1}>{time}</Text>
+  //            ? <Text style={chatStyles.date}>{time}</Text>
   //            : <View />;
 
   //   var isMyMessage = this.isMyMessage();
