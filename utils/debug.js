@@ -21,7 +21,8 @@ const consoleMethods = Object.keys(console).filter(k => {
 const enabled = [
   'console',
   'tradle:*',
-  'sendy:ws:client'
+  'sendy:ws:client',
+  'tradle:channel'
 ].concat(consoleMethods.map(method => 'console.' + method))
 
 if (__DEV__) {
