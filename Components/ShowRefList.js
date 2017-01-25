@@ -21,6 +21,8 @@ import {
 
 import React, { Component } from 'react'
 
+import ENV from '../utils/env'
+
 class ShowRefList extends Component {
   constructor(props) {
     super(props);
@@ -51,7 +53,6 @@ class ShowRefList extends Component {
         // icon = 'ios-checkmark-outline';
       propsToShow.push(p)
     }
-    let showQR = utils.getId(me) === utils.getId(resource)  &&  me.isEmployee
     propsToShow.forEach((p) => {
       let propTitle = translate(props[p], model)
       var icon = props[p].icon  ||  utils.getModel(props[p].items.ref).value.icon;
@@ -78,7 +79,8 @@ class ShowRefList extends Component {
         );
     })
 
-    if (utils.getId(me) === utils.getId(resource)  &&  me.isEmployee) {
+    const showQR = ENV.showMyQRCode && utils.getId(me) === utils.getId(resource)  &&  !me.isEmployee
+    if (showQR) {
       refList.push(
         <View style={[buttonStyles.container, {flex:1, alignSelf: 'stretch'}]} key={this.getNextKey()}>
            <TouchableHighlight onPress={this.props.showQR.bind(this)} underlayColor='transparent'>
