@@ -29,6 +29,7 @@ var VideoPlayer = require('./Components/VideoPlayer')
 var EnumList = require('./Components/EnumList')
 // var GridList = require('./Components/GridList');
 var TimHome = require('./Components/TimHome');
+var HomePage = require('./Components/HomePage')
 var PasswordCheck = require('./Components/PasswordCheck');
 var LockScreen = require('./Components/LockScreen')
 var TouchIDOptIn = require('./Components/TouchIDOptIn');
@@ -49,7 +50,6 @@ var SupervisoryView = require('./Components/SupervisoryView')
 var ProductChooser = require('./Components/ProductChooser')
 var ContextChooser = require('./Components/ContextChooser')
 var CameraView = require('./Components/CameraView');
-// var Tabs = require('./Components/Tabs')
 var PhotoCarousel = require('./Components/PhotoCarousel');
 var QRCode = require('./Components/QRCode')
 var QRCodeScanner = require('./Components/QRCodeScanner')
@@ -478,8 +478,8 @@ class TiMApp extends Component {
       return <Log navigator={nav} {...props} />
     case REMEDIATION:
       return <RemediationItemsList navigator={nav} {...props} />
-    // case 30:
-    //   return <Tabs navigator={nav} {...props} />
+    case 30:
+      return <HomePage navigator={nav} {...props} />
     case 10:
     default: // 10
       return <ResourceList navigator={nav} {...props} />

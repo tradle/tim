@@ -22,7 +22,6 @@ var StyleSheet = require('../StyleSheet')
 
 import {
   Image,
-  PixelRatio,
   // StyleSheet,
   Platform,
   Text,
@@ -616,7 +615,7 @@ var styles = StyleSheet.create({
     // backgroundColor: '#7AAAc3',
     paddingVertical: 1,
     // borderColor: '#7AAAc3',
-    borderRadius: 30,
+    // borderRadius: 30,
     // borderWidth: 1,
     height: 60,
     marginRight: 10,
@@ -634,8 +633,8 @@ var styles = StyleSheet.create({
     marginRight: 10,
     width: 60,
     borderColor: '#7AAAc3',
-    borderRadius: 30,
-    borderWidth: StyleSheet.hairlineWidth,
+    // borderRadius: 30,
+    // borderWidth: 1,
   },
   cellNoImage: {
     backgroundColor: '#dddddd',

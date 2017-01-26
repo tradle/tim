@@ -64,6 +64,8 @@ let SearchBar = (function () {
   }
 })()
 
+import ConversationsIcon from './ConversationsIcon'
+
 class ResourceList extends Component {
   props: {
     navigator: PropTypes.object.isRequired,
@@ -1094,7 +1096,7 @@ class ResourceList extends Component {
               <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
                 <TouchableOpacity onPress={this.showBanks.bind(this)}>
                   <View style={styles.row}>
-                    <Image source={require('../img/banking.png')} style={styles.cellImage} />
+                    <ConversationsIcon />
                     <View style={styles.textContainer}>
                       <Text style={styles.resourceTitle}>{translate('officialAccounts')}</Text>
                     </View>
