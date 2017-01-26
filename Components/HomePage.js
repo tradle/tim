@@ -253,7 +253,7 @@ class HomePage extends Component {
           scrollRenderAhead={10}
           showsVerticalScrollIndicator={false} />;
     }
-    var actionSheet = null //this.renderActionSheet()
+    var actionSheet = this.renderActionSheet()
     var footer = actionSheet && this.renderFooter()
     let network = this.props.isChooser || !this.props.officialAccounts || this.props.modelName !== ORGANIZATION
                 ? <View/>
@@ -276,6 +276,71 @@ class HomePage extends Component {
         {actionSheet}
       </PageView>
     );
+  }
+  renderActionSheet() {
+    let buttons
+    if (this.state.allowToAdd) {
+      buttons = [translate('addNew', this.props.prop.title), translate('cancel')]
+    } else {
+      if (!ENV.allowAddServer) return
+
+      buttons = [
+        translate('addServerUrl'),
+        translate('scanQRcode'),
+        translate('cancel')
+      ]
+    }
+
+    return (
+      <ActionSheet
+        ref={(o) => {
+          this.ActionSheet = o
+        }}
+        options={buttons}
+        cancelButtonIndex={buttons.length - 1}
+        onPress={(index) => {
+          switch (index) {
+          case 0:
+            if (this.state.allowToAdd)
+              this.addNew()
+            else
+              this.onSettingsPressed()
+            break
+          case 1:
+            this.scanFormsQRCode()
+            break;
+          // case 2:
+          //   this.talkToEmployee()
+          //   break
+          default:
+            return
+          }
+        }}
+      />
+    )
+  }
+  onSettingsPressed() {
+    var model = utils.getModel(constants.TYPES.SETTINGS).value
+    this.setState({hideMode: false})
+    var route = {
+      component: NewResource,
+      title: 'Settings',
+      backButtonTitle: 'Back',
+      rightButtonTitle: 'Done',
+      id: 4,
+      titleTextColor: '#7AAAC3',
+      passProps: {
+        model: model,
+        bankStyle: this.props.style,
+        callback: () => {
+          this.props.navigator.pop()
+          Actions.list({modelName: this.props.modelName})
+        }
+        // callback: this.register.bind(this)
+      },
+    }
+
+    this.props.navigator.push(route)
   }
 
   renderHeader() {
