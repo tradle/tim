@@ -410,7 +410,8 @@ class TimHome extends Component {
       passProps: {
         sponsorName: 'UBS',
         modelName: constants.TYPES.ORGANIZATION,
-      bankStyle: defaultBankStyle
+        bankStyle: defaultBankStyle,
+        officialAccounts: true,
       }
     })
   }

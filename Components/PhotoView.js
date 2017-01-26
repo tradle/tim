@@ -57,14 +57,14 @@ class PhotoView extends Component {
     var hasPhoto = resource.photos && resource.photos.length;
     var currentPhoto = this.state.currentPhoto || this.props.mainPhoto || (hasPhoto  &&  resource.photos[0]);
     if (!currentPhoto) {
-      // if (model.id === constants.TYPES.PROFILE) {
-      //   return (
-      //     <View style={styles.photoBG}>
-      //       <Icon name='ios-person' size={200}  color='#f6f6f4' />
-      //     </View>
-      //   )
-      // }
-      // else
+      if (model.id === constants.TYPES.PROFILE) {
+        return (
+          <View style={styles.photoBG}>
+            <Icon name='ios-leaf' size={200}  color='goldenrod' />
+          </View>
+        )
+      }
+      else
         return <View />
     }
 
@@ -152,15 +152,17 @@ reactMixin(PhotoView.prototype, PhotoCarouselMixin);
 
 var styles = StyleSheet.create({
   photoBG: {
-    backgroundColor: '#245D8C',
+    backgroundColor: '#ffffff',
     alignItems: 'center',
+    borderBottomColor: '#e8e8e8',
+    borderBottomWidth: StyleSheet.hairlineWidth,
     alignSelf: 'stretch'
   },
-    modalBackgroundStyle: {
-      backgroundColor: 'rgba(0, 0, 0, 0.4)',
-      justifyContent: 'center',
-      // padding: 20,
-    },
+  modalBackgroundStyle: {
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    justifyContent: 'center',
+    // padding: 20,
+  },
 });
 
 module.exports = PhotoView;

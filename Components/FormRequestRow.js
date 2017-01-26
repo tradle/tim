@@ -478,24 +478,24 @@ class FormRequestRow extends Component {
     let self = this
     if (sameFormRequestForm  &&  !resource.documentCreated) {
        link = <View style={[chatStyles.rowContainer, {paddingVertical: 10, alignSelf: 'center'}]}>
-               <View style={chatStyles.textContainer}>
-               <TouchableHighlight underlayColor='transparent' style={{paddingRight: 15}} onPress={() => {
-                 this.createNewResource(form, isMyMessage)
-               }}>
-                 <View style={styles.multiEntryButton}>
-                   <Text style={styles.multiEntryText}>   {translate('addSameForm')}   </Text>
-                 </View>
-               </TouchableHighlight>
-               <TouchableHighlight underlayColor='transparent' onPress={() => {
-                  Alert.alert(
-                    translate('areYouSureAboutNextForm', translate(form)),
-                    null,
-                    [
-                      {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-                      {text: translate('Ok'), onPress: onOK.bind(this)},
-                    ]
-                  )
-               }}>
+               <View style={[chatStyles.textContainer, {justifyContent: 'center'}]}>
+                 <TouchableHighlight underlayColor='transparent' style={{paddingRight: 15}} onPress={() => {
+                   this.createNewResource(form, isMyMessage)
+                 }}>
+                   <View style={styles.multiEntryButton}>
+                     <Text style={styles.multiEntryText}>   {translate('addSameForm')}   </Text>
+                   </View>
+                 </TouchableHighlight>
+                 <TouchableHighlight underlayColor='transparent' onPress={() => {
+                    Alert.alert(
+                      translate('areYouSureAboutNextForm', translate(form)),
+                      null,
+                      [
+                        {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+                        {text: translate('Ok'), onPress: onOK.bind(this)},
+                      ]
+                    )
+                 }}>
                  <View style={styles.multiEntryButton}>
                    <Text style={styles.multiEntryText}>   {translate('getNextForm')}   </Text>
                  </View>
