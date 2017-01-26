@@ -153,7 +153,7 @@ const TLSClient = require('sendy-axolotl')
 //   }
 // })
 
-const SENDY_OPTS = { resendInterval: 30000, mtu: 100, autoConnect: true }
+const SENDY_OPTS = { resendInterval: 30000, mtu: 10000, autoConnect: true }
 // const newOTRSwitchboard = require('sendy-otr-ws').Switchboard
 const newSwitchboard = SendyWS.Switchboard
 const WebSocketClient = SendyWS.Client
