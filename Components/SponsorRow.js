@@ -99,10 +99,10 @@ class SponsorRow extends Component {
           </View>
         </TouchableHighlight>
         <View style={{marginTop: 10}}>
-          <Image source={require('../img/immo-check.png')} style={{backgroundColor: 'transparent', alignSelf: 'center', width: 330, height: 120, borderWidth: StyleSheet.hairlineWidth, borderColor: '#eeeeee'}} />
+          <Image source={require('../img/immo-check.jpg')} style={{backgroundColor: 'transparent', alignSelf: 'center', width: 330, height: 120, borderWidth: StyleSheet.hairlineWidth, borderColor: '#eeeeee'}} />
         </View>
         <View style={{marginTop: 10}}>
-          <Image source={require('../img/paymit.png')} style={{backgroundColor: 'transparent', alignSelf: 'center', width: 330, height: 120, borderWidth: StyleSheet.hairlineWidth, borderColor: '#eeeeee'}} />
+          <Image source={require('../img/paymit.jpg')} style={{backgroundColor: 'transparent', alignSelf: 'center', width: 330, height: 120, borderWidth: StyleSheet.hairlineWidth, borderColor: '#eeeeee'}} />
         </View>
       </View>
     )
