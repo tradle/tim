@@ -186,6 +186,7 @@ class HomePage extends Component {
       component: MessageList,
       id: 11,
       backButtonTitle: 'Back',
+      title: title,
       passProps: {
         resource: resource,
         filter: '',
