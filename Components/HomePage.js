@@ -113,28 +113,29 @@ class HomePage extends Component {
         isLoading: false
       })
     }
-    if (action === 'getForms') {
-      if (!params.to)
-        return
-      let style = this.mergeStyle(params.to.style)
+    // if (action === 'getForms') {
+    //   if (!params.to)
+    //     return
+    //   if (utils.getMe())
+    //   let style = this.mergeStyle(params.to.style)
 
-      var route = {
-        title: params.to.name,
-        component: MessageList,
-        id: 11,
-        backButtonTitle: 'Back',
-        passProps: {
-          resource: params.to,
-          filter: '',
-          modelName: constants.TYPES.MESSAGE,
-          currency: params.to.currency,
-          bankStyle:  style,
-          dictionary: params.dictionary,
-        }
-      }
-      this.props.navigator.replace(route)
-      return
-    }
+    //   var route = {
+    //     title: params.to.name,
+    //     component: MessageList,
+    //     id: 11,
+    //     backButtonTitle: 'Back',
+    //     passProps: {
+    //       resource: params.to,
+    //       filter: '',
+    //       modelName: constants.TYPES.MESSAGE,
+    //       currency: params.to.currency,
+    //       bankStyle:  style,
+    //       dictionary: params.dictionary,
+    //     }
+    //   }
+    //   this.props.navigator.replace(route)
+    //   return
+    // }
   }
   mergeStyle(newStyle) {
     let style = {}
@@ -275,7 +276,7 @@ class HomePage extends Component {
           scrollRenderAhead={10}
           showsVerticalScrollIndicator={false} />;
     }
-    var actionSheet = this.renderActionSheet()
+    var actionSheet = null // this.renderActionSheet()
     var footer = actionSheet && this.renderFooter()
     let network = this.props.isChooser || !this.props.officialAccounts || this.props.modelName !== ORGANIZATION
                 ? <View/>
