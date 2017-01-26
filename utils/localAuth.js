@@ -9,6 +9,7 @@ import Keychain from 'react-native-keychain'
 import PasswordCheck from '../Components/PasswordCheck'
 import LockScreen from '../Components/LockScreen'
 import ENV from '../utils/env'
+import { coroutine as co } from 'bluebird'
 
 // hack!
 // hasTouchID().then(ENV.setHasTouchID)
@@ -21,6 +22,7 @@ var Actions = require('../Actions/Actions');
 const PASSWORD_ITEM_KEY = 'app-password'
 
 const isAndroid = utils.isAndroid()
+const isIOS = utils.isIOS()
 const ForgivableTouchIDErrors = [
   'LAErrorTouchIDNotAvailable',
   'LAErrorTouchIDNotSupported',
@@ -48,10 +50,18 @@ const DEFAULT_OPTS = {
 
 const PROMPTS = require('./password-prompts')
 const PASSWORD_PROMPTS = getPasswordPrompts()
-
 let pendingAuth
 let pendingEnrollRequest
 let TIMEOUT = __DEV__ ? 5000 : 1 * 60 * 1000
+
+const hasTouchID = co(function* hasTouchID () {
+  try {
+    yield LocalAuth.hasTouchID()
+    return true
+  } catch (err) {
+    return false
+  }
+})
 
 module.exports = {
   TIMEOUT,
@@ -62,57 +72,73 @@ module.exports = {
   authenticateUser
 }
 
-function hasTouchID () {
-  return LocalAuth.hasTouchID()
-    .then(() => true, err => false)
-}
-
 /**
  * Native authentication, e.g. TouchID or PIN
  * @param  {Object=DEFAULT_OPTS} opts
  * @return {Promise}
  */
-function authenticateUser (opts) {
+const authenticateUser = co(function* (opts) {
   // prevent two authentication requests from
   // going in concurrently and causing problems
+  debug('authenticating user, auth pending: ' + (!!pendingAuth))
   if (pendingAuth) return pendingAuth
 
-  if (isAndroid && __DEV__) {
-    return Q.resolve()
-  }
+  const requestEnablePasscodeAndReauth = co(function* () {
+    debug('requesting to enable device passcode')
+    yield requestEnablePasscode()
+    pendingAuth = undefined
+    debug('device passcode alert dismissed, reattempting authentication')
+    return authenticateUser(opts)
+  })
 
-  opts = typeof opts === 'string' ? { reason: opts} : opts || {}
-  opts = { ...DEFAULT_OPTS, ...opts }
-  return pendingAuth = LocalAuth.authenticate(opts)
-    .then(() => {
-      pendingAuth = undefined
-    })
-    .catch((err) => {
-      pendingAuth = undefined
-
-      if (__DEV__) {
-        if (!(err.name in Errors)) {
-          let message = `error: ${err.message}, stack: ${err.stack}`
-          debug(JSON.stringify(err))
-          Alert.alert(message)
-        }
-      } else {
-        if (isAndroid && err.code === 'E_FAILED_TO_SHOW_AUTH') {
-          return new Promise(resolve => {
-            Alert.alert(
-              translate('youShallNotPass'),
-              translate('enablePasscodeFirst'),
-              [
-                { text: 'OK', onPress: resolve }
-              ]
-            )
-          })
-          .then(() => authenticateUser(opts))
-        }
+  if (!ENV.requireDeviceLocalAuth) {
+    try {
+      const isSecure = yield LocalAuth.isDeviceSecure()
+      debug('is device secure? ' + isSecure)
+      if (!isSecure) {
+        return pendingAuth = requestEnablePasscodeAndReauth()
       }
 
-      throw err
-    })
+      return
+    } catch (err) {
+      debug('unable to determine whether device is secure, asking for auth', err)
+    }
+  }
+
+  debug('requesting local auth')
+  opts = typeof opts === 'string' ? { reason: opts} : opts || {}
+  opts = { ...DEFAULT_OPTS, ...opts }
+  try {
+    return pendingAuth = LocalAuth.authenticate(opts)
+  } catch (err) {
+    if (__DEV__) {
+      if (!(err.name in Errors)) {
+        let message = `error: ${err.message}, stack: ${err.stack}`
+        debug(JSON.stringify(err))
+        Alert.alert(message)
+      }
+    } else {
+      if (isAndroid && err.code === 'E_FAILED_TO_SHOW_AUTH') {
+        return pendingAuth = requestEnablePasscodeAndReauth()
+      }
+    }
+
+    throw err
+  } finally {
+    pendingAuth = undefined
+  }
+})
+
+function requestEnablePasscode () {
+  return new Promise(resolve => {
+    Alert.alert(
+      translate('youShallNotPass'),
+      translate('enablePasscodeFirst'),
+      [
+        { text: 'OK', onPress: resolve }
+      ]
+    )
+  })
 }
 
 function touchIDOrNothing () {
@@ -208,7 +234,7 @@ function touchIDAndPasswordAuth(navigator, isChangePassword) {
 
 function passwordAuth (navigator, isChangePassword) {
   // check if we have a password stored already
-  debug('passwordAuth')
+  debug('checking for stored gesture password')
   return utils.getHashedPassword(PASSWORD_ITEM_KEY)
     .then(
       () => checkPassword(navigator, isChangePassword),
@@ -238,7 +264,7 @@ function lockUp (nav, err) {
 }
 
 function setPassword (navigator, isChangePassword) {
-  debug('setPassword')
+  debug('requesting to choose a gesture password')
   return Q.Promise((resolve, reject) => {
     navigator.push({
       component: PasswordCheck,
@@ -264,7 +290,7 @@ function setPassword (navigator, isChangePassword) {
 }
 
 function checkPassword (navigator, isChangePassword) {
-  debug('checkPassword')
+  debug('requesting to enter gesture password')
   // HACK
   let routes = navigator.getCurrentRoutes()
   let currentRoute = routes[routes.length - 1]
