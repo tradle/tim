@@ -91,7 +91,7 @@ class SponsorRow extends Component {
       <View style={[styles.content, bg]} key={this.getNextKey()}>
         <TouchableHighlight onPress={this.props.onSelect} underlayColor='transparent'>
           <View style={[styles.row, bg]}>
-            <Icon color='#AAAAAA' size={20} name={'ios-arrow-forward'} style={{position: 'absolute', right: 10, top: 25}}/>
+            <Icon color='#AAAAAA' size={20} name={'ios-arrow-forward'} style={{position: 'absolute', right: 10, top: 50}}/>
             <View style={textStyle}>
               <Text style={{color: '#757575', fontSize: 20}}>{translate('sponsoredBy')}</Text>
             </View>
@@ -99,10 +99,10 @@ class SponsorRow extends Component {
           </View>
         </TouchableHighlight>
         <View style={{marginTop: 10}}>
-          <Image source={require('../img/immo-check.jpg')} style={{backgroundColor: 'transparent', alignSelf: 'center', width: 330, height: 120, borderWidth: StyleSheet.hairlineWidth, borderColor: '#eeeeee'}} />
+          <Image source={require('../img/immo-check.jpg')} style={{backgroundColor: 'transparent', alignSelf: 'center', width: '80%', height: '20%', resizeMode: 'cover', borderWidth: StyleSheet.hairlineWidth, borderColor: '#eeeeee'}} />
         </View>
         <View style={{marginTop: 10}}>
-          <Image source={require('../img/paymit.jpg')} style={{backgroundColor: 'transparent', alignSelf: 'center', width: 330, height: 120, borderWidth: StyleSheet.hairlineWidth, borderColor: '#eeeeee'}} />
+          <Image source={require('../img/paymit.jpg')} style={{backgroundColor: 'transparent', alignSelf: 'center', width: '80%', height: '20%', resizeMode: 'contain', borderWidth: StyleSheet.hairlineWidth, borderColor: '#eeeeee'}} />
         </View>
       </View>
     )
@@ -165,9 +165,9 @@ var styles = StyleSheet.create({
   },
   cellImage: {
     backgroundColor: '#ffffff',
-    height: 70,
+    height: 120,
     marginRight: 10,
-    width: 70,
+    width: 120,
   },
   cellNoImage: {
     backgroundColor: '#dddddd',

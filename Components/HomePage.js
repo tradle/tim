@@ -408,7 +408,7 @@ class HomePage extends Component {
 
   renderHeader() {
     let digital = (
-              <View style={{padding: 5, backgroundColor: '#ffffff', marginBottom: 2}}>
+              <View style={{padding: 5, backgroundColor: '#ffffff', borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#eeeeee'}}>
                 <TouchableOpacity onPress={this.showProfile.bind(this)}>
                   <View style={styles.row}>
                     <Icon name='ios-leaf' color='goldenrod' size={45} style={styles.cellImage} />
@@ -421,7 +421,7 @@ class HomePage extends Component {
               </View>
              )
     let officialAccounts = (
-              <View style={{padding: 5, backgroundColor: '#ffffff', marginBottom: 2}}>
+              <View style={{padding: 5, backgroundColor: '#ffffff', borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#eeeeee'}}>
                 <TouchableOpacity onPress={this.showBanks.bind(this)}>
                   <View style={styles.row}>
                     <ConversationsIcon />
