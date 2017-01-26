@@ -45,7 +45,7 @@ var buttonStyles = Object.freeze({
   },
   buttons: {
     flexDirection: 'row',
-    backgroundColor: '#F5FFED',
+    backgroundColor: '#f5f5f5',// '#F5FFED',
     borderBottomColor: '#a0a0a0',
     borderBottomWidth: 1,
     alignSelf: 'stretch'
