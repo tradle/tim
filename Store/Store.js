@@ -28,7 +28,7 @@ const SENT = 'Sent'
 const SENDING = 'Sending'
 const QUEUED = 'Queued'
 
-var debug = Debug('Store')
+var debug = Debug('tradle:app:store')
 var employee = require('../people/employee.json')
 
 var Q = require('q');
@@ -1305,10 +1305,12 @@ var Store = Reflux.createStore({
       clientForRecipient: function (recipient) {
         const sendy = new Sendy({ ...SENDY_OPTS, name: recipient })
         sendy.on('progress', ({ total, progress }) => {
+          if (total < 30000) return // don't show progress bar for < 30KB
+
           const percent = 100 * progress / total | 0
           let org = self._getItem(PROFILE + '_' + recipient).organization
           self.trigger({action: 'progressUpdate', progress: percent / 100, recipient: self._getItem(org)})
-          console.log(`${percent}% of message downloaded from ${recipient}`)
+          debug(`${percent}% of message downloaded from ${recipient}`)
         })
 
         if (!tlsKey) return sendy
