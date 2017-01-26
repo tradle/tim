@@ -136,7 +136,7 @@ var verificationStyles = Object.freeze({
     marginTop: 5,
     paddingBottom: 5,
     paddingLeft: 10,
-    justifyContent:'space-around'
+    justifyContent:'space-between'
   },
   linkIconGreyed: {
     color: '#cccccc'
