@@ -152,20 +152,28 @@ class VerificationRow extends Component {
                 : translate('verifiedBy', title)
       // verifiedBy = <View style={contentRows.length == 1 ? {flex: 1} : {flexDirection: 'row'}} key={this.getNextKey()}>
 
-      verifiedBy = <Text style={styles.description}>{by}</Text>
+      verifiedBy = <Text style={[styles.description, {color: '#AAAAAA'}]}>{by}</Text>
     }
     else
       verifiedBy = <View/>
 
+    let dateP = resource.dateVerified ? 'dateVerified' : resource.date ? 'date' : 'time'
+    // var date = r
+    //          ? this.addDateProp(dateP, [styles.verySmallLetters, {position: 'absolute', right: 10}])
+    //          : <View />
     var date = r
-             ? this.addDateProp(resource.dateVerified ? 'dateVerified' : 'time', [styles.verySmallLetters, {position: 'absolute', right: 10}])
+             ? this.addDateProp(dateP, [styles.verySmallLetters, {position: 'absolute', right: 10}])
              : <View />
 
+    let dn = isVerification ?  utils.getDisplayName(resource.document) : utils.getDisplayName(resource, model.properties)
     let title
     if (this.props.isChooser  ||  model.interfaces.indexOf(ITEM) !== -1)
-      title = utils.getDisplayName(resource, model.properties)
+      title = dn //utils.getDisplayName(resource, model.properties)
     if (!title || !title.length)
       title = verificationRequest.title || utils.makeModelTitle(verificationRequest)
+
+    let description = title === dn ? null : <Text style={styles.description}>{dn}</Text>
+
 
     var header =  <View style={{backgroundColor: '#ffffff', borderBottomColor: '#f0f0f0', borderBottomWidth: 1}} key={this.getNextKey()}>
                     <View style={{flexDirection: 'row', marginHorizontal: 10,  marginVertical: 3, paddingBottom: 4}}>
@@ -173,7 +181,10 @@ class VerificationRow extends Component {
                       {date}
                       <View style={[styles.noImageBlock, {flex: 1}]}>
                         <Text style={styles.rTitle}>{title}</Text>
-                         {verifiedBy}
+                        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                          {description}
+                          {verifiedBy}
+                        </View>
                       </View>
                     </View>
                   </View>
@@ -375,7 +386,7 @@ var styles = StyleSheet.create({
     flex: 1,
     fontSize: 18,
     marginVertical: 5,
-    color: '#757575',
+    color: '#555555',
     // fontWeight: '600',
     // marginBottom: 2,
   },
@@ -402,7 +413,7 @@ var styles = StyleSheet.create({
     flexWrap: 'wrap',
     color: '#999999',
     fontSize: 14,
-    paddingLeft: 5
+    // paddingLeft: 5
   },
   cellImage: {
     backgroundColor: '#dddddd',

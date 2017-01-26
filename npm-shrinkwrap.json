@@ -59,24 +59,7 @@
     "@tradle/protocol": {
       "version": "2.3.0",
       "from": "@tradle/protocol@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/protocol/-/protocol-2.3.0.tgz",
-      "dependencies": {
-        "isarray": {
-          "version": "1.0.0",
-          "from": "isarray@>=1.0.0 <1.1.0",
-          "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
-        },
-        "merkle-tree-stream": {
-          "version": "3.0.3",
-          "from": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
-          "resolved": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290"
-        },
-        "readable-stream": {
-          "version": "2.2.2",
-          "from": "readable-stream@>=2.0.5 <3.0.0",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.2.tgz"
-        }
-      }
+      "resolved": "https://registry.npmjs.org/@tradle/protocol/-/protocol-2.3.0.tgz"
     },
     "@tradle/wire": {
       "version": "1.2.0",
@@ -2039,11 +2022,6 @@
         }
       }
     },
-    "define-properties": {
-      "version": "1.1.2",
-      "from": "define-properties@>=1.1.2 <2.0.0",
-      "resolved": "https://registry.npmjs.org/define-properties/-/define-properties-1.1.2.tgz"
-    },
     "defined": {
       "version": "0.0.0",
       "from": "defined@>=0.0.0 <0.1.0",
@@ -3630,16 +3608,6 @@
       "from": "is-bzip2@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/is-bzip2/-/is-bzip2-1.0.0.tgz"
     },
-    "is-callable": {
-      "version": "1.1.3",
-      "from": "is-callable@>=1.1.3 <2.0.0",
-      "resolved": "https://registry.npmjs.org/is-callable/-/is-callable-1.1.3.tgz"
-    },
-    "is-date-object": {
-      "version": "1.0.1",
-      "from": "is-date-object@>=1.0.1 <2.0.0",
-      "resolved": "https://registry.npmjs.org/is-date-object/-/is-date-object-1.0.1.tgz"
-    },
     "is-dotfile": {
       "version": "1.0.2",
       "from": "is-dotfile@>=1.0.0 <2.0.0",
@@ -3749,11 +3717,6 @@
       "version": "1.0.0",
       "from": "is-redirect@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/is-redirect/-/is-redirect-1.0.0.tgz"
-    },
-    "is-regex": {
-      "version": "1.0.3",
-      "from": "is-regex@>=1.0.3 <2.0.0",
-      "resolved": "https://registry.npmjs.org/is-regex/-/is-regex-1.0.3.tgz"
     },
     "is-relative": {
       "version": "0.1.3",
@@ -3988,6 +3951,35 @@
           "version": "0.4.4",
           "from": "source-map@>=0.4.2 <0.5.0",
           "resolved": "https://registry.npmjs.org/source-map/-/source-map-0.4.4.tgz"
+        }
+      }
+    },
+    "key-encoder": {
+      "version": "1.1.6",
+      "from": "git://github.com/mvayngrib/key-encoder-js.git#9811b1d85ded6f6d8eb6b48389d80ed17df550ff",
+      "resolved": "git://github.com/mvayngrib/key-encoder-js.git#9811b1d85ded6f6d8eb6b48389d80ed17df550ff",
+      "dependencies": {
+        "asn1.js": {
+          "version": "2.2.1",
+          "from": "asn1.js@>=2.2.0 <3.0.0",
+          "resolved": "https://registry.npmjs.org/asn1.js/-/asn1.js-2.2.1.tgz",
+          "dependencies": {
+            "bn.js": {
+              "version": "2.2.0",
+              "from": "bn.js@>=2.0.0 <3.0.0",
+              "resolved": "https://registry.npmjs.org/bn.js/-/bn.js-2.2.0.tgz"
+            }
+          }
+        },
+        "bn.js": {
+          "version": "3.3.0",
+          "from": "bn.js@>=3.1.2 <4.0.0",
+          "resolved": "https://registry.npmjs.org/bn.js/-/bn.js-3.3.0.tgz"
+        },
+        "elliptic": {
+          "version": "5.2.1",
+          "from": "elliptic@>=5.1.0 <6.0.0",
+          "resolved": "https://registry.npmjs.org/elliptic/-/elliptic-5.2.1.tgz"
         }
       }
     },
@@ -4647,15 +4639,27 @@
           "from": "isarray@>=1.0.0 <1.1.0",
           "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
         },
-        "merkle-tree-stream": {
-          "version": "3.0.3",
-          "from": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
-          "resolved": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290"
-        },
         "readable-stream": {
           "version": "2.1.5",
           "from": "readable-stream@>=2.1.0 <3.0.0",
           "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.1.5.tgz"
+        }
+      }
+    },
+    "merkle-tree-stream": {
+      "version": "3.0.3",
+      "from": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
+      "resolved": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
+      "dependencies": {
+        "isarray": {
+          "version": "1.0.0",
+          "from": "isarray@>=1.0.0 <1.1.0",
+          "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
+        },
+        "readable-stream": {
+          "version": "2.2.2",
+          "from": "readable-stream@>=2.0.5 <3.0.0",
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.2.tgz"
         }
       }
     },
@@ -4857,36 +4861,7 @@
     "nkey-ecdsa": {
       "version": "1.1.0",
       "from": "nkey-ecdsa@latest",
-      "resolved": "https://registry.npmjs.org/nkey-ecdsa/-/nkey-ecdsa-1.1.0.tgz",
-      "dependencies": {
-        "asn1.js": {
-          "version": "2.2.1",
-          "from": "asn1.js@>=2.2.0 <3.0.0",
-          "resolved": "https://registry.npmjs.org/asn1.js/-/asn1.js-2.2.1.tgz",
-          "dependencies": {
-            "bn.js": {
-              "version": "2.2.0",
-              "from": "bn.js@>=2.0.0 <3.0.0",
-              "resolved": "https://registry.npmjs.org/bn.js/-/bn.js-2.2.0.tgz"
-            }
-          }
-        },
-        "bn.js": {
-          "version": "3.3.0",
-          "from": "bn.js@>=3.1.2 <4.0.0",
-          "resolved": "https://registry.npmjs.org/bn.js/-/bn.js-3.3.0.tgz"
-        },
-        "elliptic": {
-          "version": "5.2.1",
-          "from": "elliptic@>=5.1.0 <6.0.0",
-          "resolved": "https://registry.npmjs.org/elliptic/-/elliptic-5.2.1.tgz"
-        },
-        "key-encoder": {
-          "version": "1.1.6",
-          "from": "git://github.com/mvayngrib/key-encoder-js.git#9811b1d85ded6f6d8eb6b48389d80ed17df550ff",
-          "resolved": "git://github.com/mvayngrib/key-encoder-js.git#9811b1d85ded6f6d8eb6b48389d80ed17df550ff"
-        }
-      }
+      "resolved": "https://registry.npmjs.org/nkey-ecdsa/-/nkey-ecdsa-1.1.0.tgz"
     },
     "nkey-secp256k1": {
       "version": "1.1.1",
@@ -6009,11 +5984,6 @@
       "version": "1.5.13",
       "from": "react-native-linear-gradient@>=1.1.0-alpha <2.0.0",
       "resolved": "https://registry.npmjs.org/react-native-linear-gradient/-/react-native-linear-gradient-1.5.13.tgz"
-    },
-    "react-native-local-auth": {
-      "version": "1.3.1",
-      "from": "react-native-local-auth@1.3.1",
-      "resolved": "https://registry.npmjs.org/react-native-local-auth/-/react-native-local-auth-1.3.1.tgz"
     },
     "react-native-localization": {
       "version": "0.1.18",
