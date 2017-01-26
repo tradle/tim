@@ -98,6 +98,7 @@
     "react-native-orientation": "github:yamill/react-native-orientation#2782917",
     "react-native-os": "^1.0.2",
     "react-native-passcode-status": "1.1.0",
+    "react-native-progress": "^3.2.0",
     "react-native-prompt": "github:pgmemk/react-native-prompt#789e25c",
     "react-native-push-notification": "^2.1.1",
     "react-native-qrcode": "^0.2.2",
