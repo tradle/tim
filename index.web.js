@@ -41,8 +41,6 @@ function ensureOneTab () {
     if (err || !yes) {
       return alertError('This application is open in another tab. Please close one of the two tabs and refresh the page.')
     }
-
-    resolve()
   })
 }
 
