@@ -113,28 +113,28 @@ class HomePage extends Component {
         isLoading: false
       })
     }
-    // if (action === 'getForms') {
-    //   if (!params.to)
-    //     return
-    //   let style = this.mergeStyle(params.to.style)
+    if (action === 'getForms') {
+      if (!params.to)
+        return
+      let style = this.mergeStyle(params.to.style)
 
-    //   var route = {
-    //     title: params.to.name,
-    //     component: MessageList,
-    //     id: 11,
-    //     backButtonTitle: 'Back',
-    //     passProps: {
-    //       resource: params.to,
-    //       filter: '',
-    //       modelName: constants.TYPES.MESSAGE,
-    //       currency: params.to.currency,
-    //       bankStyle:  style,
-    //       dictionary: params.dictionary,
-    //     }
-    //   }
-    //   this.props.navigator.replace(route)
-    //   return
-    // }
+      var route = {
+        title: params.to.name,
+        component: MessageList,
+        id: 11,
+        backButtonTitle: 'Back',
+        passProps: {
+          resource: params.to,
+          filter: '',
+          modelName: constants.TYPES.MESSAGE,
+          currency: params.to.currency,
+          bankStyle:  style,
+          dictionary: params.dictionary,
+        }
+      }
+      this.props.navigator.replace(route)
+      return
+    }
   }
   mergeStyle(newStyle) {
     let style = {}
