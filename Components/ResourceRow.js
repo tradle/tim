@@ -23,7 +23,6 @@ var StyleSheet = require('../StyleSheet')
 
 import {
   Image,
-  PixelRatio,
   // StyleSheet,
   Platform,
   Text,
