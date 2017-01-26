@@ -191,5 +191,8 @@
     "youReviewed": "You reviewed {1} out of {2} items",
     "unknownQRCodeFormat": "Unrecognized QR code format",
     "confirmedMyData": "Confirmed my data",
-    "importData": "Import data"
+    "importData": "Import data",
+    "digitalWealthPassport": "Digital Wealth Passport",
+    "homePage": "Home",
+    "sponsoredBy": "Sponsored by"
 }
