@@ -275,7 +275,7 @@ class HomePage extends Component {
           scrollRenderAhead={10}
           showsVerticalScrollIndicator={false} />;
     }
-    var actionSheet = null // this.renderActionSheet()
+    var actionSheet = this.renderActionSheet()
     var footer = actionSheet && this.renderFooter()
     let network = this.props.isChooser || !this.props.officialAccounts || this.props.modelName !== ORGANIZATION
                 ? <View/>
@@ -398,16 +398,32 @@ class HomePage extends Component {
             </View>
   }
   showProfile() {
-    this.props.navigator.push({
+    let me = utils.getMe()
+    let route = {
       title: translate('digitalWealthPassport'),
       id: 3,
       component: ResourceView,
       titleTextColor: '#7AAAC3',
       backButtonTitle: 'Back',
+      rightButtonTitle: 'Edit',
       passProps: {
-        resource: utils.getMe()
+        resource: me
+      },
+      onRightButtonPress: {
+        title: me.firstName,
+        id: 4,
+        component: NewResource,
+        // titleTextColor: '#7AAAC3',
+        backButtonTitle: translate('back'),
+        rightButtonTitle: translate('done'),
+        passProps: {
+          model: utils.getModel(me[constants.TYPE]).value,
+          resource: me,
+          bankStyle: defaultBankStyle
+        }
       }
-   })
+    }
+    this.props.navigator.push(route)
   }
   scanFormsQRCode() {
     this.setState({hideMode: false})

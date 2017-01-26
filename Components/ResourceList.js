@@ -950,7 +950,8 @@ class ResourceList extends Component {
           scrollRenderAhead={10}
           showsVerticalScrollIndicator={false} />;
     }
-    var actionSheet = this.renderActionSheet()
+    let me = utils.getMe()
+    var actionSheet = me.isEmployee && me.organization ? this.renderActionSheet() : null
     var footer = actionSheet && this.renderFooter()
     var searchBar
     if (SearchBar  &&  ((this.state.list && this.state.list.length > 10) || (this.state.filter  &&  this.state.filter.length))) {
