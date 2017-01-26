@@ -55,7 +55,15 @@ import {
 import platformStyles from '../styles/platform'
 import ENV from '../utils/env'
 
-const SearchBar = Platform.OS === 'android' ? require('./SearchBar') : require('react-native-search-bar')
+const SearchBar = (function () {
+  switch (Platform.OS) {
+    case 'android':
+      return require('./SearchBar')
+    case 'ios':
+      return require('react-native-search-bar')
+  }
+})()
+
 import ConversationsIcon from './ConversationsIcon'
 
 class ResourceList extends Component {
