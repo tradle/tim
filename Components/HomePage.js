@@ -129,56 +129,6 @@ class HomePage extends Component {
     var isForm = model.value.id === constants.TYPES.FORM
     var isOrganization = this.props.modelName === ORGANIZATION;
     var m = utils.getModel(resource[TYPE]).value;
-    if (!isIdentity         &&
-        !isOrganization     &&
-        !this.props.callback) {
-      if (isVerification || isForm) {
-        let title
-        if (isForm)
-          title = utils.makeModelTitle(m)
-        else {
-          let type = utils.getType(resource)
-          title = utils.makeModelTitle(utils.getModel(type).value)
-        }
-        this.props.navigator.push({
-          title: title,
-          id: 5,
-          component: MessageView,
-          backButtonTitle: 'Back',
-          passProps: {
-            resource: resource,
-            bankStyle: this.props.bankStyle || defaultBankStyle
-          }
-        });
-      }
-      else {
-        var title = utils.makeTitle(utils.getDisplayName(resource, m.properties))
-        this.props.navigator.push({
-          title: title,
-          id: 3,
-          component: ResourceView,
-          // titleTextColor: '#7AAAC3',
-          backButtonTitle: 'Back',
-          rightButtonTitle: 'Edit',
-          onRightButtonPress: {
-            title: title,
-            id: 4,
-            component: NewResource,
-            titleTextColor: '#7AAAC3',
-            backButtonTitle: 'Back',
-            rightButtonTitle: 'Done',
-            passProps: {
-              model: m,
-              resource: resource,
-              bankStyle: this.props.bankStyle || defaultBankStyle
-            }
-          },
-
-          passProps: {resource: resource}
-        });
-      }
-      return;
-    }
     var title = isIdentity ? resource.firstName : resource.name; //utils.getDisplayName(resource, model.value.properties);
     var modelName = constants.TYPES.MESSAGE;
     var self = this;
@@ -196,27 +146,6 @@ class HomePage extends Component {
         bankStyle: style,
       },
     }
-    if (isIdentity) { //  ||  isOrganization) {
-      route.title = resource.firstName
-      var isMe = isIdentity ? resource[ROOT_HASH] === me[ROOT_HASH] : true;
-      if (isMe) {
-        route.onRightButtonPress.rightButtonTitle = 'Edit'
-        route.onRightButtonPress.onRightButtonPress = {
-          title: title,
-          id: 4,
-          component: NewResource,
-          titleTextColor: '#7AAAC3',
-          backButtonTitle: 'Back',
-          rightButtonTitle: 'Done',
-          passProps: {
-            bankStyle: style,
-            model: utils.getModel(resource[TYPE]).value,
-            resource: resource,
-            currency: this.props.currency,
-          }
-        }
-      }
-    }
     if (this.props.officialAccounts) {
       if (isOrganization)
         route.title = resource.name
@@ -231,63 +160,6 @@ class HomePage extends Component {
       utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage({msg: msg, isWelcome: true}))
     }
 
-    this.props.navigator.push(route);
-  }
-
-  _selectResource(resource) {
-    var model = utils.getModel(this.props.modelName);
-    var title = utils.getDisplayName(resource, model.value.properties);
-    var newTitle = title;
-    if (title.length > 20) {
-      var t = title.split(' ');
-      newTitle = '';
-      t.forEach(function(word) {
-        if (newTitle.length + word.length > 20)
-          return;
-        newTitle += newTitle.length ? ' ' + word : word;
-      })
-    }
-
-    var route = {
-      title: utils.makeTitle(newTitle),
-      id: 3,
-      component: ResourceView,
-      parentMeta: model,
-      backButtonTitle: 'Back',
-      passProps: {
-        resource: resource,
-        bankStyle: this.props.style,
-        currency: this.props.currency
-      },
-    }
-    // Edit resource
-    var me = utils.getMe();
-    if ((me || this.state.isRegistration) &&  this.props.prop) {
-      this.props.callback(this.props.prop, resource); // HACK for now
-      if (this.props.returnRoute)
-        this.props.navigator.popToRoute(this.props.returnRoute);
-      else
-        this.props.navigator.pop()
-      return;
-    }
-    if (me                       &&
-       !model.value.isInterface  &&
-       (resource[ROOT_HASH] === me[ROOT_HASH]  ||  resource[TYPE] !== PROFILE)) {
-      var self = this ;
-      route.rightButtonTitle = 'Edit'
-      route.onRightButtonPress = /*() =>*/ {
-        title: 'Edit',
-        id: 4,
-        component: NewResource,
-        rightButtonTitle: 'Done',
-        titleTextColor: '#7AAAC3',
-        passProps: {
-          model: utils.getModel(resource[TYPE]).value,
-          bankStyle: this.props.style,
-          resource: me
-        }
-      };
-    }
     this.props.navigator.push(route);
   }
 
@@ -421,7 +293,7 @@ class HomePage extends Component {
               </View>
              )
     let officialAccounts = (
-              <View style={{padding: 5, backgroundColor: '#ffffff', marginBottom: 2}}>
+              <View style={{padding: 5, backgroundColor: '#EDF5F8', marginBottom: 2}}>
                 <TouchableOpacity onPress={this.showBanks.bind(this)}>
                   <View style={styles.row}>
                     <ConversationsIcon />
