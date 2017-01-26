@@ -153,7 +153,7 @@ const TLSClient = require('sendy-axolotl')
 //   }
 // })
 
-const SENDY_OPTS = { resendInterval: 30000, mtu: 10000, autoConnect: true }
+const SENDY_OPTS = { resendInterval: 30000, mtu: 100, autoConnect: true }
 // const newOTRSwitchboard = require('sendy-otr-ws').Switchboard
 const newSwitchboard = SendyWS.Switchboard
 const WebSocketClient = SendyWS.Client
@@ -1112,6 +1112,10 @@ var Store = Reflux.createStore({
       try {
         msg = tradleUtils.unserializeMessage(msg)
         const payload = msg.object
+
+        let org = self._getItem(PROFILE + '_' + from).organization
+        self.trigger({action: 'progressUpdate', progress: 1, recipient: self._getItem(org)})
+
         if (payload.context) {
           let s = PRODUCT_APPLICATION + '_' + payload.context
           let r = list[s]
@@ -1168,8 +1172,9 @@ var Store = Reflux.createStore({
           break
         }
       } catch (err) {
+        console.log('Store.receive: ' + err.message)
         try {
-//           debugger
+          // debugger
           const payload = JSON.parse(msg)
           if (payload[TYPE] === PAIRING_REQUEST) {
             const rootHash = payload.identity[ROOT_HASH] || protocol.linkString(payload.identity)
@@ -1293,6 +1298,7 @@ var Store = Reflux.createStore({
 
   getTransport(wsClient) {
     const tlsKey = driverInfo.tlsKey
+    var self = this
     return newSwitchboard({
       identifier: this.getIdentifier(),
       unreliable: wsClient,
@@ -1300,6 +1306,8 @@ var Store = Reflux.createStore({
         const sendy = new Sendy({ ...SENDY_OPTS, name: recipient })
         sendy.on('progress', ({ total, progress }) => {
           const percent = 100 * progress / total | 0
+          let org = self._getItem(PROFILE + '_' + recipient).organization
+          self.trigger({action: 'progressUpdate', progress: percent / 100, recipient: self._getItem(org)})
           console.log(`${percent}% of message downloaded from ${recipient}`)
         })
 

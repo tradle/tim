@@ -24,6 +24,7 @@ var Reflux = require('reflux')
 var constants = require('@tradle/constants')
 var GiftedMessenger = require('react-native-gifted-messenger')
 var NetworkInfoProvider = require('./NetworkInfoProvider')
+var ProgressInfo = require('./ProgressInfo')
 var PageView = require('./PageView')
 var extend = require('extend');
 
@@ -602,6 +603,8 @@ class MessageList extends Component {
           ? <View/>
           : <NetworkInfoProvider connected={this.state.isConnected} resource={resource} online={this.state.onlineStatus} />
         }
+        <ProgressInfo />
+
         <ChatContext chat={resource} context={context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={this.props.bankStyle} allContexts={this.state.allContexts} />
         <View style={ sepStyle } />
         {content}
