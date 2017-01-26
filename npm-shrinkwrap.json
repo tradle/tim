@@ -4678,6 +4678,11 @@
       "from": "react-native-passcode-status@latest",
       "resolved": "https://registry.npmjs.org/react-native-passcode-status/-/react-native-passcode-status-1.1.0.tgz"
     },
+    "react-native-progress": {
+      "version": "3.2.0",
+      "from": "react-native-progress@>=3.2.0 <4.0.0",
+      "resolved": "https://registry.npmjs.org/react-native-progress/-/react-native-progress-3.2.0.tgz"
+    },
     "react-native-prompt": {
       "version": "0.18.4",
       "from": "git://github.com/pgmemk/react-native-prompt.git#789e25c45541180553f78567649a79a6a6aa98db",
