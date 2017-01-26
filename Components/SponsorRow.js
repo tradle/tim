@@ -148,7 +148,8 @@ var styles = StyleSheet.create({
   },
   row: {
     backgroundColor: 'white',
-    justifyContent: 'center',
+    marginLeft: 70,
+    // justifyContent: 'center',
     // justifyContent: 'space-around',
     flexDirection: 'row',
     alignSelf: 'stretch',
