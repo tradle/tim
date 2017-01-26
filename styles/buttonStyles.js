@@ -18,6 +18,18 @@ var FONT_WEIGHT = '500';
 
 var utils = require('../utils/utils')
 
+import { Dimensions } from 'react-native'
+
+(function adjustFontSize () {
+  var { width, height } = Dimensions.get('window')
+  var width = Math.min(width, height)
+  if (width < 350) {
+    // iPhone 4, 5
+    FONT_SIZE--
+  }
+})()
+
+
 var buttonStyles = Object.freeze({
   icon: {
     width: 30,

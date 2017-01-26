@@ -2455,12 +2455,20 @@ var Store = Reflux.createStore({
     // }
     this.trigger({action: 'getTemporary', resource: r})
   },
-  onAddAll(resource, to, message) {
+  async onAddAll(resource, to, message) {
     let rId = utils.getId(resource)
     let r = this._getItem(rId)
     r.documentCreated = true
     this.trigger({action: 'addItem', resource: r})
     db.put(rId, r)
+    let context = resource._context
+    await Q.all(resource.items.map((r) => {
+      r._context = context
+      r.to = to
+      r.from = me
+      return this.onAddItem({ resource: r, noTrigger: true })
+    }))
+
     this.onAddMessage({msg: {
       [TYPE]: SIMPLE_MESSAGE,
       [NONCE]: this.getNonce(),
@@ -2470,13 +2478,6 @@ var Store = Reflux.createStore({
       from: this.buildRef(me),
       to: this.buildRef(r.from)
     }})
-    let context = resource._context
-    resource.items.forEach((r) => {
-      r._context = context
-      r.to = to
-      r.from = me
-      this.onAddItem({ resource: r, noTrigger: true })
-    })
   },
   onAddItem(params) {
     var self = this
