@@ -107,6 +107,9 @@ class SponsorRow extends Component {
       </View>
     )
   }
+  shouldComponentUpdate(nextProps, nextState) {
+    return false
+  }
 
   onPress(event) {
     var model = utils.getModel(resource[TYPE] || resource.id).value;
