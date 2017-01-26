@@ -56,6 +56,7 @@ import {
 
 import platformStyles from '../styles/platform'
 import ENV from '../utils/env'
+import ConversationsIcon from './ConversationsIcon'
 
 class HomePage extends Component {
   props: {
@@ -410,7 +411,7 @@ class HomePage extends Component {
               <View style={{padding: 5, backgroundColor: '#ffffff', marginBottom: 2}}>
                 <TouchableOpacity onPress={this.showProfile.bind(this)}>
                   <View style={styles.row}>
-                    <Icon name='ios-globe' color='goldenrod' size={45} style={styles.cellImage} />
+                    <Icon name='ios-leaf' color='goldenrod' size={45} style={styles.cellImage} />
                     <View style={[styles.textContainer, {flexDirection: 'row', flex:1}]}>
                       <Text style={[styles.resourceTitle, {flex: 1}]}>{translate('digitalWealthPassport')}</Text>
                       <Icon color='#AAAAAA' size={20} name={'ios-arrow-forward'} style={{marginTop: 5}}/>
@@ -423,7 +424,7 @@ class HomePage extends Component {
               <View style={{padding: 5, backgroundColor: '#ffffff', marginBottom: 2}}>
                 <TouchableOpacity onPress={this.showBanks.bind(this)}>
                   <View style={styles.row}>
-                    <Image source={require('../img/banking.png')} style={styles.cellImage} />
+                    <ConversationsIcon />
                     <View style={[styles.textContainer, {flexDirection: 'row', flex:1}]}>
                       <Text style={[styles.resourceTitle, {flex: 1}]}>{translate('officialAccounts')}</Text>
                       <Icon color='#AAAAAA' size={20} name={'ios-arrow-forward'} style={{marginTop: 5}}/>

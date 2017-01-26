@@ -91,9 +91,9 @@ class SponsorRow extends Component {
       <View style={[styles.content, bg]} key={this.getNextKey()}>
         <TouchableHighlight onPress={this.props.onSelect} underlayColor='transparent'>
           <View style={[styles.row, bg]}>
-            <Icon color='#AAAAAA' size={20} name={'ios-arrow-forward'} style={{position: 'absolute', right: 10, top: 40}}/>
+            <Icon color='#AAAAAA' size={20} name={'ios-arrow-forward'} style={{position: 'absolute', right: 10, top: 25}}/>
             <View style={textStyle}>
-              <Text style={{color: 'red', fontSize: 24}}>{translate('sponsoredBy')}</Text>
+              <Text style={{color: '#757575', fontSize: 20}}>{translate('sponsoredBy')}</Text>
             </View>
             {photo}
           </View>
@@ -165,9 +165,9 @@ var styles = StyleSheet.create({
   },
   cellImage: {
     backgroundColor: '#ffffff',
-    height: 100,
+    height: 70,
     marginRight: 10,
-    width: 100,
+    width: 70,
   },
   cellNoImage: {
     backgroundColor: '#dddddd',
