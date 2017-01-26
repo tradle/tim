@@ -3380,9 +3380,12 @@ var Store = Reflux.createStore({
         if (params.isAggregation)
           result = this.getDependencies(result);
         var shareableResources;
+        if (params.sponsorName) {
+          result = result.filter((r) => r.name === params.sponsorName)
+        }
         var retParams = params.list
                       ? { action: 'filteredList', list: result}
-                      : { action: params.sponsorsList ? 'sponsorsList' : 'list',
+                      : { action: params.sponsorName ? 'sponsorsList' : 'list',
                           list: result,
                           spinner: params.spinner,
                           isAggregation: params.isAggregation
