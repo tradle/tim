@@ -6,6 +6,7 @@ var debounce = require('debounce')
 var ResourceList = require('./ResourceList');
 var VideoPlayer = require('./VideoPlayer')
 var NewResource = require('./NewResource');
+var HomePage = require('./HomePage')
 var ResourceView = require('./ResourceView');
 // var Tabs = require('./Tabs')
 var utils = require('../utils/utils');
@@ -389,6 +390,19 @@ class TimHome extends Component {
       }
     });
   }
+  showHomePage(doReplace) {
+    this.props.navigator.push({
+      title: translate('homePage'),
+      id: 30,
+      component: HomePage,
+      backButtonTitle: translate('back'),
+      passProps: {
+        sponsorName: 'UBS',
+        modelName: constants.TYPES.ORGANIZATION,
+      bankStyle: defaultBankStyle
+      }
+    })
+  }
   showOfficialAccounts(doReplace) {
     var nav = this.props.navigator
     nav.immediatelyResetRouteStack(nav.getCurrentRoutes().slice(0,1));
@@ -397,6 +411,8 @@ class TimHome extends Component {
       this.showContacts()
       return
     }
+    this.showHomePage(doReplace)
+    return
     let passProps = {
       filter: '',
       modelName: constants.TYPES.ORGANIZATION,
@@ -405,22 +421,6 @@ class TimHome extends Component {
       bankStyle: defaultBankStyle
     };
     Actions.hasPartials()
-    // this.props.navigator.push({
-    //   id: 30,
-    //   component: Tabs,
-    //   // title: 'Hey/Ho/Ha',
-    //   backButtonTitle: __DEV__ ? translate('back') : null,
-    //   passProps: {
-    //     bankStyle: defaultBankStyle,
-    //     rlProps: passProps,
-    //     profileProps: {
-    //       model: utils.getModel(me[constants.TYPE]).value,
-    //       resource: me,
-    //       bankStyle: defaultBankStyle
-    //     }
-    //   }
-    // })
-    // return
     let title = me.firstName;
     let route = {
       title: translate('officialAccounts'),
