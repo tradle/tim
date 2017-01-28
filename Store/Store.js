@@ -336,6 +336,8 @@ var Store = Reflux.createStore({
   },
 
   _handleConnectivityChange(isConnected) {
+    if (isConnected === this.isConnected) return
+
     debug('network connectivity changed, connected: ' + isConnected)
     this.isConnected = isConnected
     this.trigger({action: 'connectivity', isConnected: isConnected})
@@ -1021,6 +1023,7 @@ var Store = Reflux.createStore({
 
     function onTransportConnectivityChanged (connected) {
       if (connected) {
+        self._handleConnectivityChange(true)
         self._connectedServers[url] = true
       } else {
         delete self._connectedServers[url]
@@ -1050,10 +1053,9 @@ var Store = Reflux.createStore({
     })
 
     // let timeouts = {}
-    // transport.on('receiving', function (msg) {
-    //   clearTimeout(timeouts[msg.from])
-    //   delete timeouts[msg.from]
-    // })
+    transport.on('receiving', function (msg) {
+      onTransportConnectivityChanged(true)
+    })
 
     // transport.on('404', function (recipient) {
     //   if (!timeouts[recipient]) {
