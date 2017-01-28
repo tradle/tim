@@ -1,6 +1,6 @@
 
 import { NativeModules, Platform } from 'react-native'
-import { anyline } from '../environment.json'
+import { anyline } from '../utils/env'
 import Anyline, { BarcodeFormat } from 'anyline-ocr-react-native-module'
 import deepExtend from 'deep-extend'
 import shallowExtend from 'xtend/mutable'
