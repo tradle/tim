@@ -5953,6 +5953,8 @@ var Store = Reflux.createStore({
         var orgList = this.searchNotMessages({modelName: ORGANIZATION})
         this.trigger({action: 'list', list: orgList, forceUpdate: true})
       }
+      else if (!isMessage  &&  val[TYPE] === PARTIAL)
+        this.trigger({action: 'hasPartials'})
 //       else
         // this.trigger(retParams)
     })
