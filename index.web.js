@@ -32,6 +32,7 @@ require('./css/customicons.css')
 require('./css/ionicons.min.css')
 require('./css/styles.css')
 
+const BROWSER_RECOMMENDATION = 'Please use Chrome, Safari, Firefox or IE11+'
 testEnvironment().then(init, alertError)
 
 function ensureOneTab () {
@@ -67,6 +68,13 @@ function init () {
 }
 
 async function testEnvironment () {
+  if (typeof window === 'object') {
+    const crypto = window.crypto || window.msCrypto
+    if (!(crypto && crypto.getRandomValues)) {
+      throw new Error('This application is not supported in browsers without a strong random number generator. ' + BROWSER_RECOMMENDATION)
+    }
+  }
+
   if (isSafari) return
 
   if (isIE && !window.indexedDB) {
@@ -74,7 +82,7 @@ async function testEnvironment () {
   }
 
   if (!window.indexedDB) {
-    throw new Error('This application is not supported in this browser. Please use Chrome, Safari, Firefox or IE11+')
+    throw new Error('This application is not supported in this browser. ' + BROWSER_RECOMMENDATION)
   }
 
   if (isFF) {
