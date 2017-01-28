@@ -1304,11 +1304,15 @@ var Store = Reflux.createStore({
       unreliable: wsClient,
       clientForRecipient: function (recipient) {
         const sendy = new Sendy({ ...SENDY_OPTS, name: recipient })
+        let prevPercent
         sendy.on('progress', ({ total, progress }) => {
           if (total < 30000) return // don't show progress bar for < 30KB
 
           const percent = 100 * progress / total | 0
-          let org = self._getItem(PROFILE + '_' + recipient).organization
+          if (!percent || percent === prevPercent) return
+
+          prevPercent = percent
+          const org = self._getItem(PROFILE + '_' + recipient).organization
           self.trigger({action: 'progressUpdate', progress: percent / 100, recipient: self._getItem(org)})
           debug(`${percent}% of message downloaded from ${recipient}`)
         })
