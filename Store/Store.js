@@ -28,7 +28,7 @@ const SENT = 'Sent'
 const SENDING = 'Sending'
 const QUEUED = 'Queued'
 
-var debug = Debug('Store')
+var debug = Debug('tradle:app:store')
 var employee = require('../people/employee.json')
 
 var Q = require('q');
@@ -1108,6 +1108,10 @@ var Store = Reflux.createStore({
       try {
         msg = tradleUtils.unserializeMessage(msg)
         const payload = msg.object
+
+        let org = self._getItem(PROFILE + '_' + from).organization
+        self.trigger({action: 'progressUpdate', progress: 1, recipient: self._getItem(org)})
+
         if (payload.context) {
           let s = PRODUCT_APPLICATION + '_' + payload.context
           let r = list[s]
@@ -1164,8 +1168,9 @@ var Store = Reflux.createStore({
           break
         }
       } catch (err) {
+        console.log('Store.receive: ' + err.message)
         try {
-//           debugger
+          // debugger
           const payload = JSON.parse(msg)
           if (payload[TYPE] === PAIRING_REQUEST) {
             const rootHash = payload.identity[ROOT_HASH] || protocol.linkString(payload.identity)
@@ -1287,14 +1292,19 @@ var Store = Reflux.createStore({
 
   getTransport(wsClient) {
     const tlsKey = driverInfo.tlsKey
+    var self = this
     return newSwitchboard({
       identifier: this.getIdentifier(),
       unreliable: wsClient,
       clientForRecipient: function (recipient) {
         const sendy = new Sendy({ ...SENDY_OPTS, name: recipient })
         sendy.on('progress', ({ total, progress }) => {
+          if (total < 30000) return // don't show progress bar for < 30KB
+
           const percent = 100 * progress / total | 0
-          console.log(`${percent}% of message downloaded from ${recipient}`)
+          let org = self._getItem(PROFILE + '_' + recipient).organization
+          self.trigger({action: 'progressUpdate', progress: percent / 100, recipient: self._getItem(org)})
+          debug(`${percent}% of message downloaded from ${recipient}`)
         })
 
         if (!tlsKey) return sendy
@@ -2450,12 +2460,20 @@ var Store = Reflux.createStore({
     // }
     this.trigger({action: 'getTemporary', resource: r})
   },
-  onAddAll(resource, to, message) {
+  async onAddAll(resource, to, message) {
     let rId = utils.getId(resource)
     let r = this._getItem(rId)
     r.documentCreated = true
     this.trigger({action: 'addItem', resource: r})
     db.put(rId, r)
+    let context = resource._context
+    await Q.all(resource.items.map((r) => {
+      r._context = context
+      r.to = to
+      r.from = me
+      return this.onAddItem({ resource: r, noTrigger: true })
+    }))
+
     this.onAddMessage({msg: {
       [TYPE]: SIMPLE_MESSAGE,
       [NONCE]: this.getNonce(),
@@ -2465,13 +2483,6 @@ var Store = Reflux.createStore({
       from: this.buildRef(me),
       to: this.buildRef(r.from)
     }})
-    let context = resource._context
-    resource.items.forEach((r) => {
-      r._context = context
-      r.to = to
-      r.from = me
-      this.onAddItem({ resource: r, noTrigger: true })
-    })
   },
   onAddItem(params) {
     var self = this

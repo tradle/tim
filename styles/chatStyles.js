@@ -121,11 +121,13 @@ var verificationStyles = Object.freeze({
     justifyContent: 'space-between',
     padding: 5,
     borderRadius: 10,
-    backgroundColor: '#4982B1'
+    borderColor: '#4982B1',
+    backgroundColor: '#ffffff',
+    borderWidth: 1
   },
   shareText: {
     // color: '#4982B1',
-    color: '#ffffff',
+    color: '#4982B1',
     fontSize: 14,
     // fontWeight: '600',
     paddingHorizontal: 3,
@@ -136,7 +138,7 @@ var verificationStyles = Object.freeze({
     marginTop: 5,
     paddingBottom: 5,
     paddingLeft: 10,
-    justifyContent:'space-between'
+    // justifyContent:'space-between'
   },
   linkIconGreyed: {
     color: '#cccccc'

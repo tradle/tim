@@ -55,7 +55,7 @@ import platformStyles from '../styles/platform'
 import StatusBar from './StatusBar'
 import ENV from '../utils/env'
 
-let SearchBar = (function () {
+const SearchBar = (function () {
   switch (Platform.OS) {
     case 'android':
       return require('./SearchBar')
@@ -964,7 +964,8 @@ class ResourceList extends Component {
           initialListSize={1000}
           showsVerticalScrollIndicator={false} />;
     }
-    var actionSheet = this.renderActionSheet()
+    let me = utils.getMe()
+    var actionSheet = this.renderActionSheet() // me.isEmployee && me.organization ? this.renderActionSheet() : null
     var footer = actionSheet && this.renderFooter()
     var searchBar
     if (SearchBar  &&  ((this.state.list && this.state.list.length > 10) || (this.state.filter  &&  this.state.filter.length))) {

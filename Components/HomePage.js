@@ -106,13 +106,36 @@ class HomePage extends Component {
   onSponsorsList(params) {
     var action = params.action;
     if (action === 'sponsorsList') {
-      let sponsor = params.list  &&  params.list.length && params.list[0]
+      let sponsor = params.list  &&  params.list.length ? params.list[0] : null
       this.setState({
-        sponsor: sponsor,
-        dataSource: this.state.dataSource.cloneWithRows([sponsor]),
+        resource: sponsor,
+        dataSource: sponsor ? this.state.dataSource.cloneWithRows([sponsor]) : this.state.dataSource,
         isLoading: false
       })
     }
+    // if (action === 'getForms') {
+    //   if (!params.to)
+    //     return
+    //   if (utils.getMe())
+    //   let style = this.mergeStyle(params.to.style)
+
+    //   var route = {
+    //     title: params.to.name,
+    //     component: MessageList,
+    //     id: 11,
+    //     backButtonTitle: 'Back',
+    //     passProps: {
+    //       resource: params.to,
+    //       filter: '',
+    //       modelName: constants.TYPES.MESSAGE,
+    //       currency: params.to.currency,
+    //       bankStyle:  style,
+    //       dictionary: params.dictionary,
+    //     }
+    //   }
+    //   this.props.navigator.replace(route)
+    //   return
+    // }
   }
   mergeStyle(newStyle) {
     let style = {}
@@ -177,7 +200,7 @@ class HomePage extends Component {
     return (
       <SponsorRow
         onSelect={() => this.selectResource(resource)}
-        key={resource[ROOT_HASH]}
+        key={'sponsorRow'}
         navigator={this.props.navigator}
         currency={this.props.currency}
         isOfficialAccounts={this.props.officialAccounts}
@@ -253,7 +276,7 @@ class HomePage extends Component {
           scrollRenderAhead={10}
           showsVerticalScrollIndicator={false} />;
     }
-    var actionSheet = null //this.renderActionSheet()
+    var actionSheet = null // this.renderActionSheet()
     var footer = actionSheet && this.renderFooter()
     let network = this.props.isChooser || !this.props.officialAccounts || this.props.modelName !== ORGANIZATION
                 ? <View/>
@@ -276,6 +299,71 @@ class HomePage extends Component {
         {actionSheet}
       </PageView>
     );
+  }
+  renderActionSheet() {
+    let buttons
+    if (this.state.allowToAdd) {
+      buttons = [translate('addNew', this.props.prop.title), translate('cancel')]
+    } else {
+      if (!ENV.allowAddServer) return
+
+      buttons = [
+        translate('addServerUrl'),
+        translate('scanQRcode'),
+        translate('cancel')
+      ]
+    }
+
+    return (
+      <ActionSheet
+        ref={(o) => {
+          this.ActionSheet = o
+        }}
+        options={buttons}
+        cancelButtonIndex={buttons.length - 1}
+        onPress={(index) => {
+          switch (index) {
+          case 0:
+            if (this.state.allowToAdd)
+              this.addNew()
+            else
+              this.onSettingsPressed()
+            break
+          case 1:
+            this.scanFormsQRCode()
+            break;
+          // case 2:
+          //   this.talkToEmployee()
+          //   break
+          default:
+            return
+          }
+        }}
+      />
+    )
+  }
+  onSettingsPressed() {
+    var model = utils.getModel(constants.TYPES.SETTINGS).value
+    this.setState({hideMode: false})
+    var route = {
+      component: NewResource,
+      title: 'Settings',
+      backButtonTitle: 'Back',
+      rightButtonTitle: 'Done',
+      id: 4,
+      titleTextColor: '#7AAAC3',
+      passProps: {
+        model: model,
+        bankStyle: this.props.style,
+        callback: () => {
+          this.props.navigator.pop()
+          Actions.list({modelName: this.props.modelName})
+        }
+        // callback: this.register.bind(this)
+      },
+    }
+
+    this.props.navigator.push(route)
   }
 
   renderHeader() {
@@ -311,16 +399,92 @@ class HomePage extends Component {
             </View>
   }
   showProfile() {
-    this.props.navigator.push({
+    let me = utils.getMe()
+    let route = {
       title: translate('digitalWealthPassport'),
       id: 3,
       component: ResourceView,
       titleTextColor: '#7AAAC3',
       backButtonTitle: 'Back',
+      rightButtonTitle: 'Edit',
       passProps: {
-        resource: utils.getMe()
+        resource: me
+      },
+      onRightButtonPress: {
+        title: me.firstName,
+        id: 4,
+        component: NewResource,
+        // titleTextColor: '#7AAAC3',
+        backButtonTitle: translate('back'),
+        rightButtonTitle: translate('done'),
+        passProps: {
+          model: utils.getModel(me[constants.TYPE]).value,
+          resource: me,
+          bankStyle: defaultBankStyle
+        }
       }
-   })
+    }
+    this.props.navigator.push(route)
+  }
+  scanFormsQRCode() {
+    this.setState({hideMode: false})
+    this.props.navigator.push({
+      title: 'Scan QR Code',
+      id: 16,
+      component: QRCodeScanner,
+      titleTintColor: '#eeeeee',
+      backButtonTitle: 'Cancel',
+      // rightButtonTitle: 'ion|ios-reverse-camera',
+      passProps: {
+        onread: this.onread.bind(this)
+      }
+    })
+  }
+
+  onread(result) {
+    // Pairing devices QRCode
+    if (result.data.charAt(0) === '{') {
+      h = JSON.parse(result.data)
+      Actions.sendPairingRequest(h)
+      this.props.navigator.pop()
+      return
+    }
+    let h = result.data.split(';')
+
+
+    // post to server request for the forms that were filled on the web
+    let me = utils.getMe()
+    switch (h[0]) {
+    case WEB_TO_MOBILE:
+      let r = {
+        _t: 'tradle.GuestSessionProof',
+        session: h[1],
+        from: {
+          id: utils.getId(me),
+          title: utils.getDisplayName(me)
+        },
+        to: {
+          id: PROFILE + '_' + h[2]
+        }
+      }
+      Actions.addItem({resource: r, value: r, meta: utils.getModel('tradle.GuestSessionProof').value, disableAutoResponse: true})
+      break
+    case TALK_TO_EMPLOYEEE:
+      Actions.getEmployeeInfo(result.data.substring(h[0].length + 1))
+      break
+    case APP_QR_CODE:
+      Actions.addApp(result.data.substring(h[0].length + 1))
+      break
+    default:
+      // keep scanning
+      Alert.alert(
+        translate('error'),
+        translate('unknownQRCodeFormat')
+      )
+
+      this.props.navigator.pop()
+      break
+    }
   }
 }
 reactMixin(HomePage.prototype, Reflux.ListenerMixin);

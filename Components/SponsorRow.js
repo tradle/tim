@@ -77,12 +77,14 @@ class SponsorRow extends Component {
 
     var rId = utils.getId(this.props.resource)
     let style
-    if (isOfficialAccounts  &&  resource.style) {
+    if (isOfficialAccounts) {
       style = {}
       extend(style, defaultBankStyle)
-      style = extend(style, resource.style)
+      if (resource.styles) {
+        style = extend(style, resource.style)
+      }
     }
-    let bg = style ? {backgroundColor: style.LIST_BG} : {}
+    let bg = {backgroundColor: style.LIST_BG}
     let color = style ? {color: style.LIST_COLOR} : {}
 
     var textStyle = /*noImage ? [styles.textContainer, {marginVertical: 7}] :*/ styles.textContainer;
@@ -148,7 +150,8 @@ var styles = StyleSheet.create({
   },
   row: {
     backgroundColor: 'white',
-    justifyContent: 'center',
+    marginLeft: 70,
+    // justifyContent: 'center',
     // justifyContent: 'space-around',
     flexDirection: 'row',
     alignSelf: 'stretch',

@@ -61,12 +61,11 @@ function install (opts = {
     })
 }
 
-function checkPeriodically (millis) {
+function checkPeriodically (millis=DEFAULT_INTERVAL) {
   if (CHECKING) return CHECKING
 
-  millis = millis || DEFAULT_INTERVAL
-  return CHECKING = utils.promiseDelay(millis)
-    .then(sync)
+  return CHECKING = sync()
+    .then(() => utils.promiseDelay(millis))
     .then(() => {
       if (!downloadedUpdate) {
         // loop

@@ -615,7 +615,7 @@ var styles = StyleSheet.create({
     // backgroundColor: '#7AAAc3',
     paddingVertical: 1,
     // borderColor: '#7AAAc3',
-    // borderRadius: 30,
+    borderRadius: 30,
     // borderWidth: 1,
     height: 60,
     marginRight: 10,

@@ -174,10 +174,12 @@ class FormRequestRow extends Component {
     let messageBody = <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
                         {msgContent}
                       </TouchableHighlight>
+
+        // <View style={shareables ? {borderWidth: 1, width: msgWidth + 2, borderColor: '#dddddd', borderRadius: 10, borderTopLeftRadius: 0} : {}}>
     return (
       <View style={[mainStyle, {margin:2, paddingVertical: 3, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}]}>
         {date}
-        <View style={shareables ? {borderWidth: 1, width: viewStyle.width + 2, borderColor: this.props.bankStyle.VERIFIED_HEADER_COLOR, borderRadius: 10, borderTopLeftRadius: 0} : {}}>
+        <View style={shareables ? {borderWidth: 1, width: viewStyle.width + 2, borderColor: '#dddddd', borderRadius: 10, borderTopLeftRadius: 0} : {}}>
           {messageBody}
           {sendStatus}
           {shareables}
@@ -315,8 +317,8 @@ class FormRequestRow extends Component {
       var orgPhoto = verification.organization.photo
                    ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
                    : <View />
-      var shareView = <View style={[chatStyles.shareButton, {marginHorizontal: 0, backgroundColor: this.props.bankStyle.SHARE_BUTTON_BACKGROUND_COLOR, opacity: this.props.resource.documentCreated ? 0.3 : 1}]}>
-                        <CustomIcon name='tradle' style={{color: '#ffffff' }} size={32} />
+      var shareView = <View style={[chatStyles.shareButton, {marginHorizontal: 0, opacity: this.props.resource.documentCreated ? 0.3 : 1}]}>
+                        <CustomIcon name='tradle' style={{color: '#4982B1' }} size={32} />
                         <Text style={chatStyles.shareText}>{translate('Share')}</Text>
                       </View>
       var orgTitle = this.props.to[constants.TYPE] === constants.TYPES.ORGANIZATION
@@ -586,11 +588,11 @@ var styles = StyleSheet.create({
     backgroundColor: 'transparent',
     // marginTop: -8,
     justifyContent: 'center',
-    width: 36,
-    height: 36,
+    width: 30,
+    height: 30,
     marginTop: 0,
     alignSelf: 'center',
-    borderRadius: 18
+    borderRadius: 15
   },
   multiEntryButton:  {
     borderRadius: 10,
@@ -631,7 +633,7 @@ var styles = StyleSheet.create({
     fontStyle: 'italic',
     alignSelf: 'center',
     color: '#ffffff',
-    fontSize: 18,
+    fontSize: 16,
   }
 });
 reactMixin(FormRequestRow.prototype, RowMixin);

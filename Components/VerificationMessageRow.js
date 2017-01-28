@@ -144,8 +144,8 @@ class VerificationMessageRow extends Component {
       let title = this.props.shareWithRequestedParty.organization && this.props.shareWithRequestedParty.organization.title
       shareWith = <View style={styles.shareWithInquirer}>
                     <TouchableOpacity onPress={this.shareWithRequestedParty.bind(this)}>
-                       <View style={[chatStyles.shareButton, {marginLeft: 15, justifyContent: 'flex-start', backgroundColor: this.props.bankStyle.SHARE_BUTTON_BACKGROUND_COLOR}]}>
-                        <CustomIcon name='tradle' style={{color: '#ffffff' }} size={32} />
+                       <View style={[chatStyles.shareButton, {marginLeft: 15, justifyContent: 'flex-start'}]}>
+                        <CustomIcon name='tradle' style={{color: '#4982B1' }} size={32} />
                         <Text style={chatStyles.shareText}>{translate('Share')}</Text>
                       </View>
                     </TouchableOpacity>
