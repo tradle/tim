@@ -194,5 +194,7 @@
     "importData": "Import data",
     "digitalWealthPassport": "Digital Wealth Passport",
     "homePage": "Home",
-    "sponsoredBy": "Sponsored by"
+    "sponsoredBy": "Sponsored by",
+    "installingUpdate": "Installing update",
+    "restartingApp": "The application will restart momentarily"
 }

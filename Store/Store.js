@@ -7330,6 +7330,12 @@ var Store = Reflux.createStore({
   //   })
   //   this.trigger({action: 'documentsFor', documentType: requestedDocumentType, documents: docTypeToDocs})
   // }
+  onShowModal(modal) {
+    this.trigger({ action: 'showModal', modal })
+  },
+  onHideModal() {
+    this.trigger({ action: 'hideModal' })
+  }
 })
 // );
 
