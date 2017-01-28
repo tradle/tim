@@ -4,6 +4,8 @@ import {
 } from 'react-native'
 
 import DeviceInfo from 'react-native-device-info'
+import extend from 'xtend'
+import environment from '../environment.json'
 
 const MACHINE_LOCAL_IP = require('./localIP')
 const LOCAL_IP = (function () {
@@ -16,7 +18,7 @@ const LOCAL_IP = (function () {
   return MACHINE_LOCAL_IP
 })()
 
-module.exports = {
+module.exports = extend({
   GCM_SENDER_ID: '633104277721',
   serviceID: 'tradle',
   accessGroup: '94V7783F74.io.tradle.dev',
@@ -42,5 +44,7 @@ module.exports = {
   },
   serverToSendLog: __DEV__ ? `http://${LOCAL_IP}:44444/userlog` : 'https://azure1.tradle.io/userlog',
   showMyQRCode: false,
-  requireDeviceLocalAuth: false
-}
+  requireDeviceLocalAuth: false,
+  homePage: true,
+  useKeychain: true
+}, environment)

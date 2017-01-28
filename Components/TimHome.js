@@ -412,8 +412,12 @@ class TimHome extends Component {
       this.showContacts()
       return
     }
-    this.showHomePage(doReplace)
-    return
+
+    if (ENV.homePage) {
+      this.showHomePage(doReplace)
+      return
+    }
+
     let passProps = {
       filter: '',
       modelName: constants.TYPES.ORGANIZATION,

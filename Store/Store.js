@@ -38,7 +38,7 @@ Q.onerror = function (err) {
   throw err
 }
 
-var ENV = require('../environment')
+var ENV = require('../utils/env')
 var AddressBook = require('NativeModules').AddressBook;
 
 var voc = require('@tradle/models');
@@ -195,8 +195,7 @@ var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
-var COMMON_ENV = require('../utils/env')
-var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://' + COMMON_ENV.LOCAL_IP + ':44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
+var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://' + ENV.LOCAL_IP + ':44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
@@ -1304,11 +1303,15 @@ var Store = Reflux.createStore({
       unreliable: wsClient,
       clientForRecipient: function (recipient) {
         const sendy = new Sendy({ ...SENDY_OPTS, name: recipient })
+        let prevPercent
         sendy.on('progress', ({ total, progress }) => {
           if (total < 30000) return // don't show progress bar for < 30KB
 
           const percent = 100 * progress / total | 0
-          let org = self._getItem(PROFILE + '_' + recipient).organization
+          if (!percent || percent === prevPercent) return
+
+          prevPercent = percent
+          const org = self._getItem(PROFILE + '_' + recipient).organization
           self.trigger({action: 'progressUpdate', progress: percent / 100, recipient: self._getItem(org)})
           debug(`${percent}% of message downloaded from ${recipient}`)
         })

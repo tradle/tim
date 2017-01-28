@@ -17,7 +17,7 @@ var translate = utils.translate
 var constants = require('@tradle/constants');
 const TYPE = constants.TYPE
 const ORGANIZATION = constants.TYPES.ORGANIZATION
-import * as Progress from 'react-native-progress';
+import ProgressBar from 'react-native-progress/Bar';
 
 class ProgressInfo extends Component {
   constructor(props) {
@@ -35,7 +35,7 @@ class ProgressInfo extends Component {
   render() {
     if (this.state.progress !== 1)
       return <View style={[styles.progress, {height: this.state.progress === 1 ? 0 : StyleSheet.hairlineWidth, backgroundColor: '#DCF3FF'}]}>
-               <Progress.Bar progress={this.state.progress} width={utils.dimensions().width} color='#7AAAC3' borderWidth={0} height={3} />
+               <ProgressBar progress={this.state.progress} width={utils.dimensions().width} color='#7AAAC3' borderWidth={0} height={3} />
              </View>
     else
       return null

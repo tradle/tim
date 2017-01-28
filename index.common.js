@@ -87,7 +87,7 @@ let originalGetDefaultProps = Text.getDefaultProps;
 Text.defaultProps = function() {
   return {
     ...originalGetDefaultProps(),
-    allowFontScaling: false,
+    allowFontScaling: !utils.isWeb()
   };
 };
 
