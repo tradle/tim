@@ -402,7 +402,7 @@ class TimHome extends Component {
     });
   }
   showHomePage(doReplace) {
-    this.props.navigator.push({
+    this.props.navigator[doReplace ? 'replace': 'push']({
       title: translate('homePage'),
       id: 30,
       component: HomePage,
