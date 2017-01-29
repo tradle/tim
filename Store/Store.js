@@ -4069,10 +4069,7 @@ var Store = Reflux.createStore({
         // backlinks like myVerifications, myDocuments etc. on Profile
         if (backlink  &&  r[backlink]) {
           var s = params.resource ? utils.getId(params.resource) : chatId
-          if (s === utils.getId(r[backlink])) {
-            if (!filterOutForms  ||  !doFilterOut(r, chatId, i))
-              foundResources.push(r)
-            // for Loading earlier resources we don't need to check limit untill we get to the lastId
+          if (s === utils.getId(r[backlink])  &&  checkAndFilter(r, i)) {
             if (limit  &&  foundResources.length === limit)
               break
           }
@@ -4105,10 +4102,8 @@ var Store = Reflux.createStore({
         var doc = {};
         var rDoc = list[utils.getId(r.document)]
         if (!rDoc) {
-          if (params.isForgetting) {
-            if (!filterOutForms  ||  !doFilterOut(r, chatId, i))
-              foundResources.push(r)
-          }
+          if (params.isForgetting)
+            checkAndFilter(r, i)
           continue
         }
 
@@ -4118,47 +4113,24 @@ var Store = Reflux.createStore({
 
           var val = rDoc.value[p]
           switch (typeof val) {
-            case 'object':
-              if (val) {
-                if (Array.isArray(val))
-                  doc[p] = val.slice(0)
-                else
-                  doc[p] = extend(true, {}, val)
-              }
-              break
-            default:
-              doc[p] = val
-              break
+          case 'object':
+            if (val) {
+              if (Array.isArray(val))
+                doc[p] = val.slice(0)
+              else
+                doc[p] = extend(true, {}, val)
+            }
+            break
+          default:
+            doc[p] = val
+            break
           }
         }
 
         r.document = doc;
       }
-
-      if (!query) {
-        var msg = this.fillMessage(r);
-        if (!msg)
-          msg = r
-        // foundResources[key] = msg;
-        if (!filterOutForms  ||  !doFilterOut(msg, chatId, i))
-          foundResources.push(msg)
-        if (limit  &&  foundResources.length === limit)
-          break
-
-        continue;
-      }
-       // primitive filtering for this commit
-      var combinedValue = '';
-      for (var rr in props) {
-        if (r[rr] instanceof Array)
-         continue;
-        combinedValue += combinedValue ? ' ' + r[rr] : r[rr];
-      }
-      if (!combinedValue  ||  (combinedValue  &&  (!query || combinedValue.toLowerCase().indexOf(query.toLowerCase()) != -1))) {
-        // foundResources[key] = this.fillMessage(r);
-        if (!filterOutForms  ||  !doFilterOut(r, chatId, i))
-          foundResources.push(this.fillMessage(r))
-
+      // primitive filtering for this commit
+      if (checkAndFilter(r, i)) {
         if (limit  &&  foundResources.length === limit)
           break
       }
@@ -4170,6 +4142,35 @@ var Store = Reflux.createStore({
            ? foundResources.filter((r) => utils.isReadOnlyChat(r)) //r._readOnly)
            : foundResources.reverse()
 
+    function checkAndFilter(r, i) {
+      if (!query) {
+        if (!filterOutForms  ||  !doFilterOut(r, chatId, i)) {
+          foundResources.push(self.fillMessage(r))
+          return true
+        }
+      }
+      let checkVal = isVerificationR ? self._getItem(r.document) : r
+      let checkProps = self.getModel(checkVal[TYPE]).value.properties
+      var combinedValue = '';
+      for (var rr in checkProps) {
+        if (!checkVal[rr])
+          continue
+        if (checkVal[rr] instanceof Array)
+         continue;
+        let val = (checkProps[rr].type === 'object') ? checkVal[rr].title || '' : checkVal[rr]
+        if (!val)
+          continue
+        combinedValue += combinedValue ? ' ' + val : val
+      }
+      if (!combinedValue  ||  (combinedValue  &&  (!query || combinedValue.toLowerCase().indexOf(query.toLowerCase()) !== -1))) {
+        // foundResources[key] = this.fillMessage(r);
+        if (!filterOutForms  ||  !doFilterOut(r, chatId, i)) {
+          foundResources.push(self.fillMessage(r))
+          return true
+        }
+      }
+      return false
+    }
     function doFilterOut(r, toId, idx) {
       let m = utils.getModel(r[TYPE]).value
 

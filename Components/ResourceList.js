@@ -696,7 +696,9 @@ class ResourceList extends Component {
     Actions.list({
       query: this.state.filter,
       modelName: this.props.modelName,
-      to: this.props.resource
+      to: this.props.resource,
+      prop: this.props.prop,
+      listView: this.props.listView
     });
   }
 
