@@ -241,7 +241,6 @@ const ENCRYPTION_KEY = 'accountkey'
 const DEVICE_ID = 'deviceid'
 // const ENCRYPTION_SALT = 'accountsalt'
 const TLS_ENABLED = false
-const PAUSE_ON_TRANSITION = false //true
 
 const {
   newAPIBasedVerification,
@@ -369,18 +368,24 @@ var Store = Reflux.createStore({
     })
     .then(function(value) {
       me = value
+      let changed
       if (me.isAuthenticated) {
         // if (Date.now() - me.dateAuthenticated > AUTHENTICATION_TIMEOUT) {
         delete me.isAuthenticated
         delete me.dateAuthenticated
-        db.put(utils.getId(me), me)
+        changed = true
         // }
       }
       // HACK for the case if employee removed
       if (me.isEmployee  &&  !me.organization) {
         delete me.isEmployee
+        changed = true
+      }
+
+      if (changed) {
         db.put(utils.getId(me), me)
       }
+
       self.setMe(me)
       var key = value[TYPE] + '_' + value[ROOT_HASH]
       self._setItem(key, value)
@@ -418,6 +423,7 @@ var Store = Reflux.createStore({
       // })
   },
   onSetAuthenticated(authenticated) {
+    if (!authenticated) meDriver.pause()
     if (!me) me = utils.getMe()
 
     let meId = utils.getId(me)
@@ -481,7 +487,18 @@ var Store = Reflux.createStore({
       // return self.loadModels()
     })
   },
+
+  setBusyWith(reason) {
+    this.busyWith = translate(reason)
+    this.triggerBusy()
+  },
+
+  triggerBusy() {
+    this.trigger({ action: 'busy', activity: this.busyWith })
+  },
+
   buildDriver ({ keys, identity, encryption }) {
+    this.setBusyWith('initializingEngine')
     var self = this
     var keeper = createKeeper({
       path: path.join(TIM_PATH_PREFIX, 'keeper'),
@@ -532,6 +549,7 @@ var Store = Reflux.createStore({
     meDriver.identityPublishStatus = meDriver.identitySealStatus
     meDriver._multiGetFromDB = utils.multiGet
     meDriver.addressBook.setCache(new Cache({ max: 500 }))
+    meDriver.pause()
 
     let noProviders
     if (!SERVICE_PROVIDERS_BASE_URLS) {
@@ -1114,6 +1132,7 @@ var Store = Reflux.createStore({
       try {
         msg = tradleUtils.unserializeMessage(msg)
         const payload = msg.object
+        debug(`receiving ${payload[TYPE]}`)
 
         let org = self._getItem(PROFILE + '_' + from).organization
         self.trigger({action: 'progressUpdate', progress: 1, recipient: self._getItem(org)})
@@ -1174,7 +1193,7 @@ var Store = Reflux.createStore({
           break
         }
       } catch (err) {
-        console.log('Store.receive: ' + err.message)
+        debug('experienced error receiving message: ' + (err.stack || err.message))
         try {
           // debugger
           const payload = JSON.parse(msg)
@@ -1528,7 +1547,10 @@ var Store = Reflux.createStore({
 
     var promises = [
       // TODO: evaluate the security of this
-      meDriver.addContactIdentity(sp.bot.pub)
+      utils.addContactIdentity(meDriver, {
+        identity: sp.bot.pub,
+        permalink: sp.bot[CUR_HASH]
+      })
     ]
 
     if (batch.length)
@@ -1660,6 +1682,7 @@ var Store = Reflux.createStore({
     return match
   },
   onStart() {
+    this.triggerBusy()
     var self = this;
     Q.all([
       LocalAuth.hasTouchID(),
@@ -7234,9 +7257,12 @@ var Store = Reflux.createStore({
       batch.push({type: 'put', key: m.id, value: m});
     });
 
+    this.setBusyWith('loadingModels')
+
     // return Promise.resolve()
     return db.batch(batch)
           .then(function() {
+            self.setBusyWith('loadingResources')
             return self.loadMyResources();
           })
           .catch(function(err) {
@@ -7264,7 +7290,7 @@ var Store = Reflux.createStore({
 
   onStartTransition() {
     this._transitioning = true
-    if (PAUSE_ON_TRANSITION) {
+    if (ENV.pauseOnTransition) {
       if (meDriver) meDriver.pause(2000)
     }
 
@@ -7278,8 +7304,10 @@ var Store = Reflux.createStore({
     // if (!this._transitioning) return
 
     this._transitioning = false
-    if (PAUSE_ON_TRANSITION) {
-      if (meDriver) meDriver.resume()
+    if (ENV.pauseOnTransition) {
+      if (meDriver && me && me.isAuthenticated) {
+        meDriver.resume()
+      }
     }
 
     if (this._transitionCallbacks) {

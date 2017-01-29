@@ -196,5 +196,8 @@
     "homePage": "Home",
     "sponsoredBy": "Sponsored by",
     "installingUpdate": "Installing update",
-    "restartingApp": "The application will restart momentarily"
+    "restartingApp": "The application will restart momentarily",
+    "loadingModels": "loading models",
+    "loadingResources": "loading resources",
+    "initializingEngine": "initializing engine"
 }

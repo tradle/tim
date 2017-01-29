@@ -726,7 +726,7 @@ var utils = {
    * it's dangerous because it relies on the underlying implementation
    * of levelup and asyncstorage-down, and their respective key/value encoding sechemes
    */
-  dangerousReadDB(db) {
+  async dangerousReadDB(db) {
     // return new Promise((resolve, reject) => {
     //   collect(db.createReadStream(), (err, data) => {
     //     if (err) reject(err)
@@ -746,27 +746,27 @@ var utils = {
     //   })
     // }
 
-    var prefix = db.location + '!'
+    await Q.ninvoke(db, 'open')
+
+    const prefix = db.location + '!'
     // dangerous!
-    var keys = db.db._down.container._keys.slice()
-    if (!keys.length) return Promise.resolve([])
+    const keys = db.db._down.container._keys.slice()
+    if (!keys.length) return []
 
-    return AsyncStorage.multiGet(keys.map((key) => prefix + key))
-      .then((pairs) => {
-        return pairs
-          .filter((pair) => pair[1] != null)
-          .map((pair) => {
-            pair[1] = pair[1].slice(2)
-            try {
-              pair[1] = pair[1] && JSON.parse(pair[1])
-            } catch (err) {
-            }
+    const pairs = await AsyncStorage.multiGet(keys.map((key) => prefix + key))
+    return pairs
+      .filter((pair) => pair[1] != null)
+      .map((pair) => {
+        pair[1] = pair[1].slice(2)
+        try {
+          pair[1] = pair[1] && JSON.parse(pair[1])
+        } catch (err) {
+        }
 
-            return {
-              key: pair[0].slice(prefix.length + 2),
-              value: pair[1]
-            }
-          })
+        return {
+          key: pair[0].slice(prefix.length + 2),
+          value: pair[1]
+        }
       })
   },
   isEmployee(resource) {
@@ -1481,6 +1481,19 @@ var utils = {
       Alert.alert('Failed to send log', err.message)
       return false
     }
+  },
+  addContactIdentity: async function (node, { identity, permalink }) {
+    if (!permalink) permalink = tradleUtils.hexLink(identity)
+
+    let match
+    try {
+      match = await node.addressBook.byPermalink(permalink)
+      if (equal(match.object, identity)) return
+    } catch (err) {
+      // oh well, I guess we have to do things the long way
+    }
+
+    return node.addContactIdentity(identity)
   }
 }
 

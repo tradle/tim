@@ -28,7 +28,10 @@ const enabled = [
 
 if (__DEV__) {
   console.ignoredYellowBox = ['jsSchedulingOverhead']
-  enabled.push('sendy:symmetric')
+  enabled.push(
+    'sendy:symmetric',
+    'TIMER'
+  )
 }
 
 debug.enable(enabled.join(','))
