@@ -322,7 +322,7 @@ class MessageList extends Component {
     if (!resource[TYPE])
       return;
     var model = utils.getModel(resource[TYPE]).value;
-    var title = model.title; //utils.getDisplayName(resource, model.properties);
+    var title = utils.makeModelTitle(model) //utils.getDisplayName(resource, model.properties);
     var newTitle = title;
     let me = utils.getMe()
     // Check if I am a customer or a verifier and if I already verified this resource
