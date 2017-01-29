@@ -274,7 +274,7 @@ class MessageView extends Component {
                 </View>
     }
     else {
-      dateVeiw = <View style={[styles.band, {borderBottomColor: this.props.bankStyle.PRODUCT_ROW_BG_COLOR}]}>
+      dateView = <View style={[styles.band, {borderBottomColor: this.props.bankStyle.PRODUCT_ROW_BG_COLOR}]}>
                   <Text style={styles.date}>{date}</Text>
                 </View>
     }
