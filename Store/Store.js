@@ -3741,9 +3741,10 @@ var Store = Reflux.createStore({
         foundResources[key] = r
         continue;
       }
-       // primitive filtering for this commit
       var combinedValue = '';
       for (var rr in props) {
+        if (rr.charAt(0) === '_')
+          continue
         if (r[rr] instanceof Array)
           continue;
         combinedValue += combinedValue ? ' ' + r[rr] : r[rr];
