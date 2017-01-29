@@ -299,6 +299,7 @@ var Store = Reflux.createStore({
       }
       self.addNameAndTitleProps(m)
       self.addVerificationsToFormModel(m)
+      self.addFromAndTo(m)
     })
     utils.setModels(models);
 
@@ -6236,6 +6237,7 @@ var Store = Reflux.createStore({
         if (m.subClassOf === FINANCIAL_PRODUCT)
           org.products.push(m.id)
         this.addVerificationsToFormModel(m)
+        this.addFromAndTo(m)
         if (!m[ROOT_HASH])
           m[ROOT_HASH] = sha(m)
         batch.push({type: 'put', key: m.id, value: m})
@@ -6379,6 +6381,23 @@ var Store = Reflux.createStore({
         if (aprops)
           this.addNameAndTitleProps(m, aprops)
       }
+    }
+  },
+  addFromAndTo(m) {
+    if (!m.interfaces  ||  m.interfaces.indexOf(MESSAGE) === -1)
+      return
+    let properties = m.properties
+    if (properties.from  &&  properties.to)
+      return
+    properties.from = {
+      type: 'object',
+      ref: IDENTITY,
+      readOnly: true
+    }
+    properties.to = {
+      type: 'object',
+      ref: IDENTITY,
+      readOnly: true
     }
   },
   addVerificationsToFormModel(m) {
