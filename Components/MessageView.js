@@ -265,10 +265,23 @@ class MessageView extends Component {
     let msg = resource.message  &&  resource.message.length
             ? <View><Text style={styles.itemTitle}>{resource.message}</Text></View>
             : <View/>
+    let isVerification = this.props.resource[TYPE] === constants.TYPES.VERIFICATION
+    let dateView
+    if (isVerification) {
+      dateView = <View style={[styles.band, {flexDirection: 'row', justifyContent: 'flex-end', borderBottomColor: this.props.bankStyle.PRODUCT_ROW_BG_COLOR}]}>
+                  <Text style={styles.dateLabel}>{translate(model.properties.dateVerified, model)}</Text>
+                  <Text style={styles.dateValue}>{date}</Text>
+                </View>
+    }
+    else {
+      dateVeiw = <View style={[styles.band, {borderBottomColor: this.props.bankStyle.PRODUCT_ROW_BG_COLOR}]}>
+                  <Text style={styles.date}>{date}</Text>
+                </View>
+    }
 
     return (
       <ScrollView  ref='this' style={platformStyles.container} keyboardShouldPersistTaps={true}>
-        <View style={[styles.band, {borderBottomColor: this.props.bankStyle.PRODUCT_ROW_BG_COLOR, borderTopColor: '#dddddd'}]}><Text style={styles.date}>{date}</Text></View>
+        {dateView}
         <View style={styles.photoBG}>
           <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={this.props.navigator}/>
         </View>
@@ -279,7 +292,7 @@ class MessageView extends Component {
           </View>
           <View style={styles.rowContainer}>
             {msg}
-            {this.props.resource[TYPE] === constants.TYPES.VERIFICATION
+            {isVerification
               ? <VerificationView navigator={this.props.navigator}
                                   resource={resource}
                                   bankStyle={this.props.bankStyle}
@@ -396,11 +409,18 @@ var styles = StyleSheet.create({
     flexDirection: 'row',
     alignSelf: 'center',
   },
+  bandV: {
+    height: 30,
+    backgroundColor: '#f7f7f7',
+    borderBottomWidth: 1,
+    alignSelf: 'stretch',
+  },
+
   band: {
     height: 30,
     backgroundColor: '#f7f7f7',
-    borderColor:  '#f7f7f7',
-    borderWidth: 1,
+    // borderColor:  '#f7f7f7',
+    borderBottomWidth: 1,
     alignSelf: 'stretch',
     // paddingRight: 10,
     // paddingTop: 3,
@@ -416,6 +436,20 @@ var styles = StyleSheet.create({
     marginRight: 10,
     alignSelf: 'flex-end',
     color: '#2E3B4E'
+    // color: '#b4c3cb'
+  },
+  dateLabel: {
+    fontSize: 14,
+    marginTop: 5,
+    marginRight: 10,
+    color: '#999999'
+    // color: '#b4c3cb'
+  },
+  dateValue: {
+    fontSize: 14,
+    marginTop: 5,
+    marginRight: 10,
+    color: '#555555'
     // color: '#b4c3cb'
   },
 });
