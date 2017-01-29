@@ -42,14 +42,14 @@ class ShowRefList extends Component {
     let propsToShow = []
 
     for (var p in props) {
-      if (isIdentity) {
-        if (!isMe  &&  props[p].allowRoles  &&  props[p].allowRoles === 'me')
-          continue;
-        if (p === 'verifiedByMe'  &&  !me.organization)
-          continue;
-        if (p == 'myVerifications' && me.organization)
-          continue;
-      }
+      // if (isIdentity) {
+      //   if (!isMe  &&  props[p].allowRoles  &&  props[p].allowRoles === 'me')
+      //     continue;
+      //   if (p === 'verifiedByMe'  &&  !me.organization)
+      //     continue;
+      //   if (p == 'myVerifications' && me.organization)
+      //     continue;
+      // }
       if (p.charAt(0) === '_'  ||  !props[p].items  ||  !props[p].items.backlink)
         continue;
         // icon = 'ios-checkmark-outline';
