@@ -8,6 +8,7 @@ import com.bitgo.randombytes.RandomBytesPackage;
 import com.brentvatne.react.ReactVideoPackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.facebook.react.ReactApplication;
+import com.smixx.fabric.FabricPackage;
 import com.anyline.reactnative.AnylinePackage;
 import com.peel.react.TcpSocketsModule;
 import com.peel.react.rnos.RNOSModule;
@@ -50,6 +51,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
         new MainReactPackage(),
+        new FabricPackage(),
         new RNAsyncSnappyStoragePackage(),
         // new TcpSocketsModule(),
         new AnylinePackage(),
