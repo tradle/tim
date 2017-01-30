@@ -46,5 +46,6 @@ module.exports = extend({
   showMyQRCode: false,
   requireDeviceLocalAuth: false,
   homePage: true,
-  useKeychain: true
+  useKeychain: true,
+  pauseOnTransition: true
 }, environment)

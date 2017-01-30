@@ -149,6 +149,7 @@ class TimHome extends Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     return this.state.submitLogButtonText !== nextState.submitLogButtonText    ||
+        this.state.busyWith !== nextState.busyWith                             ||
         this.state.downloadUpdateProgress !== nextState.downloadUpdateProgress ||
         this.state.isLoading  !== nextState.isLoading   ||
         this.state.message !== nextState.message        ||
@@ -172,6 +173,11 @@ class TimHome extends Component {
   async handleEvent(params) {
     const self = this
     switch(params.action) {
+    case 'busy':
+      this.setState({
+        busyWith: params.activity
+      })
+      return
     case 'connectivity':
       this._handleConnectivityChange(params.isConnected)
       break
@@ -802,10 +808,19 @@ class TimHome extends Component {
     this.setState({ submitLogButtonText })
   }
 
+  getBusyReason() {
+    return this.state.busyWith && (
+      <View>
+        <Text style={styles.updateIndicator}>{this.state.busyWith}...</Text>
+      </View>
+    )
+  }
+
   getSplashScreen() {
     var {width, height} = utils.dimensions(TimHome)
     var updateIndicator = this.getUpdateIndicator()
     var submitLogButton = this.getSubmitLogButton()
+    var busyReason = updateIndicator ? null : this.getBusyReason()
     return (
       <View style={styles.container}>
         <BackgroundImage source={BG_IMAGE} />
@@ -815,6 +830,7 @@ class TimHome extends Component {
             <Text style={styles.tradle}>Tradle</Text>
             <View style={{paddingTop: 20}}>
               <ActivityIndicator hidden='true' size='large' color='#ffffff'/>
+              {busyReason}
               {updateIndicator}
               {submitLogButton}
             </View>
