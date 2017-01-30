@@ -289,17 +289,8 @@ var Store = Reflux.createStore({
       );
     }
 
+    this.addModels()
     this.loadModels()
-
-    voc.forEach(function(m) {
-      models[m.id] = {
-        key: m.id,
-        value: m
-      }
-      self.addNameAndTitleProps(m)
-      self.addVerificationsToFormModel(m)
-      self.addFromAndTo(m)
-    })
     utils.setModels(models);
 
     // if (true) {
@@ -334,7 +325,20 @@ var Store = Reflux.createStore({
         }
       })
   },
-
+  addModels() {
+    voc.forEach((m) => {
+      // if (!m[ROOT_HASH])
+      //   m[ROOT_HASH] = sha(m);
+      models[m.id] = {
+        key: m.id,
+        value: m
+      }
+      m[ROOT_HASH] = sha(m)
+      this.addNameAndTitleProps(m)
+      this.addVerificationsToFormModel(m)
+      this.addFromAndTo(m)
+    })
+  },
   _handleConnectivityChange(isConnected) {
     if (isConnected === this.isConnected) return
 
@@ -1407,9 +1411,11 @@ var Store = Reflux.createStore({
           self.setMe(me)
         }
       }
-
-      if (!SERVICE_PROVIDERS)
+      let newProviders
+      if (!SERVICE_PROVIDERS) {
         SERVICE_PROVIDERS = []
+        newProviders = true
+      }
 
       var promises = []
       json.providers.forEach(sp => {
@@ -1436,13 +1442,26 @@ var Store = Reflux.createStore({
           return
 
         sp.bot.permalink = sp.bot.pub[ROOT_HASH] || protocol.linkString(sp.bot.pub)
-        SERVICE_PROVIDERS.push({
+
+        let newSp = {
           id: sp.id,
           org: utils.getId(sp.org),
           url: originalUrl,
           style: sp.style,
           permalink: sp.bot.permalink
-        })
+        }
+        // Check is this is an update SP info
+        let oldSp
+        for (let i=0; !newProviders  &&  i<SERVICE_PROVIDERS.length; i++) {
+          let r = SERVICE_PROVIDERS[i]
+          if (r.id === sp.id  &&  r.url === originalUrl) {
+            oldSp = SERVICE_PROVIDERS[i]
+            SERVICE_PROVIDERS[i] = newSp
+            break
+          }
+        }
+        if (!oldSp)
+          SERVICE_PROVIDERS.push(newSp)
 
         promises.push(self.addInfo(sp, originalUrl, newServer))
       })
@@ -5116,28 +5135,42 @@ var Store = Reflux.createStore({
     var v = value.url
     if (v.charAt(v.length - 1) === '/')
       v = v.substring(0, v.length - 1)
+
     var key = SETTINGS + '_1'
-    var togo
-    if (SERVICE_PROVIDERS  &&  value.id) {
-      if (SERVICE_PROVIDERS.some((r) => r.id === value.id  &&  r.url === value.url))
-        return
+    const settings = this._getItem(key)
+    if (value.id) {
+      if (SERVICE_PROVIDERS) {
+        if (SERVICE_PROVIDERS.some((r) => r.id === value.id  &&  r.url === value.url))
+          return
+      }
+      // We don't have this provider yet
+      let allProviders, oneProvider
+      if (settings  &&  settings.urls.indexOf(value.url) !== -1) {
+        // check if all providers were fetched from this server.
+        if (!settings.urlToId.length)
+          allProviders = true
+        // check if this provider was already requested but
+        // it was not picked up or it was removed on server and may be added again
+        else if (settings.urlToId[value.id].indexOf(value.id) !== -1)
+          oneProvider = true
+      }
     }
     return this.getInfo([v], true, value.id ? value.id : null, true)
     .then(function(json) {
-      var settings = list[key]
+      if (allProviders)
+        return
       if (settings) {
-        const curVal = self._getItem(key)
-        if (curVal.urls.indexOf(v) === -1)
-          self._mergeItem(key, { urls: [...curVal.urls, v] })
-        // Save the knowledge that only some providers are needed from this server
+        if (settings.urls.indexOf(v) === -1)
+          self._mergeItem(key, { urls: [...settings.urls, v] })
+        // Save the fact that only some providers are needed from this server
         if (value.id) {
-          var urlToId = curVal.urlToId
+          var urlToId = settings.urlToId
           if (!urlToId[v])
             urlToId[v] = [value.id]
-          else if (urlToId[v].indexOf(value.id) !== -1)
-            return
-          else
+          else if (urlToId[v].indexOf(value.id) === -1)
             urlToId[v].push(value.id)
+          else
+            return
 
           self._mergeItem(key, { urlToId: urlToId })
         }
@@ -5148,8 +5181,6 @@ var Store = Reflux.createStore({
       }
     })
     .then(function() {
-      // if (me)
-      //   self.monitorTim()
       self.trigger({action: 'addItem', resource: value})
       db.put(key, self._getItem(key))
     })
@@ -7197,17 +7228,8 @@ var Store = Reflux.createStore({
   },
   loadDB() {
     const self = this
-    if (utils.isEmpty(models)) {
-      voc.forEach(function(m) {
-        if (!m[ROOT_HASH])
-          m[ROOT_HASH] = sha(m);
-        let key = utils.getId(m)
-        models[key] = {
-          key: key,
-          value: m
-        }
-      });
-    }
+    if (utils.isEmpty(models))
+      this.addModels()
 
     return this.loadStaticDbData(true)
     .then(() => {
@@ -7246,24 +7268,28 @@ var Store = Reflux.createStore({
   },
 
   loadModels() {
-    var self = this
     var batch = [];
-    voc.forEach(function(m) {
-      if (!m[ROOT_HASH]) {
-        m[ROOT_HASH] = sha(m);
-        self.addNameAndTitleProps(m)
-      }
 
-      batch.push({type: 'put', key: m.id, value: m});
-    });
+
+    // voc.forEach(function(m) {
+    //   if (!m[ROOT_HASH]) {
+    //     m[ROOT_HASH] = sha(m);
+    //     self.addNameAndTitleProps(m)
+    //   }
+
+    //    batch.push({type: 'put', key: m.id, value: m});
+    // });
+
+    for (var m in models)
+      batch.push({type: 'put', key: m, value: models[m].value});
 
     this.setBusyWith('loadingModels')
 
     // return Promise.resolve()
     return db.batch(batch)
-          .then(function() {
-            self.setBusyWith('loadingResources')
-            return self.loadMyResources();
+          .then(() => {
+            this.setBusyWith('loadingResources')
+            return this.loadMyResources();
           })
           .catch(function(err) {
             err = err;
