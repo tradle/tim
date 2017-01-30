@@ -86,8 +86,9 @@ class RemediationItemsList extends Component {
     )
   }
   submitAllForms() {
+    let self = this
     utils.onNextTransitionEnd(this.props.navigator, () => {
-      Actions.addAll(this.props.resource, this.props.to, translate('confirmedMyData'))
+      Actions.addAll(self.props.resource, self.props.to, translate('confirmedMyData', translate(this.props.to.name)))
     });
     this.props.navigator.pop()
   }
