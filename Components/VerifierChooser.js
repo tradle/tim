@@ -137,11 +137,9 @@ class VerifierChooser extends Component {
     );
   }
   showVerifier(resource) {
-    let formRequest = this.props.originatingMessage
-    let verifier
-    formRequest.verifiers.forEach((r) => {
-      if (r.name  === resource.name  &&  r.url === resource.url)
-        verifier = r
+    const formRequest = this.props.originatingMessage
+    const verifier = formRequest.verifiers.find(r => {
+      return r.name === resource.name  &&  utils.urlsEqual(r.url, resource.url)
     })
 
     Actions.addItem({

@@ -1494,6 +1494,10 @@ var utils = {
     }
 
     return node.addContactIdentity(identity)
+  },
+
+  urlsEqual: function urlsEqual (a, b) {
+    return trimTrailingSlashes(a) === trimTrailingSlashes(b)
   }
 }
 
@@ -1501,6 +1505,10 @@ if (__DEV__) {
   ;['setPassword', 'getPassword'].forEach(method => {
     utils[method] = utils.addCatchLogger(method, utils[method])
   })
+}
+
+function trimTrailingSlashes (str) {
+  return str.replace(/\/+$/, '')
 }
 
 function normalizeRemoveListener (addListenerRetVal) {

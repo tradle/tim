@@ -1,6 +1,10 @@
 
 import { EventEmitter } from 'events'
 import debug from 'debug'
+import { Crashlytics } from 'react-native-fabric'
+import ErrorRecorder from 'react-native-fabric-crashlytics'
+
+ErrorRecorder.init()
 
 // const localDebug = debug('tradle:logger')
 const MAX_LENGTH = 5000

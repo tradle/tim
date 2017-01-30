@@ -55,3 +55,4 @@ MicroBlink.bundle
 iOS/Frameworks
 Pods
 *.xcworkspace
+fabric.properties
