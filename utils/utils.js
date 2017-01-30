@@ -448,14 +448,13 @@ var utils = {
         }
      )
   },
-  templateIt1(prop, resource) {
+  templateIt1(prop, resource, m) {
     let pgroup = prop.group
     if (!pgroup.length)
       return prop.displayAs
     let group = []
     let hasSetProps
-    let props = this.getModel(resource[TYPE]).value.properties
-    let m = this.getModel(resource[TYPE])
+    let props = resource[TYPE] ? this.getModel(resource[TYPE]).value.properties : m.properties
     for (let i=0; i<pgroup.length; i++) {
       let p = pgroup[i]
       let v =  resource[p] ? resource[p] : ''
@@ -499,10 +498,11 @@ var utils = {
   //     return this.template(prop.displayAs, group).trim()
   // },
 
-  templateIt(prop, resource) {
+  // parentModel for array type props
+  templateIt(prop, resource, parentModel) {
     var template = prop.displayAs;
     if (typeof template === 'string')
-      return this.templateIt1(prop, resource)
+      return this.templateIt1(prop, resource, parentModel)
     var val = '';
     let self = this
     if (template instanceof Array) {
