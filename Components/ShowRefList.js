@@ -42,6 +42,8 @@ class ShowRefList extends Component {
     let propsToShow = []
 
     for (var p in props) {
+      if (props[p].hidden)
+        continue
       if (isIdentity) {
         if (!isMe  &&  props[p].allowRoles  &&  props[p].allowRoles === 'me')
           continue;
