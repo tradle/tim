@@ -100,7 +100,7 @@ var ResourceMixin = {
           return
         var value;
         if (itemMeta.displayAs)
-          value = utils.templateIt(itemMeta, v)
+          value = utils.templateIt(itemMeta, v, pMeta)
         else if (itemMeta.type === 'date')
           value = utils.formatDate(v[p]);
         else if (itemMeta.type === 'boolean')
