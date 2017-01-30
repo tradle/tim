@@ -618,8 +618,8 @@ var Store = Reflux.createStore({
       const recipientHash = recipientInfo.permalink
       let messenger = wsClients.byIdentifier[recipientHash]
       if (!messenger) {
-        let url = self._getItem(SETTINGS + '_1').hashToUrl[recipientHash]
-        messenger = wsClients.byUrl[url]
+        const url = self._getItem(SETTINGS + '_1').hashToUrl[recipientHash]
+        messenger = url && wsClients.byUrl[url]
       }
 
       if (!messenger) {
@@ -2779,7 +2779,7 @@ var Store = Reflux.createStore({
           else {
             // return newly created provider
             SERVICE_PROVIDERS.forEach((r) => {
-              if (r.id === returnVal.id  &&  r.url === returnVal.url)
+              if (r.id === returnVal.id  &&  utils.urlsEqual(r.url, returnVal.url))
                 params.cb(self._getItem(utils.getId(r.org)))
             })
           }
@@ -4698,7 +4698,7 @@ var Store = Reflux.createStore({
           let verifiers = hasVerifiers[docType]
           let foundVerifiedForm
           verifiers.forEach((v) => {
-            let provider = SERVICE_PROVIDERS.filter((sp) => sp.id === v.id  &&  sp.url === v.url)
+            let provider = SERVICE_PROVIDERS.filter((sp) => sp.id === v.id  &&  utils.urlsEqual(sp.url, v.url))
             if (!provider.length)
               return
             let spReps = this.getRepresentatives(utils.getId(provider[0].org))
@@ -5119,7 +5119,7 @@ var Store = Reflux.createStore({
     var key = SETTINGS + '_1'
     var togo
     if (SERVICE_PROVIDERS  &&  value.id) {
-      if (SERVICE_PROVIDERS.some((r) => r.id === value.id  &&  r.url === value.url))
+      if (SERVICE_PROVIDERS.some((r) => r.id === value.id  &&  utils.urlsEqual(r.url, value.url)))
         return
     }
     return this.getInfo([v], true, value.id ? value.id : null, true)
@@ -6211,8 +6211,10 @@ var Store = Reflux.createStore({
           val.message = 'Please have this form verified by one of our trusted associates'
           val.verifiers.forEach((v) => {
             let serviceProvider = SERVICE_PROVIDERS.filter((sp) => {
-              return sp.url === v.url &&
-                (v.id ? v.id === sp.id : v.permalink === sp.permalink)
+              if (!utils.urlsEqual(sp.url, v.url)) return
+              if (v.id) return v.id === sp.id
+
+              return v.permalink === sp.permalink
             })
 
             if (serviceProvider  &&  serviceProvider.length) {
