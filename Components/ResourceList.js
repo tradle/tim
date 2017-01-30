@@ -432,7 +432,7 @@ class ResourceList extends Component {
         if (isForm)
           title = utils.makeModelTitle(m)
         else {
-          let type = utils.getType(resource)
+          let type = utils.getType(resource.document)
           title = utils.makeModelTitle(utils.getModel(type).value)
         }
         this.props.navigator.push({
