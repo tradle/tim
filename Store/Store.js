@@ -2565,8 +2565,10 @@ var Store = Reflux.createStore({
     // Check if the recipient is not one if the creators of this context.
     // If NOT send the message to the counterparty of the context
     let context = resource._context || value._context
+    let isRemediation
     if (context) {
       context = this._getItem(context)
+      isRemediation = context.product === REMEDIATION
       let toId = utils.getId(resource.to)
       if (toId !== utils.getId(context.to)  &&  toId !== utils.getId(context.from))
         resource.to = utils.clone(utils.getId(context.to) === utils.getId(me) ? context.from : context.to)
@@ -2700,10 +2702,10 @@ var Store = Reflux.createStore({
 
           var title = utils.getDisplayName(value, self.getModel(value[TYPE]).value.properties);
           json[prop] = self.buildRef(value)
-          if (isMessage  &&  !json.documentCreated)
-            json.time = new Date().getTime();
         });
-        // if (isNew  &&  !resource.time)
+
+        if (isMessage  &&  !json.documentCreated  &&  (!isRemediation ||  !json.time))
+          json.time = new Date().getTime();
         if (isNew  ||  !value.documentCreated) //(meta.id !== FORM_ERROR  &&  meta.id !== FORM_REQUEST  &&  !meta.id === FORM_ERROR))
           resource.time = new Date().getTime();
 
@@ -2906,11 +2908,6 @@ var Store = Reflux.createStore({
         }
 
         var m = self.getModel(returnVal[TYPE]).value
-
-        // if (m.subClassOf === FORM)
-        //   params.sendStatus = sendStatus
-
-
 //         var to = returnVal.to
 //         Object.defineProperty(returnVal, 'to', {
 //           get: function () {
@@ -2963,14 +2960,8 @@ var Store = Reflux.createStore({
 
           var key = IDENTITY + '_' + to[ROOT_HASH]
 
-          // let sendParams = self.packMessage(returnVal, toChain)
           let sendParams = self.packMessage(toChain, returnVal.from, returnVal.to, returnVal._context)
-
           return meDriver.signAndSend(sendParams)
-          // return meDriver.signAndSend({
-          //   object: toChain,
-          //   to: { fingerprint: self.getFingerprint(list[key].value) }
-          // })
         })
         .then(function (result) {
           // TODO: fix hack
