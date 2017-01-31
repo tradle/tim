@@ -429,7 +429,8 @@ class ResourceList extends Component {
         !this.props.callback) {
       if (isVerification || isForm) {
         let title
-        if (isForm)
+        let isResourceVerification = resource[TYPE] === constants.TYPES.VERIFICATION
+        if (isForm  ||  !isResourceVerification)
           title = utils.makeModelTitle(m)
         else {
           let type = utils.getType(resource.document)
@@ -954,7 +955,7 @@ class ResourceList extends Component {
     }
     let me = utils.getMe()
     var actionSheet = this.renderActionSheet() // me.isEmployee && me.organization ? this.renderActionSheet() : null
-    var footer = actionSheet && this.renderFooter()
+    var footer = this.state.isLoading ? <View/> : actionSheet && this.renderFooter()
     var searchBar
     if (SearchBar  &&  ((this.state.list && this.state.list.length > 10) || (this.state.filter  &&  this.state.filter.length))) {
       searchBar = (
