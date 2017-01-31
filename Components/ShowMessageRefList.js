@@ -10,6 +10,9 @@ var constants = require('@tradle/constants');
 var reactMixin = require('react-mixin');
 var ResourceMixin = require('./ResourceMixin');
 var RowMixin = require('./RowMixin');
+var MessageView = require('./MessageView')
+
+const VERIFICATION = constants.TYPES.VERIFICATION
 
 import {
   View,
@@ -55,7 +58,7 @@ class ShowMessageRefList extends Component {
       let color = this.props.bankStyle ? this.props.bankStyle.BACKLINK_ROW_TEXT_COLOR : '#ffffff'
       refList.push(
         <View style={style} key={this.getNextKey()}>
-           <TouchableHighlight onPress={this.showResources.bind(this, this.props.resource, prop)} underlayColor='transparent'>
+           <TouchableHighlight onPress={this.show.bind(this, this.props.resource, prop)} underlayColor='transparent'>
              <View style={styles.item}>
              <View style={{flexDirection: 'row'}}>
                <Icon name={icon}  size={utils.getFontSize(35)}  color={color} />
@@ -82,6 +85,35 @@ class ShowMessageRefList extends Component {
                 </View>
               )
              : <View/>;
+  }
+
+  show(resource, prop) {
+    let propName = prop.name
+    if (propName !== 'verifications'  ||  resource[propName].length > 1  ||  !resource[propName][0].sources) {
+      this.showResources(resource, prop)
+      return
+    }
+    let verification = resource[propName][0]
+    let type = utils.getType(resource)
+    let title = utils.makeModelTitle(utils.getModel(type).value)
+    this.props.navigator.push({
+      title: title,
+      id: 5,
+      component: MessageView,
+      backButtonTitle: 'Back',
+      passProps: {
+        resource: verification,
+        //  {
+        //   [constants.TYPE]: VERIFICATION,
+        //   [constants.ROOT_HASH]: verification[constants.ROOT_HASH] || utils.getId(verification).split('_')[0],
+        //   document: {
+        //     id: utils.getId(resource),
+        //     title: utils.getDisplayName(resource)
+        //   }
+        // },
+        bankStyle: this.props.bankStyle || defaultBankStyle
+      }
+    });
   }
   showMoreLikeThis() {
     var self = this;
