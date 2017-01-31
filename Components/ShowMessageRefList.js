@@ -45,6 +45,9 @@ class ShowMessageRefList extends Component {
         continue;
       backlinks.push(props[p])
     }
+    if (!backlinks.length)
+      return <View/>
+    let hasCounts
     backlinks.forEach((prop) => {
       // if (isIdentity  &&  !isMe  &&  prop.allowRoles  &&  prop.allowRoles === 'me')
       //   continue;
@@ -56,18 +59,19 @@ class ShowMessageRefList extends Component {
       let style = [buttonStyles.container, {flex: 1, alignSelf: 'stretch'}]
       let count = resource[prop.name]  &&  resource[prop.name].length
       let color = this.props.bankStyle ? this.props.bankStyle.BACKLINK_ROW_TEXT_COLOR : '#ffffff'
+      if (!count)
+        return
+
+      hasCounts = true
       refList.push(
         <View style={style} key={this.getNextKey()}>
            <TouchableHighlight onPress={this.show.bind(this, this.props.resource, prop)} underlayColor='transparent'>
              <View style={styles.item}>
-             <View style={{flexDirection: 'row'}}>
-               <Icon name={icon}  size={utils.getFontSize(35)}  color={color} />
-                {count
-                    ? <View style={styles.count}>
-                        <Text style={styles.countText}>{count}</Text>
-                      </View>
-                    : <View/>
-                 }
+               <View style={{flexDirection: 'row'}}>
+                 <Icon name={icon}  size={utils.getFontSize(35)}  color={color} />
+                  <View style={styles.count}>
+                    <Text style={styles.countText}>{count}</Text>
+                  </View>
                </View>
                <Text style={[buttonStyles.msgText, {color: color}]}>{translate(prop, model)}</Text>
              </View>
@@ -78,6 +82,8 @@ class ShowMessageRefList extends Component {
      })
 
      var backlinksBg = this.props.bankStyle ? {backgroundColor: this.props.bankStyle.BACKLINK_ROW_BG_COLOR} : {backgroundColor: '#a0a0a0'}
+     if (!hasCounts)
+       return <View style={[buttonStyles.buttons, backlinksBg, {height: 10}]} />
      return refList.length
              ? (
                <View style={[buttonStyles.buttons, backlinksBg, {flexDirection: 'row'}]}>
@@ -89,11 +95,12 @@ class ShowMessageRefList extends Component {
 
   show(resource, prop) {
     let propName = prop.name
-    if (propName !== 'verifications'  ||  resource[propName].length > 1  ||  !resource[propName][0].sources) {
+    let pVal = resource[propName]
+    if (!pVal  ||  propName !== 'verifications'  ||  pVal.length > 1  ||  !pVal[0].sources) {
       this.showResources(resource, prop)
       return
     }
-    let verification = resource[propName][0]
+    let verification = pVal[0]
     let type = utils.getType(resource)
     let title = utils.makeModelTitle(utils.getModel(type).value)
     this.props.navigator.push({
@@ -103,14 +110,6 @@ class ShowMessageRefList extends Component {
       backButtonTitle: 'Back',
       passProps: {
         resource: verification,
-        //  {
-        //   [constants.TYPE]: VERIFICATION,
-        //   [constants.ROOT_HASH]: verification[constants.ROOT_HASH] || utils.getId(verification).split('_')[0],
-        //   document: {
-        //     id: utils.getId(resource),
-        //     title: utils.getDisplayName(resource)
-        //   }
-        // },
         bankStyle: this.props.bankStyle || defaultBankStyle
       }
     });
