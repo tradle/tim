@@ -45,8 +45,10 @@ class ShowMessageRefList extends Component {
         continue;
       backlinks.push(props[p])
     }
+    let noBacklinks = <View style={[buttonStyles.buttons, backlinksBg, {height: 2}]} />
+
     if (!backlinks.length)
-      return <View/>
+       return noBacklinks
     let hasCounts
     backlinks.forEach((prop) => {
       // if (isIdentity  &&  !isMe  &&  prop.allowRoles  &&  prop.allowRoles === 'me')
@@ -83,7 +85,7 @@ class ShowMessageRefList extends Component {
 
      var backlinksBg = this.props.bankStyle ? {backgroundColor: this.props.bankStyle.BACKLINK_ROW_BG_COLOR} : {backgroundColor: '#a0a0a0'}
      if (!hasCounts)
-       return <View style={[buttonStyles.buttons, backlinksBg, {height: 10}]} />
+       return noBacklinks
      return refList.length
              ? (
                <View style={[buttonStyles.buttons, backlinksBg, {flexDirection: 'row'}]}>
