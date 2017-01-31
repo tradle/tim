@@ -152,7 +152,7 @@ class VerificationRow extends Component {
                 : translate('verifiedBy', title)
       // verifiedBy = <View style={contentRows.length == 1 ? {flex: 1} : {flexDirection: 'row'}} key={this.getNextKey()}>
 
-      verifiedBy = <Text style={[styles.description, {color: '#AAAAAA'}]}>{by}</Text>
+      verifiedBy = <Text style={styles.verifiedBy}>{by}</Text>
     }
     else
       verifiedBy = <View/>
@@ -181,8 +181,9 @@ class VerificationRow extends Component {
                       {date}
                       <View style={[styles.noImageBlock, {flex: 1}]}>
                         <Text style={styles.rTitle}>{title}</Text>
-                        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                          {description}
+                        {description}
+                        <View style={{flexDirection: 'row', paddingTop: 5}}>
+                          <View style={{flex: 1}} />
                           {verifiedBy}
                         </View>
                       </View>
@@ -412,8 +413,14 @@ var styles = StyleSheet.create({
     flex: 1,
     flexWrap: 'wrap',
     color: '#999999',
-    fontSize: 14,
+    fontSize: 16,
     // paddingLeft: 5
+  },
+  verifiedBy: {
+    flex: 1,
+    flexWrap: 'wrap',
+    color: '#cccccc',
+    fontSize: 12,
   },
   cellImage: {
     backgroundColor: '#dddddd',
