@@ -502,6 +502,57 @@ var Store = Reflux.createStore({
     this.trigger({ action: 'busy', activity: this.busyWith })
   },
 
+  idlifyExpensiveCalls() {
+    if (this._idlifiedExpensiveCalls) return
+
+    this._idlifiedExpensiveCalls = true
+    this.idlify({
+      overwrite: true,
+      context: meDriver,
+      methods: [
+        'sign',
+        'signAndSend',
+        'identityPublishStatus',
+        'createObject',
+        'receive'
+      ]
+    })
+
+    this.idlify({
+      overwrite: true,
+      context: meDriver.objects,
+      methods: [
+        'get'
+      ]
+    })
+
+    this.idlify({
+      overwrite: true,
+      context: meDriver.addressBook,
+      methods: [
+        'lookupIdentity',
+        'byPubKey'
+      ]
+    })
+  },
+
+  idlify({ context, methods, overwrite }) {
+    const idlified = overwrite ? context : {}
+    methods.forEach(method => {
+      idlified[method] = this.idlifyFunction(context[method], context)
+    })
+
+    return idlified
+  },
+
+  idlifyFunction(fn, context) {
+    const self = this
+    return async function idlifiedFunction (...args) {
+      await self.onIdle()
+      return fn.apply(context || this, args)
+    }
+  },
+
   buildDriver ({ keys, identity, encryption }) {
     this.setBusyWith('initializingEngine')
     var self = this
@@ -549,6 +600,7 @@ var Store = Reflux.createStore({
 
     console.log('me: ' + meDriver.permalink)
     meDriver = tradleUtils.promisifyNode(meDriver)
+    this.idlifyExpensiveCalls()
 
     // TODO: figure out of we need to publish identities
     meDriver.identityPublishStatus = meDriver.identitySealStatus
@@ -1133,7 +1185,7 @@ var Store = Reflux.createStore({
       self.setProviderOnlineStatus(recipient, present)
     }
 
-    function receive (msg, from) {
+    const receive = this.idlifyFunction(function receive (msg, from) {
       try {
         msg = tradleUtils.unserializeMessage(msg)
         const payload = msg.object
@@ -1256,7 +1308,7 @@ var Store = Reflux.createStore({
           console.warn('failed to receive msg:', err, msg)
           debugger
         })
-    }
+    }, this)
   },
   setProviderOnlineStatus(permalink, online) {
     if (!SERVICE_PROVIDERS) return
@@ -2537,6 +2589,23 @@ var Store = Reflux.createStore({
       from: this.buildRef(me),
       to: this.buildRef(r.from)
     }})
+
+    // bulk example:
+
+    // const signed = await Q.all(resource.items.map(form => {
+    //   return applicant.createObject({ object: form })
+    // }))
+
+    // // store `signed` in `list`
+
+    // const result = await meDriver.signAndSend({
+    //   to: to,
+    //   object: {
+    //     [TYPE]: 'tradle.ConfirmPackageResponse',
+    //     message: REMEDIATION_SIMPLE_MESSAGE,
+    //     sigs: signed.map(wrapper => wrapper.object[SIG])
+    //   }
+    // })
   },
   onAddItem(params) {
     var self = this
@@ -7309,6 +7378,7 @@ var Store = Reflux.createStore({
   },
 
   onStartTransition() {
+    debug('transition start')
     this._transitioning = true
     if (ENV.pauseOnTransition) {
       if (meDriver) meDriver.pause(2000)
@@ -7320,6 +7390,7 @@ var Store = Reflux.createStore({
     // }, 2000)
   },
   onEndTransition() {
+    debug('transition end')
     // clearTimeout(this._transitionTimeout)
     // if (!this._transitioning) return
 
@@ -7337,18 +7408,27 @@ var Store = Reflux.createStore({
       cbs.forEach((fn) => fn())
     }
   },
-  onIdle(fn) {
-    if (utils.isWeb() || !this._transitioning) {
-      return Q.resolve()
-    }
+  async onIdle(fn) {
+    if (utils.isWeb() || !this._transitioning) return
 
+    debug('deferring job till transition finishes')
     if (!this._transitionCallbacks) {
       this._transitionCallbacks = []
     }
 
-    var defer = Q.defer()
-    this._transitionCallbacks.push(defer.resolve)
-    return defer.promise
+    const start = Date.now()
+    const waitForTransitionToEnd = new Promise(resolve => {
+      this._transitionCallbacks.push(resolve)
+    })
+
+    await Q.race([
+      waitForTransitionToEnd,
+      // after 2 seconds, give up waiting
+      utils.promiseDelay(2000)
+    ])
+
+    const delay = Date.now() - start
+    debug(`running deferred job (delayed ${delay})`)
   },
   buildRef(resource) {
     if (!resource[TYPE] && resource.id)
