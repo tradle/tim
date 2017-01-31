@@ -420,8 +420,10 @@ class ResourceList extends Component {
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     var model = utils.getModel(this.props.modelName);
     var isIdentity = this.props.modelName === PROFILE;
-    var isVerification = model.value.id === constants.TYPES.VERIFICATION
-    var isForm = model.value.id === constants.TYPES.FORM
+    let rType = resource[TYPE]
+    var isVerification = model.value.id === constants.TYPES.VERIFICATION || rType === constants.TYPES.VERIFICATION
+    var isForm = model.value.id === constants.TYPES.FORM || utils.getModel(rType).value.subClassOf === constants.TYPES.FORM
+
     var isOrganization = this.props.modelName === ORGANIZATION;
     var m = utils.getModel(resource[TYPE]).value;
     if (!isIdentity         &&
@@ -429,8 +431,7 @@ class ResourceList extends Component {
         !this.props.callback) {
       if (isVerification || isForm) {
         let title
-        let isResourceVerification = resource[TYPE] === constants.TYPES.VERIFICATION
-        if (isForm  ||  !isResourceVerification)
+        if (isForm)
           title = utils.makeModelTitle(m)
         else {
           let type = utils.getType(resource.document)
