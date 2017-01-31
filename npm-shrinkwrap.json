@@ -70,8 +70,8 @@
     },
     "@tradle/models": {
       "version": "4.10.9",
-      "from": "git://github.com/tradle/models.git#14c656dbe31d2142120d515a162419d80f2c3924",
-      "resolved": "git://github.com/tradle/models.git#14c656dbe31d2142120d515a162419d80f2c3924"
+      "from": "git://github.com/tradle/models.git#33adbe92c13d9fda32d76358542aa0dbf87d5404",
+      "resolved": "git://github.com/tradle/models.git#33adbe92c13d9fda32d76358542aa0dbf87d5404"
     },
     "@tradle/otr": {
       "version": "0.2.17",
@@ -4674,9 +4674,9 @@
       "resolved": "https://registry.npmjs.org/react-native-localization/-/react-native-localization-0.1.17.tgz"
     },
     "react-native-orient": {
-      "version": "1.3.1",
+      "version": "1.3.2",
       "from": "react-native-orient@latest",
-      "resolved": "https://registry.npmjs.org/react-native-orient/-/react-native-orient-1.3.1.tgz"
+      "resolved": "https://registry.npmjs.org/react-native-orient/-/react-native-orient-1.3.2.tgz"
     },
     "react-native-orientation": {
       "version": "1.17.0",
