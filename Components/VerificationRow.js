@@ -182,7 +182,7 @@ class VerificationRow extends Component {
                       <View style={[styles.noImageBlock, {flex: 1}]}>
                         <Text style={styles.rTitle}>{title}</Text>
                         {description}
-                        <View style={{flexDirection: 'row', paddingTop: 5}}>
+                        <View style={{flexDirection: 'row', paddingTop: 10}}>
                           <View style={{flex: 1}} />
                           {verifiedBy}
                         </View>
@@ -410,11 +410,8 @@ var styles = StyleSheet.create({
     // marginBottom: 2,
   },
   description: {
-    flex: 1,
-    flexWrap: 'wrap',
     color: '#999999',
     fontSize: 16,
-    // paddingLeft: 5
   },
   verifiedBy: {
     flex: 1,
