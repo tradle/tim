@@ -105,6 +105,7 @@ const SELF_INTRODUCTION = constants.TYPES.SELF_INTRODUCTION
 const FORGET_ME         = constants.TYPES.FORGET_ME
 const FORGOT_YOU        = constants.TYPES.FORGOT_YOU
 const SETTINGS          = constants.TYPES.SETTINGS
+const REMEDIATION_SIMPLE_MESSAGE = 'tradle.RemediationSimpleMessage'
 
 // const SHARED_RESOURCE     = 'tradle.SharedResource'
 const MY_IDENTITIES_TYPE  = 'tradle.MyIdentities'
@@ -2528,7 +2529,7 @@ var Store = Reflux.createStore({
     }))
 
     this.onAddMessage({msg: {
-      [TYPE]: SIMPLE_MESSAGE,
+      [TYPE]: REMEDIATION_SIMPLE_MESSAGE,
       [NONCE]: this.getNonce(),
       message: message,
       time: new Date().getTime(),

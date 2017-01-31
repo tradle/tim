@@ -10,6 +10,7 @@ var PhotoList = require('./PhotoList');
 var Icon = require('react-native-vector-icons/Ionicons');
 var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin');
+var ResourceMixin = require('./ResourceMixin')
 var extend = require('extend')
 var equal = require('deep-equal')
 var formDefaults = require('../data/formDefaults.json')
@@ -27,6 +28,7 @@ const SHARE_CONTEXT = 'tradle.ShareContext'
 const ENUM = 'tradle.Enum'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
+const REMEDIATION_SIMPLE_MESSAGE = 'tradle.RemediationSimpleMessage'
 
 var CURRENCY_SYMBOL
 var LINK_COLOR
@@ -473,6 +475,21 @@ class MessageRow extends Component {
       renderedRow.push(msg);
       return ({message: str})
     }
+    let isRemediationCompleted = resource[constants.TYPE] === REMEDIATION_SIMPLE_MESSAGE
+     if (isRemediationCompleted) {
+      let msg = <View key={this.getNextKey()}>
+                  <View style={{flexDirection: 'row'}}>
+                    <View style={{flex: 1}}>
+                      <Text style={[chatStyles.resourceTitle, {color: this.props.bankStyle.STRUCTURED_MESSAGE_TEXT_COLOR}]}>{resource.message}</Text>
+                    </View>
+                    <Icon style={{position: 'absolute', bottom: 2, right: 2, color: this.props.bankStyle.MY_MESSAGE_LINK_COLOR}} size={20} name={'ios-arrow-forward'} />
+                  </View>
+                </View>
+
+      renderedRow.push(msg)
+      return {onPressCall: this.showMyData.bind(this)}
+    }
+
     var isProductList = model.id === constants.TYPES.PRODUCT_LIST
     if (isProductList) {
       // Case when the needed form was sent along with the message
@@ -719,6 +736,10 @@ class MessageRow extends Component {
       return isConfirmation ? {isConfirmation: true} : null
     return {onPressCall: this.props.onSelect.bind(this, resource, null)}
   }
+  showMyData() {
+    let me = utils.getMe()
+    this.showResources(me, utils.getModel(me[constants.TYPE]).value.properties.myForms)
+  }
 
   onChooseProduct() {
     if (this.props.isAggregation)
@@ -796,6 +817,7 @@ var styles = StyleSheet.create({
   },
 });
 reactMixin(MessageRow.prototype, RowMixin);
+reactMixin(MessageRow.prototype, ResourceMixin)
 MessageRow = makeResponsive(MessageRow)
 
 module.exports = MessageRow;
