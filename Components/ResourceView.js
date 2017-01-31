@@ -294,18 +294,21 @@ class ResourceView extends Component {
     let buttons = []
     let actions = []
     if (isIdentity  &&  isMe) {
-      if (utils.isIOS()) {
-        // when both auth methods are available, give the choice to disable one
-        buttons.push(translate('useTouchId') + (this.state.useTouchId ? ' ✓' : ''))
-        actions.push(USE_TOUCH_ID)
-        buttons.push(translate('useGesturePassword') + (this.state.useGesturePassword ? ' ✓' : ''))
-        actions.push(USE_GESTURE_PASSWORD)
+      if (ENV.requireDeviceLocalAuth) {
+        if (utils.isIOS()) {
+          // when both auth methods are available, give the choice to disable one
+          buttons.push(translate('useTouchId') + (this.state.useTouchId ? ' ✓' : ''))
+          actions.push(USE_TOUCH_ID)
+          buttons.push(translate('useGesturePassword') + (this.state.useGesturePassword ? ' ✓' : ''))
+          actions.push(USE_GESTURE_PASSWORD)
+        }
       }
 
       if (this.state.useGesturePassword || !utils.isIOS()) {
         buttons.push(translate('changeGesturePassword'))
         actions.push(CHANGE_GESTURE_PASSWORD)
       }
+
       buttons.push(translate('pairDevices'))
       actions.push(PAIR_DEVICES)
 
