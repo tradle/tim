@@ -199,5 +199,7 @@
     "restartingApp": "The application will restart momentarily",
     "loadingModels": "loading models",
     "loadingResources": "loading resources",
-    "initializingEngine": "initializing engine"
+    "initializingEngine": "initializing engine",
+    "cameraAccess": "Camera Access",
+    "enableCameraAccess": "Tradle currently does not have permission to use the camera. To grant access, choose Settings, and make sure Camera is enabled."
 }

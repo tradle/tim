@@ -5,10 +5,12 @@ import {
   findNodeHandle,
   Dimensions,
   Alert,
+  Linking,
   PixelRatio,
   Platform
 } from 'react-native'
 
+import Camera from 'react-native-camera'
 import querystring from 'querystring'
 import AsyncStorage from '../Store/Storage'
 import DeviceInfo from 'react-native-device-info'
@@ -1498,6 +1500,38 @@ var utils = {
 
   urlsEqual: function urlsEqual (a, b) {
     return trimTrailingSlashes(a) === trimTrailingSlashes(b)
+  },
+
+  requestCameraAccess: async function (opts={}) {
+    const { video=true, audio=false } = opts
+
+    if (!(video || audio)) throw new Error('expected "video" and/or "audio"')
+
+    let request
+    if (video && audio) {
+      request = Camera.checkDeviceAuthorizationStatus()
+    } else if (video) {
+      request = Camera.checkVideoAuthorizationStatus()
+    } else {
+      request = Camera.checkAudioAuthorizationStatus()
+    }
+
+    const granted = await request
+    if (granted) return true
+
+    Alert.alert(
+      utils.translate('cameraAccess'),
+      utils.translate('enableCameraAccess'),
+      [
+        { text: 'Cancel' },
+        {
+          text: 'Settings',
+          onPress: () => {
+            Linking.openURL('app-settings:')
+          }
+        }
+      ]
+    )
   }
 }
 
