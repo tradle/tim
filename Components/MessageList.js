@@ -143,7 +143,10 @@ class MessageList extends Component {
       return
     }
     if (params.action === 'onlineStatus') {
-      this.setState({onlineStatus: params.online})
+      if (params.resource  &&  utils.getId(params.resource) == utils.getId(this.props.resource))
+      // if (params.resource  &&  params.resource[constants.ROOT_HASH] === this.props.resource[ROOT_HASH])
+      //   state.resource = resource
+        this.setState({onlineStatus: params.online})
       return
     }
     if (params.to  &&  params.to[ROOT_HASH] !== resource[ROOT_HASH])
@@ -343,7 +346,7 @@ class MessageList extends Component {
     if (!resource[TYPE])
       return;
     var model = utils.getModel(resource[TYPE]).value;
-    var title = model.title; //utils.getDisplayName(resource, model.properties);
+    var title = utils.makeModelTitle(model) //utils.getDisplayName(resource, model.properties);
     var newTitle = title;
     let me = utils.getMe()
     // Check if I am a customer or a verifier and if I already verified this resource
@@ -544,7 +547,7 @@ class MessageList extends Component {
       var maxHeight = h - (Platform.OS === 'android' ? 85 : 64)
       // Chooser for trusted party verifier
       let isChooser = this.props.originatingMessage && this.props.originatingMessage.verifiers
-      if (!isChooser  &&  (!this.state.isConnected || (resource[TYPE] === TYPES.ORGANIZATION  &&  !resource._online)))
+      if (!isChooser  &&  (!this.state.isConnected  ||  !this.state.onlineStatus)) //  || (resource[TYPE] === TYPES.ORGANIZATION  &&  !resource._online)))
         maxHeight -=  35
       if ((this.state.context  &&  this.state.context.product !== REMEDIATION)  ||  (resource[TYPE] === PRODUCT_APPLICATION && resource.product !== REMEDIATION))
         maxHeight -= 45

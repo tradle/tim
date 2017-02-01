@@ -435,8 +435,10 @@ class ResourceList extends Component {
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     var model = utils.getModel(this.props.modelName);
     var isIdentity = this.props.modelName === PROFILE;
-    var isVerification = model.value.id === constants.TYPES.VERIFICATION
-    var isForm = model.value.id === constants.TYPES.FORM
+    let rType = resource[TYPE]
+    var isVerification = model.value.id === constants.TYPES.VERIFICATION || rType === constants.TYPES.VERIFICATION
+    var isForm = model.value.id === constants.TYPES.FORM || utils.getModel(rType).value.subClassOf === constants.TYPES.FORM
+
     var isOrganization = this.props.modelName === ORGANIZATION;
     var m = utils.getModel(resource[TYPE]).value;
     if (!isIdentity         &&
@@ -447,7 +449,7 @@ class ResourceList extends Component {
         if (isForm)
           title = utils.makeModelTitle(m)
         else {
-          let type = utils.getType(resource)
+          let type = utils.getType(resource.document)
           title = utils.makeModelTitle(utils.getModel(type).value)
         }
         this.props.navigator.push({
@@ -711,7 +713,9 @@ class ResourceList extends Component {
     Actions.list({
       query: this.state.filter,
       modelName: this.props.modelName,
-      to: this.props.resource
+      to: this.props.resource,
+      prop: this.props.prop,
+      listView: this.props.listView
     });
   }
 
@@ -966,7 +970,7 @@ class ResourceList extends Component {
     }
     let me = utils.getMe()
     var actionSheet = this.renderActionSheet() // me.isEmployee && me.organization ? this.renderActionSheet() : null
-    var footer = actionSheet && this.renderFooter()
+    var footer = this.state.isLoading ? <View/> : actionSheet && this.renderFooter()
     var searchBar
     if (SearchBar  &&  ((this.state.list && this.state.list.length > 10) || (this.state.filter  &&  this.state.filter.length))) {
       searchBar = (
@@ -1190,7 +1194,7 @@ class ResourceList extends Component {
           id: PROFILE + '_' + h[2]
         }
       }
-      Actions.addItem({resource: r, value: r, meta: utils.getModel('tradle.GuestSessionProof').value, disableAutoResponse: true})
+      Actions.addItem({resource: r, value: r, meta: utils.getModel('tradle.GuestSessionProof').value}) //, disableAutoResponse: true})
       break
     case TALK_TO_EMPLOYEEE:
       Actions.getEmployeeInfo(result.data.substring(h[0].length + 1))

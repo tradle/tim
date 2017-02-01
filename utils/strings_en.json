@@ -196,9 +196,16 @@
     "areYouSureYouWantToConfirmAllItems": "Tap OK to confirm all {1}, or Cancel to continue reviewing",
     "youReviewed": "You reviewed {1} out of {2} items",
     "unknownQRCodeFormat": "Unrecognized QR code format",
-    "confirmedMyData": "Confirmed my data",
+    "confirmedMyData": "You have now copied all your data from {1} to your Digital Wealth Passport",
     "importData": "Import data",
     "digitalWealthPassport": "Digital Wealth Passport",
     "homePage": "Home",
-    "sponsoredBy": "Sponsored by"
+    "sponsoredBy": "Sponsored by",
+    "installingUpdate": "Installing update",
+    "restartingApp": "The application will restart momentarily",
+    "loadingModels": "loading models",
+    "loadingResources": "loading resources",
+    "initializingEngine": "initializing engine",
+    "cameraAccess": "Camera Access",
+    "enableCameraAccess": "Tradle currently does not have permission to use the camera. To grant access, choose Settings, and make sure Camera is enabled."
 }

@@ -5,6 +5,8 @@ import com.facebook.react.ReactActivity;
 import com.facebook.react.modules.storage.ReactDatabaseSupplier;
 import android.content.Intent;
 import android.content.res.Configuration;
+import com.crashlytics.android.Crashlytics;
+import io.fabric.sdk.android.Fabric;
 
 public class MainActivity extends ReactActivity {
     @Override
@@ -12,6 +14,7 @@ public class MainActivity extends ReactActivity {
       super.onCreate(savedInstanceState);
       // set database limit to 200MB
       ReactDatabaseSupplier.getInstance(getApplicationContext()).setMaximumSize(200000000L);
+      Fabric.with(this, new Crashlytics());
     }
 
     /**

@@ -154,7 +154,8 @@ class ResourceView extends Component {
       break
     default:
       if (params.resource)
-        this.onResourceUpdate(params)
+        Actions.getItem(params.resource)
+        // this.onResourceUpdate(params)
       break
     }
   }
@@ -165,15 +166,19 @@ class ResourceView extends Component {
             this.state.useTouchId !== nextState.useTouchId                 ||
             this.state.pairingData !== nextState.pairingData
   }
-  onResourceUpdate(params) {
-    var resource = params.resource;
+  // onResourceUpdate(params) {
+    // var resource = params.resource;
+    // let me = utils.getMe()
+    // if (resource[constants.ROOT_HASH] === me[constants.ROOT_HASH])
+    // Actions.getItem(me)
+    // else
     // if (resource  &&  this.props.resource[constants.ROOT_HASH] === resource[constants.ROOT_HASH]) {
     //   var me = utils.getMe();
     //   if (resource[constants.ROOT_HASH] === me[constants.ROOT_HASH])
     //     utils.setMe(resource);
-      this.setState({resource: resource});
+      // this.setState({resource: resource});
     // }
-  }
+  // }
   changePhoto(photo) {
     this.setState({currentPhoto: photo});
   }
@@ -290,18 +295,21 @@ class ResourceView extends Component {
     let buttons = []
     let actions = []
     if (isIdentity  &&  isMe) {
-      if (utils.isIOS()) {
-        // when both auth methods are available, give the choice to disable one
-        buttons.push(translate('useTouchId') + (this.state.useTouchId ? ' ✓' : ''))
-        actions.push(USE_TOUCH_ID)
-        buttons.push(translate('useGesturePassword') + (this.state.useGesturePassword ? ' ✓' : ''))
-        actions.push(USE_GESTURE_PASSWORD)
+      if (ENV.requireDeviceLocalAuth) {
+        if (utils.isIOS()) {
+          // when both auth methods are available, give the choice to disable one
+          buttons.push(translate('useTouchId') + (this.state.useTouchId ? ' ✓' : ''))
+          actions.push(USE_TOUCH_ID)
+          buttons.push(translate('useGesturePassword') + (this.state.useGesturePassword ? ' ✓' : ''))
+          actions.push(USE_GESTURE_PASSWORD)
+        }
       }
 
       if (this.state.useGesturePassword || !utils.isIOS()) {
         buttons.push(utils.isWeb() ? translate('changePassword') : translate('changeGesturePassword'))
         actions.push(CHANGE_GESTURE_PASSWORD)
       }
+
       buttons.push(translate('pairDevices'))
       actions.push(PAIR_DEVICES)
 

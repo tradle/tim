@@ -27,38 +27,24 @@ module.exports = {
   install
 }
 
-function hasUpdate () {
-  if (downloadedUpdate) return Promise.resolve(true)
+async function hasUpdate () {
+  if (downloadedUpdate) return true
 
-  return AsyncStorage.getItem(CODE_UPDATE_KEY)
-    .then(
-      item => downloadedUpdate = !!item,
-      err => false
-    )
+  try {
+    const item = await AsyncStorage.getItem(CODE_UPDATE_KEY)
+    downloadedUpdate = !!item
+  } catch (err)  {
+    return false
+  }
 }
 
-function install (opts = {
-  alert: 'Installing update...',
-  delay: 3000
-}) {
-  let { alert, delay } = opts
-  return AsyncStorage.getItem(CODE_UPDATE_KEY)
-    .then(item => {
-      if (!item) return
+async function install () {
+  const item = await AsyncStorage.getItem(CODE_UPDATE_KEY)
+  if (!item) return false
 
-      return AsyncStorage.removeItem(CODE_UPDATE_KEY)
-        .then(() => {
-          if (alert) {
-            delay = delay || 3000
-            Alert.alert(typeof alert === 'string' ? alert: 'installing update...')
-          }
-
-          if (delay) {
-            return utils.promiseDelay(delay)
-          }
-        })
-        .then(() => CodePush.restartApp())
-    })
+  await AsyncStorage.removeItem(CODE_UPDATE_KEY)
+  CodePush.restartApp()
+  return true
 }
 
 function checkPeriodically (millis=DEFAULT_INTERVAL) {

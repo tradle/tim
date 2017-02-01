@@ -22,7 +22,7 @@ import DatePicker from 'react-native-datepicker'
 
 import BlinkID from 'react-native-blinkid'
 import { parse as parseUSDL } from 'parse-usdl'
-const { microblink } = require('../environment.json')
+const { microblink } = require('../utils/env')
 if (microblink && BlinkID && utils.isIOS()) {
   BlinkID.setLicenseKey(microblink.licenseKey)
 }
@@ -1239,7 +1239,7 @@ var NewResourceMixin = {
     }
     else if (this.props.model.properties[propName].type === 'array') {
       let prop = this.props.model.properties[propName]
-      if (!prop.inlined  &&  prop.items  &&  prop.items.ref  &&  !utils.getModel(pMeta.ref).value.inlined) {
+      if (!prop.inlined  &&  prop.items  &&  prop.items.ref  &&  !utils.getModel(prop.items.ref).value.inlined) {
         let v = {
           id: utils.getId(value),
           title: utils.getDisplayName(value, utils.getModel(value[constants.TYPE]).properties)

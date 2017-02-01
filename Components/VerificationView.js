@@ -147,7 +147,26 @@ class VerificationView extends Component {
     var first = true;
     let self = this
     let style = [styles.textContainer, {padding: 10}]
-
+    let retCols = []
+    if (isVerification) {
+      // If document type of the original verification is not the same as in source
+      // Then show link for document to be able to review it
+      let dType = utils.getId(r.document).split('_')[0]
+      if (this.state.documentType !== dType) {
+        let mv = utils.getModel(VERIFICATION).value
+        retCols.push(
+          <View key={this.getNextKey()}>
+             <View style={styles.separator}></View>
+             <View  style={style}>
+               <TouchableOpacity onPress={this.showResource.bind(this, r.document, dType)} >
+                 <Text style={styles.title}>{translate(mv.properties.document)}</Text>
+                 <Text style={[styles.description, {color: '#7AAAC3'}]}>{translate(utils.getModel(dType).value)}</Text>
+               </TouchableOpacity>
+             </View>
+          </View>
+        )
+      }
+    }
     var viewCols = vCols.map((p) => {
       var val = resource[p];
       var pMeta = model.properties[p];
@@ -225,7 +244,6 @@ class VerificationView extends Component {
              );
     });
 
-    let retCols = []
     // flatten the tree
     viewCols.forEach((v) => {
       if (v) {
@@ -235,25 +253,7 @@ class VerificationView extends Component {
           retCols.push(v)
       }
     })
-    if (isVerification) {
-      // If document type of the original verification is not the same as in source
-      // Then show link for document to be able to review it
-      let dType = utils.getId(r.document).split('_')[0]
-      if (this.state.documentType !== dType) {
-        let mv = utils.getModel(VERIFICATION).value
-        retCols.push(
-          <View key={this.getNextKey()}>
-             <View style={styles.separator}></View>
-             <View  style={style}>
-               <TouchableOpacity onPress={this.showResource.bind(this, r.document, dType)} >
-                 <Text style={styles.title}>{translate(mv.properties.document)}</Text>
-                 <Text style={[styles.description, {color: '#7AAAC3'}]}>{translate(utils.getModel(dType).value)}</Text>
-               </TouchableOpacity>
-             </View>
-          </View>
-        )
-      }
-    }
+
     if (resource.txId) {
       retCols.push(<View key={this.getNextKey()}>
                      <View style={styles.separator}></View>

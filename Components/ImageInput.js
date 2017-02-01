@@ -6,7 +6,9 @@ import React, {
 
 import {
   Platform,
-  TouchableHighlight
+  TouchableHighlight,
+  Linking,
+  Alert
 } from 'react-native'
 
 import ImagePicker from 'react-native-image-picker'
@@ -41,7 +43,7 @@ class ImageInput extends Component {
       </TouchableHighlight>
     )
   }
-  showImagePicker() {
+  async showImagePicker() {
     const { prop, onImage } = this.props
     let options = {returnIsVertical: true, quality: utils.imageQuality, cameraType: this.props.prop.cameraType || 'back'}
     let action
@@ -56,6 +58,10 @@ class ImageInput extends Component {
         takePhotoButtonTitle: 'Take Photo…',
       })
     }
+
+    const allowed = await utils.requestCameraAccess()
+    if (!allowed) return
+
     ImagePicker[action](options, (response) => {
       if (response.didCancel)
         return

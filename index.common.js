@@ -61,6 +61,8 @@ var Icon = require('react-native-vector-icons/Ionicons');
 var Actions = require('./Actions/Actions');
 import * as AutomaticUpdates from './utils/automaticUpdates';
 import { signIn } from './utils/localAuth'
+import Reflux from 'reflux'
+import Store from './Store/Store'
 var StyleSheet = require('./StyleSheet')
 
 const TIM_HOME = 1
@@ -89,13 +91,13 @@ import {
 
 import Orientation from 'react-native-orientation'
 import platformStyles from './styles/platform'
-import Transitions from './utils/transitions'
+import SimpleModal from './Components/SimpleModal'
 
 let originalGetDefaultProps = Text.getDefaultProps;
 Text.defaultProps = function() {
   return {
     ...originalGetDefaultProps(),
-    allowFontScaling: false,
+    allowFontScaling: !utils.isWeb()
   };
 };
 
@@ -112,6 +114,23 @@ class TiMApp extends Component {
     var props = {
       modelName: constants.TYPES.PROFILE
     }
+
+    // const testModal = () => {
+    //   Actions.hideModal()
+    //   setTimeout(() => {
+    //     Actions.showModal({
+    //       title: 'I am Title!',
+    //       message: 'I am message!',
+    //       buttons: [
+    //         {text:'Cancel', onPress: testModal },
+    //         {text:'OK', onPress: testModal }
+    //       ]
+    //     })
+    //   }, 2000)
+    // }
+
+    // testModal()
+
     this.state = {
       currentAppState: 'active',
       dateAppStateChanged: Date.now(),
@@ -135,6 +154,10 @@ class TiMApp extends Component {
     })
   }
 
+  componentWillMount() {
+    this.listenTo(Store, 'onStoreEvent')
+  }
+
   componentDidMount() {
     if (AppState) AppState.addEventListener('change', this._handleAppStateChange);
     // Linking.addEventListener('url', this._handleOpenURL);
@@ -147,6 +170,18 @@ class TiMApp extends Component {
     // Linking.removeEventListener('url', this._handleOpenURL);
     this._navListeners.forEach((listener) => listener.remove())
   }
+
+  onStoreEvent({ action, modal }) {
+    switch (action) {
+      case 'showModal':
+        this.setState({ modal })
+        break
+      case 'hideModal':
+        this.setState({ modal: null })
+        break
+    }
+  }
+
   _handleAppStateChange(currentAppState) {
     // TODO:
     // Actions.appState(currentAppState)
@@ -166,7 +201,15 @@ class TiMApp extends Component {
         return
       case 'active':
         AutomaticUpdates.hasUpdate().then(has => {
-          if (has) return AutomaticUpdates.install()
+          if (has) {
+            Actions.showModal({
+              title: translate('installingUpdate') + '...',
+              message: translate('restartingApp')
+            })
+
+            return utils.promiseDelay(3000)
+              .then(() => AutomaticUpdates.install())
+          }
 
           Push.resetBadgeNumber()
           if (this.state.currentAppState === 'active') return
@@ -316,37 +359,45 @@ class TiMApp extends Component {
     }
   }
 
+  renderModal() {
+    return this.state.modal && (
+      <SimpleModal
+        animationType="slide"
+        transparent={true}
+        {...this.state.modal}
+      />
+    )
+  }
+
   render() {
-            // style={{ position: 'absolute', left: 300}}
-    var nav = (
-      <Navigator
-        style={styles.container}
-        initialRoute={this.state.initialRoute}
-        renderScene={this.renderScene.bind(this)}
-        navigationBar={
-          <Navigator.NavigationBar
-            routeMapper={NavigationBarRouteMapper}
-          />
-        }
-        passProps={this.state.props}
-        configureScene={(route) => {
-          if (!utils.isWeb() && route.sceneConfig)
-            return route.sceneConfig;
-
-          const config = utils.isWeb()
-            ? Transitions.NONE
-            : {...Navigator.SceneConfigs.FloatFromRight, springFriction:26, springTension:200}
-
-          if (route.component === PasswordCheck) {
-            config.gestures = {}
+    const modal = this.renderModal()
+    return (
+      <View style={styles.container}>
+        {modal}
+        <Navigator
+          style={styles.container}
+          initialRoute={this.state.initialRoute}
+          renderScene={this.renderScene.bind(this)}
+          navigationBar={
+            <Navigator.NavigationBar
+              routeMapper={NavigationBarRouteMapper}
+            />
           }
+          passProps={this.state.props}
+          configureScene={(route) => {
+            if (route.sceneConfig)
+              return route.sceneConfig;
 
-          return config
-        }}
+            const config = {...Navigator.SceneConfigs.FloatFromRight, springFriction:26, springTension:200}
+            if (route.component === PasswordCheck) {
+              config.gestures = {}
+            }
+
+            return config
+          }}
         />
+      </View>
     );
-
-    return nav
   }
           // return {...Navigator.SceneConfigs.FloatFromRight, springFriction:26, springTension:300};
 
@@ -486,6 +537,8 @@ class TiMApp extends Component {
     }
   }
 }
+
+reactMixin(TiMApp.prototype, Reflux.ListenerMixin)
 
 function goBack (nav) {
   const { routes, route, index } = Navs.getCurrentRouteInfo(nav)

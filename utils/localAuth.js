@@ -92,6 +92,8 @@ module.exports = {
 const authenticateUser = co(function* (opts) {
   // prevent two authentication requests from
   // going in concurrently and causing problems
+  if (__DEV__ && isAndroid) return
+
   debug('authenticating user, auth pending: ' + (!!pendingAuth))
   if (pendingAuth) return pendingAuth
 
@@ -105,7 +107,7 @@ const authenticateUser = co(function* (opts) {
 
   if (!ENV.requireDeviceLocalAuth) {
     try {
-      const isSecure = yield LocalAuth.isDeviceSecure()
+      const isSecure = utils.isSimulator() ? true : yield LocalAuth.isDeviceSecure()
       debug('is device secure? ' + isSecure)
       if (!isSecure) {
         return pendingAuth = requestEnablePasscodeAndReauth()
