@@ -4256,6 +4256,7 @@ var Store = Reflux.createStore({
           return true
         }
       }
+      let isVerificationR = r[TYPE] === VERIFICATION
       let checkVal = isVerificationR ? self._getItem(r.document) : r
       let checkProps = self.getModel(checkVal[TYPE]).value.properties
       var combinedValue = '';
