@@ -1322,7 +1322,7 @@ var Store = Reflux.createStore({
     const org = this._getItem(provider.org)
     org._online = online
 
-    this.trigger({action: 'onlineStatus', online: online})
+    this.trigger({action: 'onlineStatus', online: online, resource: org})
     this.announcePresence()
   },
 
