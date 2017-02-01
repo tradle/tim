@@ -202,32 +202,15 @@ class MessageView extends Component {
     var modelName = resource[TYPE] || resource.id.split('_')[0];
     var model = utils.getModel(modelName).value;
     let t = resource.dateVerified ? resource.dateVerified : resource.time
+    let isVerification = this.props.resource[TYPE] === constants.TYPES.VERIFICATION
     var date = t ? utils.formatDate(new Date(t)) : utils.formatDate(new Date())
+
     var photos = resource.photos
     var mainPhoto
     if (!photos) {
       photos = utils.getResourcePhotos(model, resource)
       let mainPhotoProp = utils.getMainPhotoProperty(model)
       mainPhoto = mainPhotoProp ? resource[mainPhotoProp] : photos && photos[0]
-
-      // let props = model.properties
-      // for (let p in resource) {
-      //   if (!props[p] ||  (props[p].ref !== PHOTO && (!props[p].items || props[p].items.ref !== PHOTO)))
-      //     continue
-      //   if (props[p].mainPhoto)
-      //     mainPhoto = resource[p]
-      //   if (!photos)
-      //     photos = []
-      //   if (props[p].items)
-      //     resource[p].forEach((r) => photos.push(r))
-      //   else
-      //     photos.push(resource[p])
-      // }
-      // if (photos  &&  !mainPhoto) {
-      //   mainPhoto = photos[0]
-      //   if (photos.length === 1)
-      //     photos = null
-      // }
     }
     var inRow = photos ? photos.length : 0
     if (inRow  &&  inRow > 4)
@@ -280,7 +263,7 @@ class MessageView extends Component {
           </View>
           <View style={styles.rowContainer}>
             {msg}
-            {this.props.resource[TYPE] === constants.TYPES.VERIFICATION
+            {isVerification
               ? <VerificationView navigator={this.props.navigator}
                                   resource={resource}
                                   bankStyle={this.props.bankStyle}
