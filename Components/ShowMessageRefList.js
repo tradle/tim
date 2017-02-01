@@ -98,7 +98,7 @@ class ShowMessageRefList extends Component {
   show(resource, prop) {
     let propName = prop.name
     let pVal = resource[propName]
-    if (!pVal  ||  propName !== 'verifications'  ||  pVal.length > 1  ||  !pVal[0].sources) {
+    if (!pVal  ||  propName !== 'verifications'  ||  pVal.length > 1  ||  (!pVal[0].sources  &&  !pVal[0].method)) {
       this.showResources(resource, prop)
       return
     }
