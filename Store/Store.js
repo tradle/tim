@@ -39,7 +39,6 @@ Q.onerror = function (err) {
 }
 
 var ENV = require('../utils/env')
-var AddressBook = require('NativeModules').AddressBook;
 
 var voc = require('@tradle/models');
 var sampleData = voc.data
