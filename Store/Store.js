@@ -5199,13 +5199,13 @@ var Store = Reflux.createStore({
 
     var key = SETTINGS + '_1'
     const settings = this._getItem(key)
+    let allProviders, oneProvider
     if (value.id) {
       if (SERVICE_PROVIDERS) {
         if (SERVICE_PROVIDERS.some((r) => r.id === value.id  &&  r.url === value.url))
           return
       }
       // We don't have this provider yet
-      let allProviders, oneProvider
       if (settings  &&  settings.urls.indexOf(value.url) !== -1) {
         // check if all providers were fetched from this server.
         if (!settings.urlToId.length)
