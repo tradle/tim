@@ -34,7 +34,7 @@ var employee = require('../people/employee.json')
 var Q = require('q');
 Q.longStackSupport = true
 Q.onerror = function (err) {
-  console.error(err)
+  debug(err.stack)
   throw err
 }
 
@@ -6563,10 +6563,13 @@ var Store = Reflux.createStore({
         if (data.value[TYPE] === PROFILE) {
           if (data.value.securityCode)
             employees[data.value.securityCode] = data.value
-          if (data.value.organization) {
-            if (!orgContacts[utils.getId(data.value.organization)])
-              orgContacts[utils.getId(data.value.organization)] = []
-            var c = orgContacts[utils.getId(data.value.organization)]
+
+          const org = data.value.organization
+          if (org) {
+            const orgId = utils.getId(org)
+            if (!orgContacts[orgId])
+              orgContacts[orgId] = []
+            var c = orgContacts[orgId]
             c.push(self.buildRef(data.value))
           }
         }
@@ -6636,7 +6639,7 @@ var Store = Reflux.createStore({
     })
     .catch(err => {
       debugger
-      console.error('err:' + err);
+      console.error('err: ' + err.message, err.stack);
     })
   },
   // Received by employee/bot request from customer. And all the customer resources on FI side gets deleted
