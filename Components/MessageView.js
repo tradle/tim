@@ -202,7 +202,6 @@ class MessageView extends Component {
     var modelName = resource[TYPE] || resource.id.split('_')[0];
     var model = utils.getModel(modelName).value;
     let t = resource.dateVerified ? resource.dateVerified : resource.time
-    let isVerification = this.props.resource[TYPE] === constants.TYPES.VERIFICATION
     var date = t ? utils.formatDate(new Date(t)) : utils.formatDate(new Date())
 
     var photos = resource.photos
