@@ -828,7 +828,9 @@ class TimHome extends Component {
             <CustomIcon name="tradle" color='#ffffff' size={getIconSize()} />
             <Text style={styles.tradle}>Tradle</Text>
             <View style={{paddingTop: 20, alignSelf: 'center'}}>
-              <ActivityIndicator hidden='true' size='large' color='#ffffff'/>
+              <View style={{alignSelf: 'center'}}>
+                <ActivityIndicator hidden='true' size='large' color='#ffffff'/>
+              </View>
               {busyReason}
               {updateIndicator}
               {submitLogButton}
