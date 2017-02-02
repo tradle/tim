@@ -58,6 +58,7 @@ var asyncActions = [
 var syncActions = [
   'setAuthenticated',
   'downloadedCodeUpdate',
+  'requestWipe',
   'showModal',
   'hideModal'
 ]
