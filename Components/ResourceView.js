@@ -23,6 +23,8 @@ var MessageList = require('./MessageList')
 var defaultBankStyle = require('../styles/bankStyle.json')
 var ENV = require('../utils/env')
 var StyleSheet = require('../StyleSheet')
+var extend = require('extend');
+var constants = require('@tradle/constants');
 
 // var ResourceList = require('./ResourceList')
 
@@ -37,14 +39,17 @@ import debug from '../utils/debug'
 const TALK_TO_EMPLOYEE = '1'
 // const SERVER_URL = 'http://192.168.0.162:44444/'
 
-var extend = require('extend');
-var constants = require('@tradle/constants');
 const USE_TOUCH_ID = 0
 const USE_GESTURE_PASSWORD = 1
 const CHANGE_GESTURE_PASSWORD = 2
 const PAIR_DEVICES = 3
 const VIEW_DEBUG_LOG = 4
 const WIPE_DEVICE = 5
+
+const TYPE = constants.TYPE
+const ROOT_HASH = constants.ROOT_HASH
+const T_AND_C = 'tradle.TermsAndConditions'
+
 import {
   // StyleSheet,
   ScrollView,
@@ -72,9 +77,10 @@ class ResourceView extends Component {
   constructor(props) {
     super(props);
     let me = utils.getMe()
+    let resource = props.resource
     this.state = {
-      resource: props.resource,
-      isLoading:  true, //props.resource.id ? true : false,
+      resource: resource,
+      isLoading:  resource[TYPE] && resource[TYPE] === T_AND_C ? false : true, //props.resource.id ? true : false,
       isModalOpen: false,
       useTouchId: me && me.useTouchId,
       useGesturePassword: me && me.useGesturePassword,
@@ -85,14 +91,15 @@ class ResourceView extends Component {
       currentRoutes[len - 1].onRightButtonPress = this.props.action.bind(this)
   }
   componentWillMount() {
-    if (this.props.resource.id  ||  this.props.resource[constants.TYPE] === constants.TYPES.PROFILE)
-      Actions.getItem(this.props.resource)
+    let resource = this.props.resource
+    if (resource.id  ||  resource[TYPE] === constants.TYPES.PROFILE)
+      Actions.getItem(resource)
   }
   componentDidMount() {
     this.listenTo(Store, 'handleEvent');
   }
   handleEvent(params) {
-    if (params.resource  &&  params.resource[constants.ROOT_HASH] !== this.props.resource[constants.ROOT_HASH])
+    if (params.resource  &&  params.resource[ROOT_HASH] !== this.props.resource[ROOT_HASH])
       return
 
     switch (params.action) {
@@ -170,12 +177,12 @@ class ResourceView extends Component {
   // onResourceUpdate(params) {
     // var resource = params.resource;
     // let me = utils.getMe()
-    // if (resource[constants.ROOT_HASH] === me[constants.ROOT_HASH])
+    // if (resource[ROOT_HASH] === me[ROOT_HASH])
     // Actions.getItem(me)
     // else
-    // if (resource  &&  this.props.resource[constants.ROOT_HASH] === resource[constants.ROOT_HASH]) {
+    // if (resource  &&  this.props.resource[ROOT_HASH] === resource[ROOT_HASH]) {
     //   var me = utils.getMe();
-    //   if (resource[constants.ROOT_HASH] === me[constants.ROOT_HASH])
+    //   if (resource[ROOT_HASH] === me[ROOT_HASH])
     //     utils.setMe(resource);
       // this.setState({resource: resource});
     // }
@@ -205,7 +212,7 @@ class ResourceView extends Component {
     var styles = createStyles()
 
     var resource = this.state.resource;
-    var modelName = resource[constants.TYPE];
+    var modelName = resource[TYPE];
     var model = utils.getModel(modelName).value;
     var photos = []
     if (resource.photos) { //  &&  resource.photos.length > 1) {
@@ -217,7 +224,7 @@ class ResourceView extends Component {
     var isOrg = model.id === constants.TYPES.ORGANIZATION;
     var me = utils.getMe()
     var actionPanel
-    var isMe = isIdentity ? resource[constants.ROOT_HASH] === me[constants.ROOT_HASH] : false
+    var isMe = isIdentity ? resource[ROOT_HASH] === me[ROOT_HASH] : false
     if (me) {
       actionPanel = ((isIdentity  &&  !isMe) || (isOrg  &&  (!me.organization  ||  utils.getId(me.organization) !== utils.getId(resource))))
                   ? <View/>
@@ -236,7 +243,7 @@ class ResourceView extends Component {
     else if (isMe  &&  me.isEmployee  &&  me.organization && me.organization.url) {
       w = Math.floor((width / 3) * 2)
       qrcode = <View style={{alignSelf: 'center', justifyContent: 'center', backgroundColor: '#ffffff', padding:10}} onPress={()=> this.setState({isModalOpen: true})}>
-                 <QRCode inline={true} content={TALK_TO_EMPLOYEE + ';' + me.organization.url + ';' + utils.getId(me.organization).split('_')[1] + ';' + me[constants.ROOT_HASH]} dimension={w} />
+                 <QRCode inline={true} content={TALK_TO_EMPLOYEE + ';' + me.organization.url + ';' + utils.getId(me.organization).split('_')[1] + ';' + me[ROOT_HASH]} dimension={w} />
                </View>
     }
     else
@@ -379,7 +386,7 @@ class ResourceView extends Component {
     this.setState({isModalOpen: false});
   }
   getRefResource(resource, prop) {
-    var model = utils.getModel(this.props.resource[constants.TYPE]).value;
+    var model = utils.getModel(this.props.resource[TYPE]).value;
 
     this.state.prop = prop;
     this.state.propValue = utils.getId(resource.id);
@@ -389,7 +396,7 @@ class ResourceView extends Component {
     const self = this
     let me = utils.getMe()
     let r = {
-      _r: me[constants.ROOT_HASH],
+      _r: me[ROOT_HASH],
       _t: constants.TYPES.PROFILE,
     }
     let isChangeGesturePassword
