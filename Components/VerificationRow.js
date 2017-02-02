@@ -103,7 +103,7 @@ class VerificationRow extends Component {
 
     // var val = utils.formatDate(new Date(resource.time));
     // rows.push(<View><Text style={styles.resourceTitle}>{val}</Text></View>);
-    let notAccordion = !isMyProduct  &&  !isVerification && !this.props.prop === null || resource.sources || isForm
+    let notAccordion = !isMyProduct  &&  !isVerification && !this.props.prop === null || resource.sources || resource.method || isForm
     if (r  &&  !notAccordion) {
       this.formatDoc(verificationRequest, r, rows);
       var backlink = this.props.prop &&  this.props.prop.items  &&  this.props.prop.items.backlink;
