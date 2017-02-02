@@ -74,7 +74,7 @@ class ResourceView extends Component {
     let me = utils.getMe()
     this.state = {
       resource: props.resource,
-      isLoading: props.resource.id ? true : false,
+      isLoading:  true, //props.resource.id ? true : false,
       isModalOpen: false,
       useTouchId: me && me.useTouchId,
       useGesturePassword: me && me.useGesturePassword,
@@ -161,9 +161,10 @@ class ResourceView extends Component {
   }
   shouldComponentUpdate(nextProps, nextState) {
     return utils.resized(this.props, nextProps)                            ||
-            this.state.isModalOpen  !== nextState.isModalOpen             ||
+            this.state.isModalOpen  !== nextState.isModalOpen              ||
             this.state.useGesturePassword !== nextState.useGesturePassword ||
             this.state.useTouchId !== nextState.useTouchId                 ||
+            this.state.isLoading !== nextState.isLoading                   ||
             this.state.pairingData !== nextState.pairingData
   }
   // onResourceUpdate(params) {
