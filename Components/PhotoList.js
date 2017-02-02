@@ -128,7 +128,7 @@ class PhotoList extends Component {
   renderRow(photo, imageStyle)  {
     var uri = photo.url
     if (!uri)
-      return <View />
+      return
     var source = {uri: uri};
     if (uri.indexOf('data') === 0  ||  uri.charAt(0) == '/')
       source.isStatic = true;
@@ -154,10 +154,7 @@ var styles = StyleSheet.create({
     borderWidth: 0.5,
     margin: 1,
     borderColor: '#999999'
-  },
-  row: {
-    flexDirection: 'row',
-  },
+  }
 })
 
 module.exports = PhotoList;
