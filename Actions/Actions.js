@@ -52,7 +52,9 @@ var asyncActions = [
 
   'getAllPartials',
   'hasPartials',
-  'viewChat'
+  'viewChat',
+
+  'exploreBacklink'
 ]
 
 var syncActions = [

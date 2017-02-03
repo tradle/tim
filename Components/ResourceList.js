@@ -99,6 +99,9 @@ class ResourceList extends Component {
       sharedContextCount: 0,
       hasPartials: false
     };
+    if (props.isBacklink  &&  props.backlinkList) {
+      this.state.dataSource = dataSource.cloneWithRows(props.backlinkList)
+    }
     if (props.multiChooser)
       this.state.chosen = {}
     var isRegistration = this.props.isRegistration ||  (this.props.resource  &&  this.props.resource[TYPE] === PROFILE  &&  !this.props.resource[ROOT_HASH]);
@@ -129,6 +132,14 @@ class ResourceList extends Component {
     }
     // if (reps.length)
     this.props.callback(orgs)
+  }
+  componentWillReceiveProps(props) {
+    if (props.isBacklink) {
+      if (props.backlinkList  &&  props.backlinkList.length)
+        this.state.dataSource = this.state.dataSource.cloneWithRows(props.backlinkList)
+      else
+        this.state.dataSource = this.state.dataSource.cloneWithRows([])
+    }
   }
   componentWillUnmount() {
     if (this.props.navigator.getCurrentRoutes().length === 1)
@@ -322,6 +333,14 @@ class ResourceList extends Component {
       this.setState({hasPartials: true})
       return
     }
+    // if (action === 'exploreBacklink'  &&  this.props.isBacklink  &&  this.props.resource[ROOT_HASH] === params.resource[ROOT_HASH]) {
+    //   this.setState({
+    //     prop: params.backlink,
+    //     resource: params.resource,
+    //     dataSource: this.state.dataSource.cloneWithRows(params.list),
+    //   })
+    //   return
+    // }
     if (action === 'list') {
       // First time connecting to server. No connection no providers yet loaded
       if (!params.list  &&  params.alert) {
@@ -386,6 +405,12 @@ class ResourceList extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     if (nextState.forceUpdate)
       return true
+    if (this.props.isBacklink  &&  nextProps.isBacklink) {
+      if (this.props.prop !== nextProps.prop)
+        return true
+      // else if (this.state.prop !== nextState.prop)
+      //   return true
+    }
     if (this.state.hideMode !== nextState.hideMode)
       return true
     if (this.state.serverOffline !== nextState.serverOffline)
@@ -705,7 +730,9 @@ class ResourceList extends Component {
   }
 
   renderRow(resource)  {
-    var model = utils.getModel(this.props.modelName).value;
+    var model = this.props.isBacklink
+              ? utils.getModel(resource[TYPE]).value
+              : utils.getModel(this.props.modelName).value;
     if (model.isInterface)
       model = utils.getModel(resource[TYPE]).value
  // || (model.id === constants.TYPES.FORM)
@@ -971,17 +998,8 @@ class ResourceList extends Component {
     let network = this.props.isChooser || !this.props.officialAccounts || this.props.modelName !== ORGANIZATION
                 ? <View/>
                 : <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
-
-    // let title = this.props.tabLabel
-    //           ? <View style={{height: 45, backgroundColor: '#ffffff', alignSelf: 'stretch', justifyContent: 'center'}}>
-    //               <Text style={{alignSelf: 'center', fontSize: 20}}>{translate('officialAccounts')}</Text>
-    //             </View>
-    //           : null
-      // <PageView style={[platformStyles.container, this.props.tabLabel ? {marginTop: utils.isAndroid() ? 10 : 18} : {}]}>
-      //   {title}
-
     return (
-      <PageView style={platformStyles.container}>
+      <PageView style={this.props.isBacklink ? {} : platformStyles.container}>
         {network}
         {searchBar}
         <View style={styles.separator} />

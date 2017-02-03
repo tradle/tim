@@ -2430,6 +2430,14 @@ var Store = Reflux.createStore({
     }
     this.trigger({ resource: resource, action: action || 'getItem'});
   },
+  onExploreBacklink(resource, prop) {
+    let list = this.searchMessages({
+      prop: prop,
+      modelName: prop.items.ref,
+      to: resource
+    })
+    this.trigger({action: 'exploreBacklink', resource: resource, backlink: prop, list: list})
+  },
 
   getItem(resource) {
     var self = this;

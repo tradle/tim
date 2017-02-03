@@ -5,18 +5,13 @@
 */
 'use strict';
 
-var ICON_BORDER_COLOR = '#D7E6ED';
-var BACKGROUND_COLOR = /*'#2E3B4E';*/'#7AAAC3';
-var ERROR_COLOR = '#a94442';
-var HELP_COLOR = '#999999';
-var BORDER_COLOR = '#cccccc';
-var DISABLED_COLOR = '#777777';
-var DISABLED_BACKGROUND_COLOR = '#eeeeee';
 var FONT_SIZE = 12;
 var FONT_SIZE_1 = 17;
 var FONT_WEIGHT = '500';
 
+
 var utils = require('../utils/utils')
+var appStyle = require('./appStyle.json')
 
 import { Dimensions } from 'react-native'
 
@@ -41,11 +36,12 @@ var buttonStyles = Object.freeze({
   container: {
     alignSelf: 'center',
     paddingHorizontal: 7,
-    marginTop: 10,
+    justifyContent: 'center',
+    // paddingTop: 10,
   },
   buttons: {
     flexDirection: 'row',
-    backgroundColor: '#f5f5f5',// '#F5FFED',
+    backgroundColor: appStyle.TAB_COLOR,// '#F5FFED',
     borderBottomColor: '#a0a0a0',
     borderBottomWidth: 1,
     alignSelf: 'stretch'
@@ -84,7 +80,7 @@ var buttonStyles = Object.freeze({
     width: 150,
     height: 40,
     borderRadius: 10,
-    backgroundColor: BACKGROUND_COLOR,
+    backgroundColor: appStyle.BACKGROUND_COLOR,
     opacity: 0.7,
     borderWidth: 1,
     borderColor: '#466690'
