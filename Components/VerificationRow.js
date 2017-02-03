@@ -176,7 +176,7 @@ class VerificationRow extends Component {
 
 
     var header =  <View style={{backgroundColor: '#ffffff', borderBottomColor: '#f0f0f0', borderBottomWidth: 1}} key={this.getNextKey()}>
-                    <View style={{flexDirection: 'row', marginHorizontal: 10,  marginVertical: 3, paddingBottom: 4}}>
+                    <View style={{flexDirection: 'row', marginHorizontal: 10}}>
                       {photo}
                       {date}
                       <View style={[styles.noImageBlock, {flex: 1}]}>

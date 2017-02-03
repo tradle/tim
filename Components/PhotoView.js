@@ -60,6 +60,7 @@ class PhotoView extends Component {
     var currentPhoto = this.state.currentPhoto || this.props.mainPhoto || (hasPhoto  &&  resource.photos[0]);
     if (!currentPhoto) {
       if (model.id === constants.TYPES.PROFILE) {
+        return <View/>
         return (
           <View style={styles.photoBG}>
             <Icon name='ios-leaf' size={200}  color='goldenrod' />
