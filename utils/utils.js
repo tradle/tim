@@ -159,10 +159,10 @@ var utils = {
 
     return val || property.title || utils.makeLabel(property.name)
   },
-  translateModel(model) {
+  translateModel(model, isPlural) {
     if (dictionary  &&  dictionary.models[model.id])
       return dictionary.models[model.id]
-    return model.title ? model.title : this.makeModelTitle(model)
+    return model.title ? model.title : this.makeModelTitle(model, isPlural)
   },
   translateString(...args) {
     if (!strings)
@@ -248,12 +248,16 @@ var utils = {
     // return t !== stringName ? t : (isEnumValue ? s : utils.makeLabel(s))
     return t !== stringName ? t : s
   },
-  makeModelTitle(model) {
+  makeModelTitle(model, isPlural) {
     if (typeof model === 'string')
-      return this.makeModelTitle(this.getModel(model).value)
+      return this.makeModelTitle(this.getModel(model).value, isPlural)
+    if (isPlural  &&  model.plural)
+      return model.plural
     if (model.title)
-      return model.title
+      return isPlural ? model.title + 's' : model.title
     let label = model.id.split('.')[1]
+    if (isPlural)
+      label += 's'
     return label
           // insert a space before all caps
           .replace(/([A-Z])/g, ' $1')
@@ -396,7 +400,7 @@ var utils = {
       if (!vCols)
         return displayName
       let excludeProps = []
-      if (m.value.interfaces && m.value.interfaces.indexOf(MESSAGE))
+      if (this.isMessage(m))
         excludeProps = ['from', 'to']
       for (let i=0; i<vCols.length  &&  !displayName.length; i++) {
         if (!resource[vCols[i]]  ||  excludeProps.indexOf[vCols[i]])
@@ -1501,7 +1505,11 @@ var utils = {
   urlsEqual: function urlsEqual (a, b) {
     return trimTrailingSlashes(a) === trimTrailingSlashes(b)
   },
-
+  isMessage(m) {
+    if (typeof m === 'string')
+      m = this.getModel(m).value
+    return (m.isInterface  &&  m.id === MESSAGE) || (m.interfaces && m.interfaces.indexOf(MESSAGE) !== -1)
+  },
   requestCameraAccess: async function (opts={}) {
     const { video=true, audio=false } = opts
 
