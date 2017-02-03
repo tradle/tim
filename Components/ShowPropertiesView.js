@@ -242,9 +242,10 @@ class ShowPropertiesView extends Component {
       var title = pMeta.skipLabel  ||  isItems
                 ? <View />
                 : <Text style={modelName === TERMS_AND_CONDITIONS ? styles.bigTitle : styles.title}>{pMeta.title || utils.makeLabel(p)}</Text>
-      var separator = first
-                    ? <View />
-                    : <View style={styles.separator}></View>;
+      var separator = <View/>
+      // var separator = first
+      //               ? <View />
+      //               : <View style={styles.separator}></View>;
 
       first = false;
       let isPromptVisible = this.state.promptVisible !== null

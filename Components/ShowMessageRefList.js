@@ -36,6 +36,7 @@ class ShowMessageRefList extends Component {
 
     var refList = [];
     var isIdentity = model.id === constants.TYPES.PROFILE;
+    var isVerification = model.id === constants.TYPES.VERIFICATION
     var isMe = isIdentity ? resource[constants.ROOT_HASH] === utils.getMe()[constants.ROOT_HASH] : true;
     let backlinks = []
     for (var p in props) {
@@ -45,7 +46,7 @@ class ShowMessageRefList extends Component {
         continue;
       backlinks.push(props[p])
     }
-    let noBacklinks = <View style={[buttonStyles.buttons, backlinksBg, {height: 2}]} />
+    let noBacklinks = <View style={[buttonStyles.buttons, backlinksBg, {height: isVerification? 0 : 10}]} />
 
     if (!backlinks.length)
        return noBacklinks
