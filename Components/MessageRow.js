@@ -76,7 +76,7 @@ class MessageRow extends Component {
     var me = utils.getMe();
 
     let isRemediationCompleted = resource[constants.TYPE] === REMEDIATION_SIMPLE_MESSAGE
-    var isMyMessage = this.isMyMessage()  &&  !isRemediationCompleted
+    var isMyMessage = this.isMyMessage()//  &&  !isRemediationCompleted
     var to = this.props.to;
     var ownerPhoto = this.getOwnerPhoto(isMyMessage)
     let hasOwnerPhoto = !isMyMessage &&  to  &&  to.photos;
@@ -481,7 +481,7 @@ class MessageRow extends Component {
       let msg = <View key={this.getNextKey()}>
                   <View style={{flexDirection: 'row'}}>
                     <View style={{flex: 1}}>
-                      <Text style={[chatStyles.resourceTitle, {color: '#111111'}]}>{resource.message}</Text>
+                      <Text style={[chatStyles.resourceTitle, {color: '#ffffff'}]}>{resource.message}</Text>
                     </View>
                     <Icon style={{position: 'absolute', bottom: 2, right: 2, color: this.props.bankStyle.LINK_COLOR}} size={20} name={'ios-arrow-forward'} />
                   </View>
