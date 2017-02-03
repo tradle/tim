@@ -406,23 +406,23 @@ class HomePage extends Component {
       component: ResourceView,
       titleTextColor: '#7AAAC3',
       backButtonTitle: 'Back',
-      rightButtonTitle: 'Edit',
       passProps: {
         resource: me
       },
-      onRightButtonPress: {
-        title: me.firstName,
-        id: 4,
-        component: NewResource,
-        // titleTextColor: '#7AAAC3',
-        backButtonTitle: translate('back'),
-        rightButtonTitle: translate('done'),
-        passProps: {
-          model: utils.getModel(me[constants.TYPE]).value,
-          resource: me,
-          bankStyle: defaultBankStyle
-        }
-      }
+      // rightButtonTitle: 'Edit',
+      // onRightButtonPress: {
+      //   title: me.firstName,
+      //   id: 4,
+      //   component: NewResource,
+      //   // titleTextColor: '#7AAAC3',
+      //   backButtonTitle: translate('back'),
+      //   rightButtonTitle: translate('done'),
+      //   passProps: {
+      //     model: utils.getModel(me[constants.TYPE]).value,
+      //     resource: me,
+      //     bankStyle: defaultBankStyle
+      //   }
+      // }
     }
     this.props.navigator.push(route)
   }
