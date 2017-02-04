@@ -70,6 +70,8 @@ const ORGANIZATION = TYPES.ORGANIZATION
 
 const MY_PRODUCT = 'tradle.MyProduct'
 const MESSAGE = 'tradle.Message'
+const ITEM = 'tradle.Item'
+const DOCUMENT = 'tradle.Document'
 const CUR_HASH = constants.CUR_HASH
 const NONCE = constants.NONCE
 const ROOT_HASH = constants.ROOT_HASH
@@ -1508,7 +1510,10 @@ var utils = {
   isMessage(m) {
     if (typeof m === 'string')
       m = this.getModel(m).value
-    return (m.isInterface  &&  m.id === MESSAGE) || (m.interfaces && m.interfaces.indexOf(MESSAGE) !== -1)
+    if (m.isInterface  &&  (m.id === MESSAGE || m.id === DOCUMENT || m.id === ITEM))
+      return true
+    if (m.interfaces && m.interfaces.indexOf(MESSAGE) !== -1)
+      return true
   },
   requestCameraAccess: async function (opts={}) {
     const { video=true, audio=false } = opts
