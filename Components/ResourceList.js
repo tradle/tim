@@ -13,22 +13,24 @@ import ActionSheet from 'react-native-actionsheet'
 var utils = require('../utils/utils');
 var translate = utils.translate
 var reactMixin = require('react-mixin');
+var HomePageMixin = require('./HomePageMixin')
 var extend = require('extend')
 var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var constants = require('@tradle/constants');
 var Icon = require('react-native-vector-icons/Ionicons');
-var QRCodeScanner = require('./QRCodeScanner')
-var QRCode = require('./QRCode')
+// var QRCodeScanner = require('./QRCodeScanner')
+// var QRCode = require('./QRCode')
 var buttonStyles = require('../styles/buttonStyles');
 var NetworkInfoProvider = require('./NetworkInfoProvider')
 var defaultBankStyle = require('../styles/bankStyle.json')
 var StyleSheet = require('../StyleSheet')
 
-const WEB_TO_MOBILE = '0'
-const TALK_TO_EMPLOYEEE = '1'
-const APP_QR_CODE = '5'
+// const WEB_TO_MOBILE = '0'
+// const TALK_TO_EMPLOYEEE = '1'
+// const APP_QR_CODE = '5'
+
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const PARTIAL = 'tradle.Partial'
 const TYPE = constants.TYPE
@@ -78,6 +80,8 @@ class ResourceList extends Component {
     prop: PropTypes.object,
     isAggregation: PropTypes.bool,
     isRegistration: PropTypes.bool,
+    isBacklink: PropTypes.bool,
+    backlinkList: PropTypes.array
   };
   constructor(props) {
     super(props);
@@ -259,34 +263,7 @@ class ResourceList extends Component {
       return;
     }
     if (action === 'getForms') {
-      if (!params.to)
-        return
-      let style = this.mergeStyle(params.to.style)
-
-      var route = {
-        title: params.to.name,
-        component: MessageList,
-        id: 11,
-        backButtonTitle: 'Back',
-        passProps: {
-          resource: params.to,
-          filter: '',
-          modelName: constants.TYPES.MESSAGE,
-          currency: params.to.currency,
-          bankStyle:  style,
-          dictionary: params.dictionary,
-        }
-      }
-      // var me = utils.getMe()
-      // var msg = {
-      //   message: me.firstName + ' is waiting for the response',
-      //   _t: constants.TYPES.SELF_INTRODUCTION,
-      //   identity: params.myIdentity,
-      //   from: me,
-      //   to: params.to
-      // }
-      // utils.onNextTransitionEnd(this.props.navigator, () => Actions.messageList({modelName: constants.TYPES.MESSAGE, to: params.to}))
-      this.props.navigator.replace(route)
+      this.showChat(params)
       return
     }
     if (action === 'talkToEmployee') {
@@ -397,11 +374,6 @@ class ResourceList extends Component {
 
     this.setState(state)
   }
-  mergeStyle(newStyle) {
-    let style = {}
-    extend(style, defaultBankStyle)
-    return newStyle ? extend(style, newStyle) : style
-  }
   shouldComponentUpdate(nextProps, nextState) {
     if (nextState.forceUpdate)
       return true
@@ -492,6 +464,7 @@ class ResourceList extends Component {
             passProps: {
               model: m,
               resource: resource,
+              serverOffline: this.props.serverOffline,
               bankStyle: this.props.bankStyle || defaultBankStyle
             }
           },
@@ -806,8 +779,8 @@ class ResourceList extends Component {
     return (
         <View style={styles.footer}>
           <TouchableOpacity onPress={() => this.ActionSheet.show()}>
-            <View style={platformStyles.menuButtonNarrow}>
-              <Icon name={icon}  size={33}  color={color} />
+            <View style={[platformStyles.menuButtonNarrow, {opacity: 0.4}]}>
+              <Icon name={icon}  size={33}  color={color}/>
             </View>
           </TouchableOpacity>
         </View>
@@ -853,21 +826,6 @@ class ResourceList extends Component {
     }
 
     this.props.navigator.push(route)
-  }
-  showBanks() {
-    this.props.navigator.push({
-      title: translate('officialAccounts'),
-      id: 10,
-      component: ResourceList,
-      backButtonTitle: 'Back',
-      titleTextColor: '#7AAAC3',
-      passProps: {
-        officialAccounts: true,
-        serverOffline: this.state.serverOffline,
-        bankStyle: this.props.style,
-        modelName: ORGANIZATION
-      }
-    });
   }
   showContexts() {
     this.props.navigator.push({
@@ -983,7 +941,9 @@ class ResourceList extends Component {
     }
     let me = utils.getMe()
     var actionSheet = this.renderActionSheet() // me.isEmployee && me.organization ? this.renderActionSheet() : null
-    var footer = this.state.isLoading ? <View/> : actionSheet && this.renderFooter()
+    var footer
+    if (!this.state.isLoading)
+      footer = actionSheet && this.renderFooter()
     var searchBar
     if (SearchBar  &&  ((this.state.list && this.state.list.length > 10) || (this.state.filter  &&  this.state.filter.length))) {
       searchBar = (
@@ -995,13 +955,16 @@ class ResourceList extends Component {
           />
       )
     }
-    let network = this.props.isChooser || !this.props.officialAccounts || this.props.modelName !== ORGANIZATION
-                ? <View/>
-                : <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
+    let network
+    if (!this.props.isChooser && this.props.officialAccounts && this.props.modelName === ORGANIZATION)
+       network = <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
+    let hasSearchBar = this.props.isBacklink && this.props.backlinkList && this.props.backlinkList.length > 10
     return (
       <PageView style={this.props.isBacklink ? {} : platformStyles.container}>
         {network}
-        {searchBar}
+        <View style={hasSearchBar ? {height: 0} : {}}>
+          {searchBar}
+        </View>
         <View style={styles.separator} />
         {content}
         {footer}
@@ -1076,64 +1039,68 @@ class ResourceList extends Component {
   }
 
   renderHeader() {
-    let partial = this.state.hasPartials
-                ? <View>
-                   <View style={{padding: 5, backgroundColor: '#BADFCD'}}>
-                    <TouchableOpacity onPress={this.showPartials.bind(this)}>
-                      <View style={styles.row}>
-                        <Icon name='ios-stats-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
-                        <View style={styles.textContainer}>
-                          <Text style={styles.resourceTitle}>{translate('Statistics')}</Text>
-                        </View>
-                      </View>
-                    </TouchableOpacity>
-                  </View>
-                  <View style={{padding: 5, backgroundColor: '#FBFFE5'}}>
-                    <TouchableOpacity onPress={this.showAllPartials.bind(this)}>
-                      <View style={styles.row}>
-                        <Icon name='ios-apps-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
-                        <View style={styles.textContainer}>
-                          <Text style={styles.resourceTitle}>{translate('Partials')}</Text>
-                        </View>
-                      </View>
-                    </TouchableOpacity>
-                  </View>
-                  </View>
-                : <View/>
-
-    return (this.props.modelName === PROFILE)
-          ? <View>
-              <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
-                <TouchableOpacity onPress={this.showBanks.bind(this)}>
-                  <View style={styles.row}>
-                    <ConversationsIcon />
-                    <View style={styles.textContainer}>
-                      <Text style={styles.resourceTitle}>{translate('officialAccounts')}</Text>
-                    </View>
-                  </View>
-                </TouchableOpacity>
+    let partial
+    if (this.state.hasPartials)
+      partial = (
+        <View>
+          <View style={{padding: 5, backgroundColor: '#BADFCD'}}>
+            <TouchableOpacity onPress={this.showPartials.bind(this)}>
+              <View style={styles.row}>
+                <Icon name='ios-stats-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+                <View style={styles.textContainer}>
+                  <Text style={styles.resourceTitle}>{translate('Statistics')}</Text>
+                </View>
               </View>
-              {this.state.sharedContextCount
-                ? <View style={{padding: 5, backgroundColor: '#f1ffe7'}}>
-                    <TouchableOpacity onPress={this.showContexts.bind(this)}>
-                      <View style={styles.row}>
-                        <Icon name='md-share' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
-                        <View style={styles.textContainer}>
-                          <Text style={styles.resourceTitle}>{translate('sharedContext')}</Text>
-                        </View>
-                        <View style={styles.sharedContext}>
-                          <Text style={styles.sharedContextText}>{this.state.sharedContextCount}</Text>
-                        </View>
-                      </View>
-                    </TouchableOpacity>
-                  </View>
-                : <View/>
-              }
-              {partial}
+            </TouchableOpacity>
+          </View>
+          <View style={{padding: 5, backgroundColor: '#FBFFE5'}}>
+            <TouchableOpacity onPress={this.showAllPartials.bind(this)}>
+              <View style={styles.row}>
+                <Icon name='ios-apps-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+                <View style={styles.textContainer}>
+                  <Text style={styles.resourceTitle}>{translate('Partials')}</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+    )
+    if (this.props.modelName !== PROFILE)
+      return partial
+    let sharedContext
+    if (this.state.sharedContextCount)
+      sharedContext = (
+        <View style={{padding: 5, backgroundColor: '#f1ffe7'}}>
+          <TouchableOpacity onPress={this.showContexts.bind(this)}>
+            <View style={styles.row}>
+              <Icon name='md-share' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+              <View style={styles.textContainer}>
+                <Text style={styles.resourceTitle}>{translate('sharedContext')}</Text>
+              </View>
+              <View style={styles.sharedContext}>
+                <Text style={styles.sharedContextText}>{this.state.sharedContextCount}</Text>
+              </View>
             </View>
-          : <View>
-              {partial}
+          </TouchableOpacity>
+        </View>
+      )
+
+    return  (
+      <View>
+        <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
+          <TouchableOpacity onPress={this.showBanks.bind(this)}>
+            <View style={styles.row}>
+              <ConversationsIcon />
+              <View style={styles.textContainer}>
+                <Text style={styles.resourceTitle}>{translate('officialAccounts')}</Text>
+              </View>
             </View>
+          </TouchableOpacity>
+        </View>
+        {sharedContext}
+        {partial}
+      </View>
+    )
   }
   showPartials() {
     Actions.getAllPartials()
@@ -1158,68 +1125,69 @@ class ResourceList extends Component {
       },
     })
   }
-  scanFormsQRCode() {
-    this.setState({hideMode: false})
-    this.props.navigator.push({
-      title: 'Scan QR Code',
-      id: 16,
-      component: QRCodeScanner,
-      titleTintColor: '#eeeeee',
-      backButtonTitle: 'Cancel',
-      // rightButtonTitle: 'ion|ios-reverse-camera',
-      passProps: {
-        onread: this.onread.bind(this)
-      }
-    })
-  }
+  // scanFormsQRCode() {
+  //   this.setState({hideMode: false})
+  //   this.props.navigator.push({
+  //     title: 'Scan QR Code',
+  //     id: 16,
+  //     component: QRCodeScanner,
+  //     titleTintColor: '#eeeeee',
+  //     backButtonTitle: 'Cancel',
+  //     // rightButtonTitle: 'ion|ios-reverse-camera',
+  //     passProps: {
+  //       onread: this.onread.bind(this)
+  //     }
+  //   })
+  // }
 
-  onread(result) {
-    // Pairing devices QRCode
-    if (result.data.charAt(0) === '{') {
-      h = JSON.parse(result.data)
-      Actions.sendPairingRequest(h)
-      this.props.navigator.pop()
-      return
-    }
-    let h = result.data.split(';')
+  // onread(result) {
+  //   // Pairing devices QRCode
+  //   if (result.data.charAt(0) === '{') {
+  //     h = JSON.parse(result.data)
+  //     Actions.sendPairingRequest(h)
+  //     this.props.navigator.pop()
+  //     return
+  //   }
+  //   let h = result.data.split(';')
 
 
-    // post to server request for the forms that were filled on the web
-    let me = utils.getMe()
-    switch (h[0]) {
-    case WEB_TO_MOBILE:
-      let r = {
-        _t: 'tradle.GuestSessionProof',
-        session: h[1],
-        from: {
-          id: utils.getId(me),
-          title: utils.getDisplayName(me)
-        },
-        to: {
-          id: PROFILE + '_' + h[2]
-        }
-      }
-      Actions.addItem({resource: r, value: r, meta: utils.getModel('tradle.GuestSessionProof').value}) //, disableAutoResponse: true})
-      break
-    case TALK_TO_EMPLOYEEE:
-      Actions.getEmployeeInfo(result.data.substring(h[0].length + 1))
-      break
-    case APP_QR_CODE:
-      Actions.addApp(result.data.substring(h[0].length + 1))
-      break
-    default:
-      // keep scanning
-      Alert.alert(
-        translate('error'),
-        translate('unknownQRCodeFormat')
-      )
+  //   // post to server request for the forms that were filled on the web
+  //   let me = utils.getMe()
+  //   switch (h[0]) {
+  //   case WEB_TO_MOBILE:
+  //     let r = {
+  //       _t: 'tradle.GuestSessionProof',
+  //       session: h[1],
+  //       from: {
+  //         id: utils.getId(me),
+  //         title: utils.getDisplayName(me)
+  //       },
+  //       to: {
+  //         id: PROFILE + '_' + h[2]
+  //       }
+  //     }
+  //     Actions.addItem({resource: r, value: r, meta: utils.getModel('tradle.GuestSessionProof').value}) //, disableAutoResponse: true})
+  //     break
+  //   case TALK_TO_EMPLOYEEE:
+  //     Actions.getEmployeeInfo(result.data.substring(h[0].length + 1))
+  //     break
+  //   case APP_QR_CODE:
+  //     Actions.addApp(result.data.substring(h[0].length + 1))
+  //     break
+  //   default:
+  //     // keep scanning
+  //     Alert.alert(
+  //       translate('error'),
+  //       translate('unknownQRCodeFormat')
+  //     )
 
-      this.props.navigator.pop()
-      break
-    }
-  }
+  //     this.props.navigator.pop()
+  //     break
+  //   }
+  // }
 }
 reactMixin(ResourceList.prototype, Reflux.ListenerMixin);
+reactMixin(ResourceList.prototype, HomePageMixin)
 
 var styles = StyleSheet.create({
   // container: {
