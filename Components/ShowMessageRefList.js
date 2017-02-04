@@ -46,7 +46,9 @@ class ShowMessageRefList extends Component {
         continue;
       backlinks.push(props[p])
     }
-    let noBacklinks = <View style={[buttonStyles.buttons, backlinksBg, {height: isVerification? 0 : 10}]} />
+
+    var backlinksBg = this.props.bankStyle ? {backgroundColor: this.props.bankStyle.BACKLINK_ROW_BG_COLOR} : {backgroundColor: '#a0a0a0'}
+    let noBacklinks = <View style={[buttonStyles.buttons, backlinksBg, {height: isVerification ? 0 : 10}]} />
 
     if (!backlinks.length)
        return noBacklinks
@@ -84,12 +86,11 @@ class ShowMessageRefList extends Component {
       // }
      })
 
-     var backlinksBg = this.props.bankStyle ? {backgroundColor: this.props.bankStyle.BACKLINK_ROW_BG_COLOR} : {backgroundColor: '#a0a0a0'}
      if (!hasCounts)
        return noBacklinks
      return refList.length
              ? (
-               <View style={[buttonStyles.buttons, backlinksBg, {flexDirection: 'row'}]}>
+               <View style={[buttonStyles.buttons, backlinksBg, {paddingTop: 10, flexDirection: 'row'}]}>
                   {refList}
                 </View>
               )
