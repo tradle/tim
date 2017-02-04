@@ -9,9 +9,8 @@ var constants = require('@tradle/constants');
 var reactMixin = require('react-mixin');
 var RowMixin = require('./RowMixin');
 var ResourceMixin = require('./ResourceMixin');
-// var ResourceList = require('./ResourceList')
+var extend = require('extend')
 var Actions = require('../Actions/Actions');
-
 
 import { makeResponsive } from 'react-native-orient'
 
@@ -59,6 +58,18 @@ class ShowRefList extends Component {
         // icon = 'ios-checkmark-outline';
       propsToShow.push(p)
     }
+    if (model.viewCols) {
+      let vCols = model.viewCols.filter((p) => !props[p].hidden  &&  props[p].items  &&  props[p].items.backlink)
+      if (vCols) {
+        vCols.forEach((p) => {
+          let idx = propsToShow.indexOf(p)
+          if (idx !== -1)
+            propsToShow.splice(idx, 1)
+        })
+        extend(vCols, propsToShow)
+        propsToShow = vCols
+      }
+    }
     let currentBacklink = this.props.backlink
     propsToShow.forEach((p) => {
       let propTitle = translate(props[p], model)
@@ -103,7 +114,8 @@ class ShowRefList extends Component {
          </View>
         )
 
-     }
+    }
+    // explore current backlink
     let backlinkRL
     if (currentBacklink) {
       var ResourceList = require('./ResourceList')
@@ -143,7 +155,6 @@ var styles = StyleSheet.create({
     minWidth: 18,
     marginLeft: -7,
     marginTop: 0,
-    borderRadius: 8,
     backgroundColor: appStyle.COUNTER_BG_COLOR,
     paddingHorizontal: 3,
     borderWidth: StyleSheet.hairlineWidth,
@@ -159,8 +170,8 @@ var styles = StyleSheet.create({
   },
   item: {
     alignItems: 'center',
-    paddingTop: 20,
-    paddingBottom: 10
+    paddingTop: 10,
+    paddingBottom: 0
   },
 })
 
