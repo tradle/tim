@@ -19,7 +19,6 @@ var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
 var extend = require('extend');
 var ResourceMixin = require('./ResourceMixin');
-var buttonStyles = require('../styles/buttonStyles');
 var HELP_COLOR = 'blue'
 var NetworkInfoProvider = require('./NetworkInfoProvider')
 const PHOTO = 'tradle.Photo'
@@ -75,25 +74,30 @@ class MessageView extends Component {
     this.listenTo(Store, 'onAction');
   }
   onAction(params) {
-    if (params.action === 'addVerification') {
-      var currentRoutes = this.props.navigator.getCurrentRoutes();
-      var len = currentRoutes.length;
-      if (currentRoutes[len - 1].id === 5)
-        this.props.navigator.pop();
-      Actions.list({
-        modelName: constants.TYPES.MESSAGE,
-        to: params.resource
-      });
-    }
-    else if (params.action === 'getItem') {
-      if (utils.getId(params.resource) === utils.getId(this.props.resource))
-        this.setState({
-          resource: params.resource,
-          isLoading: false
-        })
-    }
-    else if (params.action == 'connectivity') {
+    if (params.action == 'connectivity') {
       this.setState({isConnected: params.isConnected})
+      return
+    }
+    if (!params.resource)
+      return
+    if (utils.getId(params.resource) !== utils.getId(this.props.resource))
+      return
+    // if (params.action === 'addVerification') {
+    //   // var currentRoutes = this.props.navigator.getCurrentRoutes();
+    //   // var len = currentRoutes.length;
+    //   // if (currentRoutes[len - 1].id === 5)
+    //   //   this.props.navigator.pop();
+    //   Actions.list({
+    //     modelName: constants.TYPES.MESSAGE,
+    //     to: params.resource
+    //   });
+    //   return
+    // }
+    if (params.action === 'getItem') {
+      this.setState({
+        resource: params.resource,
+        isLoading: false
+      })
     }
   }
   verifyOrCreateError() {
@@ -262,9 +266,10 @@ class MessageView extends Component {
     // let message = <View style={{padding: 10}}>
     //                 <Text style={styles.itemTitle}>click done for verifying or check the properties that should be corrected and click Done button</Text>
     //               </View>
-    let msg = resource.message  &&  resource.message.length
-            ? <View><Text style={styles.itemTitle}>{resource.message}</Text></View>
-            : <View/>
+    let msg
+    if (resource.message  &&  resource.message.length)
+      msg = <View><Text style={styles.itemTitle}>{resource.message}</Text></View>
+
     let isVerification = this.props.resource[TYPE] === constants.TYPES.VERIFICATION
     let dateView
     if (isVerification) {
