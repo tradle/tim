@@ -26,7 +26,6 @@ var constants = require('@tradle/constants');
 var termsAndConditions = require('../termsAndConditions.json')
 var StyleSheet = require('../StyleSheet')
 import dismissKeyboard from 'react-native/Libraries/Utilities/dismissKeyboard'
-import ImagePicker from 'react-native-image-picker';
 import ImageInput from './ImageInput'
 
 var TextInputState = require('TextInputState')
@@ -536,7 +535,6 @@ class NewResource extends Component {
         resource[p] = json[p];
     return resource;
   }
-
   onAddItem(propName, item) {
     if (!item)
       return;
@@ -558,7 +556,8 @@ class NewResource extends Component {
       prop: propName,
       inFocus: propName
     });
-  }
+  },
+
   onNewPressed(bl) {
     // if (bl.items.backlink) {
     //   var model = utils.getModel(bl.items.ref).value;
@@ -842,20 +841,6 @@ class NewResource extends Component {
       }
       return <PageView style={platformStyles.container}>{content}</PageView>
     }
-    // return (
-    //   <View style={{height: height}}>
-    //     <Image source={BG_IMAGE} style={styles.bgImage} />
-    //     <View style={{justifyContent: 'center', height: height}}>
-    //     {content}
-    //     </View>
-    //     {isRegistration
-    //       ? <View style={styles.logo}>
-    //           <CustomIcon name='tradle' size={40} color='#ffffff' />
-    //         </View>
-    //       : <View/>
-    //     }
-    //   </View>
-    // )
     return (
       <View style={{height: height}}>
         <BackgroundImage source={BG_IMAGE} />
