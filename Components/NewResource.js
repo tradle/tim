@@ -534,7 +534,7 @@ class NewResource extends Component {
       if (!resource[p] && json[p])
         resource[p] = json[p];
     return resource;
-  }
+  },
   onAddItem(propName, item) {
     if (!item)
       return;
