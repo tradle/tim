@@ -18,7 +18,7 @@ var Reflux = require('reflux');
 var reactMixin = require('react-mixin');
 // const PRIORITY_HEIGHT = 100
 var defaultBankStyle = require('../styles/bankStyle.json')
-
+var appStyle = require('../styles/appStyle.json')
 var StyleSheet = require('../StyleSheet')
 
 import {
@@ -127,8 +127,8 @@ class ResourceRow extends Component {
         var name = (resource.firstName ? resource.firstName.charAt(0) : '');
         name += (resource.lastName ? resource.lastName.charAt(0) : '');
         photo = <LinearGradient colors={['#A4CCE0', '#7AAAc3', '#5E92AD']} style={styles.cellRoundImage}>
-           <Text style={styles.cellText}>{name}</Text>
-        </LinearGradient>
+                   <Text style={styles.cellText}>{name}</Text>
+                </LinearGradient>
       }
       else  {
         var model = utils.getModel(resource[TYPE]).value;
@@ -219,10 +219,10 @@ class ResourceRow extends Component {
     if (isIdentity)
       count = resource._unread
 
-    count = count ? <View style={styles.countView}>
-                      <Text style={styles.countText}>{count}</Text>
-                    </View>
-                  : <View/>
+    if (count)
+      count = <View style={styles.countView}>
+                <Text style={styles.countText}>{count}</Text>
+              </View>
 
     // Grey out if not loaded provider info yet
             // <ActivityIndicator hidden='true' color='#629BCA'/>
@@ -266,14 +266,17 @@ class ResourceRow extends Component {
                 <View style={textStyle}>
                    {resource.numberOfForms
                       ? <View style={{flexDirection: 'row'}}>
-                           <Icon name='ios-paper-outline' color={'#7AAAc3'} size={30} style={{marginTop: Platform.OS === 'ios' ? 0 : 0}}/>
-                           <Text style={{fontWeight: '600', marginLeft: 2, marginTop: Platform.OS === 'ios' ? -5 : -5, color: '#7AAAc3'}}>{resource.numberOfForms}</Text>
+                          <Icon name='ios-paper-outline' color={appStyle.ROW_ICON_COLOR} size={30} style={{marginTop: Platform.OS === 'ios' ? 0 : 0}}/>
+                          <View style={styles.count}>
+                            <Text style={styles.countText}>{resource.numberOfForms}</Text>
+                          </View>
                         </View>
                       : <View />
                    }
                 </View>
               </TouchableHighlight>
 
+                           // <Text style={{fontWeight: '600', marginLeft: 2, marginTop: Platform.OS === 'ios' ? -5 : -5, color: '#7AAAc3'}}>{resource.numberOfForms}</Text>
                       // <View style={[styles.row, bg, { width: utils.dimensions(ResourceRow).width - 50}, isOfficialAccounts && resource.priority ? {height: PRIORITY_HEIGHT} : {}]}>
     let content =  <View style={[styles.content, bg]} key={this.getNextKey()}>
                     <TouchableHighlight onPress={onPress} underlayColor='transparent'>
@@ -653,7 +656,25 @@ var styles = StyleSheet.create({
     right: 10,
     top: 25,
     backgroundColor: 'transparent'
-  }
+  },
+  count: {
+    alignSelf: 'flex-start',
+    minWidth: 18,
+    marginLeft: -7,
+    marginTop: 0,
+    backgroundColor: appStyle.COUNTER_BG_COLOR,
+    paddingHorizontal: 3,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: 9,
+    borderColor: appStyle.COUNTER_COLOR,
+    paddingVertical: 1
+  },
+  countText: {
+    fontSize: 12,
+    fontWeight: '600',
+    alignSelf: 'center',
+    color: appStyle.COUNTER_COLOR,
+  },
 });
 
 module.exports = ResourceRow;
