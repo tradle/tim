@@ -2408,7 +2408,7 @@ var Store = Reflux.createStore({
     extend(resource, this._getItem(utils.getId(key)))
     var props = this.getModel(resource[TYPE]).value.properties;
     for (var p in props) {
-      if (p.charAt(0) === '_')
+      if (p.charAt(0) === '_'  ||  props[p].hidden)
         continue;
       var items = props[p].items;
       if (!items  ||  !items.backlink)
@@ -2423,7 +2423,7 @@ var Store = Reflux.createStore({
         props: itemsModel.properties
       }
       var meta = utils.getModel(items.ref).value
-      var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
+      var isMessage = utils.isMessage(meta)
       var result = isMessage ? this.searchMessages(params) : this.searchNotMessages(params)
       if (result  &&  result.length)
         resource[p] = result;
@@ -2766,7 +2766,7 @@ var Store = Reflux.createStore({
       if (!isSelfIntroduction)
         utils.optimizeResource(resource)
 
-      var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
+      var isMessage = utils.isMessage(meta)
       var readOnlyBacklinks = []
       Q.allSettled(promises)
       .then(function(results) {
@@ -2808,7 +2808,7 @@ var Store = Reflux.createStore({
         if (readOnlyBacklinks.length) {
           readOnlyBacklinks.forEach((prop) => {
             let pm = utils.getModel(prop.ref).value
-            let isMessage = pm.isInterface || (pm.interfaces  &&  pm.interfaces.indexOf(MESSAGE) != -1)
+            let isMessage = utils.isMessage(pm)
             if (isMessage) {
               let result = self.searchMessages({modelName: prop.ref, context: context})
               if (result  &&  result.length)
@@ -3468,7 +3468,7 @@ var Store = Reflux.createStore({
   },
   getList(params) {
     var meta = this.getModel(params.modelName).value;
-    var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
+    var isMessage = utils.isMessage(meta)
     if (!isMessage) {
       params.fromView = true
       return this._searchNotMessages(params)
@@ -3731,7 +3731,7 @@ var Store = Reflux.createStore({
 
   searchResources(params) {
     var meta = this.getModel(params.modelName).value;
-    var isMessage = meta.isInterface  ||  (meta.interfaces  &&  meta.interfaces.indexOf(MESSAGE) != -1);
+    var isMessage = utils.isMessage(meta)
     if (isMessage) //  ||  meta.id === FORM)
       return this.searchMessages(params);
     else {
@@ -4947,7 +4947,7 @@ var Store = Reflux.createStore({
     var props = model.properties;
     var newLanguage
 
-    var isMessage = model.isInterface  ||  (model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1)
+    var isMessage = utils.isMessage(model)
     var originalR = list[utils.getId(value)]
     var isNew = !value[ROOT_HASH] || !value[CUR_HASH] || (!isMessage  &&  !originalR)
     if (value[TYPE] === SETTINGS) {
@@ -5984,7 +5984,7 @@ var Store = Reflux.createStore({
     if (model.id === IDENTITY)
       representativeAddedTo = this.putIdentityInDB(val, batch)
     else {
-      var isMessage = model.interfaces  &&  model.interfaces.indexOf(MESSAGE) != -1
+      var isMessage = utils.isMessage(model)
       if (isMessage) {
         noTrigger = this.putMessageInDB(val, obj, batch, onMessage)
         if (type === VERIFICATION)
