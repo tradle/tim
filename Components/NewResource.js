@@ -534,7 +534,7 @@ class NewResource extends Component {
       if (!resource[p] && json[p])
         resource[p] = json[p];
     return resource;
-  },
+  }
   onAddItem(propName, item) {
     if (!item)
       return;
@@ -556,7 +556,7 @@ class NewResource extends Component {
       prop: propName,
       inFocus: propName
     });
-  },
+  }
 
   onNewPressed(bl) {
     // if (bl.items.backlink) {
@@ -626,31 +626,6 @@ class NewResource extends Component {
       }
     });
   }
-  // showChoice(prop) {
-  //   var self = this;
-  //   ImagePicker.showImagePicker({
-  //     returnIsVertical: true,
-  //     chooseFromLibraryButtonTitle: utils.isSimulator() || prop._allowPicturesFromLibrary ? 'Choose from Library' : null,
-  //     takePhotoButtonTitle: utils.isSimulator() ? null : 'Take Photo…',
-  //     quality: utils.imageQuality
-  //   }, (response) => {
-  //     if (response.didCancel)
-  //       return;
-  //     if (response.error) {
-  //       console.log('ImagePickerManager Error: ', response.error);
-  //       return
-  //     }
-  //     var item = {
-  //       // title: 'photo',
-  //       url: 'data:image/jpeg;base64,' + response.data,
-  //       isVertical: response.isVertical,
-  //       width: response.width,
-  //       height: response.height,
-  //       chooseFromLibraryButtonTitle: ''
-  //     };
-  //     self.onAddItem('photos', item);
-  //   });
-  // }
 
   render() {
     if (this.state.isUploading)
@@ -764,33 +739,9 @@ class NewResource extends Component {
                    </TouchableHighlight>
                  </View>
                : <View style={{height: 0}} />
-    // var button = isRegistration
-    //            ? <View>
-    //                <TouchableHighlight style={styles.thumbButton}
-    //                     underlayColor='transparent' onPress={() => {
-    //                       if (this.state.termsAccepted)
-    //                         this.onSavePressed()
-    //                       else
-    //                         this.showTermsAndConditions()
-    //                     }}>
-    //                   <View style={styles.getStarted}>
-    //                      <Text style={styles.getStartedText}>ENTER</Text>
-    //                   </View>
-    //                </TouchableHighlight>
-    //                <TouchableHighlight underlayColor='transparent' style={{flexDirection: 'row', alignSelf: 'center', paddingTop: 7}} onPress={this.showTermsAndConditions.bind(this)}>
-    //                  <View style={{flexDirection: 'row'}}>
-    //                    <Text style={{fontSize: 16, color: '#A6DBF5'}}>{translate('acceptTermsAndConditions')}</Text>
-    //                  </View>
-    //                </TouchableHighlight>
-    //              </View>
-    //            : <View style={{height: 0}} />
     var formStyle = isRegistration
                   ? {justifyContent: 'center', height: height - (height > 1000 ? 0 : isRegistration ? 50 : 100)}
                   : {justifyContent: 'flex-start'}
-//          <View style={photoStyle}>
-//            <PhotoView resource={resource} navigator={this.props.navigator}/>
-//          </View>
-                  // keyboardDismissMode='on-drag'>
     let jsonProps = utils.getPropertiesWithRange('json', meta)
     let jsons = []
     if (jsonProps  &&  jsonProps.length) {
@@ -1213,7 +1164,6 @@ var styles = StyleSheet.create({
     backgroundColor: '#467EAE', //'#2892C6',
     paddingVertical: 10,
     marginLeft: 10,
-    // paddingHorizontal: 50,
     alignSelf: 'stretch',
   },
   thumbButton: {
@@ -1221,7 +1171,6 @@ var styles = StyleSheet.create({
     alignSelf: 'stretch',
     alignItems: 'center',
     justifyContent: 'center',
-    // paddingHorizontal: 80,
   },
   thumb: {
     width:  40,
@@ -1230,10 +1179,6 @@ var styles = StyleSheet.create({
     borderRadius: 5
   },
   error: {
-    // paddingLeft: 5,
-    // position: 'absolute',
-    // top: 70,
-    // marginBottom: -30,
     marginTop: -10,
     backgroundColor: 'transparent'
   },
@@ -1245,7 +1190,6 @@ var styles = StyleSheet.create({
   items: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    // paddingBottom: 5
   },
   activePropTitle: {
     fontSize: 12,
@@ -1255,8 +1199,6 @@ var styles = StyleSheet.create({
     color: '#bbbbbb'
   },
   photoStrip: {
-    // marginLeft: 10,
-    // marginTop: -30,
     paddingBottom: 5
   },
   photoStripItems: {
@@ -1269,3 +1211,28 @@ var styles = StyleSheet.create({
 })
 
 module.exports = makeResponsive(NewResource);
+  // showChoice(prop) {
+  //   var self = this;
+  //   ImagePicker.showImagePicker({
+  //     returnIsVertical: true,
+  //     chooseFromLibraryButtonTitle: utils.isSimulator() || prop._allowPicturesFromLibrary ? 'Choose from Library' : null,
+  //     takePhotoButtonTitle: utils.isSimulator() ? null : 'Take Photo…',
+  //     quality: utils.imageQuality
+  //   }, (response) => {
+  //     if (response.didCancel)
+  //       return;
+  //     if (response.error) {
+  //       console.log('ImagePickerManager Error: ', response.error);
+  //       return
+  //     }
+  //     var item = {
+  //       // title: 'photo',
+  //       url: 'data:image/jpeg;base64,' + response.data,
+  //       isVertical: response.isVertical,
+  //       width: response.width,
+  //       height: response.height,
+  //       chooseFromLibraryButtonTitle: ''
+  //     };
+  //     self.onAddItem('photos', item);
+  //   });
+  // }
