@@ -26,7 +26,9 @@ var StyleSheet = require('../StyleSheet')
 var extend = require('extend');
 var constants = require('@tradle/constants');
 
-// var ResourceList = require('./ResourceList')
+var HomePageMixin = require('./HomePageMixin')
+
+var ResourceList = require('./ResourceList')
 
 import ActionSheet from 'react-native-actionsheet'
 
@@ -35,15 +37,17 @@ import { signIn } from '../utils/localAuth'
 import { makeResponsive } from 'react-native-orient'
 import Log from './Log'
 import debug from '../utils/debug'
+import ConversationsIcon from './ConversationsIcon'
 
 const TALK_TO_EMPLOYEE = '1'
 // const SERVER_URL = 'http://192.168.0.162:44444/'
 
-const USE_TOUCH_ID = 0
-const USE_GESTURE_PASSWORD = 1
-const CHANGE_GESTURE_PASSWORD = 2
-const PAIR_DEVICES = 3
-const VIEW_DEBUG_LOG = 4
+const SCAN_QR_CODE = 0
+const USE_TOUCH_ID = 1
+const USE_GESTURE_PASSWORD = 2
+const CHANGE_GESTURE_PASSWORD = 3
+const PAIR_DEVICES = 4
+const VIEW_DEBUG_LOG = 5
 
 const TYPE = constants.TYPE
 const ROOT_HASH = constants.ROOT_HASH
@@ -83,7 +87,6 @@ class ResourceView extends Component {
       isModalOpen: false,
       useTouchId: me && me.useTouchId,
       useGesturePassword: me && me.useGesturePassword,
-      backlinksWithCount: []
     }
     let currentRoutes = this.props.navigator.getCurrentRoutes()
     let len = currentRoutes.length
@@ -111,6 +114,9 @@ class ResourceView extends Component {
         resource: params.resource,
         isLoading: false
       })
+      break
+    case 'getForms':
+      this.showChat(params)
       break
     case 'genPairingData':
       if (params.error)
@@ -252,94 +258,42 @@ class ResourceView extends Component {
     else
       qrcode = <View />
 
-    // let recentActivity = <View/>
-    // if (isMe) {
-    //   let type = 'tradle.ProductApplication'
-    //   let listView = true
-    //   recentActivity = <ResourceList modelName={type} listView={listView} resource={me} navigator={this.props.navigator} />
-    // }
-    let msg = ''
-    // if (this.state.useTouchId  &&  this.state.useGesturePassword)
-    //   msg = translate('bothOn')
-    // else if (this.state.useTouchId)
-    //   msg = translate('touchIdOn')
-    // else
-    //   msg = translate('passwordOn')
-////, this.state.useTouchId ? {opacity: 1} : {opacity: 0.3}
-    let switchTouchId
+    let footer
+    let conversations
     if (isIdentity) {
-      // if (Platform.OS === 'android')
-        switchTouchId = <View style={styles.footer}>
-                          <Text style={platformStyles.touchIdText}>{msg}</Text>
-                          <TouchableOpacity underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
-                             <View style={[platformStyles.menuButtonRegular]}>
-                                <Icon name='md-finger-print' color={Platform.select(FINGERPRINT_COLOR)} size={fontSize(30)} />
-                              </View>
-                            </TouchableOpacity>
-                        </View>
-      // else
-      //   switchTouchId = <View style={[platformStyles.menuButtonNarrow, { width: 47, position: 'absolute', right: 10, bottom:20, borderRadius: 24, justifyContent: 'center', alignItems: 'center'}]}>
-      //                      <TouchableOpacity onPress={() => this.ActionSheet.show()}>
-      //                         <Icon name='md-finger-print'  size={33}  color='#ffffff'/>
-      //                      </TouchableOpacity>
-      //                   </View>
+      footer = <View style={styles.footer}>
+                <View style={styles.row}>
+                  <TouchableOpacity onPress={this.showBanks.bind(this)}>
+                    <View style={styles.conversationsRow}>
+                      <ConversationsIcon  color='#cccccc' size={35} style={{marginTop: 2, marginRight: 10}} />
+                      <View style={{justifyContent: 'center'}}>
+                        <Text style={styles.resourceTitle}>{translate('officialAccounts')}</Text>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                  <TouchableOpacity underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
+                    <View style={[platformStyles.menuButtonRegular, {opacity: 0.5}]}>
+                      <Icon name='md-finger-print' color={Platform.select(FINGERPRINT_COLOR)} size={fontSize(30)} />
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              </View>
     }
-    // let showSwitch = isIdentity && Platform.OS === 'ios'  && !utils.isSimulator()
-    // let switchTouchId = showSwitch
-    //                   ? <View style={styles.footer}>
-    //                       <Text style={styles.touchIdText}>{msg}</Text>
-    //                       <TouchableOpacity underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
-    //                          <View style={[platformStyles.menuButtonRegular, this.state.useTouchId ? {opacity: 1} : {opacity: 0.3}]}>
-    //                             <Icon name='md-finger-print' color={Platform.OS === 'ios' ? '#ffffff': 'red'} size={33} />
-    //                           </View>
-    //                         </TouchableOpacity>
-    //                     </View>
-    //                  : <View />
-    // var switchTouchId = <View />
-          // <AddNewIdentity resource={resource} navigator={this.props.navigator} />
-          // <SwitchIdentity resource={resource} navigator={this.props.navigator} />
-              // <Icon  onPress={() => this.closeModal()} name={} size={30} style={{fontSize: 20, color: '#ffffff', paddingHorizontal: 30, paddingVertical: 15}}>Close</Text>
-    // let buttons = showSwitch
-    //             ? [translate('useTouchId') + (this.state.useTouchId ? '    ✔️' : ''), translate('useGesturePassword') + (this.state.useGesturePassword ? '    ✔️' : '')]
-    //             : []
 
-    let buttons = []
-    let actions = []
-    if (isIdentity  &&  isMe) {
-      if (ENV.requireDeviceLocalAuth) {
-        if (utils.isIOS()) {
-          // when both auth methods are available, give the choice to disable one
-          buttons.push(translate('useTouchId') + (this.state.useTouchId ? ' ✓' : ''))
-          actions.push(USE_TOUCH_ID)
-          buttons.push(translate('useGesturePassword') + (this.state.useGesturePassword ? ' ✓' : ''))
-          actions.push(USE_GESTURE_PASSWORD)
-        }
-      }
+    let menu = isIdentity  &&  isMe  && this.renderActionSheet()
+    let identityPhotoList, otherPhotoList
+    if (isIdentity)
+      identityPhotoList = <PhotoList photos={photos} resource={this.props.resource} navigator={this.props.navigator} isView={true} numberInRow={5} />
+    else
+      otherPhotoList = <PhotoList photos={photos} resource={this.props.resource} navigator={this.props.navigator} isView={true} numberInRow={photos.length > 4 ? 5 : photos.length} />
 
-      if (this.state.useGesturePassword || !utils.isIOS()) {
-        buttons.push(translate('changeGesturePassword'))
-        actions.push(CHANGE_GESTURE_PASSWORD)
-      }
-
-      buttons.push(translate('pairDevices'))
-      actions.push(PAIR_DEVICES)
-
-      buttons.push(translate('viewDebugLog'))
-      actions.push(VIEW_DEBUG_LOG)
-    }
-    buttons.push(translate('cancel'))
-    // let title = this.props.tabLabel
-    //           ? <View style={{height: 45, backgroundColor: '#ffffff', alignSelf: 'stretch', justifyContent: 'center'}}>
-    //               <Text style={{alignSelf: 'center', fontSize: 20}}>{translate('Profile')}</Text>
-    //             </View>
-    //           : null
-      // <PageView style={[platformStyles.container, this.props.tabLabel ? {marginTop: utils.isAndroid() ? 10 : 18} : {}]}>
-      // {title}
     return (
       <PageView style={platformStyles.container}>
       <ScrollView  ref='this'>
         <View style={styles.photoBG}>
-          <PhotoView resource={resource} navigator={this.props.navigator}/>
+          <PhotoView resource={resource} navigator={this.props.navigator}>
+            {identityPhotoList}
+          </PhotoView>
         </View>
         {actionPanel}
         <Modal animationType={'fade'} visible={this.state.isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
@@ -349,13 +303,48 @@ class ResourceView extends Component {
             </View>
           </TouchableOpacity>
         </Modal>
-        <PhotoList photos={photos} resource={this.props.resource} navigator={this.props.navigator} isView={true} numberInRow={photos.length > 4 ? 5 : photos.length} />
+        {otherPhotoList}
         <ShowPropertiesView resource={resource}
                             showItems={this.showResources.bind(this)}
                             showRefResource={this.getRefResource.bind(this)}
                             currency={this.props.currency}
                             excludedProperties={['photos']}
                             navigator={this.props.navigator} />
+        {menu}
+      </ScrollView>
+      {footer}
+
+      </PageView>
+    );
+  }
+
+  renderActionSheet() {
+    let buttons = []
+    let actions = []
+    buttons.push(translate('scanQRcode'))
+    actions.push(SCAN_QR_CODE)
+    if (ENV.requireDeviceLocalAuth) {
+      if (utils.isIOS()) {
+        // when both auth methods are available, give the choice to disable one
+        buttons.push(translate('useTouchId') + (this.state.useTouchId ? ' ✓' : ''))
+        actions.push(USE_TOUCH_ID)
+        buttons.push(translate('useGesturePassword') + (this.state.useGesturePassword ? ' ✓' : ''))
+        actions.push(USE_GESTURE_PASSWORD)
+      }
+    }
+
+    if (this.state.useGesturePassword || !utils.isIOS()) {
+      buttons.push(translate('changeGesturePassword'))
+      actions.push(CHANGE_GESTURE_PASSWORD)
+    }
+
+    buttons.push(translate('pairDevices'))
+    actions.push(PAIR_DEVICES)
+
+    buttons.push(translate('viewDebugLog'))
+    actions.push(VIEW_DEBUG_LOG)
+    buttons.push(translate('cancel'))
+    return(
         <ActionSheet
           ref={(o) => {
             this.ActionSheet = o
@@ -367,12 +356,9 @@ class ResourceView extends Component {
               this.changePreferences(index, actions[index])
           }}
         />
-      </ScrollView>
-      {switchTouchId}
-
-      </PageView>
-    );
+    )
   }
+
   openModal() {
     this.setState({isModalOpen: true});
   }
@@ -386,6 +372,7 @@ class ResourceView extends Component {
     this.state.propValue = utils.getId(resource.id);
     Actions.getItem(resource.id);
   }
+
   changePreferences(id, action) {
     const self = this
     let me = utils.getMe()
@@ -408,6 +395,9 @@ class ResourceView extends Component {
       break
     case PAIR_DEVICES:
       Actions.genPairingData()
+      return
+    case SCAN_QR_CODE:
+      this.scanFormsQRCode(true)
       return
     case VIEW_DEBUG_LOG:
       this.props.navigator.push({
@@ -458,6 +448,7 @@ class ResourceView extends Component {
 
 reactMixin(ResourceView.prototype, Reflux.ListenerMixin);
 reactMixin(ResourceView.prototype, ResourceMixin);
+reactMixin(ResourceView.prototype, HomePageMixin)
 ResourceView = makeResponsive(ResourceView)
 
 var createStyles = utils.styleFactory(ResourceView, function ({ dimensions }) {
@@ -475,6 +466,24 @@ var createStyles = utils.styleFactory(ResourceView, function ({ dimensions }) {
     photoBG: {
       // backgroundColor: '#245D8C',
       alignItems: 'center',
+    },
+    conversationsRow: {
+      flexDirection: 'row',
+      paddingLeft: 5,
+      // justifyContent: 'center',
+      width: dimensions.width - 100
+    },
+    row: {
+      flex: 1,
+      paddingHorizontal: 10,
+      marginRight: -10,
+      flexDirection: 'row',
+      justifyContent: 'space-between'
+    },
+    resourceTitle: {
+      fontSize: 20,
+      fontWeight: '400',
+      color: '#757575',
     },
     footer: {
       flexDirection: 'row',
