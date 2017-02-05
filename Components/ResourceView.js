@@ -321,8 +321,6 @@ class ResourceView extends Component {
   renderActionSheet() {
     let buttons = []
     let actions = []
-    buttons.push(translate('scanQRcode'))
-    actions.push(SCAN_QR_CODE)
     if (ENV.requireDeviceLocalAuth) {
       if (utils.isIOS()) {
         // when both auth methods are available, give the choice to disable one
@@ -343,6 +341,8 @@ class ResourceView extends Component {
 
     buttons.push(translate('viewDebugLog'))
     actions.push(VIEW_DEBUG_LOG)
+    buttons.push(translate('scanQRcode'))
+    actions.push(SCAN_QR_CODE)
     buttons.push(translate('cancel'))
     return(
         <ActionSheet
