@@ -74,6 +74,11 @@
     "verifiedBy": "Verified by {1}",
     "issuedBy": "Issued by {1}",
     "sentTo": "Sent to {1}",
+
+    "verifiedByOn": "Verified by {1} on",
+    "issuedByOn": "Issued by {1} on",
+    "sentToOn": "Sent to {1} on",
+
     "typeMessage": "Type a message",
     "newProductMsg": "I need a {1}.",
     "shareOne": "Alternatively, share below",
