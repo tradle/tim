@@ -5,6 +5,7 @@ var Icon = require('react-native-vector-icons/Ionicons');
 var constants = require('@tradle/constants');
 var reactMixin = require('react-mixin');
 var PhotoCarouselMixin = require('./PhotoCarouselMixin');
+
 import Gallery from 'react-native-gallery'
 
 var equal = require('deep-equal')
@@ -70,6 +71,8 @@ class PhotoView extends Component {
       else
         return <View />
     }
+    let coverPhoto = utils.getPropertiesWithAnnotation(model.properties, 'coverPhoto')
+    coverPhoto = coverPhoto  &&  resource[Object.keys(coverPhoto)[0]]
 
     var url = currentPhoto.url;
     // var nextPhoto = resource.photos && resource.photos.length == 1
@@ -87,7 +90,7 @@ class PhotoView extends Component {
     let {width, height} = utils.dimensions(PhotoView)
     let image = {
       width: width < height ? width : height,
-      height: Math.round(width < height ? height / 2 : width / 2),
+      height: Math.round(width < height ? height / 4 : width / 2),
       // alignSelf: 'stretch'
     }
     let style={transform: [{scale: this.state.anim}]}
@@ -100,13 +103,32 @@ class PhotoView extends Component {
  //              }).start();
  //              this.shwCarousel(resource.photos[0])
  //          }}
+    let photoView
+    if (coverPhoto) {
+      let coverPhotoUri = coverPhoto.url
+      var coverPhotoSource = coverPhotoUri.charAt(0) == '/' || coverPhotoUri.indexOf('data') === 0
+               ? {uri: coverPhotoUri, isStatic: true}
+               : {uri: coverPhotoUri}
+
+      photoView = (
+        <Image resizeMode='cover' source={coverPhotoSource} style={image}>
+          <View style={{height: 50, backgroundColor: '#000000', alignSelf: 'stretch', opacity: 0.2, position: 'absolute', left: 0, bottom: 0, width: width}} />
+          <Image source={source} style={{width: 80, height: 80, borderWidth: 2, borderColor: '#ffffff', position: 'absolute', left: 10, bottom: 10}} />
+          <Text style={{fontSize: 30, fontWeight: '600', color: '#ffffff', position: 'absolute', left: 100, bottom: 10}}>{utils.getDisplayName(this.props.resource)}</Text>
+        </Image>
+      )
+    }
+    else
+      photoView = <Image resizeMode='cover' source={source} style={image} />
+
     return (
           <Animated.View style={style}>
             <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, this.props.mainPhoto || resource.photos[0], true)}>
-              <Image resizeMode='cover' source={source} style={image} />
+              {photoView}
             </TouchableHighlight>
           </Animated.View>
     )
+            // {this.props.children}
     // return (
     //       <Animated.View style={style}>
     //         <TouchableHighlight underlayColor='transparent' onPress={this.openModal.bind(this)}>
