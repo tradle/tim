@@ -9,6 +9,7 @@ var RowMixin = require('./RowMixin');
 var Accordion = require('react-native-accordion')
 var Swipeout = require('react-native-swipeout')
 var StyleSheet = require('../StyleSheet')
+var dateformat = require('dateformat')
 
 var DEFAULT_CURRENCY_SYMBOL = '£'
 var CURRENCY_SYMBOL
@@ -146,24 +147,21 @@ class VerificationRow extends Component {
 
       let title = org ? org.title : resource.to.title
       let by = (isMyProduct)
-             ? translate('issuedBy', title)
+             ? translate('issuedByOn', title)
              : (isForm)
-                ? translate('sentTo', title)
-                : translate('verifiedBy', title)
+                ? translate('sentToOn', title)
+                : translate('verifiedByOn', title)
       // verifiedBy = <View style={contentRows.length == 1 ? {flex: 1} : {flexDirection: 'row'}} key={this.getNextKey()}>
 
-      verifiedBy = <Text style={styles.verifiedBy}>{by}</Text>
+      verifiedBy = <View style={{alignItems: 'flex-end', paddingRight: 5}}><Text style={styles.verifiedBy}>{by}</Text></View>
     }
-    else
-      verifiedBy = <View/>
 
     let dateP = resource.dateVerified ? 'dateVerified' : resource.date ? 'date' : 'time'
-    // var date = r
-    //          ? this.addDateProp(dateP, [styles.verySmallLetters, {position: 'absolute', right: 10}])
-    //          : <View />
-    var date = r
-             ? this.addDateProp(dateP, [styles.verySmallLetters, {position: 'absolute', right: 10}])
-             : <View />
+    var date = r  &&  <View style={{alignItems: 'flex-end'}}>
+                        <Text style={styles.verySmallLetters} key={this.getNextKey()}>{formatDate(resource[dateP])}</Text>
+                      </View>
+
+    // {this.addDateProp(dateP, [styles.verySmallLetters], true)}</View>
 
     let dn = isVerification ?  utils.getDisplayName(resource.document) : utils.getDisplayName(resource, model.properties)
     let title
@@ -178,13 +176,12 @@ class VerificationRow extends Component {
     var header =  <View style={{backgroundColor: '#ffffff', borderBottomColor: '#f0f0f0', borderBottomWidth: 1}} key={this.getNextKey()}>
                     <View style={{flexDirection: 'row', marginHorizontal: 10}}>
                       {photo}
-                      {date}
                       <View style={[styles.noImageBlock, {flex: 1}]}>
                         <Text style={styles.rTitle}>{title}</Text>
                         {description}
-                        <View style={{flexDirection: 'row', paddingTop: 10}}>
-                          <View style={{flex: 1}} />
+                        <View style={{paddingTop: 3, flexDirection: 'row', justifyContent: 'flex-end'}}>
                           {verifiedBy}
+                          {date}
                         </View>
                       </View>
                     </View>
@@ -368,6 +365,7 @@ class VerificationRow extends Component {
     });
   }
 }
+
 reactMixin(VerificationRow.prototype, RowMixin);
 
 var styles = StyleSheet.create({
@@ -386,14 +384,15 @@ var styles = StyleSheet.create({
   rTitle: {
     flex: 1,
     fontSize: 18,
-    marginVertical: 5,
+    marginBottom: 3,
     color: '#555555',
     // fontWeight: '600',
     // marginBottom: 2,
   },
   noImageBlock: {
     flexDirection: 'column',
-    paddingVertical: 7
+    alignSelf: 'stretch',
+    paddingVertical: 3
   },
   resourceTitle: {
     flex: 1,
@@ -440,7 +439,7 @@ var styles = StyleSheet.create({
   },
   verySmallLetters: {
     fontSize: 12,
-    alignSelf: 'flex-end',
+    // alignSelf: 'flex-end',
     color: '#b4c3cb'
   },
   refPropertyRow: {
@@ -462,5 +461,9 @@ var styles = StyleSheet.create({
   //   color: '#2E3B4E'
   // },
 });
+
+function formatDate (date) {
+  return dateformat(date, 'mmm dS, yyyy')
+}
 
 module.exports = VerificationRow;
