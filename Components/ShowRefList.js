@@ -9,7 +9,6 @@ var constants = require('@tradle/constants');
 var reactMixin = require('react-mixin');
 var RowMixin = require('./RowMixin');
 var ResourceMixin = require('./ResourceMixin');
-var extend = require('extend')
 var Actions = require('../Actions/Actions');
 
 import { makeResponsive } from 'react-native-orient'
@@ -66,7 +65,7 @@ class ShowRefList extends Component {
           if (idx !== -1)
             propsToShow.splice(idx, 1)
         })
-        extend(vCols, propsToShow)
+        propsToShow.forEach((p) => vCols.push(p))
         propsToShow = vCols
       }
     }
