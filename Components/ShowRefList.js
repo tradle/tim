@@ -69,6 +69,7 @@ class ShowRefList extends Component {
         propsToShow = vCols
       }
     }
+    let hasBacklinks
     let currentBacklink = this.props.backlink
     propsToShow.forEach((p) => {
       let propTitle = translate(props[p], model)
@@ -77,6 +78,7 @@ class ShowRefList extends Component {
         icon = 'ios-checkmark';
       let count = resource[p]  &&  resource[p].length
       if (count) {
+        hasBacklinks = true
         if (!currentBacklink)
           currentBacklink = props[p]
         count = <View style={styles.count}>
@@ -126,17 +128,26 @@ class ShowRefList extends Component {
                       backlinkList={this.props.backlinkList}
                       navigator={this.props.navigator} />
     }
+    let comment
+    if (!hasBacklinks  &&  utils.getMe()[constants.ROOT_HASH] === this.props.resource[constants.ROOT_HASH]) {
+      comment = <View style={{justifyContent: 'center', alignSelf: 'center', width: 300, marginTop: 200}}>
+                  <Text style={{fontSize: 20, alignSelf: 'center', color: '#555555'}}>{'Please tap on the red button and'}</Text>
+                  <Text style={{fontSize: 20, alignSelf: 'center', color: '#555555'}}>{'Scan QR code'}</Text>
+                </View>
+    }
 
-    return refList.length
-         ? <View>
-            <View style={[buttonStyles.buttons, {justifyContent: 'center', borderBottomWidth: 0}]} key={'ShowRefList'}>
-              {refList}
-            </View>
-            <View>
-              {backlinkRL}
-            </View>
-            </View>
-         : <View/>;
+    if (refList.length)
+      return <View>
+                <View style={[buttonStyles.buttons, {justifyContent: 'center', borderBottomWidth: 0}]} key={'ShowRefList'}>
+                  {refList}
+                </View>
+                {this.props.children}
+                {comment}
+                <View>
+                  {backlinkRL}
+                </View>
+              </View>
+    return this.props.children || <View/>
   }
 
   exploreBacklink(resource, prop) {
