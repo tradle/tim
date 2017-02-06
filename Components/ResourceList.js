@@ -86,14 +86,16 @@ class ResourceList extends Component {
   constructor(props) {
     super(props);
 
+    const dataSource = new ListView.DataSource({
+      rowHasChanged: function(row1, row2) {
+        return row1 !== row2 || row1._online !== row2._online
+      }
+    })
+
     this.state = {
       // isLoading: utils.getModels() ? false : true,
       isLoading: true,
-      dataSource: new ListView.DataSource({
-        rowHasChanged: function(row1, row2) {
-          return row1 !== row2 || row1._online !== row2._online
-        }
-      }),
+      dataSource,
       allowToAdd: this.props.prop  &&  this.props.prop.allowToAdd,
       filter: this.props.filter,
       hideMode: false,  // hide provider
