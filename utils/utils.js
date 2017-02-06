@@ -131,6 +131,10 @@ var utils = {
   getMe() {
     return me;
   },
+  isMe(resource) {
+    let me = this.getMe()
+    return me  &&  me[ROOT_HASH] === resource[ROOT_HASH]
+  },
   setModels(modelsRL) {
     models = modelsRL;
   },
@@ -412,6 +416,7 @@ var utils = {
     }
     return displayName;
   },
+
   getStringValueForProperty(resource, p, meta) {
     let displayName = ''
     if (resource[p]) {
