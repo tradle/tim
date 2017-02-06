@@ -1675,7 +1675,7 @@ var styles= StyleSheet.create({
   },
   photoIcon: {
     position: 'absolute',
-    right: 0,
+    right: 5,
     marginTop: 10
   },
   customIcon: {
