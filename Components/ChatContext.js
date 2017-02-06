@@ -6,7 +6,7 @@ import {
   Text,
   TouchableOpacity
 } from 'react-native'
-import React, { Component } from 'react'
+import React, { Component, PropTypes } from 'react'
 import utils from '../utils/utils'
 var translate = utils.translate
 import Icon from 'react-native-vector-icons/Ionicons'

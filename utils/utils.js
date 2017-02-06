@@ -1172,10 +1172,10 @@ var utils = {
 
     return top
   },
-  orientation() {
-    // disallow PORTRAITUPSIDEDOWN
-    return orientation === 'PORTRAITUPSIDEDOWN' ? 'LANDSCAPE' : orientation.replace(/-LEFT|-RIGHT/, '')
-  },
+  // orientation() {
+  //   // disallow PORTRAITUPSIDEDOWN
+  //   return orientation === 'PORTRAITUPSIDEDOWN' ? 'LANDSCAPE' : orientation.replace(/-LEFT|-RIGHT/, '')
+  // },
   dimensions(Component) {
     return getDimensions(Component)
   },
