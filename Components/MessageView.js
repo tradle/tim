@@ -203,8 +203,8 @@ class MessageView extends Component {
     if (this.state.isLoading)
       return <View/>
     var resource = this.state.resource;
-    var modelName = resource[TYPE] || resource.id.split('_')[0];
-    var model = utils.getModel(modelName).value;
+    var model = utils.getModel(resource[TYPE]).value;
+    let isVerification = model.id === VERIFICATION
     let t = resource.dateVerified ? resource.dateVerified : resource.time
     var date = t ? utils.formatDate(new Date(t)) : utils.formatDate(new Date())
     var photos = resource.photos
@@ -236,6 +236,7 @@ class MessageView extends Component {
     var inRow = photos ? photos.length : 0
     if (inRow  &&  inRow > 4)
       inRow = 5;
+
 
     let propertySheet
     if (isVerification)
@@ -306,7 +307,7 @@ class MessageView extends Component {
     if (resource.message  &&  resource.message.length)
       msg = <View><Text style={styles.itemTitle}>{resource.message}</Text></View>
 
-    let isVerification = this.props.resource[TYPE] === constants.TYPES.VERIFICATION
+    // var isVerification = this.props.resource[TYPE] === constants.TYPES.VERIFICATION
     let dateView
     if (isVerification) {
       dateView = <View style={[styles.band, {flexDirection: 'row', justifyContent: 'flex-end', borderBottomColor: this.props.bankStyle.PRODUCT_ROW_BG_COLOR}]}>
