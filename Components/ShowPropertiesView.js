@@ -128,9 +128,10 @@ class ShowPropertiesView extends Component {
     var viewCols = vCols.map((p) => {
       if (excludedProperties  &&  excludedProperties.indexOf(p) !== -1)
         return;
-
-      var val = resource[p];
       var pMeta = props[p];
+      if (pMeta.type === 'array'  &&  pMeta.items.ref  &&  !pMeta.inlined)
+        return
+      var val = resource[p];
       if (pMeta.range === 'json') {
         let jsonRows = []
         return this.showJson(pMeta, val, true, jsonRows)
@@ -196,7 +197,7 @@ class ShowPropertiesView extends Component {
       // }
 
       if (!val)
-        return <View key={this.getNextKey()}></View>;
+        return //<View key={this.getNextKey()}></View>;
       if (!isRef) {
         isItems = Array.isArray(val)
         if (isPartial  &&  p === 'leaves') {
@@ -239,9 +240,9 @@ class ShowPropertiesView extends Component {
           return
         val = this.renderSimpleProp(val, pMeta, modelName)
       }
-      var title = pMeta.skipLabel  ||  isItems
-                ? <View />
-                : <Text style={modelName === TERMS_AND_CONDITIONS ? styles.bigTitle : styles.title}>{pMeta.title || utils.makeLabel(p)}</Text>
+      var title
+      if (pMeta.skipLabel  ||  isItems)
+        title = <Text style={modelName === TERMS_AND_CONDITIONS ? styles.bigTitle : styles.title}>{pMeta.title || utils.makeLabel(p)}</Text>
       var separator = <View/>
       // var separator = first
       //               ? <View />
@@ -251,24 +252,25 @@ class ShowPropertiesView extends Component {
       let isPromptVisible = this.state.promptVisible !== null
       if (isPromptVisible)
         console.log(this.state.promptVisible)
-      let canReject = this.props.checkProperties
-                    ? <View style={styles.checkProperties}>
-                        <TouchableOpacity underlayColor='transparent' onPress={() => {
-                          this.setState({promptVisible: pMeta})
-                        }}>
-                          <Icon key={p} name={this.props.errorProps && this.props.errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={30} color={this.props.errorProps && this.props.errorProps[p] ? 'red' : this.props.bankStyle.LINK_COLOR} style={{marginTop: 10}}/>
-                        </TouchableOpacity>
-                        <Prompt
-                          title={translate('fieldErrorMessagePrompt')}
-                          placeholder={translate('thisValueIsInvalidPlaceholder')}
-                          visible={isPromptVisible}
-                          onCancel={() => this.setState({ promptVisible: null })}
-                          onSubmit={(value) => {
-                            this.setState({ promptVisible: null})
-                            this.props.checkProperties(this.state.promptVisible, value)
-                          }}/>
-                      </View>
-                    : <View />
+      let canReject
+      if (this.props.checkProperties) {
+        canReject = <View style={styles.checkProperties}>
+                      <TouchableOpacity underlayColor='transparent' onPress={() => {
+                        this.setState({promptVisible: pMeta})
+                      }}>
+                        <Icon key={p} name={this.props.errorProps && this.props.errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={30} color={this.props.errorProps && this.props.errorProps[p] ? 'red' : this.props.bankStyle.LINK_COLOR} style={{marginTop: 10}}/>
+                      </TouchableOpacity>
+                      <Prompt
+                        title={translate('fieldErrorMessagePrompt')}
+                        placeholder={translate('thisValueIsInvalidPlaceholder')}
+                        visible={isPromptVisible}
+                        onCancel={() => this.setState({ promptVisible: null })}
+                        onSubmit={(value) => {
+                          this.setState({ promptVisible: null})
+                          this.props.checkProperties(this.state.promptVisible, value)
+                        }}/>
+                    </View>
+      }
       if (this.props.checkProperties)
         isDirectionRow = true
                // <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
