@@ -397,18 +397,43 @@ class TimHome extends Component {
     });
   }
   showHomePage(doReplace) {
+    let me = utils.getMe()
+    let title = translate('digitalWealthPassport')
     this.props.navigator.push({
-      title: translate('homePage'),
-      id: 30,
-      component: HomePage,
+      title: title,
+      id: 3,
+      component: ResourceView,
       backButtonTitle: translate('back'),
+      rightButtonTitle: translate('edit'),
+      onRightButtonPress: {
+        title: title,
+        id: 4,
+        component: NewResource,
+        backButtonTitle: translate('back'),
+        rightButtonTitle: translate('done'),
+        passProps: {
+          model: utils.getModel(me[constants.TYPE]).value,
+          resource: me,
+          bankStyle: defaultBankStyle
+        }
+      },
       passProps: {
-        sponsorName: 'UBS',
-        modelName: constants.TYPES.ORGANIZATION,
-        bankStyle: defaultBankStyle,
-        officialAccounts: true,
+        resource: me,
+        bankStyle: defaultBankStyle
       }
     })
+    // this.props.navigator.push({
+    //   title: translate('homePage'),
+    //   id: 30,
+    //   component: HomePage,
+    //   backButtonTitle: translate('back'),
+    //   passProps: {
+    //     sponsorName: 'UBS',
+    //     modelName: constants.TYPES.ORGANIZATION,
+    //     bankStyle: defaultBankStyle,
+    //     officialAccounts: true,
+    //   }
+    // })
   }
   showOfficialAccounts(doReplace) {
     var nav = this.props.navigator
