@@ -315,11 +315,11 @@ class MessageView extends Component {
                   <Text style={styles.dateValue}>{date}</Text>
                 </View>
     }
-    else {
-      dateView = <View style={[styles.band, {borderBottomColor: this.props.bankStyle.PRODUCT_ROW_BG_COLOR}]}>
-                  <Text style={styles.date}>{date}</Text>
-                </View>
-    }
+    // else {
+    //   dateView = <View style={[styles.band, {borderBottomColor: this.props.bankStyle.PRODUCT_ROW_BG_COLOR}]}>
+    //               <Text style={styles.date}>{date}</Text>
+    //             </View>
+    // }
 
     return (
       <ScrollView  ref='this' style={platformStyles.container} keyboardShouldPersistTaps={true}>
