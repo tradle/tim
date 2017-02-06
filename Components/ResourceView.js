@@ -48,6 +48,7 @@ const USE_GESTURE_PASSWORD = 2
 const CHANGE_GESTURE_PASSWORD = 3
 const PAIR_DEVICES = 4
 const VIEW_DEBUG_LOG = 5
+const MY_PRODUCT = 'tradle.MyProduct'
 
 const TYPE = constants.TYPE
 const ROOT_HASH = constants.ROOT_HASH
@@ -106,9 +107,13 @@ class ResourceView extends Component {
   handleEvent(params) {
     let isMe = utils.isMe(this.props.resource)
     if (params.resource  &&  params.resource[ROOT_HASH] !== this.props.resource[ROOT_HASH]) {
-      if (params.action === 'addItem'  &&  isMe) {
-        let m = utils.getModel(params.resource[TYPE]).value
-        if (m.subClassOf === FORM  ||  m.id === VERIFICATION)
+      if (isMe) {
+        if (params.action === 'addItem') {
+          let m = utils.getModel(params.resource[TYPE]).value
+          if (m.subClassOf === FORM  ||  m.id === VERIFICATION  ||  m.id === 'tradle.ConfirmPackageRequest'  ||  m.subClassOf === MY_PRODUCT)
+            Actions.getItem(utils.getMe())
+        }
+        else if (params.actions === 'addMessage'  &&  params.resource[TYPE] === 'tradle.ConfirmPackageRequest')
           Actions.getItem(utils.getMe())
       }
       return
