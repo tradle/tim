@@ -9,6 +9,7 @@ var PhotoList = require('./PhotoList');
 var PhotoView = require('./PhotoView');
 var ShowPropertiesView = require('./ShowPropertiesView');
 var ShowMessageRefList = require('./ShowMessageRefList');
+var ShowRefList = require('./ShowRefList');
 var VerificationView = require('./VerificationView')
 // var MoreLikeThis = require('./MoreLikeThis');
 var NewResource = require('./NewResource');
@@ -235,12 +236,47 @@ class MessageView extends Component {
     var inRow = photos ? photos.length : 0
     if (inRow  &&  inRow > 4)
       inRow = 5;
-    var actionPanel = this.props.isReview
-                    ? null
-                    : <ShowMessageRefList resource={resource}
-                                          navigator={this.props.navigator}
+
+    let propertySheet
+    if (isVerification)
+      propertySheet = <VerificationView navigator={this.props.navigator}
+                                        resource={resource}
+                                        bankStyle={this.props.bankStyle}
+                                        currency={this.props.currency}
+                                        showVerification={this.showVerification.bind(this)}/>
+    else
+      propertySheet = <ShowPropertiesView navigator={this.props.navigator}
+                                          resource={resource}
+                                          bankStyle={this.props.bankStyle}
+                                          errorProps={this.state.errorProps}
                                           currency={this.props.currency}
-                                          bankStyle={this.props.bankStyle} />
+                                          checkProperties={this.props.isVerifier /* && !utils.isReadOnlyChat(resource)*/ ? this.onCheck.bind(this) : null}
+                                          excludedProperties={['tradle.Message.message', 'time', 'photos']}
+                                          showRefResource={this.getRefResource.bind(this)}/>
+
+    let content = <View>
+                    <View style={styles.photoListStyle}>
+                      <PhotoList photos={photos} resource={resource} isView={true} navigator={this.props.navigator} numberInRow={inRow} />
+                    </View>
+                    <View style={styles.rowContainer}>
+                      {msg}
+                      {propertySheet}
+                      {separator}
+                      {verificationTxID}
+                    </View>
+                  </View>
+
+    var actionPanel
+    if (this.props.isReview)
+      actionPanel = content
+    else {
+      actionPanel = <ShowRefList resource={resource}
+                                 navigator={this.props.navigator}
+                                 currency={this.props.currency}
+                                 bankStyle={this.props.bankStyle}>
+                      {content}
+                    </ShowRefList>
+    }
         // <FromToView resource={resource} navigator={this.props.navigator} />
         // <MoreLikeThis resource={resource} navigator={this.props.navigator}/>
     var verificationTxID, separator
@@ -291,31 +327,6 @@ class MessageView extends Component {
           <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={this.props.navigator}/>
         </View>
         {actionPanel}
-        <View>
-          <View style={styles.photoListStyle}>
-            <PhotoList photos={photos} resource={resource} isView={true} navigator={this.props.navigator} numberInRow={inRow} />
-          </View>
-          <View style={styles.rowContainer}>
-            {msg}
-            {isVerification
-              ? <VerificationView navigator={this.props.navigator}
-                                  resource={resource}
-                                  bankStyle={this.props.bankStyle}
-                                  currency={this.props.currency}
-                                  showVerification={this.showVerification.bind(this)}/>
-              : <ShowPropertiesView navigator={this.props.navigator}
-                                  resource={resource}
-                                  bankStyle={this.props.bankStyle}
-                                  errorProps={this.state.errorProps}
-                                  currency={this.props.currency}
-                                  checkProperties={this.props.isVerifier /* && !utils.isReadOnlyChat(resource)*/ ? this.onCheck.bind(this) : null}
-                                  excludedProperties={['tradle.Message.message', 'time', 'photos']}
-                                  showRefResource={this.getRefResource.bind(this)}/>
-            }
-            {separator}
-            {verificationTxID}
-          </View>
-        </View>
       </ScrollView>
     );
   }
