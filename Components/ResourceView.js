@@ -52,6 +52,8 @@ const VIEW_DEBUG_LOG = 5
 const TYPE = constants.TYPE
 const ROOT_HASH = constants.ROOT_HASH
 const T_AND_C = 'tradle.TermsAndConditions'
+const FORM = 'tradle.Form'
+const VERIFICATION = 'tradle.Verification'
 
 import {
   // StyleSheet,
@@ -102,8 +104,15 @@ class ResourceView extends Component {
     this.listenTo(Store, 'handleEvent');
   }
   handleEvent(params) {
-    if (params.resource  &&  params.resource[ROOT_HASH] !== this.props.resource[ROOT_HASH])
+    let isMe = utils.isMe(this.props.resource)
+    if (params.resource  &&  params.resource[ROOT_HASH] !== this.props.resource[ROOT_HASH]) {
+      if (params.action === 'addItem'  &&  isMe) {
+        let m = utils.getModel(params.resource[TYPE]).value
+        if (m.subClassOf === FORM  ||  m.id === VERIFICATION)
+          Actions.getItem(utils.getMe())
+      }
       return
+    }
 
     switch (params.action) {
     case 'showIdentityList':
@@ -235,7 +244,7 @@ class ResourceView extends Component {
     var isOrg = model.id === constants.TYPES.ORGANIZATION;
     var me = utils.getMe()
     var actionPanel
-    var isMe = isIdentity ? resource[ROOT_HASH] === me[ROOT_HASH] : false
+    var isMe = utils.isMe(resource)
     if (me) {
       let noActionPanel = (isIdentity  &&  !isMe) || (isOrg  &&  (!me.organization  ||  utils.getId(me.organization) !== utils.getId(resource)))
       if (!noActionPanel)
