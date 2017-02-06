@@ -358,6 +358,8 @@ class ResourceList extends Component {
       if (!m.subClassOf  ||  m.subClassOf != this.props.modelName)
         return;
     }
+    if (this.props.isBacklink  &&  params.prop !== this.props.prop)
+      return
     extend(state, {
       forceUpdate: params.forceUpdate,
       dictionary: params.dictionary,
@@ -416,14 +418,14 @@ class ResourceList extends Component {
     var me = utils.getMe();
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     var model = utils.getModel(this.props.modelName);
-    var isIdentity = this.props.modelName === PROFILE;
+    var isContact = this.props.modelName === PROFILE;
     let rType = resource[TYPE]
     var isVerification = model.value.id === constants.TYPES.VERIFICATION || rType === constants.TYPES.VERIFICATION
     var isForm = model.value.id === constants.TYPES.FORM || utils.getModel(rType).value.subClassOf === constants.TYPES.FORM
 
     var isOrganization = this.props.modelName === ORGANIZATION;
     var m = utils.getModel(resource[TYPE]).value;
-    if (!isIdentity         &&
+    if (!isContact          &&
         !isOrganization     &&
         !this.props.callback) {
       if (isVerification || isForm) {
@@ -491,7 +493,7 @@ class ResourceList extends Component {
         return;
       }
     }
-    var title = isIdentity ? resource.firstName : resource.name; //utils.getDisplayName(resource, model.value.properties);
+    var title = isContact ? resource.firstName : resource.name; //utils.getDisplayName(resource, model.value.properties);
     var modelName = constants.TYPES.MESSAGE;
     var self = this;
     let style = this.mergeStyle(resource.style)
@@ -531,7 +533,7 @@ class ResourceList extends Component {
 
       // }
     }
-    if (isIdentity) { //  ||  isOrganization) {
+    if (isContact) { //  ||  isOrganization) {
       route.title = resource.firstName
       // route.rightButtonTitle = translate('profile')
 
@@ -546,7 +548,7 @@ class ResourceList extends Component {
       //     resource: resource
       //   }
       // }
-      var isMe = isIdentity ? resource[ROOT_HASH] === me[ROOT_HASH] : true;
+      var isMe = isContact ? resource[ROOT_HASH] === me[ROOT_HASH] : true;
       if (isMe) {
         route.onRightButtonPress.rightButtonTitle = 'Edit'
         route.onRightButtonPress.onRightButtonPress = {
@@ -941,9 +943,7 @@ class ResourceList extends Component {
     }
     let me = utils.getMe()
     var actionSheet = this.renderActionSheet() // me.isEmployee && me.organization ? this.renderActionSheet() : null
-    var footer
-    if (!this.state.isLoading)
-      footer = actionSheet && this.renderFooter()
+    let footer = actionSheet && this.renderFooter()
     var searchBar
     if (SearchBar  &&  ((this.state.list && this.state.list.length > 10) || (this.state.filter  &&  this.state.filter.length))) {
       searchBar = (
@@ -1039,6 +1039,8 @@ class ResourceList extends Component {
   }
 
   renderHeader() {
+    if (!this.props.officialAccounts  ||  this.props.modelName !== PROFILE)
+      return
     let partial
     if (this.state.hasPartials)
       partial = (
