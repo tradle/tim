@@ -2271,14 +2271,14 @@ var Store = Reflux.createStore({
 
     return promise
     .then((result) => {
-       if (result) {
-         r = utils.clone(result.object)
-         r[ROOT_HASH] = result.permalink
-         r[CUR_HASH] = result.link
-         r.from = this.buildRef(me)
-         r.to = this.buildRef(this._getItem(to[0]))
-       }
-       newVerification = this.buildRef(r)
+      if (result) {
+        r = utils.clone(result.object)
+        r[ROOT_HASH] = result.permalink
+        r[CUR_HASH] = result.link
+        r.from = this.buildRef(me)
+        r.to = this.buildRef(this._getItem(to[0]))
+      }
+      newVerification = this.buildRef(r)
       let context = r._context
       if (!context) {
         document = this._getItem(utils.getId(document))
@@ -2303,7 +2303,22 @@ var Store = Reflux.createStore({
         r._sharedWith = []
         r._sharedWith.push(this.createSharedWith(utils.getId(r.from), r.time))
       }
+      // if (dontSend  &&  r.sources) {
+      //   let result = self.searchMessages({modelName: VERIFICATION, to: r.to})
+      //   r.sources.forEach((s) => {
+      //     let from = s.from
+      //     delete s.from
 
+      //     s[ROOT_HASH] = tradleUtils.hexLink(s)
+      //     s.from = from
+      //     let v = this._getItem(VERIFICATION + '_' + s[ROOT_HASH])
+      //     if (v)  {
+      //       if (!v._verifies)
+      //         v._verifies = []
+      //       v._verifies.push(utils.clone(v.document))
+      //     }
+      //   })
+      // }
       var batch = [];
       batch.push({type: 'put', key: key, value: r});
       let len = batch.length
