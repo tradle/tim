@@ -139,6 +139,8 @@ class ResourceList extends Component {
   }
   componentWillReceiveProps(props) {
     if (props.isBacklink) {
+      if (!props.backlinkList)
+        return
       if (props.backlinkList  &&  props.backlinkList.length)
         this.state.dataSource = this.state.dataSource.cloneWithRows(props.backlinkList)
       else
