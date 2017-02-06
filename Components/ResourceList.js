@@ -141,7 +141,7 @@ class ResourceList extends Component {
     if (props.isBacklink) {
       if (!props.backlinkList)
         return
-      if (props.backlinkList  &&  props.backlinkList.length)
+      else if (props.backlinkList.length)
         this.state.dataSource = this.state.dataSource.cloneWithRows(props.backlinkList)
       else
         this.state.dataSource = this.state.dataSource.cloneWithRows([])
@@ -213,10 +213,10 @@ class ResourceList extends Component {
     }
     if (params.error)
       return;
-    if (params.action === 'onlineStatus') {
-      this.setState({serverOffline: !params.online})
-      return
-    }
+    // if (params.action === 'onlineStatus') {
+    //   this.setState({serverOffline: !params.online})
+    //   return
+    // }
     if (action === 'newContact') {
       let routes = this.props.navigator.getCurrentRoutes()
       let curRoute = routes[routes.length - 1]
@@ -727,6 +727,7 @@ class ResourceList extends Component {
         key={resource[ROOT_HASH]}
         navigator={this.props.navigator}
         prop={this.props.prop}
+        parentResource={this.props.resource}
         currency={this.props.currency}
         isChooser={this.props.isChooser}
         resource={resource} />
