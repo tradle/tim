@@ -356,8 +356,11 @@ class ResourceView extends Component {
 
     buttons.push(translate('viewDebugLog'))
     actions.push(VIEW_DEBUG_LOG)
-    buttons.push(translate('scanQRcode'))
-    actions.push(SCAN_QR_CODE)
+    if (!utils.isWeb()) {
+      buttons.push(translate('scanQRcode'))
+      actions.push(SCAN_QR_CODE)
+    }
+
     buttons.push(translate('cancel'))
     return(
         <ActionSheet
