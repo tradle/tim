@@ -9,7 +9,7 @@ var MessageList = require('./MessageList');
 var MessageView = require('./MessageView')
 var PageView = require('./PageView')
 var SupervisoryView = require('./SupervisoryView')
-import ActionSheet from 'react-native-actionsheet'
+import ActionSheet from './ActionSheet'
 var utils = require('../utils/utils');
 var translate = utils.translate
 var reactMixin = require('react-mixin');
@@ -981,46 +981,38 @@ class ResourceList extends Component {
   renderActionSheet() {
     let buttons
     if (this.state.allowToAdd) {
-      buttons = [translate('addNew', this.props.prop.title), translate('cancel')]
+      buttons = [
+        {
+          text: translate('addNew', this.props.prop.title),
+          onPress: () => this.addNew()
+        }
+      ]
     } else {
       if (!ENV.allowAddServer) return
 
       buttons = [
-        translate('addServerUrl'),
-        translate('hideResource', translate(utils.getModel(this.props.modelName).value)),
-        translate('scanQRcode'),
-        translate('cancel')
+        {
+          text: translate('addServerUrl'),
+          onPress: () => this.onSettingsPressed()
+        },
+        {
+          text: translate('hideResource', translate(utils.getModel(this.props.modelName).value)),
+          onPress: () => this.setState({hideMode: true})
+        },
+        {
+          text: translate('scanQRcode'),
+          onPress: () => this.scanFormsQRCode()
+        }
       ]
     }
 
+    buttons.push({ text: translate('cancel') })
     return (
       <ActionSheet
         ref={(o) => {
           this.ActionSheet = o
         }}
         options={buttons}
-        cancelButtonIndex={buttons.length - 1}
-        onPress={(index) => {
-          switch (index) {
-          case 0:
-            if (this.state.allowToAdd)
-              this.addNew()
-            else
-              this.onSettingsPressed()
-            break
-          case 1:
-            this.setState({hideMode: true})
-            break
-          case 2:
-            this.scanFormsQRCode()
-            break;
-          // case 2:
-          //   this.talkToEmployee()
-          //   break
-          default:
-            return
-          }
-        }}
       />
     )
   }
