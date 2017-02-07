@@ -71,6 +71,8 @@ const ORGANIZATION = TYPES.ORGANIZATION
 
 const MY_PRODUCT = 'tradle.MyProduct'
 const MESSAGE = 'tradle.Message'
+const ITEM = 'tradle.Item'
+const DOCUMENT = 'tradle.Document'
 const CUR_HASH = constants.CUR_HASH
 const NONCE = constants.NONCE
 const ROOT_HASH = constants.ROOT_HASH
@@ -130,6 +132,10 @@ var utils = {
   getMe() {
     return me;
   },
+  isMe(resource) {
+    let me = this.getMe()
+    return me  &&  me[ROOT_HASH] === resource[ROOT_HASH]
+  },
   setModels(modelsRL) {
     models = modelsRL;
   },
@@ -160,10 +166,10 @@ var utils = {
 
     return val || property.title || utils.makeLabel(property.name)
   },
-  translateModel(model) {
+  translateModel(model, isPlural) {
     if (dictionary  &&  dictionary.models[model.id])
       return dictionary.models[model.id]
-    return model.title ? model.title : this.makeModelTitle(model)
+    return model.title ? model.title : this.makeModelTitle(model, isPlural)
   },
   translateString(...args) {
     if (!strings)
@@ -249,12 +255,16 @@ var utils = {
     // return t !== stringName ? t : (isEnumValue ? s : utils.makeLabel(s))
     return t !== stringName ? t : s
   },
-  makeModelTitle(model) {
+  makeModelTitle(model, isPlural) {
     if (typeof model === 'string')
-      return this.makeModelTitle(this.getModel(model).value)
+      return this.makeModelTitle(this.getModel(model).value, isPlural)
+    if (isPlural  &&  model.plural)
+      return model.plural
     if (model.title)
-      return model.title
+      return isPlural ? model.title + 's' : model.title
     let label = model.id.split('.')[1]
+    if (isPlural)
+      label += 's'
     return label
           // insert a space before all caps
           .replace(/([A-Z])/g, ' $1')
@@ -397,7 +407,7 @@ var utils = {
       if (!vCols)
         return displayName
       let excludeProps = []
-      if (m.value.interfaces && m.value.interfaces.indexOf(MESSAGE))
+      if (this.isMessage(m))
         excludeProps = ['from', 'to']
       for (let i=0; i<vCols.length  &&  !displayName.length; i++) {
         if (!resource[vCols[i]]  ||  excludeProps.indexOf[vCols[i]])
@@ -407,6 +417,7 @@ var utils = {
     }
     return displayName;
   },
+
   getStringValueForProperty(resource, p, meta) {
     let displayName = ''
     if (resource[p]) {
@@ -1568,7 +1579,14 @@ var utils = {
   urlsEqual: function urlsEqual (a, b) {
     return trimTrailingSlashes(a) === trimTrailingSlashes(b)
   },
-
+  isMessage(m) {
+    if (typeof m === 'string')
+      m = this.getModel(m).value
+    if (m.isInterface  &&  (m.id === MESSAGE || m.id === DOCUMENT || m.id === ITEM))
+      return true
+    if (m.interfaces && m.interfaces.indexOf(MESSAGE) !== -1)
+      return true
+  },
   requestCameraAccess: async function (opts={}) {
     const { video=true, audio=false } = opts
 

@@ -16,6 +16,7 @@ var defaultBankStyle = require('../styles/bankStyle.json')
 var StyleSheet = require('../StyleSheet')
 
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
+const PROFILE = 'tradle.Profile'
 
 import React, { Component, PropTypes } from 'react'
 import {
@@ -54,7 +55,8 @@ class VerifierChooser extends Component {
         // [constants.ROOT_HASH]: p[1],
         name: rr.name,
         url: rr.url,
-        photos: [{url: rr.photo}]
+        photos: [{url: rr.photo}],
+        botId: PROFILE + '_' + rr.permalink
       }
     })
 
@@ -147,7 +149,8 @@ class VerifierChooser extends Component {
       resource: {
         [constants.TYPE]: SETTINGS,
         url: resource.url,
-        id: verifier.id
+        id: verifier.id,
+        botId: PROFILE + '_' + verifier.permalink
       },
       cb: (r) => this.verifyByTrustedProvider(r, verifier.product)
     })

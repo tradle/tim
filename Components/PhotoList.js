@@ -140,7 +140,7 @@ class PhotoList extends Component {
   renderRow(styles, photo, imageStyle)  {
     var uri = photo.url
     if (!uri)
-      return <View />
+      return
     var source = {uri: uri};
     if (uri.indexOf('data') === 0  ||  uri.charAt(0) == '/')
       source.isStatic = true;

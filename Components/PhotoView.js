@@ -6,6 +6,8 @@ var constants = require('@tradle/constants');
 var reactMixin = require('react-mixin');
 var PhotoCarouselMixin = require('./PhotoCarouselMixin');
 
+import Gallery from 'react-native-gallery'
+
 var equal = require('deep-equal')
 import {
   StyleSheet,
@@ -58,6 +60,7 @@ class PhotoView extends Component {
     var currentPhoto = this.state.currentPhoto || this.props.mainPhoto || (hasPhoto  &&  resource.photos[0]);
     if (!currentPhoto) {
       if (model.id === constants.TYPES.PROFILE) {
+        return <View/>
         return (
           <View style={styles.photoBG}>
             <Icon name='ios-leaf' size={200}  color='goldenrod' />
@@ -67,6 +70,8 @@ class PhotoView extends Component {
       else
         return <View />
     }
+    let coverPhoto = utils.getPropertiesWithAnnotation(model.properties, 'coverPhoto')
+    coverPhoto = coverPhoto  &&  resource[Object.keys(coverPhoto)[0]]
 
     var url = currentPhoto.url;
     // var nextPhoto = resource.photos && resource.photos.length == 1
@@ -95,13 +100,42 @@ class PhotoView extends Component {
                 }
 
             // <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, currentPhoto, true)}>
+    // let style={transform: [{scale: this.state.anim}]}
+ // onPress={() => {
+ //              Animated.spring(this.state.anim, {
+ //                toValue: 0,   // Returns to the start
+ //                velocity: 3,  // Velocity makes it move
+ //                tension: 1, // Slow
+ //                friction: 100,  // Oscillate a lot
+ //              }).start();
+ //              this.shwCarousel(resource.photos[0])
+ //          }}
+    let photoView
+    if (coverPhoto) {
+      let coverPhotoUri = coverPhoto.url
+      var coverPhotoSource = coverPhotoUri.charAt(0) == '/' || coverPhotoUri.indexOf('data') === 0
+               ? {uri: coverPhotoUri, isStatic: true}
+               : {uri: coverPhotoUri}
+
+      photoView = (
+        <Image resizeMode='cover' source={coverPhotoSource} style={image}>
+          <View style={{height: 50, backgroundColor: '#000000', alignSelf: 'stretch', opacity: 0.2, position: 'absolute', left: 0, bottom: 0, width: width}} />
+          <Image source={source} style={{width: 80, height: 80, /*borderWidth: 2, borderColor: '#ffffff',*/ position: 'absolute', left: 10, bottom: 10}} />
+          <Text style={{fontSize: 30, fontWeight: '600', color: '#ffffff', position: 'absolute', left: 100, bottom: 10}}>{utils.getDisplayName(this.props.resource)}</Text>
+        </Image>
+      )
+    }
+    else
+      photoView = <Image resizeMode='cover' source={source} style={image} />
+
     return (
           <View>
             <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, this.props.mainPhoto || resource.photos[0], true)}>
-              <Image resizeMode='cover' source={source} style={image} />
+              {photoView}
             </TouchableHighlight>
           </View>
     )
+            // {this.props.children}
     // return (
     //       <Animated.View style={style}>
     //         <TouchableHighlight underlayColor='transparent' onPress={this.openModal.bind(this)}>

@@ -26,8 +26,9 @@ var equal = require('deep-equal')
 var constants = require('@tradle/constants');
 var termsAndConditions = require('../termsAndConditions.json')
 var StyleSheet = require('../StyleSheet')
-import ImagePicker from 'react-native-image-picker';
 import ImageInput from './ImageInput'
+var sampleProfile = require('../data/sampleProfile.json')
+
 import CustomIcon from '../styles/customicons'
 const ENUM = 'tradle.Enum'
 var LINK_COLOR
@@ -357,6 +358,7 @@ class NewResource extends Component {
     this.state.submitted = true
     this.state.noScroll = false
     var resource = this.state.resource;
+
     var value = this.refs.form.getValue();
     if (!value) {
       value = this.refs.form.refs.input.state.value;
@@ -370,6 +372,11 @@ class NewResource extends Component {
       for (var p in this.floatingProps) {
         json[p] = this.floatingProps[p]
       }
+    }
+    if (this.state.isRegistration) {
+      let sample = utils.clone(sampleProfile)
+      extend(sample, json)
+      json = sample
     }
     var required = this.props.model.required;
     if (!required) {
@@ -548,7 +555,6 @@ class NewResource extends Component {
         resource[p] = json[p];
     return resource;
   }
-
   onAddItem(propName, item) {
     if (!item)
       return;
@@ -571,6 +577,7 @@ class NewResource extends Component {
       inFocus: propName
     });
   }
+
   onNewPressed(bl) {
     // if (bl.items.backlink) {
     //   var model = utils.getModel(bl.items.ref).value;
@@ -639,31 +646,6 @@ class NewResource extends Component {
       }
     });
   }
-  // showChoice(prop) {
-  //   var self = this;
-  //   ImagePicker.showImagePicker({
-  //     returnIsVertical: true,
-  //     chooseFromLibraryButtonTitle: utils.isSimulator() || prop._allowPicturesFromLibrary ? 'Choose from Library' : null,
-  //     takePhotoButtonTitle: utils.isSimulator() ? null : 'Take Photo…',
-  //     quality: utils.imageQuality
-  //   }, (response) => {
-  //     if (response.didCancel)
-  //       return;
-  //     if (response.error) {
-  //       console.log('ImagePickerManager Error: ', response.error);
-  //       return
-  //     }
-  //     var item = {
-  //       // title: 'photo',
-  //       url: 'data:image/jpeg;base64,' + response.data,
-  //       isVertical: response.isVertical,
-  //       width: response.width,
-  //       height: response.height,
-  //       chooseFromLibraryButtonTitle: ''
-  //     };
-  //     self.onAddItem('photos', item);
-  //   });
-  // }
 
   render() {
     if (this.state.isUploading)
@@ -779,33 +761,9 @@ class NewResource extends Component {
                    </TouchableHighlight>
                  </View>
                : <View style={{height: 0}} />
-    // var button = isRegistration
-    //            ? <View>
-    //                <TouchableHighlight style={styles.thumbButton}
-    //                     underlayColor='transparent' onPress={() => {
-    //                       if (this.state.termsAccepted)
-    //                         this.onSavePressed()
-    //                       else
-    //                         this.showTermsAndConditions()
-    //                     }}>
-    //                   <View style={styles.getStarted}>
-    //                      <Text style={styles.getStartedText}>ENTER</Text>
-    //                   </View>
-    //                </TouchableHighlight>
-    //                <TouchableHighlight underlayColor='transparent' style={{flexDirection: 'row', alignSelf: 'center', paddingTop: 7}} onPress={this.showTermsAndConditions.bind(this)}>
-    //                  <View style={{flexDirection: 'row'}}>
-    //                    <Text style={{fontSize: 16, color: '#A6DBF5'}}>{translate('acceptTermsAndConditions')}</Text>
-    //                  </View>
-    //                </TouchableHighlight>
-    //              </View>
-    //            : <View style={{height: 0}} />
     var formStyle = isRegistration
                   ? {justifyContent: 'center', height: height - (height > 1000 ? 0 : isRegistration ? 50 : 100)}
                   : {justifyContent: 'flex-start'}
-//          <View style={photoStyle}>
-//            <PhotoView resource={resource} navigator={this.props.navigator}/>
-//          </View>
-                  // keyboardDismissMode='on-drag'>
     let jsonProps = utils.getPropertiesWithRange('json', meta)
     let jsons = []
     if (jsonProps  &&  jsonProps.length) {
@@ -852,20 +810,6 @@ class NewResource extends Component {
       }
       return <PageView style={platformStyles.container}>{content}</PageView>
     }
-    // return (
-    //   <View style={{height: height}}>
-    //     <Image source={BG_IMAGE} style={styles.bgImage} />
-    //     <View style={{justifyContent: 'center', height: height}}>
-    //     {content}
-    //     </View>
-    //     {isRegistration
-    //       ? <View style={styles.logo}>
-    //           <CustomIcon name='tradle' size={40} color='#ffffff' />
-    //         </View>
-    //       : <View/>
-    //     }
-    //   </View>
-    // )
     return (
       <View style={{height: height}}>
         <BackgroundImage source={BG_IMAGE} style={styles.bgImage} />
@@ -1284,7 +1228,6 @@ var styles = StyleSheet.create({
     alignSelf: 'stretch',
     alignItems: 'center',
     justifyContent: 'center',
-    // paddingHorizontal: 80,
   },
   thumb: {
     width:  40,
@@ -1293,10 +1236,6 @@ var styles = StyleSheet.create({
     borderRadius: 5
   },
   error: {
-    // paddingLeft: 5,
-    // position: 'absolute',
-    // top: 70,
-    // marginBottom: -30,
     marginTop: -10,
     backgroundColor: 'transparent'
   },
@@ -1308,7 +1247,6 @@ var styles = StyleSheet.create({
   items: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    // paddingBottom: 5
   },
   activePropTitle: {
     fontSize: 12,
@@ -1318,8 +1256,6 @@ var styles = StyleSheet.create({
     color: '#bbbbbb'
   },
   photoStrip: {
-    // marginLeft: 10,
-    // marginTop: -30,
     paddingBottom: 5
   },
   photoStripItems: {
@@ -1333,33 +1269,28 @@ var styles = StyleSheet.create({
 
 module.exports = makeResponsive(NewResource);
 
-function readFile (file, cb) {
-  var reader  = new FileReader();
-  reader.addEventListener('load', function () {
-    cb(null, reader.result)
-  }, false)
-
-  reader.addEventListener('error', cb)
-  reader.readAsDataURL(file)
-}
-
-function readImage (file, cb) {
-  readFile(file, function (err, dataUrl) {
-    var image = new window.Image()
-    image.addEventListener('error', function (err) {
-      if (!err) err = new Error('failed to load image')
-
-      cb(err)
-    })
-
-    image.addEventListener('load', function () {
-      cb(null, {
-        url: dataUrl,
-        width: image.width,
-        height: image.height
-      })
-    })
-
-    image.src = dataUrl
-  })
-}
+  // showChoice(prop) {
+  //   var self = this;
+  //   ImagePicker.showImagePicker({
+  //     returnIsVertical: true,
+  //     chooseFromLibraryButtonTitle: utils.isSimulator() || prop._allowPicturesFromLibrary ? 'Choose from Library' : null,
+  //     takePhotoButtonTitle: utils.isSimulator() ? null : 'Take Photo…',
+  //     quality: utils.imageQuality
+  //   }, (response) => {
+  //     if (response.didCancel)
+  //       return;
+  //     if (response.error) {
+  //       console.log('ImagePickerManager Error: ', response.error);
+  //       return
+  //     }
+  //     var item = {
+  //       // title: 'photo',
+  //       url: 'data:image/jpeg;base64,' + response.data,
+  //       isVertical: response.isVertical,
+  //       width: response.width,
+  //       height: response.height,
+  //       chooseFromLibraryButtonTitle: ''
+  //     };
+  //     self.onAddItem('photos', item);
+  //   });
+  // }

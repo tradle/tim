@@ -17,7 +17,7 @@ var Reflux = require('reflux');
 var reactMixin = require('react-mixin');
 // const PRIORITY_HEIGHT = 100
 var defaultBankStyle = require('../styles/bankStyle.json')
-
+var appStyle = require('../styles/appStyle.json')
 var StyleSheet = require('../StyleSheet')
 
 import {
@@ -110,10 +110,11 @@ class ResourceRow extends Component {
     var resource = this.props.resource;
     var photo;
     let rType = resource[TYPE]
-    var isIdentity = rType === PROFILE;
+    var isContact = rType === PROFILE;
+    var isOrg = rType === ORGANIZATION
     var noImage;
     let isOfficialAccounts = this.props.isOfficialAccounts
-    if (resource.photos &&  resource.photos.length) {
+    if (resource.photos &&  resource.photos.length  &&  resource.photos[0].url) {
       var uri = utils.getImageUri(resource.photos[0].url);
       var params = {
         uri: utils.getImageUri(uri)
@@ -123,14 +124,14 @@ class ResourceRow extends Component {
       photo = <Image source={params} style={styles.cellImage}  key={this.getNextKey()} />;
     }
     else {
-      if (isIdentity) {
+      if (isContact) {
         if (!resource.firstName  &&  !resource.lastName)
           return <View/>
         var name = (resource.firstName ? resource.firstName.charAt(0) : '');
         name += (resource.lastName ? resource.lastName.charAt(0) : '');
         photo = <LinearGradient colors={['#A4CCE0', '#7AAAc3', '#5E92AD']} style={styles.cellRoundImage}>
-           <Text style={styles.cellText}>{name}</Text>
-        </LinearGradient>
+                   <Text style={styles.cellText}>{name}</Text>
+                </LinearGradient>
       }
       else  {
         var model = utils.getModel(resource[TYPE]).value;
@@ -183,26 +184,26 @@ class ResourceRow extends Component {
     let bg = style ? {backgroundColor: style.LIST_BG} : {}
     let color = style ? {color: style.LIST_COLOR} : {}
 
-    var cancelResource = (this.props.onCancel  ||  (this.state && this.state.sharedWith))
-                       ?  <View style={styles.multiChooser}>
-                             <Icon name={this.state.sharedWith ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color={this.state.sharedWith ? '#B1010E' : style ? color.color : '#dddddd'} />
-                           </View>
-                       : <View />
-    var hideMode =  this.props.hideMode
-             ?  <View style={styles.multiChooser}>
+    var cancelResource
+    if (this.props.onCancel  ||  (this.state && this.state.sharedWith))
+      cancelResource = <View style={styles.multiChooser}>
+                         <Icon name={this.state.sharedWith ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color={this.state.sharedWith ? '#B1010E' : style ? color.color : '#dddddd'} />
+                       </View>
+    var hideMode
+    if (this.props.hideMode)
+      hideMode = <View style={styles.multiChooser}>
                   <TouchableHighlight underlayColor='transparent' onPress={() => this.props.hideResource(resource)}>
                     <Icon name='ios-remove-circle'  size={25}  color='#F63D37' />
                   </TouchableHighlight>
                  </View>
-             : <View />
 
-    var multiChooser = this.props.multiChooser
-                     ?  <View style={styles.multiChooser}>
-                          <TouchableOpacity underlayColor='transparent' onPress={this.chooseToShare.bind(this)}>
-                           <Icon name={this.state.isChosen ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color='#7AAAc3' />
-                          </TouchableOpacity>
-                        </View>
-                      : <View />
+    var multiChooser
+    if (this.props.multiChooser)
+      multiChooser = <View style={styles.multiChooser}>
+                       <TouchableHighlight underlayColor='transparent' onPress={this.chooseToShare.bind(this)}>
+                         <Icon name={this.state.isChosen ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color='#7AAAc3' />
+                       </TouchableHighlight>
+                     </View>
     var textStyle = /*noImage ? [styles.textContainer, {marginVertical: 7}] :*/ styles.textContainer;
 
     let dateRow
@@ -213,18 +214,16 @@ class ResourceRow extends Component {
                   <Text style={styles.verySmallLetters}>{val}</Text>
                 </View>
     }
-    else
-      dateRow = <View/>
 
     let isNewContact = this.props.newContact  &&  this.props.newContact[ROOT_HASH] === resource[ROOT_HASH]
     let count
-    if (isIdentity)
+    if (isContact)
       count = resource._unread
 
-    count = count ? <View style={styles.countView}>
-                      <Text style={styles.countText}>{count}</Text>
-                    </View>
-                  : <View/>
+    if (count)
+      count = <View style={styles.countView}>
+                <Text style={styles.countText}>{count}</Text>
+              </View>
 
     // Grey out if not loaded provider info yet
             // <ActivityIndicator hidden='true' color='#629BCA'/>
@@ -315,14 +314,17 @@ class ResourceRow extends Component {
                 <View style={textStyle}>
                    {resource.numberOfForms
                       ? <View style={{flexDirection: 'row'}}>
-                           <Icon name='ios-paper-outline' color={'#7AAAc3'} size={30} style={{marginTop: Platform.OS === 'ios' ? 0 : 0}}/>
-                           <Text style={{fontWeight: '600', marginLeft: 2, marginTop: Platform.OS === 'ios' ? -5 : -5, color: '#7AAAc3'}}>{resource.numberOfForms}</Text>
+                          <Icon name='ios-paper-outline' color={appStyle.ROW_ICON_COLOR} size={30} style={{marginTop: Platform.OS === 'ios' ? 0 : 0}}/>
+                          <View style={styles.count}>
+                            <Text style={styles.countText}>{resource.numberOfForms}</Text>
+                          </View>
                         </View>
                       : <View />
                    }
                 </View>
               </TouchableHighlight>
 
+                           // <Text style={{fontWeight: '600', marginLeft: 2, marginTop: Platform.OS === 'ios' ? -5 : -5, color: '#7AAAc3'}}>{resource.numberOfForms}</Text>
                       // <View style={[styles.row, bg, { width: utils.dimensions(ResourceRow).width - 50}, isOfficialAccounts && resource.priority ? {height: PRIORITY_HEIGHT} : {}]}>
     let content =  <View style={[styles.content, bg]} key={this.getNextKey()}>
                     <TouchableHighlight onPress={onPress} underlayColor='transparent'>
@@ -436,7 +438,7 @@ class ResourceRow extends Component {
 
     var isOfficialAccounts = this.props.isOfficialAccounts
     var color = isOfficialAccounts && style ? {color: style.LIST_COLOR} : {}
-    var isIdentity = resource[TYPE] === PROFILE;
+    var isContact = resource[TYPE] === PROFILE;
     viewCols.forEach((v) => {
       if (v === dateProp)
         return;
@@ -446,7 +448,7 @@ class ResourceRow extends Component {
       if (!resource[v]  &&  !properties[v].displayAs)
         return;
       var style = first ? [styles.resourceTitle, color] : [styles.description, color]
-      if (isIdentity  &&  v === 'organization') {
+      if (isContact  &&  v === 'organization') {
         style.push({alignSelf: 'flex-end', marginTop: 20})
         style.push(styles.verySmallLetters);
       }
@@ -704,7 +706,25 @@ var styles = StyleSheet.create({
     right: 10,
     top: 25,
     backgroundColor: 'transparent'
-  }
+  },
+  count: {
+    alignSelf: 'flex-start',
+    minWidth: 18,
+    marginLeft: -7,
+    marginTop: 0,
+    backgroundColor: appStyle.COUNTER_BG_COLOR,
+    paddingHorizontal: 3,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: 9,
+    borderColor: appStyle.COUNTER_COLOR,
+    paddingVertical: 1
+  },
+  countText: {
+    fontSize: 12,
+    fontWeight: '600',
+    alignSelf: 'center',
+    color: appStyle.COUNTER_COLOR,
+  },
 });
 
 ResourceRow = makeResponsive(ResourceRow)

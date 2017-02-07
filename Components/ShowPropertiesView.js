@@ -131,9 +131,10 @@ class ShowPropertiesView extends Component {
     var viewCols = vCols.map((p) => {
       if (excludedProperties  &&  excludedProperties.indexOf(p) !== -1)
         return;
-
-      var val = resource[p];
       var pMeta = props[p];
+      if (pMeta.type === 'array'  &&  pMeta.items.ref  &&  !pMeta.inlined)
+        return
+      var val = resource[p];
       if (pMeta.range === 'json') {
         let jsonRows = []
         return this.showJson(pMeta, val, true, jsonRows)
@@ -199,7 +200,7 @@ class ShowPropertiesView extends Component {
       // }
 
       if (!val)
-        return <View key={this.getNextKey()}></View>;
+        return //<View key={this.getNextKey()}></View>;
       if (!isRef) {
         isItems = Array.isArray(val)
         if (isPartial  &&  p === 'leaves') {
@@ -242,19 +243,22 @@ class ShowPropertiesView extends Component {
           return
         val = this.renderSimpleProp(val, pMeta, modelName)
       }
-      var title = pMeta.skipLabel  ||  isItems
-                ? <View />
-                : <Text style={modelName === TERMS_AND_CONDITIONS ? styles.bigTitle : styles.title}>{pMeta.title || utils.makeLabel(p)}</Text>
-      var separator = first
-                    ? <View />
-                    : <View style={styles.separator}></View>;
+      var title
+      if (pMeta.skipLabel  ||  isItems)
+        title = <Text style={modelName === TERMS_AND_CONDITIONS ? styles.bigTitle : styles.title}>{pMeta.title || utils.makeLabel(p)}</Text>
+      var separator = <View/>
+      // var separator = first
+      //               ? <View />
+      //               : <View style={styles.separator}></View>;
 
       first = false;
       let isPromptVisible = this.state.promptVisible !== null
       if (isPromptVisible)
         console.log(this.state.promptVisible)
-      let canReject = this.props.checkProperties
-                    ? <View style={styles.iconView}>
+
+      let canReject
+      if (this.props.checkProperties) {
+        canReject = <View style={styles.iconView}>
                         <TouchableOpacity underlayColor='transparent' onPress={() => {
                           this.setState({promptVisible: pMeta})
                         }}>
@@ -270,8 +274,9 @@ class ShowPropertiesView extends Component {
                             this.setState({ promptVisible: null})
                             this.props.checkProperties(this.state.promptVisible, value)
                           }}/>
-                      </View>
-                    : <View />
+                    </View>
+      }
+
       if (this.props.checkProperties)
         isDirectionRow = true
                // <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>

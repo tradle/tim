@@ -9,6 +9,7 @@ var PhotoList = require('./PhotoList');
 var PhotoView = require('./PhotoView');
 var ShowPropertiesView = require('./ShowPropertiesView');
 var ShowMessageRefList = require('./ShowMessageRefList');
+var ShowRefList = require('./ShowRefList');
 var VerificationView = require('./VerificationView')
 // var MoreLikeThis = require('./MoreLikeThis');
 var NewResource = require('./NewResource');
@@ -20,7 +21,6 @@ var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
 var extend = require('extend');
 var ResourceMixin = require('./ResourceMixin');
-var buttonStyles = require('../styles/buttonStyles');
 var HELP_COLOR = 'blue'
 var NetworkInfoProvider = require('./NetworkInfoProvider')
 const PHOTO = 'tradle.Photo'
@@ -76,25 +76,30 @@ class MessageView extends Component {
     this.listenTo(Store, 'onAction');
   }
   onAction(params) {
-    if (params.action === 'addVerification') {
-      var currentRoutes = this.props.navigator.getCurrentRoutes();
-      var len = currentRoutes.length;
-      if (currentRoutes[len - 1].id === 5)
-        this.props.navigator.pop();
-      Actions.list({
-        modelName: constants.TYPES.MESSAGE,
-        to: params.resource
-      });
-    }
-    else if (params.action === 'getItem') {
-      if (utils.getId(params.resource) === utils.getId(this.props.resource))
-        this.setState({
-          resource: params.resource,
-          isLoading: false
-        })
-    }
-    else if (params.action == 'connectivity') {
+    if (params.action == 'connectivity') {
       this.setState({isConnected: params.isConnected})
+      return
+    }
+    if (!params.resource)
+      return
+    if (utils.getId(params.resource) !== utils.getId(this.props.resource))
+      return
+    // if (params.action === 'addVerification') {
+    //   // var currentRoutes = this.props.navigator.getCurrentRoutes();
+    //   // var len = currentRoutes.length;
+    //   // if (currentRoutes[len - 1].id === 5)
+    //   //   this.props.navigator.pop();
+    //   Actions.list({
+    //     modelName: constants.TYPES.MESSAGE,
+    //     to: params.resource
+    //   });
+    //   return
+    // }
+    if (params.action === 'getItem') {
+      this.setState({
+        resource: params.resource,
+        isLoading: false
+      })
     }
   }
   verifyOrCreateError() {
@@ -199,8 +204,8 @@ class MessageView extends Component {
     if (this.state.isLoading)
       return <View/>
     var resource = this.state.resource;
-    var modelName = resource[TYPE] || resource.id.split('_')[0];
-    var model = utils.getModel(modelName).value;
+    var model = utils.getModel(resource[TYPE]).value;
+    let isVerification = model.id === VERIFICATION
     let t = resource.dateVerified ? resource.dateVerified : resource.time
     var date = t ? utils.formatDate(new Date(t)) : utils.formatDate(new Date())
 
@@ -214,12 +219,48 @@ class MessageView extends Component {
     var inRow = photos ? photos.length : 0
     if (inRow  &&  inRow > 4)
       inRow = 5;
-    var actionPanel = this.props.isReview
-                    ? null
-                    : <ShowMessageRefList resource={resource}
-                                          navigator={this.props.navigator}
+
+
+    let propertySheet
+    if (isVerification)
+      propertySheet = <VerificationView navigator={this.props.navigator}
+                                        resource={resource}
+                                        bankStyle={this.props.bankStyle}
+                                        currency={this.props.currency}
+                                        showVerification={this.showVerification.bind(this)}/>
+    else
+      propertySheet = <ShowPropertiesView navigator={this.props.navigator}
+                                          resource={resource}
+                                          bankStyle={this.props.bankStyle}
+                                          errorProps={this.state.errorProps}
                                           currency={this.props.currency}
-                                          bankStyle={this.props.bankStyle} />
+                                          checkProperties={this.props.isVerifier /* && !utils.isReadOnlyChat(resource)*/ ? this.onCheck.bind(this) : null}
+                                          excludedProperties={['tradle.Message.message', 'time', 'photos']}
+                                          showRefResource={this.getRefResource.bind(this)}/>
+
+    let content = <View>
+                    <View style={styles.photoListStyle}>
+                      <PhotoList photos={photos} resource={resource} isView={true} navigator={this.props.navigator} numberInRow={inRow} />
+                    </View>
+                    <View style={styles.rowContainer}>
+                      {msg}
+                      {propertySheet}
+                      {separator}
+                      {verificationTxID}
+                    </View>
+                  </View>
+
+    var actionPanel
+    if (this.props.isReview)
+      actionPanel = content
+    else {
+      actionPanel = <ShowRefList resource={resource}
+                                 navigator={this.props.navigator}
+                                 currency={this.props.currency}
+                                 bankStyle={this.props.bankStyle}>
+                      {content}
+                    </ShowRefList>
+    }
         // <FromToView resource={resource} navigator={this.props.navigator} />
         // <MoreLikeThis resource={resource} navigator={this.props.navigator}/>
     var verificationTxID, separator
@@ -245,10 +286,11 @@ class MessageView extends Component {
     // let message = <View style={{padding: 10}}>
     //                 <Text style={styles.itemTitle}>click done for verifying or check the properties that should be corrected and click Done button</Text>
     //               </View>
-    let msg = resource.message  &&  resource.message.length
-            ? <View><Text style={styles.itemTitle}>{resource.message}</Text></View>
-            : <View/>
-    let isVerification = this.props.resource[TYPE] === constants.TYPES.VERIFICATION
+    let msg
+    if (resource.message  &&  resource.message.length)
+      msg = <View><Text style={styles.itemTitle}>{resource.message}</Text></View>
+
+    // var isVerification = this.props.resource[TYPE] === constants.TYPES.VERIFICATION
     let dateView
     if (isVerification) {
       dateView = <View style={[styles.band, {flexDirection: 'row', justifyContent: 'flex-end', borderBottomColor: this.props.bankStyle.PRODUCT_ROW_BG_COLOR}]}>
@@ -256,11 +298,11 @@ class MessageView extends Component {
                   <Text style={styles.dateValue}>{date}</Text>
                 </View>
     }
-    else {
-      dateView = <View style={[styles.band, {borderBottomColor: this.props.bankStyle.PRODUCT_ROW_BG_COLOR}]}>
-                  <Text style={styles.date}>{date}</Text>
-                </View>
-    }
+    // else {
+    //   dateView = <View style={[styles.band, {borderBottomColor: this.props.bankStyle.PRODUCT_ROW_BG_COLOR}]}>
+    //               <Text style={styles.date}>{date}</Text>
+    //             </View>
+    // }
 
     return (
       <ScrollView  ref='this' style={platformStyles.container} keyboardShouldPersistTaps={true}>
@@ -269,31 +311,6 @@ class MessageView extends Component {
           <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={this.props.navigator}/>
         </View>
         {actionPanel}
-        <View>
-          <View style={styles.photoListStyle}>
-            <PhotoList photos={photos} resource={resource} isView={true} navigator={this.props.navigator} numberInRow={inRow} />
-          </View>
-          <View style={styles.rowContainer}>
-            {msg}
-            {isVerification
-              ? <VerificationView navigator={this.props.navigator}
-                                  resource={resource}
-                                  bankStyle={this.props.bankStyle}
-                                  currency={this.props.currency}
-                                  showVerification={this.showVerification.bind(this)}/>
-              : <ShowPropertiesView navigator={this.props.navigator}
-                                  resource={resource}
-                                  bankStyle={this.props.bankStyle}
-                                  errorProps={this.state.errorProps}
-                                  currency={this.props.currency}
-                                  checkProperties={this.props.isVerifier /* && !utils.isReadOnlyChat(resource)*/ ? this.onCheck.bind(this) : null}
-                                  excludedProperties={['tradle.Message.message', 'time', 'photos']}
-                                  showRefResource={this.getRefResource.bind(this)}/>
-            }
-            {separator}
-            {verificationTxID}
-          </View>
-        </View>
       </ScrollView>
     );
   }

@@ -157,9 +157,9 @@ class VerificationView extends Component {
         retCols.push(
           <View key={this.getNextKey()}>
              <View style={styles.separator}></View>
-             <View  style={style}>
+             <View  style={[style, {backgroundColor: this.props.bankStyle.SOURCED_VERIFICATION_BG_COLOR}]}>
                <TouchableOpacity onPress={this.showResource.bind(this, r.document, dType)} >
-                 <Text style={styles.title}>{translate(mv.properties.document)}</Text>
+                 <Text style={[styles.title, {color: this.props.bankStyle.SOURCED_VERIFICATION_TEXT_COLOR}]}>{translate(mv.properties.document)}</Text>
                  <Text style={[styles.description, {color: '#7AAAC3'}]}>{translate(utils.getModel(dType).value)}</Text>
                </TouchableOpacity>
              </View>
@@ -211,10 +211,9 @@ class VerificationView extends Component {
       }
       else if (pMeta.type === 'date')
         val = dateformat(new Date(val), 'fullDate')
-      else if (pMeta.range === 'json') {
+      else if (pMeta.range === 'json')
         // let jsonRows = []
         val = this.showJson(pMeta, val, false, [])
-      }
       if (typeof val === 'undefined')
         return <View key={this.getNextKey()}></View>;
       if (!isRef) {
@@ -242,7 +241,7 @@ class VerificationView extends Component {
                </View>
              </View>
              );
-    });
+    })
 
     // flatten the tree
     viewCols.forEach((v) => {
@@ -253,7 +252,6 @@ class VerificationView extends Component {
           retCols.push(v)
       }
     })
-
     if (resource.txId) {
       retCols.push(<View key={this.getNextKey()}>
                      <View style={styles.separator}></View>

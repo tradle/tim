@@ -49,7 +49,7 @@ class ImageInput extends Component {
     let action
     if (utils.isSimulator())
       action = 'launchImageLibrary'
-    else if (!prop._allowPicturesFromLibrary)
+    else if (!prop.allowPicturesFromLibrary)
       action = 'launchCamera'
     else {
       action = 'showImagePicker'
@@ -59,7 +59,10 @@ class ImageInput extends Component {
       })
     }
 
-    const allowed = await utils.requestCameraAccess()
+    const allowed = utils.isSimulator()
+      ? true //await ImagePicker.checkPhotosPermissions()
+      : await utils.requestCameraAccess()
+
     if (!allowed) return
 
     ImagePicker[action](options, (response) => {

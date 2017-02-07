@@ -19,6 +19,7 @@ import omit from 'object.omit'
 import pick from 'object.pick'
 import formDefaults from '../data/formDefaults.json'
 import DatePicker from 'react-native-datepicker'
+import ImageInput from './ImageInput'
 
 import BlinkID from 'react-native-blinkid'
 import { parse as parseUSDL } from 'parse-usdl'
@@ -730,20 +731,15 @@ var NewResourceMixin = {
   },
 
   showCamera(params) {
-    // if (this.props.model  &&  this.props.model.properties[params.prop].component) {
-
-    // }
     if (params.prop === 'scan')  {
       if (utils.isWeb()) return Alert.alert('Oops!', 'Scanning in the browser is not supported yet')
 
-      if (this.state.resource.documentType  &&  this.state.resource.country)
-        if (utils.isAndroid()) {
+      if (this.state.resource.documentType  &&  this.state.resource.country) {
+        if (utils.isAndroid())
           this.showAnylineScanner(params.prop)
-        } else {
+        else
           this.showBlinkIDScanner(params.prop)
-        }
-
-        // this.scanFormsQRCode(params.prop)
+      }
       else
         Alert.alert('Please choose country and document type first')
       return
@@ -1170,21 +1166,54 @@ var NewResourceMixin = {
     else
       icon = <Icon name='ios-arrow-down'  size={15}  color={iconColor}  style={[styles.icon1, styles.customIcon]} />
 
+    let content = <View  style={[styles.chooserContainer, {flexDirection: 'row', borderBottomColor: lcolor}]}>
+                    {propView}
+                    {icon}
+                  </View>
+
+    let actionItem
+    if (isVideo ||  isPhoto) {
+      if (prop.allowPicturesFromLibrary) {
+        var aiStyle = {flex: 7, paddingTop: 15, paddingBottom: 7}
+        let m = utils.getModel(prop.ref).value
+        actionItem = <ImageInput prop={prop} style={aiStyle} onImage={item => this.onSetMediaProperty(prop.name, item)}>
+                       {content}
+                     </ImageInput>
+      }
+      else
+        actionItem = <TouchableHighlight underlayColor='transparent' onPress={this.showCamera.bind(this, params)}>
+                       {content}
+                     </TouchableHighlight>
+    }
+    else
+      actionItem = <TouchableHighlight underlayColor='transparent' onPress={this.chooser.bind(this, prop, params.prop)}>
+                     {content}
+                   </TouchableHighlight>
+
     return (
       <View key={this.getNextKey()} style={{paddingBottom: this.hasError(params.errors, prop.name) ? 0 : 10, margin: 0}} ref={prop.name}>
         {propLabel}
-        <TouchableHighlight underlayColor='transparent' onPress={
-          isVideo ||  isPhoto ? this.showCamera.bind(this, params) : this.chooser.bind(this, prop, params.prop)
-        }>
-          <View  style={[styles.chooserContainer, {flexDirection: 'row', borderBottomColor: lcolor}]}>
-            {propView}
-            {icon}
-          </View>
-        </TouchableHighlight>
-         {this.getErrorView({noError: params.noError, errors: params.errors, prop: prop, paddingBottom: 0})}
+        {actionItem}
+        {this.getErrorView({noError: params.noError, errors: params.errors, prop: prop, paddingBottom: 0})}
       </View>
     );
   },
+  onSetMediaProperty(propName, item) {
+    if (!item)
+      return;
+    var resource = this.addFormValues();
+    if (this.props.model.properties[propName].ref)
+      item[constants.TYPE] = this.props.model.properties[propName].ref
+    if (this.state.missedRequiredOrErrorValue)
+      delete this.state.missedRequiredOrErrorValue[propName]
+    resource[propName] = item
+    this.setState({
+      resource: resource,
+      prop: propName,
+      inFocus: propName
+    });
+  },
+
   hasError(errors, propName) {
     return (errors && errors[propName]) || this.state.missedRequiredOrErrorValue &&  this.state.missedRequiredOrErrorValue[propName]
   },
@@ -1677,7 +1706,7 @@ var styles= StyleSheet.create({
   },
   photoIcon: {
     position: 'absolute',
-    right: 0,
+    right: 5,
     marginTop: 10
   },
   customIcon: {
@@ -1745,6 +1774,12 @@ var styles= StyleSheet.create({
     marginVertical: 5,
     paddingBottom: 5
     // marginLeft: 10
+  },
+  noItemsText: {
+    fontSize: 20,
+    color: '#AAAAAA',
+    // alignSelf: 'center',
+    // paddingLeft: 10
   },
 })
 
@@ -1886,4 +1921,67 @@ module.exports = NewResourceMixin
   //   }
   //   else
   //     this.showPicker(prop, 'preset', {date: new Date()})
+  // },
+
+  // renderPhotoItem(prop, styles) {
+  //   let meta = this.props.model
+  //   let resource = this.state.resource
+  //   let model = meta
+  //   let val
+  //   let lcolor = this.getLabelAndBorderColor(prop.name)
+  //   var value = resource  &&  resource[prop.name]
+
+  //   var title = translate(prop, model) //.title || utils.makeLabel(p)
+
+  //   if (value) {
+  //     val = <View style={[styles.photoStrip, count ? {marginTop: -25} : {marginTop: 0}]}>
+  //             <Text style={[styles.activePropTitle, {color: lcolor}]}>{title}</Text>
+  //             <View style={styles.photoStripItems}>
+  //               <Image resizeMode='cover' style={styles.thumb} source={{uri: arr[i].url}}  key={this.getNextKey()} onPress={() => {
+  //                 this.openModal(arr[i])
+  //               }}/>
+  //             </View>
+  //           </View>
+  //   }
+  //   else
+  //     val = <Text style={count ? styles.itemsText : styles.noItemsText}>{title}</Text>
+
+  //   let icon = <View style={[styles.itemsCounterEmpty]}>
+  //                <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
+  //              </View>
+  //   var err = this.state.missedRequiredOrErrorValue
+  //           ? this.state.missedRequiredOrErrorValue[prop.name]
+  //           : null
+  //   var errTitle = translate('thisFieldIsRequired')
+  //   var error = err
+  //             ? <View style={styles.error}>
+  //                 <Text style={styles.errorText}>{errTitle}</Text>
+  //               </View>
+  //             : <View/>
+  //   var actionableItem = <ImageInput
+  //                          prop={bl}
+  //                          style={[{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]}
+  //                          underlayColor='transparent'
+  //                          onImage={item => this.onAddItem(name, item)}>
+  //                          {photo}
+  //                        </ImageInput>
+
+  //   let istyle = [count ? styles.photoButton : styles.itemButton, {marginHorizontal: 10, borderBottomColor: lcolor}]
+
+  //   return (
+  //     <View key={this.getNextKey()}>
+  //       <View style={istyle} ref={prop.name}>
+  //         <View style={styles.items}>
+  //           {actionableItem}
+  //           <ImageInput
+  //               prop={prop}
+  //               underlayColor='transparent' style={[{flex: 1, position: 'absolute', right: 0}, count ? {marginTop: 15} : {marginTop: 15, paddingBottom: 7}]}
+  //               onImage={item => this.onAddItem(prop.name, item)}>
+  //             {counter}
+  //           </ImageInput>
+  //         </View>
+  //       </View>
+  //       {error}
+  //     </View>
+  //   );
   // },
