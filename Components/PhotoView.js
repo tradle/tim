@@ -87,18 +87,23 @@ class PhotoView extends Component {
         nextPhoto = i === len - 1 ? resource.photos[0] : resource.photos[i + 1];
     }
     let {width, height} = utils.dimensions(PhotoView)
-    let baseW = 0.8 * width
-    let baseH = 0.8 * height
-    let image = utils.isWeb()
-              ? {
-                  width: Math.floor(width < height ? baseW : baseH),
-                  height: Math.floor(width < height ? baseH / 2 : baseW / 2),
-                }
-              : {
-                  width: width < height ? width : height,
-                  height: Math.floor(width < height ? height / 2 : width / 2),
-                }
+    // let baseW = 0.8 * width
+    // let baseH = 0.8 * height
+    // let image = utils.isWeb()
+    //           ? {
+    //               width: Math.floor(width < height ? baseW : baseH),
+    //               height: Math.floor(width < height ? baseH / 2 : baseW / 2),
+    //             }
+    //           : {
+    //               width: width < height ? width : height,
+    //               height: Math.floor(width < height ? height / 2 : width / 2),
+    //             }
 
+    let image = {
+      width: width,
+      height: height/ 4,
+      // alignSelf: 'stretch'
+    }
             // <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, currentPhoto, true)}>
     // let style={transform: [{scale: this.state.anim}]}
  // onPress={() => {

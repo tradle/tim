@@ -124,7 +124,7 @@ class ShowRefList extends Component {
                       prop={currentBacklink}
                       resource={resource}
                       isBacklink={true}
-                      backlinkList={this.props.backlinkList}
+                      backlinkList={this.props.backlinkList  ||  resource[currentBacklink.name]}
                       navigator={this.props.navigator} />
     }
     let comment
@@ -142,7 +142,7 @@ class ShowRefList extends Component {
                 </View>
                 {this.props.children}
                 {comment}
-                <View>
+                <View style={{margin: 1, flex: 1}}>
                   {backlinkRL}
                 </View>
               </View>
