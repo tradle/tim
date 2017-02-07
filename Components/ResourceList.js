@@ -44,6 +44,7 @@ const ENUM = 'tradle.Enum'
 import React, { Component, PropTypes } from 'react'
 import {
   ListView,
+  ScrollView,
   Navigator,
   Alert,
   TouchableOpacity,
@@ -979,12 +980,12 @@ class ResourceList extends Component {
        network = <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
     let hasSearchBar = this.props.isBacklink && this.props.backlinkList && this.props.backlinkList.length > 10
     return (
-      <PageView style={this.props.isBacklink ? {} : platformStyles.container}>
+      <PageView style={this.props.isBacklink ? {height: utils.dimensions().height} : platformStyles.container}>
         {network}
         <View style={hasSearchBar ? {height: 0} : {}}>
           {searchBar}
         </View>
-        <View style={styles.separator} />
+        <View style={this.props.isBacklink ? {} : styles.separator} />
         {content}
         {footer}
         {actionSheet}
