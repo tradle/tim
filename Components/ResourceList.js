@@ -726,7 +726,7 @@ class ResourceList extends Component {
 
   renderRow(resource)  {
     var model = this.props.isBacklink
-              ? utils.getModel(resource[TYPE]).value
+              ? utils.getModel(utils.getType(resource)).value
               : utils.getModel(this.props.modelName).value;
     if (model.isInterface)
       model = utils.getModel(resource[TYPE]).value
