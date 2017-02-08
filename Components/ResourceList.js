@@ -724,7 +724,7 @@ class ResourceList extends Component {
     return /*hasBacklink  &&*/  (isVerification  || isForm || isMyProduct)
     ? (<VerificationRow
         onSelect={() => this.selectResource(isVerification
-                              ? resource.sources ? resource : resource.document
+                              ? resource.sources || resource.method ? resource : resource.document
                               : resource)}
         key={resource[ROOT_HASH]}
         navigator={this.props.navigator}
