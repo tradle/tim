@@ -21,7 +21,7 @@ var debug = require('debug')('Tradle-Home')
 var BG_IMAGE = require('../img/bg.png')
 var PasswordCheck = require('./PasswordCheck')
 var FadeInView = require('./FadeInView')
-// var TouchIDOptIn = require('./TouchIDOptIn')
+var TouchIDOptIn = require('./TouchIDOptIn')
 var defaultBankStyle = require('../styles/bankStyle.json')
 var QRCodeScanner = require('./QRCodeScanner')
 
@@ -71,7 +71,7 @@ import {
 import ActivityIndicator from './ActivityIndicator'
 
 const isAndroid = Platform.OS === 'android'
-import React, { Component } from 'react'
+import React, { Component, PropTypes } from 'react'
 
 class TimHome extends Component {
   static displayName = 'TimHome';

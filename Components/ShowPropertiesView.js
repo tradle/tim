@@ -30,7 +30,7 @@ import {
   TouchableOpacity,
 } from 'react-native'
 
-import React, { Component } from 'react'
+import React, { Component, PropTypes } from 'react'
 class ShowPropertiesView extends Component {
   props: {
     navigator: PropTypes.object.isRequired,
