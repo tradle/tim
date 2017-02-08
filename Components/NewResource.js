@@ -249,7 +249,7 @@ class NewResource extends Component {
 
     var self = this;
     var title = utils.getDisplayName(resource, this.props.model.properties);
-    var isMessage = this.props.model.interfaces  &&  this.props.model.interfaces.indexOf(constants.TYPES.MESSAGE) != -1;
+    var isMessage = utils.isMessage(this.props.model)
     // When message created the return page is the chat window,
     // When profile or some contact info changed/added the return page is Profile view page
     if (isMessage) {
@@ -648,7 +648,7 @@ class NewResource extends Component {
     var model = {};
     var arrays = [];
     extend(true, data, resource);
-    var isMessage = meta.interfaces  &&  meta.interfaces.indexOf(constants.TYPES.MESSAGE) != -1;
+    var isMessage = utils.isMessage(meta)
     var isFinancialProduct = isMessage  &&  this.props.model.subClassOf && this.props.model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT
     var showSendVerificationForm = false;
     var formToDisplay;

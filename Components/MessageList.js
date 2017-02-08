@@ -52,7 +52,7 @@ var StyleSheet = require('../StyleSheet')
 
 import React, { Component } from 'react'
 import {
-  ListView,
+  // ListView,
   // StyleSheet,
   PropTypes,
   Navigator,
@@ -386,7 +386,6 @@ class MessageList extends Component {
 
   renderRow(resource, sectionId, rowId)  {
     var model = utils.getModel(resource[TYPE] || resource.id).value;
-    var isMessage = model.interfaces  &&  model.interfaces.indexOf(TYPES.MESSAGE) != -1;
     var isAggregation = this.props.isAggregation;
     var me = utils.getMe();
     // var MessageRow = require('./MessageRow');

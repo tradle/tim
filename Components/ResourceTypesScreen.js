@@ -118,7 +118,6 @@ class ResourceTypesScreen extends Component {
 
   renderRow(resource)  {
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
-    var isMessage = model.interfaces  &&  model.interfaces.indexOf(constants.TYPES.MESSAGE) != -1;
     var MessageTypeRow = require('./MessageTypeRow');
 
     return (
