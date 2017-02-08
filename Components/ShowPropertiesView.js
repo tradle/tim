@@ -112,7 +112,7 @@ class ShowPropertiesView extends Component {
           vCols.push(p)
       }
     }
-    var isMessage = model.interfaces;
+    var isMessage = utils.isMessage(model)
     if (!isMessage) {
       var len = vCols.length;
       for (var i=0; i<len; i++) {
@@ -241,7 +241,7 @@ class ShowPropertiesView extends Component {
         val = this.renderSimpleProp(val, pMeta, modelName)
       }
       var title
-      if (pMeta.skipLabel  ||  isItems)
+      if (!pMeta.skipLabel  &&  !isItems)
         title = <Text style={modelName === TERMS_AND_CONDITIONS ? styles.bigTitle : styles.title}>{pMeta.title || utils.makeLabel(p)}</Text>
       var separator = <View/>
       // var separator = first
