@@ -47,5 +47,6 @@ module.exports = extend({
   requireDeviceLocalAuth: false,
   homePage: true,
   useKeychain: true,
-  pauseOnTransition: true
+  pauseOnTransition: true,
+  profileTitle: 'profile'
 }, environment)
