@@ -86,12 +86,13 @@ class MessageList extends Component {
     this.state = {
       isLoading: true,
       // selectedAssets: {},
-      isConnected: this.props.navigator.isConnected,
-      onlineStatus: this.props.resource._online,
+      isConnected: props.navigator.isConnected,
+      onlineStatus: props.resource._online,
       allContexts: true,  // true - for the full chat; false - filtered chat for specific context.
       isEmployee:  utils.isEmployee(props.resource),
-      filter: this.props.filter,
+      filter: props.filter,
       userInput: '',
+      hasProducts: props.resource.products,
       allLoaded: false
     }
   }
@@ -130,6 +131,10 @@ class MessageList extends Component {
     }
     if (params.to  &&  params.to[ROOT_HASH] !== resource[ROOT_HASH])
       return
+    if (params.action === 'getItem'  &&  utils.getId(params.resource) === utils.getId(this.props.resource)) {
+      this.setState({hasProducts: params.resource.products !== null})
+      return
+    }
     if (params.action === 'addItem'  ||  params.action === 'addVerification') {
       var actionParams = {
         query: this.state.filter,
@@ -295,6 +300,8 @@ class MessageList extends Component {
     if (nextState.isConnected !== this.state.isConnected || nextState.onlineStatus !== this.state.onlineStatus)
       return true
     if (this.state.context !== nextState.context || this.state.allContexts !== nextState.allContexts)
+      return true
+    if (this.state.hasProducts !== nextState.hasProducts)
       return true
     // if (this.state.show !== nextState.show)
     //   return true
@@ -635,20 +642,22 @@ class MessageList extends Component {
     }
     else {
       if (!this.state.isEmployee) {
-        cancelIndex++
-        buttons.push({
-          index: 0,
-          title: translate('applyForProduct'),
-          callback: () => this.onChooseProduct()
-        })
+        if (this.state.hasProducts) {
+          buttons.push({
+            index: cancelIndex,
+            title: translate('applyForProduct'),
+            callback: () => this.onChooseProduct()
+          })
+          cancelIndex++
+        }
       }
       if (ENV.allowForgetMe) {
-        cancelIndex++
         buttons.push({
-          index: 1,
+          index: cancelIndex,
           title: translate('forgetMe'),
           callback: () => this.forgetMe()
         })
+        cancelIndex++
       }
     }
 

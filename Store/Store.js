@@ -6017,7 +6017,7 @@ var Store = Reflux.createStore({
           return
       }
       else
-        batch.push({type: 'put', key: key, value: val})
+        this.dbBatchPut(key, val, batch)
     }
     if (model.subClassOf === MY_PRODUCT)
       val._sharedWith = [this.createSharedWith(utils.getId(val.from.id), new Date().getTime())]
@@ -6412,6 +6412,7 @@ var Store = Reflux.createStore({
       let orgId = utils.getId(org)
       list[orgId].value = org
       batch.push({type: 'put', key: utils.getId(org), value: org})
+      this.trigger({action: 'getItem', resource: org})
       noTrigger = hasNoTrigger(orgId)
     }
     if (!val.time)
