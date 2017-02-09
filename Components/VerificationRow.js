@@ -17,6 +17,10 @@ var CURRENCY_SYMBOL
 const ITEM = 'tradle.Item'
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM = 'tradle.Form'
+const PROFILE = constants.TYPES.PROFILE
+
+const TYPE = constants.TYPE
+const VERIFICATION = constants.VERIFICATION
 
 import {
   Image,
@@ -51,19 +55,17 @@ class VerificationRow extends Component {
 
   render() {
     var resource = this.props.resource;
-    var photo;
-
-    // if (resource.from  &&  resource.from.photos)
-    //   photo = <Image source={{uri: utils.getImageUri(resource.from.photos[0].url)}} style={styles.cellImage} />
-    var model = utils.getModel(resource[constants.TYPE]).value;
+    var model = utils.getModel(resource[TYPE]).value;
     var isMyProduct = model.subClassOf === MY_PRODUCT
     var isForm = model.subClassOf === FORM
     var isVerification = resource.document != null
     var r = isVerification ? resource.document : resource
+
+    var photo
     if (r  &&  isMyProduct)
       photo = resource.from.photo
     else {
-      let docModel = utils.getModel(r[constants.TYPE]).value
+      let docModel = utils.getModel(r[TYPE]).value
       let mainPhotoProp = utils.getMainPhotoProperty(docModel)
       if (mainPhotoProp)
         photo = r[mainPhotoProp]
@@ -86,24 +88,12 @@ class VerificationRow extends Component {
     else
       photo = <View style={{width: 70}} />
 
-
-    // else if (resource.organization  &&  resource.organization.photos)
-    //   photo = <Image source={{uri: utils.getImageUri(resource.organization.photos[0].url)}} style={styles.cellImage} />
-    // else if (resource.from  &&  resource.from.photos)
-    //   photo = <Image source={{uri: utils.getImageUri(resource.from.photos[0].url)}} style={styles.cellImage} />
-    // else
-    //   photo = <View style={styles.cellImage} />
-
     var verificationRequest = resource.document
-                            ? utils.getModel(resource.document[constants.TYPE]).value
-                            : utils.getModel(resource[constants.TYPE]).value;
+                            ? utils.getModel(resource.document[TYPE]).value
+                            : utils.getModel(resource[TYPE]).value;
 
     var rows = [];
 
-    // rows.push(this.addDateProp('time', styles.verySmallLetters));
-
-    // var val = utils.formatDate(new Date(resource.time));
-    // rows.push(<View><Text style={styles.resourceTitle}>{val}</Text></View>);
     let notAccordion = !isMyProduct  &&  !isVerification && !this.props.prop === null || resource.sources || resource.method || isForm
     if (r  &&  !notAccordion) {
       this.formatDoc(verificationRequest, r, rows);
@@ -117,33 +107,20 @@ class VerificationRow extends Component {
           )
     }
 
-    // if (!isForm  &&  resource.to  &&  backlink !== 'to') {
-    //   var row = <View style={{flexDirection: 'row'}} key={this.getNextKey()}>
-    //               <Text style={[styles.description, {color: '#7AAAc3'}]}>submitted by </Text>
-    //               <Text style={styles.description}>{resource.to.title}</Text>
-    //             </View>;
-      // var row = resource.to.photos
-      //         ? <View style={{flexDirection: 'row'}}>
-      //             <Text style={[styles.description, {color: '#7AAAc3'}]}>submitted by </Text>
-      //             <Text style={styles.description}>{resource.to.title}</Text>
-      //             <Image source={{uri: resource.to.photos[0].url}} style={styles.icon}/>
-      //           </View>
-      //         : <View style={{flexDirection: 'row'}}>
-      //             <Text style={[styles.description, {color: '#7AAAc3'}]}>submitted by </Text>
-      //             <Text style={styles.description}>{resource.to.title}</Text>
-      //           </View>;
-    //   rows.push(row);
-    // }
-    var verifiedBy
+    // var parentResource = this.props.parentResource
+    // if (!notAccordion  &&  parentResource[TYPE] !== VERIFICATION && parentResource !== PROFILE)
+    //   notAccordion = true
+
+    var verifiedBy, org
     if (!this.props.isChooser  &&  (isVerification || isMyProduct /* ||  isForm*/) &&  resource.from) {
       var contentRows = [];
-      // contentRows.push(<Text style={}>verified by {resource.to.title}></Text>);
-      let org = isMyProduct
-              ? resource.from.organization
-              : isForm
-                  ? resource.to.organization
-                  : resource._verifiedBy || resource.organization
 
+      if (isMyProduct)
+        org = resource.from.organization
+      else if (isForm)
+        org = resource.to.organization
+      else
+        org = resource._verifiedBy || resource.organization
 
       let title = org ? org.title : resource.to.title
       let by = (isMyProduct)
@@ -151,18 +128,13 @@ class VerificationRow extends Component {
              : (isForm)
                 ? translate('sentToOn', title)
                 : translate('verifiedByOn', title)
-      // verifiedBy = <View style={contentRows.length == 1 ? {flex: 1} : {flexDirection: 'row'}} key={this.getNextKey()}>
-
       verifiedBy = <View style={{alignItems: 'flex-end', paddingRight: 5}}><Text style={styles.verifiedBy}>{by}</Text></View>
     }
 
     let dateP = resource.dateVerified ? 'dateVerified' : resource.date ? 'date' : 'time'
     var date = r  &&  <View style={{alignItems: 'flex-end'}}>
-                        <Text style={styles.verySmallLetters} key={this.getNextKey()}>{formatDate(resource[dateP])}</Text>
+                        <Text style={styles.verySmallLetters} key={this.getNextKey()}>{dateformat(resource[dateP], 'mmm dS, yyyy')}</Text>
                       </View>
-
-    // {this.addDateProp(dateP, [styles.verySmallLetters], true)}</View>
-
     let dn = isVerification ?  utils.getDisplayName(resource.document) : utils.getDisplayName(resource, model.properties)
     let title
     if (this.props.isChooser  ||  model.interfaces.indexOf(ITEM) !== -1)
@@ -186,16 +158,6 @@ class VerificationRow extends Component {
                       </View>
                     </View>
                   </View>
-   // if (isForm  &&  !isMyProduct)
-   //   header = <Swipeout right={[{text: 'Revoke', backgroundColor: 'red', onPress: this.revokeDocument.bind(this, resource)}]} autoClose={true} scroll={(event) => this._allowScroll(event)}>
-   //              {header}
-   //            </Swipeout>
-
-    var content = <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>
-                      <View style={styles.textContainer}>
-                        {rows}
-                      </View>
-                    </TouchableHighlight>
 
     var row
     if (this.props.isChooser)
@@ -204,15 +166,31 @@ class VerificationRow extends Component {
                {header}
               </TouchableHighlight>
             </View>
-    else if (notAccordion)
-      row = <View style={{backgroundColor: '#fff'}}>
-              <Swipeout right={[{text: 'Revoke', backgroundColor: 'red', onPress: this.revokeDocument.bind(this)}]} autoClose={true} scroll={(event) => this._allowScroll(event)}>
-              <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>
-               {header}
-              </TouchableHighlight>
-              </Swipeout>
-            </View>
-    else
+    else if (notAccordion) {
+      // if (parentResource[TYPE] !== PROFILE) {
+      //   let oPhoto = org && <Image source={{uri: org.photo.url}} style={{width: 60, height: 60}}/>
+      //   let by = <View style={{justifyContent: 'center'}}><Text style={styles.rTitle}>{translate('verifiedBy', org.title)}</Text></View>
+      //   row = <View style={{height: 80, backgroundColor: '#fff', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15}}>
+      //            {oPhoto}
+      //            {by}
+      //         </View>
+      // }
+      // else {
+        row = <View style={{backgroundColor: '#fff'}}>
+                <Swipeout right={[{text: 'Revoke', backgroundColor: 'red', onPress: this.revokeDocument.bind(this)}]} autoClose={true} scroll={(event) => this._allowScroll(event)}>
+                  <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>
+                     {header}
+                  </TouchableHighlight>
+                </Swipeout>
+              </View>
+      // }
+    }
+    else {
+      var content = <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>
+                        <View style={styles.textContainer}>
+                          {rows}
+                        </View>
+                      </TouchableHighlight>
       row = <View>
              <Accordion
                header={header}
@@ -221,29 +199,8 @@ class VerificationRow extends Component {
                underlayColor='transparent'
                easing='easeOutQuad' />
             </View>
+    }
     return row
-    // return (
-    //   this.props.isChooser
-    //    ? <View>
-    //       <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>
-    //        {header}
-    //       </TouchableHighlight>
-    //      </View>
-    //      : notAccordion
-    //         ? <Swipeout right={[{text: 'Revoke', backgroundColor: 'red', onPress: this.revokeDocument.bind(this)}]} autoClose={true} scroll={(event) => this._allowScroll(event)}>
-    //             <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>
-    //              {header}
-    //             </TouchableHighlight>
-    //           </Swipeout>
-    //         : <View>
-    //            <Accordion
-    //              header={header}
-    //              style={{alignSelf: 'stretch'}}
-    //              content={content}
-    //              underlayColor='transparent'
-    //              easing='easeOutQuad' />
-    //           </View>
-    // );
   }
   revokeDocument() {
     var resource = this.props.resource
@@ -266,7 +223,7 @@ class VerificationRow extends Component {
     var verPhoto;
     var vCols = [];
     var self = this;
-    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
+    var model = utils.getModel(resource[TYPE] || resource.id).value;
 
     var properties = model.properties;
     var noMessage = !resource.message  ||  !resource.message.length;
@@ -375,12 +332,6 @@ var styles = StyleSheet.create({
     marginHorizontal: 10,
     padding: 5,
   },
-  // row: {
-  //   // backgroundColor: '#FBFFE5',
-  //   flexDirection: 'row',
-  //   marginHorizontal: 10,
-  //   padding: 5,
-  // },
   rTitle: {
     flex: 1,
     fontSize: 18,
@@ -428,15 +379,15 @@ var styles = StyleSheet.create({
     // borderRadius:10,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  icon: {
-    width: 20,
-    height: 20,
-    borderWidth: 1,
-    borderColor: '#7AAAc3',
-    borderRadius: 10,
-    marginRight: 10,
-    alignSelf: 'center',
-  },
+  // icon: {
+  //   width: 20,
+  //   height: 20,
+  //   borderWidth: 1,
+  //   borderColor: '#7AAAc3',
+  //   borderRadius: 10,
+  //   marginRight: 10,
+  //   alignSelf: 'center',
+  // },
   verySmallLetters: {
     fontSize: 12,
     // alignSelf: 'flex-end',
@@ -461,9 +412,5 @@ var styles = StyleSheet.create({
   //   color: '#2E3B4E'
   // },
 });
-
-function formatDate (date) {
-  return dateformat(date, 'mmm dS, yyyy')
-}
 
 module.exports = VerificationRow;
