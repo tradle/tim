@@ -49,6 +49,7 @@ const USE_GESTURE_PASSWORD = 2
 const CHANGE_GESTURE_PASSWORD = 3
 const PAIR_DEVICES = 4
 const VIEW_DEBUG_LOG = 5
+const WIPE_DEVICE = 6
 const MY_PRODUCT = 'tradle.MyProduct'
 
 const TYPE = constants.TYPE
@@ -356,7 +357,10 @@ class ResourceView extends Component {
 
     buttons.push(translate('viewDebugLog'))
     actions.push(VIEW_DEBUG_LOG)
-    if (!utils.isWeb()) {
+    if (utils.isWeb()) {
+      buttons.push(translate('wipeDevice'))
+      actions.push(WIPE_DEVICE)
+    } else {
       buttons.push(translate('scanQRcode'))
       actions.push(SCAN_QR_CODE)
     }
