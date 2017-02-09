@@ -3922,9 +3922,7 @@ var Store = Reflux.createStore({
     }
     // Don't show current 'me' contact in contact list or my identities list
     if (!containerProp  &&  me  &&  isIdentity) {
-      if (sampleData.getMyId())
-        delete foundResources[utils.getId(me)];
-      else if (!isTest) {
+      if (!isTest) {
         var myIdentities = this._getItem(MY_IDENTITIES).allIdentities;
         myIdentities.forEach((meId) =>  {
           if (foundResources[meId.id])
@@ -6602,10 +6600,8 @@ var Store = Reflux.createStore({
     }
   },
   loadMyResources() {
-    var self = this;
-    var myId = sampleData.getMyId();
-    if (myId)
-      myId = PROFILE + '_' + myId;
+    const self = this
+    let myId
 
     // console.time('dbStream')
     var orgContacts = {}
