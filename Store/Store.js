@@ -3223,6 +3223,7 @@ var Store = Reflux.createStore({
 
   },
   onShare(resource, shareWithList, originatingResource) {
+    const self = this
     if (resource[TYPE] === PRODUCT_APPLICATION) {
       let listOfProviders = []
       let list = shareWithList.map((id) => {
@@ -3658,7 +3659,7 @@ var Store = Reflux.createStore({
               let rContext = result.length  &&  result[result.length - 1]._context
               if (rContext)
                 for (let i=result.length - 1; i>=0; i--) {
-                  var r = result[i]
+                  let r = result[i]
                   if (r[TYPE] === FORM_REQUEST) {
                     if (!r.documentCreated  &&  utils.getId(r._context) === utils.getId(rContext)) {
                       result.splice(i, 1)
@@ -6107,7 +6108,7 @@ var Store = Reflux.createStore({
         }
         this.trigger({action: 'addItem', resource: val})
       }
-      else if (representativeAddedTo  &&  !triggeredOrgs) {
+      else if (representativeAddedTo /* &&  !triggeredOrgs*/) {
         var orgList = this.searchNotMessages({modelName: ORGANIZATION})
         this.trigger({action: 'list', list: orgList, forceUpdate: true})
       }
