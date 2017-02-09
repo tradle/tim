@@ -2781,7 +2781,7 @@ var Store = Reflux.createStore({
       var returnVal
       var identity
       // if (!isNew) // make sure that the values of ref props are not the whole resources but their references
-      if (!isSelfIntroduction)
+      if (!isSelfIntroduction  &&  !doneWithMultiEntry)
         utils.optimizeResource(resource)
 
       var isMessage = utils.isMessage(meta)
@@ -2931,18 +2931,7 @@ var Store = Reflux.createStore({
             if (ptype) {
               let multiEntryForms = utils.getModel(ptype).value.multiEntryForms
               if (multiEntryForms  &&  multiEntryForms.indexOf(returnVal.form) !== -1) {
-                // temporary hack: check why there is no org on from property
-                let rid
-                if (returnVal.from.organization)
-                  rid = returnVal.from.organization.id
-                else  {
-                  let frOrg = self._getItem(returnVal.from).organization
-                  if (frOrg)
-                    rid = utils.getId(frOrg)
-                  else
-                    return
-                }
-                // end Hack
+                let rid = returnVal.from.organization.id
                 self.deleteMessageFromChat(rid, returnVal)
                 let id = utils.getId(returnVal)
                 delete list[id]
