@@ -775,9 +775,9 @@ class MessageList extends Component {
     //            </View>
     //         </TouchableHighlight>
     // }
-    return  <TouchableHighlight underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
+    return  <TouchableOpacity underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
               {this.paintMenuButton()}
-            </TouchableHighlight>
+            </TouchableOpacity>
   }
 
   paintMenuButton() {
