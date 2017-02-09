@@ -174,8 +174,12 @@ class NewResource extends Component {
         first = p
       }
     }
-    let ref = this.refs.form.getComponent(first) || this.refs[first]
-    if (!ref) return
+
+    let ref = this.refs.form && this.refs.form.getComponent(first)
+    if (!ref) {
+      ref = this.refs[first]
+      if (!ref) return
+    }
 
     if (!utils.isEmpty(this.state.missedRequiredOrErrorValue)  &&  !this.state.noScroll) {
       utils.scrollComponentIntoView(this, ref)
