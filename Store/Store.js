@@ -43,9 +43,9 @@ var AddressBook = require('NativeModules').AddressBook;
 
 var voc = require('@tradle/models');
 var sampleData = voc.data
-var currencies = voc.currencies
-var nationalities = voc.nationalities
-var countries = voc.countries
+// var currencies = voc.currencies
+// var nationalities = voc.nationalities
+// var countries = voc.countries
 
 // var myIdentity = __DEV__ ? require('../data/myIdentity.json') : []
 var welcome = require('../data/welcome.json');
@@ -126,6 +126,7 @@ const MY_IDENTITIES       = MY_IDENTITIES_TYPE + '_1'
 const REMEDIATION         = 'tradle.Remediation'
 const CONFIRM_PACKAGE_REQUEST = "tradle.ConfirmPackageRequest"
 const VERIFIABLE          = 'tradle.Verifiable'
+const MODELS_PACK         = 'tradle.ModelsPack'
 
 const WELCOME_INTERVAL = 600000
 
@@ -387,9 +388,8 @@ var Store = Reflux.createStore({
         changed = true
       }
 
-      if (changed) {
-        db.put(utils.getId(me), me)
-      }
+      if (changed)
+        self.dbPut(utils.getId(me), me)
 
       self.setMe(me)
       var key = value[TYPE] + '_' + value[ROOT_HASH]
@@ -420,7 +420,7 @@ var Store = Reflux.createStore({
     this.setMe(r)
     let meId = utils.getId(r)
     this._setItem(meId, r)
-    return db.put(meId, r)
+    return this.dbPut(meId, r)
       // .then(() => {
       //   if (params.registered) {
       //     this.trigger({action: 'registered'})
@@ -633,7 +633,7 @@ var Store = Reflux.createStore({
         }
         SERVICE_PROVIDERS_BASE_URLS = urls
         if (updateSettings)
-          db.put(settingsId, settings)
+          this.dbPut(settingsId, settings)
       }
       else {
         SERVICE_PROVIDERS_BASE_URLS = SERVICE_PROVIDERS_BASE_URL_DEFAULTS ? SERVICE_PROVIDERS_BASE_URL_DEFAULTS.slice() : []
@@ -646,7 +646,7 @@ var Store = Reflux.createStore({
           urlToId: {}
         }
         this._setItem(settingsId, settings)
-        db.put(settingsId, settings)
+        this.dbPut(settingsId, settings)
       }
     }
 
@@ -1013,7 +1013,7 @@ var Store = Reflux.createStore({
     // save provider's employee
     // if (!hashToUrl[provider.hash]) {
     r.hashToUrl[provider.hash] = getProviderUrl(provider)
-    db.put(SETTINGS + '_1', r)
+    this.dbPut(SETTINGS + '_1', r)
     // }
   },
   addProvider(provider) {
@@ -2031,7 +2031,8 @@ var Store = Reflux.createStore({
         rr[CUR_HASH] = data[CUR_HASH]
       }
       var key = utils.getId(rr)
-      batch.push({type: 'put', key: key, value: rr})
+
+      self.dbBatchPut(key, rr, batch)
       // rr._sendStatus = self.isConnected ? SENDING : QUEUED
 
       self._setItem(key, rr)
@@ -2110,7 +2111,7 @@ var Store = Reflux.createStore({
         if (c) {
           c.lastMessageTime = new Date().getTime()
           c.formsCount = c.formsCount ? ++c.formsCount : 1
-          db.put(cId, c)
+          this.dbPut(cId, c)
         }
       }
     }
@@ -2298,7 +2299,6 @@ var Store = Reflux.createStore({
     })
     .then(() => {
       key = utils.getId(r)
-      this.addVisualProps(r)
       if (!r._sharedWith) {
         r._sharedWith = []
         r._sharedWith.push(this.createSharedWith(utils.getId(r.from), r.time))
@@ -2320,7 +2320,7 @@ var Store = Reflux.createStore({
       //   })
       // }
       var batch = [];
-      batch.push({type: 'put', key: key, value: r});
+      this.dbBatchPut(key, r, batch);
       let len = batch.length
 
       if (r._context) {
@@ -2332,7 +2332,9 @@ var Store = Reflux.createStore({
       return db.batch(batch)
     })
     .then(() => {
-      var rr = {};
+      this.addVisualProps(r)
+
+      // var rr = {};
       // extend(rr, from);
       // rr.verifiedByMe = r;
       this._setItem(key, r)
@@ -2373,7 +2375,7 @@ var Store = Reflux.createStore({
       // if (!verificationRequest._sharedWith)
       //   verificationRequest._sharedWith = []
       // verificationRequest._sharedWith.push(fromId)
-      return db.put(verificationRequestId, verificationRequest);
+      return this.dbPut(verificationRequestId, verificationRequest);
     })
     .catch((err) => {
       debugger
@@ -2404,6 +2406,7 @@ var Store = Reflux.createStore({
       if (verifiedBy.photos)
         r._verifiedBy.photo = verifiedBy.photos[0]
     }
+    return r
   },
   sendMessageToContextOwners(v, recipients, context) {
     return Q.all(recipients.map((to) => {
@@ -2547,7 +2550,7 @@ var Store = Reflux.createStore({
         // photos: me.photos
       // }
       // Wil need to publish new model
-      return db.put(key, model);
+      return self.dbPut(key, model);
     })
     .then(function() {
       if (!me.myModels)
@@ -2594,7 +2597,7 @@ var Store = Reflux.createStore({
     let r = this._getItem(rId)
     r.documentCreated = true
     this.trigger({action: 'addItem', resource: r})
-    db.put(rId, r)
+    this.dbPut(rId, r)
     let context = resource._context
     await Q.all(resource.items.map((r) => {
       r._context = context
@@ -2832,7 +2835,6 @@ var Store = Reflux.createStore({
           })
         }
 
-        // utils.optimizeResource(returnVal)
         if (!isRegistration) {
           // HACK to not to republish identity
           if (returnVal[TYPE] !== PROFILE)
@@ -2857,7 +2859,7 @@ var Store = Reflux.createStore({
             result[0].documentCreated = true
             let key = utils.getId(result[0])
             self._setItem(key, result[0])
-            db.put(key, result[0])
+            self.dbPut(key, result[0])
           }
         }
         if (isBecomingEmployee) {
@@ -2929,7 +2931,19 @@ var Store = Reflux.createStore({
             if (ptype) {
               let multiEntryForms = utils.getModel(ptype).value.multiEntryForms
               if (multiEntryForms  &&  multiEntryForms.indexOf(returnVal.form) !== -1) {
-                self.deleteMessageFromChat(returnVal.from.organization.id, returnVal)
+                // temporary hack: check why there is no org on from property
+                let rid
+                if (returnVal.from.organization)
+                  rid = returnVal.from.organization.id
+                else  {
+                  let frOrg = self._getItem(returnVal.from).organization
+                  if (frOrg)
+                    rid = utils.getId(frOrg)
+                  else
+                    return
+                }
+                // end Hack
+                self.deleteMessageFromChat(rid, returnVal)
                 let id = utils.getId(returnVal)
                 delete list[id]
                 db.del(id)
@@ -2996,7 +3010,7 @@ var Store = Reflux.createStore({
           self.addVisualProps(returnVal)
           params = {
             action: 'addItem',
-            resource: utils.clone(returnVal)
+            resource: returnVal
           }
         }
 
@@ -3257,7 +3271,7 @@ var Store = Reflux.createStore({
         let hash = data.link
         shareContext[ROOT_HASH] = shareContext[CUR_HASH] = hash
         let key = utils.getId(shareContext)
-        db.put(key, shareContext)
+        self.dbPut(key, shareContext)
         this._setItem(key, shareContext)
         this.addMessagesToChat(shareContext.to.id, shareContext, false, time)
         this.trigger({action: 'addMessage', resource: shareContext})
@@ -3331,11 +3345,11 @@ var Store = Reflux.createStore({
       var documentId = utils.getId(document)
       if (r[TYPE] === FORM_REQUEST)
         r.document = documentId
-      batch.push({type: 'put', key: key, value: r})
 
-      utils.optimizeResource(document)
+      this.dbBatchPut(key, r, batch)
+      // utils.optimizeResource(document)
       this.addLastMessage(document, batch, to)
-      batch.push({type: 'put', key: documentId, value: document})
+      this.dbBatchPut(documentId, document, batch)
 
       if (!verifications)
         return
@@ -3348,8 +3362,7 @@ var Store = Reflux.createStore({
         .then(() => {
           let vId = utils.getId(ver)
           let v = this._getItem(vId)
-          utils.optimizeResource(v)
-          batch.push({type: 'put', key: vId, value: v})
+          this.dbBatchPut(vId, v, batch)
 
           if (--all === 0) {
             defer.resolve()
@@ -3391,7 +3404,8 @@ var Store = Reflux.createStore({
       ver = this._getItem(utils.getId(resource))
       ver._sharedWith.push(this.createSharedWith(toId, time, shareBatchId))
       ver._sendStatus = this.isConnected ? SENDING : QUEUED
-      utils.optimizeResource(ver)
+
+      utils.optimizeResource(ver, true)
 
       this.addMessagesToChat(utils.getId(to.organization), ver, false, time)
       this.trigger({action: 'addItem', context: resource.context, resource: ver})
@@ -3578,7 +3592,7 @@ var Store = Reflux.createStore({
           let to = this._getItem(toId)
           if (!to.bot) {
             to._unread = 0
-            db.put(toId, to)
+            this.dbPut(toId, to)
             .then(() => {
               this.trigger({action: 'updateRow', resource: to})
             })
@@ -4302,7 +4316,6 @@ var Store = Reflux.createStore({
     }
     function doFilterOut(r, toId, idx) {
       let m = utils.getModel(r[TYPE]).value
-
       if (m.id === PRODUCT_APPLICATION  &&  r.product === REMEDIATION)
         return true
       if (r._context       &&
@@ -4318,35 +4331,35 @@ var Store = Reflux.createStore({
 
 
       return false
-      if (m.subClassOf !== FORM)
-        return false
-      // for employee
-      let meId = utils.getId(me)
-      if (utils.getId(r.from) !== meId)
-        return false
+      // if (m.subClassOf !== FORM)
+      //   return false
+      // // for employee
+      // let meId = utils.getId(me)
+      // if (utils.getId(r.from) !== meId)
+      //   return false
 
-      let rId = utils.getId(r.to)
-      if (rId === toId  ||  !r._sharedWith  ||  r._sharedWith.length === 1)
-        return false
+      // let rId = utils.getId(r.to)
+      // if (rId === toId  ||  !r._sharedWith  ||  r._sharedWith.length === 1)
+      //   return false
 
-      for (let i=idx; i<thisChatMessages.length; i++) {
-        let msg = self._getItem(thisChatMessages[i].id)
-        if (msg[TYPE] !== VERIFICATION)
-          continue
-        let item = self._getItem(utils.getId(msg.from))
-        if (utils.getId(item.organization) === toId)
-          return false
+      // for (let i=idx; i<thisChatMessages.length; i++) {
+      //   let msg = self._getItem(thisChatMessages[i].id)
+      //   if (msg[TYPE] !== VERIFICATION)
+      //     continue
+      //   let item = self._getItem(utils.getId(msg.from))
+      //   if (utils.getId(item.organization) === toId)
+      //     return false
 
-        if (!msg._sharedWith)
-          return false
+      //   if (!msg._sharedWith)
+      //     return false
 
-        for (let ii=0; ii<r._sharedWith.length; ii++) {
-          let shareBatchId = r._sharedWith[ii].shareBatchId
-          if (msg._sharedWith.some((share) => shareBatchId  &&  share.shareBatchId === shareBatchId))
-            return true
-        }
-      }
-      return false
+      //   for (let ii=0; ii<r._sharedWith.length; ii++) {
+      //     let shareBatchId = r._sharedWith[ii].shareBatchId
+      //     if (msg._sharedWith.some((share) => shareBatchId  &&  share.shareBatchId === shareBatchId))
+      //       return true
+      //   }
+      // }
+      // return false
     }
   },
   onGetAllContexts(params) {
@@ -4773,7 +4786,7 @@ var Store = Reflux.createStore({
       })
     }
     if (!verTypes.length)
-      return shareableResources
+      return {verifications: shareableResources}
 
     let toId = utils.getId(to)
     var l = this.searchMessages({modelName: VERIFICATION})
@@ -4989,15 +5002,14 @@ var Store = Reflux.createStore({
           value._sharedWith = []
         value._sharedWith.push(this.createSharedWith(utils.getId(value.to), new Date().getTime()))
       }
-      if (isNew)
-        this.addVisualProps(value)
-      else if (isForm) {
+      // if (isNew)
+      //   this.addVisualProps(value)
+      if (!isNew  &&  !isForm) {
         let prevRes = list[value[TYPE] + '_' + value[ROOT_HASH] + '_' + value[PREV_HASH]]
         if (prevRes) {
           prevRes = prevRes.value
           prevRes[NEXT_HASH] = value[CUR_HASH]
-          utils.optimizeResource(prevRes)
-          batch.push({type: 'put', key: utils.getId(prevRes), value: prevRes})
+          this.dbBatchPut(utils.getId(prevRes), prevRes, batch)
         }
       }
 
@@ -5005,7 +5017,7 @@ var Store = Reflux.createStore({
         this.addLastMessage(value, batch)
     }
     var iKey = utils.getId(value) //modelName + '_' + value[ROOT_HASH];
-    batch.push({type: 'put', key: iKey, value: value});
+    this.dbBatchPut(iKey, value, batch);
 
     var mid;
 
@@ -5024,6 +5036,11 @@ var Store = Reflux.createStore({
       return db.get(iKey)
     })
     .then((value) => {
+      if (isMessage) {
+        let r = this.addVisualProps(value)
+        if (r === value)
+          r = value
+      }
       this._setItem(iKey, value)
       if (isMessage) {
         let toId = utils.getId(value.to)
@@ -5049,7 +5066,7 @@ var Store = Reflux.createStore({
         if (newLanguage) {
           let lang = this._getItem(utils.getId(me.language))
           value.languageCode = lang.code
-          db.put(iKey, value)
+          this.dbPut(iKey, value)
 
           me.language = lang
           me.languageCode = lang.code
@@ -5265,7 +5282,7 @@ var Store = Reflux.createStore({
     })
     .then(function() {
       self.trigger({action: 'addItem', resource: value})
-      db.put(key, self._getItem(key))
+      self.dbPut(key, self._getItem(key))
     })
     .catch((err) => {
       self.trigger({action: 'addItem', error: err.message, resource: value})
@@ -5463,7 +5480,7 @@ var Store = Reflux.createStore({
              if (r.id === currentIdentity)
                r.privkeys = privkeys
           })
-          db.put(MY_IDENTITIES, myIdentities)
+          this.dbPut(MY_IDENTITIES, myIdentities)
         }
         else
           me.privkeys = privkeys
@@ -5791,7 +5808,7 @@ var Store = Reflux.createStore({
           if (r._sendStatus !== SENT) {
             self.trigger({action: 'updateItem', sendStatus: SENT, resource: r})
             r._sendStatus = SENT
-            db.put(key, r)
+            self.dbPut(key, r)
           }
         }
           // var o = {}
@@ -5890,7 +5907,14 @@ var Store = Reflux.createStore({
     // })
     // return meDriver.ready()
   },
-
+  dbPut(key, value) {
+    let v = utils.isMessage(value) ? utils.optimizeResource(value, true) : value
+    db.put(key, v)
+  },
+  dbBatchPut(key, value, batch) {
+    let v = utils.isMessage(value) ? utils.optimizeResource(value, true) : value
+    batch.push({type: 'put', key: key, value: v})
+  },
   maybeWatchSeal(msg) {
     const payload = msg.object.object
     const type = payload[TYPE]
@@ -6361,13 +6385,22 @@ var Store = Reflux.createStore({
     // }
 
     var isProductList = val[TYPE] === PRODUCT_LIST
+    var isModelsPack = val[TYPE] === MODELS_PACK
+    var pList = isProductList ? val.list : val.models
+
     var noTrigger
-    if (isProductList) {
-      var pList = val.list
+    if (pList) {
+      // var pList = val.list
       // var fOrg = obj.from.identity.toJSON().organization
       // org = list[utils.getId(fOrg)].value
       org.products = []
       pList.forEach((m) => {
+        // HACK for not overwriting Tradle models
+        if (isModelsPack  &&  m.id.indexOf('tradle.') === 0) {
+          console.log('ModelsPack: the name you chose is the same as one of Tradle\'s core Models. Please rename and resend the model')
+          return
+        }
+
         this.addNameAndTitleProps(m)
         models[m.id] = {
           key: m.id,
@@ -6375,10 +6408,15 @@ var Store = Reflux.createStore({
         }
         if (m.subClassOf === FINANCIAL_PRODUCT)
           org.products.push(m.id)
-        this.addVerificationsToFormModel(m)
-        this.addFromAndTo(m)
+        if (m.subClassOf === ENUM)
+          this.createEnumResources(m)
+
+        if (utils.isMessage(m)) {
+          this.addVerificationsToFormModel(m)
+          this.addFromAndTo(m)
+        }
         if (!m[ROOT_HASH])
-          m[ROOT_HASH] = sha(m)
+          m[ROOT_HASH] = 1
         batch.push({type: 'put', key: m.id, value: m})
       })
       utils.setModels(models)
@@ -6449,8 +6487,8 @@ var Store = Reflux.createStore({
       else
         this.addMessagesToChat(utils.getId(org ? org : from), val)
 
+      this.dbBatchPut(key, val, batch)
       this.addVisualProps(val)
-      batch.push({type: 'put', key: key, value: val})
     }
     return noTrigger
     function hasNoTrigger(orgId) {
@@ -6567,8 +6605,11 @@ var Store = Reflux.createStore({
         if (data.value == null) return
 
         if (data.value.type === MODEL) {
+          let m = data.value
           models[data.key] = data;
-          self.setPropertyNames(data.value.properties)
+          self.setPropertyNames(m.properties)
+          if (m.subClassOf === ENUM)
+            self.createEnumResources(m)
           return
         }
         isLoaded = true
@@ -6639,6 +6680,27 @@ var Store = Reflux.createStore({
         me = null
       console.log('Stream closed');
       utils.setModels(models);
+      if (me) {
+        // db resource do not have properties needed for rendering
+        let allMessages = self.searchMessages({modelName: MESSAGE, to: me})
+        if (allMessages) {
+          allMessages.forEach((r) => {
+            r = self.addVisualProps(r)
+            self._setItem(utils.getId(r), r)
+            // let props = ['from', 'to']
+            // let pvals = [self._getItem(r.from.id), self._getItem(r.to.id)]
+            // for (let i=0; i<props.length; i++) {
+            //   let v = pvals[i]
+            //   if (!v.organization)
+            //     continue
+            //   r[props[i]].organization = v.organization
+            //   let org = self._getItem(v.organization)
+            //   if (org.photos)
+            //     r[props[i]].organization.photo = org.photos[0]
+            // }
+          })
+        }
+      }
     })
     .then(() => {
       if (me  &&  utils.isEmpty(chatMessages)) {
@@ -6688,6 +6750,26 @@ var Store = Reflux.createStore({
     })
     .catch((err) => {
       debugger
+    })
+  },
+  // Creates resources from subClassOf tradle.Enum models that have 'enum' model property
+  createEnumResources(model) {
+    if (model.subClassOf !== ENUM  ||  !model.enum)
+      return
+    let eProp
+    for (let p in model.properties) {
+      if (p !== TYPE) {
+        eProp = p
+        break
+      }
+    }
+    model.enum.forEach((r) => {
+      let enumItem = {
+        [TYPE]: model.id,
+        [ROOT_HASH]: r.id,
+        [eProp]: r.title
+      }
+      this.loadStaticItem(enumItem)
     })
   },
   // Cleanup and notify customer that FI successfully forgotten him
@@ -6752,8 +6834,8 @@ var Store = Reflux.createStore({
               if (idx !== -1)
                 sharedWith.splice(idx, 1)
             })
-            utils.optimizeResource(res)
-            batch.push({type: 'put', key: rId, value: res})
+
+            this.dbBatchPut(rId, res, batch)
           }
           if (isVerification) {
             // var myVerifications = me.myVerifications.filter(function(r) {
@@ -6778,10 +6860,9 @@ var Store = Reflux.createStore({
                   })
                   if (doc.verifications.length != verifications.length) {
                     doc.verifications = verifications
-                    utils.optimizeResource(doc)
                     for (var i=0; i<data.length; i++) {
                       if (data[i][ROOT_HASH] === doc[ROOT_HASH]  &&  !data[i].deleted)
-                        batch.push({type: 'put', key: utils.getId(doc), value: doc})
+                        this.dbBatchPut(utils.getId(doc), doc, batch)
                     }
                   }
                 }
@@ -7316,10 +7397,10 @@ var Store = Reflux.createStore({
     if (utils.isEmpty(models))
       this.addModels()
 
-    return this.loadStaticDbData(true)
-    .then(() => {
+    // return this.loadStaticDbData(true)
+    // .then(() => {
       return this.loadMyResources()
-    })
+    // })
     // .then(self.loadAddressBook)
     .catch(function(err) {
       err = err;
@@ -7330,16 +7411,16 @@ var Store = Reflux.createStore({
       this.loadStaticItem(r)
     });
   },
-  loadStaticDbData(saveInDB) {
-    let batch = []
-    let sData = [currencies, nationalities, countries]
-    sData.forEach((arr) => {
-      arr.forEach((r) => {
-        this.loadStaticItem(r, saveInDB, batch)
-      })
-    })
-    return batch.length ? db.batch(batch) : Q()
-  },
+  // loadStaticDbData(saveInDB) {
+  //   let batch = []
+  //   let sData = [currencies, nationalities, countries]
+  //   sData.forEach((arr) => {
+  //     arr.forEach((r) => {
+  //       this.loadStaticItem(r, saveInDB, batch)
+  //     })
+  //   })
+  //   return batch.length ? db.batch(batch) : Q()
+  // },
   loadStaticItem(r, saveInDB, batch) {
     if (!r[ROOT_HASH])
       r[ROOT_HASH] = sha(r)
