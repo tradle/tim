@@ -214,4 +214,5 @@
     "cameraAccess": "Camera Access",
     "enableCameraAccess": "Tradle currently does not have permission to use the camera. To grant access, choose Settings, and make sure Camera is enabled.",
     "noScanningOnAndroid": "Document scanning on Android is coming soon."
+
 }
