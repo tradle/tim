@@ -281,7 +281,7 @@ class ResourceView extends Component {
                 <View style={styles.row}>
                   <TouchableOpacity onPress={this.showBanks.bind(this)}>
                     <View style={styles.conversationsRow}>
-                      <ConversationsIcon  color='#cccccc' size={35} style={{marginTop: 2, marginRight: 10}} />
+                      <ConversationsIcon size={35} style={{marginTop: 2, marginRight: 10}} />
                       <View style={{justifyContent: 'center'}}>
                         <Text style={styles.resourceTitle}>{translate('officialAccounts')}</Text>
                       </View>
