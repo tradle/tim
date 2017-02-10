@@ -398,7 +398,7 @@ class TimHome extends Component {
   }
   showHomePage(doReplace) {
     let me = utils.getMe()
-    let title = translate('digitalWealthPassport')
+    let title = translate(ENV.profileTitle)
     this.props.navigator.push({
       title: title,
       id: 3,
