@@ -7,7 +7,8 @@ import {
   Alert,
   Linking,
   PixelRatio,
-  Platform
+  Platform,
+  PermissionsAndroid
 } from 'react-native'
 
 import Camera from 'react-native-camera'
@@ -1552,6 +1553,22 @@ var utils = {
       return true
   },
   requestCameraAccess: async function (opts={}) {
+    if (utils.isAndroid()) {
+      const check = PermissionsAndroid.check || PermissionsAndroid.checkPermission
+      const request = PermissionsAndroid.request || PermissionsAndroid.requestPermission
+      // const alreadyGranted = check.call(PermissionsAndroid, PermissionsAndroid.PERMISSIONS.CAMERA)
+      // if (alreadyGranted) return true
+
+      return await request.call(
+        PermissionsAndroid,
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        {
+          'title': utils.translate('cameraAccess'),
+          'message': utils.translate('enableCameraAccess')
+        }
+      )
+    }
+
     const { video=true, audio=false } = opts
 
     if (!(video || audio)) throw new Error('expected "video" and/or "audio"')
