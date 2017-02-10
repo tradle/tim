@@ -696,6 +696,23 @@ var utils = {
            ? meId  !== this.getId(context.from)
            : isReadOnly
   },
+  buildRef(resource) {
+    if (!resource[TYPE] && resource.id)
+      return resource
+    let m = this.getModel(resource[TYPE]).value
+    let isForm = m.subClassOf === FORM
+    // let id = utils.getId(resource)
+    // if (isForm)
+    //   id += '_' + resource[CUR_HASH]
+    let ref = {
+      id: utils.getId(resource),
+      title: resource.id ? resource.title : utils.getDisplayName(resource)
+    }
+    if (resource.time)
+      ref.time = resource.time
+    return ref
+  },
+
   optimizeResource(resource, doNotChangeOriginal) {
     let res = doNotChangeOriginal ? this.clone(resource) : resource
 

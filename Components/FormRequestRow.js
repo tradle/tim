@@ -6,6 +6,7 @@ var NewResource = require('./NewResource');
 var RemediationItemsList = require('./RemediationItemsList')
 var Icon = require('react-native-vector-icons/Ionicons');
 var constants = require('@tradle/constants');
+var ResourceList = require('./ResourceList')
 var RowMixin = require('./RowMixin');
 var CameraView = require('./CameraView')
 import ImageInput from './ImageInput'
@@ -25,6 +26,7 @@ const TYPE = constants.TYPE
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM = 'tradle.Form'
 const PHOTO = 'tradle.Photo'
+const ENUM = 'tradle.Enum'
 const FORM_REQUEST = 'tradle.FormRequest'
 const CONFIRM_PACKAGE_REQUEST = 'tradle.ConfirmPackageRequest'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
@@ -215,10 +217,44 @@ class FormRequestRow extends Component {
 
     if (eCols.length === 1) {
       let p = eCols[0]
-      if (p  &&  p.type === 'object'  &&  p.ref === PHOTO)
+      if (p  &&  p.type === 'object'  &&  (p.ref === PHOTO ||  utils.getModel(p.ref).value.subClassOf === ENUM))
         return p
     }
     return
+  }
+  chooser(prop, propName) {
+    let oResource = this.props.resource
+    let model = utils.getModel(oResource.form).value
+    let resource = {
+      [TYPE]: model.id,
+      from: utils.getMe(),
+      to: oResource.from
+    }
+    if (oResource._context)
+      resource._context = oResource._context
+
+    var propRef = prop.ref
+    var m = utils.getModel(propRef).value;
+    var currentRoutes = this.props.navigator.getCurrentRoutes();
+    this.props.navigator.push({
+      title: translate(prop), //m.title,
+      // titleTextColor: '#7AAAC3',
+      id: 10,
+      component: ResourceList,
+      backButtonTitle: 'Back',
+      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      passProps: {
+        isChooser:      true,
+        prop:           prop,
+        modelName:      propRef,
+        resource:       resource,
+        returnRoute:    currentRoutes[currentRoutes.length - 1],
+        callback:       (prop, val) => {
+          resource[propName] = utils.buildRef(val)
+          Actions.addItem({resource: resource})
+        },
+      }
+    });
   }
 
   showShareableResources(rowStyle, viewStyle) {
@@ -545,14 +581,14 @@ class FormRequestRow extends Component {
         if (resource.verifiers)
           onPressCall = this.props.chooseTrustedProvider.bind(this, this.props.resource, form, isMyMessage)
         else if (prop) {
-          // if (prop.allowPicturesFromLibrary || utils.isSimulator())
+          if (prop.ref == PHOTO)
             link = <ImageInput prop={prop} onImage={item => this.onSetMediaProperty(prop.name, item)}>
                      {link}
                    </ImageInput>
-          // else
-          //   link = <TouchableHighlight onPress={() => this.showCamera({prop: prop})} underlayColor='transparent'>
-          //            {link}
-          //          </TouchableHighlight>
+          else
+            link = <TouchableHighlight onPress={() => this.chooser(prop, prop.name)} underlayColor='transparent'>
+                     {link}
+                   </TouchableHighlight>
         }
         else
           onPressCall = this.createNewResource.bind(this, form, isMyMessage)
@@ -607,29 +643,16 @@ class FormRequestRow extends Component {
     if (!item)
       return;
     let r = this.props.resource
-
-
-    // Actions.addItem({
-    //   resource: r,
-    //   value: {
-    //     [TYPE]: this.props.resource[TYPE],
-    //     documentCreated: true
-    //   },
-    //   cb: (r) => {
-    //     setTimeout(() => {
-          Actions.addItem({
-            disableFormRequest: this.props.resource,
-            resource: {
-              [TYPE]: this.props.resource.form,
-              [propName]: item,
-              _context: r._context,
-              from: utils.getMe(),
-              to: this.props.to
-            }
-          })
-    //     }, 1500)
-    //   }
-    // })
+    Actions.addItem({
+      disableFormRequest: this.props.resource,
+      resource: {
+        [TYPE]: this.props.resource.form,
+        [propName]: item,
+        _context: r._context,
+        from: utils.getMe(),
+        to: this.props.to
+      }
+    })
   }
 
 }
