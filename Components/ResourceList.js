@@ -61,6 +61,7 @@ import ENV from '../utils/env'
 const SearchBar = (function () {
   switch (Platform.OS) {
     case 'android':
+    case 'web':
       return require('./SearchBar')
     case 'ios':
       return require('react-native-search-bar')
