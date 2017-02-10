@@ -61,7 +61,8 @@ var syncActions = [
   'setAuthenticated',
   'downloadedCodeUpdate',
   'showModal',
-  'hideModal'
+  'hideModal',
+  'setProviderStyle'
 ]
 
 asyncActions.forEach(name => actionProps[name] = {})
