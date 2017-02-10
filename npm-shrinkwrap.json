@@ -201,11 +201,6 @@
       "from": "ansi-styles@>=2.2.1 <3.0.0",
       "resolved": "https://registry.npmjs.org/ansi-styles/-/ansi-styles-2.2.1.tgz"
     },
-    "anyline-ocr-react-native-module": {
-      "version": "0.0.1",
-      "from": "git://github.com/mvayngrib/anyline-ocr-react-native-module.git#45801ba6c185d7311fdef07af2dfb64124a6071e",
-      "resolved": "git://github.com/mvayngrib/anyline-ocr-react-native-module.git#45801ba6c185d7311fdef07af2dfb64124a6071e"
-    },
     "archive-type": {
       "version": "3.2.0",
       "from": "archive-type@>=3.0.0 <4.0.0",

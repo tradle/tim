@@ -27,7 +27,7 @@ if (microblink && BlinkID && utils.isIOS()) {
   BlinkID.setLicenseKey(microblink.licenseKey)
 }
 
-import Anyline from './Anyline'
+// import Anyline from './Anyline'
 
 var constants = require('@tradle/constants');
 var t = require('tcomb-form-native');
@@ -515,136 +515,136 @@ var NewResourceMixin = {
     Actions.saveTemporary(r)
   },
 
-  async showAnylineScanner(prop) {
-    const { documentType, country } = this.state.resource
-    let type
-    switch (documentType.title) {
-      case 'Passport':
-        type = 'mrz'
-        break;
-      case 'Driver licence':
-      case 'Driver license':
-        if (country.title === 'United Kingdom') {
-          return Alert.alert(
-            translate('oops') + '!',
-            translate('ukLicenseUnsupported')
-          )
-          // type = 'ocr'
-        } else {
-          type = 'barcode'
-        }
+  // async showAnylineScanner(prop) {
+  //   const { documentType, country } = this.state.resource
+  //   let type
+  //   switch (documentType.title) {
+  //     case 'Passport':
+  //       type = 'mrz'
+  //       break;
+  //     case 'Driver licence':
+  //     case 'Driver license':
+  //       if (country.title === 'United Kingdom') {
+  //         return Alert.alert(
+  //           translate('oops') + '!',
+  //           translate('ukLicenseUnsupported')
+  //         )
+  //         // type = 'ocr'
+  //       } else {
+  //         type = 'barcode'
+  //       }
 
-        break
-      default:
-        return Alert.alert(
-          translate('Error'),
-          translate('unsupported document type: ' + documentType.title)
-        )
-    }
+  //       break
+  //     default:
+  //       return Alert.alert(
+  //         translate('Error'),
+  //         translate('unsupported document type: ' + documentType.title)
+  //       )
+  //   }
 
-    let result
-    try {
-      result = await Anyline.setupScanViewWithConfigJson({ type })
-    } catch (err) {
-      if (err.type === 'canceled') return
-      if (err.type === 'invalid') {
-        return Alert.alert(
-          translate('error'),
-          err.message || translate('invalidDocument')
-        )
-      }
+  //   let result
+  //   try {
+  //     result = await Anyline.setupScanViewWithConfigJson({ type })
+  //   } catch (err) {
+  //     if (err.type === 'canceled') return
+  //     if (err.type === 'invalid') {
+  //       return Alert.alert(
+  //         translate('error'),
+  //         err.message || translate('invalidDocument')
+  //       )
+  //     }
 
-      return Alert.alert(
-        translate('somethingWentWrong'),
-        err.message
-      )
-    }
+  //     return Alert.alert(
+  //       translate('somethingWentWrong'),
+  //       err.message
+  //     )
+  //   }
 
-    const r = {}
-    extend(true, r, this.state.resource)
+  //   const r = {}
+  //   extend(true, r, this.state.resource)
 
-    r[prop] = {
-      url: result.cutoutBase64,
-      width: result.width,
-      height: result.height
-    }
+  //   r[prop] = {
+  //     url: result.cutoutBase64,
+  //     width: result.width,
+  //     height: result.height
+  //   }
 
-    let docProps = omit(result, 'cutoutBase64', 'width', 'height', 'imagePath', 'fullImagePath')
-    let normalized
-    switch (documentType.title) {
-      case 'Passport':
-        // {
-        //   "nationalityCountryCode":"USA",
-        //   "documentNumber":"...",
-        //   "givenNames":"...",
-        //   "documentType":"P",
-        //   "issuingCountryCode":"USA",
-        //   "dayOfBirth":"yymmdd",
-        //   "sex":"M",
-        //   "surNames":"...",
-        //   "expirationDate":"yymmdd",
-        //   "personalNumber":""
-        // }
-        normalized = {
-          personal: {
-            // e.g. ANNA<MARIA  to  ANNA MARIA
-            sex: result.sex,
-            firstName: result.givenNames.replace(/\</g, ' '),
-            lastName: result.surNames.replace(/\</g, ' '),
-            dateOfBirth: parseAnylineDate(result.dayOfBirth),
-            nationality: result.nationalityCountryCode
-          },
-          document: {
-            documentNumber: result.documentNumber,
-            personalNumber: result.personalNumber,
-            dateOfExpiry: parseAnylineDate(result.expirationDate),
-            issuer: result.issuingCountryCode
-          }
-        }
+  //   let docProps = omit(result, 'cutoutBase64', 'width', 'height', 'imagePath', 'fullImagePath')
+  //   let normalized
+  //   switch (documentType.title) {
+  //     case 'Passport':
+  //       // {
+  //       //   "nationalityCountryCode":"USA",
+  //       //   "documentNumber":"...",
+  //       //   "givenNames":"...",
+  //       //   "documentType":"P",
+  //       //   "issuingCountryCode":"USA",
+  //       //   "dayOfBirth":"yymmdd",
+  //       //   "sex":"M",
+  //       //   "surNames":"...",
+  //       //   "expirationDate":"yymmdd",
+  //       //   "personalNumber":""
+  //       // }
+  //       normalized = {
+  //         personal: {
+  //           // e.g. ANNA<MARIA  to  ANNA MARIA
+  //           sex: result.sex,
+  //           firstName: result.givenNames.replace(/\</g, ' '),
+  //           lastName: result.surNames.replace(/\</g, ' '),
+  //           dateOfBirth: parseAnylineDate(result.dayOfBirth),
+  //           nationality: result.nationalityCountryCode
+  //         },
+  //         document: {
+  //           documentNumber: result.documentNumber,
+  //           personalNumber: result.personalNumber,
+  //           dateOfExpiry: parseAnylineDate(result.expirationDate),
+  //           issuer: result.issuingCountryCode
+  //         }
+  //       }
 
-        break
-      case 'Driver licence':
-      case 'Driver license':
-        if (country.title === 'United States' && result.barcodeFormat === 'PDF_417') {
-          let usdl = parseUSDL(result.value)
-          let personal = pick(usdl, [
-            'sex',
-            'firstName',
-            'middleName',
-            'lastName',
-            'dateOfBirth',
-            'eyeColor',
-            'height',
-            'addressStreet',
-            'addressCity',
-            'addressState',
-            'addressPostalCode'
-          ])
+  //       break
+  //     case 'Driver licence':
+  //     case 'Driver license':
+  //       if (country.title === 'United States' && result.barcodeFormat === 'PDF_417') {
+  //         let usdl = parseUSDL(result.value)
+  //         let personal = pick(usdl, [
+  //           'sex',
+  //           'firstName',
+  //           'middleName',
+  //           'lastName',
+  //           'dateOfBirth',
+  //           'eyeColor',
+  //           'height',
+  //           'addressStreet',
+  //           'addressCity',
+  //           'addressState',
+  //           'addressPostalCode'
+  //         ])
 
-          let document = pick(usdl, [
-            'documentNumber',
-            'issuer',
-            'documentDiscriminator',
-            'jurisdictionVehicleClass',
-            'jurisdictionRestrictionCodes',
-            'jurisdictionEndorsementCodes',
-            'dateOfExpiry',
-            'dateOfIssue',
-            'inventoryControlNumber'
-          ])
+  //         let document = pick(usdl, [
+  //           'documentNumber',
+  //           'issuer',
+  //           'documentDiscriminator',
+  //           'jurisdictionVehicleClass',
+  //           'jurisdictionRestrictionCodes',
+  //           'jurisdictionEndorsementCodes',
+  //           'dateOfExpiry',
+  //           'dateOfIssue',
+  //           'inventoryControlNumber'
+  //         ])
 
-          let misc = omit(usdl, Object.keys(personal).concat(Object.keys(document)))
-          normalized = { personal, document, misc }
-        } else {
-          normalized = docProps
-        }
+  //         let misc = omit(usdl, Object.keys(personal).concat(Object.keys(document)))
+  //         normalized = { personal, document, misc }
+  //       } else {
+  //         normalized = docProps
+  //       }
 
-        break
-    }
+  //       break
+  //   }
 
-    r[prop + 'Json'] = normalized
-    this.afterScan(r, prop)
-  },
+  //   r[prop + 'Json'] = normalized
+  //   this.afterScan(r, prop)
+  // },
 
   async showBlinkIDScanner(prop) {
     const { documentType, country } = this.state.resource
@@ -719,11 +719,18 @@ var NewResourceMixin = {
   },
 
   showCamera(params) {
+    if (utils.isAndroid()) {
+      return Alert.alert(
+        translate('oops') + '!',
+        translate('noScanningOnAndroid')
+      )
+    }
+
     if (params.prop === 'scan')  {
       if (this.state.resource.documentType  &&  this.state.resource.country) {
-        if (utils.isAndroid())
-          this.showAnylineScanner(params.prop)
-        else
+        // if (utils.isAndroid())
+        //   this.showAnylineScanner(params.prop)
+        // else
           this.showBlinkIDScanner(params.prop)
       }
       else
