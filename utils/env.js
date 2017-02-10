@@ -49,5 +49,5 @@ module.exports = extend({
   useKeychain: true,
   pauseOnTransition: true,
   profileTitle: 'profile',
-  homePageScanQRCodePrompt: true
+  homePageScanQRCodePrompt: false
 }, environment)

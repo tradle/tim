@@ -355,7 +355,7 @@ class ResourceView extends Component {
 
     buttons.push(translate('viewDebugLog'))
     actions.push(VIEW_DEBUG_LOG)
-    if (!ENV.homePageScanQRCodePrompt) {
+    if (ENV.homePageScanQRCodePrompt) {
       buttons.push(translate('scanQRcode'))
       actions.push(SCAN_QR_CODE)
     }

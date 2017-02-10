@@ -129,10 +129,10 @@ class ShowRefList extends Component {
                       navigator={this.props.navigator} />
     }
     let comment
-    if (!hasBacklinks  &&  utils.getMe()[constants.ROOT_HASH] === this.props.resource[constants.ROOT_HASH]) {
+    if (ENV.homePageScanQRCodePrompt && !hasBacklinks  &&  utils.getMe()[constants.ROOT_HASH] === this.props.resource[constants.ROOT_HASH]) {
       comment = <View style={{justifyContent: 'center', alignSelf: 'center', width: 300, marginTop: 200}}>
-                  <Text style={{fontSize: 20, alignSelf: 'center', color: '#555555'}}>{'Please tap on the red button and'}</Text>
-                  <Text style={{fontSize: 20, alignSelf: 'center', color: '#555555'}}>{'Scan QR code'}</Text>
+                  <Text style={{fontSize: 20, alignSelf: 'center', color: '#555555'}}>{translate('pleaseTapOnMenu')}</Text>
+                  <Text style={{fontSize: 20, alignSelf: 'center', color: '#555555'}}>{translate('scanQRcode')}</Text>
                 </View>
     }
 
