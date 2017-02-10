@@ -32,7 +32,6 @@ const REMEDIATION_SIMPLE_MESSAGE = 'tradle.RemediationSimpleMessage'
 
 var CURRENCY_SYMBOL
 var LINK_COLOR
-var STRUCTURED_MESSAGE_COLOR
 
 const DEFAULT_CURRENCY_SYMBOL = '£'
 const DEFAULT_LINK_COLOR = '#2892C6'
@@ -59,7 +58,6 @@ class MessageRow extends Component {
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
     var me = utils.getMe();
     LINK_COLOR = this.props.bankStyle.LINK_COLOR
-    STRUCTURED_MESSAGE_COLOR = this.props.bankStyle.STRUCTURED_MESSAGE_COLOR
     CURRENCY_SYMBOL = props.currency ? props.currency.symbol || props.currency : DEFAULT_CURRENCY_SYMBOL
   }
   shouldComponentUpdate(nextProps, nextState) {
@@ -98,6 +96,7 @@ class MessageRow extends Component {
     var isSimpleMessage = resource[constants.TYPE] === constants.TYPES.SIMPLE_MESSAGE
 
     var isForgetting = model.id === constants.TYPES.FORGET_ME || model.id === constants.TYPES.FORGOT_YOU
+    const bankStyles = this.props.bankStyle
     if (!renderedRow.length) {
       var vCols = noMessage ? null : utils.getDisplayName(resource, model.properties);
       if (vCols)
@@ -107,15 +106,15 @@ class MessageRow extends Component {
       var fromHash = resource.from.id;
       if (isMyMessage) {
         if (!noMessage)
-          addStyle = chatStyles.myCell
+          addStyle = [chatStyles.myCell, {backgroundColor: bankStyles.MY_MESSAGE_BACKGROUND_COLOR}]
       }
       else if (isForgetting)
         addStyle = styles.forgetCell
       else {
         if (isConfirmation)
-          addStyle = [chatStyles.verificationBody, {borderColor: '#cccccc', backgroundColor: this.props.bankStyle.CONFIRMATION_BG}, styles.myConfCell]
+          addStyle = [chatStyles.verificationBody, {borderColor: '#cccccc', backgroundColor: bankStyle.CONFIRMATION_BG}, styles.myConfCell]
         else {
-          let borderColor = isFormError ? this.props.bankStyle.REQUEST_FULFILLED : '#efefef'
+          let borderColor = isFormError ? bankStyle.REQUEST_FULFILLED : '#efefef'
           let mstyle = {
             borderColor: borderColor,
             backgroundColor: '#ffffff',
@@ -128,11 +127,11 @@ class MessageRow extends Component {
       }
 
       if (isFormError)
-        addStyle = [addStyle, chatStyles.verificationBody, {backgroundColor: this.props.bankStyle.FORM_ERROR_BG, borderColor: resource.documentCreated ? this.props.bankStyle.REQUEST_FULFILLED : this.props.bankStyle.FORM_ERROR_BORDER}]; //model.style];
+        addStyle = [addStyle, chatStyles.verificationBody, {backgroundColor: bankStyles.FORM_ERROR_BG, borderColor: resource.documentCreated ? bankStyles.REQUEST_FULFILLED : bankStyles.FORM_ERROR_BORDER}]; //model.style];
       if (isMyMessage  &&  !isSimpleMessage && !isFormError) {
         let st = isProductApplication
-               ? {backgroundColor: this.props.bankStyle.CONTEXT_BACKGROUND_COLOR}
-               : {backgroundColor: this.props.bankStyle.STRUCTURED_MESSAGE_COLOR}
+               ? {backgroundColor: bankStyles.CONTEXT_BACKGROUND_COLOR}
+               : {backgroundColor: bankStyles.STRUCTURED_MESSAGE_COLOR}
         addStyle = [addStyle, chatStyles.verificationBody, st]; //model.style];
       }
     }
@@ -165,7 +164,7 @@ class MessageRow extends Component {
       else
         verPhoto = <View style={{height: 0, width:0}} />
     }
-    var rowStyle = [chatStyles.row, {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}];
+    var rowStyle = [chatStyles.row, {backgroundColor: bankStyles.BACKGROUND_COLOR}];
     var val = this.getTime(resource);
     var date = val
              ? <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
@@ -239,7 +238,7 @@ class MessageRow extends Component {
                           <View style={cellStyle}>
                             <View style={styles.container}>
                             {this.isShared()
-                              ? <View style={[chatStyles.verifiedHeader, {backgroundColor: this.props.bankStyle.SHARED_WITH_BG}]}>
+                              ? <View style={[chatStyles.verifiedHeader, {backgroundColor: bankStyles.SHARED_WITH_BG}]}>
                                   <Text style={styles.white18}>{translate('youShared', resource.to.organization.title)}</Text>
                                 </View>
                               : <View />
@@ -285,7 +284,7 @@ class MessageRow extends Component {
     var photoStyle = (isLicense  &&  len === 1) ? chatStyles.bigImage : photoStyle;
 
     return (
-      <View style={[viewStyle, {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}]}>
+      <View style={[viewStyle, {backgroundColor: bankStyles.BACKGROUND_COLOR}]}>
         {date}
         {messageBody}
         <View style={photoListStyle}>
@@ -295,7 +294,7 @@ class MessageRow extends Component {
       </View>
     )
     // return (
-    //   <View style={[viewStyle, {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}]}>
+    //   <View style={[viewStyle, {backgroundColor: bankStyles.BACKGROUND_COLOR}]}>
     //     {date}
     //     {messageBody}
     //     <View style={photoListStyle}>
@@ -569,13 +568,13 @@ class MessageRow extends Component {
 
     var vCols = [];
 
-    viewCols.forEach(function(v) {
+    viewCols.forEach((v) => {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date')
         return;
 
       if (properties[v].ref) {
         if (resource[v]) {
-          vCols.push(self.getPropRow(properties[v], resource, resource[v].title || resource[v]))
+          vCols.push(this.getPropRow(properties[v], resource, resource[v].title || resource[v]))
           first = false;
         }
         return;
@@ -587,7 +586,7 @@ class MessageRow extends Component {
       if (resource[v]                      &&
           properties[v].type === 'string'  &&
           (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0)) {
-        onPressCall = self.onPress.bind(self);
+        onPressCall = this.onPress.bind(self);
         vCols.push(<Text style={style} numberOfLines={first ? 2 : 1} key={self.getNextKey()}>{resource[v]}</Text>);
       }
       else if (isFormError) {
@@ -634,10 +633,14 @@ class MessageRow extends Component {
         // Case when the needed form was sent along with the message
         if (msgParts.length === 2) {
           if (resource.welcome) {
+            let bg  = isMyMessage
+                      ? self.props.bankStyle.MY_MESSAGE_BACKGROUND_COLOR
+                      : '#ffffff'
+            let color = isMyMessage ? self.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR
             msg = <View key={self.getNextKey()}>
                     <Text style={style}>{msgParts[0]}</Text>
                     <View style={chatStyles.rowContainer}>
-                      <Text style={[style, {color: isMyMessage ? STRUCTURED_MESSAGE_COLOR : isMyMessage ? self.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]}>{msgParts[1]} </Text>
+                      <Text style={[style, {backgroundColor: bg, color: color}]}>{msgParts[1]} </Text>
                       <Icon style={{color: LINK_COLOR, marginTop: 2}} size={20} name={'ios-arrow-forward'} />
                     </View>
                   </View>
@@ -667,7 +670,7 @@ class MessageRow extends Component {
                 onPressCall = self.createNewResource.bind(self, msgModel, isMyMessage);
 
               color = isMyMessage  &&  !isFormError
-                    ? {color: self.props.bankStyle.MY_MESSAGE_LINK_COLOR} //{color: STRUCTURED_MESSAGE_COLOR}
+                    ? {color: self.props.bankStyle.MY_MESSAGE_LINK_COLOR}
                     : {color: '#2892C6'}
               if (isMyMessage)
                 link = <Text style={[style, color]}>{translate(msgModel)}</Text>

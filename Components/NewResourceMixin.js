@@ -1189,11 +1189,13 @@ var NewResourceMixin = {
     if (!item)
       return;
     var resource = this.addFormValues();
-    if (this.props.model.properties[propName].ref)
-      item[constants.TYPE] = this.props.model.properties[propName].ref
+    const props = this.props.model.properties
+    if (props[propName].ref)
+      item[constants.TYPE] = props[propName].ref
     if (this.state.missedRequiredOrErrorValue)
       delete this.state.missedRequiredOrErrorValue[propName]
     resource[propName] = item
+
     this.setState({
       resource: resource,
       prop: propName,

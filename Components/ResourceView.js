@@ -30,7 +30,8 @@ var HomePageMixin = require('./HomePageMixin')
 
 var ResourceList = require('./ResourceList')
 
-import ActionSheet from 'react-native-actionsheet'
+import ActionSheet from './ActionSheet'
+// import ActionSheet from 'react-native-actionsheet'
 
 import platformStyles from '../styles/platform'
 import { signIn } from '../utils/localAuth'
@@ -332,6 +333,53 @@ class ResourceView extends Component {
     );
   }
 
+  // renderActionSheet() {
+  //   let buttons = []
+
+  //   if (ENV.requireDeviceLocalAuth) {
+  //     if (utils.isIOS()) {
+  //       // when both auth methods are available, give the choice to disable one
+  //       buttons.push({
+  //         text: translate('useTouchId') + (this.state.useTouchId ? ' ✓' : ''),
+  //         onPress: this.changePreferences(USE_TOUCH_ID)
+  //       })
+  //       buttons.push({
+  //         text: translate('useGesturePassword') + (this.state.useGesturePassword ? ' ✓' : ''),
+  //         onPress: this.changePreferences(USE_GESTURE_PASSWORD)
+  //       })
+  //     }
+  //   }
+
+  //   if (this.state.useGesturePassword || !utils.isIOS()) {
+  //     buttons.push({
+  //       text: translate('changeGesturePassword'),
+  //       onPress: this.changePreferences(CHANGE_GESTURE_PASSWORD)
+  //     })
+  //   }
+  //   buttons.push({
+  //     text: translate('pairDevices'),
+  //     onPress: this.changePreferences(PAIR_DEVICES)
+  //   })
+  //   buttons.push({
+  //     text: translate('viewDebugLog'),
+  //     onPress: this.changePreferences(VIEW_DEBUG_LOG)
+  //   })
+  //   if (!ENV.homePageScanQRCodePrompt) {
+  //     buttons.push({
+  //       text: translate('scanQRcode'),
+  //       onPress: this.changePreferences(SCAN_QR_CODE)
+  //     })
+  //   }
+  //   buttons.push({ text: translate('cancel') })
+  //   return (
+  //     <ActionSheet
+  //       ref={(o) => {
+  //         this.ActionSheet = o
+  //       }}
+  //       options={buttons}
+  //     />
+  //   )
+  // }
   renderActionSheet() {
     let buttons = []
     let actions = []
@@ -519,50 +567,3 @@ var createStyles = utils.styleFactory(ResourceView, function ({ dimensions }) {
 })
 
 module.exports = ResourceView;
-  // renderActionSheet1() {
-  //   let buttons = []
-
-  //   if (ENV.requireDeviceLocalAuth) {
-  //     if (utils.isIOS()) {
-  //       // when both auth methods are available, give the choice to disable one
-  //       buttons.push({
-  //         text: translate('useTouchId') + (this.state.useTouchId ? ' ✓' : ''),
-  //         onPress: this.changePreferences(USE_TOUCH_ID)
-  //       })
-  //       buttons.push({
-  //         text: translate('useGesturePassword') + (this.state.useGesturePassword ? ' ✓' : ''),
-  //         onPress: this.changePreferences(USE_GESTURE_PASSWORD)
-  //       })
-  //     }
-  //   }
-
-  //   if (this.state.useGesturePassword || !utils.isIOS()) {
-  //     buttons.push({
-  //       text: translate('changeGesturePassword'),
-  //       onPress: this.changePreferences(CHANGE_GESTURE_PASSWORD)
-  //     })
-  //   }
-  //   buttons.push({
-  //     text: translate('pairDevices'),
-  //     onPress: this.changePreferences(PAIR_DEVICES)
-  //   })
-  //   buttons.push({
-  //     text: translate('viewDebugLog'),
-  //     onPress: this.changePreferences(VIEW_DEBUG_LOG)
-  //   })
-  //   if (!ENV.homePageScanQRCodePrompt) {
-  //     buttons.push({
-  //       text: translate('scanQRcode'),
-  //       onPress: this.changePreferences(SCAN_QR_CODE)
-  //     })
-  //   }
-  //   buttons.push({ text: translate('cancel') })
-  //   return (
-  //     <ActionSheet
-  //       ref={(o) => {
-  //         this.ActionSheet = o
-  //       }}
-  //       options={buttons}
-  //     />
-  //   )
-  // }
