@@ -1006,7 +1006,7 @@ var Store = Reflux.createStore({
     })
   },
   onSetProviderStyle(stylePack) {
-    const style = utils.interpretStylePack(stylePack)
+    const style = utils.interpretStylesPack(stylePack)
     //
   },
   addToSettings(provider) {
