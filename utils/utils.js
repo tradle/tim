@@ -463,6 +463,8 @@ var utils = {
      )
   },
   templateIt1(prop, resource, m) {
+    if (resource.id  &&  resource.title)
+      return resource.title
     let pgroup = prop.group
     if (!pgroup.length)
       return prop.displayAs
@@ -695,20 +697,28 @@ var utils = {
            ? meId  !== this.getId(context.from)
            : isReadOnly
   },
-  optimizeResource(res) {
+  optimizeResource(resource, doNotChangeOriginal) {
+    let res = doNotChangeOriginal ? this.clone(resource) : resource
+
     var properties = this.getModel(res[TYPE]).value.properties
     for (var p in res) {
       if (p.charAt(0) === '_'  ||  !properties[p])
         continue
       if (properties[p].type === 'object') {
-        if (res[p]  &&  res[p].id  &&  res[p].title)
+        if (res[p]  &&  res[p].id  &&  res[p].title) {
+          let r = {
+            id: res[p].id,
+            title: res[p].title
+          }
+          res[p] = r
           continue
+        }
         if (properties[p].ref  &&  !utils.getModel(properties[p].ref).value.inlined) {
 
           // if (properties[p].ref !== MONEY  &&  properties[p].ref !== PHOTO) {
           res[p] = {
             id: this.getId(res[p]),
-            title: this.getDisplayName(res[p], properties)
+            title: this.getDisplayName(res[p])
           }
         }
         continue
@@ -733,6 +743,7 @@ var utils = {
       })
       res[p] = arr
     }
+    return res
   },
 
   /**
@@ -1199,10 +1210,10 @@ var utils = {
 
     return top
   },
-  orientation() {
-    // disallow PORTRAITUPSIDEDOWN
-    return orientation === 'PORTRAITUPSIDEDOWN' ? 'LANDSCAPE' : orientation.replace(/-LEFT|-RIGHT/, '')
-  },
+  // orientation() {
+  //   // disallow PORTRAITUPSIDEDOWN
+  //   return orientation === 'PORTRAITUPSIDEDOWN' ? 'LANDSCAPE' : orientation.replace(/-LEFT|-RIGHT/, '')
+  // },
   dimensions(Component) {
     return getDimensions(Component)
   },
@@ -1582,6 +1593,9 @@ var utils = {
   isMessage(m) {
     if (typeof m === 'string')
       m = this.getModel(m).value
+    else if (m[TYPE])  // resource was passed
+      m = this.getModel(m[TYPE]).value
+
     if (m.isInterface  &&  (m.id === MESSAGE || m.id === DOCUMENT || m.id === ITEM))
       return true
     if (m.interfaces && m.interfaces.indexOf(MESSAGE) !== -1)

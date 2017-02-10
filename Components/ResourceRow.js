@@ -695,12 +695,6 @@ var styles = StyleSheet.create({
     height: 20,
     backgroundColor: UNREAD_COLOR
   },
-  countText: {
-    fontSize: 14,
-    alignSelf: 'center',
-    // fontWeight: '600',
-    color: '#ffffff'
-  },
   multiChooser: {
     position: 'absolute',
     right: 10,

@@ -9,7 +9,7 @@ var MessageList = require('./MessageList');
 var PageView = require('./PageView')
 var MessageView = require('./MessageView')
 var SupervisoryView = require('./SupervisoryView')
-import ActionSheet from 'react-native-actionsheet'
+import ActionSheet from './ActionSheet'
 var utils = require('../utils/utils');
 var translate = utils.translate
 var reactMixin = require('react-mixin');
@@ -497,20 +497,22 @@ class ResourceList extends Component {
       return;
     }
     if (this.props.prop) {
-      if (me  &&  this.props.modelName != PROFILE) {
-        this._selectResource(resource);
-        return;
-      }
-      if (!me) {
-        if (this.state.isRegistration) {
+      if (me) {
+        if  (this.props.modelName != PROFILE) {
+          this._selectResource(resource);
+          return
+        }
+        if (utils.isMe(resource)  ||
+           (this.props.prop  &&  this.props.resource  &&  utils.isMe(this.props.resource))) {
           this._selectResource(resource);
           return;
         }
       }
-      else if (me[ROOT_HASH] === resource[ROOT_HASH]  ||
-         (this.props.resource  &&  me[ROOT_HASH] === this.props.resource[ROOT_HASH]  && this.props.prop)) {
-        this._selectResource(resource);
-        return;
+      else {
+        if (this.state.isRegistration) {
+          this._selectResource(resource);
+          return;
+        }
       }
     }
     var title = isContact ? resource.firstName : resource.name; //utils.getDisplayName(resource, model.value.properties);
@@ -737,32 +739,40 @@ class ResourceList extends Component {
     var isSharedContext = model.id === PRODUCT_APPLICATION && utils.isReadOnlyChat(resource)
 
     // let hasBacklink = this.props.prop && this.props.prop.items  &&  this.props.prop.backlink
-    return /*hasBacklink  &&*/  (isVerification  || isForm || isMyProduct)
-    ? (<VerificationRow
-        onSelect={() => this.selectResource(isVerification
-                              ? resource.sources ? resource : resource.document
-                              : resource)}
-        key={resource[ROOT_HASH]}
-        navigator={this.props.navigator}
-        prop={this.props.prop}
-        parentResource={this.props.resource}
-        currency={this.props.currency}
-        isChooser={this.props.isChooser}
-        resource={resource} />
+
+    let selectedResource
+    if (!isVerification)
+      selectedResource = resource
+    else if (resource.sources || resource.method)
+      selectedResource = resource
+    else
+      selectedResource = resource.document
+
+    if (isVerification  || isForm || isMyProduct)
+      return (<VerificationRow
+                onSelect={() => this.selectResource(selectedResource)}
+                key={resource[ROOT_HASH]}
+                navigator={this.props.navigator}
+                prop={this.props.prop}
+                parentResource={this.props.resource}
+                currency={this.props.currency}
+                isChooser={this.props.isChooser}
+                resource={resource} />
       )
-    : (<ResourceRow
-        onSelect={() => isSharedContext ? this.openSharedContextChat(resource) : this.selectResource(resource)}
-        key={resource[ROOT_HASH]}
-        hideResource={this.hideResource.bind(this)}
-        hideMode={this.state.hideMode}
-        navigator={this.props.navigator}
-        changeSharedWithList={this.props.chat ? this.changeSharedWithList.bind(this) : null}
-        currency={this.props.currency}
-        isOfficialAccounts={this.props.officialAccounts}
-        multiChooser={this.props.multiChooser}
-        showRefResources={this.showRefResources.bind(this)}
-        resource={resource}
-        chosen={this.state.chosen} />
+    return (<ResourceRow
+      onSelect={() => isSharedContext ? this.openSharedContextChat(resource) : this.selectResource(resource)}
+      key={resource[ROOT_HASH]}
+      hideResource={this.hideResource.bind(this)}
+      hideMode={this.state.hideMode}
+      navigator={this.props.navigator}
+      changeSharedWithList={this.props.chat ? this.changeSharedWithList.bind(this) : null}
+      newContact={this.state.newContact}
+      currency={this.props.currency}
+      isOfficialAccounts={this.props.officialAccounts}
+      multiChooser={this.props.multiChooser}
+      showRefResources={this.showRefResources.bind(this)}
+      resource={resource}
+      chosen={this.state.chosen} />
     );
         // newContact={this.state.newContact}
   }
@@ -996,46 +1006,38 @@ class ResourceList extends Component {
   renderActionSheet() {
     let buttons
     if (this.state.allowToAdd) {
-      buttons = [translate('addNew', this.props.prop.title), translate('cancel')]
+      buttons = [
+        {
+          text: translate('addNew', this.props.prop.title),
+          onPress: () => this.addNew()
+        }
+      ]
     } else {
       if (!ENV.allowAddServer) return
 
       buttons = [
-        translate('addServerUrl'),
-        translate('hideResource', translate(utils.getModel(this.props.modelName).value)),
-        translate('scanQRcode'),
-        translate('cancel')
+        {
+          text: translate('addServerUrl'),
+          onPress: () => this.onSettingsPressed()
+        },
+        {
+          text: translate('hideResource', translate(utils.getModel(this.props.modelName).value)),
+          onPress: () => this.setState({hideMode: true})
+        },
+        {
+          text: translate('scanQRcode'),
+          onPress: () => this.scanFormsQRCode()
+        }
       ]
     }
 
+    buttons.push({ text: translate('cancel') })
     return (
       <ActionSheet
         ref={(o) => {
           this.ActionSheet = o
         }}
         options={buttons}
-        cancelButtonIndex={buttons.length - 1}
-        onPress={(index) => {
-          switch (index) {
-          case 0:
-            if (this.state.allowToAdd)
-              this.addNew()
-            else
-              this.onSettingsPressed()
-            break
-          case 1:
-            this.setState({hideMode: true})
-            break
-          case 2:
-            this.scanFormsQRCode()
-            break;
-          // case 2:
-          //   this.talkToEmployee()
-          //   break
-          default:
-            return
-          }
-        }}
       />
     )
   }
@@ -1299,28 +1301,3 @@ var styles = StyleSheet.create({
 });
 
 module.exports = ResourceList;
-
-  // showQRCode1(purpose, content) {
-  //   this.props.navigator.push({
-  //     title: 'QR Code: ' + purpose,
-  //     id: 17,
-  //     component: QRCode,
-  //     titleTextColor: '#eeeeee',
-  //     backButtonTitle: translate('back'),
-  //     passProps: {
-  //       fullScreen: true,
-  //       content: content
-  //     }
-  //   })
-  // }
-
-  // talkToEmployee(qrcode) {
-  //   this.setState({show: false})
-  //   if (!qrcode)
-  //     // qrcode = 'http://127.0.0.1:444444;71e4b7cd6c11ab7221537275988f113a879029eu;6aefc09f4da125095409770592eb96ac142fb579'
-  //     // qrcode = 'http://192.168.0.104:44444/;71e4b7cd6c11ab7221537275988f113a879029eu;3497c6ce074f1bc66c05e204fd3a7fbcd5e0fb08'
-  //     qrcode = 'http://192.168.0.136:44444/;71e4b7cd6c11ab7221537275988f113a879029eu;c3adf2d26304133265c3e28b5c9037614880aec5'
-
-  //   Actions.getEmployeeInfo(qrcode)
-  //   return
-  // }

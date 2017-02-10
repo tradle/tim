@@ -27,7 +27,8 @@
     "deploy:u": "npm run build:u && GIT_DEPLOY_DIR=web/dist GIT_DEPLOY_BRANCH=gh-pages-u GIT_DEPLOY_REPO=mv ./deploy.sh",
     "deploy:static": "npm run build:static && GIT_DEPLOY_DIR=web/dist GIT_DEPLOY_BRANCH=static GIT_DEPLOY_REPO=origin ./deploy.sh",
     "deploy:local": "npm run build:local && GIT_DEPLOY_DIR=web/dist GIT_DEPLOY_BRANCH=local GIT_DEPLOY_REPO=origin ./deploy.sh",
-    "deploy:bots": "npm run build:bots && GIT_DEPLOY_DIR=web/dist GIT_DEPLOY_BRANCH=gh-pages GIT_DEPLOY_REPO=bots ./deploy.sh"
+    "deploy:bots": "npm run build:bots && GIT_DEPLOY_DIR=web/dist GIT_DEPLOY_BRANCH=gh-pages GIT_DEPLOY_REPO=bots ./deploy.sh",
+    "lint": "eslint --quiet ."
   },
   "dependencies": {
     "@tradle/cb-blockr": "^3.2.0",
@@ -160,6 +161,8 @@
     "eslint": "^2.12.0",
     "eslint-config-standard": "^5.3.1",
     "eslint-plugin-promise": "^1.3.2",
+    "eslint-plugin-react": "6.9.0",
+    "eslint-plugin-react-native": "2.2.1",
     "eslint-plugin-standard": "^1.3.2",
     "express": "^4.14.0",
     "file-loader": "^0.9.0",

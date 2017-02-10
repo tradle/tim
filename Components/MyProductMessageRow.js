@@ -102,7 +102,7 @@ class MyProductMessageRow extends Component {
 
     var viewCols = model.gridCols || model.viewCols;
     if (!viewCols)
-      return
+      return {onPressCall: this.props.onSelect.bind(this, resource, null)}
     var first = true;
     var self = this;
 

@@ -22,7 +22,7 @@ var debug = require('debug')('Tradle-Home')
 var BG_IMAGE = require('../img/bg.png')
 // var PasswordCheck = require('./PasswordCheck')
 var FadeInView = require('./FadeInView')
-// var TouchIDOptIn = require('./TouchIDOptIn')
+var TouchIDOptIn = require('./TouchIDOptIn')
 var defaultBankStyle = require('../styles/bankStyle.json')
 var QRCodeScanner = require('./QRCodeScanner')
 
@@ -71,9 +71,9 @@ import {
 import ActivityIndicator from './ActivityIndicator'
 import StatusBar from './StatusBar'
 
-const isAndroid = utils.isAndroid()
 const isLinkingSupported = utils.isIOS() && Linking
-import React, { Component } from 'react'
+const isAndroid = Platform.OS === 'android'
+import React, { Component, PropTypes } from 'react'
 
 class TimHome extends Component {
   static displayName = 'TimHome';
@@ -409,8 +409,8 @@ class TimHome extends Component {
   }
   showHomePage(doReplace) {
     let me = utils.getMe()
-    let title = translate('digitalWealthPassport')
-    this.props.navigator[doReplace ? 'replace': 'push']({
+    let title = translate(ENV.profileTitle)
+    this.props.navigator.push({
       title: title,
       id: 3,
       component: ResourceView,
