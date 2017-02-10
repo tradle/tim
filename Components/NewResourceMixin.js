@@ -1152,7 +1152,7 @@ var NewResourceMixin = {
 
     let actionItem
     if (isVideo ||  isPhoto) {
-      if (prop.allowPicturesFromLibrary) {
+      if (isPhoto) {
         var aiStyle = {flex: 7, paddingTop: 15, paddingBottom: 7}
         let m = utils.getModel(prop.ref).value
         actionItem = <ImageInput prop={prop} style={aiStyle} onImage={item => this.onSetMediaProperty(prop.name, item)}>
