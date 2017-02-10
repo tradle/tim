@@ -355,8 +355,10 @@ class ResourceView extends Component {
 
     buttons.push(translate('viewDebugLog'))
     actions.push(VIEW_DEBUG_LOG)
-    buttons.push(translate('scanQRcode'))
-    actions.push(SCAN_QR_CODE)
+    if (!ENV.homePageScanQRCodePrompt) {
+      buttons.push(translate('scanQRcode'))
+      actions.push(SCAN_QR_CODE)
+    }
     buttons.push(translate('cancel'))
     return(
         <ActionSheet
@@ -367,7 +369,7 @@ class ResourceView extends Component {
           cancelButtonIndex={buttons.length - 1}
           onPress={(index) => {
             if (index < buttons.length - 1)
-              this.changePreferences(index, actions[index])
+              this.changePreferences(actions[index])
           }}
         />
     )
@@ -387,7 +389,7 @@ class ResourceView extends Component {
     Actions.getItem(resource.id);
   }
 
-  changePreferences(id, action) {
+  changePreferences(action) {
     const self = this
     let me = utils.getMe()
     let r = {
@@ -517,3 +519,50 @@ var createStyles = utils.styleFactory(ResourceView, function ({ dimensions }) {
 })
 
 module.exports = ResourceView;
+  // renderActionSheet1() {
+  //   let buttons = []
+
+  //   if (ENV.requireDeviceLocalAuth) {
+  //     if (utils.isIOS()) {
+  //       // when both auth methods are available, give the choice to disable one
+  //       buttons.push({
+  //         text: translate('useTouchId') + (this.state.useTouchId ? ' ✓' : ''),
+  //         onPress: this.changePreferences(USE_TOUCH_ID)
+  //       })
+  //       buttons.push({
+  //         text: translate('useGesturePassword') + (this.state.useGesturePassword ? ' ✓' : ''),
+  //         onPress: this.changePreferences(USE_GESTURE_PASSWORD)
+  //       })
+  //     }
+  //   }
+
+  //   if (this.state.useGesturePassword || !utils.isIOS()) {
+  //     buttons.push({
+  //       text: translate('changeGesturePassword'),
+  //       onPress: this.changePreferences(CHANGE_GESTURE_PASSWORD)
+  //     })
+  //   }
+  //   buttons.push({
+  //     text: translate('pairDevices'),
+  //     onPress: this.changePreferences(PAIR_DEVICES)
+  //   })
+  //   buttons.push({
+  //     text: translate('viewDebugLog'),
+  //     onPress: this.changePreferences(VIEW_DEBUG_LOG)
+  //   })
+  //   if (!ENV.homePageScanQRCodePrompt) {
+  //     buttons.push({
+  //       text: translate('scanQRcode'),
+  //       onPress: this.changePreferences(SCAN_QR_CODE)
+  //     })
+  //   }
+  //   buttons.push({ text: translate('cancel') })
+  //   return (
+  //     <ActionSheet
+  //       ref={(o) => {
+  //         this.ActionSheet = o
+  //       }}
+  //       options={buttons}
+  //     />
+  //   )
+  // }
