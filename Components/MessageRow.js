@@ -745,6 +745,8 @@ class MessageRow extends Component {
   }
   showMyData() {
     let me = utils.getMe()
+    // let n = this.props.navigator.getCurrentRoutes().length
+    // this.props.navigator.popN(n - 2)
     this.showResources(me, utils.getModel(me[constants.TYPE]).value.properties.myForms)
   }
 

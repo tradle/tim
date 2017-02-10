@@ -24,7 +24,7 @@ import {
   TouchableHighlight,
 } from 'react-native'
 
-import React, { Component } from 'react'
+import React, { Component, PropTypes } from 'react'
 
 class NewItem extends Component {
   static displayName = 'NewItem'
