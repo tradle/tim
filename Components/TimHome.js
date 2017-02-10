@@ -410,7 +410,7 @@ class TimHome extends Component {
   showHomePage(doReplace) {
     let me = utils.getMe()
     let title = translate(ENV.profileTitle)
-    this.props.navigator.push({
+    this.props.navigator[doReplace ? 'replace' : 'push']({
       title: title,
       id: 3,
       component: ResourceView,
