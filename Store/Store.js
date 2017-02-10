@@ -1005,6 +1005,10 @@ var Store = Reflux.createStore({
       debugger
     })
   },
+  onSetProviderStyle(stylePack) {
+    const style = utils.interpretStylePack(stylePack)
+    //
+  },
   addToSettings(provider) {
     let r = this._getItem(SETTINGS + '_1')
     if (!r.hashToUrl)
