@@ -909,7 +909,7 @@ var NewResourceMixin = {
 
     var value = params.value
     var doWrap = label.length > 30
-    if (doWrap  && Platform.OS === 'android') {
+    if (doWrap  &&  utils.isAndroid()) {
       label = label.substring(0, 27) + '...'
       doWrap = false
     }
@@ -1269,10 +1269,8 @@ var NewResourceMixin = {
     else if (this.props.model.properties[propName].type === 'array') {
       let prop = this.props.model.properties[propName]
       if (!prop.inlined  &&  prop.items  &&  prop.items.ref  &&  !utils.getModel(prop.items.ref).value.inlined) {
-        let v = {
-          id: utils.getId(value),
-          title: utils.getDisplayName(value, utils.getModel(value[constants.TYPE]).properties)
-        }
+        let v = utils.buildRef(value)
+
         if (value.photos)
           v.photo = value.photos[0].url
         if (!resource[propName]) {
@@ -1294,10 +1292,7 @@ var NewResourceMixin = {
     }
     else {
       var id = utils.getId(value)
-      resource[propName] = {
-        id: id,
-        title: utils.getDisplayName(value, utils.getModel(value[constants.TYPE]).value.properties)
-      }
+      resource[propName] = utils.buildRef(value)
 
       if (!this.floatingProps)
         this.floatingProps = {}
