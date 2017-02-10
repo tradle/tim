@@ -19,6 +19,7 @@ var reactMixin = require('react-mixin');
 var STRUCTURED_MESSAGE_COLOR
 const MAX_PROPS_IN_FORM = 1
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
+const PHOTO = 'tradle.Photo'
 import {
   // StyleSheet,
   Text,
@@ -238,7 +239,7 @@ class FormMessageRow extends Component {
       if (properties[v].type === 'array')
         return;
       if (properties[v].ref) {
-        if (resource[v]) {
+        if (resource[v]  &&  properties[v].ref !== PHOTO) {
           vCols.push(self.getPropRow(properties[v], resource, resource[v].title || resource[v]))
           first = false;
         }
