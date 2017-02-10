@@ -7,6 +7,9 @@ var RemediationItemsList = require('./RemediationItemsList')
 var Icon = require('react-native-vector-icons/Ionicons');
 var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin');
+var CameraView = require('./CameraView')
+import ImageInput from './ImageInput'
+
 import CustomIcon from '../styles/customicons'
 var extend = require('extend')
 var equal = require('deep-equal')
@@ -18,8 +21,10 @@ var StyleSheet = require('../StyleSheet')
 var reactMixin = require('react-mixin');
 var chatStyles = require('../styles/chatStyles')
 
+const TYPE = constants.TYPE
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM = 'tradle.Form'
+const PHOTO = 'tradle.Photo'
 const FORM_REQUEST = 'tradle.FormRequest'
 const CONFIRM_PACKAGE_REQUEST = 'tradle.ConfirmPackageRequest'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
@@ -49,7 +54,7 @@ class FormRequestRow extends Component {
   constructor(props) {
     super(props);
     var resource = this.props.resource;
-    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
+    var model = utils.getModel(resource[TYPE] || resource.id).value;
     var me = utils.getMe();
     LINK_COLOR = this.props.bankStyle.LINK_COLOR
   }
@@ -61,22 +66,26 @@ class FormRequestRow extends Component {
            this.props.sendStatus !== nextProps.sendStatus
   }
   render() {
-    var resource = this.props.resource;
-    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
+    let resource = this.props.resource;
+    let model = utils.getModel(resource[TYPE] || resource.id).value;
 
-    var me = utils.getMe();
+    let me = utils.getMe();
 
-    var isMyMessage = this.isMyMessage();
-    var to = this.props.to;
-    var ownerPhoto = this.getOwnerPhoto(isMyMessage)
+    let isMyMessage = this.isMyMessage();
+    let to = this.props.to;
+    let ownerPhoto = this.getOwnerPhoto(isMyMessage)
     let hasOwnerPhoto = !isMyMessage &&  to  &&  to.photos;
 
     let message = resource.message
-    var renderedRow = [];
+    let renderedRow = [];
+
     let onPressCall
-    let isFormRequest = resource[constants.TYPE] === FORM_REQUEST
+    let isFormRequest = resource[TYPE] === FORM_REQUEST
+    let prop =  this.isOnePropForm()
+
     if (isFormRequest)
-      onPressCall = this.formRequest(resource, renderedRow)
+      onPressCall = this.formRequest(resource, renderedRow, prop)
+
     else {
       onPressCall = resource.documentCreated ? null : this.reviewFormsInContext.bind(this)
       let idx = message.indexOf('...') + 3
@@ -91,7 +100,7 @@ class FormRequestRow extends Component {
 
       renderedRow.push(msg)
     }
-    var fromHash = resource.from.id;
+    let fromHash = resource.from.id;
     let mstyle = {
       borderColor: 'transparent',
       backgroundColor: '#ffffff',
@@ -171,11 +180,15 @@ class FormRequestRow extends Component {
                         </View>
                       </View>
 
-    let messageBody = <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
-                        {msgContent}
-                      </TouchableHighlight>
+    // onPressCall = prop  &&  !prop.allowPicturesFromLibrary ? this.showCamera({prop: prop}) : onPressCall
+    let messageBody
+    if (prop)
+      messageBody = msgContent
+    else
+      messageBody = <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
+                      {msgContent}
+                    </TouchableHighlight>
 
-        // <View style={shareables ? {borderWidth: 1, width: msgWidth + 2, borderColor: '#dddddd', borderRadius: 10, borderTopLeftRadius: 0} : {}}>
     return (
       <View style={[mainStyle, {margin:2, paddingVertical: 3, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}]}>
         {date}
@@ -197,6 +210,27 @@ class FormRequestRow extends Component {
     //   </View>
     // )
   }
+  isOnePropForm() {
+    const resource = this.props.resource;
+    if (resource[TYPE] !== FORM_REQUEST)
+      return
+    const model = utils.getModel(resource.form).value;
+    const props = model.properties
+    let eCols = []
+    for (let p in props) {
+      let prop = props[p]
+      if (!prop.readOnly  &&  !prop.hidden  &&  !prop.list)
+        eCols.push(props[p])
+    }
+
+    if (eCols.length === 1) {
+      let p = eCols[0]
+      if (p  &&  p.type === 'object'  &&  p.ref === PHOTO)
+        return p
+    }
+    return
+  }
+
   showShareableResources(rowStyle, viewStyle, width) {
     if (!this.props.shareableResources) // || !this.props.resource.message)
       return null
@@ -209,7 +243,7 @@ class FormRequestRow extends Component {
                 : null
     var vtt = [];
     var cnt = 0;
-    var chatOrg = this.props.to[constants.TYPE] === constants.TYPES.ORGANIZATION  &&  utils.getId(this.props.to)
+    var chatOrg = this.props.to[TYPE] === constants.TYPES.ORGANIZATION  &&  utils.getId(this.props.to)
     let shareableResources = this.props.shareableResources.verifications
     let providers = this.props.shareableResources.providers
     for (var t in  shareableResources) {
@@ -222,7 +256,7 @@ class FormRequestRow extends Component {
         let document = r.document
         if (entries  &&  (entries.indexOf(utils.getId(document)) !== -1  ||  entries.indexOf(r.document[constants.NONCE]) !== -1))
           return
-        var vModel = utils.getModel(r[constants.TYPE]);
+        var vModel = utils.getModel(r[TYPE]);
         var doc = this.formatShareables({
           model: formModel,
           verification: r,
@@ -281,7 +315,7 @@ class FormRequestRow extends Component {
 
     var document = verification.document
 
-    var docModel = utils.getModel(document[constants.TYPE]).value;
+    var docModel = utils.getModel(document[TYPE]).value;
     var isMyProduct = docModel.subClassOf === MY_PRODUCT
     var docModelTitle = docModel.title || utils.makeLabel(docModel.id)
     var idx = docModelTitle.indexOf('Verification');
@@ -321,7 +355,7 @@ class FormRequestRow extends Component {
                         <CustomIcon name='tradle' style={{color: '#4982B1' }} size={32} />
                         <Text style={chatStyles.shareText}>{translate('Share')}</Text>
                       </View>
-      var orgTitle = this.props.to[constants.TYPE] === constants.TYPES.ORGANIZATION
+      var orgTitle = this.props.to[TYPE] === constants.TYPES.ORGANIZATION
                    ? this.props.to.name
                    : (this.props.to.organization ? this.props.to.organization.title : null);
       // let o = verification.organization.title.length < 25 ? verification.organization.title : verification.organization.title.substring(0, 27) + '..'
@@ -415,9 +449,9 @@ class FormRequestRow extends Component {
       'to': this.props.resource.from,
       _context: this.props.context
     }
-    // if (this.props.resource[constants.TYPE] !== FORM_REQUEST)
+    // if (this.props.resource[TYPE] !== FORM_REQUEST)
     //   resource.message = this.props.resource.message;
-    resource[constants.TYPE] = model.id;
+    resource[TYPE] = model.id;
 
     // Prefill for testing and demoing
     var isPrefilled = ENV.prefillForms && model.id in formDefaults
@@ -444,7 +478,7 @@ class FormRequestRow extends Component {
     });
   }
 
-  formRequest(resource, vCols) {
+  formRequest(resource, vCols, prop) {
     let form = utils.getModel(resource.form).value
     // if (this.props.shareableResources)
     //   style = styles.description;
@@ -478,6 +512,7 @@ class FormRequestRow extends Component {
     let link
     let isReadOnly = utils.isReadOnlyChat(this.props.resource, this.props.context) //this.props.context  &&  this.props.context._readOnly
     let self = this
+
     if (sameFormRequestForm  &&  !resource.documentCreated) {
        link = <View style={[chatStyles.rowContainer, {paddingVertical: 10, alignSelf: 'center'}]}>
                <View style={[chatStyles.textContainer, {justifyContent: 'center'}]}>
@@ -512,14 +547,26 @@ class FormRequestRow extends Component {
       let notLink = resource.documentCreated  ||  isReadOnly  ||  form.subClassOf === MY_PRODUCT
       let icon = <Icon  name={'ios-arrow-forward'} style={{marginTop: 2, marginRight: 2, color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}} size={20} />
       link = <View style={chatStyles.rowContainer}>
-                   <Text style={[chatStyles.resourceTitle, {color: resource.documentCreated  ||  notLink ?  '#757575' : resource.verifiers ? 'green' : LINK_COLOR}]}>{translate(form)}</Text>
-                   {resource.documentCreated ? null : icon}
-                 </View>
-      onPressCall = notLink
-                  ? null
-                  : resource.verifiers
-                     ? this.props.chooseTrustedProvider.bind(this, this.props.resource, form, isMyMessage)
-                     : this.createNewResource.bind(this, form, isMyMessage)
+               <Text style={[chatStyles.resourceTitle, {color: resource.documentCreated  ||  notLink ?  '#757575' : resource.verifiers ? 'green' : LINK_COLOR}]}>{translate(form)}</Text>
+               {resource.documentCreated ? null : icon}
+             </View>
+      if (!notLink) {
+        if (resource.verifiers)
+          onPressCall = this.props.chooseTrustedProvider.bind(this, this.props.resource, form, isMyMessage)
+        else if (prop) {
+          // if (prop.allowPicturesFromLibrary || utils.isSimulator())
+            link = <ImageInput prop={prop} onImage={item => this.onSetMediaProperty(prop.name, item)}>
+                     {link}
+                   </ImageInput>
+          // else
+          //   link = <TouchableHighlight onPress={() => this.showCamera({prop: prop})} underlayColor='transparent'>
+          //            {link}
+          //          </TouchableHighlight>
+        }
+        else
+          onPressCall = this.createNewResource.bind(this, form, isMyMessage)
+      }
+
     }
     let strName = sameFormRequestForm ? translate('addAnotherFormOrGetNext', translate(form)) : utils.getStringName(message)
     let str = strName ? utils.translate(strName) : message
@@ -534,14 +581,14 @@ class FormRequestRow extends Component {
         from: resource.to,
         to: resource.from,
         _context: self.props.context,
-        [constants.TYPE]: NEXT_FORM_REQUEST,
+        [TYPE]: NEXT_FORM_REQUEST,
         after: form.id
       }})
       var params = {
         value: {documentCreated: true},
         doneWithMultiEntry: true,
         resource: resource,
-        meta: utils.getModel(resource[constants.TYPE]).value
+        meta: utils.getModel(resource[TYPE]).value
       }
       Actions.addItem(params)
     }
@@ -564,6 +611,36 @@ class FormRequestRow extends Component {
       }
     })
   }
+
+  onSetMediaProperty(propName, item) {
+    if (!item)
+      return;
+    let r = this.props.resource
+
+
+    // Actions.addItem({
+    //   resource: r,
+    //   value: {
+    //     [TYPE]: this.props.resource[TYPE],
+    //     documentCreated: true
+    //   },
+    //   cb: (r) => {
+    //     setTimeout(() => {
+          Actions.addItem({
+            disableFormRequest: this.props.resource,
+            resource: {
+              [TYPE]: this.props.resource.form,
+              [propName]: item,
+              _context: r._context,
+              from: utils.getMe(),
+              to: this.props.to
+            }
+          })
+    //     }, 1500)
+    //   }
+    // })
+  }
+
 }
 
 function isMultientry(resource) {
@@ -636,7 +713,7 @@ var styles = StyleSheet.create({
     fontSize: 16,
   }
 });
-reactMixin(FormRequestRow.prototype, RowMixin);
+reactMixin(FormRequestRow.prototype, RowMixin)
 FormRequestRow = makeResponsive(FormRequestRow)
 
 module.exports = FormRequestRow;

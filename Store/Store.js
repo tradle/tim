@@ -2038,7 +2038,8 @@ var Store = Reflux.createStore({
       debugger
     })
     .finally(() => {
-      cb ? cb(rr) : noop()
+      if (cb)
+        cb(rr)
     })
   },
 
@@ -2635,6 +2636,7 @@ var Store = Reflux.createStore({
     var doneWithMultiEntry = params.doneWithMultiEntry
     if (!value)
       value = resource
+    let cb = params.cb
 
     delete temporaryResources[resource[TYPE]]
     var meta = params.meta;
@@ -2843,18 +2845,22 @@ var Store = Reflux.createStore({
         if (isRegistration)
           return handleRegistration()
         else if (isMessage)
-          return handleMessage(params.noTrigger)
+          return handleMessage(params.noTrigger, returnVal)
         else
-          return save(isBecomingEmployee)
+          return save(returnVal, isBecomingEmployee)
       })
       .then(() => {
         if (params.disableFormRequest) {
           let result = self.searchMessages({modelName: FORM_REQUEST, to: resource.to, context: resource._context})
           if (result &&  result.length) {
-            result[0].documentCreated = true
-            let key = utils.getId(result[0])
-            self._setItem(key, result[0])
-            self.dbPut(key, result[0])
+            result.forEach((fr) => {
+              if (!fr.documentCreated  &&  fr.form === resource[TYPE]) {
+                fr.documentCreated = true
+                let key = utils.getId(fr)
+                self._setItem(key, fr)
+                self.dbPut(key, fr)
+              }
+            })
           }
         }
         if (isBecomingEmployee) {
@@ -2912,11 +2918,11 @@ var Store = Reflux.createStore({
               returnVal[ROOT_HASH] = protocol.linkString(meDriver.identity)
             }
 
-            return save()
+            return save(returnVal)
           })
       }
 
-      function handleMessage (noTrigger) {
+      function handleMessage (noTrigger, returnVal) {
         // TODO: fix hack
         // hack: we don't know root hash yet, use a fake
         if (returnVal.documentCreated)  {
@@ -2946,7 +2952,7 @@ var Store = Reflux.createStore({
           self.trigger(params);
           return self.onIdle()
           .then(() => {
-            save()
+            save(returnVal)
           })
           .catch(function(err) {
             debugger
@@ -3094,7 +3100,7 @@ var Store = Reflux.createStore({
           //       this.onShare(returnVal, list[p].value)
           //   }
           // }
-          return save(true)
+          return save(returnVal, true)
         })
         .then(() => {
           let rId = utils.getId(returnVal.to)
@@ -3110,12 +3116,12 @@ var Store = Reflux.createStore({
           if (formRequests  &&  formRequests.length) {
             let req = formRequests[0]
             req.document = utils.getId(returnVal)
-            returnVal = req
-            save(true)
+            // returnVal = req
+            save(req, true)
           }
         })
       }
-      function save (noTrigger) {
+      function save (returnVal, noTrigger) {
         return self._putResourceInDB({
           type: returnVal[TYPE],
           resource: returnVal,
@@ -4103,11 +4109,11 @@ var Store = Reflux.createStore({
             if (m.subClassOf === FORM) {
               // Make sure to not return Items and Documents in this list
               let ilen = m.interfaces.length
-              if (ilen === 1  ||  (ilen === 2  &&  m.interfaces.indexOf(VERIFIABLE) !== -1))
+              if (params.isForgetting  ||  ilen === 1  ||  (ilen === 2  &&  m.interfaces.indexOf(VERIFIABLE) !== -1))
                 addMessage = true
             }
           }
-          else if (isInterface  &&  m.interfaces  &&  m.interfaces.indexOf(meta.id) !== -1) //  && (!isMessage  ||  m.value.interfaces.length === 1))) {
+          else if (params.isForgetting  || (isInterface  &&  m.interfaces  &&  m.interfaces.indexOf(meta.id) !== -1)) //  && (!isMessage  ||  m.value.interfaces.length === 1))) {
             addMessage = true
         }
         if (addMessage)
