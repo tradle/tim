@@ -13,6 +13,8 @@ import ReactNative, {
 import AsyncStorage from './Storage'
 import * as LocalAuth from '../utils/localAuth'
 import Push from '../utils/push'
+var TimerMixin = require('react-timer-mixin')
+var reactMixin = require('react-mixin');
 
 var noop = () => {}
 var path = require('path')
@@ -258,6 +260,7 @@ const {
 
 // var Store = Reflux.createStore(timeFunctions({
 var Store = Reflux.createStore({
+  mixins: [TimerMixin],
 
   // this will set up listeners to all publishers in TodoActions, using onKeyname (or keyname) as callbacks
   listenables: [Actions],
