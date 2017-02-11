@@ -129,8 +129,6 @@ const VERIFIABLE          = 'tradle.Verifiable'
 const MODELS_PACK         = 'tradle.ModelsPack'
 const STYLES_PACK         = 'tradle.StylesPack'
 
-const stylesPack = require('./stylesPack.json')
-
 const WELCOME_INTERVAL = 600000
 
 // var Tim = require('tim')
@@ -6398,17 +6396,6 @@ var Store = Reflux.createStore({
 
     var noTrigger
     if (pList) {
-      if (org.style)
-        this.trigger({action: 'customStyles', provider: org})
-      else {
-        org.style = utils.interpretStylesPack(stylesPack)
-        batch.push({type: 'put', key: utils.getId(org), value: org})
-        this.trigger({action: 'customStyles', provider: org})
-      }
-
-      // var pList = val.list
-      // var fOrg = obj.from.identity.toJSON().organization
-      // org = list[utils.getId(fOrg)].value
       org.products = []
       pList.forEach((m) => {
         // HACK for not overwriting Tradle models
