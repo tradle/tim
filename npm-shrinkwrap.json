@@ -70,8 +70,8 @@
     },
     "@tradle/models": {
       "version": "4.10.10",
-      "from": "git://github.com/tradle/models.git#b16e6f9c5fbba3f8cb9350c3daa2de6955b6a2a8",
-      "resolved": "git://github.com/tradle/models.git#b16e6f9c5fbba3f8cb9350c3daa2de6955b6a2a8",
+      "from": "git://github.com/tradle/models.git#c43390c1ded3d1ac7d8aae20f879803fda66023b",
+      "resolved": "git://github.com/tradle/models.git#c43390c1ded3d1ac7d8aae20f879803fda66023b",
       "dependencies": {
         "typeforce": {
           "version": "1.10.6",
