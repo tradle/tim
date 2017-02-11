@@ -1098,10 +1098,6 @@ class NewResource extends Component {
       value.photos = photos;
     }
     this.setState({userInput: '', selectedAssets: {}});
-    // setTimeout(function() {
-    //   this.setState({textValue: this.state.userInput, selectedAssets: {}});
-    //   this.refs.chat.focus();
-    // }.bind(this), 0);
     Actions.addMessage({msg: value}); //, this.state.resource, utils.getModel(modelName).value);
   }
 }

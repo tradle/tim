@@ -14,6 +14,7 @@ var buttonStyles = require('../styles/buttonStyles');
 var NetworkInfoProvider = require('./NetworkInfoProvider')
 var defaultBankStyle = require('../styles/bankStyle.json')
 var StyleSheet = require('../StyleSheet')
+var TimerMixin = require('react-timer-mixin')
 
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const PROFILE = 'tradle.Profile'
@@ -194,7 +195,8 @@ class VerifierChooser extends Component {
     })
   }
 }
-reactMixin(VerifierChooser.prototype, Reflux.ListenerMixin);
+reactMixin(VerifierChooser.prototype, Reflux.ListenerMixin)
+reactMixin(VerifierChooser.prototype, TimerMixin)
 
 var styles = StyleSheet.create({
   separator: {

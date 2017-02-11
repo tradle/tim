@@ -2,6 +2,9 @@
 
 var utils = require('../utils/utils');
 var constants = require('@tradle/constants');
+var TimerMixin = require('react-timer-mixin')
+var reactMixin = require('react-mixin');
+
 import {
   View,
   TextInput,
@@ -77,6 +80,8 @@ class ChatMessage extends Component {
     }.bind(this), 0);
   }
 }
+reactMixin(ChatMessage.prototype, TimerMixin);
+
 var styles = StyleSheet.create({
   view: {
     marginTop: 30

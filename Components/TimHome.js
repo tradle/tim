@@ -24,6 +24,7 @@ var FadeInView = require('./FadeInView')
 var TouchIDOptIn = require('./TouchIDOptIn')
 var defaultBankStyle = require('../styles/bankStyle.json')
 var QRCodeScanner = require('./QRCodeScanner')
+var TimerMixin = require('react-timer-mixin')
 
 try {
   var commitHash = require('../version').commit.slice(0, 7)
@@ -922,6 +923,7 @@ class TimHome extends Component {
 }
 
 reactMixin(TimHome.prototype, Reflux.ListenerMixin);
+reactMixin(TimHome.prototype, TimerMixin)
 
 var styles = (function () {
   var dimensions = utils.dimensions(TimHome)
