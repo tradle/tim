@@ -30,6 +30,7 @@ var extend = require('extend');
 
 import ActionSheet from 'react-native-actionsheet'
 import { makeResponsive } from 'react-native-orient'
+import { makeStylish } from './makeStylish'
 
 // var AddNewMessage = require('./AddNewMessage')
 // var SearchBar = require('react-native-search-bar')
@@ -112,7 +113,6 @@ class MessageList extends Component {
   componentDidMount() {
     this.listenTo(Store, 'onAction');
   }
-
   onAction(params) {
     if (params.error)
       return
@@ -305,6 +305,8 @@ class MessageList extends Component {
     if (this.state.context !== nextState.context || this.state.allContexts !== nextState.allContexts)
       return true
     if (this.state.hasProducts !== nextState.hasProducts)
+      return true
+    if (this.props.bankStyle !== nextProps.bankStyle)
       return true
     // if (this.state.show !== nextState.show)
     //   return true
@@ -548,6 +550,7 @@ class MessageList extends Component {
         messageSent={this.state.sendResource}
         messageSentStatus={this.state.sendStatus}
         addedItem={this.state.addedItem}
+        customStyle={this.state.customStyle}
         enableEmptySections={true}
         autoFocus={false}
         textRef={'chat'}
@@ -1024,6 +1027,7 @@ class MessageList extends Component {
 }
 reactMixin(MessageList.prototype, Reflux.ListenerMixin);
 MessageList = makeResponsive(MessageList)
+MessageList = makeStylish(MessageList)
 
 var styles = StyleSheet.create({
   imageOutline: {

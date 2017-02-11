@@ -27,6 +27,8 @@ var NetworkInfoProvider = require('./NetworkInfoProvider')
 var defaultBankStyle = require('../styles/bankStyle.json')
 var StyleSheet = require('../StyleSheet')
 
+import { makeStylish } from './makeStylish'
+
 // const WEB_TO_MOBILE = '0'
 // const TALK_TO_EMPLOYEEE = '1'
 // const APP_QR_CODE = '5'
@@ -89,7 +91,7 @@ class ResourceList extends Component {
 
     const dataSource = new ListView.DataSource({
       rowHasChanged: function(row1, row2) {
-        return row1 !== row2 || row1._online !== row2._online
+        return row1 !== row2 || row1._online !== row2._online || row1.style !== row2.style
       }
     })
 
@@ -148,6 +150,10 @@ class ResourceList extends Component {
         this.state.dataSource = this.state.dataSource.cloneWithRows(props.backlinkList)
       else
         this.state.dataSource = this.state.dataSource.cloneWithRows([])
+    }
+    if (props.provider  &&  (!this.props.provider || utils.getId(this.props.provider) !== (utils.getId(props.provider)))) {
+      Actions.list({modelName: ORGANIZATION})
+      // this.state.customStyles = props.customStyles
     }
   }
   componentWillUnmount() {
@@ -248,7 +254,10 @@ class ResourceList extends Component {
       this.setState({isConnected: params.isConnected})
       return
     }
-
+    if (action == 'newStyles'  &&  this.props.modelName === ORGANIZATION) {
+      this.setState({newStyles: params.resource})
+      return
+    }
     if (action === 'addItem'  ||  action === 'addMessage') {
       var model = action === 'addMessage'
                 ? utils.getModel(this.props.modelName).value
@@ -392,6 +401,8 @@ class ResourceList extends Component {
     }
     if (this.state.hideMode !== nextState.hideMode)
       return true
+    if (this.props.provider !== nextProps.provider)
+      return true
     if (this.state.serverOffline !== nextState.serverOffline)
       return true
     if (this.state.sharedContextCount !== nextState.sharedContextCount)
@@ -400,6 +411,8 @@ class ResourceList extends Component {
       return true
     if (nextState.isConnected !== this.state.isConnected)
       return true
+    if (this.state.newStyles !== nextState.newStyles)
+      return true
     if (nextState.newContact  &&  (!this.state.newContact ||  this.state.newContact !== nextState.newContact))
       return true
         // if (this.state.isConnected !== nextState.isConnected)
@@ -407,7 +420,6 @@ class ResourceList extends Component {
     //     return true
     if (!this.state.list  ||  !nextState.list  ||  this.state.list.length !== nextState.list.length)
       return true
-    let isOrg = this.props.modelName === ORGANIZATION
     for (var i=0; i<this.state.list.length; i++) {
       if (this.state.list[i].numberOfForms !== nextState.list[i].numberOfForms)
         return true
@@ -1197,6 +1209,7 @@ class ResourceList extends Component {
 }
 reactMixin(ResourceList.prototype, Reflux.ListenerMixin);
 reactMixin(ResourceList.prototype, HomePageMixin)
+ResourceList = makeStylish(ResourceList)
 
 var styles = StyleSheet.create({
   // container: {

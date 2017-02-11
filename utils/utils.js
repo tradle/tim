@@ -145,9 +145,11 @@ var utils = {
   },
   // temporary, let's hope
   interpretStylesPack(stylesPack) {
-    const interpreted = {}
+    let interpreted = {}
     Object.keys(stylesPack).forEach(prop => {
       // booHoo => BOO_HOO
+      if (prop.charAt(0) === '_')
+        return
       const localName = utils.splitCamelCase(prop).join('_').toUpperCase()
       interpreted[localName] = stylesPack[prop]
     })
