@@ -30,8 +30,8 @@ var HomePageMixin = require('./HomePageMixin')
 
 var ResourceList = require('./ResourceList')
 
-import ActionSheet from './ActionSheet'
-// import ActionSheet from 'react-native-actionsheet'
+// import ActionSheet from './ActionSheet'
+import ActionSheet from 'react-native-actionsheet'
 
 import platformStyles from '../styles/platform'
 import { signIn } from '../utils/localAuth'
