@@ -6957,8 +6957,8 @@ var Store = Reflux.createStore({
         [NONCE]: this.getNonce(),
         message: 'All representatives are currently assisting other customers. Please try again later'
       }
-      msgFrom.from = this.buildRef(resource)
-      msgFrom.to = this.buildRef(me)
+      msg.from = this.buildRef(resource)
+      msg.to = this.buildRef(me)
       msg.id = sha(msg)
       result.push(msg)
       this.trigger({action: 'messageList', list: result, resource: resource})
@@ -6970,8 +6970,8 @@ var Store = Reflux.createStore({
       [NONCE]: this.getNonce(),
       message: 'Representative will be with you shortly. Please tell us how can we help you today?'
     }
-    msgFrom.from = this.buildRef(resource)
-    msgFrom.to = this.buildRef(me)
+    msg.from = this.buildRef(resource)
+    msg.to = this.buildRef(me)
     msg.id = sha(msg)
     result.push(msg)
     this.trigger({action: 'messageList', list: result, resource: resource})
