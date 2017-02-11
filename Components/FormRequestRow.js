@@ -479,14 +479,16 @@ class FormRequestRow extends Component {
     // if (this.props.resource[TYPE] !== FORM_REQUEST)
     //   resource.message = this.props.resource.message;
     resource[TYPE] = model.id;
-
+    var isPrefilled = this.props.resource.prefill
     // Prefill for testing and demoing
-    var isPrefilled = ENV.prefillForms && model.id in formDefaults
-    if (isPrefilled) {
-      extend(true, resource, formDefaults[model.id])
-      // console.log(JSON.stringify(resource, 0, 2))
+    if (isPrefilled)
+      extend(true, resource, this.props.resource.prefill)
+    else {
+      isPrefilled = ENV.prefillForms && model.id in formDefaults
+      if (isPrefilled)
+        extend(true, resource, formDefaults[model.id])
+        // console.log(JSON.stringify(resource, 0, 2))
     }
-
     this.props.navigator.push({
       id: 4,
       title: translate(model),
