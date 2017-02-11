@@ -9,7 +9,7 @@
     "installhooks": "cp hooks/* .git/hooks/",
     "rmsymlinks": "find -L . -type l -exec rm {} \\;",
     "reset": "rm -fr $TMPDIR/react-* && watchman watch-del-all",
-    "lint": "eslint --ignore-path .gitignore --quiet --ext .js --ext .json ."
+    "lint": "eslint --quiet --ignore-path .gitignore ."
   },
   "dependencies": {
     "@tradle/cb-blockr": "^3.2.0",
