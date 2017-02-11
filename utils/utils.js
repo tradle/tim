@@ -372,6 +372,8 @@ var utils = {
     }
   },
   getType(r) {
+    if (typeof r === 'string')
+      return r.split('_')[0]
     return r[TYPE] || this.getId(r).split('_')[0]
   },
   getItemsMeta(metadata) {
@@ -1275,7 +1277,7 @@ var utils = {
       if (props[p].ref === PHOTO  &&  props[p].mainPhoto)
         return props[p]
     }
-    return properties.photos
+    return props.photos
   },
 
   locker: function (opts={}) {
