@@ -775,7 +775,8 @@ var utils = {
         }
         var rr = {}
         rr.id = utils.getId(r)
-        var m = utils.getModel(r[TYPE])
+        const type = utils.getType(r)
+        var m = utils.getModel(type)
         rr.title = utils.getDisplayName(r, m.properties)
         arr.push(rr)
       })
