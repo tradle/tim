@@ -765,6 +765,8 @@ var utils = {
         continue
       var arr = []
       res[p].forEach(function(r) {
+        if (typeof r === 'string')
+          return
         if (r.id) {
           if (r.photo)
             delete r.photo
