@@ -693,7 +693,7 @@ var styles = StyleSheet.create({
     borderRadius: 10,
     width: 20,
     height: 20,
-    backgroundColor: UNREAD_COLOR
+    backgroundColor: appStyle.COUNTER_BG_COLOR
   },
   multiChooser: {
     position: 'absolute',

@@ -16,7 +16,6 @@ var StyleSheet = require('../StyleSheet')
 var chatStyles = require('../styles/chatStyles')
 var reactMixin = require('react-mixin');
 
-var STRUCTURED_MESSAGE_COLOR
 const MAX_PROPS_IN_FORM = 1
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const PHOTO = 'tradle.Photo'
@@ -35,7 +34,6 @@ class FormMessageRow extends Component {
     super(props);
     var resource = this.props.resource;
     var me = utils.getMe();
-    STRUCTURED_MESSAGE_COLOR = this.props.bankStyle.STRUCTURED_MESSAGE_COLOR
   }
   shouldComponentUpdate(nextProps, nextState) {
     return !equal(this.props.resource, nextProps.resource) ||
@@ -287,9 +285,6 @@ class FormMessageRow extends Component {
     if (vCols.length > MAX_PROPS_IN_FORM)
       vCols.splice(MAX_PROPS_IN_FORM, 1)
 
-    // else
-    //   vCols.push(<Text style={[chatStyles.resourceTitle, chatStyles.formType, {color: isMyMessage ? '#EBFCFF' : this.props.bankStyle.STRUCTURED_MESSAGE_BORDER}]} key={this.getNextKey()}>{title}</Text>);
-
     if (vCols  &&  vCols.length) {
       vCols.forEach((v) => {
         renderedRow.push(v);
@@ -315,173 +310,3 @@ reactMixin(FormMessageRow.prototype, RowMixin);
 FormMessageRow = makeResponsive(FormMessageRow)
 
 module.exports = FormMessageRow;
-
-  // render() {
-  //   var resource = this.props.resource;
-  //   var isMyMessage = this.isMyMessage()
-  //   var to = this.props.to;
-
-  //   if (isMyMessage  &&  resource.to.organization  &&  utils.getId(resource.to.organization) !== utils.getId(to)) {
-      // return  <View style={{margin: 1, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}}>
-      //           <TouchableHighlight onPress={this.props.onSelect.bind(this, resource, null)} underlayColor='transparent'>
-      //             {this.formStub(resource)}
-      //           </TouchableHighlight>
-      //          </View>
-    // }
-
-    // var model = utils.getModel(resource[constants.TYPE]).value;
-
-    // var me = utils.getMe();
-    // // var isVerifier = utils.isVerifier(resource)
-    // var ownerPhoto = this.getOwnerPhoto(isMyMessage)
-    // let hasOwnerPhoto = !isMyMessage &&  to  &&  to.photos;
-
-    // var renderedRow = [];
-    // var ret = this.formatRow(isMyMessage, renderedRow);
-    // let onPressCall = ret ? ret.onPressCall : null
-
-    // var photoUrls = [];
-    // var photoListStyle = {height: 3};
-    // var addStyle, inRow;
-    // var noMessage = !resource.message  ||  !resource.message.length;
-    // if (!renderedRow.length) {
-    //   var vCols = noMessage ? null : utils.getDisplayName(resource, model.properties);
-    //   if (vCols)
-    //     renderedRow = <Text style={chatStyles.resourceTitle}>{vCols}</Text>;
-    // }
-    // else {
-    //   var fromHash = resource.from.id
-    //   if (isMyMessage) {
-    //     if (!noMessage)
-    //       addStyle = chatStyles.myCell
-    //     addStyle = [addStyle, chatStyles.verificationBody, {backgroundColor: STRUCTURED_MESSAGE_COLOR, borderColor: '#C1E3E8', paddingBottom: 5, borderTopLeftRadius: 0, borderTopRightRadius: 0 }];
-    //   }
-    //   else
-    //     addStyle = [chatStyles.verificationBody, {flex: 1, borderColor: '#efefef', backgroundColor: '#ffffff', borderTopLeftRadius: 0, borderTopRightRadius: 0 }];
-    // }
-    // var properties = model.properties;
-    // let photos = utils.getResourcePhotos(model, resource)
-    // if (photos) {
-    //   var len = photos.length;
-    //   inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
-    //   var style;
-    //   if (inRow === 1)
-    //     style = chatStyles.bigImage;
-    //   else if (inRow === 2)
-    //     style = chatStyles.mediumImage;
-    //   else
-    //     style = chatStyles.image;
-    //   photos.forEach((p) => {
-    //     photoUrls.push({url: utils.getImageUri(p.url)});
-    //   })
-    //   let isSharedContext = to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.context)
-
-    //   photoListStyle = {
-    //     flexDirection: 'row',
-    //     alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
-    //     marginLeft: isMyMessage ? 30 : isSharedContext ? 45 : 0, //(hasOwnerPhoto ? 45 : 10),
-    //     borderRadius: 10,
-    //     marginBottom: 3,
-    //   }
-    // }
-    // var rowStyle = [chatStyles.row, {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}];
-    // var val = this.getTime(resource);
-    // var date = val
-    //          ? <Text style={chatStyles.date}>{val}</Text>
-    //          : <View />;
-
-    // var sendStatus = <View />
-    // if (this.props.sendStatus  &&  this.props.sendStatus !== null)
-    //   sendStatus = this.getSendStatus()
-
-    // let cellStyle = [chatStyles.textContainer]
-    // if (addStyle) {
-    //   if (Array.isArray(addStyle))
-    //     addStyle.forEach((a) => cellStyle.push(a))
-    //   else
-    //     cellStyle.push(addStyle)
-    // }
-
-    // HACK that solves the case when the message is short and we don't want it to be displayed
-    // in a bigger than needed bubble
-    // var width = utils.dimensions(FormMessageRow).width
-    // let msgWidth =  Math.floor(width * 0.7)
-
-    // var viewStyle = { width: msgWidth, flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
-
-    // var messageBody;
-    // messageBody =
-    //   <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
-    //     <View style={[rowStyle, viewStyle]}>
-    //       {ownerPhoto}
-    //       <View style={cellStyle}>
-    //         <View style={{flex: 1}}>
-    //         {this.isShared()
-    //           ? <View style={[chatStyles.verifiedHeader, {backgroundColor: this.props.bankStyle.SHARED_WITH_BG}]}>
-    //               <Text style={styles.youSharedText}>{translate('youShared', resource.to.organization.title)}</Text>
-    //             </View>
-    //           : <View />
-    //         }
-    //           {renderedRow}
-    //        </View>
-    //       </View>
-    //     </View>
-    //   </TouchableHighlight>
-
-    // var len = photoUrls.length;
-    // var inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
-    // var photoStyle = {};
-    // var height;
-
-    // if (inRow > 0) {
-    //   if (inRow === 1) {
-    //     var ww = Math.max(240, msgWidth / 2)
-    //     var hh = ww * 280 / 240
-    //     photoStyle = [chatStyles.bigImage, {
-    //       width:  ww,
-    //       height: hh
-    //     }]
-    //   }
-    //   else if (inRow === 2)
-    //     photoStyle = chatStyles.mediumImage;
-    //   else
-    //     photoStyle = chatStyles.image;
-    // }
-                         // <Icon name={'md-done-all'} size={20} color={this.props.bankStyle.REQUEST_FULFILLED} style={{opacity: 0.7}} />
-    // return  <View style={{margin: 1, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}}>
-    //           <TouchableHighlight onPress={this.props.onSelect.bind(this, resource, null)} underlayColor='transparent'>
-    //             {this.formStub(resource, to)}
-    //           </TouchableHighlight>
-    //           <View style={photoListStyle}>
-    //             <PhotoList photos={photoUrls} resource={this.props.resource} style={[photoStyle, {marginTop: -5}]} navigator={this.props.navigator} numberInRow={inRow} chat={this.props.to} />
-    //           </View>
-    //           {sendStatus}
-    //         </View>
-    // var sealedStatus = (resource.txId)
-    //                  ? <View style={chatStyles.sealedStatus}>
-    //                      <Text style={{fontSize: 20, marginTop: -5}}>{'💋'}</Text>
-    //                    </View>
-    //                  : <View />
-
-    // let title = translate(model)
-    // if (title.length > 30)
-    //   title = title.substring(0, 27) + '...'
-
-    // let header = <View style={[viewStyle, {backgroundColor: '#fff', borderTopLeftRadius: 10, flexDirection: 'row', paddingVertical: 5, justifyContent: 'center', borderWidth: 1, borderColor: this.props.bankStyle.STRUCTURED_MESSAGE_COLOR}]} key={this.getNextKey()}>
-    //                {sealedStatus}
-    //                <Text style={[chatStyles.resourceTitle, {paddingRight: 5, color: this.props.bankStyle.STRUCTURED_MESSAGE_COLOR}]}>{title}</Text>
-    //                <Icon color={this.props.bankStyle.STRUCTURED_MESSAGE_COLOR} size={20} name={'ios-arrow-forward'} style={{marginTop: 2, position: 'absolute', right: 10}}/>
-    //              </View>
-
-    // return (
-    //   <View style={{margin: 1, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}}>
-    //     {date}
-    //     {header}
-    //     {messageBody}
-    //     <View style={photoListStyle}>
-    //       <PhotoList photos={photoUrls} resource={this.props.resource} style={[photoStyle, {marginTop: -5}]} navigator={this.props.navigator} numberInRow={inRow} chat={this.props.to} />
-    //     </View>
-    //     {sendStatus}
-    //   </View>
-    // )
-  // }
