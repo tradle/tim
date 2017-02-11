@@ -2431,6 +2431,12 @@ var Store = Reflux.createStore({
     var resource = {};
 
     extend(resource, this._getItem(utils.getId(key)))
+
+    const resModel = this.getModel(resource[TYPE])
+    if (!resModel || !resModel.value) {
+      throw new Error(`missing model for ${resource[TYPE]}`)
+    }
+
     var props = this.getModel(resource[TYPE]).value.properties;
     for (var p in props) {
       if (p.charAt(0) === '_'  ||  props[p].hidden)
