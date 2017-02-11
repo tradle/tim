@@ -28,7 +28,7 @@ import {
   Text,
   TouchableHighlight,
   ArticleView,
-  AlertIOS,
+  Alert,
   View
 } from 'react-native';
 
@@ -204,12 +204,12 @@ class VerificationRow extends Component {
   }
   revokeDocument() {
     var resource = this.props.resource
-    AlertIOS.alert(
+    Alert.alert(
       translate('confirmRevoke', resource.to.organization.title),
       null,
       [
         {text: translate('cancel'), onPress: () => console.log('Cancel')},
-        {text: 'OK', onPress: () =>  AlertIOS.alert(translate('willBeAvailable'))},
+        {text: 'OK', onPress: () =>  Alert.alert(translate('willBeAvailable'))},
       ]
     )
   }
