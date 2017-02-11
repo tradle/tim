@@ -112,9 +112,9 @@ class MessageRow extends Component {
         addStyle = styles.forgetCell
       else {
         if (isConfirmation)
-          addStyle = [chatStyles.verificationBody, {borderColor: '#cccccc', backgroundColor: bankStyle.CONFIRMATION_BG}, styles.myConfCell]
+          addStyle = [chatStyles.verificationBody, {borderColor: '#cccccc', backgroundColor: bankStyles.CONFIRMATION_BG}, styles.myConfCell]
         else {
-          let borderColor = isFormError ? bankStyle.REQUEST_FULFILLED : '#efefef'
+          let borderColor = isFormError ? bankStyles.REQUEST_FULFILLED : '#efefef'
           let mstyle = {
             borderColor: borderColor,
             backgroundColor: '#ffffff',
