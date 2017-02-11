@@ -74,7 +74,7 @@ class ItemsList extends Component {
 
         )
     return
-      renderItem([resource], prop)
+      this.renderItem([resource], this.props.prop)
 
   }
   renderItem(val, pMeta) {
@@ -113,7 +113,7 @@ class ItemsList extends Component {
           if (p == 'photos') {
             var photos = [];
             ret.push(
-               <PhotoList photos={v.photos} navigator={self.props.navigator} numberInRow={4} resource={resource}/>
+               <PhotoList photos={v.photos} navigator={self.props.navigator} numberInRow={4} resource={this.props.resource}/>
             );
             return
           }

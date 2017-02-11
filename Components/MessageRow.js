@@ -637,13 +637,13 @@ class MessageRow extends Component {
                       ? self.props.bankStyle.MY_MESSAGE_BACKGROUND_COLOR
                       : '#ffffff'
             let color = isMyMessage ? self.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR
-            msg = <View key={self.getNextKey()}>
-                    <Text style={style}>{msgParts[0]}</Text>
-                    <View style={chatStyles.rowContainer}>
-                      <Text style={[style, {backgroundColor: bg, color: color}]}>{msgParts[1]} </Text>
-                      <Icon style={{color: LINK_COLOR, marginTop: 2}} size={20} name={'ios-arrow-forward'} />
-                    </View>
-                  </View>
+            let msg = <View key={self.getNextKey()}>
+                        <Text style={style}>{msgParts[0]}</Text>
+                        <View style={chatStyles.rowContainer}>
+                          <Text style={[style, {backgroundColor: bg, color: color}]}>{msgParts[1]} </Text>
+                          <Icon style={{color: LINK_COLOR, marginTop: 2}} size={20} name={'ios-arrow-forward'} />
+                        </View>
+                      </View>
             vCols.push(msg);
             onPressCall = self.onChooseProduct.bind(self, true)
             return;

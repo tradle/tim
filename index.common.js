@@ -559,7 +559,7 @@ var NavigationBarRouteMapper = {
       style.push({color: color});
     }
     var iconIdx = lbTitle.indexOf('|')
-    var icon = iconIdx !== -1 ? lbTitle.substring(idx + 1) : lbTitle === 'Back' ? 'ios-arrow-back' : null
+    var icon = iconIdx !== -1 ? lbTitle.substring(iconIdx + 1) : lbTitle === 'Back' ? 'ios-arrow-back' : null
 
     var title = icon
               ? <Icon name={icon} size={utils.getFontSize(25)} color='#7AAAC3' style={styles.icon}/>

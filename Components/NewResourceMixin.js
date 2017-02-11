@@ -944,7 +944,7 @@ var NewResourceMixin = {
       if (minDate  &&  maxDate)
         dateProps = {maxDate: new Date(maxDate), minDate: new Date(minDate)}
       else
-        dataProps = minDate ? {minDate: new Date(minDate)} : {maxDate: new Date(maxDate)}
+        dateProps = minDate ? {minDate: new Date(minDate)} : {maxDate: new Date(maxDate)}
     }
     if (prop.format)
       dateProps.format = prop.format
@@ -1369,7 +1369,7 @@ var NewResourceMixin = {
     }
     else
       error = <View/>
-    var value = prop ? params.value : resource[enumProp.name]
+    var value = prop ? params.value : this.state.resource[enumProp.name]
     return (
       <View style={[styles.chooserContainer, styles.enumElement]} key={this.getNextKey()} ref={enumProp.name}>
         <TouchableHighlight underlayColor='transparent' onPress={this.enumChooser.bind(this, prop, enumProp)}>
@@ -1482,14 +1482,14 @@ var NewResourceMixin = {
           value[p].currency = this.props.currency
       }
       else if (prop.units && prop.units === '[min - max]') {
-        let v = value[p].split('-').forEach((n) => trim(n))
+        let v = value[p].split('-').forEach((n) => n.trim())
         if (v.length === 1)
-          checkNumber(v, prop, err)
+          this.checkNumber(v, prop, err)
         else if (v.length === 2) {
-          checkNumber(v[0], prop, err)
+          this.checkNumber(v[0], prop, err)
           if (err[p])
             continue
-          checkNumber(v[1], prop, err)
+          this.checkNumber(v[1], prop, err)
           if (!err[p])
             continue
           if (v[1] < v[0])

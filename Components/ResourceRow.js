@@ -505,6 +505,7 @@ class ResourceRow extends Component {
     ];
   }
   onPress(event) {
+    let resource = this.props.resource
     var model = utils.getModel(resource[TYPE] || resource.id).value;
     var title = utils.makeTitle(utils.getDisplayName(this.props.resource, model.properties));
     this.props.navigator.push({

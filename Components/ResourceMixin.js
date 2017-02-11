@@ -109,7 +109,7 @@ var ResourceMixin = {
           if (p == 'photos') {
             var photos = [];
             ret.push(
-               <PhotoList photos={v.photos} navigator={self.props.navigator} numberInRow={4} resource={resource}/>
+               <PhotoList photos={v.photos} navigator={self.props.navigator} numberInRow={4} resource={this.props.resource}/>
             );
             return
           }
@@ -196,7 +196,7 @@ var ResourceMixin = {
       val = <View style={{marginHorizontal: 7}}>{this.renderItems(val, pMeta)}</View>
 
       let title = <View style={{flexDirection: 'row'}}>
-                    <Text style={styles.title}>{pMeta.title || utils.makeLabel(p)}</Text>
+                    <Text style={styles.title}>{pMeta.title || utils.makeLabel(pMeta.name)}</Text>
                     {cnt > 3  &&  modelName !== TERMS_AND_CONDITIONS
                       ? <Icon name={'ios-arrow-down'} size={15} color='#7AAAC3' style={{position: 'absolute', right: 10, top: 10}}/>
                       : <View />

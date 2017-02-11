@@ -184,12 +184,12 @@ class NewItem extends Component {
       this.state.options = null;
     return !hasError;
   }
-  addItem() {
-    var propName = this.props.metadata.name;
-    var json = utils.clone(value);
-    this.props.onAddItem(propName, json);
-    return true;
-  }
+  // addItem(value) {
+  //   var propName = this.props.metadata.name;
+  //   var json = utils.clone(value);
+  //   this.props.onAddItem(propName, json);
+  //   return true;
+  // }
   render() {
     var props = this.props;
     var err = props.err || this.state.err || '';

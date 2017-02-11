@@ -179,7 +179,7 @@ class AddNewMessage extends Component {
         }
         else {
           var i = 0
-          for (; i<selectedAssets.length  &&  !doDelete; i++) {
+          for (; i<selectedAssets.length; i++) {
             if (selectedAssets[i].data === dataUri)
               break
           }

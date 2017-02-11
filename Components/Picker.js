@@ -1,6 +1,7 @@
 'use strict'
 
-var translate = require('../utils/utils').translate
+var utils = require('../utils/utils')
+var translate = utils.translate
 import {
   DatePickerIOS,
   View,

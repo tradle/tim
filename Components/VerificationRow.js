@@ -232,6 +232,7 @@ class VerificationRow extends Component {
     var isSimpleMessage = model.id === constants.TYPES.SIMPLE_MESSAGE;
     var style = styles.resourceTitle
     var labelStyle = styles.resourceTitleL
+    var isMyMessage = this.isMyMessage()
     viewCols.forEach(function(v) {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date')
         return;
