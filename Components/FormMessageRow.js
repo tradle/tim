@@ -53,10 +53,10 @@ class FormMessageRow extends Component {
     var resource = this.props.resource;
     var isVerification = resource[constants.TYPE] === constants.TYPES.VERIFICATION;
     var r = isVerification ? resource.document : resource
-
+    var bankStyle = this.props.bankStyle
     var passProps = {
       resource: r,
-      bankStyle: this.props.bankStyle,
+      bankStyle: bankStyle,
       currency: this.props.currency
     }
     if (!isVerification)
@@ -82,7 +82,7 @@ class FormMessageRow extends Component {
         passProps: {
           resource: r,
           metadata: model,
-          bankStyle: this.props.bankStyle,
+          bankStyle: bankStyle,
           currency: this.props.currency,
           callback: this.props.onSelect.bind(this, r)
         }
@@ -98,6 +98,7 @@ class FormMessageRow extends Component {
     var photoListStyle = {height: 3};
     var photoUrls = []
     var isMyMessage = this.isMyMessage()
+    let bankStyle = this.props.bankStyle
     if (photos) {
       photos.forEach((p) => {
         photoUrls.push({url: utils.getImageUri(p.url)});
@@ -137,8 +138,9 @@ class FormMessageRow extends Component {
     // var date = val
     //          ? <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
     //          : <View />;
+    let bg = bankStyle.BACKGROUND_IMAGE ? {} : {backgroundColor: bankStyle.BACKGROUND_COLOR}
 
-    return  <View style={{margin: 1, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}}>
+    return  <View style={[{margin: 1}, bg]}>
               <TouchableHighlight onPress={this.props.onSelect.bind(this, resource, null)} underlayColor='transparent'>
                 {this.formStub(resource, to)}
               </TouchableHighlight>
@@ -167,14 +169,15 @@ class FormMessageRow extends Component {
       width: Math.floor(utils.dimensions().width * 0.8), // - (isSharedContext  ? 45 : 0),
       alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
       marginLeft: isMyMessage ? 30 : 0, //(hasOwnerPhoto ? 45 : 10),
-      backgroundColor: this.props.bankStyle.BACKGROUND_COLOR,
+      backgroundColor: 'transparent', //this.props.bankStyle.BACKGROUND_COLOR,
       flexDirection: 'row',
     }
+    let bankStyle = this.props.bankStyle
 
     let headerStyle = [
       chatStyles.verifiedHeader,
       noContent ? {borderBottomLeftRadius: 10, borderBottomRightRadius: 10} : {},
-      {backgroundColor: this.props.bankStyle.SHARED_WITH_BG}, // opacity: isShared ? 0.5 : 1},
+      {backgroundColor: bankStyle.SHARED_WITH_BG}, // opacity: isShared ? 0.5 : 1},
       isMyMessage ? {borderTopRightRadius: 0, borderTopLeftRadius: 10 } : {borderTopRightRadius: 10, borderTopLeftRadius: 0 }
     ]
 
@@ -182,7 +185,7 @@ class FormMessageRow extends Component {
       margin: 1,
       paddingRight: 10,
       // flexDirection: 'row',
-      backgroundColor: this.props.bankStyle.BACKGROUND_COLOR
+      backgroundColor: 'transparent', // this.props.bankStyle.BACKGROUND_COLOR
     }
     var sealedStatus = (resource.txId)
                      ? <View style={chatStyles.sealedStatus}>
