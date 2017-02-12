@@ -91,7 +91,7 @@ class TimHome extends Component {
     this._handleConnectivityChange = this._handleConnectivityChange.bind(this)
   }
   componentWillMount() {
-    this.uhOhTimeout = setTimeout(() => {
+    this.uhOhTimeout = this.setTimeout(() => {
       if (!this.state.isLoading && !this.state.downloadingUpdate) return
 
       this.setState({ submitLogButtonText: SUBMIT_LOG_TEXT.submit })

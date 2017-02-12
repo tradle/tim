@@ -461,11 +461,11 @@ class MessageList extends Component {
   }
 
   componentDidUpdate() {
-    clearTimeout(this._scrollTimeout)
+    this.clearTimeout(this._scrollTimeout)
     if (this.state.allLoaded  ||  this.state.noScroll)
       this.state.noScroll = false
     else
-      this._scrollTimeout = setTimeout(() => {
+      this._scrollTimeout = this.setTimeout(() => {
         // inspired by http://stackoverflow.com/a/34838513/1385109
         this._GiftedMessenger  &&  this._GiftedMessenger.scrollToBottom()
       }, 200)
@@ -1050,7 +1050,7 @@ class MessageList extends Component {
   }
 }
 reactMixin(MessageList.prototype, Reflux.ListenerMixin);
-reactMixin(MessageList.prototype, TimerMixin)
+// reactMixin(MessageList.prototype, TimerMixin)
 MessageList = makeResponsive(MessageList)
 MessageList = makeStylish(MessageList)
 

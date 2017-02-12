@@ -172,7 +172,7 @@ class VerifierChooser extends Component {
     utils.onNextTransitionEnd(this.props.navigator, () => {
       Actions.addMessage({msg: msg, isWelcome: true, disableAutoResponse: true, requestForForm: true, cb: (r) => {
         form._context = r
-        setTimeout(() => Actions.addItem({
+        this.setTimeout(() => Actions.addItem({
           resource: form,
           value: form,
           disableFormRequest: this.props.originatingMessage

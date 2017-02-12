@@ -127,7 +127,7 @@ var PasswordCheck = React.createClass({
     this.setState(state)
     clearTimeout(this._resetToNormalTimeout)
     if (state.status === 'wrong') {
-      this._resetToNormalTimeout = setTimeout(() => {
+      this._resetToNormalTimeout = this.setTimeout(() => {
         if (this.state.status !== 'normal') {
           this.doSetState({ status: 'normal' })
         }

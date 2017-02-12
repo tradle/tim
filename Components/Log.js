@@ -43,7 +43,7 @@ export default class Log extends Component {
 
     // debounce a bit
     clearTimeout(this._updateTimeout)
-    this._updateTimeout = setTimeout(function () {
+    this._updateTimeout = this.setTimeout(function () {
       const lines = debug.get()
       self.state = {
         lines,
