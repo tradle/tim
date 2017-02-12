@@ -1705,7 +1705,7 @@ var Store = Reflux.createStore({
       promise = Q()
     else {
       let r = this._getItem(utils.getId(profile))
-      if ((r  &&  r.bot) || noMessage)
+      if ((r  &&  r.bot) || noMessage  ||  ENV.isDPWDemo)
         promise = Q()
       else {
         if (profile.inactive) {
