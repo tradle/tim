@@ -114,6 +114,7 @@ const REMEDIATION         = 'tradle.Remediation'
 const CONFIRM_PACKAGE_REQUEST = "tradle.ConfirmPackageRequest"
 const VERIFIABLE          = 'tradle.Verifiable'
 const MODELS_PACK         = 'tradle.ModelsPack'
+const STYLES_PACK         = 'tradle.StylesPack'
 
 const WELCOME_INTERVAL = 600000
 
@@ -999,6 +1000,9 @@ var Store = Reflux.createStore({
     .catch((err) => {
       debugger
     })
+  },
+  onSetProviderStyle(stylePack) {
+    const style = utils.interpretStylesPack(stylePack)
   },
   addToSettings(provider) {
     let r = this._getItem(SETTINGS + '_1')
@@ -6448,8 +6452,9 @@ var Store = Reflux.createStore({
           key: m.id,
           value: m
         }
-        if (m.subClassOf === FINANCIAL_PRODUCT)
+        if (isProductList  &&  m.subClassOf === FINANCIAL_PRODUCT)
           org.products.push(m.id)
+
         if (m.subClassOf === ENUM)
           this.createEnumResources(m)
 
@@ -6468,6 +6473,10 @@ var Store = Reflux.createStore({
       this.trigger({action: 'getItem', resource: org})
       noTrigger = hasNoTrigger(orgId)
     }
+    var isStylesPack = val[TYPE] === STYLES_PACK
+    if (isStylesPack)
+      org.styles = this.interpretStylesPack(val)
+
     if (!val.time)
       val.time = obj.timestamp
 
@@ -6549,23 +6558,6 @@ var Store = Reflux.createStore({
     }
   },
   // if the last message showing was PRODUCT_LIST. No need to re-render
-  hasNoTrigger1(orgId) {
-    let messages = chatMessages[orgId]
-    if (!messages)
-      return false
-    let i=messages.length - 1
-    let type
-    // Skip all SELF_INTRODUCTION messages since they are not showing anyways on customer screen
-    for (; i>=0; i--) {
-      type = messages[i].id.split('_')[0]
-      if (type  !== SELF_INTRODUCTION)
-        break
-    }
-    if (type === PRODUCT_LIST)
-      return true
-    // Don't trigger re-rendering the list if the current and previous messages were of PRODUCT_LIST type
-    return false
-  },
   fillFromAndTo(obj, val) {
     var whoAmI = obj.parsed.data._i.split(':')[0]
     var from = this._getItem(PROFILE + '_' + obj.objectinfo.author)

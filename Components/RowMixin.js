@@ -30,7 +30,6 @@ const FORM_REQUEST = 'tradle.FormRequest'
 const ENUM = 'tradle.Enum'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
-var STRUCTURED_MESSAGE_COLOR
 var BORDER_WIDTH = StyleSheet.hairlineWidth
 
 var RowMixin = {
@@ -51,7 +50,6 @@ var RowMixin = {
     return this.props.resource[constants.ROOT_HASH] + '_' + cnt++
   },
   getPropRow(prop, resource, val, isVerification) {
-    STRUCTURED_MESSAGE_COLOR = this.props.bankStyle.STRUCTURED_MESSAGE_COLOR
     CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol || this.props.currency : DEFAULT_CURRENCY_SYMBOL
 
     if (prop.ref) {
@@ -93,7 +91,7 @@ var RowMixin = {
       let isForm = model.subClassOf === constants.TYPES.FORM
       let isMyMessage = this.isMyMessage()
       if (!this.props.isAggregation  &&  (isMyMessage || isForm) &&  !isMyProduct)
-        style = [style, {borderWidth: 0, paddingVertical: 3, borderColor: isMyMessage ? STRUCTURED_MESSAGE_COLOR : '#ffffff', borderBottomColor: isMyMessage ? this.props.bankStyle.STRUCTURED_MESSAGE_BORDER : '#eeeeee'}]
+        style = [style, {borderWidth: 0, paddingVertical: 3, borderColor: isMyMessage ? this.props.bankStyle.STRUCTURED_MESSAGE_COLOR : '#ffffff', borderBottomColor: isMyMessage ? this.props.bankStyle.STRUCTURED_MESSAGE_BORDER : '#eeeeee'}]
       let value = val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')
       let ratio = value.length / propTitle.length
       let flexVal = (propTitle.length > value.length || ratio < 1.2) ? 1 : ratio < 1.5 ? 2 : 3
@@ -237,7 +235,7 @@ var RowMixin = {
 
     let hs = /*isShared ? chatStyles.description :*/ [styles.header, {fontSize: 16}]
     // let arrow = <Icon color={this.props.bankStyle.VERIFIED_HEADER_COLOR} size={20} name={'ios-arrow-forward'} style={{top: 10, position: 'absolute', right: 30}}/>
-    let arrow = <Icon color={this.props.bankStyle.VERIFIED_HEADER_COLOR} size={20} name={'ios-arrow-forward'} style={{marginRight: 10, marginTop: 3}}/>
+    let arrow = <Icon color={this.props.bankStyle.VERIFIED_LINK_COLOR} size={20} name={'ios-arrow-forward'} style={{marginRight: 10, marginTop: 3}}/>
     var header =  <View style={headerStyle}>
                     <Text style={[hs, {fontSize: 12}]}>{translate(model)}</Text>
                     <Text style={[hs, {color: '#555555'}]}>{utils.getDisplayName(document)}</Text>
@@ -431,7 +429,7 @@ var RowMixin = {
           if (msgModel) {
             vCols.push(<View key={self.getNextKey()}>
                          <Text style={style}>{msgParts[0]}</Text>
-                         <Text style={[style, {color: isMyMessage ? STRUCTURED_MESSAGE_COLOR : LINK_COLOR}]}>{msgModel.value.title}</Text>
+                         <Text style={[style, {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_BACKGROUND_COLOR : LINK_COLOR}]}>{msgModel.value.title}</Text>
                        </View>);
             return;
           }

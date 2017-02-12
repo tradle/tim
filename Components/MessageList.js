@@ -92,7 +92,7 @@ class MessageList extends Component {
       isEmployee:  utils.isEmployee(props.resource),
       filter: props.filter,
       userInput: '',
-      hasProducts: props.resource.products,
+      hasProducts: this.hasProducts(props.resource),
       allLoaded: false
     }
   }
@@ -153,7 +153,7 @@ class MessageList extends Component {
     if (params.to  &&  params.to[ROOT_HASH] !== resource[ROOT_HASH])
       return
     if (params.action === 'getItem'  &&  utils.getId(params.resource) === utils.getId(this.props.resource)) {
-      this.setState({hasProducts: params.resource.products !== null})
+      this.setState({hasProducts: this.hasProducts(params.resource) })
       return
     }
     if (params.action === 'addItem'  ||  params.action === 'addVerification') {
@@ -294,6 +294,9 @@ class MessageList extends Component {
     }
     else
       this.setState({isLoading: false, isEmployee: isEmployee})
+  }
+  hasProducts(resource) {
+    return resource.products && resource.products.length
   }
   gatherForms(list) {
     let productToForms = {}

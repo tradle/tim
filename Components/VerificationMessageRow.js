@@ -85,7 +85,7 @@ class VerificationMessageRow extends Component {
     else if (isShared)
       bgColor = this.props.bankStyle.SHARED_WITH_VERIFICATION_BG
     else
-      bgColor = this.props.bankStyle.VERIFIED_HEADER_COLOR
+      bgColor = this.props.bankStyle.VERIFIED_LINK_COLOR
     let verifiedBy = isShared ? translate('youShared', orgName) : translate('verifiedBy', orgName)
 
     var w = utils.dimensions(VerificationMessageRow).width

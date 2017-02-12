@@ -21,6 +21,7 @@ import ENV from './env'
 import { getDimensions, getOrientation } from 'react-native-orient'
 import platformUtils from './platformUtils'
 import { post as submitLog } from './debug'
+import bankStyles from '../styles/bankStyles'
 
 // import Orientation from 'react-native-orientation'
 
@@ -142,6 +143,20 @@ var utils = {
   },
   getModels() {
     return models;
+  },
+  // temporary, let's hope
+  interpretStylesPack(stylesPack) {
+    const interpreted = {}
+    Object.keys(stylesPack).forEach(prop => {
+      // booHoo => BOO_HOO
+      const localName = utils.splitCamelCase(prop).join('_').toUpperCase()
+      interpreted[localName] = stylesPack[prop]
+    })
+
+    return interpreted
+  },
+  splitCamelCase(str) {
+    return str.split(/(?=[A-Z])/g)
   },
   getModel(modelName) {
     return models ? models[modelName] : null;
