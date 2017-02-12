@@ -3617,9 +3617,7 @@ var Store = Reflux.createStore({
           if (!to.bot) {
             to._unread = 0
             this.dbPut(toId, to)
-            .then(() => {
-              this.trigger({action: 'updateRow', resource: to})
-            })
+            this.trigger({action: 'updateRow', resource: to})
           }
         }
         let orgId
@@ -3695,7 +3693,7 @@ var Store = Reflux.createStore({
                 for (let i=result.length - 1; i>=0; i--) {
                   let r = result[i]
                   if (r[TYPE] === FORM_REQUEST) {
-                    if (!r.documentCreated  &&  utils.getId(r._context) === utils.getId(rContext)) {
+                    if (!r.documentCreated  && r._context && utils.getId(r._context) === utils.getId(rContext)) {
                       result.splice(i, 1)
                       result.push(r)
                     }
