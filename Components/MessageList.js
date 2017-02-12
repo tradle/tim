@@ -461,7 +461,7 @@ class MessageList extends Component {
   }
 
   componentDidUpdate() {
-    this.clearTimeout(this._scrollTimeout)
+    clearTimeout(this._scrollTimeout)
     if (this.state.allLoaded  ||  this.state.noScroll)
       this.state.noScroll = false
     else
