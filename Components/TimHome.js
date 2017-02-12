@@ -17,6 +17,9 @@ var Actions = require('../Actions/Actions');
 var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
 var constants = require('@tradle/constants');
+const {
+  TYPE
+} = constants
 // var BACKUPS = require('asyncstorage-backup')
 var debug = require('debug')('Tradle-Home')
 var BG_IMAGE = require('../img/bg.png')
@@ -71,6 +74,7 @@ import {
 import ActivityIndicator from './ActivityIndicator'
 import StatusBar from './StatusBar'
 import ScrollableCarousel from './ScrollableCarousel'
+const MY_DIGITAL_PASSPORT = 'nl.tradle.MyDigitalPassport'
 
 const isLinkingSupported = utils.isIOS() && Linking
 const isAndroid = Platform.OS === 'android'
@@ -512,7 +516,7 @@ class TimHome extends Component {
           },
           from: utils.getMe(),
           _t: 'tradle.FormRequest',
-          form: 'nl.tradle.MyDigitalPassport',
+          form: MY_DIGITAL_PASSPORT,
           message: 'Could I please see your digital passport'
         }
       })
@@ -520,7 +524,7 @@ class TimHome extends Component {
       await new Promise(function waitForMyDigitalPassport (resolve) {
         const { stop } = self.listenTo(Store, function checkIfPassport ({ action, resource }) {
           if (action !== 'addItem') return
-          if (resource[TYPE] !== 'tradle.MyDigitalPassport') return
+          if (resource[TYPE] !== MY_DIGITAL_PASSPORT) return
 
           stop()
           resolve()
