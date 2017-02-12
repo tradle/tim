@@ -537,7 +537,11 @@ class TimHome extends Component {
     navigator[doReplace ? 'replace' : 'push']({
       id: 31,
       component: ScrollableCarousel,
-      passProps: { screens }
+      passProps: {
+        screens,
+        hideIndicators: true,
+        animate: false
+      }
     })
   }
   showOfficialAccounts(doReplace) {

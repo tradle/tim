@@ -52,14 +52,20 @@ class ScrollableCarousel extends Component {
     )
   }
   render() {
+    const {
+      hideIndicators=false,
+      animate=false,
+      loop=false
+    } = this.props
+
     const screens = this.props.screens.map(screen => this.renderOne(screen))
     return (
       <Carousel
         ref={ref => this.carousel = ref}
-        loop={false}
-        animate={false}
-        indicatorOffset={20}
-        indicatorColor={'#efefef'}>
+        loop={loop}
+        animate={animate}
+        hideIndicators={hideIndicators}
+      >
         {screens}
       </Carousel>
     );
