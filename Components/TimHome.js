@@ -502,10 +502,10 @@ class TimHome extends Component {
     screens[sendIdx].onPress = async function ({ carousel }) {
       // send stuff
       carousel.next()
-      const dude = '25b5b404ed3dc57038fa3ab2d302ba15bfecf704b38cffb0fe567ba7662a8d3a'
+      const dude = '3a5e92caf6ba2cfb375bb5d1c217dc7d9402ee7087e0268b8957bdcc438154e6'
       const name = 'Mark Johnson'
-      Actions.addItem({
-        resource: {
+      Actions.addMessage({
+        msg: {
           to: {
             id: `tradle.Profile_${dude}`,
             title: name
