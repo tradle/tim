@@ -164,7 +164,8 @@ class MessageRow extends Component {
       else
         verPhoto = <View style={{height: 0, width:0}} />
     }
-    var rowStyle = [chatStyles.row, {backgroundColor: bankStyle.BACKGROUND_COLOR}];
+
+    var rowStyle = [chatStyles.row, {backgroundColor: 'transparent'}];
     var val = this.getTime(resource);
     var date = val
              ? <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
@@ -282,9 +283,9 @@ class MessageRow extends Component {
     var model = utils.getModel(this.props.resource[constants.TYPE]).value;
     var isLicense = model.id.indexOf('License') !== -1  ||  model.id.indexOf('Passport') !== -1;
     var photoStyle = (isLicense  &&  len === 1) ? chatStyles.bigImage : photoStyle;
-
+    var bg = bankStyle.BACKGROUND_IMAGE ? 'transparent' : bankStyle.BACKGROUND_COLOR
     return (
-      <View style={[viewStyle, {backgroundColor: bankStyle.BACKGROUND_COLOR}]}>
+      <View style={[viewStyle, {backgroundColor: bg}]}>
         {date}
         {messageBody}
         <View style={photoListStyle}>

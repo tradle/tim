@@ -75,7 +75,7 @@ var verificationStyles = Object.freeze({
   },
   row: {
     // alignItems: 'center',
-    backgroundColor: '#f7f7f7',
+    // backgroundColor: '#f7f7f7',
     flexDirection: 'row',
   },
   rowContainer: {

@@ -20,6 +20,7 @@ var reactMixin = require('react-mixin');
 var defaultBankStyle = require('../styles/bankStyle.json')
 
 var StyleSheet = require('../StyleSheet')
+var ArticleView = require('./ArticleView')
 
 import {
   Image,
@@ -114,6 +115,7 @@ class SponsorRow extends Component {
   }
 
   onPress(event) {
+    let resource = this.props.resourceTitle
     var model = utils.getModel(resource[TYPE] || resource.id).value;
     var title = utils.makeTitle(utils.getDisplayName(this.props.resource, model.properties));
     this.props.navigator.push({

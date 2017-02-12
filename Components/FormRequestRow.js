@@ -84,14 +84,14 @@ class FormRequestRow extends Component {
     let onPressCall
     let isFormRequest = resource[TYPE] === FORM_REQUEST
     let prop =  this.isOnePropForm()
-
+    let bankStyle = this.props.bankStyle
     if (isFormRequest)
       onPressCall = this.formRequest(resource, renderedRow, prop)
 
     else {
       onPressCall = resource.documentCreated ? null : this.reviewFormsInContext.bind(this)
       let idx = message.indexOf('...') + 3
-      let icon = <Icon style={{marginTop: 2, marginRight: 2, color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}} size={20} name={'ios-arrow-forward'} />
+      let icon = <Icon style={{marginTop: 2, marginRight: 2, color: isMyMessage ? bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}} size={20} name={'ios-arrow-forward'} />
       let msg = <View key={this.getNextKey()}>
                   <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: '#aaaaaa'} : {}]}>{message.substring(0, idx)}</Text>
                   <View style={chatStyles.rowContainer}>
@@ -109,7 +109,7 @@ class FormRequestRow extends Component {
       borderTopLeftRadius: 0
     }
 
-    var rowStyle = [chatStyles.row, {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}];
+    var rowStyle = [chatStyles.row];
     var val = this.getTime(resource);
     var date = val
              ? <Text style={chatStyles.date}>{val}</Text>
@@ -171,7 +171,7 @@ class FormRequestRow extends Component {
                         <View style={[cellStyle, shareables ? styles.shareables : {}]}>
                           <View style={styles.container}>
                           {this.isShared()
-                            ? <View style={[chatStyles.verifiedHeader, {backgroundColor: this.props.bankStyle.SHARED_WITH_BG}]}>
+                            ? <View style={[chatStyles.verifiedHeader, {backgroundColor: bankStyle.SHARED_WITH_BG}]}>
                                 <Text style={styles.white18}>{translate('youShared', resource.to.organization.title)}</Text>
                               </View>
                             : <View />
@@ -191,8 +191,9 @@ class FormRequestRow extends Component {
                       {msgContent}
                     </TouchableHighlight>
 
+    var bg = bankStyle.BACKGROUND_IMAGE ? 'transparent' : bankStyle.BACKGROUND_COLOR
     return (
-      <View style={[mainStyle, {margin:2, paddingVertical: 3, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}]}>
+      <View style={[mainStyle, {margin:2, paddingVertical: 3, backgroundColor: bg}]}>
         {date}
         <View style={shareables ? {borderWidth: 1, width: msgWidth + 2, borderColor: '#dddddd', borderRadius: 10, borderTopLeftRadius: 0} : {}}>
           {messageBody}
@@ -211,7 +212,9 @@ class FormRequestRow extends Component {
     let eCols = []
     for (let p in props) {
       let prop = props[p]
-      if (!prop.readOnly  &&  !prop.hidden  &&  !prop.list)
+      if (!prop.readOnly  &&
+        !prop.hidden      &&
+        !prop.list )
         eCols.push(props[p])
     }
 
@@ -319,9 +322,10 @@ class FormRequestRow extends Component {
             : translate('shareOneOfMany', utils.getMe().firstName, docType, org)
 
     let w = utils.dimensions(FormRequestRow).width * 0.8 - 2
-    let color = this.props.bankStyle.VERIFIED_HEADER_COLOR
+    let bankStyle = this.props.bankStyle
+    let color = bankStyle.VERIFIED_HEADER_COLOR
     return (
-      <View style={[rowStyle, viewStyle, {marginTop: -10, width: w, backgroundColor: this.props.bankStyle.VERIFIED_BG, borderBottomLeftRadius: 10, borderBottomRightRadius: 10}]} key={this.getNextKey()}>
+      <View style={[rowStyle, viewStyle, {marginTop: -10, width: w, backgroundColor: bankStyle.VERIFIED_BG, borderBottomLeftRadius: 10, borderBottomRightRadius: 10}]} key={this.getNextKey()}>
         <View style={{flex:1}}>
           <View style={[styles.assistentBox, {backgroundColor: color}]}>
             <Text style={styles.orText}>{'OR'}</Text>
@@ -358,7 +362,8 @@ class FormRequestRow extends Component {
     let addStyle = {}//onPress ? {} : {borderBottomColor: '#efefef', borderBottomWidth: 1}
 
     let hs = /*isShared ? chatStyles.description :*/ [styles.header, {fontSize: 16}]
-    let arrow = <Icon color={this.props.bankStyle.VERIFIED_HEADER_COLOR} size={20} name={'ios-arrow-forward'} style={{marginRight: 10, marginTop: 5}}/>
+    let bankStyle = this.props.bankStyle
+    let arrow = <Icon color={bankStyle.VERIFIED_HEADER_COLOR} size={20} name={'ios-arrow-forward'} style={{marginRight: 10, marginTop: 5}}/>
     var headerContent =  <View style={headerStyle}>
                           <Text style={[hs, {color: '#555555'}]}>{utils.getDisplayName(document)}</Text>
                         </View>
@@ -541,7 +546,7 @@ class FormRequestRow extends Component {
     let link
     let isReadOnly = utils.isReadOnlyChat(this.props.resource, this.props.context) //this.props.context  &&  this.props.context._readOnly
     let self = this
-
+    let bankStyle = this.props.bankStyle
     if (sameFormRequestForm  &&  !resource.documentCreated) {
        link = <View style={[chatStyles.rowContainer, {paddingVertical: 10, alignSelf: 'center'}]}>
                <View style={[chatStyles.textContainer, {justifyContent: 'center'}]}>
@@ -574,7 +579,7 @@ class FormRequestRow extends Component {
       link = <Text style={[chatStyles.resourceTitle, color]}>{translate(form)}</Text>
     else {
       let notLink = resource.documentCreated  ||  isReadOnly  ||  form.subClassOf === MY_PRODUCT
-      let icon = <Icon  name={'ios-arrow-forward'} style={{marginTop: 2, marginRight: 2, color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}} size={20} />
+      let icon = <Icon  name={'ios-arrow-forward'} style={{marginTop: 2, marginRight: 2, color: isMyMessage ? bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}} size={20} />
       link = <View style={chatStyles.rowContainer}>
                <Text style={[chatStyles.resourceTitle, {color: resource.documentCreated  ||  notLink ?  '#757575' : resource.verifiers ? 'green' : LINK_COLOR}]}>{translate(form)}</Text>
                {resource.documentCreated ? null : icon}

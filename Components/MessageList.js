@@ -57,6 +57,7 @@ import {
   // ListView,
   // StyleSheet,
   PropTypes,
+  Image,
   Navigator,
   Platform,
   View,
@@ -494,7 +495,13 @@ class MessageList extends Component {
     //                 indeterminate={this.state.indeterminate}
     //               />
     //             : <View/>
-    var bgStyle = this.props.bankStyle.BACKGROUND_COLOR ? {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR} : {backgroundColor: '#f7f7f7'}
+    let bankStyle = this.props.bankStyle
+    var bgImage = bankStyle.BACKGROUND_IMAGE
+    var bgStyle = {}
+    if (!bgImage  &&  bankStyle.BACKGROUND_COLOR)
+      bgStyle = {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}
+    // else
+    //   bgStyle = {backgroundColor: 'transparent'}
     var alert = <View />
     if (!this.state.list || !this.state.list.length) {
       if (this.props.navigator.isConnected  &&  resource[TYPE] === TYPES.ORGANIZATION) {
@@ -508,7 +515,7 @@ class MessageList extends Component {
           content = <View style={{flex: 1}}>
                       <View style={[platformStyles.container, bgStyle]}>
                         <Text style={{fontSize: 17, alignSelf: 'center', marginTop: 80, color: '#629BCA'}}>{'Loading...'}</Text>
-                        <ActivityIndicator size='large' style={{alignSelf: 'center', marginTop: 20}} />
+                        <ActivityIndicator size='large' style={{alignSelf: 'center', backgroundColor: 'transparent', marginTop: 20}} />
                       </View>
                       {menuBtn}
                     </View>
@@ -611,24 +618,40 @@ class MessageList extends Component {
     let me = utils.getMe()
     let actionSheet = this.renderActionSheet()
     let context = this.state.context
+    let network
+    if (this.props.originatingMessage)
+      network = <NetworkInfoProvider connected={this.state.isConnected} resource={resource} online={this.state.onlineStatus} />
     if (!context  &&  this.props.resource[TYPE] === PRODUCT_APPLICATION)
       context = this.props.resource
+
+    if (!bgImage)
+      return (
+        <PageView style={[platformStyles.container, bgStyle]}>
+          {network}
+          <ProgressInfo />
+          <ChatContext chat={resource} context={context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={this.props.bankStyle} allContexts={this.state.allContexts} />
+          <View style={ sepStyle } />
+          {content}
+          {actionSheet}
+          {alert}
+        </PageView>
+    )
+    let {width, height} = utils.dimensions(MessageList)
+    let image = { width, height }
+
     return (
       <PageView style={[platformStyles.container, bgStyle]}>
-        {this.props.originatingMessage
-          ? <View/>
-          : <NetworkInfoProvider connected={this.state.isConnected} resource={resource} online={this.state.onlineStatus} />
-        }
-        <ProgressInfo />
-
-        <ChatContext chat={resource} context={context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={this.props.bankStyle} allContexts={this.state.allContexts} />
-        <View style={ sepStyle } />
-        {content}
-        {actionSheet}
-        {alert}
+        <Image source={{uri: bgImage}}  resizeMode='cover' style={image}>
+          {network}
+          <ProgressInfo />
+          <ChatContext chat={resource} context={context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={this.props.bankStyle} allContexts={this.state.allContexts} />
+          <View style={ sepStyle } />
+          {content}
+          {actionSheet}
+          {alert}
+        </Image>
       </PageView>
     );
-        // {addNew}
   }
 
   hasMenuButton() {

@@ -42,7 +42,9 @@ const PROFILE = constants.TYPES.PROFILE
 const ORGANIZATION = constants.TYPES.ORGANIZATION
 const FINANCIAL_PRODUCT = constants.TYPES.FINANCIAL_PRODUCT
 const MONEY = constants.TYPES.MONEY
-// const CHAR_WIDTH = 7
+
+const DEFAULT_CURRENCY_SYMBOL = '£'
+var CURRENCY_SYMBOL
 
 var dateProp
 
@@ -50,6 +52,7 @@ class ResourceRow extends Component {
   constructor(props) {
     super(props)
     this.state = {isConnected: this.props.navigator.isConnected}
+    CURRENCY_SYMBOL = props.currency ? props.currency.symbol || props.currency : DEFAULT_CURRENCY_SYMBOL
     if (props.changeSharedWithList)
       this.state.sharedWith = true
     // Multichooser for sharing context; isChooser for choosing delegated trusted party for requested verification
