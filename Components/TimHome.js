@@ -512,7 +512,7 @@ class TimHome extends Component {
           },
           from: utils.getMe(),
           _t: 'tradle.FormRequest',
-          form: 'tradle.MyDigitalPassport',
+          form: 'nl.tradle.MyDigitalPassport',
           message: 'Could I please see your digital passport'
         }
       })
