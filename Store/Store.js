@@ -3360,8 +3360,11 @@ var Store = Reflux.createStore({
       this.addLastMessage(document, batch, to)
       this.dbBatchPut(documentId, document, batch)
 
-      if (!verifications)
+      if (!verifications) {
+        this.trigger({action: 'addItem', sendStatus: SENT, resource: document})
+        document._sendStatus = SENT
         return
+      }
 
       let all = verifications.length
       let defer = Q.defer()
@@ -5128,7 +5131,8 @@ var Store = Reflux.createStore({
     let messageType = model.id
     if (sharedWith) {
       let sharedWithOrg = this._getItem(utils.getId(sharedWith.organization))
-      let orgName = utils.getDisplayName(to, this.getModel(ORGANIZATION).value.properties)
+      let orgName = sharedWithOrg.name
+      // let orgName = utils.getDisplayName(to, this.getModel(ORGANIZATION).value.properties)
       if (model.subClassOf !== MY_PRODUCT && model.subClassOf !== FORM)
         return
       dn = translate('sharedForm', translate(model), orgName)
@@ -6032,6 +6036,8 @@ var Store = Reflux.createStore({
     else {
       var isMessage = utils.isMessage(model)
       if (isMessage) {
+        if (val[TYPE] === PRODUCT_LIST  &&  (!val.list || !val.list.length))
+          return
         noTrigger = this.putMessageInDB(val, obj, batch, onMessage)
         if (type === VERIFICATION)
           return
