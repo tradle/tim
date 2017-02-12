@@ -98,7 +98,6 @@ class PhotoCarousel extends Component {
     );
   }
 }
-PhotoCarousel = makeResponsive(PhotoCarousel)
 
 var createStyles = utils.styleFactory(PhotoCarousel, function ({ dimensions }) {
   return StyleSheet.create({
@@ -123,5 +122,6 @@ var createStyles = utils.styleFactory(PhotoCarousel, function ({ dimensions }) {
     },
   })
 })
+
 PhotoCarousel = makeResponsive(PhotoCarousel)
 module.exports = PhotoCarousel;
