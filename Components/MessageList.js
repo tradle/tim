@@ -460,6 +460,10 @@ class MessageList extends Component {
     });
   }
 
+  componentWillUnmount() {
+    clearTimeout(this._scrollTimeout)
+  }
+
   componentDidUpdate() {
     clearTimeout(this._scrollTimeout)
     if (this.state.allLoaded  ||  this.state.noScroll)
