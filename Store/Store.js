@@ -6036,8 +6036,8 @@ var Store = Reflux.createStore({
     else {
       var isMessage = utils.isMessage(model)
       if (isMessage) {
-        if (val[TYPE] === PRODUCT_LIST  &&  (!val.list || !val.list.length))
-          return
+        // if (val[TYPE] === PRODUCT_LIST  &&  (!val.list || !val.list.length))
+        //   return
         noTrigger = this.putMessageInDB(val, obj, batch, onMessage)
         if (type === VERIFICATION)
           return
