@@ -1050,7 +1050,7 @@ class MessageList extends Component {
   }
 }
 reactMixin(MessageList.prototype, Reflux.ListenerMixin);
-// reactMixin(MessageList.prototype, TimerMixin)
+reactMixin(MessageList.prototype, TimerMixin)
 MessageList = makeResponsive(MessageList)
 MessageList = makeStylish(MessageList)
 
