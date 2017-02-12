@@ -77,6 +77,7 @@ debug.log = function (...args) {
       ].concat(toConsole.slice(1))
     }
 
+    toConsole = toConsole.filter(val => val != null && val !== undefined)
     const method = this.namespace.indexOf('console.') === 0 && this.namespace.split('.')[1]
     const logFn = rawConsole[method] || rawConsole.log
     logFn(...toConsole)
