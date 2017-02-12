@@ -221,7 +221,7 @@ class ResourceRow extends Component {
       count = resource._unread
 
     if (count)
-      count = <View style={styles.countView}>
+      count = <View style={styles.count}>
                 <Text style={styles.countText}>{count}</Text>
               </View>
 
