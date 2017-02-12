@@ -105,6 +105,7 @@ Text.defaultProps = function() {
 import React, { Component } from 'react'
 import Push from './utils/push'
 import Navs from './utils/navs'
+import ScrollableCarousel from './Components/ScrollableCarousel'
 
 var ReactPerf = __DEV__ && require('react-addons-perf')
 var UNAUTHENTICATE_AFTER_BG_MILLIS = require('./utils/localAuth').TIMEOUT
@@ -535,6 +536,8 @@ class TiMApp extends Component {
       return <RemediationItemsList navigator={nav} {...props} />
     case 30:
       return <HomePage navigator={nav} {...props} />
+    case 31:
+      return <ScrollableCarousel navigator={nav} {...props} />
     case 10:
     default: // 10
       return <ResourceList navigator={nav} {...props} />

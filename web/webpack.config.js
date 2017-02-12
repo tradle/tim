@@ -25,7 +25,9 @@ var isProd = NODE_ENV === 'production';
 var isHot = !isProd && process.env.HOT === '1'
 var projectRoot = path.join(__dirname, '../')
 var screwIE = !process.env.IE
-var envFile = path.join(__dirname, '../env', (process.env.PROVIDERS || 'dev') + '.json')
+var envFile = process.env.PROVIDERS
+  ? path.join(__dirname, '../env', process.env.PROVIDERS + '.json')
+  : path.join(__dirname, '../environment.json')
 
 // var paths = {
 //   src: path.join(ROOT_PATH, '.'),

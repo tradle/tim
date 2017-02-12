@@ -70,6 +70,7 @@ import {
 } from 'react-native'
 import ActivityIndicator from './ActivityIndicator'
 import StatusBar from './StatusBar'
+import ScrollableCarousel from './ScrollableCarousel'
 
 const isLinkingSupported = utils.isIOS() && Linking
 const isAndroid = Platform.OS === 'android'
@@ -446,6 +447,95 @@ class TimHome extends Component {
     //   }
     // })
   }
+  doDPW(doReplace) {
+    const self = this
+    const { navigator } = this.props
+    const sendIdx = 1
+    const screens = [
+      {
+        image: require('../img/dpw/1-launch.png'),
+        width: 750,
+        height: 1334
+      },
+      {
+        image: require('../img/dpw/2-prereq.png'),
+        width: 750,
+        height: 2362
+      },
+      {
+        image: require('../img/dpw/3-waiting.png'),
+        width: 750,
+        height: 2362
+      },
+      {
+        image: require('../img/dpw/4-unlocked.png'),
+        width: 750,
+        height: 2362
+      },
+      {
+        image: require('../img/dpw/5-invest.png'),
+        width: 750,
+        height: 1718
+      },
+      {
+        image: require('../img/dpw/6-previewdigitwin.png'),
+        width: 750,
+        height: 2526
+      },
+      {
+        image: require('../img/dpw/7-applydigitwin.png'),
+        width: 750,
+        height: 1334
+      },
+      {
+        image: require('../img/dpw/7-newval.png'),
+        width: 750,
+        height: 1334
+      },
+      {
+        image: require('../img/dpw/8-invested.png'),
+        width: 750,
+        height: 2362
+      }
+    ]
+
+    screens[sendIdx].onPress = async function ({ carousel }) {
+      // send stuff
+      carousel.next()
+      const dude = '25b5b404ed3dc57038fa3ab2d302ba15bfecf704b38cffb0fe567ba7662a8d3a'
+      const name = 'Mark Johnson'
+      Actions.addItem({
+        resource: {
+          to: {
+            id: `tradle.Profile_${dude}`,
+            title: name
+          },
+          from: utils.getMe(),
+          _t: 'tradle.FormRequest',
+          form: 'tradle.MyDigitalPassport',
+          message: 'Could I please see your digital passport'
+        }
+      })
+
+      await new Promise(function waitForMyDigitalPassport (resolve) {
+        const { stop } = self.listenTo(Store, function checkIfPassport ({ action, resource }) {
+          if (action !== 'addItem') return
+          if (resource[TYPE] !== 'tradle.MyDigitalPassport') return
+
+          stop()
+          resolve()
+        })
+      })
+
+      carousel.next()
+    }
+
+    navigator[doReplace ? 'replace' : 'push']({
+      id: 31,
+      component: ScrollableCarousel,
+      passProps: { screens }
+    })
+  }
   showOfficialAccounts(doReplace) {
     var nav = this.props.navigator
     if (!utils.isWeb()) {
@@ -460,6 +550,10 @@ class TimHome extends Component {
 
     let me = utils.getMe()
     if (me.isEmployee) {
+      if (ENV.isDPWDemo) {
+        return this.doDPW(doReplace)
+      }
+
       this.showContacts(doReplace)
       return
     }
