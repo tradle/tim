@@ -232,7 +232,6 @@ class VerificationRow extends Component {
     var isSimpleMessage = model.id === constants.TYPES.SIMPLE_MESSAGE;
     var style = styles.resourceTitle
     var labelStyle = styles.resourceTitleL
-    var isMyMessage = this.isMyMessage()
     viewCols.forEach(function(v) {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date')
         return;
@@ -291,7 +290,7 @@ class VerificationRow extends Component {
           if (msgModel) {
             vCols.push(<View key={self.getNextKey()} style={styles.msgParts}>
                          <Text style={style}>{msgParts[0]}</Text>
-                         <Text style={[style, {color: isMyMessage ? '#efffe5' : '#7AAAC3'}]}>{msgModel.value.title}</Text>
+                         <Text style={[style, {color: '#7AAAC3'}]}>{msgModel.value.title}</Text>
                        </View>);
             return;
           }
