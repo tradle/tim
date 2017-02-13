@@ -18,7 +18,6 @@ var reactMixin = require('react-mixin');
 
 var noop = () => {}
 var path = require('path')
-var BeSafe = require('asyncstorage-backup')
 var Reflux = require('reflux');
 var Actions = require('../Actions/Actions');
 var extend = require('extend');
