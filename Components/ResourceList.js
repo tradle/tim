@@ -437,7 +437,8 @@ class ResourceList extends Component {
     var model = utils.getModel(this.props.modelName);
     var isContact = this.props.modelName === PROFILE;
     let rType = resource[TYPE]
-    var isVerification = model.value.id === constants.TYPES.VERIFICATION || rType === constants.TYPES.VERIFICATION
+    var isVerification = model.value.id === constants.TYPES.VERIFICATION
+    var isVerificationR  = rType === constants.TYPES.VERIFICATION
     var isMessage = utils.isMessage(resource)
 
     var isOrganization = this.props.modelName === ORGANIZATION;
@@ -447,7 +448,7 @@ class ResourceList extends Component {
         !this.props.callback) {
       if (isMessage) {
         let title
-        if (isVerification) {
+        if (isVerificationR) {
           let type = utils.getType(resource.document)
           title = utils.makeModelTitle(utils.getModel(type).value)
         }
