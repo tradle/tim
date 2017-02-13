@@ -5,12 +5,16 @@ var translate = utils.translate
 var Icon = require('react-native-vector-icons/Ionicons');
 var buttonStyles = require('../styles/buttonStyles');
 var appStyle = require('../styles/appStyle.json')
-var constants = require('@tradle/constants');
 var reactMixin = require('react-mixin');
 var RowMixin = require('./RowMixin');
 var ResourceMixin = require('./ResourceMixin');
 var ShowPropertiesView = require('./ShowPropertiesView')
 var Actions = require('../Actions/Actions');
+const {
+  TYPES,
+  TYPE,
+  ROOT_HASH
+} = require('@tradle/constants');
 
 import { makeResponsive } from 'react-native-orient'
 
@@ -33,13 +37,13 @@ class ShowRefList extends Component {
   }
   render() {
     var resource = this.props.resource;
-    var model = utils.getModel(resource[constants.TYPE]).value;
+    var model = utils.getModel(resource[TYPE]).value;
     var props = model.properties;
     let self = this
     var refList = [];
-    var isIdentity = model.id === constants.TYPES.PROFILE;
+    var isIdentity = model.id === TYPES.PROFILE;
     var me = utils.getMe()
-    var isMe = isIdentity ? resource[constants.ROOT_HASH] === me[constants.ROOT_HASH] : true;
+    var isMe = isIdentity ? resource[ROOT_HASH] === me[ROOT_HASH] : true;
     // The profile page for the device owner has 2 more profile specific links: add new PROFILE and switch PROFILE
     let propsToShow = []
 
@@ -156,7 +160,7 @@ class ShowRefList extends Component {
 
     }
     let comment
-    if (ENV.homePageScanQRCodePrompt && !hasBacklinks  &&  utils.getMe()[constants.ROOT_HASH] === this.props.resource[constants.ROOT_HASH]) {
+    if (ENV.homePageScanQRCodePrompt && !hasBacklinks  &&  utils.getMe()[ROOT_HASH] === this.props.resource[ROOT_HASH]) {
       comment = <View style={{justifyContent: 'center', alignSelf: 'center', width: 300, marginTop: 200}}>
                   <Text style={{fontSize: 20, alignSelf: 'center', color: '#555555'}}>{translate('pleaseTapOnMenu')}</Text>
                   <Text style={{fontSize: 20, alignSelf: 'center', color: '#555555'}}>{translate('scanQRcode')}</Text>

@@ -18,7 +18,6 @@ var reactMixin = require('react-mixin');
 
 var noop = () => {}
 var path = require('path')
-var BeSafe = require('asyncstorage-backup')
 var Reflux = require('reflux');
 var Actions = require('../Actions/Actions');
 var extend = require('extend');
@@ -5935,7 +5934,7 @@ var Store = Reflux.createStore({
   },
   dbPut(key, value) {
     let v = utils.isMessage(value) ? utils.optimizeResource(value, true) : value
-    db.put(key, v)
+    return db.put(key, v)
   },
   dbBatchPut(key, value, batch) {
     let v = utils.isMessage(value) ? utils.optimizeResource(value, true) : value

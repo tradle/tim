@@ -218,13 +218,11 @@ class ResourceRow extends Component {
 
     let isNewContact = this.props.newContact  &&  this.props.newContact[ROOT_HASH] === resource[ROOT_HASH]
     let count
-    if (isContact)
-      count = resource._unread
-
-    if (count)
+    if (isContact && resource._unread) {
       count = <View style={styles.countView}>
                 <Text style={styles.countText}>{count}</Text>
               </View>
+    }
 
     // Grey out if not loaded provider info yet
             // <ActivityIndicator hidden='true' color='#629BCA'/>
