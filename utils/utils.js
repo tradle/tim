@@ -344,6 +344,24 @@ var utils = {
     }
     return subclasses;
   },
+  isSubclassOf(type, subType) {
+    if (typeof type === 'string')
+      return this.getModel(type).value.subClassOf === subType
+    if (type.type)  {
+      if (type.type === 'tradle.Model')
+      return type.subClassOf === subType
+    }
+    return this.getModel(type[TYPE]).value.subClassOf === subType
+  },
+  isMyProduct(type) {
+    return this.isSubclassOf(type, MY_PRODUCT)
+  },
+  isForm(type) {
+    return this.isSubclassOf(type, FORM)
+  },
+  isVerification(type) {
+    return this.isSubclassOf(type, VERIFICATION)
+  },
   getFontSize(fontSize) {
     // return fontSize
     let fontScale = PixelRatio.getFontScale()
