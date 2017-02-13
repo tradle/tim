@@ -2303,7 +2303,7 @@ var Store = Reflux.createStore({
       key = utils.getId(r)
       if (!r._sharedWith) {
         r._sharedWith = []
-        r._sharedWith.push(this.createSharedWith(utils.getId(r.from), r.time))
+        this.addSharedWith(r, r.from, r.time)
       }
       // if (dontSend  &&  r.sources) {
       //   let result = self.searchMessages({modelName: VERIFICATION, to: r.to})
@@ -2423,6 +2423,15 @@ var Store = Reflux.createStore({
   onGetFrom(key) {
     this.onGetItem(key, 'getFrom');
   },
+  addSharedWith(r, shareWith, time, shareBatchId) {
+    // if (!r._sharedWith)
+    //   r._sharedWith = []
+    let id = utils.getId(shareWith)
+    if (id === utils.getId(utils.getMe()))
+      debugger
+    r._sharedWith.push(this.createSharedWith(id, time, shareBatchId))
+  },
+
   onGetItem(key, action) {
     var resource = {};
 
@@ -2464,6 +2473,9 @@ var Store = Reflux.createStore({
       to: resource
     })
     this.trigger({action: 'exploreBacklink', resource: resource, backlink: prop, list: list})
+  },
+  onGetDetails(resource) {
+    this.trigger({action: 'showDetails', resource: resource})
   },
 
   getItem(resource) {
@@ -3392,10 +3404,10 @@ var Store = Reflux.createStore({
     .then(() => {
       if (!document._sharedWith) {
         document._sharedWith = []
-        document._sharedWith.push(this.createSharedWith(utils.getId(document.to), document.time, shareBatchId))
+        this.addSharedWith(document, document.to, document.time, shareBatchId)
       }
 
-      document._sharedWith.push(this.createSharedWith(utils.getId(to), time, shareBatchId))
+      this.addSharedWith(document, to, time, shareBatchId)
       this.addMessagesToChat(utils.getId(to.organization), document, false, time)
     })
     .catch(function(err) {
@@ -3412,10 +3424,10 @@ var Store = Reflux.createStore({
       if (!resource.sharedWith)
         resource.sharedWith = []
       ver = this._getItem(utils.getId(resource))
-      ver._sharedWith.push(this.createSharedWith(toId, time, shareBatchId))
+      this.addSharedWith(ver, to, time, shareBatchId)
       ver._sendStatus = this.isConnected ? SENDING : QUEUED
 
-      utils.optimizeResource(ver, true)
+      // utils.optimizeResource(ver, true)
 
       this.addMessagesToChat(utils.getId(to.organization), ver, false, time)
       this.trigger({action: 'addItem', context: resource.context, resource: ver})
@@ -5031,7 +5043,7 @@ var Store = Reflux.createStore({
       if (/*isNew  &&*/  isForm) {
         if (!value._sharedWith)
           value._sharedWith = []
-        value._sharedWith.push(this.createSharedWith(utils.getId(value.to), new Date().getTime()))
+        this.addSharedWith(value, value.to, new Date().getTime())
       }
       // if (isNew)
       //   this.addVisualProps(value)

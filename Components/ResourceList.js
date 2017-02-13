@@ -453,22 +453,24 @@ class ResourceList extends Component {
     var model = utils.getModel(this.props.modelName);
     var isContact = this.props.modelName === PROFILE;
     let rType = resource[TYPE]
-    var isVerification = model.value.id === constants.TYPES.VERIFICATION || rType === constants.TYPES.VERIFICATION
-    var isForm = model.value.id === constants.TYPES.FORM || utils.getModel(rType).value.subClassOf === constants.TYPES.FORM
+    var isVerification = model.value.id === constants.TYPES.VERIFICATION
+    var isVerificationR  = rType === constants.TYPES.VERIFICATION
+    var isMessage = utils.isMessage(resource)
 
     var isOrganization = this.props.modelName === ORGANIZATION;
     var m = utils.getModel(resource[TYPE]).value;
     if (!isContact          &&
         !isOrganization     &&
         !this.props.callback) {
-      if (isVerification || isForm) {
+      if (isMessage) {
         let title
-        if (isForm)
-          title = utils.makeModelTitle(m)
-        else {
+        if (isVerificationR) {
           let type = utils.getType(resource.document)
           title = utils.makeModelTitle(utils.getModel(type).value)
         }
+        else
+          title = utils.makeModelTitle(m)
+
         this.props.navigator.push({
           title: title,
           id: 5,

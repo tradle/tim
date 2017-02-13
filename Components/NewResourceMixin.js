@@ -1553,8 +1553,8 @@ var NewResourceMixin = {
     }
     if (deleteProps)
       deleteProps.forEach((p) => {
-        Reflect.deleteProperty(value, p)
-        Reflect.deleteProperty(err, p)
+        delete value[p]
+        delete err[p]
       })
     return err
   },

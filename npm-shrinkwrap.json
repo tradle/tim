@@ -53,8 +53,8 @@
     },
     "@tradle/models": {
       "version": "4.10.10",
-      "from": "git://github.com/tradle/models.git#c43390c1ded3d1ac7d8aae20f879803fda66023b",
-      "resolved": "git://github.com/tradle/models.git#c43390c1ded3d1ac7d8aae20f879803fda66023b",
+      "from": "git://github.com/tradle/models.git#16ccebbdc2e0b397f23895cf3a489ad72019a047",
+      "resolved": "git://github.com/tradle/models.git#16ccebbdc2e0b397f23895cf3a489ad72019a047",
       "dependencies": {
         "typeforce": {
           "version": "1.10.6",
