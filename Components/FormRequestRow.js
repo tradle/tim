@@ -649,15 +649,15 @@ class FormRequestRow extends Component {
   onSetMediaProperty(propName, item) {
     if (!item)
       return;
-    let r = this.props.resource
+    let formRequest = this.props.resource
     Actions.addItem({
-      disableFormRequest: this.props.resource,
+      disableFormRequest: formRequest,
       resource: {
-        [TYPE]: this.props.resource.form,
+        [TYPE]: formRequest.form,
         [propName]: item,
-        _context: r._context,
+        _context: formRequest._context,
         from: utils.getMe(),
-        to: this.props.to
+        to: formRequest.from  // FormRequest.from
       }
     })
   }
