@@ -1582,6 +1582,12 @@ function coerceNumber (obj, p) {
     obj[p] = Number(val.trim())
   }
 }
+function coerceNumber (obj, p) {
+  const val = obj[p]
+  if (typeof val === 'string') {
+    obj[p] = Number(val.trim())
+  }
+}
 
 var styles= StyleSheet.create({
   enumProp: {

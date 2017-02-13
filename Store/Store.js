@@ -18,7 +18,6 @@ var reactMixin = require('react-mixin');
 
 var noop = () => {}
 var path = require('path')
-// var BeSafe = require('asyncstorage-backup')
 var Reflux = require('reflux');
 var Actions = require('../Actions/Actions');
 var extend = require('extend');
@@ -3404,7 +3403,8 @@ var Store = Reflux.createStore({
     .then(() => {
       if (!document._sharedWith) {
         document._sharedWith = []
-        this.addSharedWith(document, document.to, document.time, shareBatchId)
+        if (!utils.isMyProduct(document))
+          this.addSharedWith(document, document.to, document.time, shareBatchId)
       }
 
       this.addSharedWith(document, to, time, shareBatchId)
@@ -5950,7 +5950,7 @@ var Store = Reflux.createStore({
   },
   dbPut(key, value) {
     let v = utils.isMessage(value) ? utils.optimizeResource(value, true) : value
-    db.put(key, v)
+    return db.put(key, v)
   },
   dbBatchPut(key, value, batch) {
     let v = utils.isMessage(value) ? utils.optimizeResource(value, true) : value

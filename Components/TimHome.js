@@ -17,7 +17,6 @@ var Actions = require('../Actions/Actions');
 var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
 var constants = require('@tradle/constants');
-// var BACKUPS = require('asyncstorage-backup')
 var debug = require('debug')('Tradle-Home')
 var BG_IMAGE = require('../img/bg.png')
 // var PasswordCheck = require('./PasswordCheck')
@@ -673,24 +672,6 @@ class TimHome extends Component {
   onReloadModels() {
     utils.setModels(null)
     Actions.reloadModels()
-  }
-  async onBackupPressed() {
-    let backupNumber = await BACKUPS.backup()
-    Alert.alert(
-      `Backed up to #${backupNumber}`
-    )
-  }
-  async onLoadFromBackupPressed() {
-    try {
-      let backupNumber = await BACKUPS.loadFromBackup()
-      Alert.alert(
-        `Loaded from backup #${backupNumber}. Please refresh`
-      )
-    } catch (err) {
-      Alert.alert(
-        `${err.message}`
-      )
-    }
   }
   render() {
     StatusBar.setHidden(true);
