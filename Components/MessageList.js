@@ -196,7 +196,6 @@ class MessageList extends Component {
       let routes = this.props.navigator.getCurrentRoutes()
       if (routes[routes.length - 1].component )
       this.props.navigator.popToRoute(routes[1])
-      // ComponentUtils.showContacts(this.props.navigator, TYPES.PROFILE)
       return
     }
     if (params.resource  &&  params.resource[ROOT_HASH] != resource[ROOT_HASH]) {
@@ -209,12 +208,6 @@ class MessageList extends Component {
         return;
     }
     var list = params.list;
-    // if (this.state.sendStatus) {
-    //   list.forEach((r) => {
-    //     if (r[ROOT_HASH] === this.state.sendResource[ROOT_HASH])
-    //       r.status = this.state.sendStatus
-    //   })
-    // }
     if (params.loadEarlierMessages  &&  this.state.postLoad) {
       if (!list || !list.length) {
         this.state.postLoad([], true)
@@ -222,11 +215,9 @@ class MessageList extends Component {
           allLoaded: true, isLoading: false, noScroll: true, loadEarlierMessages: false,
           ...this.state
         }
-//         this.setState({allLoaded: true, isLoading: false, noScroll: true, loadEarlierMessages: false})
       }
       else {
         this.state.postLoad(list, false)
-//         this.state.list = list
         let allLoaded = list.length < LIMIT
         this.state.list.forEach((r) => {
           list.push(r)
@@ -240,7 +231,6 @@ class MessageList extends Component {
           productToForms: productToForms,
           loadEarlierMessages: !allLoaded
         })
-        // this.setState({list: list, noScroll: true, allLoaded: allLoaded, loadEarlierMessages: !allLoaded})
       }
       return
     }
@@ -476,36 +466,15 @@ class MessageList extends Component {
   }
 
   render() {
-    // currentMessageTime = null;
     var content;
 
     var model = utils.getModel(this.props.modelName).value;
     var resource = this.props.resource
-                    // <Text style={{fontSize: 17, alignSelf: 'center', color: '#ffffff'}}>{'Sending...'}</Text>
-    // var isVisible = this.state.sendStatus  &&  this.state.sendStatus !== null
-    // var spinner = isVisible
-    //             ? <Text style={{alignSelf: 'flex-end', fontSize: 14, color: '#757575', marginHorizontal: 15}}>{thus.state.sendStatus}</Text>
-    //             : <View/>
-    // var spinner = <LoadingOverlay isVisible={isVisible} onDismiss={() => {this.setState({isVisible:false})}} position="bottom">
-    //                 <TouchableOpacity onPress={() => { Alert.alert('Pressed on text!') }}>
-    //                   <Text style={styles.bannerText}>{this.state.sendStatus}</Text>
-    //                 </TouchableOpacity>
-    //               </LoadingOverlay>
-
-    // var spinner = isVisible
-    //             ? <Progress.Bar
-    //                 style={styles.progress}
-    //                 progress={this.state.progress}
-    //                 indeterminate={this.state.indeterminate}
-    //               />
-    //             : <View/>
     let bankStyle = this.props.bankStyle
     var bgImage = bankStyle.BACKGROUND_IMAGE
     var bgStyle = {}
     if (!bgImage  &&  bankStyle.BACKGROUND_COLOR)
       bgStyle = {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}
-    // else
-    //   bgStyle = {backgroundColor: 'transparent'}
     var alert = <View />
     if (!this.state.list || !this.state.list.length) {
       if (this.props.navigator.isConnected  &&  resource[TYPE] === TYPES.ORGANIZATION) {
@@ -940,14 +909,6 @@ class MessageList extends Component {
     )
   }
 
-  // onPhotoSelect(asset) {
-  //   var selectedAssets = this.state.selectedAssets;
-  //   // unselect if was selected before
-  //   if (selectedAssets[asset.node.image.uri])
-  //     delete selectedAssets[asset.node.image.uri];
-  //   else
-  //     selectedAssets[asset.node.image.uri] = asset;
-  // }
   onAddNewPressed(sendForm) {
     var modelName = this.props.modelName;
     var model = utils.getModel(modelName).value;
@@ -987,33 +948,6 @@ class MessageList extends Component {
       }
     });
   }
-  // onTakePicPressed() {
-  //   var self = this;
-  //   this.props.navigator.push({
-  //     title: 'Take a pic',
-  //     backButtonTitle: 'Back',
-  //     id: 12,
-  //     component: CameraView,
-  //     sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-  //     passProps: {
-  //       onTakePic: self.onTakePic.bind(this),
-  //     }
-  //   });
-  // }
-  // onTakePic(data) {
-  //   var msg = {
-  //     from: utils.getMe(),
-  //     to: this.props.resource,
-  //     time: new Date().getTime(),
-  //     photos: [{
-  //       url: data
-  //     }],
-  //     _context: this.state.context
-  //   }
-  //   msg[TYPE] = TYPES.SIMPLE_MESSAGE;
-  //   this.props.navigator.pop();
-  //   Actions.addMessage(msg);
-  // }
   onSubmitEditing(msg) {
     var me = utils.getMe();
     var resource = {from: utils.getMe(), to: this.props.resource};
