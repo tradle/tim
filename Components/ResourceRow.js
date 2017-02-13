@@ -36,7 +36,6 @@ import React, { Component } from 'react'
 import ActivityIndicator from './ActivityIndicator'
 import Geometry from './Geometry'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
-const UNREAD_COLOR = '#FF6D0D'
 const ROOT_HASH = constants.ROOT_HASH
 const TYPE = constants.TYPE
 const FORM = constants.TYPES.FORM
@@ -44,9 +43,7 @@ const PROFILE = constants.TYPES.PROFILE
 const ORGANIZATION = constants.TYPES.ORGANIZATION
 const FINANCIAL_PRODUCT = constants.TYPES.FINANCIAL_PRODUCT
 const MONEY = constants.TYPES.MONEY
-
-const DEFAULT_CURRENCY_SYMBOL = '£'
-var CURRENCY_SYMBOL
+// const CHAR_WIDTH = 7
 
 var dateProp
 
@@ -54,7 +51,6 @@ class ResourceRow extends Component {
   constructor(props) {
     super(props)
     this.state = {isConnected: this.props.navigator.isConnected}
-    CURRENCY_SYMBOL = props.currency ? props.currency.symbol || props.currency : DEFAULT_CURRENCY_SYMBOL
     if (props.changeSharedWithList)
       this.state.sharedWith = true
     // Multichooser for sharing context; isChooser for choosing delegated trusted party for requested verification
@@ -223,13 +219,13 @@ class ResourceRow extends Component {
     if (isContact)
       count = resource._unread
 
+    let counter
     if (count)
-      count = <View style={styles.countView}>
-                <Text style={styles.countText}>{count}</Text>
-              </View>
+      counter = <View style={styles.countView}>
+                  <Text style={styles.countText}>{count}</Text>
+                </View>
 
     // Grey out if not loaded provider info yet
-            // <ActivityIndicator hidden='true' color='#629BCA'/>
     var isOpaque = resource[TYPE] === ORGANIZATION && !resource.contacts  &&  !this.props.isChooser
     if (isOpaque) {
       return (
@@ -248,57 +244,8 @@ class ResourceRow extends Component {
         </View>
       )
     }
-    // else {
-    //   let onPress = this.action.bind(this)
-    //   // let onPress = this.state  &&  !this.state.resource
-    //   //             ? this.action.bind(this)
-    //   //             : this.props.onSelect
-    //   return (
-    //     <View key={this.getNextKey()} style={{opacity: 1, justifyContent: 'center', backgroundColor: '#ffffff'}}>
-    //       <TouchableOpacity onPress={onPress} key={this.getNextKey()}>
-    //         <View style={[styles.row, {width: utils.dimensions(ResourceRow).width - 50}]} key={this.getNextKey()}>
-    //           {photo}
-    //           <View style={textStyle} key={this.getNextKey()}>
-    //             {this.formatRow(resource)}
-    //           </View>
-    //         </View>
-    //       </TouchableOpacity>
-    //       {this.props.isOfficialAccounts
-    //       ? <TouchableOpacity style={{position: 'absolute', right: 10, top: 25, backgroundColor: 'white'}} onPress={() => {
-    //           this.props.navigator.push({
-    //             component: ResourceList,
-    //             title: translate("myDocuments"),
-    //             backButtonTitle: 'Back',
-    //             passProps: {
-    //               modelName: FORM,
-    //               resource: this.props.resource
-    //             }
-    //           })
-    //         }}>
-    //           <View style={textStyle}>
-    //              {resource.numberOfForms
-    //                 ? <View style={{flexDirection: 'row'}}>
-    //                      <Icon name='ios-paper-outline' color={'#7AAAc3'} size={30} style={{marginTop: Platform.OS === 'ios' ? 0 : 0}}/>
-    //                      <Text style={{fontWeight: '600', marginLeft: 2, marginTop: Platform.OS === 'ios' ? -5 : -5, color: '#7AAAc3'}}>{resource.numberOfForms}</Text>
-    //                   </View>
-    //                 : <View />
-    //              }
-    //           </View>
-    //         </TouchableOpacity>
-    //       : <View />}
-    //       {count}
-    //       {dateRow}
-    //       {multiChooser}
-    //       {cancelResource}
-    //       <View style={isNewContact ? styles.highlightedCellBorder : styles.cellBorder}  key={this.getNextKey()} />
-    //     </View>
-    //   );
-    // }
 
     let onPress = this.action.bind(this)
-    // let onPress = this.state  &&  !this.state.resource
-    //             ? this.action.bind(this)
-    //             : this.props.onSelect
 
     let action
     if (isOfficialAccounts  &&  !this.props.hideMode)
@@ -318,7 +265,7 @@ class ResourceRow extends Component {
                    {resource.numberOfForms
                       ? <View style={{flexDirection: 'row'}}>
                           <Icon name='ios-paper-outline' color={appStyle.ROW_ICON_COLOR} size={30} style={{marginTop: Platform.OS === 'ios' ? 0 : 0}}/>
-                          <View style={styles.count}>
+                          <View style={[styles.countView, {top: 0, right: -10}]}>
                             <Text style={styles.countText}>{resource.numberOfForms}</Text>
                           </View>
                         </View>
@@ -339,7 +286,7 @@ class ResourceRow extends Component {
                       </View>
                     </TouchableHighlight>
                     {action}
-                    {count}
+                    {counter}
                     {dateRow}
                     {multiChooser}
                     {hideMode}
@@ -520,7 +467,7 @@ class ResourceRow extends Component {
           }
           else {
             if (resource._unread  &&  v === 'lastMessage')
-              style = [style, {color: UNREAD_COLOR}]
+              style = [style, {color: appStyle.UNREAD_COLOR}]
             row = <Text style={style} key={self.getNextKey()}>{val}</Text>;
           }
         }
@@ -547,7 +494,6 @@ class ResourceRow extends Component {
     ];
   }
   onPress(event) {
-    let resource = this.props.resource
     var model = utils.getModel(resource[TYPE] || resource.id).value;
     var title = utils.makeTitle(utils.getDisplayName(this.props.resource, model.properties));
     this.props.navigator.push({
@@ -697,8 +643,8 @@ var styles = StyleSheet.create({
     borderRadius: 10,
     width: 20,
     height: 20,
-    borderWidth: StyleSheet.hairlineWidth,
     backgroundColor: appStyle.COUNTER_BG_COLOR,
+    borderWidth: StyleSheet.hairlineWidth,
     borderColor: appStyle.COUNTER_COLOR,
   },
   multiChooser: {
@@ -707,18 +653,18 @@ var styles = StyleSheet.create({
     top: 25,
     backgroundColor: 'transparent'
   },
-  count: {
-    alignSelf: 'flex-start',
-    minWidth: 18,
-    marginLeft: -7,
-    marginTop: 0,
-    backgroundColor: appStyle.COUNTER_BG_COLOR,
-    paddingHorizontal: 3,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: 9,
-    borderColor: appStyle.COUNTER_COLOR,
-    paddingVertical: 1
-  },
+  // count: {
+  //   alignSelf: 'flex-start',
+  //   minWidth: 18,
+  //   marginLeft: -7,
+  //   marginTop: 0,
+  //   backgroundColor: appStyle.COUNTER_BG_COLOR,
+  //   paddingHorizontal: 3,
+  //   borderWidth: StyleSheet.hairlineWidth,
+  //   borderRadius: 9,
+  //   borderColor: appStyle.COUNTER_COLOR,
+  //   paddingVertical: 1
+  // },
   countText: {
     fontSize: 12,
     fontWeight: '600',
