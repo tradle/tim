@@ -9,6 +9,7 @@ var constants = require('@tradle/constants');
 var reactMixin = require('react-mixin');
 var RowMixin = require('./RowMixin');
 var ResourceMixin = require('./ResourceMixin');
+var ShowPropertiesView = require('./ShowPropertiesView')
 var Actions = require('../Actions/Actions');
 
 import { makeResponsive } from 'react-native-orient'
@@ -40,6 +41,28 @@ class ShowRefList extends Component {
     var isMe = isIdentity ? resource[constants.ROOT_HASH] === me[constants.ROOT_HASH] : true;
     // The profile page for the device owner has 2 more profile specific links: add new PROFILE and switch PROFILE
     let propsToShow = []
+
+    let bg
+    let currentBacklink = this.props.backlink
+    let showDetails = !isIdentity  &&  (this.props.showDetails || !this.props.backlink)
+    if (showDetails)
+      bg = {backgroundColor: appStyle.CURRENT_TAB_COLOR}
+    else
+      bg = {}
+
+    if (!isIdentity)
+      refList.push(
+        <View style={[buttonStyles.container, bg, {flex: 1, alignSelf: 'stretch'}]} key={this.getNextKey()}>
+         <TouchableHighlight onPress={this.showDetails.bind(this)} underlayColor='transparent'>
+           <View style={styles.item}>
+             <View style={{flexDirection: 'row'}}>
+               <Icon name='ios-paper-outline'  size={utils.getFontSize(30)}  color='#757575' />
+             </View>
+             <Text style={[buttonStyles.text, Platform.OS === 'android' ? {marginTop: 3} : {marginTop: 0}]}>{'Details'}</Text>
+           </View>
+         </TouchableHighlight>
+        </View>
+      )
     for (var p in props) {
       if (props[p].hidden)
         continue
@@ -48,12 +71,9 @@ class ShowRefList extends Component {
           continue;
         if (p === 'verifiedByMe'  &&  !me.organization)
           continue;
-        // if (p == 'myVerifications' && me.organization)
-        //   continue;
       }
       if (p.charAt(0) === '_'  ||  !props[p].items  ||  !props[p].items.backlink)
         continue;
-        // icon = 'ios-checkmark-outline';
       propsToShow.push(p)
     }
     if (model.viewCols) {
@@ -69,7 +89,6 @@ class ShowRefList extends Component {
       }
     }
     let hasBacklinks
-    let currentBacklink = this.props.backlink
     propsToShow.forEach((p) => {
       let propTitle = translate(props[p], model)
       var icon = props[p].icon  ||  utils.getModel(props[p].items.ref).value.icon;
@@ -78,7 +97,7 @@ class ShowRefList extends Component {
       let count = resource[p]  &&  resource[p].length
       if (count) {
         hasBacklinks = true
-        if (!currentBacklink)
+        if (!currentBacklink && !showDetails)
           currentBacklink = props[p]
         count = <View style={styles.count}>
                   <Text style={styles.countText}>{count}</Text>
@@ -116,16 +135,24 @@ class ShowRefList extends Component {
 
     }
     // explore current backlink
-    let backlinkRL
-    if (currentBacklink) {
+    let backlinkRL, details
+    if (!showDetails  && currentBacklink) {
       var ResourceList = require('./ResourceList')
       backlinkRL = <ResourceList
                       modelName={currentBacklink.items.ref}
                       prop={currentBacklink}
                       resource={resource}
                       isBacklink={true}
-                      backlinkList={this.props.backlinkList  ||  resource[currentBacklink.name]}
+                      backlinkList={this.props.backlinkList || []}
                       navigator={this.props.navigator} />
+    }
+    if (showDetails) {
+      details = <ShowPropertiesView resource={resource}
+                            showRefResource={this.getRefResource.bind(this)}
+                            currency={this.props.currency}
+                            excludedProperties={['photos']}
+                            navigator={this.props.navigator} />
+
     }
     let comment
     if (ENV.homePageScanQRCodePrompt && !hasBacklinks  &&  utils.getMe()[constants.ROOT_HASH] === this.props.resource[constants.ROOT_HASH]) {
@@ -144,6 +171,7 @@ class ShowRefList extends Component {
                 {comment}
                 <View style={{margin: 1, flex: 1}}>
                   {backlinkRL}
+                  {details}
                 </View>
               </View>
     return this.props.children || <View/>
@@ -151,6 +179,17 @@ class ShowRefList extends Component {
 
   exploreBacklink(resource, prop) {
     Actions.exploreBacklink(resource, prop)
+  }
+  showDetails() {
+    Actions.getDetails(this.props.resource)
+  }
+  getRefResource(resource, prop) {
+    var model = utils.getModel(this.props.resource[TYPE]).value;
+
+    this.state.prop = prop;
+    // this.state.propValue = utils.getId(resource.id);
+    this.showRefResource(resource, prop)
+    // Actions.getItem(resource.id);
   }
 }
 

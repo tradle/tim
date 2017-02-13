@@ -79,13 +79,14 @@ class VerificationMessageRow extends Component {
     }
     let isShared = this.isShared()
     isMyMessage = isShared
+    let bankStyle = this.props.bankStyle
     let bgColor
     if (isThirdPartyVerification)
       bgColor = '#93BEBA'
     else if (isShared)
-      bgColor = this.props.bankStyle.SHARED_WITH_VERIFICATION_BG
+      bgColor = bankStyle.SHARED_WITH_VERIFICATION_BG
     else
-      bgColor = this.props.bankStyle.VERIFIED_LINK_COLOR
+      bgColor = bankStyle.VERIFIED_LINK_COLOR
     let verifiedBy = isShared ? translate('youShared', orgName) : translate('verifiedBy', orgName)
 
     var w = utils.dimensions(VerificationMessageRow).width
@@ -135,7 +136,7 @@ class VerificationMessageRow extends Component {
     }
 
     let addStyle = [
-      { borderWidth: 0, backgroundColor: 'transparent'}, /*, backgroundColor: isShared ? '#ffffff' : this.props.bankStyle.VERIFICATION_BG,*/
+      { borderWidth: 0, backgroundColor: 'transparent'}, /*, backgroundColor: isShared ? '#ffffff' : bankStyle.VERIFICATION_BG,*/
       isMyMessage ? styles.headerRight : styles.headerLeft
     ];
 
@@ -175,7 +176,7 @@ class VerificationMessageRow extends Component {
             </View>
           </TouchableOpacity>
 
-    var viewStyle = { margin: 1, paddingRight: 10, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR }
+    var viewStyle = { margin: 1, paddingRight: 10 }
     return (
       <View style={viewStyle} key={this.getNextKey()}>
         {date}
@@ -322,7 +323,7 @@ module.exports = VerificationMessageRow;
            ? <View/>
            : <Image source={BG_IMAGE} style={[{position: 'absolute', top: 0, borderRadius: 10, left: 0, width: (isReadOnlyChat ? msgWidth - 40 : msgWidth), height: 110, opacity: 0.4}, addStyle]}/>
 
-    let androidStyle = {backgroundColor: this.props.bankStyle.VERIFICATION_BG, borderRadius: 10, borderWidth: StyleSheet.hairlineWidth, borderColor: this.props.bankStyle.SHARE_BUTTON_BACKGROUND_COLOR}
+    let androidStyle = {backgroundColor: bankStyle.VERIFICATION_BG, borderRadius: 10, borderWidth: StyleSheet.hairlineWidth, borderColor: bankStyle.SHARE_BUTTON_BACKGROUND_COLOR}
     let messageBody =
           <TouchableOpacity onPress={this.verify.bind(this, resource)}>
             <View style={{flexDirection: 'column', flex: 1}}>
@@ -382,9 +383,9 @@ module.exports = VerificationMessageRow;
   //   if (isThirdPartyVerification)
   //     bgColor = '#93BEBA'
   //   else if (isShared)
-  //     bgColor = this.props.bankStyle.SHARED_WITH_VERIFICATION_BG
+  //     bgColor = bankStyle.SHARED_WITH_VERIFICATION_BG
   //   else
-  //     bgColor = this.props.bankStyle.VERIFIED_HEADER_COLOR
+  //     bgColor = bankStyle.VERIFIED_HEADER_COLOR
   //   let verifiedBy = isShared ? translate('youShared', orgName) : translate('verifiedBy', orgName)
   //   let msgWidth = w * 0.8
   //   let numberOfCharacters = msgWidth / 12
@@ -428,18 +429,18 @@ module.exports = VerificationMessageRow;
   //     alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
   //     backgroundColor: 'transparent',
   //     marginBottom: 3,
-  //     // backgroundColor: this.props.bankStyle.BACKGROUND_COLOR
+  //     // backgroundColor: bankStyle.BACKGROUND_COLOR
   //   }
 
   //   let addStyle = [
   //     // chatStyles.verificationBody,
-  //     {borderWidth: 0, backgroundColor: 'transparent' /*, backgroundColor: isShared ? '#ffffff' : this.props.bankStyle.VERIFICATION_BG,*/ },
+  //     {borderWidth: 0, backgroundColor: 'transparent' /*, backgroundColor: isShared ? '#ffffff' : bankStyle.VERIFICATION_BG,*/ },
   //     isMyMessage ? {borderTopRightRadius: 0} : {borderTopLeftRadius: 0}
   //   ];
   //   // if (isAndroid) {
   //   //   addStyle.push({
-  //   //     backgroundColor: this.props.bankStyle.VERIFICATION_BG,
-  //   //     borderColor: this.props.bankStyle.VERIFIED_BORDER_COLOR,
+  //   //     backgroundColor: bankStyle.VERIFICATION_BG,
+  //   //     borderColor: bankStyle.VERIFIED_BORDER_COLOR,
   //   //     borderWidth: 1,
   //   //     borderRadius: 10
   //   //   })
@@ -451,7 +452,7 @@ module.exports = VerificationMessageRow;
   //     let title = this.props.shareWithRequestedParty.organization && this.props.shareWithRequestedParty.organization.title
   //     shareWith = <View style={styles.shareWithInquirer}>
   //                   <TouchableOpacity onPress={this.shareWithRequestedParty.bind(this)}>
-  //                      <View style={[chatStyles.shareButton, {marginLeft: 15, justifyContent: 'flex-start', backgroundColor: this.props.bankStyle.SHARE_BUTTON_BACKGROUND_COLOR}]}>
+  //                      <View style={[chatStyles.shareButton, {marginLeft: 15, justifyContent: 'flex-start', backgroundColor: bankStyle.SHARE_BUTTON_BACKGROUND_COLOR}]}>
   //                       <CustomIcon name='tradle' style={{color: '#ffffff' }} size={32} />
   //                       <Text style={chatStyles.shareText}>{translate('Share')}</Text>
   //                     </View>

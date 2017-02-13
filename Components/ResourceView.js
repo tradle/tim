@@ -12,7 +12,7 @@ import PhotoList from './PhotoList';
 var ShowRefList = require('./ShowRefList');
 var PageView = require('./PageView')
 var Icon = require('react-native-vector-icons/Ionicons');
-// var IdentitiesList = require('./IdentitiesList');
+var IdentitiesList = require('./IdentitiesList');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var Store = require('../Store/Store');
@@ -303,6 +303,13 @@ class ResourceView extends Component {
       identityPhotoList = <PhotoList photos={photos} resource={this.props.resource} navigator={this.props.navigator} isView={true} numberInRow={5} />
     else
       otherPhotoList = <PhotoList photos={photos} resource={this.props.resource} navigator={this.props.navigator} isView={true} numberInRow={photos.length > 4 ? 5 : photos.length} />
+    let propertySheet
+    if (resource[TYPE] === T_AND_C)
+      propertySheet = <ShowPropertiesView resource={resource}
+                        showRefResource={this.getRefResource.bind(this)}
+                        currency={this.props.currency}
+                        excludedProperties={['photos']}
+                        navigator={this.props.navigator} />
 
     return (
       <PageView style={platformStyles.container}>
@@ -321,12 +328,7 @@ class ResourceView extends Component {
           </TouchableOpacity>
         </Modal>
         {otherPhotoList}
-        <ShowPropertiesView resource={resource}
-                            showItems={this.showResources.bind(this)}
-                            showRefResource={this.getRefResource.bind(this)}
-                            currency={this.props.currency}
-                            excludedProperties={['photos']}
-                            navigator={this.props.navigator} />
+        {propertySheet}
         {menu}
       </ScrollView>
       {footer}
@@ -505,19 +507,6 @@ class ResourceView extends Component {
 
         self.setState({useGesturePassword: r.useGesturePassword, useTouchId: r.useTouchId})
       })
-    // this.props.navigator.push({
-    //   id: 1,
-    //   backButtonTitle: null,
-    //   component: TimHome,
-    //   passProps: {
-    //     navigator: this.props.navigator,
-    //     modelName: constants.TYPES.PROFILE,
-    //     newMe: r
-    //   }
-    // })
-
-    // this.setState({useGesturePassword: r.useGesturePassword, useTouchId: r.useTouchId})
-    // Actions.addItem({resource: me, value: r, meta: utils.getModel(constants.TYPES.PROFILE).value})
   }
 }
 
@@ -528,10 +517,6 @@ ResourceView = makeResponsive(ResourceView)
 
 var createStyles = utils.styleFactory(ResourceView, function ({ dimensions }) {
   return StyleSheet.create({
-    // container: {
-    //   marginTop: Platform.OS === 'ios' ? 64 : 44,
-    //   flex: 1,
-    // },
     modalBackgroundStyle: {
       backgroundColor: 'rgba(0, 0, 0, 0.7)',
       justifyContent: 'center',
@@ -539,13 +524,11 @@ var createStyles = utils.styleFactory(ResourceView, function ({ dimensions }) {
       height: dimensions.height
     },
     photoBG: {
-      // backgroundColor: '#245D8C',
       alignItems: 'center',
     },
     conversationsRow: {
       flexDirection: 'row',
       paddingLeft: 5,
-      // justifyContent: 'center',
       width: dimensions.width - 100
     },
     row: {

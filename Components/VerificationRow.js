@@ -290,7 +290,7 @@ class VerificationRow extends Component {
           if (msgModel) {
             vCols.push(<View key={self.getNextKey()} style={styles.msgParts}>
                          <Text style={style}>{msgParts[0]}</Text>
-                         <Text style={[style, {color: isMyMessage ? '#efffe5' : '#7AAAC3'}]}>{msgModel.value.title}</Text>
+                         <Text style={[style, {color: '#7AAAC3'}]}>{msgModel.value.title}</Text>
                        </View>);
             return;
           }

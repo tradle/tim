@@ -1,6 +1,9 @@
 
 import debug from '../utils/debug'
 import React, { Component } from 'react'
+var TimerMixin = require('react-timer-mixin')
+var reactMixin = require('react-mixin');
+
 import {
   View,
   ListView,
@@ -40,7 +43,7 @@ export default class Log extends Component {
 
     // debounce a bit
     clearTimeout(this._updateTimeout)
-    this._updateTimeout = setTimeout(function () {
+    this._updateTimeout = this.setTimeout(function () {
       const lines = debug.get()
       self.state = {
         lines,
@@ -75,6 +78,7 @@ export default class Log extends Component {
     )
   }
 }
+reactMixin(Log.prototype, TimerMixin);
 
 const styles = StyleSheet.create({
   container: {

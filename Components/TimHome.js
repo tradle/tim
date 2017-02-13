@@ -25,6 +25,7 @@ var FadeInView = require('./FadeInView')
 var TouchIDOptIn = require('./TouchIDOptIn')
 var defaultBankStyle = require('../styles/bankStyle.json')
 var QRCodeScanner = require('./QRCodeScanner')
+var TimerMixin = require('react-timer-mixin')
 
 try {
   var commitHash = require('../version.json').commit.slice(0, 7)
@@ -92,7 +93,7 @@ class TimHome extends Component {
     this._handleConnectivityChange = this._handleConnectivityChange.bind(this)
   }
   componentWillMount() {
-    this.uhOhTimeout = setTimeout(() => {
+    this.uhOhTimeout = this.setTimeout(() => {
       if (!this.state.isLoading && !this.state.downloadingUpdate) return
 
       this.setState({ submitLogButtonText: SUBMIT_LOG_TEXT.submit })
@@ -945,6 +946,7 @@ class TimHome extends Component {
 }
 
 reactMixin(TimHome.prototype, Reflux.ListenerMixin);
+reactMixin(TimHome.prototype, TimerMixin)
 
 var styles = (function () {
   var dimensions = utils.dimensions(TimHome)

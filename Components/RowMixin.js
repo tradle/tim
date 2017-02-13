@@ -427,9 +427,14 @@ var RowMixin = {
         if (msgParts.length === 2) {
           var msgModel = utils.getModel(msgParts[1]);
           if (msgModel) {
+            let color
+            if (this.isMyMessage())
+              color = this.props.bankStyle.MY_MESSAGE_BACKGROUND_COLOR
+            else
+              color = this.props.bankStyle.LINK_COLOR
             vCols.push(<View key={self.getNextKey()}>
                          <Text style={style}>{msgParts[0]}</Text>
-                         <Text style={[style, {color: isMyMessage ? this.props.bankStyle.MY_MESSAGE_BACKGROUND_COLOR : LINK_COLOR}]}>{msgModel.value.title}</Text>
+                         <Text style={[style, {color: color}]}>{msgModel.value.title}</Text>
                        </View>);
             return;
           }

@@ -7,6 +7,9 @@ import {
 } from 'react-native'
 
 import BackgroundImage from './BackgroundImage'
+var TimerMixin = require('react-timer-mixin')
+var reactMixin = require('react-mixin')
+
 var PasswordGesture = require('react-native-gesture-password')
 var utils = require('../utils/utils')
 var MIN_LENGTH = 5
@@ -127,7 +130,7 @@ var PasswordCheck = React.createClass({
     this.setState(state)
     clearTimeout(this._resetToNormalTimeout)
     if (state.status === 'wrong') {
-      this._resetToNormalTimeout = setTimeout(() => {
+      this._resetToNormalTimeout = this.setTimeout(() => {
         if (this.state.status !== 'normal') {
           this.doSetState({ status: 'normal' })
         }
@@ -207,6 +210,7 @@ var PasswordCheck = React.createClass({
     )
   }
 })
+reactMixin(PasswordCheck.prototype, TimerMixin)
 
 PasswordCheck.displayName = 'PasswordCheck'
 PasswordCheck.orientation = 'PORTRAIT'

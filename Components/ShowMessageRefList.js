@@ -11,6 +11,7 @@ var reactMixin = require('react-mixin');
 var ResourceMixin = require('./ResourceMixin');
 var RowMixin = require('./RowMixin');
 var MessageView = require('./MessageView')
+var defaultBankStyle = require('../styles/bankStyle.json')
 
 const VERIFICATION = constants.TYPES.VERIFICATION
 

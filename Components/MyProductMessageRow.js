@@ -151,7 +151,7 @@ class MyProductMessageRow extends Component {
       else {
         if (!resource[v]  ||  !resource[v].length)
           return
-        isConfirmation = resource[v].indexOf('Congratulations!') !== -1
+        let isConfirmation = resource[v].indexOf('Congratulations!') !== -1
 
         if (isConfirmation) {
           style = [style, {color: self.props.bankStyle.CONFIRMATION_COLOR, fontSize: 18}]

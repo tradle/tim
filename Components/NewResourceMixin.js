@@ -965,7 +965,7 @@ var NewResourceMixin = {
       if (minDate  &&  maxDate)
         dateProps = {maxDate: new Date(maxDate), minDate: new Date(minDate)}
       else
-        dataProps = minDate ? {minDate: new Date(minDate)} : {maxDate: new Date(maxDate)}
+        dateProps = minDate ? {minDate: new Date(minDate)} : {maxDate: new Date(maxDate)}
     }
     if (prop.format)
       dateProps.format = prop.format
@@ -1526,6 +1526,8 @@ var NewResourceMixin = {
       // It is for country specific patterns like 'phone number'
 
       else if (prop.pattern) {
+        if (!value[p])
+          deleteProps.push(p)
         if (!(new RegExp(prop.pattern).test(value[p])))
           err[prop.name] = translate('invalidProperty', prop.title)
       }
@@ -1551,8 +1553,8 @@ var NewResourceMixin = {
     }
     if (deleteProps)
       deleteProps.forEach((p) => {
-        delete value[p]
-        delete err[p]
+        Reflect.deleteProperty(value, p)
+        Reflect.deleteProperty(err, p)
       })
     return err
   },

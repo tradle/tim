@@ -4,7 +4,7 @@ import StyleSheet from '../StyleSheet'
 
 module.exports = exports = StyleSheet.create({
   container: {
-    backgroundColor: '#f7f7f7',
+    // backgroundColor: '#f7f7f7',
     marginTop: 64,
     flex: 1,
   },

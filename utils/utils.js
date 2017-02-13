@@ -146,9 +146,11 @@ var utils = {
   },
   // temporary, let's hope
   interpretStylesPack(stylesPack) {
-    const interpreted = {}
+    let interpreted = {}
     Object.keys(stylesPack).forEach(prop => {
       // booHoo => BOO_HOO
+      if (prop.charAt(0) === '_')
+        return
       const localName = utils.splitCamelCase(prop).join('_').toUpperCase()
       interpreted[localName] = stylesPack[prop]
     })
@@ -371,6 +373,8 @@ var utils = {
     }
   },
   getType(r) {
+    if (typeof r === 'string')
+      return r.split('_')[0]
     return r[TYPE] || this.getId(r).split('_')[0]
   },
   getItemsMeta(metadata) {
@@ -762,6 +766,8 @@ var utils = {
         continue
       var arr = []
       res[p].forEach(function(r) {
+        if (typeof r === 'string')
+          return
         if (r.id) {
           if (r.photo)
             delete r.photo
@@ -770,7 +776,8 @@ var utils = {
         }
         var rr = {}
         rr.id = utils.getId(r)
-        var m = utils.getModel(r[TYPE])
+        const type = utils.getType(r)
+        var m = utils.getModel(type)
         rr.title = utils.getDisplayName(r, m.properties)
         arr.push(rr)
       })
@@ -1340,7 +1347,7 @@ var utils = {
       if (props[p].ref === PHOTO  &&  props[p].mainPhoto)
         return props[p]
     }
-    return properties.photos
+    return props.photos
   },
 
   locker: function (opts={}) {

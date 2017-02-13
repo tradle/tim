@@ -7,7 +7,7 @@ var ArticleView = require('./ArticleView');
 // var FromToView = require('./FromToView');
 var PhotoList = require('./PhotoList');
 var PhotoView = require('./PhotoView');
-var ShowPropertiesView = require('./ShowPropertiesView');
+// var ShowPropertiesView = require('./ShowPropertiesView');
 var ShowMessageRefList = require('./ShowMessageRefList');
 var ShowRefList = require('./ShowRefList');
 var VerificationView = require('./VerificationView')
@@ -101,6 +101,12 @@ class MessageView extends Component {
         isLoading: false
       })
     }
+    else if (params.action === 'exploreBacklink') {
+      if (params.backlink !== this.state.backlink)
+        this.setState({backlink: params.backlink, backlinkList: params.list, showDetails: false})
+    }
+    else if (params.action === 'showDetails')
+      this.setState({showDetails: true, backlink: null, backlinkList: null})
   }
   verifyOrCreateError() {
     let resource = this.props.resource
@@ -228,15 +234,15 @@ class MessageView extends Component {
                                         bankStyle={this.props.bankStyle}
                                         currency={this.props.currency}
                                         showVerification={this.showVerification.bind(this)}/>
-    else
-      propertySheet = <ShowPropertiesView navigator={this.props.navigator}
-                                          resource={resource}
-                                          bankStyle={this.props.bankStyle}
-                                          errorProps={this.state.errorProps}
-                                          currency={this.props.currency}
-                                          checkProperties={this.props.isVerifier /* && !utils.isReadOnlyChat(resource)*/ ? this.onCheck.bind(this) : null}
-                                          excludedProperties={['tradle.Message.message', 'time', 'photos']}
-                                          showRefResource={this.getRefResource.bind(this)}/>
+    // else
+    //   propertySheet = <ShowPropertiesView navigator={this.props.navigator}
+    //                                       resource={resource}
+    //                                       bankStyle={this.props.bankStyle}
+    //                                       errorProps={this.state.errorProps}
+    //                                       currency={this.props.currency}
+    //                                       checkProperties={this.props.isVerifier /* && !utils.isReadOnlyChat(resource)*/ ? this.onCheck.bind(this) : null}
+    //                                       excludedProperties={['tradle.Message.message', 'time', 'photos']}
+    //                                       showRefResource={this.getRefResource.bind(this)}/>
 
     let content = <View>
                     <View style={styles.photoListStyle}>
@@ -257,7 +263,10 @@ class MessageView extends Component {
       actionPanel = <ShowRefList resource={resource}
                                  navigator={this.props.navigator}
                                  currency={this.props.currency}
-                                 bankStyle={this.props.bankStyle}>
+                                 bankStyle={this.props.bankStyle}
+                                 backlink={this.state.backlink}
+                                 showDetails={this.state.showDetails}
+                                 backlinkList={this.state.backlinkList} >
                       {content}
                     </ShowRefList>
     }

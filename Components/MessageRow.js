@@ -98,7 +98,7 @@ class MessageRow extends Component {
     var noMessage = !message  ||  !message.length;
     var isSimpleMessage = resource[constants.TYPE] === constants.TYPES.SIMPLE_MESSAGE
     var isForgetting = model.id === constants.TYPES.FORGET_ME || model.id === constants.TYPES.FORGOT_YOU
-    const bankStyles = this.props.bankStyle
+    const bankStyle = this.props.bankStyle
     if (!renderedRow.length) {
       var vCols = noMessage ? null : utils.getDisplayName(resource, model.properties);
       if (vCols)
@@ -108,7 +108,7 @@ class MessageRow extends Component {
       var fromHash = resource.from.id;
       if (isMyMessage) {
         if (!noMessage)
-          addStyle = [chatStyles.myCell, {backgroundColor: bankStyles.MY_MESSAGE_BACKGROUND_COLOR}]
+          addStyle = [chatStyles.myCell, {backgroundColor: bankStyle.MY_MESSAGE_BACKGROUND_COLOR}]
       }
       else if (isForgetting)
         addStyle = styles.forgetCell
@@ -129,11 +129,11 @@ class MessageRow extends Component {
       }
 
       if (isFormError)
-        addStyle = [addStyle, chatStyles.verificationBody, {backgroundColor: bankStyles.FORM_ERROR_BG, borderColor: resource.documentCreated ? bankStyles.REQUEST_FULFILLED : bankStyles.FORM_ERROR_BORDER}]; //model.style];
+        addStyle = [addStyle, chatStyles.verificationBody, {backgroundColor: bankStyle.FORM_ERROR_BG, borderColor: resource.documentCreated ? bankStyle.REQUEST_FULFILLED : bankStyle.FORM_ERROR_BORDER}]; //model.style];
       if (isMyMessage  &&  !isSimpleMessage && !isFormError) {
         let st = isProductApplication
-               ? {backgroundColor: bankStyles.CONTEXT_BACKGROUND_COLOR}
-               : {backgroundColor: bankStyles.STRUCTURED_MESSAGE_COLOR}
+               ? {backgroundColor: bankStyle.CONTEXT_BACKGROUND_COLOR}
+               : {backgroundColor: bankStyle.STRUCTURED_MESSAGE_COLOR}
         addStyle = [addStyle, chatStyles.verificationBody, st]; //model.style];
       }
     }
@@ -166,7 +166,8 @@ class MessageRow extends Component {
       else
         verPhoto = <View style={{height: 0, width:0}} />
     }
-    var rowStyle = [chatStyles.row, {backgroundColor: bankStyles.BACKGROUND_COLOR}];
+
+    var rowStyle = [chatStyles.row, {backgroundColor: 'transparent'}];
     var val = this.getTime(resource);
     var date = val
              ? <Text style={chatStyles.date}>{val}</Text>
@@ -248,7 +249,7 @@ class MessageRow extends Component {
                           <View style={cellStyle}>
                             <View style={styles.container}>
                             {this.isShared()
-                              ? <View style={[chatStyles.verifiedHeader, {backgroundColor: bankStyles.SHARED_WITH_BG}]}>
+                              ? <View style={[chatStyles.verifiedHeader, {backgroundColor: bankStyle.SHARED_WITH_BG}]}>
                                   <Text style={styles.white18}>{translate('youShared', resource.to.organization.title)}</Text>
                                 </View>
                               : <View />
@@ -292,9 +293,9 @@ class MessageRow extends Component {
     var model = utils.getModel(this.props.resource[constants.TYPE]).value;
     var isLicense = model.id.indexOf('License') !== -1  ||  model.id.indexOf('Passport') !== -1;
     var photoStyle = (isLicense  &&  len === 1) ? chatStyles.bigImage : photoStyle;
-
+    var bg = bankStyle.BACKGROUND_IMAGE ? 'transparent' : bankStyle.BACKGROUND_COLOR
     return (
-      <View style={[viewStyle, {backgroundColor: bankStyles.BACKGROUND_COLOR, paddingRight: isMyMessage ? 10 : 0}]}>
+      <View style={[viewStyle, {backgroundColor: bg, paddingRight: isMyMessage ? 10 : 0}]}>
         {date}
         {messageBody}
         <View style={photoListStyle}>
@@ -304,7 +305,7 @@ class MessageRow extends Component {
       </View>
     )
     // return (
-    //   <View style={[viewStyle, {backgroundColor: bankStyles.BACKGROUND_COLOR}]}>
+    //   <View style={[viewStyle, {backgroundColor: bankStyle.BACKGROUND_COLOR}]}>
     //     {date}
     //     {messageBody}
     //     <View style={photoListStyle}>
@@ -643,13 +644,13 @@ class MessageRow extends Component {
                       ? self.props.bankStyle.MY_MESSAGE_BACKGROUND_COLOR
                       : '#ffffff'
             let color = isMyMessage ? self.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR
-            msg = <View key={self.getNextKey()}>
-                    <Text style={style}>{msgParts[0]}</Text>
-                    <View style={chatStyles.rowContainer}>
-                      <Text style={[style, {backgroundColor: bg, color: color}]}>{msgParts[1]} </Text>
-                      <Icon style={{color: LINK_COLOR, marginTop: 2}} size={20} name={'ios-arrow-forward'} />
-                    </View>
-                  </View>
+            let msg = <View key={self.getNextKey()}>
+                        <Text style={style}>{msgParts[0]}</Text>
+                        <View style={chatStyles.rowContainer}>
+                          <Text style={[style, {backgroundColor: bg, color: color}]}>{msgParts[1]} </Text>
+                          <Icon style={{color: LINK_COLOR, marginTop: 2}} size={20} name={'ios-arrow-forward'} />
+                        </View>
+                      </View>
             vCols.push(msg);
             onPressCall = self.onChooseProduct.bind(self, true)
             return;

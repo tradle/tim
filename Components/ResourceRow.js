@@ -44,7 +44,9 @@ const PROFILE = constants.TYPES.PROFILE
 const ORGANIZATION = constants.TYPES.ORGANIZATION
 const FINANCIAL_PRODUCT = constants.TYPES.FINANCIAL_PRODUCT
 const MONEY = constants.TYPES.MONEY
-// const CHAR_WIDTH = 7
+
+const DEFAULT_CURRENCY_SYMBOL = '£'
+var CURRENCY_SYMBOL
 
 var dateProp
 
@@ -52,6 +54,7 @@ class ResourceRow extends Component {
   constructor(props) {
     super(props)
     this.state = {isConnected: this.props.navigator.isConnected}
+    CURRENCY_SYMBOL = props.currency ? props.currency.symbol || props.currency : DEFAULT_CURRENCY_SYMBOL
     if (props.changeSharedWithList)
       this.state.sharedWith = true
     // Multichooser for sharing context; isChooser for choosing delegated trusted party for requested verification
@@ -221,7 +224,7 @@ class ResourceRow extends Component {
       count = resource._unread
 
     if (count)
-      count = <View style={styles.count}>
+      count = <View style={styles.countView}>
                 <Text style={styles.countText}>{count}</Text>
               </View>
 
@@ -544,6 +547,7 @@ class ResourceRow extends Component {
     ];
   }
   onPress(event) {
+    let resource = this.props.resource
     var model = utils.getModel(resource[TYPE] || resource.id).value;
     var title = utils.makeTitle(utils.getDisplayName(this.props.resource, model.properties));
     this.props.navigator.push({
@@ -693,7 +697,9 @@ var styles = StyleSheet.create({
     borderRadius: 10,
     width: 20,
     height: 20,
-    backgroundColor: appStyle.COUNTER_BG_COLOR
+    borderWidth: StyleSheet.hairlineWidth,
+    backgroundColor: appStyle.COUNTER_BG_COLOR,
+    borderColor: appStyle.COUNTER_COLOR,
   },
   multiChooser: {
     position: 'absolute',

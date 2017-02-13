@@ -13,6 +13,8 @@ import ReactNative, {
 import AsyncStorage from './Storage'
 import * as LocalAuth from '../utils/localAuth'
 import Push from '../utils/push'
+var TimerMixin = require('react-timer-mixin')
+var reactMixin = require('react-mixin');
 
 var noop = () => {}
 var path = require('path')
@@ -244,6 +246,7 @@ const {
 
 // var Store = Reflux.createStore(timeFunctions({
 var Store = Reflux.createStore({
+  mixins: [TimerMixin],
 
   // this will set up listeners to all publishers in TodoActions, using onKeyname (or keyname) as callbacks
   listenables: [Actions],
@@ -2424,6 +2427,12 @@ var Store = Reflux.createStore({
     var resource = {};
 
     extend(resource, this._getItem(utils.getId(key)))
+
+    const resModel = this.getModel(resource[TYPE])
+    if (!resModel || !resModel.value) {
+      throw new Error(`missing model for ${resource[TYPE]}`)
+    }
+
     var props = this.getModel(resource[TYPE]).value.properties;
     for (var p in props) {
       if (p.charAt(0) === '_'  ||  props[p].hidden)
@@ -3349,8 +3358,11 @@ var Store = Reflux.createStore({
       this.addLastMessage(document, batch, to)
       this.dbBatchPut(documentId, document, batch)
 
-      if (!verifications)
+      if (!verifications) {
+        this.trigger({action: 'addItem', sendStatus: SENT, resource: document})
+        document._sendStatus = SENT
         return
+      }
 
       let all = verifications.length
       let defer = Q.defer()
@@ -5162,7 +5174,8 @@ var Store = Reflux.createStore({
     let messageType = model.id
     if (sharedWith) {
       let sharedWithOrg = this._getItem(utils.getId(sharedWith.organization))
-      let orgName = utils.getDisplayName(to, this.getModel(ORGANIZATION).value.properties)
+      let orgName = sharedWithOrg.name
+      // let orgName = utils.getDisplayName(to, this.getModel(ORGANIZATION).value.properties)
       if (model.subClassOf !== MY_PRODUCT && model.subClassOf !== FORM)
         return
       dn = translate('sharedForm', translate(model), orgName)
@@ -6067,6 +6080,8 @@ var Store = Reflux.createStore({
     else {
       var isMessage = utils.isMessage(model)
       if (isMessage) {
+        // if (val[TYPE] === PRODUCT_LIST  &&  (!val.list || !val.list.length))
+        //   return
         noTrigger = this.putMessageInDB(val, obj, batch, onMessage)
         if (type === VERIFICATION)
           return
@@ -6434,9 +6449,6 @@ var Store = Reflux.createStore({
 
     var noTrigger
     if (pList) {
-      // var pList = val.list
-      // var fOrg = obj.from.identity.toJSON().organization
-      // org = list[utils.getId(fOrg)].value
       org.products = []
       pList.forEach((m) => {
         // HACK for not overwriting Tradle models
@@ -6472,8 +6484,11 @@ var Store = Reflux.createStore({
       noTrigger = hasNoTrigger(orgId)
     }
     var isStylesPack = val[TYPE] === STYLES_PACK
-    if (isStylesPack)
-      org.styles = this.interpretStylesPack(val)
+    if (isStylesPack) {
+      org.style = utils.interpretStylesPack(val)
+      batch.push({type: 'put', key: utils.getId(org), value: org})
+      this.trigger({action: 'customStyles', provider: org})
+    }
 
     if (!val.time)
       val.time = obj.timestamp
@@ -6987,8 +7002,8 @@ var Store = Reflux.createStore({
         [NONCE]: this.getNonce(),
         message: 'All representatives are currently assisting other customers. Please try again later'
       }
-      msgFrom.from = this.buildRef(resource)
-      msgFrom.to = this.buildRef(me)
+      msg.from = this.buildRef(resource)
+      msg.to = this.buildRef(me)
       msg.id = sha(msg)
       result.push(msg)
       this.trigger({action: 'messageList', list: result, resource: resource})
@@ -7000,8 +7015,8 @@ var Store = Reflux.createStore({
       [NONCE]: this.getNonce(),
       message: 'Representative will be with you shortly. Please tell us how can we help you today?'
     }
-    msgFrom.from = this.buildRef(resource)
-    msgFrom.to = this.buildRef(me)
+    msg.from = this.buildRef(resource)
+    msg.to = this.buildRef(me)
     msg.id = sha(msg)
     result.push(msg)
     this.trigger({action: 'messageList', list: result, resource: resource})

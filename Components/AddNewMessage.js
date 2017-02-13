@@ -89,14 +89,7 @@ class AddNewMessage extends Component {
     var model = utils.getModel(resource[constants.TYPE]).value;
     var isMessage = model.interfaces  &&  model.interfaces.indexOf(constants.TYPES.MESSAGE) != -1;
     if (isMessage  &&  this.state.userInput.length) {
-      // if (this.props.callback) {
-        // this.props.callback('');
-        this.setState({userInput: ''});
-        // setTimeout(function() {
-        //   this.setState({textValue: this.state.userInput});
-        //   this.refs.chat.focus();
-        // }.bind(this), 0);
-      // }
+      this.setState({userInput: ''});
     }
   }
   render() {
@@ -192,7 +185,7 @@ class AddNewMessage extends Component {
         }
         else {
           var i = 0
-          for (; i<selectedAssets.length  &&  !doDelete; i++) {
+          for (; i<selectedAssets.length; i++) {
             if (selectedAssets[i].data === dataUri)
               break
           }

@@ -27,9 +27,11 @@ var NetworkInfoProvider = require('./NetworkInfoProvider')
 var ProgressInfo = require('./ProgressInfo')
 var PageView = require('./PageView')
 var extend = require('extend');
+var TimerMixin = require('react-timer-mixin')
 
 import ActionSheet from 'react-native-actionsheet'
 import { makeResponsive } from 'react-native-orient'
+import { makeStylish } from './makeStylish'
 
 // var AddNewMessage = require('./AddNewMessage')
 // var SearchBar = require('react-native-search-bar')
@@ -55,6 +57,7 @@ import {
   // ListView,
   // StyleSheet,
   PropTypes,
+  Image,
   Navigator,
   Platform,
   View,
@@ -133,7 +136,6 @@ class MessageList extends Component {
       }
     })
   }
-
   onAction(params) {
     if (params.error)
       return
@@ -215,7 +217,6 @@ class MessageList extends Component {
       let routes = this.props.navigator.getCurrentRoutes()
       if (routes[routes.length - 1].component )
       this.props.navigator.popToRoute(routes[1])
-      // ComponentUtils.showContacts(this.props.navigator, TYPES.PROFILE)
       return
     }
     if (params.resource  &&  params.resource[ROOT_HASH] != resource[ROOT_HASH]) {
@@ -228,12 +229,6 @@ class MessageList extends Component {
         return;
     }
     var list = params.list;
-    // if (this.state.sendStatus) {
-    //   list.forEach((r) => {
-    //     if (r[ROOT_HASH] === this.state.sendResource[ROOT_HASH])
-    //       r.status = this.state.sendStatus
-    //   })
-    // }
     if (params.loadEarlierMessages  &&  this.state.postLoad) {
       if (!list || !list.length) {
         this.state.postLoad([], true)
@@ -241,11 +236,9 @@ class MessageList extends Component {
           allLoaded: true, isLoading: false, noScroll: true, loadEarlierMessages: false,
           ...this.state
         }
-//         this.setState({allLoaded: true, isLoading: false, noScroll: true, loadEarlierMessages: false})
       }
       else {
         this.state.postLoad(list, false)
-//         this.state.list = list
         let allLoaded = list.length < LIMIT
         this.state.list.forEach((r) => {
           list.push(r)
@@ -259,7 +252,6 @@ class MessageList extends Component {
           productToForms: productToForms,
           loadEarlierMessages: !allLoaded
         })
-        // this.setState({list: list, noScroll: true, allLoaded: allLoaded, loadEarlierMessages: !allLoaded})
       }
       return
     }
@@ -326,6 +318,8 @@ class MessageList extends Component {
     if (this.state.context !== nextState.context || this.state.allContexts !== nextState.allContexts)
       return true
     if (this.state.hasProducts !== nextState.hasProducts)
+      return true
+    if (this.props.bankStyle !== nextProps.bankStyle)
       return true
     // if (this.state.show !== nextState.show)
     //   return true
@@ -477,12 +471,16 @@ class MessageList extends Component {
     });
   }
 
+  componentWillUnmount() {
+    clearTimeout(this._scrollTimeout)
+  }
+
   componentDidUpdate() {
     clearTimeout(this._scrollTimeout)
     if (this.state.allLoaded  ||  this.state.noScroll)
       this.state.noScroll = false
     else {
-      this._scrollTimeout = setTimeout(() => {
+      this._scrollTimeout = this.setTimeout(() => {
         // inspired by http://stackoverflow.com/a/34838513/1385109
         this._GiftedMessenger  &&  this._GiftedMessenger.scrollToBottom()
       }, 200)
@@ -492,30 +490,15 @@ class MessageList extends Component {
   }
 
   render() {
-    // currentMessageTime = null;
     var content;
 
     var model = utils.getModel(this.props.modelName).value;
     var resource = this.props.resource
-                    // <Text style={{fontSize: 17, alignSelf: 'center', color: '#ffffff'}}>{'Sending...'}</Text>
-    // var isVisible = this.state.sendStatus  &&  this.state.sendStatus !== null
-    // var spinner = isVisible
-    //             ? <Text style={{alignSelf: 'flex-end', fontSize: 14, color: '#757575', marginHorizontal: 15}}>{thus.state.sendStatus}</Text>
-    //             : <View/>
-    // var spinner = <LoadingOverlay isVisible={isVisible} onDismiss={() => {this.setState({isVisible:false})}} position="bottom">
-    //                 <TouchableOpacity onPress={() => { Alert.alert('Pressed on text!') }}>
-    //                   <Text style={styles.bannerText}>{this.state.sendStatus}</Text>
-    //                 </TouchableOpacity>
-    //               </LoadingOverlay>
-
-    // var spinner = isVisible
-    //             ? <Progress.Bar
-    //                 style={styles.progress}
-    //                 progress={this.state.progress}
-    //                 indeterminate={this.state.indeterminate}
-    //               />
-    //             : <View/>
-    var bgStyle = this.props.bankStyle.BACKGROUND_COLOR ? {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR} : {backgroundColor: '#f7f7f7'}
+    let bankStyle = this.props.bankStyle
+    var bgImage = bankStyle.BACKGROUND_IMAGE
+    var bgStyle = {}
+    if (!bgImage  &&  bankStyle.BACKGROUND_COLOR)
+      bgStyle = {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}
     var alert = <View />
     if (!this.state.list || !this.state.list.length) {
       if (this.props.navigator.isConnected  &&  resource[TYPE] === TYPES.ORGANIZATION) {
@@ -529,7 +512,7 @@ class MessageList extends Component {
           content = <View style={{flex: 1}}>
                       <View style={[platformStyles.container, bgStyle]}>
                         <Text style={{fontSize: 17, alignSelf: 'center', marginTop: 80, color: '#629BCA'}}>{'Loading...'}</Text>
-                        <ActivityIndicator size='large' style={{alignSelf: 'center', marginTop: 20}} />
+                        <ActivityIndicator size='large' style={{alignSelf: 'center', backgroundColor: 'transparent', marginTop: 20}} />
                       </View>
                       {menuBtn}
                     </View>
@@ -574,6 +557,7 @@ class MessageList extends Component {
         messageSent={this.state.sendResource}
         messageSentStatus={this.state.sendStatus}
         addedItem={this.state.addedItem}
+        customStyle={this.state.customStyle}
         enableEmptySections={true}
         autoFocus={false}
         textRef={'chat'}
@@ -635,24 +619,40 @@ class MessageList extends Component {
     let me = utils.getMe()
     let actionSheet = this.renderActionSheet()
     let context = this.state.context
+    let network
+    if (this.props.originatingMessage)
+      network = <NetworkInfoProvider connected={this.state.isConnected} resource={resource} online={this.state.onlineStatus} />
     if (!context  &&  this.props.resource[TYPE] === PRODUCT_APPLICATION)
       context = this.props.resource
+
+    if (!bgImage)
+      return (
+        <PageView style={[platformStyles.container, bgStyle]}>
+          {network}
+          <ProgressInfo />
+          <ChatContext chat={resource} context={context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={this.props.bankStyle} allContexts={this.state.allContexts} />
+          <View style={ sepStyle } />
+          {content}
+          {actionSheet}
+          {alert}
+        </PageView>
+    )
+    let {width, height} = utils.dimensions(MessageList)
+    let image = { width, height }
+
     return (
       <PageView style={[platformStyles.container, bgStyle]}>
-        {this.props.originatingMessage
-          ? <View/>
-          : <NetworkInfoProvider connected={this.state.isConnected} resource={resource} online={this.state.onlineStatus} />
-        }
-        <ProgressInfo />
-
-        <ChatContext chat={resource} context={context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={this.props.bankStyle} allContexts={this.state.allContexts} />
-        <View style={ sepStyle } />
-        {content}
-        {actionSheet}
-        {alert}
+        <Image source={{uri: bgImage}}  resizeMode='cover' style={image}>
+          {network}
+          <ProgressInfo />
+          <ChatContext chat={resource} context={context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={this.props.bankStyle} allContexts={this.state.allContexts} />
+          <View style={ sepStyle } />
+          {content}
+          {actionSheet}
+          {alert}
+        </Image>
       </PageView>
     );
-        // {addNew}
   }
 
   hasMenuButton() {
@@ -937,14 +937,6 @@ class MessageList extends Component {
     )
   }
 
-  // onPhotoSelect(asset) {
-  //   var selectedAssets = this.state.selectedAssets;
-  //   // unselect if was selected before
-  //   if (selectedAssets[asset.node.image.uri])
-  //     delete selectedAssets[asset.node.image.uri];
-  //   else
-  //     selectedAssets[asset.node.image.uri] = asset;
-  // }
   onAddNewPressed(sendForm) {
     var modelName = this.props.modelName;
     var model = utils.getModel(modelName).value;
@@ -984,33 +976,6 @@ class MessageList extends Component {
       }
     });
   }
-  // onTakePicPressed() {
-  //   var self = this;
-  //   this.props.navigator.push({
-  //     title: 'Take a pic',
-  //     backButtonTitle: 'Back',
-  //     id: 12,
-  //     component: CameraView,
-  //     sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-  //     passProps: {
-  //       onTakePic: self.onTakePic.bind(this),
-  //     }
-  //   });
-  // }
-  // onTakePic(data) {
-  //   var msg = {
-  //     from: utils.getMe(),
-  //     to: this.props.resource,
-  //     time: new Date().getTime(),
-  //     photos: [{
-  //       url: data
-  //     }],
-  //     _context: this.state.context
-  //   }
-  //   msg[TYPE] = TYPES.SIMPLE_MESSAGE;
-  //   this.props.navigator.pop();
-  //   Actions.addMessage(msg);
-  // }
   onSubmitEditing(msg) {
     var me = utils.getMe();
     var resource = {from: utils.getMe(), to: this.props.resource};
@@ -1051,7 +1016,9 @@ class MessageList extends Component {
   }
 }
 reactMixin(MessageList.prototype, Reflux.ListenerMixin);
+reactMixin(MessageList.prototype, TimerMixin)
 MessageList = makeResponsive(MessageList)
+MessageList = makeStylish(MessageList)
 
 var styles = StyleSheet.create({
   imageOutline: {
