@@ -7,7 +7,8 @@ import React, {
 import {
   Platform,
   TouchableHighlight,
-  View
+  View,
+  Alert
 } from 'react-native'
 
 import ReactDOM from 'react-dom'

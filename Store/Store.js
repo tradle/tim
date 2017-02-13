@@ -3476,8 +3476,8 @@ var Store = Reflux.createStore({
   },
 
   wipeWeb() {
-    if (localStorage) localStorage.clear()
-    if (sessionStorage) sessionStorage.clear()
+    if (global.localStorage) global.localStorage.clear()
+    if (global.sessionStorage) global.sessionStorage.clear()
     if (leveldown.destroyAll) return leveldown.destroyAll()
   },
 
@@ -3775,31 +3775,6 @@ var Store = Reflux.createStore({
       let currentProduct = c[c.length - 1].product
       contexts = c.filter((r) => !r._readOnly && r.product === currentProduct)
       return contexts.length ? contexts[0] : c[c.length - 1]
-    }
-    if (c.length === 1)
-      return utils.isReadOnlyChat(c[0]) ? null : c[0]
-
-    let contexts = c.filter((r) => !utils.isReadOnlyChat(r) && r.formsCount)
-    if (!contexts)
-      return
-    if (!contexts.length)
-      return c[c.length - 1]
-    if (contexts.length === 1)
-      return contexts[0]
-    contexts.sort((a, b) => {
-      return b.lastMessageTime - a.lastMessageTime
-    })
-    return contexts[0]
-  },
-
-  searchResources(params) {
-    var meta = this.getModel(params.modelName).value;
-    var isMessage = utils.isMessage(meta)
-    if (isMessage) //  ||  meta.id === FORM)
-      return this.searchMessages(params);
-    else {
-      params.fromView = true
-      return this.searchNotMessages(params);
     }
     if (c.length === 1)
       return utils.isReadOnlyChat(c[0]) ? null : c[0]
@@ -9417,5 +9392,29 @@ function fixOldSettings (settings) {
     //   stats.push[{provider: r, open: r.open, completed: r.completed}]
     // }
     this.trigger({action: 'allPartials', list: list, stats: Object.values(providers), owners: owners})
+  },
+  searchResources(params) {
+    var meta = this.getModel(params.modelName).value;
+    var isMessage = utils.isMessage(meta)
+    if (isMessage) //  ||  meta.id === FORM)
+      return this.searchMessages(params);
+    else {
+      params.fromView = true
+      return this.searchNotMessages(params);
+    }
+    if (c.length === 1)
+      return utils.isReadOnlyChat(c[0]) ? null : c[0]
+
+    let contexts = c.filter((r) => !utils.isReadOnlyChat(r) && r.formsCount)
+    if (!contexts)
+      return
+    if (!contexts.length)
+      return c[c.length - 1]
+    if (contexts.length === 1)
+      return contexts[0]
+    contexts.sort((a, b) => {
+      return b.lastMessageTime - a.lastMessageTime
+    })
+    return contexts[0]
   },
 */

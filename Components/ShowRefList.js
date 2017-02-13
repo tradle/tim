@@ -184,7 +184,7 @@ class ShowRefList extends Component {
     Actions.getDetails(this.props.resource)
   }
   getRefResource(resource, prop) {
-    var model = utils.getModel(this.props.resource[TYPE]).value;
+    var model = utils.getModel(this.props.resource[constants.TYPE]).value;
 
     this.state.prop = prop;
     // this.state.propValue = utils.getId(resource.id);

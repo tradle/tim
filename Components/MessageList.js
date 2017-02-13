@@ -571,7 +571,6 @@ class MessageList extends Component {
         initialListSize={LIMIT}
         hideTextInput={hideTextInput}
         maxHeight={maxHeight} // 64 for the navBar; 110 - with SearchBar
-        hideTextInput={hideTextInput}
       />
         // returnKeyType={false}
         // keyboardShouldPersistTaps={false}

@@ -259,15 +259,6 @@ function passwordAuth (navigator, isChangePassword) {
 }
 
 function lockUp (nav, err) {
-  // self.setState({isModalOpen: true})
-  if (utils.isWeb()) {
-    try {
-      Alert.alert(err)
-    } catch (err) {}
-  } else {
-    loopAlert(err)
-  }
-
   debug('lockUp')
   return new Promise(resolve => {
     nav.replace({
