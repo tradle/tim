@@ -40,7 +40,13 @@ class MyProductMessageRow extends Component {
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
     var renderedRow = [];
 
-    var ret = this.formatRow(false, renderedRow);
+    let isMyMessage
+    // Check if the provider that issued the MyProduct is the same as the one that
+    // the chat user currently viewing it. If not that means that this MyProduct was shared
+    // by user
+    if (utils.getId(resource.from.organization) !== utils.getId(this.props.to))
+      isMyMessage = true
+    var ret = this.formatRow(isMyMessage, renderedRow);
     let onPressCall = ret ? ret.onPressCall : null
 
     let addStyle = [chatStyles.verificationBody, {backgroundColor: this.props.bankStyle.PRODUCT_BG_COLOR , borderColor: this.props.bankStyle.CONFIRMATION_COLOR}];
@@ -64,10 +70,10 @@ class MyProductMessageRow extends Component {
 
     renderedRow.push(<Text  key={this.getNextKey()} style={[chatStyles.formType, {color: '#289427'}]}>{title}</Text>);
     let rowStyle = addStyle ? [chatStyles.textContainer, addStyle] : chatStyles.textContainer
-
+    let vStyle = isMyMessage ? styles.viewStyleR : styles.viewStyleL
     let messageBody =
       <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
-        <View style={[styles.viewStyle, {marginRight: 50}]}>
+        <View style={vStyle}>
           {this.getOwnerPhoto()}
           <View style={rowStyle}>
             <View style={{flex: 1}}>
@@ -181,9 +187,15 @@ class MyProductMessageRow extends Component {
 }
 
 var styles = StyleSheet.create({
-  viewStyle: {
+  viewStyleL: {
     flexDirection: 'row',
     alignSelf: 'flex-start',
+    marginRight: 50
+  },
+  viewStyleR: {
+    flexDirection: 'row',
+    alignSelf: 'flex-end',
+    marginLeft: 50
   },
   issuedBy: {
     fontSize: 18,
