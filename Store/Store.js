@@ -5933,7 +5933,7 @@ var Store = Reflux.createStore({
   },
   dbPut(key, value) {
     let v = utils.isMessage(value) ? utils.optimizeResource(value, true) : value
-    db.put(key, v)
+    return db.put(key, v)
   },
   dbBatchPut(key, value, batch) {
     let v = utils.isMessage(value) ? utils.optimizeResource(value, true) : value
