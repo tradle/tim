@@ -1482,7 +1482,7 @@ var NewResourceMixin = {
           value[p].currency = this.props.currency
       }
       else if (prop.units && prop.units === '[min - max]') {
-        let v = value[p].split('-').map((n) => n.trim())
+        let v = value[p].split('-').map(coerceNumber)
         if (v.length === 1)
           this.checkNumber(v, prop, err)
         else if (v.length === 2) {
@@ -1551,6 +1551,12 @@ var NewResourceMixin = {
       err[p] = error
     return error
   },
+}
+function coerceNumber (obj, p) {
+  const val = obj[p]
+  if (typeof val === 'string') {
+    obj[p] = Number(val.trim())
+  }
 }
 
 var styles= StyleSheet.create({
