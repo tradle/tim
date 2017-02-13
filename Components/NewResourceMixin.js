@@ -1482,7 +1482,7 @@ var NewResourceMixin = {
           value[p].currency = this.props.currency
       }
       else if (prop.units && prop.units === '[min - max]') {
-        let v = value[p].split('-').forEach((n) => n.trim())
+        let v = value[p].split('-').map((n) => n.trim())
         if (v.length === 1)
           this.checkNumber(v, prop, err)
         else if (v.length === 2) {
@@ -1529,8 +1529,8 @@ var NewResourceMixin = {
     }
     if (deleteProps)
       deleteProps.forEach((p) => {
-        Reflect.deleteProperty(value, p)
-        Reflect.deleteProperty(err, p)
+        delete value[p]
+        delete err[p]
       })
     return err
   },
