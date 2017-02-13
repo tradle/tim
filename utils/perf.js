@@ -55,18 +55,7 @@ global.timeFunctions = exports.timeFunctions = function timeFunctions (obj, over
   return timed
 }
 
-global.tradleTimer = function timer (name) {
-  var now = Date.now()
-  return function (print=true) {
-    var time = Date.now() - now
-    if (print && time > 100) {
-      console.log(`TIMER ${name}: ${time}ms`)
-    }
-
-    return time
-  }
-}
-
+global.tradleTimer = tradleTimer
 global.timeAsyncFunction = function (fn) {
   return function (...args) {
     const start = Date.now()
@@ -78,5 +67,17 @@ global.timeAsyncFunction = function (fn) {
     })
 
     return fn.apply(this, args)
+  }
+}
+
+function tradleTimer (name) {
+  var now = Date.now()
+  return function (print=true) {
+    var time = Date.now() - now
+    if (print && time > 100) {
+      console.log(`TIMER ${name}: ${time}ms`)
+    }
+
+    return time
   }
 }
