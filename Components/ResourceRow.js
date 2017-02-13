@@ -44,6 +44,8 @@ const ORGANIZATION = constants.TYPES.ORGANIZATION
 const FINANCIAL_PRODUCT = constants.TYPES.FINANCIAL_PRODUCT
 const MONEY = constants.TYPES.MONEY
 // const CHAR_WIDTH = 7
+const DEFAULT_CURRENCY_SYMBOL = '£'
+var CURRENCY_SYMBOL
 
 var dateProp
 
@@ -494,13 +496,14 @@ class ResourceRow extends Component {
     ];
   }
   onPress(event) {
+    let resource = this.props.resource
     var model = utils.getModel(resource[TYPE] || resource.id).value;
-    var title = utils.makeTitle(utils.getDisplayName(this.props.resource, model.properties));
+    var title = utils.makeTitle(utils.getDisplayName(resource, model.properties));
     this.props.navigator.push({
       id: 7,
       title: title,
       component: ArticleView,
-      passProps: {url: this.props.resource.url}
+      passProps: {url: resource.url}
     });
   }
 }
