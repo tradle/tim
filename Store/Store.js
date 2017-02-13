@@ -3406,7 +3406,8 @@ var Store = Reflux.createStore({
     .then(() => {
       if (!document._sharedWith) {
         document._sharedWith = []
-        this.addSharedWith(document, document.to, document.time, shareBatchId)
+        if (!utils.isMyProduct(document))
+          this.addSharedWith(document, document.to, document.time, shareBatchId)
       }
 
       this.addSharedWith(document, to, time, shareBatchId)
