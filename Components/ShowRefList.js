@@ -157,7 +157,6 @@ class ShowRefList extends Component {
         details = <ShowPropertiesView resource={resource}
                                       showRefResource={this.getRefResource.bind(this)}
                                       currency={this.props.currency}
-                                      errorProps={this.props.errorProps}
                                       excludedProperties={['photos']}
                                       navigator={this.props.navigator} />
     }

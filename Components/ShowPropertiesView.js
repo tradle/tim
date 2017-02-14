@@ -114,6 +114,11 @@ class ShowPropertiesView extends Component {
         if (p != constants.TYPE)
           vCols.push(p)
       }
+      // HACK
+      if (utils.isMessage(resource)) {
+        delete vCols.from
+        delete vCols.to
+      }
     }
     var isMessage = utils.isMessage(model)
     if (!isMessage) {

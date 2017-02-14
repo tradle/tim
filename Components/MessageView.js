@@ -266,9 +266,19 @@ class MessageView extends Component {
                                  backlinkList={this.state.backlinkList}
                                  showDetails={this.state.showDetails}
                                  errorProps={this.state.errorProps}
-                                 checkProperties={checkProps} >
+                                 showRefResource={this.getRefResource.bind(this)}
+                                 checkProperties={checkProps}>
                       {content}
                     </ShowRefList>
+      // actionPanel = <ShowRefList resource={resource}
+      //                            navigator={this.props.navigator}
+      //                            currency={this.props.currency}
+      //                            bankStyle={this.props.bankStyle}
+      //                            backlink={this.state.backlink}
+      //                            showDetails={this.state.showDetails}
+      //                            backlinkList={this.state.backlinkList} >
+      //                 {content}
+      //               </ShowRefList>
     }
         // <FromToView resource={resource} navigator={this.props.navigator} />
         // <MoreLikeThis resource={resource} navigator={this.props.navigator}/>

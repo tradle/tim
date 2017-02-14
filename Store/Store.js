@@ -2309,7 +2309,6 @@ var Store = Reflux.createStore({
         }
         else
           this.addSharedWith(r, r.from, r.time)
-
       }
       // if (dontSend  &&  r.sources) {
       //   let result = self.searchMessages({modelName: VERIFICATION, to: r.to})
