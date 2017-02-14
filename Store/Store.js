@@ -2303,8 +2303,13 @@ var Store = Reflux.createStore({
       if (!r._sharedWith) {
         r._sharedWith = []
         // Case where employee verifies the form
-        if (!me.isEmployee  &&  !dontSend)
+        if (me &&  me.isEmployee) {
+          let rep = this.getRepresentative(utils.getId(me.organization))
+          this.addSharedWith(r, rep, r.time)
+        }
+        else
           this.addSharedWith(r, r.from, r.time)
+
       }
       // if (dontSend  &&  r.sources) {
       //   let result = self.searchMessages({modelName: VERIFICATION, to: r.to})
