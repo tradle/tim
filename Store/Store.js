@@ -2900,24 +2900,30 @@ var Store = Reflux.createStore({
           let msg = {
             [TYPE]: PRODUCT_APPLICATION,
             product: EMPLOYEE_ONBOARDING,
-            [NONCE]: self.getNonce(),
             time: new Date().getTime()
           }
           self.trigger({action: 'employeeOnboarding', to: this._getItem(orgId)})
-          let sendParams = {
-            object: msg,
-            to: { fingerprint: self.getFingerprint(this._getItem(utils.getId(IDENTITY + '_' + orgRep[ROOT_HASH]))) }
-          }
-          meDriver.signAndSend(sendParams)
+          meDriver.createObject({object: msg})
           .then((data) => {
-            msg[CUR_HASH] = data.object.link
-            msg[ROOT_HASH] = data.object.permalink
+            let hash = data.link
+            msg = utils.clone(msg)
+            msg[CUR_HASH] = hash
+            msg[ROOT_HASH] = hash
+            msg._context = self.buildRef(msg)
             msg.to = self.buildRef(orgRep)
             msg.from = self.buildRef(me)
+
+            let sendParams = {
+              link: hash,
+              to: { permalink: orgRep[ROOT_HASH] },
+              other: { context: hash }
+            }
             self._setItem(utils.getId(msg), msg)
             self.addMessagesToChat(orgId, msg)
+            return meDriver.send(sendParams)
           })
           .catch(function (err) {
+            console.log('Store.onAddItem: ' + err.message)
             debugger
           })
         }
