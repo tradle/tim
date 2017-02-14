@@ -52,6 +52,7 @@ const PAIR_DEVICES = 4
 const VIEW_DEBUG_LOG = 5
 const WIPE_DEVICE = 6
 const MY_PRODUCT = 'tradle.MyProduct'
+const PROFILE = constants.TYPES.PROFILE
 
 const TYPE = constants.TYPE
 const ROOT_HASH = constants.ROOT_HASH
@@ -89,7 +90,7 @@ class ResourceView extends Component {
     let resource = props.resource
     this.state = {
       resource: resource,
-      isLoading:  resource[TYPE] && resource[TYPE] === T_AND_C ? false : true, //props.resource.id ? true : false,
+      isLoading:  resource[TYPE] && resource[TYPE] !== PROFILE ? false : true, //props.resource.id ? true : false,
       isModalOpen: false,
       useTouchId: me && me.useTouchId,
       useGesturePassword: me && me.useGesturePassword,
@@ -101,7 +102,7 @@ class ResourceView extends Component {
   }
   componentWillMount() {
     let resource = this.props.resource
-    if (resource.id  ||  resource[TYPE] === constants.TYPES.PROFILE)
+    if (resource.id  ||  resource[TYPE] === PROFILE)
       Actions.getItem(resource)
   }
   componentDidMount() {
@@ -248,7 +249,7 @@ class ResourceView extends Component {
       // photos.splice(0, 1);
     }
 
-    var isIdentity = model.id === constants.TYPES.PROFILE;
+    var isIdentity = model.id === PROFILE;
     var isOrg = model.id === constants.TYPES.ORGANIZATION;
     var me = utils.getMe()
     var actionPanel
@@ -310,7 +311,7 @@ class ResourceView extends Component {
     else
       otherPhotoList = <PhotoList photos={photos} resource={this.props.resource} navigator={this.props.navigator} isView={true} numberInRow={photos.length > 4 ? 5 : photos.length} />
     let propertySheet
-    if (resource[TYPE] === T_AND_C)
+    if (resource[TYPE] !== PROFILE)
       propertySheet = <ShowPropertiesView resource={resource}
                         showRefResource={this.getRefResource.bind(this)}
                         currency={this.props.currency}
@@ -458,7 +459,7 @@ class ResourceView extends Component {
     let me = utils.getMe()
     let r = {
       _r: me[ROOT_HASH],
-      _t: constants.TYPES.PROFILE,
+      _t: PROFILE,
     }
     let isChangeGesturePassword
     switch (action) {
@@ -503,7 +504,7 @@ class ResourceView extends Component {
 
     signIn(self.props.navigator, r, isChangeGesturePassword)
       .then(() => {
-        Actions.addItem({resource: me, value: r, meta: utils.getModel(constants.TYPES.PROFILE).value})
+        Actions.addItem({resource: me, value: r, meta: utils.getModel(PROFILE).value})
         if (isChangeGesturePassword) {
           let routes = self.props.navigator.getCurrentRoutes()
           self.props.navigator.popToRoute(routes[routes.length - 3])
