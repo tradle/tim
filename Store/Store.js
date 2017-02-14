@@ -4437,18 +4437,22 @@ var Store = Reflux.createStore({
       let ownerId
       // in case of form request or form error the partial will have a bot as a sender
       // in this case we need to check the context to see who those requests were sent to
-      if (t !== FORM_REQUEST  &&  t !== FORM_ERROR)
+      let owner
+      if (t !== FORM_REQUEST  &&  t !== FORM_ERROR) {
         ownerId = r.from.id
+        owner = r.from
+      }
       else {
         let pa = allContexts[PRODUCT_APPLICATION + '_' + r.context]
-        ownerId = pa ? pa.from.id : r.from.id
+        owner = pa ? pa.from : r.from
+        ownerId = owner.id
       }
       if (!owners[pId])
         owners[pId] = {}
       let providerCustomerStats = owners[pId][ownerId]
       if (!providerCustomerStats) {
         providerCustomerStats = {
-          owner: r.from,
+          owner: owner,
           openApps: {},
           completedApps: {},
           applications: [],
