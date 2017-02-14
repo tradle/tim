@@ -152,11 +152,14 @@ class ShowRefList extends Component {
                       navigator={this.props.navigator} />
     }
     if (showDetails) {
-      details = <ShowPropertiesView resource={resource}
-                            showRefResource={this.getRefResource.bind(this)}
-                            currency={this.props.currency}
-                            excludedProperties={['photos']}
-                            navigator={this.props.navigator} />
+      if (utils.isMessage(resource))
+        details = <ShowPropertiesView { ...this.props }/>
+      else
+        details = <ShowPropertiesView resource={resource}
+                                      showRefResource={this.getRefResource.bind(this)}
+                                      currency={this.props.currency}
+                                      excludedProperties={['photos']}
+                                      navigator={this.props.navigator} />
 
     }
     let comment

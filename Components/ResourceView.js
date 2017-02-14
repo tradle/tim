@@ -254,7 +254,13 @@ class ResourceView extends Component {
     if (me) {
       let noActionPanel = (isIdentity  &&  !isMe) || (isOrg  &&  (!me.organization  ||  utils.getId(me.organization) !== utils.getId(resource)))
       if (!noActionPanel)
-        actionPanel = <ShowRefList showQR={this.openModal.bind(this)} resource={resource} currency={this.props.currency} navigator={this.props.navigator} backlink={this.state.backlink} backlinkList={this.state.backlinkList} />
+       actionPanel = <ShowRefList resource={resource}
+                                  navigator={this.props.navigator}
+                                  currency={this.props.currency}
+                                  bankStyle={this.props.bankStyle}
+                                  backlink={this.state.backlink}
+                                  backlinkList={this.state.backlinkList}/>
+        // actionPanel = <ShowRefList showQR={this.openModal.bind(this)} {...this.props} backlink={this.state.backlink} backlinkList={this.state.back
     }
     var qrcode, w
     var {width, height} = utils.dimensions(ResourceView)
