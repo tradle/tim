@@ -850,7 +850,7 @@ var utils = {
       })
   },
   isEmployee(resource) {
-    if (!me.isEmployee)
+    if (!me || !me.isEmployee)
       return false
     let myId = this.getId(me.organization)
     if (resource[TYPE] === ORGANIZATION)
