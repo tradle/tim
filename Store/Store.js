@@ -1792,7 +1792,7 @@ var Store = Reflux.createStore({
     if (to[TYPE] === ORGANIZATION) {
       var orgId = utils.getId(r.to)
       var orgRep = this.getRepresentative(orgId)
-      if (me.organization  &&  utils.getId(me.organization) === orgId)
+      if (me.isEmployee  &&  utils.getId(me.organization) === orgId)
         return
       if (!orgRep) {
         var params = {
