@@ -2924,6 +2924,7 @@ var Store = Reflux.createStore({
               other: { context: hash }
             }
             self._setItem(utils.getId(msg), msg)
+            self.addMessagesToChat(orgId, msg)
             return meDriver.send(sendParams)
           })
           .catch(function (err) {
