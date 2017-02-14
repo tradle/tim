@@ -283,6 +283,7 @@ class MessageView extends Component {
                                  backlinkList={this.state.backlinkList}
                                  showDetails={this.state.showDetails}
                                  errorProps={this.state.errorProps}
+                                 showRefResource={this.getRefResource.bind(this)}
                                  checkProperties={checkProps} >
                       {content}
                     </ShowRefList>
