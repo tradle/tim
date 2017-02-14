@@ -81,6 +81,8 @@ class ShowRefList extends Component {
         continue;
       propsToShow.push(p)
     }
+    if (!propsToShow.length)
+      return <View/>
     if (model.viewCols) {
       let vCols = model.viewCols.filter((p) => !props[p].hidden  &&  props[p].items  &&  props[p].items.backlink)
       if (vCols) {
