@@ -256,17 +256,17 @@ class MessageView extends Component {
                     </View>
                   </View>
 
+    var checkProps = this.props.isVerifier /* && !utils.isReadOnlyChat(resource)*/ ? this.onCheck.bind(this) : null
     var actionPanel
     if (this.props.isReview)
       actionPanel = content
     else {
-      actionPanel = <ShowRefList resource={resource}
-                                 navigator={this.props.navigator}
-                                 currency={this.props.currency}
-                                 bankStyle={this.props.bankStyle}
+      actionPanel = <ShowRefList {...this.props}
                                  backlink={this.state.backlink}
+                                 backlinkList={this.state.backlinkList}
                                  showDetails={this.state.showDetails}
-                                 backlinkList={this.state.backlinkList} >
+                                 errorProps={this.state.errorProps}
+                                 checkProperties={checkProps} >
                       {content}
                     </ShowRefList>
     }
@@ -333,9 +333,9 @@ class MessageView extends Component {
   }
 
   verify() {
+    this.props.navigator.pop();
     var resource = this.props.resource;
     var model = utils.getModel(resource[TYPE]).value;
-    // this.props.navigator.pop();
     var me = utils.getMe();
     var from = this.props.resource.from;
     // var verificationModel = model.properties.verifications.items.ref;
