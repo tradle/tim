@@ -161,6 +161,7 @@ class TimHome extends Component {
   }
 
   _handleOpenURL({ url }) {
+    return
     debug(`opening URL: ${url}`)
     var url = url.trim();
     var idx = url.indexOf('://');
