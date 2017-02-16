@@ -12,6 +12,10 @@ import Camera from 'react-webcam'
 import Icon from 'react-native-vector-icons/Ionicons'
 import { makeResponsive, getDimensions } from 'react-native-orient'
 
+const ICON_COLOR = '#77ADFC'
+const BG_COLOR = '#fff'
+const DEFAULT_ASPECT_RATIO = 1.33333
+
 class CameraView extends Component {
   static propTypes = {
     onTakePic: PropTypes.func.isRequired,
@@ -37,10 +41,10 @@ class CameraView extends Component {
     return (
       <View style={styles.buttonsContainer}>
         <TouchableOpacity onPress={() => {this.props.onCancel()}}>
-          <Icon name='ios-arrow-back' size={50} color='#ffffff' />
+          <Icon name='ios-arrow-back' size={50} color={ICON_COLOR} />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => this.capture()}>
-          <Icon name='ios-camera' size={50} color='#ffffff' />
+          <Icon name='ios-camera' size={50} color={ICON_COLOR} />
         </TouchableOpacity>
       </View>
     )
@@ -49,10 +53,10 @@ class CameraView extends Component {
     return (
       <View style={styles.buttonsContainer}>
         <TouchableOpacity onPress={() => this.setState({ photo: null })}>
-          <Icon name='ios-close' size={50} color='#ffffff' />
+          <Icon name='ios-close' size={50} color={ICON_COLOR} />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => this.props.onTakePic(this.state.photo)}>
-          <Icon name='ios-checkmark' size={50} color='#ffffff' />
+          <Icon name='ios-checkmark' size={50} color={ICON_COLOR} />
         </TouchableOpacity>
       </View>
     )
@@ -65,7 +69,7 @@ class CameraView extends Component {
     }
   }
   renderCamera() {
-    const { width } = getDimensions(this)
+    const { width, height } = getCameraDimensions(this)
     return (
       <Camera
         ref='cam'
@@ -73,8 +77,8 @@ class CameraView extends Component {
         audio={false}
         video={true}
         style={styles.camera}
-        width='auto'
-        height='auto'
+        width={width}
+        height={height}
       />
     )
   }
@@ -105,12 +109,25 @@ class CameraView extends Component {
   }
 }
 
+function getCameraDimensions (component, ratio=DEFAULT_ASPECT_RATIO) {
+  let { width, height } = getDimensions(this)
+  if (height * ratio > width) {
+    height = width / ratio
+  } else {
+    width = height * ratio
+  }
+
+  width = width * 0.9 | 0
+  height = height * 0.9 | 0
+  return { width, height }
+}
+
 CameraView = makeResponsive(CameraView)
 module.exports = CameraView
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: BG_COLOR,
     alignItems: 'center',
     justifyContent: 'center'
   },
