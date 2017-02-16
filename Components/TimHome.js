@@ -34,7 +34,7 @@ try {
 
 // var Progress = require('react-native-progress')
 import {
-  authenticateUser,
+  // authenticateUser,
   hasTouchID,
   signIn,
   setPassword
@@ -137,23 +137,34 @@ class TimHome extends Component {
       );
     }
   }
-  componentDidMount() {
-    if (!isLinkingSupported) return
+  async _checkConnectivity() {
+    try {
+      const isConnected = NetInfo ? await NetInfo.isConnected.fetch() : true
+      const firstRoute = this.props.navigator.getCurrentRoutes()[0]
+      firstRoute.isConnected = isConnected
+    } catch (err) {
+      debug('failed to check connectivity', err)
+    }
+  }
+  async componentDidMount() {
+    this._checkConnectivity()
 
-    Linking.getInitialURL()
-    .then((url) => {
-      if (url)
-        this._handleOpenURL({url});
+    try {
+      let url
+      if (isLinkingSupported) {
+        url = await Linking.getInitialURL()
+      }
 
-      const checkConnected = NetInfo ? NetInfo.isConnected.fetch() : Q(true)
-      checkConnected().then(isConnected => {
-        let firstRoute = this.props.navigator.getCurrentRoutes()[0]
-        firstRoute.isConnected = isConnected
-      })
-    })
-    .catch((e) => {
-      debugger
-    })
+      if (!url) {
+        url = ENV.initWithDeepLink
+      }
+
+      if (url) {
+        this._handleOpenURL({url})
+      }
+    } catch (err) {
+      debug('failed to open deep link', err)
+    }
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -165,8 +176,10 @@ class TimHome extends Component {
         this.state.hasMe !== nextState.hasMe
   }
 
-  _handleOpenURL(event) {
-    var url = event.url.trim();
+  _handleOpenURL({ url }) {
+    return
+    debug(`opening URL: ${url}`)
+    var url = url.trim();
     var idx = url.indexOf('://');
     var url = url.substring(idx + 3)
     idx = url.indexOf('/')
@@ -179,6 +192,89 @@ class TimHome extends Component {
     })
   }
 
+  async onStart(params) {
+    // prior to registration
+    // force install updates before first interaction
+    if (!utils.getMe()) {
+      //   UP_TO_DATE: 0, // The running app is up-to-date
+      //   UPDATE_INSTALLED: 1, // The app had an optional/mandatory update that was successfully downloaded and is about to be installed.
+      //   UPDATE_IGNORED: 2, // The app had an optional update and the end-user chose to ignore it
+      //   UNKNOWN_ERROR: 3,
+      //   SYNC_IN_PROGRESS: 4, // There is an ongoing "sync" operation in progress.
+      //   CHECKING_FOR_UPDATE: 5,
+      //   AWAITING_USER_ACTION: 6,
+      //   DOWNLOADING_PACKAGE: 7,
+      //   INSTALLING_UPDATE: 8
+      try {
+        await AutomaticUpdates.sync({
+          onSyncStatusChanged: status => {
+            if (status === SyncStatus.DOWNLOADING_PACKAGE) {
+              this.setState({ downloadingUpdate: true, downloadUpdateProgress: 0 })
+            }
+          },
+          onDownloadProgress: debounce(({ totalBytes, receivedBytes }) => {
+            const downloadUpdateProgress = (receivedBytes * 100 / totalBytes) | 0
+            // avoid going from 1 percent to 0
+            this.setState({ downloadUpdateProgress })
+          }, 300, true)
+        })
+      } catch (err) {
+        debug('failed to sync with code push', err)
+      } finally {
+        this.setState({ downloadingUpdate: false, downloadUpdateProgress: null })
+      }
+
+      const hasUpdate = await AutomaticUpdates.hasUpdate()
+      if (hasUpdate) return AutomaticUpdates.install()
+    }
+
+    AutomaticUpdates.on()
+    if (this.state.message) {
+      this.restartTiM()
+      return
+    }
+
+    // utils.setMe(params.me);
+    // utils.setModels(params.models);
+    this.setState({isLoading: false});
+    clearTimeout(this.uhOhTimeout)
+    if (!utils.getMe()) {
+      this.setState({isModalOpen: true})
+      // this.register(() => this.showFirstPage())
+      return
+    }
+
+    this.signInAndContinue()
+  }
+
+  async signInAndContinue() {
+    const routes = this.props.navigator.getCurrentRoutes()
+    // get the top TimHome in the stack
+    const homeRoute = routes.filter(r => r.component.displayName === TimHome.displayName).pop()
+    const afterAuthRoute = utils.getTopNonAuthRoute(this.props.navigator)
+    try {
+      await signIn(this.props.navigator)
+    } catch (err) {
+      if (afterAuthRoute.component.displayName === TimHome.displayName) return
+
+      if (homeRoute) {
+        return this.props.navigator.popToRoute(homeRoute)
+      }
+
+      return this.props.navigator.resetTo({
+        id: 1,
+        component: TimHome,
+        passProps: {}
+      })
+    }
+
+    if (afterAuthRoute.component.displayName !== TimHome.displayName) {
+      return this.props.navigator.popToRoute(afterAuthRoute)
+    }
+
+    return this.showFirstPage()
+  }
+
   async handleEvent(params) {
     const self = this
     switch(params.action) {
@@ -186,161 +282,32 @@ class TimHome extends Component {
       this.setState({
         busyWith: params.activity
       })
+
       return
     case 'connectivity':
       this._handleConnectivityChange(params.isConnected)
-      break
+      return
     case 'reloadDB':
       this.setState({
         isLoading: false,
         message: translate('pleaseRestartTIM'), //Please restart TiM'
       });
       utils.setModels(params.models);
-      break
+      return
     case 'start':
-      // uncomment to test download progress indicator
-      //
-      // await new Promise(resolve => {
-      //   let percent = 0
-      //   const interval = setInterval(() => {
-      //     if (percent >= 100) {
-      //       this.setState({ downloadUpdateProgress: null })
-      //       clearInterval(interval)
-      //       resolve()
-      //     } else {
-      //       this.setState({ downloadUpdateProgress: Math.min(percent += Math.random() * 10 | 0, 100) })
-      //     }
-      //   }, 1000)
-      // })
-
-      // prior to registration
-      // force install updates before first interaction
-      if (!utils.getMe()) {
-        //   UP_TO_DATE: 0, // The running app is up-to-date
-        //   UPDATE_INSTALLED: 1, // The app had an optional/mandatory update that was successfully downloaded and is about to be installed.
-        //   UPDATE_IGNORED: 2, // The app had an optional update and the end-user chose to ignore it
-        //   UNKNOWN_ERROR: 3,
-        //   SYNC_IN_PROGRESS: 4, // There is an ongoing "sync" operation in progress.
-        //   CHECKING_FOR_UPDATE: 5,
-        //   AWAITING_USER_ACTION: 6,
-        //   DOWNLOADING_PACKAGE: 7,
-        //   INSTALLING_UPDATE: 8
-        try {
-          await AutomaticUpdates.sync({
-            onSyncStatusChanged: status => {
-              if (status === SyncStatus.DOWNLOADING_PACKAGE) {
-                this.setState({ downloadingUpdate: true, downloadUpdateProgress: 0 })
-              }
-            },
-            onDownloadProgress: debounce(({ totalBytes, receivedBytes }) => {
-              const downloadUpdateProgress = (receivedBytes * 100 / totalBytes) | 0
-              // avoid going from 1 percent to 0
-              this.setState({ downloadUpdateProgress })
-            }, 300, true)
-          })
-        } catch (err) {
-          debug('failed to sync with code push', err)
-        } finally {
-          this.setState({ downloadingUpdate: false, downloadUpdateProgress: null })
-        }
-
-        const hasUpdate = await AutomaticUpdates.hasUpdate()
-        if (hasUpdate) return AutomaticUpdates.install()
-      }
-
-      AutomaticUpdates.on()
-      if (self.state.message) {
-        self.restartTiM()
-        return
-      }
-
-      // utils.setMe(params.me);
-      // utils.setModels(params.models);
-      self.setState({isLoading: false});
-      clearTimeout(this.uhOhTimeout)
-      if (!utils.getMe()) {
-        self.setState({isModalOpen: true})
-        // if (utils.isWeb()) {
-        //   this.register(() => this.showOfficialAccounts())
-        // }
-
-        return
-      }
-
-      /* fall through */
-
-      // if (!utils.getMe()) {
-      //   return AutomaticUpdates.sync()
-      //     .then(() => AutomaticUpdates.hasUpdate())
-      //     .then(hasUpdate => {
-      //       if (hasUpdate) AutomaticUpdates.install()
-      //       else start()
-      //     })
-      // } else {
-      //   start()
-      // }
-
-      // break
-
-      // function start () {
-      //   if (self.state.message) {
-      //     self.restartTiM()
-      //     return
-      //   }
-
-      //   // utils.setMe(params.me);
-      //   // utils.setModels(params.models);
-      //   self.setState({isLoading: false});
-      //   if (!utils.getMe()) {
-      //     self.setState({isModalOpen: true})
-      //     // this.register(() => this.showOfficialAccounts())
-      //     return
-      //   }
-      // }
-      /* fall through */
+      this.onStart(params)
+      return
     case 'pairingSuccessful':
-      const routes = this.props.navigator.getCurrentRoutes()
-      // get the top TimHome in the stack
-      const homeRoute = routes.filter(r => r.component.displayName === TimHome.displayName).pop()
-      const afterAuthRoute = utils.getTopNonAuthRoute(this.props.navigator)
-      try {
-        await signIn(this.props.navigator)
-      } catch (err) {
-        if (afterAuthRoute.component.displayName === TimHome.displayName) return
-
-        if (homeRoute) {
-          return this.props.navigator.popToRoute(homeRoute)
-        }
-
-        return this.props.navigator.resetTo({
-          id: 1,
-          component: TimHome,
-          passProps: {}
-        })
-      }
-
-      if (afterAuthRoute.component.displayName !== TimHome.displayName) {
-        return this.props.navigator.popToRoute(afterAuthRoute)
-      }
-
-      // if (this.state.newMe)
-        //{
-      //   let me = utils.getMe()
-      //   Actions.addItem({resource: me, value: this.state.newMe, meta: utils.getModel(constants.TYPES.PROFILE).value})
-      //   let routes = this.props.navigator.getCurrentRoutes()
-      //   if (me.useTouchId  &&  !me.useGesturePassword)
-      //     return
-      //   this.props.navigator.popToRoute(routes[routes.length - 3])
-      // }
-      // else
-      return this.showOfficialAccounts()
+      this.signInAndContinue()
+      return
     case 'getMe':
       utils.setMe(params.me)
       this.setState({hasMe: params.me})
       var nav = this.props.navigator
-      signIn(this.props.navigator)
-        .then(() => this.showOfficialAccounts())
-      break
+      this.signInAndContinue()
+      // await signIn(this.props.navigator)
+      // this.showFirstPage()
+      return
     }
   }
 
@@ -446,7 +413,7 @@ class TimHome extends Component {
     //   }
     // })
   }
-  showOfficialAccounts(doReplace) {
+  showFirstPage(doReplace) {
     var nav = this.props.navigator
     if (!utils.isWeb()) {
       nav.immediatelyResetRouteStack(nav.getCurrentRoutes().slice(0,1));
@@ -545,16 +512,18 @@ class TimHome extends Component {
     };
 
     let self = this
-    route.passProps.callback = () => {
-      setPassword(this.props.navigator)
-      .then(() => this.optInTouchID())
-      .then(() => {
-        this.setState({hasMe: true})
-        Actions.setAuthenticated(true)
-        this.showOfficialAccounts(true)
-        // cb()
-      })
+    route.passProps.callback = async () => {
+      if (ENV.requireSoftPIN) {
+        await setPassword(this.props.navigator)
+      }
 
+      if (ENV.requireDeviceLocalAuth) {
+        await this.optInTouchID()
+      }
+
+      this.setState({hasMe: true})
+      Actions.setAuthenticated(true)
+      this.showFirstPage(true)
     }
     // let nav = self.props.navigator
     // route.passProps.callback = (me) => {
@@ -624,7 +593,7 @@ class TimHome extends Component {
       .then (() => {
         this.setState({hasMe: true})
         Actions.setAuthenticated(true)
-        this.showOfficialAccounts(true)
+        this.showFirstPage(true)
         // cb()
       })
 
@@ -729,7 +698,7 @@ class TimHome extends Component {
     let regView = <View  style={{alignSelf: 'center'}}>
                     <FadeInView>
                       <TouchableOpacity  onPress={() => {
-                        this.register(this.showOfficialAccounts.bind(this))
+                        this.register(this.showFirstPage.bind(this))
                         }} underlayColor='transparent'>
                         <View style={styles.signIn}>
                           <Text style={styles.signInText}>{translate('getStarted')}</Text>
@@ -864,55 +833,33 @@ class TimHome extends Component {
       }
     })
   }
+  // async onSettingsPressed() {
+  //   try {
+  //     await authenticateUser()
+  //   } catch (err) {
+  //     return
+  //   }
 
-  renderSplashscreen({ thumb, width, height }) {
-    const splashscreen = (
-      <View>
-        <Image source={BG_IMAGE} style={{position:'absolute', left: 0, top: 0, width: width, height: height }} />
-        <ScrollView
-          scrollEnabled={false}
-          style={{height}}>
-          <View style={[styles.container]}>
-            <Image style={thumb} source={TradleWhite}></Image>
-            <Text style={styles.tradle}>Tradle</Text>
-          </View>
-          <View style={{alignItems: 'center'}}>
-            <ActivityIndicator hidden='true' size='large' color='#ffffff'/>
-          </View>
-        </ScrollView>
-      </View>
-    )
+  //   var model = utils.getModel(constants.TYPES.SETTINGS).value
+  //   var route = {
+  //     component: NewResource,
+  //     title: translate('settings'),
+  //     backButtonTitle: translate('back'),
+  //     rightButtonTitle: translate('done'),
+  //     id: 4,
+  //     titleTextColor: '#7AAAC3',
+  //     passProps: {
+  //       model: model,
+  //       isConnected: this.state.isConnected,
+  //       callback: this.props.navigator.pop,
+  //       bankStyle: defaultBankStyle
 
-    return splashscreen
-  }
+  //       // callback: this.register.bind(this)
+  //     },
+  //   }
 
-  async onSettingsPressed() {
-    try {
-      await authenticateUser()
-    } catch (err) {
-      return
-    }
-
-    var model = utils.getModel(constants.TYPES.SETTINGS).value
-    var route = {
-      component: NewResource,
-      title: translate('settings'),
-      backButtonTitle: 'Back',
-      rightButtonTitle: 'Done',
-      id: 4,
-      titleTextColor: '#7AAAC3',
-      passProps: {
-        model: model,
-        isConnected: this.state.isConnected,
-        callback: this.props.navigator.pop,
-        bankStyle: defaultBankStyle
-
-        // callback: this.register.bind(this)
-      },
-    }
-
-    this.props.navigator.push(route)
-  }
+  //   this.props.navigator.push(route)
+  // }
   restartTiM() {
     Alert.alert(
       'Please restart TiM'
@@ -922,7 +869,7 @@ class TimHome extends Component {
   _pressHandler() {
     if (utils.getMe())
       signIn(this.props.navigator)
-        .then(() => this.showOfficialAccounts())
+        .then(() => this.showFirstPage())
   }
 }
 
@@ -1138,7 +1085,7 @@ module.exports = TimHome;
     //   }
     // }
 
-    // this.showOfficialAccounts()
+    // this.showFirstPage()
     // if (this.state.authenticating) {
     //   this.setState({ authenticating: false })
     // }
@@ -1155,7 +1102,7 @@ module.exports = TimHome;
   //       cb()
   //     }
   //   })
-  //   // this.showOfficialAccounts(true);
+  //   // this.showFirstPage(true);
   //   // this.props.navigator.popToTop();
   // }
   // signIn(cb) {

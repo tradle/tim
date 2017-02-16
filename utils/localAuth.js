@@ -45,8 +45,8 @@ const LOCK_SCREEN_BG = require('../img/bg.png')
 const AUTH_FAILED_MSG = 'Authentication failed'
 const DEFAULT_OPTS = {
   reason: translate('unlockDevice'),
-  fallbackToPasscode: ENV.autoOptInTouchId,
-  suppressEnterPassword: ENV.autoOptInTouchId
+  fallbackToPasscode: true,
+  suppressEnterPassword: true
 }
 
 const PROMPTS = require('./password-prompts')
@@ -64,24 +64,13 @@ let pendingAuth
 let pendingEnrollRequest
 let TIMEOUT = __DEV__ ? 5000 : 1 * 60 * 1000
 
-const hasTouchID = co(function* hasTouchID () {
-  if (!LocalAuth) return false
-
-  try {
-    yield LocalAuth.hasTouchID()
-    return true
-  } catch (err) {
-    return false
-  }
-})
-
 module.exports = {
   TIMEOUT,
   Errors,
   setPassword,
   signIn,
   hasTouchID,
-  authenticateUser
+  deviceAuth
 }
 
 /**
@@ -89,7 +78,7 @@ module.exports = {
  * @param  {Object=DEFAULT_OPTS} opts
  * @return {Promise}
  */
-const authenticateUser = co(function* (opts) {
+async function deviceAuth (opts) {
   // prevent two authentication requests from
   // going in concurrently and causing problems
   if (__DEV__ && isAndroid) return
@@ -97,31 +86,19 @@ const authenticateUser = co(function* (opts) {
   debug('authenticating user, auth pending: ' + (!!pendingAuth))
   if (pendingAuth) return pendingAuth
 
-  const requestEnablePasscodeAndReauth = co(function* () {
-    debug('requesting to enable device passcode')
-    yield requestEnablePasscode()
-    pendingAuth = undefined
-    debug('device passcode alert dismissed, reattempting authentication')
-    return authenticateUser(opts)
-  })
-
-  if (!ENV.requireDeviceLocalAuth) {
-    try {
-      const isSecure = utils.isSimulator() ? true : yield LocalAuth.isDeviceSecure()
-      debug('is device secure? ' + isSecure)
-      if (!isSecure) {
-        return pendingAuth = requestEnablePasscodeAndReauth()
-      }
-
-      return
-    } catch (err) {
-      debug('unable to determine whether device is secure, asking for auth', err)
+  opts = typeof opts === 'string' ? { reason: opts} : opts || {}
+  opts = { ...DEFAULT_OPTS, ...opts }
+  try {
+    const isSecure = utils.isSimulator() ? true : await LocalAuth.isDeviceSecure()
+    debug('is device secure? ' + isSecure)
+    if (!isSecure) {
+      return pendingAuth = requestEnablePasscodeAndReauth()
     }
+  } catch (err) {
+    debug('unable to determine whether device is secure, asking for auth', err)
   }
 
   debug('requesting local auth')
-  opts = typeof opts === 'string' ? { reason: opts} : opts || {}
-  opts = { ...DEFAULT_OPTS, ...opts }
   try {
     return pendingAuth = LocalAuth.authenticate(opts)
   } catch (err) {
@@ -137,11 +114,21 @@ const authenticateUser = co(function* (opts) {
       }
     }
 
-    throw err
+    if (ForgivableTouchIDErrors.indexOf(err.name) !== -1) {
+      throw err
+    }
   } finally {
     pendingAuth = undefined
   }
-})
+
+  async function requestEnablePasscodeAndReauth () {
+    debug('requesting to enable device passcode')
+    await requestEnablePasscode()
+    pendingAuth = undefined
+    debug('device passcode alert dismissed, reattempting authentication')
+    return deviceAuth(opts)
+  }
+}
 
 function requestEnablePasscode () {
   return new Promise(resolve => {
@@ -155,9 +142,12 @@ function requestEnablePasscode () {
   })
 }
 
-function touchIDOrNothing () {
-  return authenticateUser()
-    .catch(requestEnrollTouchID)
+async function touchIDOrNothing () {
+  try {
+    return deviceAuth()
+  } catch (err) {
+    return requestEnrollTouchID()
+  }
 }
 
 function requestEnrollTouchID () {
@@ -171,34 +161,55 @@ function requestEnrollTouchID () {
           pendingEnrollRequest = null
           touchIDOrNothing().then(resolve)
         }
+      },
+      {
+        text: 'Cancel',
+        onPress: function () {
+          pendingEnrollRequest = null
+          resolve()
+        }
       }
     ])
   })
 }
 
-function signIn(navigator, newMe, isChangePassword) {
+async function hasTouchID () {
+  if (!LocalAuth) return false
+
+  try {
+    await LocalAuth.hasTouchID()
+    return true
+  } catch (err) {
+    return false
+  }
+}
+
+async function signIn(navigator, newMe, isChangePassword) {
   let me = utils.getMe()
   // if (!me)
   //   return register(cb)
-  if (me.isAuthenticated  &&  !newMe)
-    return Q()
+  if (me.isAuthenticated  &&  !newMe) return
 
-  let authPromise
-  let requireTouchID = me.useTouchId
-  if (me.useTouchId  &&  me.useGesturePassword)
-    authPromise = touchIDAndPasswordAuth(navigator, isChangePassword)
-  else if (me.useTouchId)
-    authPromise = touchIDOrNothing()
-  else
-    authPromise = passwordAuth(navigator, isChangePassword)
+  // if (!me.useTouchId && newMe.useTouchId) {
+  //   let has = await hasTouchID()
+  //   if (!has) await requestEnrollTouchID()
+  //   has = await hasTouchID()
+  //   if (!has)
+  // }
 
-  return authPromise
-    .then(() => {
-      Actions.setAuthenticated(true)
-      if (isChangePassword) {
-        return setPassword(navigator, isChangePassword)
-      }
-    })
+  let useTouchId = me.useTouchId || (newMe && newMe.useTouchId)
+  if (useTouchId) {
+    await deviceAuth()
+  }
+
+  if (me.useGesturePassword) {
+    await passwordAuth(navigator, isChangePassword)
+  }
+
+  Actions.setAuthenticated(true)
+  if (isChangePassword) {
+    return setPassword(navigator, isChangePassword)
+  }
 }
 
 /**
@@ -206,26 +217,26 @@ function signIn(navigator, newMe, isChangePassword) {
  * @param  {[type]} navigator [description]
  * @return {[type]}           [description]
  */
-function touchIDAndPasswordAuth(navigator, isChangePassword) {
-  if (isWeb) return passwordAuth(navigator, isChangePassword)
+// function touchIDAndPasswordAuth(navigator, isChangePassword) {
+//   // if (isAndroid) return passwordAuth(navigator, isChangePassword)
 
-  return authenticateUser()
-    .then(
-      () => passwordAuth(navigator, isChangePassword),
-      err => {
-        if (ForgivableTouchIDErrors.indexOf(err.name) === -1) {
-          throw err
-        }
+//   return deviceAuth()
+//     .then(
+//       () => passwordAuth(navigator, isChangePassword),
+//       err => {
+//         if (ForgivableTouchIDErrors.indexOf(err.name) === -1) {
+//           throw err
+//         }
 
-        // the user may have enabled touch id but then disabled it from
-        // the Settings app
-        //
-        // there's not much we can do short of demanding that the user
-        // turn touch id back on
-        return passwordAuth(navigator, isChangePassword)
-      }
-    )
-}
+//         // the user may have enabled touch id but then disabled it from
+//         // the Settings app
+//         //
+//         // there's not much we can do short of demanding that the user
+//         // turn touch id back on
+//         return passwordAuth(navigator, isChangePassword)
+//       }
+//     )
+// }
 
 // function changePasswordAuth(navigator) {
 //   return checkPassword(navigator)
@@ -237,7 +248,7 @@ function touchIDAndPasswordAuth(navigator, isChangePassword) {
 // function touchIDWithFallback(navigator) {
 //   if (isAndroid) return passwordAuth(navigator)
 
-//   return authenticateUser()
+//   return deviceAuth()
 //     .catch((err) => {
 //       if (err.name === 'LAErrorUserFallback' || err.name.indexOf('TouchID') !== -1)
 //         return passwordAuth(navigator)
@@ -246,16 +257,18 @@ function touchIDAndPasswordAuth(navigator, isChangePassword) {
 //     })
 // }
 
-function passwordAuth (navigator, isChangePassword) {
+async function passwordAuth (navigator, isChangePassword) {
   // check if we have a password stored already
   debug('checking for stored gesture password')
-  return utils.getHashedPassword(PASSWORD_ITEM_KEY)
-    .then(
-      () => checkPassword(navigator, isChangePassword),
-      // registration must have been aborted.
-      // ask user to set a password
-      err => setPassword(navigator, isChangePassword)
-    )
+  try {
+    await utils.getHashedPassword(PASSWORD_ITEM_KEY)
+  } catch (err) {
+    // registration must have been aborted.
+    // ask user to set a password
+    return setPassword(navigator, isChangePassword)
+  }
+
+  return checkPassword(navigator, isChangePassword)
 }
 
 function lockUp (nav, err) {

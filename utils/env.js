@@ -25,8 +25,6 @@ module.exports = extend({
   isWeb: function () {
     return Platform.OS === 'web'
   },
-  autoOptInTouchId: false,
-  lenientPassword: true,
   allowAddServer: true,
   allowForgetMe: true,
   get prefillForms() {
@@ -36,10 +34,16 @@ module.exports = extend({
   },
   serverToSendLog: __DEV__ ? `http://${LOCAL_IP}:44444/userlog` : 'https://azure1.tradle.io/userlog',
   showMyQRCode: false,
-  requireDeviceLocalAuth: false,
   homePage: true,
   useKeychain: true,
   pauseOnTransition: true,
   profileTitle: 'profile',
-  homePageScanQRCodePrompt: false
+  homePageScanQRCodePrompt: false,
+  // auth settings
+  // require touch id or device passcode
+  initWithDeepLink: '/profile',
+  lenientPassword: true,
+  requireDeviceLocalAuth: false,
+  autoOptInTouchId: false,
+  requireSoftPIN: false
 }, environment)
