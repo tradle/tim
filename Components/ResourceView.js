@@ -40,6 +40,8 @@ import { makeResponsive } from 'react-native-orient'
 import Log from './Log'
 import debug from '../utils/debug'
 import ConversationsIcon from './ConversationsIcon'
+import pick from 'object.pick'
+import Navs from '../utils/navs'
 
 const TALK_TO_EMPLOYEE = '1'
 // const SERVER_URL = 'http://192.168.0.162:44444/'
@@ -59,6 +61,7 @@ const ROOT_HASH = constants.ROOT_HASH
 const T_AND_C = 'tradle.TermsAndConditions'
 const FORM = 'tradle.Form'
 const VERIFICATION = 'tradle.Verification'
+const AUTH_PROPS = ['useTouchId', 'useGesturePassword']
 
 import {
   // StyleSheet,
@@ -394,15 +397,14 @@ class ResourceView extends Component {
   renderActionSheet() {
     let buttons = []
     let actions = []
-    if (ENV.requireDeviceLocalAuth) {
-      if (utils.isIOS()) {
-        // when both auth methods are available, give the choice to disable one
-        buttons.push(translate('useTouchId') + (this.state.useTouchId ? ' ✓' : ''))
-        actions.push(USE_TOUCH_ID)
-        buttons.push(translate('useGesturePassword') + (this.state.useGesturePassword ? ' ✓' : ''))
-        actions.push(USE_GESTURE_PASSWORD)
-      }
+    if (utils.isIOS()) {
+      // when both auth methods are available, give the choice to disable one
+      buttons.push(translate('useTouchId') + (this.state.useTouchId ? ' ✓' : ''))
+      actions.push(USE_TOUCH_ID)
     }
+
+    buttons.push(translate('useGesturePassword') + (this.state.useGesturePassword ? ' ✓' : ''))
+    actions.push(USE_GESTURE_PASSWORD)
 
     if (this.state.useGesturePassword || !utils.isIOS()) {
       buttons.push(translate('changeGesturePassword'))
@@ -455,25 +457,25 @@ class ResourceView extends Component {
   }
 
   changePreferences(action) {
-    const self = this
-    let me = utils.getMe()
-    let r = {
+    const me = utils.getMe()
+    const authSettings = pick(me, AUTH_PROPS)
+    const r = {
       _r: me[ROOT_HASH],
       _t: PROFILE,
+      ...authSettings
     }
+
     let isChangeGesturePassword
     switch (action) {
     case USE_TOUCH_ID:
-      r.useTouchId = me.useTouchId ? (me.useGesturePassword ? false : true) : true
-      r.useGesturePassword = me.useGesturePassword
-      break
+      r.useTouchId = !me.useTouchId
+      return this.updateAuthSettings(r)
     case USE_GESTURE_PASSWORD:
-      r.useGesturePassword = me.useGesturePassword ? (me.useTouchId ? false : true) : true
-      r.useTouchId = me.useTouchId
-      break
+      r.useGesturePassword = !me.useGesturePassword
+      // setting a gesture password is equivalent to changing it
+      return this.updateAuthSettings(r, r.useGesturePassword)
     case CHANGE_GESTURE_PASSWORD:
-      isChangeGesturePassword = true
-      break
+      return this.updateAuthSettings(r, true)
     case PAIR_DEVICES:
       Actions.genPairingData()
       return
@@ -495,25 +497,20 @@ class ResourceView extends Component {
       Actions.requestWipe()
       return
     }
-    if (!r.useGesturePassword  &&  !r.useTouchId)
-      r.useGesturePassword = true
-    if (!isChangeGesturePassword          &&
-        me.useTouchId === r.useTouchId    &&
-        me.useGesturePassword === r.useGesturePassword)
-      return
+  }
 
-    signIn(self.props.navigator, r, isChangeGesturePassword)
-      .then(() => {
-        Actions.addItem({resource: me, value: r, meta: utils.getModel(PROFILE).value})
-        if (isChangeGesturePassword) {
-          let routes = self.props.navigator.getCurrentRoutes()
-          self.props.navigator.popToRoute(routes[routes.length - 3])
-        } else {
-          self.props.navigator.pop()
-        }
+  async updateAuthSettings (settings, isChangeGesturePassword) {
+    const me = utils.getMe()
+    const { navigator } = this.props
+    const currentRoute = Navs.getCurrentRoute(navigator)
+    await signIn(navigator, settings, isChangeGesturePassword)
+    Actions.addItem({resource: me, value: settings, meta: utils.getModel(PROFILE).value})
 
-        self.setState({useGesturePassword: r.useGesturePassword, useTouchId: r.useTouchId})
-      })
+    if (Navs.getCurrentRoute(navigator) !== currentRoute) {
+      navigator.popToRoute(currentRoute)
+    }
+
+    this.setState(pick(settings, AUTH_PROPS))
   }
 }
 

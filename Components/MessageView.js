@@ -258,7 +258,7 @@ class MessageView extends Component {
 
     var checkProps = this.props.isVerifier /* && !utils.isReadOnlyChat(resource)*/ ? this.onCheck.bind(this) : null
     var actionPanel
-    if (this.props.isReview)
+    if (this.props.isReview  ||  isVerification)
       actionPanel = content
     else {
       actionPanel = <ShowRefList {...this.props}
