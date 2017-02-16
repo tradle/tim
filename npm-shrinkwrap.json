@@ -3887,6 +3887,11 @@
         }
       }
     },
+    "getusermedia": {
+      "version": "2.0.1",
+      "from": "getusermedia@2.0.1",
+      "resolved": "https://registry.npmjs.org/getusermedia/-/getusermedia-2.0.1.tgz"
+    },
     "gh-got": {
       "version": "2.4.0",
       "from": "gh-got@>=2.2.0 <3.0.0",
@@ -6975,6 +6980,11 @@
         }
       }
     },
+    "react-webcam": {
+      "version": "0.0.14",
+      "from": "git://github.com/tradle/react-webcam.git#853727c448d54a0dcd8eb5de63218bf50ebbbab2",
+      "resolved": "git://github.com/tradle/react-webcam.git#853727c448d54a0dcd8eb5de63218bf50ebbbab2"
+    },
     "read-all-stream": {
       "version": "3.1.0",
       "from": "read-all-stream@>=3.0.0 <4.0.0",
@@ -7411,6 +7421,11 @@
       "version": "1.1.6",
       "from": "sax@>=1.1.1 <1.2.0",
       "resolved": "https://registry.npmjs.org/sax/-/sax-1.1.6.tgz"
+    },
+    "sdp": {
+      "version": "1.2.1",
+      "from": "sdp@>=1.0.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/sdp/-/sdp-1.2.1.tgz"
     },
     "secp256k1": {
       "version": "3.2.0",
@@ -8700,6 +8715,11 @@
       "version": "1.8.3",
       "from": "webpack-dev-middleware@>=1.4.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/webpack-dev-middleware/-/webpack-dev-middleware-1.8.3.tgz"
+    },
+    "webrtc-adapter": {
+      "version": "2.1.0",
+      "from": "webrtc-adapter@>=2.0.2 <3.0.0",
+      "resolved": "https://registry.npmjs.org/webrtc-adapter/-/webrtc-adapter-2.1.0.tgz"
     },
     "websocket-driver": {
       "version": "0.6.5",
