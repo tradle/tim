@@ -14,6 +14,7 @@ import {
 import ImagePicker from 'react-native-image-picker'
 import utils from '../utils/utils'
 import extend from 'extend'
+const debug = require('debug')('tradle:app:ImageInput')
 
 const imageInputPropTypes = {
   ...TouchableHighlight.propTypes,
@@ -44,6 +45,18 @@ class ImageInput extends Component {
     )
   }
   async showImagePicker() {
+    if (this._active) {
+      return debug('ignoring showImagePicker() request, as it is already active')
+    }
+
+    this._active = true
+    try {
+      await this._doShowImagePicker()
+    } finally {
+      this._active = false
+    }
+  }
+  async _doShowImagePicker () {
     const { prop, onImage } = this.props
     let options = {returnIsVertical: true, quality: utils.imageQuality, cameraType: this.props.prop.cameraType || 'back'}
     let action
