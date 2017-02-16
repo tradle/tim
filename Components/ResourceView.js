@@ -403,11 +403,23 @@ class ResourceView extends Component {
       actions.push(USE_TOUCH_ID)
     }
 
-    buttons.push(translate('useGesturePassword') + (this.state.useGesturePassword ? ' ✓' : ''))
+    const usePassword = Platform.select({
+      ios: 'useGesturePassword',
+      android: 'useGesturePassword',
+      web: 'enablePassword'
+    })
+
+    buttons.push(translate(usePassword) + (this.state.useGesturePassword ? ' ✓' : ''))
     actions.push(USE_GESTURE_PASSWORD)
 
     if (this.state.useGesturePassword || !utils.isIOS()) {
-      buttons.push(translate('changeGesturePassword'))
+      const changePassword = Platform.select({
+        ios: 'changeGesturePassword',
+        android: 'changeGesturePassword',
+        web: 'changePassword'
+      })
+
+      buttons.push(translate(changePassword))
       actions.push(CHANGE_GESTURE_PASSWORD)
     }
 
