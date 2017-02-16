@@ -597,10 +597,19 @@ class FormRequestRow extends Component {
         if (resource.verifiers)
           onPressCall = this.props.chooseTrustedProvider.bind(this, this.props.resource, form, isMyMessage)
         else if (prop) {
-          if (prop.ref == PHOTO)
-            link = <ImageInput prop={prop} onImage={item => this.onSetMediaProperty(prop.name, item)}>
-                     {link}
-                   </ImageInput>
+          if (prop.ref === PHOTO) {
+            if (utils.isWeb()) {
+              link = <TouchableHighlight underlayColor='transparent' onPress={this.showCamera.bind(this, prop)}>
+                       {link}
+                     </TouchableHighlight>
+
+            }
+            else {
+              link = <ImageInput prop={prop} onImage={item => this.onSetMediaProperty(prop.name, item)}>
+                       {link}
+                     </ImageInput>
+            }
+          }
           else
             link = <TouchableHighlight onPress={() => this.chooser(prop, prop.name)} underlayColor='transparent'>
                      {link}
@@ -671,6 +680,25 @@ class FormRequestRow extends Component {
     })
   }
 
+  showCamera(prop) {
+    this.props.navigator.push({
+      title: 'Take a pic',
+      backButtonTitle: 'Back',
+      id: 12,
+      component: CameraView,
+      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      passProps: {
+        onTakePic: this.onTakePic.bind(this, prop)
+      }
+    });
+  }
+
+  onTakePic(prop, data) {
+    if (!data)
+      return
+    utils.onTakePic(prop, data, this.props.resource)
+    this.props.navigator.pop()
+  }
 }
 
 function isMultientry(resource) {

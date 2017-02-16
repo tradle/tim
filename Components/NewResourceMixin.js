@@ -759,20 +759,16 @@ var NewResourceMixin = {
       component: CameraView,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       passProps: {
-        onTakePic: this.onTakePic.bind(this, params)
+        onTakePic: this.onTakePic.bind(this, params.prop)
       }
     });
   },
 
-  onTakePic(params, data) {
+  onTakePic(prop, data) {
     if (!data)
       return
-    this.props.resource.video = data
-    if (!this.floatingProps)
-      this.floatingProps = {}
-
-    this.floatingProps.video = data
-    this.props.navigator.pop();
+    utils.onTakePic(prop, data, this.props.originatingMessage)
+    this.props.navigator.pop()
   },
 
   scanFormsQRCode(prop) {
@@ -1181,7 +1177,7 @@ var NewResourceMixin = {
     let actionItem
     if (isVideo ||  isPhoto) {
       // HACK
-      if (isPhoto  &&  (params.prop !== 'scan'  ||  utils.isAndroid()  ||  utils.isWeb())) {
+      if (isPhoto  &&  (params.prop !== 'scan'  ||  utils.isAndroid())) {
         var aiStyle = {flex: 7, paddingTop: 15, paddingBottom: 7}
         let m = utils.getModel(prop.ref).value
         actionItem = <ImageInput prop={prop} style={aiStyle} onImage={item => this.onSetMediaProperty(prop.name, item)}>

@@ -127,9 +127,12 @@ module.exports = CameraView
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    marginTop: 64,
     backgroundColor: BG_COLOR,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    borderTopColor: '#eeeeee',
+    borderTopWidth: StyleSheet.hairlineWidth
   },
   camera: {
   },

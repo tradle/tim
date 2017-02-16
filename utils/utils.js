@@ -22,6 +22,7 @@ import { getDimensions, getOrientation } from 'react-native-orient'
 import platformUtils from './platformUtils'
 import { post as submitLog } from './debug'
 import bankStyles from '../styles/bankStyles'
+import Actions from '../Actions/Actions'
 
 // import Orientation from 'react-native-orientation'
 
@@ -1705,6 +1706,34 @@ var utils = {
         }
       ]
     )
+  },
+  onTakePic(prop, data, formRequest) {
+    if (!data)
+      return
+    // Disable FormRequest
+    var params = {
+      value: {documentCreated: true},
+      doneWithMultiEntry: true,
+      resource: formRequest,
+      meta: utils.getModel(formRequest[TYPE]).value
+    }
+    Actions.addItem(params)
+
+    let photo = {
+      url: data.data,
+      height: data.height,
+      width: data.width
+    }
+    Actions.addItem({
+      disableFormRequest: formRequest,
+      resource: {
+        [TYPE]: formRequest.form,
+        [prop.name]: photo,
+        _context: formRequest._context,
+        from: utils.getMe(),
+        to: formRequest.from  // FormRequest.from
+      }
+    })
   }
 }
 
