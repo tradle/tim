@@ -1220,7 +1220,7 @@ var styles = StyleSheet.create({
   }
 })
 
-module.exports = makeResponsive(NewResource);
+module.exports = NewResource;
   // showChoice(prop) {
   //   var self = this;
   //   ImagePicker.showImagePicker({
