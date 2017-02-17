@@ -117,6 +117,8 @@
     "useGesturePassword": "Enable Gesture Password",
     "useTouchIdAndGesturePassword": "Enable Touch ID and Gesture",
     "changeGesturePassword": "Change gesture password",
+    "enablePassword": "Enable Password",
+    "changePassword": "Change Password",
     "touchIdOn": "Touch ID is ON",
     "passwordOn": "Gesture Password is ON",
     "bothOn": "Both are ON",
