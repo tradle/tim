@@ -18,7 +18,7 @@ export default StyleSheet.create({
   // },
   menuButtonNarrow: {
     marginTop: -23,
-    paddingVertical: 5,
+    paddingVertical: 6,
     height: 45,
     borderRadius: 24,
     paddingHorizontal: 21,
@@ -38,6 +38,17 @@ export default StyleSheet.create({
     shadowRadius: 5,
     shadowColor: '#afafaf',
     backgroundColor: 'red'
+  },
+  conversationButton: {
+    marginTop: -20,
+    paddingVertical: 5,
+    // paddingHorizontal: 6,
+    borderRadius: 26,
+    // shadowOffset:{width: 5, height: 5},
+    shadowOpacity: 1,
+    shadowRadius: 5,
+    shadowColor: '#afafaf',
+    // backgroundColor: '#7AAAC3'
   },
   menuButtonRegular: {
     marginTop: -20,

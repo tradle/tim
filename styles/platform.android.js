@@ -26,6 +26,11 @@ export default StyleSheet.create({
     marginTop: 2,
     paddingHorizontal: 5
   },
+  conversationButton: {
+    marginTop: 2,
+    paddingHorizontal: 5
+  },
+
   menuButton: {
     marginTop: 5,
     paddingHorizontal: 5
