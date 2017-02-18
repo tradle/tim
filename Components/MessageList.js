@@ -471,7 +471,7 @@ class MessageList extends Component {
     var model = utils.getModel(this.props.modelName).value;
     var resource = this.props.resource
     let bankStyle = this.props.bankStyle
-    var bgImage = bankStyle.BACKGROUND_IMAGE
+    var bgImage = bankStyle &&  bankStyle.BACKGROUND_IMAGE
     var bgStyle = {}
     if (!bgImage  &&  bankStyle.BACKGROUND_COLOR)
       bgStyle = {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}
