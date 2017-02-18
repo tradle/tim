@@ -285,9 +285,7 @@ class ResourceView extends Component {
 
     let footer
     let conversations
-    if (isIdentity) {
-      footer = <View style={styles.footer}>
-                <View style={styles.row}>
+/*
                   <TouchableOpacity onPress={this.showBanks.bind(this)}>
                     <View style={styles.conversationsRow}>
                       <ConversationsIcon size={35} style={{marginTop: 2, marginRight: 10}} />
@@ -296,7 +294,16 @@ class ResourceView extends Component {
                       </View>
                     </View>
                   </TouchableOpacity>
-                  <TouchableOpacity underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
+*/
+    if (isIdentity) {
+      footer = <View style={styles.footer}>
+                <View style={styles.row}>
+                  <TouchableOpacity onPress={this.showBanks.bind(this)} style={{paddingRight: 10}}>
+                    <View style={[platformStyles.conversationButton, {backgroundColor: '#7AAAC3', borderColor: '#7AAAC3', borderWidth: 1, opacity: 0.5}]}>
+                      <ConversationsIcon size={30} color={'#ffffff'} style={{marginLeft: 9, marginRight: 9}} />
+                    </View>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => this.ActionSheet.show()}>
                     <View style={[platformStyles.menuButtonRegular, {opacity: 0.5}]}>
                       <Icon name='md-finger-print' color={Platform.select(FINGERPRINT_COLOR)} size={fontSize(30)} />
                     </View>
@@ -541,7 +548,8 @@ var createStyles = utils.styleFactory(ResourceView, function ({ dimensions }) {
       paddingHorizontal: 10,
       marginRight: -10,
       flexDirection: 'row',
-      justifyContent: 'space-between'
+      // alignItems: 'flex-end'
+      // justifyContent: 'space-between'
     },
     resourceTitle: {
       fontSize: 20,
@@ -549,17 +557,18 @@ var createStyles = utils.styleFactory(ResourceView, function ({ dimensions }) {
       color: '#757575',
     },
     footer: {
-      flexDirection: 'row',
-      flexWrap: 'nowrap',
-      alignItems: Platform.OS === 'android' ? 'center' : 'flex-start',
-      justifyContent: 'space-between',
-      alignSelf: 'stretch',
+      // flexDirection: 'row',
+      // flexWrap: 'nowrap',
+      // alignItems: Platform.OS === 'android' ? 'center' : 'flex-start',
+      // justifyContent: 'space-between',
+      // alignSelf: 'stretch',
       height: 45,
       width: dimensions.width,
-      backgroundColor: '#eeeeee',
+      backgroundColor: '#efefef',
       borderColor: '#eeeeee',
       borderWidth: 1,
-      borderTopColor: '#cccccc',
+      // borderTopColor: '#cccccc',
+      alignItems: 'flex-end',
       paddingRight: 10,
     }
   })
