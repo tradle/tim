@@ -309,26 +309,34 @@ var Store = Reflux.createStore({
         })
     }
 
-    return this.ready = Q.all([
-        this.getMe(),
-        this.getSettings(),
-        // this.loadModels()
-      ])
-      .then(() => {
-        // this.loadMyResources()
-        if (!utils.isEmpty(list))
-          isLoaded = true;
+    this.ready = this.getReady()
+  },
+  async getReady() {
+    let me
+    try {
+      me = await this.getMe()
+    } catch(err)  {
+      debug('Store.init ' + err.stack)
+    }
+    let doMonitor = true
+    if (!me  &&  ENV.autoRegister) {
+      me = await this.autoRegister()
+      doMonitor = false
+    }
+    await this.getSettings()
 
-        if (me) {
-          return this.getDriver(me)
-            .then(() => this.monitorTim())
-        }
-      })
-      .then(() => {
-        if (me && me.registeredForPushNotifications) {
-          Push.resetBadgeNumber()
-        }
-      })
+    if (!utils.isEmpty(list))
+      isLoaded = true;
+
+    if (me) {
+      await this.getDriver(me)
+      if (doMonitor)
+        this.monitorTim()
+    }
+
+    if (me && me.registeredForPushNotifications) {
+      Push.resetBadgeNumber()
+    }
   },
   addModels() {
     voc.forEach((m) => {
@@ -397,11 +405,12 @@ var Store = Reflux.createStore({
       self.setMe(me)
       var key = value[TYPE] + '_' + value[ROOT_HASH]
       self._setItem(key, value)
+      return me
     })
-    .catch(function(err) {
+    // .catch(function(err) {
       // debugger
       // return self.loadModels()
-    })
+    // })
   },
   setMe(newMe) {
     me = newMe
@@ -1776,6 +1785,9 @@ var Store = Reflux.createStore({
       });
     })
   },
+  onSetPreferences(preferences) {
+    this.preferences = preferences
+  },
   onAddMessage(params) {
     let r = params.msg
     let isWelcome = params.isWelcome
@@ -2818,7 +2830,7 @@ var Store = Reflux.createStore({
 
       var isMessage = utils.isMessage(meta)
       var readOnlyBacklinks = []
-      Q.allSettled(promises)
+      return Q.allSettled(promises)
       .then(function(results) {
         let allFoundRefs = foundRefs.concat(results);
         allFoundRefs.forEach(function(val) {
@@ -3515,6 +3527,54 @@ var Store = Reflux.createStore({
       //   err = err;
       // });
 
+  },
+  async autoRegister() {
+    let me
+    try {
+      me = await this.getMe()
+    } catch(err) {
+      debug('Store.autoRegister', err.stack)
+    }
+    if (!me) {
+      await this.onAddItem({resource: {
+              [constants.TYPE]: constants.TYPES.PROFILE,
+              firstName: 'Friend'
+            }, isRegistration: true})
+    }
+
+    return utils.getMe()
+  },
+  async onGetProvider(params) {
+    await this.ready
+    await this._loadedResourcesDefer.promise
+    // try {
+    //   await this.getMe()
+    // } catch(err) {
+    //   debug('Store.onGetProvider', err.stack)
+    // }
+    let permalink = params.provider
+    let serverUrl = params.url
+    let providerBot = this._getItem(PROFILE + '_' + permalink)
+    if (!providerBot) {
+      await this.onAddItem({
+        resource: {[constants.TYPE]: constants.TYPES.SETTINGS, url: serverUrl}
+      })
+      providerBot = this._getItem(PROFILE + '_' + permalink)
+    }
+    if (providerBot) {
+      let provider = this._getItem(utils.getId(providerBot.organization))
+      this.trigger({action: 'getProvider', provider: provider})
+    }
+  },
+  getProviderById(providerId) {
+    if (!SERVICE_PROVIDERS)
+      return
+    let provider
+    SERVICE_PROVIDERS.forEach((sp) => {
+      if (sp.id === providerId)
+        provider = this._getItem(sp.org)
+    })
+    return provider
   },
   onMessageList(params) {
     this.onList(params);
@@ -5062,10 +5122,8 @@ var Store = Reflux.createStore({
 
     var mid;
 
-    if (isRegistration) {
-      this.registration(value)
-      return
-    }
+    if (isRegistration)
+      return this.registration(value)
 
     if (value[TYPE] === SETTINGS)
       return this.addSettings(value)
@@ -5324,7 +5382,7 @@ var Store = Reflux.createStore({
     })
     .then(function() {
       self.trigger({action: 'addItem', resource: value})
-      self.dbPut(key, self._getItem(key))
+      return self.dbPut(key, self._getItem(key))
     })
     .catch((err) => {
       self.trigger({action: 'addItem', error: err.message, resource: value})
@@ -6467,6 +6525,37 @@ var Store = Reflux.createStore({
       batch.push({type: 'put', key: utils.getId(org), value: org})
       this.trigger({action: 'getItem', resource: org})
       noTrigger = hasNoTrigger(orgId)
+    }
+    if (isProductList  &&  this.preferences) {
+      if (this.preferences.firstPage === 'chat' && ENV.autoRegister) {
+          // ENV.autoRegister                &&
+          // org.products.length === 1) {
+        let meRef = this.buildRef(utils.getMe())
+        let pa = this.searchMessages({modelName: PRODUCT_APPLICATION})
+        let product = org.products[0]
+        let hasThisProductApp = pa ? pa.some((r) => {r.product === product}) : null
+        if (pa)
+          return
+        if (this.preferences.message) {
+          this.onAddMessage({
+            msg: {
+              [TYPE]: SIMPLE_MESSAGE,
+              message: translate(this.preferences.message),
+              from: meRef,
+              to: val.from
+            }
+          })
+        }
+        this.onAddItem({
+          resource: {
+            [TYPE]: PRODUCT_APPLICATION,
+            product: product,
+            from: meRef,
+            to: val.from
+          }
+        })
+        return
+      }
     }
     var isStylesPack = val[TYPE] === STYLES_PACK
     if (isStylesPack) {

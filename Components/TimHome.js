@@ -8,7 +8,8 @@ var VideoPlayer = require('./VideoPlayer')
 var NewResource = require('./NewResource');
 var HomePage = require('./HomePage')
 var ResourceView = require('./ResourceView');
-// var Tabs = require('./Tabs')
+var MessageList = require('./MessageList')
+var extend = require('extend')
 var utils = require('../utils/utils');
 var translate = utils.translate
 var Reflux = require('reflux');
@@ -160,20 +161,20 @@ class TimHome extends Component {
         this.state.hasMe !== nextState.hasMe
   }
 
-  _handleOpenURL({ url }) {
-    return
+  _handleOpenURL({url}) {
+    // return
     debug(`opening URL: ${url}`)
-    var url = url.trim();
-    var idx = url.indexOf('://');
-    var url = url.substring(idx + 3)
-    idx = url.indexOf('/')
 
-    url = url.replace('/', '://')
-    Actions.addItem({
-      resource: {_t: constants.TYPES.SETTINGS, url: url},
-      value: {_t: constants.TYPES.SETTINGS, url: url},
-      meta: utils.getModel(constants.TYPES.SETTINGS).value
-    })
+    let URL = require('url').parse(url)
+    let pathname = URL.pathname
+    let query = URL.query
+
+    let qs = require('querystring').parse(query)
+    pathname = pathname.substring(1)
+    let state = {firstPage: pathname}
+    extend(state, qs)
+    this.setState(state)
+    Actions.setPreferences(state)
   }
 
   async onStart(params) {
@@ -223,7 +224,10 @@ class TimHome extends Component {
     this.setState({isLoading: false});
     clearTimeout(this.uhOhTimeout)
     if (!utils.getMe()) {
-      this.setState({isModalOpen: true})
+      if (ENV.autoRegister)
+        this.showFirstPage()
+      else
+        this.setState({isModalOpen: true})
       // this.register(() => this.showFirstPage())
       return
     }
@@ -277,6 +281,13 @@ class TimHome extends Component {
         message: translate('pleaseRestartTIM'), //Please restart TiM'
       });
       utils.setModels(params.models);
+      return
+    case 'getProvider':
+      this.showChat(params.provider)
+      // this.setState({
+      //   provider: params.provider,
+      //   action: 'chat'
+      // })
       return
     case 'start':
       this.onStart(params)
@@ -402,7 +413,32 @@ class TimHome extends Component {
     var nav = this.props.navigator
     nav.immediatelyResetRouteStack(nav.getCurrentRoutes().slice(0,1));
     let me = utils.getMe()
-    if (me.isEmployee) {
+    if (this.state.firstPage) {
+      switch (this.state.firstPage) {
+      case 'chat':
+        Actions.getProvider({
+          provider: this.state.permalink,
+          url: this.state.url
+        })
+        // this.showChat(this.state.provider)
+        return
+      case 'officialAccounts':
+        if (me.isEmployee)
+          this.showContacts()
+        return
+      case 'profile':
+        this.showHomePage(doReplace)
+        return
+      default:
+        if (ENV.homePage)
+          this.showHomePage(doReplace)
+        else
+          this.showOfficialAccounts()
+      }
+
+      return
+    }
+    if (me  &&  me.isEmployee) {
       this.showContacts()
       return
     }
@@ -411,7 +447,38 @@ class TimHome extends Component {
       this.showHomePage(doReplace)
       return
     }
+    this.showOfficialAccounts()
+  }
+  showChat(provider) {
+    let me = utils.getMe()
+    var msg = {
+      message: translate('customerWaiting', me.firstName),
+      _t: constants.TYPES.CUSTOMER_WAITING,
+      from: me,
+      to: provider,
+      time: new Date().getTime()
+    }
 
+    utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage({msg: msg, isWelcome: true}))
+
+    let style = {}
+    extend(style, defaultBankStyle)
+    if (provider.style)
+      extend(style, provider.style)
+    this.props.navigator.push({
+      title: provider.name,
+      component: MessageList,
+      id: 11,
+      backButtonTitle: 'Back',
+      passProps: {
+        resource: provider,
+        modelName: constants.TYPES.MESSAGE,
+        currency: this.props.currency,
+        bankStyle:  style
+      }
+    })
+  }
+  showOfficialAccounts() {
     let passProps = {
       filter: '',
       modelName: constants.TYPES.ORGANIZATION,
@@ -460,7 +527,8 @@ class TimHome extends Component {
     // if (doReplace)
     //   nav.replace(route)
     // else
-      nav.push(route)
+    var nav = this.props.navigator
+    nav.push(route)
 
   }
 
