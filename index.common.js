@@ -391,7 +391,7 @@ class TiMApp extends Component {
           // return {...Navigator.SceneConfigs.FloatFromRight, springFriction:26, springTension:300};
 
   renderScene(route, nav) {
-    if (route.id === TIM_HOME || route.id === PASSWORD_CHECK  ||  (!utils.getMe()  ||  !utils.getMe().isRegistered  &&  route.id === NEW_RESOURCE)) {
+    if (isPortraitOnlyRoute(route)) {
       this._lockToPortrait()
     } else {
       this._unlockOrientation()
@@ -777,6 +777,14 @@ var styles = StyleSheet.create({
 });
 
 AppRegistry.registerComponent('Tradle', function() { return TiMApp });
+
+function isPortraitOnlyRoute (route) {
+  const orientation = route.component.orientation
+  if (orientation && orientation.toLowerCase() === 'portrait') return true
+
+  return !utils.getMe() && route.id === NEW_RESOURCE
+}
+
 
   // render() {
   //   var props = {db: this.state.db};
