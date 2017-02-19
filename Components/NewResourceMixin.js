@@ -1177,7 +1177,16 @@ var NewResourceMixin = {
     let actionItem
     if (isVideo ||  isPhoto) {
       // HACK
-      if (isPhoto  &&  (params.prop !== 'scan'  ||  utils.isAndroid())) {
+      const isScan = params.prop === 'scan'
+      let useImageInput
+      if (utils.isIOS()) {
+        useImageInput = !isScan
+      } else {
+        useImageInput = isScan
+      }
+
+      if (useImageInput) {
+      // if (isPhoto  &&  (params.prop !== 'scan'  ||  utils.isAndroid()  ||  utils.isWeb())) {
         var aiStyle = {flex: 7, paddingTop: 15, paddingBottom: 7}
         let m = utils.getModel(prop.ref).value
         actionItem = <ImageInput prop={prop} style={aiStyle} onImage={item => this.onSetMediaProperty(prop.name, item)}>
