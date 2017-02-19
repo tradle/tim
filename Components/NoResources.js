@@ -16,7 +16,7 @@ class NoResources extends Component {
     else if (!this.props.isLoading)
       // If we're looking at the latest resources, aren't currently loading, and
       // still have no results, show a message
-      noRes = <Text style={styles.NoResourcesText}>{'No ' + utils.translateModel(this.props.model, true) + ' were found.'}</Text>
+      noRes = <Text style={styles.NoResourcesText}>{'Empty list'}</Text>
     else
       return <View />
     return (

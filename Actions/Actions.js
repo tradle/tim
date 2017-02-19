@@ -55,7 +55,10 @@ var asyncActions = [
   'viewChat',
 
   'exploreBacklink',
-  'getDetails'
+  'getDetails',
+  'getProvider',
+  'autoRegister',
+  'setPreferences'
 ]
 
 var syncActions = [
