@@ -39,7 +39,18 @@ module.exports = exports = StyleSheet.create({
   menuButtonRegular: {
     marginTop: -20,
     paddingVertical: 5,
-    paddingHorizontal: 10,
+    paddingHorizontal: 13,
+    borderRadius: 24,
+    // shadowOffset:{width: 5, height: 5},
+    shadowOpacity: 1,
+    shadowRadius: 5,
+    shadowColor: '#afafaf',
+    backgroundColor: 'red'
+  },
+  conversationButton: {
+    marginTop: -20,
+    paddingVertical: 5,
+    paddingHorizontal: 2,
     borderRadius: 24,
     // shadowOffset:{width: 5, height: 5},
     shadowOpacity: 1,

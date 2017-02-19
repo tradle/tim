@@ -825,7 +825,7 @@ var styles = StyleSheet.create({
   navBarLeftButton: {
     paddingLeft: 20,
     paddingRight: 25,
-    marginTop: 7
+    marginTop: 0
   },
   navBarRightButton: {
     paddingLeft: 25,
