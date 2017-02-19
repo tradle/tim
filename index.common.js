@@ -738,8 +738,6 @@ var NavigationBarRouteMapper = {
         let width
         if (photoObj.width  &&  photoObj.height)
           width = photoObj.width > photoObj.height ? HEIGHT * (photoObj.width/photoObj.height) : HEIGHT
-        else
-          width = 149
         photo = <Image source={{uri: uri}} style={[styles.msgImageNoText, {resizeMode: 'contain', width: width}, utils.isAndroid() ? {marginTop: 23} : {}]} />
       }
     }

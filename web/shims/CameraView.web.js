@@ -90,7 +90,7 @@ class CameraView extends Component {
     let media
     if (this.state.photo) {
       const { data, width, height } = this.state.photo
-      media = <Image source={{uri: data}} style={styles.camera} />
+      media = <Image source={{uri: data}} width={width} height={height} style={styles.camera} />
     } else {
       media = this.renderCamera()
     }
