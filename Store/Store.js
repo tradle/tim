@@ -1566,8 +1566,8 @@ var Store = Reflux.createStore({
       extend(newOrg, sp.org)
       newOrg.hasSupportLine = sp.hasSupportLine
       newOrg.canShareContext = sp.canShareContext
-      batch.push({type: 'put', key: okey, value: sp.org})
-      this._setItem(okey, sp.org)
+      batch.push({type: 'put', key: okey, value: newOrg})
+      this._setItem(okey, newOrg)
     }
 
     list[okey].value._online = true
@@ -6593,9 +6593,8 @@ var Store = Reflux.createStore({
             to: val.from
           }
         })
+        return
       }
-      return
-
     }
     var isStylesPack = val[TYPE] === STYLES_PACK
     if (isStylesPack) {
