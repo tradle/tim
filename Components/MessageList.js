@@ -510,7 +510,7 @@ class MessageList extends Component {
     if (!content) {
       var isAllMessages = model.isInterface  &&  model.id === TYPES.MESSAGE;
 
-      let hideTextInput = false // resource[TYPE] === PRODUCT_APPLICATION  && utils.isReadOnlyChat(resource)
+      let hideTextInput = !this.props.resource.hasSupportLine // resource[TYPE] === PRODUCT_APPLICATION  && utils.isReadOnlyChat(resource)
       let h = utils.dimensions(MessageList).height
       var maxHeight = h - (Platform.OS === 'android' ? 85 : 64)
       // Chooser for trusted party verifier
@@ -520,7 +520,8 @@ class MessageList extends Component {
       if ((this.state.context  &&  this.state.context.product !== REMEDIATION)  ||  (resource[TYPE] === PRODUCT_APPLICATION && resource.product !== REMEDIATION))
         maxHeight -= 45
       if (hideTextInput)
-        maxHeight -= 10
+        maxHeight += 45
+        // maxHeight -= 10
       // content = <GiftedMessenger style={{paddingHorizontal: 10, marginBottom: Platform.OS === 'android' ? 0 : 20}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
       // Hide TextInput for shared context since it is read-only
       content = <GiftedMessenger style={{paddingHorizontal: 10}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
@@ -571,7 +572,8 @@ class MessageList extends Component {
     else
       chooser = <View/>
 
-    var sepStyle = { height: 1,backgroundColor: LINK_COLOR }
+    // var sepStyle = { height: 1,backgroundColor: LINK_COLOR }
+    var sepStyle = { height: 1,backgroundColor: 'transparent' }
     if (!this.state.allLoaded  && !this.props.navigator.isConnected  &&  this.state.isForgetting)
       Alert.alert(translate('noConnectionWillProcessLater'))
           // <View style={{flex: 10}}>
@@ -596,10 +598,16 @@ class MessageList extends Component {
       network = <NetworkInfoProvider connected={this.state.isConnected} resource={resource} online={this.state.onlineStatus} />
     if (!context  &&  this.props.resource[TYPE] === PRODUCT_APPLICATION)
       context = this.props.resource
-
+    let separator = {}
+    if (bankStyle) {
+      if (bankStyle.NAV_BAR_BORDER_COLOR) {
+        separator.borderTopColor = bankStyle.NAV_BAR_BORDER_COLOR
+        separator.borderTopWidth = bankStyle.NAV_BAR_BORDER_WIDTH ||  StyleSheet.hairlineWidth
+      }
+    }
     if (!bgImage)
       return (
-        <PageView style={[platformStyles.container, bgStyle]}>
+        <PageView style={[platformStyles.container, bgStyle]} separator={separator}>
           {network}
           <ProgressInfo />
           <ChatContext chat={resource} context={context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={this.props.bankStyle} allContexts={this.state.allContexts} />
@@ -613,7 +621,7 @@ class MessageList extends Component {
     let image = { width, height }
 
     return (
-      <PageView style={[platformStyles.container, bgStyle]}>
+      <PageView style={[platformStyles.container, bgStyle]} separator={separator}>
         <Image source={{uri: bgImage}}  resizeMode='cover' style={image}>
           {network}
           <ProgressInfo />
@@ -632,6 +640,8 @@ class MessageList extends Component {
   }
 
   getActionSheetItems() {
+    if (!this.props.resource.hasSupportLine)
+      return false
     let buttons = []
     let isOrg = this.props.resource[TYPE] === TYPES.ORGANIZATION
     let cancelIndex = 1
