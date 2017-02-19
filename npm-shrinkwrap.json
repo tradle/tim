@@ -6982,8 +6982,8 @@
     },
     "react-webcam": {
       "version": "0.0.14",
-      "from": "git://github.com/tradle/react-webcam.git#853727c448d54a0dcd8eb5de63218bf50ebbbab2",
-      "resolved": "git://github.com/tradle/react-webcam.git#853727c448d54a0dcd8eb5de63218bf50ebbbab2"
+      "from": "git://github.com/tradle/react-webcam.git#4139034b236595c12bba8980c09c78f56dc7ac51",
+      "resolved": "git://github.com/tradle/react-webcam.git#4139034b236595c12bba8980c09c78f56dc7ac51"
     },
     "read-all-stream": {
       "version": "3.1.0",
@@ -7423,9 +7423,9 @@
       "resolved": "https://registry.npmjs.org/sax/-/sax-1.1.6.tgz"
     },
     "sdp": {
-      "version": "1.2.1",
+      "version": "1.3.0",
       "from": "sdp@>=1.0.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/sdp/-/sdp-1.2.1.tgz"
+      "resolved": "https://registry.npmjs.org/sdp/-/sdp-1.3.0.tgz"
     },
     "secp256k1": {
       "version": "3.2.0",
