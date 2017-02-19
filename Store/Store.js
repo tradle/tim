@@ -610,6 +610,8 @@ var Store = Reflux.createStore({
       // }
     })
 
+    meDriver.setMaxListeners(0)
+
     console.log('me: ' + meDriver.permalink)
     meDriver = tradleUtils.promisifyNode(meDriver)
     this.idlifyExpensiveCalls()
@@ -1516,7 +1518,8 @@ var Store = Reflux.createStore({
           org: utils.getId(sp.org),
           url: originalUrl,
           style: sp.style,
-          permalink: sp.bot.permalink
+          permalink: sp.bot.permalink,
+          hasSupportLine: sp.hasSupportLine
         }
         // Check is this is an update SP info
         let oldSp
@@ -1564,6 +1567,10 @@ var Store = Reflux.createStore({
       }
     }
     else {
+      let newOrg = {}
+      extend(newOrg, sp.org)
+      newOrg.hasSupportLine = sp.hasSupportLine
+      newOrg.canShareContext = sp.canShareContext
       batch.push({type: 'put', key: okey, value: sp.org})
       this._setItem(okey, sp.org)
     }
@@ -1978,7 +1985,7 @@ var Store = Reflux.createStore({
       })
     })
     .then(function() {
-      if (isWelcome && utils.isEmpty(welcomeMessage))
+      if (isWelcome  &&  utils.isEmpty(welcomeMessage))
         return;
 
       // Temporary untill the real hash is known
@@ -6536,15 +6543,29 @@ var Store = Reflux.createStore({
         let hasThisProductApp = pa ? pa.some((r) => {r.product === product}) : null
         if (pa)
           return
-        if (this.preferences.message) {
-          this.onAddMessage({
-            msg: {
-              [TYPE]: SIMPLE_MESSAGE,
-              message: translate(this.preferences.message),
-              from: meRef,
-              to: val.from
-            }
-          })
+        if (this.preferences._message) {
+          let msg = {
+            [TYPE]: SIMPLE_MESSAGE,
+            [ROOT_HASH]: val.from.title.replace(' ', '_') + '_1',
+            message: translate(this.preferences._message),
+            time: new Date().getTime(),
+            from: val.from,
+            to: meRef
+          }
+          let msgId = utils.getId(msg)
+          this._setItem(msgId, msg)
+          this.addMessagesToChat(utils.getId(org), msg)
+          this.trigger({action: 'addMessage', resource: msg})
+          db.put(msgId, msg)
+
+          // this.onAddMessage({
+          //   msg: {
+          //     [TYPE]: SIMPLE_MESSAGE,
+          //     message: translate(this.preferences._message),
+          //     to: val.from,
+          //     from: meRef
+          //   }
+          // })
         }
         this.onAddItem({
           resource: {
@@ -6554,8 +6575,9 @@ var Store = Reflux.createStore({
             to: val.from
           }
         })
-        return
       }
+      return
+
     }
     var isStylesPack = val[TYPE] === STYLES_PACK
     if (isStylesPack) {

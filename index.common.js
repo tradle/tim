@@ -15,7 +15,6 @@ import './utils/shim'
 import './utils/crypto'
 import 'stream'
 // require('./timmy')
-
 var ResourceList = require('./Components/ResourceList');
 var VerifierChooser = require('./Components/VerifierChooser')
 
@@ -57,13 +56,16 @@ import * as AutomaticUpdates from './utils/automaticUpdates';
 import { signIn } from './utils/localAuth'
 import Reflux from 'reflux'
 import Store from './Store/Store'
+import extend from 'extend'
 var StyleSheet = require('./StyleSheet')
 
 const TIM_HOME = 1
 const NEW_RESOURCE = 4
 const MESSAGE_LIST = 11
+const MESSAGE_VIEW = 5
 const PASSWORD_CHECK = 20
 const REMEDIATION = 29
+const HEIGHT = 27
 
 var reactMixin = require('react-mixin');
 import {
@@ -85,6 +87,7 @@ import {
 import Orientation from 'react-native-orientation'
 import platformStyles from './styles/platform'
 import SimpleModal from './Components/SimpleModal'
+import defaultBankStyle from './styles/bankStyle.json'
 
 let originalGetDefaultProps = Text.getDefaultProps;
 Text.defaultProps = function() {
@@ -133,6 +136,7 @@ class TiMApp extends Component {
         // titleTextColor: '#7AAAC3',
         component: TimHome,
         passProps: props,
+        navBarBgColor: 'transparent'
       },
       props: props
     };
@@ -174,7 +178,6 @@ class TiMApp extends Component {
         break
     }
   }
-
   _handleAppStateChange(currentAppState) {
     // TODO:
     // Actions.appState(currentAppState)
@@ -319,7 +322,6 @@ class TiMApp extends Component {
 
   onNavigatorBeforeTransition(e) {
     if (ReactPerf) ReactPerf.start()
-
     Actions.startTransition()
   }
 
@@ -369,9 +371,17 @@ class TiMApp extends Component {
           renderScene={this.renderScene.bind(this)}
           navigationBar={
             <Navigator.NavigationBar
+              style={{backgroundColor: this.state.navBarBgColor}}
               routeMapper={NavigationBarRouteMapper}
             />
           }
+          onWillFocus={(newRoute) => {
+            let style = newRoute.passProps.bankStyle
+            if (style)
+              this.setState({navBarBgColor: style.NAV_BAR_BACKGROUND_COLOR || 'transparent'})
+            else
+              this.setState({navBarBgColor: 'transparent'})
+          }}
           passProps={this.state.props}
           configureScene={(route) => {
             if (route.sceneConfig)
@@ -686,15 +696,35 @@ var NavigationBarRouteMapper = {
     else
       org = <View />;
     let photo, uri
-    if (route.id === MESSAGE_LIST  &&  route.passProps.resource.photos)
-      uri = utils.getImageUri(route.passProps.resource.photos[0].url);
-    if (route.id === REMEDIATION)
-      uri = route.passProps.to.photos && utils.getImageUri(route.passProps.to.photos[0].url)
+    let photoObj
+    if (route.passProps.bankStyle)
+      photoObj = route.passProps.bankStyle.logo
 
-    if (uri)
-      photo = <Image source={{uri: uri}} style={[styles.msgImage, utils.isAndroid() ? {marginTop: 23} : {}]} />
-    else
-      photo = <View/>
+    if (!photoObj)
+      photoObj = route.id === MESSAGE_LIST  &&  route.passProps.resource.photos[0]
+    if (photoObj)
+      uri = utils.getImageUri(photoObj.url);
+    if (route.id === REMEDIATION) {
+      photoObj = route.passProps.to.photos  &&  route.passProps.to.photos[0]
+      uri =  photoObj && utils.getImageUri(photoObj.url)
+    }
+    let logoNeedsText = !route.passProps.resource ||
+                        route.passProps.resource[constants.TYPE] !== constants.TYPES.ORGANIZATION ||
+                        !route.passProps.bankStyle ||
+                        route.passProps.bankStyle.LOGO_NEEDS_TEXT
+    if (uri) {
+      if (logoNeedsText) {
+        photo = <Image source={{uri: uri}} style={[styles.msgImage, utils.isAndroid() ? {marginTop: 23} : {}]} />
+      }
+      else {
+        let width
+        if (photoObj.width  &&  photoObj.height)
+          width = photoObj.width > photoObj.height ? HEIGHT * (photoObj.width/photoObj.height) : HEIGHT
+        else
+          width = 149
+        photo = <Image source={{uri: uri}} style={[styles.msgImageNoText, {resizeMode: 'contain', width: width}, utils.isAndroid() ? {marginTop: 23} : {}]} />
+      }
+    }
     var style = [platformStyles.navBarText, styles.navBarTitleText, {color: '#555555'}]
     if (route.titleTextColor)
       style.push({color: route.titleTextColor});
@@ -703,14 +733,19 @@ var NavigationBarRouteMapper = {
     let tArr = t.length > 1 ? [] : <View />
 
     for (let i=1; i<t.length; i++)
-      tArr.push(<Text style={{marginTop: -3, color: '#2892C6', fontSize: 12, alignSelf: 'center'}} key={'index.common.js_' + i}>{t[i]}</Text>)
+      tArr.push(<Text style={styles.arr} key={'index.common.js_' + i}>{t[i]}</Text>)
+    let text
+    if (logoNeedsText) {
+      text = <Text style={style}>
+              {t[0]}
+             </Text>
+    }
+
     return (
       <View key={'index.common.js'}>
         <View style={{flexDirection: 'row'}}>
-        {photo}
-        <Text style={style}>
-          {t[0]}
-        </Text>
+          {photo}
+          {text}
         </View>
         {tArr}
         {org}
@@ -733,19 +768,27 @@ var NavigationBarRouteMapper = {
 var styles = StyleSheet.create({
   msgImage: {
     // backgroundColor: '#dddddd',
-    height: 27,
+    height: HEIGHT,
     marginRight: 3,
+    resizeMode: 'contain',
     marginTop: 7,
     marginLeft: 0,
-    width: 27,
+    width: HEIGHT,
     borderRadius: 13,
     borderColor: '#cccccc',
     borderWidth: StyleSheet.hairlineWidth
   },
+  msgImageNoText: {
+    // backgroundColor: '#dddddd',
+    height: 27,
+    marginRight: 3,
+    marginTop: 7,
+    marginLeft: 0,
+  },
   icon: {
     width: 25,
     height: 25,
-    marginTop: Platform.OS === 'android' ? 19 : 10
+    marginTop: Platform.OS === 'android' ? 19 : 0
   },
   row: {
     flexDirection: 'row'
@@ -765,14 +808,22 @@ var styles = StyleSheet.create({
   navBarLeftButton: {
     paddingLeft: 10,
     paddingRight: 25,
+    marginTop: 7
   },
   navBarRightButton: {
     paddingLeft: 25,
     paddingRight: 10,
+    marginTop: 7
   },
   navBarButtonText: {
     color: '#7AAAC3',
     fontSize: 18
+  },
+  arr: {
+    marginTop: -3,
+    color: '#2892C6',
+    fontSize: 12,
+    alignSelf: 'center'
   }
 });
 
