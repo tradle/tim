@@ -544,7 +544,7 @@ class MessageList extends Component {
       if ((this.state.context  &&  this.state.context.product !== REMEDIATION)  ||  (resource[TYPE] === PRODUCT_APPLICATION && resource.product !== REMEDIATION))
         maxHeight -= 45
       if (hideTextInput)
-        maxHeight += 45
+        maxHeight += 35
         // maxHeight -= 10
       // content = <GiftedMessenger style={{paddingHorizontal: 10, marginBottom: Platform.OS === 'android' ? 0 : 20}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
       var marginLeft = 10
