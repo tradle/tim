@@ -14,7 +14,7 @@ class PageView extends Component {
   }
   render() {
     return (
-      <View style={[this.props.style, styles.separator]}>
+      <View style={[this.props.style, this.props.separator || styles.separator]}>
         {this.props.children}
       </View>
     )
