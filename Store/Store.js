@@ -6559,7 +6559,7 @@ var Store = Reflux.createStore({
         let pa = this.searchMessages({modelName: PRODUCT_APPLICATION})
         let product = org.products[0]
         let hasThisProductApp = pa ? pa.some((r) => {r.product === product}) : null
-        if (pa)
+        if (hasThisProductApp)
           return
         if (this.preferences._message) {
           let msg = {
