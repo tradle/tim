@@ -3665,6 +3665,14 @@ var Store = Reflux.createStore({
       if (params.isAggregation)
         result = this.getDependencies(result);
 
+      if (ENV.hideVerificationsInChat       &&
+          params.to[TYPE] === ORGANIZATION  &&
+          params.modelName === MESSAGE      &&
+          !params.isForgetting) {
+        for (let i=result.length - 1; i>=0; i--)
+          if (result[i][TYPE] === VERIFICATION)
+            result.splice(i, 1)
+      }
       var shareableResources;
       var retParams = {
         action: !params.listView  &&  !params.prop && !params._readOnly ? 'messageList' : 'list',
