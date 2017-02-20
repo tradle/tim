@@ -170,7 +170,7 @@ class ResourceView extends Component {
       extend(style, defaultBankStyle)
       if (params.to.style)
         style = extend(style, params.to.style)
-      this.props.navigator.replacePreviousAndPop({
+      this.props.navigator.replace({
         component: MessageList,
         title: utils.getDisplayName(params.to),
         id: 11,
