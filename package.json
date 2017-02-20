@@ -27,9 +27,9 @@
     "deploy:s": "npm run build:s && GIT_DEPLOY_DIR=web/dist GIT_DEPLOY_BRANCH=gh-pages-s GIT_DEPLOY_REPO=mv ./deploy.sh",
     "deploy:l": "npm run build:l && GIT_DEPLOY_DIR=web/dist GIT_DEPLOY_BRANCH=gh-pages-l GIT_DEPLOY_REPO=mv ./deploy.sh",
     "deploy:u": "npm run build:u && GIT_DEPLOY_DIR=web/dist GIT_DEPLOY_BRANCH=gh-pages-u GIT_DEPLOY_REPO=mv ./deploy.sh",
-    "deploy:static": "npm run build:static && GIT_DEPLOY_DIR=web/dist GIT_DEPLOY_BRANCH=static GIT_DEPLOY_REPO=origin ./deploy.sh",
-    "deploy:local": "npm run build:local && GIT_DEPLOY_DIR=web/dist GIT_DEPLOY_BRANCH=local GIT_DEPLOY_REPO=origin ./deploy.sh",
-    "deploy:bots": "npm run build:bots && GIT_DEPLOY_DIR=web/dist GIT_DEPLOY_BRANCH=bots GIT_DEPLOY_REPO=origin ./deploy.sh",
+    "deploy:static": "npm run build:static && GIT_DEPLOY_DIR=web/dist GIT_DEPLOY_BRANCH=static GIT_DEPLOY_REPO=mv ./deploy.sh",
+    "deploy:local": "npm run build:local && GIT_DEPLOY_DIR=web/dist GIT_DEPLOY_BRANCH=local GIT_DEPLOY_REPO=mv ./deploy.sh",
+    "deploy:bots": "npm run build:bots && GIT_DEPLOY_DIR=web/dist GIT_DEPLOY_BRANCH=bots GIT_DEPLOY_REPO=mv ./deploy.sh",
     "lint": "eslint --quiet --ignore-path .gitignore .",
     "lintfile": "eslint --quiet --ignore-path .gitignore"
   },
