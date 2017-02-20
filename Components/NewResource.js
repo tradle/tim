@@ -767,6 +767,7 @@ class NewResource extends Component {
     }
     if (!jsons.length)
       jsons = <View/>
+
     var content =
       <ScrollView style={{backgroundColor: 'transparent'}}
                   ref='scrollView' {...this.scrollviewProps}
@@ -804,7 +805,7 @@ class NewResource extends Component {
         Alert.alert(this.state.err)
         this.state.err = null
       }
-      return <PageView style={platformStyles.container}>{content}</PageView>
+      return <PageView style={platformStyles.container}>{content}{this.makeViewTitle(meta)}</PageView>
     }
     return (
       <View style={{height: height}}>

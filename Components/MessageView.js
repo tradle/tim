@@ -341,6 +341,7 @@ class MessageView extends Component {
     // }
 
     return (
+      <View style={{height: utils.dimensions().height}}>
       <ScrollView  ref='this' style={platformStyles.container} keyboardShouldPersistTaps={true}>
         {dateView}
         <View style={styles.photoBG}>
@@ -348,6 +349,8 @@ class MessageView extends Component {
         </View>
         {actionPanel}
       </ScrollView>
+        {this.makeViewTitle(model)}
+      </View>
     );
   }
   onPress(url) {

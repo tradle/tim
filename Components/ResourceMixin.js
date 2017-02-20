@@ -289,6 +289,15 @@ var ResourceMixin = {
     //           <View style={{height: 1, marginBottom: 10, alignSelf: 'stretch', backgroundColor: this.props.bankStyle.LINK_COLOR}} />
     //           {jsonRows}
     //         </View>
+  },
+  makeViewTitle(model) {
+    let rTitle
+    let bankStyle = this.props.bankStyle
+    if (!this.props.bankStyle.LOGO_NEEDS_TEXT)
+      rTitle = <View style={{alignSelf: 'stretch', alignItems: 'center', backgroundColor: bankStyle.NAV_BAR_BACKGROUND_COLOR, borderTopColor: bankStyle.CONTEXT_BACKGROUND_COLOR, borderTopWidth: StyleSheet.hairlineWidth, height: 45, justifyContent: 'center'}}>
+                 <Text style={{fontSize: 24, color: bankStyle.CONTEXT_BACKGROUND_COLOR}}>{translate(model)}</Text>
+               </View>
+    return rTitle
   }
 }
 
