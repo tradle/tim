@@ -144,12 +144,18 @@ class VerificationRow extends Component {
 
     let description = title === dn ? null : <Text style={styles.description}>{dn}</Text>
 
-
-    var header =  <View style={{backgroundColor: '#ffffff', borderBottomColor: '#f0f0f0', borderBottomWidth: 1}} key={this.getNextKey()}>
+    let titleComponent
+    if (isVerification)
+      titleComponent = <Text style={[styles.rTitle, {color: '#FF6D0D'}]}>{'Verification of '}
+                          <Text style={styles.rTitle}>{title}</Text>
+                        </Text>
+    else
+      titleComponent =  <Text style={styles.rTitle}>{title}</Text>
+    var header =  <View style={styles.header} key={this.getNextKey()}>
                     <View style={{flexDirection: 'row', marginHorizontal: 10}}>
                       {photo}
                       <View style={[styles.noImageBlock, {flex: 1}]}>
-                        <Text style={styles.rTitle}>{title}</Text>
+                        {titleComponent}
                         {description}
                         <View style={{paddingTop: 3, flexDirection: 'row', justifyContent: 'flex-end'}}>
                           {verifiedBy}
@@ -331,6 +337,16 @@ var styles = StyleSheet.create({
     // borderColor: 'green'
     marginHorizontal: 10,
     padding: 5,
+  },
+  title: {
+    fontSize: 18,
+    marginBottom: 3,
+    color: '#555555',
+  },
+  header: {
+    backgroundColor: '#ffffff',
+    borderBottomColor: '#f0f0f0',
+    borderBottomWidth: 1
   },
   rTitle: {
     flex: 1,
