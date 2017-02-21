@@ -640,8 +640,9 @@ class MessageList extends Component {
   }
 
   getActionSheetItems() {
-    if (!this.props.resource.hasSupportLine)
+    if (!this.state.isEmployee && !this.props.resource.hasSupportLine)
       return false
+
     let buttons = []
     let isOrg = this.props.resource[TYPE] === TYPES.ORGANIZATION
     let cancelIndex = 1
