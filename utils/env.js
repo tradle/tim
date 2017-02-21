@@ -53,5 +53,9 @@ module.exports = extend({
   initWithDeepLink: '/profile',
   requireDeviceLocalAuth: false,
   autoOptInTouchId: false,
-  requireSoftPIN: false
+  requireSoftPIN: false,
+  locale: {
+    language: DeviceInfo.getDeviceLocale(),
+    country: DeviceInfo.getDeviceCountry()
+  }
 }, environment)
