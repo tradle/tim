@@ -441,15 +441,12 @@ class TimHome extends Component {
 
       return
     }
-    if (me  &&  me.isEmployee) {
-      this.showContacts()
-      return
-    }
 
     if (ENV.homePage) {
       this.showHomePage(doReplace)
       return
     }
+
     this.showOfficialAccounts()
   }
   showChat(provider) {
