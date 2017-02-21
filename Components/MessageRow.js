@@ -454,7 +454,7 @@ class MessageRow extends Component {
     var resource = this.props.resource;
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
 
-    let isReadOnlyChat = this.props.to[constants.TYPE]  &&  utils.isReadOnlyChat(this.props.context) //this.props.context  &&  this.props.context._readOnly
+    let isReadOnlyChat = this.props.to[constants.TYPE]  &&  utils.isReadOnlyChat(resource, this.props.context) //this.props.context  &&  this.props.context._readOnly
 
     if (model.id === PRODUCT_APPLICATION) {
       let msgModel = utils.getModel(resource.product).value
