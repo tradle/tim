@@ -437,6 +437,11 @@ class TimHome extends Component {
     }
 
     let me = utils.getMe()
+    if (me  &&  me.isEmployee) {
+      this.showContacts()
+      return
+    }
+
     if (this.state.firstPage) {
       switch (this.state.firstPage) {
       case 'chat':
@@ -462,15 +467,12 @@ class TimHome extends Component {
 
       return
     }
-    if (me  &&  me.isEmployee) {
-      this.showContacts()
-      return
-    }
 
     if (ENV.homePage) {
       this.showHomePage(doReplace)
       return
     }
+
     this.showOfficialAccounts()
   }
   showChat(provider) {

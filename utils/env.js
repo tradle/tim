@@ -45,5 +45,9 @@ module.exports = extend({
   lenientPassword: true,
   requireDeviceLocalAuth: false,
   autoOptInTouchId: false,
-  requireSoftPIN: false
+  requireSoftPIN: false,
+  locale: {
+    language: DeviceInfo.getDeviceLocale(),
+    country: DeviceInfo.getDeviceCountry()
+  }
 }, environment)
