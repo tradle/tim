@@ -437,7 +437,7 @@ class TimHome extends Component {
     }
 
     let me = utils.getMe()
-    if (this.state.firstPage) {
+    if (this.state.firstPage  &&  me  &&  !me.isEmployee) {
       switch (this.state.firstPage) {
       case 'chat':
         Actions.getProvider({
@@ -446,13 +446,15 @@ class TimHome extends Component {
         })
         // this.showChat(this.state.provider)
         return
-      case 'officialAccounts':
-        if (me.isEmployee)
-          this.showContacts()
-        return
       case 'profile':
         this.showHomePage(doReplace)
         return
+      case 'officialAccounts':
+        if (me.isEmployee)
+          this.showContacts()
+        else
+          this.showOfficialAccounts()
+        break
       default:
         if (ENV.homePage)
           this.showHomePage(doReplace)
@@ -511,6 +513,7 @@ class TimHome extends Component {
       bankStyle: defaultBankStyle
     };
     Actions.hasPartials()
+    let me = utils.getMe()
     let title = me.firstName;
     let route = {
       title: translate('officialAccounts'),
@@ -549,11 +552,11 @@ class TimHome extends Component {
       }
     }
 
+    // if (doReplace)
+    //   nav.replace(route)
+    // else
     var nav = this.props.navigator
-    if (doReplace)
-      nav.replace(route)
-    else
-      nav.push(route)
+    nav.push(route)
   }
 
   register(cb) {
