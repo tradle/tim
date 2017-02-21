@@ -280,7 +280,7 @@ class ResourceRow extends Component {
                       // <View style={[styles.row, bg, { width: utils.dimensions(ResourceRow).width - 50}, isOfficialAccounts && resource.priority ? {height: PRIORITY_HEIGHT} : {}]}>
     let content =  <View style={[styles.content, bg]} key={this.getNextKey()}>
                     <TouchableHighlight onPress={onPress} underlayColor='transparent'>
-                      <View style={[styles.row, bg, { width: utils.dimensions(ResourceRow).width - 50}]}>
+                      <View style={[styles.row, bg, { minHeight: 60, justifyContent: 'center', width: utils.dimensions(ResourceRow).width - 50}]}>
                         {photo}
                         <View style={textStyle}>
                           {this.formatRow(resource, style)}
@@ -584,7 +584,7 @@ var styles = StyleSheet.create({
   },
   cellImage: {
     backgroundColor: '#ffffff',
-    height: 60,
+    // height: 60,
     marginRight: 10,
     width: 60,
     resizeMode: 'contain',
