@@ -29,8 +29,13 @@ class ChatContext extends Component {
 
   render() {
     let context = this.props.context
-    if (!context  ||  context.product === REMEDIATION || !this.props.chat.canShareContext)
+    if (!context  ||  context.product === REMEDIATION)
       return <View/>
+    let me = utils.getMe()
+    if (me.isEmployee) {
+      if (this.props.chat[constants.TYPE] === constants.TYPES.PROFILE  &&  !me.organization.canShareContext)
+        return <View/>
+    }
     // if (!this.props.context  ||  this.props.context._readOnly)
     //   return <View/>
     let r = this.props.chat
