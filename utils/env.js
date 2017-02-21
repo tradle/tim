@@ -46,8 +46,5 @@ module.exports = extend({
   requireDeviceLocalAuth: false,
   autoOptInTouchId: false,
   requireSoftPIN: false,
-  locale: {
-    language: DeviceInfo.getDeviceLocale(),
-    country: DeviceInfo.getDeviceCountry()
-  }
+  locale: require('./locale')
 }, environment)
