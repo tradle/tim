@@ -104,6 +104,8 @@ import Navs from './utils/navs'
 var ReactPerf = __DEV__ && require('react-addons-perf')
 var UNAUTHENTICATE_AFTER_BG_MILLIS = require('./utils/localAuth').TIMEOUT
 
+import PassportReader from 'react-native-passport-reader'
+
 class TiMApp extends Component {
   constructor(props) {
     super(props)

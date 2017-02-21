@@ -8,10 +8,6 @@ import com.bitgo.randombytes.RandomBytesPackage;
 import com.brentvatne.react.ReactVideoPackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.facebook.react.ReactApplication;
-import com.smixx.fabric.FabricPackage;
-// import com.anyline.reactnative.AnylinePackage;
-import com.peel.react.TcpSocketsModule;
-import com.peel.react.rnos.RNOSModule;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
@@ -22,17 +18,21 @@ import com.lwansbrough.RCTCamera.RCTCameraPackage;
 import com.microsoft.codepush.react.CodePush;
 import com.oblador.keychain.KeychainPackage;
 import com.oblador.vectoricons.VectorIconsPackage;
-// import com.peel.react.TcpSocketsModule;
 import com.peel.react.rnos.RNOSModule;
 import com.rn.ecc.ECCPackage;
 import com.rnfs.RNFSPackage;
+import com.smixx.fabric.FabricPackage;
 import com.tradle.react.UdpSocketsModule;
 
 import java.util.Arrays;
 import java.util.List;
 
+import io.tradle.nfc.RNPassportReaderPackage;
 import io.tradle.react.LocalAuthPackage;
 import io.tradle.snappystorage.RNAsyncSnappyStoragePackage;
+
+// import com.anyline.reactnative.AnylinePackage;
+// import com.peel.react.TcpSocketsModule;
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -71,7 +71,8 @@ public class MainApplication extends Application implements ReactApplication {
         new RCTCameraPackage(),
         new OrientationPackage(),
         new ECCPackage(),
-        new LocalAuthPackage()
+        new LocalAuthPackage(),
+        new RNPassportReaderPackage()
       );
     }
   };

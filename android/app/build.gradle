@@ -123,6 +123,11 @@ android {
         ndk {
             abiFilters "armeabi-v7a", "x86"
         }
+
+        multiDexEnabled true
+    }
+    dexOptions {
+        javaMaxHeapSize "4g"
     }
     signingConfigs {
         release {
@@ -200,6 +205,7 @@ repositories {
 }
 
 dependencies {
+    compile project(':react-native-passport-reader')
     compile project(':react-native-fabric')
     compile('com.crashlytics.sdk.android:crashlytics:2.6.6@aar') {
         transitive = true

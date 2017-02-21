@@ -4777,6 +4777,11 @@
       "from": "react-native-passcode-status@latest",
       "resolved": "https://registry.npmjs.org/react-native-passcode-status/-/react-native-passcode-status-1.1.0.tgz"
     },
+    "react-native-passport-reader": {
+      "version": "1.0.1",
+      "from": "react-native-passport-reader@latest",
+      "resolved": "https://registry.npmjs.org/react-native-passport-reader/-/react-native-passport-reader-1.0.1.tgz"
+    },
     "react-native-progress": {
       "version": "3.2.0",
       "from": "react-native-progress@>=3.2.0 <4.0.0",
