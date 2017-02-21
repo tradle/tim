@@ -6627,7 +6627,8 @@ var Store = Reflux.createStore({
         to.isEmployee = true
         to.organization = this.buildRef(org)
         to.organization.canShareContext = org.canShareContext
-        to.organization.hasSupportLine = org.hasSupportLine        this.setMe(to)
+        to.organization.hasSupportLine = org.hasSupportLine
+        this.setMe(to)
         batch.push({type: 'put', key: utils.getId(to), value: to})
       }
 
