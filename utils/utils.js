@@ -740,7 +740,7 @@ var utils = {
     if (!resource[TYPE] && resource.id)
       return resource
     let m = this.getModel(resource[TYPE]).value
-    let isForm = m.subClassOf === FORM
+    // let isForm = m.subClassOf === FORM
     // let id = utils.getId(resource)
     // if (isForm)
     //   id += '_' + resource[CUR_HASH]
@@ -752,7 +752,11 @@ var utils = {
       ref.time = resource.time
     return ref
   },
-
+  hasSupportLine(resource) {
+    let me = this.getMe()
+    let hasSupportLine = resource.hasSupportLine || (resource[TYPE] === TYPES.PROFILE  && me.isEmployee && me.organization.hasSupportLine)
+    return hasSupportLine
+  },
   optimizeResource(resource, doNotChangeOriginal) {
     let res = doNotChangeOriginal ? this.clone(resource) : resource
 
@@ -762,20 +766,13 @@ var utils = {
         continue
       if (properties[p].type === 'object') {
         if (res[p]  &&  res[p].id  &&  res[p].title) {
-          let r = {
-            id: res[p].id,
-            title: res[p].title
-          }
-          res[p] = r
+          res[p] = this.buildRef(res[p])
           continue
         }
         if (properties[p].ref  &&  !utils.getModel(properties[p].ref).value.inlined) {
 
           // if (properties[p].ref !== MONEY  &&  properties[p].ref !== PHOTO) {
-          res[p] = {
-            id: this.getId(res[p]),
-            title: this.getDisplayName(res[p])
-          }
+          res[p] = this.buildRef(res[p])
         }
         continue
       }
