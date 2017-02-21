@@ -7,6 +7,13 @@ import DeviceInfo from 'react-native-device-info'
 import extend from 'xtend'
 import environment from '../environment.json'
 
+let getUserMedia
+try {
+  getUserMedia = require('getusermedia')
+} catch (err) {
+  console.log('getUserMedia not supported', err)
+}
+
 const LOCAL_IP = window.location.hostname
 
 module.exports = extend({
@@ -45,5 +52,7 @@ module.exports = extend({
   lenientPassword: true,
   requireDeviceLocalAuth: false,
   autoOptInTouchId: false,
-  requireSoftPIN: false
+  requireSoftPIN: false,
+  canUseWebcam: !!getUserMedia,
+  locale: require('./locale')
 }, environment)

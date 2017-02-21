@@ -437,7 +437,12 @@ class TimHome extends Component {
     }
 
     let me = utils.getMe()
-    if (this.state.firstPage  &&  me  &&  !me.isEmployee) {
+    if (me  &&  me.isEmployee) {
+      this.showContacts()
+      return
+    }
+
+    if (this.state.firstPage) {
       switch (this.state.firstPage) {
       case 'chat':
         Actions.getProvider({
@@ -450,10 +455,7 @@ class TimHome extends Component {
         this.showHomePage(doReplace)
         return
       case 'officialAccounts':
-        if (me.isEmployee)
-          this.showContacts()
-        else
-          this.showOfficialAccounts()
+        this.showOfficialAccounts()
         break
       default:
         if (ENV.homePage)
@@ -464,15 +466,12 @@ class TimHome extends Component {
 
       return
     }
-    if (me  &&  me.isEmployee) {
-      this.showContacts()
-      return
-    }
 
     if (ENV.homePage) {
       this.showHomePage(doReplace)
       return
     }
+
     this.showOfficialAccounts()
   }
   showChat(provider) {
