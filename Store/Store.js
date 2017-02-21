@@ -363,21 +363,20 @@ var Store = Reflux.createStore({
   },
 
   getMe() {
-    var self = this
 
     return db.get(MY_IDENTITIES)
-    .then(function(value) {
+    .then((value) => {
       if (value) {
         var key = MY_IDENTITIES
-        self._setItem(key, value)
+        this._setItem(key, value)
         return db.get(value.currentIdentity.replace(PROFILE, IDENTITY))
       }
     })
-    .then (function(value) {
-      self._setItem(utils.getId(value), value)
+    .then ((value) => {
+      this._setItem(utils.getId(value), value)
       return db.get(utils.getId(value).replace(IDENTITY, PROFILE))
     })
-    .then(function(value) {
+    .then((value) => {
       me = value
       let changed
       if (me.isAuthenticated) {
@@ -394,11 +393,11 @@ var Store = Reflux.createStore({
       }
 
       if (changed)
-        self.dbPut(utils.getId(me), me)
+        this.dbPut(utils.getId(me), me)
 
-      self.setMe(me)
-      var key = value[TYPE] + '_' + value[ROOT_HASH]
-      self._setItem(key, value)
+      this.setMe(me)
+      var key = me[TYPE] + '_' + me[ROOT_HASH]
+      this._setItem(key, me)
       return me
     })
     // .catch(function(err) {
@@ -1557,6 +1556,8 @@ var Store = Reflux.createStore({
       // allow to unhide the previously hidden provider
       if (newServer  &&  org.inactive) {
         org.inactive = false
+        org.hasSupportLine = sp.hasSupportLine
+        org.canShareContext = sp.canShareContext
         this._mergeItem(okey, sp.org)
         batch.push({type: 'put', key: okey, value: org})
       }
@@ -6635,6 +6636,8 @@ var Store = Reflux.createStore({
       if (val[TYPE] === MY_EMPLOYEE_PASS) {
         to.isEmployee = true
         to.organization = this.buildRef(org)
+        to.organization.canShareContext = org.canShareContext
+        to.organization.hasSupportLine = org.hasSupportLine
         this.setMe(to)
         batch.push({type: 'put', key: utils.getId(to), value: to})
       }
@@ -6866,6 +6869,24 @@ var Store = Reflux.createStore({
       }
     })
     .then(() => {
+      if (me  &&  me.isEmployee) {
+        let changed
+        let orgId = utils.getId(me.organization)
+        let org = this._getItem(orgId)
+        if (org.canShareContext !== me.organization.canShareContext) {
+          changed = true
+          me.organization.canShareContext = org.canShareContext
+        }
+        if (org.hasSupportLine !== me.organization.hasSupportLine) {
+          changed = true
+          me.organization.hasSupportLine = org.hasSupportLine
+        }
+        if (changed) {
+          let meId = utils.getId(me)
+          db.put(meId, me)
+          self._setItem(meId, me)
+        }
+      }
       if (me  &&  utils.isEmpty(chatMessages)) {
         utils.setMe(me)
         this.initChats()
@@ -7700,7 +7721,7 @@ var Store = Reflux.createStore({
     if (!resource[TYPE] && resource.id)
       return resource
     let m = this.getModel(resource[TYPE]).value
-    let isForm = m.subClassOf === FORM
+    // let isForm = m.subClassOf === FORM
     // let id = utils.getId(resource)
     // if (isForm)
     //   id += '_' + resource[CUR_HASH]
