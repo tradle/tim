@@ -613,7 +613,11 @@ var Store = Reflux.createStore({
     meDriver.identityPublishStatus = meDriver.identitySealStatus
     meDriver._multiGetFromDB = utils.multiGet
     meDriver.addressBook.setCache(new Cache({ max: 500 }))
-    meDriver.pause()
+    if (ENV.pauseOnTransition) {
+      meDriver.pause()
+    } else {
+      meDriver.pause({ timeout: 3000 })
+    }
 
     let noProviders
     if (!SERVICE_PROVIDERS_BASE_URLS) {
