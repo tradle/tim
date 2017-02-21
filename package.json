@@ -60,6 +60,7 @@
     "events": "^1.1.0",
     "extend": "~2.0.1",
     "fbjs": "^0.8.3",
+    "getusermedia": "2.0.1",
     "https-browserify": "0.0.1",
     "inherits": "^2.0.1",
     "json-stringify-safe": "^5.0.1",
