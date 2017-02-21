@@ -23,9 +23,9 @@ import ImageInput from './ImageInput'
 
 import BlinkID from 'react-native-blinkid'
 import { parse as parseUSDL } from 'parse-usdl'
-const { microblink } = require('../utils/env')
-if (microblink && BlinkID && utils.isIOS()) {
-  BlinkID.setLicenseKey(microblink.licenseKey)
+const ENV = require('../utils/env')
+if (ENV.microblink && BlinkID && utils.isIOS()) {
+  BlinkID.setLicenseKey(ENV.microblink.licenseKey)
 }
 
 // import Anyline from './Anyline'
@@ -1182,7 +1182,7 @@ var NewResourceMixin = {
       if (utils.isIOS()) {
         useImageInput = !isScan
       } else {
-        useImageInput = isScan
+        useImageInput = isScan || !ENV.canUseWebcam
       }
 
       if (useImageInput) {
