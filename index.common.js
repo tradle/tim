@@ -718,8 +718,13 @@ var NavigationBarRouteMapper = {
     if (route.passProps.bankStyle)
       photoObj = route.passProps.bankStyle.logo
 
-    if (!photoObj)
-      photoObj = route.id === MESSAGE_LIST  &&  route.passProps.resource.photos[0]
+    if (!photoObj && route.id === MESSAGE_LIST) {
+      const { photos } = route.passProps.resource
+      if (photos) {
+        photoObj = photos[0]
+      }
+    }
+
     if (photoObj)
       uri = utils.getImageUri(photoObj.url);
     if (route.id === REMEDIATION) {
