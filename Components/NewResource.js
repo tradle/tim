@@ -28,6 +28,7 @@ var StyleSheet = require('../StyleSheet')
 import dismissKeyboard from 'react-native/Libraries/Utilities/dismissKeyboard'
 import ImageInput from './ImageInput'
 var sampleProfile = require('../data/sampleProfile.json')
+var chatStyles = require('../styles/chatStyles')
 
 var TextInputState = require('TextInputState')
 
@@ -52,7 +53,7 @@ import Native, {
   // StatusBar,
   Alert,
   Navigator,
-  TouchableHighlight,
+  TouchableOpacity,
   Animated
 } from 'react-native';
 
@@ -740,8 +741,8 @@ class NewResource extends Component {
     var photoStyle = /*isMessage && !isFinancialProduct ? {marginTop: -35} :*/ styles.photoBG;
     var button = isRegistration
                ? <View>
-                   <TouchableHighlight style={styles.thumbButton}
-                        underlayColor='transparent' onPress={() => {
+                   <TouchableOpacity style={styles.thumbButton}
+                        onPress={() => {
                           if (this.state.termsAccepted)
                             this.onSavePressed()
                           else
@@ -750,7 +751,7 @@ class NewResource extends Component {
                       <View style={styles.getStarted}>
                          <Text style={styles.getStartedText}>ENTER</Text>
                       </View>
-                   </TouchableHighlight>
+                   </TouchableOpacity>
                  </View>
                : <View style={{height: 0}} />
     var formStyle = isRegistration
@@ -795,6 +796,14 @@ class NewResource extends Component {
                   : <View/>
                }
             </View>
+            <View style={styles.submitButton}>
+              <TouchableOpacity onPress={this.onSavePressed.bind(this)}>
+                <View style={[chatStyles.shareButton, {width: 100, backgroundColor: '#fdfdfd', paddingHorizontal: 10, justifyContent: 'center'}]}>
+                  <Text style={chatStyles.shareText}>{translate('Submit')}</Text>
+                  <Icon name='ios-send' size={25} style={{color: '#7AAAC3', paddingLeft: 5, transform: [{rotate: '45deg'}] }} />
+                </View>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </ScrollView>
@@ -805,7 +814,10 @@ class NewResource extends Component {
         Alert.alert(this.state.err)
         this.state.err = null
       }
-      return <PageView style={platformStyles.container}>{content}{this.makeViewTitle(meta)}</PageView>
+      return <PageView style={platformStyles.container}>
+               {content}
+               {this.makeViewTitle(meta)}
+              </PageView>
     }
     return (
       <View style={{height: height}}>
@@ -818,7 +830,6 @@ class NewResource extends Component {
           : <View/>
         }
         {content}
-        <View/>
         </View>
       </View>
     )
@@ -932,10 +943,10 @@ class NewResource extends Component {
       ? <ImageInput prop={bl} style={aiStyle} onImage={item => this.onAddItem(bl.name, item)}>
           {itemsArray}
         </ImageInput>
-      : <TouchableHighlight style={aiStyle} underlayColor='transparent'
+      : <TouchableOpacity style={aiStyle}
             onPress={this.onNewPressed.bind(this, bl, meta)}>
           {itemsArray}
-        </TouchableHighlight>
+        </TouchableOpacity>
 
     let istyle = [styles.itemButton]
     if (err)
@@ -952,10 +963,10 @@ class NewResource extends Component {
       ? <ImageInput prop={bl} style={acStyle} onImage={item => this.onAddItem(bl.name, item)}>
           {counter}
         </ImageInput>
-      : <TouchableHighlight underlayColor='transparent' style={acStyle}
+      : <TouchableOpacity style={acStyle}
             onPress={this.onNewPressed.bind(this, bl, meta)}>
           {counter}
-        </TouchableHighlight>
+        </TouchableOpacity>
     return (
       <View key={this.getNextKey()}>
         <View style={[istyle, {marginHorizontal: 10, borderBottomColor: lcolor}]} ref={bl.name}>
@@ -1014,10 +1025,10 @@ class NewResource extends Component {
                 </View>
               : <View/>
     var actionableItem = count
-                       ?  <TouchableHighlight style={{flex: 7, paddingTop: 15}} underlayColor='transparent'
+                       ?  <TouchableOpacity style={{flex: 7, paddingTop: 15}}
                            onPress={this.showItems.bind(this, bl, meta)}>
                             {itemsArray}
-                          </TouchableHighlight>
+                          </TouchableOpacity>
                        : <ImageInput
                            prop={bl}
                            style={[{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]}
@@ -1218,6 +1229,11 @@ var styles = StyleSheet.create({
   logo: {
     opacity: 0.7,
     alignSelf: 'flex-end',
+  },
+  submitButton: {
+    paddingBottom: 30,
+    justifyContent: 'center',
+    alignSelf: 'center'
   }
 })
 
