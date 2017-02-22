@@ -378,11 +378,13 @@ class MessageRow extends Component {
     });
 
   }
-  onPress(event) {
+  onPress(link, text) {
     this.props.navigator.push({
       id: 7,
+      title: text || '',
+      backButtonTitle: 'Back',
       component: ArticleView,
-      passProps: {url: this.props.resource.message}
+      passProps: {url: link}
     });
   }
   createNewResource(model, isMyMessage) {
@@ -593,8 +595,8 @@ class MessageRow extends Component {
       if (resource[v]                      &&
           properties[v].type === 'string'  &&
           (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0)) {
-        onPressCall = this.onPress.bind(self);
-        vCols.push(<Text style={style} key={self.getNextKey()}>{resource[v]}</Text>);
+        onPressCall = this.onPress.bind(self, this.props.resource.message);
+        vCols.push(<Text style={style} numberOfLines={first ? 2 : 1} key={self.getNextKey()}>{resource[v]}</Text>);
       }
       else if (isFormError) {
         let rtype = (resource.prefill[constants.TYPE]) ? resource.prefill[constants.TYPE] : utils.getId(resource.prefill).split('_')[0]
@@ -713,8 +715,32 @@ class MessageRow extends Component {
           );
 
         }
-        else
-          vCols.push(<Text style={style} key={self.getNextKey()}>{resource[v]}</Text>);
+        else {
+          let pVal = resource[v]
+          let linkIdx = pVal.indexOf('<http')
+          if (linkIdx) {
+            let endLink = pVal.indexOf('>', linkIdx)
+            let link = pVal.substring(linkIdx + 1, endLink)
+
+            let textIdx = pVal.indexOf('[')
+            let text
+            if (textIdx) {
+              text = pVal.substring(textIdx + 1, linkIdx - 1)
+              linkIdx = textIdx
+            }
+            vCols.push(<View key={self.getNextKey()}>
+                          <Text style={style}>{pVal.substring(0, linkIdx)}</Text>
+                          <TouchableHighlight underlayColor='transparent' onPress={this.onPress.bind(this, link, text)}>
+                            <Text style={[style, {color: this.props.bankStyle.LINK_COLOR}]}>{text || link}</Text>
+                          </TouchableHighlight>
+                          <Text style={style}>{pVal.substring(endLink + 1)}</Text>
+                        </View>
+              )
+            return null
+          }
+          else
+            vCols.push(<Text style={style} key={self.getNextKey()}>{resource[v]}</Text>);
+        }
       }
       first = false;
 

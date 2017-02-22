@@ -598,7 +598,7 @@ var NavigationBarRouteMapper = {
 
     style.push({fontSize: utils.getFontSize(20)})
     var title = icon
-              ? <Icon name={icon} size={utils.getFontSize(25)} color='#7AAAC3' style={styles.icon}/>
+              ? <Icon name={icon} size={utils.getFontSize(30)} color='#7AAAC3' style={styles.icon}/>
               : <Text style={style}>
                   {lbTitle}
                 </Text>
@@ -638,8 +638,8 @@ var NavigationBarRouteMapper = {
     case 'Done':
     case 'Accept':
       icon = 'ios-send'
-      iconSize = 30
-      style = {transform: [
+      iconSize = 32
+      style = {marginTop: 5, transform: [
           {rotate: '45deg'}
         ]}
       break

@@ -754,7 +754,7 @@ var utils = {
   },
   hasSupportLine(resource) {
     let me = this.getMe()
-    let hasSupportLine = resource.hasSupportLine || (resource[TYPE] === TYPES.PROFILE  && me.isEmployee && me.organization.hasSupportLine)
+    let hasSupportLine = resource._hasSupportLine || (resource[TYPE] === TYPES.PROFILE  && me.isEmployee && me.organization._hasSupportLine)
     return hasSupportLine
   },
   optimizeResource(resource, doNotChangeOriginal) {

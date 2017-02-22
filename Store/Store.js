@@ -1516,7 +1516,7 @@ var Store = Reflux.createStore({
           url: originalUrl,
           style: sp.style,
           permalink: sp.bot.permalink,
-          hasSupportLine: sp.hasSupportLine
+          publicConfig: sp.publicConfig
         }
         // Check is this is an update SP info
         let oldSp
@@ -1557,19 +1557,16 @@ var Store = Reflux.createStore({
     var org = this._getItem(okey)
     if (org) {
       // allow to unhide the previously hidden provider
-      if (newServer  &&  org.inactive) {
+      if (newServer  &&  org.inactive)
         org.inactive = false
-        org.hasSupportLine = sp.hasSupportLine
-        org.canShareContext = sp.canShareContext
-        this._mergeItem(okey, sp.org)
-        batch.push({type: 'put', key: okey, value: org})
-      }
+      this.configProvider(sp, org)
+      this._mergeItem(okey, sp.org)
+      batch.push({type: 'put', key: okey, value: org})
     }
     else {
       let newOrg = {}
       extend(newOrg, sp.org)
-      newOrg.hasSupportLine = sp.hasSupportLine
-      newOrg.canShareContext = sp.canShareContext
+      this.configProvider(sp, newOrg)
       batch.push({type: 'put', key: okey, value: newOrg})
       this._setItem(okey, newOrg)
     }
@@ -1660,6 +1657,38 @@ var Store = Reflux.createStore({
       debugger
       throw err
     })
+  },
+  configProvider(sp, org) {
+    let config = sp.publicConfig
+    let orgId = utils.getId(org)
+    for (var p in config)
+      org['_' + p] = config[p]
+
+    if (org._country) {
+      let countries = this.searchNotMessages({modelName:'tradle.Country'})
+      let country = countries.filter((c) => {
+        return c.code === org._country ||  c.country === org._country
+      })
+      if (country)
+        org.country = this.buildRef(country[0])
+      delete org._country
+    }
+    if (org._currency) {
+      let currencies = this.searchNotMessages({modelName:'tradle.Currency'})
+      let currency = currencies.filter((c) => {
+        return c.code === org._currency || c.currencyName === org._currency
+      })
+      if (currency)
+        org.currency = this.buildRef(currency[0])
+      delete org._currency
+    }
+
+    if (config.greeting) {
+      if (typeof config.greeting === 'string')
+        org._greeting = config.greeting
+      else
+        org._greeting = utils.isWeb() ? config.greeting.web : config.greeting.mobile
+    }
   },
 
   addContact(data, hash, noMessage) {
@@ -2904,17 +2933,20 @@ var Store = Reflux.createStore({
       })
       .then(() => {
         if (params.disableFormRequest) {
-          let result = self.searchMessages({modelName: FORM_REQUEST, to: resource.to, context: resource._context})
-          if (result &&  result.length) {
-            result.forEach((fr) => {
-              if (!fr.documentCreated  &&  fr.form === resource[TYPE]) {
-                fr.documentCreated = true
-                let key = utils.getId(fr)
-                self._setItem(key, fr)
-                self.dbPut(key, fr)
-              }
-            })
-          }
+          // let result = self.searchMessages({modelName: FORM_REQUEST, to: resource.to, context: resource._context})
+          // if (result &&  result.length) {
+          //   result.forEach((fr) => {
+            let fr = this._getItem(utils.getId(params.disableFormRequest))
+
+            if (!fr.documentCreated  &&  fr.form === resource[TYPE]) {
+              fr.documentCreated = true
+              let key = utils.getId(fr)
+              self._setItem(key, fr)
+              self.dbPut(key, fr)
+              self.trigger({action: 'addItem', resource: fr})
+            }
+          //   })
+          // }
         }
         if (isBecomingEmployee) {
           let orgId = utils.getId(resource.organization)
@@ -6577,11 +6609,11 @@ var Store = Reflux.createStore({
         }
         if (hasThisProductApp)
           return
-        if (this.preferences._message) {
+        if (org._greeting) {
           let msg = {
             [TYPE]: SIMPLE_MESSAGE,
             [ROOT_HASH]: val.from.title.replace(' ', '_') + '_1',
-            message: translate(this.preferences._message),
+            message: translate(org._greeting),
             time: new Date().getTime(),
             from: val.from,
             to: meRef
@@ -6648,8 +6680,8 @@ var Store = Reflux.createStore({
       if (val[TYPE] === MY_EMPLOYEE_PASS) {
         to.isEmployee = true
         to.organization = this.buildRef(org)
-        to.organization.canShareContext = org.canShareContext
-        to.organization.hasSupportLine = org.hasSupportLine
+        to.organization._canShareContext = org._canShareContext
+        to.organization._hasSupportLine = org._hasSupportLine
         this.setMe(to)
         batch.push({type: 'put', key: utils.getId(to), value: to})
       }
@@ -6885,13 +6917,13 @@ var Store = Reflux.createStore({
         let changed
         let orgId = utils.getId(me.organization)
         let org = this._getItem(orgId)
-        if (org.canShareContext !== me.organization.canShareContext) {
+        if (org._canShareContext !== me.organization._canShareContext) {
           changed = true
-          me.organization.canShareContext = org.canShareContext
+          me.organization._canShareContext = org._canShareContext
         }
-        if (org.hasSupportLine !== me.organization.hasSupportLine) {
+        if (org._hasSupportLine !== me.organization._hasSupportLine) {
           changed = true
-          me.organization.hasSupportLine = org.hasSupportLine
+          me.organization._hasSupportLine = org._hasSupportLine
         }
         if (changed) {
           let meId = utils.getId(me)
