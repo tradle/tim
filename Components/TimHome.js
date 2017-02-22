@@ -479,6 +479,7 @@ class TimHome extends Component {
     })
   }
   showOfficialAccounts() {
+    const me = utils.getMe()
     let passProps = {
       filter: '',
       modelName: constants.TYPES.ORGANIZATION,
