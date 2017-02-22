@@ -33,7 +33,7 @@ class ChatContext extends Component {
       return <View/>
     let me = utils.getMe()
     if (me.isEmployee) {
-      if (this.props.chat[constants.TYPE] === constants.TYPES.PROFILE  &&  !me.organization.canShareContext)
+      if (this.props.chat[constants.TYPE] === constants.TYPES.PROFILE  &&  !me.organization._canShareContext)
         return <View/>
     }
     // if (!this.props.context  ||  this.props.context._readOnly)
