@@ -37,6 +37,7 @@ const DEFAULT_CURRENCY_SYMBOL = '£';
 var CURRENCY_SYMBOL
 const ENUM = 'tradle.Enum'
 const SETTINGS = 'tradle.Settings'
+const COUNTRY = 'tradle.Country'
 const YEAR = 3600 * 1000 * 24 * 365
 const DAY  = 3600 * 1000 * 24
 const HOUR = 3600 * 1000
@@ -1103,6 +1104,10 @@ var NewResourceMixin = {
     let color = {color: lcolor}
     let isVideo = prop.name === 'video'
     let isPhoto = prop.name === 'photos'  ||  prop.ref === 'tradle.Photo'
+    if (this.props.model  &&  prop.ref === COUNTRY  &&  this.props.model.required.indexOf(prop.name)) {
+      if (resource  &&  !resource[prop.name])
+        resource[prop.name] = this.props.country
+    }
     if (resource && resource[params.prop]) {
       if (isPhoto) {
         label = prop.title
