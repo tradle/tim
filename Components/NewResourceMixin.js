@@ -20,11 +20,7 @@ import formDefaults from '../data/formDefaults.json'
 import DatePicker from 'react-native-datepicker'
 import ImageInput from './ImageInput'
 
-import BlinkID from 'react-native-blinkid'
-const { microblink } = require('../utils/env')
-if (microblink && BlinkID && utils.isIOS()) {
-  BlinkID.setLicenseKey(microblink.licenseKey)
-}
+import BlinkID from './BlinkID'
 
 // import Anyline from './Anyline'
 
