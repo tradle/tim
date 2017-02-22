@@ -4188,11 +4188,6 @@
       "from": "parse-json@>=2.2.0 <3.0.0",
       "resolved": "https://registry.npmjs.org/parse-json/-/parse-json-2.2.0.tgz"
     },
-    "parse-usdl": {
-      "version": "1.0.0",
-      "from": "parse-usdl@latest",
-      "resolved": "https://registry.npmjs.org/parse-usdl/-/parse-usdl-1.0.0.tgz"
-    },
     "parsejson": {
       "version": "0.0.3",
       "from": "parsejson@0.0.3",
