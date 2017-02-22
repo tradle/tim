@@ -489,6 +489,7 @@ class FormRequestRow extends Component {
     if (isPrefilled)
       extend(true, resource, this.props.resource.prefill)
     else {
+      // isPrefilled = false
       isPrefilled = ENV.prefillForms && model.id in formDefaults
       if (isPrefilled)
         extend(true, resource, formDefaults[model.id])
@@ -506,6 +507,7 @@ class FormRequestRow extends Component {
         resource: resource,
         isPrefilled: isPrefilled,
         currency: this.props.currency,
+        country: this.props.country,
         bankStyle: this.props.bankStyle,
         originatingMessage: this.props.resource
       }
