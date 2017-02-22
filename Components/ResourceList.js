@@ -198,12 +198,12 @@ class ResourceList extends Component {
 
     // if (this.props.tabLabel) {
     //   Actions.list(params)
-    //   StatusBar.setHidden(false);
+    StatusBar.setHidden(false);
     // }
     // else
     utils.onNextTransitionEnd(this.props.navigator, () => {
       Actions.list(params)
-      StatusBar.setHidden(false);
+      // StatusBar.setHidden(false);
     });
   }
 
