@@ -351,11 +351,18 @@ class TiMApp extends Component {
   }
 
   renderModal() {
-    return this.state.modal && (
+    const { modal } = this.state
+    if (!modal) return
+
+    if (modal.contents) {
+      return modal.contents
+    }
+
+    return (
       <SimpleModal
         animationType="slide"
         transparent={true}
-        {...this.state.modal}
+        {...modal}
       />
     )
   }
