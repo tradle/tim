@@ -4152,11 +4152,6 @@
       "from": "parse-json@>=2.2.0 <3.0.0",
       "resolved": "https://registry.npmjs.org/parse-json/-/parse-json-2.2.0.tgz"
     },
-    "parse-usdl": {
-      "version": "1.0.0",
-      "from": "parse-usdl@latest",
-      "resolved": "https://registry.npmjs.org/parse-usdl/-/parse-usdl-1.0.0.tgz"
-    },
     "parsejson": {
       "version": "0.0.3",
       "from": "parsejson@0.0.3",
@@ -4564,8 +4559,8 @@
     },
     "react-native-blinkid": {
       "version": "1.0.0",
-      "from": "react-native-blinkid@1.0.0",
-      "resolved": "https://registry.npmjs.org/react-native-blinkid/-/react-native-blinkid-1.0.0.tgz"
+      "from": "git://github.com/tradle/react-native-blinkid.git#35ce36b0f06bc77ef7c2ad60e16c8d31eca1a866",
+      "resolved": "git://github.com/tradle/react-native-blinkid.git#35ce36b0f06bc77ef7c2ad60e16c8d31eca1a866"
     },
     "react-native-button": {
       "version": "1.8.2",
