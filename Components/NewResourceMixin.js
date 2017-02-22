@@ -21,12 +21,7 @@ import formDefaults from '../data/formDefaults.json'
 import DatePicker from 'react-native-datepicker'
 import ImageInput from './ImageInput'
 
-import BlinkID from 'react-native-blinkid'
-import { parse as parseUSDL } from 'parse-usdl'
-const ENV = require('../utils/env')
-if (ENV.microblink && BlinkID && utils.isIOS()) {
-  BlinkID.setLicenseKey(ENV.microblink.licenseKey)
-}
+import BlinkID from './BlinkID'
 
 // import Anyline from './Anyline'
 
@@ -692,33 +687,26 @@ var NewResourceMixin = {
       height: result.image.height
     }
 
-    if (result.mrtd) {
-      result.mrtd.personal.dateOfBirth = formatDate(new Date(result.mrtd.personal.dateOfBirth))
-      result.mrtd.document.dateOfExpiry = formatDate(new Date(result.mrtd.document.dateOfExpiry))
-      r[prop + 'Json'] = result.mrtd //JSON.stringify(result.mrtd)
-    }
-    else if (result.usdl || result.eudl) {
-      const dl = result.usdl || result.eudl
-      for (let c in dl) {
-        let category = dl[c]
-        for (let p in category) {
-          let d = category[p]
-          if (p.indexOf('date') === 0) {
-            if (result.usdl) {
-              category[p] = d.slice(0, 2) + '/' + d.slice(2, 4) + '/' + d.slice(4)
-            } else {
-              category[p] = parseEUDate(d)
-            }
-          } else if (p === 'birthData') {
-            if (/^\d+\.\d+\.\d+/.test(d)) {
-              let parts = d.split(' ')
-              category[p] = [parseEUDate(parts[0]), ...parts.slice(1)].join(' ')
-            }
-          }
-        }
+    ;['mrtd', 'usdl', 'eudl'].some(docType => {
+      const scan = result[docType]
+      if (!scan) return
+
+      const { personal, document } = scan
+      if (personal.dateOfBirth) {
+        personal.dateOfBirth = formatDate(personal.dateOfBirth)
       }
-      r[prop + 'Json'] = dl
-    }
+
+      if (document.dateOfExpiry) {
+        document.dateOfExpiry = formatDate(document.dateOfExpiry)
+      }
+
+      if (document.dateOfIssue) {
+        document.dateOfIssue = formatDate(document.dateOfIssue)
+      }
+
+      r[prop + 'Json'] = scan
+      return
+    })
 
     this.afterScan(r, prop)
   },
@@ -1805,16 +1793,11 @@ function formatDate (date) {
   return dateformat(date, 'mmm dS, yyyy')
 }
 
-function parseEUDate (date) {
-  const [day, month, year] = date.split('.')
-  return [month, day, year].join('/')
-}
-
-function parseAnylineDate (date) {
-  // yymmdd
-  const [year, month, day] = [date.slice(0, 2), date.slice(2, 4), date.slice(4, 6)]
-  return [month, day, year].join('/')
-}
+// function parseAnylineDate (date) {
+//   // yymmdd
+//   const [year, month, day] = [date.slice(0, 2), date.slice(2, 4), date.slice(4, 6)]
+//   return dateFromParts({ day, month, year })
+// }
 
 module.exports = NewResourceMixin
   // icon: {

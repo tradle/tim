@@ -363,11 +363,18 @@ class TiMApp extends Component {
   }
 
   renderModal() {
-    return this.state.modal && (
+    const { modal } = this.state
+    if (!modal) return
+
+    if (modal.contents) {
+      return modal.contents
+    }
+
+    return (
       <SimpleModal
         animationType="slide"
         transparent={true}
-        {...this.state.modal}
+        {...modal}
       />
     )
   }
@@ -722,7 +729,6 @@ var NavigationBarRouteMapper = {
       photoObj = route.id === MESSAGE_LIST        &&
                  route.passProps.resource.photos  &&
                  route.passProps.resource.photos[0]
-
     if (photoObj)
       uri = utils.getImageUri(photoObj.url);
     if (route.id === REMEDIATION) {

@@ -363,7 +363,6 @@ var Store = Reflux.createStore({
   },
 
   getMe() {
-
     return db.get(MY_IDENTITIES)
     .then((value) => {
       if (value) {
@@ -3694,8 +3693,9 @@ var Store = Reflux.createStore({
         result = this.getDependencies(result);
 
       if (ENV.hideVerificationsInChat       &&
-          params.to[TYPE] === ORGANIZATION  &&
           params.modelName === MESSAGE      &&
+          params.to                         &&
+          params.to[TYPE] === ORGANIZATION  &&
           !params.isForgetting) {
         for (let i=result.length - 1; i>=0; i--)
           if (result[i][TYPE] === VERIFICATION)

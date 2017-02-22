@@ -441,7 +441,6 @@ class TimHome extends Component {
       this.showContacts()
       return
     }
-
     if (this.state.firstPage) {
       switch (this.state.firstPage) {
       case 'chat':
@@ -450,6 +449,9 @@ class TimHome extends Component {
           url: this.state.url
         })
         // this.showChat(this.state.provider)
+        return
+      case 'officialAccounts':
+        this.showOfficialAccounts()
         return
       case 'profile':
         this.showHomePage(doReplace)
@@ -504,6 +506,7 @@ class TimHome extends Component {
     })
   }
   showOfficialAccounts() {
+    const me = utils.getMe()
     let passProps = {
       filter: '',
       modelName: constants.TYPES.ORGANIZATION,
@@ -512,7 +515,6 @@ class TimHome extends Component {
       bankStyle: defaultBankStyle
     };
     Actions.hasPartials()
-    let me = utils.getMe()
     let title = me.firstName;
     let route = {
       title: translate('officialAccounts'),
