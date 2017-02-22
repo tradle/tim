@@ -1766,15 +1766,20 @@ function formatDate (date) {
   return dateformat(date, 'mmm dS, yyyy')
 }
 
-function parseEUDate (date) {
-  const [day, month, year] = date.split('.')
-  return [month, day, year].join('/')
+function parseEUDate (str) {
+  const [day, month, year] = str.split('.')
+  return dateFromParts({ day, month, year })
+}
+
+function dateFromParts ({ day, month, year }) {
+  const date = new Date(`${year}/${month}/${day}`)
+  return formatDate(date)
 }
 
 function parseAnylineDate (date) {
   // yymmdd
   const [year, month, day] = [date.slice(0, 2), date.slice(2, 4), date.slice(4, 6)]
-  return [month, day, year].join('/')
+  return dateFromParts({ day, month, year })
 }
 
 module.exports = NewResourceMixin
