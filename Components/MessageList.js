@@ -62,6 +62,7 @@ import {
   Platform,
   View,
   Text,
+  StatusBar,
   TouchableOpacity,
   Alert,
   TouchableHighlight
@@ -110,6 +111,7 @@ class MessageList extends Component {
     if (this.props.isAggregation)
       params.isAggregation = true;
 
+    StatusBar.setHidden(false);
     utils.onNextTransitionEnd(this.props.navigator, () => Actions.list(params));
   }
   componentDidMount() {
@@ -344,7 +346,8 @@ class MessageList extends Component {
       passProps: {
         bankStyle: this.props.bankStyle,
         resource: resource,
-        currency: this.props.currency,
+        currency: this.props.resource.currency || this.props.currency,
+        country: this.props.resource.country,
         verification: verification,
         // createFormError: isVerifier && !utils.isMyMessage(resource),
         isVerifier: isVerifier
@@ -363,6 +366,8 @@ class MessageList extends Component {
         passProps: {
           model: model,
           resource: resource,
+          currency: this.props.resource.currency || this.props.currency,
+          country: this.props.resource.country,
           chat: this.props.resource,
           bankStyle: this.props.bankStyle
         }
@@ -414,7 +419,8 @@ class MessageList extends Component {
     var moreProps = {
       share: this.share.bind(this),
       sendStatus: sendStatus,
-      currency: this.props.currency,
+      currency: this.props.resource.currency || this.props.currency,
+      country: this.props.resource.country,
       previousMessageTime: previousMessageTime,
     }
 
@@ -517,8 +523,8 @@ class MessageList extends Component {
       let isChooser = this.props.originatingMessage && this.props.originatingMessage.verifiers
       if (!isChooser  &&  (!this.state.isConnected  ||  !this.state.onlineStatus)) //  || (resource[TYPE] === TYPES.ORGANIZATION  &&  !resource._online)))
         maxHeight -=  35
-      // if ((this.state.context  &&  this.state.context.product !== REMEDIATION)  ||  (resource[TYPE] === PRODUCT_APPLICATION && resource.product !== REMEDIATION))
-      //   maxHeight -= 45
+      if ((this.state.context  &&  this.state.context.product !== REMEDIATION)  ||  (resource[TYPE] === PRODUCT_APPLICATION && resource.product !== REMEDIATION))
+        maxHeight -= 45
       if (hideTextInput)
       //   maxHeight += 35
         maxHeight -= 10
@@ -955,7 +961,8 @@ class MessageList extends Component {
         rightButtonTitle: 'Done',
         passProps: {
           model: utils.getModel('tradle.NewMessageModel').value,
-          currency: resource.currency,
+          currency: this.props.resource.currency,
+          country: this.props.resource.country,
           // callback: this.modelAdded.bind(this)
         }
       }
