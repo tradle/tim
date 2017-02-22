@@ -1,0 +1,153 @@
+import React from 'react'
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Modal,
+  StyleSheet,
+  Dimensions
+} from 'react-native'
+
+import InfiniteCalendar from 'react-infinite-calendar'
+import 'react-infinite-calendar/styles.css'
+
+module.exports = function createCalendarModal (props) {
+  const screen = Dimensions.get('window')
+  let {
+    onCancel,
+    onConfirm,
+    selectedDate=Date.now(),
+    width=screen.width * 0.8,
+    height=screen.height * 0.5,
+    animationType="slide",
+    ...calendarProps
+  } = props
+
+  // sensible defaults
+  calendarProps = {
+    locale: euLocale,
+    theme: defaultTheme,
+    showTodayHelper: false,
+    ...calendarProps
+  }
+
+  const { theme } = calendarProps
+  const okButtonStyle = {
+    backgroundColor: theme.selectionColor
+  }
+
+  const okTextStyle = {
+    color: theme.textColor.active
+  }
+
+  return (
+    <Modal animationType={animationType}>
+      <View style={styles.container}>
+        <View style={styles.box}>
+          <InfiniteCalendar
+            selectedDate={selectedDate}
+            afterSelect={onSelect}
+            width={width}
+            height={height}
+            {...calendarProps}
+          />
+          <View style={styles.buttonsContainer}>
+            <TouchableOpacity onPress={() => onCancel()} style={[styles.button, styles.cancel]}>
+              <Text>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => onConfirm(selectedDate)} style={[styles.button, okButtonStyle]}>
+              <Text style={okTextStyle}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  )
+
+  function onSelect (moment) {
+    selectedDate = moment.toDate().getTime()
+  }
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)'
+  },
+  box: {
+    padding: 20,
+    // maxWidth: 600,
+    backgroundColor: '#ffffff',
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    shadowColor: '#000000',
+    shadowOffset: { width: 10, height: 10 },
+    // boxShadow: '2px 2px 10px rgba(0, 0, 0, 0.2)'
+  },
+  buttonsContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    paddingTop: 10
+  },
+  button: {
+    flex: 1,
+    alignItems: 'center',
+    // borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#eeeeee',
+    paddingLeft: 15,
+    paddingRight: 15,
+    paddingTop: 10,
+    paddingBottom: 10,
+  },
+  cancel: {
+    marginRight: 5
+  },
+  ok: {
+    marginLeft: 5
+  }
+})
+
+const defaultTheme = {
+  textColor: {
+    default: '#333',
+    active: '#FFF'
+  },
+  selectionColor: '#559FFF',
+  todayColor: '#FFA726',
+  weekdayColor: '#559FFF',
+  headerColor: '#448AFF',
+  floatingNav: {
+    background: 'rgba(56, 87, 138, 0.94)',
+    color: '#FFF',
+    chevron: '#FFA726'
+  }
+}
+
+const usLocale = {
+  name: 'en',
+  todayLabel: {
+    long: 'Today'
+  },
+  blank: 'Select a date...',
+  headerFormat: 'ddd, MMM Do',
+  week: {
+    dow: 0,
+    doy: 4
+  }
+}
+
+const euLocale = {
+  name: 'en',
+  todayLabel: {
+    long: 'Today'
+  },
+  blank: 'Select a date...',
+  headerFormat: 'ddd, MMM Do',
+  week: {
+    dow: 1,
+    doy: 4
+  }
+}

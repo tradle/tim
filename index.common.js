@@ -96,6 +96,7 @@ import platformStyles from './styles/platform'
 import SimpleModal from './Components/SimpleModal'
 import Transitions from './utils/transitions'
 import defaultBankStyle from './styles/bankStyle.json'
+import Calendar from './Components/Calendar'
 
 let originalGetDefaultProps = Text.getDefaultProps;
 Text.defaultProps = function() {
@@ -552,6 +553,8 @@ class TiMApp extends Component {
       return <RemediationItemsList navigator={nav} {...props} />
     case 30:
       return <HomePage navigator={nav} {...props} />
+    case 31:
+      return <Calendar navigator={nav} {...props} />
     case 10:
     default: // 10
       return <ResourceList navigator={nav} {...props} />
