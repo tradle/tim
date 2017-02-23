@@ -558,6 +558,9 @@ class FormRequestRow extends Component {
     let isReadOnly = utils.isReadOnlyChat(this.props.resource, this.props.context) //this.props.context  &&  this.props.context._readOnly
     let self = this
     let bankStyle = this.props.bankStyle
+    let strName = sameFormRequestForm ? translate('addAnotherFormOrGetNext', translate(form)) : utils.getStringName(message)
+    let str = strName ? utils.translate(strName) : message
+    let showMessage = true
     if (sameFormRequestForm  &&  !resource.documentCreated) {
        link = <View style={[chatStyles.rowContainer, {paddingVertical: 10, alignSelf: 'center'}]}>
                <View style={[chatStyles.textContainer, {justifyContent: 'center'}]}>
@@ -606,15 +609,15 @@ class FormRequestRow extends Component {
           if (prop.ref === PHOTO) {
             if (utils.isWeb()) {
               link = <TouchableHighlight underlayColor='transparent' onPress={this.showCamera.bind(this, prop)}>
-                       {link}
+                       <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: '#aaaaaa'} : {}]}>{str}</Text>
                      </TouchableHighlight>
-
             }
             else {
               link = <ImageInput prop={prop} onImage={item => this.onSetMediaProperty(prop.name, item)}>
-                       {link}
+                       <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: '#aaaaaa'} : {}]}>{str}</Text>
                      </ImageInput>
             }
+            showMessage = false
           }
           else
             link = <TouchableHighlight onPress={() => this.chooser(prop, prop.name)} underlayColor='transparent'>
@@ -625,10 +628,11 @@ class FormRequestRow extends Component {
           onPressCall = this.createNewResource.bind(this, form, isMyMessage)
       }
     }
-    let strName = sameFormRequestForm ? translate('addAnotherFormOrGetNext', translate(form)) : utils.getStringName(message)
-    let str = strName ? utils.translate(strName) : message
+    let messagePart
+    if (showMessage)
+      messagePart = <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: '#aaaaaa'} : {}]}>{str}</Text>
     let msg = <View key={this.getNextKey()}>
-               <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: '#aaaaaa'} : {}]}>{str}</Text>
+               {messagePart}
                {resource.documentCreated ? null : icon}
                {link}
              </View>
