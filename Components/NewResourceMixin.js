@@ -20,7 +20,7 @@ import pick from 'object.pick'
 import formDefaults from '../data/formDefaults.json'
 import DatePicker from 'react-native-datepicker'
 import ImageInput from './ImageInput'
-
+import ENV from '../utils/env'
 import BlinkID from './BlinkID'
 
 // import Anyline from './Anyline'

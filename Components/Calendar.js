@@ -33,7 +33,7 @@ class Calendar extends Component {
   }
 
   onConfirm () {
-    this.props.onDate(selectedDate)
+    this.props.onDate(this.state.selectedDate)
   }
 
   onSelect (selectedDate) {

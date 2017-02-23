@@ -44,7 +44,7 @@ async function detectFFPrivateBrowsing () {
     return true
   }
 
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     let tries = 50
     const interval = setInterval(function () {
       if (db.readyState === 'done') {
