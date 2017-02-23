@@ -768,6 +768,16 @@ class NewResource extends Component {
     }
     if (!jsons.length)
       jsons = <View/>
+    var submit
+    if (!isRegistration)
+      submit = <View style={styles.submitButton}>
+                 <TouchableOpacity onPress={this.onSavePressed.bind(this)}>
+                    <View style={[chatStyles.shareButton, {width: 100, backgroundColor: '#fdfdfd', paddingHorizontal: 10, justifyContent: 'center'}]}>
+                      <Text style={chatStyles.shareText}>{translate('Submit')}</Text>
+                      <Icon name='ios-send' size={25} style={{color: '#7AAAC3', paddingLeft: 5, transform: [{rotate: '45deg'}] }} />
+                    </View>
+                  </TouchableOpacity>
+                </View>
 
     var content =
       <ScrollView style={{backgroundColor: 'transparent'}}
@@ -796,14 +806,7 @@ class NewResource extends Component {
                   : <View/>
                }
             </View>
-            <View style={styles.submitButton}>
-              <TouchableOpacity onPress={this.onSavePressed.bind(this)}>
-                <View style={[chatStyles.shareButton, {width: 100, backgroundColor: '#fdfdfd', paddingHorizontal: 10, justifyContent: 'center'}]}>
-                  <Text style={chatStyles.shareText}>{translate('Submit')}</Text>
-                  <Icon name='ios-send' size={25} style={{color: '#7AAAC3', paddingLeft: 5, transform: [{rotate: '45deg'}] }} />
-                </View>
-              </TouchableOpacity>
-            </View>
+            {submit}
           </View>
         </View>
       </ScrollView>
