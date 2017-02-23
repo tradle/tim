@@ -7,7 +7,6 @@ import DeviceInfo from 'react-native-device-info'
 import extend from 'xtend'
 import environment from '../environment.json'
 
-const MACHINE_LOCAL_IP = require('./localIP')
 const LOCAL_IP = (function () {
   if (Platform.OS === 'android') return '10.0.2.2'
 
@@ -15,7 +14,7 @@ const LOCAL_IP = (function () {
     return 'localhost'
   }
 
-  return MACHINE_LOCAL_IP
+  return require('./localIP')
 })()
 
 module.exports = extend({
