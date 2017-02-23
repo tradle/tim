@@ -11,27 +11,38 @@ import {
 import InfiniteCalendar from 'react-infinite-calendar'
 import 'react-infinite-calendar/styles.css'
 
+const DEFAULT_MIN_DATE = new Date('1900/01/01')
+
 module.exports = function createCalendarModal (props) {
   const screen = Dimensions.get('window')
+  // let minDim = Math.min(screen.width, screen.height)
+  // if (minDim === screen.height) minDim -= 250
+
   let {
     onCancel,
     onConfirm,
-    selectedDate=Date.now(),
     width=screen.width * 0.8,
     height=screen.height * 0.5,
     animationType="slide",
     ...calendarProps
   } = props
 
+  if (!(onConfirm && onCancel)) {
+    throw new Error('expected "onConfirm" and "onCancel" functions')
+  }
+
   // sensible defaults
   calendarProps = {
     locale: euLocale,
     theme: defaultTheme,
     showTodayHelper: false,
+    selectedDate: Date.now(),
+    min: DEFAULT_MIN_DATE,
+    minDate: DEFAULT_MIN_DATE,
     ...calendarProps
   }
 
-  const { theme } = calendarProps
+  let { theme, selectedDate } = calendarProps
   const okButtonStyle = {
     backgroundColor: theme.selectionColor
   }
@@ -45,7 +56,6 @@ module.exports = function createCalendarModal (props) {
       <View style={styles.container}>
         <View style={styles.box}>
           <InfiniteCalendar
-            selectedDate={selectedDate}
             afterSelect={onSelect}
             width={width}
             height={height}
