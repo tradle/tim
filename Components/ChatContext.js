@@ -32,16 +32,19 @@ class ChatContext extends Component {
     if (!context  ||  context.product === REMEDIATION)
       return <View/>
     let me = utils.getMe()
+    let chat = this.props.chat
     if (me.isEmployee) {
-      if (this.props.chat[constants.TYPE] === constants.TYPES.PROFILE  &&  !me.organization._canShareContext)
+      if (chat[constants.TYPE] === constants.TYPES.PROFILE  &&  !me.organization._canShareContext)
         return <View/>
     }
+    // No need to show context if provider has only one product and no share context
+    if (chat.products  &&  chat.products.length === 1  &&  !chat._canShareContext)
+      return <View/>
     // if (!this.props.context  ||  this.props.context._readOnly)
     //   return <View/>
-    let r = this.props.chat
     let isReadOnlyChat = utils.isReadOnlyChat(context)
     let bankStyle = this.props.bankStyle
-    let isShareContext = r[constants.TYPE] === PRODUCT_APPLICATION && isReadOnlyChat
+    let isShareContext = chat[constants.TYPE] === PRODUCT_APPLICATION && isReadOnlyChat
 
     let content = <Text style={[{color: this.props.allContexts ? bankStyle.CURRENT_CONTEXT_TEXT_COLOR : bankStyle.SHARE_CONTEXT_TEXT_COLOR}, styles.text]}>{translate(utils.getModel(context.product).value)}</Text>
     let chooser = context  &&  isShareContext
@@ -51,7 +54,7 @@ class ChatContext extends Component {
                   </TouchableOpacity>
     // HACK: if me is employee no sharing for now
     let share
-    if (this.props.allContexts || isReadOnlyChat)
+    if (this.props.allContexts || isReadOnlyChat  ||  !chat._canShareContext)
       share = <View/>
     // else if (utils.getMe().isEmployee  &&  this.props.chat[constants.TYPE] === constants.TYPES.PROFILE)
     //   share = <View/>
