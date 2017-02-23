@@ -488,7 +488,6 @@ class TimHome extends Component {
       bankStyle: defaultBankStyle
     };
     Actions.hasPartials()
-    let me = utils.getMe();
     let title = me.firstName;
     let route = {
       title: translate('officialAccounts'),
