@@ -29,6 +29,7 @@ const ENUM = 'tradle.Enum'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
 const REMEDIATION_SIMPLE_MESSAGE = 'tradle.RemediationSimpleMessage'
+const CONFIRMATION = 'tradle.Confirmation'
 
 var CURRENCY_SYMBOL
 var LINK_COLOR
@@ -82,7 +83,7 @@ class MessageRow extends Component {
     var renderedRow = [];
     var ret = this.formatRow(isMyMessage, renderedRow);
     let onPressCall = ret ? ret.onPressCall : null
-    let isConfirmation = ret ? ret.isConfirmation : null
+    let isConfirmation = resource[constants.TYPE] === CONFIRMATION
     var isFormError = resource[constants.TYPE] === FORM_ERROR
 
     var photoUrls = [];
@@ -565,8 +566,8 @@ class MessageRow extends Component {
 
     let isMyProduct = model.subClassOf === MY_PRODUCT
     var isSimpleMessage = model.id === constants.TYPES.SIMPLE_MESSAGE
+    var isConfirmation = model.id === CONFIRMATION
     var cnt = 0;
-    var isConfirmation
     var self = this
 
     var vCols = [];
@@ -591,6 +592,17 @@ class MessageRow extends Component {
           (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0)) {
         onPressCall = this.onPress.bind(self, this.props.resource.message);
         vCols.push(<Text style={style} numberOfLines={first ? 2 : 1} key={self.getNextKey()}>{resource[v]}</Text>);
+      }
+      else if (isConfirmation) {
+        style = [style, {color: self.props.bankStyle.CONFIRMATION_COLOR}, chatStyles.resourceTitle]
+        vCols.push(
+          <View key={self.getNextKey()}>
+            <Text style={[style]}>{resource[v]}</Text>
+            <Icon style={[{color: self.props.bankStyle.CONFIRMATION_COLOR, alignSelf: 'flex-end', width: 50, height: 50, marginTop: -45, opacity: 0.2}]} size={50} name={'ios-flower'} />
+            <Icon style={{color: self.props.bankStyle.CONFIRMATION_COLOR, alignSelf: 'flex-end', marginTop: -10}} size={30} name={'ios-done-all'} />
+          </View>
+        );
+
       }
       else if (isFormError) {
         let rtype = (resource.prefill[constants.TYPE]) ? resource.prefill[constants.TYPE] : utils.getId(resource.prefill).split('_')[0]
@@ -695,51 +707,38 @@ class MessageRow extends Component {
             return;
           }
         }
-        else
-          isConfirmation = resource[v].indexOf('Congratulations!') !== -1
+        // else
+        //   isConfirmation = resource[v].indexOf('Congratulations!') !== -1
 
-        if (isConfirmation) {
-          style = [style, {color: self.props.bankStyle.CONFIRMATION_COLOR}, chatStyles.resourceTitle]
-          vCols.push(
-            <View key={self.getNextKey()}>
-              <Text style={[style]}>{resource[v]}</Text>
-              <Icon style={[{color: self.props.bankStyle.CONFIRMATION_COLOR, alignSelf: 'flex-end', width: 50, height: 50, marginTop: -45, opacity: 0.2}]} size={50} name={'ios-flower'} />
-              <Icon style={{color: self.props.bankStyle.CONFIRMATION_COLOR, alignSelf: 'flex-end', marginTop: -10}} size={30} name={'ios-done-all'} />
-            </View>
-          );
+        let pVal = resource[v]
+        let linkIdx = pVal.indexOf('<http')
+        if (linkIdx) {
+          let endLink = pVal.indexOf('>', linkIdx)
+          let link = pVal.substring(linkIdx + 1, endLink)
 
-        }
-        else {
-          let pVal = resource[v]
-          let linkIdx = pVal.indexOf('<http')
-          if (linkIdx) {
-            let endLink = pVal.indexOf('>', linkIdx)
-            let link = pVal.substring(linkIdx + 1, endLink)
-
-            let textIdx = pVal.indexOf('[')
-            let text
-            if (textIdx) {
-              text = pVal.substring(textIdx + 1, linkIdx - 1)
-              linkIdx = textIdx
-            }
-            vCols.push(<View key={self.getNextKey()}>
-                          <Text style={style}>{pVal.substring(0, linkIdx)}</Text>
-                          <TouchableHighlight underlayColor='transparent' onPress={this.onPress.bind(this, link, text)}>
-                            <Text style={[style, {color: this.props.bankStyle.LINK_COLOR}]}>{text || link}</Text>
-                          </TouchableHighlight>
-                          <Text style={style}>{pVal.substring(endLink + 1)}</Text>
-                        </View>
-              )
-            return null
+          let textIdx = pVal.indexOf('[')
+          let text
+          if (textIdx) {
+            text = pVal.substring(textIdx + 1, linkIdx - 1)
+            linkIdx = textIdx
           }
-          else
-            vCols.push(<Text style={style} key={self.getNextKey()}>{resource[v]}</Text>);
+          vCols.push(<View key={self.getNextKey()}>
+                        <Text style={style}>{pVal.substring(0, linkIdx)}</Text>
+                        <TouchableHighlight underlayColor='transparent' onPress={this.onPress.bind(this, link, text)}>
+                          <Text style={[style, {color: this.props.bankStyle.LINK_COLOR}]}>{text || link}</Text>
+                        </TouchableHighlight>
+                        <Text style={style}>{pVal.substring(endLink + 1)}</Text>
+                      </View>
+            )
+          return null
         }
+        else
+          vCols.push(<Text style={style} key={self.getNextKey()}>{resource[v]}</Text>);
       }
       first = false;
 
     });
-    if (!isSimpleMessage  &&  !isFormError  &&  !isMyProduct)  {
+    if (!isSimpleMessage  &&  !isFormError  &&  !isMyProduct  &&  !isConfirmation)  {
       let title = translate(model)
       if (title.length > 30)
         title = title.substring(0, 27) + '...'
