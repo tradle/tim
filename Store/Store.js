@@ -920,6 +920,7 @@ var Store = Reflux.createStore({
     // return newResult.reverse()
   },
   getInfo(serverUrls, retry, id, newServer) {
+    debug('fetching provider info from', serverUrls)
     return Q.all(serverUrls.map(url => {
       return this.getServiceProviders(url, retry, id, newServer)
         .then(results => {
@@ -1047,6 +1048,7 @@ var Store = Reflux.createStore({
 
     // const identifier = tradle.utils.serializePubKey(identifierPubKey).toString('hex')
     const url = getProviderUrl(provider)
+    debug('adding provider', provider.hash, url)
 
     let transport = wsClients.byUrl[url] || wsClients.byIdentifier[provider.hash]
     if (transport) {
