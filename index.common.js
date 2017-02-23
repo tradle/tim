@@ -639,7 +639,7 @@ var NavigationBarRouteMapper = {
     case 'Accept':
       icon = 'ios-send'
       iconSize = 32
-      style = {marginTop: 5, transform: [
+      style = {marginTop: 0, transform: [
           {rotate: '45deg'}
         ]}
       break
