@@ -515,10 +515,10 @@ class FormRequestRow extends Component {
   }
 
   formRequest(resource, vCols, prop) {
+    let message = resource.message.replace(/\*/g, '')
     let form = utils.getModel(resource.form).value
     // if (this.props.shareableResources)
     //   style = styles.description;
-    let message = resource.message
     let onPressCall
     // if (s.length === 2)
     //   onPressCall = this.editForm.bind(self, msgParts[1], msgParts[0])
@@ -545,7 +545,7 @@ class FormRequestRow extends Component {
     let color = isMyMessage
               ? {color: '#AFBBA8'}
               : {color: '#2892C6'}
-    let link
+    let link, icon
     let isReadOnly = utils.isReadOnlyChat(this.props.resource, this.props.context) //this.props.context  &&  this.props.context._readOnly
     let self = this
     let bankStyle = this.props.bankStyle
@@ -581,11 +581,15 @@ class FormRequestRow extends Component {
       link = <Text style={[chatStyles.resourceTitle, color]}>{translate(form)}</Text>
     else {
       let notLink = resource.documentCreated  ||  isReadOnly  ||  form.subClassOf === MY_PRODUCT
-      let icon = <Icon  name={'ios-arrow-forward'} style={{marginTop: 2, marginRight: 2, color: isMyMessage ? bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}} size={20} />
+
+      icon = <View style={{position: 'absolute', bottom: 0, right: 0}}>
+             <Icon  name={'ios-arrow-forward'} style={{marginTop: 2, marginRight: 2, color: isMyMessage ? bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}} size={20} />
+             </View>
       link = <View style={chatStyles.rowContainer}>
                <Text style={[chatStyles.resourceTitle, {color: resource.documentCreated  ||  notLink ?  '#757575' : resource.verifiers ? 'green' : LINK_COLOR}]}>{translate(form)}</Text>
                {resource.documentCreated ? null : icon}
              </View>
+      link = <View/>
       if (!notLink) {
         if (resource.verifiers)
           onPressCall = this.props.chooseTrustedProvider.bind(this, this.props.resource, form, isMyMessage)
@@ -602,12 +606,12 @@ class FormRequestRow extends Component {
         else
           onPressCall = this.createNewResource.bind(this, form, isMyMessage)
       }
-
     }
     let strName = sameFormRequestForm ? translate('addAnotherFormOrGetNext', translate(form)) : utils.getStringName(message)
     let str = strName ? utils.translate(strName) : message
     let msg = <View key={this.getNextKey()}>
                <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: '#aaaaaa'} : {}]}>{str}</Text>
+               {resource.documentCreated ? null : icon}
                {link}
              </View>
     vCols.push(msg);
