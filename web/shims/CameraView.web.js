@@ -110,15 +110,14 @@ class CameraView extends Component {
 }
 
 function getCameraDimensions (component, ratio=DEFAULT_ASPECT_RATIO) {
-  let { width, height } = getDimensions(this)
+  const dimensions = getDimensions(this)
+  let { width, height } = dimensions
   if (height * ratio > width) {
     height = width / ratio
-  } else {
-    width = height * ratio
   }
 
-  width = width * 0.9 | 0
-  height = height * 0.9 | 0
+  height = Math.min(height, dimensions.height - 200)
+  width = height * ratio
   return { width, height }
 }
 
