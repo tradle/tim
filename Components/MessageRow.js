@@ -722,13 +722,20 @@ class MessageRow extends Component {
             text = pVal.substring(textIdx + 1, linkIdx - 1)
             linkIdx = textIdx
           }
-          vCols.push(<View key={self.getNextKey()}>
-                        <Text style={style}>{pVal.substring(0, linkIdx)}</Text>
-                        <TouchableHighlight underlayColor='transparent' onPress={this.onPress.bind(this, link, text)}>
-                          <Text style={[style, {color: this.props.bankStyle.LINK_COLOR}]}>{text || link}</Text>
-                        </TouchableHighlight>
-                        <Text style={style}>{pVal.substring(endLink + 1)}</Text>
-                      </View>
+          vCols.push(<TouchableHighlight underlayColor='transparent' onPress={this.onPress.bind(this, link, text)}  key={self.getNextKey()}>
+                      <Text style={style}>
+                        {pVal.substring(0, linkIdx)}
+                        <Text style={[style, {color: this.props.bankStyle.LINK_COLOR}]}>{text || link} </Text>
+                        {pVal.substring(endLink + 1)}
+                      </Text>
+                     </TouchableHighlight>
+          // vCols.push(<Text key={self.getNextKey()}>
+          //               <Text style={style}>{pVal.substring(0, linkIdx)}</Text>
+          //               <TouchableHighlight underlayColor='transparent' onPress={this.onPress.bind(this, link, text)}>
+          //                 <Text style={[style, {color: this.props.bankStyle.LINK_COLOR}]}>{text || link}</Text>
+          //               </TouchableHighlight>
+          //               <Text style={style}>{pVal.substring(endLink + 1)}</Text>
+          //             </Text>
             )
           return null
         }
