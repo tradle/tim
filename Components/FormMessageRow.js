@@ -223,8 +223,11 @@ class FormMessageRow extends Component {
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
 
     var viewCols = model.gridCols || model.viewCols;
-    if (!viewCols)
-      return
+    if (!viewCols) {
+      viewCols = model.required
+      if (!viewCols)
+        return
+    }
     var first = true;
     var self = this;
 
