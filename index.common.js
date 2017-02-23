@@ -744,7 +744,7 @@ var NavigationBarRouteMapper = {
     for (let i=1; i<t.length; i++)
       tArr.push(<Text style={styles.arr} key={'index.common.js_' + i}>{t[i]}</Text>)
     let text
-    if (logoNeedsText) {
+    if (logoNeedsText  ||  !uri) {
       text = <Text style={style}>
               {t[0]}
              </Text>
