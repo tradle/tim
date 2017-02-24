@@ -75,10 +75,11 @@ const merged = extend({
   registerForPushNotifications: true,
   hideVerificationsInChat: false,
   hideProductApplicationInChat: false,
-  splashBackground: 'tradle',
   landingPage: null, //"AvivaIntroView",
   showCollapsed: null, //{'tradle.PhotoID': 'document'}
-  brandBackground: 'tradle'
+  splashBackground: 'tradle',
+  brandBackground: 'tradle',
+  delayBetweenExpensiveTasks: 100
 }, environment)
 
 merged.splashBackground = splash[merged.splashBackground]
