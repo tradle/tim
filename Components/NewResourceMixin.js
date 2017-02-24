@@ -813,13 +813,7 @@ var NewResourceMixin = {
 
     if (params.prop === 'scan')  {
       if (this.state.resource.documentType  &&  this.state.resource.country) {
-        // if (utils.isAndroid()) {
-        //   this.showAnylineScanner(params.prop)
-        // } else {
-          this.showBlinkIDScanner(params.prop)
-        // }
-
-        // this.scanFormsQRCode(params.prop)
+        this.showBlinkIDScanner(params.prop)
       }
       else
         Alert.alert('Please choose country and document type first')
@@ -1252,7 +1246,7 @@ var NewResourceMixin = {
     let actionItem
     if (isVideo ||  isPhoto) {
       // HACK
-      if (isPhoto  &&  (params.prop !== 'scan'  ||  utils.isWeb())) {
+      if (isPhoto  &&  (params.prop !== 'scan'  ||  !BlinkID)) {
         var aiStyle = {flex: 7, paddingTop: 15, paddingBottom: 7}
         let m = utils.getModel(prop.ref).value
         actionItem = <ImageInput prop={prop} style={aiStyle} onImage={item => this.onSetMediaProperty(prop.name, item)}>
