@@ -4658,9 +4658,9 @@
       "resolved": "git://github.com/pgmemk/react-native-datepicker.git#ce456393807d8a537fd30d6cb4cf60d77dba7840"
     },
     "react-native-device-info": {
-      "version": "0.9.5",
-      "from": "react-native-device-info@>=0.9.3 <0.10.0",
-      "resolved": "https://registry.npmjs.org/react-native-device-info/-/react-native-device-info-0.9.5.tgz"
+      "version": "0.9.9",
+      "from": "react-native-device-info@>=0.9.0 <0.10.0",
+      "resolved": "https://registry.npmjs.org/react-native-device-info/-/react-native-device-info-0.9.9.tgz"
     },
     "react-native-ecc": {
       "version": "1.4.0",

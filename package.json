@@ -76,7 +76,7 @@
     "react-native-code-push": "^1.15.0-beta",
     "react-native-crypto": "^2.0.1",
     "react-native-datepicker": "github:pgmemk/react-native-datepicker#ce456393",
-    "react-native-device-info": "^0.9.3",
+    "react-native-device-info": "0.9.9",
     "react-native-ecc": "^1.4.0",
     "react-native-env": "github:tradle/react-native-env",
     "react-native-fabric": "0.3.2",

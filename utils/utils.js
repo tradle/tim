@@ -1048,7 +1048,7 @@ var utils = {
     // return symbol ? (symbol === '¬' ? '€' : symbol) : symbol
   },
   isSimulator() {
-    return DeviceInfo.getModel() === 'Simulator'
+    return DeviceInfo.getModel() === 'Simulator' || DeviceInfo.isEmulator()
   },
   toOldStyleWrapper: function (wrapper) {
     if (!wrapper.permalink) return wrapper
