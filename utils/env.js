@@ -56,5 +56,9 @@ module.exports = extend({
   locale: {
     language: DeviceInfo.getDeviceLocale(),
     country: DeviceInfo.getDeviceCountry()
-  }
+  },
+  // timeout after partial scan results have been processed
+  blinkIDScanTimeoutInternal: 10000,
+  // timeout from beginning to end of scan operation
+  blinkIDScanTimeoutExternal: 30000
 }, environment)

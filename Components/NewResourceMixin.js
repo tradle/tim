@@ -17,6 +17,7 @@ const debug = require('debug')('tradle:app:blinkid')
 
 import omit from 'object.omit'
 import pick from 'object.pick'
+import ENV from '../utils/env'
 import formDefaults from '../data/formDefaults.json'
 import DatePicker from 'react-native-datepicker'
 import ImageInput from './ImageInput'
@@ -41,6 +42,7 @@ const DAY  = 3600 * 1000 * 24
 const HOUR = 3600 * 1000
 const MINUTE = 60 * 1000
 const FOCUSED_LABEL_COLOR = '#7AAAC3'// #139459'
+const TIMEOUT_ERROR = new Error('timed out')
 
 var cnt = 0;
 var propTypesMap = {
@@ -654,13 +656,16 @@ var NewResourceMixin = {
     const { documentType, country } = this.state.resource
     let blinkIDOpts = {
       quality: 0.2,
-      base64: true
+      base64: true,
+      timeout: ENV.blinkIDScanTimeoutInternal
     }
 
     if (documentType.title === 'Passport') {
+      blinkIDOpts.tooltip = translate('centerPassport')
       // machine readable travel documents (passport)
       blinkIDOpts.mrtd = DEFAULT_BLINK_ID_OPTS.mrtd
     } else if (documentType.title === 'Driver licence' || documentType.title === 'Driver license') {
+      blinkIDOpts.tooltip = translate('centerLicence')
       if (country.title === 'United States') {
         blinkIDOpts.usdl = DEFAULT_BLINK_ID_OPTS.usdl
       } else {
@@ -669,14 +674,40 @@ var NewResourceMixin = {
     } else {
       blinkIDOpts = {
         ...DEFAULT_BLINK_ID_OPTS,
-        ...blinkIDOpts
+        ...blinkIDOpts,
+        tooltip: translate('centerID')
       }
     }
 
+    const promiseTimeout = new Promise((resolve, reject) => {
+      setTimeout(() => reject(TIMEOUT_ERROR), ENV.blinkIDScanTimeoutExternal)
+    })
+
     let result
     try {
-      result = await BlinkID.scan(blinkIDOpts)
+      result = await Promise.race([
+        BlinkID.scan(blinkIDOpts),
+        promiseTimeout
+      ])
     } catch (err) {
+      debug('scan failed:', err.message)
+      const canceled = /canceled/i.test(err.message)
+      const timedOut = !canceled && /time/i.test(err.message)
+      if (!canceled && typeof BlinkID.dismiss === 'function') {
+        // cancel programmatically
+        await BlinkID.dismiss()
+      }
+
+      // give the BlinkID view time to disappear
+      // 800ms is a bit long, but if BlinkID view is still up, Alert will just not show
+      await utils.promiseDelay(800)
+      if (canceled || timedOut) {
+        return Alert.alert(
+          translate('documentNotScanning', documentType.title),
+          translate('retryScanning', documentType.title.toLowerCase())
+        )
+      }
+
       debug('BlinkID scan failed', err.stack)
       return Alert.alert(
         translate('oops') + '!',
