@@ -61,5 +61,7 @@ module.exports = extend({
   blinkIDScanTimeoutInternal: 10000,
   // timeout from beginning to end of scan operation
   blinkIDScanTimeoutExternal: 30000,
-  registerForPushNotifications: true
+  registerForPushNotifications: true,
+  hideVerificationsInChat: false,
+  hideProductApplicationInChat: false
 }, environment)
