@@ -210,5 +210,13 @@
     "cameraAccess": "Camera Access",
     "enableCameraAccess": "Tradle currently does not have permission to use the camera. To grant access, choose Settings, and make sure Camera is enabled.",
     "noScanningOnAndroid": "Document scanning on Android is coming soon.",
-    "pleaseTapOnMenu": "Please tap on the red button and"
+    "pleaseTapOnMenu": "Please tap on the red button and",
+    "holdPhoneToPassportBackCover": "Hold the back of your phone against the back inside cover of your passport.",
+    "holdPhoneToPassport": "Hold the back of your phone against the front cover of your passport",
+    "scanningFailedTryAgain": "Scanning was unsuccessful. Could you please try again?",
+    "documentNotScanning": "{1} not scanning?",
+    "retryScanning": "Please check that you have the right document and try one more time?\n\nPS: Make sure you center your {1} in the scanning frame.",
+    "centerPassport": "Center passport photo page in frame",
+    "centerLicence": "Center licence in frame",
+    "centerID": "Center ID in frame"
 }
