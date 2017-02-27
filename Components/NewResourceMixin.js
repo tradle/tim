@@ -701,17 +701,18 @@ var NewResourceMixin = {
       // give the BlinkID view time to disappear
       // 800ms is a bit long, but if BlinkID view is still up, Alert will just not show
       await utils.promiseDelay(800)
-      if (canceled || timedOut) {
-        return Alert.alert(
-          translate('documentNotScanning', documentType.title),
-          translate('retryScanning', documentType.title.toLowerCase())
-        )
-      }
-
       debug('BlinkID scan failed', err.stack)
+
+      // if (canceled || timedOut) {
+      //   return Alert.alert(
+      //     translate('documentNotScanning', documentType.title),
+      //     translate('retryScanning', documentType.title.toLowerCase())
+      //   )
+      // }
+
       return Alert.alert(
-        translate('oops') + '!',
-        translate('scanningFailedTryAgain')
+        translate('documentNotScanning'),
+        translate('retryScanning', documentType.title.toLowerCase())
       )
     }
 

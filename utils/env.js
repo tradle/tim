@@ -60,5 +60,6 @@ module.exports = extend({
   // timeout after partial scan results have been processed
   blinkIDScanTimeoutInternal: 10000,
   // timeout from beginning to end of scan operation
-  blinkIDScanTimeoutExternal: 30000
+  blinkIDScanTimeoutExternal: 30000,
+  registerForPushNotifications: true
 }, environment)
