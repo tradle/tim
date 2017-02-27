@@ -3697,14 +3697,20 @@ var Store = Reflux.createStore({
       if (params.isAggregation)
         result = this.getDependencies(result);
 
-      if (ENV.hideVerificationsInChat       &&
+      if ((ENV.hideVerificationsInChat  ||  ENV.hideProductApplicationInChat)  &&
           params.modelName === MESSAGE      &&
           params.to                         &&
           params.to[TYPE] === ORGANIZATION  &&
           !params.isForgetting) {
         for (let i=result.length - 1; i>=0; i--)
-          if (result[i][TYPE] === VERIFICATION)
-            result.splice(i, 1)
+          if (result[i][TYPE] === VERIFICATION) {
+            if (ENV.hideVerificationsInChat)
+              result.splice(i, 1)
+          }
+          else if (result[i][TYPE] === PRODUCT_APPLICATION) {
+            if (ENV.hideProductApplicationInChat)
+              result.splice(i, 1)
+          }
       }
       var shareableResources;
       var retParams = {
