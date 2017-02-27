@@ -22,6 +22,9 @@ var VideoPlayer = require('./Components/VideoPlayer')
 var EnumList = require('./Components/EnumList')
 // var GridList = require('./Components/GridList');
 var TimHome = require('./Components/TimHome');
+
+var AvivaIntroView = require('./Components/AvivaIntroView')
+
 var HomePage = require('./Components/HomePage')
 var PasswordCheck = require('./Components/PasswordCheck');
 var LockScreen = require('./Components/LockScreen')
@@ -66,6 +69,7 @@ const MESSAGE_VIEW = 5
 const PASSWORD_CHECK = 20
 const REMEDIATION = 29
 const HEIGHT = 27
+const AVIVA_INTRO_VIEW = 50
 
 var reactMixin = require('react-mixin');
 import {
@@ -104,11 +108,19 @@ import Navs from './utils/navs'
 var ReactPerf = __DEV__ && require('react-addons-perf')
 var UNAUTHENTICATE_AFTER_BG_MILLIS = require('./utils/localAuth').TIMEOUT
 
+const landingPageMapping = {
+  AvivaIntroView: {
+    component: AvivaIntroView,
+    id: AVIVA_INTRO_VIEW
+  }
+}
+
 class TiMApp extends Component {
   constructor(props) {
     super(props)
     var props = {
-      modelName: constants.TYPES.PROFILE
+      modelName: constants.TYPES.PROFILE,
+      landingPageMapping: landingPageMapping
     }
 
     // const testModal = () => {
@@ -537,6 +549,8 @@ class TiMApp extends Component {
       return <RemediationItemsList navigator={nav} {...props} />
     case 30:
       return <HomePage navigator={nav} {...props} />
+    case AVIVA_INTRO_VIEW:
+      return <AvivaIntroView navigator={nav} {...props} />
     case 10:
     default: // 10
       return <ResourceList navigator={nav} {...props} />
@@ -618,9 +632,10 @@ var NavigationBarRouteMapper = {
     case 'Accept':
       icon = 'ios-send'
       iconSize = 32
-      style = {marginTop: 5, transform: [
-          {rotate: '45deg'}
-        ]}
+      style = {marginTop: 0}
+      // style = {marginTop: 5, transform: [
+      //     {rotate: '45deg'}
+      //   ]}
       break
     case 'Profile':
       icon = 'md-person'
@@ -817,7 +832,7 @@ var styles = StyleSheet.create({
   navBarLeftButton: {
     paddingLeft: 10,
     paddingRight: 25,
-    marginTop: 7
+    marginTop: 5
   },
   navBarRightButton: {
     paddingLeft: 25,
