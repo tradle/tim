@@ -5,7 +5,7 @@ import {
 
 import DeviceInfo from 'react-native-device-info'
 import extend from 'xtend'
-import environment from '../environment.json'
+import environment from '../environment-aviva.json'
 
 const LOCAL_IP = (function () {
   if (Platform.OS === 'web') {
