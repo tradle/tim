@@ -768,16 +768,6 @@ class NewResource extends Component {
     }
     if (!jsons.length)
       jsons = <View/>
-    var submit
-    if (!isRegistration)
-      submit = <View style={styles.submitButton}>
-                 <TouchableOpacity onPress={this.onSavePressed.bind(this)}>
-                    <View style={[chatStyles.shareButton, {width: 100, backgroundColor: '#fdfdfd', paddingHorizontal: 10, justifyContent: 'center'}]}>
-                      <Text style={chatStyles.shareText}>{translate('Submit')}</Text>
-                      <Icon name='ios-send' size={25} style={{color: '#7AAAC3', paddingLeft: 5, transform: [{rotate: '45deg'}] }} />
-                    </View>
-                  </TouchableOpacity>
-                </View>
 
     var content =
       <ScrollView style={{backgroundColor: 'transparent'}}
@@ -806,21 +796,47 @@ class NewResource extends Component {
                   : <View/>
                }
             </View>
-            {submit}
           </View>
         </View>
       </ScrollView>
 
+    // var submit
+    // if (!isRegistration)
+    //   submit = <View style={styles.submitButton}>
+    //              <TouchableOpacity onPress={this.onSavePressed.bind(this)}>
+    //                 <View style={[chatStyles.shareButton, {width: 100, backgroundColor: '#fdfdfd', paddingHorizontal: 10, justifyContent: 'center'}]}>
+    //                   <Text style={chatStyles.shareText}>{translate('Submit')}</Text>
+    //                   <Icon name='ios-send' size={25} style={{color: '#7AAAC3', paddingLeft: 5, transform: [{rotate: '45deg'}] }} />
+    //                 </View>
+    //               </TouchableOpacity>
+    //             </View>
     // StatusBar.setHidden(true);
+    let bankStyle = this.props.bankStyle
     if (!isRegistration) {
       if (this.state.err) {
         Alert.alert(this.state.err)
         this.state.err = null
       }
+      var submit
+      if (!isRegistration  &&  bankStyle  &&  bankStyle.submitBarInFooter)
+        submit = <View style={{marginHorizontal: -3, marginBottom: -2, backgroundColor: bankStyle.CONTEXT_BACKGROUND_COLOR, borderTopColor: bankStyle.CONTEXT_BACKGROUND_COLOR, borderTopWidth: StyleSheet.hairlineWidth, height: 45, justifyContent: 'center', alignItems: 'center'}}>
+                   <TouchableOpacity onPress={this.onSavePressed.bind(this)}>
+                     <View style={{backgroundColor: 'transparent', paddingHorizontal: 10, justifyContent: 'center'}}>
+                       <Text style={{fontSize: 24,color: bankStyle.CONTEXT_TEXT_COLOR}}>{translate('Next')}</Text>
+                     </View>
+                   </TouchableOpacity>
+                 </View>
+
       return <PageView style={platformStyles.container}>
                {content}
-               {this.makeViewTitle(meta)}
+               {submit}
               </PageView>
+    }
+    let title
+    if (!isRegistration  &&  !bankStyle.LOGO_NEEDS_TEXT) {
+      title = <View style={{backgroundColor: bankStyle.CONTEXT_BACKGROUND_COLOR, borderTopColor: bankStyle.CONTEXT_BACKGROUND_COLOR, borderTopWidth: StyleSheet.hairlineWidth, height: 25, justifyContent: 'center', alignItems: 'center'}}>
+                {translate(meta)}
+              </View>
     }
     return (
       <View style={{height: height}}>
@@ -830,7 +846,7 @@ class NewResource extends Component {
           ? <View style={styles.logo}>
               <CustomIcon name='tradle' size={40} color='#ffffff' style={{padding: 10}}/>
             </View>
-          : <View/>
+          : {title}
         }
         {content}
         </View>
