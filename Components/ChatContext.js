@@ -38,7 +38,7 @@ class ChatContext extends Component {
         return <View/>
     }
     // No need to show context if provider has only one product and no share context
-    if (chat.products  &&  chat.products.length === 1  &&  !chat._canShareContext)
+    if ((!chat.products  ||  chat.products.length === 1)  &&  !chat._canShareContext)
       return <View/>
     // if (!this.props.context  ||  this.props.context._readOnly)
     //   return <View/>
