@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
 } from 'react-native'
 
-var Video = require('react-native-video')
+import Video from 'react-native-video'
 var utils = require('../utils/utils')
 
 class VideoPlayer extends React.Component {
@@ -87,7 +87,7 @@ class VideoPlayer extends React.Component {
     return (
       <View style={styles.container}>
         <TouchableOpacity style={styles.fullScreen} onPress={() => {this.setState({paused: !this.state.paused})}}>
-          <Video source={{uri: this.props.uri}}
+          <Video source={this.props.source}
                  style={styles.fullScreen}
                  rate={this.state.rate}
                  paused={this.state.paused}

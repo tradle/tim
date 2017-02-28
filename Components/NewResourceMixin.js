@@ -1,4 +1,4 @@
-'use strict';
+ 'use strict';
 
 var React = require('react');
 var dateformat = require('dateformat')
@@ -14,7 +14,9 @@ var StyleSheet = require('../StyleSheet')
 var QRCodeScanner = require('./QRCodeScanner')
 var driverLicenseParser = require('../utils/driverLicenseParser')
 const debug = require('debug')('tradle:app:blinkid')
+var focusUri = require('./Focus1.mp4')
 
+import VideoPlayer from './VideoPlayer'
 import omit from 'object.omit'
 import pick from 'object.pick'
 import ENV from '../utils/env'
@@ -833,6 +835,31 @@ var NewResourceMixin = {
     this.floatingProps[prop + 'Json'] = resource[prop + 'Json']
     this.setState({ resource })
   },
+  showVideo(params) {
+    let onEnd = (err) => {
+    Alert.alert(
+        'Ready to scan?',
+        null,
+        [
+          {text: 'OK', onPress: () => {
+            this.props.navigator.pop()
+            this.showCamera(params)
+
+          }}
+        ]
+      )
+    }
+    this.props.navigator.push({
+      id: 18,
+      component: VideoPlayer,
+      passProps: {
+        source: focusUri,
+        onEnd: onEnd,
+        onError: onEnd,
+        navigator: this.props.navigator
+      },
+    })
+  },
 
   showCamera(params) {
     // if (utils.isAndroid()) {
@@ -1285,7 +1312,7 @@ var NewResourceMixin = {
                      </ImageInput>
       }
       else
-        actionItem = <TouchableHighlight underlayColor='transparent' onPress={this.showCamera.bind(this, params)}>
+        actionItem = <TouchableHighlight underlayColor='transparent' onPress={this.showVideo.bind(this, params)}>
                        {content}
                      </TouchableHighlight>
     }
