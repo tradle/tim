@@ -838,18 +838,21 @@ var NewResourceMixin = {
   },
   showVideo(params) {
     let onEnd = (err) => {
-    Alert.alert(
+      Alert.alert(
         'Ready to scan?',
         null,
         [
-          {text: 'OK', onPress: () => {
-            this.props.navigator.pop()
-            this.showCamera(params)
-
-          }}
+          {
+            text: 'OK',
+            onPress: () => {
+              this.props.navigator.pop()
+              this.showCamera(params)
+            }
+          }
         ]
       )
     }
+
     this.props.navigator.push({
       id: 18,
       component: VideoPlayer,
@@ -857,6 +860,7 @@ var NewResourceMixin = {
         source: focusUri,
         onEnd: onEnd,
         onError: onEnd,
+        muted: true,
         navigator: this.props.navigator
       },
     })
@@ -1313,7 +1317,7 @@ var NewResourceMixin = {
                      </ImageInput>
       }
       else
-        actionItem = <TouchableHighlight underlayColor='transparent' onPress={this.showVideo.bind(this, params)}>
+        actionItem = <TouchableHighlight underlayColor='transparent' onPress={this.showCamera.bind(this, params)}>
                        {content}
                      </TouchableHighlight>
     }
