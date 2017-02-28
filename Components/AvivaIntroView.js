@@ -11,11 +11,13 @@ var reactMixin = require('react-mixin');
 var ResourceMixin = require('./ResourceMixin');
 var QRCode = require('./QRCode')
 var MessageList = require('./MessageList')
+var ResourceView = require('./ResourceView')
 var defaultBankStyle = require('../styles/bankStyle.json')
 var ENV = require('../utils/env')
 var StyleSheet = require('../StyleSheet')
 var extend = require('extend');
 var ArticleView = require('./ArticleView');
+var termsAndConditions = require('../termsAndConditions.json')
 import CustomIcon from '../styles/customicons'
 import platformStyles from '../styles/platform'
 import { makeResponsive } from 'react-native-orient'
@@ -93,7 +95,7 @@ class AvivaIntroView extends Component {
              </TouchableOpacity>
            </View>
            <View style={{flexDirection: 'row', justifyContent: 'center', paddingTop: 10, paddingHorizontal: 15}}>
-             <TouchableOpacity onPress={() => this.goto(url)}>
+             <TouchableOpacity onPress={() => this.showTerms()}>
                <Text style={[styles.text, {paddingTop: 10, color: bankStyle.LINK_COLOR}]}>Terms of use</Text>
              </TouchableOpacity>
              <View style={{width: 50}}/>
@@ -155,6 +157,16 @@ class AvivaIntroView extends Component {
         bankStyle:  this.props.bankStyle
       }
     })
+  }
+  showTerms() {
+    this.props.navigator.push({
+      title: translate('Terms of use'),
+      id: 3,
+      component: ResourceView,
+      // titleTextColor: '#7AAAC3',
+      backButtonTitle: 'Back',
+      passProps: {resource: termsAndConditions}
+    });
   }
   onPress(url) {
     this.props.navigator.push({
