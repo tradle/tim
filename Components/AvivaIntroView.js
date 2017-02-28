@@ -52,7 +52,7 @@ class AvivaIntroView extends Component {
           <View style={{paddingHorizontal: 15, backgroundColor: '#f7f7f7'}}>
              <Text style={styles.resourceTitle}>Welcome to our online verification service!</Text>
              <Text style={[styles.subTitle, styles.importantText]}>Keeping your money safe is our #1 priority.</Text>
-             <Text style={styles.subTitle}>To use this service you’ll undertake 4 easy steps.</Text>
+             <Text style={styles.subTitle}>To use this service you’ll undertake 4 easy steps:</Text>
              <View style={styles.row}>
                <Icon name='ios-mail-outline' size={40} color={bankStyle.CONTEXT_BACKGROUND_COLOR} style={styles.icon}/>
                <View style={{justifyContent: 'center'}}>
