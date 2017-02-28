@@ -86,7 +86,7 @@
     "no-constant-condition": 0,      // disallow use of constant expressions in conditions
     "no-control-regex": 1,           // disallow control characters in regular expressions
     "no-debugger": 1,                // disallow use of debugger
-    "no-dupe-keys": 1,               // disallow duplicate keys when creating object literals
+    "no-dupe-keys": 2,               // disallow duplicate keys when creating object literals
     "no-empty": 0,                   // disallow empty statements
     "no-ex-assign": 1,               // disallow assigning to the exception in a catch block
     "no-extra-boolean-cast": 1,      // disallow double-negation boolean casts in a boolean context

@@ -48,7 +48,7 @@ class AvivaIntroView extends Component {
   static orientation = 'portrait';
   render() {
     var bankStyle = this.props.bankStyle
-    let content = <ScrollView style={{paddingTop: 20, paddingBottom: 40, backgroundColor: '#f7f7f7', backgroundColor: '#f7f7f7'}}>
+    let content = <ScrollView style={{paddingTop: 20, paddingBottom: 40, backgroundColor: '#f7f7f7'}}>
           <View style={{paddingHorizontal: 15, backgroundColor: '#f7f7f7'}}>
              <Text style={styles.resourceTitle}>Welcome to our online verification service!</Text>
              <Text style={[styles.subTitle, styles.importantText]}>Keeping your money safe is our #1 priority.</Text>
