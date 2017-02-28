@@ -1,11 +1,13 @@
-package io.tradle.dev;
+package io.tradle.aviva;
 
-import android.os.Bundle;
-import com.facebook.react.ReactActivity;
-import com.facebook.react.modules.storage.ReactDatabaseSupplier;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.Bundle;
+
 import com.crashlytics.android.Crashlytics;
+import com.facebook.react.ReactActivity;
+import com.facebook.react.modules.storage.ReactDatabaseSupplier;
+
 import io.fabric.sdk.android.Fabric;
 import com.cboy.rn.splashscreen.SplashScreen;
 

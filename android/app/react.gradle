@@ -59,6 +59,8 @@ task bundleReleaseJsAndAssets(type: Exec) {
     commandLine "react-native", "bundle", "--platform", "android", "--dev", "false", "--entry-file",
             entryFile, "--bundle-output", jsBundleFileRelease, "--assets-dest", resourcesDirRelease
 
+    // commandLine "echo", "optimizing"
+    // commandLine "optimize-js", jsBundleFileRelease, ">", jsBundleFileRelease
     enabled config.bundleInRelease ?: true
 }
 

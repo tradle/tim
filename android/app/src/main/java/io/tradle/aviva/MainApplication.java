@@ -1,4 +1,4 @@
-package io.tradle.dev;
+package io.tradle.aviva;
 
 import android.app.Application;
 
