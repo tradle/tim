@@ -77,7 +77,7 @@ class ShowRefList extends Component {
         return <View/>
     }
 
-    if (!isIdentity)
+    else if (!isIdentity)
       refList.push(
         <View style={[buttonStyles.container, bg, {flex: 1, alignSelf: 'stretch'}]} key={this.getNextKey()}>
          <TouchableHighlight onPress={this.showDetails.bind(this)} underlayColor='transparent'>
@@ -184,7 +184,7 @@ class ShowRefList extends Component {
                 </View>
     }
 
-    if (refList.length)
+    if (refList.length  ||  !propsToShow.length)
       return <View>
                 <View style={[buttonStyles.buttons, {justifyContent: 'center', borderBottomWidth: 0}]} key={'ShowRefList'}>
                   {refList}
