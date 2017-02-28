@@ -70,8 +70,8 @@
     },
     "@tradle/models": {
       "version": "4.10.10",
-      "from": "tradle/models#53c8060",
-      "resolved": "git://github.com/tradle/models.git#53c80604f6646db6cfcb9f46f6d0322532bb3bc5",
+      "from": "git://github.com/tradle/models.git#5de08dee2906088a430508a7f13a182efe792148",
+      "resolved": "git://github.com/tradle/models.git#5de08dee2906088a430508a7f13a182efe792148",
       "dependencies": {
         "typeforce": {
           "version": "1.10.6",
@@ -4894,8 +4894,8 @@
     },
     "react-native-video": {
       "version": "0.9.0",
-      "from": "git://github.com/tradle/react-native-video.git#89828433118d1cfbf1b85bb2985f8aec675018c7",
-      "resolved": "git://github.com/tradle/react-native-video.git#89828433118d1cfbf1b85bb2985f8aec675018c7"
+      "from": "react-native-video@>=0.9.0 <0.10.0",
+      "resolved": "https://registry.npmjs.org/react-native-video/-/react-native-video-0.9.0.tgz"
     },
     "react-native-view-transformer": {
       "version": "0.0.28",
