@@ -101,13 +101,13 @@ class AvivaIntroView extends Component {
            </View>
         </ScrollView>
 
-    let footer = <View style={styles.start}>
-                   <TouchableOpacity onPress={()=>{this.showChat(this.props.resource)}}>
+    let footer = <TouchableOpacity onPress={()=>{this.showChat(this.props.resource)}}>
+                   <View style={styles.start}>
                      <View style={{backgroundColor: 'transparent', justifyContent: 'center'}}>
                        <Text style={{fontSize: 24, color: '#ffffff'}}>{translate('Let\'s get started')}</Text>
                      </View>
-                   </TouchableOpacity>
-                 </View>
+                   </View>
+                 </TouchableOpacity>
 
     // var bgImage = bankStyle &&  bankStyle.BACKGROUND_IMAGE
     // if (bgImage) {
