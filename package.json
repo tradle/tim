@@ -110,7 +110,7 @@
     "react-native-tcp": "^3.0.0",
     "react-native-udp": "^1.2.6",
     "react-native-vector-icons": "^2.0.3",
-    "react-native-video": "github:tradle/react-native-video#8982843",
+    "react-native-video": "^0.9.0",
     "react-timer-mixin": "^0.13.3",
     "readable-stream": "^1.0.33",
     "reflux": "^0.4.1",
