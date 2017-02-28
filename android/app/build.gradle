@@ -205,6 +205,7 @@ repositories {
 }
 
 dependencies {
+    compile project(':react-native-splash-screen')
     compile project(':react-native-fabric')
     compile('com.crashlytics.sdk.android:crashlytics:2.6.6@aar') {
         transitive = true
