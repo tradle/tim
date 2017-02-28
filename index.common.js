@@ -523,8 +523,8 @@ class TiMApp extends Component {
                 content={props.content}
                 fullScreen={props.fullScreen}
                 dimension={props.dimension} />
-    // case 18:
-      // return <VideoPlayer {...props} />
+    case 18:
+      return <VideoPlayer {...props} />
     case 19:
       return <GridItemsList navigator={nav} {...props} />
     case PASSWORD_CHECK:
