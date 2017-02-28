@@ -196,7 +196,7 @@ class VerificationMessageRow extends Component {
   verify(event) {
     var resource = this.props.resource;
     var isVerification = resource[constants.TYPE] === constants.TYPES.VERIFICATION;
-    var r = isVerification &&  !resource.sources  &&  resource.method  ? resource.document : resource
+    var r = isVerification &&  !resource.sources  &&  !resource.method  ? resource.document : resource
 
     var passProps = {
       resource: r,
