@@ -30,6 +30,12 @@
 		6631C852CBA54F67827BCDA4 /* libSMXCrashlytics.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FB3837D1EEE435CACD658FB /* libSMXCrashlytics.a */; };
 		73030AF71D14DC5F0096A864 /* libRNFS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73030AF61D14DC4B0096A864 /* libRNFS.a */; };
 		73037B151E391BA500A5910C /* libRNPasscodeStatus.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73037B0F1E391B9000A5910C /* libRNPasscodeStatus.a */; };
+		730DDF171E664ADF0011080D /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 730DDF151E664ADF0011080D /* LaunchScreen.xib */; };
+		730DDF181E664ADF0011080D /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 730DDF151E664ADF0011080D /* LaunchScreen.xib */; };
+		730DDF1C1E664D6C0011080D /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 730DDF1B1E664D6C0011080D /* Launch Screen.storyboard */; };
+		730DDF1D1E664D6C0011080D /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 730DDF1B1E664D6C0011080D /* Launch Screen.storyboard */; };
+		730DDF251E6652620011080D /* 1536x2048.png in Resources */ = {isa = PBXBuildFile; fileRef = 730DDF241E6652620011080D /* 1536x2048.png */; };
+		730DDF261E6652620011080D /* 1536x2048.png in Resources */ = {isa = PBXBuildFile; fileRef = 730DDF241E6652620011080D /* 1536x2048.png */; };
 		731F233E1C31BB6600C3B09D /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 731F233D1C31BB6600C3B09D /* libz.tbd */; };
 		73261E141C4AB9FE00292FEE /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		73261E161C4AB9FE00292FEE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
@@ -56,7 +62,6 @@
 		73261E311C4AB9FE00292FEE /* libRNECC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7364872F1C34703500713F09 /* libRNECC.a */; };
 		73261E321C4AB9FE00292FEE /* libRCTVideo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ABE7159BBFD14FFDB6BBF084 /* libRCTVideo.a */; };
 		73261E331C4AB9FE00292FEE /* libRNLocalAuth.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 29F90A6163024FE8B7A7022D /* libRNLocalAuth.a */; };
-		73261E351C4AB9FE00292FEE /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB11A68108700A75B9A /* LaunchScreen.xib */; };
 		73261E361C4AB9FE00292FEE /* environment.json in Resources */ = {isa = PBXBuildFile; fileRef = 739F73081C3F74AE00D9F2FB /* environment.json */; };
 		73261E371C4AB9FE00292FEE /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		73261E381C4AB9FE00292FEE /* Ionicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 73FE35D01BFA14F600EFB313 /* Ionicons.ttf */; };
@@ -79,7 +84,6 @@
 		73855D2E1CB42638000B6A0B /* libRNImagePicker.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B2E51601CAD7DBC000439E6 /* libRNImagePicker.a */; };
 		7385C6BB1C4C24A700B92CDA /* Dev.plist in Resources */ = {isa = PBXBuildFile; fileRef = 7385C6BA1C4C24A700B92CDA /* Dev.plist */; };
 		73947DA91D3DAEAA00C5CC8F /* libRCTPushNotification.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73947DA81D3DAEA500C5CC8F /* libRCTPushNotification.a */; };
-		739F72C01C3F739700D9F2FB /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB11A68108700A75B9A /* LaunchScreen.xib */; };
 		739F72F01C3F742B00D9F2FB /* RNEnvironmentManagerIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = 739F72EF1C3F742B00D9F2FB /* RNEnvironmentManagerIOS.m */; };
 		739F73091C3F74AE00D9F2FB /* environment.json in Resources */ = {isa = PBXBuildFile; fileRef = 739F73081C3F74AE00D9F2FB /* environment.json */; };
 		73CEDF701C8CCDE8006401AA /* libReactNativeLocalization.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73CEDF691C8CCDC7006401AA /* libReactNativeLocalization.a */; };
@@ -376,7 +380,6 @@
 		13B07F961A680F5B00A75B9A /* Tradle.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tradle.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = Tradle/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = Tradle/AppDelegate.m; sourceTree = "<group>"; };
-		13B07FB21A68108700A75B9A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Tradle/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Tradle/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = Tradle/main.m; sourceTree = "<group>"; };
@@ -392,6 +395,9 @@
 		6FB3837D1EEE435CACD658FB /* libSMXCrashlytics.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libSMXCrashlytics.a; sourceTree = "<group>"; };
 		71A5BF1464684D2A8B24B80F /* libRNPasscodeStatus.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNPasscodeStatus.a; sourceTree = "<group>"; };
 		73030AF11D14DC4B0096A864 /* RNFS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNFS.xcodeproj; path = "../node_modules/react-native-fs/RNFS.xcodeproj"; sourceTree = "<group>"; };
+		730DDF161E664ADF0011080D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Tradle/Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
+		730DDF1B1E664D6C0011080D /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = "Launch Screen.storyboard"; path = "Tradle/Launch Screen.storyboard"; sourceTree = "<group>"; };
+		730DDF241E6652620011080D /* 1536x2048.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = 1536x2048.png; path = ../img/1536x2048.png; sourceTree = "<group>"; };
 		731045901D7CE25D0087E82D /* Tradle-dev.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Tradle-dev.entitlements"; sourceTree = "<group>"; };
 		731F233D1C31BB6600C3B09D /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		73261E3F1C4AB9FE00292FEE /* Tradle-dev.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Tradle-dev.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -612,6 +618,7 @@
 		13B07FAE1A68108700A75B9A /* Tradle */ = {
 			isa = PBXGroup;
 			children = (
+				730DDF151E664ADF0011080D /* LaunchScreen.xib */,
 				733D940B1E60B579009E594D /* Aviva.plist */,
 				9BFC36381DD7C3E100E739AF /* Tradle.entitlements */,
 				73683CFA1CC443B300E178CF /* QTouchposeApplication.h */,
@@ -621,8 +628,9 @@
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
-				13B07FB11A68108700A75B9A /* LaunchScreen.xib */,
 				13B07FB71A68108700A75B9A /* main.m */,
+				730DDF241E6652620011080D /* 1536x2048.png */,
+				730DDF1B1E664D6C0011080D /* Launch Screen.storyboard */,
 			);
 			name = Tradle;
 			sourceTree = "<group>";
@@ -1458,15 +1466,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				733D940C1E60B579009E594D /* Aviva.plist in Resources */,
-				739F72C01C3F739700D9F2FB /* LaunchScreen.xib in Resources */,
 				9B41626D1C6F9BBD00A93B7C /* FontAwesome.ttf in Resources */,
 				739F73091C3F74AE00D9F2FB /* environment.json in Resources */,
+				730DDF251E6652620011080D /* 1536x2048.png in Resources */,
+				730DDF1C1E664D6C0011080D /* Launch Screen.storyboard in Resources */,
 				7385C6BB1C4C24A700B92CDA /* Dev.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				73FE35D11BFA14F600EFB313 /* Ionicons.ttf in Resources */,
 				EDA552EBDE6041E294013897 /* Entypo.ttf in Resources */,
 				1236C1178A71422DBF4F6998 /* EvilIcons.ttf in Resources */,
 				BC686B7EA43346EC98F13734 /* Foundation.ttf in Resources */,
+				730DDF171E664ADF0011080D /* LaunchScreen.xib in Resources */,
 				7348E4741D9D8CDD00328628 /* tradle.ttf in Resources */,
 				1C603FB69CA74D178EB7521B /* MaterialIcons.ttf in Resources */,
 				D5FC2F4618F64B86BA09C1CC /* Octicons.ttf in Resources */,
@@ -1479,10 +1489,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				7348E4911D9D8D1B00328628 /* tradle.ttf in Resources */,
-				73261E351C4AB9FE00292FEE /* LaunchScreen.xib in Resources */,
 				73261E361C4AB9FE00292FEE /* environment.json in Resources */,
 				73261E371C4AB9FE00292FEE /* Images.xcassets in Resources */,
+				730DDF181E664ADF0011080D /* LaunchScreen.xib in Resources */,
 				73261E381C4AB9FE00292FEE /* Ionicons.ttf in Resources */,
+				730DDF1D1E664D6C0011080D /* Launch Screen.storyboard in Resources */,
+				730DDF261E6652620011080D /* 1536x2048.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1632,13 +1644,12 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		13B07FB11A68108700A75B9A /* LaunchScreen.xib */ = {
+		730DDF151E664ADF0011080D /* LaunchScreen.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				13B07FB21A68108700A75B9A /* Base */,
+				730DDF161E664ADF0011080D /* Base */,
 			);
 			name = LaunchScreen.xib;
-			path = Tradle;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -1758,7 +1769,6 @@
 			baseConfigurationReference = F65DB3B35B79AEDDF2DA8755 /* Pods-Tradle-dev.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_ENTITLEMENTS = "Tradle-dev.entitlements";
 				CODE_SIGN_IDENTITY = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -1816,7 +1826,6 @@
 			baseConfigurationReference = 59270A791A836561C82111CD /* Pods-Tradle-dev.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_ENTITLEMENTS = "Tradle-dev.entitlements";
 				CODE_SIGN_IDENTITY = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
