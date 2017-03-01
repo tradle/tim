@@ -515,13 +515,12 @@ class FormRequestRow extends Component {
   }
 
   formRequest(resource, vCols, prop) {
-    // let message = resource.message.replace(/\*/g, '')
     let message = resource.message
-    let i1 = message.indexOf('**')
-    let formType, message1, message2
-
-
-    let messagePart = this.parseMessage(message)
+    let messagePart
+    if (resource.documentCreated)
+      message = resource.message.replace(/\*/g, '')
+    else
+      messagePart = this.parseMessage(message)
     if (typeof messagePart === 'string')
       messagePart = null
 
