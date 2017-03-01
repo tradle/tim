@@ -4814,6 +4814,11 @@
       "from": "react-native-search-bar@>=2.11.0 <3.0.0",
       "resolved": "https://registry.npmjs.org/react-native-search-bar/-/react-native-search-bar-2.16.0.tgz"
     },
+    "react-native-splash-screen": {
+      "version": "1.0.9",
+      "from": "git://github.com/crazycodeboy/react-native-splash-screen.git#a59c56a6d8906ec3e94e4cf99ef37e29466a059c",
+      "resolved": "git://github.com/crazycodeboy/react-native-splash-screen.git#a59c56a6d8906ec3e94e4cf99ef37e29466a059c"
+    },
     "react-native-swipeout": {
       "version": "2.0.12",
       "from": "git://github.com/mvayngrib/react-native-swipeout.git#6939c1091773baafd4128bd772fe75e04db623e3",

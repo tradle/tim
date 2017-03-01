@@ -1,5 +1,7 @@
 'use strict'
 
+import SplashScreen from 'react-native-splash-screen'
+
 // import './utils/logAll'
 // import './utils/perf'
 
@@ -168,6 +170,10 @@ class TiMApp extends Component {
   }
 
   componentDidMount() {
+    if (SplashScreen) {
+      SplashScreen.hide()
+    }
+
     AppState.addEventListener('change', this._handleAppStateChange);
     // Linking.addEventListener('url', this._handleOpenURL);
     // var url = Linking.popInitialURL();

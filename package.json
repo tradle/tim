@@ -105,6 +105,7 @@
     "react-native-randombytes": "^2.1.0",
     "react-native-safe-async-storage": "github:mvayngrib/react-native-safe-async-storage#7afa8c65",
     "react-native-search-bar": "^2.16.0",
+    "react-native-splash-screen": "github:crazycodeboy/react-native-splash-screen#v1.0.9",
     "react-native-swipeout": "github:mvayngrib/react-native-swipeout#6939c109",
     "react-native-tcp": "^3.0.0",
     "react-native-udp": "^1.2.6",

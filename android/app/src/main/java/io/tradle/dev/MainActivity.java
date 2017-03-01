@@ -7,10 +7,12 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import com.crashlytics.android.Crashlytics;
 import io.fabric.sdk.android.Fabric;
+import com.cboy.rn.splashscreen.SplashScreen;
 
 public class MainActivity extends ReactActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+      SplashScreen.show(this);
       super.onCreate(savedInstanceState);
       // set database limit to 200MB
       ReactDatabaseSupplier.getInstance(getApplicationContext()).setMaximumSize(200000000L);

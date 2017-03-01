@@ -19,6 +19,7 @@
 #import "Orientation.h"
 #import <asl.h>
 #import "RCTLog.h"
+#import "SplashScreen.h"
 
 @implementation AppDelegate
 
@@ -68,6 +69,7 @@
   rootViewController.view = rootView;
   self.window.rootViewController = rootViewController;
   [self.window makeKeyAndVisible];
+  [SplashScreen show]; //show splash screen
 
 #ifdef DEBUG
 #else
