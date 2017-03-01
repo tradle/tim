@@ -3057,114 +3057,90 @@ var Store = Reflux.createStore({
         // and reset it after the real root hash will be known
         let isNew = returnVal[ROOT_HASH] == null
         let isForm = self.getModel(returnVal[TYPE]).value.subClassOf === FORM
-        if (isNew)
-          returnVal[ROOT_HASH] = returnVal[NONCE]
-        else {
-          if (isForm) {
-            let formId = utils.getId(returnVal)
-            let prevRes = self._getItem(formId)
-            if (utils.compare(returnVal, prevRes)) {
-              self.trigger({action: 'noChanges'})
-              return
-            }
-            returnVal[PREV_HASH] = returnVal[CUR_HASH]
-            returnVal[CUR_HASH] = returnVal[NONCE]
-          }
-          if (returnVal.txId)
-            delete returnVal.txId
-        }
-
-        var returnValKey = utils.getId(returnVal)
-
-        self._setItem(returnValKey, returnVal)
-
-        let org = self._getItem(utils.getId(returnVal.to)).organization
-        let orgId = utils.getId(org)
-        self.addMessagesToChat(orgId, returnVal)
-
-        var params;
-
-        var sendStatus = (self.isConnected) ? SENDING : QUEUED
-        if (isGuestSessionProof) {
-          org = self._getItem(utils.getId(org))
-          params = {action: 'getForms', to: org}
-        }
-        else {
-          returnVal._sendStatus = sendStatus
-          // if (isNew)
-          self.addVisualProps(returnVal)
-          params = {
-            action: 'addItem',
-            resource: returnVal
+        if (!isNew  &&  isForm) {
+          let formId = utils.getId(returnVal)
+          let prevRes = self._getItem(formId)
+          if (utils.compare(returnVal, prevRes)) {
+            self.trigger({action: 'noChanges'})
+            return
           }
         }
 
-        var m = self.getModel(returnVal[TYPE]).value
-//         var to = returnVal.to
-//         Object.defineProperty(returnVal, 'to', {
-//           get: function () {
-//             return to
-//           },
-//           set: function () {
-//             debugger
-//             console.log('yay!')
-//           }
-//         })
 
-//         var organization = to.organization
-//         Object.defineProperty(to, 'organization', {
-//           get: function () {
-//             return organization
-//           },
-//           set: function () {
-//             debugger
-//             console.log('yay!')
-//           }
-//         })
+        let rId = utils.getId(returnVal.to)
+        let to = self._getItem(rId)
+        let permalink = to[ROOT_HASH]
+        var toChain = {}
 
+        let exclude = ['to', 'from', 'verifications', CUR_HASH, '_sharedWith', '_sendStatus', '_context', '_online', 'idOld']
+        // if (isNew)
+        //   exclude.push(ROOT_HASH)
+        extend(toChain, returnVal)
+        for (let p of exclude)
+          delete toChain[p]
 
-        try {
-          if (!noTrigger)
-            self.trigger(params);
-        } catch (err) {
-          debugger
+        if (!isNew) {
+          // returnVal[PREV_HASH] = returnVal[CUR_HASH] || returnVal[ROOT_HASH]
+          toChain[PREV_HASH] = returnVal[PREV_HASH]
         }
 
-        return self.onIdle()
-        .then(function () {
-          let rId = utils.getId(returnVal.to)
-          let to = self._getItem(rId)
+        // toChain.time = returnVal.time
 
-          var toChain = {}
-          if (!isNew) {
-            // returnVal[PREV_HASH] = returnVal[CUR_HASH] || returnVal[ROOT_HASH]
-            toChain[PREV_HASH] = returnVal[PREV_HASH]
-          }
+        var key = IDENTITY + '_' + to[ROOT_HASH]
 
-          let exclude = ['to', 'from', 'verifications', CUR_HASH, '_sharedWith', '_sendStatus', '_context', '_online', 'idOld']
+        // let sendParams = self.packMessage(toChain, returnVal.from, returnVal.to, returnVal._context)
+        return meDriver.createObject({object: toChain})
+        .then((data) => {
+          let hash = data.link
           if (isNew)
-            exclude.push(ROOT_HASH)
-          extend(toChain, returnVal)
-          for (let p of exclude)
-            delete toChain[p]
+            returnVal[ROOT_HASH] = hash
+          returnVal[CUR_HASH] = hash
 
-          toChain.time = returnVal.time
+          var returnValKey = utils.getId(returnVal)
 
-          var key = IDENTITY + '_' + to[ROOT_HASH]
+          self._setItem(returnValKey, returnVal)
 
-          let sendParams = self.packMessage(toChain, returnVal.from, returnVal.to, returnVal._context)
-          return meDriver.signAndSend(sendParams)
+          let org = self._getItem(utils.getId(returnVal.to)).organization
+          let orgId = utils.getId(org)
+          self.addMessagesToChat(orgId, returnVal)
+
+          var params;
+
+          var sendStatus = (self.isConnected) ? SENDING : QUEUED
+          if (isGuestSessionProof) {
+            org = self._getItem(utils.getId(org))
+            params = {action: 'getForms', to: org}
+          }
+          else {
+            returnVal._sendStatus = sendStatus
+            // if (isNew)
+            self.addVisualProps(returnVal)
+            params = {
+              action: 'addItem',
+              resource: returnVal
+            }
+          }
+
+          var m = self.getModel(returnVal[TYPE]).value
+          try {
+            if (!noTrigger)
+              self.trigger(params);
+          } catch (err) {
+            debugger
+          }
+
+
+          let sendParams = {
+            to: {permalink: permalink},
+            link: hash,
+          }
+          if (returnVal._context)
+            sendParams.other = {
+              context: self._getItem(utils.getId(returnVal._context))[ROOT_HASH]
+            }
+          return meDriver.send(sendParams)
         })
         .then(function (result) {
-          // TODO: fix hack
-          // we now have a real root hash,
-          // scrap the placeholder
-          // if (isNew ||  !shareWith)
-          if (isNew  ||  isForm) {
-            delete list[returnValKey]
-            self.deleteMessageFromChat(orgId, returnVal)
-
-          }
           if (readOnlyBacklinks.length) {
             readOnlyBacklinks.forEach((prop) => {
               let topR = returnVal[prop.name]
@@ -3176,22 +3152,8 @@ var Store = Reflux.createStore({
             })
           }
 
-          returnVal[CUR_HASH] = result.object.link
-          returnVal[ROOT_HASH] = result.object.permalink
-          // var sendStatus = (self.isConnected) ? SENDING : QUEUED
-          // returnVal._sendStatus = sendStatus
-
-//           let org = list[utils.getId(returnVal.to)].value.organization
-//           self.addMessagesToChat(utils.getId(org), returnVal)
           delete returnVal._sharedWith
           delete returnVal.verifications
-          // if (shareWith) {
-          //   let oldValue = list[returnValKey]
-          //   for (let p in shareWith) {
-          //     if (shareWith[p])
-          //       this.onShare(returnVal, list[p].value)
-          //   }
-          // }
           return save(returnVal, true)
         })
         .then(() => {
@@ -3209,7 +3171,7 @@ var Store = Reflux.createStore({
             let req = formRequests[0]
             req.document = utils.getId(returnVal)
             // returnVal = req
-            save(req, true)
+            return save(req, true)
           }
         })
       }
@@ -3222,6 +3184,214 @@ var Store = Reflux.createStore({
           noTrigger: noTrigger
         })
       }
+
+    // })
+//       function handleMessage2 (noTrigger, returnVal) {
+//         // TODO: fix hack
+//         // hack: we don't know root hash yet, use a fake
+//         if (returnVal.documentCreated)  {
+//           // when all the multientry forms are filled out and next form is requested
+//           // do not show the last form request for the multientry form it is confusing for the user
+//           if (doneWithMultiEntry) {
+//             let ptype = returnVal[TYPE] === FORM_REQUEST && returnVal.product
+//             if (ptype) {
+//               let multiEntryForms = utils.getModel(ptype).value.multiEntryForms
+//               if (multiEntryForms  &&  multiEntryForms.indexOf(returnVal.form) !== -1) {
+//                 let rid = returnVal.from.organization.id
+//                 self.deleteMessageFromChat(rid, returnVal)
+//                 let id = utils.getId(returnVal)
+//                 delete list[id]
+//                 db.del(id)
+//                 var params = {action: 'addItem', resource: returnVal}
+//                 self.trigger(params);
+//                 return
+//               }
+//             }
+//           }
+//           var params = {action: 'addItem', resource: returnVal}
+//           // return self.disableOtherFormRequestsLikeThis(returnVal)
+//           // .then(() => {
+//             // don't save until the real resource is created
+//           list[utils.getId(returnVal)].value = returnVal
+//           self.trigger(params);
+//           return self.onIdle()
+//           .then(() => {
+//             save(returnVal)
+//           })
+//           .catch(function(err) {
+//             debugger
+//           })
+//           // })
+//         }
+//         // Trigger painting before send. for that set ROOT_HASH to some temporary value like NONCE
+//         // and reset it after the real root hash will be known
+//         let isNew = returnVal[ROOT_HASH] == null
+//         let isForm = self.getModel(returnVal[TYPE]).value.subClassOf === FORM
+//         if (isNew)
+//           returnVal[ROOT_HASH] = returnVal[NONCE]
+//         else {
+//           if (isForm) {
+//             let formId = utils.getId(returnVal)
+//             let prevRes = self._getItem(formId)
+//             if (utils.compare(returnVal, prevRes)) {
+//               self.trigger({action: 'noChanges'})
+//               return
+//             }
+//             returnVal[PREV_HASH] = returnVal[CUR_HASH]
+//             returnVal[CUR_HASH] = returnVal[NONCE]
+//           }
+//           if (returnVal.txId)
+//             delete returnVal.txId
+//         }
+
+//         var returnValKey = utils.getId(returnVal)
+
+//         self._setItem(returnValKey, returnVal)
+
+//         let org = self._getItem(utils.getId(returnVal.to)).organization
+//         let orgId = utils.getId(org)
+//         self.addMessagesToChat(orgId, returnVal)
+
+//         var params;
+
+//         var sendStatus = (self.isConnected) ? SENDING : QUEUED
+//         if (isGuestSessionProof) {
+//           org = self._getItem(utils.getId(org))
+//           params = {action: 'getForms', to: org}
+//         }
+//         else {
+//           returnVal._sendStatus = sendStatus
+//           // if (isNew)
+//           self.addVisualProps(returnVal)
+//           params = {
+//             action: 'addItem',
+//             resource: returnVal
+//           }
+//         }
+
+//         var m = self.getModel(returnVal[TYPE]).value
+// //         var to = returnVal.to
+// //         Object.defineProperty(returnVal, 'to', {
+// //           get: function () {
+// //             return to
+// //           },
+// //           set: function () {
+// //             debugger
+// //             console.log('yay!')
+// //           }
+// //         })
+
+// //         var organization = to.organization
+// //         Object.defineProperty(to, 'organization', {
+// //           get: function () {
+// //             return organization
+// //           },
+// //           set: function () {
+// //             debugger
+// //             console.log('yay!')
+// //           }
+// //         })
+
+
+//         try {
+//           if (!noTrigger)
+//             self.trigger(params);
+//         } catch (err) {
+//           debugger
+//         }
+
+//         return self.onIdle()
+//         .then(function () {
+//           let rId = utils.getId(returnVal.to)
+//           let to = self._getItem(rId)
+
+//           var toChain = {}
+//           if (!isNew) {
+//             // returnVal[PREV_HASH] = returnVal[CUR_HASH] || returnVal[ROOT_HASH]
+//             toChain[PREV_HASH] = returnVal[PREV_HASH]
+//           }
+
+//           let exclude = ['to', 'from', 'verifications', CUR_HASH, '_sharedWith', '_sendStatus', '_context', '_online', 'idOld']
+//           if (isNew)
+//             exclude.push(ROOT_HASH)
+//           extend(toChain, returnVal)
+//           for (let p of exclude)
+//             delete toChain[p]
+
+//           toChain.time = returnVal.time
+
+//           var key = IDENTITY + '_' + to[ROOT_HASH]
+
+//           let sendParams = self.packMessage(toChain, returnVal.from, returnVal.to, returnVal._context)
+//           return meDriver.signAndSend(sendParams)
+//         })
+//         .then(function (result) {
+//           // TODO: fix hack
+//           // we now have a real root hash,
+//           // scrap the placeholder
+//           // if (isNew ||  !shareWith)
+//           if (isNew  ||  isForm) {
+//             delete list[returnValKey]
+//             self.deleteMessageFromChat(orgId, returnVal)
+
+//           }
+//           if (readOnlyBacklinks.length) {
+//             readOnlyBacklinks.forEach((prop) => {
+//               let topR = returnVal[prop.name]
+//               if (topR) {
+//                 if (!topR[prop.backlink])
+//                   topR[prop.backlink] = []
+//                 topR[prop.backlink].push(self.buildRef(returnVal))
+//               }
+//             })
+//           }
+
+//           returnVal[CUR_HASH] = result.object.link
+//           returnVal[ROOT_HASH] = result.object.permalink
+//           // var sendStatus = (self.isConnected) ? SENDING : QUEUED
+//           // returnVal._sendStatus = sendStatus
+
+// //           let org = list[utils.getId(returnVal.to)].value.organization
+// //           self.addMessagesToChat(utils.getId(org), returnVal)
+//           delete returnVal._sharedWith
+//           delete returnVal.verifications
+//           // if (shareWith) {
+//           //   let oldValue = list[returnValKey]
+//           //   for (let p in shareWith) {
+//           //     if (shareWith[p])
+//           //       this.onShare(returnVal, list[p].value)
+//           //   }
+//           // }
+//           return save(returnVal, true)
+//         })
+//         .then(() => {
+//           let rId = utils.getId(returnVal.to)
+//           let to = self._getItem(rId)
+
+//           if (!isNew  ||  self.getModel(returnVal[TYPE]).value.subClassOf !== FORM)
+//             return
+//           let allFormRequests = self.searchMessages({modelName: FORM_REQUEST, to: to})
+//           let formRequests = allFormRequests  &&  allFormRequests.filter((r) => {
+//             if (r.document === returnVal[NONCE])
+//               return true
+//           })
+//           if (formRequests  &&  formRequests.length) {
+//             let req = formRequests[0]
+//             req.document = utils.getId(returnVal)
+//             // returnVal = req
+//             save(req, true)
+//           }
+//         })
+//       }
+//       function save (returnVal, noTrigger) {
+//         return self._putResourceInDB({
+//           type: returnVal[TYPE],
+//           resource: returnVal,
+//           roothash: returnVal[ROOT_HASH],
+//           isRegistration: isRegistration,
+//           noTrigger: noTrigger
+//         })
+//       }
     })
 
     function becomingEmployee(resource) {
