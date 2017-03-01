@@ -209,12 +209,20 @@ class VerificationMessageRow extends Component {
       passProps.verification = resource
 
     var model = utils.getModel(r[constants.TYPE]).value;
+    let title
+    if (r[constants.TYPE] === constants.TYPES.VERIFICATION) {
+      let type = utils.getType(r.document)
+      if (type)
+        title = translate(utils.getModel(type).value)
+    }
+    if (!title)
+      title = translate(model)
     var route = {
       id: 5,
       component: MessageView,
       backButtonTitle: translate('back'),
       passProps: passProps,
-      title: translate(model)
+      title: title
     }
     if (this.isMyMessage()) {
       route.rightButtonTitle = translate('edit');
