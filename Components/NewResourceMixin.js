@@ -20,7 +20,6 @@ import VideoPlayer from './VideoPlayer'
 import omit from 'object.omit'
 import pick from 'object.pick'
 import ENV from '../utils/env'
-import formDefaults from '../data/formDefaults.json'
 import DatePicker from 'react-native-datepicker'
 import ImageInput from './ImageInput'
 
@@ -1244,9 +1243,12 @@ var NewResourceMixin = {
     let color = {color: lcolor}
     let isVideo = prop.name === 'video'
     let isPhoto = prop.name === 'photos'  ||  prop.ref === 'tradle.Photo'
+    let noChooser
     if (this.props.model  &&  prop.ref === COUNTRY  &&  this.props.model.required.indexOf(prop.name)) {
-      if (resource  &&  !resource[prop.name])
+      if (resource  &&  !resource[prop.name]) {
         resource[prop.name] = this.props.country
+        noChooser = true
+      }
     }
     if (resource && resource[params.prop]) {
       if (isPhoto) {
@@ -1294,7 +1296,7 @@ var NewResourceMixin = {
       icon = <Icon name='ios-play-outline' size={25}  color={LINK_COLOR} />
     else if (isPhoto)
       icon = <Icon name='ios-camera-outline' size={25}  color={LINK_COLOR} style={styles.photoIcon}/>
-    else
+    else if (!noChooser)
       icon = <Icon name='ios-arrow-down'  size={15}  color={iconColor}  style={[styles.icon1, styles.customIcon]} />
 
     let content = <View  style={[styles.chooserContainer, {flexDirection: 'row', borderBottomColor: lcolor}]}>
@@ -1318,7 +1320,7 @@ var NewResourceMixin = {
                      </TouchableHighlight>
     }
     else
-      actionItem = <TouchableHighlight underlayColor='transparent' onPress={this.chooser.bind(this, prop, params.prop)}>
+      actionItem = <TouchableHighlight underlayColor='transparent' onPress={noChooser ? () => {} : this.chooser.bind(this, prop, params.prop)}>
                      {content}
                    </TouchableHighlight>
 
