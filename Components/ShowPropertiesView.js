@@ -381,14 +381,6 @@ var styles = StyleSheet.create({
     marginHorizontal: 7,
     color: '#9b9b9b'
   },
-  bigTitle: {
-    fontSize: 20,
-    // fontFamily: 'Avenir Next',
-    marginTop: 3,
-    marginBottom: 0,
-    marginHorizontal: 7,
-    color: '#7AAAC3'
-  },
   linkTitle: {
     color: '#2892C6'
   },
