@@ -66,6 +66,7 @@ import ActivityIndicator from './ActivityIndicator'
 import platformStyles from '../styles/platform'
 import { makeResponsive } from 'react-native-orient'
 import BackgroundImage from './BackgroundImage'
+var DropPage = utils.isWeb() && require('./DropPage')
 
 // DeviceHeight = Dimensions.get('window').height;
 // DeviceWidth = Dimensions.get('window').width
@@ -842,6 +843,29 @@ class NewResource extends Component {
                    </View>
                  </TouchableOpacity>
 
+      const { properties } = meta
+      const hasPhoto = Object.keys(properties).some(key => {
+        const prop = properties[key]
+        if (prop.range === 'photo' || prop.ref === 'tradle.Photo') {
+          return true
+        }
+
+        return prop.type === 'array' && prop.items && prop.items.ref === 'tradle.Photo'
+      })
+
+      if (hasPhoto) {
+        return (
+          <DropPage
+            multiple={false}
+            style={platformStyles.container}
+            onDrop={files => this.onDropFiles(files)}
+          >
+            {content}
+            {submit}
+          </DropPage>
+        )
+      }
+
       return <PageView style={platformStyles.container}>
                {content}
                {submit}
@@ -867,6 +891,11 @@ class NewResource extends Component {
         </View>
       </View>
     )
+  }
+  onDropFiles(files) {
+    // 1. figure out which prop
+    // 2. run utils.readImage
+    // debugger
   }
   showTermsAndConditions() {
     this.props.navigator.push({
