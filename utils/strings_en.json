@@ -219,5 +219,6 @@
     "retryScanning": "Was that a {1}? We couldn't tell. Could you try one more time?\n\nScanning works best when you hold the document in one hand and your phone in the other. Try to avoid glare!",
     "centerPassport": "Center passport photo page in frame",
     "centerLicence": "Center licence in frame",
-    "centerID": "Center ID in frame"
+    "centerID": "Center ID in frame",
+    "dataSecurity": "Data Security"
 }
