@@ -38,7 +38,8 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Linking
+  Linking,
+  Dimensions
 } from 'react-native'
 
 import React, { Component } from 'react'
@@ -47,11 +48,12 @@ class AvivaIntroView extends Component {
   static displayName = 'AvivaIntroView';
   static orientation = 'portrait';
   render() {
+    const screen = utils.dimensions(AvivaIntroView)
     var bankStyle = this.props.bankStyle
-    let content = <ScrollView style={{paddingTop: 20, paddingBottom: 40, backgroundColor: '#f7f7f7'}}>
-          <View style={{paddingHorizontal: 15, backgroundColor: '#f7f7f7'}}>
-             <Text style={styles.resourceTitle}>Welcome to our online verification service!</Text>
-             <Text style={[styles.subTitle, styles.importantText]}>Keeping your money safe is our #1 priority.</Text>
+    let content = <ScrollView style={{paddingTop: 20, paddingBottom: 40, backgroundColor: '#ffffff'}}>
+          <View style={{paddingHorizontal: 15, backgroundColor: '#ffffff'}}>
+             <Text style={styles.resourceTitle}>Welcome to the Aviva mobile verification service.</Text>
+             <Text style={[styles.subTitle, styles.importantText]}>Keeping your money and identity safe is our number 1 priority!</Text>
              <Text style={styles.subTitle}>To use this service you’ll undertake 4 easy steps:</Text>
              <View style={styles.row}>
                <Icon name='ios-mail-outline' size={40} color={bankStyle.CONTEXT_BACKGROUND_COLOR} style={styles.icon}/>
@@ -75,32 +77,30 @@ class AvivaIntroView extends Component {
              </View>
              <View style={styles.separator} />
              <View style={styles.row}>
-               <Icon name='ios-pin-outline' size={40} color={bankStyle.CONTEXT_BACKGROUND_COLOR} style={styles.icon}/>
+               <Icon name='ios-pin-outline' size={40} color={bankStyle.CONTEXT_BACKGROUND_COLOR} style={[styles.icon, {paddingRight: 15}]}/>
                <View style={{justifyContent: 'center'}}>
-                 <Text style={[styles.text, {paddingLeft: 3, width: 280}]}>Provide your address, if we require it</Text>
+                 <Text style={[styles.text, {paddingLeft: 3, width: 280}]}>Provide your address</Text>
                </View>
              </View>
+             <View style={styles.separator} />
+             <View style={styles.row}>
+               <Text style={[styles.text, {paddingLeft: 3, width: screen.width - 40 }]}>By using this service you agree that Aviva can run an identity check using the details you provide and you agree to our Terms of use and privacy policy.</Text>
+             </View>
            </View>
-           <View style={{flexDirection: 'row', alignSelf: 'center'}}>
-             <View style={{height: 1, alignSelf: 'center', backgroundColor: bankStyle.CONTEXT_BACKGROUND_COLOR, width: utils.dimensions().width * 0.3}} />
-             <Text style={{paddingHorizontal: 5}}>🔸</Text>
-             <View style={{height: 1, alignSelf: 'center', backgroundColor: bankStyle.CONTEXT_BACKGROUND_COLOR, width: utils.dimensions().width * 0.3}} />
-           </View>
-           <View style={{flexDirection: 'row', paddingTop: 10, justifyContent: 'center', paddingHorizontal: 15}}>
-             <CustomIcon name="tradle" size={40} style={styles.icon}  color={bankStyle.CONTEXT_BACKGROUND_COLOR} />
-             <Text style={[styles.text, {paddingTop: 10}]}>Powered by Tradle</Text>
-             <TouchableOpacity onPress={() => this.goto(LEARN_MORE_URL)}>
-               <Text style={[styles.text, {paddingLeft: 5, paddingTop: 10, color: bankStyle.LINK_COLOR}]}>Learn more</Text>
+           <View style={styles.centeredRow}>
+             <TouchableOpacity style={{paddingRight:10}} onPress={() => this.goto(LEARN_MORE_URL)}>
+               <Text style={[styles.text, {paddingLeft: 5, paddingTop: 10, color: bankStyle.LINK_COLOR}]}>Learn more  &bull;</Text>
              </TouchableOpacity>
-           </View>
-           <View style={{flexDirection: 'row', justifyContent: 'center', paddingTop: 10, paddingHorizontal: 15}}>
-             <TouchableOpacity onPress={() => this.showTerms()}>
-               <Text style={[styles.text, {paddingTop: 10, color: bankStyle.LINK_COLOR}]}>Terms of use</Text>
+             <TouchableOpacity style={{paddingRight:10}} onPress={() => this.showTerms()}>
+               <Text style={[styles.text, {paddingTop: 10, color: bankStyle.LINK_COLOR}]}>Terms of use  &bull;</Text>
              </TouchableOpacity>
-             <View style={{width: 50}}/>
              <TouchableOpacity onPress={() => this.goto(CONTACT_US_URL)}>
                <Text style={[styles.text, {paddingTop: 10, color: bankStyle.LINK_COLOR, paddingRight: 20}]}>Contact us</Text>
              </TouchableOpacity>
+           </View>
+           <View style={styles.centeredRow}>
+             <CustomIcon name="tradle" size={16} style={[styles.icon]} color={bankStyle.CONTEXT_BACKGROUND_COLOR} />
+             <Text style={[styles.text]}>Powered by Tradle</Text>
            </View>
         </ScrollView>
 
@@ -186,6 +186,12 @@ var styles =  StyleSheet.create({
   row: {
     flexDirection: 'row',
     paddingVertical: 7,
+  },
+  centeredRow: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    paddingVertical: 7
   },
   separator: {
     height: 1,
