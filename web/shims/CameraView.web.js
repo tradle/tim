@@ -18,8 +18,7 @@ const DEFAULT_ASPECT_RATIO = 1.33333
 
 class CameraView extends Component {
   static propTypes = {
-    onTakePic: PropTypes.func.isRequired,
-    onCancel: PropTypes.func.isRequired
+    onTakePic: PropTypes.func.isRequired
   };
 
   static defaultProps = {
@@ -40,11 +39,8 @@ class CameraView extends Component {
   renderShootButtons() {
     return (
       <View style={styles.buttonsContainer}>
-        <TouchableOpacity onPress={() => {this.props.onCancel()}}>
-          <Icon name='ios-arrow-back' size={50} color={ICON_COLOR} />
-        </TouchableOpacity>
         <TouchableOpacity onPress={() => this.capture()}>
-          <Icon name='ios-camera' size={50} color={ICON_COLOR} />
+          <Icon name='ios-camera' size={80} color={ICON_COLOR} />
         </TouchableOpacity>
       </View>
     )

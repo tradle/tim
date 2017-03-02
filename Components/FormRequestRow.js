@@ -602,6 +602,7 @@ class FormRequestRow extends Component {
     else {
       let notLink = resource.documentCreated  ||  isReadOnly  ||  form.subClassOf === MY_PRODUCT
 
+      const { bankStyle } = this.props
       icon = <View style={{position: 'absolute', bottom: 0, right: 0}}>
                <Icon  name={'ios-arrow-forward'} style={{marginTop: 2, marginRight: 2, color: isMyMessage ? bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}} size={20} />
              </View>
@@ -718,6 +719,26 @@ class FormRequestRow extends Component {
              <Text style={{color: bankStyle.LINK_COLOR}}>{formType}</Text>
              <Text>{this.parseMessage(message2, bankStyle, arr)}</Text>
            </Text>
+  }
+
+  showCamera(prop) {
+    this.props.navigator.push({
+      title: 'Take a pic',
+      backButtonTitle: 'Back',
+      id: 12,
+      component: CameraView,
+      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      passProps: {
+        onTakePic: this.onTakePic.bind(this, prop)
+      }
+    });
+  }
+
+  onTakePic(prop, data) {
+    if (!data)
+      return
+    utils.onTakePic(prop, data, this.props.resource)
+    this.props.navigator.pop()
   }
 }
 
