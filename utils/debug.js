@@ -126,9 +126,9 @@ debug.stripColors = function (line) {
     .filter(part => {
       if (part == null) return
 
-      return typeof str !== 'string' || str.indexOf('color:') !== 0
+      return typeof part !== 'string' || part.indexOf('color:') !== 0
     })
-    .map(line => typeof line === 'string' ? line.replace(/\%c/g, '') : line)
+    .map(part => typeof part === 'string' ? part.replace(/\%c/g, '') : part)
 }
 
 function getNow () {
