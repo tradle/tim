@@ -297,6 +297,7 @@ var Store = Reflux.createStore({
     this.addModels()
     this.loadModels()
     utils.setModels(models);
+    this.loadStaticData()
 
     // if (true) {
     if (false) {
@@ -7027,7 +7028,7 @@ var Store = Reflux.createStore({
         else
           sameContactList[p] = p
       }
-      this.loadStaticData()
+      // this.loadStaticData()
 
       for (var s in sameContactList)
         delete orgContacts[s]
