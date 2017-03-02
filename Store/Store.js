@@ -1668,6 +1668,10 @@ var Store = Reflux.createStore({
 
     if (org._country) {
       let countries = this.searchNotMessages({modelName:'tradle.Country'})
+      if (!countries) {
+        this.loadStaticData()
+        countries = this.searchNotMessages({modelName:'tradle.Country'})
+      }
       let country = countries.filter((c) => {
         return c.code === org._country ||  c.country === org._country
       })
