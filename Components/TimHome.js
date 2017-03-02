@@ -493,7 +493,7 @@ class TimHome extends Component {
       title: provider.name,
       component: c.component,
       id: c.id,
-      backButtonTitle: 'Back',
+      backButtonTitle: __DEV__ ?  'Back' : null,
       passProps: {
         bankStyle: style,
         resource: provider
@@ -719,7 +719,7 @@ class TimHome extends Component {
     var {width, height} = utils.dimensions(TimHome)
     var h = height > 800 ? height - 220 : height - 180
 
-    if (this.state.isLoading)
+    if (this.state.isLoading  ||  (!__DEV__  &&  ENV.landingPage))
       return this.getSplashScreen(h)
 
     var err = this.state.err || '';
