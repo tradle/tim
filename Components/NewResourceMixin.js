@@ -15,7 +15,7 @@ var StyleSheet = require('../StyleSheet')
 var QRCodeScanner = require('./QRCodeScanner')
 var driverLicenseParser = require('../utils/driverLicenseParser')
 const debug = require('debug')('tradle:app:blinkid')
-var focusUri = require('./Focus1.mp4')
+var focusUri = require('../video/Focus1.mp4')
 
 import VideoPlayer from './VideoPlayer'
 import omit from 'object.omit'
@@ -1329,14 +1329,13 @@ var NewResourceMixin = {
       // HACK
       const isScan = params.prop === 'scan'
       let useImageInput
-      if (utils.isIOS()) {
-        useImageInput = !isScan
-      } else {
+      if (utils.isWeb()) {
         useImageInput = isScan || !ENV.canUseWebcam
+      } else {
+        useImageInput = !isScan
       }
 
       if (useImageInput) {
-      // if (isPhoto  &&  (params.prop !== 'scan'  ||  utils.isAndroid()  ||  utils.isWeb())) {
         var aiStyle = {flex: 7, paddingTop: 15, paddingBottom: 7}
         let m = utils.getModel(prop.ref).value
         actionItem = <ImageInput prop={prop} style={aiStyle} onImage={item => this.onSetMediaProperty(prop.name, item)}>
