@@ -38,7 +38,7 @@ const LOCK_TIME = __DEV__ ? 5000 : 5 * 60 * 1000
 const LOCK_TIME_STR = __DEV__ ? '5 seconds' : '5 minutes'
 
 const LOCK_UP_MESSAGE = translate('temporarilyLocked', LOCK_TIME_STR)
-const LOCK_SCREEN_BG = require('../img/bg.png')
+const LOCK_SCREEN_BG = ENV.splashBackground
 
 // const SETUP_MSG = 'Please set up Touch ID first, so the app can better protect your data.'
 const AUTH_FAILED_MSG = 'Authentication failed'
