@@ -99,7 +99,7 @@ class AvivaIntroView extends Component {
                <Text style={[styles.text, {paddingTop: 10, color: bankStyle.LINK_COLOR, paddingRight: 20}]}>Contact us</Text>
              </TouchableOpacity>
            </View>
-           <View style={styles.centeredRow}>
+           <View style={[styles.centeredRow, { marginBottom: 10 }]}>
              <CustomIcon name="tradle" size={16} style={[styles.icon]} color={bankStyle.CONTEXT_BACKGROUND_COLOR} />
              <Text style={[styles.text]}>Powered by Tradle</Text>
            </View>
