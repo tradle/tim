@@ -146,7 +146,7 @@ class VerificationRow extends Component {
 
     let titleComponent
     if (isVerification)
-      titleComponent = <Text style={[styles.rTitle, {color: '#FF6D0D'}]}>{'Verification of '}
+      titleComponent = <Text style={[styles.rTitle, {color: '#FF6D0D'}]}>{'Verification: '}
                           <Text style={styles.rTitle}>{title}</Text>
                         </Text>
     else
