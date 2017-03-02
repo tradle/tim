@@ -13,6 +13,8 @@ var constants = require('@tradle/constants');
 var Accordion = require('react-native-accordion')
 var defaultBankStyle = require('../styles/bankStyle.json')
 
+import ENV from '../utils/env'
+
 var NOT_SPECIFIED = '[not specified]'
 var TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
 const ENUM = 'tradle.Enum'
@@ -243,15 +245,16 @@ var ResourceMixin = {
   showJson(prop, json, isView, jsonRows) {
     // let json = JSON.parse(jsonStr)
     // let jsonRows = []
+    let showCollapsed = ENV.showCollapsed  &&  ENV.showCollapsed[this.props.resource[constants.TYPE]]
     if (prop) {
       var backlinksBg = {backgroundColor: '#96B9FA', paddingHorizontal: 10, marginHorizontal: isView ? 0 : -10}
       jsonRows.push(<View style={backlinksBg} key={this.getNextKey()}>
                       <Text  style={[styles.bigTitle, {color: '#ffffff', paddingVertical: 10}]}>{translate(prop)}</Text>
                     </View>)
     }
-    let LINK_COLOR = (this.props.bankStyle  &&  this.props.bankStyle.LINK_COLOR) || defaultBankStyle.LINK_COLOR
+    let bankStyle = this.props.bankStyle || defaultBankStyle
+    let LINK_COLOR = bankStyle.LINK_COLOR
     for (let p in json) {
-      let pp = p
       // if (p === 'document_numbers' || p === 'breakdown' || p === 'properties')
       //   continue
       if (typeof json[p] === 'object') {
@@ -261,12 +264,23 @@ var ResourceMixin = {
           json[p].forEach((js) => this.showJson(null, js, isView, jsonRows))
           continue
         }
-        jsonRows.push(<View style={{paddingVertical: 10, paddingHorizontal: isView ? 10 : 0}} key={this.getNextKey()}>
-                        <Text style={styles.bigTitle}>{utils.makeLabel(p)}</Text>
+        let arr, arrow
+        if (showCollapsed  &&  showCollapsed === p) {
+          arr = []
+          jsonRows.push(arr)
+          arrow = <Icon color={bankStyle.LINK_COLOR} size={20} name={'ios-arrow-down'} style={{marginRight: 10, marginTop: 7}}/>
+        }
+        else
+          arr = jsonRows
+        arr.push(<View style={{paddingVertical: 10, paddingHorizontal: isView ? 10 : 0}} key={this.getNextKey()}>
+                        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                          <Text style={styles.bigTitle}>{utils.makeLabel(p)}</Text>
+                          {arrow}
+                        </View>
                         <View style={{height: 1, marginTop: 5, marginBottom: 10, marginHorizontal: -10, alignSelf: 'stretch', backgroundColor: LINK_COLOR}} />
                       </View>)
 // tada.push("<View style={{paddingVertical: 10, paddingHorizontal: isView ? 10 : 0}} key={this.getNextKey()}><Text style={styles.bigTitle}>{" + utils.makeLabel(p) + "}</Text></View>")
-        this.showJson(null, json[p], isView, jsonRows)
+        this.showJson(null, json[p], isView, arr)
         continue
       }
 
@@ -278,7 +292,26 @@ var ResourceMixin = {
     }
     if (!prop)
       return
+
+    if (showCollapsed) {
+      for (let i=0; i<jsonRows.length; i++) {
+        if (Array.isArray(jsonRows[i])) {
+          let arr = jsonRows[i]
+          let header = arr[0]
+          arr.splice(0, 1)
+          let content = <View>{arr}</View>
+          let row =  <Accordion
+                       header={header}
+                       style={{alignSelf: 'stretch'}}
+                       content={content}
+                       underlayColor='transparent'
+                       easing='easeOutQuad' />
+          jsonRows.splice(i, 1, row)
+        }
+      }
+    }
     return jsonRows
+
     // if (!jsonRows.length)
     //   return <View/>
     // var backlinksBg = {backgroundColor: '#96B9FA'}
@@ -292,13 +325,13 @@ var ResourceMixin = {
     //         </View>
   },
   makeViewTitle(model) {
-    // let rTitle
-    // let bankStyle = this.props.bankStyle
-    // if (!this.props.bankStyle.LOGO_NEEDS_TEXT)
-    //   rTitle = <View style={{alignSelf: 'stretch', alignItems: 'center', backgroundColor: bankStyle.NAV_BAR_BACKGROUND_COLOR, borderTopColor: bankStyle.CONTEXT_BACKGROUND_COLOR, borderTopWidth: StyleSheet.hairlineWidth, height: 45, justifyContent: 'center'}}>
-    //              <Text style={{fontSize: 24, color: bankStyle.CONTEXT_BACKGROUND_COLOR}}>{translate(model)}</Text>
-    //            </View>
-    // return rTitle
+    let rTitle
+    let bankStyle = this.props.bankStyle
+    if (this.props.bankStyle  &&  !this.props.bankStyle.LOGO_NEEDS_TEXT)
+      rTitle = <View style={{alignSelf: 'stretch', alignItems: 'center', backgroundColor: bankStyle.NAV_BAR_BACKGROUND_COLOR, borderTopColor: bankStyle.CONTEXT_BACKGROUND_COLOR, borderTopWidth: StyleSheet.hairlineWidth, height: 45, justifyContent: 'center'}}>
+                 <Text style={{fontSize: 24, color: bankStyle.CONTEXT_BACKGROUND_COLOR}}>{translate(model)}</Text>
+               </View>
+    return rTitle
   }
 }
 

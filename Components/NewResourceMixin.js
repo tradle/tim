@@ -1,4 +1,4 @@
-'use strict';
+ 'use strict';
 
 var React = require('react');
 var ReactDOM = require('react-dom')
@@ -14,14 +14,18 @@ var moment = require('moment')
 var StyleSheet = require('../StyleSheet')
 var QRCodeScanner = require('./QRCodeScanner')
 var driverLicenseParser = require('../utils/driverLicenseParser')
+const debug = require('debug')('tradle:app:blinkid')
+var focusUri = require('./Focus1.mp4')
 
+import VideoPlayer from './VideoPlayer'
 import omit from 'object.omit'
 import pick from 'object.pick'
-import formDefaults from '../data/formDefaults.json'
+import ENV from '../utils/env'
 import DatePicker from 'react-native-datepicker'
 import ImageInput from './ImageInput'
-import ENV from '../utils/env'
 import BlinkID from './BlinkID'
+// import INSTRUCTIONS_IMAGE from '../img/scan-passport.jpg'
+// import { parse as parseUSDL } from 'parse-usdl'
 
 // import Anyline from './Anyline'
 
@@ -39,6 +43,7 @@ const DAY  = 3600 * 1000 * 24
 const HOUR = 3600 * 1000
 const MINUTE = 60 * 1000
 const FOCUSED_LABEL_COLOR = '#7AAAC3'// #139459'
+const TIMEOUT_ERROR = new Error('timed out')
 
 var cnt = 0;
 var propTypesMap = {
@@ -63,6 +68,11 @@ import {
 var LINK_COLOR, DEFAULT_LINK_COLOR = '#a94442'
 // import transform from 'tcomb-json-schema'
 var component
+var DEFAULT_BLINK_ID_OPTS = {
+  mrtd: { showFullDocument: true },
+  eudl: { showFullDocument: true },
+  usdl: {}
+}
 
 var NewResourceMixin = {
   onScroll(e) {
@@ -656,27 +666,67 @@ var NewResourceMixin = {
 
   async showBlinkIDScanner(prop) {
     const { documentType, country } = this.state.resource
-    const blinkIDOpts = {
+    let blinkIDOpts = {
       quality: 0.2,
-      base64: true
+      base64: true,
+      timeout: ENV.blinkIDScanTimeoutInternal
     }
 
     if (documentType.title === 'Passport') {
+      blinkIDOpts.tooltip = translate('centerPassport')
       // machine readable travel documents (passport)
-      blinkIDOpts.mrtd = {}
+      blinkIDOpts.mrtd = DEFAULT_BLINK_ID_OPTS.mrtd
     } else if (documentType.title === 'Driver licence' || documentType.title === 'Driver license') {
+      blinkIDOpts.tooltip = translate('centerLicence')
       if (country.title === 'United States') {
-        blinkIDOpts.usdl = {}
+        blinkIDOpts.usdl = DEFAULT_BLINK_ID_OPTS.usdl
       } else {
-        blinkIDOpts.eudl = {}
+        blinkIDOpts.eudl = DEFAULT_BLINK_ID_OPTS.eudl
       }
     } else {
-      blinkIDOpts.usdl = {}
-      blinkIDOpts.eudl = {}
-      blinkIDOpts.mrtd = {}
+      blinkIDOpts = {
+        ...DEFAULT_BLINK_ID_OPTS,
+        ...blinkIDOpts,
+        tooltip: translate('centerID')
+      }
     }
 
-    const result = await BlinkID.scan(blinkIDOpts)
+    const promiseTimeout = new Promise((resolve, reject) => {
+      setTimeout(() => reject(TIMEOUT_ERROR), ENV.blinkIDScanTimeoutExternal)
+    })
+
+    let result
+    try {
+      result = await Promise.race([
+        BlinkID.scan(blinkIDOpts),
+        promiseTimeout
+      ])
+    } catch (err) {
+      debug('scan failed:', err.message)
+      const canceled = /canceled/i.test(err.message)
+      const timedOut = !canceled && /time/i.test(err.message)
+      if (!canceled && typeof BlinkID.dismiss === 'function') {
+        // cancel programmatically
+        await BlinkID.dismiss()
+      }
+
+      // give the BlinkID view time to disappear
+      // 800ms is a bit long, but if BlinkID view is still up, Alert will just not show
+      await utils.promiseDelay(800)
+      debug('BlinkID scan failed', err.stack)
+
+      // if (canceled || timedOut) {
+      //   return Alert.alert(
+      //     translate('documentNotScanning', documentType.title),
+      //     translate('retryScanning', documentType.title.toLowerCase())
+      //   )
+      // }
+
+      return Alert.alert(
+        translate('documentNotScanning'),
+        translate('retryScanning', documentType.title.toLowerCase())
+      )
+    }
 
     // const tradleObj = utils.fromMicroBlink(result)
     var r = {}
@@ -712,29 +762,133 @@ var NewResourceMixin = {
     this.afterScan(r, prop)
   },
 
+  // async maybeReadNFC({ country, ...nfcProps }) {
+  //   if (!PassportReader.isSupported) return
+
+  //   const instructions = country === 'US'
+  //     ? translate('holdPhoneToPassportBackCover')
+  //     : translate('holdPhoneToPassport')
+
+  //   await PassportReader.cancel()
+  //   const { width, height } = Dimensions.get('window')
+
+  //   Actions.showModal({
+  //     onRequestClose: function () {},
+  //     contents: (
+  //       <Modal
+  //         onRequestClose={() => {}}
+  //         animationType="none">
+  //         <View style={styles.nfcModal}>
+  //           <Image source={INSTRUCTIONS_IMAGE} style={{
+  //             resizeMode: 'center',
+  //             width,
+  //             height
+  //           }} />
+  //           <View style={styles.nfcInstructions}>
+  //             <Text style={styles.nfcInstructionsText}>
+  //               {instructions}
+  //             </Text>
+  //           </View>
+  //         </View>
+  //       </Modal>
+  //     )
+  //   })
+
+  //   let nfc
+  //   try {
+  //     nfc = await PassportReader.scan(nfcProps)
+  //   } catch (err) {
+  //     debug('failed to read nfc', err)
+  //     return
+  //   }
+
+  //   const { photo, ...nfcData } = nfc
+  //   const dataRows = Object.keys(nfcData).map(key => {
+  //     return (
+  //       <Text>{key}: {nfcData[key]}</Text>
+  //     )
+  //   })
+
+  //   let ok
+  //   const waitForOK = new Promise(resolve => ok = resolve)
+  //   Actions.showModal({
+  //     onRequestClose: function () {},
+  //     contents: (
+  //       <Modal
+  //         onRequestClose={() => {}}
+  //         animationType="none">
+  //         <View style={styles.nfcModal}>
+  //           <Image source={{uri:photo.base64}} style={{
+  //             resizeMode: 'center',
+  //             width: photo.width,
+  //             height: photo.height
+  //           }} />
+  //           <View style={styles.nfcInstructions}>
+  //             {dataRows}
+  //           </View>
+  //           <TouchableHighlight
+  //             onPress={ok}
+  //             style={{ width: 100, height: 30 }}>
+  //             OK
+  //           </TouchableHighlight>
+  //         </View>
+  //       </Modal>
+  //     )
+  //   })
+
+  //   await waitForOK
+  //   return nfc
+  // },
+
   afterScan(resource, prop) {
     if (!this.floatingProps) this.floatingProps = {}
     this.floatingProps[prop] = resource[prop]
     this.floatingProps[prop + 'Json'] = resource[prop + 'Json']
     this.setState({ resource })
   },
-
-  showCamera(params) {
-    if (utils.isAndroid()) {
-      return Alert.alert(
-        translate('oops') + '!',
-        translate('noScanningOnAndroid')
+  showVideo(params) {
+    let onEnd = (err) => {
+      Alert.alert(
+        'Ready to scan?',
+        null,
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              this.props.navigator.pop()
+              this.showCamera(params)
+            }
+          }
+        ]
       )
     }
+
+    this.props.navigator.push({
+      id: 18,
+      component: VideoPlayer,
+      passProps: {
+        source: focusUri,
+        onEnd: onEnd,
+        onError: onEnd,
+        muted: true,
+        navigator: this.props.navigator
+      },
+    })
+  },
+
+  showCamera(params) {
+    // if (utils.isAndroid()) {
+    //   return Alert.alert(
+    //     translate('oops') + '!',
+    //     translate('noScanningOnAndroid')
+    //   )
+    // }
 
     if (params.prop === 'scan')  {
       if (utils.isWeb()) return Alert.alert('Oops!', 'Scanning in the browser is not supported yet')
 
       if (this.state.resource.documentType  &&  this.state.resource.country) {
-        // if (utils.isAndroid())
-        //   this.showAnylineScanner(params.prop)
-        // else
-          this.showBlinkIDScanner(params.prop)
+        this.showBlinkIDScanner(params.prop)
       }
       else
         Alert.alert('Please choose country and document type first')
@@ -1109,9 +1263,12 @@ var NewResourceMixin = {
     let color = {color: lcolor}
     let isVideo = prop.name === 'video'
     let isPhoto = prop.name === 'photos'  ||  prop.ref === 'tradle.Photo'
+    let noChooser
     if (this.props.model  &&  prop.ref === COUNTRY  &&  this.props.model.required.indexOf(prop.name)) {
-      if (resource  &&  !resource[prop.name])
+      if (resource  &&  !resource[prop.name]) {
         resource[prop.name] = this.props.country
+        noChooser = true
+      }
     }
     if (resource && resource[params.prop]) {
       if (isPhoto) {
@@ -1159,7 +1316,7 @@ var NewResourceMixin = {
       icon = <Icon name='ios-play-outline' size={25}  color={LINK_COLOR} />
     else if (isPhoto)
       icon = <Icon name='ios-camera-outline' size={25}  color={LINK_COLOR} style={styles.photoIcon}/>
-    else
+    else if (!noChooser)
       icon = <Icon name='ios-arrow-down'  size={15}  color={iconColor}  style={[styles.icon1, styles.customIcon]} />
 
     let content = <View  style={[styles.chooserContainer, {flexDirection: 'row', borderBottomColor: lcolor}]}>
@@ -1192,7 +1349,7 @@ var NewResourceMixin = {
                      </TouchableHighlight>
     }
     else
-      actionItem = <TouchableHighlight underlayColor='transparent' onPress={this.chooser.bind(this, prop, params.prop)}>
+      actionItem = <TouchableHighlight underlayColor='transparent' onPress={noChooser ? () => {} : this.chooser.bind(this, prop, params.prop)}>
                      {content}
                    </TouchableHighlight>
 
@@ -1792,6 +1949,21 @@ var styles= StyleSheet.create({
     // alignSelf: 'center',
     // paddingLeft: 10
   },
+  nfcModal: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  nfcInstructions: {
+    position: 'absolute',
+    bottom: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 50
+  },
+  nfcInstructionsText: {
+    fontSize: 20
+  }
 })
 
 function formatDate (date) {

@@ -375,7 +375,7 @@ class MessageList extends Component {
       }
     }
     // Allow to edit resource that was not previously changed
-    if (!verification  &&  !isEmployee  &&  !resource[NEXT_HASH]  &&  model.subClassOf !== MY_PRODUCT) {
+    if (!verification  &&  !isEmployee  &&  !resource[NEXT_HASH]  &&  model.subClassOf !== MY_PRODUCT  &&  !model.notEditable) {
       route.rightButtonTitle = 'Edit'
       route.onRightButtonPress = {
         title: newTitle, //utils.getDisplayName(resource),
@@ -547,7 +547,9 @@ class MessageList extends Component {
       let isChooser = this.props.originatingMessage && this.props.originatingMessage.verifiers
       if (!isChooser  &&  (!this.state.isConnected  ||  !this.state.onlineStatus)) //  || (resource[TYPE] === TYPES.ORGANIZATION  &&  !resource._online)))
         maxHeight -=  35
-      if ((this.state.context  &&  this.state.context.product !== REMEDIATION)  ||  (resource[TYPE] === PRODUCT_APPLICATION && resource.product !== REMEDIATION))
+      if (((this.state.context  &&  this.state.context.product !== REMEDIATION)         ||
+          (resource[TYPE] === PRODUCT_APPLICATION && resource.product !== REMEDIATION)) &&
+          (this.props.resource.products  &&  this.props.resource.products.length > 1))
         maxHeight -= 45
       if (hideTextInput)
       //   maxHeight += 35

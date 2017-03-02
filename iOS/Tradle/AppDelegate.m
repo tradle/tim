@@ -19,6 +19,7 @@
 #import "Orientation.h"
 #import <asl.h>
 #import "RCTLog.h"
+#import "SplashScreen.h"
 
 @implementation AppDelegate
 
@@ -44,7 +45,7 @@
   touchposeApplication.alwaysShowTouches = YES;
 
 #ifdef DEBUG
-  jsCodeLocation = [NSURL URLWithString:@"http://192.168.0.102:8081/index.ios.bundle?platform=ios&dev=true"];
+  jsCodeLocation = [NSURL URLWithString:@"http://192.168.1.7:8081/index.ios.bundle?platform=ios&dev=true"];
 #else
   jsCodeLocation = [CodePush bundleURL];
     // jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
@@ -68,6 +69,7 @@
   rootViewController.view = rootView;
   self.window.rootViewController = rootViewController;
   [self.window makeKeyAndVisible];
+  [SplashScreen show]; //show splash screen
 
 #ifdef DEBUG
 #else

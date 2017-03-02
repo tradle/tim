@@ -1,3 +1,3 @@
 target 'Tradle-dev' do
-  pod 'PPBlinkID', '~> 2.5.1'
+  pod 'PPBlinkID', '~> 2.6.0'
 end

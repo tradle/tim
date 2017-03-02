@@ -141,6 +141,7 @@
     "nl": "Dutch",
     "submittingForm": "Submittted {1}",
     "submittingModifiedForm": "Modifying {1}",
+    "receivedForm": "Received {1}",
     "receivedProduct": "Received {1}",
     "receivedVerification": "Received verification for {1}",
     "formRequest": "Request for {1}",
@@ -215,5 +216,13 @@
     "cameraAccess": "Camera Access",
     "enableCameraAccess": "Tradle currently does not have permission to use the camera. To grant access, choose Settings, and make sure Camera is enabled.",
     "noScanningOnAndroid": "Document scanning on Android is coming soon.",
-    "pleaseTapOnMenu": "Please tap on the red button and"
+    "pleaseTapOnMenu": "Please tap on the red button and",
+    "holdPhoneToPassportBackCover": "Hold the back of your phone against the back inside cover of your passport.",
+    "holdPhoneToPassport": "Hold the back of your phone against the front cover of your passport",
+    "scanningFailedTryAgain": "Scanning was unsuccessful. Could you please try again?",
+    "documentNotScanning": "Whoopsie daisies!",
+    "retryScanning": "Was that a {1}? We couldn't tell. Could you try one more time?\n\nScanning works best when you hold the document in one hand and your phone in the other. Try to avoid glare!",
+    "centerPassport": "Center passport photo page in frame",
+    "centerLicence": "Center licence in frame",
+    "centerID": "Center ID in frame"
 }

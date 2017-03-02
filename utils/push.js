@@ -15,6 +15,7 @@ const constants = require('@tradle/engine').constants
 const TYPE = constants.TYPE
 const Actions = require('../Actions/Actions')
 const pushServerURL = ENV.pushServerURL
+const isMobile = () => utils.isIOS() || utils.isAndroid()
 
 let initialized
 let preinitialized
@@ -36,7 +37,9 @@ exports.resetBadgeNumber = function () {
 }
 
 function createPusher (opts) {
-  if (__DEV__ || utils.isSimulator() || !(utils.isIOS() || utils.isAndroid())) return Promise.resolve({})
+  if (__DEV__ || utils.isSimulator() || !isMobile() || !ENV.registerForPushNotifications) {
+    return Promise.resolve({})
+  }
 
   const me = opts.me
   const node = opts.node

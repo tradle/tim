@@ -6,6 +6,7 @@ import {
 import DeviceInfo from 'react-native-device-info'
 import extend from 'xtend'
 import environment from '../environment.json'
+import locale from './locale'
 
 let getUserMedia
 try {
@@ -54,5 +55,12 @@ module.exports = extend({
   autoOptInTouchId: false,
   requireSoftPIN: false,
   canUseWebcam: !!getUserMedia,
-  locale: require('./locale')
+  locale: locale,
+  // timeout after partial scan results have been processed
+  blinkIDScanTimeoutInternal: 10000,
+  // timeout from beginning to end of scan operation
+  blinkIDScanTimeoutExternal: 30000,
+  registerForPushNotifications: true,
+  hideVerificationsInChat: false,
+  hideProductApplicationInChat: false
 }, environment)

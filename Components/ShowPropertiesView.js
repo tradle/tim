@@ -116,8 +116,10 @@ class ShowPropertiesView extends Component {
       }
       // HACK
       if (utils.isMessage(resource)) {
-        delete vCols.from
-        delete vCols.to
+        if (!excludedProperties)
+          excludedProperties = []
+        excludedProperties.push('from')
+        excludedProperties.push('to')
       }
     }
     var isMessage = utils.isMessage(model)

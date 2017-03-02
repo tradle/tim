@@ -169,7 +169,7 @@ class FormRequestRow extends Component {
                         {ownerPhoto}
                         </View>
                         <View style={[cellStyle, shareables ? styles.shareables : {}]}>
-                          <View style={styles.container}>
+                          <View style={[styles.container, {minHeight: 45, justifyContent: 'center'}]}>
                           {this.isShared()
                             ? <View style={[chatStyles.verifiedHeader, {backgroundColor: bankStyle.SHARED_WITH_BG}]}>
                                 <Text style={styles.white18}>{translate('youShared', resource.to.organization.title)}</Text>
@@ -524,7 +524,15 @@ class FormRequestRow extends Component {
   }
 
   formRequest(resource, vCols, prop) {
-    let message = resource.message.replace(/\*/g, '')
+    let message = resource.message
+    let messagePart
+    if (resource.documentCreated)
+      message = resource.message.replace(/\*/g, '')
+    else
+      messagePart = this.parseMessage(message)
+    if (typeof messagePart === 'string')
+      messagePart = null
+
     let form = utils.getModel(resource.form).value
     // if (this.props.shareableResources)
     //   style = styles.description;
@@ -557,9 +565,9 @@ class FormRequestRow extends Component {
     let link, icon
     let isReadOnly = utils.isReadOnlyChat(this.props.resource, this.props.context) //this.props.context  &&  this.props.context._readOnly
     let self = this
-    let bankStyle = this.props.bankStyle
     let strName = sameFormRequestForm ? translate('addAnotherFormOrGetNext', translate(form)) : utils.getStringName(message)
-    let str = strName ? utils.translate(strName) : message
+    let str = messagePart ? messagePart : (strName ? utils.translate(strName) : message)
+    messagePart = null
     let showMessage = true
     if (sameFormRequestForm  &&  !resource.documentCreated) {
        link = <View style={[chatStyles.rowContainer, {paddingVertical: 10, alignSelf: 'center'}]}>
@@ -595,13 +603,13 @@ class FormRequestRow extends Component {
       let notLink = resource.documentCreated  ||  isReadOnly  ||  form.subClassOf === MY_PRODUCT
 
       icon = <View style={{position: 'absolute', bottom: 0, right: 0}}>
-             <Icon  name={'ios-arrow-forward'} style={{marginTop: 2, marginRight: 2, color: isMyMessage ? bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}} size={20} />
+               <Icon  name={'ios-arrow-forward'} style={{marginTop: 2, marginRight: 2, color: isMyMessage ? bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}} size={20} />
              </View>
-      link = <View style={chatStyles.rowContainer}>
-               <Text style={[chatStyles.resourceTitle, {color: resource.documentCreated  ||  notLink ?  '#757575' : resource.verifiers ? 'green' : LINK_COLOR}]}>{translate(form)}</Text>
-               {resource.documentCreated ? null : icon}
-             </View>
-      link = <View/>
+      // link = <View style={chatStyles.rowContainer}>
+      //          <Text style={[chatStyles.resourceTitle, {color: resource.documentCreated  ||  notLink ?  '#757575' : resource.verifiers ? 'green' : LINK_COLOR}]}>{translate(form)}</Text>
+      //          {resource.documentCreated ? null : icon}
+      //        </View>
+      // link = <View/>
       if (!notLink) {
         if (resource.verifiers)
           onPressCall = this.props.chooseTrustedProvider.bind(this, this.props.resource, form, isMyMessage)
@@ -628,9 +636,11 @@ class FormRequestRow extends Component {
           onPressCall = this.createNewResource.bind(this, form, isMyMessage)
       }
     }
-    let messagePart
+
+    // let messagePart
     if (showMessage)
       messagePart = <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: '#aaaaaa'} : {}]}>{str}</Text>
+
     let msg = <View key={this.getNextKey()}>
                {messagePart}
                {resource.documentCreated ? null : icon}
@@ -690,24 +700,24 @@ class FormRequestRow extends Component {
     })
   }
 
-  showCamera(prop) {
-    this.props.navigator.push({
-      title: 'Take a pic',
-      backButtonTitle: 'Back',
-      id: 12,
-      component: CameraView,
-      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      passProps: {
-        onTakePic: this.onTakePic.bind(this, prop)
-      }
-    });
-  }
-
-  onTakePic(prop, data) {
-    if (!data)
-      return
-    utils.onTakePic(prop, data, this.props.resource)
-    this.props.navigator.pop()
+  parseMessage(message, arr) {
+    let i1 = message.indexOf('**')
+    let formType, message1, message2
+    let messagePart
+    let bankStyle = this.props.bankStyle
+    if (i1 === -1)
+      return message
+    formType = message.substring(i1 + 2)
+    let i2 = formType.indexOf('**')
+    if (i2 !== -1) {
+      message1 = message.substring(0, i1)
+      message2 = i2 + 2 === formType.length ? '' : formType.substring(i2 + 2)
+      formType = formType.substring(0, i2)
+    }
+    return <Text style={[chatStyles.resourceTitle, this.props.resource.documentCreated ? {color: '#aaaaaa'} : {}]}>{message1}
+             <Text style={{color: bankStyle.LINK_COLOR}}>{formType}</Text>
+             <Text>{this.parseMessage(message2, bankStyle, arr)}</Text>
+           </Text>
   }
 }
 

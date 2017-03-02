@@ -477,6 +477,11 @@ class TimHome extends Component {
     this.showOfficialAccounts()
   }
   showChat(provider) {
+    if (ENV.landingPage) {
+      this.showLandingPage(provider, ENV.landingPage)
+      return
+    }
+    return
     let me = utils.getMe()
     var msg = {
       message: translate('customerWaiting', me.firstName),
@@ -502,6 +507,23 @@ class TimHome extends Component {
         modelName: constants.TYPES.MESSAGE,
         currency: this.props.currency,
         bankStyle:  style
+      }
+    })
+  }
+  showLandingPage(provider, landingPage) {
+    let style = {}
+    extend(style, defaultBankStyle)
+    if (provider.style)
+      extend(style, provider.style)
+    let c = this.props.landingPageMapping[landingPage]
+    this.props.navigator.push({
+      title: provider.name,
+      component: c.component,
+      id: c.id,
+      backButtonTitle: 'Back',
+      passProps: {
+        bankStyle: style,
+        resource: provider
       }
     })
   }

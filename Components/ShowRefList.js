@@ -16,6 +16,10 @@ const {
   ROOT_HASH
 } = require('@tradle/constants');
 
+const constants = require('@tradle/constants') // tradle.constants
+const VERIFICATION = constants.TYPES.VERIFICATION;
+const PRODUCT_APPLICATION = constants.TYPES.PRODUCT_APPLICATION;
+
 import { makeResponsive } from 'react-native-orient'
 import {
   View,
@@ -54,19 +58,6 @@ class ShowRefList extends Component {
     else
       bg = {}
 
-    if (!isIdentity)
-      refList.push(
-        <View style={[buttonStyles.container, bg, {flex: 1, alignSelf: 'stretch'}]} key={this.getNextKey()}>
-         <TouchableHighlight onPress={this.showDetails.bind(this)} underlayColor='transparent'>
-           <View style={styles.item}>
-             <View style={{flexDirection: 'row'}}>
-               <Icon name='ios-paper-outline'  size={utils.getFontSize(30)}  color='#757575' />
-             </View>
-             <Text style={[buttonStyles.text, Platform.OS === 'android' ? {marginTop: 3} : {marginTop: 0}]}>{'Details'}</Text>
-           </View>
-         </TouchableHighlight>
-        </View>
-      )
     for (var p in props) {
       if (props[p].hidden)
         continue
@@ -80,8 +71,24 @@ class ShowRefList extends Component {
         continue;
       propsToShow.push(p)
     }
-    if (!propsToShow.length)
-      return <View/>
+    if (!propsToShow.length) {
+      if (!showDetails)
+        return <View/>
+    }
+
+    else if (!isIdentity)
+      refList.push(
+        <View style={[buttonStyles.container, bg, {flex: 1, alignSelf: 'stretch'}]} key={this.getNextKey()}>
+         <TouchableHighlight onPress={this.showDetails.bind(this)} underlayColor='transparent'>
+           <View style={styles.item}>
+             <View style={{flexDirection: 'row'}}>
+               <Icon name='ios-paper-outline'  size={utils.getFontSize(30)}  color='#757575' />
+             </View>
+             <Text style={[buttonStyles.text, Platform.OS === 'android' ? {marginTop: 3} : {marginTop: 0}]}>{'Details'}</Text>
+           </View>
+         </TouchableHighlight>
+        </View>
+      )
     if (model.viewCols) {
       let vCols = model.viewCols.filter((p) => !props[p].hidden  &&  props[p].items  &&  props[p].items.backlink)
       if (vCols) {
@@ -96,6 +103,11 @@ class ShowRefList extends Component {
     }
     let hasBacklinks
     propsToShow.forEach((p) => {
+      let ref = props[p].items.ref
+      if (ENV.hideVerificationsInChat  && ref === VERIFICATION)
+        return
+      if (ENV.hideProductApplicationInChat  &&  ref === PRODUCT_APPLICATION)
+        return
       let propTitle = translate(props[p], model)
       var icon = props[p].icon  ||  utils.getModel(props[p].items.ref).value.icon;
       if (!icon)
@@ -170,7 +182,7 @@ class ShowRefList extends Component {
                 </View>
     }
 
-    if (refList.length)
+    if (refList.length  ||  !propsToShow.length)
       return <View>
                 <View style={[buttonStyles.buttons, {justifyContent: 'center', borderBottomWidth: 0}]} key={'ShowRefList'}>
                   {refList}
