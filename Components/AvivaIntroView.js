@@ -51,7 +51,8 @@ class AvivaIntroView extends Component {
     const screen = utils.dimensions(AvivaIntroView)
     var bankStyle = this.props.bankStyle
     let content = <ScrollView style={{paddingTop: 20, paddingBottom: 40, backgroundColor: '#ffffff'}}>
-          <View style={{paddingHorizontal: 15, backgroundColor: '#ffffff'}}>
+        <TouchableOpacity onPress={()=>{this.showChat(this.props.resource)}}>
+           <View style={{paddingHorizontal: 15, backgroundColor: '#ffffff'}}>
              <Text style={styles.resourceTitle}>Welcome to the Aviva mobile verification service.</Text>
              <Text style={[styles.subTitle, styles.importantText]}>Keeping your money and identity safe is our number 1 priority!</Text>
              <Text style={styles.subTitle}>To use this service you’ll undertake 4 easy steps:</Text>
@@ -102,7 +103,8 @@ class AvivaIntroView extends Component {
              <CustomIcon name="tradle" size={16} style={[styles.icon]} color={bankStyle.CONTEXT_BACKGROUND_COLOR} />
              <Text style={[styles.text]}>Powered by Tradle</Text>
            </View>
-        </ScrollView>
+         </TouchableOpacity>
+       </ScrollView>
 
     let footer = <TouchableOpacity onPress={()=>{this.showChat(this.props.resource)}}>
                    <View style={styles.start}>
