@@ -179,7 +179,7 @@ class TiMApp extends Component {
   }
 
   componentDidMount() {
-    if (SplashScreen) {
+    if (SplashScreen && SplashScreen.hide) {
       SplashScreen.hide()
     }
 

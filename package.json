@@ -233,6 +233,7 @@
     "./Components/BackgroundImage.js": "./Components/BackgroundImage.web.js",
     "./Components/ImageInput.js": "./Components/ImageInput.web.js",
     "./utils/push.js": "./web/shims/push.js",
-    "./img/bg.png": "./web/shims/bg.js"
+    "./img/bg.png": "./web/shims/bg.js",
+    "./video/Focus1.mp4": false
   }
 }
