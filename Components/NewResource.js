@@ -859,11 +859,12 @@ class NewResource extends Component {
       })
 
       if (droppable) {
+        const prop = properties[droppable]
         return (
           <DropPage
-            multiple={false}
+            multiple={prop.type === 'array'}
             style={platformStyles.container}
-            onDrop={files => this.onDropFiles({ propertyName: droppable, files })}
+            onDrop={files => this.onDropFiles({ prop, files })}
           >
             {content}
             {submit}
@@ -897,13 +898,10 @@ class NewResource extends Component {
       </View>
     )
   }
-  onDropFiles({ propertyName, files }) {
+  onDropFiles({ prop, files }) {
     // 1. figure out which prop
     // 2. run utils.readImage
-    // debugger
-
-    const { properties } = this.props.model
-    const prop = properties[propertyName]
+    debugger
   }
   showTermsAndConditions() {
     this.props.navigator.push({
