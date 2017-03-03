@@ -897,6 +897,10 @@ class TimHome extends Component {
     return (
       <TouchableOpacity style={styles.container}>
         <BackgroundImage source={BG_IMAGE} />
+        <View style={[styles.splashLayout]}>
+          <View style={{flexGrow: 1}}/>
+          <ActivityIndicator size='large' color='#ffffff' style={{ paddingBottom: 20 }} />
+        </View>
       </TouchableOpacity>
     )
   }

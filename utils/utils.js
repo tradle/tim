@@ -1659,6 +1659,12 @@ var utils = {
     if (m.interfaces && m.interfaces.indexOf(MESSAGE) !== -1)
       return true
   },
+  getEnumProperty(model) {
+    let props = model.properties
+    for (let p in props)
+      if (p !== TYPE)
+        return p
+  },
   requestCameraAccess: async function (opts={}) {
     if (utils.isAndroid()) {
       const check = PermissionsAndroid.check || PermissionsAndroid.checkPermission

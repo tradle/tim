@@ -499,7 +499,7 @@ class FormRequestRow extends Component {
       extend(true, resource, this.props.resource.prefill)
     else {
       // isPrefilled = false
-      isPrefilled = ENV.prefillForms && model.id in formDefaults
+      isPrefilled = false //ENV.prefillForms && model.id in formDefaults
       if (isPrefilled)
         extend(true, resource, formDefaults[model.id])
         // console.log(JSON.stringify(resource, 0, 2))
@@ -518,7 +518,8 @@ class FormRequestRow extends Component {
         currency: this.props.currency,
         country: this.props.country,
         bankStyle: this.props.bankStyle,
-        originatingMessage: this.props.resource
+        originatingMessage: this.props.resource,
+        defaultPropertyValues: this.props.defaultPropertyValues,
       }
     });
   }

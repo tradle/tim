@@ -71,7 +71,7 @@ class AvivaIntroView extends Component {
              </View>
              <View style={styles.separator} />
              <View style={styles.row}>
-               <Icon name='ios-image-outline' size={40} color={bankStyle.CONTEXT_BACKGROUND_COLOR} style={styles.icon}/>
+               <Icon name='ios-contact-outline' size={36} color={bankStyle.CONTEXT_BACKGROUND_COLOR} style={styles.icon}/>
                <View style={{justifyContent: 'center'}}>
                  <Text style={[styles.text, {justifyContent: 'center'}]}>Take a ‘selfie’ picture of your face.</Text>
                </View>
