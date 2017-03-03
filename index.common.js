@@ -635,6 +635,8 @@ var NavigationBarRouteMapper = {
     var style = {}
     switch (rbTitle) {
     case 'Done':
+      if (route.passProps.bankStyle  &&  route.passProps.bankStyle.submitBarInFooter)
+        return
     case 'Accept':
       icon = 'ios-send'
       iconSize = 32
