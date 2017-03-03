@@ -846,21 +846,24 @@ class NewResource extends Component {
                  </TouchableOpacity>
 
       const { properties } = meta
-      const hasPhoto = Object.keys(properties).some(key => {
+      const droppable = Object.keys(properties).find(key => {
         const prop = properties[key]
-        if (prop.range === 'photo' || prop.ref === 'tradle.Photo') {
-          return true
-        }
+        const propMeta = prop.items || prop
+        const isPhoto = propMeta.ref === PHOTO
+        if (!isPhoto) return false
+        if (!ENV.canUseWebcam) return true
 
-        return prop.type === 'array' && prop.items && prop.items.ref === 'tradle.Photo'
+        // if image processing is required
+        // let them upload, because there is none in web
+        return prop.component != null
       })
 
-      if (hasPhoto) {
+      if (droppable) {
         return (
           <DropPage
             multiple={false}
             style={platformStyles.container}
-            onDrop={files => this.onDropFiles(files)}
+            onDrop={files => this.onDropFiles({ propertyName: droppable, files })}
           >
             {content}
             {submit}
@@ -894,10 +897,13 @@ class NewResource extends Component {
       </View>
     )
   }
-  onDropFiles(files) {
+  onDropFiles({ propertyName, files }) {
     // 1. figure out which prop
     // 2. run utils.readImage
     // debugger
+
+    const { properties } = this.props.model
+    const prop = properties[propertyName]
   }
   showTermsAndConditions() {
     this.props.navigator.push({

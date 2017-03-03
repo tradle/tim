@@ -33,7 +33,6 @@ class DropPage extends Component {
   }
 
   render() {
-    console.log('DROPPAGE active', this.state.active)
     let overlay
     if (this.state.active) {
       overlay = <View style={styles.overlay} />
