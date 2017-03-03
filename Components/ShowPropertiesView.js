@@ -29,6 +29,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  Linking
 } from 'react-native'
 
 import React, { Component, PropTypes } from 'react'
@@ -309,7 +310,8 @@ class ShowPropertiesView extends Component {
              </View>
              );
     });
-    if (resource.txId) {
+
+    if (resource.txId || utils.isSealableModel(model)) {
       let bankStyle = this.props.bankStyle
       let header = (<View style={{paddingVertical: 10, paddingHorizontal: 10 }} key={this.getNextKey()}>
                       <View style={[styles.textContainer, {flexDirection: 'row', justifyContent: 'space-between'}]}>
@@ -319,18 +321,27 @@ class ShowPropertiesView extends Component {
                       <View style={{height: 1, marginTop: 5, marginBottom: 10, marginHorizontal: -10, alignSelf: 'stretch', backgroundColor: bankStyle.LINK_COLOR}} />
                     </View>)
       let description = 'This app uses blockchain technology to ensure you can always prove the contents of your data and whom you shared it with.'
+      let txs
+      if (resource.txId) {
+        txs = (
+          <View>
+            <TouchableOpacity onPress={this.onPress.bind(this, 'https://tbtc.blockr.io/tx/info/' + resource.txId)}>
+              <Text style={[styles.description, {color: bankStyle.LINK_COLOR}]}>{translate('independentBlockchainViewer') + ' 1'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={this.onPress.bind(this, 'https://test-insight.bitpay.com/tx/' + resource.txId)}>
+              <Text style={[styles.description, {color: bankStyle.LINK_COLOR}]}>{translate('independentBlockchainViewer') + ' 2'}</Text>
+            </TouchableOpacity>
+          </View>
+        )
+      }
+
       let content = <View style={{paddingHorizontal: 10}}>
                      <TouchableOpacity onPress={this.onPress.bind(this, 'http://thefinanser.com/2016/03/the-best-blockchain-white-papers-march-2016-part-2.html/')}>
                        <Text style={{color: '#9b9b9b', fontSize: 16, marginHorizontal: 7, paddingBottom: 10}}>{description}
                          <Text style={{color: bankStyle.LINK_COLOR, paddingHorizontal: 7}}> Learn more</Text>
                        </Text>
                      </TouchableOpacity>
-                     <TouchableOpacity onPress={this.onPress.bind(this, 'https://tbtc.blockr.io/tx/info/' + resource.txId)}>
-                       <Text style={[styles.description, {color: bankStyle.LINK_COLOR}]}>{translate('independentBlockchainViewer') + ' 1'}</Text>
-                     </TouchableOpacity>
-                     <TouchableOpacity onPress={this.onPress.bind(this, 'https://test-insight.bitpay.com/tx/' + resource.txId)}>
-                       <Text style={[styles.description, {color: bankStyle.LINK_COLOR}]}>{translate('independentBlockchainViewer') + ' 2'}</Text>
-                     </TouchableOpacity>
+                     {txs}
                     </View>
 
       let row = <Accordion
@@ -358,14 +369,15 @@ class ShowPropertiesView extends Component {
     return viewCols;
   }
   onPress(url, event) {
-    var model = utils.getModel(this.props.resource[constants.TYPE]).value;
-    this.props.navigator.push({
-      id: 7,
-      backButtonTitle: 'Back',
-      title: utils.getDisplayName(this.props.resource, model.properties),
-      component: ArticleView,
-      passProps: {url: url ? url : this.props.resource.url}
-    });
+    Linking.openURL(url)
+    // var model = utils.getModel(this.props.resource[constants.TYPE]).value;
+    // this.props.navigator.push({
+    //   id: 7,
+    //   backButtonTitle: 'Back',
+    //   title: utils.getDisplayName(this.props.resource, model.properties),
+    //   component: ArticleView,
+    //   passProps: {url: url ? url : this.props.resource.url}
+    // });
   }
 }
 reactMixin(ShowPropertiesView.prototype, RowMixin);

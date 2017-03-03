@@ -863,9 +863,10 @@ class NewResource extends Component {
         const prop = properties[droppable]
         return (
           <DropPage
+            accept="image/*"
             multiple={prop.type === 'array'}
             style={platformStyles.container}
-            onDrop={files => this.onDropFiles({ prop, files })}
+            onDrop={(accepted, rejected) => this.onDropFiles({ prop, rejected, files: accepted })}
           >
             {content}
             {submit}
@@ -899,7 +900,14 @@ class NewResource extends Component {
       </View>
     )
   }
-  onDropFiles({ prop, files }) {
+  onDropFiles({ prop, files, rejected }) {
+    if (!files.length && rejected.length) {
+      return Alert.alert(
+        translate('oops') + '!',
+        translate('tryAgainWithImage')
+      )
+    }
+
     // 1. figure out which prop
     // 2. run utils.readImage
     let propName = prop.name
@@ -914,7 +922,6 @@ class NewResource extends Component {
       extend(r, resource)
       this.setState({resource: r})
     })
-    debugger
   }
   showTermsAndConditions() {
     this.props.navigator.push({
