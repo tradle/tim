@@ -1265,10 +1265,11 @@ var NewResourceMixin = {
     let isPhoto = prop.name === 'photos'  ||  prop.ref === 'tradle.Photo'
     let noChooser
     if (this.props.model  &&  prop.ref === COUNTRY  &&  this.props.model.required.indexOf(prop.name)) {
-      if (resource  &&  !resource[prop.name]) {
-        resource[prop.name] = this.props.country
+      // Don't overwrite default country on provider
+      if (this.props.country)
         noChooser = true
-      }
+      if (resource  &&  !resource[prop.name])
+        resource[prop.name] = this.props.country
     }
     if (resource && resource[params.prop]) {
       if (isPhoto) {
@@ -1313,9 +1314,9 @@ var NewResourceMixin = {
     let iconColor = this.state.isRegistration ? '#eeeeee' : LINK_COLOR
     let icon
     if (isVideo)
-      icon = <Icon name='ios-play-outline' size={25}  color={LINK_COLOR} />
+      icon = <Icon name='ios-play-outline' size={35}  color={LINK_COLOR} />
     else if (isPhoto)
-      icon = <Icon name='ios-camera-outline' size={25}  color={LINK_COLOR} style={styles.photoIcon}/>
+      icon = <Icon name='ios-camera-outline' size={35}  color={LINK_COLOR} style={styles.photoIcon}/>
     else if (!noChooser)
       icon = <Icon name='ios-arrow-down'  size={15}  color={iconColor}  style={[styles.icon1, styles.customIcon]} />
 
@@ -1874,7 +1875,7 @@ var styles= StyleSheet.create({
   photoIcon: {
     position: 'absolute',
     right: 5,
-    marginTop: 10
+    marginTop: 5
   },
   customIcon: {
     position: 'absolute',

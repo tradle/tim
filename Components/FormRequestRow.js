@@ -602,7 +602,7 @@ class FormRequestRow extends Component {
     else {
       let notLink = resource.documentCreated  ||  isReadOnly  ||  form.subClassOf === MY_PRODUCT
 
-      const { bankStyle } = this.props
+      const bankStyle = this.props.bankStyle
       icon = <View style={{position: 'absolute', bottom: 0, right: 0}}>
                <Icon  name={'ios-arrow-forward'} style={{marginTop: 2, marginRight: 2, color: isMyMessage ? bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}} size={20} />
              </View>

@@ -21,7 +21,6 @@ var rStyles = require('../styles/registrationStyles');
 var NewResourceMixin = require('./NewResourceMixin');
 var PageView = require('./PageView')
 var reactMixin = require('react-mixin');
-var BG_IMAGE = require('../img/bg.png')
 var equal = require('deep-equal')
 var constants = require('@tradle/constants');
 var termsAndConditions = require('../termsAndConditions.json')
@@ -66,7 +65,10 @@ import ActivityIndicator from './ActivityIndicator'
 import platformStyles from '../styles/platform'
 import { makeResponsive } from 'react-native-orient'
 import BackgroundImage from './BackgroundImage'
-var DropPage = utils.isWeb() && require('./DropPage')
+import ENV from '../utils/env'
+
+const BG_IMAGE = ENV.splashBackground
+const DropPage = utils.isWeb() && require('./DropPage')
 
 // DeviceHeight = Dimensions.get('window').height;
 // DeviceWidth = Dimensions.get('window').width

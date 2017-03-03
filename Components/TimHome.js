@@ -19,8 +19,7 @@ var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
 var constants = require('@tradle/constants');
 var debug = require('debug')('Tradle-Home')
-var BG_IMAGE = require('../img/bg.png')
-// var PasswordCheck = require('./PasswordCheck')
+var PasswordCheck = require('./PasswordCheck')
 var FadeInView = require('./FadeInView')
 var TouchIDOptIn = require('./TouchIDOptIn')
 var defaultBankStyle = require('../styles/bankStyle.json')
@@ -48,6 +47,7 @@ import BackgroundImage from './BackgroundImage'
 import Navs from '../utils/navs'
 import ENV from '../utils/env'
 
+const BG_IMAGE = ENV.splashBackground
 const PASSWORD_ITEM_KEY = 'app-password'
 const SUBMIT_LOG_TEXT = {
   submit: translate('submitLog'),
@@ -520,7 +520,7 @@ class TimHome extends Component {
       title: provider.name,
       component: c.component,
       id: c.id,
-      backButtonTitle: 'Back',
+      backButtonTitle: __DEV__ ? 'Back' : null,
       passProps: {
         bankStyle: style,
         resource: provider
@@ -746,19 +746,20 @@ class TimHome extends Component {
     var {width, height} = utils.dimensions(TimHome)
     var h = height > 800 ? height - 220 : height - 180
 
-    if (this.state.isLoading)
+    if (!__DEV__ && ENV.landingPage) {
+      return this.getBareSplashScreen()
+    }
+
+    if (this.state.isLoading) {
       return this.getSplashScreen(h)
+    }
 
     var err = this.state.err || '';
     var errStyle = err ? styles.err : {'padding': 0, 'height': 0};
     var me = utils.getMe()
     var settings = <View/>
 
-    var version = !__DEV__ &&
-              <View>
-                <Text style={styles.version}>git: {commitHash}</Text>
-              </View>
-
+    var version = !__DEV__ && this.renderVersion()
     var dev = __DEV__
             ? <View style={styles.dev}>
                 <TouchableOpacity
@@ -824,6 +825,14 @@ class TimHome extends Component {
     );
   }
 
+  renderVersion() {
+    return (
+      <View>
+        <Text style={styles.version}>git: {commitHash}</Text>
+      </View>
+    )
+  }
+
   getUpdateIndicator() {
     if (!this.state.downloadingUpdate) return
 
@@ -884,7 +893,16 @@ class TimHome extends Component {
     )
   }
 
+  getBareSplashScreen() {
+    return (
+      <TouchableOpacity style={styles.container}>
+        <BackgroundImage source={BG_IMAGE} />
+      </TouchableOpacity>
+    )
+  }
+
   getSplashScreen() {
+    const version = __DEV__ && this.renderVersion()
     var {width, height} = utils.dimensions(TimHome)
     var updateIndicator = this.getUpdateIndicator()
     var submitLogButton = this.getSubmitLogButton()
@@ -906,6 +924,7 @@ class TimHome extends Component {
             </View>
           </View>
         </View>
+        {version}
       </View>
     )
 

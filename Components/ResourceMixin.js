@@ -19,7 +19,15 @@ var NOT_SPECIFIED = '[not specified]'
 var TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
 const ENUM = 'tradle.Enum'
 var tada = []
-
+var skip
+const skipLabelsInJSON = {
+  'tradle.PhotoID': {
+    'address': ['full']
+  }
+}
+const hideGroupInJSON = {
+  'tradle.PhotoID': ['address']
+}
 import {
   Text,
   View,
@@ -242,10 +250,13 @@ var ResourceMixin = {
     }
     return val
   },
-  showJson(prop, json, isView, jsonRows) {
+  showJson(prop, json, isView, jsonRows, skipLabels) {
     // let json = JSON.parse(jsonStr)
     // let jsonRows = []
-    let showCollapsed = ENV.showCollapsed  &&  ENV.showCollapsed[this.props.resource[constants.TYPE]]
+    let rType = this.props.resource[constants.TYPE]
+    let hideGroup = prop  &&  hideGroupInJSON[rType]
+    let showCollapsed = ENV.showCollapsed  &&  ENV.showCollapsed[rType]
+    skipLabels = !skipLabels  &&  prop  &&  skipLabelsInJSON[rType]  &&  skipLabelsInJSON[rType][prop]
     if (prop) {
       var backlinksBg = {backgroundColor: '#96B9FA', paddingHorizontal: 10, marginHorizontal: isView ? 0 : -10}
       jsonRows.push(<View style={backlinksBg} key={this.getNextKey()}>
@@ -257,11 +268,13 @@ var ResourceMixin = {
     for (let p in json) {
       // if (p === 'document_numbers' || p === 'breakdown' || p === 'properties')
       //   continue
+      if (prop  &&  hideGroup  &&  hideGroup.indexOf(p) !== -1)
+        continue
       if (typeof json[p] === 'object') {
         if (utils.isEmpty(json[p]))
           continue
         if (Array.isArray(json[p])) {
-          json[p].forEach((js) => this.showJson(null, js, isView, jsonRows))
+          json[p].forEach((js) => this.showJson(null, js, isView, jsonRows, skipLabels))
           continue
         }
         let arr, arrow
@@ -273,21 +286,23 @@ var ResourceMixin = {
         else
           arr = jsonRows
         arr.push(<View style={{paddingVertical: 10, paddingHorizontal: isView ? 10 : 0}} key={this.getNextKey()}>
-                        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                          <Text style={styles.bigTitle}>{utils.makeLabel(p)}</Text>
-                          {arrow}
-                        </View>
-                        <View style={{height: 1, marginTop: 5, marginBottom: 10, marginHorizontal: -10, alignSelf: 'stretch', backgroundColor: LINK_COLOR}} />
-                      </View>)
+                    <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                      <Text style={styles.bigTitle}>{utils.makeLabel(p)}</Text>
+                      {arrow}
+                    </View>
+                    <View style={{height: 1, marginTop: 5, marginBottom: 10, marginHorizontal: -10, alignSelf: 'stretch', backgroundColor: LINK_COLOR}} />
+                  </View>)
 // tada.push("<View style={{paddingVertical: 10, paddingHorizontal: isView ? 10 : 0}} key={this.getNextKey()}><Text style={styles.bigTitle}>{" + utils.makeLabel(p) + "}</Text></View>")
-        this.showJson(null, json[p], isView, arr)
+        this.showJson(null, json[p], isView, arr, skipLabels)
         continue
       }
-
+      let label
+      if (!skipLabels  ||  skipLabels.indexOf(p) === -1)
+        label = <Text style={[styles.title, {flex: 1}]}>{utils.makeLabel(p)}</Text>
       jsonRows.push(<View style={{flexDirection: 'row', paddingHorizontal: isView ? 10 : 0}} key={this.getNextKey()}>
-                     <Text style={[styles.title, {flex: 1}]}>{utils.makeLabel(p)}</Text>
-                     <Text style={[styles.title, {flex: 1, color: '#2e3b4e'}]}>{json[p]}</Text>
-                  </View>)
+                      {label}
+                      <Text style={[styles.title, {flex: 1, color: '#2e3b4e'}]}>{json[p]}</Text>
+                    </View>)
 // tada.push("<View style={{flexDirection: 'row', paddingHorizontal: isView ? 10 : 0}} key={this.getNextKey()}><Text style={[styles.title, {flex: 1}]}>{" + utils.makeLabel(p) + "}</Text><Text style={[styles.title, {flex: 1, color: '#2e3b4e'}]}>{" + json[p] + "}</Text></View>")
     }
     if (!prop)

@@ -122,10 +122,12 @@ debug.getColor = function (line) {
 
 debug.stripColors = function (line) {
   return line
-    .filter(str => {
-      return typeof str !== 'string' || str.indexOf('color:') !== 0
+    .filter(part => {
+      if (part == null) return
+
+      return typeof part !== 'string' || part.indexOf('color:') !== 0
     })
-    .map(line => line.replace ? line.replace(/\%c/g, '') : line)
+    .map(part => typeof part === 'string' ? part.replace(/\%c/g, '') : part)
 }
 
 function getNow () {

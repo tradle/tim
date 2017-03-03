@@ -170,6 +170,7 @@ const AUTHENTICATION_TIMEOUT = LocalAuth.TIMEOUT
 
 var models = {};
 var list = {};
+var enums = {}
 var chatMessages = {}
 var temporaryResources = {}
 var employees = {};
@@ -291,8 +292,8 @@ var Store = Reflux.createStore({
     this.addModels()
     this.loadModels()
     utils.setModels(models);
-    // this.loadStaticData = once(this.loadStaticData.bind(this))
     this.loadStaticData()
+
     // if (true) {
     if (false) {
       return this.ready = this.wipe()
@@ -4139,9 +4140,11 @@ var Store = Reflux.createStore({
 
     var foundResources = {};
     var modelName = params.modelName;
+    var meta = this.getModel(modelName).value;
+    if (meta.subClassOf === ENUM)
+      return this.getEnum(params)
     var to = params.to;
     var notVerified = params.notVerified
-    var meta = this.getModel(modelName).value;
     var props = meta.properties;
     var containerProp, resourceId;
 
@@ -4224,17 +4227,18 @@ var Store = Reflux.createStore({
         foundResources[key] = r
         continue;
       }
-      var combinedValue = '';
-      for (var rr in props) {
-        if (rr.charAt(0) === '_')
-          continue
-        if (r[rr] instanceof Array)
-          continue;
-        combinedValue += combinedValue ? ' ' + r[rr] : r[rr];
-      }
-      if (!combinedValue  ||  (combinedValue  &&  (!query || combinedValue.toLowerCase().indexOf(query.toLowerCase()) != -1))) {
+      var fr = this.checkCriteria(r, query)
+      // var combinedValue = '';
+      // for (var rr in props) {
+      //   if (rr.charAt(0) === '_')
+      //     continue
+      //   if (r[rr] instanceof Array)
+      //     continue;
+      //   combinedValue += combinedValue ? ' ' + r[rr] : r[rr];
+      // }
+      // if (!combinedValue  ||  (combinedValue  &&  (!query || combinedValue.toLowerCase().indexOf(query.toLowerCase()) != -1))) {
+      if (fr)
         foundResources[key] = r
-      }
     }
     // Don't show current 'me' contact in contact list or my identities list
     if (!containerProp  &&  me  &&  isIdentity) {
@@ -4333,6 +4337,31 @@ var Store = Reflux.createStore({
       .then(() => {
         return this.searchMessages(params)
       })
+  },
+  getEnum(params) {
+    let result
+    let enumList = enums[params.modelName]
+    if (params.query)
+      return enumList.filter((r) => this.checkCriteria(r, params.query))
+    else
+      return enumList
+  },
+  checkCriteria(r, query) {
+    if (!query)
+      return r
+    let props = utils.getModel(r[TYPE]).value.properties
+    var combinedValue = '';
+    for (var rr in props) {
+      if (rr.charAt(0) === '_'  ||   Array.isArray(r[rr]))
+        continue;
+      combinedValue += combinedValue ? ' ' + r[rr] : r[rr];
+    }
+    if (!combinedValue)
+      return r
+
+    if (combinedValue.toLowerCase().indexOf(query.toLowerCase()) !== -1)
+      return r
+    return
   },
   _searchMessages(params) {
     return this._loadedResourcesDefer.promise
@@ -4642,19 +4671,22 @@ var Store = Reflux.createStore({
       }
       let isVerificationR = r[TYPE] === VERIFICATION
       let checkVal = isVerificationR ? self._getItem(r.document) : r
-      let checkProps = self.getModel(checkVal[TYPE]).value.properties
-      var combinedValue = '';
-      for (var rr in checkProps) {
-        if (!checkVal[rr])
-          continue
-        if (checkVal[rr] instanceof Array)
-         continue;
-        let val = (checkProps[rr].type === 'object') ? checkVal[rr].title || '' : checkVal[rr]
-        if (!val)
-          continue
-        combinedValue += combinedValue ? ' ' + val : val
-      }
-      if (!combinedValue  ||  (combinedValue  &&  (!query || combinedValue.toLowerCase().indexOf(query.toLowerCase()) !== -1))) {
+      let fr = this.checkCriteria(r, query)
+
+      // let checkProps = self.getModel(checkVal[TYPE]).value.properties
+      // var combinedValue = '';
+      // for (var rr in checkProps) {
+      //   if (!checkVal[rr])
+      //     continue
+      //   if (checkVal[rr] instanceof Array)
+      //    continue;
+      //   let val = (checkProps[rr].type === 'object') ? checkVal[rr].title || '' : checkVal[rr]
+      //   if (!val)
+      //     continue
+      //   combinedValue += combinedValue ? ' ' + val : val
+      // }
+      // if (!combinedValue  ||  (combinedValue  &&  (!query || combinedValue.toLowerCase().indexOf(query.toLowerCase()) !== -1))) {
+      if (fr) {
         // foundResources[key] = this.fillMessage(r);
         if (!filterOutForms  ||  !doFilterOut(r, chatId, i)) {
           foundResources.push(self.fillMessage(r))
@@ -7836,9 +7868,17 @@ var Store = Reflux.createStore({
       r[ROOT_HASH] = sha(r)
 
     r[CUR_HASH] = r[ROOT_HASH]
+    let type = r[TYPE]
+    let enumList = enums[type]
+    if (!enumList) {
+      enumList = []
+      enums[type] = enumList
+    }
+
+    if (enumList.filter((e) => e[ROOT_HASH] === r[ROOT_HASH]).length)
+      return
+    enumList.push(r)
     let id = utils.getId(r)
-    if (!list[id])
-      this._setItem(id, r)
     if (saveInDB)
       batch.push({type: 'put', key: id, value: r})
   },

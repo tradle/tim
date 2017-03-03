@@ -310,18 +310,50 @@ class ShowPropertiesView extends Component {
              );
     });
     if (resource.txId) {
-      viewCols.push(<View key={this.getNextKey()}>
-                     <View style={styles.separator}></View>
-                     <View style={[styles.textContainer, {padding: 10}]}>
-                       <Text style={styles.title}>{translate('irrefutableProofs')}</Text>
-                       <TouchableOpacity onPress={this.onPress.bind(this, 'https://tbtc.blockr.io/tx/info/' + resource.txId)}>
-                         <Text style={[styles.description, {color: '#7AAAC3'}]}>{translate('independentBlockchainViewer') + ' 1'}</Text>
-                       </TouchableOpacity>
-                       <TouchableOpacity onPress={this.onPress.bind(this, 'https://test-insight.bitpay.com/tx/' + resource.txId)}>
-                         <Text style={[styles.description, {color: '#7AAAC3'}]}>{translate('independentBlockchainViewer') + ' 2'}</Text>
-                       </TouchableOpacity>
+      let bankStyle = this.props.bankStyle
+      let header = (<View style={{paddingVertical: 10, paddingHorizontal: 10 }} key={this.getNextKey()}>
+                      <View style={[styles.textContainer, {flexDirection: 'row', justifyContent: 'space-between'}]}>
+                        <Text style={styles.bigTitle}>{translate('dataSecurity')}</Text>
+                        <Icon color={bankStyle.LINK_COLOR} size={20} name={'ios-arrow-down'} style={{marginRight: 10, marginTop: 7}}/>
                       </View>
+                      <View style={{height: 1, marginTop: 5, marginBottom: 10, marginHorizontal: -10, alignSelf: 'stretch', backgroundColor: bankStyle.LINK_COLOR}} />
                     </View>)
+      let description = 'This app uses blockchain technology to ensure you can always prove the contents of your data and whom you shared it with.'
+      let content = <View style={{paddingHorizontal: 10}}>
+                     <TouchableOpacity onPress={this.onPress.bind(this, 'http://thefinanser.com/2016/03/the-best-blockchain-white-papers-march-2016-part-2.html/')}>
+                       <Text style={{color: '#9b9b9b', fontSize: 16, marginHorizontal: 7, paddingBottom: 10}}>{description}
+                         <Text style={{color: bankStyle.LINK_COLOR, paddingHorizontal: 7}}> Learn more</Text>
+                       </Text>
+                     </TouchableOpacity>
+                     <TouchableOpacity onPress={this.onPress.bind(this, 'https://tbtc.blockr.io/tx/info/' + resource.txId)}>
+                       <Text style={[styles.description, {color: bankStyle.LINK_COLOR}]}>{translate('independentBlockchainViewer') + ' 1'}</Text>
+                     </TouchableOpacity>
+                     <TouchableOpacity onPress={this.onPress.bind(this, 'https://test-insight.bitpay.com/tx/' + resource.txId)}>
+                       <Text style={[styles.description, {color: bankStyle.LINK_COLOR}]}>{translate('independentBlockchainViewer') + ' 2'}</Text>
+                     </TouchableOpacity>
+                    </View>
+
+      let row = <Accordion
+                  header={header}
+                  content={content}
+                  underlayColor='transparent'
+                  easing='easeInCirc' />
+      viewCols.push(
+          <View key={this.getNextKey()}>
+            {row}
+          </View>
+        )
+      // viewCols.push(<View key={this.getNextKey()}>
+      //                 <View style={[styles.textContainer, {padding: 10}]}>
+      //                  <Text style={styles.title}>{translate('dataSecurity')}</Text>
+      //                  <TouchableOpacity onPress={this.onPress.bind(this, 'https://tbtc.blockr.io/tx/info/' + resource.txId)}>
+      //                    <Text style={[styles.description, {color: '#7AAAC3'}]}>{translate('independentBlockchainViewer') + ' 1'}</Text>
+      //                  </TouchableOpacity>
+      //                  <TouchableOpacity onPress={this.onPress.bind(this, 'https://test-insight.bitpay.com/tx/' + resource.txId)}>
+      //                    <Text style={[styles.description, {color: '#7AAAC3'}]}>{translate('independentBlockchainViewer') + ' 2'}</Text>
+      //                  </TouchableOpacity>
+      //                 </View>
+      //               </View>)
     }
     return viewCols;
   }
@@ -357,14 +389,6 @@ var styles = StyleSheet.create({
     marginHorizontal: 7,
     color: '#9b9b9b'
   },
-  bigTitle: {
-    fontSize: 20,
-    // fontFamily: 'Avenir Next',
-    marginTop: 3,
-    marginBottom: 0,
-    marginHorizontal: 7,
-    color: '#7AAAC3'
-  },
   linkTitle: {
     color: '#2892C6'
   },
@@ -386,6 +410,14 @@ var styles = StyleSheet.create({
   iconView: {
     alignSelf: 'center',
     marginRight: 20
+  },
+  bigTitle: {
+    fontSize: 20,
+    // fontFamily: 'Avenir Next',
+    marginTop: 3,
+    marginBottom: 0,
+    marginHorizontal: 7,
+    color: '#7AAAC3'
   }
 });
 

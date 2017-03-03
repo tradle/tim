@@ -7,6 +7,7 @@ import {
 } from 'react-native'
 
 import BackgroundImage from './BackgroundImage'
+import ENV from '../utils/env'
 var TimerMixin = require('react-timer-mixin')
 var reactMixin = require('react-mixin')
 
@@ -14,7 +15,7 @@ var PasswordGesture = require('react-native-gesture-password')
 var utils = require('../utils/utils')
 var MIN_LENGTH = 5
 var Password1 = ''
-var BG_IMAGE = require('../img/bg.png')
+var BG_IMAGE = ENV.splashBackground
 var MODES = {
   check: 'check',
   set: 'set'
