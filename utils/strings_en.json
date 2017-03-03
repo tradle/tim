@@ -225,5 +225,7 @@
     "centerPassport": "Centre passport photo page in frame",
     "centerLicence": "Centre licence in frame",
     "centerID": "Centre ID in frame",
-    "dataSecurity": "Data Security"
+    "dataSecurity": "Data Security",
+    "onlyImagesSupported": "Please only drop image files",
+    "tryAgainWithImage": "The file you dropped is not an image! Please try again."
 }

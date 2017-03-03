@@ -40,7 +40,7 @@ class DropPage extends Component {
 
     return (
       <Dropzone
-        style={this.props.style}
+        {...this.props}
         onDragStart={() => this.onDragEvent('start')}
         onDragEnter={() => this.onDragEvent('enter')}
         onDragLeave={() => this.onDragEvent('leave')}
