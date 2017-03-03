@@ -1739,6 +1739,9 @@ var utils = {
         to: formRequest.from  // FormRequest.from
       }
     })
+  },
+  isSealable: function (model) {
+    return model.subClassOf === 'tradle.Form' || model.subClassOf === 'tradle.MyProduct' || model.id === 'tradle.Verification'
   }
 }
 
