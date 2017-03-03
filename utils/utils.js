@@ -1642,7 +1642,7 @@ var utils = {
       ]
     )
   },
-  isSealable: function (model) {
+  isSealableModel: function (model) {
     return model.subClassOf === 'tradle.Form' || model.subClassOf === 'tradle.MyProduct' || model.id === 'tradle.Verification'
   }
 }
