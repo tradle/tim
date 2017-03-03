@@ -290,7 +290,7 @@ class MessageRow extends Component {
         photoStyle = chatStyles.image;
     }
 
-    var viewStyle = { margin:1, backgroundColor: '#f7f7f7' }
+    var viewStyle = { margin:1, backgroundColor: '#f7f7f7', whiteSpace: 'pre-wrap' }
     var model = utils.getModel(this.props.resource[constants.TYPE]).value;
     var isLicense = model.id.indexOf('License') !== -1  ||  model.id.indexOf('Passport') !== -1;
     var photoStyle = (isLicense  &&  len === 1) ? chatStyles.bigImage : photoStyle;

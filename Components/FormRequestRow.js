@@ -154,7 +154,7 @@ class FormRequestRow extends Component {
     let addStyle = message.length < 30
                  ? [chatStyles.verificationBody, mstyle]
                  : [chatStyles.verificationBody, {flex: 1}, mstyle]
-    var mainStyle = { margin:1, backgroundColor: '#ffffff' }
+    var mainStyle = { margin:1, backgroundColor: '#ffffff', whiteSpace: 'pre-wrap' }
     var shareables = !isFormRequest  || resource.documentCreated
                    ? null
                    : this.showShareableResources(rowStyle, mainStyle, viewStyle.width);
