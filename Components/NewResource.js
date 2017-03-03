@@ -901,6 +901,16 @@ class NewResource extends Component {
   onDropFiles({ prop, files }) {
     // 1. figure out which prop
     // 2. run utils.readImage
+    let propName = prop.name
+    let resource = this.props.resource
+    utils.readImage(files[0], (a, img) => {
+      resource[propName] = img
+
+      if (!this.floatingProps)
+        this.floatingProps = {}
+      this.floatingProps[propName] = resource[propName]
+      this.setState({resource: resource})
+    })
     debugger
   }
   showTermsAndConditions() {
