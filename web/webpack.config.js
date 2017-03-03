@@ -25,9 +25,19 @@ var isProd = NODE_ENV === 'production';
 var isHot = !isProd && process.env.HOT === '1'
 var projectRoot = path.join(__dirname, '../')
 var screwIE = !process.env.IE
-var envFile = process.env.PROVIDERS
+const { PROVIDERS } = process.env
+const envFile = PROVIDERS
   ? path.join(__dirname, '../env', process.env.PROVIDERS + '.json')
   : path.join(__dirname, '../environment.json')
+
+let templateFile = (function () {
+  let special = path.join(__dirname, `index-template-${PROVIDERS}.html`)
+  if (fs.existsSync(special)) {
+    return special
+  }
+
+  return 'index-template.html'
+}())
 
 // var paths = {
 //   src: path.join(ROOT_PATH, '.'),
@@ -176,7 +186,7 @@ if (NODE_ENV === 'development') {
       // }),
       new HtmlPlugin({
         title: 'Tradle',
-        template: path.join(__dirname, 'index-template.html')
+        template: templateFile
       })
       // new HtmlPlugin()
     ],
@@ -230,7 +240,7 @@ if (NODE_ENV === 'development') {
       }),
       // new webpack.optimize.AggressiveMergingPlugin(),
       new HtmlPlugin({
-        template: path.join(__dirname, 'index-template.html'),
+        template: templateFile,
         filename: 'index.html',
         // hash: true,
         title: 'Tradle'
