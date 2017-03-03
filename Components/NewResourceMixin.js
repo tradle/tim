@@ -1255,6 +1255,16 @@ var NewResourceMixin = {
       if (resource  &&  !resource[prop.name])
         resource[prop.name] = this.props.country
     }
+    else if (this.props.defaultPropertyValues)  {
+      let defaults = this.props.defaultPropertyValues
+      if (this.props.model) {
+        let vals = defaults[this.props.model.id]
+        for (let v in vals) {
+          if (!resource[v])
+            resource[v] = vals[v]
+        }
+      }
+    }
     if (resource && resource[params.prop]) {
       if (isPhoto) {
         label = prop.title

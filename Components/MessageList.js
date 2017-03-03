@@ -421,6 +421,7 @@ class MessageList extends Component {
       sendStatus: sendStatus,
       currency: this.props.resource.currency || this.props.currency,
       country: this.props.resource.country,
+      defaultPropertyValues: this.props.resource._defaultPropertyValues,
       previousMessageTime: previousMessageTime,
     }
 
@@ -601,9 +602,9 @@ class MessageList extends Component {
     let me = utils.getMe()
     let actionSheet = this.renderActionSheet()
     let context = this.state.context
-    let network
-    if (this.props.originatingMessage)
-      network = <NetworkInfoProvider connected={this.state.isConnected} resource={resource} online={this.state.onlineStatus} />
+    // let network
+    // if (this.props.originatingMessage)
+    let network = <NetworkInfoProvider connected={this.state.isConnected} resource={resource} online={this.state.onlineStatus} />
     if (!context  &&  this.props.resource[TYPE] === PRODUCT_APPLICATION)
       context = this.props.resource
     let separator = {}
