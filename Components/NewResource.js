@@ -133,6 +133,7 @@ class NewResource extends Component {
            this.state.isLoadingVideo !== nextState.isLoadingVideo  ||
            this.state.keyboardSpace !== nextState.keyboardSpace    ||
            this.state.inFocus !== nextState.inFocus                ||
+           this.state.resource !== nextState.resource              ||
            // this.state.termsAccepted !== nextState.termsAccepted    ||
           !equal(this.state.resource, nextState.resource)
 
@@ -902,14 +903,16 @@ class NewResource extends Component {
     // 1. figure out which prop
     // 2. run utils.readImage
     let propName = prop.name
-    let resource = this.props.resource
+    let resource = this.state.resource
     utils.readImage(files[0], (a, img) => {
       resource[propName] = img
 
-      if (!this.floatingProps)
-        this.floatingProps = {}
-      this.floatingProps[propName] = resource[propName]
-      this.setState({resource: resource})
+      // if (!this.floatingProps)
+      //   this.floatingProps = {}
+      // this.floatingProps[propName] = resource[propName]
+      var r = {}
+      extend(r, resource)
+      this.setState({resource: r})
     })
     debugger
   }
