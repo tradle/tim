@@ -1712,7 +1712,7 @@ var Store = Reflux.createStore({
           if (props[p].ref  &&  utils.getModel(props[p].ref).value.subClassOf === ENUM) {
             let enumList = this.searchNotMessages({modelName: props[p].ref})
             let eprop = utils.getEnumProperty(utils.getModel(props[p].ref).value)
-            let val = enumList.filter((e3116Val) => eVal[eprop] === mObj[p])
+            let val = enumList.filter((eVal) => eVal[eprop] === mObj[p])
             if (val.length)
               mObj[p] = this.buildRef(val[0])
           }
