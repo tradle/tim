@@ -13,10 +13,12 @@ import ReactNative, {
 import AsyncStorage from './Storage'
 import * as LocalAuth from '../utils/localAuth'
 import Push from '../utils/push'
+
+const co = require('bluebird').coroutine
+
 var TimerMixin = require('react-timer-mixin')
 var reactMixin = require('react-mixin');
 
-var noop = () => {}
 var path = require('path')
 var Reflux = require('reflux');
 var Actions = require('../Actions/Actions');
@@ -715,7 +717,7 @@ var Store = Reflux.createStore({
     }
 
     // meDriver = timeFunctions(meDriver)
-    this.getInfo(SERVICE_PROVIDERS_BASE_URLS, true)
+    this.getInfo({serverUrls: SERVICE_PROVIDERS_BASE_URLS, retry: true})
     // .then(() => {
     //   if (me && utils.isEmpty(chatMessages))
     //     this.initChats()
@@ -922,10 +924,15 @@ var Store = Reflux.createStore({
     return newResult
     // return newResult.reverse()
   },
-  getInfo(serverUrls, retry, id, newServer) {
+  getInfo(params) {
+    let serverUrls = params.serverUrls
+    let retry = params.retry
+    let id = params.id
+    let newServer = params.newServer
+    let maxAttempts = params.maxAttempts
     debug('fetching provider info from', serverUrls)
     return Q.all(serverUrls.map(url => {
-      return this.getServiceProviders(url, retry, id, newServer)
+      return this.getServiceProviders({url: url, retry: retry, id: id, newServer: newServer})
         .then(results => {
           // var httpClient = driverInfo.httpClient
           var wsClients = driverInfo.wsClients
@@ -951,7 +958,7 @@ var Store = Reflux.createStore({
         })
         .catch(err => {
           // forgive individual errors for batch getInfo
-          if (id) throw err
+          if (id || maxAttempts > 0) throw err
         })
         .then(() => meDriver)
     }))
@@ -969,7 +976,7 @@ var Store = Reflux.createStore({
       // let serviceProvider =  SERVICE_PROVIDERS.filter((json) => json.url === serverUrl)
 
     var org = this._getItem(orgId)
-    let promise = serviceProvider ? Q() : this.getInfo([parts[0]])
+    let promise = serviceProvider ? Q() : this.getInfo({serverUrls: [parts[0]]})
 
     return promise
     .then(function() {
@@ -1429,7 +1436,11 @@ var Store = Reflux.createStore({
   },
 
   // Gets info about companies in this app, their bot representatives and their styles
-  getServiceProviders(url, retry, id, newServer) {
+  getServiceProviders(params) {
+    let url = params.url
+    let retry = params.retry
+    let id = params.id
+    let newServer = params.newServer
     var self = this
     // return Q.race([
     //   fetch(utils.joinURL(url, 'info'), { headers: { cache: 'no-cache' } }),
@@ -1687,7 +1698,22 @@ var Store = Reflux.createStore({
         org.currency = this.buildRef(currency[0])
       delete org._currency
     }
-
+    if (org._defaultPropertyValues) {
+      for (let m in org._defaultPropertyValues) {
+        let mm = utils.getModel(m).value
+        let props = mm.properties
+        let mObj = org._defaultPropertyValues[m]
+        for (let p in mObj) {
+          if (props[p].ref  &&  utils.getModel(props[p].ref).value.subClassOf === ENUM) {
+            let enumList = this.searchNotMessages({modelName: props[p].ref})
+            let eprop = utils.getEnumProperty(utils.getModel(props[p].ref).value)
+            let val = enumList.filter((eVal) => eVal[eprop] === mObj[p])
+            if (val.length)
+              mObj[p] = this.buildRef(val[0])
+          }
+        }
+      }
+    }
     if (config.greeting) {
       if (typeof config.greeting === 'string')
         org._greeting = config.greeting
@@ -3178,13 +3204,16 @@ var Store = Reflux.createStore({
         })
       }
       function save (returnVal, noTrigger) {
-        return self._putResourceInDB({
+        let r = {
           type: returnVal[TYPE],
           resource: returnVal,
           roothash: returnVal[ROOT_HASH],
           isRegistration: isRegistration,
           noTrigger: noTrigger
-        })
+        }
+        if (params.maxAttempts)
+          r.maxAttempts = params.maxAttempts
+        return self._putResourceInDB(r)
       }
 
     // })
@@ -3437,7 +3466,7 @@ var Store = Reflux.createStore({
     // let id = parts[parts.length - 1]
     // let url = parts.slice(0, parts.length - 1).join('/')
     const fullUrl = utils.joinURL(url, id)
-    return this.getInfo([url], false, id)
+    return this.getInfo({serverUrls: [url], retry: false, id: id})
     .then(() => {
       const newProvider = tradleUtils.find(SERVICE_PROVIDERS, r => r.id === id)
       if (!newProvider) {
@@ -3770,7 +3799,8 @@ var Store = Reflux.createStore({
     let providerBot = this._getItem(PROFILE + '_' + permalink)
     if (!providerBot) {
       await this.onAddItem({
-        resource: {[constants.TYPE]: constants.TYPES.SETTINGS, url: serverUrl}
+        resource: {[constants.TYPE]: constants.TYPES.SETTINGS, url: serverUrl},
+        maxAttempts: 5
       })
       providerBot = this._getItem(PROFILE + '_' + permalink)
     }
@@ -5385,7 +5415,7 @@ var Store = Reflux.createStore({
       return this.registration(value)
 
     if (value[TYPE] === SETTINGS)
-      return this.addSettings(value)
+      return this.addSettings(value, params.maxAttempts ? params.maxAttempts : -1)
 
     let meId = utils.getId(me)
 
@@ -5435,7 +5465,7 @@ var Store = Reflux.createStore({
               if (urls.indexOf(sp.url) === -1)
                 urls.push(sp.url)
             })
-            return this.getInfo(urls)
+            return this.getInfo({serverUrls: urls})
           }
         }
       }
@@ -5589,7 +5619,7 @@ var Store = Reflux.createStore({
       err = err;
     });
   },
-  addSettings(value) {
+  addSettings: co(function* addSettings (value, maxAttempts) {
     var self = this
     var v = value.url
     if (v.charAt(v.length - 1) === '/')
@@ -5614,39 +5644,57 @@ var Store = Reflux.createStore({
           oneProvider = true
       }
     }
-    return this.getInfo([v], true, value.id ? value.id : null, true)
-    .then(function(json) {
-      if (allProviders)
-        return
-      if (settings) {
-        if (settings.urls.indexOf(v) === -1)
-          self._mergeItem(key, { urls: [...settings.urls, v] })
-        // Save the fact that only some providers are needed from this server
-        if (value.id) {
-          var urlToId = settings.urlToId
-          if (!urlToId[v])
-            urlToId[v] = [value.id]
-          else if (urlToId[v].indexOf(value.id) === -1)
-            urlToId[v].push(value.id)
-          else
+    let gotInfo
+    if (maxAttempts !== -1) {
+      let attempts = 0
+  //     let waitTime = 1000
+  //     let maxWait = 60000
+      while (true) {
+        try {
+          yield this.getInfo({serverUrls: [v], retry: false, id: value.id ? value.id : null, newServer: true, maxAttempts: maxAttempts})
+          gotInfo = true
+          break;
+        }
+        catch (err) {
+          if (attempts === maxAttempts) {
+            this.trigger({action: 'noAccessToServer'})
             return
-
-          self._mergeItem(key, { urlToId: urlToId })
+          }
+          attempts++
         }
       }
-      else {
-        value.urls = SERVICE_PROVIDERS_BASE_URL_DEFAULTS.concat(v)
-        self._setItem(key, value)
+    }
+    if (!gotInfo)
+      try {
+        yield this.getInfo({serverUrls: [v], retry: true, id: value.id ? value.id : null, newServer: true})
+      } catch (err) {
+        self.trigger({action: 'addItem', error: err.message, resource: value})
       }
-    })
-    .then(function() {
-      self.trigger({action: 'addItem', resource: value})
-      return self.dbPut(key, self._getItem(key))
-    })
-    .catch((err) => {
-      self.trigger({action: 'addItem', error: err.message, resource: value})
-    })
-  },
+    if (allProviders)
+      return
+    if (settings) {
+      if (settings.urls.indexOf(v) === -1)
+        self._mergeItem(key, { urls: [...settings.urls, v] })
+      // Save the fact that only some providers are needed from this server
+      if (value.id) {
+        var urlToId = settings.urlToId
+        if (!urlToId[v])
+          urlToId[v] = [value.id]
+        else if (urlToId[v].indexOf(value.id) === -1)
+          urlToId[v].push(value.id)
+        else
+          return
+
+        self._mergeItem(key, { urlToId: urlToId })
+      }
+    }
+    else {
+      value.urls = SERVICE_PROVIDERS_BASE_URL_DEFAULTS.concat(v)
+      self._setItem(key, value)
+    }
+    self.trigger({action: 'addItem', resource: value})
+    return self.dbPut(key, self._getItem(key))
+  }),
   forgetAndReset() {
     var orgs = this.searchNotMessages({modelName: ORGANIZATION})
     var togo = orgs.length
