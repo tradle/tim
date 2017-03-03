@@ -1298,9 +1298,9 @@ var NewResourceMixin = {
     let iconColor = this.state.isRegistration ? '#eeeeee' : LINK_COLOR
     let icon
     if (isVideo)
-      icon = <Icon name='ios-play-outline' size={25}  color={LINK_COLOR} />
+      icon = <Icon name='ios-play-outline' size={35}  color={LINK_COLOR} />
     else if (isPhoto)
-      icon = <Icon name='ios-camera-outline' size={25}  color={LINK_COLOR} style={styles.photoIcon}/>
+      icon = <Icon name='ios-camera-outline' size={35}  color={LINK_COLOR} style={styles.photoIcon}/>
     else if (!noChooser)
       icon = <Icon name='ios-arrow-down'  size={15}  color={iconColor}  style={[styles.icon1, styles.customIcon]} />
 
@@ -1849,7 +1849,7 @@ var styles= StyleSheet.create({
   photoIcon: {
     position: 'absolute',
     right: 5,
-    marginTop: 10
+    marginTop: 5
   },
   customIcon: {
     position: 'absolute',
