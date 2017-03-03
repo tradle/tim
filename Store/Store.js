@@ -1712,7 +1712,7 @@ var Store = Reflux.createStore({
           if (props[p].ref  &&  utils.getModel(props[p].ref).value.subClassOf === ENUM) {
             let enumList = this.searchNotMessages({modelName: props[p].ref})
             let eprop = utils.getEnumProperty(utils.getModel(props[p].ref).value)
-            let val = enumList.filter((eVal) => eVal[eprop] === mObj[p])
+            let val = enumList.filter((e3116Val) => eVal[eprop] === mObj[p])
             if (val.length)
               mObj[p] = this.buildRef(val[0])
           }
@@ -3112,8 +3112,11 @@ var Store = Reflux.createStore({
           delete toChain[p]
 
         if (!isNew) {
-          // returnVal[PREV_HASH] = returnVal[CUR_HASH] || returnVal[ROOT_HASH]
-          toChain[PREV_HASH] = returnVal[PREV_HASH]
+          toChain[PREV_HASH] = returnVal[CUR_HASH]
+          let properties = utils.getModel(returnVal[TYPE]).value.properties
+          for (let p in toChain)
+            if (!properties[p]  && p !== TYPE && p !== ROOT_HASH && p !== PREV_HASH)
+              delete toChain[p]
         }
 
         // toChain.time = returnVal.time
