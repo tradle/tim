@@ -36,7 +36,7 @@ let templateFile = (function () {
     return special
   }
 
-  return 'index-template.html'
+  return path.join(__dirname, 'index-template.html')
 }())
 
 // var paths = {
