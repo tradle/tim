@@ -1111,7 +1111,7 @@ var NewResourceMixin = {
 
     if (!value)
       value = translate(params.prop)
-    let st = utils.isWeb() ? { borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderBottomColor: '#cccccc'} : {}
+    let st = utils.isWeb() ? {marginHorizontal: 10, borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderBottomColor: '#cccccc'} : {}
     return (
       <View>
         <View key={this.getNextKey()} ref={prop.name} style={[st, {paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10}]}>
@@ -1791,8 +1791,8 @@ var styles= StyleSheet.create({
   },
   datePicker: {
     // width: dimensions.width - 30,
-    marginLeft: utils.isWeb() ? 0 : 10,
-    paddingLeft: utils.isWeb() ? 0 : 10,
+    marginLeft: 10,
+    paddingLeft: 10,
     justifyContent: 'flex-start',
     borderColor: '#f7f7f7',
     alignSelf: 'stretch'
