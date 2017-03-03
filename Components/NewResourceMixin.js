@@ -1791,7 +1791,7 @@ var styles= StyleSheet.create({
   },
   datePicker: {
     // width: dimensions.width - 30,
-    marginLeft: utils.isWeb() ? 0 : 10,
+    marginLeft: 10,
     paddingLeft: utils.isWeb() ? 0 : 10,
     justifyContent: 'flex-start',
     borderColor: '#f7f7f7',
