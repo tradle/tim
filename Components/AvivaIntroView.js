@@ -109,7 +109,7 @@ class AvivaIntroView extends Component {
     let footer = <TouchableOpacity onPress={()=>{this.showChat(this.props.resource)}}>
                    <View style={styles.start}>
                      <View style={{backgroundColor: 'transparent', justifyContent: 'center'}}>
-                       <Text style={{fontSize: 24, color: '#ffffff'}}>Tap to get started</Text>
+                       <Text style={{fontSize: 24, color: '#ffffff'}}>Click anywhere to get started</Text>
                      </View>
                    </View>
                  </TouchableOpacity>
