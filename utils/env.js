@@ -17,7 +17,12 @@ const LOCAL_IP = (function () {
   return require('./localIP')
 })()
 
-module.exports = extend({
+const splash = {
+  tradle: require('../img/bg.png'),
+  aviva: require('../img/Aviva.png')
+}
+
+const merged = extend({
   GCM_SENDER_ID: '633104277721',
   serviceID: 'tradle',
   accessGroup: '94V7783F74.io.tradle.dev',
@@ -63,5 +68,9 @@ module.exports = extend({
   blinkIDScanTimeoutExternal: 30000,
   registerForPushNotifications: true,
   hideVerificationsInChat: false,
-  hideProductApplicationInChat: false
+  hideProductApplicationInChat: false,
+  splashBackground: 'tradle'
 }, environment)
+
+merged.splashBackground = splash[merged.splashBackground]
+exports = module.exports = merged

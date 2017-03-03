@@ -20,7 +20,6 @@ var Icon = require('react-native-vector-icons/Ionicons');
 var rStyles = require('../styles/registrationStyles');
 var NewResourceMixin = require('./NewResourceMixin');
 var reactMixin = require('react-mixin');
-var BG_IMAGE = require('../img/bg.png')
 var equal = require('deep-equal')
 var constants = require('@tradle/constants');
 var termsAndConditions = require('../termsAndConditions.json')
@@ -62,6 +61,9 @@ import ActivityIndicator from './ActivityIndicator'
 import platformStyles from '../styles/platform'
 import { makeResponsive } from 'react-native-orient'
 import BackgroundImage from './BackgroundImage'
+import ENV from '../utils/env'
+
+const BG_IMAGE = ENV.splashBackground
 
 // DeviceHeight = Dimensions.get('window').height;
 // DeviceWidth = Dimensions.get('window').width
