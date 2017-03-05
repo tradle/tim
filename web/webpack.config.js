@@ -71,6 +71,12 @@ var common = {
       {
         test   : /\.(ttf|eot|svg|woff(2)?)(\?[a-z0-9-=&.]+)?$/,
         loader : 'file'
+      },
+      // react-infinite-calendar@1 depends on moment + moment-range
+      // whose AMD build is broken
+      {
+        test: /node_modules\/moment-range\/(dist|lib)\/moment-range(\.min)?\.js$/,
+        loader: 'imports?define=>false'
       }
     ]
   },
