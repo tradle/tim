@@ -852,20 +852,9 @@ class TimHome extends Component {
     return (
       <View style={styles.container}>
         <BackgroundImage source={BG_IMAGE} />
-        <TouchableOpacity style={styles.splashLayout} onPress={() => this._pressHandler()}>
-          <View style={{flexGrow:1}} />
-          { utils.getMe()
-            ? <TouchableOpacity style={[styles.thumbButton, {justifyContent: 'flex-end',  opacity: me ? 1 : 0}]}
-                  underlayColor='transparent' onPress={() => this._pressHandler()}>
-                <View style={styles.getStarted}>
-                   <Text style={styles.getStartedText}>Get started</Text>
-                </View>
-              </TouchableOpacity>
-            : regView
-          }
-          <Text style={errStyle}>{err}</Text>
+        <View style={styles.layout}>
           {dev}
-        </TouchableOpacity>
+        </View>
       </View>
     );
   }
