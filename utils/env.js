@@ -18,6 +18,11 @@ const LOCAL_IP = (function () {
 })()
 
 const splash = {
+  tradle: require('../img/splash1536x2048.png'),
+  aviva: require('../img/Aviva.png')
+}
+
+const brandBG = {
   tradle: require('../img/bg.png'),
   aviva: require('../img/Aviva.png')
 }
@@ -69,8 +74,11 @@ const merged = extend({
   registerForPushNotifications: true,
   hideVerificationsInChat: false,
   hideProductApplicationInChat: false,
-  splashBackground: 'tradle'
+  splashBackground: 'tradle',
+  brandBackground: 'tradle'
 }, environment)
 
 merged.splashBackground = splash[merged.splashBackground]
+merged.brandBackground = brandBG[merged.brandBackground]
+
 exports = module.exports = merged
