@@ -16,10 +16,7 @@ function evil_git_dirty {
 }
 
 DEV=false
-plistName="Info"
-if [ "$PRODUCT_NAME" == "Tradle-dev" ]; then
-  plistName="Dev"
-fi
+plistName="Aviva"
 
 # Xcode project file for React Native apps is located in ios/ subfolder
 

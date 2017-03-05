@@ -11,7 +11,7 @@ const releases = fs.readdirSync('./release/android')
 const releaseDir = releases.find(r => r.indexOf(gitHash) === 0)
 if (!releaseDir) throw new Error('release dir not found, run bundle.sh first')
 
-const pushLine = `code-push release tim-android ./release/android/${releaseDir}/ ${version} -d Production`
+const pushLine = `code-push release aviva-android ./release/android/${releaseDir}/ ${version} -d Production`
 console.log(`running: ${pushLine}`)
 
 if (process.argv.indexOf('--dry-run') === -1) {
