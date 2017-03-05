@@ -8,6 +8,7 @@ var webpack = require('webpack');
 // var HtmlPlugin = require('webpack-html-plugin');
 var HtmlPlugin = require('html-webpack-plugin');
 var HasteResolverPlugin = require('haste-resolver-webpack-plugin');
+var OptimizeJsPlugin = require('optimize-js-plugin')
 // var ManifestPlugin = require('webpack-manifest-plugin');
 // var ChunkManifestPlugin = require('chunk-manifest-webpack-plugin');
 // var InlineManifestWebpackPlugin = require('inline-manifest-webpack-plugin')
@@ -243,6 +244,9 @@ if (NODE_ENV === 'development') {
         },
         beautify: false,
         // comments: false
+      }),
+      new OptimizeJsPlugin({
+        sourceMap: true
       }),
       // new webpack.optimize.AggressiveMergingPlugin(),
       new HtmlPlugin({
