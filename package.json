@@ -97,6 +97,7 @@
     "react-dom": "15.3.2",
     "react-dropzone": "3.11.0",
     "react-file-input": "github:mvayngrib/react-file-input#472ef05",
+    "react-infinite-calendar": "1.2.2",
     "react-mixin": "~1.2.2",
     "react-native": "^0.33.1",
     "react-native-accordion": "github:mvayngrib/react-native-accordion#ad6ea87",
