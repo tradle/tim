@@ -31,8 +31,6 @@
 		730DDF171E664ADF0011080D /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 730DDF151E664ADF0011080D /* LaunchScreen.xib */; };
 		730DDF1C1E664D6C0011080D /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 730DDF1B1E664D6C0011080D /* Launch Screen.storyboard */; };
 		730DDF1D1E664D6C0011080D /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 730DDF1B1E664D6C0011080D /* Launch Screen.storyboard */; };
-		730DDF251E6652620011080D /* 1536x2048.png in Resources */ = {isa = PBXBuildFile; fileRef = 730DDF241E6652620011080D /* 1536x2048.png */; };
-		730DDF261E6652620011080D /* 1536x2048.png in Resources */ = {isa = PBXBuildFile; fileRef = 730DDF241E6652620011080D /* 1536x2048.png */; };
 		731F233E1C31BB6600C3B09D /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 731F233D1C31BB6600C3B09D /* libz.tbd */; };
 		732EA0C81C24AB99000EFAA6 /* libRNRandomBytes.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732EA0C41C24AB90000EFAA6 /* libRNRandomBytes.a */; };
 		733D940C1E60B579009E594D /* Aviva.plist in Resources */ = {isa = PBXBuildFile; fileRef = 733D940B1E60B579009E594D /* Aviva.plist */; };
@@ -382,7 +380,6 @@
 		73030AF11D14DC4B0096A864 /* RNFS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNFS.xcodeproj; path = "../node_modules/react-native-fs/RNFS.xcodeproj"; sourceTree = "<group>"; };
 		730DDF161E664ADF0011080D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Tradle/Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		730DDF1B1E664D6C0011080D /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = "Launch Screen.storyboard"; path = "Tradle/Launch Screen.storyboard"; sourceTree = "<group>"; };
-		730DDF241E6652620011080D /* 1536x2048.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = 1536x2048.png; path = ../img/1536x2048.png; sourceTree = "<group>"; };
 		731045901D7CE25D0087E82D /* Tradle-dev.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Tradle-dev.entitlements"; sourceTree = "<group>"; };
 		731F233D1C31BB6600C3B09D /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		732AB4AD1D18B45600F2DE1C /* CodePush.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = CodePush.xcodeproj; path = "../node_modules/react-native-code-push/ios/CodePush.xcodeproj"; sourceTree = "<group>"; };
@@ -616,7 +613,6 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				13B07FB71A68108700A75B9A /* main.m */,
 				73EBA9111E689CA30061A189 /* Aviva.png */,
-				730DDF241E6652620011080D /* 1536x2048.png */,
 				730DDF1B1E664D6C0011080D /* Launch Screen.storyboard */,
 			);
 			name = Tradle;
@@ -1413,7 +1409,6 @@
 				733D940C1E60B579009E594D /* Aviva.plist in Resources */,
 				9B41626D1C6F9BBD00A93B7C /* FontAwesome.ttf in Resources */,
 				739F73091C3F74AE00D9F2FB /* environment.json in Resources */,
-				730DDF251E6652620011080D /* 1536x2048.png in Resources */,
 				730DDF1C1E664D6C0011080D /* Launch Screen.storyboard in Resources */,
 				7385C6BB1C4C24A700B92CDA /* Dev.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
@@ -1440,7 +1435,6 @@
 				73967E7D1E639DDC00AD5854 /* Images.xcassets in Resources */,
 				73967E7E1E639DDC00AD5854 /* Ionicons.ttf in Resources */,
 				730DDF1D1E664D6C0011080D /* Launch Screen.storyboard in Resources */,
-				730DDF261E6652620011080D /* 1536x2048.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
