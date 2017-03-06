@@ -1332,7 +1332,7 @@ var NewResourceMixin = {
       if (utils.isWeb()) {
         useImageInput = isScan || !ENV.canUseWebcam
       } else {
-        useImageInput = !isScan
+        useImageInput = !isScan || !BlinkID
       }
 
       if (useImageInput) {
