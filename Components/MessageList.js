@@ -695,6 +695,15 @@ class MessageList extends Component {
         callback: () => this.forgetMe()
       })
       cancelIndex++
+
+      if (this.state.hasProducts) {
+        buttons.push({
+          index: cancelIndex,
+          title: translate('applyForProduct'),
+          callback: () => this.onChooseProduct()
+        })
+        cancelIndex++
+      }
     }
     else
       return
