@@ -289,7 +289,7 @@ var ResourceMixin = {
                       <Text style={styles.bigTitle}>{utils.makeLabel(p)}</Text>
                       {arrow}
                     </View>
-                    <View style={{height: 1, marginTop: 5, marginBottom: 10, marginHorizontal: -10, alignSelf: 'stretch', backgroundColor: LINK_COLOR}} />
+                    <View style={{height: 1, marginTop: 5, marginBottom: 10, marginHorizontal: -10, alignSelf: 'stretch', backgroundColor: '#eeeeee'}} />
                   </View>)
 // tada.push("<View style={{paddingVertical: 10, paddingHorizontal: isView ? 10 : 0}} key={this.getNextKey()}><Text style={styles.bigTitle}>{" + utils.makeLabel(p) + "}</Text></View>")
         this.showJson(null, json[p], isView, arr, skipLabels)
