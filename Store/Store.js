@@ -133,6 +133,7 @@ const MODELS_PACK         = 'tradle.ModelsPack'
 const STYLES_PACK         = 'tradle.StylesPack'
 
 const WELCOME_INTERVAL = 600000
+const MIN_SIZE_FOR_PROGRESS_BAR = 30000
 
 // var Tim = require('tim')
 // Tim.enableOptimizations()
@@ -1285,18 +1286,17 @@ var Store = Reflux.createStore({
     const self = this
     const { tlsKey, wsClients } = driverInfo
     let progressUpdate
+    let willAnnounceProgress = willShowProgressBar(msg)
     try {
       msg = tradleUtils.unserializeMessage(msg)
       const payload = msg.object
       debug(`receiving ${payload[TYPE]}`)
 
       let org = this._getItem(PROFILE + '_' + from).organization
-      progressUpdate = {
+      progressUpdate = willAnnounceProgress && {
         action: 'progressUpdate',
         recipient: this._getItem(org)
       }
-
-      this.trigger({ ...progressUpdate, progress: ON_RECEIVED_PROGRESS })
 
       if (payload.context) {
         let s = PRODUCT_APPLICATION + '_' + payload.context
@@ -1355,14 +1355,19 @@ var Store = Reflux.createStore({
       pub: new Buffer(from, 'hex')
     }
 
-    this.trigger({ ...progressUpdate, progress: ON_RECEIVED_PROGRESS })
+    if (progressUpdate) {
+      this.trigger({ ...progressUpdate, progress: ON_RECEIVED_PROGRESS })
+    }
+
     meDriver.sender.resume(identifier)
     try {
       await meDriver.receive(msg, { [prop]: identifier })
     } catch (err) {
       console.warn('failed to receive msg:', err, msg)
     } finally {
-      this.trigger({ ...progressUpdate, progress: 1 })
+      if (progressUpdate) {
+        this.trigger({ ...progressUpdate, progress: 1 })
+      }
     }
   },
   setProviderOnlineStatus(permalink, online) {
@@ -1439,7 +1444,7 @@ var Store = Reflux.createStore({
         const sendy = new Sendy({ ...SENDY_OPTS, name: recipient })
         let prevPercent
         sendy.on('progress', ({ total, progress }) => {
-          if (total < 30000) return // don't show progress bar for < 30KB
+          if (!willShowProgressBar({ length: total })) return // don't show progress bar for < 30KB
 
           const percent = ON_RECEIVED_PROGRESS * 100 * progress / total | 0
           if (!percent || percent === prevPercent) return
@@ -2735,6 +2740,7 @@ var Store = Reflux.createStore({
     // }
     this.trigger({action: 'getTemporary', resource: r})
   },
+
   async onAddAll(resource, to, message) {
     let rId = utils.getId(resource)
     let r = this._getItem(rId)
@@ -2742,12 +2748,61 @@ var Store = Reflux.createStore({
     this.trigger({action: 'addItem', resource: r})
     this.dbPut(rId, r)
     let context = resource._context
-    await Q.all(resource.items.map((r) => {
-      r._context = context
-      r.to = to
-      r.from = me
-      return this.onAddItem({ resource: r, noTrigger: true })
-    }))
+    // prepare some whitespace
+    const numRows = 5
+    const messages = new Array(numRows).fill('')
+    const title = 'Importing to profile...   '
+
+    Actions.showModal({
+      title,
+      message: messages.join('\n')
+    })
+
+    for (let i = 0; i < resource.items.length; i++) {
+      await utils.promiseDelay(200)
+      let item = resource.items[i]
+      item._context = context
+      item.to = to
+      item.from = me
+      let displayName = item.title || utils.getDisplayName(item)
+      if (displayName.length > 20) {
+        displayName = displayName.slice(0, 17) + '...'
+      }
+
+      if (i > 0) {
+        let last = messages.length - 1
+        messages[last] = messages[last].replace('importing', 'imported')
+      }
+
+      // let's not run out of room on the screen
+      let next = `importing "${displayName}"`
+      let idx = Math.min(numRows - 1, i)
+      if (messages[idx]) {
+        messages.shift()
+        messages.push(next)
+      } else {
+        messages[idx] = next
+      }
+
+      Actions.showModal({
+        title,
+        message: messages.join('\n\n')
+      })
+
+      let promiseAddItem = this.onAddItem({ resource: item, noTrigger: true })
+      let promiseSentEvent = new Promise(resolve => meDriver.once('sent', resolve))
+      await Promise.all([
+        promiseAddItem,
+        Promise.race([
+          promiseSentEvent,
+          // force continue loop
+          utils.promiseDelay(2000)
+        ])
+      ])
+    }
+
+    await utils.promiseDelay(200)
+    Actions.hideModal()
 
     this.onAddMessage({msg: {
       [TYPE]: REMEDIATION_SIMPLE_MESSAGE,
@@ -8156,6 +8211,10 @@ function fixOldSettings (settings) {
       hashToUrl[hash] = url.slice(0, lastSlashIdx)
     }
   }
+}
+
+function willShowProgressBar ({ length }) {
+  return length >= MIN_SIZE_FOR_PROGRESS_BAR
 }
 
 // function midpoint (a, b) {

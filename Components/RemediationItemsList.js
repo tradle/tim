@@ -19,6 +19,8 @@ import {
   View,
 } from 'react-native'
 
+import ENV from '../utils/env'
+
 class RemediationItemsList extends Component {
   constructor(props) {
     super(props);
@@ -88,7 +90,7 @@ class RemediationItemsList extends Component {
   submitAllForms() {
     let self = this
     utils.onNextTransitionEnd(this.props.navigator, () => {
-      Actions.addAll(self.props.resource, self.props.to, translate('confirmedMyData', translate(this.props.to.name)))
+      Actions.addAll(self.props.resource, self.props.to, translate('confirmedMyData', translate(ENV.profileTitle)))
     });
     this.props.navigator.pop()
   }
