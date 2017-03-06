@@ -721,7 +721,7 @@ class TimHome extends Component {
     var h = height > 800 ? height - 220 : height - 180
 
     if (!__DEV__ && ENV.landingPage) {
-      return this.getBareSplashScreen()
+      return this.getSplashScreen()
     }
 
     if (this.state.isLoading) {
@@ -867,18 +867,6 @@ class TimHome extends Component {
     )
   }
 
-  getBareSplashScreen() {
-    return (
-      <TouchableOpacity style={styles.container}>
-        <BackgroundImage source={BG_IMAGE} />
-        <View style={[styles.splashLayout]}>
-          <View style={{flexGrow: 1}}/>
-          <ActivityIndicator size='large' color={FOOTER_TEXT_COLOR} style={{ paddingBottom: 20 }} />
-        </View>
-      </TouchableOpacity>
-    )
-  }
-
   getSplashScreen() {
     const version = __DEV__ && this.renderVersion()
     var {width, height} = utils.dimensions(TimHome)
@@ -977,7 +965,7 @@ var styles = (function () {
       alignSelf: 'center',
     },
     updateIndicator: {
-      color: '#ffffff',
+      color: FOOTER_TEXT_COLOR,
       paddingTop: 10,
       alignSelf: 'center'
     },
