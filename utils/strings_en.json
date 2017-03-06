@@ -70,7 +70,7 @@
     "switchToRepresentative": "Switching to representative mode is not yet implemented.",
     "fillTheForm": "Please fill out this form",
     "fillTheFormWithAttachments": "Please fill out this form",
-    "takeAPicture": "Please take a",
+    "takeAPicture": "Please take a **selfie** picture of your face",
     "verifiedBy": "Verified by {1}",
     "issuedBy": "Issued by {1}",
     "sentTo": "Sent to {1}",
@@ -220,5 +220,6 @@
     "centerPassport": "Centre passport photo page in frame",
     "centerLicence": "Centre licence in frame",
     "centerID": "Centre ID in frame",
-    "dataSecurity": "Data Security"
+    "dataSecurity": "Data Security",
+    "noAccessToServer": "Server is not accessible. Try later."
 }
