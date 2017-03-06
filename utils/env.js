@@ -57,6 +57,7 @@ const merged = extend({
   initWithDeepLink: '/profile',
   requireDeviceLocalAuth: false,
   autoOptInTouchId: false,
+  autoRegister: false,
   requireSoftPIN: false,
   locale: {
     language: DeviceInfo.getDeviceLocale(),
@@ -69,7 +70,9 @@ const merged = extend({
   registerForPushNotifications: true,
   hideVerificationsInChat: false,
   hideProductApplicationInChat: false,
-  splashBackground: 'tradle'
+  splashBackground: 'tradle',
+  landingPage: null, //"AvivaIntroView",
+  showCollapsed: null, //{'tradle.PhotoID': 'document'}
 }, environment)
 
 merged.splashBackground = splash[merged.splashBackground]
