@@ -232,7 +232,7 @@ class ResourceRow extends Component {
         <View key={this.getNextKey()} style={{opacity: 0.5}}>
           <View style={styles.row} key={this.getNextKey()}>
             {photo}
-            <View style={[textStyle, {flexDirection: 'row', justifyContent: 'space-between'}]}>
+            <View style={[textStyle, {flexDirection: 'row', justifyContent: 'center'}]}>
               {this.formatRow(resource, style)}
             </View>
             {dateRow}
