@@ -9,7 +9,7 @@ var Icon = require('react-native-vector-icons/Ionicons');
 var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin');
 var equal = require('deep-equal')
-var BG_IMAGE = require('../img/verificationBg.jpg')
+// var BG_IMAGE = require('../img/verificationBg.jpg')
 
 import { makeResponsive } from 'react-native-orient'
 var Actions = require('../Actions/Actions')
@@ -80,13 +80,13 @@ class VerificationMessageRow extends Component {
     let isShared = this.isShared()
     isMyMessage = isShared
     let bankStyle = this.props.bankStyle
-    let bgColor
+    let color
     if (isThirdPartyVerification)
-      bgColor = '#93BEBA'
+      color = '#93BEBA'
     else if (isShared)
-      bgColor = bankStyle.SHARED_WITH_VERIFICATION_BG
+      color = bankStyle.SHARED_WITH_VERIFICATION_BG
     else
-      bgColor = bankStyle.VERIFIED_LINK_COLOR
+      color = bankStyle.VERIFIED_LINK_COLOR
     let verifiedBy = isShared ? translate('youShared', orgName) : translate('verifiedBy', orgName)
 
     var w = utils.dimensions(VerificationMessageRow).width
@@ -100,30 +100,37 @@ class VerificationMessageRow extends Component {
     let headerStyle = [
       chatStyles.verifiedHeader,
       styles.header,
-      isMyMessage ? styles.headerRight : styles.headerLeft
+      isMyMessage ? styles.headerRight : styles.headerLeft,
+      {backgroundColor: bankStyle.VERIFIED_HEADER_COLOR, marginTop: 0, paddingVertical: 10}
     ]
-    let bulletStyle = {color: bgColor, marginHorizontal: 7, alignSelf: 'center'}
+    let bulletStyle = {color: color, marginHorizontal: 7, alignSelf: 'center'}
+    let row = this.formatDocument({
+                model: msgModel,
+                verification: resource,
+                onPress: this.verify.bind(this),
+                isAccordion: isThirdPartyVerification,
+                isMyMessage: isMyMessage
+              })
 
+    // renderedRow = <View>
+    //                 <View style={headerStyle}>
+    //                   <Icon style={[chatStyles.verificationIcon, {color: color}]} size={20} name={'md-checkmark'} />
+    //                   <Text style={[chatStyles.verificationHeaderText, styles.verificationHeaderText]}>{verifiedBy}</Text>
+    //                 </View>
+    //                 <View style={styles.separator}>
+    //                   <View style={[styles.separatorPart, {width: msgWidth * 0.2}]} />
+    //                   <Text style={bulletStyle}>🔸</Text>
+    //                   <View style={[styles.separatorPart, {width: msgWidth * 0.2}]} />
+    //                 </View>
+    //                 <View>{row}</View>
+    //               </View>
     renderedRow = <View>
                     <View style={headerStyle}>
-                      <Icon style={[chatStyles.verificationIcon, {color: bgColor}]} size={20} name={'md-checkmark'} />
-                      <Text style={[chatStyles.verificationHeaderText, styles.verificationHeaderText]}>{verifiedBy}</Text>
+                      <Icon style={[chatStyles.verificationIcon, {color: color}]} size={20} name={'md-checkmark'} />
+                      <Text style={[chatStyles.verificationHeaderText, styles.verificationHeaderText, {color: color}]}>{verifiedBy}</Text>
                     </View>
-                    <View style={styles.separator}>
-                      <View style={[styles.separatorPart, {width: msgWidth * 0.2}]} />
-                      <Text style={bulletStyle}>🔸</Text>
-                      <View style={[styles.separatorPart, {width: msgWidth * 0.2}]} />
-                    </View>
-                    <View>
-                      {
-                        this.formatDocument({
-                          model: msgModel,
-                          verification: resource,
-                          onPress: this.verify.bind(this),
-                          isAccordion: isThirdPartyVerification,
-                          isMyMessage: isMyMessage
-                        })
-                      }
+                    <View style={{marginTop: 15}}>
+                      {row}
                     </View>
                   </View>
 
@@ -159,22 +166,41 @@ class VerificationMessageRow extends Component {
       shareWith = <View/>
 
     let messageBody =
-          <TouchableOpacity onPress={this.verify.bind(this, resource)}>
+          <TouchableOpacity onPress={this.verify.bind(this, resource)} style={{marginTop: 10}}>
             <View style={styles.messageBody}>
               <View style={[chatStyles.row, viewStyle]}>
                 {this.getOwnerPhoto(isMyMessage)}
                 <View style={[chatStyles.textContainer, addStyle]}>
-                  <View style={[{width: msgWidth}, styles.imageFrame, isMyMessage ? styles.headerRight : styles.headerLeft]}>
-                    <Image source={BG_IMAGE} style={[{width: msgWidth-2}, styles.image, addStyle]} >
+                  <View style={[{width: msgWidth}, styles.imageFrame, {backgroundColor: '#ffffff', borderWidth: 1, borderColor: bankStyle.VERIFIED_BORDER_COLOR}, isMyMessage ? styles.headerRight : styles.headerLeft]}>
+                    <View style={[{width: msgWidth-2}, styles.image, addStyle]}>
                       {renderedRow}
-                    </Image>
+                    </View>
                     {shareWith}
                  </View>
+                <Icon name='ios-flower-outline' size={40} color={bankStyle.VERIFIED_BORDER_COLOR} style={{position: 'absolute', right: -10, top: -15}} />
               </View>
             </View>
             {this.getSendStatus()}
             </View>
           </TouchableOpacity>
+
+    // let messageBody =
+    //       <TouchableOpacity onPress={this.verify.bind(this, resource)}>
+    //         <View style={styles.messageBody}>
+    //           <View style={[chatStyles.row, viewStyle]}>
+    //             {this.getOwnerPhoto(isMyMessage)}
+    //             <View style={[chatStyles.textContainer, addStyle]}>
+    //               <View style={[{width: msgWidth}, styles.imageFrame, isMyMessage ? styles.headerRight : styles.headerLeft]}>
+    //                 <Image source={BG_IMAGE} style={[{width: msgWidth-2}, styles.image, addStyle]} >
+    //                   {renderedRow}
+    //                 </Image>
+    //                 {shareWith}
+    //              </View>
+    //           </View>
+    //         </View>
+    //         {this.getSendStatus()}
+    //         </View>
+    //       </TouchableOpacity>
 
     // let bg
     // if (this.props.bankStyle.BACKGROUND_IMAGE)
@@ -290,8 +316,8 @@ var styles = StyleSheet.create({
   },
   image: {
     borderRadius: 10,
-    height: 120,
-    resizeMode: 'cover',
+    minHeight: 120,
+    // resizeMode: 'cover',
     overflow: 'hidden'
   },
   imageFrame: {
@@ -299,7 +325,7 @@ var styles = StyleSheet.create({
     backgroundColor: 'transparent',
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#D4D4B8'
+    // borderColor: '#D4D4B8'
   },
   center: {
     justifyContent: 'center'
@@ -315,195 +341,3 @@ VerificationMessageRow = makeResponsive(VerificationMessageRow)
 
 module.exports = VerificationMessageRow;
 
-/*
-    let shareWith = this.props.shareWithRequestedParty
-                  ? <View style={[chatStyles.shareView, {justifyContent: 'flex-start', paddingLeft: 5}]}>
-                      <View style={{flexDirection: 'column'}}>
-                      <TouchableOpacity onPress={this.shareWithRequestedParty.bind(this)}>
-                         <View style={[chatStyles.shareButton, {flexDirection: 'column', marginHorizontal: 3}]}>
-                          <CustomIcon name='tradle' style={{color: '#ffffff'}} size={32} />
-                        </View>
-                      </TouchableOpacity>
-                      <Text style={[chatStyles.shareText, {color: '#4982B1', fontSize: 12}]}>{translate('Share')}</Text>
-                      </View>
-                      <View style={{justifyContent: 'center', paddingLeft: 5}}>
-                        <Text style={{fontSize: 14, color: '#4982B1'}}>{'with ' + this.props.shareWithRequestedParty.title}</Text>
-                      </View>
-                    </View>
-                  : <View/>
-    let isAndroid = utils.isAndroid()
-    let bg = isAndroid
-           ? <View/>
-           : <Image source={BG_IMAGE} style={[{position: 'absolute', top: 0, borderRadius: 10, left: 0, width: (isReadOnlyChat ? msgWidth - 40 : msgWidth), height: 110, opacity: 0.4}, addStyle]}/>
-
-    let androidStyle = {backgroundColor: bankStyle.VERIFICATION_BG, borderRadius: 10, borderWidth: StyleSheet.hairlineWidth, borderColor: bankStyle.SHARE_BUTTON_BACKGROUND_COLOR}
-    let messageBody =
-          <TouchableOpacity onPress={this.verify.bind(this, resource)}>
-            <View style={{flexDirection: 'column', flex: 1}}>
-              <View style={[chatStyles.row, viewStyle]}>
-                {this.getOwnerPhoto(isMyMessage)}
-                <View style={[chatStyles.textContainer, addStyle]}>
-                  <View style={[{flex: 1} , isAndroid ? androidStyle : {backgroundColor: 'transparent'}]}>
-                    {bg}
-                    {renderedRow}
-                    {shareWith}
-                 </View>
-              </View>
-            </View>
-            {this.getSendStatus()}
-            </View>
-          </TouchableOpacity>
-
-    var viewStyle = { margin: 1 }
-*/
-  // render() {
-  //   var resource = this.props.resource;
-  //   var model = utils.getModel(resource[constants.TYPE]).value;
-  //   var renderedRow = [];
-
-  //   var time = this.getTime(resource);
-  //   var date = time
-  //            ? <Text style={chatStyles.date} numberOfLines={1}>{time}</Text>
-  //            : <View />;
-
-  //   var isMyMessage = this.isMyMessage();
-  //   var w = utils.dimensions(VerificationMessageRow).width
-
-  //   var dType = utils.getType(resource.document)
-  //   var msgModel = utils.getModel(dType).value
-  //   var orgName = resource._verifiedBy
-  //               ? resource._verifiedBy.title
-  //               : resource.organization  ? resource.organization.title : ''
-
-  //   let me = utils.getMe()
-  //   let isThirdPartyVerification
-  //   let isReadOnlyChat
-  //   if (this.props.context) {
-  //     let me = utils.getMe()
-  //     if (me.isEmployee) {
-  //       isReadOnlyChat = utils.isReadOnlyChat(this.props.to)
-  //       if  (isReadOnlyChat)
-  //         isThirdPartyVerification = utils.getId(resource.organization) !== utils.getId(this.props.context.to.organization)
-  //       else if (this.props.to[constants.TYPE] === constants.TYPES.PROFILE)
-  //         isThirdPartyVerification = utils.getId(me) !== utils.getId(this.props.context.to) || (resource._verifiedBy  &&  utils.getId(me.organization) !== utils.getId(resource._verifiedBy))
-  //     }
-  //     else
-  //       isThirdPartyVerification = resource._verifiedBy != null && utils.getId(resource._verifiedBy)  !== utils.getId(resource.organization)// &&  utils.getId(this.props.context.to.organization) !== utils.getId(resource._verifiedBy)
-  //   }
-  //   let isShared = this.isShared()
-  //   isMyMessage = isShared
-  //   let bgColor
-  //   if (isThirdPartyVerification)
-  //     bgColor = '#93BEBA'
-  //   else if (isShared)
-  //     bgColor = bankStyle.SHARED_WITH_VERIFICATION_BG
-  //   else
-  //     bgColor = bankStyle.VERIFIED_HEADER_COLOR
-  //   let verifiedBy = isShared ? translate('youShared', orgName) : translate('verifiedBy', orgName)
-  //   let msgWidth = w * 0.8
-  //   let numberOfCharacters = msgWidth / 12
-  //   if (verifiedBy.length > numberOfCharacters)
-  //     verifiedBy = verifiedBy.substring(0, numberOfCharacters) + '..'
-
-  //   let headerStyle = [
-  //     chatStyles.verifiedHeader,
-  //     {marginTop: 10},
-  //     // {backgroundColor: bgColor}, // opacity: isShared ? 0.5 : 1},
-  //     {backgroundColor: 'transparent'}, //, borderBottomWidth: 1, borderBottomColor: bgColor}, // opacity: isShared ? 0.5 : 1},
-  //     isMyMessage ? {borderTopRightRadius: 0, borderTopLeftRadius: 10} : {borderTopLeftRadius: 0, borderTopRightRadius: 10}
-  //   ]
-
-  //   renderedRow = <View>
-  //                   <View style={headerStyle}>
-  //                     <Icon style={[chatStyles.verificationIcon, {color: bgColor}]} size={20} name={'md-checkmark'} />
-  //                     <Text style={[chatStyles.verificationHeaderText, {color: '#555555', fontStyle: 'italic'}]}>{verifiedBy}</Text>
-  //                   </View>
-  //                   <View style={{flexDirection: 'row', alignSelf: 'center', marginTop: -5}}>
-  //                     <View style={{height: 1, backgroundColor: '#cccccc', width: msgWidth * 0.2, alignSelf: 'center'}} />
-  //                     <Text style={{color: bgColor, marginHorizontal: 7, alignSelf: 'center'}}>🔸</Text>
-  //                     <View style={{height: 1, backgroundColor: '#cccccc', width: msgWidth * 0.2, alignSelf: 'center'}} />
-  //                   </View>
-  //                   <View>
-  //                     {
-  //                       this.formatDocument({
-  //                         model: msgModel,
-  //                         verification: resource,
-  //                         onPress: this.verify.bind(this),
-  //                         isAccordion: isThirdPartyVerification
-  //                       })
-  //                     }
-  //                   </View>
-  //                 </View>
-
-  //   var viewStyle = {
-  //     width: msgWidth,
-  //     flexDirection: 'row',
-  //     // borderWidth: 1,
-  //     alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
-  //     backgroundColor: 'transparent',
-  //     marginBottom: 3,
-  //     // backgroundColor: bankStyle.BACKGROUND_COLOR
-  //   }
-
-  //   let addStyle = [
-  //     // chatStyles.verificationBody,
-  //     {borderWidth: 0, backgroundColor: 'transparent' /*, backgroundColor: isShared ? '#ffffff' : bankStyle.VERIFICATION_BG,*/ },
-  //     isMyMessage ? {borderTopRightRadius: 0} : {borderTopLeftRadius: 0}
-  //   ];
-  //   // if (isAndroid) {
-  //   //   addStyle.push({
-  //   //     backgroundColor: bankStyle.VERIFICATION_BG,
-  //   //     borderColor: bankStyle.VERIFIED_BORDER_COLOR,
-  //   //     borderWidth: 1,
-  //   //     borderRadius: 10
-  //   //   })
-  //   //   addStyle.push(isMyMessage ? {borderTopRightRadius: 0} : {borderTopLeftRadius: 0})
-  //   // }
-
-  //   let shareWith
-  //   if (this.props.shareWithRequestedParty) {
-  //     let title = this.props.shareWithRequestedParty.organization && this.props.shareWithRequestedParty.organization.title
-  //     shareWith = <View style={styles.shareWithInquirer}>
-  //                   <TouchableOpacity onPress={this.shareWithRequestedParty.bind(this)}>
-  //                      <View style={[chatStyles.shareButton, {marginLeft: 15, justifyContent: 'flex-start', backgroundColor: bankStyle.SHARE_BUTTON_BACKGROUND_COLOR}]}>
-  //                       <CustomIcon name='tradle' style={{color: '#ffffff' }} size={32} />
-  //                       <Text style={chatStyles.shareText}>{translate('Share')}</Text>
-  //                     </View>
-  //                   </TouchableOpacity>
-  //                   <View style={{justifyContent: 'center'}}>
-  //                     <Text style={{fontSize: 16, color: '#757575'}}>{'with ' + title}</Text>
-  //                   </View>
-  //                 </View>
-  //   }
-  //   else {
-  //     shareWith = <View/>
-  //     viewStyle.height = 110
-  //   }
-  //   // let bgImage = <Image source={BG_IMAGE} style={[{position: 'absolute', top: 0, borderRadius: 10, left: 0, width: (isReadOnlyChat ? msgWidth - 40 : msgWidth), height: 110, resizeMode: 'stretch', opacity: 0.4}, addStyle]}/>
-
-  //   let messageBody =
-  //         <TouchableOpacity onPress={this.verify.bind(this, resource)}>
-  //           <View style={{flexDirection: 'column', flex: 1}}>
-  //             <View style={[chatStyles.row, viewStyle]}>
-  //               {this.getOwnerPhoto(isMyMessage)}
-  //               <View style={[chatStyles.textContainer, addStyle]}>
-  //                 <View style={{flex: 1, backgroundColor: 'transparent'}}>
-  //                   <Image source={BG_IMAGE} style={[{position: 'absolute', top: 0, borderRadius: 10, left: 0, width: (isReadOnlyChat ? msgWidth - 40 : msgWidth), height: 110, resizeMode: 'stretch', opacity: 0.4}, addStyle]}/>
-  //                   {renderedRow}
-  //                   {shareWith}
-  //                </View>
-  //             </View>
-  //           </View>
-  //           {this.getSendStatus()}
-  //           </View>
-  //         </TouchableOpacity>
-
-  //   var viewStyle = { margin: 1 }
-
-  //   return (
-  //     <View style={viewStyle} key={this.getNextKey()}>
-  //       {date}
-  //       {messageBody}
-  //     </View>
-  //   );
-  // }
