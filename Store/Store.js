@@ -4679,7 +4679,7 @@ var Store = Reflux.createStore({
       }
       let isVerificationR = r[TYPE] === VERIFICATION
       let checkVal = isVerificationR ? self._getItem(r.document) : r
-      let fr = this.checkCriteria(r, query)
+      let fr = self.checkCriteria(r, query)
 
       // let checkProps = self.getModel(checkVal[TYPE]).value.properties
       // var combinedValue = '';
@@ -6318,11 +6318,11 @@ var Store = Reflux.createStore({
     // return meDriver.ready()
   },
   dbPut(key, value) {
-    let v = utils.isMessage(value) ? utils.optimizeResource(value, true) : value
+    let v = utils.isMessage(value)  &&  value[TYPE] !== CONFIRM_PACKAGE_REQUEST ? utils.optimizeResource(value, true) : value
     return db.put(key, v)
   },
   dbBatchPut(key, value, batch) {
-    let v = utils.isMessage(value) ? utils.optimizeResource(value, true) : value
+    let v = utils.isMessage(value)  &&  value[TYPE] !== CONFIRM_PACKAGE_REQUEST ? utils.optimizeResource(value, true) : value
     batch.push({type: 'put', key: key, value: v})
   },
   maybeWatchSeal(msg) {
