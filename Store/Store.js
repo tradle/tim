@@ -724,7 +724,8 @@ var Store = Reflux.createStore({
     //     this.initChats()
     // })
     .catch(function(err) {
-      debugger
+      debug('initial getInfo failed:', err)
+      throw err
     })
 
     return Q(meDriver)
@@ -958,6 +959,10 @@ var Store = Reflux.createStore({
           })
         })
         .catch(err => {
+          if (err instanceof TypeError || err instanceof ReferenceError) {
+            throw err
+          }
+
           // forgive individual errors for batch getInfo
           if (id || maxAttempts > 0) throw err
         })
