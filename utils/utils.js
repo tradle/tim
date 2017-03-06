@@ -45,7 +45,7 @@ const mutexify = require('mutexify')
 var strMap = {
   'Please fill out this form and attach a snapshot of the original document': 'fillTheFormWithAttachments',
   'Please fill out this form': 'fillTheForm',
-  'Please take a': 'takeAPicture'
+  'Please take a **selfie** picture of your face': 'takeAPicture'
 }
 var translatedStrings = {
   en: require('./strings_en.json'),
