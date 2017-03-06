@@ -63,7 +63,7 @@ import { makeResponsive } from 'react-native-orient'
 import BackgroundImage from './BackgroundImage'
 import ENV from '../utils/env'
 
-const BG_IMAGE = ENV.splashBackground
+const BG_IMAGE = ENV.brandBackground
 
 // DeviceHeight = Dimensions.get('window').height;
 // DeviceWidth = Dimensions.get('window').width

@@ -72,6 +72,7 @@ import {
 import ActivityIndicator from './ActivityIndicator'
 
 const isAndroid = Platform.OS === 'android'
+const FOOTER_TEXT_COLOR = '#eeeeee'
 import React, { Component, PropTypes } from 'react'
 
 class TimHome extends Component {
@@ -720,7 +721,7 @@ class TimHome extends Component {
     var h = height > 800 ? height - 220 : height - 180
 
     if (!__DEV__ && ENV.landingPage) {
-      return this.getBareSplashScreen()
+      return this.getSplashScreen()
     }
 
     if (this.state.isLoading) {
@@ -755,15 +756,8 @@ class TimHome extends Component {
                 {version}
               </View>
 
-    let logo = <TouchableOpacity onPress={() => this._pressHandler()}>
-                <View style={[styles.container]}>
-                  <CustomIcon name="tradle" size={getIconSize()} style={styles.thumb} />
-                  <Text style={styles.tradle}>Tradle</Text>
-                </View>
-              </TouchableOpacity>
-
-                          // <Image style={{position: 'absolute', left: 0, opacity: 0.5, width: 100, height: 100}} source={TradleWhite}></Image>
-    let regView = <View  style={{alignSelf: 'center'}}>
+    let regView = !ENV.autoRegister &&
+                  <View  style={{alignSelf: 'center'}}>
                     <FadeInView>
                       <TouchableOpacity  onPress={() => {
                         this.register(this.showFirstPage.bind(this))
@@ -785,25 +779,22 @@ class TimHome extends Component {
                  </View>
 
     return (
-      <View>
+      <View style={styles.container}>
         <BackgroundImage source={BG_IMAGE} />
-        <View style={styles.layout}>
-          <View/>
-          {logo}
-          <View>
-            { utils.getMe()
-              ? <TouchableOpacity style={[styles.thumbButton, {justifyContent: 'flex-end',  opacity: me ? 1 : 0}]}
-                    underlayColor='transparent' onPress={() => this._pressHandler()}>
-                  <View style={styles.getStarted}>
-                     <Text style={styles.getStartedText}>Get started</Text>
-                  </View>
-                </TouchableOpacity>
-              : regView
-            }
-            <Text style={errStyle}>{err}</Text>
-            {dev}
-          </View>
-        </View>
+        <TouchableOpacity style={styles.splashLayout} onPress={() => this._pressHandler()}>
+          <View style={{flexGrow:1}} />
+          { utils.getMe()
+            ? <TouchableOpacity style={[styles.thumbButton, {justifyContent: 'flex-end',  opacity: me ? 1 : 0}]}
+                  underlayColor='transparent' onPress={() => this._pressHandler()}>
+                <View style={styles.getStarted}>
+                   <Text style={styles.getStartedText}>Get started</Text>
+                </View>
+              </TouchableOpacity>
+            : regView
+          }
+          <Text style={errStyle}>{err}</Text>
+          {dev}
+        </TouchableOpacity>
       </View>
     );
   }
@@ -876,18 +867,6 @@ class TimHome extends Component {
     )
   }
 
-  getBareSplashScreen() {
-    return (
-      <TouchableOpacity style={styles.container}>
-        <BackgroundImage source={BG_IMAGE} />
-        <View style={[styles.splashLayout]}>
-          <View style={{flexGrow: 1}}/>
-          <ActivityIndicator size='large' color='#ffffff' style={{ paddingBottom: 20 }} />
-        </View>
-      </TouchableOpacity>
-    )
-  }
-
   getSplashScreen() {
     const version = __DEV__ && this.renderVersion()
     var {width, height} = utils.dimensions(TimHome)
@@ -897,23 +876,20 @@ class TimHome extends Component {
     return (
       <View style={styles.container}>
         <BackgroundImage source={BG_IMAGE} />
-        <View  style={styles.splashLayout}>
-          <View>
-            <CustomIcon name="tradle" size={getIconSize()} style={styles.thumb} />
-            <Text style={styles.tradle}>Tradle</Text>
-            <View style={{paddingTop: 20}}>
-              <ActivityIndicator hidden='true' size='large' color='#ffffff'/>
-              {busyReason}
-              {updateIndicator}
-              {submitLogButton}
-            </View>
+        <View style={styles.splashLayout}>
+          <View style={{flexGrow: 1}}/>
+          <View style={{marginBottom: 20}}>
+            <ActivityIndicator hidden='true' size='large' color={FOOTER_TEXT_COLOR}/>
+            {busyReason}
+            {updateIndicator}
+            {submitLogButton}
           </View>
         </View>
         {version}
       </View>
     )
-
   }
+
   pairDevices() {
     this.props.navigator.push({
       title: 'Scan QR Code',
@@ -984,12 +960,12 @@ var styles = (function () {
     },
     tradle: {
       // color: '#7AAAC3',
-      color: '#eeeeee',
+      color: FOOTER_TEXT_COLOR,
       fontSize: height > 450 ? 35 : 25,
       alignSelf: 'center',
     },
     updateIndicator: {
-      color: '#ffffff',
+      color: FOOTER_TEXT_COLOR,
       paddingTop: 10,
       alignSelf: 'center'
     },
@@ -1076,7 +1052,8 @@ var styles = (function () {
     splashLayout: {
       alignItems: 'center',
       justifyContent: 'center',
-      height: height
+      width,
+      height
     },
     layout: {
       justifyContent: 'space-between',
