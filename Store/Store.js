@@ -46,6 +46,7 @@ var AddressBook = require('NativeModules').AddressBook;
 
 var voc = require('@tradle/models');
 var sampleData = voc.data
+var sampleProfile = require('../data/sampleProfile.json')
 // var currencies = voc.currencies
 // var nationalities = voc.nationalities
 // var countries = voc.countries
@@ -1676,6 +1677,8 @@ var Store = Reflux.createStore({
   },
   configProvider(sp, org) {
     let config = sp.publicConfig
+    if (!config)
+      return
     let orgId = utils.getId(org)
     for (var p in config)
       org['_' + p] = config[p]
@@ -5417,8 +5420,12 @@ var Store = Reflux.createStore({
 
     var mid;
 
-    if (isRegistration)
+    if (isRegistration) {
+      let sample = utils.clone(sampleProfile)
+      extend(sample, value)
+      value = sample
       return this.registration(value)
+    }
 
     if (value[TYPE] === SETTINGS)
       return this.addSettings(value, params.maxAttempts ? params.maxAttempts : -1)
@@ -5580,6 +5587,7 @@ var Store = Reflux.createStore({
   registration(value) {
     var self = this
     isLoaded = true;
+
     me = value
     // meDriver = null
     var pKey = utils.getId(me)

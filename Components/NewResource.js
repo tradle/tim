@@ -26,7 +26,6 @@ var termsAndConditions = require('../termsAndConditions.json')
 var StyleSheet = require('../StyleSheet')
 import dismissKeyboard from 'react-native/Libraries/Utilities/dismissKeyboard'
 import ImageInput from './ImageInput'
-var sampleProfile = require('../data/sampleProfile.json')
 var chatStyles = require('../styles/chatStyles')
 
 var TextInputState = require('TextInputState')
@@ -362,11 +361,6 @@ class NewResource extends Component {
       for (var p in this.floatingProps) {
         json[p] = this.floatingProps[p]
       }
-    }
-    if (this.state.isRegistration) {
-      let sample = utils.clone(sampleProfile)
-      extend(sample, json)
-      json = sample
     }
     var required = this.props.model.required;
     if (!required) {
