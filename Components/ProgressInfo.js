@@ -12,6 +12,7 @@ import utils from '../utils/utils'
 const Store = require('../Store/Store');
 const Reflux = require('reflux');
 const reactMixin = require('react-mixin');
+const TimerMixin = require('react-timer-mixin')
 
 import ProgressBar from 'react-native-progress/Bar';
 
@@ -24,22 +25,49 @@ class ProgressInfo extends Component {
   constructor(props) {
     super(props)
     this.state = { progress: 0 }
+    this._finishInterval = null
     this._finishTimeout = null
   }
   componentDidMount() {
     this.listenTo(Store, 'onProgressUpdate');
   }
+  _reset() {
+    this.clearInterval(this._finishInterval)
+    this.clearTimeout(this._finishTimeout)
+  }
   onProgressUpdate({ action, recipient, progress }) {
     if (action !== 'progressUpdate' || !recipient) return
 
     recipient = recipient[PERMALINK] || recipient
-    clearTimeout(this._finishTimeout)
-    this.setState({ progress, recipient })
-    if (progress !== 1) return
+    if (this.state.progress > progress) {
+      return this.setTimeout(() => {
+        this.onProgressUpdate({ action, recipient, progress })
+      }, 100)
+    }
 
-    this._finishTimeout = setTimeout(() => {
-      this.setState({ recipient, progress: 0 })
-    }, 1000)
+    this._reset()
+
+    // smoothly get to desired progress from where we are
+    const dest = progress
+    progress = this.state.progress > dest ? 0 : this.state.progress
+    this._finishInterval = this.setInterval(() => {
+      if (progress >= dest) {
+        this._reset()
+        if (progress >= 1) {
+          this._finishTimeout = this.setTimeout(() => {
+            this._reset()
+            this.setState({ progress: 0 })
+          }, 30)
+        }
+
+        return
+      }
+
+      const bigInc = (dest - progress) / 3
+      progress += Math.max(bigInc, 0.01)
+      progress = Math.min(dest, progress)
+      this.setState({ progress })
+    }, 30)
   }
 
   render() {
@@ -53,6 +81,7 @@ class ProgressInfo extends Component {
   }
 }
 reactMixin(ProgressInfo.prototype, Reflux.ListenerMixin);
+reactMixin(ProgressInfo.prototype, TimerMixin);
 
 var styles = StyleSheet.create({
   progress: {
