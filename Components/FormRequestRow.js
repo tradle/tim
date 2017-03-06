@@ -490,7 +490,7 @@ class FormRequestRow extends Component {
       extend(true, resource, this.props.resource.prefill)
     else {
       // isPrefilled = false
-      isPrefilled = false //ENV.prefillForms && model.id in formDefaults
+      isPrefilled = ENV.prefillForms && model.id in formDefaults
       if (isPrefilled)
         extend(true, resource, formDefaults[model.id])
         // console.log(JSON.stringify(resource, 0, 2))
