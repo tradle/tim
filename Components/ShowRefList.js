@@ -38,6 +38,7 @@ import ENV from '../utils/env'
 class ShowRefList extends Component {
   constructor(props) {
     super(props);
+    this.state = {docs: null}
   }
   render() {
     var resource = this.props.resource;
@@ -53,11 +54,12 @@ class ShowRefList extends Component {
 
     let bg
     let currentBacklink = this.props.backlink
-    let showDetails = !isIdentity  &&  (this.props.showDetails || !this.props.backlink)
+    let showDetails = !isIdentity  &&  !this.props.showDocuments  &&  (this.props.showDetails || !this.props.backlink)
     if (showDetails)
       bg = {backgroundColor: appStyle.CURRENT_TAB_COLOR}
     else
       bg = {}
+
 
     for (var p in props) {
       if (props[p].hidden)
@@ -72,11 +74,43 @@ class ShowRefList extends Component {
         continue;
       propsToShow.push(p)
     }
+    let isMessage = utils.isMessage(resource)
+    // Show supporting docs
+    if (isMessage) {
+      let rId = utils.getId(resource)
+      let docs
+      if (this.props.showDocuments) {
+        docs = this.props.backlinkList
+        this.state.docs = docs
+      }
+      else if (this.state.docs)
+        docs = this.state.docs
+      else {
+        docs = []
+        this.getDocs(resource.verifications, rId, docs)
+      }
+      if (docs  &&  docs.length) {
+        let count = <View style={styles.count}>
+                      <Text style={styles.countText}>{docs.length}</Text>
+                    </View>
+        refList.push(
+          <View style={[buttonStyles.container, bg, {flex: 1, alignSelf: 'stretch'}]} key={this.getNextKey()}>
+           <TouchableHighlight onPress={() => this.showDocs(docs)} underlayColor='transparent'>
+             <View style={styles.item}>
+               <View style={{flexDirection: 'row'}}>
+                 <Icon name='ios-paper-outline'  size={utils.getFontSize(30)}  color='#757575' />
+                 {count}
+               </View>
+               <Text style={[buttonStyles.text, Platform.OS === 'android' ? {marginTop: 3} : {marginTop: 0}]}>{'Documents'}</Text>
+             </View>
+           </TouchableHighlight>
+          </View>)
+      }
+    }
     if (!propsToShow.length) {
       if (!showDetails)
         return <View/>
     }
-
     else if (!isIdentity)
       refList.push(
         <View style={[buttonStyles.container, bg, {flex: 1, alignSelf: 'stretch'}]} key={this.getNextKey()}>
@@ -155,7 +189,7 @@ class ShowRefList extends Component {
     }
     // explore current backlink
     let backlinkRL, details
-    if (!showDetails  && currentBacklink) {
+    if (!showDetails  && (currentBacklink  ||  (this.props.backlinkList  &&  this.props.showDocuments))) {
       var ResourceList = require('./ResourceList')
       backlinkRL = <ResourceList
                       modelName={currentBacklink.items.ref}
@@ -166,7 +200,7 @@ class ShowRefList extends Component {
                       navigator={this.props.navigator} />
     }
     if (showDetails) {
-      if (utils.isMessage(resource))
+      if (isMessage)
         details = <ShowPropertiesView { ...this.props }/>
       else
         details = <ShowPropertiesView resource={resource}
@@ -198,9 +232,24 @@ class ShowRefList extends Component {
               </View>
     return this.props.children || <View/>
   }
+  getDocs(varr, rId, docs) {
+    if (!varr)
+      return
+    varr.forEach((v) => {
+      if (v.method) {
+        if (utils.getId(v.document) !== rId)
+          docs.push(v.document)
+      }
+      else if (v.sources)
+        this.getDocs(v.sources, rId, docs)
+    })
+  }
 
   exploreBacklink(resource, prop) {
     Actions.exploreBacklink(resource, prop)
+  }
+  showDocs(docs) {
+    Actions.getDocuments(this.props.resource, docs)
   }
   showDetails() {
     Actions.getDetails(this.props.resource)

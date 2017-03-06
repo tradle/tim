@@ -58,7 +58,8 @@ var asyncActions = [
   'getDetails',
   'getProvider',
   'autoRegister',
-  'setPreferences'
+  'setPreferences',
+  'getDocuments'
 ]
 
 var syncActions = [

@@ -102,10 +102,12 @@ class MessageView extends Component {
     }
     else if (params.action === 'exploreBacklink') {
       if (params.backlink !== this.state.backlink)
-        this.setState({backlink: params.backlink, backlinkList: params.list, showDetails: false})
+        this.setState({backlink: params.backlink, backlinkList: params.list, showDetails: false, showDocuments: false})
     }
     else if (params.action === 'showDetails')
-      this.setState({showDetails: true, backlink: null, backlinkList: null})
+      this.setState({showDetails: true, backlink: null, backlinkList: null, showDocuments: false})
+    else if (params.action === 'showDocuments')
+      this.setState({showDocuments: true, backlink: null, backlinkList: params.list, showDetails: false})
   }
   verifyOrCreateError() {
     let resource = this.props.resource
@@ -204,7 +206,6 @@ class MessageView extends Component {
     }
     this.props.navigator.push(route);
   }
-
   render() {
     if (this.state.isLoading)
       return <View/>
@@ -280,8 +281,10 @@ class MessageView extends Component {
     else {
       actionPanel = <ShowRefList {...this.props}
                                  backlink={this.state.backlink}
+                                 resource={this.state.resource}
                                  backlinkList={this.state.backlinkList}
                                  showDetails={this.state.showDetails}
+                                 showDocuments={this.state.showDocuments}
                                  errorProps={this.state.errorProps}
                                  showRefResource={this.getRefResource.bind(this)}
                                  checkProperties={checkProps} >
