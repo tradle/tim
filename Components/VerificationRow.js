@@ -154,7 +154,7 @@ class VerificationRow extends Component {
     var header =  <View style={styles.header} key={this.getNextKey()}>
                     <View style={{flexDirection: 'row', marginHorizontal: 10}}>
                       {photo}
-                      <View style={[styles.noImageBlock, {flex: 1}]}>
+                      <View style={[styles.noImageBlock, {flex: 1,  justifyContent: 'center'}]}>
                         {titleComponent}
                         {description}
                         <View style={{paddingTop: 3, flexDirection: 'row', justifyContent: 'flex-end'}}>
@@ -349,9 +349,9 @@ var styles = StyleSheet.create({
     borderBottomWidth: 1
   },
   rTitle: {
-    flex: 1,
+    // flex: 1,
     fontSize: 18,
-    marginBottom: 3,
+    // marginBottom: 3,
     color: '#555555',
     // fontWeight: '600',
     // marginBottom: 2,
