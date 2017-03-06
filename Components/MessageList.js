@@ -517,7 +517,7 @@ class MessageList extends Component {
     if (!content) {
       var isAllMessages = model.isInterface  &&  model.id === TYPES.MESSAGE;
 
-      let hideTextInput = !utils.hasSupportLine(resource)
+      let hideTextInput = !utils.hasSupportLine(resource)  &&  !ENV.allowForgetMe
       let h = utils.dimensions(MessageList).height
       var maxHeight = h - (Platform.OS === 'android' ? 85 : 64)
       // Chooser for trusted party verifier
@@ -528,6 +528,8 @@ class MessageList extends Component {
           (resource[TYPE] === PRODUCT_APPLICATION && resource.product !== REMEDIATION)) &&
           (this.props.resource.products  &&  this.props.resource.products.length > 1))
         maxHeight -= 45
+      // else if (ENV.allowForgetMe)
+      //   maxHeight -= 45
       if (hideTextInput)
       //   maxHeight += 35
         maxHeight -= 10
@@ -652,39 +654,51 @@ class MessageList extends Component {
     let resource = this.props.resource
     let me = utils.getMe()
     let hasSupportLine = utils.hasSupportLine(resource)
-    if (!hasSupportLine)
-      return
     let buttons = []
-    let isOrg = this.props.resource[TYPE] === TYPES.ORGANIZATION
     let cancelIndex = 1
-    if (this.state.isEmployee  &&  !isOrg) {
-      cancelIndex++
-      buttons.push({
-        index: 0,
-        title: translate('formChooser'),
-        callback: () => this.chooseFormForCustomer()
-      })
-    }
-    else {
-      if (!this.state.isEmployee) {
-        if (this.state.hasProducts) {
+
+    if (hasSupportLine) {
+      let isOrg = this.props.resource[TYPE] === TYPES.ORGANIZATION
+      if (this.state.isEmployee  &&  !isOrg) {
+        cancelIndex++
+        buttons.push({
+          index: 0,
+          title: translate('formChooser'),
+          callback: () => this.chooseFormForCustomer()
+        })
+      }
+      else {
+        if (!this.state.isEmployee) {
+          if (this.state.hasProducts) {
+            buttons.push({
+              index: cancelIndex,
+              title: translate('applyForProduct'),
+              callback: () => this.onChooseProduct()
+            })
+            cancelIndex++
+          }
+        }
+        if (ENV.allowForgetMe) {
           buttons.push({
             index: cancelIndex,
-            title: translate('applyForProduct'),
-            callback: () => this.onChooseProduct()
+            title: translate('forgetMe'),
+            callback: () => this.forgetMe()
           })
           cancelIndex++
         }
       }
-      if (ENV.allowForgetMe) {
-        buttons.push({
-          index: cancelIndex,
-          title: translate('forgetMe'),
-          callback: () => this.forgetMe()
-        })
-        cancelIndex++
-      }
     }
+    else if (ENV.allowForgetMe) {
+      buttons.push({
+        index: cancelIndex,
+        title: translate('forgetMe'),
+        callback: () => this.forgetMe()
+      })
+      cancelIndex++
+    }
+    else
+      return
+
 
     buttons.push({
       index: cancelIndex,
@@ -696,7 +710,7 @@ class MessageList extends Component {
 
   renderActionSheet() {
     const buttons = this.getActionSheetItems()
-    if (!buttons) return
+    if (!buttons || !buttons.length) return
     let titles = buttons.map((b) => b.title)
     return (
       <ActionSheet
