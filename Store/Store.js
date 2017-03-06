@@ -2565,7 +2565,10 @@ var Store = Reflux.createStore({
   onGetDetails(resource) {
     this.trigger({action: 'showDetails', resource: resource})
   },
-
+  onGetDocuments(resource, docs) {
+    let list = docs.map((r) => this._getItem(utils.getId(r)))
+    this.trigger({action: 'showDocuments', list: list, resource: resource})
+  },
   getItem(resource) {
     var self = this;
     var modelName = resource[TYPE];
