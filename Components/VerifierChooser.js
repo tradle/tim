@@ -175,7 +175,7 @@ class VerifierChooser extends Component {
         this.setTimeout(() => Actions.addItem({
           resource: form,
           value: form,
-          disableFormRequest: this.props.originatingMessage
+          // disableFormRequest: this.props.originatingMessage
         }), 500)
       }})
     })
