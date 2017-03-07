@@ -45,6 +45,7 @@ const MONEY = constants.TYPES.MONEY
 
 const DEFAULT_CURRENCY_SYMBOL = '£'
 var CURRENCY_SYMBOL
+const MAX_LENGTH = 70
 
 var dateProp
 
@@ -446,16 +447,17 @@ class ResourceRow extends Component {
           if (isOfficialAccounts  &&  v === 'lastMessage') {
             let isMyLastMessage = val.indexOf('You: ') !== -1
             let lastMessageTypeIcon = <View/>
-            if (val.length > 50) {
-              val = val.substring(0, 50)
-              let i=49
-              for (; i>=40; i--) {
+            if (val.length > MAX_LENGTH) {
+              val = val.substring(0, MAX_LENGTH)
+              let i = MAX_LENGTH - 1
+              for (; i>=MAX_LENGTH - 10; i--) {
                 let ch = val.charAt(i)
                 if (ch === ' ' || ch === '.' || ch === ',') {
-                  val = val.substring(0, i - 1)
+                  val = val.substring(0, i)
                   break
                 }
               }
+              val += '...'
             }
             if (isMyLastMessage) {
               val = val.substring(5)
