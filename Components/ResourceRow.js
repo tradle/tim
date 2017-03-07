@@ -441,6 +441,8 @@ class ResourceRow extends Component {
             for (let i=0; i<msgParts.length - 1; i++)
               val += msgParts[i];
           }
+          val = val.replace(/\*/g, '')
+
           if (isOfficialAccounts  &&  v === 'lastMessage') {
             let isMyLastMessage = val.indexOf('You: ') !== -1
             let lastMessageTypeIcon = <View/>
