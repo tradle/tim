@@ -83,8 +83,8 @@ class VerificationMessageRow extends Component {
     let color
     if (isThirdPartyVerification)
       color = '#93BEBA'
-    else if (isShared)
-      color = bankStyle.SHARED_WITH_VERIFICATION_BG
+    // else if (isShared)
+    //   color = bankStyle.SHARED_WITH_VERIFICATION_BG
     else
       color = bankStyle.VERIFIED_LINK_COLOR
     let verifiedBy = isShared ? translate('youShared', orgName) : translate('verifiedBy', orgName)
