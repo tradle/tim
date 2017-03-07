@@ -557,8 +557,10 @@ class FormRequestRow extends Component {
     let link, icon
     let isReadOnly = utils.isReadOnlyChat(this.props.resource, this.props.context) //this.props.context  &&  this.props.context._readOnly
     let self = this
-    let strName = sameFormRequestForm ? translate('addAnotherFormOrGetNext', translate(form)) : utils.getStringName(message)
-    let str = messagePart ? messagePart : (strName ? utils.translate(strName) : message)
+    // let strName = sameFormRequestForm ? translate('addAnotherFormOrGetNext', translate(form)) : utils.getStringName(message)
+    // let str = messagePart ? messagePart : (strName ? utils.translate(strName) : message)
+
+    let str = messagePart ? messagePart : message
     messagePart = null
     let showMessage = true
     if (sameFormRequestForm  &&  !resource.documentCreated) {
@@ -572,7 +574,9 @@ class FormRequestRow extends Component {
                    </View>
                  </TouchableHighlight>
                  <TouchableHighlight underlayColor='transparent' onPress={() => {
+
                     Alert.alert(
+
                       translate('areYouSureAboutNextForm', translate(form)),
                       null,
                       [
