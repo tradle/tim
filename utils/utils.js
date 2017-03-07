@@ -48,8 +48,8 @@ var strMap = {
   'Please take a **selfie** picture of your face': 'takeAPicture'
 }
 var translatedStrings = {
-  en: require('./strings_en.json'),
-  nl: require('./strings_nl.json')
+  en: preParseStrings(require('./strings_en.json'), ENV),
+  nl: preParseStrings(require('./strings_nl.json'), ENV)
 }
 
 var encryptionOpts = {
@@ -1737,6 +1737,16 @@ function dateFromParts (parts) {
   date.setUTCMonth(Number(parts.month) - 1)
   date.setUTCDate(Number(parts.day))
   return date
+}
+
+function preParseStrings (strings, { appName }) {
+  // TODO: generalize if we need to replace other variables
+  const preparsed = {}
+  for (let key in strings) {
+    preparsed[key] = strings[key].replace(/{appName}/g, appName)
+  }
+
+  return preparsed
 }
 
 module.exports = utils;

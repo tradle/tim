@@ -818,7 +818,7 @@ class NewResource extends Component {
         submit = <TouchableOpacity onPress={this.onSavePressed.bind(this)}>
                    <View style={{marginHorizontal: -3, marginBottom: -2, backgroundColor: bankStyle.CONTEXT_BACKGROUND_COLOR, borderTopColor: bankStyle.CONTEXT_BACKGROUND_COLOR, borderTopWidth: StyleSheet.hairlineWidth, height: 45, justifyContent: 'center', alignItems: 'center'}}>
                      <View style={{backgroundColor: 'transparent', paddingHorizontal: 10, justifyContent: 'center'}}>
-                       <Text style={{fontSize: 24,color: bankStyle.CONTEXT_TEXT_COLOR}}>{translate('Next')}</Text>
+                       <Text style={{fontSize: 24,color: bankStyle.CONTEXT_TEXT_COLOR}}>{translate('next')}</Text>
                      </View>
                    </View>
                  </TouchableOpacity>
