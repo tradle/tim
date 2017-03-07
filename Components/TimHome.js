@@ -290,6 +290,9 @@ class TimHome extends Component {
       //   action: 'chat'
       // })
       return
+    case 'noAccessToServer':
+      Alert.alert(translate('noAccessToServer'))
+      return
     case 'start':
       this.onStart(params)
       return
