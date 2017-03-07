@@ -79,7 +79,8 @@ const merged = extend({
   showCollapsed: null, //{'tradle.PhotoID': 'document'}
   splashBackground: 'tradle',
   brandBackground: 'tradle',
-  delayBetweenExpensiveTasks: 100
+  delayBetweenExpensiveTasks: 100,
+  appName: 'Tradle'
 }, environment)
 
 merged.splashBackground = splash[merged.splashBackground]
