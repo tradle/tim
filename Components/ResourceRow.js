@@ -446,6 +446,17 @@ class ResourceRow extends Component {
           if (isOfficialAccounts  &&  v === 'lastMessage') {
             let isMyLastMessage = val.indexOf('You: ') !== -1
             let lastMessageTypeIcon = <View/>
+            if (val.length > 50) {
+              val = val.substring(0, 50)
+              let i=49
+              for (; i>=40; i--) {
+                let ch = val.charAt(i)
+                if (ch === ' ' || ch === '.' || ch === ',') {
+                  val = val.substring(0, i - 1)
+                  break
+                }
+              }
+            }
             if (isMyLastMessage) {
               val = val.substring(5)
               let lastMessageType = resource.lastMessageType
