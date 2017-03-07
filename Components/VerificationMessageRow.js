@@ -176,11 +176,10 @@ class VerificationMessageRow extends Component {
                       {renderedRow}
                     </View>
                     {shareWith}
-                 </View>
-                <Icon name='ios-flower-outline' size={40} color={bankStyle.VERIFIED_BORDER_COLOR} style={{position: 'absolute', right: -10, top: -15}} />
+                  </View>
+                </View>
               </View>
-            </View>
-            {this.getSendStatus()}
+              {this.getSendStatus()}
             </View>
           </TouchableOpacity>
 
